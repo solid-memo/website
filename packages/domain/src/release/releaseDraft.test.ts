@@ -1200,6 +1200,41 @@ describe("the license", () => {
     };
     expect(made(named, { kind: "setLicense", license: BY }).triples).toContainEqual(typed(CC0));
   });
+
+  it("is set beside many statements, each with a text as long as a term may be, in time linear in them", () => {
+    // V8 hashes a string longer than 16,383 characters by its length
+    // alone: a statement's subject, predicate and text joined would be
+    // compared with every other of its length when the change looks for
+    // the statements it dropped. Eight times the statements must take
+    // less than four times as long as an eighth of them done eight
+    // times over (testing.md).
+    const pad = "x".repeat(16_300 - 6);
+    const ratio = growth(
+      (count) => {
+        const draft = courseDraft();
+        const long: ReleaseDraft = {
+          ...draft,
+          triples: [
+            ...draft.triples,
+            ...Array.from({ length: count }, (_, i) => ({
+              subject: of("about"),
+              predicate: "https://p.example/says",
+              object: {
+                kind: "literal" as const,
+                value: `${pad}${String(i).padStart(6, "0")}`,
+                language: "en",
+                datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+              },
+            })),
+          ],
+        };
+        return () => applyDraftChange(long, { kind: "setLicense", license: BY });
+      },
+      100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("the attribution", () => {
@@ -1772,6 +1807,33 @@ describe("mergedDraft", () => {
         return () => mergedDraft(draft, draft, draft);
       },
       2000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("compares the statements of many subjects, each as long as a term may be, in time linear in them", () => {
+    // V8 hashes a string longer than 16,383 characters by its length
+    // alone: a key of a part's kind and its subject joined would be
+    // compared with every other of its length. Eight times the subjects
+    // must take less than four times as long as an eighth of them done
+    // eight times over (testing.md).
+    const pad = "s".repeat(16_381 - "https://source.example/".length - 6);
+    const ratio = growth(
+      (count) => {
+        const draft: ReleaseDraft = {
+          ...base,
+          triples: Array.from({ length: count }, (_, i) =>
+            link(
+              `https://source.example/${pad}${String(i).padStart(6, "0")}`,
+              "https://p.example/cites",
+              "https://source.example/",
+            ),
+          ),
+        };
+        return () => mergedDraft(draft, draft, draft);
+      },
+      100,
       8,
     );
     expect(ratio).toBeLessThan(4);

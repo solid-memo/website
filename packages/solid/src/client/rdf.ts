@@ -56,6 +56,7 @@ import type {
   SubjectBuilder,
 } from "./interface";
 import { graphsOf } from "./linearDataset";
+import { pathKeys } from "./readLimits";
 
 /**
  * The app's RDF data model: datasets of subjects, read and built with the
@@ -299,6 +300,7 @@ function quadsOf(iri: string, stored: Thing): Quad[] {
 function editOf(data: SolidDataset) {
   const graph: Record<string, Thing> = Object.assign(Object.create(null), data.graphs.default);
   const log = (data as Partial<WithChangeLog>).internal_changeLog;
+  const quadKey = quadKeys();
   const additions = new Map((log?.additions ?? []).map((quad) => [quadKey(quad), quad]));
   const deletions = new Map((log?.deletions ?? []).map((quad) => [quadKey(quad), quad]));
   let edited = false;
@@ -333,18 +335,24 @@ function editOf(data: SolidDataset) {
   };
 }
 
-/** A quad's key: two quads are the same (Quad.equals) when their keys are. */
-function quadKey(quad: Quad): string {
-  const { subject, predicate, object } = quad;
-  const literal = object.termType === "Literal" ? [object.datatype.value, object.language] : [];
-  return JSON.stringify([
-    subject.termType,
-    subject.value,
-    predicate.value,
-    object.termType,
-    object.value,
-    ...literal,
-  ]);
+/**
+ * Keys for quads: two quads are the same (Quad.equals) when their keys
+ * are. A key is the path of a quad's terms (pathKeys), not one string of
+ * them, which could be past the bound on a term (MAX_TERM_CHARACTERS).
+ */
+function quadKeys(): (quad: Quad) => number {
+  const keyOf = pathKeys();
+  return ({ subject, predicate, object }) => {
+    const literal = object.termType === "Literal" ? [object.datatype.value, object.language] : [];
+    return keyOf([
+      subject.termType,
+      subject.value,
+      predicate.value,
+      object.termType,
+      object.value,
+      ...literal,
+    ]);
+  };
 }
 
 /**

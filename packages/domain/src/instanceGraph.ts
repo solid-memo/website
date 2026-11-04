@@ -7,6 +7,7 @@ import { ensureTrailingSlash, isDocumentIn } from "./instanceLayout";
 import { KNOWN_LICENSES } from "./license";
 import { DCTERMS_NS, type ReleaseText, SCHEMA_NS } from "./release/releaseModel";
 import { RDF_TYPE, type DraftTriple } from "./release/releaseDraft";
+import { PathMap } from "./pathKeys";
 import { documentUrlOf } from "./subjectUrl";
 
 /**
@@ -253,9 +254,10 @@ export function instanceGraphOf({
   // A document elsewhere is not the instance's data, whatever the catalog says.
   const documents = read.filter(({ url }) => isDrawnDocument(url, root));
   const nodes = new Map<string, GraphNode>();
-  const edges = new Map<string, GraphEdge>();
+  // Each edge by the path of its ends and link, never one string joined from them.
+  const edges = new PathMap<GraphEdge>();
   const edge = (from: string, to: string, predicate: string, kind: GraphEdgeKind): boolean => {
-    const key = `${from} ${predicate} ${to}`;
+    const key = [from, predicate, to];
     if (edges.has(key)) return false;
     edges.set(key, { from, to, predicate, kind });
     return true;

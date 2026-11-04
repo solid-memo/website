@@ -13,6 +13,7 @@ import { isRepeat, isScoredReview, promptKeyOf, segmentsOf, type ChainIndex } fr
 import { INTERVAL_BOUNDS } from "./scheduleInsight";
 import type { Recall, Retention } from "./statistics";
 import { daysBetween, weekdayOf } from "./studyPatterns";
+import { pathKeys } from "./pathKeys";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -292,15 +293,18 @@ export function memoryOverTime(
   );
   const states = { relearning: 0, young: 0, mature: 0 };
   // Each prompt's last answer, and the prompt each card (by id and direction) was last answered as.
-  const last = new Map<string, Answer>();
-  const byCard = new Map<string, string>();
+  // Each keyed by a path (pathKeys), never one string joined from its parts.
+  const promptOf = pathKeys();
+  const cardOf = pathKeys();
+  const last = new Map<number, Answer>();
+  const byCard = new Map<number, number>();
   const forget = (answer: Answer) => {
     states[stateOf(answer)] -= 1;
     intervals.add(spanOf(answer), -1);
   };
   const apply = (answer: Answer) => {
-    const key = promptKeyOf(answer);
-    const card = `${fragmentIdOf(answer.cardUrl)}\n${answer.direction}`;
+    const key = promptOf(promptKeyOf(answer));
+    const card = cardOf([fragmentIdOf(answer.cardUrl), answer.direction]);
     const before = last.get(key);
     if (before !== undefined) forget(before);
     else if (index.places.get(answer)!.at === 0 && answer.priorIntervalDays !== undefined) {

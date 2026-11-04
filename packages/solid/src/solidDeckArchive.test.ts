@@ -8,7 +8,7 @@ import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/d
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { RELEASE_LIMITS } from "./client/readLimits";
+import { MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
 import { agentNamesOf, toDeck } from "./mappers/deckMapper";
 import { createSolidDeckArchive, parseDeckFile } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
@@ -401,6 +401,20 @@ describe("readDeckFile", () => {
     await expect(parseDeckFile(text, "turtle", base, null)).rejects.toMatchObject({
       code: "deckFileUnreadable",
     });
+  });
+
+  it("refuses JSON-LD with a key longer than a term may be, with limits or with none, before it is parsed", async () => {
+    // A key the context doesn't map makes no triple, so only a look at the text bounds it.
+    const keyed = (length: number) =>
+      JSON.stringify({ "@id": "#a", "https://e.example/p": "v", ["k".repeat(length)]: 1 });
+    for (const limits of [undefined, null]) {
+      expect(() => parseDeckFile(keyed(MAX_TERM_CHARACTERS + 1), "jsonld", base, limits)).toThrow(
+        expect.objectContaining({ code: "deckFileUnreadable" }),
+      );
+      await expect(
+        parseDeckFile(keyed(MAX_TERM_CHARACTERS), "jsonld", base, limits),
+      ).resolves.toHaveLength(1);
+    }
   });
 
   it("reads JSON-LD written by hand, its context inline", async () => {

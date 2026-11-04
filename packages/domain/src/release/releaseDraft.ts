@@ -14,6 +14,7 @@ import type {
 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { EDUCATION_THEME, TURTLE_MEDIA_TYPE } from "../dcat.ts";
+import { jsonPath, PathMap, pathKeys } from "../pathKeys.ts";
 import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
 
 /**
@@ -417,6 +418,15 @@ function keyOfTriple(triple: DraftTriple): string {
   return JSON.stringify([triple.subject, triple.predicate, triple.object]);
 }
 
+/**
+ * A statement as a path of its subject, predicate and object, each part
+ * a key of its own (PathMap), to look it up by: a statement as one
+ * string (keyOfTriple) could be longer than a term may be.
+ */
+function pathOfTriple(triple: DraftTriple): string[] {
+  return [triple.subject, triple.predicate, ...jsonPath(triple.object)];
+}
+
 /** The blank node a term is, by its `_:` label; null for any other term. */
 function blankOf(term: ReleaseTerm): string | null {
   return term.kind === "blank" ? `_:${term.value}` : null;
@@ -433,7 +443,8 @@ function withoutOrphans(
   kept: readonly DraftTriple[],
   before: readonly DraftTriple[],
 ): DraftTriple[] {
-  const keys = new Set(kept.map(keyOfTriple));
+  const keys = new PathMap<true>();
+  for (const triple of kept) keys.set(pathOfTriple(triple), true);
   const naming = new Map<string, number>();
   const subjects = new Set<string>();
   for (const triple of kept) {
@@ -444,7 +455,7 @@ function withoutOrphans(
   const of = triplesBySubject(kept, subjects);
   const named = (triples: readonly DraftTriple[]) =>
     triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null);
-  const looked = named(before.filter((triple) => !keys.has(keyOfTriple(triple))));
+  const looked = named(before.filter((triple) => !keys.has(pathOfTriple(triple))));
   const orphans = new Set<string>();
   for (let blank = looked.pop(); blank !== undefined; blank = looked.pop()) {
     if (orphans.has(blank) || (naming.get(blank) ?? 0) > 0) continue;
@@ -1574,24 +1585,24 @@ export function attributionText(names: readonly string[], ai: boolean, language:
  * English and Swedish, by language and text: whether each says AI
  * helped. A comment is an attribution only when it is one of these, so
  * a note that only starts as one ("Compiled by hand…") stays a note.
+ * Each is keyed by its language, then its text (PathMap).
  */
-function attributionsOf(draft: ReleaseDraft): Map<string, boolean> {
+function attributionsOf(draft: ReleaseDraft): PathMap<boolean> {
   const names = authorNames(draft);
-  const texts = new Map<string, boolean>();
+  const texts = new PathMap<boolean>();
   if (names.length === 0) return texts;
   for (const language of ["en", "sv"])
-    for (const ai of [false, true])
-      texts.set(`${language} ${attributionText(names, ai, language)}`, ai);
+    for (const ai of [false, true]) texts.set([language, attributionText(names, ai, language)], ai);
   return texts;
 }
 
 /** Whether a statement of an activity is an attribution comment, of those `attributions` (attributionsOf) has. */
-function isAttribution(attributions: ReadonlyMap<string, boolean>, triple: DraftTriple): boolean {
+function isAttribution(attributions: PathMap<boolean>, triple: DraftTriple): boolean {
   const { object } = triple;
   return (
     triple.predicate === RDFS_COMMENT &&
     object.kind === "literal" &&
-    attributions.has(`${object.language} ${object.value}`)
+    attributions.has([object.language, object.value])
   );
 }
 
@@ -1613,7 +1624,7 @@ export function attributionOf(draft: ReleaseDraft): { ai: boolean; text: string 
     .map((triple) => triple.object as ReleaseText);
   const shown = said.find((text) => text.language === "en") ?? said[0];
   if (shown === undefined) return null;
-  return { ai: attributions.get(`${shown.language} ${shown.value}`)!, text: shown.value };
+  return { ai: attributions.get([shown.language, shown.value])!, text: shown.value };
 }
 
 /** What the release's own making says beside its attribution: each language's comments, a paragraph each. */
@@ -1762,14 +1773,20 @@ export function canonical(value: unknown): string {
 
 const LISTS = ["agents", "distributions", "chapters", "steps", "cards", "distractors"] as const;
 
-/** Each part of a draft that a change makes or not, by a key: what it says of itself, each record, each subject's statements. */
-function partsOf(draft: ReleaseDraft): Map<string, string> {
-  const parts = new Map<string, string>([
-    ["root", canonical({ course: draft.course, root: draft.root })],
+/** What keys a part of a draft (partsOf): a path of its kind and its id or subject, each a key of its own (pathKeys). */
+type PartKey = (path: readonly string[]) => number;
+
+/**
+ * Each part of a draft that a change makes or not, by a key (`keyOf`):
+ * what it says of itself, each record, each subject's statements.
+ */
+function partsOf(draft: ReleaseDraft, keyOf: PartKey): Map<number, string> {
+  const parts = new Map<number, string>([
+    [keyOf(["root"]), canonical({ course: draft.course, root: draft.root })],
   ]);
   for (const list of LISTS)
     for (const node of draft[list] as readonly DraftNode<unknown>[])
-      parts.set(`${list} ${node.id}`, canonical(node.data));
+      parts.set(keyOf([list, node.id]), canonical(node.data));
   const statements = new Map<string, string[]>();
   for (const triple of draft.triples) {
     const statement = canonical([triple.predicate, triple.object]);
@@ -1778,7 +1795,7 @@ function partsOf(draft: ReleaseDraft): Map<string, string> {
     else said.push(statement);
   }
   for (const [subject, said] of statements)
-    parts.set(`triples ${subject}`, JSON.stringify(said.sort()));
+    parts.set(keyOf(["triples", subject]), JSON.stringify(said.sort()));
   return parts;
 }
 
@@ -1794,25 +1811,24 @@ export function mergedDraft(
   mine: ReleaseDraft,
   theirs: ReleaseDraft,
 ): ReleaseDraft | null {
-  const [was, made, now] = [base, mine, theirs].map(partsOf) as [
-    Map<string, string>,
-    Map<string, string>,
-    Map<string, string>,
+  const keyOf = pathKeys();
+  const [was, made, now] = [base, mine, theirs].map((draft) => partsOf(draft, keyOf)) as [
+    Map<number, string>,
+    Map<number, string>,
+    Map<number, string>,
   ];
-  const ours = new Set<string>();
+  const ours = new Set<number>();
   for (const key of new Set([...was.keys(), ...made.keys(), ...now.keys()])) {
     if (made.get(key) === was.get(key)) continue;
     if (now.get(key) !== was.get(key) && now.get(key) !== made.get(key)) return null;
     ours.add(key);
   }
-  const from = (key: string) => (ours.has(key) ? mine : theirs);
+  const from = (path: readonly string[]) => (ours.has(keyOf(path)) ? mine : theirs);
   const nodes = <K extends (typeof LISTS)[number]>(list: K): ReleaseDraft[K] => {
     const ids = [...new Set([...theirs[list], ...mine[list]].map((node) => node.id))];
-    return ids.flatMap(
-      (id) => byIdOf(from(`${list} ${id}`)[list]).get(id) ?? [],
-    ) as ReleaseDraft[K];
+    return ids.flatMap((id) => byIdOf(from([list, id])[list]).get(id) ?? []) as ReleaseDraft[K];
   };
-  const root = from("root");
+  const root = from(["root"]);
   return {
     ...theirs,
     course: root.course,
@@ -1824,8 +1840,8 @@ export function mergedDraft(
     cards: nodes("cards"),
     distractors: nodes("distractors"),
     triples: [
-      ...theirs.triples.filter((triple) => !ours.has(`triples ${triple.subject}`)),
-      ...mine.triples.filter((triple) => ours.has(`triples ${triple.subject}`)),
+      ...theirs.triples.filter((triple) => !ours.has(keyOf(["triples", triple.subject]))),
+      ...mine.triples.filter((triple) => ours.has(keyOf(["triples", triple.subject]))),
     ],
   };
 }

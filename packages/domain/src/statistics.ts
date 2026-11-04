@@ -46,6 +46,7 @@ import {
   type WeekRetention,
 } from "./memoryCurve";
 import { answersByHour, estimateStudyTime, firstTimedOf, type StudyTime } from "./studyTime";
+import { pathKeys } from "./pathKeys";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -344,6 +345,17 @@ export function monthlyRetention(answers: readonly Answer[], index: ChainIndex):
 }
 
 /**
+ * How many cards the answers are to. A card is its deck's and its id:
+ * an upgrade moves a deck's cards into a new document. Each is keyed by
+ * the path of the two (pathKeys), never one string joined from them.
+ */
+function cardsOf(answers: readonly Answer[]): number {
+  const keyOf = pathKeys();
+  return new Set(answers.map((answer) => keyOf([answer.deckUrl, fragmentIdOf(answer.cardUrl)])))
+    .size;
+}
+
+/**
  * Everything the statistics screens show, of the answers given (in any
  * order) up to `today`. Those from `since` on, when given, are the
  * range's: the totals, recall and the rest. The figures of the days up
@@ -376,9 +388,7 @@ export function statisticsOf(
     totals: {
       answers: answers.length,
       studyDays: days.length,
-      // A card is its deck's and its id: an upgrade moves a deck's cards into a new document.
-      cards: new Set(answers.map((answer) => `${answer.deckUrl}\n${fragmentIdOf(answer.cardUrl)}`))
-        .size,
+      cards: cardsOf(answers),
     },
     prompts: promptGrowthOf(index),
     days,

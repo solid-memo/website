@@ -540,8 +540,8 @@ describe("a release already at an address, on a server that may be anyone's", ()
   });
 
   /** Access controls within ACCESS_CONTROL_LIMITS' bytes, past their characters (a long prefix each triple names) or their triples. */
-  const longPrefix = `@prefix p: <https://example.org/${"a".repeat(64 * 1024)}/> .\n${Array.from(
-    { length: 32 },
+  const longPrefix = `@prefix p: <https://example.org/${"a".repeat(8 * 1024)}/> .\n${Array.from(
+    { length: 256 },
     (_, i) => `p:s${i} p:p p:o .`,
   ).join("\n")}`;
   const manyTriples = Array.from(

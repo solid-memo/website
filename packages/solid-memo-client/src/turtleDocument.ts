@@ -51,7 +51,8 @@ class TurtleFetchError extends Error {
  * no RDF 1.2 triple terms read (TURTLE_OPTIONS, tripleTermError), as
  * resources.ts reads Turtle: the
  * replacement for shacl's src/turtleDocument.ts that names no Inrupt
- * library.
+ * library. It holds no term to the bound on its length (quadTally), so
+ * it reads only the app's own shapes, never data from a pod.
  */
 export async function readTurtleDocument(
   url: string,

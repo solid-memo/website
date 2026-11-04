@@ -178,6 +178,14 @@ flowchart LR
   literal's length. They take every value of the XSD lexical space
   (`+INF` too) and nothing else, so a value with two signs (`+-1`),
   which the library takes, is refused.
+- The engine counts how many times a check has gone over a node with
+  one shape by the two terms, a key for each, and stops at 50, as the
+  library does. The library counts by one string joined from the node
+  and the shape. That string is longer than a term may be when the node
+  is about that long ([deck-library.md](deck-library.md)), and V8 hashes
+  such a string by its length alone. So many such nodes of one length
+  would take time growing with the square of their number. The
+  library's own count is turned off.
 - One engine per shape document is shared by every document checked
   against it. It runs one check at a time: the library keeps a single
   report per validator, so two documents checked together would mix up

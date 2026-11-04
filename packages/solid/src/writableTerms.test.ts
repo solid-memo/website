@@ -4,6 +4,7 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
+import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
 
 const named = (value: string) => ({ termType: "NamedNode", value }) as Term;
@@ -80,5 +81,33 @@ describe("refuseUnwritable", () => {
         detail: 'term: {"termType":"NamedNode","value":"a b"}',
       }),
     );
+  });
+
+  it("throws termTooLong for a term longer than any read takes in, as it would be read back", () => {
+    const limit = MAX_TERM_CHARACTERS;
+    const blank = (length: number) =>
+      ({ termType: "BlankNode", value: "b".repeat(length) }) as Term;
+    // A text is named in quotes, its quotes and line breaks escaped, an IRI in `<>`; a blank node's label
+    // gets a parser's prefix as it is read.
+    for (const within of [
+      quad(literal("x".repeat(limit - 2))),
+      quad(literal(`\n\r"${"x".repeat(limit - 8)}`)),
+      quad(named(`https://pod.example/${"i".repeat(limit - 22)}`)),
+      quad(named("https://pod.example/o"), blank(limit - 34)),
+    ]) {
+      expect(() => refuseUnwritable([within])).not.toThrow();
+    }
+    for (const past of [
+      quad(literal("x".repeat(limit - 1))),
+      quad(literal("x".repeat(limit - 4), "sv")),
+      quad(literal(`\n\r"${"x".repeat(limit - 7)}`)),
+      quad(named(`https://pod.example/${"i".repeat(limit - 21)}`)),
+      quad(named("https://pod.example/o"), blank(limit - 33)),
+      quad(named("https://pod.example/o"), undefined, named("x".repeat(limit + 1))),
+    ]) {
+      expect(() => refuseUnwritable([past])).toThrow(
+        expect.objectContaining({ code: "termTooLong", vars: { limit } }),
+      );
+    }
   });
 });

@@ -16,6 +16,7 @@ import {
   limitsOf,
   spentOf,
   NO_SIZE_LIMITS,
+  pathKeys,
   quadTally,
   type ReadsSpent,
   refusalOf,
@@ -176,18 +177,22 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
  * but in time linear in the number of quads. Every map is keyed by the
  * quads' own strings, so none has a prototype: a named graph, subject,
  * datatype or language called `__proto__` is a key like any other, not
- * a way to write onto Object.prototype (GHSA-m4hj-7c28-fq4h).
+ * a way to write onto Object.prototype (GHSA-m4hj-7c28-fq4h). A quad
+ * is told from the others by the path of its terms (pathKeys), each a
+ * key of its own, as no string of them joined would be held to the
+ * bound on a term (MAX_TERM_CHARACTERS).
  */
 export function graphsOf(quads: Iterable<Quad>): Graphs {
   const graphs =
     map<Record<string, { type: "Subject"; url: string; predicates: Record<string, Objects> }>>();
   graphs.default = map();
-  const seen = new Set<string>();
+  const keyOf = pathKeys();
+  const seen = new Set<number>();
   for (const quad of quads) {
     const graphId = quad.graph.termType === "DefaultGraph" ? "default" : quad.graph.value;
     const subjectId =
       quad.subject.termType === "BlankNode" ? `_:${quad.subject.value}` : quad.subject.value;
-    const key = `${graphId} ${subjectId} ${quad.predicate.value} ${termKey(quad.object)}`;
+    const key = keyOf([graphId, subjectId, quad.predicate.value, ...termParts(quad.object)]);
     if (seen.has(key)) continue;
     seen.add(key);
     const graph = (graphs[graphId] ??= map());
@@ -221,9 +226,10 @@ function map<T>(): Record<string, T> {
   return Object.create(null) as Record<string, T>;
 }
 
-function termKey(term: Quad["object"]): string {
-  if (term.termType !== "Literal") return `${term.termType} ${term.value}`;
-  return `Literal ${term.datatype.value} ${term.language.toLowerCase()} ${term.value}`;
+/** An object's parts, each a step of the path that tells its quad from others (graphsOf). */
+function termParts(term: Quad["object"]): string[] {
+  if (term.termType !== "Literal") return [term.termType, term.value];
+  return ["Literal", term.datatype.value, term.language.toLowerCase(), term.value];
 }
 
 function deepFreeze<T extends object>(value: T): T {

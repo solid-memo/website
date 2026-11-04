@@ -8,6 +8,7 @@ import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import type { SubjectReport, ValidationReport, Violation } from "./validation";
 import { shown } from "./langText";
+import { PathMap } from "./pathKeys";
 
 /**
  * Repairing what an instance check found (see docs/validation.md). A
@@ -127,8 +128,8 @@ function problemsOf(
  * The plan with a repair added, one per kind and subject: a repair of a
  * kind the subject already has is that one.
  */
-function addRepair(planned: Map<string, Repair>, repairs: Repair[], repair: Repair): void {
-  const key = JSON.stringify([repair.kind, repair.subjectUrl]);
+function addRepair(planned: PathMap<Repair>, repairs: Repair[], repair: Repair): void {
+  const key = [repair.kind, repair.subjectUrl];
   const same = planned.get(key);
   if (same === undefined) {
     planned.set(key, repair);
@@ -147,7 +148,7 @@ function addRepair(planned: Map<string, Repair>, repairs: Repair[], repair: Repa
 export function planRepair(report: ValidationReport): RepairPlan {
   const repairs: Repair[] = [];
   // Each repair by its kind and subject, found at once however many came before.
-  const planned = new Map<string, Repair>();
+  const planned = new PathMap<Repair>();
   const unrepairable: Unrepairable[] = [];
   for (const document of report.documents) {
     for (const subject of document.subjects) {

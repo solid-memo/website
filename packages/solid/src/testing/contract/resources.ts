@@ -6,7 +6,13 @@ import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
 import { HttpError, ReadLimitError } from "../../client/interface";
-import { limitedFetch, NO_SIZE_LIMITS, noneSpent, RELEASE_LIMITS } from "../../client/readLimits";
+import {
+  limitedFetch,
+  MAX_TERM_CHARACTERS,
+  NO_SIZE_LIMITS,
+  noneSpent,
+  RELEASE_LIMITS,
+} from "../../client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
 import { type DataClient, turtleAt } from "./rdf";
 
@@ -236,6 +242,52 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       ).not.toBeNull();
     });
 
+    it("refuses a document with a term longer than any read takes in, with limits or with none, and reads one at the bound", async () => {
+      // A term counts as N-Triples names it, as the shape check keys it: a literal's text in quotes, each
+      // quote, backslash and line break in it escaped as two characters, an IRI in `<>`. V8 hashes a
+      // longer string by its length alone.
+      const literalOf = (length: number) => `<#a> <${EX}p> "${"x".repeat(length - 2)}", "y" .`;
+      const escapedOf = (length: number) =>
+        `<#a> <${EX}p> "${"\\n".repeat(40)}${"x".repeat(length - 85)}"@en, "y" .`;
+      const iriOf = (length: number) => {
+        const iri = `${EX}${"i".repeat(length - 2 - EX.length)}`;
+        return `<#a> <${EX}p> <${iri}> .\n<#a> <${EX}p> "y" .`;
+      };
+      const jsonLdOf = (length: number) =>
+        JSON.stringify({ "@id": "#a", [`${EX}p`]: ["x".repeat(length - 2), "y"] });
+      for (const [past, within, format] of [
+        [literalOf(MAX_TERM_CHARACTERS + 1), literalOf(MAX_TERM_CHARACTERS), "turtle"],
+        [escapedOf(MAX_TERM_CHARACTERS + 1), escapedOf(MAX_TERM_CHARACTERS), "turtle"],
+        [iriOf(MAX_TERM_CHARACTERS + 1), iriOf(MAX_TERM_CHARACTERS), "turtle"],
+        [jsonLdOf(MAX_TERM_CHARACTERS + 1), jsonLdOf(MAX_TERM_CHARACTERS), "jsonld"],
+      ] as const) {
+        await expect(parseQuads(past, format, URL_, RELEASE_LIMITS)).rejects.toMatchObject({
+          name: "ReadLimitError",
+          limits: RELEASE_LIMITS,
+        });
+        // A text from the user's own pod, read with no limits, is held to the bound too.
+        await expect(parseQuads(past, format, URL_)).rejects.toMatchObject({
+          name: "ReadLimitError",
+          limits: NO_SIZE_LIMITS,
+        });
+        await expect(parseQuads(within, format, URL_)).resolves.toHaveLength(2);
+        if (format === "jsonld") continue;
+        for (const fetch of [limitedFetch(turtleAt(past), RELEASE_LIMITS), turtleAt(past)]) {
+          for (const read of [
+            () => getSolidDatasetLinear(URL_, { fetch }),
+            () => readDocument(URL_, { fetch }),
+          ]) {
+            await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+          }
+        }
+        for (const fetch of [limitedFetch(turtleAt(within), RELEASE_LIMITS), turtleAt(within)]) {
+          const dataset = await getSolidDatasetLinear(URL_, { fetch });
+          expect(getThing(dataset, `${URL_}#a`)).not.toBeNull();
+          expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+        }
+      }
+    });
+
     it("refuses a document at its base when it declares one too often, and reads one that declares it a few times", async () => {
       const bases = (count: number) => `${"@base <https://pod.example/decks/> .\n".repeat(count)}`;
       const past = `${bases(17)}<a> <${EX}p> "x" .`;
@@ -264,7 +316,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         url: URL_,
         limits: NO_SIZE_LIMITS,
         message: expect.stringContaining(
-          "declarations, or longer IRIs to resolve, than a read takes in",
+          "declarations, longer IRIs to resolve, or a longer term than a read takes in",
         ),
       });
       for (const read of [
@@ -685,10 +737,15 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
     });
 
     it("writes an edit too large for one PATCH, or one asked to be whole, as one PUT of the document, If-Match", async () => {
+      // Texts no longer than a term may be, together past a PATCH.
+      const texts = Array.from({ length: 8 }, (_, at) => `${at}`.repeat(MAX_PATCH_BYTES / 8));
       const large = setThing(
         await read(),
-        buildThing(createThing({ url: `${URL_}#b` }))
-          .addStringNoLocale(`${EX}p`, "x".repeat(MAX_PATCH_BYTES))
+        texts
+          .reduce(
+            (built, text) => built.addStringNoLocale(`${EX}p`, text),
+            buildThing(createThing({ url: `${URL_}#b` })),
+          )
           .build(),
       );
       const small = setThing(await read(), createThing({ url: `${URL_}#b` }));
@@ -730,6 +787,33 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         });
       }
       expect(sent).toEqual([]);
+    });
+
+    it("refuses a term longer than any read takes in, sending nothing, and writes one at the bound", async () => {
+      // A text is named in quotes, a line break in it escaped: one of MAX_TERM_CHARACTERS - 2 characters is
+      // at the bound, and one of a character less with a line break is past it.
+      const card = (dataset: ReturnType<typeof createSolidDataset>, length: number, text = "") =>
+        setThing(
+          dataset,
+          buildThing(createThing({ url: `${URL_}#card` }))
+            .addStringNoLocale(`${EX}front`, `${text}${"x".repeat(length - text.length)}`)
+            .build(),
+        );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      for (const [dataset, whole] of [
+        [card(createSolidDataset(), MAX_TERM_CHARACTERS - 1), false],
+        [card(await read(), MAX_TERM_CHARACTERS - 1), false],
+        [card(await read(), MAX_TERM_CHARACTERS - 1), true],
+        [card(await read(), MAX_TERM_CHARACTERS - 2, "\n"), false],
+      ] as const) {
+        await expect(writeDocument(URL_, dataset, { fetch, whole })).rejects.toMatchObject({
+          code: "termTooLong",
+          vars: { limit: MAX_TERM_CHARACTERS },
+        });
+      }
+      expect(sent).toEqual([]);
+      await writeDocument(URL_, card(await read(), MAX_TERM_CHARACTERS - 2), { fetch });
+      expect(sent).toHaveLength(1);
     });
   });
 

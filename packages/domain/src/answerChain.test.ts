@@ -37,10 +37,10 @@ describe("promptKeyOf", () => {
   it("names the deck, the card by fragment id and the direction", () => {
     const before = answer("a", "2026-10-01T10:00:00.000Z");
     const upgraded = { ...before, cardUrl: "https://pod.example/i/decks/deck-1-u1.ttl#c-1" };
-    expect(promptKeyOf(upgraded)).toBe(promptKeyOf(before));
-    expect(promptKeyOf({ ...before, direction: "back-to-front" })).not.toBe(promptKeyOf(before));
-    expect(promptKeyOf({ ...before, cardUrl: `${CARDS}#c-2` })).not.toBe(promptKeyOf(before));
-    expect(promptKeyOf({ ...before, deckUrl: `${DECK}0` })).not.toBe(promptKeyOf(before));
+    expect(promptKeyOf(upgraded)).toEqual(promptKeyOf(before));
+    expect(promptKeyOf({ ...before, direction: "back-to-front" })).not.toEqual(promptKeyOf(before));
+    expect(promptKeyOf({ ...before, cardUrl: `${CARDS}#c-2` })).not.toEqual(promptKeyOf(before));
+    expect(promptKeyOf({ ...before, deckUrl: `${DECK}0` })).not.toEqual(promptKeyOf(before));
   });
 });
 

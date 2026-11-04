@@ -27,6 +27,7 @@ import { refuseUnwritable } from "./writableTerms";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { PathMap } from "@solid-memo/domain/pathKeys";
 
 /**
  * Reading and writing pod documents with HTTP preconditions, so that a
@@ -403,12 +404,13 @@ async function removeOwnedOnce(
     "subjects" in found ? found : { subjects: found, statements: [] };
   const owned = [...subjects].filter((subject) => !isNewer(dataset, subject));
   const removed = withOnlyTheirBlankNodes(quads, owned);
-  const removedStatements = new Set(statements.map((statement) => JSON.stringify(statement)));
+  // Each statement by the path of its terms (PathMap), never one string
+  // joined from them, which could be past the bound on a term.
+  const removedStatements = new PathMap<true>();
+  for (const statement of statements) removedStatements.set(statement, true);
   const isGone = (quad: Quad) =>
     removed.has(termKey(quad.subject)) ||
-    removedStatements.has(
-      JSON.stringify([quad.subject.value, quad.predicate.value, quad.object.value]),
-    );
+    removedStatements.has([quad.subject.value, quad.predicate.value, quad.object.value]);
   const left = quads.filter((quad) => !isGone(quad));
   if (left.length === 0) {
     try {

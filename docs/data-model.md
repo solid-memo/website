@@ -1541,7 +1541,10 @@ An import reads the file as the pod is read, with the same mappers:
   written or escaped. The parser removes those segments as it resolves
   the IRI, in time growing with the square of its length. Its parse stops
   there, as it stops at the first triple past the limits. A
-  declaration quoted in a card's text doesn't count. A
+  declaration quoted in a card's text doesn't count. So is a file with
+  a term longer than 16,383 characters, as every document the app
+  reads is, and a JSON-LD file with a string or key that long, which
+  is refused before it's parsed. A
   release file the Studio opens is held to a release's limits
   ([deck-library.md](deck-library.md#from-a-link));
 - a triple with a term Turtle can't write as it is is left out (below).
@@ -1623,6 +1626,13 @@ by one.
   ([writableTerms.ts](../packages/solid/src/writableTerms.ts)). An
   imported deck leaves such triples out; a release read from a file is
   refused, as a draft keeps its triples as they are.
+- **No write holds a term longer than 16,383 characters**, as no read
+  accepts one ([deck-library.md](deck-library.md#from-a-link)). The
+  write is refused with `termTooLong` before anything is sent. A
+  document saved before the bound may hold a longer text, such as a
+  card's back, a step's theory or a catalog entry's keywords. Its read
+  now fails with a `ReadLimitError`. The app has no way to shorten the
+  text, so it has to be edited outside the app.
 - Mutations always follow read → modify → save
   ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`). The save sends a PATCH

@@ -284,6 +284,27 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       );
       expect(ratio).toBeLessThan(4);
     });
+
+    it("take time that grows with strings as long as a term may be, not their square", () => {
+      // V8 hashes a string longer than 16,383 characters by its length
+      // alone: a key of a string's language and text joined would be
+      // compared with every other of its length. A text in English is
+      // named in quotes with `@en` after it.
+      const pad = "x".repeat(16_383 - 5 - 6);
+      const ratio = growth(
+        (count) => {
+          const strings = Array.from({ length: count }, (_, i) => ({
+            value: `${pad}${String(i).padStart(6, "0")}`,
+            language: "en",
+          }));
+          const subject = createThing({ url: `${URL_}#a` });
+          return () => buildThing(subject).setStringAll(P, strings).build();
+        },
+        100,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
   });
 
   describe("removeLiteralAll", () => {

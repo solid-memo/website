@@ -376,20 +376,30 @@ class Builder implements SubjectBuilder {
   }
 
   setStringAll(property: string, values: readonly LanguageString[]): this {
-    const strings = new Map<string, Value>();
+    // Each value once, keyed by its language, then its text, never by
+    // one string joined from them, which could be past the bound on a term.
+    const seen = new Map<string, Set<string>>();
+    const strings: Value[] = [];
     for (const { value, language } of values) {
       const term =
         language === ""
           ? literal(value, namedNode(XSD_STRING))
           : literal(value, language.toLowerCase());
-      strings.set(JSON.stringify([term.language, term.value]), term);
+      let texts = seen.get(term.language);
+      if (texts === undefined) {
+        texts = new Set();
+        seen.set(term.language, texts);
+      }
+      if (texts.has(term.value)) continue;
+      texts.add(term.value);
+      strings.push(term);
     }
     this.#keep(
       property,
       (one) =>
         !(one.termType === "Literal" && (isLangString(one) || one.datatype.value === XSD_STRING)),
     );
-    for (const term of strings.values()) this.#add(property, term);
+    for (const term of strings) this.#add(property, term);
     return this;
   }
 

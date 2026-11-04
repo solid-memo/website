@@ -1791,6 +1791,7 @@
     "guestStorageAborted": "Este navegador se negó a guardar un cambio en los datos de estudio en modo invitado. Comprueba que tiene espacio para guardar datos e inténtalo de nuevo.",
     "addFailed": "Solid Memo no pudo guardar en tu Pod. Comprueba tu conexión e inténtalo de nuevo.",
     "unwritableTerm": "Solid Memo no guardó esto: contiene una dirección que no se puede escribir tal cual en un Pod. No se cambió nada.",
+    "termTooLong": "Solid Memo no guardó esto: un texto o una dirección que contiene tiene más de {limit} caracteres, más de lo que Solid Memo lee en uno; cada comilla, barra invertida y salto de línea cuenta como dos. No se cambió nada. Acórtalo o divídelo y vuelve a intentarlo.",
     "draftGone": "Ese borrador ya no existe. Quizá se eliminó en otra pestaña o aplicación.",
     "releaseUnreadable": "Solid Memo no puede leer ninguna publicación en {url}. Comprueba la dirección y que la publicación esté disponible allí.",
     "releaseTooLarge": "La publicación en {url} es más grande que cualquier publicación que Solid Memo lee, así que no se ha leído. Comprueba la dirección o pregunta a quien la creó.",
