@@ -160,39 +160,25 @@ function withoutMembershipsOf(
 
 /**
  * The parent without its `links` to the subjects in `unlinked`: each
- * link's other values set at once, in time that grows with them.
- * setIriAll writes each again and refuses one the library takes for no
- * URL, which another app may have written; then only the removed
- * subjects' links are taken out, one at a time, and every other value
- * stays as it is.
+ * link's other values set at once, in time that grows with them. A value
+ * the library takes for no URL, which another app may have written,
+ * stays as it is (setIriAll).
  */
 function withoutLinks(
   parent: NamedSubject,
   links: readonly { link: string }[],
   unlinked: ReadonlySet<string>,
 ): NamedSubject {
-  try {
-    return links
-      .reduce(
-        (builder, { link }) =>
-          builder.setIriAll(
-            link,
-            getUrlAll(parent, link).filter((url) => !unlinked.has(url)),
-          ),
-        buildThing(parent),
-      )
-      .build();
-  } catch {
-    return links
-      .reduce(
-        (builder, { link }) =>
-          getUrlAll(parent, link)
-            .filter((url) => unlinked.has(url))
-            .reduce((next, url) => next.removeUrl(link, url), builder),
-        buildThing(parent),
-      )
-      .build();
-  }
+  return links
+    .reduce(
+      (builder, { link }) =>
+        builder.setIriAll(
+          link,
+          getUrlAll(parent, link).filter((url) => !unlinked.has(url)),
+        ),
+      buildThing(parent),
+    )
+    .build();
 }
 
 /**

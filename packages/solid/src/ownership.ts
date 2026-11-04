@@ -13,7 +13,7 @@ import {
   propertiesOf,
   toRdfJsDataset,
 } from "./client/rdf";
-import { isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
@@ -109,7 +109,14 @@ export function subjectsOfClasses(...classes: string[]): (dataset: Dataset) => S
  */
 export function deckDocumentSubjects(entries: readonly string[]): (dataset: Dataset) => Owned {
   const deckSubjects = subjectsOfClasses(SM.Card, SM.Distractor, SM.ReviewState);
-  const isLeaving = (url: string) => entries.some((entry) => isSameUrl(entry, url));
+  // Each entry's address as a request sends it, worked out once, so
+  // that a document's links are looked up rather than compared with
+  // every entry.
+  const leaving = new Set(entries.map(canonicalUrlOf));
+  const isLeaving = (url: string) => {
+    const canonical = canonicalUrlOf(url);
+    return canonical !== null && leaving.has(canonical);
+  };
   return (dataset) => {
     const self = documentThings(dataset, getSourceUrl(dataset)!);
     const statements = self.flatMap((thing) =>

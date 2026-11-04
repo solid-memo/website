@@ -36,7 +36,6 @@ import {
   documentsInUse,
   ensureTrailingSlash,
   canonicalUrlOf,
-  isSameUrl,
   reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
@@ -69,7 +68,7 @@ import {
   withoutCardSubjects,
   withoutUnnamedDistractors,
   assertDistractorsOwnedOnce,
-  withoutDeck,
+  withoutDecks,
   withSuggestedAnswers,
 } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
@@ -425,7 +424,7 @@ export function createSolidDeckRepository({
     },
 
     async deleteDocument(deck, url) {
-      await removeIfTheirs(url, [deck], [deck.url]);
+      await removeIfTheirs(url, [deck], deckDocumentSubjects([deck.url]));
     },
 
     completeChapter(deck, chapterUrl) {
@@ -606,7 +605,7 @@ export function createSolidDeckRepository({
         (deck) => dataset === null || getThing(dataset, deck.url) === null,
       );
       if (gone !== undefined) throw new AppError("deckGone", { deck: gone.title });
-      const updated = inDocument.reduce(withDeck, dataset!);
+      const updated = withDecks(dataset!, inDocument);
       await save(
         catalogUrl,
         updated,
@@ -644,18 +643,15 @@ export function createSolidDeckRepository({
       );
       const usable = inDocument.filter(isDeckInPlace);
       const unused = [...documentsInUse(usable)].filter((url) => !used.has(canonicalUrlOf(url)));
+      // Each document's decks found at once, and the entries told once, not per document.
+      const decksAt = decksByDocument(usable);
+      const entries = deckDocumentSubjects([...leaving]);
       for (const url of unused) {
-        const removal = await removeIfTheirs(
-          url,
-          usable.filter((deck) =>
-            [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].some((one) => isSameUrl(one, url)),
-          ),
-          [...leaving],
-        );
+        const removal = await removeIfTheirs(url, decksAt.get(canonicalUrlOf(url)!)!, entries);
         if (removal === "kept") keptDocuments.push(url);
       }
       if (dataset === null) continue;
-      await saveDataset(catalogUrl, inDocument.reduce(withoutDeck, dataset), fetch);
+      await saveDataset(catalogUrl, withoutDecks(dataset, inDocument), fetch);
     }
     return { keptDocuments };
   }
@@ -665,19 +661,20 @@ export function createSolidDeckRepository({
    * `url`, and the document when nothing else is left in it (removeOwned,
    * If-Match its read), when it is one of the decks' to remove from;
    * else, and when it cannot be read as RDF, keep it whole (null).
-   * `leaving` are the entries of the decks removed: the document's
-   * saying it is theirs goes when it names no other.
+   * `owned` is what of it goes with the entries of the decks removed
+   * (deckDocumentSubjects): the document's saying it is theirs goes when
+   * it names no other.
    */
   async function removeIfTheirs(
     url: string,
     decks: readonly Deck[],
-    leaving: readonly string[],
+    owned: ReturnType<typeof deckDocumentSubjects>,
   ): Promise<Removal | null> {
     const existing = await getSolidDatasetOrNull(url, fetch).catch(() => null);
     if (existing === null) return null;
     for (const deck of decks) {
       if ((await guard.standing(deck, url, existing)) !== "unclaimed")
-        return removeOwned(url, deckDocumentSubjects(leaving), fetch);
+        return removeOwned(url, owned, fetch);
     }
     return null;
   }
@@ -944,6 +941,27 @@ function withoutCard(dataset: Dataset, cardUrl: string): Dataset {
 function distractorsNamedBy(dataset: Dataset, cardUrl: string): string[] {
   const card = getThing(dataset, cardUrl);
   return card === null ? [] : getUrlAll(card, SM.distractor);
+}
+
+/**
+ * The decks of each of their cards and reviews documents, by the
+ * document's address as a request sends it (canonicalUrlOf), each deck
+ * once per document. The decks are in place (isDeckInPlace), so each
+ * address is a URL.
+ */
+function decksByDocument(decks: readonly Deck[]): Map<string, Deck[]> {
+  const result = new Map<string, Deck[]>();
+  for (const deck of decks) {
+    const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map(
+      (url) => canonicalUrlOf(url)!,
+    );
+    for (const url of new Set(urls)) {
+      const held = result.get(url);
+      if (held === undefined) result.set(url, [deck]);
+      else held.push(deck);
+    }
+  }
+  return result;
 }
 
 /** Decks by the catalog document their entries are in, in the order first met. */

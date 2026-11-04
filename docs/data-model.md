@@ -945,7 +945,12 @@ pace or a direction is one save of every entry (`saveDecks`). Removing
 decks first removes their cards and review states from their documents,
 deleting each document that then holds nothing else (one holding
 another app's data too is kept, `keptDocuments`), then their entries in
-one save (`removeDecks`).
+one save (`removeDecks`). Either way the catalog document is rewritten
+once for all the decks (`withDecks`, `withoutDecks`), not once per deck,
+so a change to many decks takes time that grows with them, not their
+square. A link of the catalog or of a deck group that is no URL the app
+can write (another app may have written one) stays as it is, and the
+rest of the links are changed around it.
 
 ## Wrong options
 

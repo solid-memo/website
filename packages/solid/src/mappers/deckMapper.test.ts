@@ -30,7 +30,7 @@ import { recordThing } from "../records";
 import { type Catalog, catalogToRecord, publisherToRecord } from "@solid-memo/domain/catalog";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { AGENT_V1, CATALOG_V1 } from "@solid-memo/vocab/descriptors.generated";
-import { datasetFrom } from "../testing/datasets";
+import { datasetFrom, datasetOfTurtle } from "../testing/datasets";
 import { growth } from "@solid-memo/domain/testing/growth";
 import {
   deckSubjects,
@@ -45,7 +45,7 @@ import {
   withDecks,
   writeDistractors,
   withoutUnnamedDistractors,
-  withoutDeck,
+  withoutDecks,
 } from "./deckMapper";
 import type { Deck, Distractor } from "@solid-memo/domain/deck";
 import { editOf } from "../datasetEdit";
@@ -58,6 +58,28 @@ const CARDS_DOC = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
 const REVIEWS_DOC = "https://pod.example/solid-memo/a/reviews/deck-1.ttl";
 const FLAG = "https://flagcdn.com/h80/af.png";
 const MAP = "https://img.example/af-map.png";
+
+/**
+ * A dataset's statements and the changes a save sends, as sorted lines:
+ * what two datasets must share to be the same document with the same
+ * save, whatever edits each was reached by, which a client's change log
+ * may record step by step (solid-memo-client's does).
+ */
+function stateOf(dataset: Dataset) {
+  const lines = (quads: Iterable<Quad>) =>
+    [...quads]
+      .map(
+        (quad) =>
+          `${quad.subject.value} ${quad.predicate.value} ${quad.object.termType} ${quad.object.value}`,
+      )
+      .sort();
+  const changes = changesOf(dataset);
+  return {
+    quads: lines(toRdfJsDataset(dataset)),
+    additions: lines(changes?.additions ?? []),
+    deletions: lines(changes?.deletions ?? []),
+  };
+}
 
 describe("toDeck", () => {
   function deckThing(build: (t: SubjectBuilder) => SubjectBuilder) {
@@ -809,7 +831,7 @@ describe("the catalog node", () => {
       deck.url,
       other.url,
     ]);
-    dataset = withoutDeck(dataset, deck);
+    dataset = withoutDecks(dataset, [deck]);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DATASET)).toEqual([other.url]);
   });
 
@@ -851,7 +873,7 @@ describe("the catalog node", () => {
     expect(listed()).toEqual([FOREIGN, LOCAL, deck.url].sort());
     dataset = withCatalog(dataset, CATALOG, { ...catalog, title: "Renamed" });
     expect(listed()).toEqual([FOREIGN, LOCAL, deck.url].sort());
-    dataset = withoutDeck(dataset, deck);
+    dataset = withoutDecks(dataset, [deck]);
     expect(listed()).toEqual([FOREIGN, LOCAL].sort());
   });
 
@@ -1016,23 +1038,6 @@ describe("the catalog node", () => {
       return updated;
     }
 
-    // A dataset's statements and the changes a save sends, as sorted lines.
-    const stateOf = (dataset: Dataset) => {
-      const lines = (quads: Iterable<Quad>) =>
-        [...quads]
-          .map(
-            (quad) =>
-              `${quad.subject.value} ${quad.predicate.value} ${quad.object.termType} ${quad.object.value}`,
-          )
-          .sort();
-      const changes = changesOf(dataset);
-      return {
-        quads: lines(toRdfJsDataset(dataset)),
-        additions: lines(changes?.additions ?? []),
-        deletions: lines(changes?.deletions ?? []),
-      };
-    };
-
     it("lets go of each as it let go of one at a time, and saves the same changes", () => {
       const dataset = planted(4);
       // A license a deck names stays one; one without a subject is passed over.
@@ -1142,11 +1147,92 @@ describe("the arrangement's triples (deck groups)", () => {
   });
 
   it("lose a removed deck from every group that listed it, the rest left as they are", () => {
-    const dataset = withoutDeck(arranged(), deck);
+    const dataset = withoutDecks(arranged(), [deck]);
     expect(getUrlAll(getThing(dataset, GROUP)!, DCAT.dataset)).toEqual([other.url]);
     expect(getUrlAll(getThing(dataset, `${CATALOG}#catalog`)!, DCAT.catalog)).toEqual([GROUP]);
     // A group that did not list it is not touched.
-    expect(withoutDeck(dataset, deck)).toEqual(dataset);
+    expect(withoutDecks(dataset, [deck])).toEqual(dataset);
+  });
+
+  it("lose many removed decks at once as one at a time", () => {
+    const once = withoutDecks(arranged(), [deck, other]);
+    expect(getUrlAll(getThing(once, GROUP)!, DCAT.dataset)).toEqual([]);
+    expect(getUrlAll(getThing(once, `${CATALOG}#catalog`)!, DCAT.dataset)).toEqual([]);
+    expect(toDecks(once, CATALOG)).toEqual([]);
+    expect(stateOf(once)).toEqual(stateOf(withoutDecks(withoutDecks(arranged(), [deck]), [other])));
+  });
+
+  it("add and remove decks where a group and the catalog list a member the library takes for no URL, keeping that link", async () => {
+    const dataset = await datasetOfTurtle(
+      CATALOG,
+      `@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#catalog> a dcat:Catalog ; dcat:dataset <#deck-2>, <http://[oops> ; dcat:catalog <#group-1> .
+<#group-1> a sm:DeckGroup ; dcat:dataset <#deck-1>, <#deck-2>, <http://[oops> .
+<#deck-2> a sm:Deck .
+`,
+    );
+    const added = withDeck(dataset, deck);
+    expect(getUrlAll(getThing(added, `${CATALOG}#catalog`)!, DCAT.dataset)).toEqual([
+      other.url,
+      "http://[oops",
+      deck.url,
+    ]);
+    const removed = withoutDecks(added, [deck, other]);
+    expect(getUrlAll(getThing(removed, GROUP)!, DCAT.dataset)).toEqual(["http://[oops"]);
+    expect(getUrlAll(getThing(removed, `${CATALOG}#catalog`)!, DCAT.dataset)).toEqual([
+      "http://[oops",
+    ]);
+    expect(getThing(removed, deck.url)).toBeNull();
+  });
+
+  it("remove many decks, where a group and the catalog list a member the library takes for no URL, in time that grows with them, not their square", {
+    timeout: 180_000,
+  }, async () => {
+    // The group lists four links to other documents for each deck.
+    const turtle = (count: number) => {
+      const decks = Array.from({ length: count }, (_, i) => `<#deck-${i}>`);
+      const elsewhere = Array.from(
+        { length: 4 * count },
+        (_, i) => `<https://elsewhere.example/d#${i}>`,
+      );
+      return `@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#catalog> a dcat:Catalog ; dcat:dataset ${[...decks, "<http://[oops>"].join(", ")} ; dcat:catalog <#group-1> .
+<#group-1> a sm:DeckGroup ; dcat:dataset ${[...decks, ...elsewhere, "<http://[oops>"].join(", ")} .
+`;
+    };
+    const decksOf = (count: number, from: number): Deck[] =>
+      Array.from({ length: count }, (_, i) => ({
+        ...deck,
+        id: `deck-${from + i}`,
+        url: `${CATALOG}#deck-${from + i}`,
+      }));
+    const SIZE = 250;
+    const datasets = new Map(
+      await Promise.all(
+        [SIZE, 8 * SIZE].map(
+          async (count) => [count, await datasetOfTurtle(CATALOG, turtle(count))] as const,
+        ),
+      ),
+    );
+    const ratio = growth(
+      (count) => {
+        const dataset = datasets.get(count)!;
+        const leaving = decksOf(count, 0);
+        return () => withoutDecks(dataset, leaving);
+      },
+      SIZE,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+    // The link stays, and a deck added after is listed after it.
+    const after = withDecks(withoutDecks(datasets.get(SIZE)!, decksOf(SIZE, 0)), decksOf(1, SIZE));
+    expect(getUrlAll(getThing(after, GROUP)!, DCAT.dataset)).toContain("http://[oops");
+    expect(getUrlAll(getThing(after, `${CATALOG}#catalog`)!, DCAT.dataset)).toEqual([
+      "http://[oops",
+      `${CATALOG}#deck-${SIZE}`,
+    ]);
   });
 });
 
@@ -1192,7 +1278,7 @@ describe("the agents of a catalog's decks", () => {
       const again = withDeck(withDeck(withBoth, a), b);
       expect(getUrlAll(getThing(again, b.url)!, DCTERMS.creator)).toEqual([creator]);
       expect(getUrlAll(getThing(again, a.url)!, DCTERMS.creator)).toEqual([SLUG]);
-      const removed = withoutDeck(withBoth, b);
+      const removed = withoutDecks(withBoth, [b]);
       expect(authorsOf(removed)).toEqual({ "deck-1": a.authors });
       expect(getThing(removed, creator!)).toBeNull();
     },
