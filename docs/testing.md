@@ -20,6 +20,8 @@ branches, functions, lines), or `npm test` fails
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # Biome's lint, markdownlint, cspell and the prose check, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
 npm run check:ci  # npm run check without the deck library, as CI's check job runs it (its library job checks the library)
+npm run check:lints   # the first part of both: Biome's lint, markdownlint, cspell and the prose check
+npm run check:tasks   # the second: every package's Turbo tasks but the deck library's (npm run check adds it)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
@@ -664,7 +666,7 @@ jobs run side by side, each
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm audit signatures` checks the registry's signatures of the installed packages (The workflows, below) |
+| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), its parts each a step (`check:lints`, `check:tasks`, `check:repository`), so the jobs API shows each part's time. A part runs when a part before it failed, so a run shows every failure, but none runs when a step before the parts failed, such as `npm ci` or `npm audit signatures`. Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm audit signatures` checks the registry's signatures of the installed packages (The workflows, below) |
 | `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships. Nothing in it comes from GitHub's cache, and in the merge queue and on `main` it attests the list of the site's files, which the deploy checks the artifact against ([deployment.md](deployment.md#the-build-ci-tested)) |
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over that run's site as this run's `site` artifact and, except on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
@@ -972,12 +974,13 @@ URLs are compared as strings or by parsed origin, not with patterns.
 
 ### The repository's own checks
 
-`npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
+`npm run check` starts with `npm run check:lints`, which runs `npm run lint`: [Biome](https://biomejs.dev/)
 fails on a TypeScript, JSON or CSS file it would format otherwise, or
 that breaks one of its lint rules ([style.md](style.md#formatting)).
 Then `npm run lint:markdown`, `npm run lint:spelling` and
 `npm run lint:prose` check the Markdown's style, spelling and prose
-([Documentation](#documentation)). It ends with
+([Documentation](#documentation)). Then `npm run check:tasks` runs
+every package's Turbo tasks. It ends with `npm run check:repository`,
 checks of the repository as a whole, plain Node scripts in
 [scripts/](../scripts/):
 
@@ -1183,7 +1186,7 @@ Dependency inversion gives every layer a seam for its fakes:
 | Infrastructure mappers | none needed | Pure `Dataset`/`Subject` → domain functions, fed in-memory datasets built with `datasetFrom`/`buildThing` ([datasets.ts](../packages/solid/src/testing/datasets.ts)). |
 | Infrastructure I/O shells | injected `fetch` + `vi.mock` | The app's client modules (`client/resources`, `client/rdf`, `client/session`) are mocked, or given a fake (`fakeSessionClient.ts` in `packages/solid/src/testing/`); the tests assert the shell's fetch → map → return. Only the client modules' own tests use the Solid client libraries: each runs its module's contract, in [src/testing/contract/](../packages/solid/src/testing/contract/), against Inrupt's implementation, and tests beside it what is the library's alone ([vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)). `solid-memo-client`'s tests run the same contract against its own. The contract holds both clients to reading no RDF-star in JSON-LD, which keeps the parser from holding annotated top-level nodes to the end, in time growing with their square; it stands in for a growth test there. |
 | Shapes (`packages/shacl/`, `packages/solid/src/conformance.test.ts`) | the real engine | The real `rdf-validate-shacl` over the real shapes in `ns/shapes/`: fixture documents under `packages/vocab/fixtures/` pass or fail as a table says. A record written through every descriptor, and every migration step's output, conforms (`conformance.test.ts`). Every library deck passes too, by `npm run library:check` ([deck-library.md](deck-library.md#checks)). Shape documents are read as the browser reads them, through a `fetch` that serves the repository's files at their IRIs (`shapesFetch` in [sources.ts](../packages/vocab/tooling/sources.ts), a `Response` with its `url` set). |
-| The round trip (`packages/solid/src/releaseDrafts.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` becomes a draft in a pod kept in memory, as an import makes one, is read back as the Studio opens it, and is published again at its own address (`assemble`), its triples coming back apart from what publishing sets (the format versions, its time of change), a blank node compared by what it says. Its task, `test:roundtrip`, in `npm run check`, runs again only when `decks/`, `ns/` or the package change. The unit tests take three releases the same way: a course, one with blank nodes, a plain deck. |
+| The round trip (`packages/solid/src/releaseDrafts.<n>.roundtrip.test.ts`) | the real draft adapter | Every release in `decks/` becomes a draft in a pod kept in memory, as an import makes one, is read back as the Studio opens it, and is published again at its own address (`assemble`), its triples coming back apart from what publishing sets (the format versions, its time of change), a blank node compared by what it says. Its task, `test:roundtrip`, in `npm run check`, runs again only when `decks/`, `ns/` or the package change. The releases are dealt into `ROUND_TRIP_FILES` files of about the same size, the largest first, each to the smallest file so far (`libraryReleaseShards` in `src/testing/releaseShards.ts`), whose test holds that each release is in exactly one, and that each file is there. The unit tests take three releases the same way: a course, one with blank nodes, a plain deck. |
 | The library (`packages/solid/src/libraryReleases.test.ts`) | the real library adapter | Every release in `decks/` and the index, read as the app reads them, through `createSolidDeckLibrary` over a fetch serving the repository's files at their IRIs. The index lists every deck, and each release reads with all its cards (its retired ones retired). A course's outline has every chapter and step it uses, each asking cards the app can ask (a back and at least two distractors). The library check validates the releases; this tests what the app makes of them. Its rules (`packages/domain/src/release/`) have their own tests, and a golden test, `packages/shacl/node/deckLibrary.golden.test.ts`, keeps as text what they say of published releases with faults put in. |
 | Markdown (`packages/markdown/`) | none needed | Pure functions over strings: every node in both profiles, the folds, the chunks of a step's theory, each rule for a release (`markdownProblems`), the limits at every entry point, and the cmark and commonmark.js pathological inputs at the length cap read in time linear in their length ([markdown.md](markdown.md#limits)). |
 | The docs' diagrams (`packages/site/`) | an injected `launch` | What a block must have, the settings, the keys and `checkSvg` are pure functions (`diagrams.test.ts`); `FONT_CHARS` is held to the `cmap` of the installed Fredoka file, read from its WOFF2. `drawDiagrams.test.ts` draws through a fake browser (`evaluate(fn, arg)` calls `fn(arg)` in node), a fake `mermaid` and `document.fonts`, covering the drawing page's callbacks: cache hits, a hit failing `checkSvg`, misses written under a temporary name, the font's notice in every drawing, a block Mermaid refuses at the page's line, Chromium missing when drawing is required or optional, and `DOCS_DIAGRAMS=skip`, in CI too, drawing nothing and starting no browser. One test, the only one of the real launch, draws a flowchart, a sequence diagram and a state diagram in both themes in the real Chromium with the official Mermaid (timeout 120 s); `DOCS_DIAGRAMS=skip` skips it, so the package's coverage and `npm run check` fail ([markdown.md](markdown.md#diagrams)). |
@@ -1209,6 +1212,14 @@ graph LR
 ## Conventions
 
 - Tests are colocated: `foo.ts` ↔ `foo.test.ts`.
+- Vitest runs a package's test files at once, each on a worker, but a
+  file's tests one after another. A file of slow tests is split into
+  files of about the same time, by what they test, their shared setup
+  in `src/testing/`. The deck repository's growth tests are
+  `solidDeckRepository.<what>.growth.test.ts`, over
+  `packages/solid/src/testing/deckWrites.ts`. The round trip of the
+  library's releases is `releaseDrafts.<n>.roundtrip.test.ts`
+  ([Strategy per layer](#strategy-per-layer)).
 - Test files follow the same import boundaries as their subject
   ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts`
   parses Turtle through `src/turtleDocument.ts` for the SHACL tests.
