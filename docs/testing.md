@@ -20,6 +20,8 @@ branches, functions, lines), or `npm test` fails
 npm test          # every package's tests, with coverage thresholds (turbo)
 npm run check     # Biome's lint, markdownlint, cspell and the prose check, then npm test's tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
 npm run check:ci  # npm run check without the deck library, as CI's check job runs it (its library job checks the library)
+npm run check:lints   # the first part of both: Biome's lint, markdownlint, cspell and the prose check
+npm run check:tasks   # the second: every package's Turbo tasks but the deck library's (npm run check adds it)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
@@ -664,7 +666,7 @@ jobs run side by side, each
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm audit signatures` checks the registry's signatures of the installed packages (The workflows, below) |
+| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it), its parts each a step (`check:lints`, `check:tasks`, `check:repository`), so the jobs API shows each part's time. A part runs when a part before it failed, so a run shows every failure, but none runs when a step before the parts failed, such as `npm ci` or `npm audit signatures`. Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm audit signatures` checks the registry's signatures of the installed packages (The workflows, below) |
 | `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships. Nothing in it comes from GitHub's cache, and in the merge queue and on `main` it attests the list of the site's files, which the deploy checks the artifact against ([deployment.md](deployment.md#the-build-ci-tested)) |
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over that run's site as this run's `site` artifact and, except on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
 | `release-files` | deterministic | on a release commit, when the run reuses the one that tested its parent: the files a release writes, by Biome, markdownlint and cspell, as `npm run check` has them, and `publiccode.yml` by its parser |
@@ -972,12 +974,13 @@ URLs are compared as strings or by parsed origin, not with patterns.
 
 ### The repository's own checks
 
-`npm run check` starts with `npm run lint`: [Biome](https://biomejs.dev/)
+`npm run check` starts with `npm run check:lints`, which runs `npm run lint`: [Biome](https://biomejs.dev/)
 fails on a TypeScript, JSON or CSS file it would format otherwise, or
 that breaks one of its lint rules ([style.md](style.md#formatting)).
 Then `npm run lint:markdown`, `npm run lint:spelling` and
 `npm run lint:prose` check the Markdown's style, spelling and prose
-([Documentation](#documentation)). It ends with
+([Documentation](#documentation)). Then `npm run check:tasks` runs
+every package's Turbo tasks. It ends with `npm run check:repository`,
 checks of the repository as a whole, plain Node scripts in
 [scripts/](../scripts/):
 

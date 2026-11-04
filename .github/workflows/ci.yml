@@ -138,17 +138,29 @@ jobs:
       # Chromium, which site's tests draw the docs' Mermaid diagrams in
       # (docs/markdown.md).
       - uses: ./.github/actions/chromium
-      # Biome's formatting and lint rules (docs/style.md), markdownlint's
-      # and cspell's (docs/testing.md#documentation); then every
-      # package: typecheck, tests at 100% coverage, generated code and
-      # Turtle formatting in step with their sources; then the
-      # boundaries, the docs' index (docs/docs.ttl) and the shipped
-      # dependencies' maturity (docs/testing.md). npm run check without
-      # the deck library, which the library job checks, and compares with
-      # the base.
-      - run: npm run check:ci
+      # npm run check:ci, a step per part, so that the jobs API shows how
+      # long each takes. A later part also runs when an earlier part
+      # failed, so that a run shows every failure, but not when a step
+      # before the parts failed: the lints step runs only after every
+      # step above passed, and the later parts only after it ran. npm run
+      # check without the deck library, which the library job checks,
+      # and compares with the base. First Biome's formatting and lint
+      # rules (docs/style.md), markdownlint's, cspell's and the prose
+      # check's (docs/testing.md#documentation).
+      - id: lints
+        run: npm run check:lints
+      # Every package: typecheck, tests at 100% coverage, the round trip
+      # of the library's releases, generated code and Turtle formatting
+      # in step with their sources.
+      - if: ${{ !cancelled() && (steps.lints.outcome == 'success' || steps.lints.outcome == 'failure') }}
+        run: npm run check:tasks
         env:
           TURBO_CACHE_MAX_AGE: 14d
+      # The boundaries, the docs' index (docs/docs.ttl), the shipped
+      # dependencies' maturity and the repository's other checks
+      # (docs/testing.md#the-repositorys-own-checks).
+      - if: ${{ !cancelled() && (steps.lints.outcome == 'success' || steps.lints.outcome == 'failure') }}
+        run: npm run check:repository
       # Each package's coverage, in the run's summary; the thresholds that
       # gate are each package's own, in npm run check.
       - if: success() || failure()
