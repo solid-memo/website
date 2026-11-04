@@ -9,7 +9,12 @@ import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { addCatalogLink, catalogLinks, refuseFullCatalog } from "./catalogLinks";
 import type { GrantPublicRead } from "./client/access";
-import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
+import {
+  ACCESS_CONTROL_LIMITS,
+  limitedFetch,
+  MAX_ACCESS_CONTROL_SUBJECTS,
+  RELEASE_LIMITS,
+} from "./client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
 import { RDF, SM } from "./vocab";
 
@@ -56,7 +61,8 @@ import { RDF, SM } from "./vocab";
  * under ACCESS_CONTROL_LIMITS for the same reason, and the release
  * itself, should the grant read it, under RELEASE_LIMITS: their bytes,
  * their triples, their characters and their base and prefix
- * declarations (accessControlFetch).
+ * declarations, and an access control's subjects, to
+ * MAX_ACCESS_CONTROL_SUBJECTS (accessControlFetch).
  */
 export function createSolidReleasePublisher({
   fetch,
@@ -208,7 +214,9 @@ function statementsOf(quads: readonly Quad[], url: string): string {
  * then handed on as it was. A read of the release itself, or of a
  * folder above it, which a grant may make when its server answers no
  * HEAD, is held to RELEASE_LIMITS, as any release is; every other read,
- * of an access control, to ACCESS_CONTROL_LIMITS, far smaller. The
+ * of an access control, to ACCESS_CONTROL_LIMITS, far smaller, and to
+ * MAX_ACCESS_CONTROL_SUBJECTS subjects, as the library's work on it
+ * grows with the square of their number. The
  * library takes a failed read of the release's access control for one
  * not written yet, and writes another from its folder's, so once a
  * request throws (refused here, past a limit, or not answered), every
@@ -235,16 +243,18 @@ function accessControlFetch(
     if (failed || url.origin !== origin || (!read && !own.has(url.href)))
       throw new TypeError(`Not the release's to change: ${method} ${url.href}`);
     try {
-      const [limited, limits] =
-        read && isDocument(url.href)
-          ? [document, RELEASE_LIMITS]
-          : [accessControl, ACCESS_CONTROL_LIMITS];
+      const ofDocument = read && isDocument(url.href);
+      const [limited, limits] = ofDocument
+        ? [document, RELEASE_LIMITS]
+        : [accessControl, ACCESS_CONTROL_LIMITS];
       const response = await limited(input, read ? init : { ...init, redirect: "error" });
       if (response.url !== "" && new URL(response.url).origin !== origin)
         throw new TypeError(`Answered from another origin: ${response.url}`);
       if (method !== "GET" || !response.ok) return response;
       const text = await response.text();
-      await parseDeckFile(text, "turtle", response.url || url.href, limits);
+      const quads = await parseDeckFile(text, "turtle", response.url || url.href, limits);
+      if (!ofDocument && tooManySubjects(quads))
+        throw new TypeError(`An access control of too many subjects: ${url.href}`);
       const checked = new Response(text, {
         status: response.status,
         statusText: response.statusText,
@@ -257,4 +267,17 @@ function accessControlFetch(
       throw error;
     }
   };
+}
+
+/**
+ * Whether triples have more than MAX_ACCESS_CONTROL_SUBJECTS subjects:
+ * the count stops once past it, so its set holds no more than that.
+ */
+function tooManySubjects(quads: readonly Quad[]): boolean {
+  const subjects = new Set<string>();
+  for (const { subject } of quads) {
+    subjects.add(`${subject.termType} ${subject.value}`);
+    if (subjects.size > MAX_ACCESS_CONTROL_SUBJECTS) return true;
+  }
+  return false;
 }

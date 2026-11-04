@@ -40,13 +40,27 @@ export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
  * The most the app reads of a release's access control as it makes the
  * release public (solidReleasePublisher.ts), on a server that may be
  * anyone's: an ACL or ACR holds a few rules, so a wide margin over that
- * is far less than a release may be.
+ * is far less than a release may be. The grant's library parses and
+ * edits an access control in time that grows with the square of its
+ * subjects, so the margin is kept small, and the subjects are bounded
+ * too (MAX_ACCESS_CONTROL_SUBJECTS).
  */
 export const ACCESS_CONTROL_LIMITS: ReadLimits = {
-  bytes: 1024 * 1024,
-  quads: 10_000,
-  characters: 4 * 1024 * 1024,
+  bytes: 256 * 1024,
+  quads: 1_000,
+  characters: 1024 * 1024,
 };
+
+/**
+ * The most subjects an access control the app reads as it makes a
+ * release public may have (solidReleasePublisher.ts): its rules, and
+ * the nodes they name, a few in any ACL or ACR. The grant's library
+ * copies the access control for each subject it parses and edits, in
+ * time that grows with the square of their number, so one with more is
+ * refused before the library is handed it. The grant reads the access
+ * control again once written, so the subjects its rule adds count too.
+ */
+export const MAX_ACCESS_CONTROL_SUBJECTS = 64;
 
 /**
  * The most the app reads of a WebID document, and of the documents it
