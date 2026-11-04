@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { limitedFetch, MAX_PROFILE_DOCUMENTS, PROFILE_LIMITS } from "./client/readLimits";
 import { getProfileStorages, getSourceUrl } from "./client/resources";
 import {
   type Dataset,
@@ -78,7 +79,8 @@ export async function locateTypeIndexes(
   fetch: Fetch,
   publicFetch: Fetch,
 ): Promise<TypeIndexes> {
-  const profileDataset = await readDataset(webId, fetch);
+  const profileFetch = profileFetchOf(fetch);
+  const profileDataset = await readDataset(webId, profileFetch);
   const documentUrl = getSourceUrl(profileDataset);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
@@ -104,7 +106,7 @@ export async function locateTypeIndexes(
 
   for (const extendedProfileUrl of extendedProfileUrls(webId, profile, profileDataset)) {
     if (located()) break;
-    const subject = await readSubjectSafely(extendedProfileUrl, webId, fetch);
+    const subject = await readSubjectSafely(extendedProfileUrl, webId, profileFetch);
     if (subject === null) continue;
     subjects.push(subject);
     publicIndexUrl ??= getUrl(subject, SOLID.publicTypeIndex);
@@ -114,7 +116,7 @@ export async function locateTypeIndexes(
   if (privateIndexUrl === null) {
     const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
     if (preferencesFileUrl !== null && isInPlaces(preferencesFileUrl, ownPlaces)) {
-      const subject = await readSubjectSafely(preferencesFileUrl, webId, fetch);
+      const subject = await readSubjectSafely(preferencesFileUrl, webId, profileFetch);
       privateIndexUrl = subject === null ? null : getUrl(subject, SOLID.privateTypeIndex);
     }
   }
@@ -144,11 +146,32 @@ function placesOf(
   };
 }
 
+/** The fetch of each profileFetchOf, so that what it read is kept (datasets.ts) from one call to the next. */
+const PROFILE_FETCHES = new WeakMap<Fetch, Fetch>();
+
+/**
+ * `fetch`, its answers read under PROFILE_LIMITS, as the storage lookup
+ * reads the profile's documents (solidStorageGateway.ts): the WebID
+ * document, the extended profile documents and the preferences file are
+ * read through it, and written through it too, so that a write is kept
+ * where the read was (datasets.ts). One past the limits is refused: the
+ * WebID document fails the lookup, any other is left out.
+ */
+function profileFetchOf(fetch: Fetch): Fetch {
+  let profileFetch = PROFILE_FETCHES.get(fetch);
+  if (profileFetch === undefined) {
+    profileFetch = limitedFetch(fetch, PROFILE_LIMITS);
+    PROFILE_FETCHES.set(fetch, profileFetch);
+  }
+  return profileFetch;
+}
+
 /**
  * Extended profile documents linked from the WebID subject, deduplicated
  * and excluding the WebID document itself (which is commonly its own
  * foaf:isPrimaryTopicOf), in the profile's own places (profilePlacesOf)
- * alone.
+ * alone, and no more than MAX_PROFILE_DOCUMENTS of them, as the storage
+ * lookup reads.
  */
 function extendedProfileUrls(
   webId: string,
@@ -162,7 +185,9 @@ function extendedProfileUrls(
     ...getUrlAll(profile, RDFS.seeAlso),
     ...getUrlAll(profile, FOAF.isPrimaryTopicOf),
   ].map(stripFragment);
-  return [...new Set(urls)].filter((url) => !self.has(url) && isInPlaces(url, places));
+  return [...new Set(urls)]
+    .filter((url) => !self.has(url) && isInPlaces(url, places))
+    .slice(0, MAX_PROFILE_DOCUMENTS);
 }
 
 function stripFragment(url: string): string {
@@ -229,7 +254,8 @@ async function linkTypeIndexFromProfile(
   indexUrl: string,
   fetch: Fetch,
 ): Promise<void> {
-  const profileDataset = await readDataset(webId, fetch);
+  const profileFetch = profileFetchOf(fetch);
+  const profileDataset = await readDataset(webId, profileFetch);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
     throw new AppError("profileNoSubject", { webId });
@@ -242,7 +268,7 @@ async function linkTypeIndexFromProfile(
       profileDataset,
       buildThing(profile).addIri(predicate, indexUrl).build(),
     );
-    await saveDataset(getSourceUrl(profileDataset), updated, fetch);
+    await saveDataset(getSourceUrl(profileDataset), updated, profileFetch);
     return;
   } catch (error) {
     failures.push(describeFailure(getSourceUrl(profileDataset), error));
@@ -250,10 +276,10 @@ async function linkTypeIndexFromProfile(
 
   for (const documentUrl of extendedProfileUrls(webId, profile, profileDataset)) {
     try {
-      const dataset = await readDataset(documentUrl, fetch);
+      const dataset = await readDataset(documentUrl, profileFetch);
       const subject = getThing(dataset, webId) ?? createThing({ url: webId });
       const updated = setThing(dataset, buildThing(subject).addIri(predicate, indexUrl).build());
-      await saveDataset(documentUrl, updated, fetch);
+      await saveDataset(documentUrl, updated, profileFetch);
       return;
     } catch (error) {
       failures.push(describeFailure(documentUrl, error));

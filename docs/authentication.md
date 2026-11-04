@@ -21,9 +21,10 @@ describes the default, Inrupt's, and says where the other differs.
 The learner enters only a [WebID](https://www.w3.org/2005/Incubator/webid/spec/identity/)
 ([its profile in Solid](https://solid.github.io/webid-profile/)); the
 [onboarding flow](onboarding.md) validates it as an `https:` URL. The
-app reads the WebID document unauthenticated, takes the issuer
-(`https:` too) from its `solid:oidcIssuer` triple, and starts the OIDC
-redirect flow. The issuer is never inferred from the WebID's
+app reads the WebID document unauthenticated, under `PROFILE_LIMITS`
+([the credential gate](boundaries.md#the-credential-gate)), takes the
+issuer (`https:` too) from its `solid:oidcIssuer` triple, and starts
+the OIDC redirect flow. The issuer is never inferred from the WebID's
 origin: a WebID on `alice.datapod.igrant.io` has the issuer
 `datapod.igrant.io`.
 

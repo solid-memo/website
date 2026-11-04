@@ -52,9 +52,16 @@ export const ACCESS_CONTROL_LIMITS: ReadLimits = {
  * The most the app reads of a WebID document, and of the documents it
  * names as more of the profile all together, as it looks for the user's
  * storages (solidStorageGateway.ts): at every sign-in, and again as the
- * credential gate asks. A profile holds a few dozen triples, so a wide
- * margin over that is far less than a release may be, and no profile
- * holds up a sign-in.
+ * credential gate asks. Every other read of the profile's documents is
+ * held to them too: the identity provider's lookup
+ * (solidSessionGateway.ts), the WebID document's own view
+ * (solidWebIdDocumentRepository.ts) and the type index lookup
+ * (typeIndex.ts), which runs at every load as the app lists the
+ * instances. That lookup holds each document to them on its own, and
+ * reads no more than MAX_PROFILE_DOCUMENTS of those the WebID document
+ * names. A profile holds a few dozen triples, so a wide margin over
+ * that is far less than a release may be, and no profile holds up a
+ * sign-in or a load.
  */
 export const PROFILE_LIMITS: ReadLimits = {
   bytes: 1024 * 1024,

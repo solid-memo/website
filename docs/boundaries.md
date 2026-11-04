@@ -309,14 +309,21 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   release's ([deck-library.md](deck-library.md)). The storages and the
   folders entered on this page, a storage entered by hand trusted like
   one the profile names, are read as the user with no limits on size.
-  The storage lookup's reads of the profile's documents are the
-  exception, since they're made at every sign-in. The WebID document
-  is held to `PROFILE_LIMITS`, a wide margin over the few triples a
-  profile holds. The documents it names as more of the profile are
-  held to them all together, and no more than `MAX_PROFILE_DOCUMENTS`
-  of them are read: one outside the profile's places isn't read and
-  doesn't count. A WebID document past them fails the sign-in, and a
-  further document past them, or past that count, is left out.
+  The reads of the profile's documents are the exception, since
+  they're made at every sign-in. The WebID document is held to
+  `PROFILE_LIMITS`, a wide margin over the few triples a profile holds.
+  Every read of it is: the storage lookup, the identity provider's
+  lookup (at login and sign-in, read as no one), the account's name
+  and the developer tools' view of it, and the type index lookup. That
+  last one runs at every load, as the app lists the user's instances.
+  The storage lookup holds the documents the WebID document names as
+  more of the profile to them all together, and reads no more than
+  `MAX_PROFILE_DOCUMENTS` of them: one outside the profile's places
+  isn't read and doesn't count. The type index lookup holds each of
+  them, and the preferences file, to `PROFILE_LIMITS` on its own, and
+  reads no more than `MAX_PROFILE_DOCUMENTS` of them too. A WebID
+  document past them fails the sign-in and the lookup, and a further
+  document past them, or past that count, is left out.
 - **Anywhere else** a read is sent as no one (`credentials: "omit"`),
   and a write is refused before it's sent (`writeOutsidePod`). A
   catalog may name a deck's documents on any server
