@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.11](https://github.com/solid-memo/website/compare/v6.29.10...v6.29.11) (2026-11-04)
+
+### Bug Fixes
+
+* **composition:** read the user's profile once at a time when looking up their folders ([1f28705](https://github.com/solid-memo/website/commit/1f28705c4930cab3d3844af6d6b9a941466ecbe8)), closes [#545](https://github.com/solid-memo/website/issues/545) [#547](https://github.com/solid-memo/website/issues/547) [#548](https://github.com/solid-memo/website/issues/548) [#547](https://github.com/solid-memo/website/issues/547)
+
 ## [6.29.10](https://github.com/solid-memo/website/compare/v6.29.9...v6.29.10) (2026-11-04)
 
 ### Bug Fixes
