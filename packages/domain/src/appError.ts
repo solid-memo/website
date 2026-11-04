@@ -111,6 +111,8 @@ export const ERROR_TEMPLATES = {
   },
   guestStudyTooNew:
     "A newer version of Solid Memo saved part of your study in this browser, so this version does not add it to your Pod. Reload the page to get the latest version.",
+  guestStudyTooLarge:
+    "Your study in this browser holds more than Solid Memo adds to a Pod, so none of it was added to your Pod. It is still here.",
   guestStudyChanged:
     "Your study in this browser changed while it was being added, perhaps in another tab, so it is kept here. Try again to add what changed.",
   instanceChangedDuringCopy:

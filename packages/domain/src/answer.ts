@@ -121,6 +121,15 @@ export function isOfStudyDayRange(studyDay: string): boolean {
 export const CHART_YEARS = 10;
 
 /**
+ * The most months of the answer log taken in, the newest up to the
+ * last that can hold an answer counted: those of CHART_YEARS and a year
+ * more. The log's months are listed from its folder, which anyone with
+ * write access, or the server of an instance someone else hosts, may
+ * have filled, and each month taken in may be read.
+ */
+export const MAX_LOG_MONTHS = (CHART_YEARS + 1) * 12;
+
+/**
  * Whether an answer's study day can be one of the answer log's month
  * ("YYYY-MM"): in it, or a day either side, as a time zone may put an
  * answer given near midnight on the other side of a month's end. A day

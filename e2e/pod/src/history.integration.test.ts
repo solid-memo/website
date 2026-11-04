@@ -162,14 +162,14 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
   it("adds answers to month documents it creates as needed, all of several added at once, and reads them back", async () => {
     const instanceUrl = new URL(`run-${crypto.randomUUID()}/solid-memo/main/`, server).href;
     const log = answerLog();
-    await expect(log.months(instanceUrl)).resolves.toEqual([]);
+    await expect(log.months(instanceUrl, "9999-12")).resolves.toEqual([]);
     const october = answerOf(instanceUrl, "2026-10-01", "deck-1", 1);
     await log.append(instanceUrl, october);
     const september = Array.from({ length: 5 }, (_, i) =>
       answerOf(instanceUrl, "2026-09-21", "deck-1", i + 2),
     );
     await Promise.all(september.map((answer) => log.append(instanceUrl, answer)));
-    await expect(log.months(instanceUrl)).resolves.toEqual(["2026-09", "2026-10"]);
+    await expect(log.months(instanceUrl, "9999-12")).resolves.toEqual(["2026-09", "2026-10"]);
     const read = await log.readMonth(instanceUrl, "2026-09");
     expect(read).toHaveLength(5);
     expect(read).toEqual(expect.arrayContaining(september));
@@ -225,7 +225,7 @@ describe.each(SERVERS)("the answer log on $name", ({ url: server }) => {
     await expect(log.append(instanceUrl, backwards)).rejects.toThrow(
       "A recall time is one whole number of milliseconds, 0 or more.",
     );
-    await expect(log.months(instanceUrl)).resolves.toEqual([]);
+    await expect(log.months(instanceUrl, "9999-12")).resolves.toEqual([]);
   });
 
   it("reads the statistics' months and the whole log through one cache, a month again only once it changed", async (context) => {

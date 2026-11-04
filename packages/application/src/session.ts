@@ -59,6 +59,7 @@ import type {
 import type { ReleaseDraftUseCases } from "./releaseDrafts";
 import { draftContainerOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { AppError } from "@solid-memo/domain/appError";
+import { MAX_LOG_MONTHS } from "@solid-memo/domain/answer";
 import type { InstanceCheckUseCases } from "./instanceChecks";
 import { catalogOf, type InstanceUseCases } from "./instances";
 import { unsent } from "./writes";
@@ -210,7 +211,7 @@ export function createSessionUseCases({
   writeFence: WriteFence;
   releaseDraftRepository: ReleaseDraftRepository;
   answerLog: AnswerLog;
-  answerStore: Pick<AnswerStore, "flush" | "appendAll">;
+  answerStore: Pick<AnswerStore, "flush" | "appendAll" | "logMonths">;
   instances: Pick<InstanceUseCases, "createInstance">;
   checks: Pick<InstanceCheckUseCases, "validateInstance">;
   drafts: Pick<ReleaseDraftUseCases, "copyReleaseDraft">;
@@ -370,8 +371,18 @@ export function createSessionUseCases({
       throw error;
     }
   }
-  /** Throw unless the guest's study conforms, none of it written by a newer version of this app. */
+  /**
+   * Throw unless the guest's answer log has fewer months than are taken
+   * in (MAX_LOG_MONTHS): of a log of as many, months may be left out,
+   * neither checked nor added, and the guest's study goes once it is.
+   */
+  async function ensureGuestLogWhole(source: string): Promise<void> {
+    if ((await answerStore.logMonths(source)).length >= MAX_LOG_MONTHS)
+      throw new AppError("guestStudyTooLarge");
+  }
+  /** Throw unless the guest's study conforms, whole, none of it written by a newer version of this app. */
   async function ensureGuestStudyReadable(source: string): Promise<void> {
+    await ensureGuestLogWhole(source);
     const report = await checks.validateInstance(source);
     if (!report.conforms) throw new AppError("guestStudyInvalid", { count: report.violationCount });
     if (
@@ -525,6 +536,7 @@ export function createSessionUseCases({
         progress.start(3);
         await ensureRegistrable(session.webId, registrationTarget);
         const resources = await listed();
+        await ensureGuestLogWhole(source);
         progress.stepped();
         await instanceCopier.ensureAbsent(target);
         progress.stepped();
@@ -649,7 +661,7 @@ export function createSessionUseCases({
           await Promise.all([
             deckRepository.listDecks(source),
             deckRepository.readDeckTree(source),
-            answerLog.months(source),
+            answerStore.logMonths(source),
             deckRepository.listDecks(targetUrl),
             deckRepository.readDeckTree(targetUrl),
             releaseDraftRepository.list(source),

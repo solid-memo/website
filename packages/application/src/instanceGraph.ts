@@ -16,13 +16,13 @@ import {
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type {
-  AnswerLog,
   DeckRepository,
   InstanceGraphReader,
   ReleaseDraftRepository,
   ReleasePublisher,
   StorageGateway,
 } from "./ports";
+import type { AnswerStore } from "./answerStore";
 
 /**
  * An instance read as a graph (domain/instanceGraph.ts), for the Studio
@@ -60,14 +60,14 @@ export function createInstanceGraphUseCases({
   instanceGraphReader,
   storageGateway,
   deckRepository,
-  answerLog,
+  answerStore,
   releaseDraftRepository,
   releasePublisher,
 }: {
   instanceGraphReader: InstanceGraphReader;
   storageGateway: StorageGateway;
   deckRepository: DeckRepository;
-  answerLog: AnswerLog;
+  answerStore: Pick<AnswerStore, "logMonths">;
   releaseDraftRepository: ReleaseDraftRepository;
   releasePublisher: ReleasePublisher;
 }): InstanceGraphUseCases {
@@ -75,7 +75,7 @@ export function createInstanceGraphUseCases({
   async function documentUrls(instanceUrl: string): Promise<string[]> {
     const [decks, months, drafts, releases] = await Promise.all([
       deckRepository.listDecks(instanceUrl),
-      answerLog.months(instanceUrl),
+      answerStore.logMonths(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
       releasePublisher.listPublished(instanceUrl),
     ]);

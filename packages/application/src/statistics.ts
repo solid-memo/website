@@ -53,7 +53,7 @@ import type {
   FileExchange,
 } from "./ports";
 import { readNow } from "./writes";
-import { dueStatesOf } from "./answerStore";
+import { dueStatesOf, lastLogMonthOf } from "./answerStore";
 import { scheduleFrom } from "./digestStore";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
@@ -241,16 +241,6 @@ export interface DeckProgress {
   confusions: Confusion<Card>[];
 }
 
-/**
- * The last month of the answer log a read takes in, of the study day
- * `today`: no answer counts after tomorrow (rangeAnswers), and one of
- * tomorrow may be in the next day's month's document (isOfStudyMonth).
- * The log may list later months, but they hold nothing to read.
- */
-function lastLogMonthOf(today: string): string {
-  return monthOfStudyDay(shiftStudyDay(today, 2));
-}
-
 /** A summary of each study month the answers are of (monthSummaryOf). */
 function monthSummariesOf(answers: readonly Answer[]): MonthSummary[] {
   const byMonth = new Map<string, Answer[]>();
@@ -291,7 +281,7 @@ export function createStatisticsUseCases({
   deckLibrary: DeckLibrary;
   fileExchange: FileExchange;
   preferenceStore: Pick<PreferenceStore, "get">;
-  answerStore: Pick<AnswerStore, "flush" | "readMonths" | "loadAll">;
+  answerStore: Pick<AnswerStore, "flush" | "readMonths" | "loadAll" | "logMonths">;
   digestStore: Pick<DigestStore, "of" | "recordSchedule" | "remember">;
 }): StatisticsUseCases {
   /**
@@ -322,7 +312,7 @@ export function createStatisticsUseCases({
     await answerStore.flush();
     const [prefs, logged] = await Promise.all([
       preferenceStore.get(instanceUrl),
-      answerLog.months(instanceUrl),
+      answerStore.logMonths(instanceUrl, at),
     ]);
     const today = studyDayOf(at, prefs.dayBoundaryHour);
     // The range's first study day: of `range` days up to today, or the first
@@ -410,7 +400,7 @@ export function createStatisticsUseCases({
       await answerStore.flush();
       const [prefs, logged, digest] = await Promise.all([
         preferenceStore.get(instanceUrl),
-        answerLog.months(instanceUrl),
+        answerStore.logMonths(instanceUrl, at),
         digestStore.of(instanceUrl),
       ]);
       const today = studyDayOf(at, prefs.dayBoundaryHour);
@@ -513,7 +503,7 @@ export function createStatisticsUseCases({
         const byDeck = new Map<string, Answer[]>();
         for (const answer of await answerStore.readMonths(
           instanceUrl,
-          await answerLog.months(instanceUrl),
+          await answerStore.logMonths(instanceUrl, at),
           (month) => month >= firstMonth && month <= lastMonth,
         )) {
           const answers = byDeck.get(answer.deckUrl);
@@ -562,7 +552,7 @@ export function createStatisticsUseCases({
       await answerStore.flush();
       const [prefs, logged] = await Promise.all([
         preferenceStore.get(instanceUrl),
-        answerLog.months(instanceUrl),
+        answerStore.logMonths(instanceUrl, at),
       ]);
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));

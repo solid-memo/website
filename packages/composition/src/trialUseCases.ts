@@ -79,6 +79,7 @@ export function createTrialUseCases(
     reviewStateRepository,
     preferenceStore,
     newId: randomId,
+    now,
   });
   const digestStore = createDigestStore({
     digestRepository: createSolidDigestRepository({ fetch, checkWrite }),

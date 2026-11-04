@@ -11,13 +11,18 @@ import {
   setThings,
 } from "./client/rdf";
 import type { AnswerLog } from "@solid-memo/application/ports";
-import { isOfStudyMonth, monthOfStudyDay, type Answer } from "@solid-memo/domain/answer";
+import {
+  isOfStudyMonth,
+  MAX_LOG_MONTHS,
+  monthOfStudyDay,
+  type Answer,
+} from "@solid-memo/domain/answer";
 import {
   historyContainerOf,
   historyUrlOf,
   monthOfHistoryUrl,
 } from "@solid-memo/domain/instanceLayout";
-import { listContainerTree } from "./containers";
+import { listContainer } from "./containers";
 import {
   appendAllToDocument,
   appendToDocument,
@@ -107,12 +112,15 @@ export function createSolidAnswerLog({
       }
     },
 
-    async months(instanceUrl) {
-      const resources = await listContainerTree(historyContainerOf(instanceUrl), fetch);
-      return resources
-        .map((url) => monthOfHistoryUrl(instanceUrl, url))
-        .filter((month): month is string => month !== null)
-        .sort();
+    async months(instanceUrl, until) {
+      // One listing, of history/ alone: a month's document is one of its own (monthOfHistoryUrl), never in a folder below.
+      // A month after `until` holds nothing to read, so it is left out before the newest are taken.
+      const months = new Set<string>();
+      for (const url of await listContainer(historyContainerOf(instanceUrl), fetch)) {
+        const month = monthOfHistoryUrl(instanceUrl, url);
+        if (month !== null && month <= until) months.add(month);
+      }
+      return [...months].sort().slice(-MAX_LOG_MONTHS);
     },
 
     async readMonth(instanceUrl, month) {

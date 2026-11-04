@@ -1677,6 +1677,7 @@
       "other": "En del av dina studier i den här webbläsaren har inte det format Solid Memo förväntar sig ({count} problem), så inget av dem lades till i din Pod. De finns kvar här."
     },
     "guestStudyTooNew": "En nyare version av Solid Memo har sparat en del av dina studier i den här webbläsaren, så den här versionen lägger inte till dem i din Pod. Ladda om sidan för att få den senaste versionen.",
+    "guestStudyTooLarge": "Dina studier i den här webbläsaren rymmer mer än Solid Memo lägger till i en Pod, så inget av dem lades till i din Pod. De finns kvar här.",
     "guestStudyChanged": "Dina studier i den här webbläsaren ändrades medan de lades till, kanske i en annan flik, så de finns kvar här. Försök igen för att lägga till det som ändrades.",
     "instanceChangedDuringCopy": "Dina studier i den här webbläsaren ändrades medan de kopierades, kanske i en annan flik, så de finns kvar här. Försök igen.",
     "resourceChangedDuringCopy": "En del av dina studier i den här webbläsaren ändrades medan de kopierades, kanske i en annan flik, så de finns kvar här. Försök igen.",

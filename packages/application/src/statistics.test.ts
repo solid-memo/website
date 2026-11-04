@@ -386,6 +386,7 @@ describe("the statistics of the answer log", () => {
         reviewStateRepository: deps.reviewStateRepository,
         preferenceStore: { get: async () => DEFAULT_PREFERENCES },
         newId: () => "id",
+        now: () => new Date(),
       });
       const readMonths = vi.spyOn(answerStore, "readMonths");
       const statistics = createStatisticsUseCases({
@@ -714,7 +715,9 @@ describe("the Studio's answer history and schedule insight", () => {
       value: sm2s(states),
       version: "r1",
     });
-    const useCases = createUseCases({ ...deps, answerLog, digestRepository });
+    // A day of October, whose month and September's the whole log is read up to.
+    const now = () => new Date("2026-10-20T10:00:00.000Z");
+    const useCases = createUseCases({ ...deps, answerLog, digestRepository, now });
     return { deps, useCases, answerLog, months, versions, digestRepository, stored: () => stored };
   }
 

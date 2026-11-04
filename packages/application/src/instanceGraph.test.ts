@@ -7,7 +7,6 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { DraftTriple } from "@solid-memo/domain/release/releaseDraft";
 import { createInstanceGraphUseCases } from "./instanceGraph";
 import type {
-  AnswerLog,
   DeckRepository,
   InstanceGraphReader,
   ReleaseDraftRepository,
@@ -48,7 +47,7 @@ function setUp({
     discoverStorages: vi.fn(async () => [{ url: STORAGE, source: "profile" as const }]),
   } as unknown as StorageGateway;
   const deckRepository = { listDecks: vi.fn(async () => decks) } as unknown as DeckRepository;
-  const answerLog = { months: vi.fn(async () => ["2026-09", "2026-10"]) } as unknown as AnswerLog;
+  const answerStore = { logMonths: vi.fn(async () => ["2026-09", "2026-10"]) };
   const releaseDraftRepository = {
     documents: vi.fn(async () => [DRAFT, `${INSTANCE}drafts/capitals/v2/cards.ttl`]),
   } as unknown as ReleaseDraftRepository;
@@ -59,7 +58,7 @@ function setUp({
     instanceGraphReader: reader,
     storageGateway,
     deckRepository,
-    answerLog,
+    answerStore,
     releaseDraftRepository,
     releasePublisher,
   });

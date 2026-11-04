@@ -197,6 +197,7 @@ export function createUseCases({
     reviewStateRepository,
     preferenceStore,
     newId,
+    now,
   });
   const digestStore = createDigestStore({
     digestRepository,
@@ -230,7 +231,7 @@ export function createUseCases({
   const checks = createInstanceCheckUseCases({
     deckRepository,
     releaseDraftRepository,
-    answerLog,
+    answerStore,
     shapeValidator,
     repairRepository,
     deckLibrary,
@@ -336,7 +337,7 @@ export function createUseCases({
       instanceGraphReader,
       storageGateway,
       deckRepository,
-      answerLog,
+      answerStore,
       releaseDraftRepository,
       releasePublisher,
     }),

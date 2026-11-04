@@ -22,7 +22,7 @@ import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
 import { releasesContainerOf } from "@solid-memo/domain/release/releasePlace";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import { deleteContainerIfEmpty, listContainerTree } from "./containers";
+import { deleteContainerIfEmpty, listContainer } from "./containers";
 import { getSolidDatasetOrNull, type Owned, removeOwned } from "./datasets";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { deckDocumentSubjects, solidMemoSubjects, subjectsOfClasses } from "./ownership";
@@ -81,7 +81,8 @@ export async function deleteInstanceData(
     catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog, catalogUrl);
   const deckDocuments = await deletableDeckDocuments(named, fetch);
   const history = historyContainerOf(container);
-  const months = (await listContainerTree(history, fetch)).filter(
+  // A month's document is one of history/'s own (monthOfHistoryUrl): no folder below it is listed.
+  const months = (await listContainer(history, fetch)).filter(
     (url) => monthOfHistoryUrl(container, url) !== null,
   );
   const kept: string[] = [];

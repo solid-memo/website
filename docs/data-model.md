@@ -166,7 +166,8 @@ flowchart LR
   1. each deck's cards and reviews documents as the catalog names them,
      if they're the deck's: they say so, or they're in the instance's
      own folder (below);
-  2. the answer log's months (`history/<YYYY-MM>.ttl`);
+  2. the answer log's months (`history/<YYYY-MM>.ttl`), as `history/`
+     itself lists them;
   3. the drafts the catalog links that are in the instance's `drafts/`
      ([Drafts and releases](#drafts-and-releases));
   4. `preferences.ttl`, `palettes.ttl`, `digest.ttl` and
@@ -1202,6 +1203,16 @@ nothing could rebuild it.
   `shiftStudyDay` keeps in order isn't one of the log's
   (`monthOfHistoryUrl`). No read takes in a month after that of the
   day after tomorrow: no answer counted can be in it.
+  The log's months are listed from one read of `history/` alone
+  (`AnswerLog.months`): a month's document is one of its own, so no
+  folder below it is read. A month after that of the day after
+  tomorrow is left out first. That day is by a boundary at midnight,
+  the latest any gives, so the preferences aren't read. Then of more
+  months than those of `CHART_YEARS` and a year more (`MAX_LOG_MONTHS`)
+  only the newest are taken in, since each month taken in may be read.
+  A later month listed never pushes out an earlier one. A guest's
+  study whose log has as many months isn't moved or added to a Pod
+  (`guestStudyTooLarge`): some of its months might be left behind.
   The today strip keeps a summary of each past month in the
   [digest](#the-digest).
 - **One subject per answer**, `#answer-<time>-<random>` (for one added
@@ -1265,8 +1276,8 @@ nothing could rebuild it.
   target the card's history starts again, though its review state may
   come along. A copy's history starts in the target; the original keeps
   its own.
-- **Read whole by the Studio** (`loadAnswerLog`): every month, for a
-  card's history, its lapses and the deck's leeches
+- **Read whole by the Studio** (`loadAnswerLog`): every month taken
+  in (above), for a card's history, its lapses and the deck's leeches
   ([studio.md](studio.md#a-decks-schedule)). The statistics
   (`getStatistics`) read the months of their range. Both go through one
   cache (`readLogMonths`), which keeps each month's answers in the page

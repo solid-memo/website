@@ -301,7 +301,9 @@ export function memoryLog() {
       changed(month);
     }),
     appendAll: vi.fn(async () => undefined),
-    months: vi.fn(async () => [...byMonth.keys()].sort()),
+    months: vi.fn(async (_instanceUrl: string, until: string) =>
+      [...byMonth.keys()].filter((month) => month <= until).sort(),
+    ),
     readMonth: vi.fn(async (_instanceUrl: string, month: string) => byMonth.get(month) ?? []),
     readMonthSince: vi.fn(
       async (

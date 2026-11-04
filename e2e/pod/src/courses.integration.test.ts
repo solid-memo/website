@@ -207,7 +207,7 @@ describe.each(SERVERS)("a course on $name", ({ url: server }) => {
 
     // The answer reaches the log once the session's answers are flushed.
     await useCases.refreshStudyDigest(instanceUrl, deck);
-    const months = await answerLog.months(instanceUrl);
+    const months = await answerLog.months(instanceUrl, "9999-12");
     const logged = (
       await Promise.all(months.map((month) => answerLog.readMonth(instanceUrl, month)))
     ).flat();

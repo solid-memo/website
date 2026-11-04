@@ -780,10 +780,11 @@ not a first answer, an answer the same day after another, or a course
 answer ([statistics.md](statistics.md#what-the-figures-count)). The
 row of filters ends with how many cards the query keeps and the month
 of the deck's first answer in the log ("since March 2025"). The
-workbench reads the whole log once (`loadAnswerLog`). Meanwhile the
-cards show without their lapses, and a query that needs them
-(`state=leech`, `sort=lapses`) waits. When it
-can't be read, the line says so, and such a query shows why.
+workbench reads the whole log once (`loadAnswerLog`): its newest
+`MAX_LOG_MONTHS` months. Meanwhile the cards show without their
+lapses, and a query that needs them (`state=leech`, `sort=lapses`)
+waits. When it can't be read, the line says so, and such a query
+shows why.
 
 A card opens in the card inspector, on a screen wider than 64rem beside
 the workbench, which keeps its query, selection and Undo. The workbench

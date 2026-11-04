@@ -120,13 +120,16 @@ form says how many and the names they're copied under (step
 It runs these steps:
 
 1. **read:** list the guest's instance, noting each document's version
-   before any is read. Answers waiting to be logged go to the guest's
-   log first, and the write fence keeps the guest's instance read-only
-   meanwhile. The whole instance, answer log included, is checked
-   against the shapes. Nothing is added from a study that doesn't fully
-   conform (`guestStudyInvalid`), or that has a subject a newer app
-   version wrote (`guestStudyTooNew`). Nor from a study with deck groups
-   when a newer version wrote the instance's
+   before any is read. A study that holds more than 20,000 resources,
+   folders more than 8 levels deep, or an answer log of
+   `MAX_LOG_MONTHS` months is refused (`guestStudyTooLarge`). Answers
+   waiting to be logged go to the guest's log first, and the write
+   fence keeps the guest's instance read-only meanwhile. The whole
+   instance, answer log included, is checked against the shapes.
+   Nothing is added from a study that doesn't fully conform
+   (`guestStudyInvalid`), or that has a subject a newer app version
+   wrote (`guestStudyTooNew`). Nor from a study with deck groups when a
+   newer version wrote the instance's
    [arrangement](data-model.md#deck-groups) (`deckTreeTooNew`), refused
    before any deck is written.
 2. **decks:** each kept deck becomes a new deck of the instance, in the
@@ -242,9 +245,10 @@ instance goes). It runs these steps:
    be registered: no type index of the chosen kind, and no storage the
    user's WebID leads to where one could be made
    ([data-model.md](data-model.md)). List the guest's instance, without
-   the digest (this browser's). Check the target is free, then create
-   it. Answers waiting to be logged go to
-   the guest's log first.
+   the digest (this browser's), refused past the same bounds as above
+   (`guestStudyTooLarge`). Check the target is free, then create it.
+   Answers waiting to be logged go to the guest's log first. Deleting a
+   copy that failed half-way walks it within the same bounds.
 2. **copy:** copy each resource with every IRI under the guest's
    instance moved under the target, and the guest's WebID renamed to the
    user's (`ContainerMove.renames`).
