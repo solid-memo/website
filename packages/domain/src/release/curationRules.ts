@@ -95,7 +95,9 @@ export function curationProblems(model: ReleaseModel, policy: LibraryPolicy): Re
   languages(`${DCTERMS_NS}title`, model.title, policy.titleLanguages);
   languages(`${DCTERMS_NS}description`, model.description, policy.descriptionLanguages);
   languages(`${DCAT_NS}keyword`, model.keywords, policy.keywordLanguages);
-  if (policy.describedPictures) problems.push(...model.cards.flatMap(pictureProblems));
+  if (policy.describedPictures) {
+    for (const card of model.cards) problems.push(...pictureProblems(card));
+  }
   const themes = new Set(model.themes.map((theme) => theme.value));
   for (const theme of policy.themes.filter((theme) => !themes.has(theme))) {
     problems.push(
@@ -106,21 +108,54 @@ export function curationProblems(model: ReleaseModel, policy: LibraryPolicy): Re
   return problems;
 }
 
-/** The languages of `wanted` that no literal of `terms` is in. */
-function lacking(terms: readonly ReleaseTerm[], wanted: readonly string[]): string[] {
-  const stated = terms.flatMap((term) => (term.kind === "literal" ? [term.language] : []));
-  // A language range, as sh:languageIn reads it: "en" is met by "en-gb" too.
-  const has = (language: string) =>
-    stated.some((tag) => tag === language || tag.startsWith(`${language}-`));
-  return wanted.filter((language) => !has(language));
+/** The longest primary language subtag a tag may have, as BCP 47 allows. */
+const PRIMARY_SUBTAG_LENGTH = 8;
+
+/**
+ * A language tag's primary subtag, the part before its first "-"; null
+ * when that part is longer than any language subtag, and so names no
+ * language.
+ */
+function primarySubtag(tag: string): string | null {
+  const dash = tag.indexOf("-");
+  const end = dash === -1 ? tag.length : dash;
+  return end > PRIMARY_SUBTAG_LENGTH ? null : tag.slice(0, end);
 }
+
+/**
+ * The languages of `wanted` that no literal of `terms` is in, each read
+ * as a language range, as sh:languageIn reads it: "en" is met by "en"
+ * and by "en-gb" too. Every language asked is a primary subtag, so a tag
+ * meets it where the tag's own primary subtag is the same. Those are
+ * gathered into a set once, each at most a few characters long, so the
+ * check costs time linear in the tags and the languages asked, not their
+ * product, and no more memory than a short string a tag.
+ */
+function lacking(terms: readonly ReleaseTerm[], wanted: readonly string[]): string[] {
+  const met = new Set<string>();
+  for (const term of terms) {
+    if (term.kind !== "literal") continue;
+    const primary = primarySubtag(term.language);
+    if (primary !== null) met.add(primary);
+  }
+  return wanted.filter((language) => !met.has(language));
+}
+
+/**
+ * The most languages listed as lacking of one picture's descriptions,
+ * well over the few a card's text is in. A card's text may be in any
+ * number of languages, so past these the rest are named once these are
+ * described, and one card cannot fill the check with problems.
+ */
+const LISTED_LANGUAGES = 10;
 
 /**
  * Each language a card's picture has no description in: English, and
  * every other language the card's text is in, by its primary subtag
- * ("en-gb" asks "en"). Without one, a screen reader says only that there
- * is a picture, and where the picture is the question, the card cannot
- * be studied without sight.
+ * ("en-gb" asks "en"), none longer than a language subtag can be.
+ * Without one, a screen reader says only that there is a picture, and
+ * where the picture is the question, the card cannot be studied without
+ * sight.
  */
 function pictureProblems(card: ReleaseCard): ReleaseProblem[] {
   const text = [
@@ -134,15 +169,20 @@ function pictureProblems(card: ReleaseCard): ReleaseProblem[] {
   const wanted = [
     ...new Set([
       "en",
-      ...text.flatMap(({ language }) => (language === "" ? [] : [language.split("-")[0]!])),
+      ...text.flatMap(({ language }) => {
+        const primary = language === "" ? null : primarySubtag(language);
+        return primary === null ? [] : [primary];
+      }),
     ]),
   ];
   const side = (images: readonly string[], descriptions: readonly ReleaseTerm[], field: string) =>
     images.length === 0
       ? []
-      : lacking(descriptions, wanted).map((language) =>
-          problem(card.iri, { code: "missingImageDescription", params: { language } }, { field }),
-        );
+      : lacking(descriptions, wanted)
+          .slice(0, LISTED_LANGUAGES)
+          .map((language) =>
+            problem(card.iri, { code: "missingImageDescription", params: { language } }, { field }),
+          );
   return [
     ...side(card.frontImage, card.frontImageDescription, SM.frontImageDescription),
     ...side(card.backImage, card.backImageDescription, SM.backImageDescription),

@@ -76,7 +76,8 @@ version stays at its published format; a new one is written at format
   can't be studied without sight. It says what a sighted learner sees
   and never gives the answer away: "Three vertical stripes, green, white
   and red", not the country. `npm run library:check` asks it of each
-  deck's newest version.
+  deck's newest version. It names at most ten languages a picture
+  lacks at a time, and the rest once those are described.
 - **A published card is never removed, but retired**: it stays and
   gains `owl:deprecated true` (card format 3 and later). Copies keep it
   and its review history but no longer study it; a later version brings
