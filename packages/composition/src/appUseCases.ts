@@ -229,14 +229,15 @@ export function createAppUseCases({
    * they entered or made on this page, and the instances they
    * registered, kept apart for the credential gate. With
    * `orNone`, a list that cannot be read names none, the others still
-   * counting.
+   * counting. One list after the other: each reads the profile, through
+   * a fetch of its own (datasets.ts shares a read only within one), and
+   * two reads of a document at once, one asking only if it changed,
+   * now and then crash WebKit's page.
    */
   async function ownFolders(webId: string, orNone = false): Promise<OwnFolders> {
     const settled = <T>(listed: Promise<T[]>) => (orNone ? listed.catch(() => []) : listed);
-    const [storages, instances] = await Promise.all([
-      settled(storageGateway.discoverStorages(webId)),
-      settled(instanceRepository.listInstances(webId)),
-    ]);
+    const storages = await settled(storageGateway.discoverStorages(webId));
+    const instances = await settled(instanceRepository.listInstances(webId));
     return {
       storages: [...storages.map(({ url }) => url), ...entered],
       instances: instances.map(({ url }) => url),
