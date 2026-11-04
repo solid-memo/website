@@ -15,7 +15,7 @@ import {
   toRdfJsDataset,
 } from "./client/rdf";
 import { datasetFrom } from "./testing/datasets";
-import { getSolidDatasetLinear } from "./client/linearDataset";
+import { getSolidDatasetLinear } from "./client/resources";
 import { limitedFetch, MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetOrNull } from "./datasets";
