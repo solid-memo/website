@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.20](https://github.com/solid-memo/website/compare/v6.29.19...v6.29.20) (2026-11-04)
+
+### Bug Fixes
+
+* **domain:** name colliding authors' agent nodes in linear time ([1f83256](https://github.com/solid-memo/website/commit/1f83256dedd08c7ffe69da042a102ba8f0867e6e))
+* **domain:** read answer numbers bounded ([de23dab](https://github.com/solid-memo/website/commit/de23dabb87f956f0643bde5317aab1ccae231861))
+* **solid:** bound the access control a release share reads ([4a31b33](https://github.com/solid-memo/website/commit/4a31b332ba73e5c71c7605c90e33fdbe6f9baedc))
+* **solid:** find no subject at an IRI that is no URL ([1b5e321](https://github.com/solid-memo/website/commit/1b5e3217780e32da3e7bb158a9e3710c84deacb8))
+* **solid:** hold every Solid Memo class to its shape whatever scheduler ([544382e](https://github.com/solid-memo/website/commit/544382ecedf2ba21081150ba40fc3fdd71d56b77))
+
 ## [6.29.19](https://github.com/solid-memo/website/compare/v6.29.18...v6.29.19) (2026-11-04)
 
 ### Bug Fixes
