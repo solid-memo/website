@@ -308,8 +308,13 @@ another app's rewrite drops its stamp. The catalog, a deck's agents
 and its distribution have no Solid Memo class.
 
 A review state of another scheduler is never Solid Memo's, whatever its
-class or stamp: any value of `sm:scheduler` but the `sm:sm2` and
-`sm:fsrs6` IRIs, a literal too. It only gets warnings
+stamp: any value of `sm:scheduler` but the `sm:sm2` and
+`sm:fsrs6` IRIs, a literal too. The rule is for review states only. A
+subject counts as one when it's typed `sm:ReviewState`, or has no
+Solid Memo class at all, and isn't the catalog. A subject with any
+other Solid Memo class (`sm:Card`, `sm:Deck`, …), and the catalog, is
+read as one whatever `sm:scheduler` it names, so it stays Solid Memo's
+and is held to its shape. Another scheduler's state only gets warnings
 ([data-model.md](data-model.md#decks-and-cards)). An FSRS-6 state,
 naming `sm:fsrs6`, is Solid Memo's own: it's checked against FSRS
 review state 1, its violations count as any other, and a
@@ -324,6 +329,10 @@ blocks no instance. The document holding it still conforms, and gets
 its [receipt](#flow). Only the developer report shows its results, and
 the repair offers nothing for it. A subject another app wrote with a
 Solid Memo class is held to that class's shape.
+
+A release in the library, or one added from a link, is wholly its
+publisher's: nothing in it is marked `foreign`, a link to a blank-node
+member counts as any other link, and every violation in it counts.
 
 Deleting an instance, a deck or a draft removes from each document
 only Solid Memo's subjects of that document's kind, conforming or not,

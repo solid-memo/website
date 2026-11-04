@@ -103,6 +103,43 @@ describe("foreignSubjects", () => {
     );
   });
 
+  it("keeps a subject of another Solid Memo class its own whatever scheduler it names", () => {
+    const dataset = documentOf(
+      subject("card-1")
+        .addIri(RDF.type, SM.Card)
+        .addStringNoLocale(SM.scheduler, "other-app")
+        .build(),
+      subject("deck-1")
+        .addIri(RDF.type, SM.Deck)
+        .addIri(SM.scheduler, "https://fsrs.example/ns#fsrs")
+        .build(),
+      // A review state that is a card too is read as the card.
+      subject("card-2")
+        .addIri(RDF.type, SM.ReviewState)
+        .addIri(RDF.type, SM.Card)
+        .addStringNoLocale(SM.scheduler, "other-app")
+        .build(),
+      // A stamped subject with no Solid Memo class naming another scheduler is that scheduler's state.
+      subject("rs-1")
+        .addLiteral(SM.formatVersion, integerLiteral(2))
+        .addStringNoLocale(SM.scheduler, "other-app")
+        .build(),
+    );
+    expect(foreignSubjects(dataset)).toEqual(new Set([`${DOC}#rs-1`]));
+  });
+
+  it("keeps the catalog its own whatever scheduler it names", () => {
+    const dataset = documentOf(
+      subject("catalog").addStringNoLocale(SM.scheduler, "other-app").build(),
+      subject("shelf")
+        .addIri(RDF.type, DCAT.Catalog)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
+        .addIri(SM.scheduler, "https://fsrs.example/ns#fsrs")
+        .build(),
+    );
+    expect(foreignSubjects(dataset)).toEqual(new Set());
+  });
+
   it("counts this app's FSRS-6 state as its own, unless FSRS-6 is named by a literal", () => {
     const dataset = documentOf(
       subject("card-1@fsrs6")
@@ -142,7 +179,7 @@ describe("subjectsOfClasses", () => {
       subject("agent-1").addIri(RDF.type, FOAF_AGENT).build(),
       subject("group-1").addIri(RDF.type, SM.DeckGroup).build(),
       subject("rs-1")
-        .addIri(RDF.type, SM.Deck)
+        .addIri(RDF.type, SM.ReviewState)
         .addIri(SM.scheduler, "https://fsrs.example/ns#fsrs")
         .build(),
       subject("recipes").addIri(RDF.type, DCAT.Dataset).build(),
@@ -150,6 +187,11 @@ describe("subjectsOfClasses", () => {
     expect(subjectsOfClasses(SM.Deck)(dataset)).toEqual(
       new Set([`${DOC}#deck-1`, `${DOC}#agent-1`]),
     );
+    expect(subjectsOfClasses(SM.ReviewState)(dataset)).toEqual(new Set());
+    const marked = documentOf(
+      subject("deck-2").addIri(RDF.type, SM.Deck).addStringNoLocale(SM.scheduler, "x").build(),
+    );
+    expect(subjectsOfClasses(SM.Deck)(marked)).toEqual(new Set([`${DOC}#deck-2`]));
     expect(solidMemoSubjects(dataset)).toEqual(
       new Set([`${DOC}#deck-1`, `${DOC}#agent-1`, `${DOC}#group-1`]),
     );

@@ -320,7 +320,9 @@ function withProfiled(
  * subjects is also checked against the DCAT-AP profile, with the
  * reference data beside it (see docs/validation.md). A subject another app wrote is
  * checked too, but marked `foreign`, its results warnings, and so are
- * the results about a catalog's link to a member another app wrote.
+ * the results about a catalog's link to a member another app wrote. A
+ * release is wholly its publisher's: nothing in it is another app's,
+ * and each of its results counts.
  */
 export function createShaclShapeValidator({
   fetch,
@@ -532,9 +534,11 @@ export function createShaclShapeValidator({
   ): Promise<DocumentReport> {
     if (dataset === null) return { url, status: "missing", subjects: [] };
     const data = toRdfJsDataset(dataset);
-    const blank = blankMembers(data as Iterable<Quad>);
     const subjects: SubjectReport[] = [];
-    const foreign = foreignSubjects(dataset);
+    // A release is wholly its publisher's: nothing in it is another app's, a blank member neither.
+    const whole = context === "library";
+    const blank = whole ? new PathMap<true>() : blankMembers(data as Iterable<Quad>);
+    const foreign = whole ? new Set<string>() : foreignSubjects(dataset);
     /** A subject's results: all warnings for another app's subject, and for its links to another app's members. */
     const attributed = (subject: string, violations: Violation[]) =>
       violations.map((v) =>
