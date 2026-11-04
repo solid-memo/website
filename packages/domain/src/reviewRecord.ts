@@ -8,6 +8,8 @@ import { SCHEDULERS, STUDY_DIRECTIONS } from "@solid-memo/vocab/concepts.generat
 import { conceptByIri, conceptByNotation, conceptOfDirection } from "./concepts";
 import type { Deck } from "./deck";
 import { isCardsDocumentOf } from "./deckUpgrade";
+import { boundedFsrsMemory } from "./fsrsSnapshot";
+import { boundedSm2State } from "./sm2";
 import { pathKeys } from "./pathKeys";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
 
@@ -177,6 +179,12 @@ export function pickReviewStates<T extends { url: string; key: ReviewKey }>(
  * The state from its record. The snapshot is all or nothing: a partial
  * one could only restore a state that never existed, so it reads as
  * absent.
+ *
+ * The numbers, the snapshot's too, are read bounded (boundedSm2State):
+ * a read checks their datatypes, not their range, and every path that
+ * writes a state back (grading, undo, a day's reset, a format update,
+ * a reschedule or move in the Studio) then writes numbers the write
+ * check accepts.
  */
 export function reviewStateFromRecord(
   key: ReviewKey,
@@ -186,9 +194,7 @@ export function reviewStateFromRecord(
   const previous = snapshotOf(data);
   return {
     ...key,
-    easeFactor: data.easeFactor,
-    intervalDays: data.intervalDays,
-    repetitions: data.repetitions,
+    ...boundedSm2State(data),
     due: data.due,
     firstReviewedAt: data.firstReviewedAt,
     lastReviewedAt: data.lastReviewedAt,
@@ -208,9 +214,11 @@ function snapshotOf(data: ReviewStateV2): ReviewSnapshot | undefined {
     return undefined;
   }
   return {
-    easeFactor: data.previousEaseFactor,
-    intervalDays: data.previousIntervalDays,
-    repetitions: data.previousRepetitions,
+    ...boundedSm2State({
+      easeFactor: data.previousEaseFactor,
+      intervalDays: data.previousIntervalDays,
+      repetitions: data.previousRepetitions,
+    }),
     due: data.previousDue,
     lastReviewedAt: data.previousLastReviewedAt,
   };
@@ -243,7 +251,11 @@ export function reviewStateToRecord(state: ReviewState, cardsDocumentUrl: string
   };
 }
 
-/** The FSRS-6 state from its record; a partial snapshot reads as absent, as an SM-2 state's does. */
+/**
+ * The FSRS-6 state from its record; a partial snapshot reads as absent,
+ * and the numbers are read bounded (boundedFsrsMemory), as an SM-2
+ * state's are.
+ */
 export function fsrsReviewStateFromRecord(
   key: ReviewKey,
   storedVersion: number,
@@ -252,8 +264,7 @@ export function fsrsReviewStateFromRecord(
   const previous = fsrsSnapshotOf(data);
   return {
     ...key,
-    stability: data.stability,
-    difficulty: data.difficulty,
+    ...boundedFsrsMemory(data),
     due: data.due,
     firstReviewedAt: data.firstReviewedAt,
     lastReviewedAt: data.lastReviewedAt,
@@ -272,8 +283,10 @@ function fsrsSnapshotOf(data: FsrsReviewStateV1): FsrsSnapshot | undefined {
     return undefined;
   }
   return {
-    stability: data.previousStability,
-    difficulty: data.previousDifficulty,
+    ...boundedFsrsMemory({
+      stability: data.previousStability,
+      difficulty: data.previousDifficulty,
+    }),
     due: data.previousDue,
     lastReviewedAt: data.previousLastReviewedAt,
   };

@@ -210,6 +210,69 @@ describe("what a stored FSRS-6 state is of", () => {
   });
 });
 
+describe("review state records out of range", () => {
+  it("read the numbers and the snapshot's bounded, so the state can be written back", () => {
+    const record = {
+      ...reviewStateToRecord({ ...state, previous: snapshot }, CARDS),
+      easeFactor: 1e-7,
+      intervalDays: 1e23,
+      repetitions: -4,
+      previousEaseFactor: 99,
+      previousIntervalDays: -1,
+      previousRepetitions: 1e23,
+    };
+    expect(reviewStateFromRecord(key, 2, record)).toEqual({
+      ...state,
+      easeFactor: 1.3,
+      intervalDays: 36_500,
+      repetitions: 0,
+      previous: { ...snapshot, easeFactor: 5, intervalDays: 0, repetitions: 36_500 },
+    });
+  });
+
+  it("read a state whose numbers are not finite as a new one's", () => {
+    const record = { ...reviewStateToRecord(state, CARDS), easeFactor: Number.POSITIVE_INFINITY };
+    expect(reviewStateFromRecord(key, 2, record)).toEqual({
+      ...state,
+      easeFactor: 2.5,
+      intervalDays: 0,
+      repetitions: 0,
+    });
+  });
+
+  it("read an FSRS-6 state's numbers and its snapshot's bounded", () => {
+    const record = {
+      ...fsrsReviewStateToRecord(
+        {
+          ...key,
+          stability: 1,
+          difficulty: 5,
+          due: "2026-10-03",
+          firstReviewedAt: state.firstReviewedAt,
+          lastReviewedAt: state.lastReviewedAt,
+          formatVersion: 1,
+          previous: {
+            stability: 1,
+            difficulty: 5,
+            due: "2026-09-21",
+            lastReviewedAt: snapshot.lastReviewedAt,
+          },
+        },
+        CARDS,
+      ),
+      stability: 1e23,
+      difficulty: 0,
+      previousStability: 0,
+      previousDifficulty: Number.POSITIVE_INFINITY,
+    };
+    expect(fsrsReviewStateFromRecord(key, 1, record)).toMatchObject({
+      stability: 36_500,
+      difficulty: 1,
+      previous: { stability: 0.001, difficulty: 10 },
+    });
+  });
+});
+
 describe("FSRS-6 state records", () => {
   const fsrs: FsrsState = {
     ...key,

@@ -21,6 +21,7 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { getSolidDatasetOrNull } from "./datasets";
 import { RDF, SM } from "./vocab";
+import { integerLiteral } from "./testing/literals";
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
@@ -68,9 +69,9 @@ describe("getPreferences", () => {
         datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
           .addIri(RDF.type, SM.Preferences)
-          .addInteger(SM.newCardsPerDay, 5)
-          .addInteger(SM.maxReviewsPerDay, 42)
-          .addInteger(SM.dayBoundaryHour, 3)
+          .addLiteral(SM.newCardsPerDay, integerLiteral(5))
+          .addLiteral(SM.maxReviewsPerDay, integerLiteral(42))
+          .addLiteral(SM.dayBoundaryHour, integerLiteral(3))
           .addStringNoLocale(SM.answerScale, "minimal")
           .addBoolean(SM.developerMode, true)
           .build(),
@@ -147,7 +148,7 @@ describe("savePreferences", () => {
       setThing(
         datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
-          .addInteger(SM.newCardsPerDay, 99)
+          .addLiteral(SM.newCardsPerDay, integerLiteral(99))
           .addStringNoLocale("https://other.example/#note", "kept")
           .build(),
       ),
@@ -203,8 +204,8 @@ describe("markConnectedScreen", () => {
   function stored(version: number, skipped?: boolean) {
     const builder = buildThing(createThing({ url: SUBJECT }))
       .addIri(RDF.type, SM.Preferences)
-      .addInteger(SM.formatVersion, version)
-      .addInteger(SM.newCardsPerDay, 7)
+      .addLiteral(SM.formatVersion, integerLiteral(version))
+      .addLiteral(SM.newCardsPerDay, integerLiteral(7))
       .addStringNoLocale("https://other.example/#note", "kept");
     return setThing(
       datasetFrom(DOCUMENT),
@@ -320,7 +321,7 @@ describe("connectedScreenSkipped", () => {
       add(
         buildThing(createThing({ url: SUBJECT }))
           .addIri(RDF.type, SM.Preferences)
-          .addInteger(SM.formatVersion, version),
+          .addLiteral(SM.formatVersion, integerLiteral(version)),
       ).build(),
     );
   }
@@ -358,7 +359,7 @@ describe("upgradePreferences", () => {
       datasetFrom(DOCUMENT),
       buildThing(createThing({ url: `${DOCUMENT}#it` }))
         .addIri(RDF.type, SM.Preferences)
-        .addInteger(SM.newCardsPerDay, 7)
+        .addLiteral(SM.newCardsPerDay, integerLiteral(7))
         .addStringNoLocale("https://other.example/#note", "kept")
         .build(),
     );
@@ -391,7 +392,7 @@ describe("upgradePreferences", () => {
       setThing(
         datasetFrom(DOCUMENT),
         buildThing(createThing({ url: `${DOCUMENT}#it` }))
-          .addInteger(SM.newCardsPerDay, 7)
+          .addLiteral(SM.newCardsPerDay, integerLiteral(7))
           .build(),
       ),
     );

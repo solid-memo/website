@@ -147,6 +147,39 @@ export function datetimeLiteral(value: string): Literal {
   } as Literal;
 }
 
+const XSD_INTEGER = "http://www.w3.org/2001/XMLSchema#integer";
+const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
+
+/** An xsd:integer or xsd:decimal literal of a number, spelled as plainNumeral spells it. */
+function numberLiteral(value: number, datatype: string): Literal {
+  return {
+    termType: "Literal",
+    value: plainNumeral(value),
+    language: "",
+    datatype: { termType: "NamedNode", value: datatype },
+  } as Literal;
+}
+
+/**
+ * A number as JavaScript spells it, but without an exponent, which no
+ * xsd:integer or xsd:decimal lexical form has: `1e+23` is
+ * `100000000000000000000000` and `1e-7` is `0.0000001`. JavaScript
+ * spells a number with one only from 1e21 up and below 1e-6, where
+ * every digit is before the point or after it. A number that is not
+ * finite stays as it is spelled, which the write check refuses.
+ */
+function plainNumeral(value: number): string {
+  const spelled = String(value);
+  const parts = /^(-?)(\d)(?:\.(\d+))?e([+-]\d+)$/.exec(spelled);
+  if (parts === null) return spelled;
+  const [, sign, first, rest = "", exponent] = parts;
+  const digits = `${first}${rest}`;
+  const point = 1 + Number(exponent);
+  return point > 0
+    ? `${sign}${digits.padEnd(point, "0")}`
+    : `${sign}0.${"0".repeat(-point)}${digits}`;
+}
+
 /** The date an xsd:dateTime literal holds, as readDatetime reads it; null when it holds none. */
 export function datetimeOf(term: Literal): Date | null {
   const probe = buildThing(createThing()).addLiteral(PROBE, datetimeLiteral(term.value)).build();
@@ -320,10 +353,10 @@ function addValue(
       builder.addStringNoLocale(field.predicate, value as string);
       break;
     case "integer":
-      builder.addInteger(field.predicate, value as number);
+      builder.addLiteral(field.predicate, numberLiteral(value as number, XSD_INTEGER));
       break;
     case "decimal":
-      builder.addDecimal(field.predicate, value as number);
+      builder.addLiteral(field.predicate, numberLiteral(value as number, XSD_DECIMAL));
       break;
     case "boolean":
       builder.addBoolean(field.predicate, value as boolean);

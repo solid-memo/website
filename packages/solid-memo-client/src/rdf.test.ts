@@ -190,7 +190,7 @@ describe("buildThing", () => {
       .addBoolean(`${EX}yes`, true)
       .addBoolean(`${EX}no`, false)
       .addDatetime(`${EX}when`, when)
-      .addInteger(`${EX}count`, 3)
+      .addLiteral(`${EX}count`, term("3", `${XSD}integer`))
       .addLiteral(`${EX}back`, langString("Stockholm", "EN"))
       .addStringWithLocale(`${EX}back`, "Estocolmo", "es")
       .build();
@@ -211,7 +211,7 @@ describe("buildThing", () => {
     const thing = subject()
       .addIri(P, `${URL_}#x`)
       .setIri(P, `${URL_}#y`)
-      .addInteger(`${EX}count`, 1)
+      .addLiteral(`${EX}count`, term("1", `${XSD}integer`))
       .setInteger(`${EX}count`, 2)
       .addStringNoLocale(`${EX}front`, "a")
       .setStringNoLocale(`${EX}front`, "b")
@@ -248,8 +248,8 @@ describe("buildThing", () => {
 
   it("removes a literal of its datatype and value, and nothing else", () => {
     const thing = subject()
-      .addInteger(P, 1)
-      .addInteger(P, 2)
+      .addLiteral(P, term("1", `${XSD}integer`))
+      .addLiteral(P, term("2", `${XSD}integer`))
       .addStringNoLocale(P, "1")
       .addStringWithLocale(P, "1", "en")
       .removeLiteral(P, term("1", `${XSD}integer`))

@@ -15,6 +15,7 @@ import { turtleAt } from "../testing/contract/rdf";
 import { HttpError } from "./interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
+import { integerLiteral } from "../testing/literals";
 
 resourcesContract({ rdf, resources });
 
@@ -117,7 +118,7 @@ describe("writeDocument, beside the library's own save", () => {
       .build();
     return rdf.setThing(
       rdf.setThing(rdf.createSolidDataset(), named),
-      rdf.buildThing(other).addInteger(`${EX}n`, 1).build(),
+      rdf.buildThing(other).addLiteral(`${EX}n`, integerLiteral(1)).build(),
     );
   };
   /** A fetch that answers a write as a pod does, noting each request. */

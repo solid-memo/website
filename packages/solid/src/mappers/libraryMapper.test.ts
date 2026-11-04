@@ -24,6 +24,7 @@ import {
 } from "./libraryMapper";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
+import { integerLiteral } from "../testing/literals";
 
 const INDEX = "https://solid-memo.com/decks/index.ttl";
 const DOC = "https://solid-memo.com/decks/capitals/v1.ttl";
@@ -323,7 +324,7 @@ describe("toLibraryDeckContent", () => {
         t
           .addIri(RDF.type, SM.Deck)
           .addStringNoLocale(DCTERMS.title, "Capitals")
-          .addInteger(SM.formatVersion, 2)
+          .addLiteral(SM.formatVersion, integerLiteral(2))
           .addStringNoLocale(DCTERMS.creator, "Anton Wiklund")
           .addIri(DCTERMS.license, CC0)
           .addStringNoLocale(DCTERMS.description, "From Wikipedia.")
@@ -334,14 +335,14 @@ describe("toLibraryDeckContent", () => {
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
           .addStringNoLocale(SM.back, "Stockholm")
-          .addInteger(SM.formatVersion, 1),
+          .addLiteral(SM.formatVersion, integerLiteral(1)),
       ),
       thing(`${DOC}#afghanistan`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
           .addIri(SM.frontImage, FLAG)
           .addStringNoLocale(SM.back, "Afghanistan")
-          .addInteger(SM.formatVersion, 2),
+          .addLiteral(SM.formatVersion, integerLiteral(2)),
       ),
       thing(`${DOC}#note`, (t) => t.addStringNoLocale(SM.front, "x")),
       thing(`${DOC}#half`, (t) =>
@@ -351,7 +352,7 @@ describe("toLibraryDeckContent", () => {
         t
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Norway")
-          .addInteger(SM.formatVersion, 2),
+          .addLiteral(SM.formatVersion, integerLiteral(2)),
       ),
       thing(`${DOC}#literal`, (t) =>
         t
@@ -478,7 +479,9 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
 
   it("refuses a deck in a newer format than it writes", () => {
     const dataset = deckDocument(
-      thing(DOC, (t) => t.addIri(RDF.type, SM.Deck).addInteger(SM.formatVersion, 7)),
+      thing(DOC, (t) =>
+        t.addIri(RDF.type, SM.Deck).addLiteral(SM.formatVersion, integerLiteral(7)),
+      ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
       `This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\nurl: ${DOC}\nversion: 7\nlatest: 6`,
@@ -506,7 +509,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
           .addIri("http://www.w3.org/ns/dcat#inSeries", SERIES)
           .addIri("http://www.w3.org/ns/dcat#isVersionOf", SERIES)
           .addIri("http://www.w3.org/ns/dcat#distribution", `${RELEASE}#turtle`)
-          .addInteger(SM.formatVersion, 3),
+          .addLiteral(SM.formatVersion, integerLiteral(3)),
       ),
       thing(`${RELEASE}#anton`, (t) =>
         t
@@ -534,7 +537,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
           .addUrl(DCTERMS.subject, "http://www.wikidata.org/entity/Q34")
           .addStringWithLocale(SM.front, "Sweden", "en")
           .addStringWithLocale(SM.back, "Stockholm", "en")
-          .addInteger(SM.formatVersion, 4),
+          .addLiteral(SM.formatVersion, integerLiteral(4)),
       ),
     );
     expect(toLibraryDeckContent(DOC, dataset).cards).toEqual([
@@ -556,7 +559,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
           .addIri(RDF.type, SM.Card)
           .addStringNoLocale(SM.front, "Sweden")
           .addStringNoLocale(SM.back, "Stockholm")
-          .addInteger(SM.formatVersion, 8),
+          .addLiteral(SM.formatVersion, integerLiteral(8)),
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
@@ -613,13 +616,13 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
       (t, i) => t.addStringWithLocale(SM.distractorText, `wrong ${i}`, `en-x-l${i}`),
       buildThing(createThing({ url: `${DOC}#shared` }))
         .addIri(RDF.type, SM.Distractor)
-        .addInteger(SM.formatVersion, 1),
+        .addLiteral(SM.formatVersion, integerLiteral(1)),
     );
     const cards = Array.from({ length: count }, (_, i) =>
       thing(`${DOC}#card-${i}`, (t) =>
         t
           .addIri(RDF.type, SM.Card)
-          .addInteger(SM.formatVersion, 7)
+          .addLiteral(SM.formatVersion, integerLiteral(7))
           .addStringWithLocale(SM.front, `f${i}`, "en")
           .addStringWithLocale(SM.back, `b${i}`, "en")
           .addIri(SM.distractor, `${DOC}#shared`),

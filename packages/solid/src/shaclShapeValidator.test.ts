@@ -35,6 +35,7 @@ import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { gradePrompt } from "@solid-memo/domain/grading";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { DocumentReport, Violation } from "@solid-memo/domain/validation";
+import { integerLiteral } from "./testing/literals";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -161,14 +162,14 @@ function catalog() {
     buildThing(createThing({ url: `${DOC}#deck-1` }))
       .addIri(RDF.type, SM.Deck)
       .addStringNoLocale(DCTERMS.title, "Capitals")
-      .addInteger(SM.formatVersion, 2)
+      .addLiteral(SM.formatVersion, integerLiteral(2))
       .build(),
   );
   dataset = setThing(
     dataset,
     buildThing(createThing({ url: `${DOC}#deck-2` }))
       .addIri(RDF.type, SM.Deck)
-      .addInteger(SM.formatVersion, 9)
+      .addLiteral(SM.formatVersion, integerLiteral(9))
       .build(),
   );
   dataset = setThing(
@@ -259,7 +260,7 @@ describe("createShaclShapeValidator", () => {
       buildThing(createThing({ url: release }))
         .addIri(RDF.type, SM.Deck)
         .addIri(RDF.type, DCAT.Dataset)
-        .addInteger(SM.formatVersion, 6)
+        .addLiteral(SM.formatVersion, integerLiteral(6))
         .build(),
     );
     const { validator, validateNode, validate, publicFetch } = makeValidator();
@@ -278,7 +279,7 @@ describe("createShaclShapeValidator", () => {
     const entry = (url: string, cards: string, reviews: string) =>
       buildThing(createThing({ url }))
         .addIri(RDF.type, SM.Deck)
-        .addInteger(SM.formatVersion, 6)
+        .addLiteral(SM.formatVersion, integerLiteral(6))
         .addIri(SM.cardsDocument, cards)
         .addIri(SM.reviewsDocument, reviews)
         .build();
@@ -338,7 +339,7 @@ describe("createShaclShapeValidator", () => {
         buildThing(createThing({ url: `${DOC}#deck-1` }))
           .addIri(RDF.type, SM.Card)
           .addIri(RDF.type, SM.Deck)
-          .addInteger(SM.formatVersion, 7)
+          .addLiteral(SM.formatVersion, integerLiteral(7))
           .addIri(SM.cardsDocument, `${instance}decks/deck-1.ttl.acl`)
           .addIri(SM.reviewsDocument, `${instance}reviews/deck-1.ttl`)
           .build(),
@@ -383,7 +384,7 @@ describe("createShaclShapeValidator", () => {
         datasetFrom(doc),
         buildThing(createThing({ url: "https://pod.example/kortlekar-%C3%A5/catalog.ttl#deck-1" }))
           .addIri(RDF.type, SM.Deck)
-          .addInteger(SM.formatVersion, 6)
+          .addLiteral(SM.formatVersion, integerLiteral(6))
           .addIri(SM.cardsDocument, `${instance}decks/deck-1.ttl`)
           .addIri(SM.reviewsDocument, "https://pod.example/kortlekar-%C3%A5/reviews/deck-1.ttl")
           .build(),
@@ -409,24 +410,24 @@ describe("createShaclShapeValidator", () => {
       [
         buildThing(createThing({ url: `${DOC}#deck-1` }))
           .addIri(RDF.type, SM.Deck)
-          .addInteger(SM.formatVersion, 6)
+          .addLiteral(SM.formatVersion, integerLiteral(6))
           .addLiteral(DCTERMS.created, dateTime(far))
           .addLiteral(DCTERMS.modified, dateTime(last)),
         buildThing(createThing({ url: `${DOC}#state` }))
           .addIri(RDF.type, SM.ReviewState)
-          .addInteger(SM.formatVersion, 2)
+          .addLiteral(SM.formatVersion, integerLiteral(2))
           .addLiteral(SM.lastReviewedAt, dateTime(before)),
         buildThing(createThing({ url: `${DOC}#it` }))
           .addIri(RDF.type, SM.Instance)
-          .addInteger(SM.formatVersion, 2)
+          .addLiteral(SM.formatVersion, integerLiteral(2))
           .addLiteral(DCTERMS.created, dateTime(far)),
         buildThing(createThing({ url: `${DOC}#card` }))
           .addIri(RDF.type, SM.Card)
-          .addInteger(SM.formatVersion, 7)
+          .addLiteral(SM.formatVersion, integerLiteral(7))
           .addLiteral(DCTERMS.created, dateTime("soon")),
         buildThing(createThing({ url: `${DOC}#card-2` }))
           .addIri(RDF.type, SM.Card)
-          .addInteger(SM.formatVersion, 7)
+          .addLiteral(SM.formatVersion, integerLiteral(7))
           .addLiteral(DCTERMS.created, dateTime("T2026-01-01T00:00:00Z")),
         // Another app's catalog: no stamp, and nothing of Solid Memo's names it.
         buildThing(createThing({ url: `${DOC}#theirs` }))
@@ -530,7 +531,7 @@ describe("createShaclShapeValidator", () => {
         datasetFrom(DOC),
         buildThing(createThing({ url: `${DOC}#deck-0` }))
           .addIri(RDF.type, SM.Deck)
-          .addInteger(SM.formatVersion, 0)
+          .addLiteral(SM.formatVersion, integerLiteral(0))
           .build(),
       ),
     );
@@ -569,7 +570,7 @@ describe("createShaclShapeValidator", () => {
         .addIri(RDF.type, SM.Deck)
         .addIri(RDF.type, DCAT_DATASET)
         .addStringNoLocale(DCTERMS.title, "Capitals")
-        .addInteger(SM.formatVersion, 2)
+        .addLiteral(SM.formatVersion, integerLiteral(2))
         .build(),
     );
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset);
@@ -622,14 +623,14 @@ describe("createShaclShapeValidator", () => {
       const agent = buildThing(createThing({ url: `${DOC}#${id}` })).addIri(RDF.type, FOAF_AGENT);
       dataset = setThing(
         dataset,
-        (stamped ? agent.addInteger(SM.formatVersion, 1) : agent).build(),
+        (stamped ? agent.addLiteral(SM.formatVersion, integerLiteral(1)) : agent).build(),
       );
     }
     dataset = setThing(
       dataset,
       buildThing(createThing({ url: `${DOC}#stamped` }))
         .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
-        .addInteger(SM.formatVersion, 1)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
         .build(),
     );
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset);
@@ -823,7 +824,7 @@ describe("createShaclShapeValidator", () => {
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
           .addStringNoLocale(DCTERMS.title, "Capitals")
           .addIri("http://www.w3.org/ns/dcat#theme", "https://example.com/not-a-concept")
-          .addInteger(SM.formatVersion, 2)
+          .addLiteral(SM.formatVersion, integerLiteral(2))
           .build(),
       ),
     );
@@ -937,7 +938,7 @@ describe("createShaclShapeValidator", () => {
         .build(),
       buildThing(createThing({ url: `${CARDS}#card-1` }))
         .addIri(RDF.type, SM.Card)
-        .addInteger(SM.formatVersion, 5)
+        .addLiteral(SM.formatVersion, integerLiteral(5))
         .addStringWithLocale(SM.front, "Water", "en")
         .addStringWithLocale(SM.back, "水", "ja")
         .addIri(SM.distractor, `${CARDS}#card-1-d1`)
@@ -946,7 +947,7 @@ describe("createShaclShapeValidator", () => {
       buildThing(createThing({ url: `${CARDS}#card-1-d1` }))
         .addIri(RDF.type, SM.Distractor)
         .addIri(RDF.type, "https://schema.org/Answer")
-        .addInteger(SM.formatVersion, 1)
+        .addLiteral(SM.formatVersion, integerLiteral(1))
         .addStringWithLocale(SM.distractorText, "火", "ja")
         .build(),
     ].reduce<Dataset>((dataset, thing) => setThing(dataset, thing), datasetFrom(CARDS));
@@ -1048,7 +1049,7 @@ describe("createShaclShapeValidator", () => {
         buildThing(createThing({ url: `${DOC}#deck-1` }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
-          .addInteger(SM.formatVersion, 3)
+          .addLiteral(SM.formatVersion, integerLiteral(3))
           .build(),
       ),
       buildThing(createThing({ url: `${DOC}#other` }))
@@ -1078,7 +1079,7 @@ describe("createShaclShapeValidator", () => {
             .addIri(SM.studyDirection, SM.bidirectional)
             .addIri(SM.cardsDocument, "https://pod.example/d.ttl")
             .addIri(SM.reviewsDocument, "https://pod.example/r.ttl")
-            .addInteger(SM.formatVersion, 3),
+            .addLiteral(SM.formatVersion, integerLiteral(3)),
         ).build(),
       );
 
@@ -1173,7 +1174,7 @@ describe("createShaclShapeValidator", () => {
         buildThing(createThing({ url: DOC }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
-          .addInteger(SM.formatVersion, 1)
+          .addLiteral(SM.formatVersion, integerLiteral(1))
           .addIri(SM.studyDirection, SM.frontToBack)
           .build(),
       );
@@ -1196,7 +1197,7 @@ describe("createShaclShapeValidator", () => {
         buildThing(createThing({ url: DOC }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, "http://www.w3.org/ns/dcat#Dataset")
-          .addInteger(SM.formatVersion, 1)
+          .addLiteral(SM.formatVersion, integerLiteral(1))
           .addIri(SM.studyDirection, SM.frontToBack)
           .build(),
       );
@@ -1220,7 +1221,7 @@ describe("createShaclShapeValidator", () => {
         buildThing(createThing({ url: DOC }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, DCAT.Dataset)
-          .addInteger(SM.formatVersion, 1)
+          .addLiteral(SM.formatVersion, integerLiteral(1))
           .addIri(SM.studyDirection, SM.frontToBack)
           .build(),
       );
@@ -1252,7 +1253,7 @@ describe("createShaclShapeValidator", () => {
         buildThing(createThing({ url: release }))
           .addIri(RDF.type, SM.Deck)
           .addIri(RDF.type, DCAT.Dataset)
-          .addInteger(SM.formatVersion, 6)
+          .addLiteral(SM.formatVersion, integerLiteral(6))
           .build(),
       );
       const checked = async (dataset: Dataset) => {
@@ -1344,7 +1345,7 @@ describe("createShaclShapeValidator", () => {
             .addIri(RDF.type, SM.Answer)
             .addStringWithLocale(SM.front, "Norway", "en")
             .addStringWithLocale(SM.back, "Oslo", "en")
-            .addInteger(SM.formatVersion, version)
+            .addLiteral(SM.formatVersion, integerLiteral(version))
             .build(),
         );
       await expect(validator.checkSubjects(subject(1), [`${DOC}#x`], "pod")).rejects.toThrow(
@@ -1365,7 +1366,7 @@ describe("createShaclShapeValidator", () => {
         ),
         buildThing(createThing({ url: `${DOC}#future` }))
           .addIri(RDF.type, SM.Deck)
-          .addInteger(SM.formatVersion, 9)
+          .addLiteral(SM.formatVersion, integerLiteral(9))
           .build(),
       );
       await expect(

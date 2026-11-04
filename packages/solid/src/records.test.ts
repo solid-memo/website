@@ -9,6 +9,7 @@ import {
   datasetFromQuads,
   getDecimal,
   getInteger,
+  getLiteralAll,
   getStringNoLocale,
   getStringNoLocaleAll,
   getThing,
@@ -48,6 +49,7 @@ import {
   unreadableDatetimes,
 } from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
+import { integerLiteral } from "./testing/literals";
 
 const URL_ = "https://pod.example/x.ttl#it";
 const EX = "https://example.com/ns#";
@@ -160,9 +162,9 @@ describe("recordThing and readRecord", () => {
       .addStringNoLocale(`${EX}gone`, "stale")
       .addStringNoLocale(`${EX}name`, "Old")
       .addStringNoLocale(`${EX}tag`, "old")
-      .addInteger(`${EX}count`, 9)
+      .addLiteral(`${EX}count`, integerLiteral(9))
       .addStringNoLocale(`${EX}foreign`, "kept")
-      .addInteger(SM.formatVersion, 0)
+      .addLiteral(SM.formatVersion, integerLiteral(0))
       .build();
     const thing = recordThing(
       URL_,
@@ -183,7 +185,7 @@ describe("recordThing and readRecord", () => {
     const stamped = (version: number) =>
       buildThing(createThing({ url: URL_ }))
         .addIri(RDF.type, `${EX}Thing`)
-        .addInteger(SM.formatVersion, version)
+        .addLiteral(SM.formatVersion, integerLiteral(version))
         .build();
     expect(() => recordThing(URL_, THING, FULL, stamped(2))).toThrow(
       expect.objectContaining({
@@ -198,12 +200,36 @@ describe("recordThing and readRecord", () => {
   });
 });
 
+describe("numbers written", () => {
+  /** The lexical form of the literal a written field holds. */
+  const lexical = (thing: ReturnType<typeof recordThing>, predicate: string) =>
+    getLiteralAll(thing, predicate)[0]!.value;
+
+  it.each([
+    [1e23, -1e-7, "100000000000000000000000", "-0.0000001"],
+    [-1.5e21, 1.25e-8, "-1500000000000000000000", "0.0000000125"],
+    [42, 2.5, "42", "2.5"],
+  ])("spell %s and %s without an exponent", (count, ratio, countForm, ratioForm) => {
+    const thing = recordThing(URL_, THING, { ...FULL, count, ratio }, null);
+    expect(lexical(thing, `${EX}count`)).toBe(countForm);
+    expect(lexical(thing, `${EX}ratio`)).toBe(ratioForm);
+    expect(readRecord(thing, THING)).toMatchObject({ count, ratio });
+  });
+
+  it("spell a number that is not finite as JavaScript does", () => {
+    const thing = recordThing(URL_, THING, { ...FULL, ratio: Number.POSITIVE_INFINITY }, null);
+    expect(lexical(thing, `${EX}ratio`)).toBe("Infinity");
+  });
+});
+
 describe("a change or removal that records no subject", () => {
   const CARD = "https://pod.example/cards.ttl#q";
   const card = (version?: number, type: string = SM.Card) => {
     const builder = buildThing(createThing({ url: CARD })).addIri(RDF.type, type);
     return (
-      version === undefined ? builder : builder.addInteger(SM.formatVersion, version)
+      version === undefined
+        ? builder
+        : builder.addLiteral(SM.formatVersion, integerLiteral(version))
     ).build();
   };
 
@@ -275,7 +301,7 @@ describe("a card's text format", () => {
 describe("readRecord", () => {
   it("is null when a required field is missing", () => {
     const thing = buildThing(createThing({ url: URL_ }))
-      .addInteger(`${EX}count`, 1)
+      .addLiteral(`${EX}count`, integerLiteral(1))
       .build();
     expect(readRecord(thing, THING)).toBeNull();
   });
@@ -517,7 +543,10 @@ describe("text that may be untagged (a card's sides)", () => {
 
 describe("applyRecord", () => {
   it("adds nothing for undefined fields but still clears their old values", () => {
-    const builder = buildThing(createThing({ url: URL_ })).addInteger(`${EX}count`, 9);
+    const builder = buildThing(createThing({ url: URL_ })).addLiteral(
+      `${EX}count`,
+      integerLiteral(9),
+    );
     applyRecord(builder, THING, { name: "Ann", tags: [], links: [], concepts: [] });
     expect(getInteger(builder.build(), `${EX}count`)).toBeNull();
   });
@@ -538,7 +567,7 @@ describe("a shape that fixes a value (an FSRS-6 review state's scheduler)", () =
     buildThing(createThing({ url: STATE }))
       .addIri(RDF.type, SM.ReviewState)
       .addIri(SM.scheduler, scheduler)
-      .addInteger(SM.formatVersion, version)
+      .addLiteral(SM.formatVersion, integerLiteral(version))
       .build();
 
   it("is written with the value, in place of any other, and read only where it is stated", () => {
@@ -621,7 +650,7 @@ describe("readVersioned", () => {
       .addIri(RDF.type, SM.Card)
       .addStringNoLocale(SM.front, front)
       .addStringNoLocale(SM.back, "Stockholm");
-    if (version !== undefined) b.addInteger(SM.formatVersion, version);
+    if (version !== undefined) b.addLiteral(SM.formatVersion, integerLiteral(version));
     return b.build();
   };
 
@@ -657,7 +686,7 @@ describe("readVersioned", () => {
     const noBack = buildThing(createThing({ url: URL_ }))
       .addIri(RDF.type, SM.Card)
       .addStringNoLocale(SM.front, "Sweden")
-      .addInteger(SM.formatVersion, 1)
+      .addLiteral(SM.formatVersion, integerLiteral(1))
       .build();
     expect(readVersioned(noBack, "card")).toBeNull();
   });
@@ -667,7 +696,7 @@ describe("readVersioned", () => {
       const b = buildThing(createThing({ url: URL_ }))
         .addIri(RDF.type, SM.Instance)
         .addStringNoLocale(DCTERMS.title, "Home")
-        .addInteger(SM.formatVersion, 2)
+        .addLiteral(SM.formatVersion, integerLiteral(2))
         .addLiteral(DCTERMS.modified, FAR_DATE);
       if (typeof created === "string") b.addDatetime(DCTERMS.created, new Date(created));
       else b.addLiteral(DCTERMS.created, created);

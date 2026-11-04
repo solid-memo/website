@@ -33,6 +33,7 @@ import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT, RDF, SM, SM_NS } from "./vocab";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { integerLiteral } from "./testing/literals";
 
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
 
@@ -594,7 +595,7 @@ describe("shapes, descriptors and migrations", () => {
   it("report a subject that breaks its shape", async () => {
     const thing = buildThing(createThing({ url: URL_ }))
       .addIri(RDF.type, SM.Card)
-      .addInteger(SM.formatVersion, 2)
+      .addLiteral(SM.formatVersion, integerLiteral(2))
       .addStringNoLocale(SM.frontImage, "https://flagcdn.com/se.svg")
       .build();
     const data = toRdfJsDataset(

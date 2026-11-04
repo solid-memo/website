@@ -27,6 +27,7 @@ import type { Repair } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createSolidRepairRepository } from "./solidRepairRepository";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
+import { decimalLiteral, integerLiteral } from "./testing/literals";
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();
@@ -98,7 +99,7 @@ describe("applyRepairs", () => {
         CATALOG,
         buildThing(createThing({ url: `${CATALOG}#deck-1` }))
           .addIri(RDF.type, SM.Deck)
-          .addInteger(SM.formatVersion, 99)
+          .addLiteral(SM.formatVersion, integerLiteral(99))
           .build(),
       ),
     );
@@ -202,7 +203,7 @@ describe("applyRepairs", () => {
           .addIri(RDF.type, SM.ReviewState)
           .addStringNoLocale(SM.due, "soon")
           .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
-          .addInteger(SM.intervalDays, 6)
+          .addLiteral(SM.intervalDays, integerLiteral(6))
           .addStringNoLocale(SM.previousDue, "2026-09-20")
           .build(),
         buildThing(createThing({ url: `${REVIEWS}#b` }))
@@ -236,20 +237,20 @@ describe("applyRepairs", () => {
             language: "",
             datatype: { termType: "NamedNode", value: XSD_DATETIME },
           } as never)
-          .addInteger(SM.intervalDays, 6)
+          .addLiteral(SM.intervalDays, integerLiteral(6))
           .build(),
         buildThing(createThing({ url: `${REVIEWS}#b` }))
           .addIri(RDF.type, SM.ReviewState)
           .addStringNoLocale(SM.due, "soon")
           .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
-          .addInteger(SM.intervalDays, 100_000_000)
+          .addLiteral(SM.intervalDays, integerLiteral(100_000_000))
           .build(),
         // Within what a date holds, but past the four-digit years of a study day.
         buildThing(createThing({ url: `${REVIEWS}#c` }))
           .addIri(RDF.type, SM.ReviewState)
           .addStringNoLocale(SM.due, "soon")
           .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
-          .addInteger(SM.intervalDays, 3_000_000)
+          .addLiteral(SM.intervalDays, integerLiteral(3_000_000))
           .build(),
       ),
     );
@@ -315,10 +316,10 @@ describe("applyRepairs", () => {
         buildThing(createThing({ url: `${REVIEWS}#a@fsrs6` }))
           .addIri(RDF.type, SM.ReviewState)
           .addIri(SM.scheduler, SM.fsrs6)
-          .addDecimal(SM.previousStability, 2.5)
+          .addLiteral(SM.previousStability, decimalLiteral(2.5))
           .addStringNoLocale(SM.previousDue, "2026-09-20")
           // Not an FSRS-6 term: another app's, it stays.
-          .addInteger(SM.previousRepetitions, 3)
+          .addLiteral(SM.previousRepetitions, integerLiteral(3))
           .build(),
       ),
     );

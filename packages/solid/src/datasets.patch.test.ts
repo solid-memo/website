@@ -22,6 +22,7 @@ import { datasetFrom } from "./testing/datasets";
 import type { Quad, Term } from "@rdfjs/types";
 import { appendAllToDocument, saveDataset } from "./datasets";
 import { patchBody } from "./client/sparqlUpdate";
+import { integerLiteral } from "./testing/literals";
 
 vi.mock("./client/rdf", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/rdf")>();
@@ -82,13 +83,13 @@ describe("patchBody", () => {
     const read = setThing(
       datasetFrom(DOC),
       buildThing(createThing({ url: `${DOC}#it` }))
-        .addInteger(`${NS}n`, 1)
+        .addLiteral(`${NS}n`, integerLiteral(1))
         .build(),
     );
     const edited = setThing(
       withQuads(read, toRdfJsDataset(read)),
       buildThing(createThing({ url: `${DOC}#it` }))
-        .addInteger(`${NS}n`, 2)
+        .addLiteral(`${NS}n`, integerLiteral(2))
         .addUrl(`${NS}see`, "https://example.com/x")
         .addStringNoLocale(`${NS}s`, 'say "hi"\\\nthere\r')
         .addStringWithLocale(`${NS}t`, "hej", "sv")
@@ -150,7 +151,7 @@ describe("patchBody", () => {
     const edited = setThing(
       datasetFrom(DOC),
       buildThing(createThing({ url: `${DOC}#it` }))
-        .addInteger(`${NS}n`, 2)
+        .addLiteral(`${NS}n`, integerLiteral(2))
         .build(),
     );
     await saveDataset(DOC, edited, pod);
