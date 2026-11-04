@@ -744,7 +744,9 @@ A queue run checks what a pull request run checks, except that
 `library` compares with the commit of `main` the queue built on, the
 pull requests ahead included. Each queue
 branch is its own concurrency group. A queue run releases and deploys
-nothing: release.yml and deploy.yml follow push runs on `main` alone.
+nothing: release.yml and deploy.yml follow push runs on `main` alone,
+and release.yml releases only once the queue is empty, so a release
+commit doesn't send the queued pull requests back to the start.
 
 A newer run for a pull request or branch cancels the one still going.
 Runs on `main` are never canceled: a release follows a push run that
