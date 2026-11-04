@@ -30,6 +30,12 @@ decks ([`decks/`](decks/)) are published together at
 >
 > — Anton Wiklund
 
+If you find Solid Memo valuable, to you or to the Solid ecosystem, you
+may consider
+[donating through GitHub Sponsors](https://github.com/sponsors/ixuz).
+Donations pay for the domain first, then for time spent on the project
+([GOVERNANCE.md](GOVERNANCE.md#costs)).
+
 ## About
 
 Solid Memo helps you remember what you learn. You study flashcards, and

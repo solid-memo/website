@@ -217,10 +217,10 @@ you edit the body, run the job again.
 
 ## Review
 
-Solid Memo is run by volunteers, with no funding: reviewing is done in
-their own time, at their own cost. A reviewer reads the code, the
-tests, the docs and any change of policy (the external rules the code
-follows), and runs the app when the change shows in it.
+Solid Memo is run by volunteers: reviewing is done in their own time.
+A reviewer reads the code, the tests, the docs and any change of policy
+(the external rules the code follows), and runs the app when the change
+shows in it.
 
 A reviewer checks that:
 
