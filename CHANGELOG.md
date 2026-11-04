@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.19](https://github.com/solid-memo/website/compare/v6.29.18...v6.29.19) (2026-11-04)
+
+### Bug Fixes
+
+* **application:** drop what an imported release states of an outside creator ([71e8ca3](https://github.com/solid-memo/website/commit/71e8ca32e4ac1afe474771866f3f90ecb734fc6e))
+* **domain:** read review-state numbers bounded and write them plainly ([164fb04](https://github.com/solid-memo/website/commit/164fb04f8d10448d70a29377c070b6d786f50efe))
+* **solid:** name an instance whose folder does not decode as written ([0ec77ab](https://github.com/solid-memo/website/commit/0ec77ab5e8ff32a2c10674e457b21d6868551ac7))
+* **solid:** read the WebID document under PROFILE_LIMITS everywhere ([bba367a](https://github.com/solid-memo/website/commit/bba367a7017f98c338c585fecbcc54a4394e885e))
+* **studio:** check and search a shared distractor once, not once per card ([72de2fe](https://github.com/solid-memo/website/commit/72de2feac4e1a2e6de138fec8f5141a4f531bbce))
+* **studio:** list a bounded number of other release languages and themes ([58ca77e](https://github.com/solid-memo/website/commit/58ca77e57f0fb105dc3116ff5e36608a4fcd49df))
+
 ## [6.29.18](https://github.com/solid-memo/website/compare/v6.29.17...v6.29.18) (2026-11-04)
 
 ### Bug Fixes
