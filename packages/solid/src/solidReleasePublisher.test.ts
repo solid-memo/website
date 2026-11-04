@@ -7,7 +7,12 @@ import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink, MAX_CATALOG_LINKS } from "./catalogLinks";
 import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
 import type { ReadLimits } from "./client/interface";
-import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
+import {
+  ACCESS_CONTROL_LIMITS,
+  limitedFetch,
+  MAX_ACCESS_CONTROL_SUBJECTS,
+  RELEASE_LIMITS,
+} from "./client/readLimits";
 import { createPodFence } from "./podFence";
 import { createSolidReleasePublisher } from "./solidReleasePublisher";
 
@@ -566,6 +571,77 @@ describe("a release already at an address, on a server that may be anyone's", ()
       expect(writes().slice(before)).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${CATALOG}`]);
     },
   );
+
+  /**
+   * An access control of `subjects` subjects, within ACCESS_CONTROL_LIMITS'
+   * triples with room for the grant's own rule: a rule that lets everyone
+   * do everything in `of` and below it (none in an ACR), and other
+   * subjects of many triples each.
+   */
+  function accessControlOf(of: string, subjects: number, acr = false): string {
+    const rule = acr
+      ? []
+      : [
+          `<#all> a <${ACL}Authorization>; <${ACL}agentClass> <http://xmlns.com/foaf/0.1/Agent>; <${ACL}accessTo> <${of}>; <${ACL}default> <${of}>; <${ACL}mode> <${ACL}Read>, <${ACL}Write>, <${ACL}Control> .`,
+        ];
+    const others = subjects - rule.length;
+    const each = Math.floor((ACCESS_CONTROL_LIMITS.quads - 64) / others);
+    const objects = Array.from({ length: each }, (_, i) => `<#o${i}>`).join(", ");
+    return [
+      ...rule,
+      ...Array.from({ length: others }, (_, i) => `<#s${i}> <#p> ${objects} .`),
+    ].join("\n");
+  }
+
+  /**
+   * Where each access control is put, and how many subjects the library's
+   * grant adds to it: the release's own ACL (its rule for everyone), the
+   * ACL of its folder it falls back to (none, as it writes the release's
+   * own), and the release's own ACR (an access control, a policy, its
+   * matcher and the public agent).
+   */
+  const places = [
+    ["the release's own ACL", `${RELEASE}.acl`, RELEASE, false, 1],
+    ["the ACL of its folder it falls back to", `${POD}.acl`, POD, false, 0],
+    ["the release's own ACR", `${RELEASE}.acr`, RELEASE, true, 4],
+  ] as const;
+
+  it.each(places)(
+    "makes the release public with the library's grant through %s, of as many subjects as an access control may have once written",
+    async (_, at, of, acp, added) => {
+      const { pod, publisher } = await publisherPod({ grant: libraryGrant, acp });
+      await pod.put(at, accessControlOf(of, MAX_ACCESS_CONTROL_SUBJECTS - added, acp));
+      await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({
+        public: true,
+      });
+    },
+  );
+
+  it.each(places)(
+    "refuses %s of more subjects than an access control may have before the library's grant parses it: the release is not made public, and it is linked",
+    async (_, at, of, acp) => {
+      const { pod, publisher, writes } = await publisherPod({ grant: libraryGrant, acp });
+      await pod.put(at, accessControlOf(of, MAX_ACCESS_CONTROL_SUBJECTS + 1, acp));
+      const before = writes().length;
+      await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({
+        public: false,
+      });
+      expect(writes().slice(before)).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${CATALOG}`]);
+    },
+  );
+
+  it("counts each subject once, however many triples it has, and a blank node apart from an IRI of its label", async () => {
+    const grant = vi.fn<GrantPublicRead>(async (url, { fetch }) => (await fetch(`${url}.acl`)).ok);
+    const { pod, publisher } = await publisherPod({ grant });
+    const subjects = Array.from(
+      { length: MAX_ACCESS_CONTROL_SUBJECTS / 2 },
+      (_, i) => `_:b${i} <#p> <#o1>, <#o2> . <b${i}> <#p> <#o1>, <#o2> .`,
+    ).join("\n");
+    await pod.put(`${RELEASE}.acl`, subjects);
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
+    await pod.put(`${RELEASE}.acl`, `${subjects}\n<extra> <#p> <#o> .`);
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: false });
+  });
 
   /** A release with more triples than ACCESS_CONTROL_LIMITS let through, well within RELEASE_LIMITS. */
   const largeRelease = `${TURTLE}\n${Array.from(

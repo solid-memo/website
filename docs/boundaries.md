@@ -363,7 +363,13 @@ being published to, or one being made public, is read under
 `RELEASE_LIMITS`, since the instance may be on another server. Its
 access control, read as it's made public, is read under
 `ACCESS_CONTROL_LIMITS` on its bytes, its triples, their characters and
-its declarations before the grant parses it. A read the grant makes of
+its declarations before the grant parses it, and held to
+`MAX_ACCESS_CONTROL_SUBJECTS` subjects. These limits are small, because
+the grant's library takes time that grows with the square of an access
+control's subjects. The subject limit holds as well for a folder's
+access control the server falls back to, which may be the user's own.
+So a release under a folder shared through more rules than that can't
+be made public: the grant fails. A read the grant makes of
 the release, or of a folder above it, is held to `RELEASE_LIMITS`.
 Once a request gets no answer or goes past its limits, the grant
 fails. An
