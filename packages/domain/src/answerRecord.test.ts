@@ -3,8 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { Answer } from "./answer";
+import { MAX_RESPONSE_MILLIS, type Answer } from "./answer";
 import { answerFromRecord, answerToRecord } from "./answerRecord";
+import { MAX_INTERVAL_DAYS } from "./sm2";
 
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const first: Answer = {
@@ -80,5 +81,44 @@ describe("answer records", () => {
     const { gradeMillis: _grade, priorDue: _due, ...chosen } = timed;
     expect(answerToRecord(chosen)).not.toHaveProperty("gradeMillis");
     expect(answerFromRecord("answer-1", answerToRecord(chosen))).toEqual(chosen);
+  });
+
+  it("read the numbers bounded: an answer out of its shape is none, an interval beyond the cap kept, a time or offset out of range left out", () => {
+    const record = answerToRecord({ ...first, priorIntervalDays: 6 });
+    for (const grade of [-1, 6, 2.5, Infinity])
+      expect(answerFromRecord("answer-1", { ...record, grade })).toBeNull();
+    const digits = Number("9".repeat(400));
+    for (const days of [-1, 1.5, 2 ** 53, digits, Infinity, -Infinity]) {
+      expect(answerFromRecord("answer-1", { ...record, nextIntervalDays: days })).toBeNull();
+      expect(answerFromRecord("answer-1", { ...record, priorIntervalDays: days })).toBeNull();
+    }
+    for (const days of [MAX_INTERVAL_DAYS + 1, 40_000, Number.MAX_SAFE_INTEGER]) {
+      const old = { ...first, priorIntervalDays: days, nextIntervalDays: days };
+      expect(answerFromRecord("answer-1", answerToRecord(old))).toEqual(old);
+    }
+    const edges = {
+      ...first,
+      grade: 0,
+      priorIntervalDays: MAX_INTERVAL_DAYS,
+      nextIntervalDays: 0,
+      recallMillis: 0,
+      gradeMillis: MAX_RESPONSE_MILLIS,
+      utcOffsetMinutes: -840,
+    } as const;
+    expect(answerFromRecord("answer-1", answerToRecord(edges))).toEqual(edges);
+    expect(answerFromRecord("answer-1", { ...record, utcOffsetMinutes: 840 })).toMatchObject({
+      utcOffsetMinutes: 840,
+    });
+    const { recallMillis: _r, gradeMillis: _g, utcOffsetMinutes: _u, ...untimed } = edges;
+    for (const millis of [-1, MAX_RESPONSE_MILLIS + 1, 0.5, Infinity, -Infinity])
+      for (const minutes of [-841, 841, 0.5, Infinity])
+        expect(
+          answerFromRecord("answer-1", {
+            ...answerToRecord(edges),
+            recallMillis: millis,
+            gradeMillis: millis,
+            utcOffsetMinutes: minutes,
+          }),
+        ).toEqual(untimed);
   });
 });

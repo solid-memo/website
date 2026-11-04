@@ -156,7 +156,7 @@ export function monthSummaryOf(answers: readonly Answer[]): MonthSummary {
   for (const answer of answers) {
     const ms = answer.mode === "multiple-choice" ? undefined : recordedTimeOf(answer);
     if (ms === undefined) continue;
-    // A time read leniently may be below zero: it counts as none, the least its shape has.
+    // The log reads its times bounded; a time below zero given otherwise counts as none, the least its shape has.
     const seconds = Math.min(Math.max(0, Math.floor(ms / 1000)), RECALL_SECONDS_CAP);
     recallSeconds[seconds] = (recallSeconds[seconds] ?? 0) + 1;
   }

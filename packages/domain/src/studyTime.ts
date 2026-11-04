@@ -71,11 +71,17 @@ function medianOf(values: number[]): number | null {
   return sorted.length % 2 === 1 ? sorted[middle]! : (sorted[middle - 1]! + sorted[middle]!) / 2;
 }
 
-/** An answer's recorded time, recalling and grading; undefined when it was not recorded in full. */
+/**
+ * An answer's recorded time, recalling and grading; undefined when it
+ * was not recorded in full, or is not a finite number (the answer log
+ * reads its times bounded, so a time from elsewhere never makes a
+ * summary or an estimate NaN).
+ */
 export function recordedTimeOf(answer: Answer): number | undefined {
   if (answer.recallMillis === undefined) return undefined;
-  if (answer.mode === "multiple-choice") return answer.recallMillis;
-  return answer.gradeMillis === undefined ? undefined : answer.recallMillis + answer.gradeMillis;
+  if (answer.mode !== "multiple-choice" && answer.gradeMillis === undefined) return undefined;
+  const ms = answer.recallMillis + (answer.mode === "multiple-choice" ? 0 : answer.gradeMillis!);
+  return Number.isFinite(ms) ? ms : undefined;
 }
 
 /** The answer given first of those with a recorded time; undefined of none. */

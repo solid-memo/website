@@ -409,7 +409,7 @@ says.
 |---|---|
 | `recallMillis` | In study, from the card shown to Reveal; in a course, from the question shown to the option checked (`useStopwatch` in [stopwatch.ts](../packages/ui/src/ui/stopwatch.ts), on `performance.now()`). The time the page is hidden is left out. |
 | `gradeMillis` | In study, from Reveal to the grade, measured the same way; when saving failed and the learner grades again, to the last grade pressed. A course answer has none. |
-| Either | In whole milliseconds, and left out above ten minutes (`MAX_RESPONSE_MILLIS`, `recordedResponseTimes` in [answer.ts](../packages/domain/src/answer.ts)). An answer given without a screen timing it, as when the Studio's trial plays the days to come, has neither. |
+| Either | In whole milliseconds, and left out above ten minutes (`MAX_RESPONSE_MILLIS`, `recordedResponseTimes` in [answer.ts](../packages/domain/src/answer.ts)). A time read that isn't a whole number in that range is left out too (`answerFromRecord`). An answer given without a screen timing it, as when the Studio's trial plays the days to come, has neither. |
 | `priorDue` | The prompt's due day before the answer, from its review state (`applyGrade`); none on a first answer. |
 | `utcOffsetMinutes` | The device's offset from UTC as the answer is given (`utcOffsetMinutesAt`). |
 
