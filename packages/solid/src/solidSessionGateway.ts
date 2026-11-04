@@ -4,6 +4,7 @@
 
 import { getSolidDataset } from "./client/resources";
 import { getThing, getUrlAll } from "./client/rdf";
+import { limitedFetch, PROFILE_LIMITS } from "./client/readLimits";
 import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";
@@ -17,10 +18,14 @@ const SOLID_OIDC_ISSUER = "http://www.w3.org/ns/solid/terms#oidcIssuer";
  * Dereference a WebID (unauthenticated) and read the solid:oidcIssuer
  * triple from the profile so the user only needs to type their WebID.
  * The issuer is never guessed from the WebID's origin, and only an
- * https issuer is accepted: the browser is about to be sent there.
+ * https issuer is accepted: the browser is about to be sent there. The
+ * document is read under PROFILE_LIMITS, as the storage lookup reads it
+ * (solidStorageGateway.ts): it is read at every login and sign-in.
  */
 async function discoverOidcIssuer(webId: string): Promise<string> {
-  const dataset = await getSolidDataset(webId);
+  const dataset = await getSolidDataset(webId, {
+    fetch: limitedFetch((input, init) => globalThis.fetch(input, init), PROFILE_LIMITS),
+  });
   const profile = getThing(dataset, webId);
   if (!profile) {
     throw new AppError("webIdNoSubject", { webId });

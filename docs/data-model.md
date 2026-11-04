@@ -135,7 +135,10 @@ flowchart LR
   one. Only the documents on the WebID's origin, on its document's
   origin or in a storage the WebID document names are read; a link to
   one anywhere else is left alone
-  ([boundaries.md](boundaries.md#the-credential-gate)). An index found
+  ([boundaries.md](boundaries.md#the-credential-gate)). Each is read
+  under `PROFILE_LIMITS`, no more than `MAX_PROFILE_DOCUMENTS` extended
+  profile documents: a WebID document past them fails the lookup, and
+  any other is left out. An index found
   outside those places may be someone else's: the app takes it as
   missing, so nothing in it is read or written, no instance it registers
   is listed, and the user may create their own. Of several links, one
