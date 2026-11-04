@@ -1209,6 +1209,12 @@ graph LR
 ## Conventions
 
 - Tests are colocated: `foo.ts` ↔ `foo.test.ts`.
+- Vitest runs a package's test files at once, each on a worker, but a
+  file's tests one after another. A file of slow tests is split into
+  files of about the same time, by what they test, their shared setup
+  in `src/testing/`: the deck repository's growth tests are
+  `solidDeckRepository.<what>.growth.test.ts`, over
+  `packages/solid/src/testing/deckWrites.ts`.
 - Test files follow the same import boundaries as their subject
   ([boundaries.md](boundaries.md)); `packages/shacl/src/testing/turtle.ts`
   parses Turtle through `src/turtleDocument.ts` for the SHACL tests.
