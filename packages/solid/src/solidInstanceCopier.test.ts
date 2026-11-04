@@ -411,6 +411,29 @@ describe("listResources and deleteRecursively", () => {
     await expect(copier().listResources(TO)).resolves.toEqual([]);
   });
 
+  it("refuse a tree with containers nested past the depth listed, as guestStudyTooLarge, reading no deeper", async () => {
+    // Each container lists another below it, on and on.
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      container(url, [`${url}a/`, `${url}doc.ttl`])) as never);
+    await expect(copier().listResources(FROM)).rejects.toMatchObject({
+      code: "guestStudyTooLarge",
+    });
+    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(8);
+  });
+
+  it("refuse a tree of more resources than listed, as guestStudyTooLarge, and list one of as many", async () => {
+    const documents = (count: number) =>
+      Array.from({ length: count }, (_, i) => `${FROM}doc-${String(i).padStart(5, "0")}.ttl`);
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === FROM ? container(FROM, documents(20_000)) : null) as never);
+    await expect(copier().listResources(FROM)).resolves.toHaveLength(20_000);
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === FROM ? container(FROM, documents(20_001)) : null) as never);
+    await expect(copier().listResources(FROM)).rejects.toMatchObject({
+      code: "guestStudyTooLarge",
+    });
+  });
+
   it("delete everything below the container, then the container; one that is gone counts as deleted", async () => {
     vi.mocked(getSolidDatasetOrNull).mockImplementation(
       (async (url: string) => tree[url] ?? null) as never,
@@ -424,5 +447,29 @@ describe("listResources and deleteRecursively", () => {
       `${FROM}meta.ttl`,
     ]);
     expect(vi.mocked(deleteContainer).mock.calls.map((c) => c[0])).toEqual([`${FROM}decks/`, FROM]);
+  });
+
+  it("refuse to delete a tree nested past the depth listed, as guestStudyTooLarge, reading no deeper", async () => {
+    // Each container lists another below it, on and on.
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      container(url, [`${url}a/`])) as never);
+    await expect(copier().deleteRecursively(FROM)).rejects.toMatchObject({
+      code: "guestStudyTooLarge",
+    });
+    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(8);
+  });
+
+  it("refuse to delete a tree of more resources than listed, as guestStudyTooLarge, deleting no more", async () => {
+    const documents = Array.from(
+      { length: 20_001 },
+      (_, i) => `${FROM}doc-${String(i).padStart(5, "0")}.ttl`,
+    );
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === FROM ? container(FROM, documents) : null) as never);
+    await expect(copier().deleteRecursively(FROM)).rejects.toMatchObject({
+      code: "guestStudyTooLarge",
+    });
+    expect(deleteFile).toHaveBeenCalledTimes(20_000);
+    expect(deleteContainer).not.toHaveBeenCalled();
   });
 });

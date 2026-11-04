@@ -835,8 +835,12 @@ export interface AnswerLog {
    * already, as it was, changes nothing.
    */
   appendAll(instanceUrl: string, answers: readonly Answer[]): Promise<void>;
-  /** The study months the log has a document for, "YYYY-MM", oldest first. */
-  months(instanceUrl: string): Promise<string[]>;
+  /**
+   * The study months up to `until` ("YYYY-MM") the log has a document
+   * for, oldest first: of more than MAX_LOG_MONTHS, the newest. A later
+   * month is left out first, so none can push out one of those.
+   */
+  months(instanceUrl: string, until: string): Promise<string[]>;
   /** A month's answers; an answer that does not fit its shape is left out. */
   readMonth(instanceUrl: string, month: string): Promise<Answer[]>;
   /**

@@ -126,9 +126,10 @@ months (the default), the last 12 months or all time. Under it are four
 
 The figures that run up to today look back as far as the activity
 calendar, whatever the range: its 52 weeks, or the whole log for all
-time. They're the streaks, the days studied of the last 30, the
-calendar, what each day held, this week and month beside the last, and
-the new cards beside the reviews by week. The rest are the range's.
+time (its newest `MAX_LOG_MONTHS` months, [Loading](#loading)).
+They're the streaks, the days studied of the last 30, the calendar,
+what each day held, this week and month beside the last, and the new
+cards beside the reviews by week. The rest are the range's.
 
 When the answer log begins inside the range read (always so for all
 time), the overview, activity and memory tabs open with a note, "Since
@@ -252,13 +253,17 @@ month, by server, for a learner who answers a hundred cards a day.
   boundary or another time zone can put one on tomorrow, but none
   later. The charts over time span at most ten years (`CHART_YEARS`),
   the last, and walk a count of days, weeks or months known beforehand.
+  The whole log is the months it lists up to that of the day after
+  tomorrow, the newest of them `MAX_LOG_MONTHS`
+  ([data-model.md](data-model.md#the-answer-log)), and no more.
   Its result's `coverage` is the log's first month when the log begins
   inside the range, and `logBegins` the log's first month, for the
   empty range's message. The page's ranges are 30 days, 90 days (its
   default), 12 months and `"all"` (`rangeRead` and `statisticsQuery` in
   `studyFigures.ts`), each read once and kept apart. The today strip
   has a key of its own (`todayFiguresQuery`). All time downloads the
-  whole log once a page load, as `loadAnswerLog` does.
+  whole log, the same months, once a page load, as `loadAnswerLog`
+  does.
 
 Measured against a real server (`history.integration.test.ts`, run
 with `MEASURE_ANSWER_LOG=1`; [testing.md](testing.md)), for 100

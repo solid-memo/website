@@ -16,7 +16,9 @@ import { effectiveStates } from "@solid-memo/domain/fsrs";
 import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
 import {
   answerIdOf,
+  monthOfStudyDay,
   recordedResponseTimes,
+  shiftStudyDay,
   utcOffsetMinutesAt,
   type Answer,
   type AnswerMode,
@@ -62,6 +64,16 @@ function schedulingOf(prefs: StudyPreferences): Scheduling {
 const MONTH_READS_AT_ONCE = 6;
 
 /**
+ * The last month of the answer log a read takes in, of the study day
+ * `today`: no answer counts after tomorrow, and one of tomorrow may be
+ * in the next day's month's document (isOfStudyMonth). The log may list
+ * later months, but they hold nothing to read.
+ */
+export function lastLogMonthOf(today: string): string {
+  return monthOfStudyDay(shiftStudyDay(today, 2));
+}
+
+/**
  * The answer log as the use cases share it: each answer graded queued
  * for the log, added after its review is saved, and each month read
  * kept with its version, read again only once it changed.
@@ -71,11 +83,14 @@ export function createAnswerStore({
   reviewStateRepository,
   preferenceStore,
   newId,
+  now,
 }: {
   answerLog: AnswerLog;
   reviewStateRepository: ReviewStateRepository;
   preferenceStore: Pick<PreferenceStore, "get">;
   newId: () => string;
+  /** The time, for the last month of the log taken in (lastLogMonthOf). */
+  now: () => Date;
 }) {
   /**
    * Answers given but not yet in the log, oldest first. An answer is
@@ -164,9 +179,23 @@ export function createAnswerStore({
     await Promise.all(Array.from({ length: MONTH_READS_AT_ONCE }, reader));
     return answers.flat();
   }
+  /**
+   * The months of the log there can be an answer counted in at `at`
+   * (now, unless given): of each it lists, up to the last that can hold
+   * one (lastLogMonthOf), and of very many of those the newest
+   * (MAX_LOG_MONTHS). A month listed later is never read, nor does it
+   * push out one that is. The last month is that of the study day a day
+   * boundary at midnight gives, the latest any boundary hour can, so
+   * the instance's preferences are not read: a check of an instance
+   * whose preferences cannot be read still lists its log.
+   */
+  async function logMonths(instanceUrl: string, at: Date = now()): Promise<string[]> {
+    return answerLog.months(instanceUrl, lastLogMonthOf(studyDayOf(at, 0)));
+  }
+  /** Every answer of the log, of each of its months (logMonths). */
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
     await logAnswers();
-    return readLogMonths(instanceUrl, await answerLog.months(instanceUrl), () => true);
+    return readLogMonths(instanceUrl, await logMonths(instanceUrl), () => true);
   }
   /**
    * Apply one grade to a prompt of the deck: transition its state (or the
@@ -273,6 +302,7 @@ export function createAnswerStore({
   return {
     flush: logAnswers,
     readMonths: readLogMonths,
+    logMonths,
     loadAll: loadAnswerLog,
     grade: applyGrade,
     withdraw,

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import type { Answer } from "@solid-memo/domain/answer";
+import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import { createSolidAnswerLog } from "./solidAnswerLog";
 import type { WriteCheck } from "./writeCheck";
 import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
@@ -263,14 +263,64 @@ describe("createSolidAnswerLog", () => {
   it("lists the months it has a document for, oldest first, and none without a log or not of the calendar", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });
-    await expect(log.months(INSTANCE)).resolves.toEqual([]);
+    await expect(log.months(INSTANCE, "9999-12")).resolves.toEqual([]);
     await log.append(INSTANCE, answer("2026-10-01"));
     await log.append(INSTANCE, answer("2026-09-21"));
     fake.documents.set(`${HISTORY}notes.ttl`, new Set());
     // A name of the shape that is no month of the calendar is none of the log's.
     fake.documents.set(`${HISTORY}2027-00.ttl`, new Set());
     fake.documents.set(`${HISTORY}2027-13.ttl`, new Set());
-    await expect(log.months(INSTANCE)).resolves.toEqual(["2026-09", "2026-10"]);
+    await expect(log.months(INSTANCE, "9999-12")).resolves.toEqual(["2026-09", "2026-10"]);
+    // None after the month given.
+    await expect(log.months(INSTANCE, "2026-09")).resolves.toEqual(["2026-09"]);
+  });
+
+  it("lists only history/'s own documents, in one request, never a folder below it", async () => {
+    // Every folder below history/ lists more folders, on and on.
+    const requests: string[] = [];
+    const fetch = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      requests.push(url);
+      const children = Array.from({ length: 50 }, (_, i) => `<${url}${i}/>`);
+      if (url === HISTORY) children.push(`<${SEPTEMBER}>`, `<${HISTORY}2026-10.ttl>`);
+      const response = new Response(
+        `<${url}> <http://www.w3.org/ns/ldp#contains> ${children.join(", ")} .`,
+        { headers: { "Content-Type": "text/turtle" } },
+      );
+      Object.defineProperty(response, "url", { value: url });
+      return response;
+    }) as typeof globalThis.fetch;
+    await expect(createSolidAnswerLog({ fetch }).months(INSTANCE, "2026-12")).resolves.toEqual([
+      "2026-09",
+      "2026-10",
+    ]);
+    expect(requests).toEqual([HISTORY]);
+  });
+
+  it("lists the newest months of a log of very many: MAX_LOG_MONTHS of them", async () => {
+    const fake = pod();
+    const months = Array.from({ length: 2000 }, (_, i) => {
+      const year = 1900 + Math.floor(i / 12);
+      return `${year}-${String((i % 12) + 1).padStart(2, "0")}`;
+    });
+    for (const month of months) fake.documents.set(`${HISTORY}${month}.ttl`, new Set());
+    const listed = await createSolidAnswerLog({ fetch: fake.fetch }).months(INSTANCE, "9999-12");
+    expect(listed).toEqual(months.slice(-MAX_LOG_MONTHS));
+    expect(fake.requests).toHaveLength(1);
+  });
+
+  it("lists every month up to the one given, however many later months the log lists", async () => {
+    const fake = pod();
+    const real = ["2026-09", "2026-10", "2026-11"];
+    const later = Array.from({ length: MAX_LOG_MONTHS + 12 }, (_, i) => {
+      const year = 9000 + Math.floor(i / 12);
+      return `${year}-${String((i % 12) + 1).padStart(2, "0")}`;
+    });
+    for (const month of [...real, ...later])
+      fake.documents.set(`${HISTORY}${month}.ttl`, new Set());
+    await expect(
+      createSolidAnswerLog({ fetch: fake.fetch }).months(INSTANCE, "2026-11"),
+    ).resolves.toEqual(real);
   });
 
   it("reads a month leniently: none for a month without a document, and a subject that does not fit left out", async () => {

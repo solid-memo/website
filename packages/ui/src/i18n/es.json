@@ -1754,6 +1754,7 @@
       "other": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} problemas), así que no se añadió nada a tu Pod. Siguen aquí."
     },
     "guestStudyTooNew": "Una versión más reciente de Solid Memo guardó parte de tus datos de estudio en este navegador, así que esta versión no la añade a tu Pod. Vuelve a cargar la página para obtener la última versión.",
+    "guestStudyTooLarge": "Tus datos de estudio en este navegador contienen más de lo que Solid Memo añade a un Pod, así que no se añadió nada a tu Pod. Siguen aquí.",
     "guestStudyChanged": "Tus datos de estudio en este navegador cambiaron mientras se añadían, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo para añadir lo que cambió.",
     "instanceChangedDuringCopy": "Tus datos de estudio en este navegador cambiaron mientras se copiaban, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",
     "resourceChangedDuringCopy": "Parte de tus datos de estudio en este navegador cambió mientras se copiaba, quizá en otra pestaña, así que se conservan aquí. Inténtalo de nuevo.",

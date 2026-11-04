@@ -79,6 +79,7 @@ export function createTrialUseCases(
     reviewStateRepository,
     preferenceStore,
     newId: randomId,
+    now,
   });
   const storageGateway = createSolidStorageGateway({ fetch, profileStorages: getProfileStorages });
   const digestStore = createDigestStore({

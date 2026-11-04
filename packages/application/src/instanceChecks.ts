@@ -24,11 +24,11 @@ import type {
   DeckLibrary,
   DeckRepository,
   ShapeValidator,
-  AnswerLog,
   RepairRepository,
   DocumentContext,
   ReleaseDraftRepository,
 } from "./ports";
+import type { AnswerStore } from "./answerStore";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { mapAtOnce } from "./atOnce";
@@ -103,7 +103,7 @@ function isUnclaimed(url: string, unclaimed: readonly UnclaimedDeck[]): boolean 
 export function createInstanceCheckUseCases({
   deckRepository,
   releaseDraftRepository,
-  answerLog,
+  answerStore,
   shapeValidator,
   repairRepository,
   deckLibrary,
@@ -112,7 +112,7 @@ export function createInstanceCheckUseCases({
 }: {
   deckRepository: DeckRepository;
   releaseDraftRepository: ReleaseDraftRepository;
-  answerLog: AnswerLog;
+  answerStore: Pick<AnswerStore, "logMonths">;
   shapeValidator: ShapeValidator;
   repairRepository: RepairRepository;
   deckLibrary: DeckLibrary;
@@ -201,7 +201,7 @@ export function createInstanceCheckUseCases({
   ): Promise<ValidationReport> {
     const [decks, months, drafts] = await Promise.all([
       deckRepository.listDecks(instanceUrl),
-      answerLog.months(instanceUrl),
+      answerStore.logMonths(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
     ]);
     const unclaimed = await unclaimedDecksOf(decks);

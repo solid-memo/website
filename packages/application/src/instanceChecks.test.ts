@@ -64,6 +64,19 @@ describe("instance checks", () => {
       deck.reviewsDocumentUrl,
     ]);
   });
+  it("reports on an instance whose preferences cannot be read, rather than throw", async () => {
+    const deps = makeDeps();
+    vi.mocked(deps.preferencesRepository.getPreferences).mockRejectedValue(
+      new Error("preferences.ttl does not parse"),
+    );
+    vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) => ({
+      url,
+      status: "missing",
+      subjects: [],
+    }));
+    const report = await createUseCases(deps).validateInstance(instance.url);
+    expect(report.documents.map((d) => d.url)).toContain(`${instance.url}preferences.ttl`);
+  });
   it("checks only documents changed since they conformed, by these rules", async () => {
     const urls = [
       `${instance.url}meta.ttl`,

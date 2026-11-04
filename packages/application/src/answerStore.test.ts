@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
+import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import { fsrsInterval, fuzzedInterval, fuzzFactor } from "@solid-memo/domain/fsrs";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
@@ -401,5 +402,62 @@ describe("the answer log", () => {
     expect(answers.map((answer) => answer.studyDay.slice(0, 7))).toEqual([...byMonth.keys()]);
     expect(log.readMonthSince).toHaveBeenCalledTimes(24);
     expect(most).toBe(6);
+  });
+
+  it("reads no month of the whole log after the day after tomorrow's, which no answer counted can be in", async () => {
+    const deps = makeDeps();
+    const { log, byMonth } = memoryLog();
+    const useCases = createUseCases({
+      ...deps,
+      answerLog: log,
+      newId: () => "id",
+      now: () => new Date(2026, 8, 30, 12, 0),
+    });
+    for (const studyDay of ["2026-09-21", "2026-10-01", "2026-11-01", "9999-12-31"])
+      byMonth.set(studyDay.slice(0, 7), [
+        {
+          id: `answer-${studyDay}`,
+          deckUrl: deck.url,
+          cardUrl: card.url,
+          direction: "front-to-back",
+          grade: 4,
+          answeredAt: `${studyDay}T10:00:00.000Z`,
+          studyDay,
+          nextIntervalDays: 1,
+        },
+      ]);
+    const answers = await useCases.loadAnswerLog(instance.url);
+    expect(answers.map((answer) => answer.studyDay)).toEqual(["2026-09-21", "2026-10-01"]);
+    expect(log.readMonthSince.mock.calls.map(([, month]) => month)).toEqual(["2026-09", "2026-10"]);
+  });
+
+  it("reads every month of the whole log however many later months it lists, which none can push out", async () => {
+    const deps = makeDeps();
+    const { log, byMonth } = memoryLog();
+    const useCases = createUseCases({
+      ...deps,
+      answerLog: log,
+      newId: () => "id",
+      now: () => new Date(2026, 9, 20, 12, 0),
+    });
+    const answered = (studyDay: string): Answer => ({
+      id: `answer-${studyDay}`,
+      deckUrl: deck.url,
+      cardUrl: card.url,
+      direction: "front-to-back",
+      grade: 4,
+      answeredAt: `${studyDay}T10:00:00.000Z`,
+      studyDay,
+      nextIntervalDays: 1,
+    });
+    for (const studyDay of ["2026-09-21", "2026-10-01"])
+      byMonth.set(studyDay.slice(0, 7), [answered(studyDay)]);
+    for (let i = 0; i <= MAX_LOG_MONTHS; i += 1) {
+      const month = `${9000 + Math.floor(i / 12)}-${String((i % 12) + 1).padStart(2, "0")}`;
+      byMonth.set(month, [answered(`${month}-01`)]);
+    }
+    const answers = await useCases.loadAnswerLog(instance.url);
+    expect(answers.map((answer) => answer.studyDay)).toEqual(["2026-09-21", "2026-10-01"]);
+    expect(log.months).toHaveBeenCalledWith(instance.url, "2026-10");
   });
 });

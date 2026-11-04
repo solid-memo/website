@@ -20,7 +20,7 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
-import type { Answer } from "@solid-memo/domain/answer";
+import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import {
   session,
@@ -552,6 +552,34 @@ describe("guests", () => {
     expect(outcome).toMatchObject({
       ok: false,
       error: expect.objectContaining({ code: "typeIndexNoStorage" }),
+      cleanedUp: true,
+    });
+    expect(deps.instanceCopier.createContainer).not.toHaveBeenCalled();
+    expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
+  });
+
+  it("transferGuestStudy refuses before it copies anything a study whose log has as many months as are taken in", async () => {
+    const { deps } = guestDeps();
+    const answerLog: AnswerLog = {
+      append: vi.fn(async () => undefined),
+      appendAll: vi.fn(async () => undefined),
+      months: vi.fn(async () => Array.from({ length: MAX_LOG_MONTHS }, (_, i) => `${1900 + i}-01`)),
+      readMonth: vi.fn(async () => []),
+      readMonthSince: vi.fn(),
+      removeDay: vi.fn(async () => undefined),
+      removeAnswer: vi.fn(async () => undefined),
+    };
+    const outcome = await createUseCases({ ...deps, answerLog }).transferGuestStudy(
+      session,
+      guestInstance,
+      {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      },
+    );
+    expect(outcome).toMatchObject({
+      ok: false,
+      error: expect.objectContaining({ code: "guestStudyTooLarge" }),
       cleanedUp: true,
     });
     expect(deps.instanceCopier.createContainer).not.toHaveBeenCalled();
@@ -1489,6 +1517,22 @@ describe("guests", () => {
         step: "read",
         error: new AppError("guestStudyTooNew"),
       });
+      expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+    });
+
+    it("mergeGuestStudy adds nothing from a study whose log has as many months as are taken in", async () => {
+      const { deps } = mergeDeps();
+      const months = Array.from({ length: MAX_LOG_MONTHS }, (_, i) => `${1900 + i}-01`);
+      vi.mocked(deps.answerLog.months).mockResolvedValue(months);
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({
+        ok: false,
+        step: "read",
+        error: new AppError("guestStudyTooLarge"),
+      });
+      expect(deps.answerLog.readMonth).not.toHaveBeenCalled();
       expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
       expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
     });

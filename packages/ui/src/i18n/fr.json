@@ -1754,6 +1754,7 @@
       "other": "Une partie de votre travail dans ce navigateur n’est pas au format attendu par Solid Memo ({count} problèmes), rien n’a donc été ajouté à votre Pod. Tout est toujours ici."
     },
     "guestStudyTooNew": "Une version plus récente de Solid Memo a enregistré une partie de votre travail dans ce navigateur, cette version ne l’ajoute donc pas à votre Pod. Rechargez la page pour obtenir la dernière version.",
+    "guestStudyTooLarge": "Votre travail dans ce navigateur contient plus que ce que Solid Memo ajoute à un Pod, rien n’a donc été ajouté à votre Pod. Tout est toujours ici.",
     "guestStudyChanged": "Votre travail dans ce navigateur a changé pendant son ajout, peut-être dans un autre onglet, il est donc conservé ici. Réessayez pour ajouter ce qui a changé.",
     "instanceChangedDuringCopy": "Votre travail dans ce navigateur a changé pendant sa copie, peut-être dans un autre onglet, il est donc conservé ici. Réessayez.",
     "resourceChangedDuringCopy": "Une partie de votre travail dans ce navigateur a changé pendant sa copie, peut-être dans un autre onglet, elle est donc conservée ici. Réessayez.",

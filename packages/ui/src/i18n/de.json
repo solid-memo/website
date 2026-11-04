@@ -1677,6 +1677,7 @@
       "other": "Ein Teil deines Lernstands in diesem Browser hat nicht das Format, das Solid Memo erwartet ({count} Probleme), daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier."
     },
     "guestStudyTooNew": "Eine neuere Version von Solid Memo hat einen Teil deines Lernstands in diesem Browser gespeichert, daher überträgt diese Version ihn nicht in deinen Pod. Lade die Seite neu, um die neueste Version zu erhalten.",
+    "guestStudyTooLarge": "Dein Lernstand in diesem Browser umfasst mehr, als Solid Memo in einen Pod überträgt, daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier.",
     "guestStudyChanged": "Dein Lernstand in diesem Browser hat sich während der Übertragung geändert, vielleicht in einem anderen Tab, daher bleibt er hier. Versuche es erneut, um die Änderungen zu übertragen.",
     "instanceChangedDuringCopy": "Dein Lernstand in diesem Browser hat sich während des Kopierens geändert, vielleicht in einem anderen Tab, daher bleibt er hier. Versuche es erneut.",
     "resourceChangedDuringCopy": "Ein Teil deines Lernstands in diesem Browser hat sich während des Kopierens geändert, vielleicht in einem anderen Tab, daher bleibt er hier. Versuche es erneut.",
