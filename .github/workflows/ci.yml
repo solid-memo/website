@@ -47,7 +47,13 @@ permissions:
   contents: read
 
 # A newer run of a pull request's or a branch's checks cancels the one
-# still going. Runs on main are never canceled: release.yml releases, and
+# still going, and so does a merge queue run of a pull request that the
+# queue built again, as it does when main moves under it. Each build of
+# an entry has a ref of its own (gh-readonly-queue/main/pr-<N>-<base>,
+# the base being the commit of main it was built on), so its group is
+# keyed on its merge commit's message instead ("Merge pull request #<N>
+# from ..."), which every build of one entry keeps, and which no other
+# entry has. Runs on main are never canceled: release.yml releases, and
 # deploy.yml deploys a release commit, only after a push run on main that
 # passed, so a push run canceled by a later run, a manual one included,
 # would leave its commit unreleased, or its version undeployed. Each event
@@ -58,7 +64,9 @@ permissions:
 # may replace it.
 concurrency:
   group: >-
-    ci-${{ github.event_name }}-${{ github.ref }}${{
+    ci-${{ github.event_name }}-${{
+    github.event_name == 'merge_group' && github.event.merge_group.head_commit.message ||
+    github.ref }}${{
     startsWith(github.event.head_commit.message, 'chore(release): ') &&
     format('-{0}', github.sha) || '' }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}

@@ -744,13 +744,20 @@ names the pull request.
 A queue run checks what a pull request run checks, except that
 `commits` lints nothing, `dependency-review` doesn't run, and
 `library` compares with the commit of `main` the queue built on, the
-pull requests ahead included. Each queue
-branch is its own concurrency group. A queue run releases and deploys
-nothing: release.yml and deploy.yml follow push runs on `main` alone.
+pull requests ahead included. A queue run releases and deploys
+nothing: release.yml and deploy.yml follow push runs on `main` alone,
+and release.yml releases only once the queue is empty, so a release
+commit doesn't send the queued pull requests back to the start.
 
 A newer run for a pull request or branch cancels the one still going.
-Runs on `main` are never canceled: a release follows a push run that
-passed ([releasing.md](releasing.md#what-a-release-does)), and the
+So does a queue run of a pull request the queue built again, as it does
+when `main` moves under it or an entry ahead leaves: the run it
+replaced no longer counts. Each build has a branch of its own,
+`gh-readonly-queue/main/pr-<N>-<base>`, named after the commit of
+`main` it was built on. So a queue run's concurrency group is keyed on
+its merge commit's message, `Merge pull request #<N> from …`, which
+every build of one pull request keeps. Runs on `main` are never
+canceled: a release follows a push run that passed ([releasing.md](releasing.md#what-a-release-does)), and the
 deploy one on the release commit
 ([deployment.md](deployment.md#github-pages-automatic)). Each event has
 its own concurrency group, so a run by hand doesn't cancel a push run,

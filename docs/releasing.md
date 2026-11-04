@@ -3,8 +3,9 @@
 How Solid Memo's versions are chosen, what a version promises, and what
 a release does. [semantic-release](https://semantic-release.gitbook.io/)
 releases each version; nobody releases one by hand. After CI passes on a
-push to `main`, it reads the commits since the last version and releases
-the next one when any of them is releasable. Only a version is deployed
+push to `main`, and once the merge queue is empty, it reads the commits
+since the last version and releases the next one when any of them is
+releasable. Only a version is deployed
 ([deployment.md](deployment.md)): the site runs a release commit once CI
 passes on it, and a push to `main` that releases nothing waits for the
 next version. [CHANGELOG.md](../CHANGELOG.md) says what each version
@@ -364,6 +365,25 @@ release commit. CI's run on a release commit has a concurrency group of
 its own, so a newer push to `main` can't replace it while it waits
 ([testing.md](testing.md#continuous-integration)).
 
+While the merge queue for `main` has entries, a push run releases
+nothing. A release commit moves `main` under the queue, and GitHub
+builds every queued pull request again on top of it
+([testing.md](testing.md#the-merge-queue)), so each release would cost a
+full run per entry. Before the job that releases, the workflow's
+`queue` job asks GitHub's GraphQL API how many entries the queue holds
+(`mergeQueue(branch: "main") { entries { totalCount } }`), and the
+release goes ahead only when it holds none. That job holds no secret
+and no environment, and its token can only read. When the query fails,
+the job fails, and the run with it: it neither releases nor holds back
+in silence.
+
+So the push run of the last pull request to leave the queue releases
+every commit since the last tag, as one version: during a busy queue,
+several merges come out as one release and one deploy. If that last
+entry fails, or is removed from the queue, no push follows it, and
+`main`'s commits wait for the next merge, or for a run by hand, which
+releases `main`'s tip whatever the queue holds.
+
 Releases go one at a time (concurrency group `release`), and a running
 one is never canceled. GitHub keeps only one run waiting in the group:
 a newer one replaces it, and whichever goes ahead releases the tip. A
@@ -517,7 +537,8 @@ The workflow's run says which step failed and why; nothing opens or
 comments on an issue. Once the cause is fixed, the maintainer runs the
 workflow by hand (Actions › Release › Run workflow, from `main`), which
 refuses until CI has passed on `main`'s tip. The next push to `main`
-that passes CI tries again.
+that passes CI, with the merge queue empty, tries again. A run whose
+`queue` job failed released nothing, and is handled the same way.
 
 - **Before the push** (a wrong configuration, a file the release
   couldn't write, docs that couldn't be rendered or drawn, Chromium

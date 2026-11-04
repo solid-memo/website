@@ -10,8 +10,17 @@ name: Release
 # breaking change), commits the new version to main, tags it and makes a
 # GitHub release of it. Run by hand from main, it releases main's tip
 # once CI has passed on it, as after a release that failed. A fork's
-# branch may be named main too, so the job checks, as deploy.yml does,
+# branch may be named main too, so the jobs check, as deploy.yml does,
 # that CI ran for a push, in this repository.
+#
+# While the merge queue for main holds entries, a push run releases
+# nothing: a release commit moves main under the queue, and GitHub builds
+# every entry again on top of it. The push run of the last entry to
+# merge finds the queue empty and releases every commit since the last
+# tag as one version. When that entry fails or leaves the queue, no push
+# follows it, and main's commits wait for the next merge or a run by
+# hand, which releases main's tip whatever the queue holds
+# (docs/releasing.md#what-a-release-does).
 #
 # The release commit is pushed with a deploy key (the SEMANTIC_RELEASE_KEY
 # secret), which the ruleset on main lets bypass its pull request: the
@@ -36,7 +45,7 @@ name: Release
 # (docs/releasing.md#when-a-release-fails).
 
 on:
-  workflow_run: # zizmor: ignore[dangerous-triggers] only the release job runs on it, for CI's push runs on main in this repository
+  workflow_run: # zizmor: ignore[dangerous-triggers] only the queue and release jobs run on it, for CI's push runs on main in this repository
     workflows: [CI]
     types: [completed]
     branches: [main]
@@ -56,8 +65,63 @@ permissions:
   actions: read
 
 jobs:
-  release:
+  # How many entries the merge queue for main holds, for the release job,
+  # which a push run releases with only when it holds none. It runs for
+  # the push runs the release job runs for, and holds no secret, no
+  # environment and a token that can only read: it checks out nothing
+  # and runs none of the repository's code. It asks GitHub's GraphQL API
+  # with the job's token, which reads a public repository's merge queue
+  # with contents: read. A query that fails fails the job, and so
+  # the run, rather than release or hold in silence: the next merge's
+  # run asks again, and a run by hand releases. A branch with no merge
+  # queue, as a fork's main may be, holds none.
+  queue:
     if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): ')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      entries: ${{ steps.queue.outputs.entries }}
+    steps:
+      - name: The merge queue's entries
+        id: queue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          QUERY: >-
+            query($owner: String!, $name: String!) {
+              repository(owner: $owner, name: $name) {
+                mergeQueue(branch: "main") { entries { totalCount } }
+              }
+            }
+        run: |
+          set -eo pipefail
+          entries="$(gh api graphql -f query="$QUERY" \
+            -f owner="${GH_REPO%%/*}" -f name="${GH_REPO#*/}" \
+            --jq '.data.repository.mergeQueue.entries.totalCount // 0')"
+          if ! [[ "$entries" =~ ^[0-9]+$ ]]; then
+            echo "::error::GitHub's API gave no count of the merge queue's entries: $entries"
+            exit 1
+          fi
+          if [ "$entries" != 0 ]; then
+            echo "::notice::The merge queue for main holds $entries entries, so nothing is released: the push run of the last to merge releases this commit with theirs (docs/releasing.md#what-a-release-does)."
+          fi
+          echo "entries=$entries" >> "$GITHUB_OUTPUT"
+
+  release:
+    # After the queue job, which a run by hand skips: !cancelled() lets
+    # the release job run when a job it needs was skipped, and a push run
+    # releases only once that job has found the queue empty.
+    needs: queue
+    if: >-
+      !cancelled() && (
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
        inputs.tag == '') ||
       (github.event_name == 'workflow_run' &&
@@ -65,7 +129,8 @@ jobs:
        github.event.workflow_run.event == 'push' &&
        github.event.workflow_run.head_branch == 'main' &&
        github.event.workflow_run.head_repository.full_name == github.repository &&
-       !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): '))
+       !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): ') &&
+       needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))
     runs-on: ubuntu-latest
     # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
     # apt-get three minutes and one more try) before semantic-release

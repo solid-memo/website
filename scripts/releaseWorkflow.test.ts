@@ -16,7 +16,9 @@ import { describe, expect, it } from "vitest";
  * once its files match the site job's attestation, which no other job
  * of a run can make. ci.yml's check job and the release job check the
  * registry's signatures of what they install, the release job before
- * Chromium and the key (docs/testing.md#the-workflows).
+ * Chromium and the key (docs/testing.md#the-workflows). A push run
+ * releases only while the merge queue is empty, which a job that holds
+ * nothing asks (docs/releasing.md#what-a-release-does).
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -42,8 +44,29 @@ const workflow = jobs(read(".github/workflows/release.yml"));
 const release = [...workflow.values()].flatMap((job) => steps(job, 6));
 
 describe("release.yml", () => {
-  it("has the release and docs jobs", () => {
-    expect([...workflow.keys()]).toEqual(["release", "docs"]);
+  it("has the queue, release and docs jobs", () => {
+    expect([...workflow.keys()]).toEqual(["queue", "release", "docs"]);
+  });
+
+  // The queue job runs on workflow_run, beside the job that holds the
+  // key, so it holds nothing: no secret, no environment, no checkout,
+  // and a token that can only read.
+  it("asks for the merge queue's entries in a job that holds nothing", () => {
+    const queue = workflow.get("queue") ?? "";
+    expect(queue).toMatch(/^ {4}permissions:\n {6}contents: read\n {4}outputs:$/m);
+    expect(queue).not.toMatch(/secrets\.|environment:|uses:/);
+    expect(queue).toContain('mergeQueue(branch: "main") { entries { totalCount } }');
+  });
+
+  // A run by hand releases main's tip whatever the queue holds; a push
+  // run, only once the queue job found it empty.
+  it("releases after a push run only when the merge queue is empty", () => {
+    const job = workflow.get("release") ?? "";
+    expect(job).toMatch(/^ {4}needs: queue$/m);
+    expect(job).toMatch(/^ {6}!cancelled\(\) && \($/m);
+    expect(job).toContain(
+      "needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))",
+    );
   });
 
   it("uses no cache action", () => {
