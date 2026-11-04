@@ -14,7 +14,8 @@ SHOULD and OPTIONAL, was checked again against the Standard's own list
 at `bc5a0a83` (3.10.1 and #165). The changes up to `befdae42` were
 checked the same day. #178 has since added the workflows' lint to CI,
 which criterion 12 names, and the pull request template has since
-dropped its checklist for the author.
+dropped its checklist for the author. Donations through GitHub Sponsors
+came later (#546), as GOVERNANCE.md describes.
 
 It replaces the assessments of 2026-10-16 (`main` at `2b780237`,
 2.1.1, #78) and 2026-10-11 (the branch `standard-for-public-code`, on
@@ -320,9 +321,10 @@ They need checking again before anything relies on them.
   account, `@ixuz`. A decision exists only once written in an issue, a
   discussion or a pull request, its commit messages included (decision
   13). GOVERNANCE.md says who holds the domain solid-memo.com, the
-  project's one cost, paid by the maintainer (#161).
-- SHOULD, met — who pays for reviews: volunteers, in their own time,
-  with no funding ([CONTRIBUTING.md](../CONTRIBUTING.md#review)).
+  project's one cost, paid by the maintainer (#161), and how donations
+  through GitHub Sponsors are used, with no say over decisions (#546).
+- SHOULD, met — who pays for reviews: volunteers, in their own time
+  ([CONTRIBUTING.md](../CONTRIBUTING.md#review)).
 - SHOULD, met — the engagement of organizations: GOVERNANCE.md says
   none is committed.
 - SHOULD, met — a public roadmap in [ROADMAP.md](../ROADMAP.md), whose

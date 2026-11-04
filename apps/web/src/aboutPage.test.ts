@@ -152,7 +152,7 @@ describe("the About page", () => {
           existsSync(
             resolve(
               repository,
-              href.slice("https://github.com/solid-memo/website/blob/main/".length),
+              href.slice("https://github.com/solid-memo/website/blob/main/".length).split("#")[0]!,
             ),
           ),
         ).toBe(true);

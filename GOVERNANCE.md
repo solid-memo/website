@@ -7,9 +7,11 @@ How to contribute is in [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Who maintains it
 
-Solid Memo is a volunteer project. It has no funding, and no
+Solid Memo is a volunteer project, with no income of its own. No
 organization is committed to it, as a sponsor, a user or an employer of
-its contributors. Its one maintainer is Anton Wiklund
+its contributors. People may donate to the maintainer through
+[GitHub Sponsors](https://github.com/sponsors/ixuz) ([Costs](#costs)).
+Its one maintainer is Anton Wiklund
 ([@ixuz](https://github.com/ixuz)), who owns the
 [solid-memo](https://github.com/solid-memo) GitHub organization.
 [.github/CODEOWNERS](.github/CODEOWNERS) names the maintainers.
@@ -38,6 +40,14 @@ site's hosting on GitHub Pages and the archives cost nothing, as the
 repository is public. The maintainer pays for the domain himself, so
 Solid Memo is not yet self-sufficient: it depends on him for its one
 cost.
+
+If you find Solid Memo valuable, to you or to the Solid ecosystem, you
+may donate to the maintainer through
+[GitHub Sponsors](https://github.com/sponsors/ixuz). Donations go to the
+maintainer personally. They pay for the domain first, then for time
+spent on Solid Memo. A donation is welcome, but it gives no say over the
+roadmap, priorities or reviews: decisions are made in the open, as
+[Where the project talks](#where-the-project-talks) describes.
 
 ## Where the project talks
 
