@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.10](https://github.com/solid-memo/website/compare/v6.29.9...v6.29.10) (2026-11-04)
+
+### Bug Fixes
+
+* **domain:** name a guest's pod only from a guest's own instance ([7b4cc4a](https://github.com/solid-memo/website/commit/7b4cc4a204b1afe8644a61bd307f8d3816e7f2cd))
+
 ## [6.29.9](https://github.com/solid-memo/website/compare/v6.29.8...v6.29.9) (2026-11-03)
 
 ### Bug Fixes
