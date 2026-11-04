@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.15](https://github.com/solid-memo/website/compare/v6.29.14...v6.29.15) (2026-11-04)
+
+### Bug Fixes
+
+* **release:** check a shared distractor once, not once per card ([a5f31d3](https://github.com/solid-memo/website/commit/a5f31d337b6c4b01a17deef585e09678657cf88f))
+
 ## [6.29.14](https://github.com/solid-memo/website/compare/v6.29.13...v6.29.14) (2026-11-04)
 
 ### Bug Fixes
