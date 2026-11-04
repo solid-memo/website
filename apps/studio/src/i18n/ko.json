@@ -1278,6 +1278,9 @@
       "themesRequired": "EU 데이터 주제(필수)",
       "themesTopics": "Solid Memo 주제(선택)",
       "themesOther": "릴리스에 적힌 다른 주제",
+      "othersMore": {
+        "other": "릴리스에 적힌 항목이 {count}개 더 있어요. 여기에는 나열하지 않지만 릴리스에는 그대로 남아요."
+      },
       "licenseHint": "DCAT-AP의 요구대로 라이선스 문서로 지정해요.",
       "contact": "연락처",
       "contactHint": "독자가 릴리스에 대해 묻거나 오류를 신고하는 웹 페이지예요. 예: 이슈 트래커. Solid Memo 라이브러리는 자체 연락처를 요구하고, 누구의 이메일도 넣지 않아요.",

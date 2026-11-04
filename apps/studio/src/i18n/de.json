@@ -1352,6 +1352,10 @@
       "themesRequired": "Datenthema der EU (erforderlich)",
       "themesTopics": "Themen von Solid Memo (optional)",
       "themesOther": "Weitere Themen, die die Ausgabe angibt",
+      "othersMore": {
+        "one": "Und {count} weiteres, das die Ausgabe angibt, hier nicht aufgeführt; es bleibt in der Ausgabe.",
+        "other": "Und {count} weitere, die die Ausgabe angibt, hier nicht aufgeführt; sie bleiben in der Ausgabe."
+      },
       "licenseHint": "Als Lizenzdokument angegeben, wie DCAT-AP es verlangt.",
       "contact": "Kontakt",
       "contactHint": "Eine Webseite, auf der Lesende Fragen zur Veröffentlichung stellen oder einen Fehler darin melden, etwa ein Issue-Tracker. Die Bibliothek von Solid Memo verlangt ihre eigene und keine E-Mail-Adresse.",

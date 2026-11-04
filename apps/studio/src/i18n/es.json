@@ -1426,6 +1426,11 @@
       "themesRequired": "Tema de datos de la UE (obligatorio)",
       "themesTopics": "Temas de Solid Memo (opcional)",
       "themesOther": "Otros temas que indica la publicación",
+      "othersMore": {
+        "one": "Y {count} más que indica la publicación, sin listar aquí; sigue en la publicación.",
+        "many": "Y {count} más que indica la publicación, sin listar aquí; siguen en la publicación.",
+        "other": "Y {count} más que indica la publicación, sin listar aquí; siguen en la publicación."
+      },
       "licenseHint": "Indicada como documento de licencia, como pide DCAT-AP.",
       "contact": "Contacto",
       "contactHint": "Una página web donde los lectores preguntan por la publicación o informan de un error en ella, como un gestor de incidencias. La biblioteca de Solid Memo pide la suya, y ningún correo electrónico.",

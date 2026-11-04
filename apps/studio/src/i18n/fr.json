@@ -1426,6 +1426,11 @@
       "themesRequired": "Thème de données de l’UE (obligatoire)",
       "themesTopics": "Thèmes de Solid Memo (facultatif)",
       "themesOther": "Autres thèmes indiqués par la publication",
+      "othersMore": {
+        "one": "Et {count} autre indiqué par la publication, non listé ici ; il reste dans la publication.",
+        "many": "Et {count} autres indiqués par la publication, non listés ici ; ils restent dans la publication.",
+        "other": "Et {count} autres indiqués par la publication, non listés ici ; ils restent dans la publication."
+      },
       "licenseHint": "Indiquée sous forme de document de licence, comme le demande DCAT-AP.",
       "contact": "Contact",
       "contactHint": "Une page web où les lecteurs posent des questions sur la publication ou y signalent une erreur, comme un gestionnaire de tickets. La bibliothèque de Solid Memo demande la sienne, et l'adresse e-mail de personne.",
