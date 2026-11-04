@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.18](https://github.com/solid-memo/website/compare/v6.29.17...v6.29.18) (2026-11-04)
+
+### Bug Fixes
+
+* **solid:** bound the length of a term on every read and write ([a9982dd](https://github.com/solid-memo/website/commit/a9982dd73ca57dc9af492adb3517ee5982074de3))
+
 ## [6.29.17](https://github.com/solid-memo/website/compare/v6.29.16...v6.29.17) (2026-11-04)
 
 ### Bug Fixes
