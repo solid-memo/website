@@ -31,6 +31,14 @@ describe("toInstance", () => {
       name: "main",
     });
   });
+
+  it.each([
+    ["https://pod.example/solid-memo/caf%E9/", "caf%E9"],
+    ["https://pod.example/x%/", "x%"],
+    ["https://pod.example/%ZZ/", "%ZZ"],
+  ])("names an untitled %s by its segment as written when it does not decode", (url, name) => {
+    expect(toInstance({ containerUrl: url, title: null })).toEqual({ url, name });
+  });
 });
 
 const META = "https://pod.example/solid-memo/main/meta.ttl#it";

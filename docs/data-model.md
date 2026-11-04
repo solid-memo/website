@@ -86,6 +86,12 @@ flowchart LR
   `HTTPS://Pod.example:443/kortlekar-å` is
   `https://pod.example/kortlekar-%C3%A5/`. Text that's no http(s)
   address isn't an instance to attach (`notAnInstanceNoMeta`).
+  An instance with no title is named after its folder, with its
+  percent-encoding undone; a name whose escapes don't decode, such as
+  `caf%E9`, is shown as written (`lastPathSegment` in
+  [urls.ts](../packages/solid/src/urls.ts)). A registration that still
+  can't be read as an instance is left out, and the rest of the list
+  still loads.
 - **Each class of an instance's data** has a registration of its own,
   titled with the instance's name, for other apps ([examples
   below](#registrations)):

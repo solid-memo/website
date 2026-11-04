@@ -115,6 +115,25 @@ describe("listInstances", () => {
     ]);
   });
 
+  it("lists the others when one registration does not map", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: null,
+    });
+    vi.mocked(readInstanceRegistrations).mockResolvedValueOnce([
+      { containerUrl: CONTAINER, title: "Main" },
+      { containerUrl: "not an address", title: null },
+      { containerUrl: "https://alice.example/x%E9/", title: null },
+    ]);
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([
+      { url: CONTAINER, name: "Main" },
+      { url: "https://alice.example/x%E9/", name: "x%E9" },
+    ]);
+  });
+
   it("skips missing indexes and tolerates unreadable ones", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
@@ -508,14 +527,14 @@ describe("createInstance", () => {
 });
 
 describe("attachInstance", () => {
-  function metaDataset(withTitle: boolean) {
-    let thing = buildThing(createThing({ url: `${CONTAINER}meta.ttl#it` }))
+  function metaDataset(withTitle: boolean, container = CONTAINER) {
+    let thing = buildThing(createThing({ url: `${container}meta.ttl#it` }))
       .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
       .addDatetime(DCTERMS.created, new Date("2026-09-21T10:00:00.000Z"));
     if (withTitle) {
       thing = thing.addStringNoLocale(DCTERMS.title, "Attached");
     }
-    return setThing(datasetFrom(`${CONTAINER}meta.ttl`), thing.build());
+    return setThing(datasetFrom(`${container}meta.ttl`), thing.build());
   }
 
   it("registers an existing instance, and nothing else of it, and returns its name", async () => {
@@ -556,6 +575,20 @@ describe("attachInstance", () => {
         registrationTarget: "private",
       }),
     ).resolves.toEqual({ url: CONTAINER, name: "main" });
+  });
+
+  it("names an untitled instance by its folder as written when the folder does not decode", async () => {
+    const container = "https://alice.example/x%E9/";
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset(false, container)));
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+
+    await expect(
+      makeRepository().attachInstance({
+        webId: WEBID,
+        instanceUrl: container,
+        registrationTarget: "private",
+      }),
+    ).resolves.toEqual({ url: container, name: "x%E9" });
   });
 
   it("rejects a container without a readable meta.ttl", async () => {

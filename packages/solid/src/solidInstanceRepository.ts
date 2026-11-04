@@ -89,7 +89,14 @@ export function createSolidInstanceRepository({
           if (!byUrl.has(url)) byUrl.set(url, registration);
         }
       }
-      return [...byUrl.values()].map(toInstance);
+      // One registration that does not map is left out, not the list.
+      return [...byUrl.values()].flatMap((registration) => {
+        try {
+          return [toInstance(registration)];
+        } catch {
+          return [];
+        }
+      });
     },
 
     async getRegistrationOptions(webId) {
