@@ -4,6 +4,7 @@
 
 import { expect, it } from "vitest";
 import { LOCALES } from "../locale";
+import { growth } from "../testing/growth";
 import { at, card, iri, model, RELEASE, text } from "../testing/releaseModel";
 import { curationProblems, LIBRARY_CONTACT, podPolicy, repoPolicy } from "./curationRules";
 
@@ -143,6 +144,131 @@ it("asks a description of each picture in English and every language its card's 
     },
   ]);
   expect(curationProblems(pictured, podPolicy)).toEqual([]);
+});
+
+it("reads each language asked as a range a longer tag meets, and never the other way", () => {
+  const picture = "https://example.com/flag.svg";
+  const lacks = (descriptions: string[], textLanguages: string[]) =>
+    curationProblems(
+      {
+        ...curated,
+        cards: [
+          card("pictured", {
+            frontImage: [picture],
+            frontImageDescription: descriptions.map((language) => text("Stripes", language)),
+            front: textLanguages.map((language) => text("Flag", language)),
+          }),
+        ],
+      },
+      repoPolicy,
+    ).map(({ params }) => params);
+  expect(lacks(["en-gb-oxendict", "sv-se", "ko"], ["sv", "ko-kr"])).toEqual([]);
+  // "e" and "english" are no range of "en", nor "s" of "sv".
+  expect(lacks(["e", "english-x", "s-x"], ["sv"])).toEqual([
+    { language: "en" },
+    { language: "sv" },
+  ]);
+});
+
+/** A card with a front picture, its text in `count` languages and its picture described in `count` others. */
+const manyLanguages = (count: number) => {
+  const tags = (letter: string) =>
+    Array.from({ length: count }, (_, i) => `${letter}${i.toString(36).padStart(4, "0")}`);
+  return {
+    ...curated,
+    cards: [
+      card("polyglot", {
+        frontImage: ["https://example.com/flag.svg"],
+        front: tags("x").map((language) => text("Flag", language)),
+        frontImageDescription: tags("y").map((language) => text("Stripes", `${language}-x`)),
+      }),
+    ],
+  };
+};
+
+it("names at most ten languages a picture lacks", () => {
+  const problems = curationProblems(manyLanguages(20), repoPolicy);
+  expect(problems.map(({ params }) => params)).toEqual(
+    ["en", ...Array.from({ length: 9 }, (_, i) => `x000${i}`)].map((language) => ({ language })),
+  );
+});
+
+it("checks a picture in time that grows with its card's languages, not with their square", () => {
+  // Eight times the text languages and eight times the descriptions take
+  // about as long as an eighth of them eight times over; comparing each
+  // language asked with each described would take eight times as long.
+  const ratio = growth(
+    (count) => {
+      const release = manyLanguages(count);
+      return () => curationProblems(release, repoPolicy);
+    },
+    1000,
+    8,
+  );
+  expect(ratio).toBeLessThan(4);
+});
+
+it("checks a picture described in long tags in time that grows with their number", () => {
+  // Long tags of one length are slow to tell apart in a set, so only
+  // each one's short primary subtag is kept; "en" is still met by the
+  // "en" each one starts with.
+  const longTags = (count: number) => ({
+    ...curated,
+    cards: [
+      card("described", {
+        frontImage: ["https://example.com/flag.svg"],
+        front: [text("Flag", "en")],
+        frontImageDescription: Array.from({ length: count }, (_, i) =>
+          text("Stripes", `en-${"xx-".repeat(5_700)}${i.toString(36).padStart(4, "0")}`),
+        ),
+      }),
+    ],
+  });
+  expect(curationProblems(longTags(2), repoPolicy)).toEqual([]);
+  const ratio = growth(
+    (count) => {
+      const release = longTags(count);
+      return () => curationProblems(release, repoPolicy);
+    },
+    256,
+    8,
+  );
+  expect(ratio).toBeLessThan(4);
+});
+
+it("asks no description in a language longer than a language subtag, nor keeps one", () => {
+  // A primary subtag has at most eight letters, so a longer one names no
+  // language: it is not asked, and a tag that starts with one meets
+  // nothing. Neither is kept, so a long one costs no more than its length,
+  // with or without a "-" every other character.
+  const pictured = (language: string, length: number) => ({
+    ...curated,
+    cards: [
+      card("described", {
+        frontImage: ["https://example.com/flag.svg"],
+        front: [text("Flag", language), text("Flagga", "sv")],
+        frontImageDescription: [
+          text("Stripes", "z".repeat(length)),
+          ...Array.from({ length: 8 }, (_, i) => text("Stripes", `${"z-".repeat(length / 2)}${i}`)),
+          text("Ränder", "sv"),
+        ],
+      }),
+    ],
+  });
+  const lacks = (language: string, length: number) =>
+    curationProblems(pictured(language, length), repoPolicy).map(({ params }) => params);
+  expect(lacks("z".repeat(100_000), 100_000)).toEqual([{ language: "en" }]);
+  expect(lacks("zzzzzzzz", 2)).toEqual([{ language: "en" }, { language: "zzzzzzzz" }]);
+  expect(lacks("zzzzzzzzz", 2)).toEqual([{ language: "en" }]);
+  const ratio = growth(
+    (length) => {
+      const release = pictured("z".repeat(length), length);
+      return () => curationProblems(release, repoPolicy);
+    },
+    4_000,
+    8,
+  );
+  expect(ratio).toBeLessThan(4);
 });
 
 it("asks nothing of a release in a pod, an email included", () => {
