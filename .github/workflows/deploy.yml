@@ -390,6 +390,24 @@ jobs:
           run-id: ${{ github.event.workflow_run.id }}
           github-token: ${{ github.token }}
           path: ${{ runner.temp }}/journeys
+      # Any job of the CI run could have uploaded the artifact in the
+      # report's place, so it is published only as plain files and
+      # folders, with no name that starts with a dot: no link, no git
+      # directory or attributes, nothing git or Pages reads as settings.
+      # Playwright's report has none, and the upload leaves hidden files
+      # out (docs/deployment.md#the-journeys-report). Checked before the
+      # key is on disk.
+      - name: The report is plain files
+        if: steps.key.outputs.set == 'true'
+        run: |
+          cd "$RUNNER_TEMP/journeys"
+          test -f index.html
+          odd="$(find . -mindepth 1 \( -name '.*' -o ! \( -type f -o -type d \) \) -print)"
+          if [ -n "$odd" ]; then
+            printf '%s\n' "$odd"
+            echo "::error::The journeys-report artifact holds a hidden entry or one that is neither a file nor a folder (listed above), so it is not published (docs/deployment.md#the-journeys-report)."
+            exit 1
+          fi
       # The report, with the files Pages needs beside it: CNAME, which
       # keeps the custom domain, .nojekyll, so Pages serves the files as
       # they are, and robots.txt, which keeps search engines out. Its
@@ -399,7 +417,9 @@ jobs:
       # (docs/deployment.md#the-journeys-report). One
       # commit with no parent, force-pushed over main. The key is written
       # to a file for this step alone, which git's ssh reads, as in
-      # release.yml; GitHub's host keys come from its API.
+      # release.yml; GitHub's host keys come from its API. git keeps its
+      # repository in a folder of its own, not in the report, and runs
+      # no hooks and no file system monitor.
       - name: Publish the report to the journeys repository
         if: steps.key.outputs.set == 'true'
         env:
@@ -414,7 +434,12 @@ jobs:
           unset KEY
           gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$ssh/known_hosts"
           export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
-          cd "$RUNNER_TEMP/journeys"
+          GIT_DIR="$(mktemp -d "$RUNNER_TEMP/journeys-git.XXXXXX")"
+          export GIT_DIR GIT_WORK_TREE="$RUNNER_TEMP/journeys"
+          export GIT_CONFIG_COUNT=2
+          export GIT_CONFIG_KEY_0=core.hooksPath GIT_CONFIG_VALUE_0=/dev/null
+          export GIT_CONFIG_KEY_1=core.fsmonitor GIT_CONFIG_VALUE_1=false
+          cd "$GIT_WORK_TREE"
           test -f index.html
           rm -rf trace
           cp -R "$GITHUB_WORKSPACE/e2e/journeys/report/trace" trace
