@@ -570,7 +570,10 @@ graph LR
     slug another author holds, such as `Jane Doe (jane example org)`
     beside `Jane Doe <jane@example.org>`, gets the hash after the slug
     instead (`#agent-jane-doe-jane-example-org-<hash>`). When that node
-    is taken too, a count follows the hash. An agent
+    is taken too, a count follows the hash: the lowest whose node is
+    free or holds that author. The counted nodes of one such name are
+    looked at once for all the authors that share it, so the time grows
+    with the authors and the nodes, not their product. An agent
     is read by the IRI the deck names (one written under an older rule
     is replaced on the deck's next save).
   - It may name a license (`dcterms:license`, a URL), topics

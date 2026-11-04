@@ -24,7 +24,7 @@ import {
   agentUrlOf,
   agentUrlsOf,
   authorFromAgentRecord,
-  sameAgent,
+  type AgentHolder,
 } from "@solid-memo/domain/agentRecord";
 import {
   catalogFromRecord,
@@ -61,7 +61,7 @@ import {
   DISTRACTOR_V1,
   DISTRIBUTION_V1,
 } from "@solid-memo/vocab/descriptors.generated";
-import type { AgentV1, CardV7 } from "@solid-memo/vocab/types.generated";
+import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
   readVersioned,
@@ -213,18 +213,16 @@ export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
  * of the document names its authors' nodes, and the next one is taken.
  */
 function deckAgentUrls(deck: Deck, thingAt: (url: string) => NamedSubject | null): string[] {
-  return agentUrlsOf(deck.url, deck.authors, (url, record) => agentFits(thingAt(url), record));
+  return agentUrlsOf(deck.url, deck.authors, (url) => agentHolderOf(thingAt(url)));
 }
 
-/** Whether an author's record may be written onto `thing`: there is none, it says nothing an agent says, or it is that author's. */
-function agentFits(thing: NamedSubject | null, record: AgentV1): boolean {
-  if (thing === null) return true;
+/** What `thing` holds of an agent (AgentHolder): nothing when there is none or it says nothing an agent says, else the author it names, or "unreadable". */
+function agentHolderOf(thing: NamedSubject | null): AgentHolder {
+  if (thing === null) return null;
   const said = getPropertyAll(thing);
-  if (!AGENT_V1.fields.some((field) => said.includes(field.predicate))) return true;
+  if (!AGENT_V1.fields.some((field) => said.includes(field.predicate))) return null;
   const read = readVersioned(thing, "agent");
-  return (
-    read !== null && sameAgent(migrate("agent", read.record, { subject: asUrl(thing) }), record)
-  );
+  return read === null ? "unreadable" : migrate("agent", read.record, { subject: asUrl(thing) });
 }
 
 /**
