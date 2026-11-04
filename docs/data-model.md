@@ -1308,7 +1308,17 @@ nothing could rebuild it.
   one outside 0100-01-04 to 9999-12-31, the days `shiftStudyDay` keeps
   in order (`isOfStudyDayRange`). A prior due day (`sm:priorDue`) that
   isn't a real date, or is outside that range, is dropped, and the
-  answer kept. The Studio names a deck's past answers by their card's
+  answer kept. A read checks a number's datatype, not its range, so
+  the numbers are bounded as they are read (`answerFromRecord`). An
+  answer whose grade isn't a whole number from 0 to 5, or whose
+  interval isn't a whole number of days, 0 or more, that a number holds
+  exactly, is left out. An interval above the 36,500 days the app now
+  caps at is kept: an answer written before that cap may carry one. A response
+  time that isn't a whole number from 0 to ten minutes in
+  milliseconds (`MAX_RESPONSE_MILLIS`), or an offset from UTC that
+  isn't one from −840 to 840, is dropped, and the answer kept. A
+  time from elsewhere then never makes a month's summary or the time
+  studied anything but a number. The Studio names a deck's past answers by their card's
   id in its current cards document (`deckAnswers`), which a library
   upgrade may have moved.
 - Checked in the full check only ([validation.md](validation.md)), since

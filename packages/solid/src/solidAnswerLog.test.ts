@@ -4,6 +4,9 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
+import { monthSummaryToRecord } from "@solid-memo/domain/digestRecord";
+import { monthSummaryOf } from "@solid-memo/domain/studyDigest";
+import { statisticsOf } from "@solid-memo/domain/statistics";
 import { createSolidAnswerLog } from "./solidAnswerLog";
 import type { WriteCheck } from "./writeCheck";
 import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
@@ -355,6 +358,72 @@ describe("createSolidAnswerLog", () => {
       await log.append(INSTANCE, { ...given, priorDue });
       await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([given]);
     }
+  });
+
+  it("leaves out response times of very many digits, so the month's summary stays one the write check accepts", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const given = answer("2026-09-21");
+    await log.append(INSTANCE, { ...given, recallMillis: 1, gradeMillis: 1 });
+    const digits = "9".repeat(400);
+    const lines = fake.documents.get(SEPTEMBER)!;
+    for (const line of [...lines]) {
+      const time = /^(.*#(?:recall|grade)Millis> )"1"(.*)$/.exec(line);
+      if (time === null) continue;
+      lines.delete(line);
+      lines.add(`${time[1]}"${line.includes("#grade") ? "-" : ""}${digits}"${time[2]}`);
+    }
+    expect([...lines].filter((line) => line.includes(digits))).toHaveLength(2);
+    const answers = await log.readMonth(INSTANCE, "2026-09");
+    expect(answers).toEqual([given]);
+    const summary = monthSummaryOf(answers);
+    expect(summary.recallSeconds).toEqual({});
+    const record = monthSummaryToRecord({ document: SEPTEMBER, version: '"v1"', summary });
+    for (const count of record.recallSeconds ?? [])
+      expect(count).toMatch(/^([0-9]|[1-5][0-9]|60) [1-9][0-9]*$/);
+  });
+
+  it("leaves out a response time of very many digits written as a bare integer", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const given = answer("2026-09-21");
+    await log.append(INSTANCE, { ...given, recallMillis: 1, gradeMillis: 1 });
+    const digits = "9".repeat(400);
+    const lines = fake.documents.get(SEPTEMBER)!;
+    for (const line of [...lines]) {
+      const time = /^(.*#recallMillis> )"1"\^\^<[^>]+>(.*)$/.exec(line);
+      if (time === null) continue;
+      lines.delete(line);
+      lines.add(`${time[1]}${digits}${time[2]}`);
+    }
+    expect([...lines].filter((line) => line.includes(`> ${digits} .`))).toHaveLength(1);
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([
+      { ...given, gradeMillis: 1 },
+    ]);
+  });
+
+  it("keeps an interval beyond the cap, which an older answer may carry, and counts it; leaves out one of very many digits", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const old = { ...answer("2026-09-21", DECK, 40_000), nextIntervalDays: 40_000 };
+    const broken = answer("2026-09-22", DECK, 6);
+    await log.append(INSTANCE, old);
+    await log.append(INSTANCE, broken);
+    const digits = "9".repeat(400);
+    const lines = fake.documents.get(SEPTEMBER)!;
+    for (const line of [...lines]) {
+      if (!line.startsWith(`<${SEPTEMBER}#${broken.id}>`)) continue;
+      const interval = /^(.*#nextIntervalDays> )"6"(.*)$/.exec(line);
+      if (interval === null) continue;
+      lines.delete(line);
+      lines.add(`${interval[1]}"${digits}"${interval[2]}`);
+    }
+    expect([...lines].filter((line) => line.includes(digits))).toHaveLength(1);
+    const answers = await log.readMonth(INSTANCE, "2026-09");
+    expect(answers).toEqual([old]);
+    const statistics = statisticsOf(answers, "2026-09-21");
+    expect(statistics.totals.answers).toBe(1);
+    expect(statistics.intervals.at(-1)!.recall).toEqual({ reviews: 1, recalled: 1 });
   });
 
   it("keeps a prior due day at either end of the range study days are held to", async () => {

@@ -18,7 +18,9 @@ import { readVersioned, recordThing } from "../records";
  * A prior due day that is not a real date, or is outside the range the
  * study days are held to (isOfStudyDayRange), is left out, the answer
  * kept: the reader does not apply the shape's pattern, and the
- * statistics count days from that day too.
+ * statistics count days from that day too. Its numbers are read
+ * bounded (answerFromRecord): one out of range leaves the answer out,
+ * or for a response time or the offset from UTC, that number.
  */
 export function toAnswer(thing: Subject): Answer | null {
   const read = readVersioned(thing, "answer");

@@ -327,6 +327,14 @@ describe("a month summary", () => {
       recallSeconds: { 5: 2, 60: 1 },
     });
   });
+
+  it("counts no recall time that is not a finite number", () => {
+    const summary = monthSummaryOf([
+      answer("2026-10-02", { recallMillis: Infinity, gradeMillis: -Infinity }),
+      answer("2026-10-02", { recallMillis: 1000, gradeMillis: Infinity }),
+    ]);
+    expect(summary.recallSeconds).toEqual({});
+  });
 });
 
 describe("the today strip's figures", () => {

@@ -184,6 +184,19 @@ describe("recordedTimeOf and firstTimedOf", () => {
     ).toBe(3);
   });
 
+  it("leave out a time that is not a finite number", () => {
+    const infinite = { recallMillis: Infinity, gradeMillis: -Infinity };
+    expect(recordedTimeOf(answer("2026-10-01", 0, infinite))).toBeUndefined();
+    expect(
+      recordedTimeOf(answer("2026-10-01", 0, { mode: "multiple-choice", recallMillis: Infinity })),
+    ).toBeUndefined();
+    const time = estimateStudyTime([
+      answer("2026-10-01", 0, { recallMillis: 3, gradeMillis: 2 }),
+      answer("2026-10-01", 9, infinite),
+    ]);
+    expect(time.ms).toBe(5);
+  });
+
   it("find the answer given first with a recorded time", () => {
     const first = answer("2026-10-01", 5, { recallMillis: 3 });
     expect(
