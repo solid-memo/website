@@ -24,6 +24,14 @@ describe("lastPathSegment", () => {
     expect(lastPathSegment("https://pod.example/mem%C3%B3/")).toBe("memó");
   });
 
+  it.each([
+    ["https://pod.example/solid-memo/caf%E9/", "caf%E9"],
+    ["https://pod.example/x%/", "x%"],
+    ["https://pod.example/%ZZ/", "%ZZ"],
+  ])("keeps %s's last segment as written when it does not decode", (url, segment) => {
+    expect(lastPathSegment(url)).toBe(segment);
+  });
+
   it("falls back to the input for a root URL", () => {
     expect(lastPathSegment("https://pod.example/")).toBe("https://pod.example/");
   });
