@@ -56,11 +56,16 @@ export function compare(results: Results, expected: Record<string, string>): Com
   return comparison;
 }
 
-/** The comparison as the job's summary says it. */
+/**
+ * The comparison as the job's summary says it, each expected failure
+ * under its cause: its id on `page` (docs/interop.md), where the cause is
+ * described for the server's developers.
+ */
 export function summary(
   id: string,
   comparison: Comparison,
   expected: Record<string, string>,
+  page: string,
 ): string {
   const { passed, skipped, known, failed, fixed } = comparison;
   const lines = [
@@ -68,26 +73,38 @@ export function summary(
     "",
     `${passed.length} passed, ${skipped.length} skipped, ${known.length} failed as expected, ${failed.length} failed anew, ${fixed.length} passed though listed.`,
   ];
-  const list = (title: string, keys: string[], why?: (key: string) => string) =>
-    keys.length > 0 &&
-    lines.push(
-      "",
-      `**${title}**`,
-      "",
-      ...keys.map((key) => `- ${key}${why ? `: ${why(key)}` : ""}`),
-    );
+  const list = (title: string, keys: string[]) =>
+    keys.length > 0 && lines.push("", `**${title}**`, "", ...keys.map((key) => `- ${key}`));
   list("Failed anew", failed);
   list("Passed though listed (take them off expected-failures.json)", fixed);
-  list("Failed as expected", known, (key) => expected[key]!);
+  const byCause = new Map<string, string[]>();
+  for (const key of known)
+    byCause.set(expected[key]!, [...(byCause.get(expected[key]!) ?? []), key]);
+  if (byCause.size > 0) {
+    lines.push("", `**Failed as expected, by cause ([interop.md](${page}))**`, "");
+    for (const [cause, keys] of byCause)
+      lines.push(
+        `- [${cause}](${page}#${cause}): ${keys.length} ${keys.length === 1 ? "test" : "tests"}`,
+        ...keys.map((key) => `  - ${key}`),
+      );
+  }
   return `${lines.join("\n")}\n`;
 }
+
+/** docs/interop.md at the run's commit on CI, and its path elsewhere. */
+export const pageOf = (env: Record<string, string | undefined>) =>
+  env.GITHUB_SERVER_URL && env.GITHUB_REPOSITORY && env.GITHUB_SHA
+    ? `${env.GITHUB_SERVER_URL}/${env.GITHUB_REPOSITORY}/blob/${env.GITHUB_SHA}/docs/interop.md`
+    : "docs/interop.md";
 
 /**
  * `node compare.ts <id> <result.json>`: whether an advisory server's run
  * went as expected (docs/testing.md), said in the job's summary on CI.
  * It fails on a test failing that servers/<id>/expected-failures.json
- * ({ "<test>": "<why>" }) does not list, and when there are no results
- * (the server did not start, or did not meet the contract: see its log).
+ * ({ "<test>": "<cause>" }, the cause's id on docs/interop.md) does not
+ * list, and when there are no results (the server did not start, or did
+ * not meet the contract: see its log). On CI the summary links the page
+ * at the run's commit.
  */
 if (import.meta.main) {
   const [id, resultFile] = process.argv.slice(2);
@@ -109,7 +126,7 @@ if (import.meta.main) {
       comparison.fixed.length ===
       0
       ? `### ${id}: no results\n\nNo test ran: the server did not start, or did not meet the contract (its log says).\n`
-      : summary(id, comparison, expected);
+      : summary(id, comparison, expected, pageOf(process.env));
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, text);
   console.log(text);
   for (const key of comparison?.fixed ?? [])

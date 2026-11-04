@@ -113,6 +113,8 @@ words:
   # A font's table from characters to glyphs
   - cmap
   - commonmark
+  # HTTP content negotiation, as JSS's --conneg flag names it
+  - conneg
   - datatypes
   - DCAT
   - dcterms
@@ -151,6 +153,7 @@ words:
   - Fernandes
   - Filip
   - flagcdn
+  - flysystem
   - Forgejo
   - Fredoka
   - fsfe
@@ -163,6 +166,7 @@ words:
   - linkify
   - Machado
   - Malgun
+  - mashlib
   - Masataka
   - mdurl
   - Naskh
@@ -171,6 +175,7 @@ words:
   - Noto
   - Okabe
   - Oliveira
+  - pdsinterop
   - Piotr
   - pipx
   - Poznań

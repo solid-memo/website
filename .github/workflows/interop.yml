@@ -9,7 +9,8 @@ name: Interop
 # job per server, as CI runs the blocking ones. A job fails only on a test
 # failing that its servers/<id>/expected-failures.json does not list, or
 # when no test ran; the job's summary says what passed, what failed as
-# expected and why, and what passes though listed. A release commit,
+# expected and why (by its cause on docs/interop.md), and what passes
+# though listed. A release commit,
 # whose push its paths match (package.json, package-lock.json), runs
 # nothing: it changes only the version's files, so its code is the
 # commit's before it, which Interop already ran on

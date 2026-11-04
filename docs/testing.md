@@ -81,18 +81,23 @@ merges: every test passes, or skips for a reason it gives. An
 on pushes to `main` that touch the app's Solid code. A job fails only
 when no test ran, or a test fails that
 `e2e/pod/servers/<id>/expected-failures.json`
-(`{ "<file> > <test>": "<why>" }`, the test named without its server)
-doesn't list.
+(`{ "<file> > <test>": "<cause>" }`, the test named without its server)
+doesn't list. Each cause is an entry of [interop.md](interop.md), which
+describes it for the server's developers, and a test in
+`e2e/pod/interop.test.ts` keeps the two in step: a new cause gets its
+entry there.
 [compare.ts](../e2e/pod/compare.ts) names these in the job's summary,
-with what passes though listed, to take off the list. CI still checks
+with what passes though listed, to take off the list, and the expected
+failures by cause. CI still checks
 that every advisory server starts and meets the contract (`contract`),
 so a change that breaks one isn't merged unnoticed. Renovate merges
 their minor and patch image updates once that passes; their npm
 updates wait for a person
 ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)).
-Solid-Nextcloud's SQLite refuses concurrent writes, so with it in a run
-the test files run one at a time (`serialFiles` in `servers.ts`). What
-it fails, and why, is in its `expected-failures.json`. css-8 becomes blocking at 8.0.0,
+Solid-Nextcloud fails concurrent writes to one document
+([`nc-concurrent-patch`](interop.md#nc-concurrent-patch)), so with it
+in a run the test files run one at a time (`serialFiles` in
+`servers.ts`). css-8 becomes blocking at 8.0.0,
 and css-6 then goes.
 
 Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`,
@@ -260,7 +265,7 @@ release and its folder, saying so (`keptReleases`). The public-read grant copes
 `@inrupt/solid-client` writes an ACL with, and with the Community Solid
 Server answering 404 for an ACR not written yet. Solid-Nextcloud names a
 folder's ACL as each of its documents', so the release stays private
-there (its `expected-failures.json`). A release on another origin whose
+there ([`nc-acl-link`](interop.md#nc-acl-link)). A release on another origin whose
 server names an access control on the real server as its own
 ([releaseAccess.integration.test.ts](../e2e/pod/src/releaseAccess.integration.test.ts))
 leads no request there, by publishing or by **Make it public**. On

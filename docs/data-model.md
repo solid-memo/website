@@ -224,8 +224,9 @@ flowchart LR
   holding only Solid Memo's documents with its access rules
   ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
   Solid-Nextcloud lists a folder's ACL among its contents, so there such
-  a folder is kept, its access rules in it. The advisory servers'
-  `expected-failures.json` says what they fail, and why.
+  a folder is kept, its access rules in it. What the advisory
+  servers fail, and why, is in [interop.md](interop.md); this one is
+  [`nc-acl-member`](interop.md#nc-acl-member).
 
 ### Registrations
 
