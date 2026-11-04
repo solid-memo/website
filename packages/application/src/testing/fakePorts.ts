@@ -30,6 +30,7 @@ import type { Catalog } from "@solid-memo/domain/catalog";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
+import type { DocumentReport } from "@solid-memo/domain/validation";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 
 /**
@@ -199,9 +200,14 @@ export function makeDeps() {
       publisher: null,
       releases: [],
     })),
-    readRelease: vi.fn(async (url: string): Promise<LibraryDeck> => {
-      throw new AppError("releaseUnreadable", { url });
-    }),
+    // A release is read alone only to be checked (withLinkedReleasesChecked): one that conforms, unless a test says otherwise.
+    readRelease: vi.fn(
+      async (url: string, accept?: (report: DocumentReport) => void): Promise<LibraryDeck> => {
+        if (accept === undefined) throw new AppError("releaseUnreadable", { url });
+        accept({ url, status: "checked", subjects: [] });
+        return { ...libraryDeck, url };
+      },
+    ),
     publishedBeside: vi.fn(async (): Promise<string[] | null> => null),
     // A plan's reads are the library's own here: what each read gives is the test's to say.
     linkedReads: vi.fn(() => deckLibrary),

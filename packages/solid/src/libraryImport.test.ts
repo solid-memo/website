@@ -525,6 +525,37 @@ describe("a release added from a link", () => {
     ]);
   });
 
+  it("is checked again on its first read in a later page, which refuses it, shows nothing of it and writes nothing, when its address answers otherwise then", async () => {
+    const good = await linkedRelease();
+    const site = linkedSite([good, breakingShapes(good)]);
+    const { useCases, store } = await app(site);
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const deck = await useCases.importReleaseFromUrl(
+      instance.url,
+      await useCases.readReleaseFromLink(LINKED),
+    );
+    const before = await everyTriple(store);
+
+    // The page loaded again: a deck library of its own, over the same pod.
+    const later = (await app(site, store)).useCases;
+    await expect(later.getCourse(deck)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+      vars: { host: "bob.example" },
+    });
+    await expect(later.getCourseSummary(deck)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+    });
+    await expect(later.deckRelease(deck)).rejects.toMatchObject({
+      code: "releaseNotConforming",
+    });
+    expect(site.asked()).toBe(4);
+    expect(await everyTriple(store)).toEqual(before);
+  });
+
   it("is refused when the read breaks the library's shapes, and the next read is checked again", async () => {
     const good = await linkedRelease();
     const site = linkedSite([breakingShapes(good), good]);

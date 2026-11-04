@@ -116,11 +116,11 @@ function libraryOf(...published: LibraryDeckContent[]): DeckLibrary {
       return release;
     },
     fetchCourseOutline: async (releaseUrl) => ({ releaseUrl, chapters: [] }),
-    // The release check is the Studio's: no index is read here.
+    // Its releases come with the site: its index lists them, so none is checked as a release from a link.
     readLibraryIndex: async () => ({
       url: "https://site.example/decks/index.ttl",
       publisher: null,
-      releases: [],
+      releases: published.map((release) => release.url),
     }),
     // No release is added from a link here.
     readRelease: async (url) => {
@@ -442,8 +442,9 @@ describe.each(SERVERS)("a library deck upgrade on $name", ({ url: server }) => {
       fetchLibraryDeck: async (url) =>
         url === V2.url ? { ...V2, title: { en: "Capitals", sv: "Huvudstader" } } : V1,
     };
-    const { useCases } = app({ deckLibrary: ascii });
+    // Spied before the app is wired: the use cases read the library through a wrapper that holds its functions.
     const reads = vi.spyOn(ascii, "listLibraryDecks");
+    const { useCases } = app({ deckLibrary: ascii });
     try {
       const copies = await useCases.listLibraryUpdates(instanceUrl);
       expect(reads).toHaveBeenCalledTimes(1);

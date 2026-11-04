@@ -41,7 +41,7 @@ import { createInstanceUseCases, type InstanceUseCases } from "./instances";
 import { createPreferenceUseCases, type PreferenceUseCases } from "./preferences";
 import { createDeckUseCases, type DeckUseCases } from "./decks";
 import { createCardUseCases, type CardUseCases } from "./cards";
-import { createLibraryUseCases, type LibraryUseCases } from "./library";
+import { createLibraryUseCases, withLinkedReleasesChecked, type LibraryUseCases } from "./library";
 import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
 import { createWhatsNewUseCases, type WhatsNewUseCases } from "./whatsNew";
 import { createCourseUseCases, type CourseUseCases } from "./courses";
@@ -164,7 +164,7 @@ export function createUseCases({
   storageGateway,
   instanceRepository,
   deckRepository,
-  deckLibrary,
+  deckLibrary: library,
   preferencesRepository,
   reviewStateRepository,
   shapeValidator,
@@ -192,6 +192,8 @@ export function createUseCases({
   trialSandbox,
   instanceGraphReader,
 }: Dependencies): UseCases {
+  // A release added from a link is checked on its first read in the page, by whichever slice reads it.
+  const deckLibrary = withLinkedReleasesChecked(library);
   const preferenceStore = createPreferenceStore({
     preferencesRepository,
     themePreference,

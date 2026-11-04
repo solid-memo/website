@@ -318,7 +318,9 @@ describe("courses", () => {
       ]),
     );
     const summary = useCases.getCourseSummary(courseDeck);
-    expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(RELEASE);
+    await vi.waitFor(() =>
+      expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(RELEASE),
+    );
     expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(courseDeck);
     outlined(outline);
     await expect(summary).resolves.toEqual({ outline, answeredCardIds: ["q-iri"] });
