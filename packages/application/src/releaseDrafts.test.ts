@@ -37,6 +37,7 @@ const INSTANCE = "https://pod.example/solid-memo/main/";
 const WEB_ID = "https://pod.example/profile/card#me";
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const DECKS = "https://site.example/decks/";
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const INDEX = `${DECKS}index.ttl`;
 
 const deck: Deck = {
@@ -473,6 +474,56 @@ describe("createReleaseDraft", () => {
       next.triples.some((triple) => triple.subject.startsWith(V1) || triple.subject === "_:b1"),
     ).toBe(false);
     expect(next.triples).toEqual(expect.arrayContaining(named));
+  });
+
+  it("keeps of a creator outside the release only that the release names it (GHSA-wjqr-hw63-jf4c)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const OUTSIDE = "https://outside.example/people#x";
+    const OWN = `${elsewhere}#own`;
+    const name = (subject: string, value: string): DraftTriple => ({
+      subject,
+      predicate: "http://xmlns.com/foaf/0.1/name",
+      object: { kind: "literal", value, language: "", datatype: XSD_STRING },
+    });
+    const agent = (subject: string): DraftTriple => ({
+      subject,
+      predicate: RDF_TYPE,
+      object: { kind: "iri", value: "http://xmlns.com/foaf/0.1/Agent" },
+    });
+    const crafted = {
+      ...release,
+      root: { ...release.root, creator: [OUTSIDE, OWN], publisher: OUTSIDE },
+      triples: [
+        ...release.triples,
+        agent(OUTSIDE),
+        name(OUTSIDE, "Someone else"),
+        {
+          subject: OUTSIDE,
+          predicate: "http://xmlns.com/foaf/0.1/knows",
+          object: { kind: "blank" as const, value: "b0" },
+        },
+        name("_:b0", "Friend"),
+        name(OWN, "Own"),
+      ],
+    };
+    const about = (draft: ReleaseDraft, subject: string) =>
+      draft.triples.filter((triple) => triple.subject === subject);
+    repository.parseRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    const imported = created();
+    expect(imported.root.creator).toContain(OUTSIDE);
+    expect(about(imported, OUTSIDE)).toEqual([]);
+    expect(about(imported, "_:b0")).toEqual([]);
+    expect(about(imported, `${imported.url}#own`)).toEqual([name(`${imported.url}#own`, "Own")]);
+    // Nor what the document the release names its publisher in says of that creator.
+    repository.readRelease.mockResolvedValueOnce(crafted);
+    repository.readLinked.mockResolvedValueOnce([agent(OUTSIDE), name(OUTSIDE, "Someone else")]);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
+    const next = created();
+    expect(next.root.creator).toContain(OUTSIDE);
+    expect(about(next, OUTSIDE)).toEqual([]);
   });
 
   it("drops what a release states of, or names by, another address in the new draft's container (GHSA-8w75-jg23-rxq5)", async () => {

@@ -1561,7 +1561,13 @@ be published with the draft, so such a release is refused too
 Of a release's other statements, the draft keeps those of the release,
 of its own subjects, and of what they name, at any depth: a source, a
 license, a blank node. A statement of what none of these leads to is
-dropped, with nothing said. So is one of, or naming, an address in the
+dropped, with nothing said. So is any statement of a creator
+(`dcterms:creator`) outside the release, and, for a next version, what
+the documents its series and publisher are described in say of it: the
+draft keeps only that the release names it. When such a creator is also
+the release's publisher, its series or a source, its statements in the
+release are dropped too. The Studio shows such a creator by its
+address, and so do learners. So is one of, or naming, an address in the
 new draft's folder, its own release document's too, before the
 release's subjects are moved there. Read back from the pod, that
 address would be one of the draft's subjects, with statements no editor

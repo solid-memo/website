@@ -253,12 +253,25 @@ function draftable(release: ReleaseDraft): ReleaseDraft {
 }
 
 /**
+ * The release's creators (dcterms:creator) outside it: each an IRI
+ * neither the release nor one of its own subjects (`<release>#id`).
+ */
+function outsideCreatorsOf(release: ReleaseDraft): Set<string> {
+  return new Set(
+    release.root.creator.filter((iri) => iri !== release.url && idIn(release, iri) === null),
+  );
+}
+
+/**
  * The release with only the statements a draft of it keeps: those of
  * the release and its own subjects (`<release>#id`), and of what they
  * name, at any depth (a source, a license, a blank node). A statement of
  * anything else is dropped: no editor shows it and no check sees it, and
  * published, at an address it names, it would say more of that release
- * than its draft does (GHSA-p2pr-x6fw-hrfx).
+ * than its draft does (GHSA-p2pr-x6fw-hrfx). So is a statement of a
+ * creator outside the release, which the release names only: the Studio
+ * shows such a creator by its IRI, and a name the release gave it would
+ * be the author learners see (GHSA-wjqr-hw63-jf4c).
  */
 function ownStatements(release: ReleaseDraft): ReleaseDraft {
   const bySubject = new Map<string, DraftTriple[]>();
@@ -269,8 +282,9 @@ function ownStatements(release: ReleaseDraft): ReleaseDraft {
   }
   const kept = new Set<string>();
   const queue: string[] = [];
+  const outside = outsideCreatorsOf(release);
   const keep = (subject: string) => {
-    if (kept.has(subject)) return;
+    if (kept.has(subject) || outside.has(subject)) return;
     kept.add(subject);
     queue.push(subject);
   };
@@ -553,7 +567,11 @@ export function createReleaseDraftUseCases({
             await releaseDraftRepository.readRelease(from.url, { asNoOne }),
           );
           // Its series and publisher as their document describes them, when the release does not: the next version describes them itself.
-          const linked = await releaseDraftRepository.readLinked(release);
+          // Of them, nothing of a creator outside the release, which the Studio shows by its IRI (ownStatements).
+          const outside = outsideCreatorsOf(release);
+          const linked = (await releaseDraftRepository.readLinked(release)).filter(
+            (triple) => !outside.has(triple.subject),
+          );
           const version = Number(release.root.version ?? "1") + 1;
           const name = nameInUrl(from.url) ?? undefined;
           return {
