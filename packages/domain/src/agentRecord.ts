@@ -48,34 +48,95 @@ function authorHashOf(author: string): string {
 }
 
 /**
+ * What a node of an agent's document holds, as agentUrlsOf asks: null
+ * when nothing of an agent is said there (any author may be written
+ * onto it), an author's record, or "unreadable" for an agent this app
+ * cannot read, which no author is written over.
+ */
+export type AgentHolder = AgentV1 | null | "unreadable";
+
+/**
  * The agent node each of `authors` is written to, in the document of
  * `subjectUrl`: agentUrlOf's, unless that node holds another author,
- * then the first after it that does not. `fits` says whether a node of
- * the document may hold the author's record (nothing of an agent is said
- * there, or the same author is). The nodes after it are agentUrlOf's
- * with a hash of the whole author added (unless it has one), then with
- * a count too. An author is never written over another one, whatever
- * deck named it first; the same author named twice is one node.
+ * then the first after it that does not. `holderAt` says what a node of
+ * the document holds already (AgentHolder). The nodes after it are
+ * agentUrlOf's with a hash of the whole author added (unless it has
+ * one), then with the lowest count whose node is free or holds the
+ * author. An author is never written over another one, whatever deck
+ * named it first; the same author named twice is one node.
+ *
+ * The counted nodes of each hashed name are looked at once, however
+ * many authors share it (countedUrl), so that the time grows with the
+ * authors and the nodes, not their product: names that fold to one slug
+ * and share a hash are easy to make.
  */
 export function agentUrlsOf(
   subjectUrl: string,
   authors: readonly string[],
-  fits: (url: string, record: AgentV1) => boolean = () => true,
+  holderAt: (url: string) => AgentHolder = () => null,
 ): string[] {
   const taken = new Map<string, AgentV1>();
+  const holderOf = (url: string): AgentHolder => taken.get(url) ?? holderAt(url);
+  const counted = new Map<string, CountedNodes>();
   return authors.map((author) => {
     const record = agentToRecord(author);
     const free = (url: string) => {
-      const held = taken.get(url);
-      return held === undefined ? fits(url, record) : sameAgent(held, record);
+      const holder = holderOf(url);
+      return holder === null || (holder !== "unreadable" && sameAgent(holder, record));
     };
     const first = agentUrlOf(subjectUrl, author);
     const hashed = agentFragmentOf(author).hashed ? first : `${first}-${authorHashOf(author)}`;
-    let url = free(first) ? first : hashed;
-    for (let count = 2; !free(url); count++) url = `${hashed}-${count}`;
+    let url: string;
+    if (free(first)) url = first;
+    else if (free(hashed)) url = hashed;
+    else {
+      const nodes = counted.get(hashed) ?? { next: 2, holders: new Map() };
+      counted.set(hashed, nodes);
+      url = countedUrl(hashed, record, nodes, holderOf);
+    }
     taken.set(url, record);
     return url;
   });
+}
+
+/**
+ * The counted nodes of one hashed name looked at so far: every count
+ * from 2 to before `next` holds an author or an agent no author is
+ * written over, and `holders` gives the lowest of them each author
+ * holds. A node that holds an author keeps holding that author.
+ */
+interface CountedNodes {
+  next: number;
+  holders: Map<string, number>;
+}
+
+/**
+ * The lowest counted node of `hashed` that is free or holds `record`'s
+ * author: one the nodes looked at hold, else the next ones are looked
+ * at, each once.
+ */
+function countedUrl(
+  hashed: string,
+  record: AgentV1,
+  nodes: CountedNodes,
+  holderOf: (url: string) => AgentHolder,
+): string {
+  const key = agentKey(record);
+  const held = nodes.holders.get(key);
+  if (held !== undefined) return `${hashed}-${held}`;
+  for (;;) {
+    const count = nodes.next++;
+    const holder = holderOf(`${hashed}-${count}`) ?? record;
+    if (holder === "unreadable") continue;
+    const holds = agentKey(holder);
+    if (!nodes.holders.has(holds)) nodes.holders.set(holds, count);
+    if (holds === key) return `${hashed}-${count}`;
+  }
+}
+
+/** One key per author, as sameAgent tells them apart. */
+function agentKey(record: AgentV1): string {
+  return JSON.stringify([record.name, record.mbox ?? null]);
 }
 
 /** Whether two agent records name the same author: the same name and the same mailbox, or none. */
