@@ -1025,6 +1025,105 @@ describe("createShaclShapeValidator", () => {
     expect(own).not.toHaveProperty("foreign");
   });
 
+  it("holds a card that names another scheduler to the card shape: its results count, and it is no other app's", async () => {
+    const CARDS = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
+    const cards = setThing(
+      datasetFrom(CARDS),
+      buildThing(createThing({ url: `${CARDS}#card-1` }))
+        .addIri(RDF.type, SM.Card)
+        .addLiteral(SM.formatVersion, integerLiteral(5))
+        .addStringNoLocale(SM.scheduler, "other-app")
+        .addStringWithLocale(SM.front, "Water", "en")
+        .addStringWithLocale(SM.front, "Fire", "en")
+        .addStringWithLocale(SM.back, "水", "ja")
+        .build(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cards as never);
+    const validator = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const [card] = (await validator.validateDocument(CARDS)).subjects;
+    expect(card).toMatchObject({
+      url: `${CARDS}#card-1`,
+      status: "checked",
+      shape: "card",
+      violations: [expect.objectContaining({ constraint: "UniqueLang", severity: "violation" })],
+    });
+    expect(card).not.toHaveProperty("foreign");
+  });
+
+  it("holds a catalog that names another scheduler to the catalog shape: its results count, and it is no other app's", async () => {
+    const catalog = setThing(
+      datasetFrom(DOC),
+      buildThing(createThing({ url: `${DOC}#catalog` }))
+        .addIri(RDF.type, DCAT.Catalog)
+        .addStringNoLocale(SM.scheduler, "other-app")
+        .build(),
+    );
+    const validator = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const [report] = (await validator.validateDataset(DOC, catalog, "pod")).subjects;
+    expect(report).toMatchObject({ url: `${DOC}#catalog`, status: "checked" });
+    expect(report).not.toHaveProperty("foreign");
+    expect("violations" in report! && report.violations.length).toBeGreaterThan(0);
+    expect(
+      "violations" in report! && report.violations.every((v) => v.severity === "violation"),
+    ).toBe(true);
+  });
+
+  it("counts a release's link to a blank-node member as the publisher's", async () => {
+    const release = "https://alice.example/releases/capitals/v1.ttl";
+    const dataset = withBlankMember(
+      setThing(
+        datasetFrom(release),
+        buildThing(createThing({ url: `${release}#catalog` }))
+          .addIri(RDF.type, DCAT.Catalog)
+          .build(),
+      ),
+      `${release}#catalog`,
+      "theirs",
+    );
+    const { validator, validateNode } = makeValidator();
+    const member = {
+      path: DCAT.dataset,
+      message: { en: "NodeKind" },
+      severity: "violation" as const,
+      constraint: "NodeKind",
+      value: "theirs",
+    };
+    validateNode.mockResolvedValue([member] as never);
+    const [catalog] = (await validator.validateDataset(release, dataset, "library")).subjects;
+    expect(catalog).toMatchObject({ url: `${release}#catalog`, violations: [member] });
+  });
+
+  it("finds nothing of a release another app's: a state naming another scheduler is the publisher's, its results counting", async () => {
+    const release = "https://alice.example/releases/capitals/v1.ttl";
+    const dataset = setThing(
+      datasetFrom(release),
+      buildThing(createThing({ url: `${release}#rs-1` }))
+        .addIri(RDF.type, SM.ReviewState)
+        .addIri(SM.scheduler, "https://fsrs.example/ns#fsrs")
+        .build(),
+    );
+    const validator = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const [state] = (await validator.validateDataset(release, dataset, "library")).subjects;
+    expect(state).toMatchObject({ url: `${release}#rs-1`, status: "checked" });
+    expect(state).not.toHaveProperty("foreign");
+    expect("violations" in state! && state.violations.length).toBeGreaterThan(0);
+    expect(
+      "violations" in state! && state.violations.every((v) => v.severity === "violation"),
+    ).toBe(true);
+  });
+
   it("checks a write with the engine it has: pathless results named by subject, warnings and results about other subjects passed over", async () => {
     const { validator, validateNode, validate } = makeValidator();
     validateNode.mockResolvedValue([

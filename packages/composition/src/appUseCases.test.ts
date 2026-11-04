@@ -1162,16 +1162,28 @@ describe("createAppUseCases", () => {
     const turtle = await (await shapesFetch(`${SITE}decks/capitals-of-the-world/v1.ttl`)).text();
     await put(pod, release, turtle);
     await put(pod, broken, turtle.replace(/solid-memo:back "Zagreb"@en ,\s+"Zagreb"@sv ;/, ""));
+    // The same card naming a scheduler: still a card of the release, held to its shape.
+    const marked = `${bob}releases/marked/v1.ttl`;
+    await put(
+      pod,
+      marked,
+      turtle.replace(
+        /solid-memo:back "Zagreb"@en ,\s+"Zagreb"@sv ;/,
+        'solid-memo:scheduler "other-app" ;',
+      ),
+    );
     const sent = podsNetwork({ [bob]: pod });
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     await expect(useCases.readReleaseFromLink(release)).resolves.toMatchObject({ url: release });
-    await expect(useCases.readReleaseFromLink(broken)).rejects.toMatchObject({
-      code: "releaseNotConforming",
-      vars: { host: "bob.example", count: 1 },
-    });
+    for (const refused of [broken, marked])
+      await expect(useCases.readReleaseFromLink(refused)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+        vars: { host: "bob.example", count: 1 },
+      });
     expect(sent.filter(({ method }) => method === "GET").map(({ url }) => url)).toEqual([
       release,
       broken,
+      marked,
     ]);
     expect(login.sent).not.toContain(release);
   });

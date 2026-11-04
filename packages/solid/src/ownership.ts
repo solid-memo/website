@@ -17,7 +17,7 @@ import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
-import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM, SM_NS } from "./vocab";
 
 /**
  * The links from a subject of Solid Memo's to the subjects it writes
@@ -36,11 +36,11 @@ const WRITTEN_BESIDE = [
  * stamp, the catalog at `#catalog`, and whatever these name as their
  * creator, publisher or distribution — a catalog, an agent and a
  * distribution have no class of Solid Memo's own, and they stay Solid
- * Memo's when another app's rewrite has dropped their stamp. A subject
- * naming another scheduler (any sm:scheduler but the sm:sm2 and sm:fsrs6
- * IRIs) is never Solid Memo's. So is the document itself (`<>`) when
- * all it says is that it is a deck's (isDeckBackLink). Every other
- * subject of the document is another app's.
+ * Memo's when another app's rewrite has dropped their stamp. A review
+ * state of another scheduler (isAnotherSchedulersState) is never Solid
+ * Memo's. The document itself (`<>`) is when all it says is that it is
+ * a deck's (isDeckBackLink). Every other subject of the document is
+ * another app's.
  */
 export function solidMemoSubjects(dataset: Dataset): Set<string> {
   return withWrittenBeside(
@@ -53,10 +53,29 @@ export function solidMemoSubjects(dataset: Dataset): Set<string> {
 function isSolidMemos(dataset: Dataset, thing: Subject): boolean {
   return (
     isDeckBackLink(dataset, thing) ||
-    (!namesAnotherScheduler(thing) &&
+    (!isAnotherSchedulersState(thing) &&
       (thing.url.endsWith("#catalog") ||
         getInteger(thing, SM.formatVersion) !== null ||
         getUrlAll(thing, RDF.type).some((type) => type.startsWith(SM_NS))))
+  );
+}
+
+/**
+ * Whether the subject is a review state of another scheduler: it names
+ * one (any sm:scheduler but the sm:sm2 and sm:fsrs6 IRIs), has no Solid
+ * Memo class but sm:ReviewState, and is no catalog (the subject at
+ * `#catalog`, or one of class dcat:Catalog). A card, deck, catalog or
+ * any other subject of a Solid Memo class is read as one whatever
+ * sm:scheduler it carries, so it stays Solid Memo's and is held to its
+ * shape.
+ */
+function isAnotherSchedulersState(thing: Subject): boolean {
+  const types = getUrlAll(thing, RDF.type);
+  return (
+    namesAnotherScheduler(thing) &&
+    !thing.url.endsWith("#catalog") &&
+    !types.includes(DCAT.Catalog) &&
+    !types.some((type) => type.startsWith(SM_NS) && type !== SM.ReviewState)
   );
 }
 
