@@ -275,14 +275,9 @@ export function createAppUseCases({
     instanceRepository,
     deckRepository: createSolidDeckRepository({
       fetch: dataFetch,
-      // A deck's cards copied into a draft outside their pod are read as no one, as the gate reads elsewhere.
-      publicFetch: createPodFence(
-        routedFetch({
-          origin: GUEST_ORIGIN,
-          local: writeFence.fetch,
-          remote: limitedFetch(noOneFetch, FOREIGN_LIMITS),
-        }),
-      ),
+      // A deck's cards copied into a draft outside their pod are read as no one, as the gate reads elsewhere;
+      // never from a guest's pod, which is this browser's.
+      publicFetch: createPodFence(limitedFetch(noOneFetch, FOREIGN_LIMITS)),
       checkWrite,
       now,
       randomId,
@@ -298,14 +293,9 @@ export function createAppUseCases({
     paletteRepository: createSolidPaletteRepository({ fetch: dataFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({
       fetch: dataFetch,
-      // A deck's states copied into another deck outside their pod are read as no one, as its cards are.
-      publicFetch: createPodFence(
-        routedFetch({
-          origin: GUEST_ORIGIN,
-          local: writeFence.fetch,
-          remote: limitedFetch(noOneFetch, FOREIGN_LIMITS),
-        }),
-      ),
+      // A deck's states copied into another deck outside their pod are read as no one, as its cards are;
+      // never from a guest's pod, which is this browser's.
+      publicFetch: createPodFence(limitedFetch(noOneFetch, FOREIGN_LIMITS)),
       checkWrite,
     }),
     shapeValidator,

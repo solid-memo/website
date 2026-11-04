@@ -341,7 +341,8 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   them has them asked again at most once a minute, for an instance
   registered elsewhere. A failed ask fails the request.
 - **A guest's pod** is this browser's, routed before the gate. Logged
-  out, nothing is the user's.
+  out, nothing is the user's. Only a guest's own instance may name a
+  deck's document there, and a read as no one never goes there.
 
 The profile, the storages, the type indexes and the instances'
 registrations are read and written through the pod fetch, without the

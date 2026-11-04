@@ -7,6 +7,7 @@ import { IDBFactory } from "fake-indexeddb";
 import { SITE } from "@solid-memo/vocab/tooling/sources";
 import { shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
+import type { DeckRepository } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
@@ -442,6 +443,65 @@ describe("createAppUseCases", () => {
       expect(login.sent).not.toContain(own);
       expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
         own,
+        expect.objectContaining({ credentials: "omit" }),
+      );
+    }
+  });
+
+  it("drafts a guest's own deck from their pod, and never reads it for a deck another instance names there", async () => {
+    // The cards each draft was made from, as the deck repository read them.
+    const read: string[][] = [];
+    altered.set("createSolidDeckRepository", (made) => {
+      const repository = made as DeckRepository;
+      return {
+        ...repository,
+        listCards: async (...args: Parameters<DeckRepository["listCards"]>) => {
+          const cards = await repository.listCards(...args);
+          read.push(cards.map((card) => card.front.en!));
+          return cards;
+        },
+      };
+    });
+    const indexedDB = new IDBFactory();
+    const guest = createAppUseCases({ ...options, indexedDB });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+    const made = await guest.createDeck(instance!.url, { en: "Capitals" });
+    await guest.addCard(made, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    const drafted = await guest.createReleaseDraft(
+      instance!.url,
+      { kind: "fromDeck", deck: made },
+      GUEST_SESSION.webId,
+    );
+    expect(drafted!.draft.url.startsWith(instance!.url)).toBe(true);
+    expect(read).toEqual([["Sweden"]]);
+
+    // Logged in, in the same browser: another instance's catalog names the guest's cards.
+    login.webId = "https://alice.example/profile/card#me";
+    const useCases = createAppUseCases({ ...options, indexedDB });
+    const foreign = "https://attacker.example/memo/";
+    const deck: Deck = {
+      ...made,
+      url: `${foreign}catalog.ttl#deck-1`,
+      reviewsDocumentUrl: `${foreign}reviews/deck-1.ttl`,
+    };
+    await expect(
+      useCases.createReleaseDraft(foreign, { kind: "fromDeck", deck }, login.webId),
+    ).rejects.toMatchObject({ code: "deckGone" });
+    expect(read).toEqual([["Sweden"]]);
+    expect(vi.mocked(globalThis.fetch)).not.toHaveBeenCalledWith(
+      made.cardsDocumentUrl,
+      expect.anything(),
+    );
+
+    // And whatever reached them, the reads as no one have no way to the guest's pod.
+    for (const [name, url] of [
+      ["createSolidDeckRepository", made.cardsDocumentUrl],
+      ["createSolidReviewStateRepository", made.reviewsDocumentUrl],
+    ] as const) {
+      await given.get(name)!.publicFetch!(url);
+      expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
+        url,
         expect.objectContaining({ credentials: "omit" }),
       );
     }

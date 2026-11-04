@@ -49,7 +49,8 @@ import {
   distractorToRecord,
 } from "@solid-memo/domain/deckRecord";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
-import { isDeckInPlace, isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
+import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import {

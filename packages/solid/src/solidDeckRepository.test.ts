@@ -29,6 +29,7 @@ import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain/deck";
+import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 
@@ -1185,6 +1186,30 @@ describe("listCards", () => {
     expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, publicFetch);
     await repository.readCardsSince(deck, undefined);
     expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+  });
+
+  it("refuses, without a read, a deck whose catalog is not a guest's that names a guest's documents", async () => {
+    const foreign: Deck = {
+      ...deck,
+      cardsDocumentUrl: `${GUEST_INSTANCE_URL}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/deck-1.ttl`,
+    };
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const repository = createSolidDeckRepository({
+      fetch,
+      publicFetch,
+      now: () => new Date(),
+      randomId: () => "fixed",
+    });
+    for (const asNoOne of [false, true]) {
+      await expect(repository.listCards(foreign, { asNoOne })).rejects.toMatchObject({
+        code: "deckGone",
+      });
+    }
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(publicFetch).not.toHaveBeenCalled();
   });
 
   it("maps card subjects", async () => {
