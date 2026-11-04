@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.13](https://github.com/solid-memo/website/compare/v6.29.12...v6.29.13) (2026-11-04)
+
+### Bug Fixes
+
+* **deploy:** publish the journeys' report only as plain files ([13392d3](https://github.com/solid-memo/website/commit/13392d38e85074babf4ed8d6854350dd70ecdfa8))
+* **digest:** keep only an instance's own decks in its digest ([f5e3a06](https://github.com/solid-memo/website/commit/f5e3a06e385d4384e08bed602bb7e19e7040d949))
+* **solid:** bound the link and access headers before parsing ([977638d](https://github.com/solid-memo/website/commit/977638d8275fddec83dbecbfe73b11426de1d811))
+
 ## [6.29.12](https://github.com/solid-memo/website/compare/v6.29.11...v6.29.12) (2026-11-04)
 
 ### Bug Fixes
