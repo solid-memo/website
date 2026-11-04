@@ -5,7 +5,15 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { growth } from "../testing/growth";
-import { card, courseDraft, deckDraft, DRAFT, NOW, of } from "../testing/releaseDraft";
+import {
+  card,
+  courseDraft,
+  deckDraft,
+  DRAFT,
+  NOW,
+  of,
+  sharedDistractorDraft,
+} from "../testing/releaseDraft";
 import type { ReleaseDraft } from "./releaseDraft";
 import { draftLibraryContent, draftLibraryDeck } from "./draftListing";
 
@@ -210,6 +218,25 @@ describe("draftLibraryContent", () => {
         retired: true,
       },
     ]);
+  });
+
+  it("makes a wrong option many cards name once, in time that grows with them and its languages, not with their product", () => {
+    const content = draftLibraryContent(sharedDistractorDraft(3));
+    const [first, ...rest] = content.cards.map((one) => one.distractors?.[0]);
+    expect(first).toEqual({ id: "d", text: { "x-l0": "o", "x-l1": "o", "x-l2": "o" } });
+    for (const other of rest) expect(other).toBe(first);
+    // Eight times the cards and the option's languages take about as long
+    // as an eighth of them eight times over; making the option again for
+    // each card would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = sharedDistractorDraft(count);
+        return () => draftLibraryContent(many);
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("is no course for a deck", () => {

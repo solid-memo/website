@@ -5,7 +5,13 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { growth } from "../testing/growth.ts";
-import { card, courseDraft, deckDraft, DRAFT } from "../testing/releaseDraft.ts";
+import {
+  card,
+  courseDraft,
+  deckDraft,
+  DRAFT,
+  sharedDistractorDraft,
+} from "../testing/releaseDraft.ts";
 import type { DraftNode, ReleaseDraft } from "./releaseDraft.ts";
 import { draftLibraryDeck } from "./draftListing.ts";
 import { releaseDiff, simulateLearnerUpgrade } from "./releaseDiff.ts";
@@ -327,6 +333,36 @@ describe("simulateLearnerUpgrade", () => {
         return () => [releaseDiff(many, draft), simulateLearnerUpgrade(many, draft)];
       },
       1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("compares a wrong option many cards name once, in time that grows with them and its languages, not with their product", () => {
+    const release = sharedDistractorDraft(3);
+    const next = nextVersionDraft(release, DRAFT);
+    const changed: ReleaseDraft = {
+      ...next,
+      distractors: next.distractors.map((node) => ({
+        ...node,
+        data: { ...node.data, text: { ...node.data.text, "x-l0": "changed" } },
+      })),
+    };
+    expect(simulateLearnerUpgrade(release, changed).plan?.change.map((one) => one.id)).toEqual([
+      "w0",
+      "w1",
+      "w2",
+    ]);
+    // Eight times the cards and the option's languages take about as long
+    // as an eighth of them eight times over; comparing the option again
+    // for each card would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const many = sharedDistractorDraft(count);
+        const draft = nextVersionDraft(many, DRAFT);
+        return () => simulateLearnerUpgrade(many, draft);
+      },
+      250,
       8,
     );
     expect(ratio).toBeLessThan(4);

@@ -93,13 +93,18 @@ export function draftLibraryContent(
     isCourse,
     ...about
   } = listed;
-  const options = new Map(draft.distractors.map((node) => [iriIn(draft, node.id), node.data]));
+  // Each wrong option made once, however many cards name it.
+  const options = new Map(
+    draft.distractors.map((node) => {
+      const iri = iriIn(draft, node.id);
+      return [iri, distractorFromRecord(iri, node.data)];
+    }),
+  );
   const distractorsOf = (iris: readonly string[]): Distractor[] =>
     iris
       .flatMap((iri) => {
-        const data = options.get(iri);
-        const distractor = data === undefined ? null : distractorFromRecord(iri, data);
-        return distractor === null ? [] : [distractor];
+        const distractor = options.get(iri);
+        return distractor ? [distractor] : [];
       })
       .sort((a, b) => a.id.localeCompare(b.id));
   const cards = draft.cards.flatMap((node): LibraryCard[] => {

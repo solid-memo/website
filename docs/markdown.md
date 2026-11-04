@@ -577,7 +577,9 @@ author meant: `markdownProblems(text, rule)` names what wouldn't.
 step and chapter of a release that states `sm:textFormat sm:markdown`
 ([deck-library.md](deck-library.md#markdown-rules)). The card editor
 shows the same problems as hints, never as a block
-([writing Markdown in the app](#writing-markdown-in-the-app)).
+([writing Markdown in the app](#writing-markdown-in-the-app)). A
+distractor that several marked cards name is checked once, not once for
+each card.
 
 | Problem (`code`) | Why |
 |---|---|

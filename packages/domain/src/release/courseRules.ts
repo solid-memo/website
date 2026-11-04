@@ -129,7 +129,18 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
     }
   }
 
-  for (const [iri, entry] of asked) problems.push(...askedProblems(iri, entry, distractors));
+  // A distractor's languages, worked out once however many cards name it.
+  const optionLanguages = new Map<string, ReadonlySet<string>>();
+  const languagesOfOption = (option: ReleaseDistractor) => {
+    let languages = optionLanguages.get(option.iri);
+    if (languages === undefined) {
+      languages = new Set(languagesOf(option.text));
+      optionLanguages.set(option.iri, languages);
+    }
+    return languages;
+  };
+  for (const [iri, entry] of asked)
+    problems.push(...askedProblems(iri, entry, distractors, languagesOfOption));
 
   // Members of the same list that share a schema:position.
   const clashes = (members: readonly { iri: string; positions: readonly string[] }[]) => {
@@ -244,6 +255,7 @@ function askedProblems(
   iri: string,
   { card, checkedBy, reviewedBy }: Asked,
   distractors: ReadonlyMap<string, ReleaseDistractor>,
+  languagesOfOption: (option: ReleaseDistractor) => ReadonlySet<string>,
 ): ReleaseProblem[] {
   const problems: ReleaseProblem[] = [];
   if (checkedBy.length > 1) {
@@ -277,7 +289,7 @@ function askedProblems(
     );
   }
   for (const option of options) {
-    const { listed, more } = lacking(back, new Set(languagesOf(option.text)));
+    const { listed, more } = lacking(back, languagesOfOption(option));
     if (listed.length > 0) {
       problems.push(
         problem(

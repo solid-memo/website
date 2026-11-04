@@ -102,6 +102,25 @@ describe("markdownFields", () => {
     ]);
   });
 
+  it("names a distractor's texts once, however many marked cards name it", () => {
+    const shared = model({
+      cards: ["q-1", "q-2"].map((id) =>
+        card(id, { front: [text("Front")], distractors: [iri(at("d"))] }),
+      ),
+      distractors: [distractor("d", { text: [text("Wrong")] })],
+      textFormats: [marker("q-1"), marker("q-2")],
+    });
+    expect(
+      markdownFields(shared).map(({ subject, field, text }) => [subject, field, text.value]),
+    ).toEqual([
+      [at("q-1"), SM.front, "Front"],
+      [at("q-1"), SM.back, "Answer q-1"],
+      [at("d"), SM.distractorText, "Wrong"],
+      [at("q-2"), SM.front, "Front"],
+      [at("q-2"), SM.back, "Answer q-2"],
+    ]);
+  });
+
   it("tells the subjects marked Markdown", () => {
     const marked = markedSubjects(release);
     expect([...marked]).toEqual([at("q-1"), at("q-3"), at("s-1"), at("ch-1")]);
@@ -242,6 +261,33 @@ describe("markdownProblems' growth", () => {
         return () => markdownProblems(release, quiet);
       },
       500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+});
+
+describe("markdownProblems' growth with a shared distractor", () => {
+  it("checks a distractor many marked cards name, in many languages, once, not once for each card", () => {
+    // Eight times the cards and the distractor's languages take about as
+    // long as an eighth of them eight times over; listing its texts again
+    // for each card would take eight times as long.
+    const quiet: MarkdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
+    const ratio = growth(
+      (count) => {
+        const ids = Array.from({ length: count }, (_, i) => `q-${i}`);
+        const release = model({
+          cards: ids.map((id) => card(id, { distractors: [iri(at("d"))] })),
+          distractors: [
+            distractor("d", {
+              text: Array.from({ length: count }, (_, i) => text("Wrong", `x-l${i}`)),
+            }),
+          ],
+          textFormats: ids.map(marker),
+        });
+        return () => markdownProblems(release, quiet);
+      },
+      1000,
       8,
     );
     expect(ratio).toBeLessThan(4);
