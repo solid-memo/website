@@ -73,6 +73,7 @@ or on Ctrl-C. The test names say which server and version:
 | `pivot` | Pivot, the server of solidcommunity.net (the Community Solid Server 7 with Pivot's components), in memory | built here from its lockfile ([servers/pivot/](../e2e/pod/servers/pivot/Dockerfile)) with a configuration of its own, its root open | advisory |
 | `nextcloud` | Solid-Nextcloud: Nextcloud 32 with the Solid app, on SQLite, the pod `apps/solid/~alice/storage/` | built here from a commit of the app ([servers/nextcloud/](../e2e/pod/servers/nextcloud/Dockerfile)), installed on every start, alice's pod opened by a hook | advisory |
 | `jss` | JavaScript Solid Server, files in the container, open to anyone (`--public`, which skips its access control) | built here from its lockfile ([servers/jss/](../e2e/pod/servers/jss/Dockerfile)), unmodified and pushed nowhere (it's AGPL) | advisory |
+| `css-lws` | Community Solid Server 8 with Linked Web Storage (LWS): the Solid Protocol and LWS side by side, in memory | built here from a commit of a fork not yet merged ([servers/css-lws/](../e2e/pod/servers/css-lws/Dockerfile)), with a configuration of its own, its root open | advisory |
 
 A **blocking** server's tests gate CI, and so deploys and Renovate's
 merges: every test passes, or skips for a reason it gives. An
@@ -99,6 +100,25 @@ Solid-Nextcloud fails concurrent writes to one document
 in a run the test files run one at a time (`serialFiles` in
 `servers.ts`). css-8 becomes blocking at 8.0.0,
 and css-6 then goes.
+
+css-lws tests the [LWS](https://www.w3.org/TR/lws10-core/) work in the
+Community Solid Server before any release has it: the branch
+`feat/lws-next-major` of
+[jeswr/CommunitySolidServer](https://github.com/jeswr/CommunitySolidServer/pull/126),
+on the same 8.0.0-alpha.3 as css-8, so a failure only css-lws shows
+comes from the LWS changes. Its configuration is the fork's
+`config/solid-lws.json` in memory, with the root as the storage. The
+fork's LWS-only configuration isn't tested: it treats the app's
+Solid-OIDC requests as anonymous, so the app can't sign in there. The
+image is built from code nobody has reviewed, on CI's runners and on the
+machine of anyone who runs `SOLID_SERVERS=all`. Its dependencies'
+install scripts don't run, and its final stage keeps only what the
+server runs. GitHub's dependency review doesn't see the lockfile it
+installs from. A person approves each newer commit on Renovate's
+Dependency Dashboard before Renovate proposes it. css-lws goes once a
+Community Solid Server release has LWS, or when its commit can't be
+fetched any more: a commit that can't be fetched fails the `contract`
+job of every pull request.
 
 Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`,
 asking only for `E2E_PORT` (the port on 127.0.0.1 the harness picked,

@@ -177,6 +177,17 @@ export const SERVERS = {
     urlFromHost: true,
     signedIn: { login: "jss", host: "127.0.0.1" },
   },
+  "css-lws": {
+    label: "Community Solid Server with LWS",
+    tier: "advisory",
+    internalPort: 3000,
+    podPath: "",
+    readyPath: "",
+    startTimeoutMs: 60_000,
+    // The fork's commit, on the release css-8 runs, so a failure only it shows comes from its LWS changes.
+    version: () =>
+      `${dockerfileArg("css-lws", "CSS_LWS_VERSION")} (${dockerfileArg("css-lws", "CSS_LWS_SHA").slice(0, 8)})`,
+  },
 } satisfies Record<string, Entry>;
 
 export type ServerId = keyof typeof SERVERS;
