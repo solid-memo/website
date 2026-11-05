@@ -8,7 +8,7 @@
 # is reached at; Renovate keeps it on 7 (renovate.json5).
 services:
   server:
-    image: solidproject/community-server:7.2.0@sha256:73465522db316ec2c7c0417bdf5b1b2eab432c70fab44fb25ba2f2098e21b9e5
+    image: solidproject/community-server:7.3.0@sha256:58073541889f0cd113dc482b4ddbb834bcd39463dc077d49fd1cf9f55337c4b6
     command: ["-c", "config/default.json", "-b", "http://127.0.0.1:${E2E_PORT:?}/", "-l", "warn"]
     ports: ["127.0.0.1:${E2E_PORT:?}:3000"]
     user: node
