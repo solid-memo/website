@@ -119,6 +119,14 @@ describe("deck records", () => {
     });
   });
 
+  it.each(["http://[x", "http://a:99999/x"])(
+    "read a release link %s that no URL parser takes as absent",
+    (source) => {
+      const record = { ...deckToRecord(deck), source };
+      expect(deckFromRecord(deck.url, 6, record, byAgent)).not.toHaveProperty("sourceUrl");
+    },
+  );
+
   it.each([-1, 1e300, Number.POSITIVE_INFINITY, Number.NaN, 2.5])(
     "read a deck's own daily limit of %s as absent, so the preferences apply",
     (stored) => {

@@ -48,7 +48,8 @@ export function deckFromRecord(
     authors: data.creator.map(authorOf),
     ...(data.license === undefined ? {} : { license: data.license }),
     description: data.description,
-    ...(data.source === undefined ? {} : { sourceUrl: data.source }),
+    // A release link no URL parser takes reads as absent: the catalog is data anyone may have written, and such a link would only fail where it is followed or shown (GHSA-58p4-233w-h9h8).
+    ...(data.source === undefined || !URL.canParse(data.source) ? {} : { sourceUrl: data.source }),
     ...(data.theme.length === 0 ? {} : { themes: [...data.theme] }),
     ...(noKeywords(data.keyword) ? {} : { keywords: copyKeywords(data.keyword) }),
     ...(usableCap(data.newCardsPerDay) ? { newCardsPerDay: data.newCardsPerDay } : {}),

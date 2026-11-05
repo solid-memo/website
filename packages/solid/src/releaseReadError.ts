@@ -43,5 +43,5 @@ function releaseTooLarge(url: string, { limits: { bytes, quads } }: ReadLimitErr
  * them may be within a release's limits on its own.
  */
 export function linkedReleasesTooLarge(url: string): AppError {
-  return new AppError("linkedReleasesTooLarge", { host: releaseHost(url) });
+  return new AppError("linkedReleasesTooLarge", { host: releaseHost(url) ?? url });
 }

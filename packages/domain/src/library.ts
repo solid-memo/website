@@ -170,9 +170,14 @@ export function releaseUrlOf(text: string): string | null {
     : null;
 }
 
-/** The host a release is published on, as a "from <host>" badge names it. */
-export function releaseHost(url: string): string {
-  return new URL(url).host;
+/**
+ * The host a release is published on, as a "from <host>" badge names it;
+ * null for a link no URL parser takes, or one that names no host (such
+ * as a `urn:` or `file:` link).
+ */
+export function releaseHost(url: string): string | null {
+  const host = URL.canParse(url) ? new URL(url).host : "";
+  return host === "" ? null : host;
 }
 
 /**

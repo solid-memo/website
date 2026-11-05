@@ -1000,6 +1000,18 @@ describe("the deck library", () => {
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
     });
 
+    it("a release at a link no URL parser takes that breaks the library's shapes is refused naming the link, as it names no host", async () => {
+      const deps = makeDeps();
+      const release = { ...linked(1), url: "http://[x" };
+      reading(deps, [release], breaking);
+      const library = withLinkedReleasesChecked(deps.deckLibrary);
+
+      await expect(library.fetchLibraryDeck(release.url)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+        vars: { host: "http://[x", count: 1 },
+      });
+    });
+
     it("a release read from a link without a check does not count as checked", async () => {
       const deps = makeDeps();
       const release = linked(1);

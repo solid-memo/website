@@ -171,11 +171,7 @@ export function LibraryCopiesScreen({
               <a href={deckHref(copy.deck)}>
                 <ReaderText text={copy.deck.title} />
               </a>
-              {copy.fromLink === true && (
-                <span class="studio-badge">
-                  {t("studio.decks.badge.from", { host: releaseHost(copy.deck.sourceUrl!) })}
-                </span>
-              )}
+              <FromBadge copy={copy} />
             </>
           ),
         }}
@@ -238,6 +234,15 @@ export function LibraryCopiesScreen({
         </button>
       </BulkBar>
     </section>
+  );
+}
+
+/** Where a copy of a release added from a link came from; nothing for a library copy, or for a link that names no host. */
+function FromBadge({ copy }: { copy: LibraryCopy }) {
+  const { t } = useI18n();
+  const host = copy.fromLink === true ? releaseHost(copy.deck.sourceUrl!) : null;
+  return host === null ? null : (
+    <span class="studio-badge">{t("studio.decks.badge.from", { host })}</span>
   );
 }
 

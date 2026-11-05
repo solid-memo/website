@@ -152,6 +152,29 @@ describe("LibraryCopiesScreen", () => {
     expect(cells("Lakes From bob.example")[3]).toBe("Up to date");
   });
 
+  it.each([
+    ["no URL parser takes", "http://[x"],
+    ["names no host", "urn:x"],
+  ])("shows no host for a copy whose release link %s", (_, link) => {
+    const odd = { ...makeCopy("deck-8", { en: "Pods" }, "1"), sourceUrl: link };
+    renderScreen({
+      rows: [
+        {
+          copy: {
+            deck: odd,
+            series: { ...capitals, url: odd.sourceUrl, version: "1" },
+            version: "1",
+            newer: "unknown",
+            fromLink: true,
+          },
+          plan: "loading",
+        },
+      ],
+    });
+    expect(within(table()).getByRole("rowheader", { name: "Pods" })).toBeInTheDocument();
+    expect(table().querySelector(".studio-badge")).toBeNull();
+  });
+
   it("shows the copy at its cursor beside it, marking the one shown", () => {
     const onCursor = vi.fn();
     renderScreen({ current: mine.url, onCursor });

@@ -50,6 +50,8 @@ export function ImportUrlScreen({
   reportPlace?: ReportPlace;
 }) {
   const { t } = useI18n();
+  // A link no URL parser takes names no host: the link itself says where it is published.
+  const host = release === undefined ? undefined : (releaseHost(release.url) ?? release.url);
   const [typed, setTyped] = useState(url ?? "");
 
   function handleSubmit(event: Event) {
@@ -79,10 +81,10 @@ export function ImportUrlScreen({
       <ErrorMessage error={readError} />
       {release !== undefined && (
         <>
-          <p class="hint">{t("importUrl.notLibrary", { host: releaseHost(release.url) })}</p>
+          <p class="hint">{t("importUrl.notLibrary", { host: host! })}</p>
           <LibraryDeckScreen
             deck={release}
-            host={releaseHost(release.url)}
+            host={host}
             imported={imported}
             busy={busy}
             error={error}
