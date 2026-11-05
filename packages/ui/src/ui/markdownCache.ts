@@ -11,6 +11,7 @@ import {
   OPTION,
   PROSE,
   SIDE,
+  type FieldRule,
   type MarkdownProblem,
 } from "@solid-memo/markdown/problems";
 import { textHash } from "./textHash";
@@ -48,6 +49,33 @@ export const markdownBlocks: (text: string) => MdBlock[] | null = remembered(par
 
 /** The text as one line of Markdown phrasing (parseInlineMarkdown), null when it is to be shown as plain text. */
 export const markdownPhrases: (text: string) => MdPhrase[] | null = remembered(parseInlineMarkdown);
+
+/** The text as plain text (plainText), what it shows as Markdown with its marks gone. */
+export const markdownPlainText: (text: string) => string = remembered(plainText);
+
+/**
+ * The markdown package's check of a text in a field held to a rule
+ * (markdownProblems), remembered for the last `limit` texts of each rule.
+ */
+function problemsByRule(limit = CACHE_SIZE): (text: string, rule: FieldRule) => MarkdownProblem[] {
+  const byRule = new Map<FieldRule, (text: string) => MarkdownProblem[]>();
+  return (text, rule) => {
+    let problemsOf = byRule.get(rule);
+    if (problemsOf === undefined) {
+      problemsOf = remembered((text) => markdownProblems(text, rule), limit);
+      byRule.set(rule, problemsOf);
+    }
+    return problemsOf(text);
+  };
+}
+
+/**
+ * The markdown package's check of a text in a field held to `rule`
+ * (problemsByRule), remembered for the last CACHE_SIZE texts of each
+ * rule: an editor's hints check its text again on every render.
+ */
+export const markdownFieldProblems: (text: string, rule: FieldRule) => MarkdownProblem[] =
+  problemsByRule();
 
 /**
  * The text as Markdown chunks (chunksOf), split at its top-level
@@ -136,17 +164,14 @@ export function optionPhrases(): (text: string) => MdPhrase[] | null {
 }
 
 /**
- * The markdown package's check of a field held to a rule
- * (markdownProblems), remembered for every text of each rule
- * (rememberedAll): a text checked again is not parsed again.
+ * The markdown package's check of a field held to a rule, by the rule's
+ * name (problemsByRule), remembered for every text of each rule: a text
+ * checked again is not parsed again.
  */
 function rememberedProblems(): (text: string, rule: FieldRuleName) => MarkdownProblem[] {
-  const byRule: Record<FieldRuleName, (text: string) => MarkdownProblem[]> = {
-    side: rememberedAll((text) => markdownProblems(text, SIDE)),
-    option: rememberedAll((text) => markdownProblems(text, OPTION)),
-    prose: rememberedAll((text) => markdownProblems(text, PROSE)),
-  };
-  return (text, rule) => byRule[rule](text);
+  const check = problemsByRule(Infinity);
+  const rules: Record<FieldRuleName, FieldRule> = { side: SIDE, option: OPTION, prose: PROSE };
+  return (text, rule) => check(text, rules[rule]);
 }
 
 /**

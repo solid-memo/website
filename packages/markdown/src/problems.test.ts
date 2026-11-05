@@ -2,9 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { liveLink } from "./links";
 import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "./parse";
 import { markdownProblems, OPTION, PROSE, SIDE } from "./problems";
+
+// The links module as it is, its liveLink counted, so a test can tell how often a URL is read.
+vi.mock("./links", async (importOriginal) => {
+  const links = await importOriginal<typeof import("./links")>();
+  return { ...links, liveLink: vi.fn(links.liveLink) };
+});
 
 describe("markdownProblems", () => {
   it("finds nothing in prose, code, lists and tables", () => {
@@ -180,6 +187,63 @@ describe("markdownProblems", () => {
       { code: "link", source: "[a‮](b)", autolink: false },
       { code: "hiddenControl", controls: ["⟨U+202E⟩"], in: "link" },
     ]);
+  });
+
+  it("checks a reference link's URL once for each use, its text's controls first", () => {
+    const text = "[a‮][r] [b][r] [c‮][r]\n\n[r]: https://r.example/⁦‮";
+    expect(markdownProblems(text, PROSE)).toEqual([
+      { code: "hiddenControl", controls: ["⟨U+202E⟩", "⟨U+2066⟩"], in: "link" },
+      { code: "hiddenControl", controls: ["⟨U+2066⟩", "⟨U+202E⟩"], in: "link" },
+      { code: "hiddenControl", controls: ["⟨U+202E⟩", "⟨U+2066⟩"], in: "link" },
+    ]);
+    expect(markdownProblems("[a][r] [b][r]\n\n[r]: http://r.example/", PROSE)).toEqual([
+      { code: "linkNotFollowed", url: "http://r.example/" },
+      { code: "linkNotFollowed", url: "http://r.example/" },
+    ]);
+  });
+
+  it("reads each distinct URL once, however often the text links to it", () => {
+    vi.mocked(liveLink).mockClear();
+    const text =
+      "[a][r] [b][r] [c][s] [d](https://r.example/)\n\n[r]: https://r.example/\n[s]: https://s.example/";
+    expect(markdownProblems(text, PROSE)).toEqual([]);
+    expect(vi.mocked(liveLink).mock.calls).toEqual([
+      ["https://r.example/"],
+      ["https://s.example/"],
+    ]);
+  });
+
+  /**
+   * One reference link with a long URL, used as often as the text has
+   * room for: each use is checked with its URL, so the parser charges
+   * the URL's length for each use (MAX_WORK), and a text past it is
+   * shown as plain text. Its check takes time linear in the text's
+   * length: within `growth` times what the same shape at half the
+   * length takes (four times for quadratic), the better of three runs.
+   */
+  it("checks a long URL used again and again in time linear in the text's length", () => {
+    const growth = 3;
+    const card = (length: number) => {
+      const uses = Math.floor(length / 8);
+      const head = `[a]: <https://e.example/${"‮".repeat(length - 4 * uses - 30)}>\n\n`;
+      return head + "[a] ".repeat(uses);
+    };
+    expect(markdownProblems(card(16_000), PROSE)).toEqual([{ code: "tooComplex" }]);
+    const time = (text: string) => {
+      let took = Infinity;
+      for (let round = 0; round < 3; round++) {
+        const started = performance.now();
+        markdownProblems(text, PROSE);
+        took = Math.min(took, performance.now() - started);
+      }
+      return took;
+    };
+    time(card(1_000));
+    const half = time(card(8_000));
+    const took = time(card(16_000));
+    expect(took, `${Math.round(took)} ms, ${Math.round(half)} ms at half the length`).toBeLessThan(
+      Math.max(half * growth, 5),
+    );
   });
 
   it("holds an option to one paragraph", () => {

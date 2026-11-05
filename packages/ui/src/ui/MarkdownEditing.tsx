@@ -4,16 +4,12 @@
 
 import { useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
-import { plainText } from "@solid-memo/markdown/plainText";
-import {
-  markdownProblems,
-  type FieldRule,
-  type MarkdownProblem,
-} from "@solid-memo/markdown/problems";
+import type { FieldRule, MarkdownProblem } from "@solid-memo/markdown/problems";
 import { CardFace } from "./CardFace";
 import { DataLine } from "./DataText";
 import { useI18n, type I18n, type MessageKey } from "./i18n";
 import type { LangTextDraft } from "./LangTextField";
+import { markdownFieldProblems, markdownPlainText } from "./markdownCache";
 
 export type { MarkdownProblem };
 
@@ -31,12 +27,13 @@ function collapsed(text: string): string {
  * changes in it.
  */
 export function readsDifferently(value: string): boolean {
-  return collapsed(plainText(value)) !== collapsed(value);
+  return collapsed(markdownPlainText(value)) !== collapsed(value);
 }
 
 /**
  * The hints for one text written in Markdown, one language's, in a field
- * held to `rule` (markdownProblems), in this language: what would not
+ * held to `rule` (markdownProblems, remembered by text and rule:
+ * markdownFieldProblems), in this language: what would not
  * show as its writer means, each hint once; and that it shows no text at
  * all, when it holds only marks (a rule alone). None for a text with no
  * words. Hints, never a reason to refuse the card: a user's own card may
@@ -44,8 +41,9 @@ export function readsDifferently(value: string): boolean {
  */
 export function markdownHints(value: string, rule: FieldRule, t: I18n["t"]): string[] {
   if (value.trim() === "") return [];
-  const hints = new Set(markdownProblems(value, rule).map((problem) => problemText(problem, t)));
-  if (plainText(value).trim() === "") hints.add(t("markdownProblem.noText"));
+  const problems = markdownFieldProblems(value, rule);
+  const hints = new Set(problems.map((problem) => problemText(problem, t)));
+  if (markdownPlainText(value).trim() === "") hints.add(t("markdownProblem.noText"));
   return [...hints];
 }
 

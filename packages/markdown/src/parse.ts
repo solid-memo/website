@@ -90,7 +90,8 @@ export const MAX_TABLE_CELLS = 2_000;
  * The most work the parser may do on a text, for each of its characters
  * (and as if it had at least WORK_FLOOR): a try of one of its rules, a
  * step through a link's label, or a token it makes, is one unit of work,
- * counted as it is done. Past it,
+ * as is each byte of a link's or a picture's destination in UTF-8, for
+ * each time it is used, counted as it is done. Past it,
  * the text is shown as plain text, so no text costs more than time
  * linear in its length. markdown-it reads most text in time linear in
  * its length, but some shapes, such as a block quote after each line of
@@ -121,9 +122,15 @@ export function visibleControls(text: string): string {
   return text.replace(HIDDEN_CONTROLS, marker);
 }
 
-/** The markers of the hidden characters (HIDDEN_CONTROLS) in a text, each once, in the order they first come. */
+/**
+ * The markers of the hidden characters (HIDDEN_CONTROLS) in a text, each
+ * once, in the order they first come: a marker for each character, not
+ * for each time it comes.
+ */
 export function hiddenControls(text: string): string[] {
-  return [...new Set(text.match(HIDDEN_CONTROLS)?.map(marker))];
+  const found = new Set<string>();
+  for (const [control] of text.matchAll(HIDDEN_CONTROLS)) found.add(control);
+  return [...found].map(marker);
 }
 
 function marker(control: string): string {
@@ -292,6 +299,28 @@ function spend(): void {
 }
 
 /**
+ * The work of a link's or a picture's destination, one unit for each
+ * byte of it in UTF-8, for each time it is used (see MAX_WORK). A
+ * reference link resolves to its definition's URL however often it is
+ * used, and the check and the renderer handle the URL of each use on
+ * its own: a URL in an `href` takes at most three characters for each
+ * byte (a percent escape), so the links a text shows hold at most a
+ * small multiple of its length.
+ */
+function spendOn(token: Token): void {
+  // The destination is the first attribute of each: `href` of a link, `src` of a picture.
+  const url = String(token.attrs![0]![1]);
+  let bytes = url.length;
+  for (let i = 0; i < url.length; i++) {
+    const code = url.charCodeAt(i);
+    // Up to U+07FF two bytes, a surrogate pair's halves two each (four in all), the rest three.
+    if (code >= 0x80) bytes += code < 0x800 || (code >= 0xd800 && code < 0xe000) ? 1 : 2;
+  }
+  work -= bytes;
+  if (work < 0) throw tooMuchWork;
+}
+
+/**
  * A token as this module keeps it: where it was read from in its
  * state's source, `start` to `end` (-1 till a rule says), whether it is
  * pending text its state flushed, and for an `inline` block token, the
@@ -381,6 +410,7 @@ for (const { name, fn, alt } of md.inline.ruler.__rules__) {
         } else if (token.start < 0) {
           token.start = start;
           token.end = state.pos;
+          if (token.type === "link_open" || token.type === "image") spendOn(token);
         }
       }
       const last = tokens.at(-1)!;
