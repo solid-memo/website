@@ -37,7 +37,7 @@ describe("provenanceOf", () => {
       said,
       [`${URL}#compilation`, `${URL}#revision-2`],
       [iri("https://a.example/"), { kind: "blank", value: "s" }],
-      new Set([`${URL}#compilation`]),
+      (activity) => activity === `${URL}#compilation`,
     );
     expect(making).toEqual([
       {
@@ -53,6 +53,7 @@ describe("provenanceOf", () => {
       { iri: "https://b.example/", title: [], creator: [text("Bo")], license: [], comments: [] },
     ]);
     expect(provenanceOf(said, [], []).making).toEqual([]);
+    expect(provenanceOf(said, [`${URL}#compilation`], []).making[0]!.carried).toBe(false);
   });
 });
 

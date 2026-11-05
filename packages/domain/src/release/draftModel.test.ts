@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { growth } from "../testing/growth";
 import { courseDraft, deckDraft, DRAFT, link, of } from "../testing/releaseDraft";
@@ -342,3 +342,124 @@ describe("draftReleaseModel", () => {
     expect(ratio).toBeLessThan(4);
   });
 });
+
+describe("draftReleaseModel, of a draft whose earlier release carried activities with ids as long as a term may be", () => {
+  // An id that is most of a term, so that the draft's URL and it, joined,
+  // are past the bound on a term (MAX_TERM_CHARACTERS).
+  const id = (n: number) => `${"a".repeat(16_381 - 6)}${String(n).padStart(6, "0")}`;
+  const activities = [id(0), id(1), "compilation"];
+
+  it("tells the carried activities as it does with shorter ids", () => {
+    expect(`${DRAFT}#${id(0)}`.length).toBeGreaterThan(16_383);
+    const draft = courseDraft({ ids: {}, activities });
+    const outside = "https://other.example/release.ttl#compilation";
+    const making = (one: ReleaseDraft, url?: string) =>
+      draftReleaseModel(one, url).making.map((it) => [it.iri, it.carried]);
+    expect(
+      making({
+        ...draft,
+        triples: [...draft.triples, link(DRAFT, `${PROV}wasGeneratedBy`, outside)],
+      }),
+    ).toEqual([
+      [of("compilation"), true],
+      [outside, false],
+    ]);
+    const elsewhere = "https://pod.example/solid-memo/main/decks/solid/v2/release.ttl";
+    expect(making(draft, elsewhere)).toEqual([[`${elsewhere}#compilation`, true]]);
+    expect(making(courseDraft({ ids: {}, activities: [id(0), id(1)] }))).toEqual([
+      [of("compilation"), false],
+    ]);
+  });
+
+  it("keys no set or map by a string past the bound on a term", () => {
+    expect(
+      longestKey(() => draftReleaseModel(courseDraft({ ids: {}, activities }))),
+    ).toBeLessThanOrEqual(16_383);
+  });
+});
+
+describe("draftReleaseModel, of a draft with ids as long as a term may be, moved to a longer URL", () => {
+  // Ids so long that each of the draft's IRIs is as long as a term may
+  // be (MAX_TERM_CHARACTERS): moved to a longer URL, it is past it.
+  const id = (n: number) =>
+    `${"a".repeat(16_383 - DRAFT.length - 1 - 6)}${String(n).padStart(6, "0")}`;
+  const elsewhere = "https://pod.example/solid-memo/main/decks/solid/a-longer-place/release.ttl";
+  const there = (n: number) => `${elsewhere}#${id(n)}`;
+  const draft = (): ReleaseDraft => {
+    const course = courseDraft();
+    return {
+      ...course,
+      root: { ...course.root, wasDerivedFrom: [of(id(5))] },
+      cards: [
+        {
+          id: id(6),
+          data: { ...course.cards[0]!.data, distractor: [of(id(0)), of(id(1)), of(id(2))] },
+        },
+      ],
+      distractors: [
+        { id: id(0), data: { text: { en: "No 0" } } },
+        { id: id(1), data: { text: { en: "No 1" } } },
+      ],
+      triples: [
+        link(DRAFT, `${PROV}wasGeneratedBy`, of(id(3))),
+        link(DRAFT, `${PROV}wasGeneratedBy`, of(id(4))),
+        link(DRAFT, `${PROV}wasGeneratedBy`, of(id(3))),
+        link(of(id(3)), RDF_TYPE, `${PROV}Activity`),
+        link(of(id(4)), RDF_TYPE, `${PROV}Activity`),
+        link(of(id(4)), RDF_TYPE, `${PROV}Activity`),
+        link(of(id(3)), `${PROV}used`, of(id(5))),
+      ],
+    };
+  };
+
+  it("reads it as it reads a draft with shorter ids", () => {
+    expect(of(id(0)).length).toBe(16_383);
+    expect(there(0).length).toBeGreaterThan(16_383);
+    const model = draftReleaseModel(draft(), elsewhere);
+    expect(model.distractors.map((one) => [one.iri, one.typed])).toEqual([
+      [there(0), true],
+      [there(1), true],
+      [there(2), false],
+    ]);
+    expect(model.activities).toEqual([
+      { iri: there(3), generating: true },
+      { iri: there(4), generating: true },
+    ]);
+    expect(model.making.map((one) => [one.iri, one.used])).toEqual([
+      [there(3), [there(5)]],
+      [there(4), []],
+    ]);
+    expect(model.sourceDetails.map((one) => one.iri)).toEqual([there(5)]);
+  });
+
+  it("keys no set or map by a string past the bound on a term", () => {
+    expect(longestKey(() => draftReleaseModel(draft(), elsewhere))).toBeLessThanOrEqual(16_383);
+  });
+});
+
+/**
+ * The longest string `run` keys a Set or a Map by: V8 hashes a string
+ * longer than a term may be by its length alone (domain/pathKeys.ts).
+ */
+function longestKey(run: () => void): number {
+  let longest = 0;
+  const spy = (prototype: object, name: string) => {
+    const host = prototype as Record<string, (this: unknown, ...args: unknown[]) => unknown>;
+    const original = host[name]!;
+    return vi.spyOn(host, name).mockImplementation(function (this: unknown, ...args: unknown[]) {
+      if (typeof args[0] === "string") longest = Math.max(longest, args[0].length);
+      return original.apply(this, args);
+    });
+  };
+  const spies = [
+    ...["add", "has"].map((name) => spy(Set.prototype, name)),
+    ...["get", "set", "has"].map((name) => spy(Map.prototype, name)),
+  ];
+  try {
+    run();
+  } finally {
+    for (const spy of spies) spy.mockRestore();
+  }
+  expect(longest).toBeGreaterThan(0);
+  return longest;
+}

@@ -1050,12 +1050,24 @@ flowchart LR
   from them. The guest's pod on the device stores a document as
   N-Triples lines, each joined from three terms, so it keys a line by
   the path of its pieces, each no longer than the bound (`TripleLines`
-  in the `solid` package). The app refuses to write a longer term
-  (`termTooLong`), so whatever it writes it can read back. A document
-  written before the bound, with a longer text in it, can't be read any
-  more: the app shows the read's error and offers no way to shorten the
-  text. The longest text in `decks/` is about a third of the bound, and
-  a test fails once a term there reaches half of it.
+  in the `solid` package). An answer names its card and the wrong
+  option chosen in the deck's cards document as it is now
+  (`deckAnswers` in `cardHistory.ts`): an IRI joined from that document
+  and a fragment. The answer statistics so count cards and wrong
+  options by their fragment ids alone. Merging a guest's answers into a
+  deck (`mergedAnswer` in `guest.ts`) joins IRIs the same way, but only
+  to write them, and a write refuses a term past the bound. A release
+  check moves a draft's IRIs where it is published (`draftReleaseModel`
+  in `draftModel.ts`), which can push them past the bound. The model so
+  keys each IRI of the release by its fragment (`keyOf`, which
+  `provenanceOf` takes too). The shape check refuses a release with a
+  moved IRI past the bound (`termTooLong`), as it couldn't be written
+  there. The app refuses to write a longer term (`termTooLong`), so
+  whatever it writes it can read back. A document written before the
+  bound, with a longer text in it, can't be read any more: the app
+  shows the read's error and offers no way to shorten the text. The
+  longest text in `decks/` is about a third of the bound, and a test
+  fails once a term there reaches half of it.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

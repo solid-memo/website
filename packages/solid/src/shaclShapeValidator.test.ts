@@ -1578,6 +1578,24 @@ describe("validateRelease", () => {
     );
   }, 60_000);
 
+  it("refuses a release whose IRIs, moved where it is published, are longer than a term may be", async () => {
+    const base = courseDraft();
+    // A subject in `<>` as long as a term may be at the draft's own address.
+    const long = of("l".repeat(MAX_TERM_CHARACTERS - 2 - of("").length));
+    const draft = {
+      ...base,
+      triples: [
+        ...base.triples,
+        { subject: long, predicate: RDF.type, object: { kind: "iri" as const, value: SM.Card } },
+      ],
+    };
+    await expect(validator.validateRelease(draft, draft.url)).resolves.toBeDefined();
+    await expect(validator.validateRelease(draft, `${draft.url}x`)).rejects.toMatchObject({
+      code: "termTooLong",
+      vars: { limit: MAX_TERM_CHARACTERS },
+    });
+  }, 60_000);
+
   it("names a date of the release its readers cannot read as an error, and a value no date-time at all once", async () => {
     const base = courseDraft();
     const created = (value: string) => ({

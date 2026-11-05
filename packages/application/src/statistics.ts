@@ -168,7 +168,7 @@ export interface DeckInsight {
   scheduled: number;
   intervals: Bin[];
   eases: Bin[];
-  /** How often each card was forgotten, by its IRI in the deck's cards document now. */
+  /** How often each card was forgotten, by its fragment id (`Card.id`). */
   lapses: LapseIndex;
   /** The deck's cards in use forgotten LEECH_LAPSES times or more, the most forgotten first. */
   leeches: { card: Card; lapses: number }[];
@@ -466,7 +466,7 @@ export function createStatisticsUseCases({
       const states = scheduledStates(cards.value, deck.direction, reviews.value.sm2);
       const due = scheduledStates(cards.value, deck.direction, dueStatesOf(reviews.value, prefs));
       const lapses = lapseIndex(deckAnswers(answers, deck));
-      const live = new Map(activeCards(cards.value).map((card) => [card.url, card]));
+      const live = new Map(activeCards(cards.value).map((card) => [card.id, card]));
       return {
         today,
         maxReviewsPerDay,
@@ -475,8 +475,8 @@ export function createStatisticsUseCases({
         intervals: intervalHistogram(due),
         eases: easeHistogram(states),
         lapses,
-        leeches: leechesOf(lapses).flatMap(({ cardUrl, lapses }) => {
-          const card = live.get(cardUrl);
+        leeches: leechesOf(lapses).flatMap(({ cardId, lapses }) => {
+          const card = live.get(cardId);
           return card === undefined ? [] : [{ card, lapses }];
         }),
       };

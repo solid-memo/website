@@ -39,6 +39,7 @@ import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
 import { getSolidDatasetLinear } from "./client/resources";
+import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 
@@ -234,6 +235,25 @@ function formatVersionViolation(version: number): Violation {
     severity: "violation",
     constraint: "FormatVersionRange",
   };
+}
+
+/**
+ * Throws termTooLong when an IRI of the release, moved from `from` to
+ * `to`, is longer than a term may be (MAX_TERM_CHARACTERS), as in `<>`:
+ * such a release could never be written there, and the check keys its
+ * subjects by their IRIs, which V8 hashes past that length by their
+ * length alone.
+ */
+function refuseMovedPastBound(quads: readonly Quad[], from: string, to: string): void {
+  for (const q of quads) {
+    for (const term of [q.subject, q.predicate, q.object, q.graph]) {
+      if (
+        term.termType === "NamedNode" &&
+        moved(term.value, from, to).length + 2 > MAX_TERM_CHARACTERS
+      )
+        throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
+    }
+  }
 }
 
 /** Each subject's statements, gathered in one pass. */
@@ -654,6 +674,7 @@ export function createShaclShapeValidator({
       const assembled = quadsOf(
         datasetFromQuads(releaseQuadsOf(draftQuads(draft), draft.url, new Date().toISOString())),
       );
+      refuseMovedPastBound(assembled, draft.url, asUrl);
       const release = mapIris(mergeDatasets(assembled), (iri) => moved(iri, draft.url, asUrl));
       const quads = [...(release as Iterable<Quad>)];
       const back = (iri: string) => moved(iri, asUrl, draft.url);

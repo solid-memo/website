@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { Answer } from "./answer";
 import {
   cardAnswers,
@@ -12,6 +12,7 @@ import {
   hardestCardsOf,
   lapseIndex,
 } from "./cardHistory";
+import { fragmentIdOf } from "./subjectUrl";
 import { growth } from "./testing/growth";
 
 const DECK = "https://pod.example/a/catalog.ttl#deck-1";
@@ -74,8 +75,8 @@ describe("distractorPicksOf", () => {
       answer(4),
     ]);
     expect([...picks]).toEqual([
-      [`${CARDS}#d1`, 2],
-      [`${CARDS}#d2`, 1],
+      ["d1", 2],
+      ["d2", 1],
     ]);
   });
 });
@@ -96,8 +97,8 @@ describe("lapseIndex", () => {
       answer(6, { grade: 5, priorIntervalDays: 1, cardUrl: `${CARDS}#c-3` }),
     ]);
     expect([...index.lapses]).toEqual([
-      [`${CARDS}#c-1`, 3],
-      [`${CARDS}#c-2`, 1],
+      ["c-1", 3],
+      ["c-2", 1],
     ]);
     expect(index.since).toBe("2025-03");
   });
@@ -265,5 +266,97 @@ describe("confusionsOf", () => {
       { card: first, distractor: option("c-1-d2"), picks: 2 },
       { card: second, distractor: option("c-2-d1"), picks: 1 },
     ]);
+  });
+});
+
+describe("the answers of a deck, their card and wrong option names as long as a term may be", () => {
+  // The longest term the read limits accept (MAX_TERM_CHARACTERS, with
+  // its <>): a short document and the rest its fragment, so that the IRI
+  // in the deck's cards document is past the bound on a term.
+  const deck = { url: DECK, cardsDocumentUrl: CARDS };
+  const term = (pad: string, n: number) =>
+    `https://a.b/#${pad.repeat(16_381 - 13 - 6)}${String(n).padStart(6, "0")}`;
+  const logOf = (count: number) =>
+    deckAnswers(
+      Array.from({ length: count }, (_, n) =>
+        answer(1, {
+          id: `answer-${n}`,
+          cardUrl: term("c", n),
+          chosenDistractor: term("d", n),
+          grade: 0,
+          priorIntervalDays: 3,
+        }),
+      ),
+      deck,
+    );
+
+  it("are counted by their fragment ids, the same as shorter ones", () => {
+    const log = logOf(2);
+    const ids = log.map((one) => fragmentIdOf(one.cardUrl));
+    expect(log[0]!.cardUrl.length).toBeGreaterThan(16_383);
+    expect([...lapseIndex(log).lapses]).toEqual(ids.map((id) => [id, 1]));
+    expect([...distractorPicksOf(log).keys()]).toEqual(
+      log.map((one) => fragmentIdOf(one.chosenDistractor!)),
+    );
+    const cards = log.map((one) => ({ url: one.cardUrl }));
+    expect(hardestCardsOf(log, cards)).toEqual({
+      reviews: 2,
+      cards: cards.map((card) => ({ card, lapses: 1, reviews: 1 })),
+    });
+  });
+
+  it("key no map by a string past the bound on a term", () => {
+    // V8 hashes a longer string by its length alone (domain/pathKeys.ts).
+    const longest = { key: 0 };
+    const seen = (key: unknown) => {
+      if (typeof key === "string") longest.key = Math.max(longest.key, key.length);
+    };
+    const spies = (["get", "set", "has"] as const).map((name) => {
+      const original = Map.prototype[name] as (
+        this: Map<unknown, unknown>,
+        ...args: unknown[]
+      ) => unknown;
+      return vi.spyOn(Map.prototype, name).mockImplementation(function (
+        this: Map<unknown, unknown>,
+        ...args: unknown[]
+      ) {
+        seen(args[0]);
+        return original.apply(this, args);
+      } as never);
+    });
+    try {
+      const log = logOf(2);
+      const cards = log.map((one, n) => ({
+        url: one.cardUrl,
+        distractors: [{ id: fragmentIdOf(log[n]!.chosenDistractor!), text: { en: "No" } }],
+      }));
+      lapseIndex(log);
+      distractorPicksOf(log);
+      hardestCardsOf(log, cards);
+      expect(confusionsOf(log, cards)).toHaveLength(2);
+    } finally {
+      for (const spy of spies) spy.mockRestore();
+    }
+    expect(longest.key).toBeGreaterThan(0);
+    expect(longest.key).toBeLessThanOrEqual(16_383);
+  });
+
+  // The linear check the advisory's case calls for; the guard against
+  // keys joined past the term bound is the key-length test above.
+  it("are counted in one pass, however many there are", () => {
+    const ratio = growth(
+      (count) => {
+        const log = logOf(count);
+        // No cards given: what is timed is the counting, not the sort.
+        return () => {
+          lapseIndex(log);
+          distractorPicksOf(log);
+          hardestCardsOf(log, []);
+        };
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
