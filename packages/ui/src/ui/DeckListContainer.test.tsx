@@ -18,6 +18,7 @@ import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 import { HIGHLIGHTS } from "./highlights";
+import { boundedQueryKeyHash } from "./queryKeys";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -50,9 +51,10 @@ function renderContainer(
   useCases: UseCases,
   seed: (queryClient: QueryClient) => void = () => {},
   isSetAside?: (deck: Deck) => boolean,
+  on: Instance = instance,
 ) {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
+    defaultOptions: { queries: { retry: false, queryKeyHashFn: boundedQueryKeyHash() } },
   });
   seed(queryClient);
   const onStudyDeck = vi.fn();
@@ -61,7 +63,7 @@ function renderContainer(
     <QueryClientProvider client={queryClient}>
       <DeckListContainer
         useCases={useCases}
-        instance={instance}
+        instance={on}
         isSetAside={isSetAside}
         onStudyDeck={onStudyDeck}
         onCourseStarted={onCourseStarted}
@@ -1186,6 +1188,42 @@ describe("DeckListContainer, renaming and deleting decks", () => {
     });
     await waitFor(() => {
       expect(editDeckTree).toHaveBeenCalledOnce();
+    });
+    expect(useCases.listDeckTree).toHaveBeenCalledOnce();
+  });
+
+  it("leaves the arrangement to an edit waiting behind a rename, however long the instance's URL", async () => {
+    // Its key's JSON is past the length the hash keeps (boundedQueryKeyHash).
+    const long: Instance = { ...instance, url: `https://pod.example/${"a".repeat(16_400)}/` };
+    const { editDeckTree, writes } = deferredEdits();
+    let written: (renamed: Deck) => void = () => undefined;
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, second]),
+      editDeckTree,
+      renameDeck: vi.fn(() => new Promise<Deck>((resolve) => (written = resolve))),
+    });
+    const { queryClient } = renderContainer(useCases, undefined, undefined, long);
+    await screen.findByRole("link", { name: "Kana" });
+    expect(
+      queryClient.getQueryCache().find({ queryKey: ["decks", long.url, "tree"] })!.queryHash,
+    ).toMatch(/^#/);
+    choose("Kanji N5", "Rename");
+    const field = screen.getByRole("textbox", { name: "Deck name" });
+    fireEvent.input(field, { target: { value: "Kanji N4" } });
+    fireEvent.submit(field.closest("form")!);
+    await screen.findByRole("link", { name: "Kanji N4" });
+    moveDown("Kanji N4");
+    written({ ...deck, title: { en: "Kanji N4" } });
+    await waitFor(() => {
+      expect(editDeckTree).toHaveBeenCalledOnce();
+    });
+    expect(useCases.listDeckTree).toHaveBeenCalledOnce();
+    writes[0]!.resolve({
+      readOnly: false,
+      children: [node(second), node({ ...deck, title: { en: "Kanji N4" } })],
+    });
+    await waitFor(() => {
+      expect(order()).toEqual(["Kana", "Kanji N4"]);
     });
     expect(useCases.listDeckTree).toHaveBeenCalledOnce();
   });

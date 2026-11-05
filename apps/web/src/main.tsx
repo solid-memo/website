@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createAppUseCases } from "@solid-memo/composition/appUseCases";
 import { ErrorGuard } from "@solid-memo/ui/ErrorGuard";
 import { loadLocale } from "@solid-memo/ui/i18n";
+import { boundedQueryKeyHash } from "@solid-memo/ui/queryKeys";
 import { retryable } from "@solid-memo/ui/retryable";
 import "@solid-memo/ui/style.css";
 import { App } from "./App";
@@ -35,8 +36,14 @@ const useCases = createAppUseCases({
 });
 
 // A failed read is tried three times more only when another try may pass, so a checked outcome shows at once (retryable).
+// A key's hash stays short, however long the IRIs in it (boundedQueryKeyHash).
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { retry: (count, error) => count < 3 && retryable(error) } },
+  defaultOptions: {
+    queries: {
+      retry: (count, error) => count < 3 && retryable(error),
+      queryKeyHashFn: boundedQueryKeyHash(),
+    },
+  },
 });
 
 const source = {
