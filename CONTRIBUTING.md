@@ -129,7 +129,11 @@ CI's `commits` job lints a pull request's commits with commitlint
 that every commit has a body and names its issue, and both refuse a
 merge commit, which commitlint does not lint: update your branch by
 rebasing it on `main`. They refuse a `chore(release)` header too: it
-is semantic-release's, for the release commit it makes on `main`.
+is semantic-release's, for the release commit it makes on `main`. And
+they refuse a message that holds one of GitHub's keywords that skip CI
+(`[skip ci]`, `[ci skip]`, `[no ci]`, `[skip actions]`,
+`[actions skip]`, or a `skip-checks:` trailer), in upper or lower
+case: CI runs on every push to `main`, and the deploy only after it.
 `npm run lint:commits` lints the commits since `origin/main`, so from a
 fork, sync the fork's `main` with this repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the

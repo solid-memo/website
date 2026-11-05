@@ -26,6 +26,9 @@ type Config = {
 };
 
 const config = (await import(new URL("../release.config.mjs", import.meta.url).href)) as Config;
+const { SKIP_KEYWORD } = (await import(
+  new URL("../commitlint.config.mjs", import.meta.url).href
+)) as { SKIP_KEYWORD: RegExp };
 
 function options(name: string): Record<string, unknown> {
   const plugin = config.default.plugins.find(([plugin]) => plugin === name);
@@ -53,8 +56,8 @@ describe("release.config.mjs", () => {
     for (const asset of config.assets) expect(existsSync(join(ROOT, asset))).toBe(true);
   });
 
-  it("does not skip CI on the release commit, so the deploy shows its version", () => {
-    expect(options("@semantic-release/git").message).not.toMatch(/skip ci|ci skip/i);
+  it("titles the release commit with its version alone, which GitHub skips no CI for", () => {
+    expect(options("@semantic-release/git").message).toBe("chore(release): ${nextRelease.version}");
   });
 
   it("writes the version, then the docs' archive, with npm scripts that are there", () => {
@@ -211,6 +214,23 @@ describe("the commits, as the release reads them", () => {
       `* **studio:** check a draft's links ([aaaaaaa](https://github.com/solid-memo/website/commit/${hash}))`,
     );
     expect(written).not.toContain("say why");
+  });
+
+  // The release commit's message, as @semantic-release/git fills in its
+  // template: GitHub skips CI on a push whose message holds a skip
+  // keyword anywhere, and the deploy runs only after CI on it.
+  it("writes a release commit message without the skip keywords the notes copy", async () => {
+    const written = await notes({
+      hash: "f".repeat(40),
+      message: `fix(web): tidy the deck list [skip ci]\n\nThe list reads better.\n\nCloses: #1`,
+    });
+    expect(written).toMatch(SKIP_KEYWORD);
+    const template = options("@semantic-release/git").message as string;
+    const message = template
+      .replaceAll("${nextRelease.version}", "1.1.0")
+      .replaceAll("${nextRelease.notes}", written);
+    expect(message).toBe("chore(release): 1.1.0");
+    expect(message).not.toMatch(SKIP_KEYWORD);
   });
 
   // Like the body of a4d7b99, which 5.2.0's notes say closes #9ba6b2 and

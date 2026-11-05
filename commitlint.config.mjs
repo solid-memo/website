@@ -35,6 +35,13 @@
  * advisory instead (`Refs: GHSA-xxxx-xxxx-xxxx`), which is published
  * once the fix is deployed.
  *
+ * No commit holds one of the keywords that make GitHub skip a push's
+ * workflows (`[skip ci]`, `[ci skip]`, `[no ci]`, `[skip actions]`,
+ * `[actions skip]`, or a `skip-checks:` trailer), in upper or lower
+ * case, anywhere in its message: CI must run on every push to main, and
+ * the deploy runs only after it. A commit commitlint otherwise skips,
+ * such as a revert, is checked for them too.
+ *
  * A `chore(release)` header is semantic-release's alone, on the release
  * commit it pushes onto main (docs/releasing.md#what-a-release-does), so
  * a commit of a pull request or a branch may not have it. commitlint
@@ -67,8 +74,26 @@ function referencesOrRenovate({ references, raw }) {
 }
 
 /**
+ * GitHub's keywords that skip the workflows of a push whose head commit's
+ * message holds one, anywhere in it and in upper or lower case, as
+ * GitHub's docs on skipping workflow runs list them.
+ */
+export const SKIP_KEYWORD =
+  /\[\s*(?:skip\s+ci|ci\s+skip|no\s+ci|skip\s+actions|actions\s+skip)\s*\]|^\s*skip-checks\s*:/im;
+
+/**
+ * @param {{ raw: string }} commit
+ */
+function noSkipKeyword({ raw }) {
+  return [
+    !SKIP_KEYWORD.test(raw),
+    "the message must not hold a keyword that makes GitHub skip CI, such as `[skip ci]` or a `skip-checks:` trailer: CI and the deploy must run on main (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
  * The header semantic-release titles its release commit with
- * (release.config.mjs), in any case and with or without a `!`.
+ * (release.config.mjs), in upper or lower case and with or without a `!`.
  *
  * @param {{ header: string | null }} commit
  */
@@ -84,7 +109,8 @@ function notARelease({ header }) {
  * that is a version: merges, which CI and `npm run lint:commits` refuse
  * on their own, reverts, reapplies, and fixups. They are matched against
  * the header alone, so a line of the body cannot make a commit skip
- * every rule.
+ * every rule. A message with a skip keyword is never skipped, so that
+ * the rule against them holds for every commit.
  */
 const IGNORED = [
   /^((Merge pull request)|(Merge (.*?) into (.*?)|(Merge branch (.*?)))$)/,
@@ -103,7 +129,7 @@ export default {
   ignores: [
     (/** @type {string} */ message) => {
       const header = message.split(/\r?\n/, 1)[0];
-      return IGNORED.some((pattern) => pattern.test(header));
+      return !SKIP_KEYWORD.test(message) && IGNORED.some((pattern) => pattern.test(header));
     },
   ],
   extends: ["@commitlint/config-conventional"],
@@ -112,6 +138,7 @@ export default {
       rules: {
         "references-or-renovate": referencesOrRenovate,
         "not-a-release": notARelease,
+        "no-skip-keyword": noSkipKeyword,
       },
     },
   ],
@@ -122,5 +149,6 @@ export default {
     "body-empty": [2, "never"],
     "references-or-renovate": [2, "always"],
     "not-a-release": [2, "always"],
+    "no-skip-keyword": [2, "always"],
   },
 };

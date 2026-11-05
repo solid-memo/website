@@ -109,6 +109,59 @@ describe("commitlint.config.mjs", () => {
     );
   });
 
+  // GitHub skips CI on a push whose head commit's message holds one, and
+  // the deploy runs only after CI.
+  it("fails a commit that holds a keyword that skips CI, in any case, anywhere", async () => {
+    const keywords = [
+      "[skip ci]",
+      "[ci skip]",
+      "[no ci]",
+      "[skip actions]",
+      "[actions skip]",
+      "[Skip CI]",
+      "[ SKIP  ACTIONS ]",
+    ];
+    for (const keyword of keywords) {
+      expect(
+        await errors(`fix(web): tidy the deck list ${keyword}
+
+${why}
+
+Refs: #1`),
+      ).toEqual(["no-skip-keyword"]);
+      expect(
+        await errors(`fix(web): tidy the deck list
+
+${why} ${keyword}
+
+Refs: #1`),
+      ).toEqual(["no-skip-keyword"]);
+    }
+    for (const trailer of ["skip-checks: true", "Skip-Checks:true"]) {
+      expect(
+        await errors(`fix(web): tidy the deck list
+
+${why}
+
+Refs: #1
+${trailer}`),
+      ).toEqual(["no-skip-keyword"]);
+    }
+    // Even in a commit the other rules skip.
+    expect(await errors('Revert "fix: keep the title [skip ci]"')).toContain("no-skip-keyword");
+    expect(await errors("fixup! fix: keep the title\n\n[ci skip]")).toContain("no-skip-keyword");
+    // The words alone, outside the brackets or the trailer, skip nothing.
+    for (const words of ["skip ci on drafts", "[skip] ci", "the skip-checks: line"]) {
+      expect(
+        await errors(`fix(web): ${words}
+
+${why}
+
+Refs: #1`),
+      ).toEqual([]);
+    }
+  });
+
   it("still skips a revert and a fixup, as commitlint does by default", async () => {
     expect(await errors('Revert "fix: keep the deck\'s title"')).toEqual([]);
     expect(await errors("fixup! fix: keep the deck's title")).toEqual([]);
