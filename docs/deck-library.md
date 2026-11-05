@@ -1047,12 +1047,15 @@ flowchart LR
   check names, a link the shape check looks up, a part or a statement
   of a draft, a card's two sides. Each of those is a key of its own in
   a path of them (`PathMap` in `pathKeys.ts`), never one string joined
-  from them. The app refuses to write a longer term (`termTooLong`), so
-  whatever it writes it can read back. A document written before the
-  bound, with a longer text in it, can't be read any more: the app
-  shows the read's error and offers no way to shorten the text. The
-  longest text in `decks/` is about a third of the bound, and a test
-  fails once a term there reaches half of it.
+  from them. The guest's pod on the device stores a document as
+  N-Triples lines, each joined from three terms, so it keys a line by
+  the path of its pieces, each no longer than the bound (`TripleLines`
+  in the `solid` package). The app refuses to write a longer term
+  (`termTooLong`), so whatever it writes it can read back. A document
+  written before the bound, with a longer text in it, can't be read any
+  more: the app shows the read's error and offers no way to shorten the
+  text. The longest text in `decks/` is about a third of the bound, and
+  a test fails once a term there reaches half of it.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { triplesOf } from "./ntriples";
+import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { TripleLines, triplesOf } from "./ntriples";
 
 const DOC = "https://pod.example/doc.ttl";
 
@@ -26,5 +27,31 @@ describe("triplesOf", () => {
 
   it("rejects what does not parse", async () => {
     await expect(triplesOf(DOC, "<#a> <#p")).rejects.toThrow();
+  });
+});
+
+describe("TripleLines", () => {
+  const long = (end: string, start = "") =>
+    `<${DOC}#a> <${DOC}#p> "${start}${"x".repeat(MAX_TERM_CHARACTERS)}${end}" .`;
+
+  it("holds each line once, in the order each was first added, as a Set does", () => {
+    const lines = new TripleLines(["b", "a", "b"]);
+    lines.add("c");
+    lines.add("a");
+    lines.delete("b");
+    lines.delete("d");
+    lines.add("b");
+    expect([...lines]).toEqual(["a", "c", "b"]);
+  });
+
+  it("tells lines past the bound on a term apart wherever they differ", () => {
+    const lines = new TripleLines([long("1"), long("2"), long("1", "y"), long("1")]);
+    expect([...lines]).toEqual([long("1"), long("2"), long("1", "y")]);
+    lines.delete(long("2"));
+    expect([...lines]).toEqual([long("1"), long("1", "y")]);
+  });
+
+  it("keeps a document's lines once", async () => {
+    expect([...(await triplesOf(DOC, "<#a> <#p> 1 . <#a> <#p> 1 ."))]).toHaveLength(1);
   });
 });

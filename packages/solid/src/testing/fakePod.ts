@@ -82,7 +82,7 @@ export function fakePod() {
     if (headers.get("If-None-Match") === "*" && doc !== undefined) return answer(412);
     const body = String(init?.body ?? "");
     if (method === "PUT") {
-      documents.set(url, { triples: await triplesOf(url, body), etag: nextEtag() });
+      documents.set(url, { triples: new Set(await triplesOf(url, body)), etag: nextEtag() });
       return answer(201);
     }
     if (method === "PATCH") {
@@ -100,7 +100,7 @@ export function fakePod() {
     fetch,
     requests,
     async put(url: string, turtle: string) {
-      documents.set(url, { triples: await triplesOf(url, turtle), etag: nextEtag() });
+      documents.set(url, { triples: new Set(await triplesOf(url, turtle)), etag: nextEtag() });
     },
     /** The document as N-Triples lines; undefined when there is none. */
     triples(url: string): string[] | undefined {
