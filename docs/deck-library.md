@@ -817,8 +817,13 @@ Such a release is made from a draft in the creator's pod
 - Every subject of the draft moves to the release's address, its
   `@base`, and its release and change time are set.
 - A series the draft starts (its own `<#series>`) is described in it,
-  the release its first, last and current version; one an earlier
-  release described still is, the release added as last and current.
+  the release its first, last and current version. One an earlier
+  release described still is, the release added as last and current,
+  when it lists the version the release follows (`dcat:prev`) and is in
+  a document in that version's container or in one above it. Any other
+  series elsewhere says nothing of the release: what the draft states
+  of it is published as it is, without the release as its last or
+  current version.
 - A series an index describes, as this library's, is left to the index,
   but a next version's draft copies the series, the publisher and the
   earlier versions from the index (`readLinked`, `linkedDescription`).
@@ -827,7 +832,8 @@ Such a release is made from a draft in the creator's pod
   from a next version carries those statements.
 - A `decks/` release made a draft and published again comes back as it
   was, but for what publishing sets (a test of its own,
-  [testing.md](testing.md#strategy-per-layer)).
+  [testing.md](testing.md#strategy-per-layer)). Imported from a file in
+  the Studio, it starts a series of its own instead of the index's.
 
 ## In the app
 

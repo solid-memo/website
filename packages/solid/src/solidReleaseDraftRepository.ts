@@ -35,6 +35,7 @@ import {
   unreadableDraftSummary,
   type ReleaseDraftSummary,
 } from "@solid-memo/domain/release/draftLayout";
+import { seriesAbove } from "@solid-memo/domain/release/continuityRules";
 import { DCAT_NS, DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import {
   RDF_TYPE,
@@ -738,19 +739,31 @@ function withBlankNodes(
 
 /**
  * The series a release is in, described in it when the draft says it
- * starts it there (its IRI the release's own, `<#series>`) or describes
- * it already: the release its last and current version, one of its
- * versions, its title, description, publisher, themes and keywords the
- * release's (docs/deck-library.md, A release outside the library). A
- * series elsewhere, which an index describes, is left to it.
+ * starts it there (its IRI the release's own, `<#series>`), or when it
+ * describes a series elsewhere that lists the version it follows
+ * (`dcat:prev`), as a next version does, and is in a document in that
+ * version's container or one above it (`seriesAbove`): the release its
+ * last and current version, one of its versions, its title,
+ * description, publisher, themes and keywords the release's
+ * (docs/deck-library.md, A release outside the library). Any other
+ * series elsewhere, which an index describes, is left to it, and says
+ * nothing of the release: a release would otherwise make itself the
+ * newest version of another's series, the version it follows only
+ * claiming to be in it (GHSA-38m7-8r5j-q79f).
  */
 function withSeries(quads: readonly Quad[], target: string): Quad[] {
   const of = (subject: string, predicate: string) =>
     quads.filter((quad) => quad.subject.value === subject && quad.predicate.value === predicate);
   const [series] = of(target, DCAT("inSeries")).map((quad) => quad.object.value);
   if (series === undefined) return [...quads];
+  const own = series.startsWith(`${target}#`);
   const described = quads.some((quad) => quad.subject.value === series);
-  if (!described && !series.startsWith(`${target}#`)) return [...quads];
+  const previous = new Set(of(target, DCAT("prev")).map((quad) => quad.object.value));
+  const follows = of(series, DCAT("hasVersion")).some(
+    (quad) => previous.has(quad.object.value) && seriesAbove(quad.object.value, series),
+  );
+  if (!own && !(described && follows))
+    return quads.filter((quad) => !(quad.subject.value === series && quad.object.value === target));
   const replaced = new Set([
     DCAT("last"),
     DCAT("hasCurrentVersion"),

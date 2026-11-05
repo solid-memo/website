@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT, link } from "../testing/releaseDraft.ts";
-import { moved, rebaseDraft, releaseToDraft } from "./releaseToDraft.ts";
+import { moved, rebaseDraft, releaseToDraft, withOwnSeries } from "./releaseToDraft.ts";
 
 const RELEASE = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 
@@ -70,5 +70,69 @@ describe("releaseToDraft", () => {
       root,
       published: { ids: {}, activities: [] },
     });
+  });
+});
+
+describe("withOwnSeries", () => {
+  const OTHER = "https://creator.example/memo/releases/capitals/v1.ttl";
+  const SERIES = `${OTHER}#series`;
+  const DCAT = "http://www.w3.org/ns/dcat#";
+  /** The release in `inSeries` and `isVersionOf`, and stating of SERIES what an index says of one. */
+  const inSeries = (
+    root: { inSeries?: string; isVersionOf?: string },
+    more: ReturnType<typeof release>["triples"] = [],
+  ) => {
+    const { inSeries: _series, isVersionOf: _version, ...rest } = release().root;
+    return {
+      ...release(),
+      root: { ...rest, ...root },
+      triples: [
+        ...release().triples,
+        link(SERIES, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", `${DCAT}DatasetSeries`),
+        link(SERIES, `${DCAT}last`, RELEASE),
+        ...more,
+      ],
+    };
+  };
+
+  it("keeps a series that is one of the release's own subjects", () => {
+    const own = release();
+    expect(withOwnSeries(own)).toBe(own);
+    const none = inSeries({});
+    expect(withOwnSeries(none)).toBe(none);
+  });
+
+  it("gives a release in another's series one of its own, dropping what it states of that one (GHSA-38m7-8r5j-q79f)", () => {
+    const foreign = withOwnSeries(inSeries({ inSeries: SERIES, isVersionOf: SERIES }));
+    expect(foreign.root.inSeries).toBe(`${RELEASE}#series`);
+    expect(foreign.root.isVersionOf).toBe(`${RELEASE}#series`);
+    expect(foreign.triples).toEqual(release().triples);
+    expect(releaseToDraft(foreign, DRAFT).root.inSeries).toBe(`${DRAFT}#series`);
+  });
+
+  it("names its own series `#series-2`, … when a subject of it has that id", () => {
+    const taken = inSeries({ inSeries: SERIES }, [
+      link(`${RELEASE}#series`, "https://other.example/p", RELEASE),
+    ]);
+    expect(withOwnSeries(taken).root.inSeries).toBe(`${RELEASE}#series-2`);
+    expect(withOwnSeries(taken).root.isVersionOf).toBeUndefined();
+  });
+
+  it("makes a release a version of its own series, not another's", () => {
+    const own = `${RELEASE}#series`;
+    expect(withOwnSeries(inSeries({ inSeries: own, isVersionOf: SERIES })).root).toMatchObject({
+      inSeries: own,
+      isVersionOf: own,
+    });
+    const versionOnly = withOwnSeries(inSeries({ isVersionOf: SERIES })).root;
+    expect(versionOnly.inSeries).toBeUndefined();
+    expect(versionOnly.isVersionOf).toBeUndefined();
+  });
+
+  it("keeps what a release named as its own series states of itself", () => {
+    const kept = link(RELEASE, "https://other.example/keep", RELEASE);
+    const itself = withOwnSeries(inSeries({ inSeries: RELEASE }, [kept]));
+    expect(itself.root.inSeries).toBe(`${RELEASE}#series`);
+    expect(itself.triples).toContainEqual(kept);
   });
 });

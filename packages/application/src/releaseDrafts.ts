@@ -53,7 +53,11 @@ import {
 } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseModel } from "@solid-memo/domain/release/releaseModel";
 import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
-import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
+import {
+  rebaseDraft,
+  releaseToDraft,
+  withOwnSeries,
+} from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import type {
   DeckLibrary,
@@ -90,7 +94,7 @@ export type NewDraft =
    * otherwise.
    */
   | { kind: "nextVersionOf"; url: string }
-  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements (ownStatements, releaseToDraft). */
+  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements and in a series of its own (ownStatements, withOwnSeries, releaseToDraft). */
   | { kind: "fromFile" };
 
 /** A draft made, and for one made from a copy of a release, that release: to start the next version of instead. */
@@ -590,10 +594,13 @@ export function createReleaseDraftUseCases({
         case "fromFile": {
           const file = await fileExchange.open(DECK_FILE_ACCEPT);
           if (file === null) return null;
+          // In a series of its own, unless the file's is one of its subjects (GHSA-38m7-8r5j-q79f).
           const release = draftable(
-            await releaseDraftRepository.parseRelease(
-              file.text,
-              deckFileFormatOf(file.name, file.text),
+            withOwnSeries(
+              await releaseDraftRepository.parseRelease(
+                file.text,
+                deckFileFormatOf(file.name, file.text),
+              ),
             ),
           );
           const version = Number(release.root.version ?? "1");

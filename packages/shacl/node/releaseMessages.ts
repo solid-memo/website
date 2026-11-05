@@ -87,7 +87,9 @@ function markdownText(problem: MarkdownProblem): string {
  * The problems worded here: all but curation (save the languages the
  * library asks, which the command checks of each deck's newest version), readiness and the shapes'
  * results (the Studio's: the library's command words what the shapes
- * find as the shapes do), `versionNotNext`, and the Studio's own parts
+ * find as the shapes do), `versionNotNext`, a pod's own series
+ * (`seriesNotOwn`, `seriesNotPrevious`: the command checks the
+ * library, whose index places a series), and the Studio's own parts
  * not read (the command reads every release, or fails).
  */
 export type WordedProblem = Exclude<
@@ -96,7 +98,7 @@ export type WordedProblem = Exclude<
   | ReadinessProblem
   | ShapeProblem
   | UnreadProblem
-  | { code: "versionNotNext" }
+  | { code: "versionNotNext" | "seriesNotOwn" | "seriesNotPrevious" }
 >;
 
 /**

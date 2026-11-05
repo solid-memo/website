@@ -6,9 +6,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
+import { newestRelease } from "@solid-memo/domain/library";
 import { courseProblems } from "@solid-memo/domain/release/courseRules";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { draftReleaseModel, strayPartsOf } from "@solid-memo/domain/release/draftModel";
+import { ruleProblems } from "@solid-memo/domain/release/releaseCheck";
 import {
   applyDraftChanges,
   blankDraft,
@@ -20,13 +22,14 @@ import {
 import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
+import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { READS_AT_ONCE } from "@solid-memo/application/atOnce";
 import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { RELEASE_LIMITS } from "./client/readLimits";
 import { datasetFromQuads } from "./client/rdf";
 import { turtleAt } from "./testing/contract/rdf";
-import { toLibraryCards } from "./mappers/libraryMapper";
+import { toLibraryCards, toStandaloneLibraryDeck } from "./mappers/libraryMapper";
 import { draftQuads } from "./mappers/releaseDraftMapper";
 import {
   DECKS,
@@ -1060,6 +1063,125 @@ describe("assemble", () => {
       expect(released.root.releasedAs).toBeUndefined();
     }
   });
+
+  it("publishes a release file in another's series in a series of its own, which no learner of that one is offered (GHSA-38m7-8r5j-q79f)", async () => {
+    const capitals = "https://creator.example/memo/releases/capitals/v1.ttl";
+    const series = `${capitals}#series`;
+    const published = `${INSTANCE}releases/spanish-verbs/v999.ttl`;
+    const text = `${readFileSync(join(DECKS_ROOT, "git-commands/v1.ttl"), "utf8")
+      .replace('dcat:version "1"', 'dcat:version "999"')
+      .replace("<https://solid-memo.com/decks/index.ttl#git-commands>", `<${series}>`)}
+<${series}> a dcat:DatasetSeries .
+`;
+    const pod = await draftPod();
+    const useCases = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: {} as never,
+      deckLibrary: {} as never,
+      shapeValidator: pod.validator,
+      fileExchange: { open: async () => ({ name: "verbs.ttl", text }), save: () => undefined },
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    const created = await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "fromFile" },
+      "https://pod.example/profile/card#me",
+    );
+    const draft = await useCases.getReleaseDraft(created!.draft.url);
+    expect(draft.root.inSeries).toBe(`${draft.url}#series`);
+    expect(draft.root.isVersionOf).toBe(`${draft.url}#series`);
+    const quads = await quadsOfTurtle(
+      await pod.repository.assemble(draft.url, published, NOW),
+      published,
+    );
+    expect(quads.filter((quad) => quad.subject.value === series)).toEqual([]);
+    const release = toStandaloneLibraryDeck(published, datasetFromQuads(quads));
+    expect(release.seriesUrl).toBe(`${published}#series`);
+    const copied = { ...release, url: capitals, seriesUrl: series, version: "1", releases: [] };
+    expect(newestRelease(copied, [release])).toBe(copied);
+  });
+
+  it("makes no series elsewhere that does not list the version it follows the release's, whatever the draft states", async () => {
+    const pod = await draftPod();
+    const series = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+    const DCAT = "http://www.w3.org/ns/dcat#";
+    const draft = course();
+    await pod.repository.create(INSTANCE, {
+      ...draft,
+      root: { ...draft.root, inSeries: series, isVersionOf: series },
+      triples: [
+        ...draft.triples,
+        {
+          subject: series,
+          predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+          object: { kind: "iri", value: `${DCAT}DatasetSeries` },
+        },
+        { subject: series, predicate: `${DCAT}last`, object: { kind: "iri", value: DRAFT } },
+      ],
+    });
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    const quads = await quadsOfTurtle(await pod.repository.assemble(DRAFT, target, NOW), target);
+    expect(
+      quads.filter((quad) => quad.subject.value === series).map((quad) => quad.predicate.value),
+    ).toEqual(["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]);
+  });
+
+  it.each([
+    ["off its origin", "https://other.example/memo/releases/capitals/v998.ttl"],
+    ["in another pod on its origin", "https://creator.example/mallory/releases/capitals/v998.ttl"],
+    [
+      "through an encoded slash",
+      "https://creator.example/memo/releases/capitals/..%2f..%2f..%2fmallory/v998.ttl",
+    ],
+  ])(
+    "makes the next version of a release that claims a series %s no version of that series, and the check names it (GHSA-38m7-8r5j-q79f)",
+    async (_, other) => {
+      const series = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+      const text = `${readFileSync(join(DECKS_ROOT, "git-commands/v1.ttl"), "utf8")
+        .replace("@base <https://solid-memo.com/decks/git-commands/v1.ttl>", `@base <${other}>`)
+        .replace('dcat:version "1"', 'dcat:version "998"')
+        .replaceAll("<https://solid-memo.com/decks/index.ttl#git-commands>", `<${series}>`)}
+<${series}> a dcat:DatasetSeries ; dcat:hasVersion <> ; dcat:last <> ; dcat:hasCurrentVersion <> .
+`;
+      const pod = await draftPod();
+      const otherFetch: typeof globalThis.fetch = async (input, init) =>
+        String(input instanceof Request ? input.url : input) === other
+          ? turtleFetch(text)(other, init)
+          : siteFetch(input, init);
+      const repository = createSolidReleaseDraftRepository({
+        fetch: pod.fetch,
+        releaseFetch: otherFetch,
+      });
+      const useCases = createReleaseDraftUseCases({
+        releaseDraftRepository: repository,
+        deckRepository: {} as never,
+        deckLibrary: {} as never,
+        shapeValidator: pod.validator,
+        fileExchange: {} as never,
+        storageGateway: { discoverStorages: async () => [] },
+        now: () => new Date(NOW),
+      });
+      const created = await useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "nextVersionOf", url: other },
+        "https://alice.example/profile/card#me",
+      );
+      const draft = await useCases.getReleaseDraft(created!.draft.url);
+      expect(draft.root).toMatchObject({ inSeries: series, prev: other, version: "999" });
+      expect(
+        ruleProblems(draftReleaseModel(draft), "pod").filter((p) => p.code === "seriesNotPrevious"),
+      ).toMatchObject([{ params: { series, previous: other } }]);
+      const published = `${INSTANCE}releases/capitals/v999.ttl`;
+      const quads = await quadsOfTurtle(
+        await repository.assemble(draft.url, published, NOW),
+        published,
+      );
+      expect(
+        quads.filter((quad) => quad.subject.value === series && quad.object.value === published),
+      ).toEqual([]);
+    },
+  );
 
   it("leaves a series described elsewhere to where it is, and a release with none as it is", async () => {
     const pod = await draftPod();

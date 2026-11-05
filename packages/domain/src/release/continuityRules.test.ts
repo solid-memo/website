@@ -3,8 +3,18 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
-import { card, chapter, distractor, model, RELEASE, step, text } from "../testing/releaseModel";
-import { continuityProblems } from "./continuityRules";
+import {
+  at,
+  card,
+  chapter,
+  distractor,
+  iri,
+  model,
+  RELEASE,
+  step,
+  text,
+} from "../testing/releaseModel";
+import { continuityProblems, ownSeriesProblems, seriesAbove } from "./continuityRules";
 
 const NEXT = "https://solid-memo.com/decks/solid/v2.ttl";
 const before = model({
@@ -71,4 +81,83 @@ it("names a version that is not the one before it plus one, when both state one"
   ).toEqual([{ version: 3, previousVersion: 1, previous: RELEASE }]);
   expect(continuityProblems(before, after({ version: [] }))).toEqual([]);
   expect(continuityProblems({ ...before, version: [] }, after({}))).toEqual([]);
+});
+
+it("names a series not its own of a release that follows none (GHSA-38m7-8r5j-q79f)", () => {
+  const OTHER = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+  expect(ownSeriesProblems(model({ inSeries: [iri(OTHER)] }))).toEqual([
+    {
+      severity: "error",
+      subject: RELEASE,
+      field: "http://www.w3.org/ns/dcat#inSeries",
+      related: [OTHER],
+      code: "seriesNotOwn",
+      params: { series: OTHER },
+    },
+  ]);
+  // Its own; one that follows a release, whose series is that one's; none, or one no IRI.
+  expect(ownSeriesProblems(model({ inSeries: [iri(at("series"))] }))).toEqual([]);
+  expect(ownSeriesProblems(model({ inSeries: [iri(OTHER)], prev: [iri(OTHER)] }))).toEqual([]);
+  expect(ownSeriesProblems(model({ inSeries: [] }))).toEqual([]);
+  expect(ownSeriesProblems(model({ inSeries: [text("series", "")] }))).toEqual([]);
+});
+
+it.each([
+  ["off its origin", "https://other.example/memo/releases/capitals/v998.ttl"],
+  ["in another pod on its origin", "https://creator.example/mallory/releases/capitals/v998.ttl"],
+])(
+  "names a series %s that a next version's release follows (GHSA-38m7-8r5j-q79f)",
+  (_, PREVIOUS) => {
+    const SERIES = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+    expect(ownSeriesProblems(model({ inSeries: [iri(SERIES)], prev: [iri(PREVIOUS)] }))).toEqual([
+      {
+        severity: "error",
+        subject: RELEASE,
+        field: "http://www.w3.org/ns/dcat#inSeries",
+        related: [SERIES, PREVIOUS],
+        code: "seriesNotPrevious",
+        params: { series: SERIES, previous: PREVIOUS },
+      },
+    ]);
+  },
+);
+
+it("takes a next version's series beside or above the release it follows", () => {
+  const SERIES = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+  // A pod's v1#series or a library's index; a prev no IRI is none.
+  const v1 = "https://creator.example/memo/releases/capitals/v1.ttl";
+  expect(ownSeriesProblems(model({ inSeries: [iri(SERIES)], prev: [iri(v1)] }))).toEqual([]);
+  expect(
+    ownSeriesProblems(
+      model({
+        inSeries: [iri("https://solid-memo.com/decks/index.ttl#solid")],
+        prev: [iri("https://solid-memo.com/decks/solid/v1.ttl")],
+      }),
+    ),
+  ).toEqual([]);
+  expect(
+    ownSeriesProblems(model({ inSeries: [iri(SERIES)], prev: [text(v1, "")] })).map((p) => p.code),
+  ).toEqual(["seriesNotOwn"]);
+});
+
+it("finds a series in the container of a release or one above it, on its origin", () => {
+  const release = "https://a.example/pod/releases/x/v2.ttl";
+  expect(seriesAbove(release, "https://a.example/pod/releases/x/v1.ttl#series")).toBe(true);
+  expect(seriesAbove(release, "https://a.example/pod/index.ttl#x")).toBe(true);
+  expect(seriesAbove(release, "https://a.example/other/releases/x/v1.ttl#series")).toBe(false);
+  expect(seriesAbove(release, "https://a.example/pod/releases/x/y/v1.ttl#series")).toBe(false);
+  expect(seriesAbove(release, "https://a.example/pod/releases/xy/v1.ttl#series")).toBe(false);
+  expect(seriesAbove(release, "https://a.example:8443/pod/releases/x/v1.ttl#series")).toBe(false);
+  expect(
+    seriesAbove("https://a.example/pod/../other/x/v2.ttl", "https://a.example/pod/x/v1.ttl#s"),
+  ).toBe(false);
+  for (const separator of ["%2f", "%2F", "%5c", "%5C"]) {
+    const encoded = `https://a.example/pod/releases/x/..${separator}..${separator}mallory/v2.ttl`;
+    expect(seriesAbove(encoded, "https://a.example/pod/releases/x/v1.ttl#series")).toBe(false);
+    expect(seriesAbove(release, `https://a.example/pod/releases/x${separator}v1.ttl#s`)).toBe(
+      false,
+    );
+  }
+  expect(seriesAbove("urn:x:1", "urn:x:2")).toBe(false);
+  expect(seriesAbove("not a URL", "not a URL")).toBe(false);
 });
