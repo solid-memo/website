@@ -74,6 +74,7 @@ or on Ctrl-C. The test names say which server and version:
 | `nextcloud` | Solid-Nextcloud: Nextcloud 32 with the Solid app, on SQLite, the pod `apps/solid/~alice/storage/` | built here from a commit of the app ([servers/nextcloud/](../e2e/pod/servers/nextcloud/Dockerfile)), installed on every start, alice's pod opened by a hook | advisory |
 | `jss` | JavaScript Solid Server, files in the container, open to anyone (`--public`, which skips its access control) | built here from its lockfile ([servers/jss/](../e2e/pod/servers/jss/Dockerfile)), unmodified and pushed nowhere (it's AGPL) | advisory |
 | `css-lws` | Community Solid Server 8 with Linked Web Storage (LWS): the Solid Protocol and LWS side by side, in memory | built here from a commit of a fork not yet merged ([servers/css-lws/](../e2e/pod/servers/css-lws/Dockerfile)), with a configuration of its own, its root open | advisory |
+| `css-lws-only` | The same with LWS alone, in memory | css-lws's image ([servers/css-lws-only/](../e2e/pod/servers/css-lws-only/compose.yml)), with a configuration of its own, its root open | advisory |
 
 A **blocking** server's tests gate CI, and so deploys and Renovate's
 merges: every test passes, or skips for a reason it gives. An
@@ -107,10 +108,11 @@ Community Solid Server before any release has it: the branch
 [jeswr/CommunitySolidServer](https://github.com/jeswr/CommunitySolidServer/pull/126),
 on the same 8.0.0-alpha.3 as css-8, so a failure only css-lws shows
 comes from the LWS changes. Its configuration is the fork's
-`config/solid-lws.json` in memory, with the root as the storage. The
-fork's LWS-only configuration isn't tested: it treats the app's
-Solid-OIDC requests as anonymous, so the app can't sign in there. The
-image is built from code nobody has reviewed, on CI's runners and on the
+`config/solid-lws.json` in memory, with the root as the storage.
+css-lws-only runs the same image with the fork's `config/lws.json`
+instead: LWS alone. The tests send no credentials, so neither shows
+how the app signs in to an LWS storage; [lws.md](lws.md) says how
+that's tried by hand. The image is built from code nobody has reviewed, on CI's runners and on the
 machine of anyone who runs `SOLID_SERVERS=all`. Its dependencies'
 install scripts don't run, and its final stage keeps only what the
 server runs. GitHub's dependency review doesn't see the lockfile it
@@ -119,6 +121,19 @@ Dependency Dashboard before Renovate proposes it. css-lws goes once a
 Community Solid Server release has LWS, or when its commit can't be
 fetched any more: a commit that can't be fetched fails the `contract`
 job of every pull request.
+
+Every request of the tests goes through the bridge to an LWS server
+(`lwsBridge.ts`, `setup.ts`), as the app's do,
+and the contract's too for a server `SOLID_SERVER_URL` names. A Solid
+server takes each request as it's made, so the bridge sends it on as
+it is. The fork takes the Solid Protocol's requests even with LWS
+alone, so the bridge's own way of making them shows only on a server
+that refuses them. `npm run lws:strict -w @solid-memo/e2e-pod --
+<server> <port>` runs one ([strictLws.ts](../e2e/pod/strictLws.ts)): a
+proxy that refuses a folder's listing in Turtle, a PUT of a resource
+not there, and every PATCH. With `E2E_SEEDS_AS_LWS=1`, a test's own
+seed, a plain PUT of a document not there, is made as LWS makes one. CI
+runs neither.
 
 Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`,
 asking only for `E2E_PORT` (the port on 127.0.0.1 the harness picked,

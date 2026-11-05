@@ -77,6 +77,13 @@
     schema:learningResourceType "reference" ;
     dcterms:abstract "the second Solid client, on no Inrupt library: what it replaces, switching to it with SOLID_CLIENT=solid-memo-client, how it signs in and keeps the session, the public-read grant, how it differs from Inrupt's, and its tests."@en .
 
+<lws.md>
+    a schema:TechArticle ;
+    schema:isPartOf <#the-code> ;
+    schema:position 46 ;
+    schema:learningResourceType "explanation" ;
+    dcterms:abstract "how the app works on a Linked Web Storage server: finding the storage, the bridge that makes the app's Solid requests as LWS has them, signing in with a token exchange, and what LWS can't give the app yet."@en .
+
 <testing.md>
     a schema:TechArticle ;
     schema:isPartOf <#the-code> ;
