@@ -127,11 +127,11 @@ const library: DeckLibrary = {
   listLibraryDecks: async () => [course],
   fetchLibraryDeck: async () => content,
   fetchCourseOutline: async () => outline,
-  // The release check is the Studio's: no index is read here.
+  // The course comes with the site: its index lists it, so it is not checked as a release from a link.
   readLibraryIndex: async () => ({
     url: "https://site.example/decks/index.ttl",
     publisher: null,
-    releases: [],
+    releases: [RELEASE],
   }),
   // No release is added from a link here.
   readRelease: async (url) => {

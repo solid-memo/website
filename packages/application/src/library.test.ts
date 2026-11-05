@@ -6,6 +6,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "./useCases";
+import { withLinkedReleasesChecked } from "./library";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { DocumentReport } from "@solid-memo/domain/validation";
@@ -112,6 +113,11 @@ describe("the deck library", () => {
       url: "https://solid-memo.com/decks/capitals/v2.ttl",
       version: "2",
     };
+    vi.mocked(deps.deckLibrary.readLibraryIndex).mockResolvedValue({
+      url: "https://solid-memo.com/decks/index.ttl",
+      publisher: null,
+      releases: [libraryDeck.url, current.url],
+    });
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
       url === current.url
         ? {
@@ -956,6 +962,102 @@ describe("the deck library", () => {
         code: "linkedReleasesTooLarge",
       });
     });
+    it("a copy of a release from a link is checked on its first read in the page, whatever reads it, and that check is kept", async () => {
+      const deps = makeDeps();
+      const release = linked(1);
+      reading(deps, [release]);
+      const copy: Deck = { ...deck, sourceUrl: release.url, course: true };
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(copy);
+      const useCases = createUseCases(deps);
+
+      await useCases.getCourse(copy);
+      await useCases.deckRelease(copy);
+      await useCases.getCourseSummary(copy);
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(1);
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledWith(release.url, expect.any(Function));
+      expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(release.url);
+      expect(deps.deckLibrary.fetchCourseOutline).toHaveBeenCalledWith(release.url);
+    });
+
+    it("a copy whose release now breaks the library's shapes is refused where it is read, nothing of it shown or written, and checked again on the next read", async () => {
+      const deps = makeDeps();
+      const release = linked(1);
+      reading(deps, [release], breaking);
+      const copy: Deck = { ...deck, sourceUrl: release.url, course: true };
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(copy);
+      const useCases = createUseCases(deps);
+
+      await expect(useCases.getCourse(copy)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+        vars: { host: "bob.example", count: 1 },
+      });
+      await expect(useCases.deckRelease(copy)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+      });
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(2);
+      expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+      expect(deps.deckLibrary.fetchCourseOutline).not.toHaveBeenCalled();
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    });
+
+    it("a release read from a link without a check does not count as checked", async () => {
+      const deps = makeDeps();
+      const release = linked(1);
+      reading(deps, [release]);
+      const library = withLinkedReleasesChecked(deps.deckLibrary);
+
+      await library.readRelease(release.url);
+      await library.fetchLibraryDeck(release.url);
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(2);
+      expect(deps.deckLibrary.readRelease).toHaveBeenLastCalledWith(
+        release.url,
+        expect.any(Function),
+      );
+    });
+
+    it("a release read with a check that refuses nothing is still held to the library's shapes, and counts as checked only once they pass it", async () => {
+      const deps = makeDeps();
+      const release = linked(1);
+      reading(deps, [release], breaking);
+      const library = withLinkedReleasesChecked(deps.deckLibrary);
+
+      await expect(library.readRelease(release.url, () => {})).rejects.toMatchObject({
+        code: "releaseNotConforming",
+      });
+      await expect(library.fetchLibraryDeck(release.url)).rejects.toMatchObject({
+        code: "releaseNotConforming",
+      });
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(2);
+      expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
+    });
+
+    it("a release read with a check of its own is checked by that too, once the library's shapes pass it", async () => {
+      const deps = makeDeps();
+      const release = linked(1);
+      reading(deps, [release]);
+      const library = withLinkedReleasesChecked(deps.deckLibrary);
+      const accept = vi.fn(() => {
+        throw new AppError("releaseUnreadable", { url: release.url });
+      });
+
+      await expect(library.readRelease(release.url, accept)).rejects.toMatchObject({
+        code: "releaseUnreadable",
+      });
+      expect(accept).toHaveBeenCalledTimes(1);
+    });
+
+    it("a release checked as it is added from a link is not read again to be copied", async () => {
+      const deps = makeDeps();
+      const release = linked(1);
+      reading(deps, [release]);
+      const useCases = createUseCases(deps);
+
+      const read = await useCases.readReleaseFromLink(release.url);
+      await useCases.importReleaseFromUrl(instance.url, read);
+      expect(deps.deckLibrary.readRelease).toHaveBeenCalledTimes(1);
+      expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(release.url);
+      expect(deps.deckRepository.importDeck).toHaveBeenCalledTimes(1);
+    });
   });
   it("importLibraryDeck fetches the deck's content and imports it", async () => {
     const deps = makeDeps();
@@ -1024,6 +1126,11 @@ describe("library deck upgrade", () => {
         libraryCard("norway", "Oslo"),
       ],
     };
+    vi.mocked(deps.deckLibrary.readLibraryIndex).mockResolvedValue({
+      url: `${LIB}../index.ttl`,
+      publisher: null,
+      releases: [v1.url, v2.url],
+    });
     vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
       {
         ...libraryDeck,

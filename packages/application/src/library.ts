@@ -185,6 +185,92 @@ async function readEach<T>(
   return results;
 }
 
+/**
+ * Refuse a release with a subject in a format newer than the library's
+ * shapes have, which no shape checks (libraryCardTooNew for a card,
+ * libraryDeckTooNew for any other), or with a violation of its shape
+ * (releaseNotConforming): the check reports a subject stamped with a
+ * version below 1 as breaking its shape.
+ */
+function refuseNonConforming(url: string, report: DocumentReport): void {
+  const newer = report.subjects.find((subject) => subject.status === "newer");
+  if (newer !== undefined) {
+    const { version, latest } = newer;
+    throw newer.shape === "card"
+      ? new AppError("libraryCardTooNew", { card: newer.url, url, version, latest })
+      : new AppError("libraryDeckTooNew", { url, version, latest });
+  }
+  const problems = report.subjects.flatMap((subject) =>
+    subject.status === "checked"
+      ? subject.violations.filter((violation) => violation.severity === "violation")
+      : [],
+  );
+  if (problems.length > 0) {
+    throw new AppError("releaseNotConforming", {
+      host: releaseHost(url),
+      count: problems.length,
+      problems: problems
+        .map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`)
+        .join("\n"),
+    });
+  }
+}
+
+/**
+ * The deck library with every release its index does not list (one
+ * added from a link) checked against the library's shapes on its first
+ * read in this page session, whatever reads it, as when it was added
+ * (checkLinkedRelease): its cards and outline are then read from that
+ * checked read. A release whose address answers otherwise after it was
+ * added is refused (releaseNotConforming) where it would have been
+ * shown or its cards copied. A check that fails is not kept, so the next
+ * read checks again; one that passes is kept for the page session, as
+ * the read it accepted is (DeckLibrary.readRelease). A release read with
+ * a check of the caller's own (`accept`) is held to the library's shapes
+ * too, before that check, so only a read they pass counts as checked.
+ * Releases the index
+ * lists are read as they are: they come with the site, checked when
+ * they were published.
+ */
+export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary {
+  const checked = new Map<string, Promise<unknown>>();
+  /** The release at `url` checked once, unless the index lists it. */
+  async function checkedOnce(url: string): Promise<void> {
+    if ((await deckLibrary.readLibraryIndex()).releases.includes(url)) return;
+    let check = checked.get(url);
+    if (check === undefined) {
+      const checking = deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
+      check = checking;
+      checked.set(url, checking);
+      // A check refused is forgotten, so the next read checks again.
+      checking.catch(() => checked.delete(url));
+    }
+    await check;
+  }
+  return {
+    ...deckLibrary,
+    async fetchLibraryDeck(url) {
+      await checkedOnce(url);
+      return deckLibrary.fetchLibraryDeck(url);
+    },
+    async fetchCourseOutline(url) {
+      await checkedOnce(url);
+      return deckLibrary.fetchCourseOutline(url);
+    },
+    async readRelease(url, accept) {
+      if (accept === undefined) return deckLibrary.readRelease(url);
+      // The library's shapes refuse first, whatever `accept` does: only a read they pass counts as checked.
+      const read = await deckLibrary.readRelease(url, (report) => {
+        refuseNonConforming(url, report);
+        accept(report);
+      });
+      // A read checked as it was added is the one its cards are copied from: it is not read again.
+      checked.set(url, Promise.resolve(read));
+      return read;
+    },
+  };
+}
+
 /** A library course as its preview shows it (LibraryUseCases.getLibraryCourse). */
 export type LibraryCourse = Pick<Course, "outline" | "cards">;
 
@@ -317,36 +403,6 @@ export function createLibraryUseCases({
     reads: LinkedReleaseReads = deckLibrary,
   ): Promise<LibraryDeck> {
     return reads.readRelease(url, (report) => refuseNonConforming(url, report));
-  }
-  /**
-   * Refuse a release with a subject in a format newer than the library's
-   * shapes have, which no shape checks (libraryCardTooNew for a card,
-   * libraryDeckTooNew for any other), or with a violation of its shape
-   * (releaseNotConforming): the check reports a subject stamped with a
-   * version below 1 as breaking its shape.
-   */
-  function refuseNonConforming(url: string, report: DocumentReport): void {
-    const newer = report.subjects.find((subject) => subject.status === "newer");
-    if (newer !== undefined) {
-      const { version, latest } = newer;
-      throw newer.shape === "card"
-        ? new AppError("libraryCardTooNew", { card: newer.url, url, version, latest })
-        : new AppError("libraryDeckTooNew", { url, version, latest });
-    }
-    const problems = report.subjects.flatMap((subject) =>
-      subject.status === "checked"
-        ? subject.violations.filter((violation) => violation.severity === "violation")
-        : [],
-    );
-    if (problems.length > 0) {
-      throw new AppError("releaseNotConforming", {
-        host: releaseHost(url),
-        count: problems.length,
-        problems: problems
-          .map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`)
-          .join("\n"),
-      });
-    }
   }
   /**
    * The series of a release added from a link, as its newest release

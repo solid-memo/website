@@ -1066,6 +1066,27 @@ flowchart LR
   that passes is kept as the release's, so the deck or course imported
   next is that read, the one shown, not a later answer from the
   release's host. A read refused isn't kept.
+- That kept read lasts for the page session. A copy's release that the
+  library's index doesn't list is checked the same way on its first read
+  in each later page session, whatever reads it
+  (`withLinkedReleasesChecked` in
+  [library.ts](../packages/application/src/library.ts)). That covers the
+  course screen, a course's summary and statistics, the deck's release,
+  its check and a mistake report. A release that
+  no longer fits the shapes is refused there (`releaseNotConforming`),
+  so nothing of it is shown and no card of it is written to the pod.
+  Only a read the library's shapes pass counts as checked, whatever
+  else checks it.
+- A release the index lists comes with the site and isn't checked
+  again. To tell which releases those are, each read of a release's
+  cards or outline waits for the index, and fails when the index can't
+  be read. A copy of a release the index no longer lists is checked as
+  one from a link, so one that the current shapes refuse can't be read
+  any more.
+- Looking up a copy's series (`linkedSeries`) reads only what each
+  release says of its version and series, without the check.
+  The newer release it finds is checked when its upgrade is planned,
+  before any card of it is read.
 - The screen shows the release like the library's page, without card
   list or preview, with its host, whether it's a deck or a course, and
   that it isn't the library's. Any link in its text goes
