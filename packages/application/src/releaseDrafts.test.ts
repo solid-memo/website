@@ -352,6 +352,49 @@ describe("createReleaseDraft", () => {
     ).resolves.toBeNull();
   });
 
+  it("imports a release file in another's series in a series of its own, without what it states of that one (GHSA-38m7-8r5j-q79f)", async () => {
+    const { useCases, repository, created } = setUp();
+    const SERIES = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+    const DCAT = "http://www.w3.org/ns/dcat#";
+    repository.parseRelease.mockResolvedValueOnce({
+      ...v1,
+      root: { ...v1.root, version: "999", inSeries: SERIES, isVersionOf: SERIES },
+      triples: [
+        ...v1.triples,
+        {
+          subject: SERIES,
+          predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+          object: { kind: "iri", value: `${DCAT}DatasetSeries` },
+        },
+        {
+          subject: SERIES,
+          predicate: `${DCAT}hasCurrentVersion`,
+          object: { kind: "blank", value: "b0" },
+        },
+        {
+          subject: "_:b0",
+          predicate: `${DCAT}version`,
+          object: {
+            kind: "literal",
+            value: "999",
+            language: "",
+            datatype: "http://www.w3.org/2001/XMLSchema#string",
+          },
+        },
+      ],
+    });
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    const draft = created();
+    expect(draft.root.inSeries).toBe(`${draft.url}#series`);
+    expect(draft.root.isVersionOf).toBe(`${draft.url}#series`);
+    const named = draft.triples.flatMap((triple) => [
+      triple.subject,
+      ...(triple.object.kind === "iri" ? [triple.object.value] : []),
+    ]);
+    expect(named).not.toContain(SERIES);
+    expect(named).not.toContain("_:b0");
+  });
+
   it("refuses a release that names a subject by an id a draft cannot keep, writing nothing", async () => {
     const { useCases, repository } = setUp();
     const odd = {

@@ -69,7 +69,11 @@ export type ContinuityProblem =
   | {
       code: "versionNotNext";
       params: { version: number; previousVersion: number; previous: string };
-    };
+    }
+  /** A release that follows none, in a pod, in a series not its own (`<release>#id`): the series it names. */
+  | { code: "seriesNotOwn"; params: { series: string } }
+  /** A release that follows one, in a pod, in a series neither its own nor in that one's container or one above it: the series, and the release it follows. */
+  | { code: "seriesNotPrevious"; params: { series: string; previous: string } };
 
 /** A course's outline and options (courseRules). */
 export type CourseProblem =

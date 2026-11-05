@@ -58,6 +58,18 @@ describe("ruleProblems", () => {
     );
     expect(description).toEqual(["de", "en", "es", "fr", "sv", "ko"]);
   });
+
+  it("names, in a pod only, a first version's series that is not its own", () => {
+    const draft = courseDraft();
+    const OTHER = "https://creator.example/memo/releases/capitals/v1.ttl#series";
+    const model = draftReleaseModel({ ...draft, root: { ...draft.root, inSeries: OTHER } });
+    const codes = (policy: "pod" | "library") => ruleProblems(model, policy).map((p) => p.code);
+    expect(codes("pod")).toContain("seriesNotOwn");
+    expect(codes("library")).not.toContain("seriesNotOwn");
+    expect(ruleProblems(draftReleaseModel(draft), "pod").map((p) => p.code)).not.toContain(
+      "seriesNotOwn",
+    );
+  });
 });
 
 describe("ruleProblems' growth", () => {

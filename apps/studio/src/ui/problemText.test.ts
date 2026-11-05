@@ -95,6 +95,19 @@ describe("problemMessage", () => {
         params: { version: 3, previousVersion: 1, previous: "https://r.example/v1.ttl" },
       }),
     ).toBe("Version 3 does not follow <https://r.example/v1.ttl>, version 1.");
+    expect(
+      say({ code: "seriesNotOwn", params: { series: "https://r.example/v1.ttl#series" } }),
+    ).toBe(
+      "Follows no release, yet names <https://r.example/v1.ttl#series> as its series: a first version starts a series of its own.",
+    );
+    expect(
+      say({
+        code: "seriesNotPrevious",
+        params: { series: "https://r.example/v1.ttl#series", previous: "https://o.example/v2.ttl" },
+      }),
+    ).toBe(
+      "Names <https://r.example/v1.ttl#series> as its series, which is neither its own nor where <https://o.example/v2.ttl>, the release it follows, is: a next version stays in the series of the release it follows.",
+    );
     expect(say({ code: "outlineWithoutCourse", params: {} })).toBe(
       "Has chapters or steps, but is no course.",
     );

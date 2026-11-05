@@ -1548,9 +1548,22 @@ A new draft starts from
     them: the series by what an index says of one, a publisher by its
     class and name only. A document that can't be read gives nothing,
     and the release check says what the draft lacks.
+  - The draft stays in the release's series. A series in a document
+    neither in the release's container nor in one above it is one the
+    release only claims: on another origin, or in another pod on the
+    same server. The release check reports it (`seriesNotPrevious`),
+    and publishing makes the new release no version of it.
 - **a release saved as a file**, Turtle or JSON-LD, as it is
   (`releaseToDraft` in
-  [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)).
+  [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)),
+  but for its series (`withOwnSeries`). A series that is one of the
+  file's own subjects (`<release>#id`) moves with it. One anywhere
+  else, a library's index or another release, belongs to other
+  releases, and the draft, once published, would be their newest
+  version. The draft starts a series of its own (`#series`, or
+  `#series-2`, … when that id is taken) in its place, as `dcat:inSeries`
+  and `dcat:isVersionOf`, and what the file states of the other series
+  is dropped. The release screen shows the series and the version.
 
 Either way, the draft doesn't keep a statement that one of its
 documents is `dcterms:isPartOf` anything, which to a deck would say the
@@ -1862,7 +1875,23 @@ becomes: the rules `npm run library:check` runs on `decks/`
     step's fields the draft shapes relax;
   - the policy's curation (`curationProblems`);
   - how the release says it was made (`provenanceProblems`,
-    [below](#what-the-check-asks-of-a-releases-provenance)).
+    [below](#what-the-check-asks-of-a-releases-provenance));
+  - the draft's series (the pod policy only; `ownSeriesProblems` in
+    [continuityRules.ts](../packages/domain/src/release/continuityRules.ts)).
+    A draft that follows no release (no `dcat:prev`) is in a series of
+    its own, `<release>#id` (`seriesNotOwn`). A next version is in the
+    series of the release it follows, in a document in that release's
+    container or in one above it: its `#series`, or a library's index
+    (`seriesNotPrevious`). A series in another pod on the same server
+    is in neither. So is one in a sibling container, beside the
+    release's container rather than above it: a next version of a
+    release whose series is kept there is reported too. A path with an
+    encoded `/` or `\` counts as in neither. What the release it
+    follows says of a series elsewhere doesn't make that series its
+    own. Published, the draft would be another series' newest version,
+    so a draft that names one can't be published. A library's first
+    versions are in its index's series, which the library policy
+    places them in.
 - **Library** (the library policy only): the draft's name, version and
   metadata against its place in the library's live index
   (`readLibraryIndex`, `libraryProblems`).
@@ -1928,12 +1957,16 @@ Not every problem can be fixed in the Studio yet, so a new draft's
 problem count may not reach zero:
 
 - No screen has a field yet for the version, the series (`inSeries`,
-  `isVersionOf`) or the distribution. A blank draft and a deck's have
-  them all, so only a draft of a release that lacks one has this
-  problem. It links to the overview. A problem about the release's
-  license, contact, publisher, languages, themes, version notes or
-  authors, a source, an
-  agent or an activity links to the [release
+  `isVersionOf`) or the distribution. The release screen shows the
+  version and the series. A blank draft and a deck's have them all, so
+  only a draft of a release that lacks one has this problem, or a draft
+  in a series not its own (`seriesNotOwn`, `seriesNotPrevious`). Such
+  a draft is started again instead: from the file, whose import gives
+  it a series of its own, or as the next version of a release in the
+  series. It links to the overview.
+  A problem about the release's license, contact, publisher,
+  languages, themes, version notes or authors, a source, an agent or
+  an activity links to the [release
   screen](#the-releases-metadata-and-provenance), at its part.
 - The library policy places the draft at `decks/<draft name>/v<N>.ttl`
   and reports each link that differs from that place, so a draft that
@@ -2090,9 +2123,11 @@ the library's releases are
 `DraftChange`, saved as the other screens save theirs
 ([above](#how-edits-are-saved)). Its parts:
 
-- **About this version**: the version notes (`adms:versionNotes`, one
-  text), the languages (`dcterms:language`), the themes (`dcat:theme`),
-  the license, the contact and the publisher.
+- **About this version**: the version and the series, shown only
+  (the series as the draft's own or by its address), the version notes
+  (`adms:versionNotes`, one text), the languages (`dcterms:language`),
+  the themes (`dcat:theme`), the license, the contact and the
+  publisher.
   - The languages are those of the EU's table (`EU_LANGUAGES`,
     generated from [external.ttl](../ns/vocab/external.ttl):
     [vocab.md](vocab.md)), each named in the reader's language; one

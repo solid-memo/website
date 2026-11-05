@@ -13,6 +13,7 @@ import {
   attributionText,
   authorNames,
   contactOf,
+  idIn,
   makingNotesOf,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
@@ -84,6 +85,7 @@ export function ReleaseMetadataScreen({
       <DraftScope readOnly={readOnly} draftsHref={links.draftsHref} healthHref={links.healthHref}>
         <section aria-labelledby="release-about-heading">
           <h3 id="release-about-heading">{t("studio.release.about")}</h3>
+          <VersionAndSeries draft={draft} />
           <VersionNotes draft={draft} arrival={field === "versionNotes"} onEdit={onEdit} />
           <Languages draft={draft} arrival={field === "languages"} onEdit={onEdit} />
           <Themes draft={draft} arrival={field === "themes"} onEdit={onEdit} />
@@ -132,6 +134,27 @@ export function ReleaseMetadataScreen({
       </DraftScope>
     </section>
   );
+}
+
+/**
+ * The version and the series (dcat:version, dcat:inSeries), which no
+ * field edits: shown, so a draft made from a file says what it states
+ * (docs/studio.md, The release's metadata and provenance).
+ */
+function VersionAndSeries({ draft }: { draft: ReleaseDraft }) {
+  const { t } = useI18n();
+  const { version, inSeries } = draft.root;
+  const parts = [
+    ...(version === undefined ? [] : [t("studio.release.version", { version })]),
+    ...(inSeries === undefined
+      ? []
+      : [
+          idIn(draft, inSeries) === null
+            ? t("studio.release.seriesOf", { series: `<${inSeries}>` })
+            : t("studio.release.seriesOwn"),
+        ]),
+  ];
+  return parts.length === 0 ? null : <p class="hint">{parts.join(" ")}</p>;
 }
 
 /** The version notes (adms:versionNotes): one text, saved as it is typed; cleared when empty. */

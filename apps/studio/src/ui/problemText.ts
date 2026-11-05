@@ -205,6 +205,13 @@ export function problemMessage(
         previous: `<${problem.params.previous}>`,
         previousVersion: problem.params.previousVersion,
       });
+    case "seriesNotOwn":
+      return t(key, { series: `<${problem.params.series}>` });
+    case "seriesNotPrevious":
+      return t(key, {
+        series: `<${problem.params.series}>`,
+        previous: `<${problem.params.previous}>`,
+      });
     case "courseDirection":
       return t(key, { stated: values(problem.params.stated) });
     case "chapterPartOf":

@@ -100,6 +100,20 @@ describe("ReleaseMetadataScreen", () => {
     });
   });
 
+  it("shows the version and the series, its own or another's, which no field edits", () => {
+    const draft = authoredDraft();
+    renderScreen(draft);
+    expect(screen.getByText("Version 1. In a series of its own.")).toBeInTheDocument();
+    cleanup();
+    const series = "https://other.example/capitals/v1.ttl#series";
+    renderScreen({ ...draft, root: { ...draft.root, version: "2", inSeries: series } });
+    expect(screen.getByText(`Version 2. In the series <${series}>.`)).toBeInTheDocument();
+    cleanup();
+    const { version: _version, inSeries: _series, ...root } = draft.root;
+    renderScreen({ ...draft, root });
+    expect(screen.queryByText(/^Version \d|series/)).not.toBeInTheDocument();
+  });
+
   it("states the release's languages from the EU's table, keeping one outside it to leave out", () => {
     const draft = with_(authoredDraft(), {
       kind: "setMeta",
