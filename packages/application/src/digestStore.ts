@@ -157,7 +157,7 @@ export function createDigestStore({
     });
   }
   async function refreshStudyDigest(instanceUrl: string, deck: Deck): Promise<void> {
-    await answerStore.flush();
+    await answerStore.flush(instanceUrl);
     // A deck whose documents are not the instance's keeps nothing in its digest: nothing to read.
     if (!keepsDeck(await asNoOneOf(instanceUrl, deck))) return;
     const [prefs, cards, reviews] = await Promise.all([

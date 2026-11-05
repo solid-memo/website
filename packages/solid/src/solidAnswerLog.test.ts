@@ -7,7 +7,7 @@ import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import { monthSummaryToRecord } from "@solid-memo/domain/digestRecord";
 import { monthSummaryOf } from "@solid-memo/domain/studyDigest";
 import { statisticsOf } from "@solid-memo/domain/statistics";
-import { createSolidAnswerLog } from "./solidAnswerLog";
+import { APPEND_DEADLINE_MS, createSolidAnswerLog } from "./solidAnswerLog";
 import type { WriteCheck } from "./writeCheck";
 import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
 
@@ -203,6 +203,26 @@ describe("createSolidAnswerLog", () => {
       code: "addFailed",
       detail: `url: ${SEPTEMBER}\nstatus: 500`,
     });
+  });
+
+  it("gives up adding an answer the pod does not answer in time, so it can be added again", async () => {
+    vi.useFakeTimers();
+    try {
+      const silent = vi.fn(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+          }),
+      );
+      const added = createSolidAnswerLog({ fetch: silent }).append(INSTANCE, answer("2026-09-21"));
+      const failed = expect(added).rejects.toMatchObject({ name: "AbortError" });
+      await vi.advanceTimersByTimeAsync(APPEND_DEADLINE_MS);
+      await failed;
+      expect(silent).toHaveBeenCalledWith(SEPTEMBER, expect.objectContaining({ method: "PATCH" }));
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("adds many answers with one insert-only PATCH per month, checked first, and adding them again changes nothing", async () => {

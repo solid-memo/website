@@ -500,26 +500,30 @@ function termKey(term: { termType: string; value: string }): string {
  * insert-only PATCH, with no precondition, since inserting a subject no
  * other writer names cannot clash with any other edit. Every server the
  * app is tested on creates the document (and its container) when it is
- * missing, and keeps every one of several concurrent inserts.
+ * missing, and keeps every one of several concurrent inserts. A
+ * `signal` aborts it.
  */
 export function appendToDocument(
   url: string,
   thing: Subject,
   fetch: typeof globalThis.fetch,
+  signal?: AbortSignal,
 ): Promise<void> {
-  return appendAllToDocument(url, [thing], fetch);
+  return appendAllToDocument(url, [thing], fetch, signal);
 }
 
 /**
  * Add several subjects' triples to a document without reading it, as
  * appendToDocument adds one: one insert-only PATCH, or several in turn
  * where one would be larger than MAX_PATCH_BYTES, each subject whole in
- * one. A subject whose triples are there already changes nothing.
+ * one. A subject whose triples are there already changes nothing. A
+ * `signal` aborts them.
  */
 export async function appendAllToDocument(
   url: string,
   things: readonly Subject[],
   fetch: typeof globalThis.fetch,
+  signal?: AbortSignal,
 ): Promise<void> {
   const encoder = new TextEncoder();
   const batches: (string | null)[][] = [];
@@ -543,6 +547,7 @@ export async function appendAllToDocument(
       method: "PATCH",
       headers: { "Content-Type": "application/sparql-update" },
       body: `INSERT DATA {\n${triples.join("\n")}\n};\n`,
+      ...(signal === undefined ? {} : { signal }),
     });
     if (!response.ok) throw new AppError("addFailed", { url, status: response.status });
   }

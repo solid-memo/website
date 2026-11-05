@@ -33,6 +33,7 @@ import {
 import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { mapSince, readSince } from "./readSince";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
+import { READ_DEADLINE_MS } from "./readDeadline";
 import { unlessNewer } from "./records";
 
 /**
@@ -49,6 +50,14 @@ function answersIn(month: string, dataset: Dataset | null): Answer[] {
       });
 }
 
+/**
+ * How long adding an answer waits for the server, in milliseconds: as
+ * long as a read (readDeadline.ts). An answer is added whole, so one cut
+ * off is added again later; a server that never answers holds up nothing
+ * waiting for the log.
+ */
+export const APPEND_DEADLINE_MS = READ_DEADLINE_MS;
+
 /** Tries at removing answers while other writes keep adding to the document. */
 const ATTEMPTS = 3;
 
@@ -56,7 +65,9 @@ const ATTEMPTS = 3;
  * The answer log in the pod (see docs/data-model.md): one document per
  * study month under the instance's history/ container. An answer is
  * added with an insert-only PATCH, without reading the document: answers
- * never clash, whichever tab or device adds them. Read leniently: an
+ * never clash, whichever tab or device adds them, and one the server
+ * does not answer in time is given up (APPEND_DEADLINE_MS), to be
+ * added again later. Read leniently: an
  * answer that does not fit its shape is left out of the statistics.
  */
 export function createSolidAnswerLog({
@@ -90,7 +101,14 @@ export function createSolidAnswerLog({
       const url = historyUrlOf(instanceUrl, monthOfStudyDay(answer.studyDay));
       const thing = toAnswerThing(url, answer);
       await checkWrite(setThing(createSolidDataset(), thing), [`${url}#${answer.id}`], "pod");
-      await appendToDocument(url, thing, fetch);
+      // Given up when the server does not answer in time, as a read is: it is added again later, which changes nothing if it was saved.
+      const deadline = new AbortController();
+      const timer = setTimeout(() => deadline.abort(), APPEND_DEADLINE_MS);
+      try {
+        await appendToDocument(url, thing, fetch, deadline.signal);
+      } finally {
+        clearTimeout(timer);
+      }
     },
 
     async appendAll(instanceUrl, answers) {

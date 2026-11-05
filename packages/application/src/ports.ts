@@ -826,7 +826,11 @@ export interface DigestRepository {
  * document per study month, which the study statistics are computed from.
  */
 export interface AnswerLog {
-  /** Add an answer to its month's document, without reading it. */
+  /**
+   * Add an answer to its month's document, without reading it. Adding
+   * one that is there already changes nothing; an add the pod does not
+   * answer in time fails, so a queued answer can be tried again.
+   */
   append(instanceUrl: string, answer: Answer): Promise<void>;
   /**
    * Add answers to their months' documents, without reading them: one

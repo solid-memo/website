@@ -93,27 +93,39 @@ export function createAnswerStore({
   now: () => Date;
 }) {
   /**
-   * Answers given but not yet in the log, oldest first. An answer is
-   * added after its review is saved, without holding up study; one that
-   * fails to be added waits here, and the ones after it with it, until
-   * the next answer, the end of the session or the statistics try again.
+   * Answers given but not yet in the log, by instance, oldest first, and
+   * each instance's chain of adding them. An answer is added after its
+   * review is saved, without holding up study; one that fails to be
+   * added waits here, and the ones of its instance after it with it,
+   * until that instance's next answer, or something that reads or
+   * changes its log (flush, loadAll, removeDay), tries again. Each
+   * instance's answers wait only for its own: one whose log refuses or
+   * never answers holds up no other's, and an add that gets no answer
+   * in time fails (AnswerLog.append).
    */
-  const unlogged: { instanceUrl: string; answer: Answer }[] = [];
-  let logging: Promise<void> = Promise.resolve();
-  function logAnswers(): Promise<void> {
-    logging = logging.then(async () => {
-      while (unlogged.length > 0) {
-        const [next] = unlogged;
+  const queues = new Map<string, { unlogged: Answer[]; logging: Promise<void> }>();
+  function queueOf(instanceUrl: string) {
+    let queue = queues.get(instanceUrl);
+    if (queue === undefined) {
+      queue = { unlogged: [], logging: Promise.resolve() };
+      queues.set(instanceUrl, queue);
+    }
+    return queue;
+  }
+  function logInstance(instanceUrl: string): Promise<void> {
+    const queue = queueOf(instanceUrl);
+    queue.logging = queue.logging.then(async () => {
+      while (queue.unlogged.length > 0) {
         try {
-          await answerLog.append(next!.instanceUrl, next!.answer);
+          await answerLog.append(instanceUrl, queue.unlogged[0]!);
         } catch {
           return;
         }
         logWrites += 1;
-        unlogged.shift();
+        queue.unlogged.shift();
       }
     });
-    return logging;
+    return queue.logging;
   }
   /** Each instance's answer log as last read, by month: its answers, and the version they were read at. */
   const answerMonths = new Map<string, Map<string, { version: string; answers: Answer[] }>>();
@@ -194,7 +206,7 @@ export function createAnswerStore({
   }
   /** Every answer of the log, of each of its months (logMonths). */
   async function loadAnswerLog(instanceUrl: string): Promise<Answer[]> {
-    await logAnswers();
+    await logInstance(instanceUrl);
     return readLogMonths(instanceUrl, await logMonths(instanceUrl), () => true);
   }
   /**
@@ -236,26 +248,23 @@ export function createAnswerStore({
     const next = promptDueOf(state, fsrs, prefs);
     const id = answerIdOf(state.lastReviewedAt, newId().slice(0, 8));
     const studyDay = studyDayOf(now, prefs.dayBoundaryHour);
-    unlogged.push({
-      instanceUrl,
-      answer: {
-        id,
-        deckUrl: deck.url,
-        cardUrl: prompt.cardUrl,
-        direction: prompt.direction,
-        grade: quality,
-        answeredAt: state.lastReviewedAt,
-        studyDay,
-        ...(prior === null ? {} : { priorIntervalDays: prior.intervalDays }),
-        nextIntervalDays: next.intervalDays,
-        ...(how.mode === undefined ? {} : { mode: how.mode }),
-        ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
-        ...recordedResponseTimes(how.times),
-        ...(prior === null ? {} : { priorDue: prior.due }),
-        utcOffsetMinutes: utcOffsetMinutesAt(now),
-      },
+    queueOf(instanceUrl).unlogged.push({
+      id,
+      deckUrl: deck.url,
+      cardUrl: prompt.cardUrl,
+      direction: prompt.direction,
+      grade: quality,
+      answeredAt: state.lastReviewedAt,
+      studyDay,
+      ...(prior === null ? {} : { priorIntervalDays: prior.intervalDays }),
+      nextIntervalDays: next.intervalDays,
+      ...(how.mode === undefined ? {} : { mode: how.mode }),
+      ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
+      ...recordedResponseTimes(how.times),
+      ...(prior === null ? {} : { priorDue: prior.due }),
+      utcOffsetMinutes: utcOffsetMinutesAt(now),
     });
-    void logAnswers();
+    void logInstance(instanceUrl);
     return {
       state,
       ...(fsrs === undefined ? {} : { fsrs }),
@@ -270,14 +279,13 @@ export function createAnswerStore({
 
   /**
    * Take an answer back (UseCases.undoReview): off the answers on their
-   * way to the log, else out of it. Answers being added are waited for;
-   * any added later start only after this goes on.
+   * way to the log, else out of it. The instance's answers being added
+   * are waited for; any added later start only after this goes on.
    */
   async function withdraw(instanceUrl: string, answer: { id: string; studyDay: string }) {
+    const { unlogged, logging } = queueOf(instanceUrl);
     await logging;
-    const waiting = unlogged.findIndex(
-      (each) => each.instanceUrl === instanceUrl && each.answer.id === answer.id,
-    );
+    const waiting = unlogged.findIndex((each) => each.id === answer.id);
     if (waiting === -1) {
       await answerLog.removeAnswer(instanceUrl, answer.studyDay, answer.id);
       logWrites += 1;
@@ -286,9 +294,9 @@ export function createAnswerStore({
     }
   }
 
-  /** Remove a deck's answers of a study day from the log, those still on their way first. */
+  /** Remove a deck's answers of a study day from the log, those of the instance still on their way first. */
   async function removeDay(instanceUrl: string, deckUrl: string, studyDay: string) {
-    await logAnswers();
+    await logInstance(instanceUrl);
     await answerLog.removeDay(instanceUrl, deckUrl, studyDay);
     logWrites += 1;
   }
@@ -300,7 +308,7 @@ export function createAnswerStore({
   }
 
   return {
-    flush: logAnswers,
+    flush: logInstance,
     readMonths: readLogMonths,
     logMonths,
     loadAll: loadAnswerLog,
