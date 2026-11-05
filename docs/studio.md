@@ -931,6 +931,10 @@ Its four tabs are links, the one shown marked (`aria-current`):
   - Each shows when it was given, which way, its grade, how (recalled,
     or chosen among options in a course) and, for a wrong choice, the
     wrong option chosen, by its id once it's no longer on the card.
+    The chosen option is looked up by its id among the card's wrong
+    options once for the answers, not searched for row by row, so the
+    tab's time grows with the answers and the options, not with their
+    product.
   - A column's name sorts the answers by it (but the wrong option's),
     then the other way, then newest first again. Beside the deck's
     cards, **j** and **k** stay the cards' table's.
