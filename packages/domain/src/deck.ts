@@ -490,10 +490,14 @@ export function isFormatted(textFormat: string | undefined): boolean {
  * as their own editor does (tidiedDistractor), their ids and retirement
  * kept; none stated keeps the card's (DeckRepository.updateCard). What
  * the card is about is kept as the input states it, or as `saved` has it.
+ * With `tidiedOnce`, a distractor several cards name (one object to all
+ * of them) is tidied for the first card in each format and that result
+ * reused for the rest.
  */
 export function validateCardContent(
   input: CardContent,
   saved?: CardContent,
+  tidiedOnce?: TidiedDistractors,
 ): CardContentValidation {
   const formatted = isFormatted(input.textFormat ?? saved?.textFormat);
   const subjects = input.subjects ?? saved?.subjects;
@@ -528,7 +532,7 @@ export function validateCardContent(
   if (isEmptyText(back) && backImageUrl === undefined) {
     return { ok: false, error: new AppError("cardBackEmpty") };
   }
-  const distractors = tidiedDistractors(input.distractors ?? [], formatted);
+  const distractors = tidiedDistractors(input.distractors ?? [], formatted, tidiedOnce);
   if (!Array.isArray(distractors)) return distractors;
   return {
     ok: true,
@@ -554,23 +558,52 @@ export function validateCardContent(
   };
 }
 
+/**
+ * The distractors validateCardContent has tidied for the cards of one
+ * edit, by whether their card is formatted and then by id: each with the
+ * distractor it was made from, since an id alone does not say the text
+ * is the same. A distractor is so tidied at most once for each format.
+ */
+export type TidiedDistractors = Map<
+  boolean,
+  Map<string, { from: Distractor; tidied: Distractor | CardContentValidation }>
+>;
+
 /** A card's distractors tidied as their own editor does, ids and retirement kept; the first one's error, if any. */
 function tidiedDistractors(
   input: readonly Distractor[],
   formatted: boolean,
+  tidiedOnce: TidiedDistractors = new Map(),
 ): Distractor[] | CardContentValidation {
+  let inFormat = tidiedOnce.get(formatted);
+  if (inFormat === undefined) {
+    inFormat = new Map();
+    tidiedOnce.set(formatted, inFormat);
+  }
   const distractors: Distractor[] = [];
   for (const distractor of input) {
-    const tidy = tidiedDistractor(distractor, formatted);
-    if (!tidy.ok) return { ok: false, error: tidy.error };
-    distractors.push({
-      id: distractor.id,
-      text: tidy.text,
-      ...(tidy.note === undefined ? {} : { note: tidy.note }),
-      ...(distractor.retired ? { retired: true } : {}),
-    });
+    const held = inFormat.get(distractor.id);
+    const tidied = held?.from === distractor ? held.tidied : tidiedOption(distractor, formatted);
+    inFormat.set(distractor.id, { from: distractor, tidied });
+    if ("ok" in tidied) return tidied;
+    distractors.push(tidied);
   }
   return distractors;
+}
+
+/** One distractor tidied as its own editor does, its id and retirement kept; its error, if any. */
+function tidiedOption(
+  distractor: Distractor,
+  formatted: boolean,
+): Distractor | CardContentValidation {
+  const tidy = tidiedDistractor(distractor, formatted);
+  if (!tidy.ok) return { ok: false, error: tidy.error };
+  return {
+    id: distractor.id,
+    text: tidy.text,
+    ...(tidy.note === undefined ? {} : { note: tidy.note }),
+    ...(distractor.retired ? { retired: true } : {}),
+  };
 }
 
 function needsLanguage(part: CardTextPart): CardContentValidation {

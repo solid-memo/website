@@ -157,6 +157,33 @@ describe("FindReplaceDialog", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
+  it("lists a distractor several cards share once, under the first of them", () => {
+    const shared = { id: "shared", text: { sv: "cat?" } };
+    const both = [
+      { ...makeCard(deck, "one"), front: { en: "one" }, distractors: [shared] },
+      { ...makeCard(deck, "two"), front: { en: "two" }, distractors: [shared] },
+    ];
+    renderDialog({
+      cards: both,
+      plan: (edit) =>
+        planCardEdit(
+          both,
+          both.map((card) => card.id),
+          edit,
+        ),
+    });
+    type("Find", "cat");
+    type("Replace with", "dog");
+    const shown = preview();
+    expect(within(shown).getByText("2 cards change:")).toBeInTheDocument();
+    const listed = (name: string) =>
+      within(within(shown).getByText(name, { selector: "strong" }).closest("li")!)
+        .queryAllByRole("listitem")
+        .map((item) => item.textContent);
+    expect(listed("one")).toEqual(["Wrong option, Swedish — svenska (sv): cat? → dog?"]);
+    expect(listed("two")).toEqual([]);
+  });
+
   it("cannot be confirmed while an edit is being made", () => {
     renderDialog({ busy: true });
     type("Find", "cat");

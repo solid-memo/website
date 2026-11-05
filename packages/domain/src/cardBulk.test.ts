@@ -4,7 +4,14 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { changedTexts, planCardEdit, planUndo, sameCardEditPlan, type CardEdit } from "./cardBulk";
+import {
+  changedTexts,
+  planCardEdit,
+  planUndo,
+  sameCardEditPlan,
+  type CardEdit,
+  type ListedDistractors,
+} from "./cardBulk";
 import { UNSTATED } from "./cardQuery";
 import type { Card } from "./deck";
 import type { ReviewState } from "./review";
@@ -333,6 +340,106 @@ describe("planCardEdit, replacing text", () => {
   });
 });
 
+describe("planCardEdit, a distractor several cards share", () => {
+  // One object to every card that names it, as a deck read from a document has it.
+  const shared = { id: "d", text: { sv: "  Katt?" }, note: { en: "a cat" } };
+
+  it("edits it once for all of them: each saved card gets the same distractor", () => {
+    const cards = [card("a", { distractors: [shared] }), card("b", { distractors: [shared] })];
+    const plan = planCardEdit(cards, ["a", "b"], replace("cat", "dog"));
+    const [a, b] = plan.save;
+    expect(a?.distractors).toEqual([{ id: "d", text: { sv: "Katt?" }, note: { en: "a dog" } }]);
+    expect(b?.distractors?.[0]).toBe(a?.distractors?.[0]);
+    const retired = planCardEdit(cards, ["a", "b"], { kind: "retire" }).save;
+    expect(retired[1]?.distractors?.[0]).toBe(retired[0]?.distractors?.[0]);
+  });
+
+  it("finds that it would be emptied once, and skips every card that names it", () => {
+    const empties = { id: "e", text: { sv: "cat" } };
+    const cards = [card("a", { distractors: [empties] }), card("b", { distractors: [empties] })];
+    expect(planCardEdit(cards, ["a", "b"], replace("cat", "")).skipped).toEqual([
+      { id: "a", reason: "wouldEmpty" },
+      { id: "b", reason: "wouldEmpty" },
+    ]);
+  });
+
+  it("refuses it once, for every card that names it, when it is not valid", () => {
+    const mixed = { id: "m", text: { "": "x", en: "y" } };
+    const cards = [card("a", { distractors: [mixed] }), card("b", { distractors: [mixed] })];
+    expect(planCardEdit(cards, ["a", "b"], { kind: "retire" }).skipped).toEqual([
+      { id: "a", reason: "unstatedLanguage" },
+      { id: "b", reason: "unstatedLanguage" },
+    ]);
+  });
+
+  it("edits apart two distractors of one id that differ, and one tidied for a Markdown card and a plain one", () => {
+    const cards = [
+      card("a", { distractors: [{ id: "d", text: { sv: "cat" } }] }),
+      card("b", { distractors: [{ id: "d", text: { sv: "cat cat" } }] }),
+      card("c", { distractors: [shared] }),
+      card("md", { textFormat: SM.markdown, distractors: [shared] }),
+    ];
+    const replaced = planCardEdit(cards, ["a", "b"], replace("cat", "dog")).save;
+    expect(replaced.map((saved) => saved.distractors?.[0]?.text)).toEqual([
+      { sv: "dog" },
+      { sv: "dog dog" },
+    ]);
+    const retired = planCardEdit(cards, ["c", "md"], { kind: "retire" }).save;
+    expect(retired.map((saved) => saved.distractors?.[0]?.text)).toEqual([
+      { sv: "Katt?" },
+      { sv: "  Katt?" },
+    ]);
+  });
+
+  it("tidies it once for each text format when the cards' formats alternate", () => {
+    const cards = ["a", "b", "c", "d"].map((id, at) =>
+      card(id, { ...(at % 2 === 0 ? {} : { textFormat: SM.markdown }), distractors: [shared] }),
+    );
+    const ids = cards.map(({ id }) => id);
+    for (const edit of [replace("cat", "dog"), { kind: "retire" } as const]) {
+      const [a, b, c, d] = planCardEdit(cards, ids, edit).save.map(
+        (saved) => saved.distractors?.[0],
+      );
+      expect(c).toBe(a);
+      expect(d).toBe(b);
+      expect(b).not.toBe(a);
+    }
+  });
+
+  // Eight times the cards, sharing a distractor with eight times the
+  // languages, take about as long as an eighth of both eight times over;
+  // editing the distractor again for each card would take eight times as
+  // long. With `alternate`, every other card is in Markdown.
+  const sharedGrowth = (edit: CardEdit, alternate: boolean) =>
+    growth(
+      (count) => {
+        const text = Object.fromEntries(
+          Array.from({ length: count }, (_, i) => [`en-x-l${i}`, `cat${" ".repeat(16)}`]),
+        );
+        const distractor = { id: "d", text, note: text };
+        const cards = Array.from({ length: count }, (_, i) =>
+          card(`c${i}`, {
+            ...(alternate && i % 2 === 1 ? { textFormat: SM.markdown } : {}),
+            distractors: [distractor],
+          }),
+        );
+        const ids = cards.map(({ id }) => id);
+        return () => planCardEdit(cards, ids, edit);
+      },
+      100,
+      8,
+    );
+
+  it("replaces in it in time that grows with the cards and its texts, not with their product", () => {
+    expect(sharedGrowth(replace("cat", "dog"), false)).toBeLessThan(4);
+  });
+
+  it("replaces in it and retires its cards in such time when their formats alternate", () => {
+    expect(sharedGrowth(replace("cat", "dog"), true)).toBeLessThan(4);
+    expect(sharedGrowth({ kind: "retire" }, true)).toBeLessThan(4);
+  });
+});
+
 describe("planCardEdit, writing a side's text anew", () => {
   const setText = (side: "front" | "back", tag: string, text: string): CardEdit => ({
     kind: "setText",
@@ -464,6 +571,50 @@ describe("changedTexts", () => {
     ]);
     expect(changedTexts(before, before)).toEqual([]);
     expect(changedTexts(card("p"), card("p"))).toEqual([]);
+  });
+
+  it("leaves out a distractor already listed with the same edit, and adds those it lists", () => {
+    const shared = { id: "d", text: { sv: "Katt?" } };
+    const edited = { id: "d", text: { sv: "Hund?" } };
+    const listed: ListedDistractors = new Map();
+    const first = changedTexts(
+      card("a", { distractors: [shared] }),
+      card("a", { distractors: [edited] }),
+      listed,
+    );
+    expect(first).toEqual([{ part: "distractor", tag: "sv", before: "Katt?", after: "Hund?" }]);
+    expect(listed).toEqual(new Map([[shared, new Set([edited])]]));
+    expect(
+      changedTexts(
+        card("b", { front: { en: "b" }, distractors: [shared] }),
+        card("b", { front: { en: "B" }, distractors: [edited] }),
+        listed,
+      ),
+    ).toEqual([{ part: "front", tag: "en", before: "b", after: "B" }]);
+  });
+
+  it("lists a distractor again when a card edits it otherwise, or names another of its id", () => {
+    const shared = { id: "d", text: { sv: "Katt?" } };
+    const listed: ListedDistractors = new Map();
+    changedTexts(
+      card("a", { distractors: [shared] }),
+      card("a", { distractors: [{ id: "d", text: { sv: "Hund?" } }] }),
+      listed,
+    );
+    expect(
+      changedTexts(
+        card("b", { distractors: [shared] }),
+        card("b", { distractors: [{ id: "d", text: { sv: "Häst?" } }] }),
+        listed,
+      ),
+    ).toEqual([{ part: "distractor", tag: "sv", before: "Katt?", after: "Häst?" }]);
+    expect(
+      changedTexts(
+        card("c", { distractors: [{ id: "d", text: { sv: "Katt?" } }] }),
+        card("c", { distractors: [{ id: "d", text: { sv: "Hund?" } }] }),
+        listed,
+      ),
+    ).toEqual([{ part: "distractor", tag: "sv", before: "Katt?", after: "Hund?" }]);
   });
 
   it("takes a language named like a member of Object.prototype as any other", () => {

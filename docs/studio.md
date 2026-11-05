@@ -824,8 +824,10 @@ The edits are:
   in the fields checked (the front, the back, the notes, the labels,
   the wrong options and their notes), in one language or all, matching
   case and whole words when asked. A preview lists every text changed,
-  before and after, and every card left as it is, and why. Nothing's
-  written until the user confirms.
+  before and after, and every card left as it is, and why. A wrong
+  option several cards share is listed once, under the first of them,
+  unless its edit differs for another card.
+  Nothing's written until the user confirms.
 - **Delete**, with every SM-2 and FSRS-6 state of each card, read or
   not, once the user confirms. Another scheduler's state stays
   ([data-model.md](data-model.md#decks-and-cards)). Undone, the cards'
@@ -844,7 +846,9 @@ card it would change must pass the card editor's validation
 edit doesn't change, and one whose side or wrong option a replace
 would leave empty. A note or a label left empty is removed, as in the
 card editor. Text whose language isn't stated can't be changed before
-its language is.
+its language is. A wrong option several cards share is edited once
+for all of them, and checked once for each text format among them,
+not once for each card.
 
 The use case `editCards` plans the edit again on the cards as they are
 now, and writes it in one If-Match PUT of the cards document

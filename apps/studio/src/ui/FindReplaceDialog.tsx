@@ -8,6 +8,7 @@ import {
   REPLACE_FIELDS,
   type CardEdit,
   type CardEditPlan,
+  type ListedDistractors,
   type ReplaceField,
 } from "@solid-memo/domain/cardBulk";
 import { UNSTATED } from "@solid-memo/domain/cardQuery";
@@ -21,9 +22,11 @@ import { Dialog } from "./shell/Dialog";
  * Find and replace in the selected cards, with a preview: as the user
  * types, every card the replace would change is listed with each text
  * it changes, before and after, and every card it leaves as it is for
- * a reason (not one without a match). Nothing is written until the user
- * confirms (`onConfirm`, with the plan they saw). It is a modal dialog
- * (Dialog): Cancel, Escape or Close leaves it (`onCancel`).
+ * a reason (not one without a match). A distractor that several cards
+ * share is edited once, so its change is listed under the first of
+ * those cards only. Nothing is written until the user confirms
+ * (`onConfirm`, with the plan they saw). It is a modal dialog (Dialog):
+ * Cancel, Escape or Close leaves it (`onCancel`).
  */
 export function FindReplaceDialog({
   cards,
@@ -75,7 +78,16 @@ export function FindReplaceDialog({
       )),
     [languages, t, languageLabel],
   );
-  const byId = new Map(cards.map((card) => [card.id, card]));
+  const byId = useMemo(() => new Map(cards.map((card) => [card.id, card])), [cards]);
+  // Each saved card with its changes, made once for each preview; a
+  // distractor that several cards share is listed once, under the first.
+  const changes = useMemo(() => {
+    const listed: ListedDistractors = new Map();
+    return (preview?.save ?? []).map((after) => {
+      const before = byId.get(after.id)!;
+      return { before, after, changes: changedTexts(before, after, listed) };
+    });
+  }, [preview, byId]);
   const reasons = preview?.skipped.filter((skip) => skip.reason !== "unchanged") ?? [];
   const tagName = (tag: string) => (tag === "" ? t("studio.cards.unstated") : languageLabel(tag));
   const check = (label: string, checked: boolean, onChange: (checked: boolean) => void) => (
@@ -149,13 +161,12 @@ export function FindReplaceDialog({
             <>
               <p>{t("studio.cardBulk.changes", { count: preview.save.length })}</p>
               <ul>
-                {preview.save.map((after) => {
-                  const before = byId.get(after.id)!;
-                  return (
-                    <li key={after.id}>
-                      <strong>{cardName(before, cardText)}</strong>
+                {changes.map(({ before, after, changes: texts }) => (
+                  <li key={after.id}>
+                    <strong>{cardName(before, cardText)}</strong>
+                    {texts.length > 0 && (
                       <ul>
-                        {changedTexts(before, after).map((change, at) => (
+                        {texts.map((change, at) => (
                           <li key={at}>
                             {t(`studio.cardBulk.part.${change.part}`)}, {tagName(change.tag)}:{" "}
                             <del>{change.before}</del>
@@ -170,9 +181,9 @@ export function FindReplaceDialog({
                           </li>
                         ))}
                       </ul>
-                    </li>
-                  );
-                })}
+                    )}
+                  </li>
+                ))}
               </ul>
             </>
           )}

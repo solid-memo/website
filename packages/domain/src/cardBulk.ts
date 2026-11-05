@@ -13,6 +13,7 @@ import {
   type Card,
   type CardContent,
   type Distractor,
+  type TidiedDistractors,
 } from "./deck";
 import { withStatedLanguages } from "./deckLanguages";
 import { canonicalTag } from "./languageTag";
@@ -151,6 +152,10 @@ function noChanges(): CardChanges {
 
 /** How an edit changes one card: the card as it is to be saved, or why it is not. */
 function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Card | SkipReason {
+  // A distractor several cards name is tidied once for each text format, not once for each card.
+  const tidiedOnce: TidiedDistractors = new Map();
+  const validated = (card: Card, content: CardContent, retired: boolean) =>
+    validatedIn(card, content, retired, tidiedOnce);
   switch (edit.kind) {
     case "retire":
       return (card) => (card.retired === true ? "unchanged" : validated(card, card, true));
@@ -173,7 +178,7 @@ function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Ca
       };
     }
     case "replaceText":
-      return replacing(edit);
+      return replacing(edit, validated);
     case "setText":
       return (card) => {
         const text = tidied(edit.text, isFormatted(card.textFormat));
@@ -192,10 +197,17 @@ function editOf(edit: Exclude<CardEdit, { kind: "remove" }>): (card: Card) => Ca
  * The card with the content given, as it is saved, once it passes
  * validateCardContent; why not when it does not (a side the edit
  * empties is caught before: see replacing). Its distractors, when
- * `content` states them, are those the validation checked and tidied.
+ * `content` states them, are those the validation checked and tidied,
+ * each tidied once for each text format among the cards of
+ * `tidiedOnce`'s edit.
  */
-function validated(card: Card, content: CardContent, retired: boolean): Card | SkipReason {
-  const valid = validateCardContent(content, card);
+function validatedIn(
+  card: Card,
+  content: CardContent,
+  retired: boolean,
+  tidiedOnce: TidiedDistractors,
+): Card | SkipReason {
+  const valid = validateCardContent(content, card, tidiedOnce);
   if (!valid.ok) {
     switch (valid.error.code) {
       case "textNeedsLanguage":
@@ -227,9 +239,12 @@ function patternOf(edit: Extract<CardEdit, { kind: "replaceText" }>): RegExp {
  * for, every match of `find` becomes `replace`, as written. A text left
  * empty is gone, as when it is cleared in the card editor, but a side's
  * or a wrong option's may not be: the card is skipped (wouldEmpty).
+ * A distractor several cards name (one object to all of them) is
+ * replaced in once, for the first: the rest get that same result.
  */
 function replacing(
   edit: Extract<CardEdit, { kind: "replaceText" }>,
+  validated: (card: Card, content: CardContent, retired: boolean) => Card | SkipReason,
 ): (card: Card) => Card | SkipReason {
   if (edit.find === "") return () => "unchanged";
   const pattern = patternOf(edit);
@@ -245,15 +260,25 @@ function replacing(
       ]),
     );
   };
+  // Each distractor as replaced in, by id, with the one it was made from and whether it empties a text.
+  const replaced = new Map<string, { from: Distractor; to: Distractor; empties: boolean }>();
+  const replacedIn = (from: Distractor) => {
+    const held = replaced.get(from.id);
+    if (held?.from === from) return held;
+    const { note: was, ...distractor } = from;
+    const note = withoutEmpty(inside(was, "distractor"));
+    const to: Distractor = {
+      ...distractor,
+      text: inside(distractor.text, "distractor")!,
+      ...(note === undefined ? {} : { note }),
+    };
+    const done = { from, to, empties: hasEmpty(to.text) };
+    replaced.set(from.id, done);
+    return done;
+  };
   return (card) => {
-    const distractors = card.distractors?.map(({ note: was, ...distractor }): Distractor => {
-      const note = withoutEmpty(inside(was, "distractor"));
-      return {
-        ...distractor,
-        text: inside(distractor.text, "distractor")!,
-        ...(note === undefined ? {} : { note }),
-      };
-    });
+    const done = card.distractors?.map(replacedIn);
+    const distractors = done?.map(({ to }) => to);
     const content: CardContent = {
       ...card,
       front: inside(card.front, "front")!,
@@ -265,13 +290,17 @@ function replacing(
       ...(distractors === undefined ? {} : { distractors }),
     };
     if (sameContent(content, card)) return "unchanged";
-    const emptied = [
-      content.front,
-      content.back,
-      ...(distractors ?? []).map((distractor) => distractor.text),
-    ].some((text) => Object.values(text).some((value) => value.trim() === ""));
+    const emptied =
+      hasEmpty(content.front) ||
+      hasEmpty(content.back) ||
+      (done ?? []).some(({ empties }) => empties);
     return emptied ? "wouldEmpty" : validated(card, content, card.retired === true);
   };
+}
+
+/** Whether a text has a language whose text is empty. */
+function hasEmpty(text: LangText): boolean {
+  return Object.values(text).some((value) => value.trim() === "");
 }
 
 /** Text without its languages left empty; undefined when none is left. */
@@ -344,8 +373,23 @@ function textIn(text: LangText | undefined, tag: string): string | undefined {
   return text !== undefined && Object.hasOwn(text, tag) ? text[tag] : undefined;
 }
 
-/** The texts that differ between a card and its edit, part by part, for a preview to show. */
-export function changedTexts(before: CardContent, after: CardContent): TextChange[] {
+/** The distractors a preview has listed, each with the edits of it it was compared to. */
+export type ListedDistractors = Map<Distractor, Set<Distractor | undefined>>;
+
+/**
+ * The texts that differ between a card and its edit, part by part, for a
+ * preview to show. A distractor already compared to the same edited
+ * distractor in `listed` (the very same objects) is left out, and those
+ * compared are added to it: a preview of many cards passes one map so
+ * that a distractor several cards name and share one edit of is listed
+ * once, under the first, while one edited otherwise for a card is listed
+ * there too.
+ */
+export function changedTexts(
+  before: CardContent,
+  after: CardContent,
+  listed: ListedDistractors = new Map(),
+): TextChange[] {
   const changes: TextChange[] = [];
   const compare = (part: ChangedPart, was: LangText | undefined, is: LangText | undefined) => {
     for (const tag of new Set([...Object.keys(was ?? {}), ...Object.keys(is ?? {})])) {
@@ -371,6 +415,10 @@ export function changedTexts(before: CardContent, after: CardContent): TextChang
   );
   for (const distractor of before.distractors ?? []) {
     const edited = theirs.get(distractor.id);
+    const compared = listed.get(distractor) ?? new Set();
+    if (compared.has(edited)) continue;
+    compared.add(edited);
+    listed.set(distractor, compared);
     compare("distractor", distractor.text, edited?.text);
     compare("distractorNote", distractor.note, edited?.note);
   }
