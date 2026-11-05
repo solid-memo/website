@@ -264,6 +264,9 @@ export function rdfContract({ rdf, resources }: DataClient): void {
         .build();
       expect(getUrlAll(set, P)).toEqual(["http://[oops", `${EX}y`, `${EX}z`]);
       expect(() => buildThing(subject).setIriAll(P, ["http://[other"])).toThrow();
+      // One it had when the builder was made, before a removeAll of the property, too.
+      const replaced = buildThing(subject).removeAll(P).setIriAll(P, ["http://[oops"]).build();
+      expect(getUrlAll(replaced, P)).toEqual(["http://[oops"]);
     });
 
     it("set the property's strings, each once, a language as an add reads it, and keep its other values", () => {

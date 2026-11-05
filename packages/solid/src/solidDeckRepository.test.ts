@@ -297,6 +297,23 @@ describe("applyCardChanges", () => {
     ]);
   });
 
+  it("writes a card as read again, as an undo does, keeping a release it names that is no URL as it is", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        deck.cardsDocumentUrl,
+        `<${card.url}> a <${SM.Card}> ; <${SM.formatVersion}> 7 ; <${SM.front}> "水" ; <${SM.back}> "water" ;
+          <${SM.fromRelease}> <http://[x> .`,
+      ),
+    );
+    const [read] = await makeRepository().listCards(deck);
+    expect(read!.fromRelease).toBeUndefined();
+
+    await makeRepository().applyCardChanges(deck, { save: [read!], remove: [] });
+
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SM.fromRelease)).toEqual(["http://[x"]);
+  });
+
   it("writes a card whose creation time is past what a date holds as one without it", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       await datasetOfTurtle(
@@ -989,6 +1006,30 @@ describe("saveDeck", () => {
     ]);
   });
 
+  it("renames a deck whose theme or source is no URL, dropping that value", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        CATALOG,
+        `<${deck.url}> a <${SM.Deck}>, <${DCAT.Dataset}> ; <${SM.formatVersion}> 6 ;
+          <${DCTERMS.title}> "${deck.title.en}"@en ; <${DCTERMS.description}> "Flashcards."@en ;
+          <${SM.studyDirection}> <${SM.frontToBack}> ; <${SM.cardsDocument}> <${deck.cardsDocumentUrl}> ; <${SM.reviewsDocument}> <${deck.reviewsDocumentUrl}> ;
+          <http://www.w3.org/ns/dcat#theme> <http://[x> ; <${PROV_WAS_DERIVED_FROM}> <http://a:99999/x> .`,
+      ),
+    );
+    const [read] = await makeRepository().listDecks(INSTANCE);
+    expect(read!.formatVersion).toBe(6);
+    expect(read!.themes).toBeUndefined();
+    expect(read!.sourceUrl).toBeUndefined();
+
+    await makeRepository().saveDeck({ ...read!, title: { en: "Renamed" } });
+
+    const [, dataset] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(dataset as Dataset, deck.url)!;
+    expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Renamed");
+    expect(getUrlAll(thing, "http://www.w3.org/ns/dcat#theme")).toEqual([]);
+    expect(getUrlAll(thing, PROV_WAS_DERIVED_FROM)).toEqual([]);
+  });
+
   it("rejects when the deck is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().saveDeck(deck)).rejects.toThrow("no longer exists");
@@ -1650,6 +1691,24 @@ describe("upgradeCards", () => {
     const upgraded = getThing(saved as Dataset, card.url)!;
     expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
     expect(getUrlAll(upgraded, SM.distractor)).toEqual([]);
+  });
+
+  it("rewrites a card whose release or subject is no URL, keeping the release and dropping the subject", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        deck.cardsDocumentUrl,
+        `<${card.url}> a <${SM.Card}> ; <${SM.formatVersion}> 6 ; <${SM.front}> "水" ; <${SM.back}> "water" ;
+          <${SM.fromRelease}> <http://a:99999/x> ; <${DCTERMS.subject}> <http://[x> .`,
+      ),
+    );
+
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const upgraded = getThing(saved as Dataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getUrlAll(upgraded, SM.fromRelease)).toEqual(["http://a:99999/x"]);
+    expect(getUrlAll(upgraded, DCTERMS.subject)).toEqual([]);
   });
 
   it("writes nothing when no card is outdated, or there is no cards document", async () => {

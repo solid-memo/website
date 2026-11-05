@@ -64,7 +64,8 @@ export interface SubjectBuilder {
   /**
    * The property's IRIs become `values`, each once, in the order given;
    * its other values stay. A value the subject has already for the
-   * property stays as it is, even one an add would refuse as no URL
+   * property, or had when the builder was made (before a removeAll of
+   * it), stays as it is, even one an add would refuse as no URL
    * (another app may have written it); a new one is checked as an add
    * checks it. One call for a list of any length, where an add or a
    * remove at each value takes time in the square of the list.

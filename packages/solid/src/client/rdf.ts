@@ -387,9 +387,12 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 
 class Builder implements SubjectBuilder {
   #thing: Thing;
+  /** The subject as the builder was given it, whose IRIs setIriAll keeps as they are. */
+  readonly #given: Thing;
 
   constructor(subject: Thing) {
     this.#thing = subject;
+    this.#given = subject;
   }
 
   #with(change: (subject: Thing) => Thing): this {
@@ -465,8 +468,12 @@ class Builder implements SubjectBuilder {
 
   setIriAll(property: string, values: readonly string[]): this {
     // Each new one as the library's add writes it, which refuses one that
-    // is no URL; one the subject has already stays as it is.
-    const stored = new Set(this.#thing.predicates[property]?.namedNodes);
+    // is no URL; one the subject has already, or had before a removeAll
+    // of this build, stays as it is.
+    const stored = new Set([
+      ...(this.#given.predicates[property]?.namedNodes ?? []),
+      ...(this.#thing.predicates[property]?.namedNodes ?? []),
+    ]);
     const iris = new Set(
       values.map((value) =>
         stored.has(value)
