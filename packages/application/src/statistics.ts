@@ -309,7 +309,7 @@ export function createStatisticsUseCases({
     firstTimed: Answer | undefined;
     dayBoundaryHour: number;
   }> {
-    await answerStore.flush();
+    await answerStore.flush(instanceUrl);
     const [prefs, logged] = await Promise.all([
       preferenceStore.get(instanceUrl),
       answerStore.logMonths(instanceUrl, at),
@@ -397,7 +397,7 @@ export function createStatisticsUseCases({
       };
     },
     async getTodayFigures(instanceUrl, at) {
-      await answerStore.flush();
+      await answerStore.flush(instanceUrl);
       const [prefs, logged, digest] = await Promise.all([
         preferenceStore.get(instanceUrl),
         answerStore.logMonths(instanceUrl, at),
@@ -499,7 +499,7 @@ export function createStatisticsUseCases({
       const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));
       const lastMonth = lastLogMonthOf(today);
       const logged = (async () => {
-        await answerStore.flush();
+        await answerStore.flush(instanceUrl);
         const byDeck = new Map<string, Answer[]>();
         for (const answer of await answerStore.readMonths(
           instanceUrl,
@@ -549,7 +549,7 @@ export function createStatisticsUseCases({
     },
     async getCourseStatistics(instanceUrl, at, courses) {
       if (courses.length === 0) return [];
-      await answerStore.flush();
+      await answerStore.flush(instanceUrl);
       const [prefs, logged] = await Promise.all([
         preferenceStore.get(instanceUrl),
         answerStore.logMonths(instanceUrl, at),

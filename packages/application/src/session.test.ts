@@ -669,6 +669,37 @@ describe("guests", () => {
     expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
   });
 
+  it("transferGuestStudy waits for no other instance's answers on their way", async () => {
+    const { deps } = guestDeps();
+    const foreign = "https://other.example/solid-memo/";
+    const answerLog: AnswerLog = {
+      append: vi.fn((instanceUrl: string) =>
+        instanceUrl === foreign ? new Promise<void>(() => undefined) : Promise.resolve(),
+      ),
+      appendAll: vi.fn(async () => undefined),
+      months: vi.fn(async () => []),
+      readMonth: vi.fn(async () => []),
+      readMonthSince: vi.fn(),
+      removeDay: vi.fn(async () => undefined),
+      removeAnswer: vi.fn(async () => undefined),
+    };
+    const useCases = createUseCases({ ...deps, answerLog });
+    await useCases.recordReview(
+      foreign,
+      { ...deck, url: `${foreign}catalog.ttl#deck-1` },
+      { card, direction: "front-to-back" },
+      4,
+      new Date("2026-10-03T10:00:00.000Z"),
+    );
+    await vi.waitFor(() => expect(answerLog.append).toHaveBeenCalledOnce());
+    await expect(
+      useCases.transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      }),
+    ).resolves.toMatchObject({ ok: true });
+  });
+
   it("transferGuestStudy tidies the guest's study away even when its data could not be registered", async () => {
     const { deps } = guestDeps();
     vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("offline"));
@@ -1744,6 +1775,25 @@ describe("guests", () => {
       expect(deps.answerLog.append).toHaveBeenCalledTimes(2);
       expect(vi.mocked(deps.answerLog.append).mock.invocationCallOrder[1]).toBeLessThan(
         vi.mocked(deps.instanceCopier.listResources).mock.invocationCallOrder[0]!,
+      );
+    });
+
+    it("mergeGuestStudy waits for no other instance's answers on their way", async () => {
+      const { deps } = mergeDeps();
+      vi.mocked(deps.answerLog.append).mockImplementation((instanceUrl) =>
+        instanceUrl === target.url ? new Promise<void>(() => undefined) : Promise.resolve(),
+      );
+      const useCases = createUseCases(deps);
+      await useCases.recordReview(
+        target.url,
+        { ...own, url: `${target.url}catalog.ttl#deck-1` },
+        { card, direction: "front-to-back" },
+        4,
+        new Date("2026-10-03T10:00:00.000Z"),
+      );
+      await vi.waitFor(() => expect(deps.answerLog.append).toHaveBeenCalledOnce());
+      await expect(useCases.mergeGuestStudy(session, guestInstance, target)).resolves.toMatchObject(
+        { ok: true },
       );
     });
   });

@@ -1283,10 +1283,14 @@ nothing could rebuild it.
 - **After the review, not in its way**: `recordReview` saves the review
   state, then queues the answer, with its response times
   ([statistics.md](statistics.md#response-times)), to be added in the
-  background. One that fails waits, with those after
-  it, for the next answer, the end of the session or the statistics
-  page. An answer still queued when the tab closes is lost; its review
-  isn't.
+  background. Each instance has its own queue, and another instance's
+  answers never wait for a failed one. One that fails waits, with those
+  of its instance after it, until that instance's next answer tries
+  again, or something that reads or changes its log: the end of a study
+  session in it, its statistics, resetting a day. An add the server
+  hasn't answered within 10 seconds is given up and tried again later,
+  which changes nothing if it was saved (`APPEND_DEADLINE_MS`). An
+  answer still queued when the tab closes is lost; its review isn't.
 - **Resetting the day removes that deck's answers of the day**
   (`removeDay`: read, remove, save with If-Match, again on 412).
   **Undoing an answer in a session removes that one answer** by its id

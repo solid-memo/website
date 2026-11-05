@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { createUseCases } from "./useCases";
+import { createUseCases, type UseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import { fsrsInterval, fuzzedInterval, fuzzFactor } from "@solid-memo/domain/fsrs";
@@ -101,6 +101,62 @@ describe("the answer log", () => {
       ["front-to-back", 4],
       ["back-to-front", 5],
     ]);
+  });
+
+  describe("of several instances", () => {
+    const foreign = "https://other.example/solid-memo/shared/";
+    const answer = (instanceUrl: string, grade: 0 | 1 | 2 | 3 | 4 | 5, useCases: UseCases) =>
+      useCases.recordReview(instanceUrl, deck, { card, direction: "front-to-back" }, grade, noon);
+
+    it("logs an instance's answers when another instance's log refuses its own, and tries those again later, in order", async () => {
+      const { log, byMonth, useCases } = setup();
+      const add = log.append.getMockImplementation()!;
+      let refusing = true;
+      log.append.mockImplementation(async (instanceUrl, given) => {
+        if (instanceUrl === foreign && refusing) throw new Error("403");
+        await add(instanceUrl, given);
+      });
+      await answer(foreign, 3, useCases);
+      for (const grade of [4, 5] as const) await answer(instance.url, grade, useCases);
+      await answer(foreign, 2, useCases);
+      await useCases.getStatistics(instance.url, noon);
+      expect(byMonth.get("2026-09")!.map((each) => each.grade)).toEqual([4, 5]);
+      refusing = false;
+      await useCases.getStatistics(foreign, noon);
+      expect(byMonth.get("2026-09")!.map((each) => each.grade)).toEqual([4, 5, 3, 2]);
+    });
+
+    it("logs, undoes and resets an instance's answers while another instance's log never answers", async () => {
+      const { deps, log, byMonth, useCases } = setup();
+      const add = log.append.getMockImplementation()!;
+      log.append.mockImplementation((instanceUrl, given) =>
+        instanceUrl === foreign ? new Promise<void>(() => undefined) : add(instanceUrl, given),
+      );
+      await answer(foreign, 3, useCases);
+      await answer(instance.url, 4, useCases);
+      const { undo } = await answer(instance.url, 5, useCases);
+      await useCases.undoReview(instance.url, deck, undo);
+      await useCases.getStatistics(instance.url, noon);
+      expect(byMonth.get("2026-09")!.map((each) => each.grade)).toEqual([4]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+        sm2s([
+          {
+            cardId: card.id,
+            direction: "front-to-back",
+            easeFactor: 2.6,
+            intervalDays: 1,
+            repetitions: 1,
+            due: "2026-09-22",
+            firstReviewedAt: noon.toISOString(),
+            lastReviewedAt: noon.toISOString(),
+            formatVersion: 2,
+          },
+        ]),
+      );
+      await expect(useCases.resetStudyDay(instance.url, deck, noon)).resolves.toBe(1);
+      expect(log.removeDay).toHaveBeenCalledWith(instance.url, deck.url, "2026-09-21");
+      expect(byMonth.get("2026-09")).toEqual([]);
+    });
   });
 
   it("forgets a reset day's answers of the deck, those still on their way too", async () => {

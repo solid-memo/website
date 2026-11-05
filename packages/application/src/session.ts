@@ -524,8 +524,9 @@ export function createSessionUseCases({
       const digest = digestUrlOf(source);
       const listed = async () =>
         (await instanceCopier.listResources(source)).filter((url) => url !== digest);
-      // Answers still on their way to the guest's log go there first, to move with it.
-      await answerStore.flush();
+      // Answers still on their way to the guest's log go there first,
+      // to move with it; another instance's are not waited for.
+      await answerStore.flush(guestInstance.url);
       let begun = false;
       let created = false;
       let instance: Instance;
@@ -644,8 +645,9 @@ export function createSessionUseCases({
               .map(async (url) => [url, await instanceCopier.versionOf(url)] as const),
           ),
         );
-      // Answers still on their way to the guest's log go there first, to be added with it.
-      await answerStore.flush();
+      // Answers still on their way to the guest's log go there first,
+      // to be added with it; another instance's are not waited for.
+      await answerStore.flush(guestInstance.url);
       const added: Deck[] = [];
       const copied: ReleaseDraftSummary[] = [];
       const notes: string[] = [];

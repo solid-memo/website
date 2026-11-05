@@ -271,9 +271,11 @@ seconds, the read is aborted and fails with `podNoAnswer`, which the
 app tries again ([style.md](style.md#typescript)). Without it, a
 request the server never answers keeps a screen loading for good. The
 deadline ends when the answer's headers arrive, so a large document
-takes as long as it needs. A write has no deadline: one cut off might
-still be saved, and only its answer says whether it was. The guest's
-pod, in this browser, has none either.
+takes as long as it needs. The guest's pod, in this browser, has no
+deadline. A write has none either: one cut off might still be saved,
+and only its answer says whether it was. Adding an answer to the log is
+the one exception: it's added whole, so one given up is added again
+later ([data-model.md](data-model.md#the-answer-log)).
 
 The release publisher alone gets a second fetch for its access
 control, through the same fences, whose pod fence lets a document's own
