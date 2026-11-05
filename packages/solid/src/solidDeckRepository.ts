@@ -913,7 +913,8 @@ export function createSolidDeckRepository({
    * card's own predicates are replaced (empty text and a missing picture
    * remove theirs), anything else on the subject survives, the release
    * it was taken from (`sm:fromRelease`) too, unless the card names
-   * another. A new card is stamped with the time of writing.
+   * another; one the subject states already stays as it is. A new card
+   * is stamped with the time of writing.
    */
   function cardThing(deck: Deck, card: CardToWrite, existing: NamedSubject | null): NamedSubject {
     const thing = recordThing(
@@ -922,7 +923,8 @@ export function createSolidDeckRepository({
       cardToRecord(card, card.createdAt ?? now().toISOString(), deck.cardsDocumentUrl),
       existing,
     );
-    return card.fromRelease === undefined
+    const stored = getUrlAll(thing, SM.fromRelease);
+    return card.fromRelease === undefined || (stored.length === 1 && stored[0] === card.fromRelease)
       ? thing
       : buildThing(thing).setIri(SM.fromRelease, card.fromRelease).build();
   }

@@ -13,7 +13,6 @@ import {
   getStringNoLocale,
   getThing,
   getThingAll,
-  getUrl,
   getUrlAll,
   removeThings,
   setThing,
@@ -64,6 +63,8 @@ import {
 import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
+  readIri,
+  readIris,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
@@ -417,7 +418,8 @@ export function toCard(thing: Subject, dataset: Dataset): Card | null {
     read.data,
     distractorsOf(dataset, read.data.distractor),
   );
-  const fromRelease = getUrl(thing, SM.fromRelease);
+  // One that is no URL (readIri) is not read, and stays as it is on the card (cardThing).
+  const fromRelease = readIri(thing, SM.fromRelease);
   return card === null || fromRelease === null ? card : { ...card, fromRelease };
 }
 
@@ -436,7 +438,7 @@ export function readCard(thing: Subject): { storedVersion: number; data: CardV7 
   if (read.record.version >= 7) return { storedVersion: read.storedVersion, data };
   return {
     storedVersion: read.storedVersion,
-    data: { ...data, subject: getUrlAll(thing, DCTERMS.subject) },
+    data: { ...data, subject: readIris(thing, DCTERMS.subject) },
   };
 }
 

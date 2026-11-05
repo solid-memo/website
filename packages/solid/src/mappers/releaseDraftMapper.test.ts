@@ -292,6 +292,26 @@ ${STEP} ; schema:position 1 ; owl:deprecated false .
     );
   });
 
+  it("refuses an IRI that is no URL with the draft's own message, and reads a release without it", async () => {
+    await expect(read(`${ROOT} ; dcat:theme <http://[x> .`)).rejects.toEqual(
+      hidden(DRAFT, "http://www.w3.org/ns/dcat#theme"),
+    );
+    await expect(
+      read(`${ROOT} .\n${CARD} ; solid-memo:frontImage <http://a:99999/x> .`),
+    ).rejects.toEqual(hidden(of("q1"), `${SM}frontImage`));
+    const old = `<#old> a solid-memo:Card ; solid-memo:formatVersion 4 ; solid-memo:front "Q"@en ;
+    solid-memo:back "A"@en ; dcterms:subject <https://data.example/a> , <http://[x>`;
+    await expect(read(`${ROOT} .\n${old} .`)).rejects.toEqual(
+      hidden(of("old"), "http://purl.org/dc/terms/subject"),
+    );
+    const release = draftFromQuads(
+      await quadsOfTurtle(`${PREFIXES}${ROOT} ; dcat:theme <http://[x> .\n${old} .`, DRAFT),
+      DRAFT,
+    );
+    expect(release?.root.theme).toEqual([]);
+    expect(release?.cards[0]?.data.subject).toEqual(["https://data.example/a"]);
+  });
+
   it("refuses a subject a newer app wrote with the reload message, not as a value to remove", async () => {
     await expect(
       read(`${ROOT} .\n${CARD.replace("formatVersion 7", 'formatVersion "99"^^xsd:integer')} .`),

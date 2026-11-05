@@ -963,7 +963,9 @@ once for all the decks (`withDecks`, `withoutDecks`), not once per deck,
 so a change to many decks takes time that grows with them, not their
 square. A link of the catalog or of a deck group that is no URL the app
 can write (another app may have written one) stays as it is, and the
-rest of the links are changed around it.
+rest of the links are changed around it. The same holds when the deck
+list is rearranged: such a link is no member of the arrangement, and
+renaming, moving or combining groups keeps it.
 
 ## Wrong options
 
@@ -1663,6 +1665,19 @@ by one.
   card's back, a step's theory or a catalog entry's keywords. Its read
   now fails with a `ReadLimitError`. The app has no way to shorten the
   text, so it has to be edited outside the app.
+- **What is read can be written back.** An IRI that `new URL` refuses,
+  such as `<http://[x>`, is still an IRI to the Turtle parser, but the
+  client library writes no such IRI. So no value the app reads into
+  its models holds one (`readIris` in
+  [records.ts](../packages/solid/src/records.ts)): a deck's theme or
+  source, a card's release or subject, a draft's field, or the
+  catalog's publisher, which a new deck group takes. The next write
+  of a subject leaves such a value out, but a value the write keeps
+  stays as it is (`setIriAll`): a link of the catalog or of a deck
+  group, a deck entry's `sm:completedChapter`, and a card's
+  `sm:fromRelease`. A draft that states one is refused as one that
+  states a value otherwise than the Studio reads it
+  (`draftHiddenValue`), so it is never published with it.
 - Mutations always follow read → modify → save
   ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`). The save sends a PATCH

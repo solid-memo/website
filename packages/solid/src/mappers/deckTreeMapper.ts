@@ -9,7 +9,6 @@ import {
   getInteger,
   getThing,
   getThingAll,
-  getUrl,
   getUrlAll,
 } from "../client/rdf";
 import { editOf } from "../datasetEdit";
@@ -19,6 +18,8 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import {
+  readIri,
+  readIris,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
@@ -66,7 +67,7 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
     decks,
     deckPositions,
     groups,
-    rootGroups: root === null ? [] : getUrlAll(root, DCAT.catalog),
+    rootGroups: root === null ? [] : readIris(root, DCAT.catalog),
     readOnly,
   };
 }
@@ -110,8 +111,9 @@ export function withTreeChanges(
   const rootUrl = `${catalogUrl}#catalog`;
   const root = getThing(dataset, rootUrl);
   const noCatalog = () => new Error("Deck groups need the catalog, and its publisher");
+  // A publisher that is no URL is none: a new group could not be written with it.
   const publisher = () => {
-    const url = root === null ? null : getUrl(root, DCTERMS.publisher);
+    const url = root === null ? null : readIri(root, DCTERMS.publisher);
     if (url === null) throw noCatalog();
     return url;
   };
@@ -140,10 +142,12 @@ export function withTreeChanges(
       groups: before!.groups.filter((link) => groupUrls.has(link)),
     };
     const position = changes.positions.get(url) ?? before?.position;
+    // A link the group has that is no URL (readIris) is no member, and stays as it is (setIriAll).
+    const linked = (link: string) => (existing === null ? [] : getUrlAll(existing, link));
     const group: StoredGroup = {
       group: titles.get(url) ?? before!.group,
-      decks: [...members.decks, ...foreign(before?.decks ?? [], datasets)],
-      groups: [...members.groups, ...foreign(before?.groups ?? [], catalogs)],
+      decks: [...members.decks, ...foreign(linked(DCAT.dataset), datasets)],
+      groups: [...members.groups, ...foreign(linked(DCAT.catalog), catalogs)],
       ...(position === undefined ? {} : { position }),
     };
     const record = deckGroupToRecord(group, previous?.publisher ?? publisher(), previous);
@@ -161,14 +165,15 @@ export function withTreeChanges(
 
   if (changes.rootGroups !== undefined) {
     if (root === null) throw noCatalog();
-    let builder = buildThing(unlessNewer(edit.getThing(rootUrl)!)).removeAll(DCAT.catalog);
-    for (const url of [
-      ...changes.rootGroups,
-      ...foreign(getUrlAll(root!, DCAT.catalog), catalogs),
-    ]) {
-      builder = builder.addIri(DCAT.catalog, url);
-    }
-    edit.setThing(builder.build());
+    // Set in one call (setIriAll): a link that is no URL, which another app may have written, stays as it is.
+    edit.setThing(
+      buildThing(unlessNewer(edit.getThing(rootUrl)!))
+        .setIriAll(DCAT.catalog, [
+          ...changes.rootGroups,
+          ...foreign(getUrlAll(root, DCAT.catalog), catalogs),
+        ])
+        .build(),
+    );
   }
 
   return { dataset: edit.done(), subjects: [...written, ...(root === null ? [] : [rootUrl])] };

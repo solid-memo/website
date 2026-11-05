@@ -262,9 +262,12 @@ function iriValue(value: string | Subject): string {
 class Builder implements SubjectBuilder {
   readonly #url: string;
   readonly #values: Record<string, Value[]>;
+  /** The subject's values as the builder was given them, whose IRIs setIriAll keeps as they are. */
+  readonly #given: Readonly<Record<string, readonly Value[]>>;
 
   constructor(subject: Subject) {
     this.#url = subject.url;
+    this.#given = clientSubject(subject).values;
     this.#values = record();
     for (const [predicate, values] of Object.entries(clientSubject(subject).values)) {
       this.#values[predicate] = [...values];
@@ -365,9 +368,10 @@ class Builder implements SubjectBuilder {
   }
 
   setIriAll(property: string, values: readonly string[]): this {
-    // One the subject has already stays as it is, without being checked again.
+    // One the subject has already, or had before a removeAll of this
+    // build, stays as it is, without being checked again.
     const stored = new Set(
-      (this.#values[property] ?? []).flatMap((one) =>
+      [...(this.#given[property] ?? []), ...(this.#values[property] ?? [])].flatMap((one) =>
         one.termType === "NamedNode" ? [one.value] : [],
       ),
     );

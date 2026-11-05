@@ -18,7 +18,7 @@ import {
   setThing,
   toRdfJsDataset,
 } from "./client/rdf";
-import { getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
+import { datasetOfTurtle, getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
 import type { Literal, Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
@@ -363,6 +363,29 @@ describe("readRecord", () => {
       .addStringNoLocale(`${EX}link`, "https://example.com/a")
       .build();
     expect(readRecord(thing, THING)).toEqual({ name: "Ann", tags: [], links: [], concepts: [] });
+  });
+
+  it("leaves out an IRI that is no URL, which the library would not write back, and writes the record over it", async () => {
+    const dataset = await datasetOfTurtle(
+      URL_,
+      `<${URL_}> <${EX}name> "Ann" ; <${EX}link> <http://[x>, <https://example.com/a> ;
+        <${EX}links> <http://a:99999/x>, <https://example.com/b> .`,
+    );
+    const thing = getThing(dataset, URL_)!;
+    const record = readRecord(thing, THING)!;
+    expect(record).toEqual({
+      name: "Ann",
+      link: "https://example.com/a",
+      tags: [],
+      links: ["https://example.com/b"],
+      concepts: [],
+    });
+    const written = recordThing(URL_, THING, { ...record, name: "Bo" }, thing);
+    expect(getUrlAll(written, `${EX}link`)).toEqual(["https://example.com/a"]);
+    expect(getUrlAll(written, `${EX}links`)).toEqual(["https://example.com/b"]);
+    // A value the subject has stays as it is when the record keeps it.
+    const kept = recordThing(URL_, THING, { ...record, link: "http://[x" }, thing);
+    expect(getUrlAll(kept, `${EX}link`)).toEqual(["http://[x"]);
   });
 
   it("treats a date past what a JavaScript date holds as absent, so a required one does not fit", () => {

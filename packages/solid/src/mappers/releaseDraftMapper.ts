@@ -39,7 +39,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
-import { datetimeOf, readRecord, readVersioned, recordThing } from "../records";
+import { datetimeOf, readIris, readRecord, readVersioned, recordThing } from "../records";
 import { DCTERMS, SM } from "../vocab";
 
 /**
@@ -460,7 +460,7 @@ export function draftFromQuads(
     // into its record, not the raw triples: the latest card shape writes
     // it, once, and the release diff and a learner's upgrade compare it.
     if (shape === "card" && read.record.version < 7) {
-      const about = getUrlAll(thing, DCTERMS.subject);
+      const about = readIris(thing, DCTERMS.subject);
       refuse(subject, descriptor, read.record.data, [[DCTERMS.subject, about]]);
       own(subject, descriptor, [], [DCTERMS.subject]);
       nodes[list]!.push({ id, data: { ...data, subject: about } });

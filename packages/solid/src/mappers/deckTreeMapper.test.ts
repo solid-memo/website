@@ -218,6 +218,48 @@ describe("withTreeChanges", () => {
     expect(getThing(removed, at("group-odd"))).toEqual(getThing(dataset, at("group-odd")));
   });
 
+  it("keeps a link that is no URL as it is, and arranges the rest around it", async () => {
+    const odd = ["http://[x", "http://a:99999/x"];
+    const dataset = await document(
+      rootTtl("; dcat:catalog <#group-x>, <http://[x>, <http://a:99999/x>") +
+        deckTtl("a") +
+        deckTtl("b") +
+        deckTtl("c") +
+        groupTtl(
+          "group-x",
+          "X",
+          "; dcat:dataset <#b>, <http://[x>, <http://a:99999/x> ; dcat:catalog <http://[x>",
+        ),
+    );
+    expect(toStoredLayout(dataset, CATALOG).rootGroups).toEqual([at("group-x")]);
+    expect(toStoredLayout(dataset, CATALOG).groups[0]!.decks).toEqual([at("b")]);
+    const group = { url: at("group-2"), title: { en: "New" } };
+    for (const edit of [
+      { kind: "rename", group: at("group-x"), title: { en: "Y" } },
+      { kind: "move", node: at("a"), to: { parent: at("group-x"), after: null } },
+      { kind: "combine", dragged: at("a"), target: at("c"), group },
+    ] satisfies DeckTreeEdit[]) {
+      const { dataset: written } = edited(dataset, edit);
+      const x = getThing(written, at("group-x"))!;
+      expect(getUrlAll(x, DCAT.dataset)).toEqual(expect.arrayContaining([at("b"), ...odd]));
+      expect(getUrlAll(x, DCAT.catalog)).toEqual(["http://[x"]);
+      expect(getUrlAll(getThing(written, ROOT)!, DCAT.catalog)).toEqual(
+        expect.arrayContaining([at("group-x"), ...odd]),
+      );
+    }
+    const combined = edited(dataset, {
+      kind: "combine",
+      dragged: at("a"),
+      target: at("c"),
+      group,
+    }).dataset;
+    expect(getUrlAll(getThing(combined, ROOT)!, DCAT.catalog)).toEqual([
+      at("group-2"),
+      at("group-x"),
+      ...odd,
+    ]);
+  });
+
   it("removes a group, its members taking its place, and moves a group, writing its position", async () => {
     const dataset = await document(
       rootTtl("; dcat:catalog <#group-x>") +
@@ -250,11 +292,15 @@ describe("withTreeChanges", () => {
     expect(getInteger(getThing(moved.dataset, at("c"))!, SM.position)).toBe(0);
   });
 
-  it("needs the catalog and its publisher for a new group, and a URL the document does not have yet", async () => {
+  it("needs the catalog and its publisher, a URL, for a new group, and a URL the document does not have yet", async () => {
     const group = { url: at("group-1"), title: { en: "G" } };
     const combine: DeckTreeEdit = { kind: "combine", dragged: at("b"), target: at("a"), group };
     const withoutPublisher = await document(rootTtl("", "") + deckTtl("a") + deckTtl("b"));
     expect(() => edited(withoutPublisher, combine)).toThrow("Deck groups need the catalog");
+    const oddPublisher = await document(
+      rootTtl("", "dcterms:publisher <http://[x> ;") + deckTtl("a") + deckTtl("b"),
+    );
+    expect(() => edited(oddPublisher, combine)).toThrow("Deck groups need the catalog");
     const withoutCatalog = await document(deckTtl("a") + deckTtl("b"));
     expect(() => edited(withoutCatalog, combine)).toThrow("Deck groups need the catalog");
     const taken = await document(

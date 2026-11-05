@@ -46,12 +46,29 @@ import { AppError } from "@solid-memo/domain/appError";
 
 type FieldValue = string | number | boolean | readonly string[] | LangText | LangTexts;
 
+/**
+ * The subject's IRIs for the property that are URLs, in stored order.
+ * n3 reads an IRI that `new URL` refuses, such as `<http://[x>` or
+ * `<http://a:99999/x>`, and the client library writes no such IRI
+ * (addIri, setIri), so a value read with one would make every later
+ * write of the subject fail. It is not read: what is read of a subject
+ * can always be written back (docs/data-model.md "Write discipline").
+ */
+export function readIris(thing: Subject, predicate: string): string[] {
+  return getUrlAll(thing, predicate).filter((iri) => URL.canParse(iri));
+}
+
+/** The first of the subject's IRIs for the property that is a URL (readIris); null when it has none. */
+export function readIri(thing: Subject, predicate: string): string | null {
+  return readIris(thing, predicate)[0] ?? null;
+}
+
 /** One field's value; undefined when absent, null when a required one is. */
 function readField(thing: Subject, field: FieldDescriptor): FieldValue | null | undefined {
   if (field.cardinality === "many") {
     switch (field.kind) {
       case "iri":
-        return getUrlAll(thing, field.predicate);
+        return readIris(thing, field.predicate);
       case "iriEnum":
         return getUrlAll(thing, field.predicate).filter((v) => field.values!.includes(v));
       case "text":
@@ -90,7 +107,7 @@ function readScalar(
     case "dateTime":
       return readDatetime(thing, field.predicate)?.toISOString() ?? null;
     case "iri":
-      return getUrl(thing, field.predicate);
+      return readIri(thing, field.predicate);
     case "iriEnum": {
       const value = getUrl(thing, field.predicate);
       return value !== null && field.values!.includes(value) ? value : null;
@@ -317,10 +334,12 @@ export function applyRecord<T>(
     // A list, or a text in many languages, is written in one call (setIriAll, setStringAll).
     if (field.kind === "text" || field.kind === "anyText") {
       builder.setStringAll(field.predicate, languageStrings(value as LangText | LangTexts));
+    } else if (field.kind === "iri" || field.kind === "iriEnum") {
+      // As setIriAll writes them: a value the subject had stays as it is.
+      const iris = field.cardinality === "many" ? (value as readonly string[]) : [value as string];
+      builder.setIriAll(field.predicate, iris);
     } else if (field.cardinality !== "many") {
       addValue(builder, field, value as string | number | boolean);
-    } else if (field.kind === "iri" || field.kind === "iriEnum") {
-      builder.setIriAll(field.predicate, value as readonly string[]);
     } else {
       const strings = (value as readonly string[]).map((one) => ({ value: one, language: "" }));
       builder.setStringAll(field.predicate, strings);
@@ -363,10 +382,6 @@ function addValue(
       break;
     case "dateTime":
       builder.addDatetime(field.predicate, new Date(value as string));
-      break;
-    case "iri":
-    case "iriEnum":
-      builder.addIri(field.predicate, value as string);
       break;
   }
 }
