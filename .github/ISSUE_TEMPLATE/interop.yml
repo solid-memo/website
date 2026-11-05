@@ -9,7 +9,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        The servers the tests already run against are listed in [docs/testing.md](https://github.com/solid-memo/website/blob/main/docs/testing.md). A report from any server is welcome, whether Solid Memo works on it or not.
+        The servers the tests already run against are listed in [docs/testing.md](https://github.com/solid-memo/website/blob/main/docs/testing.md). A report from any server is welcome, whether Solid Memo works on it or not. To have the tests run against a server they don't run against yet, use "Suggest a server for the interop tests".
   - type: input
     id: server
     attributes:
