@@ -102,11 +102,10 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
 
     async readDeckFile(text, format, baseUrl) {
       // A triple with a term Turtle cannot write as it is (JSON-LD can hold one) is left out: saved, it would say more than was read (GHSA-x937-hx25-qfp4).
-      const dataset = datasetFromQuads(
-        (await parseDeckFile(text, format, baseUrl)).filter(
-          (quad) => unwritableTermOf(quad) === undefined,
-        ),
+      const quads = (await parseDeckFile(text, format, baseUrl)).filter(
+        (quad) => unwritableTermOf(quad) === undefined,
       );
+      const dataset = datasetFromQuads(quads);
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);
       const typed = (type: string) =>
@@ -114,6 +113,8 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       // A file of more than one deck is refused before any is read (GHSA-hcrw-cr33-jg78).
       const deckThings = typed(SM.Deck);
       if (deckThings.length !== 1) throw new AppError("notADeckFile");
+      // A value of the deck that is an IRI but no URL fails the write of its entry, which comes after its cards and reviews documents: such a file is refused before anything is written.
+      if (hasNonUrlValue(quads, asUrl(deckThings[0]!))) throw new AppError("notADeckFile");
       const deck = toDeck(deckThings[0]!, agentNamesOf(dataset));
       if (deck === null) throw new AppError("notADeckFile");
 
@@ -192,6 +193,19 @@ function readReviewStates(
     }
   }
   return { reviews, fsrsReviews };
+}
+
+/**
+ * Whether the deck subject has a value that is an IRI no URL parser takes
+ * (`<http://a:99999/x>`): its catalog entry could not be written. Told
+ * from the triples, not the deck read from them, which may leave such a
+ * value out.
+ */
+function hasNonUrlValue(quads: readonly Quad[], deckUrl: string): boolean {
+  return quads.some(
+    ({ subject, object }) =>
+      subject.value === deckUrl && object.termType === "NamedNode" && !URL.canParse(object.value),
+  );
 }
 
 /** The triples of a document read; none of one there is none of. */
