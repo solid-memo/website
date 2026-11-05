@@ -190,7 +190,7 @@ async function parsed(url: string, turtle: string): Promise<TripleLines | null> 
  * The document's triples with the update applied, block by block, each
  * line once (TripleLines); null when it is not one this pod applies.
  */
-async function patched(
+export async function patched(
   url: string,
   triples: readonly string[],
   update: string,

@@ -6,6 +6,7 @@ import { createUseCases, type UseCases } from "@solid-memo/application/useCases"
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { anonymousFetch } from "@solid-memo/solid/authFetch";
+import { lwsBridge } from "@solid-memo/solid/lwsBridge";
 import { withReadDeadline } from "@solid-memo/solid/readDeadline";
 import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -108,17 +109,19 @@ export function createAppUseCases({
    * (docs/guest-mode.md); then to the guest's pod or, as the logged-in
    * user, to any other, following no redirect to an address the fences
    * never checked (authFetch.ts). A read of another server that gets no
-   * answer in time is given up, to be tried again (readDeadline.ts).
+   * answer in time is given up, to be tried again (readDeadline.ts). A
+   * request a Linked Web Storage server does not take as the app makes
+   * it is made as LWS has it (lwsBridge.ts, docs/lws.md).
    */
   const writeFence = createWriteFence(
     routedFetch({
       origin: GUEST_ORIGIN,
       local: guestFetch,
-      remote: withReadDeadline(session.fetch),
+      remote: withReadDeadline(lwsBridge(session.fetch)),
     }),
   );
   /** A fetch as no one (authFetch.ts), whose reads have a deadline as the user's do. */
-  const noOneFetch = withReadDeadline(anonymousFetch);
+  const noOneFetch = withReadDeadline(lwsBridge(anonymousFetch));
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
   const shareFetch = createPodFence(writeFence.fetch, { accessControl: true });
