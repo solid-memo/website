@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Suggest a server for the interop tests
+description: Ask for Solid Memo's tests to run against a Solid server they don't run against yet.
+labels: [interop]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The servers the tests run against, and what a server needs to join them, are in [docs/testing.md](https://github.com/solid-memo/website/blob/main/docs/testing.md): a compose file that asks only for a port and a password and publishes on 127.0.0.1 only, an image pinned by digest or built here from a lockfile, and a pod root anyone can read and write, which the tests check first ([contract.ts](https://github.com/solid-memo/website/blob/main/e2e/pod/contract.ts)). A new server starts as advisory: its results are reported, not a gate. How Solid Memo works on a server you already use goes in an "Interop report".
+  - type: input
+    id: server
+    attributes:
+      label: Server
+      description: Its name, and the link to its source.
+      placeholder: JavaScript Solid Server, https://github.com/JavaScriptSolidServer/JavaScriptSolidServer
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version to test
+      placeholder: 0.0.224
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+      description: It decides whether an image built here may be pushed anywhere.
+      placeholder: AGPL-3.0-only
+    validations:
+      required: true
+  - type: textarea
+    id: docker
+    attributes:
+      label: Running it in Docker
+      description: An official image and its registry, or how to build one from source. How the server is told the port and the URL it is reached at, if it needs telling.
+    validations:
+      required: true
+  - type: dropdown
+    id: access
+    attributes:
+      label: Access control
+      options:
+        - Web Access Control (WAC)
+        - Access Control Policies (ACP)
+        - Both
+        - None
+        - I do not know
+    validations:
+      required: true
+  - type: textarea
+    id: account
+    attributes:
+      label: An account and a pod without a browser
+      description: How the tests get a pod to write in, with no one signing in. A seeded account, a root open to anyone, a setup script, or nothing yet.
+    validations:
+      required: true
+  - type: input
+    id: users
+    attributes:
+      label: Who runs it
+      description: A public provider or a known deployment that runs it, if there is one.
+      placeholder: solidcommunity.net
+  - type: dropdown
+    id: role
+    attributes:
+      label: Do you build it?
+      options:
+        - Yes, I am one of its developers
+        - No
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Would you help?
+      options:
+        - label: I can help write its compose file.
+        - label: I can look into the failures the tests find on it.

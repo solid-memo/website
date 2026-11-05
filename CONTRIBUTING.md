@@ -39,7 +39,8 @@ reports are the only private exceptions
   [Adding a language](docs/i18n.md#adding-a-language).
 - **Report how Solid Memo works with your Solid server.** Use the "Interop
   report" form. The servers the tests already run against are listed in
-  [docs/testing.md](docs/testing.md).
+  [docs/testing.md](docs/testing.md). To have the tests run against
+  another one, use the "Suggest a server for the interop tests" form.
 - **Change the code.** Start with [docs/architecture.md](docs/architecture.md)
   and the index of the docs, [docs/docs.ttl](docs/docs.ttl). A term
   you don't know is in [docs/glossary.md](docs/glossary.md).
