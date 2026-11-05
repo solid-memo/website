@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { createLocalPod, dataBlocks, parentOf } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 
@@ -180,6 +181,18 @@ describe("createLocalPod", () => {
       `<${DOC}#a> <${DOC}#b> "x}y" .`,
       `<${DOC}#a> <${DOC}#b> <${DOC}#c> .`,
     ]);
+  });
+
+  it("tells lines past the bound on a term apart, on PUT and on PATCH", async () => {
+    const { fetch } = pod();
+    const text = (end: string) => `"${"k".repeat(MAX_TERM_CHARACTERS - 10)}${end}"`;
+    const line = (end: string) => `<${DOC}#a> <${DOC}#b> ${text(end)} .`;
+    await fetch(DOC, turtle(`<#a> <#b> ${text("1")}, ${text("2")} .`));
+    await fetch(
+      DOC,
+      update(`DELETE DATA {\n${line("1")}\n};\nINSERT DATA {\n${line("2")}\n${line("3")}\n};\n`),
+    );
+    expect((await (await fetch(DOC)).text()).split("\n")).toEqual([line("2"), line("3")]);
   });
 
   it("refuses a PATCH it cannot apply", async () => {

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
-import { triplesOf } from "./ntriples";
+import { TripleLines, triplesOf } from "./ntriples";
 
 const LDP = "http://www.w3.org/ns/ldp#";
 const PIM_STORAGE = "http://www.w3.org/ns/pim/space#Storage";
@@ -178,7 +178,7 @@ export function createLocalPod({ root, store, newEtag }: LocalPodDeps): typeof g
 }
 
 /** The triples of a Turtle document; null when it does not parse. */
-async function parsed(url: string, turtle: string): Promise<Set<string> | null> {
+async function parsed(url: string, turtle: string): Promise<TripleLines | null> {
   try {
     return await triplesOf(url, turtle);
   } catch {
@@ -186,7 +186,10 @@ async function parsed(url: string, turtle: string): Promise<Set<string> | null> 
   }
 }
 
-/** The document's triples with the update applied, block by block; null when it is not one this pod applies. */
+/**
+ * The document's triples with the update applied, block by block, each
+ * line once (TripleLines); null when it is not one this pod applies.
+ */
 async function patched(
   url: string,
   triples: readonly string[],
@@ -194,7 +197,7 @@ async function patched(
 ): Promise<string[] | null> {
   const blocks = dataBlocks(update);
   if (blocks === null) return null;
-  const result = new Set(triples);
+  const result = new TripleLines(triples);
   for (const { operation, data } of blocks) {
     const changed = await parsed(url, data);
     if (changed === null) return null;
