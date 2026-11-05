@@ -78,6 +78,8 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
       text.length > MAX_CHARS ? { code: "tooLong", length: text.length } : { code: "tooComplex" },
     ];
   const problems: MarkdownProblem[] = [];
+  // A reference link's URL is checked once, however often the text uses it.
+  const urls = new Map<string, { live: ReturnType<typeof liveLink>; controls: string[] }>();
   for (const note of inspected.notes) {
     switch (note.type) {
       case "html":
@@ -94,13 +96,18 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
         break;
       }
       case "link": {
-        const live = liveLink(note.url);
+        let url = urls.get(note.url);
+        if (url === undefined) {
+          url = { live: liveLink(note.url), controls: hiddenControls(note.url) };
+          urls.set(note.url, url);
+        }
+        const { live } = url;
         if (!rule.links)
           problems.push({ code: "link", source: note.source, autolink: note.autolink });
         else if (live === null) problems.push({ code: "linkNotFollowed", url: note.url });
         else if (!leadsTo(note.text, live.href))
           problems.push({ code: "linkHost", text: note.text, host: live.host });
-        const controls = hiddenControls(note.text + note.url);
+        const controls = [...new Set([...hiddenControls(note.text), ...url.controls])];
         if (controls.length > 0) problems.push({ code: "hiddenControl", controls, in: "link" });
         break;
       }

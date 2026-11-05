@@ -111,8 +111,14 @@ shapes of Markdown make the parser slow.
 - **`MAX_WORK`, 40 units of the parser's work for each character** (of
   at least 1,000). Each try of one of the parser's rules, each step
   through a link's label and each token it makes is a unit, counted as
-  the parser works. Past the budget the parse stops, and the text is
-  plain, so no text costs more than time linear in its length.
+  the parser works. So is each byte of a link's or a picture's URL in
+  UTF-8, each time it's used. A reference link resolves to its
+  definition's URL however often a text uses it, and the check and the
+  renderer handle the URL of each use on its own. An `href` takes at
+  most three characters for each byte, a percent escape, so the links
+  a text shows hold at most a small multiple of its length. Past the
+  budget the parse stops, and the text is plain, so no text costs more
+  than time linear in its length.
   markdown-it reads most text in such time, but some shapes make it
   read the rest of a text again and again: a block quote after each
   line of a paragraph, or link openers before an unclosed declaration

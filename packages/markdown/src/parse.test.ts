@@ -238,6 +238,26 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown("[r]: https://alone.example")).toEqual([]);
   });
 
+  it("charges a link's or a picture's URL for each use, and shows a text past it as plain text", () => {
+    const definition = `\n\n[r]: https://r.example/${"a".repeat(1_000)}`;
+    for (const use of ["[a][r] ", "![a][r] "]) {
+      expect(parseMarkdown(use.repeat(10) + definition)).not.toBeNull();
+      expect(parseMarkdown(use.repeat(100) + definition)).toBeNull();
+    }
+    const inline = `[a](https://r.example/${"a".repeat(1_000)}) `;
+    expect(parseMarkdown(inline.repeat(10))).not.toBeNull();
+  });
+
+  it("charges a URL by its bytes in UTF-8: two for é, three for €, four for an emoji", () => {
+    // 1,000 UTF-16 code units of each, used `uses` times.
+    const text = (unit: string, uses: number) =>
+      `${"[a][r] ".repeat(uses)}\n\n[r]: https://r.example/${unit.repeat(1_000 / unit.length)}`;
+    for (const unit of ["a", "é", "😀"]) expect(parseMarkdown(text(unit, 20))).not.toBeNull();
+    expect(parseMarkdown(text("€", 20))).toBeNull();
+    expect(parseMarkdown(text("a", 30))).not.toBeNull();
+    for (const unit of ["é", "😀"]) expect(parseMarkdown(text(unit, 30))).toBeNull();
+  });
+
   it("reads the corpus's look-alikes as CommonMark has them", () => {
     expect(parseMarkdown("M87* ln|x| `&aring;` &aring; \\&aring;")).toEqual([
       paragraph(text("M87* ln|x| "), { type: "inlineCode", value: "&aring;" }, text(" å &aring;")),

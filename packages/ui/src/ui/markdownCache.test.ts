@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MAX_CHARS, parseMarkdown } from "@solid-memo/markdown/parse";
 import { plainText } from "@solid-memo/markdown/plainText";
+import { PROSE, SIDE } from "@solid-memo/markdown/problems";
 import { growth } from "@solid-memo/domain/testing/growth";
 import {
   CACHE_SIZE,
@@ -13,7 +14,9 @@ import {
   deckTextCheck,
   markdownBlocks,
   markdownChunks,
+  markdownFieldProblems,
   markdownPhrases,
+  markdownPlainText,
   plainTexts,
   releaseMarkdownCheck,
 } from "./markdownCache";
@@ -131,6 +134,27 @@ describe("plainTexts", () => {
     expect(
       vi.mocked(plainText).mock.calls.filter(([text]) => text === "**Coffee** shop"),
     ).toHaveLength(1);
+  });
+});
+
+describe("markdownPlainText", () => {
+  it("gives Markdown as plain text, read once for a text given again", () => {
+    vi.mocked(plainText).mockClear();
+    expect(markdownPlainText("**Tea** room")).toBe("Tea room");
+    expect(markdownPlainText("**Tea** room")).toBe("Tea room");
+    expect(plainText).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("markdownFieldProblems", () => {
+  it("checks a text once by each rule, giving back what it gave before", () => {
+    const link = "[a](https://example.org)";
+    const found = markdownFieldProblems(link, SIDE);
+    expect(found).toEqual([{ code: "link", source: link, autolink: false }]);
+    expect(markdownFieldProblems(link, SIDE)).toBe(found);
+    const prose = markdownFieldProblems(link, PROSE);
+    expect(prose).toEqual([]);
+    expect(markdownFieldProblems(link, PROSE)).toBe(prose);
   });
 });
 
