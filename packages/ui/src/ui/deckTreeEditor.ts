@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useRef, useState } from "preact/hooks";
 import {
   matchQuery,
   useMutation,
@@ -22,7 +22,8 @@ import {
 } from "@solid-memo/domain/deckTree";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
-import { isCopyOf, libraryCopiesOf, releaseHost } from "@solid-memo/domain/library";
+import { libraryCopiesOf, releaseHost, type LibraryDeck } from "@solid-memo/domain/library";
+import { libraryCopyTest } from "@solid-memo/domain/libraryCopy";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import { useI18n, type ErrorText } from "./i18n";
 import { collapsedGroups, rememberCollapsed } from "./remembered";
@@ -271,6 +272,12 @@ export function libraryIndexQuery(useCases: UseCases) {
  * (docs/migrations.md, Catching up with the library). A copy of a
  * release added from a link has none, since only its creator's catalog
  * would list one.
+ *
+ * What the library tells of the decks is worked out once for each list
+ * of decks and value of the library, not on each render: the release
+ * reads settling render the screen again, as many times as there are
+ * copies to read. Each deck's series is found once, and matched against
+ * the library's series and releases gathered once (libraryCopyTest).
  */
 export function useCopies(
   useCases: UseCases,
@@ -283,14 +290,11 @@ export function useCopies(
   const isCopy = decks.some((deck) => deck.sourceUrl !== undefined);
   const libraryQuery = useQuery({ ...libraryIndexQuery(useCases), enabled: isCopy });
   const library = libraryQuery.data;
-  const linked =
-    library === undefined
-      ? []
-      : decks.filter(
-          (deck) =>
-            deck.sourceUrl !== undefined &&
-            !library.some((libraryDeck) => isCopyOf(deck, libraryDeck)),
-        );
+  const listed = useSameDecks(decks);
+  const { linked, libraryCourses, behind } = useMemo(
+    () => copiesOf(listed, library),
+    [listed, library],
+  );
   // A copy that says it is a course needs no release read to tell.
   const unknown = linked.filter((deck) => deck.course !== true);
   const releaseQueries = useQueries({
@@ -301,30 +305,73 @@ export function useCopies(
       refetchOnWindowFocus: false,
     })),
   });
-  const courses = new Set(
-    (library ?? []).filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl),
-  );
   const linkedSources = new Set(linked.map((deck) => deck.sourceUrl!));
   const linkedCourses = new Set(
     unknown
       .filter((_, at) => releaseQueries[at]!.data?.isCourse === true)
       .map((deck) => deck.sourceUrl!),
   );
-  const behind = new Set(
-    libraryCopiesOf(decks, library ?? [])
-      .filter((copy) => copy.newer === true)
-      .map((copy) => copy.deck.url),
-  );
   return {
     isCourse: (deck) =>
       deck.sourceUrl !== undefined &&
-      (deck.course === true ||
-        courses.has(librarySeriesUrlOf(deck.sourceUrl)) ||
-        linkedCourses.has(deck.sourceUrl)),
+      (deck.course === true || libraryCourses(deck) || linkedCourses.has(deck.sourceUrl)),
     linkedHost: (deck) =>
       deck.sourceUrl !== undefined && linkedSources.has(deck.sourceUrl)
         ? releaseHost(deck.sourceUrl)
         : null,
     newerRelease: (deck) => behind.has(deck.url),
+  };
+}
+
+/**
+ * The decks as an earlier render listed them while they are the same
+ * decks in the same order, so that what is worked out from them is kept
+ * though each render lists them anew.
+ */
+function useSameDecks(decks: readonly Deck[]): readonly Deck[] {
+  const kept = useRef(decks);
+  const previous = kept.current;
+  if (previous.length !== decks.length || decks.some((deck, at) => deck !== previous[at])) {
+    kept.current = decks;
+  }
+  return kept.current;
+}
+
+/**
+ * What the library tells of the decks (useCopies): which copies it does
+ * not list (linked), which are copies of a course it lists, and which it
+ * has a newer release of. Nothing before the library is read.
+ */
+function copiesOf(
+  decks: readonly Deck[],
+  library: readonly LibraryDeck[] | undefined,
+): {
+  linked: Deck[];
+  libraryCourses: (deck: Deck) => boolean;
+  behind: Set<string>;
+} {
+  if (library === undefined) {
+    return { linked: [], libraryCourses: () => false, behind: new Set() };
+  }
+  const isLibraryCopy = libraryCopyTest(library);
+  const courses = new Set(
+    library.filter((deck) => deck.isCourse === true).map((deck) => deck.seriesUrl),
+  );
+  const coursesAmong = new Map(
+    decks.map((deck) => [
+      deck,
+      deck.sourceUrl !== undefined && courses.has(librarySeriesUrlOf(deck.sourceUrl)),
+    ]),
+  );
+  return {
+    linked: decks.filter((deck) => deck.sourceUrl !== undefined && !isLibraryCopy(deck)),
+    // A deck it was not given is told as it is asked for.
+    libraryCourses: (deck) =>
+      coursesAmong.get(deck) ?? courses.has(librarySeriesUrlOf(deck.sourceUrl!)),
+    behind: new Set(
+      libraryCopiesOf(decks, library)
+        .filter((copy) => copy.newer === true)
+        .map((copy) => copy.deck.url),
+    ),
   };
 }

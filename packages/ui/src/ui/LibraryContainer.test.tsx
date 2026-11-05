@@ -10,6 +10,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
+import * as libraryLayout from "@solid-memo/domain/libraryLayout";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { forget } from "./remembered";
@@ -135,6 +136,35 @@ describe("LibraryContainer", () => {
     );
     expect(await screen.findByText("Already imported")).toBeInTheDocument();
     expect(screen.getAllByText("Already imported")).toHaveLength(1);
+  });
+
+  it("parses the decks' release links once for each read of them, not on each render", async () => {
+    const parses = vi.spyOn(libraryLayout, "librarySeriesUrlOf");
+    const decks = Array.from({ length: 200 }, (_, at) => ({
+      ...importedDeck,
+      id: `deck-${at}`,
+      sourceUrl: `https://elsewhere.example/${at}/${"/decks/x".repeat(2_000)}`,
+    }));
+    renderContainer(
+      makeUseCasesFake({
+        listLibraryDecks: vi.fn(async () => [capitals, rivers]),
+        listDecks: vi.fn(async () => [importedDeck, ...decks]),
+      }),
+    );
+    expect(await screen.findByText("Already imported")).toBeInTheDocument();
+    const parsed = parses.mock.calls.length;
+    expect(parsed).toBeLessThanOrEqual(decks.length + 1);
+    // Each keystroke in the search and each check renders the screen again.
+    fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), {
+      target: { value: "ca" },
+    });
+    fireEvent.input(screen.getByRole("searchbox", { name: "Search" }), {
+      target: { value: "" },
+    });
+    fireEvent.click(screen.getByRole("checkbox", { name: "Rivers" }));
+    expect(screen.getAllByText("Already imported")).toHaveLength(1);
+    expect(parses).toHaveBeenCalledTimes(parsed);
+    parses.mockRestore();
   });
 
   it("imports the checked decks one by one, then returns to the deck list", async () => {

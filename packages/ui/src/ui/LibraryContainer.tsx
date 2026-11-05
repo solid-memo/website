@@ -2,10 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useMemo } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
-import { isCopyOf, type LibraryDeck } from "@solid-memo/domain/library";
+import type { LibraryDeck } from "@solid-memo/domain/library";
+import { copiedTest } from "@solid-memo/domain/libraryCopy";
 import { libraryIndexQuery } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
@@ -39,7 +41,9 @@ export function LibraryContainer({
     queryKey: queryKeys.decks(instance.url),
     queryFn: () => useCases.listDecks(instance.url),
   });
-  const podDecks = decksQuery.data ?? [];
+  // Worked out once for each read of the decks, not on each render: the
+  // screen renders again on each keystroke in the search.
+  const isImported = useMemo(() => copiedTest(decksQuery.data ?? []), [decksQuery.data]);
 
   const importMutation = useMutation({
     mutationFn: async (decks: LibraryDeck[]) => {
@@ -73,7 +77,7 @@ export function LibraryContainer({
       deckHref={(deck) => libraryDeckHref(instance.url, deck.seriesUrl)}
       previewHref={(deck) => libraryPreviewHref(instance.url, deck.seriesUrl)}
       importUrlHref={importUrlHref(instance.url)}
-      isImported={(deck) => podDecks.some((podDeck) => isCopyOf(podDeck, deck))}
+      isImported={isImported}
       busy={importMutation.isPending}
       error={errorText(importMutation.error)}
       onImport={(decks) => importMutation.mutate(decks)}

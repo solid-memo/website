@@ -906,7 +906,10 @@ flowchart LR
   not silently stripped.
 - A pod deck whose source is any version of a series is a copy of that
   deck (`isCopyOf`), marked "Already imported"; a second copy is still
-  allowed.
+  allowed. The marks are worked out once for each read of the pod's
+  decks, not on each render, and each deck's release link is parsed
+  once (`copiedTest` in
+  [libraryCopy.ts](../packages/domain/src/libraryCopy.ts)).
 - Several decks can be checked and imported at once, one at a time; a
   failure part-way leaves the earlier ones imported and reports the
   error.
@@ -1119,7 +1122,10 @@ flowchart LR
   "From \<host>" badge. A course's deck says it's one (`schema:Course`
   on its catalog entry, [courses.md](courses.md#the-learners-state));
   any other copy's release is read once, to tell a course copied before
-  decks said so.
+  decks said so. Which decks are copies of the library's is worked out
+  once for each list of decks and each read of the index, not on each
+  render, and each deck's release link is parsed once
+  ([libraryCopy.ts](../packages/domain/src/libraryCopy.ts)).
 - **Newer versions** of a release from a link may be listed by the
   creator's catalog, which links what its instance published
   (`sm:publishedRelease`, [data-model.md](data-model.md)).
