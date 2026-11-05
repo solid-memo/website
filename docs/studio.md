@@ -1436,13 +1436,18 @@ how many can't be read and are left out. A
 file in a newer format than the app reads is refused (as
 `deckFileTooNew`, not `writtenByNewerApp`, since nothing is saved
 over), as is one without exactly one deck, or one that doesn't parse.
+So is one whose deck has an address that isn't a URL, which its entry
+in the catalog can't hold.
 
 **Import into** the instance (`importDeckFile`) makes a new deck of
 it, with its progress when the file has some and the user leaves it
 checked. A course's completed chapters come as many as the app [reads
 of an entry](data-model.md#courses). Its cards document goes first,
 only if none is at its URL yet, then its review states, then its
-entry in the catalog, so the deck shows only once it's whole. A cards
+entry in the catalog, so the deck shows only once it's whole. When a
+write after the cards document fails, the import deletes the documents
+it wrote, which no entry names, unless the entry was written after all.
+A cards
 document left behind by an import cut off makes the deck take a fresh
 id, once. Then the deck's schedule in the digest is brought up to
 date, the screen links to the deck's cards, and the instance's decks

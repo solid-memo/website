@@ -178,6 +178,34 @@ describe("createSolidDeckArchive", () => {
     expect(read.deck.course).toBe(true);
   });
 
+  for (const predicate of [
+    "http://www.w3.org/ns/dcat#theme",
+    "http://purl.org/dc/terms/license",
+    "http://www.w3.org/ns/prov#wasDerivedFrom",
+    "http://purl.org/dc/terms/source",
+  ]) {
+    it(`refuses a deck whose ${predicate} is an IRI no URL parser takes, before anything is written (GHSA-5hqv-c3r3-7mx9)`, async () => {
+      const { pod, deck } = await podWithDeck();
+      const archive = createSolidDeckArchive({ fetch: pod.fetch });
+      const text = await archive.exportDeck(deck, { format: "turtle", withProgress: true });
+      const base = `${DECK_FILE_BASE}deck`;
+      await expect(
+        archive.readDeckFile(
+          `${text}\n<${deck.url}> <${predicate}> <http://a:99999/x> .\n`,
+          "turtle",
+          base,
+        ),
+      ).rejects.toMatchObject({ code: "notADeckFile" });
+      // One of another subject's, or one a URL parser takes, is no reason to refuse the file.
+      const read = await archive.readDeckFile(
+        `${text}\n<${deck.url}> <${predicate}> <urn:isbn:9780000000000> .\n<${INSTANCE}elsewhere#x> <${predicate}> <http://a:99999/x> .\n`,
+        "turtle",
+        base,
+      );
+      expect(read.deck.url).toBe(deck.url);
+    });
+  }
+
   it("writes JSON-LD with its context in full, as compact IRIs and value objects", async () => {
     const { pod, deck } = await podWithDeck();
     const json = JSON.parse(

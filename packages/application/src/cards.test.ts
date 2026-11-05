@@ -1221,6 +1221,82 @@ describe("cards", () => {
       ).rejects.toMatchObject({ code: "createdElsewhere" });
     });
 
+    it("deletes the documents it wrote when the entry's write fails, throwing what failed (GHSA-5hqv-c3r3-7mx9)", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.registerDeck).mockRejectedValueOnce(
+        new Error("Expected a valid URL value"),
+      );
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
+      // One that can't be deleted is left as the instance check finds it; the others still go.
+      vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(new Error("offline"));
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toThrow("Expected a valid URL value");
+      const imported = vi.mocked(deps.deckRepository.registerDeck).mock.calls[0]![0];
+      expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(imported.url);
+      expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
+        [imported, imported.cardsDocumentUrl],
+        [imported, imported.reviewsDocumentUrl],
+      ]);
+      expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
+    });
+
+    it("deletes them without asking after the entry when the pod refused it, or the entry can't be read", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.registerDeck).mockRejectedValueOnce(
+        new AppError("writeRefused"),
+      );
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: false }),
+      ).rejects.toMatchObject({ code: "writeRefused" });
+      expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
+      const imported = vi.mocked(deps.deckRepository.registerDeck).mock.calls[0]![0];
+      expect(vi.mocked(deps.deckRepository.deleteDocument).mock.calls).toEqual([
+        [imported, imported.cardsDocumentUrl],
+      ]);
+      vi.mocked(deps.deckRepository.registerDeck).mockRejectedValueOnce(new Error("offline"));
+      vi.mocked(deps.deckRepository.readDeck).mockRejectedValueOnce(new Error("offline"));
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: false }),
+      ).rejects.toThrow("offline");
+      expect(deps.deckRepository.deleteDocument).toHaveBeenCalledTimes(2);
+    });
+
+    it("keeps the deck whose entry was written after all, its answer lost", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.registerDeck).mockRejectedValueOnce(new Error("lost"));
+      const entry = { ...fileDeck, id: "deck-entry" };
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(entry);
+      expect(await useCases.importDeckFile(instance.url, file, { withProgress: true })).toBe(entry);
+      expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
+    });
+
+    it("deletes the cards document when the review states' write fails, and theirs only when it may have been made", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockRejectedValueOnce(
+        new AppError("createdElsewhere"),
+      );
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toMatchObject({ code: "createdElsewhere" });
+      expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
+      const urls = () =>
+        vi.mocked(deps.deckRepository.deleteDocument).mock.calls.map(([, url]) => url);
+      expect(urls()).toEqual([`${instance.url}decks/deck-x.ttl`]);
+      vi.mocked(deps.deckRepository.deleteDocument).mockClear();
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockRejectedValueOnce(
+        new Error("offline"),
+      );
+      vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toThrow("offline");
+      expect(urls()).toEqual([
+        `${instance.url}decks/deck-x.ttl`,
+        `${instance.url}reviews/deck-x.ttl`,
+      ]);
+    });
+
     it("stops at any other failure of the cards' write, writing nothing more", async () => {
       const { deps, useCases } = withFiles();
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(new Error("offline"));

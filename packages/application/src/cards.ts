@@ -51,7 +51,7 @@ import type {
   StorageGateway,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
-import { changedElsewhere, readNow } from "./writes";
+import { changedElsewhere, readNow, unsent } from "./writes";
 import type { DigestStore } from "./digestStore";
 import { isInInstancePod } from "./releaseDrafts";
 
@@ -192,6 +192,8 @@ export interface CardUseCases {
    * given a fresh id, once); then its review states in one write of its
    * reviews document; then its entry in the catalog, so the deck shows
    * only once it is whole. Each write is checked against the shapes.
+   * A failure after the cards document deletes the documents the import
+   * wrote, which no entry names.
    * Then the deck's schedule in the digest is brought up to date. The
    * deck as written.
    */
@@ -541,17 +543,52 @@ export function createCardUseCases({
           decks = [...decks, deck];
           continue;
         }
-        if (reviews.length + fsrsReviews.length > 0)
+        const imported = await completeImport(deck, reviews, fsrsReviews);
+        // The deck is in: a digest left behind is brought up to date by the next deck list.
+        await digestStore.refresh(instanceUrl, imported).catch(() => undefined);
+        return imported;
+      }
+    },
+  };
+
+  /**
+   * After the cards document: the deck's review states, then its entry.
+   * A failure before the entry deletes the documents the import wrote
+   * (and one whose write may have been made, its answer lost), which
+   * nothing names, never one the pod refused to create; unless the entry
+   * was written after all, its answer lost on the way: then the deck is
+   * there, whole.
+   */
+  async function completeImport(
+    deck: Deck,
+    reviews: ReviewState[],
+    fsrsReviews: FsrsState[],
+  ): Promise<Deck> {
+    const written = [deck.cardsDocumentUrl];
+    try {
+      if (reviews.length + fsrsReviews.length > 0) {
+        try {
           await reviewStateRepository.applyReviewChanges(deck, {
             save: reviews,
             remove: [],
             fsrs: { save: fsrsReviews, remove: [] },
           });
-        await deckRepository.registerDeck(deck);
-        // The deck is in: a digest left behind is brought up to date by the next deck list.
-        await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
-        return deck;
+        } catch (error) {
+          if (!unsent(error)) written.push(deck.reviewsDocumentUrl);
+          throw error;
+        }
+        written.push(deck.reviewsDocumentUrl);
       }
-    },
-  };
+      await deckRepository.registerDeck(deck);
+      return deck;
+    } catch (error) {
+      const entry = unsent(error)
+        ? null
+        : await deckRepository.readDeck(deck.url).catch(() => null);
+      if (entry !== null) return entry;
+      for (const url of written)
+        await deckRepository.deleteDocument(deck, url).catch(() => undefined);
+      throw error;
+    }
+  }
 }
