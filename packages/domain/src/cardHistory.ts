@@ -21,8 +21,9 @@ export const LEECH_LAPSES = 4;
 /** How often each card was forgotten, since the first month the answers given cover. */
 export interface LapseIndex {
   /**
-   * By card IRI: its lapses (answerChain.ts isLapse), scored reviews below
-   * grade 3, in either direction. A card never forgotten is left out.
+   * By card fragment id (Card.id): its lapses (answerChain.ts isLapse),
+   * scored reviews below grade 3, in either direction. A card never
+   * forgotten is left out.
    */
   lapses: ReadonlyMap<string, number>;
   /** The first month answered in ("YYYY-MM"), which the lapses count from; null without answers. */
@@ -58,6 +59,10 @@ export interface Confusion<C> {
  * cards into a new document, and their history goes with them. A card
  * moved to another deck keeps naming its old deck, so its history there
  * starts again.
+ *
+ * The IRIs so joined could be past the bound on a term
+ * (domain/pathKeys.ts), so what counts the answers below keys a card or
+ * a wrong option by its fragment id, never by the joined IRI.
  */
 export function deckAnswers(
   answers: readonly Answer[],
@@ -82,12 +87,17 @@ export function cardAnswers(answers: readonly Answer[], cardIri: string): Answer
     .sort((a, b) => b.answeredAt.localeCompare(a.answeredAt) || b.id.localeCompare(a.id));
 }
 
-/** How often each wrong option was chosen, by its IRI. */
+/**
+ * How often each wrong option was chosen, by its fragment id
+ * (Distractor.id). The answers are a card's or a deck's, as deckAnswers
+ * gives them.
+ */
 export function distractorPicksOf(answers: readonly Answer[]): Map<string, number> {
   const picks = new Map<string, number>();
   for (const { chosenDistractor } of answers) {
-    if (chosenDistractor !== undefined)
-      picks.set(chosenDistractor, (picks.get(chosenDistractor) ?? 0) + 1);
+    if (chosenDistractor === undefined) continue;
+    const id = fragmentIdOf(chosenDistractor);
+    picks.set(id, (picks.get(id) ?? 0) + 1);
   }
   return picks;
 }
@@ -104,7 +114,9 @@ export function lapseIndex(answers: readonly Answer[]): LapseIndex {
   let first: string | null = null;
   for (const answer of answers) {
     if (first === null || answer.studyDay < first) first = answer.studyDay;
-    if (isLapse(answer, index)) lapses.set(answer.cardUrl, (lapses.get(answer.cardUrl) ?? 0) + 1);
+    if (!isLapse(answer, index)) continue;
+    const id = fragmentIdOf(answer.cardUrl);
+    lapses.set(id, (lapses.get(id) ?? 0) + 1);
   }
   return { lapses, since: first === null ? null : monthOfStudyDay(first) };
 }
@@ -122,13 +134,15 @@ export function hardestCardsOf<C extends { url: string }>(
   cards: readonly C[],
 ): HardestCards<C> {
   const index = chainIndexOf(answers);
+  // By the card's fragment id, as lapseIndex counts.
   const counts = new Map<string, { lapses: number; reviews: number }>();
   let reviews = 0;
   for (const answer of answers) {
     if (!isScoredReview(answer, index)) continue;
     reviews += 1;
-    let count = counts.get(answer.cardUrl);
-    if (count === undefined) counts.set(answer.cardUrl, (count = { lapses: 0, reviews: 0 }));
+    const id = fragmentIdOf(answer.cardUrl);
+    let count = counts.get(id);
+    if (count === undefined) counts.set(id, (count = { lapses: 0, reviews: 0 }));
     count.reviews += 1;
     if (isLapse(answer, index)) count.lapses += 1;
   }
@@ -136,7 +150,7 @@ export function hardestCardsOf<C extends { url: string }>(
     reviews,
     cards: cards
       .flatMap((card) => {
-        const count = counts.get(card.url);
+        const count = counts.get(fragmentIdOf(card.url));
         return count === undefined || count.lapses === 0 ? [] : [{ card, ...count }];
       })
       .sort(
@@ -164,8 +178,8 @@ export function confusionsOf<C extends { url: string; distractors?: readonly Dis
     for (const distractor of card.distractors ?? [])
       options.set(distractor.id, { card, distractor });
   return [...distractorPicksOf(answers)]
-    .flatMap(([iri, picks]) => {
-      const option = options.get(fragmentIdOf(iri));
+    .flatMap(([id, picks]) => {
+      const option = options.get(id);
       return option === undefined ? [] : [{ ...option, picks }];
     })
     .sort(

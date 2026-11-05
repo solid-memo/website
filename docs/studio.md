@@ -1172,6 +1172,8 @@ case `deckInsight` reads what it needs, writing nothing.
     the same machine, eight
     times the answers take less than four times as long as an eighth
     of them eight times over.
+  - Lapses are counted by the card's fragment id, so an answer whose
+    card IRI is as long as a term may be is counted the same way.
 
 The charts are the statistics' own (`BarChart` and `StatTile` in `ui`).
 A bar pointed at, tapped or reached with the arrow keys says what it

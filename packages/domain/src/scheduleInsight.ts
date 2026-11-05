@@ -180,7 +180,8 @@ export function easeHistogram(states: readonly ReviewState[]): Bin[] {
 
 /** A card forgotten often, and how often. */
 export interface Leech {
-  cardUrl: string;
+  /** The card's fragment id (Card.id), as lapseIndex keys it. */
+  cardId: string;
   lapses: number;
 }
 
@@ -191,6 +192,6 @@ export function leechesOf(
 ): Leech[] {
   return [...index.lapses]
     .filter(([, lapses]) => lapses >= minLapses)
-    .map(([cardUrl, lapses]) => ({ cardUrl, lapses }))
-    .sort((a, b) => b.lapses - a.lapses || a.cardUrl.localeCompare(b.cardUrl));
+    .map(([cardId, lapses]) => ({ cardId, lapses }))
+    .sort((a, b) => b.lapses - a.lapses || a.cardId.localeCompare(b.cardId));
 }

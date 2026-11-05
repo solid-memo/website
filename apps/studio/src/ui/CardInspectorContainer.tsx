@@ -8,7 +8,6 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import { distractorPicksOf } from "@solid-memo/domain/cardHistory";
 import type { Card, CardTextPart, Deck, Distractor } from "@solid-memo/domain/deck";
 import { instanceUrlOfDeck } from "@solid-memo/domain/instanceLayout";
-import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { untouched } from "@solid-memo/domain/libraryUpgrade";
 import { CardContainer } from "@solid-memo/ui/CardContainer";
@@ -112,12 +111,7 @@ export function CardInspectorContainer({
   });
   const answers = answersQuery.data;
   const picks = useMemo(
-    () =>
-      answers === undefined
-        ? undefined
-        : new Map(
-            [...distractorPicksOf(answers)].map(([iri, count]) => [fragmentIdOf(iri), count]),
-          ),
+    () => (answers === undefined ? undefined : distractorPicksOf(answers)),
     [answers],
   );
   const saveMutation = useMutation({

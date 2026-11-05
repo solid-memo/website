@@ -27,7 +27,7 @@ const insight: DeckInsight = {
   scheduled: 3,
   intervals: intervalHistogram(states),
   eases: easeHistogram(states),
-  lapses: { lapses: new Map([[water.url, 5]]), since: "2025-03" },
+  lapses: { lapses: new Map([[water.id, 5]]), since: "2025-03" },
   leeches: [{ card: water, lapses: 5 }],
 };
 

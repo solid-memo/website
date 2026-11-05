@@ -269,9 +269,9 @@ describe("queryCards", () => {
 
   it("keeps the cards forgotten four times or more as leeches, once their lapses are known", () => {
     const lapses = new Map([
-      [house.url, 4],
-      [cafe.url, 3],
-      [old.url, 9],
+      [house.id, 4],
+      [cafe.id, 3],
+      [old.id, 9],
     ]);
     const query = { ...DEFAULT_CARD_QUERY, state: "leech" as const };
     const leeches = (given?: ReadonlyMap<string, number>) =>
@@ -284,7 +284,7 @@ describe("queryCards", () => {
   });
 
   it("gives each card its lapses when they are known, none counting as 0", () => {
-    const lapses = new Map([[house.url, 2]]);
+    const lapses = new Map([[house.id, 2]]);
     const rows = queryCards(
       cards,
       reviews,
@@ -302,8 +302,8 @@ describe("queryCards", () => {
 
   it("sorts by lapses when they are known, else keeps the deck's order", () => {
     const lapses = new Map([
-      [iron.url, 5],
-      [house.url, 1],
+      [iron.id, 5],
+      [house.id, 1],
     ]);
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "lapses", descending: true } };
     const sorted = (given?: ReadonlyMap<string, number>) =>

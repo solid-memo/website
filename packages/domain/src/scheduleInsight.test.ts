@@ -213,25 +213,23 @@ describe("mergeBins", () => {
 describe("leechesOf", () => {
   const index = {
     lapses: new Map([
-      ["https://pod.example/d.ttl#b", 4],
-      ["https://pod.example/d.ttl#a", 4],
-      ["https://pod.example/d.ttl#c", 7],
-      ["https://pod.example/d.ttl#d", 3],
+      ["b", 4],
+      ["a", 4],
+      ["c", 7],
+      ["d", 3],
     ]),
     since: "2026-01",
   };
 
   it("lists the cards forgotten four times or more, the most forgotten first", () => {
     expect(leechesOf(index)).toEqual([
-      { cardUrl: "https://pod.example/d.ttl#c", lapses: 7 },
-      { cardUrl: "https://pod.example/d.ttl#a", lapses: 4 },
-      { cardUrl: "https://pod.example/d.ttl#b", lapses: 4 },
+      { cardId: "c", lapses: 7 },
+      { cardId: "a", lapses: 4 },
+      { cardId: "b", lapses: 4 },
     ]);
   });
 
   it("takes another least", () => {
-    expect(leechesOf(index, { minLapses: 5 })).toEqual([
-      { cardUrl: "https://pod.example/d.ttl#c", lapses: 7 },
-    ]);
+    expect(leechesOf(index, { minLapses: 5 })).toEqual([{ cardId: "c", lapses: 7 }]);
   });
 });

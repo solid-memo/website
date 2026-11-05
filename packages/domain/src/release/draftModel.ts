@@ -21,6 +21,7 @@ import {
   type ReleaseTerm,
   type ReleaseText,
 } from "./releaseModel.ts";
+import { PathMap } from "../pathKeys.ts";
 import { provenanceOf } from "./provenanceRules.ts";
 import { moved } from "./releaseToDraft.ts";
 
@@ -39,6 +40,19 @@ const XSD_DATE_TIME = "http://www.w3.org/2001/XMLSchema#dateTime";
  */
 export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url): ReleaseModel {
   const at = (iri: string) => moved(iri, draft.url, url);
+  // A moved IRI as a key (PathMap): one in the release by its fragment,
+  // as moving it joins `url` and a fragment past the bound on a term,
+  // which V8 hashes by its length alone (pathKeys.ts); any other IRI is
+  // a term of the draft as it was read.
+  const keyOf = (value: string): readonly string[] => {
+    if (value === url) return ["="];
+    return value.startsWith(`${url}#`) ? ["#", value.slice(url.length + 1)] : ["", value];
+  };
+  const once = (values: readonly string[]): string[] => {
+    const seen = new PathMap<string>();
+    for (const value of values) seen.set(keyOf(value), value);
+    return [...seen.values()];
+  };
   const iri = (value: string): ReleaseTerm => ({ kind: "iri", value: at(value) });
   const iris = (values: readonly string[]) => values.map(iri);
   const one = (value: string | undefined) => (value === undefined ? [] : [iri(value)]);
@@ -65,13 +79,13 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
   // read once, so a lookup per source, activity or contact point costs
   // what that subject states, not every statement of the draft.
   const byPredicate = new Map<string, ReleaseStatement[]>();
-  const bySubject = new Map<string, Map<string, ReleaseTerm[]>>();
+  const bySubject = new PathMap<Map<string, ReleaseTerm[]>>();
   for (const { subject, predicate, object } of triples) {
     const ofPredicate = byPredicate.get(predicate);
     if (ofPredicate === undefined) byPredicate.set(predicate, [{ subject, object }]);
     else ofPredicate.push({ subject, object });
-    let ofSubject = bySubject.get(subject);
-    if (ofSubject === undefined) bySubject.set(subject, (ofSubject = new Map()));
+    let ofSubject = bySubject.get(keyOf(subject));
+    if (ofSubject === undefined) bySubject.set(keyOf(subject), (ofSubject = new Map()));
     const objects = ofSubject.get(predicate);
     if (objects === undefined) ofSubject.set(predicate, [object]);
     else objects.push(object);
@@ -79,27 +93,34 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
   const statements = (predicate: string): ReleaseStatement[] => [
     ...(byPredicate.get(predicate) ?? []),
   ];
-  const typed = (type: string) => [
-    ...new Set(
+  const typed = (type: string) =>
+    once(
       statements(RDF_TYPE)
         .filter(({ object }) => object.value === type)
         .map(({ subject }) => subject),
-    ),
-  ];
+    );
   const subjectAt = (node: DraftNode<{ deprecated?: boolean }>) => ({
     iri: at(`${draft.url}#${node.id}`),
     retired: node.data.deprecated === true,
   });
   const { root } = draft;
-  const generating = new Set(
+  const generating = once(
     statements(`${PROV}wasGeneratedBy`)
       .filter(({ subject }) => subject === url)
       .map(({ object }) => object.value),
   );
+  const generatingKeys = new PathMap<true>();
+  for (const activity of generating) generatingKeys.set(keyOf(activity), true);
   const said = (subject: string, predicate: string): ReleaseTerm[] => [
-    ...(bySubject.get(subject)?.get(predicate) ?? []),
+    ...(bySubject.get(keyOf(subject))?.get(predicate) ?? []),
   ];
   const sources = iris(root.wasDerivedFrom);
+  // An activity an earlier release carried, by its id in the release: a
+  // Set of the joined IRIs could hold strings past the bound on a term,
+  // which V8 hashes by their length alone (pathKeys.ts).
+  const carriedIds = new Set(draft.published.activities);
+  const carriedActivity = (activity: string) =>
+    activity.startsWith(`${url}#`) && carriedIds.has(activity.slice(url.length + 1));
 
   const cards = draft.cards.map((node) => ({
     ...subjectAt(node),
@@ -122,10 +143,11 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     note: texts(node.data.note),
   }));
   // What a card names as its distractor without its being one: its text is still its card's to check.
-  const known = new Set(distractors.map((d) => d.iri));
+  const known = new PathMap<true>();
+  for (const distractor of distractors) known.set(keyOf(distractor.iri), true);
   for (const option of cards.flatMap((card) => card.distractors)) {
-    if (!known.has(option.value)) {
-      known.add(option.value);
+    if (!known.has(keyOf(option.value))) {
+      known.set(keyOf(option.value), true);
       distractors.push({ iri: option.value, typed: false, retired: false, text: [], note: [] });
     }
   }
@@ -181,14 +203,9 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
     sources,
     activities: typed(`${PROV}Activity`).map((activity) => ({
       iri: activity,
-      generating: generating.has(activity),
+      generating: generatingKeys.has(keyOf(activity)),
     })),
-    ...provenanceOf(
-      said,
-      [...generating],
-      sources,
-      new Set(draft.published.activities.map((id) => at(`${draft.url}#${id}`))),
-    ),
+    ...provenanceOf(said, generating, sources, carriedActivity, keyOf),
     cards,
     chapters: draft.chapters.map((node) => ({
       ...subjectAt(node),

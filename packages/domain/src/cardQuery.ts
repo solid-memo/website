@@ -354,7 +354,7 @@ function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | un
  * when in Markdown. It is compared as the first of those languages sorts
  * text: case and accents aside, as the search sets them aside, but a
  * letter the language counts as one of its own as that letter (Swedish
- * puts "ä" after "z"); and numbers by value. `lapses`, by card IRI, says
+ * puts "ä" after "z"); and numbers by value. `lapses`, by card id, says
  * how often each card lapsed in its reviews (lapseIndex; a card it leaves out
  * never was): without it, no card is a leech, and sorting by lapses
  * keeps the deck's order.
@@ -408,7 +408,7 @@ export function queryCards(
       stateOf.get(reviewKeyOf({ cardId: card.id, direction })),
     );
     const prompts = held.map(standingOf);
-    const forgotten = lapses === undefined ? undefined : (lapses.get(card.url) ?? 0);
+    const forgotten = lapses === undefined ? undefined : (lapses.get(card.id) ?? 0);
     if (query.state !== undefined && !inState(card, query.state, prompts, today, forgotten))
       continue;
     if (wanted !== "" || query.lang !== undefined) {

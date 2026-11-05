@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { PathMap } from "../pathKeys.ts";
 import { problem, type CountedThing, type ReleaseProblem, type SourceDetail } from "./problems.ts";
 import {
   DCTERMS_NS,
@@ -34,14 +35,18 @@ export type StatementsOf = (subject: string, predicate: string) => ReleaseTerm[]
  * The activities that generated a release (`generating`, in order) and
  * what it states of its sources (provenanceRules), from its statements
  * (`said`): the library's command reads them from its quads, the Studio
- * from a draft's statements. An activity in `carried` is how an earlier
- * release was made.
+ * from a draft's statements. An activity for which `carried` is true is
+ * how an earlier release was made. Two IRIs are one source when their
+ * keys (`keyOf`, a path as in PathMap) are the same: the Studio's moved
+ * IRIs can be longer than a term, and a key of one such string is
+ * hashed by its length alone (pathKeys.ts).
  */
 export function provenanceOf(
   said: StatementsOf,
   generating: readonly string[],
   sources: readonly ReleaseTerm[],
-  carried: ReadonlySet<string> = new Set(),
+  carried: (iri: string) => boolean = () => false,
+  keyOf: (iri: string) => readonly string[] = (iri) => [iri],
 ): Pick<ReleaseModel, "making" | "sourceDetails"> {
   const making: ReleaseMaking[] = generating.map((iri) => ({
     iri,
@@ -49,15 +54,15 @@ export function provenanceOf(
     comments: said(iri, RDFS_COMMENT).filter(
       (term): term is ReleaseText => term.kind === "literal",
     ),
-    carried: carried.has(iri),
+    carried: carried(iri),
   }));
-  const named = [
-    ...new Set([
-      ...sources.flatMap((term) => (term.kind === "iri" ? [term.value] : [])),
-      ...making.flatMap((one) => one.used),
-    ]),
-  ];
-  const sourceDetails: ReleaseSource[] = named.map((iri) => ({
+  const named = new PathMap<string>();
+  for (const iri of [
+    ...sources.flatMap((term) => (term.kind === "iri" ? [term.value] : [])),
+    ...making.flatMap((one) => one.used),
+  ])
+    named.set(keyOf(iri), iri);
+  const sourceDetails: ReleaseSource[] = [...named.values()].map((iri) => ({
     iri,
     title: said(iri, `${DCTERMS_NS}title`),
     creator: said(iri, `${DCTERMS_NS}creator`),

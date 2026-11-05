@@ -830,7 +830,7 @@ describe("the Studio's answer history and schedule insight", () => {
     expect(insight.intervals.find((bin) => bin.from === 2)).toMatchObject({ count: 1 });
     expect(insight.eases[0]).toMatchObject({ from: 1.3, count: 1 });
     expect(insight.lapses.since).toBe("2026-09");
-    expect(insight.lapses.lapses.get(live.url)).toBe(4);
+    expect(insight.lapses.lapses.get(live.id)).toBe(4);
     // card-3 is forgotten as often, but retired.
     expect(insight.leeches).toEqual([{ card: live, lapses: 4 }]);
     // The schedule was computed afresh, and kept.

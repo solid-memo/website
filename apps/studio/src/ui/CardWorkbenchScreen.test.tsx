@@ -49,7 +49,7 @@ function Harness({
         rows={rows}
         total={4}
         languages={["en", "ja", "unstated"]}
-        lapses={{ lapses: new Map([[water.url, 2]]), since: "2025-03" }}
+        lapses={{ lapses: new Map([[water.id, 2]]), since: "2025-03" }}
         lapsesFailed={false}
         healthHref="#/health"
         query={query}
