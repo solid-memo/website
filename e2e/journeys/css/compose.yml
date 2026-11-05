@@ -27,7 +27,7 @@ services:
     mem_limit: 256m
     pids_limit: 256
   server:
-    image: solidproject/community-server:7.2.0@sha256:73465522db316ec2c7c0417bdf5b1b2eab432c70fab44fb25ba2f2098e21b9e5
+    image: solidproject/community-server:7.3.0@sha256:58073541889f0cd113dc482b4ddbb834bcd39463dc077d49fd1cf9f55337c4b6
     command: ["-c", "config/file.json", "-f", "/data", "-b", "https://127.0.0.1:${E2E_PORT:?}/", "-l", "info"]
     network_mode: "service:tls"
     depends_on: [tls]
