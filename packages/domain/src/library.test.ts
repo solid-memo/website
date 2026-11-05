@@ -116,6 +116,17 @@ describe("releaseUrlOf and releaseHost", () => {
     expect(releaseHost("https://alice.example/v1.ttl")).toBe("alice.example");
     expect(releaseHost("https://127.0.0.1:8443/v1.ttl")).toBe("127.0.0.1:8443");
   });
+
+  it("name no host for a link no URL parser takes", () => {
+    expect(releaseHost("http://[x")).toBeNull();
+    expect(releaseHost("http://a:99999/x")).toBeNull();
+  });
+
+  it("name no host for a link that names none", () => {
+    for (const url of ["urn:x", "file:///x", "data:,x"]) {
+      expect(releaseHost(url), url).toBeNull();
+    }
+  });
 });
 
 describe("newestRelease", () => {

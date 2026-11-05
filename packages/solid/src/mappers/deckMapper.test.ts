@@ -25,6 +25,7 @@ import {
   toRdfJsDataset,
   withQuads,
 } from "../client/rdf";
+import { solidDatasetAsTurtle } from "../client/resources";
 import { foreignSubjects } from "../ownership";
 import { recordThing } from "../records";
 import { type Catalog, catalogToRecord, publisherToRecord } from "@solid-memo/domain/catalog";
@@ -216,6 +217,37 @@ describe("toDeck", () => {
       description: { en: "Capitals, from Wikipedia." },
       sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl",
     });
+  });
+
+  it("lists a deck whose release link no URL parser takes, without that link (GHSA-58p4-233w-h9h8)", async () => {
+    const PLACE = "https://placeholder.example/releases/v1.ttl";
+    const current = await solidDatasetAsTurtle(
+      withDeck(datasetFrom(CATALOG), {
+        id: "deck-1",
+        url: `${CATALOG}#deck-1`,
+        title: { en: "Capitals" },
+        cardsDocumentUrl: CARDS_DOC,
+        reviewsDocumentUrl: REVIEWS_DOC,
+        createdAt: "",
+        formatVersion: 6,
+        direction: "front-to-back",
+        authors: [],
+        sourceUrl: PLACE,
+      }),
+    );
+    expect(current).toContain("wasDerivedFrom");
+    const formatOne = `@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#deck-1> a sm:Deck ; sm:formatVersion 1 ; dcterms:title "Capitals" ;
+  sm:cardsDocument <${CARDS_DOC}> ; sm:reviewsDocument <${REVIEWS_DOC}> ;
+  dcterms:source <${PLACE}> .
+`;
+    for (const turtle of [current, formatOne]) {
+      const dataset = await datasetOfTurtle(CATALOG, turtle.replaceAll(PLACE, "http://[x"));
+      const decks = toDecks(dataset, CATALOG);
+      expect(decks.map((one) => one.title)).toEqual([{ en: "Capitals" }]);
+      expect(decks[0]).not.toHaveProperty("sourceUrl");
+    }
   });
 
   it("names a format-3 deck's creators from the agents beside it, or by IRI when there is none", () => {

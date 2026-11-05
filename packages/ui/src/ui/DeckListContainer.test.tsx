@@ -356,6 +356,30 @@ describe("DeckListContainer", () => {
     );
   });
 
+  it("lists a copy whose release link no URL parser takes, naming no host for it", async () => {
+    const odd = {
+      ...deck,
+      id: "deck-3",
+      url: `${instance.url}catalog.ttl#deck-3`,
+      title: { en: "Rivers" },
+      sourceUrl: "http://[x",
+    };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, odd]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      deckRelease: vi.fn(async (copy: Deck) => ({
+        ...courseLibraryDeck,
+        url: copy.sourceUrl!,
+        formatVersion: 6,
+        cards: [],
+      })),
+    });
+    renderContainer(useCases);
+    await waitFor(() => expect(useCases.deckRelease).toHaveBeenCalledOnce());
+    expect(await screen.findByRole("link", { name: "Rivers" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
+  });
+
   it("takes a deck's word that it is a course, while the index is still read and when its release cannot be", async () => {
     const fromLibrary: Deck = {
       ...deck,

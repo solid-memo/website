@@ -140,6 +140,14 @@ describe("ImportUrlContainer", () => {
     expect(onCourseStarted).not.toHaveBeenCalled();
   });
 
+  it("names the link itself where a release is published when no URL parser takes it", async () => {
+    const odd = { ...rivers, url: "http://[x" };
+    renderContainer(makeUseCasesFake({ readReleaseFromLink: vi.fn(async () => odd) }), RIVERS);
+    expect(await screen.findByRole("heading", { name: "Rivers" })).toBeInTheDocument();
+    expect(screen.getByText(/it is published on http:\/\/\[x\./)).toBeInTheDocument();
+    expect(screen.getByText("Published on").nextElementSibling).toHaveTextContent("http://[x");
+  });
+
   it("starts a course and opens it; one the instance has already is continued", async () => {
     const course = { ...rivers, isCourse: true as const };
     const useCases = makeUseCasesFake({

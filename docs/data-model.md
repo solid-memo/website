@@ -588,7 +588,9 @@ graph LR
     release added [from a link](deck-library.md#from-a-link), names the
     release it came from with `prov:wasDerivedFrom` (`dcterms:source`
     before format 3), wherever that release is; it's read, never
-    written.
+    written. A link the URL parser doesn't take reads as none, so the
+    deck is a copy of no release, and the next write of that deck's
+    entry leaves the link out.
 
   Agents no deck names any more go with the deck that named them. The
   Studio edits the authors and the license (`setDeckProvenance`,

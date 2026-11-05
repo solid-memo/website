@@ -207,7 +207,7 @@ function refuseNonConforming(url: string, report: DocumentReport): void {
   );
   if (problems.length > 0) {
     throw new AppError("releaseNotConforming", {
-      host: releaseHost(url),
+      host: releaseHost(url) ?? url,
       count: problems.length,
       problems: problems
         .map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`)
