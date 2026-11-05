@@ -2,7 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { jsonPath, pathKeys } from "@solid-memo/domain/pathKeys";
 import type { ReviewKey } from "@solid-memo/domain/review";
+import { hashKey, type QueryKey } from "@tanstack/react-query";
 import type { StatisticsRange } from "./router";
 
 /**
@@ -181,3 +183,35 @@ export const queryKeys = {
     cardId,
   ],
 };
+
+/**
+ * The longest hash a query keeps as TanStack Query makes it: V8 hashes a
+ * string longer than this by its length alone (domain/pathKeys.ts).
+ */
+const MAX_HASH_CHARACTERS = 16_383;
+
+/**
+ * A query key hash function for a QueryClient (queryKeyHashFn), each
+ * client its own (docs/architecture.md#query-keys). TanStack Query keeps
+ * its queries in Maps keyed by the hash, which is JSON.stringify of the
+ * key. A key holds pod IRIs, each held to MAX_TERM_CHARACTERS, but its
+ * JSON adds to them and some keys hold several, so the hash could be
+ * past V8's limit, and many such hashes of one length make each lookup
+ * compare a key with every other. Such a key gets a short id instead,
+ * the same for keys of the same JSON and never another's: its JSON as a
+ * path of its strings (PathMap), each one a step of its own. An id
+ * starts with "#", which JSON never does. Partial matching compares the
+ * keys themselves, not their hashes, so it is the same either way. Code
+ * that tells one query's key from another's compares them with
+ * matchQuery, which hashes the key with the query's own function, never
+ * with hashKey. The ids are kept for the client's life, also after their
+ * queries leave the cache.
+ */
+export function boundedQueryKeyHash(): (queryKey: QueryKey) => string {
+  const idOf = pathKeys();
+  return (queryKey) => {
+    const hash = hashKey(queryKey);
+    if (hash.length <= MAX_HASH_CHARACTERS) return hash;
+    return `#${idOf(jsonPath(JSON.parse(hash)))}`;
+  };
+}

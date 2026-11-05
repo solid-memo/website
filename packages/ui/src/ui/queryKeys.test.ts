@@ -2,8 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { growth } from "@solid-memo/domain/testing/growth";
+import { hashKey, QueriesObserver, QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
-import { queryKeys } from "./queryKeys";
+import { boundedQueryKeyHash, queryKeys } from "./queryKeys";
 
 const WEB_ID = "https://pod.example/profile/card#me";
 const INSTANCE = "https://pod.example/solid-memo/a/";
@@ -161,5 +163,101 @@ describe("queryKeys", () => {
     expectUnder(queryKeys.cardProgress(INSTANCE), queryKeys.allCardProgress());
     expectUnder(queryKeys.deckCardProgress(INSTANCE, DECK), queryKeys.cardProgress(INSTANCE));
     expectUnder(queryKeys.cardAnswers(DECK, "card-1"), queryKeys.allCardAnswers());
+  });
+});
+
+/** A cards document IRI `length` characters long, the same up to its number. */
+function cardsDocument(length: number, number: number): string {
+  const start = "https://pod.example/c/";
+  const end = `${String(number).padStart(6, "0")}.ttl`;
+  return `${start}${"x".repeat(length - start.length - end.length)}${end}`;
+}
+
+/** The longest IRI a term may be (MAX_TERM_CHARACTERS, less "<" and ">"). */
+const LONGEST_IRI = 16_381;
+
+describe("boundedQueryKeyHash", () => {
+  it("hashes a key as TanStack Query does while the hash is short", () => {
+    const hash = boundedQueryKeyHash();
+    const keys = [
+      queryKeys.cards(CARDS),
+      queryKeys.cards(undefined),
+      queryKeys.reviewState(REVIEWS, { cardId: "card-1", direction: "back-to-front" }),
+      ["deckInsight", DECK, 3, { b: 1, a: [null, "x"] }],
+      queryKeys.cards(cardsDocument(16_371, 1)),
+    ];
+    for (const key of keys) expect(hash(key)).toBe(hashKey(key));
+    expect(hashKey(keys.at(-1)!)).toHaveLength(16_383);
+  });
+
+  it("gives a long key a short id, the same for keys alike and another for every other", () => {
+    const hash = boundedQueryKeyHash();
+    const long = cardsDocument(LONGEST_IRI, 1);
+    const other = cardsDocument(LONGEST_IRI, 2);
+    const first = hash(queryKeys.cards(long));
+    expect(first.length).toBeLessThan(20);
+    expect(first.startsWith("#")).toBe(true);
+    expect(hash(queryKeys.cards(long))).toBe(first);
+    // Keys alike in JSON are alike here too: an object's fields in any order, an undefined field left out.
+    expect(hash(["a", { x: long, y: 1, z: undefined }])).toBe(hash(["a", { y: 1, x: long }]));
+    const hashes = [
+      first,
+      hash(queryKeys.cards(other)),
+      hash(queryKeys.studyCounts(long)),
+      hash(queryKeys.studyQueue(long)),
+      hash([long, "a b"]),
+      hash([`${long} a`, "b"]),
+      hash(queryKeys.libraryUpgradePlan(DECK, long, CARDS)),
+      hash(queryKeys.libraryUpgradePlan(DECK, CARDS, long)),
+      hash(["a", { x: long, y: 1 }]),
+      hash(["a", { x: long, y: "1" }]),
+      hash(queryKeys.cards(cardsDocument(16_372, 1))),
+    ];
+    expect(new Set(hashes).size).toBe(hashes.length);
+    for (const one of hashes) expect(one.length).toBeLessThanOrEqual(16_383);
+  });
+
+  // TanStack Query matches partial keys on the keys, not their hashes: refreshing the shorter key reaches the long one.
+  it("keeps exact lookups and partial matches on a client", async () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { queryKeyHashFn: boundedQueryKeyHash() } },
+    });
+    const long = cardsDocument(LONGEST_IRI, 1);
+    client.setQueryData(queryKeys.cards(long), "long");
+    client.setQueryData(queryKeys.cards(cardsDocument(LONGEST_IRI, 2)), "other");
+    client.setQueryData(queryKeys.cards(CARDS), "short");
+    expect(client.getQueryData(queryKeys.cards(long))).toBe("long");
+    expect(client.getQueryData(queryKeys.cards(CARDS))).toBe("short");
+    expect(client.getQueryCache().findAll({ queryKey: queryKeys.allCards() })).toHaveLength(3);
+    await client.invalidateQueries({ queryKey: queryKeys.allCards() });
+    expect(client.getQueryState(queryKeys.cards(long))?.isInvalidated).toBe(true);
+    client.removeQueries({ queryKey: queryKeys.cards(long), exact: true });
+    expect(client.getQueryData(queryKeys.cards(long))).toBeUndefined();
+    expect(client.getQueryData(queryKeys.cards(cardsDocument(LONGEST_IRI, 2)))).toBe("other");
+  });
+
+  // One render of the Studio's deck table: a query per deck's cards, keyed by its cards document.
+  it.each([
+    ["past V8's limit for a hash", 16_373],
+    ["under it", 15_803],
+  ])("keeps a render of many decks' queries linear, their IRIs %s", (_, length) => {
+    const ratio = growth(
+      (decks) => {
+        const client = new QueryClient({
+          defaultOptions: { queries: { queryKeyHashFn: boundedQueryKeyHash() } },
+        });
+        const queries = Array.from({ length: decks }, (_, deck) => ({
+          queryKey: queryKeys.cards(cardsDocument(length, deck)),
+          queryFn: () => new Promise<never>(() => {}),
+          enabled: false,
+        }));
+        const observer = new QueriesObserver(client, queries);
+        observer.subscribe(() => {});
+        return () => observer.setQueries(queries.map((query) => ({ ...query })));
+      },
+      125,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

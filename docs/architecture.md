@@ -175,6 +175,21 @@ study counts (`queryKeys.studyCounts`) under its study queue. Each
 function's comment names the key it sits under, which the modules'
 tests check.
 
+Every `QueryClient` the apps make hashes its keys with
+`boundedQueryKeyHash` from the first module. TanStack Query keys its
+cache by a hash of each key, by default the key's JSON. A key holds
+IRIs read from a pod, and some hold several, so that JSON could pass
+16,383 characters. V8 hashes a longer string by its length alone, and
+the cache's lookups would slow with the square of the number of such
+keys. A key whose JSON is longer gets a short id
+instead, the same for every key of the same JSON and different from
+every other key's (`PathMap` in
+[packages/domain/src/pathKeys.ts](../packages/domain/src/pathKeys.ts)).
+Refreshing or dropping a shorter key matches the keys themselves, not
+their hashes, so it reaches a key with a long id too. Code that tells
+one query's key from another's uses `matchQuery`, which hashes with
+the query's own function, never `hashKey`.
+
 ## Why
 
 - Vendor code stays swappable and upgradeable in isolation

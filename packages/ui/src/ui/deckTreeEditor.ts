@@ -4,7 +4,7 @@
 
 import { useState } from "preact/hooks";
 import {
-  hashKey,
+  matchQuery,
   useMutation,
   useQueries,
   useQuery,
@@ -153,7 +153,8 @@ export function useDeckTreeEditor(
   const refresh = () =>
     queryClient.invalidateQueries({
       queryKey: queryKeys.allDecks(),
-      predicate: (query) => pending() === 1 || query.queryHash !== hashKey(treeKey),
+      predicate: (query) =>
+        pending() === 1 || !matchQuery({ queryKey: treeKey, exact: true }, query),
     });
 
   const retitle = (deck: Deck, title: LangText) => {

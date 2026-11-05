@@ -21,6 +21,7 @@ import { ChapterReviewContainer } from "@solid-memo/ui/ChapterReviewContainer";
 import { CourseContainer, type CompletedChapter } from "@solid-memo/ui/CourseContainer";
 import { Clock, CourseLinksContext, type CourseLinks } from "@solid-memo/ui/courseLinks";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
+import { boundedQueryKeyHash } from "@solid-memo/ui/queryKeys";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { StudyContainer } from "@solid-memo/ui/StudyContainer";
@@ -107,7 +108,9 @@ export function TrialContainer({
         draft,
         opening,
         // The trial's pod is in memory: a read that failed fails again.
-        client: new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+        client: new QueryClient({
+          defaultOptions: { queries: { retry: false, queryKeyHashFn: boundedQueryKeyHash() } },
+        }),
       }),
   });
   useEffect(() => open.mutate(editor.draft!), []);
