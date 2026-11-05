@@ -372,7 +372,10 @@ They need checking again before anything relies on them.
   - Every other commit since 1.0.0 has a body, which CONTRIBUTING.md
     asks to say why. Renovate's (`commitBody` in `renovate.json5`) give
     each update, from what version to what, where, its source and
-    release notes, and why. Each release commit carries its changelog.
+    release notes, and why. Each release commit carried its changelog
+    until 6.29.21; since, its message is its subject alone,
+    `chore(release): X.Y.Z`, and the changelog is in `CHANGELOG.md`
+    and the GitHub release.
   - From 1.0.0 on, every commit but the merge commits follows
     Conventional Commits, its type recording the kind of decision.
     Since 2026-10-15, CI's `commits` job checks with commitlint that

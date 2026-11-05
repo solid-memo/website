@@ -329,8 +329,11 @@ semantic-release:
    ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). git
    ignores the archive, so the release commit leaves it out;
 5. commits the five files of steps 2 and 3 to `main` as
-   `chore(release): X.Y.Z`, with the notes as the body, and pushes the
-   commit with the deploy key ([below](#the-deploy-key));
+   `chore(release): X.Y.Z`, with no body, and pushes the commit with
+   the deploy key ([below](#the-deploy-key)). The notes are left out of
+   the message: they copy the subjects of the commits released, and a
+   skip keyword such as `[skip ci]` in one would stop CI, and so the
+   deploy, on the release commit;
 6. tags that commit `vX.Y.Z` and pushes the tag;
 7. makes a GitHub release of the tag, "Solid Memo X.Y.Z", with the
    notes and the archive of its docs, "Documentation X.Y.Z (HTML)". It
@@ -357,9 +360,9 @@ checks that they agree: a change to one, such as a new keyword, goes
 into the other in the same pull request, and into `publiccode.yml`
 where it says the same.
 
-Once CI passes on the release commit, which isn't marked to skip CI, the
-deploy ships the site that run carries, with the new version in its
-pages and footer ([deployment.md](deployment.md#the-build-ci-tested)),
+Once CI passes on the release commit, whose message holds no keyword
+that skips CI, the deploy ships the site that run carries, with the new
+version in its pages and footer ([deployment.md](deployment.md#the-build-ci-tested)),
 and deploys no other commit. The release workflow doesn't run on a
 release commit. CI's run on a release commit has a concurrency group of
 its own, so a newer push to `main` can't replace it while it waits

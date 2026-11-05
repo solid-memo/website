@@ -21,6 +21,14 @@
  * version from the commit's package.json put in its pages. The release
  * workflow does not run on a release commit: there is nothing since the
  * tag to release.
+ *
+ * Its message is the subject alone, with no body. The notes are written
+ * from the subjects of the commits released, as they are, and GitHub
+ * skips CI on a push whose message holds one of its skip keywords
+ * anywhere, so notes in the body could stop CI, and with it the deploy,
+ * on the release commit. CHANGELOG.md and the GitHub release carry the
+ * notes; commitlint refuses the keywords in a commit too
+ * (commitlint.config.mjs).
  */
 
 /**
@@ -136,7 +144,7 @@ export default {
       "@semantic-release/git",
       {
         assets,
-        message: "chore(release): ${nextRelease.version}\n\n${nextRelease.notes}",
+        message: "chore(release): ${nextRelease.version}",
       },
     ],
     // No comments on the issues and pull requests a release includes, and
