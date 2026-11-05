@@ -16,6 +16,17 @@ const profileStorages = vi.fn<ProfileStorages>();
 const CARD = "https://alice.example/profile/card";
 const WEBID = `${CARD}#me`;
 const STORAGE_LINK = '<http://www.w3.org/ns/pim/space#Storage>; rel="type"';
+const LWS_STORAGE = "https://www.w3.org/ns/lws#storage";
+
+/** An LWS storage description of `id`, its root container at `root`. */
+function description(id: string, root: string) {
+  return {
+    "@context": ["https://www.w3.org/ns/cid/v1", "https://www.w3.org/ns/lws/v1"],
+    id,
+    type: "Storage",
+    service: [{ type: "StorageRoot", serviceEndpoint: root }],
+  };
+}
 
 function headResponse(linkHeader?: string): Response {
   const headers = new Headers();
@@ -142,7 +153,59 @@ describe("createSolidStorageGateway", () => {
       ]);
       expect(fetch).toHaveBeenCalledWith("https://alice.example/profile/card", {
         method: "HEAD",
+        headers: { Accept: "text/turtle, */*;q=0.1" },
       });
+    });
+
+    it("takes the storage a Linked Web Storage server links, as its description names its root", async () => {
+      profileStorages.mockResolvedValue([]);
+      const asked: [string, RequestInit | undefined][] = [];
+      const fetch = vi.fn<typeof globalThis.fetch>(async (input, init) => {
+        asked.push([String(input), init]);
+        if (init?.method === "HEAD")
+          return headResponse(`<https://alice.example/>; rel="${LWS_STORAGE}"`);
+        return Response.json(description("https://alice.example/", "https://alice.example/"));
+      });
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+        { url: "https://alice.example/", source: "linkHeader" },
+      ]);
+      expect(asked).toEqual([
+        [CARD, { method: "HEAD", headers: { Accept: "text/turtle, */*;q=0.1" } }],
+        ["https://alice.example/", { headers: { Accept: "application/lws+cid" } }],
+      ]);
+    });
+
+    it("walks on past a linked storage whose description can't be read", async () => {
+      profileStorages.mockResolvedValue([]);
+      const fetch = vi.fn<typeof globalThis.fetch>(async (input, init) => {
+        if (init?.method !== "HEAD") return new Response(null, { status: 500 });
+        return String(input) === "https://alice.example/"
+          ? headResponse(STORAGE_LINK)
+          : headResponse(`<https://alice.example/>; rel="${LWS_STORAGE}"`);
+      });
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+        { url: "https://alice.example/", source: "linkHeader" },
+      ]);
+    });
+
+    it("walks on past a linked storage whose roots the document is not in", async () => {
+      profileStorages.mockResolvedValue([]);
+      const fetch = vi.fn<typeof globalThis.fetch>(async (input, init) => {
+        if (init?.method !== "HEAD")
+          return Response.json(description("https://alice.example/", "https://other.example/"));
+        return String(input) === "https://alice.example/"
+          ? headResponse(STORAGE_LINK)
+          : headResponse(`<https://alice.example/>; rel="${LWS_STORAGE}"`);
+      });
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+        { url: "https://alice.example/", source: "linkHeader" },
+      ]);
     });
 
     it("skips candidates whose HEAD request fails", async () => {

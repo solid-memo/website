@@ -4,7 +4,7 @@
 
 import { universalAccess } from "@inrupt/solid-client";
 import type { GrantPublicRead } from "./interface";
-import { withBoundedHeaders } from "./linkHeader";
+import { TURTLE_FIRST, withBoundedHeaders } from "./linkHeader";
 
 export type { GrantPublicRead } from "./interface";
 
@@ -59,6 +59,9 @@ const ACP_RESOURCE = `${ACP}resource`;
  *   it (`<…#Agent>.}`), which node-solid-server's parser takes for a
  *   path and refuses (400), as it does every PATCH of the library's
  *   (sparqlUpdate.ts); an ACL holds no other kind of term;
+ * - a read that names no media type asks for Turtle: a Linked Web
+ *   Storage server that is a storage's root too answers it otherwise
+ *   with the storage's description, which links no ACL;
  * - for the Community Solid Server, an Access Control Resource not
  *   written yet, which it answers 404 (its Link saying what it is), is
  *   read as one that says only that it is one, which the write then
@@ -83,10 +86,18 @@ export function accessFetch(
         }),
       );
     }
-    const response = withBoundedHeaders(await fetch(input, init));
-    const link = response.headers.get("Link") ?? "";
     const method = init?.method ?? "GET";
     const read = method === "GET" || method === "HEAD";
+    // A read that asks for nothing asks for Turtle, as the app reads a folder: a Linked Web Storage server answers a storage's root otherwise, without the link to its ACL (docs/lws.md).
+    const asked =
+      read && !new Headers(init?.headers).has("Accept")
+        ? {
+            ...init,
+            headers: { ...Object.fromEntries(new Headers(init?.headers)), accept: TURTLE_FIRST },
+          }
+        : init;
+    const response = withBoundedHeaders(await fetch(input, asked));
+    const link = response.headers.get("Link") ?? "";
     const isAcr = link.includes(`<${ACCESS_CONTROL_RESOURCE}>`);
     if (read && isAcr) onAcr(String(input));
     if (!read || response.status !== 404 || !isAcr) return response;

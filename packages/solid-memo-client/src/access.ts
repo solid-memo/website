@@ -5,7 +5,7 @@
 import type { Quad, Term } from "@rdfjs/types";
 import { DataFactory, Writer } from "n3";
 import type { GrantPublicRead } from "@solid-memo/solid/client/interface";
-import { boundedHeader } from "@solid-memo/solid/client/linkHeader";
+import { linkTargets, TURTLE_FIRST } from "@solid-memo/solid/client/linkHeader";
 import { parseQuads } from "./resources";
 
 export type { GrantPublicRead } from "@solid-memo/solid/client/interface";
@@ -36,7 +36,7 @@ const ACCESS_CONTROL_RESOURCE = `${ACP}AccessControlResource`;
  * (solidReleasePublisher.ts) can read where each goes.
  */
 export const grantPublicRead: GrantPublicRead = async (url, { fetch }) => {
-  const control = linked(await headOrGet(url, fetch), url, "acl")[0];
+  const control = linkTargets(await headOrGet(url, fetch), "acl", url)[0];
   if (control === undefined) return false;
   const current = await readControl(control, fetch);
   if (current === undefined) return false;
@@ -81,7 +81,7 @@ async function readControl(
   fetch: typeof globalThis.fetch,
 ): Promise<AccessControl | undefined> {
   const response = await fetch(url, { headers: { Accept: "text/turtle" } });
-  const typed = linked(response, url, "type").includes(ACCESS_CONTROL_RESOURCE);
+  const typed = linkTargets(response, "type", url).includes(ACCESS_CONTROL_RESOURCE);
   if (response.status === 404) return { acp: typed, exists: false, quads: [] };
   if (!response.ok) return undefined;
   const quads = await parseQuads(await response.text(), "turtle", base(response, url));
@@ -107,7 +107,7 @@ async function inheritedRules(
   let resource = new URL(url);
   while (resource.pathname !== "/") {
     const folder = new URL(resource.pathname.endsWith("/") ? ".." : ".", resource);
-    const folderAcl = linked(await headOrGet(folder.href, fetch), folder.href, "acl")[0];
+    const folderAcl = linkTargets(await headOrGet(folder.href, fetch), "acl", folder.href)[0];
     if (folderAcl === undefined) return undefined;
     const current = await readControl(folderAcl, fetch);
     if (current === undefined || current.acp) return undefined;
@@ -258,20 +258,10 @@ async function insert(
 
 /** A HEAD of `url`, or a GET when the server will not answer that. */
 async function headOrGet(url: string, fetch: typeof globalThis.fetch): Promise<Response> {
-  const head = await fetch(url, { method: "HEAD" });
-  return head.ok ? head : fetch(url);
-}
-
-/** The targets of a response's Link header with relation `rel`, made absolute; none when the header is past its bound (linkHeader.ts). */
-function linked(response: Response, url: string, rel: string): string[] {
-  const header = boundedHeader(response, "Link") ?? "";
-  const found: string[] = [];
-  for (const [, target, params] of header.matchAll(/<([^>]*)>([^<]*)/g)) {
-    const relation = /;\s*rel\s*=\s*(?:"([^"]*)"|([^\s;,]+))/i.exec(params);
-    const relations = (relation?.[1] ?? relation?.[2] ?? "").split(/\s+/);
-    if (relations.includes(rel)) found.push(new URL(target, base(response, url)).href);
-  }
-  return found;
+  // Turtle asked for, as the app reads a folder: a Linked Web Storage server answers a storage's root otherwise, with its description, which links no ACL (docs/lws.md).
+  const headers = { Accept: TURTLE_FIRST };
+  const head = await fetch(url, { method: "HEAD", headers });
+  return head.ok ? head : fetch(url, { headers });
 }
 
 function base(response: Response, url: string): string {
