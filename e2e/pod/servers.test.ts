@@ -234,6 +234,9 @@ describe("the names in the tests", () => {
       "css-lws": expect.stringMatching(
         /^Community Solid Server with LWS 8\.\d+\.\d+(-[\w.]+)? \([0-9a-f]{8}\)$/,
       ),
+      "css-lws-only": expect.stringMatching(
+        /^Community Solid Server with LWS only 8\.\d+\.\d+(-[\w.]+)? \([0-9a-f]{8}\)$/,
+      ),
     });
   });
 });

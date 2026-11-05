@@ -13,7 +13,8 @@
     "test:pod": "vitest run",
     "pod": "node pod.ts",
     "servers": "node servers.ts prepare",
-    "pod:clean": "node servers.ts clean"
+    "pod:clean": "node servers.ts clean",
+    "lws:strict": "node strictLws.ts"
   },
   "dependencies": {
     "@solid-memo/application": "*",

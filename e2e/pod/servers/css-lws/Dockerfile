@@ -6,7 +6,8 @@
 # end-to-end tests (docs/testing.md): the branch of jeswr's fork that adds
 # LWS to CSS 8.0.0-alpha.3 (pull request 126 there), at a commit
 # (CSS_LWS_SHA), as no release or image of it is published. It is built
-# without its dependencies' install scripts, then run with css-lws-e2e.json.
+# without its dependencies' install scripts, then run with css-lws-e2e.json
+# (css-lws) or css-lws-only-e2e.json (css-lws-only).
 FROM node:22.23.4-bookworm-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e2078fd3b14d159fdb5c7279da AS build
 # Renovate proposes newer commits of the branch for a person to approve (renovate.json5).
 # renovate: datasource=git-refs depName=https://github.com/jeswr/CommunitySolidServer branch=feat/lws-next-major
@@ -30,6 +31,6 @@ COPY --from=build /community-server/config ./config
 COPY --from=build /community-server/dist ./dist
 COPY --from=build /community-server/node_modules ./node_modules
 COPY --from=build /community-server/templates ./templates
-COPY css-lws-e2e.json ./config/css-lws-e2e.json
+COPY css-lws-e2e.json css-lws-only-e2e.json ./config/
 USER node
 ENTRYPOINT ["node", "bin/server.js"]
