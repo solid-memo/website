@@ -21,6 +21,24 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.22](https://github.com/solid-memo/website/compare/v6.29.21...v6.29.22) (2026-11-05)
+
+### Bug Fixes
+
+* **application:** keep each instance's unlogged answers apart ([1a8e7bb](https://github.com/solid-memo/website/commit/1a8e7bb020be84d3114813619e3f9ad884649385))
+* **domain:** count answers by card and option fragment ids ([d14031f](https://github.com/solid-memo/website/commit/d14031f485c393b2151cda1887782cafbc91d6b7))
+* **domain:** read a deck release link that is no URL as none ([2ade01a](https://github.com/solid-memo/website/commit/2ade01a95d65be362fc38cb7018130d239b4fc4b))
+* look up a history answer's chosen option by its id ([9f039d8](https://github.com/solid-memo/website/commit/9f039d8f68dcb6c1dd9390496881c5b2ca8616d8))
+* **markdown:** charge a link's URL to the parse for each use ([bc38e87](https://github.com/solid-memo/website/commit/bc38e87758877834d7da88cf343d28d92aa58d36))
+* **release:** keep the release notes out of the release commit ([8625994](https://github.com/solid-memo/website/commit/8625994895e8baea80ab0a7766f49964de206d3d))
+* **solid:** key the guest pod's triples by pieces, not whole lines ([bd6805e](https://github.com/solid-memo/website/commit/bd6805ebae46675eb1e7cfc83c505ef6fba495a6))
+* **solid:** read no IRI value that is no URL ([d76d77c](https://github.com/solid-memo/website/commit/d76d77c322107c5d32cc40424565996de75258af))
+* **studio:** edit a shared distractor once in find and replace ([435c8ad](https://github.com/solid-memo/website/commit/435c8ad7840e81b3df3f366d223ce135707a6c83))
+* **studio:** give a draft imported from a file a series of its own ([701b3d8](https://github.com/solid-memo/website/commit/701b3d8414794d1428e3039b740ba2278e97fda6))
+* **studio:** refuse a deck file whose deck has an IRI that is no URL ([908c31a](https://github.com/solid-memo/website/commit/908c31af966c7ce4c7c2598ac5bfb33a7bdc2fc1))
+* **ui:** keep query key hashes short however long their IRIs ([5cfe191](https://github.com/solid-memo/website/commit/5cfe191a63228db77b563ca08f3a891c85e634ae))
+* **ui:** tell the library's copies once per list of decks ([6e71b5f](https://github.com/solid-memo/website/commit/6e71b5f9e9e9d556f7845d092395ebf05df7e9a8))
+
 ## [6.29.21](https://github.com/solid-memo/website/compare/v6.29.20...v6.29.21) (2026-11-05)
 
 ### Bug Fixes
