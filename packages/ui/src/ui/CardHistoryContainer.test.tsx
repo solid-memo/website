@@ -3,14 +3,16 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/preact";
+import { cleanup, render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReviewState } from "@solid-memo/domain/review";
+import { growth } from "@solid-memo/domain/testing/growth";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { makeUseCasesFake } from "../test/useCasesFake";
+import { CardHistory } from "./CardHistory";
 import { CardHistoryContainer } from "./CardHistoryContainer";
 
 const INSTANCE_URL = "https://pod.example/solid-memo/a/";
@@ -282,5 +284,97 @@ describe("CardHistoryContainer", () => {
     expect(
       await screen.findByText("The card's history cannot be read just now."),
     ).toBeInTheDocument();
+  });
+
+  it("names each wrong answer's chosen option among many with long ids alike, the first of an id kept", () => {
+    const prefix = "d".repeat(2_000);
+    const many: Card = {
+      ...card,
+      distractors: [
+        ...Array.from({ length: 50 }, (_, n) => ({
+          id: `${prefix}${String(n).padStart(3, "0")}`,
+          text: { en: `option ${n}` },
+        })),
+        { id: `${prefix}007`, text: { en: "a second option 7" } },
+      ],
+    };
+    const picks = [49, 7, 0, 23];
+    const wrong = (chosen: string) =>
+      answer("2026-09-04", 1, {
+        mode: "multiple-choice",
+        chosenDistractor: `${deck.cardsDocumentUrl}#${chosen}`,
+      });
+    const { unmount } = render(
+      <CardHistory
+        deck={deck}
+        card={many}
+        answers={picks.map((pick) => wrong(`${prefix}${String(pick).padStart(3, "0")}`))}
+        states={[]}
+        dayBoundaryHour={4}
+      />,
+    );
+    expect(
+      within(screen.getByRole("table"))
+        .getAllByRole("row")
+        .slice(1)
+        .map((row) => within(row).getAllByRole("cell").at(-2)!.textContent),
+    ).toEqual(picks.map((pick) => `Wrong: option ${pick}`));
+    unmount();
+    // A card without wrong options names none.
+    render(
+      <CardHistory
+        deck={deck}
+        card={{ ...card, distractors: undefined }}
+        answers={[wrong("c-1-d1")]}
+        states={[]}
+        dayBoundaryHour={4}
+      />,
+    );
+    expect(within(screen.getByRole("table")).getAllByRole("row")[1]).toHaveTextContent(
+      "Course questionWrong1 day",
+    );
+  });
+
+  it("grows with the answers and the card's options, not with their product", () => {
+    // Ids near the longest a pod term may be, so that a search among the
+    // options, reading each id, stands out of the rendering by far.
+    const prefix = "d".repeat(16_000);
+    const ratio = growth(
+      (size) => {
+        // More options than answers, as only the answers are rows of the table.
+        const ids = Array.from(
+          { length: size * 8 },
+          (_, n) => `${prefix}${String(n).padStart(6, "0")}`,
+        );
+        const large: Card = {
+          ...card,
+          textFormat: undefined,
+          distractors: ids.map((id) => ({ id, text: { en: "fire" } })),
+        };
+        // Each answer names the last option: a search among them all reads every id.
+        const answers = Array.from({ length: size }, (_, n) =>
+          answer("2026-09-04", 1, {
+            id: `answer-many-${n}`,
+            mode: "multiple-choice",
+            chosenDistractor: `${deck.cardsDocumentUrl}#${ids.at(-1)}`,
+          }),
+        );
+        return () => {
+          render(
+            <CardHistory
+              deck={deck}
+              card={large}
+              answers={answers}
+              states={[]}
+              dayBoundaryHour={4}
+            />,
+          );
+          cleanup();
+        };
+      },
+      50,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });

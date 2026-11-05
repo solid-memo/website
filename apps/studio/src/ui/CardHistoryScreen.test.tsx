@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { Card } from "@solid-memo/domain/deck";
 import type { ReviewQuality } from "@solid-memo/domain/review";
+import { growth } from "@solid-memo/domain/testing/growth";
 import { CardHistoryScreen } from "./CardHistoryScreen";
 import { makeCard, makeDeck } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
@@ -133,6 +134,75 @@ describe("CardHistoryScreen", () => {
     // The table beside the deck's cards leaves j and k to theirs.
     document.body.focus();
     expect(fireEvent.keyDown(document.body, { key: "j" })).toBe(true);
+  });
+
+  it("names each answer's chosen option among many with long ids alike, the first of an id kept", () => {
+    const prefix = "d".repeat(2_000);
+    const many: Card = {
+      ...card,
+      distractors: [
+        ...Array.from({ length: 50 }, (_, n) => ({
+          id: `${prefix}${String(n).padStart(3, "0")}`,
+          text: { en: `option ${n}` },
+        })),
+        { id: `${prefix}007`, text: { en: "a second option 7" } },
+      ],
+    };
+    const picks = [49, 7, 0, 23];
+    render(
+      <CardHistoryScreen
+        card={many}
+        answers={picks.map((pick, n) =>
+          answer(9 - n, {
+            grade: 1,
+            mode: "multiple-choice",
+            chosenDistractor: `${deck.cardsDocumentUrl}#${prefix}${String(pick).padStart(3, "0")}`,
+          }),
+        )}
+      />,
+    );
+    const table = screen.getByRole("table", { name: "The card's answers, newest first" });
+    expect(
+      within(table)
+        .getAllByRole("row")
+        .slice(1)
+        .map((row) => within(row).getAllByRole("cell").at(-1)!.textContent),
+    ).toEqual(picks.map((pick) => `option ${pick}`));
+  });
+
+  it("grows with the answers and the card's options, not with their product", () => {
+    // Ids near the longest a pod term may be, so that a search among the
+    // options, reading each id, stands out of the rendering by far.
+    const prefix = "d".repeat(16_000);
+    const ratio = growth(
+      (size) => {
+        // More options than answers, as only the answers are rows of the table.
+        const ids = Array.from(
+          { length: size * 8 },
+          (_, n) => `${prefix}${String(n).padStart(6, "0")}`,
+        );
+        const large: Card = {
+          ...card,
+          distractors: ids.map((id) => ({ id, text: { en: "fire" } })),
+        };
+        // Each answer names the last option: a search among them all reads every id.
+        const answers = Array.from({ length: size }, (_, n) =>
+          answer(1, {
+            id: `answer-${n}`,
+            grade: 1,
+            mode: "multiple-choice",
+            chosenDistractor: `${deck.cardsDocumentUrl}#${ids.at(-1)}`,
+          }),
+        );
+        return () => {
+          render(<CardHistoryScreen card={large} answers={answers} />);
+          cleanup();
+        };
+      },
+      50,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("says when the card has no answers in this deck", () => {

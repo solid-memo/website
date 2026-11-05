@@ -2,10 +2,16 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useId } from "preact/hooks";
+import { useId, useMemo } from "preact/hooks";
 import { isRecalled, type Answer } from "@solid-memo/domain/answer";
 import { chainIndexOf, isRepeat } from "@solid-memo/domain/answerChain";
-import { isMarkdown, type Card, type Deck, type StudyDirection } from "@solid-memo/domain/deck";
+import {
+  isMarkdown,
+  type Card,
+  type Deck,
+  type Distractor,
+  type StudyDirection,
+} from "@solid-memo/domain/deck";
 import type { DueState } from "@solid-memo/domain/review";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { gradeGroupOf } from "@solid-memo/domain/studyPatterns";
@@ -17,6 +23,19 @@ import { GRADE_GROUPS } from "./charts/GradeBars";
 const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
 
 /**
+ * The card's distractors by id, the first of an id kept, so that each
+ * wrong answer's chosen option is looked up at once, not searched for
+ * among all of them, however many the card has.
+ */
+function distractorsById(card: Card): ReadonlyMap<string, Distractor> {
+  const byId = new Map<string, Distractor>();
+  for (const distractor of card.distractors ?? []) {
+    if (!byId.has(distractor.id)) byId.set(distractor.id, distractor);
+  }
+  return byId;
+}
+
+/**
  * A card's history on its page, for the learner: where it stands now in
  * each direction it has been studied (its interval, when it is due, and
  * the study day it was first studied on), then every answer to it
@@ -25,7 +44,9 @@ const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
  * ways, what kind of answer it was (a first one, a review, one again the
  * same day, or a course question), the button pressed or whether the
  * option chosen was right (naming the wrong one), and the interval it
- * gave. A card not studied yet says so.
+ * gave. A card not studied yet says so. The wrong option an answer
+ * chose is looked up in the card's distractors by id, indexed once per
+ * card.
  */
 export function CardHistory({
   deck,
@@ -52,6 +73,7 @@ export function CardHistory({
     deck.direction === "bidirectional" ||
     new Set([...own, ...answers].map(({ direction }) => direction)).size > 1;
   const markdown = isMarkdown(card.textFormat);
+  const byId = useMemo(() => distractorsById(card), [card]);
   const kindOf = (answer: Answer) =>
     answer.mode === "multiple-choice"
       ? t("card.historyCourse")
@@ -66,7 +88,7 @@ export function CardHistory({
     if (isRecalled(answer)) return t("card.historyRight");
     const id =
       answer.chosenDistractor === undefined ? undefined : fragmentIdOf(answer.chosenDistractor);
-    const option = card.distractors?.find((distractor) => distractor.id === id);
+    const option = id === undefined ? undefined : byId.get(id);
     return option === undefined
       ? t("card.historyWrong")
       : tx("card.historyWrongOption", {

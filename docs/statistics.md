@@ -333,7 +333,8 @@ as the Studio's card inspector reads it). A row has:
   option chosen;
 - last, the interval the answer gave.
 
-A card not studied yet says so.
+The wrong option chosen is looked up by its id among the card's wrong
+options, indexed once for the card. A card not studied yet says so.
 
 ## What the figures count
 
@@ -456,6 +457,8 @@ The statistics are the same for a guest ([guest-mode.md](guest-mode.md)).
   - Held to linear growth: `chainIndexOf`,
     `statisticsOf`, the answer buttons, first try, recall each way,
     where the cards stood, the estimated time and the hardest cards.
+    So is a card's history, over many wrong answers that name one of
+    the card's many wrong options.
   - The use cases: `useCases.test.ts`.
   - The UI: `StatisticsScreen.test.tsx`, `StatisticsSections.test.tsx`,
     `router.test.ts`, `Workspace.test.tsx` (the range and tab in the
