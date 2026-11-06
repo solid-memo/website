@@ -1596,12 +1596,22 @@ Of a release's other statements, the draft keeps those of the release,
 of its own subjects, and of what they name, at any depth: a source, a
 license, a blank node. A statement of what none of these leads to is
 dropped, with nothing said. So is any statement of a creator
-(`dcterms:creator`) outside the release, and, for a next version, what
-the documents its series and publisher are described in say of it: the
-draft keeps only that the release names it. When such a creator is also
-the release's publisher, its series or a source, its statements in the
-release are dropped too. The Studio shows such a creator by its
-address, and so do learners. So is one of, or naming, an address in the
+(`dcterms:creator`) with no agent record in the draft, wherever its
+address is: outside the release, or one of its subjects with a second
+class a record is of. For a next version, so is what the documents its
+series and publisher are described in say of it, or of an agent the
+draft has a record of. The draft keeps only that the release names it.
+When such a creator is the release's publisher, its series or a source,
+its statements in the release are dropped too. The Studio shows such a
+creator by its address, and so do learners. The shape check wants an
+author described as an agent, and the Studio has no way to remove such a
+creator, so a draft that names one can't be published to a pod. A
+statement that the release itself is an agent or a distribution is
+dropped as well, from the release and those documents, with any
+`foaf:name` of it. A release holds no such record, so the Studio would
+show no such name.
+
+Also dropped is a statement of, or naming, an address in the
 new draft's folder, its own release document's too, before the
 release's subjects are moved there. Read back from the pod, that
 address would be one of the draft's subjects, with statements no editor
@@ -1880,8 +1890,10 @@ becomes: the rules `npm run library:check` runs on `decks/`
   - the course's (`courseProblems`), among them cards, chapters, steps
     or wrong options the draft doesn't hold as its parts
     (`strayParts`): ones outside the release, or whose records can't
-    be read. No editor shows them, but the release would publish them, so
-    a draft that holds one can't be published;
+    be read. So are the release or one of its subjects stated to be an
+    agent or a distribution with no record of it. No editor shows them,
+    but the release would publish them, so a draft that holds one can't
+    be published;
   - what a release needs that a draft may lack (`readinessProblems`): a
     title and a description with English text, a publisher, a version,
     a series, a distribution, the theme EDUC, and each chapter's and
@@ -2177,7 +2189,7 @@ the library's releases are
   A release in a pod may name an email; one for the library names
   none. Removing an author removes its
   agent too, unless it publishes the release or a statement names it.
-  Authors another document describes are kept as they are.
+  Authors named by address only are kept as they are.
   Each author is found among the agents by its id, which the draft's
   agents are indexed by once, not looked through for each author. A
   test keeps the time this takes growing in step with the number of

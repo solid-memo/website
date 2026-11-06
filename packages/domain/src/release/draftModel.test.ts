@@ -276,6 +276,26 @@ describe("draftReleaseModel", () => {
     expect(draftReleaseModel(draft, moved).strays).toEqual([foreign, `${moved}#ch-odd`, "_:b0"]);
   });
 
+  it("names as strays the draft and its subjects its statements type an agent or distribution, not one outside it (GHSA-mv57-839j-wrf6)", () => {
+    const deck = deckDraft();
+    const typed = (subject: string, type: string) => link(subject, RDF_TYPE, type);
+    const AGENT = "http://xmlns.com/foaf/0.1/Agent";
+    const DISTRIBUTION = "http://www.w3.org/ns/dcat#Distribution";
+    const publisher = "https://elsewhere.example/index.ttl#publisher";
+    const draft: ReleaseDraft = {
+      ...deck,
+      triples: [
+        ...deck.triples,
+        typed(publisher, AGENT),
+        typed("https://elsewhere.example/x#file", DISTRIBUTION),
+        typed(of("both"), AGENT),
+        typed(of("both"), DISTRIBUTION),
+        typed(deck.url, AGENT),
+      ],
+    };
+    expect(draftReleaseModel(draft).strays).toEqual([of("both"), deck.url]);
+  });
+
   it("names a distractor two cards share once", () => {
     const deck = deckDraft();
     const shared = { ...deck.cards[0]!.data, distractor: [of("x")] };

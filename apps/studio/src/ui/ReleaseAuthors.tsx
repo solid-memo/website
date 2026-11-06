@@ -35,7 +35,8 @@ function emailOf(agent: AgentV1): string {
  * provenance): agents kept in the release itself (`#<name>`), each
  * renamed or removed, and a new one added last. A change of them writes
  * the attribution again for the authors it leaves (releaseMetadata.ts).
- * Authors another document describes are named, and kept as they are.
+ * Authors with no record in the draft, in another document or among its
+ * own subjects, are named by address, and kept as they are.
  */
 export function ReleaseAuthors({
   draft,
