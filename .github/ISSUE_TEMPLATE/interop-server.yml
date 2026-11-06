@@ -48,7 +48,7 @@ body:
         - Web Access Control (WAC)
         - Access Control Policies (ACP)
         - Both
-        - None
+        - No access control
         - I do not know
     validations:
       required: true
@@ -71,7 +71,7 @@ body:
       label: Do you build it?
       options:
         - Yes, I am one of its developers
-        - No
+        - "No"
     validations:
       required: true
   - type: checkboxes
