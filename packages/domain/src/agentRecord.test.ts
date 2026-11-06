@@ -14,6 +14,7 @@ import {
 } from "./agentRecord";
 import { fnv1a } from "./fnv1a";
 import { growth } from "./testing/growth";
+import { LONG_SUBJECT, longNames, namesOf } from "./testing/longAgents";
 
 const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";
 
@@ -184,6 +185,51 @@ describe("agentUrlsOf", () => {
       );
       expect(ratio).toBeLessThan(4);
     });
+  });
+});
+
+describe("agentUrlsOf with URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", () => {
+  it("names the same nodes as with short ones, an author named twice one node", () => {
+    const authors = longNames(3);
+    const urls = agentUrlsOf(CATALOG, [...authors, authors[1]!]);
+    expect(urls[0]!.length).toBeGreaterThan(16_383);
+    expect(urls).toEqual(probedUrlsOf(CATALOG, [...authors, authors[1]!]));
+    expect(urls[3]).toBe(urls[1]);
+  });
+
+  it("takes time that grows with the authors of a long subject, not their square", {
+    timeout: 180_000,
+  }, () => {
+    const ratio = growth(
+      (count) => {
+        const authors = namesOf(count, 24);
+        return () => agentUrlsOf(LONG_SUBJECT, authors);
+      },
+      250,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("takes time that grows with long names, not their square", { timeout: 180_000 }, () => {
+    const ratio = growth(
+      (count) => {
+        const authors = longNames(count);
+        return () => agentUrlsOf(CATALOG, authors);
+      },
+      400,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("tells long authors of one counted name apart by name and mailbox alone", () => {
+    const start = `${"j".repeat(16_200)} <`;
+    const many = collidingNames(start, 12).map((name) => `${name}@example.org>`);
+    const named = agentUrlsOf(CATALOG, [...many.slice(0, 3), many[2]!]);
+    expect(agentToRecord(many[2]!).mbox).toBeDefined();
+    expect(named[2]).toBe(`${named[1]}-2`);
+    expect(named[3]).toBe(named[2]);
   });
 });
 

@@ -151,6 +151,15 @@ describe("create", () => {
     expect(writes(pod)).toEqual([]);
   });
 
+  it("refuses a draft with an IRI longer than a term may be, writing nothing (GHSA-4mgg-5xpp-3jx5)", async () => {
+    const pod = await draftPod();
+    const agents = [{ id: "a".repeat(16_383), data: { name: "Name" } }];
+    await expect(pod.repository.create(INSTANCE, { ...course(), agents })).rejects.toMatchObject({
+      code: "termTooLong",
+    });
+    expect(writes(pod)).toEqual([]);
+  });
+
   it("refuses a draft at an address no draft has, writing nothing", async () => {
     const pod = await draftPod();
     const url = `${INSTANCE}drafts/solid/v1e+21/release.ttl`;

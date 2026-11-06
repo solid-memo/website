@@ -14,6 +14,7 @@ import {
   type Deck,
 } from "./deck";
 import { unlikeRelease } from "./deckLanguages";
+import { TextMap } from "./pathKeys";
 import type { FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
 import { reviewKeyOf } from "./reviewRecord";
@@ -118,12 +119,10 @@ export function deckReport(report: ValidationReport, deck: Deck): ValidationRepo
 }
 
 /** The deck's subjects in the catalog: its entry, its distribution and its authors' agent nodes. */
-function ownSubjectUrls(deck: Deck): Set<string> {
-  return new Set([
-    deck.url,
-    distributionUrlOf(deck.url),
-    ...deck.authors.map((author) => agentUrlOf(deck.url, author)),
-  ]);
+function ownSubjectUrls(deck: Deck): TextMap<true> {
+  const own = new TextMap<true>().set(deck.url, true).set(distributionUrlOf(deck.url), true);
+  for (const author of deck.authors) own.set(agentUrlOf(deck.url, author), true);
+  return own;
 }
 
 /**

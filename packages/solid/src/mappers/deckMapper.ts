@@ -18,6 +18,7 @@ import {
   setThing,
   setThings,
 } from "../client/rdf";
+import { MAX_TERM_CHARACTERS } from "../client/readLimits";
 import { editOf, type DatasetEdit } from "../datasetEdit";
 import {
   agentUrlOf,
@@ -25,6 +26,7 @@ import {
   authorFromAgentRecord,
   type AgentHolder,
 } from "@solid-memo/domain/agentRecord";
+import { isIriPastBound, TextMap } from "@solid-memo/domain/pathKeys";
 import {
   catalogFromRecord,
   catalogToRecord,
@@ -87,6 +89,24 @@ export function agentNamesOf(dataset: Dataset): Map<string, string> {
 }
 
 /**
+ * Who an agent of a deck or release is, the agent named by its IRI: for
+ * one from before format 3, `creators` are the authors it names itself
+ * ("Name <email>"), which name the agents the migration gives it, at
+ * URLs joined from `subject`'s document and each author, which can be
+ * longer than any term (TextMap); else the agents of the document, by
+ * `names`, or the IRI where there is none.
+ */
+export function authorOfAgents(
+  subject: string,
+  creators: readonly string[],
+  names: ReadonlyMap<string, string>,
+): (agent: string) => string {
+  const own = new TextMap<string>();
+  for (const author of creators) own.set(agentUrlOf(subject, author), author);
+  return (agent) => own.get(agent) ?? names.get(agent) ?? agent;
+}
+
+/**
  * Every deck of the catalog document at `catalogUrl`, its creators named
  * from the agents beside it: those whose entry is a subject of this
  * document and whose cards and reviews documents are where the instance
@@ -127,15 +147,12 @@ export function toDeck(
   if (read === null) return null;
   const url = asUrl(thing);
   // Only a deck before format 3 names agents of its own: the document's are not copied for each deck, which made many decks and agents take quadratic time (GHSA-hcrw-cr33-jg78).
-  const own = new Map<string, string>();
-  if (read.record.version < 3) {
-    for (const author of read.record.data.creator) own.set(agentUrlOf(url, author), author);
-  }
+  const own = read.record.version < 3 ? read.record.data.creator : [];
   const stored = deckFromRecord(
     url,
     read.storedVersion,
     migrate("deck", read.record, { subject: url }),
-    (agent) => own.get(agent) ?? agentNames.get(agent) ?? agent,
+    authorOfAgents(url, own, agentNames),
   );
   const completedChapters = boundedCompletedChapters(getUrlAll(thing, SM.completedChapter), [
     stored.sourceUrl,
@@ -171,12 +188,17 @@ export function withDeck(dataset: Dataset, deck: Deck): Dataset {
  * writes one: every subject set at once (editOf), and stray agents and
  * the catalog's links seen to once, so that many decks (a catalog
  * brought to this app's format) take time that grows with them and the
- * document, not their product.
+ * document, not their product. An agent's node longer than any term is
+ * refused here (termTooLong), as the write would refuse it, before the
+ * edits and the dataset are keyed by it (GHSA-4mgg-5xpp-3jx5).
  */
 export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const edit = editOf(dataset);
   for (const deck of decks) {
     const creator = deckAgentUrls(deck, edit.getThing);
+    if (creator.some(isIriPastBound)) {
+      throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
+    }
     edit.setThing(
       recordThing(deck.url, DECK_V6, deckToRecord(deck, creator), edit.getThing(deck.url)),
     );
@@ -203,8 +225,9 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
 
 /** The subjects a deck is written as in `dataset` (withDeck's): its entry, its distribution and its agents. */
 export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
-  const agents = new Set(deckAgentUrls(deck, (url) => getThing(dataset, url)));
-  return [deck.url, distributionUrlOf(deck.url), ...agents];
+  const agents = new TextMap<string>();
+  for (const url of deckAgentUrls(deck, (url) => getThing(dataset, url))) agents.set(url, url);
+  return [deck.url, distributionUrlOf(deck.url), ...agents.values()];
 }
 
 /**
@@ -212,9 +235,13 @@ export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
  * whose subjects `thingAt` finds (agentUrlsOf): a node that holds
  * another author's name or mailbox is never written over, as every deck
  * of the document names its authors' nodes, and the next one is taken.
+ * A node longer than any term holds nothing, and is not looked for: the
+ * dataset's subjects are the keys of an object, which would key it too.
  */
 function deckAgentUrls(deck: Deck, thingAt: (url: string) => NamedSubject | null): string[] {
-  return agentUrlsOf(deck.url, deck.authors, (url) => agentHolderOf(thingAt(url)));
+  return agentUrlsOf(deck.url, deck.authors, (url) =>
+    isIriPastBound(url) ? null : agentHolderOf(thingAt(url)),
+  );
 }
 
 /** What `thing` holds of an agent (AgentHolder): nothing when there is none or it says nothing an agent says, else the author it names, or "unreadable". */

@@ -7,6 +7,7 @@ import { AppError } from "./appError";
 import { parseAuthor } from "./author";
 import type { Deck } from "./deck";
 import { chosenLicense } from "./license";
+import { TextMap } from "./pathKeys";
 
 /**
  * Who made a deck and under what terms: its authors, each "Name" or
@@ -28,7 +29,7 @@ export interface DeckProvenance {
  */
 export function withProvenance(deck: Deck, provenance: DeckProvenance): Deck {
   const authors: string[] = [];
-  const agents = new Set<string>();
+  const agents = new TextMap<true>();
   for (const typed of provenance.authors) {
     if (typed.trim() === "") continue;
     const { name, email } = parseAuthor(typed);
@@ -36,7 +37,7 @@ export function withProvenance(deck: Deck, provenance: DeckProvenance): Deck {
     const author = email === undefined ? name : `${name} <${email}>`;
     const agent = agentUrlOf(deck.url, author);
     if (agents.has(agent)) throw new AppError("authorTwice", { author: name });
-    agents.add(agent);
+    agents.set(agent, true);
     authors.push(author);
   }
   const license = chosenLicense(provenance.license, deck.license);

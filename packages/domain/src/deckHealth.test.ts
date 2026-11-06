@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { agentUrlOf } from "./agentRecord";
+import { LONG_AGENTS } from "./testing/longAgents";
 import { distributionUrlOf } from "./dcat";
 import type { Card, Deck } from "./deck";
 import {
@@ -101,6 +102,27 @@ describe("deckReport", () => {
     expect(scoped.violationCount).toBe(4);
     expect(scoped.instanceUrl).toBe("https://pod.example/a/");
   });
+});
+
+describe("deckReport with agent URLs longer than any term", () => {
+  it.each(LONG_AGENTS)(
+    "takes time that grows with the authors, not their square, with $variant (GHSA-4mgg-5xpp-3jx5)",
+    {
+      timeout: 180_000,
+    },
+    ({ subject, authors }) => {
+      const ratio = growth(
+        (count) => {
+          const long = { ...deck, url: subject, authors: authors(count) };
+          const report = { instanceUrl: "https://pod.example/", documents: [] } as never;
+          return () => deckReport(report, long);
+        },
+        250,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
 });
 
 describe("withDeckReport", () => {

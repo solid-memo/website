@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
+import { TextMap } from "../pathKeys.ts";
 import { takenIds } from "./courseIds.ts";
 import { slugOf } from "./draftLayout.ts";
 import { RDFS_COMMENT } from "./provenanceRules.ts";
@@ -51,7 +52,8 @@ export function authorsOf(draft: ReleaseDraft): DraftNode<AgentV1>[] {
 
 /** The authors the release names that are not agents of the draft (another document's), by IRI: kept as they are. */
 export function otherAuthorsOf(draft: ReleaseDraft): string[] {
-  const own = new Set(authorsOf(draft).map((node) => iriIn(draft, node.id)));
+  const own = new TextMap<true>();
+  for (const node of authorsOf(draft)) own.set(iriIn(draft, node.id), true);
   return draft.root.creator.filter((iri) => !own.has(iri));
 }
 

@@ -12,10 +12,11 @@ import {
   setThing,
   toRdfJsDataset,
 } from "../client/rdf";
-import { pathKeys } from "../client/readLimits";
+import { MAX_TERM_CHARACTERS, pathKeys } from "../client/readLimits";
 import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import {
   draftDocuments,
   draftDocumentUrl,
@@ -517,8 +518,14 @@ export interface DraftEntry {
  * any way a request sends it) is dcterms:isPartOf something is left out:
  * it is what the release the draft was made from said, and to a deck
  * it would say the document is the deck's to write (ownsDocument).
+ *
+ * A draft with an IRI longer than a term may be, there or in the
+ * document it is kept in, is refused (termTooLong), as its write would
+ * refuse it, before anything is keyed by that IRI
+ * (GHSA-4mgg-5xpp-3jx5).
  */
 export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
+  refuseKeysPastBound(draft);
   const unsupported = unsupportedIdOf(draft);
   if (unsupported !== null) throw new AppError("draftIdUnsupported", { id: unsupported });
   const places = draftDocuments(draft);
@@ -526,7 +533,9 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
     draftDocumentUrl(draft.url, places.get(iri) ?? { kind: "release" });
   const podIri = (iri: string) => {
     const id = idIn(draft, iri);
-    return id === null ? iri : `${documentOf(iri)}#${id}`;
+    const inPod = id === null ? iri : `${documentOf(iri)}#${id}`;
+    if (isIriPastBound(inPod)) throw termTooLong();
+    return inPod;
   };
   const pod = rebaseDraft(draft, draft.url, podIri);
   const entries = new Map<string, DraftEntry>();
@@ -565,6 +574,27 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
     entry.raw.push(pod.triples[at]!);
   });
   return entries;
+}
+
+function termTooLong(): AppError {
+  return new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
+}
+
+/**
+ * Throws termTooLong for a draft with a subject or link V8 would hash by
+ * its length alone. A subject is named at most two characters longer
+ * here than in its shortest document (`release.ttl` for `cards.ttl`), so
+ * no IRI that document can hold is refused for that.
+ */
+function refuseKeysPastBound(draft: ReleaseDraft): void {
+  const refused = (iri: string) => {
+    if (iri.length > MAX_TERM_CHARACTERS) throw termTooLong();
+    return iri;
+  };
+  for (const { list } of KINDS) {
+    for (const node of draft[list] as readonly DraftNode<unknown>[]) refused(iriIn(draft, node.id));
+  }
+  rebaseDraft(draft, draft.url, refused);
 }
 
 /**

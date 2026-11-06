@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad, Term } from "@rdfjs/types";
+import { HASHED_CHARACTERS, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
 import { ReadLimitError, type ReadLimits } from "./interface";
 
 /** Keys for paths of terms, each term a key of its own, for the client modules and the alternative client. */
@@ -221,7 +222,7 @@ export function refusalOf(response: Response | undefined): ReadLimitError | unde
  * one that does, such as TriG or JSON-LD read from a pod, needs its
  * graphs bounded as well.
  */
-export const MAX_TERM_CHARACTERS = 16_383;
+export const MAX_TERM_CHARACTERS = HASHED_CHARACTERS;
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
@@ -252,8 +253,7 @@ function escapedCharacters(value: string): number {
  * each as two characters, and a datatype in `<>` too.
  */
 export function termKeyLength(term: Term): number {
-  // `_:` before a label, or `<>` around an IRI.
-  if (term.termType !== "Literal") return term.value.length + 2;
+  if (term.termType !== "Literal") return term.value.length + TERM_NAME_ROOM;
   const { value, language, direction, datatype } = term;
   const tagged = language.length + 1 + (direction ? direction.length + 2 : 0);
   const typed = datatype.value === XSD_STRING ? 0 : datatype.value.length + 4;

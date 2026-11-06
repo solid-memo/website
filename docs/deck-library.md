@@ -1056,7 +1056,10 @@ flowchart LR
   check names, a link the shape check looks up, a part or a statement
   of a draft, a card's two sides. Each of those is a key of its own in
   a path of them (`PathMap` in `pathKeys.ts`), never one string joined
-  from them. The guest's pod on the device stores a document as
+  from them. An agent's URL is joined from a document and an author's
+  name, and a release from before format 3 names its agents by those
+  URLs: each is kept as a path of its pieces (`TextMap`, the same
+  file). The guest's pod on the device stores a document as
   N-Triples lines, each joined from three terms, so it keys a line by
   the path of its pieces, each no longer than the bound (`TripleLines`
   in the `solid` package). An answer names its card and the wrong

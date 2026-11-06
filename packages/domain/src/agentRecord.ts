@@ -5,6 +5,7 @@
 import { parseAuthor } from "./author";
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
 import { fnv1a } from "./fnv1a";
+import { PathMap, TextMap } from "./pathKeys";
 import { documentUrlOf } from "./subjectUrl";
 
 /**
@@ -68,16 +69,18 @@ export type AgentHolder = AgentV1 | null | "unreadable";
  * The counted nodes of each hashed name are looked at once, however
  * many authors share it (countedUrl), so that the time grows with the
  * authors and the nodes, not their product: names that fold to one slug
- * and share a hash are easy to make.
+ * and share a hash are easy to make. A node's URL, joined from the
+ * document and the author's name, can be longer than any term, so no
+ * map here is keyed by it as one string (TextMap).
  */
 export function agentUrlsOf(
   subjectUrl: string,
   authors: readonly string[],
   holderAt: (url: string) => AgentHolder = () => null,
 ): string[] {
-  const taken = new Map<string, AgentV1>();
+  const taken = new TextMap<AgentV1>();
   const holderOf = (url: string): AgentHolder => taken.get(url) ?? holderAt(url);
-  const counted = new Map<string, CountedNodes>();
+  const counted = new TextMap<CountedNodes>();
   return authors.map((author) => {
     const record = agentToRecord(author);
     const free = (url: string) => {
@@ -90,7 +93,7 @@ export function agentUrlsOf(
     if (free(first)) url = first;
     else if (free(hashed)) url = hashed;
     else {
-      const nodes = counted.get(hashed) ?? { next: 2, holders: new Map() };
+      const nodes = counted.get(hashed) ?? { next: 2, holders: new PathMap() };
       counted.set(hashed, nodes);
       url = countedUrl(hashed, record, nodes, holderOf);
     }
@@ -107,7 +110,7 @@ export function agentUrlsOf(
  */
 interface CountedNodes {
   next: number;
-  holders: Map<string, number>;
+  holders: PathMap<number>;
 }
 
 /**
@@ -121,22 +124,22 @@ function countedUrl(
   nodes: CountedNodes,
   holderOf: (url: string) => AgentHolder,
 ): string {
-  const key = agentKey(record);
+  const key = agentPath(record);
   const held = nodes.holders.get(key);
   if (held !== undefined) return `${hashed}-${held}`;
   for (;;) {
     const count = nodes.next++;
     const holder = holderOf(`${hashed}-${count}`) ?? record;
     if (holder === "unreadable") continue;
-    const holds = agentKey(holder);
+    const holds = agentPath(holder);
     if (!nodes.holders.has(holds)) nodes.holders.set(holds, count);
-    if (holds === key) return `${hashed}-${count}`;
+    if (sameAgent(holder, record)) return `${hashed}-${count}`;
   }
 }
 
-/** One key per author, as sameAgent tells them apart. */
-function agentKey(record: AgentV1): string {
-  return JSON.stringify([record.name, record.mbox ?? null]);
+/** One path (PathMap) per author, as sameAgent tells them apart. */
+function agentPath(record: AgentV1): string[] {
+  return record.mbox === undefined ? [record.name] : [record.name, record.mbox];
 }
 
 /** Whether two agent records name the same author: the same name and the same mailbox, or none. */

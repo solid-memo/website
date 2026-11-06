@@ -5,6 +5,8 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card, Deck } from "../deck.ts";
+import { growth } from "../testing/growth.ts";
+import { LONG_SUBJECT, longNames, namesOf } from "../testing/longAgents.ts";
 import { DRAFT, NOW } from "../testing/releaseDraft.ts";
 import { deckToDraft } from "./deckToDraft.ts";
 
@@ -54,6 +56,52 @@ const cards: Card[] = [
 ];
 
 describe("deckToDraft", () => {
+  describe("with an agent IRI longer than a term may be (GHSA-4mgg-5xpp-3jx5)", () => {
+    const LONG_URL = LONG_SUBJECT.slice(0, LONG_SUBJECT.indexOf("#"));
+    const refused = expect.objectContaining({ code: "termTooLong", vars: { limit: 16_383 } });
+    /** A name that makes the agent's IRI in the draft `length` characters long. */
+    const nameFor = (length: number) => "a".repeat(length - `${DRAFT}#agent-`.length);
+
+    it("keeps the longest a document holds, and refuses one more", () => {
+      const named = (authors: string[]) => deckToDraft({ ...deck, authors }, [], DRAFT, NOW);
+      expect(named([nameFor(16_381)]).draft.root.creator[0]).toHaveLength(16_381);
+      expect(() => named([nameFor(16_382)])).toThrow(refused);
+    });
+
+    it.each([
+      { variant: "a long draft address", url: LONG_URL, authors: (n: number) => namesOf(n, 24) },
+      { variant: "long names", url: DRAFT, authors: longNames },
+      {
+        variant: "names that make long ids",
+        url: DRAFT,
+        authors: (n: number) => namesOf(n, 16_381),
+      },
+    ])(
+      "refuses it, in time that grows with the authors, not their square, with $variant",
+      {
+        timeout: 180_000,
+      },
+      ({ url, authors }) => {
+        expect(() => deckToDraft({ ...deck, authors: authors(3) }, [], url, NOW)).toThrow(refused);
+        const ratio = growth(
+          (count) => {
+            const long = { ...deck, authors: authors(count) };
+            return () => {
+              try {
+                deckToDraft(long, [], url, NOW);
+              } catch {
+                return;
+              }
+            };
+          },
+          250,
+          8,
+        );
+        expect(ratio).toBeLessThan(4);
+      },
+    );
+  });
+
   it("keeps what a release says the deck does too, in a stated language", () => {
     const { draft } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(draft.course).toBe(false);
