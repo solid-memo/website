@@ -11,6 +11,7 @@ import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { fsrsReview } from "@solid-memo/domain/fsrs";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import type { LibraryCard } from "@solid-memo/domain/library";
 import type { CourseChapter, CourseOutline } from "@solid-memo/domain/course";
@@ -195,6 +196,41 @@ describe("courses", () => {
     await expect(useCases.getCourseStatistics(instance.url, noon, [deck])).rejects.toThrow(
       "names the release",
     );
+  });
+
+  it("getCourseStatistics groups the answers once, not once per course", async () => {
+    const ratio = await growthAsync(
+      (size) => {
+        const { useCases, answerLog } = setup();
+        const courses = Array.from({ length: size }, (_, i) => ({
+          ...courseDeck,
+          url: `${deck.url}-${i}`,
+        }));
+        vi.mocked(answerLog.months).mockResolvedValue(["2026-10"]);
+        vi.mocked(answerLog.readMonthSince).mockResolvedValue({
+          unchanged: false,
+          value: Array.from(
+            { length: size },
+            (_, i): Answer => ({
+              id: `a${i}`,
+              deckUrl: `${deck.url}-${i}`,
+              cardUrl: `${deck.cardsDocumentUrl}#q-iri`,
+              direction: "front-to-back",
+              grade: 3,
+              answeredAt: "2026-10-06T10:00:00.000Z",
+              studyDay: "2026-10-06",
+              nextIntervalDays: 1,
+              mode: "multiple-choice",
+            }),
+          ),
+          version: null,
+        });
+        return () => useCases.getCourseStatistics(instance.url, noon, courses);
+      },
+      500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 
   it("startCourse copies the release without its cards, saying it is a course, or returns the copy the instance has", async () => {

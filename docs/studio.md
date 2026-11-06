@@ -942,6 +942,10 @@ Its four tabs are links, the one shown marked (`aria-current`):
   - A column's name sorts the answers by it (but the wrong option's),
     then the other way, then newest first again. Beside the deck's
     cards, **j** and **k** stay the cards' table's.
+  - Past 1,000 answers (`MAX_HISTORY_ROWS`, as the learner's
+    [card history](statistics.md#a-cards-history)) the table holds the
+    newest 1,000, and sorts those; a line under it says how many there
+    are.
   - A line counts the answers and the card's lapses, as the cards'
     table counts them
     ([statistics.md](statistics.md#what-the-figures-count)). An answer

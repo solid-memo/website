@@ -221,8 +221,9 @@
     "historyInterval": "Intervall",
     "historyDue": "Nächste Wiederholung",
     "historyFirstStudied": "Zuerst gelernt",
-    "historyHint": "Jede Antwort zu dieser Karte, neueste zuerst. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und Antworten in Kursen sind keine Wiederholungen.",
+    "historyHint": "Die Antworten zu dieser Karte, neueste zuerst. Eine erste Antwort, eine Karte, die am selben Tag erneut in die Sitzung kommt, und Antworten in Kursen sind keine Wiederholungen.",
     "historyAnswers": "Antworten zu dieser Karte",
+    "historyCapped": "Nur die neuesten {shown} von {total} Antworten werden gezeigt.",
     "historyDirection": "Richtung",
     "historyKind": "Art",
     "historyAnswer": "Antwort",
@@ -1837,6 +1838,14 @@
       "other": "{percent} von {count} Antworten"
     },
     "removedDeck": "Ein entfernter Stapel",
+    "otherDecks": {
+      "one": "{count} weiterer Stapel kommt auf {answers}. Nur die {shown} Stapel mit den meisten Antworten werden einzeln gezeigt.",
+      "other": "{count} weitere Stapel kommen zusammen auf {answers}. Nur die {shown} Stapel mit den meisten Antworten werden einzeln gezeigt."
+    },
+    "otherDecksAnswers": {
+      "one": "{count} Antwort",
+      "other": "{count} Antworten"
+    },
     "pointAtMonth": "Zeige auf einen Monat (oder nutze die Pfeiltasten), um zu sehen, wie viel du gewusst hast, oder öffne die Tabelle darunter.",
     "pointAtDayAhead": "Zeige auf einen Tag (oder nutze die Pfeiltasten), um zu sehen, was fällig wird, oder öffne die Tabelle darunter.",
     "progress": "Fortschritt",

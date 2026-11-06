@@ -377,4 +377,31 @@ describe("CardHistoryContainer", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+
+  it("lists a thousand answers at most, the newest, and says so", () => {
+    const answers = Array.from({ length: 1002 }, (_, i) =>
+      answer("2026-09-04", 4, { id: `row-${i}`, nextIntervalDays: i + 1 }),
+    );
+    render(
+      <CardHistory deck={deck} card={card} answers={answers} states={[]} dayBoundaryHour={4} />,
+    );
+    const rows = within(screen.getByRole("table")).getAllByRole("row").slice(1);
+    expect(rows).toHaveLength(1000);
+    expect(rows[0]).toHaveTextContent("1 day");
+    expect(rows.at(-1)).toHaveTextContent("1,000 days");
+    expect(
+      screen.getByText("Only the newest 1,000 of 1,002 answers are listed."),
+    ).toBeInTheDocument();
+  });
+
+  it("lists every answer up to the limit, saying nothing of one", () => {
+    const answers = Array.from({ length: 1000 }, (_, i) =>
+      answer("2026-09-04", 4, { id: `row-${i}` }),
+    );
+    render(
+      <CardHistory deck={deck} card={card} answers={answers} states={[]} dayBoundaryHour={4} />,
+    );
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(1001);
+    expect(screen.queryByText(/answers are listed/)).not.toBeInTheDocument();
+  });
 });

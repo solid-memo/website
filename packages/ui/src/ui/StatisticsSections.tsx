@@ -132,7 +132,13 @@ export function OverviewSection({
         </>
       )}
       <ActivityCalendar days={statistics.recentDays} today={statistics.today} />
-      {decks !== undefined && <ByDeckStatistics decks={decks} statistics={statistics.decks} />}
+      {decks !== undefined && (
+        <ByDeckStatistics
+          decks={decks}
+          statistics={statistics.decks}
+          others={statistics.otherDecks}
+        />
+      )}
     </>
   );
 }

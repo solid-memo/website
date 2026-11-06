@@ -97,7 +97,7 @@ first, then returns to the Browser. An unknown card falls back to the
 Browser.
 
 Under the editor is the card's **history**: where it stands in each
-direction and every answer to it, newest first
+direction and its answers, newest first, up to the newest 1,000
 ([statistics.md](statistics.md#a-cards-history)). The statistics'
 leeches and hardest cards link here.
 

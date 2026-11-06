@@ -383,6 +383,15 @@ export interface Card extends CardContent {
 }
 
 /**
+ * How many entries of one kind a catalog may have that the app follows:
+ * decks, drafts or releases. A catalog is data anyone may have written,
+ * each document it names is read, and one within its read limits could
+ * name far more than any instance holds; past this many, its entries of
+ * that kind are refused (catalogTooManyLinks), not read.
+ */
+export const MAX_CATALOG_LINKS = 1000;
+
+/**
  * How many chapters a deck has completed (Deck.completedChapters) as the
  * app reads, imports and writes them. A course has fewer chapters than
  * this, and completing one adds it only once; the values are data anyone

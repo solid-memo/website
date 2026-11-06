@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { growth } from "./testing/growth";
 import { type Answer, shiftStudyDay } from "./answer";
 import { chainIndexOf } from "./answerChain";
+import { MAX_CATALOG_LINKS } from "./deck";
 import {
   dailyActivity,
   introducedOverTime,
@@ -365,6 +366,35 @@ describe("statisticsOf", () => {
         [`${DECK}3`, 1, "2026-10-02"],
       ],
     );
+  });
+
+  it("gives figures to the decks with the most answers, a removed one as any other, and folds the rest into one total", () => {
+    const name = (i: number) => String(i).padStart(5, "0");
+    const deckCount = MAX_CATALOG_LINKS + 3;
+    const answers = Array.from({ length: deckCount }, (_, i) =>
+      answer("2026-10-02", 4, undefined, name(i)),
+    );
+    // The last deck by name has the most answers, so it is listed first and not folded.
+    answers.push(answer("2026-10-02", 4, undefined, name(deckCount - 1)));
+    const { decks, otherDecks, totals } = statisticsOf(answers, "2026-10-03");
+    expect(decks).toHaveLength(MAX_CATALOG_LINKS);
+    expect(decks[0]).toMatchObject({ deckUrl: `${DECK}${name(deckCount - 1)}`, answers: 2 });
+    expect(decks.at(-1)!.deckUrl).toBe(`${DECK}${name(MAX_CATALOG_LINKS - 2)}`);
+    expect(otherDecks).toEqual({ decks: 3, answers: 3 });
+    expect(decks.reduce((sum, deck) => sum + deck.answers, otherDecks.answers)).toBe(
+      answers.length,
+    );
+    // The instance's own totals still count every answer.
+    expect(totals.answers).toBe(answers.length);
+  });
+
+  it("folds no deck when a catalog's worth of them are answered in", () => {
+    const answers = Array.from({ length: MAX_CATALOG_LINKS }, (_, i) =>
+      answer("2026-10-02", 4, undefined, String(i)),
+    );
+    const { decks, otherDecks } = statisticsOf(answers, "2026-10-03");
+    expect(decks).toHaveLength(MAX_CATALOG_LINKS);
+    expect(otherDecks).toEqual({ decks: 0, answers: 0 });
   });
 
   it("gives each deck its recall, introductions, lapses, course answers, first tries and directions", () => {
