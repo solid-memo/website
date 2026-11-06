@@ -14,6 +14,7 @@ import { ReadLimitError, type ReadLimits } from "./interface";
 import { withBoundedHeaders } from "./linkHeader";
 import {
   limitsOf,
+  namesIriUnder,
   spentOf,
   NO_SIZE_LIMITS,
   pathKeys,
@@ -31,6 +32,9 @@ type Dataset = Awaited<ReturnType<typeof getSolidDataset>>;
 
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 
+/** Where the library names a subject that has no URL yet: `<#name>` in the document it is saved to. */
+export const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
+
 /**
  * getSolidDataset, with the dataset built in one pass. @inrupt/solid-client
  * adds each parsed quad by copying (and freezing) the whole graph again,
@@ -43,9 +47,10 @@ const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
  * the characters of their terms, the read fails with a ReadLimitError
  * before any of it is built. A Turtle text whose base or prefix
  * declarations or IRIs are past what a read takes in fails so too, read
- * under limits or with none (writeTurtle). The library is given the
- * response with its `Link` and `WAC-Allow` headers bounded
- * (linkHeader.ts), read under limits or with none.
+ * under limits or with none (writeTurtle). A quad that names an IRI
+ * the library keeps for subjects not saved yet is left out (LOCAL_NODE).
+ * The library is given the response with its `Link` and `WAC-Allow`
+ * headers bounded (linkHeader.ts), read under limits or with none.
  */
 export async function getSolidDatasetLinear(
   url: string,
@@ -129,7 +134,8 @@ interface Collected {
  * The Turtle parser (turtleParser), whose quads go to `collected`
  * instead of to solid-client; one past the limits of the read of `url` (quadTally)
  * fails the parse instead, once, and drops what was kept, as does a
- * base, prefix or IRI past what any read takes in (writeTurtle). The
+ * base, prefix or IRI past what any read takes in (writeTurtle). One
+ * that names an IRI under LOCAL_NODE is tallied and not kept. The
  * text is written to the parser in parts, so that it reads no further
  * than the part it is in.
  */
@@ -159,8 +165,8 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
       };
       parser.onQuad((quad) => {
         if (collected.refused !== undefined) return;
-        if (!past(quad)) return quads.push(quad);
-        refuse();
+        if (past(quad)) return refuse();
+        if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(quad);
       });
       // solid-client hands the text to n3's parser as it is, which reads a stream as well.
       const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);

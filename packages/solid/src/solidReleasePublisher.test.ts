@@ -7,6 +7,7 @@ import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink, MAX_CATALOG_LINKS } from "./catalogLinks";
 import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
 import type { ReadLimits } from "./client/interface";
+import { createThing } from "./client/rdf";
 import {
   ACCESS_CONTROL_LIMITS,
   limitedFetch,
@@ -65,6 +66,7 @@ async function publisherPod({
   answeredFrom,
   grant = fakeGrant,
   dataLimits,
+  servedAccessControl,
 }: {
   wac?: boolean;
   acp?: boolean;
@@ -72,6 +74,8 @@ async function publisherPod({
   answeredFrom?: string;
   grant?: GrantPublicRead;
   dataLimits?: ReadLimits;
+  /** The text a GET of an ACL answers, as a server keeps it: the test pod stores what it parses. */
+  servedAccessControl?: string;
 } = {}) {
   const pod = await draftPod();
   const sent: string[] = [];
@@ -82,6 +86,13 @@ async function publisherPod({
     sent.push(
       `${method} ${url}${init?.redirect ? ` redirect: ${init.redirect}` : ""}${method === "PATCH" ? ` ${String(init?.body)}` : ""}`,
     );
+    if (servedAccessControl !== undefined && method === "GET" && url === `${RELEASE}.acl`) {
+      const served = new Response(servedAccessControl, {
+        headers: { "Content-Type": "text/turtle" },
+      });
+      Object.defineProperty(served, "url", { value: url });
+      return served;
+    }
     const response = await pod.fetch(input, init);
     if (acp && url.endsWith(".acr")) {
       const headers = new Headers(response.headers);
@@ -641,6 +652,27 @@ describe("a release already at an address, on a server that may be anyone's", ()
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
     await pod.put(`${RELEASE}.acl`, `${subjects}\n<extra> <#p> <#o> .`);
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: false });
+  });
+
+  it("counts a subject at an IRI a read leaves out, as the grant's library reads the text itself", async () => {
+    const kept = createThing({ name: "s" }).url;
+    const acl = (subjects: number) =>
+      Array.from({ length: subjects }, (_, i) => `<${kept}${i}> <#p> <#o> .`).join("\n");
+    const grant = vi.fn<GrantPublicRead>(async (url, { fetch }) => (await fetch(`${url}.acl`)).ok);
+    const within = await publisherPod({
+      grant,
+      servedAccessControl: acl(MAX_ACCESS_CONTROL_SUBJECTS),
+    });
+    await expect(within.publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({
+      public: true,
+    });
+    const past = await publisherPod({
+      grant,
+      servedAccessControl: acl(MAX_ACCESS_CONTROL_SUBJECTS + 1),
+    });
+    await expect(past.publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({
+      public: false,
+    });
   });
 
   /** A release with more triples than ACCESS_CONTROL_LIMITS let through, well within RELEASE_LIMITS. */

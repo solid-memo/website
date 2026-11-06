@@ -139,20 +139,21 @@ export class HttpError extends Error {
 
 /**
  * How much of a document a read takes in: its body's bytes, the triples
- * parsed from it, and the characters of their terms (readLimits.ts,
- * quadTally).
+ * parsed from it, the characters of their terms, and, where given, their
+ * subjects (readLimits.ts, quadTally).
  */
 export interface ReadLimits {
   readonly bytes: number;
   readonly quads: number;
   readonly characters: number;
+  readonly subjects?: number;
 }
 
 /**
  * What a read rejects with when the document is larger than its limits
  * allow (readLimits.ts): its body, as sent or as said in advance
- * (Content-Length), or the triples parsed from it, or their terms; or
- * when a Turtle text's base or prefix declarations, or the IRIs it
+ * (Content-Length), or the triples parsed from it, their terms or their
+ * subjects; or when a Turtle text's base or prefix declarations, or the IRIs it
  * resolves, or a term, are past what any read takes in, its limits then
  * NO_SIZE_LIMITS for a read with none.
  * What was read so far is dropped.

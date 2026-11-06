@@ -963,6 +963,44 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       ]);
     });
 
+    it("leaves out a quad that names an IRI kept for subjects made by name, in any format", async () => {
+      const kept = rdf.createThing({ name: "x" }).url;
+      const turtle = `<${kept}> <${EX}p> "x" . <#a> <${EX}p> <${kept}> . <#a> <${EX}p> "${kept}" .`;
+      const jsonLd = JSON.stringify({
+        "@id": kept,
+        "@graph": [{ "@id": "#a", [`${EX}p`]: "x" }],
+      });
+      const quads = await parseQuads(turtle, "turtle", URL_);
+      expect(quads.map((one) => [one.subject.value, one.object.value])).toEqual([
+        [`${URL_}#a`, kept],
+      ]);
+      await expect(parseQuads(jsonLd, "jsonld", URL_)).resolves.toEqual([]);
+    });
+
+    it("counts a quad it leaves out for an IRI kept for subjects made by name", async () => {
+      const kept = rdf.createThing({ name: "x" }).url;
+      const limits = { bytes: 1_000, quads: 1, characters: 1_000 };
+      const text = `<${kept}> <${EX}p> "x" . <${kept}> <${EX}p> "y" .`;
+      await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      await expect(
+        getSolidDatasetLinear(URL_, { fetch: limitedFetch(turtleAt(text), limits) }),
+      ).rejects.toMatchObject({ name: "ReadLimitError" });
+    });
+
+    it("counts the subject of a quad it leaves out toward a read's subjects", async () => {
+      const kept = rdf.createThing({ name: "x" }).url;
+      const limits = { bytes: 1_000, quads: 10, characters: 1_000, subjects: 1 };
+      const text = `<${kept}> <${EX}p> "x" . <#a> <${EX}p> "y" .`;
+      await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      await expect(
+        parseQuads(`<#a> <${EX}p> "x", "y" .`, "turtle", URL_, limits),
+      ).resolves.toHaveLength(2);
+    });
+
     it("rejects a text that does not parse", async () => {
       await expect(parseQuads("<#a> <#b> .", "turtle", URL_)).rejects.toBeDefined();
     });
