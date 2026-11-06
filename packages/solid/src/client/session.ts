@@ -27,8 +27,11 @@ export type { SessionClient } from "./interface";
  * restores silently: its ID, and under that its fields, the issuer
  * among them. A silent restore logs in again at that issuer. A login
  * request's state is kept under the same prefix, naming its session.
+ * The page a silent restore left is kept too, and would make the next
+ * login count as that restore.
  */
 const CURRENT_SESSION_KEY = "solidClientAuthn:currentSession";
+const CURRENT_URL_KEY = "solidClientAuthn:currentUrl";
 const USER_PREFIX = "solidClientAuthenticationUser:";
 
 /** One of the library's entries, by user (a session or a state); none unless an object. */
@@ -116,6 +119,12 @@ export function createSessionClient(): SessionClient {
 
     async sessionIssuer() {
       return storedSessionIssuer(window.localStorage.getItem(CURRENT_SESSION_KEY));
+    },
+
+    async forgetSession() {
+      window.localStorage.removeItem(CURRENT_SESSION_KEY);
+      window.localStorage.removeItem(CURRENT_URL_KEY);
+      window.sessionStorage.removeItem(PROVIDER_REDIRECT_KEY);
     },
 
     // The library looks the request up by its state, in localStorage, which every tab shares.

@@ -139,6 +139,7 @@
   },
   "app": {
     "restoringSession": "Sitzung wird wiederhergestellt…",
+    "backToProvider": "Zurück zu deinem Anbieter",
     "skipToContent": "Zum Inhalt springen",
     "tagline": "Karteikarten mit verteilter Wiederholung, die in deinem eigenen Solid Pod leben.",
     "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
@@ -1659,6 +1660,8 @@
     "loginIssuerMissing": "Dein Anbieter hat nicht gesagt, welcher Anbieter er ist, deshalb hat Solid Memo die Anmeldung zur Sicherheit abgebrochen. Melde dich erneut an oder wähle einen anderen Anbieter.",
     "loginIssuerMismatch": "Du bist von einem anderen Anbieter zurückgekommen als dem, bei dem du dich angemeldet hast, deshalb hat Solid Memo die Anmeldung zur Sicherheit abgebrochen. Melde dich erneut an.",
     "loginNotStarted": "Solid Memo hat diese Anmeldung nicht in diesem Tab gestartet, deshalb hat es die Anmeldung zur Sicherheit abgebrochen. Melde dich in diesem Tab erneut an.",
+    "restoreTimedOut": "Dein Anbieter hat nicht rechtzeitig geantwortet, deshalb hat Solid Memo die Wiederherstellung deiner Sitzung abgebrochen. Melde dich erneut an oder wähle einen anderen Anbieter.",
+    "restoreNotReturned": "Dein Anbieter hat dich nicht zurückgeschickt, deshalb hat Solid Memo die Wiederherstellung deiner Sitzung abgebrochen. Geh zurück zu deinem Anbieter, melde dich erneut an oder wähle einen anderen Anbieter.",
     "profileNoSubject": "Dein Profil beschreibt dich nicht, daher kann Solid Memo darin nicht vermerken, wo deine Daten liegen. Prüfe dein Profil bei deinem Pod-Anbieter und versuche es dann erneut.",
     "privateTypeIndexNotLinked": "Solid Memo konnte sein privates Verzeichnis deiner Daten nicht mit deinem Profil verknüpfen. Prüfe, ob Solid Memo dein Profil bearbeiten darf, und versuche es dann erneut.",
     "publicTypeIndexNotLinked": "Solid Memo konnte sein öffentliches Verzeichnis deiner Daten nicht mit deinem Profil verknüpfen. Prüfe, ob Solid Memo dein Profil bearbeiten darf, und versuche es dann erneut.",

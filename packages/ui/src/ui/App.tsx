@@ -4,6 +4,7 @@
 
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { AppError } from "@solid-memo/domain/appError";
 import type { Locale } from "@solid-memo/domain/locale";
 import {
   parsePalette,
@@ -296,6 +297,13 @@ function opensAsGuest(hash: string): boolean {
 /** The login screen's error once the session expired: not a failure to report, but why the user is back. */
 const SESSION_EXPIRED = Symbol("session expired");
 
+/** The provider that never sent the learner back, to go back to in their own time; none for any other error. */
+function providerNotReturning(error: unknown): string | null {
+  return error instanceof AppError && error.code === "restoreNotReturned"
+    ? String(error.vars.issuer)
+    : null;
+}
+
 function AppContent({
   useCases,
   source,
@@ -337,6 +345,8 @@ function AppContent({
         }
       } catch (e) {
         setAuthError(e);
+        // They had a session or were logging in: the login is what they need next, not the introduction.
+        setReturning(true);
       } finally {
         setCheckingSession(false);
       }
@@ -458,6 +468,7 @@ function AppContent({
 
   if (signedOut) {
     const guest = session?.guest === true;
+    const provider = providerNotReturning(authError);
     return (
       <>
         <SiteHeader link={identity.headerLink} />
@@ -470,6 +481,11 @@ function AppContent({
           {/* First and focused: after the session expired the whole screen
               changed under the user, and this says why. */}
           <ErrorMessage error={authText} focus />
+          {provider !== null && (
+            <p>
+              <ExternalLink url={provider}>{t("app.backToProvider")}</ExternalLink>
+            </p>
+          )}
           <OnboardingFlow
             key={landingVisit}
             providers={providers}

@@ -8,6 +8,7 @@ import {
   completeLogin,
   discover,
   isRefusal,
+  PENDING_LOGIN_KEY,
   pendingLogin,
   startLogin,
   startSilentLogin,
@@ -46,6 +47,7 @@ const LOGGED_OUT: RestoredSession = { webId: null, fromLogin: false, restoredFro
 /** Completes the redirect back from the provider this page is: a login, or a silent restore. */
 async function completeRedirect(
   redirect: NonNullable<ReturnType<typeof takeRedirect>>,
+  forgotten: () => boolean,
 ): Promise<RestoredSession> {
   const { pending } = redirect;
   const silent = pending.silentFrom !== undefined;
@@ -76,17 +78,24 @@ async function completeRedirect(
     ...(tokens.refreshToken !== undefined && { refreshToken: tokens.refreshToken }),
   };
   // After any refresh under way, which would otherwise store the older session over this one.
-  await exclusively(() => saveSession(stored));
+  const saved = await exclusively(async () => {
+    if (forgotten()) return false;
+    await saveSession(stored);
+    return true;
+  });
+  // Given up on while the provider answered: the next load restores nothing.
+  if (!saved) return LOGGED_OUT;
   setCurrentSession(new OidcSession(as, stored, tokens));
   return { webId, fromLogin: !silent, restoredFrom: pending.silentFrom ?? null };
 }
 
 /** The sign-in client on the tab's session (oidcSession.ts). */
 export function createSessionClient(): SessionClient {
+  let forgotten = false;
   return {
     async restore() {
       const redirect = takeRedirect();
-      if (redirect !== undefined) return completeRedirect(redirect);
+      if (redirect !== undefined) return completeRedirect(redirect, () => forgotten);
       const stored = await loadSession();
       if (stored === undefined) return LOGGED_OUT;
       const as = await discover(stored.issuer);
@@ -104,6 +113,14 @@ export function createSessionClient(): SessionClient {
 
     async sessionIssuer() {
       return (await loadSession())?.issuer ?? null;
+    },
+
+    async forgetSession() {
+      forgotten = true;
+      setCurrentSession(null);
+      window.sessionStorage.removeItem(PENDING_LOGIN_KEY);
+      // Without waiting for a refresh under way, which then cannot store the session again (refreshStored).
+      await clearSession();
     },
 
     async requestIssuer(state) {
