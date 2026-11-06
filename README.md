@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/solid-memo/website/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/solid-memo/website/actions/workflows/ci.yml)
 [![Interop](https://github.com/solid-memo/website/actions/workflows/interop.yml/badge.svg?branch=main)](https://github.com/solid-memo/website/actions/workflows/interop.yml)
+[![Links](https://github.com/solid-memo/website/actions/workflows/links.yml/badge.svg?branch=main)](https://github.com/solid-memo/website/actions/workflows/links.yml)
 [![Commit activity](https://img.shields.io/github/commit-activity/m/solid-memo/website)](https://github.com/solid-memo/website/pulse)
 [![Last commit](https://img.shields.io/github/last-commit/solid-memo/website)](https://github.com/solid-memo/website/commits/main)
 [![Contributors](https://img.shields.io/github/contributors/solid-memo/website)](https://github.com/solid-memo/website/graphs/contributors)

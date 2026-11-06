@@ -18,6 +18,11 @@ exclude_path = ["(^|/)node_modules/"]
 
 no_progress = true
 
+# Ask for a page, as a browser does. The Community Solid Server answers
+# its sign-up page (docs/onboarding.md) only to an Accept that names
+# text/html, and 404 to lychee's own */*.
+header = { "accept" = "text/html, */*;q=0.8" }
+
 # Addresses that answer only once the maintainer does something, each to
 # remove from this list then. The changelog's links to tags and
 # comparisons are not among them: semantic-release writes them with the
