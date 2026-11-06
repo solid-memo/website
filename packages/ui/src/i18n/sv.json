@@ -221,8 +221,9 @@
     "historyInterval": "Intervall",
     "historyDue": "Nästa repetition",
     "historyFirstStudied": "Först studerat",
-    "historyHint": "Varje svar på det här kortet, nyaste först. Ett första svar, ett kort som kommer tillbaka i passet samma dag och svar i kurser är inga repetitioner.",
+    "historyHint": "Svaren på det här kortet, nyaste först. Ett första svar, ett kort som kommer tillbaka i passet samma dag och svar i kurser är inga repetitioner.",
     "historyAnswers": "Svar på det här kortet",
+    "historyCapped": "Bara de {shown} nyaste av {total} svar visas.",
     "historyDirection": "Riktning",
     "historyKind": "Slag",
     "historyAnswer": "Svar",
@@ -1817,6 +1818,14 @@
       "other": "{percent} av {count} svar"
     },
     "removedDeck": "En borttagen kortlek",
+    "otherDecks": {
+      "one": "{count} kortlek till har {answers}. Bara de {shown} kortlekar som har flest svar visas var för sig.",
+      "other": "{count} kortlekar till har sammanlagt {answers}. Bara de {shown} kortlekar som har flest svar visas var för sig."
+    },
+    "otherDecksAnswers": {
+      "one": "{count} svar",
+      "other": "{count} svar"
+    },
     "pointAtMonth": "Peka på en månad (eller använd piltangenterna) för att se hur mycket du mindes då, eller öppna tabellen nedan.",
     "pointAtDayAhead": "Peka på en dag (eller använd piltangenterna) för att se vad som ska repeteras, eller öppna tabellen nedan.",
     "progress": "Framsteg",

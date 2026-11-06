@@ -219,8 +219,9 @@
     "historyInterval": "복습 간격",
     "historyDue": "다음 복습일",
     "historyFirstStudied": "처음 학습한 날",
-    "historyHint": "이 카드에 대한 모든 답변이에요(최신순). 첫 답변, 같은 날 세션에 다시 나온 카드, 코스 답변은 복습이 아니에요.",
+    "historyHint": "이 카드에 대한 답변이에요(최신순). 첫 답변, 같은 날 세션에 다시 나온 카드, 코스 답변은 복습이 아니에요.",
     "historyAnswers": "이 카드에 대한 답변",
+    "historyCapped": "답변 {total}개 중 최신 {shown}개만 보여 줘요.",
     "historyDirection": "방향",
     "historyKind": "종류",
     "historyAnswer": "답변",
@@ -1728,6 +1729,12 @@
       "other": "답변 {count}개 중 {percent}"
     },
     "removedDeck": "삭제된 덱",
+    "otherDecks": {
+      "other": "덱 {count}개가 더 있고 모두 합쳐 {answers}예요. 답변이 가장 많은 덱 {shown}개만 하나씩 보여 줘요."
+    },
+    "otherDecksAnswers": {
+      "other": "답변 {count}개"
+    },
     "pointAtMonth": "달을 가리키거나 화살표 키로 고르면 그달에 얼마나 기억했는지 볼 수 있어요. 아래 표를 열어도 돼요.",
     "pointAtDayAhead": "날짜를 가리키거나 화살표 키로 고르면 그날 복습할 카드를 볼 수 있어요. 아래 표를 열어도 돼요.",
     "progress": "진행 상황",

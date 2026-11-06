@@ -4,7 +4,7 @@
 
 import { useMemo, useState } from "preact/hooks";
 import type { Answer } from "@solid-memo/domain/answer";
-import { isRecalled } from "@solid-memo/domain/answer";
+import { isRecalled, MAX_HISTORY_ROWS } from "@solid-memo/domain/answer";
 import { chainIndexOf, isLapse } from "@solid-memo/domain/answerChain";
 import { isMarkdown, type Card, type Distractor } from "@solid-memo/domain/deck";
 import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
@@ -54,7 +54,8 @@ const GRADES = ["blackout", "wrong", "almost", "hard", "good", "easy"] as const;
  * cards' table's, not its own. Each answer's chosen option is looked
  * up in the card's distractors by id once for the answers, and the rows
  * are sorted again only when the answers, the sort or the language
- * change.
+ * change. Past MAX_HISTORY_ROWS the table holds the newest, a line under
+ * it saying so, and sorts those; the count above still covers them all.
  */
 export function CardHistoryScreen({ card, answers }: { card: Card; answers: readonly Answer[] }) {
   const { t, locale, directionLabel } = useI18n();
@@ -65,7 +66,7 @@ export function CardHistoryScreen({ card, answers }: { card: Card; answers: read
   const byId = useMemo(() => distractorsById(card), [card]);
   const rows = useMemo(
     () =>
-      answers.map((answer): HistoryRow => {
+      answers.slice(0, MAX_HISTORY_ROWS).map((answer): HistoryRow => {
         if (answer.chosenDistractor === undefined) return { answer };
         const chosenId = fragmentIdOf(answer.chosenDistractor);
         const chosen = byId.get(chosenId);
@@ -144,6 +145,11 @@ export function CardHistoryScreen({ card, answers }: { card: Card; answers: read
             onSort={(key) => setSort(nextSort(sort, key as HistoryColumn))}
             keys={false}
           />
+          {answers.length > MAX_HISTORY_ROWS && (
+            <p class="hint">
+              {t("card.historyCapped", { shown: MAX_HISTORY_ROWS, total: answers.length })}
+            </p>
+          )}
         </>
       )}
       <p class="hint">{t("studio.history.hint")}</p>

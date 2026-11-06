@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen, within } from "@testing-library/preact";
 import type { Answer } from "@solid-memo/domain/answer";
-import type { Deck } from "@solid-memo/domain/deck";
+import { MAX_CATALOG_LINKS, type Deck } from "@solid-memo/domain/deck";
 import { statisticsReportOf } from "../test/fakes/statistics";
 import { ByDeckStatistics } from "./ByDeckStatistics";
 
@@ -47,7 +47,7 @@ const blocks = () =>
 
 describe("ByDeckStatistics", () => {
   it("gives each deck's figures under their labels, a share's count under its percent", () => {
-    const { decks } = statisticsReportOf(
+    const { decks, otherDecks } = statisticsReportOf(
       [
         answer("new", "2026-09-20"),
         answer("young", "2026-09-21", { priorIntervalDays: 1 }),
@@ -59,7 +59,7 @@ describe("ByDeckStatistics", () => {
       ],
       "2026-09-21",
     );
-    render(<ByDeckStatistics decks={[deck]} statistics={decks} />);
+    render(<ByDeckStatistics decks={[deck]} statistics={decks} others={otherDecks} />);
     expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("By deck");
     expect(blocks()).toEqual([
       {
@@ -77,7 +77,7 @@ describe("ByDeckStatistics", () => {
   });
 
   it("gives recall each way only for a deck with reviews both ways, a direction a line", () => {
-    const { decks } = statisticsReportOf(
+    const { decks, otherDecks } = statisticsReportOf(
       [
         answer("front", "2026-09-21", { priorIntervalDays: 1 }),
         answer("back", "2026-09-21", {
@@ -88,7 +88,7 @@ describe("ByDeckStatistics", () => {
       ],
       "2026-09-21",
     );
-    render(<ByDeckStatistics decks={[deck]} statistics={decks} />);
+    render(<ByDeckStatistics decks={[deck]} statistics={decks} others={otherDecks} />);
     expect(blocks()[0]?.figures.at(-1)).toEqual([
       "By direction",
       "Front → back: 100% of 1 review",
@@ -97,7 +97,7 @@ describe("ByDeckStatistics", () => {
   });
 
   it("gives a course's graded answers, leaving out the shares of none, and names a removed deck", () => {
-    const { decks } = statisticsReportOf(
+    const { decks, otherDecks } = statisticsReportOf(
       [
         answer("right", "2026-09-21", { mode: "multiple-choice", grade: 3 }),
         answer("wrong", "2026-09-21", {
@@ -108,7 +108,7 @@ describe("ByDeckStatistics", () => {
       ],
       "2026-09-21",
     );
-    render(<ByDeckStatistics decks={[]} statistics={decks} />);
+    render(<ByDeckStatistics decks={[]} statistics={decks} others={otherDecks} />);
     expect(blocks()).toEqual([
       {
         name: "A removed deck",
@@ -120,5 +120,57 @@ describe("ByDeckStatistics", () => {
         ],
       },
     ]);
+  });
+
+  it("gives the most answered decks a block each, removed ones too, and says what is folded", () => {
+    const manyDecks = MAX_CATALOG_LINKS + 2;
+    const { decks, otherDecks } = statisticsReportOf(
+      [
+        // The deck the instance has, with the most answers.
+        answer("own-1", "2026-09-21"),
+        answer("own-2", "2026-09-21"),
+        ...Array.from({ length: manyDecks }, (_, i) =>
+          answer(`other-${i}`, "2026-09-21", {
+            deckUrl: `https://other.example/catalog.ttl#deck-${String(i).padStart(5, "0")}`,
+          }),
+        ),
+      ],
+      "2026-09-21",
+    );
+    render(<ByDeckStatistics decks={[deck]} statistics={decks} others={otherDecks} />);
+    const shown = blocks();
+    expect(shown).toHaveLength(MAX_CATALOG_LINKS);
+    expect(shown[0]!.name).toBe("Capitals");
+    expect(shown[1]!.name).toBe("A removed deck");
+    expect(
+      screen.getByText(
+        "3 more decks come to 3 answers in all. Only the 1,000 decks with the most answers are listed one by one.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("says a single folded deck and its answers in the singular", () => {
+    const { decks, otherDecks } = statisticsReportOf(
+      Array.from({ length: MAX_CATALOG_LINKS + 1 }, (_, i) =>
+        answer(`other-${i}`, "2026-09-21", {
+          deckUrl: `https://other.example/catalog.ttl#deck-${String(i).padStart(5, "0")}`,
+        }),
+      ),
+      "2026-09-21",
+    );
+    render(<ByDeckStatistics decks={[]} statistics={decks} others={otherDecks} />);
+    expect(
+      screen.getByText(
+        "1 more deck comes to 1 answer. Only the 1,000 decks with the most answers are listed one by one.",
+      ),
+    ).toBeInTheDocument();
+  });
+
+  it("says nothing of other decks when none are folded", () => {
+    const { decks, otherDecks } = statisticsReportOf([answer("one", "2026-09-21")], "2026-09-21");
+    const { container } = render(
+      <ByDeckStatistics decks={[deck]} statistics={decks} others={otherDecks} />,
+    );
+    expect(container.textContent).not.toContain("listed one by one");
   });
 });

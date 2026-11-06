@@ -4,7 +4,7 @@
 
 import type { ComponentChild } from "preact";
 import type { Deck } from "@solid-memo/domain/deck";
-import type { DeckStatistics } from "@solid-memo/domain/statistics";
+import type { DeckStatistics, OtherDecks } from "@solid-memo/domain/statistics";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 
@@ -15,27 +15,37 @@ type Share = { percent: string; of: string } | null;
  * Each deck's figures, a block a deck, as many blocks to a row as fit:
  * ten figures a deck are too many for a table's row in the page's
  * column, let alone on a phone. A deck since removed is named as such.
+ * The decks past those statisticsOf gives figures of are said in one
+ * total under the blocks.
  */
 export function ByDeckStatistics({
   decks,
   statistics,
+  others,
 }: {
   decks: readonly Deck[];
   statistics: readonly DeckStatistics[];
+  others: OtherDecks;
 }) {
   const { t } = useI18n();
+  const titles = new Map(decks.map((deck) => [deck.url, deck.title]));
   return (
     <>
       <h3 id="by-deck-heading">{t("statistics.byDeck")}</h3>
       <ul class="by-deck" aria-labelledby="by-deck-heading">
         {statistics.map((deck) => (
-          <DeckBlock
-            key={deck.deckUrl}
-            deck={deck}
-            title={decks.find((d) => d.url === deck.deckUrl)?.title}
-          />
+          <DeckBlock key={deck.deckUrl} deck={deck} title={titles.get(deck.deckUrl)} />
         ))}
       </ul>
+      {others.decks > 0 && (
+        <p class="hint">
+          {t("statistics.otherDecks", {
+            count: others.decks,
+            answers: t("statistics.otherDecksAnswers", { count: others.answers }),
+            shown: statistics.length,
+          })}
+        </p>
+      )}
     </>
   );
 }

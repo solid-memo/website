@@ -259,6 +259,17 @@ function firstDayOfMonths(today: string, months: number): string {
   return new Date(Date.UTC(year!, month! - months, 1)).toISOString().slice(0, 10);
 }
 
+/** The answers of each deck they name, each deck's in their order. */
+function answersByDeck(answers: readonly Answer[]): Map<string, Answer[]> {
+  const byDeck = new Map<string, Answer[]>();
+  for (const answer of answers) {
+    const group = byDeck.get(answer.deckUrl);
+    if (group === undefined) byDeck.set(answer.deckUrl, [answer]);
+    else group.push(answer);
+  }
+  return byDeck;
+}
+
 /**
  * What the learner's answers and schedules say (docs/statistics.md): the
  * statistics of a range of the answer log, saved as a file too, how far
@@ -500,17 +511,13 @@ export function createStatisticsUseCases({
       const lastMonth = lastLogMonthOf(today);
       const logged = (async () => {
         await answerStore.flush(instanceUrl);
-        const byDeck = new Map<string, Answer[]>();
-        for (const answer of await answerStore.readMonths(
-          instanceUrl,
-          await answerStore.logMonths(instanceUrl, at),
-          (month) => month >= firstMonth && month <= lastMonth,
-        )) {
-          const answers = byDeck.get(answer.deckUrl);
-          if (answers === undefined) byDeck.set(answer.deckUrl, [answer]);
-          else answers.push(answer);
-        }
-        return byDeck;
+        return answersByDeck(
+          await answerStore.readMonths(
+            instanceUrl,
+            await answerStore.logMonths(instanceUrl, at),
+            (month) => month >= firstMonth && month <= lastMonth,
+          ),
+        );
       })().catch(() => new Map<string, Answer[]>());
       const progress = await Promise.all(
         decks.map(async (one) => {
@@ -557,10 +564,12 @@ export function createStatisticsUseCases({
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const firstMonth = monthOfStudyDay(firstDayOfMonths(today, 12));
       const lastMonth = lastLogMonthOf(today);
-      const answers = await answerStore.readMonths(
-        instanceUrl,
-        logged,
-        (month) => month >= firstMonth && month <= lastMonth,
+      const byDeck = answersByDeck(
+        await answerStore.readMonths(
+          instanceUrl,
+          logged,
+          (month) => month >= firstMonth && month <= lastMonth,
+        ),
       );
       const results = await Promise.all(
         courses.map(async (deck): Promise<CourseStatistics[]> => {
@@ -574,7 +583,7 @@ export function createStatisticsUseCases({
               ...courseProgressOf(
                 outline,
                 deck.completedChapters ?? [],
-                deckAnswers(answers, deck),
+                deckAnswers(byDeck.get(deck.url) ?? [], deck),
               ),
             },
           ];

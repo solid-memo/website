@@ -228,7 +228,8 @@ leech only through your normal study
   which way it's studied (front to back, back to front, or both), add
   cards, and open a card to edit or remove it. Under the editor, a
   card's history shows when it comes back, how long until then, when
-  you first studied it, and every answer you gave it.
+  you first studied it, and the answers you gave it, up to the newest
+  1,000.
 - **Add card** opens a form for the front and the back: text, a
   picture, or both, and optional notes. It stays open, so you can add
   many in a row. Check "Format with Markdown" for code, lists or tables

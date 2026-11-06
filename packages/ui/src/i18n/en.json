@@ -221,8 +221,9 @@
     "historyInterval": "Interval",
     "historyDue": "Next review",
     "historyFirstStudied": "First studied",
-    "historyHint": "Every answer to this card, newest first. A first answer, a card back in the session the same day and course answers are not reviews.",
+    "historyHint": "The answers to this card, newest first. A first answer, a card back in the session the same day and course answers are not reviews.",
     "historyAnswers": "Answers to this card",
+    "historyCapped": "Only the newest {shown} of {total} answers are listed.",
     "historyDirection": "Direction",
     "historyKind": "Kind",
     "historyAnswer": "Answer",
@@ -1817,6 +1818,14 @@
       "other": "{percent} of {count} answers"
     },
     "removedDeck": "A removed deck",
+    "otherDecks": {
+      "one": "{count} more deck comes to {answers}. Only the {shown} decks with the most answers are listed one by one.",
+      "other": "{count} more decks come to {answers} in all. Only the {shown} decks with the most answers are listed one by one."
+    },
+    "otherDecksAnswers": {
+      "one": "{count} answer",
+      "other": "{count} answers"
+    },
     "pointAtMonth": "Point at a month (or use the arrow keys) to see how well it was remembered, or open the table below.",
     "pointAtDayAhead": "Point at a day (or use the arrow keys) to see what falls due, or open the table below.",
     "progress": "Progress",

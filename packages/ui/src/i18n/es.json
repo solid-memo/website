@@ -223,8 +223,9 @@
     "historyInterval": "Intervalo",
     "historyDue": "Próximo repaso",
     "historyFirstStudied": "Estudiada por primera vez",
-    "historyHint": "Todas las respuestas a esta tarjeta, de la más reciente a la más antigua. La primera respuesta, una tarjeta que vuelve a la sesión el mismo día y las respuestas de los cursos no son repasos.",
+    "historyHint": "Las respuestas a esta tarjeta, de la más reciente a la más antigua. La primera respuesta, una tarjeta que vuelve a la sesión el mismo día y las respuestas de los cursos no son repasos.",
     "historyAnswers": "Respuestas a esta tarjeta",
+    "historyCapped": "Solo se muestran las {shown} respuestas más recientes de {total}.",
     "historyDirection": "Sentido",
     "historyKind": "Tipo",
     "historyAnswer": "Respuesta",
@@ -1906,6 +1907,16 @@
       "other": "{percent} de {count} respuestas"
     },
     "removedDeck": "Un mazo eliminado",
+    "otherDecks": {
+      "one": "{count} mazo más suma {answers}. Solo se muestran uno a uno los {shown} mazos con más respuestas.",
+      "many": "{count} de mazos más suman {answers} en total. Solo se muestran uno a uno los {shown} mazos con más respuestas.",
+      "other": "{count} mazos más suman {answers} en total. Solo se muestran uno a uno los {shown} mazos con más respuestas."
+    },
+    "otherDecksAnswers": {
+      "one": "{count} respuesta",
+      "many": "{count} de respuestas",
+      "other": "{count} respuestas"
+    },
     "pointAtMonth": "Señala un mes (o usa las flechas del teclado) para ver lo bien que se recordó, o abre la tabla de abajo.",
     "pointAtDayAhead": "Señala un día (o usa las flechas del teclado) para ver qué toca repasar, o abre la tabla de abajo.",
     "progress": "Progreso",

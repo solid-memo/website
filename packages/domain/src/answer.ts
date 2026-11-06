@@ -142,6 +142,13 @@ export function isOfStudyMonth(studyDay: string, month: string): boolean {
   );
 }
 
+/**
+ * The most answers a card's history lists, on its page and in the
+ * Studio's inspector, the newest of them: far more than a card is ever
+ * answered, as an answer log is data anyone with access may have written.
+ */
+export const MAX_HISTORY_ROWS = 1000;
+
 /** A prompt reviewed at an interval of this many days or more is mature; below, young. */
 export const MATURE_INTERVAL_DAYS = 21;
 

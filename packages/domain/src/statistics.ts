@@ -45,6 +45,7 @@ import {
   type TimeToMature,
   type WeekRetention,
 } from "./memoryCurve";
+import { MAX_CATALOG_LINKS } from "./deck";
 import { answersByHour, estimateStudyTime, firstTimedOf, type StudyTime } from "./studyTime";
 import { pathKeys } from "./pathKeys";
 import { fragmentIdOf } from "./subjectUrl";
@@ -127,6 +128,12 @@ export interface Streaks {
   longest: number;
 }
 
+/** The decks past those given their own figures, and their answers, as one total. */
+export interface OtherDecks {
+  decks: number;
+  answers: number;
+}
+
 export interface DeckStatistics {
   deckUrl: string;
   answers: number;
@@ -182,8 +189,15 @@ export interface Statistics {
   memory: MemoryWeek[];
   /** How long the prompts that grew mature in the range took, of those introduced in the answers given. */
   timeToMature: TimeToMature;
-  /** Every deck answered in, most answers first. */
+  /**
+   * The decks answered in, most answers first: MAX_CATALOG_LINKS at most,
+   * as many as a catalog can hold. A deck since removed counts as any
+   * other. An answer log is data anyone with access may have written, and
+   * can name any number of decks.
+   */
   decks: DeckStatistics[];
+  /** The decks answered in past those, as one total: none when `decks` holds them all. */
+  otherDecks: OtherDecks;
   /** The answer buttons pressed. */
   buttons: AnswerButtons;
   firstTry: FirstTry;
@@ -405,29 +419,7 @@ export function statisticsOf(
     lateness: recallByLateness(answers, allIndex),
     memory: memoryOverTime(allAnswers, allIndex, today, since),
     timeToMature: timeToMatureOf(allIndex, since),
-    decks: [...groupBy(answers, (answer) => answer.deckUrl)]
-      .map(([deckUrl, deckAnswers]) => {
-        const retention = retentionOf(deckAnswers, index);
-        return {
-          deckUrl,
-          answers: deckAnswers.length,
-          lastStudyDay: deckAnswers.reduce(
-            (last, answer) => (answer.studyDay > last ? answer.studyDay : last),
-            deckAnswers[0]!.studyDay,
-          ),
-          retention,
-          introduced: deckAnswers.filter((answer) => isIntroduction(answer, index)).length,
-          lapses:
-            retention.young.reviews -
-            retention.young.recalled +
-            retention.mature.reviews -
-            retention.mature.recalled,
-          quiz: quizAccuracyOf(deckAnswers, index),
-          firstTry: firstTrySuccessOf(deckAnswers, index),
-          directions: retentionByDirection(deckAnswers, index),
-        };
-      })
-      .sort((a, b) => b.answers - a.answers || a.deckUrl.localeCompare(b.deckUrl)),
+    ...decksOf(answers, index),
     buttons: gradeGroupsOf(answers, index),
     firstTry: firstTrySuccessOf(answers, index),
     directions: retentionByDirection(answers, index),
@@ -438,6 +430,56 @@ export function statisticsOf(
     intake: intakeVsLoadOf(recentDays, today),
     studyTime: estimateStudyTime(answers, firstTimed),
     hours: answersByHour(answers),
+  };
+}
+
+/** One deck's figures, from its answers. */
+function deckStatisticsOf(
+  deckUrl: string,
+  deckAnswers: readonly Answer[],
+  index: ChainIndex,
+): DeckStatistics {
+  const retention = retentionOf(deckAnswers, index);
+  return {
+    deckUrl,
+    answers: deckAnswers.length,
+    lastStudyDay: deckAnswers.reduce(
+      (last, answer) => (answer.studyDay > last ? answer.studyDay : last),
+      deckAnswers[0]!.studyDay,
+    ),
+    retention,
+    introduced: deckAnswers.filter((answer) => isIntroduction(answer, index)).length,
+    lapses:
+      retention.young.reviews -
+      retention.young.recalled +
+      retention.mature.reviews -
+      retention.mature.recalled,
+    quiz: quizAccuracyOf(deckAnswers, index),
+    firstTry: firstTrySuccessOf(deckAnswers, index),
+    directions: retentionByDirection(deckAnswers, index),
+  };
+}
+
+/**
+ * The figures of the MAX_CATALOG_LINKS decks with the most answers, and
+ * one total of the rest, whose own figures are never worked out.
+ */
+function decksOf(
+  answers: readonly Answer[],
+  index: ChainIndex,
+): Pick<Statistics, "decks" | "otherDecks"> {
+  const ranked = [...groupBy(answers, (answer) => answer.deckUrl)].sort(
+    ([aUrl, a], [bUrl, b]) => b.length - a.length || (aUrl < bUrl ? -1 : 1),
+  );
+  const others = ranked.slice(MAX_CATALOG_LINKS);
+  return {
+    decks: ranked
+      .slice(0, MAX_CATALOG_LINKS)
+      .map(([deckUrl, deckAnswers]) => deckStatisticsOf(deckUrl, deckAnswers, index)),
+    otherDecks: {
+      decks: others.length,
+      answers: others.reduce((sum, [, deckAnswers]) => sum + deckAnswers.length, 0),
+    },
   };
 }
 
