@@ -470,7 +470,11 @@ over days). The release workflow's jobs restore nothing from the cache
 and always ask the mirror
 ([releasing.md](releasing.md#the-deploy-key)), as do CI's `site` job
 and the deploy's build, which make the site that's deployed
-([deployment.md](deployment.md#the-build-ci-tested)).
+([deployment.md](deployment.md#the-build-ci-tested)). The release
+job, the `site` job and that build, which use the Chromium action,
+leave out the system's fonts, the only packages the runner image
+lacks, so they have nothing to download: the diagrams carry their own
+font ([markdown.md](markdown.md#the-diagrams-font)).
 
 The journeys run the same way every time:
 

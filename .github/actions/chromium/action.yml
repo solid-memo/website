@@ -14,7 +14,9 @@
 # committed in actions/headless-shell, not installed by Playwright,
 # whose download checks no hash. With `cache: false`, nothing comes
 # from GitHub's cache: the shell is downloaded and checked so, the
-# libraries come from Ubuntu's signed mirror, and nothing is saved. A
+# libraries come from Ubuntu's signed mirror, less the system's fonts
+# the diagrams don't use (actions/playwright-deps), and nothing is
+# saved. A
 # job that holds a secret, attests what it makes or builds the site
 # that is deployed uses that
 # (release.yml's release job, ci.yml's site job, deploy.yml's build job;
@@ -51,3 +53,5 @@ runs:
       with:
         browser: chromium
         cache: ${{ inputs.cache }}
+        # With the cache, the entry is the journeys' too, which need them.
+        fonts: ${{ inputs.cache }}

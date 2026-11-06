@@ -23,6 +23,13 @@
 # With `cache: false`, it always asks the mirror, whose signed lists apt
 # checks each file against, and saves nothing (actions/chromium says
 # which jobs do).
+#
+# With `fonts: false`, it leaves out the system's fonts (fonts-*,
+# xfonts-*), for a browser that only draws the docs' diagrams, which
+# carry their own font (docs/markdown.md#the-diagrams-font): they are
+# what the image lacks, so a job that has to ask the mirror then has
+# nothing to download. Only with `cache: false`: entries are kept per
+# browser, and a job that shows the app needs them.
 name: Playwright's system libraries
 description: Restores or downloads, and installs, the system libraries a Playwright browser needs.
 inputs:
@@ -31,6 +38,9 @@ inputs:
     required: true
   cache:
     description: Whether to restore the .deb files from GitHub's cache, and save them there (true or false).
+    default: "true"
+  fonts:
+    description: Whether to install the system's fonts too (true or false). False only with cache false.
     default: "true"
 runs:
   using: composite
@@ -55,6 +65,7 @@ runs:
       shell: bash
       env:
         BROWSER: ${{ inputs.browser }}
+        FONTS: ${{ inputs.fonts }}
       run: |
         apt() {
           for try in 1 2; do
@@ -70,6 +81,9 @@ runs:
           *"Missing system dependencies"*) mapfile -t packages < <(sed -n 's/^  //p' <<< "$listed") ;;
           *) echo "$listed"; exit 1 ;;
         esac
+        if [[ $FONTS == false ]]; then
+          mapfile -t packages < <(printf '%s\n' "${packages[@]}" | grep -Ev '^(x?fonts-|$)' || true)
+        fi
         echo "Missing: ${#packages[@]} packages"
         sudo apt-get clean
         if (( ${#packages[@]} )); then
