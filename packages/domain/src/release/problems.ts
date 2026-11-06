@@ -100,7 +100,7 @@ export type CourseProblem =
   | { code: "chapterPositions"; params: { chapters: string[]; position: string } }
   | { code: "stepPositions"; params: { steps: string[]; chapter: string; position: string } }
   | { code: "chapterWithoutStep"; params: Record<string, never> }
-  /** Subjects typed a card, chapter, step or distractor that are no parts of the release (ReleaseModel.strays). */
+  /** Subjects typed a card, chapter, step or distractor, or in a draft an agent or distribution, that are no parts of the release (ReleaseModel.strays). */
   | { code: "strayParts"; params: { parts: string[] } };
 
 /** Text and how it is written (markdownFields). */

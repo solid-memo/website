@@ -20,6 +20,8 @@ export const DCTERMS_NS = "http://purl.org/dc/terms/";
 export const SCHEMA_NS = "https://schema.org/";
 export const VCARD_NS = "http://www.w3.org/2006/vcard/ns#";
 export const FOAF_MBOX = "http://xmlns.com/foaf/0.1/mbox";
+export const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+export const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
 
 /** A value a release states: an IRI, a blank node, or a literal with its language ("" for none) and datatype. */
 export type ReleaseTerm =
