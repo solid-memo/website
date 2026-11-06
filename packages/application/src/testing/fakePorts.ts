@@ -134,6 +134,7 @@ export function makeDeps() {
       keptReleases: false,
       keptDocuments: [],
     })),
+    detachInstance: vi.fn(async () => undefined),
     readMeta: vi.fn(async () => null),
     saveMeta: vi.fn(async () => undefined),
     renameRegistrations: vi.fn(async () => undefined),

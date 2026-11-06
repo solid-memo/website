@@ -7,26 +7,30 @@ import { Screen } from "./Screen.ts";
 
 /**
  * "Choose a Solid Memo instance": the user's instances, each a button
- * that opens it, a link to its folder ("Open in your Pod") and
- * "Delete instance {name}"; under them, New instance… and attaching one
- * by URL. Reached from the instance bar's "Switch instance", or on
- * arriving with more than one instance. An instance is attached by its
- * address. A deletion that kept the instance's folder says so, and why,
- * in a notice that links the folder, and says how many documents it kept
- * because they also hold another app's data.
+ * that opens it, a link to its folder ("Open in your Pod"), "Remove from
+ * my list: {name}" and, for one in the user's own storages,
+ * "Delete instance {name}"; a guest's own has only the last. Under them,
+ * New instance… and attaching one by URL. Reached from the instance
+ * bar's "Switch instance", or on arriving with more than one instance.
+ * An instance is attached by its address. A deletion that kept the
+ * instance's folder says so, and why, in a notice that links the folder,
+ * and says how many documents it kept because they also hold another
+ * app's data.
  */
 export class InstancePicker extends Screen {
   get heading(): Locator {
     return this.page.getByRole("heading", { name: this.t("instancePicker.heading"), level: 2 });
   }
 
-  /** The list of instances: the main list whose items have a Delete button. */
+  /** The list of instances: the main list whose items have a Remove or a Delete button. */
   private get list(): Locator {
     return this.page
       .getByRole("main")
       .getByRole("list")
       .filter({
-        has: this.page.getByRole("button", { name: this.tp("instancePicker.deleteLabel") }),
+        has: this.page
+          .getByRole("button", { name: this.tp("instancePicker.removeLabel") })
+          .or(this.page.getByRole("button", { name: this.tp("instancePicker.deleteLabel") })),
       });
   }
 
@@ -44,9 +48,7 @@ export class InstancePicker extends Screen {
   async expectInstances(names: readonly string[]): Promise<void> {
     await this.intent(`Check the instances listed: ${names.join(", ")}`, async () => {
       await this.expectShown();
-      await expect(
-        this.list.getByRole("button", { name: this.tp("instancePicker.deleteLabel") }),
-      ).toHaveCount(names.length);
+      await expect(this.list.getByRole("listitem")).toHaveCount(names.length);
       for (const name of names) await expect(this.openButton(name)).toBeVisible();
     });
   }
@@ -104,6 +106,33 @@ export class InstancePicker extends Screen {
         this.page
           .getByRole("status")
           .filter({ hasText: this.t("instancePicker.deleted", { name }) }),
+      ).toBeAttached();
+      await expect(this.openButton(name)).toBeHidden();
+    });
+  }
+
+  /**
+   * Removes the instance named `name` from the list, confirmed when the
+   * app asks: its row goes, and the status line says it is gone. No delete
+   * is offered for it when `outsideStorages`.
+   */
+  async remove(name: string, { outsideStorages = false } = {}): Promise<void> {
+    await this.intent(`Remove the instance ${name} from the list`, async () => {
+      if (outsideStorages)
+        await expect(
+          this.list.getByRole("button", {
+            name: this.t("instancePicker.deleteLabel", { name }),
+            exact: true,
+          }),
+        ).toHaveCount(0);
+      this.app.expectDialog(this.tp("instancePicker.removeConfirm", { name }));
+      await this.list
+        .getByRole("button", { name: this.t("instancePicker.removeLabel", { name }), exact: true })
+        .click();
+      await expect(
+        this.page
+          .getByRole("status")
+          .filter({ hasText: this.t("instancePicker.removed", { name }) }),
       ).toBeAttached();
       await expect(this.openButton(name)).toBeHidden();
     });

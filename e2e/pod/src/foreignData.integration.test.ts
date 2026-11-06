@@ -26,6 +26,7 @@ import { createUseCases, type UseCases } from "@solid-memo/application/useCases"
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Instance } from "@solid-memo/domain/instance";
 import { arrangementSetAside, deckSetAside } from "@solid-memo/domain/validation";
+import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
@@ -33,6 +34,7 @@ import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRe
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
+import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { aclOf } from "./serverTraits";
@@ -62,7 +64,11 @@ function page(): UseCases {
   return createUseCases({
     ...NO_PORTS,
     sessionGateway: undefined as never,
-    storageGateway: undefined as never,
+    // The user's storages, which a delete must be inside of, as the profile names them.
+    storageGateway: createSolidStorageGateway({
+      fetch: podFetch,
+      profileStorages: getProfileStorages,
+    }),
     deckLibrary: undefined as never,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository(deps),
@@ -103,9 +109,9 @@ function openTo(target: string, inherit: boolean): string {
 }
 
 /**
- * A user's pod in a fresh folder of the server: a profile with a private
- * type index, and an instance made by the app with two decks, a card, a
- * review state and a month of answers.
+ * A user's pod in a fresh folder of the server: a profile naming that folder
+ * as its storage, with a private type index, and an instance made by the app
+ * with two decks, a card, a review state and a month of answers.
  */
 async function seed(server: string) {
   const base = new URL(`foreign-${crypto.randomUUID()}/`, server).href;
@@ -113,7 +119,8 @@ async function seed(server: string) {
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
   await put(
     `${base}profile/card`,
-    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> ;
+    <http://www.w3.org/ns/pim/space#storage> <${base}> .`,
   );
   await put(
     typeIndex,

@@ -229,6 +229,33 @@ flowchart LR
   servers fail, and why, is in [interop.md](interop.md); this one is
   [`nc-acl-member`](interop.md#nc-acl-member).
 
+  Only an instance in the user's own storages (what `discoverStorages`
+  finds, `isInStorages`; a folder entered by hand isn't one) has its
+  data deleted. Any other is someone else's, or a server's that may
+  refuse or be gone: the picker doesn't offer the delete and says why,
+  and the use case refuses it (`instanceOutsideStorages`) with nothing
+  sent there.
+- **Removing an instance from the list** (`detachInstance`) removes its
+  registrations of every class from both type indexes, as deleting does
+  (below), and nothing else. It reads and writes only those indexes, so
+  no request goes to the instance's server and it works whatever that
+  server answers. Each index is tried whatever the other answers, and
+  one that's missing has nothing to remove; a failure is reported once
+  both were tried, and the list is read again either way.
+
+  The picker offers it for every instance but a guest's own, which is on
+  no other server and can only be deleted; the use case refuses to
+  remove that one too. The data stays where it is, and attaching by its
+  address brings the instance back; a new instance in that folder is
+  refused (`instanceAlreadyThere`).
+
+  Once it's gone from the indexes, this page's credential gate no longer
+  counts the folder as the user's, so reads there go as no one and
+  writes are refused. A folder the user entered by hand still counts
+  until the page reloads, as does the folder in another open tab. An
+  instance's meta document is always read as the user, but once the
+  instance is off the list, only attaching it again reads that document.
+
 ### Registrations
 
 In the type index, the instance's own registration, by which Solid Memo
@@ -282,8 +309,9 @@ and, in the private type index only:
 ```
 
 `meta.ttl` makes a container self-describing: attach-by-URL reads it to
-recover an instance that lost its registration. Deleting an instance
-removes the `sm:Instance` registration by its container, and each other
+recover an instance that lost its registration. Deleting an instance,
+or removing it from the list, removes the `sm:Instance` registration by
+its container, and each other
 by the exact IRI it names (`<container>catalog.ttl#catalog`,
 `<container>catalog.ttl`, `<container>decks/`, `<container>reviews/`,
 `<container>history/`, `<container>drafts/`). None is removed by what

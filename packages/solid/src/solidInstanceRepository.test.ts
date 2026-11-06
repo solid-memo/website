@@ -31,6 +31,7 @@ import {
   renameInstanceRegistrations,
 } from "./typeIndex";
 import { DCTERMS, SM } from "./vocab";
+import { AppError } from "@solid-memo/domain/appError";
 import { deleteInstanceData } from "./instanceData";
 
 vi.mock("./client/resources", async (importOriginal) => {
@@ -524,6 +525,16 @@ describe("createInstance", () => {
       }),
     ).rejects.toThrow("original");
   });
+
+  it.each([
+    ["a refused write", new AppError("writeRefused")],
+    ["a network failure", new TypeError("Failed to fetch")],
+  ])("rethrows %s saving meta.ttl as it is", async (_, failure) => {
+    vi.mocked(writeDocument).mockRejectedValue(failure);
+
+    await expect(create("private")).rejects.toBe(failure);
+    expect(locateTypeIndexes).not.toHaveBeenCalled();
+  });
 });
 
 describe("attachInstance", () => {
@@ -786,6 +797,91 @@ describe("deleteInstance", () => {
 
     expect(removeInstanceRegistrations).not.toHaveBeenCalled();
   });
+});
+
+describe("detachInstance", () => {
+  const instance = { url: "https://bob.example/shared", name: "Shared" };
+  const SHARED = "https://bob.example/shared/";
+
+  it("drops its registrations from both indexes, through theirs alone, and deletes no data", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const dataFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const repository = createSolidInstanceRepository({
+      fetch,
+      dataFetch,
+      now: () => new Date(),
+      randomId: () => "fixed-id",
+    });
+
+    await repository.detachInstance({ webId: WEBID, instance });
+
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, SHARED, indexFetch);
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, SHARED, indexFetch);
+    expect(deleteInstanceData).not.toHaveBeenCalled();
+    expect(dataFetch).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("writes to no type index outside the profile's own places", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: (url) => url === PUBLIC_INDEX,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+
+    await makeRepository().detachInstance({ webId: WEBID, instance });
+
+    expect(removeInstanceRegistrations).toHaveBeenCalledOnce();
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, SHARED, indexFetch);
+  });
+});
+
+describe("removing registrations when an index fails", () => {
+  const instance = { url: "https://bob.example/shared", name: "Shared" };
+  const failing = (at: string, error: unknown) => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+    vi.mocked(removeInstanceRegistrations).mockImplementation(async (index) => {
+      if (index === at) throw error;
+    });
+  };
+
+  for (const [name, at] of [
+    ["private", PRIVATE_INDEX],
+    ["public", PUBLIC_INDEX],
+  ] as const) {
+    it(`tries both when the ${name} index fails, and then says so`, async () => {
+      const refused = new AppError("addFailed", { url: at, status: 500 });
+      failing(at, refused);
+
+      await expect(makeRepository().detachInstance({ webId: WEBID, instance })).rejects.toBe(
+        refused,
+      );
+
+      expect(removeInstanceRegistrations).toHaveBeenCalledTimes(2);
+    });
+
+    it(`counts a missing ${name} index as nothing to remove`, async () => {
+      failing(at, { statusCode: 404 });
+
+      await expect(
+        makeRepository().detachInstance({ webId: WEBID, instance }),
+      ).resolves.toBeUndefined();
+
+      expect(removeInstanceRegistrations).toHaveBeenCalledTimes(2);
+    });
+  }
 });
 
 describe("readMeta and upgradeMeta", () => {

@@ -803,6 +803,93 @@ describe("createAppUseCases", () => {
     expect(await useCases.listCards(deckAt(`${alice}memo/decks/deck-1.ttl`))).toEqual([]);
   });
 
+  it("lets a guest delete their instance, which is in their own storage", async () => {
+    const guest = createAppUseCases({ ...options, indexedDB: undefined });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+
+    await expect(guest.deleteInstance(GUEST_SESSION, instance!)).resolves.toMatchObject({
+      keptFolder: null,
+    });
+
+    expect(await guest.listInstances(GUEST_SESSION)).toEqual([]);
+  });
+
+  it("keeps a guest's own instance on the list when asked to remove it, so they can go on", async () => {
+    const guest = createAppUseCases({ ...options, indexedDB: undefined });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+
+    await expect(guest.detachInstance(GUEST_SESSION, instance!)).rejects.toThrow(
+      "A guest's own instance",
+    );
+
+    expect(await guest.listInstances(GUEST_SESSION)).toEqual([instance]);
+    expect((await guest.findGuestStudy())?.instances).toEqual([{ instance, deckCount: 0 }]);
+  });
+
+  it("stops sending the user's credentials into an instance on another server once it is removed from their list, and sends it nothing to remove it", async () => {
+    const alice = "https://alice.example/";
+    const shared = "https://shared.example/study/";
+    login.webId = `${alice}profile/card#me`;
+    const guest = createAppUseCases({ ...options, indexedDB: undefined });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+    const made = await guest.createDeck(instance!.url, { en: "Capitals" });
+    const deck = {
+      ...made,
+      url: `${alice}memo/catalog.ttl#deck-1`,
+      cardsDocumentUrl: `${shared}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${shared}decks/deck-1.ttl`,
+    };
+    const index = `${alice}settings/private.ttl`;
+    const documents: Record<string, string> = {
+      [`${alice}profile/card`]: `<${login.webId}>
+        <http://www.w3.org/ns/pim/space#storage> <${alice}>;
+        <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${index}>.`,
+      [index]: `<#memo>
+        a <http://www.w3.org/ns/solid/terms#TypeRegistration>;
+        <http://www.w3.org/ns/solid/terms#forClass> <https://solid-memo.com/ns/vocab/v1.ttl#Instance>;
+        <http://www.w3.org/ns/solid/terms#instanceContainer> <${shared}>.`,
+    };
+    const unregistered = `<> a <http://www.w3.org/ns/solid/terms#TypeIndex>.`;
+    let seen: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input instanceof Request ? input.url : input).replace(/#.*/, "");
+        if (!url.startsWith(alice) && !url.startsWith(shared))
+          return servedSiteNetwork(input, init);
+        if (url.startsWith(shared)) seen.push(url);
+        const method = init?.method ?? "GET";
+        if (method !== "GET" && method !== "HEAD") {
+          documents[url] = unregistered;
+          return Promise.resolve(new Response(null, { status: 205 }));
+        }
+        const response = new Response(documents[url] ?? "", {
+          headers: { "Content-Type": "text/turtle", ETag: '"1"' },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+
+    await useCases.listCards(deck);
+    expect(login.sent).toContain(deck.cardsDocumentUrl);
+
+    seen = [];
+    login.sent.length = 0;
+    await useCases.detachInstance(session, { url: shared, name: "Shared" });
+    expect(seen).toEqual([]);
+    expect(await useCases.listInstances(session)).toEqual([]);
+
+    await useCases.listCards(deck);
+    expect(seen).toEqual([deck.cardsDocumentUrl]);
+    expect(login.sent).not.toContain(deck.cardsDocumentUrl);
+  });
+
   it("studies a deck whose catalog names its documents on another server without the user's credentials there, writing nothing there", {
     timeout: 60_000,
   }, async () => {

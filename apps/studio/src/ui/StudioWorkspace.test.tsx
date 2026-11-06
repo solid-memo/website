@@ -194,7 +194,12 @@ describe("StudioWorkspace", () => {
   it("asks before an instance is deleted in the Studio's own dialog, not the browser's", async () => {
     const confirm = vi.fn(() => true);
     vi.stubGlobal("confirm", confirm);
-    const useCases = makeUseCasesFake({ listInstances: vi.fn(async () => [instanceA, instanceB]) });
+    const useCases = makeUseCasesFake({
+      listInstances: vi.fn(async () => [instanceA, instanceB]),
+      listStorages: vi.fn(async () => [
+        { url: new URL(instanceB.url).origin, source: "profile" as const },
+      ]),
+    });
     renderWorkspace(useCases);
     fireEvent.click(
       await screen.findByRole("button", { name: `Delete instance ${instanceB.name}` }),
@@ -206,6 +211,26 @@ describe("StudioWorkspace", () => {
     await waitFor(() => expect(useCases.deleteInstance).toHaveBeenCalledWith(session, instanceB));
     expect(confirm).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
+  });
+
+  it("removes an instance from the list in the Studio's own dialog, and lists it no more", async () => {
+    let detached = false;
+    const useCases = makeUseCasesFake({
+      listInstances: vi.fn(async () => (detached ? [instanceA] : [instanceA, instanceB])),
+      detachInstance: vi.fn(async () => {
+        detached = true;
+      }),
+    });
+    renderWorkspace(useCases);
+    fireEvent.click(
+      await screen.findByRole("button", { name: `Remove from my list: ${instanceB.name}` }),
+    );
+    expect(dialog("Remove from my list")).toHaveTextContent("stay where they are");
+    answer("Remove from my list", "Remove");
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: instanceB.name })).not.toBeInTheDocument(),
+    );
+    expect(useCases.detachInstance).toHaveBeenCalledWith(session, instanceB);
   });
 
   it("keeps Home's filter and sort in the URL, replacing the entry, and links its decks to their about screen, their cards to the workbench", async () => {

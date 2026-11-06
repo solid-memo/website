@@ -23,6 +23,7 @@ import {
   isCanonicalUrl,
   isDocumentIn,
   isInFolder,
+  isInStorages,
   isPaletteOf,
   isInstanceAddress,
   isPlainHttpUrl,
@@ -409,5 +410,21 @@ describe("where an instance's documents are", () => {
     expect(ownsDocument([`${ROOT}catalog.ttl#deck-2`, deck], deck)).toBe(true);
     expect(ownsDocument([], deck)).toBe(false);
     expect(ownsDocument(["https://pod.example/other/catalog.ttl#deck-1"], deck)).toBe(false);
+  });
+});
+
+describe("isInStorages", () => {
+  const storages = [{ url: "https://pod.example/" }, { url: "https://other.example/alice/" }];
+
+  it("tells an address in one of the storages from any other", () => {
+    expect(isInStorages("https://pod.example/solid-memo/main/", storages)).toBe(true);
+    expect(isInStorages("https://other.example/alice/memo/", storages)).toBe(true);
+    expect(isInStorages("https://other.example/bob/memo/", storages)).toBe(false);
+    expect(isInStorages("https://pod.example.attacker.example/memo/", storages)).toBe(false);
+    expect(isInStorages("https://other.example/alice/../bob/", storages)).toBe(false);
+  });
+
+  it("finds nothing the user's with no storages known", () => {
+    expect(isInStorages("https://pod.example/solid-memo/main/", [])).toBe(false);
   });
 });
