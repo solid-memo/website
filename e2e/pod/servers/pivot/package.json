@@ -4,5 +4,6 @@
   "description": "Pivot, installed into the end-to-end tests' image (e2e/pod/servers/pivot/Dockerfile).",
   "dependencies": {
     "@solid/pivot": "1.8.2"
-  }
+  },
+  "packageManager": "npm@12.2.1"
 }
