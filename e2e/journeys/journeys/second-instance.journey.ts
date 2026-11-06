@@ -132,7 +132,21 @@ test("a second instance @instances", async ({ app, account, otherApp, runId }) =
   );
 
   await app.step(
-    "09 · Delete the first instance, which another app keeps a file in: its folder is kept, and why",
+    "09 · Remove the second instance from the list: its data stays, and attaching it by its address brings it back",
+    async () => {
+      await app.instancePicker.remove(second.name);
+      await app.instancePicker.expectInstances([first.name]);
+      expect(await otherApp.status(`${second.folder}meta.ttl`), "the second's meta.ttl").toBe(200);
+      await app.instancePicker.attach(second.folder, second.name);
+      await app.decks.expectToReview(deckB, 1);
+      await app.chrome.openAtItsAddress();
+      await app.instancePicker.expectInstances([first.name, second.name]);
+    },
+    { screen: "instance-picker" },
+  );
+
+  await app.step(
+    "10 · Delete the first instance, which another app keeps a file in: its folder is kept, and why",
     async () => {
       await otherApp.put(otherAppsFile, `Another app's notes, run ${runId}.\n`, "text/plain");
       // The first's own data is in its folder before, so that it is gone after says something.
@@ -148,7 +162,7 @@ test("a second instance @instances", async ({ app, account, otherApp, runId }) =
   );
 
   await app.step(
-    "10 · At Solid Memo's address, one instance: it opens",
+    "11 · At Solid Memo's address, one instance: it opens",
     async () => {
       await app.chrome.openAtItsAddress();
       await app.chrome.expectBreadcrumbHere("breadcrumbs.decks");

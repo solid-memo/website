@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "@solid-memo/domain/appError";
+import { GUEST_INSTANCE_URL, GUEST_SESSION } from "@solid-memo/domain/guest";
 import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import {
@@ -130,6 +131,59 @@ describe("instances", () => {
       webId: session.webId,
       instance,
     });
+  });
+  it("deleteInstance refuses an instance outside the user's storages, sending nothing there", async () => {
+    const deps = makeDeps();
+    const elsewhere = { url: "https://bob.example/shared/", name: "Shared" };
+    const useCases = createUseCases(deps);
+
+    await expect(useCases.deleteInstance(session, elsewhere)).rejects.toMatchObject({
+      code: "instanceOutsideStorages",
+      vars: { url: elsewhere.url },
+    });
+
+    expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+  });
+  it("deleteInstance deletes nothing when the user's storages cannot be read", async () => {
+    const deps = makeDeps();
+    vi.mocked(deps.storageGateway.discoverStorages).mockRejectedValue(new Error("offline"));
+
+    await expect(createUseCases(deps).deleteInstance(session, instance)).rejects.toThrow("offline");
+
+    expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+  });
+  it("detachInstance removes any instance's registrations, leaving its data, wherever it is", async () => {
+    const deps = makeDeps();
+    const elsewhere = { url: "https://bob.example/shared/", name: "Shared" };
+
+    await createUseCases(deps).detachInstance(session, elsewhere);
+
+    expect(deps.instanceRepository.detachInstance).toHaveBeenCalledWith({
+      webId: session.webId,
+      instance: elsewhere,
+    });
+    expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+  });
+  it("detachInstance refuses a guest's own instance, which the list could not get back", async () => {
+    const deps = makeDeps();
+    const own = { url: GUEST_INSTANCE_URL, name: "My study" };
+
+    await expect(createUseCases(deps).detachInstance(GUEST_SESSION, own)).rejects.toThrow(
+      "A guest's own instance",
+    );
+
+    expect(deps.instanceRepository.detachInstance).not.toHaveBeenCalled();
+  });
+  it("detachInstance lets a guest remove an instance elsewhere, and a user one at a guest's address", async () => {
+    const deps = makeDeps();
+    const elsewhere = { url: "https://bob.example/shared/", name: "Shared" };
+    const stray = { url: GUEST_INSTANCE_URL, name: "Stray" };
+    const useCases = createUseCases(deps);
+
+    await useCases.detachInstance(GUEST_SESSION, elsewhere);
+    await useCases.detachInstance(session, stray);
+
+    expect(deps.instanceRepository.detachInstance).toHaveBeenCalledTimes(2);
   });
   it("dataClassRegistrations and registerDataClasses pass the WebID and the instance, titled with its name", async () => {
     const deps = makeDeps();

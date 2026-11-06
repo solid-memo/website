@@ -306,8 +306,9 @@ a draft or a part of it, forgetting progress, restarting a course, and
 removing data from the pod on the health screen ask this way.
 
 The components the Studio shares with Solid Memo (removing a card,
-deleting a wrong option, deleting an instance) ask through `ui`'s
-`AskFirst` ([`askFirst.ts`](../packages/ui/src/ui/askFirst.ts)): the
+deleting a wrong option, deleting an instance, removing one from the
+list) ask through `ui`'s `AskFirst`
+([`askFirst.ts`](../packages/ui/src/ui/askFirst.ts)): the
 Studio gives it `useConfirm`, and Solid Memo the browser's `confirm`.
 Deleting a group, or a deck from the groups' tree, still asks in the
 browser's dialog: the focus afterward comes from the button the

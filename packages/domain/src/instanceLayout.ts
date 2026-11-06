@@ -165,6 +165,14 @@ export function isInFolder(url: string, container: string): boolean {
   );
 }
 
+/**
+ * Whether `url` is in one of the user's storages (isInFolder), which
+ * only then makes what is there theirs to delete.
+ */
+export function isInStorages(url: string, storages: readonly { url: string }[]): boolean {
+  return storages.some((storage) => isInFolder(url, storage.url));
+}
+
 /** Whether two addresses are one as a request would send them (canonicalUrlOf). */
 export function isSameUrl(a: string, b: string): boolean {
   const resolved = canonicalUrlOf(a);

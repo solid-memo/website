@@ -116,7 +116,12 @@ export function createSolidInstanceRepository({
         { name, createdAt: now().toISOString(), formatVersion: INSTANCE_FORMAT_VERSION },
         metaFetch,
         checkWrite,
-      );
+      ).catch((error: unknown) => {
+        // One taken off the list stays there, so reloading wouldn't help: the user is told to attach it.
+        throw error instanceof AppError && error.code === "createdElsewhere"
+          ? new AppError("instanceAlreadyThere", { url })
+          : error;
+      });
       // The private index, for the review states' and answers' registrations of an instance registered elsewhere.
       let privateIndexElsewhere: string | null;
       let indexFetch: typeof globalThis.fetch;
@@ -241,14 +246,35 @@ export function createSolidInstanceRepository({
     async deleteInstance({ webId, instance }) {
       const url = ensureTrailingSlash(instance.url);
       const deletion = await deleteInstanceData(url, dataFetch);
-      const locations = await ownTypeIndexes(webId, fetch, publicFetch);
-      for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
-        if (indexUrl === null) continue;
-        await removeInstanceRegistrations(indexUrl, url, locations.fetch);
-      }
+      await removeRegistrations(webId, url);
       return deletion;
     },
+
+    async detachInstance({ webId, instance }) {
+      await removeRegistrations(webId, ensureTrailingSlash(instance.url));
+    },
   };
+
+  /**
+   * Drop the registrations of the instance's data from the user's own
+   * type indexes, reading and writing only those. Each is tried whatever
+   * the other answers, one that isn't there having nothing to remove, as
+   * the list reads each on its own; the first failure is thrown once
+   * both were tried.
+   */
+  async function removeRegistrations(webId: string, url: string): Promise<void> {
+    const locations = await ownTypeIndexes(webId, fetch, publicFetch);
+    const failures: unknown[] = [];
+    for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
+      if (indexUrl === null) continue;
+      try {
+        await removeInstanceRegistrations(indexUrl, url, locations.fetch);
+      } catch (error) {
+        if ((error as { statusCode?: number }).statusCode !== 404) failures.push(error);
+      }
+    }
+    if (failures.length > 0) throw failures[0];
+  }
 }
 
 /**

@@ -156,11 +156,14 @@ async function attach(app: App, url: string, name: string): Promise<void> {
   await app.instancePicker.attach(url, name);
 }
 
-/** From the Studio back to Solid Memo, and on to the picker, where the instance is deleted. */
-async function deleteFromStudio(app: App, name: string): Promise<void> {
+/**
+ * From the Studio back to Solid Memo, and on to the picker, where the
+ * instance elsewhere, with no delete on offer, is removed from the list.
+ */
+async function removeFromStudio(app: App, name: string): Promise<void> {
   await app.studio.backToApp();
   await app.chrome.switchInstance();
-  await app.instancePicker.delete(name);
+  await app.instancePicker.remove(name, { outsideStorages: true });
 }
 
 /**
@@ -168,10 +171,11 @@ async function deleteFromStudio(app: App, name: string): Promise<void> {
  * them, whose catalog names the user's own documents, their profile
  * and a private document, as its decks' documents: the decks are
  * listed, and the Studio's health screen says their documents do not
- * say they are theirs. Removing one deck, then deleting the instance,
- * changes neither document and adds none.
+ * say they are theirs. Removing one deck, then taking the instance off
+ * the list, the only way out of one elsewhere, changes neither document
+ * and adds none, and leaves the instance's data with its owner.
  */
-test("removing a deck and deleting an instance someone else shares leave the user's documents as they were @studio", async ({
+test("removing a deck and an instance someone else shares from the list leave the user's documents as they were @studio", async ({
   app,
   account,
   runId,
@@ -228,11 +232,12 @@ test("removing a deck and deleting an instance someone else shares leave the use
   );
 
   await app.step(
-    "06 · Delete the instance: the user's documents are as they were",
+    "06 · Remove the instance from the list: the user's documents are as they were, and its owner's kept",
     async () => {
-      await deleteFromStudio(app, name);
+      const meta = await otherUser.read(`${instance}meta.ttl`);
+      await removeFromStudio(app, name);
       expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
-      expect(await otherUser.read(`${instance}meta.ttl`)).toBe("404 ");
+      expect(await otherUser.read(`${instance}meta.ttl`)).toBe(meta);
     },
     { screen: "instance-picker" },
   );
@@ -316,9 +321,9 @@ test("an instance whose catalog names documents by addresses that resolve elsewh
   );
 
   await app.step(
-    "06 · Delete the instance: the user's documents are as they were",
+    "06 · Remove the instance from the list: the user's documents are as they were",
     async () => {
-      await deleteFromStudio(app, name);
+      await removeFromStudio(app, name);
       expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
     },
     { screen: "instance-picker" },

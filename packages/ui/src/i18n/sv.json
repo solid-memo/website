@@ -747,11 +747,18 @@
     "deleteAction": "Ta bort",
     "deleteLabel": "Ta bort instansen {name}",
     "delete": "Ta bort…",
+    "removeConfirm": "Ta bort instansen ”{name}” från din lista? Dess kortlekar och kort ligger kvar där de är, oförändrade. Du kan lägga till den igen via dess adress.",
+    "removeHeading": "Ta bort från min lista",
+    "removeAction": "Ta bort från listan",
+    "removeLabel": "Ta bort från min lista: {name}",
+    "remove": "Ta bort från min lista…",
     "newInstance": "Ny instans…",
     "attachSummary": "Lägg till en befintlig instans via URL",
     "attachUrl": "URL till instansens container",
     "attach": "Lägg till",
-    "deleted": "Tog bort instansen ”{name}”."
+    "deleted": "Tog bort instansen ”{name}”.",
+    "removed": "Tog bort instansen ”{name}” från din lista.",
+    "outsidePod": "Utanför din Pod, så Solid Memo kan inte ta bort den."
   },
   "keptFolder": {
     "text": "Solid Memo tog bort sina egna data och behöll {link}: en annan app har lagt filer där.",
@@ -1684,6 +1691,8 @@
     "guestStudyBeingMoved": "Solid Memo flyttar dina studier i den här webbläsaren till din Pod och sparar inget i dem förrän det är klart. Vänta tills det är klart och försök sedan igen.",
     "writeRefused": "Solid Memo stoppade en ändring i din Pod av säkerhetsskäl: den skulle ha sparats på en adress där Solid Memo aldrig sparar något. Inget ändrades.",
     "writeOutsidePod": "Solid Memo sparade inte detta: det finns på {host}, utanför din Pod, och Solid Memo sparar bara i din Pod. Inget ändrades.",
+    "instanceOutsideStorages": "Solid Memo tog inte bort den här instansen: den finns utanför din Pod, och Solid Memo tar bara bort det som finns i din Pod. Du kan ta bort den från din lista i stället. Inget ändrades.",
+    "instanceAlreadyThere": "Det finns redan en instans i den här mappen, så inget sparades. Lägg till den via dess adress i din lista över instanser för att använda den. Välj en annan mapp för att skapa en ny.",
     "redirectRefused": "Solid Memo stoppade en ändring i din Pod av säkerhetsskäl: din Pod skickade den vidare till en annan adress, och Solid Memo sparar bara på den adress den bad om.",
     "deckChangedSinceOffer": "Kortleken ändrades efter att uppdateringen erbjöds, kanske i en annan flik eller app, så inget ändrades. Titta på erbjudandet igen.",
     "deckChangedDuringUpgrade": "Kortleken ändrades medan den uppdaterades, kanske i en annan flik eller app. Försök igen.",
