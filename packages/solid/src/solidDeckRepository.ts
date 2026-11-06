@@ -79,6 +79,7 @@ import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
+import { unsent } from "@solid-memo/application/writes";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
 import { withinCatalogLimit } from "./catalogLinks";
 
@@ -208,8 +209,17 @@ export function createSolidDeckRepository({
         card: { ...card, fromRelease: content.url },
         existing: null,
       }));
-      await saveCardsDocument(deck, written.dataset, written.subjects);
-      return registerDeck(deck);
+      // Checked first: an entry that would be refused leaves no cards document behind.
+      const entry = await catalogWithEntry(deck);
+      await checkWrite(entry.dataset, entry.subjects, "pod");
+      try {
+        await saveCardsDocument(deck, written.dataset, written.subjects);
+      } catch (error) {
+        // A write refused was never made: nothing of the import's is there.
+        if (unsent(error)) throw error;
+        return finishCutOffImport(deck, error);
+      }
+      return registerDeck(deck).catch((error: unknown) => finishCutOffImport(deck, error));
     },
 
     async addDeck(deck): Promise<Deck> {
@@ -874,13 +884,52 @@ export function createSolidDeckRepository({
    * completed and its card language; refused (alreadyExists) when the catalog has one of its URL.
    */
   async function registerDeck(deck: Deck): Promise<Deck> {
-    const catalogUrl = documentUrlOf(deck.url);
-    const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-    if (getThing(dataset, deck.url) !== null)
-      throw new AppError("alreadyExists", { url: deck.url });
-    const updated = withOwnTerms(withDeck(dataset, deck), deck);
-    await save(catalogUrl, updated, deckSubjects(updated, deck));
+    const entry = await catalogWithEntry(deck);
+    await save(entry.catalogUrl, entry.dataset, entry.subjects);
     return deck;
+  }
+
+  /**
+   * The catalog as it is now with the deck's entry added, and the subjects
+   * that adds, for the write check; refused (alreadyExists) when it has one of its URL.
+   */
+  async function catalogWithEntry(deck: Deck) {
+    const catalogUrl = documentUrlOf(deck.url);
+    const read = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+    if (getThing(read, deck.url) !== null) throw new AppError("alreadyExists", { url: deck.url });
+    const dataset = withOwnTerms(withDeck(read, deck), deck);
+    return { catalogUrl, dataset, subjects: deckSubjects(dataset, deck) };
+  }
+
+  /**
+   * After a failed write of an import, whose cards document no entry may
+   * name yet: the deck, when the entry was written after all, its answer
+   * lost on the way; else the cards document is deleted and the failure
+   * stands. While the document may still be there the failure says so
+   * (importDocumentLeft). When the catalog cannot be read the document
+   * stays, as it may be the deck's, and the failure says the import may
+   * have worked (importOutcomeUnknown).
+   */
+  async function finishCutOffImport(deck: Deck, failure: unknown): Promise<Deck> {
+    const context = { url: deck.cardsDocumentUrl, failure: String(failure) };
+    const left = new AppError("importDocumentLeft", context);
+    if (!unsent(failure)) {
+      let catalog: Dataset | null;
+      try {
+        catalog = await getSolidDatasetOrNull(documentUrlOf(deck.url), fetch);
+      } catch {
+        throw new AppError("importOutcomeUnknown", context);
+      }
+      if (catalog !== null && getThing(catalog, deck.url) !== null) return deck;
+    }
+    let remaining: Dataset | null;
+    try {
+      await removeIfTheirs(deck.cardsDocumentUrl, [deck], deckDocumentSubjects([deck.url]));
+      remaining = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+    } catch {
+      throw left;
+    }
+    throw remaining === null ? failure : left;
   }
 
   /**

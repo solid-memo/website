@@ -174,6 +174,10 @@ export const ERROR_TEMPLATES = {
     "The guest study on this device could not be opened. Reload the page and try again.",
   guestStorageAborted:
     "This browser refused to save a change to the guest study. Check that it has room to keep data, then try again.",
+  importDocumentLeft:
+    "Solid Memo could not add this to your Pod, and could not remove a document it may have saved for it, at {url}. No deck uses that document, so you can delete it from your Pod. Check your connection and try again.",
+  importOutcomeUnknown:
+    "Solid Memo lost touch with your Pod while adding this, and cannot tell whether it was added. Once your connection is back, reload the page and look for it before you try again. If it is listed, it was added, so keep the document at {url}. If it is not, that document is one it may have saved for it and no deck uses it, so you can delete it from your Pod and try again.",
   addFailed: "Solid Memo could not save to your Pod. Check your connection and try again.",
   unwritableTerm:
     "Solid Memo did not save this: it holds an address that cannot be written to a Pod as it is. Nothing was changed.",
