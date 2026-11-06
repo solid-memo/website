@@ -177,6 +177,14 @@ export interface InstanceRepository {
  */
 export type Since<T> = { unchanged: true } | { unchanged: false; value: T; version: string | null };
 
+/** A card to write by its fragment id (DeckRepository.applyCardChanges). */
+type CardToSave = CardContent & {
+  id: string;
+  retired?: true;
+  createdAt?: string;
+  fromRelease?: string;
+};
+
 export interface DeckRepository {
   listDecks(instanceUrl: string): Promise<Deck[]>;
   /** The instance's catalog (catalog.ttl#catalog); null when it has none yet. */
@@ -320,16 +328,19 @@ export interface DeckRepository {
   applyCardChanges(
     deck: Deck,
     changes: {
-      save: (CardContent & {
-        id: string;
-        retired?: true;
-        createdAt?: string;
-        fromRelease?: string;
-      })[];
+      save: CardToSave[];
       remove: string[];
     },
     options?: { whole?: boolean; version?: string },
   ): Promise<void>;
+  /**
+   * Write the card only when the deck has no card it can read at its
+   * fragment id, in one write of the cards document as applyCardChanges
+   * writes it. A card already there stays as it is, its text and the
+   * release it names, or none, and nothing is written. Says whether the
+   * card was written.
+   */
+  addCardIfAbsent(deck: Deck, card: CardToSave): Promise<boolean>;
   /**
    * Add a deck's catalog entry as the deck says it, its chapters
    * completed (sm:completedChapter) included: for a deck whose documents

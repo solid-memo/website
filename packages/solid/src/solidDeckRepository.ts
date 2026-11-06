@@ -395,6 +395,16 @@ export function createSolidDeckRepository({
       await saveCardsDocument(deck, changed.dataset, changed.subjects, { whole });
     },
 
+    async addCardIfAbsent(deck, card): Promise<boolean> {
+      const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+      const dataset = read ?? createSolidDataset();
+      const there = getThing(dataset, `${deck.cardsDocumentUrl}#${card.id}`);
+      if (there !== null && toCard(there, dataset) !== null) return false;
+      const changed = withCardChanges(dataset, deck, { save: [card], remove: [] });
+      await saveCardsDocument(deck, changed.dataset, changed.subjects);
+      return true;
+    },
+
     async readDeck(deckUrl) {
       const catalogUrl = documentUrlOf(deckUrl);
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);

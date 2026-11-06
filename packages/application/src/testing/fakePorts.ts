@@ -168,6 +168,7 @@ export function makeDeps() {
     upgradeCards: vi.fn(async () => true),
     stateCardLanguages: vi.fn(async (_deck, ids) => ids.length),
     applyCardChanges: vi.fn(async () => undefined),
+    addCardIfAbsent: vi.fn(async () => true),
     importDeck: vi.fn(async () => deck),
     addDeck: vi.fn(async (added) => added),
     readCardsSince: vi.fn(async (d) => ({

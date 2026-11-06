@@ -1175,7 +1175,9 @@ flowchart LR
   names that release (`sm:fromRelease`). A card moved or copied in, or
   one the user wrote, names none and is the user's, whatever ids the
   releases list. The upgrade never removes, changes or retires it
-  ([migrations.md](migrations.md#catching-up-with-the-library)). The
+  ([migrations.md](migrations.md#catching-up-with-the-library)), and
+  answering a course question of that id grades it as it stands
+  ([courses.md](courses.md#use-cases-and-ports)). The
   notice names the cards an upgrade removes and those it retires by
   their fronts.
 - The newer release and the ones in between are read for that plan

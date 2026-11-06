@@ -457,6 +457,80 @@ describe("applyCardChanges", () => {
   });
 });
 
+describe("addCardIfAbsent", () => {
+  const card = {
+    id: "se",
+    front: { "": "Release" },
+    back: { "": "Release" },
+    fromRelease: "https://lib.example/v1.ttl",
+  };
+  const saved = () => vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+  const typed = (type: string) =>
+    setThing(
+      datasetFrom(deck.cardsDocumentUrl),
+      buildThing(createThing({ url: `${deck.cardsDocumentUrl}#se` }))
+        .addIri(RDF.type, type)
+        .addStringNoLocale(SM.front, "Mine")
+        .build(),
+    ) as never;
+
+  it("writes a card the deck does not have, naming its release, creating the document when there is none", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().addCardIfAbsent(deck, card);
+    expect(writeDocument).toHaveBeenCalledOnce();
+    expect(getUrl(getThing(saved(), `${deck.cardsDocumentUrl}#se`)!, SM.fromRelease)).toBe(
+      card.fromRelease,
+    );
+  });
+
+  it("writes nothing when the deck has a card at that id", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().addCardIfAbsent(deck, card)).resolves.toBe(true);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved() as never);
+    vi.mocked(writeDocument).mockClear();
+    await expect(makeRepository().addCardIfAbsent(deck, card)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("writes over a subject typed as a card that can't be read as one, so a state never lacks its card", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(typed(SM.Card));
+    await expect(makeRepository().addCardIfAbsent(deck, card)).resolves.toBe(true);
+    expect(getUrl(getThing(saved(), `${deck.cardsDocumentUrl}#se`)!, SM.fromRelease)).toBe(
+      card.fromRelease,
+    );
+  });
+
+  it("refuses a subject a newer version of the app has written, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: `${deck.cardsDocumentUrl}#se` }))
+          .addIri(RDF.type, SM.Card)
+          .addLiteral(SM.formatVersion, integerLiteral(99))
+          .build(),
+      ) as never,
+    );
+    await expect(makeRepository().addCardIfAbsent(deck, card)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("goes by what the subject is: another's subject at that id takes the card, a distractor refuses it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(typed("https://other.example/Note"));
+    await makeRepository().addCardIfAbsent(deck, card);
+    expect(getUrlAll(getThing(saved(), `${deck.cardsDocumentUrl}#se`)!, RDF.type)).toContain(
+      SM.Card,
+    );
+    vi.mocked(writeDocument).mockClear();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(typed(SM.Distractor));
+    await expect(makeRepository().addCardIfAbsent(deck, card)).rejects.toMatchObject({
+      code: "idTakenInDeck",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
 describe("addDeck", () => {
   const added: Deck = {
     ...deck,
