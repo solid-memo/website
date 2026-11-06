@@ -984,11 +984,14 @@ Studio's card inspector edit them
 ([studio.md](studio.md#card-inspector); the domain is
 [distractors.ts](../packages/domain/src/distractors.ts)):
 
-- **A new one** is written once it has text, as `#<card>-d<n>`, `n` one
-  more than the highest such id the card or the release the deck came
-  from has used. An id the release published is never used again (a
-  learner's answers may name it, `sm:chosenDistractor`); one deleted
-  before it was published may be.
+- **A new one** is written once it has text, as `#<card>-d<n>`. `n` is
+  one more than the highest such id of up to 15 digits the card or the
+  release the deck came from has used, or the first free one after it.
+  An id the release published is never used again (a learner's answers
+  may name it, `sm:chosenDistractor`); one deleted before it was
+  published may be. A card is never saved with two of one id, which
+  would be one subject: a write of such a card, an imported deck file's
+  too, is refused before anything is sent (`writeDistractors`).
 - **Retiring** one writes `owl:deprecated true` on its subject, and
   restoring it removes that. A retired one stays named by the card, is
   read marked retired (`toDistractor`) and kept by every write, and only

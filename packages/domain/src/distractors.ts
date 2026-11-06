@@ -5,6 +5,7 @@
 import { AppError } from "./appError";
 import type { CardContent, Distractor } from "./deck";
 import { tidiedSideText, tidiedTagged, type LangText } from "./langText";
+import { nextNumberedId } from "./nextNumberedId";
 import { LEAST_DISTRACTORS, lacking } from "./release/courseRules";
 
 /**
@@ -54,19 +55,13 @@ export function tidiedDistractor(
 /**
  * The id for a card's next distractor: `<card>-d<n>`, n one more than the
  * highest such id `used` holds (the card's distractors, retired ones
- * included, and those its release published). So an id the release
- * published, which a learner's history may name, is never used again;
- * one deleted before it was published may be.
+ * included, and those its release published), or the first free one
+ * after it (nextNumberedId). So an id the release published, which a
+ * learner's history may name, is never used again; one deleted before it
+ * was published may be.
  */
 export function nextDistractorId(cardId: string, used: Iterable<string>): string {
-  const prefix = `${cardId}-d`;
-  let highest = 0;
-  for (const id of used) {
-    if (!id.startsWith(prefix)) continue;
-    const n = id.slice(prefix.length);
-    if (/^[1-9][0-9]*$/.test(n)) highest = Math.max(highest, Number(n));
-  }
-  return `${prefix}${highest + 1}`;
+  return nextNumberedId(`${cardId}-d`, used, /^[1-9][0-9]{0,14}$/);
 }
 
 /**

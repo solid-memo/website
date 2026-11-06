@@ -461,6 +461,35 @@ describe("validateCardContent", () => {
       content: { ...card, distractors: [] },
     });
   });
+
+  it("refuses two distractors of one id, as they would be written to one subject", () => {
+    const card = { front: { en: "a" }, back: { en: "b" } };
+    expect(
+      validateCardContent({
+        ...card,
+        distractors: [
+          { id: "c-d1", text: { en: "x" } },
+          { id: "c-d2", text: { en: "y" } },
+          { id: "c-d1", text: { en: "z" } },
+        ],
+      }),
+    ).toEqual({ ok: false, error: new AppError("distractorIdRepeated") });
+  });
+
+  it("asks nothing of the distractors a card was saved with when it is not given any", () => {
+    const saved = {
+      front: { en: "a" },
+      back: { en: "b" },
+      distractors: [
+        { id: "c-d1", text: { en: "x" } },
+        { id: "c-d1", text: { en: "y" } },
+      ],
+    };
+    expect(validateCardContent({ front: { en: "a2" }, back: { en: "b" } }, saved)).toEqual({
+      ok: true,
+      content: { front: { en: "a2" }, back: { en: "b" } },
+    });
+  });
 });
 
 describe("deck directions", () => {

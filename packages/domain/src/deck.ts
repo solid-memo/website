@@ -492,7 +492,8 @@ export function isFormatted(textFormat: string | undefined): boolean {
  * the card is about is kept as the input states it, or as `saved` has it.
  * With `tidiedOnce`, a distractor several cards name (one object to all
  * of them) is tidied for the first card in each format and that result
- * reused for the rest.
+ * reused for the rest. Two distractors of one id are refused: they would
+ * be written to one subject, the later replacing the earlier.
  */
 export function validateCardContent(
   input: CardContent,
@@ -569,7 +570,7 @@ export type TidiedDistractors = Map<
   Map<string, { from: Distractor; tidied: Distractor | CardContentValidation }>
 >;
 
-/** A card's distractors tidied as their own editor does, ids and retirement kept; the first one's error, if any. */
+/** A card's distractors tidied as their own editor does, ids and retirement kept; the first one's error, or a repeated id's, if any. */
 function tidiedDistractors(
   input: readonly Distractor[],
   formatted: boolean,
@@ -581,7 +582,10 @@ function tidiedDistractors(
     tidiedOnce.set(formatted, inFormat);
   }
   const distractors: Distractor[] = [];
+  const ids = new Set<string>();
   for (const distractor of input) {
+    if (ids.has(distractor.id)) return { ok: false, error: new AppError("distractorIdRepeated") };
+    ids.add(distractor.id);
     const held = inFormat.get(distractor.id);
     const tidied = held?.from === distractor ? held.tidied : tidiedOption(distractor, formatted);
     inFormat.set(distractor.id, { from: distractor, tidied });

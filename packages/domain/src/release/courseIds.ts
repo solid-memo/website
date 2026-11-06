@@ -4,6 +4,7 @@
 
 import type { DraftStepV1 } from "@solid-memo/vocab/types.generated";
 import { shown, type LangText } from "../langText.ts";
+import { nextNumberedId } from "../nextNumberedId.ts";
 import { slugOf } from "./draftLayout.ts";
 import {
   DRAFT_ID,
@@ -84,14 +85,9 @@ export function idBetween(
   return null;
 }
 
-/** `prefix` then 1, 2, …: the first that is none of `taken`, after the highest `prefix<n>` taken. */
+/** `prefix` then 1, 2, …: the first that is none of `taken`, after the highest `prefix<n>` taken (nextNumberedId). */
 function numbered(prefix: string, taken: ReadonlySet<string>, width = 1): string {
-  let highest = 0;
-  for (const id of taken) {
-    const n = id.startsWith(prefix) ? id.slice(prefix.length) : "";
-    if (/^[0-9]+$/.test(n)) highest = Math.max(highest, Number(n));
-  }
-  return `${prefix}${String(highest + 1).padStart(width, "0")}`;
+  return nextNumberedId(prefix, taken, /^[0-9]{1,15}$/, width);
 }
 
 /** What a chapter's ids name: `ch-why-solid` → `why-solid`; another id as it is. */
