@@ -4,6 +4,7 @@
 
 import type { StudyDirection } from "./deck";
 import type { ReviewQuality } from "./review";
+import { isStudyDay } from "./reviewStateEdits";
 
 /**
  * One grade given to one prompt during study: an entry of the instance's
@@ -111,6 +112,15 @@ export function shiftStudyDay(studyDay: string, days: number): string {
  */
 export function isOfStudyDayRange(studyDay: string): boolean {
   return shiftStudyDay(studyDay, 0) === studyDay;
+}
+
+/**
+ * Whether a day read or worked out from a date in a pod is one to count
+ * from: a real "YYYY-MM-DD" date (isStudyDay) in the range the study
+ * days are held to (isOfStudyDayRange).
+ */
+export function isCountableDay(day: string): boolean {
+  return isStudyDay(day) && isOfStudyDayRange(day);
 }
 
 /**

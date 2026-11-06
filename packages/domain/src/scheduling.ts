@@ -14,7 +14,7 @@ import {
   type ReviewState,
 } from "./review";
 import { boundedFsrsSnapshot } from "./fsrsSnapshot";
-import { isStudyDay } from "./reviewStateEdits";
+import { isStudyDay, isWritableInstant } from "./reviewStateEdits";
 import { boundedSm2State } from "./sm2";
 
 /**
@@ -36,6 +36,17 @@ export function studyDayOf(instant: Date, dayBoundaryHour: number): string {
 function shiftedByBoundary(instant: Date, dayBoundaryHour: number): Date {
   const shifted = new Date(instant.getTime() - dayBoundaryHour * 3_600_000);
   return Number.isNaN(shifted.getTime()) ? new Date(instant.getTime()) : shifted;
+}
+
+/**
+ * The first review a grade `now` writes: the one a prompt's state holds,
+ * unless it cannot be written (isWritableInstant), which would refuse the
+ * grade; then, as for a new prompt, now.
+ */
+export function firstReviewOf(before: { firstReviewedAt: string } | null, now: Date): string {
+  return before !== null && isWritableInstant(before.firstReviewedAt)
+    ? before.firstReviewedAt
+    : now.toISOString();
 }
 
 /** The study day a card reviewed now with the given interval is next due. */
@@ -163,7 +174,8 @@ export function requeueCard<T>(remaining: T[], card: T, random: () => number): T
  * snapshot it already has; a card without earlier state has none. The
  * snapshot is bounded as the state applySm2 gives (boundedSm2State),
  * so that it is written back as numbers the write check accepts; one
- * whose due day is not a real "YYYY-MM-DD" date is dropped.
+ * whose due day is not a real "YYYY-MM-DD" date, or whose last review
+ * cannot be written (isWritableInstant), is dropped.
  */
 export function snapshotBeforeReview(
   current: ReviewState | null,
@@ -179,7 +191,7 @@ export function snapshotBeforeReview(
 }
 
 function boundedSnapshot(state: ReviewSnapshot): ReviewSnapshot | undefined {
-  if (!isStudyDay(state.due)) return undefined;
+  if (!isStudyDay(state.due) || !isWritableInstant(state.lastReviewedAt)) return undefined;
   return { ...boundedSm2State(state), due: state.due, lastReviewedAt: state.lastReviewedAt };
 }
 
@@ -196,7 +208,7 @@ export interface StudyDayReset {
  * how it was before. Untouched prompts are not mentioned in the result.
  *
  * A prompt reviewed today that has no usable snapshot (state written
- * before snapshots existed, or one whose due day is not a real date)
+ * before snapshots existed, or one whose dates cannot be written back)
  * cannot be restored; it is made due today instead, so
  * it can at least be studied again.
  */
@@ -261,8 +273,18 @@ export function resetFsrsStudyDay(
   return reset;
 }
 
+/**
+ * A year as a date string gives it for Date to read: four digits from
+ * 0 to 9999, past them a sign and six (the date string format's expanded
+ * years). A date stored in a state can be of any year.
+ */
+function formatYear(year: number): string {
+  if (year >= 0 && year <= 9999) return String(year).padStart(4, "0");
+  return `${year < 0 ? "-" : "+"}${String(Math.abs(year)).padStart(6, "0")}`;
+}
+
 function formatLocalDate(date: Date): string {
-  const year = date.getFullYear();
+  const year = formatYear(date.getFullYear());
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
