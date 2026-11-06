@@ -375,7 +375,9 @@ and `– — ‘ ’ “ ” … −`, written out and held to the file's own ta
 a test. The package's `unicode-range` declares more than the file has
 (`↑` and `↓` among them). A character outside `FONT_CHARS` would be
 drawn and measured in another font, so a block that draws one fails,
-naming it.
+naming it. So a drawing doesn't depend on the system's fonts, and the
+jobs that build what's deployed don't install them
+([testing.md](testing.md#the-repositorys-own-checks)).
 
 Fredoka is under the SIL Open Font License 1.1 (OFL). It may be
 bundled and embedded in software on four conditions. It isn't sold by

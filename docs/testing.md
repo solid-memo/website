@@ -463,14 +463,18 @@ installed from them
 mirror often stalls for minutes, at times past a job's timeout.
 Their key is the runner image's (`ImageOS`, `ImageVersion`) with
 playwright-core's version. A job asks the mirror only when the cache
-has none, each `apt-get` given three minutes and one more try, and
+has none, each `apt-get` given four tries of three minutes, and
 saves the download only on `main`. The `caches` job keeps
 `main`'s two newest entries per browser (GitHub rolls a new image out
 over days). The release workflow's jobs restore nothing from the cache
 and always ask the mirror
 ([releasing.md](releasing.md#the-deploy-key)), as do CI's `site` job
 and the deploy's build, which make the site that's deployed
-([deployment.md](deployment.md#the-build-ci-tested)).
+([deployment.md](deployment.md#the-build-ci-tested)). The release
+job, the `site` job and that build, which use the Chromium action,
+leave out the system's fonts, the only packages the runner image
+lacks, so they have nothing to download: the diagrams carry their own
+font ([markdown.md](markdown.md#the-diagrams-font)).
 
 The journeys run the same way every time:
 

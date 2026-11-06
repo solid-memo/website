@@ -310,4 +310,23 @@ describe("the Chromium action's cache input", () => {
     const call = chromium.find((step) => step.includes("uses: ./.github/actions/playwright-deps"));
     expect(call).toMatch(/^\s+cache: \$\{\{ inputs\.cache \}\}$/m);
   });
+
+  // The entry under the cache's key is the journeys' too, which show the
+  // app, so one saved without the fonts would reach them.
+  it("leaves out the system's fonts only when false", () => {
+    const call = chromium.find((step) => step.includes("uses: ./.github/actions/playwright-deps"));
+    expect(call).toMatch(/^\s+fonts: \$\{\{ inputs\.cache \}\}$/m);
+    const listed = deps.find((step) => step.includes("install-deps --dry-run"));
+    expect(listed).toMatch(/^\s+FONTS: \$\{\{ inputs\.fonts \}\}$/m);
+    expect(listed).toMatch(/if \[\[ \$FONTS == false \]\]; then\n.*grep -Ev '\^\(x\?fonts-\|\$\)'/);
+    expect(read(".github/actions/playwright-deps/action.yml")).toMatch(
+      /^ {2}fonts:\n.*\n {4}default: "true"$/m,
+    );
+  });
+
+  it("is the only caller to choose the fonts", () => {
+    for (const file of ["ci", "release", "deploy"]) {
+      expect(read(`.github/workflows/${file}.yml`)).not.toMatch(/^\s+fonts:/m);
+    }
+  });
 });
