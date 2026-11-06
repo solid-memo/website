@@ -992,7 +992,7 @@ These aren't met, and the settings and actions above don't close them:
 - **Criterion 16, dependencies ready to use.** A decided gap (decision
   14), closed when each of the four
   ([vendor-code.md](vendor-code.md#maturity)) reaches 1.0.0 or has a
-  ready replacement. [`shacl-engine`](https://www.npmjs.com/package/shacl-engine)
+  ready replacement. [`shacl-engine`](https://github.com/rdf-ext/shacl-engine)
   1.x exists, but brings in packages before 1.0.0 of its own, and a
   SPARQL engine the app doesn't need.
 - **Criterion 14, findability.** The name is kept by choice; catalogs
