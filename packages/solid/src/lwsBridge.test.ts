@@ -229,6 +229,31 @@ describe("lwsBridge, its listing", () => {
     await expect(lwsBridge(fetch)(MAIN)).rejects.toThrow("lists more than 20000");
   });
 
+  it("asks for the server's own listing only when the answer names the LWS profile as its profile", async () => {
+    const PROFILE = "https://www.w3.org/ns/lws/v1";
+    const requestsFor = async (contentType: string | undefined) => {
+      const headers: Record<string, string> = contentType ? { "Content-Type": contentType } : {};
+      const { fetch, asked } = scripted(() => lws(200, headers));
+      await lwsBridge(fetch)(MAIN);
+      return asked.length;
+    };
+    for (const named of [
+      `text/turtle; profile="${PROFILE}"`,
+      `text/turtle;PROFILE = "https://other.example/p ${PROFILE}"`,
+      `text/turtle; charset=utf-8; profile=${PROFILE}`,
+    ])
+      expect(await requestsFor(named)).toBe(3);
+    for (const unnamed of [
+      undefined,
+      "text/turtle",
+      `text/turtle; profile="${PROFILE}.elsewhere.example"`,
+      `text/turtle; profile=https://elsewhere.example/${PROFILE}`,
+      `text/turtle; note="${PROFILE}"`,
+      `text/turtle; profile=`,
+    ])
+      expect(await requestsFor(unnamed)).toBe(1);
+  });
+
   it("names the listing by the address asked for when the answer has none, and passes on one of no type", async () => {
     const bare: typeof globalThis.fetch = async () =>
       new Response(JSON.stringify({ items: [{ id: "a.ttl" }] }), {

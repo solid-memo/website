@@ -81,6 +81,13 @@ function mediaTypeOf(contentType: string | null): string {
   return (contentType ?? "").split(";")[0]!.trim().toLowerCase();
 }
 
+/** Whether a Content-Type names `profile` in its `profile` parameter, a space-separated list, quoted or not. */
+function hasProfile(contentType: string | null, profile: string): boolean {
+  const parameter = /;\s*profile\s*=\s*(?:"([^"]*)"|([^\s;]+))/i.exec(contentType ?? "");
+  const profiles = parameter?.[1] ?? parameter?.[2] ?? "";
+  return profiles.split(/\s+/).some((named) => named === profile);
+}
+
 /** A response for `url`, as a server's answer is: its URL set. */
 function named(response: Response, url: string): Response {
   Object.defineProperty(response, "url", { value: url });
@@ -123,7 +130,7 @@ async function listing(
   if (response.ok && mediaTypeOf(contentType) === LWS_JSON)
     return listingOf(fetch, url, init, response);
   // An LWS server that gives Turtle in the LWS profile (lws:items, no ldp:contains), or none, is asked for its own listing.
-  const lwsProfile = response.ok && String(contentType).includes(LWS_PROFILE);
+  const lwsProfile = response.ok && hasProfile(contentType, LWS_PROFILE);
   if (response.status !== 406 && !lwsProfile) return response;
   if (!(await isLws(fetch, url, init?.signal))) return response;
   await response.body?.cancel();
