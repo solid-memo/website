@@ -45,3 +45,12 @@ function releaseTooLarge(url: string, { limits: { bytes, quads } }: ReadLimitErr
 export function linkedReleasesTooLarge(url: string): AppError {
   return new AppError("linkedReleasesTooLarge", { host: releaseHost(url) ?? url });
 }
+
+/**
+ * A release from a link not read, or not read whole, because the reads
+ * of such releases have taken in what they may in a page session, until
+ * the page is loaded again: of this release, whatever else goes on.
+ */
+export function linkedReadsSpent(url: string): AppError {
+  return new AppError("linkedReadsSpent", { url });
+}

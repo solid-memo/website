@@ -73,7 +73,7 @@ export function DeckListContainer({
   const { t, errorText } = useI18n();
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
   const decks = decksOf(treeQuery.data?.children ?? []);
-  const { isCourse, linkedHost, newerRelease } = useCopies(useCases, decks);
+  const { isCourse, linkedHost, newerRelease, readsRefused } = useCopies(useCases, decks);
 
   if (treeQuery.error) {
     return <ErrorMessage error={errorText(treeQuery.error)} />;
@@ -96,6 +96,7 @@ export function DeckListContainer({
         instance={instance}
         decks={decks.filter((deck) => isCourse(deck) && !isSetAside(deck))}
         libraryHref={decks.every(isCourse) ? libraryHref(instance.url) : undefined}
+        readsRefused={readsRefused}
       />
       <SchedulerInvitationContainer useCases={useCases} instance={instance} />
       <DeckListScreen

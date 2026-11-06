@@ -40,6 +40,7 @@ export function LibraryDeckScreen({
   shareUrl,
   imported,
   busy,
+  unavailable = false,
   error,
   onImport,
   onStartCourse,
@@ -61,6 +62,8 @@ export function LibraryDeckScreen({
   imported: boolean;
   /** The import, or the start of a course, is in progress. */
   busy: boolean;
+  /** The release shown cannot be added just now. */
+  unavailable?: boolean;
   error: ErrorText | null;
   onImport: () => void;
   /** Starts the course, or goes on with it (a course only). */
@@ -187,7 +190,7 @@ export function LibraryDeckScreen({
       </dl>
       <div class="actions">
         {deck.isCourse === true ? (
-          <button class="primary" onClick={onStartCourse} disabled={busy}>
+          <button class="primary" onClick={onStartCourse} disabled={busy || unavailable}>
             {busy
               ? t("libraryDeck.starting")
               : imported
@@ -195,7 +198,7 @@ export function LibraryDeckScreen({
                 : t("libraryDeck.startCourse")}
           </button>
         ) : (
-          <button class="primary" onClick={onImport} disabled={busy}>
+          <button class="primary" onClick={onImport} disabled={busy || unavailable}>
             {busy ? t("libraryDeck.importing") : t("libraryDeck.import")}
           </button>
         )}

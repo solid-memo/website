@@ -204,4 +204,46 @@ describe("ImportUrlContainer", () => {
     await waitFor(() => expect(readReleaseFromLink).toHaveBeenCalledTimes(2));
     expect(onShow).not.toHaveBeenCalled();
   });
+
+  it("adds nothing while the release shown is read again, or after that read failed", async () => {
+    let answer: (release: LibraryDeck) => void = () => undefined;
+    let refuse: (error: Error) => void = () => undefined;
+    const readReleaseFromLink = vi.fn(
+      () =>
+        new Promise<LibraryDeck>((resolve, reject) => {
+          answer = resolve;
+          refuse = reject;
+        }),
+    );
+    renderContainer(makeUseCasesFake({ readReleaseFromLink }), RIVERS);
+    await waitFor(() => expect(readReleaseFromLink).toHaveBeenCalledOnce());
+    answer(rivers);
+    const add = await screen.findByRole("button", { name: "Import this deck" });
+    expect(add).toBeEnabled();
+    fireEvent.click(showButton());
+    await waitFor(() => expect(add).toBeDisabled());
+    expect(add).toHaveTextContent("Import this deck");
+    refuse(new AppError("releaseUnreadable", { url: RIVERS }));
+    expect(await screen.findByText(/cannot read a release/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Rivers" })).toBeInTheDocument();
+    expect(add).toBeDisabled();
+    fireEvent.click(showButton());
+    await waitFor(() => expect(readReleaseFromLink).toHaveBeenCalledTimes(3));
+    answer(rivers);
+    await waitFor(() => expect(add).toBeEnabled());
+  });
+
+  it("starts no course while its release is read again", async () => {
+    let answer: (release: LibraryDeck) => void = () => undefined;
+    const readReleaseFromLink = vi.fn(
+      () => new Promise<LibraryDeck>((resolve) => (answer = resolve)),
+    );
+    renderContainer(makeUseCasesFake({ readReleaseFromLink }), RIVERS);
+    await waitFor(() => expect(readReleaseFromLink).toHaveBeenCalledOnce());
+    answer({ ...rivers, isCourse: true });
+    const start = await screen.findByRole("button", { name: "Start course" });
+    expect(start).toBeEnabled();
+    fireEvent.click(showButton());
+    await waitFor(() => expect(start).toBeDisabled());
+  });
 });

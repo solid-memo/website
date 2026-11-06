@@ -39,6 +39,7 @@ import type {
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
+import { mapAtOnce } from "./atOnce";
 import type { Course, CourseUseCases } from "./courses";
 import { readNow, unsent } from "./writes";
 import { stepReporter } from "./progress";
@@ -96,7 +97,8 @@ export interface LibraryUseCases {
    * A copy whose series the index does not list is looked for as a
    * release added from a link: its release read, and its creator's
    * catalog for a newer one in its series ("unknown" when it cannot be
-   * read). Writes nothing: planLibraryUpgrade says what an upgrade would
+   * read), each release once, whichever copies name it, and a few at a
+   * time. Writes nothing: planLibraryUpgrade says what an upgrade would
    * change.
    */
   listLibraryUpdates(instanceUrl: string): Promise<LibraryCopy[]>;
@@ -116,6 +118,12 @@ export interface LibraryUseCases {
    * text that is still the release's as it is (see sameText). Writes nothing.
    */
   deckRelease(deck: Deck): Promise<LibraryDeckContent | null>;
+  /**
+   * Whether the release at `url` is a course, for a copy that does not
+   * say (useCopies): its answer alone, so no list holds on to the cards
+   * of every release it asks of. Read and checked as deckRelease's is.
+   */
+  releaseIsCourse(url: string): Promise<boolean>;
   /**
    * Apply the upgrade the user agreed to (domain/deckUpgrade.ts,
    * docs/migrations.md "How an upgrade is applied"), planned again on the
@@ -224,13 +232,14 @@ function refuseNonConforming(url: string, report: DocumentReport): void {
  * checked read. A release whose address answers otherwise after it was
  * added is refused (releaseNotConforming) where it would have been
  * shown or its cards copied. A check that fails is not kept, so the next
- * read checks again; one that passes is kept for the page session, as
- * the read it accepted is (DeckLibrary.readRelease). A release read with
- * a check of the caller's own (`accept`) is held to the library's shapes
- * too, before that check, so only a read they pass counts as checked.
- * Releases the index
- * lists are read as they are: they come with the site, checked when
- * they were published.
+ * read checks again; one that passes is kept for the page session, and
+ * the read it accepted for as long as the adapter holds it
+ * (DeckLibrary.readRelease), then read and held to the check again. A
+ * release read with a check of the caller's own (`accept`), which is what
+ * is shown before it is added, is held to the library's shapes too, before
+ * that check, so only a read they pass counts as checked, and is pinned,
+ * so what is added is what was shown. Releases the index lists are read
+ * as they are: they come with the site, checked when they were published.
  */
 export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary {
   const checked = new Map<string, Promise<unknown>>();
@@ -260,15 +269,26 @@ export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary
     async readRelease(url, accept) {
       if (accept === undefined) return deckLibrary.readRelease(url);
       // The library's shapes refuse first, whatever `accept` does: only a read they pass counts as checked.
-      const read = await deckLibrary.readRelease(url, (report) => {
-        refuseNonConforming(url, report);
-        accept(report);
-      });
-      // A read checked as it was added is the one its cards are copied from: it is not read again.
+      // A read checked as it is added is the one its cards are copied from: it is not read again.
+      const read = await deckLibrary.readRelease(
+        url,
+        (report) => {
+          refuseNonConforming(url, report);
+          accept(report);
+        },
+        { pin: true },
+      );
       checked.set(url, Promise.resolve(read));
       return read;
     },
   };
+}
+
+/** What a lookup of the series of a release from a link found (linkedSeries). */
+interface LinkedSeries {
+  copied: LibraryDeck;
+  series: LibraryDeck;
+  complete: boolean;
 }
 
 /** A library course as its preview shows it (LibraryUseCases.getLibraryCourse). */
@@ -416,12 +436,11 @@ export function createLibraryUseCases({
    * none is are the others read (likeliestNewer). The copied release,
    * the catalog and those are read for this lookup alone
    * (DeckLibrary.linkedReads), under one release's limits together: past
-   * them (linkedReleasesTooLarge) before a newer release is found, the
+   * them (linkedReleasesTooLarge), or past what such reads may take in a
+   * page session (linkedReadsSpent), before a newer release is found, the
    * newest is not known (not `complete`).
    */
-  async function linkedSeries(
-    url: string,
-  ): Promise<{ copied: LibraryDeck; series: LibraryDeck; complete: boolean }> {
+  async function linkedSeries(url: string): Promise<LinkedSeries> {
     const linked = deckLibrary.linkedReads();
     const [copied, published] = await Promise.all([
       linked.readRelease(url),
@@ -439,7 +458,11 @@ export function createLibraryUseCases({
     const read = async (other: string): Promise<void> => {
       if (pastLimits || newest !== copied) return;
       const release = await linked.readRelease(other).catch((error: unknown) => {
-        if (error instanceof AppError && error.code === "linkedReleasesTooLarge") pastLimits = true;
+        if (
+          error instanceof AppError &&
+          (error.code === "linkedReleasesTooLarge" || error.code === "linkedReadsSpent")
+        )
+          pastLimits = true;
         return null;
       });
       newest = newestRelease(newest, [release]);
@@ -449,20 +472,17 @@ export function createLibraryUseCases({
     if (newest === copied && pastLimits) return { copied, series: copied, complete: false };
     return { copied, series: newest, complete: true };
   }
-  /** A copy whose series the library's index does not list, as a release added from a link; as it was when its release cannot be read. */
-  async function linkedCopy(copy: LibraryCopy): Promise<LibraryCopy> {
-    try {
-      const { copied, series, complete } = await linkedSeries(copy.deck.sourceUrl!);
-      return {
-        deck: copy.deck,
-        series,
-        version: copied.version,
-        newer: complete ? offersNewerRelease(copy.deck, series) : "unknown",
-        fromLink: true,
-      };
-    } catch {
-      return copy;
-    }
+  /** A copy whose series the library's index does not list, as a release added from a link, by what its lookup found; as it was when its release cannot be read. */
+  function linkedCopy(copy: LibraryCopy, found: LinkedSeries | null): LibraryCopy {
+    if (found === null) return copy;
+    const { copied, series, complete } = found;
+    return {
+      deck: copy.deck,
+      series,
+      version: copied.version,
+      newer: complete ? offersNewerRelease(copy.deck, series) : "unknown",
+      fromLink: true,
+    };
   }
 
   return {
@@ -499,8 +519,18 @@ export function createLibraryUseCases({
       const decks = await deckRepository.listDecks(instanceUrl);
       if (decks.every((deck) => deck.sourceUrl === undefined)) return [];
       const copies = libraryCopiesOf(decks, await deckLibrary.listLibraryDecks());
-      // Each copy's series is looked up on its own, under limits of its own, as its deck's page looks it up.
-      return Promise.all(copies.map((copy) => (copy.series === null ? linkedCopy(copy) : copy)));
+      // Each release's series is looked up on its own, under limits of its own, as its deck's page looks it up, a few at
+      // a time, and once however many copies name it: they share what is found.
+      const sources = [
+        ...new Set(
+          copies.filter((copy) => copy.series === null).map((copy) => copy.deck.sourceUrl!),
+        ),
+      ];
+      const found = await mapAtOnce(sources, (url) => linkedSeries(url).catch(() => null));
+      const foundOf = new Map(sources.map((url, at) => [url, found[at]!]));
+      return copies.map((copy) =>
+        copy.series === null ? linkedCopy(copy, foundOf.get(copy.deck.sourceUrl!)!) : copy,
+      );
     },
     async addReleaseLanguages(deck) {
       if (deck.sourceUrl === undefined) return null;
@@ -514,6 +544,9 @@ export function createLibraryUseCases({
     },
     async deckRelease(deck) {
       return deck.sourceUrl === undefined ? null : deckLibrary.fetchLibraryDeck(deck.sourceUrl);
+    },
+    async releaseIsCourse(url) {
+      return (await deckLibrary.fetchLibraryDeck(url)).isCourse === true;
     },
     async applyLibraryUpgrade(offered, offeredPlan, onProgress = () => undefined) {
       const progress = stepReporter<DeckUpgradeStep>("read", DECK_UPGRADE_STEPS.length, onProgress);
