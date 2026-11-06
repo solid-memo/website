@@ -17,6 +17,7 @@ import { getSolidDataset, parseQuads } from "../client/resources";
 import { datasetFrom } from "../testing/datasets";
 import { answersCsv } from "@solid-memo/domain/answerCsv";
 import { growth } from "@solid-memo/domain/testing/growth";
+import { longNames, namesOf } from "@solid-memo/domain/testing/longAgents";
 import { toAnswer, toAnswerThing } from "./answerMapper";
 import {
   toCourseOutline,
@@ -488,6 +489,49 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
       `This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\nurl: ${DOC}\nversion: 7\nlatest: 6`,
+    );
+  });
+
+  describe("a release from before format 3 whose agents' URLs are longer than any term", () => {
+    /** The release at `url`, naming `authors` itself. */
+    function oldRelease(url: string, authors: readonly string[]): Dataset {
+      let release = buildThing(createThing({ url }))
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, "Capitals")
+        .addStringNoLocale(DCTERMS.description, "Capitals.")
+        .addStringNoLocale(SM.direction, "bidirectional")
+        .addLiteral(SM.formatVersion, integerLiteral(2));
+      for (const author of authors) release = release.addStringNoLocale(DCTERMS.creator, author);
+      return setThing(datasetFrom(url), release.build());
+    }
+    const LONG_RELEASE = `https://solid-memo.com/${"p".repeat(16_340)}`;
+    const VARIANTS = [
+      { variant: "a long address", url: LONG_RELEASE, authors: (n: number) => namesOf(n, 24) },
+      { variant: "long names", url: DOC, authors: longNames },
+    ];
+
+    it.each(VARIANTS)("names its authors with $variant", ({ url, authors }) => {
+      const named = authors(3);
+      expect(toLibraryDeckContent(url, oldRelease(url, named)).authors).toEqual(named);
+    });
+
+    it.each(VARIANTS)(
+      "takes time that grows with $variant, not their square (GHSA-4mgg-5xpp-3jx5)",
+      {
+        timeout: 180_000,
+      },
+      ({ url, authors }) => {
+        const ratio = growth(
+          (count) => {
+            const dataset = oldRelease(url, authors(count));
+            // A document is read once, so each run maps a copy of it not read yet.
+            return () => toLibraryDeckContent(url, Object.freeze({ ...dataset }));
+          },
+          240,
+          8,
+        );
+        expect(ratio).toBeLessThan(4);
+      },
     );
   });
 

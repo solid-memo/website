@@ -3,7 +3,18 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { courseDraft, deckDraft, DRAFT, link, of } from "@solid-memo/domain/testing/releaseDraft";
+import { blankDraft, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
+import { growth } from "@solid-memo/domain/testing/growth";
+import { namesOf } from "@solid-memo/domain/testing/longAgents";
+import {
+  courseDraft,
+  deckDraft,
+  DRAFT,
+  link,
+  NOW,
+  of,
+} from "@solid-memo/domain/testing/releaseDraft";
 import { quadsOfTurtle } from "../testing/releaseDrafts";
 import {
   draftEntries,
@@ -384,6 +395,108 @@ ${STEP} ; schema:position "-01"^^xsd:integer ; owl:deprecated "1"^^xsd:boolean .
     dcterms:subject <https://data.example/a> , "a literal" .`),
     ).rejects.toEqual(hidden(of("old"), "http://purl.org/dc/terms/subject"));
   });
+});
+
+describe("draftEntries with an IRI longer than a term may be (GHSA-4mgg-5xpp-3jx5)", () => {
+  const refused = expect.objectContaining({ code: "termTooLong", vars: { limit: 16_383 } });
+  const LONG = "a".repeat(16_383);
+  /** How many times each timed run makes its draft, for a run long enough to measure. */
+  const MADE_PER_RUN = 50;
+
+  /** A draft at `url` with `count` agents of ids `length` characters long, all its creators. */
+  function withAgents(url: string, count: number, length: number): ReleaseDraft {
+    const blank = blankDraft({ url, course: false, title: { en: "t" }, now: NOW });
+    const ids = namesOf(count, length);
+    return {
+      ...blank,
+      root: { ...blank.root, creator: ids.map((id) => `${url}#${id}`) },
+      agents: ids.map((id) => ({ id, data: { name: "Name" } })),
+    };
+  }
+
+  it("refuses a subject past the bound, an id no draft can have or not", () => {
+    const draft = deckDraft();
+    expect(() =>
+      draftEntries({ ...draft, agents: [{ id: LONG, data: { name: "Name" } }] }),
+    ).toThrow(refused);
+    expect(() =>
+      draftEntries({ ...draft, agents: [{ id: `~${LONG}`, data: { name: "Name" } }] }),
+    ).toThrow(refused);
+  });
+
+  it("refuses a link or a statement's subject past the bound", () => {
+    const draft = deckDraft();
+    const far = `https://elsewhere.example/${LONG}`;
+    expect(() => draftEntries({ ...draft, root: { ...draft.root, creator: [far] } })).toThrow(
+      refused,
+    );
+    expect(() =>
+      draftEntries({ ...draft, triples: [link(far, "https://example.org/p", DRAFT)] }),
+    ).toThrow(refused);
+  });
+
+  it("refuses a subject in bound in the draft but past it in the document it is kept in", () => {
+    const id = "c".repeat(9_000);
+    const draft = rebaseDraft(courseDraft(), DRAFT, (iri) => (iri === of("ch-a") ? of(id) : iri));
+    const named = {
+      ...draft,
+      chapters: draft.chapters.map((node) => (node.id === "ch-a" ? { ...node, id } : node)),
+    };
+    expect(of(id).length).toBeLessThan(16_383);
+    expect(() => draftEntries(named)).toThrow(refused);
+  });
+
+  it("keeps a subject its document holds, though it is longer in the draft", () => {
+    const draft = deckDraft();
+    const id = "c".repeat(16_381 - `${CONTAINER}cards.ttl#`.length);
+    const long = { ...draft, cards: [{ ...draft.cards[0]!, id }] };
+    const entry = draftEntries(long).get(of(id))!;
+    expect(of(id)).toHaveLength(16_383);
+    expect(entry.subject).toBe(`${CONTAINER}cards.ttl#${id}`);
+  });
+
+  it.each([
+    {
+      variant: "agents named past the bound",
+      draftOf: (count: number) => {
+        const draft = withAgents(DRAFT, count, 16_370);
+        return () => rebaseDraft(draft, draft.url);
+      },
+    },
+    {
+      variant: "a release its move takes past the bound",
+      draftOf: (count: number) => {
+        const release = withAgents("https://a.example/r.ttl", count, 16_350);
+        expect(release.root.creator[0]!.length).toBeLessThan(16_382);
+        return () => releaseToDraft(release, DRAFT);
+      },
+    },
+  ])(
+    "refuses, in time that grows with them, not their square, $variant",
+    {
+      timeout: 180_000,
+    },
+    ({ draftOf }) => {
+      expect(() => draftEntries(draftOf(3)())).toThrow(refused);
+      const ratio = growth(
+        (count) => {
+          const made = draftOf(count);
+          return () => {
+            // The refusal comes at the first IRI: one rebase before it is too short a run to time.
+            for (let run = 1; run < MADE_PER_RUN; run++) made();
+            try {
+              draftEntries(made());
+            } catch {
+              return;
+            }
+          };
+        },
+        250,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
 });
 
 describe("draftEntries", () => {

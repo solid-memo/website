@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { growth } from "../testing/growth";
+import { namesOf } from "../testing/longAgents";
 import {
   card,
   courseDraft,
@@ -169,6 +170,30 @@ describe("draftLibraryDeck", () => {
         return () => draftLibraryDeck(many);
       },
       1_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("names many agents at IRIs longer than any term, in time that grows with them, not their square (GHSA-4mgg-5xpp-3jx5)", {
+    timeout: 180_000,
+  }, () => {
+    const withAgents = (count: number): ReleaseDraft => {
+      const ids = namesOf(count, 16_340);
+      const draft = deckDraft();
+      return {
+        ...draft,
+        root: { ...draft.root, creator: ids.map(of) },
+        agents: ids.map((id) => ({ id, data: { name: `Name of ${id.slice(-6)}` } })),
+      };
+    };
+    expect(draftLibraryDeck(withAgents(2)).authors).toEqual(["Name of aaaaaa", "Name of aaaaab"]);
+    const ratio = growth(
+      (count) => {
+        const many = withAgents(count);
+        return () => draftLibraryDeck(many);
+      },
+      250,
       8,
     );
     expect(ratio).toBeLessThan(4);

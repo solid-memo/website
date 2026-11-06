@@ -4,9 +4,11 @@
 
 import type { DistractorV1, DraftDeckV1 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { agentToRecord, agentUrlsOf } from "../agentRecord.ts";
-import { cardToRecord, distractorToRecord } from "../deckRecord.ts";
+import { agentUrlsOf } from "../agentRecord.ts";
+import { AppError } from "../appError.ts";
+import { cardToRecord, deckAgents, distractorToRecord } from "../deckRecord.ts";
 import type { Card, Deck, DeckDirection } from "../deck.ts";
+import { HASHED_CHARACTERS, isIriPastBound } from "../pathKeys.ts";
 import { blankDraft, licenseType, type DraftNode, type ReleaseDraft } from "./releaseDraft.ts";
 
 const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
@@ -33,7 +35,9 @@ const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
  *   source of the new one: it is offered as what the deck is based on
  *   (`basedOn`), to start the next version of instead.
  * - **Its authors** become agents of the release (`#agent-<name>`), its
- *   creators; the first of them its publisher.
+ *   creators; the first of them its publisher. One whose IRI is longer
+ *   than a term may be is refused (termTooLong), as the draft's write
+ *   would refuse it, before the draft's ids are keyed by it.
  * - **Like a new release** it is version 1 of a series of its own, with
  *   its Turtle distribution (blankDraft), made `now`, nothing published
  *   before it, and about education (EDUC) besides its own themes.
@@ -44,9 +48,11 @@ export function deckToDraft(
   url: string,
   now: string,
 ): { draft: ReleaseDraft; basedOn?: string } {
-  const urls = agentUrlsOf(url, deck.authors);
-  const agents = new Map(deck.authors.map((author, i) => [urls[i], agentToRecord(author)]));
-  const creators = [...agents.keys()];
+  const agents = deckAgents(deck, agentUrlsOf(url, deck.authors));
+  const creators = agents.map((agent) => agent.url);
+  if (creators.some(isIriPastBound)) {
+    throw new AppError("termTooLong", { limit: HASHED_CHARACTERS });
+  }
   const fragment = (iri: string) => iri.slice(url.length + 1);
   const taken = [
     ...creators.map(fragment),
@@ -69,7 +75,7 @@ export function deckToDraft(
       theme: [...new Set([...(deck.themes ?? []), ...blank.root.theme])],
       keyword: stated(deck.keywords ?? {}),
     },
-    agents: [...agents].map(([iri, data]) => ({ id: fragment(iri), data })),
+    agents: agents.map((agent) => ({ id: fragment(agent.url), data: agent.record })),
     cards: cards.map((card) => ({ id: card.id, data: cardToRecord(card, card.createdAt, url) })),
     distractors: distractorNodes(cards),
     // Its license, typed as a release's is (setLicense).

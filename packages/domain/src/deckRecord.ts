@@ -8,6 +8,7 @@ import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from
 import { isEmptyText, type Card, type CardContent, type Deck, type Distractor } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
+import { TextMap } from "./pathKeys";
 import type {
   AgentV1,
   CardV7,
@@ -102,11 +103,11 @@ export function deckAgents(
   deck: Deck,
   creator: readonly string[] = agentUrlsOf(deck.url, deck.authors),
 ): { url: string; record: AgentV1 }[] {
-  const agents = new Map<string, AgentV1>();
+  const agents = new TextMap<{ url: string; record: AgentV1 }>();
   for (const [i, author] of deck.authors.entries()) {
-    agents.set(creator[i], agentToRecord(author));
+    agents.set(creator[i], { url: creator[i], record: agentToRecord(author) });
   }
-  return [...agents].map(([url, record]) => ({ url, record }));
+  return [...agents.values()];
 }
 
 /** The deck's distribution: its cards document, in Turtle. */

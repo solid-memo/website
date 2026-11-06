@@ -581,7 +581,10 @@ graph LR
     is taken too, a count follows the hash: the lowest whose node is
     free or holds that author. The counted nodes of one such name are
     looked at once for all the authors that share it, so the time grows
-    with the authors and the nodes, not their product. An agent
+    with the authors and the nodes, not their product. A node's URL,
+    joined from the document and the name, can be longer than any
+    term, so the app keys it by its pieces (`TextMap` in `pathKeys.ts`)
+    and refuses to write a deck or draft that would hold one. An agent
     is read by the IRI the deck names (one written under an older rule
     is replaced on the deck's next save).
   - It may name a license (`dcterms:license`, a URL), topics

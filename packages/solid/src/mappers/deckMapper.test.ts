@@ -33,6 +33,10 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { AGENT_V1, CATALOG_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { datasetFrom, datasetOfTurtle } from "../testing/datasets";
 import { growth } from "@solid-memo/domain/testing/growth";
+import { LONG_SUBJECT, longNames, namesOf } from "@solid-memo/domain/testing/longAgents";
+import { agentUrlOf } from "@solid-memo/domain/agentRecord";
+import { distributionUrlOf } from "@solid-memo/domain/dcat";
+import { MAX_TERM_CHARACTERS } from "../client/readLimits";
 import {
   deckSubjects,
   toCard,
@@ -471,6 +475,119 @@ describe("toDecks over many decks and agents", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+});
+
+describe("a deck's agents at URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", () => {
+  /** A deck entry from before format 3, at `url`, naming `authors` itself. */
+  function oldEntry(url: string, authors: readonly string[]) {
+    let entry = buildThing(createThing({ url }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "t")
+      .addStringNoLocale(SM.direction, "bidirectional")
+      .addIri(SM.cardsDocument, CARDS_DOC)
+      .addIri(SM.reviewsDocument, REVIEWS_DOC)
+      .addLiteral(SM.formatVersion, integerLiteral(2));
+    for (const author of authors) entry = entry.addStringNoLocale(DCTERMS.creator, author);
+    return entry.build();
+  }
+  const SHORT_SUBJECT = `${CATALOG}#deck-1`;
+  const VARIANTS = [
+    { variant: "a long subject", subject: LONG_SUBJECT, authors: (n: number) => namesOf(n, 24) },
+    { variant: "long names", subject: SHORT_SUBJECT, authors: longNames },
+  ];
+
+  it.each(VARIANTS)(
+    "reads a deck's own authors with $variant, in order",
+    ({ subject, authors }) => {
+      const named = authors(3);
+      expect(toDeck(oldEntry(subject, named))?.authors).toEqual(named);
+    },
+  );
+
+  it.each(VARIANTS)(
+    "reads a deck in time that grows with $variant, not their square",
+    {
+      timeout: 180_000,
+    },
+    ({ subject, authors }) => {
+      const ratio = growth(
+        (count) => {
+          const entry = oldEntry(subject, authors(count));
+          return () => toDeck(entry);
+        },
+        240,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
+
+  it.each(VARIANTS)(
+    "lists a deck's subjects in time that grows with $variant, not their square",
+    {
+      timeout: 180_000,
+    },
+    ({ subject, authors }) => {
+      const dataset = datasetFrom(CATALOG);
+      const three = authors(3);
+      const deck = { url: subject, authors: [...three, three[0]!] } as Deck;
+      expect(deckSubjects(dataset, deck)).toEqual([
+        subject,
+        distributionUrlOf(subject),
+        ...three.map((author) => agentUrlOf(subject, author)),
+      ]);
+      const ratio = growth(
+        (count) => {
+          const many = { url: subject, authors: authors(count) } as Deck;
+          return () => deckSubjects(dataset, many);
+        },
+        240,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
+
+  it.each(VARIANTS)(
+    "refuses to write a deck with $variant, in time that grows with them, not their square",
+    {
+      timeout: 180_000,
+    },
+    ({ subject, authors }) => {
+      const dataset = datasetFrom(CATALOG);
+      const deckOf = (count: number) =>
+        ({
+          id: "d",
+          url: subject,
+          title: { en: "t" },
+          cardsDocumentUrl: CARDS_DOC,
+          reviewsDocumentUrl: REVIEWS_DOC,
+          createdAt: "",
+          formatVersion: 6,
+          direction: "front-to-back",
+          authors: authors(count),
+        }) as Deck;
+      const refused = () => withDeck(dataset, deckOf(3));
+      expect(refused).toThrow(
+        expect.objectContaining({ code: "termTooLong", vars: { limit: MAX_TERM_CHARACTERS } }),
+      );
+      const ratio = growth(
+        (count) => {
+          const many = deckOf(count);
+          return () => {
+            try {
+              withDeck(dataset, many);
+            } catch {
+              return;
+            }
+          };
+        },
+        240,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
 });
 
 describe("toCard", () => {
