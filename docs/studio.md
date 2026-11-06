@@ -2379,7 +2379,11 @@ The releases screen
 its catalog links them. Each shows:
 
 - its address, named by it ("capitals, version 2") when it's named as
-  releases are;
+  releases are, and linked like any other address from a pod, in a new
+  tab and never with a user name or password
+  ([`ExternalLink`](markdown.md#safety));
+- the host it's on, when that's another origin than the instance's, as
+  a catalog can link a release anywhere and its name doesn't say where;
 - a link to copy;
 - who can read it (everyone, or only its owner, with **Make it
   public**). It's asked of a release on the instance's own server
@@ -2391,7 +2395,9 @@ its catalog links them. Each shows:
 
 It changes no release. The table is a [`DataTable`](#card-workbench),
 a column's name sorting it, then the other way, then as the catalog
-lists them, and **Enter** opening the release at the cursor. A filter
+lists them, and **Enter** opening the release at the cursor. That does
+as its link does, or nothing when it has no link: **j** and **k** then
+leave the focus on the page's body, and go on from that row. A filter
 keeps the releases whose name or address holds its text, case and
 accents aside.
 The sidebar and the drafts screen link to it ("Published releases"

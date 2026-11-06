@@ -539,18 +539,15 @@ export class Studio extends Screen {
       const table = this.page.getByRole("table", {
         name: this.t("studio.releases.caption", { instance }),
       });
+      // A link to another document opens in a new tab, and says so.
+      const linkName = `${this.t("studio.releases.name", { name, version })} ${this.t("common.opensInNewTab")}`;
       const row = table.getByRole("row").filter({
-        has: this.page.getByRole("link", {
-          name: this.t("studio.releases.name", { name, version }),
-          exact: true,
-        }),
+        has: this.page.getByRole("link", { name: linkName, exact: true }),
       });
-      await expect(
-        row.getByRole("link", {
-          name: this.t("studio.releases.name", { name, version }),
-          exact: true,
-        }),
-      ).toHaveAttribute("href", url);
+      await expect(row.getByRole("link", { name: linkName, exact: true })).toHaveAttribute(
+        "href",
+        url,
+      );
       await expect(
         row.getByRole("cell", { name: this.t("studio.releases.public"), exact: true }),
       ).toBeVisible();

@@ -1503,6 +1503,7 @@
       "public": "Alle",
       "private": "Nur du",
       "unchecked": "Nicht geprüft: auf einem anderen Server",
+      "elsewhere": "Auf einem anderen Server: {host}",
       "makePublicOf": "{release} öffentlich machen",
       "copy": "Link kopieren",
       "copyLink": "Link {url} kopieren",

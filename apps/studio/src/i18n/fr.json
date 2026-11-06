@@ -1580,6 +1580,7 @@
       "public": "Tout le monde",
       "private": "Vous seul",
       "unchecked": "Non vérifié : sur un autre serveur",
+      "elsewhere": "Sur un autre serveur : {host}",
       "makePublicOf": "Rendre publique la publication {release}",
       "copy": "Copier le lien",
       "copyLink": "Copier le lien {url}",
