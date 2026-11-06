@@ -954,6 +954,11 @@ flowchart LR
     imp -->|authenticated| pod["the learner's instance"]
 ```
 
+- A copy's card pictures stay hidden until the learner chooses to show
+  each host's, for that deck
+  ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)); the
+  screen says so. A release of the library's index is never offered as
+  the next version of such a copy.
 - The learner pastes the link, which must be an http(s) address of a
   document with no fragment (`releaseUrlOf`). It goes into the URL as
   the URL standard writes it (a host in capitals or a default port

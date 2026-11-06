@@ -11,6 +11,7 @@ import {
   createThing,
   getPropertyAll,
   getStringNoLocale,
+  getStringNoLocaleAll,
   getThing,
   getThingAll,
   getUrlAll,
@@ -38,6 +39,7 @@ import {
   type Distractor,
 } from "@solid-memo/domain/deck";
 import { cardLanguageTag } from "@solid-memo/domain/deckCardLanguage";
+import { storedPictureHosts } from "@solid-memo/domain/deckPictures";
 import {
   cardFromRecord,
   deckAgents,
@@ -114,8 +116,10 @@ export function toDecks(dataset: Dataset, catalogUrl: string): Deck[] {
  * course's deck is also typed schema:Course and has the chapters it
  * completed (sm:completedChapter, at most MAX_COMPLETED_CHAPTERS of
  * them, its release's kept first), and a deck the language its card text is shown in first
- * (sm:deckCardLanguage), kept only when it names a language: the catalog
- * is data anyone may have written, and no shape checks that term. A
+ * (sm:deckCardLanguage), kept only when it names a language, and the
+ * hosts whose pictures it shows (sm:deckPictureHost), kept only when they
+ * are hosts: the catalog is data anyone may have written, and no shape
+ * checks those terms. A
  * deck from before format 3 names its creators itself ("Name <email>"),
  * which name the agents the migration gives it.
  */
@@ -142,12 +146,14 @@ export function toDeck(
   ]);
   const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);
   const cardLanguage = storedLanguage === null ? undefined : cardLanguageTag(storedLanguage);
+  const pictureHosts = storedPictureHosts(getStringNoLocaleAll(thing, SM.deckPictureHost));
   return {
     ...stored,
     // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
     ...(getUrlAll(thing, RDF.type).includes(SCHEMA.Course) ? { course: true as const } : {}),
     ...(completedChapters.length === 0 ? {} : { completedChapters }),
     ...(cardLanguage === undefined ? {} : { cardLanguage }),
+    ...(pictureHosts.length === 0 ? {} : { pictureHosts }),
   };
 }
 

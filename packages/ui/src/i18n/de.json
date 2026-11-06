@@ -316,7 +316,11 @@
     "front": "Vorderseite",
     "back": "Rückseite",
     "question": "Frage",
-    "answer": "Antwort"
+    "answer": "Antwort",
+    "pictureHidden": "Ausgeblendet. Wenn du es zeigst, sieht {host}, wann du diese Karte lernst.",
+    "showPictures": "Bilder von {host} anzeigen",
+    "picturesHidden": "Bilder von {host} sind ausgeblendet. Wenn du sie zeigst, sieht dieser Server, wann du diese Karten öffnest oder lernst.",
+    "picturesShown": "Bilder von {host} werden für diesen Stapel angezeigt."
   },
   "course": {
     "chaptersDone": {
@@ -709,6 +713,12 @@
       },
       "releaseHint": "Karten, die noch dem Stand ihrer Ausgabe in der Bibliothek entsprechen, werden ausgelassen: Eine spätere Ausgabe aktualisiert sie.",
       "settled": "Bei jeder Karte ist angegeben, in welcher Sprache ihr Text ist."
+    },
+    "pictures": {
+      "heading": "Bilder von anderen Servern",
+      "intro": "Du hast gewählt, die Bilder dieses Stapels von diesen Servern anzuzeigen. Jeder sieht eine Anfrage, wenn du eine Karte mit einem Bild von ihm öffnest oder lernst.",
+      "hide": "Bilder von {host} nicht mehr anzeigen",
+      "stopped": "Bilder von {host} sind wieder ausgeblendet."
     }
   },
   "deckProvenance": {
@@ -2137,6 +2147,7 @@
     "label": "Link zur Ausgabe",
     "show": "Anzeigen",
     "reading": "Die Ausgabe wird gelesen und geprüft…",
-    "notLibrary": "Das ist nicht in der Bibliothek von Solid Memo: Es ist auf {host} veröffentlicht. Solid Memo hat geprüft, dass es sich lesen lässt, nicht was darin steht. Deine Kopie merkt sich, woher sie stammt, und dort wird nichts geschrieben."
+    "notLibrary": "Das ist nicht in der Bibliothek von Solid Memo: Es ist auf {host} veröffentlicht. Solid Memo hat geprüft, dass es sich lesen lässt, nicht was darin steht. Deine Kopie merkt sich, woher sie stammt, und dort wird nichts geschrieben.",
+    "picturesHidden": "Bilder auf den Karten bleiben ausgeblendet, bis du sie anzeigen lässt, denn jedes Bild ist eine Anfrage an den Server, auf dem es liegt."
   }
 }

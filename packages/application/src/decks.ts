@@ -87,6 +87,12 @@ export interface DeckUseCases {
    * (textLanguageInvalid) before any write.
    */
   setDeckCardLanguage(deck: Deck, language: string | null): Promise<Deck>;
+  /**
+   * Show the deck's pictures from `host`, or stop showing them: the
+   * learner's choice, for one deck and one host, kept on the deck's entry
+   * (docs/privacy.md). Returns the deck as its entry says then.
+   */
+  setDeckPictureHost(deck: Deck, host: string, shown: boolean): Promise<Deck>;
   /** Remove a deck and its cards; the result names the documents kept for another app's data in them. */
   removeDeck(deck: Deck): Promise<KeptDocuments>;
   /** Remove several decks of an instance and their cards, their entries in one write of their catalog. */
@@ -200,6 +206,9 @@ export function createDeckUseCases({
         deck,
         withCardLanguage(deck, language).cardLanguage ?? null,
       );
+    },
+    setDeckPictureHost(deck, host, shown) {
+      return deckRepository.setPictureHost(deck, host, shown);
     },
     removeDeck(deck) {
       return deckRepository.removeDeck(deck);

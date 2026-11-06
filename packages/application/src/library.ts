@@ -13,6 +13,7 @@ import {
   releaseUrlOf,
   type LibraryCopy,
 } from "@solid-memo/domain/library";
+import { libraryCopyTest } from "@solid-memo/domain/libraryCopy";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import {
@@ -380,11 +381,10 @@ export function createLibraryUseCases({
    * otherwise.
    */
   async function seriesOf(deck: Deck): Promise<{ series: LibraryDeck | null; fromLink?: true }> {
-    const indexed = (await deckLibrary.listLibraryDecks()).find((libraryDeck) =>
-      isCopyOf(deck, libraryDeck),
-    );
+    const library = await deckLibrary.listLibraryDecks();
+    const indexed = library.find((libraryDeck) => isCopyOf(deck, libraryDeck));
     if (indexed !== undefined) return { series: indexed };
-    return linkedSeries(deck.sourceUrl!).then(
+    return linkedSeries(deck.sourceUrl!, library).then(
       (found) => (found.complete ? { series: found.series, fromLink: true } : { series: null }),
       () => ({ series: null }),
     );
@@ -410,7 +410,10 @@ export function createLibraryUseCases({
    * itself unless its creator's catalog can be read (`complete`), then
    * the newest of its series the catalog links. A release the
    * catalog links that cannot be read is passed over, and so is one the
-   * copied release lists, as no newer one. Of the rest, those named as
+   * copied release lists, as no newer one, and one of the library's index
+   * (`library`): a copy from a link stays one, and its pictures asked
+   * about (docs/privacy.md), whatever series its release claims. Of the
+   * rest, those named as
    * the copied release are read one at a time, the highest version first,
    * until one is a newer release of its series: the newest. Only when
    * none is are the others read (likeliestNewer). The copied release,
@@ -421,6 +424,7 @@ export function createLibraryUseCases({
    */
   async function linkedSeries(
     url: string,
+    library: readonly LibraryDeck[],
   ): Promise<{ copied: LibraryDeck; series: LibraryDeck; complete: boolean }> {
     const linked = deckLibrary.linkedReads();
     const [copied, published] = await Promise.all([
@@ -429,9 +433,12 @@ export function createLibraryUseCases({
     ]);
     if (published === null) return { copied, series: copied, complete: false };
     const listed = new Set(copied.releases.map((release) => release.url));
+    const inLibrary = libraryCopyTest(library);
     const { named, others } = likeliestNewer(
       url,
-      [...new Set(published)].filter((other) => other !== url && !listed.has(other)),
+      [...new Set(published)].filter(
+        (other) => other !== url && !listed.has(other) && !inLibrary({ sourceUrl: other }),
+      ),
     );
     let newest = copied;
     let pastLimits = false;
@@ -450,9 +457,12 @@ export function createLibraryUseCases({
     return { copied, series: newest, complete: true };
   }
   /** A copy whose series the library's index does not list, as a release added from a link; as it was when its release cannot be read. */
-  async function linkedCopy(copy: LibraryCopy): Promise<LibraryCopy> {
+  async function linkedCopy(
+    copy: LibraryCopy,
+    library: readonly LibraryDeck[],
+  ): Promise<LibraryCopy> {
     try {
-      const { copied, series, complete } = await linkedSeries(copy.deck.sourceUrl!);
+      const { copied, series, complete } = await linkedSeries(copy.deck.sourceUrl!, library);
       return {
         deck: copy.deck,
         series,
@@ -498,9 +508,12 @@ export function createLibraryUseCases({
     async listLibraryUpdates(instanceUrl) {
       const decks = await deckRepository.listDecks(instanceUrl);
       if (decks.every((deck) => deck.sourceUrl === undefined)) return [];
-      const copies = libraryCopiesOf(decks, await deckLibrary.listLibraryDecks());
+      const library = await deckLibrary.listLibraryDecks();
+      const copies = libraryCopiesOf(decks, library);
       // Each copy's series is looked up on its own, under limits of its own, as its deck's page looks it up.
-      return Promise.all(copies.map((copy) => (copy.series === null ? linkedCopy(copy) : copy)));
+      return Promise.all(
+        copies.map((copy) => (copy.series === null ? linkedCopy(copy, library) : copy)),
+      );
     },
     async addReleaseLanguages(deck) {
       if (deck.sourceUrl === undefined) return null;

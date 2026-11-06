@@ -1189,9 +1189,12 @@ describe("applyLibraryUpgrade", () => {
       gone: [],
       appliedAbout: [],
     };
-    expect(applyLibraryUpgrade({ ...deck, cardLanguage: "sv" }, plan)).toEqual({
+    expect(
+      applyLibraryUpgrade({ ...deck, cardLanguage: "sv", pictureHosts: ["a.example"] }, plan),
+    ).toEqual({
       ...deck,
       cardLanguage: "sv",
+      pictureHosts: ["a.example"],
       sourceUrl: `${DECKS}capitals/v3.ttl`,
     });
   });

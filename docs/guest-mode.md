@@ -138,7 +138,8 @@ It runs these steps:
      named after it in the instance's `decks/` and `reviews/`. The rest
      of its entry is the guest's: title, description, authors, license,
      topics, keywords, direction, pace, card language
-     (`sm:deckCardLanguage`), creation time, the release it came from
+     (`sm:deckCardLanguage`), picture hosts (`sm:deckPictureHost`) and
+     creation time. So are the release it came from
      (`prov:wasDerivedFrom`) and, for a course's deck, its
      `schema:Course` type and completed chapters
      (`sm:completedChapter`);

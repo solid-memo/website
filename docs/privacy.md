@@ -129,7 +129,9 @@ The browser contacts these, each when it's needed:
 - **The servers of pictures on cards**, each seeing a request from the
   browser: for the library's decks, image hosts such as `flagcdn.com`,
   `upload.wikimedia.org`, `thumb.wikimedia.org` and `iiif.micr.io`; for
-  the learner's own cards, wherever their pictures are.
+  the learner's own cards, wherever their pictures are. For a deck added
+  by link, they're only the hosts the learner chose
+  ([below](#pictures-on-a-deck-added-by-link)).
 - **The address of a deck or release added by link**
   ([deck-library.md](deck-library.md#from-a-link)).
 - **The server of a release a Studio draft follows**, or whose next
@@ -140,6 +142,76 @@ The browser contacts these, each when it's needed:
 
 Links the learner follows, such as a deck's sources, lead to those
 sites as any link does.
+
+## Pictures on a deck added by link
+
+A card's picture is a request from the learner's browser to the server
+its address names, and the author of a release chooses that address and
+may run that server. With an address of its own for each card and side,
+that server's log could tell when the learner studies, from which IP
+address and which cards came up. Were the answer's picture requested
+as it's revealed, it could tell how long they took.
+
+So a deck from a release outside the library's index, a course too,
+shows no picture until the learner chooses to
+([`deckPictures.tsx`](../packages/ui/src/ui/deckPictures.tsx)), and so
+does every deck of an instance outside the learner's own pod and every
+Studio draft ([below](#decks-and-drafts-from-elsewhere)):
+
+- Until then, nothing is requested from the picture's host, in study,
+  in a course, in card lists and their thumbnails, or on a card's page.
+  The card shows its text, the picture's description and **Show
+  pictures from** the host, which says what showing them means. A list
+  has the choice above it and an empty frame in each picture's place.
+  Adding the release shows no card's picture, and that screen says they
+  stay hidden.
+- The choice is for one deck and one host. A picture from another host,
+  which an upgrade may bring, asks again. It's kept with the deck in
+  the pod (`sm:deckPictureHost` on its catalog entry,
+  [data-model.md](data-model.md#decks-and-cards)), never set by a
+  release, and the deck's Preferences page lists the hosts, each with
+  a button to stop showing its pictures.
+- Once a host is chosen, it sees a request for each picture it serves
+  as the card comes up: the IP address, the user agent, the address
+  asked for and the time. The answer's picture is
+  requested with the question's, so a request doesn't mark the reveal.
+- Every card's picture is requested with no referrer.
+
+The learner's own decks and copies of the library's load their pictures
+as before. A card the learner adds to a deck added by link follows the
+deck, as nothing tells it from the release's for certain, and a card
+moved or copied to another deck is that deck's.
+
+What counts as a copy of the library's is what the index lists now. A
+copy whose series has left the index, or one made on a deployment with
+another library, asks as a deck added by link does. So does any copy
+while the index can't be read. A copy added by link is never offered a
+release of the index as its next version, so it can't become a copy of
+the library's by an upgrade.
+
+### Decks and drafts from elsewhere
+
+- **A deck in an instance attached from someone else's pod** is written
+  by that pod's owner, along with what it says of itself: a release it
+  was copied from, and hosts as chosen. So every deck there asks,
+  library copy or not, and what its entry says of its hosts isn't
+  believed. The learner's own pod means the storages their profile
+  names, the storage found by walking up from their WebID, or a guest's
+  pod on this device. An instance in a storage entered by hand counts as
+  outside it, and so does every instance until the storages have been
+  read once.
+- **A Studio draft** may be made from a linked deck or a linked release,
+  and nothing in it says so afterward, so every draft's previews and
+  trial ask, including for pictures the author added.
+- In both, the choice lasts until the page is reloaded and is written
+  nowhere: the pod of an attached instance isn't the learner's, and a
+  draft is published as it's written.
+- **A deck read from a file** is what the file says. One that names a
+  release outside the index stays a linked deck, and keeps the hosts
+  the file states as chosen, so a file from someone else can carry
+  pictures from any host and state its own choice. One that names no
+  release, or a release of the library, loads its pictures as the
+  learner's own do. A file is only as trustworthy as whoever gave it.
 
 ## No analytics, no cookies, no tracking
 

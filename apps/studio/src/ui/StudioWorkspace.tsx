@@ -2,17 +2,20 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ComponentChildren } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import { DEFAULT_CARD_QUERY } from "@solid-memo/domain/cardQuery";
 import { DEFAULT_DECK_TABLE_VIEW } from "@solid-memo/domain/deckTable";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { WorkspaceProps } from "@solid-memo/ui/App";
 import type { CardEdits } from "@solid-memo/ui/CardScreen";
 import { AskFirst } from "@solid-memo/ui/askFirst";
 import { Breadcrumbs } from "@solid-memo/ui/Breadcrumbs";
 import { CardLanguage } from "@solid-memo/ui/cardLanguage";
+import { DeckPictures, DraftPictures } from "@solid-memo/ui/deckPictures";
 import { useDocumentTitle } from "@solid-memo/ui/documentTitle";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -818,7 +821,9 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
           <UnsavedEdits.Provider value={unsaved.report}>
             {/* A deck's screens show its cards in its card language first; no deck's, as usual. */}
             <CardLanguage language={activeDeck?.cardLanguage}>
-              {waiting ?? screenFor(route!)}
+              <ScreenPictures useCases={useCases} deck={activeDeck} draftUrl={draftUrl}>
+                {waiting ?? screenFor(route!)}
+              </ScreenPictures>
             </CardLanguage>
           </UnsavedEdits.Provider>
         </div>
@@ -922,6 +927,27 @@ interface Open {
   draft: ReleaseDraft | null;
   // Whether the chapter, step or card of the draft the route names is there (subjectOf).
   subject: boolean | null;
+}
+
+/** The screens below it, whose pictures are held as their draft's, or as their deck's (docs/privacy.md). */
+function ScreenPictures({
+  useCases,
+  deck,
+  draftUrl,
+  children,
+}: {
+  useCases: UseCases;
+  deck: Deck | null;
+  draftUrl: string | null;
+  children: ComponentChildren;
+}) {
+  return draftUrl === null ? (
+    <DeckPictures useCases={useCases} deck={deck ?? undefined}>
+      {children}
+    </DeckPictures>
+  ) : (
+    <DraftPictures draftUrl={draftUrl}>{children}</DraftPictures>
+  );
 }
 
 /** The deck a route is about, if it is about one. */

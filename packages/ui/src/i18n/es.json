@@ -321,7 +321,11 @@
     "front": "Anverso",
     "back": "Reverso",
     "question": "Pregunta",
-    "answer": "Respuesta"
+    "answer": "Respuesta",
+    "pictureHidden": "Oculta. Si la muestras, {host} podrá ver cuándo estudias esta tarjeta.",
+    "showPictures": "Mostrar imágenes de {host}",
+    "picturesHidden": "Las imágenes de {host} están ocultas. Si las muestras, ese servidor podrá ver cuándo abres o estudias estas tarjetas.",
+    "picturesShown": "Las imágenes de {host} se muestran en esta baraja."
   },
   "course": {
     "chaptersDone": {
@@ -741,6 +745,12 @@
       },
       "releaseHint": "No se cuentan las tarjetas que siguen tal como las trae su versión de la biblioteca: una versión posterior las actualiza.",
       "settled": "Todas las tarjetas indican en qué idioma está su texto."
+    },
+    "pictures": {
+      "heading": "Imágenes de otros servidores",
+      "intro": "Elegiste mostrar las imágenes de esta baraja desde estos servidores. Cada uno ve una petición cuando abres o estudias una tarjeta con una imagen suya.",
+      "hide": "Dejar de mostrar imágenes de {host}",
+      "stopped": "Las imágenes de {host} vuelven a estar ocultas."
     }
   },
   "deckProvenance": {
@@ -2253,6 +2263,7 @@
     "label": "Enlace a la publicación",
     "show": "Mostrar",
     "reading": "Leyendo y comprobando la publicación…",
-    "notLibrary": "Esto no está en la biblioteca de Solid Memo: está publicado en {host}. Solid Memo ha comprobado que puede leerlo, no lo que dice. Tu copia recuerda de dónde viene, y no se escribe nada allí."
+    "notLibrary": "Esto no está en la biblioteca de Solid Memo: está publicado en {host}. Solid Memo ha comprobado que puede leerlo, no lo que dice. Tu copia recuerda de dónde viene, y no se escribe nada allí.",
+    "picturesHidden": "Las imágenes de sus tarjetas siguen ocultas hasta que decidas mostrarlas, porque cada imagen es una petición al servidor donde está."
   }
 }

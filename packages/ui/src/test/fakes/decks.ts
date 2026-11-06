@@ -6,6 +6,7 @@ import { vi } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import { withAbout } from "@solid-memo/domain/deckAbout";
 import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
+import { withPictureHost } from "@solid-memo/domain/deckPictures";
 import { withProvenance } from "@solid-memo/domain/deckProvenance";
 import { applyDeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type { DeckUseCases } from "@solid-memo/application/decks";
@@ -49,6 +50,7 @@ export function makeDeckUseCasesFake(
       setDeckPace: vi.fn(async (deck, pace) => ({ ...deck, ...pace })),
       // As the real one does: the tag in lower case, and left off for null.
       setDeckCardLanguage: vi.fn(async (deck, language) => withCardLanguage(deck, language)),
+      setDeckPictureHost: vi.fn(async (deck, host, shown) => withPictureHost(deck, host, shown)),
       // As the real one does: authors tidied, the license one offered.
       setDeckProvenance: vi.fn(async (deck, provenance) => withProvenance(deck, provenance)),
       setDecksDirection: vi.fn(async (decks: readonly Deck[], direction) =>

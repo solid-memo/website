@@ -1676,6 +1676,27 @@ describe("StudioWorkspace", () => {
       expect(window.history.length).toBe(length + 1);
     });
 
+    it("holds a draft's pictures back until the author chooses their host, as nothing says whose they are", async () => {
+      const PICTURE = "https://author.example/p/question.svg";
+      const draft = courseDraft();
+      const withPicture: ReleaseDraft = {
+        ...draft,
+        cards: draft.cards.map((card) =>
+          card.id === "q-pods-1a" ? { ...card, data: { ...card.data, frontImage: PICTURE } } : card,
+        ),
+      };
+      window.history.replaceState(
+        null,
+        "",
+        studioRouteToHash({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-1a" }),
+      );
+      const { container } = renderWorkspace(draftUseCases(withPicture));
+      const show = await screen.findByRole("button", { name: "Show pictures from author.example" });
+      expect(container.querySelector(`img[src="${PICTURE}"]`)).toBeNull();
+      fireEvent.click(show);
+      expect(container.querySelector(`img[src="${PICTURE}"]`)).not.toBeNull();
+    });
+
     it("leaves a chapter, step or question once it is deleted, and falls back from one the draft has not", async () => {
       const useCases = draftUseCases();
       window.history.replaceState(

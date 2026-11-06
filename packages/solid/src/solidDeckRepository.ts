@@ -30,6 +30,7 @@ import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { editCompletedChapters as completedChaptersAfter } from "@solid-memo/domain/course";
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
 import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
+import { withPictureHost } from "@solid-memo/domain/deckPictures";
 import {
   cardsContainerOf,
   catalogUrlOf,
@@ -465,6 +466,23 @@ export function createSolidDeckRepository({
       );
     },
 
+    setPictureHost(deck, host, shown) {
+      return editEntry(deck, (stored) => {
+        if ((stored.pictureHosts ?? []).includes(host) === shown) return null;
+        const changed = withPictureHost(stored, host, shown);
+        return {
+          edit: (entry) => {
+            let edited = entry.removeAll(SM.deckPictureHost);
+            for (const kept of changed.pictureHosts ?? []) {
+              edited = edited.addStringNoLocale(SM.deckPictureHost, kept);
+            }
+            return edited;
+          },
+          deck: changed,
+        };
+      });
+    },
+
     async removeCard(deck, card): Promise<void> {
       guard.assertUsable(deck);
       const cards = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
@@ -887,8 +905,9 @@ export function createSolidDeckRepository({
    * A new entry with what the deck says of the terms no shape owns, which
    * withDeck keeps as stored: a course's type (schema:Course, as its
    * release is typed), the chapters it completed (sm:completedChapter,
-   * as completeChapter adds one, bounded as a read bounds them) and the card language
-   * (sm:deckCardLanguage, as setCardLanguage sets it).
+   * as completeChapter adds one, bounded as a read bounds them), the card language
+   * (sm:deckCardLanguage, as setCardLanguage sets it) and the hosts whose
+   * pictures it shows (sm:deckPictureHost, as setPictureHost adds them).
    */
   function withOwnTerms(dataset: Dataset, deck: Deck): Dataset {
     const entry = getThing(dataset, deck.url)!;
@@ -904,6 +923,9 @@ export function createSolidDeckRepository({
     }
     if (deck.cardLanguage !== undefined)
       builder = builder.addStringNoLocale(SM.deckCardLanguage, deck.cardLanguage);
+    for (const host of deck.pictureHosts ?? []) {
+      builder = builder.addStringNoLocale(SM.deckPictureHost, host);
+    }
     return setThing(dataset, builder.build());
   }
 

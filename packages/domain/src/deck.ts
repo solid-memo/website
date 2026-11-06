@@ -252,6 +252,15 @@ export interface Deck {
    * language, then the browser's.
    */
   cardLanguage?: string;
+  /**
+   * The hosts whose pictures the learner chose to show on this deck's
+   * cards: `sm:deckPictureHost` on the catalog entry, a triple outside
+   * the deck's shape like `sm:deckCardLanguage`. Only a copy of a release
+   * outside the library's index asks (deckPictures.ts). A release never
+   * sets it. Absent means none chosen. Believed only in the learner's own
+   * pod: elsewhere, whoever writes the catalog could have stated it.
+   */
+  pictureHosts?: readonly string[];
 }
 
 /** What is on a card: its editable content, without identity. */

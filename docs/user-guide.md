@@ -196,6 +196,13 @@ screen allows. Pinch to zoom in, or double tap a spot to zoom in on it
 and double tap again to zoom back out; drag to look around. Tap once,
 press Escape, or throw the picture up or down to put it back.
 
+A deck or course you added from a link keeps its pictures hidden until
+you press **Show pictures from** the server they're on, as that server
+sees a request for each picture. The choice is for that deck and
+server, and the deck's Preferences page lets you take it back. A deck
+in an instance from someone else's Pod asks too, for as long as the page
+stays open, and so does a draft's preview in the Studio.
+
 A wrong card in a library deck, such as a bad translation? **Report a
 mistake**, under the card, opens a report on the project's issue
 tracker with the deck and the card filled in: say what's wrong. A deck

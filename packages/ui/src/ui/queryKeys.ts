@@ -27,6 +27,8 @@ export const queryKeys = {
   instances: (webId: string) => [...queryKeys.allInstances(), webId],
   /** The storages a WebID's profile names. */
   storages: (webId: string) => ["storages", webId],
+  /** Whether a document is in the learner's own pod (UseCases.isInOwnPod). */
+  inOwnPod: (url: string | null) => ["inOwnPod", url],
   /** Where a WebID's instances are registered, and may be. */
   registrationOptions: (webId: string) => ["registrationOptions", webId],
 

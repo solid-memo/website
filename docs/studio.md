@@ -1525,7 +1525,8 @@ A new draft starts from
     wrong options with it, its authors as the release's agents, the
     first as its publisher, its themes and EDUC.
   - The learner's own is left behind: where its documents are, its
-    study caps, its card language, its place among the groups, a
+    study caps, its card language, the hosts whose pictures it shows,
+    its place among the groups, a
     course's progress.
   - A deck copied from a release names it (`prov:wasDerivedFrom`),
     which is no source of the new release. The screen says the deck is
@@ -1999,6 +2000,9 @@ The trial ([`TrialContainer`](../apps/studio/src/ui/TrialContainer.tsx)),
 the draft's Trial tab, plays the draft as learners play the release it
 becomes: a course with Solid Memo's own course screens (its page, a
 chapter's steps, its final review), a deck with Solid Memo's study.
+Its pictures, and a question's preview's, stay hidden until the author
+chooses to show each host's, for as long as the page stays open
+([privacy.md](privacy.md#decks-and-drafts-from-elsewhere)).
 
 It's played in a sandbox, set up by `openTrial(draft, instanceUrl)`
 with `startTrial`, both in

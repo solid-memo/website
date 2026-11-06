@@ -13,7 +13,9 @@ import { librarySeriesUrlOf } from "./libraryLayout";
  * library deck: telling many decks takes time linear in them and in the
  * library, not in their product.
  */
-export function libraryCopyTest(library: readonly LibraryDeck[]): (deck: Deck) => boolean {
+export function libraryCopyTest(
+  library: readonly LibraryDeck[],
+): (deck: Pick<Deck, "sourceUrl">) => boolean {
   const series = new Set(library.map((libraryDeck) => libraryDeck.seriesUrl));
   const releases = new Set(
     library.flatMap((libraryDeck) => [

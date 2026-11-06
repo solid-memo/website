@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "@solid-memo/domain/appError";
+import { withPictureHost } from "@solid-memo/domain/deckPictures";
 import { vi } from "vitest";
 import { NO_PORTS } from "./noPorts";
 import type { Answer } from "@solid-memo/domain/answer";
@@ -186,6 +187,7 @@ export function makeDeps() {
       completedChapters: [...(completed.completedChapters ?? []), chapterUrl],
     })),
     setCompletedChapters: vi.fn(async (edited) => edited),
+    setPictureHost: vi.fn(async (edited, host, shown) => withPictureHost(edited, host, shown)),
     setCardLanguage: vi.fn(async (edited, language) =>
       language === null ? edited : { ...edited, cardLanguage: language },
     ),

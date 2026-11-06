@@ -316,7 +316,11 @@
     "front": "Front",
     "back": "Back",
     "question": "Question",
-    "answer": "Answer"
+    "answer": "Answer",
+    "pictureHidden": "Hidden. Showing it lets {host} see when you study this card.",
+    "showPictures": "Show pictures from {host}",
+    "picturesHidden": "Pictures from {host} are hidden. Showing them lets that server see when you open or study these cards.",
+    "picturesShown": "Pictures from {host} are shown for this deck."
   },
   "course": {
     "chaptersDone": {
@@ -709,6 +713,12 @@
       },
       "releaseHint": "Cards still as their library release has them are left out: a later release updates them.",
       "settled": "Every card says which language its text is in."
+    },
+    "pictures": {
+      "heading": "Pictures from other servers",
+      "intro": "You chose to show this deck's pictures from these servers. Each sees a request when you open or study a card with a picture from it.",
+      "hide": "Stop showing pictures from {host}",
+      "stopped": "Pictures from {host} are hidden again."
     }
   },
   "deckProvenance": {
@@ -2137,6 +2147,7 @@
     "label": "Link to the release",
     "show": "Show",
     "reading": "Reading and checking the release…",
-    "notLibrary": "This is not in Solid Memo's library: it is published on {host}. Solid Memo checked that it can read it, not what it says. Your copy remembers where it came from, and nothing is written there."
+    "notLibrary": "This is not in Solid Memo's library: it is published on {host}. Solid Memo checked that it can read it, not what it says. Your copy remembers where it came from, and nothing is written there.",
+    "picturesHidden": "Pictures on its cards stay hidden until you choose to show them, as each picture is a request to the server it is on."
   }
 }

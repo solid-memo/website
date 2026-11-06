@@ -330,7 +330,8 @@ loses only the link to the instance's data.
 │                        (sm:completedChapter); the language its
 │                        card text (and a course's text) is shown
 │                        in first (sm:deckCardLanguage, outside the
-│                        shape);
+│                        shape); the hosts whose pictures it shows
+│                        (sm:deckPictureHost, outside the shape);
 │                        beside each deck its
 │                        dcat:Distribution (#deck-X-cards) and the
 │                        foaf:Agent nodes of its creators (#agent-…);
@@ -674,6 +675,20 @@ graph LR
   Preferences page (`#/deck-preferences`, from the deck's page). A
   library release never sets them, and a library upgrade keeps the
   copy's.
+- **Picture hosts**: a deck copied from a release outside the library's
+  index shows a card's picture only from a host the learner chose for
+  it ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)). Each
+  is one `sm:deckPictureHost`, as a URL writes it with any port that
+  isn't the default.
+  Like `sm:deckCardLanguage` it belongs to no shape, every other write
+  of the deck keeps it as the entry has it, and only `setPictureHost`
+  adds or removes one, on the entry as it is then (If-Match). A new
+  entry is written with the deck's, a reader drops a value that's no
+  host, a library upgrade keeps them, and a release drafted from the
+  deck leaves them behind. A release never sets them: reading one
+  doesn't read the term. In a catalog outside the learner's own pod the
+  term isn't believed, as that pod's owner writes it, and nothing is
+  written of a choice there.
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, the version of its class's [shape](shapes.md) it
   conforms to. The instance is at 1, decks at 3 (DCAT), cards at 2
@@ -1469,8 +1484,8 @@ to a file. The domain names its parts
 An export holds triples as the pod has them, at the pod's IRIs:
 
 - the deck's entry in `catalog.ttl`, its distribution and the agents it
-  names as its creators, its card language (`sm:deckCardLanguage`) among
-  them, but not its `sm:position`, nor its `sm:completedChapter`s
+  names as its creators, its card language (`sm:deckCardLanguage`) and
+  picture hosts (`sm:deckPictureHost`) among them, but not its `sm:position`, nor its `sm:completedChapter`s
   unless the progress goes too;
 - every subject of its cards document: its cards and their wrong
   options, retired ones too, and whatever another app put there;

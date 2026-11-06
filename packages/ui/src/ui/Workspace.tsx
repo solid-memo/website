@@ -80,6 +80,7 @@ import {
 import { ValidationContainer } from "./ValidationContainer";
 import { WebIdDocumentContainer } from "./WebIdDocumentContainer";
 import { CardLanguage, CourseLanguage } from "./cardLanguage";
+import { DeckPictures } from "./deckPictures";
 import { useI18n, type I18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { useInstanceTheme } from "./theme";
@@ -938,18 +939,20 @@ export function Workspace({
         );
       case "deckDetail":
         return (
-          <DeckDetailContainer
-            useCases={useCases}
-            instance={activeInstance!}
-            deck={activeDeck!}
-            onStudy={() =>
-              navigate({
-                screen: "study",
-                instanceUrl: instanceUrl!,
-                deckUrl: deckUrl!,
-              })
-            }
-          />
+          <DeckPictures useCases={useCases} deck={activeDeck!}>
+            <DeckDetailContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              deck={activeDeck!}
+              onStudy={() =>
+                navigate({
+                  screen: "study",
+                  instanceUrl: instanceUrl!,
+                  deckUrl: deckUrl!,
+                })
+              }
+            />
+          </DeckPictures>
         );
       case "deckPreferences":
         return (
@@ -971,35 +974,37 @@ export function Workspace({
       case "browser":
         return (
           <CardLanguage language={activeDeck!.cardLanguage}>
-            <BrowserContainer
-              useCases={useCases}
-              deck={activeDeck!}
-              deckHref={deckHref(instanceUrl!, deckUrl!)}
-              page={route.page ?? 1}
-              languageFilter={route.languages}
-              addCardHref={routeToHash({
-                screen: "cardCreator",
-                instanceUrl: instanceUrl!,
-                deckUrl: deckUrl!,
-              })}
-              cardHref={(card) =>
-                routeToHash({
-                  screen: "card",
+            <DeckPictures useCases={useCases} deck={activeDeck!}>
+              <BrowserContainer
+                useCases={useCases}
+                deck={activeDeck!}
+                deckHref={deckHref(instanceUrl!, deckUrl!)}
+                page={route.page ?? 1}
+                languageFilter={route.languages}
+                addCardHref={routeToHash({
+                  screen: "cardCreator",
                   instanceUrl: instanceUrl!,
                   deckUrl: deckUrl!,
-                  cardUrl: card.url,
-                })
-              }
-              onPageChange={(page) => replace({ ...route, page })}
-              onLanguageFilterChange={(languages) =>
-                replace({
-                  screen: "browser",
-                  instanceUrl: route.instanceUrl,
-                  deckUrl: route.deckUrl,
-                  ...(languages === undefined ? {} : { languages }),
-                })
-              }
-            />
+                })}
+                cardHref={(card) =>
+                  routeToHash({
+                    screen: "card",
+                    instanceUrl: instanceUrl!,
+                    deckUrl: deckUrl!,
+                    cardUrl: card.url,
+                  })
+                }
+                onPageChange={(page) => replace({ ...route, page })}
+                onLanguageFilterChange={(languages) =>
+                  replace({
+                    screen: "browser",
+                    instanceUrl: route.instanceUrl,
+                    deckUrl: route.deckUrl,
+                    ...(languages === undefined ? {} : { languages }),
+                  })
+                }
+              />
+            </DeckPictures>
           </CardLanguage>
         );
       case "cardCreator":
@@ -1023,33 +1028,37 @@ export function Workspace({
         } as const;
         return (
           <CardLanguage key={activeCard!.url} language={activeDeck!.cardLanguage}>
-            <CardContainer
-              useCases={useCases}
-              deck={activeDeck!}
-              card={activeCard!}
-              onRemoved={() => replace(browser)}
-            />
-            <CardHistoryContainer
-              useCases={useCases}
-              instanceUrl={instanceUrl!}
-              deck={activeDeck!}
-              card={activeCard!}
-            />
+            <DeckPictures useCases={useCases} deck={activeDeck!}>
+              <CardContainer
+                useCases={useCases}
+                deck={activeDeck!}
+                card={activeCard!}
+                onRemoved={() => replace(browser)}
+              />
+              <CardHistoryContainer
+                useCases={useCases}
+                instanceUrl={instanceUrl!}
+                deck={activeDeck!}
+                card={activeCard!}
+              />
+            </DeckPictures>
           </CardLanguage>
         );
       }
       case "study":
         return (
           <CardLanguage language={activeDeck!.cardLanguage}>
-            <StudyContainer
-              useCases={useCases}
-              instance={activeInstance!}
-              deck={activeDeck!}
-              onExit={(studied) => {
-                setJustStudied(studied);
-                navigate({ screen: "home", instanceUrl: instanceUrl! });
-              }}
-            />
+            <DeckPictures useCases={useCases} deck={activeDeck!}>
+              <StudyContainer
+                useCases={useCases}
+                instance={activeInstance!}
+                deck={activeDeck!}
+                onExit={(studied) => {
+                  setJustStudied(studied);
+                  navigate({ screen: "home", instanceUrl: instanceUrl! });
+                }}
+              />
+            </DeckPictures>
           </CardLanguage>
         );
       case "cram":
@@ -1079,39 +1088,45 @@ export function Workspace({
       case "course":
         return (
           <CourseLanguage language={activeDeck!.cardLanguage}>
-            <CourseContainer
-              useCases={useCases}
-              instance={activeInstance!}
-              course={activeCourse!}
-              justCompleted={justCompleted ?? undefined}
-            />
+            <DeckPictures useCases={useCases} deck={activeDeck!}>
+              <CourseContainer
+                useCases={useCases}
+                instance={activeInstance!}
+                course={activeCourse!}
+                justCompleted={justCompleted ?? undefined}
+              />
+            </DeckPictures>
           </CourseLanguage>
         );
       case "courseChapter":
         return (
           <CourseLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
-            <ChapterPlayerContainer
-              useCases={useCases}
-              instance={activeInstance!}
-              course={activeCourse!}
-              chapter={activeChapter!}
-              onReview={() => navigate({ ...route, screen: "courseReview" })}
-            />
+            <DeckPictures useCases={useCases} deck={activeDeck!}>
+              <ChapterPlayerContainer
+                useCases={useCases}
+                instance={activeInstance!}
+                course={activeCourse!}
+                chapter={activeChapter!}
+                onReview={() => navigate({ ...route, screen: "courseReview" })}
+              />
+            </DeckPictures>
           </CourseLanguage>
         );
       case "courseReview":
         return (
           <CourseLanguage key={route.chapterUrl} language={activeDeck!.cardLanguage}>
-            <ChapterReviewContainer
-              useCases={useCases}
-              instance={activeInstance!}
-              course={activeCourse!}
-              chapter={activeChapter!}
-              onCompleted={(finishedCourse) => {
-                setJustCompleted({ chapterUrl: route.chapterUrl, finishedCourse });
-                navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
-              }}
-            />
+            <DeckPictures useCases={useCases} deck={activeDeck!}>
+              <ChapterReviewContainer
+                useCases={useCases}
+                instance={activeInstance!}
+                course={activeCourse!}
+                chapter={activeChapter!}
+                onCompleted={(finishedCourse) => {
+                  setJustCompleted({ chapterUrl: route.chapterUrl, finishedCourse });
+                  navigate({ screen: "course", instanceUrl: instanceUrl!, deckUrl: deckUrl! });
+                }}
+              />
+            </DeckPictures>
           </CourseLanguage>
         );
       case "preferences":
