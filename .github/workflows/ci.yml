@@ -1243,6 +1243,13 @@ jobs:
   # in their pull request, and the release commit is written by
   # semantic-release.
   #
+  # What commitlint does not read, check:merges does
+  # (docs/releasing.md#what-a-merge-commit-decides). On a pull request,
+  # that its commits commitlint skips, such as a revert, do not say they
+  # break. In the merge queue, that too, and that the merge commits it
+  # built hold no skip keyword or footer, as they hold pull requests'
+  # titles and land on main; it fails if the run built no merge commit.
+  #
   # The pull request closes its issue (CONTRIBUTING.md#commit-messages):
   # its body or a commit has `Closes: #NN` (or Fixes, Resolves), or the
   # body has `Refs: #NN`, for a pull request that is one step of it.
@@ -1260,13 +1267,25 @@ jobs:
       contents: read
       pull-requests: read
     steps:
-      - if: github.event_name != 'pull_request'
-        run: echo "Only a pull request's commits are linted; this run is for a ${{ github.event_name }}."
-      - if: github.event_name == 'pull_request'
+      - if: github.event_name != 'pull_request' && github.event_name != 'merge_group'
+        run: echo "Only a pull request's commits and a merge queue run's are read; this run is for a ${{ github.event_name }}."
+      - if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
+      # The script imports no package, so the queue installs nothing.
+      - if: github.event_name == 'merge_group'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - if: github.event_name == 'merge_group'
+        name: npm run check:merges -- --base <base> --head <head> --queue
+        env:
+          BASE: ${{ github.event.merge_group.base_sha }}
+          HEAD: ${{ github.event.merge_group.head_sha }}
+        run: npm run check:merges -- --base "$BASE" --head "$HEAD" --queue
       - if: github.event_name == 'pull_request'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -1291,6 +1310,12 @@ jobs:
             echo "::error::These merge commits are not linted: $merges. Update the branch by rebasing it on main instead (git rebase origin/main)."
             exit 1
           fi
+      - if: github.event_name == 'pull_request'
+        name: npm run check:merges -- --base <base> --head <head>
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: npm run check:merges -- --base "$BASE" --head "$HEAD"
       - if: github.event_name == 'pull_request' && github.event.pull_request.user.login != 'renovate[bot]' && (success() || failure())
         name: npm run check:closes -- --base <base> --head <head> --body-file <body>
         env:

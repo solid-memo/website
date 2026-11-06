@@ -330,3 +330,37 @@ describe("the Chromium action's cache input", () => {
     }
   });
 });
+
+// The commits job's reading of what commitlint doesn't read, on the
+// refs of the run's own event, and ci-ok's asking for the job
+// (docs/releasing.md#what-a-merge-commit-decides).
+describe("ci.yml's check:merges", () => {
+  const ci = jobs(read(".github/workflows/ci.yml"));
+  const commits = steps(ci.get("commits") ?? "", 6);
+  const step = (event: string) =>
+    commits.filter(
+      (text) => text.includes(`event_name == '${event}'`) && text.includes("check:merges"),
+    );
+
+  it("reads a merge queue run's commits, and asks for a merge commit", () => {
+    const [queue, ...rest] = step("merge_group");
+    expect(rest).toEqual([]);
+    expect(queue).toContain("BASE: ${{ github.event.merge_group.base_sha }}");
+    expect(queue).toContain("HEAD: ${{ github.event.merge_group.head_sha }}");
+    expect(queue).toContain('run: npm run check:merges -- --base "$BASE" --head "$HEAD" --queue');
+  });
+
+  it("reads a pull request's commits", () => {
+    const [pull, ...rest] = step("pull_request");
+    expect(rest).toEqual([]);
+    expect(pull).toContain("BASE: ${{ github.event.pull_request.base.sha }}");
+    expect(pull).toContain("HEAD: ${{ github.event.pull_request.head.sha }}");
+    expect(pull).toContain('run: npm run check:merges -- --base "$BASE" --head "$HEAD"\n');
+  });
+
+  it("counts toward ci-ok", () => {
+    const ok = ci.get("ci-ok") ?? "";
+    expect(ok).toMatch(/needs:\s*\[[^\]]*\bcommits\b/);
+    expect(ok).toContain("${{ needs.commits.result }}");
+  });
+});

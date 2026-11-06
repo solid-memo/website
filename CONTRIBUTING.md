@@ -135,6 +135,11 @@ they refuse a message that holds one of GitHub's keywords that skip CI
 (`[skip ci]`, `[ci skip]`, `[no ci]`, `[skip actions]`,
 `[actions skip]`, or a `skip-checks:` trailer), in upper or lower
 case: CI runs on every push to `main`, and the deploy only after it.
+The merge queue refuses those keywords in a pull request's title too,
+and a title that starts as a breaking change's footer, as the merge
+commit holds the title
+([docs/releasing.md](docs/releasing.md#what-a-merge-commit-decides)).
+A commit commitlint skips, such as a revert, may not say it breaks.
 `npm run lint:commits` lints the commits since `origin/main`, so from a
 fork, sync the fork's `main` with this repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the
