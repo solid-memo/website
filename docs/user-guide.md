@@ -443,6 +443,12 @@ the deck's, press **These are this deck's documents**, check the
 addresses once more and press **Mark them as the deck's**. The deck
 then works like any other.
 
+Some decks have no such button: those with a document outside the
+instance's folder, when Solid Memo finds no Pod of yours that holds both
+the document and the instance. A deck from someone else's Pod that names
+a document outside that Pod is one. The notice says which document and
+why, and the document stays as it is.
+
 ## Solid Memo Studio
 
 "Open in Studio", in the instance bar, on a deck's page or in a deck's

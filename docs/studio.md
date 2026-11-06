@@ -1303,7 +1303,10 @@ outside the instance's own folder,
 named with its documents' addresses (`UnclaimedDecksNotice`). "These
 are this deck's documents" asks once more, then marks them as the
 deck's (`claimDeckDocuments`), and the checks are read afresh. Until
-then nothing in those documents changes.
+then nothing in those documents changes. A deck with a document outside
+the instance's folder, and not in a storage of the user's found to hold
+the instance too (`isInInstancePod`), has no such button: the notice
+says which document and why.
 
 The badge on [Home](#home) counts every violation (warnings aside),
 side to settle, group of cards that say the same, and Markdown finding

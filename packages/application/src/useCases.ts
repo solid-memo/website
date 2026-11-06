@@ -247,6 +247,8 @@ export function createUseCases({
     repairRepository,
     deckLibrary,
     digestStore,
+    storageGateway,
+    webId,
     ruleset,
   });
   const courses = createCourseUseCases({

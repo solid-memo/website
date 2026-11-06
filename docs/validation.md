@@ -137,7 +137,10 @@ flowchart LR
   check and the
   Studio's Health screen show them (`UnclaimedDecksNotice`) with "These
   are this deck's documents", which claims them once the user confirms
-  (`claimDeckDocuments`), for the next check.
+  (`claimDeckDocuments`), for the next check. A document outside the
+  instance's folder, and not in a storage of the user's found to hold
+  the instance too (`isInInstancePod`), is named in `outsidePod` too,
+  and its deck gets no such button.
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled:
   they're published with the site, so the browser checks against the

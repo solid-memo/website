@@ -16,6 +16,7 @@ const SPANISH: UnclaimedDeck = {
   deckUrl: `${INSTANCE}catalog.ttl#deck-1`,
   title: { en: "Spanish" },
   documents: [`${INSTANCE}spanish.ttl`, `${INSTANCE}spanish-reviews.ttl`],
+  outsidePod: [],
 };
 
 function renderNotice(useCases: UseCases, decks: readonly UnclaimedDeck[] = [SPANISH]) {
@@ -64,6 +65,19 @@ describe("UnclaimedDecksNotice", () => {
       expect(invalidate).toHaveBeenCalledWith({ queryKey: ["validation", INSTANCE] }),
     );
     expect(screen.queryByRole("button", { name: "Mark them as the deck's" })).toBeNull();
+  });
+
+  it("offers no claim of a deck with a document outside the instance's pod, and says which and why", () => {
+    const outside = "https://alice.example/profile/card";
+    renderNotice(makeUseCasesFake(), [
+      { ...SPANISH, documents: [...SPANISH.documents, outside], outsidePod: [outside] },
+      { ...SPANISH, deckUrl: `${INSTANCE}catalog.ttl#deck-2` },
+    ]);
+    expect(screen.getByText(/they are outside this instance's folder/)).toHaveTextContent(outside);
+    // Only the other deck, all of whose documents are in the pod, can be claimed.
+    expect(screen.getAllByRole("button", { name: "These are this deck's documents" })).toHaveLength(
+      1,
+    );
   });
 
   it("says why a claim failed, and shows it is under way meanwhile", async () => {

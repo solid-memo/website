@@ -446,13 +446,14 @@
   "unclaimedDecks": {
     "region": "Paquets à confirmer",
     "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant que vous n’avez pas confirmé qu’ils sont ceux des paquets.",
-    "hint": "Les documents d’un paquet ici n’indiquent pas qu’ils lui appartiennent, et ils se trouvent hors du dossier propre de l’instance, où les données de quelqu’un d’autre pourraient être désignées. Solid Memo les lit et vous permet d’en étudier, mais n’y enregistre ni réponse ni modification, et retirer le paquet ne retire que son entrée. Ne confirmez que des documents dont vous savez qu’ils sont ceux du paquet.",
+    "hint": "Les documents d’un paquet ici n’indiquent pas qu’ils lui appartiennent, et ils se trouvent hors du dossier propre de l’instance, où les données de quelqu’un d’autre pourraient être désignées. Solid Memo les lit et vous permet d’en étudier, mais n’y enregistre ni réponse ni modification, et retirer le paquet ne retire que son entrée. Là où Solid Memo le propose, ne confirmez que des documents dont vous savez qu’ils sont ceux du paquet.",
     "deck": "{deck} : ses documents n’indiquent pas qu’ils appartiennent à ce paquet.",
     "claim": "Ce sont les documents de ce paquet",
     "confirm": "Solid Memo marquera ces documents comme ceux de {deck}, puis les modifiera et les supprimera avec le paquet :",
     "confirmButton": "Les marquer comme ceux du paquet",
     "cancel": "Annuler",
-    "claiming": "Marquage…"
+    "claiming": "Marquage…",
+    "outsidePod": "Solid Memo ne peut pas marquer ces documents comme ceux du paquet : ils se trouvent hors du dossier de cette instance, et Solid Memo n’a trouvé aucun de vos Pods contenant à la fois ces documents et l’instance. Ils restent tels quels :"
   },
   "deckAbout": {
     "label": "À propos de ce paquet",
@@ -1776,7 +1777,8 @@
     "dataNotConforming": "Solid Memo n’a pas enregistré ceci : ce n’est pas au format attendu par Solid Memo. Rien n’a été modifié. Rechargez la page et réessayez.",
     "deckGone": "Le paquet « {deck} » n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "cardsDocumentGone": "Les cartes de « {deck} » sont désormais introuvables. Rechargez la page et réessayez.",
-    "deckDocumentUnclaimed": "Solid Memo n’a pas modifié « {deck} » : ses documents n’indiquent pas qu’ils appartiennent à ce paquet. Rien n’a été modifié. Là où la vérification des données liste le paquet, confirmez qu’il s’agit de ses documents, puis réessayez.",
+    "deckDocumentUnclaimed": "Solid Memo n’a pas modifié « {deck} » : ses documents n’indiquent pas qu’ils appartiennent à ce paquet. Rien n’a été modifié. Si la vérification des données le propose pour ce paquet, confirmez qu’il s’agit de ses documents, puis réessayez.",
+    "claimOutsidePod": "Solid Memo n’a pas marqué les documents de « {deck} » comme ceux du paquet : {url} se trouve hors du dossier de cette instance, et Solid Memo n’a trouvé aucun de vos Pods contenant à la fois ce document et l’instance. Rien n’a été modifié.",
     "cardGone": "Cette carte n’existe plus. Elle a peut-être été supprimée dans un autre onglet ou une autre application. Rechargez la page.",
     "notADeck": "Ce n’est pas un paquet Solid Memo, il ne peut donc pas être ajouté. Choisissez un autre paquet.",
     "libraryIdsRepeat": "Ce paquet donne le même identifiant à deux de ses cartes ou mauvaises réponses, Solid Memo ne peut donc pas le lire. Demandez à son créateur de le vérifier.",

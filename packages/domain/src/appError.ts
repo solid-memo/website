@@ -151,7 +151,9 @@ export const ERROR_TEMPLATES = {
   deckGone: "The deck “{deck}” no longer exists. Perhaps it was removed in another tab or app.",
   cardsDocumentGone: "The cards of “{deck}” can no longer be found. Reload the page and try again.",
   deckDocumentUnclaimed:
-    "Solid Memo did not change “{deck}”: its documents do not say they belong to this deck. Nothing was changed. Where the data check lists the deck, confirm that they are its documents, then try again.",
+    "Solid Memo did not change “{deck}”: its documents do not say they belong to this deck. Nothing was changed. If the data check offers it for this deck, confirm that they are its documents, then try again.",
+  claimOutsidePod:
+    "Solid Memo did not mark the documents of “{deck}” as the deck's: {url} is outside this instance's folder, and Solid Memo found no Pod of yours that holds both that document and the instance. Nothing was changed.",
   cardGone:
     "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
   notADeck: "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",

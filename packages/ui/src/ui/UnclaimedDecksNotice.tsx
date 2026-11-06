@@ -18,7 +18,8 @@ import { queryKeys } from "./queryKeys";
  * "Where an instance's documents are"): each with its documents'
  * addresses and "These are this deck's documents", which asks once more,
  * then marks them as the deck's (UseCases.claimDeckDocuments) and reads
- * every check of the instance afresh. Nothing when there are none.
+ * every check of the instance afresh. A deck with documents that may not
+ * be claimed (`outsidePod`) has no such button, and says which and why. Nothing when there are none.
  * Solid Memo shows it with the data check; the Studio, on its Health
  * screen.
  */
@@ -58,7 +59,11 @@ export function UnclaimedDecksNotice({
                 </li>
               ))}
             </ul>
-            {confirming === deck.deckUrl ? (
+            {deck.outsidePod.length > 0 ? (
+              <p>
+                {t("unclaimedDecks.outsidePod")} {deck.outsidePod.join(", ")}
+              </p>
+            ) : confirming === deck.deckUrl ? (
               <p>
                 {tx("unclaimedDecks.confirm", { deck: <ReaderText text={deck.title} /> })}{" "}
                 {deck.documents.join(", ")}{" "}

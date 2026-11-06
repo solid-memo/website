@@ -437,13 +437,14 @@
   "unclaimedDecks": {
     "region": "Zu bestätigende Stapel",
     "heading": "Solid Memo ändert nichts an den Dokumenten dieser Stapel, bis du bestätigst, dass es die eigenen Dokumente der Stapel sind.",
-    "hint": "Die Dokumente eines Stapels hier geben nicht an, dass sie zu ihm gehören, und sie liegen außerhalb des eigenen Ordners der Instanz, wo auch Daten anderer genannt sein könnten. Solid Memo liest sie und lernt mit ihnen, speichert dort aber keine Antworten oder Änderungen, und wenn du den Stapel entfernst, wird nur sein Eintrag entfernt. Bestätige nur Dokumente, von denen du weißt, dass sie zum Stapel gehören.",
+    "hint": "Die Dokumente eines Stapels hier geben nicht an, dass sie zu ihm gehören, und sie liegen außerhalb des eigenen Ordners der Instanz, wo auch Daten anderer genannt sein könnten. Solid Memo liest sie und lernt mit ihnen, speichert dort aber keine Antworten oder Änderungen, und wenn du den Stapel entfernst, wird nur sein Eintrag entfernt. Wo Solid Memo es anbietet, bestätige nur Dokumente, von denen du weißt, dass sie zum Stapel gehören.",
     "deck": "{deck}: Seine Dokumente geben nicht an, dass sie zu diesem Stapel gehören.",
     "claim": "Das sind die Dokumente dieses Stapels",
     "confirm": "Solid Memo markiert diese Dokumente als Dokumente von {deck} und ändert und entfernt sie von da an mit dem Stapel:",
     "confirmButton": "Als Dokumente des Stapels markieren",
     "cancel": "Abbrechen",
-    "claiming": "Wird markiert …"
+    "claiming": "Wird markiert …",
+    "outsidePod": "Solid Memo kann diese Dokumente nicht als Dokumente des Stapels markieren: Sie liegen außerhalb des Ordners dieser Instanz, und Solid Memo hat keinen deiner Pods gefunden, der sowohl sie als auch die Instanz enthält. Sie bleiben, wie sie sind:"
   },
   "deckAbout": {
     "label": "Über diesen Stapel",
@@ -1699,7 +1700,8 @@
     "dataNotConforming": "Solid Memo hat dies nicht gespeichert: Es hat nicht das Format, das Solid Memo erwartet. Es wurde nichts geändert. Lade die Seite neu und versuche es erneut.",
     "deckGone": "Den Stapel „{deck}“ gibt es nicht mehr. Vielleicht wurde er in einem anderen Tab oder einer anderen App entfernt.",
     "cardsDocumentGone": "Die Karten von „{deck}“ lassen sich nicht mehr finden. Lade die Seite neu und versuche es erneut.",
-    "deckDocumentUnclaimed": "Solid Memo hat „{deck}“ nicht geändert: Seine Dokumente geben nicht an, dass sie zu diesem Stapel gehören. Es wurde nichts geändert. Bestätige dort, wo die Datenprüfung den Stapel auflistet, dass es seine Dokumente sind, und versuche es dann erneut.",
+    "deckDocumentUnclaimed": "Solid Memo hat „{deck}“ nicht geändert: Seine Dokumente geben nicht an, dass sie zu diesem Stapel gehören. Es wurde nichts geändert. Wenn die Datenprüfung es für diesen Stapel anbietet, bestätige, dass es seine Dokumente sind, und versuche es dann erneut.",
+    "claimOutsidePod": "Solid Memo hat die Dokumente von „{deck}“ nicht als Dokumente des Stapels markiert: {url} liegt außerhalb des Ordners dieser Instanz, und Solid Memo hat keinen deiner Pods gefunden, der sowohl das Dokument als auch die Instanz enthält. Es wurde nichts geändert.",
     "cardGone": "Diese Karte gibt es nicht mehr. Vielleicht wurde sie in einem anderen Tab oder einer anderen App entfernt. Lade die Seite neu.",
     "notADeck": "Das ist kein Stapel von Solid Memo, daher kann er nicht hinzugefügt werden. Wähle einen anderen Stapel.",
     "libraryIdsRepeat": "Dieser Stapel gibt zwei seiner Karten oder falschen Antwortmöglichkeiten dieselbe ID, daher kann Solid Memo ihn nicht lesen. Bitte die Person, die ihn erstellt hat, ihn zu prüfen.",

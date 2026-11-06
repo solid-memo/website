@@ -856,7 +856,7 @@ describe("createAppUseCases", () => {
       expect.objectContaining({ documents: [`${attacker}reviews.ttl`] }),
     ]);
     await expect(useCases.claimDeckDocuments(instance.url, deck!.url)).rejects.toMatchObject({
-      code: "writeOutsidePod",
+      code: "claimOutsidePod",
     });
     // An export reads them as no one too.
     await given.get("createSolidDeckArchive")!.fetch(`${attacker}cards.ttl`);
@@ -869,6 +869,80 @@ describe("createAppUseCases", () => {
     // The user's own pod is still theirs.
     expect(login.sent).toContain(`${alice}memo/catalog.ttl`);
     // What the digest learned is written back after, into Alice's pod: until it is, the network stays.
+    await digestWritten();
+  });
+
+  it("claims no document of the user's pod for an instance attached from someone else's, and those of the user's own instance in another folder", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const bob = "https://bob.example/";
+    const profile = `${alice}profile/card`;
+    const old = `${alice}private/old.ttl`;
+    const card = `<#mine> a <https://solid-memo.com/ns/vocab/v1.ttl#Card> .`;
+    const pod = podAt(alice);
+    const theirs = podAt(bob);
+    const sent = podsNetwork({ [alice]: pod, [bob]: theirs });
+    await put(pod, profile, `<#me> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`);
+    await put(pod, old, card);
+    await put(
+      theirs,
+      `${bob}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${bob}>.`,
+    );
+    const digestWritten = digestWork();
+
+    // Bob's instance, whose catalog comes to name Alice's documents as a deck's.
+    login.webId = `${bob}profile/card#me`;
+    const bobs = createAppUseCases({ ...options, indexedDB: undefined });
+    const shared = await bobs.createInstance(
+      { webId: login.webId },
+      { containerUrl: `${bob}memo/`, name: "Shared", registrationTarget: "private" },
+    );
+    const made = await bobs.createDeck(shared.url, { en: "Spanish" });
+    const catalog = `${bob}memo/catalog.ttl`;
+    const named = (await (await theirs(catalog)).text())
+      .replaceAll(made.cardsDocumentUrl, old)
+      .replaceAll(made.reviewsDocumentUrl, profile);
+    await put(theirs, catalog, named);
+    await digestWritten();
+
+    login.webId = `${alice}profile/card#me`;
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+    await useCases.attachInstanceByUrl(session, shared.url, "private");
+    const report = await useCases.checkInstance(shared.url);
+    expect(report.unclaimed).toEqual([
+      expect.objectContaining({ documents: [old, profile], outsidePod: [old, profile] }),
+    ]);
+    const before = [await (await pod(old)).text(), await (await pod(profile)).text()];
+    sent.length = 0;
+    await expect(useCases.claimDeckDocuments(shared.url, made.url)).rejects.toMatchObject({
+      code: "claimOutsidePod",
+    });
+    expect(
+      sent.filter(({ url, method }) => url.startsWith(alice) && !["GET", "HEAD"].includes(method)),
+    ).toEqual([]);
+    expect([await (await pod(old)).text(), await (await pod(profile)).text()]).toEqual(before);
+
+    // The user's own instance, naming a document elsewhere in the same pod.
+    const own = await useCases.createInstance(session, {
+      containerUrl: `${alice}memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const mine = await useCases.createDeck(own.url, { en: "Capitals" });
+    const ownCatalog = `${alice}memo/catalog.ttl`;
+    await put(
+      pod,
+      ownCatalog,
+      (await (await pod(ownCatalog)).text()).replaceAll(mine.cardsDocumentUrl, old),
+    );
+    const [unclaimed] = (await useCases.checkInstance(own.url)).unclaimed!;
+    expect(unclaimed).toMatchObject({ documents: [old], outsidePod: [] });
+    await useCases.claimDeckDocuments(own.url, mine.url);
+    expect((await useCases.checkInstance(own.url)).unclaimed).toBeUndefined();
+    expect(await (await pod(old)).text()).toContain(mine.url);
     await digestWritten();
   });
 

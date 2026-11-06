@@ -79,6 +79,13 @@ export interface UnclaimedDeck {
   title: LangText;
   /** The documents that do not say so, as the catalog names them. */
   documents: string[];
+  /**
+   * Those of them outside the instance's folder and not in a storage of
+   * the user's found to hold the instance too: never claimed, so the
+   * deck's documents are not claimed while there is any
+   * (InstanceCheckUseCases.claimDeckDocuments).
+   */
+  outsidePod: string[];
 }
 
 export interface ValidationReport {
