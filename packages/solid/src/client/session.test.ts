@@ -142,7 +142,12 @@ const harness: SessionHarness = {
       info: webId === undefined ? { isLoggedIn: false } : { isLoggedIn: true, webId },
     } as never);
   },
-  logins: () => vi.mocked(login).mock.calls.map(([options]) => options as LoginOptions),
+  logins: () =>
+    vi.mocked(login).mock.calls.map(([options]) => {
+      // The session's ID is this implementation's own, not part of the contract.
+      const { sessionId: _, ...asked } = options as LoginOptions & { sessionId: string };
+      return asked;
+    }),
   logouts: () => vi.mocked(logout).mock.calls.length,
 };
 
@@ -257,6 +262,17 @@ describe("createSessionClient, over the library", () => {
     vi.mocked(login).mockRejectedValue(new Error("unreachable"));
     await expect(createSessionClient().login(LOGIN)).rejects.toThrow("unreachable");
     expect(window.sessionStorage.getItem(PROVIDER_REDIRECT_KEY)).toBeNull();
+  });
+
+  it("starts every login under a new session ID", async () => {
+    await createSessionClient().login(LOGIN);
+    await createSessionClient().login(LOGIN);
+    const [first, second] = vi.mocked(login).mock.calls.map(([options]) => options) as [
+      { sessionId: string },
+      { sessionId: string },
+    ];
+    expect(first.sessionId).not.toBe("");
+    expect(second.sessionId).not.toBe(first.sessionId);
   });
 
   it("stops listening for logins and restores afterward, even on failure", async () => {

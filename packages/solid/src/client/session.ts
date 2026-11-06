@@ -7,11 +7,14 @@ import {
   events,
   getDefaultSession,
   handleIncomingRedirect,
+  type ILoginInputOptions,
   login,
   logout,
 } from "@inrupt/solid-client-authn-browser";
+import { AppError } from "@solid-memo/domain/appError";
 import type { SessionClient } from "./interface";
 import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
+import { limitedFetch, PROFILE_LIMITS, refusalOf } from "./readLimits";
 
 /**
  * The sign-in client (SessionClient, interface.ts) over
@@ -82,10 +85,63 @@ function dropUnaskedAnswer(): void {
   window.history.replaceState(window.history.state, "", url.href);
 }
 
+/** Where the library reads a provider's metadata, at a login and again at each refresh. */
+const METADATA_PATH = "/.well-known/openid-configuration";
+
+/**
+ * Whether metadata names an endpoint whose parsed path starts with `//`.
+ * The library signs a request's DPoP proof for the path read against
+ * the origin, and such a path reads as another host. A value that is no
+ * string is read as the library reads it, which turns it into one.
+ */
+function namesAnotherHost(metadata: unknown): boolean {
+  return Object.entries(metadata ?? {}).some(([field, value]) => {
+    if (!field.endsWith("_endpoint") && field !== "jwks_uri") return false;
+    const url = String(value);
+    return URL.canParse(url) && new URL(url).pathname.startsWith("//");
+  });
+}
+
+const guardedFetches = new WeakSet<typeof globalThis.fetch>();
+
+/**
+ * Refuses such metadata wherever the library reads it. That has to be
+ * at the global fetch: a refresh reads the metadata anew and calls that
+ * fetch itself, so nothing else of the app sees it, and the library has
+ * no option for its own. Every request passes through; only an answer
+ * from an address ending in the metadata's path is looked at, under
+ * PROFILE_LIMITS. Any document can sit at this path, and the limits of
+ * the read that asked for it wrap this fetch, so they apply only once it
+ * has answered; these allow a profile all its own do, and past them the
+ * read fails as too large. A login and a restore put it in place: a
+ * session comes from one of them.
+ */
+function guardProviderMetadata(): void {
+  const { fetch: next } = globalThis;
+  if (guardedFetches.has(next)) return;
+  const limited = limitedFetch((input, init) => next.call(globalThis, input, init), PROFILE_LIMITS);
+  const guarded: typeof globalThis.fetch = async (input, init) => {
+    const url = String(input);
+    if (!url.endsWith(METADATA_PATH)) return next.call(globalThis, input, init);
+    const response = await limited(input, init);
+    const metadata: unknown = await response
+      .clone()
+      .json()
+      .catch(() => null);
+    const tooLarge = refusalOf(response);
+    if (tooLarge !== undefined) throw tooLarge;
+    if (namesAnotherHost(metadata)) throw new AppError("loginProviderRefused", { url });
+    return response;
+  };
+  guardedFetches.add(guarded);
+  globalThis.fetch = guarded;
+}
+
 /** The sign-in client on @inrupt/solid-client-authn-browser's default session. */
 export function createSessionClient(): SessionClient {
   return {
     async restore() {
+      guardProviderMetadata();
       dropUnaskedAnswer();
       let fromLogin = false;
       const onLogin = () => {
@@ -124,9 +180,15 @@ export function createSessionClient(): SessionClient {
     },
 
     async login(options) {
+      guardProviderMetadata();
       window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "login");
       try {
-        await login(options);
+        // A new ID each time, never the one this page restored: the
+        // library reads a session's provider from localStorage by its ID
+        // alone, so under that ID every other tab's refresh would go to
+        // this login's provider. A silent restore does not come here: it
+        // stays under the session's ID, at the session's provider.
+        await login({ ...options, sessionId: crypto.randomUUID() } as ILoginInputOptions);
       } catch (error) {
         window.sessionStorage.removeItem(PROVIDER_REDIRECT_KEY);
         throw error;
