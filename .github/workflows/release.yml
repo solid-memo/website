@@ -133,9 +133,9 @@ jobs:
        needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))
     runs-on: ubuntu-latest
     # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
-    # apt-get three minutes and one more try) before semantic-release
+    # apt-get four tries of three minutes) before semantic-release
     # starts, so a stall never cuts a release short.
-    timeout-minutes: 30
+    timeout-minutes: 42
     permissions:
       contents: write
       actions: read

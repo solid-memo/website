@@ -288,7 +288,7 @@ jobs:
       attestations: write
       artifact-metadata: write
     # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
-    # apt-get three minutes and one more try), as the libraries come from
+    # apt-get four tries of three minutes), as the libraries come from
     # it every time.
     timeout-minutes: 30
     steps:

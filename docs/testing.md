@@ -463,7 +463,7 @@ installed from them
 mirror often stalls for minutes, at times past a job's timeout.
 Their key is the runner image's (`ImageOS`, `ImageVersion`) with
 playwright-core's version. A job asks the mirror only when the cache
-has none, each `apt-get` given three minutes and one more try, and
+has none, each `apt-get` given four tries of three minutes, and
 saves the download only on `main`. The `caches` job keeps
 `main`'s two newest entries per browser (GitHub rolls a new image out
 over days). The release workflow's jobs restore nothing from the cache

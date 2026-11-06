@@ -12,8 +12,9 @@
 # files fit, and playwright-core's version, which fixes the list: a new
 # image or a new Playwright is a new entry.
 #
-# On a miss, the job asks the mirror, each apt-get given three minutes
-# and one more try, so a stall costs minutes rather than the job, and,
+# On a miss, the job asks the mirror, each apt-get given four tries of
+# three minutes, each going on from what the last one downloaded, so a
+# stall costs minutes rather than the job, and,
 # on main only, saves what it downloaded (a pull request's or the merge
 # queue's copy would be kept under its own ref, never read again). Where
 # main's run skips the jobs that would save it, warm-browsers does
@@ -68,9 +69,9 @@ runs:
         FONTS: ${{ inputs.fonts }}
       run: |
         apt() {
-          for try in 1 2; do
+          for try in 1 2 3 4; do
             sudo timeout 180 apt-get -q -o Acquire::Retries=3 "$@" && return
-            echo "::warning::apt-get $1 failed or took over three minutes (try $try of 2)"
+            echo "::warning::apt-get $1 failed or took over three minutes (try $try of 4)"
           done
           return 1
         }
