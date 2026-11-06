@@ -62,6 +62,11 @@ export class ImportUrl extends Screen {
     await expect(this.fact(this.t("libraryDeck.kind"))).toHaveText(this.t(`libraryDeck.${kind}`));
   }
 
+  /** The screen says the release's pictures stay hidden until the learner chooses to show them. */
+  async expectPicturesHidden(): Promise<void> {
+    await expect(this.page.getByText(this.t("importUrl.picturesHidden"))).toBeVisible();
+  }
+
   /** What the release's facts say after the term `term` (that term exactly: "Release" is not "Release notes"). */
   private fact(term: string) {
     return this.page

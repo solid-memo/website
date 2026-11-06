@@ -53,6 +53,28 @@ function renderContainer(useCases: UseCases, shown: Deck = deck, section?: "lang
 }
 
 describe("DeckPreferencesContainer", () => {
+  it("stops showing the deck's pictures from a host, and reads the decks anew", async () => {
+    const useCases = makeUseCasesFake();
+    const shown = { ...deck, pictureHosts: ["a.example"] };
+    const { queryClient } = renderContainer(useCases, shown);
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Stop showing pictures from a.example" }),
+    );
+    await waitFor(() =>
+      expect(useCases.setDeckPictureHost).toHaveBeenCalledWith(shown, "a.example", false),
+    );
+    await waitFor(() => expect(invalidate).toHaveBeenCalled());
+  });
+
+  it("lists no host a deck's entry states outside the learner's pod", async () => {
+    const useCases = makeUseCasesFake({ isInOwnPod: vi.fn(async () => false) });
+    renderContainer(useCases, { ...deck, pictureHosts: ["a.example"] });
+    await waitFor(() => expect(useCases.isInOwnPod).toHaveBeenCalled());
+    await screen.findByRole("button", { name: "Remove" }).catch(() => undefined);
+    expect(screen.queryByRole("button", { name: /Stop showing pictures/ })).toBeNull();
+  });
+
   it("shows a loading state, then the form against the instance's preferences", async () => {
     const useCases = makeUseCasesFake({
       getPreferences: vi.fn(async () => ({ ...DEFAULT_PREFERENCES, newCardsPerDay: 7 })),

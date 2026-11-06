@@ -8,6 +8,7 @@ import type { Choice } from "@solid-memo/domain/course";
 import { isMarkdown, promptSides, type CardContent } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import { CardFace } from "./CardFace";
+import { useLoadsAhead } from "./deckPictures";
 import { useCardText } from "./cardLanguage";
 import { DataText, plainDataText } from "./DataText";
 import { ErrorMessage } from "./ErrorMessage";
@@ -83,6 +84,7 @@ export function CourseQuestion({
   const { question, answer: rightAnswer } = promptSides({ card, direction: "front-to-back" });
   const correct = choices.find((choice) => choice.correct)!;
   const checked = answer !== null;
+  const loadsAhead = useLoadsAhead(rightAnswer.imageUrl);
   const shownQuestion = cardText(question.text);
   const blocks = markdown ? markdownBlocks(shownQuestion) : null;
   // A question that is one paragraph is all in its name: no description repeats it.
@@ -157,9 +159,15 @@ export function CourseQuestion({
       >
         {verdict}
       </p>
-      {answer !== null && (
-        <div ref={feedbackRef} class="course-feedback" tabIndex={-1} onKeyDown={onFeedbackKeyDown}>
-          {answer.choice.note !== undefined &&
+      {(checked || loadsAhead) && (
+        <div
+          ref={feedbackRef}
+          class="course-feedback"
+          tabIndex={-1}
+          hidden={!checked}
+          onKeyDown={onFeedbackKeyDown}
+        >
+          {answer?.choice.note !== undefined &&
             (markdown ? (
               <div class="course-why">
                 <span class="course-why-label">{t("courseQuestion.why")}</span>{" "}

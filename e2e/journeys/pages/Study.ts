@@ -87,6 +87,34 @@ export class Study extends Screen {
     return (await this.page.getByRole("main").locator(".study-face").first().innerText()).trim();
   }
 
+  /** The question's picture is not on the page: the choice to show the host's stands in its place. */
+  async expectPictureHidden(host: string): Promise<void> {
+    await expect(this.showPicturesButton(host)).toBeVisible();
+    await expect(this.page.getByRole("main").locator(".study-face img")).toHaveCount(0);
+  }
+
+  /** Chooses to show the host's pictures for this deck: the question's takes the choice's place. */
+  async showPictures(host: string): Promise<void> {
+    await this.intent(`Show pictures from ${host}`, async () => {
+      await this.showPicturesButton(host).click();
+      await expect(this.showPicturesButton(host)).toHaveCount(0);
+      await expect(this.page.getByRole("main").locator(".study-face img").first()).toBeVisible();
+    });
+  }
+
+  /** How many answers' pictures are in sight, out of the card's. */
+  async expectPictureShown(answers: number): Promise<void> {
+    await expect(this.page.getByRole("main").locator(".card-answer img:visible")).toHaveCount(
+      answers,
+    );
+  }
+
+  private showPicturesButton(host: string) {
+    return this.page
+      .getByRole("main")
+      .getByRole("button", { name: this.t("cardFace.showPictures", { host }), exact: true });
+  }
+
   async reveal(): Promise<void> {
     await this.intent("Reveal the answer", async () => {
       await this.page

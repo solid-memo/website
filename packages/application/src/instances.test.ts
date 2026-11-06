@@ -14,6 +14,7 @@ import {
 import { DEFAULT_PREFERENCES, NEW_INSTANCE_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { defaultCatalogDescription } from "@solid-memo/domain/catalog";
+import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import {
   session,
@@ -36,6 +37,19 @@ describe("instances", () => {
     const useCases = createUseCases(deps);
     await expect(useCases.listStorages(session)).resolves.toEqual([storage]);
     expect(deps.storageGateway.discoverStorages).toHaveBeenCalledWith(session.webId);
+  });
+  it("isInOwnPod is true in a storage of the one signed in, or in a guest's pod, false anywhere else or when no one is, and rejects when the storages cannot be read", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    const inStorage = `${storage.url}memo/catalog.ttl`;
+    await expect(useCases.isInOwnPod(inStorage)).resolves.toBe(true);
+    await expect(useCases.isInOwnPod("https://bob.example/memo/catalog.ttl")).resolves.toBe(false);
+    await expect(useCases.isInOwnPod(`${GUEST_INSTANCE_URL}catalog.ttl`)).resolves.toBe(true);
+    vi.mocked(deps.webId).mockReturnValue(undefined);
+    await expect(useCases.isInOwnPod(inStorage)).resolves.toBe(false);
+    vi.mocked(deps.webId).mockReturnValue(session.webId);
+    vi.mocked(deps.storageGateway.discoverStorages).mockRejectedValue(new Error("offline"));
+    await expect(useCases.isInOwnPod(inStorage)).rejects.toThrow("offline");
   });
   it("addManualStorage trims the URL before probing", async () => {
     const deps = makeDeps();

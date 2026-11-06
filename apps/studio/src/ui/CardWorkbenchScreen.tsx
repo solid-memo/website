@@ -18,6 +18,7 @@ import {
 import type { CardEdit, CardEditPlan, SkipReason } from "@solid-memo/domain/cardBulk";
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
 import { CardRowBack, CardRowFront } from "@solid-memo/ui/CardFace";
+import { HiddenPicturesNotice } from "@solid-memo/ui/deckPictures";
 import { useCardText } from "@solid-memo/ui/cardLanguage";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { cardName, cardNameText } from "@solid-memo/ui/DataText";
@@ -456,6 +457,9 @@ export function CardWorkbenchScreen({
             <p>{t("studio.cards.noMatch")}</p>
           ) : (
             <>
+              <HiddenPicturesNotice
+                urls={shown.flatMap(({ card }) => [card.frontImageUrl, card.backImageUrl])}
+              />
               <DataTable
                 caption={tx("studio.cards.caption", { deck: <ReaderText text={deck.title} /> })}
                 class="studio-cards"

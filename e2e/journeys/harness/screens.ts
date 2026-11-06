@@ -88,11 +88,7 @@ export type ScreenName = (typeof TOURS)[Tour][number];
  * tour checks these in Standard light too, and their reflow, which the
  * journeys check every other screen in.
  */
-export const TOUR_ONLY: readonly ScreenName[] = [
-  "study.answer",
-  "chapter.question",
-  "studio.confirm",
-];
+export const TOUR_ONLY: readonly ScreenName[] = ["chapter.question", "studio.confirm"];
 
 /** The screens of a tour it hasn't checked yet, in the tour's order. */
 export function unchecked(tour: Tour, checked: ReadonlySet<string>): ScreenName[] {

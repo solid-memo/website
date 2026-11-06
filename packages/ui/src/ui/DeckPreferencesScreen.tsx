@@ -71,6 +71,62 @@ function limitUnit(t: I18n["t"], limit: Limit, count: number): string {
  * Cancel give it back to Rename. The buttons that start a change keep
  * the focus while it saves (aria-disabled), as the screen stays.
  */
+/**
+ * The hosts whose pictures the deck shows, each with a button to stop.
+ * As a button goes, a line saying so takes its focus, and keeps the
+ * section while it was the last.
+ */
+function PictureHosts({
+  hosts,
+  busy,
+  onHide,
+}: {
+  hosts: readonly string[];
+  busy: boolean;
+  onHide: (host: string) => void;
+}) {
+  const { t } = useI18n();
+  const [asked, setAsked] = useState<string | null>(null);
+  const stopped = asked !== null && !hosts.includes(asked) ? asked : null;
+  const stoppedRef = useRef<HTMLParagraphElement>(null);
+  useLayoutEffect(() => {
+    if (stopped !== null) stoppedRef.current!.focus();
+  }, [stopped]);
+  if (hosts.length === 0 && stopped === null) return null;
+  return (
+    <section>
+      <h3>{t("deckPreferences.pictures.heading")}</h3>
+      {stopped !== null && (
+        <p ref={stoppedRef} class="hint" tabIndex={-1}>
+          {t("deckPreferences.pictures.stopped", { host: stopped })}
+        </p>
+      )}
+      {hosts.length > 0 && (
+        <>
+          <p class="hint">{t("deckPreferences.pictures.intro")}</p>
+          <ul>
+            {hosts.map((host) => (
+              <li key={host}>
+                <button
+                  type="button"
+                  aria-disabled={busy}
+                  onClick={() => {
+                    if (busy) return;
+                    setAsked(host);
+                    onHide(host);
+                  }}
+                >
+                  {t("deckPreferences.pictures.hide", { host })}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
 export function DeckPreferencesScreen({
   deck,
   deckHref,
@@ -89,6 +145,8 @@ export function DeckPreferencesScreen({
   onRemove,
   onStateLanguages,
   onSetCardLanguage,
+  onHidePictures,
+  pictureHosts,
 }: {
   deck: Deck;
   /** URL of the deck's page; its name links there. */
@@ -119,6 +177,10 @@ export function DeckPreferencesScreen({
   onStateLanguages: (languages: StatedLanguages) => void;
   /** Show the deck's cards (a course: all of it) in this language first; null for the app's. */
   onSetCardLanguage: (language: string | null) => void;
+  /** Stop showing the deck's pictures from this host. */
+  onHidePictures: (host: string) => void;
+  /** The hosts whose pictures the learner chose to show on this deck, as far as its entry can be believed. */
+  pictureHosts: readonly string[];
 }) {
   const { t, tx, locale, readerText, errorText } = useI18n();
   /** The deck-name draft while renaming; null otherwise. */
@@ -310,6 +372,7 @@ export function DeckPreferencesScreen({
         busy={busy}
         onSave={onSetCardLanguage}
       />
+      <PictureHosts hosts={pictureHosts} busy={busy} onHide={onHidePictures} />
       <DeckLanguagesSection
         deck={deck}
         languages={languages}

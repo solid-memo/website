@@ -41,7 +41,8 @@
     prov:wasDerivedFrom <https://solid-memo.com/decks/capitals/v1.ttl> ;
     solid-memo:deckNewCardsPerDay 5 ;
     solid-memo:deckMaxReviewsPerDay 50 ;
-    solid-memo:deckCardLanguage "sv" .
+    solid-memo:deckCardLanguage "sv" ;
+    solid-memo:deckPictureHost "pictures.example" .
 
 <#agent-anton>
     a foaf:Agent ;

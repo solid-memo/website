@@ -26,10 +26,12 @@ import {
   type RegistrationOptions,
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
+import { isGuestUrl } from "@solid-memo/domain/guest";
 import { planMigration, type MigrationPlan } from "@solid-memo/domain/migration";
 import {
   catalogUrlOf,
   ensureTrailingSlash,
+  isDocumentIn,
   metaUrlOf,
   preferencesUrlOf,
 } from "@solid-memo/domain/instanceLayout";
@@ -55,6 +57,14 @@ export interface InstanceUseCases {
   listStorages(session: Session): Promise<Storage[]>;
   addManualStorage(url: string): Promise<Storage>;
   listInstances(session: Session): Promise<Instance[]>;
+  /**
+   * Whether the document at `url` is in the learner's own pod: a storage
+   * of the one signed in, or a guest's pod on this device. Not for an
+   * instance attached from anywhere else, whose catalog its owner writes
+   * (docs/privacy.md). Rejects when the storages cannot be read, as that
+   * says nothing either way.
+   */
+  isInOwnPod(url: string): Promise<boolean>;
   getRegistrationOptions(session: Session): Promise<RegistrationOptions>;
   /**
    * Make an instance: its meta document and registrations, its catalog,
@@ -188,6 +198,7 @@ export function createInstanceUseCases({
   webIdDocumentRepository,
   preferenceStore,
   digestStore,
+  webId,
 }: {
   storageGateway: StorageGateway;
   instanceRepository: InstanceRepository;
@@ -197,6 +208,7 @@ export function createInstanceUseCases({
   webIdDocumentRepository: WebIdDocumentRepository;
   preferenceStore: Pick<PreferenceStore, "withDeviceAppearance">;
   digestStore: Pick<DigestStore, "of" | "asNoOneOf">;
+  webId: () => string | undefined;
 }): InstanceUseCases {
   /**
    * What bringing the instance up to this app's formats would touch: its
@@ -332,6 +344,13 @@ export function createInstanceUseCases({
     },
     listInstances(session) {
       return instanceRepository.listInstances(session.webId);
+    },
+    async isInOwnPod(url) {
+      if (isGuestUrl(url)) return true;
+      const signedIn = webId();
+      if (signedIn === undefined) return false;
+      const storages = await storageGateway.discoverStorages(signedIn);
+      return storages.some((storage) => isDocumentIn(url, storage.url));
     },
     getRegistrationOptions(session) {
       return instanceRepository.getRegistrationOptions(session.webId);

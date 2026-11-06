@@ -321,7 +321,11 @@
     "front": "Recto",
     "back": "Verso",
     "question": "Question",
-    "answer": "Réponse"
+    "answer": "Réponse",
+    "pictureHidden": "Masquée. L'afficher permet à {host} de voir quand vous étudiez cette carte.",
+    "showPictures": "Afficher les images de {host}",
+    "picturesHidden": "Les images de {host} sont masquées. Les afficher permet à ce serveur de voir quand vous ouvrez ou étudiez ces cartes.",
+    "picturesShown": "Les images de {host} sont affichées pour ce paquet."
   },
   "course": {
     "chaptersDone": {
@@ -742,6 +746,12 @@
       },
       "releaseHint": "Les cartes encore identiques à leur version de la bibliothèque sont laissées de côté : une version ultérieure les mettra à jour.",
       "settled": "Chaque carte indique la langue de son texte."
+    },
+    "pictures": {
+      "heading": "Images d'autres serveurs",
+      "intro": "Vous avez choisi d'afficher les images de ce paquet depuis ces serveurs. Chacun voit une requête quand vous ouvrez ou étudiez une carte avec une de ses images.",
+      "hide": "Ne plus afficher les images de {host}",
+      "stopped": "Les images de {host} sont de nouveau masquées."
     }
   },
   "deckProvenance": {
@@ -2259,6 +2269,7 @@
     "label": "Lien vers la publication",
     "show": "Afficher",
     "reading": "Lecture et vérification de la publication…",
-    "notLibrary": "Ce contenu ne fait pas partie de la bibliothèque de Solid Memo : il est publié sur {host}. Solid Memo a vérifié qu’il pouvait le lire, pas ce qu’il dit. Votre copie garde en mémoire sa provenance, et rien n’est écrit là-bas."
+    "notLibrary": "Ce contenu ne fait pas partie de la bibliothèque de Solid Memo : il est publié sur {host}. Solid Memo a vérifié qu’il pouvait le lire, pas ce qu’il dit. Votre copie garde en mémoire sa provenance, et rien n’est écrit là-bas.",
+    "picturesHidden": "Les images de ses cartes restent masquées jusqu'à ce que vous choisissiez de les afficher, car chaque image est une requête au serveur qui l'héberge."
   }
 }

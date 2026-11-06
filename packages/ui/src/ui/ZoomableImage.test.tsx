@@ -90,6 +90,7 @@ describe("ZoomableImage", () => {
     const image = screen.getByRole("img", { name: "Flagga" });
     expect(image).toHaveClass("card-image");
     expect(image).toHaveAttribute("src", FLAG);
+    expect(image).toHaveAttribute("referrerpolicy", "no-referrer");
     expect(image).toHaveAttribute("lang", "sv");
     // Not inside the button, whose content would be read as one flat name.
     expect(button).not.toContainElement(image);

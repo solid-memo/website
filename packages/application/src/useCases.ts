@@ -233,6 +233,7 @@ export function createUseCases({
     now,
   });
   const instances = createInstanceUseCases({
+    webId,
     storageGateway,
     instanceRepository,
     deckRepository,

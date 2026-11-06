@@ -158,6 +158,8 @@ A value from a fixed set is a
     ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
   - 1.27: `sm:fromRelease`, outside `CardV7`
     ([migrations.md](migrations.md#catching-up-with-the-library)).
+  - 1.28: `sm:deckPictureHost`, outside `DeckV6`
+    ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)).
   - Another vocabulary's term that a shape takes moves no vocabulary
     version: card format 7 took `dcterms:subject`, what a card is about
     ([deck-library.md](deck-library.md#what-a-card-is-about)).
@@ -464,6 +466,13 @@ keeps it only when it names a language other than `zxx`.
 library releases, for DCAT-AP, naming EU authority-table languages
 (IRIs, not tags), and can't tell a card's front from its back or a
 learner's preference.
+
+`sm:deckPictureHost` (1.28), one host per value as a plain string on the
+deck's catalog entry, is a host whose pictures the learner chose to
+show on a deck copied from a release outside the library's index
+([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)). A reader
+keeps only a value written as a URL's host is, and a catalog outside
+the learner's own pod isn't believed.
 
 ## License
 

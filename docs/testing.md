@@ -404,6 +404,10 @@ Firefox and WebKit, with their system libraries). CI runs them as a gate
 
 Further journeys go through:
 
+- a deck added by link whose cards name pictures on its author's
+  server: nothing is asked of that server until the learner chooses it,
+  and then the answer's picture comes with the question's
+  ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link));
 - reloading in the middle of a study session, which goes on with the
   cards left and counts every answer once;
 - logging out with a second tab open, which logs that tab out too and

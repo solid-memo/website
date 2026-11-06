@@ -490,6 +490,27 @@ describe("the deck library", () => {
       expect(deps.deckRepository.importDeck).toHaveBeenCalledTimes(2);
     });
 
+    it("listLibraryUpdates offers a linked copy no release of the library's index, whatever series its release claims", async () => {
+      const deps = makeDeps();
+      const indexed = linked(2, {
+        url: "https://solid-memo.example/decks/flags/v2.ttl",
+        seriesUrl: "https://solid-memo.example/decks/flags/",
+        releases: [],
+      });
+      const copied = linked(1, { seriesUrl: indexed.seriesUrl });
+      reading(deps, [copied, indexed]);
+      vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([indexed]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([indexed.url]);
+      const copy: Deck = { ...deck, sourceUrl: copied.url };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: copied, version: "1", newer: false, fromLink: true },
+      ]);
+      expect(vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url)).not.toContain(
+        indexed.url,
+      );
+    });
     it("listLibraryUpdates finds a newer version of a linked copy in its creator's catalog, else says it does not know", async () => {
       const deps = makeDeps();
       const elsewhere = linked(3, {

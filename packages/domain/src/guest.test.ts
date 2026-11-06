@@ -316,6 +316,7 @@ describe("adding a guest's study to an instance", () => {
       completedChapters: false,
       course: false,
       cardLanguage: false,
+      pictureHosts: false,
     };
     const cardFields: Record<keyof Card, boolean> = {
       id: false,
