@@ -17,6 +17,7 @@ export function fakeSessionClient() {
   return {
     restore: vi.fn<SessionClient["restore"]>(async () => restored),
     sessionIssuer: vi.fn<SessionClient["sessionIssuer"]>(async () => null),
+    forgetSession: vi.fn<SessionClient["forgetSession"]>(async () => {}),
     requestIssuer: vi.fn<SessionClient["requestIssuer"]>(async () => null),
     login: vi.fn<SessionClient["login"]>(async () => {}),
     logout: vi.fn<SessionClient["logout"]>(async () => {}),

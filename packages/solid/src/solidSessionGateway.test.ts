@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSolidDataset } from "./client/resources";
 import { getThing, getUrlAll } from "./client/rdf";
 import { createSolidSessionGateway } from "./solidSessionGateway";
@@ -99,6 +99,20 @@ describe("createSolidSessionGateway", () => {
   describe("restore, given the identity provider's answer", () => {
     const ISSUER = "https://issuer.example/";
 
+    /**
+     * The page leaves for the provider: restore does not settle until the
+     * test ends it, so that the page does not outlive the test.
+     */
+    function pageLeaves() {
+      let settle = () => {};
+      client.restore.mockReturnValue(
+        new Promise((resolve) => {
+          settle = () => resolve({ webId: null, fromLogin: false, restoredFrom: null });
+        }),
+      );
+      return () => settle();
+    }
+
     /** The identity provider sends the user back with these parameters. */
     function sendBack(parameters: Record<string, string>) {
       window.history.replaceState(null, "", `/?${new URLSearchParams(parameters)}`);
@@ -155,22 +169,21 @@ describe("createSolidSessionGateway", () => {
 
     it("keeps the session's provider before a silent restore leaves, and lets its answer through", async () => {
       client.sessionIssuer.mockResolvedValue(ISSUER);
-      // The page leaves for the provider: restore never settles.
-      client.restore.mockReturnValue(new Promise(() => {}));
-      void createSolidSessionGateway(options).restore();
+      const settle = pageLeaves();
+      const left = createSolidSessionGateway(options).restore();
       await vi.waitFor(() => expect(client.restore).toHaveBeenCalledOnce());
       expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBe(ISSUER);
 
       // The provider sends the user back; the page loads afresh.
       sendBack({ code: "c", state: "s", iss: ISSUER });
-      client.sessionIssuer.mockClear();
       restored(false);
       await expect(createSolidSessionGateway(options).restore()).resolves.toMatchObject({
         origin: "restored",
       });
-      // An answer is completed, not a new silent restore set off.
-      expect(client.sessionIssuer).not.toHaveBeenCalled();
       expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+      expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toBeNull();
+      settle();
+      await left;
     });
 
     it("refuses a silent restore's answer that names another provider than the session's", async () => {
@@ -261,13 +274,44 @@ describe("createSolidSessionGateway", () => {
       expect(client.restore).not.toHaveBeenCalled();
     });
 
-    it("lets an error answer from the provider it set off for through, whatever its state", async () => {
+    it("lets an error answering a request to the provider it set off for through", async () => {
       const gateway = createSolidSessionGateway(options);
       await gateway.loginWithIssuer(ISSUER);
-      sendBack({ error: "access_denied", iss: ISSUER });
+      sendBack({ error: "access_denied", state: "s", iss: ISSUER });
       await expect(gateway.restore()).resolves.toBeNull();
-      expect(client.requestIssuer).not.toHaveBeenCalled();
+      expect(client.requestIssuer).toHaveBeenCalledWith("s");
       expect(client.restore).toHaveBeenCalledOnce();
+    });
+
+    it("refuses an error answering no request the client holds, or with no state", async () => {
+      const answers: Record<string, string>[] = [
+        { error: "login_required", state: "unknown", iss: ISSUER },
+        { error: "login_required", iss: ISSUER },
+      ];
+      for (const parameters of answers) {
+        const gateway = createSolidSessionGateway(options);
+        await gateway.loginWithIssuer(ISSUER);
+        sendBack(parameters);
+        await expect(gateway.restore()).rejects.toMatchObject({
+          code: "loginNotStarted",
+          detail: `iss: ${ISSUER}\nstate: ${parameters.state ?? ""}`,
+        });
+        expect(window.location.search).toBe("");
+      }
+      expect(client.restore).not.toHaveBeenCalled();
+    });
+
+    it("keeps the provider and the attempt before passing an answer to a client that may leave", async () => {
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      const settle = pageLeaves();
+      window.sessionStorage.setItem("solid-memo:login-issuer", ISSUER);
+      sendBack({ code: "c", state: "s", iss: ISSUER });
+      const left = createSolidSessionGateway(options).restore();
+      await vi.waitFor(() => expect(client.restore).toHaveBeenCalledOnce());
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBe(ISSUER);
+      expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toContain(ISSUER);
+      settle();
+      await left;
     });
 
     it("leaves an address without an answer to the client", async () => {
@@ -275,6 +319,285 @@ describe("createSolidSessionGateway", () => {
       const gateway = createSolidSessionGateway(options);
       await expect(gateway.restore()).resolves.toBeNull();
       expect(client.restore).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("restore, when the provider keeps the page waiting", () => {
+    const ISSUER = "https://issuer.example/";
+    const DEADLINE_MS = 60_000;
+
+    /** A session is stored at the provider, and restoring it never settles. */
+    function neverSettles() {
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      client.restore.mockReturnValue(new Promise(() => {}));
+    }
+
+    /** How a load came about, as the browser reports it. */
+    function loadedBy(type: string) {
+      vi.spyOn(window.performance, "getEntriesByType").mockReturnValue([
+        { type } as PerformanceNavigationTiming,
+      ]);
+    }
+
+    /** This tab set off on a silent restore this long ago, and left. */
+    function attemptMade(age: number) {
+      window.sessionStorage.setItem(
+        "solid-memo:restore-attempt",
+        JSON.stringify({ issuer: ISSUER, at: Date.now() - age }),
+      );
+      window.sessionStorage.setItem("solid-memo:login-issuer", ISSUER);
+    }
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    });
+
+    afterEach(async () => {
+      // No page of a test stays waiting, to answer the next test's events.
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    /** A restore that left for the provider, whatever becomes of it after the test. */
+    async function restoreThatLeft() {
+      neverSettles();
+      const restoring = createSolidSessionGateway(options).restore();
+      restoring.catch(() => {});
+      await vi.waitFor(() => expect(client.restore).toHaveBeenCalledOnce());
+      return { restoring };
+    }
+
+    /** The browser brings the page back: from its back/forward cache, or not. */
+    function pageShown(persisted: boolean) {
+      window.dispatchEvent(Object.assign(new Event("pageshow"), { persisted }));
+    }
+
+    it("gives up at the deadline, ends the stored session and keeps nothing for an answer", async () => {
+      neverSettles();
+      const restoring = createSolidSessionGateway(options).restore();
+      const given = expect(restoring).rejects.toMatchObject({
+        code: "restoreTimedOut",
+        vars: { seconds: DEADLINE_MS / 1000 },
+      });
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS - 1);
+      expect(client.forgetSession).not.toHaveBeenCalled();
+      expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toContain(ISSUER);
+      await vi.advanceTimersByTimeAsync(1);
+      await given;
+      expect(client.forgetSession).toHaveBeenCalledOnce();
+      expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
+      expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toBeNull();
+    });
+
+    it("still restores with a provider that answers just inside the deadline", async () => {
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      client.restore.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            setTimeout(
+              () => resolve({ webId: WEBID, fromLogin: false, restoredFrom: null }),
+              DEADLINE_MS - 1,
+            );
+          }),
+      );
+      const restoring = createSolidSessionGateway(options).restore();
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      await expect(restoring).resolves.toMatchObject({ origin: "restored" });
+      expect(client.forgetSession).not.toHaveBeenCalled();
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("ends the stored session after a silent restore that fails, so the next visit does not repeat it", async () => {
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      client.restore.mockRejectedValue(new Error("boom"));
+      await expect(createSolidSessionGateway(options).restore()).rejects.toThrow("boom");
+      expect(client.forgetSession).toHaveBeenCalledOnce();
+    });
+
+    it("keeps the stored session when the browser is offline, which says nothing of the provider", async () => {
+      vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+      client.sessionIssuer.mockResolvedValue(ISSUER);
+      client.restore.mockRejectedValue(new Error("boom"));
+      await expect(createSolidSessionGateway(options).restore()).rejects.toThrow("boom");
+      expect(client.forgetSession).not.toHaveBeenCalled();
+    });
+
+    it("gets past a stored session that can't be ended, still with the restore's error", async () => {
+      neverSettles();
+      client.forgetSession.mockReturnValue(new Promise(() => {}));
+      const given = expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+        code: "restoreTimedOut",
+      });
+      await vi.advanceTimersByTimeAsync(2 * DEADLINE_MS);
+      await given;
+      expect(vi.getTimerCount()).toBe(0);
+
+      client.forgetSession.mockRejectedValue(new Error("blocked"));
+      const again = expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+        code: "restoreTimedOut",
+      });
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      await again;
+    });
+
+    it.each([
+      ["took the attempt", null],
+      ["set off on its own", JSON.stringify({ issuer: ISSUER, at: Date.now() + 1 })],
+    ])(
+      "leaves the session and the keys alone at the deadline when a later load %s",
+      async (_, later) => {
+        const { restoring } = await restoreThatLeft();
+        window.sessionStorage.removeItem("solid-memo:restore-attempt");
+        window.sessionStorage.removeItem("solid-memo:login-issuer");
+        if (later !== null) {
+          window.sessionStorage.setItem("solid-memo:restore-attempt", later);
+          window.sessionStorage.setItem("solid-memo:login-issuer", ISSUER);
+        }
+
+        await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+
+        await expect(restoring).rejects.toMatchObject({ code: "restoreTimedOut" });
+        expect(client.forgetSession).not.toHaveBeenCalled();
+        expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toBe(later);
+        expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBe(
+          later === null ? null : ISSUER,
+        );
+      },
+    );
+
+    it("reloads a page the browser brings back from its cache after a later load took its attempt", async () => {
+      const reload = vi.spyOn(window.location, "reload").mockImplementation(() => {});
+      const { restoring } = await restoreThatLeft();
+
+      pageShown(true);
+      expect(reload).not.toHaveBeenCalled();
+      window.sessionStorage.removeItem("solid-memo:restore-attempt");
+      pageShown(false);
+      expect(reload).not.toHaveBeenCalled();
+      pageShown(true);
+      expect(reload).toHaveBeenCalledOnce();
+
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      await expect(restoring).rejects.toMatchObject({ code: "restoreTimedOut" });
+      pageShown(true);
+      expect(reload).toHaveBeenCalledOnce();
+    });
+
+    it("waits for the deadline, then ends the stored session, when the page brought back still holds its attempt", async () => {
+      const reload = vi.spyOn(window.location, "reload").mockImplementation(() => {});
+      const { restoring } = await restoreThatLeft();
+      pageShown(true);
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      await expect(restoring).rejects.toMatchObject({ code: "restoreTimedOut" });
+      expect(reload).not.toHaveBeenCalled();
+      expect(client.forgetSession).toHaveBeenCalledOnce();
+    });
+
+    it.each(["back_forward", "navigate"])(
+      "skips the silent restore, and ends the stored session, when an attempt found by a %s load is past what a working provider takes",
+      async (type) => {
+        attemptMade(DEADLINE_MS);
+        loadedBy(type);
+        await expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+          code: "restoreNotReturned",
+          vars: { issuer: ISSUER },
+        });
+        expect(client.restore).not.toHaveBeenCalled();
+        expect(client.sessionIssuer).not.toHaveBeenCalled();
+        expect(client.forgetSession).toHaveBeenCalledOnce();
+        expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toBeNull();
+      },
+    );
+
+    it.each(["back_forward", "navigate"])(
+      "skips the silent restore but keeps the stored session when an attempt found by a %s load is young",
+      async (type) => {
+        await restoreThatLeft();
+
+        // The page loads afresh with no answer, by the learner or by another page.
+        loadedBy(type);
+        client.restore.mockClear();
+        await expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+          code: "restoreNotReturned",
+          vars: { issuer: ISSUER },
+        });
+        expect(client.restore).not.toHaveBeenCalled();
+        expect(client.forgetSession).not.toHaveBeenCalled();
+        expect(window.sessionStorage.getItem("solid-memo:restore-attempt")).toBeNull();
+      },
+    );
+
+    it("restores anew when the learner reloaded the page, which had not left", async () => {
+      await restoreThatLeft();
+
+      loadedBy("reload");
+      restored(false);
+      await expect(createSolidSessionGateway(options).restore()).resolves.toMatchObject({
+        origin: "restored",
+      });
+      expect(client.forgetSession).not.toHaveBeenCalled();
+    });
+
+    it("takes a silent restore's answer as answered, not as a provider that never came back", async () => {
+      attemptMade(0);
+      client.requestIssuer.mockResolvedValue(ISSUER);
+      window.history.replaceState(null, "", `/?code=c&state=s&iss=${encodeURIComponent(ISSUER)}`);
+      restored(false);
+      await expect(createSolidSessionGateway(options).restore()).resolves.toMatchObject({
+        origin: "restored",
+      });
+      expect(client.forgetSession).not.toHaveBeenCalled();
+    });
+
+    it.each([0, DEADLINE_MS])(
+      "keeps the stored session when an answer to an attempt %i ms old is refused, as another page can send one",
+      async (age) => {
+        const iss = encodeURIComponent(ISSUER);
+        const answers = [
+          ["/?error=x", "loginIssuerMissing"],
+          ["/?error=x&iss=https%3A%2F%2Fother.example%2F", "loginIssuerMismatch"],
+          [`/?error=x&iss=${iss}`, "loginNotStarted"],
+          [`/?error=x&state=unknown&iss=${iss}`, "loginNotStarted"],
+          [`/?code=c&state=unknown&iss=${iss}`, "loginNotStarted"],
+        ] as const;
+        client.sessionIssuer.mockResolvedValue(ISSUER);
+        for (const [address, code] of answers) {
+          attemptMade(age);
+          loadedBy("navigate");
+          window.history.replaceState(null, "", address);
+          await expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+            code,
+          });
+          expect(window.location.search).toBe("");
+        }
+        expect(client.restore).not.toHaveBeenCalled();
+        expect(client.forgetSession).not.toHaveBeenCalled();
+      },
+    );
+
+    it("ends the stored session when a silent restore's accepted answer fails", async () => {
+      attemptMade(0);
+      client.requestIssuer.mockResolvedValue(ISSUER);
+      client.restore.mockRejectedValue(new Error("boom"));
+      window.history.replaceState(null, "", `/?code=c&state=s&iss=${encodeURIComponent(ISSUER)}`);
+      await expect(createSolidSessionGateway(options).restore()).rejects.toThrow("boom");
+      expect(client.forgetSession).toHaveBeenCalledOnce();
+      expect(window.location.search).toBe("");
+    });
+
+    it("gives up on a login's answer at the deadline, leaving the stored session and clearing the address", async () => {
+      window.sessionStorage.setItem("solid-memo:login-issuer", ISSUER);
+      client.requestIssuer.mockResolvedValue(ISSUER);
+      client.restore.mockReturnValue(new Promise(() => {}));
+      window.history.replaceState(null, "", `/?code=c&state=s&iss=${encodeURIComponent(ISSUER)}`);
+      const given = expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+        code: "restoreTimedOut",
+      });
+      await vi.advanceTimersByTimeAsync(DEADLINE_MS);
+      await given;
+      expect(client.forgetSession).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("");
     });
   });
 

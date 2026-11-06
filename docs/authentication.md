@@ -91,7 +91,9 @@ client redeems any code:
   which belongs to this tab, until the next page load. A login keeps
   the issuer it goes to. A silent restore keeps the issuer of the
   session it restores, which the sign-in client names
-  (`sessionIssuer()`), and forgets it if the page doesn't leave.
+  (`sessionIssuer()`), and forgets it if the page doesn't leave. It
+  does the same before it passes an answer to the client, which could
+  still leave.
 - `restore()` drops an answer, a code or an error, when this tab sent
   the browser to no provider: it removes the answer from the address
   and restores the previous session as on any load. Such an answer
@@ -100,10 +102,12 @@ client redeems any code:
 - It refuses an answer without `iss` (`loginIssuerMissing`), and one
   whose `iss` is another issuer than the one kept, a trailing slash
   aside (`loginIssuerMismatch`).
-- It refuses a code whose `state` names no request the sign-in client
-  holds (`loginNotStarted`), and one whose request went to another
-  issuer than the one kept (`loginIssuerMismatch`). The client names
-  that issuer (`requestIssuer(state)`). Inrupt's library keeps its
+- It refuses an answer, a code or an error, whose `state` names no
+  request the sign-in client holds (`loginNotStarted`), and one whose
+  request went to another issuer than the one kept
+  (`loginIssuerMismatch`). The client would drop an answer it doesn't
+  hold and restore silently, leaving for the provider again. The client
+  names that issuer (`requestIssuer(state)`). Inrupt's library keeps its
   requests in `localStorage`, which every tab shares, and keeps one
   that was never answered. It fetches the provider's metadata again
   from the request's issuer when the answer comes, and checks `iss`
@@ -119,12 +123,12 @@ client redeems any code:
   against the metadata it fetches.
 
 An answer comes through only from the provider this tab sent the
-browser to, and with a code, only for a request that went to that
-provider. A provider's error without `iss` is refused too: the learner
-sees the safety error, not the provider's. If that error answers a
-silent restore, the Inrupt library still holds the session to
-restore, so each reload shows the error again until the learner logs
-in.
+browser to, and only for a request that went to that provider. A
+provider's error without `iss` is refused too: the learner sees the
+safety error, not the provider's. If that error answers a silent
+restore, the stored session stays, as a refused answer proves nothing
+of the provider, so each reload shows the error again until the
+learner logs in.
 
 A provider that doesn't send `iss` can't be used to log in.
 
@@ -282,6 +286,54 @@ refresh token it keeps in IndexedDB, with the DPoP key pair, and
 leaves the page only when it has none, or the provider refuses it. Its
 access tokens stay in memory
 ([solid-memo-client.md](solid-memo-client.md#what-a-session-keeps)).
+
+### When the provider doesn't answer
+
+The app shows only its loading screen until `restore()` settles, and
+the Inrupt library's restore may never settle: the fix has a
+[security advisory](https://github.com/solid-memo/website/security/advisories/GHSA-m5g9-pcp3-w6w8).
+So the gateway bounds what stays on the page and notes what leaves it:
+
+- **The deadline**: `RESTORE_DEADLINE_MS`, 60 seconds, covers all of
+  `restore()` on the page, a login's answer included. Past it, `restore()`
+  rejects with `restoreTimedOut`, and the landing page shows the error
+  and the login. It's a whole restore's allowance, not a request's: a
+  restore can make a few requests, a slow but working provider should
+  still restore, and `solid-memo-client` alone gives each request 30
+  seconds. A restore that ends the stored session gives that step a
+  deadline of its own, so if ending it hangs too, the loading screen
+  can last up to twice as long.
+- **After the deadline**: what the sign-in client is still doing can't
+  be called off. With the Inrupt library, metadata that arrives late
+  can still send the page to the provider, and the provider chooses
+  when. The answer it then sends is refused or dropped.
+  `solid-memo-client` doesn't store a session it completes after the
+  gateway gave up.
+- **The attempt**: before a silent restore, the gateway keeps the
+  provider and the time in `sessionStorage`
+  (`solid-memo:restore-attempt`) until the next load. A load that finds
+  it, with no answer on the address, doesn't restore silently: the
+  provider hasn't sent the browser back. `restore()` rejects with
+  `restoreNotReturned`, and the landing page adds a link to the provider
+  beside the login. A load the learner started with Reload doesn't
+  count, since the page hadn't left.
+- **The stored session**: a silent restore that fails or runs out of
+  time ends the stored session (`forgetSession()`), so the next visit
+  doesn't repeat it, and the learner logs in again. So does an attempt
+  older than the deadline that found no answer, as a working provider
+  has answered by then. The provider's own refusal of the request ends
+  it too, in the sign-in client. A younger attempt, and a refused
+  answer, keep the session, as they could also come from another page
+  navigating the tab: the next load tries again. A browser that says
+  it's offline keeps the session, as that says nothing of the provider.
+  A login's own answer leaves the stored session alone.
+- **A page brought back**: the browser can bring a page that left for
+  the provider back from its back/forward cache, its restore still
+  pending and its deadline running again. A later load in the tab may
+  have restored the session and taken the attempt by then. Such a page
+  reloads, and if its deadline still runs out, it leaves the session
+  and what that load kept alone: only the page whose attempt the tab
+  still holds ends the stored session.
 
 ## Authenticated requests
 

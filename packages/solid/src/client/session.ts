@@ -189,6 +189,12 @@ export function createSessionClient(): SessionClient {
       return storedSessionIssuer(window.localStorage.getItem(CURRENT_SESSION_KEY));
     },
 
+    async forgetSession() {
+      window.localStorage.removeItem(CURRENT_SESSION_KEY);
+      window.localStorage.removeItem(CURRENT_URL_KEY);
+      window.sessionStorage.removeItem(PROVIDER_REDIRECT_KEY);
+    },
+
     // The library looks the request up by its state, in localStorage, which every tab shares.
     async requestIssuer(state) {
       return storedSessionIssuer(sessionOfState(state));

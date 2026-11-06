@@ -55,6 +55,30 @@ export const LOGIN_HASH_KEY = "solid-memo:login-hash";
  */
 export const LOGIN_ISSUER_KEY = "solid-memo:login-issuer";
 
+/**
+ * The identity provider a silent restore is under way with, or left for,
+ * in this tab, and when it set off (RestoreAttempt): kept until the next
+ * page load, which finds it unanswered when the provider never sent the
+ * browser back.
+ */
+const RESTORE_ATTEMPT_KEY = "solid-memo:restore-attempt";
+
+/** A silent restore this tab set off: the provider, and when, in milliseconds since the epoch. */
+interface RestoreAttempt {
+  issuer: string;
+  at: number;
+}
+
+/**
+ * How long a restore may keep the page on its loading screen, in
+ * milliseconds (docs/authentication.md#session-restore): twice what
+ * solid-memo-client gives one request to the provider, as a restore
+ * makes a few, and a false alarm costs the learner their session. An
+ * attempt that left the page gets as long to come back: only one older
+ * than this says the provider isn't answering.
+ */
+const RESTORE_DEADLINE_MS = 60_000;
+
 /** The parameters an identity provider sends back on the redirect URL. */
 const RESPONSE_PARAMETERS = ["code", "state", "iss", "error", "error_description", "session_state"];
 
@@ -90,10 +114,12 @@ function refuseAuthorizationResponse(url: URL, error: AppError): never {
  * `iss` parameter (RFC 9207). Every provider is sent the same redirect
  * URL and client, so `iss` is all that ties an answer to the provider
  * it came from, and only this tab knows which provider it sent the
- * browser to. An answer with a code must also answer a request, by its
- * `state`, that went to that same provider: the client redeems the code
- * where the request went, and may hold requests from other tabs, or
- * ones left unanswered. A refused answer is taken off the address too.
+ * browser to. An answer must also answer a request, by its `state`,
+ * that went to that same provider: the client redeems a code where the
+ * request went, and may hold requests from other tabs, or ones left
+ * unanswered, and an answer it does not know, an error's too, it would
+ * drop and restore silently, leaving for the provider again. A refused
+ * answer is taken off the address too.
  */
 async function checkAuthorizationResponse(
   expectedIssuer: string | null,
@@ -119,7 +145,6 @@ async function checkAuthorizationResponse(
       new AppError("loginIssuerMismatch", { issuer: expectedIssuer, iss }),
     );
   }
-  if (!searchParams.has("code")) return;
   const state = searchParams.get("state");
   const requestIssuer = state === null ? null : await client.requestIssuer(state);
   if (requestIssuer === null) {
@@ -130,6 +155,33 @@ async function checkAuthorizationResponse(
       url,
       new AppError("loginIssuerMismatch", { issuer: expectedIssuer, request: requestIssuer }),
     );
+  }
+}
+
+/** Whether the page's address carries an identity provider's answer. */
+function hasAuthorizationResponse(): boolean {
+  return isAuthorizationResponse(new URL(window.location.href).searchParams);
+}
+
+/** Whether the learner reloaded this page: it had not left then, whatever it kept before leaving. */
+function isReload(): boolean {
+  const [navigation] = window.performance.getEntriesByType("navigation");
+  return (navigation as PerformanceNavigationTiming | undefined)?.type === "reload";
+}
+
+/** What a restore finds, or a refusal once the deadline passes; what it does after that is ignored. */
+async function withinRestoreDeadline<T>(restoring: Promise<T>): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(
+      () => reject(new AppError("restoreTimedOut", { seconds: RESTORE_DEADLINE_MS / 1000 })),
+      RESTORE_DEADLINE_MS,
+    );
+  });
+  try {
+    return await Promise.race([restoring, deadline]);
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -182,21 +234,83 @@ export function createSolidSessionGateway({
   }
 
   /**
-   * Completes the provider's answer or restores the previous session.
-   * A silent restore may send the browser to the session's provider,
-   * so that provider is kept first, for its answer to be checked
-   * against; if the page does not leave, it is not needed.
+   * Before a restore, which may send the browser to the session's
+   * provider, even past an answer it does not take: keeps that provider,
+   * for its answer to be checked against, and the attempt, for the next
+   * load to tell that it never answered. What it returns is the attempt
+   * as kept, by which this page knows its own.
    */
-  async function restoreSession() {
-    if (isAuthorizationResponse(new URL(window.location.href).searchParams)) {
-      return client.restore();
-    }
-    const sessionIssuer = await client.sessionIssuer();
-    if (sessionIssuer !== null) window.sessionStorage.setItem(LOGIN_ISSUER_KEY, sessionIssuer);
+  async function noteRestoreAttempt(): Promise<string | null> {
+    const issuer = await client.sessionIssuer();
+    if (issuer === null) return null;
+    const attempt: RestoreAttempt = { issuer, at: Date.now() };
+    const kept = JSON.stringify(attempt);
+    window.sessionStorage.setItem(LOGIN_ISSUER_KEY, issuer);
+    window.sessionStorage.setItem(RESTORE_ATTEMPT_KEY, kept);
+    return kept;
+  }
+
+  /**
+   * Ends the stored session, unless the browser is offline, which says
+   * nothing of the provider. It stays bounded like the restore, and the
+   * learner sees the restore's error whatever becomes of it.
+   */
+  async function endStoredSession() {
+    if (!window.navigator.onLine) return;
+    await withinRestoreDeadline(client.forgetSession()).catch(() => {});
+  }
+
+  /**
+   * Checks the provider's answer and restores, within the deadline. A
+   * silent restore that fails or runs out of time ends the stored
+   * session, so that the next visit does not repeat it, and so does an
+   * attempt that went unanswered for longer than a working provider
+   * takes. Another page can navigate this tab, so neither a young
+   * attempt nor a refused answer says anything of the provider: they
+   * skip the restore and show the error, and the session stays. So does
+   * it past a login's answer. What was kept for a provider's answer stays
+   * only if the page leaves, as a restore that left never comes back here.
+   *
+   * The browser can bring a page that left back from its back/forward
+   * cache, its restore still pending and its timer running again. If a
+   * later load has taken this page's attempt from the tab by then, the
+   * restore is no longer this page's to end: it reloads, and whatever
+   * still settles here leaves the session and what that load kept alone.
+   */
+  async function attemptRestore(loginIssuer: string | null, attempt: RestoreAttempt | null) {
+    const answered = hasAuthorizationResponse();
+    let endsSession = false;
+    let ownAttempt: string | null = null;
+    const takenOver = () =>
+      ownAttempt !== null && window.sessionStorage.getItem(RESTORE_ATTEMPT_KEY) !== ownAttempt;
+    const reloadIfTakenOver = (event: PageTransitionEvent) => {
+      if (event.persisted && takenOver()) window.location.reload();
+    };
+    window.addEventListener("pageshow", reloadIfTakenOver);
     try {
-      return await client.restore();
+      if (attempt !== null && !answered && !isReload()) {
+        endsSession = Date.now() - attempt.at >= RESTORE_DEADLINE_MS;
+        throw new AppError("restoreNotReturned", { issuer: attempt.issuer });
+      }
+      return await withinRestoreDeadline(
+        checkAuthorizationResponse(loginIssuer, client).then(async () => {
+          endsSession = !answered || loginIssuer === null || attempt !== null;
+          ownAttempt = await noteRestoreAttempt();
+          return client.restore();
+        }),
+      );
+    } catch (error) {
+      if (endsSession && !takenOver()) await endStoredSession();
+      if (hasAuthorizationResponse()) {
+        takeOffAuthorizationResponse(new URL(window.location.href));
+      }
+      throw error;
     } finally {
-      window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
+      window.removeEventListener("pageshow", reloadIfTakenOver);
+      if (!takenOver()) {
+        window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
+        window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
+      }
     }
   }
 
@@ -204,10 +318,14 @@ export function createSolidSessionGateway({
     async restore() {
       const loginHash = window.sessionStorage.getItem(LOGIN_HASH_KEY) ?? "";
       const loginIssuer = window.sessionStorage.getItem(LOGIN_ISSUER_KEY);
+      const attempt = window.sessionStorage.getItem(RESTORE_ATTEMPT_KEY);
       window.sessionStorage.removeItem(LOGIN_HASH_KEY);
       window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
-      await checkAuthorizationResponse(loginIssuer, client);
-      const { webId, fromLogin, restoredFrom } = await restoreSession();
+      window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
+      const { webId, fromLogin, restoredFrom } = await attemptRestore(
+        loginIssuer,
+        attempt === null ? null : (JSON.parse(attempt) as RestoreAttempt),
+      );
       if (webId === null) return null;
       // A silent restore leaves the page for the identity provider and
       // comes back without its hash; the client reports the page it left.

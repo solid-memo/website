@@ -101,6 +101,7 @@ export function sessionClient(session: Session): SessionClient {
     requestIssuer: never,
     login: never,
     logout: never,
+    forgetSession: never,
     sessionIssuer: async () => session.issuer,
     webId: () => session.webId,
     fetch: (input, init) => {

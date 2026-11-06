@@ -139,6 +139,7 @@
   },
   "app": {
     "restoringSession": "Återställer sessionen…",
+    "backToProvider": "Gå tillbaka till din leverantör",
     "skipToContent": "Hoppa till innehållet",
     "tagline": "Flashcards med intervallrepetition som bor i din egen Solid Pod.",
     "sessionExpired": "Din session har gått ut. Logga in igen.",
@@ -1672,6 +1673,8 @@
     "loginIssuerMismatch": "Du kom tillbaka från en annan leverantör än den du loggade in hos, så Solid Memo stoppade inloggningen för säkerhets skull. Logga in igen.",
     "loginNotStarted": "Solid Memo startade inte den här inloggningen i den här fliken, så den stoppade inloggningen för säkerhets skull. Logga in igen i den här fliken.",
     "loginProviderRefused": "Din leverantörs inställningar anger en adress som Solid Memo inte kan använda säkert, så den stoppade inloggningen. Välj en annan leverantör.",
+    "restoreTimedOut": "Din leverantör svarade inte i tid, så Solid Memo slutade återställa din session. Logga in igen, eller välj en annan leverantör.",
+    "restoreNotReturned": "Din leverantör skickade inte tillbaka dig, så Solid Memo slutade återställa din session. Gå tillbaka till din leverantör, logga in igen eller välj en annan leverantör.",
     "profileNoSubject": "Din profil beskriver inte dig, så Solid Memo kan inte anteckna i den var dina data finns. Kontrollera profilen hos din Pod-leverantör och försök sedan igen.",
     "privateTypeIndexNotLinked": "Solid Memo kunde inte länka sin privata lista över dina data från din profil. Kontrollera att Solid Memo får ändra din profil och försök sedan igen.",
     "publicTypeIndexNotLinked": "Solid Memo kunde inte länka sin publika lista över dina data från din profil. Kontrollera att Solid Memo får ändra din profil och försök sedan igen.",
