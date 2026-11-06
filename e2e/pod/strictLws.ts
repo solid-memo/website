@@ -39,6 +39,20 @@ export function ruleFor(method: string, path: string, accept: string | undefined
   return { send: true };
 }
 
+/**
+ * The URL on the server that a request's target asks for: only its path
+ * and query, for a request line may name a host of its own
+ * (`GET http://elsewhere/ HTTP/1.1`, `GET //elsewhere/`), which the proxy
+ * does not go to.
+ */
+export function targetOf(server: string, requestTarget: string): URL {
+  const { pathname, search } = new URL(requestTarget, server);
+  const target = new URL(server);
+  target.pathname = pathname;
+  target.search = search;
+  return target;
+}
+
 /** The headers of a response a proxy may pass on as they are (fetch has undone its encoding and length). */
 const DROPPED = new Set([
   "content-encoding",
@@ -68,8 +82,8 @@ function headersOf(request: IncomingMessage, accept?: string): Headers {
 
 async function proxy(server: string, request: IncomingMessage, response: ServerResponse) {
   const method = request.method ?? "GET";
-  const target = new URL(request.url ?? "/", server).href;
-  const rule = ruleFor(method, new URL(target).pathname, request.headers.accept);
+  const target = targetOf(server, request.url ?? "/");
+  const rule = ruleFor(method, target.pathname, request.headers.accept);
   const body = await bodyOf(request);
   if ("refuse" in rule) {
     response.writeHead(rule.refuse, { "access-control-allow-origin": "*" }).end();

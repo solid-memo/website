@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { ruleFor } from "./strictLws.ts";
+import { ruleFor, targetOf } from "./strictLws.ts";
 
 describe("the strict LWS proxy's rules", () => {
   it("lists a container only as LWS does, and refuses Turtle alone", () => {
@@ -29,5 +29,25 @@ describe("the strict LWS proxy's rules", () => {
     expect(ruleFor("GET", "/a/b.ttl", "text/turtle")).toEqual({ send: true });
     expect(ruleFor("POST", "/a/", undefined)).toEqual({ send: true });
     expect(ruleFor("DELETE", "/a/b.ttl", undefined)).toEqual({ send: true });
+  });
+});
+
+describe("the strict LWS proxy's target", () => {
+  const server = "http://127.0.0.1:3000/";
+
+  it("keeps a request's path and query", () => {
+    expect(targetOf(server, "/a/b.ttl?c=d").href).toBe("http://127.0.0.1:3000/a/b.ttl?c=d");
+    expect(targetOf(server, "/a/../b/").href).toBe("http://127.0.0.1:3000/b/");
+  });
+
+  it("stays on the server, whatever host a request line names", () => {
+    for (const requestTarget of [
+      "http://elsewhere.example/a",
+      "//elsewhere.example/a",
+      "/\\elsewhere.example/a",
+      "/.//elsewhere.example/a",
+      "http://user:password@elsewhere.example:8080/a",
+    ])
+      expect(targetOf(server, requestTarget).host).toBe("127.0.0.1:3000");
   });
 });
