@@ -826,7 +826,10 @@ An upgrade writes the deck's documents where they are, each in one
 write made only if it's still as it was read. The order leaves the
 deck readable after each write: its cards, then the review states
 of the cards it removes (SM-2's and FSRS-6's, in one write), then its
-catalog entry, which says which release the deck is. A failure stops it
+catalog entry, which says which release the deck is. The entry is
+checked before the first write (`checkDeckEntryUpgrade`), so one the
+[write check](validation.md#the-write-check) refuses leaves the deck as
+it was. A later failure stops it
 where it is and puts nothing back; planned again, the upgrade is
 offered and finishes
 ([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),
@@ -840,7 +843,7 @@ still name them.
 flowchart TD
     accTitle: Upgrading a library deck
     accDescr: The upgrade reads the deck, puts its cards, drops the removed cards' review states and moves the entry to the new release, and an error stops it where it is.
-    offer["Notice: what the upgrade changes"] -->|Update to release n| read["1 read: the deck's entry and cards;<br/>the plan again must change the same cards;<br/>the review states, when cards go"]
+    offer["Notice: what the upgrade changes"] -->|Update to release n| read["1 read: the deck's entry and cards;<br/>the plan again must change the same cards;<br/>the review states, when cards go;<br/>the new entry checked"]
     read --> cards["2 cards: one PUT of the whole document,<br/>If-Match the read the plan was made from<br/>(none when no card changes)"]
     cards --> reviews["3 reviews: the removed cards' states dropped,<br/>If-Match the read (none when there are none)"]
     reviews --> entry["4 entry: moved to the new release,<br/>with the deck's texts, If-Match the read"]

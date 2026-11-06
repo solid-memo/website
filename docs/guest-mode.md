@@ -153,6 +153,9 @@ It runs these steps:
      Until the entry is written, nothing names the documents. A
      failure before the entry deletes the documents it wrote, and any
      whose write's answer was lost, never one the pod refused to create.
+     If one can't be deleted, the failure says where it is. If the
+     catalog can't be read to tell whether the entry was written, they
+     stay and the failure says to look for the deck first.
      If only the entry's answer was lost, the deck is whole. A deck with
      no cards, or no review states, has no such document yet;
    - then its answers: each of the deck's answers in the guest's log is

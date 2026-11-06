@@ -1539,6 +1539,25 @@ describe("library deck upgrade", () => {
     }
   });
 
+  it("writes nothing when the entry would be refused, and says the deck was not changed", async () => {
+    const { deps, pod, copy, plan, useCases } = await world();
+    const refused = new AppError("dataNotConforming");
+    vi.mocked(deps.deckRepository.checkDeckEntryUpgrade).mockRejectedValueOnce(refused);
+    const cards = cardsOf(pod, copy.cardsDocumentUrl);
+
+    const outcome = await useCases.applyLibraryUpgrade(copy, plan);
+
+    expect(outcome).toEqual({ ok: false, step: "read", error: refused, changed: false });
+    expect(vi.mocked(deps.deckRepository.checkDeckEntryUpgrade).mock.calls[0]![1]).toMatchObject({
+      sourceUrl: plan.releaseUrl,
+    });
+    expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+    expect(deps.deckRepository.upgradeDeckEntry).not.toHaveBeenCalled();
+    expect(pod.deck).toEqual(copy);
+    expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual(cards);
+  });
+
   it("stops where a write fails, nothing put back, and offered again it finishes, no card it wrote taken for the user's", async () => {
     const { deps, pod, copy, plan, useCases, v2 } = await world();
     vi.mocked(deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(

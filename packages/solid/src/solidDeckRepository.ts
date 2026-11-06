@@ -79,6 +79,7 @@ import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
+import { finishCutOffImport, unsent } from "@solid-memo/application/writes";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
 import { withinCatalogLimit } from "./catalogLinks";
 
@@ -208,8 +209,17 @@ export function createSolidDeckRepository({
         card: { ...card, fromRelease: content.url },
         existing: null,
       }));
-      await saveCardsDocument(deck, written.dataset, written.subjects);
-      return registerDeck(deck);
+      // Checked first: an entry that would be refused leaves no cards document behind.
+      const entry = await catalogWithEntry(deck);
+      await checkWrite(entry.dataset, entry.subjects, "pod");
+      try {
+        await saveCardsDocument(deck, written.dataset, written.subjects);
+      } catch (error) {
+        // A write refused was never made: nothing of the import's is there.
+        if (unsent(error)) throw error;
+        return finishImport(deck, error);
+      }
+      return registerDeck(deck).catch((error: unknown) => finishImport(deck, error));
     },
 
     async addDeck(deck): Promise<Deck> {
@@ -405,37 +415,21 @@ export function createSolidDeckRepository({
       return true;
     },
 
-    async readDeck(deckUrl) {
-      const catalogUrl = documentUrlOf(deckUrl);
-      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      return dataset === null
-        ? null
-        : (toDecks(dataset, catalogUrl).find((deck) => deck.url === deckUrl) ?? null);
-    },
+    readDeck,
 
     async upgradeDeckEntry(current, next): Promise<Deck> {
-      const catalogUrl = documentUrlOf(current.url);
-      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      const stored =
-        dataset === null
-          ? undefined
-          : toDecks(dataset, catalogUrl).find((deck) => deck.url === current.url);
-      if (dataset === null || stored === undefined || !sameDeckState(stored, current)) {
-        throw new AppError("deckChangedDuringUpgrade", { url: current.url });
-      }
-      const written: Deck = {
-        ...withDeckChanges(stored, current, next),
-        formatVersion: DECK_FORMAT_VERSION,
-      };
+      const { catalogUrl, dataset, subjects, written } = await upgradedEntry(current, next);
       // The write carries If-Match of the read above: the entry changes as it was checked, or not at all.
-      const updated = withDeck(dataset, written);
-      await save(catalogUrl, updated, deckSubjects(updated, written));
+      await save(catalogUrl, dataset, subjects);
       return written;
     },
 
-    async deleteDocument(deck, url) {
-      await removeIfTheirs(url, [deck], deckDocumentSubjects([deck.url]));
+    async checkDeckEntryUpgrade(current, next) {
+      const { dataset, subjects } = await upgradedEntry(current, next);
+      await checkWrite(dataset, subjects, "pod");
     },
+
+    deleteDocument,
 
     completeChapter(deck, chapterUrl) {
       return editCompletedChapters(deck, (completed) =>
@@ -884,13 +878,64 @@ export function createSolidDeckRepository({
    * completed and its card language; refused (alreadyExists) when the catalog has one of its URL.
    */
   async function registerDeck(deck: Deck): Promise<Deck> {
-    const catalogUrl = documentUrlOf(deck.url);
-    const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-    if (getThing(dataset, deck.url) !== null)
-      throw new AppError("alreadyExists", { url: deck.url });
-    const updated = withOwnTerms(withDeck(dataset, deck), deck);
-    await save(catalogUrl, updated, deckSubjects(updated, deck));
+    const entry = await catalogWithEntry(deck);
+    await save(entry.catalogUrl, entry.dataset, entry.subjects);
     return deck;
+  }
+
+  /**
+   * The catalog as it is now with the deck's entry added, and the subjects
+   * that adds, for the write check; refused (alreadyExists) when it has one of its URL.
+   */
+  async function catalogWithEntry(deck: Deck) {
+    const catalogUrl = documentUrlOf(deck.url);
+    const read = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+    if (getThing(read, deck.url) !== null) throw new AppError("alreadyExists", { url: deck.url });
+    const dataset = withOwnTerms(withDeck(read, deck), deck);
+    return { catalogUrl, dataset, subjects: deckSubjects(dataset, deck) };
+  }
+
+  /** An import cut off after its entry was checked, whose only document is its cards. */
+  function finishImport(deck: Deck, failure: unknown): Promise<Deck> {
+    return finishCutOffImport({ readDeck, deleteDocument }, deck, [deck.cardsDocumentUrl], failure);
+  }
+
+  async function readDeck(deckUrl: string): Promise<Deck | null> {
+    const catalogUrl = documentUrlOf(deckUrl);
+    const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
+    return dataset === null
+      ? null
+      : (toDecks(dataset, catalogUrl).find((deck) => deck.url === deckUrl) ?? null);
+  }
+
+  async function deleteDocument(deck: Deck, url: string): Promise<void> {
+    await removeIfTheirs(url, [deck], deckDocumentSubjects([deck.url]));
+    // removeIfTheirs leaves a document it cannot read: only a read says it is gone.
+    if ((await getSolidDatasetOrNull(url, fetch)) !== null)
+      throw new Error(`The document ${url} is still there.`);
+  }
+
+  /**
+   * The catalog as it is now with the deck's entry upgraded, and the
+   * subjects that touches, for the write check; refused
+   * (deckChangedDuringUpgrade) unless the entry still says what `current` does.
+   */
+  async function upgradedEntry(current: Deck, next: Deck) {
+    const catalogUrl = documentUrlOf(current.url);
+    const read = await getSolidDatasetOrNull(catalogUrl, fetch);
+    const stored =
+      read === null
+        ? undefined
+        : toDecks(read, catalogUrl).find((deck) => deck.url === current.url);
+    if (read === null || stored === undefined || !sameDeckState(stored, current)) {
+      throw new AppError("deckChangedDuringUpgrade", { url: current.url });
+    }
+    const written: Deck = {
+      ...withDeckChanges(stored, current, next),
+      formatVersion: DECK_FORMAT_VERSION,
+    };
+    const dataset = withDeck(read, written);
+    return { catalogUrl, dataset, subjects: deckSubjects(dataset, written), written };
   }
 
   /**

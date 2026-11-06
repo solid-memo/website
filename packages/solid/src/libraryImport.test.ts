@@ -414,6 +414,38 @@ describe("a library deck's documents, through its import and an upgrade", () => 
     expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
   });
 
+  it("to a release whose entry the write check refuses, for a theme the library's shapes take, leaves the deck as it is", {
+    timeout: 60_000,
+  }, async () => {
+    const { store, instance, deck, removed, site } = await studiedDeck(`${POD}solid-memo/`);
+    const EDUC = "<http://publications.europa.eu/resource/authority/data-theme/EDUC>";
+    const refusedTheme: typeof fetch = async (input, init) => {
+      const response = await site(input, init);
+      if (String(input) !== LATEST) return response;
+      const turtle = await response.text();
+      expect(turtle).toContain(EDUC);
+      const changed = new Response(
+        turtle.replace(EDUC, `${EDUC}, <https://elsewhere.example/theme>`),
+        { headers: { "content-type": "text/turtle" } },
+      );
+      return Object.defineProperty(changed, "url", { value: LATEST });
+    };
+    const before = await everyTriple(store);
+
+    const { useCases, plan, outcome } = await upgrade(store, refusedTheme, instance.url, deck.url);
+
+    expect(plan.remove.map((card) => card.id)).toEqual([removed]);
+    expect(outcome).toMatchObject({
+      ok: false,
+      step: "read",
+      error: { code: "dataNotConforming" },
+      changed: false,
+    });
+    expect(await everyTriple(store)).toEqual(before);
+    const [same] = await useCases.listDecks(instance.url);
+    expect(same!.sourceUrl).toBe(deck.sourceUrl);
+  });
+
   it("made before documents said whose they are, in the instance's own folder, says so in the upgrade's own writes", {
     timeout: 60_000,
   }, async () => {
@@ -555,6 +587,48 @@ describe("a release added from a link", () => {
     expect(site.asked()).toBe(4);
     expect(await everyTriple(store)).toEqual(before);
   });
+
+  it.each([
+    ["deck", false, (release: string) => release],
+    [
+      "course",
+      true,
+      (release: string) =>
+        release.replace(
+          "<>\n    a solid-memo:Deck ,",
+          "<>\n    a <https://schema.org/Course> ,\n      solid-memo:Deck ,",
+        ),
+    ],
+  ])(
+    "as a %s, whose entry the write check refuses for a theme the library's shapes take, writes no document",
+    { timeout: 60_000 },
+    async (_kind, isCourse, typed) => {
+      const good = await linkedRelease();
+      const EDUC = "<http://publications.europa.eu/resource/authority/data-theme/EDUC>";
+      const refused = typed(good).replace(EDUC, `${EDUC}, <https://elsewhere.example/theme>`);
+      expect(refused).toContain("elsewhere.example");
+      expect(refused).not.toBe(typed(good));
+      const { useCases, store } = await app(linkedSite([refused]));
+      const instance = await useCases.createInstance(ALICE, {
+        containerUrl: `${POD}solid-memo/`,
+        name: "Main",
+        registrationTarget: "private",
+      });
+      const before = await store.urls();
+
+      const release = await useCases.readReleaseFromLink(LINKED);
+      expect(release.isCourse === true).toBe(isCourse);
+      await expect(useCases.importReleaseFromUrl(instance.url, release)).rejects.toMatchObject({
+        code: "dataNotConforming",
+      });
+      await expect(useCases.importReleaseFromUrl(instance.url, release)).rejects.toMatchObject({
+        code: "dataNotConforming",
+      });
+
+      expect(await store.urls()).toEqual(before);
+      expect(await useCases.listDecks(instance.url)).toEqual([]);
+    },
+  );
 
   it("is refused when the read breaks the library's shapes, and the next read is checked again", async () => {
     const good = await linkedRelease();

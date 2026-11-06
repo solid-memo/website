@@ -63,7 +63,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { MAX_LOG_MONTHS } from "@solid-memo/domain/answer";
 import type { InstanceCheckUseCases } from "./instanceChecks";
 import { catalogOf, type InstanceUseCases } from "./instances";
-import { unsent } from "./writes";
+import { finishCutOffImport, unsent } from "./writes";
 import { stepReporter } from "./progress";
 import type { AnswerStore } from "./answerStore";
 
@@ -337,7 +337,7 @@ export function createSessionUseCases({
    * (and one whose write may have been made, its answer lost), which
    * nothing names, never one the pod refused to create; unless the entry
    * was written after all, its answer lost on the way: then the deck is
-   * there, whole.
+   * there, whole. A document that may be left is reported (finishCutOffImport).
    */
   async function addGuestDeck(guest: Deck, instanceUrl: string): Promise<Deck> {
     const deck = mergedDeck(guest, instanceUrl, `deck-${newId()}`, DECK_FORMAT_VERSION);
@@ -374,13 +374,7 @@ export function createSessionUseCases({
       }
       return await deckRepository.addDeck(deck);
     } catch (error) {
-      const entry = unsent(error)
-        ? null
-        : await deckRepository.readDeck(deck.url).catch(() => null);
-      if (entry !== null) return entry;
-      for (const url of written)
-        await deckRepository.deleteDocument(deck, url).catch(() => undefined);
-      throw error;
+      return await finishCutOffImport(deckRepository, deck, written, error);
     }
   }
   /**

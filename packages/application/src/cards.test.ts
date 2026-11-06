@@ -1227,8 +1227,6 @@ describe("cards", () => {
         new Error("Expected a valid URL value"),
       );
       vi.mocked(deps.deckRepository.readDeck).mockResolvedValueOnce(null);
-      // One that can't be deleted is left as the instance check finds it; the others still go.
-      vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(new Error("offline"));
       await expect(
         useCases.importDeckFile(instance.url, file, { withProgress: true }),
       ).rejects.toThrow("Expected a valid URL value");
@@ -1241,7 +1239,22 @@ describe("cards", () => {
       expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
     });
 
-    it("deletes them without asking after the entry when the pod refused it, or the entry can't be read", async () => {
+    it("says where a document it could not delete is, not what failed before it, and still deletes the others", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.registerDeck).mockRejectedValueOnce(
+        new AppError("dataNotConforming"),
+      );
+      vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(new Error("offline"));
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toMatchObject({
+        code: "importDocumentLeft",
+        vars: { url: `${instance.url}decks/deck-x.ttl` },
+      });
+      expect(deps.deckRepository.deleteDocument).toHaveBeenCalledTimes(2);
+    });
+
+    it("deletes them without asking after the entry when the pod refused it, and keeps them when the entry can't be read", async () => {
       const { deps, useCases } = withFiles();
       vi.mocked(deps.deckRepository.registerDeck).mockRejectedValueOnce(
         new AppError("writeRefused"),
@@ -1258,8 +1271,8 @@ describe("cards", () => {
       vi.mocked(deps.deckRepository.readDeck).mockRejectedValueOnce(new Error("offline"));
       await expect(
         useCases.importDeckFile(instance.url, file, { withProgress: false }),
-      ).rejects.toThrow("offline");
-      expect(deps.deckRepository.deleteDocument).toHaveBeenCalledTimes(2);
+      ).rejects.toMatchObject({ code: "importOutcomeUnknown" });
+      expect(deps.deckRepository.deleteDocument).toHaveBeenCalledTimes(1);
     });
 
     it("keeps the deck whose entry was written after all, its answer lost", async () => {

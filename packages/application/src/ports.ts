@@ -261,7 +261,11 @@ export interface DeckRepository {
    * Create a deck with all its cards at once — one write of the cards
    * document rather than one per card — remembering the library deck it
    * came from. The cards keep their library ids, and each names the
-   * release it was taken from (Card.fromRelease, `content.url`).
+   * release it was taken from (Card.fromRelease, `content.url`). The
+   * entry is checked before anything is written, and a failure after
+   * that deletes the cards document, unless the entry was written after
+   * all; one that cannot be deleted is reported, as for any import
+   * (finishCutOffImport in writes.ts).
    */
   importDeck(instanceUrl: string, content: LibraryDeckContent): Promise<Deck>;
   /**
@@ -363,6 +367,11 @@ export interface DeckRepository {
    */
   upgradeDeckEntry(current: Deck, next: Deck): Promise<Deck>;
   /**
+   * Throw what upgradeDeckEntry would, writing nothing: for an upgrade to
+   * check its entry before it writes the deck's other documents.
+   */
+  checkDeckEntryUpgrade(current: Deck, next: Deck): Promise<void>;
+  /**
    * The deck's cards and reviews documents that do not say they are the
    * deck's (`<> dcterms:isPartOf` its entry) and that Solid Memo may not
    * mark as its own by itself, being outside the instance's own folder
@@ -381,7 +390,7 @@ export interface DeckRepository {
    * one a guest's deck being added wrote before its catalog entry
    * failed: the deck's cards and review states are removed from it, and
    * it is deleted when nothing else is left in it; one that is gone
-   * counts as deleted.
+   * counts as deleted. Throws unless it can be read to be gone.
    */
   deleteDocument(deck: Deck, url: string): Promise<void>;
   /**
