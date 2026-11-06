@@ -270,6 +270,15 @@ clients send the request with the redirect mode authFetch gives it
 ([solid-memo-client.md](solid-memo-client.md#restore-refresh-and-logout)).
 So no request carries the user's credentials to an address the fences
 never saw.
+
+authFetch also refuses (`credentialsRefused`), before anything is sent
+and whatever the method, an address whose path would lead to another
+server if read as an address of its own, or to no address at all.
+Inrupt's sign-in client builds a DPoP proof's `htu` that way, so a proof
+sent to such an address would name another server. The test is on the
+parsed address, so every spelling of a `//` at the start of the path is
+caught, and a path with one further along (`/a//b`) isn't refused here.
+
 When a request fails and wasn't aborted, authFetch asks the same
 address with a HEAD as no one, the redirect not followed:
 

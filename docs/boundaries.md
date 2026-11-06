@@ -262,7 +262,9 @@ redirects it to. Behind them, the fetch that carries the user's
 credentials follows no redirect, so a write never reaches an address
 the pod fence didn't check. A write that redirects is refused
 (`redirectRefused`), and a read that redirects is sent again as no one
-([authentication.md](authentication.md#authenticated-requests)).
+([authentication.md](authentication.md#authenticated-requests)). That
+fetch also refuses any address, read or write, that the proof of the
+user's login would name another server for (`credentialsRefused`).
 
 A read of another server, as the user or as no one, has a deadline
 ([readDeadline.ts](../packages/solid/src/readDeadline.ts),

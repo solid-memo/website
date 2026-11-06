@@ -48,6 +48,10 @@ export const anonymousFetch: typeof globalThis.fetch = (input, init) =>
  * other failure is passed on. The HEAD asks as no one, so a server that
  * sends only visitors with no login elsewhere (to a login page, say)
  * shows a failed write there as a refused redirect.
+ *
+ * It refuses, before anything is sent, an address the proof of the
+ * user's login would name another server for (`credentialsRefused`,
+ * namesAnotherServer), whatever the method, whichever adapter asks.
  */
 export function createAuthFetch(
   client: SessionClient,
@@ -81,6 +85,7 @@ export function createAuthFetch(
     user = client.webId() ?? user;
     const request = input instanceof Request ? input : undefined;
     const url = request?.url ?? String(input);
+    if (namesAnotherServer(url)) throw new AppError("credentialsRefused", { url });
     let response: Response;
     try {
       response = await client.fetch(input, { ...init, redirect: "error" });
@@ -103,6 +108,21 @@ export function createAuthFetch(
       user = undefined;
     },
   };
+}
+
+/**
+ * Whether the path of `url`, read as an address of its own, leads to
+ * another server, or to no address at all: Inrupt's sign-in client makes
+ * the address a proof of the login names in just that way, so the proof
+ * sent to `url` would be good at the other server. It is told from the
+ * parsed address, which is what a request sends: a `//` may be written
+ * `/.//`, with a backslash, or with a tab. An address with no origin (not
+ * one a login is for) or text that is no address names none.
+ */
+function namesAnotherServer(url: string): boolean {
+  const parsed = URL.parse(url);
+  if (parsed === null || parsed.origin === "null") return false;
+  return URL.parse(parsed.pathname, parsed.origin)?.origin !== parsed.origin;
 }
 
 /**
