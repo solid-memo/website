@@ -9,12 +9,15 @@ import {
   buildThing,
   createThing,
   type Dataset,
+  datasetFromQuads,
   setThing,
   type SubjectBuilder,
 } from "../client/rdf";
-import { getSolidDataset } from "../client/resources";
+import { getSolidDataset, parseQuads } from "../client/resources";
 import { datasetFrom } from "../testing/datasets";
+import { answersCsv } from "@solid-memo/domain/answerCsv";
 import { growth } from "@solid-memo/domain/testing/growth";
+import { toAnswer, toAnswerThing } from "./answerMapper";
 import {
   toCourseOutline,
   toLibraryCards,
@@ -791,5 +794,35 @@ describe("toCourseOutline", () => {
       { id: "ch-1", steps: [{ id: "ch-1-1", questionIds: ["q-1"] }], reviewQuestionIds: ["q-1"] },
     ]);
     expect(toCourseOutline(DOC, dataset).chapters[0]!.steps).toHaveLength(1);
+  });
+});
+
+describe("a release's card id in the answers CSV", () => {
+  it.each([
+    [";", "%3B"],
+    ["\u061b", "%D8%9B"],
+  ])("starts no cell of a reading separated by %s as a formula", async (separator, encoded) => {
+    const formula = "=HYPERLINK(CHAR(104)&CHAR(116)&A2)";
+    const turtle = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#c${separator}${formula}${separator}> a sm:Card ;
+  sm:formatVersion 7 ; sm:front "f"@en ; sm:back "b"@en ;
+  <http://purl.org/dc/terms/created> "2026-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .`;
+    const [card] = toLibraryCards(DOC, datasetFromQuads(await parseQuads(turtle, "turtle", DOC)));
+    expect(card!.id).toBe(`c${separator}${formula}${separator}`);
+    const answer = toAnswer(
+      toAnswerThing("https://pod.example/i/history/2026-01.ttl", {
+        id: "a1",
+        deckUrl: "https://pod.example/i/catalog.ttl#deck",
+        cardUrl: `https://pod.example/i/cards.ttl#${card!.id}`,
+        direction: "front-to-back",
+        grade: 3,
+        answeredAt: "2026-01-01T00:00:00.000Z",
+        studyDay: "2026-01-01",
+        nextIntervalDays: 1,
+      }),
+    );
+    const row = answersCsv([answer!]).split("\r\n")[1]!;
+    expect(row).toContain(`#c${encoded}${formula}${encoded},`);
+    expect(row).not.toContain(separator);
   });
 });
