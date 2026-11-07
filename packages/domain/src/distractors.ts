@@ -133,17 +133,22 @@ function withoutRetirement({ id, text, note }: Distractor): Distractor {
 }
 
 /**
- * The card's distractors without one; refused (distractorPublished) for
- * one the deck's release published, which a learner's history may name:
- * it is retired instead.
+ * The card's distractors without the one at position `at`, so of two
+ * that hold one id (which no save accepts, distractorIdRepeated) the
+ * other stays; refused (distractorPublished) when that takes away an id
+ * the deck's release published, which a learner's history may name: it
+ * is retired instead.
  */
 export function deleteDistractor(
   distractors: readonly Distractor[],
-  id: string,
+  at: number,
   published: ReadonlySet<string>,
 ): DistractorEdit {
-  if (published.has(id)) return { ok: false, error: new AppError("distractorPublished") };
-  return { ok: true, distractors: distractors.filter((distractor) => distractor.id !== id) };
+  const { id } = distractors[at]!;
+  const kept = distractors.filter((_, position) => position !== at);
+  if (published.has(id) && !kept.some((distractor) => distractor.id === id))
+    return { ok: false, error: new AppError("distractorPublished") };
+  return { ok: true, distractors: kept };
 }
 
 /**

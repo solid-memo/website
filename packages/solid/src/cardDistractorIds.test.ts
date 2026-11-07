@@ -15,8 +15,9 @@
 import { describe, expect, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import type { LibraryCard, LibraryDeckContent } from "@solid-memo/domain/library";
+import { deleteDistractor } from "@solid-memo/domain/distractors";
 import { planLibraryUpgrade, upgradedCards } from "@solid-memo/domain/libraryUpgrade";
-import { buildThing, getThing, setThing } from "./client/rdf";
+import { buildThing, createThing, getThing, setThing } from "./client/rdf";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -123,6 +124,39 @@ async function editedCopy(edited = true) {
       .build();
     await saveDataset(deck.cardsDocumentUrl, setThing(dataset, taken), fetch);
   };
+  /** A document written by hand: card x names a second distractor of id dx, a subject of another document, card x in an older format when asked. */
+  const repeatDistractor = async (formatVersion = 7) => {
+    const dataset = (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch))!;
+    const url = "https://pod.example/elsewhere#dx";
+    const second = buildThing(createThing({ url }))
+      .addUrl(RDF.type, SM.Distractor)
+      .addStringWithLocale(SM.distractorText, "Lille", "en")
+      .setInteger(SM.formatVersion, 1)
+      .build();
+    const x = getThing(dataset, `${deck.cardsDocumentUrl}#x`)!;
+    const naming = buildThing(x)
+      .addUrl(SM.distractor, url)
+      .setInteger(SM.formatVersion, formatVersion)
+      .build();
+    await saveDataset(deck.cardsDocumentUrl, setThing(setThing(dataset, second), naming), fetch);
+  };
+  /** Save the card with the text it has but its front, its wrong options as they are. */
+  const editFront = async (id: string, front: string) => {
+    const one = await find(id);
+    await repository.updateCard(deck, one, { front: { en: front }, back: one.back });
+  };
+  /** Delete the card's wrong option at `at`, as its fields do, and save the card with what is left. */
+  const deleteOption = async (id: string, at: number) => {
+    const one = await find(id);
+    const edit = deleteDistractor(one.distractors!, at, new Set());
+    if (!edit.ok) throw edit.error;
+    await repository.updateCard(deck, one, {
+      front: one.front,
+      back: one.back,
+      distractors: edit.distractors,
+    });
+  };
+  const upgradeFormat = () => repository.upgradeCards(deck);
   /** The pod as an earlier app left it: no card's front says its language. */
   const unstateFronts = async () => {
     let dataset = (await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch))!;
@@ -152,6 +186,10 @@ async function editedCopy(edited = true) {
     fronts,
     remove,
     removeByChanges,
+    repeatDistractor,
+    editFront,
+    deleteOption,
+    upgradeFormat,
   };
 }
 
@@ -296,5 +334,71 @@ describe("a card and a distractor of one id", () => {
     const copy = await editedCopy();
     await copy.removeByChanges("x");
     expect(await copy.cards()).toEqual([["y", null]]);
+  });
+});
+
+describe("a card naming two distractors of one id, in a document written by hand", () => {
+  const both = [
+    ["dx", "Lyon"],
+    ["dx", "Lille"],
+  ];
+
+  it("still reads, and another card of the document can be edited", async () => {
+    const copy = await editedCopy();
+    await copy.repeatDistractor();
+    expect(await copy.cards()).toEqual([
+      ["x", both],
+      ["y", null],
+    ]);
+    await copy.editFront("y", "Capital of Spain? (my own wording)");
+    expect(await copy.fronts()).toEqual([
+      ["x", { en: "Capital of France? (my own wording)" }],
+      ["y", { en: "Capital of Spain? (my own wording)" }],
+    ]);
+    expect(await copy.cards()).toEqual([
+      ["x", both],
+      ["y", null],
+    ]);
+  });
+
+  it("refuses a write of the card, both kept", async () => {
+    const copy = await editedCopy();
+    await copy.repeatDistractor();
+    await expect(copy.editFront("x", "Changed")).rejects.toMatchObject({
+      code: "distractorIdRepeated",
+    });
+    expect(await copy.cards()).toEqual([
+      ["x", both],
+      ["y", null],
+    ]);
+  });
+
+  it.each([
+    [0, "Lille"],
+    [1, "Lyon"],
+  ])("deleting the one at %i keeps the other, %s", async (at, kept) => {
+    const copy = await editedCopy();
+    await copy.repeatDistractor();
+    await copy.deleteOption("x", at);
+    expect(await copy.cards()).toEqual([
+      ["x", [["dx", kept]]],
+      ["y", null],
+    ]);
+  });
+
+  it("refuses to upgrade the document's format, as it was, until one is deleted", async () => {
+    const copy = await editedCopy();
+    await copy.repeatDistractor(6);
+    await expect(copy.upgradeFormat()).rejects.toMatchObject({ code: "distractorIdRepeated" });
+    expect(await copy.cards()).toEqual([
+      ["x", both],
+      ["y", null],
+    ]);
+    await copy.deleteOption("x", 1);
+    await expect(copy.upgradeFormat()).resolves.toBe(false);
+    expect(await copy.cards()).toEqual([
+      ["x", [["dx", "Lyon"]]],
+      ["y", null],
+    ]);
   });
 });

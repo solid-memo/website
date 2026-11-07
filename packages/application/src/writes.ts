@@ -53,7 +53,8 @@ export async function readNow<T>(
  * before sending it (the data would not conform, a newer version of the
  * app wrote it, a deck's entry no longer as the upgrade read it, a deck's
  * document not yet said to be the deck's, a deck that cannot be used, an
- * address the pod fence refuses or one outside the user's pod, say).
+ * address the pod fence refuses or one outside the user's pod, a card or
+ * wrong option that would be written over another, say).
  * Any other failure, an answer lost on the way, may follow a write the
  * pod made.
  */
@@ -71,6 +72,8 @@ export function unsent(error: unknown): boolean {
       "deckChangedDuringUpgrade",
       "deckDocumentUnclaimed",
       "deckGone",
+      "distractorIdRepeated",
+      "idTakenInDeck",
     ].includes(error.code)
   );
 }

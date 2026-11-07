@@ -970,7 +970,9 @@ The domain makes each change
 - `deleteDistractor` removes it, once the user confirms, but only one
   the release the deck came from never published; one it did (a
   learner's history may name it) is refused, to be retired instead.
-  While the release is read, every one counts as published.
+  While the release is read, every one counts as published. It goes by
+  position: of two that hold one id, the other stays, so its id does
+  too, and even a published one may go.
 - `distractorIssues` lists an option in use that isn't in exactly the
   back's languages, and fewer than two in use, as warnings in a pod's
   deck, never refusals.

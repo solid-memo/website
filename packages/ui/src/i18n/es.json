@@ -1708,7 +1708,7 @@
     "textMixesUnstated": "Este texto no indica en qué idioma está, así que no puede tener traducciones. Elige primero su idioma.",
     "distractorEmpty": "Una opción incorrecta necesita texto.",
     "distractorPublished": "Esta opción incorrecta está en la publicación de la que viene el mazo, así que no se puede eliminar. Retírala en su lugar.",
-    "distractorIdRepeated": "Dos opciones incorrectas de esta tarjeta tienen el mismo id, así que solo se podría guardar una. Elimina una de ellas.",
+    "distractorIdRepeated": "Dos opciones incorrectas de una tarjeta tienen el mismo id, así que una reemplazaría a la otra. No se ha guardado nada. Elimina una de ellas de la tarjeta o, en un archivo de mazo, dale a cada una su propio id.",
     "dailyLimitInvalid": "Un límite diario es un número entero, 0 o mayor.",
     "dueDayInvalid": "«{day}» no es un día. Elige el día en que toca repasar la tarjeta.",
     "cardTransferSameDeck": "Las tarjetas ya están en este mazo. Elige otro mazo.",

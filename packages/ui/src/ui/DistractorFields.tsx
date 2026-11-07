@@ -187,9 +187,9 @@ export function DistractorFields({
     return onChange(next);
   }
 
-  function remove(distractor: Distractor) {
+  function remove(distractor: Distractor, at: number) {
     if (busy) return;
-    const edit = deleteDistractor(distractors, distractor.id, published);
+    const edit = deleteDistractor(distractors, at, published);
     // One the release published is refused at once, saying to retire it instead.
     if (!edit.ok) return setRefusal(edit.error);
     askFirst({
@@ -321,7 +321,7 @@ export function DistractorFields({
         <p class="hint">{t("distractorFields.none")}</p>
       ) : (
         <ul class="distractor-list" aria-describedby="distractor-fields-hint">
-          {distractors.map((distractor) =>
+          {distractors.map((distractor, at) =>
             editing?.id === distractor.id ? (
               <li key={distractor.id}>{editor(editing)}</li>
             ) : (
@@ -387,7 +387,7 @@ export function DistractorFields({
                     class="danger"
                     aria-label={t("distractorFields.deleteLabel", { option: named(distractor) })}
                     aria-disabled={busy}
-                    onClick={() => remove(distractor)}
+                    onClick={() => remove(distractor, at)}
                   >
                     {t("distractorFields.delete")}
                   </button>

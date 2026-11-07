@@ -1040,7 +1040,13 @@ Studio's card inspector edit them
   its distractor, removing the card that took it over, by hand or in an
   upgrade, removes only the card statements: the `sm:Card` type and the
   card properties (`withoutCardSubject`). The other card keeps its
-  distractor and is editable again.
+  distractor and is editable again. A card may also name two
+  distractors of one id, subjects of two documents, as only a document
+  written by hand can. It still reads, and the document's other cards
+  can be edited. A write of that card is refused
+  (`distractorIdRepeated`), and so is an upgrade of its document to
+  this app's format, which stays as it is until the user deletes one
+  of the two (`deleteDistractor`, by position) and saves the card.
 
 ## Courses
 
