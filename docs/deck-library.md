@@ -1167,8 +1167,9 @@ flowchart LR
   `DeckLibrary.publishedBeside` takes the first catalog that links the
   release in the folders above it, nearest first and eight folders at
   most, read as anyone reads them. Of its links, it keeps only those at
-  an address a release may have (`isPublishedReleaseUrl`), as the
-  user's own catalog does. Of those links, the app reads only some, and
+  an address a release may have (`isPublishedReleaseUrl`, which refuses
+  an empty segment and user info), as the user's own catalog does. Of
+  those links, the app reads only some, and
   never one the copy's release lists. First come those named as the
   copy's release (`…/<name>/vN.ttl`): 16 at most, one at a time, the
   highest version first, until one is a newer release of the same
@@ -1196,8 +1197,9 @@ flowchart LR
   newer release is its creator's to write, so it may list any number of
   releases in between. The app keeps only those at an address a release
   may have (`isPublishedReleaseUrl`, in `toStandaloneLibraryDeck`), as
-  with a catalog's links, and reads the newest 16 of them at most, four
-  at once, each once. A card as one left out has it counts as the
+  with a catalog's links: no empty segment, no user info. It reads the
+  newest 16 of them at most, four at once, each once. A card as one
+  left out has it counts as the
   user's, and the upgrade keeps it. The copy's own release is checked
   the same way, as its creator can change it after the import.
 - Only the cards the copy took from a release are the series': each

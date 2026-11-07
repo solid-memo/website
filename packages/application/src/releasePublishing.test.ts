@@ -264,6 +264,19 @@ describe("makeReleasePublic, of a release elsewhere", () => {
       expect(publisher.makePublic).not.toHaveBeenCalled();
     }
   });
+
+  it("refuses a release of an instance whose address has an empty segment, in any storage", async () => {
+    const root = "https://evil.example//honest.example/";
+    const url = `${root}alice/private/notes/v1.ttl`;
+    const { useCases, publisher } = setUp({
+      storages: [{ url: root }, { url: "https://evil.example/" }],
+    });
+    await expect(useCases.makeReleasePublic(root, url, WEBID)).rejects.toMatchObject({
+      code: "publicAccessRefused",
+      vars: { url },
+    });
+    expect(publisher.makePublic).not.toHaveBeenCalled();
+  });
 });
 
 describe("downloadRelease", () => {

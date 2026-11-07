@@ -84,8 +84,9 @@ flowchart LR
   attached by URL or moved to from a guest's pod is registered at its
   address as a request sends it (`instanceAddressOf`):
   `HTTPS://Pod.example:443/kortlekar-å` is
-  `https://pod.example/kortlekar-%C3%A5/`. An address that `isInstanceAddress`
-  refuses isn't an instance to attach (`notAnInstanceNoMeta`).
+  `https://pod.example/kortlekar-%C3%A5/`. An address that
+  `isInstanceAddress` refuses as a request sends it isn't an instance
+  to attach (`notAnInstanceNoMeta`).
   An instance with no title is named after its folder, with its
   percent-encoding undone; a name whose escapes don't decode, such as
   `caf%E9`, is shown as written (`lastPathSegment` in
@@ -516,9 +517,12 @@ No document Solid Memo names has any.
 - **A release** the catalog links (`sm:publishedRelease`) is listed only
   at an http(s) address named as a release is, `…/<name>/v<N>.ttl`,
   written as a request sends it, like the folder it's published in
-  ([studio.md](studio.md#publishing-a-release)). It's made public again
-  only when the catalog lists it, its document is a release, and it's in
-  the instance or in a storage of the user's that holds the instance.
+  ([studio.md](studio.md#publishing-a-release)). That address has no
+  empty segment (`//`) and no user info (`isPublishedReleaseUrl`). It's
+  made public again only when the catalog lists it, its document is a
+  release, and
+  it's in the instance or in a storage of the user's that holds the
+  instance.
   An instance attached from another's pod may list the user's own. Its
   next version, written into the instance, is made from it read as the
   user only by the same place rule, and from it read as no one
