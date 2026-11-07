@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { isCountableDay } from "./answer";
 import { MINIMAL_ANSWERS } from "./answerScale";
 import {
   FSRS_REVIEW_STATE_FORMAT_VERSION,
@@ -12,7 +13,7 @@ import {
   type ReviewQuality,
   type ReviewState,
 } from "./review";
-import { nextDueDate, studyDayOf } from "./scheduling";
+import { firstReviewOf, nextDueDate, studyDayOf } from "./scheduling";
 import { fnv1a } from "./fnv1a";
 import {
   boundedFsrsSnapshot,
@@ -97,8 +98,9 @@ export function usableDesiredRetention(stored: number): number {
  */
 const SM2_RETENTION = 0.9;
 
+/** A value kept from min to max; one that is no number takes the min. */
 function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
+  return value > min ? Math.min(max, value) : min;
 }
 
 /** The chance of recalling a card of `stability` days `elapsedDays` after its last review. */
@@ -286,19 +288,34 @@ export function ratingOfGrade(grade: ReviewQuality): FsrsRating {
 
 /**
  * Whether an FSRS-6 state is fresh: the SM-2 state of its prompt has the
- * same last review, so no review since has left it behind. A stale one
- * (an older app graded SM-2 only, the day was reset, or the card
- * forgotten) counts for nothing and is replaced at the next review.
+ * same last review, so no review since has left it behind, and its due
+ * day is one to count from (isCountableDay). A stale one (an older app
+ * graded SM-2 only, the day was reset, the card forgotten, or the due
+ * day read is no date) counts for nothing and is replaced at the next
+ * review.
  */
 export function isFresh(fsrs: FsrsState, sm2: ReviewState): boolean {
-  return Date.parse(fsrs.lastReviewedAt) === Date.parse(sm2.lastReviewedAt);
+  return (
+    isCountableDay(fsrs.due) && Date.parse(fsrs.lastReviewedAt) === Date.parse(sm2.lastReviewedAt)
+  );
+}
+
+/**
+ * The whole study days from a last review to `day`, 0 or more. A last
+ * review outside the range of study days (isCountableDay) counts as
+ * none: 0, as a state's dates can hold any year.
+ */
+function daysSinceReview(lastReviewedAt: string, day: string, dayBoundaryHour: number): number {
+  const lastDay = studyDayOf(new Date(lastReviewedAt), dayBoundaryHour);
+  return isCountableDay(lastDay) ? Math.max(0, daysBetween(lastDay, day)) : 0;
 }
 
 /**
  * What sets each prompt's due day: under SM-2 the SM-2 states; under
  * FSRS-6, for each SM-2 state, its fresh FSRS-6 state's due day and
  * interval (the study days from the last review to it, 0 when the due
- * day was set before the last review), else the SM-2 state's own. One per SM-2 state, in their order: an FSRS-6 state
+ * day was set before the last review or the last review counts as none,
+ * daysSinceReview), else the SM-2 state's own. One per SM-2 state, in their order: an FSRS-6 state
  * without an SM-2 state counts for nothing.
  */
 export function effectiveStates(
@@ -312,12 +329,11 @@ export function effectiveStates(
   return sm2.map((state) => {
     const own = fsrsOf.get(reviewKeyOf(state));
     if (own === undefined || !isFresh(own, state)) return state;
-    const lastDay = studyDayOf(new Date(state.lastReviewedAt), dayBoundaryHour);
     return {
       cardId: state.cardId,
       direction: state.direction,
       due: own.due,
-      intervalDays: Math.max(0, daysBetween(lastDay, own.due)),
+      intervalDays: daysSinceReview(state.lastReviewedAt, own.due, dayBoundaryHour),
       firstReviewedAt: state.firstReviewedAt,
       lastReviewedAt: state.lastReviewedAt,
     };
@@ -327,16 +343,19 @@ export function effectiveStates(
 /**
  * The chance of recalling a prompt `now`, by its FSRS-6 state: at the
  * whole study days since its last review (0 the same study day, and
- * when the last review is later than now).
+ * when the last review is later than now or counts as none,
+ * daysSinceReview).
  */
 export function recallNow(
   state: Pick<FsrsState, "stability" | "lastReviewedAt">,
   now: Date,
   dayBoundaryHour: number,
 ): number {
-  const lastDay = studyDayOf(new Date(state.lastReviewedAt), dayBoundaryHour);
-  const elapsed = Math.max(0, daysBetween(lastDay, studyDayOf(now, dayBoundaryHour)));
-  return retrievability(elapsed, state.stability);
+  const today = studyDayOf(now, dayBoundaryHour);
+  return retrievability(
+    daysSinceReview(state.lastReviewedAt, today, dayBoundaryHour),
+    state.stability,
+  );
 }
 
 /**
@@ -344,7 +363,8 @@ export function recallNow(
  * before it (`sm2`, `fsrs`; null when there is none). The memory builds
  * on the fresh FSRS-6 state, else on an estimate from the SM-2 state,
  * else it starts from the rating (a new prompt); the elapsed days are
- * the study days since the last review, 0 the same study day. The due
+ * the study days since the last review, 0 the same study day or when
+ * the last review counts as none (daysSinceReview). The due
  * day is the interval at `desiredRetention`, fuzzed by the factor of
  * the prompt and its last review (fuzzedInterval, fuzzFactor), after
  * today. The first review of a study day snapshots a fresh state, and
@@ -365,8 +385,7 @@ export function fsrsReview(
   let memory: FsrsMemory;
   if (sm2 === null) memory = nextMemory(null, rating, 0);
   else {
-    const lastDay = studyDayOf(new Date(sm2.lastReviewedAt), dayBoundaryHour);
-    const elapsed = Math.max(0, daysBetween(lastDay, today));
+    const elapsed = daysSinceReview(sm2.lastReviewedAt, today, dayBoundaryHour);
     memory = nextMemory(fresh ?? memoryFromSm2(sm2), rating, elapsed);
   }
   const previous =
@@ -388,7 +407,7 @@ export function fsrsReview(
       ),
       dayBoundaryHour,
     ),
-    firstReviewedAt: sm2?.firstReviewedAt ?? now.toISOString(),
+    firstReviewedAt: firstReviewOf(sm2, now),
     lastReviewedAt: now.toISOString(),
     formatVersion: FSRS_REVIEW_STATE_FORMAT_VERSION,
     ...(previous === undefined ? {} : { previous }),

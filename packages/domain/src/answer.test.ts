@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   answerIdOf,
+  isCountableDay,
   isOfStudyDayRange,
   isOfStudyMonth,
   isRecalled,
@@ -96,4 +97,17 @@ describe("answers", () => {
     expect(Object.is(utcOffsetMinutesAt({ getTimezoneOffset: () => 0 } as Date), 0)).toBe(true);
     expect(utcOffsetMinutesAt({ getTimezoneOffset: () => -120 } as Date)).toBe(120);
   });
+});
+
+describe("isCountableDay", () => {
+  it("takes a real date of the study days' range", () => {
+    expect(isCountableDay("2026-11-06")).toBe(true);
+  });
+
+  it.each(["0000-00-00", "2026-13-45", "2026-02-31", "0050-01-01", "NaN-NaN-NaN", "+012000-01-01"])(
+    "leaves out %s",
+    (day) => {
+      expect(isCountableDay(day)).toBe(false);
+    },
+  );
 });

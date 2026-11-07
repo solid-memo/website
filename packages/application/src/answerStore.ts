@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { AppError } from "@solid-memo/domain/appError";
 import type { Deck, StudyDirection } from "@solid-memo/domain/deck";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import type {
@@ -16,6 +17,7 @@ import { effectiveStates } from "@solid-memo/domain/fsrs";
 import { gradePrompt, type Scheduling } from "@solid-memo/domain/grading";
 import {
   answerIdOf,
+  isCountableDay,
   monthOfStudyDay,
   recordedResponseTimes,
   shiftStudyDay,
@@ -101,7 +103,9 @@ export function createAnswerStore({
    * changes its log (flush, loadAll, removeDay), tries again. Each
    * instance's answers wait only for its own: one whose log refuses or
    * never answers holds up no other's, and an add that gets no answer
-   * in time fails (AnswerLog.append).
+   * in time fails (AnswerLog.append). An answer the write check refuses
+   * (dataNotConforming) would be refused on every try, so it alone is
+   * set aside, and those after it go on.
    */
   const queues = new Map<string, { unlogged: Answer[]; logging: Promise<void> }>();
   function queueOf(instanceUrl: string) {
@@ -118,10 +122,10 @@ export function createAnswerStore({
       while (queue.unlogged.length > 0) {
         try {
           await answerLog.append(instanceUrl, queue.unlogged[0]!);
-        } catch {
-          return;
+          logWrites += 1;
+        } catch (error) {
+          if (!(error instanceof AppError && error.code === "dataNotConforming")) return;
         }
-        logWrites += 1;
         queue.unlogged.shift();
       }
     });
@@ -261,7 +265,7 @@ export function createAnswerStore({
       ...(how.mode === undefined ? {} : { mode: how.mode }),
       ...(how.chosenDistractor === undefined ? {} : { chosenDistractor: how.chosenDistractor }),
       ...recordedResponseTimes(how.times),
-      ...(prior === null ? {} : { priorDue: prior.due }),
+      ...(prior === null || !isCountableDay(prior.due) ? {} : { priorDue: prior.due }),
       utcOffsetMinutes: utcOffsetMinutesAt(now),
     });
     void logInstance(instanceUrl);

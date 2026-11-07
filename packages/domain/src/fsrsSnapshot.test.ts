@@ -3,10 +3,20 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { boundedFsrsSnapshot } from "./fsrsSnapshot";
+import {
+  boundedFsrsMemory,
+  boundedFsrsSnapshot,
+  MIN_DIFFICULTY,
+  MIN_STABILITY,
+} from "./fsrsSnapshot";
 
 describe("boundedFsrsSnapshot", () => {
-  const snapshot = { stability: 3, difficulty: 5, due: "2026-09-21", lastReviewedAt: "x" };
+  const snapshot = {
+    stability: 3,
+    difficulty: 5,
+    due: "2026-09-21",
+    lastReviewedAt: "2026-09-11T10:00:00.000Z",
+  };
 
   it("keeps a snapshot within the bounds as it is", () => {
     expect(boundedFsrsSnapshot(snapshot)).toEqual(snapshot);
@@ -33,5 +43,28 @@ describe("boundedFsrsSnapshot", () => {
   it("drops a snapshot whose due day is no real date", () => {
     expect(boundedFsrsSnapshot({ ...snapshot, due: "soon" })).toBeUndefined();
     expect(boundedFsrsSnapshot({ ...snapshot, due: "2026-02-30" })).toBeUndefined();
+  });
+});
+
+describe("a snapshot read from a pod", () => {
+  const snapshot = {
+    stability: 2,
+    difficulty: 5,
+    due: "2026-11-10",
+    lastReviewedAt: "2026-11-01T00:00:00.000Z",
+  };
+
+  it("takes the lower bound for a number that is no number", () => {
+    expect(boundedFsrsMemory({ stability: Number.NaN, difficulty: Number.NaN })).toEqual({
+      stability: MIN_STABILITY,
+      difficulty: MIN_DIFFICULTY,
+    });
+  });
+
+  it("is dropped when its last review cannot be written back", () => {
+    expect(boundedFsrsSnapshot(snapshot)).toEqual(snapshot);
+    expect(
+      boundedFsrsSnapshot({ ...snapshot, lastReviewedAt: "+012000-01-01T00:00:00Z" }),
+    ).toBeUndefined();
   });
 });

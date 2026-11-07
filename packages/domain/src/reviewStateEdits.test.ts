@@ -4,7 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 import type { ReviewState } from "./review";
-import { isStudyDay, rescheduleState, rescheduleStates, resetStates } from "./reviewStateEdits";
+import {
+  isStudyDay,
+  isWritableInstant,
+  rescheduleState,
+  rescheduleStates,
+  resetStates,
+} from "./reviewStateEdits";
 import { resetStudyDay } from "./scheduling";
 
 const now = new Date(2026, 9, 9, 15, 0);
@@ -120,4 +126,20 @@ describe("rescheduleStates", () => {
       expect.objectContaining({ code: "dueDayInvalid" }),
     );
   });
+});
+
+describe("isWritableInstant", () => {
+  it.each(["2026-11-06T12:00:00Z", "0000-01-01T00:00:00Z", "9999-12-31T23:59:59Z"])(
+    "takes %s",
+    (instant) => {
+      expect(isWritableInstant(instant)).toBe(true);
+    },
+  );
+
+  it.each(["+012000-01-01T00:00:00Z", "-000500-01-01T00:00:00Z", "not a date"])(
+    "leaves out %s",
+    (instant) => {
+      expect(isWritableInstant(instant)).toBe(false);
+    },
+  );
 });

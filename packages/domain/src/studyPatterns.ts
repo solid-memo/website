@@ -156,9 +156,14 @@ export function weekdayOf(studyDay: string): number {
   return (new Date(`${studyDay}T00:00:00Z`).getUTCDay() + 6) % 7;
 }
 
-/** Calendar days from one study day to another, negative when it is the earlier. */
+/**
+ * Calendar days from one study day to another, negative when it is the
+ * earlier; 0 when either is no date, as a day read from a pod may be
+ * (2026-13-45), so that what counts from it stays a number.
+ */
 export function daysBetween(from: string, to: string): number {
-  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+  const days = (Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000;
+  return Number.isNaN(days) ? 0 : Math.round(days);
 }
 
 /** What the days given held from `first` to `last`, both included. */

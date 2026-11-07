@@ -1294,7 +1294,10 @@ nothing could rebuild it.
   session in it, its statistics, resetting a day. An add the server
   hasn't answered within 10 seconds is given up and tried again later,
   which changes nothing if it was saved (`APPEND_DEADLINE_MS`). An
-  answer still queued when the tab closes is lost; its review isn't.
+  answer the write check refuses (`dataNotConforming`) would be refused
+  every time, so only that answer is set aside, never logged, and those
+  after it go on. An answer still queued when the tab closes is lost;
+  its review isn't.
 - **Resetting the day removes that deck's answers of the day**
   (`removeDay`: read, remove, save with If-Match, again on 412).
   **Undoing an answer in a session removes that one answer** by its id

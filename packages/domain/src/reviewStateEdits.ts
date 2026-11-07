@@ -19,6 +19,16 @@ export function isStudyDay(day: string): boolean {
   return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(day);
 }
 
+/**
+ * Whether an instant read from a pod can be written back: one of the
+ * years 0 to 9999. Past them its ISO form has six year digits, which the
+ * write check refuses, though a read lets them through.
+ */
+export function isWritableInstant(instant: string): boolean {
+  const year = new Date(instant).getUTCFullYear();
+  return year >= 0 && year <= 9999;
+}
+
 /** A state that sets a due day and snapshots what a day's first review overwrites: an SM-2 or FSRS-6 state. */
 type Rescheduled = ReviewKey & { due: string; previous?: unknown };
 

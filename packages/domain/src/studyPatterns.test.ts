@@ -9,6 +9,7 @@ import { chainIndexOf } from "./answerChain";
 import type { DayActivity } from "./statistics";
 import {
   calendarStartOf,
+  daysBetween,
   daysStudiedOf,
   firstTrySuccessOf,
   gradeGroupOf,
@@ -312,4 +313,21 @@ describe("the figures of a large log", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+});
+
+describe("daysBetween", () => {
+  it("counts the calendar days between two study days, negative when going back", () => {
+    expect(daysBetween("2026-09-20", "2026-09-25")).toBe(5);
+    expect(daysBetween("2026-09-25", "2026-09-20")).toBe(-5);
+    expect(daysBetween("0500-01-01", "0500-01-02")).toBe(1);
+    expect(daysBetween("+012000-01-01", "+012000-01-02")).toBe(1);
+  });
+
+  it.each(["0000-00-00", "2026-13-45", "NaN-NaN-NaN", "500-01-01"])(
+    "is 0 when one of them is %s, no date",
+    (day) => {
+      expect(daysBetween(day, "2026-09-25")).toBe(0);
+      expect(daysBetween("2026-09-25", day)).toBe(0);
+    },
+  );
 });
