@@ -20,6 +20,7 @@
     "@solid-memo/application": "*",
     "@solid-memo/domain": "*",
     "@solid-memo/solid": "*",
+    "@solid-memo/solid-memo-client": "*",
     "@solid-memo/vocab": "*"
   },
   "devDependencies": {

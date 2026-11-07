@@ -119,8 +119,9 @@ app the ID token only in the address that ends the session, so a build that sign
 
 ## Trying it by hand
 
-The end-to-end tests send no credentials, so sign-in on an LWS storage
-is tried by hand, with the user journeys
+[The signed-in tests](testing.md#the-signed-in-tests) sign in to an LWS
+storage without a browser. The login in a browser is tried by hand, with
+the user journeys
 ([e2e/journeys/css-lws/compose.yml](../e2e/journeys/css-lws/compose.yml)).
 The fork's image, which `npm run servers -w @solid-memo/e2e-pod --
 css-lws` builds, runs its own `config/lws.json` behind the journeys'

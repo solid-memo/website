@@ -19,9 +19,10 @@ import { createAuthFetch, SESSION_EXPIRED_EVENT } from "@solid-memo/solid/authFe
 import { grantPublicRead } from "@solid-memo/solid/client/access";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
+import { clientOf } from "../signedInClient.ts";
 import {
+  exchangedToken,
   resolveSubdomainsOfLocalhost,
-  sessionClient,
   signIn,
   trustCa,
   type Session,
@@ -36,7 +37,7 @@ const ORIGINAL = `<#entry> <https://example.org/says> "first words" .`;
 /** The app's fetch for a session, its fence around it, as createAppUseCases wires it. */
 function appFetch(session: Session, pod: string): typeof globalThis.fetch {
   return createPodFence(
-    createAuthFetch(sessionClient(session), { ownStorages: async () => [pod] }).fetch,
+    createAuthFetch(clientOf(session), { ownStorages: async () => [pod] }).fetch,
   );
 }
 
@@ -85,7 +86,7 @@ describe.each<SignedInServer>(SERVERS)("signed in on $name", (server) => {
     ownerSession = await signIn(server, owner);
     ownerFetch = appFetch(ownerSession, owner.pod);
     // No fence: what refuses the stranger must be the server, whatever they send it.
-    strangerFetch = createAuthFetch(sessionClient(await signIn(server, stranger)), {
+    strangerFetch = createAuthFetch(clientOf(await signIn(server, stranger)), {
       ownStorages: async () => [stranger.pod],
     }).fetch;
     others = [
@@ -159,7 +160,7 @@ describe.each<SignedInServer>(SERVERS)("signed in on $name", (server) => {
 
   /** The release publisher as createAppUseCases wires it, as the session's user. */
   function publisherOf(session: Session, pod: string) {
-    const fetch = createAuthFetch(sessionClient(session), {
+    const fetch = createAuthFetch(clientOf(session), {
       ownStorages: async () => [pod],
     }).fetch;
     return createSolidReleasePublisher({
@@ -257,12 +258,19 @@ describe.each<SignedInServer>(SERVERS)("signed in on $name", (server) => {
     it(`answers ${what} with a 401 the app can read, the document staying as it was`, async () => {
       const url = await privateDocument();
       const before = await contents(url);
-      const window = new EventTarget();
+      const window = Object.assign(new EventTarget(), { location: { href: server.url } });
       const expired = vi.fn();
       window.addEventListener(SESSION_EXPIRED_EVENT, expired);
       vi.stubGlobal("window", window);
       const spoiled = appFetch(
-        { ...ownerSession, accessToken: spoil(ownerSession.accessToken) },
+        {
+          ...ownerSession,
+          accessToken: spoil(ownerSession.accessToken),
+          // On Linked Web Storage alone a bad access token is no one's, and the ID token is what's exchanged.
+          ...(ownerSession.openId && {
+            openId: { ...ownerSession.openId, idToken: spoil(ownerSession.openId.idToken) },
+          }),
+        },
         owner.pod,
       );
       const read = await spoiled(url);
@@ -276,4 +284,56 @@ describe.each<SignedInServer>(SERVERS)("signed in on $name", (server) => {
       expect(await contents(url)).toBe(before);
     });
   }
+
+  /** The rest is Linked Web Storage's (docs/lws.md): a token for a storage, from the ID token. */
+  if (server.login !== "css-lws") return;
+
+  it("signs in with the app's client as the server takes it: the exchange on LWS alone, and DPoP beside Solid", async () => {
+    const url = await privateDocument();
+    const fresh = appFetch(await signIn(server, owner), owner.pod);
+    const sent = vi.spyOn(globalThis, "fetch");
+    try {
+      expect(await statusOf(fresh, url)).toBe(200);
+      const requests = sent.mock.calls.map(([input, init]) => ({
+        url: String(input),
+        scheme: new Headers(init?.headers).get("authorization")?.split(" ")[0],
+      }));
+      const exchanges = requests.filter((request) => request.url.endsWith("/lws/token"));
+      expect(requests[0]).toEqual({ url, scheme: "DPoP" });
+      if (server.id === "css-lws-only") {
+        expect(exchanges).toHaveLength(1);
+        expect(requests.some((request) => request.url.includes("oauth-protected-resource"))).toBe(
+          true,
+        );
+        expect(requests.at(-1)).toEqual({ url, scheme: "Bearer" });
+      } else {
+        expect(exchanges).toEqual([]);
+        expect(requests).toEqual([{ url, scheme: "DPoP" }]);
+      }
+    } finally {
+      sent.mockRestore();
+    }
+  });
+
+  it("holds a Bearer token from the exchange to its storage and its user's access", async () => {
+    const url = await privateDocument();
+    const bearer = (token: string) => ({ headers: { authorization: `Bearer ${token}` } });
+    const ownerToken = await exchangedToken(ownerSession, owner.pod);
+    expect(await statusOf(globalThis.fetch, url, bearer(ownerToken))).toBe(200);
+    const theirs = new URL(`private-${randomUUID()}/diary.ttl`, stranger.pod).href;
+    const written = await strangerFetch(theirs, { method: "PUT", headers: TURTLE, body: ORIGINAL });
+    expect(written.status).toBe(201);
+    expect(await statusOf(globalThis.fetch, theirs, bearer(ownerToken))).toBe(401);
+    const strangerSession = await signIn(server, stranger);
+    const strangerToken = await exchangedToken(strangerSession, owner.pod);
+    expect(await statusOf(globalThis.fetch, url, bearer(strangerToken))).toBe(403);
+    const before = await contents(url);
+    expect(
+      await statusOf(globalThis.fetch, url, {
+        ...CHANGES[0]!.init,
+        headers: { ...TURTLE, ...bearer(strangerToken).headers },
+      }),
+    ).toBe(403);
+    expect(await contents(url)).toBe(before);
+  });
 });
