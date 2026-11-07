@@ -203,8 +203,9 @@ export interface SessionClient {
    */
   restore(): Promise<RestoredSession>;
   /**
-   * The identity provider of the session restore() would restore
-   * silently, by sending the browser there; none without one.
+   * The identity provider of the session restore() established or,
+   * before it has, of the one it would restore silently, by sending the
+   * browser there; none without one.
    */
   sessionIssuer(): Promise<string | null>;
   /**

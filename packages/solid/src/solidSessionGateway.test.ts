@@ -21,6 +21,8 @@ describe("createSolidSessionGateway", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
+    // The session's WebID profile can't be read, so a session is kept unchecked (sessionIssuerCheck.test.ts).
+    vi.mocked(getSolidDataset).mockRejectedValue(new Error("not read"));
     client = fakeSessionClient();
     options = { clientName: "Test App", site: SITE, client };
     window.sessionStorage.clear();
@@ -149,8 +151,8 @@ describe("createSolidSessionGateway", () => {
         expect(window.location.hash).toBe("#/study");
       }
       expect(client.requestIssuer).not.toHaveBeenCalled();
-      // A silent restore, as on any load, not the answer completed.
-      expect(client.sessionIssuer).toHaveBeenCalledTimes(answers.length);
+      // A silent restore, as on any load, not the answer completed; then the session's check.
+      expect(client.sessionIssuer).toHaveBeenCalledTimes(answers.length * 2);
     });
 
     it("keeps the session's provider before a silent restore leaves, and lets its answer through", async () => {
@@ -168,8 +170,8 @@ describe("createSolidSessionGateway", () => {
       await expect(createSolidSessionGateway(options).restore()).resolves.toMatchObject({
         origin: "restored",
       });
-      // An answer is completed, not a new silent restore set off.
-      expect(client.sessionIssuer).not.toHaveBeenCalled();
+      // An answer is completed, not a new silent restore set off: only the session's check asks.
+      expect(client.sessionIssuer).toHaveBeenCalledOnce();
       expect(window.sessionStorage.getItem("solid-memo:login-issuer")).toBeNull();
     });
 
