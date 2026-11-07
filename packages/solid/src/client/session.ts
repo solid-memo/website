@@ -35,7 +35,9 @@ export type { SessionClient } from "./interface";
  * tells the library a completed redirect is a restore, not a login: it
  * reports SESSION_RESTORED, and does not keep the session, while the key
  * is there. Only a completed redirect takes it off, so the client does
- * when a silent restore did not complete.
+ * when a silent restore did not complete. The ID is kept only on the
+ * library's LOGIN event, so a login completed while another tab's silent
+ * restore has left its page there keeps none.
  */
 const CURRENT_SESSION_KEY = "solidClientAuthn:currentSession";
 const CURRENT_URL_KEY = "solidClientAuthn:currentUrl";
@@ -186,7 +188,10 @@ export function createSessionClient(): SessionClient {
     },
 
     async sessionIssuer() {
-      return storedSessionIssuer(window.localStorage.getItem(CURRENT_SESSION_KEY));
+      const { isLoggedIn, sessionId } = getDefaultSession().info;
+      return storedSessionIssuer(
+        isLoggedIn ? sessionId : window.localStorage.getItem(CURRENT_SESSION_KEY),
+      );
     },
 
     async forgetSession() {

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { getSolidDataset } from "./client/resources";
-import { getThing, getUrlAll } from "./client/rdf";
+import { type FetchedDataset, getThing, getUrlAll } from "./client/rdf";
 import { limitedFetch, PROFILE_LIMITS } from "./client/readLimits";
 import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
@@ -15,17 +15,33 @@ import { AppError } from "@solid-memo/domain/appError";
 const SOLID_OIDC_ISSUER = "http://www.w3.org/ns/solid/terms#oidcIssuer";
 
 /**
- * Dereference a WebID (unauthenticated) and read the solid:oidcIssuer
- * triple from the profile so the user only needs to type their WebID.
- * The issuer is never guessed from the WebID's origin, and only an
- * https issuer is accepted: the browser is about to be sent there. The
- * document is read under PROFILE_LIMITS, as the storage lookup reads it
- * (solidStorageGateway.ts): it is read at every login and sign-in.
+ * How long a session waits for its WebID profile before it is kept
+ * unchecked, in milliseconds. It holds up the page's first screen, on a
+ * read a slow pod must not turn into a lockout, so it is shorter than a
+ * pod read's deadline (readDeadline.ts).
  */
-async function discoverOidcIssuer(webId: string): Promise<string> {
-  const dataset = await getSolidDataset(webId, {
-    fetch: limitedFetch((input, init) => globalThis.fetch(input, init), PROFILE_LIMITS),
-  });
+const ISSUER_CHECK_DEADLINE_MS = 5_000;
+
+/**
+ * Dereference a WebID (unauthenticated). The document is read under
+ * PROFILE_LIMITS, as the storage lookup reads it
+ * (solidStorageGateway.ts): it is read at every login and sign-in, and
+ * as every session is checked.
+ */
+function readWebIdProfile(
+  webId: string,
+  fetch: typeof globalThis.fetch = (input, init) => globalThis.fetch(input, init),
+): Promise<FetchedDataset> {
+  return getSolidDataset(webId, { fetch: limitedFetch(fetch, PROFILE_LIMITS) });
+}
+
+/**
+ * Read the solid:oidcIssuer triple from the profile so the user only
+ * needs to type their WebID. The issuer is never guessed from the
+ * WebID's origin, and only an https issuer is accepted: the browser is
+ * about to be sent there.
+ */
+function issuerOfProfile(dataset: FetchedDataset, webId: string): string {
   const profile = getThing(dataset, webId);
   if (!profile) {
     throw new AppError("webIdNoSubject", { webId });
@@ -39,6 +55,35 @@ async function discoverOidcIssuer(webId: string): Promise<string> {
     throw new AppError("webIdIssuerNotHttps", { webId });
   }
   return issuer;
+}
+
+/**
+ * The WebID profile, or null if it can't be read in time, for whatever
+ * reason. It is asked of the pod, not taken from the browser's cache,
+ * which could hold a profile from before the user added a provider.
+ */
+async function readProfileToCheck(webId: string): Promise<FetchedDataset | null> {
+  const deadline = new AbortController();
+  const timer = setTimeout(() => deadline.abort(), ISSUER_CHECK_DEADLINE_MS);
+  try {
+    return await readWebIdProfile(webId, (input, init) =>
+      globalThis.fetch(input, { ...init, cache: "no-cache", signal: deadline.signal }),
+    );
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Whether the WebID's profile names this issuer, a trailing slash aside. */
+function profileNamesIssuer(dataset: FetchedDataset, webId: string, issuer: string): boolean {
+  const profile = getThing(dataset, webId);
+  if (!profile) return false;
+  const wanted = withoutTrailingSlash(issuer);
+  return getUrlAll(profile, SOLID_OIDC_ISSUER).some(
+    (listed) => withoutTrailingSlash(listed) === wanted,
+  );
 }
 
 /**
@@ -218,6 +263,34 @@ export function createSolidSessionGateway({
   client,
 }: SessionGatewayOptions & { client: SessionClient }): SessionGateway {
   const ownClientId = clientId != null && new URL(".", clientId).href === site;
+  /** The profile a login's check read, for the account's lookup that follows it: one read for both. */
+  let checkedAtLogin: { webId: string; dataset: FetchedDataset } | null = null;
+
+  async function discoverOidcIssuer(webId: string): Promise<string> {
+    const checked = checkedAtLogin;
+    checkedAtLogin = null;
+    const dataset = checked?.webId === webId ? checked.dataset : await readWebIdProfile(webId);
+    return issuerOfProfile(dataset, webId);
+  }
+
+  /**
+   * Ends the session and refuses it if the WebID's profile, read as no
+   * one, does not name the session's issuer: a provider's word for a
+   * WebID is not enough (Solid-OIDC). The session is kept if the profile
+   * can't be read, so that a slow or absent pod locks no one out.
+   */
+  async function refuseUnlistedIssuer(webId: string, fromLogin: boolean): Promise<void> {
+    const issuer = await client.sessionIssuer().catch(() => null);
+    if (issuer === null) return;
+    const dataset = await readProfileToCheck(webId);
+    if (dataset === null) return;
+    if (!profileNamesIssuer(dataset, webId, issuer)) {
+      // Refused either way: a logout that fails is tried again by the next load's check.
+      await client.logout().catch(() => undefined);
+      throw new AppError("webIdIssuerNotListed", { webId, issuer });
+    }
+    if (fromLogin) checkedAtLogin = { webId, dataset };
+  }
 
   /** Redirects the browser to the identity provider; does not return. */
   async function startLogin(oidcIssuer: string): Promise<void> {
@@ -327,6 +400,7 @@ export function createSolidSessionGateway({
         attempt === null ? null : (JSON.parse(attempt) as RestoreAttempt),
       );
       if (webId === null) return null;
+      await refuseUnlistedIssuer(webId, fromLogin);
       // A silent restore leaves the page for the identity provider and
       // comes back without its hash; the client reports the page it left.
       const restoredHash = restoredFrom === null ? "" : new URL(restoredFrom).hash;
@@ -344,6 +418,7 @@ export function createSolidSessionGateway({
     loginWithIssuer: startLogin,
 
     async logout() {
+      checkedAtLogin = null;
       await client.logout();
     },
 

@@ -317,10 +317,13 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   The reads of the profile's documents are the exception, since
   they're made at every sign-in. The WebID document is held to
   `PROFILE_LIMITS`, a wide margin over the few triples a profile holds.
-  Every read of it is: the storage lookup, the identity provider's
-  lookup (at login and sign-in, read as no one), the account's name
-  and the developer tools' view of it, and the type index lookup. That
-  last one runs at every load, as the app lists the user's instances.
+  The reads of it, each under that limit, are these: the storage
+  lookup, the identity provider's lookup, the check of a session's
+  issuer, the account's name, the developer tools' view of it, and the
+  type index lookup. The provider's lookup is read as no one, at login
+  and sign-in. The [issuer check](authentication.md#the-issuer-in-the-webids-profile)
+  is read as no one too, on every load with a session. The type index
+  lookup runs at every load, as the app lists the user's instances.
   The storage lookup holds the documents the WebID document names as
   more of the profile to them all together, and reads no more than
   `MAX_PROFILE_DOCUMENTS` of them: one outside the profile's places

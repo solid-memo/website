@@ -90,6 +90,9 @@ function sentBack(): void {
  */
 function completesRedirect(webId: string): void {
   vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
+    vi.mocked(getDefaultSession).mockReturnValue({
+      info: { isLoggedIn: true, webId, sessionId: "s" },
+    } as never);
     const from = window.localStorage.getItem(CURRENT_URL_KEY);
     if (from === null) {
       harness.sessionAt("https://idp.example/");
@@ -111,6 +114,7 @@ const harness: SessionHarness = {
     window.history.replaceState(null, "", "/");
     emitter = makeEmitter();
     vi.mocked(events).mockReturnValue(emitter as never);
+    vi.mocked(getDefaultSession).mockReturnValue({ info: { isLoggedIn: false } } as never);
     vi.mocked(handleIncomingRedirect).mockResolvedValue({ isLoggedIn: false, sessionId: "s" });
   },
   create: createSessionClient,
@@ -118,6 +122,7 @@ const harness: SessionHarness = {
     sentBack();
     completesRedirect(webId);
   },
+  loginIssuer: LOGIN.oidcIssuer,
   sessionToRestore(webId, from) {
     if (from !== undefined) {
       sentBack();

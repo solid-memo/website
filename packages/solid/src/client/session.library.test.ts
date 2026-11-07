@@ -5,8 +5,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
 import { AppError } from "@solid-memo/domain/appError";
-import { createSolidSessionGateway } from "../solidSessionGateway";
+import { LOGIN_ISSUER_KEY, createSolidSessionGateway } from "../solidSessionGateway";
 import { type LoginOptions, ReadLimitError } from "./interface";
+import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
 import {
   ACCESS_CONTROL_LIMITS,
   limitedFetch,
@@ -24,6 +25,10 @@ import { createSessionClient } from "./session";
  */
 
 const ISSUER = "https://issuer.example/";
+const CARD = "https://alice.example/profile/card";
+const PROFILE_WEBID = `${CARD}#me`;
+const CURRENT_SESSION_KEY = "solidClientAuthn:currentSession";
+const CURRENT_URL_KEY = "solidClientAuthn:currentUrl";
 
 /** The provider: its metadata, and a dynamic registration. */
 function provider(input: RequestInfo | URL): Response {
@@ -63,10 +68,38 @@ async function startLogin(): Promise<URL> {
   return new URL(handleRedirect.mock.calls[0]![0]);
 }
 
+/**
+ * The provider sends the user back to this tab with a code, and the
+ * library's own session handles it. Only the token exchange is stood in
+ * for, as it takes a provider that signs tokens.
+ */
+function sendBack(request: URL): void {
+  const { clientAuthentication } = getDefaultSession() as unknown as {
+    clientAuthentication: { handleIncomingRedirect: () => Promise<unknown> };
+  };
+  vi.spyOn(clientAuthentication, "handleIncomingRedirect").mockResolvedValue({
+    isLoggedIn: true,
+    webId: PROFILE_WEBID,
+    sessionId: getDefaultSession().info.sessionId,
+  });
+  const state = request.searchParams.get("state")!;
+  window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "login");
+  window.sessionStorage.setItem(LOGIN_ISSUER_KEY, ISSUER);
+  window.history.replaceState(
+    null,
+    "",
+    `/?code=c&state=${state}&iss=${encodeURIComponent(ISSUER)}`,
+  );
+}
+
 describe("createSessionClient, over what the library keeps", () => {
-  afterEach(() => {
+  afterEach(async () => {
+    await getDefaultSession().logout();
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     window.localStorage.clear();
+    window.sessionStorage.clear();
+    window.history.replaceState(null, "", "/");
   });
 
   it("names the issuer a login request the library sent went to, by its state", async () => {
@@ -135,6 +168,46 @@ describe("createSessionClient, over what the library keeps", () => {
       expect(window.location.origin).not.toBe(new URL(ISSUER).origin);
       expect(window.location.search).toBe("");
       expect(window.localStorage.getItem("solidClientAuthn:currentSession")).toBeNull();
+    });
+  });
+
+  describe("after a silent restore that never came back left its URL behind", () => {
+    const STALE_URL = "https://memo.example/#/study";
+
+    it("names the issuer of the login completed, which the library keeps no session ID for", async () => {
+      sendBack(await startLogin());
+      window.localStorage.setItem(CURRENT_URL_KEY, STALE_URL);
+      const client = createSessionClient();
+      await expect(client.restore()).resolves.toEqual({
+        webId: PROFILE_WEBID,
+        fromLogin: false,
+        restoredFrom: STALE_URL,
+      });
+      expect(window.localStorage.getItem(CURRENT_SESSION_KEY)).toBeNull();
+      await expect(client.sessionIssuer()).resolves.toBe(ISSUER);
+    });
+
+    it("refuses that login when the WebID's profile lists another issuer", async () => {
+      sendBack(await startLogin());
+      window.localStorage.setItem(CURRENT_URL_KEY, STALE_URL);
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async () => {
+          const profile = new Response(
+            "<#me> <http://www.w3.org/ns/solid/terms#oidcIssuer> <https://other.example/> .\n",
+            { headers: { "Content-Type": "text/turtle" } },
+          );
+          Object.defineProperty(profile, "url", { value: CARD });
+          return profile;
+        }),
+      );
+      const gateway = createSolidSessionGateway({
+        clientName: "Solid Memo",
+        site: "https://memo.example/",
+        client: createSessionClient(),
+      });
+      await expect(gateway.restore()).rejects.toMatchObject({ code: "webIdIssuerNotListed" });
+      expect(getDefaultSession().info.isLoggedIn).toBe(false);
     });
   });
 });
