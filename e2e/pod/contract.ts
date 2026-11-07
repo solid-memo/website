@@ -13,18 +13,12 @@ const LDP_CONTAINS = "http://www.w3.org/ns/ldp#contains";
  * lists it at the URL it was written to (so the server knows the URL it
  * is reached at: a wrong base URL, port or trailing slash shows here,
  * not as every test failing), and it deletes. Throws saying which failed.
- * The requests go through `fetch`: the bridge to a Linked Web Storage
- * server (lwsBridge.ts) for a server a contributor names, which may be one.
  */
-export async function checkContract(
-  root: string,
-  fetch: typeof globalThis.fetch = globalThis.fetch,
-): Promise<void> {
+export async function checkContract(root: string): Promise<void> {
   const url = new URL(`probe-${randomUUID()}.ttl`, root).href;
   const put = await fetch(url, {
     method: "PUT",
-    // Made as the app makes a document: only where none is.
-    headers: { "content-type": "text/turtle", "if-none-match": "*" },
+    headers: { "content-type": "text/turtle" },
     body: `<#a> <#b> "1" .`,
   }).catch((error: Error) => {
     throw new Error(

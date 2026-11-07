@@ -4,7 +4,6 @@
 
 import { createPublicKey } from "node:crypto";
 import { OidcSession, setCurrentSession } from "@solid-memo/solid-memo-client/oidcSession";
-import { lwsBridge } from "@solid-memo/solid/lwsBridge";
 import type { SessionClient } from "@solid-memo/solid/client/session";
 import { sessionClient, type Session } from "./signedIn.ts";
 
@@ -13,8 +12,7 @@ const ECDSA = { name: "ECDSA", namedCurve: "P-256" };
 /**
  * The sign-in client over a session. Where it has an ID token, that of
  * the app's own Solid client, whose session makes a Linked Web Storage
- * server's token exchange (docs/lws.md), with the app's bridge above it,
- * as appUseCases.ts wires it. It is apart from signedIn.ts because
+ * server's token exchange (docs/lws.md). It is apart from signedIn.ts because
  * servers.ts, which node runs as it is, imports that.
  */
 export function clientOf(session: Session): SessionClient {
@@ -43,10 +41,10 @@ export function clientOf(session: Session): SessionClient {
   );
   return {
     ...plain,
-    fetch: lwsBridge((input, init) => {
+    fetch: (input, init) => {
       // The app has one user at a time; these tests have two, one request at a time.
       setCurrentSession(oidc);
       return oidc.fetch(input, init);
-    }),
+    },
   };
 }

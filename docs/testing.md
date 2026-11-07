@@ -121,19 +121,6 @@ Community Solid Server release has LWS, or when its commit can't be
 fetched any more: a commit that can't be fetched fails the `contract`
 job of every pull request.
 
-Every request of the tests goes through the bridge to an LWS server
-(`lwsBridge.ts`, `setup.ts`), as the app's do,
-and the contract's too for a server `SOLID_SERVER_URL` names. A Solid
-server takes each request as it's made, so the bridge sends it on as
-it is. The fork takes the Solid Protocol's requests even with LWS
-alone, so the bridge's own way of making them shows only on a server
-that refuses them. `npm run lws:strict -w @solid-memo/e2e-pod --
-<server> <port>` runs one ([strictLws.ts](../e2e/pod/strictLws.ts)): a
-proxy that refuses a folder's listing in Turtle, a PUT of a resource
-not there, and every PATCH. With `E2E_SEEDS_AS_LWS=1`, a test's own
-seed, a plain PUT of a document not there, is made as LWS makes one. CI
-runs neither.
-
 Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`,
 asking only for `E2E_PORT` (the port on 127.0.0.1 the harness picked,
 which the server must be told) and `E2E_SECRET` (a password made up for the run). It publishes on
@@ -391,7 +378,7 @@ The tests check that:
 
 On `css-lws` and `css-lws-only`, the sign-in client is the app's own
 ([signedInClient.ts](../e2e/pod/signedInClient.ts)): `solid-memo-client`'s
-session, below the bridge, as the app wires it, since Inrupt's client
+session, as the app wires it, since Inrupt's client
 gives the app no ID token. So the requests are the ones a browser's
 session makes, and:
 

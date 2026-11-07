@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import type { TestProject } from "vitest/node";
-import { lwsBridge } from "@solid-memo/solid/lwsBridge";
 import { checkContract } from "./contract";
 import {
   serversNamed,
@@ -37,8 +36,7 @@ export default async function setup(project: TestProject) {
   const given = process.env.SOLID_SERVER_URL;
   if (given !== undefined && given !== "") {
     const url = given.endsWith("/") ? given : `${given}/`;
-    // Made as the app makes its requests, through the bridge to a Linked Web Storage server it may be (setup.ts).
-    await checkContract(url, lwsBridge(fetch));
+    await checkContract(url);
     project.provide("solidServers", [
       { id: "external", tier: "advisory", name: process.env.SOLID_SERVER_NAME || given, url },
     ]);
