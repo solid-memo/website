@@ -22,6 +22,9 @@ const source: ReleaseDraftSummary = {
   releasedAs: SOLID,
 };
 
+/** The accessible name of an ExternalLink to the web. */
+const newTab = (text: string) => `${text} (opens in a new tab)`;
+
 type Props = Parameters<typeof ReleasesScreen>[0];
 
 function renderScreen(overrides: Partial<Props> = {}) {
@@ -57,9 +60,15 @@ describe("ReleasesScreen", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "Releases published from Deck set A" }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "solid, version 2" })).toHaveAttribute("href", SOLID);
+    const named = screen.getByRole("link", { name: newTab("solid, version 2") });
+    expect(named).toHaveAttribute("href", SOLID);
+    expect(named).toHaveAttribute("target", "_blank");
+    expect(named).toHaveAttribute("rel", "noopener noreferrer");
     // A release its address names otherwise is named by its address.
-    expect(screen.getByRole("link", { name: ELSEWHERE })).toHaveAttribute("href", ELSEWHERE);
+    expect(screen.getByRole("link", { name: newTab(ELSEWHERE) })).toHaveAttribute(
+      "href",
+      ELSEWHERE,
+    );
     expect(screen.getByRole("cell", { name: "Everyone" })).toBeInTheDocument();
     // Made public only once the user says so: Cancel leaves it as it is.
     fireEvent.click(screen.getByRole("button", { name: `Make ${ELSEWHERE} public` }));
@@ -97,10 +106,11 @@ describe("ReleasesScreen", () => {
     expect(screen.getByText("Not among this instance's drafts")).toBeInTheDocument();
     // A draft of no title, by its name.
     renderScreen({ draftOf: () => ({ draft: { ...source, title: {} }, href: "#/draft/solid" }) });
-    expect(screen.getAllByRole("link", { name: "solid, version 2" })).toHaveLength(4);
+    expect(screen.getAllByRole("link", { name: "solid, version 2" })).toHaveLength(2);
   });
 
-  it("opens the release at the cursor with Enter, as its name's link does", () => {
+  it("opens the release at the cursor with Enter in a new tab, as its name's link does", () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
     const assign = vi.spyOn(window.location, "assign").mockImplementation(() => undefined);
     renderScreen();
     document.body.focus();
@@ -108,14 +118,94 @@ describe("ReleasesScreen", () => {
     fireEvent.keyDown(document.body, { key: "j" });
     document.body.focus();
     fireEvent.keyDown(document.body, { key: "Enter" });
-    expect(assign).toHaveBeenCalledWith(ELSEWHERE);
+    expect(open).toHaveBeenCalledWith(ELSEWHERE, "_blank", "noopener,noreferrer");
     // A row's button keeps its own Enter.
-    assign.mockClear();
+    open.mockClear();
     const startNext = screen.getAllByRole("button", { name: /^Start the next version/ })[0]!;
     startNext.focus();
     fireEvent.keyDown(startNext, { key: "Enter" });
+    expect(open).not.toHaveBeenCalled();
     expect(assign).not.toHaveBeenCalled();
+    open.mockRestore();
     assign.mockRestore();
+  });
+
+  it("names the host of a release on another origin, which its name alone does not", () => {
+    const planted = "https://other.example:8443/capitals/v2.ttl";
+    renderScreen({
+      releases: [
+        { url: planted, public: null },
+        { url: SOLID, public: true },
+      ],
+    });
+    const [other, own] = screen.getAllByRole("rowheader") as [HTMLElement, HTMLElement];
+    expect(
+      within(other).getByRole("link", { name: newTab("capitals, version 2") }),
+    ).toHaveAttribute("href", planted);
+    expect(other).toHaveTextContent("On another server: other.example:8443");
+    expect(own).not.toHaveTextContent("On another server");
+  });
+
+  it("neither links nor opens a release whose address hides its host, and names the host", () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    const assign = vi.spyOn(window.location, "assign").mockImplementation(() => undefined);
+    const hiding = "https://solid-memo.com@other.example/capitals/v2.ttl";
+    renderScreen({ releases: [{ url: hiding, public: null }] });
+    const row = screen.getByRole("rowheader");
+    expect(within(row).queryByRole("link")).toBeNull();
+    expect(row).toHaveTextContent("capitals, version 2");
+    expect(row).toHaveTextContent("On another server: other.example");
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "j" });
+    document.body.focus();
+    fireEvent.keyDown(document.body, { key: "Enter" });
+    expect(open).not.toHaveBeenCalled();
+    expect(assign).not.toHaveBeenCalled();
+    open.mockRestore();
+    assign.mockRestore();
+  });
+
+  it("keeps the keys going past a row with no link, whose Enter does nothing", () => {
+    const open = vi.spyOn(window, "open").mockImplementation(() => null);
+    const first = "https://a.example/first/v1.ttl";
+    const hiding = "https://solid-memo.com@other.example/hiding/v1.ttl";
+    const third = "https://c.example/third/v1.ttl";
+    renderScreen({
+      releases: [
+        { url: first, public: null },
+        { url: hiding, public: null },
+        { url: third, public: null },
+      ],
+    });
+    (document.activeElement as HTMLElement).blur();
+    const key = (name: string) =>
+      fireEvent.keyDown(document.activeElement as HTMLElement, { key: name });
+    key("j");
+    expect(document.activeElement).toHaveAttribute("href", first);
+    // On the row with no link, the focus leaves the row before it.
+    key("j");
+    expect(document.activeElement).toBe(document.body);
+    expect(screen.getAllByRole("row")[2]).toHaveClass("cursor");
+    key("Enter");
+    expect(open).not.toHaveBeenCalled();
+    // And the next row is reached, and back.
+    key("j");
+    expect(document.activeElement).toHaveAttribute("href", third);
+    key("k");
+    expect(document.activeElement).toBe(document.body);
+    key("k");
+    expect(document.activeElement).toHaveAttribute("href", first);
+    open.mockRestore();
+  });
+
+  it("does not link a release on the instance's own host whose address has a user name", () => {
+    const own = new URL(instanceA.url).host;
+    const hiding = `https://user@${own}/capitals/v2.ttl`;
+    renderScreen({ releases: [{ url: hiding, public: true }] });
+    const row = screen.getByRole("rowheader");
+    expect(within(row).queryByRole("link")).toBeNull();
+    expect(row).toHaveTextContent("capitals, version 2");
+    expect(row).not.toHaveTextContent("On another server");
   });
 
   it("sorts by a column's header, then the other way, then as listed, but by its actions", () => {
@@ -129,7 +219,9 @@ describe("ReleasesScreen", () => {
     });
     const table = within(screen.getByRole("table", { name: "Releases published from Deck set A" }));
     const order = () =>
-      table.getAllByRole("rowheader").map((cell) => cell.querySelector("a")!.textContent);
+      table
+        .getAllByRole("rowheader")
+        .map((cell) => cell.querySelector("a")!.firstChild!.textContent);
     expect(table.queryByRole("button", { name: "Actions" })).toBeNull();
     fireEvent.click(table.getByRole("button", { name: "Release" }));
     expect(order()).toEqual(["apps, version 1", ELSEWHERE, "solid, version 2"]);

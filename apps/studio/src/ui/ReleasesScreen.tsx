@@ -8,8 +8,10 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { folded } from "@solid-memo/domain/langText";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
+import { isLinkableUrl } from "@solid-memo/domain/webId";
 import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
+import { ExternalLink } from "@solid-memo/ui/ExternalLink";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
@@ -30,14 +32,16 @@ function readersKey(
 
 /**
  * The releases an instance published (docs/studio.md, Releases), as its
- * catalog links them: each by its address, with a link to copy,
+ * catalog links them: each by its address, its host named when it is on
+ * another origin than the instance, with a link to copy,
  * whether anyone can read it (and, if not, a way to try again, once the
  * user confirms it; not asked of one on another origin), the draft it was published from, while the
  * instance has it (`draftOf`),
  * and its next version to start as a draft. A release is never changed here.
  * The table is a DataTable: a column's header sorts it by the column,
  * then the other way, then as the catalog lists them, Enter opens the
- * release at the cursor, as its name's link does, and a filter keeps
+ * release at the cursor as its name's link does (an ExternalLink: in a
+ * new tab, and not one that would hide its host), and a filter keeps
  * the releases whose name or address holds its text, case and accents
  * aside.
  * Starting a next version writes the catalog, so it is held while the
@@ -142,7 +146,15 @@ export function ReleasesScreen({
                 label: t("studio.releases.column.release"),
                 cell: (release) => (
                   <>
-                    <a href={release.url}>{nameOf(release.url)}</a>
+                    <ExternalLink url={release.url}>{nameOf(release.url)}</ExternalLink>
+                    {release.public === null && (
+                      <>
+                        {" "}
+                        <span class="hint">
+                          {t("studio.releases.elsewhere", { host: new URL(release.url).host })}
+                        </span>
+                      </>
+                    )}
                     <br />
                     <code>{release.url}</code>
                   </>
@@ -220,7 +232,9 @@ export function ReleasesScreen({
               ]}
               sort={sort}
               onSort={(key) => setSort(nextSort(sort, key as ReleaseColumn))}
-              onOpen={(release) => window.location.assign(release.url)}
+              onOpen={({ url }) => {
+                if (isLinkableUrl(url)) window.open(url, "_blank", "noopener,noreferrer");
+              }}
             />
           )}
         </>
