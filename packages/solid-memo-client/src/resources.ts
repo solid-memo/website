@@ -19,6 +19,7 @@ import {
 } from "@solid-memo/solid/client/interface";
 import {
   limitsOf,
+  namesIriUnder,
   NO_SIZE_LIMITS,
   quadTally,
   type ReadsSpent,
@@ -34,6 +35,7 @@ import {
   allQuads,
   clientDataset,
   datasetOf,
+  LOCAL_NODE,
   localName,
   NO_CHANGES,
   partsOf,
@@ -167,7 +169,9 @@ function resourceOf(response: Response): Resource {
  * with others: limitedFetch), as
  * `refuse` does for a text whose declarations or IRIs are past what a
  * read takes in, with limits or with none (writeTurtle); nothing
- * more is kept, and `refused` says to stop the parser.
+ * more is kept, and `refused` says to stop the parser. A quad that
+ * names an IRI kept for subjects not saved yet is tallied and not kept
+ * (LOCAL_NODE).
  */
 function collector(
   url: string,
@@ -190,8 +194,8 @@ function collector(
     refused: () => refused,
     add(quad: Quad): void {
       if (refused) return;
-      if (!past(quad)) return void quads.push(quad);
-      refuse();
+      if (past(quad)) refuse();
+      else if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(quad);
     },
   };
 }

@@ -15,7 +15,9 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
  * against `url`: how the pods kept outside a server (localPod.ts, and
  * the one tests use) store documents, built in one pass (client/linearDataset.ts),
  * so a large document is stored in time linear in its size. Each line is
- * there once (TripleLines). Rejects when the Turtle does not parse.
+ * there once (TripleLines), and what a read leaves out is not stored
+ * (client/linearDataset.ts, LOCAL_NODE). Rejects when the Turtle does
+ * not parse.
  */
 export async function triplesOf(url: string, turtle: string): Promise<TripleLines> {
   const fetch = (async () => {

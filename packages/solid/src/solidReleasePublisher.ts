@@ -9,12 +9,7 @@ import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { addCatalogLink, catalogLinks, refuseFullCatalog } from "./catalogLinks";
 import type { GrantPublicRead } from "./client/access";
-import {
-  ACCESS_CONTROL_LIMITS,
-  limitedFetch,
-  MAX_ACCESS_CONTROL_SUBJECTS,
-  RELEASE_LIMITS,
-} from "./client/readLimits";
+import { ACCESS_CONTROL_LIMITS, limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
 import { RDF, SM } from "./vocab";
 
@@ -252,9 +247,7 @@ function accessControlFetch(
         throw new TypeError(`Answered from another origin: ${response.url}`);
       if (method !== "GET" || !response.ok) return response;
       const text = await response.text();
-      const quads = await parseDeckFile(text, "turtle", response.url || url.href, limits);
-      if (!ofDocument && tooManySubjects(quads))
-        throw new TypeError(`An access control of too many subjects: ${url.href}`);
+      await parseDeckFile(text, "turtle", response.url || url.href, limits);
       const checked = new Response(text, {
         status: response.status,
         statusText: response.statusText,
@@ -267,17 +260,4 @@ function accessControlFetch(
       throw error;
     }
   };
-}
-
-/**
- * Whether triples have more than MAX_ACCESS_CONTROL_SUBJECTS subjects:
- * the count stops once past it, so its set holds no more than that.
- */
-function tooManySubjects(quads: readonly Quad[]): boolean {
-  const subjects = new Set<string>();
-  for (const { subject } of quads) {
-    subjects.add(`${subject.termType} ${subject.value}`);
-    if (subjects.size > MAX_ACCESS_CONTROL_SUBJECTS) return true;
-  }
-  return false;
 }

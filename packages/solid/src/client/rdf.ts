@@ -53,7 +53,7 @@ import type {
   Subject,
   SubjectBuilder,
 } from "./interface";
-import { graphsOf } from "./linearDataset";
+import { graphsOf, LOCAL_NODE } from "./linearDataset";
 import { pathKeys } from "./readLimits";
 
 /**
@@ -73,6 +73,10 @@ import { pathKeys } from "./readLimits";
  *   one by its `_:label`.
  * - getThing resolves the IRI of a subject made with createThing({ name })
  *   against the URL the dataset was read from: `#name` in that document.
+ * - A read leaves out a quad that names an IRI of the kind such a subject
+ *   has, which asUrl throws on: no document can state one, so no subject,
+ *   value or property read from a pod has one, and a subject made by name
+ *   is the only one that does.
  * - getDatetime reads any literal its unanchored pattern finds a date-time
  *   in, so it throws on some ("T2026-01-01T00:00:00Z") and gives an
  *   invalid date for one past what a JavaScript date holds; records.ts
@@ -179,9 +183,6 @@ function valuesOf(objects: Thing["predicates"][string]): PropertyValue[] {
   }
   return values;
 }
-
-/** Where the library names a subject that has no URL yet: `<#name>` in the document it is saved to. */
-const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
 
 /**
  * The name of a subject made with createThing({ name }) and not saved
