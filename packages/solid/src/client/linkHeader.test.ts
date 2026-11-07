@@ -7,6 +7,7 @@ import { getSolidDatasetLinear } from "./linearDataset";
 import {
   boundedHeader,
   boundedHeadersFetch,
+  linkTargets,
   MAX_DESCRIBING_HEADER_LENGTH,
   withBoundedHeaders,
 } from "./linkHeader";
@@ -89,5 +90,38 @@ describe("getSolidDatasetLinear, with a long header", () => {
     });
     expect(dataset.internal_resourceInfo.aclUrl).toBe(`${URL_}.acl`);
     expect(dataset.internal_resourceInfo.permissions?.user.read).toBe(true);
+  });
+});
+
+describe("linkTargets", () => {
+  const at = (link: string, url = "https://pod.example/a/b") => {
+    const response = new Response(null, { headers: { Link: link } });
+    Object.defineProperty(response, "url", { value: url });
+    return response;
+  };
+
+  it("names the targets with the relation, made absolute against the response's URL", () => {
+    const response = at(
+      '<../s/>; rel="https://www.w3.org/ns/lws#storage", <x>; rel="type up", <y>; rel=acl, <z>; title="no rel"',
+    );
+    expect(
+      linkTargets(response, "https://www.w3.org/ns/lws#storage", "https://other.example/"),
+    ).toEqual(["https://pod.example/s/"]);
+    expect(linkTargets(response, "up", "https://other.example/")).toEqual([
+      "https://pod.example/a/x",
+    ]);
+    expect(linkTargets(response, "acl", "https://other.example/")).toEqual([
+      "https://pod.example/a/y",
+    ]);
+    expect(linkTargets(response, "describedby", "https://other.example/")).toEqual([]);
+  });
+
+  it("resolves against the address asked for a response made here, and reads no header past its bound", () => {
+    expect(linkTargets(at("<x>; rel=up", ""), "up", "https://pod.example/c/")).toEqual([
+      "https://pod.example/c/x",
+    ]);
+    expect(linkTargets(new Response(null), "up", "https://pod.example/")).toEqual([]);
+    const long = `<x>; rel=up, <${"y".repeat(MAX_DESCRIBING_HEADER_LENGTH)}>; rel=acl`;
+    expect(linkTargets(at(long), "up", "https://pod.example/")).toEqual([]);
   });
 });

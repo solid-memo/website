@@ -29,7 +29,9 @@ import {
   RELEASE_DOCUMENT,
 } from "@solid-memo/domain/release/draftLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
 import { getSolidDatasetOrNull, isReadFrom, saveDataset } from "./datasets";
+import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { deckBackLinksOf } from "./ownership";
 import { hasStorageLink } from "./solidStorageGateway";
 import { DCTERMS, RDF, SM } from "./vocab";
@@ -135,11 +137,22 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     if (known === undefined) {
       known = (async () => {
         if (new URL(folder).pathname === "/") return false;
-        const response = await fetch(folder, { method: "HEAD" });
+        // Turtle asked for, as the app reads a folder: an LWS server may answer a storage's root otherwise, without its Solid links.
+        const response = await fetch(folder, {
+          method: "HEAD",
+          headers: { Accept: TURTLE_FIRST },
+        });
         // An answer that says nothing of the folder (401, 429, 503) is asked again, never kept as "not its own".
         if (!response.ok)
           throw new AppError("cannotCheck", { url: folder, status: response.status });
-        return !hasStorageLink(response.headers.get("Link"));
+        if (hasStorageLink(response.headers.get("Link"))) return false;
+        // A Linked Web Storage server names a storage's root in its description (lwsStorage.ts), not with a type.
+        const [storage] = linkTargets(response, LWS_STORAGE_REL, folder);
+        if (storage === undefined) return true;
+        const roots = await storageRootsOf(storage, fetch);
+        // A description that can't be read says nothing of the folder: asked again, never kept as its own.
+        if (roots === null) throw new AppError("cannotCheck", { url: folder, status: 0 });
+        return !roots.some((root) => isSameUrl(root, folder));
       })();
       known.catch(() => dedicated.delete(folder));
       dedicated.set(folder, known);

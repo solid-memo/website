@@ -124,8 +124,11 @@ interface Provider {
   /** Whether it gives refresh tokens, and a new one on every refresh. */
   refreshTokensIssued: boolean;
   rotates: boolean;
-  /** Whether it sends an ID token with the authorization code grant's tokens. */
+  /** Whether it sends an ID token with the authorization code grant's tokens, and with a refresh's. */
   idToken: boolean;
+  refreshIdToken: boolean;
+  /** The ID tokens it issued, last one last. */
+  idTokens: string[];
   failure?: Error;
   /** What the token endpoint fails with, unreachable. */
   tokenFailure?: Error;
@@ -177,9 +180,12 @@ async function tokenEndpoint(init: RequestInit | undefined): Promise<Response> {
     await provider.refreshGate;
     const used = parameters.get("refresh_token") ?? "";
     if (!provider.refreshTokens.has(used)) return json({ error: "invalid_grant" }, 400);
-    if (!provider.rotates) return json({ ...tokens, refresh_token: undefined });
+    const refreshed = provider.refreshIdToken
+      ? { ...tokens, id_token: await idToken({ aud: parameters.get("client_id") }) }
+      : tokens;
+    if (!provider.rotates) return json({ ...refreshed, refresh_token: undefined });
     provider.refreshTokens.delete(used);
-    return json(tokens);
+    return json(refreshed);
   }
   const grant = provider.grants.get(parameters.get("code") ?? "");
   if (grant === undefined) return json({ error: "invalid_grant" }, 400);
@@ -191,20 +197,103 @@ async function tokenEndpoint(init: RequestInit | undefined): Promise<Response> {
   ) {
     return json({ error: "invalid_grant" }, 400);
   }
-  const now = Math.floor(Date.now() / 1000);
-  const claims = Object.fromEntries(
-    Object.entries({
-      iss: ISSUER,
-      aud: grant.clientId,
-      sub: provider.webId,
-      webid: provider.webId,
-      nonce: grant.nonce,
-      iat: now,
-      exp: now + 300,
-      ...provider.claims,
-    }).filter(([, value]) => value !== undefined),
+  return json(
+    provider.idToken
+      ? { ...tokens, id_token: await idToken({ aud: grant.clientId, nonce: grant.nonce }) }
+      : tokens,
   );
-  return json(provider.idToken ? { ...tokens, id_token: await signedJwt(claims) } : tokens);
+}
+
+/** An ID token the provider issues, valid for 300 s, with `claims` besides its own. */
+async function idToken(claims: Record<string, unknown>): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const token = await signedJwt(
+    Object.fromEntries(
+      Object.entries({
+        iss: ISSUER,
+        sub: provider.webId,
+        webid: provider.webId,
+        iat: now,
+        exp: now + 300,
+        ...claims,
+        ...provider.claims,
+      }).filter(([, value]) => value !== undefined),
+    ),
+  );
+  provider.idTokens.push(token);
+  return token;
+}
+
+/** A Linked Web Storage storage, its authorization server the identity provider's (lwsAuth.ts). */
+const STORAGE = "https://pod.example/alice/";
+const POD_METADATA = "https://pod.example/.well-known/oauth-protected-resource";
+const LWS_TOKEN_ENDPOINT = `${ISSUER}.well-known/lws/token`;
+
+/** The LWS authorization server on the provider's origin, as the Community Solid Server LWS fork runs one. */
+interface Lws {
+  configuration: Record<string, unknown>;
+  exchanges: { parameters: URLSearchParams; dpop: string | null }[];
+  /** The storage's tokens it still takes. */
+  valid: Set<string>;
+  /** Whether the storage refuses every token. */
+  refusesAll: boolean;
+  issued: number;
+}
+
+let lws: Lws;
+
+function exchangeEndpoint(init: RequestInit | undefined): Response {
+  const parameters = new URLSearchParams(String(init?.body));
+  lws.exchanges.push({ parameters, dpop: new Headers(init?.headers).get("dpop") });
+  if (!provider.idTokens.includes(parameters.get("subject_token") ?? "")) {
+    return json({ error: "invalid_grant" }, 400);
+  }
+  lws.issued += 1;
+  const token = `lws-${lws.issued}`;
+  lws.valid.add(token);
+  return json({
+    access_token: token,
+    issued_token_type: "urn:ietf:params:oauth:token-type:access_token",
+    token_type: "Bearer",
+    expires_in: 300,
+  });
+}
+
+/**
+ * The storage as the fork serves it: its protected resource metadata
+ * and description, a request with one of its tokens within it, and a
+ * 401 with its challenge to anything else, a DPoP request among them,
+ * which it reads as no one's.
+ */
+function lwsPod(asUri = ISSUER) {
+  return vi.fn<typeof globalThis.fetch>(async (input, init) => {
+    const url = input instanceof Request ? input.url : String(input);
+    const headers = new Headers(init?.headers);
+    if (url.startsWith(`${POD_METADATA}/`)) {
+      const resource = new URL(url.slice(POD_METADATA.length), STORAGE).href;
+      return json({ resource, authorization_servers: [asUri] });
+    }
+    if (url === STORAGE && headers.get("accept") === "application/lws+cid") {
+      return json({
+        "@context": ["https://www.w3.org/ns/cid/v1", "https://www.w3.org/ns/lws/v1"],
+        id: STORAGE,
+        type: "Storage",
+        service: [{ type: "StorageRoot", serviceEndpoint: STORAGE }],
+      });
+    }
+    const [scheme, token] = (headers.get("authorization") ?? "").split(" ");
+    const bearer = scheme === "Bearer";
+    if (bearer && !lws.refusesAll && lws.valid.has(token ?? "") && url.startsWith(STORAGE)) {
+      return new Response("ok");
+    }
+    return new Response(null, {
+      status: 401,
+      headers: {
+        "www-authenticate": `Bearer resource_metadata="${POD_METADATA}${new URL(url).pathname}", as_uri="${asUri}", realm="${STORAGE}"${bearer ? ', error="invalid_token"' : ""}`,
+        link: `<${STORAGE}>; rel="https://www.w3.org/ns/lws#storage"`,
+      },
+    });
+  });
 }
 
 const fakeFetch: typeof globalThis.fetch = async (input, init) => {
@@ -227,6 +316,8 @@ const fakeFetch: typeof globalThis.fetch = async (input, init) => {
     return json({ ...metadata, client_id: id, ...secret }, 201);
   }
   if (url === `${ISSUER}token`) return tokenEndpoint(init);
+  if (url === `${ISSUER}.well-known/lws-configuration`) return json(lws.configuration);
+  if (url === LWS_TOKEN_ENDPOINT) return exchangeEndpoint(init);
   return provider.pod(input, init);
 };
 
@@ -324,10 +415,24 @@ const harness: SessionHarness = {
       refreshTokensIssued: true,
       rotates: true,
       idToken: true,
+      refreshIdToken: false,
+      idTokens: [],
       tokenRequests: [],
       registrations: [],
       issued: 0,
       pod: async () => new Response("pod"),
+    };
+    lws = {
+      configuration: {
+        issuer: ISSUER,
+        token_endpoint: LWS_TOKEN_ENDPOINT,
+        grant_types_supported: ["urn:ietf:params:oauth:grant-type:token-exchange"],
+        subject_token_types_supported: ["urn:ietf:params:oauth:token-type:id_token"],
+      },
+      exchanges: [],
+      valid: new Set(),
+      refusesAll: false,
+      issued: 0,
     };
     vi.stubGlobal("fetch", fakeFetch);
   },
@@ -1150,5 +1255,288 @@ describe("createSessionClient, over oauth4webapi", () => {
       throw new TypeError("Failed to fetch");
     };
     await expect(client.fetch("https://pod.example/a")).rejects.toThrow("Failed to fetch");
+  });
+});
+
+describe("createSessionClient, on a Linked Web Storage storage", () => {
+  beforeEach(() => harness.reset());
+
+  async function logIn() {
+    await createSessionClient().login(LOGIN);
+    sendBack();
+    const client = createSessionClient();
+    await client.restore();
+    return client;
+  }
+
+  /** The requests the pod was sent, as their URL and Authorization; not the checks', for its metadata and description. */
+  const sent = (pod: ReturnType<typeof lwsPod>) =>
+    pod.mock.calls
+      .filter(
+        ([input, init]) =>
+          !String(input).startsWith(POD_METADATA) &&
+          new Headers(init?.headers).get("accept") !== "application/lws+cid",
+      )
+      .map(([input, init]) => [
+        input instanceof Request ? input.url : String(input),
+        new Headers(init?.headers).get("authorization"),
+      ]);
+
+  const RESOURCE = `${STORAGE}notes/a.ttl`;
+
+  it("exchanges the ID token for the storage's token on its challenge, and sends the request again with it", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    const response = await client.fetch(RESOURCE, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body: "<> a <#t>.",
+      redirect: "error",
+      signal: new AbortController().signal,
+    });
+    expect(response.status).toBe(200);
+    expect(sent(pod)).toEqual([
+      [RESOURCE, "DPoP access-1"],
+      [RESOURCE, "Bearer lws-1"],
+    ]);
+    const retry = (pod.mock.calls.at(-1) as unknown as [string, RequestInit])[1];
+    expect(retry).toMatchObject({ method: "PUT", body: "<> a <#t>.", redirect: "error" });
+    expect(new Headers(retry.headers).get("content-type")).toBe("text/turtle");
+    expect(new Headers(retry.headers).get("dpop")).toBeNull();
+    const [exchange] = lws.exchanges;
+    expect(Object.fromEntries(exchange!.parameters)).toEqual({
+      grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+      resource: STORAGE,
+      subject_token: provider.idTokens[0],
+      subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
+      client_id: "registered-1",
+    });
+    expect(exchange?.dpop).toBeNull();
+  });
+
+  it("sends the storage's token first afterwards, within the storage only", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    await client.fetch(RESOURCE);
+    pod.mockClear();
+    await client.fetch(`${STORAGE}b`);
+    await client.fetch("https://pod.example/bob/x");
+    await client.fetch("https://pod.example/alicex");
+    expect(sent(pod)).toEqual([
+      [`${STORAGE}b`, "Bearer lws-1"],
+      ["https://pod.example/bob/x", "DPoP access-1"],
+      ["https://pod.example/alicex", "DPoP access-1"],
+    ]);
+    expect(lws.exchanges).toHaveLength(1);
+  });
+
+  it("exchanges once for requests that meet the storage together", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    const answers = await Promise.all([client.fetch(RESOURCE), client.fetch(`${STORAGE}b`)]);
+    expect(answers.map(({ status }) => status)).toEqual([200, 200]);
+    expect(lws.exchanges).toHaveLength(1);
+  });
+
+  it("exchanges once more when the storage refuses a kept token, and passes the second refusal on", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    await client.fetch(RESOURCE);
+    lws.valid.clear();
+    pod.mockClear();
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 200 });
+    expect(sent(pod)).toEqual([
+      [RESOURCE, "Bearer lws-1"],
+      [RESOURCE, "Bearer lws-2"],
+    ]);
+
+    lws.refusesAll = true;
+    pod.mockClear();
+    const refused = await client.fetch(RESOURCE);
+    expect(refused.status).toBe(401);
+    expect(refused.headers.get("www-authenticate")).toContain('error="invalid_token"');
+    expect(sent(pod)).toEqual([
+      [RESOURCE, "Bearer lws-2"],
+      [RESOURCE, "Bearer lws-3"],
+    ]);
+    expect(lws.exchanges).toHaveLength(3);
+  });
+
+  it("passes the storage's refusal on when the authorization server refuses a new exchange", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    await client.fetch(RESOURCE);
+    lws.valid.clear();
+    // The authorization server no longer takes the ID token.
+    provider.idTokens = [];
+    pod.mockClear();
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    expect(sent(pod)).toEqual([[RESOURCE, "Bearer lws-1"]]);
+    expect(lws.exchanges).toHaveLength(2);
+  });
+
+  it("asks the authorization server once for an ID token it refused, however many requests come", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    // The authorization server takes no ID token of this session's.
+    provider.idTokens = [];
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    await expect(client.fetch(`${STORAGE}b`)).resolves.toMatchObject({ status: 401 });
+    expect(lws.exchanges).toHaveLength(1);
+    expect(sent(pod).map(([, authorization]) => authorization)).toEqual([
+      "DPoP access-1",
+      "DPoP access-1",
+      "DPoP access-1",
+    ]);
+  });
+
+  it("follows no redirect with the storage's token, which never leaves the storage", async () => {
+    const client = await logIn();
+    const pod = lwsPod();
+    provider.pod = pod;
+    await client.fetch(RESOURCE);
+    // The storage sends a request to an address outside it, on its own origin.
+    const redirecting = vi.fn<typeof globalThis.fetch>(async (input, init) =>
+      String(input) === `${STORAGE}moved`
+        ? new Response(null, { status: 302, headers: { location: "/bob/y" } })
+        : pod(input, init),
+    );
+    provider.pod = redirecting;
+    await expect(client.fetch(`${STORAGE}moved`)).resolves.toMatchObject({ status: 302 });
+    await client.fetch(`${STORAGE}moved`, { redirect: "follow" });
+    await client.fetch(`${STORAGE}moved`, { redirect: "error" });
+    await client.fetch(new Request(`${STORAGE}moved`, { redirect: "error" }));
+    expect(
+      redirecting.mock.calls.map(([, init]) => [
+        new Headers(init?.headers).get("authorization"),
+        init?.redirect,
+      ]),
+    ).toEqual([
+      ["Bearer lws-1", "manual"],
+      ["Bearer lws-1", "manual"],
+      ["Bearer lws-1", "error"],
+      ["Bearer lws-1", "error"],
+    ]);
+    expect(redirecting.mock.calls.map(([input]) => String(input))).not.toContain(
+      "https://pod.example/bob/y",
+    );
+  });
+
+  it("sends a body it can't send again once, and keeps what it learned for the next request", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    await expect(client.fetch(new Request(RESOURCE))).resolves.toMatchObject({ status: 401 });
+    expect(lws.exchanges).toHaveLength(0);
+    await expect(client.fetch(new Request(RESOURCE))).resolves.toMatchObject({ status: 200 });
+    lws.valid.clear();
+    await expect(client.fetch(new Request(RESOURCE))).resolves.toMatchObject({ status: 401 });
+    expect(sent(pod).map(([, authorization]) => authorization)).toEqual([
+      "DPoP access-1",
+      "Bearer lws-1",
+      "Bearer lws-1",
+    ]);
+  });
+
+  it("sends the ID token to no authorization server but on its identity provider's origin", async () => {
+    const pod = lwsPod("https://as.example/");
+    const client = await logIn();
+    provider.pod = pod;
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    expect(lws.exchanges).toEqual([]);
+    expect(pod.mock.calls.map(([input]) => String(input))).toEqual([
+      RESOURCE,
+      `${POD_METADATA}/alice/notes/a.ttl`,
+    ]);
+  });
+
+  it("forgets the storages' tokens at logout", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    await client.fetch(RESOURCE);
+    await client.logout();
+    const again = await logIn();
+    pod.mockClear();
+    await again.fetch(RESOURCE);
+    expect(sent(pod)).toEqual([
+      [RESOURCE, "DPoP access-2"],
+      [RESOURCE, "Bearer lws-2"],
+    ]);
+  });
+
+  it("exchanges the ID token a restore's refresh brought", async () => {
+    provider.refreshIdToken = true;
+    storedSession(WEBID, "refresh-0");
+    const client = createSessionClient();
+    await client.restore();
+    provider.pod = lwsPod();
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 200 });
+    expect(lws.exchanges[0]?.parameters.get("subject_token")).toBe(provider.idTokens[0]);
+  });
+
+  it("passes the challenge on when no refresh brings an ID token, and stops asking for one", async () => {
+    storedSession(WEBID, "refresh-0");
+    const client = createSessionClient();
+    await client.restore();
+    const pod = lwsPod();
+    provider.pod = pod;
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    expect(provider.tokenRequests.map(({ parameters }) => parameters.get("grant_type"))).toEqual([
+      "refresh_token",
+      "refresh_token",
+    ]);
+    expect(lws.exchanges).toEqual([]);
+    expect(client.webId()).toBe(WEBID);
+  });
+
+  it("refreshes an ID token about to expire, and keeps the old one when the refresh brings none", async () => {
+    provider.refreshIdToken = true;
+    const client = await logIn();
+    provider.pod = lwsPod();
+    vi.useFakeTimers({ toFake: ["Date"], now: Date.now() + 280_000 });
+    try {
+      await client.fetch(RESOURCE);
+      expect(lws.exchanges[0]?.parameters.get("subject_token")).toBe(provider.idTokens[1]);
+    } finally {
+      vi.useRealTimers();
+    }
+
+    harness.reset();
+    const other = await logIn();
+    provider.pod = lwsPod();
+    vi.useFakeTimers({ toFake: ["Date"], now: Date.now() + 280_000 });
+    try {
+      await other.fetch(RESOURCE);
+      expect(provider.tokenRequests).toHaveLength(2);
+      expect(lws.exchanges[0]?.parameters.get("subject_token")).toBe(provider.idTokens[0]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("goes as the access token's request once the storage's token and the ID token expired", async () => {
+    const pod = lwsPod();
+    const client = await logIn();
+    provider.pod = pod;
+    await client.fetch(RESOURCE);
+    pod.mockClear();
+    vi.useFakeTimers({ toFake: ["Date"], now: Date.now() + 400_000 });
+    try {
+      await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
+    } finally {
+      vi.useRealTimers();
+    }
+    // The refresh that brought no ID token renewed the access token; the request had the one it began with.
+    expect(sent(pod)).toEqual([[RESOURCE, "DPoP access-1"]]);
+    expect(lws.exchanges).toHaveLength(1);
   });
 });

@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# The Community Solid Server 8 with Linked Web Storage alone, built from
+# ../css-lws/Dockerfile, in memory, its root open to anyone
+# (css-lws-only-e2e.json): an advisory server (docs/testing.md). The
+# harness (../../servers.ts) sets E2E_PORT, the port on 127.0.0.1 it is
+# reached at.
+services:
+  server:
+    build: ../css-lws
+    image: localhost/solid-memo-e2e-css-lws-only:local
+    pull_policy: never
+    command: ["-c", "config/css-lws-only-e2e.json", "-b", "http://127.0.0.1:${E2E_PORT:?}/", "-l", "warn"]
+    ports: ["127.0.0.1:${E2E_PORT:?}:3000"]
+    init: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    pids_limit: 512

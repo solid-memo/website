@@ -33,12 +33,16 @@ export interface PendingLogin {
   silentFrom?: string;
 }
 
-/** The tokens of a session: the access token, in memory only. */
+/** The tokens of a session: the access token and the ID token, in memory only. */
 export interface Tokens {
   accessToken: string;
   /** When the access token expires, in ms since the epoch; Infinity when the provider did not say. */
   expiresAt: number;
   refreshToken?: string;
+  /** The ID token, which a Linked Web Storage authorization server takes for its own tokens (lwsAuth.ts). */
+  idToken?: string;
+  /** When the ID token expires, in ms since the epoch (its exp claim). */
+  idTokenExpiresAt?: number;
 }
 
 /** The parameters a provider sends back on the redirect URL, removed once read. */
@@ -60,17 +64,29 @@ export function isLoopbackHttp(url: URL): boolean {
 /** How long a request to the provider may take, in ms, before it is given up. */
 const REQUEST_TIMEOUT = 30_000;
 
+/** A signal that aborts after the time limit, or as soon as `signal`, the caller's, does. */
+export function timeLimited(signal?: AbortSignal | null): AbortSignal {
+  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT);
+  return signal ? AbortSignal.any([signal, timeout]) : timeout;
+}
+
 /**
  * The options of a request to the provider: http: only to this machine,
  * and a time limit, so that a provider that does not answer cannot keep
  * a login, restore or refresh waiting, and the Web Lock a refresh holds
  * (oidcSession.ts), forever.
  */
-function requestOptions(url: string) {
+export function requestOptions(url: string) {
   return {
     [oauth.allowInsecureRequests]: isLoopbackHttp(new URL(url)),
-    signal: () => AbortSignal.timeout(REQUEST_TIMEOUT),
+    signal: () => timeLimited(),
   };
+}
+
+/** The endpoint, when it is a URL the app sends requests to: `https:`, or `http:` to this machine. */
+export function secureEndpoint(endpoint: string): URL | undefined {
+  const url = URL.parse(endpoint);
+  return url !== null && (url.protocol === "https:" || isLoopbackHttp(url)) ? url : undefined;
 }
 
 /**
@@ -79,9 +95,7 @@ function requestOptions(url: string) {
  * authorization endpoint, and the app's requests go to the others.
  */
 function checkEndpoint(issuer: string, name: string, endpoint: string | undefined): void {
-  if (endpoint === undefined) return;
-  const url = URL.parse(endpoint);
-  if (url === null || !(url.protocol === "https:" || isLoopbackHttp(url))) {
+  if (endpoint !== undefined && secureEndpoint(endpoint) === undefined) {
     throw new Error(`${issuer}'s ${name} is neither https: nor on this machine`);
   }
 }
@@ -113,7 +127,7 @@ export async function discover(issuer: string): Promise<oauth.AuthorizationServe
  * public clients gave it one. The app does not ask for a method then, so
  * it gets RFC 7591's default, client_secret_basic.
  */
-function clientAuth(client: oauth.Client): oauth.ClientAuth {
+export function clientAuth(client: oauth.Client): oauth.ClientAuth {
   return typeof client.client_secret === "string"
     ? oauth.ClientSecretBasic(client.client_secret)
     : oauth.None();
@@ -254,7 +268,13 @@ async function withDpopNonce<T>(request: () => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * The tokens to keep from the token endpoint's answer, the ID token with
+ * them when it sent one, which oauth4webapi checked (issuer, audience,
+ * expiry). The ID token stays in memory, as the access token does.
+ */
 function tokensOf(response: oauth.TokenEndpointResponse): Tokens {
+  const claims = oauth.getValidatedIdTokenClaims(response);
   return {
     accessToken: response.access_token,
     expiresAt:
@@ -262,6 +282,10 @@ function tokensOf(response: oauth.TokenEndpointResponse): Tokens {
         ? Number.POSITIVE_INFINITY
         : Date.now() + response.expires_in * 1000,
     ...(response.refresh_token !== undefined && { refreshToken: response.refresh_token }),
+    ...(claims !== undefined && {
+      idToken: response.id_token,
+      idTokenExpiresAt: claims.exp * 1000,
+    }),
   };
 }
 
@@ -315,7 +339,10 @@ export async function completeLogin(
   return { tokens: tokensOf(response), webId: webIdOf(claims) };
 }
 
-/** New tokens for `refreshToken`, bound to `dpop`'s key as the old ones were. */
+/**
+ * New tokens for `refreshToken`, bound to `dpop`'s key as the old ones
+ * were, with a new ID token when the provider sends one.
+ */
 export async function refreshTokens(
   as: oauth.AuthorizationServer,
   client: oauth.Client,

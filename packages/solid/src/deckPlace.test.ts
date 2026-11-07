@@ -703,6 +703,64 @@ describe("an instance at the pod's root, laid out flat", () => {
     await expect(busy.unclaimed(at(BOB))).resolves.toEqual([]);
     expect(heads).toBe(2);
   });
+
+  it("is not its own folder at the root a Linked Web Storage server names, and is below it", async () => {
+    const p = await pod();
+    const at = (instance: string) => ({
+      url: `${instance}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${instance}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${instance}reviews/deck-1.ttl`,
+    });
+    const lws = (folder: string, root: string) =>
+      (async (input, init) => {
+        if (String(input) === folder && init?.method === "HEAD")
+          return new Response(null, {
+            headers: { Link: `<${ROOT}bob/>; rel="https://www.w3.org/ns/lws#storage"` },
+          });
+        if (String(input) === `${ROOT}bob/` && init?.method === undefined)
+          return Response.json({
+            id: `${ROOT}bob/`,
+            type: "Storage",
+            service: [{ type: "StorageRoot", serviceEndpoint: root }],
+          });
+        return p.fetch(input, init);
+      }) as typeof globalThis.fetch;
+    await p.put(`${ROOT}bob/decks/deck-1.ttl`, "");
+    await expect(
+      createDeckDocumentGuard(lws(`${ROOT}bob/`, `${ROOT}bob/`)).unclaimed(at(`${ROOT}bob/`)),
+    ).resolves.toEqual([`${ROOT}bob/decks/deck-1.ttl`]);
+    await p.put(`${BOB}decks/deck-1.ttl`, "");
+    await expect(
+      createDeckDocumentGuard(lws(BOB, `${ROOT}bob/`)).unclaimed(at(BOB)),
+    ).resolves.toEqual([]);
+  });
+
+  it("asks again a folder whose storage description can't be read", async () => {
+    const p = await pod();
+    let heads = 0;
+    const guard = createDeckDocumentGuard((async (input, init) => {
+      if (String(input) === BOB && init?.method === "HEAD") {
+        heads += 1;
+        return new Response(null, {
+          headers: { Link: `<${ROOT}bob/>; rel="https://www.w3.org/ns/lws#storage"` },
+        });
+      }
+      if (String(input) === `${ROOT}bob/` && init?.method === undefined)
+        return new Response(null, { status: 500 });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    await p.put(`${BOB}decks/deck-1.ttl`, "");
+    const at = {
+      url: `${BOB}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${BOB}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+    };
+    await expect(guard.unclaimed(at)).rejects.toMatchObject({ code: "cannotCheck" });
+    await expect(guard.unclaimed(at)).rejects.toMatchObject({ code: "cannotCheck" });
+    expect(heads).toBe(2);
+  });
 });
 
 describe("an instance whose address is spelled otherwise than a request sends it", () => {

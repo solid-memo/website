@@ -51,3 +51,30 @@ export function withBoundedHeaders(response: Response): Response {
 export function boundedHeadersFetch(fetch: typeof globalThis.fetch): typeof globalThis.fetch {
   return async (input, init) => withBoundedHeaders(await fetch(input, init));
 }
+
+/**
+ * The targets of a response's `Link` header with relation `rel`, made
+ * absolute against the response's URL (or `url`, for a response made
+ * here, which has none); none when the header is past its bound. A link
+ * may name several relations (`rel="type up"`), quoted or not.
+ */
+export function linkTargets(response: Response, rel: string, url: string): string[] {
+  const header = boundedHeader(response, "Link") ?? "";
+  const found: string[] = [];
+  for (const [, target, params] of header.matchAll(/<([^>]*)>([^<]*)/g)) {
+    const relation = /;\s*rel\s*=\s*(?:"([^"]*)"|([^\s;,]+))/i.exec(params!);
+    const relations = (relation?.[1] ?? relation?.[2] ?? "").split(/\s+/);
+    if (relations.includes(rel)) found.push(new URL(target!, response.url || url).href);
+  }
+  return found;
+}
+
+/**
+ * What a request that reads a resource's links asks for: Turtle, as the
+ * app reads a folder, or else whatever the server has. A Linked Web
+ * Storage server answers a storage's root, asked for anything, with the
+ * storage's description, which has none of the Solid Protocol's links
+ * (`pim:Storage`, the ACL's); one that lists a container only as LWS has
+ * it would answer Turtle alone with 406 (docs/lws.md).
+ */
+export const TURTLE_FIRST = "text/turtle, */*;q=0.1";

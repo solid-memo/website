@@ -578,7 +578,7 @@ jobs:
       # the run; on main, each runs to its end, saving its images.
       fail-fast: ${{ github.ref != 'refs/heads/main' }}
       matrix:
-        server: [css-8, pivot, nextcloud, jss]
+        server: [css-8, pivot, nextcloud, jss, css-lws, css-lws-only]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

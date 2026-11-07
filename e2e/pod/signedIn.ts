@@ -15,7 +15,7 @@ import type { SessionClient } from "@solid-memo/solid/client/session";
  */
 
 /** How a server makes accounts and gives out tokens. */
-export type Login = "css" | "css-6" | "nss" | "jss";
+export type Login = "css" | "css-6" | "css-lws" | "nss" | "jss";
 
 export interface Account {
   webId: string;
@@ -48,6 +48,8 @@ export interface Session {
   issuer: string;
   accessToken: string;
   key: DpopKey;
+  /** The ID token and client of a login that gives them, which a Linked Web Storage server exchanges (cssLogin). */
+  openId?: { idToken: string; clientId: string; expiresAt: number };
 }
 
 export interface DpopKey {
@@ -260,6 +262,7 @@ async function nssAccount(server: string, username: string): Promise<Account> {
 const ACCOUNT_MAKERS = {
   css: cssAccount,
   "css-6": css6Account,
+  "css-lws": cssAccount,
   nss: nssAccount,
   jss: jssAccount,
 } satisfies Record<Login, (server: string, username: string) => Promise<Account>>;
@@ -318,6 +321,30 @@ function redirectOf(what: string, response: Response, base: string): URL {
   return new URL(location, base);
 }
 
+/** Requests as a browser's, keeping cookies and following no redirect: a form's body if it is given one. */
+function browser() {
+  const cookies = new Map<string, string>();
+  return async (url: string | URL, form?: Record<string, string>, json?: unknown) => {
+    const response = await fetch(url, {
+      method: form === undefined && json === undefined ? "GET" : "POST",
+      redirect: "manual",
+      headers: {
+        accept: json === undefined ? "text/html" : "application/json",
+        cookie: [...cookies].map(([name, value]) => `${name}=${value}`).join("; "),
+        ...(form !== undefined && FORM_BODY),
+        ...(json !== undefined && JSON_BODY),
+      },
+      ...(form !== undefined && { body: new URLSearchParams(form) }),
+      ...(json !== undefined && { body: JSON.stringify(json) }),
+    });
+    for (const cookie of response.headers.getSetCookie()) {
+      const [name, ...value] = cookie.split(";")[0]!.split("=");
+      cookies.set(name!, value.join("="));
+    }
+    return response;
+  };
+}
+
 /**
  * A token through node-solid-server's authorization-code flow, its forms
  * filled in as a browser would (it has no other way to one): a client
@@ -343,24 +370,7 @@ async function codeFlowToken(server: string, account: Account, key: DpopKey): Pr
     state: randomUUID(),
     nonce: randomUUID(),
   };
-  const cookies = new Map<string, string>();
-  const browse = async (url: string | URL, form?: Record<string, string>) => {
-    const response = await fetch(url, {
-      method: form === undefined ? "GET" : "POST",
-      redirect: "manual",
-      headers: {
-        accept: "text/html",
-        cookie: [...cookies].map(([name, value]) => `${name}=${value}`).join("; "),
-        ...(form !== undefined && FORM_BODY),
-      },
-      ...(form !== undefined && { body: new URLSearchParams(form) }),
-    });
-    for (const cookie of response.headers.getSetCookie()) {
-      const [name, ...value] = cookie.split(";")[0]!.split("=");
-      cookies.set(name!, value.join("="));
-    }
-    return response;
-  };
+  const browse = browser();
   await browse(`${server}authorize?${new URLSearchParams(params).toString()}`);
   let next = redirectOf(
     "Logging in",
@@ -403,16 +413,127 @@ async function codeFlowToken(server: string, account: Account, key: DpopKey): Pr
   return access_token;
 }
 
+/**
+ * The tokens of a login on the Community Solid Server's authorization-code
+ * flow, its account API answering as its pages would: a client registered,
+ * the login, the WebID picked, the consent, the code redeemed. Client
+ * credentials give no ID token, which the Linked Web Storage exchange takes.
+ */
+async function cssLogin(
+  server: string,
+  account: Account,
+  key: DpopKey,
+): Promise<Pick<Session, "accessToken" | "openId">> {
+  const redirectUri = "https://signed-in.example/callback";
+  const provider = await answered<{
+    registration_endpoint: string;
+    authorization_endpoint: string;
+    token_endpoint: string;
+  }>("Reading the provider", await fetch(`${server}.well-known/openid-configuration`));
+  const { client_id: clientId } = await answered<{ client_id: string }>(
+    "Registering a client",
+    await post(provider.registration_endpoint, {
+      redirect_uris: [redirectUri],
+      response_types: ["code"],
+      grant_types: ["authorization_code"],
+      token_endpoint_auth_method: "none",
+      application_type: "web",
+      scope: "openid webid",
+    }),
+  );
+  const verifier = randomUUID() + randomUUID();
+  const browse = browser();
+  const follow = async (start: string) => {
+    let next = new URL(start, server);
+    for (let step = 0; step < 8; step++) {
+      if (next.href.startsWith(redirectUri) || next.pathname.startsWith("/.account/")) return next;
+      next = redirectOf(`Following the login at ${next.pathname}`, await browse(next), server);
+    }
+    throw new Error(`The login never came back, ending at ${next.href}.`);
+  };
+  const step = async (path: string, body: unknown) =>
+    follow(
+      (
+        await answered<{ location: string }>(
+          `Answering ${path}`,
+          await browse(`${server}.account/${path}`, undefined, body),
+        )
+      ).location,
+    );
+  const authorize = new URL(provider.authorization_endpoint);
+  authorize.search = new URLSearchParams({
+    response_type: "code",
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: "openid webid",
+    state: randomUUID(),
+    nonce: randomUUID(),
+    code_challenge: createHash("sha256").update(verifier).digest("base64url"),
+    code_challenge_method: "S256",
+  }).toString();
+  await follow(authorize.href);
+  await step("login/password/", { email: account.email, password: account.password });
+  await step("oidc/pick-webid/", { webId: account.webId });
+  const back = await step("oidc/consent/", { remember: false });
+  const { access_token: accessToken, id_token: idToken } = await answered<{
+    access_token: string;
+    id_token: string;
+  }>(
+    "Redeeming the code",
+    await fetch(provider.token_endpoint, {
+      method: "POST",
+      headers: { ...FORM_BODY, dpop: dpopProof(key, "POST", provider.token_endpoint) },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        client_id: clientId,
+        code: back.searchParams.get("code") ?? "",
+        redirect_uri: redirectUri,
+        code_verifier: verifier,
+      }),
+    }),
+  );
+  const { exp } = JSON.parse(Buffer.from(idToken.split(".")[1]!, "base64url").toString()) as {
+    exp: number;
+  };
+  return { accessToken, openId: { idToken, clientId, expiresAt: exp * 1000 } };
+}
+
 const TOKEN_MAKERS = {
   css: clientCredentialsToken,
   "css-6": clientCredentialsToken,
   nss: codeFlowToken,
   jss: passwordToken,
-} satisfies Record<Login, (server: string, account: Account, key: DpopKey) => Promise<string>>;
+} satisfies Record<
+  Exclude<Login, "css-lws">,
+  (server: string, account: Account, key: DpopKey) => Promise<string>
+>;
 
 /** The account signed in, on a key of its own. */
 export async function signIn(server: SignedInServer, account: Account): Promise<Session> {
   const key = newDpopKey();
-  const accessToken = await TOKEN_MAKERS[server.login](server.url, account, key);
-  return { webId: account.webId, issuer: server.url, accessToken, key };
+  const signedIn = { webId: account.webId, issuer: server.url, key };
+  if (server.login === "css-lws")
+    return { ...signedIn, ...(await cssLogin(server.url, account, key)) };
+  return {
+    ...signedIn,
+    accessToken: await TOKEN_MAKERS[server.login](server.url, account, key),
+  };
+}
+
+/** The Bearer token the session's ID token is exchanged for, for `storage`, as the app's client asks for it (lwsAuth.ts). */
+export async function exchangedToken(session: Session, storage: string): Promise<string> {
+  const { access_token } = await answered<{ access_token: string }>(
+    "Exchanging the ID token",
+    await fetch(`${session.issuer}.well-known/lws/token`, {
+      method: "POST",
+      headers: FORM_BODY,
+      body: new URLSearchParams({
+        grant_type: "urn:ietf:params:oauth:grant-type:token-exchange",
+        resource: storage,
+        subject_token: session.openId!.idToken,
+        subject_token_type: "urn:ietf:params:oauth:token-type:id_token",
+      }),
+    }),
+  );
+  return access_token;
 }
