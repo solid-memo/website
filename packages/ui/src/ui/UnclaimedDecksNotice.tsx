@@ -60,11 +60,11 @@ export function UnclaimedDecksNotice({
               ))}
             </ul>
             {deck.outsidePod.length > 0 ? (
-              <p>
+              <p class="unclaimed-addresses">
                 {t("unclaimedDecks.outsidePod")} {deck.outsidePod.join(", ")}
               </p>
             ) : confirming === deck.deckUrl ? (
-              <p>
+              <p class="unclaimed-addresses">
                 {tx("unclaimedDecks.confirm", { deck: <ReaderText text={deck.title} /> })}{" "}
                 {deck.documents.join(", ")}{" "}
                 <button

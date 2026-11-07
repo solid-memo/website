@@ -341,6 +341,13 @@ main.workspace {
   overflow-wrap: anywhere;
 }
 
+/* A deck's documents named again in a sentence (UnclaimedDecksNotice), their addresses joined
+   by commas: broken anywhere, so a long one wraps on a narrow screen instead of scrolling the
+   page sideways (WCAG 1.4.10). */
+.unclaimed-addresses {
+  overflow-wrap: anywhere;
+}
+
 /* The theme and language choices above every screen: a sun or a moon, then the language list. */
 .top-bar {
   display: flex;
