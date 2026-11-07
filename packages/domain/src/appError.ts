@@ -133,6 +133,10 @@ export const ERROR_TEMPLATES = {
     "Solid Memo stopped a change to your Pod for safety: it would have been saved at an address Solid Memo never saves to. Nothing was changed.",
   writeOutsidePod:
     "Solid Memo did not save this: it is kept on {host}, outside your Pod, and Solid Memo saves only to your Pod. Nothing was changed.",
+  instanceOutsideStorages:
+    "Solid Memo did not delete this instance: it is outside your Pod, and Solid Memo deletes only what is in your Pod. You can remove it from your list instead. Nothing was changed.",
+  instanceAlreadyThere:
+    "An instance is already in this folder, so nothing was saved. To use it, attach it by its address from your list of instances. To start a new one, choose another folder.",
   redirectRefused:
     "Solid Memo stopped a change to your Pod for safety: your Pod sent it on to another address, and Solid Memo saves only at the address it asked for.",
   credentialsRefused:

@@ -792,11 +792,18 @@
     "deleteAction": "Eliminar",
     "deleteLabel": "Eliminar la instancia {name}",
     "delete": "Eliminar…",
+    "removeConfirm": "¿Quitar la instancia «{name}» de tu lista? Sus mazos y tarjetas se quedan donde están, sin cambios. Puedes vincularla de nuevo por su dirección.",
+    "removeHeading": "Quitar de mi lista",
+    "removeAction": "Quitar",
+    "removeLabel": "Quitar de mi lista: {name}",
+    "remove": "Quitar de mi lista…",
     "newInstance": "Instancia nueva…",
     "attachSummary": "Vincular una instancia existente por URL",
     "attachUrl": "URL del contenedor de la instancia",
     "attach": "Vincular",
-    "deleted": "Se eliminó la instancia «{name}»."
+    "deleted": "Se eliminó la instancia «{name}».",
+    "removed": "Se quitó la instancia «{name}» de tu lista.",
+    "outsidePod": "Fuera de tu Pod, así que Solid Memo no puede eliminarla."
   },
   "keptFolder": {
     "text": "Solid Memo eliminó sus propios datos y conservó {link}: otra aplicación guardó archivos allí.",
@@ -1778,6 +1785,8 @@
     "guestStudyBeingMoved": "Solid Memo está trasladando a tu Pod tus datos de estudio de este navegador y no guarda nada en ellos hasta que termine. Espera a que acabe e inténtalo de nuevo.",
     "writeRefused": "Solid Memo detuvo un cambio en tu Pod por seguridad: se habría guardado en una dirección en la que Solid Memo nunca guarda nada. No se cambió nada.",
     "writeOutsidePod": "Solid Memo no guardó esto: está en {host}, fuera de tu Pod, y Solid Memo solo guarda en tu Pod. No se cambió nada.",
+    "instanceOutsideStorages": "Solid Memo no eliminó esta instancia: está fuera de tu Pod, y Solid Memo solo elimina lo que está en tu Pod. En su lugar, puedes quitarla de tu lista. No se cambió nada.",
+    "instanceAlreadyThere": "Ya hay una instancia en esta carpeta, así que no se guardó nada. Para usarla, vincúlala por su dirección desde tu lista de instancias. Para empezar una nueva, elige otra carpeta.",
     "redirectRefused": "Solid Memo detuvo un cambio en tu Pod por seguridad: tu Pod lo redirigió a otra dirección, y Solid Memo solo guarda en la dirección que pidió.",
     "credentialsRefused": "Solid Memo no envió esta solicitud por seguridad: la dirección está escrita de una forma que podría permitir a otro servidor usar tu inicio de sesión. No se envió nada.",
     "deckChangedSinceOffer": "El mazo cambió después de que se ofreciera la actualización, quizá en otra pestaña o aplicación, así que no se cambió nada. Vuelve a mirar la oferta.",

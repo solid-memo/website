@@ -203,6 +203,7 @@ export function createAppUseCases({
     createInstance: (args) => podInstances.createInstance(args).finally(changed),
     attachInstance: (args) => podInstances.attachInstance(args).finally(changed),
     deleteInstance: (args) => podInstances.deleteInstance(args).finally(changed),
+    detachInstance: (args) => podInstances.detachInstance(args).finally(changed),
   };
   const podCopier = createSolidInstanceCopier({ fetch: podFetch });
   const instanceCopier: typeof podCopier = {

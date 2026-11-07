@@ -7,6 +7,7 @@ import { act, fireEvent, render, screen, waitFor, within } from "@testing-librar
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Workspace } from "./Workspace";
 import type { Course } from "@solid-memo/application/courses";
+import { statusTexts } from "../test/liveRegions";
 import type { UseCases } from "@solid-memo/application/useCases";
 import {
   CARD_FORMAT_VERSION,
@@ -19,6 +20,7 @@ import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
+import { GUEST_INSTANCE_URL, GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
@@ -783,6 +785,188 @@ describe("Workspace", () => {
       expect(screen.queryByRole("button", { name: "Deck set B" })).not.toBeInTheDocument();
     });
     expect(screen.getByRole("button", { name: "Deck set A" })).toBeInTheDocument();
+  });
+
+  it("removes an instance on another server from the list, offers no delete there, and forgets what was read of it", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const elsewhere: Instance = { url: "https://bob.example/shared/", name: "Shared" };
+    let detached = false;
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => (detached ? [instanceA] : [instanceA, elsewhere])),
+      detachInstance: vi.fn(async () => {
+        detached = true;
+      }),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    queryClient.setQueryData(queryKeys.decks(elsewhere.url), []);
+    queryClient.setQueryData(queryKeys.palettes(elsewhere.url), []);
+    queryClient.setQueryData(queryKeys.palettes(instanceA.url), []);
+    queryClient.setQueryData(queryKeys.connectedScreen(session.webId), {
+      skipped: false,
+      instances: [instanceA, elsewhere],
+    });
+    renderWorkspace(useCases, queryClient);
+
+    expect(await screen.findByRole("button", { name: "Delete instance Deck set A" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Delete instance Shared" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Remove from my list: Shared" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Shared" })).not.toBeInTheDocument();
+    });
+    expect(useCases.detachInstance).toHaveBeenCalledWith(session, elsewhere);
+    expect(useCases.deleteInstance).not.toHaveBeenCalled();
+    expect(queryClient.getQueryData(queryKeys.decks(elsewhere.url))).toBeUndefined();
+    expect(queryClient.getQueryData(queryKeys.palettes(elsewhere.url))).toBeUndefined();
+    expect(queryClient.getQueryData(queryKeys.palettes(instanceA.url))).toEqual([]);
+    expect(queryClient.getQueryData(queryKeys.connectedScreen(session.webId))).toBeUndefined();
+  });
+
+  it("offers a guest their own instance only to delete, and any other to remove as well", async () => {
+    const own: Instance = { url: GUEST_INSTANCE_URL, name: "My study" };
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [own, instanceB]),
+      listStorages: vi.fn(async () => [{ url: GUEST_ORIGIN, source: "profile" as const }]),
+    });
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <Workspace useCases={useCases} session={{ ...session, guest: true }} />
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByRole("button", { name: "Delete instance My study" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Remove from my list: My study" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Remove from my list: Deck set B" })).toBeVisible();
+  });
+
+  it("offers a logged-in user an instance registered at a guest address to remove", async () => {
+    const stray: Instance = { url: GUEST_INSTANCE_URL, name: "Stray" };
+    const useCases = makeUseCases({ listInstances: vi.fn(async () => [stray, instanceB]) });
+    renderWorkspace(useCases);
+
+    expect(await screen.findByRole("button", { name: "Remove from my list: Stray" })).toBeVisible();
+  });
+
+  it("reads the list again after a removal that failed in one index only, saying so", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    let detached = false;
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => (detached ? [instanceA] : [instanceA, instanceB])),
+      detachInstance: vi.fn(async () => {
+        detached = true;
+        throw new Error("the public index refused");
+      }),
+    });
+    renderWorkspace(useCases);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Remove from my list: Deck set B" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: "Deck set B" })).not.toBeInTheDocument();
+    });
+    expect(screen.getByText("the public index refused")).toBeInTheDocument();
+    expect(statusTexts()).toEqual([]);
+  });
+
+  it("says a removal succeeded although attaching one failed before it, whose error goes", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    let detached = false;
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => (detached ? [instanceA] : [instanceA, instanceB])),
+      attachInstanceByUrl: vi.fn(async () => {
+        throw new Error("not an instance");
+      }),
+      detachInstance: vi.fn(async () => {
+        detached = true;
+      }),
+    });
+    renderWorkspace(useCases);
+
+    const remove = await screen.findByRole("button", { name: "Remove from my list: Deck set B" });
+    fireEvent.input(screen.getByLabelText("Instance container URL"), {
+      target: { value: "https://bob.example/nothing/" },
+    });
+    fireEvent.submit(screen.getByLabelText("Instance container URL").closest("form")!);
+    expect(await screen.findByText("not an instance")).toBeInTheDocument();
+    fireEvent.click(remove);
+
+    await waitFor(() => {
+      expect(statusTexts()).toEqual(['Removed the instance "Deck set B" from your list.']);
+    });
+    expect(screen.queryByText("not an instance")).not.toBeInTheDocument();
+  });
+
+  it("says why an instance outside the user's Pod has no delete, once their storages are known", async () => {
+    let storagesRead: (storages: Storage[]) => void = () => undefined;
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA, instanceB]),
+      listStorages: vi.fn(
+        () =>
+          new Promise<Storage[]>((resolve) => {
+            storagesRead = resolve;
+          }),
+      ),
+    });
+    renderWorkspace(useCases);
+    const hint = "Outside your Pod, so Solid Memo cannot delete it.";
+
+    await screen.findByRole("button", { name: "Remove from my list: Deck set B" });
+    await waitFor(() => expect(useCases.listStorages).toHaveBeenCalled());
+    expect(screen.queryByText(hint)).toBeNull();
+
+    storagesRead([{ url: "https://nowhere.example/", source: "profile" }]);
+
+    expect(await screen.findAllByText(hint)).toHaveLength(2);
+  });
+
+  it("offers no instance to delete while the storages cannot be read, and any to remove", async () => {
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA, instanceB]),
+      listStorages: vi.fn(async () => {
+        throw new Error("no storages");
+      }),
+    });
+    renderWorkspace(useCases);
+
+    expect(
+      await screen.findByRole("button", { name: "Remove from my list: Deck set A" }),
+    ).toBeVisible();
+    await waitFor(() => expect(useCases.listStorages).toHaveBeenCalled());
+    expect(screen.queryByRole("button", { name: /^Delete instance/ })).toBeNull();
+  });
+
+  it("clears a failed delete's error when the instance is removed from the list instead, and says a failed removal's", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA, instanceB]),
+      deleteInstance: vi.fn(async () => {
+        throw new Error("the delete was refused");
+      }),
+      detachInstance: vi.fn(async () => {
+        throw new Error("the index is busy");
+      }),
+    });
+    renderWorkspace(useCases);
+
+    fireEvent.click(await screen.findByRole("button", { name: "Delete instance Deck set B" }));
+    expect(await screen.findByText("the delete was refused")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Remove from my list: Deck set B" }));
+
+    expect(await screen.findByText("the index is busy")).toBeInTheDocument();
+    expect(screen.queryByText("the delete was refused")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Deck set B" })).toBeInTheDocument();
   });
 
   it("says when deleting an instance kept its folder, which holds another app's files", async () => {

@@ -128,6 +128,13 @@ export interface InstanceRepository {
    */
   deleteInstance(args: { webId: string; instance: Instance }): Promise<InstanceDeletion>;
   /**
+   * Drop the instance's registrations from the user's type indexes and
+   * nothing else: no request goes to the instance's server, so it works
+   * whatever that server answers, or if it is gone, and its data stays
+   * as it is, to attach again by its address.
+   */
+  detachInstance(args: { webId: string; instance: Instance }): Promise<void>;
+  /**
    * The registrations of the instance's data, one per class, that
    * belong in the type indexes there are, and whether each is there:
    * Solid Memo's own, the catalog's, the decks' and the cards' in each

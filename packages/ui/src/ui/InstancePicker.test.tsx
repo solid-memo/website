@@ -23,6 +23,10 @@ function renderPicker(overrides: Partial<Parameters<typeof InstancePicker>[0]> =
     newInstanceHref: "#/storages",
     onAttach: vi.fn(),
     onDelete: vi.fn(),
+    onDetach: vi.fn(),
+    removable: () => true,
+    deletable: () => true,
+    outsidePod: () => false,
     ...overrides,
   };
   const view = render(<InstancePicker {...props} />);
@@ -158,6 +162,85 @@ describe("InstancePicker", () => {
     rerender(<InstancePicker {...props} error="refused" />);
     expect(del).toHaveFocus();
     expect(statusTexts()).toEqual([]);
+  });
+
+  it("offers every instance to remove from the list, and to delete only one in the user's storages", () => {
+    renderPicker({ deletable: (instance) => instance === instances[1] });
+    const [own, elsewhere] = [
+      screen.getByRole("button", { name: "Delete instance Deck set B" }),
+      screen.queryByRole("button", { name: "Delete instance Deck set A" }),
+    ];
+    expect(own).toBeInTheDocument();
+    expect(elsewhere).not.toBeInTheDocument();
+    for (const { name } of instances)
+      expect(
+        screen.getByRole("button", { name: `Remove from my list: ${name}` }),
+      ).toHaveTextContent("Remove from my list…");
+  });
+
+  it("says why a row outside the user's Pod has no delete, and only there", () => {
+    renderPicker({ outsidePod: (instance) => instance === instances[0] });
+    const [outside, inside] = within(screen.getByRole("list")).getAllByRole("listitem");
+    const hint = "Outside your Pod, so Solid Memo cannot delete it.";
+    expect(within(outside!).getByText(hint)).toHaveClass("hint");
+    expect(within(inside!).queryByText(hint)).toBeNull();
+  });
+
+  it("says nothing is removed when the row went but the removal failed, and still moves the focus", () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const { props, rerender } = renderPicker();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove from my list: Deck set A" }));
+    rerender(<InstancePicker {...props} instances={[instances[1]!]} error="the index refused" />);
+
+    expect(screen.getByRole("button", { name: "Deck set B" })).toHaveFocus();
+    expect(statusTexts()).toEqual([]);
+    expect(screen.getByText("the index refused")).toBeInTheDocument();
+  });
+
+  it("offers no removal from the list of an instance that is not removable", () => {
+    renderPicker({ removable: (instance) => instance !== instances[0] });
+    expect(screen.queryByRole("button", { name: "Remove from my list: Deck set A" })).toBeNull();
+    expect(screen.getByRole("button", { name: "Delete instance Deck set A" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Remove from my list: Deck set B" })).toBeVisible();
+  });
+
+  it("removes an instance from the list after the user confirms, says so, and moves the focus", () => {
+    const confirm = vi.fn(() => true);
+    vi.stubGlobal("confirm", confirm);
+    const { props, rerender } = renderPicker();
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove from my list: Deck set A" }));
+
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining("stay where they are"));
+    expect(props.onDetach).toHaveBeenCalledWith(instances[0]);
+    expect(props.onDelete).not.toHaveBeenCalled();
+    rerender(<InstancePicker {...props} instances={[instances[1]!]} />);
+    expect(screen.getByRole("button", { name: "Deck set B" })).toHaveFocus();
+    expect(statusTexts()).toEqual(['Removed the instance "Deck set A" from your list.']);
+  });
+
+  it("does not remove an instance when the user cancels, or while busy", () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => false),
+    );
+    const { props, rerender } = renderPicker();
+    const remove = screen.getByRole("button", { name: "Remove from my list: Deck set A" });
+    fireEvent.click(remove);
+    expect(props.onDetach).not.toHaveBeenCalled();
+
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    rerender(<InstancePicker {...props} busy />);
+    expect(remove).toHaveAttribute("aria-disabled", "true");
+    fireEvent.click(remove);
+    expect(props.onDetach).not.toHaveBeenCalled();
   });
 
   it("deletes an instance after the user confirms", () => {

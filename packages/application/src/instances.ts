@@ -34,6 +34,7 @@ import {
   isDocumentIn,
   metaUrlOf,
   preferencesUrlOf,
+  isInStorages,
 } from "@solid-memo/domain/instanceLayout";
 import { NEW_INSTANCE_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { Session } from "@solid-memo/domain/session";
@@ -90,8 +91,20 @@ export interface InstanceUseCases {
    * other document Solid Memo wrote there, then its registrations. Its
    * folder goes too unless it holds what another app put there, or the
    * releases published from it, which are kept, and the result says so.
+   * Only for an instance in the user's own storages (isInStorages): any
+   * other is someone else's data, and is refused
+   * (`instanceOutsideStorages`), with nothing sent to its server.
    */
   deleteInstance(session: Session, instance: Instance): Promise<InstanceDeletion>;
+  /**
+   * Take an instance off the user's list: its registrations go from
+   * their type indexes, its data stays where it is, and its server is
+   * sent nothing, so any instance can be removed, whatever its server
+   * answers. A guest's own is the exception, and is refused: a guest
+   * couldn't learn its address to attach it again, or start over in the
+   * folder it would still hold, so it can only be deleted.
+   */
+  detachInstance(session: Session, instance: Instance): Promise<void>;
   /**
    * The registrations of the instance's data, one per class, that belong
    * in the user's type indexes, and whether each is there
@@ -363,8 +376,19 @@ export function createInstanceUseCases({
         registrationTarget,
       });
     },
-    deleteInstance(session, instance) {
+    async deleteInstance(session, instance) {
+      const storages = await storageGateway.discoverStorages(session.webId);
+      if (!isInStorages(instance.url, storages))
+        throw new AppError("instanceOutsideStorages", { url: instance.url });
       return instanceRepository.deleteInstance({
+        webId: session.webId,
+        instance,
+      });
+    },
+    async detachInstance(session, instance) {
+      if (session.guest === true && isGuestUrl(instance.url))
+        throw new Error("A guest's own instance is deleted, not removed from the list.");
+      return instanceRepository.detachInstance({
         webId: session.webId,
         instance,
       });

@@ -728,11 +728,18 @@
     "deleteAction": "삭제",
     "deleteLabel": "{name} 인스턴스 삭제",
     "delete": "삭제…",
+    "removeConfirm": "‘{name}’ 인스턴스를 목록에서 제거할까요? 덱과 카드는 바뀌지 않고 있던 곳에 그대로 남아요. 주소로 다시 연결할 수 있어요.",
+    "removeHeading": "내 목록에서 제거",
+    "removeAction": "제거",
+    "removeLabel": "내 목록에서 제거: {name}",
+    "remove": "내 목록에서 제거…",
     "newInstance": "새 인스턴스…",
     "attachSummary": "URL로 기존 인스턴스 연결",
     "attachUrl": "인스턴스 컨테이너 URL",
     "attach": "연결",
-    "deleted": "‘{name}’ 인스턴스를 삭제했어요."
+    "deleted": "‘{name}’ 인스턴스를 삭제했어요.",
+    "removed": "‘{name}’ 인스턴스를 목록에서 제거했어요.",
+    "outsidePod": "Pod 밖에 있어서 Solid Memo가 삭제할 수 없어요."
   },
   "keptFolder": {
     "text": "Solid Memo가 자체 데이터는 삭제했지만 {link}은(는) 남겨 두었어요. 다른 앱이 그 안에 파일을 넣었기 때문이에요.",
@@ -1624,6 +1631,8 @@
     "guestStudyBeingMoved": "Solid Memo가 이 브라우저의 학습 기록을 Pod로 옮기는 중이라, 끝날 때까지 이 학습 기록에는 아무것도 저장하지 않아요. 옮기기가 끝나면 다시 시도해 주세요.",
     "writeRefused": "Solid Memo가 안전을 위해 Pod의 변경을 멈췄어요. Solid Memo가 절대 저장하지 않는 주소에 저장될 뻔했어요. 아무것도 바뀌지 않았어요.",
     "writeOutsidePod": "Solid Memo가 이것을 저장하지 않았어요. {host}에 있어서 Pod 밖에 있고, Solid Memo는 Pod에만 저장해요. 아무것도 바뀌지 않았어요.",
+    "instanceOutsideStorages": "Solid Memo가 이 인스턴스를 삭제하지 않았어요. Pod 밖에 있고, Solid Memo는 Pod 안에 있는 것만 삭제해요. 대신 목록에서 제거할 수 있어요. 아무것도 바뀌지 않았어요.",
+    "instanceAlreadyThere": "이 폴더에 이미 인스턴스가 있어서 아무것도 저장하지 않았어요. 사용하려면 인스턴스 목록에서 주소로 연결해 주세요. 새로 만들려면 다른 폴더를 선택해 주세요.",
     "redirectRefused": "Solid Memo가 안전을 위해 Pod의 변경을 멈췄어요. Pod가 변경을 다른 주소로 보냈는데, Solid Memo는 요청한 주소에만 저장해요.",
     "credentialsRefused": "Solid Memo가 안전을 위해 이 요청을 보내지 않았어요. 주소가 다른 서버에서 내 로그인을 쓸 수 있는 형태로 적혀 있어요. 아무것도 보내지 않았어요.",
     "deckChangedSinceOffer": "업데이트를 제안한 뒤 덱이 바뀌어서 아무것도 바꾸지 않았어요. 다른 탭이나 앱에서 바뀌었을 수 있어요. 제안을 다시 확인해 주세요.",

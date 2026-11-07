@@ -46,6 +46,7 @@ export function makeInstanceUseCasesFake(
         keptReleases: false,
         keptDocuments: [],
       })),
+      detachInstance: vi.fn(async () => undefined),
       dataClassRegistrations: vi.fn(async () => ({
         registrations: (
           ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const
