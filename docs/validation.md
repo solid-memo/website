@@ -330,6 +330,16 @@ its [receipt](#flow). Only the developer report shows its results, and
 the repair offers nothing for it. A subject another app wrote with a
 Solid Memo class is held to that class's shape.
 
+The Solid client keeps some IRIs for subjects it hasn't saved yet
+([`LOCAL_NODE`](../packages/solid/src/client/linearDataset.ts)), so a
+document can't state one as data: its subject would have no URL to
+report. A read leaves out any statement that names such an IRI, so
+the check, the deck writes and every other reader never see it. It
+still counts toward a read's limits. A patch leaves it in the
+document; a write of the whole document drops it. A document that says
+nothing else reads as empty, so removing its deck deletes the document,
+whereas other foreign data keeps it.
+
 A release in the library, or one added from a link, is wholly its
 publisher's: nothing in it is marked `foreign`, a link to a blank-node
 member counts as any other link, and every violation in it counts.

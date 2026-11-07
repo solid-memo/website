@@ -34,6 +34,7 @@ import {
 import { boundedHeadersFetch, withBoundedHeaders } from "./linkHeader";
 import {
   getSolidDatasetLinear as libraryGetSolidDatasetLinear,
+  LOCAL_NODE,
   turtleParser,
 } from "./linearDataset";
 import {
@@ -46,7 +47,14 @@ import {
   sourceOf,
   toRdfJsDataset,
 } from "./rdf";
-import { NO_SIZE_LIMITS, quadTally, type TextStream, textChunks, writeTurtle } from "./readLimits";
+import {
+  namesIriUnder,
+  NO_SIZE_LIMITS,
+  quadTally,
+  type TextStream,
+  textChunks,
+  writeTurtle,
+} from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
 import { refuseUnwritable } from "../writableTerms";
 
@@ -424,8 +432,10 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * (quadTally; the text's own size is its caller's to check: it holds the
  * text already), or on a Turtle text at its first base, prefix or IRI
  * past what a read takes in, with limits or with none (writeTurtle); the
- * parser reads no further. JSON-LD is read with no
- * fetch at all: a context named by its address is refused (parseJsonLd).
+ * parser reads no further. A quad that names an IRI the library keeps
+ * for subjects not saved yet is left out (LOCAL_NODE). JSON-LD is read
+ * with no fetch at all: a context named by its address is refused
+ * (parseJsonLd).
  */
 export function parseQuads(
   text: string,
@@ -446,12 +456,12 @@ export function parseQuads(
     // Whether to go on: false once past limits, for the parser to stop (parseJsonLd, writeTurtle).
     const onQuad = (quad: Quad): boolean => {
       if (refused) return false;
-      if (!past(quad)) {
-        quads.push(quad);
-        return true;
+      if (past(quad)) {
+        refuse();
+        return false;
       }
-      refuse();
-      return false;
+      if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(quad);
+      return true;
     };
     const done = () => resolve(quads);
     if (format === "jsonld") {

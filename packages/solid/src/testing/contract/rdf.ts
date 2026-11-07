@@ -67,6 +67,7 @@ const text = (value: string, language = ""): Quad["object"] =>
  */
 export function rdfContract({ rdf, resources }: DataClient): void {
   const {
+    asUrl,
     buildThing,
     changesOf,
     createSolidDataset,
@@ -130,6 +131,24 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       const found = getThing(dataset, createThing({ name: "a" }).url)!;
       expect(found.url).toBe(`${URL_}#a`);
       expect(getThing(createSolidDataset(), createThing({ name: "a" }).url)).toBeNull();
+    });
+
+    it("reads no statement that names an IRI kept for subjects made by name", async () => {
+      const kept = createThing({ name: "x" }).url;
+      // asUrl throws on a subject at such an IRI, so a read must give none.
+      expect(() => asUrl(createThing({ name: "x" }))).toThrow();
+      const dataset = await read(`@prefix ex: <${EX}> .
+<${kept}> ex:front "Planted" .
+<#a> ex:front "Sweden" ; ex:link <${kept}> ; <${kept}> "property" ; ex:note "${kept}" .
+`);
+      expect(getThingAll(dataset).map(asUrl)).toEqual([`${URL_}#a`]);
+      expect(getThing(dataset, kept)).toBeNull();
+      const [a] = getThingAll(dataset);
+      expect(propertiesOf(a!).map(({ predicate }) => predicate)).toEqual([
+        `${EX}front`,
+        `${EX}note`,
+      ]);
+      expect(localNameOf(kept)).toBe("x");
     });
 
     it("reads a date-time as its unanchored pattern finds one: throwing, or an invalid date", () => {

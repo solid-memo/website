@@ -103,7 +103,7 @@ export const NO_CHANGES: Step = Object.freeze({
 // Subjects made by name and not saved yet.
 
 /** Where a subject made by name has its IRI until it is saved: `<#name>` in the document it is saved to. */
-const LOCAL_NODE = "https://solid-memo.invalid/.well-known/local-node/";
+export const LOCAL_NODE = "https://solid-memo.invalid/.well-known/local-node/";
 
 export function localIri(name: string): string {
   return `${LOCAL_NODE}${name}`;

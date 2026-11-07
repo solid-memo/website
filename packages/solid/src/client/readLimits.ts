@@ -37,21 +37,6 @@ export const RELEASE_LIMITS: ReadLimits = {
 export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
 
 /**
- * The most the app reads of a release's access control as it makes the
- * release public (solidReleasePublisher.ts), on a server that may be
- * anyone's: an ACL or ACR holds a few rules, so a wide margin over that
- * is far less than a release may be. The grant's library parses and
- * edits an access control in time that grows with the square of its
- * subjects, so the margin is kept small, and the subjects are bounded
- * too (MAX_ACCESS_CONTROL_SUBJECTS).
- */
-export const ACCESS_CONTROL_LIMITS: ReadLimits = {
-  bytes: 256 * 1024,
-  quads: 1_000,
-  characters: 1024 * 1024,
-};
-
-/**
  * The most subjects an access control the app reads as it makes a
  * release public may have (solidReleasePublisher.ts): its rules, and
  * the nodes they name, a few in any ACL or ACR. The grant's library
@@ -61,6 +46,24 @@ export const ACCESS_CONTROL_LIMITS: ReadLimits = {
  * control again once written, so the subjects its rule adds count too.
  */
 export const MAX_ACCESS_CONTROL_SUBJECTS = 64;
+
+/**
+ * The most the app reads of a release's access control as it makes the
+ * release public (solidReleasePublisher.ts), on a server that may be
+ * anyone's: an ACL or ACR holds a few rules, so a wide margin over that
+ * is far less than a release may be. The grant's library parses and
+ * edits an access control in time that grows with the square of its
+ * subjects, so the margin is kept small, and the subjects are bounded
+ * too (MAX_ACCESS_CONTROL_SUBJECTS), every subject the text states
+ * counted, one a read leaves out as well, since the library reads the
+ * text itself.
+ */
+export const ACCESS_CONTROL_LIMITS: ReadLimits = {
+  bytes: 256 * 1024,
+  quads: 1_000,
+  characters: 1024 * 1024,
+  subjects: MAX_ACCESS_CONTROL_SUBJECTS,
+};
 
 /**
  * The most the app reads of a WebID document, and of the documents it
@@ -270,26 +273,50 @@ function termPast({ subject, predicate, object, graph }: Quad): boolean {
 }
 
 /**
+ * Whether a parsed quad names an IRI under `prefix` as its subject,
+ * predicate, object or graph. A client keeps such a prefix for the
+ * subjects it makes by name, whose IRI says they aren't saved yet, so
+ * no document can state one: a read tallies the quad (quadTally), then
+ * leaves it out.
+ */
+export function namesIriUnder(
+  { subject, predicate, object, graph }: Quad,
+  prefix: string,
+): boolean {
+  return [subject, predicate, object, graph].some(
+    (term) => term.termType === "NamedNode" && term.value.startsWith(prefix),
+  );
+}
+
+/**
  * A tally of the triples parsed under `limits`, and of the characters of
  * their terms (subject, predicate, object with its datatype and
  * language, graph): a prefix lets a short line of Turtle, or a context
  * a short line of JSON-LD, stand for terms as long as it is, so a
  * document's bytes do not bound what its triples hold. Each call counts
- * one triple, into `spent` (by default the parse's own), and says
- * whether the count is now past either limit, or the triple has a term
- * longer than MAX_TERM_CHARACTERS: that, with no limits too.
+ * one triple, into `spent` (by default the parse's own), and its subject,
+ * in this parse, where the limits bound subjects, and says whether a
+ * count is now past its limit, or the triple has a term longer than
+ * MAX_TERM_CHARACTERS: that, with no limits too. The set of subjects
+ * holds one past its limit at most, as a read stops there.
  */
 export function quadTally(
   limits: ReadLimits | undefined,
   spent: ReadsSpent = noneSpent(),
 ): (quad: Quad) => boolean {
+  const subjects = new Set<string>();
   return (quad) => {
     if (termPast(quad)) return true;
     if (limits === undefined) return false;
     const { subject, predicate, object, graph } = quad;
     spent.quads++;
     spent.characters += length(subject) + length(predicate) + length(object) + length(graph);
-    return spent.quads > limits.quads || spent.characters > limits.characters;
+    if (limits.subjects !== undefined) subjects.add(`${subject.termType} ${subject.value}`);
+    return (
+      spent.quads > limits.quads ||
+      spent.characters > limits.characters ||
+      subjects.size > (limits.subjects ?? Number.POSITIVE_INFINITY)
+    );
   };
 }
 
