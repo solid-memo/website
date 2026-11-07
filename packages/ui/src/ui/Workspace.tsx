@@ -117,6 +117,7 @@ function crumbNamesOf(
     libraryDeck: libraryDeck === null ? "" : readerText(libraryDeck.title),
     libraryCard: libraryCard === null ? "" : cardName(libraryCard, readerText),
     chapter: chapter === null ? "" : course.cardText(chapter.title),
+    chapterStepless: chapter?.steps.length === 0,
     deckLang: deck === null ? undefined : course.cardLang(deck.title),
     cardLang: card === null ? undefined : cardLang(cardNameText(card, cardText)),
     libraryDeckLang: libraryDeck === null ? undefined : readerLang(libraryDeck.title),
@@ -441,8 +442,9 @@ function useHomePrefetch(
 /**
  * The course the route has open, read through the learner's deck of it
  * (the route's deck, once found) on a course's routes: the query, the
- * course once read, the open chapter, and whether a final review comes
- * too soon (reviewTooSoon).
+ * course once read, the open chapter, whether a final review comes too
+ * soon (reviewTooSoon), and whether the route's chapter has no step to
+ * play. Both of those wait for the redirect resolveRoute gives them.
  */
 function useRouteCourse(useCases: UseCases, route: RouteRef | null, activeDeck: Deck | null) {
   const { deckUrl, chapterUrl } = routeAddresses(route);
@@ -456,7 +458,8 @@ function useRouteCourse(useCases: UseCases, route: RouteRef | null, activeDeck: 
   const activeCourse = needsCourse ? (courseQuery.data ?? null) : null;
   const { activeChapter } = openChapterOf(activeCourse, chapterUrl);
   const tooSoon = reviewTooSoon(route, activeCourse, courseQuery.isFetching);
-  return { onCourse, needsCourse, courseQuery, activeCourse, activeChapter, tooSoon };
+  const stepless = route?.screen === "courseChapter" && activeChapter?.steps.length === 0;
+  return { onCourse, needsCourse, courseQuery, activeCourse, activeChapter, tooSoon, stepless };
 }
 
 /**
@@ -569,7 +572,7 @@ export function Workspace({
   // final review of a chapter with steps not done, to the chapter, once
   // the course is read afresh (the last step's answer is still being
   // read as the learner goes on from it).
-  const { onCourse, needsCourse, courseQuery, activeCourse, activeChapter, tooSoon } =
+  const { onCourse, needsCourse, courseQuery, activeCourse, activeChapter, tooSoon, stepless } =
     useRouteCourse(useCases, route, activeDeck);
 
   // The chapter the learner has just completed, for the course's page to
@@ -747,7 +750,10 @@ export function Workspace({
       lookupWaiting(
         needsCourse,
         courseQuery,
-        activeCourse === null || (chapterUrl !== null && activeChapter === null) || tooSoon,
+        activeCourse === null ||
+          (chapterUrl !== null && activeChapter === null) ||
+          tooSoon ||
+          stepless,
         t("workspace.loadingCourse"),
         errorText,
       ) ??

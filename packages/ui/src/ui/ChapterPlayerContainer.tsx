@@ -88,6 +88,28 @@ export function nextPlace(chapter: CourseChapter, at: ChapterPlace): ChapterPlac
 }
 
 /**
+ * The place `at` as far as the chapter goes now, as a course read afresh
+ * may have fewer steps or questions than when the learner got there:
+ * past the last step, that step's theory; past a step's last question,
+ * that question. The chapter has a step: one without opens at its final
+ * review (resolveRoute).
+ */
+export function placeWithin(chapter: CourseChapter, at: ChapterPlace): ChapterPlace {
+  const lastStep = chapter.steps.length - 1;
+  if (at.step > lastStep) return { step: lastStep, phase: "read", chunk: 0, question: 0 };
+  const lastQuestion = chapter.steps[at.step]!.questionIds.length - 1;
+  return at.question > lastQuestion ? { ...at, question: lastQuestion } : at;
+}
+
+/**
+ * The answer checked, while it's to one of the options shown: a course
+ * read afresh may have put another card in the question's place.
+ */
+export function answerTo(checked: CheckedAnswer | null, choices: readonly Choice[]) {
+  return checked !== null && choices.includes(checked.choice) ? checked : null;
+}
+
+/**
  * Owns one chapter of a course, taken a step at a time. It opens at the
  * step the learner's progress says to resume at (the first not done; the
  * first, for a chapter whose steps are all done), then goes on step by
@@ -115,7 +137,7 @@ export function ChapterPlayerContainer({
   random?: () => number;
 }) {
   const { t, errorText } = useI18n();
-  const [at, setAt] = useState<ChapterPlace>(() => {
+  const [place, setAt] = useState<ChapterPlace>(() => {
     const resume = course.progress.chapters.find(
       (entry) => entry.url === chapter.url,
     )!.resumeStepId;
@@ -129,18 +151,20 @@ export function ChapterPlayerContainer({
       question: 0,
     };
   });
-  const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
+  const at = placeWithin(chapter, place);
+  const [checked, setAnswer] = useState<CheckedAnswer | null>(null);
   const step = chapter.steps[at.step]!;
   const card = course.cards.get(step.questionIds[at.question]!)!;
-  const choices = useMemo(() => choicesOf(card, random), [at.step, at.question]);
+  const choices = useMemo(() => choicesOf(card, random), [at.step, at.question, card.id]);
+  const answer = answerTo(checked, choices);
   const answerMutation = useCourseAnswer(useCases, instance, course, setAnswer);
 
   function next() {
     answerMutation.reset();
     setAnswer(null);
-    const place = nextPlace(chapter, at);
-    if (place === null) onReview();
-    else setAt(place);
+    const following = nextPlace(chapter, at);
+    if (following === null) onReview();
+    else setAt(following);
   }
 
   return (

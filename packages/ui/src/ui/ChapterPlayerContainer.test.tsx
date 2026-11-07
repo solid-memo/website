@@ -47,6 +47,70 @@ function answer(option: string) {
 }
 
 describe("ChapterPlayerContainer", () => {
+  it("stays within a chapter read afresh with fewer questions and steps than the learner has reached", async () => {
+    const useCases = makeUseCasesFake({
+      answerCourseQuestion: vi.fn(async () => ({ effect: "introduce" as const, state: null })),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const course = makeCourse(["q-1"]);
+    const [first, second] = course.outline.chapters[0]!.steps;
+    const player = (steps = [first!, second!]) => (
+      <QueryClientProvider client={queryClient}>
+        <ChapterPlayerContainer
+          useCases={useCases}
+          instance={courseInstance}
+          course={course}
+          chapter={{ ...course.outline.chapters[0]!, steps }}
+          onReview={vi.fn()}
+          random={noShuffle}
+        />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(player());
+    toQuestions();
+    answer("Three terms");
+    fireEvent.click(await screen.findByRole("button", { name: "Next" }));
+    expect(screen.getByText("What is Turtle?")).toBeInTheDocument();
+
+    rerender(player([first!, { ...second!, questionIds: ["q-2"] }]));
+    expect(screen.getByText("What is a triple?")).toBeInTheDocument();
+
+    rerender(player([first!]));
+    expect(screen.getByRole("heading", { name: "Step 1 of 1" })).toBeInTheDocument();
+    expect(screen.getByText("Things are named by IRIs.")).toBeInTheDocument();
+  });
+
+  it("asks a question that a course read afresh has put in the place of an answered one", async () => {
+    const useCases = makeUseCasesFake({
+      answerCourseQuestion: vi.fn(async () => ({ effect: "introduce" as const, state: null })),
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const course = makeCourse();
+    const chapter = course.outline.chapters[0]!;
+    const [first, ...rest] = chapter.steps;
+    const player = (questionIds: string[]) => (
+      <QueryClientProvider client={queryClient}>
+        <ChapterPlayerContainer
+          useCases={useCases}
+          instance={courseInstance}
+          course={course}
+          chapter={{ ...chapter, steps: [{ ...first!, questionIds }, ...rest] }}
+          onReview={vi.fn()}
+          random={noShuffle}
+        />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(player(["q-1"]));
+    toQuestions();
+    answer("An IRI");
+    await screen.findByRole("button", { name: "Next" });
+
+    rerender(player(["q-2"]));
+    expect(screen.getByText("What is a triple?")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Three terms" })).not.toBeChecked();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+  });
+
   it("takes the chapter a step at a time: the theory, then its questions without it, and on to the final review", async () => {
     const answerCourseQuestion = vi.fn<UseCases["answerCourseQuestion"]>(
       async (_instance, _deck, _card, choice) => ({

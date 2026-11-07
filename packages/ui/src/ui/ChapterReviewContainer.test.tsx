@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { Course } from "@solid-memo/application/courses";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
@@ -25,21 +26,34 @@ function renderReview(
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
   const onCompleted = vi.fn();
-  const { unmount } = render(
+  const review = (read: Course) => (
     <QueryClientProvider client={queryClient}>
       <CourseLinksContext.Provider value={links}>
         <ChapterReviewContainer
           useCases={useCases}
           instance={courseInstance}
-          course={reviewed}
-          chapter={reviewed.outline.chapters[chapterIndex]!}
+          course={read}
+          chapter={read.outline.chapters[chapterIndex]!}
           onCompleted={onCompleted}
           random={noShuffle}
         />
       </CourseLinksContext.Provider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
-  return { invalidate, onCompleted, unmount };
+  const { unmount, rerender } = render(review(reviewed));
+  return {
+    invalidate,
+    onCompleted,
+    unmount,
+    /** The course read afresh, lacking these cards. */
+    reread: (...gone: string[]) =>
+      rerender(
+        review({
+          ...reviewed,
+          cards: new Map([...reviewed.cards].filter(([id]) => !gone.includes(id))),
+        }),
+      ),
+  };
 }
 
 /** Starts the review, past the word before it. */
@@ -148,6 +162,67 @@ describe("ChapterReviewContainer", () => {
     await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(false));
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["course", course.deck.url] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks", courseInstance.url] });
+  });
+
+  it("passes over a question that a course read afresh no longer has", async () => {
+    const useCases = makeUseCasesFake();
+    rightAnswers(useCases);
+    const { reread } = renderReview(useCases);
+    start();
+    fireEvent.click(screen.getByRole("radio", { name: "An IRI" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check" }));
+    await screen.findByRole("button", { name: "Next" });
+
+    // The one just answered: on to the next, with nothing of the answer left.
+    reread("q-1");
+    expect(screen.getByText("What is a triple?")).toBeInTheDocument();
+    expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+    await answer("Three terms");
+
+    // One still to come.
+    expect(screen.getByText("What is Turtle?")).toBeInTheDocument();
+    reread("q-1", "q-3");
+    expect(screen.getByText("Which is linked data?")).toBeInTheDocument();
+    expect(screen.getByText("Question 2 of 2")).toBeInTheDocument();
+
+    // One already asked.
+    reread("q-1", "q-2", "q-3");
+    expect(screen.getByText("Which is linked data?")).toBeInTheDocument();
+    expect(screen.getByText("Question 1 of 1")).toBeInTheDocument();
+    await answer("Data with links");
+    await waitFor(() => expect(useCases.completeChapter).toHaveBeenCalledTimes(1));
+  });
+
+  it("completes the chapter once a course read afresh has none of its questions left", async () => {
+    const useCases = makeUseCasesFake();
+    const { reread, onCompleted } = renderReview(useCases, 1);
+    start();
+    expect(screen.getByText("What is a pod?")).toBeInTheDocument();
+    reread("q-4");
+    await waitFor(() => expect(onCompleted).toHaveBeenCalledWith(false));
+    expect(useCases.completeChapter).toHaveBeenCalledTimes(1);
+  });
+
+  it("doesn't put back a question gone from the course while its wrong answer was saved", async () => {
+    let saved!: (result: Awaited<ReturnType<UseCases["answerCourseQuestion"]>>) => void;
+    const useCases = makeUseCasesFake({
+      answerCourseQuestion: vi.fn<UseCases["answerCourseQuestion"]>(
+        () => new Promise((resolve) => (saved = resolve)),
+      ),
+    });
+    const { reread } = renderReview(useCases);
+    start();
+    fireEvent.click(screen.getByRole("radio", { name: "Hardly An IRI" }));
+    fireEvent.click(screen.getByRole("button", { name: "Check" }));
+    await waitFor(() => expect(useCases.answerCourseQuestion).toHaveBeenCalled());
+    reread("q-1");
+    expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
+
+    await act(async () => saved({ effect: "review", state: null }));
+    expect(screen.getByText("What is a triple?")).toBeInTheDocument();
+    expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
   });
 
   it("links back to the course's page where the course links say", () => {

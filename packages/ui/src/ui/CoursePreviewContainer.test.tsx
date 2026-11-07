@@ -44,7 +44,13 @@ function renderPreview({
     </QueryClientProvider>
   );
   const view = render(preview(chapterId));
-  return { ...view, onChapter, onExit, open: (id?: string) => view.rerender(preview(id)) };
+  return {
+    ...view,
+    queryClient,
+    onChapter,
+    onExit,
+    open: (id?: string) => view.rerender(preview(id)),
+  };
 }
 
 /** Leaves the step's theory for its questions. */
@@ -176,6 +182,55 @@ describe("CoursePreviewContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Continue" }));
     expect(screen.getByText("Part 2 of 2")).toHaveFocus();
     expect(screen.getByText("Two.")).toBeInTheDocument();
+  });
+
+  it("stays within a chapter read afresh with fewer steps than the learner has reached", async () => {
+    const course = makeCourse();
+    const chapter = course.outline.chapters[0]!;
+    let read = course;
+    const { queryClient } = renderPreview({
+      useCases: makeUseCasesFake({ getLibraryCourse: vi.fn(async () => read) }),
+      chapterId: "ch-1",
+    });
+    fireEvent.click(await screen.findByRole("button", { name: /^On to the question/ }));
+    answer("An IRI");
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(screen.getByRole("heading", { name: "Step 2 of 2" })).toBeInTheDocument();
+
+    read = {
+      ...course,
+      outline: {
+        ...course.outline,
+        chapters: [{ ...chapter, steps: chapter.steps.slice(0, 1) }],
+      },
+    };
+    await queryClient.invalidateQueries();
+    expect(await screen.findByRole("heading", { name: "Step 1 of 1" })).toBeInTheDocument();
+  });
+
+  it("asks a question that a course read afresh has put in the place of an answered one", async () => {
+    const course = makeCourse();
+    const chapter = course.outline.chapters[0]!;
+    const [first, ...rest] = chapter.steps;
+    let read = course;
+    const { queryClient } = renderPreview({
+      useCases: makeUseCasesFake({ getLibraryCourse: vi.fn(async () => read) }),
+      chapterId: "ch-1",
+    });
+    fireEvent.click(await screen.findByRole("button", { name: /^On to the question/ }));
+    answer("An IRI");
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
+
+    read = {
+      ...course,
+      outline: {
+        ...course.outline,
+        chapters: [{ ...chapter, steps: [{ ...first!, questionIds: ["q-2"] }, ...rest] }],
+      },
+    };
+    await queryClient.invalidateQueries();
+    expect(await screen.findByRole("radio", { name: "Three terms" })).not.toBeChecked();
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
   });
 
   it("leaves out a chapter with no step, and lists the chapters for one it doesn't have", async () => {

@@ -168,10 +168,11 @@ flowchart LR
   8. **An unknown library card**: its deck's cards.
   9. **A course's routes**: a deck that's no copy of a release goes to
      its page. A chapter the course lacks or keeps locked goes to the
-     course. A final review of a chapter with steps not done goes to
-     the chapter, once the course has been read afresh (going on from
-     the last step reaches the review before that step's answer is
-     read back).
+     course. A chapter with no step goes to its final review, and the
+     player doesn't open meanwhile. A final review of a chapter with
+     steps not done goes to the chapter, once the course has been read
+     afresh (going on from the last step reaches the review before that
+     step's answer is read back).
   10. **The storage picker** with a single storage: on to the instance
       creator for it.
   11. **The instance creator** with a storage that the storage picker
@@ -236,4 +237,6 @@ The trail is the way back up: screens have no "Back to …" buttons,
 except where going back is one of a screen's choices: a course's final
 review before it starts, and a finished course. Those are plain links
 too. Top-level screens (deck list, instance picker) show a single crumb,
-so "Decks" is on hand everywhere inside an instance.
+so "Decks" is on hand everywhere inside an instance. The trail of a final
+review leaves out a chapter with no step, as that chapter's address only
+comes back to the review.
