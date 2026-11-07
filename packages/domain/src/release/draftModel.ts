@@ -5,6 +5,7 @@
 import type { LangText, LangTexts } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
+  idIn,
   PROV,
   RDF_TYPE,
   SCHEMA_COURSE,
@@ -13,6 +14,7 @@ import {
 } from "./releaseDraft.ts";
 import {
   DCAT_NS,
+  FOAF_AGENT,
   FOAF_MBOX,
   VCARD_NS,
   type ReleaseDistractor,
@@ -236,20 +238,34 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
 const PART_CLASSES: ReadonlySet<string> = new Set([SM.Card, SM.Chapter, SM.Step, SM.Distractor]);
 
 /**
- * The subjects the draft's statements beyond its records type a card,
- * chapter, step or distractor, each once, in order: none of its parts,
- * so no editor and no rule on its parts sees them, but its release
- * would publish them. One outside the draft (not a fragment of it) is
- * never a part of it; one in it has a record its kind's shape does not
- * read.
+ * The classes of what else a draft holds as records (an agent, a
+ * distribution). A subject of the draft's that its statements type one
+ * has no record of it, as when it has two of the classes records are of
+ * (GHSA-mv57-839j-wrf6). Outside the draft they say nothing of it: a next
+ * version keeps what is stated of a publisher described elsewhere.
  */
-export function strayPartsOf(draft: Pick<ReleaseDraft, "triples">): string[] {
+export const RECORD_CLASSES: ReadonlySet<string> = new Set([FOAF_AGENT, `${DCAT_NS}Distribution`]);
+
+/**
+ * The subjects the draft's statements beyond its records type a card,
+ * chapter, step or distractor, or, the draft itself or one of its
+ * subjects, an agent or distribution, each once, in order: none of its
+ * parts, so no editor and no rule on its parts sees them, but its
+ * release would publish them. One outside the draft (not a fragment of
+ * it) is never a part of it; one in it has a record its kind's shape
+ * does not read.
+ */
+export function strayPartsOf(draft: Pick<ReleaseDraft, "url" | "triples">): string[] {
+  const isOwn = (subject: string) => subject === draft.url || idIn(draft, subject) !== null;
   return [
     ...new Set(
       draft.triples
         .filter(
-          ({ predicate, object }) =>
-            predicate === RDF_TYPE && object.kind === "iri" && PART_CLASSES.has(object.value),
+          ({ subject, predicate, object }) =>
+            predicate === RDF_TYPE &&
+            object.kind === "iri" &&
+            (PART_CLASSES.has(object.value) ||
+              (RECORD_CLASSES.has(object.value) && isOwn(subject))),
         )
         .map(({ subject }) => subject),
     ),

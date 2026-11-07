@@ -56,6 +56,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import {
   AGENT_V1,
+  ALL_SHAPES,
   CARD_V7,
   CATALOG_V1,
   DECK_V6,
@@ -76,10 +77,22 @@ import {
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 import { AppError } from "@solid-memo/domain/appError";
 
-/** Every agent of a document by URL, named "Name <email>". */
+/** The classes a shape describes, but an agent's. */
+const NOT_AGENT_CLASSES: ReadonlySet<string> = new Set(
+  ALL_SHAPES.map((shape) => shape.targetClass).filter((type) => type !== AGENT_V1.targetClass),
+);
+
+/**
+ * Every agent of a document by URL, named "Name <email>". A subject that
+ * is also of another class a shape describes is none: the Studio holds
+ * no agent record of it, so it would show no such name
+ * (GHSA-mv57-839j-wrf6). A release is such a subject too, as a learner
+ * reads one only when it is an sm:Deck.
+ */
 export function agentNamesOf(dataset: Dataset): Map<string, string> {
   const names = new Map<string, string>();
   for (const thing of getThingAll(dataset)) {
+    if (getUrlAll(thing, RDF.type).some((type) => NOT_AGENT_CLASSES.has(type))) continue;
     const read = readVersioned(thing, "agent");
     if (read === null) continue;
     const url = asUrl(thing);

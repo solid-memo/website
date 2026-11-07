@@ -568,6 +568,8 @@ graph LR
     `mailto:` `foaf:mbox`, shown as `Name <email>`. Only a bare
     address counts as the email: one with `,`, `;`, `?`, `#`, `%` or
     `&` in it leaves the whole author a name, shown without a link.
+    A subject that also has another class a shape describes, as a deck
+    itself does, names no author: the app shows the author's address.
     The slug is the
     author folded to ASCII, `unnamed` when nothing is left of it. An
     author the folding loses letters or digits of, such as 김민수 or "Kim
