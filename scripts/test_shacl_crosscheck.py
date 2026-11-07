@@ -147,6 +147,9 @@ class OwnShapes(Repository):
         self.write("ns/shapes/resource/v1.ttl", RESOURCE_V1)
         self.write("ns/shapes/special-thing/v1.ttl", SPECIAL_THING_V1)
         self.shapes, self.picks = crosscheck.own_shapes()
+        releases = mock.patch.object(crosscheck, "RELEASE_CLASSES", {SM.Thing})
+        releases.start()
+        self.addCleanup(releases.stop)
 
     def shape(self, path: str, fragment: str) -> URIRef:
         return URIRef(f"https://solid-memo.com/ns/shapes/{path}#{fragment}")
@@ -176,9 +179,12 @@ class OwnShapes(Repository):
     def test_takes_a_subject_without_a_format_version_to_be_at_format_1(self) -> None:
         self.assertEqual(self.targets("ex:a a sm:Thing .", "draft"), {(self.shape("thing/v1.ttl", "inDraft"), EX.a)})
 
-    def test_prefers_the_shape_of_a_solid_memo_class(self) -> None:
+    def test_targets_the_shape_of_a_standard_class_beside_a_solid_memo_one(self) -> None:
         data = "ex:a a sm:Thing , schema:LearningResource ; sm:formatVersion 1 ."
-        self.assertEqual(self.targets(data, "draft"), {(self.shape("thing/v1.ttl", "inDraft"), EX.a)})
+        self.assertEqual(
+            self.targets(data, "draft"),
+            {(self.shape("thing/v1.ttl", "inDraft"), EX.a), (self.shape("resource/v1.ttl", "resource"), EX.a)},
+        )
         self.assertEqual(self.targets("ex:a a schema:LearningResource .", "draft"), {(self.shape("resource/v1.ttl", "resource"), EX.a)})
 
     def test_prefers_the_shape_whose_fixed_values_the_subject_has_and_never_picks_it_without_them(self) -> None:
@@ -201,6 +207,22 @@ class OwnShapes(Repository):
         # A class with no shape at the subject's version is not passed over.
         with self.assertRaisesRegex(ValueError, "https://example.org/a has no pod shape at format 1"):
             self.targets("ex:a a sm:Thing , sm:Other ; sm:formatVersion 1 .", "pod")
+
+    def test_does_not_target_the_catalogs_shape_at_a_deck_group(self) -> None:
+        self.write("ns/shapes/deck-group/v1.ttl", '<#group> a sh:NodeShape ; sh:name "DeckGroupV1" ; sh:class sm:DeckGroup .')
+        self.write("ns/shapes/catalog/v1.ttl", '<#catalog> a sh:NodeShape ; sh:name "CatalogV1" ; sh:class dcat:Catalog .')
+        self.shapes, self.picks = crosscheck.own_shapes()
+        self.assertEqual(self.targets("ex:a a sm:DeckGroup , dcat:Catalog .", "pod"), {(self.shape("deck-group/v1.ttl", "group"), EX.a)})
+        self.assertEqual(self.targets("ex:a a dcat:Catalog .", "pod"), {(self.shape("catalog/v1.ttl", "catalog"), EX.a)})
+
+    def test_stops_on_a_subject_in_a_release_of_a_class_only_a_pod_holds(self) -> None:
+        self.write("ns/shapes/other/v1.ttl", '<#other> a sh:NodeShape ; sh:name "OtherV1" ; sh:class sm:Other .')
+        self.shapes, self.picks = crosscheck.own_shapes()
+        for data in ("ex:a a sm:Other .", "ex:a a sm:Other , sm:Thing .", "ex:a a sm:Other , schema:LearningResource ; sm:formatVersion 99 ."):
+            with self.subTest(data=data), self.assertRaisesRegex(ValueError, "https://example.org/a has a class only a pod holds"):
+                self.targets(data, "library")
+        # A pod is where it belongs.
+        self.assertEqual(self.targets("ex:a a sm:Other .", "pod"), {(self.shape("other/v1.ttl", "other"), EX.a)})
 
     def test_leaves_a_subject_of_no_class_it_has_a_shape_for(self) -> None:
         self.assertEqual(self.targets("ex:a a dcat:Dataset .", "draft"), set())
