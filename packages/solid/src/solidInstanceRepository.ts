@@ -17,7 +17,7 @@ import {
   type InstanceMeta,
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
-import { instanceAddressOf, isPlainHttpUrl, metaUrlOf } from "@solid-memo/domain/instanceLayout";
+import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
 import { getSolidDatasetOrNull, readDataset, removeOwned, saveDataset } from "./datasets";
 import { subjectsOfClasses } from "./ownership";
@@ -157,9 +157,9 @@ export function createSolidInstanceRepository({
     },
 
     async attachInstance({ webId, instanceUrl, registrationTarget }) {
-      // As a request would send it, so every address made from it is compared as sent; an http(s) folder only.
+      // As a request would send it, so every address made from it is compared as sent; an http(s) folder only, as a registration's is (isInstanceAddress).
       const url = instanceAddressOf(instanceUrl);
-      if (!isPlainHttpUrl(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
+      if (!isInstanceAddress(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
       const name = await readInstanceName(url, metaFetch);
       const index = await ensureTypeIndex(registrationTarget, webId, url, fetch, publicFetch);
       await addRegistrations(

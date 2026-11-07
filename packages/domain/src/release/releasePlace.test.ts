@@ -67,6 +67,11 @@ describe("isPublishedReleaseUrl", () => {
       "https://pod.example/solid/v1.ttl#x",
       "https://pod.example/profile/card",
       "urn:x:solid/v1.ttl",
+      "https://evil.example//pod.example/solid/v1.ttl",
+      "https://pod.example/a//solid/v1.ttl",
+      "https://user@pod.example/solid/v1.ttl",
+      "https://:secret@pod.example/solid/v1.ttl",
+      "https://user:secret@pod.example/solid/v1.ttl",
     ]) {
       expect(isPublishedReleaseUrl(url), url).toBe(false);
     }

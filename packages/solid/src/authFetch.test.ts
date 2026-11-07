@@ -2,9 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
+import {
+  buildAuthenticatedFetch,
+  createDpopHeader,
+  generateDpopKeyPair,
+} from "@inrupt/solid-client-authn-core";
 import { AppError } from "@solid-memo/domain/appError";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { anonymousFetch, createAuthFetch, SESSION_EXPIRED_EVENT } from "./authFetch";
+import { createPodFence } from "./podFence";
+import { createSolidReleasePublisher } from "./solidReleasePublisher";
+import { createSolidStorageGateway } from "./solidStorageGateway";
 import { fakeSessionClient } from "./testing/fakeSessionClient";
 
 const URL_ = "https://pod.example/resource";
@@ -264,5 +272,139 @@ describe("anonymousFetch", () => {
     vi.stubGlobal("fetch", fetch);
     await anonymousFetch(URL_, { method: "HEAD" });
     expect(fetch).toHaveBeenCalledWith(URL_, { method: "HEAD", credentials: "omit" });
+  });
+});
+
+describe("createAuthFetch, with the sign-in library's own proof", () => {
+  /** The address in a proof. */
+  function htuOf(proof: string): string {
+    return JSON.parse(atob(proof.split(".")[1]!.replace(/-/g, "+").replace(/_/g, "/"))).htu;
+  }
+
+  /** The library's authenticated fetch behind authFetch, and the server it would reach. */
+  async function signedIn() {
+    const server = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => {
+      return new Response("ok");
+    });
+    const client = fakeSessionClient();
+    client.fetch.mockImplementation(
+      buildAuthenticatedFetch("TOKEN", { dpopKey: await generateDpopKeyPair(), fetch: server }),
+    );
+    return { server, auth: createAuthFetch(client) };
+  }
+
+  const REFUSED = [
+    "https://evil.example//honest.example/alice/notes.ttl",
+    "https://evil.example///honest.example/alice/notes.ttl",
+    "https://evil.example/.//honest.example/alice/notes.ttl",
+    "https://evil.example/%2e//honest.example/alice/notes.ttl",
+    "https://evil.example/x/..//honest.example/alice/notes.ttl",
+    "https://evil.example/\\honest.example/alice/notes.ttl",
+    "https://evil.example/\t/honest.example/alice/notes.ttl",
+    "https://evil.example//honest.example:8443/alice/notes.ttl",
+    "https://evil.example//user:secret@honest.example/alice/notes.ttl",
+    // These the library cannot make a proof for at all.
+    "https://evil.example//",
+    "https://evil.example//honest.example:99999/",
+  ];
+
+  it("would name another server in the proof, or throw, for each refused address", async () => {
+    const dpopKey = await generateDpopKeyPair();
+    for (const url of REFUSED) {
+      const htu = await createDpopHeader(url, "GET", dpopKey).then(htuOf, () => null);
+      expect(htu === null || !htu.startsWith("https://evil.example/"), url).toBe(true);
+    }
+  });
+
+  it("sends nothing to an address whose proof would name another server", async () => {
+    const { server, auth } = await signedIn();
+    for (const url of REFUSED) {
+      for (const method of ["GET", "HEAD", "PUT"]) {
+        await expect(auth.fetch(url, { method }), `${method} ${url}`).rejects.toEqual(
+          new AppError("credentialsRefused", { url }),
+        );
+      }
+    }
+    await expect(auth.fetch(new URL(REFUSED[0]!))).rejects.toMatchObject({
+      code: "credentialsRefused",
+    });
+    await expect(auth.fetch(new Request(REFUSED[0]!))).rejects.toMatchObject({
+      code: "credentialsRefused",
+    });
+    expect(server).not.toHaveBeenCalled();
+  });
+
+  it("sends the proof to any other address, naming the server it goes to", async () => {
+    const { server, auth } = await signedIn();
+    for (const url of [
+      "https://pod.example/alice/notes.ttl",
+      "https://pod.example/alice//notes.ttl",
+      "https://pod.example/%2F/honest.example/notes.ttl",
+      "https://pod.example//pod.example/notes.ttl",
+    ]) {
+      server.mockClear();
+      await auth.fetch(url);
+      const proof = new Headers(server.mock.calls[0]![1]!.headers).get("DPoP")!;
+      expect(new URL(htuOf(proof)).origin, url).toBe("https://pod.example");
+    }
+  });
+
+  it("leaves to the client text that is no address, and an address with no origin", async () => {
+    const client = fakeSessionClient();
+    const { fetch } = createAuthFetch(client);
+    await fetch("/relative");
+    await fetch("data:text/plain,x");
+    expect(client.fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("sends nothing when a storage typed by hand is asked after", async () => {
+    const { server, auth } = await signedIn();
+    const gateway = createSolidStorageGateway({
+      fetch: auth.fetch,
+      profileStorages: async () => [],
+    });
+    await expect(
+      gateway.probeStorage("https://evil.example//honest.example/alice/"),
+    ).rejects.toMatchObject({ code: "credentialsRefused" });
+    expect(server).not.toHaveBeenCalled();
+  });
+
+  it("gives a foreign instance no proof for another server when a release is made public", async () => {
+    const root = "https://evil.example//honest.example/";
+    const target = `${root}alice/private/notes/v1.ttl`;
+    const hostile = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "HEAD") return new Response(null, { status: 403 });
+      const url = String(input);
+      const body = url.endsWith("catalog.ttl")
+        ? `<${root}catalog.ttl#catalog> <https://solid-memo.com/ns/vocab/v1.ttl#publishedRelease> <${target}> .`
+        : "";
+      const answer = new Response(body, { headers: { "Content-Type": "text/turtle" } });
+      Object.defineProperty(answer, "url", { value: url });
+      return answer;
+    });
+    const client = fakeSessionClient();
+    client.fetch.mockImplementation(
+      buildAuthenticatedFetch("TOKEN", { dpopKey: await generateDpopKeyPair(), fetch: hostile }),
+    );
+    const session = createPodFence(createAuthFetch(client).fetch);
+    const publisher = createSolidReleasePublisher({
+      fetch: session,
+      dataFetch: session,
+      shareFetch: session,
+      publicFetch: hostile,
+      grantPublicRead: async () => false,
+    });
+
+    await expect(publisher.listPublished(root)).resolves.toEqual([]);
+    await expect(publisher.makePublic(root, target)).rejects.toMatchObject({
+      code: "publicAccessRefused",
+    });
+
+    for (const [input, init] of hostile.mock.calls) {
+      const proof = new Headers(init?.headers).get("DPoP");
+      if (proof !== null) {
+        expect(new URL(htuOf(proof)).origin, String(input)).toBe("https://evil.example");
+      }
+    }
   });
 });
