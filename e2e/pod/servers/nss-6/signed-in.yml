@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# The same server, not open: WebID authentication on, several users, each
+# account's pod private to it on a subdomain of localhost, which the
+# server needs to find too, so they are named here
+# (../nss/signed-in/, docs/testing.md).
+services:
+  tls:
+    extends: { file: ../compose.tls.yml, service: tls }
+    environment: { E2E_UPSTREAM: "8443" }
+    extra_hosts: ["alice.localhost:127.0.0.1", "stranger.localhost:127.0.0.1"]
+  server:
+    extends: { file: compose.yml, service: server }
+    command: !override [start, --root, /srv/solid/signed-in/data, --port, "8443", --server-uri, "https://localhost:${E2E_PORT:?}",
+      --webid, --multiuser, --auth, oidc, --no-live, --suppress-data-browser, --config-path, /srv/solid/signed-in/config, --db-path, /srv/solid/db]
+    ports: !reset []
+    network_mode: "service:tls"
+    depends_on: [tls]
+    # Caddy's CA is made as it starts, and this server is thrown away after
+    # the run: it trusts whatever certificate its own requests meet.
+    environment: { NODE_TLS_REJECT_UNAUTHORIZED: "0" }

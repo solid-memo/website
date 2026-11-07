@@ -14,6 +14,6 @@ FROM node:22.23.4-bookworm-slim@sha256:4b150b48b4116e2a22f2c39cc27025fbf4f153e20
 WORKDIR /srv/pivot
 COPY package.json package-lock.json ./
 RUN corepack npm ci --ignore-scripts --omit=dev --no-audit --no-fund && ln -s node_modules/@solid/pivot/templates templates
-COPY pivot-e2e.json ./
+COPY pivot-e2e.json pivot-signed-in.json ./
 USER node
 ENTRYPOINT ["node", "node_modules/@solid/community-server/bin/server.js", "-m", ".", "-c", "pivot-e2e.json"]

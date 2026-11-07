@@ -25,7 +25,8 @@ every test.
   optional feature done wrong says so.
 - **Reproduction** uses `$POD` for the pod's root URL, ending in `/`.
   The test pods are open to anyone, so the requests carry no
-  credentials. Headers and bodies are trimmed to what matters.
+  credentials, unless an entry says it's from the
+  [signed-in tests](testing.md#the-signed-in-tests). Headers and bodies are trimmed to what matters.
 - **Upstream** links the issue or pull request that tracks the cause,
   or says that none does yet.
 

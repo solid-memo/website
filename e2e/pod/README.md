@@ -8,6 +8,9 @@ Server, the JavaScript Solid Server, Nextcloud and others, each in
 ## What is in it
 
 - `src/*.integration.test.ts`: the tests, run against every server.
+- `src/signedIn.integration.test.ts`, `signedIn.ts`: the signed-in tests,
+  on each server's instance that isn't open (`signed-in.yml`), and how
+  their accounts get a token ([testing.md](../../docs/testing.md#the-signed-in-tests)).
 - `servers/`: one folder per server, with its compose file and, where
   it has any, the failures it is expected to have
   (`expected-failures.json`), each by its cause on

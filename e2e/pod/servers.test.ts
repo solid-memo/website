@@ -24,6 +24,7 @@ import {
   SERVER_IDS,
   SERVERS,
   serversNamed,
+  signedInFile,
 } from "./servers.ts";
 
 interface Service {
@@ -94,6 +95,88 @@ describe.each(SERVER_IDS)("servers/%s/compose.yml", (id) => {
     ])
       expect(server).not.toHaveProperty(key);
     expect(text).not.toContain("docker.sock");
+  });
+});
+
+/**
+ * What a signed-in instance's file must say: it runs the server's own
+ * image, behind TLS at the port the harness picks, published nowhere else,
+ * and given nothing more of the host.
+ */
+const WITH_SIGNED_IN = SERVER_IDS.filter(
+  (id) => (SERVERS[id] as { signedIn?: object }).signedIn !== undefined,
+);
+/** Compose's own YAML tags, which the parser here need not know. */
+const composeTags = [
+  { tag: "!override", resolve: (value: unknown) => value, collection: "seq" as const },
+  { tag: "!reset", resolve: (value: unknown) => value, collection: "seq" as const },
+];
+
+describe.each(WITH_SIGNED_IN)("servers/%s/signed-in.yml", (id) => {
+  const text = readFileSync(signedInFile(id), "utf8");
+  const { tls, server } = (
+    parse(text, { customTags: composeTags as never }) as {
+      services: Record<string, Service>;
+    }
+  ).services as { tls: Service; server: Service };
+
+  it("extends the server's compose file, so it has no image of its own to keep up to date", () => {
+    expect(server.extends).toEqual({ file: "compose.yml", service: "server" });
+    expect(server).not.toHaveProperty("image");
+    expect(server).not.toHaveProperty("build");
+  });
+
+  it("is reached only through TLS, at the port its server listens on", () => {
+    expect(tls.extends).toEqual({ file: "../compose.tls.yml", service: "tls" });
+    expect(tls.environment).toEqual({ E2E_UPSTREAM: String(SERVERS[id].internalPort) });
+    expect(server.ports).toEqual([]);
+    expect(server.network_mode).toBe("service:tls");
+  });
+
+  it("is told its https URL at E2E_PORT, on the host the table says", () => {
+    const { host } = (SERVERS[id] as unknown as { signedIn: { host: string } }).signedIn;
+    expect(text).toContain(`https://${host}:\${E2E_PORT:?}`);
+  });
+
+  it("isn't opened to anyone", () => {
+    // Its own command, or the open one's would run; Pivot's image names its configuration in its entrypoint.
+    expect(server.command).toBeDefined();
+    if (id === "pivot") expect(server.entrypoint).toBeDefined();
+    const started = JSON.stringify([server.command, server.entrypoint]);
+    for (const open of [
+      "--public",
+      "config/default.json",
+      "acp-e2e.json",
+      "pivot-e2e.json",
+      "/srv/solid/data",
+      "/srv/solid/config",
+    ])
+      expect(started).not.toContain(open);
+  });
+
+  it("is given nothing of the host", () => {
+    for (const key of ["privileged", "pid", "ipc", "devices", "volumes", "volumes_from"])
+      expect(server).not.toHaveProperty(key);
+    expect(text).not.toContain("docker.sock");
+  });
+});
+
+describe("servers/compose.tls.yml", () => {
+  const { tls } = (
+    parse(readFileSync(join(import.meta.dirname, "servers/compose.tls.yml"), "utf8")) as {
+      services: { tls: Service };
+    }
+  ).services;
+
+  it("publishes on 127.0.0.1 only, at E2E_PORT", () => {
+    expect(tls.ports).toEqual(["127.0.0.1:${E2E_PORT:?}:${E2E_PORT:?}"]);
+  });
+
+  it("runs an image pinned by digest, limited, and mounts only its configuration", () => {
+    expect(tls.image).toMatch(/^[^\s:]+:[^\s@]+@sha256:[0-9a-f]{64}$/);
+    expect(tls).toMatchObject({ cap_drop: ["ALL"], security_opt: ["no-new-privileges:true"] });
+    expect(tls.mem_limit).toBeDefined();
+    expect(tls.volumes).toEqual(["./Caddyfile:/etc/caddy/Caddyfile:ro"]);
   });
 });
 

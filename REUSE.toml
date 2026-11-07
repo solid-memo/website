@@ -37,6 +37,7 @@ path = [
     # Test data.
     "packages/vocab/fixtures/**",
     "e2e/pod/servers/nss/seed/**",
+    "e2e/pod/servers/nss/signed-in/**",
     "e2e/pod/servers/nextcloud/open.acl",
     # Written by tools (.gitattributes).
     "packages/vocab/src/*.generated.ts",

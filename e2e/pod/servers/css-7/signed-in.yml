@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# The same server, not open: its own configuration, in files on a tmpfs, each account's pod private to it (docs/testing.md).
+services:
+  tls:
+    extends: { file: ../compose.tls.yml, service: tls }
+    environment: { E2E_UPSTREAM: "3000" }
+  server:
+    extends: { file: compose.yml, service: server }
+    command: !override ["-c", "config/file.json", "-f", "/data", "-b", "https://127.0.0.1:${E2E_PORT:?}/", "-l", "warn"]
+    ports: !reset []
+    network_mode: "service:tls"
+    depends_on: [tls]
+    # Caddy's CA is made as it starts, and this server is thrown away after
+    # the run: it trusts whatever certificate its own requests meet.
+    environment: { NODE_TLS_REJECT_UNAUTHORIZED: "0" }
+    tmpfs: ["/data:uid=1000,gid=1000,mode=0700"]
