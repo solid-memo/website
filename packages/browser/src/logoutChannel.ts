@@ -7,6 +7,8 @@ import type { LogoutChannel } from "@solid-memo/application/ports";
 /** The BroadcastChannel a logout is announced on, and the localStorage key where there is none. */
 export const CHANNEL = "solid-memo:logout";
 export const KEY = "solid-memo:logout";
+/** What an announcement says on the channel; anything else posted there is no logout. */
+const MESSAGE = "logout";
 
 /**
  * The LogoutChannel in the browser: a BroadcastChannel, which every page
@@ -37,7 +39,7 @@ export function createLogoutChannel(
     announce() {
       const broadcast = channel();
       if (broadcast !== null) {
-        broadcast.postMessage("logout");
+        broadcast.postMessage(MESSAGE);
         return;
       }
       try {
@@ -50,7 +52,9 @@ export function createLogoutChannel(
     listen(listener) {
       const broadcast = channel();
       if (broadcast !== null) {
-        const heard = () => listener();
+        const heard = ({ data }: MessageEvent) => {
+          if (data === MESSAGE) listener();
+        };
         broadcast.addEventListener("message", heard);
         return () => broadcast.removeEventListener("message", heard);
       }
