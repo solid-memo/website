@@ -32,8 +32,10 @@ function editCell(row: Element, target: Element): boolean {
  * The keys of a table's rows (DataTable), the screen's own of the
  * Studio's (useScreenKeys), wherever the focus is but in a field the
  * user types in: j and k move the cursor to the next row or the one
- * before (the focus goes to the row's link; from outside the table, from
- * the cursor's row, or to the first), Shift+J and Shift+K move it too,
+ * before (the focus goes to the row's link, or, for a row with none, to
+ * the page's body, so that the next key acts on the cursor's row; from
+ * outside the table, from the cursor's row, or to the first), Shift+J
+ * and Shift+K move it too,
  * selecting every row from where the selection was last made to it, x
  * selects the row or not, Enter opens it (`onOpen`), and Escape clears
  * the selection, while there is one. x, Enter and Shift+J or Shift+K act
@@ -119,7 +121,9 @@ export function useRowKeys({
       return;
     }
     cursorTo(at);
-    linkOf(at)?.focus();
+    const link = linkOf(at);
+    if (link) link.focus();
+    else (document.activeElement as HTMLElement).blur();
   }
 
   /** The cursor on a row, told as it moves: not again while the row is shown, or about to be. */
