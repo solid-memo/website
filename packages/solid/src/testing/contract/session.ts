@@ -20,6 +20,8 @@ export interface SessionHarness {
   returnFromLogin(webId: string): void;
   /** A session from before is there to restore silently, as `webId`, leaving `from` if given. */
   sessionToRestore(webId: string, from?: string): void;
+  /** The provider has just refused the silent restore of a session from before, left from `from`. */
+  refuseRestore(from: string): void;
   /** A session from before, at `issuer`, is kept for a silent restore. */
   sessionAt(issuer: string): void;
   /** A login request to `issuer` is under way; gives its state. */
@@ -91,6 +93,29 @@ export function sessionContract(harness: SessionHarness): void {
             });
           }
         }
+      });
+
+      it("keeps a login that follows a silent restore the provider refused", async () => {
+        harness.refuseRestore("https://memo.example/#/studio");
+        await expect(harness.create().restore()).resolves.toEqual({
+          webId: null,
+          fromLogin: false,
+          restoredFrom: null,
+        });
+        await harness.create().login({
+          oidcIssuer: "https://issuer.example/",
+          redirectUrl: "https://memo.example/",
+          clientName: "Test App",
+          clientId: "https://memo.example/clientid.jsonld",
+        });
+        harness.returnFromLogin(WEBID);
+        const client = harness.create();
+        await expect(client.restore()).resolves.toEqual({
+          webId: WEBID,
+          fromLogin: true,
+          restoredFrom: null,
+        });
+        await expect(client.sessionIssuer()).resolves.not.toBeNull();
       });
 
       it("finds no one when there is no session", async () => {
