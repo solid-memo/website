@@ -35,6 +35,7 @@ export function ChapterReviewScreen({
   chapterTitle,
   started,
   courseHref,
+  place,
   position,
   total,
   card,
@@ -53,6 +54,11 @@ export function ChapterReviewScreen({
   started: boolean;
   /** The course's page, with its chapters: the way back before starting. */
   courseHref: string;
+  /**
+   * Where the question shown stands in the queue, which says when it's
+   * another question: its position may change with the same one shown.
+   */
+  place: number;
   /** 1-based position of the question shown. */
   position: number;
   /** Questions in the review, including those coming back. */
@@ -98,7 +104,7 @@ export function ChapterReviewScreen({
         <ReviewEnd completion={completion!} onRetry={onRetry} />
       ) : (
         <CourseQuestion
-          key={`${position}:${card.id}`}
+          key={place}
           card={card}
           choices={choices}
           answer={answer}

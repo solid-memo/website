@@ -115,6 +115,7 @@ export function ChapterReviewContainer({
       chapterTitle={chapter.title}
       started={started}
       courseHref={links.courseHref(instance.url, deck.url)}
+      place={at}
       position={held(queue.slice(0, at)).length + 1}
       total={held(queue).length}
       card={card}

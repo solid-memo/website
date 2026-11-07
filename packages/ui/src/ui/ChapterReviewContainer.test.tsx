@@ -178,6 +178,7 @@ describe("ChapterReviewContainer", () => {
     expect(screen.getByText("What is a triple?")).toBeInTheDocument();
     expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+    for (const option of screen.getAllByRole("radio")) expect(option).not.toBeChecked();
     await answer("Three terms");
 
     // One still to come.
@@ -192,6 +193,20 @@ describe("ChapterReviewContainer", () => {
     expect(screen.getByText("Question 1 of 1")).toBeInTheDocument();
     await answer("Data with links");
     await waitFor(() => expect(useCases.completeChapter).toHaveBeenCalledTimes(1));
+  });
+
+  it("keeps the option chosen when a course read afresh loses a question already asked", async () => {
+    const useCases = makeUseCasesFake();
+    rightAnswers(useCases);
+    const { reread } = renderReview(useCases);
+    start();
+    await answer("An IRI");
+    expect(screen.getByText("Question 2 of 4")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "Three terms" }));
+
+    reread("q-1");
+    expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
+    expect(screen.getByRole("radio", { name: "Three terms" })).toBeChecked();
   });
 
   it("completes the chapter once a course read afresh has none of its questions left", async () => {
@@ -219,7 +234,11 @@ describe("ChapterReviewContainer", () => {
     reread("q-1");
     expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
 
-    await act(async () => saved({ effect: "review", state: null }));
+    // Long enough for the save's onSuccess to have run, not only for act to return.
+    await act(async () => {
+      saved({ effect: "review", state: null });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
     expect(screen.getByText("What is a triple?")).toBeInTheDocument();
     expect(screen.getByText("Question 1 of 3")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
