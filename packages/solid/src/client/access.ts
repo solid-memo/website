@@ -18,17 +18,36 @@ export type { GrantPublicRead } from "./interface";
  * Its requests go through accessFetch, which makes them as the servers
  * tested take them. It asks by URL, never with a Request, so a fence
  * around `fetch` (solidReleasePublisher.ts) can read where each goes.
+ *
+ * An ACR then says it governs the document (`acp:resource`), which the
+ * library leaves as it finds it: the Community Solid Server applies no
+ * ACR that doesn't, so its policies would change nothing. Saying so of
+ * one that does already changes nothing.
  */
 export const grantPublicRead: GrantPublicRead = async (url, { fetch }) => {
+  let acr: string | undefined;
   const access = await universalAccess.setPublicAccess(
     url,
     { read: true },
-    { fetch: accessFetch(fetch) },
+    {
+      fetch: accessFetch(fetch, (found) => {
+        acr = found;
+      }),
+    },
   );
-  return access?.read === true;
+  if (access?.read !== true) return false;
+  if (acr === undefined) return true;
+  const said = await fetch(acr, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/sparql-update" },
+    body: `INSERT DATA { <${acr}> <${ACP_RESOURCE}> <${url}> . }`,
+  });
+  return said.ok;
 };
 
-const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlResource";
+const ACP = "http://www.w3.org/ns/solid/acp#";
+const ACCESS_CONTROL_RESOURCE = `${ACP}AccessControlResource`;
+const ACP_RESOURCE = `${ACP}resource`;
 
 /**
  * The fetch the library's access write is made with, so that it is made
@@ -47,9 +66,13 @@ const ACCESS_CONTROL_RESOURCE = "http://www.w3.org/ns/solid/acp#AccessControlRes
  *   ACP, and change nothing.
  *
  * Every response it gives has the headers that describe a resource
- * bounded (linkHeader.ts), as the library reads them.
+ * bounded (linkHeader.ts), as the library reads them. `onAcr` is told the
+ * address of each read that answers as an Access Control Resource.
  */
-export function accessFetch(fetch: typeof globalThis.fetch): typeof globalThis.fetch {
+export function accessFetch(
+  fetch: typeof globalThis.fetch,
+  onAcr: (url: string) => void = () => {},
+): typeof globalThis.fetch {
   return async (input, init) => {
     if (init?.method === "PATCH") {
       // The library sends a PATCH's body as text.
@@ -63,12 +86,10 @@ export function accessFetch(fetch: typeof globalThis.fetch): typeof globalThis.f
     const response = withBoundedHeaders(await fetch(input, init));
     const link = response.headers.get("Link") ?? "";
     const method = init?.method ?? "GET";
-    if (
-      (method !== "GET" && method !== "HEAD") ||
-      response.status !== 404 ||
-      !link.includes(`<${ACCESS_CONTROL_RESOURCE}>`)
-    )
-      return response;
+    const read = method === "GET" || method === "HEAD";
+    const isAcr = link.includes(`<${ACCESS_CONTROL_RESOURCE}>`);
+    if (read && isAcr) onAcr(String(input));
+    if (!read || response.status !== 404 || !isAcr) return response;
     const body = method === "HEAD" ? null : `<> a <${ACCESS_CONTROL_RESOURCE}> .`;
     const empty = new Response(body, {
       status: 200,

@@ -51,12 +51,20 @@ const applying = (policy: string) =>
   `<> acp:accessControl <#c>. <#c> acp:apply <#p>. <#p> ${policy}.`;
 
 describe("grantPublicRead, on an Access Control Resource", () => {
-  it("leaves alone an ACR whose policy already lets everyone read", async () => {
+  it("leaves alone an ACR that governs the document and whose policy already lets everyone read", async () => {
+    const pod = acpPod(
+      `<> acp:resource <${DOCUMENT}>. ${applying("acp:allow acl:Read; acp:anyOf <#m>")} <#m> acp:agent acp:PublicAgent.`,
+    );
+    await expect(grantPublicRead(DOCUMENT, { fetch: pod.fetch })).resolves.toBe(true);
+    expect(pod.patches).toBe(0);
+  });
+
+  it("only says it governs the document, of an ACR whose policy already lets everyone read, which the server wouldn't apply", async () => {
     const pod = acpPod(
       `${applying("acp:allow acl:Read; acp:anyOf <#m>")} <#m> acp:agent acp:PublicAgent.`,
     );
     await expect(grantPublicRead(DOCUMENT, { fetch: pod.fetch })).resolves.toBe(true);
-    expect(pod.patches).toBe(0);
+    expect(pod.patches).toBe(1);
   });
 
   it("adds read for everyone where a policy naming everyone also needs another agent, a client or no one excluded", async () => {
@@ -258,6 +266,7 @@ describe("grantPublicRead, on an Access Control Resource, what it writes", () =>
     const control = `${ACR}#publicRead-2`;
     expect(lines(pod.patches[0]?.quads ?? [])).toEqual(
       [
+        `${ACR} ${ACP}resource ${DOCUMENT}`,
         `${ACR} ${ACP}accessControl ${control}`,
         `${control} ${TYPE} ${ACP}AccessControl`,
         `${control} ${ACP}apply ${control}Policy`,

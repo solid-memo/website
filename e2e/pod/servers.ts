@@ -18,6 +18,14 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve as resolvePath } from "node:path";
 import { parse } from "yaml";
 import { checkContract } from "./contract.ts";
+import {
+  createAccounts,
+  resolveSubdomainsOfLocalhost,
+  signIn,
+  trustCa,
+  type Login,
+  type SignedInServer,
+} from "./signedIn.ts";
 
 export type Tier = "blocking" | "advisory";
 
@@ -59,6 +67,13 @@ interface Entry {
   serialFiles?: true;
   /** It makes its URLs from each request's Host, so it is told none. */
   urlFromHost?: true;
+  /**
+   * It has an instance that isn't open, in servers/<id>/signed-in.yml:
+   * how its accounts are made and sign in (signedIn.ts), and the host it
+   * is reached at, which its server is told. A server without one says
+   * why in docs/testing.md.
+   */
+  signedIn?: { login: Login; host: "127.0.0.1" | "localhost" };
 }
 
 /** The servers the end-to-end tests can start, by the id SOLID_SERVERS names them with. */
@@ -71,6 +86,7 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     version: () => imageTag("css-7"),
+    signedIn: { login: "css", host: "127.0.0.1" },
   },
   "css-6": {
     label: "Community Solid Server",
@@ -80,6 +96,7 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     version: () => imageTag("css-6"),
+    signedIn: { login: "css-6", host: "127.0.0.1" },
   },
   "nss-6": {
     label: "node-solid-server",
@@ -89,6 +106,7 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     version: () => lockedVersion("nss/6", "solid-server"),
+    signedIn: { login: "nss", host: "localhost" },
   },
   "nss-5": {
     label: "node-solid-server",
@@ -98,6 +116,7 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     version: () => lockedVersion("nss/5", "solid-server"),
+    signedIn: { login: "nss", host: "localhost" },
   },
   "css-8": {
     label: "Community Solid Server",
@@ -107,6 +126,7 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     version: () => imageTag("css-8"),
+    signedIn: { login: "css", host: "127.0.0.1" },
   },
   "css-acp": {
     label: "Community Solid Server with ACP",
@@ -117,6 +137,7 @@ export const SERVERS = {
     readyPath: "",
     startTimeoutMs: 60_000,
     version: () => baseImageTag("css-acp"),
+    signedIn: { login: "css", host: "127.0.0.1" },
   },
   pivot: {
     label: "Pivot",
@@ -128,6 +149,7 @@ export const SERVERS = {
     // With the Community Solid Server it runs on, which its lockfile and solidcommunity.net's may resolve differently.
     version: () =>
       `${lockedVersion("pivot", "@solid/pivot")} (Community Solid Server ${lockedVersion("pivot", "@solid/community-server")})`,
+    signedIn: { login: "css", host: "127.0.0.1" },
   },
   nextcloud: {
     label: "Solid-Nextcloud",
@@ -153,6 +175,7 @@ export const SERVERS = {
     startTimeoutMs: 30_000,
     version: () => lockedVersion("jss", "javascript-solid-server"),
     urlFromHost: true,
+    signedIn: { login: "jss", host: "127.0.0.1" },
   },
 } satisfies Record<string, Entry>;
 
@@ -182,9 +205,23 @@ const CHECKOUT = createHash("sha1").update(join(HERE, "../..")).digest("hex").sl
 const PLACEHOLDERS = { E2E_PORT: "1", E2E_SECRET: "placeholder" };
 
 export const composeFile = (id: string) => join(HERE, "servers", id, "compose.yml");
-const project = (id: string) => `solid-memo-e2e-${id}-${CHECKOUT}`;
-const compose = (id: ServerId, args: string[], env: Record<string, string>) =>
-  docker(["compose", "-p", project(id), "-f", composeFile(id), ...args], env);
+export const signedInFile = (id: string) => join(HERE, "servers", id, "signed-in.yml");
+const TLS_FILE = join(HERE, "servers", "compose.tls.yml");
+
+/** One of a server's instances: the open one, or the signed-in one (servers/<id>/signed-in.yml). */
+interface Instance {
+  /** What its log and lock files are named after, and its compose project. */
+  key: string;
+  file: string;
+}
+const openInstance = (id: ServerId): Instance => ({ key: id, file: composeFile(id) });
+const signedInInstance = (id: ServerId): Instance => ({
+  key: `${id}-signed-in`,
+  file: signedInFile(id),
+});
+const project = (key: string) => `solid-memo-e2e-${key}-${CHECKOUT}`;
+const compose = ({ key, file }: Instance, args: string[], env: Record<string, string>) =>
+  docker(["compose", "-p", project(key), "-f", file, ...args], env);
 
 /** The tag its image is pinned to in its compose.yml: "7.2.0". */
 function imageTag(id: string): string {
@@ -309,7 +346,9 @@ const repositoryOf = (image: string) => image.replace(/:[^:/]+$/, "");
  */
 export function imageKey(id: ServerId): string {
   const naming = builtImage(id)?.inputs ?? readFileSync(composeFile(id), "utf8");
-  return createHash("sha256").update(naming).digest("hex").slice(0, 16);
+  // The signed-in instance's TLS image is saved with the server's (images.ts).
+  const tls = existsSync(signedInFile(id)) ? readFileSync(TLS_FILE, "utf8") : "";
+  return createHash("sha256").update(naming).update(tls).digest("hex").slice(0, 16);
 }
 
 /** Whether Docker has an image by that reference. */
@@ -326,13 +365,25 @@ async function hasImage(reference: string): Promise<boolean> {
  * image cache brings along, so a job never needs the base image again).
  */
 export async function prepare(id: ServerId): Promise<void> {
+  // The signed-in instance runs the server's image, behind TLS.
+  if (existsSync(signedInFile(id)))
+    await compose(
+      signedInInstance(id),
+      ["pull", "--ignore-buildable", "--policy", "missing", "--quiet"],
+      PLACEHOLDERS,
+    );
   const built = builtImage(id);
   if (built !== null && (await hasImage(built.inputs))) {
     await docker(["tag", built.inputs, built.image], {});
     return;
   }
-  await compose(id, ["pull", "--ignore-buildable", "--policy", "missing", "--quiet"], PLACEHOLDERS);
-  await compose(id, ["build", "--quiet"], PLACEHOLDERS);
+  const open = openInstance(id);
+  await compose(
+    open,
+    ["pull", "--ignore-buildable", "--policy", "missing", "--quiet"],
+    PLACEHOLDERS,
+  );
+  await compose(open, ["build", "--quiet"], PLACEHOLDERS);
   // Tagged only when nothing changed while it was built, and older tags let go, so `docker image prune` takes their images.
   if (built === null || builtImage(id)?.inputs !== built.inputs) return;
   await docker(["tag", built.image, built.inputs], {});
@@ -351,55 +402,50 @@ export async function prepare(id: ServerId): Promise<void> {
   if (older.length > 0) await docker(["rmi", ...older], {});
 }
 
-/**
- * The server, up on a free port of 127.0.0.1 and meeting the contract
- * (contract.ts), what it prints going to logs/<id>.log; it is stopped
- * (its containers and their data removed) if it does not get that far.
- */
-export async function startServer(id: ServerId): Promise<StartedServer> {
-  const entry: Entry = SERVERS[id];
-  await clearLeftovers(id);
-  await prepare(id);
+/** An instance's containers, up on a free port of 127.0.0.1, what they print going to logs/<key>.log. */
+interface Running {
+  port: string;
+  log: string;
+  stop: () => Promise<void>;
+  /** Runs a command in one of its services, giving what it printed. */
+  exec: (service: string, command: string[]) => Promise<string>;
+}
+
+async function bringUp(instance: Instance): Promise<Running> {
+  const { key, file } = instance;
+  await clearLeftovers(key);
   const env = { E2E_PORT: "", E2E_SECRET: randomUUID() };
-  const log = join(LOGS, `${id}.log`);
+  const log = join(LOGS, `${key}.log`);
   let logs: ChildProcess | undefined;
   let stopping: Promise<void> | undefined;
   const stop = () =>
     (stopping ??= (async () => {
       running.delete(stopNow);
-      await compose(id, ["down", "-v", "--remove-orphans", "-t", "0"], env);
+      await compose(instance, ["down", "-v", "--remove-orphans", "-t", "0"], env);
       logs?.kill();
-      await rm(lockFile(id), { force: true });
+      await rm(lockFile(key), { force: true });
     })());
   const stopNow = () => {
     if (stopping !== undefined) return;
     stopping = Promise.resolve();
     running.delete(stopNow);
-    const args = [
-      "compose",
-      "-p",
-      project(id),
-      "-f",
-      composeFile(id),
-      "down",
-      "-v",
-      "--remove-orphans",
-      "-t",
-      "0",
-    ];
-    spawnSync("docker", args, { env: { ...process.env, ...env }, stdio: "ignore" });
+    const args = ["compose", "-p", project(key), "-f", file, "down", "-v", "--remove-orphans"];
+    spawnSync("docker", [...args, "-t", "0"], {
+      env: { ...process.env, ...env },
+      stdio: "ignore",
+    });
     logs?.kill();
-    rmSync(lockFile(id), { force: true });
+    rmSync(lockFile(key), { force: true });
   };
   running.add(stopNow);
   // The port is free when picked, not necessarily when Docker binds it: one more try.
   for (let attempt = 1; ; attempt++) {
     env.E2E_PORT = String(await freePort());
     try {
-      await compose(id, ["up", "-d", "--no-build", "--pull", "never"], env);
+      await compose(instance, ["up", "-d", "--no-build", "--pull", "never"], env);
       break;
     } catch (error) {
-      await compose(id, ["down", "-v", "--remove-orphans", "-t", "0"], env);
+      await compose(instance, ["down", "-v", "--remove-orphans", "-t", "0"], env);
       if (attempt === 2 || !/already allocated|address already in use/.test(String(error))) {
         running.delete(stopNow);
         throw error;
@@ -407,9 +453,29 @@ export async function startServer(id: ServerId): Promise<StartedServer> {
     }
   }
   await mkdir(LOGS, { recursive: true });
-  await writeFile(lockFile(id), JSON.stringify({ pid: process.pid }));
-  logs = follow(id, env, log);
-  const base = `http://127.0.0.1:${env.E2E_PORT}/`;
+  await writeFile(lockFile(key), JSON.stringify({ pid: process.pid }));
+  logs = follow(instance, env, log);
+  return {
+    port: env.E2E_PORT,
+    log,
+    stop,
+    exec: (service, command) => compose(instance, ["exec", "-T", service, ...command], env),
+  };
+}
+
+/**
+ * The server, up on a free port of 127.0.0.1 and meeting the contract
+ * (contract.ts), what it prints going to logs/<id>.log; it is stopped
+ * (its containers and their data removed) if it does not get that far.
+ */
+export async function startServer(id: ServerId): Promise<StartedServer> {
+  const entry: Entry = SERVERS[id];
+  // Before the images change: what a killed run left holds on to them.
+  await clearLeftovers(openInstance(id).key);
+  await clearLeftovers(signedInInstance(id).key);
+  await prepare(id);
+  const { port, log, stop } = await bringUp(openInstance(id));
+  const base = `http://127.0.0.1:${port}/`;
   const server: SolidServer = {
     id,
     tier: entry.tier,
@@ -426,6 +492,53 @@ export async function startServer(id: ServerId): Promise<StartedServer> {
     });
   }
   return { server, stop };
+}
+
+/** Caddy's CA, which it makes as it starts (servers/compose.tls.yml). */
+async function caddyCa({ exec }: Running): Promise<string> {
+  const path = "/data/caddy/pki/authorities/local/root.crt";
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await exec("tls", ["cat", path]);
+    } catch (error) {
+      if (attempt === 60) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+}
+
+/**
+ * The server's instance that isn't open, up behind TLS, with its two
+ * accounts, each signed in once to show they can: null for a server with
+ * none. It is stopped if it does not get that far. The image is the one
+ * startServer prepares, so that runs first.
+ */
+export async function startSignedIn(
+  id: ServerId,
+): Promise<{ server: SignedInServer; stop: () => Promise<void> } | null> {
+  const entry: Entry = SERVERS[id];
+  if (entry.signedIn === undefined) return null;
+  const running = await bringUp(signedInInstance(id));
+  const { port, log, stop } = running;
+  const url = `https://${entry.signedIn.host}:${port}/`;
+  const name = `${entry.label} ${entry.version()}`;
+  try {
+    const ca = await caddyCa(running);
+    trustCa(ca);
+    resolveSubdomainsOfLocalhost();
+    await untilUp(name, `${url}.well-known/openid-configuration`, entry.startTimeoutMs, log);
+    const { login } = entry.signedIn;
+    const { owner, stranger } = await createAccounts(login, url);
+    const server: SignedInServer = { id, tier: entry.tier, name, url, ca, login, owner, stranger };
+    await signIn(server, owner);
+    await signIn(server, stranger);
+    return { server, stop };
+  } catch (error) {
+    await stop();
+    throw new Error(`${name} (${id}, signed in): ${(error as Error).message}\nIts log: ${log}`, {
+      cause: error,
+    });
+  }
 }
 
 /** How to take down, at once, each server this process has brought up and not stopped. */
@@ -455,16 +568,16 @@ export function stopOnExit(): void {
  * run killed before its teardown), unless that run is still going: its
  * lock names a live process and its project is still there.
  */
-async function clearLeftovers(id: ServerId): Promise<void> {
-  if (existsSync(lockFile(id))) {
-    const { pid } = JSON.parse(await readFile(lockFile(id), "utf8")) as { pid: number };
-    if (pid !== process.pid && alive(pid) && (await projects()).includes(project(id))) {
+async function clearLeftovers(key: string): Promise<void> {
+  if (existsSync(lockFile(key))) {
+    const { pid } = JSON.parse(await readFile(lockFile(key), "utf8")) as { pid: number };
+    if (pid !== process.pid && alive(pid) && (await projects()).includes(project(key))) {
       throw new Error(
-        `Another run (process ${pid}) is using ${id}; if there is none, run npm run pod:clean.`,
+        `Another run (process ${pid}) is using ${key}; if there is none, run npm run pod:clean.`,
       );
     }
   }
-  await takeDown(project(id));
+  await takeDown(project(key));
 }
 
 /** Every server this checkout's runs left behind, taken down: `npm run pod:clean`. */
@@ -488,7 +601,7 @@ async function projects(): Promise<string[]> {
   return listed.map(({ Name }) => Name);
 }
 
-const lockFile = (id: ServerId) => join(LOGS, `${id}.lock`);
+const lockFile = (key: string) => join(LOGS, `${key}.lock`);
 
 function alive(pid: number): boolean {
   try {
@@ -500,20 +613,14 @@ function alive(pid: number): boolean {
 }
 
 /** What the server prints, with times, into the file, until killed or the server is gone. */
-function follow(id: ServerId, env: Record<string, string>, file: string): ChildProcess {
+function follow(
+  { key, file: composePath }: Instance,
+  env: Record<string, string>,
+  file: string,
+): ChildProcess {
   const child = spawn(
     "docker",
-    [
-      "compose",
-      "-p",
-      project(id),
-      "-f",
-      composeFile(id),
-      "logs",
-      "-f",
-      "--no-color",
-      "--timestamps",
-    ],
+    ["compose", "-p", project(key), "-f", composePath, "logs", "-f", "--no-color", "--timestamps"],
     {
       env: { ...process.env, ...env },
       stdio: ["ignore", "pipe", "pipe"],
@@ -580,7 +687,7 @@ async function untilUp(name: string, url: string, timeoutMs: number, log: string
 /**
  * `node servers.ts prepare [id...]` pulls or builds the servers' images
  * (every one when none is named), `contract [id...]` starts each, checks
- * the contract and stops it, `key <id>` prints what names its images
+ * the contract, signs in on its signed-in instance and stops them, `key <id>` prints what names its images
  * (imageKey), `keys [id...]` each server's id and key, one a line (the
  * blocking servers when none is named), `clean` takes down what
  * interrupted runs left.
@@ -599,6 +706,9 @@ if (import.meta.main) {
       const { server, stop } = await startServer(id);
       await stop();
       console.log(`${server.name} (${id}) meets the contract.`);
+      const signedIn = await startSignedIn(id);
+      await signedIn?.stop();
+      if (signedIn !== null) console.log(`${server.name} (${id}) signs its accounts in.`);
     }
   } else if (command === "key" && named.length === 1) {
     console.log(imageKey(named[0]!));

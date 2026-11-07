@@ -342,7 +342,8 @@ describe("publish, with the library's grant (client/access.ts)", () => {
   it("writes the release's own ACR on a pod with Access Control Policies, one not written yet read as an empty one", async () => {
     const { pod, publisher, writes } = await publisherPod({ grant, acp: true });
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
-    expect(writes()).toEqual([
+    // Each address once: a Solid client may write the ACR in one PATCH or in two.
+    expect([...new Set(writes())]).toEqual([
       `PUT ${RELEASE} If-None-Match`,
       `PATCH ${RELEASE}.acr`,
       `PATCH ${CATALOG}`,
@@ -350,6 +351,8 @@ describe("publish, with the library's grant (client/access.ts)", () => {
     const acr = await pod.text(`${RELEASE}.acr`);
     expect(acr).toContain(`<${ACP}PublicAgent>`);
     expect(acr).toContain(`<${ACL}Read>`);
+    // The Community Solid Server applies no ACR that doesn't say what it governs.
+    expect(acr).toContain(`<${ACP}resource> <${RELEASE}>`);
   });
 
   it("says a pod without access control did not make the release public", async () => {

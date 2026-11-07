@@ -16,5 +16,14 @@ COPY ${MAJOR}/package.json ${MAJOR}/package-lock.json ./
 RUN npm ci --ignore-scripts --omit=dev --no-audit --no-fund
 COPY --chown=node seed/ ./
 RUN mkdir db && chown node . db
+# The signed-in instance's templates: the package's, and the .acl files its
+# npm package leaves out, without which an account's pod would have none.
+# Its server's root folder is made here: two of its starting steps make it
+# at once otherwise, and node-solid-server 5 can exit on the second.
+COPY signed-in/templates/ /tmp/signed-in-templates/
+RUN mkdir -p signed-in/data/localhost signed-in/config/templates \
+ && cp -r node_modules/solid-server/default-templates/server node_modules/solid-server/default-templates/new-account signed-in/config/templates/ \
+ && cp -r /tmp/signed-in-templates/. signed-in/config/templates/ && rm -rf /tmp/signed-in-templates \
+ && chown -R node signed-in
 USER node
 ENTRYPOINT ["node", "node_modules/solid-server/bin/solid"]

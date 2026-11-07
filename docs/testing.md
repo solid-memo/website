@@ -155,7 +155,8 @@ states ([srs.md](srs.md#what-a-grade-costs)). CI runs neither.
 
 **In CI the images come from GitHub's cache**, not Docker Hub (the
 runners share its limit on pulls without an account). Each job restores
-its server's images ([e2e-images](../.github/actions/e2e-images/action.yml)),
+its server's images, with the Caddy of its signed-in instance
+([e2e-images](../.github/actions/e2e-images/action.yml)),
 and pulls or builds them only when the cache has none under the job's
 key, saving them on `main` ([e2e/pod/images.ts](../e2e/pod/images.ts)).
 Where `main`'s run skips those jobs
@@ -305,6 +306,68 @@ each new deck version as a pull request. The Wikidata script checks its
 decks against the revisions they record, weekly and by hand, in the
 [Wikidata workflow](../.github/workflows/wikidata.yml). Neither runs on
 a pull request.
+
+### The signed-in tests
+
+The suite above runs every request as no one, on servers open to anyone,
+so it can't show a login, access control being enforced, or a refusal.
+[signedIn.integration.test.ts](../e2e/pod/src/signedIn.integration.test.ts)
+covers those, in a few tests beside it.
+
+Each server that can support it has a second instance,
+`e2e/pod/servers/<id>/signed-in.yml`, which isn't open. It extends the
+server's `compose.yml`, so it runs the same image, and has two accounts,
+an owner and a stranger. It's reached over https, through a Caddy with a
+CA of its own ([servers/compose.tls.yml](../e2e/pod/servers/compose.tls.yml)), which the
+harness reads from the container and trusts for the run: the servers'
+token verifiers refuse an issuer or WebID on http at 127.0.0.1.
+
+The harness ([signedIn.ts](../e2e/pod/signedIn.ts)) gets each account a
+token without a browser. Browser login stays with the
+[journeys](#user-journeys). It hands the token to the app's own
+[authFetch](authentication.md#authenticated-requests), behind the
+[pod fences](boundaries.md#the-pod-fence), through a sign-in client that
+sends what the app sends: `Authorization: DPoP`, with a proof for each
+request.
+
+| Server | How it signs in |
+|---|---|
+| `css-7`, `css-8`, `css-acp`, `pivot` | Client credentials from the account API, DPoP-bound |
+| `css-6` | Client credentials from its older identity API, DPoP-bound |
+| `nss-6`, `nss-5` | The authorization-code flow, its login and consent forms filled in by script; each pod on a subdomain of localhost |
+| `jss` | Its own email and password endpoint, `/idp/credentials`, DPoP-bound |
+
+`nextcloud` is left out. Its login is Nextcloud's browser form and the
+Solid app's approval page, which nothing here scripts.
+
+The tests check that:
+
+- the owner reads, writes, patches and deletes in their pod;
+- someone with no login gets 401 and the stranger 403 on a private
+  document, for each method, and the document stays as it was;
+- a release the owner publishes reads with no login, and no one else can
+  change it or its access control, while the rest of the instance stays
+  private;
+- making a document public changes what the stranger gets, on Web Access
+  Control and on Access Control Policies (`css-acp`);
+- the app sees the 403 when the stranger publishes or makes public;
+- an invalid token gets a 401, the document stays as it was, and the app
+  ends the session only if the answer names the token invalid.
+
+The app has no way to take access back, so nothing tests removing it. A
+real expired token isn't tested either: the shortest lifetime on these
+servers is ten minutes, too long to wait for in a test. A server checks
+expiry in a step of its own, which an invalid token doesn't reach.
+
+The suite runs in the same job as its server's other tests, so it counts
+as that server's tier does: it gates CI on a blocking server and only
+reports on an advisory one. There, a known failure goes in
+`expected-failures.json` with its cause on [interop.md](interop.md). A
+server that turns out not to enforce access control is a security
+problem for its maintainers. It's reported to them in private first, and
+goes in those public files only after that. `contract` also starts each
+signed-in instance and signs its accounts in. `SOLID_SERVER_URL` runs
+none of this.
 
 ## User journeys
 

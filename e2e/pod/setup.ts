@@ -11,6 +11,8 @@ const send = closingConnections(globalThis.fetch);
  * own (connections.ts): before any test file is imported, so also where a
  * module keeps the fetch it was given. None follows a redirect, as none
  * the app sends with the user's credentials does (authFetch.ts), so a
- * server that answers a pod request with one fails here.
+ * server that answers a pod request with one fails here. A scripted login
+ * reads each redirect it gets, by asking for "manual" (signedIn.ts).
  */
-globalThis.fetch = (input, init) => send(input, { ...init, redirect: "error" });
+globalThis.fetch = (input, init) =>
+  send(input, { ...init, redirect: init?.redirect === "manual" ? "manual" : "error" });
