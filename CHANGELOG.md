@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.25](https://github.com/solid-memo/website/compare/v6.29.24...v6.29.25) (2026-11-07)
+
+### Bug Fixes
+
+* **solid:** make a release public on a private ACP pod ([0ad7ddb](https://github.com/solid-memo/website/commit/0ad7ddb364c190029e11754e5753c1df9e9f8e88)), closes [#614](https://github.com/solid-memo/website/issues/614)
+
 ## [6.29.24](https://github.com/solid-memo/website/compare/v6.29.23...v6.29.24) (2026-11-06)
 
 ### Bug Fixes
