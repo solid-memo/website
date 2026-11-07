@@ -52,11 +52,12 @@ export interface CourseUseCases {
    * Answer one of a course's multiple-choice questions (domain/course.ts
    * choicesOf): what the answer does to the card's schedule follows
    * courseAnswerEffect. A card introduced is first written into the deck,
-   * as its release has it (distractors and fragment id included), then
-   * graded; a review is graded as in study; either way the answer is
-   * logged as a multiple-choice one, naming the wrong option chosen. No
-   * daily limit applies: the learner reached the card. Writes nothing
-   * when the answer is practice ("none"). The answer logged keeps how
+   * as its release has it (distractors and fragment id included), only
+   * when the deck has no card at its id, then graded; a review is graded
+   * as in study; either way the answer is logged as a multiple-choice
+   * one, naming the wrong option chosen. No daily limit applies: the
+   * learner reached the card. Writes nothing when the answer is practice
+   * ("none"). The answer logged keeps how
    * long choosing took (`times`; a multiple-choice answer is not graded,
    * so it has no grading time).
    */

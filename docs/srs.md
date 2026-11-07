@@ -789,8 +789,9 @@ In a [course](courses.md)'s deck, a reset treats the day's course
 answers like study answers:
 
 - A card introduced today loses its state but stays in the deck, with
-  its distractors: new in study, its course step not done, introduced
-  again when its question is answered, keeping any edit made to it.
+  its distractors: new in study, its course step not done. Its question
+  answered again grades it as it stands, keeping any edit made to it,
+  with no word that it was added to the deck.
 - A card reviewed today gets its snapshot back.
 - The day's multiple-choice answers leave the answer log.
 - A chapter completed today stays completed: `sm:completedChapter` is
