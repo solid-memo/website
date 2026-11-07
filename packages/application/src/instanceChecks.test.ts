@@ -146,7 +146,12 @@ describe("instance checks", () => {
     const { deps, useCases } = setup();
     deps.deckRepository.unclaimedDocuments = vi.fn(async () => [deck.reviewsDocumentUrl]);
     const unclaimed = [
-      { deckUrl: deck.url, title: deck.title, documents: [deck.reviewsDocumentUrl] },
+      {
+        deckUrl: deck.url,
+        title: deck.title,
+        documents: [deck.reviewsDocumentUrl],
+        outsidePod: [],
+      },
     ];
     const quick = await useCases.checkInstance(instance.url);
     expect(quick.unclaimed).toEqual(unclaimed);
@@ -189,6 +194,101 @@ describe("instance checks", () => {
     ].map(([url]) => url);
     expect(checked).toContain(`${instance.url}catalog.ttl`);
     expect(checked.filter((url) => url.includes("/notes/"))).toEqual([]);
+  });
+  describe("documents outside the instance's pod", () => {
+    const ownElsewhere = "https://alice.example/notes/old-cards.ttl";
+    const others = "https://bob.example/memo/";
+    const place = { ...instance, url: others };
+    const theirs = { ...deck, url: `${others}catalog.ttl#deck-1` };
+
+    it("reports a document of the user's own that an instance from someone else's pod names, and refuses its claim", async () => {
+      const { deps, useCases } = setup();
+      deps.deckRepository.listDecks = vi.fn(async () => [theirs]);
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [
+        ownElsewhere,
+        `${others}cards.ttl`,
+      ]);
+      const report = await useCases.checkInstance(place.url);
+      expect(report.unclaimed).toEqual([
+        {
+          deckUrl: theirs.url,
+          title: theirs.title,
+          documents: [ownElsewhere, `${others}cards.ttl`],
+          outsidePod: [ownElsewhere],
+        },
+      ]);
+      await expect(useCases.claimDeckDocuments(place.url, theirs.url)).rejects.toMatchObject({
+        code: "claimOutsidePod",
+        vars: { deck: theirs.title, url: ownElsewhere },
+      });
+      expect(deps.deckRepository.claimDocuments).not.toHaveBeenCalled();
+    });
+
+    it("reports them on the deck's own check too", async () => {
+      const { deps, useCases } = setup();
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
+      const health = await useCases.checkDeck(place.url, theirs, {
+        plain: (value) => value,
+        check: () => [],
+      });
+      expect(health.report.unclaimed).toEqual([
+        {
+          deckUrl: theirs.url,
+          title: theirs.title,
+          documents: [ownElsewhere],
+          outsidePod: [ownElsewhere],
+        },
+      ]);
+    });
+
+    it("claims the documents of the user's own pod laid out in other folders, and those in another's instance's own folder", async () => {
+      const { deps, useCases } = setup();
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
+      const [named] = (await useCases.checkInstance(instance.url)).unclaimed!;
+      expect(named!.outsidePod).toEqual([]);
+      await useCases.claimDeckDocuments(instance.url, deck.url);
+      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(deck);
+
+      deps.deckRepository.listDecks = vi.fn(async () => [theirs]);
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [`${others}cards.ttl`]);
+      await useCases.claimDeckDocuments(place.url, theirs.url);
+      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledWith(theirs);
+    });
+
+    it("refuses a claim that the user's storages cannot be found for, outside the instance's folder", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.storageGateway.discoverStorages).mockRejectedValue(new Error("offline"));
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
+      await expect(useCases.claimDeckDocuments(instance.url, deck.url)).rejects.toMatchObject({
+        code: "claimOutsidePod",
+      });
+      expect(deps.deckRepository.claimDocuments).not.toHaveBeenCalled();
+    });
+
+    it("with no one signed in, keeps a claim to the instance's own folder", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.webId).mockReturnValue(undefined);
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
+      await expect(useCases.claimDeckDocuments(instance.url, deck.url)).rejects.toMatchObject({
+        code: "claimOutsidePod",
+      });
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [deck.reviewsDocumentUrl]);
+      await useCases.claimDeckDocuments(instance.url, deck.url);
+      expect(deps.deckRepository.claimDocuments).toHaveBeenCalledTimes(1);
+      expect(deps.storageGateway.discoverStorages).not.toHaveBeenCalled();
+    });
+
+    it("looks for the user's storages once in a check, however many decks name such a document", async () => {
+      const { deps, useCases } = setup();
+      deps.deckRepository.listDecks = vi.fn(async () => [
+        deck,
+        { ...deck, url: `${instance.url}catalog.ttl#deck-2` },
+      ]);
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
+      vi.mocked(deps.storageGateway.discoverStorages).mockClear();
+      await useCases.validateInstance(instance.url);
+      expect(deps.storageGateway.discoverStorages).toHaveBeenCalledTimes(1);
+    });
   });
   it("claims a deck's documents as the user confirmed, a deck of the instance only", async () => {
     const { deps, useCases } = setup();

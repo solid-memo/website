@@ -1477,6 +1477,17 @@ export class Studio extends Screen {
     });
   }
 
+  /** The health screen says the deck's documents are outside the instance's pod, and offers no claim of them. */
+  async expectCannotClaim(deck: string): Promise<void> {
+    await this.intent(`See that the documents of ${deck} cannot be claimed`, async () => {
+      const item = this.unclaimedDeck(deck);
+      await expect(item).toContainText(this.t("unclaimedDecks.outsidePod"));
+      await expect(
+        item.getByRole("button", { name: this.t("unclaimedDecks.claim"), exact: true }),
+      ).toHaveCount(0);
+    });
+  }
+
   /**
    * Confirms, on the health screen, that the deck's documents are its
    * own ("These are this deck's documents", then "Mark them as the

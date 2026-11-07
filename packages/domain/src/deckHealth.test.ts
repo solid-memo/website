@@ -163,8 +163,9 @@ describe("a deck whose documents are unclaimed", () => {
     deckUrl: `${CATALOG}#deck-2`,
     title: { en: "Other" },
     documents: ["https://pod.example/other.ttl"],
+    outsidePod: [],
   };
-  const own = { deckUrl: deck.url, title: deck.title, documents: [REVIEWS] };
+  const own = { deckUrl: deck.url, title: deck.title, documents: [REVIEWS], outsidePod: [] };
 
   it("is named in the deck's part of the report, and in the instance's after a later check of the deck", () => {
     const report = withUnclaimed(summarize("https://pod.example/a/", []), [own, other]);

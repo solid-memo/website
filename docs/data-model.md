@@ -485,7 +485,14 @@ No document Solid Memo names has any.
   documents". Once the user confirms, each document is made to say it's
   the deck's: one write made only while it's as read (`If-Match`), or
   only where there's none (`claimDeckDocuments`;
-  `createDeckDocumentGuard` in `deckPlace.ts`). Removing a deck, or
+  `createDeckDocumentGuard` in `deckPlace.ts`). The claim is only for
+  documents in the instance's folder, or in one of the user's storages,
+  as found at that moment, that holds the instance too
+  (`isInInstancePod`). An instance attached from someone else's pod may
+  name a document of the user's own, and writes to that document go out
+  as the user. Any other document is refused (`claimOutsidePod`), and
+  the deck is shown without the button. A document that already says
+  it's the deck's stays the deck's. Removing a deck, or
   deleting its instance, takes out a document's cards and review states
   only when every deck it names is leaving; otherwise only
   the leaving deck's `dcterms:isPartOf` goes (`deckDocumentSubjects` in
