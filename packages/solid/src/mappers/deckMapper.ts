@@ -503,6 +503,8 @@ function distractorAt(dataset: Dataset, url: string): Distractor | null {
  * says another card of the same write has written already is not
  * written again (writeCards in solidDeckRepository.ts says why), so a
  * distractor many cards name is written once, not once for each.
+ * Refused (distractorIdRepeated) when two of the card's are one subject,
+ * the later replacing the earlier, whichever route the card came by.
  * Returns the URLs the card names,
  * for the write check, and those it named before (`before`) but names
  * no longer (`dropped`), for withoutUnnamedDistractors.
@@ -515,6 +517,8 @@ export function writeDistractors(
   writtenBefore: (url: string) => boolean = () => false,
 ): { subjects: string[]; dropped: string[] } {
   const subjects = distractors.map((distractor) => `${documentUrl}#${distractor.id}`);
+  const written = new Set(subjects);
+  if (written.size < subjects.length) throw new AppError("distractorIdRepeated");
   for (const [i, distractor] of distractors.entries()) {
     if (writtenBefore(subjects[i])) continue;
     edit.setThing(
@@ -526,7 +530,6 @@ export function writeDistractors(
       ),
     );
   }
-  const written = new Set(subjects);
   return { subjects, dropped: before.filter((url) => !written.has(url)) };
 }
 

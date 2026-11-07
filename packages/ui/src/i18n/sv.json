@@ -1633,6 +1633,7 @@
     "textMixesUnstated": "Den här texten anger inte vilket språk den är på, så den kan inte ha översättningar. Välj dess språk först.",
     "distractorEmpty": "Ett felaktigt alternativ behöver text.",
     "distractorPublished": "Det här felaktiga alternativet finns i utgåvan som kortleken kommer från, så det kan inte tas bort. Ta det ur bruk i stället.",
+    "distractorIdRepeated": "Två felaktiga alternativ på det här kortet har samma id, så bara ett av dem kan sparas. Ta bort ett av dem.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
     "dueDayInvalid": "”{day}” är ingen dag. Välj dagen då kortet ska repeteras.",
     "cardTransferSameDeck": "Korten finns redan i den här kortleken. Välj en annan kortlek.",

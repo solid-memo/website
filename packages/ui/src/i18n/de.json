@@ -1633,6 +1633,7 @@
     "textMixesUnstated": "Bei diesem Text ist nicht angegeben, in welcher Sprache er geschrieben ist, daher kann er keine Übersetzungen haben. Wähle zuerst seine Sprache.",
     "distractorEmpty": "Eine falsche Antwortmöglichkeit braucht einen Text.",
     "distractorPublished": "Diese falsche Antwortmöglichkeit gehört zur Ausgabe, aus der der Stapel stammt, und lässt sich daher nicht löschen. Mustere sie stattdessen aus.",
+    "distractorIdRepeated": "Zwei falsche Antwortmöglichkeiten dieser Karte haben dieselbe ID, daher ließe sich nur eine speichern. Lösche eine davon.",
     "dailyLimitInvalid": "Ein Tageslimit ist eine ganze Zahl ab 0.",
     "dueDayInvalid": "„{day}“ ist kein Tag. Wähle den Tag, an dem die Karte fällig ist.",
     "cardTransferSameDeck": "Die Karten sind schon in diesem Stapel. Wähle einen anderen Stapel.",

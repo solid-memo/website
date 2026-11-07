@@ -1558,6 +1558,7 @@
     "textMixesUnstated": "이 텍스트는 어떤 언어인지 정해지지 않아서 번역을 추가할 수 없어요. 먼저 언어를 선택해 주세요.",
     "distractorEmpty": "오답 선택지에 텍스트를 입력해 주세요.",
     "distractorPublished": "이 오답 선택지는 덱을 가져온 릴리스에 들어 있어서 삭제할 수 없어요. 대신 사용 중지해 주세요.",
+    "distractorIdRepeated": "이 카드의 오답 선택지 두 개의 ID가 같아서 하나만 저장할 수 있어요. 하나를 삭제해 주세요.",
     "dailyLimitInvalid": "하루 한도는 0 이상의 정수여야 해요.",
     "dueDayInvalid": "‘{day}’은(는) 날짜가 아니에요. 카드를 복습할 날짜를 선택해 주세요.",
     "cardTransferSameDeck": "카드가 이미 이 덱에 있어요. 다른 덱을 선택해 주세요.",

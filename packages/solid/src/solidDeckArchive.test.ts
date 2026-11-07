@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
@@ -274,6 +275,64 @@ const OLD_DECK = `${PREFIXES}
   sm:lastReviewedAt "2026-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .
 <cards#broken> a sm:ReviewState .
 `;
+
+describe("a deck file's wrong options, imported", () => {
+  /** A file whose card names the subjects at `urls`, each with its own text, then that file imported. */
+  async function imported(urls: readonly string[]) {
+    const options = urls
+      .map(
+        (url, at) =>
+          `<${url}> a sm:Distractor ; sm:distractorText "option ${at}" ; sm:formatVersion 1 .`,
+      )
+      .join("\n");
+    const file = `@prefix sm: <${SM_NS}> .
+      @prefix dcterms: <http://purl.org/dc/terms/> .
+      <#deck> a sm:Deck ; dcterms:title "Deck" ; sm:cardsDocument <cards> ;
+        sm:reviewsDocument <reviews> ; sm:formatVersion 1 .
+      <cards#c1> a sm:Card ; sm:front "Front" ; sm:back "Back" ; sm:formatVersion 7 ;
+        sm:distractor ${urls.map((url) => `<${url}>`).join(", ")} .
+      ${options}`;
+    const pod = fakePod();
+    const read = await createSolidDeckArchive({ fetch: pod.fetch }).readDeckFile(
+      file,
+      "turtle",
+      `${DECK_FILE_BASE}deck.ttl`,
+    );
+    const { deck, cards } = importedDeck(INSTANCE, read, {
+      withProgress: false,
+      decks: [],
+      freshId: "deck-1",
+      now: "2026-10-01T10:00:00.000Z",
+    });
+    const repository = createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date("2026-10-01T10:00:00.000Z"),
+      randomId: () => "id",
+    });
+    return {
+      read: () => repository.listCards(deck),
+      write: () =>
+        repository.applyCardChanges(
+          deck,
+          { save: cards, remove: [] },
+          { whole: true, version: ABSENT_VERSION },
+        ),
+    };
+  }
+
+  it("refuses two of one id, in two documents of the file, writing nothing", async () => {
+    const file = await imported([`${DECK_FILE_BASE}cards#same`, `${DECK_FILE_BASE}elsewhere#same`]);
+    await expect(file.write()).rejects.toMatchObject({ code: "distractorIdRepeated" });
+    await expect(file.read()).resolves.toEqual([]);
+  });
+
+  it("keeps two of different ids, in two documents of the file", async () => {
+    const file = await imported([`${DECK_FILE_BASE}cards#one`, `${DECK_FILE_BASE}elsewhere#two`]);
+    await file.write();
+    const [card] = await file.read();
+    expect(card!.distractors!.map((option) => option.text[""])).toEqual(["option 0", "option 1"]);
+  });
+});
 
 describe("readDeckFile", () => {
   const archive = createSolidDeckArchive({

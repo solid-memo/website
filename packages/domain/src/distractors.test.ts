@@ -34,6 +34,39 @@ describe("nextDistractorId", () => {
     expect(nextDistractorId("q", ["q-d", "q-dx", "q-d02", "q-d2b", "qq-d9", "other"])).toBe("q-d1");
     expect(nextDistractorId("q-1", ["q-1-d4", "q-d9"])).toBe("q-1-d5");
   });
+
+  it("ignores a number too long to count on, each new id still being free", () => {
+    for (const digits of [16, 17, 25, 400]) {
+      const huge = `q-d${"9".repeat(digits)}`;
+      expect(nextDistractorId("q", [huge])).toBe("q-d1");
+      expect(nextDistractorId("q", [huge, "q-d1"])).toBe("q-d2");
+    }
+    // 2^53 - 1, 2^53 and 2^53 + 2: past the first, adding 1 may not change a number.
+    for (const id of ["q-d9007199254740991", "q-d9007199254740992", "q-d9007199254740994"]) {
+      expect(nextDistractorId("q", [id])).toBe("q-d1");
+    }
+  });
+
+  it("goes on past the longest number it counts, skipping those taken", () => {
+    const longest = "q-d999999999999999";
+    expect(nextDistractorId("q", [longest])).toBe("q-d1000000000000000");
+    expect(nextDistractorId("q", [longest, "q-d1000000000000000"])).toBe("q-d1000000000000001");
+  });
+
+  it("gives each wrong option added its own id, whatever id the card has", () => {
+    let distractors: Distractor[] = [{ id: `q-d${"9".repeat(25)}`, text: { en: "Planted" } }];
+    for (const text of ["One", "Two", "Three"]) {
+      const edit = addDistractor(distractors, "q", { text: { en: text } });
+      if (!edit.ok) throw edit.error;
+      distractors = edit.distractors;
+    }
+    expect(distractors.map((distractor) => distractor.id)).toEqual([
+      `q-d${"9".repeat(25)}`,
+      "q-d1",
+      "q-d2",
+      "q-d3",
+    ]);
+  });
 });
 
 describe("tidiedDistractor", () => {

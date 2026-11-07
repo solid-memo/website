@@ -42,6 +42,8 @@ export const ERROR_TEMPLATES = {
   distractorEmpty: "A wrong option needs text.",
   distractorPublished:
     "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
+  distractorIdRepeated:
+    "Two wrong options on this card have the same id, so only one could be saved. Delete one of them.",
   dailyLimitInvalid: "A daily limit is a whole number, 0 or more.",
   dueDayInvalid: "“{day}” is not a day. Choose the day the card is due.",
   cardTransferSameDeck: "The cards are in this deck already. Choose another deck.",

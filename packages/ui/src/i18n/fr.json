@@ -1708,6 +1708,7 @@
     "textMixesUnstated": "Ce texte n’indique pas sa langue, il ne peut donc pas avoir de traductions. Choisissez d’abord sa langue.",
     "distractorEmpty": "Une mauvaise réponse doit avoir un texte.",
     "distractorPublished": "Cette mauvaise réponse figure dans la publication d’où vient le paquet : elle ne peut donc pas être supprimée. Archivez-la plutôt.",
+    "distractorIdRepeated": "Deux mauvaises réponses de cette carte ont le même identifiant : une seule pourrait être enregistrée. Supprimez-en une.",
     "dailyLimitInvalid": "Une limite quotidienne doit être un nombre entier supérieur ou égal à 0.",
     "dueDayInvalid": "« {day} » n’est pas une date. Choisissez le jour où la carte est à réviser.",
     "cardTransferSameDeck": "Les cartes sont déjà dans ce paquet. Choisissez-en un autre.",

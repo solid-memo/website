@@ -29,6 +29,8 @@ import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain/deck";
+import { addDistractor } from "@solid-memo/domain/distractors";
+import { distractorsOf } from "./mappers/deckMapper";
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
@@ -1552,6 +1554,29 @@ describe("updateCard", () => {
         "en",
       ),
     ).toBe("Earth");
+  });
+
+  it("keeps each wrong option added to a card that holds a very long numbered one", async () => {
+    const planted = `card-1-d${"9".repeat(25)}`;
+    let current: Card = { ...card, distractors: [{ id: planted, text: { en: "Planted" } }] };
+    let stored: Dataset = cardsDoc();
+    for (const text of ["Fire", "Earth"]) {
+      const edit = addDistractor(current.distractors!, current.id, { text: { en: text } });
+      if (!edit.ok) throw edit.error;
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored as never);
+      current = await makeRepository().updateCard(deck, current, {
+        front: { "": "水" },
+        back: { "": "water" },
+        distractors: edit.distractors,
+      });
+      stored = vi.mocked(writeDocument).mock.lastCall![1] as Dataset;
+    }
+    const named = getUrlAll(getThing(stored, card.url)!, SM.distractor);
+    expect(distractorsOf(stored, named).map((option) => option.text.en)).toEqual([
+      "Fire",
+      "Earth",
+      "Planted",
+    ]);
   });
 
   it("names each distractor a schema:suggestedAnswer too, keeping another app's suggested answers", async () => {

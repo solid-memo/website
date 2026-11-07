@@ -958,8 +958,11 @@ The domain makes each change
 
 - `addDistractor` creates one only once it has text, under
   `nextDistractorId`: `<card>-d<n>`, `n` one more than the highest such
-  id the card or its release has used. An id the release published is
-  never used again; one deleted before it was published may be.
+  id the card or its release has used, or the first free one after it.
+  A number of more than 15 digits isn't counted, so counting stays
+  exact. An id the release published is never used again; one deleted
+  before it was published may be. A card can't be saved with two wrong
+  options of one id, which would be one subject.
 - `editDistractor` changes its text and note, keeping its id and
   whether it's retired.
 - `retireDistractor` and `restoreDistractor` mark it retired
@@ -1837,6 +1840,9 @@ names them:
 - `q-<topic>-<n><letter>` for a step's question, sorting after its
   last;
 - `q-<topic>-r<nn>` for a review question.
+
+A number of more than 15 digits in an id already there isn't counted,
+and a number already taken is skipped.
 
 The user may write another. The field says at once when an id is none
 a subject can have, or one the draft or a release before it has. A new

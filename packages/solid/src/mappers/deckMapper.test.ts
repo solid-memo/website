@@ -751,6 +751,20 @@ describe("writeDistractors", () => {
     expect(getStringNoLocale(d1, "https://example.org/other")).toBe("kept");
   });
 
+  it("refuses two distractors of one id, as they would be written to one subject", () => {
+    expect(() =>
+      withDistractors(
+        datasetFrom(CARDS_DOC),
+        CARDS_DOC,
+        [
+          { id: "d1", text: { en: "One" } },
+          { id: "d1", text: { en: "Two" } },
+        ],
+        [],
+      ),
+    ).toThrow(expect.objectContaining({ code: "distractorIdRepeated" }));
+  });
+
   it("does not write again a distractor another card of the write wrote, but names it", () => {
     const [one, two] = [`${CARDS_DOC}#d1`, `${CARDS_DOC}#d2`];
     const written = withDistractors(

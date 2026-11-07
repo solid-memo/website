@@ -67,6 +67,49 @@ describe("chapterIdFor and stepIdFor", () => {
       "ch-b-5",
     );
   });
+
+  it("ignores a number too long to count on, and skips one taken", () => {
+    for (const huge of ["9".repeat(16), "9".repeat(25), "9".repeat(400), "9007199254740992"]) {
+      const draft = {
+        ...deckDraft(),
+        published: { ids: { [`card-${huge}`]: "card" as const }, activities: [] },
+      };
+      const suggested = questionIdFor(draft, null);
+      expect(suggested).toBe("card-1");
+      expect(idProblem(draft, suggested)).toBeNull();
+    }
+    const longest = {
+      ...deckDraft(),
+      published: {
+        ids: {
+          "card-999999999999999": "card" as const,
+          "card-1000000000000000": "card" as const,
+        },
+        activities: [],
+      },
+    };
+    expect(questionIdFor(longest, null)).toBe("card-1000000000000001");
+  });
+
+  it("writes a skipped-to number at the width asked for", () => {
+    const draft = {
+      ...courseDraft(),
+      published: {
+        ids: {
+          "q-b-r999999999999999": "card" as const,
+          "q-b-r1000000000000000": "card" as const,
+        },
+        activities: [],
+      },
+    };
+    expect(questionIdFor(draft, { kind: "review", chapter: "ch-b" })).toBe("q-b-r1000000000000001");
+    expect(
+      questionIdFor(
+        { ...courseDraft(), published: { ids: { "q-b-r07": "card" }, activities: [] } },
+        { kind: "review", chapter: "ch-b" },
+      ),
+    ).toBe("q-b-r08");
+  });
 });
 
 describe("questions and their ids", () => {
