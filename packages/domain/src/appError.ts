@@ -89,6 +89,8 @@ export const ERROR_TEMPLATES = {
     "Your provider did not answer in time, so Solid Memo stopped restoring your session. Log in again, or pick another provider.",
   restoreNotReturned:
     "Your provider did not send you back, so Solid Memo stopped restoring your session. Go back to your provider, log in again, or pick another provider.",
+  webIdIssuerNotListed:
+    "Your WebID profile does not name the provider you logged in at, so Solid Memo ended the session for safety. Add the provider to your profile, or log in at one it names.",
   profileNoSubject:
     "Your profile does not describe you, so Solid Memo cannot note in it where your data is. Check your profile with your Pod provider, then try again.",
   privateTypeIndexNotLinked:

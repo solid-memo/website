@@ -354,6 +354,7 @@ const harness: SessionHarness = {
     provider.webId = webId;
     pendingReturn();
   },
+  loginIssuer: ISSUER,
   sessionToRestore(webId, from) {
     if (from === undefined) {
       storedSession(webId, "refresh-0");

@@ -18,6 +18,8 @@ export interface SessionHarness {
   create(): SessionClient;
   /** The provider has just sent the user back from a login, as `webId`. */
   returnFromLogin(webId: string): void;
+  /** The identity provider of that login. */
+  loginIssuer: string;
   /** A session from before is there to restore silently, as `webId`, leaving `from` if given. */
   sessionToRestore(webId: string, from?: string): void;
   /** The provider has just refused the silent restore of a session from before, left from `from`. */
@@ -136,6 +138,13 @@ export function sessionContract(harness: SessionHarness): void {
       it("names the issuer of the session a silent restore would go to", async () => {
         harness.sessionAt("https://issuer.example/");
         await expect(harness.create().sessionIssuer()).resolves.toBe("https://issuer.example/");
+      });
+
+      it("names the issuer of the session a login just completed", async () => {
+        harness.returnFromLogin(WEBID);
+        const client = harness.create();
+        await client.restore();
+        await expect(client.sessionIssuer()).resolves.toBe(harness.loginIssuer);
       });
 
       it("names none when there is no session", async () => {
