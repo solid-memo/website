@@ -137,7 +137,7 @@ describe("useDataCheck", () => {
 
   it("names the decks whose documents are unclaimed, though the data conforms", async () => {
     const unclaimed = [
-      { deckUrl: good.url, title: good.title, documents: [good.cardsDocumentUrl] },
+      { deckUrl: good.url, title: good.title, documents: [good.cardsDocumentUrl], outsidePod: [] },
     ];
     renderProbe({
       checkInstance: vi.fn(async () => ({

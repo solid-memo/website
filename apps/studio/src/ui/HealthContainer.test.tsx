@@ -259,7 +259,12 @@ describe("HealthContainer", () => {
 
   it("offers to claim a deck's unclaimed documents, on the instance's health and the deck's", async () => {
     const unclaimed = [
-      { deckUrl: deck.url, title: deck.title, documents: [deck.reviewsDocumentUrl] },
+      {
+        deckUrl: deck.url,
+        title: deck.title,
+        documents: [deck.reviewsDocumentUrl],
+        outsidePod: [],
+      },
     ];
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck]),

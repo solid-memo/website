@@ -8,6 +8,7 @@ import {
   catalogUrlOf,
   historyUrlOf,
   instanceDocumentUrls,
+  isDocumentIn,
   isSameUrl,
 } from "@solid-memo/domain/instanceLayout";
 import {
@@ -27,6 +28,7 @@ import type {
   RepairRepository,
   DocumentContext,
   ReleaseDraftRepository,
+  StorageGateway,
 } from "./ports";
 import type { AnswerStore } from "./answerStore";
 import { AppError } from "@solid-memo/domain/appError";
@@ -34,6 +36,7 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { mapAtOnce } from "./atOnce";
 import { noting } from "./digestStore";
 import type { DigestStore } from "./digestStore";
+import { isInInstancePod } from "./releaseDrafts";
 
 export interface InstanceCheckUseCases {
   /**
@@ -56,7 +59,9 @@ export interface InstanceCheckUseCases {
    * deck's, once the user has confirmed they are: from then on they are
    * written to and deleted as the deck's. Each in one write made only
    * while it is as read; nothing else in it changes. deckGone when the
-   * instance has no such deck.
+   * instance has no such deck; claimOutsidePod, with nothing written,
+   * when any of them is outside the instance's pod (UnclaimedDeck
+   * `outsidePod`).
    */
   claimDeckDocuments(instanceUrl: string, deckUrl: string): Promise<void>;
   /**
@@ -108,6 +113,8 @@ export function createInstanceCheckUseCases({
   repairRepository,
   deckLibrary,
   digestStore,
+  storageGateway,
+  webId,
   ruleset,
 }: {
   deckRepository: DeckRepository;
@@ -117,6 +124,9 @@ export function createInstanceCheckUseCases({
   repairRepository: RepairRepository;
   deckLibrary: DeckLibrary;
   digestStore: Pick<DigestStore, "of" | "remember" | "isInstances">;
+  storageGateway: Pick<StorageGateway, "discoverStorages">;
+  /** The WebID of whoever is signed in, asked at each call; none when no one is. */
+  webId: () => string | undefined;
   ruleset: string;
 }): InstanceCheckUseCases {
   async function checkInstance(instanceUrl: string): Promise<ValidationReport> {
@@ -125,7 +135,7 @@ export function createInstanceCheckUseCases({
       releaseDraftRepository.documents(instanceUrl),
       digestStore.of(instanceUrl),
     ]);
-    const unclaimed = await unclaimedDecksOf(decks);
+    const unclaimed = await unclaimedDecksOf(instanceUrl, decks);
     return withUnclaimed(
       await checkDocuments(
         instanceUrl,
@@ -135,13 +145,50 @@ export function createInstanceCheckUseCases({
       unclaimed,
     );
   }
-  /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments). */
-  async function unclaimedDecksOf(decks: readonly Deck[]): Promise<UnclaimedDeck[]> {
-    const found = await mapAtOnce(decks, async (deck) => ({
-      deckUrl: deck.url,
-      title: deck.title,
-      documents: await deckRepository.unclaimedDocuments(deck),
-    }));
+  /**
+   * A test of which documents may not be claimed for a deck of the
+   * instance, giving those of `documents` that are outside its pod: a
+   * claim lets the app write to a document as the user and delete from
+   * it, and an instance attached from someone else's pod may name a
+   * document of the user's own. A document is inside when it is the
+   * instance's (isInInstancePod), which holds for any folder of the
+   * user's own pod; with no one signed in, only in the instance's own
+   * folder. The user's storages are found once for one test.
+   */
+  function outsidePodTest(
+    instanceUrl: string,
+  ): (documents: readonly string[]) => Promise<string[]> {
+    const user = webId();
+    let found: ReturnType<StorageGateway["discoverStorages"]> | undefined;
+    const storages: Pick<StorageGateway, "discoverStorages"> = {
+      discoverStorages: (id) => (found ??= storageGateway.discoverStorages(id)),
+    };
+    return async (documents) => {
+      const inside = await Promise.all(
+        documents.map(async (url) =>
+          user === undefined
+            ? isDocumentIn(url, instanceUrl)
+            : isInInstancePod(storages, instanceUrl, url, user),
+        ),
+      );
+      return documents.filter((_, index) => !inside[index]);
+    };
+  }
+  /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments) and which of them are outside the instance's pod. */
+  async function unclaimedDecksOf(
+    instanceUrl: string,
+    decks: readonly Deck[],
+  ): Promise<UnclaimedDeck[]> {
+    const outsidePodOf = outsidePodTest(instanceUrl);
+    const found = await mapAtOnce(decks, async (deck) => {
+      const documents = await deckRepository.unclaimedDocuments(deck);
+      return {
+        deckUrl: deck.url,
+        title: deck.title,
+        documents,
+        outsidePod: await outsidePodOf(documents),
+      };
+    });
     return found.filter((deck) => deck.documents.length > 0);
   }
   /**
@@ -204,7 +251,7 @@ export function createInstanceCheckUseCases({
       answerStore.logMonths(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
     ]);
-    const unclaimed = await unclaimedDecksOf(decks);
+    const unclaimed = await unclaimedDecksOf(instanceUrl, decks);
     const urls = [
       ...documentsToCheck(instanceUrl, decks, drafts, unclaimed),
       ...months.map((month) => ({
@@ -230,11 +277,15 @@ export function createInstanceCheckUseCases({
         (listed) => listed.url === deckUrl,
       );
       if (deck === undefined) throw new AppError("deckGone", { deck: deckUrl });
+      const documents = await deckRepository.unclaimedDocuments(deck);
+      const [outside] = await outsidePodTest(instanceUrl)(documents);
+      if (outside !== undefined)
+        throw new AppError("claimOutsidePod", { deck: deck.title, url: outside });
       await deckRepository.claimDocuments(deck);
     },
     async checkDeck(instanceUrl, deck, text) {
       const [report, cards, release] = await Promise.all([
-        Promise.all([digestStore.of(instanceUrl), unclaimedDecksOf([deck])]).then(
+        Promise.all([digestStore.of(instanceUrl), unclaimedDecksOf(instanceUrl, [deck])]).then(
           async ([digest, unclaimed]) => {
             const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
               (url) => !isUnclaimed(url, unclaimed),

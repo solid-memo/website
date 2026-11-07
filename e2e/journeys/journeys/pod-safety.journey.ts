@@ -168,7 +168,8 @@ async function deleteFromStudio(app: App, name: string): Promise<void> {
  * them, whose catalog names the user's own documents, their profile
  * and a private document, as its decks' documents: the decks are
  * listed, and the Studio's health screen says their documents do not
- * say they are theirs. Removing one deck, then deleting the instance,
+ * say they are theirs, and offers no claim of them, being outside the
+ * instance's pod. Removing one deck, then deleting the instance,
  * changes neither document and adds none.
  */
 test("removing a deck and deleting an instance someone else shares leave the user's documents as they were @studio", async ({
@@ -212,6 +213,7 @@ test("removing a deck and deleting an instance someone else shares leave the use
       await app.studio.openInstanceHealth(name, []);
       await app.studio.expectUnclaimed(decks[0]!.title, [profile, diary]);
       await app.studio.expectUnclaimed(decks[1]!.title, [diary, profile]);
+      for (const deck of decks) await app.studio.expectCannotClaim(deck.title);
     },
     { screen: "studio.instance-health" },
   );
