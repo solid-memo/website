@@ -1001,6 +1001,17 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       ).resolves.toHaveLength(2);
     });
 
+    it("names a read's subjects in its refusal only where its limits bound them", async () => {
+      const text = `<#a> <${EX}p> "x" . <#b> <${EX}p> "y" .`;
+      const limits = { bytes: 1_000, quads: 1, characters: 1_000 };
+      await expect(
+        parseQuads(text, "turtle", URL_, { ...limits, quads: 10, subjects: 1 }),
+      ).rejects.toMatchObject({ message: expect.stringContaining("1 subjects") });
+      await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
+        message: expect.not.stringContaining("subjects"),
+      });
+    });
+
     it("rejects a text that does not parse", async () => {
       await expect(parseQuads("<#a> <#b> .", "turtle", URL_)).rejects.toBeDefined();
     });

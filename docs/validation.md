@@ -340,7 +340,9 @@ The Solid client keeps some IRIs for subjects it hasn't saved yet
 ([`LOCAL_NODE`](../packages/solid/src/client/linearDataset.ts)), so a
 document can't state one as data: its subject would have no URL to
 report. A read leaves out any statement that names such an IRI, so
-the check, the deck writes and every other reader never see it. It
+the check, the deck writes and every other reader never see it. The
+one exception is the library that makes a release public, which reads
+the text of the release's access control itself. Such a statement
 still counts toward a read's limits. A patch leaves it in the
 document; a write of the whole document drops it. A document that says
 nothing else reads as empty, so removing its deck deletes the document,
