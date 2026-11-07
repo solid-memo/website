@@ -45,6 +45,9 @@ function makeEmitter() {
 
 let emitter: ReturnType<typeof makeEmitter>;
 
+/** Where the library keeps the page a silent restore left from. */
+const CURRENT_URL_KEY = "solidClientAuthn:currentUrl";
+
 /** What the library answers handleIncomingRedirect with when the page's URL has no provider's answer. */
 type Answer = () => Promise<Awaited<ReturnType<typeof handleIncomingRedirect>>>;
 
@@ -80,6 +83,25 @@ function sentBack(): void {
   window.history.replaceState(null, "", "/?code=c&state=s&iss=https%3A%2F%2Fidp.example%2F");
 }
 
+/**
+ * The library completing a redirect: the key of the page a silent
+ * restore left from alone tells it a login from a restore, and it keeps
+ * the session of a login only.
+ */
+function completesRedirect(webId: string): void {
+  vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
+    const from = window.localStorage.getItem(CURRENT_URL_KEY);
+    if (from === null) {
+      harness.sessionAt("https://idp.example/");
+      emitter.emit(EVENTS.LOGIN);
+    } else {
+      window.localStorage.removeItem(CURRENT_URL_KEY);
+      emitter.emit(EVENTS.SESSION_RESTORED, from);
+    }
+    return { isLoggedIn: true, webId, sessionId: "s" };
+  });
+}
+
 /** The library, mocked: the provider's answers are what handleIncomingRedirect resolves to, and the events it fires. */
 const harness: SessionHarness = {
   reset() {
@@ -94,22 +116,22 @@ const harness: SessionHarness = {
   create: createSessionClient,
   returnFromLogin(webId) {
     sentBack();
-    // The library completes the login it sent the user for.
-    vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
-      emitter.emit(EVENTS.LOGIN);
-      return { isLoggedIn: true, webId, sessionId: "s" };
-    });
+    completesRedirect(webId);
   },
   sessionToRestore(webId, from) {
     if (from !== undefined) {
       sentBack();
-      vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
-        emitter.emit(EVENTS.SESSION_RESTORED, from);
-        return { isLoggedIn: true, webId, sessionId: "s" };
-      });
+      window.localStorage.setItem(CURRENT_URL_KEY, from);
+      completesRedirect(webId);
       return;
     }
     library(async () => ({ isLoggedIn: true, webId, sessionId: "s" }));
+  },
+  refuseRestore(from) {
+    leftForProvider();
+    window.localStorage.setItem(CURRENT_URL_KEY, from);
+    window.history.replaceState(null, "", "/?error=login_required&state=s");
+    library(async () => ({ isLoggedIn: false, sessionId: "s" }));
   },
   unaskedAnswer(search, awaiting) {
     if (awaiting) leftForProvider();
@@ -229,6 +251,28 @@ describe("createSessionClient, over the library", () => {
     window.history.replaceState(null, "", "/?error=login_required&state=s");
     await createSessionClient().restore();
     expect(window.location.search).toBe("?error=login_required&state=s");
+  });
+
+  it("forgets the page a silent restore left from once the provider refuses it", async () => {
+    harness.refuseRestore("https://memo.example/#/studio");
+    await createSessionClient().restore();
+    expect(window.localStorage.getItem(CURRENT_URL_KEY)).toBeNull();
+  });
+
+  it("keeps the page a silent restore left from past an answer to no request of this tab's", async () => {
+    window.localStorage.setItem(CURRENT_URL_KEY, "https://memo.example/#/studio");
+    window.history.replaceState(null, "", "/?error=login_required");
+    await createSessionClient().restore();
+    expect(window.localStorage.getItem(CURRENT_URL_KEY)).toBe("https://memo.example/#/studio");
+  });
+
+  it("forgets the page of a silent restore that did not complete before it logs in", async () => {
+    window.localStorage.setItem(CURRENT_URL_KEY, "https://memo.example/#/studio");
+    vi.mocked(login).mockImplementation(async () => {
+      expect(window.localStorage.getItem(CURRENT_URL_KEY)).toBeNull();
+    });
+    await createSessionClient().login(LOGIN);
+    expect(login).toHaveBeenCalledOnce();
   });
 
   it("takes off an answer to no request of this tab's, whether or not it awaits the provider", async () => {
