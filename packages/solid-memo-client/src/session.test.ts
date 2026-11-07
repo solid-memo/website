@@ -422,6 +422,26 @@ describe("createSessionClient, over oauth4webapi", () => {
     return { client, restored: await client.restore() };
   }
 
+  it("forgets the session and the request under way, so that no reload restores them", async () => {
+    const { client } = await logIn();
+    window.sessionStorage.setItem(PENDING_LOGIN_KEY, "{}");
+    await client.forgetSession();
+    expect(memory.session).toBeUndefined();
+    expect(window.sessionStorage.getItem(PENDING_LOGIN_KEY)).toBeNull();
+    expect(client.webId()).toBeUndefined();
+  });
+
+  it("does not store a session it completes after a restore was given up on", async () => {
+    await createSessionClient().login(LOGIN);
+    sendBack();
+    const client = createSessionClient();
+    const restoring = client.restore();
+    await client.forgetSession();
+    await expect(restoring).resolves.toMatchObject({ webId: null });
+    expect(memory.session).toBeUndefined();
+    expect(client.webId()).toBeUndefined();
+  });
+
   it("asks for a code with PKCE, state, nonce and consent, as the client the provider registered", async () => {
     await createSessionClient().login(LOGIN);
     const request = lastAuthorization();

@@ -12,6 +12,7 @@ import { useEffect, useState } from "preact/hooks";
 import { AppShell, SOLID_MEMO, STUDIO, type WorkspaceProps } from "./App";
 import { Workspace } from "./Workspace";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { AppError } from "@solid-memo/domain/appError";
 import type { SolidAccount } from "@solid-memo/domain/account";
 import { POD_PROVIDERS } from "@solid-memo/domain/podProvider";
 import type { EstablishedSession, Session } from "@solid-memo/domain/session";
@@ -846,6 +847,48 @@ describe("AppShell", () => {
       }),
     );
     expect(await screen.findByText("plain failure")).toBeInTheDocument();
+  });
+
+  it("leaves the loading screen for the login when a restore runs out of time", async () => {
+    renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("restoreTimedOut", { seconds: 60 });
+        }),
+      }),
+    );
+    expect(await screen.findByText(/did not answer in time/)).toBeInTheDocument();
+    expect(screen.getByLabelText("WebID")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Go back to your provider/ })).toBeNull();
+  });
+
+  it("shows the login, not the introduction, when a provider's answer is refused", async () => {
+    renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("loginIssuerMissing", { issuer: "https://issuer.example/" });
+        }),
+      }),
+    );
+    expect(await screen.findByText(/did not say which provider/)).toBeInTheDocument();
+    expect(screen.getByLabelText("WebID")).toBeInTheDocument();
+  });
+
+  it("offers the way back to a provider that never sent the learner back, and the login", async () => {
+    const issuer = "https://issuer.example/";
+    renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("restoreNotReturned", { issuer });
+        }),
+      }),
+    );
+    expect(await screen.findByText(/did not send you back/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Go back to your provider/ })).toHaveAttribute(
+      "href",
+      issuer,
+    );
+    expect(screen.getByLabelText("WebID")).toBeInTheDocument();
   });
 
   it("logs in with the entered WebID and stays busy while redirecting", async () => {

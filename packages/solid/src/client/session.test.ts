@@ -199,6 +199,16 @@ describe("createSessionClient, over the library", () => {
     }
   });
 
+  it("forgets what the library keeps for a silent restore, and the tab's mark", async () => {
+    window.localStorage.setItem("solidClientAuthn:currentSession", "s");
+    window.localStorage.setItem("solidClientAuthn:currentUrl", "https://memo.example/#/study");
+    window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "restore");
+    await createSessionClient().forgetSession();
+    expect(window.localStorage.getItem("solidClientAuthn:currentSession")).toBeNull();
+    expect(window.localStorage.getItem("solidClientAuthn:currentUrl")).toBeNull();
+    expect(window.sessionStorage.getItem(PROVIDER_REDIRECT_KEY)).toBeNull();
+  });
+
   it("names no issuer for a session whose fields the library could not read either", async () => {
     window.localStorage.setItem("solidClientAuthn:currentSession", "s");
     for (const fields of [null, "not json", "null", JSON.stringify({ issuer: 1 })]) {

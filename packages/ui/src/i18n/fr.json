@@ -141,6 +141,7 @@
   },
   "app": {
     "restoringSession": "Restauration de la session…",
+    "backToProvider": "Retourner chez votre fournisseur",
     "skipToContent": "Aller au contenu",
     "tagline": "Des cartes mémoire à répétition espacée, conservées dans votre propre Pod Solid.",
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
@@ -1748,6 +1749,8 @@
     "loginIssuerMismatch": "Vous êtes revenu d’un autre fournisseur que celui auprès duquel vous vous êtes connecté, donc Solid Memo a arrêté la connexion par sécurité. Reconnectez-vous.",
     "loginNotStarted": "Solid Memo n’a pas lancé cette connexion dans cet onglet, donc il l’a arrêtée par sécurité. Reconnectez-vous dans cet onglet.",
     "loginProviderRefused": "Les réglages de votre fournisseur indiquent une adresse que Solid Memo ne peut pas utiliser en sécurité, donc il a arrêté la connexion. Choisissez un autre fournisseur.",
+    "restoreTimedOut": "Votre fournisseur n’a pas répondu à temps, donc Solid Memo a arrêté de restaurer votre session. Reconnectez-vous ou choisissez un autre fournisseur.",
+    "restoreNotReturned": "Votre fournisseur ne vous a pas renvoyé ici, donc Solid Memo a arrêté de restaurer votre session. Retournez chez votre fournisseur, reconnectez-vous ou choisissez un autre fournisseur.",
     "profileNoSubject": "Votre profil ne vous décrit pas, Solid Memo ne peut donc pas y noter où se trouvent vos données. Vérifiez votre profil auprès de votre fournisseur de Pod, puis réessayez.",
     "privateTypeIndexNotLinked": "Solid Memo n’a pas pu relier à votre profil sa liste privée de vos données. Vérifiez que Solid Memo peut modifier votre profil, puis réessayez.",
     "publicTypeIndexNotLinked": "Solid Memo n’a pas pu relier à votre profil sa liste publique de vos données. Vérifiez que Solid Memo peut modifier votre profil, puis réessayez.",

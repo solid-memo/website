@@ -5,6 +5,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
 import { AppError } from "@solid-memo/domain/appError";
+import { createSolidSessionGateway } from "../solidSessionGateway";
 import { type LoginOptions, ReadLimitError } from "./interface";
 import {
   ACCESS_CONTROL_LIMITS,
@@ -84,6 +85,57 @@ describe("createSessionClient, over what the library keeps", () => {
       getDefaultSession().info.sessionId,
     );
     await expect(createSessionClient().sessionIssuer()).resolves.toBe(ISSUER);
+  });
+
+  describe("a silent restore's answer", () => {
+    const ATTEMPT = JSON.stringify({ issuer: ISSUER, at: 0 });
+
+    /** The tab has left for the provider, which sends it back to `address`. */
+    async function answered(address: (state: string) => string) {
+      const request = await startLogin();
+      window.localStorage.setItem(
+        "solidClientAuthn:currentSession",
+        getDefaultSession().info.sessionId,
+      );
+      window.sessionStorage.setItem("solid-memo:restore-attempt", ATTEMPT);
+      window.sessionStorage.setItem("solid-memo:login-issuer", ISSUER);
+      window.sessionStorage.setItem("solid-memo:provider-redirect", "restore");
+      window.history.replaceState(null, "", address(request.searchParams.get("state")!));
+      return createSolidSessionGateway({
+        clientName: "Solid Memo",
+        site: "https://memo.example/",
+        client: createSessionClient(),
+      });
+    }
+
+    const iss = encodeURIComponent(ISSUER);
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+      window.sessionStorage.clear();
+      window.history.replaceState(null, "", "/");
+    });
+
+    it("does not lead to another silent request when it answers no request", async () => {
+      const gateway = await answered(() => `/?error=login_required&iss=${iss}`);
+      const fetched = vi.mocked(globalThis.fetch);
+      fetched.mockClear();
+      await expect(gateway.restore()).rejects.toMatchObject({ code: "loginNotStarted" });
+      // The library set off nothing: no metadata fetched, on the app's address still.
+      expect(fetched).not.toHaveBeenCalled();
+      expect(window.location.search).toBe("");
+      expect(window.sessionStorage.getItem("solid-memo:provider-redirect")).toBe("restore");
+      // Another page could have sent it: the session stays.
+      expect(window.localStorage.getItem("solidClientAuthn:currentSession")).not.toBeNull();
+    });
+
+    it("ends the session, with no other silent request, when the provider refuses the request", async () => {
+      const gateway = await answered((state) => `/?error=login_required&state=${state}&iss=${iss}`);
+      await expect(gateway.restore()).resolves.toBeNull();
+      expect(window.location.origin).not.toBe(new URL(ISSUER).origin);
+      expect(window.location.search).toBe("");
+      expect(window.localStorage.getItem("solidClientAuthn:currentSession")).toBeNull();
+    });
   });
 });
 
@@ -405,5 +457,49 @@ describe("createSessionClient, with the library's own sessions", () => {
       expect(refusalOf(held)).toBeInstanceOf(ReadLimitError);
       await expect((await fetch(AT_PATH)).text()).resolves.toBe(text);
     });
+  });
+});
+
+// Last in the file: the library's default session stays busy with a restore that never settles.
+describe("createSessionClient, over a restore that never settles", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    window.localStorage.clear();
+  });
+
+  it("gets past a provider whose metadata has no authorization endpoint", async () => {
+    // The tests above leave the library's default session logged in.
+    await getDefaultSession().logout({ logoutType: "app" });
+    await startLogin();
+    const sessionId = getDefaultSession().info.sessionId;
+    window.localStorage.setItem("solidClientAuthn:currentSession", sessionId);
+    // On a later visit the provider answers with metadata the library can't use.
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        const { authorization_endpoint: _, ...metadata } = await provider(
+          `${ISSUER}.well-known/openid-configuration`,
+        ).json();
+        return Response.json(metadata);
+      }),
+    );
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    try {
+      const gateway = createSolidSessionGateway({
+        clientName: "Solid Memo",
+        site: "https://memo.example/",
+        client: createSessionClient(),
+      });
+      const given = expect(gateway.restore()).rejects.toMatchObject({ code: "restoreTimedOut" });
+      await vi.advanceTimersByTimeAsync(60_000);
+      await given;
+    } finally {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    }
+    // The next visit has nothing to restore silently, so it does not repeat this.
+    expect(window.localStorage.getItem("solidClientAuthn:currentSession")).toBeNull();
+    await expect(createSessionClient().sessionIssuer()).resolves.toBeNull();
   });
 });
