@@ -19,9 +19,9 @@ import { queryKeys } from "./queryKeys";
  * addresses and "These are this deck's documents", which asks once more,
  * then marks them as the deck's (UseCases.claimDeckDocuments) and reads
  * every check of the instance afresh. A deck with documents that may not
- * be claimed (`outsidePod`) has no such button, and says which and why. Nothing when there are none.
- * Solid Memo shows it with the data check; the Studio, on its Health
- * screen.
+ * be claimed (`outsidePod`) has no such button, and says which and why.
+ * Nothing when there are none. Solid Memo shows it with the data check;
+ * the Studio, on its Health screen.
  */
 export function UnclaimedDecksNotice({
   useCases,

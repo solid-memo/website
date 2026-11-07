@@ -445,7 +445,7 @@
   },
   "unclaimedDecks": {
     "region": "Paquets à confirmer",
-    "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant que vous n’avez pas confirmé qu’ils sont ceux des paquets.",
+    "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant qu’ils ne sont pas marqués comme ceux des paquets.",
     "hint": "Les documents d’un paquet ici n’indiquent pas qu’ils lui appartiennent, et ils se trouvent hors du dossier propre de l’instance, où les données de quelqu’un d’autre pourraient être désignées. Solid Memo les lit et vous permet d’en étudier, mais n’y enregistre ni réponse ni modification, et retirer le paquet ne retire que son entrée. Là où Solid Memo le propose, ne confirmez que des documents dont vous savez qu’ils sont ceux du paquet.",
     "deck": "{deck} : ses documents n’indiquent pas qu’ils appartiennent à ce paquet.",
     "claim": "Ce sont les documents de ce paquet",

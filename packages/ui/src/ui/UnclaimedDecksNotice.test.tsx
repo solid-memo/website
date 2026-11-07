@@ -67,14 +67,14 @@ describe("UnclaimedDecksNotice", () => {
     expect(screen.queryByRole("button", { name: "Mark them as the deck's" })).toBeNull();
   });
 
-  it("offers no claim of a deck with a document outside the instance's pod, and says which and why", () => {
+  it("offers no claim of a deck with a document that may not be claimed, and says which and why", () => {
     const outside = "https://alice.example/profile/card";
     renderNotice(makeUseCasesFake(), [
       { ...SPANISH, documents: [...SPANISH.documents, outside], outsidePod: [outside] },
       { ...SPANISH, deckUrl: `${INSTANCE}catalog.ttl#deck-2` },
     ]);
     expect(screen.getByText(/they are outside this instance's folder/)).toHaveTextContent(outside);
-    // Only the other deck, all of whose documents are in the pod, can be claimed.
+    // Only the other deck, with no such document, can be claimed.
     expect(screen.getAllByRole("button", { name: "These are this deck's documents" })).toHaveLength(
       1,
     );

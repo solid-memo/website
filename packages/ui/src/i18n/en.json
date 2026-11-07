@@ -436,7 +436,7 @@
   },
   "unclaimedDecks": {
     "region": "Decks to confirm",
-    "heading": "Solid Memo changes nothing in these decks' documents until you confirm they are the decks' own.",
+    "heading": "Solid Memo changes nothing in these decks' documents unless they are marked as the decks' own.",
     "hint": "A deck's documents here don't say they belong to it, and they are outside the instance's own folder, where someone else's data could be named. Solid Memo reads them and studies from them, but saves no answer or edit there, and removing the deck removes only its entry. Where Solid Memo offers it, confirm only documents you know are the deck's.",
     "deck": "{deck}: its documents don't say they belong to this deck.",
     "claim": "These are this deck's documents",

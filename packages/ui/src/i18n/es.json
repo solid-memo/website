@@ -445,7 +445,7 @@
   },
   "unclaimedDecks": {
     "region": "Mazos por confirmar",
-    "heading": "Solid Memo no cambia nada en los documentos de estos mazos hasta que confirmes que son de los mazos.",
+    "heading": "Solid Memo no cambia nada en los documentos de estos mazos mientras no estén marcados como de los mazos.",
     "hint": "Los documentos de un mazo aquí no indican que le pertenecen y están fuera de la carpeta propia de la instancia, donde podrían figurar datos de otra persona. Solid Memo los lee y estudia con ellos, pero no guarda allí respuestas ni cambios, y al quitar el mazo solo se quita su entrada. Donde Solid Memo lo ofrezca, confirma solo los documentos que sepas que son del mazo.",
     "deck": "{deck}: sus documentos no indican que pertenecen a este mazo.",
     "claim": "Estos son los documentos de este mazo",

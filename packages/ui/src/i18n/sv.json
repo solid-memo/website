@@ -436,7 +436,7 @@
   },
   "unclaimedDecks": {
     "region": "Kortlekar att bekräfta",
-    "heading": "Solid Memo ändrar inget i de här kortlekarnas dokument förrän du bekräftar att de är kortlekarnas egna.",
+    "heading": "Solid Memo ändrar inget i de här kortlekarnas dokument så länge de inte är markerade som kortlekarnas egna.",
     "hint": "En kortleks dokument här säger inte att de hör till den, och de ligger utanför instansens egen mapp, där någon annans data kan vara angivna. Solid Memo läser dem och studerar från dem, men sparar inga svar eller ändringar där, och tar du bort kortleken tas bara dess post bort. Där Solid Memo erbjuder det, bekräfta bara dokument som du vet är kortlekens.",
     "deck": "{deck}: dess dokument säger inte att de hör till den här kortleken.",
     "claim": "Det här är kortlekens dokument",
@@ -444,7 +444,7 @@
     "confirmButton": "Markera dem som kortlekens",
     "cancel": "Avbryt",
     "claiming": "Markerar …",
-    "outsidePod": "Solid Memo kan inte markera de här dokumenten som kortlekens: de ligger utanför instansens mapp, och Solid Memo hittade ingen Pod av dina som rymmer både dem och instansen. De förblir som de är:"
+    "outsidePod": "Solid Memo kan inte markera de här dokumenten som kortlekens: de ligger utanför instansens mapp, och Solid Memo hittade ingen Pod som är din och rymmer både dem och instansen. De förblir som de är:"
   },
   "deckAbout": {
     "label": "Om den här kortleken",
@@ -1704,7 +1704,7 @@
     "deckGone": "Kortleken ”{deck}” finns inte längre. Kanske togs den bort i en annan flik eller app.",
     "cardsDocumentGone": "Korten i ”{deck}” går inte längre att hitta. Läs in sidan igen och försök på nytt.",
     "deckDocumentUnclaimed": "Solid Memo ändrade inte ”{deck}”: dess dokument säger inte att de hör till den här kortleken. Inget ändrades. Om datakontrollen erbjuder det för den här kortleken, bekräfta att de är dess dokument och försök sedan igen.",
-    "claimOutsidePod": "Solid Memo markerade inte dokumenten för ”{deck}” som kortlekens: {url} ligger utanför instansens mapp, och Solid Memo hittade ingen Pod av dina som rymmer både dokumentet och instansen. Inget ändrades.",
+    "claimOutsidePod": "Solid Memo markerade inte dokumenten för ”{deck}” som kortlekens: {url} ligger utanför instansens mapp, och Solid Memo hittade ingen Pod som är din och rymmer både dokumentet och instansen. Inget ändrades.",
     "cardGone": "Kortet finns inte längre. Kanske togs det bort i en annan flik eller app. Läs in sidan igen.",
     "notADeck": "Det är ingen kortlek från Solid Memo, så den kan inte läggas till. Välj en annan kortlek.",
     "libraryIdsRepeat": "Den här kortleken ger två av sina kort eller felaktiga alternativ samma id, så Solid Memo kan inte läsa den. Be den som skapade den att kontrollera den.",
