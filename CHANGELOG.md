@@ -21,6 +21,25 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.27](https://github.com/solid-memo/website/compare/v6.29.26...v6.29.27) (2026-11-07)
+
+### Bug Fixes
+
+* **application:** say a claim keeps to storages found to hold the instance ([0340629](https://github.com/solid-memo/website/commit/03406299962c68816eab116732273c15f0b3bef2))
+* **application:** say a course answer keeps a card the deck has ([0ce7df3](https://github.com/solid-memo/website/commit/0ce7df368a996faaeee4a953234445166fa2360f))
+* **domain:** key agent URLs by pieces, not as one long string ([b6589fb](https://github.com/solid-memo/website/commit/b6589fbf6dbcac96a17bd814eb00ffe9db629ef4))
+* **domain:** let a card with two wrong options of one id be put right ([07d9929](https://github.com/solid-memo/website/commit/07d99297147d28e62d9ae95bd9c208f3e2250907))
+* **domain:** write a review date the switch to FSRS-6 can save ([818f40a](https://github.com/solid-memo/website/commit/818f40a4a43c5db3ab8da8da6df588a2af621902))
+* **release:** keep no statements of a creator with no agent record ([ccc7e0e](https://github.com/solid-memo/website/commit/ccc7e0e88f986ced578d979e2f44fc46421ab55f))
+* **session:** end the session of a page back from the cache, and only on a logout ([eeca751](https://github.com/solid-memo/website/commit/eeca751e2c81cc21e61f576cd215282aa1dd7c3a))
+* **solid:** check an import's entry before writing its documents ([ef7deea](https://github.com/solid-memo/website/commit/ef7deea12dba03769aed1bcb5154e2d177fc41a6))
+* **solid:** keep a login that follows a failed silent restore ([94eb173](https://github.com/solid-memo/website/commit/94eb1736a3df2893c29a9dd953ea817e7c5b00cd))
+* **solid:** name the subject bound when a read is refused for it ([b4f71c7](https://github.com/solid-memo/website/commit/b4f71c752b6d192e7a985b1662a009e0f2f9422b))
+* **solid:** test refusing a release under an address with an empty segment ([d197772](https://github.com/solid-memo/website/commit/d197772f3a4b84172909c50f82aa36f352beaa4a))
+* **solid:** test the metadata guard on every endpoint it refuses ([5a98bee](https://github.com/solid-memo/website/commit/5a98beed707222179b94d55c9c0b958e51b6dd35))
+* **ui:** keep the option chosen when a final review's position shifts ([789c502](https://github.com/solid-memo/website/commit/789c50260cfe5f3a10236475a78bf996f03016a2))
+* **ui:** show a linked deck's pictures only once the learner chooses ([fe517cc](https://github.com/solid-memo/website/commit/fe517cc58ebf0f31341daf25c16aa937b8e99fba))
+
 ## [6.29.26](https://github.com/solid-memo/website/compare/v6.29.25...v6.29.26) (2026-11-07)
 
 ### Bug Fixes
