@@ -92,7 +92,8 @@ export interface CourseChoice {
 export interface CourseAnswer {
   /**
    * "introduce": the card joined the deck ("Added to your deck"), graded;
-   * "review": it was graded; "none": nothing was written.
+   * "review": it was graded, a card the deck already had; "none": nothing
+   * was written.
    */
   effect: CourseAnswerEffect["kind"];
   /** The card's review state after the answer; null for a card that has none. */
@@ -207,11 +208,10 @@ export function createCourseUseCases({
       if (effect.kind === "none") return { effect: "none", state: current.sm2 };
       // The card joins the deck before its first state, so no state is ever without its card.
       // It names the release it is taken from, the one the deck names: the series' card, which an upgrade may change.
-      if (effect.kind === "introduce")
-        await deckRepository.applyCardChanges(deck, {
-          save: [{ ...card, fromRelease: sourceOf(deck) }],
-          remove: [],
-        });
+      // No state doesn't mean no card: one the deck has at that id is graded as it stands, its mark or lack of one too.
+      const added =
+        effect.kind === "introduce" &&
+        (await deckRepository.addCardIfAbsent(deck, { ...card, fromRelease: sourceOf(deck) }));
       const chosen =
         choice.correct || choice.distractorId === undefined
           ? undefined
@@ -229,7 +229,7 @@ export function createCourseUseCases({
         },
         { prefs },
       );
-      return { effect: effect.kind, state };
+      return { effect: added ? "introduce" : "review", state };
     },
     completeChapter(deck, chapterUrl) {
       return deckRepository.completeChapter(deck, chapterUrl);

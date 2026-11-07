@@ -141,9 +141,10 @@ new type-index entries ([data-model.md](data-model.md#courses)):
 
 - **A card joins the deck when its question is answered.** Starting a
   course creates an empty deck, and the first answer to a question
-  writes the card, its distractors and its first review state. Study
-  never shows a card the learner hasn't reached, and an older app sees a
-  plain deck.
+  writes the card, its distractors and its first review state. A card
+  the deck already has at that id stays as it is and only gets the
+  state. Study never shows a card the learner hasn't reached, and an
+  older app sees a plain deck.
 - **Progress is derived, not stored** (`courseProgress`):
   - A card is answered when it has a front→back review state.
   - A step is done when every card that checks it is answered. The
@@ -307,7 +308,7 @@ its current release is a course; anything else offers nothing.
 | `getCourse(deck)` | The course as the learner has it: the deck as its entry is now, the release, its outline, its cards by id, the cards answered and the progress. Writes nothing. A deck that's gone throws `deckGone`. |
 | `getLibraryCourse(deck)` | For a library course's preview, before it's added: the release's outline, asking only its cards (`outlineOfCards`), and its cards by id. Writes nothing. |
 | `getCourseSummary(deck)` | For the deck list's strip: the outline of the release the deck names and the cards answered. The deck is taken as given, not read again, and the release's cards aren't mapped. Writes nothing. |
-| `answerCourseQuestion(instanceUrl, deck, card, choice, now, times?)` | Grades one answer as `courseAnswerEffect` says, logging how long choosing took (`times.recallMillis`). A card introduced is written first (`applyCardChanges`), then graded, so a review state never exists without its card. Returns the effect and the card's state. |
+| `answerCourseQuestion(instanceUrl, deck, card, choice, now, times?)` | Grades one answer as `courseAnswerEffect` says, logging how long choosing took (`times.recallMillis`). A card introduced is written first, only when the deck has no card at its id (`addCardIfAbsent`), then graded, so a review state never exists without its card. A card already there is graded as it stands: its text stays, and so does the release it names, or its lack of one, and the effect is `review`, since nothing joined the deck. Returns the effect and the card's state. |
 | `completeChapter(deck, chapterUrl)` | Adds `sm:completedChapter` to the deck's entry. |
 | `setCompletedChapters(deck, edit)` | The Studio's change of the chapters completed: one marked not done (in any release, by its fragment id), or the course restarted, none completed. Answers and review states stay. |
 

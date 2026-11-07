@@ -787,7 +787,7 @@ answers like study answers:
 
 - A card introduced today loses its state but stays in the deck, with
   its distractors: new in study, its course step not done, introduced
-  again when its question is answered.
+  again when its question is answered, keeping any edit made to it.
 - A card reviewed today gets its snapshot back.
 - The day's multiple-choice answers leave the answer log.
 - A chapter completed today stays completed: `sm:completedChapter` is

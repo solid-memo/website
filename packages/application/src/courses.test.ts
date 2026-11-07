@@ -340,13 +340,12 @@ describe("courses", () => {
       { recallMillis: 3100 },
     );
     // The card names the release it was taken from, the one the deck names: the series' card.
-    expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledWith(courseDeck, {
-      save: [{ ...question, fromRelease: RELEASE }],
-      remove: [],
+    expect(deps.deckRepository.addCardIfAbsent).toHaveBeenCalledWith(courseDeck, {
+      ...question,
+      fromRelease: RELEASE,
     });
-    expect(
-      vi.mocked(deps.deckRepository.applyCardChanges).mock.invocationCallOrder[0],
-    ).toBeLessThan(
+    expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    expect(vi.mocked(deps.deckRepository.addCardIfAbsent).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(deps.reviewStateRepository.gradeReviewState).mock.invocationCallOrder[0]!,
     );
     expect(answered).toEqual({
@@ -404,6 +403,14 @@ describe("courses", () => {
     ]);
   });
 
+  it("answerCourseQuestion says a card the deck already had was reviewed, not added", async () => {
+    const { deps, useCases } = setup();
+    vi.mocked(deps.deckRepository.addCardIfAbsent).mockResolvedValue(false);
+    await expect(
+      useCases.answerCourseQuestion(instance.url, courseDeck, question, { correct: true }, noon),
+    ).resolves.toMatchObject({ effect: "review", state: { repetitions: 1 } });
+  });
+
   it("answerCourseQuestion writes nothing for a right answer on a card graded today, and lapses it on a wrong one, without writing the card again", async () => {
     const { deps, useCases, appended } = setup();
     const morning = stateOf(new Date(2026, 9, 7, 9, 0), "2026-10-08");
@@ -422,7 +429,7 @@ describe("courses", () => {
       effect: "review",
       state: { repetitions: 0, firstReviewedAt: morning.firstReviewedAt },
     });
-    expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    expect(deps.deckRepository.addCardIfAbsent).not.toHaveBeenCalled();
     await useCases.refreshStudyDigest(instance.url, courseDeck);
     expect(appended).toEqual([expect.objectContaining({ grade: 1, priorDue: "2026-10-08" })]);
   });
