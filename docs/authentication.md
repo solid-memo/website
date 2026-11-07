@@ -53,7 +53,7 @@ a logout leaves the ID on the page. So
 new ID to every login the user starts. The library clears what it kept
 of earlier sessions on that login, so another tab still under the old
 ID has no provider to refresh at, and sends nothing. That tab's session
-ends once its access token expires
+ends at its next refused read after the access token expires
 ([An expired session](#an-expired-session)). A silent restore keeps its
 session's ID, since it goes to that session's provider.
 

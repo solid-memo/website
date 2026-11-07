@@ -112,9 +112,9 @@ const guardedFetches = new WeakSet<typeof globalThis.fetch>();
  * from an address ending in the metadata's path is looked at, under
  * PROFILE_LIMITS. Any document can sit at this path, and the limits of
  * the read that asked for it wrap this fetch, so they apply only once it
- * has answered; these allow a profile all its own do, and past them the
- * read fails as too large. A login and a restore put it in place: a
- * session comes from one of them.
+ * has answered; these allow as much as a profile read's own limits do,
+ * and past them the read fails as too large. A login and a restore put
+ * it in place: a session comes from one of them.
  */
 function guardProviderMetadata(): void {
   const { fetch: next } = globalThis;
