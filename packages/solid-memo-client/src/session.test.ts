@@ -362,6 +362,15 @@ const harness: SessionHarness = {
       pendingReturn({ silentFrom: from });
     }
   },
+  refuseRestore(from) {
+    storedSession(WEBID);
+    pendingReturn({ silentFrom: from });
+    window.history.replaceState(
+      null,
+      "",
+      `/?error=login_required&state=state-1&iss=${encodeURIComponent(ISSUER)}`,
+    );
+  },
   sessionAt(issuer) {
     storedSession(WEBID);
     memory.session = { ...memory.session!, issuer };

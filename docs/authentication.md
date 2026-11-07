@@ -237,6 +237,14 @@ completed on this load), and `"restored"` otherwise. The UI shows the
 "Pod connected" onboarding step only for `"login"`, unless every instance's preferences say to skip it
 ([onboarding.md](onboarding.md#skipping-the-connected-screen)).
 
+The library tells a login from a silent restore only by the page it
+keeps in `localStorage` (`solidClientAuthn:currentUrl`) on leaving for
+a restore, and it keeps a session for later reloads only after a
+login. Only a completed redirect takes that page off, so the sign-in
+client also does when the provider's answer to this tab is an error,
+and before every login. A login after a failed restore is then a login
+like any other.
+
 `restore()` completes only a redirect this tab set off. Before a
 login, and before a restore that may leave for the provider, the
 sign-in client marks the tab in `sessionStorage`

@@ -70,12 +70,12 @@ server already on port 4173, which may serve another build
 ([testing.md](testing.md#user-journeys)).
 
 Under the switch, the tests of the four Inrupt modules this client
-replaces (`packages/solid/src/client/{access,rdf,resources,session,session.library}.test.ts`)
+replaces (`packages/solid/src/client/{access,rdf,resources,session,session.library,session.redirect.library}.test.ts`)
 test what is the library's alone, and some fail. The rest of `solid`
 runs without them, as CI runs it:
 
 ```sh
-SOLID_CLIENT=solid-memo-client npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session,session.library}.test.ts'
+SOLID_CLIENT=solid-memo-client npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session,session.library,session.redirect.library}.test.ts'
 ```
 
 Turbo hashes `SOLID_CLIENT` (`globalEnv`) and `scripts/solidClient.ts`

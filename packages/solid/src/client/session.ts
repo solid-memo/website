@@ -30,8 +30,15 @@ export type { SessionClient } from "./interface";
  * restores silently: its ID, and under that its fields, the issuer
  * among them. A silent restore logs in again at that issuer. A login
  * request's state is kept under the same prefix, naming its session.
+ *
+ * The page a silent restore left from is kept too, and that key alone
+ * tells the library a completed redirect is a restore, not a login: it
+ * reports SESSION_RESTORED, and does not keep the session, while the key
+ * is there. Only a completed redirect takes it off, so the client does
+ * when a silent restore did not complete.
  */
 const CURRENT_SESSION_KEY = "solidClientAuthn:currentSession";
+const CURRENT_URL_KEY = "solidClientAuthn:currentUrl";
 const USER_PREFIX = "solidClientAuthenticationUser:";
 
 /** One of the library's entries, by user (a session or a state); none unless an object. */
@@ -137,12 +144,20 @@ function guardProviderMetadata(): void {
   globalThis.fetch = guarded;
 }
 
+/** Forgets the page a silent restore left from, once the provider's answer to this tab is an error. */
+function forgetRefusedRestore(): void {
+  if (new URL(window.location.href).searchParams.has("error")) {
+    window.localStorage.removeItem(CURRENT_URL_KEY);
+  }
+}
+
 /** The sign-in client on @inrupt/solid-client-authn-browser's default session. */
 export function createSessionClient(): SessionClient {
   return {
     async restore() {
       guardProviderMetadata();
       dropUnaskedAnswer();
+      forgetRefusedRestore();
       let fromLogin = false;
       const onLogin = () => {
         fromLogin = true;
@@ -179,8 +194,10 @@ export function createSessionClient(): SessionClient {
       return storedSessionIssuer(sessionOfState(state));
     },
 
+    // A silent restore goes through the library's own login, not this one, and keeps its page.
     async login(options) {
       guardProviderMetadata();
+      window.localStorage.removeItem(CURRENT_URL_KEY);
       window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "login");
       try {
         // A new ID each time, never the one this page restored: the
