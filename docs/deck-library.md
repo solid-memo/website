@@ -379,6 +379,9 @@ every Monday, and by hand (Actions › Taxonomy › Run workflow):
 - It pushes a commit to the branch `taxonomy-deck` whose `Closes:`
   lines close that issue and those of earlier taxonomy versions still
   open, and opens a pull request from it, or updates the open one.
+  Only a pull request from this repository's own branch counts, in
+  this step and the `check` job; a fork's branch of the same name
+  doesn't.
 - An open pull request for the newest taxonomy version is left alone
   until a maintainer merges it, or closes it to have it remade; nothing
   merges it automatically. Once merged through the merge queue

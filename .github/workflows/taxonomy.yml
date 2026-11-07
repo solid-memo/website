@@ -40,7 +40,9 @@ defaults:
 jobs:
   # One small request: the taxonomy's versions, against the newest the deck
   # records. A pull request already open for the newest version is left as
-  # it is, so the deck is not made again every week until it is merged.
+  # it is, so the deck is not made again every week until it is merged. Only
+  # this repository's branch counts: the head filter names its owner, so a
+  # fork's branch of the same name is not asked for at all.
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -66,7 +68,7 @@ jobs:
           UPDATE: ${{ steps.check.outputs.update }}
           NEWEST: ${{ steps.check.outputs.newest }}
         run: |
-          title="$(gh pr list --head "$BRANCH" --state open --json title --jq '.[0].title // ""')"
+          title="$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].title // ""')"
           if [ "$UPDATE" = true ] && [[ "$title" == *"taxonomy version $NEWEST "* ]]; then
             echo "::notice::The pull request for taxonomy version $NEWEST is open already: merge it, or close it to have it made again."
             echo "update=false" >> "$GITHUB_OUTPUT"
@@ -288,10 +290,12 @@ jobs:
           $CLOSES
           EOF
           )"
-          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" = "0" ]; then
+          # This repository's branch alone, as in the check job.
+          number="$(gh api "repos/$GITHUB_REPOSITORY/pulls?head=$GITHUB_REPOSITORY_OWNER:$BRANCH&state=open" --jq '.[0].number // ""')"
+          if [ -z "$number" ]; then
             gh pr create --head "$BRANCH" --title "$title" --body "$body" --label deck
           else
-            gh pr edit "$BRANCH" --title "$title" --body "$body"
+            gh pr edit "$number" --title "$title" --body "$body"
           fi
 
   failed:
