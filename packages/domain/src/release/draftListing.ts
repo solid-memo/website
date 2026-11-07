@@ -8,6 +8,7 @@ import { CARD_FORMAT_VERSION, type Distractor } from "../deck.ts";
 import { distractorFromRecord, libraryCardFromRecord } from "../deckRecord.ts";
 import { copyKeywords } from "../keywords.ts";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent, LibrarySource } from "../library.ts";
+import { TextMap } from "../pathKeys.ts";
 import { iriIn, type ReleaseDraft, triplesBySubject } from "./releaseDraft.ts";
 import { DCTERMS_NS } from "./releaseModel.ts";
 
@@ -21,7 +22,8 @@ import { DCTERMS_NS } from "./releaseModel.ts";
  */
 export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
   const { root } = draft;
-  const names = new Map(draft.agents.map((agent) => [iriIn(draft, agent.id), agent.data.name]));
+  const names = new TextMap<string>();
+  for (const agent of draft.agents) names.set(iriIn(draft, agent.id), agent.data.name);
   // A source named twice is listed once, as the release's statements would name it.
   const sources = new Set(root.wasDerivedFrom);
   const saying = triplesBySubject(draft.triples, sources);

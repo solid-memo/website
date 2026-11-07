@@ -44,6 +44,7 @@ import {
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { moved } from "@solid-memo/domain/release/releaseToDraft";
+import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { addCatalogLink, catalogLinks, removeCatalogLink } from "./catalogLinks";
 import { deleteContainerIfEmpty } from "./containers";
@@ -66,6 +67,7 @@ import {
   quadsOf,
   sameEntry,
   termOf,
+  termTooLong,
   tripleParts,
   type DraftEntry,
   UNPUBLISHED_ROOT_PREDICATES,
@@ -311,7 +313,12 @@ export function createSolidReleaseDraftRepository({
       if (!urls.includes(draftUrl)) throw new AppError("draftGone");
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
       const inPlace = inPlaceIn(draftContainerOf(draftUrl), draftUrl);
-      const to = (iri: string) => moved(iriOf(iri), draftUrl, targetUrl);
+      const to = (iri: string) => {
+        const there = moved(iriOf(iri), draftUrl, targetUrl);
+        // Past the bound no document holds it: refused before the statements are keyed by it, which V8 would hash by its length alone (GHSA-4mgg-5xpp-3jx5).
+        if (isIriPastBound(there)) throw termTooLong();
+        return there;
+      };
       const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
       if (version !== undefined && versionOfDocuments(urls, datasets) !== version)
         throw new AppError("changedElsewhere", { url: draftUrl });

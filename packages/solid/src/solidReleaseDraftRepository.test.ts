@@ -21,6 +21,8 @@ import {
 } from "@solid-memo/domain/release/releaseDraft";
 import { rebaseDraft, releaseToDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
+import { namesOf } from "@solid-memo/domain/testing/longAgents";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
@@ -148,6 +150,15 @@ describe("create", () => {
     await expect(
       pod.repository.create(INSTANCE, chapterNamed(course(), ESCAPING_ID)),
     ).rejects.toMatchObject({ code: "draftIdUnsupported", vars: { id: ESCAPING_ID } });
+    expect(writes(pod)).toEqual([]);
+  });
+
+  it("refuses a draft with an IRI longer than a term may be, writing nothing (GHSA-4mgg-5xpp-3jx5)", async () => {
+    const pod = await draftPod();
+    const agents = [{ id: "a".repeat(16_383), data: { name: "Name" } }];
+    await expect(pod.repository.create(INSTANCE, { ...course(), agents })).rejects.toMatchObject({
+      code: "termTooLong",
+    });
     expect(writes(pod)).toEqual([]);
   });
 
@@ -769,6 +780,61 @@ describe("applyChanges", () => {
         .map((node) => node.id)
         .sort(),
     ).toEqual(["q-a-2a", "q-loose"]);
+  });
+});
+
+describe("assemble with an IRI its move takes past the bound (GHSA-4mgg-5xpp-3jx5)", () => {
+  /** A release's address that is `longer` characters longer than the draft's. */
+  const targetLongerBy = (longer: number) =>
+    `${DECKS}${"y".repeat(DRAFT.length - DECKS.length - ".ttl".length + longer)}.ttl`;
+
+  /** A pod with a draft of `count` agents, each at the longest IRI a document holds. */
+  async function podWithAgents(count: number) {
+    const pod = await draftPod();
+    const blank = blankDraft({ url: DRAFT, course: false, title: { en: "t" }, now: NOW });
+    const ids = namesOf(count, 16_381 - `${DRAFT}#`.length);
+    await pod.repository.create(INSTANCE, {
+      ...blank,
+      root: { ...blank.root, creator: ids.map((id) => `${DRAFT}#${id}`) },
+      agents: ids.map((id) => ({ id, data: { name: "Name" } })),
+    });
+    return pod;
+  }
+  const refused = { code: "termTooLong", vars: { limit: 16_383 } };
+
+  it("writes one that stays in bound, and refuses it one character further", async () => {
+    const pod = await podWithAgents(1);
+    const turtle = await pod.repository.assemble(DRAFT, targetLongerBy(0), NOW);
+    expect(turtle.startsWith(`@base <${targetLongerBy(0)}> .`)).toBe(true);
+    await expect(pod.repository.assemble(DRAFT, targetLongerBy(1), NOW)).rejects.toMatchObject(
+      refused,
+    );
+  });
+
+  it("refuses it in time that grows with the agents, not their square", {
+    timeout: 180_000,
+  }, async () => {
+    const SIZE = 250;
+    const TIMES = 8;
+    const pods = new Map([
+      [SIZE, await podWithAgents(SIZE)],
+      [SIZE * TIMES, await podWithAgents(SIZE * TIMES)],
+    ]);
+    /** A release's address that takes the agents' IRIs past what V8 hashes all of. */
+    const target = targetLongerBy(8);
+    await expect(pods.get(SIZE)!.repository.assemble(DRAFT, target, NOW)).rejects.toMatchObject(
+      refused,
+    );
+    const ratio = await growthAsync(
+      (count) => () =>
+        pods
+          .get(count)!
+          .repository.assemble(DRAFT, target, NOW)
+          .catch(() => undefined),
+      SIZE,
+      TIMES,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 

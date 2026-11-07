@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { growth } from "../testing/growth";
+import { LONG_AGENTS } from "../testing/longAgents";
 import { courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/releaseDraft";
 import {
   applyDraftChanges,
@@ -155,6 +156,36 @@ describe("authors", () => {
     );
     expect(ratio).toBeLessThan(4);
   });
+});
+
+describe("otherAuthorsOf with agent IRIs longer than any term", () => {
+  it.each(LONG_AGENTS)(
+    "takes time that grows with the authors, not their square, with $variant (GHSA-4mgg-5xpp-3jx5)",
+    {
+      timeout: 180_000,
+    },
+    ({ subject, authors }) => {
+      const ratio = growth(
+        (count) => {
+          const url = subject.slice(0, subject.indexOf("#"));
+          const ids = authors(count);
+          const draft = {
+            ...courseDraft(),
+            url,
+            agents: ids.map((id) => ({ id, data: { name: id } })),
+          };
+          const named = {
+            ...draft,
+            root: { ...draft.root, creator: ids.map((id) => `${url}#${id}`) },
+          };
+          return () => otherAuthorsOf({ ...named, agents: [...named.agents] });
+        },
+        250,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
 });
 
 describe("sources", () => {

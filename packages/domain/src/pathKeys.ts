@@ -10,8 +10,20 @@
  * other, in time that grows with the square of their number. A term the
  * app reads is held to that length (MAX_TERM_CHARACTERS); strings
  * joined from several could be past it, so a key of several is a path
- * of them, never one string.
+ * of them, never one string. A string joined elsewhere, whose parts the
+ * code that keys it does not have, is a key of pieces (TextMap).
  */
+
+/** The most characters of a string V8 hashes all of: the bound on a term (MAX_TERM_CHARACTERS). */
+export const HASHED_CHARACTERS = 16_383;
+
+/** What a term's longest name holds beside an IRI or a blank node's label: `_:` before it, or `<>` around it. */
+export const TERM_NAME_ROOM = 2;
+
+/** Whether an IRI is longer than a term may be, as in `<>`: no document read or written holds one. */
+export function isIriPastBound(iri: string): boolean {
+  return iri.length + TERM_NAME_ROOM > HASHED_CHARACTERS;
+}
 
 /** A step of a path (PathMap): the steps that go on from it, and the value of the path that ends there. */
 interface PathStep<V> {
@@ -68,6 +80,42 @@ export class PathMap<V> {
     if (!step.held) this.#held.push(step);
     step.held = true;
     step.value = value;
+    return this;
+  }
+}
+
+/** A string as a path (PathMap) of pieces short enough for V8 to hash all of: the same path only for the same string. */
+function piecesOf(text: string): string[] {
+  const pieces: string[] = [];
+  for (let start = 0; start < text.length; start += HASHED_CHARACTERS) {
+    pieces.push(text.slice(start, start + HASHED_CHARACTERS));
+  }
+  return pieces;
+}
+
+/**
+ * A map from strings of any length, such as an IRI joined from a
+ * document and a fragment, each kept as the path of its pieces: its
+ * time grows with the strings' number however long they are.
+ */
+export class TextMap<V> {
+  readonly #paths = new PathMap<V>();
+
+  /** The values, in the order their strings were first set. */
+  values(): IterableIterator<V> {
+    return this.#paths.values();
+  }
+
+  has(text: string): boolean {
+    return this.#paths.has(piecesOf(text));
+  }
+
+  get(text: string): V | undefined {
+    return this.#paths.get(piecesOf(text));
+  }
+
+  set(text: string, value: V): this {
+    this.#paths.set(piecesOf(text), value);
     return this;
   }
 }

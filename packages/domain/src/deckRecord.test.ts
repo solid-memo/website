@@ -3,6 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { agentUrlsOf } from "./agentRecord";
+import { growth } from "./testing/growth";
+import { LONG_AGENTS } from "./testing/longAgents";
 import type { Deck, Distractor } from "./deck";
 import {
   cardContentFromRecord,
@@ -551,4 +554,26 @@ describe("library deck records", () => {
       direction: "bidirectional",
     });
   });
+});
+
+describe("deckAgents with URLs longer than any term", () => {
+  it.each(LONG_AGENTS)(
+    "takes time that grows with the authors, not their square, with $variant (GHSA-4mgg-5xpp-3jx5)",
+    {
+      timeout: 180_000,
+    },
+    ({ subject, authors: authorsOf }) => {
+      const ratio = growth(
+        (count) => {
+          const authors = authorsOf(count);
+          const deck = { url: subject, authors } as Deck;
+          const creator = agentUrlsOf(subject, authors);
+          return () => deckAgents(deck, creator);
+        },
+        250,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    },
+  );
 });

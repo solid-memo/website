@@ -16,7 +16,6 @@ import {
 } from "../client/rdf";
 import { directionOfConcept } from "@solid-memo/domain/concepts";
 import { copyKeywords } from "@solid-memo/domain/keywords";
-import { agentUrlOf } from "@solid-memo/domain/agentRecord";
 import { libraryCardFromRecord, libraryDeckFromRecord } from "@solid-memo/domain/deckRecord";
 import type {
   LibraryCard,
@@ -27,7 +26,7 @@ import type {
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { readDatetime, readVersioned, storedVersionOf } from "../records";
-import { agentNamesOf, distractorsOf, readCard } from "./deckMapper";
+import { agentNamesOf, authorOfAgents, distractorsOf, readCard } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
 import {
   courseOutlineFromRecords,
@@ -197,17 +196,14 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
   }
   const cards = refuseRepeatedIds(url, toLibraryCards(url, dataset));
   const subject = asUrl(deck!);
-  const names = agentNamesOf(dataset);
-  if (read.record.version < 3) {
-    for (const author of read.record.data.creator) names.set(agentUrlOf(subject, author), author);
-  }
+  const own = read.record.version < 3 ? read.record.data.creator : [];
   return {
     ...libraryDeckFromRecord(
       url,
       read.storedVersion,
       migrate("libraryDeck", read.record, { subject }),
       cards,
-      (agent) => names.get(agent) ?? agent,
+      authorOfAgents(subject, own, agentNamesOf(dataset)),
     ),
     ...courseOf(deck!),
     ...contactOf(deck!, dataset),
