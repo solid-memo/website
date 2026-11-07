@@ -64,12 +64,16 @@ check a draft's cards, distractors, agents and distributions.
   The class is Solid Memo's own or, for the standard classes it writes,
   DCAT's or FOAF's (`CLASS_NAMESPACES` in
   [packages/vocab/tooling/shapes.ts](../packages/vocab/tooling/shapes.ts)).
-  A subject with a Solid Memo class is checked against the shapes of
-  its Solid Memo classes only: a deck group, a `dcat:Catalog` too, is
-  never checked as `CatalogV1`. A subject with two Solid Memo classes
-  is checked against the shape of each at its version, as the reader of
-  each reads it. A class with no shape at that version is a violation
-  (`FormatVersionClass`). A deck's place in the pod is checked whenever
+  A subject with two classes is checked against the shape of each at
+  its version, as the reader of each reads it, a standard class's as
+  well as a Solid Memo one's; the report names the Solid Memo class's
+  shape. Only a deck group, a `dcat:Catalog` too, is never checked as
+  `CatalogV1`. `dcat:Dataset` beside `sm:Deck` has
+  no shape, so it asks nothing. A class with no shape at that version
+  is a violation (`FormatVersionClass`). A release holds subjects of
+  `sm:Deck`, `sm:Card`, `sm:Distractor`, `sm:Chapter` and `sm:Step`; a
+  subject of another Solid Memo class that has a shape is refused
+  there (`ReleaseClass`). A deck's place in the pod is checked whenever
   `sm:Deck` is among its classes.
 - **Fixed values tell shapes of one class apart.** A property shape
   with `sh:hasValue` and `sh:maxCount 1` on a predicate other than

@@ -172,7 +172,7 @@ export type ShapeProblem =
         profile?: string;
       };
     }
-  /** A subject typed with a Solid Memo term no shape of this app describes, or in a format it does not know. */
+  /** A subject typed with a Solid Memo term no shape of this app describes, of a class only a pod holds, or in a format it does not know. */
   | { code: "unshaped"; params: Record<string, never> };
 
 /**

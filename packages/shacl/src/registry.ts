@@ -5,7 +5,7 @@
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import type { ShapeContext, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
-import { SM_NS } from "@solid-memo/vocab/vocab.generated";
+import { SM, SM_NS } from "@solid-memo/vocab/vocab.generated";
 
 /**
  * Which shapes a subject is checked against: chosen by its rdf:types,
@@ -19,13 +19,27 @@ export type ShapePick =
   /**
    * The shape of each class of the subject that has one at its version,
    * and the classes whose shapes do not have that version: a subject is
-   * held to every class it has, as each class's reader reads it as one.
+   * held to every class it has, Solid Memo's or a standard one, as each
+   * class's reader reads it as one. Only a deck group isn't held to the
+   * catalog's shape. A Solid Memo class comes before a standard one, so
+   * the first descriptor, the shape a report names, is the Solid Memo
+   * class's whenever that class has one at this version.
    */
   | { kind: "shapes"; descriptors: readonly ShapeDescriptor[]; unknown: readonly ShapeName[] }
-  /** A version none of its classes' shapes has: newer data, left alone. */
+  /** A version none of its classes' shapes has: newer data, left alone. It names the first class's shape. */
   | { kind: "unknown-version"; shape: ShapeName; version: number; latest: number }
+  /** Of a Solid Memo class no subject of a release has, in a release: refused whatever its version. */
+  | { kind: "refused"; shapes: readonly ShapeName[] }
   /** Not a Solid Memo subject (no sm: class, or none for this context). */
   | { kind: "untyped" };
+
+/** The Solid Memo classes a release holds subjects of; the crosscheck lists them too (scripts/shaclCrosscheck.test.ts). */
+const RELEASE_CLASSES = new Set<string>([SM.Deck, SM.Card, SM.Distractor, SM.Chapter, SM.Step]);
+
+/** The shapes of Solid Memo's other classes: what a pod holds, which no reader of a release reads. */
+const NOT_IN_RELEASE = ALL_SHAPES.filter(
+  (d) => d.targetClass.startsWith(SM_NS) && !RELEASE_CLASSES.has(d.targetClass),
+);
 
 /** The IRIs a subject has as values of one predicate. */
 export type ValuesOf = (predicate: string) => readonly string[];
@@ -35,7 +49,8 @@ export type ValuesOf = (predicate: string) => readonly string[];
  * fixed values (an FSRS-6 review state's sm:scheduler) fits only a
  * subject that has them all, and is then preferred to its class's
  * shapes without: an FSRS-6 state is never checked as an SM-2 one, nor
- * an SM-2 state as FSRS-6's.
+ * an SM-2 state as FSRS-6's. A subject in a release of a class only a
+ * pod holds is refused.
  */
 export function pickShapes(
   types: readonly string[],
@@ -49,13 +64,22 @@ export function pickShapes(
       (d.context === "any" || d.context === context) &&
       d.fixedValues.every((fixed) => valuesOf(fixed.predicate).includes(fixed.value)),
   );
-  // A subject with a Solid Memo class is checked as its Solid Memo
-  // classes only: a deck group is a dcat:Catalog too, but not the catalog.
-  const own = (d: ShapeDescriptor) => d.targetClass.startsWith(SM_NS);
-  const classed = matching.some(own) ? matching.filter(own) : matching;
+  if (context === "library") {
+    const refused = NOT_IN_RELEASE.filter((d) => types.includes(d.targetClass));
+    if (refused.length > 0) {
+      return { kind: "refused", shapes: [...new Set(refused.map((d) => d.shape))] };
+    }
+  }
+  // A deck group is a dcat:Catalog too, but not the catalog, which is read
+  // at its own address: the one class a subject isn't held to.
+  const classed = matching.some((d) => d.shape === "deckGroup")
+    ? matching.filter((d) => d.shape !== "catalog")
+    : matching;
   if (classed.length === 0) return { kind: "untyped" };
   const fixed = (d: ShapeDescriptor) => d.fixedValues.length > 0;
-  const byClass = [...new Set(classed.map((d) => d.targetClass))].map((targetClass) => {
+  const own = (targetClass: string) => Number(targetClass.startsWith(SM_NS));
+  const classes = [...new Set(classed.map((d) => d.targetClass))].sort((a, b) => own(b) - own(a));
+  const byClass = classes.map((targetClass) => {
     const ofClass = classed.filter((d) => d.targetClass === targetClass);
     return ofClass.some(fixed) ? ofClass.filter(fixed) : ofClass;
   });

@@ -28,7 +28,7 @@ import { foreignSubjects, isDeckBackLink } from "./ownership";
 import { RDF, SM, SM_NS } from "./vocab";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
 import { coreOnly } from "@solid-memo/shacl/profiles";
-import { pickShapes } from "@solid-memo/shacl/registry";
+import { pickShapes, type ShapePick } from "@solid-memo/shacl/registry";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { createShapeLoader, type ShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { AppError } from "@solid-memo/domain/appError";
@@ -42,14 +42,6 @@ import { getSolidDatasetLinear } from "./client/resources";
 import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
-
-/** The IRIs a subject has as values of a predicate, among its own quads: what pickShapes asks of a subject. */
-function iriValuesIn(own: readonly Quad[]): (predicate: string) => string[] {
-  return (predicate) =>
-    own
-      .filter((q) => q.predicate.value === predicate && q.object.termType === "NamedNode")
-      .map((q) => q.object.value);
-}
 
 export interface ShaclShapeValidatorDeps {
   /** Fetches pod documents (authenticated). */
@@ -284,8 +276,22 @@ function classVersionViolation(shape: ShapeName, version: number): Violation {
   };
 }
 
+/** A subject of a class only a pod holds, in a release. */
+function releaseClassViolation(shape: ShapeName): Violation {
+  return {
+    path: RDF.type,
+    message: { en: `${RELEASE_CLASS} (${shape})` },
+    builtIn: true,
+    severity: "violation",
+    constraint: "ReleaseClass",
+  };
+}
+
+const RELEASE_CLASS =
+  "This subject has a Solid Memo class that only a pod holds, and no subject of a release has it";
+
 const FORMAT_VERSION_CLASS =
-  "This subject has more than one Solid Memo class, and one of them has no format of this version, so Solid Memo can't read the subject as that class";
+  "This subject has more than one class, and one of them has no format of this version, so Solid Memo can't read the subject as that class";
 
 const FORMAT_VERSION_RANGE =
   "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject.";
@@ -299,6 +305,24 @@ const DATE_TIME_RANGE =
  */
 function asWarning(violation: Violation): Violation {
   return violation.severity === "violation" ? { ...violation, severity: "warning" } : violation;
+}
+
+/** What a report says of a subject no shape is run on: refused in a release, or of a version below 1. */
+function shapelessResult(
+  pick: Extract<ShapePick, { kind: "refused" | "unknown-version" }>,
+  version: number,
+): { shape: ShapeName; version: number; violations: Violation[] } {
+  return pick.kind === "refused"
+    ? {
+        shape: pick.shapes[0],
+        version,
+        violations: pick.shapes.map(releaseClassViolation),
+      }
+    : {
+        shape: pick.shape,
+        version: pick.version,
+        violations: [formatVersionViolation(pick.version)],
+      };
 }
 
 /**
@@ -391,8 +415,8 @@ export function createShaclShapeValidator({
   /**
    * A release's subject, of its own statements, against the library shape
    * of each of its classes (a subject of two is read as both), and whether
-   * a class of it has none at its version: one the library reads no
-   * subject of.
+   * a class of it has none at its version, or is one no release has: one
+   * the library reads no subject of.
    */
   async function releaseSubjectViolations(
     release: DatasetCore,
@@ -403,7 +427,8 @@ export function createShaclShapeValidator({
     const version = Number(
       own.find((q) => q.predicate.value === SM_FORMAT_VERSION)?.object.value ?? "1",
     );
-    const pick = pickShapes(types, version, "library", iriValuesIn(own));
+    // No fixed value decides here: the one class with such a shape, the review state, no release has.
+    const pick = pickShapes(types, version, "library", () => []);
     if (pick.kind !== "shapes") return { unshaped: true, violations: [] };
     // A date the library's readers cannot read is an error of the release, as one the shape names is.
     const unreadable = (predicate: string) =>
@@ -621,11 +646,7 @@ export function createShaclShapeValidator({
                 pick.unknown,
               ),
             }
-          : {
-              shape: pick.shape,
-              version: pick.version,
-              violations: [formatVersionViolation(pick.version)],
-            };
+          : shapelessResult(pick, version);
       subjects.push({
         url: subject,
         status: "checked",

@@ -72,11 +72,14 @@ flowchart LR
   (`toRdfJsDataset`). For every subject, it picks the shapes by class
   and stored version as the mappers do (`pickShapes`), and by the values
   a shape fixes (an FSRS-6 review state's `sm:scheduler`,
-  [shapes.md](shapes.md#conventions)). A subject with a Solid Memo class
-  is checked against the shapes of its Solid Memo classes only (a deck
-  group, though a `dcat:Catalog`, isn't checked as the catalog). A
-  subject of two of them is read as both, so it's held to the shape of
-  each. A subject is then:
+  [shapes.md](shapes.md#conventions)). A subject of two classes is read
+  as both, so it's held to the shape of each, a standard class's
+  (`foaf:Agent`, `dcat:DatasetSeries`) as well as a Solid Memo one's. A
+  deck group is the one exception: though a `dcat:Catalog`, it isn't
+  checked as the catalog, which is read at its own address. In a
+  release, a subject of a Solid Memo class only a pod holds
+  (`sm:Preferences`, `sm:Palette`) is in violation (`ReleaseClass`). A
+  subject is then:
   - `checked`, with its violations. A subject stamped with a format
     version below 1, which no shape has, is checked too: it's in
     violation (`FormatVersionRange`), as the app reads it as one that

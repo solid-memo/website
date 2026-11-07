@@ -1081,10 +1081,11 @@ flowchart LR
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the
   release (`releaseNotConforming`); warnings don't. A subject with more
-  than one Solid Memo class is held to the shape of each, so a second
-  class never stands in for the library deck shape. A subject in a
-  format version the library's shapes don't have refuses it too, as no
-  shape checks it. One newer than the app reads is too new
+  than one class is held to the shape of each, so a second class never
+  stands in for the first's shape. A subject of a Solid Memo class only
+  a pod holds (`sm:Preferences`, `sm:Palette`) refuses it too. A subject
+  in a format version the library's shapes don't have refuses it too, as
+  no shape checks it. One newer than the app reads is too new
   (`libraryDeckTooNew`, or `libraryCardTooNew` for a card). One below 1
   doesn't fit its shape (`releaseNotConforming`). The read
   that passes is kept as the release's, so the deck or course imported
