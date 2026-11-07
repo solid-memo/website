@@ -23,7 +23,7 @@ import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draf
 import { releasesContainerOf } from "@solid-memo/domain/release/releasePlace";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainer } from "./containers";
-import { getSolidDatasetOrNull, type Owned, removeOwned } from "./datasets";
+import { type Owned, readForRemoval, removeOwned, UNREADABLE } from "./datasets";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { deckDocumentSubjects, solidMemoSubjects, subjectsOfClasses } from "./ownership";
 import { deleteDraftResources } from "./solidReleaseDraftRepository";
@@ -76,16 +76,17 @@ export async function deleteInstanceData(
   const container = ensureTrailingSlash(instanceUrl);
   const meta = metaUrlOf(container);
   const catalogUrl = catalogUrlOf(container);
-  const catalog = await readCatalog(catalogUrl, fetch);
+  // Afresh; a catalog that fails to be read throws, so the delete can be tried again.
+  const catalog = await readForRemoval(catalogUrl, fetch);
   const named =
     catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog, catalogUrl);
-  const deckDocuments = await deletableDeckDocuments(named, fetch);
+  const { deletable: deckDocuments, unreadable } = await deletableDeckDocuments(named, fetch);
   const history = historyContainerOf(container);
   // A month's document is one of history/'s own (monthOfHistoryUrl): no folder below it is listed.
   const months = (await listContainer(history, fetch)).filter(
     (url) => monthOfHistoryUrl(container, url) !== null,
   );
-  const kept: string[] = [];
+  const kept = [...unreadable];
   const remove = async (url: string, owns: (dataset: Dataset) => Owned) => {
     if ((await removeOwned(url, owns, fetch)) === "kept") kept.push(url);
   };
@@ -124,32 +125,6 @@ export async function deleteInstanceData(
   };
 }
 
-const UNREADABLE = Symbol("unreadable");
-
-/**
- * The catalog, read afresh; null when there is none, UNREADABLE when
- * the pod served it but it could not be read (not Turtle, or not RDF at
- * all). Any other failure throws, so the delete can be tried again.
- */
-async function readCatalog(
-  url: string,
-  fetch: typeof globalThis.fetch,
-): Promise<Dataset | null | typeof UNREADABLE> {
-  let served = false;
-  // A fetch of its own, so the read is not one remembered from before.
-  const noting = (async (input, init) => {
-    const response = await fetch(input, init);
-    served = response.ok;
-    return response;
-  }) as typeof globalThis.fetch;
-  try {
-    return await getSolidDatasetOrNull(url, noting);
-  } catch (error) {
-    if (served) return UNREADABLE;
-    throw error;
-  }
-}
-
 /** The drafts the instance's catalog links that are in its `drafts/`: a link elsewhere is never followed to a delete. */
 function draftsOf(catalog: Dataset, container: string): string[] {
   const node = getThing(catalog, catalogNodeUrlOf(container));
@@ -182,18 +157,23 @@ function deckDocumentsOf(catalog: Dataset, catalogUrl: string): { entry: string;
 /**
  * Of the decks' documents, those that are their decks' to delete: at an
  * address a deck's may be (isDeckInPlace) and not unclaimed (deckPlace.ts).
- * An unclaimed document may be anyone's, and is kept.
+ * An unclaimed document may be anyone's, and is kept; one not read
+ * (deckPlace.ts, readToRemove) is kept too, and named. A failed read of
+ * any other throws here, before anything is deleted.
  */
 async function deletableDeckDocuments(
   named: readonly { entry: string; url: string }[],
   fetch: typeof globalThis.fetch,
-): Promise<string[]> {
+): Promise<{ deletable: string[]; unreadable: string[] }> {
   const guard = createDeckDocumentGuard(fetch);
-  const deletable: string[] = [];
+  const deletable = new Set<string>();
+  const unreadable = new Set<string>();
   for (const { entry, url } of named) {
     const deck = { url: entry, title: {}, cardsDocumentUrl: url, reviewsDocumentUrl: url };
-    if (deletable.includes(url) || !isDeckInPlace(deck)) continue;
-    if ((await guard.unclaimed(deck)).length === 0) deletable.push(url);
+    if (deletable.has(url) || !isDeckInPlace(deck)) continue;
+    const standing = await guard.removal(deck, url);
+    if (standing === "deletable") deletable.add(url);
+    if (standing === "unreadable") unreadable.add(url);
   }
-  return deletable;
+  return { deletable: [...deletable], unreadable: [...unreadable] };
 }

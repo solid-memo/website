@@ -140,6 +140,12 @@ export function DeckPreferencesContainer({
       await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
       onDeckRemoved();
     },
+    // A removal stopped part-way may have taken the deck's cards already.
+    onError: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+      ]),
   });
 
   if (preferencesQuery.error) {

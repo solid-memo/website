@@ -12,6 +12,7 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { DeckPreferencesContainer } from "./DeckPreferencesContainer";
+import { queryKeys } from "./queryKeys";
 import { makeUseCasesFake } from "../test/useCasesFake";
 
 const instance: Instance = {
@@ -334,16 +335,20 @@ describe("DeckPreferencesContainer", () => {
       "confirm",
       vi.fn(() => true),
     );
-    const { onDeckRemoved } = renderContainer(
+    const { onDeckRemoved, queryClient } = renderContainer(
       makeUseCasesFake({
         removeDeck: vi.fn(async () => {
           throw new Error("deck remove refused");
         }),
       }),
     );
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
     fireEvent.click(await screen.findByRole("button", { name: "Remove deck" }));
     expect((await screen.findByText("deck remove refused")).closest(".error")).toBeInTheDocument();
     expect(onDeckRemoved).not.toHaveBeenCalled();
+    // A removal stopped part-way may have taken the deck's cards already.
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.allDecks() });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) });
     vi.unstubAllGlobals();
   });
 

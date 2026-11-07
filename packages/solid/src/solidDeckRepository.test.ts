@@ -47,7 +47,15 @@ vi.mock("./client/resources", async (importOriginal) => {
 });
 vi.mock("./datasets", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./datasets")>();
-  return { ...actual, getSolidDatasetOrNull: vi.fn(), versionOf: vi.fn(actual.versionOf) };
+  const getSolidDatasetOrNull = vi.fn();
+  return {
+    ...actual,
+    getSolidDatasetOrNull,
+    // A removal's first read, as any other read here.
+    readForRemoval: (url: string, fetch: typeof globalThis.fetch) =>
+      getSolidDatasetOrNull(url, fetch),
+    versionOf: vi.fn(actual.versionOf),
+  };
 });
 
 const INSTANCE = "https://pod.example/solid-memo/a/";

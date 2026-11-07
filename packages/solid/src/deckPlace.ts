@@ -29,7 +29,13 @@ import {
   RELEASE_DOCUMENT,
 } from "@solid-memo/domain/release/draftLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import { getSolidDatasetOrNull, isReadFrom, saveDataset } from "./datasets";
+import {
+  getSolidDatasetOrNull,
+  isReadFrom,
+  readForRemoval,
+  saveDataset,
+  UNREADABLE,
+} from "./datasets";
 import { deckBackLinksOf } from "./ownership";
 import { hasStorageLink } from "./solidStorageGateway";
 import { DCTERMS, RDF, SM } from "./vocab";
@@ -199,6 +205,22 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     return found;
   }
 
+  /**
+   * The deck's document as its removal reads it (readForRemoval). Of one
+   * outside the instance's folder, which may be anyone's on any server,
+   * a failed read counts as UNREADABLE too, so that it is kept and
+   * named: such a read may never succeed, and must not hold back the
+   * deck's removal. Any other failed read throws.
+   */
+  async function readToRemove(deck: DeckPlace, url: string): ReturnType<typeof readForRemoval> {
+    try {
+      return await readForRemoval(url, fetch);
+    } catch (error) {
+      if (isDocumentIn(url, instanceOf(deck))) throw error;
+      return UNREADABLE;
+    }
+  }
+
   return {
     /** Refuse a deck that cannot be used (isDeckInPlace): deckGone, before anything is read or sent. */
     assertUsable(deck: DeckPlace): void {
@@ -208,6 +230,23 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     standing,
 
     unclaimed,
+
+    readToRemove,
+
+    /**
+     * What an instance's deletion does with the deck's document:
+     * "deletable" when it is the deck's, "unclaimed" when it is left
+     * alone, "unreadable" when it is kept unread (readToRemove). One in
+     * the instance's own folder is not read here, as in unclaimed: its
+     * removal reads it.
+     */
+    async removal(deck: DeckPlace, url: string): Promise<"deletable" | "unclaimed" | "unreadable"> {
+      const instance = instanceOf(deck);
+      if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance))) return "deletable";
+      const dataset = await readToRemove(deck, url);
+      if (dataset === UNREADABLE) return "unreadable";
+      return (await standing(deck, url, dataset)) === "unclaimed" ? "unclaimed" : "deletable";
+    },
 
     /**
      * The dataset to save at `url`, one of the deck's documents, saying it
