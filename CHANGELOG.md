@@ -21,6 +21,26 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.26](https://github.com/solid-memo/website/compare/v6.29.25...v6.29.26) (2026-11-07)
+
+### Bug Fixes
+
+* **application:** claim a deck's documents only in the instance's pod ([375f98c](https://github.com/solid-memo/website/commit/375f98c202396f23f32030404c24f9c3cde5039b))
+* **application:** keep a card the deck has when a course question is answered ([65681a8](https://github.com/solid-memo/website/commit/65681a8c7ff040d5c5fda9230680a91ee77e0b0d))
+* bound the reads of releases added from a link together ([ce6fdba](https://github.com/solid-memo/website/commit/ce6fdbaaca25aa91b4db9467e45586bd3b921c66))
+* **domain:** encode separators and line breaks in answers CSV text ([57817da](https://github.com/solid-memo/website/commit/57817da0a4aa9624b52a158d62501c43854ffda5))
+* **domain:** keep FSRS-6 day arithmetic to dates it can count from ([3a9f63a](https://github.com/solid-memo/website/commit/3a9f63a00c372f842a09bd9138c5d875cb4d7d39))
+* **domain:** keep new ids free of numbers too long to count on ([c0ae26b](https://github.com/solid-memo/website/commit/c0ae26bfe7afcc47058efe29452f1d560b7ba6a4))
+* **release:** keep a pull request's title from deciding a release ([a1c15f2](https://github.com/solid-memo/website/commit/a1c15f21e96199e191601e7d8cd970cec01bb306))
+* **session:** end the session in every tab on logout ([717d0ab](https://github.com/solid-memo/website/commit/717d0abb3efbfc37219552f48ee5eb616c3198ef))
+* **shacl:** hold a subject to the shape of every class it has ([65a5113](https://github.com/solid-memo/website/commit/65a5113a2af0ece6ef91d2d278733dd02d08dd52))
+* **solid:** leave out statements at the client's local-node IRIs on read ([7c565de](https://github.com/solid-memo/website/commit/7c565debd53eb83aae1f47f9b242a8cf68c05dc1))
+* **solid:** refuse credentials an address's proof would give elsewhere ([a2cd98c](https://github.com/solid-memo/website/commit/a2cd98cd7644827bfa47179cfc4b36465f15c532))
+* **solid:** start every login under a new session ID ([652bbe3](https://github.com/solid-memo/website/commit/652bbe3c98e1a1f01578f95cd58e4ab5b7776261))
+* **studio:** open a listed release as any other link from a pod ([c4f0f1a](https://github.com/solid-memo/website/commit/c4f0f1a5b7c169e2325877c3ef1fb27dc1055ae7))
+* **ui:** let the addresses in the decks-to-confirm notice wrap ([2a1dd3f](https://github.com/solid-memo/website/commit/2a1dd3fffd3e3bc08314ba8ba71b7444c8fd7d5e))
+* **ui:** open a chapter with no step at its final review ([ecfa7ec](https://github.com/solid-memo/website/commit/ecfa7ec6c803174fcf07e6927664c4a39125cdc2))
+
 ## [6.29.25](https://github.com/solid-memo/website/compare/v6.29.24...v6.29.25) (2026-11-07)
 
 ### Bug Fixes
