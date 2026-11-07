@@ -303,7 +303,7 @@ describe("ReleaseMetadataScreen", () => {
     const onEdit = renderScreen(draft);
     expect(
       screen.getByText(
-        "Also named, in another document, and kept as they are: https://elsewhere.example/#me",
+        "Also named, by address only, and kept as they are: https://elsewhere.example/#me",
       ),
     ).toBeInTheDocument();
     const ann = screen.getByRole("group", { name: "Ann" });

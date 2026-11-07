@@ -49,7 +49,7 @@ export function authorsOf(draft: ReleaseDraft): DraftNode<AgentV1>[] {
   });
 }
 
-/** The authors the release names that are not agents of the draft (another document's), by IRI: kept as they are. */
+/** The authors the release names that are not agents of the draft (another document's, or a subject with no record), by IRI: kept as they are. */
 export function otherAuthorsOf(draft: ReleaseDraft): string[] {
   const own = new Set(authorsOf(draft).map((node) => iriIn(draft, node.id)));
   return draft.root.creator.filter((iri) => !own.has(iri));

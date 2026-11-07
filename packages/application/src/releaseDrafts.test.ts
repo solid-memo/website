@@ -38,6 +38,7 @@ const WEB_ID = "https://pod.example/profile/card#me";
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const DECKS = "https://site.example/decks/";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
+const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
 const INDEX = `${DECKS}index.ttl`;
 
 const deck: Deck = {
@@ -537,7 +538,7 @@ describe("createReleaseDraft", () => {
     });
     const crafted = {
       ...release,
-      root: { ...release.root, creator: [OUTSIDE, OWN], publisher: OUTSIDE },
+      root: { ...release.root, creator: [OUTSIDE], publisher: OUTSIDE },
       triples: [
         ...release.triples,
         agent(OUTSIDE),
@@ -567,6 +568,109 @@ describe("createReleaseDraft", () => {
     const next = created();
     expect(next.root.creator).toContain(OUTSIDE);
     expect(about(next, OUTSIDE)).toEqual([]);
+  });
+
+  it("keeps nothing of a creator among the release's subjects with no record, and keeps one with a record (GHSA-mv57-839j-wrf6)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const HIDDEN = `${elsewhere}#hidden`;
+    const KEPT = `${elsewhere}#kept`;
+    const nick = (subject: string): DraftTriple => ({
+      subject,
+      predicate: "http://xmlns.com/foaf/0.1/nick",
+      object: { kind: "literal", value: "Nick", language: "", datatype: XSD_STRING },
+    });
+    const crafted = {
+      ...release,
+      root: { ...release.root, creator: [HIDDEN, KEPT] },
+      agents: [{ id: "kept", data: { name: "Kept" } }],
+      triples: [...release.triples, nick(KEPT), nick(HIDDEN)],
+    };
+    const subjects = (draft: ReleaseDraft) => draft.triples.map((triple) => triple.subject);
+    repository.parseRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    const imported = created();
+    expect(imported.root.creator).toEqual([`${imported.url}#hidden`, `${imported.url}#kept`]);
+    expect(subjects(imported)).not.toContain(`${imported.url}#hidden`);
+    expect(subjects(imported)).toContain(`${imported.url}#kept`);
+  });
+
+  it("drops of the release what makes it an agent or distribution, from it and from what it links (GHSA-mv57-839j-wrf6)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const type = (value: string): DraftTriple => ({
+      subject: elsewhere,
+      predicate: RDF_TYPE,
+      object: { kind: "iri", value },
+    });
+    const statements: DraftTriple[] = [
+      type("http://xmlns.com/foaf/0.1/Agent"),
+      type("http://www.w3.org/ns/dcat#Distribution"),
+      {
+        subject: elsewhere,
+        predicate: FOAF_NAME,
+        object: { kind: "literal", value: "Itself", language: "", datatype: XSD_STRING },
+      },
+    ];
+    const kept: DraftTriple[] = [
+      type("https://example.org/Thing"),
+      { subject: elsewhere, predicate: RDF_TYPE, object: { kind: "blank", value: "b0" } },
+    ];
+    const crafted = {
+      ...release,
+      root: { ...release.root, creator: [elsewhere] },
+      triples: [...release.triples, ...statements, ...kept],
+    };
+    const about = (draft: ReleaseDraft) =>
+      draft.triples
+        .filter((triple) => triple.subject === draft.url)
+        .map(({ predicate, object }) => `${predicate} ${object.value}`);
+    const asRecord = statements.map(({ predicate, object }) => `${predicate} ${object.value}`);
+    repository.parseRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    const imported = created();
+    expect(imported.root.creator).toEqual([imported.url]);
+    for (const statement of asRecord) expect(about(imported)).not.toContain(statement);
+    expect(about(imported)).toEqual(
+      expect.arrayContaining(kept.map(({ predicate, object }) => `${predicate} ${object.value}`)),
+    );
+    const describedElsewhere = {
+      ...release,
+      root: { ...release.root, publisher: elsewhere },
+      triples: release.triples.filter((triple) => triple.subject !== elsewhere),
+    };
+    repository.readRelease.mockResolvedValueOnce(describedElsewhere);
+    repository.readLinked.mockResolvedValueOnce(statements);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
+    const next = about(created());
+    for (const statement of asRecord) expect(next).not.toContain(statement);
+  });
+
+  it("takes nothing of an agent the release holds a record of from what it links (GHSA-mv57-839j-wrf6)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const AUTHOR = `${elsewhere}#author`;
+    const PUBLISHER = `${elsewhere}#publisher`;
+    const named = (subject: string): DraftTriple => ({
+      subject,
+      predicate: FOAF_NAME,
+      object: { kind: "literal", value: "Another name", language: "", datatype: XSD_STRING },
+    });
+    const crafted = {
+      ...release,
+      root: { ...release.root, creator: [AUTHOR], publisher: PUBLISHER },
+      agents: [
+        { id: "author", data: { name: "Author" } },
+        { id: "publisher", data: { name: "Publisher" } },
+      ],
+    };
+    repository.readRelease.mockResolvedValueOnce(crafted);
+    repository.readLinked.mockResolvedValueOnce([named(AUTHOR), named(PUBLISHER)]);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
+    expect(created().triples.filter((triple) => triple.predicate === FOAF_NAME)).toEqual([]);
   });
 
   it("drops what a release states of, or names by, another address in the new draft's container (GHSA-8w75-jg23-rxq5)", async () => {

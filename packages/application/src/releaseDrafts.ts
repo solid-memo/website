@@ -21,9 +21,11 @@ import {
   applyDraftChanges,
   blankDraft,
   idIn,
+  iriIn,
   isRefusal,
   mergedDraft,
   publishedIdsOf,
+  RDF_TYPE,
   type DraftChange,
   type DraftRefusal,
   type DraftTriple,
@@ -39,7 +41,11 @@ import {
   type LearnerUpgrade,
   type ReleaseDiff,
 } from "@solid-memo/domain/release/releaseDiff";
-import { draftReleaseModel, strayPartsOf } from "@solid-memo/domain/release/draftModel";
+import {
+  draftReleaseModel,
+  RECORD_CLASSES,
+  strayPartsOf,
+} from "@solid-memo/domain/release/draftModel";
 import { markdownProblems, type MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
@@ -51,7 +57,7 @@ import {
   type CheckPolicy,
   type ReleaseCheck,
 } from "@solid-memo/domain/release/releaseCheck";
-import type { ReleaseModel } from "@solid-memo/domain/release/releaseModel";
+import { FOAF_NAME, type ReleaseModel } from "@solid-memo/domain/release/releaseModel";
 import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
 import {
   rebaseDraft,
@@ -248,21 +254,63 @@ function placeTaken(error: unknown, url: string): boolean {
  * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp). Of
  * its other statements, it keeps only its own (ownStatements).
  */
-function draftable(release: ReleaseDraft): ReleaseDraft {
-  const id = unsupportedIdOf(release);
+function draftable(read: ReleaseDraft): ReleaseDraft {
+  const id = unsupportedIdOf(read);
   if (id !== null) throw new AppError("releaseIdUnsupported", { id });
+  const release = {
+    ...read,
+    triples: read.triples.filter((triple) => !isOfReleaseAsRecord(read, triple)),
+  };
   const foreign = strayPartsOf(release).find((stray) => idIn(release, stray) === null);
   if (foreign !== undefined) throw new AppError("releaseForeignPart", { part: foreign });
   return ownStatements(release);
 }
 
 /**
- * The release's creators (dcterms:creator) outside it: each an IRI
- * neither the release nor one of its own subjects (`<release>#id`).
+ * Whether a statement types the release an agent or distribution, or
+ * names it: it can have no record of those, so the Studio would show no
+ * such name, and learners would see it if the release were its own
+ * creator or publisher (GHSA-mv57-839j-wrf6).
+ */
+function isOfReleaseAsRecord(
+  release: Pick<ReleaseDraft, "url">,
+  { subject, predicate, object }: DraftTriple,
+): boolean {
+  if (subject !== release.url) return false;
+  if (predicate === FOAF_NAME) return true;
+  return predicate === RDF_TYPE && object.kind === "iri" && RECORD_CLASSES.has(object.value);
+}
+
+/**
+ * The release's creators (dcterms:creator) outside its records: each an
+ * IRI neither the release nor one of its agents, wherever the IRI is. A
+ * subject of the release that its statements type more than one class
+ * of record has no record, so it is outside too (GHSA-mv57-839j-wrf6).
  */
 function outsideCreatorsOf(release: ReleaseDraft): Set<string> {
-  return new Set(
-    release.root.creator.filter((iri) => iri !== release.url && idIn(release, iri) === null),
+  const agents = agentIrisOf(release);
+  return new Set(release.root.creator.filter((iri) => iri !== release.url && !agents.has(iri)));
+}
+
+/** The IRIs of the release's agents, each of which it holds a record of. */
+function agentIrisOf(release: ReleaseDraft): Set<string> {
+  return new Set(release.agents.map(({ id }) => iriIn(release, id)));
+}
+
+/**
+ * Of what the documents a release links to state, what a next version of
+ * it may take: nothing of a creator with no record, which the Studio
+ * shows by its IRI (ownStatements), of an agent, whose record is the
+ * release's own to state, or of the release as a record (isOfReleaseAsRecord).
+ */
+function linkedStatements(release: ReleaseDraft, linked: readonly DraftTriple[]): DraftTriple[] {
+  const outside = outsideCreatorsOf(release);
+  const agents = agentIrisOf(release);
+  return linked.filter(
+    (triple) =>
+      !outside.has(triple.subject) &&
+      !agents.has(triple.subject) &&
+      !isOfReleaseAsRecord(release, triple),
   );
 }
 
@@ -273,7 +321,7 @@ function outsideCreatorsOf(release: ReleaseDraft): Set<string> {
  * anything else is dropped: no editor shows it and no check sees it, and
  * published, at an address it names, it would say more of that release
  * than its draft does (GHSA-p2pr-x6fw-hrfx). So is a statement of a
- * creator outside the release, which the release names only: the Studio
+ * creator with no record, which the release names only: the Studio
  * shows such a creator by its IRI, and a name the release gave it would
  * be the author learners see (GHSA-wjqr-hw63-jf4c).
  */
@@ -571,10 +619,9 @@ export function createReleaseDraftUseCases({
             await releaseDraftRepository.readRelease(from.url, { asNoOne }),
           );
           // Its series and publisher as their document describes them, when the release does not: the next version describes them itself.
-          // Of them, nothing of a creator outside the release, which the Studio shows by its IRI (ownStatements).
-          const outside = outsideCreatorsOf(release);
-          const linked = (await releaseDraftRepository.readLinked(release)).filter(
-            (triple) => !outside.has(triple.subject),
+          const linked = linkedStatements(
+            release,
+            await releaseDraftRepository.readLinked(release),
           );
           const version = Number(release.root.version ?? "1") + 1;
           const name = nameInUrl(from.url) ?? undefined;
