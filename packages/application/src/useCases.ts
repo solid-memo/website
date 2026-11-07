@@ -25,6 +25,7 @@ import type {
   TextSizePreference,
   ThemePreference,
   UpdateJournal,
+  LogoutChannel,
   WriteFence,
   DeckArchive,
   FileExchange,
@@ -108,6 +109,7 @@ export interface Dependencies {
   instanceCopier: InstanceCopier;
   /** Notes of a guest's study being moved or added to an instance, kept on this device. */
   updateJournal: UpdateJournal;
+  logoutChannel: LogoutChannel;
   /** The language the user chose, kept on this device. */
   languagePreference: LanguagePreference;
   /** The theme the user chose, kept on this device. */
@@ -171,6 +173,7 @@ export function createUseCases({
   repairRepository,
   instanceCopier,
   updateJournal,
+  logoutChannel,
   languagePreference,
   themePreference,
   palettePreference,
@@ -261,6 +264,8 @@ export function createUseCases({
   return {
     ...createSessionUseCases({
       sessionGateway,
+      logoutChannel,
+      webId,
       storageGateway,
       webIdDocumentRepository,
       guestPod,

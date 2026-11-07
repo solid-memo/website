@@ -42,6 +42,7 @@ export function makeSessionUseCasesFake(
       loginWithProvider: vi.fn(async () => undefined),
       logout: vi.fn(async () => undefined),
       onSessionExpired: vi.fn(() => () => undefined),
+      onLoggedOutElsewhere: vi.fn(() => () => undefined),
       discoverAccount: vi.fn(async (session) => ({
         webId: session.webId,
         podUrl: "https://pod.example/",

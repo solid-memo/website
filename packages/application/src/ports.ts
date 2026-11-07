@@ -1105,6 +1105,18 @@ export interface UpdateJournal {
 }
 
 /**
+ * Driven port: word of a logout to this browser's other pages of the
+ * app, each of which holds its session in its own memory. Best effort:
+ * a browser with no way to tell them leaves them to their token's end.
+ */
+export interface LogoutChannel {
+  /** Tell the other pages the user logged out; never this page. */
+  announce(): void;
+  /** Call `listener` for each logout another page announces. Returns an unsubscribe function. */
+  listen(listener: () => void): () => void;
+}
+
+/**
  * Driven port: makes a container read-only for a while. Moving a guest's
  * study holds the guest's instance, so nothing else in this tab writes to
  * it until the move is over. A move another tab runs is held the same

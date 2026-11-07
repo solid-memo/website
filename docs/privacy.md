@@ -70,7 +70,18 @@ before any pod is reached:
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:collapsedGroups.<instance URL>` | which deck groups the learner folded | `remembered.ts` |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
+| `solid-memo:logout` | set and taken off at once to tell other tabs of a logout, only where the browser has no `BroadcastChannel`; holds nothing | [`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts) |
 | `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
+
+A logout leaves these keys in place, `solid-memo:palette-colors`,
+`solid-memo:collapsedGroups.<instance URL>` and
+`solid-memo:studioInstances.v1` among them. They hold no credential.
+They do hold instance, deck and draft URLs and a palette's colors and
+name, which anyone using the same browser profile can read. They stay
+because they are this device's and not the session's. The folds, saved
+views and pins are kept nowhere else, so removing them at a logout
+would lose them for good. The palette's copy is what the next first
+paint uses.
 
 During a login, `sessionStorage` holds the page the learner was on
 (`solid-memo:login-hash`), to bring them back to it

@@ -148,6 +148,107 @@ describe("session", () => {
     await useCases.logout();
     expect(deps.sessionGateway.logout).toHaveBeenCalledOnce();
   });
+  it("logout tells the other tabs, even when this tab's logout fails", async () => {
+    const deps = makeDeps();
+    vi.mocked(deps.sessionGateway.logout).mockRejectedValueOnce(new Error("storage refused"));
+    const useCases = createUseCases(deps);
+    await expect(useCases.logout()).rejects.toThrow("storage refused");
+    expect(deps.logoutChannel.announce).toHaveBeenCalledOnce();
+  });
+  describe("a logout in another tab", () => {
+    /** The use cases over a channel the test can speak on, as another tab's logout would. */
+    function subscribed(deps: ReturnType<typeof makeDeps>) {
+      const useCases = createUseCases(deps);
+      const listener = vi.fn();
+      const stop = vi.fn();
+      deps.logoutChannel.listen.mockImplementationOnce((heard: () => void) => {
+        hear = heard;
+        return stop;
+      });
+      let hear: () => void = () => undefined;
+      const unsubscribe = useCases.onLoggedOutElsewhere(listener);
+      return { listener, stop, unsubscribe, hear: () => hear() };
+    }
+    it("ends this tab's session, then tells the screen, announcing nothing itself", async () => {
+      const deps = makeDeps();
+      const { listener, hear } = subscribed(deps);
+      hear();
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+      expect(deps.sessionGateway.logout).toHaveBeenCalledOnce();
+      expect(deps.logoutChannel.announce).not.toHaveBeenCalled();
+    });
+    it("tells the screen even when ending this tab's session fails", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.sessionGateway.logout).mockRejectedValueOnce(new Error("storage refused"));
+      const { listener, hear } = subscribed(deps);
+      hear();
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+    });
+    it("touches no session in a tab with no user, whose storage isn't its own to clear", async () => {
+      const deps = makeDeps();
+      deps.webId.mockReturnValue(undefined);
+      const { listener, hear } = subscribed(deps);
+      hear();
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+      expect(deps.sessionGateway.logout).not.toHaveBeenCalled();
+    });
+    it("stops listening once unsubscribed", () => {
+      const { stop, unsubscribe } = subscribed(makeDeps());
+      unsubscribe();
+      expect(stop).toHaveBeenCalledOnce();
+    });
+    describe("during a restore", () => {
+      /** A restore the test finishes, and the channel's word during it. */
+      function restoring(deps: ReturnType<typeof makeDeps>) {
+        const stop = vi.fn();
+        let hear: () => void = () => undefined;
+        deps.logoutChannel.listen.mockImplementationOnce((heard: () => void) => {
+          hear = heard;
+          return stop;
+        });
+        return { stop, hear: () => hear() };
+      }
+      it("logs out of what the restore brought back", async () => {
+        const deps = makeDeps();
+        const { stop, hear } = restoring(deps);
+        const useCases = createUseCases(deps);
+        vi.mocked(deps.sessionGateway.restore).mockImplementationOnce(async () => {
+          hear();
+          return { session, origin: "restored" };
+        });
+        await expect(useCases.restoreSession()).resolves.toBeNull();
+        expect(deps.sessionGateway.logout).toHaveBeenCalledOnce();
+        expect(stop).toHaveBeenCalledOnce();
+      });
+      it("has nothing to log out of when the restore found no session", async () => {
+        const deps = makeDeps();
+        const { hear } = restoring(deps);
+        const useCases = createUseCases(deps);
+        vi.mocked(deps.sessionGateway.restore).mockImplementationOnce(async () => {
+          hear();
+          return null;
+        });
+        await expect(useCases.restoreSession()).resolves.toBeNull();
+        expect(deps.sessionGateway.logout).not.toHaveBeenCalled();
+      });
+      it("stops listening when the restore fails", async () => {
+        const deps = makeDeps();
+        const { stop } = restoring(deps);
+        const useCases = createUseCases(deps);
+        vi.mocked(deps.sessionGateway.restore).mockRejectedValueOnce(new Error("no provider"));
+        await expect(useCases.restoreSession()).rejects.toThrow("no provider");
+        expect(stop).toHaveBeenCalledOnce();
+      });
+      it("keeps the session of a restore no logout overtook", async () => {
+        const deps = makeDeps();
+        const { stop } = restoring(deps);
+        const useCases = createUseCases(deps);
+        await expect(useCases.restoreSession()).resolves.toEqual({ session, origin: "login" });
+        expect(deps.sessionGateway.logout).not.toHaveBeenCalled();
+        expect(stop).toHaveBeenCalledOnce();
+      });
+    });
+  });
   it("onSessionExpired delegates to the session gateway", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);

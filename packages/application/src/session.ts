@@ -53,6 +53,7 @@ import type {
   ContainerMove,
   GuestPod,
   UpdateJournal,
+  LogoutChannel,
   WriteFence,
   ReleaseDraftRepository,
 } from "./ports";
@@ -73,9 +74,15 @@ export interface SessionUseCases {
   loginWithWebId(webId: string): Promise<void>;
   /** Log in at a chosen identity provider; rejects unless it is an https URL. */
   loginWithProvider(oidcIssuer: string): Promise<void>;
+  /** Ends the session in this tab, and tells this browser's other tabs to end theirs. */
   logout(): Promise<void>;
   /** Subscribe to session expiry; returns an unsubscribe function. */
   onSessionExpired(listener: () => void): () => void;
+  /**
+   * Subscribe to a logout in another tab, called once this tab's own
+   * session has ended, if it had one; returns an unsubscribe function.
+   */
+  onLoggedOutElsewhere(listener: () => void): () => void;
   /**
    * The account behind a session: its Pod, discovered through the WebID
    * profile's storage link, its identity provider and its foaf:name.
@@ -182,6 +189,8 @@ function fenceMovesElsewhere(
  */
 export function createSessionUseCases({
   sessionGateway,
+  logoutChannel,
+  webId,
   storageGateway,
   webIdDocumentRepository,
   guestPod,
@@ -200,6 +209,9 @@ export function createSessionUseCases({
   newId,
 }: {
   sessionGateway: SessionGateway;
+  logoutChannel: LogoutChannel;
+  /** The WebID of whoever this tab has signed in, asked at each call; none for a guest. */
+  webId: () => string | undefined;
   storageGateway: StorageGateway;
   webIdDocumentRepository: WebIdDocumentRepository;
   guestPod: GuestPod;
@@ -434,8 +446,16 @@ export function createSessionUseCases({
 
   return {
     async restoreSession() {
-      const established = await sessionGateway.restore();
-      if (established !== null) return established;
+      // Another tab's logout during the restore holds for what it brings back.
+      let loggedOutElsewhere = false;
+      const stopListening = logoutChannel.listen(() => {
+        loggedOutElsewhere = true;
+      });
+      const established = await sessionGateway.restore().finally(stopListening);
+      if (established !== null) {
+        if (!loggedOutElsewhere) return established;
+        await sessionGateway.logout();
+      }
       return (await guestPod.exists()) ? { session: GUEST_SESSION, origin: "restored" } : null;
     },
     async loginWithWebId(webId) {
@@ -452,7 +472,17 @@ export function createSessionUseCases({
       return sessionGateway.loginWithIssuer(oidcIssuer);
     },
     logout() {
+      // First: the other tabs are told even if this one's logout fails or the tab is closed.
+      logoutChannel.announce();
       return sessionGateway.logout();
+    },
+    onLoggedOutElsewhere(listener) {
+      return logoutChannel.listen(() => {
+        // Only a tab with a user has a session to end: this logout is local, and announces nothing.
+        const ended = webId() === undefined ? Promise.resolve() : sessionGateway.logout();
+        // The tab leaves its session behind whether or not the sign-in client managed to.
+        void ended.catch(() => undefined).then(listener);
+      });
     },
     onSessionExpired(listener) {
       return sessionGateway.onSessionExpired(listener);

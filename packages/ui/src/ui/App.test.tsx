@@ -62,7 +62,7 @@ function renderApp(
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
+  const rendered = render(
     <QueryClientProvider client={queryClient}>
       <AppShell
         useCases={useCases}
@@ -74,6 +74,7 @@ function renderApp(
       />
     </QueryClientProvider>,
   );
+  return { ...rendered, queryClient };
 }
 
 describe("AppShell", () => {
@@ -1214,6 +1215,73 @@ describe("AppShell", () => {
     const note = screen.getByText("— Anton Wiklund").closest("figure")!;
     expect(note.previousElementSibling).toHaveClass("guest-start");
     expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
+  });
+
+  describe("when another tab logs out", () => {
+    /** The use cases, and the word of another tab's logout. */
+    function hearing(overrides: Parameters<typeof makeUseCases>[0]) {
+      let heard: (() => void) | undefined;
+      const useCases = makeUseCases({
+        ...overrides,
+        onLoggedOutElsewhere: vi.fn((listener: () => void) => {
+          heard = listener;
+          return () => undefined;
+        }),
+      });
+      return { useCases, hear: () => act(() => heard!()) };
+    }
+
+    it("goes to the landing, logging in first, its cache cleared, starting no logout", async () => {
+      const { useCases, hear } = hearing({ restoreSession: vi.fn(async () => restored) });
+      const { queryClient } = renderApp(useCases);
+      await screen.findByRole("button", { name: "Log out" });
+      queryClient.setQueryData(["pod data"], "kept until now");
+
+      hear();
+
+      expect(await screen.findByRole("button", { name: "Log in with Solid" })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Log out" })).toBeNull();
+      expect(landingSections()).toEqual([
+        "Log in with your Pod",
+        "Try it right away",
+        "No Pod yet?",
+      ]);
+      expect(queryClient.getQueryData(["pod data"])).toBeUndefined();
+      // No expired session: nothing went wrong.
+      expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
+      expect(useCases.logout).not.toHaveBeenCalled();
+    });
+
+    it("leaves a guest's study alone", async () => {
+      const { useCases, hear } = hearing({
+        restoreSession: vi.fn(async () => ({
+          session: {
+            webId: "https://guest.solid-memo.invalid/profile/card#me",
+            guest: true as const,
+          },
+          origin: "restored" as const,
+        })),
+      });
+      const { queryClient } = renderApp(useCases);
+      const banner = await screen.findByText(/You are trying Solid Memo as a guest/);
+      queryClient.setQueryData(["guest data"], "kept");
+
+      hear();
+
+      expect(banner).toBeInTheDocument();
+      expect(queryClient.getQueryData(["guest data"])).toBe("kept");
+    });
+
+    it("leaves a landing page as it is", async () => {
+      const { useCases, hear } = hearing({});
+      renderApp(useCases);
+      await screen.findByRole("button", { name: "Log in with Solid" });
+      const before = landingSections();
+
+      hear();
+
+      expect(landingSections()).toEqual(before);
+    });
   });
 
   it("logs out to the landing, logging in first", async () => {

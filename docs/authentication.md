@@ -356,3 +356,19 @@ clears the react-query cache: no pod data outlives its session. On
 `solid-memo-client`, `logout()` deletes the stored session from
 IndexedDB, and keeps the provider's registration of the app. Neither
 client ends the session at the provider.
+
+Each tab holds its token in its own memory, so a logout is announced
+to this browser's other tabs
+([`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts)): on a
+`BroadcastChannel`, or through a `localStorage` key where the browser
+has none or refuses one. Each tab with a user then runs the same local
+`logout()`, which discards its token and, with the session gone from
+storage, ends its refreshing, a tab with a login of its own included.
+It shows the landing and clears its react-query cache. It announces
+nothing itself, and doesn't contact the provider. A session a tab is
+restoring when it hears the announcement is logged out of as well once
+it arrives. A guest's tab keeps its study, which belongs to no login.
+
+The announcement is best effort: where a browser allows neither way,
+the other tabs keep their current token until it expires. Other devices
+aren't told.

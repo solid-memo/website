@@ -29,6 +29,7 @@ import { createLocalStorageSeenHighlights } from "@solid-memo/browser/localStora
 import { createLocalStorageTextSizePreference } from "@solid-memo/browser/localStorageTextSizePreference";
 import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
+import { createLogoutChannel } from "@solid-memo/browser/logoutChannel";
 import { createIndexedDbResourceStore } from "@solid-memo/browser/indexedDbResourceStore";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
@@ -304,6 +305,7 @@ export function createAppUseCases({
     repairRepository: createSolidRepairRepository({ fetch: dataFetch }),
     instanceCopier,
     updateJournal: createLocalStorageUpdateJournal(),
+    logoutChannel: createLogoutChannel(),
     languagePreference: createLocalStorageLanguagePreference(),
     themePreference: createLocalStorageThemePreference(),
     palettePreference: createLocalStoragePalettePreference(),
