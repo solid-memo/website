@@ -20,6 +20,8 @@ import {
 
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
+import { ReadLimitError } from "./client/interface";
+import { refusalOf } from "./client/readLimits";
 import { deleteSolidDataset, readDocument, writeDocument } from "./client/resources";
 import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
 import { unlessNewer } from "./records";
@@ -249,6 +251,45 @@ export async function getSolidDatasetOrNull(
   }
 }
 
+/** A document the pod served whole that could not be read (readForRemoval). */
+export const UNREADABLE = Symbol("unreadable");
+
+/**
+ * A document as a removal reads it, made afresh by a fetch of its own,
+ * never one remembered from before: null when it is gone (404, 410),
+ * UNREADABLE when the pod served all of it but it could not be read
+ * (not Turtle, not RDF at all, or past the read's limits). Any other
+ * failure throws, a body cut off on its way among them: nothing was
+ * learned of the document, so the removal can only be tried again.
+ */
+export async function readForRemoval(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<FetchedDataset | null | typeof UNREADABLE> {
+  let served = false;
+  const noting: typeof globalThis.fetch = async (input, init) => {
+    const response = await fetch(input, init);
+    if (response.ok) {
+      // Taken in first, so that only a parse can fail once it counts as served.
+      await response
+        .clone()
+        .arrayBuffer()
+        .catch((error: unknown) => {
+          throw refusalOf(response) ?? error;
+        });
+      served = true;
+    }
+    return response;
+  };
+  try {
+    return await getSolidDatasetOrNull(url, noting);
+  } catch (error) {
+    if (served || error instanceof ReadLimitError) return UNREADABLE;
+    if (statusOf(error) === 410) return null;
+    throw error;
+  }
+}
+
 /**
  * Save a dataset: an edit of the document it was read from only if that
  * is unchanged (If-Match), a new dataset only if nothing is there yet
@@ -362,19 +403,22 @@ export type Removal = "absent" | "deleted" | "kept";
  * A document changed meanwhile (412) is read again and the removal made
  * once more; a second 412 is a PreconditionFailedError. One outside the
  * user's own pod, which the app's fetch never writes to (ownPodGate.ts,
- * `writeOutsidePod`), is "kept" as it is.
+ * `writeOutsidePod`), is "kept" as it is. `read` is how the document is
+ * read each time, for a caller that takes a failed read differently
+ * (deckPlace.ts, readToRemove).
  */
 export async function removeOwned(
   url: string,
   owns: (dataset: Dataset) => Owned,
   fetch: typeof globalThis.fetch,
+  read: () => ReturnType<typeof readForRemoval> = () => readForRemoval(url, fetch),
 ): Promise<Removal> {
   try {
-    return await removeOwnedOnce(url, owns, fetch);
+    return await removeOwnedOnce(url, owns, fetch, read);
   } catch (error) {
     if (error instanceof AppError && error.code === "writeOutsidePod") return "kept";
     if (!(error instanceof PreconditionFailedError)) throw error;
-    return removeOwnedOnce(url, owns, fetch);
+    return removeOwnedOnce(url, owns, fetch, read);
   }
 }
 
@@ -382,21 +426,10 @@ async function removeOwnedOnce(
   url: string,
   owns: (dataset: Dataset) => Owned,
   fetch: typeof globalThis.fetch,
+  read: () => ReturnType<typeof readForRemoval>,
 ): Promise<Removal> {
-  let served = false;
-  // A fetch of its own, so the read is made afresh, never one remembered from before.
-  const noting = (async (input, init) => {
-    const response = await fetch(input, init);
-    served = response.ok;
-    return response;
-  }) as typeof globalThis.fetch;
-  let dataset: FetchedDataset | null;
-  try {
-    dataset = await getSolidDatasetOrNull(url, noting);
-  } catch (error) {
-    if (served) return "kept";
-    throw error;
-  }
+  const dataset = await read();
+  if (dataset === UNREADABLE) return "kept";
   if (dataset === null) return "absent";
   const quads = [...toRdfJsDataset(dataset)];
   const found = owns(dataset);

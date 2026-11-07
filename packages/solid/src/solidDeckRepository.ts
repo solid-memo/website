@@ -52,6 +52,7 @@ import {
   saveDataset,
   versionOf,
   type Removal,
+  UNREADABLE,
 } from "./datasets";
 import { deckDocumentSubjects } from "./ownership";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
@@ -646,7 +647,10 @@ export function createSolidDeckRepository({
    * whose documents are unclaimed, or that cannot be used, only the entry
    * is removed. Of a document that also holds another app's data, only
    * the decks' cards and review states are removed (removeOwned), and
-   * the document is kept, which the result names.
+   * the document is kept, which the result names. A document in the
+   * instance's folder that fails to be read stops the removal before the
+   * entries are written, so they still name what is left and the removal
+   * can be made again; a document already gone by then counts as removed.
    */
   async function removeDecks(decks: readonly Deck[]): Promise<KeptDocuments> {
     const keptDocuments: string[] = [];
@@ -682,21 +686,26 @@ export function createSolidDeckRepository({
    * Remove the decks' cards and review states from the document at
    * `url`, and the document when nothing else is left in it (removeOwned,
    * If-Match its read), when it is one of the decks' to remove from;
-   * else, and when it cannot be read as RDF, keep it whole (null).
-   * `owned` is what of it goes with the entries of the decks removed
-   * (deckDocumentSubjects): the document's saying it is theirs goes when
-   * it names no other.
+   * else keep it whole (null). One the pod serves that cannot be read as
+   * RDF is kept whole too, and said to be ("kept"), and so is one outside
+   * the instance's folder whose read fails (deckPlace.ts, readToRemove).
+   * Any other failed read (refused, a server error, no answer, a body cut
+   * off) throws: whether it is theirs is not known, so nothing may be
+   * taken as settled. `owned` is what of it goes with the entries of the
+   * decks removed (deckDocumentSubjects): the document's saying it is
+   * theirs goes when it names no other.
    */
   async function removeIfTheirs(
     url: string,
     decks: readonly Deck[],
     owned: ReturnType<typeof deckDocumentSubjects>,
   ): Promise<Removal | null> {
-    const existing = await getSolidDatasetOrNull(url, fetch).catch(() => null);
+    const existing = await guard.readToRemove(decks[0]!, url);
+    if (existing === UNREADABLE) return "kept";
     if (existing === null) return null;
     for (const deck of decks) {
       if ((await guard.standing(deck, url, existing)) !== "unclaimed")
-        return removeOwned(url, owned, fetch);
+        return removeOwned(url, owned, fetch, () => guard.readToRemove(decks[0]!, url));
     }
     return null;
   }

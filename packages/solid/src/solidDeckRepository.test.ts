@@ -50,7 +50,15 @@ vi.mock("./client/resources", async (importOriginal) => {
 });
 vi.mock("./datasets", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./datasets")>();
-  return { ...actual, getSolidDatasetOrNull: vi.fn(), versionOf: vi.fn(actual.versionOf) };
+  const getSolidDatasetOrNull = vi.fn();
+  return {
+    ...actual,
+    getSolidDatasetOrNull,
+    // A removal's read through the guard, as any other read here.
+    readForRemoval: (url: string, fetch: typeof globalThis.fetch) =>
+      getSolidDatasetOrNull(url, fetch),
+    versionOf: vi.fn(actual.versionOf),
+  };
 });
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
@@ -2128,6 +2136,8 @@ describe("library upgrade writes", () => {
   });
 
   it("deleteDocument deletes a document of the deck there is, and nothing when it is gone", async () => {
+    // Read to tell it is the deck's, then again by its removal (removeOwned).
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(datasetFrom(STAGED));
     vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(datasetFrom(STAGED));
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().deleteDocument(deck, STAGED);

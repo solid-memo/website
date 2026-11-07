@@ -152,10 +152,14 @@ export function DeckTableContainer({
     },
     onMutate: () => setFailure(null),
     onError: (error) => setFailure(error),
-    onSettled: () =>
+    onSettled: (_done, _error, bulk) =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
+        // A removal stopped part-way may have taken decks' cards already.
+        ...(bulk.kind === "remove" ? bulk.decks : []).map((deck) =>
+          queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+        ),
       ]),
   });
   const run = (bulk: Bulk) =>
