@@ -2293,6 +2293,8 @@ releases it, two ways.
   Access Control, its ACR on one with Access Control Policies
   (`ReleasePublisher`, [boundaries.md](boundaries.md#access-control)).
   - This is the only place the app changes who may read something.
+  - An ACR comes to say it governs the release (`acp:resource`).
+    The Community Solid Server applies no ACR that doesn't.
   - Only the release's own access control, beside it on its server
     (`<release>.acl` or `<release>.acr`), is ever written, whatever a
     server's answers name instead.

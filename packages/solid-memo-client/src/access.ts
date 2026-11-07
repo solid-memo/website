@@ -25,7 +25,9 @@ const ACCESS_CONTROL_RESOURCE = `${ACP}AccessControlResource`;
  * control is the one its server names (`rel="acl"`). That is an Access
  * Control Resource when its own answer says so (`rel="type"`), a 404
  * too, as the Community Solid Server answers one not written yet, or
- * when it speaks ACP; it is a Web Access Control ACL otherwise. Either
+ * when it speaks ACP; it is a Web Access Control ACL otherwise. An ACR
+ * also comes to say it governs the document (`acp:resource`): the
+ * Community Solid Server applies none that doesn't. Either
  * way read for everyone is added to it, for the document alone, in one
  * PATCH whose statements each end in " ." (node-solid-server refuses a
  * "." touching the term before it, sparqlUpdate.ts), and nothing is
@@ -42,10 +44,17 @@ export const grantPublicRead: GrantPublicRead = async (url, { fetch }) => {
     const read = publicAcpRead(current.quads, control);
     // A policy denying everyone read wins over any that allows it.
     if (read === "denied") return false;
-    const additions = read === "allowed" ? [] : publicAcpQuads(current.quads, control);
+    const additions = [
+      ...(governs(current.quads, control, url) ? [] : [governing(control, url)]),
+      ...(read === "allowed" ? [] : publicAcpQuads(current.quads, control)),
+    ];
     if (!(await insert(control, additions, fetch))) return false;
     const after = await readControl(control, fetch);
-    return after !== undefined && publicAcpRead(after.quads, control) === "allowed";
+    return (
+      after !== undefined &&
+      governs(after.quads, control, url) &&
+      publicAcpRead(after.quads, control) === "allowed"
+    );
   }
   // An ACL not written yet: the rules the document inherits come along,
   // so that its owner keeps what the folder's ACL gave them.
@@ -193,6 +202,16 @@ function publicAcpRead(quads: Quad[], acr: string): "allowed" | "denied" | "not 
     policies.some((policy) => has(quads, policy, `${ACP}${verb}`, `${ACL}Read`));
   if (read("deny")) return "denied";
   return read("allow") ? "allowed" : "not granted";
+}
+
+/** Whether the ACR at `acr` says it governs `url`. */
+function governs(quads: Quad[], acr: string, url: string): boolean {
+  return has(quads, namedNode(acr), `${ACP}resource`, url);
+}
+
+/** That the ACR at `acr` governs `url`. */
+function governing(acr: string, url: string): Quad {
+  return quad(namedNode(acr), namedNode(`${ACP}resource`), namedNode(url));
 }
 
 /**

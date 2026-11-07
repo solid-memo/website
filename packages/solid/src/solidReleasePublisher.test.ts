@@ -345,11 +345,14 @@ describe("publish, with the library's grant (client/access.ts)", () => {
     expect(writes()).toEqual([
       `PUT ${RELEASE} If-None-Match`,
       `PATCH ${RELEASE}.acr`,
+      `PATCH ${RELEASE}.acr`,
       `PATCH ${CATALOG}`,
     ]);
     const acr = await pod.text(`${RELEASE}.acr`);
     expect(acr).toContain(`<${ACP}PublicAgent>`);
     expect(acr).toContain(`<${ACL}Read>`);
+    // The Community Solid Server applies no ACR that doesn't say what it governs.
+    expect(acr).toContain(`<${ACP}resource> <${RELEASE}>`);
   });
 
   it("says a pod without access control did not make the release public", async () => {
