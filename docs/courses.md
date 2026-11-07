@@ -198,9 +198,10 @@ new type-index entries ([data-model.md](data-model.md#courses)):
      right: a wrong choice shows its distractor's note, and the right
      answer shows as the card's back, with its `sm:backNote`. The first
      answer to a question adds the card to the deck ("Added to your
-     deck"). After the step's last question, Next goes to the next
-     step's theory, or after the chapter's last step to the final
-     review.
+     deck"), unless the deck already has a card at that id, which stays
+     as it is and gets no such word. After the step's last question,
+     Next goes to the next step's theory, or after the chapter's last
+     step to the final review.
    - Every step, the one a chapter resumes at included, starts on its
      theory at its first chunk. The chunks are counted in the language
      the app shows the theory in, the course's first. On a switch to a

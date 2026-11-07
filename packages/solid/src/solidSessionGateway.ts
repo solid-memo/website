@@ -233,5 +233,20 @@ export function createSolidSessionGateway({
       window.addEventListener(SESSION_EXPIRED_EVENT, listener);
       return () => window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
     },
+
+    onReturnedWithoutSession(listener) {
+      const heard = ({ persisted }: PageTransitionEvent) => {
+        if (!persisted) return;
+        // A store that can't be read vouches for no session.
+        void client
+          .sessionIssuer()
+          .catch(() => null)
+          .then((issuer) => {
+            if (issuer === null) listener();
+          });
+      };
+      window.addEventListener("pageshow", heard);
+      return () => window.removeEventListener("pageshow", heard);
+    },
   };
 }

@@ -85,6 +85,20 @@ describe("createLogoutChannel", () => {
       close();
     });
 
+    it("takes nothing else posted on the channel for a logout", async () => {
+      const { there, close } = twoPages();
+      const heard = vi.fn();
+      there.listen(heard);
+      const stray = new BroadcastChannel(CHANNEL);
+
+      stray.postMessage({ not: "logout" });
+      await delivered();
+
+      expect(heard).not.toHaveBeenCalled();
+      stray.close();
+      close();
+    });
+
     it("stops telling a listener once it unsubscribes", async () => {
       const { here, there, close } = twoPages();
       const heard = vi.fn();

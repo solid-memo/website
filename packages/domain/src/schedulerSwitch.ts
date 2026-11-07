@@ -9,6 +9,8 @@ import { memoryFromSm2, nextMemory, type FsrsMemory } from "./fsrs";
 import { ratingOfAnswer } from "./grading";
 import type { LangText } from "./langText";
 import { FSRS_REVIEW_STATE_FORMAT_VERSION, type FsrsState, type ReviewState } from "./review";
+import { isWritableInstant } from "./reviewStateEdits";
+import { firstReviewOf } from "./scheduling";
 import { daysBetween } from "./studyPatterns";
 
 /**
@@ -112,12 +114,18 @@ function replayed(history: readonly Answer[]): FsrsMemory {
  * replayed from the prompt's answers when they are its whole history
  * since it was introduced, else estimated from the SM-2 state
  * (memoryFromSm2). Each keeps the SM-2 state's due day and reviews, and
- * has no snapshot, as nothing FSRS-6 wrote is there to restore.
+ * has no snapshot, as nothing FSRS-6 wrote is there to restore. A review
+ * date that cannot be written (isWritableInstant), which would refuse
+ * the deck's whole write, is `now` instead, as a grade has it; then the
+ * SM-2 state's last review differs, so that FSRS-6 state is stale
+ * (isFresh) and SM-2 keeps setting the prompt's due day until its next
+ * review.
  */
 export function switchedStates(
   deckUrl: string,
   sm2: readonly ReviewState[],
   answers: readonly Answer[],
+  now: Date,
 ): SwitchedStates {
   const { chains } = chainIndexOf(answers.filter((answer) => answer.deckUrl === deckUrl));
   let replayedCount = 0;
@@ -132,8 +140,10 @@ export function switchedStates(
       stability: memory.stability,
       difficulty: memory.difficulty,
       due: state.due,
-      firstReviewedAt: state.firstReviewedAt,
-      lastReviewedAt: state.lastReviewedAt,
+      firstReviewedAt: firstReviewOf(state, now),
+      lastReviewedAt: isWritableInstant(state.lastReviewedAt)
+        ? state.lastReviewedAt
+        : now.toISOString(),
       formatVersion: FSRS_REVIEW_STATE_FORMAT_VERSION,
     };
   });

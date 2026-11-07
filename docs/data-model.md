@@ -84,8 +84,9 @@ flowchart LR
   attached by URL or moved to from a guest's pod is registered at its
   address as a request sends it (`instanceAddressOf`):
   `HTTPS://Pod.example:443/kortlekar-å` is
-  `https://pod.example/kortlekar-%C3%A5/`. An address that `isInstanceAddress`
-  refuses isn't an instance to attach (`notAnInstanceNoMeta`).
+  `https://pod.example/kortlekar-%C3%A5/`. An address that
+  `isInstanceAddress` refuses as a request sends it isn't an instance
+  to attach (`notAnInstanceNoMeta`).
   An instance with no title is named after its folder, with its
   percent-encoding undone; a name whose escapes don't decode, such as
   `caf%E9`, is shown as written (`lastPathSegment` in
@@ -517,9 +518,12 @@ No document Solid Memo names has any.
 - **A release** the catalog links (`sm:publishedRelease`) is listed only
   at an http(s) address named as a release is, `…/<name>/v<N>.ttl`,
   written as a request sends it, like the folder it's published in
-  ([studio.md](studio.md#publishing-a-release)). It's made public again
-  only when the catalog lists it, its document is a release, and it's in
-  the instance or in a storage of the user's that holds the instance.
+  ([studio.md](studio.md#publishing-a-release)). That address has no
+  empty segment (`//`) and no user info (`isPublishedReleaseUrl`). It's
+  made public again only when the catalog lists it, its document is a
+  release, and
+  it's in the instance or in a storage of the user's that holds the
+  instance.
   An instance attached from another's pod may list the user's own. Its
   next version, written into the instance, is made from it read as the
   user only by the same place rule, and from it read as no one
@@ -1053,7 +1057,13 @@ Studio's card inspector edit them
   its distractor, removing the card that took it over, by hand or in an
   upgrade, removes only the card statements: the `sm:Card` type and the
   card properties (`withoutCardSubject`). The other card keeps its
-  distractor and is editable again.
+  distractor and is editable again. A card may also name two
+  distractors of one id, subjects of two documents, as only a document
+  written by hand can. It still reads, and the document's other cards
+  can be edited. A write of that card is refused
+  (`distractorIdRepeated`), and so is an upgrade of its document to
+  this app's format, which stays as it is until the user deletes one
+  of the two (`deleteDistractor`, by position) and saves the card.
 
 ## Courses
 

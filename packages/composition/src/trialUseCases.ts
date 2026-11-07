@@ -126,6 +126,7 @@ export function createTrialUseCases(
         answerStore,
         digestStore,
         newId: randomId,
+        now,
       }),
       ...courses,
       ...createLibraryUseCases({

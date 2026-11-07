@@ -970,7 +970,9 @@ The domain makes each change
 - `deleteDistractor` removes it, once the user confirms, but only one
   the release the deck came from never published; one it did (a
   learner's history may name it) is refused, to be retired instead.
-  While the release is read, every one counts as published.
+  While the release is read, every one counts as published. It goes by
+  position: of two that hold one id, the other stays, so its id does
+  too, and even a published one may go.
 - `distractorIssues` lists an option in use that isn't in exactly the
   back's languages, and fewer than two in use, as warnings in a pod's
   deck, never refusals.
@@ -1402,10 +1404,11 @@ and its row says "From \<host>".
 
 - Its creator's catalog, found in the folders above the release and
   read as anyone reads it, lists the releases its instance published
-  (`sm:publishedRelease`); only links at an address a release may have
-  are read. The newest of the copy's series is its upgrade, planned and
-  applied as a library copy's. The newer release's own list of releases
-  in between is kept to such addresses the same way.
+  (`sm:publishedRelease`). Only links at an address a release may have
+  (`isPublishedReleaseUrl`: no empty segment, no user info) are read.
+  The newest of the copy's series is its upgrade, planned and applied
+  as a library copy's. The newer release's own list of releases in
+  between is kept to such addresses the same way.
 - Each release a catalog links is read once for each copy, and none
   that the copy's own release lists. A copy's lookup reads them for
   itself, its own release among them, under one release's limits
@@ -2370,8 +2373,9 @@ instance as its next version, nor a deck's cards into a draft there
 or into another of its decks
 ([moving and copying cards](#moving-and-copying-cards)). The releases
 screen lists only links at an http(s) address named as a release is,
-`…/<name>/v<N>.ttl`, as a request sends it
-([data-model.md](data-model.md#where-an-instances-documents-are)).
+`…/<name>/v<N>.ttl`, as a request sends it, with no empty segment
+(`//`) and no user info (`isPublishedReleaseUrl`,
+[data-model.md](data-model.md#where-an-instances-documents-are)).
 Whether a release is public is asked without credentials
 (`isReleasePublic`).
 

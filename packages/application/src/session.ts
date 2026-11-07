@@ -79,8 +79,10 @@ export interface SessionUseCases {
   /** Subscribe to session expiry; returns an unsubscribe function. */
   onSessionExpired(listener: () => void): () => void;
   /**
-   * Subscribe to a logout in another tab, called once this tab's own
-   * session has ended, if it had one; returns an unsubscribe function.
+   * Subscribe to a logout in another tab, heard at once, or found out
+   * when this page returns from the back/forward cache with no session
+   * stored. Called once this tab's own session has ended, if it had one;
+   * returns an unsubscribe function.
    */
   onLoggedOutElsewhere(listener: () => void): () => void;
   /**
@@ -471,12 +473,18 @@ export function createSessionUseCases({
       return sessionGateway.logout();
     },
     onLoggedOutElsewhere(listener) {
-      return logoutChannel.listen(() => {
+      const endSession = () => {
         // Only a tab with a user has a session to end: this logout is local, and announces nothing.
         const ended = webId() === undefined ? Promise.resolve() : sessionGateway.logout();
         // The tab leaves its session behind whether or not the sign-in client managed to.
         void ended.catch(() => undefined).then(listener);
-      });
+      };
+      const stopListening = logoutChannel.listen(endSession);
+      const stopWatching = sessionGateway.onReturnedWithoutSession(endSession);
+      return () => {
+        stopListening();
+        stopWatching();
+      };
     },
     onSessionExpired(listener) {
       return sessionGateway.onSessionExpired(listener);

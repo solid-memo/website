@@ -440,7 +440,7 @@
   },
   "unclaimedDecks": {
     "region": "Decks to confirm",
-    "heading": "Solid Memo changes nothing in these decks' documents until you confirm they are the decks' own.",
+    "heading": "Solid Memo changes nothing in these decks' documents unless they are marked as the decks' own.",
     "hint": "A deck's documents here don't say they belong to it, and they are outside the instance's own folder, where someone else's data could be named. Solid Memo reads them and studies from them, but saves no answer or edit there, and removing the deck removes only its entry. Where Solid Memo offers it, confirm only documents you know are the deck's.",
     "deck": "{deck}: its documents don't say they belong to this deck.",
     "claim": "These are this deck's documents",
@@ -1643,7 +1643,7 @@
     "textMixesUnstated": "This text does not say which language it is in, so it cannot have translations. Choose its language first.",
     "distractorEmpty": "A wrong option needs text.",
     "distractorPublished": "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
-    "distractorIdRepeated": "Two wrong options on this card have the same id, so only one could be saved. Delete one of them.",
+    "distractorIdRepeated": "Two wrong options of one card have the same id, so one would replace the other. Nothing was saved. Delete one of them from the card, or, in a deck file, give each its own id.",
     "dailyLimitInvalid": "A daily limit is a whole number, 0 or more.",
     "dueDayInvalid": "“{day}” is not a day. Choose the day the card is due.",
     "cardTransferSameDeck": "The cards are in this deck already. Choose another deck.",

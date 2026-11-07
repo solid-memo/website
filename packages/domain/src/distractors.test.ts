@@ -182,14 +182,32 @@ describe("retiring and restoring", () => {
 
 describe("deleteDistractor", () => {
   it("deletes one its release never published", () => {
-    expect(deleteDistractor([d1, d2], "q-d2", new Set(["q-d1"]))).toEqual({
+    expect(deleteDistractor([d1, d2], 1, new Set(["q-d1"]))).toEqual({
       ok: true,
       distractors: [d1],
     });
   });
 
   it("refuses one its release published, to be retired instead", () => {
-    expect(deleteDistractor([d1, d2], "q-d1", new Set(["q-d1"]))).toEqual({
+    expect(deleteDistractor([d1, d2], 0, new Set(["q-d1"]))).toEqual({
+      ok: false,
+      error: new AppError("distractorPublished"),
+    });
+  });
+
+  it("deletes only the one asked for of two of one id, published or not, then refuses the last if published", () => {
+    const again: Distractor = { id: "q-d1", text: { en: "Only files" } };
+    for (const published of [new Set<string>(), new Set(["q-d1"])]) {
+      expect(deleteDistractor([d1, d2, again], 0, published)).toEqual({
+        ok: true,
+        distractors: [d2, again],
+      });
+      expect(deleteDistractor([d1, d2, again], 2, published)).toEqual({
+        ok: true,
+        distractors: [d1, d2],
+      });
+    }
+    expect(deleteDistractor([d2, again], 1, new Set(["q-d1"]))).toEqual({
       ok: false,
       error: new AppError("distractorPublished"),
     });
@@ -197,7 +215,7 @@ describe("deleteDistractor", () => {
 
   it("frees the id of the highest one, never published, for the next one added", () => {
     const d3: Distractor = { id: "q-d3", text: { en: "Only files" } };
-    const deleted = deleteDistractor([d1, d2, d3], "q-d3", new Set(["q-d1"]));
+    const deleted = deleteDistractor([d1, d2, d3], 2, new Set(["q-d1"]));
     expect(deleted).toEqual({ ok: true, distractors: [d1, d2] });
     const added = addDistractor(
       [d1, d2],

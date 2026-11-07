@@ -1474,7 +1474,7 @@ export class Studio extends Screen {
     });
   }
 
-  /** The health screen says the deck's documents are outside the instance's pod, and offers no claim of them. */
+  /** The health screen says the deck's documents are outside the instance's folder and in no storage of the user's found to hold it, and offers no claim of them. */
   async expectCannotClaim(deck: string): Promise<void> {
     await this.intent(`See that the documents of ${deck} cannot be claimed`, async () => {
       const item = this.unclaimedDeck(deck);

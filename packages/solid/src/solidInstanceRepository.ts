@@ -157,7 +157,8 @@ export function createSolidInstanceRepository({
     },
 
     async attachInstance({ webId, instanceUrl, registrationTarget }) {
-      // As a request would send it, so every address made from it is compared as sent; an http(s) folder only, as a registration's is (isInstanceAddress).
+      // As a request would send it, so every address made from it is compared as sent;
+      // an http(s) folder only, as a registration's is (isInstanceAddress).
       const url = instanceAddressOf(instanceUrl);
       if (!isInstanceAddress(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
       const name = await readInstanceName(url, metaFetch);

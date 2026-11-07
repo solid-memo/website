@@ -391,7 +391,10 @@ FSRS-6 is never turned on without its states.
     older app wrote.
   - Each keeps the SM-2 state's due day and reviews, with no snapshot,
     so no due day moves. One already there is made again at the same
-    subject: a switch run twice gives the same states.
+    subject: a switch run twice gives the same states. A review date
+    the write check would refuse is the time of the switch instead, as
+    a grade has it. With a last review that differs, the FSRS-6 state
+    is stale, and SM-2 sets that prompt's due day until its next review.
   - Progress shows per deck. A deck that can't be written now is named
     with why, and the others go on. The preferences are saved last,
     once every deck is written (until then SM-2 sets the due days, and
@@ -786,8 +789,9 @@ In a [course](courses.md)'s deck, a reset treats the day's course
 answers like study answers:
 
 - A card introduced today loses its state but stays in the deck, with
-  its distractors: new in study, its course step not done, introduced
-  again when its question is answered, keeping any edit made to it.
+  its distractors: new in study, its course step not done. Its question
+  answered again grades it as it stands, keeping any edit made to it,
+  with no word that it was added to the deck.
 - A card reviewed today gets its snapshot back.
 - The day's multiple-choice answers leave the answer log.
 - A chapter completed today stays completed: `sm:completedChapter` is

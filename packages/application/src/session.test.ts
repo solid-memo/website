@@ -192,10 +192,23 @@ describe("session", () => {
       await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
       expect(deps.sessionGateway.logout).not.toHaveBeenCalled();
     });
-    it("stops listening once unsubscribed", () => {
-      const { stop, unsubscribe } = subscribed(makeDeps());
+    it("ends this tab's session too when the page returns from the cache with none stored", async () => {
+      const deps = makeDeps();
+      const { listener } = subscribed(deps);
+      const returned = vi.mocked(deps.sessionGateway.onReturnedWithoutSession).mock.calls[0]![0];
+      returned();
+      await vi.waitFor(() => expect(listener).toHaveBeenCalledOnce());
+      expect(deps.sessionGateway.logout).toHaveBeenCalledOnce();
+      expect(deps.logoutChannel.announce).not.toHaveBeenCalled();
+    });
+    it("stops listening and watching once unsubscribed", () => {
+      const deps = makeDeps();
+      const stopWatching = vi.fn();
+      vi.mocked(deps.sessionGateway.onReturnedWithoutSession).mockReturnValueOnce(stopWatching);
+      const { stop, unsubscribe } = subscribed(deps);
       unsubscribe();
       expect(stop).toHaveBeenCalledOnce();
+      expect(stopWatching).toHaveBeenCalledOnce();
     });
     describe("during a restore", () => {
       /** A restore the test finishes, and the channel's word during it. */

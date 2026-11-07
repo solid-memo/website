@@ -195,7 +195,7 @@ describe("instance checks", () => {
     expect(checked).toContain(`${instance.url}catalog.ttl`);
     expect(checked.filter((url) => url.includes("/notes/"))).toEqual([]);
   });
-  describe("documents outside the instance's pod", () => {
+  describe("documents outside the instance's folder and any storage of the user's that holds it", () => {
     const ownElsewhere = "https://alice.example/notes/old-cards.ttl";
     const others = "https://bob.example/memo/";
     const place = { ...instance, url: others };
@@ -241,7 +241,7 @@ describe("instance checks", () => {
       ]);
     });
 
-    it("claims the documents of the user's own pod laid out in other folders, and those in another's instance's own folder", async () => {
+    it("claims documents elsewhere in a storage of the user's found to hold the instance, and those in another's instance's own folder", async () => {
       const { deps, useCases } = setup();
       deps.deckRepository.unclaimedDocuments = vi.fn(async () => [ownElsewhere]);
       const [named] = (await useCases.checkInstance(instance.url)).unclaimed!;

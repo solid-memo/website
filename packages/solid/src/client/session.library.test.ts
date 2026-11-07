@@ -251,9 +251,13 @@ describe("createSessionClient, with the library's own sessions", () => {
       (handleRedirect) => client.login(asked(OTHER, handleRedirect)),
       OTHER,
     );
-    // The other tab's refresh is due, and finds no provider for its session.
+    // The other tab's refresh is due: it reads its session, which holds no
+    // provider any more, and so stops at that read.
+    const kept = `solidClientAuthenticationUser:${otherTab.info.sessionId}`;
+    const reads = vi.spyOn(window.localStorage, "getItem");
     await refreshesComeDue();
-    await settled();
+    await vi.waitFor(() => expect(reads).toHaveBeenCalledWith(kept));
+    expect(window.localStorage.getItem(kept)).toBeNull();
     expect(world.tokenRequests).toEqual([]);
 
     // The login itself completes, and is what a silent restore goes on from.
@@ -276,13 +280,15 @@ describe("createSessionClient, with the library's own sessions", () => {
   });
 
   it.each([
-    "https://other.example//home.example/token",
-    "https://other.example/.//home.example/token",
-    "https://other.example/\\\\home.example/token",
-    ["https://other.example//home.example/token"],
-  ])("refuses a login at a provider whose token endpoint is %j", async (tokenEndpoint) => {
+    ["token_endpoint", "https://other.example//home.example/token"],
+    ["token_endpoint", "https://other.example/.//home.example/token"],
+    ["token_endpoint", "https://other.example/\\\\home.example/token"],
+    ["token_endpoint", ["https://other.example//home.example/token"]],
+    ["authorization_endpoint", "https://other.example//home.example/authorize"],
+    ["jwks_uri", "https://other.example//home.example/jwks"],
+  ])("refuses a login at a provider whose %s is %j", async (field, address) => {
     const world = await providers();
-    world.metadataOf[OTHER] = { token_endpoint: tokenEndpoint };
+    world.metadataOf[OTHER] = { [field]: address };
     const handleRedirect = vi.fn<(url: string) => void>();
     const refused = await createSessionClient()
       .login(asked(OTHER, handleRedirect))

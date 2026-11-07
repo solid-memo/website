@@ -168,7 +168,7 @@ export class ReadLimitError extends Error {
     super(
       limits.bytes === Number.POSITIVE_INFINITY
         ? `The document at [${url}] has more or longer base or prefix declarations, longer IRIs to resolve, or a longer term than a read takes in.`
-        : `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms, a few base and prefix declarations, short IRIs to resolve and short terms.`,
+        : `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms, ${limits.subjects === undefined ? "" : `${limits.subjects} subjects, `}a few base and prefix declarations, short IRIs to resolve and short terms.`,
     );
     this.name = "ReadLimitError";
   }

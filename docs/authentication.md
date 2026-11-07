@@ -53,7 +53,7 @@ a logout leaves the ID on the page. So
 new ID to every login the user starts. The library clears what it kept
 of earlier sessions on that login, so another tab still under the old
 ID has no provider to refresh at, and sends nothing. That tab's session
-ends once its access token expires
+ends at its next refused read after the access token expires
 ([An expired session](#an-expired-session)). A silent restore keeps its
 session's ID, since it goes to that session's provider.
 
@@ -365,18 +365,37 @@ clears the react-query cache: no pod data outlives its session. On
 IndexedDB, and keeps the provider's registration of the app. Neither
 client ends the session at the provider.
 
-Each tab holds its token in its own memory, so a logout is announced
-to this browser's other tabs
+Each tab holds its token in its own memory, so a logout is announced to
+this browser's other tabs
 ([`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts)): on a
 `BroadcastChannel`, or through a `localStorage` key where the browser
 has none or refuses one. Each tab with a user then runs the same local
-`logout()`, which discards its token and, with the session gone from
-storage, ends its refreshing, a tab with a login of its own included.
-It shows the landing and clears its react-query cache. It announces
-nothing itself, and doesn't contact the provider. A session a tab is
-restoring when it hears the announcement is logged out of as well once
-it arrives. A guest's tab keeps its study, which belongs to no login.
+`logout()`, which discards its token and deletes the session data from
+storage. With the authn library, its refresh timer isn't canceled: its
+next refresh fails for want of that data, and no further one is set, in
+a tab with a login of its own too. That holds for as long as the data
+stays deleted. A later login can store it again under the same ID, and
+the old timer's refresh then succeeds, though the tab's requests no
+longer use the token it gets. The tab shows the landing and clears its
+react-query cache. It announces nothing itself, and doesn't contact the
+provider. A session a tab is restoring when it hears the announcement
+is logged out of as well once it arrives. A guest's tab keeps its
+study, which belongs to no login.
 
-The announcement is best effort: where a browser allows neither way,
-the other tabs keep their current token until it expires. Other devices
-aren't told.
+A page held in the browser's back/forward cache hears nothing while it
+is there. When it comes back, it asks whether a session is still stored,
+and with none it runs the same local logout.
+
+The announcement is best effort, and has these limits:
+
+- Where a browser allows neither way, the other tabs keep their current
+  token until it expires.
+- A page back from the cache finds a session stored if someone logged in
+  while it was away. It then keeps its screen, and its token until that
+  expires.
+- A tab the browser froze hears the announcement when it resumes. If
+  someone has logged in again by then, that tab's local logout can remove
+  the session stored for the new login. This fails closed: the tabs
+  holding the new login's token keep working, and the next reload shows
+  the landing.
+- Other devices aren't told.

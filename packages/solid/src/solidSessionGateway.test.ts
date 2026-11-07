@@ -427,4 +427,55 @@ describe("createSolidSessionGateway", () => {
       expect(listener).toHaveBeenCalledOnce();
     });
   });
+
+  describe("onReturnedWithoutSession", () => {
+    /** The page shown again, from the back/forward cache or not, and time for the client to answer. */
+    async function shown(persisted: boolean) {
+      window.dispatchEvent(Object.assign(new Event("pageshow"), { persisted }));
+      await new Promise((resolve) => setTimeout(resolve));
+    }
+
+    it("notifies when the page returns from the cache with no session stored", async () => {
+      client.sessionIssuer.mockResolvedValue(null);
+      const listener = vi.fn();
+      const unsubscribe = createSolidSessionGateway(options).onReturnedWithoutSession(listener);
+      await shown(true);
+      expect(listener).toHaveBeenCalledOnce();
+      unsubscribe();
+    });
+
+    it("stays quiet while a session is stored", async () => {
+      client.sessionIssuer.mockResolvedValue("https://issuer.example/");
+      const listener = vi.fn();
+      const unsubscribe = createSolidSessionGateway(options).onReturnedWithoutSession(listener);
+      await shown(true);
+      expect(listener).not.toHaveBeenCalled();
+      unsubscribe();
+    });
+
+    it("takes a store it can't read for no session", async () => {
+      client.sessionIssuer.mockRejectedValue(new Error("storage refused"));
+      const listener = vi.fn();
+      const unsubscribe = createSolidSessionGateway(options).onReturnedWithoutSession(listener);
+      await shown(true);
+      expect(listener).toHaveBeenCalledOnce();
+      unsubscribe();
+    });
+
+    it("doesn't ask on a page's ordinary load", async () => {
+      const listener = vi.fn();
+      const unsubscribe = createSolidSessionGateway(options).onReturnedWithoutSession(listener);
+      await shown(false);
+      expect(client.sessionIssuer).not.toHaveBeenCalled();
+      expect(listener).not.toHaveBeenCalled();
+      unsubscribe();
+    });
+
+    it("stops after unsubscribe", async () => {
+      const listener = vi.fn();
+      createSolidSessionGateway(options).onReturnedWithoutSession(listener)();
+      await shown(true);
+      expect(client.sessionIssuer).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -60,7 +60,8 @@ export interface InstanceCheckUseCases {
    * written to and deleted as the deck's. Each in one write made only
    * while it is as read; nothing else in it changes. deckGone when the
    * instance has no such deck; claimOutsidePod, with nothing written,
-   * when any of them is outside the instance's pod (UnclaimedDeck
+   * when any of them is outside the instance's folder and in no storage
+   * of the user's found to hold the instance too (UnclaimedDeck
    * `outsidePod`).
    */
   claimDeckDocuments(instanceUrl: string, deckUrl: string): Promise<void>;
@@ -147,13 +148,13 @@ export function createInstanceCheckUseCases({
   }
   /**
    * A test of which documents may not be claimed for a deck of the
-   * instance, giving those of `documents` that are outside its pod: a
-   * claim lets the app write to a document as the user and delete from
-   * it, and an instance attached from someone else's pod may name a
-   * document of the user's own. A document is inside when it is the
-   * instance's (isInInstancePod), which holds for any folder of the
-   * user's own pod; with no one signed in, only in the instance's own
-   * folder. The user's storages are found once for one test.
+   * instance, giving those of `documents` outside its folder and in no
+   * storage of the user's that holds it too (isInInstancePod): a claim
+   * lets the app write to a document as the user and delete from it, and
+   * an instance attached from someone else's pod may name a document of
+   * the user's own. A storage counts only when it can be found; when none
+   * can, or no one is signed in, only the instance's own folder does.
+   * The user's storages are found once for one test.
    */
   function outsidePodTest(
     instanceUrl: string,
@@ -174,7 +175,7 @@ export function createInstanceCheckUseCases({
       return documents.filter((_, index) => !inside[index]);
     };
   }
-  /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments) and which of them are outside the instance's pod. */
+  /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments) and which of them may not be claimed (outsidePodTest). */
   async function unclaimedDecksOf(
     instanceUrl: string,
     decks: readonly Deck[],

@@ -55,6 +55,12 @@ export interface SessionGateway {
    */
   onSessionExpired(listener: () => void): () => void;
   /**
+   * Subscribe to this page coming back from the browser's back/forward
+   * cache, where it heard nothing, with no session stored any more.
+   * Returns an unsubscribe function.
+   */
+  onReturnedWithoutSession(listener: () => void): () => void;
+  /**
    * The identity provider the WebID profile declares (solid:oidcIssuer).
    * Never derived from the WebID's own origin: the two may differ.
    */

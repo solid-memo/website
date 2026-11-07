@@ -449,7 +449,7 @@
   },
   "unclaimedDecks": {
     "region": "Paquets à confirmer",
-    "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant que vous n’avez pas confirmé qu’ils sont ceux des paquets.",
+    "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant qu’ils ne sont pas marqués comme ceux des paquets.",
     "hint": "Les documents d’un paquet ici n’indiquent pas qu’ils lui appartiennent, et ils se trouvent hors du dossier propre de l’instance, où les données de quelqu’un d’autre pourraient être désignées. Solid Memo les lit et vous permet d’en étudier, mais n’y enregistre ni réponse ni modification, et retirer le paquet ne retire que son entrée. Là où Solid Memo le propose, ne confirmez que des documents dont vous savez qu’ils sont ceux du paquet.",
     "deck": "{deck} : ses documents n’indiquent pas qu’ils appartiennent à ce paquet.",
     "claim": "Ce sont les documents de ce paquet",
@@ -1718,7 +1718,7 @@
     "textMixesUnstated": "Ce texte n’indique pas sa langue, il ne peut donc pas avoir de traductions. Choisissez d’abord sa langue.",
     "distractorEmpty": "Une mauvaise réponse doit avoir un texte.",
     "distractorPublished": "Cette mauvaise réponse figure dans la publication d’où vient le paquet : elle ne peut donc pas être supprimée. Archivez-la plutôt.",
-    "distractorIdRepeated": "Deux mauvaises réponses de cette carte ont le même identifiant : une seule pourrait être enregistrée. Supprimez-en une.",
+    "distractorIdRepeated": "Deux mauvaises réponses d’une carte ont le même identifiant : l’une remplacerait l’autre. Rien n’a été enregistré. Supprimez-en une de la carte ou, dans un fichier de paquet, donnez à chacune son propre identifiant.",
     "dailyLimitInvalid": "Une limite quotidienne doit être un nombre entier supérieur ou égal à 0.",
     "dueDayInvalid": "« {day} » n’est pas une date. Choisissez le jour où la carte est à réviser.",
     "cardTransferSameDeck": "Les cartes sont déjà dans ce paquet. Choisissez-en un autre.",

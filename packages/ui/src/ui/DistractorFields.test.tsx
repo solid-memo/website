@@ -214,6 +214,20 @@ describe("DistractorFields", () => {
     );
   });
 
+  it("deletes only the option asked for of two of one id, the other kept", () => {
+    const confirm = vi.fn().mockReturnValue(true);
+    vi.stubGlobal("confirm", confirm);
+    const again: Distractor = { id: "q-d1", text: { en: "Only files" } };
+    const { props } = renderFields({ distractors: [d1, again] });
+    fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “Only files”" }));
+    expect(confirm).toHaveBeenLastCalledWith("Delete the wrong option “Only files”?");
+    expect(props.onChange).toHaveBeenLastCalledWith([d1]);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Delete the wrong option “Only web pages”" }),
+    );
+    expect(props.onChange).toHaveBeenLastCalledWith([again]);
+  });
+
   it("does nothing while busy", () => {
     const confirm = vi.fn();
     vi.stubGlobal("confirm", confirm);

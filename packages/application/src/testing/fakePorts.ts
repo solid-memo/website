@@ -112,6 +112,7 @@ export function makeDeps() {
     loginWithIssuer: vi.fn(async () => undefined),
     logout: vi.fn(async () => undefined),
     onSessionExpired: vi.fn(() => () => undefined),
+    onReturnedWithoutSession: vi.fn((_listener: () => void): (() => void) => vi.fn()),
   };
   const webIdDocumentRepository: WebIdDocumentRepository = {
     fetchWebIdDocument: vi.fn(async () => document),

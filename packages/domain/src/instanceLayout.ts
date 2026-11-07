@@ -122,10 +122,9 @@ export function hasEmptySegment(url: string): boolean {
  * Whether a registration's address may be taken as an instance's as it
  * is written: an http(s) address with no query or fragment
  * (isPlainHttpUrl), no dot segment (hasDotSegment) and no empty segment
- * (hasEmptySegment). Another spelling
- * of the same folder (its host's case, a character outside ASCII) is
- * that folder, as every address made from it is compared as a request
- * sends it.
+ * (hasEmptySegment). Another spelling of the same folder (its host's
+ * case, a character outside ASCII) is that folder, as every address made
+ * from it is compared as a request sends it.
  */
 export function isInstanceAddress(text: string): boolean {
   return isPlainHttpUrl(text) && !hasDotSegment(text) && !hasEmptySegment(text);
@@ -149,10 +148,11 @@ const OUT_OF_PLACE = /[?#;]|%(?:2f|5c|25|00|c0|c1|u)|(?:^|\/)(?:\.|%2e|\/)/i;
  * or in one of its folders, as a request would resolve both
  * (canonicalUrlOf): below the folder, not a folder itself, and with
  * nothing after the folder a server might read as a step out of it
- * (OUT_OF_PLACE), in a folder with no empty segment (isInFolder). A catalog, a type index or a link is data anyone may
- * have written (docs/data-model.md, "Where an instance's documents
- * are"), so an address it names is held to this before Solid Memo reads,
- * writes or deletes there.
+ * (OUT_OF_PLACE), in a folder with no empty segment (isInFolder). A
+ * catalog, a type index or a link is data anyone may have written
+ * (docs/data-model.md, "Where an instance's documents are"), so an
+ * address it names is held to this before Solid Memo reads, writes or
+ * deletes there.
  */
 export function isDocumentIn(url: string, container: string): boolean {
   return isInFolder(url, container) && !canonicalUrlOf(url)!.endsWith("/");
