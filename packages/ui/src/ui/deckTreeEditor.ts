@@ -189,8 +189,13 @@ export function useDeckTreeEditor(
     scope: { id: scope },
     mutationFn: (deck: Deck) => useCases.removeDeck(deck),
     onMutate: () => setFailure(null),
-    onSuccess: refresh,
     onError: (error) => setFailure(error),
+    // A removal stopped part-way may have taken the deck's cards already.
+    onSettled: (_removed, _error, deck) =>
+      Promise.all([
+        refresh(),
+        queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+      ]),
   });
 
   if (treeQuery.data === undefined) return { treeQuery, editor: undefined };

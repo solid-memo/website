@@ -499,6 +499,15 @@ No document Solid Memo names has any.
   only when every deck it names is leaving; otherwise only
   the leaving deck's `dcterms:isPartOf` goes (`deckDocumentSubjects` in
   [ownership.ts](../packages/solid/src/ownership.ts)).
+  A failed read (refused, a server error, no answer, a download cut off)
+  of a deck's document in the instance's folder stops the removal, or the
+  instance's deletion, before the catalog is written. The entry stays, the
+  error is shown, and trying again finishes it, a document already gone
+  (404, 410) counting as removed. A document outside the instance's
+  folder may be anyone's and may never answer, so a failed read doesn't
+  hold the deck back: it's kept whole, the result names it
+  (`keptDocuments`), and the entry goes. The same holds for one the pod
+  serves that can't be read as RDF.
 - **Any other deck is left alone.** It isn't listed (`toDecks` in
   [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)), so
   nothing reads, writes or deletes through it, whatever the [invalid

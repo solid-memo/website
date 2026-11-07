@@ -356,6 +356,24 @@ describe("DeckTableContainer", () => {
     );
   });
 
+  it("reads the cards afresh, and says why, when a removal stops part-way", async () => {
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [kanji, verbs]),
+      removeDecks: vi.fn(async () => {
+        throw new Error("The pod said no");
+      }),
+    });
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select Kanji N5" }));
+    await waitFor(() => expect(useCases.listCards).toHaveBeenCalledWith(kanji));
+    vi.mocked(useCases.listCards).mockClear();
+    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    answer("Delete the selected decks", "Delete");
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("The pod said no"));
+    await waitFor(() => expect(useCases.listCards).toHaveBeenCalledWith(kanji));
+    expect(useCases.listCards).not.toHaveBeenCalledWith(verbs);
+  });
+
   it("says why the decks could not be read", async () => {
     renderContainer(
       makeUseCasesFake({

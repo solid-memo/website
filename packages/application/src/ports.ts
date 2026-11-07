@@ -237,13 +237,17 @@ export interface DeckRepository {
    * document, and the deck from its group, in the same write. Of a
    * document that also holds another app's data, only the deck's cards
    * and review states are removed, and the document is kept, which the
-   * result names.
+   * result names, as is one that cannot be read as RDF or, outside the
+   * instance's folder, cannot be read at all. A failed read of any other
+   * throws before the entry is written: the entry stays, and the removal
+   * can be made again.
    */
   removeDeck(deck: Deck): Promise<KeptDocuments>;
   /**
    * Removes several decks as removeDeck does: their cards and reviews
    * documents, then their catalog entries in ONE write of their catalog
-   * document.
+   * document. A throw leaves the entries of that document, and any it
+   * had not reached, in place.
    */
   removeDecks(decks: readonly Deck[]): Promise<KeptDocuments>;
   /**
@@ -396,7 +400,9 @@ export interface DeckRepository {
    * one a guest's deck being added wrote before its catalog entry
    * failed: the deck's cards and review states are removed from it, and
    * it is deleted when nothing else is left in it; one that is gone
-   * counts as deleted. Throws unless it can be read to be gone.
+   * counts as deleted. One that cannot be read as RDF or, outside the
+   * instance's folder, cannot be read at all is kept. Throws unless it
+   * can be read to be gone.
    */
   deleteDocument(deck: Deck, url: string): Promise<void>;
   /**

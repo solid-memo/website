@@ -775,4 +775,22 @@ describe("an instance whose address is spelled otherwise than a request sends it
       expect(read.dropped).toEqual([]);
     });
   }
+
+  it("lists a document that is both of a deck's documents once", async () => {
+    const elsewhere = "https://elsewhere.example/both.ttl";
+    const guard = createDeckDocumentGuard(
+      (async () =>
+        new Response("", {
+          headers: { "Content-Type": "text/turtle" },
+        })) as unknown as typeof globalThis.fetch,
+    );
+    await expect(
+      guard.unclaimed({
+        url: "https://pod.example/memo/catalog.ttl#deck",
+        title: {},
+        cardsDocumentUrl: elsewhere,
+        reviewsDocumentUrl: elsewhere,
+      }),
+    ).resolves.toEqual([elsewhere]);
+  });
 });

@@ -18,7 +18,7 @@ import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 import { HIGHLIGHTS } from "./highlights";
-import { boundedQueryKeyHash } from "./queryKeys";
+import { boundedQueryKeyHash, queryKeys } from "./queryKeys";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -1334,12 +1334,20 @@ describe("DeckListContainer, renaming and deleting decks", () => {
     const removeDeck = vi.fn(async () => {
       throw new Error("pod unreachable");
     });
-    renderContainer(makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), removeDeck }));
+    const { queryClient } = renderContainer(
+      makeUseCasesFake({ listDecks: vi.fn(async () => [deck, second]), removeDeck }),
+    );
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
     await screen.findByRole("link", { name: "Kana" });
     choose("Kanji N5", "Delete deck");
     await waitFor(() => {
       expect(alertTexts()).toEqual([expect.stringContaining("pod unreachable")]);
     });
+    // A removal stopped part-way may have taken the deck's cards already.
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) });
+    expect(invalidate).toHaveBeenCalledWith(
+      expect.objectContaining({ queryKey: queryKeys.allDecks() }),
+    );
     expect(order()).toEqual(["Kanji N5", "Kana"]);
     expect(statusTexts()).toEqual([]);
     removeDeck.mockImplementation(() => new Promise<never>(() => undefined));
