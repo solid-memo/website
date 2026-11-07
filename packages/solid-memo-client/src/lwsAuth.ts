@@ -27,12 +27,6 @@ import { clientAuth, requestOptions, secureEndpoint, timeLimited } from "./oidcL
  *   server that names its own authorization server never gets it.
  * - A storage's token goes only to URLs within that storage (same origin,
  *   and the storage's path as a prefix), never elsewhere on its server.
- *
- * Deviation, for the Community Solid Server LWS fork: its challenge
- * names the authorization server in `as_uri` and has no
- * `resource_metadata` (RFC 9728), which LWS requires. A challenge with
- * `as_uri` alone takes it as the authorization server's issuer; the
- * trust rule above holds it to the identity provider's origin.
  */
 
 /** The Link relation naming the storage a resource is in. */
@@ -141,18 +135,16 @@ function abortable<T>(work: Promise<T>, signal: AbortSignal | null | undefined):
 }
 
 /**
- * The authorization server's issuer the challenge leads to. With
- * `resource_metadata` (LWS): the metadata is on the requested URI's
- * scheme and authority, names that URI as its `resource`, and its first
- * authorization server is the one. Without it, the fork's `as_uri`.
+ * The authorization server's issuer the challenge's `resource_metadata`
+ * (RFC 9728) leads to: the metadata is on the requested URI's scheme and
+ * authority, names that URI as its `resource`, and its first
+ * authorization server is the one.
  */
 async function issuerOf(
   url: URL,
-  challenge: oauth.WWWAuthenticateChallenge,
+  metadataUri: string,
   signal: AbortSignal | null | undefined,
 ): Promise<string | undefined> {
-  const { resource_metadata: metadataUri, as_uri: asUri } = challenge.parameters;
-  if (metadataUri === undefined) return asUri;
   const metadataUrl = URL.parse(metadataUri);
   if (metadataUrl?.origin !== url.origin) return undefined;
   const metadata = await getJson(metadataUrl.href, "application/json", signal);
@@ -250,17 +242,15 @@ export class LwsTokens {
     challenges: oauth.WWWAuthenticateChallenge[],
     signal?: AbortSignal | null,
   ): Promise<LwsStorage | undefined> {
-    const challenge = challenges.find(
-      ({ scheme, parameters }) =>
-        scheme === "bearer" &&
-        (parameters.resource_metadata !== undefined || parameters.as_uri !== undefined),
-    );
-    if (response.status !== 401 || challenge === undefined) return undefined;
+    const metadataUri = challenges.find(
+      ({ scheme, parameters }) => scheme === "bearer" && parameters.resource_metadata !== undefined,
+    )?.parameters.resource_metadata;
+    if (response.status !== 401 || metadataUri === undefined) return undefined;
     const uri = linkTargets(response, LWS_STORAGE, url.href).find((target) => within(url, target));
     if (uri === undefined) return undefined;
     const known = this.#storages.get(uri);
     if (known !== undefined) return known;
-    const issuer = URL.parse((await issuerOf(url, challenge, signal)) ?? "");
+    const issuer = URL.parse((await issuerOf(url, metadataUri, signal)) ?? "");
     if (
       issuer?.origin !== new URL(this.#session.issuer).origin ||
       !(await describesStorage(uri, url, signal))

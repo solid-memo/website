@@ -12,11 +12,19 @@ const STORAGE = `${ISSUER}alice/`;
 const RESOURCE = new URL(`${STORAGE}notes/a.ttl`);
 const TOKEN_ENDPOINT = `${ISSUER}.well-known/lws/token`;
 const CONFIGURATION = `${ISSUER}.well-known/lws-configuration`;
-const CHALLENGE = `Bearer as_uri="${ISSUER}", realm="${STORAGE}"`;
+const METADATA = `${ISSUER}.well-known/oauth-protected-resource/alice/notes/a.ttl`;
+const CHALLENGE = `Bearer resource_metadata="${METADATA}", as_uri="${ISSUER}", realm="${ISSUER}"`;
 const STORAGE_LINK = `<${STORAGE}>; rel="https://www.w3.org/ns/lws#storage"`;
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "content-type": "application/json" } });
+
+/** The fork's protected resource metadata for RESOURCE, naming `issuer` as its authorization server. */
+const protectedResource = (issuer = ISSUER): Record<string, unknown> => ({
+  resource: RESOURCE.href,
+  authorization_servers: [issuer],
+  bearer_methods_supported: ["header"],
+});
 
 /** The fork's metadata, as its /.well-known/lws-configuration serves it. */
 const configuration = (): Record<string, unknown> => ({
@@ -71,6 +79,7 @@ beforeEach(() => {
   requests = [];
   vi.mocked(session.idToken).mockClear();
   routes = new Map([
+    [METADATA, () => json(protectedResource())],
     [CONFIGURATION, () => json(configuration())],
     [STORAGE, () => json(description())],
     [TOKEN_ENDPOINT, exchangeAnswer],
@@ -120,6 +129,7 @@ describe("LwsTokens, on the fork's answers", () => {
     expect(
       requests.map(({ url, init }) => [url, new Headers(init?.headers).get("accept")]),
     ).toEqual([
+      [METADATA, "application/json"],
       [STORAGE, "application/lws+cid"],
       [CONFIGURATION, "application/json"],
     ]);
@@ -143,6 +153,13 @@ describe("LwsTokens, on the fork's answers", () => {
     // Kept: the next request has it at once.
     await expect(tokens.token(storage!)).resolves.toEqual({ value: "lws-1", exchanged: false });
     expect(issued).toBe(1);
+  });
+
+  it("reads the same challenge with the scope it has beside Solid", async () => {
+    const dual = `${CHALLENGE}, scope="openid webid"`;
+    await expect(discovered(undefined, unauthorized(RESOURCE, dual))).resolves.toMatchObject({
+      uri: STORAGE,
+    });
   });
 
   it("knows a storage it checked by the URLs within it, the innermost first", async () => {
@@ -300,13 +317,8 @@ describe("LwsTokens, on the fork's answers", () => {
 });
 
 describe("LwsTokens, on LWS's resource metadata (RFC 9728)", () => {
-  const METADATA = `${ISSUER}.well-known/oauth-protected-resource/alice/notes/a.ttl`;
   const specChallenge = (metadata = METADATA) =>
     `Bearer resource_metadata="${metadata}", error="invalid_token"`;
-
-  beforeEach(() => {
-    routes.set(METADATA, () => json({ resource: RESOURCE.href, authorization_servers: [ISSUER] }));
-  });
 
   it("takes the authorization server from the metadata that names the requested URI", async () => {
     const response = unauthorized(RESOURCE, specChallenge());
@@ -317,6 +329,13 @@ describe("LwsTokens, on LWS's resource metadata (RFC 9728)", () => {
     );
     expect(storage?.as.issuer).toBe(ISSUER);
     expect(requests[0]?.url).toBe(METADATA);
+  });
+
+  it("takes no authorization server from a challenge's as_uri", async () => {
+    const challenge = `Bearer resource_metadata="${METADATA}", as_uri="https://as.example/"`;
+    await expect(discovered(undefined, unauthorized(RESOURCE, challenge))).resolves.toMatchObject({
+      as: { issuer: ISSUER },
+    });
   });
 
   it.each([
@@ -367,29 +386,21 @@ describe("LwsTokens, refusing", () => {
   ])("reads no storage description that %s past 64 KiB", async (_, said) => {
     routes.set(STORAGE, oversized(said));
     await expect(discovered()).resolves.toBeUndefined();
-    expect(requests.map(({ url }) => url)).toEqual([STORAGE]);
+    expect(requests.map(({ url }) => url)).toEqual([METADATA, STORAGE]);
   });
 
   it("reads no resource metadata or authorization server metadata past 64 KiB", async () => {
-    const metadata = `${ISSUER}.well-known/oauth-protected-resource/alice/notes/a.ttl`;
-    routes.set(
-      metadata,
-      oversized(true, { resource: RESOURCE.href, authorization_servers: [ISSUER] }),
-    );
-    const response = unauthorized(RESOURCE, `Bearer resource_metadata="${metadata}"`);
-    await expect(
-      new LwsTokens(session).discover(RESOURCE, response, await challengesOf(response)),
-    ).resolves.toBeUndefined();
+    routes.set(METADATA, oversized(true, protectedResource()));
+    await expect(discovered()).resolves.toBeUndefined();
+    routes.set(METADATA, () => json(protectedResource()));
     routes.set(CONFIGURATION, oversized(false, configuration()));
     await expect(discovered()).resolves.toBeUndefined();
   });
 
   it.each([
     ["no LWS challenge", unauthorized(RESOURCE, 'DPoP error="invalid_token"')],
-    [
-      "a Bearer challenge that names no authorization server",
-      unauthorized(RESOURCE, 'Bearer realm="x"'),
-    ],
+    ["a Bearer challenge without resource metadata", unauthorized(RESOURCE, 'Bearer realm="x"')],
+    ["a challenge with as_uri alone", unauthorized(RESOURCE, `Bearer as_uri="${ISSUER}"`)],
     ["a status other than 401", unauthorized(RESOURCE, CHALLENGE, STORAGE_LINK, 403)],
     ["no storage link", unauthorized(RESOURCE, CHALLENGE, "")],
     [
@@ -424,15 +435,14 @@ describe("LwsTokens, refusing", () => {
   });
 
   it.each([
-    ["another origin", `Bearer as_uri="https://as.example/"`],
-    ["no URL", `Bearer as_uri="not a URL"`],
+    ["another origin", "https://as.example/"],
+    ["no URL", "not a URL"],
   ])(
     "sends nothing to an authorization server on %s than the identity provider's",
-    async (_, challenge) => {
-      await expect(
-        discovered(undefined, unauthorized(RESOURCE, challenge)),
-      ).resolves.toBeUndefined();
-      expect(requests).toEqual([]);
+    async (_, issuer) => {
+      routes.set(METADATA, () => json(protectedResource(issuer)));
+      await expect(discovered()).resolves.toBeUndefined();
+      expect(requests.map(({ url }) => url)).toEqual([METADATA]);
     },
   );
 
@@ -458,7 +468,7 @@ describe("LwsTokens, refusing", () => {
   ])("refuses a storage whose description %s", async (_, body) => {
     routes.set(STORAGE, () => json(body));
     await expect(discovered()).resolves.toBeUndefined();
-    expect(requests.map(({ url }) => url)).toEqual([STORAGE]);
+    expect(requests.map(({ url }) => url)).toEqual([METADATA, STORAGE]);
   });
 
   it("takes a description whose types are lists, or full IRIs", async () => {
@@ -509,9 +519,8 @@ describe("LwsTokens, refusing", () => {
     const issuer = `${ISSUER}tenant`;
     const configured = `${ISSUER}.well-known/lws-configuration/tenant`;
     routes.set(configured, () => json({ ...configuration(), issuer }));
-    await expect(
-      discovered(undefined, unauthorized(RESOURCE, `Bearer as_uri="${issuer}"`)),
-    ).resolves.toMatchObject({ as: { issuer } });
+    routes.set(METADATA, () => json(protectedResource(issuer)));
+    await expect(discovered()).resolves.toMatchObject({ as: { issuer } });
     expect(requests.map(({ url }) => url)).toContain(configured);
   });
 });

@@ -213,9 +213,9 @@ working draft:
 1. **The challenge.** A request goes with the access token, as to any
    Solid server. A 401 is an LWS challenge when its `WWW-Authenticate`
    has a `Bearer` challenge with `resource_metadata`
-   ([RFC 9728](https://www.rfc-editor.org/rfc/rfc9728)), or with
-   `as_uri` ([below](#the-forks-challenge)). Its `Link` header names
-   the storage, with relation `https://www.w3.org/ns/lws#storage`. The
+   ([RFC 9728](https://www.rfc-editor.org/rfc/rfc9728)). Its `Link`
+   header names the storage, with relation
+   `https://www.w3.org/ns/lws#storage`. The
    requested URL must be within that storage: on its origin, its path
    the storage's or below it.
 2. **The checks,** LWS's "Discovery Validation by a Client", before the
@@ -296,15 +296,6 @@ server of its own choosing would get a credential good at every
 storage behind that provider. An LWS deployment whose authorization
 server isn't on the identity provider's origin isn't supported yet:
 its storages answer 401, as to no one.
-
-### The fork's challenge
-
-The Community Solid Server's LWS fork names its authorization server in
-an `as_uri` parameter, and leaves out `resource_metadata`, which LWS
-requires on every challenge. As a workaround, a `Bearer` challenge with
-`as_uri` and no `resource_metadata` takes `as_uri` as the issuer, and
-skips the resource metadata checks. The trust rule and the other
-checks still hold. A challenge with both takes `resource_metadata`.
 
 ## The public-read grant
 

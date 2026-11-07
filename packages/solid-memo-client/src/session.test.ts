@@ -226,6 +226,7 @@ async function idToken(claims: Record<string, unknown>): Promise<string> {
 
 /** A Linked Web Storage storage, its authorization server the identity provider's (lwsAuth.ts). */
 const STORAGE = "https://pod.example/alice/";
+const POD_METADATA = "https://pod.example/.well-known/oauth-protected-resource";
 const LWS_TOKEN_ENDPOINT = `${ISSUER}.well-known/lws/token`;
 
 /** The LWS authorization server on the provider's origin, as the Community Solid Server LWS fork runs one. */
@@ -259,14 +260,19 @@ function exchangeEndpoint(init: RequestInit | undefined): Response {
 }
 
 /**
- * The storage as the fork serves it: its description, a request with
- * one of its tokens within it, and a 401 with its challenge to anything
- * else, a DPoP request among them, which it reads as no one's.
+ * The storage as the fork serves it: its protected resource metadata
+ * and description, a request with one of its tokens within it, and a
+ * 401 with its challenge to anything else, a DPoP request among them,
+ * which it reads as no one's.
  */
 function lwsPod(asUri = ISSUER) {
   return vi.fn<typeof globalThis.fetch>(async (input, init) => {
     const url = input instanceof Request ? input.url : String(input);
     const headers = new Headers(init?.headers);
+    if (url.startsWith(`${POD_METADATA}/`)) {
+      const resource = new URL(url.slice(POD_METADATA.length), STORAGE).href;
+      return json({ resource, authorization_servers: [asUri] });
+    }
     if (url === STORAGE && headers.get("accept") === "application/lws+cid") {
       return json({
         "@context": ["https://www.w3.org/ns/cid/v1", "https://www.w3.org/ns/lws/v1"],
@@ -283,7 +289,7 @@ function lwsPod(asUri = ISSUER) {
     return new Response(null, {
       status: 401,
       headers: {
-        "www-authenticate": `Bearer as_uri="${asUri}", realm="${STORAGE}"${bearer ? ', error="invalid_token"' : ""}`,
+        "www-authenticate": `Bearer resource_metadata="${POD_METADATA}${new URL(url).pathname}", as_uri="${asUri}", realm="${STORAGE}"${bearer ? ', error="invalid_token"' : ""}`,
         link: `<${STORAGE}>; rel="https://www.w3.org/ns/lws#storage"`,
       },
     });
@@ -1263,10 +1269,14 @@ describe("createSessionClient, on a Linked Web Storage storage", () => {
     return client;
   }
 
-  /** The requests the pod was sent, as their URL and Authorization; not the description's. */
+  /** The requests the pod was sent, as their URL and Authorization; not the checks', for its metadata and description. */
   const sent = (pod: ReturnType<typeof lwsPod>) =>
     pod.mock.calls
-      .filter(([, init]) => new Headers(init?.headers).get("accept") !== "application/lws+cid")
+      .filter(
+        ([input, init]) =>
+          !String(input).startsWith(POD_METADATA) &&
+          new Headers(init?.headers).get("accept") !== "application/lws+cid",
+      )
       .map(([input, init]) => [
         input instanceof Request ? input.url : String(input),
         new Headers(init?.headers).get("authorization"),
@@ -1441,7 +1451,10 @@ describe("createSessionClient, on a Linked Web Storage storage", () => {
     provider.pod = pod;
     await expect(client.fetch(RESOURCE)).resolves.toMatchObject({ status: 401 });
     expect(lws.exchanges).toEqual([]);
-    expect(pod.mock.calls.map(([input]) => String(input))).toEqual([RESOURCE]);
+    expect(pod.mock.calls.map(([input]) => String(input))).toEqual([
+      RESOURCE,
+      `${POD_METADATA}/alice/notes/a.ttl`,
+    ]);
   });
 
   it("forgets the storages' tokens at logout", async () => {
