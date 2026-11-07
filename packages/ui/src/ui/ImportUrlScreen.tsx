@@ -16,7 +16,9 @@ import { Loading } from "./Loading";
  * (`onShow`, which puts it in the URL), then the release as the
  * library's page shows one, with the host it is published on and what
  * it is, and a line saying it is not the library's. It is added as the
- * library's are: a deck imported, a course started (`onAdd`).
+ * library's are: a deck imported, a course started (`onAdd`), once the
+ * read shown is the latest: not while it is read again, nor after that
+ * failed, when what would be added may not be what is shown.
  */
 export function ImportUrlScreen({
   url,
@@ -87,6 +89,7 @@ export function ImportUrlScreen({
             host={host}
             imported={imported}
             busy={busy}
+            unavailable={reading || readError !== null}
             error={error}
             onImport={onAdd}
             onStartCourse={onAdd}

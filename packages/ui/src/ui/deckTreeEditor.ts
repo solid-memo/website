@@ -12,6 +12,7 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
   applyDeckTreeEdit,
@@ -264,10 +265,11 @@ export function libraryIndexQuery(useCases: UseCases) {
  * stale, since the index changes only with a deploy). A copy whose series the
  * library does not list is of a release added from a link
  * (docs/deck-library.md, From a link): `linkedHost` names the host it
- * came from, and its own release, read once (queryKeys.deckRelease), says
+ * came from, and its own release, read once (queryKeys.releaseIsCourse), says
  * whether it is a course, read only for a copy that does not say so
- * itself. `newerRelease` tells a copy the library has a
- * newer release of, as its index tells (libraryCopiesOf), reading no
+ * itself, and only that is kept of it; `readsRefused` tells when such a
+ * read was refused (linkedReadsSpent). `newerRelease` tells a copy the
+ * library has a newer release of, as its index tells (libraryCopiesOf), reading no
  * release: the deck's page says what upgrading would change
  * (docs/migrations.md, Catching up with the library). A copy of a
  * release added from a link has none, since only its creator's catalog
@@ -286,6 +288,8 @@ export function useCopies(
   isCourse: (deck: Deck) => boolean;
   linkedHost: (deck: Deck) => string | null;
   newerRelease: (deck: Deck) => boolean;
+  /** What refused a release read because the session's reads from links are spent, if one was. */
+  readsRefused: unknown;
 } {
   const isCopy = decks.some((deck) => deck.sourceUrl !== undefined);
   const libraryQuery = useQuery({ ...libraryIndexQuery(useCases), enabled: isCopy });
@@ -299,17 +303,16 @@ export function useCopies(
   const unknown = linked.filter((deck) => deck.course !== true);
   const releaseQueries = useQueries({
     queries: unknown.map((deck) => ({
-      queryKey: queryKeys.deckRelease(deck.sourceUrl),
-      queryFn: () => useCases.deckRelease(deck),
+      queryKey: queryKeys.releaseIsCourse(deck.sourceUrl!),
+      queryFn: () => useCases.releaseIsCourse(deck.sourceUrl!),
       staleTime: Infinity,
+      gcTime: Infinity,
       refetchOnWindowFocus: false,
     })),
   });
   const linkedSources = new Set(linked.map((deck) => deck.sourceUrl!));
   const linkedCourses = new Set(
-    unknown
-      .filter((_, at) => releaseQueries[at]!.data?.isCourse === true)
-      .map((deck) => deck.sourceUrl!),
+    unknown.filter((_, at) => releaseQueries[at]!.data === true).map((deck) => deck.sourceUrl!),
   );
   return {
     isCourse: (deck) =>
@@ -320,7 +323,19 @@ export function useCopies(
         ? releaseHost(deck.sourceUrl)
         : null,
     newerRelease: (deck) => behind.has(deck.url),
+    readsRefused: readsSpentAmong(releaseQueries),
   };
+}
+
+/**
+ * The first of these queries' errors that says the page session's reads
+ * of releases from a link are spent (linkedReadsSpent), if any: such a
+ * deck reads as a plain one, or is left out of the strip, so the list
+ * says why.
+ */
+export function readsSpentAmong(queries: readonly { error: unknown }[]): unknown {
+  return queries.find(({ error }) => error instanceof AppError && error.code === "linkedReadsSpent")
+    ?.error;
 }
 
 /**

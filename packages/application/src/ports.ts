@@ -432,10 +432,25 @@ export interface DeckLibrary {
    * shapes too (DocumentContext "library"), once it reads as a release:
    * `accept` is handed what they say of it, and throws to refuse it. A
    * read it accepts is the release's from then on, as fetchLibraryDeck
-   * and fetchCourseOutline read it, in place of any kept before: what is
-   * checked and shown is what is imported. A read refused is not kept.
+   * and fetchCourseOutline read it, in place of any kept before. A read
+   * refused is not kept. The adapter may let an accepted read go, once
+   * it holds many: the release is then read and held to the same `accept`
+   * when asked for. With `pin`, it does not let that read go, nor another
+   * read of the release take its place, until the next read pinned takes
+   * its place: what is checked and shown is what is imported.
+   *
+   * Reads of releases from a link are within one budget a page session,
+   * whatever reads them, and a few run at once: past it, a read fails
+   * with linkedReadsSpent until the page is loaded again, as do those
+   * under way then. Reading a document again spends no more of it, unless
+   * it grew or such reads have taken a generous allowance of their own.
+   * This read knows no index: it counts whatever `url` is.
    */
-  readRelease(url: string, accept?: (report: DocumentReport) => void): Promise<LibraryDeck>;
+  readRelease(
+    url: string,
+    accept?: (report: DocumentReport) => void,
+    options?: { pin?: boolean },
+  ): Promise<LibraryDeck>;
   /**
    * The releases the catalog of the instance that published `url`
    * links (`sm:publishedRelease`), read as anyone reads it: looked for

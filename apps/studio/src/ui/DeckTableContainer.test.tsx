@@ -7,8 +7,9 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/pre
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { DeckTree } from "@solid-memo/domain/deckTree";
-import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import type { LibraryDeck } from "@solid-memo/domain/library";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
+import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
@@ -169,11 +170,7 @@ describe("DeckTableContainer", () => {
         solid,
         { ...plain, ...firstRelease(copy.sourceUrl), url: copy.sourceUrl },
       ]),
-      deckRelease: vi.fn(async (deck) =>
-        deck.url === linkedCourse.url
-          ? ({ isCourse: true } as LibraryDeckContent)
-          : ({} as LibraryDeckContent),
-      ),
+      releaseIsCourse: vi.fn(async (url) => url === linkedCourse.sourceUrl),
     });
     renderContainer(useCases);
     const row = await screen.findByRole("row", { name: /Kanji N5/ });
@@ -343,6 +340,20 @@ describe("DeckTableContainer", () => {
     pick("Edit the selected decks", "Set direction");
     fireEvent.click(screen.getByRole("button", { name: "Apply" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("The pod said no"));
+  });
+
+  it("says when a copy's release was refused because the visit's reads from links are spent", async () => {
+    const url = "https://bob.example/releases/rivers/v1.ttl";
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [{ ...kanji, sourceUrl: url }]),
+      releaseIsCourse: vi.fn(async () => {
+        throw new AppError("linkedReadsSpent", { url });
+      }),
+    });
+    renderContainer(useCases);
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(`so the release at ${url} was not read`),
+    );
   });
 
   it("says why the decks could not be read", async () => {
