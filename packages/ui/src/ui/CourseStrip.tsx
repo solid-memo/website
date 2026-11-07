@@ -11,6 +11,8 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
 import { chapterHref } from "./CourseContainer";
 import { useCourseLinks } from "./courseLinks";
+import { readsSpentAmong } from "./deckTreeEditor";
+import { ErrorMessage } from "./ErrorMessage";
 import { CourseIcon, LibraryIcon } from "./icons";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
@@ -116,27 +118,42 @@ export function courseStripQuery(useCases: UseCases, deck: Deck) {
 }
 
 /**
+ * How many of the courses shown are read whole behind the strip, from
+ * the library or a link: a catalog may list any number, and a course
+ * read whole holds all its cards for a while. Any other reads as its
+ * page opens.
+ */
+const COURSES_READ_BEHIND = 4;
+
+/**
  * Reads what the strip needs of each course deck (courseStripQuery) and
  * shows those still to finish, as far as the deck says (its title and
  * completed chapters, so a deck read afresh moves the strip on), linked where the course links say (useCourseLinks). A
  * course not yet read, or that cannot be, is left out: the deck list
  * works without it. Once a course is shown, the whole of it (getCourse,
- * under queryKeys.course) is read behind it, so its page and chapter open on
- * it, as Workspace reads them.
+ * under queryKeys.course) is read behind it, for the first few
+ * (COURSES_READ_BEHIND), so its page and chapter open on it, as Workspace
+ * reads them. When the page session's reads of releases from a link are
+ * spent (linkedReadsSpent), for a course here or for `readsRefused`, the
+ * list's copies, one error says so above the strip.
  */
 export function CourseStripContainer({
   useCases,
   instance,
   decks,
   libraryHref,
+  readsRefused,
 }: {
   useCases: UseCases;
   instance: Instance;
   /** The decks that are courses, in the list's order. */
   decks: readonly Deck[];
+  /** What refused a read for the list's copies (useCopies), if anything did. */
+  readsRefused?: unknown;
   /** The deck library, while the instance has no deck that is not a course (CourseStrip). */
   libraryHref?: string;
 }) {
+  const { errorText } = useI18n();
   const links = useCourseLinks();
   const queryClient = useQueryClient();
   const results = useQueries({
@@ -164,8 +181,10 @@ export function CourseStripContainer({
   });
   const shown = entries.map((entry) => entry.key).join(" ");
   useEffect(() => {
-    for (const deck of decks) {
-      if (!shown.split(" ").includes(deck.url)) continue;
+    const keys = shown.split(" ");
+    for (const deck of decks
+      .filter((one) => keys.includes(one.url))
+      .slice(0, COURSES_READ_BEHIND)) {
       void queryClient.prefetchQuery({
         queryKey: queryKeys.course(deck.url),
         queryFn: () => useCases.getCourse(deck),
@@ -173,5 +192,10 @@ export function CourseStripContainer({
       });
     }
   }, [shown]);
-  return <CourseStrip entries={entries} libraryHref={libraryHref} />;
+  return (
+    <>
+      <ErrorMessage error={errorText(readsRefused ?? readsSpentAmong(results))} />
+      <CourseStrip entries={entries} libraryHref={libraryHref} />
+    </>
+  );
 }

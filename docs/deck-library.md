@@ -1090,7 +1090,8 @@ flowchart LR
   that passes is kept as the release's, so the deck or course imported
   next is that read, the one shown, not a later answer from the
   release's host. A read refused isn't kept.
-- That kept read lasts for the page session. A copy's release that the
+- That kept read stays until another release is read from a link, which
+  then takes its place. A copy's release that the
   library's index doesn't list is checked the same way on its first read
   in each later page session, whatever reads it
   (`withLinkedReleasesChecked` in
@@ -1101,6 +1102,29 @@ flowchart LR
   so nothing of it is shown and no card of it is written to the pod.
   Only a read the library's shapes pass counts as checked, whatever
   else checks it.
+- However many decks name releases from a link, reads of those releases
+  and their creators' catalogs are bounded together. Four run at a time
+  (`createSolidDeckLibrary`), and `listLibraryUpdates` looks up each
+  release once, six at a time, whichever copies name it. A slow read
+  gives up its turn after 30 seconds and goes on. Hosts take turns, and
+  a read still waiting after two minutes fails, so a server that never
+  answers doesn't hold up the rest. In one page session, they take in at
+  most twice `RELEASE_LIMITS` in total, on top of the limits on each
+  read. A document counts once, by its largest read. Reading it again
+  comes out of an allowance of its own, twice that total, which is far
+  more than looking up and planning a few ordinary copies again takes.
+  Past the allowance, reading a document again counts whole. Past the
+  total, a read fails (`linkedReadsSpent`) until the page is loaded
+  again, as do reads still under way then, each for its own deck. The
+  deck list goes on, as do a release's cards and outline when the
+  index lists it; reading such a release from its link fails as well, as
+  that read doesn't look at the index. The deck list and the Studio's
+  Home say so when it happens. Besides the read shown before adding, the
+  app keeps a few reads checked for other reasons: 100,000 triples, and
+  always the latest. An older one is let go with its cards, and read and
+  checked again when they're asked for, so what those cards then are is
+  what passes the check then. Its course outline stays, as does what a
+  check said of the release.
 - A release the index lists comes with the site and isn't checked
   again. To tell which releases those are, each read of a release's
   cards or outline waits for the index, and fails when the index can't
@@ -1128,9 +1152,10 @@ flowchart LR
   "From \<host>" badge. A course's deck says it's one (`schema:Course`
   on its catalog entry, [courses.md](courses.md#the-learners-state));
   any other copy's release is read once, to tell a course copied before
-  decks said so. Which decks are copies of the library's is worked out
-  once for each list of decks and each read of the index, not on each
-  render, and each deck's release link is parsed once
+  decks said so, and only that answer stays with the list. Which decks
+  are copies of the library's is worked out once for each list of decks
+  and each read of the index, not on each render, and each deck's release
+  link is parsed once
   ([libraryCopy.ts](../packages/domain/src/libraryCopy.ts)).
 - **Newer versions** of a release from a link may be listed by the
   creator's catalog, which links what its instance published

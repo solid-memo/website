@@ -38,6 +38,7 @@ export function makeLibraryUseCasesFake(
       listLibraryUpdates: vi.fn(async () => []),
       addReleaseLanguages: vi.fn(async () => null),
       deckRelease: vi.fn(async () => null),
+      releaseIsCourse: vi.fn(async () => false),
       applyLibraryUpgrade: vi.fn(async (deck, plan) => ({
         ok: true as const,
         deck: { ...deck, sourceUrl: plan.releaseUrl },

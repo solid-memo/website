@@ -127,6 +127,8 @@ export const queryKeys = {
   ],
   /** A release, by its URL. */
   deckRelease: (sourceUrl: string | undefined) => ["deckRelease", sourceUrl],
+  /** Whether a release is a course, by its URL. */
+  releaseIsCourse: (sourceUrl: string) => ["releaseIsCourse", sourceUrl],
   /** Where a mistake in a release is reported. */
   reportPlace: (releaseUrl: string | undefined) => ["reportPlace", releaseUrl],
   /** A release read from a link the user gave. */

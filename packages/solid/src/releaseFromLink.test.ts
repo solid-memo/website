@@ -372,8 +372,10 @@ describe("linkedReads", () => {
       code: "releaseUnreadable",
     });
     // Each is within a release's limits on its own.
-    await expect(library.readRelease(v3)).resolves.toMatchObject({ url: v3 });
-    await expect(library.linkedReads().readRelease(v3)).resolves.toMatchObject({ url: v3 });
+    await expect(libraryOver(fetch).readRelease(v3)).resolves.toMatchObject({ url: v3 });
+    await expect(libraryOver(fetch).linkedReads().readRelease(v3)).resolves.toMatchObject({
+      url: v3,
+    });
   });
 });
 
@@ -401,8 +403,9 @@ describe("linkedReads of a release's catalogs", () => {
     await expect(reads.publishedBeside(V2)).resolves.toBeNull();
     await expect(reads.readRelease(V2)).rejects.toMatchObject({ code: "linkedReleasesTooLarge" });
     // The library reads each under limits of its own.
-    await expect(library.publishedBeside(V2)).resolves.toBeNull();
-    await expect(library.readRelease(V2)).resolves.toMatchObject({ url: V2 });
+    const own = libraryOver(fetch);
+    await expect(own.publishedBeside(V2)).resolves.toBeNull();
+    await expect(own.readRelease(V2)).resolves.toMatchObject({ url: V2 });
   });
 });
 
@@ -528,13 +531,14 @@ ${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, 
 
   it("is not offered when the newer release and those in between are larger together than one release may be", async () => {
     // Each in between is within a release's limits on its own, as its newer release is.
-    const { plan, library } = planning(RELEASE_LIMITS.quads / 2);
+    const { plan, fetch } = planning(RELEASE_LIMITS.quads / 2);
     await expect(plan()).rejects.toMatchObject({
       code: "linkedReleasesTooLarge",
       vars: { host: "bob.example" },
     });
-    await expect(library.readRelease(bob(2))).resolves.toMatchObject({ version: "2" });
-    await expect(library.readRelease(bob(3))).resolves.toMatchObject({ version: "3" });
+    const fresh = libraryOver(fetch);
+    await expect(fresh.readRelease(bob(2))).resolves.toMatchObject({ version: "2" });
+    await expect(fresh.readRelease(bob(3))).resolves.toMatchObject({ version: "3" });
   });
 
   it("is found by the newest release named as the copy's its creator's catalog links, the others not read", async () => {

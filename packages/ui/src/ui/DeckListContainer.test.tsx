@@ -331,20 +331,14 @@ describe("DeckListContainer", () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck, linkedCourse, linked]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
-      deckRelease: vi.fn(async (copy: Deck) => ({
-        ...courseLibraryDeck,
-        url: copy.sourceUrl!,
-        formatVersion: 6,
-        cards: [],
-        isCourse: copy === linkedCourse ? (true as const) : undefined,
-      })),
+      releaseIsCourse: vi.fn(async (url: string) => url === linkedCourse.sourceUrl),
     });
     renderContainer(useCases);
     expect(
       await screen.findByRole("link", { name: "Rivers from bob.example:8443" }),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
-    await waitFor(() => expect(useCases.deckRelease).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(useCases.releaseIsCourse).toHaveBeenCalledTimes(2));
     fireEvent.click(screen.getByRole("button", { name: "Actions for Pods" }));
     expect(await screen.findByRole("menuitem", { name: "Continue course" })).toHaveAttribute(
       "href",
@@ -354,6 +348,64 @@ describe("DeckListContainer", () => {
       "href",
       routeToHash({ screen: "importUrl", instanceUrl: instance.url }),
     );
+  });
+
+  it("says so when a copy's release was refused because the visit's reads from links are spent", async () => {
+    const spent = "https://bob.example/releases/rivers/v1.ttl";
+    const other = "https://bob.example/releases/lakes/v1.ttl";
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [
+        { ...deck, title: { en: "Lakes" }, sourceUrl: other },
+        { ...deck, id: "rivers", url: `${instance.url}catalog.ttl#rivers`, sourceUrl: spent },
+      ]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      releaseIsCourse: vi.fn(async (url: string) => {
+        if (url === other) throw new Error("host unreachable");
+        throw new AppError("linkedReadsSpent", { url });
+      }),
+    });
+    renderContainer(useCases);
+    // The list stays, and says what was not read and what to do.
+    await waitFor(() =>
+      expect(alertTexts().join(" ")).toContain(`so the release at ${spent} was not read`),
+    );
+    expect(screen.getByRole("link", { name: "Lakes from bob.example" })).toBeInTheDocument();
+  });
+
+  it("says so when a course's summary was refused because the visit's reads from links are spent", async () => {
+    const url = "https://bob.example/releases/course/v1.ttl";
+    const course = { ...deck, title: { en: "Pods" }, course: true as const, sourceUrl: url };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [course]),
+      getCourseSummary: vi.fn(async () => {
+        throw new AppError("linkedReadsSpent", { url });
+      }),
+    });
+    renderContainer(useCases);
+    await waitFor(() =>
+      expect(alertTexts().join(" ")).toContain(`so the release at ${url} was not read`),
+    );
+  });
+
+  it("reads only the first few courses it shows whole behind the strip", async () => {
+    const courses = Array.from({ length: 6 }, (_, at) => ({
+      ...deck,
+      id: `course-${at}`,
+      url: `${instance.url}catalog.ttl#course-${at}`,
+      title: { en: `Course ${at}` },
+      course: true as const,
+      sourceUrl: `https://bob.example/releases/course-${at}/v1.ttl`,
+    }));
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => courses),
+      getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
+      getCourse: vi.fn(() => new Promise<never>(() => undefined)),
+    });
+    renderContainer(useCases);
+    await screen.findByRole("link", { name: "Start the course Course 5" });
+    await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledTimes(4));
+    expect(useCases.getCourse).toHaveBeenCalledWith(courses[0]);
+    expect(useCases.getCourse).not.toHaveBeenCalledWith(courses[4]);
   });
 
   it("lists a copy whose release link no URL parser takes, naming no host for it", async () => {
@@ -367,15 +419,10 @@ describe("DeckListContainer", () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck, odd]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
-      deckRelease: vi.fn(async (copy: Deck) => ({
-        ...courseLibraryDeck,
-        url: copy.sourceUrl!,
-        formatVersion: 6,
-        cards: [],
-      })),
+      releaseIsCourse: vi.fn(async () => false),
     });
     renderContainer(useCases);
-    await waitFor(() => expect(useCases.deckRelease).toHaveBeenCalledOnce());
+    await waitFor(() => expect(useCases.releaseIsCourse).toHaveBeenCalledOnce());
     expect(await screen.findByRole("link", { name: "Rivers" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Kanji N5" })).toBeInTheDocument();
   });
@@ -410,7 +457,7 @@ describe("DeckListContainer", () => {
       listLibraryDecks: vi.fn(
         () => new Promise<(typeof courseLibraryDeck)[]>((resolve) => (index = resolve)),
       ),
-      deckRelease: vi.fn(async () => {
+      releaseIsCourse: vi.fn(async () => {
         throw new Error("host unreachable");
       }),
       getCourseSummary: vi.fn(async () => ({ outline: courseOutline, answeredCardIds: [] })),
@@ -428,7 +475,7 @@ describe("DeckListContainer", () => {
       courseHref(instance.url, fromLink.url),
     );
     // Its release is not read just to tell what it is.
-    expect(useCases.deckRelease).not.toHaveBeenCalled();
+    expect(useCases.releaseIsCourse).not.toHaveBeenCalled();
     expect(screen.queryByRole("link", { name: "Start the course Notes" })).toBeNull();
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(sourceless);
   });
@@ -465,12 +512,7 @@ describe("DeckListContainer", () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [deck, behind, current, linked]),
       listLibraryDecks: vi.fn(async () => [library]),
-      deckRelease: vi.fn(async (copy: Deck) => ({
-        ...courseLibraryDeck,
-        url: copy.sourceUrl!,
-        formatVersion: 6,
-        cards: [],
-      })),
+      releaseIsCourse: vi.fn(async () => false),
     });
     renderContainer(useCases);
     expect(await screen.findByRole("link", { name: "Pods New release" })).toHaveAttribute(

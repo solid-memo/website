@@ -127,7 +127,7 @@ export function DeckTableContainer({
   const countQueries = useQueries({
     queries: decks.map((deck) => studyCountsQuery(useCases, instance.url, deck)),
   });
-  const { isCourse, linkedHost } = useCopies(useCases, decks);
+  const { isCourse, linkedHost, readsRefused } = useCopies(useCases, decks);
 
   const bulkMutation = useMutation({
     scope: { id: catalogScope(instance.url) },
@@ -270,7 +270,7 @@ export function DeckTableContainer({
       onPace={(selected, pace) => run({ kind: "pace", decks: selected, pace })}
       onDirection={(selected, direction) => run({ kind: "direction", decks: selected, direction })}
       onRemove={(selected) => run({ kind: "remove", decks: selected })}
-      error={errorText(failure)}
+      error={errorText(failure ?? readsRefused)}
     />
   );
 }

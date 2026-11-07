@@ -53,7 +53,7 @@ describe("useCopies", () => {
     const isCopyTests = vi.spyOn(libraryCopy, "libraryCopyTest");
     const useCases = makeUseCasesFake({
       listLibraryDecks: vi.fn(async () => [course]),
-      deckRelease: vi.fn(() => new Promise<never>(() => {})),
+      releaseIsCourse: vi.fn(() => new Promise<never>(() => {})),
     });
     const decks = Array.from({ length: 1_000 }, (_, at) =>
       deck(`d${at}`, `https://elsewhere.example/${at}/${"/decks/x".repeat(2_000)}`),
