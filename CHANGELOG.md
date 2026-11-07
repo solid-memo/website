@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.28](https://github.com/solid-memo/website/compare/v6.29.27...v6.29.28) (2026-11-07)
+
+### Bug Fixes
+
+* **solid:** stop a deck's removal when a document cannot be read ([82d46c6](https://github.com/solid-memo/website/commit/82d46c6392f7a569bea5474ad57ef067618a9524))
+* **statistics:** cap the blocks by deck and a card's history rows ([ccfbcb2](https://github.com/solid-memo/website/commit/ccfbcb20c13bbf7da44ac5dcb48ebd09471a45f1))
+
 ## [6.29.27](https://github.com/solid-memo/website/compare/v6.29.26...v6.29.27) (2026-11-07)
 
 ### Bug Fixes
