@@ -913,6 +913,22 @@ flowchart LR
   (`Deck.sourceUrl`). Cards keep their library fragment ids (`#sweden`).
   A release or card in a *newer* format than the app writes is refused,
   not silently stripped.
+- An import checks the deck's entry against the catalog as read before
+  it writes anything, so an entry the
+  [write check](validation.md#the-write-check) refuses leaves no document
+  in the pod. A release from a link can pass the library's shapes and
+  still be refused here: the entry is also held to DCAT-AP, which knows
+  fewer themes. When a write fails after that, the import deletes the
+  cards document, which no entry names, unless the entry was written
+  after all. If it can't be deleted, the failure says where it is
+  (`importDocumentLeft`). If the catalog can't be read to tell whether
+  the entry was written, the document stays, as it may be the deck's. The
+  failure then says to look for the deck first, and to delete the
+  document only if the deck isn't listed (`importOutcomeUnknown`). A
+  course starts the same way, and a deck file's import and a guest's deck
+  added to an instance end the same way (`finishCutOffImport`). A guest
+  can't reach a document, so a guest's text asks nothing of one
+  (`guestImportDocumentLeft`, `guestImportOutcomeUnknown`).
 - A pod deck whose source is any version of a series is a copy of that
   deck (`isCopyOf`), marked "Already imported"; a second copy is still
   allowed. The marks are worked out once for each read of the pod's

@@ -583,6 +583,9 @@ export function createLibraryUseCases({
           list.filter((state) => removed.has(state.cardId));
         const dropped = of(states?.sm2);
         const droppedFsrs = of(states?.fsrs);
+        // Checked before the first write: an entry that would be refused leaves the deck as it is.
+        const upgradedEntry = applyLibraryUpgrade(deck, plan);
+        await deckRepository.checkDeckEntryUpgrade(deck, upgradedEntry);
 
         // The cards first, the deck readable with them, still naming the release it came from: written whole (a
         // PATCH of much text can be cut short, docs/testing.md), and only while the document is as the plan read it.
@@ -609,10 +612,7 @@ export function createLibraryUseCases({
           );
         // Last the entry, which moves the deck to the new release, only while it says what was read.
         progress.finished("entry");
-        const upgraded = await deckRepository.upgradeDeckEntry(
-          deck,
-          applyLibraryUpgrade(deck, plan),
-        );
+        const upgraded = await deckRepository.upgradeDeckEntry(deck, upgradedEntry);
         progress.finished();
         return { ok: true, deck: upgraded };
       } catch (error) {

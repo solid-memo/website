@@ -2,8 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Since } from "./ports";
+import type { DeckRepository, Since } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
+import type { Deck } from "@solid-memo/domain/deck";
+import { isGuestUrl } from "@solid-memo/domain/guest";
 
 /**
  * How the use cases read and write a pod's documents while other apps,
@@ -73,4 +75,45 @@ export function unsent(error: unknown): boolean {
       "deckGone",
     ].includes(error.code)
   );
+}
+
+/**
+ * After a failed write of an import that writes a deck's documents, then
+ * its entry, with `written` the documents that are there or may be: the
+ * deck, when the entry was written after all, its answer lost on the way;
+ * else they are deleted, as nothing names them, and the failure stands.
+ * It says so while one may still be there (importDocumentLeft). When the
+ * catalog cannot be read they stay, as they may be the deck's, and it says
+ * the import may have worked (importOutcomeUnknown). A guest cannot reach
+ * a document, so a guest's text does not ask them to.
+ */
+export async function finishCutOffImport(
+  repository: Pick<DeckRepository, "readDeck" | "deleteDocument">,
+  deck: Deck,
+  written: readonly string[],
+  failure: unknown,
+): Promise<Deck> {
+  const guest = isGuestUrl(deck.url);
+  const context = (urls: readonly string[]) => ({
+    url: urls.join(", "),
+    failure: String(failure),
+  });
+  if (!unsent(failure)) {
+    let entry: Deck | null;
+    try {
+      entry = await repository.readDeck(deck.url);
+    } catch {
+      if (written.length === 0) throw failure;
+      throw new AppError(
+        guest ? "guestImportOutcomeUnknown" : "importOutcomeUnknown",
+        context(written),
+      );
+    }
+    if (entry !== null) return entry;
+  }
+  const left: string[] = [];
+  for (const url of written) await repository.deleteDocument(deck, url).catch(() => left.push(url));
+  if (left.length > 0)
+    throw new AppError(guest ? "guestImportDocumentLeft" : "importDocumentLeft", context(left));
+  throw failure;
 }

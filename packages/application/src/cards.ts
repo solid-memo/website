@@ -51,7 +51,7 @@ import type {
   StorageGateway,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
-import { changedElsewhere, readNow, unsent } from "./writes";
+import { changedElsewhere, finishCutOffImport, readNow, unsent } from "./writes";
 import type { DigestStore } from "./digestStore";
 import { isInInstancePod } from "./releaseDrafts";
 
@@ -557,7 +557,7 @@ export function createCardUseCases({
    * (and one whose write may have been made, its answer lost), which
    * nothing names, never one the pod refused to create; unless the entry
    * was written after all, its answer lost on the way: then the deck is
-   * there, whole.
+   * there, whole. A document that may be left is reported (finishCutOffImport).
    */
   async function completeImport(
     deck: Deck,
@@ -582,13 +582,7 @@ export function createCardUseCases({
       await deckRepository.registerDeck(deck);
       return deck;
     } catch (error) {
-      const entry = unsent(error)
-        ? null
-        : await deckRepository.readDeck(deck.url).catch(() => null);
-      if (entry !== null) return entry;
-      for (const url of written)
-        await deckRepository.deleteDocument(deck, url).catch(() => undefined);
-      throw error;
+      return finishCutOffImport(deckRepository, deck, written, error);
     }
   }
 }

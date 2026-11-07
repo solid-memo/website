@@ -179,6 +179,7 @@ export function makeDeps() {
     readDeck: vi.fn(async () => deck),
     upgradeDecks: vi.fn(async () => true),
     upgradeDeckEntry: vi.fn(async (_current, next) => next),
+    checkDeckEntryUpgrade: vi.fn(async () => undefined),
     deleteDocument: vi.fn(async () => undefined),
     unclaimedDocuments: vi.fn(async () => []),
     claimDocuments: vi.fn(async () => undefined),

@@ -1712,9 +1712,6 @@ describe("guests", () => {
       vi.mocked(deps.deckRepository.addDeck)
         .mockResolvedValueOnce(added("deck-n1", own))
         .mockRejectedValueOnce(new Error("offline"));
-      vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(
-        new Error("still offline"),
-      );
       const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
       expect(outcome).toEqual({
         ok: false,
@@ -1739,6 +1736,22 @@ describe("guests", () => {
       expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
       expect(journal.size).toBe(1);
       expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
+    });
+
+    it("mergeGuestStudy says where a document of a deck it could not add is, when it could not delete it", async () => {
+      const { deps } = mergeDeps();
+      vi.mocked(deps.deckRepository.addDeck).mockRejectedValueOnce(
+        new AppError("dataNotConforming"),
+      );
+      vi.mocked(deps.deckRepository.deleteDocument).mockRejectedValueOnce(
+        new Error("still offline"),
+      );
+      const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+      expect(outcome).toMatchObject({
+        ok: false,
+        step: "decks",
+        error: { code: "importDocumentLeft", vars: { url: `${TARGET}decks/deck-n1.ttl` } },
+      });
     });
 
     it("mergeGuestStudy deletes only what it wrote of a deck it could not add, and counts a deck whose entry was written though its answer was lost", async () => {
@@ -1779,14 +1792,13 @@ describe("guests", () => {
       vi.mocked(unknown.deps.deckRepository.readDeck).mockRejectedValueOnce(new Error("offline"));
       expect(
         await createUseCases(unknown.deps).mergeGuestStudy(session, guestInstance, target),
-      ).toMatchObject({ ok: false, step: "decks" });
-      // A write whose answer was lost may have been made: its document goes, as nothing names it.
-      expect(vi.mocked(unknown.deps.deckRepository.deleteDocument).mock.calls).toEqual([
-        [
-          expect.objectContaining({ url: `${TARGET}catalog.ttl#deck-n1` }),
-          `${TARGET}decks/deck-n1.ttl`,
-        ],
-      ]);
+      ).toMatchObject({
+        ok: false,
+        step: "decks",
+        error: { code: "importOutcomeUnknown", vars: { url: `${TARGET}decks/deck-n1.ttl` } },
+      });
+      // The catalog can't say whether the entry was written: the documents may be the deck's.
+      expect(unknown.deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
     });
 
     it.each([
