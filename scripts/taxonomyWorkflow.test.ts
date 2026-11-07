@@ -13,8 +13,9 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
  * repository's branch (docs/deck-library.md#the-taxonomy-deck). Its steps
  * run here as the workflow states them, against a stand-in for gh that
  * answers as GitHub does: the head filter of the REST call matches owner
- * and branch, and a pull request is edited by its number. A fork's pull
- * request from a branch of the same name changes nothing.
+ * and branch, the state filter leaves closed pull requests out, and a pull
+ * request is edited by its number. A fork's pull request from a branch of
+ * the same name changes nothing, and neither does a closed one.
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -23,6 +24,7 @@ interface PullRequest {
   number: number;
   /** The owner of the repository the pull request comes from. */
   owner: string;
+  state: "open" | "closed";
   title: string;
 }
 
@@ -30,17 +32,20 @@ interface PullRequest {
 const FORK: PullRequest = {
   number: 42,
   owner: "someone",
+  state: "open",
   title: "taxonomy version 31 taxonomy version 32 ",
 };
 const OWN: PullRequest = {
   number: 7,
   owner: "solid-memo",
+  state: "open",
   title: "feat(decks): add taxonomy version 32 to the occupation names deck",
 };
 const OLDER: PullRequest = {
   ...OWN,
   title: "feat(decks): add taxonomy version 31 to the occupation names deck",
 };
+const CLOSED: PullRequest = { ...OWN, number: 3, state: "closed" };
 
 const FAKE_GH = `#!/usr/bin/env node
 const { appendFileSync } = require("node:fs");
@@ -56,8 +61,11 @@ if (command === "api" && subcommand.startsWith("/users/")) {
   console.log("1");
 } else if (command === "api") {
   const query = new URL(subcommand, "https://api.github.com/").searchParams;
+  if (query.get("state") !== "open") fail("unexpected state " + query.get("state"));
   const found = pulls.filter(
-    (pull) => !query.has("head") || pull.owner + ":taxonomy-deck" === query.get("head"),
+    (pull) =>
+      pull.state === "open" &&
+      (!query.has("head") || pull.owner + ":taxonomy-deck" === query.get("head")),
   );
   const expression = args[args.indexOf("--jq") + 1];
   const field = { '.[0].title // ""': "title", '.[0].number // ""': "number" }[expression];
@@ -177,6 +185,12 @@ describe("taxonomy.yml's check job", () => {
     expect(check([FORK, OLDER]).output).toBe("update=true\n");
   });
 
+  it("goes on when the repository's pull request for the newest version is closed", () => {
+    const { status, output } = check([CLOSED]);
+    expect(status).toBe(0);
+    expect(output).toBe("update=true\n");
+  });
+
   it("makes nothing when the deck is up to date", () => {
     expect(check([], "false").output).toBe("update=false\n");
   });
@@ -208,6 +222,18 @@ describe("taxonomy.yml's publish job", () => {
     const { status, calls } = publish([FORK]);
     expect(status).toBe(0);
     expect(pr(calls).map((call) => call.slice(0, 2))).toEqual([["pr", "create"]]);
+  });
+
+  it("opens a pull request when the repository's is closed", () => {
+    const { status, calls } = publish([CLOSED]);
+    expect(status).toBe(0);
+    expect(pr(calls).map((call) => call.slice(0, 2))).toEqual([["pr", "create"]]);
+  });
+
+  it("updates the repository's open pull request beside a closed one", () => {
+    const { status, calls } = publish([CLOSED, OWN]);
+    expect(status).toBe(0);
+    expect(pr(calls).map((call) => call.slice(0, 3))).toEqual([["pr", "edit", "7"]]);
   });
 
   it("updates the repository's pull request beside a newer one from a fork", () => {
