@@ -618,6 +618,28 @@ describe("the shapes over the fixtures", async () => {
     );
   });
 
+  it("reject in a release a subject of a class only a pod holds", async () => {
+    const quads = parseTurtle(
+      `@prefix sm: <${SM}> .
+<#x> a <http://xmlns.com/foaf/0.1/Agent> , sm:Preferences ; <http://xmlns.com/foaf/0.1/name> "x" .`,
+      base("x.ttl"),
+    );
+    await expect(validateTurtleDocument("x.ttl", quads, engine, "library")).rejects.toThrow(
+      "x.ttl:\n  <https://pod.example/x.ttl#x> is preferences, which only a pod holds: no release has one.",
+    );
+  });
+
+  it("hold a subject to a standard class's shape beside a Solid Memo class", async () => {
+    const quads = parseTurtle(
+      `@prefix sm: <${SM}> .
+<#x> a <http://xmlns.com/foaf/0.1/Agent> , sm:Preferences .`,
+      base("x.ttl"),
+    );
+    await expect(validateTurtleDocument("x.ttl", quads, engine, "pod")).rejects.toThrow(
+      "foaf/0.1/name",
+    );
+  });
+
   it("reject a subject typed with a Solid Memo term that is no class", async () => {
     const quads = parseTurtle(
       `<#x> a <https://solid-memo.com/ns/vocab/v1.ttl#front> .`,

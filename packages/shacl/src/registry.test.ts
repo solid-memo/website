@@ -21,13 +21,17 @@ import {
   DECK_V2,
   DECK_V6,
   DISTRACTOR_V1,
+  DISTRIBUTION_V1,
   DRAFT_CHAPTER_V1,
   DRAFT_DECK_V1,
   DRAFT_STEP_V1,
   FSRS_REVIEW_STATE_V1,
+  INSTANCE_V1,
+  LIBRARY_DECK_SERIES_V1,
   LIBRARY_DECK_V1,
   LIBRARY_DECK_V5,
   LIBRARY_DECK_V6,
+  PREFERENCES_V1,
   REVIEW_STATE_V1,
   REVIEW_STATE_V2,
   SHAPES,
@@ -51,6 +55,9 @@ const one = (descriptor: ShapeDescriptor) => ({
 
 const DCAT_CATALOG = "http://www.w3.org/ns/dcat#Catalog";
 const DCAT_DATASET = "http://www.w3.org/ns/dcat#Dataset";
+const DCAT_DISTRIBUTION = "http://www.w3.org/ns/dcat#Distribution";
+const DCAT_SERIES = "http://www.w3.org/ns/dcat#DatasetSeries";
+const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
 
 describe("the generated registry", () => {
   it("has every version from 1 to the latest of each kind", () => {
@@ -147,13 +154,83 @@ describe("pickShapes", () => {
       latest: 1,
     });
     expect(pick([SM.Deck, DCAT_DATASET], 6, "pod")).toEqual(one(DECK_V6));
+    // There is no deck group in a release, so nothing there passes for one.
+    expect(pick([DCAT_CATALOG], 1, "library")).toEqual(one(CATALOG_V1));
+  });
+
+  it("holds a subject to a standard class's shape beside a Solid Memo class, in whatever order it names them", () => {
+    for (const types of [
+      [FOAF_AGENT, SM.Preferences],
+      [SM.Preferences, FOAF_AGENT],
+    ]) {
+      expect(pick(types, 1, "pod"), types.join(" ")).toEqual({
+        kind: "shapes",
+        descriptors: [AGENT_V1, PREFERENCES_V1],
+        unknown: [],
+      });
+    }
+    expect(pick([DCAT_SERIES, SM.Card], 1, "library")).toEqual({
+      kind: "shapes",
+      descriptors: [CARD_V1, LIBRARY_DECK_SERIES_V1],
+      unknown: [],
+    });
+    expect(pick([DCAT_DISTRIBUTION, SM.Deck], 1, "library")).toEqual({
+      kind: "shapes",
+      descriptors: [DISTRIBUTION_V1, LIBRARY_DECK_V1],
+      unknown: [],
+    });
+    expect(pick([DCAT_CATALOG, SM.Instance], 1, "pod")).toEqual({
+      kind: "shapes",
+      descriptors: [CATALOG_V1, INSTANCE_V1],
+      unknown: [],
+    });
+    // A standard class has no format of a Solid Memo class's later version.
+    expect(pick([FOAF_AGENT, SM.Card], 7, "library")).toEqual({
+      kind: "shapes",
+      descriptors: [CARD_V7],
+      unknown: ["agent"],
+    });
+    expect(pick([FOAF_AGENT, SM.Card], 9, "library")).toEqual({
+      kind: "unknown-version",
+      shape: "agent",
+      version: 9,
+      latest: 1,
+    });
+  });
+
+  it("refuses in a release a Solid Memo class only a pod holds, at any version and beside any class", () => {
+    const refused = (shape: string, ...more: string[]) => ({
+      kind: "refused",
+      shapes: [shape, ...more],
+    });
+    expect(pick([SM.Preferences], 1, "library")).toEqual(refused("preferences"));
+    expect(pick([SM.Palette], 99, "library")).toEqual(refused("palette"));
+    expect(pick([FOAF_AGENT, SM.Preferences], 1, "library")).toEqual(refused("preferences"));
+    expect(pick([SM.Deck, SM.Answer], 6, "library")).toEqual(refused("answer"));
+    expect(pick([DCAT_CATALOG, SM.DeckGroup], 1, "library")).toEqual(refused("deckGroup"));
+    expect(pick([SM.ReviewState], 1, "library")).toEqual(refused("fsrsReviewState", "reviewState"));
+    for (const type of [
+      SM.ColorSet,
+      SM.DeckSchedule,
+      SM.DocumentReceipt,
+      SM.Instance,
+      SM.MonthSummary,
+    ]) {
+      expect(pick([type], 1, "library").kind, type).toBe("refused");
+    }
+    // What a release holds stays, and elsewhere the classes are what they are.
+    for (const type of [SM.Deck, SM.Card, SM.Distractor, SM.Chapter, SM.Step]) {
+      expect(pick([type], 1, "library").kind, type).toBe("shapes");
+    }
+    expect(pick([SM.Preferences], 1, "pod").kind).toBe("shapes");
+    expect(pick([SM.Preferences], 1, "draft").kind).toBe("shapes");
   });
 
   it("tells an FSRS-6 review state from an SM-2 one by its scheduler, the shape that fixes it first", () => {
     const fsrs6 = { [SM.scheduler]: [SM.fsrs6] };
     expect(pick([SM.ReviewState], 1, "pod", fsrs6)).toEqual(one(FSRS_REVIEW_STATE_V1));
-    // Every place shares the shape, as it does the review-state shapes.
-    expect(pick([SM.ReviewState], 1, "library", fsrs6)).toEqual(one(FSRS_REVIEW_STATE_V1));
+    // Every place that holds one shares the shape, as it does the review-state shapes.
+    expect(pick([SM.ReviewState], 1, "draft", fsrs6)).toEqual(one(FSRS_REVIEW_STATE_V1));
     expect(pick([SM.ReviewState], 2, "pod", fsrs6)).toEqual({
       kind: "unknown-version",
       shape: "fsrsReviewState",

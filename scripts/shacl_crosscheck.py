@@ -89,9 +89,12 @@ def site(path: str) -> tuple[Path, str]:
 
 SH = Namespace("http://www.w3.org/ns/shacl#")
 SM = Namespace("https://solid-memo.com/ns/vocab/v1.ttl#")
+DCAT_CATALOG = URIRef("http://www.w3.org/ns/dcat#Catalog")
 # The node shape fragments that name where a subject lives, as
 # packages/vocab/tooling/shapes.ts reads them; any other fits everywhere.
 CONTEXTS = {"inPod": "pod", "inLibrary": "library", "inDraft": "draft"}
+# The Solid Memo classes a release holds subjects of (registry.ts, RELEASE_CLASSES).
+RELEASE_CLASSES = {SM.Deck, SM.Card, SM.Distractor, SM.Chapter, SM.Step}
 
 
 Pick = tuple[URIRef, URIRef, int, str, frozenset[tuple[URIRef, URIRef]]]
@@ -123,16 +126,20 @@ def own_shapes() -> tuple[Graph, list[Pick]]:
 def targeted(data: Graph, shapes: Graph, picks: list[Pick], context: str) -> Graph:
     """The shapes with each subject of `data` targeted at the shapes the app picks for it (registry.ts, pickShapes).
 
-    A subject is targeted at the shape of each of its classes. A shape that
-    fixes values fits only a subject that has them all, and is then
-    preferred to its class's shapes without (an FSRS-6 review state).
+    A subject is targeted at the shape of each of its classes, a deck group
+    not at the catalog's. A shape that fixes values fits only a subject that
+    has them all, and is then preferred to its class's shapes without (an
+    FSRS-6 review state). A subject in a release of a class only a pod holds
+    stops the script, as the app refuses it.
     """
     chosen = Graph() + shapes
+    not_in_release = {p[1] for p in picks if str(p[1]).startswith(str(SM))} - RELEASE_CLASSES
     for subject in set(data.subjects(RDF.type, None)):
         types = set(data.objects(subject, RDF.type))
+        if context == "library" and types & not_in_release:
+            raise ValueError(f"{subject} has a class only a pod holds, which no release has.")
         matching = [p for p in picks if p[1] in types and p[3] in ("any", context) and all((subject, predicate, value) in data for predicate, value in p[4])]
-        own = [p for p in matching if str(p[1]).startswith(str(SM))]
-        classed = own or matching
+        classed = [p for p in matching if p[1] != DCAT_CATALOG] if any(p[1] == SM.DeckGroup for p in matching) else matching
         version = int(data.value(subject, SM.formatVersion, default=Literal(1)))
         picked = []
         unpicked = False

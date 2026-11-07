@@ -14,12 +14,12 @@ import {
   type SubjectBuilder,
   toRdfJsDataset,
 } from "./client/rdf";
-import { datasetFrom } from "./testing/datasets";
+import { datasetFrom, datasetOfTurtle } from "./testing/datasets";
 import { getSolidDatasetLinear } from "./client/resources";
 import { limitedFetch, MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetOrNull } from "./datasets";
-import { DCAT, DCTERMS, RDF, SM } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM, SM_NS } from "./vocab";
 import { withCatalog } from "./mappers/deckMapper";
 import { toFsrsStateThing, toReviewStateThing } from "./mappers/reviewStateMapper";
 import type { ShapeEngine } from "@solid-memo/shacl/engine";
@@ -1124,6 +1124,80 @@ describe("createShaclShapeValidator", () => {
     ).toBe(true);
   });
 
+  describe("a subject with a standard class beside a Solid Memo one", () => {
+    const release = "https://publisher.example/decks/x/v1.ttl";
+    const prefixes = `@prefix sm: <${SM_NS}> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+`;
+    const agent = (classes: string) =>
+      `${prefixes}<#a> a ${classes} ; foaf:name "One", "Two" ;
+        foaf:mbox <https://example.org/no-mailbox>, <mailto:x@example.org> .`;
+    const series = (classes: string) =>
+      `${prefixes}<#series> a ${classes} ; sm:formatVersion 1 ; dcterms:title "S" ;
+        dcat:hasVersion <>, "text" .`;
+    const validator = createShaclShapeValidator({
+      fetch: vi.fn() as unknown as typeof fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const reportOf = async (turtle: string, context: "library" | "pod" = "library") =>
+      (await validator.validateDataset(release, await datasetOfTurtle(release, turtle), context))
+        .subjects;
+    const constraints = async (turtle: string, context?: "library" | "pod") =>
+      (await reportOf(turtle, context)).flatMap((subject) =>
+        "violations" in subject ? subject.violations.map((v) => v.constraint) : [],
+      );
+
+    it("refuses a release's agent or series that also has a class only a pod holds", async () => {
+      expect(await constraints(agent("foaf:Agent"))).not.toEqual([]);
+      expect(await constraints(series("dcat:DatasetSeries, dcat:Dataset"))).not.toEqual([]);
+      for (const turtle of [
+        agent("foaf:Agent, sm:Preferences"),
+        series("dcat:DatasetSeries, dcat:Dataset, sm:Preferences"),
+        agent("foaf:Agent, sm:Palette"),
+      ]) {
+        expect(await constraints(turtle), turtle).toEqual(["ReleaseClass"]);
+      }
+      const [subject] = await reportOf(agent("foaf:Agent, sm:Preferences"));
+      expect(subject).toMatchObject({
+        status: "checked",
+        shape: "preferences",
+        version: 1,
+        violations: [
+          {
+            path: RDF.type,
+            severity: "violation",
+            builtIn: true,
+            message: {
+              en: "This subject has a Solid Memo class that only a pod holds, and no subject of a release has it (preferences)",
+            },
+          },
+        ],
+      });
+    });
+
+    it("refuses such a class at a version newer than the app knows too", async () => {
+      expect(await constraints(`${prefixes}<#p> a sm:Preferences ; sm:formatVersion 99 .`)).toEqual(
+        ["ReleaseClass"],
+      );
+    });
+
+    it("holds the subject to its standard class's shape as well as the Solid Memo one's", async () => {
+      // In a pod, where preferences belong, and in a release, as a card.
+      const inPod = await constraints(agent("foaf:Agent, sm:Preferences"), "pod");
+      expect(inPod).toEqual(await constraints(agent("foaf:Agent"), "pod"));
+      expect(inPod).not.toEqual([]);
+      const asCard = await constraints(agent("foaf:Agent, sm:Card"));
+      expect(asCard).toEqual(expect.arrayContaining(await constraints(agent("foaf:Agent"))));
+      expect(asCard.length).toBeGreaterThan((await constraints(agent("foaf:Agent"))).length);
+      expect(await constraints(series("dcat:DatasetSeries, dcat:Dataset, sm:Card"))).toEqual(
+        expect.arrayContaining(await constraints(series("dcat:DatasetSeries, dcat:Dataset"))),
+      );
+    });
+  });
+
   it("checks a write with the engine it has: pathless results named by subject, warnings and results about other subjects passed over", async () => {
     const { validator, validateNode, validate } = makeValidator();
     validateNode.mockResolvedValue([
@@ -1451,7 +1525,7 @@ describe("createShaclShapeValidator", () => {
         `<${DOC}#x> (${SM.answeredCard}): `,
       );
       await expect(validator.checkSubjects(subject(7), [`${DOC}#x`], "pod")).rejects.toThrow(
-        `<${DOC}#x> (${SM.formatVersion}): This subject has more than one Solid Memo class, and one of them has no format of this version, so Solid Memo can't read the subject as that class (answer)`,
+        `<${DOC}#x> (${SM.formatVersion}): This subject has more than one class, and one of them has no format of this version, so Solid Memo can't read the subject as that class (answer)`,
       );
     });
 
@@ -1632,7 +1706,7 @@ describe("validateRelease", () => {
     expect(dates.filter(([, , value]) => value === "soon")).toHaveLength(1);
   }, 60_000);
 
-  it("checks a review state in a release against the shape its scheduler picks, an IRI only", async () => {
+  it("refuses a review state in a release, whatever scheduler it names", async () => {
     const base = courseDraft();
     const state = (name: string, scheduler: ReleaseTerm) => [
       {
@@ -1656,11 +1730,11 @@ describe("validateRelease", () => {
       ],
     };
     const found = await validator.validateRelease(draft, AT);
-    const fields = (name: string) =>
-      found.filter((p) => p.subject === of(name)).map((p) => p.field);
-    expect(fields("fsrs")).toContain(SM.stability);
-    expect(fields("text")).not.toContain(SM.stability);
-    expect(fields("text")).toContain(SM.easeFactor);
+    for (const name of ["fsrs", "text"]) {
+      expect(found.filter((p) => p.subject === of(name))).toEqual([
+        { severity: "error", subject: of(name), code: "unshaped", params: {} },
+      ]);
+    }
   }, 60_000);
 
   it("holds a release's deck that has a second Solid Memo class to the shapes of both, and names a class with no format of its version", async () => {
@@ -1680,18 +1754,20 @@ describe("validateRelease", () => {
     // The card shape's own result, about no field: a side needs text or a picture.
     expect(fields(plain)).not.toContain(undefined);
     expect(fields(asCard)).toEqual(expect.arrayContaining([...fields(plain), undefined]));
-    // A Solid Memo answer has no format of the deck's version.
+    // A chapter has no format of the deck's version.
+    const asChapter = await validator.validateRelease(
+      { ...base, triples: [...base.triples, typed(SM.Chapter)] },
+      AT,
+    );
+    const unshaped = { severity: "error", subject: DRAFT, code: "unshaped", params: {} };
+    expect(asChapter).toContainEqual(unshaped);
+    expect(fields(asChapter)).toEqual(expect.arrayContaining(fields(plain)));
+    // An answer is no subject of a release at all.
     const asAnswer = await validator.validateRelease(
       { ...base, triples: [...base.triples, typed(SM.Answer)] },
       AT,
     );
-    expect(asAnswer).toContainEqual({
-      severity: "error",
-      subject: DRAFT,
-      code: "unshaped",
-      params: {},
-    });
-    expect(fields(asAnswer)).toEqual(expect.arrayContaining(fields(plain)));
+    expect(asAnswer).toContainEqual(unshaped);
   }, 60_000);
 
   it("checks a release for a library with its index beside it, the series it names a version of it, described when the index has it not", async () => {

@@ -89,6 +89,12 @@ export async function validateTurtleDocument(
       problems.push(`<${subject}> is typed with a Solid Memo term that names no class.`);
       continue;
     }
+    if (pick.kind === "refused") {
+      for (const shape of pick.shapes) {
+        problems.push(`<${subject}> is ${shape}, which only a pod holds: no release has one.`);
+      }
+      continue;
+    }
     if (pick.kind === "unknown-version") {
       problems.push(
         `<${subject}> is ${pick.shape} format ${pick.version}; this app knows formats 1–${pick.latest}.`,
