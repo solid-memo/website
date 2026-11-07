@@ -39,6 +39,7 @@ npm run test:roundtrip -w @solid-memo/solid   # every library release through a 
 npm run crosscheck # the pySHACL cross-check, as CI runs it (needs scripts/requirements-ci.txt)
 npm run test:crosscheck   # the Python scripts' own tests (the cross-check's, the taxonomy deck generator's, the Wikidata labels script's), Python's unittest (needs scripts/requirements-ci.txt too)
 npm run check:closes -- --base origin/main   # a commit since the branch left main closes an issue (add --body-file <file> for the pull request's body), as CI's commits job checks it (CONTRIBUTING.md)
+npm run check:merges -- --base <git ref> --head <git ref> [--queue]   # between the two, merge commits hold no skip keyword and no breaking change's footer, and commits commitlint skips don't say they break, as CI's commits job checks them (--queue: as in the merge queue, where there must be a merge commit; docs/releasing.md)
 npm run check:breaking -- --base origin/main   # the public API against where the branch left main, as CI's library job checks it (docs/releasing.md)
 npm run test:pod  # the end-to-end tests, against the Solid servers they start in Docker
 SOLID_CLIENT=solid-memo-client npm run test:pod   # the same on the Solid client with no Inrupt library (docs/solid-memo-client.md); with a package's test:unit, or npm run build, too
@@ -752,7 +753,7 @@ jobs run side by side, each
 | `journeys-report` | deterministic | nothing: on `main`, after the `journeys` jobs, even when one failed (then with what the canceled ones ran), it merges their runs, or those of the run that tested its code (the gate's `tested-by`), into the `journeys-report` artifact the deploy publishes ([User journeys](#user-journeys)). It fails without every job's report when the journeys passed or the gate skipped them, not when the `site` job's failure skipped them. Its failure fails the run, holding back the release and the deploy, but not `ci-ok` |
 | `docs` | deterministic | the docs' links, every file's license, and `publiccode.yml` ([Documentation](#documentation)) |
 | `workflows` | deterministic | the workflows and local actions, by actionlint and zizmor (`npm run lint:workflows`, [The workflows](#the-workflows)) |
-| `commits` | deterministic | on a pull request only: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's) |
+| `commits` | deterministic | on a pull request: each commit it adds follows Conventional Commits, by commitlint ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)), and its body or a commit closes its issue, or the body says it's one step of it (`npm run check:closes`; not for Renovate's), and a commit commitlint skips doesn't say it breaks (`npm run check:merges`). In the merge queue: nothing is linted, but `npm run check:merges` reads the run's commits, and each merge commit it built holds no skip keyword and no breaking change's footer ([releasing.md](releasing.md#what-a-merge-commit-decides)) |
 | `dependency-review` | deterministic | on a pull request only, skipped on every other run: no package it adds or changes has a known vulnerability of moderate severity or worse that the base doesn't have, or a license off the list, by GitHub's dependency graph; every package it adds, changes or removes goes to the run's summary ([Dependency review](#dependency-review)) |
 | `caches` | deterministic | nothing: on `main`, after `check` or `reuse`, it deletes all but the newest of `main`'s Turbo caches, of the CodeQL databases per language, and of each end-to-end server's images, and all but the two newest of the browsers' system libraries per browser. Its token can write (`actions: write`), as only the `fail-fast` jobs' can besides. It runs none of the repository's code, and its failure fails neither the run nor `ci-ok` |
 | `fail-fast (<job>)` | deterministic | nothing: one per job that tests the tree, `commits` and `dependency-review` aside, needing that job alone. When it fails, outside `main` and not for a fork's pull request, it cancels the run ([Canceled runs](#canceled-runs)); when it passes, it is skipped. Its token can write (`actions: write`), and it runs none of the repository's code |
@@ -813,11 +814,14 @@ CI passed as they land. The queue merges with a merge commit, so a
 pull request's commits keep their SHAs on `main`. The merge commit
 names the pull request.
 
-A queue run checks what a pull request run checks, except that
-`commits` lints nothing, `dependency-review` doesn't run, and
-`library` compares with the commit of `main` the queue built on, the
-pull requests ahead included. A queue run releases and deploys
-nothing: release.yml and deploy.yml follow push runs on `main` alone,
+A queue run checks what a pull request run checks, with three
+differences. `commits` lints nothing, and reads the commits the run
+built instead, the merge commits among them (`npm run check:merges`,
+[releasing.md](releasing.md#what-a-merge-commit-decides)).
+`dependency-review` doesn't run. And `library` compares with the commit
+of `main` the queue built on, the pull requests ahead included. A queue
+run releases and deploys nothing: release.yml and deploy.yml follow push
+runs on `main` alone,
 and release.yml releases only once the queue is empty, so a release
 commit doesn't send the queued pull requests back to the start.
 

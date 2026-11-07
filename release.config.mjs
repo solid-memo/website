@@ -6,10 +6,11 @@
  * semantic-release's settings (docs/releasing.md): after CI passes on a
  * push to main, .github/workflows/release.yml runs it on main's tip. It
  * reads the commits since the last tag, written as Conventional Commits
- * (CONTRIBUTING.md#commit-messages), and when one of them is releasable
- * it chooses the next version from their types, writes it into the
- * files that name it, commits them to main, tags the commit vX.Y.Z and
- * makes a GitHub release of it, from which Zenodo mints a DOI.
+ * (CONTRIBUTING.md#commit-messages), merge commits aside, and when one
+ * of them is releasable it chooses the next version from their types,
+ * writes it into the files that name it, commits them to main, tags the
+ * commit vX.Y.Z and makes a GitHub release of it, from which Zenodo
+ * mints a DOI.
  *
  * The GitHub release carries the version's docs, as pages in an archive
  * (scripts/docsArchive.ts, docs/deployment.md#a-releases-docs-as-an-archive),
@@ -109,20 +110,23 @@ export default {
   branches: ["main"],
   tagFormat: "v${version}",
   plugins: [
+    // The commit analyzer and the release-notes generator, given every
+    // commit but the merge commits, whose messages hold a pull request's
+    // title (scripts/releaseWithoutMerges.ts). Its own commits decide.
+    //
     // feat: a minor version, fix:, perf: and revert: a patch, a breaking
     // change (`!` or a BREAKING CHANGE: footer) a major one; the other
     // types release nothing. The preset counts a revert only by the
     // "This reverts commit <sha>." line that git revert writes, so the
     // rule makes a revert: commit without it release too.
     [
-      "@semantic-release/commit-analyzer",
+      "./scripts/releaseWithoutMerges.ts",
       {
         preset: "conventionalcommits",
         parserOpts,
         releaseRules: [{ type: "revert", release: "patch" }],
       },
     ],
-    ["@semantic-release/release-notes-generator", { preset: "conventionalcommits", parserOpts }],
     ["@semantic-release/changelog", { changelogFile: "CHANGELOG.md", changelogTitle }],
     // The root package.json's version, and package-lock.json's: the
     // deploy puts it in the site's pages, which the footer reads it from

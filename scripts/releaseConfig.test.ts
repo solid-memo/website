@@ -107,13 +107,15 @@ describe("the commits, as the release reads them", () => {
   // Untyped modules: imported by a name TypeScript does not resolve.
   const analyzer = "@semantic-release/commit-analyzer";
   const notesGenerator = "@semantic-release/release-notes-generator";
+  // The plugin that wraps both, given their options (scripts/releaseWithoutMerges.ts).
+  const wrapper = "./scripts/releaseWithoutMerges.ts";
   const logger = { log: () => {}, warn: () => {}, error: () => {}, success: () => {} };
 
   async function bump(...messages: string[]): Promise<string | null> {
     const { analyzeCommits } = (await import(analyzer)) as {
       analyzeCommits(config: unknown, context: unknown): Promise<string | null>;
     };
-    return analyzeCommits(options(analyzer), {
+    return analyzeCommits(options(wrapper), {
       commits: messages.map((message, i) => ({ hash: `${i}`.padStart(40, "0"), message })),
       cwd: ROOT,
       logger,
@@ -137,7 +139,7 @@ describe("the commits, as the release reads them", () => {
     const { generateNotes } = (await import(notesGenerator)) as {
       generateNotes(config: unknown, context: unknown): Promise<string>;
     };
-    return generateNotes(options(notesGenerator), {
+    return generateNotes(options(wrapper), {
       commits,
       lastRelease: { gitTag: "v1.0.0" },
       nextRelease: { gitTag: "v1.1.0", version: "1.1.0" },
@@ -183,9 +185,11 @@ describe("the commits, as the release reads them", () => {
     }
   });
 
-  it("gives both plugins the same way to find the footer", () => {
-    expect(options(analyzer).parserOpts).toBe(config.parserOpts);
-    expect(options(notesGenerator).parserOpts).toBe(config.parserOpts);
+  it("runs both plugins only through the wrapper, which finds the footer one way", () => {
+    expect(options(wrapper).parserOpts).toBe(config.parserOpts);
+    const names = config.default.plugins.map(([name]) => name);
+    expect(names).not.toContain(analyzer);
+    expect(names).not.toContain(notesGenerator);
   });
 
   it("lists under BREAKING CHANGES only a footer as written", async () => {
