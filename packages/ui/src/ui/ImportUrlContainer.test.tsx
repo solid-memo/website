@@ -127,6 +127,7 @@ describe("ImportUrlContainer", () => {
     expect(await screen.findByRole("heading", { name: "Rivers" })).toBeInTheDocument();
     expect(useCases.readReleaseFromLink).toHaveBeenCalledWith(RIVERS);
     expect(screen.getByText(/it is published on bob\.example/)).toBeInTheDocument();
+    expect(screen.getByText(/Pictures on its cards stay hidden/)).toBeInTheDocument();
     expect(screen.getByText("Published on").nextElementSibling).toHaveTextContent("bob.example");
     expect(screen.getByText("Kind").nextElementSibling).toHaveTextContent("Deck");
     expect(screen.getByText("3 cards")).toBeInTheDocument();

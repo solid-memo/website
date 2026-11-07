@@ -14,6 +14,7 @@ import { deckLanguages, type StatedLanguages } from "@solid-memo/domain/deckLang
 import type { DeckPace } from "@solid-memo/domain/deckPace";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
+import { useInOwnPod } from "./deckPictures";
 import { DeckPreferencesScreen } from "./DeckPreferencesScreen";
 import { ErrorMessage } from "./ErrorMessage";
 import { Loading } from "./Loading";
@@ -61,6 +62,8 @@ export function DeckPreferencesContainer({
 }) {
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
+  // Outside the learner's pod, what the entry states of them is its writer's, not the learner's choice.
+  const inOwnPod = useInOwnPod(useCases, deck);
 
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
@@ -134,6 +137,15 @@ export function DeckPreferencesContainer({
       ]),
   });
 
+  const hidePicturesMutation = useMutation({
+    mutationFn: (host: string) => useCases.setDeckPictureHost(deck, host, false),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() }),
+      ]),
+  });
+
   const removeMutation = useMutation({
     mutationFn: () => useCases.removeDeck(deck),
     onSuccess: async () => {
@@ -168,20 +180,24 @@ export function DeckPreferencesContainer({
         renameMutation.isPending ||
         removeMutation.isPending ||
         stateLanguagesMutation.isPending ||
-        cardLanguageMutation.isPending
+        cardLanguageMutation.isPending ||
+        hidePicturesMutation.isPending
       }
       error={
         errorText(saveMutation.error) ??
         errorText(renameMutation.error) ??
         errorText(removeMutation.error) ??
         errorText(stateLanguagesMutation.error) ??
-        errorText(cardLanguageMutation.error)
+        errorText(cardLanguageMutation.error) ??
+        errorText(hidePicturesMutation.error)
       }
       onSave={(pace) => saveMutation.mutate(pace)}
       onRename={(title) => renameMutation.mutate(title)}
       onRemove={() => removeMutation.mutate()}
       onStateLanguages={(languages) => stateLanguagesMutation.mutate(languages)}
       onSetCardLanguage={(language) => cardLanguageMutation.mutate(language)}
+      onHidePictures={(host) => hidePicturesMutation.mutate(host)}
+      pictureHosts={inOwnPod === true ? (deck.pictureHosts ?? []) : []}
     />
   );
 }

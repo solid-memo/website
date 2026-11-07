@@ -166,6 +166,8 @@ describe("CramContainer", () => {
       "deckRelease",
       "getCardProgress",
       "getPreferences",
+      "isInOwnPod",
+      "listLibraryDecks",
       "reportPlace",
     ]);
     expect(useCases.recordReview).not.toHaveBeenCalled();
@@ -312,6 +314,8 @@ describe("CramContainer", () => {
       "deckRelease",
       "getCardProgress",
       "getPreferences",
+      "isInOwnPod",
+      "listLibraryDecks",
       "reportPlace",
     ]);
   });

@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Workspace } from "./Workspace";
+import type { Course } from "@solid-memo/application/courses";
 import type { UseCases } from "@solid-memo/application/useCases";
 import {
   CARD_FORMAT_VERSION,
@@ -14,6 +15,7 @@ import {
   type Deck,
 } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { DEFAULT_PREFERENCES, PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
@@ -24,7 +26,7 @@ import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { deckProgressOf, todayFiguresFrom } from "../test/fakes/statistics";
 import { QUEUE_DEFAULTS } from "../test/fakes/study";
-import { routeToHash, statisticsHref } from "./router";
+import { routeToHash, statisticsHref, type RouteRef } from "./router";
 import { queryKeys } from "./queryKeys";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
@@ -32,6 +34,7 @@ import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
 import {
   CH1,
   CH2,
+  courseCards,
   courseDeck,
   courseLibraryDeck,
   courseOutline,
@@ -3271,6 +3274,90 @@ describe("Workspace", () => {
         }),
       );
       expect(await screen.findByText("release unreachable")).toBeInTheDocument();
+    });
+  });
+
+  describe("a linked deck's pictures", () => {
+    const PICTURE = "https://author.example/p/card.svg";
+    const SHOW = "Show pictures from author.example";
+    const linked: Deck = { ...courseDeck, sourceUrl: "https://author.example/decks/pics/v1.ttl" };
+    const place = { instanceUrl: instanceA.url, deckUrl: linked.url };
+    const pictured: Card = {
+      id: "card-1",
+      url: `${linked.cardsDocumentUrl}#card-1`,
+      front: { en: "A bridge" },
+      back: { en: "En bro" },
+      frontImageUrl: PICTURE,
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: CARD_FORMAT_VERSION,
+    };
+    const plan: LibraryUpgradePlan = {
+      fromVersion: "1",
+      toVersion: "2",
+      releaseUrl: "https://author.example/decks/pics/v2.ttl",
+      notes: [],
+      add: [],
+      change: [],
+      retire: [pictured],
+      restore: [],
+      remove: [],
+      about: [],
+      kept: [],
+      applied: [],
+      gone: [],
+      appliedAbout: [],
+    };
+    const picturedCards = courseCards.map((card) => ({ ...card, frontImageUrl: PICTURE }));
+    const linkedCourse = (answered: string[]): Course => {
+      const course = makeCourse(answered);
+      return {
+        ...course,
+        deck: linked,
+        release: { ...course.release, cards: picturedCards },
+        cards: new Map(picturedCards.map((card) => [card.id, card])),
+      };
+    };
+
+    it.each<[string, RouteRef, string?, string[]?]>([
+      ["a deck's page", { screen: "deckDetail", ...place }],
+      ["the browser", { screen: "browser", ...place }],
+      ["a card's page", { screen: "card", ...place, cardUrl: pictured.url }],
+      ["a course's page", { screen: "course", ...place }],
+      [
+        "a chapter's question",
+        { screen: "courseChapter", ...place, chapterUrl: CH1 },
+        "On to the question",
+      ],
+      [
+        "a final review's question",
+        { screen: "courseReview", ...place, chapterUrl: CH1 },
+        "Start the final review",
+        ["q-1", "q-2", "q-3"],
+      ],
+    ])("holds it back on %s until the learner chooses", async (_name, route, onward, answered) => {
+      window.history.replaceState(null, "", routeToHash(route));
+      const setDeckPictureHost = vi.fn(async () => linked);
+      const { container } = renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [linked]),
+          listCards: vi.fn(async () => [pictured]),
+          getCourse: vi.fn(async () => linkedCourse(answered ?? [])),
+          planLibraryUpgrade: vi.fn(async () => plan),
+          setDeckPictureHost,
+        }),
+      );
+      const picture = () => container.querySelector(`img[src="${PICTURE}"]`);
+      if (onward !== undefined) {
+        fireEvent.click(await screen.findByRole("button", { name: onward }));
+      }
+
+      const show = await screen.findByRole("button", { name: SHOW });
+      expect(picture()).toBeNull();
+
+      fireEvent.click(show);
+      await waitFor(() => expect(picture()).not.toBeNull());
+      expect(setDeckPictureHost).toHaveBeenCalledWith(linked, "author.example", true);
     });
   });
 });

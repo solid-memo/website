@@ -196,6 +196,28 @@ describe("toDeck", () => {
     });
   });
 
+  it("reads the hosts whose pictures a deck shows, leaving out what is no host", () => {
+    const thing = deckThing((t) =>
+      t
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, "Words")
+        .addIri(SM.cardsDocument, CARDS_DOC)
+        .addIri(SM.reviewsDocument, REVIEWS_DOC)
+        .addStringNoLocale(SM.deckPictureHost, "a.example")
+        .addStringNoLocale(SM.deckPictureHost, "https://b.example/"),
+    );
+    expect(toDeck(thing)?.pictureHosts).toEqual(["a.example"]);
+    const none = deckThing((t) =>
+      t
+        .addIri(RDF.type, SM.Deck)
+        .addStringNoLocale(DCTERMS.title, "Words")
+        .addIri(SM.cardsDocument, CARDS_DOC)
+        .addIri(SM.reviewsDocument, REVIEWS_DOC)
+        .addStringNoLocale(SM.deckPictureHost, "https://b.example/"),
+    );
+    expect(toDeck(none)).not.toHaveProperty("pictureHosts");
+  });
+
   it("keeps the provenance of an imported deck", () => {
     const thing = deckThing((t) =>
       t

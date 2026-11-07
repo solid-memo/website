@@ -17,6 +17,7 @@ import { leechesOf } from "./HardestCards";
 import { Loading } from "./Loading";
 import { StudyScreen } from "./StudyScreen";
 import { CardLanguage } from "./cardLanguage";
+import { DeckPictures } from "./deckPictures";
 import { useReportTarget } from "./deckRelease";
 import { deckHref } from "./router";
 import { useI18n } from "./i18n";
@@ -135,22 +136,24 @@ export function CramContainer({
   const { prompts, position, putBack, answerScale } = cram;
   return (
     <CardLanguage language={shown?.cardLanguage}>
-      <StudyScreen
-        deckName={shown && readerText(shown.title)}
-        deckLang={shown && readerLang(shown.title)}
-        deckHref={shown && deckHref(instance.url, shown.url)}
-        report={report}
-        prompt={up?.prompt ?? null}
-        position={position + 1}
-        total={prompts.length}
-        putBack={putBack}
-        answerScale={answerScale}
-        busy={false}
-        error={null}
-        onAnswer={answer}
-        onExit={onExit}
-        cram={{ onAgain: () => setCram(startOf(cram.leeches, answerScale, random)) }}
-      />
+      <DeckPictures useCases={useCases} deck={shown}>
+        <StudyScreen
+          deckName={shown && readerText(shown.title)}
+          deckLang={shown && readerLang(shown.title)}
+          deckHref={shown && deckHref(instance.url, shown.url)}
+          report={report}
+          prompt={up?.prompt ?? null}
+          position={position + 1}
+          total={prompts.length}
+          putBack={putBack}
+          answerScale={answerScale}
+          busy={false}
+          error={null}
+          onAnswer={answer}
+          onExit={onExit}
+          cram={{ onAgain: () => setCram(startOf(cram.leeches, answerScale, random)) }}
+        />
+      </DeckPictures>
     </CardLanguage>
   );
 }

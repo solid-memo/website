@@ -23,6 +23,7 @@ export function makeInstanceUseCasesFake(
     fake,
     {
       listStorages: vi.fn(async () => []),
+      isInOwnPod: vi.fn(async () => true),
       addManualStorage: vi.fn(async () => ({
         url: "https://pod.example/",
         source: "manual" as const,

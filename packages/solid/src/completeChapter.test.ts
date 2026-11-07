@@ -309,6 +309,60 @@ describe("the deck's card language", () => {
   });
 });
 
+describe("the hosts whose pictures the deck shows", () => {
+  const HOST = "<https://solid-memo.com/ns/vocab/v1.ttl#deckPictureHost>";
+  const hostsIn = (pod: ReturnType<typeof fakePod>) =>
+    pod
+      .triples(CATALOG)!
+      .filter((triple) => triple.includes(HOST))
+      .map((triple) => triple.split(" ")[2])
+      .sort();
+
+  it("adds a host on the entry in one write, If-Match the read, keeps the others, and takes one away", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    expect(await repository.setPictureHost(deck, "a.example", true)).toMatchObject({
+      pictureHosts: ["a.example"],
+    });
+    expect(writes(pod)).toEqual([
+      expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 }),
+    ]);
+    await repository.setPictureHost(deck, "b.example:8080", true);
+    expect(hostsIn(pod)).toEqual(['"a.example"', '"b.example:8080"']);
+    expect((await repository.readDeck(deck.url))?.pictureHosts).toEqual(
+      expect.arrayContaining(["a.example", "b.example:8080"]),
+    );
+    await repository.setPictureHost(deck, "a.example", false);
+    expect(hostsIn(pod)).toEqual(['"b.example:8080"']);
+    const none = await repository.setPictureHost(deck, "b.example:8080", false);
+    expect(none).not.toHaveProperty("pictureHosts");
+    expect(hostsIn(pod)).toEqual([]);
+  });
+
+  it("writes nothing for what the entry says, and throws deckGone for a deck it has none of", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await repository.setPictureHost(deck, "a.example", false);
+    expect(writes(pod)).toEqual([]);
+    await repository.setPictureHost(deck, "a.example", true);
+    pod.clearRequests();
+    await repository.setPictureHost(deck, "a.example", true);
+    expect(writes(pod)).toEqual([]);
+    await expect(
+      repository.setPictureHost({ ...deck, url: `${CATALOG}#gone` }, "a.example", true),
+    ).rejects.toMatchObject({ code: "deckGone" });
+  });
+
+  it("is kept by every save of a deck read before it was set", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await repository.setPictureHost(deck, "a.example", true);
+    await repository.renameDeck(deck, { en: "Solid, renamed" });
+    await repository.saveDeck({ ...deck, newCardsPerDay: 5 });
+    expect(hostsIn(pod)).toEqual(['"a.example"']);
+  });
+});
+
 describe("registerDeck", () => {
   it("adds a deck's entry with the chapters it completed, in one checked write", async () => {
     const pod = await podWithCourse();

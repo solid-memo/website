@@ -15,6 +15,7 @@ import { promptSides, type Prompt } from "@solid-memo/domain/deck";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import type { ReviewQuality } from "@solid-memo/domain/review";
 import { CardFace } from "./CardFace";
+import { useLoadsAhead } from "./deckPictures";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { inDataRegion } from "./Markdown";
@@ -299,6 +300,10 @@ export function StudyScreen({
  * A grade comes with how long the learner took (useStopwatch): to
  * recall, from the card shown to Reveal, and to grade, from Reveal to
  * the grade (to the last grade pressed, when saving failed before).
+ *
+ * On a deck that asks about its pictures' hosts, an answer with a picture
+ * the learner chose to show is on the page from the start, hidden until
+ * revealed (useLoadsAhead).
  */
 function StudyCard({
   prompt,
@@ -325,6 +330,7 @@ function StudyCard({
   const answerRef = useRef<HTMLDivElement>(null);
   const gradePromptId = useId();
   const buttons = answerButtons(answerScale, t);
+  const loadsAhead = useLoadsAhead(answer.imageUrl);
 
   function reveal() {
     recallMillis.current = stopwatch.read();
@@ -370,11 +376,13 @@ function StudyCard({
       <div ref={questionRef} class="study-face" tabIndex={-1} aria-describedby={describedBy}>
         <CardFace {...question} note={revealed ? question.note : undefined} role="question" />
       </div>
+      {(revealed || loadsAhead) && (
+        <div ref={answerRef} class="study-face" tabIndex={-1} hidden={!revealed}>
+          <CardFace {...answer} role="answer" />
+        </div>
+      )}
       {revealed ? (
         <>
-          <div ref={answerRef} class="study-face" tabIndex={-1}>
-            <CardFace {...answer} role="answer" />
-          </div>
           <p id={gradePromptId} class="grade-prompt">
             {t("study.gradePrompt")}
           </p>

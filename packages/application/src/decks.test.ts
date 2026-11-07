@@ -118,6 +118,14 @@ describe("decks", () => {
       "A daily limit is a whole number, 0 or more.",
     );
   });
+  it("setDeckPictureHost edits the deck's entry as it is now, never by a save of the deck as read", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    await useCases.setDeckPictureHost(deck, "a.example", true);
+    expect(deps.deckRepository.setPictureHost).toHaveBeenLastCalledWith(deck, "a.example", true);
+    await expect(useCases.setDeckPictureHost(deck, "a.example", false)).resolves.toEqual(deck);
+    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+  });
   it("setDeckCardLanguage saves the deck's card language or clears it, refusing one that names no language", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);

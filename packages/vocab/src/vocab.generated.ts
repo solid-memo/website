@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.27 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.28 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -58,6 +58,8 @@ export const SM = {
   deckMaxReviewsPerDay: `${SM_NS}deckMaxReviewsPerDay`,
   /** The language, as a lower-case BCP 47 tag, the learner wants this deck's card text shown in first: its fronts, backs, notes, labels, picture descriptions and wrong options (distractors). On a deck that is a course it ranks all of the course's text too: the course's title and description, each chapter's title and description and each step's theory. A text with no value in that language falls back to the usual order (the app's language, then the browser's, then English). The deck's keywords, and the title and description of a deck that is no course, are not affected. Absent means the usual order. (Added in 1.24. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it. Its definition took in a course's text after 1.25, without a version bump, as no term was added and no stored value changed its meaning.) */
   deckCardLanguage: `${SM_NS}deckCardLanguage`,
+  /** A host, as a URL writes it with any port that is not the default, whose pictures the learner chose to show on the cards of this deck, one value per host. Only a deck copied from a release outside the library's index, in the learner's own pod, reads it: a picture from any other host stays hidden on it, and nothing is requested from that host. The learner's choice alone sets it, never a release, and in a catalog outside the learner's pod it is not believed. Absent means none chosen. (Added in 1.28. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  deckPictureHost: `${SM_NS}deckPictureHost`,
   /** Text on the front of the card. (Since 1.0.) */
   front: `${SM_NS}front`,
   /** Text on the back of the card. (Since 1.0.) */

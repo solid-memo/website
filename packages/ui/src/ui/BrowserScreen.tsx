@@ -7,6 +7,7 @@ import type { DeckAbout } from "@solid-memo/domain/deckAbout";
 import { hasUnstatedSide } from "@solid-memo/domain/deckLanguages";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { CardRowBack, CardRowFront } from "./CardFace";
+import { HiddenPicturesNotice } from "./deckPictures";
 import { useCardText } from "./cardLanguage";
 import { cardName } from "./DataText";
 import { DeckAboutSection } from "./DeckAboutSection";
@@ -202,6 +203,9 @@ export function BrowserScreen({
                 })
               : t("browser.openHint")}
           </p>
+          <HiddenPicturesNotice
+            urls={pageCards.flatMap((card) => [card.frontImageUrl, card.backImageUrl])}
+          />
           <table class="card-table">
             <thead>
               <tr>

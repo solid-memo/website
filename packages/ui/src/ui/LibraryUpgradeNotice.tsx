@@ -5,6 +5,7 @@
 import { activeCards, type Card } from "@solid-memo/domain/deck";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { CardRowFront } from "./CardFace";
+import { HiddenPicturesNotice } from "./deckPictures";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 
@@ -95,6 +96,7 @@ function CardFronts({ label, cards }: { label: string; cards: readonly Card[] })
   return (
     <details open={cards.length <= OPEN_CARD_LIST}>
       <summary>{label}</summary>
+      <HiddenPicturesNotice urls={cards.map((card) => card.frontImageUrl)} />
       <ul>
         {cards.map((card) => (
           <li key={card.id}>

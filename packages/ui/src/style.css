@@ -2659,6 +2659,39 @@ form.card-edit {
   border-color: var(--primary-hover);
 }
 
+/* A picture of a deck added by link, until the learner chooses to show its
+   host's: nothing is requested, and the choice stands in its place. */
+.card-picture-hidden {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px dashed var(--text-muted);
+  border-radius: var(--radius-sm);
+  text-align: center;
+}
+
+.card-picture-hidden p {
+  margin: 0;
+}
+
+.card-pictures-hidden {
+  margin-bottom: 0.75rem;
+}
+
+.card-pictures-hidden p {
+  margin: 0 0 0.25rem;
+}
+
+.card-thumbnail-hidden {
+  display: inline-block;
+  width: 1.5rem;
+  border-style: dashed;
+  border-color: var(--text-muted);
+}
+
 /* The question and the answer each take focus in study, so a keyboard or
    screen reader user is taken to what just came up. */
 .study-face {
@@ -3246,6 +3279,11 @@ form.card-edit {
   align-items: flex-start;
   gap: 1rem;
   border-radius: var(--radius-sm);
+}
+
+/* An answer on the page ahead of time, for its picture's sake (useLoadsAhead). */
+.course-feedback[hidden] {
+  display: none;
 }
 
 .course-feedback:focus-visible,

@@ -546,6 +546,7 @@ describe("addDeck", () => {
     course: true,
     completedChapters: ["https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid"],
     cardLanguage: "sv",
+    pictureHosts: ["a.example", "b.example"],
   };
 
   it("adds the deck's entry as it is, at its own URLs, a course with its chapters completed, beside the decks there, checked first", async () => {
@@ -566,6 +567,7 @@ describe("addDeck", () => {
     expect(getUrlAll(thing, RDF.type)).toContain(SCHEMA.Course);
     expect(getUrlAll(thing, SM.completedChapter)).toEqual(added.completedChapters);
     expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
+    expect(getStringNoLocaleAll(thing, SM.deckPictureHost)).toEqual(["a.example", "b.example"]);
     expect(getDatetime(thing, DCTERMS.created)?.toISOString()).toBe("2026-01-02T03:04:05.000Z");
     expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
   });

@@ -423,6 +423,14 @@ export interface DeckRepository {
    * then; throws deckGone when it has no entry.
    */
   setCardLanguage(deck: Deck, language: string | null): Promise<Deck>;
+  /**
+   * Add a host to the hosts whose pictures the deck shows
+   * (`sm:deckPictureHost`, a host already checked), or take it away, on
+   * its catalog entry as it is now, as setCardLanguage edits it. What the
+   * entry already says writes nothing. Returns the deck as its entry says
+   * then; throws deckGone when it has no entry.
+   */
+  setPictureHost(deck: Deck, host: string, shown: boolean): Promise<Deck>;
 }
 
 /** Driven port: the app's read-only library of ready-made decks. */

@@ -220,6 +220,7 @@ export function ZoomableImage({
   src,
   alt,
   lang,
+  takeFocus = false,
 }: {
   /** The picture's class, as it is laid out in the page. */
   class: string;
@@ -227,6 +228,8 @@ export function ZoomableImage({
   alt: string;
   /** The language of `alt`, when not the page's. */
   lang?: string;
+  /** Focus its button as it appears: it takes the place of what had the focus. */
+  takeFocus?: boolean;
 }) {
   const { t } = useI18n();
   const [zoom, setZoom] = useState<Zoom | null>(null);
@@ -515,6 +518,10 @@ export function ZoomableImage({
     };
   }, [expanded]);
 
+  useLayoutEffect(() => {
+    if (takeFocus) buttonRef.current!.focus();
+  }, []);
+
   // On its way back too, as the page under it may still be moving.
   useEffect(() => {
     if (!onScreen) return;
@@ -531,6 +538,7 @@ export function ZoomableImage({
         src={src}
         alt={alt}
         lang={lang}
+        referrerpolicy="no-referrer"
       />
       <button
         ref={buttonRef}
@@ -565,6 +573,7 @@ export function ZoomableImage({
               ref={copyRef}
               class="picture-zoom-image"
               src={src}
+              referrerpolicy="no-referrer"
               alt=""
               style={{
                 left: `${zoom.fitted.left}px`,

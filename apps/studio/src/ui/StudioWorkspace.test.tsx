@@ -594,6 +594,30 @@ describe("StudioWorkspace", () => {
     expect(within(trail).getByRole("link", { name: "vatten" })).toBeInTheDocument();
   });
 
+  it.each([
+    ["cards", () => ({ screen: "cards" as const, deckUrl: kanji.url })],
+    ["card", (cardUrl: string) => ({ screen: "card" as const, deckUrl: kanji.url, cardUrl })],
+  ] as const)(
+    "holds a linked deck's pictures back on its %s screen until the learner chooses their host",
+    async (_name, routeOf) => {
+      const PICTURE = "https://author.example/p/water.svg";
+      const linked = { ...kanji, sourceUrl: "https://author.example/decks/kanji/v1.ttl" };
+      const card = { ...makeCard(kanji, "water"), frontImageUrl: PICTURE };
+      window.history.replaceState(null, "", studioRouteToHash(routeOf(card.url)));
+      const { container } = renderWorkspace(
+        makeUseCasesFake({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [linked]),
+          listCards: vi.fn(async () => [card]),
+        }),
+      );
+      const show = await screen.findByRole("button", { name: "Show pictures from author.example" });
+      expect(container.querySelector(`img[src="${PICTURE}"]`)).toBeNull();
+      fireEvent.click(show);
+      await waitFor(() => expect(container.querySelector(`img[src="${PICTURE}"]`)).not.toBeNull());
+    },
+  );
+
   it("opens a deck's schedule from its tabs, its trail through its cards, its leeches linked to their history and to the workbench", async () => {
     const card = makeCard(kanji, "water");
     window.history.replaceState(
@@ -1674,6 +1698,27 @@ describe("StudioWorkspace", () => {
         });
       });
       expect(window.history.length).toBe(length + 1);
+    });
+
+    it("holds a draft's pictures back until the author chooses their host, as nothing says whose they are", async () => {
+      const PICTURE = "https://author.example/p/question.svg";
+      const draft = courseDraft();
+      const withPicture: ReleaseDraft = {
+        ...draft,
+        cards: draft.cards.map((card) =>
+          card.id === "q-pods-1a" ? { ...card, data: { ...card.data, frontImage: PICTURE } } : card,
+        ),
+      };
+      window.history.replaceState(
+        null,
+        "",
+        studioRouteToHash({ screen: "question", draftUrl: DRAFT_URL, card: "q-pods-1a" }),
+      );
+      const { container } = renderWorkspace(draftUseCases(withPicture));
+      const show = await screen.findByRole("button", { name: "Show pictures from author.example" });
+      expect(container.querySelector(`img[src="${PICTURE}"]`)).toBeNull();
+      fireEvent.click(show);
+      expect(container.querySelector(`img[src="${PICTURE}"]`)).not.toBeNull();
     });
 
     it("leaves a chapter, step or question once it is deleted, and falls back from one the draft has not", async () => {

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen } from "@testing-library/preact";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DeckPreferencesScreen } from "./DeckPreferencesScreen";
 import { I18nProvider } from "./i18n";
@@ -37,13 +37,53 @@ function renderScreen(overrides: Partial<Parameters<typeof DeckPreferencesScreen
     onStateLanguages: vi.fn(),
     cardLanguages: ["en", "sv"],
     onSetCardLanguage: vi.fn(),
+    onHidePictures: vi.fn(),
+    pictureHosts: [],
     ...overrides,
   };
-  render(<DeckPreferencesScreen {...props} />);
-  return props;
+  const { rerender } = render(<DeckPreferencesScreen {...props} />);
+  return {
+    ...props,
+    showHosts: (pictureHosts: readonly string[]) =>
+      rerender(<DeckPreferencesScreen {...props} pictureHosts={pictureHosts} />),
+  };
 }
 
 describe("DeckPreferencesScreen", () => {
+  it("lists the hosts whose pictures the deck shows, each to stop showing, and none when it has none", () => {
+    const { onHidePictures } = renderScreen({ pictureHosts: ["a.example", "b.example"] });
+    expect(
+      screen.getByRole("heading", { name: "Pictures from other servers" }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Stop showing pictures from b.example" }));
+    expect(onHidePictures).toHaveBeenCalledWith("b.example");
+    cleanup();
+    const busy = renderScreen({ pictureHosts: ["a.example"], busy: true });
+    fireEvent.click(screen.getByRole("button", { name: "Stop showing pictures from a.example" }));
+    expect(busy.onHidePictures).not.toHaveBeenCalled();
+    cleanup();
+    renderScreen();
+    expect(screen.queryByRole("heading", { name: "Pictures from other servers" })).toBeNull();
+  });
+
+  it("says a host was taken back and gives that line the focus, which keeps the section after the last", () => {
+    const { showHosts } = renderScreen({ pictureHosts: ["a.example", "b.example"] });
+    const stop = screen.getByRole("button", { name: "Stop showing pictures from b.example" });
+    fireEvent.click(stop);
+    // Saving failed: the button stays, with the focus.
+    showHosts(["a.example", "b.example"]);
+    expect(screen.queryByText("Pictures from b.example are hidden again.")).toBeNull();
+    showHosts(["a.example"]);
+    expect(screen.getByText("Pictures from b.example are hidden again.")).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "Stop showing pictures from a.example" }));
+    showHosts([]);
+    expect(screen.getByText("Pictures from a.example are hidden again.")).toHaveFocus();
+    expect(screen.queryByText(/You chose to show this deck's pictures/)).toBeNull();
+    expect(
+      screen.getByRole("heading", { name: "Pictures from other servers" }),
+    ).toBeInTheDocument();
+  });
+
   it("links the deck in its heading", () => {
     renderScreen();
     expect(screen.getByRole("heading", { name: "Preferences: Kanji N5" })).toBeInTheDocument();
@@ -175,6 +215,8 @@ describe("DeckPreferencesScreen", () => {
       onStateLanguages: vi.fn(),
       cardLanguages: [],
       onSetCardLanguage: vi.fn(),
+      onHidePictures: vi.fn(),
+      pictureHosts: [],
     };
     const { rerender } = render(<DeckPreferencesScreen {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Rename deck" }));
@@ -277,6 +319,8 @@ describe("DeckPreferencesScreen", () => {
           onStateLanguages={vi.fn()}
           cardLanguages={[]}
           onSetCardLanguage={vi.fn()}
+          onHidePictures={vi.fn()}
+          pictureHosts={[]}
         />
       </I18nProvider>,
     );
@@ -306,6 +350,8 @@ describe("DeckPreferencesScreen", () => {
           onStateLanguages={vi.fn()}
           cardLanguages={[]}
           onSetCardLanguage={vi.fn()}
+          onHidePictures={vi.fn()}
+          pictureHosts={[]}
         />
       </I18nProvider>,
     );
@@ -340,6 +386,8 @@ describe("DeckPreferencesScreen", () => {
           onStateLanguages={vi.fn()}
           cardLanguages={[]}
           onSetCardLanguage={vi.fn()}
+          onHidePictures={vi.fn()}
+          pictureHosts={[]}
         />
       </I18nProvider>,
     );

@@ -316,7 +316,11 @@
     "front": "Framsida",
     "back": "Baksida",
     "question": "Fråga",
-    "answer": "Svar"
+    "answer": "Svar",
+    "pictureHidden": "Dold. Om du visar den kan {host} se när du studerar det här kortet.",
+    "showPictures": "Visa bilder från {host}",
+    "picturesHidden": "Bilder från {host} är dolda. Om du visar dem kan den servern se när du öppnar eller studerar de här korten.",
+    "picturesShown": "Bilder från {host} visas för den här kortleken."
   },
   "course": {
     "chaptersDone": {
@@ -710,6 +714,12 @@
       },
       "releaseHint": "Kort som fortfarande är som i bibliotekets utgåva räknas inte: en senare utgåva uppdaterar dem.",
       "settled": "Varje kort anger vilket språk dess text är på."
+    },
+    "pictures": {
+      "heading": "Bilder från andra servrar",
+      "intro": "Du har valt att visa kortlekens bilder från de här servrarna. Var och en ser en begäran när du öppnar eller studerar ett kort med en bild därifrån.",
+      "hide": "Sluta visa bilder från {host}",
+      "stopped": "Bilder från {host} är dolda igen."
     }
   },
   "deckProvenance": {
@@ -2147,6 +2157,7 @@
     "label": "Länk till utgåvan",
     "show": "Visa",
     "reading": "Läser och kontrollerar utgåvan…",
-    "notLibrary": "Den här finns inte i Solid Memos bibliotek: den är publicerad på {host}. Solid Memo har kontrollerat att den går att läsa, inte vad den säger. Din kopia minns var den kom ifrån, och inget skrivs där."
+    "notLibrary": "Den här finns inte i Solid Memos bibliotek: den är publicerad på {host}. Solid Memo har kontrollerat att den går att läsa, inte vad den säger. Din kopia minns var den kom ifrån, och inget skrivs där.",
+    "picturesHidden": "Bilderna på korten förblir dolda tills du väljer att visa dem, eftersom varje bild är en begäran till servern den ligger på."
   }
 }

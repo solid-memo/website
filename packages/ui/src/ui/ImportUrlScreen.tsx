@@ -15,10 +15,12 @@ import { Loading } from "./Loading";
  * anywhere (docs/deck-library.md, From a link): the link pasted
  * (`onShow`, which puts it in the URL), then the release as the
  * library's page shows one, with the host it is published on and what
- * it is, and a line saying it is not the library's. It is added as the
- * library's are: a deck imported, a course started (`onAdd`), once the
- * read shown is the latest: not while it is read again, nor after that
- * failed, when what would be added may not be what is shown.
+ * it is, and lines saying it is not the library's and that its cards'
+ * pictures stay hidden until the learner chooses to show them
+ * (DeckPictures). It is added as the library's are: a deck imported, a
+ * course started (`onAdd`), once the read shown is the latest: not while
+ * it is read again, nor after that failed, when what would be added may
+ * not be what is shown.
  */
 export function ImportUrlScreen({
   url,
@@ -84,6 +86,7 @@ export function ImportUrlScreen({
       {release !== undefined && (
         <>
           <p class="hint">{t("importUrl.notLibrary", { host: host! })}</p>
+          <p class="hint">{t("importUrl.picturesHidden")}</p>
           <LibraryDeckScreen
             deck={release}
             host={host}

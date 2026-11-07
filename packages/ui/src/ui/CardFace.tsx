@@ -2,11 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import type { LangText } from "@solid-memo/domain/langText";
 import { DataLineContent, DataText, plainDataText } from "./DataText";
 import { useCardText } from "./cardLanguage";
+import { ShowPictures, usePictureAccess, usePictureGate } from "./deckPictures";
 import { useI18n } from "./i18n";
 import { CardText } from "./ReaderText";
 import { ZoomableImage } from "./ZoomableImage";
@@ -21,7 +23,9 @@ import { ZoomableImage } from "./ZoomableImage";
  * flag under "Which country?"), so its alt is the description the card
  * gives it, in the reader's language (the deck's card language first, useCardText), else a name for its side. A tap
  * enlarges the picture to the viewport's size and another puts it back
- * (ZoomableImage).
+ * (ZoomableImage). On a deck that asks about its pictures' hosts
+ * (DeckPictures), a picture not chosen yet is requested from nowhere:
+ * its name and the choice stand in its place (CardPicture).
  *
  * The face is sized by its role — the question large, the answer under
  * it smaller — not by which side it is, so a deck studied back-to-front
@@ -82,8 +86,7 @@ export function CardFace({
       <span class="visually-hidden">{`${name}: `}</span>
       {imageUrl !== undefined &&
         (isHttpUrl(imageUrl) ? (
-          <ZoomableImage
-            class="card-image"
+          <CardPicture
             src={imageUrl}
             alt={
               description !== ""
@@ -109,10 +112,37 @@ export function CardFace({
 }
 
 /**
+ * A side's picture, unless the deck asks about its host (DeckPictures)
+ * and the learner has not chosen: then its name, what showing it means,
+ * and the choice, with no request made. The picture's button takes the
+ * focus from the choice's, which goes as the picture comes. While the
+ * library's index is read, nothing yet.
+ */
+function CardPicture({ src, alt, lang }: { src: string; alt: string; lang: string | undefined }) {
+  const { t } = useI18n();
+  const gate = usePictureGate();
+  const access = usePictureAccess(src);
+  const [asked, setAsked] = useState(false);
+  if (access === "wait") return null;
+  if (access === "show") {
+    return <ZoomableImage class="card-image" src={src} alt={alt} lang={lang} takeFocus={asked} />;
+  }
+  return (
+    <div class="card-picture-hidden">
+      <p lang={lang}>{alt}</p>
+      <p class="hint">{t("cardFace.pictureHidden", { host: access.host })}</p>
+      <ShowPictures gate={gate!} host={access.host} asked={asked} onAsk={() => setAsked(true)} />
+    </div>
+  );
+}
+
+/**
  * A card's picture at list size, e.g. beside its text in a Browser row.
  * Decorative by default, since the row's text sits next to it; give `alt`
  * (and its `lang`, when it is not the page's) when the picture is all
- * there is to name the row's link.
+ * there is to name the row's link. On a deck that asks about its
+ * pictures' hosts (DeckPictures), one not chosen is an empty frame of the
+ * same name, with the choice above the list (HiddenPicturesNotice).
  */
 export function CardThumbnail({
   imageUrl,
@@ -124,7 +154,20 @@ export function CardThumbnail({
   lang?: string;
 }) {
   if (imageUrl === undefined || !isHttpUrl(imageUrl)) return null;
-  return <img class="card-thumbnail" src={imageUrl} alt={alt} lang={lang} />;
+  return <Thumbnail url={imageUrl} alt={alt} lang={lang} />;
+}
+
+function Thumbnail({ url, alt, lang }: { url: string; alt: string; lang: string | undefined }) {
+  if (usePictureAccess(url) === "show") {
+    return (
+      <img class="card-thumbnail" src={url} alt={alt} lang={lang} referrerpolicy="no-referrer" />
+    );
+  }
+  return alt === "" ? (
+    <span class="card-thumbnail card-thumbnail-hidden" aria-hidden="true" />
+  ) : (
+    <span class="card-thumbnail card-thumbnail-hidden" role="img" aria-label={alt} lang={lang} />
+  );
 }
 
 /**

@@ -367,6 +367,19 @@ no format version:
 - **No re-check.** No shape file changed, and the check doesn't read
   the term.
 
+The hosts whose pictures a deck shows (vocabulary 1.28,
+`sm:deckPictureHost`,
+[privacy.md](privacy.md#pictures-on-a-deck-added-by-link)) need no
+migration and moved no format version:
+
+- **It belongs to no shape**, as a deck's `sm:deckCardLanguage`, so
+  `DeckV6` is unchanged and every writer of the deck keeps it. This
+  version adds or removes a host only on the entry as it is then
+  (`setPictureHost`). An older one keeps it, ignores it, and shows every
+  picture.
+- **No re-check.** No shape file changed, and the check doesn't read
+  the term.
+
 The release a card was taken from (vocabulary 1.27, `sm:fromRelease`,
 see the library upgrades below) needs no migration and moved no format
 version:
