@@ -3,7 +3,7 @@
   "private": true,
   "description": "Pivot, installed into the end-to-end tests' image (e2e/pod/servers/pivot/Dockerfile).",
   "dependencies": {
-    "@solid/pivot": "1.9.0"
+    "@solid/pivot": "1.9.1"
   },
   "packageManager": "npm@12.2.1"
 }
