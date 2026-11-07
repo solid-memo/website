@@ -223,8 +223,9 @@
     "historyInterval": "Intervalle",
     "historyDue": "Prochaine révision",
     "historyFirstStudied": "Étudiée pour la première fois",
-    "historyHint": "Toutes les réponses à cette carte, de la plus récente à la plus ancienne. La première réponse, une carte qui revient dans la séance le même jour et les réponses des cours ne sont pas des révisions.",
+    "historyHint": "Les réponses à cette carte, de la plus récente à la plus ancienne. La première réponse, une carte qui revient dans la séance le même jour et les réponses des cours ne sont pas des révisions.",
     "historyAnswers": "Réponses à cette carte",
+    "historyCapped": "Seules les {shown} réponses les plus récentes sur {total} sont affichées.",
     "historyDirection": "Sens",
     "historyKind": "Type",
     "historyAnswer": "Réponse",
@@ -1926,6 +1927,16 @@
       "other": "{percent} sur {count} réponses"
     },
     "removedDeck": "Un paquet supprimé",
+    "otherDecks": {
+      "one": "{count} paquet de plus totalise {answers}. Seuls les {shown} paquets ayant le plus de réponses sont affichés un par un.",
+      "many": "{count} de paquets de plus totalisent {answers}. Seuls les {shown} paquets ayant le plus de réponses sont affichés un par un.",
+      "other": "{count} paquets de plus totalisent {answers}. Seuls les {shown} paquets ayant le plus de réponses sont affichés un par un."
+    },
+    "otherDecksAnswers": {
+      "one": "{count} réponse",
+      "many": "{count} de réponses",
+      "other": "{count} réponses"
+    },
     "pointAtMonth": "Survolez un mois (ou utilisez les flèches du clavier) pour voir son taux de mémorisation, ou ouvrez le tableau ci-dessous.",
     "pointAtDayAhead": "Survolez un jour (ou utilisez les flèches du clavier) pour voir ce qui arrive à échéance, ou ouvrez le tableau ci-dessous.",
     "progress": "Progression",

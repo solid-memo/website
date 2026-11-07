@@ -4,6 +4,7 @@
 
 import { type NamedSubject, buildThing, getThing, getUrlAll, setThing } from "./client/rdf";
 import { AppError } from "@solid-memo/domain/appError";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import { unlessNewer } from "./records";
@@ -19,14 +20,7 @@ import { unlessNewer } from "./records";
 /** How often a link is written, in all, while the catalog keeps changing elsewhere. */
 const LINK_ATTEMPTS = 3;
 
-/**
- * How many entries of one kind a catalog may have that the app follows:
- * decks, drafts or releases. A catalog is data anyone may have written,
- * each document it names is read, and one within its read limits could
- * name far more than any instance holds; past this many, its entries of
- * that kind are refused (catalogTooManyLinks), not read.
- */
-export const MAX_CATALOG_LINKS = 1000;
+export { MAX_CATALOG_LINKS };
 
 /** `links`, unless there are more than MAX_CATALOG_LINKS of them: catalogTooManyLinks. */
 export function withinCatalogLimit<T>(links: T[]): T[] {

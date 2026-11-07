@@ -72,6 +72,30 @@ describe("CardHistoryScreen", () => {
     expect(rows[2]).not.toHaveClass("forgotten");
   });
 
+  it("lists a thousand answers at most, the newest, sorts those and says so, counting them all", () => {
+    const answers = Array.from({ length: 1002 }, (_, n) =>
+      // The oldest answer, past the limit, has the lowest grade of all.
+      answer(1, { id: `row-${n}`, grade: n === 1001 ? 0 : 4 }),
+    );
+    render(<CardHistoryScreen card={card} answers={answers} />);
+    expect(screen.getByText("1,002 answers. Lapses: 0.")).toBeInTheDocument();
+    const rows = () => within(screen.getByRole("table")).getAllByRole("row").slice(1);
+    expect(rows()).toHaveLength(1000);
+    expect(
+      screen.getByText("Only the newest 1,000 of 1,002 answers are listed."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Grade" }));
+    expect(rows()).toHaveLength(1000);
+    expect(rows().filter((row) => row.classList.contains("forgotten"))).toEqual([]);
+  });
+
+  it("lists every answer up to the limit, saying nothing of one", () => {
+    const answers = Array.from({ length: 1000 }, (_, n) => answer(1, { id: `row-${n}` }));
+    render(<CardHistoryScreen card={card} answers={answers} />);
+    expect(within(screen.getByRole("table")).getAllByRole("row")).toHaveLength(1001);
+    expect(screen.queryByText(/answers are listed/)).not.toBeInTheDocument();
+  });
+
   it("counts the card's lapses as the cards' table does, though every answer below grade 3 is marked forgotten", () => {
     const at = (n: number, time: string, grade: ReviewQuality, priorIntervalDays?: number) =>
       answer(n, {

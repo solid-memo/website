@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useId, useMemo } from "preact/hooks";
-import { isRecalled, type Answer } from "@solid-memo/domain/answer";
+import { isRecalled, MAX_HISTORY_ROWS, type Answer } from "@solid-memo/domain/answer";
 import { chainIndexOf, isRepeat } from "@solid-memo/domain/answerChain";
 import {
   isMarkdown,
@@ -38,15 +38,15 @@ function distractorsById(card: Card): ReadonlyMap<string, Distractor> {
 /**
  * A card's history on its page, for the learner: where it stands now in
  * each direction it has been studied (its interval, when it is due, and
- * the study day it was first studied on), then every answer to it
- * (`answers`, newest first, as UseCases.cardAnswers gives them) as a
- * table: the study day, which way when the card has been asked both
- * ways, what kind of answer it was (a first one, a review, one again the
- * same day, or a course question), the button pressed or whether the
- * option chosen was right (naming the wrong one), and the interval it
- * gave. A card not studied yet says so. The wrong option an answer
- * chose is looked up in the card's distractors by id, indexed once per
- * card.
+ * the study day it was first studied on), then its answers (`answers`,
+ * newest first, as UseCases.cardAnswers gives them; past
+ * MAX_HISTORY_ROWS the newest, saying so) as a table: the study day,
+ * which way when the card has been asked both ways, what kind of answer
+ * it was (a first one, a review, one again the same day, or a course
+ * question), the button pressed or whether the option chosen was right
+ * (naming the wrong one), and the interval it gave. A card not studied
+ * yet says so. The wrong option an answer chose is looked up in the
+ * card's distractors by id, indexed once per card.
  */
 export function CardHistory({
   deck,
@@ -135,7 +135,7 @@ export function CardHistory({
                   </tr>
                 </thead>
                 <tbody>
-                  {answers.map((answer) => (
+                  {answers.slice(0, MAX_HISTORY_ROWS).map((answer) => (
                     <tr key={answer.id}>
                       <th scope="row">{formatDate(answer.studyDay)}</th>
                       {ways && <td>{directionLabel(answer.direction)}</td>}
@@ -147,6 +147,11 @@ export function CardHistory({
                 </tbody>
               </table>
             </div>
+          )}
+          {answers.length > MAX_HISTORY_ROWS && (
+            <p class="hint">
+              {t("card.historyCapped", { shown: MAX_HISTORY_ROWS, total: answers.length })}
+            </p>
           )}
         </>
       )}
