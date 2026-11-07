@@ -81,6 +81,8 @@ export const ERROR_TEMPLATES = {
     "You came back from another provider than the one you logged in at, so Solid Memo stopped the login for safety. Log in again.",
   loginNotStarted:
     "Solid Memo did not start this login in this tab, so it stopped the login for safety. Log in again in this tab.",
+  loginProviderRefused:
+    "Your provider's settings name an address Solid Memo cannot use safely, so it stopped the login. Pick another provider.",
   profileNoSubject:
     "Your profile does not describe you, so Solid Memo cannot note in it where your data is. Check your profile with your Pod provider, then try again.",
   privateTypeIndexNotLinked:

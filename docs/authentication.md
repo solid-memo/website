@@ -42,6 +42,39 @@ client leaves the protocol to a library too, `oauth4webapi`, and
 chooses the client the same way. The provider returns the learner to
 the page's address without `index.html` or a hash.
 
+### One session per login
+
+The library keeps a session in `localStorage` under its ID, and its
+provider with it. A tab holds its refresh token in memory, and at each
+refresh reads the provider to send it to from `localStorage`, by the ID
+alone. Every tab that restores a session shares that session's ID, and
+a logout leaves the ID on the page. So
+[client/session.ts](../packages/solid/src/client/session.ts) passes a
+new ID to every login the user starts. The library clears what it kept
+of earlier sessions on that login, so another tab still under the old
+ID has no provider to refresh at, and sends nothing. That tab's session
+ends once its access token expires
+([An expired session](#an-expired-session)). A silent restore keeps its
+session's ID, since it goes to that session's provider.
+
+The same file refuses a provider's metadata when an endpoint's parsed
+path starts with `//`, because the library would sign the DPoP proof
+for a request to it as a proof for another host. A login at such a
+provider fails before the browser leaves (`loginProviderRefused`), and
+a refresh there fails without a request to the token endpoint. A
+refresh reads the metadata anew and calls the global `fetch` itself,
+with no option to replace it, so the sign-in client wraps the global
+`fetch`. Every request of the page passes through that wrapper, and it
+reads only an answer from an address ending in the metadata's path,
+under the limits of a profile
+([client/readLimits.ts](../packages/solid/src/client/readLimits.ts)).
+Past them, the read fails as too large and the request is canceled.
+
+`solid-memo-client` needs neither: it refreshes only a stored session
+from the tab's own provider, and its library builds a proof's address
+from the request's own origin and path
+([solid-memo-client.md](solid-memo-client.md#sign-in)).
+
 ### The issuer on the provider's answer
 
 Every provider gets the same redirect URL and, on the site's domain,
