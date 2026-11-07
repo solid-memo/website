@@ -747,11 +747,18 @@
     "deleteAction": "Löschen",
     "deleteLabel": "Instanz „{name}“ löschen",
     "delete": "Löschen…",
+    "removeConfirm": "Instanz „{name}“ aus deiner Liste entfernen? Ihre Stapel und Karten bleiben unverändert, wo sie sind. Du kannst sie über ihre Adresse wieder hinzufügen.",
+    "removeHeading": "Aus meiner Liste entfernen",
+    "removeAction": "Entfernen",
+    "removeLabel": "Aus meiner Liste entfernen: {name}",
+    "remove": "Aus meiner Liste entfernen…",
     "newInstance": "Neue Instanz…",
     "attachSummary": "Vorhandene Instanz per URL hinzufügen",
     "attachUrl": "Container-URL der Instanz",
     "attach": "Hinzufügen",
-    "deleted": "Instanz „{name}“ gelöscht."
+    "deleted": "Instanz „{name}“ gelöscht.",
+    "removed": "Instanz „{name}“ aus deiner Liste entfernt.",
+    "outsidePod": "Außerhalb deines Pods, daher kann Solid Memo sie nicht löschen."
   },
   "keptFolder": {
     "text": "Solid Memo hat seine eigenen Daten gelöscht und {link} behalten: Eine andere App hat dort Dateien abgelegt.",
@@ -1684,6 +1691,8 @@
     "guestStudyBeingMoved": "Solid Memo überträgt gerade deinen Lernstand aus diesem Browser in deinen Pod und speichert bis dahin keine Änderungen daran. Warte, bis die Übertragung fertig ist, und versuche es dann erneut.",
     "writeRefused": "Solid Memo hat eine Änderung in deinem Pod aus Sicherheitsgründen gestoppt: Sie wäre an einer Adresse gespeichert worden, an der Solid Memo nie etwas speichert. Es wurde nichts geändert.",
     "writeOutsidePod": "Solid Memo hat das nicht gespeichert: Es liegt auf {host}, außerhalb deines Pods, und Solid Memo speichert nur in deinem Pod. Es wurde nichts geändert.",
+    "instanceOutsideStorages": "Solid Memo hat diese Instanz nicht gelöscht: Sie liegt außerhalb deines Pods, und Solid Memo löscht nur, was in deinem Pod liegt. Du kannst sie stattdessen aus deiner Liste entfernen. Es wurde nichts geändert.",
+    "instanceAlreadyThere": "In diesem Ordner liegt bereits eine Instanz, daher wurde nichts gespeichert. Um sie zu nutzen, füge sie in deiner Instanzenliste über ihre Adresse hinzu. Um eine neue anzulegen, wähle einen anderen Ordner.",
     "redirectRefused": "Solid Memo hat eine Änderung in deinem Pod aus Sicherheitsgründen gestoppt: Dein Pod hat sie an eine andere Adresse weitergeleitet, und Solid Memo speichert nur an der Adresse, die es angefragt hat.",
     "deckChangedSinceOffer": "Der Stapel hat sich geändert, seit die Aktualisierung angeboten wurde, vielleicht in einem anderen Tab oder einer anderen App, daher wurde nichts geändert. Sieh dir das Angebot noch einmal an.",
     "deckChangedDuringUpgrade": "Der Stapel hat sich während der Aktualisierung geändert, vielleicht in einem anderen Tab oder einer anderen App. Versuche es erneut.",

@@ -412,8 +412,9 @@ Further journeys go through:
   statistics, with no leech to cram yet. Unit tests cover cramming: a
   leech takes more study days than a journey's time zones hold;
 - a second instance in another folder: switching between the two,
-  reloading, and deleting one whose folder another app also writes to,
-  which is kept, and the app says why;
+  reloading, and taking one off the list and attaching it again by its
+  address. Deleting one whose folder another app also writes to keeps
+  that folder, and the app says why;
 - logging out and back in, and in on a second device, onto the same
   instance, after a WebID the form refuses and a consent refused. The
   dark theme, High contrast and Larger text follow through the pod and
@@ -437,7 +438,8 @@ Further journeys go through:
   - an instance another user shares, whose catalog names the user's
     profile and a private document as its decks' documents, by address
     or spelled to resolve there. Its deck is removed, the instance
-    deleted, and the Studio's health screen names those decks;
+    taken off the list with its owner's data kept, and the Studio's
+    health screen names those decks;
   - a draft there whose chapter has an id Solid Memo doesn't accept,
     which the Studio doesn't open, saying why;
   - a release published and made public where the server names an
