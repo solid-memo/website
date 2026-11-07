@@ -1712,6 +1712,8 @@
     "noGuestPod": "Det finns inga gäststudier på den här enheten.",
     "guestPodStartFailed": "Gäststudierna på den här enheten gick inte att öppna. Läs in sidan igen och försök på nytt.",
     "guestStorageAborted": "Webbläsaren vägrade spara en ändring i gäststudierna. Kontrollera att den har plats att spara data och försök sedan igen.",
+    "importDocumentLeft": "Solid Memo kunde inte lägga till detta i din Pod och kunde inte ta bort ett dokument som det kan ha sparat för det, på {url}. Ingen kortlek använder dokumentet, så du kan ta bort det från din Pod. Kontrollera din anslutning och försök igen.",
+    "importOutcomeUnknown": "Solid Memo tappade kontakten med din Pod medan det lade till detta och kan inte avgöra om det lades till. När anslutningen är tillbaka, läs in sidan igen och leta efter det innan du försöker på nytt. Om det finns med i listan lades det till, så behåll dokumentet på {url}. Om det inte finns med är det ett dokument som det kan ha sparat för det och ingen kortlek använder det, så du kan ta bort det från din Pod och försöka på nytt.",
     "addFailed": "Solid Memo kunde inte spara i din Pod. Kontrollera anslutningen och försök igen.",
     "unwritableTerm": "Solid Memo sparade inte detta: det innehåller en adress som inte kan skrivas till en Pod som den är. Inget ändrades.",
     "termTooLong": "Solid Memo sparade inte detta: en text eller adress i det är längre än {limit} tecken, mer än Solid Memo läser i en; varje citattecken, omvänt snedstreck och radbrytning räknas som två. Inget ändrades. Korta den eller dela upp den och försök igen.",

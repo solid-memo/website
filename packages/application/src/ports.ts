@@ -253,7 +253,13 @@ export interface DeckRepository {
    * Create a deck with all its cards at once — one write of the cards
    * document rather than one per card — remembering the library deck it
    * came from. The cards keep their library ids, and each names the
-   * release it was taken from (Card.fromRelease, `content.url`).
+   * release it was taken from (Card.fromRelease, `content.url`). The
+   * entry is checked before anything is written, and a failure after
+   * that deletes the cards document, unless the entry was written after
+   * all; one that cannot be deleted is reported (importDocumentLeft).
+   * When the catalog cannot be read to tell whether the entry was
+   * written, the document stays and the import's outcome is reported as
+   * unknown (importOutcomeUnknown).
    */
   importDeck(instanceUrl: string, content: LibraryDeckContent): Promise<Deck>;
   /**

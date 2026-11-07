@@ -32,6 +32,7 @@ import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain
 import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
+import { AppError } from "@solid-memo/domain/appError";
 import { integerLiteral } from "./testing/literals";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
@@ -793,7 +794,8 @@ describe("importDeck", () => {
     expect(getStringNoLocale(afghanistan, SM.front)).toBeNull();
     expect(getUrl(afghanistan, SM.frontImage)).toBe(FLAG);
     expect(getStringNoLocale(afghanistan, SM.back)).toBe("Afghanistan");
-    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(1);
+    // The catalog as the entry is checked first, and again as it is written.
+    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(2);
     const entry = getThing(calls[1][1] as Dataset, imported.url)!;
     expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe("Capitals");
     expect(getUrl(entry, PROV_WAS_DERIVED_FROM)).toBe(content.url);
@@ -842,7 +844,7 @@ describe("importDeck", () => {
 
     const doc = imported.cardsDocumentUrl;
     expect(checkWrite).toHaveBeenNthCalledWith(
-      1,
+      2,
       expect.anything(),
       [`${doc}#q`, `${doc}#q-d1`],
       "pod",
@@ -886,11 +888,29 @@ describe("importDeck", () => {
   });
 
   it("leaves the catalog alone when the cards document fails to save", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     vi.mocked(writeDocument).mockRejectedValueOnce(new Error("403"));
 
     await expect(makeRepository().importDeck(INSTANCE, content)).rejects.toThrow("403");
-    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
     expect(writeDocument).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes nothing when the entry would be refused", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const checkWrite = vi.fn(async () => {
+      throw new AppError("dataNotConforming");
+    });
+
+    await expect(makeRepository(checkWrite).importDeck(INSTANCE, content)).rejects.toMatchObject({
+      code: "dataNotConforming",
+    });
+    expect(checkWrite).toHaveBeenCalledTimes(1);
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([`${CATALOG}#deck-fixed`]),
+      "pod",
+    );
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 });
 
