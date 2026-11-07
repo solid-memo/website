@@ -591,6 +591,24 @@ describe("attachInstance", () => {
     ).resolves.toEqual({ url: container, name: "x%E9" });
   });
 
+  it("refuses a folder with an empty segment, reading nothing of it", async () => {
+    for (const instanceUrl of [
+      "https://evil.example//alice.example/",
+      "https://evil.example/\\alice.example/",
+      "https://evil.example/.//alice.example/",
+    ]) {
+      await expect(
+        makeRepository().attachInstance({
+          webId: WEBID,
+          instanceUrl,
+          registrationTarget: "private",
+        }),
+      ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
+    }
+    expect(readDocument).not.toHaveBeenCalled();
+    expect(addRegistrations).not.toHaveBeenCalled();
+  });
+
   it("rejects a container without a readable meta.ttl", async () => {
     vi.mocked(readDocument).mockRejectedValue(new Error("404"));
 

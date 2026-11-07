@@ -2,7 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { ensureTrailingSlash, isCanonicalUrl, isPlainHttpUrl } from "../instanceLayout.ts";
+import {
+  ensureTrailingSlash,
+  hasEmptySegment,
+  isCanonicalUrl,
+  isPlainHttpUrl,
+} from "../instanceLayout.ts";
 
 /**
  * Where a creator publishes a release in a pod (docs/studio.md,
@@ -53,12 +58,15 @@ export function releasePlaceOf(url: string): { name: string; version: number } |
  * Whether a catalog's link may be to a release the instance published:
  * an http(s) address written as a request sends it (isCanonicalUrl, as
  * the folder it is published in is: isReleaseContainer), with no query
- * or fragment (isPlainHttpUrl), named as a release is (releasePlaceOf).
- * The catalog is data anyone may have written; a link that is not one is
- * neither listed nor made public.
+ * or fragment (isPlainHttpUrl), no empty segment (hasEmptySegment) and
+ * no user info, named as a release is (releasePlaceOf). The catalog is
+ * data anyone may have written; a link that is not one is neither listed
+ * nor made public.
  */
 export function isPublishedReleaseUrl(url: string): boolean {
-  return isCanonicalUrl(url) && isPlainHttpUrl(url) && releasePlaceOf(url) !== null;
+  if (!isCanonicalUrl(url) || !isPlainHttpUrl(url) || hasEmptySegment(url)) return false;
+  const { username, password } = new URL(url);
+  return username === "" && password === "" && releasePlaceOf(url) !== null;
 }
 
 /** The name of a release saved as a file: `<name>-v<N>.ttl`, which the library keeps as `decks/<name>/v<N>.ttl`. */

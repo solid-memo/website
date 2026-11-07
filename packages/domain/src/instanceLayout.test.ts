@@ -209,6 +209,12 @@ describe("where an instance's documents are", () => {
       "https://pod.example/a/.%2e/",
       "https://pod.example/a\\..\\b/",
       "https://pod.example/a/.\t./",
+      "https://evil.example//pod.example/",
+      "https://evil.example/\\pod.example/",
+      "https://evil.example/\t/pod.example/",
+      "https://evil.example/.//pod.example/",
+      "https://pod.example/a//b/",
+      "https://pod.example/a//",
       `${ROOT}?x`,
       "urn:x:a",
     ]) {
@@ -258,6 +264,16 @@ describe("where an instance's documents are", () => {
       "not a url",
     ]) {
       expect(isInFolder(url, instance), url).toBe(false);
+    }
+    // A folder whose own address has an empty segment holds nothing, however it is written.
+    for (const folder of [
+      "https://evil.example//pod.example/",
+      "https://evil.example/\\pod.example/",
+      "https://evil.example/.//pod.example/",
+      "https://pod.example/a//b/",
+    ]) {
+      expect(isInFolder("https://evil.example//pod.example/x.ttl", folder), folder).toBe(false);
+      expect(isDocumentIn("https://pod.example/a//b/x.ttl", folder), folder).toBe(false);
     }
   });
 

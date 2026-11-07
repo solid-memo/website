@@ -75,8 +75,8 @@ flowchart LR
   only registration Solid
   Memo reads to find its instances. Reading accepts
   `solid:instanceContainer` or `solid:instance` naming an http(s)
-  address with no query, fragment or dot segment (`..`, `%2e%2e` in any
-  case; `isInstanceAddress` in
+  address with no query, fragment, dot segment (`..`, `%2e%2e` in any
+  case) or empty segment (`//`; `isInstanceAddress` in
   [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). The
   address is taken as written: another spelling of a folder (its host's
   case, a name outside ASCII) is that folder
@@ -84,8 +84,8 @@ flowchart LR
   attached by URL or moved to from a guest's pod is registered at its
   address as a request sends it (`instanceAddressOf`):
   `HTTPS://Pod.example:443/kortlekar-å` is
-  `https://pod.example/kortlekar-%C3%A5/`. Text that's no http(s)
-  address isn't an instance to attach (`notAnInstanceNoMeta`).
+  `https://pod.example/kortlekar-%C3%A5/`. An address that `isInstanceAddress`
+  refuses isn't an instance to attach (`notAnInstanceNoMeta`).
   An instance with no title is named after its folder, with its
   percent-encoding undone; a name whose escapes don't decode, such as
   `caf%E9`, is shown as written (`lastPathSegment` in
