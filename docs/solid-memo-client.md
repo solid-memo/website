@@ -157,6 +157,10 @@ The session's requests are in
 - **`sessionIssuer()`** names the stored session's issuer, which the
   gateway keeps before a silent restore leaves the page
   ([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
+- **`forgetSession()`** ends the stored session and any request under
+  way in this tab, as the gateway asks after a silent restore that
+  failed or was given up on
+  ([authentication.md](authentication.md#when-the-provider-doesnt-answer)).
 - **`requestIssuer(state)`** names the issuer of the request under way
   in this tab when `state` is its state, and none otherwise.
 - **A request** carries `Authorization: DPoP` with the access token and

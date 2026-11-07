@@ -118,6 +118,15 @@ export function sessionContract(harness: SessionHarness): void {
       });
     });
 
+    describe("forgetSession", () => {
+      it("ends the stored session, so that no restore goes to its issuer", async () => {
+        harness.sessionAt("https://issuer.example/");
+        const client = harness.create();
+        await client.forgetSession();
+        await expect(client.sessionIssuer()).resolves.toBeNull();
+      });
+    });
+
     describe("requestIssuer", () => {
       it("names the issuer a login request went to, by its state", async () => {
         const state = harness.requestSentTo("https://issuer.example/");

@@ -208,6 +208,12 @@ export interface SessionClient {
    */
   sessionIssuer(): Promise<string | null>;
   /**
+   * Ends the stored session after a restore that failed or was given
+   * up on, even one still under way, without asking the identity
+   * provider anything: the next load restores nothing.
+   */
+  forgetSession(): Promise<void>;
+  /**
    * The identity provider the login request with this `state` went to,
    * where restore() would redeem the code answering it; none for a
    * request this client did not send, or no longer holds.
