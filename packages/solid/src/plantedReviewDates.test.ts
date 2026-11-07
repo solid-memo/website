@@ -5,6 +5,7 @@
 import { createAnswerStore } from "@solid-memo/application/answerStore";
 import type { Deck } from "@solid-memo/domain/deck";
 import { NEW_INSTANCE_PREFERENCES } from "@solid-memo/domain/preferences";
+import { switchedStates } from "@solid-memo/domain/schedulerSwitch";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { describe, expect, it } from "vitest";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
@@ -74,7 +75,7 @@ function memoryPod(reviews: string) {
   return { fetch, writes };
 }
 
-/** Grade the prompt of a reviews document under FSRS-6, with the real write checks,. */
+/** Grade the prompt of a reviews document under FSRS-6, with the real write checks. */
 async function graded(reviews: string, cardId: string) {
   const { fetch, writes } = memoryPod(reviews);
   const { checkSubjects } = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
@@ -146,4 +147,24 @@ describe("a review state with dates that pass the shape but are no study days", 
       expect(writes).toEqual(["/i/reviews/d.ttl", "/i/history/2026-11.ttl"]);
     },
   );
+
+  it.each([
+    "-0500-01-01T00:00:00Z",
+    "+012000-01-01T00:00:00Z",
+    "12000-01-01T00:00:00Z",
+    "2026-02-31T00:00:00Z",
+  ])("switches a deck to FSRS-6 with a review of %s", async (reviewed) => {
+    const { fetch, writes } = memoryPod(reviewsOf("c1", reviewed, "2026-11-10"));
+    const { checkSubjects } = createShaclShapeValidator({ fetch, shapesFetch, ...SHAPE_SOURCES });
+    const repository = createSolidReviewStateRepository({
+      fetch,
+      checkWrite: checkSubjects,
+      randomId: () => "x",
+    });
+    await repository.writeFsrsStates(
+      deck,
+      ({ sm2 }) => switchedStates(deck.url, sm2, [], NOW).fsrs,
+    );
+    expect(writes).toEqual(["/i/reviews/d.ttl"]);
+  });
 });

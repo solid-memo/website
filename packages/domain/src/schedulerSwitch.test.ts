@@ -4,11 +4,14 @@
 
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
-import { memoryFromSm2, nextMemory } from "./fsrs";
+import { effectiveStates, memoryFromSm2, nextMemory } from "./fsrs";
 import type { ReviewState } from "./review";
 import { switchedStates } from "./schedulerSwitch";
+import { studyDayOf } from "./scheduling";
+import { daysBetween } from "./studyPatterns";
 
 const DECK = "https://pod.example/i/catalog.ttl#deck-1";
+const NOW = new Date("2026-11-06T12:00:00.000Z");
 const CARDS = "https://pod.example/i/decks/deck-1.ttl";
 
 function answer(at: string, extra: Partial<Answer> = {}): Answer {
@@ -73,7 +76,7 @@ describe("switchedStates", () => {
       history[2]!,
     ];
     const { stability, difficulty } = byHand();
-    expect(switchedStates(DECK, [state], answers)).toEqual({
+    expect(switchedStates(DECK, [state], answers, NOW)).toEqual({
       fsrs: [
         {
           cardId: "c-1",
@@ -96,7 +99,7 @@ describe("switchedStates", () => {
       answer("2026-08-01T10:00:00.000Z", { grade: 5, priorIntervalDays: undefined }),
       answer("2026-08-10T10:00:00.000Z", { grade: 5 }),
     ];
-    const switched = switchedStates(DECK, [state], [...forgotten, ...history]);
+    const switched = switchedStates(DECK, [state], [...forgotten, ...history], NOW);
     expect(switched.replayed).toBe(1);
     expect(switched.fsrs[0]!.stability).toBe(byHand().stability);
   });
@@ -111,7 +114,7 @@ describe("switchedStates", () => {
     memory = nextMemory(memory, 3, 0);
     memory = nextMemory(memory, 3, 1);
     memory = nextMemory(memory, 3, 6);
-    expect(switchedStates(DECK, [state], course).fsrs[0]!.stability).toBe(memory.stability);
+    expect(switchedStates(DECK, [state], course, NOW).fsrs[0]!.stability).toBe(memory.stability);
   });
 
   it("estimates from SM-2 a prompt whose history the log does not hold whole", () => {
@@ -127,14 +130,52 @@ describe("switchedStates", () => {
       history.slice(0, 3),
     ];
     for (const answers of cases) {
-      const switched = switchedStates(DECK, [state], answers);
+      const switched = switchedStates(DECK, [state], answers, NOW);
       expect(switched).toMatchObject({ replayed: 0, estimated: 1 });
       expect(switched.fsrs[0]).toMatchObject({ ...estimate, due: state.due });
       expect(switched.fsrs[0]!.previous).toBeUndefined();
     }
   });
 
+  it.each(["+012000-01-01T00:00:00Z", "-0500-01-01T00:00:00Z", "not a date"])(
+    "writes now for a first review of %s, and the state stays fresh",
+    (reviewed) => {
+      const dated = { ...state, firstReviewedAt: reviewed };
+      const made = switchedStates(DECK, [dated], [], NOW).fsrs;
+      expect(made[0]).toMatchObject({
+        due: state.due,
+        firstReviewedAt: NOW.toISOString(),
+        lastReviewedAt: state.lastReviewedAt,
+      });
+      // FSRS-6's own view of the prompt, which the SM-2 state's fields would fail.
+      expect(effectiveStates([dated], made, "fsrs6", 4)).toEqual([
+        {
+          cardId: state.cardId,
+          direction: state.direction,
+          due: state.due,
+          intervalDays: daysBetween(studyDayOf(new Date(state.lastReviewedAt), 4), state.due),
+          firstReviewedAt: reviewed,
+          lastReviewedAt: state.lastReviewedAt,
+        },
+      ]);
+    },
+  );
+
+  it.each(["+012000-01-01T00:00:00Z", "-0500-01-01T00:00:00Z", "not a date"])(
+    "writes now for a last review of %s, and SM-2 keeps setting the due day",
+    (reviewed) => {
+      const dated = { ...state, lastReviewedAt: reviewed };
+      const made = switchedStates(DECK, [dated], [], NOW).fsrs;
+      expect(made[0]).toMatchObject({
+        due: state.due,
+        firstReviewedAt: state.firstReviewedAt,
+        lastReviewedAt: NOW.toISOString(),
+      });
+      expect(effectiveStates([dated], made, "fsrs6", 4)).toEqual([dated]);
+    },
+  );
+
   it("gives a deck without SM-2 states none", () => {
-    expect(switchedStates(DECK, [], history)).toEqual({ fsrs: [], replayed: 0, estimated: 0 });
+    expect(switchedStates(DECK, [], history, NOW)).toEqual({ fsrs: [], replayed: 0, estimated: 0 });
   });
 });

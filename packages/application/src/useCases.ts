@@ -299,6 +299,7 @@ export function createUseCases({
       answerStore,
       digestStore,
       newId,
+      now,
     }),
     ...createDeckUseCases({ deckRepository, newId }),
     ...createCardUseCases({
