@@ -6,6 +6,7 @@ import { expect, it } from "vitest";
 import type { StoredResource } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { DATABASE, DATABASE_VERSION, LOCK, RESOURCES } from "./indexedDbResourceStore";
+import { CHANNEL as LOGOUT_CHANNEL, KEY as LOGOUT_KEY } from "./logoutChannel";
 import { KEY as LANGUAGE_KEY } from "./localStorageLanguagePreference";
 import { KEY as CUSTOM_PALETTE_KEY } from "./localStorageCustomPalettePreference";
 import { KEY as PALETTE_KEY } from "./localStoragePalettePreference";
@@ -29,8 +30,8 @@ const RECORDS: { [K in StoredResource["kind"]]: Extract<StoredResource, { kind: 
  * What this package keeps in the browser, part of the app's public API
  * (docs/releasing.md#the-public-api): the localStorage keys, the
  * IndexedDB database that holds a guest's pod, its version, store,
- * records and the origin its keys are under, and the Web Locks the
- * site's tabs share. A line that goes, a key renamed or a database
+ * records and the origin its keys are under, and the Web Locks and the
+ * BroadcastChannel the site's tabs share. A line that goes, a key renamed or a database
  * raised, is a breaking change, which `npm run check:breaking` holds to
  * a commit that says so.
  */
@@ -47,6 +48,8 @@ it("keeps api/browser-storage/browser.txt to what the browser keeps", async () =
     `localStorage: ${JOURNAL_PREFIX}<source URL>`,
     `Web Locks: ${JOURNAL_PREFIX}<source URL>`,
     `Web Locks: ${LOCK}`,
+    `BroadcastChannel: ${LOGOUT_CHANNEL}`,
+    `localStorage: ${LOGOUT_KEY}, set and removed at once, where there is no BroadcastChannel`,
     `indexedDB: ${DATABASE} version ${DATABASE_VERSION}, store ${RESOURCES}, keyed by resource URL under ${GUEST_ORIGIN}`,
     ...Object.values(RECORDS).map(
       (record) =>

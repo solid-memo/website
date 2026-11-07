@@ -151,6 +151,11 @@ sessionContract(harness);
 describe("createSessionClient, over the library", () => {
   beforeEach(() => harness.reset());
 
+  it("logs out of this app only: the library's default, never at the provider", async () => {
+    await createSessionClient().logout();
+    expect(logout).toHaveBeenCalledWith();
+  });
+
   it("asks the library to complete a login or restore the previous session", async () => {
     await createSessionClient().restore();
     expect(handleIncomingRedirect).toHaveBeenCalledWith({ restorePreviousSession: true });

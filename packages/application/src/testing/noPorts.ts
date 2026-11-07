@@ -14,6 +14,7 @@ import type {
   TextSizePreference,
   ThemePreference,
   UpdateJournal,
+  LogoutChannel,
   WriteFence,
   DeckArchive,
   FileExchange,
@@ -83,6 +84,11 @@ const NO_ANSWER_LOG: AnswerLog = {
   removeAnswer: nothing,
 };
 
+const NO_LOGOUT_CHANNEL: LogoutChannel = {
+  announce: () => undefined,
+  listen: () => () => undefined,
+};
+
 const NO_JOURNAL: UpdateJournal = {
   begin: () => undefined,
   end: () => undefined,
@@ -147,6 +153,7 @@ export const NO_PORTS = {
   trialSandbox: noTrials,
   instanceGraphReader: NO_INSTANCE_GRAPH,
   updateJournal: NO_JOURNAL,
+  logoutChannel: NO_LOGOUT_CHANNEL,
   writeFence: NO_FENCE,
   guestPod: NO_GUEST_POD,
   answerLog: NO_ANSWER_LOG,

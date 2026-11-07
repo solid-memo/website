@@ -342,6 +342,8 @@ Further journeys go through:
 
 - reloading in the middle of a study session, which goes on with the
   cards left and counts every answer once;
+- logging out with a second tab open, which logs that tab out too and
+  leaves it logged out when reloaded;
 - resetting today's study on a deck's page: its cards, today's budget
   of new cards and the statistics come back as before the session;
 - coming back on the next study day to review a deck, forgetting some

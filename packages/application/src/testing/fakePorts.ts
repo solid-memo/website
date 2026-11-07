@@ -273,9 +273,14 @@ export function makeDeps() {
     run: vi.fn((_sourceUrl: string): (() => void) => vi.fn()),
     watch: vi.fn(),
   };
+  const logoutChannel = {
+    announce: vi.fn(),
+    listen: vi.fn((_listener: () => void): (() => void) => vi.fn()),
+  };
   return {
     ...NO_PORTS,
     sessionGateway,
+    logoutChannel,
     webId: vi.fn((): string | undefined => session.webId),
     webIdDocumentRepository,
     storageGateway,

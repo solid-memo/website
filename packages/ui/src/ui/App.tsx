@@ -324,6 +324,18 @@ function AppContent({
   // A guest on their way to logging in, to keep their study; and one about to discard it.
   const [guestLoggingIn, setGuestLoggingIn] = useState(false);
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  // Read when another tab logs out, whenever that comes: a guest's study is no login's to end.
+  const loggedIn = useRef(false);
+  loggedIn.current = session !== null && session.guest !== true;
+
+  /** Back to the landing, for someone returning, with nothing of the session's left on screen. */
+  function leaveSession(reason: unknown) {
+    setSession(null);
+    setConnecting(false);
+    setReturning(true);
+    setAuthError(reason);
+    queryClient.clear();
+  }
 
   useEffect(() => {
     void (async () => {
@@ -344,12 +356,12 @@ function AppContent({
   }, [useCases]);
 
   useEffect(() => {
-    return useCases.onSessionExpired(() => {
-      setSession(null);
-      setConnecting(false);
-      setReturning(true);
-      setAuthError(SESSION_EXPIRED);
-      queryClient.clear();
+    return useCases.onSessionExpired(() => leaveSession(SESSION_EXPIRED));
+  }, [useCases, queryClient]);
+
+  useEffect(() => {
+    return useCases.onLoggedOutElsewhere(() => {
+      if (loggedIn.current) leaveSession(null);
     });
   }, [useCases, queryClient]);
 
@@ -425,11 +437,7 @@ function AppContent({
 
   async function handleLogout() {
     await useCases.logout();
-    setSession(null);
-    setConnecting(false);
-    setReturning(true);
-    setAuthError(null);
-    queryClient.clear();
+    leaveSession(null);
   }
 
   // Signed out, or a guest logging in to keep their study: the guest's study stays where it is meanwhile.

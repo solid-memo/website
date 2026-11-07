@@ -12,6 +12,7 @@ as downloads and opened from the user's disk.
 - `localStorageUpdateJournal`, `localStorageLanguagePreference`,
   `localStorageThemePreference`, `localStoragePalettePreference`,
   `localStorageTextSizePreference` and `localStorageSeenHighlights`.
+- `logoutChannel`: word of a logout to the app's other tabs.
 - `indexedDbResourceStore`: the guest's pod ([guest-mode.md](../../docs/guest-mode.md)).
 - `fileExchange`: the `FileExchange` port, with a `Blob` behind a link
   and a hidden file input ([boundaries.md](../../docs/boundaries.md#files-without-a-vendor-library)).
