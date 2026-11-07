@@ -18,7 +18,9 @@
  *
  * A breaking change says so twice (docs/releasing.md#what-counts-as-breaking):
  * `!` after its type or scope, and a `BREAKING CHANGE:` footer that
- * tells users what to do. Either one without the other is refused.
+ * tells users what to do. Either one without the other is refused. A
+ * commit commitlint skips, such as a revert, may not say it at all, which
+ * `npm run check:merges` refuses (scripts/checkMergeMessages.ts).
  *
  * Every commit records its decision and links its discussion (criterion
  * 6 of the Standard for Public Code, docs/standard-for-public-code.md):
@@ -124,14 +126,19 @@ const IGNORED = [
   /^Auto-merged (.*?) into (.*)/,
 ];
 
+/**
+ * Whether commitlint skips a message, every rule above with it.
+ *
+ * @param {string} message
+ */
+export function skippedByCommitlint(message) {
+  const header = message.split(/\r?\n/, 1)[0];
+  return !SKIP_KEYWORD.test(message) && IGNORED.some((pattern) => pattern.test(header));
+}
+
 export default {
   defaultIgnores: false,
-  ignores: [
-    (/** @type {string} */ message) => {
-      const header = message.split(/\r?\n/, 1)[0];
-      return !SKIP_KEYWORD.test(message) && IGNORED.some((pattern) => pattern.test(header));
-    },
-  ],
+  ignores: [skippedByCommitlint],
   extends: ["@commitlint/config-conventional"],
   plugins: [
     {

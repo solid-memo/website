@@ -126,6 +126,34 @@ colon, as commitlint and `npm run check:breaking` read it
 ([release.config.mjs](../release.config.mjs)'s `parserOpts`). A body
 line that begins "breaking change" in a sentence isn't a footer.
 
+### What a merge commit decides
+
+Nothing. The merge queue's merge commit holds the pull request's title
+in its message, and commitlint reads neither. So the release leaves out
+every commit with more than one parent, when it chooses the version and
+when it writes the notes
+([releaseWithoutMerges.ts](../scripts/releaseWithoutMerges.ts)). A
+pull request's own commits are all in the range and count as usual, so
+a change that breaks says so in a commit: a title that says it breaks
+releases nothing.
+
+The queue also refuses a pull request whose title holds what the tools
+after it would act on. CI's `commits` job reads each merge commit the
+queue built (`npm run check:merges`), and fails on one of GitHub's
+keywords that skip CI, or on a line that starts `BREAKING CHANGE:` or
+`BREAKING-CHANGE:`. GitHub reads those keywords from the commit a push
+leaves at the tip of `main`, so a title that held one would stop CI, and
+with it the release and the deploy, for that commit. To fix a refused
+pull request, change its title and add it to the queue again. The job
+fails too on a queue run that built no merge commit, as this all rests
+on the queue merging with one.
+
+A commit with one parent that commitlint skips, such as a revert or a
+`fixup!`, is read by the release as any other, so a revert still
+releases. It may not say it breaks: on a pull request and in the queue,
+`npm run check:merges` fails on such a commit that has the `!` or the
+footer. A change that breaks says so in a commit commitlint reads.
+
 ## How CI holds to it
 
 [`api/`](../api/README.md) holds the public API, one promise a line: the
