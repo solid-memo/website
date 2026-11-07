@@ -177,9 +177,12 @@ in the reviews document beside its SM-2 `ReviewState`:
 | `previous` | The snapshot a reset of the day restores: stability, difficulty, due, last review |
 
 An FSRS-6 state counts only while it's **fresh**: while its prompt's
-SM-2 state has the same last review (`isFresh`). It goes stale when an
-older app graded SM-2 only, the day was reset, or the card was
-forgotten, and then counts for nothing. A prompt's due
+SM-2 state has the same last review and its due day is a real date in
+the range of study days (`isFresh`). It goes stale when an older app
+graded SM-2 only, the day was reset, the card was forgotten, or the
+due day read from the pod isn't such a date, and then counts for
+nothing. A last review outside that range counts as none: 0 study
+days since it. A prompt's due
 day comes from a `DueState`: a due day, the interval that led there
 and the reviews. Under FSRS-6, `effectiveStates` takes it from the
 fresh FSRS-6 state, with the study days from the last review to that
@@ -503,6 +506,11 @@ Scheduling works in *study days*, not calendar days. `studyDayOf`
 shifts an instant back by `dayBoundaryHour` (default 4) before taking
 the local date: a review at 03:00 counts as yesterday. A boundary that
 would move the instant off the calendar falls back to the calendar day.
+A state's dates can hold any year, so a study day's year is written as
+`Date` reads it, and the days between two study days are a number even
+when one of them isn't a date: 0.
+A grade doesn't carry over a first review or a snapshot whose date the
+write check would refuse.
 Study days are device-local, and traveling shifts due times by a few
 hours (accepted for v1).
 

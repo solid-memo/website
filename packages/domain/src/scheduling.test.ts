@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildStudyQueue,
+  firstReviewOf,
   interleave,
   nextDueDate,
   repeatsInSession,
@@ -578,5 +579,52 @@ describe("resetFsrsStudyDay", () => {
       restore: [],
       remove: [key],
     });
+  });
+});
+
+describe("a state's dates of any year", () => {
+  const atNoon = (year: number) => {
+    const date = new Date(2026, 0, 15, 12);
+    date.setFullYear(year);
+    return date;
+  };
+
+  it.each([
+    [500, "0500-01-15"],
+    [0, "0000-01-15"],
+    [9999, "9999-01-15"],
+    [12000, "+012000-01-15"],
+    [-5, "-000005-01-15"],
+  ])("gives the year %i a study day Date can read", (year, day) => {
+    expect(studyDayOf(atNoon(year), 4)).toBe(day);
+    expect(Date.parse(`${day}T00:00:00Z`)).not.toBeNaN();
+  });
+
+  const state: ReviewState = {
+    cardId: "c",
+    direction: "front-to-back",
+    easeFactor: 2.5,
+    intervalDays: 1,
+    repetitions: 1,
+    due: "2026-01-01",
+    firstReviewedAt: "2026-01-01T00:00:00.000Z",
+    lastReviewedAt: "2026-01-01T00:00:00.000Z",
+    formatVersion: 2,
+  };
+  const now = new Date("2026-11-06T12:00:00.000Z");
+
+  it("keeps a first review that can be written back, else takes now", () => {
+    expect(firstReviewOf(state, now)).toBe(state.firstReviewedAt);
+    expect(firstReviewOf(null, now)).toBe(now.toISOString());
+    expect(firstReviewOf({ firstReviewedAt: "+012000-01-01T00:00:00Z" }, now)).toBe(
+      now.toISOString(),
+    );
+  });
+
+  it("snapshots no last review that cannot be written back", () => {
+    expect(snapshotBeforeReview(state, now, 4)?.lastReviewedAt).toBe(state.lastReviewedAt);
+    expect(
+      snapshotBeforeReview({ ...state, lastReviewedAt: "-000500-01-01T00:00:00Z" }, now, 4),
+    ).toBeUndefined();
   });
 });

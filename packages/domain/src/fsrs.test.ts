@@ -668,7 +668,12 @@ describe("fsrsReview", () => {
     });
     expect(review({ ...fsrsState("c", tenDaysAgo), due: "soon" })).not.toHaveProperty("previous");
     const morning = new Date(2026, 8, 21, 9, 0);
-    const snapshot = { stability: -5, difficulty: 0, due: "2026-09-21", lastReviewedAt: "" };
+    const snapshot = {
+      stability: -5,
+      difficulty: 0,
+      due: "2026-09-21",
+      lastReviewedAt: "2026-09-11T10:00:00.000Z",
+    };
     const sameDay = fsrsReview(
       key,
       { sm2: sm2State("c", morning), fsrs: fsrsState("c", morning, { previous: snapshot }) },
@@ -743,5 +748,58 @@ describe("fsrsReview", () => {
     expect(fsrsReview(key, { sm2: later, fsrs: ahead }, 3, now, 0.9, BOUNDARY).stability).toBe(
       nextMemory(ahead, 3, 0).stability,
     );
+  });
+});
+
+describe("dates that are no study days", () => {
+  const sm2 = (lastReviewedAt: string): ReviewState => ({
+    cardId: "c",
+    direction: "front-to-back",
+    easeFactor: 2.5,
+    intervalDays: 6,
+    repetitions: 2,
+    due: "2026-09-21",
+    firstReviewedAt: lastReviewedAt,
+    lastReviewedAt,
+    formatVersion: 2,
+  });
+  const fsrs = (lastReviewedAt: string, due: string): FsrsState => ({
+    cardId: "c",
+    direction: "front-to-back",
+    stability: 2,
+    difficulty: 5,
+    due,
+    firstReviewedAt: lastReviewedAt,
+    lastReviewedAt,
+    formatVersion: 1,
+  });
+  const good = "2026-09-15T12:00:00.000Z";
+
+  it.each(["0000-00-00", "2026-13-45", "2026-02-31", "0050-01-01"])(
+    "reads an FSRS-6 state due on %s as stale, the SM-2 state's own setting the due day",
+    (due) => {
+      expect(isFresh(fsrs(good, due), sm2(good))).toBe(false);
+      expect(effectiveStates([sm2(good)], [fsrs(good, due)], "fsrs6", 4)).toEqual([sm2(good)]);
+    },
+  );
+
+  it.each(["0050-01-01T12:00:00Z", "+012000-01-01T12:00:00Z", "not a date"])(
+    "counts a last review of %s as none",
+    (last) => {
+      const [state] = effectiveStates([sm2(last)], [fsrs(last, "2026-09-25")], "fsrs6", 4);
+      expect(state).toMatchObject({ due: last === "not a date" ? "2026-09-21" : "2026-09-25" });
+      expect(state!.intervalDays).toBe(last === "not a date" ? 6 : 0);
+      expect(recallNow(fsrs(last, "2026-09-25"), new Date(2026, 8, 21, 12), 4)).toBe(1);
+    },
+  );
+
+  it("counts from a last review of the range however long ago", () => {
+    const [state] = effectiveStates(
+      [sm2("0500-01-02T12:00:00Z")],
+      [fsrs("0500-01-02T12:00:00Z", "0500-01-12")],
+      "fsrs6",
+      4,
+    );
+    expect(state!.intervalDays).toBeGreaterThan(0);
   });
 });

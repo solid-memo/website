@@ -4,6 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { createUseCases, type UseCases } from "./useCases";
+import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import { fsrsInterval, fuzzedInterval, fuzzFactor } from "@solid-memo/domain/fsrs";
@@ -101,6 +102,48 @@ describe("the answer log", () => {
       ["front-to-back", 4],
       ["back-to-front", 5],
     ]);
+  });
+
+  it("sets aside only an answer the write check refuses, and those after it go on", async () => {
+    const { log, byMonth, useCases } = setup();
+    log.append.mockRejectedValueOnce(new AppError("dataNotConforming", { problems: "a date" }));
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 5, noon);
+    await useCases.refreshStudyDigest(instance.url, deck);
+    expect(byMonth.get("2026-09")!.map((answer) => [answer.direction, answer.grade])).toEqual([
+      ["back-to-front", 5],
+    ]);
+  });
+
+  it("never drops an answer for any other failure, an AppError among them", async () => {
+    const { log, byMonth, useCases } = setup();
+    log.append.mockRejectedValueOnce(new AppError("podNoAnswer"));
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    await useCases.refreshStudyDigest(instance.url, deck);
+    expect(byMonth.get("2026-09")!.map((answer) => answer.grade)).toEqual([4]);
+    expect(log.append).toHaveBeenCalledTimes(2);
+  });
+
+  it("logs no due day of the state before when it is no study day, the answer kept", async () => {
+    const { deps, byMonth, useCases } = setup();
+    vi.mocked(deps.reviewStateRepository.getReviewState).mockResolvedValue(
+      promptOf({
+        cardId: card.id,
+        direction: "front-to-back",
+        easeFactor: 2.5,
+        intervalDays: 6,
+        repetitions: 2,
+        due: "someday",
+        firstReviewedAt: "2026-09-01T10:00:00.000Z",
+        lastReviewedAt: "2026-09-15T10:00:00.000Z",
+        formatVersion: 2,
+      }),
+    );
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    await useCases.refreshStudyDigest(instance.url, deck);
+    const [answer] = byMonth.get("2026-09")!;
+    expect(answer!.priorIntervalDays).toBe(6);
+    expect(answer!.priorDue).toBeUndefined();
   });
 
   describe("of several instances", () => {

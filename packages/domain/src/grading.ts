@@ -12,7 +12,7 @@ import {
   type ReviewQuality,
   type ReviewState,
 } from "./review";
-import { nextDueDate, snapshotBeforeReview, studyDayOf } from "./scheduling";
+import { firstReviewOf, nextDueDate, snapshotBeforeReview, studyDayOf } from "./scheduling";
 import { applySm2, INITIAL_SM2_STATE } from "./sm2";
 import { SM2_QUALITIES } from "./answerScale";
 import { daysBetween } from "./studyPatterns";
@@ -76,7 +76,7 @@ export function gradePrompt(
     direction: key.direction,
     ...next,
     due: nextDueDate(now, next.intervalDays, scheduling.dayBoundaryHour),
-    firstReviewedAt: before?.firstReviewedAt ?? now.toISOString(),
+    firstReviewedAt: firstReviewOf(before, now),
     lastReviewedAt: now.toISOString(),
     formatVersion: REVIEW_STATE_FORMAT_VERSION,
     ...(previous === undefined ? {} : { previous }),

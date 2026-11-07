@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { fsrsInterval, fsrsReview, fuzzedInterval, fuzzFactor } from "./fsrs";
+import { effectiveStates, fsrsInterval, fsrsReview, fuzzedInterval, fuzzFactor } from "./fsrs";
 import { gradePrompt, previewIntervals, ratingOfAnswer, type Scheduling } from "./grading";
 import type { FsrsState, ReviewState } from "./review";
 import { studyDayOf } from "./scheduling";
@@ -159,5 +159,56 @@ describe("previewIntervals", () => {
       }
       expect(intervals[3] <= intervals[4] && intervals[4] <= intervals[5]).toBe(true);
     }
+  });
+});
+
+describe("a grade under FSRS-6 of a state with any date its shape admits", () => {
+  const scheduling: Scheduling = { scheduler: "fsrs6", desiredRetention: 0.9, dayBoundaryHour: 4 };
+  const lasts = [
+    "2026-09-15T10:00:00.000Z",
+    "0100-01-03T12:00:00Z",
+    "0500-01-01T00:00:00Z",
+    "1000-01-01T00:00:00Z",
+    "0000-01-01T00:00:00Z",
+    "-0500-01-01T00:00:00Z",
+    "+012000-01-01T00:00:00Z",
+    "12000-01-01T00:00:00Z",
+    "9999-12-31T23:59:59Z",
+    "2026-02-31T00:00:00Z",
+  ];
+  const dues = ["2026-09-25", "0000-00-00", "2026-13-45", "2026-02-31", "0050-01-01", "9999-12-31"];
+  const cases = lasts.flatMap((last) => dues.map((due) => [last, due] as const));
+
+  it.each(cases)("is finite with a last review of %s and a due day of %s", (last, due) => {
+    const sm2 = { ...before, firstReviewedAt: last, lastReviewedAt: last };
+    const fsrs = { ...fresh, firstReviewedAt: last, lastReviewedAt: last, due };
+    for (const grade of [0, 1, 2, 3, 4, 5] as const) {
+      const graded = gradePrompt(key, { sm2, fsrs }, { grade }, now, scheduling).fsrs!;
+      expect(Number.isFinite(graded.stability)).toBe(true);
+      expect(Number.isFinite(graded.difficulty)).toBe(true);
+      expect(graded.due).toMatch(/^2\d{3}-\d{2}-\d{2}$/);
+    }
+    const intervals = Object.values(previewIntervals(key, { sm2, fsrs }, now, scheduling));
+    expect(intervals.every(Number.isFinite)).toBe(true);
+    const [state] = effectiveStates([sm2], [fsrs], "fsrs6", 4);
+    expect(state!.intervalDays).toBeGreaterThanOrEqual(0);
+  });
+
+  it("is finite from a memory that is no number", () => {
+    const fsrs = { ...fresh, stability: Number.NaN, difficulty: Number.NaN };
+    const graded = gradePrompt(key, { sm2: before, fsrs }, { grade: 4 }, now, scheduling).fsrs!;
+    expect(Number.isFinite(graded.stability)).toBe(true);
+    expect(Number.isFinite(graded.difficulty)).toBe(true);
+  });
+
+  it("writes a new first review and no snapshot for dates that cannot be written back", () => {
+    const last = "+012000-01-01T00:00:00Z";
+    const sm2 = { ...before, firstReviewedAt: last, lastReviewedAt: last };
+    const fsrs = { ...fresh, firstReviewedAt: last, lastReviewedAt: last };
+    const graded = gradePrompt(key, { sm2, fsrs }, { grade: 4 }, now, scheduling);
+    expect(graded.sm2.firstReviewedAt).toBe(now.toISOString());
+    expect(graded.sm2.previous).toBeUndefined();
+    expect(graded.fsrs!.firstReviewedAt).toBe(now.toISOString());
+    expect(graded.fsrs!.previous).toBeUndefined();
   });
 });
