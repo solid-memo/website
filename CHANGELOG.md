@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.29](https://github.com/solid-memo/website/compare/v6.29.28...v6.29.29) (2026-11-07)
+
+### Bug Fixes
+
+* **solid:** give the session restore a deadline and a way out ([be7fb7f](https://github.com/solid-memo/website/commit/be7fb7f448f756ab4e1d6e877c85430b34641f7b))
+* **solid:** let any instance be removed from the list ([ad7da16](https://github.com/solid-memo/website/commit/ad7da16cb6fdab564ad7ddaa3c72fd9b8d84f18d))
+
 ## [6.29.28](https://github.com/solid-memo/website/compare/v6.29.27...v6.29.28) (2026-11-07)
 
 ### Bug Fixes
