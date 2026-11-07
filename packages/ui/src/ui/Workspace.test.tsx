@@ -29,7 +29,15 @@ import { queryKeys } from "./queryKeys";
 import { CARDS_PER_PAGE } from "./BrowserScreen";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
-import { CH1, CH2, courseDeck, courseLibraryDeck, courseOutline, makeCourse } from "../test/course";
+import {
+  CH1,
+  CH2,
+  courseDeck,
+  courseLibraryDeck,
+  courseOutline,
+  makeCourse,
+  makeSteplessCourse,
+} from "../test/course";
 
 const session: Session = { webId: "https://alice.example/profile/card#me" };
 const storageA: Storage = { url: "https://pod.example/", source: "profile" };
@@ -3206,6 +3214,20 @@ describe("Workspace", () => {
       expect(await screen.findByRole("heading", { name: "Step 2 of 2" })).toBeInTheDocument();
       expect(window.location.hash).toBe(routeToHash(chapterRoute));
       expect(screen.queryByRole("button", { name: "Start the final review" })).toBeNull();
+    });
+
+    it("goes on to the final review from the address of a chapter with no step, whose player never opens", async () => {
+      window.history.replaceState(null, "", routeToHash(chapterRoute));
+      renderWorkspace(courseUseCases({ getCourse: vi.fn(async () => makeSteplessCourse()) }));
+
+      expect(
+        await screen.findByRole("heading", { name: "Final review: Linked data" }),
+      ).toBeInTheDocument();
+      expect(window.location.hash).toBe(routeToHash(reviewRoute));
+      // Its address would only come back here, so the trail doesn't link it.
+      const trail = within(screen.getByRole("navigation", { name: "Breadcrumb" }));
+      expect(trail.getByRole("link", { name: "Final review" })).toBeInTheDocument();
+      expect(trail.queryByRole("link", { name: "Linked data" })).toBeNull();
     });
 
     it("opens a course from the strip on the course read behind it, not waiting for it again", async () => {

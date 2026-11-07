@@ -4,7 +4,8 @@
 
 import { useId, useLayoutEffect, useRef } from "preact/hooks";
 import type { Choice, CourseChapter } from "@solid-memo/domain/course";
-import { isMarkdown, type CardContent } from "@solid-memo/domain/deck";
+import { isMarkdown } from "@solid-memo/domain/deck";
+import type { LibraryCard } from "@solid-memo/domain/library";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
 import { DataProse, useProseChunks } from "./DataText";
 import { useI18n, type ErrorText } from "./i18n";
@@ -74,7 +75,7 @@ export function ChapterPlayerScreen({
   /** The chunk of the step's theory shown while reading, 0-based. */
   chunkIndex: number;
   /** The question's card. */
-  card: CardContent;
+  card: LibraryCard;
   choices: readonly Choice[];
   answer: CheckedAnswer | null;
   busy: boolean;
@@ -181,7 +182,7 @@ export function ChapterPlayerScreen({
               : t("chapterPlayer.check")}
           </h3>
           <CourseQuestion
-            key={`${stepIndex}:${questionIndex}`}
+            key={`${stepIndex}:${questionIndex}:${card.id}`}
             card={card}
             choices={choices}
             answer={answer}

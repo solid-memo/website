@@ -4,8 +4,8 @@
 
 import { useLayoutEffect, useRef } from "preact/hooks";
 import type { Choice } from "@solid-memo/domain/course";
-import type { CardContent } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import type { LibraryCard } from "@solid-memo/domain/library";
 import { CourseQuestion, type CheckedAnswer } from "./CourseQuestion";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
@@ -58,7 +58,7 @@ export function ChapterReviewScreen({
   /** Questions in the review, including those coming back. */
   total: number;
   /** The question's card; null once every question is answered right. */
-  card: CardContent | null;
+  card: LibraryCard | null;
   choices: readonly Choice[];
   answer: CheckedAnswer | null;
   busy: boolean;
@@ -98,7 +98,7 @@ export function ChapterReviewScreen({
         <ReviewEnd completion={completion!} onRetry={onRetry} />
       ) : (
         <CourseQuestion
-          key={position}
+          key={`${position}:${card.id}`}
           card={card}
           choices={choices}
           answer={answer}

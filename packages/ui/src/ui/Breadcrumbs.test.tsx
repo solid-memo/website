@@ -262,6 +262,17 @@ describe("breadcrumbsFor", () => {
       { label: "Final review", route: review },
     ]);
   });
+
+  it("leaves a chapter with no step out of its final review's trail", () => {
+    const chapterUrl = "https://solid-memo.com/decks/solid/v1.ttl#ch-1";
+    const review: RouteRef = { screen: "courseReview", instanceUrl, deckUrl, chapterUrl };
+    expect(breadcrumbsFor(review, { ...NO_NAMES, chapterStepless: true })).toEqual([
+      { label: "Decks", route: home },
+      { label: "", route: deckDetail },
+      { label: "Course", route: { screen: "course", instanceUrl, deckUrl } },
+      { label: "Final review", route: review },
+    ]);
+  });
 });
 
 describe("Breadcrumbs", () => {

@@ -25,6 +25,8 @@ export interface CrumbNames {
   libraryCard?: string;
   /** Title of the route's course chapter; read for a chapter and its final review. */
   chapter?: string;
+  /** The route's chapter has no step, so its address only comes back to its final review. */
+  chapterStepless?: boolean;
   /** The language each name above is in, when not the page's. */
   deckLang?: string;
   cardLang?: string;
@@ -184,9 +186,11 @@ export function breadcrumbsFor(route: RouteRef, names: CrumbNames, t: I18n["t"])
     lang: names.chapterLang,
     route: { ...route, screen: "courseChapter" },
   };
-  return route.screen === "courseChapter"
-    ? [decks, deck, course, chapter]
-    : [decks, deck, course, chapter, { label: t("breadcrumbs.courseReview"), route }];
+  if (route.screen === "courseChapter") return [decks, deck, course, chapter];
+  const review: Crumb = { label: t("breadcrumbs.courseReview"), route };
+  return names.chapterStepless
+    ? [decks, deck, course, review]
+    : [decks, deck, course, chapter, review];
 }
 
 /**

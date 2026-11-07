@@ -2,14 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMemo, useState } from "preact/hooks";
+import { useEffect, useMemo, useState } from "preact/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CourseUseCases } from "@solid-memo/application/courses";
 import type { StudyUseCases } from "@solid-memo/application/study";
 import type { Course } from "@solid-memo/application/courses";
 import { choicesOf, finalReviewQueue, type CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
-import { useCourseAnswer } from "./ChapterPlayerContainer";
+import { answerTo, useCourseAnswer } from "./ChapterPlayerContainer";
 import { ChapterReviewScreen, type Completion } from "./ChapterReviewScreen";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useCourseLinks } from "./courseLinks";
@@ -26,7 +26,10 @@ import { queryKeys } from "./queryKeys";
  * learner is taken to shows it done and the next chapter open. A learner
  * who leaves the review while that is saved stays where they went: the
  * course is still read afresh, but `onCompleted` is not called. Back to
- * the course's page links where the course links say.
+ * the course's page links where the course links say. The course may be
+ * read afresh meanwhile (each answer does so), and a queued question it
+ * no longer has is passed over: the chapter is completed once none is
+ * left.
  */
 export function ChapterReviewContainer({
   useCases,
@@ -52,14 +55,18 @@ export function ChapterReviewContainer({
   const [started, setStarted] = useState(false);
   const [queue, setQueue] = useState(() => finalReviewQueue(chapter, random));
   const [position, setPosition] = useState(0);
-  const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
-  const cardId = queue[position];
+  const [checked, setAnswer] = useState<CheckedAnswer | null>(null);
+  const held = (ids: readonly string[]) => ids.filter((id) => course.cards.has(id));
+  const at = queue.findIndex((id, index) => index >= position && course.cards.has(id));
+  const cardId = queue[at];
   const card = cardId === undefined ? null : course.cards.get(cardId)!;
-  const choices = useMemo(() => (card === null ? [] : choicesOf(card, random)), [position]);
-  const answerMutation = useCourseAnswer(useCases, instance, course, (checked) => {
-    setAnswer(checked);
+  const choices = useMemo(() => (card === null ? [] : choicesOf(card, random)), [position, cardId]);
+  const answer = answerTo(checked, choices);
+  const answerMutation = useCourseAnswer(useCases, instance, course, (answered) => {
+    setAnswer(answered);
     // Wrong, it comes back once the rest have been asked.
-    if (!checked.choice.correct) setQueue((current) => [...current, cardId!]);
+    if (!answered.choice.correct && answerTo(answered, choices) !== null)
+      setQueue((current) => [...current, cardId!]);
   });
 
   // Read before the course is read afresh: whether this chapter is the
@@ -85,11 +92,15 @@ export function ChapterReviewContainer({
       onSuccess: (finishedCourse) => onCompleted(finishedCourse),
     });
 
+  // None left, whether the last was answered right or is gone from the course.
+  useEffect(() => {
+    if (started && card === null) complete();
+  }, [started, card === null]);
+
   function next() {
     answerMutation.reset();
     setAnswer(null);
-    setPosition(position + 1);
-    if (position + 1 === queue.length) complete();
+    setPosition(at + 1);
   }
 
   const completion: Completion | null =
@@ -104,8 +115,8 @@ export function ChapterReviewContainer({
       chapterTitle={chapter.title}
       started={started}
       courseHref={links.courseHref(instance.url, deck.url)}
-      position={position + 1}
-      total={queue.length}
+      position={held(queue.slice(0, at)).length + 1}
+      total={held(queue).length}
       card={card}
       choices={choices}
       answer={answer}

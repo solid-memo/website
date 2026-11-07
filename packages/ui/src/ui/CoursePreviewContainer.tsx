@@ -8,7 +8,7 @@ import type { LibraryCourse } from "@solid-memo/application/library";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { choicesOf, type CourseChapter } from "@solid-memo/domain/course";
 import type { LibraryDeck } from "@solid-memo/domain/library";
-import { nextPlace, type ChapterPlace } from "./ChapterPlayerContainer";
+import { answerTo, nextPlace, placeWithin, type ChapterPlace } from "./ChapterPlayerContainer";
 import { ChapterPlayerScreen } from "./ChapterPlayerScreen";
 import { CoursePreviewScreen } from "./CoursePreviewScreen";
 import type { CheckedAnswer } from "./CourseQuestion";
@@ -112,16 +112,23 @@ function PreviewChapter({
   onEnd: () => void;
   random: () => number;
 }) {
-  const [at, setAt] = useState<ChapterPlace>({ step: 0, phase: "read", chunk: 0, question: 0 });
-  const [answer, setAnswer] = useState<CheckedAnswer | null>(null);
+  const [place, setAt] = useState<ChapterPlace>({
+    step: 0,
+    phase: "read",
+    chunk: 0,
+    question: 0,
+  });
+  const at = placeWithin(chapter, place);
+  const [checked, setAnswer] = useState<CheckedAnswer | null>(null);
   const card = course.cards.get(chapter.steps[at.step]!.questionIds[at.question]!)!;
-  const choices = useMemo(() => choicesOf(card, random), [at.step, at.question]);
+  const choices = useMemo(() => choicesOf(card, random), [at.step, at.question, card.id]);
+  const answer = answerTo(checked, choices);
 
   function next() {
     setAnswer(null);
-    const place = nextPlace(chapter, at);
-    if (place === null) onEnd();
-    else setAt(place);
+    const following = nextPlace(chapter, at);
+    if (following === null) onEnd();
+    else setAt(following);
   }
 
   return (

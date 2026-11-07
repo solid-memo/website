@@ -204,7 +204,10 @@ new type-index entries ([data-model.md](data-model.md#courses)):
      theory at its first chunk. The chunks are counted in the language
      the app shows the theory in, the course's first. On a switch to a
      language with fewer chunks (which a release the library checked
-     never has), a chunk past the last shows the last.
+     never has), a chunk past the last shows the last. If a course read
+     afresh has fewer steps or questions than the learner has reached,
+     the player and the course preview go on from the last step's theory
+     or the step's last question.
 3. **The final review** comes once every step is done, by Next or from
    the course's page. It opens on a word that every step of the chapter
    is done, and what the review is, with a button to start it, a link
@@ -213,7 +216,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    taking the focus as it comes up. A question answered wrongly comes
    back until it's answered right. Then the chapter is completed
    (`completeChapter`), which opens the next; the review says so while
-   that's saved, and when saving fails, with a way to try again. A final
+   that's saved, and when saving fails, with a way to try again. If a
+   course read afresh no longer has a queued question, the review passes
+   over it, and completes the chapter once none is left. A final
    review reached some other way (a bookmark, a typed link, Back) for a
    chapter with steps not done goes to the chapter's first such step
    instead.
