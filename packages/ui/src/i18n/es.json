@@ -1734,6 +1734,7 @@
     "loginIssuerMissing": "Tu proveedor no dijo qué proveedor es, así que Solid Memo detuvo el inicio de sesión por seguridad. Vuelve a iniciar sesión o elige otro proveedor.",
     "loginIssuerMismatch": "Volviste desde un proveedor distinto de aquel en el que iniciaste sesión, así que Solid Memo detuvo el inicio de sesión por seguridad. Vuelve a iniciar sesión.",
     "loginNotStarted": "Solid Memo no inició este inicio de sesión en esta pestaña, así que lo detuvo por seguridad. Vuelve a iniciar sesión en esta pestaña.",
+    "webIdIssuerNotListed": "Tu perfil WebID no indica el proveedor en el que iniciaste sesión, así que Solid Memo cerró la sesión por seguridad. Añade el proveedor a tu perfil o inicia sesión en uno que indique.",
     "profileNoSubject": "Tu perfil no te describe, así que Solid Memo no puede anotar en él dónde están tus datos. Revisa tu perfil con tu proveedor de Pods e inténtalo de nuevo.",
     "privateTypeIndexNotLinked": "Solid Memo no pudo enlazar desde tu perfil su lista privada de tus datos. Comprueba que Solid Memo puede editar tu perfil e inténtalo de nuevo.",
     "publicTypeIndexNotLinked": "Solid Memo no pudo enlazar desde tu perfil su lista pública de tus datos. Comprueba que Solid Memo puede editar tu perfil e inténtalo de nuevo.",

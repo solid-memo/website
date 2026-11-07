@@ -89,17 +89,26 @@ const harness: SessionHarness = {
     window.history.replaceState(null, "", "/");
     emitter = makeEmitter();
     vi.mocked(events).mockReturnValue(emitter as never);
+    vi.mocked(getDefaultSession).mockReturnValue({ info: { isLoggedIn: false } } as never);
     vi.mocked(handleIncomingRedirect).mockResolvedValue({ isLoggedIn: false, sessionId: "s" });
   },
   create: createSessionClient,
   returnFromLogin(webId) {
     sentBack();
+    window.localStorage.setItem(
+      requestKey("s"),
+      JSON.stringify({ sessionId: "s", issuer: LOGIN.oidcIssuer }),
+    );
     // The library completes the login it sent the user for.
     vi.mocked(handleIncomingRedirect).mockImplementation(async () => {
+      vi.mocked(getDefaultSession).mockReturnValue({
+        info: { isLoggedIn: true, webId, sessionId: "s" },
+      } as never);
       emitter.emit(EVENTS.LOGIN);
       return { isLoggedIn: true, webId, sessionId: "s" };
     });
   },
+  loginIssuer: LOGIN.oidcIssuer,
   sessionToRestore(webId, from) {
     if (from !== undefined) {
       sentBack();

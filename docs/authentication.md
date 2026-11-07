@@ -108,7 +108,7 @@ belongs to Solid Memo, and a fork's repository doesn't have it.
 ```mermaid
 sequenceDiagram
     accTitle: Logging in with Solid-OIDC
-    accDescr: The user enters a WebID, the gateway finds its identity provider, the provider redirects back with a code, and the gateway exchanges the code for a session.
+    accDescr: The user enters a WebID, the gateway finds its identity provider, the provider redirects back with a code, the gateway exchanges the code for a session, and checks that the WebID's profile lists that provider.
     actor User
     participant UI
     participant Gateway as SolidSessionGateway
@@ -127,6 +127,9 @@ sequenceDiagram
     Note over Gateway: refuses an answer without the issuer's iss, or for another issuer's request
     Gateway->>IdP: handleIncomingRedirect (token exchange)
     IdP-->>Gateway: session (WebID)
+    Gateway->>Pod: GET WebID document
+    Pod-->>Gateway: profile (solid:oidcIssuer)
+    Note over Gateway: ends a session whose profile does not list its issuer
     Gateway-->>UI: { session: { webId }, origin: "login" }
 ```
 
@@ -241,6 +244,36 @@ refresh token it keeps in IndexedDB, with the DPoP key pair, and
 leaves the page only when it has none, or the provider refuses it. Its
 access tokens stay in memory
 ([solid-memo-client.md](solid-memo-client.md#what-a-session-keeps)).
+
+### The issuer in the WebID's profile
+
+A provider says which WebID a session belongs to, in its ID token, and
+the sign-in clients take its word. So a session is checked against the
+WebID's profile too, before `restore()` returns it: on a login and on
+every restore, with either sign-in client, in one place in the gateway.
+
+- The gateway reads the WebID document as no one, under
+  `PROFILE_LIMITS`, asking the pod rather than the browser's cache.
+- It looks for the session's issuer among the `solid:oidcIssuer`
+  values, a trailing slash aside. The sign-in client names that issuer
+  (`sessionIssuer()`), of the session it's logged in with.
+- A profile that can be read and doesn't list the issuer ends the
+  session, which then shows `webIdIssuerNotListed`. The learner can
+  add the provider to their profile, or log in at one it lists.
+- A session stays if the profile can't be read, in a few seconds at
+  most. A slow, absent or private pod locks no one out, so the check
+  says only what a profile that answers says.
+- A session also stays if the client can't name its issuer, which
+  takes the client's own record of the session being gone. That session
+  hasn't passed the check: it was never made.
+- A guest logs in nowhere, so a guest's session isn't checked.
+
+The check adds one read of the profile to a load. After a login, the
+account's issuer lookup uses that read rather than making its own, so
+a login reads the document no more often than before.
+
+The check doesn't vouch for a provider: a session under a WebID whose
+profile lists that provider passes it.
 
 ## Authenticated requests
 

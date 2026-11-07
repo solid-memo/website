@@ -81,6 +81,8 @@ export const ERROR_TEMPLATES = {
     "You came back from another provider than the one you logged in at, so Solid Memo stopped the login for safety. Log in again.",
   loginNotStarted:
     "Solid Memo did not start this login in this tab, so it stopped the login for safety. Log in again in this tab.",
+  webIdIssuerNotListed:
+    "Your WebID profile does not name the provider you logged in at, so Solid Memo ended the session for safety. Add the provider to your profile, or log in at one it names.",
   profileNoSubject:
     "Your profile does not describe you, so Solid Memo cannot note in it where your data is. Check your profile with your Pod provider, then try again.",
   privateTypeIndexNotLinked:
