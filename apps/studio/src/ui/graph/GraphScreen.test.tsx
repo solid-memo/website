@@ -156,6 +156,19 @@ describe("GraphScreen", () => {
     expect(onSelect).toHaveBeenCalledTimes(2);
   });
 
+  it("finds a blank node by its term and its document's address, not the number the graph gives it", () => {
+    const graph = smallGraph();
+    const blank = graph.nodes.find((node) => node.blank === true)!;
+    show(graph);
+    const search = screen.getByRole("searchbox", { name: "Find a node" });
+    fireEvent.input(search, { target: { value: "_:b0" } });
+    expect(screen.getByRole("button", { name: "_:b0" })).toBeInTheDocument();
+    fireEvent.input(search, { target: { value: blank.document! } });
+    expect(screen.getByRole("button", { name: "_:b0" })).toBeInTheDocument();
+    fireEvent.input(search, { target: { value: blank.id } });
+    expect(screen.queryByRole("button", { name: "_:b0" })).toBeNull();
+  });
+
   it("lists the first nodes found, and says how many more there are", () => {
     show(largeGraph(20));
     fireEvent.input(screen.getByRole("searchbox"), { target: { value: "card-1" } });

@@ -496,7 +496,7 @@ others.
 | `#/studio/diff?draft=…` | a draft's release diff ([below](#the-release-diff)). |
 | `#/studio/release?draft=…[&field=…]` | the release's metadata and provenance ([below](#the-releases-metadata-and-provenance)), then its publishing ([below](#publishing-a-release)). |
 | `#/studio/releases?instance=…` | the releases the instance published ([below](#releases)). |
-| `#/studio/graph?instance=…[&node=…]` | the graph ([below](#graph)). `node` is the node selected, by its IRI. |
+| `#/studio/graph?instance=…[&node=…]` | the graph ([below](#graph)). `node` is the node selected, by its IRI, a blank node by the number the graph gives it. |
 
 `#/studio/` and its query count as `#/studio`. Anything else under
 `#/studio`, `#/studio` among them, is the default route: the only
@@ -2523,7 +2523,8 @@ small square, and the table of edges names each.
 
 - **Find a node**, by its name or its address, among the nodes the
   filters show, beyond the neighbors too: ten at most, Enter selecting
-  the first, the focus staying in the search.
+  the first, the focus staying in the search. A blank node is found by
+  its label or its document's address.
 - **Cards**, **Wrong options**, **Review states**, **Answers** and
   **Leaves** ("in your Pod", "outside your Pod", and found in no
   document), each shown or hidden, all shown at first.
@@ -2577,7 +2578,8 @@ A leaf hangs by the first node that links to it. A choice that would
 make a cycle falls back, at the first node of the cycle (by address)
 that can, to what holds it, else to the first node that links to it.
 If none can, that first node goes under the middle. Where the cycle is
-broken doesn't depend on nodes unrelated to it. No node hangs more than
+broken doesn't depend on nodes unrelated to it: blank nodes are in
+order by their document, then their label. No node hangs more than
 16 steps from the middle: one that a chain of links (each part of the
 next, say) would hang deeper hangs beside its parent instead. So no
 edge's path is longer for a long chain, and laying it out takes no
@@ -2667,7 +2669,8 @@ line, and brought into sight.
 
 **The aside** (Node) shows the node selected:
 
-- its address, its kind, the document that defines it, and its classes;
+- its address (a blank node's label), its kind, the document that
+  defines it, and its classes;
 - the values the documents state of it, each with its language tag as
   BCP 47 writes it (`@en`, `@sv` or `@en-GB`, though the data is read
   in lower case) or its datatype (`xsd:date`). The document a value is

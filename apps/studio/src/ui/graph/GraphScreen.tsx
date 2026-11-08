@@ -153,7 +153,10 @@ export function GraphScreen({
     wanted === ""
       ? []
       : filtered.nodes.filter((node) =>
-          [node.id, labels.get(node.id)!].some((text) => folded(text).includes(wanted)),
+          // A blank node by its term and its document's address, not the number the graph gives it.
+          (node.term === undefined ? [node.id] : [node.term, node.document!])
+            .concat(labels.get(node.id)!)
+            .some((text) => folded(text).includes(wanted)),
         );
 
   const toggle = (group: NodeGroup) =>

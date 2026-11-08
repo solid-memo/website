@@ -131,11 +131,14 @@ describe("labelOf and shortName", () => {
 
   it("names a resource by its fragment, a blank node by its label, a term in short", () => {
     expect(label(CARD)).toBe("sweden");
-    expect(label(`_:b0@${CATALOG}`)).toBe("_:b0");
+    const inGraph = graph.nodes.find((node) => node.blank === true)!;
+    expect(labelOf(inGraph, instanceA.url, instanceA.name)).toBe("_:b0");
     const blank: GraphNode = {
-      id: "_:b0@https://pod.example/al@ice/solid-memo/main/meta.ttl",
+      id: "_:7",
       kind: "resource",
       blank: true,
+      term: "_:b0",
+      document: "https://pod.example/al@ice/solid-memo/main/meta.ttl",
       types: [],
       literals: [],
     };
@@ -224,6 +227,26 @@ describe("distinctLabels", () => {
       "x",
       "x",
       "only",
+    ]);
+  });
+
+  it("names blank nodes of one label in two documents after their documents' files", () => {
+    const label = `_:${"b".repeat(16_381)}`;
+    const blank = (id: string, document: string): GraphNode => ({
+      ...of(id, "resource", document),
+      blank: true,
+      term: label,
+    });
+    const nodes = [
+      blank("_:0", `${root}decks/cards-0.ttl`),
+      blank("_:1", `${root}decks/cards-1.ttl`),
+      blank("_:2", `${root}reviews/cards-1.ttl`),
+    ];
+    const labels = new Map(nodes.map((node) => [node.id, labelOf(node, root, instanceA.name)]));
+    expect([...distinctLabels(nodes, labels, root).values()]).toEqual([
+      `cards-0#${label}`,
+      `decks/cards-1#${label}`,
+      `reviews/cards-1#${label}`,
     ]);
   });
 

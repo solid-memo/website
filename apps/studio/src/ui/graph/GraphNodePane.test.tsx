@@ -54,6 +54,15 @@ describe("GraphNodePane", () => {
     expect(screen.getByText("Stockholm")).toHaveAttribute("lang", "sv");
   });
 
+  it("shows a blank node's term in its document, not the number the graph gives it", () => {
+    const graph = smallGraph();
+    const blank = graph.nodes.find((node) => node.blank === true)!;
+    expect(blank.id).not.toBe("_:b0");
+    pane(blank.id, graph);
+    expect(screen.getByRole("heading", { name: "_:b0" })).toBeInTheDocument();
+    expect(document.querySelector(".graph-iri")).toHaveTextContent(/^_:b0$/);
+  });
+
   it("says a value's language tag after it, as stated, and none for a value with none", () => {
     const hintOf = (value: string) =>
       within(list("Values")).getByText(value).closest("dd")!.querySelector("code.hint")
