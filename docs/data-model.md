@@ -1338,16 +1338,19 @@ nothing could rebuild it.
   An answer to a [course](courses.md) question says how it was given
   (`sm:answerMode sm:multipleChoice`) and, when it was wrong, which
   wrong option was chosen (`sm:chosenDistractor`, the distractor in the
-  deck's cards document). An answer given in study says neither, which
-  means recalled. Since vocabulary 1.19 an answer may say how long it
-  took, in milliseconds the app was shown. That's from the prompt to the
-  answer revealed, or to the option chosen (`sm:recallMillis`), and
-  from there to the grade (`sm:gradeMillis`), each left out above ten
-  minutes. It
-  may say the day the prompt was due before it (`sm:priorDue`, absent
-  on a first answer), and the device's offset from UTC then, in minutes
-  east of Greenwich (`sm:utcOffsetMinutes`). Each is optional, and an
-  older app ignores them ([migrations.md](migrations.md)).
+  deck's cards document). It's left out when that IRI couldn't be
+  written: longer than a term may be, or not one Turtle writes as it is
+  (`chosenDistractorIn`). A release's own address may be much shorter
+  than the deck's, and the answer is logged without it. An answer given
+  in study says neither, which means recalled. Since vocabulary 1.19 an
+  answer may say how long it took, in milliseconds the app was shown.
+  That's from the prompt to the answer revealed, or to the option chosen
+  (`sm:recallMillis`), and from there to the grade (`sm:gradeMillis`),
+  each left out above ten minutes. It may say the day the prompt was due
+  before it (`sm:priorDue`, absent on a first answer), and the device's
+  offset from UTC then, in minutes east of Greenwich
+  (`sm:utcOffsetMinutes`). Each is optional, and an older app ignores
+  them ([migrations.md](migrations.md)).
 - **The intervals and due day are those of the scheduler that set
   them.** The grade is always the SM-2 quality, but the interval before
   and after an answer and the day it was due come from what set the
@@ -1364,7 +1367,10 @@ nothing could rebuild it.
   64 KiB (`appendAll`). Each id is the guest's followed by the new
   deck's, so adding it again to the same deck changes nothing. Adding
   it to another deck (the guest's deck added anew) makes an entry of
-  its own, never one naming two decks.
+  its own, never one naming two decks. A wrong option chosen that would
+  be too long in the new deck's longer address is left out, not the
+  answer. An answer to a card left out, whose IRI there would be too
+  long, isn't added.
 - **After the review, not in its way**: `recordReview` saves the review
   state, then queues the answer, with its response times
   ([statistics.md](statistics.md#response-times)), to be added in the
@@ -1375,10 +1381,16 @@ nothing could rebuild it.
   session in it, its statistics, resetting a day. An add the server
   hasn't answered within 10 seconds is given up and tried again later,
   which changes nothing if it was saved (`APPEND_DEADLINE_MS`). An
-  answer the write check refuses (`dataNotConforming`) would be refused
-  every time, so only that answer is set aside, never logged, and those
-  after it go on. An answer still queued when the tab closes is lost;
-  its review isn't.
+  answer refused before it's sent would be refused every time: by the
+  write check (`dataNotConforming`), or for a term Turtle can't write
+  as it is (`unwritableTerm`) or longer than a term may be
+  (`termTooLong`). Only that answer is set aside, never logged, and
+  those after it go on. So is one the pod refuses as a bad request
+  (400, 413, 414 or 422) a third time. Any other failure, such as no
+  answer from the pod, a failed login or a server error, is tried
+  again: it says nothing of the answer, and those after it would fail
+  alike. An answer still queued when the tab closes is lost; its
+  review isn't.
 - **Resetting the day removes that deck's answers of the day**
   (`removeDay`: read, remove, save with If-Match, again on 412).
   **Undoing an answer in a session removes that one answer** by its id

@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   answerIdOf,
+  chosenDistractorIn,
   isCountableDay,
   isOfStudyDayRange,
   isOfStudyMonth,
@@ -71,6 +72,16 @@ describe("answers", () => {
     expect(isOfStudyDayRange("9999-12-31")).toBe(true);
     expect(isOfStudyDayRange("0100-01-03")).toBe(false);
     expect(isOfStudyDayRange("2026-09-31")).toBe(false);
+  });
+
+  it("name the wrong option chosen in the cards document, or none when that IRI could not be written", () => {
+    const cards = "https://pod.example/solid-memo/instances/default/decks/d.ttl";
+    expect(chosenDistractorIn(cards, "q-1-d1")).toBe(`${cards}#q-1-d1`);
+    // Just within the bound on a term, `<>` around it, and one past it.
+    const fits = "x".repeat(16_383 - 2 - cards.length - 1);
+    expect(chosenDistractorIn(cards, fits)).toBe(`${cards}#${fits}`);
+    expect(chosenDistractorIn(cards, `${fits}x`)).toBeUndefined();
+    expect(chosenDistractorIn(cards, "q>1")).toBeUndefined();
   });
 
   it("remember the card from grade 3 up", () => {

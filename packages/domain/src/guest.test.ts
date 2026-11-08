@@ -12,6 +12,7 @@ import { rebaseDraft } from "./release/releaseToDraft";
 import { card as draftCard, courseDraft } from "./testing/releaseDraft";
 import {
   addressesGuest,
+  cardFitsDeck,
   linksGuestPod,
   decodeGuestMergeNote,
   draftAddressesGuest,
@@ -27,6 +28,7 @@ import {
   isGuestUrl,
   mergedAnswer,
   mergedDeck,
+  movedCard,
   suggestedGuestLocation,
 } from "./guest";
 
@@ -134,6 +136,76 @@ describe("adding a guest's study to an instance", () => {
     // Added to another deck, the same answer is an entry of its own; to the same deck, the same entry.
     expect(mergedAnswer(answer, deck("deck-m", TARGET)).id).toBe("answer-1-deck-m");
     expect(mergedAnswer(answer, to)).toEqual(mergedAnswer(answer, to));
+  });
+
+  it("leaves out a wrong option whose IRI in the deck it was added as would be too long, not the answer", () => {
+    const from = deck("deck-g1");
+    const to = deck("deck-n", `${TARGET}${"p".repeat(200)}/`);
+    // Fits under the guest's address, not under the longer one of the deck it is added as.
+    const id = "d".repeat(16_383 - 2 - from.cardsDocumentUrl.length - 1);
+    const answer: Answer = {
+      id: "answer-1",
+      deckUrl: from.url,
+      cardUrl: `${from.cardsDocumentUrl}#q-1`,
+      direction: "front-to-back",
+      grade: 1,
+      answeredAt: "2026-10-01T10:00:00.000Z",
+      studyDay: "2026-10-01",
+      nextIntervalDays: 1,
+      mode: "multiple-choice",
+      chosenDistractor: `${from.cardsDocumentUrl}#${id}`,
+    };
+    const { chosenDistractor: _chosen, ...rest } = answer;
+    expect(mergedAnswer(answer, to)).toEqual({
+      ...rest,
+      id: "answer-1-deck-n",
+      deckUrl: to.url,
+      cardUrl: `${to.cardsDocumentUrl}#q-1`,
+    });
+  });
+
+  it("adds a card only when its IRI, and its review states' longest, can be written in the deck it was added as", () => {
+    const from = deck("deck-g1");
+    const to = deck("deck-n", `${TARGET}${"p".repeat(200)}/`);
+    // The longest name a card's states take: its FSRS-6 state from back to front.
+    const room = 16_383 - 2 - "@back-to-front@fsrs6".length - 1;
+    const fits = "c".repeat(room - from.reviewsDocumentUrl.length);
+
+    expect(cardFitsDeck("q-1", to)).toBe(true);
+    expect(cardFitsDeck(fits, from)).toBe(true);
+    expect(cardFitsDeck(fits, to)).toBe(false);
+    // Its own IRI fits; that of its FSRS-6 state from back to front does not.
+    expect(cardFitsDeck(`${fits}c`, from)).toBe(false);
+    expect(cardFitsDeck("q 1", to)).toBe(false);
+  });
+
+  it("adds a card without a wrong option whose IRI in the deck it was added as would be too long", () => {
+    const from = deck("deck-g1");
+    const to = deck("deck-n", `${TARGET}${"p".repeat(200)}/`);
+    // Fits under the guest's address, not under the longer one of the deck it is added as.
+    const long: Distractor = {
+      id: "d".repeat(16_383 - 2 - from.cardsDocumentUrl.length - 1),
+      text: { en: "Oslo" },
+    };
+    const short: Distractor = { id: "wrong-1", text: { en: "Bergen" } };
+    const card: Pick<Card, "id" | "front" | "back" | "distractors"> = {
+      id: "q-1",
+      front: { en: "Sweden" },
+      back: { en: "Stockholm" },
+    };
+
+    expect(movedCard({ ...card, distractors: [short, long] }, to.cardsDocumentUrl)).toEqual({
+      ...card,
+      distractors: [short],
+    });
+    expect(movedCard({ ...card, distractors: [long] }, to.cardsDocumentUrl)).toEqual(card);
+    const whole = { ...card, distractors: [short] };
+    expect(movedCard(whole, to.cardsDocumentUrl)).toBe(whole);
+    expect(movedCard(card, to.cardsDocumentUrl)).toBe(card);
+    expect(movedCard({ ...card, distractors: [long] }, from.cardsDocumentUrl)).toEqual({
+      ...card,
+      distractors: [long],
+    });
   });
 
   it("keeps an answer's response times, prior due day and offset from UTC as they were", () => {

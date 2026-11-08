@@ -169,6 +169,15 @@ It runs these steps:
      part of the deck. Its review states keep their SM-2 fields and
      snapshots, each naming its card, direction and scheduler; its
      FSRS-6 states come as they are;
+   - a card's id, or a distractor's, comes from a release and may fit
+     under the guest's short address but not under the new deck's. A
+     card whose IRI there, or the longest its review states take
+     (`#<id>@back-to-front@fsrs6`), would be longer than a term may be
+     is left out, with its review states and its answers: it could be
+     neither written nor studied there (`cardFitsDeck`). Such a
+     distractor is left out, not the card (`movedCard`). A course still
+     asks the card with its release's options, which it reads from the
+     release;
    - the cards document, then the reviews document, is created with
      one PUT only where nothing is, then the deck's catalog entry, with
      `If-Match`, read and added again on 412 a few times at most.
@@ -184,10 +193,12 @@ It runs these steps:
      added to the instance's log for its month, insert-only, unread
      (`appendAll`, one PATCH per month, more where one would pass 64
      KiB). Its deck, card and chosen wrong option are named in the new
-     deck's documents, by the same fragment ids; its grade, intervals
-     and response times stay as given. Its id is the guest's followed by
-     the new deck's (`answer-<time>-<random>-deck-<uuid>`). Answers of a
-     deck the guest removed, or left out, aren't added.
+     deck's documents, by the same fragment ids; a chosen wrong option
+     whose IRI would be too long there is left out, not the answer. Its
+     grade, intervals and response times stay as given. Its id is the
+     guest's followed by the new deck's
+     (`answer-<time>-<random>-deck-<uuid>`). Answers of a deck the guest
+     removed, or left out, aren't added, nor those of a card left out.
 
    No address in a deck's entry, cards or review states may name the
    guest's pod, in any spelling of its origin (`guestDeckUrlsLeft`, which
@@ -276,7 +287,9 @@ instance goes). It runs these steps:
    copy that failed half-way walks it within the same bounds.
 2. **copy:** copy each resource with every IRI under the guest's
    instance moved under the target, and the guest's WebID renamed to the
-   user's (`ContainerMove.renames`).
+   user's (`ContainerMove.renames`). A copy of a card whose IRI would be
+   longer than a term may be under the target fails, as below. Added to
+   an instance instead, such a card is left out.
 3. **adopt:** name the catalog's publisher as the user's profile names
    them. No Turtle document of the copy may still name an IRI at the
    origin of `GUEST_ORIGIN`, in any spelling. The failure names the

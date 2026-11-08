@@ -439,6 +439,22 @@ describe("courses", () => {
     ]);
   });
 
+  it("answerCourseQuestion logs a wrong answer without a wrong option whose IRI in the deck's copy would be too long", async () => {
+    const { useCases, appended } = setup();
+    // An id that fits a release's short address, past the bound on a term in the deck's cards document.
+    const distractorId = "x".repeat(16_383 - "https://a.io/c#".length);
+    await useCases.answerCourseQuestion(
+      instance.url,
+      courseDeck,
+      question,
+      { correct: false, distractorId },
+      noon,
+    );
+    await useCases.refreshStudyDigest(instance.url, courseDeck);
+    expect(appended).toEqual([expect.objectContaining({ grade: 1, mode: "multiple-choice" })]);
+    expect(appended[0]).not.toHaveProperty("chosenDistractor");
+  });
+
   it("answerCourseQuestion says a card the deck already had was reviewed, not added", async () => {
     const { deps, useCases } = setup();
     vi.mocked(deps.deckRepository.addCardIfAbsent).mockResolvedValue(false);

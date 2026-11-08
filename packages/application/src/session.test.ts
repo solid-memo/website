@@ -1373,6 +1373,46 @@ describe("guests", () => {
       expect(guestPod.discard).toHaveBeenCalledOnce();
     });
 
+    it("mergeGuestStudy leaves out a card whose IRI in the deck it is added as would be too long, with its states and answers", async () => {
+      const { deps, answers } = mergeDeps();
+      // An id from a release, past the bound on a term under the instance's address.
+      const long = "c".repeat(16_383);
+      const longCard: Card = { ...guestCard, url: `${course.cardsDocumentUrl}#${long}`, id: long };
+      vi.mocked(deps.deckRepository.listCards).mockImplementation(async (of) =>
+        of.url === course.url ? [guestCard, longCard] : [],
+      );
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (of) =>
+        of.url === course.url
+          ? {
+              sm2: [guestState, { ...guestState, cardId: long }],
+              fsrs: [{ ...guestFsrs, cardId: long }, guestFsrs],
+            }
+          : sm2s([]),
+      );
+      vi.mocked(deps.answerLog.readMonth).mockResolvedValue([
+        ...answers,
+        answerTo(course, "answer-4", { cardUrl: `${course.cardsDocumentUrl}#${long}` }),
+      ]);
+      const outcome = await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, {
+        skip: [own.url],
+      });
+      const first = added("deck-n1", course);
+      expect(outcome).toMatchObject({ ok: true, added: [first] });
+      const { url: _url, formatVersion: _version, ...content } = guestCard;
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
+        first,
+        { save: [content], remove: [] },
+        { whole: true },
+      );
+      expect(deps.reviewStateRepository.createReviewStates).toHaveBeenCalledExactlyOnceWith(first, {
+        sm2: [guestState],
+        fsrs: [guestFsrs],
+      });
+      expect(deps.answerLog.appendAll).toHaveBeenCalledExactlyOnceWith(TARGET, [
+        expect.objectContaining({ id: "answer-1-deck-n1" }),
+      ]);
+    });
+
     describe("a guest's drafts", () => {
       const GUEST_DRAFT = draftUrlOf(GUEST_INSTANCE_URL, "solid", 1);
       const guestDraft = rebaseDraft(courseDraft(), GUEST_DRAFT);

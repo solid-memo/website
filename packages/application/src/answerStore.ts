@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { AppError } from "@solid-memo/domain/appError";
+import { AppError, type ErrorCode } from "@solid-memo/domain/appError";
 import type { Deck, StudyDirection } from "@solid-memo/domain/deck";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import type {
@@ -76,6 +76,39 @@ export function lastLogMonthOf(today: string): string {
 }
 
 /**
+ * The refusals of an answer before anything is sent, each the same on
+ * every try: the write check's (dataNotConforming), and a term Turtle
+ * cannot write as it is (unwritableTerm) or longer than any read takes
+ * in (termTooLong). Any other failure, such as no answer from the pod or
+ * a server error, may pass on a later try.
+ */
+const REFUSED_BEFORE_SENDING: ReadonlySet<ErrorCode> = new Set<ErrorCode>([
+  "dataNotConforming",
+  "unwritableTerm",
+  "termTooLong",
+]);
+
+/**
+ * What the pod answers to a request that is itself at fault (a 400, 413,
+ * 414 or 422), which the same answer is likely to get again: unlike a
+ * failed login (401, 403) or a busy or failing server (408, 429, 5xx),
+ * which say nothing of the answer and refuse those after it alike.
+ */
+const ANSWER_AT_FAULT: ReadonlySet<number> = new Set([400, 413, 414, 422]);
+
+/** How many times the pod refuses one answer as at fault (ANSWER_AT_FAULT) before it is set aside. */
+const AT_FAULT_ATTEMPTS = 3;
+
+/** Whether the pod refused an answer as at fault (ANSWER_AT_FAULT). */
+function refusedAsAtFault(error: unknown): boolean {
+  return (
+    error instanceof AppError &&
+    error.code === "addFailed" &&
+    ANSWER_AT_FAULT.has(Number(error.vars.status))
+  );
+}
+
+/**
  * The answer log as the use cases share it: each answer graded queued
  * for the log, added after its review is saved, and each month read
  * kept with its version, read again only once it changed.
@@ -103,11 +136,15 @@ export function createAnswerStore({
    * changes its log (flush, loadAll, removeDay), tries again. Each
    * instance's answers wait only for its own: one whose log refuses or
    * never answers holds up no other's, and an add that gets no answer
-   * in time fails (AnswerLog.append). An answer the write check refuses
-   * (dataNotConforming) would be refused on every try, so it alone is
-   * set aside, and those after it go on.
+   * in time fails (AnswerLog.append). An answer refused before it is
+   * sent (REFUSED_BEFORE_SENDING) would be refused on every try, so it
+   * alone is set aside, and those after it go on; so is one the pod
+   * refused as at fault a few times (AT_FAULT_ATTEMPTS), which
+   * `refusals` counts. No answer from the pod, a failed login, a busy
+   * server or any other failure leaves it at the head, to be tried again.
    */
   const queues = new Map<string, { unlogged: Answer[]; logging: Promise<void> }>();
+  const refusals = new WeakMap<Answer, number>();
   function queueOf(instanceUrl: string) {
     let queue = queues.get(instanceUrl);
     if (queue === undefined) {
@@ -120,11 +157,17 @@ export function createAnswerStore({
     const queue = queueOf(instanceUrl);
     queue.logging = queue.logging.then(async () => {
       while (queue.unlogged.length > 0) {
+        const head = queue.unlogged[0]!;
         try {
-          await answerLog.append(instanceUrl, queue.unlogged[0]!);
+          await answerLog.append(instanceUrl, head);
           logWrites += 1;
         } catch (error) {
-          if (!(error instanceof AppError && error.code === "dataNotConforming")) return;
+          if (!(error instanceof AppError && REFUSED_BEFORE_SENDING.has(error.code))) {
+            if (!refusedAsAtFault(error)) return;
+            const refused = (refusals.get(head) ?? 0) + 1;
+            refusals.set(head, refused);
+            if (refused < AT_FAULT_ATTEMPTS) return;
+          }
         }
         queue.unlogged.shift();
       }
