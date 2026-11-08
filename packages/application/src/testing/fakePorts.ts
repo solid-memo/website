@@ -111,6 +111,8 @@ export function makeDeps() {
     login: vi.fn(async () => undefined),
     loginWithIssuer: vi.fn(async () => undefined),
     logout: vi.fn(async () => undefined),
+    hasStoredSession: vi.fn(async () => false),
+    forgetStoredSession: vi.fn(async () => undefined),
     onSessionExpired: vi.fn(() => () => undefined),
     onReturnedWithoutSession: vi.fn((_listener: () => void): (() => void) => vi.fn()),
   };

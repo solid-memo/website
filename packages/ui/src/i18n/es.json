@@ -142,6 +142,7 @@
   "app": {
     "restoringSession": "Restaurando la sesión…",
     "backToProvider": "Volver a tu proveedor",
+    "forgetSession": "Olvidar esta sesión",
     "skipToContent": "Saltar al contenido",
     "tagline": "Tarjetas de memoria con repetición espaciada que viven en tu propio Pod de Solid.",
     "sessionExpired": "Tu sesión ha caducado. Vuelve a iniciar sesión.",

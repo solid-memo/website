@@ -432,7 +432,7 @@ describe("createSessionClient, over oauth4webapi", () => {
     expect(client.webId()).toBeUndefined();
   });
 
-  it("does not store a session it completes after a restore was given up on", async () => {
+  it("does not store a session it completes after it was forgotten mid-restore", async () => {
     await createSessionClient().login(LOGIN);
     sendBack();
     const client = createSessionClient();

@@ -140,6 +140,7 @@
   "app": {
     "restoringSession": "Återställer sessionen…",
     "backToProvider": "Gå tillbaka till din leverantör",
+    "forgetSession": "Glöm den här sessionen",
     "skipToContent": "Hoppa till innehållet",
     "tagline": "Flashcards med intervallrepetition som bor i din egen Solid Pod.",
     "sessionExpired": "Din session har gått ut. Logga in igen.",

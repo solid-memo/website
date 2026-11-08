@@ -78,6 +78,14 @@ export interface SessionGateway {
    */
   loginWithIssuer(oidcIssuer: string): Promise<void>;
   logout(): Promise<void>;
+  /** Whether a session is stored in this browser for a restore to try. */
+  hasStoredSession(): Promise<boolean>;
+  /**
+   * Ends the stored session without asking its identity provider, which
+   * may never answer a restore, and what this tab kept for the restore:
+   * the next load restores nothing.
+   */
+  forgetStoredSession(): Promise<void>;
 }
 
 /** Driven port: read access to WebID documents. */

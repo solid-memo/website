@@ -140,6 +140,7 @@
   "app": {
     "restoringSession": "Sitzung wird wiederhergestellt…",
     "backToProvider": "Zurück zu deinem Anbieter",
+    "forgetSession": "Diese Sitzung vergessen",
     "skipToContent": "Zum Inhalt springen",
     "tagline": "Karteikarten mit verteilter Wiederholung, die in deinem eigenen Solid Pod leben.",
     "sessionExpired": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",

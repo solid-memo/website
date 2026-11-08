@@ -142,6 +142,7 @@
   "app": {
     "restoringSession": "Restauration de la session…",
     "backToProvider": "Retourner chez votre fournisseur",
+    "forgetSession": "Oublier cette session",
     "skipToContent": "Aller au contenu",
     "tagline": "Des cartes mémoire à répétition espacée, conservées dans votre propre Pod Solid.",
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",

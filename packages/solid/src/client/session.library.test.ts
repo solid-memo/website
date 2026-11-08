@@ -558,21 +558,23 @@ describe("createSessionClient, over a restore that never settles", () => {
     );
     vi.spyOn(console, "error").mockImplementation(() => {});
     vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
-    try {
-      const gateway = createSolidSessionGateway({
+    const gateway = () =>
+      createSolidSessionGateway({
         clientName: "Solid Memo",
         site: "https://memo.example/",
         client: createSessionClient(),
       });
-      const given = expect(gateway.restore()).rejects.toMatchObject({ code: "restoreTimedOut" });
+    try {
+      const given = expect(gateway().restore()).rejects.toMatchObject({ code: "restoreTimedOut" });
       await vi.advanceTimersByTimeAsync(60_000);
       await given;
     } finally {
       vi.useRealTimers();
       vi.restoreAllMocks();
     }
-    // The next visit has nothing to restore silently, so it does not repeat this.
-    expect(window.localStorage.getItem("solidClientAuthn:currentSession")).toBeNull();
-    await expect(createSessionClient().sessionIssuer()).resolves.toBeNull();
+    // The session stays, as only the provider's refusal ends it, but the next visit does not wait on it again.
+    expect(window.localStorage.getItem("solidClientAuthn:currentSession")).toBe(sessionId);
+    await expect(gateway().restore()).rejects.toMatchObject({ code: "restoreNotReturned" });
+    window.sessionStorage.clear();
   });
 });

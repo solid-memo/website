@@ -83,7 +83,7 @@ async function completeRedirect(
     await saveSession(stored);
     return true;
   });
-  // Given up on while the provider answered: the next load restores nothing.
+  // Forgotten while the provider answered, a restore past its deadline: the next load restores nothing.
   if (!saved) return LOGGED_OUT;
   setCurrentSession(new OidcSession(as, stored, tokens));
   return { webId, fromLogin: !silent, restoredFrom: pending.silentFrom ?? null };
