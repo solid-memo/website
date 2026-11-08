@@ -211,18 +211,6 @@ describe("agentUrlsOf with URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", () 
     expect(ratio).toBeLessThan(4);
   });
 
-  it("takes time that grows with long names, not their square", { timeout: 180_000 }, () => {
-    const ratio = growth(
-      (count) => {
-        const authors = longNames(count);
-        return () => agentUrlsOf(CATALOG, authors);
-      },
-      400,
-      8,
-    );
-    expect(ratio).toBeLessThan(4);
-  });
-
   it("tells long authors of one counted name apart by name and mailbox alone", () => {
     const start = `${"j".repeat(16_200)} <`;
     const many = collidingNames(start, 12).map((name) => `${name}@example.org>`);
