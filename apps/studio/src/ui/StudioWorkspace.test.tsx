@@ -1647,7 +1647,7 @@ describe("StudioWorkspace", () => {
       expect(status.getByText("Draft saved")).toBeInTheDocument();
       fireEvent.input(title, { target: { value: "Pods!" } });
       expect(status.getByText("Saving the draft…")).toBeInTheDocument();
-      expect(await status.findByText("Draft saved", {}, { timeout: 3000 })).toBeInTheDocument();
+      expect(await status.findByText("Draft saved")).toBeInTheDocument();
       expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(1);
     });
 
@@ -1666,9 +1666,7 @@ describe("StudioWorkspace", () => {
       const title = await screen.findByRole("textbox", { name: "Title" });
       await waitFor(() => expect(title).toBeEnabled());
       fireEvent.input(title, { target: { value: "Pods!" } });
-      expect(
-        await status.findByText("Last change not saved", {}, { timeout: 3000 }),
-      ).toBeInTheDocument();
+      expect(await status.findByText("Last change not saved")).toBeInTheDocument();
     });
 
     it("keeps the cards' view in the URL, replacing the entry", async () => {

@@ -1265,7 +1265,12 @@ runs every package's tests at once with coverage on, and takes some
 tests fifty times as long as a laptop does: the generator's check of
 `ns/` took over 5 s there, against 0.1 s. Tests that read a file at the
 size limits, about a second on a laptop, ran out of 30 s on a slow
-runner. A test that hangs still fails.
+runner. A test that hangs still fails. For the same reason, a
+Testing Library query that waits (`findBy…`, `waitFor`) waits 10 s,
+not its 1 s. The setting is in `packages/ui/src/test/setup.ts`, which
+the Studio's and the web app's setup import. A screen whose button came
+after a few reads of its data, about 0.1 s on a laptop, ran out of 1 s
+in CI.
 
 ## Strategy per layer
 
