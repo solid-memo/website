@@ -62,6 +62,25 @@ const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 /** The course fixture as a draft of the instance. */
 const course = (): ReleaseDraft => rebaseDraft(courseDraft(), DRAFT);
 
+/**
+ * The pod's reads as a server answers them that gives no ETag (null), or
+ * always the same one, and ignores If-None-Match: every read a 200.
+ */
+function withEtag(fetch: typeof globalThis.fetch, etag: string | null): typeof globalThis.fetch {
+  return (async (input, init) => {
+    if ((init?.method ?? "GET") !== "GET") return fetch(input, init);
+    const asked = new Headers(init?.headers);
+    asked.delete("If-None-Match");
+    const response = await fetch(input, { ...init, headers: asked });
+    const headers = new Headers(response.headers);
+    if (etag === null) headers.delete("ETag");
+    else headers.set("ETag", etag);
+    const answer = new Response(await response.text(), { status: response.status, headers });
+    Object.defineProperty(answer, "url", { value: response.url || String(input) });
+    return answer;
+  }) as typeof globalThis.fetch;
+}
+
 /** The draft with the changes made, which must be. */
 function changed(draft: ReleaseDraft, ...changes: DraftChange[]): ReleaseDraft {
   const result = applyDraftChanges(draft, changes);
@@ -997,6 +1016,61 @@ describe("assemble", () => {
       code: "changedElsewhere",
       vars: { url: DRAFT },
     });
+  });
+
+  describe.each([
+    ["its own ETags", undefined],
+    ["no ETag", null],
+    ["the same ETag for other content", '"same"'],
+  ] as const)("on a pod that gives %s (GHSA-438x-f779-7chm)", (_, etag) => {
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    const SWAPPED = "Changed after the check";
+
+    /** A draft read as publishing reads it before its checks, one card changed on the pod since. */
+    async function checkedThenChanged() {
+      const pod = await draftPod();
+      await pod.repository.create(INSTANCE, course());
+      const repository = createSolidReleaseDraftRepository({
+        fetch: etag === undefined ? pod.fetch : withEtag(pod.fetch, etag),
+        releaseFetch: siteFetch,
+      });
+      const read = await repository.read(DRAFT);
+      await pod.put(CARDS, (await pod.text(CARDS)).replace('"loose!"@en', `"${SWAPPED}"@en`));
+      return { repository, ...read };
+    }
+
+    it("makes the release of the draft as read at that version, not as it is now", async () => {
+      const { repository, version } = await checkedThenChanged();
+      const turtle = await repository.assemble(DRAFT, target, NOW, version);
+      expect(turtle).toContain("loose!");
+      expect(turtle).not.toContain(SWAPPED);
+      expect(await repository.assemble(DRAFT, target, NOW)).toContain(SWAPPED);
+    });
+
+    it("refuses to make it, or mark it released, at that version once the draft is read again", async () => {
+      const { repository, draft, version } = await checkedThenChanged();
+      await repository.read(DRAFT);
+      await expect(repository.assemble(DRAFT, target, NOW, version)).rejects.toMatchObject({
+        code: "changedElsewhere",
+        vars: { url: DRAFT },
+      });
+      await expect(
+        repository.applyChanges(
+          draft,
+          { ...draft, root: { ...draft.root, releasedAs: target } },
+          version,
+        ),
+      ).rejects.toMatchObject({ code: "changedElsewhere" });
+    });
+  });
+
+  it("keeps the version of a draft read again unchanged, where the pod says so (304)", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    const { version } = await pod.repository.read(DRAFT);
+    expect((await pod.repository.read(DRAFT)).version).toBe(version);
+    await expect(pod.repository.assemble(DRAFT, target, NOW, version)).resolves.toContain("loose!");
   });
 
   it("refuses a draft that states anything of the release at its address already, for a pod or the library (GHSA-p2pr-x6fw-hrfx)", async () => {

@@ -1266,6 +1266,13 @@ own pod, as a draft, before publishing it
   ([deck-library.md](deck-library.md#a-release-outside-the-library)).
   `assemble` makes a draft a release's text, with every subject moved to
   the release's address, `@base` that address, and its release time set.
+  Publishing assembles the draft from the read its checks saw, not from
+  its documents read again. A draft's version names that read, never
+  only its documents' ETags: a document read again is a new read unless
+  the pod answers 304. A server can give no ETag, or the same one for
+  other content, so ETags alone can't show the draft is unchanged. A
+  read since, or an edit, makes publishing at that version
+  `changedElsewhere`.
 - **Publishing a release**
   ([solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
   [studio.md](studio.md#publishing-a-release)) puts that text, as it is,

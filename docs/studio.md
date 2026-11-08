@@ -2347,10 +2347,12 @@ releases it, two ways.
   address is ignored, so such a draft reads as not released, as
   `data-model.md` says.
 - **One version.** What is checked, written and marked released is the
-  draft at the version read (If-Match). A draft changed elsewhere
-  meanwhile is `changedElsewhere`: before the release is written,
-  nothing is written; after, the release stays and the draft isn't
-  marked.
+  draft at the version read (If-Match). The release is made from the read
+  the checks saw, not from the documents read again, so it doesn't
+  rest on the server's ETags, which some servers leave out. A draft
+  read anew or changed elsewhere meanwhile is `changedElsewhere`:
+  before the release is written, nothing is written; after, the
+  release stays and the draft isn't marked.
 - **Finished again.** Publishing cut short after the release is written
   (the catalog, the draft or the network failed) is finished by
   publishing again, at the same address. A document there that states

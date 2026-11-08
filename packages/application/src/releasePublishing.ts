@@ -118,7 +118,8 @@ export function createReleasePublishingUseCases({
   return {
     async publishRelease(draftUrl, targetUrl, markdownCheck) {
       if (isGuestUrl(draftUrl)) throw new AppError("guestCannotPublish");
-      // Read once: what is checked is what is published, and what is marked released.
+      // Read once: what is checked is what is published (assembled from
+      // this read, not read again), and what is marked released.
       const { draft, version } = await drafts.readReleaseDraft(draftUrl);
       if (draft.root.releasedAs !== undefined)
         throw new AppError("draftReleased", { url: draft.root.releasedAs });

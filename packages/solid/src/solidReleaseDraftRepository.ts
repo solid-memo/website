@@ -54,7 +54,6 @@ import {
   removeOwned,
   readDataset,
   saveDataset,
-  versionOf,
 } from "./datasets";
 import {
   draftEntries,
@@ -156,11 +155,33 @@ export function createSolidReleaseDraftRepository({
 
   const documentsOf = (draftUrl: string) => draftDocumentsIn(draftUrl, fetch);
 
-  /** A draft's documents, read now and remembered as read. */
-  async function readDraft(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }> {
+  /** A draft's documents, read now. */
+  async function readDocuments(
+    draftUrl: string,
+  ): Promise<{ urls: readonly string[]; datasets: readonly Dataset[] }> {
     const urls = await documentsOf(draftUrl);
     if (!urls.includes(draftUrl)) throw new AppError("draftGone");
-    const datasets = await mapAtOnce(urls, (url) => readDataset(url, fetch));
+    return { urls, datasets: await mapAtOnce(urls, (url) => readDataset(url, fetch)) };
+  }
+
+  /**
+   * A draft's documents as the read at `version` had them, not read
+   * again: what was checked of that read is what is published, which a
+   * server's ETags alone cannot vouch for (GHSA-438x-f779-7chm).
+   * changedElsewhere when that read is not the draft's last.
+   */
+  function readAt(
+    draftUrl: string,
+    version: string,
+  ): { urls: readonly string[]; datasets: readonly Dataset[] } {
+    const read = reads.get(draftUrl);
+    if (read?.version !== version) throw new AppError("changedElsewhere", { url: draftUrl });
+    return { urls: [...read.documents.keys()], datasets: [...read.documents.values()] };
+  }
+
+  /** A draft's documents, read now and remembered as read. */
+  async function readDraft(draftUrl: string): Promise<{ draft: ReleaseDraft; version: string }> {
+    const { urls, datasets } = await readDocuments(draftUrl);
     const quads = draftNamedQuads(draftUrl, urls, datasets);
     // What its documents state otherwise than its records write it would be published, unseen and unchecked (GHSA-32jq-jh7h-r7v4).
     const draft = draftFromQuads(quads, draftUrl, { refuseHidden: true });
@@ -309,8 +330,8 @@ export function createSolidReleaseDraftRepository({
     },
 
     async assemble(draftUrl, targetUrl, issued, version) {
-      const urls = await documentsOf(draftUrl);
-      if (!urls.includes(draftUrl)) throw new AppError("draftGone");
+      const { urls, datasets } =
+        version === undefined ? await readDocuments(draftUrl) : readAt(draftUrl, version);
       const iriOf = draftIriOf(draftContainerOf(draftUrl), draftUrl);
       const inPlace = inPlaceIn(draftContainerOf(draftUrl), draftUrl);
       const to = (iri: string) => {
@@ -319,9 +340,6 @@ export function createSolidReleaseDraftRepository({
         if (isIriPastBound(there)) throw termTooLong();
         return there;
       };
-      const datasets = await Promise.all(urls.map((url) => readDataset(url, fetch)));
-      if (version !== undefined && versionOfDocuments(urls, datasets) !== version)
-        throw new AppError("changedElsewhere", { url: draftUrl });
       // A statement of the release at its address already would say more of it than the draft does, which no editor shows (GHSA-p2pr-x6fw-hrfx).
       const atTargetAlready = (iri: string) => iri === targetUrl || iri.startsWith(`${targetUrl}#`);
       const atTarget = datasets.flatMap((dataset, at) =>
@@ -435,9 +453,29 @@ export function createSolidReleaseDraftRepository({
   };
 }
 
-/** The version of each of a draft's documents, in order: a draft changed when any of them did, or one came or went. */
+/** The number of each dataset read, given once: see readNumberOf. */
+const READ_NUMBERS = new WeakMap<object, number>();
+let readsNumbered = 0;
+
+/**
+ * A dataset's own number among those read. A document read again is
+ * another dataset, so another number, unless the pod answered that it
+ * is unchanged (304), which gives the dataset read before. Its ETag
+ * alone would not tell two reads apart: a pod may give none, or the
+ * same one for other content (GHSA-438x-f779-7chm).
+ */
+function readNumberOf(dataset: object): number {
+  let number = READ_NUMBERS.get(dataset);
+  if (number === undefined) {
+    number = ++readsNumbered;
+    READ_NUMBERS.set(dataset, number);
+  }
+  return number;
+}
+
+/** The version of a read of a draft's documents, in order: another when any of them was read anew, or one came or went. */
 function versionOfDocuments(urls: readonly string[], datasets: readonly Dataset[]): string {
-  return JSON.stringify(urls.map((url, at) => [url, versionOf(datasets[at]!)]));
+  return JSON.stringify(urls.map((url, at) => [url, readNumberOf(datasets[at]!)]));
 }
 
 /**
