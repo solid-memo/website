@@ -1357,6 +1357,27 @@
       "series": "차트 단계 {step}"
     }
   },
+  "oldRegistrations": {
+    "heading": "이전 등록",
+    "intro": "이전 버전의 Solid Memo는 이 인스턴스의 데이터 종류마다 타입 인덱스에 등록했어요. 지금은 인스턴스만 등록하고, 나머지는 인스턴스에서 찾아요. 이 등록을 제거해도 데이터는 바뀌지 않으며, Solid Memo가 만든 항목만 제거돼요.",
+    "class": {
+      "catalog": "이 인스턴스의 덱 카탈로그",
+      "deck": "덱",
+      "card": "카드",
+      "reviewState": "복습 상태",
+      "answer": "답변",
+      "draft": "릴리스 초안"
+    },
+    "index": {
+      "private": "비공개 타입 인덱스",
+      "public": "공개 타입 인덱스"
+    },
+    "in": "{index}에 있음",
+    "unreadable": "{index}을(를) 읽지 못해서 여기에 내용을 표시하지 않고, 아무것도 제거하지 않아요.",
+    "remove": "이전 등록 제거",
+    "removing": "제거하는 중…",
+    "removed": "제거했어요."
+  },
   "registrationTargetChooser": {
     "legend": "등록 위치",
     "intro": "타입 인덱스는 프로필에 있는 목록으로, 데이터가 어디에 있는지 앱에 알려 줘요. 비공개 타입 인덱스는 본인만 볼 수 있어요.",

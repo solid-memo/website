@@ -22,6 +22,7 @@ import {
   instanceName,
   type Instance,
   type InstanceDeletion,
+  type OldRegistrations,
   type RegistrationOptions,
   type RegistrationTarget,
 } from "@solid-memo/domain/instance";
@@ -104,6 +105,18 @@ export interface InstanceUseCases {
    * folder it would still hold, so it can only be deleted.
    */
   detachInstance(session: Session, instance: Instance): Promise<void>;
+  /**
+   * The registrations earlier versions wrote for the instance's data
+   * that are still in the user's own type indexes (docs/data-model.md
+   * "Registrations"), and which index could not be read. Reads only.
+   */
+  oldRegistrations(session: Session, instance: Instance): Promise<OldRegistrations>;
+  /**
+   * Remove the registrations oldRegistrations finds, and nothing else:
+   * never the instance's own. Only on the user's say, never on opening
+   * an instance or in a format update.
+   */
+  removeOldRegistrations(session: Session, instance: Instance): Promise<void>;
   /**
    * Give an instance a new name (instanceName: trimmed, not empty)
    * everywhere it is kept: its meta document, its catalog's title (and
@@ -374,6 +387,18 @@ export function createInstanceUseCases({
       return instanceRepository.detachInstance({
         webId: session.webId,
         instance,
+      });
+    },
+    oldRegistrations(session, instance) {
+      return instanceRepository.readOldRegistrations({
+        webId: session.webId,
+        instanceUrl: instance.url,
+      });
+    },
+    removeOldRegistrations(session, instance) {
+      return instanceRepository.removeOldRegistrations({
+        webId: session.webId,
+        instanceUrl: instance.url,
       });
     },
     async renameInstance(session, instance, typed) {

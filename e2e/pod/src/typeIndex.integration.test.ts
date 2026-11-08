@@ -14,7 +14,7 @@
  * its data gets no registration of its own. The registrations earlier
  * versions wrote for each class of its data, which an index may still
  * hold, take the instance's new name with it and go when the instance is
- * removed, while another app's stay. Runs against each server
+ * removed, or on the user's say, while another app's stay. Runs against each server
  * globalSetup.ts starts. Every run here shares the storage's one type
  * index; a file's tests run one at a time.
  */
@@ -311,6 +311,68 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     // Taken off the list, every one of the instance's goes; another app's stays.
     await repository.detachInstance({ webId, instance });
     expect(await registrationsIn(index, instance.url)).toEqual([foreign]);
+  });
+
+  it("lists and removes, on the user's say, the registrations an earlier version wrote for the instance's data and nothing else", async () => {
+    const { base, webId } = await profile(server, () => [], { privateIndex: true });
+    const index = `${base}settings/privateTypeIndex.ttl`;
+    const repository = instances();
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const legacy = ["catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
+    const foreign = {
+      subject: `${index}#other-app`,
+      forClass: [`${SM}Card`],
+      predicate: "instanceContainer",
+      target: `${instance.url}other-app/`,
+      title: ["Other"],
+    };
+    await seedLegacyRegistrations(index, instance.url, [...legacy], foreign.target);
+    // The instance's cards registered as an earlier version did, but not by its name for them: maybe another app's.
+    const lookalike = {
+      subject: `${index}#cards`,
+      forClass: [`${SM}Card`],
+      predicate: "instanceContainer",
+      target: `${instance.url}decks/`,
+      title: ["Lookalike"],
+    };
+    const insertion = await fetch(index, {
+      method: "PATCH",
+      headers: { "content-type": "application/sparql-update" },
+      body: `INSERT DATA {
+        <${lookalike.subject}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SOLID_TERMS}TypeRegistration> .
+        <${lookalike.subject}> <${SOLID_TERMS}forClass> <${SM}Card> .
+        <${lookalike.subject}> <${SOLID_TERMS}instanceContainer> <${lookalike.target}> .
+        <${lookalike.subject}> <http://purl.org/dc/terms/title> "Lookalike" .
+      }`,
+    });
+    expect(insertion.ok, `PATCH ${index}: ${insertion.status}`).toBe(true);
+    const args = { webId, instanceUrl: instance.url };
+
+    expect(await repository.readOldRegistrations(args)).toEqual({
+      registrations: legacy.map((dataClass) => ({ dataClass, index: "private" })),
+      unreadableIndexes: [],
+    });
+
+    await repository.removeOldRegistrations(args);
+    // The instance's registration stays, and so do another app's and the lookalike.
+    expect(await registrationsIn(index, instance.url)).toEqual(
+      [...registered(instance.url, ["instance"]), foreign, lookalike].sort((a, b) =>
+        a.target.localeCompare(b.target),
+      ),
+    );
+    expect(await repository.readOldRegistrations(args)).toEqual({
+      registrations: [],
+      unreadableIndexes: [],
+    });
+    expect(await repository.listInstances(webId)).toContainEqual({
+      url: instance.url,
+      name: "Main",
+    });
   });
 
   it("registers an instance publicly alone, and removes it and an earlier version's registrations of its data from both indexes when deleted", async () => {

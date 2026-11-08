@@ -1495,6 +1495,27 @@
       "series": "Paso de gráfico {step}"
     }
   },
+  "oldRegistrations": {
+    "heading": "Registros antiguos",
+    "intro": "Las versiones anteriores de Solid Memo registraban cada tipo de datos de esta instancia en tus índices de tipos. Ahora solo registra la instancia, y llega al resto desde ella. Quitarlos no cambia ninguno de tus datos, y solo se quitan las entradas propias de Solid Memo.",
+    "class": {
+      "catalog": "El catálogo de mazos de esta instancia",
+      "deck": "Mazos",
+      "card": "Tarjetas",
+      "reviewState": "Estados de repaso",
+      "answer": "Respuestas",
+      "draft": "Borradores de publicaciones"
+    },
+    "index": {
+      "private": "índice de tipos privado",
+      "public": "índice de tipos público"
+    },
+    "in": "en tu {index}",
+    "unreadable": "No se pudo leer tu {index}, así que lo que contiene no se muestra aquí, y no se le quita nada.",
+    "remove": "Quitar los registros antiguos",
+    "removing": "Quitando…",
+    "removed": "Quitados."
+  },
   "registrationTargetChooser": {
     "legend": "Registrar en",
     "intro": "Un índice de tipos es una lista en tu perfil que indica a las aplicaciones dónde están tus datos. Solo tú puedes ver uno privado.",

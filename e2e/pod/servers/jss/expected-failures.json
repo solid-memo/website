@@ -73,6 +73,7 @@
   "reviewStateEdits.integration.test.ts > sets a card due on a day, its snapshot dropped, so a reset of the day makes it due today": "jss-lang-tag",
   "signedIn.integration.test.ts > changes what the stranger gets when the app makes a document public, and nothing else about it": "jss-own-iri",
   "typeIndex.integration.test.ts > links it from an extended profile when the WebID document is read-only": "jss-acl-turtle",
+  "typeIndex.integration.test.ts > lists and removes, on the user's say, the registrations an earlier version wrote for the instance's data and nothing else": "jss-no-extension",
   "typeIndex.integration.test.ts > makes a type index in the instance's storage, linked from a WebID document that has none": "jss-no-extension",
   "typeIndex.integration.test.ts > refuses, saying where it tried, and keeps no instance, when no profile document can be written": "jss-acl-turtle",
   "typeIndex.integration.test.ts > registers an instance publicly alone, and removes it and an earlier version's registrations of its data from both indexes when deleted": "jss-no-extension",

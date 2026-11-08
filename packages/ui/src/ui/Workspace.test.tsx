@@ -1100,6 +1100,37 @@ describe("Workspace", () => {
     expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
+  it("offers in the preferences to remove the registrations earlier versions wrote, to a user and not to a guest", async () => {
+    window.history.replaceState(
+      null,
+      "",
+      routeToHash({ screen: "preferences", instanceUrl: instanceA.url }),
+    );
+    const old = vi.fn(async () => ({
+      registrations: [{ dataClass: "card" as const, index: "private" as const }],
+      unreadableIndexes: [],
+    }));
+    const useCases = makeUseCases({
+      listInstances: vi.fn(async () => [instanceA]),
+      oldRegistrations: old,
+    });
+    const view = renderWorkspace(useCases);
+    expect(await screen.findByRole("region", { name: "Old registrations" })).toBeInTheDocument();
+    expect(old).toHaveBeenCalledWith(session, instanceA);
+    view.unmount();
+
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const guest = makeUseCases({ listInstances: vi.fn(async () => [instanceA]) });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Workspace useCases={guest} session={{ ...session, guest: true }} />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByRole("heading", { name: "Study preferences" })).toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Old registrations" })).toBeNull();
+    expect(guest.oldRegistrations).not.toHaveBeenCalled();
+  });
+
   it("opens the statistics from the instance bar", async () => {
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
     fireEvent.click(await screen.findByRole("link", { name: "Statistics" }));

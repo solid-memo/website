@@ -1426,6 +1426,27 @@
       "series": "Diagrammstufe {step}"
     }
   },
+  "oldRegistrations": {
+    "heading": "Alte Einträge",
+    "intro": "Frühere Versionen von Solid Memo haben jede Art von Daten dieser Instanz in deinen Typindizes eingetragen. Jetzt wird nur noch die Instanz eingetragen, und der Rest wird über sie gefunden. Das Entfernen ändert keine deiner Daten, und es werden nur die eigenen Einträge von Solid Memo entfernt.",
+    "class": {
+      "catalog": "Der Stapelkatalog dieser Instanz",
+      "deck": "Stapel",
+      "card": "Karten",
+      "reviewState": "Wiederholungsstände",
+      "answer": "Antworten",
+      "draft": "Entwürfe für Ausgaben"
+    },
+    "index": {
+      "private": "privater Typindex",
+      "public": "öffentlicher Typindex"
+    },
+    "in": "eingetragen ({index})",
+    "unreadable": "Dein {index} konnte nicht gelesen werden. Was darin steht, wird deshalb hier nicht angezeigt, und es wird nichts daraus entfernt.",
+    "remove": "Alte Einträge entfernen",
+    "removing": "Wird entfernt…",
+    "removed": "Entfernt."
+  },
   "registrationTargetChooser": {
     "legend": "Eintragen in",
     "intro": "Ein Typindex ist eine Liste in deinem Profil, die Apps sagt, wo deine Daten liegen. Einen privaten Typindex kannst nur du sehen.",

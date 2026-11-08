@@ -198,6 +198,26 @@ describe("instances", () => {
 
     expect(deps.instanceRepository.detachInstance).toHaveBeenCalledTimes(2);
   });
+  it("oldRegistrations and removeOldRegistrations pass the WebID and the instance's address", async () => {
+    const deps = makeDeps();
+    const old = {
+      registrations: [{ dataClass: "card" as const, index: "private" as const }],
+      unreadableIndexes: ["public" as const],
+    };
+    vi.mocked(deps.instanceRepository.readOldRegistrations).mockResolvedValue(old);
+    const useCases = createUseCases(deps);
+    await expect(useCases.oldRegistrations(session, instance)).resolves.toEqual(old);
+    expect(deps.instanceRepository.readOldRegistrations).toHaveBeenCalledWith({
+      webId: session.webId,
+      instanceUrl: instance.url,
+    });
+    expect(deps.instanceRepository.removeOldRegistrations).not.toHaveBeenCalled();
+    await useCases.removeOldRegistrations(session, instance);
+    expect(deps.instanceRepository.removeOldRegistrations).toHaveBeenCalledExactlyOnceWith({
+      webId: session.webId,
+      instanceUrl: instance.url,
+    });
+  });
   describe("format migration", () => {
     const other: Deck = {
       ...deck,
@@ -360,6 +380,7 @@ describe("instances", () => {
       // Nothing outside the instance: no type index registration is added.
       expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.removeOldRegistrations).not.toHaveBeenCalled();
       expect(progress).toEqual([
         "read 0/2",
         "write 1/2 (0 of 5)",

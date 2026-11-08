@@ -1495,6 +1495,27 @@
       "series": "Palier de graphique {step}"
     }
   },
+  "oldRegistrations": {
+    "heading": "Anciens référencements",
+    "intro": "Les versions précédentes de Solid Memo référençaient chaque type de données de cette instance dans vos index de types. Désormais, seule l’instance est référencée, et le reste est trouvé à partir d’elle. Les supprimer ne modifie aucune de vos données, et seules les entrées de Solid Memo sont supprimées.",
+    "class": {
+      "catalog": "Le catalogue de paquets de cette instance",
+      "deck": "Paquets",
+      "card": "Cartes",
+      "reviewState": "États de révision",
+      "answer": "Réponses",
+      "draft": "Brouillons de publications"
+    },
+    "index": {
+      "private": "index de types privé",
+      "public": "index de types public"
+    },
+    "in": "dans votre {index}",
+    "unreadable": "Impossible de lire votre {index} : ce qu’il contient n’est donc pas affiché ici, et rien n’en est supprimé.",
+    "remove": "Supprimer les anciens référencements",
+    "removing": "Suppression…",
+    "removed": "Supprimés."
+  },
   "registrationTargetChooser": {
     "legend": "Référencer dans",
     "intro": "Un index de types est une liste dans votre profil qui indique aux applications où se trouvent vos données. Un index privé n’est visible que par vous.",

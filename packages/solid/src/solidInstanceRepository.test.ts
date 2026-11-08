@@ -26,7 +26,9 @@ import {
   ensureTypeIndex,
   locateTypeIndexes,
   readInstanceRegistrations,
+  readOldRegistrations,
   removeInstanceRegistrations,
+  removeOldRegistrations,
   renameInstanceRegistrations,
 } from "./typeIndex";
 import { DCTERMS, SM } from "./vocab";
@@ -90,6 +92,8 @@ beforeEach(() => {
   vi.mocked(createTypeIndex).mockReset();
   vi.mocked(addInstanceRegistration).mockReset();
   vi.mocked(removeInstanceRegistrations).mockReset();
+  vi.mocked(readOldRegistrations).mockReset();
+  vi.mocked(removeOldRegistrations).mockReset();
   vi.mocked(deleteInstanceData).mockReset();
 });
 
@@ -734,6 +738,138 @@ describe("removing registrations when an index fails", () => {
       expect(removeInstanceRegistrations).toHaveBeenCalledTimes(2);
     });
   }
+});
+
+describe("old registrations", () => {
+  const bothIndexes = (inPlaces: (url: string) => boolean = () => true) =>
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+  const args = { webId: WEBID, instanceUrl: CONTAINER };
+
+  it("says which each of the user's own indexes holds, the private one's first", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockImplementation(async (index) =>
+      index === PRIVATE_INDEX ? ["card", "answer"] : ["catalog"],
+    );
+
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [
+        { dataClass: "card", index: "private" },
+        { dataClass: "answer", index: "private" },
+        { dataClass: "catalog", index: "public" },
+      ],
+      unreadableIndexes: [],
+    });
+    expect(readOldRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, indexFetch);
+    expect(readOldRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, CONTAINER, indexFetch);
+    expect(removeOldRegistrations).not.toHaveBeenCalled();
+  });
+
+  it("says which index could not be read, takes one that is not there as holding none, and reads none outside the profile's own places", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockImplementation(async (index) => {
+      throw index === PRIVATE_INDEX ? new Error("403 Forbidden") : { statusCode: 404 };
+    });
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [],
+      unreadableIndexes: ["private"],
+    });
+
+    vi.mocked(readOldRegistrations).mockReset().mockResolvedValue(["deck"]);
+    bothIndexes((url) => url === PRIVATE_INDEX);
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [{ dataClass: "deck", index: "private" }],
+      unreadableIndexes: [],
+    });
+    expect(readOldRegistrations).toHaveBeenCalledOnce();
+
+    // One document named as both indexes is read once, as the private one.
+    vi.mocked(readOldRegistrations).mockReset().mockResolvedValue(["deck"]);
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PRIVATE_INDEX,
+    });
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [{ dataClass: "deck", index: "private" }],
+      unreadableIndexes: [],
+    });
+    expect(readOldRegistrations).toHaveBeenCalledOnce();
+  });
+
+  it("removes them from each index that holds any, and writes to none that holds none or cannot be read", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: null,
+    });
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    await makeRepository().removeOldRegistrations(args);
+    expect(removeOldRegistrations).toHaveBeenCalledExactlyOnceWith(
+      PRIVATE_INDEX,
+      CONTAINER,
+      indexFetch,
+    );
+
+    vi.mocked(removeOldRegistrations).mockReset();
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockImplementation(async (index) => {
+      if (index === PRIVATE_INDEX) return [];
+      throw new Error("403 Forbidden");
+    });
+    await makeRepository().removeOldRegistrations(args);
+    expect(removeOldRegistrations).not.toHaveBeenCalled();
+
+    // Nor outside the profile's own places.
+    bothIndexes((url) => url === PRIVATE_INDEX);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    await makeRepository().removeOldRegistrations(args);
+    expect(vi.mocked(removeOldRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+    ]);
+  });
+
+  it("tries both indexes when one fails, and then says so", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const refused = new AppError("addFailed", { url: PRIVATE_INDEX, status: 500 });
+    vi.mocked(removeOldRegistrations).mockImplementation(async (index) => {
+      if (index === PRIVATE_INDEX) throw refused;
+    });
+
+    await expect(makeRepository().removeOldRegistrations(args)).rejects.toBe(refused);
+    expect(removeOldRegistrations).toHaveBeenCalledTimes(2);
+  });
+
+  it("says the first failure when both indexes fail", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const privateRefused = new AppError("addFailed", { url: PRIVATE_INDEX, status: 500 });
+    const publicRefused = new AppError("addFailed", { url: PUBLIC_INDEX, status: 500 });
+    vi.mocked(removeOldRegistrations).mockImplementation(async (index) => {
+      throw index === PRIVATE_INDEX ? privateRefused : publicRefused;
+    });
+
+    await expect(makeRepository().removeOldRegistrations(args)).rejects.toBe(privateRefused);
+    expect(removeOldRegistrations).toHaveBeenCalledTimes(2);
+  });
+
+  it("takes an index gone since it was read as nothing left to remove", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    vi.mocked(removeOldRegistrations).mockImplementation(async (index) => {
+      if (index === PRIVATE_INDEX) throw { statusCode: 404 };
+    });
+
+    await expect(makeRepository().removeOldRegistrations(args)).resolves.toBeUndefined();
+    expect(removeOldRegistrations).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("readMeta and upgradeMeta", () => {

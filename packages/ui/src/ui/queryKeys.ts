@@ -104,6 +104,13 @@ export const queryKeys = {
     guestInstanceUrl,
     targetUrl,
   ],
+  /** The registrations earlier versions wrote for an instance's data, still in the type indexes. */
+  oldRegistrations: (webId: string, instanceUrl: string) => [
+    "oldRegistrations",
+    webId,
+    instanceUrl,
+  ],
+
   /** The deck library's index. */
   library: () => ["library"],
   /** A library deck's cards. */

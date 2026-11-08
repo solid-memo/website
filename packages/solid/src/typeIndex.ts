@@ -31,6 +31,8 @@ import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
 import { createPlacesFetch, isInPlaces, profilePlacesOf } from "./profilePlaces";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { OLD_REGISTRATION_CLASSES, type OldRegistrationClass } from "@solid-memo/domain/instance";
 import {
   cardsContainerOf,
   catalogNodeUrlOf,
@@ -355,20 +357,25 @@ export async function readInstanceRegistrations(
  * The registrations of an instance's data Solid Memo recognizes as its
  * own (docs/data-model.md "Discovery chain"): the class and what it
  * names. Only the instance's own is written. Earlier versions of the
- * app wrote the others too, one per class of the instance's data; they
- * are known here so that removing or renaming an instance still finds
- * them in the user's type indexes.
+ * app wrote the others too, one per class of the instance's data, each
+ * with a subject whose fragment starts with the class's `idPrefix` and
+ * a dash (`#sm-card-…`); they are known here so that removing or
+ * renaming an instance still finds them in the user's type indexes, and
+ * so that the user can remove them (removeOldRegistrations).
  */
 const REGISTERED_CLASSES = {
   instance: { forClass: SM.Instance, target: (container: string) => container },
-  catalog: { forClass: DCAT.Catalog, target: catalogNodeUrlOf },
-  deck: { forClass: SM.Deck, target: catalogUrlOf },
-  card: { forClass: SM.Card, target: cardsContainerOf },
-  reviewState: { forClass: SM.ReviewState, target: reviewsContainerOf },
-  answer: { forClass: SM.Answer, target: historyContainerOf },
+  catalog: { forClass: DCAT.Catalog, target: catalogNodeUrlOf, idPrefix: "sm-cat" },
+  deck: { forClass: SM.Deck, target: catalogUrlOf, idPrefix: "sm-deck" },
+  card: { forClass: SM.Card, target: cardsContainerOf, idPrefix: "sm-card" },
+  reviewState: { forClass: SM.ReviewState, target: reviewsContainerOf, idPrefix: "sm-review" },
+  answer: { forClass: SM.Answer, target: historyContainerOf, idPrefix: "sm-answer" },
   // A draft's release document is an sm:Deck too: the drafts were told from the decks by where they are.
-  draft: { forClass: SM.Deck, target: draftsContainerOf },
-} satisfies Record<string, { forClass: string; target: (container: string) => string }>;
+  draft: { forClass: SM.Deck, target: draftsContainerOf, idPrefix: "sm-draft" },
+} satisfies Record<
+  "instance" | OldRegistrationClass,
+  { forClass: string; target: (container: string) => string; idPrefix?: string }
+>;
 type RegisteredClass = keyof typeof REGISTERED_CLASSES;
 const REGISTERED_CLASS_NAMES = Object.keys(REGISTERED_CLASSES) as RegisteredClass[];
 
@@ -464,11 +471,9 @@ export async function addInstanceRegistration(
  * (`<container>catalog.ttl#catalog`), catalog document, `decks/`,
  * `reviews/`, `history/` and `drafts/`, never anything else below the
  * container, which may be another app's. A registration that names
- * something else besides keeps it, and loses only the links to the instance's data.
- * Saves only when something was removed. The registrations changed are
- * set in one edit and those removed taken out in one (setThings,
- * removeThings), so many take time that grows with them, not their
- * square.
+ * something else besides keeps it, and loses only the links to the
+ * instance's data. Saves only when something was removed
+ * (removeRegistered).
  */
 export async function removeInstanceRegistrations(
   indexUrl: string,
@@ -476,14 +481,88 @@ export async function removeInstanceRegistrations(
   fetch: Fetch,
 ): Promise<void> {
   const container = ensureTrailingSlash(containerUrl);
+  await removeRegistered(indexUrl, fetch, (thing) =>
+    REGISTERED_CLASS_NAMES.flatMap((dataClass) => registeredOf(thing, dataClass, container)),
+  );
+}
+
+/**
+ * Which of the registrations earlier versions wrote for an instance's
+ * data a type index document holds (oldRegisteredOf), by class, in
+ * OLD_REGISTRATION_CLASSES order. Reads only.
+ */
+export async function readOldRegistrations(
+  indexUrl: string,
+  containerUrl: string,
+  fetch: Fetch,
+): Promise<OldRegistrationClass[]> {
+  const container = ensureTrailingSlash(containerUrl);
+  const things = getThingAll(await readDataset(indexUrl, fetch));
+  return OLD_REGISTRATION_CLASSES.filter((dataClass) =>
+    things.some((thing) => oldRegisteredOf(thing, dataClass, indexUrl, container).length > 0),
+  );
+}
+
+/**
+ * Remove from a type index document the registrations earlier versions
+ * wrote for an instance's data (oldRegisteredOf), and nothing else:
+ * never an sm:Instance registration, and of a registration that names
+ * something else besides, only the link to the instance's data. One
+ * save, made only when something was removed (removeRegistered).
+ */
+export async function removeOldRegistrations(
+  indexUrl: string,
+  containerUrl: string,
+  fetch: Fetch,
+): Promise<void> {
+  const container = ensureTrailingSlash(containerUrl);
+  await removeRegistered(indexUrl, fetch, (thing) =>
+    OLD_REGISTRATION_CLASSES.flatMap((dataClass) =>
+      oldRegisteredOf(thing, dataClass, indexUrl, container),
+    ),
+  );
+}
+
+/**
+ * What a registration earlier versions wrote for the instance's data of
+ * one class registers (registeredOf), when it is surely one of theirs:
+ * its subject is in the index document, with a fragment that starts with
+ * the class's idPrefix and a dash, as they named it, and it is no
+ * sm:Instance registration, which is kept whole. Another registration
+ * naming the same, which may be another app's, registers nothing here.
+ */
+function oldRegisteredOf(
+  registration: Subject,
+  dataClass: OldRegistrationClass,
+  indexUrl: string,
+  container: string,
+): string[] {
+  const ownId = `${documentUrlOf(indexUrl)}#${REGISTERED_CLASSES[dataClass].idPrefix}-`;
+  if (!registration.url.startsWith(ownId)) return [];
+  if (getUrlAll(registration, SOLID.forClass).includes(SM.Instance)) return [];
+  return registeredOf(registration, dataClass, container);
+}
+
+/**
+ * Take out of a type index document (see changeIndex) what each
+ * registration registers of the instance's data (`registered`): the
+ * registration whole when it registers nothing else (withoutRegistered).
+ * Saves only when something was removed. The registrations changed are
+ * set in one edit and those removed taken out in one (setThings,
+ * removeThings), so many take time that grows with them, not their
+ * square.
+ */
+async function removeRegistered(
+  indexUrl: string,
+  fetch: Fetch,
+  registered: (registration: Subject) => string[],
+): Promise<void> {
   await changeIndex(indexUrl, fetch, (dataset) => {
     // Every registration changed set at once, and every one removed taken out at once.
     const changed: Subject[] = [];
     const removed: Subject[] = [];
     for (const thing of getThingAll(dataset)) {
-      const ours = REGISTERED_CLASS_NAMES.flatMap((dataClass) =>
-        registeredOf(thing, dataClass, container),
-      );
+      const ours = registered(thing);
       if (ours.length === 0) continue;
       const kept = withoutRegistered(thing, ours);
       if (kept === null) removed.push(thing);

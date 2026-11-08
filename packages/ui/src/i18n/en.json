@@ -1426,6 +1426,27 @@
       "series": "Chart step {step}"
     }
   },
+  "oldRegistrations": {
+    "heading": "Old registrations",
+    "intro": "Earlier versions of Solid Memo registered each kind of this instance's data in your type indexes. It now registers only the instance, and reaches the rest from it. Removing these changes none of your data, and removes only Solid Memo's own entries.",
+    "class": {
+      "catalog": "This instance's catalog of decks",
+      "deck": "Decks",
+      "card": "Cards",
+      "reviewState": "Review states",
+      "answer": "Answers",
+      "draft": "Drafts of releases"
+    },
+    "index": {
+      "private": "private type index",
+      "public": "public type index"
+    },
+    "in": "in your {index}",
+    "unreadable": "Your {index} could not be read, so what it holds is not shown here, and nothing is removed from it.",
+    "remove": "Remove old registrations",
+    "removing": "Removing…",
+    "removed": "Removed."
+  },
   "registrationTargetChooser": {
     "legend": "Register in",
     "intro": "A type index is a list in your profile that tells apps where your data is. Only you can see a private one.",

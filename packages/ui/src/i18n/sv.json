@@ -1426,6 +1426,27 @@
       "series": "Diagramsteg {step}"
     }
   },
+  "oldRegistrations": {
+    "heading": "Gamla registreringar",
+    "intro": "Tidigare versioner av Solid Memo registrerade varje sorts data i den här instansen i dina typindex. Nu registreras bara instansen, och resten nås från den. Att ta bort dem ändrar ingenting i dina data, och bara Solid Memos egna poster tas bort.",
+    "class": {
+      "catalog": "Den här instansens katalog över kortlekar",
+      "deck": "Kortlekar",
+      "card": "Kort",
+      "reviewState": "Repetitionslägen",
+      "answer": "Svar",
+      "draft": "Utkast till utgåvor"
+    },
+    "index": {
+      "private": "privata typindex",
+      "public": "publika typindex"
+    },
+    "in": "i ditt {index}",
+    "unreadable": "Ditt {index} gick inte att läsa, så det som finns där visas inte här, och inget tas bort ur det.",
+    "remove": "Ta bort gamla registreringar",
+    "removing": "Tar bort…",
+    "removed": "Borttagna."
+  },
   "registrationTargetChooser": {
     "legend": "Registrera i",
     "intro": "Ett typindex är en lista i din profil som talar om för appar var dina data finns. Bara du kan se ett privat typindex.",

@@ -100,7 +100,8 @@ flowchart LR
   wrote one registration per class of that data beside the
   `sm:Instance` one ([examples below](#registrations)). The app no
   longer writes them, and still recognizes them: removing or deleting
-  an instance removes them, and renaming it retitles them.
+  an instance removes them, renaming it retitles them, and the user can
+  remove them from Preferences, keeping the instance.
 - **Writing a type index** saves it with `If-Match` the version read; on
   a 412 it tries again, three attempts in all (`changeIndex` in
   [typeIndex.ts](../packages/solid/src/typeIndex.ts)). The registration
@@ -268,6 +269,28 @@ data. A registration that registers something else too keeps it, and
 loses only the link to the instance's data. Those an earlier version
 wrote for an instance whose `sm:Instance` registration went some other
 way stay, as the app no longer lists that instance to remove.
+
+From Preferences, the user can remove those an earlier version wrote
+for the open instance on the list, keeping the instance. "Old
+registrations" is offered when an index holds any, never to a guest
+and never on its own (`removeOldRegistrations` in
+[typeIndex.ts](../packages/solid/src/typeIndex.ts)). It reads and writes
+only the user's own type indexes, and takes a registration for one of
+the app's old ones only when all of these hold:
+
+- it's a `solid:TypeRegistration` for one of the classes above;
+- it names that class's exact IRI for this instance, under either
+  predicate;
+- its id is in the index document, with a fragment that starts with
+  that class's prefix and a dash, such as `#sm-card-`.
+
+A registration that names the same IRI under another id stays: it may
+be another app's. An `sm:Instance` registration is never removed or
+changed, even one that also registers a class above. A registration
+that names something else too loses only the link to the instance's
+data. Each index is written once, with `If-Match` as above, and only
+when it holds one. An index that can't be read is said to be so, and
+isn't written.
 
 ## Instance layout
 

@@ -40,6 +40,7 @@ import { GuestStudyOffer } from "./GuestStudyOffer";
 import { InstanceBar } from "./InstanceBar";
 import { InstanceCreator } from "./InstanceCreator";
 import { InstancePickerContainer } from "./InstancePickerContainer";
+import { OldRegistrationsContainer } from "./OldRegistrationsContainer";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { UnclaimedDecksNotice } from "./UnclaimedDecksNotice";
 import { type DataCheck, useDataCheck } from "./dataCheck";
@@ -1136,13 +1137,23 @@ export function Workspace({
         );
       case "preferences":
         return (
-          <PreferencesContainer
-            useCases={useCases}
-            instance={activeInstance!}
-            // A guest never logs in, so never sees the Connected screen.
-            offersConnectedScreen={session.guest !== true}
-            onBack={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
-          />
+          <>
+            <PreferencesContainer
+              useCases={useCases}
+              instance={activeInstance!}
+              // A guest never logs in, so never sees the Connected screen.
+              offersConnectedScreen={session.guest !== true}
+              onBack={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
+            />
+            {/* A guest's pod is on this device: no other app looks there, so nothing there needs tidying. */}
+            {session.guest !== true && (
+              <OldRegistrationsContainer
+                useCases={useCases}
+                session={session}
+                instance={activeInstance!}
+              />
+            )}
+          </>
         );
       case "palette":
         return (

@@ -71,3 +71,29 @@ export interface InstanceDeletion extends KeptDocuments {
   /** Whether what the kept folder holds includes the releases published from the instance (`releases/`), which are kept. */
   keptReleases: boolean;
 }
+
+/**
+ * The classes of an instance's data earlier versions of Solid Memo
+ * registered in the user's type indexes, one registration each, beside
+ * the instance's own (docs/data-model.md "Registrations"): its catalog,
+ * decks, cards, review states, answers and the drafts of releases. Only
+ * the instance is registered now; these are known so that the user can
+ * remove them.
+ */
+export const OLD_REGISTRATION_CLASSES = [
+  "catalog",
+  "deck",
+  "card",
+  "reviewState",
+  "answer",
+  "draft",
+] as const;
+export type OldRegistrationClass = (typeof OLD_REGISTRATION_CLASSES)[number];
+
+/** The registrations earlier versions wrote for an instance's data that are still in the user's type indexes. */
+export interface OldRegistrations {
+  /** The private index's first, each index's in OLD_REGISTRATION_CLASSES order. */
+  registrations: { dataClass: OldRegistrationClass; index: RegistrationTarget }[];
+  /** The user's type indexes that could not be read: what they hold is not known, and nothing is removed from them. */
+  unreadableIndexes: RegistrationTarget[];
+}

@@ -20,6 +20,7 @@ import type {
   InstanceDeletion,
   KeptDocuments,
   InstanceMeta,
+  OldRegistrations,
   RegistrationOptions,
   RegistrationTarget,
 } from "@solid-memo/domain/instance";
@@ -131,6 +132,23 @@ export interface InstanceRepository {
    * as it is, to attach again by its address.
    */
   detachInstance(args: { webId: string; instance: Instance }): Promise<void>;
+  /**
+   * Which registrations earlier versions wrote for the instance's data
+   * are still in the user's own type indexes (docs/data-model.md
+   * "Registrations"): only those surely the app's, by their class, what
+   * they name and the app's own name for them; never an sm:Instance
+   * one. An index that cannot be read is left out, and said to be
+   * unreadable; one that is not there holds none. Reads only.
+   */
+  readOldRegistrations(args: { webId: string; instanceUrl: string }): Promise<OldRegistrations>;
+  /**
+   * Remove the registrations readOldRegistrations finds, and nothing
+   * else: one save per index that holds any (If-Match, read again and
+   * retried when the index changed meanwhile), none in an index that
+   * cannot be read. Each index is tried whatever the other answers; the
+   * first failure is thrown once both were tried.
+   */
+  removeOldRegistrations(args: { webId: string; instanceUrl: string }): Promise<void>;
   /**
    * Give the instance's registrations a new title, in every type index
    * that registers it: its sm:Instance registration, which names it in

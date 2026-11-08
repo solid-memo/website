@@ -47,6 +47,8 @@ export function makeInstanceUseCasesFake(
         keptDocuments: [],
       })),
       detachInstance: vi.fn(async () => undefined),
+      oldRegistrations: vi.fn(async () => ({ registrations: [], unreadableIndexes: [] })),
+      removeOldRegistrations: vi.fn(async () => undefined),
       planMigration: vi.fn(async () => ({
         decks: [],
         deckCount: 0,

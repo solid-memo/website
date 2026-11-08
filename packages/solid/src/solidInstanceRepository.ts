@@ -11,6 +11,9 @@ import {
   INSTANCE_FORMAT_VERSION,
   type Instance,
   type InstanceMeta,
+  type OldRegistrationClass,
+  type OldRegistrations,
+  type RegistrationTarget,
 } from "@solid-memo/domain/instance";
 import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
@@ -25,7 +28,9 @@ import {
   ensureTypeIndex,
   locateTypeIndexes,
   readInstanceRegistrations,
+  readOldRegistrations,
   removeInstanceRegistrations,
+  removeOldRegistrations,
   renameInstanceRegistrations,
   type InstanceRegistration,
   type TypeIndexes,
@@ -152,6 +157,34 @@ export function createSolidInstanceRepository({
       return { url, name };
     },
 
+    async readOldRegistrations({ webId, instanceUrl }): Promise<OldRegistrations> {
+      const registrations: OldRegistrations["registrations"] = [];
+      const unreadableIndexes: RegistrationTarget[] = [];
+      for (const index of await oldRegistrationsOf(webId, instanceUrl)) {
+        if (index.classes === null) unreadableIndexes.push(index.kind);
+        else
+          registrations.push(
+            ...index.classes.map((dataClass) => ({ dataClass, index: index.kind })),
+          );
+      }
+      return { registrations, unreadableIndexes };
+    },
+
+    async removeOldRegistrations({ webId, instanceUrl }) {
+      const failures: unknown[] = [];
+      for (const index of await oldRegistrationsOf(webId, instanceUrl)) {
+        // One that could not be read is not written to; one that holds none is not written either.
+        if (index.classes === null || index.classes.length === 0) continue;
+        try {
+          await removeOldRegistrations(index.url, instanceUrl, index.fetch);
+        } catch (error) {
+          // One gone since it was read has nothing left to remove.
+          if ((error as { statusCode?: number }).statusCode !== 404) failures.push(error);
+        }
+      }
+      if (failures.length > 0) throw failures[0];
+    },
+
     async renameRegistrations({ webId, instanceUrl, title }) {
       const locations = await ownTypeIndexes(webId, fetch, publicFetch);
       for (const indexUrl of [locations.privateIndexUrl, locations.publicIndexUrl]) {
@@ -214,6 +247,35 @@ export function createSolidInstanceRepository({
   };
 
   /**
+   * Each of the user's own type indexes (ownTypeIndexes), the private
+   * one first, with the classes of the instance's data it holds a
+   * registration of that earlier versions wrote (readOldRegistrations):
+   * none when the index is not there (404), null when it cannot be read.
+   */
+  async function oldRegistrationsOf(
+    webId: string,
+    instanceUrl: string,
+  ): Promise<OldRegistrationsIndex[]> {
+    const locations = await ownTypeIndexes(webId, fetch, publicFetch);
+    const indexes: OldRegistrationsIndex[] = [];
+    for (const [kind, url] of [
+      ["private", locations.privateIndexUrl],
+      ["public", locations.publicIndexUrl],
+    ] as const) {
+      // A profile that names one document as both indexes has it read once, as the private one.
+      if (url === null || indexes.some((index) => index.url === url)) continue;
+      let classes: OldRegistrationClass[] | null;
+      try {
+        classes = await readOldRegistrations(url, instanceUrl, locations.fetch);
+      } catch (error) {
+        classes = (error as { statusCode?: number }).statusCode === 404 ? [] : null;
+      }
+      indexes.push({ kind, url, fetch: locations.fetch, classes });
+    }
+    return indexes;
+  }
+
+  /**
    * Drop the registrations of the instance's data from the user's own
    * type indexes, reading and writing only those. Each is tried whatever
    * the other answers, one that isn't there having nothing to remove, as
@@ -234,6 +296,14 @@ export function createSolidInstanceRepository({
     if (failures.length > 0) throw failures[0];
   }
 }
+
+/** One of the user's own type indexes, with the old registrations it holds (null: unreadable). */
+type OldRegistrationsIndex = {
+  kind: RegistrationTarget;
+  url: string;
+  fetch: typeof globalThis.fetch;
+  classes: OldRegistrationClass[] | null;
+};
 
 /**
  * The type indexes (locateTypeIndexes), but for one outside the
