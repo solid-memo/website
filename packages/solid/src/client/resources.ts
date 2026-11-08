@@ -430,8 +430,8 @@ const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as 
  * parse, as a Turtle text with a triple term does not (turtleParser) nor
  * JSON-LD with RDF-star, and with a ReadLimitError at the first quad past `limits`
  * (quadTally; the text's own size is its caller's to check: it holds the
- * text already), or on a Turtle text at its first base, prefix or IRI
- * past what a read takes in, with limits or with none (writeTurtle); the
+ * text already), or on a Turtle text at its first base, prefix, IRI or
+ * level of nesting past what a read takes in, with limits or with none (writeTurtle); the
  * parser reads no further. A quad that names an IRI the library keeps
  * for subjects not saved yet is left out (LOCAL_NODE). JSON-LD is read
  * with no fetch at all: a context named by its address is refused

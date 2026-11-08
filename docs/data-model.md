@@ -1657,9 +1657,12 @@ An import reads the file as the pod is read, with the same mappers:
   So is one with an IRI longer than 512 characters, in a triple or a
   prefix, that's relative or may hold a `.` or `..` segment, as
   written or escaped. The parser removes those segments as it resolves
-  the IRI, in time growing with the square of its length. Its parse stops
-  there, as it stops at the first triple past the limits. A
-  declaration quoted in a card's text doesn't count. So is a file with
+  the IRI, in time growing with the square of its length. So is one
+  nested more than 64 levels deep in collections, blank nodes,
+  annotations or triple terms, which the parser holds memory for
+  without making a triple to count. Its parse stops there, as it stops
+  at the first triple past the limits. A declaration or a bracket
+  quoted in a card's text doesn't count. So is a file with
   a term longer than 16,383 characters, as every document the app
   reads is, and a JSON-LD file with a string or key that long, which
   is refused before it's parsed. A

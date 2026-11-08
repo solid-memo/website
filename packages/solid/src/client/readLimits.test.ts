@@ -443,6 +443,49 @@ describe("writeTurtle", () => {
     expect(ended).toBe(false);
   });
 
+  it("lets a text nest 64 levels, by collections, blank nodes, annotations or triple terms, and no more", () => {
+    for (const [opening, closing] of [
+      ["(", ")"],
+      ["[ <p> ", "]"],
+      ["{| <p> ", "|}"],
+      ["<< ", ">>"],
+    ]) {
+      const nested = (depth: number) =>
+        `<a> <b> ${opening!.repeat(depth)}<c>${closing!.repeat(depth)} .\n`;
+      expect(refuses(nested(64)), opening).toBe(false);
+      expect(refuses(nested(65)), opening).toBe(true);
+      // Levels closed are left: one after another, they don't add up.
+      expect(refuses(nested(64).repeat(100)), opening).toBe(false);
+    }
+    // A level closed that was never opened makes no room for another.
+    expect(refuses(`${")".repeat(100)}${"(".repeat(65)}`)).toBe(true);
+  });
+
+  it("counts no level in a string, an IRI or a comment, as the parser does not", () => {
+    const quoted = [
+      '"(((((((("',
+      "'[[[[[[[['",
+      '"""{{{{\n<<<<"""',
+      "<https://other.example/((((((((>",
+      "<https://other.example/[[[[[[[[>",
+    ];
+    const cards = quoted.map((text) => `<a> <b> ${text} .\n`).join("");
+    expect(refuses(cards.repeat(20))).toBe(false);
+    expect(refuses("# ((((((((\n<a> <b> <c> .\n".repeat(20))).toBe(false);
+    // What the parser reads as no IRI, nor a closing `>>`, it stops at.
+    expect(refuses("<a b> <c> > .\n".repeat(100))).toBe(false);
+  });
+
+  it("refuses a text at the part where it nests past the bound, and writes none of it", () => {
+    for (const opening of ["(", "[ <p> "]) {
+      const text = `<a> <b> ${opening.repeat(1_000_000)}`;
+      const { wrote, written, ended } = writing(text, () => true);
+      expect(wrote).toBe(false);
+      expect(written).toEqual([]);
+      expect(ended).toBe(false);
+    }
+  });
+
   it("refuses a long IRI with dot segments, and looks through short ones, in time that grows with the text, not its square", () => {
     // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
     for (const text of [
@@ -480,6 +523,9 @@ describe("writeTurtle", () => {
       "'''\\'",
       // IRIs with no end, each up to the next.
       "<a",
+      // Levels opened and closed, and what the parser reads as no IRI.
+      "( [ {| << >> |} ] ) ",
+      "<a b> > ",
     ]) {
       const ratio = growth(
         (count) => {

@@ -249,7 +249,8 @@ const DECK_FILE_LIMITS: ReadLimits = {
  * is larger than `limits` allow (its characters, which are no more than
  * its bytes, then its triples and their terms: quadTally); no limits for
  * a text from the user's own pod, which is then unreadable when its base
- * or prefix declarations are past what any read takes in. A deck file is triples: statements in
+ * or prefix declarations are past what any read takes in, or it nests
+ * too deep (writeTurtle). A deck file is triples: statements in
  * a named graph (JSON-LD can say them, Turtle cannot) are not the file's
  * and are left out (GHSA-m4hj-7c28-fq4h).
  */
@@ -266,7 +267,7 @@ export function parseDeckFile(
   return parseQuads(checked, format, baseUrl, limits ?? undefined).then(
     (parsed) => parsed.filter((quad) => quad.graph.termType === "DefaultGraph"),
     (error: unknown) => {
-      // With no limits, a text is refused only for its declarations and IRIs (writeTurtle), not its size.
+      // With no limits, a text is refused only for its declarations, IRIs and nesting (writeTurtle), not its size.
       if (error instanceof ReadLimitError && limits !== null) throw tooLarge();
       throw new AppError("deckFileUnreadable", { reason: String(error) });
     },
