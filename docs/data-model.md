@@ -1743,11 +1743,15 @@ by one.
   an IRI with a control character, a space or one of `` <>"{}|^`\ ``. So
   is a blank node label or a language tag outside Turtle's grammar, a
   language subtag over 8 characters, which the pod's parser refuses, text
-  typed `rdf:langString` without a language, a base direction, or a
-  quoted triple. JSON-LD can hold such a term, and the writers don't escape it,
-  so a `>` would end an IRI and the rest be read as statements no check
-  saw. A PATCH, a PUT, an insert-only PATCH, a release's Turtle and an
-  export are refused with `unwritableTerm` before anything is sent
+  typed `rdf:langString` or `rdf:dirLangString` without a language, or a
+  quoted triple. So is text typed `rdf:dirLangString` without a base
+  direction or with one other than `ltr` or `rtl`, and a direction on
+  any other literal. JSON-LD can hold such a term, and the writers
+  don't escape it, so a `>` would end an IRI and the rest be read as
+  statements no check saw. A JSON-LD value with a `@direction` but no
+  `@language` is such a term too. A PATCH, a PUT, an insert-only PATCH,
+  a release's Turtle and an export are refused with `unwritableTerm`
+  before anything is sent
   ([writableTerms.ts](../packages/solid/src/writableTerms.ts)). An
   imported deck leaves such triples out; a release read from a file is
   refused, as a draft keeps its triples as they are.
@@ -1771,6 +1775,13 @@ by one.
   `sm:fromRelease`. A draft that states one is refused as one that
   states a value otherwise than the Studio reads it
   (`draftHiddenValue`), so it is never published with it.
+  A literal with a base direction (RDF 1.2, `"…"@ar--rtl`) that another
+  app wrote is kept with its language and direction, and written back
+  as it was read, in a PATCH and in a PUT alike (`graphsOf`). A Studio
+  draft keeps it too, as it is edited and published, and so does a
+  deck's export, in Turtle and in JSON-LD (`@direction`).
+  The app writes no direction of its own and reads no such literal as
+  text in a language.
 - Mutations always follow read → modify → save
   ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`). The save sends a PATCH

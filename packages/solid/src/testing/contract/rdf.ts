@@ -496,6 +496,106 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     });
   });
 
+  describe("literals with a base direction", () => {
+    const P = `${EX}p`;
+    const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
+    const DIRECTED = `<#a> <${P}> "مرحبا"@ar--rtl, "hello"@en--ltr, "hello"@en--rtl, "hi"@en, "plain" .\n`;
+    /** A literal's parts, its language and direction among them. */
+    const parts = (term: Quad["object"]) =>
+      term.termType === "Literal"
+        ? [term.value, term.language, term.direction ?? "", term.datatype.value]
+        : [term.value];
+    const sorted = (terms: Iterable<Quad["object"]>) => [...terms].map(parts).sort();
+    const DIRECTED_PARTS = [
+      ["hello", "en", "ltr", DIR_LANG_STRING],
+      ["hello", "en", "rtl", DIR_LANG_STRING],
+      ["hi", "en", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"],
+      ["plain", "", "", `${XSD}string`],
+      ["مرحبا", "ar", "rtl", DIR_LANG_STRING],
+    ];
+
+    it("keep their language and direction as read, through every dataset made of them", async () => {
+      const dataset = await read(DIRECTED);
+      for (const again of [
+        dataset,
+        datasetFromQuads(toRdfJsDataset(dataset) as Iterable<Quad>),
+        fromRdfJsDataset(toRdfJsDataset(dataset)),
+        withQuads(dataset, toRdfJsDataset(dataset) as Iterable<Quad>),
+      ]) {
+        expect(sorted([...toRdfJsDataset(again)].map((one) => one.object))).toEqual(DIRECTED_PARTS);
+        expect(sorted(getLiteralAll(getThing(again, `${URL_}#a`)!, P))).toEqual(DIRECTED_PARTS);
+      }
+    });
+
+    it("keep their direction from quads that spell their language in upper case", () => {
+      const quads = [
+        quad(`${URL_}#a`, {
+          termType: "Literal",
+          value: "مرحبا",
+          language: "AR",
+          direction: "rtl",
+          datatype: { termType: "NamedNode", value: DIR_LANG_STRING },
+        } as Quad["object"]),
+      ];
+      for (const dataset of [datasetFromQuads(quads), fromRdfJsDataset(quads as never)]) {
+        expect(sorted(getLiteralAll(getThing(dataset, `${URL_}#a`)!, P))).toEqual([
+          ["مرحبا", "ar", "rtl", DIR_LANG_STRING],
+        ]);
+      }
+    });
+
+    it("are kept once when an RDF/JS dataset states one twice, as a read keeps it", () => {
+      const one = quad(`${URL_}#a`, {
+        termType: "Literal",
+        value: "مرحبا",
+        language: "ar",
+        direction: "rtl",
+        datatype: { termType: "NamedNode", value: DIR_LANG_STRING },
+      } as Quad["object"]);
+      const dataset = fromRdfJsDataset([one, { ...one }] as never);
+      expect(sorted(getLiteralAll(getThing(dataset, `${URL_}#a`)!, P))).toEqual([
+        ["مرحبا", "ar", "rtl", DIR_LANG_STRING],
+      ]);
+    });
+
+    it("are no text in a language, which keeps them when it is set", async () => {
+      const thing = getThing(await read(DIRECTED), `${URL_}#a`)!;
+      expect(getStringByLocaleAll(thing, P)).toEqual(new Map([["en", ["hi"]]]));
+      expect(getStringNoLocale(thing, P)).toBe("plain");
+      expect(
+        propertiesOf(thing)[0]!
+          .values.filter((one) => one.type === "literal")
+          .map((one) => one.value)
+          .sort(),
+      ).toEqual(["hello", "hello", "plain", "مرحبا"]);
+      expect(
+        propertiesOf(thing)[0]!.values.filter(
+          (one) => one.type === "literal" && one.dataType === DIR_LANG_STRING,
+        ),
+      ).toHaveLength(3);
+      const set = buildThing(thing)
+        .setStringAll(P, [{ value: "hej", language: "sv" }])
+        .build();
+      expect(getStringByLocaleAll(set, P)).toEqual(new Map([["sv", ["hej"]]]));
+      expect(sorted(getLiteralAll(set, P))).toEqual([
+        ["hej", "sv", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"],
+        ...DIRECTED_PARTS.filter(([, , direction]) => direction !== ""),
+      ]);
+    });
+
+    it("are told apart by their direction in a dataset's changes", async () => {
+      const dataset = await read(DIRECTED);
+      const kept = getThing(await read(`<#a> <${P}> "hello"@en--rtl .\n`), `${URL_}#a`)!;
+      const changes = changesOf(setThing(dataset, kept))!;
+      expect(changes.additions).toEqual([]);
+      expect(sorted(changes.deletions.map((one) => one.object))).toEqual(
+        DIRECTED_PARTS.filter(
+          ([, language, direction]) => !(language === "en" && direction === "rtl"),
+        ),
+      );
+    });
+  });
+
   describe("localNameOf", () => {
     it("names a subject made by name and not saved yet, and nothing else", () => {
       const thing = buildThing(createThing({ name: "new" }))

@@ -828,6 +828,29 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(sent).toEqual([]);
     });
 
+    it("writes back a literal with a base direction as it was read: beside an edit, in a whole write, and in an edit of it", async () => {
+      const directed = `<${URL_}#a> <${EX}label> "مرحبا"@ar--rtl .`;
+      const dataset = await read(`<#a> <${EX}p> "x" ; <${EX}label> "مرحبا"@ar--rtl .`);
+      const edited = (property: string) =>
+        setThing(
+          dataset,
+          buildThing(getThing(dataset, `${URL_}#a`)!)
+            .removeAll(property)
+            .addStringNoLocale(property, "y")
+            .build(),
+        );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      await writeDocument(URL_, edited(`${EX}p`), { fetch });
+      await writeDocument(URL_, edited(`${EX}p`), { fetch, whole: true });
+      await writeDocument(URL_, edited(`${EX}label`), { fetch });
+      expect(sent.map(({ method }) => method)).toEqual(["PATCH", "PUT", "PATCH"]);
+      expect(String(sent[0]!.body)).not.toContain("مرحبا");
+      expect(String(sent[2]!.body)).toContain(`DELETE DATA {\n${directed}\n}`);
+      const back = await getSolidDatasetLinear(URL_, { fetch: turtleAt(String(sent[1]!.body)) });
+      const [label] = rdf.getLiteralAll(getThing(back, `${URL_}#a`)!, `${EX}label`);
+      expect([label!.value, label!.language, label!.direction]).toEqual(["مرحبا", "ar", "rtl"]);
+    });
+
     it("refuses a term longer than any read takes in, sending nothing, and writes one at the bound", async () => {
       // A text is named in quotes, a line break in it escaped: one of MAX_TERM_CHARACTERS - 2 characters is
       // at the bound, and one of a character less with a line break is past it.

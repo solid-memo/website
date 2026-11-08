@@ -12,7 +12,7 @@ describe("triplesOf", () => {
   it("writes every kind of term as Solid Memo's PATCH bodies do", async () => {
     const triples = await triplesOf(
       DOC,
-      `<#a> <#p> [ <#q> "x" ] ; <#r> "say \\"hi\\"\\n\\r\\\\"@en , 3 , "plain" .`,
+      `<#a> <#p> [ <#q> "x" ] ; <#r> "say \\"hi\\"\\n\\r\\\\"@en , 3 , "plain" , "مرحبا"@ar--rtl .`,
     );
     const lines = [...triples];
     expect(lines).toContain(`<${DOC}#a> <${DOC}#r> "say \\"hi\\"\\n\\r\\\\"@en .`);
@@ -20,6 +20,7 @@ describe("triplesOf", () => {
       `<${DOC}#a> <${DOC}#r> "3"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
     );
     expect(lines).toContain(`<${DOC}#a> <${DOC}#r> "plain" .`);
+    expect(lines).toContain(`<${DOC}#a> <${DOC}#r> "مرحبا"@ar--rtl .`);
     const blank = lines.find((line) => line.startsWith(`<${DOC}#a> <${DOC}#p> _:`))!;
     const node = blank.split(" ")[2]!;
     expect(lines).toContain(`${node} <${DOC}#q> "x" .`);

@@ -6,6 +6,7 @@ import { pathKeys } from "@solid-memo/domain/pathKeys";
 import type { Quad, Term } from "@rdfjs/types";
 import { toRdfJsDataset } from "./client/rdf";
 import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { directionOf } from "./client/sparqlUpdate";
 import { getSolidDatasetLinear } from "./client/resources";
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
@@ -74,6 +75,6 @@ function piecesOf(line: string): string[] {
 export function termOf(t: Term): string {
   if (t.termType !== "Literal") return t.termType === "BlankNode" ? `_:${t.value}` : `<${t.value}>`;
   const text = `"${t.value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
-  if (t.language !== "") return `${text}@${t.language}`;
+  if (t.language !== "") return `${text}@${t.language}${directionOf(t)}`;
   return t.datatype.value === XSD_STRING ? text : `${text}^^<${t.datatype.value}>`;
 }

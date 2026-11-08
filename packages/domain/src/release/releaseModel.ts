@@ -36,6 +36,12 @@ export interface ReleaseText {
   /** The language tag, "" when untagged. */
   language: string;
   datatype: string;
+  /**
+   * Its base direction (RDF 1.2, `"…"@ar--rtl`), on text typed
+   * rdf:dirLangString that another app wrote; absent for any other. The
+   * app writes none of its own, and keeps one it read.
+   */
+  direction?: string;
 }
 
 /** What every subject of the outline has: its IRI and whether it is retired (owl:deprecated true). */

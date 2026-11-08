@@ -57,6 +57,7 @@ const CHAPTER_B = `${CONTAINER}chapter-ch-b.ttl`;
 const CARDS = `${CONTAINER}cards.ttl`;
 const CATALOG = `${INSTANCE}catalog.ttl`;
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
 
 /** The course fixture as a draft of the instance. */
 const course = (): ReleaseDraft => rebaseDraft(courseDraft(), DRAFT);
@@ -607,6 +608,48 @@ describe("applyChanges", () => {
     expect(writes(pod, from)).toEqual([`PUT ${DRAFT} If-Match`]);
     const { draft: read } = await pod.repository.read(DRAFT);
     expect(sorted(read)).toEqual(sorted(after));
+  });
+
+  it("keeps a literal with a base direction another app wrote, through an edit beside it and publishing (GHSA-vgv2-vh37-7c34)", async () => {
+    const { pod } = await opened();
+    await pod.put(
+      CARDS,
+      `${await pod.text(CARDS)}\n<#q-loose> <https://other.example/label> "مرحبا"@ar--rtl, "مرحبا"@ar ; <https://other.example/v> "a" .`,
+    );
+    const { draft, version } = await pod.repository.read(DRAFT);
+    const label = draft.triples.filter(
+      (triple) => triple.predicate === "https://other.example/label",
+    );
+    expect(label.map((triple) => triple.object)).toEqual(
+      expect.arrayContaining([
+        { kind: "literal", value: "مرحبا", language: "ar", datatype: `${RDF}langString` },
+        {
+          kind: "literal",
+          value: "مرحبا",
+          language: "ar",
+          direction: "rtl",
+          datatype: `${RDF}dirLangString`,
+        },
+      ]),
+    );
+    const after = {
+      ...draft,
+      triples: draft.triples.map((triple) =>
+        triple.object.kind === "literal" && triple.object.value === "a"
+          ? { ...triple, object: { ...triple.object, value: "b" } }
+          : triple,
+      ),
+    };
+    await pod.repository.applyChanges(draft, after, version);
+    const text = await pod.text(CARDS);
+    expect(text).toContain('"b"');
+    expect(text).toContain('"مرحبا"@ar--rtl');
+    expect(text).toMatch(/"مرحبا"@ar[^-]/);
+    const { draft: read } = await pod.repository.read(DRAFT);
+    expect(sorted(read)).toEqual(sorted(after));
+    const turtle = await pod.repository.assemble(DRAFT, `${INSTANCE}releases/solid/v1.ttl`, NOW);
+    expect(turtle).toContain('"مرحبا"@ar--rtl');
+    expect(turtle).toMatch(/"مرحبا"@ar[^-]/);
   });
 
   it("keeps what another app said in a document of the draft", async () => {

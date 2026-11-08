@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Quad, Term } from "@rdfjs/types";
+import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isWritableIri } from "@solid-memo/domain/webId";
 import { MAX_TERM_CHARACTERS, termKeyLength } from "./client/readLimits";
@@ -17,11 +17,17 @@ const PN_CHARS = `${PN_CHARS_U}\\-0-9\\u00B7\\u0300-\\u036F\\u203F\\u2040`;
 /** A blank node label as Turtle reads one after `_:` (BLANK_NODE_LABEL). */
 const BLANK_LABEL = new RegExp(`^[${PN_CHARS_U}0-9](?:[${PN_CHARS}.]*[${PN_CHARS}])?$`, "u");
 
+/** The datatype of text in a language with a base direction (RDF 1.2), which Turtle writes as `"…"@tag--dir`. */
+const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
+
 /** The datatypes of text in a language, which Turtle writes as `"…"@tag`, never with `^^`. */
 const LANGUAGE_STRINGS = new Set([
   "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
-  "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString",
+  DIR_LANG_STRING,
 ]);
+
+/** The base directions RDF 1.2 has, the only ones Turtle reads after `--`. */
+const DIRECTIONS = new Set(["ltr", "rtl"]);
 
 /**
  * A language tag as Turtle reads one after `@` (LANGTAG), its subtags no
@@ -38,8 +44,10 @@ const LANGUAGE = /^[a-zA-Z]{1,8}(?:-[a-zA-Z0-9]{1,8})*$/;
  * node label or a language tag, and a JSON-LD parser keeps any text in
  * them: written, a `>` in an IRI ends it, and what follows is read as
  * statements no check saw (GHSA-x937-hx25-qfp4). Nor can it write text
- * typed as in a language without one, a base direction or a quoted
- * triple (RDF-star), none of which the app writes.
+ * typed as in a language without one, a base direction but on text in a
+ * language (isWritableDirection), or a quoted triple (RDF-star). The app
+ * writes none of these, nor any base direction of its own; a literal
+ * with one that a read kept (`"…"@ar--rtl`) is written back as it was.
  */
 function isWritable(term: Term): boolean {
   switch (term.termType) {
@@ -53,13 +61,23 @@ function isWritable(term: Term): boolean {
         (term.language === ""
           ? !LANGUAGE_STRINGS.has(term.datatype.value)
           : LANGUAGE.test(term.language)) &&
-        (term.direction ?? "") === ""
+        isWritableDirection(term)
       );
     case "Quad":
       return false;
     default:
       return true;
   }
+}
+
+/**
+ * Whether Turtle can write a literal's base direction as it is: `ltr` or
+ * `rtl` on text typed as having one (`"…"@ar--rtl`), and none on any
+ * other literal, which a writer would give one it does not have.
+ */
+function isWritableDirection({ datatype, direction }: Literal): boolean {
+  if (datatype.value === DIR_LANG_STRING) return DIRECTIONS.has(direction ?? "");
+  return (direction ?? "") === "";
 }
 
 /** The first term of a quad Turtle cannot write as it is (isWritable); undefined when there is none. */

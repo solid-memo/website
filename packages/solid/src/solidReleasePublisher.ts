@@ -174,14 +174,15 @@ const TIMES = new Set([`${DCTERMS_NS}issued`, `${DCTERMS_NS}modified`]);
 
 /**
  * A release's statements as text to compare, in order, its times left
- * out: every blank node alike, as each server names them afresh.
+ * out: every blank node alike, as each server names them afresh. Both
+ * sides are read by n3, whose literals all name a direction ("" for none).
  */
 function statementsOf(quads: readonly Quad[], url: string): string {
   const term = (one: Term) =>
     one.termType === "BlankNode"
       ? "_:"
       : one.termType === "Literal"
-        ? JSON.stringify([one.value, one.language, one.datatype.value])
+        ? JSON.stringify([one.value, one.language, one.direction, one.datatype.value])
         : `<${one.value}>`;
   return quads
     .filter((quad) => !(quad.subject.value === url && TIMES.has(quad.predicate.value)))

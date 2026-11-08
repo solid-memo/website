@@ -163,6 +163,32 @@ describe("graphsOf", () => {
     expect(getThing(fromRdfJsDataset([] as never), victim)).toBeNull();
   });
 
+  it("keeps a literal with a base direction under its language and direction, one with no language or no direction by its datatype", async () => {
+    const [first] = await quadsOf(`<#a> <https://example.com/ns#p> "x" .`);
+    const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
+    const withObject = (language: string, direction: string) =>
+      ({
+        subject: first!.subject,
+        predicate: first!.predicate,
+        graph: first!.graph,
+        object: {
+          termType: "Literal",
+          value: `${language}${direction}`,
+          language,
+          direction,
+          datatype: { termType: "NamedNode", value: DIR_LANG_STRING },
+        },
+      }) as Quad;
+    const objects = graphsOf([
+      withObject("AR", "RTL"),
+      withObject("ar", "ltr"),
+      withObject("", "rtl"),
+      withObject("ar", ""),
+    ]).default[`${URL_}#a`]!.predicates["https://example.com/ns#p"]!;
+    expect(objects.langStrings).toEqual({ "ar--rtl": ["ARRTL"], "ar--ltr": ["arltr"] });
+    expect(objects.literals).toEqual({ [DIR_LANG_STRING]: ["rtl", "ar"] });
+  });
+
   it("refuses an object solid-client cannot hold, as solid-client does", async () => {
     const [first] = await quadsOf(`<#a> <https://example.com/ns#p> "x" .`);
     const { subject, predicate, graph } = first!;

@@ -222,3 +222,14 @@ it("reads each kind of term", () => {
   const [q] = parseTurtle(`<a> <b> _:x .`, URL);
   expect(termOf(q.object)).toEqual({ kind: "blank", value: q.object.value });
 });
+
+it("reads a literal's base direction with it", () => {
+  const [q] = parseTurtle(`<a> <b> "x"@ar--rtl .`, URL);
+  expect(termOf(q.object)).toEqual({
+    kind: "literal",
+    value: "x",
+    language: "ar",
+    direction: "rtl",
+    datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString",
+  });
+});
