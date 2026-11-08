@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.32](https://github.com/solid-memo/website/compare/v6.29.31...v6.29.32) (2026-11-08)
+
+### Bug Fixes
+
+* **application:** look up unclaimed documents once per address ([ecc9653](https://github.com/solid-memo/website/commit/ecc965346a866af528f9ad3292edeed225a98fc3))
+* **domain:** read a deck group position too large to hold as none ([61f11e5](https://github.com/solid-memo/website/commit/61f11e534d77ae778a051606c584777f3ebfc8c3))
+* **guest:** refuse outside data that links to the guest's pod ([62edb9d](https://github.com/solid-memo/website/commit/62edb9d4ee5fd35b9998515ba29e87920ad0a2f0))
+* **release:** check out the docs job's tag by its release commit ([68df534](https://github.com/solid-memo/website/commit/68df534c39aec1530b95f6e863f2b3df62b1efce))
+* **solid:** bound how deep a Turtle text may nest ([174eb78](https://github.com/solid-memo/website/commit/174eb7844dc19441d2da9df0808674210bf5ac45))
+* **solid:** keep a literal's base direction from read to write ([5e7a17c](https://github.com/solid-memo/website/commit/5e7a17c9c582ea153cdf3009bfc5a8179c876da1))
+
 ## [6.29.31](https://github.com/solid-memo/website/compare/v6.29.30...v6.29.31) (2026-11-08)
 
 ### Reverts
