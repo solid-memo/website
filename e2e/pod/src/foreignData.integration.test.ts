@@ -117,10 +117,12 @@ async function seed(server: string) {
   const base = new URL(`foreign-${crypto.randomUUID()}/`, server).href;
   const webId = `${base}profile/card#me`;
   const typeIndex = `${base}settings/privateTypeIndex.ttl`;
+  // On one line: Solid-Nextcloud guesses an extensionless document's format, and answers 500
+  // for one whose statement goes on to the next line without a @prefix (nc-put-type).
   await put(
     `${base}profile/card`,
-    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> ;
-    <http://www.w3.org/ns/pim/space#storage> <${base}> .`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> ; ` +
+      `<http://www.w3.org/ns/pim/space#storage> <${base}> .`,
   );
   await put(
     typeIndex,

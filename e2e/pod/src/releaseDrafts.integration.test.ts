@@ -86,7 +86,10 @@ function page(podFetch: typeof globalThis.fetch = fetch) {
   });
 }
 
-/** A user with a private type index and an instance, in a fresh folder of the server. */
+/**
+ * A user with a private type index and an instance, in a fresh folder of the server
+ * that their profile names as their storage, so they may delete the instance.
+ */
 async function seed(server: string) {
   const base = new URL(`drafts-${crypto.randomUUID()}/`, server).href;
   const webId = `${base}profile/card.ttl#me`;
@@ -101,7 +104,8 @@ async function seed(server: string) {
   };
   await put(
     `${base}profile/card.ttl`,
-    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> .`,
+    `<#me> <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${typeIndex}> ;
+    <http://www.w3.org/ns/pim/space#storage> <${base}> .`,
   );
   await put(
     typeIndex,
