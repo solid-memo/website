@@ -794,8 +794,7 @@
     "keepOpen": "Håll sidan öppen tills uppdateringen är klar. Skulle den avbrytas går varje dokument ändå att läsa, uppdaterat eller inte, och du kan uppdatera resten senare.",
     "step": {
       "read": "Tar reda på vad som ska uppdateras",
-      "write": "Uppdaterar dina dokument",
-      "register": "Gör dina data hittbara för andra appar"
+      "write": "Uppdaterar dina dokument"
     },
     "count": {
       "one": "{done} av {count} dokument",
@@ -1426,31 +1425,6 @@
       "grade": "Svarsknapp {grade}",
       "series": "Diagramsteg {step}"
     }
-  },
-  "findable": {
-    "heading": "Hittbar för andra appar",
-    "intro": "Andra Solid-appar hittar dina data genom typindexen i din Pod: en registrering för varje sorts data, som talar om var den finns. Solid Memo lägger till dem när det skapar en instans eller uppdaterar dess format, och här när du ber om det. Det lägger aldrig av sig självt tillbaka en som du eller en annan app har tagit bort.",
-    "loading": "Läser dina typindex…",
-    "class": {
-      "instance": "Den här instansen (Solid Memos mapp)",
-      "catalog": "Dess katalog över kortlekar",
-      "deck": "Kortlekar",
-      "card": "Kort",
-      "reviewState": "Repetitionslägen",
-      "answer": "Svar",
-      "draft": "Utkast till utgåvor"
-    },
-    "index": {
-      "private": "privata typindex",
-      "public": "publika typindex"
-    },
-    "registered": "finns i ditt {index}",
-    "missing": "saknas i ditt {index}",
-    "noPrivateIndex": "Repetitionslägen och svar visar vad du har studerat och hur väl, så de registreras aldrig någon annanstans än i ditt privata typindex. Du har inget, så de är inte registrerade.",
-    "unreadable": "Ditt {index} gick inte att läsa, så det som registreras där visas inte här, och inget läggs till i det.",
-    "add": "Registrera det som saknas",
-    "adding": "Registrerar…",
-    "complete": "Allt är registrerat."
   },
   "registrationTargetChooser": {
     "legend": "Registrera i",

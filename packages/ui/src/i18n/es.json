@@ -827,8 +827,7 @@
     "keepOpen": "Mantén esta página abierta hasta que termine la actualización. Si se interrumpe, todos los documentos se podrán seguir leyendo, actualizados o no, y podrás actualizar el resto más tarde.",
     "step": {
       "read": "Buscando qué actualizar",
-      "write": "Actualizando tus documentos",
-      "register": "Haciendo que otras aplicaciones puedan localizar tus datos"
+      "write": "Actualizando tus documentos"
     },
     "count": {
       "one": "{done} de {count} documento",
@@ -1495,31 +1494,6 @@
       "grade": "Botón de respuesta {grade}",
       "series": "Paso de gráfico {step}"
     }
-  },
-  "findable": {
-    "heading": "Localizable por otras aplicaciones",
-    "intro": "Otras aplicaciones Solid encuentran tus datos a través de los índices de tipos de tu Pod: un registro por cada tipo de datos, que dice dónde están. Solid Memo los añade cuando crea una instancia o actualiza su formato, y aquí cuando lo pides. Nunca vuelve a añadir por su cuenta un registro que hayas quitado tú o que haya quitado otra aplicación.",
-    "loading": "Leyendo tus índices de tipos…",
-    "class": {
-      "instance": "Esta instancia (la carpeta de Solid Memo)",
-      "catalog": "Su catálogo de mazos",
-      "deck": "Mazos",
-      "card": "Tarjetas",
-      "reviewState": "Estados de repaso",
-      "answer": "Respuestas",
-      "draft": "Borradores de publicaciones"
-    },
-    "index": {
-      "private": "índice de tipos privado",
-      "public": "índice de tipos público"
-    },
-    "registered": "en tu {index}",
-    "missing": "falta en tu {index}",
-    "noPrivateIndex": "Los estados de repaso y las respuestas dicen qué has estudiado y lo bien que lo has hecho, así que solo se registran en tu índice de tipos privado. No tienes ninguno, así que no están registrados.",
-    "unreadable": "No se pudo leer tu {index}, así que lo que registra no se muestra aquí, y no se le añade nada.",
-    "add": "Registrar lo que falta",
-    "adding": "Registrando…",
-    "complete": "Todo está registrado."
   },
   "registrationTargetChooser": {
     "legend": "Registrar en",

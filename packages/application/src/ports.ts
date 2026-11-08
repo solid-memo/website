@@ -16,7 +16,6 @@ import type { CompletedChaptersEdit, CourseOutline } from "@solid-memo/domain/co
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import type { DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import type {
-  DataClassRegistrations,
   Instance,
   InstanceDeletion,
   KeptDocuments,
@@ -93,13 +92,11 @@ export interface InstanceRepository {
   getRegistrationOptions(webId: string): Promise<RegistrationOptions>;
   /**
    * Create the instance container + meta document and register it in the
-   * chosen type index (creating the index if needed), with its
-   * catalog, decks and cards; its review states and answers in the
-   * private index, whichever is chosen, and nowhere when there is none
-   * (docs/data-model.md "Discovery chain"). Fails loudly and cleans up
-   * the container when registration in the chosen index fails; the
-   * review states' and answers' registrations of an instance registered
-   * publicly are left out when the private index refuses them.
+   * chosen type index (creating the index if needed): its sm:Instance
+   * registration, and none for the classes of its data, which are
+   * reached from the instance (docs/data-model.md "Discovery chain").
+   * Fails loudly and cleans up the container when the registration
+   * fails.
    */
   createInstance(args: {
     webId: string;
@@ -135,28 +132,10 @@ export interface InstanceRepository {
    */
   detachInstance(args: { webId: string; instance: Instance }): Promise<void>;
   /**
-   * The registrations of the instance's data, one per class, that
-   * belong in the type indexes there are, and whether each is there:
-   * Solid Memo's own, the catalog's, the decks' and the cards' in each
-   * index that registers the instance, the review states' and answers'
-   * in the private index only. An index that cannot be read is left
-   * out, and said to be unreadable.
-   */
-  readDataClassRegistrations(args: {
-    webId: string;
-    instanceUrl: string;
-  }): Promise<DataClassRegistrations>;
-  /**
-   * Add each registration readDataClassRegistrations finds missing,
-   * titled `title`, one save per index (If-Match, read again and
-   * retried when the index changed meanwhile), none where an equal one
-   * is there, and none in an index that cannot be read.
-   */
-  registerDataClasses(args: { webId: string; instanceUrl: string; title: string }): Promise<void>;
-  /**
    * Give the instance's registrations a new title, in every type index
    * that registers it: its sm:Instance registration, which names it in
-   * the instance list, and its catalog's dcat:Catalog registration.
+   * the instance list, and those of its data's classes earlier versions
+   * wrote.
    * One write per index, made only if the index is as it was read
    * (If-Match), else read and written again, a few times. An index
    * already saying so is not written.

@@ -170,19 +170,12 @@ describe("MigrationContainer", () => {
     );
     act(() => report!({ step: "write", done: 1, total: 3, part: { done: 0, total: 1 } }));
     expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent("0 of 1 document");
-    act(() => report!({ step: "register", done: 2, total: 3 }));
-    expect(screen.getByRole("status")).toHaveTextContent(
-      /^Making your data findable by other apps…$/,
-    );
+    expect(screen.getByRole("status")).toHaveTextContent(/^Updating your documents…$/);
     expect(
       within(screen.getByRole("region", { name: "Updating" }))
         .getAllByRole("listitem")
         .map((step) => step.textContent),
-    ).toEqual([
-      "✓Finding what to update (done)",
-      "✓Updating your documents (done)",
-      "➜Making your data findable by other apps (in progress)",
-    ]);
+    ).toEqual(["✓Finding what to update (done)", "➜Updating your documents (in progress)"]);
     expect(screen.getByRole("region", { name: "Updating" })).toHaveTextContent(
       "Should it be cut off, every document can still be read, updated or not, and you can update the rest later.",
     );

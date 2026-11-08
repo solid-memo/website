@@ -21,12 +21,11 @@ import {
 import { datasetFrom, readOf } from "./testing/datasets";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import {
-  addRegistrations,
+  addInstanceRegistration,
   createTypeIndex,
   ensureTypeIndex,
   locateTypeIndexes,
   readInstanceRegistrations,
-  readRegisteredClasses,
   removeInstanceRegistrations,
   renameInstanceRegistrations,
 } from "./typeIndex";
@@ -89,8 +88,7 @@ beforeEach(() => {
   vi.mocked(ensureTypeIndex).mockReset();
   vi.mocked(readInstanceRegistrations).mockReset();
   vi.mocked(createTypeIndex).mockReset();
-  vi.mocked(readRegisteredClasses).mockReset();
-  vi.mocked(addRegistrations).mockReset();
+  vi.mocked(addInstanceRegistration).mockReset();
   vi.mocked(removeInstanceRegistrations).mockReset();
   vi.mocked(deleteInstanceData).mockReset();
 });
@@ -180,145 +178,6 @@ describe("getRegistrationOptions", () => {
   });
 });
 
-const ALL = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"];
-const SHARED = ["instance", "catalog", "deck", "card"];
-const PRIVATE_ONLY = ["reviewState", "answer", "draft"];
-
-describe("readDataClassRegistrations and registerDataClasses", () => {
-  const args = { webId: WEBID, instanceUrl: CONTAINER };
-
-  it("want the instance's data of every class in each index that registers it, review states, answers and drafts in the private one only", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue({
-      fetch: indexFetch,
-      inPlaces: () => true,
-      privateIndexUrl: PRIVATE_INDEX,
-      publicIndexUrl: PUBLIC_INDEX,
-    });
-    vi.mocked(readRegisteredClasses).mockImplementation(async (indexUrl) =>
-      indexUrl === PRIVATE_INDEX ? ["instance", "catalog", "answer"] : ["instance", "deck"],
-    );
-    const repository = makeRepository();
-
-    await expect(repository.readDataClassRegistrations(args)).resolves.toEqual({
-      registrations: [
-        { dataClass: "instance", index: "private", registered: true },
-        { dataClass: "instance", index: "public", registered: true },
-        { dataClass: "catalog", index: "private", registered: true },
-        { dataClass: "catalog", index: "public", registered: false },
-        { dataClass: "deck", index: "private", registered: false },
-        { dataClass: "deck", index: "public", registered: true },
-        { dataClass: "card", index: "private", registered: false },
-        { dataClass: "card", index: "public", registered: false },
-        { dataClass: "reviewState", index: "private", registered: false },
-        { dataClass: "answer", index: "private", registered: true },
-        { dataClass: "draft", index: "private", registered: false },
-      ],
-      privateIndexMissing: false,
-      unreadableIndexes: [],
-    });
-    expect(readRegisteredClasses).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, indexFetch);
-
-    await repository.registerDataClasses({ ...args, title: "Main" });
-    expect(vi.mocked(addRegistrations).mock.calls.map((call) => [call[0], call[1]])).toEqual([
-      [
-        PRIVATE_INDEX,
-        {
-          instanceUrl: CONTAINER,
-          title: "Main",
-          classes: ["deck", "card", "reviewState", "draft"],
-        },
-      ],
-      [PUBLIC_INDEX, { instanceUrl: CONTAINER, title: "Main", classes: ["catalog", "card"] }],
-    ]);
-  });
-
-  it("want review states and answers in the private index when only the public one registers the instance", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue({
-      fetch: indexFetch,
-      inPlaces: () => true,
-      privateIndexUrl: PRIVATE_INDEX,
-      publicIndexUrl: PUBLIC_INDEX,
-    });
-    vi.mocked(readRegisteredClasses).mockImplementation(async (indexUrl) =>
-      indexUrl === PRIVATE_INDEX ? [] : (SHARED as never),
-    );
-    const repository = makeRepository();
-
-    await expect(repository.readDataClassRegistrations(args)).resolves.toEqual({
-      registrations: [
-        ...SHARED.map((dataClass) => ({ dataClass, index: "public", registered: true })),
-        ...PRIVATE_ONLY.map((dataClass) => ({ dataClass, index: "private", registered: false })),
-      ],
-      privateIndexMissing: false,
-      unreadableIndexes: [],
-    });
-    await repository.registerDataClasses({ ...args, title: "Main" });
-    expect(addRegistrations).toHaveBeenCalledExactlyOnceWith(
-      PRIVATE_INDEX,
-      { instanceUrl: CONTAINER, title: "Main", classes: PRIVATE_ONLY },
-      expect.any(Function),
-      indexFetch,
-    );
-  });
-
-  it("leave out an index that cannot be read, and say so", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue({
-      fetch: indexFetch,
-      inPlaces: () => true,
-      privateIndexUrl: PRIVATE_INDEX,
-      publicIndexUrl: PUBLIC_INDEX,
-    });
-    vi.mocked(readRegisteredClasses).mockImplementation(async (indexUrl) => {
-      if (indexUrl === PUBLIC_INDEX) throw new Error("404 Not Found");
-      return [];
-    });
-    const repository = makeRepository();
-
-    await expect(repository.readDataClassRegistrations(args)).resolves.toEqual({
-      registrations: PRIVATE_ONLY.map((dataClass) => ({
-        dataClass,
-        index: "private",
-        registered: false,
-      })),
-      privateIndexMissing: false,
-      unreadableIndexes: ["public"],
-    });
-    await repository.registerDataClasses({ ...args, title: "Main" });
-    expect(addRegistrations).toHaveBeenCalledExactlyOnceWith(
-      PRIVATE_INDEX,
-      { instanceUrl: CONTAINER, title: "Main", classes: PRIVATE_ONLY },
-      expect.any(Function),
-      indexFetch,
-    );
-
-    vi.mocked(readRegisteredClasses).mockRejectedValue(new Error("403 Forbidden"));
-    await expect(repository.readDataClassRegistrations(args)).resolves.toEqual({
-      registrations: [],
-      privateIndexMissing: false,
-      unreadableIndexes: ["private", "public"],
-    });
-  });
-
-  it("never want review states or answers in the public index, without a private one", async () => {
-    vi.mocked(locateTypeIndexes).mockResolvedValue({
-      fetch: indexFetch,
-      inPlaces: () => true,
-      privateIndexUrl: null,
-      publicIndexUrl: PUBLIC_INDEX,
-    });
-    vi.mocked(readRegisteredClasses).mockResolvedValue(SHARED as never);
-    const repository = makeRepository();
-
-    await expect(repository.readDataClassRegistrations(args)).resolves.toEqual({
-      registrations: SHARED.map((dataClass) => ({ dataClass, index: "public", registered: true })),
-      privateIndexMissing: true,
-      unreadableIndexes: [],
-    });
-    await repository.registerDataClasses({ ...args, title: "Main" });
-    expect(addRegistrations).not.toHaveBeenCalled();
-  });
-});
-
 describe("createInstance", () => {
   const create = (registrationTarget: "private" | "public") =>
     makeRepository().createInstance({
@@ -328,7 +187,7 @@ describe("createInstance", () => {
       registrationTarget,
     });
 
-  it("writes meta.ttl, registers every class of its data in the private index, and returns the instance", async () => {
+  it("writes meta.ttl, registers the instance in the private index, and returns the instance", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
       inPlaces: () => true,
@@ -347,13 +206,13 @@ describe("createInstance", () => {
     expect(getInteger(meta, SM.formatVersion)).toBe(2);
 
     expect(createTypeIndex).not.toHaveBeenCalled();
-    expect(addRegistrations).toHaveBeenCalledExactlyOnceWith(
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
       PRIVATE_INDEX,
-      { instanceUrl: CONTAINER, title: "Main", classes: ALL },
+      { instanceUrl: CONTAINER, title: "Main" },
       expect.any(Function),
       indexFetch,
     );
-    expect(vi.mocked(addRegistrations).mock.calls[0][2]()).toBe("fixed-id");
+    expect(vi.mocked(addInstanceRegistration).mock.calls[0][2]()).toBe("fixed-id");
   });
 
   it("makes the instance at its address as a request sends it", async () => {
@@ -386,15 +245,15 @@ describe("createInstance", () => {
     await create("private");
 
     expect(createTypeIndex).toHaveBeenCalledWith("private", WEBID, CONTAINER, expect.anything());
-    expect(addRegistrations).toHaveBeenCalledExactlyOnceWith(
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
       PRIVATE_INDEX,
-      expect.objectContaining({ classes: ALL }),
+      { instanceUrl: CONTAINER, title: "Main" },
       expect.any(Function),
       indexFetch,
     );
   });
 
-  it("registers it publicly, its review states and answers in the private index", async () => {
+  it("registers a public instance in the public index alone, nothing in the private one", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
       inPlaces: () => true,
@@ -402,19 +261,20 @@ describe("createInstance", () => {
       publicIndexUrl: PUBLIC_INDEX,
     });
 
-    await create("public");
+    await expect(create("public")).resolves.toEqual({ url: CONTAINER, name: "Main" });
 
-    expect(
-      vi.mocked(addRegistrations).mock.calls.map((call) => [call[0], call[1].classes]),
-    ).toEqual([
-      [PUBLIC_INDEX, SHARED],
-      [PRIVATE_INDEX, PRIVATE_ONLY],
-    ]);
+    expect(createTypeIndex).not.toHaveBeenCalled();
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
+      PUBLIC_INDEX,
+      { instanceUrl: CONTAINER, title: "Main" },
+      expect.any(Function),
+      indexFetch,
+    );
   });
 
-  it("registers its review states and answers nowhere when it is registered publicly without a private index", async () => {
+  it("creates the public index for a public instance when there is none", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
-      privateIndexUrl: null,
+      privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: null,
       fetch: indexFetch,
       inPlaces: () => true,
@@ -424,35 +284,27 @@ describe("createInstance", () => {
     await create("public");
 
     expect(createTypeIndex).toHaveBeenCalledWith("public", WEBID, CONTAINER, expect.anything());
-    expect(addRegistrations).toHaveBeenCalledExactlyOnceWith(
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
       PUBLIC_INDEX,
-      expect.objectContaining({ classes: SHARED }),
+      { instanceUrl: CONTAINER, title: "Main" },
       expect.any(Function),
       indexFetch,
     );
   });
 
-  it("still creates a public instance when the private index refuses its review states and answers", async () => {
+  it("takes the instance back and rethrows when the index refuses its registration", async () => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
       inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: PUBLIC_INDEX,
     });
-    vi.mocked(addRegistrations).mockImplementation(async (indexUrl) => {
-      if (indexUrl === PRIVATE_INDEX) throw new Error("private index refused");
-      return [];
-    });
+    vi.mocked(addInstanceRegistration).mockRejectedValue(new Error("index refused"));
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaWith()));
 
-    await expect(create("public")).resolves.toEqual({ url: CONTAINER, name: "Main" });
-    expect(
-      vi.mocked(addRegistrations).mock.calls.map((call) => [call[0], call[1].classes]),
-    ).toEqual([
-      [PUBLIC_INDEX, SHARED],
-      [PRIVATE_INDEX, PRIVATE_ONLY],
-    ]);
-    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
-    expect(deleteContainer).not.toHaveBeenCalled();
+    await expect(create("public")).rejects.toThrow("index refused");
+    expect(addInstanceRegistration).toHaveBeenCalledOnce();
+    expect(deleteContainer).toHaveBeenCalledWith(CONTAINER, expect.anything());
   });
 
   it("cleans up the container and rethrows when registration fails", async () => {
@@ -567,9 +419,9 @@ describe("attachInstance", () => {
       expect.anything(),
       expect.anything(),
     );
-    expect(addRegistrations).toHaveBeenCalledExactlyOnceWith(
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
       PRIVATE_INDEX,
-      { instanceUrl: CONTAINER, title: "Attached", classes: ["instance"] },
+      { instanceUrl: CONTAINER, title: "Attached" },
       expect.any(Function),
       indexFetch,
     );
@@ -617,7 +469,7 @@ describe("attachInstance", () => {
       ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
     }
     expect(readDocument).not.toHaveBeenCalled();
-    expect(addRegistrations).not.toHaveBeenCalled();
+    expect(addInstanceRegistration).not.toHaveBeenCalled();
   });
 
   it("rejects a container without a readable meta.ttl", async () => {
@@ -1104,30 +956,9 @@ describe("a type index outside the profile's own places", () => {
     });
 
     expect(createTypeIndex).toHaveBeenCalledWith("public", WEBID, CONTAINER, expect.anything());
-    expect(vi.mocked(addRegistrations).mock.calls.map((call) => call[0])).toEqual([
+    expect(vi.mocked(addInstanceRegistration).mock.calls.map((call) => call[0])).toEqual([
       OWN_PUBLIC,
-      PRIVATE_INDEX,
     ]);
-  });
-
-  it("shows no registration of the instance's data, and gets none", async () => {
-    publicElsewhere();
-    vi.mocked(readRegisteredClasses).mockResolvedValue(["instance"]);
-    const args = { webId: WEBID, instanceUrl: CONTAINER };
-
-    const registrations = await makeRepository().readDataClassRegistrations(args);
-    expect(new Set(registrations.registrations.map((entry) => entry.index))).toEqual(
-      new Set(["private"]),
-    );
-    expect(registrations.unreadableIndexes).toEqual([]);
-
-    await makeRepository().registerDataClasses({ ...args, title: "Main" });
-    expect(readRegisteredClasses).not.toHaveBeenCalledWith(
-      PUBLIC_INDEX,
-      expect.anything(),
-      expect.anything(),
-    );
-    expect(vi.mocked(addRegistrations).mock.calls.map((call) => call[0])).toEqual([PRIVATE_INDEX]);
   });
 
   it("is neither renamed in nor unregistered from", async () => {

@@ -500,9 +500,9 @@ They need checking again before anything relies on them.
   - Undoing an answer, resetting the day, reporting a mistake, updating
     a library copy, a deck's link and the error screen each have a
     journey.
-  - A release's themes, attaching an instance by its address and
-    "Findable by other apps" have neither a journey nor a worked
-    example. No journey shows text written right to left.
+  - A release's themes and attaching an instance by its address have
+    neither a journey nor a worked example. No journey shows text
+    written right to left.
 - SHOULD, met — the components and their relations, in
   [architecture.md](architecture.md).
 - SHOULD, met — CI checks the docs: markdownlint, cspell, lychee and the

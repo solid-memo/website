@@ -47,18 +47,6 @@ export function makeInstanceUseCasesFake(
         keptDocuments: [],
       })),
       detachInstance: vi.fn(async () => undefined),
-      dataClassRegistrations: vi.fn(async () => ({
-        registrations: (
-          ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const
-        ).map((dataClass) => ({
-          dataClass,
-          index: "private" as const,
-          registered: true,
-        })),
-        privateIndexMissing: false,
-        unreadableIndexes: [],
-      })),
-      registerDataClasses: vi.fn(async () => undefined),
       planMigration: vi.fn(async () => ({
         decks: [],
         deckCount: 0,

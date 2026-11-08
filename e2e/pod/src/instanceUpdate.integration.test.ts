@@ -45,7 +45,6 @@ import {
 } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
-const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
 const PREFIXES = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
@@ -557,10 +556,6 @@ async function triples(url: string): Promise<string> {
   );
 }
 
-async function registeredContainers(pod: Pod): Promise<string> {
-  return triples(pod.typeIndex);
-}
-
 /** The documents of the seeded pod the update changes, in the order it writes them. */
 const UPDATED = [
   "meta.ttl",
@@ -594,7 +589,7 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
     const pod = await seedPod(server);
     const documents = UPDATED.map((path) => `${pod.source}${path}`);
     const before = await snapshot(pod.source);
-    const indexBefore = await registeredContainers(pod);
+    const indexBefore = await servedBytes([pod.typeIndex]);
     const { useCases, attempts, sent, session } = app(pod);
 
     expect((await useCases.planMigration(pod.source)).deckCount).toBe(1);
@@ -604,12 +599,9 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       failed: [],
     });
 
-    // Every write went to one of the documents, once each, in order, but the last: the type index, once updated,
-    // given the registrations of the instance's data it lacked, If-Match where the server enforces it.
+    // Every write went to one of the documents, once each, in order; none to the type index.
     const writes = sent.filter(isWrite);
-    expect(writes.map((request) => request.url)).toEqual([...documents, pod.typeIndex]);
-    expect(writes.at(-1)).toMatchObject({ method: "PATCH", url: pod.typeIndex });
-    if (conditional.edits) expect(writes.at(-1)!.ifMatch).toMatch(/^"/);
+    expect(writes.map((request) => request.url)).toEqual(documents);
     // Each write of a document held to the version it was read at.
     expectConditional(sent, documents, conditional);
     // Nothing is kept beside the documents: no copy, no backup.
@@ -618,29 +610,8 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
       writes.map((request) => request.url),
     );
 
-    // The instance: updated, conforming, at its address; the type index as it was, and each class of its data registered.
-    const indexAfter = await registeredContainers(pod);
-    for (const triple of indexBefore.split("\n").filter((line) => line !== ""))
-      expect(indexAfter).toContain(triple);
-    for (const [forClass, predicate, target] of [
-      ["http://www.w3.org/ns/dcat#Catalog", "instance", `${pod.source}catalog.ttl#catalog`],
-      [`${SM}Deck`, "instance", `${pod.source}catalog.ttl`],
-      [`${SM}Card`, "instanceContainer", `${pod.source}decks/`],
-      [`${SM}ReviewState`, "instanceContainer", `${pod.source}reviews/`],
-      [`${SM}Answer`, "instanceContainer", `${pod.source}history/`],
-    ]) {
-      // Found as text, not as a pattern, whose dots would take any character for those of the IRIs.
-      const registration = ` <http://www.w3.org/ns/solid/terms#forClass> <${forClass}> .`;
-      const subject = indexAfter
-        .split("\n")
-        .find((line) => line.startsWith("<") && line.endsWith(registration))
-        ?.slice(0, -registration.length);
-      expect(subject, forClass).toBeDefined();
-      expect(indexAfter).toContain(
-        `${subject} <http://www.w3.org/ns/solid/terms#${predicate}> <${target}> .`,
-      );
-      expect(indexAfter).toContain(`${subject} <http://purl.org/dc/terms/title> "Main" .`);
-    }
+    // The instance: updated, conforming, at its address; the type index byte for byte as it was.
+    expect(await servedBytes([pod.typeIndex])).toEqual(indexBefore);
     expect(await useCases.planMigration(pod.source)).toMatchObject({
       deckCount: 0,
       cardCount: 0,
@@ -829,10 +800,8 @@ describe.each(SERVERS)("the format update on $name", ({ url: server }) => {
         updated: [{ url: seeded.cards }],
         failed: [],
       });
-      expect(second.sent.filter(isWrite).map((request) => request.url)).toEqual([
-        seeded.cards,
-        seeded.pod.typeIndex,
-      ]);
+      expect(second.sent.filter(isWrite).map((request) => request.url)).toEqual([seeded.cards]);
+      expect(await servedBytes([seeded.pod.typeIndex])).toEqual(seeded.index);
       expect(await second.useCases.planMigration(seeded.pod.source)).toMatchObject({
         deckCount: 0,
         cardCount: 0,

@@ -391,8 +391,8 @@ SM-2 ones ([#191](https://github.com/solid-memo/website/issues/191)):
 
 - **An FSRS-6 state is a review state.** It reuses the class and
   `sm:due`, `sm:lastReviewedAt`, `sm:reviewOf` and `sm:scheduler`
-  (frozen domain `sm:ReviewState`), and the reviews document's type
-  index registration. `sm:scheduler sm:fsrs6`, which its shape fixes,
+  (frozen domain `sm:ReviewState`) and the reviews document.
+  `sm:scheduler sm:fsrs6`, which its shape fixes,
   tells it from an SM-2 state ([shapes.md](shapes.md#conventions)).
   Its snapshot reuses `sm:previousDue` and `sm:previousLastReviewedAt`;
   SM-2's `sm:easeFactor` and `sm:repetitions` aren't reused.

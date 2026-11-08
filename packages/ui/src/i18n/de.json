@@ -794,8 +794,7 @@
     "keepOpen": "Lass diese Seite geöffnet, bis die Aktualisierung fertig ist. Falls sie abbricht, bleibt jedes Dokument lesbar, aktualisiert oder nicht, und du kannst den Rest später aktualisieren.",
     "step": {
       "read": "Zu aktualisierende Dokumente werden ermittelt",
-      "write": "Deine Dokumente werden aktualisiert",
-      "register": "Deine Daten werden für andere Apps auffindbar gemacht"
+      "write": "Deine Dokumente werden aktualisiert"
     },
     "count": {
       "one": "{done} von {count} Dokument",
@@ -1426,31 +1425,6 @@
       "grade": "Antwortknopf {grade}",
       "series": "Diagrammstufe {step}"
     }
-  },
-  "findable": {
-    "heading": "Für andere Apps auffindbar",
-    "intro": "Andere Solid-Apps finden deine Daten über die Typindizes in deinem Pod: ein Eintrag für jede Art von Daten, der angibt, wo sie liegen. Solid Memo fügt sie hinzu, wenn es eine Instanz erstellt oder ihr Format aktualisiert, und hier, wenn du darum bittest. Einen Eintrag, den du oder eine andere App entfernt hat, fügt es nie von selbst wieder hinzu.",
-    "loading": "Deine Typindizes werden gelesen…",
-    "class": {
-      "instance": "Diese Instanz (der Ordner von Solid Memo)",
-      "catalog": "Der Stapelkatalog dieser Instanz",
-      "deck": "Stapel",
-      "card": "Karten",
-      "reviewState": "Wiederholungsstände",
-      "answer": "Antworten",
-      "draft": "Entwürfe für Ausgaben"
-    },
-    "index": {
-      "private": "privater Typindex",
-      "public": "öffentlicher Typindex"
-    },
-    "registered": "eingetragen ({index})",
-    "missing": "fehlt ({index})",
-    "noPrivateIndex": "Wiederholungsstände und Antworten verraten, was du gelernt hast und wie gut. Deshalb werden sie nur in deinem privaten Typindex eingetragen. Du hast keinen, also sind sie nicht eingetragen.",
-    "unreadable": "Dein {index} konnte nicht gelesen werden. Was darin eingetragen ist, wird deshalb hier nicht angezeigt, und es wird nichts hinzugefügt.",
-    "add": "Fehlende Einträge hinzufügen",
-    "adding": "Wird eingetragen…",
-    "complete": "Alles ist eingetragen."
   },
   "registrationTargetChooser": {
     "legend": "Eintragen in",

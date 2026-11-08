@@ -19,12 +19,11 @@ import {
 import { readDocument, writeDocument } from "./client/resources";
 import { datasetFrom, readOf, writtenAsGiven } from "./testing/datasets";
 import {
-  addRegistrations,
+  addInstanceRegistration,
   createTypeIndex,
   ensureTypeIndex,
   locateTypeIndexes,
   readInstanceRegistrations,
-  readRegisteredClasses,
   removeInstanceRegistrations,
   renameInstanceRegistrations,
 } from "./typeIndex";
@@ -799,59 +798,17 @@ function privateIndex(...things: NamedSubject[]): Dataset {
 const preconditionFailed = () =>
   Object.assign(new Error("412 Precondition Failed"), { statusCode: 412 });
 
-describe("readRegisteredClasses", () => {
-  const MAIN = "https://alice.example/solid-memo/main/";
-
-  it("says which classes of the instance's data the index registers, each by what it names exactly", async () => {
-    mockDatasets({
-      [PRIVATE_INDEX]: privateIndex(
-        // The container under either predicate, a missing slash ignored.
-        registered("inst", SM.Instance, SOLID.instance, "https://alice.example/solid-memo/main"),
-        registered("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
-        registered("card", SM.Card, SOLID.instance, `${MAIN}decks/`),
-        // Not the instance's: its answers' container without the slash, another instance's review states,
-        // a catalog elsewhere in the folder, and a registration that is not one.
-        registered("answer", SM.Answer, SOLID.instanceContainer, `${MAIN}history`),
-        registered(
-          "review",
-          SM.ReviewState,
-          SOLID.instanceContainer,
-          "https://alice.example/solid-memo/b/reviews/",
-        ),
-        registered("cat", DCAT.Catalog, SOLID.instance, `${MAIN}attachments/index.ttl#catalog`),
-        buildThing(createThing({ url: `${PRIVATE_INDEX}#note` }))
-          .addIri(SOLID.forClass, DCAT.Catalog)
-          .addIri(SOLID.instance, `${MAIN}catalog.ttl#catalog`)
-          .build(),
-      ),
-    });
-    await expect(
-      readRegisteredClasses(PRIVATE_INDEX, "https://alice.example/solid-memo/main", noFetch),
-    ).resolves.toEqual(["instance", "deck", "card"]);
-  });
-});
-
-describe("addRegistrations", () => {
+describe("addInstanceRegistration", () => {
   const MAIN = "https://alice.example/solid-memo/main/";
   const ids = () => {
     let next = 0;
     return () => `id${++next}`;
   };
+  const main = { instanceUrl: "https://alice.example/solid-memo/main", title: "Main" };
 
-  it("registers each class of the instance's data, titled, in one save", async () => {
+  it("registers the instance alone, titled, naming its container, in one save", async () => {
     mockDatasets({ [PRIVATE_INDEX]: privateIndex() });
-    await expect(
-      addRegistrations(
-        PRIVATE_INDEX,
-        {
-          instanceUrl: "https://alice.example/solid-memo/main",
-          title: "Main",
-          classes: ["instance", "catalog", "deck", "card", "reviewState", "answer"],
-        },
-        ids(),
-        noFetch,
-      ),
-    ).resolves.toEqual(["instance", "catalog", "deck", "card", "reviewState", "answer"]);
+    await addInstanceRegistration(PRIVATE_INDEX, main, ids(), noFetch);
     expect(writeDocument).toHaveBeenCalledOnce();
     const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(saveUrl).toBe(PRIVATE_INDEX);
@@ -863,135 +820,96 @@ describe("addRegistrations", () => {
       instanceContainer: getUrlAll(thing, SOLID.instanceContainer),
       title: getStringNoLocale(thing, DCTERMS.title),
     }));
-    const common = { types: [SOLID.TypeRegistration], title: "Main" };
+    // No registration of the catalog, decks, cards, review states, answers or drafts.
     expect(registrations).toEqual([
       {
-        ...common,
         url: `${PRIVATE_INDEX}#sm-inst-id1`,
+        types: [SOLID.TypeRegistration],
         forClass: [SM.Instance],
         instance: [],
         instanceContainer: [MAIN],
-      },
-      {
-        ...common,
-        url: `${PRIVATE_INDEX}#sm-cat-id2`,
-        forClass: [DCAT.Catalog],
-        instance: [`${MAIN}catalog.ttl#catalog`],
-        instanceContainer: [],
-      },
-      {
-        ...common,
-        url: `${PRIVATE_INDEX}#sm-deck-id3`,
-        forClass: [SM.Deck],
-        instance: [`${MAIN}catalog.ttl`],
-        instanceContainer: [],
-      },
-      {
-        ...common,
-        url: `${PRIVATE_INDEX}#sm-card-id4`,
-        forClass: [SM.Card],
-        instance: [],
-        instanceContainer: [`${MAIN}decks/`],
-      },
-      {
-        ...common,
-        url: `${PRIVATE_INDEX}#sm-review-id5`,
-        forClass: [SM.ReviewState],
-        instance: [],
-        instanceContainer: [`${MAIN}reviews/`],
-      },
-      {
-        ...common,
-        url: `${PRIVATE_INDEX}#sm-answer-id6`,
-        forClass: [SM.Answer],
-        instance: [],
-        instanceContainer: [`${MAIN}history/`],
+        title: "Main",
       },
     ]);
   });
 
-  it("adds only what the index does not register already, and saves nothing when it registers it all", async () => {
-    const index = privateIndex(
-      registered("inst", SM.Instance, SOLID.instance, "https://alice.example/solid-memo/main"),
-      registered("cat", DCAT.Catalog, SOLID.instance, `${MAIN}catalog.ttl#catalog`),
-    );
-    mockDatasets({ [PRIVATE_INDEX]: index });
-    await expect(
-      addRegistrations(
-        PRIVATE_INDEX,
-        { instanceUrl: MAIN, title: "Main", classes: ["instance", "catalog", "card"] },
-        ids(),
-        noFetch,
-      ),
-    ).resolves.toEqual(["card"]);
-    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
-    expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
-      `${PRIVATE_INDEX}#inst`,
-      `${PRIVATE_INDEX}#cat`,
-      `${PRIVATE_INDEX}#sm-card-id1`,
-    ]);
-
-    vi.mocked(writeDocument).mockClear();
-    await expect(
-      addRegistrations(
-        PRIVATE_INDEX,
-        { instanceUrl: MAIN, title: "Main", classes: ["instance", "catalog"] },
-        ids(),
-        noFetch,
-      ),
-    ).resolves.toEqual([]);
+  it("saves nothing when the index registers the instance already, its container with or without the slash", async () => {
+    for (const [predicate, url] of [
+      [SOLID.instanceContainer, MAIN],
+      [SOLID.instance, "https://alice.example/solid-memo/main"],
+    ]) {
+      mockDatasets({
+        [PRIVATE_INDEX]: privateIndex(registered("inst", SM.Instance, predicate, url)),
+      });
+      await addInstanceRegistration(PRIVATE_INDEX, main, ids(), noFetch);
+      await addInstanceRegistration(PRIVATE_INDEX, { ...main, instanceUrl: MAIN }, ids(), noFetch);
+    }
     expect(writeDocument).not.toHaveBeenCalled();
   });
 
-  it("reads the index again and adds what is still missing when it changed meanwhile", async () => {
+  it("adds it beside other registrations of the folder that are not the instance's", async () => {
+    mockDatasets({
+      [PRIVATE_INDEX]: privateIndex(
+        // An earlier version's registration of the cards, and another class naming the container.
+        registered("card", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`),
+        registered("recipes", "https://schema.org/Recipe", SOLID.instanceContainer, MAIN),
+      ),
+    });
+    await addInstanceRegistration(PRIVATE_INDEX, main, ids(), noFetch);
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
+      `${PRIVATE_INDEX}#card`,
+      `${PRIVATE_INDEX}#recipes`,
+      `${PRIVATE_INDEX}#sm-inst-id1`,
+    ]);
+  });
+
+  it("reads the index again when it changed meanwhile, and adds nothing when the instance is registered by then", async () => {
     let reads = 0;
     vi.mocked(readDocument).mockImplementation((async () =>
       readOf(
-        // Meanwhile another tab registered the cards.
+        // Meanwhile another tab registered the notes, then the instance.
         ++reads === 1
           ? privateIndex()
-          : privateIndex(registered("theirs", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`)),
+          : reads === 2
+            ? privateIndex(
+                registered(
+                  "notes",
+                  "https://schema.org/Note",
+                  SOLID.instanceContainer,
+                  "https://alice.example/notes/",
+                ),
+              )
+            : privateIndex(registered("theirs", SM.Instance, SOLID.instanceContainer, MAIN)),
       )) as never);
     vi.mocked(writeDocument).mockRejectedValueOnce(preconditionFailed());
-    await expect(
-      addRegistrations(
-        PRIVATE_INDEX,
-        { instanceUrl: MAIN, title: "Main", classes: ["deck", "card"] },
-        ids(),
-        noFetch,
-      ),
-    ).resolves.toEqual(["deck"]);
+    const newId = ids();
+    await addInstanceRegistration(PRIVATE_INDEX, main, newId, noFetch);
     expect(writeDocument).toHaveBeenCalledTimes(2);
     const saved = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
     expect(getThingAll(saved).map((thing) => thing.url)).toEqual([
-      `${PRIVATE_INDEX}#theirs`,
-      `${PRIVATE_INDEX}#sm-deck-id3`,
+      `${PRIVATE_INDEX}#notes`,
+      `${PRIVATE_INDEX}#sm-inst-id2`,
     ]);
+
+    vi.mocked(writeDocument).mockClear();
+    await addInstanceRegistration(PRIVATE_INDEX, main, newId, noFetch);
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("gives up after three attempts, and rethrows any other failure at once", async () => {
     mockDatasets({ [PRIVATE_INDEX]: privateIndex() });
     vi.mocked(writeDocument).mockRejectedValue(preconditionFailed());
     await expect(
-      addRegistrations(
-        PRIVATE_INDEX,
-        { instanceUrl: MAIN, title: "Main", classes: ["deck"] },
-        ids(),
-        noFetch,
-      ),
+      addInstanceRegistration(PRIVATE_INDEX, main, ids(), noFetch),
     ).rejects.toMatchObject({ code: "changedElsewhere" });
     expect(writeDocument).toHaveBeenCalledTimes(3);
 
     vi.mocked(writeDocument).mockReset();
     vi.mocked(writeDocument).mockRejectedValue(new Error("403 Forbidden"));
-    await expect(
-      addRegistrations(
-        PRIVATE_INDEX,
-        { instanceUrl: MAIN, title: "Main", classes: ["deck"] },
-        ids(),
-        noFetch,
-      ),
-    ).rejects.toThrow("403 Forbidden");
+    await expect(addInstanceRegistration(PRIVATE_INDEX, main, ids(), noFetch)).rejects.toThrow(
+      "403 Forbidden",
+    );
     expect(writeDocument).toHaveBeenCalledOnce();
   });
 });
@@ -1105,11 +1023,13 @@ describe("removeInstanceRegistrations", () => {
     ).toEqual(["https://alice.example/recipes/index.ttl#catalog"]);
   });
 
-  it("removes the registration of each class of the instance's data by exact IRI, never another app's below the folder", async () => {
+  it("removes the registration earlier versions wrote of each class of the instance's data by exact IRI, never another app's below the folder", async () => {
     const MAIN = "https://alice.example/solid-memo/a/";
     mockDatasets({
       [PRIVATE_INDEX]: privateIndex(
+        registered("cat", DCAT.Catalog, SOLID.instance, `${MAIN}catalog.ttl#catalog`),
         registered("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
+        registered("draft", SM.Deck, SOLID.instanceContainer, `${MAIN}drafts/`),
         registered("card", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`),
         registered("review", SM.ReviewState, SOLID.instanceContainer, `${MAIN}reviews/`),
         // Under the other predicate: still the instance's answers' container.
@@ -1219,13 +1139,16 @@ describe("renameInstanceRegistrations", () => {
   const titleOf = (saved: Dataset, id: string) =>
     getStringNoLocale(getThing(saved, `${PRIVATE_INDEX}#${id}`)!, DCTERMS.title);
 
-  it("renames the registration of each class of the instance's data, in one save, and no other", async () => {
+  it("renames the instance's registration and each one earlier versions wrote for its data, in one save, and no other", async () => {
     mockDatasets({
       [PRIVATE_INDEX]: index(
         registration("inst", SM.Instance, SOLID.instance, "https://alice.example/solid-memo/main"),
         registration("cat", DCAT.Catalog, SOLID.instance, `${MAIN}catalog.ttl#catalog`),
         registration("deck", SM.Deck, SOLID.instance, `${MAIN}catalog.ttl`),
         registration("card", SM.Card, SOLID.instanceContainer, `${MAIN}decks/`),
+        registration("review", SM.ReviewState, SOLID.instanceContainer, `${MAIN}reviews/`),
+        registration("answer", SM.Answer, SOLID.instanceContainer, `${MAIN}history/`),
+        registration("draft", SM.Deck, SOLID.instanceContainer, `${MAIN}drafts/`),
         registration(
           "other",
           SM.Instance,
@@ -1250,6 +1173,9 @@ describe("renameInstanceRegistrations", () => {
     expect(titleOf(saved, "cat")).toBe("Languages");
     expect(titleOf(saved, "deck")).toBe("Languages");
     expect(titleOf(saved, "card")).toBe("Languages");
+    expect(titleOf(saved, "review")).toBe("Languages");
+    expect(titleOf(saved, "answer")).toBe("Languages");
+    expect(titleOf(saved, "draft")).toBe("Languages");
     expect(titleOf(saved, "other")).toBe("Main");
     expect(titleOf(saved, "other-cat")).toBe("Main");
     expect(titleOf(saved, "note")).toBe("x");

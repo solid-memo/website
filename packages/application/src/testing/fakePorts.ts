@@ -139,12 +139,6 @@ export function makeDeps() {
     saveMeta: vi.fn(async () => undefined),
     renameRegistrations: vi.fn(async () => undefined),
     upgradeMeta: vi.fn(async () => true),
-    readDataClassRegistrations: vi.fn(async () => ({
-      registrations: [],
-      privateIndexMissing: false,
-      unreadableIndexes: [],
-    })),
-    registerDataClasses: vi.fn(async () => undefined),
   };
   const deckRepository: DeckRepository = {
     listDecks: vi.fn(async () => [deck]),

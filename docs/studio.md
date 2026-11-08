@@ -1243,7 +1243,8 @@ shows where the instance is, links to its study preferences in Solid
 Memo, and has two forms:
 
 - **Name**: `renameInstance` writes it everywhere it's kept: the meta
-  document, the catalog and the type index registrations
+  document, the catalog and the instance's type index registrations,
+  with any an earlier version wrote for its data
   ([data-model.md](data-model.md#the-catalog)), and the instances are
   read afresh. An empty name is refused.
 - **Catalog**: its description, required, and its license, from the
@@ -1484,8 +1485,8 @@ are read afresh.
 
 The deck is written as any deck Solid Memo writes: wrong options named
 with `sm:distractor` and `schema:suggestedAnswer`, states naming their
-card in the new deck. The instance's type-index registrations of its
-decks, cards and review states cover it (`data-model.md`). While the data
+card in the new deck. It needs no type-index registration: the
+instance's own leads to it (`data-model.md`). While the data
 check is under way, or the catalog is set aside, the import is held
 ([below](#data-set-aside)); a file can still be read.
 
@@ -1508,7 +1509,7 @@ instance, before publishing it. The drafts screen
 the instance's drafts, each with its kind (deck or course), the version
 it drafts and whether it's being written, was released, or can't be
 read. One is deleted, with its documents, once the user confirms. A
-draft is private, in the private type index alone
+draft is registered in no type index
 ([data-model.md](data-model.md#drafts-and-releases)).
 
 The drafts are read a few at a time (`mapAtOnce` in

@@ -50,14 +50,14 @@ flowchart LR
 ```mermaid
 flowchart LR
     accTitle: The discovery chain
-    accDescr: From the WebID, the app follows the storage and the private and public type indexes to the instance container, and to the registrations other apps read.
+    accDescr: From the WebID, the app follows the storage and the private and public type indexes to the instance container, and from the instance's folder to the rest of its data.
     W[WebID] -->|pim:storage| S[Storage root]
     W -->|solid:privateTypeIndex<br/>directly or via pim:preferencesFile| PTI[Private type index]
     W -->|solid:publicTypeIndex| PUB[Public type index]
     PTI -->|solid:TypeRegistration<br/>forClass sm:Instance| I1[Instance container]
-    PUB -->|solid:TypeRegistration| I2[Instance container]
-    PTI -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card, sm:ReviewState, sm:Answer,<br/>sm:Deck (the drafts)"| D1[The instance's data,<br/>for other apps]
-    PUB -.->|"forClass dcat:Catalog, sm:Deck,<br/>sm:Card"| D1
+    PUB -->|solid:TypeRegistration<br/>forClass sm:Instance| I2[Instance container]
+    I1 -->|the folder's layout| D1["catalog.ttl, decks/, reviews/,<br/>history/, drafts/"]
+    I2 -->|the folder's layout| D1
 ```
 
 - **Storage**: `pim:storage` triples in the (extended) profile. That's
@@ -93,49 +93,22 @@ flowchart LR
   [urls.ts](../packages/solid/src/urls.ts)). A registration that still
   can't be read as an instance is left out, and the rest of the list
   still loads.
-- **Each class of an instance's data** has a registration of its own,
-  titled with the instance's name, for other apps ([examples
-  below](#registrations)):
-  - the catalog: `dcat:Catalog`, `solid:instance` its subject
-    `catalog.ttl#catalog`;
-  - the decks: `sm:Deck`, `solid:instance` `catalog.ttl`;
-  - the cards: `sm:Card`, `solid:instanceContainer` `decks/`;
-  - the review states: `sm:ReviewState`, `reviews/`;
-  - the answers: `sm:Answer`, `history/`;
-  - the drafts of releases: `sm:Deck` again, `solid:instanceContainer`
-    `drafts/` (a draft's release document is a deck too, told from the
-    instance's decks by where it is).
-
-  Per the Type Indexes spec, `solid:instance` names the one resource
-  holding the class's subjects, and `solid:instanceContainer` a
-  container whose documents hold them. The catalog's, decks' and cards'
-  registrations go in each index that registers the instance. The
-  review states', answers' and drafts' go in the private index only,
-  even for an instance registered publicly, and without one nowhere.
-  They're written:
-  - when an instance is created;
-  - by a [format update](migrations.md#the-pod-migration) once it
-    updated every document (a failure there leaves the update done);
-  - when a guest's study moves into the pod as a new instance
-    ([guest-mode.md](guest-mode.md#as-a-new-instance));
-  - by **Register what is missing** under **Findable by other apps** in
-    Preferences (not offered to a guest), which lists each registration
-    that belongs in an index and whether it's there. A linked index that
-    can't be read is left out of the list and said to be unreadable, and
-    nothing is added to it.
-
-  They're never written on opening an instance, which would fight other
-  editors of the index and add back what the user removed. Attaching an
-  instance by URL writes only its `sm:Instance` registration; adding a
-  guest's study to an instance writes none.
+- **The rest of an instance's data** has no registration: the catalog,
+  the decks, cards, review states, answers and drafts are reached from
+  the instance, at the places its folder's layout gives them
+  ([Instance layout](#instance-layout)). Earlier versions of the app
+  wrote one registration per class of that data beside the
+  `sm:Instance` one ([examples below](#registrations)). The app no
+  longer writes them, and still recognizes them: removing or deleting
+  an instance removes them, and renaming it retitles them.
 - **Writing a type index** saves it with `If-Match` the version read; on
   a 412 it tries again, three attempts in all (`changeIndex` in
-  [typeIndex.ts](../packages/solid/src/typeIndex.ts)). A registration is
-  added only when no equal one is there: the same class, naming the same
-  resource under either predicate, the container with or without its
-  trailing slash.
+  [typeIndex.ts](../packages/solid/src/typeIndex.ts)). The registration
+  is added only when no equal one is there: `sm:Instance`, naming the
+  container under either predicate, with or without its trailing slash
+  (`addInstanceRegistration`).
   [typeIndex.integration.test.ts](../e2e/pod/src/typeIndex.integration.test.ts)
-  reads every registration back from real servers.
+  reads the registration back from real servers.
 - **Type index links** are read from the WebID subject in the WebID
   document and in its extended profile documents (`rdfs:seeAlso` /
   `foaf:isPrimaryTopicOf`), plus `pim:preferencesFile` for the private
@@ -164,15 +137,13 @@ flowchart LR
   writable). An index document already at the target URL is adopted,
   not overwritten. If registration fails, instance creation fails
   loudly, with no local fallback, and the new container is cleaned up.
-  For an instance registered publicly, the review states' and answers'
-  registrations go to the private index afterward; a refusal there
-  doesn't fail the creation, and leaves them for **Register what is
-  missing**.
+  An instance is registered in the index the user chose, and in no
+  other.
 - **Deleting an instance** deletes what Solid Memo wrote in its
   container and nothing else (`deleteInstanceData` in
   [instanceData.ts](../packages/solid/src/instanceData.ts)), then
-  removes its registrations of every class from both type indexes
-  (below). In order:
+  removes its registrations from both type indexes: its `sm:Instance`
+  one and any an earlier version wrote for its data (below). In order:
   1. each deck's cards and reviews documents as the catalog names them,
      if they're the deck's: they say so, or they're in the instance's
      own folder (below);
@@ -236,9 +207,9 @@ flowchart LR
   and the use case refuses it (`instanceOutsideStorages`) with nothing
   sent there.
 - **Removing an instance from the list** (`detachInstance`) removes its
-  registrations of every class from both type indexes, as deleting does
-  (below), and nothing else. It reads and writes only those indexes, so
-  no request goes to the instance's server and it works whatever that
+  registrations from both type indexes, as deleting does (below), and
+  nothing else. It reads and writes only those indexes, so no request
+  goes to the instance's server and it works whatever that
   server answers. Each index is tried whatever the other answers, and
   one that's missing has nothing to remove; a failure is reported once
   both were tried, and the list is read again either way.
@@ -258,7 +229,7 @@ flowchart LR
 
 ### Registrations
 
-In the type index, the instance's own registration, by which Solid Memo
+In the type index, the instance's one registration, by which Solid Memo
 finds it:
 
 ```turtle
@@ -268,56 +239,35 @@ finds it:
     dcterms:title "Japanese study" .
 ```
 
-Beside it, one registration for each class of its data: its catalog as a
-DCAT catalog, its decks, and the containers of its cards, review states
-and answers.
+Earlier versions of the app wrote one more for each class of the
+instance's data, titled with the instance's name, so a pod may still
+hold them. Each index that registered the instance got `dcat:Catalog`
+naming `catalog.ttl#catalog`, `sm:Deck` naming `catalog.ttl` (both
+with `solid:instance`) and `sm:Card` naming `decks/` (with
+`solid:instanceContainer`). The private index alone got
+`sm:ReviewState` naming `reviews/`, `sm:Answer` naming `history/` and
+`sm:Deck` naming `drafts/`. Their ids start `#sm-cat-`, `#sm-deck-`,
+`#sm-card-`, `#sm-review-`, `#sm-answer-` and `#sm-draft-`:
 
 ```turtle
-<#sm-cat-4b7d2e> a solid:TypeRegistration ;
-    solid:forClass dcat:Catalog ;
-    solid:instance <https://pod.example/solid-memo/main/catalog.ttl#catalog> ;
-    dcterms:title "Japanese study" .
-
-<#sm-deck-1c8e40> a solid:TypeRegistration ;
-    solid:forClass sm:Deck ;
-    solid:instance <https://pod.example/solid-memo/main/catalog.ttl> ;
-    dcterms:title "Japanese study" .
-
 <#sm-card-7a21d9> a solid:TypeRegistration ;
     solid:forClass sm:Card ;
     solid:instanceContainer <https://pod.example/solid-memo/main/decks/> ;
     dcterms:title "Japanese study" .
 ```
 
-and, in the private type index only:
-
-```turtle
-<#sm-review-52f0b3> a solid:TypeRegistration ;
-    solid:forClass sm:ReviewState ;
-    solid:instanceContainer <https://pod.example/solid-memo/main/reviews/> ;
-    dcterms:title "Japanese study" .
-
-<#sm-answer-e9d417> a solid:TypeRegistration ;
-    solid:forClass sm:Answer ;
-    solid:instanceContainer <https://pod.example/solid-memo/main/history/> ;
-    dcterms:title "Japanese study" .
-
-<#sm-draft-3d90c6> a solid:TypeRegistration ;
-    solid:forClass sm:Deck ;
-    solid:instanceContainer <https://pod.example/solid-memo/main/drafts/> ;
-    dcterms:title "Japanese study" .
-```
-
 `meta.ttl` makes a container self-describing: attach-by-URL reads it to
 recover an instance that lost its registration. Deleting an instance,
 or removing it from the list, removes the `sm:Instance` registration by
-its container, and each other
+its container, and each one an earlier version wrote
 by the exact IRI it names (`<container>catalog.ttl#catalog`,
 `<container>catalog.ttl`, `<container>decks/`, `<container>reviews/`,
 `<container>history/`, `<container>drafts/`). None is removed by what
 lies under the container, where another app may have registered its own
 data. A registration that registers something else too keeps it, and
-loses only the link to the instance's data.
+loses only the link to the instance's data. Those an earlier version
+wrote for an instance whose `sm:Instance` registration went some other
+way stay, as the app no longer lists that instance to remove.
 
 ## Instance layout
 
@@ -867,8 +817,9 @@ graph LR
 An instance's URL is permanent, and so is every document's and subject's
 in it: the [format update](migrations.md#the-pod-migration) and the
 library upgrade write the documents where they are, and change no
-registration (the format update only adds those missing). Another app
-may keep a link to the instance, a deck, a card or a review state.
+registration: the format update writes nothing outside the instance.
+Another app may keep a link to the instance, a deck, a card or a review
+state.
 
 ## The catalog
 
@@ -906,19 +857,19 @@ limit holds for its links to drafts and releases
 
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;
-its registration as the [Discovery chain](#discovery-chain) says. The
-whole document conforms to DCAT-AP, a course's deck typed
-`schema:Course` too ([Courses](#courses)), and a test holds what the app
-writes to it.
+it has no registration of its own ([Discovery
+chain](#discovery-chain)). The whole document conforms to DCAT-AP, a
+course's deck typed `schema:Course` too ([Courses](#courses)), and a
+test holds what the app writes to it.
 
 The instance's name is in the meta document's `dcterms:title`, the
-catalog's `dcterms:title`, and the `dcterms:title` of every registration
-of the instance's data in each type index (its `sm:Instance` one names
-it in the instance list). Renaming it in the Studio (`renameInstance`,
-[studio.md](studio.md#the-instance)) writes them all, each document
-read and written again on a 412. A catalog description the old name
-gave (`defaultCatalogDescription`) follows the new name; one the user
-wrote stays.
+catalog's `dcterms:title`, and the `dcterms:title` of its registrations
+in each type index. Its `sm:Instance` one names it in the instance
+list, beside any an earlier version wrote for its data. Renaming it in
+the Studio (`renameInstance`, [studio.md](studio.md#the-instance))
+writes them all, each document read and written again on a 412. A
+catalog description the old name gave (`defaultCatalogDescription`)
+follows the new name; one the user wrote stays.
 
 A deck's description, topics and keywords are edited in its Browser
 ("Describe deck") and on its about screen in the Studio, the keywords as

@@ -358,11 +358,6 @@ Press **Save**. A deck's own preferences can set daily limits for that
 deck, where an empty field follows these, and show its cards in another
 language ([Languages](#languages)).
 
-Under the settings (not for a guest), **Findable by other apps** shows
-whether other Solid apps can find your decks and study through your
-Pod's type indexes, and registers what's missing when you ask
-([data-model.md](data-model.md#discovery-chain)).
-
 ## Languages
 
 Solid Memo speaks English, Swedish, Korean, German, Spanish and French.

@@ -20,7 +20,6 @@ import {
 } from "@solid-memo/domain/instanceUpdate";
 import {
   instanceName,
-  type DataClassRegistrations,
   type Instance,
   type InstanceDeletion,
   type RegistrationOptions,
@@ -106,30 +105,14 @@ export interface InstanceUseCases {
    */
   detachInstance(session: Session, instance: Instance): Promise<void>;
   /**
-   * The registrations of the instance's data, one per class, that belong
-   * in the user's type indexes, and whether each is there
-   * (docs/data-model.md "Discovery chain"): what lets other apps find
-   * each kind of it. Reads only.
-   */
-  dataClassRegistrations(session: Session, instance: Instance): Promise<DataClassRegistrations>;
-  /**
-   * Add the registrations dataClassRegistrations finds missing, titled
-   * with the instance's name. Only on the user's say (or with a new
-   * instance, a format update, a guest's study kept as a new instance;
-   * adding one to an instance registers nothing): never on opening an
-   * instance, where it would add back what the user, or another app,
-   * removed.
-   */
-  registerDataClasses(session: Session, instance: Instance): Promise<void>;
-  /**
    * Give an instance a new name (instanceName: trimmed, not empty)
    * everywhere it is kept: its meta document, its catalog's title (and
    * the description, while it is the one the old name gave), and its
-   * registrations in the type indexes, the instance's and the
-   * catalog's, which name it in the instance list. Each write is made
-   * of its document as it is then, and made again from a fresh read
-   * when it changed meanwhile, three times in all. The instance as
-   * renamed.
+   * registrations in the type indexes: the instance's, which names it in
+   * the instance list, and those of its data's classes earlier versions
+   * wrote. Each write is made of its document as it is then, and made
+   * again from a fresh read when it changed meanwhile, three times in
+   * all. The instance as renamed.
    */
   renameInstance(session: Session, instance: Instance, name: string): Promise<Instance>;
   /** The instance's catalog; null when it has none (an instance not updated yet). */
@@ -158,10 +141,10 @@ export interface InstanceUseCases {
    * left as it is — as it was, or updated when the answer to its write
    * was lost — and named with why; the others go on. Nothing is put back:
    * every document is readable, updated or not, and running it again
-   * updates what is still outdated. Once nothing failed, the
-   * registrations of the instance's data that are missing are added
-   * (registerDataClasses); a failure there leaves the update done. Throws
-   * when what is outdated cannot be read: nothing was written.
+   * updates what is still outdated. Nothing is written outside the
+   * instance: no type index registration is added, so none the user, or
+   * another app, removed comes back. Throws when what is outdated cannot
+   * be read: nothing was written.
    */
   updateInstance(
     session: Session,
@@ -393,19 +376,6 @@ export function createInstanceUseCases({
         instance,
       });
     },
-    dataClassRegistrations(session, instance) {
-      return instanceRepository.readDataClassRegistrations({
-        webId: session.webId,
-        instanceUrl: instance.url,
-      });
-    },
-    registerDataClasses(session, instance) {
-      return instanceRepository.registerDataClasses({
-        webId: session.webId,
-        instanceUrl: instance.url,
-        title: instance.name,
-      });
-    },
     async renameInstance(session, instance, typed) {
       const name = instanceName(typed);
       await again(async () => {
@@ -457,13 +427,6 @@ export function createInstanceUseCases({
           failed.push({ ...document, error });
         }
         progress.stepped();
-      }
-      progress.finished("register");
-      // Other apps find each kind of the instance's data by its class; the instance works without, and Preferences adds them later.
-      if (failed.length === 0) {
-        await instanceRepository
-          .registerDataClasses({ webId: session.webId, instanceUrl, title: instance.name })
-          .catch(() => undefined);
       }
       progress.finished();
       return { updated, failed };

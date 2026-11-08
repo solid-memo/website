@@ -104,9 +104,6 @@ export const queryKeys = {
     guestInstanceUrl,
     targetUrl,
   ],
-  /** Whether an instance's data classes are registered in the type index. */
-  dataClassRegistrations: (instanceUrl: string) => ["dataClassRegistrations", instanceUrl],
-
   /** The deck library's index. */
   library: () => ["library"],
   /** A library deck's cards. */
