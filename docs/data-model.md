@@ -980,8 +980,12 @@ A cycle is broken by moving its lowest-URL group to the top level. A
 group nested deeper than 16 groups (`MAX_GROUP_DEPTH`) is read at the
 top level, with the groups it holds counting their depth from there.
 The editor doesn't stop a move that nests a group deeper, so the next
-read shows that group at the top level. A negative position counts as none; on a tie of positions, decks come
-before groups, each kind in document order. A group in a format newer
+read shows that group at the top level. A negative position counts as
+none, and so does one larger than the app holds exactly (2^53 − 1):
+the node sorts last, and a group written again is written without it,
+or renumbered when its level is reordered. On a tie of positions,
+decks come before groups, each kind in document order. A group in a
+format newer
 than the app's makes the arrangement read-only. So does, under the
 "Set invalid data aside" policy (`sm:blockSubject`, the default), a
 catalog or group that doesn't conform, or that check still running

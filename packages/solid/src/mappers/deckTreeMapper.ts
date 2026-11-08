@@ -12,7 +12,11 @@ import {
   getUrlAll,
 } from "../client/rdf";
 import { editOf } from "../datasetEdit";
-import { deckGroupFromRecord, deckGroupToRecord } from "@solid-memo/domain/deckGroupRecord";
+import {
+  deckGroupFromRecord,
+  deckGroupToRecord,
+  usablePosition,
+} from "@solid-memo/domain/deckGroupRecord";
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
@@ -60,7 +64,8 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
   const deckPositions = new Map<string, number>();
   for (const deck of decks) {
     const position = getInteger(getThing(dataset, deck.url)!, SM.position);
-    if (position !== null) deckPositions.set(deck.url, position);
+    // A position the tree would not keep is none, as a group's is (usablePosition).
+    if (usablePosition(position)) deckPositions.set(deck.url, position);
   }
   const root = getThing(dataset, `${catalogUrl}#catalog`);
   return {

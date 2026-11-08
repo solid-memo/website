@@ -35,10 +35,14 @@ describe("deck group records", () => {
     expect(deckGroupFromRecord(URL, record)).toEqual(stored);
   });
 
-  it("read a negative position as none", () => {
+  it("read a negative position, or one too large to hold exactly, as none", () => {
     const stored = { group: { url: URL, title: { en: "Languages" } }, decks: [], groups: [] };
-    const record = deckGroupToRecord({ ...stored, position: -1 }, PUBLISHER);
-    expect(deckGroupFromRecord(URL, record)).toEqual(stored);
+    for (const position of [-1, Infinity, Number.MAX_SAFE_INTEGER + 1, 0.5]) {
+      const record = deckGroupToRecord({ ...stored, position }, PUBLISHER);
+      expect(deckGroupFromRecord(URL, record)).toEqual(stored);
+    }
+    const largest = deckGroupToRecord({ ...stored, position: Number.MAX_SAFE_INTEGER }, PUBLISHER);
+    expect(deckGroupFromRecord(URL, largest).position).toBe(Number.MAX_SAFE_INTEGER);
   });
 
   it("keep a description the user wrote, and renew the default one on a rename", () => {

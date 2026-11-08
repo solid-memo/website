@@ -162,6 +162,26 @@ describe("withTreeChanges", () => {
     expect(getInteger(y, SM.position)).toBeNull();
   });
 
+  it("reads a position too large to hold as none, on a group and a deck, and writes the group without it", async () => {
+    const huge = "9".repeat(400);
+    const dataset = await document(
+      rootTtl("; dcat:catalog <#group-x>") +
+        deckTtl("a", `; sm:position ${huge} `) +
+        deckTtl("b", "; sm:position 9007199254740992 ") +
+        deckTtl("c") +
+        groupTtl("group-x", "X", "; dcat:dataset <#a>", `; sm:position ${huge} `),
+    );
+    const layout = toStoredLayout(dataset, CATALOG);
+    expect(layout.groups[0]).not.toHaveProperty("position");
+    expect([...layout.deckPositions]).toEqual([]);
+    const renamed = edited(dataset, {
+      kind: "rename",
+      group: at("group-x"),
+      title: { en: "Y" },
+    }).dataset;
+    expect(getInteger(getThing(renamed, at("group-x"))!, SM.position)).toBeNull();
+  });
+
   it("drops a negative position, which the shape does not allow, when it writes the group", async () => {
     const dataset = await document(
       rootTtl("; dcat:catalog <#group-x>") +
