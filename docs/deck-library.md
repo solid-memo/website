@@ -1099,13 +1099,15 @@ flowchart LR
   from them. An agent's URL is joined from a document and an author's
   name, and a release from before format 3 names its agents by those
   URLs: each is kept as a path of its pieces (`TextMap`, the same
-  file). The guest's pod on the device stores a document as
-  N-Triples lines, each joined from three terms, so it keys a line by
-  the path of its pieces, each no longer than the bound (`TripleLines`
-  in the `solid` package). An answer names its card and the wrong
-  option chosen in the deck's cards document as it is now
-  (`deckAnswers` in `cardHistory.ts`): an IRI joined from that document
-  and a fragment. The answer statistics so count cards and wrong
+  file). The Studio's graph names a blank node by a number for its label
+  in its document (`instanceGraphOf` in `instanceGraph.ts`), never by
+  the label joined to the document's address. The guest's pod on the
+  device stores a document as N-Triples lines, each joined from three
+  terms, so it keys a line by the path of its pieces, each no longer
+  than the bound (`TripleLines` in the `solid` package). An answer names
+  its card and the wrong option chosen in the deck's cards document as
+  it is now (`deckAnswers` in `cardHistory.ts`): an IRI joined from that
+  document and a fragment. The answer statistics so count cards and wrong
   options by their fragment ids alone. Merging a guest's answers into a
   deck (`mergedAnswer` in `guest.ts`) joins IRIs the same way, but only
   to write them, and a write refuses a term past the bound. A release

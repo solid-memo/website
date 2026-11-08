@@ -78,7 +78,10 @@ export interface GraphLiteral {
 }
 
 export interface GraphNode {
-  /** The IRI; for a blank node, `_:<label>@<document>`, its label being its document's own. */
+  /**
+   * The IRI; for a blank node, `_:<n>`, a number the graph gives each
+   * label of each document, as its label is its document's own.
+   */
   id: string;
   kind: GraphNodeKind;
   /** The document that defines it: a resource's, or a document's own URL; none for a container or a leaf. */
@@ -89,6 +92,8 @@ export interface GraphNode {
   unreadable?: true;
   /** Whether it is a blank node. */
   blank?: true;
+  /** For a blank node: its term in its document, `_:<label>`. */
+  term?: string;
   /** Its classes (rdf:type), as the documents read state them. */
   types: string[];
   /** The literals the documents read state of it, a leaf's too. */
@@ -146,13 +151,40 @@ const LICENSES = new Set(KNOWN_LICENSES);
 const LICENSE = `${DCTERMS_NS}license`;
 const LICENSE_DOCUMENT = `${DCTERMS_NS}LicenseDocument`;
 
-/** The id of a term a document states: a blank node's is scoped to the document. */
-function idOf(term: string, document: string): string {
-  return term.startsWith("_:") ? `${term}@${document}` : term;
+/** The id of a term a document states (GraphNode's `id`). */
+type IdOf = (term: string, document: string) => string;
+
+/**
+ * The ids of the terms the documents state: an IRI's its own, a blank
+ * node's a number for its label in its document. Never the label and
+ * document joined: each may be as long as a term may be, and V8 hashes
+ * a longer string by its length alone (pathKeys.ts), so the graph's
+ * maps, and the Studio's, would key many such ids in time growing with
+ * the square of their number. `terms` holds each blank node's term.
+ */
+function blankIds(): { idOf: IdOf; terms: Map<string, string> } {
+  const ids = new PathMap<string>();
+  const terms = new Map<string, string>();
+  const idOf: IdOf = (term, document) => {
+    if (!term.startsWith("_:")) return term;
+    const key = [document, term];
+    let id = ids.get(key);
+    if (id === undefined) {
+      id = `_:${ids.size}`;
+      ids.set(key, id);
+      terms.set(id, term);
+    }
+    return id;
+  };
+  return { idOf, terms };
 }
 
 /** Each subject's defining document, worked out from every statement read (see homeOf). */
-function homesOf(documents: readonly GraphDocument[], root: string): Map<string, string> {
+function homesOf(
+  documents: readonly GraphDocument[],
+  root: string,
+  idOf: IdOf,
+): Map<string, string> {
   const own = new Set<string>();
   const first = new Map<string, string>();
   const state = (term: string, url: string) => {
@@ -281,10 +313,12 @@ export function instanceGraphOf({
     edge(parent, url, LDP_CONTAINS, "containment");
   }
 
-  const homes = homesOf(documents, root);
+  const { idOf, terms: blanks } = blankIds();
+  const homes = homesOf(documents, root, idOf);
   for (const [id, document] of homes) {
     if (nodes.has(id)) continue;
-    add({ id, kind: "resource", document, ...(id.startsWith("_:") ? { blank: true } : {}) });
+    const term = blanks.get(id);
+    add({ id, kind: "resource", document, ...(term === undefined ? {} : { blank: true, term }) });
     edge(document, id, "", "containment");
   }
 

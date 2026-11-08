@@ -395,6 +395,46 @@ describe("createLayout", () => {
     }
   });
 
+  it("breaks a cycle of blank nodes at the same node, whatever blank nodes other documents have", () => {
+    const doc = `${INSTANCE}d.ttl`;
+    const other = `${INSTANCE}a.ttl`;
+    const part = (from: string, to: string): DraftTriple => ({
+      subject: `_:${from}`,
+      predicate: IS_PART_OF,
+      object: { kind: "blank", value: to },
+    });
+    // The graph numbers blank nodes as it reads them: nine of another document read first make the cycle's "_:9" and "_:10".
+    const graph = (unrelated: boolean) =>
+      instanceGraphOf({
+        instanceUrl: INSTANCE,
+        storages: ["https://pod.example/"],
+        documents: [
+          ...(unrelated
+            ? [
+                found(
+                  other,
+                  Array.from({ length: 9 }, (_, k) => triple(`_:o${k}`, TYPE, SM.Card)),
+                ),
+              ]
+            : []),
+          found(doc, [part("p", "q"), part("q", "p")]),
+        ],
+      });
+    for (const unrelated of [false, true]) {
+      const built = graph(unrelated);
+      const { routes } = laidOut(built);
+      const [p, q] = ["_:p", "_:q"].map(
+        (term) => built.nodes.find((each) => each.term === term && each.document === doc)!.id,
+      ) as [string, string];
+      const of = (from: string, to: string) =>
+        routes.of(built.edges.find((each) => each.from === from && each.to === to)!);
+      // The first by its label falls back to its document, the other hangs under it.
+      expect(of(doc, p).tree).toBe(true);
+      expect(of(q, p).tree).toBe(true);
+      expect(of(doc, q).tree).toBe(false);
+    }
+  });
+
   it("routes the edges to a term up the tree, those of a document's nodes meeting in the same parts", () => {
     const graph = largeGraph(40);
     const { routes } = laidOut(graph);
@@ -643,6 +683,14 @@ describe("graphIdentity", () => {
       edges: graph.edges,
     };
     expect(graphIdentity(rekinded)).not.toBe(graphIdentity(graph));
+  });
+
+  it("differs for two graphs whose blank nodes differ only in label", () => {
+    const graphOf = (term: string): InstanceGraph => ({
+      nodes: [{ id: "_:0", kind: "resource", types: [], literals: [], blank: true, term }],
+      edges: [],
+    });
+    expect(graphIdentity(graphOf("_:a"))).not.toBe(graphIdentity(graphOf("_:b")));
   });
 
   it("differs for two graphs a short hash of them cannot tell apart", () => {

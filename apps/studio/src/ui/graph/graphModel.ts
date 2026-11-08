@@ -13,6 +13,7 @@
 
 import { SM, SM_NS } from "@solid-memo/vocab/vocab.generated";
 import type { GraphEdge, GraphNode, InstanceGraph } from "@solid-memo/domain/instanceGraph";
+import { PathMap } from "@solid-memo/domain/pathKeys";
 import type { Point, Positions } from "./layout";
 
 /**
@@ -174,8 +175,7 @@ export function labelOf(node: GraphNode, instanceUrl: string, instanceName: stri
     return node.id.slice(node.id.lastIndexOf("/", node.id.length - 2) + 1);
   if (node.kind === "document" && node.id.startsWith(instanceUrl))
     return node.id.slice(instanceUrl.length);
-  // A blank node's label holds no "@", its document's address may.
-  if (node.blank === true) return node.id.slice(0, node.id.indexOf("@"));
+  if (node.term !== undefined) return node.term;
   if (node.kind === "vocabularyLeaf" && shortName(node.id) !== node.id) return shortName(node.id);
   const hash = node.id.indexOf("#");
   if (hash !== -1 && hash < node.id.length - 1) return node.id.slice(hash + 1);
@@ -226,17 +226,22 @@ export function distinctLabels(
     return each.id.slice(Math.max(parent + 1, instanceUrl.length));
   };
   const parentCounts = counted(sharedFolders.map(parentOf));
-  const shortOf = (each: GraphNode) =>
-    `${documentName(each.document!, instanceUrl).split("/").at(-1)}#${labels.get(each.id)}`;
-  const shortCounts = counted(shared.map(shortOf));
+  // Counted by the file's name and the label, each a key of its own: joined, they could be longer than V8 hashes all of (pathKeys.ts).
+  const shortOf = (each: GraphNode) => [
+    documentName(each.document!, instanceUrl).split("/").at(-1)!,
+    labels.get(each.id)!,
+  ];
+  const shortCounts = new PathMap<number>();
+  for (const short of shared.map(shortOf))
+    shortCounts.set(short, (shortCounts.get(short) ?? 0) + 1);
   const distinct = new Map(labels);
   for (const each of shared) {
     const short = shortOf(each);
     distinct.set(
       each.id,
       shortCounts.get(short)! > 1
-        ? `${documentName(each.document!, instanceUrl)}#${labels.get(each.id)}`
-        : short,
+        ? `${documentName(each.document!, instanceUrl)}#${short[1]}`
+        : short.join("#"),
     );
   }
   for (const each of sharedFolders) {

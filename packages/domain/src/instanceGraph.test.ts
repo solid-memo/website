@@ -11,6 +11,7 @@ import {
   type GraphNode,
   type InstanceGraph,
 } from "./instanceGraph";
+import { HASHED_CHARACTERS } from "./pathKeys";
 import type { DraftTriple } from "./release/releaseDraft";
 import type { ReleaseTerm } from "./release/releaseModel";
 import { growth } from "./testing/growth";
@@ -49,6 +50,10 @@ function graph(documents: GraphDocument[], storages = [STORAGE]): InstanceGraph 
 }
 function node(of: InstanceGraph, id: string): GraphNode | undefined {
   return of.nodes.find((each) => each.id === id);
+}
+/** The blank node `term` of `document`. */
+function blank(of: InstanceGraph, term: string, document: string): GraphNode | undefined {
+  return of.nodes.find((each) => each.term === term && each.document === document);
 }
 function kinds(of: InstanceGraph): Record<string, string> {
   return Object.fromEntries(of.nodes.map((each) => [each.id, each.kind]));
@@ -160,18 +165,52 @@ describe("instanceGraphOf", () => {
         triple(`${REVIEWS}#s`, "http://example.org/x", { kind: "blank", value: "e" }),
       ]),
     ]);
-    expect(node(of, `_:b0@${CATALOG}`)).toMatchObject({
+    const inner = blank(of, "_:b0", CATALOG);
+    expect(inner).toMatchObject({
       kind: "resource",
-      document: CATALOG,
       blank: true,
       literals: [{ value: "Inner" }],
     });
-    expect(node(of, `_:b0@${CARDS}`)).toMatchObject({
-      document: CARDS,
+    expect(blank(of, "_:b0", CARDS)).toMatchObject({
+      kind: "resource",
+      blank: true,
       literals: [{ value: "Other" }],
     });
+    expect(blank(of, "_:b0", CARDS)?.id).not.toBe(inner?.id);
+    expect(of.edges).toContainEqual({
+      from: `${CATALOG}#catalog`,
+      to: inner?.id,
+      predicate: "http://example.org/part",
+      kind: "link",
+    });
     // Named only as an object, it is still its document's.
-    expect(node(of, `_:e@${REVIEWS}`)).toMatchObject({ kind: "resource", document: REVIEWS });
+    expect(blank(of, "_:e", REVIEWS)).toMatchObject({ kind: "resource", blank: true });
+  });
+
+  it("gives blank nodes short ids, however long their labels and addresses", () => {
+    // V8 hashes a string past HASHED_CHARACTERS by its length alone: a
+    // blank node's label joined to its document's address would key the
+    // graph's maps, and the Studio's, in time growing with the square of
+    // their number. Labels as long as a term may be, in documents whose
+    // addresses are as long as each other.
+    const label = (n: number) =>
+      `b0_${"a".repeat(HASHED_CHARACTERS - 13)}${String(n).padStart(8, "0")}`;
+    const documents = [0, 1].map((d) =>
+      found(
+        `${INSTANCE}decks/cards-${d}.ttl`,
+        Array.from({ length: 50 }, (_, n) => triple(`_:${label(n)}`, TITLE, text(`${d} ${n}`))),
+      ),
+    );
+    expect(`_:${label(0)}`).toHaveLength(HASHED_CHARACTERS);
+    const of = graph(documents);
+    const blanks = of.nodes.filter((each) => each.blank);
+    expect(blanks).toHaveLength(100);
+    expect(new Set(blanks.map((each) => each.id)).size).toBe(100);
+    for (const each of of.nodes) expect(each.id.length).toBeLessThanOrEqual(HASHED_CHARACTERS);
+    for (const each of blanks) expect(each.id.length).toBeLessThan(16);
+    expect(blank(of, `_:${label(7)}`, `${INSTANCE}decks/cards-1.ttl`)?.literals).toEqual([
+      expect.objectContaining({ value: "1 7" }),
+    ]);
   });
 
   it("makes what is said elsewhere of a leaf the leaf's, said by that document", () => {

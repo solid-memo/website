@@ -181,7 +181,8 @@ export function GraphNodePane({
         {labels.get(node.id)}
       </h3>
       <p>
-        <code class="graph-iri">{node.id}</code>
+        {/* A blank node's id is a number the graph gives it: its term is what its document calls it. */}
+        <code class="graph-iri">{node.term ?? node.id}</code>
       </p>
       {note !== null && <p>{t(note)}</p>}
       <dl>

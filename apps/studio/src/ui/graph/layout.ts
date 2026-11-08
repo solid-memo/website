@@ -196,12 +196,27 @@ function append<K, V>(map: Map<K, V[]>, key: K, value: V): void {
   else list.push(value);
 }
 
-/** `graph`'s nodes and edges in order, whatever order they came in. */
+/**
+ * `graph`'s nodes and edges in order, whatever order they came in. A
+ * blank node's id is a number the graph gives it as it reads the
+ * documents, which other documents' blank nodes change: blank nodes
+ * are in order by their document, then their term, compared apart,
+ * never joined. Their ids all start "_:", as no IRI does, so they keep
+ * one place among the others.
+ */
 function sortedOf(graph: InstanceGraph): InstanceGraph {
+  const blanks = new Map<string, GraphNode>();
+  for (const node of graph.nodes) if (node.term !== undefined) blanks.set(node.id, node);
+  const byId = (a: string, b: string) => {
+    const [x, y] = [blanks.get(a), blanks.get(b)];
+    return x === undefined || y === undefined
+      ? order(a, b)
+      : order(x.document!, y.document!) || order(x.term!, y.term!);
+  };
   return {
-    nodes: [...graph.nodes].sort((a, b) => order(a.id, b.id)),
+    nodes: [...graph.nodes].sort((a, b) => byId(a.id, b.id)),
     edges: [...graph.edges].sort(
-      (a, b) => order(a.from, b.from) || order(a.to, b.to) || order(a.predicate, b.predicate),
+      (a, b) => byId(a.from, b.from) || byId(a.to, b.to) || order(a.predicate, b.predicate),
     ),
   };
 }
@@ -907,8 +922,8 @@ export function createLayout(graph: InstanceGraph): Layout {
 const identities = new WeakMap<InstanceGraph, string>();
 
 /**
- * What a graph is, in full: every node's id and kind and every edge's
- * ends, predicate and kind, in order, as text that two graphs share only
+ * What a graph is, in full: every node's id, kind and blank label and
+ * every edge's ends, predicate and kind, in order, as text that two graphs share only
  * when they are the same. So a layout kept from before is used only for
  * the graph it was made of; a short hash of these could be made to match
  * for another graph. Made once for each graph object.
@@ -917,7 +932,7 @@ export function graphIdentity(graph: InstanceGraph): string {
   let identity = identities.get(graph);
   if (identity === undefined) {
     identity = JSON.stringify([
-      graph.nodes.map((node) => [node.id, node.kind]),
+      graph.nodes.map((node) => [node.id, node.kind, node.term ?? null]),
       graph.edges.map((edge) => [edge.from, edge.predicate, edge.to, edge.kind]),
     ]);
     identities.set(graph, identity);
