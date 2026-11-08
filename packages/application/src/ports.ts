@@ -589,10 +589,12 @@ export interface ReleaseDraftRepository {
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
-   * The draft as its documents say now, with the version they are at
-   * together (opaque: it changes when any of them does, or one comes or
-   * goes). Nothing it published before is known here: `published` is
-   * empty. Throws draftGone when it has no release document, and
+   * The draft as its documents say now, with the version of this read
+   * of them (opaque: another when any of them is read anew rather than
+   * found unchanged, or one comes or goes; never only their ETags, which
+   * a server may leave out or keep for other content). Nothing it
+   * published before is known here: `published` is empty. Throws
+   * draftGone when it has no release document, and
    * draftIdUnsupported when it names a subject by an id no draft can
    * have (DRAFT_ID): a chapter's document is named after its id; and
    * draftHiddenValue when its documents state a predicate a subject's
@@ -618,8 +620,10 @@ export interface ReleaseDraftRepository {
    * (`@base` its URL, the usual prefixes): every subject moved there,
    * released `issued` (also its time of change), written at library
    * deck format 6, with the series it starts described in it. With
-   * `version`, the draft as it was at that version (read), or
-   * changedElsewhere when its documents changed since. A draft that
+   * `version`, the draft as the read at that version had it, not read
+   * again, so what was checked of that read is what is published; or
+   * changedElsewhere when that read is not the draft's last (read again
+   * or edited since). A draft that
    * states anything of `targetUrl` or a subject of it (`<targetUrl>#id`)
    * itself, which would say more of the release than its parts do, is
    * releaseForeignStatement. One whose documents name a subject of the
