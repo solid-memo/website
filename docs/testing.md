@@ -804,7 +804,9 @@ catching round trips growing from linear to quadratic, for example, at
 every stage. Time is measured only
 for CPU work, as a ratio of two runs on the same machine (the growth
 tests, [growth.ts](../packages/domain/src/testing/growth.ts)), not
-against a budget in milliseconds. The pod tests that time a server only
+against a budget in milliseconds. The Markdown package, which imports no
+other, keeps its own copy in
+[growth.ts](../packages/markdown/src/testing/growth.ts). The pod tests that time a server only
 print what they measure.
 
 ### The merge queue

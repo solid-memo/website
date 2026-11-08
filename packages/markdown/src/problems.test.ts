@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { liveLink } from "./links";
 import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "./parse";
 import { markdownProblems, OPTION, PROSE, SIDE } from "./problems";
+import { growth } from "./testing/growth";
 
 // The links module as it is, its liveLink counted, so a test can tell how often a URL is read.
 vi.mock("./links", async (importOriginal) => {
@@ -218,32 +219,30 @@ describe("markdownProblems", () => {
    * room for: each use is checked with its URL, so the parser charges
    * the URL's length for each use (MAX_WORK), and a text past it is
    * shown as plain text. Its check takes time linear in the text's
-   * length: within `growth` times what the same shape at half the
-   * length takes (four times for quadratic), the better of three runs.
+   * length: the text eight times as long takes under four times what
+   * the short one does eight times over (about one for linear, eight for
+   * quadratic). Both lengths are past MAX_WORK.
    */
   it("checks a long URL used again and again in time linear in the text's length", () => {
-    const growth = 3;
     const card = (length: number) => {
       const uses = Math.floor(length / 8);
       const head = `[a]: <https://e.example/${"‮".repeat(length - 4 * uses - 30)}>\n\n`;
       return head + "[a] ".repeat(uses);
     };
+    expect(markdownProblems(card(2_000), PROSE)).toEqual([{ code: "tooComplex" }]);
     expect(markdownProblems(card(16_000), PROSE)).toEqual([{ code: "tooComplex" }]);
-    const time = (text: string) => {
-      let took = Infinity;
-      for (let round = 0; round < 3; round++) {
-        const started = performance.now();
-        markdownProblems(text, PROSE);
-        took = Math.min(took, performance.now() - started);
-      }
-      return took;
-    };
-    time(card(1_000));
-    const half = time(card(8_000));
-    const took = time(card(16_000));
-    expect(took, `${Math.round(took)} ms, ${Math.round(half)} ms at half the length`).toBeLessThan(
-      Math.max(half * growth, 5),
+    const ratio = growth(
+      (length) => {
+        const text = card(length);
+        return () => markdownProblems(text, PROSE);
+      },
+      2_000,
+      8,
     );
+    expect(
+      ratio,
+      `the text at 16,000 characters took ${ratio.toFixed(1)} times the one at 2,000 checked 8 times`,
+    ).toBeLessThan(4);
   });
 
   it("holds an option to one paragraph", () => {
