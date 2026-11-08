@@ -5,6 +5,8 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import { decksOf, nodeId, type DeckTree, type TreeNode } from "@solid-memo/domain/deckTree";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
+import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { fakePod } from "./testing/fakePod";
 import type { WriteCheck } from "./writeCheck";
@@ -197,5 +199,38 @@ describe("the deck tree in the pod", () => {
     expect(shape(after.children)).toEqual([{ "group-1": ["b"] }, "c"]);
     expect(pod.triples(CATALOG)!.some((triple) => triple.includes(`<${a.url}>`))).toBe(false);
     expect(after.children.map(nodeId)).toEqual([group.url, at("c")]);
+  });
+
+  it("renames and fills a group whose position is too large to read, under the real write check", async () => {
+    // A valid xsd:integer this long reads as Infinity: it counts as none and is not written back.
+    const huge = "9".repeat(400);
+    const pod = await podWith(
+      `<#catalog> dcat:catalog <#group-1> .
+       <#group-1> a sm:DeckGroup, dcat:Catalog ; sm:formatVersion 1 ; dcterms:title "Languages"@en ;
+         dcterms:description "Deck group: Languages."@en ; dcterms:publisher <https://pod.example/profile/card#me> ;
+         dcat:dataset <#a> ; sm:position ${huge} .
+       <#a> sm:position ${huge} .
+       <https://pod.example/profile/card#me> a <http://xmlns.com/foaf/0.1/Agent> ;
+         <http://xmlns.com/foaf/0.1/name> "Me" .`,
+    );
+    const validator = createShaclShapeValidator({
+      fetch: pod.fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    }).over(pod.fetch);
+    const repository = repositoryOn(pod.fetch, validator.checkSubjects);
+    const renamed = await repository.editDeckTree(INSTANCE, {
+      kind: "rename",
+      group: group.url,
+      title: { en: "Words" },
+    });
+    expect(shape(renamed.children)).toEqual(["b", "c", { "group-1": ["a"] }]);
+    const filled = await repository.editDeckTree(INSTANCE, {
+      kind: "move",
+      node: at("b"),
+      to: { parent: group.url, after: at("a") },
+    });
+    expect(shape(filled.children)).toEqual(["c", { "group-1": ["a", "b"] }]);
+    expect(pod.triples(CATALOG)!.some((triple) => triple.includes(huge))).toBe(false);
   });
 });
