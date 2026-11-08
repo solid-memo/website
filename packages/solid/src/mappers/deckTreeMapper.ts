@@ -42,16 +42,22 @@ import { toDecks } from "./deckMapper";
  * A group the app cannot read (one that does not fit its shape) is not
  * part of the layout and is never written: its members are at the top
  * level, and the catalog's `dcat:catalog` keeps listing it. A group in
- * a newer format than this app's makes the whole layout read-only.
+ * a newer format than this app's makes the whole layout read-only. A
+ * subject read as a deck is a deck, never also a group, whatever else
+ * it is typed as: the tree holds each node once.
  */
 
-function groupThings(dataset: Dataset) {
-  return getThingAll(dataset).filter((thing) => getUrlAll(thing, RDF.type).includes(SM.DeckGroup));
+/** The subjects typed as groups, but for those in `decks`. */
+function groupThings(dataset: Dataset, decks: ReadonlySet<string>) {
+  return getThingAll(dataset).filter(
+    (thing) => getUrlAll(thing, RDF.type).includes(SM.DeckGroup) && !decks.has(asUrl(thing)),
+  );
 }
 
 /** The arrangement a catalog document (at `catalogUrl`) states. */
 export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayout {
-  const things = groupThings(dataset);
+  const decks = toDecks(dataset, catalogUrl);
+  const things = groupThings(dataset, new Set(decks.map((deck) => deck.url)));
   const readOnly = things.some((thing) => storedVersionOf(thing) > LATEST_VERSION.deckGroup);
   const groups: StoredGroup[] = [];
   for (const thing of things) {
@@ -60,7 +66,6 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
     const url = asUrl(thing);
     groups.push(deckGroupFromRecord(url, migrate("deckGroup", read.record, { subject: url })));
   }
-  const decks = toDecks(dataset, catalogUrl);
   const deckPositions = new Map<string, number>();
   for (const deck of decks) {
     const position = getInteger(getThing(dataset, deck.url)!, SM.position);

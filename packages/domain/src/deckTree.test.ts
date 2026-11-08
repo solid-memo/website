@@ -249,6 +249,19 @@ describe("tree lookups", () => {
     expect(isDescendant(sample, "gone", "b")).toBe(false);
   });
 
+  it("look a parent up as a group, past a deck of the same URL", () => {
+    // A tree should never hold a deck and a group of one URL; if one does, a parent is still the group.
+    const twins = tree(["h", "x", ["x", "a"]], ["g"]);
+    expect(isDescendant(twins, "x", "a")).toBe(true);
+    expect(shape(moveNode(twins, "a", { parent: null, after: null }))).toEqual([
+      "a",
+      ["h", "x", ["x"]],
+      ["g"],
+    ]);
+    expect(shape(renameGroup(twins, "x", { en: "New" }))).toEqual(shape(twins));
+    expect(shape(deleteGroup(twins, "x"))).toEqual([["h", "x", "a"], ["g"]]);
+  });
+
   it("list the decks under nodes, depth first", () => {
     expect(decksOf(sample.children).map((d) => d.url)).toEqual(["a", "b", "c", "d"]);
     expect(decksOf([sample.children[1]!]).map((d) => d.url)).toEqual(["b", "c"]);
@@ -460,6 +473,14 @@ describe("graft", () => {
     ]);
   });
 
+  it("takes the deck of a URL, past a group of the same URL", () => {
+    // A tree should never hold a deck and a group of one URL; if one does, a graft's deck is still the deck.
+    expect(shape(graft(tree(["x", "a"], "x"), [made("n", deckNode("x"))]))).toEqual([
+      ["x", "a"],
+      ["n", "x"],
+    ]);
+  });
+
   it("changes nothing when done again", () => {
     const nodes = [made("n", deckNode("a"))];
     const once = graft(tree("a", "b"), nodes);
@@ -516,6 +537,11 @@ describe("applyDeckTreeEdit", () => {
 });
 
 describe("treeChanges", () => {
+  it("refuses a tree that holds a node twice, a deck and a group of one URL", () => {
+    const stored = layout(["a", "x"], { groups: [group("x", { decks: ["a"] })] });
+    changedError(() => treeChanges(stored, tree("a", "x", ["x"])));
+  });
+
   it("is empty for the tree the layout states", () => {
     const stored = layout(["a", "b"], {
       groups: [group("g1", { decks: ["b"], position: 1 })],
