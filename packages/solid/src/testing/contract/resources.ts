@@ -317,7 +317,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         url: URL_,
         limits: NO_SIZE_LIMITS,
         message: expect.stringContaining(
-          "declarations, longer IRIs to resolve, or a longer term than a read takes in",
+          "declarations, longer IRIs to resolve, deeper nesting, or a longer term than a read takes in",
         ),
       });
       for (const read of [
@@ -469,6 +469,43 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       }
     });
 
+    it("refuses a document nested deeper than 64 levels, with limits or with none, and reads one nested 64 deep", async () => {
+      // Levels that are opened and never closed make no triple for the limits to count.
+      for (const opening of ["(", `[ <${EX}p> `]) {
+        const past = `<${EX}s> <${EX}p> ${opening.repeat(1_000_000)}`;
+        const fetch = limitedFetch(turtleAt(past), RELEASE_LIMITS);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(past, "turtle", URL_, RELEASE_LIMITS),
+        ]) {
+          await expect(read()).rejects.toMatchObject({
+            name: "ReadLimitError",
+            url: URL_,
+            limits: RELEASE_LIMITS,
+          });
+        }
+        // A text from the user's own pod, read with no limits, is held to as few levels.
+        for (const read of [
+          () => parseQuads(past, "turtle", URL_),
+          () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
+          () => getSolidDataset(URL_, { fetch: turtleAt(past) }),
+        ]) {
+          await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+        }
+      }
+      // A list of lists, each with a blank node in it.
+      const nested = `${`( [ <${EX}p> `.repeat(32)}"v"${" ] )".repeat(32)}`;
+      const within = `<${EX}s> <${EX}p> ${nested} .\n`;
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const quads = await parseQuads(within, "turtle", URL_, limits);
+        expect(quads.filter(({ object }) => object.value === "v")).toHaveLength(1);
+      }
+      expect(
+        getThing(await getSolidDatasetLinear(URL_, { fetch: turtleAt(within) }), `${EX}s`),
+      ).not.toBeNull();
+    });
+
     it("refuses a long IRI with dot segments in time that grows with it, not its square", async () => {
       const dotted = (count: number) =>
         `<${"x/".repeat(count)}${"y/../".repeat(count)}> <${EX}p> "v" .\n`;
@@ -575,7 +612,8 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       const annotated = `<#a> <${EX}p> <#o> {| <${EX}q> <#r> |} .`;
       for (const head of [
         `<#a> <${EX}p> ${nested(1)} .`,
-        `<#a> <${EX}p> ${nested(100)} .`,
+        // Deeper, the text is refused at its nesting (MAX_TURTLE_DEPTH) before the parser reads it.
+        `<#a> <${EX}p> ${nested(30)} .`,
         annotated,
       ]) {
         const text = `${head}\n${rest}`;

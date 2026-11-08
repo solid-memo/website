@@ -55,8 +55,8 @@ import { RDF, SM } from "./vocab";
  * Its access control, which the grant reads before writing it, is read
  * under ACCESS_CONTROL_LIMITS for the same reason, and the release
  * itself, should the grant read it, under RELEASE_LIMITS: their bytes,
- * their triples, their characters and their base and prefix
- * declarations, and an access control's subjects, to
+ * their triples, their characters, their base and prefix declarations
+ * and how deep they nest, and an access control's subjects, to
  * MAX_ACCESS_CONTROL_SUBJECTS (accessControlFetch).
  */
 export function createSolidReleasePublisher({
@@ -205,8 +205,8 @@ function statementsOf(quads: readonly Quad[], url: string): string {
  * anyone's, and the grant's library parses what it reads with no
  * limits, so every answer is read under limits: its body on its bytes,
  * and the body of a read that succeeds is parsed first under them, on
- * its triples, their characters and its base and prefix declarations,
- * then handed on as it was. A read of the release itself, or of a
+ * its triples, their characters, its base and prefix declarations and
+ * how deep it nests, then handed on as it was. A read of the release itself, or of a
  * folder above it, which a grant may make when its server answers no
  * HEAD, is held to RELEASE_LIMITS, as any release is; every other read,
  * of an access control, to ACCESS_CONTROL_LIMITS, far smaller, and to

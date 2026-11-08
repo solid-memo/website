@@ -167,7 +167,7 @@ function resourceOf(response: Response): Resource {
  * drops what was kept and rejects once, with a ReadLimitError (the
  * triples counted into `spent` too, when the read shares its limits
  * with others: limitedFetch), as
- * `refuse` does for a text whose declarations or IRIs are past what a
+ * `refuse` does for a text whose declarations, IRIs or nesting are past what a
  * read takes in, with limits or with none (writeTurtle); nothing
  * more is kept, and `refused` says to stop the parser. A quad that
  * names an IRI kept for subjects not saved yet is tallied and not kept
@@ -202,8 +202,8 @@ function collector(
 
 /**
  * The quads of a Turtle text, its relative IRIs resolved against
- * `baseIRI`, under `limits` (collector), refused at a base, prefix or
- * IRI past what any read takes in (writeTurtle). The text is written to
+ * `baseIRI`, under `limits` (collector), refused at a base, prefix,
+ * IRI or level of nesting past what any read takes in (writeTurtle). The text is written to
  * the parser in parts, so that it reads no further than the part it is
  * in. A text with an RDF 1.2 triple term does not parse: n3 is told to
  * read none (TURTLE_OPTIONS), and the parse fails at the first triple
@@ -694,7 +694,7 @@ const MEDIA_TYPES = { turtle: TURTLE, jsonld: "application/ld+json" } as const;
  * against `baseUrl`, parsed as a pod's documents are: in every graph the
  * text names. Rejects with the parser's error on a text that does not
  * parse, and with a ReadLimitError at the first quad past `limits`, or
- * on a Turtle text at its first base, prefix or IRI past what a read
+ * on a Turtle text at its first base, prefix, IRI or level of nesting past what a read
  * takes in, with limits or with none (writeTurtle).
  */
 export async function parseQuads(

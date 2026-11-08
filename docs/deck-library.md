@@ -1016,8 +1016,13 @@ flowchart LR
   parser walks the whole base for each relative IRI, base and prefix it
   resolves, and a declaration makes no triple to count. The search
   reads the text as the parser does, past strings, IRIs and comments,
-  so a declaration quoted in a card's text doesn't count. With the
-  bases and prefixes bounded and the parse stopped at the first limit,
+  so a declaration or a bracket quoted in a card's text doesn't count.
+  It's refused, too, where it nests more than 64 levels deep in
+  collections, blank nodes, annotations or triple terms (`(`, `[`,
+  `{|`, `<<`). The parser holds memory for each level it's in, and
+  makes the triple that links a level to the one above only once the
+  level closes, so levels that never close make no triple to count.
+  With the bases and prefixes bounded and the parse stopped at the first limit,
   the time to read or refuse a release grows with its size, not faster. Each case refuses
   the release (`releaseTooLarge`), however the release is read. The
   same limits apply to a creator's catalog read for the release's
@@ -1033,8 +1038,8 @@ flowchart LR
   (`releaseUnreadable`), however it's read: the parser reads none, as
   for a deck file, and stops at the first one. The library's
   index, which comes with the site and grows with the library, and the
-  documents in the user's storages aren't limited in size. Their bases
-  and prefixes are, as those of every document the app reads into a
+  documents in the user's storages aren't limited in size. Their bases,
+  prefixes and nesting are, as those of every document the app reads into a
   dataset, a folder's listing too; the document's
   own address counts toward a base's length. An
   instance's documents outside the user's storages, in an instance

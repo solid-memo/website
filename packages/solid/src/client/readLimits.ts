@@ -32,8 +32,8 @@ export const RELEASE_LIMITS: ReadLimits = {
  * instance anyone may make can be added by its address or registered by
  * another app, a catalog may name a deck's documents on any server, and
  * the app keeps every triple of what it reads. The user's storages are
- * read with no limits but on their declarations (writeTurtle) and on
- * the length of each term (MAX_TERM_CHARACTERS).
+ * read with no limits but on their declarations and nesting
+ * (writeTurtle) and on the length of each term (MAX_TERM_CHARACTERS).
  */
 export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
 
@@ -97,10 +97,10 @@ export const MAX_PROFILE_DOCUMENTS = 16;
 
 /**
  * What a read with no limits is refused under, by the bounds every read
- * keeps: a Turtle text's base and prefix declarations and its long IRIs
- * that the parser resolves (writeTurtle), and the length of each term
- * (MAX_TERM_CHARACTERS). Its body, its triples and the characters of
- * all their terms are not bounded.
+ * keeps: a Turtle text's base and prefix declarations, its long IRIs
+ * that the parser resolves and how deep it nests (writeTurtle), and the
+ * length of each term (MAX_TERM_CHARACTERS). Its body, its triples and
+ * the characters of all their terms are not bounded.
  */
 export const NO_SIZE_LIMITS: ReadLimits = {
   bytes: Number.POSITIVE_INFINITY,
@@ -348,6 +348,18 @@ const MAX_PREFIX_DECLARATIONS = 4096;
  */
 export const MAX_BASE_CHARACTERS = 512;
 
+/**
+ * How deep a Turtle text may nest its collections (`(`), blank nodes
+ * (`[`), annotations (`{|`) and triple terms (`<<`), read under limits
+ * or with none. The parser keeps a context for each level it is in, and
+ * makes the triple that links a level to the one above it only once the
+ * level ends, so a text that only opens levels makes no triple for
+ * quadTally to count, and holds memory in the measure of its length.
+ * The app's own documents, and every release in the library, nest a few
+ * levels; the bound leaves a wide margin over that.
+ */
+const MAX_TURTLE_DEPTH = 64;
+
 const SPACE = 0x20;
 const TAB = 0x09;
 const LF = 0x0a;
@@ -369,9 +381,26 @@ const ANY_DOT_SEGMENT = /(?:^|\/)\.\.?(?:$|[/?#])/;
 
 /**
  * Where the search of a Turtle text stops to look: a string, an IRI, an
- * escape, a comment, or what may start a directive.
+ * escape, a comment, a bracket, or what may start a directive.
  */
-const NEXT = /["'<\\#@bBpP]/g;
+const NEXT = /["'<>\\#@bBpP()[\]{}]/g;
+
+/** How each bracket of one character, by its code, changes how deep a Turtle text nests: one that opens a level, or one that closes it. */
+const NESTING = new Map([
+  [0x28, 1], // (
+  [0x5b, 1], // [
+  [0x7b, 1], // {
+  [0x29, -1], // )
+  [0x5d, -1], // ]
+  [0x7d, -1], // }
+]);
+
+/** How the bracket of two characters at `at` changes how deep a Turtle text nests: `<<` opens a level, `>>` closes one, and 0 where there is none. */
+function doubleBracketAt(text: string, at: number): number {
+  const code = text.charCodeAt(at);
+  if ((code !== LESS_THAN && code !== GREATER_THAN) || text.charCodeAt(at + 1) !== code) return 0;
+  return code === LESS_THAN ? 1 : -1;
+}
 
 /**
  * Where an IRI the parser reads stops: at its `>`, or at what no IRI
@@ -467,10 +496,11 @@ function stringEnd(text: string, at: number): number {
  * prefixes, a base whose path is not plain (plainBase), a base of more
  * than MAX_BASE_CHARACTERS, or an IRI longer than that which is
  * relative or may hold a dot segment (longIriPast), in a triple or a
- * declaration. A document needs one base, a few prefixes and short
- * relative IRIs, and the parser takes time in the square of a chain of
- * relative bases, and of an IRI with dot segments, wherever the text is
- * read from. Each call looks on from where the last stopped, so a text
+ * declaration, or nesting deeper than MAX_TURTLE_DEPTH. A document
+ * needs one base, a few prefixes, short relative IRIs and a few levels,
+ * and the parser takes time in the square of a chain of relative bases,
+ * and of an IRI with dot segments, and holds memory for every level it
+ * is in, wherever the text is read from. Each call looks on from where the last stopped, so a text
  * is looked through once, as far as it is written (writeTurtle), in
  * time linear in it.
  *
@@ -483,7 +513,9 @@ function stringEnd(text: string, at: number): number {
  * differ, the search errs toward a refusal, or the parser stops at an
  * error before it. The longest base the parser can reach is then the
  * longest of the URL and the absolute IRIs, with every relative IRI
- * added on.
+ * added on. A level opens at `(`, `[`, `{` and `<<`, and closes at `)`,
+ * `]`, `}` and `>>`; one closed that was never opened counts for none,
+ * so the depth found is never less than the parser's.
  */
 function declarationsPast(text: string, url: string): (end: number) => boolean {
   const lineEnd = /[\n\r]/g;
@@ -525,6 +557,14 @@ function declarationsPast(text: string, url: string): (end: number) => boolean {
   // The document's own address is its first base: a Turtle text at a longer one is refused, with limits or with none.
   let refused = url.length > MAX_BASE_CHARACTERS;
 
+  let depth = 0;
+  /** Where the search goes on, at `next`, a level opened (1) or closed (-1) before it. */
+  const nest = (step: number, next: number): number => {
+    depth = Math.max(0, depth + step);
+    refused = depth > MAX_TURTLE_DEPTH;
+    return next;
+  };
+
   /** Where the search goes on after what starts at `at`, having checked a directive there. */
   const lookAt = (at: number): number => {
     const code = text.charCodeAt(at);
@@ -533,6 +573,10 @@ function declarationsPast(text: string, url: string): (end: number) => boolean {
       return lineEnd.exec(text)?.index ?? text.length;
     }
     if (code === BACKSLASH) return at + 2;
+    const single = NESTING.get(code);
+    if (single !== undefined) return nest(single, at + 1);
+    const double = doubleBracketAt(text, at);
+    if (double !== 0) return nest(double, at + 2);
     if (code === LESS_THAN) {
       const end = iriEnd(text, at);
       if (end < 0) return at + 1;
@@ -574,10 +618,11 @@ export interface TextStream {
  * is written to it in parts (textChunks), then ended, while `goOn` says
  * to. A parser given the whole text goes on through all of it after the
  * tally is past its limits; here it reads no further than the part it
- * is in. Before each part, the base and prefix declarations and the
- * IRIs that start in it, or before, are checked (declarationsPast),
- * with limits or with none: false when they are past what a read takes
- * in, and the rest is not written; true otherwise.
+ * is in. Before each part, the base and prefix declarations, the IRIs
+ * and the levels that start in it, or before, are checked
+ * (declarationsPast), with limits or with none: false when they are
+ * past what a read takes in, and the rest is not written; true
+ * otherwise.
  */
 export function writeTurtle(
   text: string,

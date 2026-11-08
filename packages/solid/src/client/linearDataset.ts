@@ -134,7 +134,8 @@ interface Collected {
  * The Turtle parser (turtleParser), whose quads go to `collected`
  * instead of to solid-client; one past the limits of the read of `url` (quadTally)
  * fails the parse instead, once, and drops what was kept, as does a
- * base, prefix or IRI past what any read takes in (writeTurtle). One
+ * base, prefix or IRI past what any read takes in, or nesting deeper
+ * than any read takes in (writeTurtle). One
  * that names an IRI under LOCAL_NODE is tallied and not kept. The
  * text is written to the parser in parts, so that it reads no further
  * than the part it is in.
