@@ -129,6 +129,45 @@ describe("withOwnSeries", () => {
     expect(versionOnly.isVersionOf).toBeUndefined();
   });
 
+  it("gives the release's own series no version but the release (GHSA-jp29-vf56-5g4g)", () => {
+    const own = `${RELEASE}#series`;
+    const PLANTED = "https://attacker.example/x/v2.ttl";
+    const kept = link(own, `${DCAT}hasVersion`, RELEASE);
+    const planted = [
+      link(own, `${DCAT}hasVersion`, PLANTED),
+      link(own, `${DCAT}first`, PLANTED),
+      { subject: own, predicate: `${DCAT}last`, object: { kind: "blank" as const, value: "b9" } },
+    ];
+    const versions = withOwnSeries(
+      inSeries({ inSeries: own, isVersionOf: own }, [kept, ...planted]),
+    );
+    expect(versions.triples).toContainEqual(kept);
+    for (const triple of planted) expect(versions.triples).not.toContainEqual(triple);
+    // A series the file describes keeps a first version: the release, as one the file names would be.
+    expect(versions.triples).toContainEqual(link(own, `${DCAT}first`, RELEASE));
+    const named = inSeries({ inSeries: own }, [link(own, `${DCAT}first`, RELEASE)]);
+    expect(withOwnSeries(named)).toBe(named);
+    // A series elsewhere gives way to the release's own, which lists nothing of the file's either.
+    const foreign = withOwnSeries(
+      inSeries({ inSeries: SERIES, isVersionOf: own }, [link(own, `${DCAT}hasVersion`, PLANTED)]),
+    );
+    expect(foreign.triples).toEqual(release().triples);
+  });
+
+  it("makes the release follow no version, nor its series list that one (GHSA-jp29-vf56-5g4g)", () => {
+    const own = `${RELEASE}#series`;
+    const BEFORE = "https://pod.example/solid-memo/main/releases/solid/v0.ttl";
+    const listed = link(own, `${DCAT}hasVersion`, BEFORE);
+    const { root, triples } = withOwnSeries({
+      ...inSeries({ inSeries: own }, [listed]),
+      root: { ...inSeries({ inSeries: own }).root, prev: BEFORE, previousVersion: BEFORE },
+    });
+    expect(root.prev).toBeUndefined();
+    expect(root.previousVersion).toBeUndefined();
+    expect(root.inSeries).toBe(own);
+    expect(triples).not.toContainEqual(listed);
+  });
+
   it("keeps what a release named as its own series states of itself", () => {
     const kept = link(RELEASE, "https://other.example/keep", RELEASE);
     const itself = withOwnSeries(inSeries({ inSeries: RELEASE }, [kept]));

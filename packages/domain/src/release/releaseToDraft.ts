@@ -21,6 +21,7 @@ import {
   type DraftTriple,
   type ReleaseDraft,
 } from "./releaseDraft.ts";
+import { DCAT_NS } from "./releaseModel.ts";
 
 /**
  * A release as a draft at another address (docs/studio.md, Drafts): the
@@ -48,9 +49,51 @@ export function releaseToDraft(release: ReleaseDraft, url: string): ReleaseDraft
  * file's own, `#series` (or `#series-2`, … when that id is taken), as
  * `dcat:inSeries` and as `dcat:isVersionOf` when that names no subject
  * of the file either, and what the file states of it is dropped
- * (GHSA-38m7-8r5j-q79f).
+ * (GHSA-38m7-8r5j-q79f). Either way the series has no version but the
+ * release (withVersionsOnly): the file's other versions are none of the
+ * creator's, and published, the release would list them, with what the
+ * file states of them, as its series' (GHSA-jp29-vf56-5g4g). Nor does
+ * the release follow one (asFirst).
  */
 export function withOwnSeries(release: ReleaseDraft): ReleaseDraft {
+  return withFirst(withVersionsOnly(inOwnSeries(asFirst(release)), (iri) => iri === release.url));
+}
+
+/**
+ * The release following no version (`dcat:prev`,
+ * `dcat:previousVersion`): the version a file follows is none of the
+ * creator's, and published, the release would list it, with what the
+ * file states of it, as an earlier version of its series
+ * (GHSA-jp29-vf56-5g4g). What only that link led to goes with it
+ * (ownStatements, in the application).
+ */
+function asFirst(release: ReleaseDraft): ReleaseDraft {
+  const { prev, previousVersion, ...root } = release.root;
+  return prev === undefined && previousVersion === undefined ? release : { ...release, root };
+}
+
+/**
+ * The release as the first version of the series it is in, when the
+ * file describes that series but names no first version of it any more
+ * (withOwnSeries): publishing keeps what a described series states, and
+ * a series has a first version.
+ */
+function withFirst(release: ReleaseDraft): ReleaseDraft {
+  const series = release.root.inSeries;
+  const first = `${DCAT_NS}first`;
+  const stated = release.triples.filter((triple) => triple.subject === series);
+  if (series === undefined || stated.length === 0 || stated.some((t) => t.predicate === first))
+    return release;
+  const link: DraftTriple = {
+    subject: series,
+    predicate: first,
+    object: { kind: "iri", value: release.url },
+  };
+  return { ...release, triples: [...release.triples, link] };
+}
+
+/** The release in a series of its own, or the one it names when that is one of its subjects (withOwnSeries). */
+function inOwnSeries(release: ReleaseDraft): ReleaseDraft {
   const { inSeries, isVersionOf, ...rest } = release.root;
   const foreign = (iri: string | undefined): iri is string =>
     iri !== undefined && idIn(release, iri) === null;
@@ -70,6 +113,33 @@ export function withOwnSeries(release: ReleaseDraft): ReleaseDraft {
     },
     triples: release.triples.filter((triple) => !dropped.has(triple.subject)),
   };
+}
+
+/** How a series names its versions (DCAT): each a link from the series to one. */
+const VERSION_LINKS = new Set(
+  ["first", "last", "hasVersion", "hasCurrentVersion", "prev", "previousVersion"].map(
+    (name) => `${DCAT_NS}${name}`,
+  ),
+);
+
+/**
+ * The release without the links of the series it is in
+ * (`dcat:inSeries`, `dcat:isVersionOf`) to versions `isVersion` doesn't
+ * say are its series': what is stated of those is no longer the
+ * release's own, and goes with them (ownStatements, in the application).
+ */
+export function withVersionsOnly(
+  release: ReleaseDraft,
+  isVersion: (iri: string) => boolean,
+): ReleaseDraft {
+  const series = new Set([release.root.inSeries, release.root.isVersionOf]);
+  const triples = release.triples.filter(
+    ({ subject, predicate, object }) =>
+      !series.has(subject) ||
+      !VERSION_LINKS.has(predicate) ||
+      (object.kind === "iri" && isVersion(object.value)),
+  );
+  return triples.length === release.triples.length ? release : { ...release, triples };
 }
 
 /** `id`, or `id-2`, `id-3`, … the first that no subject of the draft has. */

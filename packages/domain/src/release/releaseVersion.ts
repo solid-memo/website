@@ -5,7 +5,8 @@
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { DCAT_NS, DCTERMS_NS, type ReleaseText } from "./releaseModel.ts";
 import { publishedIdsOf, RDF_TYPE, type DraftTriple, type ReleaseDraft } from "./releaseDraft.ts";
-import { moved, rebaseDraft } from "./releaseToDraft.ts";
+import { isEarlierVersionBeside } from "./releasePlace.ts";
+import { moved, rebaseDraft, withVersionsOnly } from "./releaseToDraft.ts";
 
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
@@ -29,13 +30,18 @@ const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
  * chapter, step and distractor, which the draft may retire but never
  * drop or give to another, and how it was made, its activities, which
  * the draft keeps as they are.
+ *
+ * Its series lists only the release's own versions (withOwnVersions).
  */
 export function nextVersionDraft(
   read: ReleaseDraft,
   url: string,
   linked: readonly DraftTriple[] = [],
 ): ReleaseDraft {
-  const release = { ...read, triples: [...read.triples, ...linkedDescription(read, linked)] };
+  const release = withOwnVersions({
+    ...read,
+    triples: [...read.triples, ...linkedDescription(read, linked)],
+  });
   const series = new Set(
     [release.root.inSeries, release.root.isVersionOf].filter(
       (iri): iri is string => iri !== undefined,
@@ -68,6 +74,29 @@ export function nextVersionDraft(
     triples: described ? [...triples, ...earlierVersion(release)] : triples,
     published: publishedIdsOf(read),
   };
+}
+
+/**
+ * The release with only its own versions in its series: a link of the
+ * series to a version (withVersionsOnly) names the release, the version
+ * it follows (`dcat:prev`, `dcat:previousVersion`) or an earlier version
+ * in its folder (ownVersionOf). A release made from a file could
+ * otherwise list other addresses, with notes of its choosing, as its
+ * series' versions, which learners read as the creator's, and carry them
+ * into every next version (GHSA-jp29-vf56-5g4g). What it states of where
+ * its draft is published is the application's to drop (inItsPlace).
+ */
+export function withOwnVersions(release: ReleaseDraft): ReleaseDraft {
+  return withVersionsOnly(release, ownVersionOf(release));
+}
+
+/** Whether an address is one of the release's own versions, as withOwnVersions says. */
+function ownVersionOf({ url, root }: ReleaseDraft): (iri: string) => boolean {
+  return (iri) =>
+    iri === url ||
+    iri === root.prev ||
+    iri === root.previousVersion ||
+    isEarlierVersionBeside(url, iri);
 }
 
 /** What an earlier version is described by: its class, title, description and version. */
@@ -104,7 +133,8 @@ const AGENT = new Set([RDF_TYPE, "http://xmlns.com/foaf/0.1/name"]);
  * (SERIES); each publisher, the release's and the series', by its class
  * and name, nothing more of what a profile may say of its person; each
  * version the series lists but the release, as a dcat:Dataset with its
- * title, description and version.
+ * title, description and version, when it is one of the release's own
+ * (withOwnVersions).
  */
 export function linkedDescription(
   release: ReleaseDraft,
@@ -130,8 +160,11 @@ export function linkedDescription(
       (iri): iri is string => iri !== undefined && !own.has(iri),
     ),
   );
+  const ownVersion = ownVersionOf(release);
   const versions = new Set(
-    of(series, `${DCAT_NS}hasVersion`).filter((iri) => iri !== release.url && !own.has(iri)),
+    of(series, `${DCAT_NS}hasVersion`).filter(
+      (iri) => iri !== release.url && !own.has(iri) && ownVersion(iri),
+    ),
   );
   return linked.filter(
     (triple) =>

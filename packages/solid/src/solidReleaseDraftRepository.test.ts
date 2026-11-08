@@ -1285,6 +1285,53 @@ describe("assemble", () => {
     expect(newestRelease(copied, [release])).toBe(copied);
   });
 
+  it("publishes a release file that follows a version elsewhere as following none, with nothing the file states of that version (GHSA-jp29-vf56-5g4g)", async () => {
+    const before = "https://attacker.example/memo/releases/git-commands/v1.ttl";
+    const published = `${INSTANCE}releases/git-commands/v2.ttl`;
+    const text = `${readFileSync(join(DECKS_ROOT, "git-commands/v1.ttl"), "utf8")
+      .replace(
+        "@base <https://solid-memo.com/decks/git-commands/v1.ttl>",
+        "@base <https://attacker.example/memo/releases/git-commands/v2.ttl>",
+      )
+      .replace(
+        'dcat:version "1"',
+        `dcat:version "2" ; dcat:prev <${before}> ; dcat:previousVersion <${before}>`,
+      )}
+<${before}> a dcat:Dataset ; dcterms:title "Planted"@en ; dcterms:description "x"@en ;
+    dcat:version "1" ; adms:versionNotes "Planted notes" ; dcterms:publisher [ adms:versionNotes "Planted" ] .
+`;
+    const pod = await draftPod();
+    const useCases = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: {} as never,
+      deckLibrary: {} as never,
+      shapeValidator: pod.validator,
+      fileExchange: { open: async () => ({ name: "git.ttl", text }), save: () => undefined },
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    const created = await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "fromFile" },
+      "https://pod.example/profile/card#me",
+    );
+    const draft = await useCases.getReleaseDraft(created!.draft.url);
+    expect(draft.root.version).toBe("2");
+    expect(draft.root.prev).toBeUndefined();
+    expect(draft.root.previousVersion).toBeUndefined();
+    // Nothing to compare it with: everything in it is new.
+    expect(await useCases.diffReleaseDraft(draft)).toBeNull();
+    const turtle = await pod.repository.assemble(draft.url, published, NOW);
+    expect(turtle).not.toContain("attacker.example");
+    expect(turtle).not.toContain("Planted");
+    const quads = await quadsOfTurtle(turtle, published);
+    const DCAT = "http://www.w3.org/ns/dcat#";
+    const follows = [`${DCAT}prev`, `${DCAT}previousVersion`];
+    expect(quads.filter((quad) => follows.includes(quad.predicate.value))).toEqual([]);
+    const release = toStandaloneLibraryDeck(published, datasetFromQuads(quads));
+    expect(release.releases.map((listed) => listed.url)).toEqual([published]);
+  });
+
   it("makes no series elsewhere that does not list the version it follows the release's, whatever the draft states", async () => {
     const pod = await draftPod();
     const series = "https://creator.example/memo/releases/capitals/v1.ttl#series";

@@ -5,7 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT, link } from "../testing/releaseDraft.ts";
 import { rebaseDraft } from "./releaseToDraft.ts";
-import { linkedDescription, nextVersionDraft } from "./releaseVersion.ts";
+import { linkedDescription, nextVersionDraft, withOwnVersions } from "./releaseVersion.ts";
 
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const DCAT = "http://www.w3.org/ns/dcat#";
@@ -93,8 +93,10 @@ describe("nextVersionDraft", () => {
         publisher: `${INDEX}#pub`,
       },
     };
-    const library = { ...release, triples: v1().triples.slice(0, 4) };
-    const OLD = "https://solid-memo.com/decks/solid/v0.ttl";
+    // Released in the library, beside the version before it.
+    const LIB = "https://solid-memo.com/decks/solid/v2.ttl";
+    const library = rebaseDraft({ ...release, triples: v1().triples.slice(0, 4) }, LIB);
+    const OLD = "https://solid-memo.com/decks/solid/v1.ttl";
     const text = (subject: string, predicate: string, value: string) => ({
       subject,
       predicate,
@@ -104,7 +106,7 @@ describe("nextVersionDraft", () => {
       link(`${INDEX}#solid`, RDF_TYPE, `${DCAT}DatasetSeries`),
       link(`${INDEX}#solid`, `${DCTERMS}publisher`, `${INDEX}#lib`),
       link(`${INDEX}#solid`, `${DCAT}hasVersion`, OLD),
-      link(`${INDEX}#solid`, `${DCAT}hasVersion`, V1),
+      link(`${INDEX}#solid`, `${DCAT}hasVersion`, LIB),
     ];
     const agents = [
       link(`${INDEX}#pub`, RDF_TYPE, "http://xmlns.com/foaf/0.1/Agent"),
@@ -115,7 +117,7 @@ describe("nextVersionDraft", () => {
       link(`${INDEX}#other`, RDF_TYPE, `${DCAT}DatasetSeries`),
       link(OLD, RDF_TYPE, "https://solid-memo.com/ns/vocab/v1.ttl#Deck"),
       link(OLD, `${DCTERMS}creator`, `${INDEX}#someone`),
-      link(V1, `${DCTERMS}creator`, `${INDEX}#someone`),
+      link(LIB, `${DCTERMS}creator`, `${INDEX}#someone`),
       // Of the series, what an index says of one; of a publisher, its class and name, nothing more a profile says of its person.
       link(`${INDEX}#solid`, "http://www.w3.org/ns/prov#wasAttributedTo", `${INDEX}#someone`),
       link(`${INDEX}#pub`, "http://xmlns.com/foaf/0.1/mbox", "mailto:pub@example.org"),
@@ -129,7 +131,7 @@ describe("nextVersionDraft", () => {
         ...series,
         ...agents,
         ...older,
-        link(V1, RDF_TYPE, `${DCAT}Dataset`),
+        link(LIB, RDF_TYPE, `${DCAT}Dataset`),
       ]),
     );
     expect(draft.triples).not.toContainEqual(elsewhere[0]);
@@ -183,5 +185,85 @@ describe("nextVersionDraft", () => {
         (triple) => triple.subject === V1 && triple.predicate === `${DCAT}version`,
       )!.object.value,
     ).toBe("1");
+  });
+});
+
+describe("withOwnVersions", () => {
+  const at = (version: number) => V1.replace("v1.ttl", `v${version}.ttl`);
+  const V3 = at(3);
+  const SERIES = `${V3}#series`;
+  const ELSEWHERE = "https://elsewhere.example/x/v2.ttl";
+  const notes = (subject: string) => ({
+    subject,
+    predicate: "http://www.w3.org/ns/adms#versionNotes",
+    object: { kind: "literal" as const, value: "Notes", language: "", datatype: "" },
+  });
+  /** Release 3 at V3, after version 2, its series listing versions 1 to 3, and what `more` adds. */
+  const v3 = (more: ReturnType<typeof v1>["triples"] = []) => {
+    const release = rebaseDraft(courseDraft(), V3);
+    return {
+      ...release,
+      root: { ...release.root, version: "3", prev: at(2), previousVersion: at(2) },
+      triples: [
+        ...release.triples,
+        link(SERIES, `${DCAT}first`, at(1)),
+        link(SERIES, `${DCAT}hasVersion`, at(1)),
+        link(SERIES, `${DCAT}hasVersion`, at(2)),
+        link(SERIES, `${DCAT}hasVersion`, V3),
+        notes(at(1)),
+        ...more,
+      ],
+    };
+  };
+
+  it("keeps the release's own versions: itself, the one it follows and the earlier ones beside it", () => {
+    const own = v3();
+    expect(withOwnVersions(own)).toBe(own);
+    const away = { ...v3(), root: { ...v3().root, prev: ELSEWHERE, previousVersion: undefined } };
+    const followed = {
+      ...away,
+      triples: [...away.triples, link(SERIES, `${DCAT}hasVersion`, ELSEWHERE)],
+    };
+    expect(withOwnVersions(followed)).toBe(followed);
+  });
+
+  it("lists no other version in its series (GHSA-jp29-vf56-5g4g)", () => {
+    const planted = [
+      link(SERIES, `${DCAT}hasVersion`, ELSEWHERE),
+      link(SERIES, `${DCAT}hasVersion`, at(4)),
+      link(SERIES, `${DCAT}hasVersion`, V1.replace("v1.ttl", "v0.ttl")),
+      link(SERIES, `${DCAT}first`, ELSEWHERE),
+      {
+        subject: SERIES,
+        predicate: `${DCAT}last`,
+        object: { kind: "blank" as const, value: "b0" },
+      },
+      notes(ELSEWHERE),
+    ];
+    // What only a dropped link led to is the application's to drop (ownStatements).
+    expect(withOwnVersions(v3(planted)).triples).toEqual([...v3().triples, notes(ELSEWHERE)]);
+    const next = nextVersionDraft(v3(planted), DRAFT);
+    expect(next.triples.filter((triple) => triple.object.value === ELSEWHERE)).toEqual([]);
+    expect(next.triples.filter((triple) => triple.object.value === at(4))).toEqual([]);
+  });
+
+  it("describes no version a series described elsewhere lists that isn't the release's own", () => {
+    const INDEX = "https://index.example/decks/index.ttl";
+    const release = {
+      ...v3(),
+      root: { ...v3().root, inSeries: `${INDEX}#s`, isVersionOf: undefined },
+    };
+    const index = [
+      link(`${INDEX}#s`, `${DCAT}hasVersion`, at(1)),
+      link(`${INDEX}#s`, `${DCAT}hasVersion`, ELSEWHERE),
+      link(at(1), RDF_TYPE, `${DCAT}Dataset`),
+      link(ELSEWHERE, RDF_TYPE, `${DCAT}Dataset`),
+    ];
+    // Version 1 the release describes itself; the other is described by no one.
+    expect(linkedDescription(release, index)).toEqual(index.slice(0, 2));
+    const next = nextVersionDraft(release, DRAFT, index);
+    expect(next.triples).toContainEqual(index[0]);
+    expect(next.triples).not.toContainEqual(index[1]);
+    expect(next.triples).not.toContainEqual(index[3]);
   });
 });

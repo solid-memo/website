@@ -8,6 +8,7 @@ import {
   isCanonicalUrl,
   isPlainHttpUrl,
 } from "../instanceLayout.ts";
+import { draftPlaceOf } from "./draftLayout.ts";
 
 /**
  * Where a creator publishes a release in a pod (docs/studio.md,
@@ -67,6 +68,47 @@ export function isPublishedReleaseUrl(url: string): boolean {
   if (!isCanonicalUrl(url) || !isPlainHttpUrl(url) || hasEmptySegment(url)) return false;
   const { username, password } = new URL(url);
   return username === "" && password === "" && releasePlaceOf(url) !== null;
+}
+
+/**
+ * The version an address names beside the release at `url`, in its
+ * folder (`<folder><name>/v<M>.ttl`, or a fragment of it): null when
+ * either is named otherwise than a release is, or the address is in
+ * another folder.
+ */
+function versionBeside(url: string, iri: string): number | null {
+  const document = iri.split("#", 1)[0]!;
+  const folder = (of: string) => of.slice(0, of.lastIndexOf("/") + 1);
+  if (releasePlaceOf(url) === null || folder(document) !== folder(url)) return null;
+  return releasePlaceOf(document)?.version ?? null;
+}
+
+/**
+ * Whether an address is an earlier version of the release at `url`, as
+ * its series' versions are published: a release's address
+ * (isPublishedReleaseUrl) in its folder, of a lower version.
+ */
+export function isEarlierVersionBeside(url: string, iri: string): boolean {
+  const version = versionBeside(url, iri);
+  return isPublishedReleaseUrl(iri) && version !== null && version < releasePlaceOf(url)!.version;
+}
+
+/**
+ * Whether an address is where the draft at `draftUrl` is published
+ * unless the creator chooses another folder (releaseUrlIn the instance's
+ * releases/, by the draft's name and version), a later version there,
+ * or one of their subjects (`#id`): where it and each next version of
+ * it are published. False for an address no draft has (draftPlaceOf).
+ */
+export function isDraftsPlaceOnward(draftUrl: string, iri: string): boolean {
+  const place = draftPlaceOf(draftUrl);
+  if (place === null) return false;
+  const folder = `${releasesContainerOf(place.instanceUrl)}${place.name}/`;
+  const document = iri.split("#", 1)[0]!;
+  const version = document.startsWith(folder)
+    ? /^v([1-9][0-9]*)\.ttl$/.exec(document.slice(folder.length))
+    : null;
+  return version !== null && Number(version[1]) >= place.version;
 }
 
 /** The name of a release saved as a file: `<name>-v<N>.ttl`, which the library keeps as `decks/<name>/v<N>.ttl`. */
