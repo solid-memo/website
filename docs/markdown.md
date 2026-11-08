@@ -155,8 +155,10 @@ shapes of Markdown make the parser slow.
 The package's tests include the cmark and commonmark.js pathological
 inputs, and the shapes that made the parser before it slow, each at the
 length cap. Each reads within 25 times what plain prose of the same
-length takes, or within 3 times what its first half takes, as a text
-read in time linear in its length does.
+length takes, or within 4 times what its first eighth takes read eight
+times over. Time linear in the length gives about once, quadratic time
+about eight. Both are CPU time, which a busy CI runner doesn't stretch
+as it does the time on the clock.
 
 ### Chunks
 

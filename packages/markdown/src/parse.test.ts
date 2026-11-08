@@ -16,6 +16,7 @@ import {
   visibleControls,
   type MdBlock,
 } from "./parse";
+import { cpuTime, growth } from "./testing/growth";
 
 const text = (value: string) => ({ type: "text", value }) as const;
 const paragraph = (...children: object[]) => ({ type: "paragraph", children }) as MdBlock;
@@ -699,11 +700,13 @@ describe("visibleControls", () => {
  * commonmark.js pathological tests, and those that made micromark slow),
  * each at the length cap, read in time linear in their length. A case
  * reads within `slowest` times what plain prose of the same length takes
- * on the same machine, or else within `growth` times what its first half
- * takes: about twice for time linear in the length, four times for
- * quadratic. The better of three runs each. A wall-clock budget would
- * depend on the machine: CI runs these tests about twenty times slower
- * than a laptop. The parser reads prose much faster than text dense with
+ * (the best of three runs each), or else within `limit` times what its
+ * first eighth takes read eight times over (`growth`): about once for
+ * time linear in the length, eight times for quadratic. Both are CPU
+ * time, not time on the clock, which a busy CI runner stretches more for
+ * a long run than a short one. A budget in milliseconds would depend on
+ * the machine: CI runs these tests about twenty times slower than a
+ * laptop. The parser reads prose much faster than text dense with
  * blocks, such as a list of one-word items, which is linear all the same;
  * a quadratic case at the cap takes hundreds of times the prose. A slow
  * case takes seconds on CI, past vitest's default timeout, so the suite
@@ -711,14 +714,16 @@ describe("visibleControls", () => {
  */
 describe("pathological input", () => {
   const slowest = 25;
-  const growth = 3;
-  /** The fastest of three reads of a text, in milliseconds. */
+  const times = 8;
+  const limit = 4;
+  /** The CPU time of the fastest of three reads of a text, in microseconds. */
   const time = (markdown: string) => {
     let took = Infinity;
     for (let round = 0; round < 3; round++) {
-      const started = performance.now();
-      parseMarkdown(markdown);
-      took = Math.min(took, performance.now() - started);
+      took = Math.min(
+        took,
+        cpuTime(() => parseMarkdown(markdown)),
+      );
     }
     return took;
   };
@@ -831,10 +836,17 @@ describe("pathological input", () => {
     const base = time(fill("Plain words in a paragraph.\n"));
     const took = time(input);
     if (took < base * slowest) return;
-    const half = time(input.slice(0, input.length / 2));
+    const ratio = growth(
+      (length) => {
+        const text = input.slice(0, length);
+        return () => parseMarkdown(text);
+      },
+      Math.ceil(input.length / times),
+      times,
+    );
     expect(
-      took,
-      `${Math.round(took)} ms, ${Math.round(half)} ms for its first half, against ${Math.round(base)} ms of prose`,
-    ).toBeLessThan(half * growth);
+      ratio,
+      `${Math.round(took / 1000)} ms against ${Math.round(base / 1000)} ms of prose; the text took ${ratio.toFixed(1)} times its first ${times}th read ${times} times`,
+    ).toBeLessThan(limit);
   });
 });
