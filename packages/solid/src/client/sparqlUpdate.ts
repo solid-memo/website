@@ -87,6 +87,15 @@ function literal(term: Literal, decimalsAsNumbers: boolean): string {
       ? String(Number.parseFloat(term.value))
       : term.value;
   const text = `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
-  if (term.language !== "") return `${text}@${term.language}`;
+  if (term.language !== "") return `${text}@${term.language}${directionOf(term)}`;
   return term.datatype.value === XSD_STRING ? text : `${text}^^<${term.datatype.value}>`;
+}
+
+/**
+ * A literal's base direction as Turtle, N-Triples and SPARQL write it
+ * after its language (`"…"@ar--rtl`, RDF 1.2); empty for one with none.
+ * Whether it can be written so is writableTerms.ts's to check.
+ */
+export function directionOf(term: { direction?: string | null | undefined }): string {
+  return term.direction ? `--${term.direction}` : "";
 }

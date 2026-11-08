@@ -13,6 +13,7 @@ import {
   toRdfJsDataset,
 } from "../client/rdf";
 import { MAX_TERM_CHARACTERS, pathKeys } from "../client/readLimits";
+import { directionOf } from "../client/sparqlUpdate";
 import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
@@ -79,7 +80,7 @@ const LATEST = (shape: ShapeName): ShapeDescriptor => {
   return versions[Math.max(...Object.keys(versions).map(Number))]!;
 };
 
-/** A term as the domain keeps it. */
+/** A term as the domain keeps it, a literal's base direction with it when it has one. */
 export function termOf(term: Term): ReleaseTerm {
   switch (term.termType) {
     case "Literal":
@@ -88,6 +89,7 @@ export function termOf(term: Term): ReleaseTerm {
         value: term.value,
         language: term.language,
         datatype: term.datatype.value,
+        ...(term.direction ? { direction: term.direction } : {}),
       };
     case "BlankNode":
       return { kind: "blank", value: term.value };
@@ -114,6 +116,7 @@ export function quadOf(subject: string, predicate: string, object: ReleaseTerm):
           value: object.value,
           language: object.language,
           datatype: { termType: "NamedNode", value: object.datatype },
+          ...(object.direction ? { direction: object.direction } : {}),
         }
       : subjectTerm(object.kind === "blank" ? `_:${object.value}` : object.value);
   return {
@@ -134,7 +137,7 @@ export function tripleKey(triple: DraftTriple): string {
   const { object } = triple;
   const value =
     object.kind === "literal"
-      ? `"${object.value}"@${object.language.toLowerCase()}^^${object.datatype}`
+      ? `"${object.value}"@${object.language.toLowerCase()}${directionOf(object)}^^${object.datatype}`
       : `${object.kind} ${object.value}`;
   return `${triple.subject} ${triple.predicate} ${value}`;
 }
@@ -149,7 +152,13 @@ export function tripleParts(triple: DraftTriple): string[] {
   const { object } = triple;
   const value =
     object.kind === "literal"
-      ? [object.kind, object.value, object.language.toLowerCase(), object.datatype]
+      ? [
+          object.kind,
+          object.value,
+          object.language.toLowerCase(),
+          object.direction ?? "",
+          object.datatype,
+        ]
       : [object.kind, object.value];
   return [triple.subject, triple.predicate, ...value];
 }

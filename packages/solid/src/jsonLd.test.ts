@@ -80,6 +80,23 @@ describe("jsonLdOf", () => {
     expect(a[RDF_TYPE]).toEqual({ "@id": "_:t" });
   });
 
+  it("writes a literal's base direction, which reads back the same", async () => {
+    const directional = {
+      termType: "Literal",
+      value: "مرحبا",
+      language: "ar",
+      direction: "rtl",
+      datatype: iri("http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString"),
+    } as Term;
+    const text = jsonLdOf([quad(iri(`${EX}a`), `${EX}name`, directional)], { ex: EX });
+    expect(JSON.parse(text)["@graph"][0]["ex:name"]).toEqual({
+      "@value": "مرحبا",
+      "@language": "ar",
+      "@direction": "rtl",
+    });
+    expect(await triplesOf(text)).toEqual([`<${EX}a> <${EX}name> "مرحبا"@ar--rtl .`]);
+  });
+
   it("writes the same triples the same, whatever their order", () => {
     expect(jsonLdOf([...quads].reverse(), { ex: EX })).toBe(jsonLdOf(quads, { ex: EX }));
   });

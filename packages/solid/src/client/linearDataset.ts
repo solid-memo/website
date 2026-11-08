@@ -8,7 +8,7 @@ import {
   type Parser,
   type SolidDataset,
 } from "@inrupt/solid-client";
-import type { Quad } from "@rdfjs/types";
+import type { Literal, Quad } from "@rdfjs/types";
 import { Parser as N3Parser, type ParserOptions } from "n3";
 import { ReadLimitError, type ReadLimits } from "./interface";
 import { withBoundedHeaders } from "./linkHeader";
@@ -31,6 +31,7 @@ type Objects = Graph[string]["predicates"][string];
 type Dataset = Awaited<ReturnType<typeof getSolidDataset>>;
 
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
+const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
 
 /** Where the library names a subject that has no URL yet: `<#name>` in the document it is saved to. */
 export const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
@@ -85,6 +86,8 @@ export async function getSolidDatasetLinear(
  * parse fails at the first triple that holds one all the same, as an
  * annotation (`{| ... |}`) or a reifier (`~`) gives, which the option
  * does not keep n3 from reading; after its error it reports nothing more.
+ * An RDF 1.2 literal with a base direction (`"…"@ar--rtl`) is read, and
+ * kept with its language and direction (graphsOf).
  */
 export function turtleParser(): Parser {
   const onQuad: ((quad: Quad) => void)[] = [];
@@ -186,7 +189,9 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
  * a way to write onto Object.prototype (GHSA-m4hj-7c28-fq4h). A quad
  * is told from the others by the path of its terms (pathKeys), each a
  * key of its own, as no string of them joined would be held to the
- * bound on a term (MAX_TERM_CHARACTERS).
+ * bound on a term (MAX_TERM_CHARACTERS). A literal with a base direction
+ * keeps its language and direction (localeOf), so that what is read can
+ * be written back as it is.
  */
 export function graphsOf(quads: Iterable<Quad>): Graphs {
   const graphs =
@@ -215,8 +220,9 @@ export function graphsOf(quads: Iterable<Quad>): Graphs {
     } else if (object.termType === "BlankNode") {
       (objects.blankNodes ??= []).push(`_:${object.value}`);
     } else if (object.termType === "Literal") {
-      if (object.datatype.value === LANG_STRING) {
-        ((objects.langStrings ??= map())[object.language.toLowerCase()] ??= []).push(object.value);
+      const locale = localeOf(object);
+      if (locale !== undefined) {
+        ((objects.langStrings ??= map())[locale] ??= []).push(object.value);
       } else {
         ((objects.literals ??= map())[object.datatype.value] ??= []).push(object.value);
       }
@@ -227,6 +233,27 @@ export function graphsOf(quads: Iterable<Quad>): Graphs {
   return deepFreeze(graphs) as Graphs;
 }
 
+/**
+ * Where a literal in a language is kept among a subject's language
+ * strings: under its language in lower case, and one with a base
+ * direction (RDF 1.2) under its language and direction as Turtle writes
+ * them (`ar--rtl`), from which the library's data factory (n3's) makes
+ * the same literal again, its language and direction apart. No language
+ * tag has `--` in it, so no other is kept there; the getters of language
+ * text leave such a one out (rdf.ts getStringByLocaleAll). Undefined for
+ * a literal in no language, or one with a direction but no language,
+ * which is kept by its datatype, as Turtle cannot write it (writableTerms.ts).
+ */
+function localeOf(literal: Literal): string | undefined {
+  const language = literal.language.toLowerCase();
+  if (literal.datatype.value === LANG_STRING) return language;
+  const direction = literal.direction ?? "";
+  if (literal.datatype.value !== DIR_LANG_STRING || language === "" || direction === "") {
+    return undefined;
+  }
+  return `${language}--${direction.toLowerCase()}`;
+}
+
 /** An empty map with no prototype, so that no key reaches Object.prototype. */
 function map<T>(): Record<string, T> {
   return Object.create(null) as Record<string, T>;
@@ -235,7 +262,8 @@ function map<T>(): Record<string, T> {
 /** An object's parts, each a step of the path that tells its quad from others (graphsOf). */
 function termParts(term: Quad["object"]): string[] {
   if (term.termType !== "Literal") return [term.termType, term.value];
-  return ["Literal", term.datatype.value, term.language.toLowerCase(), term.value];
+  const { datatype, language, direction, value } = term;
+  return ["Literal", datatype.value, language.toLowerCase(), direction ?? "", value];
 }
 
 function deepFreeze<T extends object>(value: T): T {

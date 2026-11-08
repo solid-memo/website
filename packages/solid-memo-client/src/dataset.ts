@@ -137,18 +137,20 @@ function subjectId(term: Quad_Subject): string {
   return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
 }
 
-/** A value with its language tag in lower case, as every value read is held. */
+/** A value with its language tag in lower case, as every value read is held, its base direction kept. */
 function lowerCased(value: Value): Value {
   if (value.termType !== "Literal" || value.language === value.language.toLowerCase()) {
     return value;
   }
-  return literal(value.value, value.language.toLowerCase());
+  // n3's factory reads a tag with a direction after `--` (`ar--rtl`) as the two apart.
+  const direction = value.direction ? `--${value.direction}` : "";
+  return literal(value.value, `${value.language.toLowerCase()}${direction}`);
 }
 
 /** A value's parts, each a step of the path that keys its quad (pathKeys): two values are the same when their parts are. */
 function valueParts(value: Value): string[] {
   if (value.termType !== "Literal") return [value.termType, value.value];
-  return ["Literal", value.datatype.value, value.language, value.value];
+  return ["Literal", value.datatype.value, value.language, value.direction ?? "", value.value];
 }
 
 /**

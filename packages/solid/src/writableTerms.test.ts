@@ -7,6 +7,8 @@ import { describe, expect, it } from "vitest";
 import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
 
+const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
+const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 const named = (value: string) => ({ termType: "NamedNode", value }) as Term;
 const literal = (
   value: string,
@@ -32,6 +34,8 @@ describe("unwritableTermOf", () => {
     ["text with anything in it", literal('a> . <b> "c', "en-GB")],
     ["a language tag with subtags of 8 characters", literal("a", "abcdefgh-12345678")],
     ["a literal without a direction", { ...literal("a"), direction: undefined } as Term],
+    ["text with a base direction read from a pod", literal("a", "ar", DIR_LANG_STRING, "rtl")],
+    ["text with a left-to-right direction", literal("a", "en-gb", DIR_LANG_STRING, "ltr")],
   ])("finds none in %s", (_, term) => {
     expect(unwritableTermOf(quad(term))).toBeUndefined();
   });
@@ -55,9 +59,20 @@ describe("unwritableTermOf", () => {
     ["a language subtag longer than 8 characters", literal("a", "constructor")],
     ["a later subtag longer than 8 characters", literal("a", "en-123456789")],
     [
-      "a base direction",
-      literal("a", "ar", "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString", "rtl"),
+      "text typed as having a base direction without a language",
+      literal("a", "", DIR_LANG_STRING, "rtl"),
     ],
+    ["text typed as having a base direction without one", literal("a", "ar", DIR_LANG_STRING)],
+    [
+      "text typed as having a base direction without one at all",
+      { ...literal("a", "ar", DIR_LANG_STRING), direction: undefined } as Term,
+    ],
+    ["a base direction RDF does not have", literal("a", "ar", DIR_LANG_STRING, "up")],
+    [
+      "a base direction on text typed as in a language only",
+      literal("a", "ar", LANG_STRING, "rtl"),
+    ],
+    ["a base direction on text in no language", literal("a", "", undefined, "rtl")],
     ["a quoted triple", { termType: "Quad", value: "" } as unknown as Term],
   ])("finds %s", (_, term) => {
     expect(unwritableTermOf(quad(term))).toBe(term);

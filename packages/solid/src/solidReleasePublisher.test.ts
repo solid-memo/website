@@ -236,6 +236,18 @@ describe("publish", () => {
     ).rejects.toMatchObject({ code: "releaseTaken" });
   });
 
+  it("tells a release there from this one by a text's base direction", async () => {
+    const { pod, publisher } = await publisherPod();
+    const titled = (title: string) => `${TURTLE}\n<> <http://purl.org/dc/terms/title> ${title} .`;
+    await pod.put(RELEASE, titled('"Solid"@ar--ltr'));
+    await expect(
+      publisher.publish(INSTANCE, titled('"Solid"@ar--rtl'), RELEASE),
+    ).rejects.toMatchObject({ code: "releaseTaken" });
+    await expect(publisher.publish(INSTANCE, titled('"Solid"@ar--ltr'), RELEASE)).resolves.toEqual({
+      public: true,
+    });
+  });
+
   it("publishes a release the pod will not make public all the same, readable by its owner alone", async () => {
     const { pod, publisher } = await publisherPod({ wac: false });
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: false });

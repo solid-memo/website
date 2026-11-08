@@ -150,7 +150,10 @@ type crosses upward past a mapper.
     can name one. A subject made by name resolves against the
     URL its dataset was read from. `getDatetime` throws on some literals
     and gives an invalid date past the JavaScript date range. Language
-    tags read back in lower case. `getDecimal` reads as `parseFloat`
+    tags read back in lower case. A literal with a base direction
+    (`"…"@ar--rtl`) keeps its language and direction, is no text in a
+    language to `getStringByLocaleAll`, and is written back as read.
+    `getDecimal` reads as `parseFloat`
     does, and a decimal is written as JavaScript spells it (`1`, not
     `1.0`). The change log (`changesOf`) and the source (`sourceOf`)
     behave as their comments in `rdf.ts` say. The resource module's pin

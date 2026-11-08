@@ -12,7 +12,6 @@ import {
   asUrl as libraryAsUrl,
   createSolidDataset as libraryCreateSolidDataset,
   createThing as libraryCreateThing,
-  fromRdfJsDataset as libraryFromRdfJsDataset,
   getBoolean as libraryGetBoolean,
   getDatetime as libraryGetDatetime,
   getDecimal as libraryGetDecimal,
@@ -87,6 +86,11 @@ import { pathKeys } from "./readLimits";
  *   (getStringByLocaleAll, getLiteralAll), however the document spells it.
  * - getDecimal reads a decimal as parseFloat does (`2.50` is 2.5, a value
  *   that is no number null).
+ * - A literal with a base direction (RDF 1.2, `"…"@ar--rtl`) is kept with
+ *   its language and direction, and written back as it was read. It is
+ *   no language text: getStringByLocaleAll and setStringAll leave it be,
+ *   and propertiesOf gives it as a literal of its datatype
+ *   (rdf:dirLangString); getLiteralAll and getTermAll give it whole.
  */
 
 export type {
@@ -160,6 +164,18 @@ export function propertiesOf(subject: Subject): { predicate: string; values: Pro
   }));
 }
 
+const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
+
+/**
+ * Whether a subject's language strings under `locale` have a base
+ * direction: kept under their language and direction (`ar--rtl`,
+ * linearDataset.ts graphsOf), never under a language tag alone, which
+ * has no `--` in it.
+ */
+function isDirectional(locale: string): boolean {
+  return locale.includes("--");
+}
+
 function valuesOf(objects: Thing["predicates"][string]): PropertyValue[] {
   const values: PropertyValue[] = [];
   for (const iri of objects.namedNodes ?? []) {
@@ -170,7 +186,13 @@ function valuesOf(objects: Thing["predicates"][string]): PropertyValue[] {
       values.push({ type: "literal", value: literal, dataType });
     }
   }
-  for (const [language, strings] of Object.entries(objects.langStrings ?? {})) {
+  const langStrings = Object.entries(objects.langStrings ?? {});
+  for (const [, strings] of langStrings.filter(([locale]) => isDirectional(locale))) {
+    for (const value of strings) {
+      values.push({ type: "literal", value, dataType: DIR_LANG_STRING });
+    }
+  }
+  for (const [language, strings] of langStrings.filter(([locale]) => !isDirectional(locale))) {
     for (const value of strings) {
       values.push({ type: "langString", value, language });
     }
@@ -347,7 +369,11 @@ function editOf(data: SolidDataset) {
 function quadKeys(): (quad: Quad) => number {
   const keyOf = pathKeys();
   return ({ subject, predicate, object }) => {
-    const literal = object.termType === "Literal" ? [object.datatype.value, object.language] : [];
+    // Every quad keyed is made by the library's data factory (n3's), whose literals all name a direction.
+    const literal =
+      object.termType === "Literal"
+        ? [object.datatype.value, object.language, object.direction as string]
+        : [];
     return keyOf([
       subject.termType,
       subject.value,
@@ -507,9 +533,11 @@ class Builder implements SubjectBuilder {
       const literals = { ...previous.literals };
       delete literals[XSD_STRING];
       if (strings.size > 0) literals[XSD_STRING] = [...strings];
-      const langStrings = Object.fromEntries(
-        [...byLanguage].map(([tag, texts]) => [tag, [...texts]]),
-      );
+      // Text with a base direction is no language text: kept as it is.
+      const langStrings = Object.fromEntries([
+        ...Object.entries(previous.langStrings ?? {}).filter(([locale]) => isDirectional(locale)),
+        ...[...byLanguage].map(([tag, texts]) => [tag, [...texts]]),
+      ]);
       return { ...previous, literals, langStrings };
     });
   }
@@ -570,9 +598,15 @@ export function getStringNoLocaleAll(subject: Subject, property: string): string
   return libraryGetStringNoLocaleAll(thing(subject), property);
 }
 
-/** The subject's strings with a language for the property, by their language in lower case. */
+/**
+ * The subject's strings with a language for the property, by their
+ * language in lower case; none with a base direction, which is no
+ * language text (isDirectional).
+ */
 export function getStringByLocaleAll(subject: Subject, property: string): Map<string, string[]> {
-  return libraryGetStringByLocaleAll(thing(subject), property);
+  const strings = libraryGetStringByLocaleAll(thing(subject), property);
+  for (const locale of strings.keys()) if (isDirectional(locale)) strings.delete(locale);
+  return strings;
 }
 
 /** An integer the subject has for the property; null when it has none. */
@@ -615,7 +649,11 @@ export function toRdfJsDataset(dataset: Dataset): DatasetCore {
   return libraryToRdfJsDataset(solidDataset(dataset));
 }
 
-/** A dataset of an RDF/JS dataset's triples. */
+/**
+ * A dataset of an RDF/JS dataset's triples, built in one pass as a read
+ * builds one (datasetFromQuads), a literal with a base direction kept
+ * whole.
+ */
 export function fromRdfJsDataset(dataset: DatasetCore): Dataset {
-  return libraryFromRdfJsDataset(dataset);
+  return datasetFromQuads(dataset);
 }

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import { quadOf } from "./mappers/releaseDraftMapper";
 import { quadsOfTurtle } from "./testing/releaseDrafts";
@@ -20,6 +21,10 @@ const literal = (value: string, datatype = `${XSD}string`, language = "") => ({
   language,
   datatype,
 });
+const RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
+/** The quad, its literal given a right-to-left base direction, as a read of `"…"@ar--rtl` gives it. */
+const directed = (quad: Quad): Quad =>
+  ({ ...quad, object: { ...quad.object, direction: "rtl" } }) as Quad;
 const blank = (value: string) => ({ kind: "blank" as const, value });
 
 describe("turtleOf", () => {
@@ -89,6 +94,7 @@ describe("turtleOf", () => {
         quadOf(BASE, `${SM}d`, literal("x1", `${XSD}integer`)),
         quadOf(BASE, `${SM}e`, literal("maybe", `${XSD}boolean`)),
         quadOf(BASE, `${SM}f`, literal("1", "https://other.example/type")),
+        directed(quadOf(BASE, `${SM}g`, literal("مرحبا", `${RDF}dirLangString`, "ar"))),
       ],
       { base: BASE, prefixes: PREFIXES },
     );
@@ -97,7 +103,8 @@ describe("turtleOf", () => {
     expect(turtle).toContain('solid-memo:c "2026-10-10T00:00:00Z"^^xsd:dateTime ;');
     expect(turtle).toContain('solid-memo:d "x1"^^xsd:integer ;');
     expect(turtle).toContain('solid-memo:e "maybe"^^xsd:boolean ;');
-    expect(turtle).toContain('solid-memo:f "1"^^<https://other.example/type> .');
+    expect(turtle).toContain('solid-memo:f "1"^^<https://other.example/type> ;');
+    expect(turtle).toContain('solid-memo:g "مرحبا"@ar--rtl .');
   });
 
   it("writes a blank node named once in place, any other by its label, and reads back as written", async () => {

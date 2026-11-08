@@ -15,7 +15,7 @@ const LOCAL_NAME = /^[A-Za-z0-9_][A-Za-z0-9_.-]*$/;
 type Value =
   | string
   | { "@id": string }
-  | { "@value": string; "@language"?: string; "@type"?: string };
+  | { "@value": string; "@language"?: string; "@direction"?: string; "@type"?: string };
 
 /**
  * Triples as a JSON-LD document of our own writing: flattened, every
@@ -77,7 +77,11 @@ function idOf(term: Term): string {
 function termValue(term: Term, compact: (iri: string) => string): Value {
   if (term.termType !== "Literal")
     return { "@id": term.termType === "BlankNode" ? idOf(term) : compact(term.value) };
-  if (term.language !== "") return { "@value": term.value, "@language": term.language };
+  if (term.language !== "") {
+    // A base direction a read kept (`"…"@ar--rtl`) is written as it is, as Turtle writes it.
+    const direction = term.direction ? { "@direction": term.direction } : {};
+    return { "@value": term.value, "@language": term.language, ...direction };
+  }
   if (term.datatype.value === XSD_STRING) return term.value;
   return { "@value": term.value, "@type": compact(term.datatype.value) };
 }

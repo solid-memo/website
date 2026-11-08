@@ -26,13 +26,17 @@ const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 /** A term as the release rules read it. */
 export function termOf(object: Quad_Object): ReleaseTerm {
   switch (object.termType) {
-    case "Literal":
+    case "Literal": {
+      // A base direction (RDF 1.2), which n3 reads but this package's RDF/JS types do not name.
+      const { direction } = object as { direction?: string };
       return {
         kind: "literal",
         value: object.value,
         language: object.language,
         datatype: object.datatype.value,
+        ...(direction ? { direction } : {}),
       };
+    }
     case "BlankNode":
       return { kind: "blank", value: object.value };
     default:

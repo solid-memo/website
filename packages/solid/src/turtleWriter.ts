@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad, Term } from "@rdfjs/types";
+import { directionOf } from "./client/sparqlUpdate";
 import { refuseUnwritable } from "./writableTerms";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -143,7 +144,12 @@ function keyOf(term: Term): string {
 }
 
 function literal(
-  term: { value: string; language: string; datatype: { value: string } },
+  term: {
+    value: string;
+    language: string;
+    direction?: "ltr" | "rtl" | "" | null;
+    datatype: { value: string };
+  },
   iri: (value: string) => string,
 ): string {
   const datatype = term.datatype.value;
@@ -151,6 +157,7 @@ function literal(
   if (datatype === `${XSD}boolean` && (term.value === "true" || term.value === "false"))
     return term.value;
   const text = `"${term.value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
-  if (term.language !== "" || datatype === LANG_STRING) return `${text}@${term.language}`;
+  if (term.language !== "" || datatype === LANG_STRING)
+    return `${text}@${term.language}${directionOf(term)}`;
   return datatype === `${XSD}string` ? text : `${text}^^${iri(datatype)}`;
 }
