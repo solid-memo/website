@@ -6,7 +6,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { KeptDocuments } from "@solid-memo/domain/instance";
 import { catalogUrlOf, isDocumentIn } from "@solid-memo/domain/instanceLayout";
-import { draftAddressesGuest, isGuestUrl } from "@solid-memo/domain/guest";
+import { draftAddressesGuest, isGuestPodIri, isGuestUrl } from "@solid-memo/domain/guest";
 import { DECK_FILE_ACCEPT, deckFileFormatOf } from "@solid-memo/domain/deckFile";
 import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
@@ -267,6 +267,23 @@ function draftable(read: ReleaseDraft): ReleaseDraft {
   const foreign = strayPartsOf(release).find((stray) => idIn(release, stray) === null);
   if (foreign !== undefined) throw new AppError("releaseForeignPart", { part: foreign });
   return ownStatements(release);
+}
+
+/**
+ * Whether a draft links to the guest's pod by an IRI other than its own
+ * or one of its subjects' (`<draft>#id`), the only ones a copy of it
+ * moves (copyReleaseDraft): a guest's draft that does could not be kept
+ * (GHSA-hc3p-fpwj-fvjp). A next version takes statements from the
+ * documents its release links to, which the release's own check
+ * (draftable) does not see (GHSA-vrq3-87m3-6rgg).
+ */
+function linksGuestPodBeyond(draft: ReleaseDraft): boolean {
+  let links = false;
+  rebaseDraft(draft, draft.url, (iri) => {
+    links ||= isGuestPodIri(iri) && iri !== draft.url && !iri.startsWith(`${draft.url}#`);
+    return iri;
+  });
+  return links;
 }
 
 /**
@@ -632,12 +649,17 @@ export function createReleaseDraftUseCases({
             draft: await create(
               instanceUrl,
               { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
-              (url) =>
-                nextVersionDraft(
+              (url) => {
+                const draft = nextVersionDraft(
                   inItsPlace(release, url),
                   url,
                   untaken(linked, takenBy(release, url)),
-                ),
+                );
+                // What the linked documents state is checked as the draft has it, as the release was (draftable).
+                if (linksGuestPodBeyond(draft))
+                  throw new AppError("releaseLinksGuestPod", { url: release.url });
+                return draft;
+              },
             ),
           };
         }

@@ -80,7 +80,9 @@ brings one in, for a guest and a logged-in user alike:
   address in it, such as a card's picture or what it's about
   (`releaseLinksGuestPod`);
 - so is a release made a [draft](studio.md#drafts), from a file or as
-  a next version;
+  a next version. So is a next version whose series or publisher, as
+  the documents they're described in say, links to it, such as by the
+  earlier versions the series lists (`dcat:hasVersion`);
 - so is a [deck file](studio.md#import-and-export) with such an
   address (`deckFileLinksGuestPod`). The deck's, its cards' and their
   documents' own addresses may name it: the import gives them new

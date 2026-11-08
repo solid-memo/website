@@ -1606,7 +1606,12 @@ anywhere else is shown by no editor and checked by no rule, but would
 be published with the draft, so such a release is refused too
 (`releaseForeignPart`). So is one that links to the guest's pod by an
 IRI (`releaseLinksGuestPod`): a guest's draft of it couldn't be kept
-([guest-mode.md](guest-mode.md#what-comes-from-outside)). Its text may
+([guest-mode.md](guest-mode.md#what-comes-from-outside)). For a next
+version, the draft as it's made is held to this too. It takes what the
+documents its series and publisher are described in say, such as the
+earlier versions the series lists (`dcat:hasVersion`). It's refused,
+with nothing written, when it links to the guest's pod by an IRI other
+than its own URL or its own subjects' (`<draft>#id`). Its text may
 name any address.
 
 Of a release's other statements, the draft keeps those of the release,

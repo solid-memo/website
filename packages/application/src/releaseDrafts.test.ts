@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
-import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
+import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_WEBID } from "@solid-memo/domain/guest";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import {
   draftSummaryOf,
@@ -458,6 +458,57 @@ describe("createReleaseDraft", () => {
     repository.parseRelease.mockResolvedValueOnce(naming);
     await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
     expect(repository.create).toHaveBeenCalledOnce();
+  });
+
+  it("refuses a next version whose release's linked documents link to the guest's pod, writing nothing (GHSA-vrq3-87m3-6rgg)", async () => {
+    const { useCases, repository, created } = setUp();
+    const OUTSIDE = "https://elsewhere.example/decks/solid/v1.ttl";
+    const SERIES = "https://elsewhere.example/decks/index.ttl#solid";
+    const outside = rebaseDraft(courseDraft(), OUTSIDE);
+    // The release itself names nothing at the guest's pod: its series is described in another document.
+    const release = {
+      ...outside,
+      root: { ...outside.root, inSeries: SERIES, isVersionOf: SERIES },
+      triples: outside.triples.filter((triple) => !triple.subject.endsWith("#series")),
+    };
+    const iri = (value: string) => ({ kind: "iri" as const, value });
+    const series: DraftTriple = {
+      subject: SERIES,
+      predicate: RDF_TYPE,
+      object: iri("http://www.w3.org/ns/dcat#DatasetSeries"),
+    };
+    const linking: DraftTriple[] = [
+      series,
+      {
+        subject: SERIES,
+        predicate: "http://www.w3.org/ns/dcat#theme",
+        object: iri(`${GUEST_ORIGIN}x`),
+      },
+      {
+        subject: SERIES,
+        predicate: "http://purl.org/dc/terms/publisher",
+        object: iri("HTTPS://GUEST.solid-memo.invalid:443/me"),
+      },
+    ];
+    const refused = new AppError("releaseLinksGuestPod", { url: OUTSIDE });
+    for (const instance of [GUEST_INSTANCE_URL, INSTANCE]) {
+      repository.readRelease.mockResolvedValueOnce(release);
+      repository.readLinked.mockResolvedValueOnce(linking);
+      await expect(
+        useCases.createReleaseDraft(instance, { kind: "nextVersionOf", url: OUTSIDE }, GUEST_WEBID),
+      ).rejects.toEqual(refused);
+    }
+    expect(repository.create).not.toHaveBeenCalled();
+    // A guest's next version names its own place at the guest's pod, which a copy of it moves.
+    repository.readRelease.mockResolvedValueOnce(release);
+    repository.readLinked.mockResolvedValueOnce([series]);
+    await useCases.createReleaseDraft(
+      GUEST_INSTANCE_URL,
+      { kind: "nextVersionOf", url: OUTSIDE },
+      GUEST_WEBID,
+    );
+    expect(created().url).toBe(draftUrlOf(GUEST_INSTANCE_URL, "solid", 2));
+    expect(created().triples).toContainEqual(series);
   });
 
   it("refuses a release with a card outside it, writing nothing, but not one of its own its records do not hold", async () => {
