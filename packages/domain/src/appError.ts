@@ -112,6 +112,8 @@ export const ERROR_TEMPLATES = {
   },
   guestUrlsLeft:
     "The copy {url} in your Pod still points to the guest's study, so your study is left as it was. Try again.",
+  guestDeckCopyUrlsLeft:
+    "The copy of the deck “{deck}” in your Pod still points to the guest's study, so your study is left as it was. Remove that deck from the guest's study, then try again.",
   guestDeckUrlsLeft:
     "The deck “{deck}” still points to the guest's study, so it was not added to your Pod. Leave it out, then try again.",
   guestStudyInvalid: {
@@ -175,6 +177,8 @@ export const ERROR_TEMPLATES = {
   notADeck: "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
   libraryIdsRepeat:
     "This deck gives two of its cards or wrong options the same id, so Solid Memo cannot read it. Ask its creator to check it.",
+  releaseLinksGuestPod:
+    "This release links to the guest's study in this browser, which no release may, so Solid Memo does not read it. Ask its creator to check it.",
   libraryDeckTooNew:
     "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
   libraryCardTooNew:
@@ -183,6 +187,8 @@ export const ERROR_TEMPLATES = {
     "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
   notADeckFile:
     "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
+  deckFileLinksGuestPod:
+    "That file links to the guest's study in this browser, which no deck may, so it was not imported. Choose another file.",
   deckFileTooNew:
     "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
   deckFileTooLarge:

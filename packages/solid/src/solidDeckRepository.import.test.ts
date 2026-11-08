@@ -13,6 +13,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createSolidDeckRepository } from "./solidDeckRepository";
+import type { LibraryCard } from "@solid-memo/domain/library";
 import { release } from "./testing/deckWrites";
 
 const INSTANCE = "https://pod.example/memo/";
@@ -45,7 +46,7 @@ function importInto(answer: Answer, root = "https://pod.example/", instance = IN
     now: () => new Date("2026-11-06T00:00:00Z"),
     randomId: () => "new",
   });
-  return { store, run: () => repository.importDeck(instance, release(2)) };
+  return { store, repository, run: () => repository.importDeck(instance, release(2)) };
 }
 
 const refused = (status: number) => new Response("", { status });
@@ -195,5 +196,32 @@ describe("an import cut off", () => {
     await expect(failure).rejects.toMatchObject({ code: "importOutcomeUnknown" });
     await expect(failure).rejects.toThrow(/cannot tell whether it was added/);
     expect(await store.urls()).toEqual(expect.arrayContaining([CARDS, CATALOG]));
+  });
+});
+
+describe("an import of a release that links to the guest's pod", () => {
+  it("is refused before anything is written, whatever links there: a guest could not keep it (GHSA-hc3p-fpwj-fvjp)", async () => {
+    const content = release(2);
+    const [first, second] = content.cards as [LibraryCard, LibraryCard];
+    for (const linking of [
+      { ...content, license: `${GUEST_ORIGIN}license` },
+      { ...content, themes: [`${GUEST_ORIGIN}theme`] },
+      { ...content, cards: [first, { ...second, frontImageUrl: `${GUEST_ORIGIN}p.png` }] },
+      { ...content, cards: [{ ...first, subjects: [`${GUEST_ORIGIN}a`] }, second] },
+    ]) {
+      const { store, repository } = importInto(() => undefined);
+      await expect(repository.importDeck(INSTANCE, linking)).rejects.toEqual(
+        new AppError("releaseLinksGuestPod", { url: content.url }),
+      );
+      expect(await store.urls()).toEqual([]);
+    }
+  });
+
+  it("is not refused for the release's own address, which the copy names as its source", async () => {
+    const { repository } = importInto(() => undefined);
+    const url = `${GUEST_ORIGIN}memo/drafts/capitals/v1/release.ttl`;
+    expect(await repository.importDeck(INSTANCE, { ...release(2), url })).toMatchObject({
+      sourceUrl: url,
+    });
   });
 });

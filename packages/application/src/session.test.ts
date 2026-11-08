@@ -912,6 +912,69 @@ describe("guests", () => {
     expect(deps.instanceCopier.deleteRecursively).not.toHaveBeenCalled();
   });
 
+  it("transferGuestStudy names the guest's deck whose copied document still names the guest's pod, so it can be left out", async () => {
+    const { deps } = guestDeps();
+    const deckOf = (id: string, extra: Partial<Deck> = {}): Deck => ({
+      ...deck,
+      id,
+      url: `${GUEST_INSTANCE_URL}catalog.ttl#${id}`,
+      title: { en: id },
+      cardsDocumentUrl: `${GUEST_INSTANCE_URL}decks/${id}.ttl`,
+      reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/${id}.ttl`,
+      ...extra,
+    });
+    const linking = deckOf("deck-l", { license: `${GUEST_ORIGIN}license` });
+    vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+      url === GUEST_INSTANCE_URL ? [deckOf("deck-a"), deckOf("deck-b"), linking] : [],
+    );
+    vi.mocked(deps.instanceCopier.listResources).mockResolvedValue([
+      `${GUEST_INSTANCE_URL}catalog.ttl`,
+      `${GUEST_INSTANCE_URL}decks/deck-a.ttl`,
+      `${GUEST_INSTANCE_URL}reviews/deck-b.ttl`,
+      `${GUEST_INSTANCE_URL}history/2026-10.ttl`,
+    ]);
+    const moveNaming = async (named: string) => {
+      vi.mocked(deps.instanceCopier.namesIriAt).mockImplementation(async (url) => url === named);
+      const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      });
+      return outcome.ok ? null : outcome.error;
+    };
+    expect(await moveNaming(`${TARGET}decks/deck-a.ttl`)).toEqual(
+      new AppError("guestDeckCopyUrlsLeft", {
+        deck: { en: "deck-a" },
+        url: `${TARGET}decks/deck-a.ttl`,
+      }),
+    );
+    expect(await moveNaming(`${TARGET}reviews/deck-b.ttl`)).toEqual(
+      new AppError("guestDeckCopyUrlsLeft", {
+        deck: { en: "deck-b" },
+        url: `${TARGET}reviews/deck-b.ttl`,
+      }),
+    );
+    // In the catalog, the deck whose entry links to the guest's pod.
+    expect(await moveNaming(`${TARGET}catalog.ttl`)).toEqual(
+      new AppError("guestDeckCopyUrlsLeft", {
+        deck: { en: "deck-l" },
+        url: `${TARGET}catalog.ttl`,
+      }),
+    );
+    // A document of no deck, or a catalog whose entries link nowhere there, is named itself.
+    expect(await moveNaming(`${TARGET}history/2026-10.ttl`)).toEqual(
+      new AppError("guestUrlsLeft", { url: `${TARGET}history/2026-10.ttl` }),
+    );
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deckOf("deck-a")]);
+    expect(await moveNaming(`${TARGET}catalog.ttl`)).toEqual(
+      new AppError("guestUrlsLeft", { url: `${TARGET}catalog.ttl` }),
+    );
+    // So is any, when the guest's decks cannot be listed.
+    vi.mocked(deps.deckRepository.listDecks).mockRejectedValue(new Error("unreadable"));
+    expect(await moveNaming(`${TARGET}decks/deck-a.ttl`)).toEqual(
+      new AppError("guestUrlsLeft", { url: `${TARGET}decks/deck-a.ttl` }),
+    );
+  });
+
   it("transferGuestStudy refuses a copy that still names the guest's pod, or does not conform", async () => {
     const { deps } = guestDeps();
     vi.mocked(deps.instanceCopier.namesIriAt).mockImplementation(async (url) =>

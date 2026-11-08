@@ -4,6 +4,7 @@
 
 import { profileNameOf, type SolidAccount } from "@solid-memo/domain/account";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import {
@@ -29,6 +30,7 @@ import {
   guestMergeKey,
   guestMergePlan,
   isGuestUrl,
+  linksGuestPod,
   mergedAnswer,
   mergedDeck,
   type GuestMergeOutcome,
@@ -332,6 +334,31 @@ export function createSessionUseCases({
       await guestPod.discard();
   }
   /**
+   * The error of a move whose copied document at `url` still names the
+   * guest's pod: when the document is a guest's deck's, its cards or
+   * reviews document, or the catalog whose entry of it links to the
+   * guest's pod, the error names that deck (guestDeckCopyUrlsLeft), so
+   * the user can tell which to leave out; else the document
+   * (guestUrlsLeft), as when the guest's decks cannot be listed.
+   */
+  async function guestUrlsLeftIn(
+    url: string,
+    guestInstanceUrl: string,
+    { from, to }: ContainerMove,
+  ): Promise<AppError> {
+    const moved = (iri: string) => rebaseIri(iri, from, to);
+    const decks = await deckRepository.listDecks(guestInstanceUrl).catch((): Deck[] => []);
+    const deck = decks.find(
+      (deck) =>
+        moved(deck.cardsDocumentUrl) === url ||
+        moved(deck.reviewsDocumentUrl) === url ||
+        (moved(documentUrlOf(deck.url)) === url && linksGuestPod(deck)),
+    );
+    return deck === undefined
+      ? new AppError("guestUrlsLeft", { url })
+      : new AppError("guestDeckCopyUrlsLeft", { deck: deck.title, url });
+  }
+  /**
    * Add a guest's deck to the instance as a new deck, whole: its cards
    * document, then its reviews document (each created only where nothing
    * is), then its catalog entry, the write that makes it a deck of the
@@ -594,7 +621,7 @@ export function createSessionUseCases({
         progress.stepped();
         for (const url of documents) {
           if (await instanceCopier.namesIriAt(url, GUEST_ORIGIN))
-            throw new AppError("guestUrlsLeft", { url });
+            throw await guestUrlsLeftIn(url, guestInstance.url, move);
           progress.stepped();
         }
         progress.finished("validate");

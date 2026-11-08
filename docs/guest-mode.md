@@ -68,6 +68,27 @@ session), and the deck opens in the guest's instance. A logged-in
 user's opens it in their own. A guest's study that can't start leaves the
 landing page, with the reason.
 
+## What comes from outside
+
+When the study is kept, every address that names the guest's pod must
+be one of the study's own, which the move gives a new place
+([Keeping the study](#keeping-the-study)). So data from outside never
+brings one in, for a guest and a logged-in user alike:
+
+- a [release](deck-library.md#reading-it), from the library or a link,
+  is refused when it's at the guest's pod or links to it by an
+  address in it, such as a card's picture or what it's about
+  (`releaseLinksGuestPod`);
+- so is a release made a [draft](studio.md#drafts), from a file or as
+  a next version;
+- so is a [deck file](studio.md#import-and-export) with such an
+  address (`deckFileLinksGuestPod`). The deck's, its cards' and their
+  documents' own addresses may name it: the import gives them new
+  ones.
+
+Text the reader reads, such as card text and notes or what changed in
+a release, may name any address.
+
 ## Keeping the study
 
 ```mermaid
@@ -258,10 +279,14 @@ instance goes). It runs these steps:
    user's (`ContainerMove.renames`).
 3. **adopt:** name the catalog's publisher as the user's profile names
    them. No Turtle document of the copy may still name an IRI at the
-   origin of `GUEST_ORIGIN`, in any spelling (`guestUrlsLeft`, which
-   names the document). Literals aren't looked at, their text or their
-   datatypes: the copy moves only the IRIs of subjects, predicates,
-   objects and graphs, and text such as a card's may name any address.
+   origin of `GUEST_ORIGIN`, in any spelling. The failure names the
+   guest's deck the document is of (`guestDeckCopyUrlsLeft`), so it
+   can be removed from the guest's study: the deck's cards or reviews
+   document, or the catalog whose entry of it links there. Else it
+   names the document (`guestUrlsLeft`). Literals aren't looked at,
+   their text or their datatypes: the copy moves only the IRIs of
+   subjects, predicates, objects and graphs, and text such as a card's
+   may name any address.
 4. **validate:** the copy must fully conform to the shapes
    (`movedCopyInvalid`).
 5. **verify:** the guest's instance must be unchanged since it was

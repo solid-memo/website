@@ -313,10 +313,43 @@ const READER_TEXT_FIELDS: ReadonlySet<string> = new Set([
  * does: a URL parser reads spellings without `//` as the guest's pod too.
  */
 export function addressesGuest(value: unknown): boolean {
+  return addressesGuestBut(value, READER_TEXT_FIELDS);
+}
+
+/**
+ * The fields of a deck, a card and a wrong option that hold its own
+ * place (its id, its address and its documents'): an import gives it a
+ * new one, and a release or a deck file read at the guest's pod has
+ * them there. With them, the text a release adds for the reader (what
+ * changed in it), which may name any address: guest.test.ts lists every
+ * field of LibraryDeckContent, so a new one fails it until it is placed.
+ */
+const OWN_PLACE_FIELDS: ReadonlySet<string> = new Set([
+  ...READER_TEXT_FIELDS,
+  "versionNotes",
+  "id",
+  "url",
+  "cardsDocumentUrl",
+  "reviewsDocumentUrl",
+]);
+
+/**
+ * Whether data from outside the instance, a release or a deck file as
+ * it is read, links to the guest's pod by an address in a field that
+ * is neither its own place nor text for the reader (OWN_PLACE_FIELDS),
+ * as addressesGuest finds one: added to a guest's study, such an
+ * address would stay as it is when the study is kept, so it would not
+ * be kept (GHSA-hc3p-fpwj-fvjp).
+ */
+export function linksGuestPod(value: unknown): boolean {
+  return addressesGuestBut(value, OWN_PLACE_FIELDS);
+}
+
+function addressesGuestBut(value: unknown, skipped: ReadonlySet<string>): boolean {
   if (typeof value === "string") return isGuestPodIri(value) || namesGuestPod(value);
   if (typeof value !== "object" || value === null) return false;
   return Object.entries(value).some(
-    ([field, held]) => !READER_TEXT_FIELDS.has(field) && addressesGuest(held),
+    ([field, held]) => !skipped.has(field) && addressesGuestBut(held, skipped),
   );
 }
 

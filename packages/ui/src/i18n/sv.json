@@ -1696,6 +1696,7 @@
       "other": "Kopian i din Pod har inte det format Solid Memo förväntar sig ({count} problem), så dina studier lämnas som de var. Försök igen senare."
     },
     "guestUrlsLeft": "Kopian {url} i din Pod pekar fortfarande på gästens studier, så dina studier lämnas som de var. Försök igen.",
+    "guestDeckCopyUrlsLeft": "Kopian av kortleken ”{deck}” i din Pod pekar fortfarande på gästens studier, så dina studier lämnas som de var. Ta bort den kortleken från gästens studier och försök igen.",
     "guestDeckUrlsLeft": "Kortleken ”{deck}” pekar fortfarande på gästens studier, så den lades inte till i din Pod. Lämna den utanför och försök igen.",
     "guestStudyInvalid": {
       "one": "En del av dina studier i den här webbläsaren har inte det format Solid Memo förväntar sig ({count} problem), så inget av dem lades till i din Pod. De finns kvar här.",
@@ -1732,10 +1733,12 @@
     "cardGone": "Kortet finns inte längre. Kanske togs det bort i en annan flik eller app. Läs in sidan igen.",
     "notADeck": "Det är ingen kortlek från Solid Memo, så den kan inte läggas till. Välj en annan kortlek.",
     "libraryIdsRepeat": "Den här kortleken ger två av sina kort eller felaktiga alternativ samma id, så Solid Memo kan inte läsa den. Be den som skapade den att kontrollera den.",
+    "releaseLinksGuestPod": "Den här utgåvan länkar till gästens studier i den här webbläsaren, vilket ingen utgåva får göra, så Solid Memo läser den inte. Be den som skapade den att kontrollera den.",
     "libraryDeckTooNew": "Kortleken har ett nyare format än den här versionen av Solid Memo kan läsa. Läs in sidan igen för att få den senaste versionen.",
     "libraryCardTooNew": "Ett kort i kortleken har ett nyare format än den här versionen av Solid Memo kan läsa. Läs in sidan igen för att få den senaste versionen.",
     "deckFileUnreadable": "Solid Memo kan inte läsa den filen. Välj en Turtle- eller JSON-LD-fil som exporterats från Solid Memo.",
     "notADeckFile": "Den filen innehåller inte en kortlek från Solid Memo. Välj en fil som exporterats från Solid Memo.",
+    "deckFileLinksGuestPod": "Den filen länkar till gästens studier i den här webbläsaren, vilket ingen kortlek får göra, så den importerades inte. Välj en annan fil.",
     "deckFileTooNew": "Den filen skrevs av en nyare version av Solid Memo, så den här versionen kan inte importera den. Läs in sidan igen för att få den senaste versionen.",
     "deckFileTooLarge": "Den filen är större än någon kortlek Solid Memo läser, så den lästes inte. Välj en mindre fil.",
     "noGuestPod": "Det finns inga gäststudier på den här enheten.",

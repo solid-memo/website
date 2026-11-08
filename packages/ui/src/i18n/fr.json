@@ -1772,6 +1772,7 @@
       "other": "La copie dans votre Pod n’est pas au format attendu par Solid Memo ({count} problèmes), votre travail reste donc tel quel. Réessayez plus tard."
     },
     "guestUrlsLeft": "La copie {url} dans votre Pod renvoie encore au travail du mode invité, votre travail reste donc tel quel. Réessayez.",
+    "guestDeckCopyUrlsLeft": "La copie du paquet « {deck} » dans votre Pod renvoie encore au travail du mode invité, votre travail reste donc tel quel. Retirez ce paquet du travail du mode invité, puis réessayez.",
     "guestDeckUrlsLeft": "Le paquet « {deck} » renvoie encore au travail du mode invité, il n’a donc pas été ajouté à votre Pod. Laissez-le de côté, puis réessayez.",
     "guestStudyInvalid": {
       "one": "Une partie de votre travail dans ce navigateur n’est pas au format attendu par Solid Memo ({count} problème), rien n’a donc été ajouté à votre Pod. Tout est toujours ici.",
@@ -1809,10 +1810,12 @@
     "cardGone": "Cette carte n’existe plus. Elle a peut-être été supprimée dans un autre onglet ou une autre application. Rechargez la page.",
     "notADeck": "Ce n’est pas un paquet Solid Memo, il ne peut donc pas être ajouté. Choisissez un autre paquet.",
     "libraryIdsRepeat": "Ce paquet donne le même identifiant à deux de ses cartes ou mauvaises réponses, Solid Memo ne peut donc pas le lire. Demandez à son créateur de le vérifier.",
+    "releaseLinksGuestPod": "Cette publication renvoie au travail du mode invité de ce navigateur, ce qu’aucune publication ne peut faire, Solid Memo ne la lit donc pas. Demandez à son créateur de la vérifier.",
     "libraryDeckTooNew": "Ce paquet est dans un format plus récent que celui que cette version de Solid Memo sait lire. Rechargez la page pour obtenir la dernière version.",
     "libraryCardTooNew": "Une carte de ce paquet est dans un format plus récent que celui que cette version de Solid Memo sait lire. Rechargez la page pour obtenir la dernière version.",
     "deckFileUnreadable": "Solid Memo ne peut pas lire ce fichier. Choisissez un fichier Turtle ou JSON-LD exporté depuis Solid Memo.",
     "notADeckFile": "Ce fichier ne contient pas exactement un paquet Solid Memo. Choisissez un fichier exporté depuis Solid Memo.",
+    "deckFileLinksGuestPod": "Ce fichier renvoie au travail du mode invité de ce navigateur, ce qu’aucun paquet ne peut faire, il n’a donc pas été importé. Choisissez un autre fichier.",
     "deckFileTooNew": "Ce fichier a été écrit par une version plus récente de Solid Memo : celle-ci ne peut donc pas l’importer. Rechargez la page pour obtenir la dernière version.",
     "deckFileTooLarge": "Ce fichier est plus volumineux que tout paquet que Solid Memo lit : il n’a donc pas été lu. Choisissez un fichier plus petit.",
     "noGuestPod": "Il n’y a pas de travail en mode invité sur cet appareil.",

@@ -18,6 +18,7 @@ import type { Quad } from "@rdfjs/types";
 import type { DeckArchive } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
+import { linksGuestPod } from "@solid-memo/domain/guest";
 import {
   CARD_FORMAT_VERSION,
   DECK_FORMAT_VERSION,
@@ -123,6 +124,9 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
       const cards = readCards(typed(SM.Card), dataset, deck, report);
       const ids = new Set(cards.map((card) => card.id));
       const { reviews, fsrsReviews } = readReviewStates(typed(SM.ReviewState), deck, ids, report);
+      // An address the import keeps as it is, such as a card's picture or subject, never links to a guest's pod: a guest's copy would stay there (GHSA-hc3p-fpwj-fvjp).
+      if (linksGuestPod([deck, cards, reviews, fsrsReviews]))
+        throw new AppError("deckFileLinksGuestPod");
       return {
         deck,
         cards,

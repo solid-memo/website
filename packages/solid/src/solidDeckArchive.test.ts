@@ -385,6 +385,24 @@ describe("readDeckFile", () => {
     });
   });
 
+  it("refuses a file that links to the guest's pod by an address an import keeps, but not by its own places (GHSA-hc3p-fpwj-fvjp)", async () => {
+    const guest = "https://guest.solid-memo.invalid/";
+    // A guest's own export: its deck, cards and review states at the guest's pod.
+    const own = await archive.readDeckFile(OLD_DECK, "turtle", `${guest}solid-memo/old.ttl`);
+    expect(own.deck.url).toBe(`${guest}solid-memo/old.ttl#deck`);
+    expect(own.cards.map((card) => card.id)).toEqual(["c1"]);
+    const card = `<cards#c9> a sm:Card ; sm:front "Q"@en ; sm:back "A"@en ; sm:formatVersion 7`;
+    for (const linking of [
+      `${card} ; sm:frontImage <${guest}p.png> .`,
+      `${card} ; dcterms:subject <HTTPS://GUEST.solid-memo.invalid:443/a> .`,
+    ]) {
+      await expect(
+        archive.readDeckFile(`${OLD_DECK}${linking}`, "turtle", base),
+        linking,
+      ).rejects.toMatchObject({ code: "deckFileLinksGuestPod" });
+    }
+  });
+
   it("refuses a file that holds no deck it can read, or more than one", async () => {
     await expect(archive.readDeckFile(PREFIXES, "turtle", base)).rejects.toMatchObject({
       code: "notADeckFile",

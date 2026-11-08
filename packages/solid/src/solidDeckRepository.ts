@@ -81,6 +81,7 @@ import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
+import { linksGuestPod } from "@solid-memo/domain/guest";
 import { finishCutOffImport, unsent } from "@solid-memo/application/writes";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
 import { withinCatalogLimit } from "./catalogLinks";
@@ -205,6 +206,9 @@ export function createSolidDeckRepository({
     registerDeck,
 
     async importDeck(instanceUrl, content): Promise<Deck> {
+      // What a copy keeps of the release, by address, never links to a guest's pod: a guest's copy would stay there (GHSA-hc3p-fpwj-fvjp).
+      if (linksGuestPod([content.license, content.themes, content.cards]))
+        throw new AppError("releaseLinksGuestPod", { url: content.url });
       const deck = newDeck(instanceUrl, content.title, content);
       // Each card names the release it is taken from: the series', which an upgrade may change.
       const written = withCards(createSolidDataset(), deck, content.cards, (_, card) => ({

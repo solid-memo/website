@@ -1461,7 +1461,12 @@ file in a newer format than the app reads is refused (as
 `deckFileTooNew`, not `writtenByNewerApp`, since nothing is saved
 over), as is one without exactly one deck, or one that doesn't parse.
 So is one whose deck has an address that isn't a URL, which its entry
-in the catalog can't hold.
+in the catalog can't hold. So is one with an address the import keeps,
+such as a card's picture or what it's about, that links to the guest's
+pod (`deckFileLinksGuestPod`,
+[guest-mode.md](guest-mode.md#what-comes-from-outside)). The deck's,
+its cards' and their documents' own addresses may: the import gives
+them new ones.
 
 **Import into** the instance (`importDeckFile`) makes a new deck of
 it, with its progress when the file has some and the user leaves it
@@ -1599,7 +1604,10 @@ chapter, step and wrong option must be a fragment of the release
 (`<release>#id`), as the draft holds only those as its parts. One
 anywhere else is shown by no editor and checked by no rule, but would
 be published with the draft, so such a release is refused too
-(`releaseForeignPart`).
+(`releaseForeignPart`). So is one that links to the guest's pod by an
+IRI (`releaseLinksGuestPod`): a guest's draft of it couldn't be kept
+([guest-mode.md](guest-mode.md#what-comes-from-outside)). Its text may
+name any address.
 
 Of a release's other statements, the draft keeps those of the release,
 of its own subjects, and of what they name, at any depth: a source, a

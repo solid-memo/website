@@ -416,6 +416,50 @@ describe("createReleaseDraft", () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
+  it("refuses a release that links to the guest's pod, writing nothing, but not one whose text names it (GHSA-hc3p-fpwj-fvjp)", async () => {
+    const { useCases, repository } = setUp();
+    const linking = {
+      ...v1,
+      triples: [
+        ...v1.triples,
+        {
+          subject: V1,
+          predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+          object: { kind: "iri" as const, value: "HTTPS://GUEST.solid-memo.invalid:443/x" },
+        },
+      ],
+    };
+    const refused = new AppError("releaseLinksGuestPod", { url: V1 });
+    repository.readRelease.mockResolvedValueOnce(linking);
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }, WEB_ID),
+    ).rejects.toEqual(refused);
+    repository.parseRelease.mockResolvedValueOnce(linking);
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).rejects.toEqual(refused);
+    expect(repository.create).not.toHaveBeenCalled();
+    const naming = {
+      ...v1,
+      triples: [
+        ...v1.triples,
+        {
+          subject: V1,
+          predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+          object: {
+            kind: "literal" as const,
+            value: `See ${GUEST_INSTANCE_URL}`,
+            language: "",
+            datatype: "http://www.w3.org/2001/XMLSchema#string",
+          },
+        },
+      ],
+    };
+    repository.parseRelease.mockResolvedValueOnce(naming);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    expect(repository.create).toHaveBeenCalledOnce();
+  });
+
   it("refuses a release with a card outside it, writing nothing, but not one of its own its records do not hold", async () => {
     const { useCases, repository } = setUp();
     const typed = (subject: string, type: string): DraftTriple => ({
