@@ -43,7 +43,12 @@ import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairReposi
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { grantPublicRead } from "@solid-memo/solid/client/access";
-import { FOREIGN_LIMITS, limitedFetch } from "@solid-memo/solid/client/readLimits";
+import {
+  FOREIGN_LIMITS,
+  FOREIGN_READS_BUDGET,
+  FOREIGN_REREADS,
+  sharedReadBudget,
+} from "@solid-memo/solid/client/readLimits";
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSessionClient } from "@solid-memo/solid/client/session";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
@@ -120,6 +125,29 @@ export function createAppUseCases({
   );
   /** A fetch as no one (authFetch.ts), whose reads have a deadline as the user's do. */
   const noOneFetch = withReadDeadline(anonymousFetch);
+  /**
+   * What is read outside the user's storages as no one, each document
+   * under FOREIGN_LIMITS and all of them within FOREIGN_READS_BUDGET
+   * together in a page session: an instance anyone may make may list a
+   * thousand decks, each with two documents as large as a release.
+   */
+  const foreignReads = sharedReadBudget({
+    limits: FOREIGN_LIMITS,
+    budget: FOREIGN_READS_BUDGET,
+    rereads: FOREIGN_REREADS,
+  });
+  /**
+   * What is read as the user in an instance they registered outside their
+   * storages, as foreignReads is, within a budget of each server's own,
+   * so reads elsewhere never spend it; what is written there is sent
+   * whatever is spent.
+   */
+  const instanceReads = sharedReadBudget({
+    limits: FOREIGN_LIMITS,
+    budget: FOREIGN_READS_BUDGET,
+    rereads: FOREIGN_REREADS,
+    scope: (url) => new URL(url).origin,
+  });
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
   const shareFetch = createPodFence(writeFence.fetch, { accessControl: true });
@@ -131,7 +159,8 @@ export function createAppUseCases({
    * anywhere else as no one, writing nothing there; a guest's pod is
    * this browser's. What it reads outside the user's storages, in an
    * instance they registered elsewhere too, is read under
-   * FOREIGN_LIMITS.
+   * FOREIGN_LIMITS, within a budget for the page session (foreignReads,
+   * instanceReads).
    */
   const dataFetch = createPodFence(
     routedFetch({
@@ -139,8 +168,8 @@ export function createAppUseCases({
       local: writeFence.fetch,
       remote: createOwnPodGate({
         fetch: writeFence.fetch,
-        instanceFetch: limitedFetch(writeFence.fetch, FOREIGN_LIMITS),
-        publicFetch: limitedFetch(noOneFetch, FOREIGN_LIMITS),
+        instanceFetch: instanceReads(writeFence.fetch),
+        publicFetch: foreignReads(noOneFetch),
         webId: session.webId,
         ownFolders,
         revision: () => folderRevision,
@@ -280,7 +309,7 @@ export function createAppUseCases({
       fetch: dataFetch,
       // A deck's cards copied into a draft outside their pod are read as no one, as the gate reads elsewhere;
       // never from a guest's pod, which is this browser's.
-      publicFetch: createPodFence(limitedFetch(noOneFetch, FOREIGN_LIMITS)),
+      publicFetch: createPodFence(foreignReads(noOneFetch)),
       checkWrite,
       now,
       randomId,
@@ -298,7 +327,7 @@ export function createAppUseCases({
       fetch: dataFetch,
       // A deck's states copied into another deck outside their pod are read as no one, as its cards are;
       // never from a guest's pod, which is this browser's.
-      publicFetch: createPodFence(limitedFetch(noOneFetch, FOREIGN_LIMITS)),
+      publicFetch: createPodFence(foreignReads(noOneFetch)),
       checkWrite,
     }),
     shapeValidator,

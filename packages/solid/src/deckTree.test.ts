@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import type { Deck } from "@solid-memo/domain/deck";
+import { type Deck, MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { decksOf, nodeId, type DeckTree, type TreeNode } from "@solid-memo/domain/deckTree";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
@@ -73,6 +73,24 @@ describe("the deck tree in the pod", () => {
     );
     const tree = await repositoryOn(arranged.fetch).readDeckTree(INSTANCE);
     expect(shape(tree.children)).toEqual(["b", { "group-1": ["c", "a"] }]);
+  });
+
+  it("refuses a catalog with more decks than MAX_CATALOG_LINKS, as catalogTooManyLinks, to read or edit", async () => {
+    const decks = (count: number) =>
+      Array.from({ length: count }, (_, i) => deckTtl(`d${i}`)).join("");
+    const most = fakePod();
+    await most.put(CATALOG, PREFIXES + decks(MAX_CATALOG_LINKS));
+    expect(decksOf((await repositoryOn(most.fetch).readDeckTree(INSTANCE)).children)).toHaveLength(
+      MAX_CATALOG_LINKS,
+    );
+    const past = fakePod();
+    await past.put(CATALOG, PREFIXES + decks(MAX_CATALOG_LINKS + 1));
+    const tooMany = { code: "catalogTooManyLinks", vars: { limit: MAX_CATALOG_LINKS } };
+    await expect(repositoryOn(past.fetch).readDeckTree(INSTANCE)).rejects.toMatchObject(tooMany);
+    await expect(
+      repositoryOn(past.fetch).editDeckTree(INSTANCE, { kind: "removeGroup", group: group.url }),
+    ).rejects.toMatchObject(tooMany);
+    expect(writes(past)).toEqual([]);
   });
 
   it("is edited in one checked write of the groups and the catalog, If-Match the read, and reads back as written", async () => {

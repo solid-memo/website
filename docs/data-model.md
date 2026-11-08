@@ -897,12 +897,15 @@ instance listing one stays valid on real servers
 ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
 
 A catalog is data anyone may have written, so the app reads at most
-`MAX_CATALOG_LINKS` (1,000) decks of it, in the deck list, the
-statistics and the format update as in the Studio
+`MAX_CATALOG_LINKS` (1,000) decks of it, in the deck list and its
+arrangement, the statistics and the format update as in the Studio
 ([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
 it reads none of them and says why (`catalogTooManyLinks`). The same
 limit holds for its links to drafts and releases
-([Drafts and releases](#drafts-and-releases)).
+([Drafts and releases](#drafts-and-releases)). The deck list works out
+the study counts of three decks at a time (`getStudyCounts` in
+[study.ts](../packages/application/src/study.ts)), each reading the
+deck's two documents, so a long list never reads all of them at once.
 
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;

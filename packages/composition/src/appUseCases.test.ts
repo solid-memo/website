@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { IDBFactory } from "fake-indexeddb";
 import { SITE } from "@solid-memo/vocab/tooling/sources";
 import { shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
@@ -70,6 +70,24 @@ vi.mock(
 );
 vi.mock("@solid-memo/solid/solidReleasePublisher", recorded("createSolidReleasePublisher"));
 vi.mock("@solid-memo/solid/solidInstanceGraphReader", recorded("createSolidInstanceGraphReader"));
+
+/** A budget for the reads outside the user's storages, small enough for a test to spend, while `on`. */
+const smallBudget = vi.hoisted(() => ({
+  on: false,
+  limits: { bytes: 1024 * 1024, quads: 30, characters: 1024 * 1024 },
+}));
+vi.mock("@solid-memo/solid/client/readLimits", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/solid/client/readLimits")>();
+  return {
+    ...original,
+    sharedReadBudget: (options: Parameters<typeof original.sharedReadBudget>[0]) =>
+      original.sharedReadBudget(
+        smallBudget.on
+          ? { ...options, budget: smallBudget.limits, rereads: smallBudget.limits }
+          : options,
+      ),
+  };
+});
 
 /** The login: who is logged in, and the addresses requested with their credentials. */
 const login = vi.hoisted(() => ({
@@ -750,6 +768,98 @@ describe("createAppUseCases", () => {
     });
     expect(login.sent).toContain(registered);
     expect(await useCases.listCards(deckAt(`${alice}memo/decks/deck-1.ttl`))).toEqual([]);
+  });
+
+  it("reads the documents of many decks outside the user's storages within a budget, one of each server for an instance they registered, and sends their writes there whatever is spent", async () => {
+    smallBudget.on = true;
+    onTestFinished(() => {
+      smallBudget.on = false;
+    });
+    const alice = "https://alice.example/";
+    const shared = "https://shared.example/study/";
+    login.webId = `${alice}profile/card#me`;
+    const guest = createAppUseCases({ ...options, indexedDB: undefined });
+    await guest.startGuest("My study");
+    const [instance] = await guest.listInstances(GUEST_SESSION);
+    const made = await guest.createDeck(instance!.url, { en: "Capitals" });
+    const entry = `${alice}memo/catalog.ttl#deck-1`;
+    const deckAt = (url: string) => ({
+      ...made,
+      url: entry,
+      cardsDocumentUrl: url,
+      reviewsDocumentUrl: url,
+    });
+    const documents: Record<string, string> = {
+      [`${alice}profile/card`]: `<${login.webId}>
+        <http://www.w3.org/ns/pim/space#storage> <${alice}>;
+        <http://www.w3.org/ns/solid/terms#privateTypeIndex> <${alice}settings/private.ttl>.`,
+      // An instance on another server, registered as the user's.
+      [`${alice}settings/private.ttl`]: `<#memo>
+        a <http://www.w3.org/ns/solid/terms#TypeRegistration>;
+        <http://www.w3.org/ns/solid/terms#forClass> <https://solid-memo.com/ns/vocab/v1.ttl#Instance>;
+        <http://www.w3.org/ns/solid/terms#instanceContainer> <${shared}>.`,
+    };
+    const asked: { url: string; method: string }[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input instanceof Request ? input.url : input).replace(/#.*/, "");
+        const elsewhere = ["https://elsewhere.example/", shared].some((at) => url.startsWith(at));
+        if (!url.startsWith(alice) && !elsewhere) return servedSiteNetwork(input, init);
+        asked.push({ url, method: init?.method ?? "GET" });
+        // Each deck's document well within the limits of one read: twelve triples.
+        const triples = Array.from({ length: 11 }, (_, at) => `<#c${at}> <#p> "${at}".`);
+        const body =
+          documents[url] ??
+          [`<${url}> <http://purl.org/dc/terms/isPartOf> <${entry}>.`, ...triples].join("\n");
+        const response = new Response(body, { headers: { "Content-Type": "text/turtle" } });
+        Object.defineProperty(response, "url", { value: url });
+        return Promise.resolve(response);
+      }),
+    );
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    /** Lists the cards of the decks whose documents are at `urls`, one after another: whether each was read. */
+    const listed = async (urls: string[]) => {
+      const read: boolean[] = [];
+      for (const url of urls)
+        read.push(
+          await useCases.listCards(deckAt(url)).then(
+            () => true,
+            (error: unknown) => {
+              expect(error).toMatchObject({ name: "ReadLimitError" });
+              return false;
+            },
+          ),
+        );
+      return read;
+    };
+    const decks = (at: string) => Array.from({ length: 5 }, (_, deck) => `${at}deck-${deck}.ttl`);
+
+    const foreign = decks("https://elsewhere.example/");
+    expect(await listed(foreign)).toEqual([true, true, false, false, false]);
+    // Past the budget, the server is not asked.
+    expect(asked.filter(({ url }) => url === foreign[4])).toEqual([]);
+    // Nor when a deck's cards or states are copied from there: those reads count in the same budget.
+    for (const name of ["createSolidDeckRepository", "createSolidReviewStateRepository"])
+      await expect(given.get(name)!.publicFetch!(foreign[4]!)).rejects.toMatchObject({
+        name: "ReadLimitError",
+        limits: smallBudget.limits,
+      });
+    expect(asked.filter(({ url }) => url === foreign[4])).toEqual([]);
+    const registered = decks(`${shared}decks/`);
+    expect(await listed(registered)).toEqual([true, true, false, false, false]);
+    expect(asked.filter(({ url }) => url === registered[4])).toEqual([]);
+    expect(login.sent).toContain(registered[0]);
+    // A write to the instance registered elsewhere goes out all the same.
+    const write = await given.get("createSolidDeckRepository")!.fetch!(registered[4]!, {
+      method: "PUT",
+      body: "",
+    });
+    expect(write.ok).toBe(true);
+    expect(asked).toContainEqual({ url: registered[4], method: "PUT" });
+    // The user's own storage has no such budget.
+    for (let deck = 0; deck < 5; deck++)
+      expect(await useCases.listCards(deckAt(`${alice}memo/decks/deck-${deck}.ttl`))).toEqual([]);
   });
 
   it("lets a guest delete their instance, which is in their own storage", async () => {

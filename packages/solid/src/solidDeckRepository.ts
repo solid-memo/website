@@ -44,7 +44,12 @@ import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { isDeckOutdated, isOutdated, upgradeCard, upgradeDeck } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { CARD_V7 } from "@solid-memo/vocab/descriptors.generated";
-import { applyDeckTreeEdit, buildTree, treeChanges } from "@solid-memo/domain/deckTree";
+import {
+  applyDeckTreeEdit,
+  buildTree,
+  type StoredLayout,
+  treeChanges,
+} from "@solid-memo/domain/deckTree";
 import {
   getSolidDatasetOrNull,
   PreconditionFailedError,
@@ -120,6 +125,17 @@ export interface SolidDeckRepositoryDeps {
  * again to the document as it is then, so a retry keeps what changed.
  */
 const TREE_ATTEMPTS = 3;
+
+/**
+ * The arrangement the catalog states (toStoredLayout), or
+ * catalogTooManyLinks past MAX_CATALOG_LINKS decks, as listDecks gives:
+ * each deck's documents are read by whoever shows the tree.
+ */
+function cappedLayout(dataset: Dataset, catalogUrl: string): StoredLayout {
+  const layout = toStoredLayout(dataset, catalogUrl);
+  withinCatalogLimit(layout.decks);
+  return layout;
+}
 
 export function createSolidDeckRepository({
   fetch,
@@ -263,14 +279,14 @@ export function createSolidDeckRepository({
     async readDeckTree(instanceUrl) {
       const catalogUrl = catalogUrlOf(instanceUrl);
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      return buildTree(toStoredLayout(dataset ?? createSolidDataset(), catalogUrl));
+      return buildTree(cappedLayout(dataset ?? createSolidDataset(), catalogUrl));
     },
 
     async editDeckTree(instanceUrl, edit) {
       const catalogUrl = catalogUrlOf(instanceUrl);
       for (let attempt = 1; ; attempt++) {
         const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-        const stored = toStoredLayout(dataset, catalogUrl);
+        const stored = cappedLayout(dataset, catalogUrl);
         const before = buildTree(stored);
         const after = applyDeckTreeEdit(before, edit);
         if (after === before) return after;

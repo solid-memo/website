@@ -23,7 +23,7 @@ const LINK_ATTEMPTS = 3;
 export { MAX_CATALOG_LINKS };
 
 /** `links`, unless there are more than MAX_CATALOG_LINKS of them: catalogTooManyLinks. */
-export function withinCatalogLimit<T>(links: T[]): T[] {
+export function withinCatalogLimit<L extends readonly unknown[]>(links: L): L {
   if (links.length > MAX_CATALOG_LINKS)
     throw new AppError("catalogTooManyLinks", { limit: MAX_CATALOG_LINKS });
   return links;

@@ -17,12 +17,13 @@ import {
   quadTally,
   refusalOf,
   RELEASE_LIMITS,
+  sharedReadBudget,
   spentOf,
   termKeyLength,
   textChunks,
   writeTurtle,
 } from "./readLimits";
-import { parseQuads } from "./resources";
+import { getSolidDatasetLinear, parseQuads } from "./resources";
 
 const URL_ = "https://other.example/release.ttl";
 const LIMITS = { bytes: 10, quads: 5, characters: 100 };
@@ -190,6 +191,131 @@ describe("limitedFetch", () => {
     const response = await limitedFetch(async () => answer, LIMITS)(URL_);
     expect(response).toBe(answer);
     expect(limitsOf(response)).toBeUndefined();
+  });
+});
+
+describe("sharedReadBudget", () => {
+  const BUDGET = { bytes: 20, quads: 10, characters: 200 };
+  const REREADS = { bytes: 10, quads: 5, characters: 100 };
+  const budgeted = () => sharedReadBudget({ limits: LIMITS, budget: BUDGET, rereads: REREADS });
+  /** Whether a read of `url` through `fetch` is taken in whole; one that is not names `past`, the limits it went past. */
+  const reads = async (fetch: typeof globalThis.fetch, url: string | Request, past = LIMITS) => {
+    const response = await fetch(url);
+    try {
+      await response.text();
+      return true;
+    } catch {
+      expect(refusalOf(response)).toMatchObject({ limits: past });
+      return false;
+    }
+  };
+
+  it("reads each document under its own limits", async () => {
+    const fetch = budgeted()(serving("0123456789".repeat(2)).fetch);
+    expect(await reads(fetch, URL_)).toBe(false);
+  });
+
+  it("reads documents within the budget together, through every fetch it made, then refuses any read without asking", async () => {
+    const budget = budgeted();
+    const { fetch: seven } = serving("0123456");
+    const first = budget(seven);
+    const second = budget(seven);
+    expect(await reads(first, "https://other.example/a.ttl")).toBe(true);
+    expect(await reads(second, "https://other.example/b.ttl")).toBe(true);
+    // Within the document's limits, past what the budget leaves: the budget is named.
+    expect(await reads(first, "https://other.example/c.ttl", BUDGET)).toBe(false);
+    const asked = vi.fn(seven);
+    const request = new Request("https://other.example/d.ttl");
+    await expect(budget(asked)(request)).rejects.toMatchObject({
+      name: "ReadLimitError",
+      url: request.url,
+      limits: BUDGET,
+    });
+    await expect(budget(asked)("https://other.example/e.ttl")).rejects.toMatchObject({
+      limits: BUDGET,
+    });
+    expect(asked).not.toHaveBeenCalled();
+  });
+
+  it("names the limits a Content-Length says the body is past: the document's own, or else the budget", async () => {
+    const budget = budgeted();
+    const seven = serving("0123456").fetch;
+    expect(await reads(budget(seven), "https://other.example/a.ttl")).toBe(true);
+    expect(await reads(budget(seven), "https://other.example/b.ttl")).toBe(true);
+    const said = (length: string) => serving("0123456", { headers: { "Content-Length": length } });
+    await expect(budget(said("11").fetch)("https://other.example/c.ttl")).rejects.toMatchObject({
+      limits: LIMITS,
+    });
+    await expect(budget(said("7").fetch)("https://other.example/c.ttl")).rejects.toMatchObject({
+      limits: BUDGET,
+    });
+  });
+
+  it("counts a document read again up to its largest read out of the rereads, and whole once they are spent", async () => {
+    const fetch = budgeted()(serving("0123456").fetch);
+    const url = "https://other.example/a.ttl";
+    // 7 counted, then 7 and 3 of the rereads, then 4 and 7 counted: 18 of 20.
+    for (let read = 0; read < 4; read++) expect(await reads(fetch, url)).toBe(true);
+    expect(await reads(fetch, url, BUDGET)).toBe(false);
+  });
+
+  it("holds the documents of many decks, each within its limits, to the budget together", async () => {
+    // Each deck's document as large as a read of one takes in; together, past the budget.
+    const limits = { bytes: 1024 * 1024, quads: 400, characters: 1024 * 1024 };
+    const budget = { bytes: 4 * 1024 * 1024, quads: 1_000, characters: 4 * 1024 * 1024 };
+    const turtle = Array.from({ length: 400 }, (_, at) => `<#c${at}> <#front> "card ${at}" .`);
+    const fetch = sharedReadBudget({ limits, budget, rereads: budget })(async (input) => {
+      const response = new Response(turtle.join("\n"), {
+        headers: { "Content-Type": "text/turtle" },
+      });
+      Object.defineProperty(response, "url", { value: String(input) });
+      return response;
+    });
+    const deck = (at: number) =>
+      getSolidDatasetLinear(`https://other.example/memo/decks/deck-${at}.ttl`, { fetch });
+    await expect(deck(0)).resolves.toBeDefined();
+    await expect(deck(1)).resolves.toBeDefined();
+    await expect(deck(2)).rejects.toMatchObject({ name: "ReadLimitError", limits: budget });
+    await expect(deck(3)).rejects.toMatchObject({ name: "ReadLimitError", limits: budget });
+  });
+
+  it("sends a write once the budget is spent, its answer under the limits of one read", async () => {
+    const budget = budgeted();
+    const { fetch: seven } = serving("0123456");
+    const fetch = budget(seven);
+    for (const name of ["a", "b"]) await reads(fetch, `https://other.example/${name}.ttl`);
+    await reads(fetch, "https://other.example/c.ttl", BUDGET);
+    await expect(fetch("https://other.example/d.ttl")).rejects.toMatchObject({ limits: BUDGET });
+    const asked = vi.fn(seven);
+    for (const method of ["PUT", "patch", "DELETE"]) {
+      const response = await budget(asked)("https://other.example/d.ttl", { method });
+      expect(limitsOf(response)).toEqual(LIMITS);
+      expect(await response.text()).toBe("0123456");
+    }
+    const written = await budget(asked)(
+      new Request("https://other.example/d.ttl", { method: "POST" }),
+    );
+    expect(written.status).toBe(200);
+    expect(asked).toHaveBeenCalledTimes(4);
+  });
+
+  it("keeps a budget for each scope a read's address is in", async () => {
+    const budget = sharedReadBudget({
+      limits: LIMITS,
+      budget: BUDGET,
+      rereads: REREADS,
+      scope: (url) => new URL(url).origin,
+    });
+    const fetch = budget(serving("0123456").fetch);
+    for (const name of ["a", "b"]) await reads(fetch, `https://other.example/${name}.ttl`);
+    await reads(fetch, "https://other.example/c.ttl", BUDGET);
+    await expect(fetch("https://other.example/d.ttl")).rejects.toMatchObject({ limits: BUDGET });
+    expect(await reads(fetch, "https://own.example/a.ttl")).toBe(true);
+  });
+
+  it("gives an answer with no body as it is, counting nothing", async () => {
+    const fetch = budgeted()(serving(null).fetch);
+    for (let read = 0; read < 30; read++) expect((await fetch(URL_)).status).toBe(304);
   });
 });
 
