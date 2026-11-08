@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.35](https://github.com/solid-memo/website/compare/v6.29.34...v6.29.35) (2026-11-08)
+
+### Bug Fixes
+
+* **domain:** give the instance graph's blank nodes short ids ([ef2a2bd](https://github.com/solid-memo/website/commit/ef2a2bd8b117122157b50adbff4db5b68d1f5e1d))
+* **solid:** read a subject typed as deck and group as a deck only ([95b30b7](https://github.com/solid-memo/website/commit/95b30b7a5128359586def2f1d2437455de036f8f))
+
 ## [6.29.34](https://github.com/solid-memo/website/compare/v6.29.33...v6.29.34) (2026-11-08)
 
 ### Bug Fixes
