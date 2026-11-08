@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.36](https://github.com/solid-memo/website/compare/v6.29.35...v6.29.36) (2026-11-08)
+
+### Bug Fixes
+
+* **domain:** list only a release's own versions in its series ([dedc6b4](https://github.com/solid-memo/website/commit/dedc6b48279919262d343dd94037c0dbc868599c))
+* **solid:** bound the reads of documents outside the user's storages ([f674c3a](https://github.com/solid-memo/website/commit/f674c3a8c68a44b7a698ffb132d6a2d122bce6c4))
+* **solid:** keep the stored session when a restore attempt is old ([a2c30ae](https://github.com/solid-memo/website/commit/a2c30ae285b29092f33252dfca456779610786d1))
+
 ## [6.29.35](https://github.com/solid-memo/website/compare/v6.29.34...v6.29.35) (2026-11-08)
 
 ### Bug Fixes
