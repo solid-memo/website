@@ -103,6 +103,50 @@ describe("toStoredLayout", () => {
     expect(toStoredLayout(unreadable, CATALOG)).toMatchObject({ groups: [], readOnly: true });
   });
 
+  it("reads a subject typed as both a deck and a group as a deck only, and its edits as a deck's", async () => {
+    // Another app's subject that fits both shapes: no sm:formatVersion (read as 1), titles with and without a language.
+    const dual = (extra = "") =>
+      document(
+        rootTtl("; dcat:catalog <#x>") +
+          deckTtl("a", "; sm:position 0 ") +
+          groupTtl("g", "G", "", "; sm:position 3 ") +
+          `<#x> a sm:Deck, dcat:Dataset, sm:DeckGroup, dcat:Catalog ;
+  dcterms:title "X"@en, "X" ; dcterms:description "X."@en ; dcterms:publisher <${ME}> ;
+  sm:cardsDocument <https://pod.example/solid-memo/a/decks/x.ttl> ;
+  sm:reviewsDocument <https://pod.example/solid-memo/a/reviews/x.ttl> ; sm:position 1 ${extra}.
+` +
+          groupTtl("h", "H", "; dcat:dataset <#x>", "; sm:position 2 "),
+      );
+    const dataset = await dual();
+    const layout = toStoredLayout(dataset, CATALOG);
+    expect(layout.decks.map((deck) => deck.id)).toContain("x");
+    expect(layout.groups.map((entry) => entry.group.url)).toEqual([at("g"), at("h")]);
+    expect(ids(dataset)).toEqual([
+      { kind: "deck", deck: "a" },
+      { kind: "group", group: "h", children: [{ kind: "deck", deck: "x" }] },
+      { kind: "group", group: "g", children: [] },
+    ]);
+    const into = edited(dataset, {
+      kind: "move",
+      node: at("x"),
+      to: { parent: at("g"), after: null },
+    });
+    expect(getUrlAll(getThing(into.dataset, at("g"))!, DCAT.dataset)).toEqual([at("x")]);
+    const top = edited(dataset, {
+      kind: "move",
+      node: at("x"),
+      to: { parent: null, after: at("g") },
+    });
+    expect(buildTree(toStoredLayout(top.dataset, CATALOG))).toEqual(top.after);
+    // Its dcat:dataset links are no group's members: the deck it names stays where it is.
+    const withA = await dual("; dcat:dataset <#a> ");
+    const out = edited(withA, { kind: "move", node: at("a"), to: { parent: null, after: null } });
+    expect(buildTree(toStoredLayout(out.dataset, CATALOG))).toEqual(out.after);
+    // A deck's format is not a group's: one also typed as a group does not make the layout read-only.
+    const typed = await document(rootTtl() + deckTtl("b", "; a sm:DeckGroup, dcat:Catalog "));
+    expect(toStoredLayout(typed, CATALOG)).toMatchObject({ groups: [], readOnly: false });
+  });
+
   it("lists no top-level groups without a catalog", async () => {
     expect(toStoredLayout(await document(deckTtl("a")), CATALOG)).toMatchObject({
       rootGroups: [],

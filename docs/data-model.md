@@ -973,9 +973,12 @@ such).
 
 What isn't one valid tree is read as one, not refused. A link to
 nothing, from a group to itself, or of the wrong kind (a `dcat:dataset`
-link to a group, a `dcat:catalog` link to a deck) is ignored. A node
-several parents list goes to the group with the lowest URL, except a
-group the catalog's `dcat:catalog` lists, which stays at the top level.
+link to a group, a `dcat:catalog` link to a deck) is ignored. A
+subject the app reads as a deck is a deck only, even when it's also
+typed as a group: it's never a group too, and its own links to members
+are ignored. A node several parents list goes to the group with the
+lowest URL, except a group the catalog's `dcat:catalog` lists, which
+stays at the top level.
 A cycle is broken by moving its lowest-URL group to the top level. A
 group nested deeper than 16 groups (`MAX_GROUP_DEPTH`) is read at the
 top level, with the groups it holds counting their depth from there.

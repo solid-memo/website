@@ -134,11 +134,13 @@ function locateIn(
   nodes: readonly TreeNode[],
   parent: ParentId,
   id: string,
+  kind?: TreeNode["kind"],
 ): TreeLocation | undefined {
   for (const [index, node] of nodes.entries()) {
-    if (nodeId(node) === id) return { node, parent, index };
+    if (nodeId(node) === id && (kind === undefined || node.kind === kind))
+      return { node, parent, index };
     if (node.kind === "group") {
-      const found = locateIn(node.children, node.group.url, id);
+      const found = locateIn(node.children, node.group.url, id, kind);
       if (found !== undefined) return found;
     }
   }
@@ -150,17 +152,30 @@ export function locate(tree: DeckTree, id: string): TreeLocation | undefined {
   return locateIn(tree.children, null, id);
 }
 
+/**
+ * Where a group is in the tree; undefined when it is not. A parent is
+ * always a group, so it is looked up as one: a deck of the same URL is
+ * not it.
+ */
+function locateGroup(
+  tree: DeckTree,
+  id: string,
+): (TreeLocation & { node: Extract<TreeNode, { kind: "group" }> }) | undefined {
+  return locateIn(tree.children, null, id, "group") as
+    | (TreeLocation & { node: Extract<TreeNode, { kind: "group" }> })
+    | undefined;
+}
+
 /** Whether `id` is inside the group `ancestor`, at any depth (not the group itself). */
 export function isDescendant(tree: DeckTree, ancestor: string, id: string): boolean {
-  const found = locate(tree, ancestor);
-  return found?.node.kind === "group" && locateIn(found.node.children, ancestor, id) !== undefined;
+  const found = locateGroup(tree, ancestor);
+  return found !== undefined && locateIn(found.node.children, ancestor, id) !== undefined;
 }
 
 /** A parent's children; undefined when there is no such group. */
 function childrenOf(tree: DeckTree, parent: ParentId): readonly TreeNode[] | undefined {
   if (parent === null) return tree.children;
-  const found = locate(tree, parent);
-  return found?.node.kind === "group" ? found.node.children : undefined;
+  return locateGroup(tree, parent)?.node.children;
 }
 
 /** The tree with a parent's children replaced (the parent must exist). */
@@ -243,8 +258,8 @@ export function combine(
  * level, no further. A group that is already gone changes nothing.
  */
 export function deleteGroup(tree: DeckTree, url: string): DeckTree {
-  const at = locate(tree, url);
-  if (at?.node.kind !== "group") return tree;
+  const at = locateGroup(tree, url);
+  if (at === undefined) return tree;
   return withChildren(
     tree,
     at.parent,
@@ -274,8 +289,8 @@ export function gather(tree: DeckTree, ids: readonly string[], parent: ParentId)
 
 /** The tree with a group renamed; a group that is gone means the tree changed under the edit. */
 export function renameGroup(tree: DeckTree, url: string, title: LangText): DeckTree {
-  const at = locate(tree, url);
-  if (at?.node.kind !== "group") throw changed();
+  const at = locateGroup(tree, url);
+  if (at === undefined) throw changed();
   if (sameText(at.node.group.title, title)) return tree;
   const node: TreeNode = { ...at.node, group: { ...at.node.group, title } };
   return withChildren(tree, at.parent, spliced(childrenOf(tree, at.parent)!, at.index, 1, node));
@@ -299,8 +314,8 @@ export function graft(tree: DeckTree, nodes: readonly GraftNode[]): DeckTree {
     list.flatMap((node): TreeNode[] => {
       if (node.kind === "group")
         return [{ kind: "group", group: node.group, children: placed(node.children) }];
-      const at = locate(rest, node.url);
-      if (at?.node.kind !== "deck") return [];
+      const at = locateIn(rest.children, null, node.url, "deck");
+      if (at === undefined) return [];
       rest = without(rest, at);
       return [at.node];
     });
@@ -488,6 +503,8 @@ function sameMembers(
  * the tree it reads gives changes. An edit that changes nothing (the
  * same tree back from `applyDeckTreeEdit`) must therefore write nothing
  * without asking: the pod is set straight only alongside a real edit.
+ * A tree that holds a node twice (a deck and a group of one URL) states
+ * no one arrangement to write: the tree changed under the edit.
  */
 export function treeChanges(stored: StoredLayout, after: DeckTree): TreeChanges {
   const before = levels(buildTree(stored));
@@ -498,6 +515,7 @@ export function treeChanges(stored: StoredLayout, after: DeckTree): TreeChanges 
   const kinds = new Map<string, TreeNode>();
   const collect = (nodes: readonly TreeNode[]) => {
     for (const node of nodes) {
+      if (kinds.has(nodeId(node))) throw changed();
       kinds.set(nodeId(node), node);
       if (node.kind === "group") collect(node.children);
     }
