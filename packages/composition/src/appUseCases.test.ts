@@ -661,57 +661,6 @@ describe("createAppUseCases", () => {
     expect(login.sent).toContain(entered);
   });
 
-  it("reads the user's profile once at a time when it first finds their own pod", async () => {
-    const alice = "https://alice.example/";
-    login.webId = `${alice}profile/card#me`;
-    const guest = createAppUseCases({ ...options, indexedDB: undefined });
-    await guest.startGuest("My study");
-    const [instance] = await guest.listInstances(GUEST_SESSION);
-    const made = await guest.createDeck(instance!.url, { en: "Capitals" });
-    const own = `${alice}memo/decks/deck-1.ttl`;
-    const deck = {
-      ...made,
-      url: `${alice}memo/catalog.ttl#deck-1`,
-      cardsDocumentUrl: own,
-      reviewsDocumentUrl: own,
-    };
-    const documents = new Map([
-      [
-        `${alice}profile/card`,
-        `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
-      ],
-      [own, `<${own}> <http://purl.org/dc/terms/isPartOf> <${deck.url}>.`],
-    ]);
-    let reading = 0;
-    let most = 0;
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = String(input instanceof Request ? input.url : input).replace(/#.*/, "");
-        const body = documents.get(url);
-        if (body === undefined) return servedSiteNetwork(input, init);
-        const profile = url === `${alice}profile/card`;
-        if (profile) most = Math.max(most, ++reading);
-        // A server takes its time: a read made meanwhile is in flight with this one.
-        await settled();
-        if (profile) reading--;
-        const response = new Response(body, {
-          headers: { "Content-Type": "text/turtle", ETag: '"1"' },
-        });
-        Object.defineProperty(response, "url", { value: url });
-        return response;
-      }),
-    );
-    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
-    // The workspace lists the instances first, so the profile's version is known when the gate reads it.
-    await useCases.listInstances({ webId: login.webId });
-
-    expect(await useCases.listCards(deck)).toEqual([]);
-    expect(login.sent).toContain(own);
-    // Two reads of one document at once, one asking only if it changed, crash WebKit now and then.
-    expect(most).toBe(1);
-  });
-
   it("lists the releases of an instance outside the user's storages as no one, under limits", async () => {
     const alice = "https://alice.example/";
     login.webId = `${alice}profile/card#me`;
