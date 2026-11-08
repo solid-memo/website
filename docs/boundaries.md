@@ -338,6 +338,21 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   ([data-model.md](data-model.md#where-an-instances-documents-are)), and
   what such a document says of itself never makes it writable. Such a
   read is held to `FOREIGN_LIMITS` too.
+- **Outside the user's storages**, the reads share a budget in a page
+  session (`FOREIGN_READS_BUDGET`, `sharedReadBudget` in
+  [readLimits.ts](../packages/solid/src/client/readLimits.ts)): four
+  times `FOREIGN_LIMITS` in total, on top of the limits on each read.
+  A catalog may list a thousand decks, each with two documents as
+  large as a release. The reads as no one share one budget; the reads
+  in a registered instance elsewhere have one for each server, so
+  reads anywhere else never spend it. As with releases read from a
+  link ([deck-library.md](deck-library.md#from-a-link)), a document
+  counts once, by its largest read, and reading it again comes out of
+  an allowance of its own (`FOREIGN_REREADS`) while that lasts. Past
+  the budget, such a read fails with a `ReadLimitError` until the page
+  is loaded again, without asking the server. Only reads count: a
+  write to a registered instance goes out whatever is spent. The
+  storages and the folders entered on this page aren't part of it.
 - **A read past its limits** fails with a `ReadLimitError`. So does
   a document the app reads into a dataset whose Turtle text has too
   many bases, a base that's too long or not plain, or too many

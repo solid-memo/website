@@ -31,7 +31,8 @@ export const RELEASE_LIMITS: ReadLimits = {
  * holds a deck's cards as an instance's largest documents do. An
  * instance anyone may make can be added by its address or registered by
  * another app, a catalog may name a deck's documents on any server, and
- * the app keeps every triple of what it reads. The user's storages are
+ * the app keeps every triple of what it reads; all of them together
+ * are held to FOREIGN_READS_BUDGET too. The user's storages are
  * read with no limits but on their declarations and nesting
  * (writeTurtle) and on the length of each term (MAX_TERM_CHARACTERS).
  */
@@ -122,9 +123,29 @@ export interface ReadsSpent {
   characters: number;
 }
 
+/**
+ * The limits a read went past, `bytes` more taken in, for each tally
+ * that stands for more than one set of them (sharedReadBudget); those
+ * it is read under for any other.
+ */
+const PAST = new WeakMap<ReadsSpent, (bytes: number) => ReadLimits>();
+
 /** Nothing taken in yet. */
 export function noneSpent(): ReadsSpent {
   return { bytes: 0, quads: 0, characters: 0 };
+}
+
+/**
+ * The limits to name in the ReadLimitError of a read past `limits`, with
+ * `bytes` more taken in: the ones the tally names (PAST), or
+ * `limits`, or NO_SIZE_LIMITS for a read with none.
+ */
+export function limitsPast(
+  limits: ReadLimits | undefined,
+  spent: ReadsSpent | undefined,
+  bytes = 0,
+): ReadLimits {
+  return (spent === undefined ? undefined : PAST.get(spent)?.(bytes)) ?? limits ?? NO_SIZE_LIMITS;
 }
 
 /** Each response limitedFetch gave: the limits it is read under, what is spent of them, and how it went past them, once it did. */
@@ -155,9 +176,10 @@ export function limitedFetch(
     if (response.body === null || NULL_BODY_STATUSES.has(response.status)) return response;
     const { url } = response;
     const tally = spent ?? noneSpent();
-    if (tally.bytes + Number(response.headers.get("Content-Length")) > limits.bytes) {
+    const said = Number(response.headers.get("Content-Length"));
+    if (tally.bytes + said > limits.bytes) {
       await response.body.cancel();
-      throw new ReadLimitError(url, limits);
+      throw new ReadLimitError(url, limitsPast(limits, tally, said));
     }
     const read: { limits: ReadLimits; spent: ReadsSpent; refused?: ReadLimitError } = {
       limits,
@@ -168,7 +190,7 @@ export function limitedFetch(
         transform(chunk, controller) {
           tally.bytes += chunk.byteLength;
           if (tally.bytes <= limits.bytes) return controller.enqueue(chunk);
-          read.refused = new ReadLimitError(url, limits);
+          read.refused = new ReadLimitError(url, limitsPast(limits, tally));
           controller.error(read.refused);
         },
       }),
@@ -182,6 +204,120 @@ export function limitedFetch(
     Object.defineProperty(limited, "url", { value: url });
     READS.set(limited, read);
     return limited;
+  };
+}
+
+/**
+ * The most the reads of documents outside the user's storages take in
+ * together in a page session (foreignReads), on top of FOREIGN_LIMITS on
+ * each: four times what one release may hold, so many times the largest
+ * release in the library. A catalog may name a thousand decks, each with
+ * two documents as large as a release, and the app holds every triple of
+ * what it reads while it reads it. Once read, a document counts once, by
+ * its largest read, while reads of it again come out of FOREIGN_REREADS.
+ */
+export const FOREIGN_READS_BUDGET: ReadLimits = {
+  bytes: 4 * RELEASE_LIMITS.bytes,
+  quads: 4 * RELEASE_LIMITS.quads,
+  characters: 4 * RELEASE_LIMITS.characters,
+};
+
+/**
+ * How much reads of documents already read may take in a page session
+ * without counting in FOREIGN_READS_BUDGET, up to each one's largest
+ * read: twice that budget. Past it they count whole, or many decks
+ * naming one document could read it again and again without limit.
+ */
+export const FOREIGN_REREADS: ReadLimits = {
+  bytes: 2 * FOREIGN_READS_BUDGET.bytes,
+  quads: 2 * FOREIGN_READS_BUDGET.quads,
+  characters: 2 * FOREIGN_READS_BUDGET.characters,
+};
+
+const SPENT_KEYS = ["bytes", "quads", "characters"] as const;
+
+/** The methods that read, which a read budget counts; any other request is sent as it is asked. */
+const BUDGETED_METHODS = new Set(["GET", "HEAD"]);
+
+/** What one budget of sharedReadBudget has spent so far. */
+interface BudgetSpent {
+  /** What the reads have taken in of the budget. */
+  session: ReadsSpent;
+  /** What is left of `rereads`. */
+  free: ReadsSpent;
+  /** The largest read of each document so far. */
+  largest: Map<string, ReadsSpent>;
+}
+
+/**
+ * Reads under one budget together, as the reads of releases from a link
+ * are (solidDeckLibrary.ts): what it gives makes a fetch whose answers
+ * are each read under `limits` (limitedFetch), and its reads (GET and
+ * HEAD), through every fetch it made, within `budget` too. With `scope`,
+ * each scope it names a read's address by has a budget of its own. A
+ * document counts in the budget by its largest read; what a read of it
+ * again takes within that comes out of `rereads` while that lasts. Once
+ * the budget is spent, a read under way fails as it goes on, and any
+ * after it fails at once, without asking the server, with a
+ * ReadLimitError naming the budget, until the page is loaded again. A
+ * request that writes is sent whatever is spent, its answer under
+ * `limits` alone.
+ */
+export function sharedReadBudget({
+  limits,
+  budget,
+  rereads,
+  scope = () => "",
+}: {
+  limits: ReadLimits;
+  budget: ReadLimits;
+  rereads: ReadLimits;
+  /** The budget a read of an address counts in: one for all of them unless given. */
+  scope?: (url: string) => string;
+}): (fetch: typeof globalThis.fetch) => typeof globalThis.fetch {
+  const budgets = new Map<string, BudgetSpent>();
+  const budgetOf = (url: string): BudgetSpent => {
+    const key = scope(url);
+    const found = budgets.get(key);
+    if (found !== undefined) return found;
+    const made: BudgetSpent = { session: noneSpent(), free: { ...rereads }, largest: new Map() };
+    budgets.set(key, made);
+    return made;
+  };
+  return (fetch) => async (input, init) => {
+    const url = input instanceof Request ? input.url : String(input);
+    const method = (
+      init?.method ?? (input instanceof Request ? input.method : "GET")
+    ).toUpperCase();
+    if (!BUDGETED_METHODS.has(method)) return limitedFetch(fetch, limits)(input, init);
+    const { session, free, largest } = budgetOf(url);
+    if (SPENT_KEYS.some((key) => session[key] > budget[key])) throw new ReadLimitError(url, budget);
+    const most = largest.get(url) ?? noneSpent();
+    largest.set(url, most);
+    const document = noneSpent();
+    // limitedFetch compares one tally with `limits`: this read's own, or what the budget leaves of them, whichever is
+    // more, so it is past them once either is past its limit, and names the budget when it is the one past.
+    const over = (tally: ReadsSpent, bounds: ReadLimits, bytes: number) =>
+      SPENT_KEYS.some((key) => tally[key] + (key === "bytes" ? bytes : 0) > bounds[key]);
+    const spent = {} as ReadsSpent;
+    PAST.set(spent, (bytes) =>
+      over(session, budget, bytes) && !over(document, limits, bytes) ? budget : limits,
+    );
+    for (const key of SPENT_KEYS) {
+      Object.defineProperty(spent, key, {
+        get: () => Math.max(document[key], limits[key] - budget[key] + session[key]),
+        set: (value: number) => {
+          const taken = value - spent[key];
+          const within = Math.max(0, Math.min(most[key], document[key] + taken) - document[key]);
+          const reread = Math.min(within, free[key]);
+          free[key] -= reread;
+          document[key] += taken;
+          most[key] = Math.max(most[key], document[key]);
+          session[key] += taken - reread;
+        },
+      });
+    }
+    return limitedFetch(fetch, limits, spent)(input, init);
   };
 }
 

@@ -20,7 +20,7 @@ import {
 import {
   limitsOf,
   namesIriUnder,
-  NO_SIZE_LIMITS,
+  limitsPast,
   quadTally,
   type ReadsSpent,
   refusalOf,
@@ -186,7 +186,7 @@ function collector(
     refused = true;
     quads.length = 0;
     // The tally is past limits only under some; the declarations, under none too.
-    reject(new ReadLimitError(url, limits ?? NO_SIZE_LIMITS));
+    reject(new ReadLimitError(url, limitsPast(limits, spent)));
   };
   return {
     quads,

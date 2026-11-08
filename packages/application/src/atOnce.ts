@@ -33,3 +33,25 @@ export async function mapAtOnce<T, R>(
   await Promise.all(Array.from({ length: Math.min(atOnce, items.length) }, worker));
   return results;
 }
+
+/**
+ * Work taken in turns, `atOnce` at most at once, the rest waiting in the
+ * order asked: whoever asks, a list as long as anyone may write never
+ * runs all of its work together. A turn ends when its work does, failed
+ * or not.
+ */
+export function inTurns(atOnce = READS_AT_ONCE): <T>(work: () => Promise<T>) => Promise<T> {
+  let running = 0;
+  const waiting: (() => void)[] = [];
+  return async (work) => {
+    if (running >= atOnce) await new Promise<void>((start) => waiting.push(start));
+    else running++;
+    try {
+      return await work();
+    } finally {
+      const next = waiting.shift();
+      if (next === undefined) running--;
+      else next();
+    }
+  };
+}

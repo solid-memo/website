@@ -16,6 +16,7 @@ import {
 } from "@solid-memo/domain/scheduling";
 import { effectiveStates } from "@solid-memo/domain/fsrs";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
+import { inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
@@ -34,7 +35,9 @@ export interface StudyUseCases {
    * digest is brought up to date). Each document is read as the user
    * only when it is the instance's (isInInstancePod), as no one
    * otherwise, and only a deck whose documents both are has its
-   * schedule kept in the digest.
+   * schedule kept in the digest. STUDY_COUNTS_AT_ONCE decks are counted
+   * at once, whoever asks, the others waiting their turn: a deck list
+   * asks for every deck's, and a catalog may list a thousand.
    */
   getStudyCounts(
     instanceUrl: string,
@@ -127,6 +130,9 @@ export interface ReviewUndo {
   answer: { id: string; studyDay: string };
 }
 
+/** How many decks' study counts are worked out at once: each reads two documents together. */
+const STUDY_COUNTS_AT_ONCE = READS_AT_ONCE / 2;
+
 /**
  * Study (docs/srs.md): a deck's queue for today and how many prompts it
  * holds, each answer graded by the instance's scheduler and logged, an
@@ -148,6 +154,7 @@ export function createStudyUseCases({
   answerStore: Pick<AnswerStore, "grade" | "withdraw" | "removeDay">;
   random: () => number;
 }): StudyUseCases {
+  const countsTurn = inTurns(STUDY_COUNTS_AT_ONCE);
   async function studyCountsAndSchedule(instanceUrl: string, deck: Deck, now: Date) {
     const [prefs, digest, asNoOne] = await Promise.all([
       preferenceStore.get(instanceUrl),
@@ -215,7 +222,7 @@ export function createStudyUseCases({
       return { ...queue, prefs, states: reviews.sm2, fsrsStates: reviews.fsrs };
     },
     getStudyCounts(instanceUrl, deck, now) {
-      return studyCountsAndSchedule(instanceUrl, deck, now);
+      return countsTurn(() => studyCountsAndSchedule(instanceUrl, deck, now));
     },
     refreshStudyDigest: digestStore.refresh,
     recordReview(instanceUrl, deck, prompt, quality, now, times = {}, known) {

@@ -16,7 +16,7 @@ import {
   limitsOf,
   namesIriUnder,
   spentOf,
-  NO_SIZE_LIMITS,
+  limitsPast,
   pathKeys,
   quadTally,
   type ReadsSpent,
@@ -163,7 +163,7 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
       collected.quads = quads;
       const refuse = () => {
         // The tally is past limits only under some; the declarations, under none too.
-        collected.refused = new ReadLimitError(url, collected.limits ?? NO_SIZE_LIMITS);
+        collected.refused = new ReadLimitError(url, limitsPast(collected.limits, collected.spent));
         quads.length = 0;
         for (const callback of failed) callback(collected.refused);
       };

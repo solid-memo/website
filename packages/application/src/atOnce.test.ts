@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { mapAtOnce, READS_AT_ONCE } from "./atOnce";
+import { inTurns, mapAtOnce, READS_AT_ONCE } from "./atOnce";
 
 /** `each` that counts how many run at once, each waiting a turn of the event loop. */
 function counted<T>() {
@@ -49,5 +49,43 @@ describe("mapAtOnce", () => {
       ),
     ).rejects.toBe(failure);
     expect(started).toEqual([0, 1]);
+  });
+});
+
+describe("inTurns", () => {
+  it("runs all the work asked of it, READS_AT_ONCE at most at once, in the order asked", async () => {
+    const turn = inTurns();
+    const { each, most } = counted<number>();
+    const started: number[] = [];
+    const items = Array.from({ length: 40 }, (_, at) => at);
+    const done = await Promise.all(
+      items.map((item) =>
+        turn(() => {
+          started.push(item);
+          return each(item);
+        }),
+      ),
+    );
+    expect(done).toEqual(items);
+    expect(started).toEqual(items);
+    expect(most()).toBe(READS_AT_ONCE);
+  });
+
+  it("ends a turn whose work fails, and lets the next start", async () => {
+    const turn = inTurns(1);
+    const failure = new Error("unreadable");
+    const first = turn(async () => {
+      throw failure;
+    });
+    const second = turn(async () => "read");
+    await expect(first).rejects.toBe(failure);
+    await expect(second).resolves.toBe("read");
+    // Every turn is free again.
+    const { each, most } = counted<string>();
+    await expect(Promise.all(["a", "b"].map((item) => turn(() => each(item))))).resolves.toEqual([
+      "a",
+      "b",
+    ]);
+    expect(most()).toBe(1);
   });
 });

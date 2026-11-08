@@ -33,6 +33,31 @@ describe("the instance digest", () => {
     });
   });
 
+  it("counts three decks at once at most, however many are asked for, each reading its two documents", async () => {
+    const { deps, useCases } = setup();
+    const read = deps.deckRepository.readCardsSince;
+    let reading = 0;
+    let most = 0;
+    deps.deckRepository.readCardsSince = vi.fn(async (...args: Parameters<typeof read>) => {
+      most = Math.max(most, ++reading);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      reading--;
+      return read(...args);
+    });
+    const decks = Array.from({ length: 200 }, (_, at) => ({
+      ...deck,
+      url: `${deck.url}-${at}`,
+      cardsDocumentUrl: `${deck.cardsDocumentUrl}-${at}`,
+      reviewsDocumentUrl: `${deck.reviewsDocumentUrl}-${at}`,
+    }));
+    const counts = await Promise.all(
+      decks.map((one) => useCases.getStudyCounts(instance.url, one, now)),
+    );
+    expect(counts).toHaveLength(200);
+    expect(read).toHaveBeenCalledTimes(200);
+    expect(most).toBe(3);
+  });
+
   it("counts from the schedule while neither document changed", async () => {
     const { deps, useCases } = setup(await learned());
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
