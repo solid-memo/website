@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.31](https://github.com/solid-memo/website/compare/v6.29.30...v6.29.31) (2026-11-08)
+
+### Reverts
+
+* **composition:** read the user's profile and instances at once again ([002c6d1](https://github.com/solid-memo/website/commit/002c6d1fdeaf228c8f480ee27f8ca908a3e1f15b)), closes [#649](https://github.com/solid-memo/website/issues/649) [#547](https://github.com/solid-memo/website/issues/547)
+
 ## [6.29.30](https://github.com/solid-memo/website/compare/v6.29.29...v6.29.30) (2026-11-08)
 
 ### Bug Fixes
