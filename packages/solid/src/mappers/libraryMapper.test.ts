@@ -481,6 +481,55 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
     ).not.toHaveProperty("contact");
   });
 
+  it("refuses a release at the guest's pod, or that links to it by an address in it (GHSA-hc3p-fpwj-fvjp)", async () => {
+    const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
+    const turtle = await readFile(
+      `${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`,
+      "utf8",
+    );
+    const guest = "https://guest.solid-memo.invalid/";
+    const card = `\n<#gx> a solid-memo:Card ; solid-memo:formatVersion 7 ; solid-memo:front "Q"@en ; solid-memo:back "A"@en ;`;
+    // Text the reader reads may name any address.
+    expect(
+      toLibraryDeckContent(
+        url,
+        await datasetOf(`${turtle}${card} solid-memo:frontNote "See ${guest}"@en .\n`, url),
+      ).cards,
+    ).toHaveLength(3);
+    const notes = `adms:versionNotes "Pictures moved from ${guest}p.png." ;`;
+    const noted = turtle.replace('adms:versionNotes "Added Norway." ;', notes);
+    expect(noted).not.toBe(turtle);
+    expect(toLibraryDeckContent(url, await datasetOf(noted, url)).versionNotes).toBe(
+      `Pictures moved from ${guest}p.png.`,
+    );
+    const refused = `This release links to the guest's study in this browser, which no release may, so Solid Memo does not read it. Ask its creator to check it.\nurl: ${url}`;
+    const license = "dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/>";
+    for (const linking of [
+      `${turtle}${card} solid-memo:frontImage <${guest}p.png> .`,
+      `${turtle}${card} solid-memo:backImage <HTTPS://GUEST.solid-memo.invalid:443/p.png> .`,
+      `${turtle}${card} dcterms:subject <${guest}a> .`,
+      turtle.replace(license, `dcterms:license <${guest}license>`),
+      `${turtle}\n<> dcat:theme <${guest}theme> .`,
+      `${noted}${card} solid-memo:frontImage <${guest}p.png> .`,
+    ]) {
+      expect(linking).toMatch(/guest\.solid-memo\.invalid/i);
+      const dataset = await datasetOf(`${linking}\n`, url);
+      expect(() => toLibraryDeckContent(url, dataset), linking.slice(-80)).toThrow(refused);
+    }
+    // Read at the guest's pod, or stating it is there (@base).
+    const atGuest = turtle.replaceAll("https://alice.example/solid-memo/main/", guest);
+    const there = `${guest}releases/capitals/v2.ttl`;
+    expect(() => toLibraryDeckContent(there, datasetFrom(there) as Dataset)).toThrow(
+      "That is not a Solid Memo deck",
+    );
+    for (const read of [there, url]) {
+      const dataset = await datasetOf(atGuest, read);
+      expect(() => toLibraryDeckContent(read, dataset), read).toThrow("which no release may");
+    }
+    const elsewhere = await datasetOf(turtle, there);
+    expect(() => toLibraryDeckContent(there, elsewhere)).toThrow("which no release may");
+  });
+
   it("refuses a deck in a newer format than it writes", () => {
     const dataset = deckDocument(
       thing(DOC, (t) =>

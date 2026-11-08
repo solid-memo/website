@@ -8,18 +8,23 @@
  * the pod kept on their device, then logs in and keeps it. Their pod is a
  * second local pod here; e2e/pod moves a guest's study into real servers.
  */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
-import type { ResourceStore } from "@solid-memo/application/ports";
+import type { DeckLibrary, ResourceStore } from "@solid-memo/application/ports";
 import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
+import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalGuestPod } from "./localGuestPod";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { routedFetch } from "./routedFetch";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidAnswerLog } from "./solidAnswerLog";
+import { createSolidDeckLibrary } from "./solidDeckLibrary";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidDigestRepository } from "./solidDigestRepository";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
@@ -86,7 +91,7 @@ async function addTriples(store: ResourceStore, document: string, lines: string[
   });
 }
 
-async function app() {
+async function app(deckLibrary?: DeckLibrary) {
   const newEtag = () => `"${crypto.randomUUID()}"`;
   const guestStore = createMemoryResourceStore();
   const guestFetch = createLocalPod({ root: GUEST_ORIGIN, store: guestStore, newEtag });
@@ -119,7 +124,7 @@ async function app() {
       restore: async () => null,
       discoverOidcIssuer: async () => Promise.reject(new Error("none")),
     } as never,
-    deckLibrary: undefined as never,
+    deckLibrary: deckLibrary ?? (undefined as never),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     storageGateway: createSolidStorageGateway({
       fetch: podFetch,
@@ -225,10 +230,14 @@ describe("a guest's study", () => {
     const link = `<${card.url}> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <HTTPS://GUEST.solid-memo.invalid:443/x> .`;
     await addTriples(guestStore, deck.cardsDocumentUrl, [link]);
     const refused = await useCases.transferGuestStudy(ALICE, guestInstance!, into);
+    // The document is the deck's: the error names the deck, so the user can tell which to leave out.
     expect(refused).toMatchObject({
       ok: false,
       step: "adopt",
-      error: expect.objectContaining({ code: "guestUrlsLeft" }),
+      error: expect.objectContaining({
+        code: "guestDeckCopyUrlsLeft",
+        vars: { deck: { en: "Guests" }, url: `${TARGET}decks/${deck.id}.ttl` },
+      }),
       cleanedUp: true,
     });
     const resource = await guestStore.get(deck.cardsDocumentUrl);
@@ -248,6 +257,95 @@ describe("a guest's study", () => {
     expect(await everyTriple(aliceStore)).toContain(
       `<${TARGET}decks/${deck.id}.ttl#${card.id}> <${SM_NS}front> "${naming.en}"@en .`,
     );
+  });
+
+  // A release that links to the guest's pod, by a card's picture and what it is about, as a release from a link may.
+  const PLANTED = "https://mallory.example/releases/capitals/v2.ttl";
+  const plantedLibrary = () => {
+    const release = readFileSync(
+      join(VOCAB_ROOT, "fixtures/library-deck/v6/valid/library-standalone-release.ttl"),
+      "utf8",
+    )
+      .replaceAll(
+        "https://alice.example/solid-memo/main/releases/",
+        "https://mallory.example/releases/",
+      )
+      .replace(
+        'solid-memo:formatVersion 5 ;\n    solid-memo:front "Norway"@en ;',
+        `solid-memo:formatVersion 7 ;\n    solid-memo:frontImage <${GUEST_ORIGIN}p.png> ;\n    <http://purl.org/dc/terms/subject> <${GUEST_ORIGIN}a> ;\n    solid-memo:front "Norway"@en ;`,
+      );
+    expect(release).toContain(`<${GUEST_ORIGIN}a>`);
+    const documents: Record<string, string> = {
+      [PLANTED]: release,
+      "https://solid-memo.com/decks/index.ttl": "",
+    };
+    const fetch: typeof globalThis.fetch = async (input) => {
+      const url = String(input instanceof Request ? input.url : input);
+      const body = documents[url];
+      const response =
+        body === undefined
+          ? new Response("", { status: 404 })
+          : new Response(body, { headers: { "content-type": "text/turtle" } });
+      Object.defineProperty(response, "url", { value: url });
+      return response;
+    };
+    return createSolidDeckLibrary({
+      fetch,
+      indexUrl: "https://solid-memo.com/decks/index.ttl",
+      validate: async (url) => ({ url, status: "checked", subjects: [] }),
+    });
+  };
+
+  /** A guest who studied a deck of their own, then was refused a release that links to the guest's pod. */
+  async function refusedPlanted() {
+    const study = await app(plantedLibrary());
+    const { useCases } = study;
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
+    await useCases.addCard(deck, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    const refused = expect.objectContaining({ code: "releaseLinksGuestPod" });
+    await expect(useCases.readReleaseFromLink(PLANTED)).rejects.toEqual(refused);
+    await expect(
+      useCases.importReleaseFromUrl(guestInstance!.url, { url: PLANTED } as LibraryDeck),
+    ).rejects.toEqual(refused);
+    expect((await useCases.listDecks(guestInstance!.url)).map(({ title }) => title)).toEqual([
+      { en: "Capitals" },
+    ]);
+    return { ...study, guestInstance: guestInstance! };
+  }
+
+  it("adds no release that links to the guest's pod, so the study moves into a new instance (GHSA-hc3p-fpwj-fvjp)", async () => {
+    const { useCases, aliceStore, guestInstance } = await refusedPlanted();
+
+    const outcome = await useCases.transferGuestStudy(ALICE, guestInstance, {
+      containerUrl: TARGET,
+      registrationTarget: "private",
+    });
+
+    expect(outcome).toMatchObject({ ok: true });
+    expect((await useCases.listDecks(TARGET)).map(({ title }) => title)).toEqual([
+      { en: "Capitals" },
+    ]);
+    expect((await everyTriple(aliceStore)).filter((line) => line.includes(GUEST_ORIGIN))).toEqual(
+      [],
+    );
+  });
+
+  it("adds no release that links to the guest's pod, so the study is added to an instance (GHSA-hc3p-fpwj-fvjp)", async () => {
+    const { useCases, guestInstance } = await refusedPlanted();
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: TARGET,
+      name: "Main",
+      registrationTarget: "private",
+    });
+
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance, target);
+
+    expect(outcome).toMatchObject({ ok: true });
+    expect((await useCases.listDecks(TARGET)).map(({ title }) => title)).toEqual([
+      { en: "Capitals" },
+    ]);
   });
 
   it("adds a deck whose card text names the guest's pod to an instance, the text as it was", async () => {

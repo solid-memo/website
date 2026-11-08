@@ -282,7 +282,9 @@ export interface DeckRepository {
    * entry is checked before anything is written, and a failure after
    * that deletes the cards document, unless the entry was written after
    * all; one that cannot be deleted is reported, as for any import
-   * (finishCutOffImport in writes.ts).
+   * (finishCutOffImport in writes.ts). A release whose license, topics
+   * or cards link to the guest's pod is refused before any write
+   * (releaseLinksGuestPod, domain/guest.ts linksGuestPod).
    */
   importDeck(instanceUrl: string, content: LibraryDeckContent): Promise<Deck>;
   /**
@@ -550,8 +552,10 @@ export interface DeckArchive {
    * the text does not parse (or a JSON-LD context would be fetched from
    * elsewhere), notADeckFile when it holds no deck this app can read, or
    * more than one, deckFileTooNew when a deck, card or review state
-   * is in a newer format than this app reads, and deckFileTooLarge when
-   * the file is larger than a deck file may be.
+   * is in a newer format than this app reads, deckFileTooLarge when
+   * the file is larger than a deck file may be, and
+   * deckFileLinksGuestPod when an address it would keep, but its own
+   * places, links to the guest's pod (domain/guest.ts linksGuestPod).
    */
   readDeckFile(text: string, format: DeckFileFormat, baseUrl: string): Promise<DeckFileContent>;
 }

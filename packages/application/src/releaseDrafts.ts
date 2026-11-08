@@ -251,10 +251,13 @@ function placeTaken(error: unknown, url: string): boolean {
  * The release, unless it names a subject by an id a draft cannot keep
  * (releaseIdUnsupported), or has a card, chapter, step or distractor
  * outside it (releaseForeignPart): no editor or check of a draft would
- * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp). Of
- * its other statements, it keeps only its own (ownStatements).
+ * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp). Nor
+ * one that links to the guest's pod by an IRI (releaseLinksGuestPod): a
+ * guest's draft of it could not be kept (GHSA-hc3p-fpwj-fvjp). Of its
+ * other statements, it keeps only its own (ownStatements).
  */
 function draftable(read: ReleaseDraft): ReleaseDraft {
+  if (draftAddressesGuest(read)) throw new AppError("releaseLinksGuestPod", { url: read.url });
   const id = unsupportedIdOf(read);
   if (id !== null) throw new AppError("releaseIdUnsupported", { id });
   const release = {

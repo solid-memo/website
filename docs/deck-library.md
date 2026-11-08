@@ -780,6 +780,17 @@ The library conforms to [shapes.md](shapes.md)'s
 `LibraryDeckV6`, each release to its own format's shape. The app
 migrates a format-5 release to format 6 in memory.
 
+The app refuses a release read at the guest's pod, or that states it's
+there (`@base`). Nor does it read one that links there by an address
+in it: a card's picture or what it's about, its license, a topic, its
+series or its contact. Either is `releaseLinksGuestPod`, for an
+import, an upgrade and a release from a link alike: a guest's copy of
+it couldn't be kept
+([guest-mode.md](guest-mode.md#what-comes-from-outside)). Text the
+reader reads, such as a card's text or what changed in the release,
+may name any address. Before it writes anything, an import checks a
+release's license, topics and cards for such a link.
+
 A release's cards and distractors share one set of ids: a copy keeps
 them all in one cards document, each at its id. The app refuses a
 release in which a card and a distractor have the same id, or two

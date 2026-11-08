@@ -1772,6 +1772,7 @@
       "other": "La copia de tu Pod no está en el formato que espera Solid Memo ({count} problemas), así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo más tarde."
     },
     "guestUrlsLeft": "La copia {url} de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo.",
+    "guestDeckCopyUrlsLeft": "La copia del mazo «{deck}» de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Quita ese mazo de los datos de estudio en modo invitado e inténtalo de nuevo.",
     "guestDeckUrlsLeft": "El mazo «{deck}» todavía apunta a los datos de estudio en modo invitado, así que no se añadió a tu Pod. Déjalo fuera e inténtalo de nuevo.",
     "guestStudyInvalid": {
       "one": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} problema), así que no se añadió nada a tu Pod. Siguen aquí.",
@@ -1809,10 +1810,12 @@
     "cardGone": "Esa tarjeta ya no existe. Quizá se eliminó en otra pestaña o aplicación. Vuelve a cargar la página.",
     "notADeck": "Eso no es un mazo de Solid Memo, así que no se puede añadir. Elige otro mazo.",
     "libraryIdsRepeat": "Este mazo da el mismo id a dos de sus tarjetas u opciones incorrectas, así que Solid Memo no puede leerlo. Pide a quien lo creó que lo revise.",
+    "releaseLinksGuestPod": "Esta publicación enlaza con los datos de estudio en modo invitado de este navegador, algo que ninguna publicación puede hacer, así que Solid Memo no la lee. Pide a quien la creó que la revise.",
     "libraryDeckTooNew": "Este mazo está en un formato más reciente del que puede leer esta versión de Solid Memo. Vuelve a cargar la página para obtener la última versión.",
     "libraryCardTooNew": "Una tarjeta de este mazo está en un formato más reciente del que puede leer esta versión de Solid Memo. Vuelve a cargar la página para obtener la última versión.",
     "deckFileUnreadable": "Solid Memo no puede leer ese archivo. Elige un archivo Turtle o JSON-LD exportado desde Solid Memo.",
     "notADeckFile": "Ese archivo no contiene un único mazo de Solid Memo. Elige un archivo exportado desde Solid Memo.",
+    "deckFileLinksGuestPod": "Ese archivo enlaza con los datos de estudio en modo invitado de este navegador, algo que ningún mazo puede hacer, así que no se importó. Elige otro archivo.",
     "deckFileTooNew": "Ese archivo lo escribió una versión más reciente de Solid Memo, así que esta no puede importarlo. Vuelve a cargar la página para obtener la última versión.",
     "deckFileTooLarge": "Ese archivo es más grande que cualquier mazo que Solid Memo lee, así que no se ha leído. Elige un archivo más pequeño.",
     "noGuestPod": "No hay datos de estudio en modo invitado en este dispositivo.",

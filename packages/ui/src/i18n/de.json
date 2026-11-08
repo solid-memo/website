@@ -1696,6 +1696,7 @@
       "other": "Die Kopie in deinem Pod hat nicht das Format, das Solid Memo erwartet ({count} Probleme), daher bleibt dein Lernstand unverändert. Versuche es später erneut."
     },
     "guestUrlsLeft": "Die Kopie {url} in deinem Pod verweist noch auf den Lernstand als Gast, daher bleibt dein Lernstand unverändert. Versuche es erneut.",
+    "guestDeckCopyUrlsLeft": "Die Kopie des Stapels „{deck}“ in deinem Pod verweist noch auf den Lernstand als Gast, daher bleibt dein Lernstand unverändert. Entferne diesen Stapel aus dem Lernstand als Gast und versuche es erneut.",
     "guestDeckUrlsLeft": "Der Stapel „{deck}“ verweist noch auf den Lernstand als Gast, daher wurde er nicht zu deinem Pod hinzugefügt. Lass ihn weg und versuche es erneut.",
     "guestStudyInvalid": {
       "one": "Ein Teil deines Lernstands in diesem Browser hat nicht das Format, das Solid Memo erwartet ({count} Problem), daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier.",
@@ -1732,10 +1733,12 @@
     "cardGone": "Diese Karte gibt es nicht mehr. Vielleicht wurde sie in einem anderen Tab oder einer anderen App entfernt. Lade die Seite neu.",
     "notADeck": "Das ist kein Stapel von Solid Memo, daher kann er nicht hinzugefügt werden. Wähle einen anderen Stapel.",
     "libraryIdsRepeat": "Dieser Stapel gibt zwei seiner Karten oder falschen Antwortmöglichkeiten dieselbe ID, daher kann Solid Memo ihn nicht lesen. Bitte die Person, die ihn erstellt hat, ihn zu prüfen.",
+    "releaseLinksGuestPod": "Diese Ausgabe verlinkt auf den Lernstand als Gast in diesem Browser, was keine Ausgabe darf, daher liest Solid Memo sie nicht. Bitte die Person, die sie erstellt hat, sie zu prüfen.",
     "libraryDeckTooNew": "Dieser Stapel hat ein neueres Format, als diese Version von Solid Memo lesen kann. Lade die Seite neu, um die neueste Version zu erhalten.",
     "libraryCardTooNew": "Eine Karte in diesem Stapel hat ein neueres Format, als diese Version von Solid Memo lesen kann. Lade die Seite neu, um die neueste Version zu erhalten.",
     "deckFileUnreadable": "Solid Memo kann diese Datei nicht lesen. Wähle eine Turtle- oder JSON-LD-Datei, die aus Solid Memo exportiert wurde.",
     "notADeckFile": "Diese Datei enthält nicht genau einen Stapel von Solid Memo. Wähle eine Datei, die aus Solid Memo exportiert wurde.",
+    "deckFileLinksGuestPod": "Diese Datei verlinkt auf den Lernstand als Gast in diesem Browser, was kein Stapel darf, daher wurde sie nicht importiert. Wähle eine andere Datei.",
     "deckFileTooNew": "Diese Datei wurde von einer neueren Version von Solid Memo geschrieben, deshalb kann diese Version sie nicht importieren. Lade die Seite neu, um die neueste Version zu erhalten.",
     "deckFileTooLarge": "Diese Datei ist größer als jeder Stapel, den Solid Memo liest, deshalb wurde sie nicht gelesen. Wähle eine kleinere Datei.",
     "noGuestPod": "Auf diesem Gerät gibt es keinen Lernstand als Gast.",

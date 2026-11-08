@@ -1696,6 +1696,7 @@
       "other": "The copy in your Pod is not in the format Solid Memo expects ({count} problems), so your study is left as it was. Try again later."
     },
     "guestUrlsLeft": "The copy {url} in your Pod still points to the guest's study, so your study is left as it was. Try again.",
+    "guestDeckCopyUrlsLeft": "The copy of the deck “{deck}” in your Pod still points to the guest's study, so your study is left as it was. Remove that deck from the guest's study, then try again.",
     "guestDeckUrlsLeft": "The deck “{deck}” still points to the guest's study, so it was not added to your Pod. Leave it out, then try again.",
     "guestStudyInvalid": {
       "one": "Part of your study in this browser is not in the format Solid Memo expects ({count} problem), so none of it was added to your Pod. It is still here.",
@@ -1732,10 +1733,12 @@
     "cardGone": "That card no longer exists. Perhaps it was removed in another tab or app. Reload the page.",
     "notADeck": "That is not a Solid Memo deck, so it cannot be added. Choose another deck.",
     "libraryIdsRepeat": "This deck gives two of its cards or wrong options the same id, so Solid Memo cannot read it. Ask its creator to check it.",
+    "releaseLinksGuestPod": "This release links to the guest's study in this browser, which no release may, so Solid Memo does not read it. Ask its creator to check it.",
     "libraryDeckTooNew": "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
     "libraryCardTooNew": "A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
     "deckFileUnreadable": "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
     "notADeckFile": "That file does not hold one Solid Memo deck. Choose a file exported from Solid Memo.",
+    "deckFileLinksGuestPod": "That file links to the guest's study in this browser, which no deck may, so it was not imported. Choose another file.",
     "deckFileTooNew": "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
     "deckFileTooLarge": "That file is larger than any deck Solid Memo reads, so it was not read. Choose a smaller file.",
     "noGuestPod": "There is no guest study on this device.",

@@ -6,11 +6,13 @@ import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
 import type { Card, Deck, Distractor } from "./deck";
 import type { DeckTree } from "./deckTree";
+import type { LibraryDeckContent } from "./library";
 import type { FsrsSnapshot, FsrsState, ReviewSnapshot, ReviewState, ReviewStates } from "./review";
 import { rebaseDraft } from "./release/releaseToDraft";
 import { card as draftCard, courseDraft } from "./testing/releaseDraft";
 import {
   addressesGuest,
+  linksGuestPod,
   decodeGuestMergeNote,
   draftAddressesGuest,
   encodeGuestMergeNote,
@@ -366,6 +368,66 @@ describe("adding a guest's study to an instance", () => {
     for (const fields of [deckFields, cardFields, distractorFields, stateFields, statesFields])
       for (const [field, readerText] of Object.entries(fields))
         expect(addressesGuest({ [field]: `${GUEST_ORIGIN}x` }), field).toBe(!readerText);
+  });
+
+  it("finds outside data that links to the guest's pod, but not by its own places, which an import gives anew (GHSA-hc3p-fpwj-fvjp)", () => {
+    const own = {
+      id: "deck-1",
+      url: `${GUEST_INSTANCE_URL}catalog.ttl#deck-1`,
+      cardsDocumentUrl: `${GUEST_INSTANCE_URL}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/deck-1.ttl`,
+      title: { en: `About ${GUEST_ORIGIN}` },
+    };
+    const card = { id: "c1", url: `${GUEST_INSTANCE_URL}decks/deck-1.ttl#c1`, front: { en: "Q" } };
+    expect(linksGuestPod([own, [card], [{ cardId: "c1" }]])).toBe(false);
+    expect(addressesGuest([own])).toBe(true);
+    for (const link of [
+      { frontImageUrl: `${GUEST_ORIGIN}p.png` },
+      { backImageUrl: "HTTPS://GUEST.solid-memo.invalid:443/p.png" },
+      { subjects: [`${GUEST_ORIGIN}a`] },
+    ])
+      expect(linksGuestPod([own, [{ ...card, ...link }]]), JSON.stringify(link)).toBe(true);
+    for (const link of [
+      { license: `${GUEST_ORIGIN}l` },
+      { themes: [`${GUEST_ORIGIN}t`] },
+      { sourceUrl: `${GUEST_ORIGIN}r.ttl` },
+      { seriesUrl: `${GUEST_ORIGIN}r.ttl#series` },
+    ])
+      expect(linksGuestPod({ ...own, ...link }), JSON.stringify(link)).toBe(true);
+  });
+
+  it("skips in a release only its own address and the text the reader reads, which may name the guest's pod (GHSA-hc3p-fpwj-fvjp)", () => {
+    // Every field, true when it is skipped: a field added to a release fails to typecheck until it is placed here.
+    const releaseFields: Record<keyof LibraryDeckContent, boolean> = {
+      url: true,
+      title: true,
+      formatVersion: false,
+      authors: true,
+      license: false,
+      description: true,
+      direction: false,
+      version: false,
+      seriesUrl: false,
+      versionNotes: true,
+      modifiedAt: false,
+      themes: false,
+      keywords: true,
+      cards: false,
+      isCourse: false,
+      contact: false,
+    };
+    for (const [field, skipped] of Object.entries(releaseFields))
+      expect(linksGuestPod({ [field]: `${GUEST_ORIGIN}x` }), field).toBe(!skipped);
+    const notes = `Pictures no longer at ${GUEST_ORIGIN}p.png, see HTTPS://GUEST.solid-memo.invalid:443`;
+    expect(linksGuestPod({ versionNotes: notes, cards: [{ id: "c1", front: { en: "Q" } }] })).toBe(
+      false,
+    );
+    for (const link of [
+      { license: `${GUEST_ORIGIN}l` },
+      { cards: [{ id: "c1", frontImageUrl: `${GUEST_ORIGIN}p.png` }] },
+      { cards: [{ id: "c1", subjects: [`${GUEST_ORIGIN}a`] }] },
+    ])
+      expect(linksGuestPod({ versionNotes: notes, ...link }), JSON.stringify(link)).toBe(true);
   });
 
   it("finds a draft that links to the guest's pod, but not one whose text names it", () => {

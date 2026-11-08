@@ -35,6 +35,7 @@ import {
 } from "@solid-memo/domain/course";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { isGuestPodIri, linksGuestPod } from "@solid-memo/domain/guest";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
 
@@ -178,7 +179,10 @@ function toLibrarySource(url: string, thing: Subject | null): LibrarySource {
  * are brought up to the current one in memory. A release that gives two
  * of its cards and distractors one id is refused (libraryIdsRepeat): a
  * copy keeps them all as subjects of one cards document, by their ids
- * (refuseRepeatedIds).
+ * (refuseRepeatedIds). So is one at the guest's pod, or that links to it
+ * by an address a copy would keep, such as a card's picture or subject
+ * (releaseLinksGuestPod): a guest could not keep a copy of it
+ * (GHSA-hc3p-fpwj-fvjp).
  */
 export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeckContentOf {
   const deck = releaseDeckOf(url, dataset);
@@ -197,7 +201,7 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
   const cards = refuseRepeatedIds(url, toLibraryCards(url, dataset));
   const subject = asUrl(deck!);
   const own = read.record.version < 3 ? read.record.data.creator : [];
-  return {
+  const content = {
     ...libraryDeckFromRecord(
       url,
       read.storedVersion,
@@ -208,6 +212,9 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
     ...courseOf(deck!),
     ...contactOf(deck!, dataset),
   };
+  if (isGuestPodIri(url) || isGuestPodIri(subject) || linksGuestPod(content))
+    throw new AppError("releaseLinksGuestPod", { url });
+  return content;
 }
 
 /**
