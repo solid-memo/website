@@ -2,11 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Answer } from "./answer";
-import type { Deck } from "./deck";
+import { chosenDistractorIn, type Answer } from "./answer";
+import type { Deck, Distractor } from "./deck";
 import type { DeckGroup, DeckTree, GraftNode, TreeNode } from "./deckTree";
 import type { StepPart } from "./deckUpgrade";
 import type { Instance } from "./instance";
+import { isIriPastBound } from "./pathKeys";
+import { namedFsrsSubject } from "./reviewRecord";
 import {
   cardsContainerOf,
   catalogUrlOf,
@@ -202,24 +204,69 @@ export function mergedDeck(
 }
 
 /**
+ * Whether the guest's card `cardId` can be added to the deck `to`: its
+ * IRI in `to`'s cards document can be written (chosenDistractorIn), and
+ * so can the longest name its review states take in `to`'s reviews
+ * document, its FSRS-6 state from back to front. Its id came from a
+ * release and fit under the guest's shorter address; a card that does
+ * not fit is left out, with its review states and its answers, as it
+ * could be neither written nor studied there.
+ */
+export function cardFitsDeck(
+  cardId: string,
+  to: Pick<Deck, "cardsDocumentUrl" | "reviewsDocumentUrl">,
+): boolean {
+  return (
+    chosenDistractorIn(to.cardsDocumentUrl, cardId) !== undefined &&
+    !isIriPastBound(namedFsrsSubject(to.reviewsDocumentUrl, { cardId, direction: "back-to-front" }))
+  );
+}
+
+/**
+ * A card of the guest's deck as it is added to the deck whose cards
+ * document is at `cardsDocumentUrl`: without a wrong option whose IRI
+ * there could not be written (chosenDistractorIn). Its id came from a
+ * release and fit under the guest's shorter address; the rest of the
+ * card, and every other option, is added as it is.
+ */
+export function movedCard<C extends { distractors?: readonly Distractor[] }>(
+  card: C,
+  cardsDocumentUrl: string,
+): C {
+  const { distractors, ...rest } = card;
+  if (distractors === undefined) return card;
+  const kept = distractors.filter(
+    ({ id }) => chosenDistractorIn(cardsDocumentUrl, id) !== undefined,
+  );
+  if (kept.length === distractors.length) return card;
+  return (kept.length === 0 ? rest : { ...rest, distractors: kept }) as C;
+}
+
+/**
  * An answer to a card of the guest's deck `from`, as an answer to the
  * same card of `to`, the deck it was added as: its deck, its card and the
  * wrong option chosen named in `to`'s documents, by the same fragment
  * ids; its own id the guest's followed by `to`'s, so that the same answer
  * added to another deck (the guest's deck added again) is an entry of its
- * own, and added again to the same deck changes nothing. Everything else
+ * own, and added again to the same deck changes nothing. A wrong option
+ * whose IRI in `to`'s cards document could not be written
+ * (chosenDistractorIn), as one with an id that fit under the guest's
+ * shorter address may be, is left out, not the answer. Everything else
  * stays.
  */
 export function mergedAnswer(answer: Answer, to: Deck): Answer {
   const inCards = (url: string) => `${to.cardsDocumentUrl}#${fragmentIdOf(url)}`;
+  const { chosenDistractor, ...rest } = answer;
+  const chosen =
+    chosenDistractor === undefined
+      ? undefined
+      : chosenDistractorIn(to.cardsDocumentUrl, fragmentIdOf(chosenDistractor));
   return {
-    ...answer,
+    ...rest,
     id: `${answer.id}-${to.id}`,
     deckUrl: to.url,
     cardUrl: inCards(answer.cardUrl),
-    ...(answer.chosenDistractor === undefined
-      ? {}
-      : { chosenDistractor: inCards(answer.chosenDistractor) }),
+    ...(chosen === undefined ? {} : { chosenDistractor: chosen }),
   };
 }
 

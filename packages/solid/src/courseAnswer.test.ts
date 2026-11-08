@@ -8,10 +8,12 @@
  * the learner made of the card stays (docs/courses.md).
  */
 import { describe, expect, it, vi } from "vitest";
+import { createAnswerStore } from "@solid-memo/application/answerStore";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryCard, LibraryDeckContent } from "@solid-memo/domain/library";
+import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { planLibraryUpgrade } from "@solid-memo/domain/libraryUpgrade";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { createSolidAnswerLog } from "./solidAnswerLog";
@@ -201,6 +203,54 @@ describe("answering a course question", () => {
         ]),
       ),
     );
+  });
+
+  it("logs a wrong answer whose option's IRI in the deck would be too long, without the option, and the answers after it", async () => {
+    const { pod, useCases } = app();
+    // An id that fits under a release's short address, past the bound on a term in the deck's cards document.
+    const distractorId = "x".repeat(16_383 - "https://a.io/c#".length);
+    await useCases.answerCourseQuestion(
+      INSTANCE,
+      course,
+      question,
+      { correct: false, distractorId },
+      NOON,
+    );
+    // Wrong again: a right answer the same day would log nothing.
+    await useCases.answerCourseQuestion(INSTANCE, course, question, { correct: false }, NOON);
+    const logged = () => pod.triples(`${INSTANCE}history/2026-11.ttl`) ?? [];
+    await vi.waitFor(() =>
+      expect(logged().filter((triple) => triple.includes("#grade>"))).toHaveLength(2),
+    );
+    expect(logged().some((triple) => triple.includes("chosenDistractor"))).toBe(false);
+  });
+
+  it("sets aside an answer the log can never add, and adds those after it", async () => {
+    const { pod } = app();
+    const store = createAnswerStore({
+      answerLog: createSolidAnswerLog({ fetch: pod.fetch }),
+      reviewStateRepository: createSolidReviewStateRepository({ fetch: pod.fetch }),
+      preferenceStore: { get: async () => DEFAULT_PREFERENCES },
+      newId: () => crypto.randomUUID(),
+      now: () => NOON,
+    });
+    const prompt = (id: string) => ({
+      cardId: id,
+      cardUrl: `${course.cardsDocumentUrl}#${id}`,
+      direction: "front-to-back" as const,
+    });
+    const tooLong = `${course.cardsDocumentUrl}#${"x".repeat(16_383)}`;
+    await store.grade(INSTANCE, course, prompt("q1"), 1, NOON, {
+      mode: "multiple-choice",
+      chosenDistractor: tooLong,
+      times: {},
+    });
+    for (const id of ["c1", "c2", "c3"]) {
+      await store.grade(INSTANCE, course, prompt(id), 4, NOON, { times: {} });
+    }
+    await store.flush(INSTANCE);
+    const logged = pod.triples(`${INSTANCE}history/2026-11.ttl`) ?? [];
+    expect(logged.filter((triple) => triple.includes("#grade>"))).toHaveLength(3);
   });
 
   it.each([

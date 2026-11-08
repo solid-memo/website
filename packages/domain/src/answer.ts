@@ -4,7 +4,9 @@
 
 import type { StudyDirection } from "./deck";
 import type { ReviewQuality } from "./review";
+import { isIriPastBound } from "./pathKeys";
 import { isStudyDay } from "./reviewStateEdits";
+import { isWritableIri } from "./webId";
 
 /**
  * One grade given to one prompt during study: an entry of the instance's
@@ -42,7 +44,8 @@ export interface Answer {
   mode?: AnswerMode;
   /**
    * For a wrong multiple-choice answer, the wrong option chosen: the
-   * distractor's subject in the deck's cards document. Absent otherwise.
+   * distractor's subject in the deck's cards document (chosenDistractorIn).
+   * Absent otherwise, and when that subject could not be written.
    */
   chosenDistractor?: string;
   /**
@@ -202,4 +205,21 @@ export function recordedResponseTimes(times: ResponseTimes): ResponseTimes {
 export function utcOffsetMinutesAt(instant: Date): number {
   // 0 - x, not -x: an offset of 0 is never -0.
   return 0 - instant.getTimezoneOffset();
+}
+
+/**
+ * The wrong option chosen, as an answer names it: the distractor
+ * `distractorId` in the cards document at `cardsDocumentUrl`. Undefined
+ * when that IRI could not be written, past the bound on a term
+ * (isIriPastBound) or not one Turtle writes as it is (isWritableIri):
+ * the id comes from a release, whose own address may be much shorter, and
+ * an answer that names it could never be added to the log. The answer is
+ * then logged without it.
+ */
+export function chosenDistractorIn(
+  cardsDocumentUrl: string,
+  distractorId: string,
+): string | undefined {
+  const iri = `${cardsDocumentUrl}#${distractorId}`;
+  return isIriPastBound(iri) || !isWritableIri(iri) ? undefined : iri;
 }

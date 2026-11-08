@@ -4,7 +4,7 @@
 
 import { profileNameOf, type SolidAccount } from "@solid-memo/domain/account";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import {
@@ -17,6 +17,7 @@ import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { isSecureUrl, validateWebId } from "@solid-memo/domain/webId";
 import {
   addressesGuest,
+  cardFitsDeck,
   decodeGuestMergeNote,
   encodeGuestMergeNote,
   guestDeckStamp,
@@ -33,6 +34,7 @@ import {
   linksGuestPod,
   mergedAnswer,
   mergedDeck,
+  movedCard,
   type GuestMergeOutcome,
   type GuestMergePlan,
   type GuestMergeProgress,
@@ -370,12 +372,20 @@ export function createSessionUseCases({
    */
   async function addGuestDeck(guest: Deck, instanceUrl: string): Promise<Deck> {
     const deck = mergedDeck(guest, instanceUrl, `deck-${newId()}`, DECK_FORMAT_VERSION);
-    const [cards, states] = await Promise.all([
+    const [cards, read] = await Promise.all([
       deckRepository.listCards(guest),
       reviewStateRepository.listReviewStates(guest),
     ]);
-    // A card is written by its fragment id, in this app's format, at the time it was made.
-    const content = cards.map(({ url: _url, formatVersion: _formatVersion, ...card }) => card);
+    // A card is written by its fragment id, in this app's format, at the time it was made;
+    // without a wrong option too long under the deck's address (movedCard). A card whose
+    // own names there would be too long is left out, with its states (cardFitsDeck).
+    const fits = ({ cardId }: { cardId: string }) => cardFitsDeck(cardId, deck);
+    const content = cards
+      .filter((card) => fits({ cardId: card.id }))
+      .map(({ url: _url, formatVersion: _formatVersion, ...card }) =>
+        movedCard(card, deck.cardsDocumentUrl),
+      );
+    const states = { sm2: read.sm2.filter(fits), fsrs: read.fsrs.filter(fits) };
     // Only an address can still name the guest's pod; card text is copied as it is.
     if (addressesGuest([deck, content, states]))
       throw new AppError("guestDeckUrlsLeft", { deck: guest.title, url: deck.url });
@@ -752,7 +762,10 @@ export function createSessionUseCases({
           await answerStore.appendAll(
             targetUrl,
             answers
-              .filter((answer) => answer.deckUrl === deck.url)
+              .filter(
+                (answer) =>
+                  answer.deckUrl === deck.url && cardFitsDeck(fragmentIdOf(answer.cardUrl), merged),
+              )
               .map((answer) => mergedAnswer(answer, merged)),
           );
           progress.stepped();

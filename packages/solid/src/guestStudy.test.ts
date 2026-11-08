@@ -142,7 +142,7 @@ async function app(deckLibrary?: DeckLibrary) {
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
     writeFence,
   });
-  return { useCases, guestStore, aliceStore, requests };
+  return { useCases, guestStore, aliceStore, requests, podFetch };
 }
 
 describe("a guest's study", () => {
@@ -346,6 +346,119 @@ describe("a guest's study", () => {
     expect((await useCases.listDecks(TARGET)).map(({ title }) => title)).toEqual([
       { en: "Capitals" },
     ]);
+  });
+
+  it("adds an answer whose wrong option would be too long in the instance's longer address, without that option", async () => {
+    const { useCases, aliceStore, podFetch } = await app();
+    const longer = `${ALICE_POD}solid-memo/${"p".repeat(200)}/`;
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: longer,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
+    const card = await useCases.addCard(deck, {
+      front: { en: "Sweden" },
+      back: { en: "Stockholm" },
+    });
+    // An option whose id just fits under the guest's address, and so not under the instance's.
+    const id = "d".repeat(16_383 - 2 - deck.cardsDocumentUrl.length - 1);
+    await createSolidAnswerLog({ fetch: podFetch }).append(guestInstance!.url, {
+      id: "answer-1",
+      deckUrl: deck.url,
+      cardUrl: `${deck.cardsDocumentUrl}#${card.id}`,
+      direction: "front-to-back",
+      grade: 1,
+      answeredAt: "2026-10-01T10:00:00.000Z",
+      studyDay: "2026-10-01",
+      nextIntervalDays: 1,
+      mode: "multiple-choice",
+      chosenDistractor: `${deck.cardsDocumentUrl}#${id}`,
+    });
+
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true });
+    const logged = (await everyTriple(aliceStore)).filter((line) =>
+      line.includes(`${longer}history/`),
+    );
+    expect(logged.filter((line) => line.includes("#grade>"))).toHaveLength(1);
+    expect(logged.filter((line) => line.includes("chosenDistractor"))).toEqual([]);
+  });
+
+  it("adds a card whose wrong option would be too long in the instance's longer address, without that option", async () => {
+    const { useCases, aliceStore } = await app();
+    const longer = `${ALICE_POD}solid-memo/${"p".repeat(200)}/`;
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: longer,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
+    // An option whose id just fits under the guest's address, and so not under the instance's.
+    const id = "d".repeat(16_383 - 2 - deck.cardsDocumentUrl.length - 1);
+    await useCases.addCard(deck, {
+      front: { en: "Sweden" },
+      back: { en: "Stockholm" },
+      distractors: [
+        { id: "wrong-1", text: { en: "Bergen" } },
+        { id, text: { en: "Oslo" } },
+      ],
+    });
+
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true });
+    const [added] = await useCases.listDecks(target.url);
+    const [card] = await useCases.listCards(added!);
+    expect(card!.back).toEqual({ en: "Stockholm" });
+    expect(card!.distractors!.map((option) => option.id)).toEqual(["wrong-1"]);
+    expect((await everyTriple(aliceStore)).some((line) => line.includes(id))).toBe(false);
+  });
+
+  it("adds a deck without a card whose own IRI would be too long in the instance's longer address, its states and answers left out too", async () => {
+    const { useCases, guestStore, aliceStore } = await app();
+    const longer = `${ALICE_POD}solid-memo/${"p".repeat(200)}/`;
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: longer,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
+    const long = await useCases.addCard(deck, { front: { en: "Norway" }, back: { en: "Oslo" } });
+    await useCases.addCard(deck, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    const now = new Date();
+    const queue = await useCases.getStudyQueue(guestInstance!.url, deck, now);
+    for (const prompt of queue.newPrompts)
+      await useCases.recordReview(guestInstance!.url, deck, prompt, 4, now);
+    expect((await useCases.getStatistics(guestInstance!.url, now)).totals.answers).toBe(2);
+    // The card renamed, as a release may name it: an id that fits under the guest's addresses, its states' too, and not under the instance's.
+    const id = "c".repeat(16_383 - 2 - deck.reviewsDocumentUrl.length - 1 - 20);
+    for (const url of await guestStore.urls()) {
+      const resource = await guestStore.get(url);
+      if (resource?.kind !== "rdf") continue;
+      const triples = resource.triples.map((line) => line.replaceAll(long.id, id));
+      await guestStore.set(url, { ...resource, triples, etag: `"${crypto.randomUUID()}"` });
+    }
+    expect((await useCases.listCards(deck)).map((card) => card.id)).toContain(id);
+
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true });
+    const [added] = await useCases.listDecks(target.url);
+    expect((await useCases.listCards(added!)).map((card) => card.front)).toEqual([
+      { en: "Sweden" },
+    ]);
+    expect((await useCases.getStudyQueue(target.url, added!, now)).newPrompts).toEqual([]);
+    expect((await useCases.getStatistics(target.url, now)).totals.answers).toBe(1);
+    expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
+    expect((await everyTriple(aliceStore)).some((line) => line.includes(id))).toBe(false);
   });
 
   it("adds a deck whose card text names the guest's pod to an instance, the text as it was", async () => {

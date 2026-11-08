@@ -115,6 +115,72 @@ describe("the answer log", () => {
     ]);
   });
 
+  it.each(["unwritableTerm", "termTooLong"] as const)(
+    "sets aside an answer refused before it is sent (%s), and those after it go on",
+    async (code) => {
+      const { log, byMonth, useCases } = setup();
+      log.append.mockRejectedValueOnce(new AppError(code, { term: "<a>", limit: 16_383 }));
+      await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+      );
+      await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "back-to-front" },
+        5,
+        noon,
+      );
+      await useCases.refreshStudyDigest(instance.url, deck);
+      expect(byMonth.get("2026-09")!.map((answer) => [answer.direction, answer.grade])).toEqual([
+        ["back-to-front", 5],
+      ]);
+      expect(log.append).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  it("sets aside an answer the pod refuses as at fault a third time, and those after it go on", async () => {
+    const { log, byMonth, useCases } = setup();
+    const refused = new AppError("addFailed", { url: "https://pod.example/log", status: 400 });
+    log.append
+      .mockRejectedValueOnce(refused)
+      .mockRejectedValueOnce(new AppError("addFailed", { url: "", status: 503 }))
+      .mockRejectedValueOnce(refused)
+      .mockRejectedValueOnce(refused);
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    await useCases.refreshStudyDigest(instance.url, deck);
+    await useCases.refreshStudyDigest(instance.url, deck);
+    expect(byMonth.size).toBe(0);
+    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 5, noon);
+    await useCases.refreshStudyDigest(instance.url, deck);
+    expect(byMonth.get("2026-09")!.map((answer) => [answer.direction, answer.grade])).toEqual([
+      ["back-to-front", 5],
+    ]);
+    expect(log.append).toHaveBeenCalledTimes(5);
+  });
+
+  it.each([401, 403, 408, 429, 500])(
+    "never sets aside an answer the pod refuses with a %s, which says nothing of the answer",
+    async (status) => {
+      const { log, byMonth, useCases } = setup();
+      for (let time = 0; time < 4; time++)
+        log.append.mockRejectedValueOnce(new AppError("addFailed", { url: "", status }));
+      await useCases.recordReview(
+        instance.url,
+        deck,
+        { card, direction: "front-to-back" },
+        4,
+        noon,
+      );
+      for (let time = 0; time < 4; time++) await useCases.refreshStudyDigest(instance.url, deck);
+      expect(byMonth.get("2026-09")!.map((answer) => answer.grade)).toEqual([4]);
+      expect(log.append).toHaveBeenCalledTimes(5);
+    },
+  );
+
   it("never drops an answer for any other failure, an AppError among them", async () => {
     const { log, byMonth, useCases } = setup();
     log.append.mockRejectedValueOnce(new AppError("podNoAnswer"));

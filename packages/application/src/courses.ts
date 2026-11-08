@@ -6,7 +6,7 @@ import { isCopyOf } from "@solid-memo/domain/library";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { ReviewState } from "@solid-memo/domain/review";
-import type { ResponseTimes } from "@solid-memo/domain/answer";
+import { chosenDistractorIn, type ResponseTimes } from "@solid-memo/domain/answer";
 import {
   courseAnswerEffect,
   courseProgress,
@@ -213,10 +213,11 @@ export function createCourseUseCases({
       const added =
         effect.kind === "introduce" &&
         (await deckRepository.addCardIfAbsent(deck, { ...card, fromRelease: sourceOf(deck) }));
+      // A distractor whose IRI in the deck's cards document could not be written is left out: the answer is still logged.
       const chosen =
         choice.correct || choice.distractorId === undefined
           ? undefined
-          : `${deck.cardsDocumentUrl}#${choice.distractorId}`;
+          : chosenDistractorIn(deck.cardsDocumentUrl, choice.distractorId);
       const { state } = await answerStore.grade(
         instanceUrl,
         deck,
