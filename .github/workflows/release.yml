@@ -301,11 +301,13 @@ jobs:
   # A version's docs, attached to its GitHub release when the release job
   # could not (docs/releasing.md#when-a-release-fails): the release was
   # made as a draft, and the upload failed, or the archive was not
-  # attested. Run by hand from main, with the version's tag. It renders
-  # the docs from the tag, as the release would have, attests them as
-  # this workflow's on main, and uploads them, then publishes the draft,
-  # which the deploy refuses; it needs no deploy key, and has none. A release that already
-  # carries an attested archive keeps it: an archive is rendered once.
+  # attested. Run by hand from main, with the version's tag. It checks
+  # that the tag (read as refs/tags/ only) names its version's release
+  # commit on main, renders the docs from that commit, as the release
+  # would have, attests them as this workflow's on main, and uploads
+  # them, then publishes the draft, which the deploy refuses; it needs
+  # no deploy key, and has none. A release that already carries an
+  # attested archive keeps it: an archive is rendered once.
   docs:
     if: >-
       github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
@@ -371,11 +373,35 @@ jobs:
             echo "attach=$attach"
             echo "latest=$([ "$TAG" = "$newest" ] && echo true || echo false)"
           } >> "$GITHUB_OUTPUT"
-      - if: steps.release.outputs.attach == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # The tag is read as refs/tags/<tag> only, never as a bare name,
+      # which a branch of the same name would win; and the commit it
+      # names must be its version's release commit on main, as the
+      # deploy checks (npm run release:commit, scripts/releaseCommit.ts).
+      # main is this run's commit, as the job runs only from main; the
+      # check is main's script, under main's Node, before anything of
+      # the tag's is checked out. The tag's commit is then checked out
+      # by its SHA.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ inputs.tag }}
+          fetch-depth: 0
           persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: The tag names its release commit on main
+        id: commit
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          git fetch --force --no-tags --quiet origin "+refs/tags/$TAG:refs/tags/$TAG"
+          RELEASE_MAIN=HEAD npm run release:commit -- tag "$TAG"
+          echo "sha=$(git rev-parse --verify "refs/tags/$TAG^{commit}")" >> "$GITHUB_OUTPUT"
+      - if: steps.release.outputs.attach == 'true'
+        name: Check out the tag's commit
+        env:
+          SHA: ${{ steps.commit.outputs.sha }}
+        run: git checkout --quiet --detach "$SHA"
       - name: The version can archive its docs
         if: steps.release.outputs.attach == 'true'
         env:

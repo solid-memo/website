@@ -75,7 +75,7 @@ describe("release.yml", () => {
 
   it("sets up Node without npm's cache", () => {
     const setups = release.filter((step) => step.includes("uses: actions/setup-node@"));
-    expect(setups).toHaveLength(2);
+    expect(setups).toHaveLength(3);
     for (const step of setups) {
       expect(step).not.toMatch(/^\s+cache:/m);
       expect(step).toMatch(/^\s+package-manager-cache: false$/m);
@@ -93,10 +93,10 @@ describe("release.yml", () => {
   });
 
   // A local action is the checkout's, and the docs job checks out the
-  // tag, whose copy of an action may restore from the cache.
-  it("runs no local action in the docs job, which checks out the tag", () => {
+  // tag's commit, whose copy of an action may restore from the cache.
+  it("runs no local action in the docs job, which checks out the tag's commit", () => {
     const docs = steps(workflow.get("docs") ?? "", 6);
-    expect(docs.some((step) => step.includes("ref: ${{ inputs.tag }}"))).toBe(true);
+    expect(docs.some((step) => step.includes('git checkout --quiet --detach "$SHA"'))).toBe(true);
     expect(docs.filter((step) => /uses:\s*\.\//.test(step))).toEqual([]);
     // The shell from its own download, checked against the pinned
     // SHA-256 (npm run check:shell), and only the libraries from
@@ -151,6 +151,34 @@ describe("the release commit's checks", () => {
     );
   });
 
+  // A bare name is a branch's before it is a tag's for actions/checkout,
+  // so the docs job reads the tag as refs/tags/<tag>, checks its commit
+  // with main's script before anything of the tag's is checked out, and
+  // checks out that commit by its SHA.
+  it("check the tag's commit in release.yml's docs job, then check out its SHA", () => {
+    const docs = steps(workflow.get("docs") ?? "", 6);
+    expect(docs.filter((step) => step.includes("inputs.tag") && /\bref:/.test(step))).toEqual([]);
+    const checkouts = docs.filter((step) => step.includes("uses: actions/checkout@"));
+    expect(checkouts).toHaveLength(1);
+    expect(checkouts[0]).not.toMatch(/^\s+ref:/m);
+    expect(checkouts[0]).toMatch(/^\s+fetch-depth: 0$/m);
+    const checked = at(docs, "name: The tag names its release commit on main");
+    expect(docs[checked]).toContain(
+      'git fetch --force --no-tags --quiet origin "+refs/tags/$TAG:refs/tags/$TAG"',
+    );
+    expect(docs[checked]).toMatch(
+      /^ {10}RELEASE_MAIN=HEAD npm run release:commit -- tag "\$TAG"$/m,
+    );
+    expect(docs[checked]).toContain('git rev-parse --verify "refs/tags/$TAG^{commit}"');
+    expect(docs[checked]).not.toMatch(/^\s+if:/m);
+    expect(at(docs, "uses: actions/checkout@")).toBeLessThan(checked);
+    expect(at(docs, "uses: actions/setup-node@")).toBeLessThan(checked);
+    const switched = at(docs, "name: Check out the tag's commit");
+    expect(switched).toBe(checked + 1);
+    expect(docs[switched]).toContain("SHA: ${{ steps.commit.outputs.sha }}");
+    expect(docs[switched + 1]).toContain("name: The version can archive its docs");
+  });
+
   it("check the tag's commit in deploy.yml with the script, against origin/main", () => {
     const checked = at(version, "name: The tag is the newest release");
     expect(version[checked]).toMatch(
@@ -163,6 +191,7 @@ describe("the release commit's checks", () => {
     expect(version[checked].indexOf("npm run release:commit")).toBeLessThan(
       version[checked].indexOf('echo "sha=$sha"'),
     );
+    expect(version[checked]).toContain('sha=$(git rev-parse --verify "refs/tags/$TAG^{commit}")');
     const setup = at(version, "uses: actions/setup-node@");
     expect(setup).toBeGreaterThan(-1);
     expect(setup).toBeLessThan(checked);

@@ -43,7 +43,8 @@ Only `main` deploys, and only from this repository:
 - **Only the newest release.** The deploy checks that the tag is the
   newest version on `main` (the highest `vX.Y.Z` tag), that it names
   that version's release commit, and that the version has a GitHub
-  release. A release commit is one semantic-release made
+  release. The tag is read as `refs/tags/vX.Y.Z`, never as a branch of
+  the same name. A release commit is one semantic-release made
   (`npm run release:commit`,
   [releaseCommit.ts](../scripts/releaseCommit.ts)): on `main`'s
   first-parent chain, titled `chore(release): X.Y.Z`, by
