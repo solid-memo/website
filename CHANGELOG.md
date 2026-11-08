@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.34](https://github.com/solid-memo/website/compare/v6.29.33...v6.29.34) (2026-11-08)
+
+### Bug Fixes
+
+* **application:** check a next version's draft for guest-pod links ([901b022](https://github.com/solid-memo/website/commit/901b0229670d59d94d48ff6c9e15dc9f0e79e738))
+* **application:** set aside an answer the log can never add ([f96216d](https://github.com/solid-memo/website/commit/f96216d5d36c94aa1cf22363b2a9c2cb0150adb5))
+* **solid:** publish the draft as its checks read it ([4842ad9](https://github.com/solid-memo/website/commit/4842ad9a829fa0c35ce38c21c12e4669997c3f19))
+
 ## [6.29.33](https://github.com/solid-memo/website/compare/v6.29.32...v6.29.33) (2026-11-08)
 
 ### Bug Fixes
