@@ -80,7 +80,7 @@ describe("main last", () => {
 
 describe("main tag", () => {
   const refusal = (tag: string, why: string) =>
-    `::error::${tag} names no release commit of semantic-release's on main (${why}), so the site is not deployed (docs/releasing.md#when-a-release-fails).`;
+    `::error::${tag} names no release commit of semantic-release's on main (${why}), so it is refused (docs/releasing.md#when-a-release-fails).`;
 
   it("passes a tag on its version's release commit on main", () => {
     const { io, messages } = fake([commit("a", "chore(release): 1.0.1")], {
@@ -218,10 +218,22 @@ describe("defaultIo, on a repository with a pull request's commit titled as a re
     git(["tag", "v1.0.1", fake]);
     expect(main(["node", "tag", "v1.0.1"], io())).toBe(1);
     expect(messages).toEqual([
-      `::error::v1.0.1 names no release commit of semantic-release's on main (${fake} is not on main's first-parent chain), so the site is not deployed (docs/releasing.md#when-a-release-fails).`,
+      `::error::v1.0.1 names no release commit of semantic-release's on main (${fake} is not on main's first-parent chain), so it is refused (docs/releasing.md#when-a-release-fails).`,
     ]);
     expect(main(["node", "tag", "v1.0.0"], io())).toBe(0);
     expect(main(["node", "tag", "v9.9.9"], io())).toBe(1);
+  });
+
+  // A branch named like a version's tag is not that tag: the tag is read
+  // as refs/tags/<tag> only, whichever commit the branch is on.
+  it("reads a version's tag, not a branch of the same name", () => {
+    const release = git(["rev-parse", "v1.0.0^{commit}"]);
+    git(["branch", "v1.0.0", "feature^"]);
+    expect(main(["node", "tag", "v1.0.0"], io())).toBe(0);
+    expect(messages).toEqual([`v1.0.0 names ${release}, its release commit.`]);
+    git(["branch", "v1.0.1", "main^"]);
+    expect(main(["node", "tag", "v1.0.1"], io())).toBe(1);
+    expect(messages[1]).toContain("(it names no commit)");
   });
 
   it("stops on semantic-release's commit when its tag is missing", () => {

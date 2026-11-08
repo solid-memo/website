@@ -26,8 +26,11 @@
  * tag, or every release stops (a tag's push failed). A commit that is
  * only titled as one is passed over, with a notice.
  *
- * `tag`, in deploy.yml: the commit a version's tag names must be that
- * version's release commit, or the site is not deployed.
+ * `tag`, in deploy.yml and in release.yml's docs job: the commit a
+ * version's tag names must be that version's release commit, or the
+ * site is not deployed and the docs are not rendered. The tag is read
+ * as refs/tags/<tag> only, so a branch of the same name is never taken
+ * for it.
  */
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
@@ -101,7 +104,7 @@ function last(io: ReleaseCommitIo): number {
 function tag(io: ReleaseCommitIo, name: string): number {
   const refuse = (why: string) => {
     io.log(
-      `::error::${name} names no release commit of semantic-release's on main (${why}), so the site is not deployed (docs/releasing.md#when-a-release-fails).`,
+      `::error::${name} names no release commit of semantic-release's on main (${why}), so it is refused (docs/releasing.md#when-a-release-fails).`,
     );
     return 1;
   };

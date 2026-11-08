@@ -137,7 +137,7 @@ jobs:
             exit 0
           fi
           RELEASE_MAIN=FETCH_HEAD npm run release:commit -- tag "$TAG"
-          sha=$(git rev-list -n 1 "$TAG")
+          sha=$(git rev-parse --verify "refs/tags/$TAG^{commit}")
           for _ in 1 2 3 4 5 6; do
             draft=$(gh release view "$TAG" --json isDraft --jq .isDraft 2>/dev/null || true)
             [ "$draft" = false ] && break

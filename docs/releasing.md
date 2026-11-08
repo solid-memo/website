@@ -651,8 +651,12 @@ that passes CI, with the merge queue empty, tries again. A run whose
   waiting. That run's `docs` job has its own concurrency group, so it
   doesn't wait for a Release run. It marks the version latest when
   it's the newest tag, and a release made while it runs would leave
-  that wrong. The job renders
-  the docs from the tag, draws them, attests the archive, attaches it
+  that wrong. The job reads the tag as `refs/tags/vX.Y.Z` only, never
+  as a bare name, which a branch of the same name would win. It fails
+  unless the tag names that version's release commit on `main`, as the
+  deploy checks (`npm run release:commit`), and it checks out that
+  commit by its hash. It then renders
+  the docs from it, draws them, attests the archive, attaches it
   with the run's token, and publishes the release if it's still a
   draft, without the deploy key. It keeps an attested archive already on
   the release, and renders and replaces one that isn't.
