@@ -5,5 +5,5 @@
   "dependencies": {
     "@solid/pivot": "1.9.1"
   },
-  "packageManager": "npm@12.2.1"
+  "packageManager": "npm@12.2.2"
 }
