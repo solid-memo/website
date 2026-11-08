@@ -842,12 +842,15 @@ Such a release is made from a draft in the creator's pod
   but a next version's draft copies the series, the publisher and the
   earlier versions from the index (`readLinked`, `linkedDescription`).
   It copies only what a release needs: what an index says of a series,
-  and a publisher's class and name. A release downloaded for `decks/`
-  from a next version carries those statements.
+  and a publisher's class and name. Of the earlier versions, it copies
+  only those in the release's folder, and the version it follows. A
+  release downloaded for `decks/` from a next version carries those
+  statements.
 - A `decks/` release made a draft and published again comes back as it
   was, but for what publishing sets (a test of its own,
   [testing.md](testing.md#strategy-per-layer)). Imported from a file in
-  the Studio, it starts a series of its own instead of the index's.
+  the Studio, it starts a series of its own instead of the index's,
+  and follows no version.
 
 ## In the app
 

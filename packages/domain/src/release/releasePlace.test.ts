@@ -4,6 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  isDraftsPlaceOnward,
+  isEarlierVersionBeside,
   isPublishedReleaseUrl,
   isReleaseContainer,
   releaseFileName,
@@ -75,5 +77,44 @@ describe("isPublishedReleaseUrl", () => {
     ]) {
       expect(isPublishedReleaseUrl(url), url).toBe(false);
     }
+  });
+});
+
+describe("a version beside a release", () => {
+  const V2 = "https://pod.example/shared/capitals/v2.ttl";
+
+  it("is earlier at a release's address in its folder, of a lower version", () => {
+    expect(isEarlierVersionBeside(V2, "https://pod.example/shared/capitals/v1.ttl")).toBe(true);
+    for (const iri of [
+      V2,
+      "https://pod.example/shared/capitals/v3.ttl",
+      "https://pod.example/shared/capitals/v1.ttl#x",
+      "https://pod.example/other/capitals/v1.ttl",
+      "https://pod.example/shared/capitals/one.ttl",
+    ])
+      expect(isEarlierVersionBeside(V2, iri)).toBe(false);
+    expect(isEarlierVersionBeside("https://pod.example/shared/capitals.ttl", V2)).toBe(false);
+  });
+});
+
+describe("isDraftsPlaceOnward", () => {
+  const DRAFT = "https://pod.example/memo/drafts/capitals/v2/release.ttl";
+  const at = (path: string) => `https://pod.example/memo/releases/capitals/${path}`;
+
+  it("is where the draft is published by default, a later version there, or a subject of one", () => {
+    for (const iri of [at("v2.ttl"), at("v2.ttl#x"), at("v3.ttl"), at("v10.ttl#series")])
+      expect(isDraftsPlaceOnward(DRAFT, iri)).toBe(true);
+    for (const iri of [
+      at("v1.ttl"),
+      at("v1.ttl#x"),
+      at("v02.ttl"),
+      at("v3.ttl/x"),
+      at("other.ttl"),
+      "https://pod.example/memo/releases/other/v3.ttl",
+      "https://elsewhere.example/memo/releases/capitals/v3.ttl",
+      "_:b0",
+    ])
+      expect(isDraftsPlaceOnward(DRAFT, iri)).toBe(false);
+    expect(isDraftsPlaceOnward(at("v1.ttl"), at("v2.ttl"))).toBe(false);
   });
 });

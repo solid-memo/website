@@ -58,13 +58,13 @@ import {
   type ReleaseCheck,
 } from "@solid-memo/domain/release/releaseCheck";
 import { FOAF_NAME, type ReleaseModel } from "@solid-memo/domain/release/releaseModel";
-import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
+import { isDraftsPlaceOnward, releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
 import {
   rebaseDraft,
   releaseToDraft,
   withOwnSeries,
 } from "@solid-memo/domain/release/releaseToDraft";
-import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
+import { nextVersionDraft, withOwnVersions } from "@solid-memo/domain/release/releaseVersion";
 import type {
   DeckLibrary,
   DeckRepository,
@@ -100,7 +100,7 @@ export type NewDraft =
    * otherwise.
    */
   | { kind: "nextVersionOf"; url: string }
-  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements and in a series of its own (ownStatements, withOwnSeries, releaseToDraft). */
+  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements, in a series of its own and following no version (ownStatements, withOwnSeries, releaseToDraft). */
   | { kind: "fromFile" };
 
 /** A draft made, and for one made from a copy of a release, that release: to start the next version of instead. */
@@ -253,8 +253,10 @@ function placeTaken(error: unknown, url: string): boolean {
  * outside it (releaseForeignPart): no editor or check of a draft would
  * see that, but its release would publish it (GHSA-67w8-qjpm-jhwp). Nor
  * one that links to the guest's pod by an IRI (releaseLinksGuestPod): a
- * guest's draft of it could not be kept (GHSA-hc3p-fpwj-fvjp). Of its
- * other statements, it keeps only its own (ownStatements).
+ * guest's draft of it could not be kept (GHSA-hc3p-fpwj-fvjp). Its
+ * series lists only its own versions (withOwnVersions), and of its other
+ * statements, it keeps only its own (ownStatements): nothing of a
+ * version it no longer lists (GHSA-jp29-vf56-5g4g).
  */
 function draftable(read: ReleaseDraft): ReleaseDraft {
   if (draftAddressesGuest(read)) throw new AppError("releaseLinksGuestPod", { url: read.url });
@@ -266,7 +268,7 @@ function draftable(read: ReleaseDraft): ReleaseDraft {
   };
   const foreign = strayPartsOf(release).find((stray) => idIn(release, stray) === null);
   if (foreign !== undefined) throw new AppError("releaseForeignPart", { part: foreign });
-  return ownStatements(release);
+  return ownStatements(withOwnVersions(release));
 }
 
 /**
@@ -399,14 +401,35 @@ function untaken(triples: readonly DraftTriple[], taken: (iri: string) => boolea
 }
 
 /**
+ * The statements, but those of an address where the draft at `url` or a
+ * next version of it is published unless the creator chooses another
+ * folder (isDraftsPlaceOnward), other than the source's own, which move
+ * to the draft's. Publishing the draft there would be refused
+ * (releaseForeignStatement), or its next version would be, and published
+ * elsewhere, it would say of that release what no draft of it does
+ * (GHSA-jp29-vf56-5g4g). The place is the draft's, wherever its source
+ * is: the instance's releases/, by the draft's name.
+ */
+function unplaced(
+  triples: readonly DraftTriple[],
+  source: ReleaseDraft,
+  url: string,
+): DraftTriple[] {
+  const theirs = (iri: string) =>
+    isDraftsPlaceOnward(url, iri) && iri !== source.url && idIn(source, iri) === null;
+  return untaken(triples, takenBy(source, url)).filter(({ subject }) => !theirs(subject));
+}
+
+/**
  * The release, or draft, to be made the draft at `url`, before it is
  * moved there: without a statement of or naming an address in the new
- * draft's container (takenBy), and what only such a statement led to
- * (ownStatements). Before the move, the draft's own address is one of
- * these too: a statement of it is not one of the source's.
+ * draft's container (takenBy), or of where it is published (unplaced),
+ * and what only such a statement led to (ownStatements). Before the
+ * move, the draft's own address is one of these too: a statement of it
+ * is not one of the source's.
  */
 function inItsPlace(source: ReleaseDraft, url: string): ReleaseDraft {
-  const triples = untaken(source.triples, takenBy(source, url));
+  const triples = unplaced(source.triples, source, url);
   return triples.length === source.triples.length ? source : ownStatements({ ...source, triples });
 }
 
@@ -653,7 +676,7 @@ export function createReleaseDraftUseCases({
                 const draft = nextVersionDraft(
                   inItsPlace(release, url),
                   url,
-                  untaken(linked, takenBy(release, url)),
+                  unplaced(linked, release, url),
                 );
                 // What the linked documents state is checked as the draft has it, as the release was (draftable).
                 if (linksGuestPodBeyond(draft))
@@ -666,7 +689,7 @@ export function createReleaseDraftUseCases({
         case "fromFile": {
           const file = await fileExchange.open(DECK_FILE_ACCEPT);
           if (file === null) return null;
-          // In a series of its own, unless the file's is one of its subjects (GHSA-38m7-8r5j-q79f).
+          // In a series of its own, unless the file's is one of its subjects (GHSA-38m7-8r5j-q79f), following no version (GHSA-jp29-vf56-5g4g).
           const release = draftable(
             withOwnSeries(
               await releaseDraftRepository.parseRelease(

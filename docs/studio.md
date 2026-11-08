@@ -1577,17 +1577,38 @@ A new draft starts from
     release only claims: on another origin, or in another pod on the
     same server. The release check reports it (`seriesNotPrevious`),
     and publishing makes the new release no version of it.
+  - The series lists only the release's own versions
+    (`withOwnVersions`): the release, the version it follows,
+    and earlier versions in its folder (`<name>/v<N>.ttl`). Any other
+    version the series lists is dropped.
 - **a release saved as a file**, Turtle or JSON-LD, as it is
   (`releaseToDraft` in
   [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)),
-  but for its series (`withOwnSeries`). A series that is one of the
-  file's own subjects (`<release>#id`) moves with it. One anywhere
+  but for its series and the version it follows (`withOwnSeries`). It
+  follows none (no `dcat:prev` or `dcat:previousVersion`): the
+  version the file follows isn't the creator's, and what only that
+  link leads to is dropped too. With nothing to compare it with, all
+  of it is new, and there's no **Changes** tab. A series that is one
+  of the file's own subjects (`<release>#id`) moves with it. One anywhere
   else, a library's index or another release, belongs to other
   releases, and the draft, once published, would be their newest
   version. The draft starts a series of its own (`#series`, or
   `#series-2`, … when that id is taken) in its place, as `dcat:inSeries`
   and `dcat:isVersionOf`, and what the file states of the other series
-  is dropped. The release screen shows the series and the version.
+  is dropped. Either way, the series lists no version but the release:
+  the file's other versions aren't the creator's. What only those
+  versions lead to is dropped too. A series the file describes keeps
+  a first version: the release, when the file names no other. The
+  release screen shows the series and the version.
+
+In both cases, the draft keeps nothing the release states of its
+default place (`unplaced` in `releaseDrafts.ts`). That's the
+instance's `releases/<name>/v<M>.ttl`, by the draft's name, with M its
+version or higher: where the draft and its next versions are published
+unless the creator picks another folder. That place is the draft's
+wherever the release is, in the library, in another pod or in a file.
+Publishing the draft or a next version of it there would otherwise be
+refused (`releaseForeignStatement`).
 
 Either way, the draft doesn't keep a statement that one of its
 documents is `dcterms:isPartOf` anything, which to a deck would say the

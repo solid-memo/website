@@ -396,6 +396,158 @@ describe("createReleaseDraft", () => {
     expect(named).not.toContain("_:b0");
   });
 
+  it("keeps no version a release's own series lists but its own, nor what only those lead to (GHSA-jp29-vf56-5g4g)", async () => {
+    const { useCases, repository, created } = setUp();
+    const DCAT = "http://www.w3.org/ns/dcat#";
+    const SERIES = `${V1}#series`;
+    // The address its next version is published at, and one elsewhere, each listed with notes of the file's choosing.
+    const NEXT = `${INSTANCE}releases/solid/v2.ttl`;
+    const ELSEWHERE = "https://attacker.example/x/v2.ttl";
+    const notes = (subject: string): DraftTriple => ({
+      subject,
+      predicate: "http://www.w3.org/ns/adms#versionNotes",
+      object: { kind: "literal", value: "Planted", language: "", datatype: XSD_STRING },
+    });
+    const crafted: ReleaseDraft = {
+      ...v1,
+      triples: [
+        ...v1.triples,
+        { subject: SERIES, predicate: `${DCAT}hasVersion`, object: { kind: "iri", value: V1 } },
+        { subject: SERIES, predicate: `${DCAT}hasVersion`, object: { kind: "iri", value: NEXT } },
+        {
+          subject: SERIES,
+          predicate: `${DCAT}hasVersion`,
+          object: { kind: "iri", value: ELSEWHERE },
+        },
+        { subject: SERIES, predicate: `${DCAT}first`, object: { kind: "iri", value: ELSEWHERE } },
+        notes(NEXT),
+        notes(`${NEXT}#x`),
+        notes(ELSEWHERE),
+        {
+          subject: ELSEWHERE,
+          predicate: "http://purl.org/dc/terms/publisher",
+          object: { kind: "blank", value: "b0" },
+        },
+        notes("_:b0"),
+        {
+          subject: `${V1}#q-a-1a`,
+          predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+          object: { kind: "iri", value: `${NEXT}#x` },
+        },
+      ],
+    };
+    const planted = (draft: ReleaseDraft) =>
+      draft.triples.filter(
+        (triple) =>
+          [NEXT, `${NEXT}#x`, ELSEWHERE, "_:b0"].includes(triple.subject) ||
+          (triple.subject.endsWith("#series") && [NEXT, ELSEWHERE].includes(triple.object.value)),
+      );
+    repository.parseRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    const imported = created();
+    expect(planted(imported)).toEqual([]);
+    expect(imported.triples.filter((triple) => triple.predicate === `${DCAT}hasVersion`)).toEqual([
+      {
+        subject: `${imported.url}#series`,
+        predicate: `${DCAT}hasVersion`,
+        object: { kind: "iri", value: imported.url },
+      },
+    ]);
+    // A release published with them carries none into its next version, which its own place takes.
+    repository.readRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: V1 }, WEB_ID);
+    const next = created();
+    expect(planted(next)).toEqual([]);
+    expect(next.triples).toContainEqual({
+      subject: SERIES,
+      predicate: `${DCAT}hasVersion`,
+      object: { kind: "iri", value: V1 },
+    });
+    expect(next.triples).toContainEqual({
+      ...crafted.triples.at(-1)!,
+      subject: `${next.url}#q-a-1a`,
+    });
+  });
+
+  it("keeps nothing a release states of where its draft is published, wherever the release is (GHSA-jp29-vf56-5g4g)", async () => {
+    const { useCases, repository, created } = setUp();
+    const notes = (subject: string): DraftTriple => ({
+      subject,
+      predicate: "http://www.w3.org/ns/adms#versionNotes",
+      object: { kind: "literal", value: "Planted", language: "", datatype: XSD_STRING },
+    });
+    /** The course at `url`, stating what it may of the instance's `releases/solid/v<from>.ttl` and later. */
+    const stating = (url: string, from: number): ReleaseDraft => {
+      const at = (version: number) => `${INSTANCE}releases/solid/v${version}.ttl`;
+      const release = rebaseDraft(courseDraft(), url);
+      return {
+        ...release,
+        triples: [
+          ...release.triples,
+          {
+            subject: `${url}#q-a-1a`,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+            object: { kind: "iri", value: `${at(from)}#x` },
+          },
+          notes(at(from)),
+          notes(`${at(from)}#x`),
+          notes(at(from + 1)),
+          {
+            subject: at(from),
+            predicate: "http://purl.org/dc/terms/publisher",
+            object: { kind: "blank", value: "b0" },
+          },
+          notes("_:b0"),
+          {
+            subject: `${url}#q-a-1a`,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+            object: { kind: "iri", value: at(from - 1) },
+          },
+          notes(at(from - 1)),
+        ],
+      };
+    };
+    const placed = (draft: ReleaseDraft) =>
+      draft.triples.filter(
+        ({ subject }) =>
+          (subject.startsWith(`${INSTANCE}releases/solid/`) &&
+            !subject.includes("/v0.ttl") &&
+            !subject.endsWith("/v1.ttl")) ||
+          subject === "_:b0",
+      );
+    // The next version of a release in another pod is published in the instance's releases/ all the same.
+    repository.readRelease.mockResolvedValueOnce(
+      stating("https://elsewhere.example/releases/solid/v1.ttl", 2),
+    );
+    await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "nextVersionOf", url: "https://elsewhere.example/releases/solid/v1.ttl" },
+      WEB_ID,
+    );
+    const next = created();
+    expect(next.url).toBe(`${INSTANCE}drafts/solid/v2/release.ttl`);
+    expect(placed(next)).toEqual([]);
+    // What it states of an address before its place, and a link to its place, are kept.
+    expect(next.triples).toContainEqual(notes(`${INSTANCE}releases/solid/v1.ttl`));
+    expect(next.triples).toContainEqual({
+      subject: `${next.url}#q-a-1a`,
+      predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+      object: { kind: "iri", value: `${INSTANCE}releases/solid/v2.ttl#x` },
+    });
+    // So is a file's, imported as version 1, published at the instance's releases/solid/v1.ttl.
+    repository.parseRelease.mockResolvedValueOnce(
+      stating("https://elsewhere.example/x/solid/v1.ttl", 1),
+    );
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    const imported = created();
+    expect(imported.url).toBe(`${INSTANCE}drafts/solid/v1/release.ttl`);
+    expect(
+      imported.triples.filter(
+        ({ subject }) => subject.startsWith(`${INSTANCE}releases/solid/v`) || subject === "_:b0",
+      ),
+    ).toEqual([notes(`${INSTANCE}releases/solid/v0.ttl`)]);
+  });
+
   it("refuses a release that names a subject by an id a draft cannot keep, writing nothing", async () => {
     const { useCases, repository } = setUp();
     const odd = {
