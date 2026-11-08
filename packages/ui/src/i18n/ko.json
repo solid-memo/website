@@ -138,6 +138,7 @@
   "app": {
     "restoringSession": "세션을 복원하는 중…",
     "backToProvider": "제공자로 돌아가기",
+    "forgetSession": "이 세션 지우기",
     "skipToContent": "본문으로 건너뛰기",
     "tagline": "내 Solid Pod에 저장되는 간격 반복 플래시카드.",
     "sessionExpired": "세션이 만료됐어요. 다시 로그인해 주세요.",

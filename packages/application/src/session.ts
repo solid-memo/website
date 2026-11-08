@@ -80,6 +80,14 @@ export interface SessionUseCases {
   loginWithProvider(oidcIssuer: string): Promise<void>;
   /** Ends the session in this tab, and tells this browser's other tabs to end theirs. */
   logout(): Promise<void>;
+  /** Whether a session is stored in this browser for a restore to try. */
+  hasStoredSession(): Promise<boolean>;
+  /**
+   * Ends the stored session without asking its provider, for a learner
+   * whose provider never answers a restore, and tells this browser's
+   * other tabs to end theirs, as a logout does.
+   */
+  forgetStoredSession(): Promise<void>;
   /** Subscribe to session expiry; returns an unsubscribe function. */
   onSessionExpired(listener: () => void): () => void;
   /**
@@ -508,6 +516,14 @@ export function createSessionUseCases({
       // First: the other tabs are told even if this one's logout fails or the tab is closed.
       logoutChannel.announce();
       return sessionGateway.logout();
+    },
+    hasStoredSession() {
+      return sessionGateway.hasStoredSession();
+    },
+    forgetStoredSession() {
+      // First, as for a logout.
+      logoutChannel.announce();
+      return sessionGateway.forgetStoredSession();
     },
     onLoggedOutElsewhere(listener) {
       const endSession = () => {

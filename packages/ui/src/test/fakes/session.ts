@@ -41,6 +41,8 @@ export function makeSessionUseCasesFake(
       loginWithWebId: vi.fn(async () => undefined),
       loginWithProvider: vi.fn(async () => undefined),
       logout: vi.fn(async () => undefined),
+      hasStoredSession: vi.fn(async () => false),
+      forgetStoredSession: vi.fn(async () => undefined),
       onSessionExpired: vi.fn(() => () => undefined),
       onLoggedOutElsewhere: vi.fn(() => () => undefined),
       discoverAccount: vi.fn(async (session) => ({

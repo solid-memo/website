@@ -155,6 +155,25 @@ describe("session", () => {
     await expect(useCases.logout()).rejects.toThrow("storage refused");
     expect(deps.logoutChannel.announce).toHaveBeenCalledOnce();
   });
+  it("tells whether a session is stored, as the session gateway does", async () => {
+    const deps = makeDeps();
+    vi.mocked(deps.sessionGateway.hasStoredSession).mockResolvedValueOnce(true);
+    await expect(createUseCases(deps).hasStoredSession()).resolves.toBe(true);
+  });
+  it("forgets the stored session and tells the other tabs, even when forgetting it fails", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    await useCases.forgetStoredSession();
+    expect(deps.sessionGateway.forgetStoredSession).toHaveBeenCalledOnce();
+    expect(deps.sessionGateway.logout).not.toHaveBeenCalled();
+    expect(deps.logoutChannel.announce).toHaveBeenCalledOnce();
+
+    vi.mocked(deps.sessionGateway.forgetStoredSession).mockRejectedValueOnce(
+      new Error("storage refused"),
+    );
+    await expect(useCases.forgetStoredSession()).rejects.toThrow("storage refused");
+    expect(deps.logoutChannel.announce).toHaveBeenCalledTimes(2);
+  });
   describe("a logout in another tab", () => {
     /** The use cases over a channel the test can speak on, as another tab's logout would. */
     function subscribed(deps: ReturnType<typeof makeDeps>) {

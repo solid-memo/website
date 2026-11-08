@@ -303,15 +303,15 @@ So the gateway bounds what stays on the page and notes what leaves it:
   and the login. It's a whole restore's allowance, not a request's: a
   restore can make a few requests, a slow but working provider should
   still restore, and `solid-memo-client` alone gives each request 30
-  seconds. A restore that ends the stored session gives that step a
-  deadline of its own, so if ending it hangs too, the loading screen
-  can last up to twice as long.
+  seconds. The deadline keeps the stored session: another page can
+  keep the tab from leaving for the provider, so running out of time
+  doesn't show that the provider failed.
 - **After the deadline**: what the sign-in client is still doing can't
   be called off. With the Inrupt library, metadata that arrives late
   can still send the page to the provider, and the provider chooses
   when. The answer it then sends is refused or dropped.
   `solid-memo-client` doesn't store a session it completes after the
-  gateway gave up.
+  learner forgot it.
 - **The attempt**: before a silent restore, the gateway keeps the
   provider and the time in `sessionStorage`
   (`solid-memo:restore-attempt`) until the next load. A load that finds
@@ -319,24 +319,35 @@ So the gateway bounds what stays on the page and notes what leaves it:
   provider hasn't sent the browser back. `restore()` rejects with
   `restoreNotReturned`, and the landing page adds a link to the provider
   beside the login. A load the learner started with Reload doesn't
-  count, since the page hadn't left.
-- **The stored session**: a silent restore that fails or runs out of
-  time ends the stored session (`forgetSession()`), so the next visit
-  doesn't repeat it, and the learner logs in again. So does an attempt
-  older than the deadline that found no answer, as a working provider
-  has answered by then. The provider's own refusal of the request ends
-  it too, in the sign-in client. A younger attempt, and a refused
-  answer, keep the session, as they could also come from another page
-  navigating the tab: the next load tries again. A browser that says
-  it's offline keeps the session, as that says nothing of the provider.
-  A login's own answer leaves the stored session alone.
+  count, since the page hadn't left. A silent restore that runs out of
+  time keeps the attempt too, so the next load doesn't wait on the
+  provider again, and the load after that tries again. A login's
+  answer that runs out of time keeps none.
+- **The stored session**: only the provider's own refusal of this tab's
+  request, an answer whose `state` matches it, ends the stored session,
+  in the sign-in client. Neither an attempt's age nor the deadline
+  does, since another page can control both: it can navigate the tab,
+  keep it from leaving, and choose when it brings it back. A restore
+  that fails, an attempt that found no answer, and a refused answer
+  keep the session too, and the next load tries again. A login's own
+  answer leaves the stored session alone.
+- **Forget this session**: the landing page that shows
+  `restoreTimedOut` or `restoreNotReturned` offers "Forget this
+  session" while a session is stored. It ends the stored session in
+  the sign-in client (`forgetSession()`), without asking the provider,
+  and the restore attempt, and announces a logout to the other tabs.
+  The landing page then shows no error. It takes the learner's click on
+  the app's own page. That's the cost of the deadline keeping the
+  session: with a provider that never answers, each fresh load waits up
+  to the deadline, or shows that the provider didn't answer, until the
+  learner logs in again or forgets the session.
 - **A page brought back**: the browser can bring a page that left for
   the provider back from its back/forward cache, its restore still
-  pending and its deadline running again. A later load in the tab may
-  have restored the session and taken the attempt by then. Such a page
-  reloads, and if its deadline still runs out, it leaves the session
-  and what that load kept alone: only the page whose attempt the tab
-  still holds ends the stored session.
+  pending and its deadline running again. Another page can bring it
+  back too, so its deadline keeps the session, as any deadline does. A
+  later load in the tab may have restored the session and taken the
+  attempt by then. Such a page reloads, and if its deadline still runs
+  out, it leaves what that load kept alone.
 
 ### The issuer in the WebID's profile
 

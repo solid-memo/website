@@ -140,6 +140,7 @@
   "app": {
     "restoringSession": "Restoring session…",
     "backToProvider": "Go back to your provider",
+    "forgetSession": "Forget this session",
     "skipToContent": "Skip to content",
     "tagline": "Spaced-repetition flashcards that live in your own Solid Pod.",
     "sessionExpired": "Your session has expired. Please log in again.",

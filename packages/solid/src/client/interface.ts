@@ -210,9 +210,10 @@ export interface SessionClient {
    */
   sessionIssuer(): Promise<string | null>;
   /**
-   * Ends the stored session after a restore that failed or was given
-   * up on, even one still under way, without asking the identity
-   * provider anything: the next load restores nothing.
+   * Ends the stored session, even one a restore is still under way
+   * with, without asking the identity provider anything, which may never
+   * answer: the next load restores nothing. The learner asks for it on
+   * the landing page after a restore the provider left unanswered.
    */
   forgetSession(): Promise<void>;
   /**

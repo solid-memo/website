@@ -108,7 +108,11 @@ export const LOGIN_ISSUER_KEY = "solid-memo:login-issuer";
  */
 const RESTORE_ATTEMPT_KEY = "solid-memo:restore-attempt";
 
-/** A silent restore this tab set off: the provider, and when, in milliseconds since the epoch. */
+/**
+ * A silent restore this tab set off: the provider, and when, in
+ * milliseconds since the epoch, by which a page tells its own attempt
+ * from a later load's.
+ */
 interface RestoreAttempt {
   issuer: string;
   at: number;
@@ -118,9 +122,7 @@ interface RestoreAttempt {
  * How long a restore may keep the page on its loading screen, in
  * milliseconds (docs/authentication.md#session-restore): twice what
  * solid-memo-client gives one request to the provider, as a restore
- * makes a few, and a false alarm costs the learner their session. An
- * attempt that left the page gets as long to come back: only one older
- * than this says the provider isn't answering.
+ * makes a few, and a false alarm stops a restore that would have worked.
  */
 const RESTORE_DEADLINE_MS = 60_000;
 
@@ -324,36 +326,32 @@ export function createSolidSessionGateway({
   }
 
   /**
-   * Ends the stored session, unless the browser is offline, which says
-   * nothing of the provider. It stays bounded like the restore, and the
-   * learner sees the restore's error whatever becomes of it.
-   */
-  async function endStoredSession() {
-    if (!window.navigator.onLine) return;
-    await withinRestoreDeadline(client.forgetSession()).catch(() => {});
-  }
-
-  /**
-   * Checks the provider's answer and restores, within the deadline. A
-   * silent restore that fails or runs out of time ends the stored
-   * session, so that the next visit does not repeat it, and so does an
-   * attempt that went unanswered for longer than a working provider
-   * takes. Another page can navigate this tab, so neither a young
-   * attempt nor a refused answer says anything of the provider: they
-   * skip the restore and show the error, and the session stays. So does
-   * it past a login's answer. What was kept for a provider's answer stays
-   * only if the page leaves, as a restore that left never comes back here.
+   * Checks the provider's answer and restores, within the deadline. Only
+   * the provider's own refusal of this tab's request ends the stored
+   * session, in the sign-in client. Another page can navigate this tab,
+   * keep it from leaving and choose when it brings it back, so neither
+   * an unanswered attempt, however old, nor a refused answer, nor the
+   * deadline says anything of the provider: they show the error, and the
+   * session stays, until the learner logs in again or forgets it
+   * (forgetStoredSession). Past the deadline of a silent restore its
+   * attempt stays kept, so that the next load does not wait on the
+   * provider again but shows that it did not answer; the load after that
+   * tries again. A login's answer keeps none. What was kept for a
+   * provider's answer stays only if the page leaves, as a restore that
+   * left never comes back here.
    *
    * The browser can bring a page that left back from its back/forward
    * cache, its restore still pending and its timer running again. If a
    * later load has taken this page's attempt from the tab by then, the
-   * restore is no longer this page's to end: it reloads, and whatever
-   * still settles here leaves the session and what that load kept alone.
+   * restore is no longer this page's: it reloads, and whatever still
+   * settles here leaves what that load kept alone.
    */
   async function attemptRestore(loginIssuer: string | null, attempt: RestoreAttempt | null) {
     const answered = hasAuthorizationResponse();
-    let endsSession = false;
     let ownAttempt: string | null = null;
+    // A login's answer is no silent restore, whatever session is stored from before it.
+    const silent = !answered || loginIssuer === null || attempt !== null;
+    let keepsAttempt = false;
     const takenOver = () =>
       ownAttempt !== null && window.sessionStorage.getItem(RESTORE_ATTEMPT_KEY) !== ownAttempt;
     const reloadIfTakenOver = (event: PageTransitionEvent) => {
@@ -362,18 +360,16 @@ export function createSolidSessionGateway({
     window.addEventListener("pageshow", reloadIfTakenOver);
     try {
       if (attempt !== null && !answered && !isReload()) {
-        endsSession = Date.now() - attempt.at >= RESTORE_DEADLINE_MS;
         throw new AppError("restoreNotReturned", { issuer: attempt.issuer });
       }
       return await withinRestoreDeadline(
         checkAuthorizationResponse(loginIssuer, client).then(async () => {
-          endsSession = !answered || loginIssuer === null || attempt !== null;
           ownAttempt = await noteRestoreAttempt();
           return client.restore();
         }),
       );
     } catch (error) {
-      if (endsSession && !takenOver()) await endStoredSession();
+      keepsAttempt = silent && error instanceof AppError && error.code === "restoreTimedOut";
       if (hasAuthorizationResponse()) {
         takeOffAuthorizationResponse(new URL(window.location.href));
       }
@@ -382,7 +378,7 @@ export function createSolidSessionGateway({
       window.removeEventListener("pageshow", reloadIfTakenOver);
       if (!takenOver()) {
         window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
-        window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
+        if (!keepsAttempt) window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
       }
     }
   }
@@ -420,6 +416,16 @@ export function createSolidSessionGateway({
     async logout() {
       checkedAtLogin = null;
       await client.logout();
+    },
+
+    async hasStoredSession() {
+      return (await client.sessionIssuer()) !== null;
+    },
+
+    async forgetStoredSession() {
+      window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
+      window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
+      await client.forgetSession();
     },
 
     onSessionExpired(listener) {

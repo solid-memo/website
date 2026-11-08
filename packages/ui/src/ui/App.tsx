@@ -304,6 +304,14 @@ function providerNotReturning(error: unknown): string | null {
     : null;
 }
 
+/** Whether a restore was stopped with no answer from the provider, which may never give one. */
+function restoreUnanswered(error: unknown): boolean {
+  return (
+    error instanceof AppError &&
+    (error.code === "restoreTimedOut" || error.code === "restoreNotReturned")
+  );
+}
+
 function AppContent({
   useCases,
   source,
@@ -327,6 +335,8 @@ function AppContent({
   const [landingVisit, setLandingVisit] = useState(0);
   const [busy, setBusy] = useState(false);
   const [authError, setAuthError] = useState<unknown>(null);
+  // A session stored that a provider left unanswered: the learner may forget it, as no restore ends it.
+  const [stuckSession, setStuckSession] = useState(false);
   // Said in whatever language the user reads by the time it shows, not as an error's message.
   const authText = authError === SESSION_EXPIRED ? t("app.sessionExpired") : errorText(authError);
   // A guest on their way to logging in, to keep their study; and one about to discard it.
@@ -359,6 +369,9 @@ function AppContent({
         setAuthError(e);
         // They had a session or were logging in: the login is what they need next, not the introduction.
         setReturning(true);
+        if (restoreUnanswered(e)) {
+          setStuckSession(await useCases.hasStoredSession().catch(() => false));
+        }
       } finally {
         setCheckingSession(false);
       }
@@ -445,6 +458,20 @@ function AppContent({
     setLandingVisit((visit) => visit + 1);
   }
 
+  /** Forgets a session whose provider left its restore unanswered: the plain landing page then. */
+  async function handleForgetSession() {
+    setBusy(true);
+    try {
+      await useCases.forgetStoredSession();
+      setStuckSession(false);
+      setAuthError(null);
+    } catch (e) {
+      setAuthError(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function handleLogout() {
     await useCases.logout();
     leaveSession(null);
@@ -493,6 +520,13 @@ function AppContent({
             <p>
               <ExternalLink url={provider}>{t("app.backToProvider")}</ExternalLink>
             </p>
+          )}
+          {stuckSession && restoreUnanswered(authError) && (
+            <div class="onboarding-actions">
+              <button onClick={() => void handleForgetSession()} disabled={busy}>
+                {t("app.forgetSession")}
+              </button>
+            </div>
           )}
           <OnboardingFlow
             key={landingVisit}

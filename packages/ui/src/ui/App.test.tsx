@@ -891,6 +891,93 @@ describe("AppShell", () => {
     expect(screen.getByLabelText("WebID")).toBeInTheDocument();
   });
 
+  it.each([
+    new AppError("restoreTimedOut", { seconds: 60 }),
+    new AppError("restoreNotReturned", { issuer: "https://issuer.example/" }),
+  ])("offers to forget a stored session a provider left unanswered ($code)", async (error) => {
+    const forgetStoredSession = vi.fn(async () => undefined);
+    renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw error;
+        }),
+        hasStoredSession: vi.fn(async () => true),
+        forgetStoredSession,
+      }),
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Forget this session" }));
+    expect(forgetStoredSession).toHaveBeenCalledOnce();
+    // The plain landing page then: no error, and nothing more to forget.
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Forget this session" })).toBeNull(),
+    );
+    expect(screen.queryByText(/Solid Memo stopped restoring your session/)).toBeNull();
+    expect(screen.queryByRole("link", { name: /Go back to your provider/ })).toBeNull();
+    expect(screen.getByLabelText("WebID")).toBeInTheDocument();
+  });
+
+  it("offers nothing to forget when no session is stored, or the restore failed otherwise", async () => {
+    const hasStoredSession = vi.fn(async () => false);
+    const { unmount } = renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("restoreTimedOut", { seconds: 60 });
+        }),
+        hasStoredSession,
+      }),
+    );
+    expect(await screen.findByText(/did not answer in time/)).toBeInTheDocument();
+    expect(hasStoredSession).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "Forget this session" })).toBeNull();
+    unmount();
+
+    // A store that can't be read offers nothing either.
+    const unreadable = vi.fn(async () => {
+      throw new Error("storage refused");
+    });
+    const second = renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("restoreNotReturned", { issuer: "https://issuer.example/" });
+        }),
+        hasStoredSession: unreadable,
+      }),
+    );
+    expect(await screen.findByText(/did not send you back/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Forget this session" })).toBeNull();
+    second.unmount();
+
+    const notAsked = vi.fn(async () => true);
+    renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new Error("restore failed");
+        }),
+        hasStoredSession: notAsked,
+      }),
+    );
+    expect(await screen.findByText("restore failed")).toBeInTheDocument();
+    expect(notAsked).not.toHaveBeenCalled();
+    expect(screen.queryByRole("button", { name: "Forget this session" })).toBeNull();
+  });
+
+  it("shows why a session could not be forgotten, and stops offering it", async () => {
+    renderApp(
+      makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("restoreTimedOut", { seconds: 60 });
+        }),
+        hasStoredSession: vi.fn(async () => true),
+        forgetStoredSession: vi.fn(async () => {
+          throw new Error("storage refused");
+        }),
+      }),
+    );
+    fireEvent.click(await screen.findByRole("button", { name: "Forget this session" }));
+    expect(await screen.findByText("storage refused")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Forget this session" })).toBeNull();
+  });
+
   it("logs in with the entered WebID and stays busy while redirecting", async () => {
     const loginWithWebId = vi.fn(() => new Promise<void>(() => {}));
     const useCases = makeUseCases({ loginWithWebId });

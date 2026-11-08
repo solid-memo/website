@@ -158,9 +158,10 @@ The session's requests are in
   gateway keeps before a silent restore leaves the page
   ([authentication.md](authentication.md#the-issuer-on-the-providers-answer)).
 - **`forgetSession()`** ends the stored session and any request under
-  way in this tab, as the gateway asks after a silent restore that
-  failed or was given up on
+  way in this tab, without asking the provider anything, as the learner
+  asks after a restore the provider left unanswered
   ([authentication.md](authentication.md#when-the-provider-doesnt-answer)).
+  A restore still under way then stores nothing.
 - **`requestIssuer(state)`** names the issuer of the request under way
   in this tab when `state` is its state, and none otherwise.
 - **A request** carries `Authorization: DPoP` with the access token and
