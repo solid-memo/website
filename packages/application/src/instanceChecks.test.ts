@@ -11,6 +11,23 @@ import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { instance, deck, libraryContent, makeDeps } from "./testing/fakePorts";
 import { current, card2, setup } from "./testing/digestWorld";
 
+/** How many addresses the code under test brings to the form a request sends (canonicalUrlOf) or compares (isSameUrl). */
+const urlWork = vi.hoisted(() => ({ count: 0 }));
+vi.mock("@solid-memo/domain/instanceLayout", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/domain/instanceLayout")>();
+  return {
+    ...actual,
+    canonicalUrlOf: (text: string) => {
+      urlWork.count += 1;
+      return actual.canonicalUrlOf(text);
+    },
+    isSameUrl: (a: string, b: string) => {
+      urlWork.count += 2;
+      return actual.isSameUrl(a, b);
+    },
+  };
+});
+
 describe("instance checks", () => {
   it("planRepair plans from a report, and applyRepairs hands the repairs to the repository", async () => {
     const deps = makeDeps();
@@ -194,6 +211,43 @@ describe("instance checks", () => {
     ].map(([url]) => url);
     expect(checked).toContain(`${instance.url}catalog.ttl`);
     expect(checked.filter((url) => url.includes("/notes/"))).toEqual([]);
+  });
+  it("checks an address that is no URL, unclaimed or not", async () => {
+    const { deps, useCases } = setup();
+    const named = { ...deck, cardsDocumentUrl: "no url" };
+    deps.deckRepository.unclaimedDocuments = vi.fn(async () => ["also no url"]);
+    await useCases.checkDeck(instance.url, named, { plain: (value) => value, check: () => [] });
+    expect(
+      vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
+    ).toEqual(expect.arrayContaining(["no url", deck.reviewsDocumentUrl]));
+  });
+  it("skips the unclaimed documents of many decks in work that grows with their number, not its square", async () => {
+    const unclaimedWork = async (count: number) => {
+      const { deps, useCases } = setup();
+      const decks = Array.from({ length: count }, (_, index) => ({
+        ...deck,
+        id: `deck-${index}`,
+        url: `${instance.url}catalog.ttl#deck-${index}`,
+        cardsDocumentUrl: `https://elsewhere.example/c${index}.ttl`,
+        reviewsDocumentUrl: `https://elsewhere.example/r${index}.ttl`,
+      }));
+      deps.deckRepository.listDecks = vi.fn(async () => decks);
+      deps.deckRepository.unclaimedDocuments = vi.fn(async (one) => [
+        one.cardsDocumentUrl,
+        one.reviewsDocumentUrl,
+      ]);
+      urlWork.count = 0;
+      const report = await useCases.checkInstance(instance.url);
+      const work = urlWork.count;
+      expect(report.unclaimed).toHaveLength(count);
+      expect(
+        vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
+      ).not.toContain(decks[0]!.cardsDocumentUrl);
+      return work;
+    };
+    const few = await unclaimedWork(100);
+    // Ten times the decks, about ten times the work; comparing every pair would be about a hundred.
+    expect(await unclaimedWork(1000)).toBeLessThan(few * 20);
   });
   describe("documents outside the instance's folder and any storage of the user's that holds it", () => {
     const ownElsewhere = "https://alice.example/notes/old-cards.ttl";

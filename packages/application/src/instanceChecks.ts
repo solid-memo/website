@@ -5,11 +5,11 @@
 import { planRepair, type Repair, type RepairPlan } from "@solid-memo/domain/repair";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
+  canonicalUrlOf,
   catalogUrlOf,
   historyUrlOf,
   instanceDocumentUrls,
   isDocumentIn,
-  isSameUrl,
 } from "@solid-memo/domain/instanceLayout";
 import {
   summarize,
@@ -33,6 +33,7 @@ import type {
 import type { AnswerStore } from "./answerStore";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { TextMap } from "@solid-memo/domain/pathKeys";
 import { mapAtOnce } from "./atOnce";
 import { noting } from "./digestStore";
 import type { DigestStore } from "./digestStore";
@@ -88,14 +89,32 @@ export interface InstanceCheckUseCases {
 }
 
 /**
- * Whether the document at `url` is one of these decks' unclaimed ones,
- * in whatever spelling (isSameUrl): a deck may name one document twice,
- * and only the first spelling is listed as unclaimed.
+ * A test of whether the document at an address is one of these decks'
+ * unclaimed ones, in whatever spelling: a deck may name one document
+ * twice, and only the first spelling is listed as unclaimed. Each
+ * address is compared as a request would send it (canonicalUrlOf), the
+ * unclaimed ones brought to that form once for the test, so that a
+ * catalog naming many decks costs one lookup per address, not a
+ * comparison with every unclaimed document.
  */
-function isUnclaimed(url: string, unclaimed: readonly UnclaimedDeck[]): boolean {
-  return unclaimed.some((deck) =>
-    deck.documents.some((document) => isSameUrl(documentUrlOf(document), documentUrlOf(url))),
-  );
+function unclaimedTest(unclaimed: readonly UnclaimedDeck[]): (url: string) => boolean {
+  // Keyed by pieces (TextMap): an address as a request sends it may be longer than V8 hashes all of.
+  const skipped = new TextMap<true>();
+  for (const deck of unclaimed) {
+    for (const document of deck.documents) {
+      const canonical = canonicalDocumentOf(document);
+      if (canonical !== null) skipped.set(canonical, true);
+    }
+  }
+  return (url) => {
+    const canonical = canonicalDocumentOf(url);
+    return canonical !== null && skipped.has(canonical);
+  };
+}
+
+/** The address of the document `url` is in, as a request sends it (canonicalUrlOf); null for one that is no URL. */
+function canonicalDocumentOf(url: string): string | null {
+  return canonicalUrlOf(documentUrlOf(url));
 }
 
 /**
@@ -195,7 +214,7 @@ export function createInstanceCheckUseCases({
   /**
    * The instance's documents, then its drafts': each with where it is,
    * which picks its shapes. An unclaimed document is not checked, in any
-   * spelling of its address (isUnclaimed): it may be anyone's, and a
+   * spelling of its address (unclaimedTest): it may be anyone's, and a
    * repair of what the check finds writes to it.
    */
   function documentsToCheck(
@@ -204,9 +223,10 @@ export function createInstanceCheckUseCases({
     drafts: readonly string[],
     unclaimed: readonly UnclaimedDeck[],
   ): { url: string; context: Exclude<DocumentContext, "library"> }[] {
+    const isUnclaimed = unclaimedTest(unclaimed);
     return [
       ...instanceDocumentUrls(instanceUrl, decks)
-        .filter((url) => !isUnclaimed(url, unclaimed))
+        .filter((url) => !isUnclaimed(url))
         .map((url) => ({ url, context: "pod" as const })),
       ...drafts.map((url) => ({ url, context: "draft" as const })),
     ];
@@ -288,8 +308,9 @@ export function createInstanceCheckUseCases({
       const [report, cards, release] = await Promise.all([
         Promise.all([digestStore.of(instanceUrl), unclaimedDecksOf(instanceUrl, [deck])]).then(
           async ([digest, unclaimed]) => {
+            const isUnclaimed = unclaimedTest(unclaimed);
             const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
-              (url) => !isUnclaimed(url, unclaimed),
+              (url) => !isUnclaimed(url),
             );
             return withUnclaimed(
               await checkDocuments(
