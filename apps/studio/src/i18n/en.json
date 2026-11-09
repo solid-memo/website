@@ -1241,6 +1241,7 @@
       "shape": "{field}: {message}",
       "unshaped": "Is of a Solid Memo class that no shape of this app describes.",
       "sourceUndescribed": "Does not state {missing}: a source says what it is, whose it is, and on what terms it was used.",
+      "sourceTextAmbiguous": "States more than one title, or a title or creator that is not plain text: learners would see only the first plain title and the plain creators.",
       "usedNotDerived": "Was used to make the release, which does not say it is derived from it.",
       "countDisagrees": "Says {stated} {what}, but the release has {counted}."
     },
@@ -1397,6 +1398,7 @@
       "derivedFrom": "The release is derived from it",
       "used": "This version's making used it",
       "usedEarlier": "An earlier version's making used it.",
+      "sourceMoreCreators": "Its other creators, kept as they are: {names}.",
       "sourceOthers": {
         "one": "{count} more statement of it is kept as it is.",
         "other": "{count} more statements of it are kept as they are."

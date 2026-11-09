@@ -431,6 +431,7 @@ describe("ReleaseMetadataScreen", () => {
           { predicate: "http://purl.org/dc/terms/title", object: plain("Source") },
           { predicate: "http://purl.org/dc/terms/license", object: { kind: "iri", value: CC0 } },
           { predicate: "http://purl.org/dc/terms/creator", object: plain("Cy") },
+          { predicate: "http://purl.org/dc/terms/creator", object: plain("Dee") },
           { predicate: "http://www.w3.org/2000/01/rdf-schema#comment", object: plain("Footer.") },
           { predicate: "http://www.w3.org/2000/01/rdf-schema#comment", object: plain("Kept.") },
         ],
@@ -443,12 +444,15 @@ describe("ReleaseMetadataScreen", () => {
     expect(within(sources).getByText("https://source.example/")).toBeInTheDocument();
     expect(
       within(sources).getByText(
-        "Cy · CC0 1.0 · The release is derived from it · This version's making used it",
+        "Cy, Dee · CC0 1.0 · The release is derived from it · This version's making used it",
       ),
     ).toBeInTheDocument();
     expect(within(sources).getByText("Wiki")).toBeInTheDocument();
     fireEvent.click(within(sources).getByRole("button", { name: "Edit Source" }));
     const form = within(sources).getByRole("group", { name: "https://source.example/" });
+    expect(
+      within(form).getByText("Its other creators, kept as they are: Dee."),
+    ).toBeInTheDocument();
     expect(within(form).getByText("1 more statement of it is kept as it is.")).toBeInTheDocument();
     expect(within(form).getByRole("textbox", { name: "Evidence for its license" })).toHaveValue(
       "Footer.",
@@ -468,6 +472,7 @@ describe("ReleaseMetadataScreen", () => {
             { predicate: "http://purl.org/dc/terms/creator", object: plain("Cy") },
             { predicate: "http://purl.org/dc/terms/license", object: { kind: "iri", value: CC0 } },
             { predicate: "http://www.w3.org/2000/01/rdf-schema#comment", object: plain("Footer.") },
+            { predicate: "http://purl.org/dc/terms/creator", object: plain("Dee") },
             { predicate: "http://www.w3.org/2000/01/rdf-schema#comment", object: plain("Kept.") },
           ],
           derivedFrom: true,

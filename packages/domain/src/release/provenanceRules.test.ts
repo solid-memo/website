@@ -18,6 +18,13 @@ const text = (value: string, language = "en"): ReleaseText => ({
   language,
   datatype: "",
 });
+/** Plain text, as a source's title and creators are read. */
+const plain = (value: string): ReleaseText => ({
+  kind: "literal",
+  value,
+  language: "",
+  datatype: "http://www.w3.org/2001/XMLSchema#string",
+});
 
 describe("provenanceOf", () => {
   const statements: Record<string, ReleaseTerm[]> = {
@@ -77,15 +84,15 @@ describe("provenanceProblems", () => {
           { iri: "https://a.example/", title: [], creator: [], license: [], comments: [] },
           {
             iri: "https://b.example/",
-            title: [text("B")],
-            creator: [text("Bo")],
+            title: [plain("B")],
+            creator: [plain("Bo")],
             license: [],
             comments: [text("The page's footer: CC0.")],
           },
           {
             iri: "https://c.example/",
-            title: [text("C")],
-            creator: [text("Cy")],
+            title: [plain("C")],
+            creator: [plain("Cy")],
             license: [iri("https://cc0.example/")],
             comments: [],
           },
@@ -102,10 +109,60 @@ describe("provenanceProblems", () => {
     ]);
   });
 
+  it("warns of a source learners would read otherwise than the Studio shows it (GHSA-xwww-xpwj-j6jx)", () => {
+    const described = { license: [iri("https://cc0.example/")], comments: [] };
+    const typed: ReleaseText = {
+      ...plain("Typed"),
+      datatype: "http://www.w3.org/2001/XMLSchema#normalizedString",
+    };
+    const problems = provenanceProblems(
+      model({
+        sources: ["a", "b", "c", "d", "e"].map((name) => iri(`https://${name}.example/`)),
+        sourceDetails: [
+          // A typed title, then a plain one: learners read the second.
+          {
+            iri: "https://a.example/",
+            title: [typed, plain("A")],
+            creator: [plain("Al")],
+            ...described,
+          },
+          {
+            iri: "https://b.example/",
+            title: [plain("B"), plain("Bis")],
+            creator: [plain("Bo")],
+            ...described,
+          },
+          { iri: "https://c.example/", title: [text("C")], creator: [plain("Cy")], ...described },
+          {
+            iri: "https://d.example/",
+            title: [plain("D")],
+            creator: [plain("Di"), text("Dee")],
+            ...described,
+          },
+          // A creator by IRI is read by no one as text.
+          {
+            iri: "https://e.example/",
+            title: [plain("E")],
+            creator: [plain("Ed"), iri("https://ed.example/")],
+            ...described,
+          },
+        ],
+      }),
+    );
+    expect(problems).toEqual(
+      ["a", "b", "c", "d"].map((name) => ({
+        severity: "warning",
+        subject: `https://${name}.example/`,
+        code: "sourceTextAmbiguous",
+        params: {},
+      })),
+    );
+  });
+
   it("warns of a source the making used that the release is not derived from", () => {
     const described = {
-      title: [text("D")],
-      creator: [text("Di")],
+      title: [plain("D")],
+      creator: [plain("Di")],
       license: [iri("https://cc0.example/")],
       comments: [],
     };
@@ -132,8 +189,8 @@ describe("provenanceProblems", () => {
 
   it("does not hold what an earlier version's making used to this version's derivation", () => {
     const described = {
-      title: [text("D")],
-      creator: [text("Di")],
+      title: [plain("D")],
+      creator: [plain("Di")],
       license: [iri("https://cc0.example/")],
       comments: [],
     };
@@ -266,8 +323,8 @@ describe("provenanceProblems", () => {
 
   it("holds each source a making used to the derivation in time that grows with the sources, not with their product", () => {
     const described = {
-      title: [text("A")],
-      creator: [text("Ann")],
+      title: [plain("A")],
+      creator: [plain("Ann")],
       license: [iri("https://cc0.example/")],
       comments: [],
     };

@@ -6,6 +6,7 @@ import { PathMap } from "../pathKeys.ts";
 import { problem, type CountedThing, type ReleaseProblem, type SourceDetail } from "./problems.ts";
 import {
   DCTERMS_NS,
+  isPlainText,
   SCHEMA_NS,
   type ReleaseMaking,
   type ReleaseModel,
@@ -19,7 +20,8 @@ import {
  * check): warnings, never errors, on what a reader of its provenance
  * would miss. A source it names says what it is (a title), whose it is
  * (a creator) and on what terms it was used (a license, or a comment
- * quoting the evidence for one). A source its own making used is one it
+ * quoting the evidence for one), each title and creator as one plain
+ * text. A source its own making used is one it
  * is derived from too. And what its making says it counts (its chapters,
  * steps, sources, cards) is what it has. No rule here names a series,
  * author or host.
@@ -132,7 +134,22 @@ function usersBySource(model: ReleaseModel): Map<string, string[]> {
 }
 
 /**
- * What a reader would miss of the sources: what describes each, and
+ * Whether a source states more than one title, or a title or a creator
+ * as a literal that is not plain text (isPlainText): learners read only
+ * the first plain one of its titles and its plain creators, so they
+ * could see other text than the Studio would (GHSA-xwww-xpwj-j6jx).
+ */
+function ambiguous(source: ReleaseSource): boolean {
+  return (
+    source.title.length > 1 ||
+    !source.title.every(isPlainText) ||
+    source.creator.some((term) => term.kind === "literal" && !isPlainText(term))
+  );
+}
+
+/**
+ * What a reader would miss of the sources: what describes each, whether
+ * it is read one way, and
  * whether a source a making used is one the release is derived from.
  */
 function sourceProblems(model: ReleaseModel): ReleaseProblem[] {
@@ -152,6 +169,10 @@ function sourceProblems(model: ReleaseModel): ReleaseProblem[] {
           { code: "sourceUndescribed", params: { missing } },
           { severity: "warning" },
         ),
+      );
+    if (ambiguous(source))
+      problems.push(
+        problem(source.iri, { code: "sourceTextAmbiguous", params: {} }, { severity: "warning" }),
       );
     const users = usersOf.get(source.iri);
     if (users !== undefined && !derived.has(source.iri)) {

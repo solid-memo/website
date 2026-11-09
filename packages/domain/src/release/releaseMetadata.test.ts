@@ -28,6 +28,7 @@ import {
   sourceIri,
   sourceLicenseValid,
   sourcesOf,
+  withPlainSources,
 } from "./releaseMetadata";
 import { rebaseDraft } from "./releaseToDraft";
 import { nextVersionDraft } from "./releaseVersion";
@@ -228,6 +229,83 @@ describe("sources", () => {
       license: "https://cc0.example/",
       evidence: "Footer: CC0.",
       others: [{ predicate: COMMENT, object: plain("Used for facts.") }],
+    });
+  });
+
+  describe("read as learners read them (GHSA-xwww-xpwj-j6jx)", () => {
+    const SOURCE = "https://source.example/";
+    const typed = (value: string, datatype: string, language = "") => ({
+      kind: "literal" as const,
+      value,
+      language,
+      datatype,
+    });
+    const said = (predicate: string, object: ReturnType<typeof typed>) => ({
+      subject: SOURCE,
+      predicate: `${DCTERMS}${predicate}`,
+      object,
+    });
+    // A harmless typed title, then a plain one; a tagged creator among plain ones.
+    const statements = [
+      said("title", typed("List of capitals", "http://www.w3.org/2001/XMLSchema#normalizedString")),
+      said("title", plain("Other text")),
+      said("title", plain("More text")),
+      said("creator", plain("Wikipedia contributors")),
+      said(
+        "creator",
+        typed("Tagged", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString", "en"),
+      ),
+      said("creator", plain("Someone else")),
+    ];
+    const draft = courseDraft();
+    const mixed: ReleaseDraft = {
+      ...draft,
+      // The fixture states the source's title: these stand in its place.
+      triples: [
+        ...draft.triples.filter((triple) => triple.subject !== SOURCE),
+        ...statements,
+        link(SOURCE, `${DCTERMS}creator`, "https://someone.example/"),
+        {
+          subject: "https://unnamed.example/",
+          predicate: `${DCTERMS}title`,
+          object: statements[0]!.object,
+        },
+      ],
+    };
+
+    it("show the first plain title and every plain creator, the rest kept as they are", () => {
+      const [source] = sourcesOf(mixed);
+      expect(source).toMatchObject({
+        iri: SOURCE,
+        title: "Other text",
+        creator: "Wikipedia contributors",
+        creators: ["Wikipedia contributors", "Someone else"],
+      });
+      expect(source!.others.map(({ object }) => object.value)).toEqual([
+        "List of capitals",
+        "More text",
+        "Tagged",
+        "Someone else",
+        "https://someone.example/",
+      ]);
+    });
+
+    it("keep, made a draft, one plain title and their plain creators", () => {
+      const kept = withPlainSources(mixed);
+      expect(kept.triples.filter((triple) => triple.subject === SOURCE)).toEqual([
+        statements[1],
+        statements[3],
+        statements[5],
+        link(SOURCE, `${DCTERMS}creator`, "https://someone.example/"),
+      ]);
+      // What is not a source's is not read so.
+      expect(kept.triples.at(-1)!.subject).toBe("https://unnamed.example/");
+      const [source] = sourcesOf(kept);
+      expect([source!.title, source!.creators]).toEqual([
+        "Other text",
+        ["Wikipedia contributors", "Someone else"],
+      ]);
+      expect(withPlainSources(kept)).toBe(kept);
     });
   });
 

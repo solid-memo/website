@@ -264,6 +264,9 @@ describe("problemMessage", () => {
     ).toBe(
       "Anger inte sin licens eller belägget för en: en källa säger vad den är, vems den är och på vilka villkor den användes.",
     );
+    expect(say({ code: "sourceTextAmbiguous", params: {} })).toBe(
+      "States more than one title, or a title or creator that is not plain text: learners would see only the first plain title and the plain creators.",
+    );
     expect(say({ code: "usedNotDerived", params: {} })).toBe(
       "Was used to make the release, which does not say it is derived from it.",
     );

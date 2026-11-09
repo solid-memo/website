@@ -136,6 +136,8 @@ export type CurationProblem =
   | { code: "emailNamed"; params: Record<string, never> }
   /** A source that does not say what it is, whose it is, or on what terms it was used. */
   | { code: "sourceUndescribed"; params: { missing: SourceDetail[] } }
+  /** A source with more than one title, or a title or creator that is not plain text, which learners would read otherwise than the Studio shows it. */
+  | { code: "sourceTextAmbiguous"; params: Record<string, never> }
   /** A source the making used (`related`: the activities) that the release does not say it is derived from. */
   | { code: "usedNotDerived"; params: Record<string, never> }
   /** A making's comment that states a count the release does not have. */

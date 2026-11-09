@@ -329,7 +329,11 @@ const RELEASE_SCREEN_FIELDS: Readonly<Record<string, ReleaseField>> = {
   [`${PROV}wasDerivedFrom`]: "sources",
 };
 /** The problems of a source, by code, which the release screen's sources show. */
-const SOURCE_CODES: ReadonlySet<string> = new Set(["sourceUndescribed", "usedNotDerived"]);
+const SOURCE_CODES: ReadonlySet<string> = new Set([
+  "sourceUndescribed",
+  "sourceTextAmbiguous",
+  "usedNotDerived",
+]);
 /** The problems of the outline, by code, which the outline's part of the screen shows. */
 const OUTLINE_CODES: ReadonlySet<string> = new Set([
   "courseWithoutChapter",

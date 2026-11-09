@@ -275,6 +275,7 @@ export function problemMessage(
           .map((detail) => t(`studio.release.detail.${detail}`))
           .join(", "),
       });
+    case "sourceTextAmbiguous":
     case "usedNotDerived":
       return t(key);
     case "countDisagrees":

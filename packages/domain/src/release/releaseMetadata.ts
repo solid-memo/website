@@ -25,7 +25,7 @@ import {
   type DraftTriple,
   type ReleaseDraft,
 } from "./releaseDraft.ts";
-import { DCTERMS_NS, type ReleaseTerm, type ReleaseText } from "./releaseModel.ts";
+import { DCTERMS_NS, isPlainText, type ReleaseTerm, type ReleaseText } from "./releaseModel.ts";
 
 /**
  * The release screen's view of a draft (docs/studio.md, The release's
@@ -119,10 +119,12 @@ export function removeAuthorChanges(draft: ReleaseDraft, id: string): DraftChang
 /** A source of the release as its screen edits it. */
 export interface SourceView {
   iri: string;
-  /** Its title (dcterms:title), "" for none. */
+  /** Its title (its first dcterms:title as plain text, as learners read it), "" for none. */
   title: string;
-  /** Who made it (dcterms:creator, as text), "" for none. */
+  /** Who made it (its first dcterms:creator as plain text), "" for none: the one its form edits. */
   creator: string;
+  /** Everyone who made it (each dcterms:creator as plain text), in order, as learners see them. */
+  creators: string[];
   /** Its license (dcterms:license), "" for none. */
   license: string;
   /** The evidence for its license, quoted or described (rdfs:comment), "" for none. */
@@ -177,9 +179,13 @@ export function sourcesOf(draft: ReleaseDraft): SourceView[] {
     const said = saying.get(iri) ?? [];
     const first = (predicate: string, kind: ReleaseTerm["kind"]) =>
       said.find((triple) => triple.predicate === predicate && triple.object.kind === kind);
+    // Its title and creators as learners read them: plain text only (isPlainText).
+    const plain = (predicate: string) =>
+      said.filter((triple) => triple.predicate === predicate && isPlainText(triple.object));
+    const creators = plain(DCTERMS_CREATOR);
     const shown = [
-      first(DCTERMS_TITLE, "literal"),
-      first(DCTERMS_CREATOR, "literal"),
+      plain(DCTERMS_TITLE)[0],
+      creators[0],
       first(DCTERMS_LICENSE, "iri"),
       first(RDFS_COMMENT, "literal"),
     ];
@@ -188,6 +194,7 @@ export function sourcesOf(draft: ReleaseDraft): SourceView[] {
       iri,
       title: value(shown[0]),
       creator: value(shown[1]),
+      creators: creators.map(value),
       license: value(shown[2]),
       evidence: value(shown[3]),
       derivedFrom: derivedFrom.has(iri),
@@ -198,6 +205,29 @@ export function sourcesOf(draft: ReleaseDraft): SourceView[] {
         .map(({ predicate, object }) => ({ predicate, object })),
     };
   });
+}
+
+/**
+ * The draft, each of its sources (sourcesOf) read one way: of its
+ * titles (dcterms:title), only the first that is plain text; of its
+ * creators as literals (dcterms:creator), only those that are plain
+ * text (isPlainText). Learners read a source only so, and a title or
+ * creator they read past would be one the Studio shows them in place of
+ * (GHSA-xwww-xpwj-j6jx). A release becomes a draft so.
+ */
+export function withPlainSources(draft: ReleaseDraft): ReleaseDraft {
+  const sources = new Set(sourcesOf(draft).map(({ iri }) => iri));
+  const titled = new Set<string>();
+  const triples = draft.triples.filter(({ subject, predicate, object }) => {
+    if (!sources.has(subject)) return true;
+    if (predicate === DCTERMS_TITLE) {
+      if (!isPlainText(object) || titled.has(subject)) return false;
+      titled.add(subject);
+      return true;
+    }
+    return predicate !== DCTERMS_CREATOR || object.kind !== "literal" || isPlainText(object);
+  });
+  return triples.length === draft.triples.length ? draft : { ...draft, triples };
 }
 
 /** A source's address: an http(s) URL, as a browser writes it. */

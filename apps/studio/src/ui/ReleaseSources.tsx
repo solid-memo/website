@@ -79,7 +79,7 @@ export function ReleaseSources({
   );
 }
 
-/** A source as a line: its title (else its address), its address, creator and license, and how the release uses it. */
+/** A source as a line: its title (else its address), its address, creators and license, and how the release uses it. */
 function SourceSummary({
   source,
   onEdit,
@@ -106,7 +106,11 @@ function SourceSummary({
         )}
       </p>
       <p class="hint">
-        {[source.creator, source.license === "" ? "" : licenseLabel(source.license), ...uses]
+        {[
+          source.creators.join(", "),
+          source.license === "" ? "" : licenseLabel(source.license),
+          ...uses,
+        ]
           .filter((one) => one !== "")
           .join(" · ")}
       </p>
@@ -210,7 +214,7 @@ function sourceUseGiven(form: SourceForm, usedEarlier = false): boolean {
   return form.derivedFrom || form.used || usedEarlier;
 }
 
-/** A source being edited: its form, saved by its button, its other statements kept as they are. */
+/** A source being edited: its form, saved by its button, its other creators named and its other statements counted, all kept as they are. */
 function SourceEditor({
   source,
   onSave,
@@ -223,6 +227,9 @@ function SourceEditor({
   const { t } = useI18n();
   const [form, setForm] = useState<SourceForm>(source);
   const [problem, setProblem] = useState<"licenseInvalid" | "sourceUnused" | null>(null);
+  // The creators after the first, which the form doesn't edit: named here, and so not counted with the rest.
+  const moreCreators = source.creators.slice(1);
+  const unshown = source.others.length - moreCreators.length;
   return (
     <form
       class="card-edit"
@@ -255,9 +262,12 @@ function SourceEditor({
         <p id="release-source-error" class="error" role="alert">
           {problem !== null && t(`studio.release.${problem}`)}
         </p>
-        {source.others.length > 0 && (
-          <p class="hint">{t("studio.release.sourceOthers", { count: source.others.length })}</p>
+        {moreCreators.length > 0 && (
+          <p class="hint">
+            {t("studio.release.sourceMoreCreators", { names: moreCreators.join(", ") })}
+          </p>
         )}
+        {unshown > 0 && <p class="hint">{t("studio.release.sourceOthers", { count: unshown })}</p>}
         <button type="submit">{t("studio.release.saveSource")}</button>{" "}
         <button type="button" onClick={onCancel}>
           {t("studio.release.cancel")}

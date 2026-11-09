@@ -1171,6 +1171,7 @@
       "shape": "{field}: {message}",
       "unshaped": "이 앱의 어떤 셰이프도 설명하지 않는 Solid Memo 클래스예요.",
       "sourceUndescribed": "{missing}을(를) 밝히지 않았어요. 출처에는 무엇인지, 누구의 것인지, 어떤 조건으로 사용했는지가 있어야 해요.",
+      "sourceTextAmbiguous": "제목이 둘 이상이거나, 일반 텍스트가 아닌 제목이나 만든 사람이 있어요. 학습자에게는 첫 번째 일반 텍스트 제목과 일반 텍스트로 된 만든 사람만 보여요.",
       "usedNotDerived": "릴리스를 만드는 데 쓰였지만, 릴리스는 이것을 바탕으로 했다고 밝히지 않아요.",
       "countDisagrees": "{what}이(가) {stated}(이)라고 하지만, 릴리스에는 {counted}이(가) 있어요."
     },
@@ -1322,6 +1323,7 @@
       "derivedFrom": "릴리스가 이 출처에서 파생됨",
       "used": "이 버전을 만들 때 사용함",
       "usedEarlier": "이전 버전을 만들 때 사용했어요.",
+      "sourceMoreCreators": "그대로 유지되는 다른 만든 사람: {names}",
       "sourceOthers": {
         "other": "이 출처에 대한 다른 진술 {count}개는 그대로 유지돼요."
       },

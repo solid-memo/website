@@ -1241,6 +1241,7 @@
       "shape": "{field}: {message}",
       "unshaped": "Är av en klass i Solid Memo som ingen form i den här appen beskriver.",
       "sourceUndescribed": "Anger inte {missing}: en källa säger vad den är, vems den är och på vilka villkor den användes.",
+      "sourceTextAmbiguous": "Anger mer än en titel, eller en titel eller upphovsperson som inte är vanlig text: elever skulle bara se den första vanliga titeln och de vanliga upphovspersonerna.",
       "usedNotDerived": "Användes för att ta fram utgåvan, som inte säger att den bygger på den.",
       "countDisagrees": "Säger {stated} {what}, men utgåvan har {counted}."
     },
@@ -1397,6 +1398,7 @@
       "derivedFrom": "Utgåvan bygger på den",
       "used": "Den här versionens framtagning använde den",
       "usedEarlier": "En tidigare versions framtagning använde den.",
+      "sourceMoreCreators": "Dess övriga upphovspersoner, som behålls som de är: {names}.",
       "sourceOthers": {
         "one": "{count} uppgift till om den behålls som den är.",
         "other": "{count} uppgifter till om den behålls som de är."

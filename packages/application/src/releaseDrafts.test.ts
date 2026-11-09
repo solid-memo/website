@@ -19,6 +19,7 @@ import {
   type DraftTriple,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
+import { sourcesOf } from "@solid-memo/domain/release/releaseMetadata";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
@@ -815,6 +816,56 @@ describe("createReleaseDraft", () => {
     const next = created();
     expect(next.root.creator).toContain(OUTSIDE);
     expect(about(next, OUTSIDE)).toEqual([]);
+  });
+
+  it("keeps of a source one plain title and its plain creators, as learners read it (GHSA-xwww-xpwj-j6jx)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const SOURCE = "https://source.example/";
+    const said = (predicate: string, value: string, datatype = XSD_STRING): DraftTriple => ({
+      subject: SOURCE,
+      predicate: `http://purl.org/dc/terms/${predicate}`,
+      object: { kind: "literal", value, language: "", datatype },
+    });
+    // A harmless typed title first, then a plain one, which learners would read.
+    const crafted = {
+      ...release,
+      triples: [
+        ...release.triples.filter((triple) => triple.subject !== SOURCE),
+        said("title", "List of capitals", "http://www.w3.org/2001/XMLSchema#normalizedString"),
+        said("title", "Other text"),
+        said("creator", "Wikipedia contributors"),
+        said("creator", "Tagged", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"),
+        said("creator", "Someone else"),
+      ],
+    };
+    const read = (draft: ReleaseDraft) => {
+      const source = sourcesOf(draft).find(({ iri }) => iri === SOURCE)!;
+      return {
+        title: source.title,
+        creators: source.creators,
+        others: source.others.filter(({ predicate }) =>
+          predicate.startsWith("http://purl.org/dc/terms/"),
+        ),
+      };
+    };
+    const expected = {
+      title: "Other text",
+      creators: ["Wikipedia contributors", "Someone else"],
+      others: [said("creator", "Someone else")].map(({ predicate, object }) => ({
+        predicate,
+        object,
+      })),
+    };
+    repository.parseRelease.mockResolvedValueOnce(crafted);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    expect(read(created())).toEqual(expected);
+    // Nor what the documents the release links to state of it.
+    repository.readRelease.mockResolvedValueOnce(crafted);
+    repository.readLinked.mockResolvedValueOnce([said("title", "Linked text")]);
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
+    expect(read(created())).toEqual(expected);
   });
 
   it("keeps nothing of a creator among the release's subjects with no record, and keeps one with a record (GHSA-mv57-839j-wrf6)", async () => {

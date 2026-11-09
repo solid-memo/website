@@ -10,7 +10,7 @@ import { copyKeywords } from "../keywords.ts";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent, LibrarySource } from "../library.ts";
 import { TextMap } from "../pathKeys.ts";
 import { iriIn, type ReleaseDraft, triplesBySubject } from "./releaseDraft.ts";
-import { DCTERMS_NS } from "./releaseModel.ts";
+import { DCTERMS_NS, isPlainText } from "./releaseModel.ts";
 
 /**
  * A draft as the library lists the release it will be (docs/studio.md,
@@ -58,13 +58,14 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
     ...(root.created === undefined ? {} : { createdAt: root.created }),
     ...(root.modified === undefined ? {} : { modifiedAt: root.modified }),
     sources: [...sources].map((url): LibrarySource => {
-      const title = said(url, `${DCTERMS_NS}title`).find((term) => term.kind === "literal");
+      // Its title and authors as learners read them: plain text only.
+      const title = said(url, `${DCTERMS_NS}title`).find(isPlainText);
       const license = said(url, `${DCTERMS_NS}license`).find((term) => term.kind === "iri");
       return {
         url,
         ...(title === undefined ? {} : { title: title.value }),
         authors: said(url, `${DCTERMS_NS}creator`)
-          .filter((term) => term.kind === "literal")
+          .filter(isPlainText)
           .map((term) => term.value),
         ...(license === undefined ? {} : { license: license.value }),
       };
