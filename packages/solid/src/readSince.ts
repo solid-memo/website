@@ -8,9 +8,18 @@ import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { getSolidDatasetOrNull, readDatasetSince, UNCHANGED, versionOf } from "./datasets";
 
 /**
+ * Whether a version can go in a request's If-None-Match: the characters
+ * of a header value (RFC 9110, field-value). A version a pod just gave
+ * always can, having come in a header; one read back from a digest, which
+ * anyone may have written, need not, and Headers throws on it.
+ */
+const SENDABLE_VERSION = /^[\t\x20-\x7e\x80-\xff]*$/;
+
+/**
  * A document's dataset unless it is still at `version` (see Since): a
- * conditional read with the version known, a plain one without. A
- * document there is none of is at ABSENT_VERSION, with a null dataset.
+ * conditional read with the version known, a plain one without. A version
+ * that cannot be sent counts as none, so what the read gives replaces it.
+ * A document there is none of is at ABSENT_VERSION, with a null dataset.
  */
 export async function readSince(
   url: string,
@@ -18,7 +27,7 @@ export async function readSince(
   fetch: typeof globalThis.fetch,
 ): Promise<Since<Dataset | null>> {
   const read =
-    version === undefined || version === ABSENT_VERSION
+    version === undefined || version === ABSENT_VERSION || !SENDABLE_VERSION.test(version)
       ? await getSolidDatasetOrNull(url, fetch)
       : await readDatasetSince(url, version, fetch);
   const unchanged = read === UNCHANGED || (read === null && version === ABSENT_VERSION);

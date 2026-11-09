@@ -148,6 +148,75 @@ describe("reading a document since a version", () => {
   });
 });
 
+describe("a stored version that cannot be sent as a header value", () => {
+  it.each([
+    ["a newline", "a\nb"],
+    ["a NUL", "a\u0000b"],
+    ["a character above U+00FF", "\u20ac"],
+  ])("reads the document plainly for %s, and gives its real version", async (_, version) => {
+    const pod = await podWithDeck();
+    const read = await readSince(CARDS, version, pod.fetch);
+    expect(read).toMatchObject({ unchanged: false, version: pod.etag(CARDS) });
+    expect(pod.requests).toEqual([expect.objectContaining({ ifNoneMatch: null, status: 200 })]);
+  });
+
+  it.each([
+    ["a strong ETag", '"v1"'],
+    ["a weak ETag", 'W/"v1"'],
+    ["a character up to U+00FF", '"\u00e9"'],
+  ])("still asks conditionally with %s", async (_, version) => {
+    const pod = await podWithDeck();
+    await readSince(CARDS, version, pod.fetch);
+    expect(pod.requests).toEqual([expect.objectContaining({ ifNoneMatch: version })]);
+  });
+
+  it("is written over with the version the read gave", async () => {
+    const pod = await podWithDeck();
+    const history = `${INSTANCE}history/2026-09.ttl`;
+    await pod.put(
+      DIGEST,
+      `${PREFIXES}
+      <#r1> a sm:DocumentReceipt ; sm:formatVersion 1 ;
+        sm:receiptOf <${CARDS}> ; sm:documentVersion "a\\nb" .
+      <#s1> a sm:DeckSchedule ; sm:formatVersion 2 ; sm:scheduleOf <${deck.url}> ;
+        sm:cardsVersion "\u20ac" ; sm:reviewsVersion "absent" ;
+        sm:scheduledDirection sm:frontToBack ; sm:scheduledDayBoundaryHour 4 ; sm:scheduledWith sm:sm2 ;
+        sm:scheduledOn "2026-10-01" ; sm:unreviewedCount 0 ; sm:reviewedOnDayCount 0 ; sm:introducedOnDayCount 0 .
+      <#m1> a sm:MonthSummary ; sm:formatVersion 1 ;
+        sm:summaryOf <${history}> ; sm:summarizedVersion "a\\u0000b" ;
+        sm:youngReviewCount 0 ; sm:youngRecalledCount 0 .`,
+    );
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    const stored = (await digests.readDigest(INSTANCE))!;
+    const planted = [
+      stored.receipts[CARDS]!.version,
+      stored.schedules[deck.url]!.cardsVersion,
+      stored.months[history]!.version,
+    ];
+    expect(planted).toEqual(["a\nb", "\u20ac", "a\u0000b"]);
+
+    for (const version of planted) {
+      await expect(readSince(CARDS, version, pod.fetch)).resolves.toMatchObject({
+        unchanged: false,
+        version: pod.etag(CARDS),
+      });
+    }
+
+    await digests.updateDigest(INSTANCE, (draft) => {
+      draft.receipts[CARDS] = { ...draft.receipts[CARDS]!, version: pod.etag(CARDS)! };
+      draft.schedules[deck.url] = {
+        ...draft.schedules[deck.url]!,
+        cardsVersion: pod.etag(CARDS)!,
+      };
+      draft.months[history] = { ...draft.months[history]!, version: pod.etag(CARDS)! };
+    });
+    const healed = (await digests.readDigest(INSTANCE))!;
+    expect(healed.receipts[CARDS]!.version).toBe(pod.etag(CARDS));
+    expect(healed.schedules[deck.url]!.cardsVersion).toBe(pod.etag(CARDS));
+    expect(healed.months[history]!.version).toBe(pod.etag(CARDS));
+  });
+});
+
 describe("cards, review states and checks since a version", () => {
   it("reads a deck's cards and review states unless they are unchanged", async () => {
     const pod = await podWithDeck();
