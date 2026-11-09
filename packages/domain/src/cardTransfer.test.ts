@@ -3,7 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { planCardTransfer, type TransferOptions } from "./cardTransfer";
+import {
+  planCardTransfer,
+  sharesDocuments,
+  sharesDocumentsWith,
+  type TransferOptions,
+} from "./cardTransfer";
 import type { Card } from "./deck";
 import type { FsrsState, ReviewState } from "./review";
 import { growth } from "./testing/growth";
@@ -70,6 +75,40 @@ const a = card("a", {
 });
 const b = card("b", { retired: true });
 const sourceStates = [state("a"), state("a", "back-to-front"), state("b", "back-to-front")];
+
+describe("sharesDocumentsWith", () => {
+  it("answers for each target as sharesDocuments does", () => {
+    const targets = [
+      TARGET,
+      { ...TARGET, url: SOURCE.url },
+      { ...TARGET, cardsDocumentUrl: SOURCE.cardsDocumentUrl },
+      { ...TARGET, reviewsDocumentUrl: SOURCE.cardsDocumentUrl },
+      { ...TARGET, cardsDocumentUrl: SOURCE.reviewsDocumentUrl },
+      // One document, written another way.
+      { ...TARGET, cardsDocumentUrl: "https://pod.example./a/decks/source%2Dcards.ttl" },
+      { ...TARGET, reviewsDocumentUrl: "https://me:pw@pod.example/a/reviews/source.ttl" },
+      { ...TARGET, cardsDocumentUrl: "not a url" },
+    ];
+    const shares = sharesDocumentsWith(SOURCE);
+    expect(targets.map(shares)).toEqual([false, true, true, true, true, true, true, false]);
+    expect(targets.map(shares)).toEqual(targets.map((t) => sharesDocuments(SOURCE, t)));
+  });
+
+  it("reads the source's addresses once, however many targets it is asked about", () => {
+    let reads = 0;
+    const source = {
+      url: SOURCE.url,
+      get cardsDocumentUrl() {
+        reads++;
+        return SOURCE.cardsDocumentUrl;
+      },
+      reviewsDocumentUrl: SOURCE.reviewsDocumentUrl,
+    };
+    const shares = sharesDocumentsWith(source);
+    for (const n of [1, 2, 3]) shares({ ...TARGET, url: `${TARGET.url}${n}` });
+    expect(reads).toBe(1);
+  });
+});
 
 describe("planCardTransfer", () => {
   it("drops the release a card was taken from: in the target it is the user's card", () => {

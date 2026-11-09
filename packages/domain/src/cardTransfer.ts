@@ -49,11 +49,18 @@ function documentKeyOf(url: string): string {
  * would remove them from both.
  */
 export function sharesDocuments(source: DeckPlace, target: DeckPlace): boolean {
+  return sharesDocumentsWith(source)(target);
+}
+
+/**
+ * sharesDocuments for one source and many targets: the source's
+ * addresses are read once, here, not once for each target.
+ */
+export function sharesDocumentsWith(source: DeckPlace): (target: DeckPlace) => boolean {
   const own = new Set([source.cardsDocumentUrl, source.reviewsDocumentUrl].map(documentKeyOf));
-  return (
+  return (target) =>
     source.url === target.url ||
-    [target.cardsDocumentUrl, target.reviewsDocumentUrl].some((url) => own.has(documentKeyOf(url)))
-  );
+    [target.cardsDocumentUrl, target.reviewsDocumentUrl].some((url) => own.has(documentKeyOf(url)));
 }
 
 /** Copy the cards (the source keeps them), or move them (the source loses them once the target has them). */
