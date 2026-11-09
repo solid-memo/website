@@ -604,7 +604,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             webId={session.webId}
             healthHref={studioRouteToHash({ screen: "health", instanceUrl: route.instanceUrl })}
             draftsHref={studioRouteToHash({ screen: "drafts", instanceUrl: route.instanceUrl })}
-            draftHref={(draft) => studioRouteToHash({ screen: "draft", draftUrl: draft.url })}
+            draftHref={hrefOfDraft}
             onStarted={(created) => navigate({ screen: "draft", draftUrl: created.draft.url })}
           />
         );
@@ -948,6 +948,11 @@ function ScreenPictures({
   ) : (
     <DraftPictures draftUrl={draftUrl}>{children}</DraftPictures>
   );
+}
+
+/** Outside the component, so Releases keeps its sorted rows from one render to the next. */
+function hrefOfDraft(draft: { url: string }): string {
+  return studioRouteToHash({ screen: "draft", draftUrl: draft.url });
 }
 
 /** The deck a route is about, if it is about one. */

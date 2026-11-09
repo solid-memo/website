@@ -3,11 +3,16 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useState } from "preact/hooks";
+import { useMemo, useRef, useState } from "preact/hooks";
 import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import { paceOf, type DeckPace } from "@solid-memo/domain/deckPace";
 import {
   arrangeDeckRows,
+  deckGroupPaths,
+  deckRowRanks,
+  deckSortTexts,
+  deckTextRanks,
+  matchesFilter,
   nextSort,
   type DeckColumn,
   type DeckFigure,
@@ -70,6 +75,26 @@ const COLUMNS: readonly Exclude<DeckColumn, "title">[] = [
   "modified",
   "cards",
 ];
+
+/** The list given last, while each item of this one is the same: so a memo can be keyed on a list made anew each render. */
+function useSameList<T>(
+  list: readonly T[],
+  same: (a: T, b: T) => boolean = Object.is,
+): readonly T[] {
+  const kept = useRef(list);
+  if (
+    kept.current.length !== list.length ||
+    list.some((item, index) => !same(item, kept.current[index]!))
+  ) {
+    kept.current = list;
+  }
+  return kept.current;
+}
+
+/** Whether two rows are sorted by the same texts: those are the deck's and its groups', and those objects keep from render to render. */
+function sameSortSource(a: DeckTableRow, b: DeckTableRow): boolean {
+  return a.deck === b.deck && a.groups === b.groups;
+}
 
 /**
  * Home: every deck of the instance as a table, a row each, with the
@@ -187,6 +212,27 @@ export function DeckTableScreen({
   const [busy, setBusy] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const log = useActivityLog();
+  // The rows are made anew on each render, and renders come as each deck's
+  // figures do: the texts of the column sorted by are made once, as a long
+  // path of groups is work too, and only when a deck or its groups change;
+  // they are ranked again only when one of them, or the language, changes.
+  const sortRows = useSameList(rows, sameSortSource);
+  const sortColumn = view.sort?.column;
+  const sortTexts = useSameList(
+    useMemo(
+      () => deckSortTexts(sortRows, sortColumn, readerText),
+      [sortRows, sortColumn, readerText],
+    ),
+  );
+  const ranks = useMemo(() => deckTextRanks(sortTexts, locale), [sortTexts, locale]);
+  // Each list of groups is named once for its cells, for the same reason.
+  const groupPaths = useMemo(() => deckGroupPaths(sortRows, readerText), [sortRows, readerText]);
+  // And the filter goes over every title and group once a change, not once a render.
+  const filter = view.filter;
+  const matching = useMemo(
+    () => new Set(sortRows.filter((row) => matchesFilter(row, filter)).map((row) => row.deck)),
+    [sortRows, filter],
+  );
 
   if (rows.length === 0) {
     return (
@@ -205,10 +251,9 @@ export function DeckTableScreen({
     row.figures[which] ?? pending(row.deck, which);
   const factsOf = (row: DeckTableRow) => ({ due: figure(row, "due"), badges: badges(row.deck) });
   const shown = arrangeDeckRows(
-    rows.filter((row) => inView(shownView, factsOf(row))),
-    view,
-    readerText,
-    locale,
+    rows.filter((row) => matching.has(row.deck) && inView(shownView, factsOf(row))),
+    view.sort,
+    deckRowRanks(rows, ranks),
   );
   // Only decks shown, in the table's order: one filtered out, or deleted here or elsewhere, is left alone.
   const selected = shown
@@ -269,7 +314,7 @@ export function DeckTableScreen({
       row.groups.length === 0 ? (
         <span class="hint">{t("studio.decks.topLevel")}</span>
       ) : (
-        row.groups.map((group) => readerText(group.title)).join(" › ")
+        groupPaths.get(row.groups)
       ),
     direction: ({ deck }) => (
       <EditableCell

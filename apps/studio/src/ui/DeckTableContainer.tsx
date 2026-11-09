@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { activeCards, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
@@ -168,6 +168,10 @@ export function DeckTableContainer({
       () => false,
     );
 
+  // Kept from render to render, so Home's sort has no path of groups to make again.
+  const tree = treeQuery.data;
+  const groups = useMemo(() => groupsOfDecks(tree ?? { readOnly: false, children: [] }), [tree]);
+
   const error = treeQuery.error ?? preferencesQuery.error;
   if (error) return <ErrorMessage error={errorText(error)} />;
   if (treeQuery.data === undefined || preferencesQuery.data === undefined) {
@@ -175,7 +179,6 @@ export function DeckTableContainer({
   }
 
   const preferences = preferencesQuery.data;
-  const groups = groupsOfDecks(treeQuery.data);
   const report = check.report;
   const at = new Map(decks.map((deck, index) => [deck, index]));
   const queries = (deck: Deck) => {

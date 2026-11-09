@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMemo } from "preact/hooks";
+import { useCallback, useMemo } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
@@ -62,6 +62,14 @@ export function ReleasesContainer({
     }
     return byRelease;
   }, [draftsQuery.data]);
+  // The same function while the drafts are: the screen sorts by what it says.
+  const draftOf = useCallback(
+    (url: string) => {
+      const draft = draftsByRelease.get(url);
+      return draft === undefined ? null : { draft, href: draftHref(draft) };
+    },
+    [draftsByRelease, draftHref],
+  );
   const publicMutation = useMakePublic(useCases, instance.url, webId);
   const nextMutation = useStartNextVersion(useCases, instance.url, webId, onStarted);
 
@@ -74,10 +82,7 @@ export function ReleasesContainer({
       hold={check.readOnly() ?? (check.arrangementSetAside ? "setAside" : null)}
       healthHref={healthHref}
       draftsHref={draftsHref}
-      draftOf={(url) => {
-        const draft = draftsByRelease.get(url);
-        return draft === undefined ? null : { draft, href: draftHref(draft) };
-      }}
+      draftOf={draftOf}
       makingPublic={publicMutation.isPending ? publicMutation.variables! : null}
       publicError={errorText(publicMutation.error)}
       onMakePublic={(url) => publicMutation.mutate(url)}

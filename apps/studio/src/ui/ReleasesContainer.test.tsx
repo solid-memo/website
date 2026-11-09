@@ -12,6 +12,7 @@ import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { ReleasesContainer } from "./ReleasesContainer";
 import { instanceA, invalidReport } from "../test/fixtures";
+import { countSorts } from "../test/sorts";
 import { queryKeys } from "./queryKeys";
 
 const SOLID = `${instanceA.url}releases/solid/v1.ttl`;
@@ -145,6 +146,22 @@ describe("ReleasesContainer", () => {
     await waitFor(() => expect(start).toBeEnabled());
     fireEvent.click(start);
     expect(await screen.findByText("Starting the next version…")).toBeInTheDocument();
+  });
+
+  it("does not sort the releases again while one is made public", async () => {
+    const sorts = countSorts();
+    const useCases = makeUseCasesFake({
+      listPublishedReleases: vi.fn(async () => [{ url: SOLID, public: false }]),
+      makeReleasePublic: vi.fn(() => new Promise<void>(() => undefined)),
+    });
+    renderContainer(useCases);
+    const makePublic = await screen.findByRole("button", { name: "Make solid, version 1 public" });
+    fireEvent.click(screen.getByRole("button", { name: "Release" }));
+    const sorted = sorts();
+    fireEvent.click(makePublic);
+    confirmMakePublic();
+    expect(await screen.findByText("Making the release public…")).toBeInTheDocument();
+    expect(sorts()).toBe(sorted);
   });
 
   it("holds a next version while the instance's catalog is set aside", async () => {

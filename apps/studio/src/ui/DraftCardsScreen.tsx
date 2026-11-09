@@ -99,9 +99,9 @@ export function DraftCardsScreen({
 }) {
   const { t, locale, readerText } = useI18n();
   const [chosen, setChosen] = useState<Selection>(NO_SELECTION);
-  // A draft may have thousands of cards: its rows, languages and chapter
-  // titles are worked out when it or the view changes, not on every
-  // render (a tick of a checkbox, a page).
+  // A draft may have thousands of cards: its rows, languages, chapter
+  // titles and their order are worked out when it or the view changes,
+  // not on every render (a tick of a checkbox, a page).
   const found = useMemo(
     () =>
       draftCardRows(draft, {
@@ -115,41 +115,52 @@ export function DraftCardsScreen({
     () => new Map(draft.chapters.map((node) => [node.id, node.data.title])),
     [draft],
   );
-  const chapterName = (id: string) => {
-    const title = chapterTitles.get(id);
-    return title === undefined ? id : readerText(title);
-  };
-  const placeName = (place: QuestionPlace | null) => {
-    if (place === null) return t("studio.question.nowhere");
-    if (place.kind === "review")
-      return t("studio.question.atReview", { chapter: chapterName(place.chapter) });
-    const at = stepPlaceOf(draft, place.step);
-    return at === null
-      ? place.step
-      : t("studio.question.atStep", { chapter: chapterName(at.chapter), step: at.index + 1 });
-  };
+  const placeText = useMemo(() => {
+    const chapterName = (id: string) => {
+      const title = chapterTitles.get(id);
+      return title === undefined ? id : readerText(title);
+    };
+    const placeName = (place: QuestionPlace | null) => {
+      if (place === null) return t("studio.question.nowhere");
+      if (place.kind === "review")
+        return t("studio.question.atReview", { chapter: chapterName(place.chapter) });
+      const at = stepPlaceOf(draft, place.step);
+      return at === null
+        ? place.step
+        : t("studio.question.atStep", { chapter: chapterName(at.chapter), step: at.index + 1 });
+    };
+    return (row: DraftCardRow) =>
+      row.asked > 1
+        ? t("studio.draftCards.askedTimes", { count: row.asked })
+        : placeName(row.place);
+  }, [draft, chapterTitles, t, readerText]);
   const languageName = (tag: string) =>
     tag === "unstated" ? t("studio.draftCards.unstated") : tag;
-  const placeText = (row: DraftCardRow) =>
-    row.asked > 1 ? t("studio.draftCards.askedTimes", { count: row.asked }) : placeName(row.place);
-  const rows = sortedRows(
-    found,
-    view.sort,
-    (row, column) => {
-      switch (column) {
-        case "front":
-          return row.card.front === undefined ? row.id : readerText(row.card.front);
-        case "back":
-          return row.card.back === undefined ? undefined : readerText(row.card.back);
-        case "place":
-          return placeText(row);
-        case "distractors":
-          return row.distractors;
-        case "id":
-          return row.id;
-      }
-    },
-    locale,
+  // The route is parsed anew when only its page changes: compared by what the sort says.
+  const sortColumn = view.sort?.key;
+  const descending = view.sort?.descending === true;
+  const rows = useMemo(
+    () =>
+      sortedRows(
+        found,
+        sortColumn === undefined ? undefined : { key: sortColumn, descending },
+        (row, column) => {
+          switch (column) {
+            case "front":
+              return row.card.front === undefined ? row.id : readerText(row.card.front);
+            case "back":
+              return row.card.back === undefined ? undefined : readerText(row.card.back);
+            case "place":
+              return placeText(row);
+            case "distractors":
+              return row.distractors;
+            case "id":
+              return row.id;
+          }
+        },
+        locale,
+      ),
+    [found, sortColumn, descending, locale, readerText, placeText],
   );
   const page = paginate(rows, view.page ?? 1, DRAFT_CARDS_PAGE);
   // The cards selected the table keeps, in its order; one it hides stays selected, but is left alone.

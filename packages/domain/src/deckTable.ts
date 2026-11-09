@@ -121,31 +121,37 @@ export function groupTrails(tree: DeckTree): { group: DeckGroup; trail: readonly
   return result;
 }
 
+/** Each text's forms in every language, folded: a table folds the same titles on each render while a filter is set. */
+const foldedForms = new WeakMap<LangText, readonly string[]>();
+
+function foldedFormsOf(text: LangText): readonly string[] {
+  let forms = foldedForms.get(text);
+  if (forms === undefined) {
+    forms = Object.values(text).map(folded);
+    foldedForms.set(text, forms);
+  }
+  return forms;
+}
+
 /** Whether a row's title, in any language, or one of its groups' names holds the filter, case and diacritics aside. */
 export function matchesFilter(row: DeckTableRow, filter: string): boolean {
   const wanted = folded(filter.trim());
   if (wanted === "") return true;
-  const texts = [row.deck.title, ...row.groups.map((group) => group.title)].flatMap((text) =>
-    Object.values(text),
-  );
-  return texts.some((text) => folded(text).includes(wanted));
+  return [row.deck.title, ...row.groups.map((group) => group.title)]
+    .flatMap(foldedFormsOf)
+    .some((form) => form.includes(wanted));
 }
 
-/**
- * What a row is sorted by in a column: text, a number, or undefined
- * while a figure is not known (such rows come last, either way).
- * `text` names a text as the reader sees it.
- */
-function sortKey(
-  row: DeckTableRow,
-  column: DeckColumn,
-  text: (text: LangText) => string,
-): string | number | undefined {
+/** The columns that sort by a text as the reader sees it; the others by a number. */
+type TextColumn = "title" | "group";
+
+function isTextColumn(column: DeckColumn): column is TextColumn {
+  return column === "title" || column === "group";
+}
+
+/** The number a row is sorted by in a column of numbers: undefined while a figure is not known (such rows come last, either way). */
+function numberKey(row: DeckTableRow, column: Exclude<DeckColumn, TextColumn>): number | undefined {
   switch (column) {
-    case "title":
-      return text(row.deck.title);
-    case "group":
-      return row.groups.map((group) => text(group.title)).join(" › ");
     case "direction":
       return DECK_DIRECTIONS.indexOf(row.deck.direction);
     case "newCardsPerDay":
@@ -162,32 +168,87 @@ function sortKey(
 }
 
 /**
- * The rows the view shows, in its order: those that match its filter,
- * sorted by its column, ties (and every row, unsorted) in the order they
- * were given in. Text is compared as the reader's language sorts it
- * (`locale`), case aside and numbers by value ("Kanji 2" before "Kanji 10").
+ * The texts the table's rows are sorted by, a text per row in the rows'
+ * order: none unless `column` is one of text. A row's figures may
+ * change without changing these, so a caller can rank them once and keep
+ * the ranks while the texts stay the same.
+ */
+export function deckSortTexts(
+  rows: readonly DeckTableRow[],
+  column: DeckColumn | undefined,
+  text: (text: LangText) => string,
+): string[] {
+  if (column === "title") return rows.map((row) => text(row.deck.title));
+  if (column !== "group") return [];
+  const paths = deckGroupPaths(rows, text);
+  return rows.map((row) => paths.get(row.groups)!);
+}
+
+/** Each list of groups the rows are in, named as the reader sees it: once a list, as decks of a group share theirs and a path can be long. */
+export function deckGroupPaths(
+  rows: readonly DeckTableRow[],
+  text: (text: LangText) => string,
+): Map<readonly DeckGroup[], string> {
+  return new Map(
+    [...new Set(rows.map((row) => row.groups))].map((groups) => [
+      groups,
+      groups.map((group) => text(group.title)).join(" › "),
+    ]),
+  );
+}
+
+/**
+ * Each text's place in the order the reader's language sorts them
+ * (`locale`), case aside and numbers by value ("Kanji 2" before
+ * "Kanji 10"), by the text's position in `texts`; texts that compare
+ * equal share a place. By position, as a Map of texts would be slow to
+ * look a long path of groups up in.
+ */
+export function deckTextRanks(texts: readonly string[], locale: string): number[] {
+  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
+  const order = texts.map((_, index) => index);
+  order.sort((a, b) => collator.compare(texts[a]!, texts[b]!));
+  const ranks = new Array<number>(texts.length);
+  let rank = 0;
+  order.forEach((at, place) => {
+    if (place > 0 && collator.compare(texts[order[place - 1]!]!, texts[at]!) !== 0) rank += 1;
+    ranks[at] = rank;
+  });
+  return ranks;
+}
+
+/** The rows' ranks (`deckTextRanks` of their `deckSortTexts`) by the row: none for a column of numbers. */
+export function deckRowRanks(
+  rows: readonly DeckTableRow[],
+  ranks: readonly number[],
+): Map<DeckTableRow, number> {
+  return new Map(ranks.map((rank, index) => [rows[index]!, rank]));
+}
+
+/**
+ * The rows in the order of `sort`, ties (and every row, unsorted) in
+ * the order they were given in. A column of text sorts by each row's place in `ranks`
+ * (`deckRowRanks`).
  */
 export function arrangeDeckRows(
   rows: readonly DeckTableRow[],
-  view: DeckTableView,
-  text: (text: LangText) => string,
-  locale: string,
+  sort: DeckTableView["sort"],
+  ranks: ReadonlyMap<DeckTableRow, number>,
 ): DeckTableRow[] {
-  const shown = rows.filter((row) => matchesFilter(row, view.filter));
-  const sort = view.sort;
-  if (sort === undefined) return shown;
-  const collator = new Intl.Collator(locale, { sensitivity: "base", numeric: true });
-  const keys = new Map(shown.map((row) => [row, sortKey(row, sort.column, text)]));
-  const compare = (a: string | number, b: string | number) =>
-    typeof a === "number" && typeof b === "number" ? a - b : collator.compare(String(a), String(b));
-  return shown
+  if (sort === undefined) return [...rows];
+  const column = sort.column;
+  const keyOf = isTextColumn(column)
+    ? (row: DeckTableRow) => ranks.get(row)!
+    : (row: DeckTableRow) => numberKey(row, column);
+  const keys = new Map(rows.map((row) => [row, keyOf(row)]));
+  return rows
     .map((row, index) => ({ row, index }))
     .sort((a, b) => {
       const [x, y] = [keys.get(a.row), keys.get(b.row)];
       if (x === undefined || y === undefined) {
         return x === y ? a.index - b.index : x === undefined ? 1 : -1;
       }
-      return (sort.descending ? compare(y, x) : compare(x, y)) || a.index - b.index;
+      return (sort.descending ? y - x : x - y) || a.index - b.index;
     })
     .map(({ row }) => row);
 }

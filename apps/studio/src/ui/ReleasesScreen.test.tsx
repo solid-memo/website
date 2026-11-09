@@ -5,9 +5,11 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
+import { I18nProvider } from "@solid-memo/ui/i18n";
 import { ReleasesScreen } from "./ReleasesScreen";
 import { instanceA } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
+import { countSorts } from "../test/sorts";
 
 const SOLID = `${instanceA.url}releases/solid/v2.ttl`;
 const ELSEWHERE = "https://pod.example/public/course.ttl";
@@ -46,12 +48,13 @@ function renderScreen(overrides: Partial<Props> = {}) {
     onStartNext: vi.fn(),
     ...overrides,
   };
-  render(
+  const element = (changed: Partial<Props> = {}) => (
     <WithKeys>
-      <ReleasesScreen {...props} />
-    </WithKeys>,
+      <ReleasesScreen {...props} {...changed} />
+    </WithKeys>
   );
-  return props;
+  const { rerender } = render(element());
+  return { ...props, rerender: (changed: Partial<Props>) => rerender(element(changed)) };
 }
 
 describe("ReleasesScreen", () => {
@@ -232,6 +235,56 @@ describe("ReleasesScreen", () => {
     fireEvent.click(table.getByRole("button", { name: "Draft" }));
     fireEvent.click(table.getByRole("button", { name: "Draft" }));
     expect(order()).toEqual(["solid, version 2", ELSEWHERE, "apps, version 1"]);
+  });
+
+  it("sorts again only when the releases or the sort change, not on any other render", () => {
+    const sorts = countSorts();
+    const { rerender } = renderScreen();
+    fireEvent.click(screen.getByRole("button", { name: "Release" }));
+    const sorted = sorts();
+    expect(sorted).toBeGreaterThan(0);
+    rerender({ makingPublic: SOLID });
+    expect(sorts()).toBe(sorted);
+    rerender({ releases: [{ url: SOLID, public: false }] });
+    expect(sorts()).toBe(sorted + 1);
+  });
+
+  it("orders the releases anew in another language", () => {
+    const other = `${instanceA.url}releases/other/v1.ttl`;
+    const titled = (title: string) => ({ draft: { ...source, title: { en: title } }, href: "#/d" });
+    const props = {
+      releases: [
+        { url: SOLID, public: true },
+        { url: other, public: true },
+      ],
+      draftOf: (url: string) => titled(url === SOLID ? "Zebra" : "Ägg"),
+    };
+    const inLocale = (locale: "en" | "sv") => (
+      <I18nProvider locale={locale} onChoose={() => undefined}>
+        <WithKeys>
+          <ReleasesScreen
+            instance={instanceA}
+            hold={null}
+            healthHref="#/health"
+            draftsHref="#/drafts"
+            makingPublic={null}
+            publicError={null}
+            onMakePublic={vi.fn()}
+            starting={null}
+            startError={null}
+            onStartNext={vi.fn()}
+            {...props}
+          />
+        </WithKeys>
+      </I18nProvider>
+    );
+    const order = () =>
+      screen.getAllByRole("rowheader").map((cell) => cell.textContent.split(",", 1)[0]);
+    const { rerender } = render(inLocale("en"));
+    fireEvent.click(screen.getByRole("button", { name: "Draft" }));
+    expect(order()).toEqual(["other", "solid"]);
+    rerender(inLocale("sv"));
+    expect(order()).toEqual(["solid", "other"]);
   });
 
   it("filters the releases by name or address, case and accents aside, and says when none matches", () => {
