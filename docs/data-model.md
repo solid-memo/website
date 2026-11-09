@@ -175,7 +175,9 @@ flowchart LR
   (below). In order:
   1. each deck's cards and reviews documents as the catalog names them,
      if they're the deck's: they say so, or they're in the instance's
-     own folder (below);
+     own folder (below). A release (a document whose `<>` is an
+     `sm:Deck`) or a draft's document is never a deck's, wherever it
+     is, and nothing in it is removed;
   2. the answer log's months (`history/<YYYY-MM>.ttl`), as `history/`
      itself lists them;
   3. the drafts the catalog links that are in the instance's `drafts/`
@@ -210,9 +212,12 @@ flowchart LR
   Solid Protocol has the server delete it). A document that's missing,
   or goes before the delete, counts as deleted.
 
-  Anything else in the folder is another app's, and kept, as are the
-  releases published from the instance (`releases/`), which others may
-  have added by their address, and every container on the folder's path.
+  Anything else in the folder is another app's, and kept, as is every
+  container on the folder's path. The releases published from the
+  instance, which others may have added by their address, are kept
+  too: those in `releases/`, those the catalog links
+  (`sm:publishedRelease`) in another folder of the instance, and any
+  the catalog names as a deck's document.
   A notice (`KeptFolderNotice`) links the kept folder, says why it was
   kept (another app's files, or the releases, `keptReleases`) and how
   many documents were kept for another app's data. The delete's
@@ -487,7 +492,8 @@ No document Solid Memo names has any.
   (`<> a sm:Deck`) is never a deck's document, whatever it says, nor is
   a draft's own document in its folder: its release document,
   `cards.ttl` or a chapter's. It's unclaimed, and claiming leaves it as it is
-  (`isDeckItself` and `isDraftDocument` in
+  (`isDeckItself` in [ownership.ts](../packages/solid/src/ownership.ts)
+  and `isDraftDocument` in
   [deckPlace.ts](../packages/solid/src/deckPlace.ts)).
 - **An older document that doesn't say so** (from an earlier version, a
   repair or a copy) is the deck's in the instance's own folder, unless
@@ -526,7 +532,7 @@ No document Solid Memo names has any.
   deleting its instance, takes out a document's cards and review states
   only when every deck it names is leaving; otherwise only
   the leaving deck's `dcterms:isPartOf` goes (`deckDocumentSubjects` in
-  [ownership.ts](../packages/solid/src/ownership.ts)).
+  `ownership.ts`).
   A failed read (refused, a server error, no answer, a download cut off)
   of a deck's document in the instance's folder stops the removal, or the
   instance's deletion, before the catalog is written. The entry stays, the

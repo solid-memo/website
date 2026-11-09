@@ -269,6 +269,71 @@ describe("deleteInstanceData", () => {
     ]);
   });
 
+  it("keeps whole a release in another folder of the instance that the catalog names as a deck's document, and says the releases are why the folder was kept", async () => {
+    const p = pod();
+    const release = `${INSTANCE}public/solid/v1.ttl`;
+    const body = `<> a <${SM}Deck> ; <http://purl.org/dc/terms/title> "Solid" .
+<#c1> a <${SM}Card> ; <${SM}formatVersion> 7 ; <${SM}front> "q" .
+<#c2> a <${SM}Card> ; <${SM}formatVersion> 7 ; <${SM}front> "q2" .`;
+    await seedInstance(
+      p,
+      `<#catalog> <${SM}publishedRelease> <public/solid/v1.ttl> .
+<#deck-3> a <${SM}Deck> ; <${SM}cardsDocument> <public/solid/v1.ttl> ; <${SM}reviewsDocument> <reviews/deck-3.ttl> .`,
+    );
+    await p.put(release, body);
+    const before = await (await p.fetch(release)).text();
+
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
+      keptFolder: INSTANCE,
+      keptReleases: true,
+      keptDocuments: [],
+    });
+
+    expect(await (await p.fetch(release)).text()).toBe(before);
+  });
+
+  it("says the releases are why the folder was kept for one the catalog links in another folder of the instance, while it is there", async () => {
+    const elsewhere = `<#catalog> <${SM}publishedRelease> <public/solid/v1.ttl> , <releases/gone/v1.ttl> , <${ROOT}other/solid/v1.ttl> , <notes.txt> .`;
+    const p = pod();
+    await seedInstance(p, elsewhere);
+    await p.put(`${INSTANCE}public/solid/v1.ttl`, `<> a <${SM}Deck> .`);
+
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
+      keptFolder: INSTANCE,
+      keptReleases: true,
+      keptDocuments: [],
+    });
+
+    const gone = pod();
+    await seedInstance(gone, elsewhere);
+    await gone.put(`${INSTANCE}notes.txt`, "another app's", "text/plain");
+
+    await expect(deleteInstanceData(INSTANCE, gone.fetch)).resolves.toEqual({
+      keptFolder: INSTANCE,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+  });
+
+  it("keeps whole a draft's document the catalog names as a deck's, in another instance in the folder", async () => {
+    const p = pod();
+    const cards = `${INSTANCE}nested/drafts/solid/v1/cards.ttl`;
+    await seedInstance(
+      p,
+      `<#deck-3> a <${SM}Deck> ; <${SM}cardsDocument> <nested/drafts/solid/v1/cards.ttl> ; <${SM}reviewsDocument> <reviews/deck-3.ttl> .`,
+    );
+    await p.put(cards, `<#q> a <${SM}Card> .`);
+    const before = await (await p.fetch(cards)).text();
+
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
+      keptFolder: INSTANCE,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+
+    expect(await (await p.fetch(cards)).text()).toBe(before);
+  });
+
   it("follows the catalog only to documents below the folder, never to the folder's own documents or a container", async () => {
     const p = pod();
     const elsewhere = `${ROOT}solid-memo/other/decks/deck-9.ttl`;
