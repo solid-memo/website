@@ -587,7 +587,11 @@ export interface DeckArchive {
 export interface ReleaseDraftRepository {
   /** The drafts the instance's catalog links, each as its release document says; one that cannot be read is listed as such. */
   list(instanceUrl: string): Promise<ReleaseDraftSummary[]>;
-  /** Every document of the instance's drafts, for the instance's check. */
+  /**
+   * Every document of the instance's drafts, for the instance's check: of
+   * a draft past MAX_DRAFT_DOCUMENTS, its release document alone, so the
+   * check of the rest still stands.
+   */
   documents(instanceUrl: string): Promise<string[]>;
   /**
    * Write a new draft where its URL says (draftLayout.ts): each document
@@ -597,9 +601,11 @@ export interface ReleaseDraftRepository {
    * createdElsewhere naming it, with nothing written. Any later failure
    * deletes the documents written, and their containers left empty,
    * before it is thrown: no draft is left that the catalog does not
-   * link. Throws noCatalogToUpdate when the instance has no catalog, and
+   * link. Throws noCatalogToUpdate when the instance has no catalog;
    * draftIdUnsupported, with nothing written, for a draft with an id no
-   * draft can have (DRAFT_ID).
+   * draft can have (DRAFT_ID); and draftTooManyDocuments, with nothing
+   * written, for a draft of more documents than a read of one takes
+   * (MAX_DRAFT_DOCUMENTS).
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
@@ -626,7 +632,9 @@ export interface ReleaseDraftRepository {
    * chapter's document nothing is left in is deleted, as it was read.
    * changedElsewhere too when the draft was read since at another
    * version, or not by this repository; draftIdUnsupported, with nothing
-   * written, when `after` has an id no draft can have (DRAFT_ID).
+   * written, when `after` has an id no draft can have (DRAFT_ID);
+   * draftTooManyDocuments, with nothing written, when `after` would have
+   * more documents than a read of a draft takes (MAX_DRAFT_DOCUMENTS).
    */
   applyChanges(before: ReleaseDraft, after: ReleaseDraft, version: string): Promise<void>;
   /**
@@ -682,7 +690,8 @@ export interface ReleaseDraftRepository {
    * draft's, nothing else in its container), each document deleted when
    * nothing else is left in it, its container and the ones above it when
    * they are then empty, then its link from the catalog. Returns the
-   * documents kept for another app's data in them.
+   * documents kept for another app's data in them. A draft past the limit
+   * on what is read of one (MAX_DRAFT_DOCUMENTS) is deleted all the same.
    */
   delete(draft: ReleaseDraftSummary): Promise<KeptDocuments>;
 }

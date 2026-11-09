@@ -98,7 +98,12 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
  * how many all of an instance's drafts may list together. A container's
  * listing is data anyone may have written, as is the catalog naming the
  * drafts; past either, the drafts' documents are refused
- * (draftTooManyDocuments), not read.
+ * (draftTooManyDocuments), not read. A draft made or changed past the
+ * first is refused before anything is written (a change that fails
+ * partway may still leave it past).
+ * One already past it is read as no draft (the instance's check reads
+ * its release document alone), but it can still be deleted
+ * (deleteDraftResources).
  */
 export const MAX_DRAFT_DOCUMENTS = 1000;
 export const MAX_DRAFT_DOCUMENTS_IN_ALL = 5000;
@@ -251,13 +256,14 @@ export function createSolidReleaseDraftRepository({
 
     async documents(instanceUrl) {
       // Stopped as soon as the drafts list more than MAX_DRAFT_DOCUMENTS_IN_ALL together, no other draft read after.
+      // A draft past its own limit counts as that limit and is read as its release document alone: one such draft doesn't stop the check of the rest.
       let listed = 0;
       const each = await mapAtOnce(await linked(instanceUrl), async ({ url }) => {
-        const urls = await documentsOf(url);
-        listed += urls.length;
+        const urls = await listedDocumentsIn(url, fetch);
+        listed += Math.min(urls.length, MAX_DRAFT_DOCUMENTS);
         if (listed > MAX_DRAFT_DOCUMENTS_IN_ALL)
           throw new AppError("draftTooManyDocuments", { limit: MAX_DRAFT_DOCUMENTS_IN_ALL });
-        return urls;
+        return urls.length > MAX_DRAFT_DOCUMENTS ? [url] : urls;
       });
       return each.flat();
     },
@@ -266,15 +272,17 @@ export function createSolidReleaseDraftRepository({
       // A draft at an address no draft has would be written where no list finds it, nor a delete.
       const summary = draftSummaryOf(draft);
       if (summary === null) throw new Error(`No draft can be at ${draft.url}`);
-      const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
-      if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null)
-        throw new AppError("noCatalogToUpdate");
       const byDocument = new Map<string, DraftEntry[]>([[draft.url, []]]);
       for (const entry of draftEntries(draft).values()) {
         const entries = byDocument.get(entry.document);
         if (entries === undefined) byDocument.set(entry.document, [entry]);
         else entries.push(entry);
       }
+      // One the app could not read back: nothing of it is written.
+      refuseTooManyDocuments(byDocument.size);
+      const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
+      if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null)
+        throw new AppError("noCatalogToUpdate");
       // The release document first: a draft whose place is taken stops there, having written nothing.
       const written: string[] = [];
       try {
@@ -311,13 +319,23 @@ export function createSolidReleaseDraftRepository({
           Number(read.documents.has(a)) - Number(read.documents.has(b)) ||
           Number(a === before.url) - Number(b === before.url),
       );
-      for (const url of order) {
+      const changes = order.map((url) => {
         const stored = read.documents.get(url);
         const { dataset, made } = changedDocument(stored, touched.get(url)!);
+        // A chapter's document with nothing left in it goes, as it was read.
+        const emptied = stored !== undefined && url !== before.url && isEmptyDataset(dataset);
+        return { url, stored, dataset, made, emptied };
+      });
+      // No more documents than the draft could be read with again: nothing of the change is written.
+      refuseTooManyDocuments(
+        read.documents.size +
+          changes.filter(({ stored }) => stored === undefined).length -
+          changes.filter(({ emptied }) => emptied).length,
+      );
+      for (const { url, stored, dataset, made, emptied } of changes) {
         await checkWrite(dataset, shapedSubjects(made.map(({ entry }) => entry)), "draft");
-        if (stored !== undefined && url !== before.url && isEmptyDataset(dataset)) {
-          // A chapter's document with nothing left in it goes, as it was read.
-          await deleteDataset(url, stored, fetch);
+        if (emptied) {
+          await deleteDataset(url, stored!, fetch);
         } else {
           // One PUT of the whole document, If-Match: a draft's documents are all text, which Community Solid
           // Server's in-memory store cuts short after a PATCH, and node-solid-server stores a boolean a PATCH
@@ -543,12 +561,28 @@ export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued
   );
 }
 
+/** draftTooManyDocuments, for a draft of `count` documents: past MAX_DRAFT_DOCUMENTS, no read of it would take it. */
+function refuseTooManyDocuments(count: number): void {
+  if (count > MAX_DRAFT_DOCUMENTS)
+    throw new AppError("draftTooManyDocuments", { limit: MAX_DRAFT_DOCUMENTS });
+}
+
 /**
  * The documents of a draft's container, those a draft has (draftLayout.ts),
  * by URL; none when it is gone (404), and draftTooManyDocuments past
  * MAX_DRAFT_DOCUMENTS.
  */
 export async function draftDocumentsIn(
+  draftUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<string[]> {
+  const documents = await listedDocumentsIn(draftUrl, fetch);
+  refuseTooManyDocuments(documents.length);
+  return documents;
+}
+
+/** The documents of a draft's container, those a draft has, by URL, however many it lists; none when it is gone (404). */
+async function listedDocumentsIn(
   draftUrl: string,
   fetch: typeof globalThis.fetch,
 ): Promise<string[]> {
@@ -562,12 +596,9 @@ export async function draftDocumentsIn(
     if ((error as { statusCode?: number }).statusCode === 404) return [];
     throw error;
   }
-  const documents = getContainedResourceUrlAll(listing).filter(
-    (url) => url.startsWith(container) && isDraftDocumentName(url.slice(container.length)),
-  );
-  if (documents.length > MAX_DRAFT_DOCUMENTS)
-    throw new AppError("draftTooManyDocuments", { limit: MAX_DRAFT_DOCUMENTS });
-  return documents.sort();
+  return getContainedResourceUrlAll(listing)
+    .filter((url) => url.startsWith(container) && isDraftDocumentName(url.slice(container.length)))
+    .sort();
 }
 
 /**
@@ -576,13 +607,15 @@ export async function draftDocumentsIn(
  * then its container, the one named after it, and the instance's
  * `drafts/`, each only if it is then empty. Anything else in them,
  * another app's, is kept, and so is the container holding it. Returns
- * the documents kept for another app's data in them.
+ * the documents kept for another app's data in them. However many
+ * documents the draft lists: one past MAX_DRAFT_DOCUMENTS, which no read
+ * takes, is still the user's to delete.
  */
 export async function deleteDraftResources(
   draftUrl: string,
   fetch: typeof globalThis.fetch,
 ): Promise<string[]> {
-  const urls = await draftDocumentsIn(draftUrl, fetch);
+  const urls = await listedDocumentsIn(draftUrl, fetch);
   return deleteDocuments(draftUrl, [...urls.filter((one) => one !== draftUrl), draftUrl], fetch);
 }
 
