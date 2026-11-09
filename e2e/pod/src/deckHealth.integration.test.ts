@@ -194,6 +194,7 @@ describe.each(SERVERS)("a deck's health on $name", ({ url: server }) => {
       `${deck.cardsDocumentUrl}#wren`,
     ]);
     await useCases.applyRepairs(
+      instanceUrl,
       plan.unrepairable.map(({ documentUrl, subjectUrl }) => ({
         kind: "remove-subject" as const,
         documentUrl,

@@ -18,7 +18,8 @@ import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
 import { type DatasetEdit, editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
-import { foreignSubjects } from "./ownership";
+import { createDeckDocumentGuard, type DeckPlace, isDraftDocument } from "./deckPlace";
+import { foreignSubjects, isDeckItself } from "./ownership";
 import { readDatetime, readText, unlessNewer, unreadableDatetimes, XSD_DATETIME } from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 
@@ -44,18 +45,33 @@ const FSRS_SNAPSHOT = [
  * read once, every repair of its subjects applied in one edit, and
  * written once. A repair only fills in or removes what its problem is
  * about, so what else a subject says survives; a subject that is gone
- * is skipped.
+ * is skipped. A document that the same read shows is not to be written
+ * is left as it is: a release, and a deck's document that is unclaimed
+ * for every deck naming it (deckPlace.ts standing).
  */
 export function createSolidRepairRepository({
   fetch,
 }: {
   fetch: typeof globalThis.fetch;
 }): RepairRepository {
+  const guard = createDeckDocumentGuard(fetch);
+
+  /** Whether the document just read is one no repair writes to. A draft's release document is a deck too, and is repaired as the draft's. */
+  async function isLeftAlone(
+    documentUrl: string,
+    dataset: Dataset,
+    decks: readonly DeckPlace[],
+  ): Promise<boolean> {
+    if (isDeckItself(dataset, documentUrl) && !isDraftDocument(documentUrl)) return true;
+    return decks.length > 0 && guard.unclaimedForAll(decks, documentUrl, dataset);
+  }
+
   return {
-    async applyRepairs(repairs) {
+    async applyRepairs(repairs, decksOf) {
       for (const [documentUrl, ofDocument] of byDocument(repairs)) {
         const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
-        if (dataset === null) continue;
+        if (dataset === null || (await isLeftAlone(documentUrl, dataset, decksOf(documentUrl))))
+          continue;
         await saveDataset(documentUrl, repaired(dataset, documentUrl, ofDocument), fetch);
       }
     },

@@ -477,7 +477,9 @@ No document Solid Memo names has any.
   entry (such as a nested instance's) isn't the deck's: the app never
   adds a second owner on its own, and refuses the write
   (`deckDocumentUnclaimed`). The data check doesn't read a document in
-  the instance's own folder to list it as unclaimed. The folder is asked
+  the instance's own folder to list it as unclaimed; it leaves one out
+  once it has read it and found it isn't the deck's, and a
+  [repair](validation.md#repair) makes the same decision. The folder is asked
   once a session; when the pod doesn't answer (an error or a refusal,
   `cannotCheck`), the write fails and can be retried, and the folder is
   asked again; the document isn't taken for unclaimed. A refusal before

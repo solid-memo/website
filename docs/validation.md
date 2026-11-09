@@ -147,6 +147,14 @@ flowchart LR
   instance's folder, and not in a storage of the user's found to hold
   the instance too (`isInInstancePod`), is named in `outsidePod` too,
   and its deck gets no such button.
+- **A deck's document that isn't the deck's once read** is left out of
+  the report and isn't listed as unclaimed either. That's a release in
+  the instance's folder named as a deck's document, or a document there
+  that names only other decks. The check doesn't read a document
+  in the instance's own folder to list it as unclaimed. It decides this
+  (`DeckRepository.isUnclaimedAsRead`) only for a document with
+  something to repair. A check of an unchanged instance still downloads
+  nothing.
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled:
   they're published with the site, so the browser checks against the
@@ -454,7 +462,10 @@ the catalog as publisher. `applyRepairs`
 reads each document once, applies its repairs in one edit, each to
 the subject as the repairs before it left it, and writes it once,
 then the instance is checked again. Many repairs take time that grows
-with them and the document, not their square.
+with them and the document, not their square. That read decides the
+write, as for any write to a deck's document: a release (`<> a sm:Deck`,
+other than a draft's release document) and a document unclaimed for
+every deck naming it are left as they are.
 
 ## The CI cross-check
 

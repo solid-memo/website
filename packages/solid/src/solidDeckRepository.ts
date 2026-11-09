@@ -541,6 +541,11 @@ export function createSolidDeckRepository({
       return guard.unclaimed(deck);
     },
 
+    isUnclaimedAsRead(decks, url) {
+      // A read that fails says nothing of a document the check has just found faulty.
+      return guard.unclaimedAsRead(decks, url, false);
+    },
+
     claimDocuments(deck) {
       return guard.claim(deck);
     },

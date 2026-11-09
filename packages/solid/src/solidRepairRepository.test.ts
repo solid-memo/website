@@ -54,7 +54,8 @@ function documentOf(url: string, ...things: NamedSubject[]): never {
 }
 
 function repository() {
-  return createSolidRepairRepository({ fetch: vi.fn() as unknown as typeof fetch });
+  const repairs = createSolidRepairRepository({ fetch: vi.fn() as unknown as typeof fetch });
+  return { applyRepairs: (list: readonly Repair[]) => repairs.applyRepairs(list, () => []) };
 }
 
 function repair(
@@ -109,6 +110,34 @@ describe("applyRepairs", () => {
       code: "writtenByNewerApp",
     });
     expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("leaves a release as it is, though no deck names it", async () => {
+    const release = "https://pod.example/solid-memo/a/published/v1.ttl";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        release,
+        buildThing(createThing({ url: release }))
+          .addIri(RDF.type, SM.Deck)
+          .build(),
+      ),
+    );
+    await repository().applyRepairs([repair("remove-subject", release, 6, release)]);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("repairs a draft's release document, which is a deck too", async () => {
+    const draft = "https://pod.example/solid-memo/a/drafts/spanish/v1/release.ttl";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        draft,
+        buildThing(createThing({ url: draft }))
+          .addIri(RDF.type, SM.Deck)
+          .build(),
+      ),
+    );
+    await repository().applyRepairs([repair("remove-subject", draft, 6, draft)]);
+    expect(writeDocument).toHaveBeenCalledOnce();
   });
 
   it("fills in a deck's description and direction, in the deck's own format, with one write per document", async () => {

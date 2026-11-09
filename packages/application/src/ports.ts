@@ -404,6 +404,14 @@ export interface DeckRepository {
    */
   unclaimedDocuments(deck: Deck): Promise<string[]>;
   /**
+   * Whether the document, read now, is unclaimed for every one of the
+   * decks that name it: unlike unclaimedDocuments, it says so of one in
+   * the instance's own folder too, a release or another deck's document
+   * there, which the check then leaves out. One that cannot be read is
+   * not, so that the check keeps what it found. Writes nothing.
+   */
+  isUnclaimedAsRead(decks: readonly Deck[], url: string): Promise<boolean>;
+  /**
    * Claim the deck's unclaimed documents, as the user confirmed: each is
    * marked as the deck's, in one write made only while it is as read;
    * nothing else in it changes.
@@ -1180,8 +1188,16 @@ export interface WriteFence {
 
 /** Driven port: repairs of what an instance check found (docs/validation.md). */
 export interface RepairRepository {
-  /** Apply the repairs, one read and one write per document. */
-  applyRepairs(repairs: readonly Repair[]): Promise<void>;
+  /**
+   * Apply the repairs, one read and one write per document. `decksOf`
+   * gives the decks naming a document as theirs; a document that the
+   * read shows is not to be written is left as it is (a release, or one
+   * unclaimed for every deck naming it).
+   */
+  applyRepairs(
+    repairs: readonly Repair[],
+    decksOf: (documentUrl: string) => readonly Deck[],
+  ): Promise<void>;
 }
 
 /** Driven port: discovery of storage roots in the user's pod(s). */
