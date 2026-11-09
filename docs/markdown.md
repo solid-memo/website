@@ -111,14 +111,26 @@ shapes of Markdown make the parser slow.
 - **`MAX_WORK`, 40 units of the parser's work for each character** (of
   at least 1,000). Each try of one of the parser's rules, each step
   through a link's label and each token it makes is a unit, counted as
-  the parser works. So is each byte of a link's or a picture's URL in
-  UTF-8, each time it's used. A reference link resolves to its
-  definition's URL however often a text uses it, and the check and the
-  renderer handle the URL of each use on its own. An `href` takes at
-  most three characters for each byte, a percent escape, so the links
-  a text shows hold at most a small multiple of its length. Past the
-  budget the parse stops, and the text is plain, so no text costs more
-  than time linear in its length.
+  the parser works. A try that reads more than its one unit covers
+  costs what it reads. A block rule's silent try asks whether a line
+  ends the block before it. It costs a unit for each character it reads
+  past its first 8, as the tries of raw HTML, a fence, a thematic
+  break, a list and a table may read on through a line. A block quote's
+  try costs a unit for each line it reads on through, and one for each
+  space after a line's `>` past the first 8. A link reference
+  definition's try costs a unit for each line it reads past its first,
+  and one for each of that line's characters past the first 8. Both may
+  read lines that later tries read again. Every other try reads its own
+  line, or the lines its block holds, besides a table's try that fails,
+  which reads the next line too, and a code block's, which reads the
+  blank lines after it, each once. Each byte of a link's or a
+  picture's URL in UTF-8 is a unit too, each time it's used. A
+  reference link resolves to its definition's URL however often a text
+  uses it, and the check and the renderer handle the URL of each use on
+  its own. An `href` takes at most three characters for each byte, a
+  percent escape, so the links a text shows hold at most a small
+  multiple of its length. Past the budget the parse stops, and the text
+  is plain, so no text costs more than time linear in its length.
   markdown-it reads most text in such time, but some shapes make it
   read the rest of a text again and again: a block quote after each
   line of a paragraph, or link openers before an unclosed declaration

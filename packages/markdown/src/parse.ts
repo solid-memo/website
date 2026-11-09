@@ -91,13 +91,21 @@ export const MAX_TABLE_CELLS = 2_000;
  * (and as if it had at least WORK_FLOOR): a try of one of its rules, a
  * step through a link's label, or a token it makes, is one unit of work,
  * as is each byte of a link's or a picture's destination in UTF-8, for
- * each time it is used, counted as it is done. Past it,
- * the text is shown as plain text, so no text costs more than time
- * linear in its length. markdown-it reads most text in time linear in
- * its length, but some shapes, such as a block quote after each line of
- * a paragraph, make it read the rest of the text again and again: this
- * bounds them, whatever their shape, without predicting it. Repository
- * Markdown lifts it with MAX_CHARS.
+ * each time it is used, counted as it is done. A try that reads past
+ * what its one unit covers costs what it reads: a silent try of a rule
+ * that reads on through its line (see reads) a unit for each character
+ * of its line past TRY_READ, and a block quote's try or a link
+ * reference definition's for each line it reads on through, as both may
+ * read lines that rules after them read again.
+ * What a try reads otherwise is its own line, or lines that its block,
+ * or a paragraph read there instead, then holds, once for each level of
+ * blocks they are in (up to NESTING). Past it, the text is shown as
+ * plain text, so no text costs more than time linear in its length.
+ * markdown-it reads most text in time linear in its length, but some
+ * shapes, such as a block quote after each line of a paragraph, make it
+ * read the rest of the text again and again: this bounds them, whatever
+ * their shape, without predicting it. Repository Markdown lifts it with
+ * MAX_CHARS.
  */
 const MAX_WORK = 40;
 const WORK_FLOOR = 1_000;
@@ -290,12 +298,15 @@ md.core.ruler.at("inline", (state) => {
 
 /** The work the parser may still do on the text it reads (see MAX_WORK). */
 let work = 0;
+/** Whether a try of a link reference definition is reading (see isEmpty). */
+let defining = false;
 /** What stops a parse that has done all the work it may. */
 const tooMuchWork = new Error("too much work");
 
-/** One unit of the parser's work, or the end of the parse when none is left. */
-function spend(): void {
-  if (--work < 0) throw tooMuchWork;
+/** Units of the parser's work, one by default, or the end of the parse when too few are left. */
+function spend(units = 1): void {
+  work -= units;
+  if (work < 0) throw tooMuchWork;
 }
 
 /**
@@ -316,8 +327,7 @@ function spendOn(token: Token): void {
     // Up to U+07FF two bytes, a surrogate pair's halves two each (four in all), the rest three.
     if (code >= 0x80) bytes += code < 0x800 || (code >= 0xd800 && code < 0xe000) ? 1 : 2;
   }
-  work -= bytes;
-  if (work < 0) throw tooMuchWork;
+  spend(bytes);
 }
 
 /**
@@ -443,6 +453,22 @@ for (const { name, fn, alt } of md.inline.ruler.__rules__) {
 const unspanned: Read[] = [];
 
 md.block.State = class extends md.block.State {
+  /**
+   * Whether a line is blank. A link reference definition's try asks it
+   * of each line it reads on to, its destination's or its title's, as
+   * far as the paragraph it would be read as goes: that line costs a
+   * unit and one for each of its characters past TRY_READ, as a try
+   * that fails, or ends before its title, leaves the lines it read to
+   * the next rule's try.
+   */
+  override isEmpty(line: number): boolean {
+    if (defining)
+      spend(
+        1 + Math.max(0, this.eMarks[line]! - this.bMarks[line]! - this.tShift[line]! - TRY_READ),
+      );
+    return super.isEmpty(line);
+  }
+
   override push(type: string, tag: string, nesting: -1 | 0 | 1): Token {
     spend();
     const token = unread(super.push(type, tag, nesting), false);
@@ -451,16 +477,47 @@ md.block.State = class extends md.block.State {
   }
 };
 
+/**
+ * The characters a try of a block rule reads for its one unit of work,
+ * as a heading's reads its marker of up to six `#`.
+ */
+const TRY_READ = 8;
+
+/**
+ * What a silent try of a block rule reads of its line, past its
+ * indentation, where that may be more than TRY_READ: raw HTML tries its
+ * patterns on the whole line and a fence reads its info string, once
+ * the line starts as their blocks do; a thematic break reads its markers
+ * and spaces, and a list its marker and the spaces after it. A table's
+ * try reads the next line while it reads as a delimiter row, and then
+ * its own line (see silentRead).
+ */
+const reads: Record<string, RegExp> = {
+  html_block: /<[^\n]*/y,
+  fence: /(?:`{3,}|~{3,})[^\n]*/y,
+  hr: /[*_-][\t *_-]*/y,
+  list: /(?:\d{1,9}[.)]|[*+-])[\t ]*/y,
+  table: /[|:-][\t |:-]*/y,
+};
+
 for (const { name, fn, alt } of md.block.ruler.__rules__) {
+  const read = reads[name];
   md.block.ruler.at(
     name,
     (state, startLine, endLine, silent) => {
-      spend();
       const pushed = unspanned.length;
       const start = state.bMarks[startLine]! + state.tShift[startLine]!;
+      spend(silent && read ? 1 + silentRead(read, name === "table", state, startLine) : 1);
+      if (name === "blockquote" && !silent) quoteLines(state, startLine, endLine);
       if (name === "table" && !silent) {
         if (!largeTable(state, startLine, endLine, fn) && !fn(state, startLine, endLine, false))
           return false;
+      } else if (name === "reference") {
+        // Never tried silently: no rule ends where a definition starts.
+        defining = true;
+        const found = fn(state, startLine, endLine, false);
+        defining = false;
+        if (!found) return false;
       } else if (!fn(state, startLine, endLine, silent)) return false;
       if (silent) return true;
       // A definition shows nothing, but parseDocument refuses it where it is.
@@ -482,6 +539,59 @@ for (const { name, fn, alt } of md.block.ruler.__rules__) {
     },
     { alt },
   );
+}
+
+/**
+ * The work, past its one unit, of a silent try of a block rule that
+ * reads `pattern` (see reads) at `line`, or past it for a table: a unit
+ * for each character it reads past TRY_READ, so a try of a line that a
+ * text makes the parser read again and again costs what it reads each
+ * time.
+ */
+function silentRead(pattern: RegExp, table: boolean, state: StateBlock, line: number): number {
+  const at = table ? line + 1 : line;
+  const start = state.bMarks[at]! + state.tShift[at]!;
+  const end = state.eMarks[at]!;
+  if (!table && end - start <= TRY_READ) return 0;
+  pattern.lastIndex = start;
+  let read = pattern.exec(state.src)?.[0].length ?? 0;
+  if (table && read > 0 && start + read === end)
+    read += state.eMarks[line]! - state.bMarks[line]! - state.tShift[line]!;
+  return Math.max(0, read - TRY_READ);
+}
+
+/** The spaces and tabs at a point in a line. */
+const spaces = /[\t ]*/y;
+
+/**
+ * The work of the lines a block quote's try reads before it reads its
+ * content, read as markdown-it's blockquote rule reads them: each line
+ * that goes on the quote with a `>` costs a unit and one for each space
+ * or tab after the `>` past TRY_READ, as its try reads on through the
+ * rest of the quote, while it reads its content only up to the first
+ * line that goes on it lazily, without a `>`, so a quote after each line
+ * of a paragraph would read the rest of the text again and again. A line
+ * without a `>` costs its tries of the rules that may end the quote,
+ * asked here as the rule asks them, so they cost twice.
+ */
+function quoteLines(state: StateBlock, startLine: number, endLine: number): void {
+  if (state.src.charCodeAt(state.bMarks[startLine]! + state.tShift[startLine]!) !== 0x3e) return;
+  const ends = state.md.block.ruler.getRules("blockquote");
+  const parentType = state.parentType;
+  state.parentType = "blockquote";
+  let blank = false;
+  for (let line = startLine; line < endLine; line++) {
+    const start = state.bMarks[line]! + state.tShift[line]!;
+    const end = state.eMarks[line]!;
+    if (start >= end) break;
+    if (state.src.charCodeAt(start) === 0x3e && state.sCount[line]! >= state.blkIndent) {
+      spaces.lastIndex = start + 1;
+      const read = spaces.exec(state.src)![0].length;
+      spend(1 + Math.max(0, read - TRY_READ));
+      blank = start + 1 + read >= end;
+    } else if (blank || ends.some((rule) => rule(state, line, endLine, true))) break;
+  }
+  state.parentType = parentType;
 }
 
 /**
@@ -672,6 +782,7 @@ function cellsOf(source: string, start: number, end: number): number[][] {
 function parse(text: string, budget: number): Node[] | null {
   unspanned.length = 0;
   work = budget;
+  defining = false;
   let tokens: Token[];
   try {
     tokens = md.parse(text, {});
