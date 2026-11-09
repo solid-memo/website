@@ -12,6 +12,7 @@ import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createSolidDeckArchive } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";
+import { createSolidRepairRepository } from "./solidRepairRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 
 const ROOT = "https://pod.example/";
@@ -269,6 +270,8 @@ describe("a deck whose documents do not say they are its own", () => {
     await plant(p, deck, picture, DIARY);
     const [listed] = await p.decks.listDecks(BOB);
     await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([picture, DIARY]);
+    // A check that found it faulty keeps what it found.
+    await expect(p.decks.isUnclaimedAsRead([listed!], picture)).resolves.toBe(false);
     p.writes.length = 0;
     await expect(p.decks.addCard(listed!, DOS)).rejects.toThrow();
     expect(p.writes).toEqual([]);
@@ -493,6 +496,70 @@ describe("a deck whose document is a deck itself: a release", () => {
     await p.decks.removeDeck(listed!);
     expect(p.writes.filter((write) => write.endsWith(release))).toEqual([]);
     expect(await p.text(release)).toBe(before);
+  });
+});
+
+describe("a repair of what a data check found in a deck's document", () => {
+  const removal = (documentUrl: string, subjectUrl: string) => ({
+    kind: "remove-subject" as const,
+    documentUrl,
+    subjectUrl,
+    version: 6,
+  });
+
+  it("leaves a release in the instance's folder as it is, read as no deck's document", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const release = `${BOB}published/v1.ttl`;
+    await p.put(release, `<> a <${SM}Deck> ; <${SM}formatVersion> 6 .`);
+    await plant(p, deck, release, deck.reviewsDocumentUrl);
+    const [listed] = await p.decks.listDecks(BOB);
+    const before = await p.text(release);
+
+    // The check of an unchanged instance still reads nothing here; a read of it says so.
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+    await expect(p.decks.isUnclaimedAsRead([listed!], release)).resolves.toBe(true);
+
+    p.writes.length = 0;
+    const repairs = createSolidRepairRepository({ fetch: p.fetch });
+    await repairs.applyRepairs([removal(release, release)], () => [listed!]);
+    await repairs.applyRepairs([removal(release, release)], () => []);
+    expect(p.writes).toEqual([]);
+    expect(await p.text(release)).toBe(before);
+  });
+
+  it("leaves a document in the folder that names only another deck as it is", async () => {
+    const p = await pod();
+    const other = await p.decks.createDeck(BOB, { en: "Other" });
+    await p.decks.addCard(other, UNO);
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    await plant(p, deck, other.cardsDocumentUrl, deck.reviewsDocumentUrl);
+    const listed = (await p.decks.listDecks(BOB)).find(({ url }) => url === deck.url)!;
+    await expect(p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl)).resolves.toBe(true);
+    await expect(p.decks.isUnclaimedAsRead([listed, other], other.cardsDocumentUrl)).resolves.toBe(
+      false,
+    );
+
+    p.writes.length = 0;
+    await createSolidRepairRepository({ fetch: p.fetch }).applyRepairs(
+      [removal(other.cardsDocumentUrl, `${other.cardsDocumentUrl}#nothing`)],
+      () => [listed],
+    );
+    expect(p.writes).toEqual([]);
+  });
+
+  it("repairs an ordinary deck's document", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const card = await p.decks.addCard(deck, UNO);
+
+    p.writes.length = 0;
+    await createSolidRepairRepository({ fetch: p.fetch }).applyRepairs(
+      [removal(deck.cardsDocumentUrl, card.url)],
+      () => [deck],
+    );
+    expect(p.writes).toHaveLength(1);
+    expect(await p.decks.listCards(deck)).toEqual([]);
   });
 });
 

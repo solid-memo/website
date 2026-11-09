@@ -56,7 +56,7 @@ function repairsOf(
     await pod.put(url, document(count));
     const repairs = createSolidRepairRepository({ fetch: pod.fetch });
     const all = Array.from({ length: count }, (_, i) => repairOf(`${url}#${name(i)}`));
-    return () => repairs.applyRepairs(all);
+    return () => repairs.applyRepairs(all, () => []);
   };
 }
 
@@ -109,7 +109,7 @@ it("drops many unreadable dates of one deck in time that grows with them, not th
         version: 6,
         predicates: ["http://purl.org/dc/terms/created"],
       };
-      return () => repairs.applyRepairs([repair]);
+      return () => repairs.applyRepairs([repair], () => []);
     },
     2000,
     8,

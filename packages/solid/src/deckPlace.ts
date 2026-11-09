@@ -80,7 +80,7 @@ function partOfOf(dataset: Dataset, url: string): string[] {
  * made from said, which may name any of its documents as one of its
  * subjects, so none of them is a deck's document, whatever it says.
  */
-function isDraftDocument(url: string): boolean {
+export function isDraftDocument(url: string): boolean {
   const sent = canonicalUrlOf(url) ?? url;
   let read: string;
   try {
@@ -169,9 +169,10 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
    * instance's own folder is not read for this, so that a check of an
    * unchanged instance downloads nothing (docs/data-model.md): one there
    * that says it is another deck's is still refused on a write
-   * (standing), and kept with that deck's cards when the deck goes
-   * (ownership.ts deckDocumentSubjects). One that cannot be read as RDF
-   * is unclaimed.
+   * (standing), kept with that deck's cards when the deck goes
+   * (ownership.ts deckDocumentSubjects), and left out of what a check
+   * reports once it has read it (unclaimedAsRead). One that cannot be
+   * read as RDF is unclaimed.
    */
   async function unclaimed(deck: DeckPlace): Promise<string[]> {
     if (!isDeckInPlace(deck)) return [];
@@ -180,17 +181,42 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
       if (found.some((other) => isSameUrl(other, url))) continue;
       if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance))) continue;
-      let dataset: Dataset | null;
-      try {
-        dataset = await getSolidDatasetOrNull(url, fetch);
-      } catch {
-        // Not a document Solid Memo can read (not RDF, refused): nothing says it is the deck's.
-        found.push(url);
-        continue;
-      }
-      if ((await standing(deck, url, dataset)) === "unclaimed") found.push(url);
+      if (await unclaimedAsRead([deck], url)) found.push(url);
     }
     return found;
+  }
+
+  /** Whether the document, as `dataset` (null: no document) says, is unclaimed for every one of the decks (standing). */
+  async function unclaimedForAll(
+    decks: readonly DeckPlace[],
+    url: string,
+    dataset: Dataset | null,
+  ): Promise<boolean> {
+    for (const deck of decks) {
+      if ((await standing(deck, url, dataset)) !== "unclaimed") return false;
+    }
+    return true;
+  }
+
+  /**
+   * Whether the document is unclaimed for every one of the decks, read
+   * once, now (unclaimed spares one in the instance's own folder that
+   * read). `unreadable` is the answer for a document that cannot be
+   * read. Each deck must be one that can be used, else deckGone.
+   */
+  async function unclaimedAsRead(
+    decks: readonly DeckPlace[],
+    url: string,
+    unreadable = true,
+  ): Promise<boolean> {
+    let dataset: Dataset | null;
+    try {
+      dataset = await getSolidDatasetOrNull(url, fetch);
+    } catch {
+      // Not a document Solid Memo can read (not RDF, refused): nothing says it is the deck's.
+      return unreadable;
+    }
+    return unclaimedForAll(decks, url, dataset);
   }
 
   /**
@@ -219,6 +245,10 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     standing,
 
     unclaimed,
+
+    unclaimedForAll,
+
+    unclaimedAsRead,
 
     readToRemove,
 

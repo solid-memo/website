@@ -46,8 +46,93 @@ describe("instance checks", () => {
     const repairs = [
       { kind: "describe-deck" as const, documentUrl: "d", subjectUrl: "d#x", version: 3 },
     ];
-    await useCases.applyRepairs(repairs);
-    expect(deps.repairRepository.applyRepairs).toHaveBeenCalledWith(repairs);
+    await useCases.applyRepairs(instance.url, repairs);
+    expect(deps.repairRepository.applyRepairs).toHaveBeenCalledWith(repairs, expect.any(Function));
+  });
+  it("hands the repairs a lookup of the decks naming each document, in any spelling", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    const twice = { ...deck, reviewsDocumentUrl: deck.cardsDocumentUrl };
+    const unusable = {
+      ...deck,
+      url: `${deck.url}-2`,
+      cardsDocumentUrl: "no url",
+      reviewsDocumentUrl: deck.cardsDocumentUrl,
+    };
+    deps.deckRepository.listDecks = vi.fn(async () => [twice, unusable]);
+    await useCases.applyRepairs(instance.url, []);
+    const decksOf = vi.mocked(deps.repairRepository.applyRepairs).mock.calls[0]![1];
+    expect(decksOf(deck.cardsDocumentUrl.replace("https://", "HTTPS://"))).toEqual([
+      twice,
+      unusable,
+    ]);
+    expect(decksOf("no url")).toEqual([]);
+    expect(decksOf(`${instance.url}catalog.ttl`)).toEqual([]);
+  });
+  describe("a deck's document with something to repair", () => {
+    const failing = {
+      url: deck.cardsDocumentUrl,
+      status: "checked" as const,
+      subjects: [
+        {
+          url: deck.cardsDocumentUrl,
+          status: "checked" as const,
+          shape: "deck" as const,
+          version: 6,
+          violations: [
+            {
+              severity: "violation" as const,
+              message: { en: "No." },
+              constraint: "MinCount",
+            },
+          ],
+        },
+      ],
+    };
+    const text = { plain: (value: string) => value, check: () => [] };
+    function reportingFailure() {
+      const deps = makeDeps();
+      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
+        url === deck.cardsDocumentUrl ? failing : { url, status: "checked", subjects: [] },
+      );
+      return { deps, useCases: createUseCases(deps) };
+    }
+
+    it("is left out once its read shows it is no deck's, and offers no repair or removal", async () => {
+      const { deps, useCases } = reportingFailure();
+      deps.deckRepository.isUnclaimedAsRead = vi.fn(async () => true);
+      for (const report of [
+        await useCases.validateInstance(instance.url),
+        await useCases.checkInstance(instance.url),
+        (await useCases.checkDeck(instance.url, deck, text)).report,
+      ]) {
+        expect(report.documents.map((one) => one.url)).not.toContain(deck.cardsDocumentUrl);
+        expect(report.conforms).toBe(true);
+        expect(useCases.planRepair(report).unrepairable).toEqual([]);
+      }
+      expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
+        [deck],
+        deck.cardsDocumentUrl,
+      );
+    });
+
+    it("stays in the report while it is a deck's", async () => {
+      const { useCases } = reportingFailure();
+      const report = await useCases.checkInstance(instance.url);
+      expect(report.conforms).toBe(false);
+      expect(useCases.planRepair(report).unrepairable).toHaveLength(1);
+    });
+
+    it("is not read again when it conforms, nor when no deck names it", async () => {
+      const deps = makeDeps();
+      const useCases = createUseCases(deps);
+      const catalog = `${instance.url}catalog.ttl`;
+      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
+        url === catalog ? { ...failing, url } : { url, status: "checked", subjects: [] },
+      );
+      await useCases.checkInstance(instance.url);
+      expect(deps.deckRepository.isUnclaimedAsRead).not.toHaveBeenCalled();
+    });
   });
   it("validateInstance checks every document of the instance", async () => {
     const deps = makeDeps();

@@ -76,7 +76,10 @@ describe("RepairContainer", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "Repair 2 problems" }));
     await waitFor(() => {
-      expect(useCases.applyRepairs).toHaveBeenCalledWith([repair("deck-1"), repair("deck-2")]);
+      expect(useCases.applyRepairs).toHaveBeenCalledWith(instance.url, [
+        repair("deck-1"),
+        repair("deck-2"),
+      ]);
     });
   });
 
@@ -102,7 +105,7 @@ describe("RepairContainer", () => {
     confirm.mockReturnValue(true);
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));
     await waitFor(() => {
-      expect(useCases.applyRepairs).toHaveBeenCalledWith([
+      expect(useCases.applyRepairs).toHaveBeenCalledWith(instance.url, [
         {
           kind: "remove-subject",
           documentUrl: problem.documentUrl,

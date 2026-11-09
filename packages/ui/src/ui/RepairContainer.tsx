@@ -43,8 +43,8 @@ export function useRepairMutation(
 ) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[0]) =>
-      useCases.applyRepairs(repairs),
+    mutationFn: (repairs: Parameters<UseCases["applyRepairs"]>[1]) =>
+      useCases.applyRepairs(instanceUrl, repairs),
     onSuccess: async () => {
       for (const queryKey of [
         queryKeys.allDecks(),

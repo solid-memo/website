@@ -84,8 +84,12 @@ export interface InstanceCheckUseCases {
   ): Promise<DeckHealth<F>>;
   /** What the app can repair of what a check found, and what it leaves to the user. */
   planRepair(report: ValidationReport): RepairPlan;
-  /** Apply repairs (the planned ones, or removals the user chose). */
-  applyRepairs(repairs: readonly Repair[]): Promise<void>;
+  /**
+   * Apply repairs (the planned ones, or removals the user chose) to the
+   * instance's documents. A document that its read shows is not to be
+   * written is left as it is (RepairRepository).
+   */
+  applyRepairs(instanceUrl: string, repairs: readonly Repair[]): Promise<void>;
 }
 
 /**
@@ -109,6 +113,28 @@ function unclaimedTest(unclaimed: readonly UnclaimedDeck[]): (url: string) => bo
   return (url) => {
     const canonical = canonicalDocumentOf(url);
     return canonical !== null && skipped.has(canonical);
+  };
+}
+
+/**
+ * A lookup of the decks naming a document as theirs, in whatever spelling
+ * of its address, each once: found once for all the documents, so that a
+ * catalog naming many decks costs one lookup per document.
+ */
+function decksByDocument(decks: readonly Deck[]): (url: string) => readonly Deck[] {
+  const naming = new TextMap<Deck[]>();
+  for (const deck of decks) {
+    const documents = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].map(canonicalDocumentOf);
+    for (const url of new Set(documents)) {
+      if (url === null) continue;
+      const listed = naming.get(url);
+      if (listed === undefined) naming.set(url, [deck]);
+      else listed.push(deck);
+    }
+  }
+  return (url) => {
+    const canonical = canonicalDocumentOf(url);
+    return (canonical === null ? undefined : naming.get(canonical)) ?? [];
   };
 }
 
@@ -161,6 +187,7 @@ export function createInstanceCheckUseCases({
         instanceUrl,
         documentsToCheck(instanceUrl, decks, drafts, unclaimed),
         digest,
+        decks,
       ),
       unclaimed,
     );
@@ -240,6 +267,7 @@ export function createInstanceCheckUseCases({
     instanceUrl: string,
     urls: readonly { url: string; context: Exclude<DocumentContext, "library"> }[],
     digest: InstanceDigest,
+    decks: readonly Deck[],
   ): Promise<ValidationReport> {
     // A few at a time: the catalog says how many there are (MAX_CATALOG_LINKS of each kind at most).
     const documents = await mapAtOnce(urls, async ({ url, context }): Promise<DocumentReport> => {
@@ -260,7 +288,31 @@ export function createInstanceCheckUseCases({
       }
       return since.value;
     });
-    return summarize(instanceUrl, documents);
+    return summarize(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents));
+  }
+  /**
+   * The reports without those of a deck's document that its read shows
+   * is unclaimed for every deck naming it (isUnclaimedAsRead): a repair
+   * or removal of what the check found would write to a document that
+   * is no deck's to change, a release in the instance's folder say. Only
+   * a report with something to repair needs that read, so a check of an
+   * unchanged instance still downloads nothing.
+   */
+  async function withoutUnclaimedOnRead(
+    instanceUrl: string,
+    decks: readonly Deck[],
+    documents: readonly DocumentReport[],
+  ): Promise<DocumentReport[]> {
+    const decksOf = decksByDocument(decks);
+    const left = await mapAtOnce(documents, async (document) => {
+      const naming = decksOf(document.url);
+      return (
+        naming.length > 0 &&
+        !summarize(instanceUrl, [document]).conforms &&
+        (await deckRepository.isUnclaimedAsRead(naming, document.url))
+      );
+    });
+    return documents.filter((_, index) => !left[index]);
   }
   /** Every document of the instance, its answer log's too: not checked on every visit, being large and growing. */
   async function validateInstance(
@@ -287,7 +339,10 @@ export function createInstanceCheckUseCases({
       onChecked(++checked, urls.length);
       return document;
     });
-    return withUnclaimed(summarize(instanceUrl, documents), unclaimed);
+    return withUnclaimed(
+      summarize(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents)),
+      unclaimed,
+    );
   }
 
   return {
@@ -320,6 +375,7 @@ export function createInstanceCheckUseCases({
                   context: "pod" as const,
                 })),
                 digest,
+                [deck],
               ),
               unclaimed,
             );
@@ -339,8 +395,9 @@ export function createInstanceCheckUseCases({
     planRepair(report) {
       return planRepair(report);
     },
-    applyRepairs(repairs) {
-      return repairRepository.applyRepairs(repairs);
+    async applyRepairs(instanceUrl, repairs) {
+      const decks = await deckRepository.listDecks(instanceUrl);
+      return repairRepository.applyRepairs(repairs, decksByDocument(decks));
     },
   };
 }

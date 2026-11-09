@@ -79,7 +79,9 @@ describe("HealthContainer", () => {
       "#/about?deck=deck-1",
     );
     fireEvent.click(screen.getByRole("button", { name: "Repair 1 problem" }));
-    await waitFor(() => expect(useCases.applyRepairs).toHaveBeenCalledWith(plan.repairs));
+    await waitFor(() =>
+      expect(useCases.applyRepairs).toHaveBeenCalledWith(instanceA.url, plan.repairs),
+    );
     await waitFor(() =>
       expect(invalidate).toHaveBeenCalledWith({
         queryKey: ["validation", instanceA.url, "deck", deck.url, deck.cardsDocumentUrl],
@@ -104,7 +106,7 @@ describe("HealthContainer", () => {
     fireEvent.click(remove);
     answer("Remove it from your pod", "Remove");
     await waitFor(() =>
-      expect(useCases.applyRepairs).toHaveBeenCalledWith([
+      expect(useCases.applyRepairs).toHaveBeenCalledWith(instanceA.url, [
         {
           kind: "remove-subject",
           documentUrl: deck.cardsDocumentUrl,

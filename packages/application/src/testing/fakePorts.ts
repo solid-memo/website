@@ -187,6 +187,7 @@ export function makeDeps() {
     checkDeckEntryUpgrade: vi.fn(async () => undefined),
     deleteDocument: vi.fn(async () => undefined),
     unclaimedDocuments: vi.fn(async () => []),
+    isUnclaimedAsRead: vi.fn(async () => false),
     claimDocuments: vi.fn(async () => undefined),
     completeChapter: vi.fn(async (completed, chapterUrl) => ({
       ...completed,
