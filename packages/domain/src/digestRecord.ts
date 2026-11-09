@@ -42,7 +42,12 @@ export function receiptToRecord(receipt: DocumentReceipt): DocumentReceiptV1 {
   };
 }
 
-export function scheduleFromRecord(data: DeckScheduleV2): StoredSchedule {
+/** A schedule's prompts due on a day as its shape has them (deck-schedule/v2.ttl), the count of at most 15 digits, so a safe integer. */
+const DUE_ON_DAY = /^\d{4}-\d{2}-\d{2} [1-9]\d{0,14}$/;
+
+/** null when a day's count is not as the shape has it: the schedule is derived, so it is computed again. */
+export function scheduleFromRecord(data: DeckScheduleV2): StoredSchedule | null {
+  if (!data.dueOnDay.every((value) => DUE_ON_DAY.test(value))) return null;
   const dueByDay: Record<string, number> = {};
   for (const value of data.dueOnDay) {
     const [day, count] = value.split(" ");

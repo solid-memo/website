@@ -146,6 +146,25 @@ describe("a deck schedule", () => {
     });
   });
 
+  it("leaves out a state whose due day is no real day", () => {
+    const due = (reviewsOf: ReviewState[]) =>
+      scheduleOf({
+        cards,
+        direction: "front-to-back",
+        reviews: reviewsOf,
+        scheduler: "sm2",
+        dayBoundaryHour: 4,
+        now,
+      }).dueByDay;
+    expect(due([review("a", "2026-09-19", lastWeek)])).toEqual({ "2026-09-19": 1 });
+    for (const day of ["not a day", "", "2026-13-45", "2026-02-30", "__proto__"]) {
+      expect(Object.keys(due([review("a", day, lastWeek)]))).toEqual([]);
+      expect(due([review("a", day, lastWeek), review("b", "2026-09-19", lastWeek)])).toEqual({
+        "2026-09-19": 1,
+      });
+    }
+  });
+
   it("cannot say for another direction, day boundary or scheduler, or a day before it was computed", () => {
     const schedule = scheduleOf({
       cards,
