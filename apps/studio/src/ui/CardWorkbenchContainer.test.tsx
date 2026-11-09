@@ -9,15 +9,18 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Answer } from "@solid-memo/domain/answer";
 import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_CARD_QUERY, type CardQuery } from "@solid-memo/domain/cardQuery";
+import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
+import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { CardLanguage } from "@solid-memo/ui/cardLanguage";
 import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
+import { queryKeys } from "./queryKeys";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 import { answer, pick } from "../test/dialogs";
 
@@ -454,6 +457,142 @@ describe("CardWorkbenchContainer", () => {
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
     expect(await screen.findByText(/This deck has invalid data/)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Retire" })).toBeNull();
+  });
+
+  it("works out the decks to move cards to once, not again on each render", async () => {
+    let reads = 0;
+    const counted = {
+      ...nouns,
+      get reviewsDocumentUrl() {
+        reads++;
+        return nouns.reviewsDocumentUrl;
+      },
+    };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => [water, fire]) });
+    const ui = (query: CardQuery, decks: readonly Deck[]) => (
+      <QueryClientProvider client={queryClient}>
+        <CardWorkbenchContainer
+          useCases={useCases}
+          instance={instanceA}
+          webId={WEB_ID}
+          deck={deck}
+          decks={decks}
+          query={query}
+          onQuery={() => undefined}
+          savedViews={[]}
+          onSavedViews={() => undefined}
+          cardHref={(card) => `#/card?card=${card.id}`}
+          onOpen={() => undefined}
+          healthHref="#/health"
+        />
+      </QueryClientProvider>
+    );
+    const decks = [deck, counted];
+    const { rerender } = render(ui(DEFAULT_CARD_QUERY, decks));
+    // Nouns is offered only once the check is in: nothing is left to change the answer.
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    await screen.findByRole("group", { name: "Selected cards" });
+    pick("Move or copy the selected cards", "Move to deck…");
+    expect(
+      within(screen.getByRole("combobox", { name: "To the deck" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent),
+    ).toEqual(["Nouns"]);
+    const settled = reads;
+    expect(settled).toBeGreaterThan(0);
+
+    rerender(ui({ ...DEFAULT_CARD_QUERY, text: "fire" }, decks));
+    await screen.findByText("1 of 2 cards");
+    expect(reads).toBe(settled);
+
+    rerender(ui({ ...DEFAULT_CARD_QUERY, text: "fire" }, [...decks]));
+    await waitFor(() => expect(reads).toBeGreaterThan(settled));
+  });
+
+  describe("the decks to move cards to follow what the data check answers from", () => {
+    const verbs = makeDeck("verbs", { en: "Verbs" });
+    const offered = () =>
+      within(screen.getByRole("combobox", { name: "To the deck" }))
+        .getAllByRole("option")
+        .map((o) => o.textContent);
+    const validationKey = queryKeys.validation(instanceA.url);
+    const conforming: ValidationReport = {
+      instanceUrl: instanceA.url,
+      documents: [],
+      violationCount: 0,
+      conforms: true,
+    };
+    const withClient = (useCases: UseCases) => {
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      render(
+        <QueryClientProvider client={queryClient}>
+          <CardWorkbenchContainer
+            useCases={useCases}
+            instance={instanceA}
+            webId={WEB_ID}
+            deck={deck}
+            decks={[deck, nouns, verbs]}
+            query={DEFAULT_CARD_QUERY}
+            onQuery={() => undefined}
+            savedViews={[]}
+            onSavedViews={() => undefined}
+            cardHref={(card) => `#/card?card=${card.id}`}
+            onOpen={() => undefined}
+            healthHref="#/health"
+          />
+        </QueryClientProvider>,
+      );
+      return queryClient;
+    };
+    type Preferences = Awaited<ReturnType<UseCases["getPreferences"]>>;
+    const openTransfer = async () => {
+      fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+      await screen.findByRole("button", { name: "Move or copy the selected cards" });
+      pick("Move or copy the selected cards", "Move to deck…");
+    };
+
+    it("when the check comes in after the preferences and finds nothing wrong", async () => {
+      let finish: (report: ValidationReport) => void = () => undefined;
+      const useCases = makeUseCasesFake({
+        listCards: vi.fn(async () => [water, fire]),
+        checkInstance: vi.fn(() => new Promise<ValidationReport>((done) => (finish = done))),
+      });
+      withClient(useCases);
+      expect(await screen.findByText("2 of 2 cards")).toBeInTheDocument();
+      finish(conforming);
+      await openTransfer();
+      expect(offered()).toEqual(["Nouns", "Verbs"]);
+    });
+
+    it("when a check made again no longer finds a deck invalid", async () => {
+      const useCases = makeUseCasesFake({
+        listCards: vi.fn(async () => [water, fire]),
+        checkInstance: vi
+          .fn<UseCases["checkInstance"]>()
+          .mockResolvedValueOnce(invalidReport([nouns]))
+          .mockResolvedValue(conforming),
+      });
+      const queryClient = withClient(useCases);
+      await openTransfer();
+      expect(offered()).toEqual(["Verbs"]);
+      await queryClient.invalidateQueries({ queryKey: validationKey });
+      await waitFor(() => expect(offered()).toEqual(["Nouns", "Verbs"]));
+    });
+
+    it("when the preferences come in after the check", async () => {
+      let finish: (preferences: Preferences) => void = () => undefined;
+      const useCases = makeUseCasesFake({
+        listCards: vi.fn(async () => [water, fire]),
+        getPreferences: vi.fn(() => new Promise<Preferences>((done) => (finish = done))),
+        checkInstance: vi.fn(async () => invalidReport([nouns])),
+      });
+      const queryClient = withClient(useCases);
+      await waitFor(() => expect(queryClient.getQueryData(validationKey)).toBeDefined());
+      finish(DEFAULT_PREFERENCES);
+      await openTransfer();
+      expect(offered()).toEqual(["Verbs"]);
+    });
   });
 
   it("says when a copy found cards there already, and why a transfer was not made", async () => {

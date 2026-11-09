@@ -1081,7 +1081,9 @@ case refuses such a transfer before reading anything, and the domain
 plans none. Two addresses name one document when a server may read
 them as one: written another way a request or a server resolves, such
 as a character encoded that needs no encoding, or with a user name
-and password in it.
+and password in it. The decks to offer are worked out once for each
+read of the decks and of the data check, not on each render of the
+workbench.
 
 The source's cards and review states are copied into the target. So
 each of its two documents is read as the user only when it's the
