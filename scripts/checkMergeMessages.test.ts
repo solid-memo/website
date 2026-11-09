@@ -72,6 +72,59 @@ describe("problemsOf", () => {
     expect(problemsOf(message, false)).toEqual([]);
   });
 
+  // The release writes a commit's subject and its footer into
+  // CHANGELOG.md, whose generated entries are exempt from the linters only
+  // through directives in the file.
+  const directives = [
+    "fix(ui): tidy the footer <!-- cspell:enable --> <!-- markdownlint-enable -->",
+    "fix: tidy <!-- the footer",
+    "fix: tidy --> the footer",
+    "fix: tidy --!> the footer",
+    "fix: tidy the footer cspell:enable",
+    "fix: tidy the footer spell-checker:locale de",
+    "fix: tidy the footer xcspell:enable",
+    "fix: tidy the footer x_cspell: enable",
+  ];
+
+  it.each(directives)("refuses a title with a directive: %s", (title) => {
+    expect(problemsOf(merge(title), true)).toEqual([
+      "holds an HTML comment or a spell checker's directive",
+    ]);
+  });
+
+  it.each(directives)("refuses a directive in a commit commitlint skips: %s", (title) => {
+    expect(problemsOf(`Revert "${title}"`, false)).toEqual([
+      "holds an HTML comment or a spell checker's directive",
+    ]);
+  });
+
+  it("refuses a directive in a skipped commit's body, and says both when it breaks too", () => {
+    const body = "fixup! chore: x\n\nthe footer <!-- x";
+    expect(problemsOf(body, false)).toEqual([
+      "holds an HTML comment or a spell checker's directive",
+    ]);
+    expect(problemsOf(`${body}\n\nBREAKING CHANGE: a footer`, false)).toHaveLength(2);
+  });
+
+  it("refuses a directive in the part of a message commitlint would not read", () => {
+    const message =
+      "fix(ui)!: tidy the footer\n\nKeep it tidy.\n\nRefs: #1\n\nBREAKING CHANGE: x------------------------ >8 ------------------------\nfixup! <!-- cspell:enable --> <!-- markdownlint-enable -->";
+    expect(problemsOf(message, false)).toEqual([
+      "holds an HTML comment or a spell checker's directive",
+    ]);
+  });
+
+  it("refuses a directive in a commit commitlint reads", () => {
+    expect(problemsOf("fix: tidy <!-- the footer\n\nRefs: #1", false)).toEqual([
+      "holds an HTML comment or a spell checker's directive",
+    ]);
+  });
+
+  it("passes a commit commitlint reads that says it breaks, and what only looks like a directive", () => {
+    expect(problemsOf("fix!: tidy\n\nBREAKING CHANGE: the footer\n\nRefs: #1", false)).toEqual([]);
+    expect(problemsOf("fix: the misspell: rule, a -> b\n\nRefs: #1", false)).toEqual([]);
+  });
+
   it("says both when both are there", () => {
     expect(problemsOf(merge("BREAKING CHANGE: tidy [skip ci]"), true)).toHaveLength(2);
   });
@@ -135,15 +188,17 @@ describe("main", () => {
         c: merge("the title's text [skip ci]"),
         d: "Revert \"the title's text\"\n\nBREAKING CHANGE: the title's text",
         e: "Merge branch 'z'\n\nthe title's text [skip ci]\n\nBREAKING CHANGE: the title's text",
+        f: 'Revert "the title\'s text <!-- x"',
       },
-      ["d", "e"],
+      ["d", "e", "f"],
     );
     expect(main(args, fake)).toBe(1);
-    expect(fake.logged).toHaveLength(4);
+    expect(fake.logged).toHaveLength(5);
     expect(fake.logged[0]).toMatch(/^a \(#1\) holds a line/);
     expect(fake.logged[1]).toMatch(/^c \(#1\) holds a keyword/);
     expect(fake.logged[2]).toMatch(/^d says it breaks/);
-    expect(fake.logged[3]).toContain("change the title");
+    expect(fake.logged[3]).toMatch(/^f holds an HTML comment/);
+    expect(fake.logged[4]).toContain("change the title");
     expect(fake.logged.join("\n")).not.toContain("the title's text");
   });
 
