@@ -4,7 +4,6 @@
 
 import {
   addBoolean as libraryAddBoolean,
-  addDatetime as libraryAddDatetime,
   addLiteral as libraryAddLiteral,
   addStringNoLocale as libraryAddStringNoLocale,
   addStringWithLocale as libraryAddStringWithLocale,
@@ -451,10 +450,6 @@ class Builder implements SubjectBuilder {
 
   addBoolean(property: string, value: boolean): this {
     return this.#with((subject) => libraryAddBoolean(subject, property, value));
-  }
-
-  addDatetime(property: string, value: Date): this {
-    return this.#with((subject) => libraryAddDatetime(subject, property, value));
   }
 
   addLiteral(property: string, value: Literal): this {

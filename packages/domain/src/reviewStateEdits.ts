@@ -20,11 +20,13 @@ export function isStudyDay(day: string): boolean {
 }
 
 /**
- * Whether an instant read from a pod can be written back: one of the
- * years 0 to 9999. Past them its ISO form has six year digits, which the
- * write check refuses, though a read lets them through.
+ * Whether an instant read from a pod is of the years 0 to 9999, the
+ * ones a grade, a snapshot or a scheduler switch carries over. A date
+ * past them is kept where a subject is only written back, but no
+ * schedule counts from it, so these put now in its place or leave it
+ * out.
  */
-export function isWritableInstant(instant: string): boolean {
+export function isCarriedOverInstant(instant: string): boolean {
   const year = new Date(instant).getUTCFullYear();
   return year >= 0 && year <= 9999;
 }

@@ -9,7 +9,7 @@ import { memoryFromSm2, nextMemory, type FsrsMemory } from "./fsrs";
 import { ratingOfAnswer } from "./grading";
 import type { LangText } from "./langText";
 import { FSRS_REVIEW_STATE_FORMAT_VERSION, type FsrsState, type ReviewState } from "./review";
-import { isWritableInstant } from "./reviewStateEdits";
+import { isCarriedOverInstant } from "./reviewStateEdits";
 import { firstReviewOf } from "./scheduling";
 import { daysBetween } from "./studyPatterns";
 
@@ -115,8 +115,8 @@ function replayed(history: readonly Answer[]): FsrsMemory {
  * since it was introduced, else estimated from the SM-2 state
  * (memoryFromSm2). Each keeps the SM-2 state's due day and reviews, and
  * has no snapshot, as nothing FSRS-6 wrote is there to restore. A review
- * date that cannot be written (isWritableInstant), which would refuse
- * the deck's whole write, is `now` instead, as a grade has it; then the
+ * date outside the years a grade carries over (isCarriedOverInstant) is
+ * `now` instead, as a grade has it; then the
  * SM-2 state's last review differs, so that FSRS-6 state is stale
  * (isFresh) and SM-2 keeps setting the prompt's due day until its next
  * review.
@@ -141,7 +141,7 @@ export function switchedStates(
       difficulty: memory.difficulty,
       due: state.due,
       firstReviewedAt: firstReviewOf(state, now),
-      lastReviewedAt: isWritableInstant(state.lastReviewedAt)
+      lastReviewedAt: isCarriedOverInstant(state.lastReviewedAt)
         ? state.lastReviewedAt
         : now.toISOString(),
       formatVersion: FSRS_REVIEW_STATE_FORMAT_VERSION,

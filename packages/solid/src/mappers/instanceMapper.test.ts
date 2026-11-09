@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import { buildThing, createThing, getInteger, getStringNoLocale } from "../client/rdf";
 import { toInstance, toInstanceMeta, toInstanceMetaThing } from "./instanceMapper";
+import { datetimeLiteral } from "../records";
 import { DCTERMS, RDF, SM } from "../vocab";
 
 describe("toInstance", () => {
@@ -56,7 +57,7 @@ describe("toInstanceMeta and toInstanceMetaThing", () => {
     const thing = buildThing(createThing({ url: META }))
       .addIri(RDF.type, SM.Instance)
       .addStringNoLocale(DCTERMS.title, "Main")
-      .addDatetime(DCTERMS.created, new Date(meta.createdAt))
+      .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
       .build();
     expect(toInstanceMeta(thing)).toEqual({ ...meta, formatVersion: 1 });
   });

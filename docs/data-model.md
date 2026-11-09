@@ -1796,6 +1796,11 @@ by one.
   deck's export, in Turtle and in JSON-LD (`@direction`).
   The app writes no direction of its own and reads no such literal as
   text in a language.
+- **A date is written as `xsd:dateTime` spells it.** A year past 9999
+  or before 0 has no plus sign and no leading zeros beyond four digits
+  (`xsdDatetime` in `records.ts`), as `12345-01-01T00:00:00.000Z` or
+  `-0001-01-01T00:00:00.000Z`. So a date the app read is written back
+  and passes the write check.
 - Mutations always follow read → modify → save
   ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`). The save sends a PATCH

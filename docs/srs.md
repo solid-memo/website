@@ -392,7 +392,7 @@ FSRS-6 is never turned on without its states.
   - Each keeps the SM-2 state's due day and reviews, with no snapshot,
     so no due day moves. One already there is made again at the same
     subject: a switch run twice gives the same states. A review date
-    the write check would refuse is the time of the switch instead, as
+    outside the years 0 to 9999 is the time of the switch instead, as
     a grade has it. With a last review that differs, the FSRS-6 state
     is stale, and SM-2 sets that prompt's due day until its next review.
   - Progress shows per deck. A deck that can't be written now is named
@@ -512,8 +512,8 @@ would move the instant off the calendar falls back to the calendar day.
 A state's dates can hold any year, so a study day's year is written as
 `Date` reads it, and the days between two study days are a number even
 when one of them isn't a date: 0.
-A grade doesn't carry over a first review or a snapshot whose date the
-write check would refuse.
+A grade doesn't carry over a first review or a snapshot whose date is
+outside the years 0 to 9999.
 Study days are device-local, and traveling shifts due times by a few
 hours (accepted for v1).
 
@@ -749,13 +749,14 @@ decides, per card reviewed today:
 |---|---|
 | introduced today (`firstReviewedAt` is today) | removes its state — it is a new card again |
 | reviewed today, has a snapshot | restores the snapshot (ease, interval, repetitions, due, last review) |
-| reviewed today, no snapshot (state written before snapshots existed, or given a due day in the Studio), or one whose due day isn't a real date | can't be restored: made due today |
+| reviewed today, no snapshot (state written before snapshots existed, or given a due day in the Studio), or one whose due day isn't a real date or whose last review is outside the years 0 to 9999 | can't be restored: made due today |
 | not reviewed today | untouched |
 
 The FSRS-6 states go back in the same save (`resetFsrsStudyDay`): one
 reviewed today gets its snapshot back. One introduced today is removed,
-as is one first written today from an estimate, or with a snapshot
-that can't be written back; the next review
+as is one first written today from an estimate. So is one with a
+snapshot whose due day isn't a real date or whose last review is
+outside the years 0 to 9999; the next review
 estimates it again from the restored SM-2 state.
 
 ```mermaid

@@ -300,10 +300,6 @@ class Builder implements SubjectBuilder {
     return this.#literal(property, value ? "true" : "false", XSD_BOOLEAN);
   }
 
-  addDatetime(property: string, value: Date): this {
-    return this.#literal(property, value.toISOString(), XSD_DATETIME);
-  }
-
   addLiteral(property: string, value: Literal): this {
     if (isLangString(value)) return this.addStringWithLocale(property, value.value, value.language);
     return this.#literal(property, value.value, value.datatype.value);

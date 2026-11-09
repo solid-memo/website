@@ -613,7 +613,7 @@ describe("a state's dates of any year", () => {
   };
   const now = new Date("2026-11-06T12:00:00.000Z");
 
-  it("keeps a first review that can be written back, else takes now", () => {
+  it("keeps a first review of the years 0 to 9999, else takes now", () => {
     expect(firstReviewOf(state, now)).toBe(state.firstReviewedAt);
     expect(firstReviewOf(null, now)).toBe(now.toISOString());
     expect(firstReviewOf({ firstReviewedAt: "+012000-01-01T00:00:00Z" }, now)).toBe(
@@ -621,7 +621,7 @@ describe("a state's dates of any year", () => {
     );
   });
 
-  it("snapshots no last review that cannot be written back", () => {
+  it("snapshots no last review outside the years 0 to 9999", () => {
     expect(snapshotBeforeReview(state, now, 4)?.lastReviewedAt).toBe(state.lastReviewedAt);
     expect(
       snapshotBeforeReview({ ...state, lastReviewedAt: "-000500-01-01T00:00:00Z" }, now, 4),

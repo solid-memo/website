@@ -201,7 +201,7 @@ describe("a grade under FSRS-6 of a state with any date its shape admits", () =>
     expect(Number.isFinite(graded.difficulty)).toBe(true);
   });
 
-  it("writes a new first review and no snapshot for dates that cannot be written back", () => {
+  it("writes a new first review and no snapshot for dates outside the years 0 to 9999", () => {
     const last = "+012000-01-01T00:00:00Z";
     const sm2 = { ...before, firstReviewedAt: last, lastReviewedAt: last };
     const fsrs = { ...fresh, firstReviewedAt: last, lastReviewedAt: last };

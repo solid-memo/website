@@ -186,7 +186,7 @@ describe("buildThing", () => {
       .addUrl(`${EX}url`, other)
       .addBoolean(`${EX}yes`, true)
       .addBoolean(`${EX}no`, false)
-      .addDatetime(`${EX}when`, when)
+      .addLiteral(`${EX}when`, term(when.toISOString(), `${XSD}dateTime`))
       .addLiteral(`${EX}count`, term("3", `${XSD}integer`))
       .addLiteral(`${EX}back`, langString("Stockholm", "EN"))
       .addStringWithLocale(`${EX}back`, "Estocolmo", "es")

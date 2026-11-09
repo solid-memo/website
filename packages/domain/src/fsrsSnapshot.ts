@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { FsrsSnapshot } from "./review";
-import { isStudyDay, isWritableInstant } from "./reviewStateEdits";
+import { isCarriedOverInstant, isStudyDay } from "./reviewStateEdits";
 
 /** The bounds of an FSRS-6 stability, in days, as the write check keeps them (above 0). */
 export const MIN_STABILITY = 0.001;
@@ -17,13 +17,13 @@ export const MAX_DIFFICULTY = 10;
  * The fields a review of a state overwrites, bounded as the write check
  * expects them (docs/srs.md, boundedFsrsMemory). A snapshot whose due
  * day is not a real "YYYY-MM-DD" date (isStudyDay), or whose last review
- * cannot be written (isWritableInstant), is dropped (undefined): it
- * could not be written back, so a state read from elsewhere still takes
+ * is outside the years a grade carries over (isCarriedOverInstant), is
+ * dropped (undefined), so a state read from elsewhere still takes
  * grades.
  */
 export function boundedFsrsSnapshot(snapshot: FsrsSnapshot): FsrsSnapshot | undefined {
   const { stability, difficulty, due, lastReviewedAt } = snapshot;
-  if (!isStudyDay(due) || !isWritableInstant(lastReviewedAt)) return undefined;
+  if (!isStudyDay(due) || !isCarriedOverInstant(lastReviewedAt)) return undefined;
   return { ...boundedFsrsMemory({ stability, difficulty }), due, lastReviewedAt };
 }
 
