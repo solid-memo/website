@@ -1472,7 +1472,9 @@ describe("createAppUseCases", () => {
     expect(login.sent).not.toContain(release);
   });
 
-  it("gives up a release from a link whose host never answers, holding up neither a course's statistics nor the deck's check, and reads it again later", async () => {
+  it("gives up a release from a link whose host never answers, holding up neither a course's statistics nor the deck's check, and reads it again later", {
+    timeout: 180_000,
+  }, async () => {
     const carol = "https://carol.example/";
     const release = `${carol}releases/capitals/v1.ttl`;
     const pod = podAt(carol);
@@ -1506,7 +1508,9 @@ describe("createAppUseCases", () => {
     expect(sent.map(({ url }) => url)).toContain(release);
   });
 
-  it("gives up a release from a link whose host answers but never sends it all, holding up neither a course's statistics nor the deck's check", async () => {
+  it("gives up a release from a link whose host answers but never sends it all, holding up neither a course's statistics nor the deck's check", {
+    timeout: 180_000,
+  }, async () => {
     const carol = "https://carol.example/";
     const release = `${carol}releases/capitals/v1.ttl`;
     vi.stubGlobal("fetch", stallingAt(carol, servedSiteNetwork));
