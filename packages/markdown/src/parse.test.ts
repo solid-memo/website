@@ -351,6 +351,43 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown("a\n>>>>\n".repeat(20))).not.toBeNull();
   });
 
+  it("charges a block rule's silent try for what it reads, so a long line read again and again uses up the work", () => {
+    // A heading in a quote after each line of a paragraph makes each later line tried again.
+    const tried = (times: number, line: string) =>
+      parseMarkdown(`${"a\n> # b\n".repeat(times)}${line}`);
+    const long = (start: string) => `${start}${" ".repeat(16_000)}x`;
+    expect(tried(20, `<a${" b".repeat(8_000)}`)).not.toBeNull();
+    for (const start of ["<a", "~~~", "```", "-", "*", "+", "1."])
+      expect(tried(50, long(start))).toBeNull();
+    // A line that starts as none of their blocks costs a try a unit, however long.
+    expect(tried(50, long("a"))).not.toBeNull();
+    // A table's try reads the next line, and its own once the next reads as a delimiter row.
+    expect(parseMarkdown(`a\n${long("b|")}\n|-|-|`)?.map(({ type }) => type)).toEqual([
+      "paragraph",
+      "table",
+    ]);
+    expect(parseMarkdown(`a\n${long("b|")}\n|-|x`)?.map(({ type }) => type)).toEqual(["paragraph"]);
+  });
+
+  it("charges a block quote's try for each line it reads on through, so lines read again and again use up the work", () => {
+    // A heading in a quote after each line of a paragraph makes each quote read on to the end.
+    const quoted = (times: number, rest: string) =>
+      parseMarkdown(`${"a\n> # b\n".repeat(times)}${rest}`);
+    expect(quoted(50, `>${"\t".repeat(16_000)}x`)).toBeNull();
+    expect(quoted(100, ">\n".repeat(8_000))).toBeNull();
+    // A few spaces after each `>` cost nothing more, and a blank line ends what each quote reads.
+    expect(quoted(50, `>${"\t".repeat(8)}${"x".repeat(16_000)}`)).not.toBeNull();
+    expect(quoted(100, `\n${">\n".repeat(8_000)}`)).not.toBeNull();
+    expect(parseMarkdown("> a\n".repeat(4_000))).not.toBeNull();
+    expect(parseMarkdown("> a\nb\n".repeat(2_000))).not.toBeNull();
+    // What a quote holds is as before: a line goes on it lazily, past a blank `>` it doesn't, nor past a list or out of a list item.
+    const types = (text: string) => parseMarkdown(text)?.map(({ type }) => type);
+    expect(types("> a\nb")).toEqual(["quote"]);
+    expect(types("> a\n>\nb")).toEqual(["quote", "paragraph"]);
+    expect(types("> a\n- b")).toEqual(["quote", "list"]);
+    expect(types("- > a\n> b")).toEqual(["list", "quote"]);
+  });
+
   it("shows a table past its caps as its source without reading its rows, up to where markdown-it ends it", () => {
     const header = `|${"a|".repeat(128)}\n|${"-|".repeat(128)}\n`;
     // markdown-it ends a table whose short rows would take more than 65,536 cells to fill.
