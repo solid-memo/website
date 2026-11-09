@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [6.29.37](https://github.com/solid-memo/website/compare/v6.29.36...v6.29.37) (2026-11-09)
+
+### Bug Fixes
+
+* **domain:** read a release's sources the same way in the Studio ([5c752b5](https://github.com/solid-memo/website/commit/5c752b58bc54995011f2ab49765189f570508d7c))
+* **markdown:** charge a block rule's try for what it reads ([55150c4](https://github.com/solid-memo/website/commit/55150c40c5a97766b9e70c6ce5a3238b203e94b4))
+* **solid:** bound release reads from a link in time ([3ecda95](https://github.com/solid-memo/website/commit/3ecda956ff911de139d6037d48f7a3753b2d5df2))
+* **solid:** never strip a release when deleting an instance ([731725b](https://github.com/solid-memo/website/commit/731725b38f8ff7946f64b017a75e516d80912c68))
+* **solid:** refuse a too-long webid and bound the storage walk-up ([3d26163](https://github.com/solid-memo/website/commit/3d2616363d5aa9894f6bae09e454cd7a8677c997))
+
 ## [6.29.36](https://github.com/solid-memo/website/compare/v6.29.35...v6.29.36) (2026-11-08)
 
 ### Bug Fixes
