@@ -1233,6 +1233,8 @@
     "move": "Trasladar a mi Pod",
     "discard": "Descartar",
     "notNow": "Ahora no",
+    "readFailed": "No se han podido leer tus datos de estudio, así que ahora mismo no se pueden mover.",
+    "nothingToMove": "No hay nada que se pueda trasladar a tu Pod.",
     "discardConfirm": "¿Eliminar todo lo que has estudiado en modo invitado? No se puede deshacer.",
     "discardYes": "Eliminar",
     "cancel": "Cancelar",

@@ -337,11 +337,20 @@ export function createSessionUseCases({
     );
     return (await instanceCopier.listResources(staging)).every((url) => written.has(url));
   }
-  /** The guest's instance, and the whole guest pod once it has no instance left. */
+  /**
+   * The instances in the guest's pod, the study there is to keep. Another
+   * instance the guest attached is only registered there: it is not on
+   * this device, it cannot be moved, and how it answers says nothing of
+   * the guest's study.
+   */
+  async function guestPodInstances(): Promise<Instance[]> {
+    const instances = await instanceRepository.listInstances(GUEST_WEBID);
+    return instances.filter(({ url }) => isGuestUrl(url));
+  }
+  /** The guest's instance, and the whole guest pod once it holds no instance of its own. */
   async function removeGuestInstance(instance: Instance): Promise<void> {
     await instanceRepository.deleteInstance({ webId: GUEST_WEBID, instance });
-    if ((await instanceRepository.listInstances(GUEST_WEBID)).length === 0)
-      await guestPod.discard();
+    if ((await guestPodInstances()).length === 0) await guestPod.discard();
   }
   /**
    * The error of a move whose copied document at `url` still names the
@@ -561,7 +570,8 @@ export function createSessionUseCases({
     },
     async startGuest(instanceName) {
       await guestPod.start();
-      if ((await instanceRepository.listInstances(GUEST_WEBID)).length === 0) {
+      // Another instance the guest attached is not one to study in on this device.
+      if ((await guestPodInstances()).length === 0) {
         await instances.createInstance(GUEST_SESSION, {
           containerUrl: GUEST_INSTANCE_URL,
           name: instanceName,
@@ -575,7 +585,7 @@ export function createSessionUseCases({
     },
     async findGuestStudy() {
       if (!(await guestPod.exists())) return null;
-      const instances = await instanceRepository.listInstances(GUEST_WEBID);
+      const instances = await guestPodInstances();
       return {
         instances: await Promise.all(
           instances.map(async (instance) => ({

@@ -1168,6 +1168,8 @@
     "move": "Move it into my Pod",
     "discard": "Discard it",
     "notNow": "Not now",
+    "readFailed": "That study could not be read, so it cannot be moved right now.",
+    "nothingToMove": "Nothing in it can be moved into your Pod.",
     "discardConfirm": "Delete everything you studied as a guest? This cannot be undone.",
     "discardYes": "Delete it",
     "cancel": "Cancel",

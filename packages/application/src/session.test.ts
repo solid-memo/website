@@ -397,6 +397,59 @@ describe("guests", () => {
     expect(await createUseCases(deps).findGuestStudy()).toBeNull();
   });
 
+  describe("with an instance elsewhere attached to the guest's pod", () => {
+    const foreign: Instance = { url: "https://elsewhere.example/study/", name: "Attached" };
+
+    it("findGuestStudy offers only the guest's own instance, whatever the other one answers", async () => {
+      const { deps } = guestDeps();
+      vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([foreign, guestInstance]);
+      vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) => {
+        if (url === foreign.url) throw new Error("500");
+        return [deck];
+      });
+      expect(await createUseCases(deps).findGuestStudy()).toEqual({
+        instances: [{ instance: guestInstance, deckCount: 1 }],
+      });
+      expect(deps.deckRepository.listDecks).not.toHaveBeenCalledWith(foreign.url);
+    });
+
+    it("startGuest makes the guest an instance of their own when only the other one is registered", async () => {
+      const { deps } = guestDeps();
+      vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([foreign]);
+      vi.mocked(deps.instanceRepository.createInstance).mockResolvedValue(guestInstance);
+      await createUseCases(deps).startGuest("My study");
+      expect(deps.instanceRepository.createInstance).toHaveBeenCalledWith(
+        expect.objectContaining({ webId: GUEST_WEBID, containerUrl: GUEST_INSTANCE_URL }),
+      );
+    });
+
+    it("startGuest keeps the guest's own instance beside the other one", async () => {
+      const { deps } = guestDeps();
+      vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([foreign, guestInstance]);
+      await createUseCases(deps).startGuest("My study");
+      expect(deps.instanceRepository.createInstance).not.toHaveBeenCalled();
+    });
+
+    it("findGuestStudy has nothing to offer when only the other instance is left", async () => {
+      const { deps } = guestDeps();
+      vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([foreign]);
+      expect(await createUseCases(deps).findGuestStudy()).toEqual({ instances: [] });
+    });
+
+    it("transferGuestStudy deletes the guest pod with the last instance of its own", async () => {
+      const { deps, guestPod } = guestDeps();
+      vi.mocked(deps.instanceRepository.deleteInstance).mockImplementation(async () => {
+        vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue([foreign]);
+        return { keptFolder: null, keptReleases: false, keptDocuments: [] };
+      });
+      await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "public",
+      });
+      expect(guestPod.discard).toHaveBeenCalledOnce();
+    });
+  });
+
   it("transferGuestStudy copies the study into the user's pod as theirs, checks and registers it, then deletes the guest's", async () => {
     const { deps, guestPod } = guestDeps();
     vi.mocked(deps.webIdDocumentRepository.fetchWebIdDocument).mockResolvedValue({
