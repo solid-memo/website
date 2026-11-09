@@ -253,7 +253,7 @@ describe("applyRepairs", () => {
     expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#b`)!, SM.due)).toBe("soon");
   });
 
-  it("leaves a due day as it is when the last review or the next one is past what a date holds", async () => {
+  it("writes a real day from a bounded interval, unless the last review cannot be read", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       documentOf(
         REVIEWS,
@@ -282,16 +282,28 @@ describe("applyRepairs", () => {
           .addLiteral(SM.lastReviewedAt, datetimeLiteral("2026-09-21T10:00:00Z"))
           .addLiteral(SM.intervalDays, integerLiteral(3_000_000))
           .build(),
+        buildThing(createThing({ url: `${REVIEWS}#d` }))
+          .addIri(RDF.type, SM.ReviewState)
+          .addStringNoLocale(SM.due, "soon")
+          .addLiteral(SM.lastReviewedAt, datetimeLiteral("9999-12-01T10:00:00Z"))
+          .addLiteral(SM.intervalDays, integerLiteral(100))
+          .build(),
       ),
     );
     await repository().applyRepairs([
       repair("recompute-due", `${REVIEWS}#a`, 2, REVIEWS),
       repair("recompute-due", `${REVIEWS}#b`, 2, REVIEWS),
       repair("recompute-due", `${REVIEWS}#c`, 2, REVIEWS),
+      repair("recompute-due", `${REVIEWS}#d`, 2, REVIEWS),
     ]);
-    expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#a`)!, SM.due)).toBe("soon");
-    expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#b`)!, SM.due)).toBe("soon");
-    expect(getStringNoLocale(getThing(saved(), `${REVIEWS}#c`)!, SM.due)).toBe("soon");
+    const dueOf = (id: string) => getStringNoLocale(getThing(saved(), `${REVIEWS}#${id}`)!, SM.due);
+    // No last review the app can read: nothing to count from, and the state is not read either.
+    expect(dueOf("a")).toBe("soon");
+    // Within what a date holds, but the next review is past the four-digit years.
+    expect(dueOf("d")).toBe("1970-01-01");
+    // The interval as a read bounds it, the longest a state holds.
+    expect(dueOf("b")).toBe("2126-08-28");
+    expect(dueOf("c")).toBe("2126-08-28");
   });
 
   it("drops only the unreadable dates of the fields it names, a readable one and the rest kept", async () => {

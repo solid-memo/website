@@ -106,6 +106,34 @@ function review(cardId: string, formatVersion: number): ReviewState {
 }
 
 describe("review states, preferences and the instance record", () => {
+  it("writes a state brought up to date with real due days", () => {
+    const lastReviewedAt = new Date(2026, 9, 6, 12, 0).toISOString();
+    const stored: ReviewState = {
+      cardId: "a",
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "zzz",
+      firstReviewedAt: lastReviewedAt,
+      lastReviewedAt,
+      formatVersion: 1,
+      previous: {
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "zzz",
+        lastReviewedAt,
+      },
+    };
+    const { previous: _dropped, ...rest } = stored;
+    expect(upgradeReviewState(stored)).toEqual({
+      ...rest,
+      due: "2026-10-06",
+      formatVersion: REVIEW_STATE_FORMAT_VERSION,
+    });
+  });
+
   it("are outdated below the current format only", () => {
     expect(isReviewStateOutdated(review("a", 1))).toBe(true);
     expect(isReviewStateOutdated(review("a", 2))).toBe(false);

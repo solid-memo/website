@@ -118,6 +118,14 @@ describe("planCardEdit", () => {
     });
   });
 
+  it("writes a due day that is no date back as a real day when undone", () => {
+    const lastReviewedAt = new Date(2026, 9, 6, 12, 0).toISOString();
+    const plan = planCardEdit([live], ["live"], { kind: "remove" }, [
+      { ...state("live"), due: "zzz", lastReviewedAt },
+    ]);
+    expect(plan.inverse.reviewSaves.map(({ due }) => due)).toEqual(["2026-10-06"]);
+  });
+
   it("removes a large selection in time that grows with the cards, not with their square", () => {
     // Eight times the cards and their states take about as long as an
     // eighth of them eight times over; finding each card's states among

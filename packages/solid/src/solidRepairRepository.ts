@@ -15,7 +15,8 @@ import {
 import type { RepairRepository } from "@solid-memo/application/ports";
 import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/domain/dcat";
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
-import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";
+import { dueDayOfInstant } from "@solid-memo/domain/scheduling";
+import { boundedSm2State, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import { type DatasetEdit, editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createDeckDocumentGuard, type DeckPlace, isDraftDocument } from "./deckPlace";
@@ -266,10 +267,10 @@ function repairedThing(
       const last = readDatetime(thing, SM.lastReviewedAt);
       const interval = getInteger(thing, SM.intervalDays);
       if (last === null || interval === null) return thing;
-      const due = new Date(last.getTime() + interval * 86_400_000);
-      // A due day past the years a study day holds leaves the due as it is.
-      const day = Number.isNaN(due.getTime()) ? "" : due.toISOString().slice(0, 10);
-      return isStudyDay(day) ? builder.setStringNoLocale(SM.due, day).build() : thing;
+      // The interval as a read bounds it, so the day is a real one whatever was planted.
+      const { intervalDays } = boundedSm2State({ ...INITIAL_SM2_STATE, intervalDays: interval });
+      const due = new Date(last.getTime() + intervalDays * 86_400_000);
+      return builder.setStringNoLocale(SM.due, dueDayOfInstant(due, 0)).build();
     }
     case "drop-unreadable-date":
       // Only the dates the app reads as none: a readable value of the same field stays.

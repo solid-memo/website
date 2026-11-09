@@ -92,8 +92,10 @@ Decisions fixed in code (and tests):
   and difficulty, and both schedulers' snapshots, are read bounded too.
   Whatever writes a state back as read (an undo, a day's reset, a
   format update, a reschedule or move in the Studio) then writes
-  numbers the write check accepts. Every number is written without an
-  exponent, which no `xsd:integer` or `xsd:decimal` has. The estimate
+  numbers the write check accepts. An undo or a format update writes a
+  due day that isn't a real date as the day of the state's last review,
+  so the prompt falls due again by the next study day. Every number
+  is written without an exponent, which no `xsd:integer` or `xsd:decimal` has. The estimate
   FSRS-6 makes from an SM-2 state is bounded the same way. A state
   from elsewhere, such as a deck file with progress, then still gives
   a due day that is a `YYYY-MM-DD` date and numbers the write check
@@ -390,11 +392,13 @@ FSRS-6 is never turned on without its states.
     from; a guest's study whose answers weren't all kept; or a state an
     older app wrote.
   - Each keeps the SM-2 state's due day and reviews, with no snapshot,
-    so no due day moves. One already there is made again at the same
-    subject: a switch run twice gives the same states. A review date
-    outside the years 0 to 9999 is the time of the switch instead, as
-    a grade has it. With a last review that differs, the FSRS-6 state
-    is stale, and SM-2 sets that prompt's due day until its next review.
+    so no due day moves. A due day that is no real date is the study
+    day of the switch instead, so one such state doesn't fail its deck.
+    One already there is made again at the same subject: a switch run
+    twice gives the same states. A review date outside the years 0 to
+    9999 is the time of the switch instead, as a grade has it. With a
+    last review that differs, the FSRS-6 state is stale, and SM-2 sets
+    that prompt's due day until its next review.
   - Progress shows per deck. A deck that can't be written now is named
     with why, and the others go on. The preferences are saved last,
     once every deck is written (until then SM-2 sets the due days, and

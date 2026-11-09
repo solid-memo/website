@@ -163,7 +163,7 @@ describe("a review state with dates that pass the shape but are no study days", 
     });
     await repository.writeFsrsStates(
       deck,
-      ({ sm2 }) => switchedStates(deck.url, sm2, [], NOW).fsrs,
+      ({ sm2 }) => switchedStates(deck.url, sm2, [], NOW, 0).fsrs,
     );
     expect(writes).toEqual(["/i/reviews/d.ttl"]);
   });

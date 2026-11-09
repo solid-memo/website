@@ -49,6 +49,39 @@ export function firstReviewOf(before: { firstReviewedAt: string } | null, now: D
     : now.toISOString();
 }
 
+/**
+ * The study day an instant falls on (studyDayOf) as a state's due day
+ * can hold it; a long-past day when it is outside the four-digit years,
+ * or no date at all. That day has passed, so the prompt is due at once.
+ */
+export function dueDayOfInstant(instant: Date, dayBoundaryHour: number): string {
+  const day = studyDayOf(instant, dayBoundaryHour);
+  return isStudyDay(day) ? day : "1970-01-01";
+}
+
+/**
+ * A state's due day to write back: its own when that is a real date
+ * (isStudyDay), else the study day of `instant` (dueDayOfInstant).
+ */
+export function writableDueDay(due: string, instant: Date, dayBoundaryHour: number): string {
+  return isStudyDay(due) ? due : dueDayOfInstant(instant, dayBoundaryHour);
+}
+
+/**
+ * A state as it is written back unchanged, read from a pod, where the
+ * due day is any text and the write check holds it to a date: a due day
+ * that is no real date (isStudyDay) becomes the day of the last review,
+ * which has passed, so the prompt falls due; a snapshot whose due day is
+ * none is dropped, as a grade drops it. Valid values stay as they are.
+ */
+export function withWritableDueDays<
+  T extends { due: string; lastReviewedAt: string; previous?: { due: string } },
+>(state: T): T {
+  const { previous, ...rest } = state;
+  const kept = previous === undefined || isStudyDay(previous.due) ? state : (rest as T);
+  return { ...kept, due: writableDueDay(state.due, new Date(state.lastReviewedAt), 0) } as T;
+}
+
 /** The study day a card reviewed now with the given interval is next due. */
 export function nextDueDate(
   reviewedAt: Date,

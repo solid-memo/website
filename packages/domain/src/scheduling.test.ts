@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildStudyQueue,
+  dueDayOfInstant,
   firstReviewOf,
   interleave,
   nextDueDate,
@@ -14,6 +15,8 @@ import {
   resetStudyDay,
   snapshotBeforeReview,
   studyDayOf,
+  withWritableDueDays,
+  writableDueDay,
 } from "./scheduling";
 import type { ReviewQuality } from "./review";
 import type { Card, StudyDirection } from "./deck";
@@ -74,6 +77,58 @@ describe("studyDayOf", () => {
   it("gives the calendar day when a boundary far out of range would leave the calendar", () => {
     expect(studyDayOf(now, 2_500_000_000)).toBe("2026-09-21");
     expect(studyDayOf(now, -2_500_000_000)).toBe("2026-09-21");
+  });
+});
+
+describe("a due day written back", () => {
+  const reviewed = new Date(2026, 9, 6, 12, 0);
+  const state = {
+    due: "zzz",
+    lastReviewedAt: reviewed.toISOString(),
+    extra: "kept",
+  };
+
+  it("is the day of an instant, or a long-past day past the four-digit years or for no date", () => {
+    expect(dueDayOfInstant(reviewed, 0)).toBe("2026-10-06");
+    expect(dueDayOfInstant(new Date("+300000-01-01T00:00:00Z"), 0)).toBe("1970-01-01");
+    expect(dueDayOfInstant(new Date(Number.NaN), 4)).toBe("1970-01-01");
+  });
+
+  it("is the study day at the day boundary given", () => {
+    const beforeBoundary = new Date(2026, 9, 6, 2, 0);
+    expect(dueDayOfInstant(beforeBoundary, 4)).toBe("2026-10-05");
+    expect(dueDayOfInstant(beforeBoundary, 0)).toBe("2026-10-06");
+  });
+
+  it("keeps a real day and replaces anything else", () => {
+    expect(writableDueDay("2026-11-10", reviewed, 0)).toBe("2026-11-10");
+    for (const due of ["zzz", "", "2026-13-45", "2026-1-9"]) {
+      expect(writableDueDay(due, reviewed, 0)).toBe("2026-10-06");
+    }
+  });
+
+  it("puts the day of the last review in place of a due day that is no date, the rest kept", () => {
+    expect(withWritableDueDays(state)).toEqual({ ...state, due: "2026-10-06" });
+  });
+
+  it("gives a state whose last review is past the four-digit years a long-past day", () => {
+    expect(withWritableDueDays({ ...state, lastReviewedAt: "+300000-01-01T00:00:00Z" }).due).toBe(
+      "1970-01-01",
+    );
+  });
+
+  it("leaves a state with real days as it is", () => {
+    const valid = { ...state, due: "2026-11-10", previous: { due: "2026-10-01" } };
+    expect(withWritableDueDays(valid)).toEqual(valid);
+  });
+
+  it("drops a snapshot whose due day is no date, keeping the state's own day", () => {
+    const written = withWritableDueDays({
+      ...state,
+      due: "2026-11-10",
+      previous: { due: "zzz" },
+    });
+    expect(written).toEqual({ ...state, due: "2026-11-10" });
   });
 });
 

@@ -20,6 +20,7 @@ import { canonicalTag } from "./languageTag";
 import { tidied, type LangText } from "./langText";
 import { sameContent } from "./libraryUpgrade";
 import { reviewKeyOf, type ReviewKey, type ReviewState } from "./review";
+import { withWritableDueDays } from "./scheduling";
 
 /**
  * The Studio's bulk edits of a deck's cards (docs/studio.md): one edit,
@@ -132,7 +133,8 @@ export function planCardEdit(
         { cardId: id, direction: "back-to-front" },
       );
       plan.inverse.save.push(card);
-      for (const state of statesOf.get(id) ?? []) plan.inverse.reviewSaves.push(state);
+      for (const state of statesOf.get(id) ?? [])
+        plan.inverse.reviewSaves.push(withWritableDueDays(state));
     } else {
       const edited = change!(card);
       if (typeof edited === "string") {

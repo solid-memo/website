@@ -497,6 +497,32 @@ describe("the answer log", () => {
     });
   });
 
+  it("writes a due day that is no date back as a real day when an answer is undone", async () => {
+    const { deps, useCases } = setup();
+    const key = { cardId: card.id, direction: "front-to-back" } as const;
+    const before = {
+      ...key,
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "1",
+      firstReviewedAt: noon.toISOString(),
+      lastReviewedAt: noon.toISOString(),
+      formatVersion: 2,
+    };
+    await expect(
+      useCases.undoReview(instance.url, deck, {
+        key,
+        before,
+        answer: { id: "answer-1", studyDay: "2026-09-21" },
+      }),
+    ).resolves.toBe(before);
+    expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+      save: [{ ...before, due: "2026-09-21" }],
+      remove: [],
+    });
+  });
+
   it("undoes a new prompt's answer still on its way to the log: its state goes, the answer never reaches the log", async () => {
     const { deps, log, byMonth, useCases } = setup();
     log.append.mockRejectedValueOnce(new Error("offline"));
