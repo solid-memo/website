@@ -14,16 +14,23 @@
  * graph draws it at once, and a graph changed since is laid out afresh.
  */
 
-import { useEffect, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import type { InstanceGraph } from "@solid-memo/domain/instanceGraph";
 import { useRemembered } from "@solid-memo/ui/remembered";
-import { createLayout, graphIdentity, type Positions, type Routes } from "./layout";
+import {
+  createLayout,
+  type GraphIdentity,
+  graphIdentity,
+  type Positions,
+  type Routes,
+  sameGraph,
+} from "./layout";
 
 /** How long a batch of steps may run, in milliseconds, so the page still draws at a good pace. */
 const BATCH_MS = 12;
 
 interface KeptLayout {
-  identity: string;
+  identity: GraphIdentity;
   positions: Positions;
   routes: Routes;
 }
@@ -43,7 +50,17 @@ export function useLayout(
   const identity = graphIdentity(graph);
   const [kept, keep] = useRemembered<KeptLayout | null>(`studio.graphLayout.${key}`, null);
   const [progress, setProgress] = useState(0);
-  const laid = kept?.identity === identity ? kept : null;
+  // A new object of the same graph, as a read again gives, goes on with the layout under way.
+  const seen = useRef(identity);
+  const changes = useRef(0);
+  if (seen.current !== identity) {
+    if (!sameGraph(seen.current, identity)) changes.current++;
+    seen.current = identity;
+  }
+  const laid = useMemo(
+    () => (kept !== null && sameGraph(kept.identity, identity) ? kept : null),
+    [kept, identity],
+  );
 
   useEffect(() => {
     if (!run || laid !== null) return;
@@ -68,7 +85,7 @@ export function useLayout(
       timer = setTimeout(batch, 0);
     }, 0);
     return () => clearTimeout(timer);
-  }, [identity, run, laid === null]);
+  }, [changes.current, run, laid === null]);
 
   return { laid, progress };
 }

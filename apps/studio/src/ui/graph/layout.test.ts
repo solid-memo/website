@@ -30,7 +30,7 @@ import {
   REVIEW,
   smallGraph,
 } from "../../test/graph";
-import { createLayout, graphIdentity, ROUTE_BATCH, type Point } from "./layout";
+import { createLayout, graphIdentity, ROUTE_BATCH, sameGraph, type Point } from "./layout";
 
 const INSTANCE = instanceA.url;
 const TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -666,23 +666,25 @@ function shortMark(graph: InstanceGraph): string {
   return `${graph.nodes.length}.${graph.edges.length}.${(hash >>> 0).toString(16)}`;
 }
 
+const same = (a: InstanceGraph, b: InstanceGraph) => sameGraph(graphIdentity(a), graphIdentity(b));
+
 describe("graphIdentity", () => {
   it("is the same for the same graph, and differs for another", () => {
-    expect(graphIdentity(smallGraph())).toBe(graphIdentity(smallGraph()));
-    expect(graphIdentity(smallGraph())).not.toBe(graphIdentity(largeGraph(1)));
+    expect(same(smallGraph(), smallGraph())).toBe(true);
+    expect(same(smallGraph(), largeGraph(1))).toBe(false);
     const graph = smallGraph();
     expect(graphIdentity(graph)).toBe(graphIdentity(graph));
     const relinked = (change: Partial<InstanceGraph["edges"][number]>): InstanceGraph => ({
       nodes: graph.nodes,
       edges: graph.edges.map((each, at) => (at === 0 ? { ...each, ...change } : each)),
     });
-    expect(graphIdentity(relinked({ predicate: "x" }))).not.toBe(graphIdentity(graph));
-    expect(graphIdentity(relinked({ kind: "vocabulary" }))).not.toBe(graphIdentity(graph));
+    expect(same(relinked({ predicate: "x" }), graph)).toBe(false);
+    expect(same(relinked({ kind: "vocabulary" }), graph)).toBe(false);
     const rekinded: InstanceGraph = {
       nodes: graph.nodes.map((each, at) => (at === 0 ? { ...each, kind: "missing" } : each)),
       edges: graph.edges,
     };
-    expect(graphIdentity(rekinded)).not.toBe(graphIdentity(graph));
+    expect(same(rekinded, graph)).toBe(false);
   });
 
   it("differs for two graphs whose blank nodes differ only in label", () => {
@@ -690,13 +692,13 @@ describe("graphIdentity", () => {
       nodes: [{ id: "_:0", kind: "resource", types: [], literals: [], blank: true, term }],
       edges: [],
     });
-    expect(graphIdentity(graphOf("_:a"))).not.toBe(graphIdentity(graphOf("_:b")));
+    expect(same(graphOf("_:a"), graphOf("_:b"))).toBe(false);
   });
 
   it("differs for two graphs a short hash of them cannot tell apart", () => {
     const [first, second] = collidingGraphs();
     expect(shortMark(first)).toBe(shortMark(second));
-    expect(graphIdentity(first)).not.toBe(graphIdentity(second));
+    expect(same(first, second)).toBe(false);
   });
 
   it("cannot be matched by moving text from one id to the next", () => {
@@ -707,6 +709,23 @@ describe("graphIdentity", () => {
       ],
       edges: [],
     });
-    expect(graphIdentity(graphOf('a","', "b"))).not.toBe(graphIdentity(graphOf("a", '",b')));
+    expect(same(graphOf('a","', "b"), graphOf("a", '",b'))).toBe(false);
+  });
+
+  it("holds a graph whose terms together are longer than a string can be", () => {
+    // Three times this is past V8's longest string, and the one string costs its length once.
+    const long = "x".repeat(2 ** 28);
+    const node: InstanceGraph["nodes"][number] = {
+      id: long,
+      kind: "resource",
+      types: [],
+      literals: [],
+    };
+    const graphOf = (kind: "resource" | "missing"): InstanceGraph => ({
+      nodes: [node, node, { ...node, kind }],
+      edges: [{ from: long, predicate: long, to: long, kind: "link" }],
+    });
+    expect(same(graphOf("resource"), graphOf("resource"))).toBe(true);
+    expect(same(graphOf("resource"), graphOf("missing"))).toBe(false);
   });
 });
