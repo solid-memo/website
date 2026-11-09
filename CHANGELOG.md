@@ -21,6 +21,28 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.0.0](https://github.com/solid-memo/website/compare/v6.29.38...v7.0.0) (2026-11-09)
+
+### ⚠ BREAKING CHANGES
+
+* **solid:** Solid Memo no longer registers the classes of an instance's data in the type indexes (dcat:Catalog, sm:Deck, sm:Card, sm:ReviewState, sm:Answer, and sm:Deck for the drafts). A new instance has only its sm:Instance registration, and a format update no longer adds the others. An app that found the data by those classes finds the instance by sm:Instance instead, and its data at the places the instance's folder gives it (docs/data-model.md). Those earlier versions wrote stay until the user removes them in Preferences or removes the instance.
+
+### Features
+
+* **ui:** let the user remove old type index registrations ([c21ab91](https://github.com/solid-memo/website/commit/c21ab91eeaa66df95834ae8d208394a83f9b4daa)), closes [#644](https://github.com/solid-memo/website/issues/644)
+
+### Bug Fixes
+
+* **ci:** tie each lockfile entry to its own registry tarball ([abe49c7](https://github.com/solid-memo/website/commit/abe49c7e2e0ed99275cc89dd4922e8904d0aa3cb))
+* **domain:** keep a malformed due day out of a deck's schedule ([a906814](https://github.com/solid-memo/website/commit/a9068145d84033c3a8cc280d2fa2e6e6fa174866))
+* **solid:** bound the instances read from a type index ([1855356](https://github.com/solid-memo/website/commit/1855356e741060ff36f06393a4124dea52f140bd))
+* **solid:** keep repairs off documents that are no deck's ([f67df29](https://github.com/solid-memo/website/commit/f67df299293678e05a8bd93afe7ee0cdd1a22fdf))
+* **solid:** read plainly when a stored version cannot be sent ([a72a613](https://github.com/solid-memo/website/commit/a72a6139a951266ad914db7ac40afa56200fda57))
+* **solid:** register only the instance in the type index ([6a3bb50](https://github.com/solid-memo/website/commit/6a3bb50d2f12552082557b4cf56bd7131a08ecd7)), closes [#644](https://github.com/solid-memo/website/issues/644)
+* **solid:** write a date of any year in xsd:dateTime's form ([2178395](https://github.com/solid-memo/website/commit/2178395f772b24280b740fc0dc62592886edc77a))
+* **studio:** sort Studio tables only when their rows or sort change ([c504cc5](https://github.com/solid-memo/website/commit/c504cc5cef24b0dbc63710e8ac8b1f161c7f88e9))
+* **ui:** draw and parse only the wrong options that change ([36c7417](https://github.com/solid-memo/website/commit/36c74171bef373ecdff53c67bc761a6fabb7abbc))
+
 ## [6.29.38](https://github.com/solid-memo/website/compare/v6.29.37...v6.29.38) (2026-11-09)
 
 ### Bug Fixes
