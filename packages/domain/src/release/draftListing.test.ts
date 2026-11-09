@@ -19,6 +19,7 @@ import type { ReleaseDraft } from "./releaseDraft";
 import { draftLibraryContent, draftLibraryDeck } from "./draftListing";
 
 const DCTERMS = "http://purl.org/dc/terms/";
+const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 
 /** The deck fixture drawn from `count` more sources, each with a title. */
 function withSources(count: number, draft: ReleaseDraft = deckDraft()): ReleaseDraft {
@@ -31,7 +32,12 @@ function withSources(count: number, draft: ReleaseDraft = deckDraft()): ReleaseD
       ...urls.map((url, n) => ({
         subject: url,
         predicate: `${DCTERMS}title`,
-        object: { kind: "literal" as const, value: `Source ${n}`, language: "", datatype: "" },
+        object: {
+          kind: "literal" as const,
+          value: `Source ${n}`,
+          language: "",
+          datatype: XSD_STRING,
+        },
       })),
     ],
   };
@@ -88,7 +94,7 @@ describe("draftLibraryDeck", () => {
         {
           subject: "https://source.example/",
           predicate: `${DCTERMS}creator`,
-          object: { kind: "literal" as const, value: "Ben", language: "", datatype: "" },
+          object: { kind: "literal" as const, value: "Ben", language: "", datatype: XSD_STRING },
         },
         {
           subject: "https://source.example/",
@@ -129,6 +135,28 @@ describe("draftLibraryDeck", () => {
     expect(listed.isCourse).toBeUndefined();
     expect(listed.sources[0]!.title).toBeUndefined();
     expect(SM.bidirectional).toBe(draft.root.studyDirection);
+  });
+
+  it("reads a source's title and authors as learners do: plain text only (GHSA-xwww-xpwj-j6jx)", () => {
+    const draft = deckDraft();
+    const source = "https://source.example/";
+    const said = (predicate: string, value: string, datatype = XSD_STRING, language = "") => ({
+      subject: source,
+      predicate: `${DCTERMS}${predicate}`,
+      object: { kind: "literal" as const, value, language, datatype },
+    });
+    const listed = draftLibraryDeck({
+      ...draft,
+      root: { ...draft.root, wasDerivedFrom: [source] },
+      triples: [
+        said("title", "Typed", "http://www.w3.org/2001/XMLSchema#normalizedString"),
+        said("title", "Plain"),
+        said("creator", "Tagged", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString", "en"),
+        said("creator", "Ada"),
+        said("creator", "Bo"),
+      ],
+    });
+    expect(listed.sources).toEqual([{ url: source, title: "Plain", authors: ["Ada", "Bo"] }]);
   });
 
   it("lists a draft without a title or a time it was made with none", () => {

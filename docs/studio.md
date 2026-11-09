@@ -2054,8 +2054,9 @@ shows the draft as learners see it in the library: its row in the
 library's list (`LibraryDeckRow`) and its own page
 (`LibraryDeckScreen`). They're over a library deck built from the
 draft alone (`draftLibraryDeck` in
-[draftListing.ts](../packages/domain/src/release/draftListing.ts)).
-Both are inert: nothing in them to follow or press.
+[draftListing.ts](../packages/domain/src/release/draftListing.ts)),
+each source's title and authors read as learners read them, plain text
+only. Both are inert: nothing in them to follow or press.
 
 ## The trial
 
@@ -2255,8 +2256,19 @@ the library's releases are
   - A release that names no making is given one, `#compilation`, when
     it first needs it; a next version gets its own `#revision-<N>`.
 - **Sources**: each by its address, shown as text and never opened,
-  with its title, its creator (as text), its license, and the evidence
+  with its title, its creators (as text), its license, and the evidence
   for that license (a comment that quotes or describes it).
+  - Its title and creators are read as learners read them: the first
+    `dcterms:title` that's plain text (an `xsd:string` with no
+    language), and every `dcterms:creator` that is. The form edits the
+    title and the first creator, and names the other creators, which it
+    keeps as they are.
+  - A release made a draft, from a file or as the next version of
+    one, keeps of each source's titles only the first plain one, and
+    of its creators given as text only the plain ones
+    (`withPlainSources` in `releaseMetadata.ts`). A creator given as an
+    address is kept, as is every other statement of a source, such as
+    its license or comment.
   - Each says whether the release is derived from it
     (`prov:wasDerivedFrom`) and whether this version's making used it
     (`prov:used`), at least one, else the change is refused
@@ -2291,6 +2303,10 @@ each a warning that links to the release screen:
 - **A source that doesn't describe itself** (`sourceUndescribed`): it
   states no title, no creator, or neither a license nor a comment with
   the evidence for one.
+- **A source read more than one way** (`sourceTextAmbiguous`): it
+  states more than one title, or a title or creator that isn't plain
+  text. Learners would see only its first plain title and its plain
+  creators.
 - **A source used, not derived from** (`usedNotDerived`): this
   version's own making used it, but the release doesn't say it's
   derived from it. An earlier version's making isn't held to this.

@@ -368,6 +368,10 @@ describe("problemTarget", () => {
       screen: "release",
       field: "sources",
     });
+    expect(target("https://source.example/", { code: "sourceTextAmbiguous" })).toEqual({
+      screen: "release",
+      field: "sources",
+    });
     expect(target("https://source.example/", { code: "usedNotDerived" })).toEqual({
       screen: "release",
       field: "sources",

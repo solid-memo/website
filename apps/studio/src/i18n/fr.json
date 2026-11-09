@@ -1311,6 +1311,7 @@
       "shape": "{field} : {message}",
       "unshaped": "Appartient à une classe Solid Memo qu’aucune forme de cette application ne décrit.",
       "sourceUndescribed": "N’indique pas {missing} : une source dit ce qu’elle est, à qui elle appartient et à quelles conditions elle a été utilisée.",
+      "sourceTextAmbiguous": "Indique plus d’un titre, ou un titre ou un créateur qui n’est pas du texte simple : les apprenants ne verraient que le premier titre simple et les créateurs en texte simple.",
       "usedNotDerived": "A servi à élaborer la publication, qui n’indique pas en être dérivée.",
       "countDisagrees": "Indique {stated} {what}, mais la publication en compte {counted}."
     },
@@ -1472,6 +1473,7 @@
       "derivedFrom": "La publication en est dérivée",
       "used": "Utilisée pour l’élaboration de cette version",
       "usedEarlier": "Utilisée pour l’élaboration d’une version antérieure.",
+      "sourceMoreCreators": "Ses autres créateurs, conservés tels quels : {names}.",
       "sourceOthers": {
         "one": "{count} autre déclaration la concernant est conservée telle quelle.",
         "many": "{count} d’autres déclarations la concernant sont conservées telles quelles.",

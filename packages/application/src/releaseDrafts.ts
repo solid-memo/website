@@ -34,6 +34,7 @@ import {
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
+import { withPlainSources } from "@solid-memo/domain/release/releaseMetadata";
 import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import {
   releaseDiff,
@@ -95,12 +96,13 @@ export type NewDraft =
   | { kind: "fromDeck"; deck: Deck }
   /**
    * A release, by its URL: the next version of it (nextVersionDraft),
-   * describing the series and publisher it names elsewhere. Read as the
+   * describing the series and publisher it names elsewhere, its sources
+   * read one way (withPlainSources). Read as the
    * user only when it is the instance's (isInInstancePod), as no one
    * otherwise.
    */
   | { kind: "nextVersionOf"; url: string }
-  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements, in a series of its own and following no version (ownStatements, withOwnSeries, releaseToDraft). */
+  /** A release in a Turtle or JSON-LD file the user picks, with only its own statements, in a series of its own and following no version (ownStatements, withOwnSeries, releaseToDraft), its sources read one way (withPlainSources). */
   | { kind: "fromFile" };
 
 /** A draft made, and for one made from a copy of a release, that release: to start the next version of instead. */
@@ -673,10 +675,9 @@ export function createReleaseDraftUseCases({
               instanceUrl,
               { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
               (url) => {
-                const draft = nextVersionDraft(
-                  inItsPlace(release, url),
-                  url,
-                  unplaced(linked, release, url),
+                // Its sources read as learners read them, whatever the linked documents state of them (withPlainSources).
+                const draft = withPlainSources(
+                  nextVersionDraft(inItsPlace(release, url), url, unplaced(linked, release, url)),
                 );
                 // What the linked documents state is checked as the draft has it, as the release was (draftable).
                 if (linksGuestPodBeyond(draft))
@@ -704,7 +705,7 @@ export function createReleaseDraftUseCases({
             draft: await create(
               instanceUrl,
               { title: release.root.title ?? {}, ...(name === undefined ? {} : { name }), version },
-              (url) => releaseToDraft(inItsPlace(release, url), url),
+              (url) => withPlainSources(releaseToDraft(inItsPlace(release, url), url)),
             ),
           };
         }

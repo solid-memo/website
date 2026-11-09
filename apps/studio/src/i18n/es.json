@@ -1311,6 +1311,7 @@
       "shape": "{field}: {message}",
       "unshaped": "Es de una clase de Solid Memo que ninguna forma de esta aplicación describe.",
       "sourceUndescribed": "No indica {missing}: una fuente dice qué es, de quién es y en qué condiciones se usó.",
+      "sourceTextAmbiguous": "Indica más de un título, o un título o un autor que no es texto simple: los estudiantes solo verían el primer título simple y los autores simples.",
       "usedNotDerived": "Se usó para elaborar la publicación, que no indica que derive de ella.",
       "countDisagrees": "Indica {stated} {what}, pero la publicación tiene {counted}."
     },
@@ -1472,6 +1473,7 @@
       "derivedFrom": "La publicación deriva de ella",
       "used": "Se usó para elaborar esta versión",
       "usedEarlier": "Se usó para elaborar una versión anterior.",
+      "sourceMoreCreators": "Sus demás creadores, que se conservan tal como están: {names}.",
       "sourceOthers": {
         "one": "{count} declaración más sobre ella se conserva tal como está.",
         "many": "{count} de declaraciones más sobre ella se conservan tal como están.",

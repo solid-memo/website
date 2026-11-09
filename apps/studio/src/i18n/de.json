@@ -1241,6 +1241,7 @@
       "shape": "{field}: {message}",
       "unshaped": "Gehört zu einer Klasse von Solid Memo, die keine Form dieser App beschreibt.",
       "sourceUndescribed": "Gibt {missing} nicht an: Eine Quelle sagt, was sie ist, wem sie gehört und zu welchen Bedingungen sie verwendet wurde.",
+      "sourceTextAmbiguous": "Gibt mehr als einen Titel an oder einen Titel oder Urheber, der kein einfacher Text ist: Lernende sähen nur den ersten einfachen Titel und die einfachen Urheber.",
       "usedNotDerived": "Wurde bei der Entstehung der Ausgabe verwendet, doch die Ausgabe gibt nicht an, dass sie darauf beruht.",
       "countDisagrees": "Nennt {stated} {what}, die Ausgabe hat aber {counted}."
     },
@@ -1397,6 +1398,7 @@
       "derivedFrom": "Die Ausgabe beruht auf ihr",
       "used": "Bei der Entstehung dieser Version verwendet",
       "usedEarlier": "Bei der Entstehung einer früheren Version verwendet.",
+      "sourceMoreCreators": "Weitere Urheber, unverändert erhalten: {names}.",
       "sourceOthers": {
         "one": "{count} weitere Angabe zu ihr bleibt unverändert erhalten.",
         "other": "{count} weitere Angaben zu ihr bleiben unverändert erhalten."

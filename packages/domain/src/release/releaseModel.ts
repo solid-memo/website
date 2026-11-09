@@ -44,6 +44,19 @@ export interface ReleaseText {
   direction?: string;
 }
 
+/**
+ * Whether a value is plain text: a literal of xsd:string, with no
+ * language. Learners read a source's title and creators as such text
+ * only, so the Studio does too (GHSA-xwww-xpwj-j6jx).
+ */
+export function isPlainText(term: ReleaseTerm): term is ReleaseText {
+  return (
+    term.kind === "literal" &&
+    term.datatype === "http://www.w3.org/2001/XMLSchema#string" &&
+    term.language === ""
+  );
+}
+
 /** What every subject of the outline has: its IRI and whether it is retired (owl:deprecated true). */
 export interface ReleaseSubject {
   iri: string;
