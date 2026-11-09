@@ -9,12 +9,14 @@ import { DRAFT_URL, instanceA, instanceB, makeCard, makeDeck } from "../../test/
 import { studioRouteToHash, type StudioRoute } from "../router";
 import {
   buildCommands,
+  indexCommands,
   itemCommandId,
   matchScore,
   MAX_SHOWN,
   rankCommands,
   type Command,
   type CommandSources,
+  type IndexedCommand,
 } from "./commandIndex";
 import { deckTabs } from "./workspaceLayout";
 
@@ -185,10 +187,20 @@ describe("matching what was typed", () => {
   it("scores a shorter text a little higher", () => {
     expect(matchScore("deck", "deck")!).toBeGreaterThan(matchScore("deck", "decks")!);
   });
+
+  it("asks once of each character whether a word starts there, however many letters walk past it", () => {
+    const text = "xe".repeat(100);
+    const test = vi.spyOn(RegExp.prototype, "test");
+    const score = matchScore("e".repeat(100), text);
+    const asked = test.mock.calls.length;
+    test.mockRestore();
+    expect(score).not.toBeNull();
+    expect(asked).toBeLessThanOrEqual(text.length);
+  });
 });
 
 describe("ranking the entries", () => {
-  const commands = buildCommands(sources, en);
+  const commands = indexCommands(buildCommands(sources, en));
   /** The ranked entries as their groups, each with its entries' names. */
   const ranked = (query: string, recent: readonly string[] = [], pinned: readonly string[] = []) =>
     rankCommands(commands, query, recent, pinned).map((section) => [
@@ -248,8 +260,60 @@ describe("ranking the entries", () => {
       { length: MAX_SHOWN + 10 },
       (_, n): Command => ({ id: `${n}`, group: "decks", label: `Deck ${n}`, run }),
     );
-    expect(rankCommands(many, "", [])[0]!.commands).toHaveLength(MAX_SHOWN);
-    expect(rankCommands(many, "deck", [])[0]!.commands).toHaveLength(MAX_SHOWN);
+    const indexed = indexCommands(many);
+    expect(rankCommands(indexed, "", [])[0]!.commands).toHaveLength(MAX_SHOWN);
+    expect(rankCommands(indexed, "deck", [])[0]!.commands).toHaveLength(MAX_SHOWN);
+  });
+
+  it("keeps the best, and as found among those that score the same, whatever the order they come in", () => {
+    const labels = Array.from({ length: 400 }, (_, n) => {
+      const name = ["deck", "a deck", "dark eck", "d e c k here"][(n * 37) % 4]!;
+      return `${name}${"!".repeat((n * 13) % 7)}`;
+    });
+    const many = labels.map((label, n): Command => ({ id: `${n}`, group: "decks", label, run }));
+    const everyMatch = many
+      .map((command) => ({ command, score: matchScore("deck", command.label)! }))
+      .sort((a, b) => b.score - a.score)
+      .map(({ command }) => command.id);
+    const best = rankCommands(indexCommands(many), "deck", [])[0]!.commands;
+    expect(best.map((command) => command.id)).toEqual(everyMatch.slice(0, MAX_SHOWN));
+  });
+
+  it("lists a match however many entries match", () => {
+    // Entries as indexCommands gives them, more than a call can take as arguments.
+    const many = Array.from(
+      { length: 200_000 },
+      (_, n): IndexedCommand => ({
+        command: { id: `${n}`, group: "cards", label: "card", run },
+        name: "card",
+      }),
+    );
+    const shown = rankCommands(many, "c", [])[0]!.commands;
+    expect(shown).toHaveLength(MAX_SHOWN);
+    expect(shown[0]!.id).toBe("0");
+  });
+
+  it("lists every entry but the cards when nothing is typed, however many cards there are", () => {
+    const many = Array.from(
+      { length: 200_000 },
+      (_, n): IndexedCommand => ({
+        command: { id: `${n}`, group: n === 0 ? "decks" : "cards", label: "card", run },
+        name: "card",
+      }),
+    );
+    expect(rankCommands(many, "", []).map((section) => section.group)).toEqual(["decks"]);
+  });
+
+  it("matches the start of a name, not what comes after it", () => {
+    const long = (label: string): Command => ({ id: label, group: "cards", label, run });
+    const late = long(`${"x".repeat(200)}q`);
+    const early = long(`${"x".repeat(199)}q`);
+    const names = (query: string) =>
+      rankCommands(indexCommands([late, early]), query, []).flatMap((section) =>
+        section.commands.map((command) => command.id),
+      );
+    expect(names("q")).toEqual([early.id]);
+    expect(indexCommands([long("É".repeat(1000))])[0]!.name).toBe("e".repeat(200));
   });
 
   it("stays fast for a few thousand entries, growing with them no faster than they do", () => {
@@ -265,11 +329,10 @@ describe("ranking the entries", () => {
         }),
       );
     /** The milliseconds that ranking takes for a few queries, `times` over. */
-    const timed = (commands: readonly Command[], times = 1) => {
+    const timed = (indexed: readonly IndexedCommand[], times = 1) => {
       const start = performance.now();
       for (let time = 0; time < times; time++) {
-        for (const query of ["k", "wa ri", "cap", "mtn 12", "zz"])
-          rankCommands(commands, query, []);
+        for (const query of ["k", "wa ri", "cap", "mtn 12", "zz"]) rankCommands(indexed, query, []);
       }
       return performance.now() - start;
     };
@@ -278,8 +341,8 @@ describe("ranking the entries", () => {
     // short run often slips between its pauses and a long one never does.
     // The fewest of a few runs each, taken in turns, so that a machine
     // busier for a while slows both sizes and not only the one timed then.
-    const smallEntries = entriesOf(500);
-    const largeEntries = entriesOf(4000);
+    const smallEntries = indexCommands(entriesOf(500));
+    const largeEntries = indexCommands(entriesOf(4000));
     let small = Infinity;
     let large = Infinity;
     for (let round = 0; round < 8; round++) {

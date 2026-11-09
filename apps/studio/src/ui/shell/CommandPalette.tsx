@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useId, useState } from "preact/hooks";
+import { useEffect, useId, useMemo, useState } from "preact/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -12,6 +12,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { instanceOfRoute, type StudioRoute } from "../router";
 import {
   buildCommands,
+  indexCommands,
   itemCommandId,
   rankCommands,
   type Command,
@@ -80,21 +81,27 @@ export function CommandPalette({
       instanceUrl === null
         ? undefined
         : queryClient.getQueryData<ReleaseDraftSummary[]>(queryKeys.releaseDrafts(instanceUrl));
-    return buildCommands(
-      {
-        instances,
-        instanceUrl,
-        tabs,
-        decks: decks ?? [],
-        drafts: drafts ?? [],
-        cards: cards === undefined ? null : { deckUrl: deck!.url, cards },
-        commands,
-      },
-      { t, readerText, cardReader },
+    return indexCommands(
+      buildCommands(
+        {
+          instances,
+          instanceUrl,
+          tabs,
+          decks: decks ?? [],
+          drafts: drafts ?? [],
+          cards: cards === undefined ? null : { deckUrl: deck!.url, cards },
+          commands,
+        },
+        { t, readerText, cardReader },
+      ),
     );
   });
   const [recent] = useState(() => recentCommands());
-  const sections = rankCommands(all, query, recent, pinned.map(itemCommandId));
+  // Moving the entry picked draws the list again but changes nothing in it.
+  const sections = useMemo(
+    () => rankCommands(all, query, recent, pinned.map(itemCommandId)),
+    [all, query, recent, pinned],
+  );
   const shown = sections.flatMap((section) => section.commands);
   const optionId = (index: number) => `${listId}-${index}`;
 

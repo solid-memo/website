@@ -167,49 +167,56 @@ export interface CommandSection {
 }
 
 /**
+ * How much of an entry's name is matched, in UTF-16 code units: a name as
+ * long as a card's front can be costs no more to search than one this long.
+ */
+const MATCHED_LENGTH = 200;
+
+/** An entry of the palette with its name as rankCommands matches it: its start, folded. */
+export interface IndexedCommand {
+  command: Command;
+  name: string;
+}
+
+/** The palette's entries made ready to rank: done once, when it opens, not for each letter typed. */
+export function indexCommands(commands: readonly Command[]): IndexedCommand[] {
+  return commands.map((command) => ({
+    command,
+    name: folded(command.label.slice(0, MATCHED_LENGTH)),
+  }));
+}
+
+/** An entry to show, under the heading it goes under. */
+interface ShownCommand {
+  group: CommandGroup;
+  command: Command;
+}
+
+/**
  * The entries the palette shows for what the user typed, under their
  * headings, MAX_SHOWN at most. With nothing typed: the decks and drafts
  * pinned (`pinned`, by their ids, in their order), the entries used last
  * (`recent`, the last first), each of those the palette still has, then
  * every other but the cards, in their order. Else those whose name holds the
  * letters typed in their order (matchScore), case and accents aside, the
- * best first, and their groups in the order of their best.
+ * best first, and their groups in the order of their best. A name is matched
+ * by its start alone (MATCHED_LENGTH).
  */
 export function rankCommands(
-  commands: readonly Command[],
+  entries: readonly IndexedCommand[],
   query: string,
   recent: readonly string[],
   pinned: readonly string[] = [],
 ): CommandSection[] {
   const wanted = folded(query.trim());
-  const shown: { group: CommandGroup; command: Command }[] = [];
-  if (wanted === "") {
-    const find = (ids: readonly string[]) =>
-      ids.flatMap((id) => commands.find((command) => command.id === id) ?? []);
-    const first = find(pinned);
-    const used = find(recent).filter((command) => !first.includes(command));
-    shown.push(...first.map((command) => ({ group: "pinned" as const, command })));
-    shown.push(...used.map((command) => ({ group: "recent" as const, command })));
-    shown.push(
-      ...commands
-        .filter(
-          (command) =>
-            command.group !== "cards" && !first.includes(command) && !used.includes(command),
+  const shown =
+    wanted === ""
+      ? unfiltered(
+          entries.map(({ command }) => command),
+          recent,
+          pinned,
         )
-        .map((command) => ({ group: command.group, command })),
-    );
-  } else {
-    const scored = commands.flatMap((command) => {
-      const score = matchScore(wanted, folded(command.label));
-      return score === null ? [] : [{ score, command }];
-    });
-    // Sorted as found where they score the same: the commands of the screen before the decks, say.
-    shown.push(
-      ...scored
-        .sort((a, b) => b.score - a.score)
-        .map(({ command }) => ({ group: command.group, command })),
-    );
-  }
+      : bestMatches(entries, wanted);
   const sections = new Map<CommandGroup, Command[]>();
   for (const { group, command } of shown.slice(0, MAX_SHOWN)) {
     const section = sections.get(group) ?? [];
@@ -219,10 +226,54 @@ export function rankCommands(
   return [...sections].map(([group, commands]) => ({ group, commands }));
 }
 
+/** What the palette lists with nothing typed (rankCommands). */
+function unfiltered(
+  commands: readonly Command[],
+  recent: readonly string[],
+  pinned: readonly string[],
+): ShownCommand[] {
+  const find = (ids: readonly string[]) =>
+    ids.flatMap((id) => commands.find((command) => command.id === id) ?? []);
+  const first = find(pinned);
+  const used = find(recent).filter((command) => !first.includes(command));
+  return [
+    ...first.map((command) => ({ group: "pinned" as const, command })),
+    ...used.map((command) => ({ group: "recent" as const, command })),
+    ...commands
+      .filter(
+        (command) =>
+          command.group !== "cards" && !first.includes(command) && !used.includes(command),
+      )
+      .map((command) => ({ group: command.group, command })),
+  ];
+}
+
+/**
+ * The MAX_SHOWN best matches, the best first, and as found where they
+ * score the same: the commands of the screen before the decks, say. Only
+ * those are ever held, however many entries match.
+ */
+function bestMatches(entries: readonly IndexedCommand[], wanted: string): ShownCommand[] {
+  const best: { score: number; command: Command }[] = [];
+  for (const { command, name } of entries) {
+    const score = matchScore(wanted, name);
+    if (score === null) continue;
+    if (best.length === MAX_SHOWN && score <= best[MAX_SHOWN - 1]!.score) continue;
+    let at = best.length;
+    while (at > 0 && best[at - 1]!.score < score) at--;
+    best.splice(at, 0, { score, command });
+    best.length = Math.min(best.length, MAX_SHOWN);
+  }
+  return best.map(({ command }) => ({ group: command.group, command }));
+}
+
 /** What a letter scores matched, at the start of a word, and right after the letter before. */
 const LETTER = 1;
 const WORD_START = 4;
 const CONSECUTIVE = 2;
+
+/** A letter starts a word as the text's first, or after a character not of this class. */
+const LETTER_OR_DIGIT = /[\p{L}\p{N}]/u;
 
 /**
  * How well `text` matches `query` (both folded): null when its letters
@@ -233,25 +284,24 @@ const CONSECUTIVE = 2;
  * start of a later word when the rest still matches after it.
  */
 export function matchScore(query: string, text: string): number | null {
+  // Each character is asked about once, however many letters typed walk past it.
+  const known: boolean[] = [];
+  const startsWord = (at: number) =>
+    (known[at] ??= at === 0 || !LETTER_OR_DIGIT.test(text[at - 1]!));
   let score = -text.length / 100;
   let last = -2;
   for (let q = 0; q < query.length; q++) {
     let at = text.indexOf(query[q]!, last + 1);
     if (at === -1) return null;
-    if (at !== last + 1 && !startsWord(text, at)) {
+    if (at !== last + 1 && !startsWord(at)) {
       let later = text.indexOf(query[q]!, at + 1);
-      while (later !== -1 && !startsWord(text, later)) later = text.indexOf(query[q]!, later + 1);
+      while (later !== -1 && !startsWord(later)) later = text.indexOf(query[q]!, later + 1);
       if (later !== -1 && holds(text, query.slice(q + 1), later + 1)) at = later;
     }
-    score += LETTER + (startsWord(text, at) ? WORD_START : 0) + (at === last + 1 ? CONSECUTIVE : 0);
+    score += LETTER + (startsWord(at) ? WORD_START : 0) + (at === last + 1 ? CONSECUTIVE : 0);
     last = at;
   }
   return score;
-}
-
-/** Whether a letter starts a word: the text's first, or one after a character no letter or digit. */
-function startsWord(text: string, at: number): boolean {
-  return at === 0 || !/[\p{L}\p{N}]/u.test(text[at - 1]!);
 }
 
 /** Whether the letters of `query` come in `text` in their order, from `from` on. */
