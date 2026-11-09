@@ -86,23 +86,37 @@ function atMost(most: number, fetch: typeof globalThis.fetch): typeof globalThis
 }
 
 /**
- * Candidate URLs for the Solid Protocol storage walk-up: the WebID document
- * itself, then each ancestor container up to the origin root.
+ * How many ancestor containers of the WebID document the storage
+ * walk-up asks, nearest first, before it gives up: a pod's WebID sits a
+ * few levels below its storage, and each one asked is a request, so a
+ * WebID deeper than this below its storage needs its profile to name
+ * the storage (pim:storage), or the storage typed by hand.
  */
-function candidateStorageUrls(webId: string): string[] {
+const MAX_STORAGE_ANCESTORS = 8;
+
+/**
+ * Candidate URLs for the Solid Protocol storage walk-up: the WebID document
+ * itself, then each ancestor container toward the origin root, no more
+ * than MAX_STORAGE_ANCESTORS of them, skipping any that ends in an empty
+ * segment ("//"). Each is made only when the walk-up asks for it, by
+ * cutting the one before at its last slash, so the work grows with the
+ * WebID's length, not with its square.
+ */
+function* candidateStorageUrls(webId: string): Generator<string> {
   const url = new URL(webId);
   url.hash = "";
   url.search = "";
-  const segments = url.pathname.split("/").filter((s) => s.length > 0);
-  const candidates = [url.toString()];
-  for (let depth = segments.length - 1; depth >= 0; depth--) {
-    const path = segments
-      .slice(0, depth)
-      .map((segment) => `${segment}/`)
-      .join("");
-    candidates.push(`${url.origin}/${path}`);
+  yield url.href;
+  let path = url.pathname;
+  let ancestors = 0;
+  while (ancestors < MAX_STORAGE_ANCESTORS && path !== "/" && path !== "") {
+    path = path.slice(0, path.lastIndexOf("/", path.length - 2) + 1);
+    // An empty path (a WebID with no hierarchy) or one ending in an empty
+    // segment names no container of its own: cut on.
+    if (path === "" || path.endsWith("//")) continue;
+    ancestors++;
+    yield `${url.origin}${path}`;
   }
-  return candidates;
 }
 
 /**

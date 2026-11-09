@@ -1760,6 +1760,7 @@
     "restoreTimedOut": "Votre fournisseur n’a pas répondu à temps, donc Solid Memo a arrêté de restaurer votre session. Reconnectez-vous ou choisissez un autre fournisseur.",
     "restoreNotReturned": "Votre fournisseur ne vous a pas renvoyé ici, donc Solid Memo a arrêté de restaurer votre session. Retournez chez votre fournisseur, reconnectez-vous ou choisissez un autre fournisseur.",
     "webIdIssuerNotListed": "Votre profil WebID n’indique pas le fournisseur auprès duquel vous vous êtes connecté, donc Solid Memo a fermé la session par sécurité. Ajoutez ce fournisseur à votre profil, ou connectez-vous auprès d’un fournisseur qu’il indique.",
+    "webIdTooLong": "Votre fournisseur indique un WebID plus long que ce que Solid Memo accepte ({limit} caractères au plus), donc Solid Memo a fermé la session par sécurité. Connectez-vous auprès d’un autre fournisseur.",
     "profileNoSubject": "Votre profil ne vous décrit pas, Solid Memo ne peut donc pas y noter où se trouvent vos données. Vérifiez votre profil auprès de votre fournisseur de Pod, puis réessayez.",
     "privateTypeIndexNotLinked": "Solid Memo n’a pas pu relier à votre profil sa liste privée de vos données. Vérifiez que Solid Memo peut modifier votre profil, puis réessayez.",
     "publicTypeIndexNotLinked": "Solid Memo n’a pas pu relier à votre profil sa liste publique de vos données. Vérifiez que Solid Memo peut modifier votre profil, puis réessayez.",

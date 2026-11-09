@@ -67,8 +67,10 @@ flowchart LR
   them all together, no more than `MAX_PROFILE_DOCUMENTS` of them
   ([readLimits.ts](../packages/solid/src/client/readLimits.ts)). Else
   the Solid Protocol's Link-header walk-up from the WebID URL
-  (`rel="type"` targeting `pim:Storage`, capital S); else a URL typed
-  by hand. 0, 1 or N storages are handled.
+  (`rel="type"` targeting `pim:Storage`, capital S), which asks the
+  WebID document and its nearest `MAX_STORAGE_ANCESTORS` (8) containers
+  ([solidStorageGateway.ts](../packages/solid/src/solidStorageGateway.ts));
+  else a URL typed by hand. 0, 1 or N storages are handled.
 - **Instances**: one `solid:TypeRegistration` per instance,
   `solid:forClass sm:Instance`, in the private type index by default,
   its `dcterms:title` naming the instance (harmless extra triples): the

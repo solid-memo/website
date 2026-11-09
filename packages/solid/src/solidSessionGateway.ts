@@ -4,7 +4,7 @@
 
 import { getSolidDataset } from "./client/resources";
 import { type FetchedDataset, getThing, getUrlAll } from "./client/rdf";
-import { limitedFetch, PROFILE_LIMITS } from "./client/readLimits";
+import { limitedFetch, MAX_BASE_CHARACTERS, PROFILE_LIMITS } from "./client/readLimits";
 import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";
@@ -21,6 +21,14 @@ const SOLID_OIDC_ISSUER = "http://www.w3.org/ns/solid/terms#oidcIssuer";
  * pod read's deadline (readDeadline.ts).
  */
 const ISSUER_CHECK_DEADLINE_MS = 5_000;
+
+/**
+ * The most characters a session's WebID may have: the longest address
+ * Solid Memo accepts as a document's base, far beyond any real WebID.
+ * The storage lookup derives addresses from the WebID's path
+ * (solidStorageGateway.ts), so a longer one is refused.
+ */
+const MAX_WEBID_CHARACTERS = MAX_BASE_CHARACTERS;
 
 /**
  * Dereference a WebID (unauthenticated). The document is read under
@@ -294,6 +302,17 @@ export function createSolidSessionGateway({
     if (fromLogin) checkedAtLogin = { webId, dataset };
   }
 
+  /**
+   * Ends the session and refuses it if its WebID is longer than
+   * MAX_WEBID_CHARACTERS: the provider names it, and nothing is read or
+   * derived from it before this check.
+   */
+  async function refuseLongWebId(webId: string): Promise<void> {
+    if (webId.length <= MAX_WEBID_CHARACTERS) return;
+    await client.logout().catch(() => undefined);
+    throw new AppError("webIdTooLong", { limit: MAX_WEBID_CHARACTERS, characters: webId.length });
+  }
+
   /** Redirects the browser to the identity provider; does not return. */
   async function startLogin(oidcIssuer: string): Promise<void> {
     window.sessionStorage.setItem(LOGIN_HASH_KEY, window.location.hash);
@@ -396,6 +415,7 @@ export function createSolidSessionGateway({
         attempt === null ? null : (JSON.parse(attempt) as RestoreAttempt),
       );
       if (webId === null) return null;
+      await refuseLongWebId(webId);
       await refuseUnlistedIssuer(webId, fromLogin);
       // A silent restore leaves the page for the identity provider and
       // comes back without its hash; the client reports the page it left.
