@@ -415,11 +415,11 @@ entry fails, or is removed from the queue, no push follows it, and
 `main`'s commits wait for the next merge, or for a run by hand, which
 releases `main`'s tip whatever the queue holds.
 
-Releases go one at a time (concurrency group `release`), and a running
-one is never canceled. GitHub keeps only one run waiting in the group:
-a newer one replaces it, and whichever goes ahead releases the tip. A
-fork, or a copy without the deploy key, runs the workflow and releases
-nothing.
+Releases go one at a time (concurrency group `release`), and the
+workflow doesn't cancel a running one to start another. GitHub keeps
+only one run waiting in the group: a newer one replaces it, and
+whichever goes ahead releases the tip. A fork, or a copy without the
+deploy key, runs the workflow and releases nothing.
 
 A release made by mistake isn't taken back
 ([below](#when-a-release-fails)); the next version fixes the mistake.
@@ -431,6 +431,17 @@ colon, as a breaking footer, and its changelog entry lists the rest of
 that line under "BREAKING CHANGES". The release now reads the footer
 only as written ([what counts as breaking](#what-counts-as-breaking)),
 and the version after 2.0.0 says so (#84).
+
+### Runs from forks
+
+The repository requires approval for all outside contributors' workflow
+runs: under Settings › Actions › General, "Approval for running fork
+pull request workflows from contributors" is set to "Require approval
+for all external contributors". The maintainer reads what a pull
+request changes under `.github/` before approving its run, so the checks
+of a fork's pull request don't start until the maintainer has approved
+them. A copy of the repository that takes pull requests from forks needs
+the same setting.
 
 ## The deploy key
 
@@ -569,7 +580,8 @@ comments on an issue. Once the cause is fixed, the maintainer runs the
 workflow by hand (Actions › Release › Run workflow, from `main`), which
 refuses until CI has passed on `main`'s tip. The next push to `main`
 that passes CI, with the merge queue empty, tries again. A run whose
-`queue` job failed released nothing, and is handled the same way.
+`queue` job failed released nothing, and is handled the same way. A
+canceled run is handled by what it left behind, as in the cases below.
 
 - **Before the push** (a wrong configuration, a file the release
   couldn't write, docs that couldn't be rendered or drawn, Chromium
@@ -580,9 +592,10 @@ that passes CI, with the merge queue empty, tries again. A run whose
   is missing. Nothing was tagged, and the next run releases from the
   new tip.
 - **The release commit is on `main`, but not its tag** (the tag's push
-  failed): every run of the workflow stops with an error that names the
-  commit until it's tagged. That stops semantic-release from releasing
-  the same version again on top of it. Only a commit semantic-release
+  failed, or the run was canceled between the two): every run of the
+  workflow stops with an error that names the commit until it's tagged.
+  That stops semantic-release from releasing the same version again on
+  top of it. Only a commit semantic-release
   made counts (`npm run release:commit`,
   [releaseCommit.ts](../scripts/releaseCommit.ts)): one on `main`'s
   first-parent chain, by `github-actions[bot]` as author and committer,

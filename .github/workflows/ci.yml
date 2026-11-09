@@ -13,12 +13,15 @@ name: CI
 # merges exactly the commit that passed. A branch's pushes alone run
 # nothing, so a pull request's commits are not checked twice for one
 # push. The jobs read the repository and nothing else: the token can
-# only read, and no secret is used, so a fork's pull request runs them as
-# safely as ours. The exceptions, caches, which runs on main alone, and the
-# fail-fast jobs, which never run for a fork, run no code of the
-# repository's. Only runs on main save Turbo's cache and
-# the end-to-end images, Turbo's being the queue's when main's run reuses
-# it; a pull request and the merge queue read main's.
+# only read, and no secret is used, so a fork's pull request neither
+# writes to the repository nor reads a secret. The exceptions, caches,
+# which runs on main alone, and the fail-fast jobs, which never run for a
+# fork, run no code of the repository's. A pull request's run uses the
+# workflow files it carries, so the repository requires approval of every
+# outside contributor's run (docs/releasing.md#runs-from-forks). Only
+# runs on main save Turbo's cache and the end-to-end images, Turbo's
+# being the queue's when main's run reuses it; a pull request and the
+# merge queue read main's.
 #
 # A tree is tested once (docs/releasing.md#what-each-stage-checks): the
 # gate job has every job run in a pull request, in the merge queue, by
