@@ -145,7 +145,8 @@ export function useMissingLanguage(fieldId: string) {
  * Markdown, say): a list right under it, which describes it alone, so a
  * hint about a translation sits by the translation and is read with it.
  * They are read as the text is reached, never announced as they change,
- * which as the user types would be noise.
+ * which as the user types would be noise. It is asked for each entry on
+ * every drawing, so one that parses text remembers it (useEntryHints).
  *
  * `arrival`: the screen was opened at this field (a link to it), so its
  * main text is where the user arrives (useScreenFocus).

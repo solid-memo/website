@@ -10,6 +10,30 @@ import { alertTexts } from "../test/liveRegions";
 import { DistractorFields } from "./DistractorFields";
 import { I18nProvider } from "./i18n";
 
+const markdownWork = vi.hoisted(() => ({ parses: 0, checks: 0 }));
+
+vi.mock("@solid-memo/markdown/inline", async (original) => {
+  const real = await original<typeof import("@solid-memo/markdown/inline")>();
+  return {
+    ...real,
+    parseInlineMarkdown: (text: string) => {
+      markdownWork.parses++;
+      return real.parseInlineMarkdown(text);
+    },
+  };
+});
+
+vi.mock("@solid-memo/markdown/problems", async (original) => {
+  const real = await original<typeof import("@solid-memo/markdown/problems")>();
+  return {
+    ...real,
+    markdownProblems: (...args: Parameters<typeof real.markdownProblems>) => {
+      markdownWork.checks++;
+      return real.markdownProblems(...args);
+    },
+  };
+});
+
 afterEach(() => vi.unstubAllGlobals());
 
 const d1: Distractor = {
@@ -360,6 +384,109 @@ describe("DistractorFields", () => {
     };
     expect(add(SM.plainText)).toEqual({ en: "x" });
     expect(add(SM.markdown)).toEqual({ en: "    x" });
+  });
+
+  describe("with more options than the Markdown cache keeps", () => {
+    const manyOptions = 501;
+
+    /** Options in Markdown, each with a note, counting each time a row reads its text. */
+    function counted() {
+      const reads = { count: 0 };
+      const distractors = Array.from({ length: manyOptions }, (_, i): Distractor => {
+        const text = { en: `*wrong* \`option\` ${i}` };
+        return {
+          id: `q-d${i}`,
+          get text() {
+            reads.count++;
+            return text;
+          },
+          note: { en: `*note* ${i}` },
+        };
+      });
+      return { distractors, reads };
+    }
+
+    function typeInEditor(value: string) {
+      fireEvent.input(document.getElementById("distractor-text")!, { target: { value } });
+    }
+
+    it("parses nothing and draws no option again as an option is written", () => {
+      const { distractors, reads } = counted();
+      renderFields({ distractors, textFormat: SM.markdown });
+      fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
+      markdownWork.parses = 0;
+      reads.count = 0;
+      for (const value of ["a", "ab", "abc"]) typeInEditor(value);
+      expect(markdownWork.parses).toBe(0);
+      expect(reads.count).toBe(0);
+      expect(document.getElementById("distractor-text")).toHaveValue("abc");
+    });
+
+    it("parses nothing and draws no option again when the list is drawn again with the same options", () => {
+      const { distractors, reads } = counted();
+      const { rerender, props } = renderFields({ distractors, textFormat: SM.markdown });
+      markdownWork.parses = 0;
+      reads.count = 0;
+      rerender(<DistractorFields {...props} suggestions={["en", "sv"]} onChange={vi.fn()} />);
+      expect(markdownWork.parses).toBe(0);
+      expect(reads.count).toBe(0);
+    });
+
+    it("still shows an option's change, parsing that text alone, and uses the latest list and caller", () => {
+      const { distractors } = counted();
+      const first = vi.fn();
+      const { rerender, props } = renderFields({
+        distractors,
+        textFormat: SM.markdown,
+        onChange: first,
+      });
+      fireEvent.click(
+        screen.getByRole("button", { name: "Edit the wrong option “wrong option 7”" }),
+      );
+      typeInEditor("*rewritten* seven");
+      fireEvent.click(screen.getByRole("button", { name: "Update" }));
+      const next = first.mock.calls[0]![0] as Distractor[];
+      expect(next[7]!.text).toEqual({ en: "*rewritten* seven" });
+      markdownWork.parses = 0;
+      const onChange = vi.fn();
+      rerender(<DistractorFields {...props} distractors={next} onChange={onChange} />);
+      expect(markdownWork.parses).toBe(1);
+      const item = within(fields()).getAllByRole("listitem")[7]!;
+      expect(item).toHaveTextContent("rewritten seven");
+      expect(item.querySelector("em")).toHaveTextContent("rewritten");
+      expect(within(fields()).getAllByRole("listitem")[8]).toHaveTextContent("wrong option 8");
+
+      // A row that was not drawn again acts on the list as it is now, for the caller of now.
+      fireEvent.click(
+        screen.getByRole("button", { name: "Retire the wrong option “wrong option 8”" }),
+      );
+      expect(first).toHaveBeenCalledTimes(1);
+      const retired = onChange.mock.calls[0]![0] as Distractor[];
+      expect(retired[7]!.text).toEqual({ en: "*rewritten* seven" });
+      expect(retired[8]!.retired).toBe(true);
+    });
+
+    it("parses every option again for another card, whose cache is its own", () => {
+      const { distractors } = counted();
+      const { rerender, props } = renderFields({ distractors, textFormat: SM.markdown });
+      markdownWork.parses = 0;
+      rerender(<DistractorFields {...props} cardId="other" />);
+      expect(markdownWork.parses).toBe(manyOptions * 2);
+    });
+
+    it("checks only the language typed in when an option has more languages than the cache keeps", () => {
+      const text = Object.fromEntries(
+        Array.from({ length: manyOptions }, (_, i) => [`x-${i}`, `*text* ${i}`]),
+      );
+      renderFields({
+        distractors: [{ id: "q-d1", text }],
+        textFormat: SM.markdown,
+      });
+      fireEvent.click(screen.getByRole("button", { name: /^Edit the wrong option/ }));
+      markdownWork.checks = 0;
+      for (const value of ["*a", "*ab", "*abc"]) typeInEditor(value);
+      expect(markdownWork.checks).toBe(3);
+    });
   });
 
   it("speaks Swedish", () => {

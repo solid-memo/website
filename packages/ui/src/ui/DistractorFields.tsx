@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { memo } from "preact/compat";
 import { useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
 import { isFormatted, isMarkdown, type Distractor } from "@solid-memo/domain/deck";
@@ -15,6 +16,7 @@ import {
   type DistractorIssue,
 } from "@solid-memo/domain/distractors";
 import { shownTag, type LangText } from "@solid-memo/domain/langText";
+import type { MdPhrase } from "@solid-memo/markdown/parse";
 import { OPTION, PROSE } from "@solid-memo/markdown/problems";
 import { useAskFirst } from "./askFirst";
 import { useCardText } from "./cardLanguage";
@@ -29,9 +31,13 @@ import {
   type DraftEntry,
   type LangTextDraft,
 } from "./LangTextField";
-import { markdownHints } from "./MarkdownEditing";
+import { optionPhrases } from "./markdownCache";
+import { useEntryHints } from "./MarkdownEditing";
 
 const NONE_PUBLISHED: ReadonlySet<string> = new Set();
+
+/** The id of an option's Edit button: where focus returns when its editor closes. */
+const editButtonId = (id: string) => `distractor-${id}-edit`;
 
 /** The wrong option being written: a new one (`id` null) or one of the card's. */
 interface Editing {
@@ -66,6 +72,11 @@ interface Editing {
  * too few in use for a course, as warnings, never refusals, for a pod's
  * deck is its user's. With `picks`, each option says how often a learner
  * chose it, as the answer log tells.
+ *
+ * A card may have thousands of options. Each one's Markdown is parsed once
+ * for as long as the card is shown (optionPhrases), and writing an option,
+ * or anything else that draws this list again, draws again only the options
+ * that change (OptionRow).
  */
 export function DistractorFields({
   cardId,
@@ -100,6 +111,9 @@ export function DistractorFields({
   const { t, languageLabel, errorText } = useI18n();
   const { cardText } = useCardText();
   const askFirst = useAskFirst();
+  const hintsOf = useEntryHints();
+  // One cache per card: the shared one keeps fewer texts than a card may have options.
+  const phrasesOf = useMemo(optionPhrases, [cardId]);
   const [editing, setEditing] = useState<Editing | null>(null);
   /** Why the last Delete was refused, until the next change. */
   const [refusal, setRefusal] = useState<AppError | null>(null);
@@ -128,10 +142,10 @@ export function DistractorFields({
   }, [missing]);
 
   const named = (distractor: Distractor) => plainDataText(cardText(distractor.text), markdown, 60);
-  const editButtonId = (id: string) => `distractor-${id}-edit`;
   const backTag = shownTag(back) ?? null;
 
   function start(distractor: Distractor | null) {
+    if (busy || editing !== null) return;
     setEditing({
       id: distractor?.id ?? null,
       text: draftOf(distractor?.text, [], { tag: backTag }),
@@ -187,6 +201,12 @@ export function DistractorFields({
     return onChange(next);
   }
 
+  function retireOrRestore(distractor: Distractor) {
+    if (busy) return;
+    const toggle = distractor.retired ? restoreDistractor : retireDistractor;
+    change(toggle(distractors, distractor.id));
+  }
+
   function remove(distractor: Distractor, at: number) {
     if (busy) return;
     const edit = deleteDistractor(distractors, at, published);
@@ -202,6 +222,11 @@ export function DistractorFields({
       },
     });
   }
+
+  // The same object from one drawing to the next, so a row needs drawing again
+  // only for its own data; what it does is always what this drawing would do.
+  const actions = useRef<OptionActions>({ start, retireOrRestore, remove });
+  actions.current = { start, retireOrRestore, remove };
 
   // A card may have thousands of wrong options, each with its issues: the
   // issues are found once a change, not on every render, and each tag's
@@ -262,7 +287,7 @@ export function DistractorFields({
         draft={state.text}
         suggestions={suggestions}
         disabled={busy}
-        entryHints={markdown ? (entry) => markdownHints(entry.value, OPTION, t) : undefined}
+        entryHints={markdown ? hintsOf("distractor-text", OPTION) : undefined}
         missing={state.missing?.field === "text" ? state.missing.entry : undefined}
         errorId="distractor-error"
         onChange={(text) => setEditing({ ...state, text, missing: undefined, error: null })}
@@ -281,7 +306,7 @@ export function DistractorFields({
             {t("distractorFields.noteHint")}
           </p>
         }
-        entryHints={markdown ? (entry) => markdownHints(entry.value, PROSE, t) : undefined}
+        entryHints={markdown ? hintsOf("distractor-note", PROSE) : undefined}
         missing={state.missing?.field === "note" ? state.missing.entry : undefined}
         errorId="distractor-error"
         onChange={(note) => setEditing({ ...state, note, missing: undefined, error: null })}
@@ -325,74 +350,18 @@ export function DistractorFields({
             editing?.id === distractor.id ? (
               <li key={distractor.id}>{editor(editing)}</li>
             ) : (
-              <li key={distractor.id} class={distractor.retired ? "retired" : undefined}>
-                <p class="distractor-text">
-                  <DataLine text={distractor.text} markdown={markdown} />
-                  {distractor.retired && (
-                    <>
-                      {" "}
-                      <span class="retired-tag">{t("distractorFields.retiredTag")}</span>
-                    </>
-                  )}
-                </p>
-                {distractor.note !== undefined && (
-                  <p class="hint distractor-note">
-                    <DataLine text={distractor.note} markdown={markdown} />
-                  </p>
-                )}
-                <p class="hint distractor-id">{distractor.id}</p>
-                {picks !== undefined && (
-                  <p class="hint distractor-picks">
-                    {t("distractorFields.picks", { count: picks.get(distractor.id) ?? 0 })}
-                  </p>
-                )}
-                <div class="edit-actions">
-                  <button
-                    type="button"
-                    id={editButtonId(distractor.id)}
-                    data-arrival={distractor.id === arrival || undefined}
-                    class="secondary"
-                    aria-label={t("distractorFields.editLabel", { option: named(distractor) })}
-                    aria-disabled={busy || editing !== null}
-                    onClick={() => !busy && editing === null && start(distractor)}
-                  >
-                    {t("distractorFields.edit")}
-                  </button>
-                  <button
-                    type="button"
-                    class="secondary"
-                    aria-label={t(
-                      distractor.retired
-                        ? "distractorFields.restoreLabel"
-                        : "distractorFields.retireLabel",
-                      {
-                        option: named(distractor),
-                      },
-                    )}
-                    aria-disabled={busy}
-                    onClick={() =>
-                      !busy &&
-                      change(
-                        (distractor.retired ? restoreDistractor : retireDistractor)(
-                          distractors,
-                          distractor.id,
-                        ),
-                      )
-                    }
-                  >
-                    {t(distractor.retired ? "distractorFields.restore" : "distractorFields.retire")}
-                  </button>
-                  <button
-                    type="button"
-                    class="danger"
-                    aria-label={t("distractorFields.deleteLabel", { option: named(distractor) })}
-                    aria-disabled={busy}
-                    onClick={() => remove(distractor, at)}
-                  >
-                    {t("distractorFields.delete")}
-                  </button>
-                </div>
-              </li>
+              <OptionRow
+                key={distractor.id}
+                distractor={distractor}
+                at={at}
+                markdown={markdown}
+                phrasesOf={phrasesOf}
+                busy={busy}
+                editingAny={editing !== null}
+                picked={picks === undefined ? undefined : (picks.get(distractor.id) ?? 0)}
+                arrival={distractor.id === arrival}
+                actions={actions}
+              />
             ),
           )}
         </ul>
@@ -415,7 +384,7 @@ export function DistractorFields({
           id="distractor-add"
           class="secondary"
           aria-disabled={busy || editing !== null}
-          onClick={() => !busy && editing === null && start(null)}
+          onClick={() => start(null)}
         >
           {t("distractorFields.add")}
         </button>
@@ -423,3 +392,100 @@ export function DistractorFields({
     </fieldset>
   );
 }
+
+/** What an option's buttons do, as of the list's latest drawing. */
+interface OptionActions {
+  start: (distractor: Distractor) => void;
+  retireOrRestore: (distractor: Distractor) => void;
+  remove: (distractor: Distractor, at: number) => void;
+}
+
+/**
+ * One option of the list, drawn again only when something it shows
+ * changes: the props are its own data, and `actions` stays the same.
+ */
+const OptionRow = memo(function OptionRow({
+  distractor,
+  at,
+  markdown,
+  phrasesOf,
+  busy,
+  editingAny,
+  picked,
+  arrival,
+  actions,
+}: {
+  distractor: Distractor;
+  /** Its place in the card's list. */
+  at: number;
+  markdown: boolean;
+  phrasesOf: (text: string) => MdPhrase[] | null;
+  busy: boolean;
+  /** An option is being written, so none can be opened. */
+  editingAny: boolean;
+  /** How often it was chosen; undefined when that is not shown. */
+  picked: number | undefined;
+  /** The screen was opened at this option. */
+  arrival: boolean;
+  actions: { current: OptionActions };
+}) {
+  const { t } = useI18n();
+  const { cardText } = useCardText();
+  const option = plainDataText(cardText(distractor.text), markdown, 60);
+  return (
+    <li class={distractor.retired ? "retired" : undefined}>
+      <p class="distractor-text">
+        <DataLine text={distractor.text} markdown={markdown} phrasesOf={phrasesOf} />
+        {distractor.retired && (
+          <>
+            {" "}
+            <span class="retired-tag">{t("distractorFields.retiredTag")}</span>
+          </>
+        )}
+      </p>
+      {distractor.note !== undefined && (
+        <p class="hint distractor-note">
+          <DataLine text={distractor.note} markdown={markdown} phrasesOf={phrasesOf} />
+        </p>
+      )}
+      <p class="hint distractor-id">{distractor.id}</p>
+      {picked !== undefined && (
+        <p class="hint distractor-picks">{t("distractorFields.picks", { count: picked })}</p>
+      )}
+      <div class="edit-actions">
+        <button
+          type="button"
+          id={editButtonId(distractor.id)}
+          data-arrival={arrival || undefined}
+          class="secondary"
+          aria-label={t("distractorFields.editLabel", { option })}
+          aria-disabled={busy || editingAny}
+          onClick={() => actions.current.start(distractor)}
+        >
+          {t("distractorFields.edit")}
+        </button>
+        <button
+          type="button"
+          class="secondary"
+          aria-label={t(
+            distractor.retired ? "distractorFields.restoreLabel" : "distractorFields.retireLabel",
+            { option },
+          )}
+          aria-disabled={busy}
+          onClick={() => actions.current.retireOrRestore(distractor)}
+        >
+          {t(distractor.retired ? "distractorFields.restore" : "distractorFields.retire")}
+        </button>
+        <button
+          type="button"
+          class="danger"
+          aria-label={t("distractorFields.deleteLabel", { option })}
+          aria-disabled={busy}
+          onClick={() => actions.current.remove(distractor, at)}
+        >
+          {t("distractorFields.delete")}
+        </button>
+      </div>
+    </li>
+  );
+});

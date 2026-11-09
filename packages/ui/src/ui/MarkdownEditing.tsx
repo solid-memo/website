@@ -2,13 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { FieldRule, MarkdownProblem } from "@solid-memo/markdown/problems";
 import { CardFace } from "./CardFace";
 import { DataLine } from "./DataText";
 import { useI18n, type I18n, type MessageKey } from "./i18n";
-import type { LangTextDraft } from "./LangTextField";
+import type { DraftEntry, LangTextDraft } from "./LangTextField";
 import { markdownFieldProblems, markdownPlainText } from "./markdownCache";
 
 export type { MarkdownProblem };
@@ -45,6 +45,34 @@ export function markdownHints(value: string, rule: FieldRule, t: I18n["t"]): str
   const hints = new Set(problems.map((problem) => problemText(problem, t)));
   if (markdownPlainText(value).trim() === "") hints.add(t("markdownProblem.noText"));
   return [...hints];
+}
+
+/**
+ * markdownHints for the entries of a component's fields, as LangTextField
+ * asks for them (`entryHints`): hintsOf(the field's id, its rule). Each
+ * entry keeps the hints of its last text, and is checked again only once
+ * that text or the rule changes, so a keystroke checks the one entry typed
+ * in, however many languages the text has: more than markdownCache keeps,
+ * which would miss on every entry of a list read again in the same order.
+ * It keeps one text for each entry, and forgets them when the interface
+ * language changes.
+ */
+export function useEntryHints(): (
+  field: string,
+  rule: FieldRule,
+) => (entry: DraftEntry) => readonly string[] {
+  const { t } = useI18n();
+  return useMemo(() => {
+    const kept = new Map<string, { value: string; rule: FieldRule; hints: readonly string[] }>();
+    return (field, rule) => (entry) => {
+      const key = `${field} ${entry.id}`;
+      const hit = kept.get(key);
+      if (hit?.value === entry.value && hit.rule === rule) return hit.hints;
+      const hints = markdownHints(entry.value, rule, t);
+      kept.set(key, { value: entry.value, rule, hints });
+      return hints;
+    };
+  }, [t]);
 }
 
 /** A problem of Markdown text (markdownProblems) as a hint to its writer. */

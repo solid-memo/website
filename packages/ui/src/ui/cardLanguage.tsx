@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { createContext, type ComponentChildren } from "preact";
-import { useContext } from "preact/hooks";
+import { useContext, useMemo } from "preact/hooks";
 import { useI18n, type CardReader } from "./i18n";
 
 /** The card language of the deck whose cards the screens below show; undefined for none. */
@@ -32,9 +32,18 @@ export function CardLanguage({
   return <CardLanguageContext.Provider value={language}>{children}</CardLanguageContext.Provider>;
 }
 
+/**
+ * A reader for `language`, the same one from one drawing to the next, so
+ * what is worked out from its functions (useMemo) is worked out once.
+ */
+function useReader(language: string | undefined): CardReader {
+  const { cardReader } = useI18n();
+  return useMemo(() => cardReader(language), [cardReader, language]);
+}
+
 /** How card text is shown here: in the card language of the nearest CardLanguage first. */
 export function useCardText(): CardReader {
-  return useI18n().cardReader(useContext(CardLanguageContext));
+  return useReader(useContext(CardLanguageContext));
 }
 
 /**
@@ -64,5 +73,5 @@ export function CourseLanguage({
 
 /** How a course's own text is shown here: in the language of the nearest CourseLanguage first. */
 export function useCourseText(): CardReader {
-  return useI18n().cardReader(useContext(CourseLanguageContext));
+  return useReader(useContext(CourseLanguageContext));
 }
