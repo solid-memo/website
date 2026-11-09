@@ -1516,7 +1516,9 @@ sequenceDiagram
   after the pod says its document is still at the stamped version. A
   document changed elsewhere is read and checked in full, and the digest
   repaired with what that read learned; nothing else keeps it up to
-  date.
+  date. A stored version that can't be sent as a header value counts as
+  none: the document is read in full, and what that read gives replaces
+  it.
 - **When a study session ends** (End session, leaving the screen, or the
   page being hidden) the deck's schedule and its reviews document's
   receipt are brought up to date.
