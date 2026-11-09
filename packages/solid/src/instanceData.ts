@@ -11,6 +11,7 @@ import {
   digestUrlOf,
   ensureTrailingSlash,
   historyContainerOf,
+  isDocumentIn,
   isSameUrl,
   metaUrlOf,
   monthOfHistoryUrl,
@@ -20,12 +21,20 @@ import {
 } from "@solid-memo/domain/instanceLayout";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { draftPlaceOf, draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
-import { releasesContainerOf } from "@solid-memo/domain/release/releasePlace";
+import {
+  isPublishedReleaseUrl,
+  releasesContainerOf,
+} from "@solid-memo/domain/release/releasePlace";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainer } from "./containers";
 import { type Owned, readForRemoval, removeOwned, UNREADABLE } from "./datasets";
 import { createDeckDocumentGuard, type DeckPlace } from "./deckPlace";
-import { deckDocumentSubjects, solidMemoSubjects, subjectsOfClasses } from "./ownership";
+import {
+  deckDocumentSubjects,
+  isDeckItself,
+  solidMemoSubjects,
+  subjectsOfClasses,
+} from "./ownership";
 import { deleteDraftResources } from "./solidReleaseDraftRepository";
 import { RDF, SM } from "./vocab";
 
@@ -39,7 +48,9 @@ import { RDF, SM } from "./vocab";
  *    them (`sm:cardsDocument`, `sm:reviewsDocument`), those that are the
  *    deck's to delete only (deckPlace.ts): ones that say they are the
  *    deck's, or are in the instance's own folder. The catalog is data,
- *    and one naming a document elsewhere must not lead a delete there;
+ *    and one naming a document elsewhere must not lead a delete there,
+ *    nor one naming a release (a document that is a deck itself) or a
+ *    draft's document anywhere lead to what is in it being removed;
  * 2. the answer log's months, `history/<YYYY-MM>.ttl`;
  * 3. the drafts the catalog links (`sm:releaseDraft`), those in the
  *    instance's `drafts/` only: each draft's documents and its folders,
@@ -67,7 +78,9 @@ import { RDF, SM } from "./vocab";
  * resource's auxiliary resources with it. A resource already gone
  * counts as deleted. What is left is kept, and so is the container
  * holding it, which the result names, with whether the releases
- * published from the instance (`releases/`, never deleted) are among it.
+ * published from the instance (never deleted: in `releases/`, any other
+ * folder of the instance the catalog links one in, or one the catalog
+ * names as a deck's document) are among it.
  */
 export async function deleteInstanceData(
   instanceUrl: string,
@@ -96,9 +109,24 @@ export async function deleteInstanceData(
     if ((await removeOwned(url, owns, fetch, read)) === "kept") kept.push(url);
   };
   const deckSubjects = deckDocumentSubjects(named.map(({ entry }) => entry));
+  // A release named as a deck's document is kept whole (deckDocumentSubjects), as a release, not as another app's data.
+  let releaseKept = false;
   for (const [url, deck] of deckDocuments) {
-    await remove(url, deckSubjects, () => guard.readToRemove(deck, url));
+    let isRelease = false;
+    const removal = await removeOwned(
+      url,
+      (dataset) => {
+        isRelease = isDeckItself(dataset, url);
+        return deckSubjects(dataset);
+      },
+      fetch,
+      () => guard.readToRemove(deck, url),
+    );
+    if (isRelease) releaseKept = true;
+    else if (removal === "kept") kept.push(url);
   }
+  const linkedReleases =
+    catalog === UNREADABLE || catalog === null ? [] : releasesElsewhereOf(catalog, container);
   for (const url of months) await remove(url, subjectsOfClasses(SM.Answer));
   for (const draft of catalog === UNREADABLE || catalog === null
     ? []
@@ -127,9 +155,36 @@ export async function deleteInstanceData(
   // Releases others may read by their address are never deleted: the user is told they are why the folder is kept.
   return {
     keptFolder: container,
-    keptReleases: (await fetch(releasesContainerOf(container), { method: "HEAD" })).ok,
+    keptReleases:
+      releaseKept ||
+      (await fetch(releasesContainerOf(container), { method: "HEAD" })).ok ||
+      (await anyThere(linkedReleases, fetch)),
     keptDocuments: kept,
   };
+}
+
+/**
+ * The releases the instance's catalog links (`sm:publishedRelease`) in
+ * its folder but outside `releases/`, at an address a release may have
+ * (isPublishedReleaseUrl): a creator may publish into any folder, and
+ * such a release is kept too.
+ */
+function releasesElsewhereOf(catalog: Dataset, container: string): string[] {
+  const node = getThing(catalog, catalogNodeUrlOf(container));
+  return node === null
+    ? []
+    : getUrlAll(node, SM.publishedRelease).filter(
+        (url) =>
+          isPublishedReleaseUrl(url) &&
+          isDocumentIn(url, container) &&
+          !isDocumentIn(url, releasesContainerOf(container)),
+      );
+}
+
+/** Whether any of the documents is there, asked one at a time until one is. */
+async function anyThere(urls: readonly string[], fetch: typeof globalThis.fetch): Promise<boolean> {
+  for (const url of urls) if ((await fetch(url, { method: "HEAD" })).ok) return true;
+  return false;
 }
 
 /** The drafts the instance's catalog links that are in its `drafts/`: a link elsewhere is never followed to a delete. */

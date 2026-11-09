@@ -12,6 +12,7 @@ import {
   deckDocumentSubjects,
   draftSubjects,
   foreignSubjects,
+  isDeckItself,
   solidMemoSubjects,
   subjectsOfClasses,
 } from "./ownership";
@@ -242,6 +243,32 @@ describe("deckDocumentSubjects", () => {
     expect(deckDocumentSubjects([ENTRY, other])(dataset)).toEqual(
       new Set([`${CARDS}#c1`, `${CARDS}#c1-sm2`, CARDS]),
     );
+  });
+
+  it("names nothing of a document that is a deck itself, a release, whatever else it says", async () => {
+    const release = await served(
+      CARDS,
+      `<> a <${SM.Deck}> ; <${DCTERMS.isPartOf}> <${ENTRY}> .
+<#c1> a <${SM.Card}> ; <${SM.distractor}> <#d1> .
+<#d1> a <${SM.Distractor}> .`,
+    );
+    expect(deckDocumentSubjects([ENTRY])(release)).toEqual(new Set());
+  });
+});
+
+describe("isDeckItself", () => {
+  it("knows a release by its address spelled with percent-encoding too, and is not thrown by one that cannot be undone", async () => {
+    const url = "https://pod.example/solid-memo/a/public/solid/v1.ttl";
+    const release = await served(url, `<> a <${SM.Deck}> .\n<#c1> a <${SM.Card}> .`);
+    expect(isDeckItself(release, url)).toBe(true);
+    expect(isDeckItself(release, "https://pod.example/solid-memo/a/public/solid/v%31.ttl")).toBe(
+      true,
+    );
+    expect(isDeckItself(release, "https://pod.example/solid-memo/a/public/solid/v%E0.ttl")).toBe(
+      false,
+    );
+    const cards = await served(CARDS, `<#c1> a <${SM.Card}> .`);
+    expect(isDeckItself(cards, CARDS)).toBe(false);
   });
 });
 

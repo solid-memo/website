@@ -122,7 +122,9 @@ export function subjectsOfClasses(...classes: string[]): (dataset: Dataset) => S
  *   states, and its saying it is theirs;
  * - when it says it is another deck's too (deckBackLinksOf), of this
  *   instance or another one: only its saying it is the leaving decks',
- *   the rest being that deck's.
+ *   the rest being that deck's;
+ * - when it is a deck itself (isDeckItself), a release others may read
+ *   by its address: nothing.
  *
  * Anything else in it is kept.
  */
@@ -137,7 +139,9 @@ export function deckDocumentSubjects(entries: readonly string[]): (dataset: Data
     return canonical !== null && leaving.has(canonical);
   };
   return (dataset) => {
-    const self = documentThings(dataset, getSourceUrl(dataset)!);
+    const url = getSourceUrl(dataset)!;
+    if (isDeckItself(dataset, url)) return new Set();
+    const self = documentThings(dataset, url);
     const statements = self.flatMap((thing) =>
       getUrlAll(thing, DCTERMS.isPartOf)
         .filter(isLeaving)
@@ -213,6 +217,29 @@ function isCatalogEntry(url: string): boolean {
 /** The subjects that are the document at `url` itself (`<>`), spelled any way a request sends it. */
 function documentThings(dataset: Dataset, url: string): Subject[] {
   return getThingAll(dataset).filter((thing) => isSameUrl(thing.url, url));
+}
+
+/**
+ * Whether the document itself (`<>`, spelled any way a request sends it,
+ * with its percent-encoding undone too, as a server may read it) is an
+ * sm:Deck: a release, or a draft's release document. No deck's cards or
+ * reviews are kept in one, and what it says of itself is what the
+ * release it was made from said, so it is never a deck's document
+ * (deckPlace.ts).
+ */
+export function isDeckItself(dataset: Dataset, url: string): boolean {
+  return [url, decodedOf(url)].some((spelling) =>
+    documentThings(dataset, spelling).some((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck)),
+  );
+}
+
+/** The address with its percent-encoding undone; as it is when that cannot be done. */
+function decodedOf(url: string): string {
+  try {
+    return decodeURI(url);
+  } catch {
+    return url;
+  }
 }
 
 /** The decks a subject says it is part of: its dcterms:isPartOf naming a catalog's entry (isCatalogEntry). */

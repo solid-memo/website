@@ -68,7 +68,7 @@ export interface KeptDocuments {
 export interface InstanceDeletion extends KeptDocuments {
   /** The instance's folder, when it was kept for what else it holds; null when it is gone. */
   keptFolder: string | null;
-  /** Whether what the kept folder holds includes the releases published from the instance (`releases/`), which are kept. */
+  /** Whether what the kept folder holds includes releases, which are kept: the `releases/` folder, a release the catalog links (`sm:publishedRelease`) in another folder of the instance, or one the catalog names as a deck's document. */
   keptReleases: boolean;
 }
 

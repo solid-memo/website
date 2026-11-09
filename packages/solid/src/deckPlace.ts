@@ -36,9 +36,9 @@ import {
   saveDataset,
   UNREADABLE,
 } from "./datasets";
-import { deckBackLinksOf } from "./ownership";
+import { deckBackLinksOf, isDeckItself } from "./ownership";
 import { hasStorageLink } from "./solidStorageGateway";
-import { DCTERMS, RDF, SM } from "./vocab";
+import { DCTERMS } from "./vocab";
 
 /** A deck as the guard needs it: its entry, its title for an error, and its two documents. */
 export type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocumentUrl">;
@@ -70,18 +70,6 @@ function partOfOf(dataset: Dataset, url: string): string[] {
   return getThingAll(dataset)
     .filter((thing) => isSameUrl(thing.url, url))
     .flatMap((thing) => getUrlAll(thing, DCTERMS.isPartOf));
-}
-
-/**
- * Whether the document itself (`<>`, spelled any way a request sends it)
- * is an sm:Deck: a release, or a draft's release document. No deck's
- * cards or reviews are kept in one, and what it says of itself is what
- * the release it was made from said, so it is never a deck's document.
- */
-function isDeckItself(dataset: Dataset, url: string): boolean {
-  return getThingAll(dataset).some(
-    (thing) => isSameUrl(thing.url, url) && getUrlAll(thing, RDF.type).includes(SM.Deck),
-  );
 }
 
 /**
@@ -239,10 +227,13 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
      * "deletable" when it is the deck's, "unclaimed" when it is left
      * alone, "unreadable" when it is kept unread (readToRemove). One in
      * the instance's own folder is not read here, as in unclaimed: its
-     * removal reads it.
+     * removal reads it, and keeps one that is a deck itself
+     * (ownership.ts deckDocumentSubjects). A draft's is unclaimed
+     * wherever it is (isDraftDocument).
      */
     async removal(deck: DeckPlace, url: string): Promise<"deletable" | "unclaimed" | "unreadable"> {
       const instance = instanceOf(deck);
+      if (isDraftDocument(url)) return "unclaimed";
       if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance))) return "deletable";
       const dataset = await readToRemove(deck, url);
       if (dataset === UNREADABLE) return "unreadable";
