@@ -56,6 +56,38 @@ describe("the digest's records", () => {
     });
   });
 
+  it("leaves out a schedule whose due days are not as the shape has them, to be computed again", () => {
+    const record = scheduleToRecord({
+      deck: "https://pod.example/catalog.ttl#deck-1",
+      cardsVersion: '"c"',
+      reviewsVersion: "absent",
+      schedule: {
+        direction: "front-to-back",
+        dayBoundaryHour: 4,
+        scheduler: "sm2",
+        dueByDay: { "2026-10-01": 1 },
+        unreviewed: 0,
+        studyDay: "2026-10-01",
+        reviewedOnDay: 0,
+        introducedOnDay: 0,
+      },
+    });
+    const read = (dueOnDay: string[]) => scheduleFromRecord({ ...record, dueOnDay });
+    expect(read([`2026-10-01 ${"9".repeat(15)}`])).not.toBeNull();
+    expect(read([])!.schedule.dueByDay).toEqual({});
+    for (const value of [
+      "not a day 1",
+      "2026-10-01",
+      "2026-10-01 x",
+      "2026-10-01 0",
+      "2026-10-01 -1",
+      "2026-10-01 1e400",
+      `2026-10-01 ${"9".repeat(16)}`,
+      "__proto__ 1",
+    ])
+      expect(read(["2026-10-02 1", value])).toBeNull();
+  });
+
   it('writes a month summary\'s days as "YYYY-MM-DD answers introduced reviews lapses" and its times as "seconds count"', () => {
     const stored: StoredMonthSummary = {
       document: "https://pod.example/history/2026-09.ttl",

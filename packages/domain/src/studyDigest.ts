@@ -8,6 +8,7 @@ import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
 import type { Scheduler } from "./fsrs";
 import type { StudyPreferences } from "./preferences";
 import { reviewKeyOf, type DueState } from "./review";
+import { isStudyDay } from "./reviewStateEdits";
 import { studyDayOf } from "./scheduling";
 import {
   dailyActivity,
@@ -37,7 +38,7 @@ export interface DeckSchedule {
   dayBoundaryHour: number;
   /** The scheduler whose due days it counts: switching sets other days without a write to the reviews. */
   scheduler: Scheduler;
-  /** Prompts with review state, by the study day they are due. */
+  /** Prompts with review state, by the study day they are due: a state whose due day is no real day (isStudyDay) is left out. */
   dueByDay: Record<string, number>;
   /** Prompts never reviewed. */
   unreviewed: number;
@@ -68,7 +69,8 @@ export function scheduleOf(input: {
       reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction }),
     );
     if (review === undefined) unreviewed++;
-    else dueByDay[review.due] = (dueByDay[review.due] ?? 0) + 1;
+    // Read leniently, a due day may be anything; the digest's shape holds only real ones, and one it refuses would take the changes written with it along.
+    else if (isStudyDay(review.due)) dueByDay[review.due] = (dueByDay[review.due] ?? 0) + 1;
   }
   const onDay = (instant: string) => studyDayOf(new Date(instant), dayBoundaryHour) === studyDay;
   return {

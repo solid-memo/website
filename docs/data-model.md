@@ -1471,7 +1471,10 @@ version (ETag) of the document it was learned from
   prompts never reviewed, and the reviews and introductions of the day
   it was computed on. With today's preferences they give the deck list
   the same counts as `buildStudyQueue`
-  ([srs.md](srs.md#study-days-and-the-queue)). It names the direction,
+  ([srs.md](srs.md#study-days-and-the-queue)). A review state whose
+  `sm:due` is no real day isn't counted on any day, and a schedule
+  with a `sm:dueOnDay` not as its shape has it is dropped and computed
+  again. It names the direction,
   the day boundary and the scheduler it was computed with
   (`sm:scheduledWith`, the preferences' `sm:studyScheduler`), and holds
   only while all three are the deck's and the preferences' (switching

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -11,6 +12,7 @@ import {
   addReceipt,
   changedDigest,
   setMonthSummaries,
+  scheduleOf,
   setSchedule,
   type DigestChange,
   type StoredMonthSummary,
@@ -464,6 +466,83 @@ describe("the instance's digest in the pod", () => {
     expect(triples).toContain(`<${subject}> <${SM}scheduledWith> <${SM}sm2> .`);
     expect(triples.filter((t) => t.includes("formatVersion"))).toHaveLength(1);
   });
+
+  it("drops a schedule whose due days are not as its shape has them, and writes one over it", async () => {
+    const pod = fakePod();
+    const subject = `${DIGEST}#schedule-catalog.ttl-deck-1`;
+    await pod.put(
+      DIGEST,
+      `${PREFIXES}<#schedule-catalog.ttl-deck-1> a sm:DeckSchedule ; sm:formatVersion 2 ;
+        sm:scheduleOf <catalog.ttl#deck-1> ; sm:cardsVersion "\\"v1\\"" ; sm:reviewsVersion "${ABSENT_VERSION}" ;
+        sm:scheduledDirection sm:frontToBack ; sm:scheduledDayBoundaryHour 4 ; sm:scheduledWith sm:sm2 ;
+        sm:scheduledOn "2026-10-01" ; sm:dueOnDay "2026-10-01 ${"9".repeat(400)}" ;
+        sm:unreviewedCount 3 ; sm:reviewedOnDayCount 1 ; sm:introducedOnDayCount 0 .`,
+    );
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    expect(await digests.readDigest(INSTANCE)).toEqual(emptyDigest());
+    await digests.updateDigest(INSTANCE, (draft) => setSchedule(draft, schedule));
+    expect((await digests.readDigest(INSTANCE))!.schedules[deck.url]).toEqual(schedule);
+    expect(
+      pod.triples(DIGEST)!.filter((t) => t.startsWith(`<${subject}> <${SM}dueOnDay>`)),
+    ).toEqual([`<${subject}> <${SM}dueOnDay> "2026-10-01 2" .`]);
+  });
+
+  it("writes a deck's schedule, and what is written with it, past a review state's malformed due day", async () => {
+    const pod = await podWithDeck();
+    await pod.put(
+      REVIEWS,
+      `${PREFIXES}<> dcterms:isPartOf <../catalog.ttl#deck-1> .
+      <#r> a sm:ReviewState ; sm:formatVersion 2 ; sm:reviewOf <../decks/deck-1.ttl#a> ;
+        sm:reviewDirection sm:frontToBack ; sm:scheduler sm:sm2 ; sm:easeFactor 2.5 ;
+        sm:intervalDays 1 ; sm:repetitions 1 ; sm:due "not a day" ;
+        sm:firstReviewedAt "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+        sm:lastReviewedAt "2026-01-02T00:00:00Z"^^xsd:dateTime .`,
+    );
+    const { checkSubjects } = createShaclShapeValidator({
+      fetch: pod.fetch,
+      shapesFetch,
+      ...SHAPE_SOURCES,
+    });
+    const digests = createSolidDigestRepository({ fetch: pod.fetch, checkWrite: checkSubjects });
+    const cards = await createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date(),
+      randomId: () => "x",
+    }).readCardsSince(deck, undefined);
+    const reviews = await createSolidReviewStateRepository({
+      fetch: pod.fetch,
+    }).readReviewStatesSince(deck, undefined);
+    if (cards.unchanged || reviews.unchanged) throw new Error("expected both documents read");
+    const stored: StoredSchedule = {
+      deck: deck.url,
+      cardsVersion: cards.version!,
+      reviewsVersion: reviews.version!,
+      schedule: scheduleOf({
+        cards: cards.value,
+        direction: deck.direction,
+        reviews: reviews.value.sm2,
+        scheduler: "sm2",
+        dayBoundaryHour: 4,
+        now: new Date("2026-11-09T12:00:00Z"),
+      }),
+    };
+    expect(stored.schedule.dueByDay).toEqual({});
+    const receipt = (name: string) =>
+      digests.updateDigest(INSTANCE, (draft) =>
+        addReceipt(draft, `${INSTANCE}${name}.ttl`, '"v"', { latestFormat: true }),
+      );
+    await Promise.all([
+      receipt("alone"),
+      receipt("before"),
+      digests.updateDigest(INSTANCE, (draft) => setSchedule(draft, stored)),
+      receipt("after"),
+    ]);
+    const read = await digests.readDigest(INSTANCE);
+    expect(read!.schedules[deck.url]).toEqual(stored);
+    expect(Object.keys(read!.receipts).sort()).toEqual(
+      ["after", "alone", "before"].map((name) => `${INSTANCE}${name}.ttl`),
+    );
+  }, 60_000);
 
   it("leaves out what does not fit its shape", async () => {
     const pod = fakePod();

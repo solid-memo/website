@@ -40,7 +40,7 @@ export interface DigestSubjects {
   receipts: Map<string, string[]>;
   schedules: Map<string, string[]>;
   months: Map<string, string[]>;
-  /** Those of receipts and schedules the digest was read without: about none of the instance's, or past the most it is read with. */
+  /** Those of receipts and schedules the digest was read without: about none of the instance's, past the most it is read with, or a schedule whose due days are not as its shape has them. */
   dropped: string[];
 }
 
@@ -98,7 +98,8 @@ function trim<T>(now: Record<string, T>, was: Record<string, T>, most: number): 
  * older format is brought up to the latest (one of format 1 counted
  * SM-2's due days). So are a receipt of no document the app reads one
  * at (isSafeDocumentUrl), a schedule of no deck of the instance at
- * `instanceUrl` (a subject of its catalog), and those past
+ * `instanceUrl` (a subject of its catalog), a schedule whose due days are
+ * not as its shape has them (scheduleFromRecord), and those past
  * the most it is read with (maxReceiptsOf, MAX_SCHEDULES): their subjects are
  * `dropped`.
  */
@@ -139,6 +140,7 @@ export function toDigest(
         migrate("deckSchedule", schedule.record, { subject: asUrl(thing) }),
       );
       if (
+        read !== null &&
         isSameUrl(documentUrlOf(read.deck), catalog) &&
         (subjects.schedules.has(read.deck) || subjects.schedules.size < MAX_SCHEDULES)
       ) {
