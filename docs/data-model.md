@@ -399,6 +399,8 @@ isn't written.
                          (#schedule-<path>) and a sm:MonthSummary per past
                          month of the answer log (#month-<path>), each
                          stamped with the versions it was learned from;
+                         a path past 256 characters is named by its
+                         hash instead, #<kind>~sha256-<hash>;
                          sm:formatVersion 1 (a receipt or a month
                          summary), 2 (a schedule)
 ```
@@ -1509,9 +1511,14 @@ sequenceDiagram
   is under way go in the next one. On a 412 it's read and changed
   again, six times in all, waiting longer before each (50 ms, then
   100 ms, …), since a page learning a check's documents writes the
-  digest several times running. A failed write is dropped: the next
-  visit learns it again. Each write is one edit of the document, made
-  in time that grows with its subjects, not their square. What's
+  digest several times running. When the app or the pod refuses what
+  a write says, its changes are written again one at a time, so only
+  the refused one fails. Until one of them is written, when the pod
+  refuses one alone with an answer it gave already, as it would every
+  write over its quota, the rest fail with it. A failed write is
+  dropped: the next visit learns it again. Each write is one edit of
+  the document, made in time that grows with its subjects, not their
+  square. What's
   dropped is removed from every subject it was read from, whatever
   that subject's name, as is any other subject that said what's
   written again, so none of it is read back.
