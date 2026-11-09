@@ -80,13 +80,39 @@ and after any of npm's own options. It fails on
 `npm run check:dependencies` checks the lockfile, `package-lock.json`,
 for what an install fetches. It fails on any package that:
 
-- comes from anywhere but `https://registry.npmjs.org/`, such as a git
-  repository or another server;
+- comes from anywhere but the tarball `https://registry.npmjs.org/`
+  serves for that package's own name and version, such as a git
+  repository, another server or the tarball of another package or
+  version;
+- is named after another package when no `package.json` of the
+  workspace declares that alias (`npm:other@1.0.0`). An alias that
+  only a third-party package or the root's `overrides` asks for fails
+  too, until a `package.json` of the workspace declares it;
 - has no integrity hash, which `npm ci` checks the download against;
 - has an install script, unless the list below names it.
 
-The workspace's own packages, and those a package carries in its
-own tarball, aren't fetched, so they're left out.
+It also fails on:
+
+- a location that isn't exactly a `node_modules` path of a valid
+  package name;
+- a version that isn't a plain semantic version;
+- a link to anything but a folder of the workspace;
+- a dependency listed as anything but a version range, or an alias the
+  workspace declares;
+- a package that brings a shrinkwrap of its own;
+- a field whose name starts with an underscore, which only npm's own
+  metadata has;
+- a folder of the workspace with no `package.json`, or with an address
+  of its own;
+- an `npm-shrinkwrap.json`, which `npm ci` would read instead of the
+  lockfile.
+
+Three kinds of entry have no download to check: the workspace's own
+folders, links to them, and packages carried in another's tarball.
+The lockfile's `inBundle` flag alone proves nothing. A carried package
+has neither an address nor a hash, keeps its own name and a plain
+version, and sits below a fetched package that lists
+`bundleDependencies`.
 
 | Package | Why its install script is no loss |
 |---|---|

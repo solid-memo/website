@@ -985,9 +985,10 @@ versions had provenance when this one has none. The command checks the
 registry's record, not what was installed: it doesn't compare that hash
 with the lockfile's or with the installed files, so a lockfile whose
 hash was changed passes it. `npm ci` compares each download with the
-lockfile's hash, and `check:dependencies` that each package comes from
-the npm registry. Nor does a signature make a package safe: a hijacked
-maintainer account still publishes a validly signed version.
+lockfile's hash, and `check:dependencies` that each package fetched comes from
+the npm registry's tarball of its own name and version. Nor does a
+signature make a package safe: a hijacked maintainer account still
+publishes a validly signed version.
 
 ### Dependency review
 
@@ -1093,10 +1094,12 @@ checks of the repository as a whole, plain Node scripts in
 - `check:dependencies`
   ([checkDependencies.ts](../scripts/checkDependencies.ts)): the app
   ships only released versions of other code, or the exceptions in
-  [vendor-code.md](vendor-code.md#maturity). Every package in the
-  lockfile comes from the npm registry with its integrity hash, no
-  install script but the listed ones, and the root `.npmrc` turns install
-  scripts off ([vendor-code.md](vendor-code.md#installing)).
+  [vendor-code.md](vendor-code.md#maturity). Every package the
+  lockfile has fetched is the npm registry's tarball of its own name
+  and version with its integrity hash, and its location and version
+  have an exact shape. Links lead only to the workspace. There's no
+  install script but the listed ones and no `npm-shrinkwrap.json`, and
+  the root `.npmrc` turns install scripts off ([vendor-code.md](vendor-code.md#installing)).
 - `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
   library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
   own `dcterms:license` says ([style.md](style.md#licenses)).
