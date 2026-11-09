@@ -772,7 +772,8 @@
     "attach": "Attach",
     "deleted": "Deleted the instance \"{name}\".",
     "removed": "Removed the instance \"{name}\" from your list.",
-    "outsidePod": "Outside your Pod, so Solid Memo cannot delete it."
+    "outsidePod": "Outside your Pod, so Solid Memo cannot delete it.",
+    "listFull": "Solid Memo lists at most {limit} instances, so yours may not all be here."
   },
   "keptFolder": {
     "text": "Solid Memo deleted its own data and kept {link}: another app put files there.",

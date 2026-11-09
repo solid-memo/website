@@ -313,6 +313,40 @@ describe("sharedReadBudget", () => {
     expect(await reads(fetch, "https://own.example/a.ttl")).toBe(true);
   });
 
+  it("bounds the reads of every scope together with a total, naming it once past it", async () => {
+    const total = { bytes: 30, quads: 1000, characters: 1000 };
+    const budget = sharedReadBudget({
+      limits: LIMITS,
+      budget: BUDGET,
+      rereads: REREADS,
+      scope: (url) => new URL(url).origin,
+      total,
+    });
+    const fetch = budget(serving("0123456").fetch);
+    for (const host of ["a", "b", "c", "d"])
+      expect(await reads(fetch, `https://${host}.example/d.ttl`)).toBe(true);
+    expect(await reads(fetch, "https://e.example/d.ttl", total)).toBe(false);
+    // Spent over all of them, a server not yet read from is not asked.
+    await expect(fetch("https://f.example/d.ttl")).rejects.toMatchObject({ limits: total });
+  });
+
+  it("has one allowance for reads again over every scope when there is a total", async () => {
+    const budget = sharedReadBudget({
+      limits: LIMITS,
+      budget: BUDGET,
+      rereads: REREADS,
+      scope: (url) => new URL(url).origin,
+      total: { bytes: 1000, quads: 1000, characters: 1000 },
+    });
+    const fetch = budget(serving("0123456").fetch);
+    // Read again on one server: 7 of the allowance of 10 gone.
+    for (let read = 0; read < 2; read++) await reads(fetch, "https://a.example/d.ttl");
+    // On another, the 3 left, so its budget of 20 ends at the fourth read, not the fifth.
+    for (let read = 0; read < 3; read++)
+      expect(await reads(fetch, "https://b.example/d.ttl")).toBe(true);
+    expect(await reads(fetch, "https://b.example/d.ttl", BUDGET)).toBe(false);
+  });
+
   it("gives an answer with no body as it is, counting nothing", async () => {
     const fetch = budgeted()(serving(null).fetch);
     for (let read = 0; read < 30; read++) expect((await fetch(URL_)).status).toBe(304);

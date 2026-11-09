@@ -68,7 +68,8 @@ device:
   `connectedScreenChoice` lists the learner's instances (the type
   indexes) and reads the choice in each one's preferences, of any
   format and whether or not they fit their shape
-  (`connectedScreenSkipped`). The screen is skipped only when at least
+  (`connectedScreenSkipped`), a few instances at a time
+  (`mapAtOnce`). The screen is skipped only when at least
   one instance exists and all say so (`skipsConnectedScreen`). An
   instance whose preferences can't be read counts as showing it.
 - **Discovering waits only so long.** Once storage is found,

@@ -804,7 +804,8 @@
     "attach": "Ajouter",
     "deleted": "L’instance « {name} » a été supprimée.",
     "removed": "L’instance « {name} » a été retirée de votre liste.",
-    "outsidePod": "Hors de votre Pod : Solid Memo ne peut donc pas la supprimer."
+    "outsidePod": "Hors de votre Pod : Solid Memo ne peut donc pas la supprimer.",
+    "listFull": "Solid Memo affiche au plus {limit} instances : les vôtres ne sont peut-être pas toutes ici."
   },
   "keptFolder": {
     "text": "Solid Memo a supprimé ses propres données et a conservé {link} : une autre application y a placé des fichiers.",

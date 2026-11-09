@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { statusTexts } from "../test/liveRegions";
 import { InstancePicker } from "./InstancePicker";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 
 const instances: Instance[] = [
@@ -42,6 +43,18 @@ describe("InstancePicker", () => {
     const { props } = renderPicker();
     fireEvent.click(screen.getByRole("button", { name: "Deck set A" }));
     expect(props.onSelect).toHaveBeenCalledWith(instances[0]);
+  });
+
+  it("says some may be left out only when the list is as long as it gets", () => {
+    const full = Array.from({ length: MAX_CATALOG_LINKS }, (_, at) => ({
+      url: `https://pod.example/${at}/`,
+      name: `Instance ${at}`,
+    }));
+    renderPicker();
+    expect(screen.queryByText(/lists at most/)).toBeNull();
+    cleanup();
+    renderPicker({ instances: full });
+    expect(screen.getByText(/lists at most 1,000 instances/)).toHaveClass("hint");
   });
 
   it("says what an instance is, under its heading", () => {

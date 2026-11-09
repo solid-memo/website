@@ -186,6 +186,43 @@ describe("createOwnPodGate", () => {
     expect(ownFolders).toHaveBeenCalledTimes(2);
   });
 
+  it("keeps to each folder's bounds, whatever other folders its server has", async () => {
+    const { gate, fetch, instanceFetch, publicFetch } = setup(
+      { webId: WEB_ID },
+      ["https://Alice.example/pod", "not a folder"],
+      ["https://alice.example/study/", "https://alice.example/study-two/"],
+    );
+    const whose = async (url: string) => {
+      const before = [fetch, instanceFetch, publicFetch].map((one) => one.mock.calls.length);
+      await gate(url);
+      const asked = [fetch, instanceFetch, publicFetch].findIndex(
+        (one, at) => one.mock.calls.length > before[at]!,
+      );
+      return ["storage", "instance", "no one"][asked];
+    };
+    expect(await whose("https://alice.example/pod/d.ttl")).toBe("storage");
+    expect(await whose("https://ALICE.example:443/pod/d.ttl")).toBe("storage");
+    expect(await whose("https://alice.example/study/d.ttl")).toBe("instance");
+    expect(await whose("https://alice.example/study-two/d.ttl")).toBe("instance");
+    for (const url of [
+      // The folder's name without its slash, and a sibling that starts with it.
+      "https://alice.example/pod",
+      "https://alice.example/podcast/d.ttl",
+      "https://alice.example/study-three/d.ttl",
+      // A step out of a folder, as a request sends it or a server might read it.
+      "https://alice.example/study/../d.ttl",
+      "https://alice.example/study/%2e%2e/d.ttl",
+      "https://alice.example/study/..%2fd.ttl",
+      "https://alice.example/study//d.ttl",
+      // Another scheme, port or host, and no address at all.
+      "http://alice.example/study/d.ttl",
+      "https://alice.example:8443/study/d.ttl",
+      "https://bob.example/study/d.ttl",
+      "not an address",
+    ])
+      expect(await whose(url), url).toBe("no one");
+  });
+
   it("asks for another user's folders once they log in", async () => {
     const user = { webId: WEB_ID as string | undefined };
     const { gate, fetch, publicFetch, ownFolders } = setup(user);

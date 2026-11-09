@@ -33,6 +33,7 @@ import {
 } from "./typeIndex";
 import { DCTERMS, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { deleteInstanceData } from "./instanceData";
 
 vi.mock("./client/resources", async (importOriginal) => {
@@ -147,6 +148,29 @@ describe("listInstances", () => {
     vi.mocked(readInstanceRegistrations).mockRejectedValue(new Error("403 Forbidden"));
 
     await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([]);
+  });
+
+  it("lists the first MAX_CATALOG_LINKS instances of both indexes, a repeated one counted once", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+    const named = (from: number, count: number) =>
+      Array.from({ length: count }, (_, at) => ({
+        containerUrl: `https://i${from + at}.example/a/`,
+        title: `Instance ${from + at}`,
+      }));
+    vi.mocked(readInstanceRegistrations)
+      .mockResolvedValueOnce([...named(0, 600), ...named(0, 600)])
+      .mockResolvedValueOnce(named(600, MAX_CATALOG_LINKS));
+
+    const listed = await makeRepository().listInstances(WEBID);
+
+    expect(listed).toHaveLength(MAX_CATALOG_LINKS);
+    expect(listed[0]).toEqual({ url: "https://i0.example/a/", name: "Instance 0" });
+    expect(listed.at(-1)).toEqual({ url: "https://i999.example/a/", name: "Instance 999" });
   });
 
   it("lists nothing an index outside the profile's own places registers, nor reads it", async () => {

@@ -94,7 +94,10 @@ flowchart LR
   `caf%E9`, is shown as written (`lastPathSegment` in
   [urls.ts](../packages/solid/src/urls.ts)). A registration that still
   can't be read as an instance is left out, and the rest of the list
-  still loads.
+  still loads. A type index is data another app may have written, and
+  every instance listed is read. So the app follows the first
+  `MAX_CATALOG_LINKS` (1,000) instances of both indexes, the private
+  one first, and the list says when it is that long.
 - **The rest of an instance's data** has no registration: the catalog,
   the decks, cards, review states, answers and drafts are reached from
   the instance, at the places its folder's layout gives them

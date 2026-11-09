@@ -772,7 +772,8 @@
     "attach": "Lägg till",
     "deleted": "Tog bort instansen ”{name}”.",
     "removed": "Tog bort instansen ”{name}” från din lista.",
-    "outsidePod": "Utanför din Pod, så Solid Memo kan inte ta bort den."
+    "outsidePod": "Utanför din Pod, så Solid Memo kan inte ta bort den.",
+    "listFull": "Solid Memo visar högst {limit} instanser, så alla dina kanske inte finns här."
   },
   "keptFolder": {
     "text": "Solid Memo tog bort sina egna data och behöll {link}: en annan app har lagt filer där.",

@@ -772,7 +772,8 @@
     "attach": "Hinzufügen",
     "deleted": "Instanz „{name}“ gelöscht.",
     "removed": "Instanz „{name}“ aus deiner Liste entfernt.",
-    "outsidePod": "Außerhalb deines Pods, daher kann Solid Memo sie nicht löschen."
+    "outsidePod": "Außerhalb deines Pods, daher kann Solid Memo sie nicht löschen.",
+    "listFull": "Solid Memo listet höchstens {limit} Instanzen auf, daher sind hier vielleicht nicht alle deine zu sehen."
   },
   "keptFolder": {
     "text": "Solid Memo hat seine eigenen Daten gelöscht und {link} behalten: Eine andere App hat dort Dateien abgelegt.",
