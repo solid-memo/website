@@ -219,12 +219,6 @@ async function untilSettled(work: Promise<unknown>[], ms: number): Promise<void>
     await vi.advanceTimersByTimeAsync(1000);
 }
 
-/** Moves fake time a second at a time past the read deadline, however late in the work a read is sent. */
-async function pastReadDeadline(): Promise<void> {
-  for (let second = 0; second <= 2 * (READ_DEADLINE_MS / 1000); second++)
-    await vi.advanceTimersByTimeAsync(1000);
-}
-
 /** Writes `body` to `url` in `pod` as Turtle, as anyone who may write there can. */
 async function put(pod: typeof globalThis.fetch, url: string, body: string): Promise<void> {
   await pod(url, { method: "PUT", headers: { "Content-Type": "text/turtle" }, body });
@@ -1500,7 +1494,8 @@ describe("createAppUseCases", () => {
     });
     const statistics = useCases.getCourseStatistics(instance!.url, new Date(), [course]);
     const health = useCases.checkDeck(instance!.url, course, text);
-    await pastReadDeadline();
+    // Fake time does not wait for the site's files read from disk, so it moves on until the work is done, not by a fixed amount.
+    await untilSettled([statistics, health], 30 * 60_000);
     vi.useRealTimers();
     await expect(statistics).resolves.toEqual([]);
     // The release unknown, the rest of the check still made.
