@@ -1154,10 +1154,22 @@ flowchart LR
 - However many decks name releases from a link, reads of those releases
   and their creators' catalogs are bounded together. Four run at a time
   (`createSolidDeckLibrary`), and `listLibraryUpdates` looks up each
-  release once, six at a time, whichever copies name it. A slow read
-  gives up its turn after 30 seconds and goes on. Hosts take turns, and
-  a read still waiting after two minutes fails, so a server that never
-  answers doesn't hold up the rest. In one page session, they take in at
+  release once, six at a time, whichever copies name it. Each read has
+  the read deadline a pod read has
+  ([boundaries.md](boundaries.md#the-pod-fence)): one whose host hasn't
+  started to answer within 10 seconds fails. Each read of a release or a
+  catalog has two minutes in all, its body included, or it fails. The
+  check of a release read comes after and isn't counted, so a large
+  release that takes long to check still passes. Either
+  way it fails with `podNoAnswer`, so the learner sees that the server
+  didn't answer in time and that trying again may work. The read isn't
+  kept, and the next read tries again. A slow but honest host fails the
+  same way, as a slow pod does. A slow read gives up its turn after 30
+  seconds and goes on. Hosts take turns, and a read still waiting for
+  its turn after two minutes fails. So a server that answers slowly or
+  not at all holds up neither the rest for long nor a screen that waits
+  on it with others, such as a course's statistics or the deck's check.
+  In one page session, they take in at
   most twice `RELEASE_LIMITS` in total, on top of the limits on each
   read. A document counts once, by its largest read. Reading it again
   comes out of an allowance of its own, twice that total, which is far

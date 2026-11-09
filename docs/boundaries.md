@@ -270,15 +270,19 @@ user's login would name another server for (`credentialsRefused`).
 A read of another server, as the user or as no one, has a deadline
 ([readDeadline.ts](../packages/solid/src/readDeadline.ts),
 `withReadDeadline`). If the server hasn't started to answer within 10
-seconds, the read is aborted and fails with `podNoAnswer`, which the
-app tries again ([style.md](style.md#typescript)). Without it, a
-request the server never answers keeps a screen loading for good. The
-deadline ends when the answer's headers arrive, so a large document
-takes as long as it needs. The guest's pod, in this browser, has no
-deadline. A write has none either: one cut off might still be saved,
-and only its answer says whether it was. Adding an answer to the log is
-the one exception: it's added whole, so one given up is added again
-later ([data-model.md](data-model.md#the-answer-log)).
+seconds, the read is aborted and fails with `podNoAnswer`, which the app
+tries again ([style.md](style.md#typescript)). Without it, a request the
+server never answers keeps a screen loading for good. The deadline ends
+when the answer's headers arrive, so a large document takes as long as
+it needs. A read of a release added from a link has two minutes in all
+as well, its body included and its check not
+([deck-library.md](deck-library.md#from-a-link)). Its host is anyone's
+choice, and the screens that wait on it with others wait for it too. The
+guest's pod, in this browser, has no deadline. A write has none either:
+one cut off might still be saved, and only its answer says whether it
+was. Adding an answer to the log is the one exception: it's added whole,
+so one given up is added again later
+([data-model.md](data-model.md#the-answer-log)).
 
 The release publisher alone gets a second fetch for its access
 control, through the same fences, whose pod fence lets a document's own

@@ -95,6 +95,15 @@ const LINKED_READ_TURN_MS = 30_000;
 const LINKED_READ_WAIT_MS = 120_000;
 
 /**
+ * How long a read of one release's or catalog's document may take in
+ * all, in milliseconds, its body too: far longer than the largest release
+ * in the library takes to download, but a server that answers and then
+ * sends its body slowly, or not at all, holds up no reader for good. The
+ * check of a release read (validate) is not counted.
+ */
+const RELEASE_READ_MS = 120_000;
+
+/**
  * The triples of accepted reads of releases from a link kept to be read
  * again (the latest whatever its size), oldest let go first: room for
  * the largest releases in the library, and far more than a few decks.
@@ -328,7 +337,7 @@ export function createSolidDeckLibrary({
   const turn = turnsOf(LINKED_READS_AT_ONCE, LINKED_READ_TURN_MS, LINKED_READ_WAIT_MS);
   const limited = limitedFetch(fetch, RELEASE_LIMITS);
   const reads = releaseReads({
-    unchecked: (url) => getSolidDatasetLinear(url, { fetch: limited }),
+    unchecked: (url) => readDocument(url, limited),
     linked: (url, work) => budget.reads()(url, work),
     validate,
     tooLarge: budget.tooLarge(),
@@ -361,8 +370,7 @@ export function createSolidDeckLibrary({
     linkedReads() {
       const linked = budget.reads();
       return releaseReads({
-        unchecked: (url) =>
-          turn(url, () => linked(url, ({ fetch }) => getSolidDatasetLinear(url, { fetch }))),
+        unchecked: (url) => turn(url, () => linked(url, ({ fetch }) => readDocument(url, fetch))),
         linked,
         validate,
         tooLarge: budget.tooLarge(linkedReleasesTooLarge),
@@ -446,7 +454,7 @@ function releaseReads({
       linked(url, async ({ fetch, quads }) => {
         let dataset: Dataset;
         try {
-          dataset = await getSolidDatasetLinear(url, { fetch });
+          dataset = await readDocument(url, fetch);
         } catch (error) {
           throw releaseReadError(url, error, tooLarge);
         }
@@ -501,7 +509,9 @@ function releaseReads({
       for (const folder of foldersAbove(url)) {
         // An instance's catalog is `<instance>catalog.ttl`; one that cannot be read is no answer.
         const links = await turn(folder, () =>
-          linked(folder, ({ fetch }) => catalogLinks(folder, SM.publishedRelease, fetch)),
+          linked(folder, ({ fetch }) =>
+            readWithin(folder, fetch, (fetch) => catalogLinks(folder, SM.publishedRelease, fetch)),
+          ),
         ).catch((): string[] => []);
         // The catalog is data its creator wrote: of its links, only those at an address a release may have are
         // read, and may become a copy's source (isPublishedReleaseUrl), as the user's own catalog's are.
@@ -533,6 +543,37 @@ function foldersAbove(url: string): string[] {
     folder = new URL("..", folder);
   }
   return folders;
+}
+
+/** The release's document at `url`, read with `fetch` within RELEASE_READ_MS (readWithin). */
+function readDocument(url: string, fetch: typeof globalThis.fetch): Promise<Dataset> {
+  return readWithin(url, fetch, (fetch) => getSolidDatasetLinear(url, { fetch }));
+}
+
+/**
+ * `read` of the document at `url` with `fetch`, within RELEASE_READ_MS:
+ * a read not done by then, its body read too, fails with podNoAnswer, so
+ * that what is kept of it is let go (kept), and its requests are aborted.
+ * Only the read is timed: the check of what was read (validate) comes
+ * after, however long it takes. The reads here pass no signal of their
+ * own.
+ */
+function readWithin<T>(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  read: (fetch: typeof globalThis.fetch) => Promise<T>,
+): Promise<T> {
+  const deadline = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<never>((_, fail) => {
+    timer = setTimeout(() => {
+      const error = new AppError("podNoAnswer", { url, seconds: RELEASE_READ_MS / 1000 });
+      fail(error);
+      deadline.abort(error);
+    }, RELEASE_READ_MS);
+  });
+  const reading = read((input, init) => fetch(input, { ...init, signal: deadline.signal }));
+  return Promise.race([reading, late]).finally(() => clearTimeout(timer));
 }
 
 /**

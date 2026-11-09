@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { buildThing, createThing, getThing, setThing } from "./client/rdf";
 import { getSolidDatasetLinear } from "./client/resources";
 import { datasetFrom } from "./testing/datasets";
@@ -145,10 +145,43 @@ describe("fetchLibraryDeck", () => {
         { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
       ],
     });
-    // Through the fetch given, under the limits of a release.
+    // Through the fetch given, under the limits of a release and within the time a read may take.
     vi.mocked(fetch).mockResolvedValueOnce(new Response(null, { status: 404 }));
     await vi.mocked(getSolidDatasetLinear).mock.calls[0]![1].fetch(DOC);
-    expect(fetch).toHaveBeenCalledWith(DOC, undefined);
+    expect(fetch).toHaveBeenCalledWith(DOC, { signal: expect.any(AbortSignal) });
+  });
+
+  it("gives up a read not done in two minutes, its body read too, and reads the release again later", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    let signal: AbortSignal | undefined;
+    // The server answered, but the read of its body never ends.
+    vi.mocked(getSolidDatasetLinear).mockImplementationOnce(async (_url, options) => {
+      vi.mocked(fetch).mockImplementationOnce(async (_input, init) => {
+        signal = init?.signal ?? undefined;
+        return new Response("");
+      });
+      await options.fetch(DOC);
+      return new Promise<never>(() => {});
+    });
+    const library = makeLibrary();
+    const read = library.fetchLibraryDeck(DOC);
+    const outline = library.fetchCourseOutline(DOC);
+    const given = expect(Promise.all([read, outline])).rejects.toMatchObject({
+      code: "podNoAnswer",
+      vars: { url: DOC, seconds: 120 },
+    });
+    await vi.advanceTimersByTimeAsync(119_999);
+    expect(signal?.aborted).toBe(false);
+    await vi.advanceTimersByTimeAsync(1);
+    await given;
+    await expect(outline).rejects.toMatchObject({ code: "podNoAnswer" });
+    // Its requests are aborted, and nothing of it kept.
+    expect(signal?.aborted).toBe(true);
+    vi.mocked(getSolidDatasetLinear).mockResolvedValue(deckDocument());
+    await expect(library.fetchLibraryDeck(DOC)).resolves.toMatchObject({ url: DOC });
   });
 
   it("reads a release once, for every reader of it, concurrent or later", async () => {

@@ -481,7 +481,8 @@ export interface DeckLibrary {
    * (docs/deck-library.md, From a link): what its one document says of
    * it, its series and its earlier versions, with no index. Read afresh
    * each time, as an address may hold anything, now or later. Throws
-   * releaseUnreadable when nothing can be read there, releaseTooLarge
+   * releaseUnreadable when nothing can be read there, podNoAnswer when
+   * its server does not answer in time, releaseTooLarge
    * when it is larger than a release may be, notADeck when it holds no
    * deck, libraryDeckTooNew when its deck is in a newer format.
    *
@@ -647,7 +648,8 @@ export interface ReleaseDraftRepository {
   /**
    * A release document anywhere, as it states itself, at its own URL;
    * releaseUnreadable when there is none to read there, or its version
-   * is none of 1, 2, …; releaseTooLarge when it is larger than a release
+   * is none of 1, 2, …; podNoAnswer when its server does not answer in
+   * time; releaseTooLarge when it is larger than a release
    * may be. Read as releases are (a release in the user's own pod as
    * the user), or with `asNoOne`, as no one, as readLinked reads: for a
    * release copied into a place it may not be the user's to share.
