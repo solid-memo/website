@@ -197,7 +197,7 @@ describe.each(SERVERS)("what another app wrote, on $name", ({ url: server }) => 
       expect(await status(url), url).toBe(404);
     }
     expect(rivers.cardsDocumentUrl.startsWith(`${instance.url}decks/`)).toBe(true);
-    // Unregistered, the catalog too.
+    // Unregistered.
     expect(await page().listInstances(session)).toEqual([]);
     const index = await triples(typeIndex);
     expect(index).not.toContain(instance.url);

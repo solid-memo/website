@@ -795,8 +795,7 @@
     "keepOpen": "Keep this page open until the update is done. Should it be cut off, every document can still be read, updated or not, and you can update the rest later.",
     "step": {
       "read": "Finding what to update",
-      "write": "Updating your documents",
-      "register": "Making your data findable by other apps"
+      "write": "Updating your documents"
     },
     "count": {
       "one": "{done} of {count} document",
@@ -1428,13 +1427,11 @@
       "series": "Chart step {step}"
     }
   },
-  "findable": {
-    "heading": "Findable by other apps",
-    "intro": "Other Solid apps find your data through the type indexes in your Pod: one registration for each kind of data, saying where it is. Solid Memo adds them when it creates an instance or updates its format, and here when you ask. It never adds back by itself one that you or another app removed.",
-    "loading": "Reading your type indexes…",
+  "oldRegistrations": {
+    "heading": "Old registrations",
+    "intro": "Earlier versions of Solid Memo registered each kind of this instance's data in your type indexes. It now registers only the instance, and reaches the rest from it. Removing these changes none of your data, and removes only Solid Memo's own entries.",
     "class": {
-      "instance": "This instance (Solid Memo's folder)",
-      "catalog": "Its catalog of decks",
+      "catalog": "This instance's catalog of decks",
       "deck": "Decks",
       "card": "Cards",
       "reviewState": "Review states",
@@ -1445,13 +1442,11 @@
       "private": "private type index",
       "public": "public type index"
     },
-    "registered": "in your {index}",
-    "missing": "missing from your {index}",
-    "noPrivateIndex": "Review states and answers say what you studied and how well, so they are only ever registered in your private type index. You have none, so they are not registered.",
-    "unreadable": "Your {index} could not be read, so what it registers is not shown here, and nothing is added to it.",
-    "add": "Register what is missing",
-    "adding": "Registering…",
-    "complete": "Everything is registered."
+    "in": "in your {index}",
+    "unreadable": "Your {index} could not be read, so what it holds is not shown here, and nothing is removed from it.",
+    "remove": "Remove old registrations",
+    "removing": "Removing…",
+    "removed": "Removed."
   },
   "registrationTargetChooser": {
     "legend": "Register in",

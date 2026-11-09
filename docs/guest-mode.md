@@ -206,8 +206,8 @@ It runs these steps:
    guest's pod, in any spelling of its origin (`guestDeckUrlsLeft`, which
    names the deck, so it can be left out). Text the reader reads, such
    as titles, card text and notes, may name any address and is copied
-   as it is. Nothing is registered: the instance's registered catalog
-   and folders hold the added decks.
+   as it is. Nothing is registered: the instance's catalog and folders
+   hold the added decks.
 3. **arrange:** each of the guest's deck groups becomes a new group
    (`#group-<uuid>`) with its name, holding the added decks and new
    groups it held, an empty one empty. They go, in the guest's order,
@@ -309,12 +309,10 @@ instance goes). It runs these steps:
    other open tabs too.
 6. **register:** `attachInstance` in the type index the user chose.
    From here on the study is theirs.
-7. **tidy:** register each class of the instance's data (its
-   catalog, decks, cards, review states, answers and drafts,
-   [data-model.md](data-model.md#discovery-chain)), then delete as the
-   merge's **tidy** does. A registration that fails is left for
-   **Register what is missing** in Preferences; the delete goes ahead
-   anyway.
+7. **tidy:** delete as the merge's **tidy** does. Nothing more is
+   registered: the instance's `sm:Instance` registration leads to the
+   rest of its data
+   ([data-model.md](data-model.md#discovery-chain)).
 
 A failure before **register** deletes the copy, whole, and leaves the
 guest's study as it was. The target's container, created where nothing

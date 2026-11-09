@@ -828,8 +828,7 @@
     "keepOpen": "Gardez cette page ouverte jusqu’à la fin de la mise à jour. Si elle est interrompue, chaque document reste lisible, mis à jour ou non, et vous pourrez mettre à jour le reste plus tard.",
     "step": {
       "read": "Recherche de ce qu’il faut mettre à jour",
-      "write": "Mise à jour de vos documents",
-      "register": "Référencement de vos données pour les autres applications"
+      "write": "Mise à jour de vos documents"
     },
     "count": {
       "one": "Documents : {done} sur {count}",
@@ -1497,13 +1496,11 @@
       "series": "Palier de graphique {step}"
     }
   },
-  "findable": {
-    "heading": "Repérable par d’autres applications",
-    "intro": "Les autres applications Solid trouvent vos données grâce aux index de types de votre Pod : un référencement par type de données, qui indique où elles se trouvent. Solid Memo ajoute ces référencements quand il crée une instance ou met à jour son format, et ici quand vous le demandez. Il ne rajoute jamais de lui-même un référencement que vous ou une autre application avez supprimé.",
-    "loading": "Lecture de vos index de types…",
+  "oldRegistrations": {
+    "heading": "Anciens référencements",
+    "intro": "Les versions précédentes de Solid Memo référençaient chaque type de données de cette instance dans vos index de types. Désormais, seule l’instance est référencée, et le reste est trouvé à partir d’elle. Les supprimer ne modifie aucune de vos données, et seules les entrées de Solid Memo sont supprimées.",
     "class": {
-      "instance": "Cette instance (dossier de Solid Memo)",
-      "catalog": "Son catalogue de paquets",
+      "catalog": "Le catalogue de paquets de cette instance",
       "deck": "Paquets",
       "card": "Cartes",
       "reviewState": "États de révision",
@@ -1514,13 +1511,11 @@
       "private": "index de types privé",
       "public": "index de types public"
     },
-    "registered": "dans votre {index}",
-    "missing": "absent de votre {index}",
-    "noPrivateIndex": "Les états de révision et les réponses indiquent ce que vous avez étudié et avec quel succès : ils ne sont donc jamais référencés ailleurs que dans votre index de types privé. Comme vous n’en avez pas, ils ne sont pas référencés.",
-    "unreadable": "Impossible de lire votre {index} : ce qu’il référence n’est donc pas affiché ici, et rien n’y est ajouté.",
-    "add": "Référencer ce qui manque",
-    "adding": "Référencement…",
-    "complete": "Tout est référencé."
+    "in": "dans votre {index}",
+    "unreadable": "Impossible de lire votre {index} : ce qu’il contient n’est donc pas affiché ici, et rien n’en est supprimé.",
+    "remove": "Supprimer les anciens référencements",
+    "removing": "Suppression…",
+    "removed": "Supprimés."
   },
   "registrationTargetChooser": {
     "legend": "Référencer dans",

@@ -358,10 +358,13 @@ Press **Save**. A deck's own preferences can set daily limits for that
 deck, where an empty field follows these, and show its cards in another
 language ([Languages](#languages)).
 
-Under the settings (not for a guest), **Findable by other apps** shows
-whether other Solid apps can find your decks and study through your
-Pod's type indexes, and registers what's missing when you ask
-([data-model.md](data-model.md#discovery-chain)).
+If you used Solid Memo before it registered only the instance, **Old
+registrations** may show under the settings (not for a guest). It lists
+the entries earlier versions added to your Pod's type indexes for each
+kind of this instance's data. Press **Remove old registrations** to
+take them out. Your data doesn't change, the instance stays on your
+list, and entries other apps added stay where they are
+([data-model.md](data-model.md#registrations)).
 
 ## Languages
 

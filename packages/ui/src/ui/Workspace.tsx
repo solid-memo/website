@@ -40,7 +40,7 @@ import { GuestStudyOffer } from "./GuestStudyOffer";
 import { InstanceBar } from "./InstanceBar";
 import { InstanceCreator } from "./InstanceCreator";
 import { InstancePickerContainer } from "./InstancePickerContainer";
-import { FindableContainer } from "./FindableContainer";
+import { OldRegistrationsContainer } from "./OldRegistrationsContainer";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { UnclaimedDecksNotice } from "./UnclaimedDecksNotice";
 import { type DataCheck, useDataCheck } from "./dataCheck";
@@ -1145,9 +1145,13 @@ export function Workspace({
               offersConnectedScreen={session.guest !== true}
               onBack={() => navigate({ screen: "home", instanceUrl: instanceUrl! })}
             />
-            {/* A guest's pod is on this device: no other app looks there. */}
+            {/* A guest's pod is on this device: no other app looks there, so nothing there needs tidying. */}
             {session.guest !== true && (
-              <FindableContainer useCases={useCases} session={session} instance={activeInstance!} />
+              <OldRegistrationsContainer
+                useCases={useCases}
+                session={session}
+                instance={activeInstance!}
+              />
             )}
           </>
         );

@@ -7,7 +7,7 @@
 /**
  * The Studio's edits of metadata against a real Solid server: an
  * instance renamed everywhere its name is kept (its meta document, its
- * catalog and both of its type index registrations), its catalog
+ * catalog and its type index registration), its catalog
  * described, a deck given authors and a license, and a course's
  * chapters completed changed. Every write is checked against the shapes,
  * and the instance stays valid. A change made elsewhere meanwhile is
@@ -213,18 +213,18 @@ describe.each(SERVERS)("metadata on $name", ({ url: server }) => {
     everyEdit = await etagMarksEveryEdit(server);
   });
 
-  it("renames an instance in its meta document, its catalog and every type index registration of its data", async () => {
+  it("renames an instance in its meta document, its catalog and its type index registration", async () => {
     const { session, instance, typeIndex } = await seed(server);
     const useCases = page();
-    // One registration for each class of the instance's data, all in the private index.
-    expect(await titlesIn(typeIndex)).toEqual(Array(7).fill("Main"));
+    // The instance's registration alone, in the private index.
+    expect(await titlesIn(typeIndex)).toEqual(["Main"]);
 
     await expect(useCases.renameInstance(session, instance, " Languages ")).resolves.toEqual({
       ...instance,
       name: "Languages",
     });
 
-    expect(await titlesIn(typeIndex)).toEqual(Array(7).fill("Languages"));
+    expect(await titlesIn(typeIndex)).toEqual(["Languages"]);
     await expect(useCases.listInstances(session)).resolves.toEqual([
       { ...instance, name: "Languages" },
     ]);

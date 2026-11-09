@@ -682,13 +682,7 @@ export function createSessionUseCases({
       // The study is the user's now: what follows only tidies.
       progress.finished("tidy");
       updateJournal.end(source);
-      const tidied = await (async () => {
-        // The registrations of each class of its data let other apps find it; the instance works without, and Preferences adds them later.
-        await instanceRepository
-          .registerDataClasses({ webId: session.webId, instanceUrl: target, title: instance.name })
-          .catch(() => undefined);
-        await removeGuestInstance(guestInstance);
-      })().then(
+      const tidied = await removeGuestInstance(guestInstance).then(
         () => true,
         () => false,
       );

@@ -73,13 +73,14 @@ export interface InstanceDeletion extends KeptDocuments {
 }
 
 /**
- * The kinds of an instance's data registered in the type indexes, one
- * class each (docs/data-model.md "Discovery chain"): the instance
- * itself, its catalog, its decks, cards, review states and answers,
- * and the drafts of releases its owner writes.
+ * The classes of an instance's data earlier versions of Solid Memo
+ * registered in the user's type indexes, one registration each, beside
+ * the instance's own (docs/data-model.md "Registrations"): its catalog,
+ * decks, cards, review states, answers and the drafts of releases. Only
+ * the instance is registered now; these are known so that the user can
+ * remove them.
  */
-export const DATA_CLASSES = [
-  "instance",
+export const OLD_REGISTRATION_CLASSES = [
   "catalog",
   "deck",
   "card",
@@ -87,31 +88,12 @@ export const DATA_CLASSES = [
   "answer",
   "draft",
 ] as const;
-export type DataClass = (typeof DATA_CLASSES)[number];
+export type OldRegistrationClass = (typeof OLD_REGISTRATION_CLASSES)[number];
 
-/**
- * Review states and answers say what the user studied, and how well,
- * and a draft is its author's until it is published: they are
- * registered in the private type index only, never in the public one,
- * even for an instance registered publicly.
- */
-export function isPrivateOnly(dataClass: DataClass): boolean {
-  return dataClass === "reviewState" || dataClass === "answer" || dataClass === "draft";
-}
-
-/** One registration an instance's data has, or is missing, in one type index. */
-export interface DataClassRegistration {
-  dataClass: DataClass;
-  index: RegistrationTarget;
-  registered: boolean;
-}
-
-/** The registrations an instance's data has and is missing, by class. */
-export interface DataClassRegistrations {
-  /** In DATA_CLASSES order, the private index's before the public one's. */
-  registrations: DataClassRegistration[];
-  /** No private type index: review states and answers, which go only there, are not registered. */
-  privateIndexMissing: boolean;
-  /** The type indexes the profile links that could not be read: what they register is not known, and nothing is added to them. */
+/** The registrations earlier versions wrote for an instance's data that are still in the user's type indexes. */
+export interface OldRegistrations {
+  /** The private index's first, each index's in OLD_REGISTRATION_CLASSES order. */
+  registrations: { dataClass: OldRegistrationClass; index: RegistrationTarget }[];
+  /** The user's type indexes that could not be read: what they hold is not known, and nothing is removed from them. */
   unreadableIndexes: RegistrationTarget[];
 }

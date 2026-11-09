@@ -491,10 +491,10 @@ the shape it moves to.
 The format update brings each outdated document up to this app's formats
 on its own, where it is, in one write the pod makes whole or not at all.
 No document, subject or folder changes its address, so bookmarks and
-other apps' links still hold, and no type index registration changes;
-only missing ones are added. No copy or backup is kept. A document that
-can't be updated now is left as it is, readable, and the update goes on;
-run again, it updates what's still outdated
+other apps' links still hold. Nothing outside the instance is written:
+no type index registration is added or changed. No copy or backup is
+kept. A document that can't be updated now is left as it is, readable,
+and the update goes on; run again, it updates what's still outdated
 ([instanceUpdate.ts](../packages/domain/src/instanceUpdate.ts),
 `updateInstance` in
 [instances.ts](../packages/application/src/instances.ts)).
@@ -502,7 +502,7 @@ run again, it updates what's still outdated
 ```mermaid
 flowchart TD
     accTitle: Updating an instance
-    accDescr: Once the learner confirms, the update reads what is outdated, writes one document after another, and registers what the type index lacks once nothing failed.
+    accDescr: Once the learner confirms, the update reads what is outdated and writes one document after another, then says what is done or left.
     open["Instance opened"] --> plan["planMigration<br/>read meta, preferences,<br/>every deck's cards and reviews"]
     plan -->|nothing outdated| quiet["(nothing shown)"]
     plan -->|outdated| notice["Notice: what will change"]
@@ -512,8 +512,7 @@ flowchart TD
     write -->|written| updated["Updated"]
     write -->|refused or failed| left["Left as it is,<br/>named with why"]
     updated & left -->|the next document| write
-    updated & left -->|none left| register["3 register: once nothing failed,<br/>the registrations missing<br/>from the type index"]
-    register --> done["Done; or what is left, and why:<br/>Try again updates only that"]
+    updated & left -->|none left| done["Done; or what is left, and why:<br/>Try again updates only that"]
 ```
 
 - **One document at a time is enough.** No fact of the update spans
@@ -581,15 +580,13 @@ flowchart TD
   catalog of the decks, or a deck's cards or review states — with why,
   and how many it did update. **Try again** plans afresh and writes only
   what's still outdated. Closed, the notice shows what's left.
-- **Then the registrations.** Once nothing failed, the update adds each
-  registration by class that belongs in a type index and is missing
-  there ([data-model.md](data-model.md#discovery-chain)), in one write
-  per index, with `If-Match`. An instance made before there were such
-  registrations gains them; existing ones are left as they are. This
-  is the one write outside the instance; a failure there leaves the
-  update done, and **Register what is missing** in Preferences adds them
-  later. An update that left a document adds none: it would register
-  a catalog it couldn't write.
+- **Nothing outside the instance.** The update writes no type index
+  registration. The instance's data is reached from its folder
+  ([data-model.md](data-model.md#discovery-chain)), so an instance made
+  before there were catalogs needs no more than its `sm:Instance`
+  registration once updated. Earlier versions also added a
+  registration per class of the instance's data once nothing failed;
+  those already in a pod are left as they are.
 - **A closed tab** part-way leaves an instance that works, and its next
   opening offers the rest. Nothing is noted in the browser.
 - **Other tabs, other devices.** Nothing is held while the update runs.
@@ -627,10 +624,8 @@ file and shared access, and checks that:
 
 - each outdated document is written once, in order, held to the version
   it was read at (`If-Match` the ETag of its last read where the server
-  enforces it, else right after a read of it). The last write is one
-  edit of the type index (with `If-Match` where enforced), which keeps
-  every triple and adds the registrations of the instance's catalog,
-  decks, cards, review states and answers. No access control is
+  enforces it, else right after a read of it). None goes to the type
+  index, which is served byte for byte as before. No access control is
   written, and no resource comes or goes;
 - the instance is updated, conforms and has nothing left to update, its
   decks and documents at the addresses they had; the other app's triple,

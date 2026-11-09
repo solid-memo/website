@@ -452,15 +452,11 @@ describe("guests", () => {
       [`${TARGET}history/2026-10.ttl`, GUEST_ORIGIN],
     ]);
     expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${TARGET}meta.ttl`, "pod");
-    expect(deps.instanceRepository.attachInstance).toHaveBeenCalledWith({
+    // Its sm:Instance registration is the one written: none for the classes of its data.
+    expect(deps.instanceRepository.attachInstance).toHaveBeenCalledExactlyOnceWith({
       webId: session.webId,
       instanceUrl: TARGET,
       registrationTarget: "private",
-    });
-    expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledWith({
-      webId: session.webId,
-      instanceUrl: TARGET,
-      title: "My study",
     });
     expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
       webId: GUEST_WEBID,
@@ -831,21 +827,6 @@ describe("guests", () => {
         registrationTarget: "private",
       }),
     ).resolves.toMatchObject({ ok: true });
-  });
-
-  it("transferGuestStudy tidies the guest's study away even when its data could not be registered", async () => {
-    const { deps } = guestDeps();
-    vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(new Error("offline"));
-    expect(
-      await createUseCases(deps).transferGuestStudy(session, guestInstance, {
-        containerUrl: TARGET,
-        registrationTarget: "private",
-      }),
-    ).toEqual({ ok: true, instance: { url: TARGET, name: "My study" }, tidied: true });
-    expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
-      webId: GUEST_WEBID,
-      instance: guestInstance,
-    });
   });
 
   it("transferGuestStudy says the study moved even when the guest's could not be tidied away", async () => {
@@ -1327,7 +1308,7 @@ describe("guests", () => {
       });
       // The target's preferences stay; the guest's are not read, nor anything registered.
       expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
-      expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
       expect(deps.instanceRepository.deleteInstance).toHaveBeenCalledWith({
         webId: GUEST_WEBID,
         instance: guestInstance,

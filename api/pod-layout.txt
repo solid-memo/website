@@ -15,19 +15,7 @@ digest: kept in <instance>digest.ttl
 draft: its chapter "intro" in <instance>drafts/solid/v2/chapter-intro.ttl
 draft: the cards no chapter asks in <instance>drafts/solid/v2/cards.ttl
 draft: version 2 of the draft "solid" in <instance>drafts/solid/v2/release.ttl
-instance registered in the private index: the private type index registers dcat:Catalog at solid:instance <instance>catalog.ttl#catalog, titled with the instance's name
-instance registered in the private index: the private type index registers sm:Answer at solid:instanceContainer <instance>history/, titled with the instance's name
-instance registered in the private index: the private type index registers sm:Card at solid:instanceContainer <instance>decks/, titled with the instance's name
-instance registered in the private index: the private type index registers sm:Deck at solid:instance <instance>catalog.ttl, titled with the instance's name
-instance registered in the private index: the private type index registers sm:Deck at solid:instanceContainer <instance>drafts/, titled with the instance's name
 instance registered in the private index: the private type index registers sm:Instance at solid:instanceContainer <instance>, titled with the instance's name
-instance registered in the private index: the private type index registers sm:ReviewState at solid:instanceContainer <instance>reviews/, titled with the instance's name
-instance registered in the public index: the private type index registers sm:Answer at solid:instanceContainer <instance>history/, titled with the instance's name
-instance registered in the public index: the private type index registers sm:Deck at solid:instanceContainer <instance>drafts/, titled with the instance's name
-instance registered in the public index: the private type index registers sm:ReviewState at solid:instanceContainer <instance>reviews/, titled with the instance's name
-instance registered in the public index: the public type index registers dcat:Catalog at solid:instance <instance>catalog.ttl#catalog, titled with the instance's name
-instance registered in the public index: the public type index registers sm:Card at solid:instanceContainer <instance>decks/, titled with the instance's name
-instance registered in the public index: the public type index registers sm:Deck at solid:instance <instance>catalog.ttl, titled with the instance's name
 instance registered in the public index: the public type index registers sm:Instance at solid:instanceContainer <instance>, titled with the instance's name
 instance: described by <instance>meta.ttl#it, a sm:Instance
 instances: found by a sm:Instance registration at solid:instance in the private type index

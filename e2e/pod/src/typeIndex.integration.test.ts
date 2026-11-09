@@ -10,18 +10,20 @@
  * made in the storage the instance is in (not at the server's root, which
  * may be another pod's), linked from the WebID document, or, where that
  * cannot be written (as on Inrupt PodSpaces), from an extended profile it
- * names. Beside the instance, each class of its data is registered, its
- * review states, answers and drafts in the private index alone, read back from
- * the index as written, and every registration goes when the instance is
- * deleted. Runs against each server globalSetup.ts starts. Every run here
- * shares the storage's one type index; a file's tests run one at a time.
+ * names. The instance alone is registered, by which Solid Memo finds it;
+ * its data gets no registration of its own. The registrations earlier
+ * versions wrote for each class of its data, which an index may still
+ * hold, take the instance's new name with it and go when the instance is
+ * removed, or on the user's say, while another app's stay. Runs against each server
+ * globalSetup.ts starts. Every run here shares the storage's one type
+ * index; a file's tests run one at a time.
  */
 import { Parser, Writer } from "n3";
 import { describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
-import { aclOf, ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, storageOf } from "./serverTraits";
+import { aclOf, storageOf } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
 const PRIVATE_TYPE_INDEX = "http://www.w3.org/ns/solid/terms#privateTypeIndex";
@@ -140,11 +142,11 @@ async function registrationsIn(index: string, container: string) {
     .sort((a, b) => a.target.localeCompare(b.target));
 }
 
+/** The classes of an instance's data earlier versions registered, beside the instance itself. */
+type DataClass = "instance" | "catalog" | "deck" | "card" | "reviewState" | "answer" | "draft";
+
 /** What each class of an instance's data is registered as, in the order registrationsIn sorts them. */
-function registered(
-  container: string,
-  classes: ("instance" | "catalog" | "deck" | "card" | "reviewState" | "answer" | "draft")[],
-) {
+function registered(container: string, classes: DataClass[], title = "Main") {
   const all = {
     instance: { forClass: [`${SM}Instance`], predicate: "instanceContainer", target: container },
     catalog: {
@@ -171,8 +173,60 @@ function registered(
     },
   };
   return classes
-    .map((dataClass) => ({ ...all[dataClass], subject: expect.any(String), title: ["Main"] }))
+    .map((dataClass) => ({ ...all[dataClass], subject: expect.any(String), title: [title] }))
     .sort((a, b) => a.target.localeCompare(b.target));
+}
+
+/** The id prefix earlier versions gave each class's registration. */
+const LEGACY_PREFIX: Record<Exclude<DataClass, "instance">, string> = {
+  catalog: "sm-cat",
+  deck: "sm-deck",
+  card: "sm-card",
+  reviewState: "sm-review",
+  answer: "sm-answer",
+  draft: "sm-draft",
+};
+
+/**
+ * Add to a type index the registrations an earlier version wrote for
+ * classes of the instance's data, titled "Main", as it wrote them; and,
+ * when given, another app's registration of a folder of its own inside the
+ * instance's container, which is not the instance's data.
+ */
+async function seedLegacyRegistrations(
+  index: string,
+  container: string,
+  classes: Exclude<DataClass, "instance">[],
+  foreignFolder?: string,
+): Promise<void> {
+  const statements = classes.map((dataClass) => {
+    const [registration] = registered(container, [dataClass]);
+    const subject = `<${index}#${LEGACY_PREFIX[dataClass]}-${crypto.randomUUID()}>`;
+    // A statement each: Solid-Nextcloud stores `<s> a <C> ; <p> <o>` as `<s> <C> <p>`.
+    return [
+      `${subject} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SOLID_TERMS}TypeRegistration> .`,
+      `${subject} <${SOLID_TERMS}forClass> <${registration!.forClass[0]}> .`,
+      `${subject} <${SOLID_TERMS}${registration!.predicate}> <${registration!.target}> .`,
+      `${subject} <http://purl.org/dc/terms/title> "Main" .`,
+    ].join("\n");
+  });
+  if (foreignFolder !== undefined) {
+    const subject = `<${index}#other-app>`;
+    statements.push(
+      [
+        `${subject} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SOLID_TERMS}TypeRegistration> .`,
+        `${subject} <${SOLID_TERMS}forClass> <${SM}Card> .`,
+        `${subject} <${SOLID_TERMS}instanceContainer> <${foreignFolder}> .`,
+        `${subject} <http://purl.org/dc/terms/title> "Other" .`,
+      ].join("\n"),
+    );
+  }
+  const insertion = await fetch(index, {
+    method: "PATCH",
+    headers: { "content-type": "application/sparql-update" },
+    body: `INSERT DATA { ${statements.join("\n")} }`,
+  });
+  expect(insertion.ok, `PATCH ${index}: ${insertion.status}`).toBe(true);
 }
 
 describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => {
@@ -194,7 +248,7 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     );
   });
 
-  it("registers each class of the instance's data in it, where Solid Memo still finds the instance by its own", async () => {
+  it("registers the instance alone in it, by which Solid Memo finds it, and unregisters it when deleted", async () => {
     const { base, webId } = await profile(server);
     const repository = instances();
 
@@ -206,27 +260,21 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
     });
 
     const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
-    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
-    expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, [...all]));
+    expect(await registrationsIn(index, instance.url)).toEqual(
+      registered(instance.url, ["instance"]),
+    );
     expect(await repository.listInstances(webId)).toContainEqual({
       url: instance.url,
       name: "Main",
     });
-    expect(
-      await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url }),
-    ).toEqual({
-      registrations: all.map((dataClass) => ({ dataClass, index: "private", registered: true })),
-      privateIndexMissing: false,
-      unreadableIndexes: [],
-    });
 
-    // Deleting the instance removes every one of them.
     await repository.deleteInstance({ webId, instance });
     expect(await registrationsIn(index, instance.url)).toEqual([]);
   });
 
-  it("says a registration the user removed is missing, and adds it back only when asked", async (context) => {
-    const { base, webId } = await profile(server);
+  it("renames and removes the registrations an earlier version wrote for each class of the instance's data, and keeps another app's", async () => {
+    const { base, webId } = await profile(server, () => [], { privateIndex: true });
+    const index = `${base}settings/privateTypeIndex.ttl`;
     const repository = instances();
     const instance = await repository.createInstance({
       webId,
@@ -234,37 +282,100 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
       name: "Main",
       registrationTarget: "private",
     });
-    const index = `${await storageOf(base)}settings/privateTypeIndex.ttl`;
-    // The removal is made in the same second as the index was read, which such a server's ETag does not tell apart.
-    if (!(await etagMarksEveryEdit(server))) context.skip(ETAG_OUTLIVES_EDITS);
-    const all = ["instance", "catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
-
-    const cards = (await registrationsIn(index, instance.url)).find((registration) =>
-      registration.target.endsWith("decks/"),
-    )!;
-    const removal = await fetch(index, {
-      method: "PATCH",
-      headers: { "content-type": "application/sparql-update" },
-      body: `DELETE DATA { <${cards.subject}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SOLID_TERMS}TypeRegistration> ; <${SOLID_TERMS}forClass> <${SM}Card> ;
-        <${SOLID_TERMS}instanceContainer> <${cards.target}> ; <http://purl.org/dc/terms/title> "Main" . }`,
-    });
-    expect(removal.ok, `PATCH ${index}: ${removal.status}`).toBe(true);
-    expect(await registrationsIn(index, instance.url)).toEqual(
-      registered(instance.url, ["instance", "catalog", "deck", "reviewState", "answer", "draft"]),
+    const legacy = ["catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
+    const foreign = {
+      subject: `${index}#other-app`,
+      forClass: [`${SM}Card`],
+      predicate: "instanceContainer",
+      target: `${instance.url}other-app/`,
+      title: ["Other"],
+    };
+    await seedLegacyRegistrations(index, instance.url, [...legacy], foreign.target);
+    const all = [...registered(instance.url, ["instance", ...legacy]), foreign].sort((a, b) =>
+      a.target.localeCompare(b.target),
     );
-    expect(
-      (await repository.readDataClassRegistrations({ webId, instanceUrl: instance.url }))
-        .registrations,
-    ).toContainEqual({
-      dataClass: "card",
-      index: "private",
-      registered: false,
+    expect(await registrationsIn(index, instance.url)).toEqual(all);
+    expect(await repository.listInstances(webId)).toContainEqual({
+      url: instance.url,
+      name: "Main",
     });
-    await repository.registerDataClasses({ webId, instanceUrl: instance.url, title: "Main" });
-    expect(await registrationsIn(index, instance.url)).toEqual(registered(instance.url, [...all]));
+
+    // Renamed, the instance's registrations take the new name, earlier versions' too; another app's keeps its own.
+    await repository.renameRegistrations({ webId, instanceUrl: instance.url, title: "Renamed" });
+    expect(await registrationsIn(index, instance.url)).toEqual(
+      [...registered(instance.url, ["instance", ...legacy], "Renamed"), foreign].sort((a, b) =>
+        a.target.localeCompare(b.target),
+      ),
+    );
+
+    // Taken off the list, every one of the instance's goes; another app's stays.
+    await repository.detachInstance({ webId, instance });
+    expect(await registrationsIn(index, instance.url)).toEqual([foreign]);
   });
 
-  it("registers an instance publicly, its review states, answers and drafts in the private index alone, and unregisters it from both", async () => {
+  it("lists and removes, on the user's say, the registrations an earlier version wrote for the instance's data and nothing else", async () => {
+    const { base, webId } = await profile(server, () => [], { privateIndex: true });
+    const index = `${base}settings/privateTypeIndex.ttl`;
+    const repository = instances();
+    const instance = await repository.createInstance({
+      webId,
+      containerUrl: `${base}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const legacy = ["catalog", "deck", "card", "reviewState", "answer", "draft"] as const;
+    const foreign = {
+      subject: `${index}#other-app`,
+      forClass: [`${SM}Card`],
+      predicate: "instanceContainer",
+      target: `${instance.url}other-app/`,
+      title: ["Other"],
+    };
+    await seedLegacyRegistrations(index, instance.url, [...legacy], foreign.target);
+    // The instance's cards registered as an earlier version did, but not by its name for them: maybe another app's.
+    const lookalike = {
+      subject: `${index}#cards`,
+      forClass: [`${SM}Card`],
+      predicate: "instanceContainer",
+      target: `${instance.url}decks/`,
+      title: ["Lookalike"],
+    };
+    const insertion = await fetch(index, {
+      method: "PATCH",
+      headers: { "content-type": "application/sparql-update" },
+      body: `INSERT DATA {
+        <${lookalike.subject}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SOLID_TERMS}TypeRegistration> .
+        <${lookalike.subject}> <${SOLID_TERMS}forClass> <${SM}Card> .
+        <${lookalike.subject}> <${SOLID_TERMS}instanceContainer> <${lookalike.target}> .
+        <${lookalike.subject}> <http://purl.org/dc/terms/title> "Lookalike" .
+      }`,
+    });
+    expect(insertion.ok, `PATCH ${index}: ${insertion.status}`).toBe(true);
+    const args = { webId, instanceUrl: instance.url };
+
+    expect(await repository.readOldRegistrations(args)).toEqual({
+      registrations: legacy.map((dataClass) => ({ dataClass, index: "private" })),
+      unreadableIndexes: [],
+    });
+
+    await repository.removeOldRegistrations(args);
+    // The instance's registration stays, and so do another app's and the lookalike.
+    expect(await registrationsIn(index, instance.url)).toEqual(
+      [...registered(instance.url, ["instance"]), foreign, lookalike].sort((a, b) =>
+        a.target.localeCompare(b.target),
+      ),
+    );
+    expect(await repository.readOldRegistrations(args)).toEqual({
+      registrations: [],
+      unreadableIndexes: [],
+    });
+    expect(await repository.listInstances(webId)).toContainEqual({
+      url: instance.url,
+      name: "Main",
+    });
+  });
+
+  it("registers an instance publicly alone, and removes it and an earlier version's registrations of its data from both indexes when deleted", async () => {
     const { base, card, webId } = await profile(server, () => [], { privateIndex: true });
     const privateIndex = `${base}settings/privateTypeIndex.ttl`;
     const repository = instances();
@@ -281,15 +392,23 @@ describe.each(SERVERS)("registering an instance on $name", ({ url: server }) => 
       `<${webId}> <${SOLID_TERMS}publicTypeIndex> <${publicIndex}> .`,
     );
     expect(await registrationsIn(publicIndex, instance.url)).toEqual(
+      registered(instance.url, ["instance"]),
+    );
+    expect(await registrationsIn(privateIndex, instance.url)).toEqual([]);
+    expect(await repository.listInstances(webId)).toContainEqual({
+      url: instance.url,
+      name: "Main",
+    });
+
+    // As an earlier version registered a public instance's data: its review states, answers and drafts privately.
+    await seedLegacyRegistrations(publicIndex, instance.url, ["catalog", "deck", "card"]);
+    await seedLegacyRegistrations(privateIndex, instance.url, ["reviewState", "answer", "draft"]);
+    expect(await registrationsIn(publicIndex, instance.url)).toEqual(
       registered(instance.url, ["instance", "catalog", "deck", "card"]),
     );
     expect(await registrationsIn(privateIndex, instance.url)).toEqual(
       registered(instance.url, ["reviewState", "answer", "draft"]),
     );
-    expect(await repository.listInstances(webId)).toContainEqual({
-      url: instance.url,
-      name: "Main",
-    });
 
     await repository.deleteInstance({ webId, instance });
     expect(await registrationsIn(publicIndex, instance.url)).toEqual([]);

@@ -18,7 +18,6 @@ function stepLabels(t: I18n["t"]): Record<UpdateStep, string> {
   return {
     read: t("instanceUpdate.step.read"),
     write: t("instanceUpdate.step.write"),
-    register: t("instanceUpdate.step.register"),
   };
 }
 

@@ -21,9 +21,10 @@
   "releases.integration.test.ts > finishes a publishing cut short by publishing again, and keeps the release when the instance is deleted": "nc-acl-link",
   "releases.integration.test.ts > publishes a draft as one document anyone can read, lists it, freezes the draft, and never writes over it": "nc-acl-link",
   "typeIndex.integration.test.ts > links it from an extended profile when the WebID document is read-only": "nc-reported-privately",
+  "typeIndex.integration.test.ts > lists and removes, on the user's say, the registrations an earlier version wrote for the instance's data and nothing else": "nc-put-type",
   "typeIndex.integration.test.ts > makes a type index in the instance's storage, linked from a WebID document that has none": "nc-put-type",
   "typeIndex.integration.test.ts > refuses, saying where it tried, and keeps no instance, when no profile document can be written": "nc-reported-privately",
-  "typeIndex.integration.test.ts > registers an instance publicly, its review states, answers and drafts in the private index alone, and unregisters it from both": "nc-put-type",
-  "typeIndex.integration.test.ts > registers each class of the instance's data in it, where Solid Memo still finds the instance by its own": "nc-put-type",
-  "typeIndex.integration.test.ts > says a registration the user removed is missing, and adds it back only when asked": "nc-put-type"
+  "typeIndex.integration.test.ts > registers an instance publicly alone, and removes it and an earlier version's registrations of its data from both indexes when deleted": "nc-put-type",
+  "typeIndex.integration.test.ts > registers the instance alone in it, by which Solid Memo finds it, and unregisters it when deleted": "nc-put-type",
+  "typeIndex.integration.test.ts > renames and removes the registrations an earlier version wrote for each class of the instance's data, and keeps another app's": "nc-put-type"
 }

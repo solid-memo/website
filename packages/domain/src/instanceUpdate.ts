@@ -19,10 +19,10 @@ import type { LangText } from "./langText";
  * address.
  */
 
-/** The steps the user sees: finding what to update, updating each document, making the instance's data findable. */
-export type UpdateStep = "read" | "write" | "register";
+/** The steps the user sees: finding what to update, and updating each document. */
+export type UpdateStep = "read" | "write";
 
-export const UPDATE_STEPS: readonly UpdateStep[] = ["read", "write", "register"];
+export const UPDATE_STEPS: readonly UpdateStep[] = ["read", "write"];
 
 export interface UpdateProgress {
   step: UpdateStep;

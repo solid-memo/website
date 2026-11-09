@@ -198,27 +198,24 @@ describe("instances", () => {
 
     expect(deps.instanceRepository.detachInstance).toHaveBeenCalledTimes(2);
   });
-  it("dataClassRegistrations and registerDataClasses pass the WebID and the instance, titled with its name", async () => {
+  it("oldRegistrations and removeOldRegistrations pass the WebID and the instance's address", async () => {
     const deps = makeDeps();
-    const registrations = {
-      registrations: [{ dataClass: "deck" as const, index: "private" as const, registered: false }],
-      privateIndexMissing: false,
-      unreadableIndexes: [],
+    const old = {
+      registrations: [{ dataClass: "card" as const, index: "private" as const }],
+      unreadableIndexes: ["public" as const],
     };
-    vi.mocked(deps.instanceRepository.readDataClassRegistrations).mockResolvedValue(registrations);
+    vi.mocked(deps.instanceRepository.readOldRegistrations).mockResolvedValue(old);
     const useCases = createUseCases(deps);
-    await expect(useCases.dataClassRegistrations(session, instance)).resolves.toEqual(
-      registrations,
-    );
-    expect(deps.instanceRepository.readDataClassRegistrations).toHaveBeenCalledWith({
+    await expect(useCases.oldRegistrations(session, instance)).resolves.toEqual(old);
+    expect(deps.instanceRepository.readOldRegistrations).toHaveBeenCalledWith({
       webId: session.webId,
       instanceUrl: instance.url,
     });
-    await useCases.registerDataClasses(session, instance);
-    expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledWith({
+    expect(deps.instanceRepository.removeOldRegistrations).not.toHaveBeenCalled();
+    await useCases.removeOldRegistrations(session, instance);
+    expect(deps.instanceRepository.removeOldRegistrations).toHaveBeenCalledExactlyOnceWith({
       webId: session.webId,
       instanceUrl: instance.url,
-      title: instance.name,
     });
   });
   describe("format migration", () => {
@@ -359,7 +356,7 @@ describe("instances", () => {
       { url: CATALOG, holds: "catalog" },
     ];
 
-    it("updateInstance brings each outdated document up to date on its own, one after another, then adds the missing registrations", async () => {
+    it("updateInstance brings each outdated document up to date on its own, one after another, and registers nothing", async () => {
       const { deps, written } = outdated();
       const progress: string[] = [];
       const outcome = await createUseCases(deps).updateInstance(session, instance, (p) =>
@@ -380,22 +377,19 @@ describe("instances", () => {
       expect(deps.instanceCopier.copyResource).not.toHaveBeenCalled();
       expect(deps.shapeValidator.validateDocument).not.toHaveBeenCalled();
       expect(deps.updateJournal.begin).not.toHaveBeenCalled();
-      // Once updated, the registrations of its data that are missing are added.
-      expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledExactlyOnceWith({
-        webId: session.webId,
-        instanceUrl: instance.url,
-        title: instance.name,
-      });
+      // Nothing outside the instance: no type index registration is added.
+      expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.removeOldRegistrations).not.toHaveBeenCalled();
       expect(progress).toEqual([
-        "read 0/3",
-        "write 1/3 (0 of 5)",
-        ...[1, 2, 3, 4].map((n) => `write 1/3 (${n} of 5)`),
-        "register 2/3",
-        "register 3/3",
+        "read 0/2",
+        "write 1/2 (0 of 5)",
+        ...[1, 2, 3, 4].map((n) => `write 1/2 (${n} of 5)`),
+        "write 2/2",
       ]);
     });
 
-    it("updateInstance goes on past a document it cannot update, naming it with why, and adds no registration until all are", async () => {
+    it("updateInstance goes on past a document it cannot update, naming it with why", async () => {
       const { deps, written } = outdated();
       const refused = new AppError("changedElsewhere", { url: CARDS });
       const offline = new TypeError("Failed to fetch");
@@ -411,7 +405,6 @@ describe("instances", () => {
       });
       // Nothing is put back: each document written stays written, each failed one as it was.
       expect(written).toEqual([META, REVIEWS, CATALOG]);
-      expect(deps.instanceRepository.registerDataClasses).not.toHaveBeenCalled();
     });
 
     it("updateInstance runs again on what is still outdated, as it finds it then, and finishes", async () => {
@@ -435,7 +428,6 @@ describe("instances", () => {
       });
       expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();
       expect(deps.deckRepository.upgradeDecks).not.toHaveBeenCalled();
-      expect(deps.instanceRepository.registerDataClasses).toHaveBeenCalledOnce();
     });
 
     it("updateInstance counts a document brought up to date meanwhile, elsewhere, as neither updated nor failed", async () => {
@@ -446,7 +438,7 @@ describe("instances", () => {
         updated: [UPDATED[1], UPDATED[3], UPDATED[4]],
         failed: [],
       });
-      // With nothing outdated left at all, it writes nothing, and adds the missing registrations.
+      // With nothing outdated left at all, it writes nothing.
       const done = makeDeps();
       vi.mocked(done.deckRepository.listCards).mockResolvedValue([current("a")]);
       const progress: string[] = [];
@@ -459,8 +451,7 @@ describe("instances", () => {
         failed: [],
       });
       expect(done.deckRepository.upgradeCards).not.toHaveBeenCalled();
-      expect(done.instanceRepository.registerDataClasses).toHaveBeenCalledOnce();
-      expect(progress).toEqual(["read ", "write ", "register ", "register "]);
+      expect(progress).toEqual(["read ", "write ", "write "]);
     });
 
     it("updateInstance writes a document two decks share as one, each deck's part in turn, failed when either part fails", async () => {
@@ -554,17 +545,6 @@ describe("instances", () => {
       await expect(createUseCases(deps).updateInstance(session, instance)).rejects.toThrow("503");
       expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();
       expect(deps.deckRepository.upgradeCards).not.toHaveBeenCalled();
-    });
-
-    it("updateInstance is done even when the registrations of the instance's data cannot be added", async () => {
-      const { deps } = outdated();
-      vi.mocked(deps.instanceRepository.registerDataClasses).mockRejectedValue(
-        new Error("index refused"),
-      );
-      expect(await createUseCases(deps).updateInstance(session, instance)).toEqual({
-        updated: UPDATED,
-        failed: [],
-      });
     });
   });
   describe("renameInstance", () => {
