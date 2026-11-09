@@ -10,11 +10,13 @@ import {
   type DraftChange,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
+import { I18nProvider } from "@solid-memo/ui/i18n";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import { DraftCardsScreen, type DraftCardsView } from "./DraftCardsScreen";
 import { choose } from "../test/choose";
 import { WithKeys } from "../test/keys";
 import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
+import { countSorts } from "../test/sorts";
 
 function renderScreen(
   draft: ReleaseDraft = courseDraft(),
@@ -254,6 +256,69 @@ describe("DraftCardsScreen", () => {
   ] as const)("sorts by %s (descending: %s)", (key, descending, order) => {
     renderScreen(courseDraft(), { sort: { key, descending } });
     expect(fronts()).toEqual(order);
+  });
+
+  it("sorts again only when the cards or the sort change, not on a tick or a new page", () => {
+    const sorts = countSorts();
+    const draft = courseDraft();
+    const shown = (view: DraftCardsView, of = draft) => (
+      <DraftCardsScreen
+        draft={of}
+        view={view}
+        readOnly={null}
+        status={{ saving: false, failure: null }}
+        links={draftLinks}
+        onView={() => undefined}
+        onOpen={() => undefined}
+        onEdit={() => null}
+      />
+    );
+    const { rerender } = render(shown({ sort: { key: "front", descending: false } }), {
+      wrapper: WithKeys,
+    });
+    const first = sorts();
+    fireEvent.click(within(table()).getAllByRole("checkbox")[1]!);
+    expect(sorts()).toBe(first);
+    // A sort that says the same, as a route parsed anew has it.
+    rerender(shown({ sort: { key: "front", descending: false }, page: 2 }));
+    expect(sorts()).toBe(first);
+    rerender(shown({ sort: { key: "front", descending: true } }));
+    expect(sorts()).toBe(first + 1);
+    const edited = applyDraftChanges(draft, [
+      { kind: "addCard", id: "q-new", card: { front: { en: "Another" }, back: { en: "Yes" } } },
+    ]) as ReleaseDraft;
+    rerender(shown({ sort: { key: "front", descending: true } }, edited));
+    expect(sorts()).toBe(first + 2);
+  });
+
+  it("orders the cards anew in another language", () => {
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "addCard", id: "z", card: { front: { en: "Zebra" }, back: { en: "Yes" } } },
+      { kind: "addCard", id: "a", card: { front: { en: "Ägg" }, back: { en: "Yes" } } },
+    ]) as ReleaseDraft;
+    const inLocale = (locale: "en" | "sv") => (
+      <I18nProvider locale={locale} onChoose={() => undefined}>
+        <DraftCardsScreen
+          draft={draft}
+          view={{ sort: { key: "front", descending: false } }}
+          readOnly={null}
+          status={{ saving: false, failure: null }}
+          links={draftLinks}
+          onView={() => undefined}
+          onOpen={() => undefined}
+          onEdit={() => null}
+        />
+      </I18nProvider>
+    );
+    const order = () =>
+      screen
+        .getAllByRole("rowheader")
+        .map((cell) => cell.textContent)
+        .filter((front) => front === "Zebra" || front === "Ägg");
+    const { rerender } = render(inLocale("en"), { wrapper: WithKeys });
+    expect(order()).toEqual(["Ägg", "Zebra"]);
+    rerender(inLocale("sv"));
+    expect(order()).toEqual(["Zebra", "Ägg"]);
   });
 
   it("sorts a card of no front by its id, and one of no back last", () => {

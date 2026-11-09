@@ -2,11 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import type { Deck } from "./deck";
 import {
   arrangeDeckRows,
+  deckGroupPaths,
+  deckRowRanks,
+  deckSortTexts,
   deckTableViewFromParams,
+  deckTextRanks,
   deckTableViewToParams,
   groupsOfDecks,
   groupTrails,
@@ -70,8 +74,14 @@ const capitals = row(deck("capitals", { en: "Kanji 2" }, { direction: "back-to-f
 const rows = [kanji, verbs, capitals];
 
 const english = (text: LangText) => shown(text, ["en"]);
+const rowRanks = (of: readonly DeckTableRow[], view: DeckTableView, locale = "en") =>
+  deckRowRanks(of, deckTextRanks(deckSortTexts(of, view.sort?.column, english), locale));
 const arranged = (view: DeckTableView) =>
-  arrangeDeckRows(rows, view, english, "en").map((r) => r.deck.id);
+  arrangeDeckRows(
+    rows.filter((r) => matchesFilter(r, view.filter)),
+    view.sort,
+    rowRanks(rows, view),
+  ).map((r) => r.deck.id);
 const sorted = (column: DeckColumn, descending = false) =>
   arranged({ filter: "", sort: { column, descending } });
 
@@ -159,6 +169,17 @@ describe("the deck table's filter", () => {
     expect(matchesFilter(row(deck("o", { sv: "Öl" })), "ol")).toBe(true);
     expect(arranged({ filter: "language" })).toEqual(["kanji", "verbs"]);
   });
+
+  it("folds a title once, however many renders ask", () => {
+    const normalize = vi.spyOn(String.prototype, "normalize");
+    onTestFinished(() => normalize.mockRestore());
+    const row = { ...kanji, deck: { ...kanji.deck, title: { en: "Ägg", sv: "Örn" } } };
+    expect(matchesFilter(row, "orn")).toBe(true);
+    normalize.mockClear();
+    // Made anew, as on every render; the same title. Only the filter itself is folded.
+    expect(matchesFilter({ ...row }, "agg")).toBe(true);
+    expect(normalize).toHaveBeenCalledOnce();
+  });
 });
 
 describe("the deck table's order", () => {
@@ -179,6 +200,63 @@ describe("the deck table's order", () => {
     expect(sorted("maxReviewsPerDay", true)).toEqual(["kanji", "verbs", "capitals"]);
     // Kanji was changed last; the others only made, at the same time, so they keep their order.
     expect(sorted("modified", true)).toEqual(["kanji", "verbs", "capitals"]);
+  });
+
+  it("has no texts to rank without a sort, or for a column of numbers", () => {
+    expect(deckSortTexts(rows, undefined, english)).toEqual([]);
+    expect(deckSortTexts(rows, "due", english)).toEqual([]);
+    expect(deckSortTexts(rows, "title", english)).toEqual(
+      rows.map((row) => english(row.deck.title)),
+    );
+  });
+
+  it("ranks texts in the reader's order, those equal but for case at one place", () => {
+    expect(deckTextRanks(["Kanji 10", "kanji 2", "KANJI 2", "Äpple"], "sv")).toEqual([1, 0, 0, 2]);
+  });
+
+  it("keeps rows of texts equal but for case in the order given, either way", () => {
+    const upper = { ...verbs, deck: { ...verbs.deck, title: { en: "KANJI 10" } } };
+    const pair = [kanji, upper];
+    for (const descending of [false, true]) {
+      const sort = { column: "title", descending } as const;
+      const view = { filter: "", sort };
+      expect(arrangeDeckRows(pair, view.sort, rowRanks(pair, view))).toEqual(pair);
+    }
+  });
+
+  it("finds a row's rank by the row, so rows of the same text keep their own", () => {
+    const twin = { ...kanji, deck: { ...kanji.deck, id: "twin" } };
+    const pair = [kanji, twin];
+    const view = { filter: "", sort: { column: "title", descending: false } } as const;
+    expect(arrangeDeckRows(pair, view.sort, deckRowRanks(pair, [1, 0]))).toEqual([twin, kanji]);
+  });
+
+  it("ranks paths of groups longer than a single text can be", () => {
+    const parent = { url: "https://x.example/#g", title: { en: "p".repeat(16_383) } } as DeckGroup;
+    const inGroup = (tail: string) => ({
+      ...kanji,
+      groups: [parent, { ...parent, title: { en: "l".repeat(16_376) + tail } }],
+    });
+    const paths = [inGroup("0000010"), inGroup("0000002"), inGroup("0000003")];
+    const view = { filter: "", sort: { column: "group", descending: false } } as const;
+    expect(deckSortTexts(paths, "group", english)[0]!.length).toBeGreaterThan(16_383);
+    expect(arrangeDeckRows(paths, view.sort, rowRanks(paths, view))).toEqual([
+      paths[1],
+      paths[2],
+      paths[0],
+    ]);
+  });
+
+  it("names a list of groups the decks share once", () => {
+    const shared = kanji.groups;
+    const titles = vi.fn(english);
+    const paths = deckGroupPaths([kanji, { ...verbs, groups: shared }], titles);
+    expect([...paths.keys()]).toEqual([shared]);
+    expect(titles).toHaveBeenCalledTimes(shared.length);
+  });
+
+  it("has no rank by row for a column of numbers", () => {
+    expect(deckRowRanks(rows, []).size).toBe(0);
   });
 
   it("keeps ties in order, and puts a figure not known yet last, either way", () => {

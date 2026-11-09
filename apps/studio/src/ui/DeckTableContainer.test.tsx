@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { DeckTableView } from "@solid-memo/domain/deckTable";
 import type { DeckTree } from "@solid-memo/domain/deckTree";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
@@ -23,14 +24,14 @@ const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
 const languages = { url: `${instanceA.url}catalog.ttl#group-1`, title: { en: "Languages" } };
 
-function renderContainer(useCases: UseCases) {
+function renderContainer(useCases: UseCases, view: DeckTableView = { filter: "" }) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
       <DeckTableContainer
         useCases={useCases}
         instance={instanceA}
-        view={{ filter: "" }}
+        view={view}
         onView={() => undefined}
         shownView="all"
         onShow={() => undefined}
@@ -53,6 +54,27 @@ function renderContainer(useCases: UseCases) {
 const cells = (row: HTMLElement) => within(row).getAllByRole("cell").map(shownText);
 
 describe("DeckTableContainer", () => {
+  it("makes each path of groups once, as the figures come in", async () => {
+    const join = vi.spyOn(Array.prototype, "join");
+    onTestFinished(() => join.mockRestore());
+    const tree: DeckTree = {
+      readOnly: false,
+      children: [
+        { kind: "group", group: languages, children: [{ kind: "deck", deck: kanji }] },
+        { kind: "deck", deck: verbs },
+      ],
+    };
+    const useCases = makeUseCasesFake({
+      listDeckTree: vi.fn(async () => tree),
+      listCards: vi.fn(async () => []),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 7, newCount: 5 })),
+    });
+    renderContainer(useCases, { filter: "", sort: { column: "group", descending: false } });
+    await waitFor(() => expect(screen.getAllByText("7")).toHaveLength(2));
+    // A text to sort by per deck, and a cell's text per list of groups, the empty one too.
+    expect(join.mock.calls.filter(([separator]) => separator === " › ")).toHaveLength(4);
+  });
+
   it("reads the decks as arranged, then each one's cards in use and today's counts, with the instance's pace", async () => {
     const tree: DeckTree = {
       readOnly: false,

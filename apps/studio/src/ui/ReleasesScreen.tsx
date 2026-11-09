@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useCallback, useMemo, useState } from "preact/hooks";
 import type { PublishedRelease } from "@solid-memo/application/releasePublishing";
 import type { Instance } from "@solid-memo/domain/instance";
 import { folded } from "@solid-memo/domain/langText";
@@ -82,37 +82,53 @@ export function ReleasesScreen({
   const [sort, setSort] = useState<TableSort<ReleaseColumn>>();
   const { ask, dialog } = useConfirm();
   /** A release as its address names it ("capitals, version 2"), or its address. */
-  const nameOf = (url: string) => {
-    const place = releasePlaceOf(url);
-    return place === null
-      ? url
-      : t("studio.releases.name", { name: place.name, version: place.version });
-  };
-  /** A draft as its link names it: its title, else its name, and its version. */
-  const draftName = (draft: ReleaseDraftSummary) =>
-    t("studio.releases.name", {
-      name: Object.keys(draft.title).length === 0 ? draft.name : readerText(draft.title),
-      version: draft.version,
-    });
-  const wanted = folded(filter.trim());
-  const shown = sortedRows(
-    releases.filter((release) =>
-      [nameOf(release.url), release.url].some((text) => folded(text).includes(wanted)),
-    ),
-    sort,
-    (release, column) => {
-      switch (column) {
-        case "release":
-          return nameOf(release.url);
-        case "readers":
-          return t(readersKey(release.public));
-        case "draft": {
-          const source = draftOf(release.url);
-          return source === null ? undefined : draftName(source.draft);
-        }
-      }
+  const nameOf = useCallback(
+    (url: string) => {
+      const place = releasePlaceOf(url);
+      return place === null
+        ? url
+        : t("studio.releases.name", { name: place.name, version: place.version });
     },
-    locale,
+    [t],
+  );
+  /** A draft as its link names it: its title, else its name, and its version. */
+  const draftName = useCallback(
+    (draft: ReleaseDraftSummary) =>
+      t("studio.releases.name", {
+        name: Object.keys(draft.title).length === 0 ? draft.name : readerText(draft.title),
+        version: draft.version,
+      }),
+    [t, readerText],
+  );
+  const wanted = folded(filter.trim());
+  // Filtered and sorted when the releases or the view change, not on every render.
+  const found = useMemo(
+    () =>
+      releases.filter((release) =>
+        [nameOf(release.url), release.url].some((text) => folded(text).includes(wanted)),
+      ),
+    [releases, wanted, nameOf],
+  );
+  const shown = useMemo(
+    () =>
+      sortedRows(
+        found,
+        sort,
+        (release, column) => {
+          switch (column) {
+            case "release":
+              return nameOf(release.url);
+            case "readers":
+              return t(readersKey(release.public));
+            case "draft": {
+              const source = draftOf(release.url);
+              return source === null ? undefined : draftName(source.draft);
+            }
+          }
+        },
+        locale,
+      ),
+    [found, sort, locale, t, nameOf, draftName, draftOf],
   );
   return (
     <section>

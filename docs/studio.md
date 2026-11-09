@@ -613,7 +613,12 @@ name sorts by it, then the other way, then back to that order; the
 sorted column says so (`aria-sort`). A figure not known yet sorts last,
 either way. The filter keeps the decks whose name, in any language, or
 whose groups' names hold its text, case and accents aside. The domain
-does both ([deckTable.ts](../packages/domain/src/deckTable.ts)).
+does both ([deckTable.ts](../packages/domain/src/deckTable.ts)). The
+texts of a sorted column are ordered once, and again only when one of
+them or the reader's language changes. A render, as each deck's figures
+come in, doesn't compare them anew, and nor does a draft's cards table
+or Releases. Home's filter goes over the names again only when a deck,
+its groups or the filter's text change.
 
 **Views.** Tabs above the table (a group named Views, the one shown
 pressed) each keep the decks of one kind, and count them:

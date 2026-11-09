@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { useState } from "preact/hooks";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import type { DeckTableRow, DeckTableView } from "@solid-memo/domain/deckTable";
@@ -14,6 +14,7 @@ import { choose } from "../test/choose";
 import { answer, dialog, pick } from "../test/dialogs";
 import { WithKeys } from "../test/keys";
 import { shownText } from "../test/names";
+import { countSorts } from "../test/sorts";
 import { instanceA, makeDeck } from "../test/fixtures";
 
 const languages: DeckGroup = {
@@ -208,6 +209,130 @@ describe("DeckTableScreen", () => {
     sortBy("Deck");
     expect(header("Deck")).not.toHaveAttribute("aria-sort");
     expect(names()).toEqual(["Kanji N5", "Verbs"]);
+  });
+
+  it("sorts a column's texts again only when one changes, not as figures come in", () => {
+    const sorts = countSorts();
+    const initial: DeckTableView = { filter: "", sort: { column: "title", descending: false } };
+    const { rerender } = render(<Harness initial={initial} rows={rows} />);
+    const first = sorts();
+    // Rows made anew, as on every render, a figure read since; the texts the same.
+    rerender(
+      <Harness
+        initial={initial}
+        rows={rows.map((row) => ({ ...row, figures: { ...row.figures, due: 9 } }))}
+      />,
+    );
+    expect(within(table()).getAllByText("9")).toHaveLength(2);
+    expect(sorts()).toBe(first);
+    // The decks read again, the same texts: nothing to sort.
+    rerender(
+      <Harness initial={initial} rows={rows.map((row) => ({ ...row, deck: { ...row.deck } }))} />,
+    );
+    expect(sorts()).toBe(first);
+    // A title changed: sorted again.
+    rerender(
+      <Harness
+        initial={initial}
+        rows={[rows[0]!, { ...rows[1]!, deck: { ...verbs, title: { en: "Adverbs" } } }]}
+      />,
+    );
+    expect(names()).toEqual(["Adverbs", "Kanji N5"]);
+    expect(sorts()).toBe(first + 1);
+    // A deck gone: sorted again.
+    rerender(<Harness initial={initial} rows={[rows[0]!]} />);
+    expect(names()).toEqual(["Kanji N5"]);
+    expect(sorts()).toBe(first + 2);
+  });
+
+  it("makes a path of groups once, however many renders come, and again when the groups change", () => {
+    const join = vi.spyOn(Array.prototype, "join");
+    onTestFinished(() => join.mockRestore());
+    const paths = () => join.mock.calls.filter(([separator]) => separator === " › ").length;
+    const initial: DeckTableView = { filter: "", sort: { column: "group", descending: false } };
+    const { rerender } = render(<Harness initial={initial} rows={rows} />);
+    const first = paths();
+    expect(first).toBeGreaterThan(0);
+    // Rows made anew, as on every render, the same deck in the same groups.
+    rerender(
+      <Harness
+        initial={initial}
+        rows={rows.map((row) => ({ ...row, figures: { ...row.figures, due: 9 } }))}
+      />,
+    );
+    expect(within(table()).getAllByText("9")).toHaveLength(2);
+    expect(paths()).toBe(first);
+    // The same deck, moved: its path is made again.
+    rerender(<Harness initial={initial} rows={[{ ...rows[0]!, groups: [scripts] }, rows[1]!]} />);
+    expect(paths()).toBeGreaterThan(first);
+    expect(within(table()).getByText("Scripts")).toBeInTheDocument();
+  });
+
+  it("goes over the titles for a filter once, however many renders come", () => {
+    const includes = vi.spyOn(String.prototype, "includes");
+    onTestFinished(() => includes.mockRestore());
+    const searches = () => includes.mock.calls.filter(([text]) => text === "kanji").length;
+    const initial: DeckTableView = { filter: "kanji" };
+    const { rerender } = render(<Harness initial={initial} rows={rows} />);
+    const first = searches();
+    expect(first).toBeGreaterThan(0);
+    rerender(
+      <Harness
+        initial={initial}
+        rows={rows.map((row) => ({ ...row, figures: { ...row.figures, due: 9 } }))}
+      />,
+    );
+    expect(searches()).toBe(first);
+    expect(names()).toEqual(["Kanji N5"]);
+    // A deck read again: gone over again.
+    rerender(
+      <Harness
+        initial={initial}
+        rows={[rows[0]!, { ...rows[1]!, deck: { ...verbs, title: { en: "Kanji N4" } } }]}
+      />,
+    );
+    expect(searches()).toBeGreaterThan(first);
+    expect(names()).toEqual(["Kanji N5", "Kanji N4"]);
+  });
+
+  it("names a column's texts anew in another language", () => {
+    const initial: DeckTableView = { filter: "", sort: { column: "title", descending: false } };
+    const named = [
+      { ...rows[0]!, deck: { ...kanji, title: { en: "Zebra", sv: "Apa" } } },
+      { ...rows[1]!, deck: { ...verbs, title: { en: "Bear", sv: "Björn" } } },
+    ];
+    const inLocale = (locale: "en" | "sv") => (
+      <I18nProvider locale={locale} onChoose={() => undefined}>
+        <Harness initial={initial} rows={named} />
+      </I18nProvider>
+    );
+    const order = () =>
+      screen
+        .getAllByRole("rowheader")
+        .map((cell) => /Bear|Zebra|Apa|Björn/.exec(cell.textContent)?.[0]);
+    const { rerender } = render(inLocale("en"));
+    expect(order()).toEqual(["Bear", "Zebra"]);
+    rerender(inLocale("sv"));
+    expect(order()).toEqual(["Apa", "Björn"]);
+  });
+
+  it("orders a column's texts anew in another language", () => {
+    const initial: DeckTableView = { filter: "", sort: { column: "title", descending: false } };
+    const accents = [
+      { ...rows[0]!, deck: { ...kanji, title: { en: "Zebra" } } },
+      { ...rows[1]!, deck: { ...verbs, title: { en: "Ägg" } } },
+    ];
+    const inLocale = (locale: "en" | "sv") => (
+      <I18nProvider locale={locale} onChoose={() => undefined}>
+        <Harness initial={initial} rows={accents} />
+      </I18nProvider>
+    );
+    const order = () =>
+      screen.getAllByRole("rowheader").map((cell) => /Zebra|Ägg/.exec(cell.textContent)?.[0]);
+    const { rerender } = render(inLocale("en"));
+    expect(order()).toEqual(["Ägg", "Zebra"]);
+    rerender(inLocale("sv"));
+    expect(order()).toEqual(["Zebra", "Ägg"]);
   });
 
   it("filters the decks by name or group, saying how many it shows, and when none", () => {
