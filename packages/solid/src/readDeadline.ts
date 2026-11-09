@@ -13,12 +13,16 @@ const READS = new Set(["GET", "HEAD", "OPTIONS"]);
 /**
  * `fetch`, with a deadline on every read (docs/boundaries.md#the-pod-fence):
  * a read the server has not started to answer within `ms` is aborted, and
- * rejects with `podNoAnswer`, which the app's queries try again. Without
- * it, a request the server never answers would keep a screen loading for
- * good. The deadline ends with the response's headers, so a large
- * document takes as long as it needs to download. A write has none: one
- * cut off might still be saved, and only its answer says whether it was.
- * A read the caller aborts rejects as the caller's signal says.
+ * rejects with `podNoAnswer`, which the app's queries try again. Every
+ * read of another server has it, a pod's and a release's from a link
+ * alike. Without it, a request the server never answers would keep a
+ * screen loading for good. The deadline ends with the response's
+ * headers, so a large document takes as long as it needs to download;
+ * the deck library gives a read of a release from a link a deadline on
+ * the whole read as well (solidDeckLibrary.ts, RELEASE_READ_MS). A write
+ * has none: one cut off might still be saved, and only its answer says
+ * whether it was. A read the caller aborts rejects as the caller's signal
+ * says.
  */
 export function withReadDeadline(
   fetch: typeof globalThis.fetch,

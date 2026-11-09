@@ -378,12 +378,15 @@ export function createAppUseCases({
  * deck library) from the site the page is served from: the same address
  * in production, the dev or preview server's copy of the repository's
  * otherwise. Its IRIs stay the published ones, which each document
- * states as its @base; any other request is passed on as it is.
+ * states as its @base; any other request, a release's from a link among
+ * them, is passed on as it is, its reads with the deadline a pod read
+ * has (readDeadline.ts).
  */
 export function createSiteFetch(servedSite: string): typeof globalThis.fetch {
+  const elsewhere = withReadDeadline((input, init) => globalThis.fetch(input, init));
   return (input, init) => {
     const url = String(input instanceof Request ? input.url : input);
-    if (!url.startsWith(SITE)) return globalThis.fetch(input, init);
+    if (!url.startsWith(SITE)) return elsewhere(input, init);
     const served = `${servedSite}${url.slice(SITE.length)}`;
     // A Request keeps its method and headers at the served address.
     return globalThis.fetch(input instanceof Request ? new Request(served, input) : served, init);

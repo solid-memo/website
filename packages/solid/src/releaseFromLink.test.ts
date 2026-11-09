@@ -4,7 +4,7 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { createLibraryUseCases } from "@solid-memo/application/library";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -12,6 +12,7 @@ import type { DocumentReport } from "@solid-memo/domain/validation";
 import { RELEASE_LIMITS } from "./client/readLimits";
 import type { Dataset } from "./client/rdf";
 import { toLibraryDeckContent } from "./mappers/libraryMapper";
+import { READ_DEADLINE_MS, withReadDeadline } from "./readDeadline";
 import { createSolidDeckLibrary } from "./solidDeckLibrary";
 
 /**
@@ -79,6 +80,28 @@ function answering(documents: Record<string, string[]>): typeof globalThis.fetch
     return response;
   };
   return Object.assign(fetch, { asked });
+}
+
+/**
+ * A fetch whose server answers each read of an address in `stalled` with
+ * its headers and the start of a body that then never ends, the read
+ * failing only when it is aborted, as a browser's does; any other as
+ * `rest` answers.
+ */
+function stalling(stalled: Set<string>, rest: typeof globalThis.fetch): typeof globalThis.fetch {
+  return async (input, init) => {
+    const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
+    if (!stalled.has(url)) return rest(input, init);
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode("@prefix dcat: <http://www.w3.org/ns/dcat#> .\n"),
+        );
+        init?.signal?.addEventListener("abort", () => controller.error(init.signal?.reason));
+      },
+    });
+    return new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
+  };
 }
 
 /** The standalone release with Norway's capital another: a read that differs from the first. */
@@ -213,6 +236,56 @@ describe("readRelease", () => {
     expect(asked).toEqual([V2, V2]);
   });
 
+  it("gives up a read whose body has not come in two minutes, and reads the release again later", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const stalled = new Set([V2]);
+    const library = libraryOver(stalling(stalled, serving({ [V2]: STANDALONE })));
+    const read = expect(library.readRelease(V2, () => {})).rejects.toMatchObject({
+      code: "podNoAnswer",
+      vars: { url: V2, seconds: 120 },
+    });
+    await vi.advanceTimersByTimeAsync(120_000);
+    await read;
+    vi.useRealTimers();
+    stalled.clear();
+    await expect(library.readRelease(V2, () => {})).resolves.toMatchObject({ url: V2 });
+  });
+
+  it("does not count the check of a release read in the two minutes its read has", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    // The read is done at once, but its check takes longer than the read may.
+    const slowCheck = (url: string) =>
+      new Promise<DocumentReport>((done) => {
+        setTimeout(() => done({ url, status: "checked", subjects: [] }), 180_000);
+      });
+    const library = libraryOver(serving({ [V2]: STANDALONE }), slowCheck);
+    const read = expect(library.readRelease(V2, () => {})).resolves.toMatchObject({ url: V2 });
+    await vi.advanceTimersByTimeAsync(180_000);
+    await read;
+  });
+
+  it("shows a server that has not started to answer by the read deadline as one that did not answer in time", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const silent: typeof globalThis.fetch = (_input, init) =>
+      new Promise((_answer, fail) => {
+        init?.signal?.addEventListener("abort", () => fail(init.signal?.reason));
+      });
+    const read = expect(
+      libraryOver(withReadDeadline(silent)).readRelease(V2, () => {}),
+    ).rejects.toMatchObject({ code: "podNoAnswer", vars: { url: V2 } });
+    await vi.advanceTimersByTimeAsync(READ_DEADLINE_MS);
+    await read;
+  });
+
   it("checks nothing, and keeps nothing, without `accept`", async () => {
     const fetch = answering({ [V2]: [STANDALONE, CHANGED] });
     const validate = vi.fn(conforming);
@@ -324,6 +397,23 @@ describe("publishedBeside", () => {
       "https://alice.example/memo/catalog.ttl",
       "https://alice.example/catalog.ttl",
     ]);
+  });
+});
+
+describe("publishedBeside, of a catalog whose body never comes", () => {
+  it("passes over that catalog after two minutes, as one that cannot be read", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const instance = "https://alice.example/solid-memo/main/";
+    const fetch = stalling(
+      new Set([`${RELEASES}catalog.ttl`]),
+      serving({ [`${instance}catalog.ttl`]: catalog(instance, [V1, V2]) }),
+    );
+    const found = libraryOver(fetch).publishedBeside(V1);
+    await vi.advanceTimersByTimeAsync(120_000);
+    await expect(found).resolves.toEqual([V1, V2]);
   });
 });
 

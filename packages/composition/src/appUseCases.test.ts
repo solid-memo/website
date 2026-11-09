@@ -13,6 +13,7 @@ import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorag
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
+import { READ_DEADLINE_MS } from "@solid-memo/solid/readDeadline";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
 
@@ -169,6 +170,55 @@ function podsNetwork(pods: Record<string, typeof globalThis.fetch>) {
   return sent;
 }
 
+/**
+ * A network on which the host at `origin` takes every request and never
+ * answers it, the request failing only when it is aborted, as a browser's
+ * does; any other is `rest`'s.
+ */
+function silentAt(origin: string, rest: typeof globalThis.fetch): typeof globalThis.fetch {
+  return (input, init) => {
+    if (!String(input instanceof Request ? input.url : input).startsWith(origin))
+      return rest(input, init);
+    return new Promise((_resolve, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+    });
+  };
+}
+
+/**
+ * A network on which the host at `origin` answers every request with its
+ * headers and the start of a body that then never ends, the body failing
+ * only when the request is aborted, as a browser's does; any other is
+ * `rest`'s.
+ */
+function stallingAt(origin: string, rest: typeof globalThis.fetch): typeof globalThis.fetch {
+  return async (input, init) => {
+    if (!String(input instanceof Request ? input.url : input).startsWith(origin))
+      return rest(input, init);
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode("@prefix dcat: <http://www.w3.org/ns/dcat#> .\n"),
+        );
+        init?.signal?.addEventListener("abort", () => controller.error(init.signal?.reason));
+      },
+    });
+    return new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
+  };
+}
+
+/** Moves fake time a second at a time until every one of `work` is settled, for no more than `ms`. */
+async function untilSettled(work: Promise<unknown>[], ms: number): Promise<void> {
+  let settled = 0;
+  for (const one of work)
+    void one.then(
+      () => settled++,
+      () => settled++,
+    );
+  for (let passed = 0; settled < work.length && passed < ms; passed += 1000)
+    await vi.advanceTimersByTimeAsync(1000);
+}
+
 /** Writes `body` to `url` in `pod` as Turtle, as anyone who may write there can. */
 async function put(pod: typeof globalThis.fetch, url: string, body: string): Promise<void> {
   await pod(url, { method: "PUT", headers: { "Content-Type": "text/turtle" }, body });
@@ -237,6 +287,20 @@ describe("createSiteFetch", () => {
     const response = await siteFetch("https://alice.example/profile/card", { method: "PUT" });
     expect(response.status).toBe(404);
     expect(requests).toEqual([{ url: "https://alice.example/profile/card", method: "PUT" }]);
+  });
+
+  it("gives up a read of any other server that has not started to answer by the read deadline", async () => {
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    vi.stubGlobal("fetch", silentAt("https://silent.example/", servedSiteNetwork));
+    const read = expect(siteFetch("https://silent.example/a.ttl")).rejects.toMatchObject({
+      code: "podNoAnswer",
+      vars: { url: "https://silent.example/a.ttl", seconds: READ_DEADLINE_MS / 1000 },
+    });
+    await vi.advanceTimersByTimeAsync(READ_DEADLINE_MS);
+    await read;
   });
 });
 
@@ -1406,6 +1470,63 @@ describe("createAppUseCases", () => {
       marked,
     ]);
     expect(login.sent).not.toContain(release);
+  });
+
+  it("gives up a release from a link whose host never answers, holding up neither a course's statistics nor the deck's check, and reads it again later", async () => {
+    const carol = "https://carol.example/";
+    const release = `${carol}releases/capitals/v1.ttl`;
+    const pod = podAt(carol);
+    await put(
+      pod,
+      release,
+      await (await shapesFetch(`${SITE}decks/capitals-of-the-world/v1.ttl`)).text(),
+    );
+    vi.stubGlobal("fetch", silentAt(carol, servedSiteNetwork));
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
+    const course = { ...deck, sourceUrl: release };
+    const text = { plain: (value: string) => value, check: () => [] };
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const statistics = useCases.getCourseStatistics(instance!.url, new Date(), [course]);
+    const health = useCases.checkDeck(instance!.url, course, text);
+    // Fake time does not wait for the site's files read from disk, so it moves on until the work is done, not by a fixed amount.
+    await untilSettled([statistics, health], 30 * 60_000);
+    vi.useRealTimers();
+    await expect(statistics).resolves.toEqual([]);
+    // The release unknown, the rest of the check still made.
+    expect(await health).toMatchObject({ unstated: null });
+    // Once the host answers, the release is read again, not left as the read given up.
+    const sent = podsNetwork({ [carol]: pod });
+    expect((await useCases.checkDeck(instance!.url, course, text)).unstated).toEqual([]);
+    expect(sent.map(({ url }) => url)).toContain(release);
+  });
+
+  it("gives up a release from a link whose host answers but never sends it all, holding up neither a course's statistics nor the deck's check", async () => {
+    const carol = "https://carol.example/";
+    const release = `${carol}releases/capitals/v1.ttl`;
+    vi.stubGlobal("fetch", stallingAt(carol, servedSiteNetwork));
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    await useCases.startGuest("My study");
+    const [instance] = await useCases.listInstances(GUEST_SESSION);
+    const deck = await useCases.createDeck(instance!.url, { en: "Capitals" });
+    const course = { ...deck, sourceUrl: release };
+    const text = { plain: (value: string) => value, check: () => [] };
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const statistics = useCases.getCourseStatistics(instance!.url, new Date(), [course]);
+    const health = useCases.checkDeck(instance!.url, course, text);
+    // Within a few minutes, a read of the release, and of each catalog above it, at most two each.
+    await untilSettled([statistics, health], 30 * 60_000);
+    vi.useRealTimers();
+    await expect(statistics).resolves.toEqual([]);
+    expect(await health).toMatchObject({ unstated: null });
   });
 
   it("reads the deck library the site publishes", async () => {

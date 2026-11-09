@@ -12,16 +12,18 @@ export type TooLarge = (url: string, error: ReadLimitError) => AppError;
 /**
  * The error to show for a release at `url` that could not be read:
  * releaseTooLarge when it is larger than RELEASE_LIMITS allow (or as
- * `tooLarge` says), releaseUnreadable for any other failure.
+ * `tooLarge` says), podNoAnswer as it is when the server did not answer
+ * in time (readDeadline.ts), which may well answer when tried again, and
+ * releaseUnreadable for any other failure.
  */
 export function releaseReadError(
   url: string,
   error: unknown,
   tooLarge: TooLarge = releaseTooLarge,
 ): AppError {
-  return error instanceof ReadLimitError
-    ? tooLarge(url, error)
-    : new AppError("releaseUnreadable", { url });
+  if (error instanceof ReadLimitError) return tooLarge(url, error);
+  if (error instanceof AppError && error.code === "podNoAnswer") return error;
+  return new AppError("releaseUnreadable", { url });
 }
 
 /** What a read of the release at `url` failed with, as shown: releaseTooLarge past RELEASE_LIMITS (or as `tooLarge` says), any other error as it is. */
