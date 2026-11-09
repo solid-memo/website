@@ -171,6 +171,50 @@ describe("createSolidStorageGateway", () => {
         "https://alice.example/",
       ]);
     });
+
+    it("walks up from a container WebID and from one at the origin root", async () => {
+      profileStorages.mockResolvedValue([]);
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await gateway.discoverStorages("https://alice.example/a/b/?x=1#me");
+      await gateway.discoverStorages("https://alice.example/#me");
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        "https://alice.example/a/b/",
+        "https://alice.example/a/",
+        "https://alice.example/",
+        "https://alice.example/",
+      ]);
+    });
+
+    it("skips empty segments and asks nothing above a WebID with no hierarchy", async () => {
+      profileStorages.mockResolvedValue([]);
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await gateway.discoverStorages("https://a.example//card#me");
+      await gateway.discoverStorages("urn:x:y");
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        "https://a.example//card",
+        "https://a.example/",
+        "urn:x:y",
+      ]);
+    });
+
+    it("asks no more than eight ancestors, nearest first, however deep the WebID", async () => {
+      profileStorages.mockResolvedValue([]);
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+      // Deep enough that making every ancestor up front, as the walk-up
+      // once did, would take the tab's memory.
+      const nearest = `https://evil.example/${"a/".repeat(64_000)}`;
+
+      await expect(gateway.discoverStorages(`${nearest}card#me`)).resolves.toEqual([]);
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        `${nearest}card`,
+        ...Array.from({ length: 8 }, (_, i) => nearest.slice(0, nearest.length - 2 * i)),
+      ]);
+    });
   });
 
   describe("probeStorage", () => {

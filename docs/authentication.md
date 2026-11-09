@@ -356,6 +356,11 @@ the sign-in clients take its word. So a session is checked against the
 WebID's profile too, before `restore()` returns it: on a login and on
 every restore, with either sign-in client, in one place in the gateway.
 
+- A WebID longer than `MAX_BASE_CHARACTERS` (512 characters) ends the
+  session before anything is read, and shows `webIdTooLong`. A WebID
+  that long is far beyond any real one, and beyond the longest address
+  Solid Memo accepts as a document's base; the storage lookup derives
+  addresses from its path.
 - The gateway reads the WebID document as no one, under
   `PROFILE_LIMITS`, asking the pod rather than the browser's cache.
 - It looks for the session's issuer among the `solid:oidcIssuer`

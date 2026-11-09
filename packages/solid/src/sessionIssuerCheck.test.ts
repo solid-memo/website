@@ -178,6 +178,43 @@ describe("the session's issuer in its WebID's profile", () => {
     });
   });
 
+  describe("refuses and ends a session whose WebID is too long", () => {
+    /** A WebID of exactly 512 characters, the most a session's may have. */
+    const longest = `https://alice.example/${"a".repeat(512 - "https://alice.example/#me".length)}#me`;
+
+    it("past 512 characters, before it reads anything, on a login or restored", async () => {
+      expect(longest).toHaveLength(512);
+      const deep = `https://evil.example/${"a/".repeat(64_000)}card#me`;
+      for (const fromLogin of [true, false]) {
+        client.logout.mockClear();
+        const gateway = establish({ fromLogin });
+        for (const webId of [deep, `${longest.slice(0, -3)}a#me`]) {
+          client.restore.mockResolvedValue({ webId, fromLogin, restoredFrom: null });
+          await expect(gateway.restore()).rejects.toMatchObject({
+            code: "webIdTooLong",
+            detail: `characters: ${webId.length}`,
+          });
+        }
+        expect(client.logout).toHaveBeenCalledTimes(2);
+      }
+      expect(reads).not.toHaveBeenCalled();
+    });
+
+    it("even if ending it fails, and keeps one of 512 characters", async () => {
+      client.logout.mockRejectedValue(new Error("storage is gone"));
+      const gateway = establish();
+      client.restore.mockResolvedValue({
+        webId: `${longest}e`,
+        fromLogin: false,
+        restoredFrom: null,
+      });
+      await expect(gateway.restore()).rejects.toMatchObject({ code: "webIdTooLong" });
+      reads.mockResolvedValue(new Response("gone", { status: 404 }));
+      client.restore.mockResolvedValue({ webId: longest, fromLogin: false, restoredFrom: null });
+      await expect(gateway.restore()).resolves.toMatchObject({ session: { webId: longest } });
+    });
+  });
+
   it("reads nothing when there is no session", async () => {
     const gateway = establish();
     client.restore.mockResolvedValue({ webId: null, fromLogin: false, restoredFrom: null });
