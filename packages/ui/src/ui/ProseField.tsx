@@ -9,7 +9,7 @@ import { PROSE } from "@solid-memo/markdown/problems";
 import { useI18n } from "./i18n";
 import { LangTextField, type DraftEntry, type LangTextDraft } from "./LangTextField";
 import type { LanguageRole } from "./LanguagePicker";
-import { MarkdownHelp, markdownHints, previewText } from "./MarkdownEditing";
+import { MarkdownHelp, previewText, useEntryHints } from "./MarkdownEditing";
 
 /**
  * Prose of a course, a step's theory or a chapter's description, as its
@@ -54,6 +54,7 @@ export function ProseField({
   onMarkdown: (on: boolean) => void;
 }) {
   const { t } = useI18n();
+  const hintsOf = useEntryHints();
   const hintId = useId();
   const shown = previewText(draft);
   return (
@@ -66,7 +67,7 @@ export function ProseField({
         suggestions={suggestions}
         multiline
         disabled={disabled}
-        entryHints={markdown ? (entry) => markdownHints(entry.value, PROSE, t) : undefined}
+        entryHints={markdown ? hintsOf(id, PROSE) : undefined}
         missing={missing}
         errorId={errorId}
         arrival={arrival}

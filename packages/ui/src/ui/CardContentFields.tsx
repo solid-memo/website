@@ -26,7 +26,7 @@ import {
   type LangTextDraft,
 } from "./LangTextField";
 import type { LanguageRole } from "./LanguagePicker";
-import { CardPreview, MarkdownHelp, markdownHints, readsDifferently } from "./MarkdownEditing";
+import { CardPreview, MarkdownHelp, readsDifferently, useEntryHints } from "./MarkdownEditing";
 import { recentLanguages } from "./remembered";
 
 /**
@@ -492,6 +492,7 @@ export function CardContentFields({
   onChange: (draft: CardDraft) => void;
 }) {
   const { t } = useI18n();
+  const hintsOf = useEntryHints();
   const invalidField = invalid === null ? undefined : fieldOf(invalid);
   const languageError = invalid?.entry !== undefined;
   /** The texts edited in a textarea: once one, always one in this editor. */
@@ -576,7 +577,7 @@ export function CardContentFields({
             </p>
           )
         }
-        entryHints={inMarkdown ? (entry) => markdownHints(entry.value, ruleOf(part), t) : undefined}
+        entryHints={inMarkdown ? hintsOf(FIELD_IDS[part], ruleOf(part)) : undefined}
         missing={invalid?.part === part ? invalid.entry : undefined}
         errorId={CARD_FIELDS_ERROR_ID}
         arrival={part === arrival}

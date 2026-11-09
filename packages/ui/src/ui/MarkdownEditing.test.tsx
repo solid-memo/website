@@ -3,13 +3,32 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render, renderHook, screen } from "@testing-library/preact";
 import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "@solid-memo/markdown/parse";
 import { OPTION, PROSE, SIDE } from "@solid-memo/markdown/problems";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { createI18n } from "./i18n";
+import { createI18n, I18nProvider } from "./i18n";
 import type { LangTextDraft } from "./LangTextField";
-import { CardPreview, MarkdownHelp, markdownHints, readsDifferently } from "./MarkdownEditing";
+import {
+  CardPreview,
+  MarkdownHelp,
+  markdownHints,
+  readsDifferently,
+  useEntryHints,
+} from "./MarkdownEditing";
+
+const checks = vi.hoisted(() => ({ count: 0 }));
+
+vi.mock("@solid-memo/markdown/problems", async (original) => {
+  const real = await original<typeof import("@solid-memo/markdown/problems")>();
+  return {
+    ...real,
+    markdownProblems: (...args: Parameters<typeof real.markdownProblems>) => {
+      checks.count++;
+      return real.markdownProblems(...args);
+    },
+  };
+});
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -19,6 +38,44 @@ const { t } = createI18n("en");
 function draftOf(...values: string[]): LangTextDraft {
   return values.map((value, id) => ({ id, value, tag: id === 0 ? "en" : `x-${id}` }));
 }
+
+describe("useEntryHints", () => {
+  const entries = draftOf(...Array.from({ length: 501 }, (_, i) => `*text* ${i}`));
+
+  it("checks each entry once, however many there are, and again once its text changes", () => {
+    const { result } = renderHook(() => useEntryHints());
+    const hints = result.current("field", SIDE);
+    for (const entry of entries) expect(hints(entry)).toEqual([]);
+    checks.count = 0;
+    for (const entry of entries) hints(entry);
+    expect(checks.count).toBe(0);
+    expect(hints({ ...entries[3]!, value: "---" })).toEqual(["This shows no text as Markdown."]);
+    expect(checks.count).toBe(1);
+  });
+
+  it("keeps a field's entries apart from another's, and checks an entry anew under another rule", () => {
+    const { result } = renderHook(() => useEntryHints());
+    const entry = { id: 0, value: "<b>raw</b> one", tag: "en" };
+    const other = { id: 0, value: "plain two", tag: "en" };
+    const hinted = result.current("one", SIDE)(entry);
+    expect(hinted).not.toEqual([]);
+    expect(result.current("two", SIDE)(other)).toEqual([]);
+    expect(result.current("one", SIDE)(entry)).toBe(hinted);
+    expect(result.current("one", OPTION)(entry)).not.toBe(hinted);
+  });
+
+  it("says its hints in the language spoken now", () => {
+    let locale: "en" | "sv" = "en";
+    const { result, rerender } = renderHook(() => useEntryHints(), {
+      wrapper: ({ children }) => <I18nProvider locale={locale}>{children}</I18nProvider>,
+    });
+    const entry = { id: 0, value: "---", tag: "en" };
+    expect(result.current("field", SIDE)(entry)).toEqual(["This shows no text as Markdown."]);
+    locale = "sv";
+    rerender();
+    expect(result.current("field", SIDE)(entry)).not.toEqual(["This shows no text as Markdown."]);
+  });
+});
 
 describe("markdownHints", () => {
   it("says nothing of Markdown that shows as meant, or of no text", () => {

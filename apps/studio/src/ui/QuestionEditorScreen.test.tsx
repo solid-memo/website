@@ -190,21 +190,22 @@ describe("QuestionEditorScreen", () => {
     const made = vi.mocked(optionPhrases);
     made.mockClear();
     renderScreen("q-pods-1a", draft);
-    // The option neither chosen nor right, read by the preview's question.
+    // The option neither chosen nor right, read once by the preview's question
+    // and once by the wrong-option list beside it, each with its own cache.
     const reads = () =>
       made.mock.results
         .flatMap(({ value }) => vi.mocked(value as ReturnType<typeof optionPhrases>).mock.calls)
         .filter(([text]) => text === "A *server*").length;
-    expect(reads()).toBe(1);
+    expect(reads()).toBe(2);
     fireEvent.input(screen.getByRole("textbox", { name: "Front" }), {
       target: { value: "What keeps data?" },
     });
     fireEvent.click(within(preview()).getByRole("radio", { name: "An app" }));
-    expect(reads()).toBe(1);
+    expect(reads()).toBe(2);
     // Checking fixes every option, each read from the question's one cache.
     fireEvent.click(within(preview()).getByRole("button", { name: "Check" }));
     expect(within(preview()).getByText("Not quite.")).toBeInTheDocument();
-    expect(made).toHaveBeenCalledTimes(1);
+    expect(made).toHaveBeenCalledTimes(2);
   });
 
   it("asks a deck's card from nowhere, and only retires one published", () => {
