@@ -234,6 +234,19 @@ export const FOREIGN_REREADS: ReadLimits = {
   characters: 2 * FOREIGN_READS_BUDGET.characters,
 };
 
+/**
+ * The most the reads in the instances a user registered outside their
+ * storages take in together in a page session, over all their servers:
+ * four times the budget each server has of its own, so a server that
+ * spends its own leaves room for others, and a type index naming many
+ * servers still ends here. They have one FOREIGN_REREADS between them.
+ */
+export const INSTANCE_READS_TOTAL: ReadLimits = {
+  bytes: 4 * FOREIGN_READS_BUDGET.bytes,
+  quads: 4 * FOREIGN_READS_BUDGET.quads,
+  characters: 4 * FOREIGN_READS_BUDGET.characters,
+};
+
 const SPENT_KEYS = ["bytes", "quads", "characters"] as const;
 
 /** The methods that read, which a read budget counts; any other request is sent as it is asked. */
@@ -254,9 +267,11 @@ interface BudgetSpent {
  * are (solidDeckLibrary.ts): what it gives makes a fetch whose answers
  * are each read under `limits` (limitedFetch), and its reads (GET and
  * HEAD), through every fetch it made, within `budget` too. With `scope`,
- * each scope it names a read's address by has a budget of its own. A
+ * each scope it names a read's address by has a budget of its own, and
+ * `total`, when given, bounds what all of them take together. A
  * document counts in the budget by its largest read; what a read of it
- * again takes within that comes out of `rereads` while that lasts. Once
+ * again takes within that comes out of `rereads` while that lasts, one
+ * allowance over all the scopes when there is a `total`. Once
  * the budget is spent, a read under way fails as it goes on, and any
  * after it fails at once, without asking the server, with a
  * ReadLimitError naming the budget, until the page is loaded again. A
@@ -268,19 +283,28 @@ export function sharedReadBudget({
   budget,
   rereads,
   scope = () => "",
+  total = NO_SIZE_LIMITS,
 }: {
   limits: ReadLimits;
   budget: ReadLimits;
   rereads: ReadLimits;
   /** The budget a read of an address counts in: one for all of them unless given. */
   scope?: (url: string) => string;
+  /** What the reads of every scope may take together, reads again past `rereads` too: no limit of its own unless given. */
+  total?: ReadLimits;
 }): (fetch: typeof globalThis.fetch) => typeof globalThis.fetch {
   const budgets = new Map<string, BudgetSpent>();
+  const allSpent = noneSpent();
+  const allFree = total === NO_SIZE_LIMITS ? undefined : { ...rereads };
   const budgetOf = (url: string): BudgetSpent => {
     const key = scope(url);
     const found = budgets.get(key);
     if (found !== undefined) return found;
-    const made: BudgetSpent = { session: noneSpent(), free: { ...rereads }, largest: new Map() };
+    const made: BudgetSpent = {
+      session: noneSpent(),
+      free: allFree ?? { ...rereads },
+      largest: new Map(),
+    };
     budgets.set(key, made);
     return made;
   };
@@ -292,20 +316,27 @@ export function sharedReadBudget({
     if (!BUDGETED_METHODS.has(method)) return limitedFetch(fetch, limits)(input, init);
     const { session, free, largest } = budgetOf(url);
     if (SPENT_KEYS.some((key) => session[key] > budget[key])) throw new ReadLimitError(url, budget);
+    if (SPENT_KEYS.some((key) => allSpent[key] > total[key])) throw new ReadLimitError(url, total);
     const most = largest.get(url) ?? noneSpent();
     largest.set(url, most);
     const document = noneSpent();
-    // limitedFetch compares one tally with `limits`: this read's own, or what the budget leaves of them, whichever is
-    // more, so it is past them once either is past its limit, and names the budget when it is the one past.
+    // limitedFetch compares one tally with `limits`: this read's own, or what a budget leaves of them, whichever is
+    // more, so it is past them once any is past its limit, and names the budget when it is the one past.
     const over = (tally: ReadsSpent, bounds: ReadLimits, bytes: number) =>
       SPENT_KEYS.some((key) => tally[key] + (key === "bytes" ? bytes : 0) > bounds[key]);
     const spent = {} as ReadsSpent;
-    PAST.set(spent, (bytes) =>
-      over(session, budget, bytes) && !over(document, limits, bytes) ? budget : limits,
-    );
+    PAST.set(spent, (bytes) => {
+      if (over(document, limits, bytes)) return limits;
+      return over(session, budget, bytes) ? budget : total;
+    });
     for (const key of SPENT_KEYS) {
       Object.defineProperty(spent, key, {
-        get: () => Math.max(document[key], limits[key] - budget[key] + session[key]),
+        get: () =>
+          Math.max(
+            document[key],
+            limits[key] - budget[key] + session[key],
+            limits[key] - total[key] + allSpent[key],
+          ),
         set: (value: number) => {
           const taken = value - spent[key];
           const within = Math.max(0, Math.min(most[key], document[key] + taken) - document[key]);
@@ -314,6 +345,7 @@ export function sharedReadBudget({
           document[key] += taken;
           most[key] = Math.max(most[key], document[key]);
           session[key] += taken - reread;
+          allSpent[key] += taken - reread;
         },
       });
     }

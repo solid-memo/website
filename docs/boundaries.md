@@ -349,7 +349,10 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   A catalog may list a thousand decks, each with two documents as
   large as a release. The reads as no one share one budget; the reads
   in a registered instance elsewhere have one for each server, so
-  reads anywhere else never spend it. As with releases read from a
+  reads anywhere else never spend it. Those reads share a total
+  over all their servers (`INSTANCE_READS_TOTAL`) and one allowance
+  for reading again, since the app follows up to a thousand of them
+  in a type index. As with releases read from a
   link ([deck-library.md](deck-library.md#from-a-link)), a document
   counts once, by its largest read, and reading it again comes out of
   an allowance of its own (`FOREIGN_REREADS`) while that lasts. Past

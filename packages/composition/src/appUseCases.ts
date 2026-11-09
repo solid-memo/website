@@ -46,6 +46,7 @@ import { grantPublicRead } from "@solid-memo/solid/client/access";
 import {
   FOREIGN_LIMITS,
   FOREIGN_READS_BUDGET,
+  INSTANCE_READS_TOTAL,
   FOREIGN_REREADS,
   sharedReadBudget,
 } from "@solid-memo/solid/client/readLimits";
@@ -139,14 +140,16 @@ export function createAppUseCases({
   /**
    * What is read as the user in an instance they registered outside their
    * storages, as foreignReads is, within a budget of each server's own,
-   * so reads elsewhere never spend it; what is written there is sent
-   * whatever is spent.
+   * so reads elsewhere never spend it, and all of them within
+   * INSTANCE_READS_TOTAL, as a type index may name a thousand
+   * servers; what is written there is sent whatever is spent.
    */
   const instanceReads = sharedReadBudget({
     limits: FOREIGN_LIMITS,
     budget: FOREIGN_READS_BUDGET,
     rereads: FOREIGN_REREADS,
     scope: (url) => new URL(url).origin,
+    total: INSTANCE_READS_TOTAL,
   });
   const podFetch = createPodFence(writeFence.fetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */

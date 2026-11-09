@@ -38,6 +38,7 @@ import {
 import { ensureTrailingSlash, lastPathSegment } from "./urls";
 import { SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 
 export interface SolidInstanceRepositoryDeps {
   fetch: typeof globalThis.fetch;
@@ -89,13 +90,15 @@ export function createSolidInstanceRepository({
         }
       }
       // One registration that does not map is left out, not the list.
-      return [...byUrl.values()].flatMap((registration) => {
+      const instances = [...byUrl.values()].flatMap((registration) => {
         try {
           return [toInstance(registration)];
         } catch {
           return [];
         }
       });
+      // A type index is data another app may have written, and each instance listed is read: no more than a catalog's links.
+      return instances.slice(0, MAX_CATALOG_LINKS);
     },
 
     async getRegistrationOptions(webId) {

@@ -44,6 +44,7 @@ import type {
   ThemePreference,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
+import { mapAtOnce } from "./atOnce";
 import { stepReporter } from "./progress";
 import { again } from "./writes";
 import type { PreferenceStore } from "./preferenceStore";
@@ -503,27 +504,28 @@ export function createPreferenceUseCases({
     },
     async connectedScreenChoice(session) {
       const instances = await instanceRepository.listInstances(session.webId);
-      const skipped = await Promise.all(
-        instances.map((instance) =>
-          preferencesRepository.connectedScreenSkipped(instance.url).catch(() => false),
-        ),
+      // A few at a time: a type index may register many (MAX_CATALOG_LINKS at most).
+      const skipped = await mapAtOnce(instances, (instance) =>
+        preferencesRepository.connectedScreenSkipped(instance.url).catch(() => false),
       );
       return { instances, skipped: skipsConnectedScreen(skipped) };
     },
     async skipConnectedScreen(instances) {
-      const results = await Promise.allSettled(
-        instances.map((instance) =>
-          preferenceStore.inTurn(instance.url, async () => {
+      // A few at a time, as connectedScreenChoice reads them; one that fails stops none of the others.
+      const results = await mapAtOnce(instances, (instance) =>
+        preferenceStore
+          .inTurn(instance.url, async () => {
             if ((await marking(instance.url, true, null)) !== "none") return;
             // No preferences: made only where the instance's meta document says an instance is.
             if ((await instanceRepository.readMeta(instance.url)) === null) return;
             await marking(instance.url, true, created(instance.url));
-          }),
-        ),
+          })
+          .then(
+            () => undefined,
+            (reason: unknown) => ({ reason }),
+          ),
       );
-      const failed = results.find(
-        (result): result is PromiseRejectedResult => result.status === "rejected",
-      );
+      const failed = results.find((result) => result !== undefined);
       if (failed !== undefined) throw failed.reason;
     },
     async connectedScreenShown(instanceUrl) {

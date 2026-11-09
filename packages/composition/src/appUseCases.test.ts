@@ -13,6 +13,7 @@ import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorag
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
+import { INSTANCE_READS_TOTAL } from "@solid-memo/solid/client/readLimits";
 import { READ_DEADLINE_MS } from "@solid-memo/solid/readDeadline";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
@@ -76,17 +77,21 @@ vi.mock("@solid-memo/solid/solidInstanceGraphReader", recorded("createSolidInsta
 const smallBudget = vi.hoisted(() => ({
   on: false,
   limits: { bytes: 1024 * 1024, quads: 30, characters: 1024 * 1024 },
+  /** The options each budget was made with. */
+  made: [] as { scope?: unknown; total?: unknown }[],
 }));
 vi.mock("@solid-memo/solid/client/readLimits", async (importOriginal) => {
   const original = await importOriginal<typeof import("@solid-memo/solid/client/readLimits")>();
   return {
     ...original,
-    sharedReadBudget: (options: Parameters<typeof original.sharedReadBudget>[0]) =>
-      original.sharedReadBudget(
+    sharedReadBudget: (options: Parameters<typeof original.sharedReadBudget>[0]) => {
+      smallBudget.made.push(options);
+      return original.sharedReadBudget(
         smallBudget.on
           ? { ...options, budget: smallBudget.limits, rereads: smallBudget.limits }
           : options,
-      ),
+      );
+    },
   };
 });
 
@@ -924,6 +929,14 @@ describe("createAppUseCases", () => {
     // The user's own storage has no such budget.
     for (let deck = 0; deck < 5; deck++)
       expect(await useCases.listCards(deckAt(`${alice}memo/decks/deck-${deck}.ttl`))).toEqual([]);
+  });
+
+  it("holds the reads in the instances registered elsewhere to one total over all their servers", () => {
+    smallBudget.made.length = 0;
+    createAppUseCases({ ...options, indexedDB: undefined });
+    expect(smallBudget.made.find(({ scope }) => scope !== undefined)?.total).toBe(
+      INSTANCE_READS_TOTAL,
+    );
   });
 
   it("lets a guest delete their instance, which is in their own storage", async () => {

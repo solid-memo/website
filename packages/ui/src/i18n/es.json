@@ -804,7 +804,8 @@
     "attach": "Vincular",
     "deleted": "Se eliminó la instancia «{name}».",
     "removed": "Se quitó la instancia «{name}» de tu lista.",
-    "outsidePod": "Fuera de tu Pod, así que Solid Memo no puede eliminarla."
+    "outsidePod": "Fuera de tu Pod, así que Solid Memo no puede eliminarla.",
+    "listFull": "Solid Memo muestra como máximo {limit} instancias, así que puede que no estén aquí todas las tuyas."
   },
   "keptFolder": {
     "text": "Solid Memo eliminó sus propios datos y conservó {link}: otra aplicación guardó archivos allí.",

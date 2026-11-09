@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "@solid-memo/domain/appError";
-import { isInFolder } from "@solid-memo/domain/instanceLayout";
+import { ensureTrailingSlash, isInFolder } from "@solid-memo/domain/instanceLayout";
 
 /** Methods that only read; every other one writes. */
 const READS = new Set(["GET", "HEAD", "OPTIONS"]);
@@ -20,6 +20,43 @@ export interface OwnFolders {
   storages: string[];
   /** The instances they registered, wherever they are. */
   instances: string[];
+}
+
+/** Whether an address is in one of some folders. */
+type InFolders = (url: string) => boolean;
+
+/** OwnFolders, each kind ready to be asked about any number of addresses. */
+interface FolderLookup {
+  storages: InFolders;
+  instances: InFolders;
+}
+
+/**
+ * Whether an address is in one of `folders` (isInFolder, which still
+ * decides each one): every folder is parsed once, here, and an address
+ * is compared only with the folders of its own origin that start as it
+ * does, a folder's documents having its origin. So a read costs the same
+ * however many folders are on other servers. Those on its own server are
+ * still gone through on each read: a list all on one server costs as many
+ * comparisons as it has folders, MAX_CATALOG_LINKS at most.
+ */
+function inFolders(folders: readonly string[]): InFolders {
+  const byOrigin = new Map<string, { folder: string; root: string }[]>();
+  for (const folder of folders) {
+    const root = URL.parse(ensureTrailingSlash(folder));
+    if (root === null) continue;
+    const sameOrigin = byOrigin.get(root.origin) ?? [];
+    sameOrigin.push({ folder, root: root.href });
+    byOrigin.set(root.origin, sameOrigin);
+  }
+  return (url) => {
+    const address = URL.parse(url);
+    if (address === null) return false;
+    const sameOrigin = byOrigin.get(address.origin) ?? [];
+    return sameOrigin.some(
+      ({ folder, root }) => address.href.startsWith(root) && isInFolder(url, folder),
+    );
+  };
 }
 
 /**
@@ -64,11 +101,15 @@ export function createOwnPodGate({
 }): typeof globalThis.fetch {
   /** The folders last asked: for whom, at which revision and when. */
   let known:
-    | { webId: string; revision: number; at: number; folders: Promise<OwnFolders> }
+    | { webId: string; revision: number; at: number; folders: Promise<FolderLookup> }
     | undefined;
 
-  function ask(user: string): Promise<OwnFolders> {
-    const asked = { webId: user, revision: revision(), at: now(), folders: ownFolders(user) };
+  function ask(user: string): Promise<FolderLookup> {
+    const folders = ownFolders(user).then(({ storages, instances }) => ({
+      storages: inFolders(storages),
+      instances: inFolders(instances),
+    }));
+    const asked = { webId: user, revision: revision(), at: now(), folders };
     known = asked;
     asked.folders.catch(() => {
       if (known === asked) known = undefined;
@@ -80,9 +121,8 @@ export function createOwnPodGate({
   async function whose(url: string): Promise<typeof globalThis.fetch | undefined> {
     const user = webId();
     if (user === undefined) return undefined;
-    const inOne = (folders: string[]) => folders.some((folder) => isInFolder(url, folder));
-    const fetchIn = ({ storages, instances }: OwnFolders) =>
-      inOne(storages) ? fetch : inOne(instances) ? instanceFetch : undefined;
+    const fetchIn = ({ storages, instances }: FolderLookup) =>
+      storages(url) ? fetch : instances(url) ? instanceFetch : undefined;
     const kept = known;
     if (kept?.webId !== user || kept.revision !== revision()) return fetchIn(await ask(user));
     const found = fetchIn(await kept.folders);

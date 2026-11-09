@@ -740,7 +740,8 @@
     "attach": "연결",
     "deleted": "‘{name}’ 인스턴스를 삭제했어요.",
     "removed": "‘{name}’ 인스턴스를 목록에서 제거했어요.",
-    "outsidePod": "Pod 밖에 있어서 Solid Memo가 삭제할 수 없어요."
+    "outsidePod": "Pod 밖에 있어서 Solid Memo가 삭제할 수 없어요.",
+    "listFull": "Solid Memo는 인스턴스를 최대 {limit}개까지 표시하므로 일부가 여기에 없을 수 있어요."
   },
   "keptFolder": {
     "text": "Solid Memo가 자체 데이터는 삭제했지만 {link}은(는) 남겨 두었어요. 다른 앱이 그 안에 파일을 넣었기 때문이에요.",

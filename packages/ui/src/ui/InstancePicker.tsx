@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { isGuestUrl } from "@solid-memo/domain/guest";
 import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
@@ -195,6 +196,9 @@ export function InstancePicker({
             </li>
           ))}
         </ul>
+      )}
+      {instances.length >= MAX_CATALOG_LINKS && (
+        <p class="hint">{t("instancePicker.listFull", { limit: MAX_CATALOG_LINKS })}</p>
       )}
       <a ref={newInstanceRef} class="button" href={newInstanceHref}>
         {t("instancePicker.newInstance")}

@@ -95,7 +95,7 @@ export interface WebIdDocumentRepository {
 
 /** Driven port: Solid Memo instances registered in the user's type indexes. */
 export interface InstanceRepository {
-  /** All instances registered in the private and public type indexes. */
+  /** The instances registered in the private and public type indexes, the first MAX_CATALOG_LINKS of them. */
   listInstances(webId: string): Promise<Instance[]>;
   /** Which type indexes exist, for the UI's warn-and-choose flow. */
   getRegistrationOptions(webId: string): Promise<RegistrationOptions>;

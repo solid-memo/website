@@ -4,6 +4,7 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
+import { READS_AT_ONCE } from "./atOnce";
 import { createUseCases } from "./useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
@@ -1059,6 +1060,32 @@ describe("preferences", () => {
         }
       });
 
+      it("reads a few instances at a time, however many are registered", async () => {
+        const deps = makeDeps();
+        const many = Array.from({ length: 40 }, (_, at) => ({
+          url: `https://i${at}.example/a/`,
+          name: `${at}`,
+        }));
+        vi.mocked(deps.instanceRepository.listInstances).mockResolvedValue(many);
+        let running = 0;
+        let most = 0;
+        vi.mocked(deps.preferencesRepository.connectedScreenSkipped).mockImplementation(
+          async () => {
+            running++;
+            most = Math.max(most, running);
+            await Promise.resolve();
+            running--;
+            return true;
+          },
+        );
+        await expect(createUseCases(deps).connectedScreenChoice(session)).resolves.toEqual({
+          instances: many,
+          skipped: true,
+        });
+        expect(deps.preferencesRepository.connectedScreenSkipped).toHaveBeenCalledTimes(40);
+        expect(most).toBe(READS_AT_ONCE);
+      });
+
       it("shows it to a learner with no instances", async () => {
         await expect(createUseCases(storing({})).connectedScreenChoice(session)).resolves.toEqual({
           instances: [],
@@ -1153,6 +1180,31 @@ describe("preferences", () => {
           true,
           null,
         );
+      });
+
+      it("marks a few instances at a time, however many are listed, and all of them though one fails", async () => {
+        const deps = makeDeps();
+        const many = Array.from({ length: 40 }, (_, at) => ({
+          url: `https://i${at}.example/a/`,
+          name: `${at}`,
+        }));
+        let running = 0;
+        let most = 0;
+        vi.mocked(deps.preferencesRepository.markConnectedScreen).mockImplementation(
+          async (url) => {
+            running++;
+            most = Math.max(most, running);
+            await Promise.resolve();
+            running--;
+            if (url === many[0]!.url) throw new AppError("writtenByNewerApp");
+            return "written";
+          },
+        );
+        await expect(createUseCases(deps).skipConnectedScreen(many)).rejects.toMatchObject({
+          code: "writtenByNewerApp",
+        });
+        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledTimes(40);
+        expect(most).toBe(READS_AT_ONCE);
       });
 
       it("writes nothing without instances", async () => {
