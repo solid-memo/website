@@ -27,7 +27,7 @@ import {
 } from "../client/rdf";
 import { solidDatasetAsTurtle } from "../client/resources";
 import { foreignSubjects } from "../ownership";
-import { recordThing } from "../records";
+import { datetimeLiteral, recordThing } from "../records";
 import { type Catalog, catalogToRecord, publisherToRecord } from "@solid-memo/domain/catalog";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { AGENT_V1, CATALOG_V1 } from "@solid-memo/vocab/descriptors.generated";
@@ -97,7 +97,7 @@ describe("toDeck", () => {
       t
         .addIri(RDF.type, SM.Deck)
         .addStringNoLocale(DCTERMS.title, "Kanji N5")
-        .addDatetime(DCTERMS.created, new Date("2026-09-21T10:00:00.000Z"))
+        .addLiteral(DCTERMS.created, datetimeLiteral("2026-09-21T10:00:00.000Z"))
         .addIri(SM.cardsDocument, CARDS_DOC)
         .addIri(SM.reviewsDocument, REVIEWS_DOC),
     );
@@ -626,7 +626,7 @@ describe("toCard", () => {
         .addIri(RDF.type, SM.Card)
         .addStringNoLocale(SM.front, "水")
         .addStringNoLocale(SM.back, "water (mizu)")
-        .addDatetime(DCTERMS.created, new Date("2026-09-21T10:00:00.000Z")),
+        .addLiteral(DCTERMS.created, datetimeLiteral("2026-09-21T10:00:00.000Z")),
     );
     expect(cardOf(thing)).toEqual({
       id: "card-1",

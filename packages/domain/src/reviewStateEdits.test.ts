@@ -5,8 +5,8 @@
 import { describe, expect, it } from "vitest";
 import type { ReviewState } from "./review";
 import {
+  isCarriedOverInstant,
   isStudyDay,
-  isWritableInstant,
   rescheduleState,
   rescheduleStates,
   resetStates,
@@ -128,18 +128,18 @@ describe("rescheduleStates", () => {
   });
 });
 
-describe("isWritableInstant", () => {
+describe("isCarriedOverInstant", () => {
   it.each(["2026-11-06T12:00:00Z", "0000-01-01T00:00:00Z", "9999-12-31T23:59:59Z"])(
     "takes %s",
     (instant) => {
-      expect(isWritableInstant(instant)).toBe(true);
+      expect(isCarriedOverInstant(instant)).toBe(true);
     },
   );
 
   it.each(["+012000-01-01T00:00:00Z", "-000500-01-01T00:00:00Z", "not a date"])(
     "leaves out %s",
     (instant) => {
-      expect(isWritableInstant(instant)).toBe(false);
+      expect(isCarriedOverInstant(instant)).toBe(false);
     },
   );
 });

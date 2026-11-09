@@ -160,6 +160,13 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       expect(Number.isNaN(at("-271822-01-01T00:00:00Z")!.getTime())).toBe(true);
     });
 
+    it("reads a date-time of a year past 9999, or of year 0 or before", () => {
+      const at = (value: string) => getDatetime(withLiteral(value, `${XSD}dateTime`), `${EX}p`);
+      expect(at("12345-01-01T00:00:00Z")).toEqual(new Date("+012345-01-01T00:00:00Z"));
+      expect(at("0000-01-01T00:00:00Z")).toEqual(new Date("0000-01-01T00:00:00Z"));
+      expect(at("-0001-01-01T00:00:00Z")).toEqual(new Date("-000001-01-01T00:00:00Z"));
+    });
+
     it("gives language tags in lower case, however the document spells them", async () => {
       const quads = [quad(`${URL_}#a`, text("Stockholm", "EN-gb"), `${EX}back`)];
       for (const dataset of [

@@ -164,6 +164,18 @@ export function datetimeLiteral(value: string): Literal {
   } as Literal;
 }
 
+/**
+ * An instant in xsd:dateTime's lexical form: as toISOString writes it,
+ * but for a year past 9999 or before 0, which toISOString writes with a
+ * sign and six digits (`+012345`, `-000001`). XSD's year has no plus
+ * sign and no leading zeros beyond four digits (`12345`, `-0001`), and
+ * the write check refuses any other spelling. A date reads the same
+ * either way, so what was read is kept.
+ */
+function xsdDatetime(instant: string): string {
+  return new Date(instant).toISOString().replace(/^\+?(-?)0*(\d{4,}-)/, "$1$2");
+}
+
 const XSD_INTEGER = "http://www.w3.org/2001/XMLSchema#integer";
 const XSD_DECIMAL = "http://www.w3.org/2001/XMLSchema#decimal";
 
@@ -381,7 +393,7 @@ function addValue(
       builder.addBoolean(field.predicate, value as boolean);
       break;
     case "dateTime":
-      builder.addDatetime(field.predicate, new Date(value as string));
+      builder.addLiteral(field.predicate, datetimeLiteral(xsdDatetime(value as string)));
       break;
   }
 }

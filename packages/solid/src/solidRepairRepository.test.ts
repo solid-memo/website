@@ -26,6 +26,7 @@ import { datasetFrom, datasetOfTurtle, getStringWithLocale } from "./testing/dat
 import type { Repair } from "@solid-memo/domain/repair";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createSolidRepairRepository } from "./solidRepairRepository";
+import { datetimeLiteral } from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { decimalLiteral, integerLiteral } from "./testing/literals";
 
@@ -202,7 +203,7 @@ describe("applyRepairs", () => {
         buildThing(createThing({ url: `${REVIEWS}#a` }))
           .addIri(RDF.type, SM.ReviewState)
           .addStringNoLocale(SM.due, "soon")
-          .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
+          .addLiteral(SM.lastReviewedAt, datetimeLiteral("2026-09-21T10:00:00Z"))
           .addLiteral(SM.intervalDays, integerLiteral(6))
           .addStringNoLocale(SM.previousDue, "2026-09-20")
           .build(),
@@ -242,14 +243,14 @@ describe("applyRepairs", () => {
         buildThing(createThing({ url: `${REVIEWS}#b` }))
           .addIri(RDF.type, SM.ReviewState)
           .addStringNoLocale(SM.due, "soon")
-          .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
+          .addLiteral(SM.lastReviewedAt, datetimeLiteral("2026-09-21T10:00:00Z"))
           .addLiteral(SM.intervalDays, integerLiteral(100_000_000))
           .build(),
         // Within what a date holds, but past the four-digit years of a study day.
         buildThing(createThing({ url: `${REVIEWS}#c` }))
           .addIri(RDF.type, SM.ReviewState)
           .addStringNoLocale(SM.due, "soon")
-          .addDatetime(SM.lastReviewedAt, new Date("2026-09-21T10:00:00Z"))
+          .addLiteral(SM.lastReviewedAt, datetimeLiteral("2026-09-21T10:00:00Z"))
           .addLiteral(SM.intervalDays, integerLiteral(3_000_000))
           .build(),
       ),

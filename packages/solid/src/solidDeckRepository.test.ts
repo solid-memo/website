@@ -27,6 +27,7 @@ import {
 import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";
+import { datetimeLiteral } from "./records";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain/deck";
 import { addDistractor } from "@solid-memo/domain/distractors";
@@ -247,7 +248,7 @@ describe("applyCardChanges", () => {
             .addIri(RDF.type, SM.Card)
             .addStringNoLocale(SM.front, "Sweden")
             .addStringNoLocale(SM.back, "Stockholm?")
-            .addDatetime(DCTERMS.created, new Date("2026-01-01T00:00:00.000Z"))
+            .addLiteral(DCTERMS.created, datetimeLiteral("2026-01-01T00:00:00.000Z"))
             .build(),
         ),
         buildThing(createThing({ url: `${deck.cardsDocumentUrl}#is` }))
@@ -1861,7 +1862,7 @@ describe("stateCardLanguages", () => {
         .addIri(RDF.type, SM.Card)
         .addStringNoLocale(SM.front, front)
         .addStringNoLocale(SM.back, back)
-        .addDatetime(DCTERMS.created, new Date("2026-01-02T03:04:05.000Z"))
+        .addLiteral(DCTERMS.created, datetimeLiteral("2026-01-02T03:04:05.000Z"))
         .addLiteral(SM.formatVersion, integerLiteral(4))
         .addStringNoLocale(VOCAB_NOTE, "kept")
         .build();

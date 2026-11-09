@@ -23,6 +23,7 @@ import {
 } from "./client/resources";
 import { containerFrom, datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
+import { datetimeLiteral } from "./records";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
 
 vi.mock("./client/resources", async (importOriginal) => {
@@ -101,7 +102,10 @@ describe("copyResource", () => {
             "http://www.w3.org/ns/prov#wasDerivedFrom",
             "https://solid-memo.com/decks/capitals/v1.ttl",
           )
-          .addDatetime("http://purl.org/dc/terms/created", new Date("2026-09-21T10:00:00.000Z"))
+          .addLiteral(
+            "http://purl.org/dc/terms/created",
+            datetimeLiteral("2026-09-21T10:00:00.000Z"),
+          )
           .build(),
       ) as never,
     );

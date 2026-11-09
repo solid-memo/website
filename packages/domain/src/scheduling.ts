@@ -14,7 +14,7 @@ import {
   type ReviewState,
 } from "./review";
 import { boundedFsrsSnapshot } from "./fsrsSnapshot";
-import { isStudyDay, isWritableInstant } from "./reviewStateEdits";
+import { isCarriedOverInstant, isStudyDay } from "./reviewStateEdits";
 import { boundedSm2State } from "./sm2";
 
 /**
@@ -40,11 +40,11 @@ function shiftedByBoundary(instant: Date, dayBoundaryHour: number): Date {
 
 /**
  * The first review a grade `now` writes: the one a prompt's state holds,
- * unless it cannot be written (isWritableInstant), which would refuse the
- * grade; then, as for a new prompt, now.
+ * unless it is outside the years a grade carries over
+ * (isCarriedOverInstant); then, as for a new prompt, now.
  */
 export function firstReviewOf(before: { firstReviewedAt: string } | null, now: Date): string {
-  return before !== null && isWritableInstant(before.firstReviewedAt)
+  return before !== null && isCarriedOverInstant(before.firstReviewedAt)
     ? before.firstReviewedAt
     : now.toISOString();
 }
@@ -175,7 +175,8 @@ export function requeueCard<T>(remaining: T[], card: T, random: () => number): T
  * snapshot is bounded as the state applySm2 gives (boundedSm2State),
  * so that it is written back as numbers the write check accepts; one
  * whose due day is not a real "YYYY-MM-DD" date, or whose last review
- * cannot be written (isWritableInstant), is dropped.
+ * is outside the years a grade carries over (isCarriedOverInstant), is
+ * dropped.
  */
 export function snapshotBeforeReview(
   current: ReviewState | null,
@@ -191,7 +192,7 @@ export function snapshotBeforeReview(
 }
 
 function boundedSnapshot(state: ReviewSnapshot): ReviewSnapshot | undefined {
-  if (!isStudyDay(state.due) || !isWritableInstant(state.lastReviewedAt)) return undefined;
+  if (!isStudyDay(state.due) || !isCarriedOverInstant(state.lastReviewedAt)) return undefined;
   return { ...boundedSm2State(state), due: state.due, lastReviewedAt: state.lastReviewedAt };
 }
 
@@ -208,8 +209,9 @@ export interface StudyDayReset {
  * how it was before. Untouched prompts are not mentioned in the result.
  *
  * A prompt reviewed today that has no usable snapshot (state written
- * before snapshots existed, or one whose dates cannot be written back)
- * cannot be restored; it is made due today instead, so
+ * before snapshots existed, or one boundedSnapshot drops: its due day
+ * is not a real date or its last review is outside the years a grade
+ * carries over) cannot be restored; it is made due today instead, so
  * it can at least be studied again.
  */
 export function resetStudyDay(
@@ -249,8 +251,8 @@ export interface FsrsStudyDayReset {
  * of the SM-2 ones: every state reviewed today goes back to its
  * snapshot. One introduced today goes, as its SM-2 state does; so does
  * one without a snapshot (first written today from an estimate), or
- * with one that cannot be written back (boundedFsrsSnapshot), which
- * the next review estimates again from the SM-2 state restored.
+ * with one boundedFsrsSnapshot drops, which the next review estimates
+ * again from the SM-2 state restored.
  */
 export function resetFsrsStudyDay(
   states: readonly FsrsState[],

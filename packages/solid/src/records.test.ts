@@ -19,14 +19,21 @@ import {
   toRdfJsDataset,
 } from "./client/rdf";
 import { datasetOfTurtle, getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
+import { cardToRecord } from "@solid-memo/domain/deckRecord";
+import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
+import { deckSubjects, toCards, toDecks, withDeck } from "./mappers/deckMapper";
+import { toReviewStates, withReviewStates } from "./mappers/reviewStateMapper";
+import { createShaclShapeValidator } from "./shaclShapeValidator";
 import type { Literal, Quad } from "@rdfjs/types";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { LATEST_VERSION, type CardV5 } from "@solid-memo/vocab/types.generated";
 import {
   CARD_V2,
   CARD_V4,
   CARD_V5,
+  CARD_V7,
   DECK_V2,
   DECK_V4,
   DECK_V6,
@@ -622,7 +629,7 @@ describe("unreadableDatetimes", () => {
   it("names the date-times of a predicate readDatetime reads as none, and only those", () => {
     const thing = buildThing(createThing({ url: URL_ }))
       .addLiteral(`${EX}when`, FAR_DATE)
-      .addDatetime(`${EX}when`, new Date("2026-01-01T00:00:00Z"))
+      .addLiteral(`${EX}when`, datetimeLiteral("2026-01-01T00:00:00Z"))
       .addStringNoLocale(`${EX}when`, "300000-01-01T00:00:00Z")
       .addLiteral(`${EX}other`, FAR_DATE)
       .build();
@@ -721,7 +728,7 @@ describe("readVersioned", () => {
         .addStringNoLocale(DCTERMS.title, "Home")
         .addLiteral(SM.formatVersion, integerLiteral(2))
         .addLiteral(DCTERMS.modified, FAR_DATE);
-      if (typeof created === "string") b.addDatetime(DCTERMS.created, new Date(created));
+      if (typeof created === "string") b.addLiteral(DCTERMS.created, datetimeLiteral(created));
       else b.addLiteral(DCTERMS.created, created);
       return b.build();
     };
@@ -798,5 +805,138 @@ describe("the real descriptors", () => {
         },
       },
     });
+  });
+});
+
+describe("a date of any year a date holds", () => {
+  const INSTANCE = "https://pod.example/solid-memo/a/";
+  const CATALOG = `${INSTANCE}catalog.ttl`;
+  const CARDS = `${INSTANCE}decks/d1/cards.ttl`;
+  const REVIEWS = `${INSTANCE}decks/d1/reviews.ttl`;
+  const PREFIXES = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+`;
+  const { checkSubjects } = createShaclShapeValidator({
+    fetch: vi.fn() as never,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
+
+  const DATES = [
+    ["12345-01-01T00:00:00Z", "+012345-01-01T00:00:00.000Z", "12345-01-01T00:00:00.000Z"],
+    ["10000-06-15T08:30:00Z", "+010000-06-15T08:30:00.000Z", "10000-06-15T08:30:00.000Z"],
+    ["-0001-01-01T00:00:00Z", "-000001-01-01T00:00:00.000Z", "-0001-01-01T00:00:00.000Z"],
+    ["-271821-04-20T00:00:00Z", "-271821-04-20T00:00:00.000Z", "-271821-04-20T00:00:00.000Z"],
+    ["0000-01-01T00:00:00Z", "0000-01-01T00:00:00.000Z", "0000-01-01T00:00:00.000Z"],
+    ["2026-01-01T00:00:00Z", "2026-01-01T00:00:00.000Z", "2026-01-01T00:00:00.000Z"],
+  ] as const;
+
+  it.each(DATES)(
+    "keeps a deck's date of %s and passes the write check",
+    async (stored, read, written) => {
+      const dataset = await datasetOfTurtle(
+        CATALOG,
+        `${PREFIXES}
+<#catalog> a dcat:Catalog ; sm:formatVersion 1 ; dcterms:title "c"@en ; dcterms:description "c"@en ;
+  dcterms:publisher <#a> ; dcat:dataset <#d1> .
+<#a> a foaf:Agent ; foaf:name "A" .
+<#d1> a sm:Deck, dcat:Dataset ; sm:formatVersion 6 ; dcterms:title "t"@en ; dcterms:description "d"@en ;
+  dcterms:created "${stored}"^^xsd:dateTime ; dcterms:creator <#a> ; sm:studyDirection sm:frontToBack ;
+  dcat:distribution <#dist> ; sm:cardsDocument <${CARDS}> ; sm:reviewsDocument <${REVIEWS}> .
+<#dist> a dcat:Distribution ; sm:formatVersion 1 ; dcat:accessURL <${CARDS}> ;
+  dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> .
+`,
+      );
+      const [deck] = toDecks(dataset, CATALOG);
+      expect(deck!.createdAt).toBe(read);
+      const edited = withDeck(dataset, { ...deck!, title: { en: "renamed" } });
+      await expect(
+        checkSubjects(edited, deckSubjects(edited, deck!), "pod"),
+      ).resolves.toBeUndefined();
+      expect(
+        getLiteralAll(getThing(edited, `${CATALOG}#d1`)!, DCTERMS.created).map((one) => one.value),
+      ).toEqual([written]);
+      expect(toDecks(edited, CATALOG)[0]!.createdAt).toBe(read);
+    },
+  );
+
+  it.each(DATES)(
+    "keeps a card's date of %s and passes the write check",
+    async (stored, read, written) => {
+      const url = `${CARDS}#c1`;
+      const dataset = await datasetOfTurtle(
+        CARDS,
+        `${PREFIXES}<${url}> a sm:Card ; sm:formatVersion 7 ; sm:front "f"@en ; sm:back "b"@en ;
+  dcterms:created "${stored}"^^xsd:dateTime .`,
+      );
+      const [card] = toCards(dataset);
+      expect(card!.createdAt).toBe(read);
+      const edited = setThing(
+        dataset,
+        recordThing(
+          url,
+          CARD_V7,
+          cardToRecord({ ...card!, front: { en: "edited" } }, card!.createdAt!, CARDS),
+          getThing(dataset, url),
+        ),
+      );
+      await expect(checkSubjects(edited, [url], "pod")).resolves.toBeUndefined();
+      expect(
+        getLiteralAll(getThing(edited, url)!, DCTERMS.created).map((one) => one.value),
+      ).toEqual([written]);
+    },
+  );
+
+  it("updates the format of a document holding a review state of such a date, with the others", async () => {
+    const state = (id: string, first: string) =>
+      `<${REVIEWS}#${id}> a sm:ReviewState ; sm:formatVersion 1 ; sm:reviewOf <${CARDS}#${id}> ;
+  sm:reviewDirection sm:frontToBack ; sm:easeFactor 2.5 ; sm:intervalDays 3 ; sm:repetitions 2 ;
+  sm:due "2026-02-02" ; sm:firstReviewedAt "${first}"^^xsd:dateTime ;
+  sm:lastReviewedAt "2026-01-01T00:00:00Z"^^xsd:dateTime .\n`;
+    const dataset = await datasetOfTurtle(
+      REVIEWS,
+      PREFIXES +
+        state("a", "2026-01-01T00:00:00Z") +
+        state("b", "12345-01-01T00:00:00Z") +
+        state("c", "-0001-01-01T00:00:00Z"),
+    );
+    const documents = { id: "d1", cardsDocumentUrl: CARDS, reviewsDocumentUrl: REVIEWS } as never;
+    const outdated = toReviewStates(dataset, documents).sm2.filter(isReviewStateOutdated);
+    expect(outdated).toHaveLength(3);
+    const written = withReviewStates(
+      dataset,
+      documents,
+      { sm2: outdated.map(upgradeReviewState) },
+      () => "x",
+    );
+    await expect(checkSubjects(written.dataset, written.subjects, "pod")).resolves.toBeUndefined();
+    expect(
+      getLiteralAll(getThing(written.dataset, `${REVIEWS}#b`)!, SM.firstReviewedAt).map(
+        (one) => one.value,
+      ),
+    ).toEqual(["12345-01-01T00:00:00.000Z"]);
+  });
+
+  it("writes an ordinary date as toISOString spells it, milliseconds and all", () => {
+    const written = recordThing(
+      URL_,
+      DECK_V2,
+      {
+        title: "Capitals",
+        created: "2026-09-21T10:00:00.123Z",
+        creator: ["Anton"],
+        license: "https://creativecommons.org/publicdomain/zero/1.0/",
+        direction: "bidirectional",
+        cardsDocument: "https://pod.example/decks/d.ttl",
+        reviewsDocument: "https://pod.example/reviews/d.ttl",
+      },
+      null,
+    );
+    expect(getLiteralAll(written, DCTERMS.created).map((one) => one.value)).toEqual([
+      "2026-09-21T10:00:00.123Z",
+    ]);
   });
 });

@@ -51,7 +51,6 @@ export interface SubjectBuilder {
   addIri(property: string, value: string | Subject): SubjectBuilder;
   addUrl(property: string, value: string | Subject): SubjectBuilder;
   addBoolean(property: string, value: boolean): SubjectBuilder;
-  addDatetime(property: string, value: Date): SubjectBuilder;
   addLiteral(property: string, value: Literal): SubjectBuilder;
   addStringNoLocale(property: string, value: string): SubjectBuilder;
   addStringWithLocale(property: string, value: string, locale: string): SubjectBuilder;

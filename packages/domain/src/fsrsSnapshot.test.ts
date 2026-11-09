@@ -61,7 +61,7 @@ describe("a snapshot read from a pod", () => {
     });
   });
 
-  it("is dropped when its last review cannot be written back", () => {
+  it("is dropped when its last review is outside the years 0 to 9999", () => {
     expect(boundedFsrsSnapshot(snapshot)).toEqual(snapshot);
     expect(
       boundedFsrsSnapshot({ ...snapshot, lastReviewedAt: "+012000-01-01T00:00:00Z" }),

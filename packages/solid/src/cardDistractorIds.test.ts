@@ -23,6 +23,7 @@ import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidDeckRepository } from "./solidDeckRepository";
+import { datetimeLiteral } from "./records";
 import { DCTERMS, RDF, SM } from "./vocab";
 
 const SERIES = "https://library.example/releases/x/v1.ttl#series";
@@ -119,7 +120,7 @@ async function editedCopy(edited = true) {
       .addUrl(RDF.type, SM.Card)
       .addStringWithLocale(SM.front, "Planted", "en")
       .addStringWithLocale(SM.back, "Card", "en")
-      .addDatetime(DCTERMS.created, new Date("2026-10-29T00:00:00Z"))
+      .addLiteral(DCTERMS.created, datetimeLiteral("2026-10-29T00:00:00Z"))
       .setInteger(SM.formatVersion, 7)
       .build();
     await saveDataset(deck.cardsDocumentUrl, setThing(dataset, taken), fetch);

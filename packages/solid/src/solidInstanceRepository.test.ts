@@ -31,6 +31,7 @@ import {
   removeOldRegistrations,
   renameInstanceRegistrations,
 } from "./typeIndex";
+import { datetimeLiteral } from "./records";
 import { DCTERMS, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
 import { deleteInstanceData } from "./instanceData";
@@ -397,7 +398,7 @@ describe("attachInstance", () => {
   function metaDataset(withTitle: boolean, container = CONTAINER) {
     let thing = buildThing(createThing({ url: `${container}meta.ttl#it` }))
       .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
-      .addDatetime(DCTERMS.created, new Date("2026-09-21T10:00:00.000Z"));
+      .addLiteral(DCTERMS.created, datetimeLiteral("2026-09-21T10:00:00.000Z"));
     if (withTitle) {
       thing = thing.addStringNoLocale(DCTERMS.title, "Attached");
     }
@@ -882,7 +883,7 @@ describe("readMeta and upgradeMeta", () => {
       buildThing(createThing({ url: `${META}#it` }))
         .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
         .addStringNoLocale(DCTERMS.title, "Main")
-        .addDatetime(DCTERMS.created, new Date(meta.createdAt))
+        .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
         .addStringNoLocale("https://other.example/#note", "kept")
         .build(),
     );
@@ -1013,7 +1014,7 @@ describe("saveMeta", () => {
           buildThing(createThing({ url: `${META}#it` }))
             .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
             .addStringNoLocale(DCTERMS.title, "Main")
-            .addDatetime(DCTERMS.created, new Date(meta.createdAt))
+            .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
             .addStringNoLocale("https://other.example/#note", "kept")
             .build(),
         ),
