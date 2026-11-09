@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.0.1](https://github.com/solid-memo/website/compare/v7.0.0...v7.0.1) (2026-11-09)
+
+### Bug Fixes
+
+* **studio:** work out a deck's transfer targets once per read ([dea5803](https://github.com/solid-memo/website/commit/dea58031fe98b2d3fe94a31c0497e1e7fcce8f53))
+
 ## [7.0.0](https://github.com/solid-memo/website/compare/v6.29.38...v7.0.0) (2026-11-09)
 
 ### ⚠ BREAKING CHANGES
