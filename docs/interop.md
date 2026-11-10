@@ -7,14 +7,17 @@ server does, where in its code, and the fewest HTTP requests that show
 it, with no Solid Memo involved.
 
 The tests and how they run are in [testing.md](testing.md).
-The Interop workflow runs them weekly and on changes to the app's Solid
-code. Each server's `e2e/pod/servers/<id>/expected-failures.json` names
-the tests a cause fails, by the cause's id on this page.
+The Interop workflow runs them, and the user journeys on the servers
+with Linked Web Storage, weekly and on changes to the app, its Solid
+code or the journeys.
+Each server's `e2e/pod/servers/<id>/expected-failures.json` names the
+tests a cause fails, and its `e2e/journeys/servers/<id>/expected-failures.json`
+the journeys, by the cause's id on this page.
 
 A cause here is one that the tests hit and a live run reproduced. The
 servers are set up for testing, and each entry says when the setup
 plays a part. A server not on this page, or with no entries, passes
-every test.
+every test and journey.
 
 ## How to read an entry
 
@@ -26,7 +29,8 @@ every test.
 - **Reproduction** uses `$POD` for the pod's root URL, ending in `/`.
   The test pods are open to anyone, so the requests carry no
   credentials, unless an entry says it's from the
-  [signed-in tests](testing.md#the-signed-in-tests). Headers and bodies are trimmed to what matters.
+  [signed-in tests](testing.md#the-signed-in-tests) or the
+  [user journeys](testing.md#user-journeys), which sign in. Headers and bodies are trimmed to what matters.
 - **Upstream** links the issue or pull request that tracks the cause,
   or says that none does yet.
 

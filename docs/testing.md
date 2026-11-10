@@ -81,7 +81,8 @@ A **blocking** server's tests gate CI, and so deploys and Renovate's
 merges: every test passes, or skips for a reason it gives. An
 **advisory** server's results are reported, not a gate, by the Interop workflow
 ([interop.yml](../.github/workflows/interop.yml)), weekly, by hand, and
-on pushes to `main` that touch the app's Solid code. A job fails only
+on pushes to `main` that touch the app, its Solid code or the journeys.
+A job fails only
 when no test ran, or a test fails that
 `e2e/pod/servers/<id>/expected-failures.json`
 (`{ "<file> > <test>": "<cause>" }`, the test named without its server)
@@ -445,6 +446,17 @@ their signed-in instances behind TLS
 ([harness/journeyServer.ts](../e2e/journeys/harness/journeyServer.ts)),
 from the image e2e/pod builds. The app signs in to them only when built
 with `SOLID_CLIENT=solid-memo-client` ([lws.md](lws.md#how-its-tested)).
+The Interop workflow runs Chromium's journeys on both and reports them,
+as it does the pod tests: they gate nothing. A job fails only when no
+journey ran, or a journey fails that
+`e2e/journeys/servers/<id>/expected-failures.json`
+(`{ "<file> > <journey>": "<cause>" }`, the journey named by its file,
+its describe blocks and its title) doesn't list. Each cause is an entry
+of [interop.md](interop.md), in the same server's section as its pod
+tests' causes, and `e2e/pod/interop.test.ts` keeps the lists and the
+page in step. [harness/compare.ts](../e2e/journeys/harness/compare.ts)
+names these in the job's summary, with what passes though listed and
+the expected failures by cause.
 
 Further journeys go through:
 

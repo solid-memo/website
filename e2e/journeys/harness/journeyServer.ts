@@ -7,7 +7,8 @@ import { join } from "node:path";
 /**
  * The Solid servers the journeys run against, which JOURNEY_SERVER
  * names (docs/testing.md#user-journeys): the Community Solid Server 7
- * they gate on, first, and the advisory ones with Linked Web Storage.
+ * they gate on, first, and the advisory ones with Linked Web Storage,
+ * which the Interop workflow runs them on.
  */
 const SERVERS = {
   "css-7": {

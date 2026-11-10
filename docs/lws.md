@@ -83,7 +83,8 @@ storage without a browser. [The user journeys](testing.md#user-journeys)
 sign in with one, in Chromium, on both servers. `JOURNEY_SERVER=css-lws`
 or `css-lws-only` runs them against that server's signed-in instance:
 the fork's own configuration behind TLS, with a storage for each pod.
-The app is built with `SOLID_CLIENT=solid-memo-client`.
+The app is built with `SOLID_CLIENT=solid-memo-client`. The Interop
+workflow runs them.
 
 Some journeys read or write the pod themselves, as another app or to
 check what the app left. There the harness does what the app does: it
