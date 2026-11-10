@@ -187,6 +187,7 @@ export const SERVERS = {
     // The fork's commit, on the release css-8 runs, so a failure only it shows comes from its LWS changes.
     version: () =>
       `${dockerfileArg("css-lws", "CSS_LWS_VERSION")} (${dockerfileArg("css-lws", "CSS_LWS_SHA").slice(0, 8)})`,
+    signedIn: { login: "css-lws", host: "127.0.0.1" },
   },
   "css-lws-only": {
     label: "Community Solid Server with LWS only",
@@ -198,6 +199,7 @@ export const SERVERS = {
     // css-lws's image, with the fork's LWS-alone configuration, which still takes the Solid Protocol's requests (docs/lws.md).
     version: () =>
       `${dockerfileArg("css-lws", "CSS_LWS_VERSION")} (${dockerfileArg("css-lws", "CSS_LWS_SHA").slice(0, 8)})`,
+    signedIn: { login: "css-lws", host: "127.0.0.1" },
   },
 } satisfies Record<string, Entry>;
 

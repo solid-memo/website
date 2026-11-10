@@ -51,9 +51,9 @@ export const LAYERS: Record<string, string[]> = {
   web: ["application", "domain", "vocab", "ui", "composition", "studio", "site"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
-  "e2e-pod": ["application", "domain", "vocab", "solid"],
+  "e2e-pod": ["application", "domain", "vocab", "solid", "solid-memo-client"],
   // A second implementation of solid's client modules, which it tests with solid's contract. No package
-  // imports it: the build puts it in their place when SOLID_CLIENT names it (scripts/solidClient.ts).
+  // the app is made of imports it: the build puts it in their place when SOLID_CLIENT names it (scripts/solidClient.ts).
   "solid-memo-client": ["solid"],
   // The journeys drive the built app in a browser; they read only its text.
   "e2e-journeys": ["ui", "studio"],
@@ -76,6 +76,8 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   shacl: { turtle: /^node\//, markdown: /^node\// },
   // The app's messages (packages/ui/src/i18n, apps/studio/src/i18n), which the page objects find text by.
   "e2e-journeys": { ui: /^harness\/strings\.ts$/, studio: /^harness\/strings\.ts$/ },
+  // The signed-in tests sign in to a Linked Web Storage server with the only client that can.
+  "e2e-pod": { "solid-memo-client": /^signedInClient\.ts$/ },
 };
 
 /** Within a package, the entry points of an allowed package that alone it may import. */

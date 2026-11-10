@@ -111,7 +111,8 @@ on the same 8.0.0-alpha.3 as css-8, so a failure only css-lws shows
 comes from the LWS changes. Its configuration is the fork's
 `config/solid-lws.json` in memory, with the root as the storage.
 css-lws-only runs the same image with the fork's `config/lws.json`
-instead: LWS alone. The image is built from code nobody has reviewed, on CI's runners and on the
+instead: LWS alone. The app's sign-in to an LWS storage is shown by
+[the signed-in tests](#the-signed-in-tests). The image is built from code nobody has reviewed, on CI's runners and on the
 machine of anyone who runs `SOLID_SERVERS=all`. Its dependencies'
 install scripts don't run, and its final stage keeps only what the
 server runs. GitHub's dependency review doesn't see the lockfile it
@@ -357,6 +358,7 @@ request.
 | `css-6` | Client credentials from its older identity API, DPoP-bound |
 | `nss-6`, `nss-5` | The authorization-code flow, its login and consent forms filled in by script; each pod on a subdomain of localhost |
 | `jss` | Its own email and password endpoint, `/idp/credentials`, DPoP-bound |
+| `css-lws`, `css-lws-only` | The authorization-code flow, the account API answering for its login and consent pages, for an ID token as well as a DPoP-bound access token |
 
 `nextcloud` is left out. Its login is Nextcloud's browser form and the
 Solid app's approval page, which nothing here scripts.
@@ -374,6 +376,21 @@ The tests check that:
 - the app sees the 403 when the stranger publishes or makes public;
 - an invalid token gets a 401, the document stays as it was, and the app
   ends the session only if the answer names the token invalid.
+
+On `css-lws` and `css-lws-only`, the sign-in client is the app's own
+([signedInClient.ts](../e2e/pod/signedInClient.ts)): `solid-memo-client`'s
+session, as the app wires it, since Inrupt's client
+gives the app no ID token. So the requests are the ones a browser's
+session makes, and:
+
+- on LWS alone, a DPoP request is answered with the LWS challenge, and
+  the client goes through the resource metadata and the exchange to a
+  Bearer token; beside Solid, it stays on DPoP;
+- a Bearer token from the exchange works for its user's access, and only
+  in the storage it's for.
+
+There an invalid token is the ID token too: on LWS alone a bad access
+token is no one's, and it's the exchange that refuses.
 
 The app has no way to take access back, so nothing tests removing it. A
 real expired token isn't tested either: the shortest lifetime on these

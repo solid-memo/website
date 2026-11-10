@@ -75,3 +75,8 @@ that exchange when a storage answers 401 with an LWS challenge, and
 keeps one token for each storage. Inrupt's sign-in client gives the
 app the ID token only in the address that ends the session, so a build that signs in to an LWS storage is made with
 `SOLID_CLIENT=solid-memo-client`.
+
+## How it's tested
+
+[The signed-in tests](testing.md#the-signed-in-tests) sign in to an LWS
+storage without a browser, on both servers.
