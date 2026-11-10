@@ -160,6 +160,33 @@ describe("planCardTransfer", () => {
     });
   });
 
+  it("carries states whose due day is no date with a real day, valid ones unchanged", () => {
+    const badDue = "zzz";
+    const lastReview = new Date(2026, 9, 6, 12, 0);
+    const bad = { ...state("a"), due: badDue, lastReviewedAt: lastReview.toISOString() };
+    const fsrs: FsrsState = {
+      cardId: "a",
+      direction: "front-to-back",
+      stability: 8,
+      difficulty: 5,
+      due: badDue,
+      firstReviewedAt: "2026-10-01T10:00:00.000Z",
+      lastReviewedAt: lastReview.toISOString(),
+      formatVersion: 1,
+    };
+    const plan = planCardTransfer(
+      { ...SOURCE, cards: [a], states: [bad, state("a", "back-to-front")], fsrs: [fsrs] },
+      { ...TARGET, cards: [], states: [] },
+      ["a"],
+      move,
+    );
+    expect(plan.target.reviewSaves.map(({ direction, due }) => [direction, due])).toEqual([
+      ["front-to-back", "2026-10-06"],
+      ["back-to-front", "2026-10-12"],
+    ]);
+    expect(plan.target.fsrsSaves.map(({ due }) => due)).toEqual(["2026-10-06"]);
+  });
+
   it("carries a card's FSRS-6 state with its SM-2 state, under its id in the target", () => {
     const fsrs: FsrsState = {
       cardId: "a",

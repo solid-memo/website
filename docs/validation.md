@@ -447,7 +447,7 @@ written in the subject's own stored format:
 | A deck without a description | The default description, `Flashcards: <title>.` |
 | A deck without a study direction, or an unknown one | Front to back, as format 1 studied every deck |
 | A review state with half an undo snapshot (an SM-2 or an FSRS-6 state's) | The snapshot dropped (as the review-state 1 → 2 migration does), the four terms of an FSRS-6 state's or the five of an SM-2 state's |
-| A malformed due day | Recomputed from the last review and the interval |
+| A malformed due day | Recomputed from the last review and the bounded interval, or a long-past day, due at once, when those give no real day |
 | An agent without a name | Named after its IRI |
 | A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document doesn't describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
 | A date the app can't read (`DateTimeRange`) of a field the subject's shape and format make optional | Those dates dropped, every such date of the subject in one repair; a readable value of the same field, and every other field, are kept |

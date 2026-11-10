@@ -10,7 +10,7 @@ import { ratingOfAnswer } from "./grading";
 import type { LangText } from "./langText";
 import { FSRS_REVIEW_STATE_FORMAT_VERSION, type FsrsState, type ReviewState } from "./review";
 import { isCarriedOverInstant } from "./reviewStateEdits";
-import { firstReviewOf } from "./scheduling";
+import { firstReviewOf, writableDueDay } from "./scheduling";
 import { daysBetween } from "./studyPatterns";
 
 /**
@@ -114,7 +114,10 @@ function replayed(history: readonly Answer[]): FsrsMemory {
  * replayed from the prompt's answers when they are its whole history
  * since it was introduced, else estimated from the SM-2 state
  * (memoryFromSm2). Each keeps the SM-2 state's due day and reviews, and
- * has no snapshot, as nothing FSRS-6 wrote is there to restore. A review
+ * has no snapshot, as nothing FSRS-6 wrote is there to restore. A due
+ * day that is no real date (isStudyDay) is the study day of `now`, at
+ * the learner's `dayBoundaryHour`, instead, so one such state does not
+ * fail the deck's write. A review
  * date outside the years a grade carries over (isCarriedOverInstant) is
  * `now` instead, as a grade has it; then the
  * SM-2 state's last review differs, so that FSRS-6 state is stale
@@ -126,6 +129,7 @@ export function switchedStates(
   sm2: readonly ReviewState[],
   answers: readonly Answer[],
   now: Date,
+  dayBoundaryHour: number,
 ): SwitchedStates {
   const { chains } = chainIndexOf(answers.filter((answer) => answer.deckUrl === deckUrl));
   let replayedCount = 0;
@@ -139,7 +143,7 @@ export function switchedStates(
       direction: state.direction,
       stability: memory.stability,
       difficulty: memory.difficulty,
-      due: state.due,
+      due: writableDueDay(state.due, now, dayBoundaryHour),
       firstReviewedAt: firstReviewOf(state, now),
       lastReviewedAt: isCarriedOverInstant(state.lastReviewedAt)
         ? state.lastReviewedAt

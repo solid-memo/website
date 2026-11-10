@@ -7,6 +7,7 @@ import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "
 import { INSTANCE_FORMAT_VERSION, type InstanceMeta } from "./instance";
 import { PREFERENCES_FORMAT_VERSION, type StoredPreferences } from "./preferences";
 import { REVIEW_STATE_FORMAT_VERSION, type ReviewState } from "./review";
+import { withWritableDueDays } from "./scheduling";
 
 /**
  * Format migrations: bringing data written by an older Solid Memo up to
@@ -45,10 +46,10 @@ export function isReviewStateOutdated(state: ReviewState): boolean {
   return state.formatVersion < REVIEW_STATE_FORMAT_VERSION;
 }
 
-/** The review state as this app writes it: the same state, current version. */
+/** The review state as this app writes it: the same state, current version, a due day that is no real date as withWritableDueDays has it. */
 export function upgradeReviewState(state: ReviewState): ReviewState {
   return isReviewStateOutdated(state)
-    ? { ...state, formatVersion: REVIEW_STATE_FORMAT_VERSION }
+    ? { ...withWritableDueDays(state), formatVersion: REVIEW_STATE_FORMAT_VERSION }
     : state;
 }
 

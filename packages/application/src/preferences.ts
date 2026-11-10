@@ -460,7 +460,13 @@ export function createPreferenceUseCases({
           // Made of the states as written, again when the document changed meanwhile: the last one counts.
           let made = { replayed: 0, estimated: 0 };
           await reviewStateRepository.writeFsrsStates(deck, ({ sm2 }) => {
-            const switched = switchedStates(deck.url, sm2, answers, now());
+            const switched = switchedStates(
+              deck.url,
+              sm2,
+              answers,
+              now(),
+              preferences.dayBoundaryHour,
+            );
             made = switched;
             return switched.fsrs;
           });

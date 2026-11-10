@@ -912,6 +912,18 @@ describe("preferences", () => {
       ]);
     });
 
+    it("to FSRS-6 puts the learner's study day in place of a due day that is no date", async () => {
+      const deps = makeDeps();
+      const beforeBoundary = new Date(2026, 8, 28, 2, 0);
+      const useCases = createUseCases({ ...deps, now: () => beforeBoundary });
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck]);
+
+      await useCases.switchScheduler(instance.url, { ...fsrsPrefs, dayBoundaryHour: 4 });
+
+      const write = vi.mocked(deps.reviewStateRepository.writeFsrsStates).mock.calls[0]![1];
+      expect(write(sm2s([{ ...moved, due: "zzz" }]))[0]!.due).toBe("2026-09-27");
+    });
+
     it("to FSRS-6 leaves SM-2 in charge when a deck cannot be written, naming it, and goes on with the others", async () => {
       const { deps, useCases } = await studied();
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([second, deck]);

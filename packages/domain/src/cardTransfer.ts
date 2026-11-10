@@ -7,6 +7,7 @@ import type { Card, CardContent, Deck, StudyDirection } from "./deck";
 import { canonicalUrlOf } from "./instanceLayout";
 import { sameContent } from "./libraryUpgrade";
 import { reviewKeyOf, type FsrsState, type ReviewKey, type ReviewState } from "./review";
+import { withWritableDueDays } from "./scheduling";
 
 /**
  * The Studio's move and copy of cards from one deck to another of the
@@ -144,7 +145,8 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * UseCases.transferCards); a copy leaves the
  * source as it is. The states are those read, joined to their cards by
  * sm:reviewOf (domain/reviewRecord.ts): another scheduler's are never
- * among them, and stay where they are. The answer log is not the plan's: past answers keep naming the
+ * among them, and stay where they are. A due day that is no real date
+ * is written as withWritableDueDays has it. The answer log is not the plan's: past answers keep naming the
  * cards in the source (docs/data-model.md).
  *
  * Refuses a transfer to the source itself, or to a deck that shares a
@@ -203,9 +205,9 @@ export function planCardTransfer(
       const key: ReviewKey = { cardId: to, direction };
       const held = targetStates.has(reviewKeyOf(key));
       if (keepProgress && state !== undefined && !(present && held)) {
-        plan.target.reviewSaves.push({ ...state, ...key });
+        plan.target.reviewSaves.push({ ...withWritableDueDays(state), ...key });
         if (fsrs === undefined) plan.target.fsrsRemovals.push(key);
-        else plan.target.fsrsSaves.push({ ...fsrs, ...key });
+        else plan.target.fsrsSaves.push({ ...withWritableDueDays(fsrs), ...key });
       } else if (!present && (held || targetFsrs.has(reviewKeyOf(key)))) {
         plan.target.reviewRemovals.push(key);
       }

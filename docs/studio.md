@@ -1123,6 +1123,8 @@ The domain plans the transfer
   - Its FSRS-6 state goes with its SM-2 state the same way; where the
     card has none, a state the target held at that prompt goes. One
     with no SM-2 state beside it isn't carried, only removed.
+  - A due day that isn't a real date is written as the day of the state's
+    last review, and a snapshot with such a day is left out.
 - A card written in the target names its wrong options with
   `sm:distractor` and `schema:suggestedAnswer` alike, each typed
   `sm:Distractor` and `schema:Answer`.

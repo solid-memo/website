@@ -12,6 +12,7 @@ import {
   resetFsrsStudyDay,
   resetStudyDay,
   studyDayOf,
+  withWritableDueDays,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
 import { effectiveStates } from "@solid-memo/domain/fsrs";
@@ -237,8 +238,10 @@ export function createStudyUseCases({
       );
     },
     async undoReview(instanceUrl, deck, { key, before, fsrs, answer }) {
-      const back = <T>(state: T | null) =>
-        state === null ? { save: [], remove: [key] } : { save: [state], remove: [] };
+      const back = <T extends ReviewState | FsrsState>(state: T | null) =>
+        state === null
+          ? { save: [], remove: [key] }
+          : { save: [withWritableDueDays(state)], remove: [] };
       // Both states as they were, in one save: FSRS-6's only when the answer wrote it.
       await reviewStateRepository.applyReviewChanges(deck, {
         ...back(before),
