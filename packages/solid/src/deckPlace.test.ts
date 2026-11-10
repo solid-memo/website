@@ -11,6 +11,7 @@ import { deleteInstanceData } from "./instanceData";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createSolidDeckArchive } from "./solidDeckArchive";
+import { datasetOfTurtle } from "./testing/datasets";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidRepairRepository } from "./solidRepairRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
@@ -461,7 +462,7 @@ describe("a deck whose documents do not say they are its own", () => {
     ]);
   });
 
-  it("is written to wherever it is when it says it is the deck's", async () => {
+  it("is written to anywhere in the instance's storage when it says it is the deck's", async () => {
     const p = await pod();
     const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
     const cards = `${ROOT}carol/shared/spanish`;
@@ -473,6 +474,202 @@ describe("a deck whose documents do not say they are its own", () => {
     expect(await backLinks(p, cards, deck)).toBe(1);
     await p.decks.removeDeck(listed!);
     expect(await p.urls()).not.toContain(cards);
+  });
+});
+
+describe("a deck whose document says it is the deck's, outside the instance's folder", () => {
+  const VICTIM = "https://victim.example/";
+  const ATTACKER = "https://attacker.example/";
+  const GUESTBOOK = `${VICTIM}public/guestbook.ttl`;
+  const ENTRIES = `<> <http://purl.org/dc/terms/title> "My guestbook" .
+<#entry1> <http://schema.org/text> "Hello from Alice" .
+<#entry2> <http://schema.org/text> "Hello from Bob" .`;
+
+  it("is never written to or deleted through an instance on another server, whatever classes were appended to it", async () => {
+    let etags = 0;
+    const newEtag = () => `"e${++etags}"`;
+    const victim = createLocalPod({ root: VICTIM, store: createMemoryResourceStore(), newEtag });
+    const attacker = createLocalPod({
+      root: ATTACKER,
+      store: createMemoryResourceStore(),
+      newEtag,
+    });
+    const sent: { method: string; origin: string }[] = [];
+    const fetch = (async (input, init) => {
+      const url = String(input);
+      const { origin } = new URL(url);
+      sent.push({ method: (init?.method ?? "GET").toUpperCase(), origin });
+      return origin === new URL(VICTIM).origin ? victim(url, init) : attacker(url, init);
+    }) as typeof globalThis.fetch;
+    const decks = createSolidDeckRepository({
+      fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "x",
+    });
+    const instance = `${ATTACKER}memo/`;
+    const deck = await decks.createDeck(instance, { en: "Spanish" });
+    // What an agent that may only append to the user's document can add to it.
+    const appended = `${ENTRIES}
+<> <${IS_PART_OF}> <${deck.url}> ; a <${SM}Card> .
+<#entry1> a <${SM}Card> .
+<#entry2> a <${SM}Card> .`;
+    const response = await victim(GUESTBOOK, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: appended,
+    });
+    expect(response.ok).toBe(true);
+    const catalog = `${instance}catalog.ttl`;
+    const turtle = (await (await attacker(catalog)).text())
+      .replaceAll(`<${deck.cardsDocumentUrl}>`, `<${GUESTBOOK}>`)
+      .replaceAll(`<decks/${deck.id}.ttl>`, `<${GUESTBOOK}>`);
+    await attacker(catalog, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: turtle,
+    });
+    const [listed] = await decks.listDecks(instance);
+    expect(listed).toMatchObject({ cardsDocumentUrl: GUESTBOOK });
+    await expect(decks.unclaimedDocuments(listed!)).resolves.toEqual([GUESTBOOK]);
+    await expect(decks.addCard(listed!, UNO)).rejects.toMatchObject({
+      code: "deckDocumentUnclaimed",
+    });
+
+    const before = await (await victim(GUESTBOOK)).text();
+    sent.length = 0;
+    await decks.removeDeck(listed!);
+    expect(
+      sent.filter(
+        (request) => request.origin === new URL(VICTIM).origin && request.method !== "GET",
+      ),
+    ).toEqual([]);
+    expect(await (await victim(GUESTBOOK)).text()).toBe(before);
+    await expect(decks.listDecks(instance)).resolves.toEqual([]);
+  });
+
+  it("keeps what others wrote in the user's document when an instance in the same storage, in another folder, names it", async () => {
+    let etags = 0;
+    const victim = createLocalPod({
+      root: VICTIM,
+      store: createMemoryResourceStore(),
+      newEtag: () => `"e${++etags}"`,
+    });
+    const sent: string[] = [];
+    const fetch = (async (input, init) => {
+      const url = String(input);
+      sent.push(`${(init?.method ?? "GET").toUpperCase()} ${url}`);
+      return victim(url, init);
+    }) as typeof globalThis.fetch;
+    const decks = createSolidDeckRepository({
+      fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "x",
+    });
+    // An instance made where others may append, in the user's own storage.
+    const instance = `${VICTIM}inbox/memo/`;
+    const deck = await decks.createDeck(instance, { en: "Spanish" });
+    const appended = `${ENTRIES}
+<> <${IS_PART_OF}> <${deck.url}> ; a <${SM}Card> .
+<#entry1> a <${SM}Card> .
+<#entry2> a <${SM}Card> .`;
+    const response = await victim(GUESTBOOK, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: appended,
+    });
+    expect(response.ok).toBe(true);
+    const catalog = `${instance}catalog.ttl`;
+    const turtle = (await (await victim(catalog)).text())
+      .replaceAll(`<${deck.cardsDocumentUrl}>`, `<${GUESTBOOK}>`)
+      .replaceAll(`<decks/${deck.id}.ttl>`, `<${GUESTBOOK}>`);
+    await victim(catalog, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: turtle,
+    });
+    const [listed] = await decks.listDecks(instance);
+    expect(listed).toMatchObject({ cardsDocumentUrl: GUESTBOOK });
+
+    const before = await (await victim(GUESTBOOK)).text();
+    sent.length = 0;
+    await decks.removeDeck(listed!);
+    expect(
+      sent.filter((request) => request.endsWith(GUESTBOOK) && !request.startsWith("GET")),
+    ).toEqual([]);
+    expect(await (await victim(GUESTBOOK)).text()).toBe(before);
+  });
+
+  it("refuses a write for now, rather than calling it no deck's, when the pod does not answer for a folder on the way", async () => {
+    const p = await pod();
+    const deck = {
+      url: `${BOB}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${ROOT}bob/kort/spanish.ttl`,
+      reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+    };
+    await p.put(deck.cardsDocumentUrl, `<> <${IS_PART_OF}> <${deck.url}> .`);
+    const ours = await datasetOfTurtle(deck.cardsDocumentUrl, `<> <${IS_PART_OF}> <${deck.url}> .`);
+    let busy = true;
+    const guard = createDeckDocumentGuard((async (input, init) => {
+      if (busy && init?.method === "HEAD") return new Response(null, { status: 503 });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    await expect(guard.writable(deck, deck.cardsDocumentUrl, ours)).rejects.toMatchObject({
+      code: "cannotCheck",
+    });
+    busy = false;
+    await expect(guard.writable(deck, deck.cardsDocumentUrl, ours)).resolves.toBeDefined();
+  });
+
+  it("is the deck's in the instance's storage only, on a server that holds the storages of many", async () => {
+    const p = await pod();
+    const deck = {
+      url: `${BOB}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${BOB}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+    };
+    const says = await datasetOfTurtle(
+      `${ROOT}alice/public/guestbook.ttl`,
+      `<> <${IS_PART_OF}> <${deck.url}> .`,
+    );
+    const ours = await datasetOfTurtle(
+      `${ROOT}bob/kort/spanish.ttl`,
+      `<> <${IS_PART_OF}> <${deck.url}> .`,
+    );
+    await p.put(`${ROOT}alice/public/guestbook.ttl`, "");
+    await p.put(`${ROOT}bob/kort/spanish.ttl`, "");
+    const asked: string[] = [];
+    let busy = false;
+    const storages = [`${ROOT}alice/`, `${ROOT}bob/`];
+    const guard = createDeckDocumentGuard((async (input, init) => {
+      const url = String(input);
+      asked.push(url);
+      if (busy) return new Response(null, { status: 503 });
+      if (storages.includes(url))
+        return new Response(null, {
+          headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
+        });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    // Another storage on the instance's server: what the document says makes it no deck's, so nothing is written there.
+    await expect(guard.standing(deck, `${ROOT}alice/public/guestbook.ttl`, says)).resolves.toBe(
+      "unclaimed",
+    );
+    expect(asked).toEqual([`${ROOT}alice/public/`, `${ROOT}alice/`]);
+    // The pod not answering for a folder on the way leaves it no deck's, and the folder is asked again.
+    busy = true;
+    await expect(guard.standing(deck, `${ROOT}bob/kort/spanish.ttl`, ours)).resolves.toBe(
+      "unclaimed",
+    );
+    busy = false;
+    await expect(guard.standing(deck, `${ROOT}bob/kort/spanish.ttl`, ours)).resolves.toBe("owned");
+    // Another server: nothing asked.
+    asked.length = 0;
+    await expect(
+      guard.standing(deck, "https://elsewhere.example/bob/kort/spanish.ttl", ours),
+    ).resolves.toBe("unclaimed");
+    expect(asked).toEqual([]);
   });
 });
 
@@ -636,7 +833,7 @@ describe("removing a deck whose document holds another app's data too", () => {
 });
 
 describe("deleting an instance", () => {
-  it("deletes a deck's documents that say they are its own, wherever they are, and keeps unclaimed ones", async () => {
+  it("deletes a deck's documents that say they are its own, anywhere in its storage, and keeps unclaimed ones", async () => {
     const p = await pod();
     const claimed = await p.decks.createDeck(BOB, { en: "Spanish" });
     const unclaimed = await p.decks.createDeck(BOB, { en: "Korean" });

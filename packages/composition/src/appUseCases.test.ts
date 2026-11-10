@@ -679,7 +679,7 @@ describe("createAppUseCases", () => {
       cardsDocumentUrl: cards,
       reviewsDocumentUrl: reviews,
     });
-    /** A document saying it is the deck's: what anyone who may write it can state. */
+    /** A document saying it is the deck's: what anyone who may append to it can state. */
     const owned = (url: string) => `<${url}> <http://purl.org/dc/terms/isPartOf> <${entry}>.`;
     const documents = new Map([
       [
@@ -719,11 +719,9 @@ describe("createAppUseCases", () => {
     expect(await useCases.listCards(elsewhere)).toEqual([]);
     await expect(
       useCases.addCard(elsewhere, { front: { en: "Sweden" }, back: { en: "Stockholm" } }),
-    ).rejects.toMatchObject({ code: "writeOutsidePod", vars: { host: "attacker.example" } });
-    // Removing the deck keeps its documents there, whatever they say.
-    await expect(useCases.removeDeck(elsewhere)).resolves.toEqual({
-      keptDocuments: ["https://attacker.example/cards.ttl", "https://attacker.example/reviews.ttl"],
-    });
+    ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+    // Removing the deck keeps its documents there, whatever they say: outside the instance's storage, they are not its own.
+    await expect(useCases.removeDeck(elsewhere)).resolves.toEqual({ keptDocuments: [] });
     expect(login.sent.filter((url) => url.startsWith("https://attacker.example/"))).toEqual([]);
     expect(vi.mocked(globalThis.fetch)).toHaveBeenCalledWith(
       "https://attacker.example/cards.ttl",
@@ -1071,12 +1069,13 @@ describe("createAppUseCases", () => {
     const now = new Date();
     const [prompt] = (await useCases.getStudyQueue(instance.url, deck!, now)).newPrompts;
     await expect(useCases.recordReview(instance.url, deck!, prompt!, 4, now)).rejects.toMatchObject(
-      { code: "writeOutsidePod", vars: { host: "attacker.example" } },
+      { code: "deckDocumentUnclaimed" },
     );
-    // Once the reviews document no longer says it is the deck's, the data check finds it unclaimed; claiming it is refused too.
-    await put(theirs, `${attacker}reviews.ttl`, "");
+    // Saying they are the deck's makes neither the deck's outside the instance's storage: the data check finds them unclaimed; claiming them is refused too.
     expect((await useCases.checkInstance(instance.url)).unclaimed).toEqual([
-      expect.objectContaining({ documents: [`${attacker}reviews.ttl`] }),
+      expect.objectContaining({
+        documents: [`${attacker}cards.ttl`, `${attacker}reviews.ttl`],
+      }),
     ]);
     await expect(useCases.claimDeckDocuments(instance.url, deck!.url)).rejects.toMatchObject({
       code: "claimOutsidePod",

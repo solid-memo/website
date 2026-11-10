@@ -266,13 +266,21 @@ export function isInstanceOwnDocument(instanceUrl: string, url: string): boolean
 /**
  * Whether a deck's document says it is the deck's: the document itself
  * (`<>`) is dcterms:isPartOf the deck's catalog entry (`partOf`, the
- * values it states), compared as a request sends the address. Only
- * someone who may write the document can state it, so it is what lets
- * Solid Memo write to the document or delete it (docs/data-model.md,
- * "Where an instance's documents are"), wherever it is. Solid Memo
- * copies what others wrote into one document only, a draft made from a
- * release, and leaves this out of it; a release or a draft is still no
- * deck's document, whatever it says (deckPlace.ts).
+ * values it states), compared as a request sends the address. Anyone
+ * who may append to the document can state it, not only someone who may
+ * write it, so it lets Solid Memo write to the document or delete it
+ * (docs/data-model.md, "Where an instance's documents are") only in the
+ * instance's folder or in the storage the instance is in (deckPlace.ts),
+ * and even there it never makes what others wrote in it the deck's: a
+ * removal takes out only the cards, distractors and review states of
+ * Solid Memo's whose every class is one of theirs and every property
+ * one of their shapes', at any version, or the format stamp, the
+ * release a card came from or a distractor's schema:suggestedAnswer,
+ * and the document's own statement, when that is all it says
+ * (ownership.ts deckDocumentSubjects).
+ * Solid Memo copies what others wrote into one document only, a draft
+ * made from a release, and leaves this out of it; a release or a draft
+ * is still no deck's document, whatever it says.
  */
 export function ownsDocument(partOf: readonly string[], deckUrl: string): boolean {
   return partOf.some((url) => isSameUrl(url, deckUrl));

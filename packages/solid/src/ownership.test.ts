@@ -245,6 +245,47 @@ describe("deckDocumentSubjects", () => {
     );
   });
 
+  it("never names the document itself by the class it states, nor what its cards link to", async () => {
+    const typed = await served(
+      CARDS,
+      `<> <${DCTERMS.isPartOf}> <${ENTRY}> ; a <${SM.Card}> .
+<#c1> a <${SM.Card}> ; <${SM.front}> "uno" ; <${DCTERMS.created}> "2026-01-01" .
+<#c2> a <${SM.Card}> ; <${DCTERMS.creator}> <#alice> ; <${DCAT_DISTRIBUTION}> <#file> .
+<#alice> <${SAYS}> "kept" .
+<#file> <${SAYS}> "kept" .`,
+    );
+    expect(deckDocumentSubjects([ENTRY])(typed)).toEqual(new Set([`${CARDS}#c1`]));
+  });
+
+  it("names only cards, distractors and review states that say nothing but what Solid Memo writes of one", async () => {
+    const appended = await served(
+      CARDS,
+      `<> <${DCTERMS.isPartOf}> <${ENTRY}> .
+<#c1> a <${SM.Card}> ; <${SM.front}> "uno" ; <${SM.distractor}> <#d1> ; <https://schema.org/suggestedAnswer> <#d1> ; <${DCTERMS.subject}> <https://www.wikidata.org/entity/Q1> ; <http://www.w3.org/2002/07/owl#deprecated> true .
+<#d1> a <${SM.Distractor}>, <https://schema.org/Answer> ; <${SM.distractorText}> "dos" .
+<#c1-sm2> a <${SM.ReviewState}> ; <${SM.due}> "2026-01-01T00:00:00Z" .
+<#entry1> a <${SM.Card}> ; <https://schema.org/text> "Hello from Alice" .
+<#entry2> a <${SM.Card}>, <https://schema.org/Comment> .`,
+    );
+    expect(deckDocumentSubjects([ENTRY])(appended)).toEqual(
+      new Set([`${CARDS}#c1`, `${CARDS}#d1`, `${CARDS}#c1-sm2`, CARDS]),
+    );
+  });
+
+  it("keeps a subject of another Solid Memo class, or with another Solid Memo property, that also says it is a card", async () => {
+    const appended = await served(
+      CARDS,
+      `<> <${DCTERMS.isPartOf}> <${ENTRY}> .
+<#c1> a <${SM.Card}> ; <${SM.front}> "uno" ; <${SM.formatVersion}> 7 ; <${SM.fromRelease}> <https://pod.example/release.ttl> .
+<#c1-fsrs> a <${SM.ReviewState}> ; <${SM.scheduler}> <${SM.fsrs6}> ; <${SM.stability}> 1.5 ; <${SM.reviewOf}> <#c1> .
+<#prefs> a <${SM.Preferences}>, <${SM.Card}> ; <${SM.newCardsPerDay}> 20 .
+<#settings> a <${SM.Card}> ; <${SM.newCardsPerDay}> 20 .`,
+    );
+    expect(deckDocumentSubjects([ENTRY])(appended)).toEqual(
+      new Set([`${CARDS}#c1`, `${CARDS}#c1-fsrs`, CARDS]),
+    );
+  });
+
   it("names nothing of a document that is a deck itself, a release, whatever else it says", async () => {
     const release = await served(
       CARDS,

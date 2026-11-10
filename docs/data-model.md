@@ -457,7 +457,8 @@ No document Solid Memo names has any.
   storages and the instances they registered) is read as no one, and
   nothing is written to or deleted there, whatever it says
   (`writeOutsidePod`, [boundaries.md](boundaries.md#the-credential-gate)).
-  Removing its deck, or deleting its instance, keeps it, and says so.
+  Removing its deck, or deleting its instance, keeps it. One in the
+  instance's storage that says it's the deck's is named as kept.
   In an instance from someone else's pod, only documents in the
   instance's folder are the user's: a deck whose documents lie
   elsewhere in that pod can be read only if they're public, and can't
@@ -465,9 +466,25 @@ No document Solid Memo names has any.
 - **A deck's document is written to, or deleted, only when it says it is
   the deck's**: the document states
   `<> dcterms:isPartOf <catalog.ttl#deck-X>`, naming this deck's entry
-  (`ownsDocument`; [below](#decks-and-cards)), which only someone who
-  may write the document can state. A draft made from a release holds
-  what others wrote, so it never keeps a statement that one of its
+  (`ownsDocument`; [below](#decks-and-cards)). Anyone who may append to
+  a document can state that, so the statement alone doesn't make a
+  document safe to change. It counts only for a document in the
+  instance's folder or in the storage the instance is in. That's one on
+  the instance's server where no folder between the document and the
+  first folder that holds the instance too is a storage's root (typed
+  `pim:Storage`, or named by a Linked Web Storage server). Anywhere else
+  it's unclaimed, whatever it says, and nothing is written to or
+  deleted there for the deck. A deck whose documents are in another
+  storage, even one of the user's own, is read-only until they're moved
+  into the instance's storage. When the pod doesn't answer for a folder
+  on the way, a write fails with `cannotCheck` and can be retried; the
+  data check and a removal take the document for unclaimed that time.
+  The storage rule doesn't tell who made the instance. So what keeps
+  the rest of the document safe is what a removal takes out of it: only
+  subjects that say nothing but what Solid Memo writes of a card,
+  distractor or review state (below). A draft
+  made from a release holds what others wrote, so it never keeps a
+  statement that one of its
   documents is `dcterms:isPartOf` anything (`draftEntries`). A release
   (`<> a sm:Deck`) is never a deck's document, whatever it says, nor is
   a draft's own document in its folder: its release document,
@@ -509,12 +526,22 @@ No document Solid Memo names has any.
   (`isInInstancePod`). An instance attached from someone else's pod may
   name a document of the user's own, and writes to that document go out
   as the user. Any other document is refused (`claimOutsidePod`), and
-  the deck is shown without the button. A document that already says
-  it's the deck's stays the deck's. Removing a deck, or
-  deleting its instance, takes out a document's cards and review states
-  only when every deck it names is leaving; otherwise only
-  the leaving deck's `dcterms:isPartOf` goes (`deckDocumentSubjects` in
-  `ownership.ts`).
+  the deck is shown without the button. A document in the instance's
+  storage that already says it's the deck's stays the deck's. Removing a
+  deck, or deleting its instance, takes out a document's cards,
+  distractors and review states only when every deck it names is
+  leaving; otherwise only the leaving deck's `dcterms:isPartOf` goes
+  (`deckDocumentSubjects` in `ownership.ts`). A subject goes only when
+  it's a card, distractor or review state of Solid Memo's (not one of
+  another scheduler) and says nothing else. Each class it states is
+  `sm:Card`, `sm:Distractor`, `sm:ReviewState` or a distractor's
+  `schema:Answer`. Each property is `rdf:type`, one of the card,
+  distractor, review state or FSRS review state shapes at any version,
+  `sm:formatVersion`, `sm:fromRelease` or `schema:suggestedAnswer`. A
+  subject with any other class or property, Solid Memo's own too, such
+  as preferences that also say they're a card, stays whole. Nothing
+  they link to goes with them, and the document's own subject goes only
+  when all it says is that it's the deck's.
   A failed read (refused, a server error, no answer, a download cut off)
   of a deck's document in the instance's folder stops the removal, or the
   instance's deletion, before the catalog is written. The entry stays, the

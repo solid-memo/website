@@ -17,7 +17,9 @@ import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
-import { DCAT, DCTERMS, RDF, SM, SM_NS } from "./vocab";
+import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
+import { DCAT, DCTERMS, RDF, SCHEMA, SM, SM_NS } from "./vocab";
 
 /**
  * The links from a subject of Solid Memo's to the subjects it writes
@@ -119,7 +121,7 @@ export function subjectsOfClasses(...classes: string[]): (dataset: Dataset) => S
  *
  * - when the document says it is only theirs (each deck it names, if
  *   any, one of `entries`): its cards, their distractors and its review
- *   states, and its saying it is theirs;
+ *   states (deckEntrySubjects), and its saying it is theirs;
  * - when it says it is another deck's too (deckBackLinksOf), of this
  *   instance or another one: only its saying it is the leaving decks',
  *   the rest being that deck's;
@@ -129,7 +131,6 @@ export function subjectsOfClasses(...classes: string[]): (dataset: Dataset) => S
  * Anything else in it is kept.
  */
 export function deckDocumentSubjects(entries: readonly string[]): (dataset: Dataset) => Owned {
-  const deckSubjects = subjectsOfClasses(SM.Card, SM.Distractor, SM.ReviewState);
   // Each entry's address as a request sends it, worked out once, so
   // that a document's links are looked up rather than compared with
   // every entry.
@@ -149,10 +150,88 @@ export function deckDocumentSubjects(entries: readonly string[]): (dataset: Data
     );
     if (self.some((thing) => deckBackLinks(thing).some((url) => !isLeaving(url))))
       return { subjects: new Set(), statements };
-    const owned = deckSubjects(dataset);
+    const owned = deckEntrySubjects(dataset, url);
     for (const thing of self) if (isDeckBackLink(dataset, thing)) owned.add(thing.url);
     return owned;
   };
+}
+
+/**
+ * The shapes of what a deck's cards and reviews documents hold, at
+ * every version: cards, distractors and review states of either
+ * scheduler.
+ */
+const DECK_ENTRY_SHAPES: readonly ShapeDescriptor[] = [
+  SHAPES.card,
+  SHAPES.distractor,
+  SHAPES.reviewState,
+  SHAPES.fsrsReviewState,
+].flatMap((versions) => Object.values(versions));
+
+/** The classes a card, distractor or review state is of (DECK_ENTRY_SHAPES' target classes). */
+const DECK_ENTRY_CLASSES: ReadonlySet<string> = new Set(
+  DECK_ENTRY_SHAPES.map((shape) => shape.targetClass),
+);
+
+/** Every class a card, distractor or review state of Solid Memo's states: its own and the others its shape adds. */
+const DECK_ENTRY_TYPES: ReadonlySet<string> = new Set(
+  DECK_ENTRY_SHAPES.flatMap((shape) => [shape.targetClass, ...shape.additionalTypes]),
+);
+
+/**
+ * Every property a card, distractor or review state of Solid Memo's
+ * has: rdf:type, those of its shape at any version, the format stamp,
+ * the release a card was taken from (solidDeckRepository.ts), and the
+ * schema:suggestedAnswer beside each sm:distractor (deckMapper.ts
+ * withSuggestedAnswers).
+ */
+const DECK_ENTRY_PROPERTIES: ReadonlySet<string> = new Set([
+  RDF.type,
+  SM.formatVersion,
+  SM.fromRelease,
+  SCHEMA.suggestedAnswer,
+  ...DECK_ENTRY_SHAPES.flatMap((shape) => [
+    ...shape.fields.map((field) => field.predicate),
+    ...shape.fixedValues.map((fixed) => fixed.predicate),
+  ]),
+]);
+
+/**
+ * The cards, distractors and review states of the deck's document at
+ * `url` that are Solid Memo's (isSolidMemos) and say nothing else
+ * (isDeckEntryShaped), and nothing they name: no card links to a
+ * subject of another kind. The document itself (`<>`) is never one,
+ * whatever class it says it has, so that it goes only when all it says
+ * is that it is a deck's (isDeckBackLink).
+ */
+function deckEntrySubjects(dataset: Dataset, url: string): Set<string> {
+  return new Set(
+    getThingAll(dataset)
+      .filter(
+        (thing) =>
+          !isSameUrl(thing.url, url) &&
+          isSolidMemos(dataset, thing) &&
+          getUrlAll(thing, RDF.type).some((type) => DECK_ENTRY_CLASSES.has(type)) &&
+          isDeckEntryShaped(thing),
+      )
+      .map((thing) => thing.url),
+  );
+}
+
+/**
+ * Whether all a subject says is what a card, distractor or review state
+ * of Solid Memo's says: each of its classes one of DECK_ENTRY_TYPES and
+ * each of its properties one of DECK_ENTRY_PROPERTIES. Any other class
+ * or property, Solid Memo's own or not, keeps it whole: anyone who may
+ * append to a document can add a class to a subject of someone else's
+ * in it, such as the user's preferences, but what that subject said
+ * before stays.
+ */
+function isDeckEntryShaped(thing: Subject): boolean {
+  return (
+    getUrlAll(thing, RDF.type).every((type) => DECK_ENTRY_TYPES.has(type)) &&
+    propertiesOf(thing).every(({ predicate }) => DECK_ENTRY_PROPERTIES.has(predicate))
+  );
 }
 
 /**
