@@ -6,6 +6,7 @@ import {
   removeThing as libraryRemoveThing,
   type SolidDataset,
   setThing as librarySetThing,
+  toRdfJsDataset as libraryToRdfJsDataset,
 } from "@inrupt/solid-client";
 import type { Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
@@ -48,6 +49,70 @@ describe("propertiesOf, of the library's subjects", () => {
       },
       { predicate: `${EX}q`, values: [] },
     ]);
+  });
+});
+
+describe("toRdfJsDataset, beside the library's own", () => {
+  /** A dataset's quads as sorted lines, a blank node the library names afresh as `_:new`. */
+  const lines = (quads: Iterable<Quad>) =>
+    [...quads]
+      .map((quad) =>
+        [quad.subject, quad.predicate, quad.object, quad.graph]
+          .map((term) =>
+            term.termType === "BlankNode"
+              ? `_:${term.value === "b1" ? "b1" : "new"}`
+              : term.termType === "Literal"
+                ? `"${term.value}"@${term.language}^^${term.datatype.value}`
+                : term.value,
+          )
+          .join(" "),
+      )
+      .sort();
+
+  it("gives the library's quads, of every kind of value, in a named graph too", () => {
+    const predicates = {
+      [`${EX}p`]: {
+        namedNodes: ["https://iri.example/x"],
+        literals: { [`${XSD}integer`]: ["42", "7"] },
+        langStrings: { en: ["hello"], "ar--rtl": ["مرحبا"] },
+        blankNodes: ["_:b1", { [`${EX}q`]: { literals: { [`${XSD}string`]: ["inner"] } } }],
+      },
+    };
+    const dataset = {
+      type: "Dataset",
+      graphs: {
+        default: {
+          [`${URL_}#a`]: { type: "Subject", url: `${URL_}#a`, predicates },
+          "_:b1": {
+            type: "Subject",
+            url: "_:b1",
+            predicates: { [`${EX}r`]: { namedNodes: [URL_] } },
+          },
+        },
+        [`${URL_}#g`]: { [`${URL_}#b`]: { type: "Subject", url: `${URL_}#b`, predicates } },
+      },
+    } as unknown as SolidDataset;
+    const ours = lines(rdf.toRdfJsDataset(dataset as never));
+    expect(ours).toHaveLength(17);
+    expect(ours).toEqual(lines(libraryToRdfJsDataset(dataset)));
+  });
+
+  // The library spreads a subject's quads into a call, which so many values overflow.
+  it("gives every quad of a subject with 200,000 values", () => {
+    const values = Array.from({ length: 200_000 }, (_, i) => `https://iri.example/${i}`);
+    const dataset = {
+      type: "Dataset",
+      graphs: {
+        default: {
+          [`${URL_}#a`]: {
+            type: "Subject",
+            url: `${URL_}#a`,
+            predicates: { [`${EX}p`]: { namedNodes: values } },
+          },
+        },
+      },
+    };
+    expect(rdf.toRdfJsDataset(dataset as never).size).toBe(200_000);
   });
 });
 

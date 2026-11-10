@@ -5,6 +5,7 @@
 import { mkdir, mkdtemp, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { DataFactory } from "n3";
 import { describe, expect, it } from "vitest";
 import {
   RDF_TYPE,
@@ -16,6 +17,7 @@ import {
   subjectsOfType,
 } from "./rdf.ts";
 
+const { literal, namedNode, quad } = DataFactory;
 const BASE = "https://example.com/doc.ttl";
 const DOC = `
 @prefix ex: <https://example.com/ns#> .
@@ -45,6 +47,14 @@ describe("parseTurtle and lookups", () => {
   it("walks an RDF list", () => {
     const head = objectsOf(quads, `${BASE}#a`, "https://example.com/ns#list")[0];
     expect(listMembers(quads, head).map((o) => o.value)).toEqual(["x", "y"]);
+  });
+
+  // Spread into a call, so a list node with that many members overflowed its arguments.
+  it("walks a list node with 200,000 members", () => {
+    const head = namedNode(`${BASE}#l`);
+    const first = namedNode("http://www.w3.org/1999/02/22-rdf-syntax-ns#first");
+    const members = Array.from({ length: 200_000 }, (_, i) => quad(head, first, literal(`m${i}`)));
+    expect(listMembers(members, head)).toHaveLength(200_000);
   });
 
   it("stops at a list node without a rest", () => {

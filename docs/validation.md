@@ -203,6 +203,27 @@ flowchart LR
   such a string by its length alone. So many such nodes of one length
   would take time growing with the square of their number. The
   library's own count is turned off.
+- A check keeps at most 1,000 results (`MAX_RESULTS_PER_CHECK` in
+  [validation.ts](../packages/domain/src/validation.ts)): of one
+  subject against one shape, and of each node in a check of a whole
+  graph against a profile. A constraint on each value, such as
+  `sh:datatype`, gives a result for each, and a document may hold any
+  number of values, and a constraint such as `sh:closed` gives all of a
+  node's results at once. The engine makes no more than the limit of
+  each severity of any one node, whatever the constraint, and leaves
+  out the rest before they're made. The most severe are kept first, so
+  a violation isn't left out for warnings found before it. It doesn't
+  run a constraint again on a node whose left-out results are already
+  as severe as any it could give. Past the limit, one more result
+  (`ResultLimit`) says there are more. It's as severe as the most
+  severe of those left out, so a subject with too many violations still
+  doesn't conform, and one with only too many warnings still does. The
+  library's own limit (`maxErrors`) isn't used: it counts only some
+  constraints' results, and stops the whole check, every node's, not
+  one node's. The places a deck entry names (`DeckPlace`, above) are
+  held to the same limit. A subject's results, and a document's
+  statements as the check reads them, are gathered one by one, never
+  spread into a call, which a large list would overflow.
 - One engine per shape document is shared by every document checked
   against it. It runs one check at a time: the library keeps a single
   report per validator, so two documents checked together would mix up
@@ -307,8 +328,28 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
   study, preferences and course) wait, and the deck list shows but
   can't be rearranged. So no write lands on data the check would set
   aside: a review state a reader drops would be studied as new, and the
-  first answer would write over its history. A check that fails sets nothing aside.
-- A check that can't run (the shapes unreachable, say) only warns.
+  first answer would write over its history.
+- **A document the check can't read** (refused, say, or not Turtle,
+  or past the read's limits) is in the report as unreadable, with why
+  (`unreadableDocument` in
+  [validation.ts](../packages/domain/src/validation.ts)). What it holds
+  isn't known, so it counts as one violation, and it holds back what
+  it's part of, no more. Under "Set invalid data aside" the decks
+  naming it are set aside (the arrangement too, when it's the
+  catalog). Under "Block the instance" the instance is blocked.
+  The validation view and the Studio's health name it, and why, with
+  hidden characters shown as markers, as in a web address. No receipt
+  is kept of it, and the app checks again when the user comes back to
+  its tab.
+- **A check that can't be made** (the shapes unreachable, say) says so
+  in a warning. Under "Block the instance" and "Set invalid data
+  aside", the app then holds back what it would while the check is
+  under way, until a later check is made. The app makes it again when
+  the user comes back to its tab. What the check would have found
+  isn't known, so nothing is taken as valid. The warning then says
+  that choosing "Warn only" in Preferences, which the app always
+  reaches, uses the data unchecked, and so does the Studio's line on a
+  held screen. Under "Warn only" the warning is all.
 - **The Studio holds to the same check and policy** (`useDataCheck` in
   `ui`, which Solid Memo's workspace uses too), as [studio.md](studio.md#data-set-aside) says.
 

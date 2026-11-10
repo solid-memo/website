@@ -23,8 +23,14 @@ export interface DataCheck {
   policy: InvalidDataPolicy;
   /** The check is not in yet (nor, when there is none, are the preferences). */
   pending: boolean;
-  /** Why the check could not be made: it then sets nothing aside. */
+  /**
+   * Why the check could not be made. A policy that holds invalid data
+   * back then holds everything back, as while the check is not in: what
+   * the check would have found is not known.
+   */
   error: Error | null;
+  /** The check is not in, or could not be made: under a policy that holds data back, nothing is known to be valid. */
+  unsettled: boolean;
   /** The check's report when the data does not conform; else null. */
   report: ValidationReport | null;
   /** The decks whose documents the check found unclaimed, conforming or not: none until it is in. */
@@ -36,15 +42,21 @@ export interface DataCheck {
   /**
    * Why nothing may be written to the instance, or (given) to the deck:
    * "checking" until the check is done (a policy that sets data aside
-   * may yet set it aside), "blocked" under "block the instance" with
-   * invalid data, "setAside" for a deck set aside; null when it may be.
+   * may yet set it aside), "unchecked" while it could not be made, "blocked"
+   * under "block the instance" with invalid data, "setAside" for a deck
+   * set aside; null when it may be.
    * Under "only warn" nothing waits. What another app wrote only warns,
    * and sets nothing aside.
    */
   readOnly: (deck?: Deck) => ReadOnlyReason | null;
 }
 
-export type ReadOnlyReason = "checking" | "blocked" | "setAside";
+export type ReadOnlyReason = "checking" | "unchecked" | "blocked" | "setAside";
+
+/** Whether the check found a document it could not read: it is made again, as a failed one is. */
+function hasUnreadable(report: ValidationReport | undefined): boolean {
+  return report?.documents.some((document) => document.status === "unreadable") ?? false;
+}
 
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
@@ -62,6 +74,9 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     queryFn: () => useCases.checkInstance(instanceUrl!),
     enabled: instanceUrl !== null,
     staleTime: Infinity,
+    // A check that failed, or could not read a document, holds data back, so it is made again when the user comes back to the tab.
+    refetchOnWindowFocus: (query) =>
+      query.state.status === "error" || hasUnreadable(query.state.data) ? "always" : false,
   });
   // Until the preferences are read, as under "block the instance": a user who chose it never sees data before the check.
   const policy =
@@ -71,16 +86,20 @@ export function useDataCheck(useCases: UseCases, instanceUrl: string | null): Da
     checkQuery.data !== undefined && !checkQuery.data.conforms ? checkQuery.data : null;
   const setsAside = report !== null && policy === "block-subject";
   const isSetAside = (deck: Deck) => setsAside && deckSetAside(report, deck);
+  // A check that fails holds back as one not in yet: the instance stays held while it cannot be checked.
+  const unsettled = checkQuery.isPending || checkQuery.isError;
   return {
     policy,
     pending: checkQuery.isPending,
     error: checkQuery.error,
+    unsettled,
     report,
     unclaimed: checkQuery.data?.unclaimed ?? [],
     isSetAside,
     arrangementSetAside: setsAside && arrangementSetAside(report),
     readOnly(deck) {
       if (policy === "warn-only") return null;
+      if (checkQuery.isError) return "unchecked";
       if (checkQuery.isPending) return "checking";
       if (report !== null && policy === "block-instance") return "blocked";
       return deck !== undefined && isSetAside(deck) ? "setAside" : null;

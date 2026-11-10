@@ -49,7 +49,7 @@ export function listMembers(quads: readonly Quad[], head: Quad_Object): Quad_Obj
   const members: Quad_Object[] = [];
   let node = head;
   while (node.value !== RDF_NIL) {
-    members.push(...objectsOf(quads, node.value, RDF_FIRST));
+    for (const member of objectsOf(quads, node.value, RDF_FIRST)) members.push(member);
     const rest = objectsOf(quads, node.value, RDF_REST)[0];
     if (rest === undefined) break;
     node = rest;

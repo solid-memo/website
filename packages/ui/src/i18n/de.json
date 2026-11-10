@@ -1568,6 +1568,7 @@
       "other": "{count} Dokumenten"
     },
     "notCreated": "Noch nicht erstellt.",
+    "unreadable": "Solid Memo konnte dieses Dokument nicht lesen, daher gilt es als ungültig: {reason}",
     "noSubjects": "Keine Subjekte.",
     "untyped": "{name} – kein Subjekt von Solid Memo.",
     "newer": "{name} – {shape}-Format {version} ist neuer als alles, was diese App kennt (bis {latest}); übersprungen.",
@@ -1609,7 +1610,8 @@
       "Closed": "Die Eigenschaft ist hier nicht erlaubt.",
       "DeckPlace": "Der Eintrag des Stapels steht nicht im Katalog seiner Instanz, oder er nennt ein Dokument unter einer Adresse, die kein Dokument eines Stapels haben darf, etwa die Zugriffskontrolle einer anderen Ressource oder eines der eigenen Dokumente der Instanz. Solid Memo verwendet ihn nicht.",
       "DateTimeRange": "Solid Memo kann dieses Datum nicht lesen: Es liegt zu weit in der Zukunft oder Vergangenheit oder ist länger als ein Zeitpunkt, daher gilt es als kein Datum.",
-      "FormatVersionRange": "Kein Format von Solid Memo hat diese Version: Sie ist kleiner als 1, daher kann Solid Memo das Subjekt nicht lesen."
+      "FormatVersionRange": "Kein Format von Solid Memo hat diese Version: Sie ist kleiner als 1, daher kann Solid Memo das Subjekt nicht lesen.",
+      "ResultLimit": "Dieses Subjekt hat in einer Prüfung mehr Ergebnisse, als Solid Memo auflistet: Es zeigt die 1.000 schwerwiegendsten. Repariere sie, dann findet die Prüfung den Rest."
     }
   },
   "webIdDocument": {
@@ -1633,6 +1635,7 @@
     "checkingData": "Daten dieser Instanz werden geprüft…",
     "deckSetAside": "Dieser Stapel ist zurückgestellt: Seine Daten entsprechen nicht den Formen. Repariere ihn oben, um ihn wieder zu verwenden.",
     "checkFailed": "Die Daten dieser Instanz konnten nicht geprüft werden: {error}",
+    "checkFailedHeld": "Bis die Prüfung möglich ist, hält Solid Memo zurück, was es während der Prüfung zurückhält. Um die Daten ungeprüft zu verwenden, wähle „Nur warnen“ in den {preferences}.",
     "developerTools": "Entwicklerwerkzeuge",
     "validateInstance": "Diese Instanz prüfen",
     "loadingCourse": "Kurs wird geladen…",

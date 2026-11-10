@@ -1643,6 +1643,7 @@
       "other": "{count} documentos"
     },
     "notCreated": "Aún no creado.",
+    "unreadable": "Solid Memo no pudo leer este documento, así que cuenta como no válido: {reason}",
     "noSubjects": "Sin sujetos.",
     "untyped": "{name} — no es un sujeto de Solid Memo.",
     "newer": "{name} — el formato {shape} {version} es más reciente de lo que conoce esta aplicación (hasta {latest}); se omite.",
@@ -1684,7 +1685,8 @@
       "Closed": "La propiedad no está permitida aquí.",
       "DeckPlace": "La entrada del mazo no está en el catálogo de su instancia, o indica un documento en una dirección que ningún documento de un mazo puede tener, como el control de acceso de otro recurso o uno de los documentos propios de la instancia. Solid Memo no lo usa.",
       "DateTimeRange": "Solid Memo no puede leer esta fecha: está demasiado lejos en el futuro o en el pasado, o es más larga que una fecha y hora, así que se lee como si no hubiera fecha.",
-      "FormatVersionRange": "Ningún formato de Solid Memo tiene esta versión: es menor que 1, así que Solid Memo no puede leer el sujeto."
+      "FormatVersionRange": "Ningún formato de Solid Memo tiene esta versión: es menor que 1, así que Solid Memo no puede leer el sujeto.",
+      "ResultLimit": "Este sujeto tiene en una comprobación más resultados de los que Solid Memo enumera: muestra los 1000 más graves. Repáralos y la comprobación encontrará el resto."
     }
   },
   "webIdDocument": {
@@ -1708,6 +1710,7 @@
     "checkingData": "Comprobando los datos de esta instancia…",
     "deckSetAside": "Este mazo está apartado: sus datos no se ajustan a su forma. Repáralo arriba para volver a usarlo.",
     "checkFailed": "No se pudieron comprobar los datos de esta instancia: {error}",
+    "checkFailedHeld": "Hasta que se pueda hacer la comprobación, Solid Memo retiene lo que retendría mientras comprueba. Para usar los datos sin comprobar, elige «Solo avisar» en {preferences}.",
     "developerTools": "Herramientas de desarrollador",
     "validateInstance": "Validar esta instancia",
     "loadingCourse": "Cargando el curso…",

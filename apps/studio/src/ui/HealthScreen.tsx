@@ -24,7 +24,12 @@ import { useI18n, type CardReader, type ErrorText, type I18n } from "@solid-memo
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { repairLabels } from "@solid-memo/ui/RepairContainer";
-import { summaryClass, summaryOf, ViolationMessage } from "@solid-memo/ui/ValidationScreen";
+import {
+  summaryClass,
+  summaryOf,
+  unreadableReason,
+  ViolationMessage,
+} from "@solid-memo/ui/ValidationScreen";
 import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What can be repaired of what a check found, and the actions that repair it. */
@@ -42,9 +47,10 @@ type SubjectLink = (subjectUrl: string, path?: string) => ComponentChildren;
 /**
  * What a check of the instance's documents found (`report`): its
  * summary, then each result, a violation or a warning, its subject as
- * `link` names it, then what Solid Memo can repair (one button for all),
- * and the subjects no repair covers, each to remove once the user
- * confirms (the container asks).
+ * `link` names it, and each document it could not read, then what
+ * Solid Memo can repair (one button for all), and the subjects no
+ * repair covers, each to remove once the user confirms (the container
+ * asks).
  */
 function DataCheckSection({
   report,
@@ -68,6 +74,10 @@ function DataCheckSection({
         : [],
     ),
   );
+  // A document the check could not read: what it holds is not known, so it is named on its own.
+  const unreadable = report.documents.flatMap((document) =>
+    document.status === "unreadable" ? [document] : [],
+  );
   const { plan, busy } = repairs;
   return (
     <section aria-labelledby="health-data">
@@ -80,6 +90,16 @@ function DataCheckSection({
             <li key={index}>
               {link(subject, violation.path)}:{" "}
               <Result violation={violation} severity={severityLabel(violation.severity)} />
+            </li>
+          ))}
+        </ul>
+      )}
+      {unreadable.length > 0 && (
+        <ul class="studio-health-list">
+          {unreadable.map((document) => (
+            <li key={document.url}>
+              <ExternalLink url={document.url} />:{" "}
+              {t("validation.unreadable", { reason: unreadableReason(document.reason) })}
             </li>
           ))}
         </ul>

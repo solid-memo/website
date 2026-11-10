@@ -875,6 +875,7 @@
     },
     "readOnly": {
       "checking": "Instansens data kontrolleras. Inget kan ändras förrän kontrollen är klar.",
+      "unchecked": "Instansens data kunde inte kontrolleras, så inget kan ändras förrän de kan kontrolleras. Välj ”Varna bara” i Solid Memos inställningar för att ändra dem okontrollerade.",
       "blocked": "Instansen har ogiltiga data, och dina inställningar håller den stängd tills de är reparerade, så inget kan ändras här. {repair}",
       "deck": "Kortleken har ogiltiga data, så den är lagd åt sidan: den visas här, men inget i den kan ändras förrän den är reparerad. {repair}",
       "decks": "Kortlekar med ogiltiga data är lagda åt sidan: de kan inte väljas eller ändras förrän de är reparerade. {repair}",

@@ -34,7 +34,6 @@ import {
   type SolidDataset,
   type Thing,
   type ThingPersisted,
-  toRdfJsDataset as libraryToRdfJsDataset,
   type WithChangeLog,
   type WithServerResourceInfo,
 } from "@inrupt/solid-client";
@@ -51,7 +50,7 @@ import type {
   Subject,
   SubjectBuilder,
 } from "./interface";
-import { graphsOf, LOCAL_NODE } from "./linearDataset";
+import { graphsOf, LOCAL_NODE, quadsOfGraphs, rdfJsDatasetOf } from "./linearDataset";
 import { pathKeys } from "./readLimits";
 
 /**
@@ -301,14 +300,10 @@ function resolvedIri(data: SolidDataset, iri: string): string {
 /**
  * A subject's quads, as setThing records them among a dataset's changes:
  * in the library's order, without those that name a blank node, which
- * it leaves out. Made by the library's toRdfJsDataset, given back as
- * the list it makes rather than a dataset of it.
+ * it leaves out.
  */
 function quadsOf(iri: string, stored: Thing): Quad[] {
-  const alone = { graphs: { default: { [iri]: stored } } } as unknown as SolidDataset;
-  const quads = libraryToRdfJsDataset(alone, {
-    datasetFactory: { dataset: (made?: Quad[]) => made as unknown as DatasetCore },
-  }) as unknown as Quad[];
+  const quads = quadsOfGraphs({ default: { [iri]: stored } } as never);
   return quads.filter(
     (quad) => quad.subject.termType !== "BlankNode" && quad.object.termType !== "BlankNode",
   );
@@ -641,7 +636,7 @@ export function getPropertyAll(subject: Subject): string[] {
 
 /** The dataset's triples, as an RDF/JS dataset. */
 export function toRdfJsDataset(dataset: Dataset): DatasetCore {
-  return libraryToRdfJsDataset(solidDataset(dataset));
+  return rdfJsDatasetOf(quadsOfGraphs(solidDataset(dataset).graphs));
 }
 
 /**

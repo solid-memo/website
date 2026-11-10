@@ -374,7 +374,21 @@ function instanceNotices(
       <MigrationContainer useCases={useCases} session={session} instance={instance} />
       {check.error && (
         // A div: the error may bring its technical details, a block.
-        <div class="warning">{tx("workspace.checkFailed", { error: errorText(check.error) })}</div>
+        <div class="warning">
+          {tx("workspace.checkFailed", { error: errorText(check.error) })}
+          {check.policy !== "warn-only" && (
+            // What the policy holds back stays held; "Warn only" lets the user go on regardless.
+            <p>
+              {tx("workspace.checkFailedHeld", {
+                preferences: (
+                  <a href={routeToHash({ screen: "preferences", instanceUrl: instance.url })}>
+                    {tx("workspace.preferencesLink", {})}
+                  </a>
+                ),
+              })}
+            </p>
+          )}
+        </div>
       )}
       {check.report !== null && (
         <DataCheckNotice
@@ -625,8 +639,8 @@ export function Workspace({
   // Under "set invalid data aside" nothing is known to be set aside until
   // the check is done: until then a deck's pages wait for it and the list
   // cannot be rearranged, so no write lands on data the check would set
-  // aside. A check that fails sets nothing aside.
-  const checkUnsettled = activeInstance !== null && policy === "block-subject" && check.pending;
+  // aside. A check that fails holds them as one not in yet, its notice saying why.
+  const checkUnsettled = activeInstance !== null && policy === "block-subject" && check.unsettled;
 
   const storagesQuery = useQuery({
     queryKey: queryKeys.storages(webId),
@@ -1194,12 +1208,14 @@ export function Workspace({
     activeInstance !== null &&
     !alwaysReachable(route) &&
     policy === "block-instance" &&
-    (check.pending || invalidReport !== null);
+    (check.unsettled || invalidReport !== null);
   const deckSetAside = activeDeck !== null && isSetAside(activeDeck);
   const deckWaits = activeDeck !== null && checkUnsettled;
+  // A notice says why the screen is held: what the check found, or that it failed.
+  const reported = invalidReport !== null || check.error !== null;
   const shown =
     waiting ??
-    checkedScreen(blocked || deckWaits, invalidReport !== null, deckSetAside, t, () =>
+    checkedScreen(blocked || deckWaits, reported, deckSetAside, t, () =>
       screenFor(route!, instances!),
     );
 

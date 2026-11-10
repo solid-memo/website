@@ -875,6 +875,7 @@
     },
     "readOnly": {
       "checking": "Die Daten dieser Instanz werden geprüft. Bis die Prüfung abgeschlossen ist, lässt sich nichts ändern.",
+      "unchecked": "Die Daten dieser Instanz ließen sich nicht prüfen. Bis die Prüfung möglich ist, lässt sich daher nichts ändern. Um sie ungeprüft zu ändern, wähle „Nur warnen“ in den Einstellungen von Solid Memo.",
       "blocked": "Diese Instanz hat ungültige Daten, und deine Einstellungen halten sie bis zur Reparatur gesperrt. Daher lässt sich hier nichts ändern. {repair}",
       "deck": "Dieser Stapel hat ungültige Daten und ist daher zurückgestellt: Er wird hier angezeigt, aber bis zur Reparatur lässt sich darin nichts ändern. {repair}",
       "decks": "Stapel mit ungültigen Daten sind zurückgestellt: Bis zur Reparatur lassen sie sich weder auswählen noch ändern. {repair}",

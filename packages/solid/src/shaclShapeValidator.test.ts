@@ -221,6 +221,65 @@ beforeEach(() => {
 });
 
 describe("createShaclShapeValidator", () => {
+  // Spread into a call, so many results overflowed its arguments, and the whole check failed.
+  it("keeps the first 1,000 results of a subject against a shape, and one that says there are more", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
+    const { validator, validateNode } = makeValidator();
+    const many = Array.from({ length: 150_000 }, (_, i) => ({
+      path: SM.cardsDocument,
+      message: { en: `Value ${i} is wrong` },
+      severity: "violation" as const,
+      constraint: "Datatype",
+    }));
+    validateNode.mockImplementation(async (_data, focus) => (focus.endsWith("deck-1") ? many : []));
+    const report = await validator.validateDocument(DOC);
+    const deck = report.subjects.find((subject) => subject.url === `${DOC}#deck-1`);
+    const violations = deck?.status === "checked" ? deck.violations : [];
+    expect(violations).toHaveLength(1001);
+    expect(violations.slice(0, 1000)).toEqual(many.slice(0, 1000));
+    expect(violations.at(-1)).toMatchObject({ severity: "violation", constraint: "ResultLimit" });
+  });
+
+  // The read document's statements, and its deck's places, were spread into a call, so the check failed.
+  it("checks a deck entry with 150,000 wrong or misplaced document values, keeping the first 1,000 results of each check", async () => {
+    const instance = "https://pod.example/solid-memo/a/";
+    const named = (value: string) => ({ termType: "NamedNode", value });
+    const quad = (predicate: string, object: object) => ({
+      subject: named(`${DOC}#deck-1`),
+      predicate: named(predicate),
+      object,
+      graph: { termType: "DefaultGraph", value: "" },
+    });
+    const entry = (values: (i: number) => object) =>
+      fromRdfJsDataset(
+        new Set([
+          quad(RDF.type, named(SM.Deck)),
+          quad(SM.formatVersion, integerLiteral(6)),
+          quad(SM.reviewsDocument, named(`${instance}reviews/deck-1.ttl`)),
+          ...Array.from({ length: 150_000 }, (_, i) => quad(SM.cardsDocument, values(i))),
+        ]) as never,
+      );
+    const validator = createShaclShapeValidator({ fetch: vi.fn(), shapesFetch, ...SHAPE_SOURCES });
+    const constraints = async (dataset: Dataset) => {
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset as never);
+      const [deck] = (await validator.validateDocument(DOC)).subjects;
+      return deck.status === "checked" ? deck.violations.map((v) => v.constraint) : [];
+    };
+    const wrong = await constraints(
+      entry((i) => ({
+        termType: "Literal",
+        value: `x${i}`,
+        language: "",
+        datatype: named("http://www.w3.org/2001/XMLSchema#decimal"),
+      })),
+    );
+    expect(wrong).toHaveLength(1001);
+    expect(wrong.at(-1)).toBe("ResultLimit");
+    const misplaced = await constraints(entry((i) => named(`${instance}decks/d${i}.ttl.acl`)));
+    expect(misplaced.filter((c) => c === "DeckPlace")).toHaveLength(1000);
+    expect(misplaced.filter((c) => c === "ResultLimit")).toHaveLength(1);
+  }, 120_000);
+
   it("loads the engine and the published shapes itself by default", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
     const validator = createShaclShapeValidator({
@@ -487,6 +546,36 @@ describe("createShaclShapeValidator", () => {
       subjects: [],
     });
     expect(loader.load).not.toHaveBeenCalled();
+  });
+
+  // A document that cannot be read is one result: the rest of the instance's check still stands.
+  it("reports a document it cannot read as unreadable, with why, whether read afresh or since a version", async () => {
+    const { validator, loader } = makeValidator();
+    vi.mocked(getSolidDatasetOrNull).mockRejectedValue(new Error("403 Forbidden"));
+    await expect(validator.validateDocument(DOC)).resolves.toEqual({
+      url: DOC,
+      status: "unreadable",
+      subjects: [],
+      reason: "403 Forbidden",
+    });
+    vi.mocked(getSolidDatasetOrNull).mockRejectedValue("not Turtle");
+    await expect(validator.validateDocumentSince(DOC, undefined)).resolves.toEqual({
+      unchanged: false,
+      value: { url: DOC, status: "unreadable", subjects: [], reason: "not Turtle" },
+      version: null,
+    });
+    // A parser's message may quote the document: only its start is kept.
+    vi.mocked(getSolidDatasetOrNull).mockRejectedValue(new Error("x".repeat(10_000)));
+    const long = await validator.validateDocument(DOC);
+    expect(long).toMatchObject({ status: "unreadable", reason: `${"x".repeat(300)}…` });
+    expect(loader.load).not.toHaveBeenCalled();
+  });
+
+  it("fails the check when the shapes cannot be loaded, the document read", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
+    const { validator, loader } = makeValidator();
+    vi.mocked(loader.load).mockRejectedValue(new Error("shapes unreachable"));
+    await expect(validator.validateDocument(DOC)).rejects.toThrow("shapes unreachable");
   });
 
   it("checks each subject against the shape of its class and version", async () => {

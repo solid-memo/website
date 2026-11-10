@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
+import { DataFactory as environment } from "n3";
 import { datasetFromTurtle } from "./testing/turtle";
 import type { Literal, Quad } from "@rdfjs/types";
+import ValidationEngine from "rdf-validate-shacl/src/validation-engine.js";
 import { createEngine, mapIris, mergeDatasets } from "./engine";
 import { subclassCycle, subclassDiamond } from "./testing/subclassTangle";
 import { readSiteTurtle, SHAPES_BASE } from "@solid-memo/vocab/tooling/sources";
@@ -599,4 +601,192 @@ describe("the checks of a node against a shape", () => {
     );
     expect(ratio).toBeLessThan(3);
   }, 180_000);
+});
+
+describe("the results of one check", () => {
+  const EX = "https://example.com/ns#";
+  const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+  const LIMITED = `
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+<#ease> a sh:NodeShape ; sh:targetClass <${EX}E> ;
+    sh:property [ sh:path <${EX}ease> ; sh:datatype xsd:decimal ; sh:maxCount 1 ] .
+<#closed> a sh:NodeShape ; sh:targetClass <${EX}C> ; sh:closed true ;
+    sh:property [ sh:path <${EX}ease> ] .
+<#mixed> a sh:NodeShape ;
+    sh:property <#hint>, <#strict> .
+<#hint> sh:path <${EX}hint> ; sh:datatype xsd:decimal ; sh:severity sh:Warning .
+<#strict> sh:path <${EX}strict> ; sh:datatype xsd:decimal .
+<#hints> a sh:NodeShape ; sh:property <#hint> .
+`;
+  const limited = async () => createEngine(await datasetFromTurtle(LIMITED, SHAPES_URL));
+  /** A subject with `count` values of ex:ease (or another property), none a decimal. */
+  const eases = (subject: string, count: number, property = `${EX}ease`): Quad[] =>
+    Array.from({ length: count }, (_, i) =>
+      environment.quad(
+        environment.namedNode(subject),
+        environment.namedNode(property),
+        environment.literal(`x${i}`),
+      ),
+    );
+  /** A subject with `count` properties the closed shape does not allow, one value each. */
+  const extras = (subject: string, count: number): Quad[] =>
+    Array.from({ length: count }, (_, i) =>
+      environment.quad(
+        environment.namedNode(subject),
+        environment.namedNode(`${EX}extra${i}`),
+        environment.literal("x"),
+      ),
+    );
+  /** Counts the results the library makes while `check` runs. */
+  async function made(check: () => Promise<unknown>): Promise<number> {
+    const created = vi.spyOn(ValidationEngine.prototype, "createResult");
+    try {
+      await check();
+      return created.mock.calls.length;
+    } finally {
+      created.mockRestore();
+    }
+  }
+  const typed = (subject: string) =>
+    environment.quad(
+      environment.namedNode(subject),
+      environment.namedNode(RDF_TYPE),
+      environment.namedNode(`${EX}E`),
+    );
+  const notShown: Record<string, unknown> = {
+    message: {
+      en: "There are more results than Solid Memo shows: it lists the 1000 most severe of a check.",
+    },
+    builtIn: true,
+    severity: "violation",
+    constraint: "ResultLimit",
+  };
+
+  // A spread of so many results into a call's arguments overflowed the stack.
+  it("keeps the first 1,000 results of a subject with 150,000 wrong values, and one that says there are more", async () => {
+    const e = await limited();
+    const subject = `${DATA_URL}#s`;
+    const results = await e.validateNode(
+      mergeDatasets(eases(subject, 150_000)),
+      subject,
+      `${SHAPES_URL}#ease`,
+    );
+    expect(results).toHaveLength(1001);
+    expect(results.at(-1)).toEqual(notShown);
+    expect(results.slice(0, 1000).every((result) => result.constraint !== "ResultLimit")).toBe(
+      true,
+    );
+    // The next check counts its own results.
+    const few = await e.validateNode(
+      mergeDatasets(eases(subject, 1)),
+      subject,
+      `${SHAPES_URL}#ease`,
+    );
+    expect(few.map((result) => result.constraint)).toEqual(["Datatype"]);
+  });
+
+  it("keeps all of 1,000 results", async () => {
+    const e = await limited();
+    const subject = `${DATA_URL}#s`;
+    const results = await e.validateNode(
+      mergeDatasets(eases(subject, 999)),
+      subject,
+      `${SHAPES_URL}#ease`,
+    );
+    // 999 values of the wrong datatype, and too many of them.
+    expect(results).toHaveLength(1000);
+    expect(results.some((result) => result.constraint === "ResultLimit")).toBe(false);
+  });
+
+  it("keeps the first 1,000 results of each node of a graph, and every node's", async () => {
+    const e = await limited();
+    const many = `${DATA_URL}#a`;
+    const one = `${DATA_URL}#b`;
+    // A check of a node first: a graph's check is not limited as a whole.
+    await e.validateNode(mergeDatasets(eases(many, 2)), many, `${SHAPES_URL}#ease`);
+    const results = await e.validate(
+      mergeDatasets([typed(many), ...eases(many, 1_500), typed(one), ...eases(one, 1)]),
+    );
+    expect(results).toHaveLength(1002);
+    expect(results.filter((result) => result.focusNode === many)).toHaveLength(1001);
+    expect(results[1000]).toEqual({ focusNode: many, ...notShown });
+    expect(results.at(-1)).toMatchObject({ focusNode: one, constraint: "Datatype" });
+  });
+
+  // A constraint such as sh:closed gives all of a node's results at once, which the library does not count.
+  it("makes no more than 1,000 results of a closed shape, whether of many properties or many values", async () => {
+    const e = await limited();
+    const subject = `${DATA_URL}#c`;
+    for (const data of [extras(subject, 5_000), eases(subject, 5_000, `${EX}other`)]) {
+      let results: unknown[] = [];
+      const count = await made(async () => {
+        results = await e.validateNode(mergeDatasets(data), subject, `${SHAPES_URL}#closed`);
+      });
+      expect(count).toBe(1000);
+      expect(results).toHaveLength(1001);
+      expect(results.at(-1)).toEqual(notShown);
+    }
+  });
+
+  it("makes no more than 1,000 results of a node in a check of a whole graph", async () => {
+    const e = await limited();
+    const many = `${DATA_URL}#a`;
+    let results: { focusNode: string; constraint: string }[] = [];
+    const count = await made(async () => {
+      results = await e.validate(mergeDatasets([typed(many), ...eases(many, 5_000)]));
+    });
+    expect(count).toBe(1000);
+    expect(results).toHaveLength(1001);
+    expect(results.at(-1)).toEqual({ focusNode: many, ...notShown });
+  });
+
+  it("says there are more warnings as a warning, so a subject of only warnings still conforms", async () => {
+    const e = await limited();
+    const subject = `${DATA_URL}#w`;
+    const results = await e.validateNode(
+      mergeDatasets(eases(subject, 1_500, `${EX}hint`)),
+      subject,
+      `${SHAPES_URL}#hints`,
+    );
+    expect(results).toHaveLength(1001);
+    expect(results.every((result) => result.severity === "warning")).toBe(true);
+    expect(results.at(-1)).toEqual({ ...notShown, severity: "warning" });
+  });
+
+  it("says there are more as a violation when one of those left out is a violation", async () => {
+    const e = await limited();
+    const subject = `${DATA_URL}#m`;
+    let results: { severity: string }[] = [];
+    const count = await made(async () => {
+      results = await e.validateNode(
+        mergeDatasets([
+          ...eases(subject, 1_500, `${EX}hint`),
+          ...eases(subject, 1_500, `${EX}strict`),
+        ]),
+        subject,
+        `${SHAPES_URL}#mixed`,
+      );
+    });
+    // At most the limit of each severity is made; the violations are kept, ahead of the warnings.
+    expect(count).toBeLessThanOrEqual(2000);
+    expect(results).toHaveLength(1001);
+    expect(results.slice(0, 1000).every((result) => result.severity === "violation")).toBe(true);
+    expect(results.at(-1)).toEqual(notShown);
+  });
+
+  it("keeps a violation found after 1,000 warnings, the warnings left out said as a warning", async () => {
+    const e = await limited();
+    const subject = `${DATA_URL}#v`;
+    const results = await e.validateNode(
+      mergeDatasets([...eases(subject, 1_500, `${EX}hint`), ...eases(subject, 1, `${EX}strict`)]),
+      subject,
+      `${SHAPES_URL}#mixed`,
+    );
+    expect(results).toHaveLength(1001);
+    expect(results.filter((result) => result.severity === "violation")).toEqual([
+      expect.objectContaining({ constraint: "Datatype", path: `${EX}strict` }),
+    ]);
+    expect(results.at(-1)).toEqual({ ...notShown, severity: "warning" });
+  });
 });

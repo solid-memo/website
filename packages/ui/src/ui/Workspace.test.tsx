@@ -433,20 +433,80 @@ describe("Workspace", () => {
       });
     });
 
-    it("goes on, with a warning, when the check itself fails", async () => {
+    const failedCheck = () =>
+      vi.fn(async (): Promise<typeof invalid> => {
+        throw new Error("shapes offline");
+      });
+
+    it("shows the deck list, with a warning, when the check itself fails", async () => {
       renderWorkspace(
         makeUseCases({
           listInstances: vi.fn(async () => [instanceA]),
           listDecks: vi.fn(async () => [deck]),
-          validateInstance: vi.fn(async () => {
-            throw new Error("shapes offline");
-          }),
+          validateInstance: failedCheck(),
         }),
       );
       expect((await screen.findByText("shapes offline")).closest(".warning")).toHaveTextContent(
         "Could not check this instance's data: Something went wrong. Try again, or reload the page. Details: shapes offline",
       );
       expect(await screen.findByText("Kanji N5")).toBeInTheDocument();
+    });
+
+    it("holds a deck's pages under the default policy when the check fails, its warning saying why", async () => {
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({ screen: "browser", instanceUrl: instanceA.url, deckUrl: deck.url }),
+      );
+      const listCards = vi.fn(async () => []);
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          listCards,
+          validateInstance: failedCheck(),
+        }),
+      );
+      expect(await screen.findByText(/Could not check this instance's data/)).toBeInTheDocument();
+      expect(screen.queryByText("Checking this instance's data…")).toBeNull();
+      // The way on: "Warn only" in Preferences, always reachable.
+      const held = screen.getByText(/To use the data unchecked, choose “Warn only”/);
+      expect(within(held).getByRole("link", { name: "Preferences" })).toHaveAttribute(
+        "href",
+        routeToHash({ screen: "preferences", instanceUrl: instanceA.url }),
+      );
+      // The deck's page, were it shown, would read its cards on the next turns.
+      await act(() => new Promise((resolve) => setTimeout(resolve, 50)));
+      expect(screen.queryByText("No cards in this deck yet.")).toBeNull();
+      expect(listCards).not.toHaveBeenCalled();
+    });
+
+    it("holds the instance under blocking the instance when the check fails", async () => {
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          getPreferences: withPolicy("block-instance"),
+          validateInstance: failedCheck(),
+        }),
+      );
+      expect(await screen.findByText(/Could not check this instance's data/)).toBeInTheDocument();
+      expect(screen.queryByText("Checking this instance's data…")).toBeNull();
+      expect(screen.queryByRole("heading", { name: "Decks" })).toBeNull();
+    });
+
+    it("only warns under warning only when the check fails, with no word on what is held", async () => {
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => [deck]),
+          getPreferences: withPolicy("warn-only"),
+          validateInstance: failedCheck(),
+        }),
+      );
+      expect(await screen.findByText(/Could not check this instance's data/)).toBeInTheDocument();
+      expect(await screen.findByText("Kanji N5")).toBeInTheDocument();
+      expect(screen.queryByText(/To use the data unchecked/)).toBeNull();
     });
   });
 

@@ -1568,6 +1568,7 @@
       "other": "{count} documents"
     },
     "notCreated": "Not created yet.",
+    "unreadable": "Solid Memo could not read this document, so it counts as invalid: {reason}",
     "noSubjects": "No subjects.",
     "untyped": "{name} — not a Solid Memo subject.",
     "newer": "{name} — {shape} format {version} is newer than this app knows (up to {latest}); skipped.",
@@ -1609,7 +1610,8 @@
       "Closed": "The property is not allowed here.",
       "DeckPlace": "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it.",
       "DateTimeRange": "Solid Memo can't read this date: it is too far in the future or the past, or longer than a date-time is, so it reads as no date.",
-      "FormatVersionRange": "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject."
+      "FormatVersionRange": "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject.",
+      "ResultLimit": "This subject has more results in one check than Solid Memo lists: it shows the 1,000 most severe. Repair those, and the check finds the rest."
     }
   },
   "webIdDocument": {
@@ -1633,6 +1635,7 @@
     "checkingData": "Checking this instance's data…",
     "deckSetAside": "This deck is set aside: its data does not conform. Repair it above to use it again.",
     "checkFailed": "Could not check this instance's data: {error}",
+    "checkFailedHeld": "Until the check can be made, Solid Memo holds back what it would while checking. To use the data unchecked, choose “Warn only” in {preferences}.",
     "developerTools": "Developer tools",
     "validateInstance": "Validate this instance",
     "loadingCourse": "Loading the course…",

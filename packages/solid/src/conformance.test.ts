@@ -31,7 +31,11 @@ import { toReviewStateThing } from "./mappers/reviewStateMapper";
 import { createShapeLoader } from "@solid-memo/shacl/shapeLoader";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT, RDF, SM, SM_NS } from "./vocab";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
+import {
+  readShapeTree,
+  SHAPE_SOURCES,
+  shapesFetch,
+} from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { integerLiteral } from "./testing/literals";
 
@@ -715,6 +719,31 @@ describe("deck format 6 over the format-5 fixtures", () => {
 async function sourceDataset(url: string) {
   return datasetFromTurtle(await (await shapesFetch(url)).text(), url);
 }
+
+describe("the shapes the app checks against", () => {
+  // The engine's result limit (TermKeyedEngine in @solid-memo/shacl/engine)
+  // leaves a result out by making a constraint pass for that call: under
+  // sh:node, which runs on the same engine, that could make a node conform
+  // to the shape it names. Such a shape would need the limit there first.
+  it("use no sh:node, of Solid Memo's own shapes and the profiles' alike", async () => {
+    const own = await Promise.all(
+      (await readShapeTree()).map(({ path, turtle }) =>
+        datasetFromTurtle(turtle, `${SHAPE_SOURCES.shapesBaseUrl}${path}`),
+      ),
+    );
+    const profiles = await Promise.all(
+      Object.values(PROFILES)
+        .flat()
+        .map((path) => sourceDataset(`${SHAPE_SOURCES.vendorBaseUrl}${path}`)),
+    );
+    const datasets = [...own, ...profiles];
+    expect(datasets.length).toBeGreaterThan(PROFILES["dcat-ap"].length + PROFILES.skos.length);
+    const node = datasets.flatMap((dataset) =>
+      [...dataset].filter((quad) => quad.predicate.value === "http://www.w3.org/ns/shacl#node"),
+    );
+    expect(node).toEqual([]);
+  });
+});
 
 describe("what the app writes, under DCAT-AP", () => {
   const CATALOG = "https://pod.example/solid-memo/a/catalog.ttl";

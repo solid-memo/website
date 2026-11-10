@@ -570,7 +570,9 @@ export async function appendAllToDocument(
       batches.push(lines);
       size = bytes;
     } else {
-      batches.at(-1)!.push(...lines);
+      // One by one: a subject with very many values would overflow push's arguments.
+      const batch = batches.at(-1)!;
+      for (const line of lines) batch.push(line);
       size += bytes;
     }
   }

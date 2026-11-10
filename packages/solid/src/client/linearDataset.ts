@@ -8,8 +8,15 @@ import {
   type Parser,
   type SolidDataset,
 } from "@inrupt/solid-client";
-import type { Literal, Quad } from "@rdfjs/types";
-import { Parser as N3Parser, type ParserOptions } from "n3";
+import type {
+  DatasetCore,
+  Literal,
+  Quad,
+  Quad_Graph,
+  Quad_Object,
+  Quad_Subject,
+} from "@rdfjs/types";
+import { DataFactory, Parser as N3Parser, type ParserOptions, Store } from "n3";
 import { ReadLimitError, type ReadLimits } from "./interface";
 import { withBoundedHeaders } from "./linkHeader";
 import {
@@ -272,4 +279,63 @@ function deepFreeze<T extends object>(value: T): T {
     if (typeof child === "object" && child !== null) deepFreeze(child);
   }
   return Object.freeze(value);
+}
+
+/**
+ * The quads of a library dataset's graphs, as the library's
+ * toRdfJsDataset makes them and in its order, but added one by one: the
+ * library spreads each subject's quads into a single call, which a
+ * subject with very many values takes past the engine's limit on a
+ * call's arguments.
+ */
+export function quadsOfGraphs(graphs: Graphs): Quad[] {
+  const quads: Quad[] = [];
+  for (const [graphIri, graph] of Object.entries(graphs)) {
+    const graphNode =
+      graphIri === "default" ? DataFactory.defaultGraph() : DataFactory.namedNode(graphIri);
+    for (const [subjectIri, subject] of Object.entries(graph)) {
+      addSubjectQuads(quads, subject.predicates, nodeOf(subjectIri), graphNode);
+    }
+  }
+  return quads;
+}
+
+/** A subject's node by its IRI: a blank node by its `_:` id. */
+function nodeOf(iri: string): Quad_Subject {
+  return iri.startsWith("_:") ? DataFactory.blankNode(iri.slice(2)) : DataFactory.namedNode(iri);
+}
+
+/** Adds a subject's quads to `quads`, a blank node given by its predicates followed by its own. */
+function addSubjectQuads(
+  quads: Quad[],
+  predicates: Graph[string]["predicates"],
+  subject: Quad_Subject,
+  graph: Quad_Graph,
+): void {
+  const add = (predicate: string, object: Quad_Object) =>
+    quads.push(DataFactory.quad(subject, DataFactory.namedNode(predicate), object, graph));
+  for (const [predicate, objects] of Object.entries(predicates)) {
+    for (const [dataType, values] of Object.entries(objects.literals ?? {})) {
+      const type = DataFactory.namedNode(dataType);
+      for (const value of values) add(predicate, DataFactory.literal(value, type));
+    }
+    for (const [locale, values] of Object.entries(objects.langStrings ?? {})) {
+      for (const value of values) add(predicate, DataFactory.literal(value, locale));
+    }
+    for (const iri of objects.namedNodes ?? []) add(predicate, DataFactory.namedNode(iri));
+    for (const blankNode of objects.blankNodes ?? []) {
+      if (typeof blankNode === "string") {
+        add(predicate, DataFactory.blankNode(blankNode.slice(2)));
+      } else {
+        const node = DataFactory.blankNode();
+        add(predicate, node);
+        addSubjectQuads(quads, blankNode, node, graph);
+      }
+    }
+  }
+}
+
+/** An RDF/JS dataset of quads, the kind the library's toRdfJsDataset gives. */
+export function rdfJsDatasetOf(quads: Quad[]): DatasetCore {
+  return new Store(quads);
 }

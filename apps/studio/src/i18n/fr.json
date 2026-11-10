@@ -933,6 +933,7 @@
     },
     "readOnly": {
       "checking": "Les données de cette instance sont en cours de vérification. Rien ne peut être modifié avant la fin de la vérification.",
+      "unchecked": "Les données de cette instance n’ont pas pu être vérifiées : rien ne peut donc être modifié tant qu’elles ne peuvent pas l’être. Pour les modifier sans vérification, choisissez « Avertir seulement » dans les préférences de Solid Memo.",
       "blocked": "Cette instance contient des données non valides, et vos préférences la gardent fermée jusqu’à sa réparation : rien ne peut donc être modifié ici. {repair}",
       "deck": "Ce paquet contient des données non valides, il est donc mis de côté : il est affiché ici, mais rien ne peut y être modifié avant sa réparation. {repair}",
       "decks": "Les paquets aux données non valides sont mis de côté : ils ne peuvent être ni sélectionnés ni modifiés avant leur réparation. {repair}",

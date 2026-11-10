@@ -22,6 +22,15 @@ describe("ReadOnlyNotice", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
+  it("says the data could not be checked, and that Solid Memo's “Warn only” changes it unchecked", () => {
+    render(<ReadOnlyNotice reason="unchecked" subject="deck" healthHref="#/health" />);
+    expect(screen.getByText(/could not be checked, so nothing can be changed/)).toHaveClass(
+      "warning",
+    );
+    expect(screen.getByText(/choose “Warn only” in Solid Memo's preferences/)).toBeInTheDocument();
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+
   it("says what is set aside, with a link to repair it", () => {
     const { unmount } = render(
       <ReadOnlyNotice reason="setAside" subject="deck" healthHref="#/health?deck=d" />,

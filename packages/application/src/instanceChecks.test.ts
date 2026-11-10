@@ -8,6 +8,7 @@ import type { ReleaseDraftRepository } from "./ports";
 import { createUseCases } from "./useCases";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
+import { deckSetAside, unreadableDocument } from "@solid-memo/domain/validation";
 import { instance, deck, libraryContent, makeDeps } from "./testing/fakePorts";
 import { current, card2, setup } from "./testing/digestWorld";
 
@@ -437,6 +438,37 @@ describe("instance checks", () => {
       useCases.claimDeckDocuments(instance.url, `${instance.url}catalog.ttl#deck-other`),
     ).rejects.toMatchObject({ code: "deckGone" });
     expect(deps.deckRepository.claimDocuments).toHaveBeenCalledTimes(1);
+  });
+  // One document the check cannot read is in the report: it fails neither the check nor another deck.
+  it("reports a deck's document the check could not read, and sets aside only that deck", async () => {
+    const { deps, useCases, stored } = setup();
+    const other = {
+      ...deck,
+      id: "other",
+      url: `${instance.url}catalog.ttl#other`,
+      cardsDocumentUrl: `${instance.url}decks/other.ttl`,
+      reviewsDocumentUrl: `${instance.url}reviews/other.ttl`,
+    };
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, other]);
+    deps.shapeValidator.validateDocumentSince = vi.fn(async (url: string) => ({
+      unchanged: false as const,
+      value:
+        url === deck.reviewsDocumentUrl
+          ? unreadableDocument(url, "403 Forbidden")
+          : { url, status: "checked" as const, subjects: [] },
+      version: url === deck.reviewsDocumentUrl ? null : `v-${url}`,
+    }));
+    const report = await useCases.checkInstance(instance.url);
+    expect(report).toMatchObject({ violationCount: 1, conforms: false });
+    expect(report.documents.find((d) => d.url === deck.reviewsDocumentUrl)).toMatchObject({
+      status: "unreadable",
+      reason: "403 Forbidden",
+    });
+    expect(deckSetAside(report, deck)).toBe(true);
+    expect(deckSetAside(report, other)).toBe(false);
+    // A receipt of each document read, none of the one that could not be.
+    await vi.waitFor(() => expect(stored()?.receipts[other.cardsDocumentUrl]).toBeDefined());
+    expect(stored()!.receipts[deck.reviewsDocumentUrl]).toBeUndefined();
   });
   it("keeps no receipt of a document that does not conform or has no version", async () => {
     const { deps, useCases, digestRepository } = setup();

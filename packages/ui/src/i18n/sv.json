@@ -1568,6 +1568,7 @@
       "other": "{count} dokument"
     },
     "notCreated": "Inte skapat än.",
+    "unreadable": "Solid Memo kunde inte läsa dokumentet, så det räknas som ogiltigt: {reason}",
     "noSubjects": "Inga subjekt.",
     "untyped": "{name} — inte ett Solid Memo-subjekt.",
     "newer": "{name} — formatet {shape} {version} är nyare än vad appen känner till (upp till {latest}); hoppas över.",
@@ -1609,7 +1610,8 @@
       "Closed": "Egenskapen är inte tillåten här.",
       "DeckPlace": "Kortlekens post finns inte i instansens katalog, eller så anger den ett dokument på en adress som ingen kortleks dokument får ha, till exempel en annan resurs åtkomstkontroll eller ett av instansens egna dokument. Solid Memo använder den inte.",
       "DateTimeRange": "Solid Memo kan inte läsa det här datumet: det ligger för långt fram eller tillbaka i tiden, eller är längre än en tidpunkt är, så det läses som inget datum.",
-      "FormatVersionRange": "Inget format i Solid Memo har den här versionen: den är lägre än 1, så Solid Memo kan inte läsa subjektet."
+      "FormatVersionRange": "Inget format i Solid Memo har den här versionen: den är lägre än 1, så Solid Memo kan inte läsa subjektet.",
+      "ResultLimit": "Det här subjektet har fler resultat i en kontroll än Solid Memo listar: det visar de 1 000 allvarligaste. Reparera dem, så hittar kontrollen resten."
     }
   },
   "webIdDocument": {
@@ -1633,6 +1635,7 @@
     "checkingData": "Kontrollerar instansens data…",
     "deckSetAside": "Kortleken är lagd åt sidan: dess data uppfyller inte formerna. Reparera den ovan för att använda den igen.",
     "checkFailed": "Det gick inte att kontrollera instansens data: {error}",
+    "checkFailedHeld": "Tills kontrollen kan göras håller Solid Memo tillbaka det som hålls tillbaka medan den pågår. Välj ”Varna bara” i {preferences} för att använda datan okontrollerad.",
     "developerTools": "Utvecklarverktyg",
     "validateInstance": "Kontrollera den här instansen",
     "loadingCourse": "Läser in kursen…",
