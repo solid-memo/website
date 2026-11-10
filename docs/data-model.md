@@ -203,7 +203,7 @@ flowchart LR
 
   Every blocking server the end-to-end tests start
   ([testing.md](testing.md#commands)), and Pivot and Community Solid
-  Server 8, keep another app's file and its folder, and delete a folder
+  Server 8 (with LWS too), keep another app's file and its folder, and delete a folder
   holding only Solid Memo's documents with its access rules
   ([foreignData.integration.test.ts](../e2e/pod/src/foreignData.integration.test.ts)).
   Solid-Nextcloud lists a folder's ACL among its contents, so there such

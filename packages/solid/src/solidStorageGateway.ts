@@ -14,6 +14,9 @@ import {
 import { getSourceUrl, type ProfileStorages } from "./client/resources";
 import { readDataset } from "./datasets";
 import { createPlacesFetch, profilePlacesOf, readNothing } from "./profilePlaces";
+import { isInFolder } from "@solid-memo/domain/instanceLayout";
+import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
+import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { ensureTrailingSlash } from "./urls";
 import { AppError } from "@solid-memo/domain/appError";
 
@@ -57,11 +60,7 @@ export function createSolidStorageGateway({
       if (fromProfile.length > 0) {
         return fromProfile.map((url) => ({ url, source: "profile" }));
       }
-      const fromLinkHeader = await walkUpToStorage(webId, fetch);
-      if (fromLinkHeader !== null) {
-        return [{ url: fromLinkHeader, source: "linkHeader" }];
-      }
-      return [];
+      return (await walkUpToStorage(webId, fetch)).map((url) => ({ url, source: "linkHeader" }));
     },
 
     async probeStorage(url): Promise<Storage> {
@@ -133,21 +132,31 @@ export function hasStorageLink(linkHeader: string | null): boolean {
     .some((link) => link.includes(`<${PIM_STORAGE_TYPE}>`) && /rel="?type"?/.test(link));
 }
 
-async function walkUpToStorage(
-  webId: string,
-  fetch: typeof globalThis.fetch,
-): Promise<string | null> {
+/**
+ * The storage the WebID's document is in, as its server links it: the
+ * first of the document and the folders above it whose answer is typed
+ * `pim:Storage` (the Solid Protocol), or, from a Linked Web Storage
+ * server, which links the storage of everything it serves, the roots of
+ * that storage the document is in (lwsStorage.ts). None when no answer
+ * names one.
+ */
+async function walkUpToStorage(webId: string, fetch: typeof globalThis.fetch): Promise<string[]> {
   for (const candidate of candidateStorageUrls(webId)) {
-    let linkHeader: string | null;
+    let response: Response;
     try {
-      const response = await fetch(candidate, { method: "HEAD" });
-      linkHeader = response.headers.get("Link");
+      // Turtle asked for, as the app reads a container: an LWS server may answer a storage's root otherwise, without its Solid links.
+      response = await fetch(candidate, { method: "HEAD", headers: { Accept: TURTLE_FIRST } });
     } catch {
       continue;
     }
-    if (hasStorageLink(linkHeader)) {
-      return candidate;
+    if (hasStorageLink(response.headers.get("Link"))) return [candidate];
+    const [storage] = linkTargets(response, LWS_STORAGE_REL, candidate);
+    if (storage !== undefined) {
+      const roots = ((await storageRootsOf(storage, fetch)) ?? []).filter((root) =>
+        isInFolder(candidate, root),
+      );
+      if (roots.length > 0) return roots;
     }
   }
-  return null;
+  return [];
 }

@@ -23,21 +23,27 @@ const sections = page
   }))
   .filter((section) => section.headings.length > 0);
 
+/** The causes a server's list in `dir` names, none where it has no list. */
+const causesOf = (dir: string, id: string) => {
+  const file = join(dir, id, "expected-failures.json");
+  return existsSync(file)
+    ? Object.values(JSON.parse(readFileSync(file, "utf8")) as Record<string, string>)
+    : [];
+};
+// The pod tests' lists, and the journeys' (e2e/journeys/servers/<id>/).
 const servers = join(import.meta.dirname, "servers");
-const lists = readdirSync(servers)
-  .filter((id) => existsSync(join(servers, id, "expected-failures.json")))
+const journeyServers = join(import.meta.dirname, "../journeys/servers");
+const lists = [
+  ...new Set([
+    ...readdirSync(servers),
+    ...(existsSync(journeyServers) ? readdirSync(journeyServers) : []),
+  ]),
+]
   .map((id) => ({
     id,
-    causes: new Set(
-      Object.values(
-        JSON.parse(readFileSync(join(servers, id, "expected-failures.json"), "utf8")) as Record<
-          string,
-          string
-        >,
-      ),
-    ),
+    causes: new Set([...causesOf(servers, id), ...causesOf(journeyServers, id)]),
   }))
-  // A server with an empty list fails nothing, and the page leaves it out.
+  // A server whose lists are empty fails nothing, and the page lists no cause of it.
   .filter((list) => list.causes.size > 0);
 
 describe("docs/interop.md", () => {

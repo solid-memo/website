@@ -7,26 +7,33 @@ server does, where in its code, and the fewest HTTP requests that show
 it, with no Solid Memo involved.
 
 The tests and how they run are in [testing.md](testing.md).
-The Interop workflow runs them weekly and on changes to the app's Solid
-code. Each server's `e2e/pod/servers/<id>/expected-failures.json` names
-the tests a cause fails, by the cause's id on this page.
+The Interop workflow runs them, and the user journeys on the servers
+with Linked Web Storage, weekly and on changes to the app, its Solid
+code or the journeys.
+Each server's `e2e/pod/servers/<id>/expected-failures.json` names the
+tests a cause fails, and its `e2e/journeys/servers/<id>/expected-failures.json`
+the journeys, by the cause's id on this page.
 
 A cause here is one that the tests hit and a live run reproduced. The
 servers are set up for testing, and each entry says when the setup
 plays a part. A server not on this page, or with no entries, passes
-every test.
+every test and journey.
 
 ## How to read an entry
 
 - **Requirement** is the strongest clause the behavior goes against,
   with its level: a MUST of the [Solid Protocol 0.11](https://solidproject.org/TR/protocol)
   or of [Web Access Control 1.0.0](https://solidproject.org/TR/wac), a
-  definition in an RDF, SPARQL or HTTP specification, or none. An
-  optional feature done wrong says so.
+  definition in an RDF, SPARQL or HTTP specification, or none. On a
+  server with Linked Web Storage, it may be a clause of
+  [LWS Protocol 1.0](https://www.w3.org/TR/lws10-core/). An optional
+  feature done wrong says so. So does something the app needs that LWS
+  doesn't define.
 - **Reproduction** uses `$POD` for the pod's root URL, ending in `/`.
   The test pods are open to anyone, so the requests carry no
   credentials, unless an entry says it's from the
-  [signed-in tests](testing.md#the-signed-in-tests). Headers and bodies are trimmed to what matters.
+  [signed-in tests](testing.md#the-signed-in-tests) or the
+  [user journeys](testing.md#user-journeys), which sign in. Headers and bodies are trimmed to what matters.
 - **Upstream** links the issue or pull request that tracks the cause,
   or says that none does yet.
 
@@ -543,3 +550,28 @@ The same PUT to `card.ttl` is served as sent.
 
 **Reported to the maintainers in private.** It gets an entry like the
 others once a fixed release is out.
+
+## Community Solid Server with Linked Web Storage
+
+`css-lws`: the Linked Web Storage branch of a fork of the Community
+Solid Server, not yet merged
+([jeswr/CommunitySolidServer#126](https://github.com/jeswr/CommunitySolidServer/pull/126)),
+at commit
+[`ef6d664f`](https://github.com/jeswr/CommunitySolidServer/tree/ef6d664f1253662cbfcb0f1786fe45d32849e067)
+(version 8.0.0-alpha.3). Its configuration is the fork's
+`config/solid-lws.json`: the Solid Protocol and LWS side by side, with
+Web Access Control. The pod tests run it in memory, its root open to
+anyone. The signed-in tests and the user journeys run its signed-in
+instance, behind TLS.
+
+No causes: every pod test and every journey passes.
+
+## Community Solid Server with Linked Web Storage alone
+
+`css-lws-only`: the same commit, with the fork's `config/lws.json`, LWS
+alone with Web Access Control. This configuration takes the Solid
+Protocol's requests too, so the app's requests are answered as on
+`css-lws`. The pod tests and the signed-in instance are run as for
+`css-lws`.
+
+No causes: every pod test and every journey passes.

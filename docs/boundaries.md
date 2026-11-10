@@ -88,8 +88,8 @@ boundaries."
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
 | `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `site` | `composition`, and `studio` with a dynamic `import()`: `src/main.tsx` only; `site`: `vite.config.ts` (the site's build, which renders the docs) and tests only |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
-| `e2e-pod` | `application`, `domain`, `vocab`, `solid` | |
-| `solid-memo-client` | `solid` | No package imports it: the build puts its modules in place of `solid`'s client modules ([below](#the-solid-client-libraries)) |
+| `e2e-pod` | `application`, `domain`, `vocab`, `solid`, `solid-memo-client` | `solid-memo-client`: `signedInClient.ts` only, which signs in to a Linked Web Storage server |
+| `solid-memo-client` | `solid` | No package the app is made of imports it: the build puts its modules in place of `solid`'s client modules ([below](#the-solid-client-libraries)) |
 | `e2e-journeys` | `ui`, `studio` | `ui` and `studio`: `harness/strings.ts` only, for their messages |
 
 Browser code is the `src/` of `markdown`, `vocab`, `domain`,

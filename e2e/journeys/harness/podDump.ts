@@ -4,12 +4,12 @@
 
 import type { APIRequestContext } from "@playwright/test";
 import type { CssAccount } from "./cssAccount.ts";
+import { podToken } from "./podToken.ts";
 
 /**
  * Everything in a journey's pod, as Turtle: what the app had written when
- * the journey failed, attached to its report. Read with the account's
- * client credentials (a Bearer token from the server's token endpoint),
- * not through the browser, whose page may be the thing that broke.
+ * the journey failed, attached to its report. Read with a token of the
+ * account's own (podToken.ts), not through the browser, whose page may be the thing that broke.
  */
 
 const LDP_CONTAINS = "http://www.w3.org/ns/ldp#contains";
@@ -39,33 +39,13 @@ export function containedIn(jsonld: unknown, container: string): string[] {
   return [...found].sort();
 }
 
-/** A token for the account's WebID, by its client credentials. */
-export async function bearer(
-  api: APIRequestContext,
-  server: string,
-  account: CssAccount,
-): Promise<string> {
-  const basic = Buffer.from(
-    `${encodeURIComponent(account.client.id)}:${encodeURIComponent(account.client.secret)}`,
-  ).toString("base64");
-  const response = await api.post(new URL(".oidc/token", server).href, {
-    headers: { authorization: `Basic ${basic}` },
-    form: { grant_type: "client_credentials", scope: "webid" },
-  });
-  if (!response.ok())
-    throw new Error(
-      `The token endpoint refused the client credentials: ${response.status()} ${await response.text()}`,
-    );
-  return ((await response.json()) as { access_token: string }).access_token;
-}
-
 /** The pod's documents, each under a `# <url>` line, containers first listing what they hold. */
 export async function dumpPod(
   api: APIRequestContext,
   server: string,
   account: CssAccount,
 ): Promise<string> {
-  const headers = { authorization: `Bearer ${await bearer(api, server, account)}` };
+  const headers = { authorization: `Bearer ${await podToken(api, server, account)}` };
   const out: string[] = [];
   const queue = [account.pod];
   const seen = new Set(queue);

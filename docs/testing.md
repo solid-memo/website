@@ -74,12 +74,15 @@ or on Ctrl-C. The test names say which server and version:
 | `pivot` | Pivot, the server of solidcommunity.net (the Community Solid Server 7 with Pivot's components), in memory | built here from its lockfile ([servers/pivot/](../e2e/pod/servers/pivot/Dockerfile)) with a configuration of its own, its root open | advisory |
 | `nextcloud` | Solid-Nextcloud: Nextcloud 32 with the Solid app, on SQLite, the pod `apps/solid/~alice/storage/` | built here from a commit of the app ([servers/nextcloud/](../e2e/pod/servers/nextcloud/Dockerfile)), installed on every start, alice's pod opened by a hook | advisory |
 | `jss` | JavaScript Solid Server, files in the container, open to anyone (`--public`, which skips its access control) | built here from its lockfile ([servers/jss/](../e2e/pod/servers/jss/Dockerfile)), unmodified and pushed nowhere (it's AGPL) | advisory |
+| `css-lws` | Community Solid Server 8 with Linked Web Storage (LWS): the Solid Protocol and LWS side by side, in memory | built here from a commit of a fork not yet merged ([servers/css-lws/](../e2e/pod/servers/css-lws/Dockerfile)), with a configuration of its own, its root open | advisory |
+| `css-lws-only` | The same with LWS alone, in memory | css-lws's image ([servers/css-lws-only/](../e2e/pod/servers/css-lws-only/compose.yml)), with a configuration of its own, its root open | advisory |
 
 A **blocking** server's tests gate CI, and so deploys and Renovate's
 merges: every test passes, or skips for a reason it gives. An
 **advisory** server's results are reported, not a gate, by the Interop workflow
 ([interop.yml](../.github/workflows/interop.yml)), weekly, by hand, and
-on pushes to `main` that touch the app's Solid code. A job fails only
+on pushes to `main` that touch the app, its Solid code or the journeys.
+A job fails only
 when no test ran, or a test fails that
 `e2e/pod/servers/<id>/expected-failures.json`
 (`{ "<file> > <test>": "<cause>" }`, the test named without its server)
@@ -100,6 +103,25 @@ Solid-Nextcloud fails concurrent writes to one document
 in a run the test files run one at a time (`serialFiles` in
 `servers.ts`). css-8 becomes blocking at 8.0.0,
 and css-6 then goes.
+
+css-lws tests the [LWS](https://www.w3.org/TR/lws10-core/) work in the
+Community Solid Server before any release has it: the branch
+`feat/lws-next-major` of
+[jeswr/CommunitySolidServer](https://github.com/jeswr/CommunitySolidServer/pull/126),
+on the same 8.0.0-alpha.3 as css-8, so a failure only css-lws shows
+comes from the LWS changes. Its configuration is the fork's
+`config/solid-lws.json` in memory, with the root as the storage.
+css-lws-only runs the same image with the fork's `config/lws.json`
+instead: LWS alone. The app's sign-in to an LWS storage is shown by
+[the signed-in tests](#the-signed-in-tests). The image is built from code nobody has reviewed, on CI's runners and on the
+machine of anyone who runs `SOLID_SERVERS=all`. Its dependencies'
+install scripts don't run, and its final stage keeps only what the
+server runs. GitHub's dependency review doesn't see the lockfile it
+installs from. A person approves each newer commit on Renovate's
+Dependency Dashboard before Renovate proposes it. css-lws goes once a
+Community Solid Server release has LWS, or when its commit can't be
+fetched any more: a commit that can't be fetched fails the `contract`
+job of every pull request.
 
 Each server is a compose file, `e2e/pod/servers/<id>/compose.yml`,
 asking only for `E2E_PORT` (the port on 127.0.0.1 the harness picked,
@@ -337,6 +359,7 @@ request.
 | `css-6` | Client credentials from its older identity API, DPoP-bound |
 | `nss-6`, `nss-5` | The authorization-code flow, its login and consent forms filled in by script; each pod on a subdomain of localhost |
 | `jss` | Its own email and password endpoint, `/idp/credentials`, DPoP-bound |
+| `css-lws`, `css-lws-only` | The authorization-code flow, the account API answering for its login and consent pages, for an ID token as well as a DPoP-bound access token |
 
 `nextcloud` is left out. Its login is Nextcloud's browser form and the
 Solid app's approval page, which nothing here scripts.
@@ -354,6 +377,21 @@ The tests check that:
 - the app sees the 403 when the stranger publishes or makes public;
 - an invalid token gets a 401, the document stays as it was, and the app
   ends the session only if the answer names the token invalid.
+
+On `css-lws` and `css-lws-only`, the sign-in client is the app's own
+([signedInClient.ts](../e2e/pod/signedInClient.ts)): `solid-memo-client`'s
+session, as the app wires it, since Inrupt's client
+gives the app no ID token. So the requests are the ones a browser's
+session makes, and:
+
+- on LWS alone, a DPoP request is answered with the LWS challenge, and
+  the client goes through the resource metadata and the exchange to a
+  Bearer token; beside Solid, it stays on DPoP;
+- a Bearer token from the exchange works for its user's access, and only
+  in the storage it's for.
+
+There an invalid token is the ID token too: on LWS alone a bad access
+token is no one's, and it's the exchange that refuses.
 
 The app has no way to take access back, so nothing tests removing it. A
 real expired token isn't tested either: the shortest lifetime on these
@@ -401,6 +439,24 @@ need Docker and the browsers
 (`npm run browsers -w @solid-memo/e2e-journeys` installs Chromium,
 Firefox and WebKit, with their system libraries). CI runs them as a gate
 ([below](#deterministic-and-timing-dependent-jobs)).
+
+`JOURNEY_SERVER` names another server to run them against: `css-lws` or
+`css-lws-only`, the advisory servers above with Linked Web Storage, as
+their signed-in instances behind TLS
+([harness/journeyServer.ts](../e2e/journeys/harness/journeyServer.ts)),
+from the image e2e/pod builds. The app signs in to them only when built
+with `SOLID_CLIENT=solid-memo-client` ([lws.md](lws.md#how-its-tested)).
+The Interop workflow runs Chromium's journeys on both and reports them,
+as it does the pod tests: they gate nothing. A job fails only when no
+journey ran, or a journey fails that
+`e2e/journeys/servers/<id>/expected-failures.json`
+(`{ "<file> > <journey>": "<cause>" }`, the journey named by its file,
+its describe blocks and its title) doesn't list. Each cause is an entry
+of [interop.md](interop.md), in the same server's section as its pod
+tests' causes, and `e2e/pod/interop.test.ts` keeps the lists and the
+page in step. [harness/compare.ts](../e2e/journeys/harness/compare.ts)
+names these in the job's summary, with what passes though listed and
+the expected failures by cause.
 
 Further journeys go through:
 

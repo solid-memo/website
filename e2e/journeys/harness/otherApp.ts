@@ -4,12 +4,12 @@
 
 import type { APIRequestContext } from "@playwright/test";
 import type { CssAccount } from "./cssAccount.ts";
-import { bearer } from "./podDump.ts";
+import { podToken } from "./podToken.ts";
 
 /**
  * An app other than Solid Memo, acting for the journey's WebID in its
- * pod with the account's client credentials, not through the browser:
- * what puts files of its own in a folder Solid Memo also uses, which
+ * pod with a token of the account's own (podToken.ts), not through the
+ * browser: what puts files of its own in a folder Solid Memo also uses, which
  * Solid Memo must then leave be (docs/data-model.md "Deleting an
  * instance").
  */
@@ -24,7 +24,7 @@ export interface OtherApp {
 export function otherApp(api: APIRequestContext, server: string, account: CssAccount): OtherApp {
   let token: Promise<string> | undefined;
   const headers = async () => ({
-    authorization: `Bearer ${await (token ??= bearer(api, server, account))}`,
+    authorization: `Bearer ${await (token ??= podToken(api, server, account))}`,
   });
   return {
     async put(url, body, contentType) {

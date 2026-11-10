@@ -136,6 +136,16 @@
                 '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) branch=(?<currentValue>\\S+)\\nARG SOLID_NEXTCLOUD_SHA=(?<currentDigest>[0-9a-f]{40})',
             ],
         },
+        // The commit of the Community Solid Server fork with Linked Web
+        // Storage its end-to-end tests' image builds (css-lws), as the
+        // fork's branch moves on: a person approves each (below).
+        {
+            customType: 'regex',
+            managerFilePatterns: ['/^e2e/pod/servers/css-lws/Dockerfile$/'],
+            matchStrings: [
+                '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) branch=(?<currentValue>\\S+)\\nARG CSS_LWS_SHA=(?<currentDigest>[0-9a-f]{40})',
+            ],
+        },
     ],
     packageRules: [
         // A new version of a package.json dependency raises its range to
@@ -207,6 +217,22 @@
         // Pivot's image keeps to Node 22, which Pivot's own CI runs.
         {
             matchFileNames: ['e2e/pod/servers/pivot/Dockerfile'],
+            matchDepNames: ['node'],
+            allowedVersions: '<23',
+        },
+        // The fork with Linked Web Storage is unreviewed code, built in CI
+        // and on contributors' machines: a person approves each new commit
+        // on the Dependency Dashboard before Renovate proposes it, and
+        // merges it after reading what it changes. Its image keeps to Node
+        // 22, which the fork's own Dockerfile runs.
+        {
+            matchFileNames: ['e2e/pod/servers/css-lws/Dockerfile'],
+            matchDepNames: ['https://github.com/jeswr/CommunitySolidServer'],
+            dependencyDashboardApproval: true,
+            automerge: false,
+        },
+        {
+            matchFileNames: ['e2e/pod/servers/css-lws/Dockerfile'],
             matchDepNames: ['node'],
             allowedVersions: '<23',
         },
