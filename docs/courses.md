@@ -185,7 +185,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    - Each course in the strip has its deck's title, and is read only as
      far as the strip needs (`getCourseSummary`), once the deck list's
      arrangement is in. The library's index is read beside the
-     arrangement, not after it.
+     arrangement, not after it. A course's progress is worked out once
+     for each summary and value of its completed chapters, not on each
+     render, as the strip renders again with each summary that arrives.
 2. **A step** comes in two phases.
    - The theory first, with no question shown, one chunk at a time from
      the first. "Part 2 of 3" says where the learner is, and takes the
