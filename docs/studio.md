@@ -432,8 +432,11 @@ nothing from the pod. The entries and their rank come from
 
 - An entry matches when its name holds the letters typed in their
   order, case and accents aside ("kn5" finds Kanji N5).
+- Only the first 200 characters of a name are searched, so a name as
+  long as a card's front costs no more than one of 200 characters.
 - A letter at the start of a word, or right after the one before,
-  counts for more, and a shorter name a little. The best 50 come
+  counts for more, and a shorter name a little, up to 200
+  characters. The best 50 come
   first, each group under its heading where its best is.
 - With nothing typed, the decks and drafts pinned come first (Pinned),
   then the entries used last (Recently used, eight at most, those

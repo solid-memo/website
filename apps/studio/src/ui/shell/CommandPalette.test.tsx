@@ -7,11 +7,20 @@ import { act, fireEvent, render, screen, within } from "@testing-library/preact"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DRAFT_URL, instanceA, instanceB, makeCard, makeDeck } from "../../test/fixtures";
 import { studioRouteToHash, type StudioRoute } from "../router";
-import type { ScreenCommand } from "./commandIndex";
+import { indexCommands, rankCommands, type ScreenCommand } from "./commandIndex";
 import { CommandPalette } from "./CommandPalette";
 import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { deckTabs } from "./workspaceLayout";
 import { queryKeys } from "../queryKeys";
+
+vi.mock("./commandIndex", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./commandIndex")>();
+  return {
+    ...actual,
+    indexCommands: vi.fn(actual.indexCommands),
+    rankCommands: vi.fn(actual.rankCommands),
+  };
+});
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -198,6 +207,20 @@ describe("CommandPalette", () => {
     expect(within(list()).queryByRole("group", { name: "Decks" })).toBeNull();
     type("verbs");
     expect(headings()).toEqual(["Decks"]);
+  });
+
+  it("folds the names once, and ranks for what is typed, not again as the entry picked moves", () => {
+    vi.mocked(indexCommands).mockClear();
+    vi.mocked(rankCommands).mockClear();
+    renderPalette();
+    type("d");
+    expect(vi.mocked(rankCommands).mock.lastCall![1]).toBe("d");
+    const ranked = vi.mocked(rankCommands).mock.calls.length;
+    press("ArrowDown");
+    fireEvent.mouseMove(within(list()).getAllByRole("option")[2]!);
+    expect(picked()).toBe(within(list()).getAllByRole("option")[2]);
+    expect(rankCommands).toHaveBeenCalledTimes(ranked);
+    expect(indexCommands).toHaveBeenCalledTimes(1);
   });
 
   it("closes on Escape", () => {
