@@ -52,10 +52,63 @@ async function openForm() {
 }
 
 describe("GuestStudyOffer", () => {
-  it("offers nothing when no guest studied in this browser, or the guest has no instance", async () => {
+  it("offers nothing when no guest studied in this browser", async () => {
     const useCases = renderOffer({ findGuestStudy: vi.fn(async () => null) });
     await waitFor(() => expect(useCases.findGuestStudy).toHaveBeenCalled());
     expect(screen.queryByRole("region")).toBeNull();
+  });
+
+  it("says so when the study cannot be read, and can be put off", async () => {
+    renderOffer({
+      findGuestStudy: vi.fn(async () => {
+        throw new Error("unreadable");
+      }),
+    });
+    const region = await screen.findByRole("region", { name: "Your study as a guest" });
+    expect(region).toHaveAccessibleDescription(/That study could not be read/);
+    expect(region).not.toHaveFocus();
+    expect(alertTexts()).toEqual([unexpectedText("unreadable")]);
+    expect(within(region).queryByRole("button", { name: "Move it into my Pod" })).toBeNull();
+    expect(within(region).getByRole("button", { name: "Discard it" })).toBeInTheDocument();
+    fireEvent.click(within(region).getByRole("button", { name: "Not now" }));
+    expect(screen.queryByRole("region", { name: "Your study as a guest" })).toBeNull();
+  });
+
+  it("can discard the study it cannot read, once the user confirms it", async () => {
+    const useCases = renderOffer({
+      findGuestStudy: vi.fn(async () => {
+        throw new Error("unreadable");
+      }),
+    });
+    fireEvent.click(await screen.findByRole("button", { name: "Discard it" }));
+    expect(
+      screen.getByRole("region", { name: "Your study as a guest" }),
+    ).toHaveAccessibleDescription(
+      "Delete everything you studied as a guest? This cannot be undone.",
+    );
+    vi.mocked(useCases.findGuestStudy).mockResolvedValue(null);
+    fireEvent.click(screen.getByRole("button", { name: "Delete it" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("region", { name: "Your study as a guest" })).toBeNull(),
+    );
+    expect(useCases.discardGuest).toHaveBeenCalledOnce();
+  });
+
+  it("offers to discard a guest pod that holds no instance of its own, and nothing to move", async () => {
+    const useCases = renderOffer({ findGuestStudy: vi.fn(async () => ({ instances: [] })) });
+    const region = await screen.findByRole("region", { name: "Your study as a guest" });
+    expect(region).toHaveAccessibleDescription(/Nothing in it can be moved into your Pod/);
+    expect(region).not.toHaveFocus();
+    expect(alertTexts()).toEqual([]);
+    expect(within(region).queryByRole("button", { name: "Move it into my Pod" })).toBeNull();
+    expect(useCases.findInterruptedGuestMove).not.toHaveBeenCalled();
+    fireEvent.click(within(region).getByRole("button", { name: "Discard it" }));
+    vi.mocked(useCases.findGuestStudy).mockResolvedValue(null);
+    fireEvent.click(screen.getByRole("button", { name: "Delete it" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("region", { name: "Your study as a guest" })).toBeNull(),
+    );
+    expect(useCases.discardGuest).toHaveBeenCalledOnce();
   });
 
   it("offers to remove the copy a cut-off move left, above the offer and its form", async () => {

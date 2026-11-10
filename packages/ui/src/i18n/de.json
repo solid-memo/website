@@ -1168,6 +1168,8 @@
     "move": "In meinen Pod übertragen",
     "discard": "Verwerfen",
     "notNow": "Nicht jetzt",
+    "readFailed": "Dein Lernstand konnte nicht gelesen werden und lässt sich deshalb gerade nicht verschieben.",
+    "nothingToMove": "Davon lässt sich nichts in deinen Pod verschieben.",
     "discardConfirm": "Alles löschen, was du als Gast gelernt hast? Das lässt sich nicht rückgängig machen.",
     "discardYes": "Löschen",
     "cancel": "Abbrechen",

@@ -1233,6 +1233,8 @@
     "move": "Le déplacer dans mon Pod",
     "discard": "L’effacer",
     "notNow": "Pas maintenant",
+    "readFailed": "Votre travail n’a pas pu être lu et ne peut donc pas être déplacé pour l’instant.",
+    "nothingToMove": "Rien ne peut en être déplacé dans votre Pod.",
     "discardConfirm": "Supprimer tout ce que vous avez étudié en mode invité ? Cette action est irréversible.",
     "discardYes": "Supprimer",
     "cancel": "Annuler",

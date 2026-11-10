@@ -1168,6 +1168,8 @@
     "move": "Flytta till min pod",
     "discard": "Släng",
     "notNow": "Inte nu",
+    "readFailed": "Dina studier kunde inte läsas, så de kan inte flyttas just nu.",
+    "nothingToMove": "Inget av det kan flyttas till din pod.",
     "discardConfirm": "Radera allt du studerat som gäst? Det går inte att ångra.",
     "discardYes": "Radera",
     "cancel": "Avbryt",

@@ -70,7 +70,9 @@ type KeepProgress =
  * the offer to keep the guest's study in their Pod — added to an instance
  * they have, or, when they have none, as a new one — or to discard it, or
  * to leave it for now; then the move, step by step, and how it ended.
- * Nothing to see when no guest studied in this browser.
+ * Nothing to see when no guest studied in this browser. When the study
+ * cannot be read, or the guest's pod holds no instance of its own, the
+ * offer says so and can still discard it.
  */
 export function GuestStudyOffer({ useCases, session }: { useCases: UseCases; session: Session }) {
   const { t } = useI18n();
@@ -218,15 +220,21 @@ function GuestStudyOfferStage({
     );
   }
 
+  if (stage === "dismissed") return null;
+  const readFailed = studyQuery.isLoadingError;
+  if (!readFailed && (studyQuery.data ?? null) === null) return null;
+  // The instance of the guest's pod to keep. Without one — the study could
+  // not be read, or the pod holds no instance of its own — the guest pod can
+  // still be discarded, rather than stay on this device unseen.
   const first = studyQuery.data?.instances[0];
-  if (stage === "dismissed" || first === undefined) return null;
   // The copy a move cut off by a closed tab left, offered for removal here,
   // to the user logged in to the Pod it is in, above the offer and its form.
-  const leftover = (
-    <InterruptedMoveContainer useCases={useCases} session={session} instance={first.instance} />
-  );
+  const leftover =
+    first === undefined ? null : (
+      <InterruptedMoveContainer useCases={useCases} session={session} instance={first.instance} />
+    );
 
-  if (stage === "form") {
+  if (stage === "form" && first !== undefined) {
     return (
       <>
         {leftover}
@@ -258,7 +266,9 @@ function GuestStudyOfferStage({
           <>
             <p id={stage === "discard" ? undefined : bodyId}>
               <strong>{t("guestOffer.heading")}</strong>{" "}
-              {t("guestOffer.body", { name: first.instance.name, count: first.deckCount })}
+              {first === undefined
+                ? t(readFailed ? "guestOffer.readFailed" : "guestOffer.nothingToMove")
+                : t("guestOffer.body", { name: first.instance.name, count: first.deckCount })}
             </p>
             {stage === "discard" ? (
               <>
@@ -288,13 +298,18 @@ function GuestStudyOfferStage({
                 <ErrorMessage error={errorText(discard.error)} />
               </>
             ) : (
-              <div class="edit-actions">
-                <button class="primary" onClick={() => setStage("form")}>
-                  {t("guestOffer.move")}
-                </button>
-                <button onClick={() => setStage("discard")}>{t("guestOffer.discard")}</button>
-                <button onClick={() => setStage("dismissed")}>{t("guestOffer.notNow")}</button>
-              </div>
+              <>
+                <ErrorMessage error={readFailed ? errorText(studyQuery.error) : null} />
+                <div class="edit-actions">
+                  {first !== undefined && (
+                    <button class="primary" onClick={() => setStage("form")}>
+                      {t("guestOffer.move")}
+                    </button>
+                  )}
+                  <button onClick={() => setStage("discard")}>{t("guestOffer.discard")}</button>
+                  <button onClick={() => setStage("dismissed")}>{t("guestOffer.notNow")}</button>
+                </div>
+              </>
             )}
           </>
         )}
