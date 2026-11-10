@@ -520,7 +520,35 @@ describe("LwsTokens, refusing", () => {
     const configured = `${ISSUER}.well-known/lws-configuration/tenant`;
     routes.set(configured, () => json({ ...configuration(), issuer }));
     routes.set(METADATA, () => json(protectedResource(issuer)));
-    await expect(discovered()).resolves.toMatchObject({ as: { issuer } });
+    await expect(discovered(new LwsTokens({ ...session, issuer }))).resolves.toMatchObject({
+      as: { issuer },
+    });
     expect(requests.map(({ url }) => url)).toContain(configured);
+  });
+
+  it.each([
+    ["with a trailing slash", `${ISSUER}realms/A/`, `${ISSUER}realms/A`],
+    ["without a trailing slash", `${ISSUER}realms/A`, `${ISSUER}realms/A/`],
+  ])("takes the session's issuer %s", async (_, named, own) => {
+    const configured = `${ISSUER}.well-known/lws-configuration${new URL(named).pathname}`;
+    routes.set(configured, () => json({ ...configuration(), issuer: named }));
+    routes.set(METADATA, () => json(protectedResource(named)));
+    await expect(discovered(new LwsTokens({ ...session, issuer: own }))).resolves.toMatchObject({
+      as: { issuer: named },
+    });
+  });
+
+  it.each([
+    ["a sibling realm", `${ISSUER}realms/B`],
+    ["a path below its own", `${ISSUER}realms/A/B`],
+    ["the origin's root", ISSUER],
+  ])("sends nothing to %s on the identity provider's origin", async (_, issuer) => {
+    const configured = `${ISSUER}.well-known/lws-configuration${new URL(issuer).pathname}`;
+    routes.set(configured, () => json({ ...configuration(), issuer }));
+    routes.set(METADATA, () => json(protectedResource(issuer)));
+    const tokens = new LwsTokens({ ...session, issuer: `${ISSUER}realms/A` });
+    await expect(discovered(tokens)).resolves.toBeUndefined();
+    expect(requests.map(({ url }) => url)).toEqual([METADATA]);
+    expect(session.idToken).not.toHaveBeenCalled();
   });
 });

@@ -21,10 +21,11 @@ import { clientAuth, requestOptions, secureEndpoint, timeLimited } from "./oidcL
  * Two rules of the app's own, both because a Bearer token, unlike a DPoP
  * one, works for whoever holds it:
  *
- * - The ID token goes only to an authorization server on the origin of
- *   the session's own identity provider. Its audience is the app, so any
- *   authorization server that trusts that provider would take it; a
- *   server that names its own authorization server never gets it.
+ * - The ID token goes only to an authorization server whose issuer is
+ *   the session's own, but for a trailing slash. Its audience is the app,
+ *   so any authorization server that trusts that provider would take it;
+ *   a server that names its own authorization server, or another issuer
+ *   on the provider's origin, never gets it.
  * - A storage's token goes only to URLs within that storage (same origin,
  *   and the storage's path as a prefix), never elsewhere on its server.
  */
@@ -211,6 +212,15 @@ async function lwsConfiguration(
   return { issuer: metadata.issuer, token_endpoint: tokenEndpoint };
 }
 
+/**
+ * Whether two issuers are the same, but for one trailing slash: one
+ * origin can serve many issuers under different paths (tenants or
+ * realms), each its own identity provider.
+ */
+const sameIssuer = (a: URL, b: URL) => withoutSlash(a.href) === withoutSlash(b.href);
+
+const withoutSlash = (href: string) => (href.endsWith("/") ? href.slice(0, -1) : href);
+
 /** The tokens of the LWS storages a session has met, kept on the session (oidcSession.ts). */
 export class LwsTokens {
   readonly #session: LwsSession;
@@ -252,7 +262,8 @@ export class LwsTokens {
     if (known !== undefined) return known;
     const issuer = URL.parse((await issuerOf(url, metadataUri, signal)) ?? "");
     if (
-      issuer?.origin !== new URL(this.#session.issuer).origin ||
+      issuer === null ||
+      !sameIssuer(issuer, new URL(this.#session.issuer)) ||
       !(await describesStorage(uri, url, signal))
     ) {
       return undefined;

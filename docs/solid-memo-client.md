@@ -227,7 +227,8 @@ working draft:
    ID token goes anywhere. The `resource_metadata` URL has the
    requested URL's scheme and authority, and its document names the
    requested URL as its `resource`. Its first `authorization_servers`
-   entry is the authorization server. The storage's description,
+   entry is the authorization server, and must be the session's issuer
+   ([the trust rule](#the-trust-rule)). The storage's description,
    asked for as `application/lws+cid`, is a `Storage` with a
    `StorageRoot` service on the requested URL's scheme and authority.
 3. **The authorization server's metadata** comes from its
@@ -293,14 +294,17 @@ with refreshed tokens.
 
 ### The trust rule
 
-The session sends the ID token only to an authorization server on the
-origin of its own identity provider. The ID token's audience is the
-app, so any LWS authorization server that trusts the identity provider
-takes it as proof of the user. A storage that named an authorization
-server of its own choosing would get a credential good at every
-storage behind that provider. An LWS deployment whose authorization
-server isn't on the identity provider's origin isn't supported yet:
-its storages answer 401, as to no one.
+The session sends the ID token only to an authorization server whose
+issuer is the session's own issuer, but for one trailing slash. The ID
+token's audience is the app, so any LWS authorization server that
+trusts the identity provider takes it as proof of the user. A storage
+that named an authorization server of its own choosing would get a
+credential good at every storage behind that provider. The rule
+compares the whole issuer, path included, as one origin can serve
+several issuers under different paths, such as the tenants or realms of
+one provider, and each is a provider of its own. An LWS deployment
+whose authorization server has another issuer than the identity
+provider isn't supported yet: its storages answer 401, as to no one.
 
 ## The public-read grant
 
