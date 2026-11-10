@@ -89,7 +89,15 @@ brings one in, for a guest and a logged-in user alike:
   ones.
 
 Text the reader reads, such as card text and notes or what changed in
-a release, may name any address.
+a release, may name any address. So may the fragment id of a card or a
+wrong option, and a review state's reference to it. Such an id is no
+address but the part after the `#` of the deck's own document, so it's
+copied as it is, and keeping the study doesn't refuse it.
+
+The address of a release, and of a chapter in it, is the address of the
+release a deck was taken from. It's read as one whole address, and only one at the guest's
+pod counts: its path, query or fragment may spell anything, and a deck
+taken from it can be kept, as in a move into a new instance.
 
 ## Keeping the study
 
@@ -206,8 +214,11 @@ It runs these steps:
    guest's pod, in any spelling of its origin (`guestDeckUrlsLeft`, which
    names the deck, so it can be left out). Text the reader reads, such
    as titles, card text and notes, may name any address and is copied
-   as it is. Nothing is registered: the instance's catalog and folders
-   hold the added decks.
+   as it is, as is a fragment id, which is no address. The address of
+   a release or a chapter (a deck's source, a card's release and the
+   chapters completed) counts only as a whole, whatever it spells inside.
+   Nothing is registered: the instance's catalog and folders hold the
+   added decks.
 3. **arrange:** each of the guest's deck groups becomes a new group
    (`#group-<uuid>`) with its name, holding the added decks and new
    groups it held, an empty one empty. They go, in the guest's order,

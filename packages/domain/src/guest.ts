@@ -352,29 +352,54 @@ const READER_TEXT_FIELDS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * The fields that hold what is not an address: the text for the reader,
+ * and a fragment id, `id` or a review state's `cardId`. A fragment id
+ * comes after the `#` of a document of the deck that holds it, so its
+ * whole IRI is at that document's origin, whatever the id spells. It is
+ * skipped by name as the text is, and guest.test.ts lists it there.
+ */
+const NON_ADDRESS_FIELDS: ReadonlySet<string> = new Set([...READER_TEXT_FIELDS, "id", "cardId"]);
+
+/**
+ * The fields that hold the address of a release, or of a chapter in it,
+ * as the release was read: a release is read at no address of the
+ * guest's pod, and whatever its address spells in its path, query or
+ * fragment is its publisher's to choose. Read as one whole IRI only
+ * (isGuestPodIri), as the move does, at any depth.
+ */
+const WHOLE_IRI_FIELDS: ReadonlySet<string> = new Set([
+  "sourceUrl",
+  "fromRelease",
+  "completedChapters",
+]);
+
+/**
  * Whether a guest's deck, its cards or review states, as they are added
  * to an instance, still name the guest's pod by address: in any field at
- * any depth but the text the reader reads (READER_TEXT_FIELDS), which
- * may name any address and is copied as it is. Each such field holds one
- * whole IRI, which is also parsed as one (isGuestPodIri), as the move
- * does: a URL parser reads spellings without `//` as the guest's pod too.
+ * any depth but those that hold none (NON_ADDRESS_FIELDS), which are
+ * copied as they are, as the move into a new instance copies them. A
+ * field of WHOLE_IRI_FIELDS names it only as a whole IRI. Each other
+ * field names it as a whole IRI, which a URL parser also reads in
+ * spellings without `//`, or by an address inside it (namesGuestPod).
  */
 export function addressesGuest(value: unknown): boolean {
-  return addressesGuestBut(value, READER_TEXT_FIELDS);
+  return addressesGuestBut(value, NON_ADDRESS_FIELDS);
 }
 
 /**
  * The fields of a deck, a card and a wrong option that hold its own
- * place (its id, its address and its documents'): an import gives it a
- * new one, and a release or a deck file read at the guest's pod has
- * them there. With them, the text a release adds for the reader (what
- * changed in it), which may name any address: guest.test.ts lists every
- * field of LibraryDeckContent, so a new one fails it until it is placed.
+ * place (its address and its documents'): an import gives it a new one,
+ * and a release or a deck file read at the guest's pod has them there.
+ * With them, those that hold no address (NON_ADDRESS_FIELDS), as
+ * addressesGuest skips them, and the text a release adds for the reader
+ * (what changed in it), which may name any address. addressesGuest does
+ * look at a deck's own place, by then the instance's. guest.test.ts
+ * lists every field of LibraryDeckContent, so a new one fails it until
+ * it is placed.
  */
 const OWN_PLACE_FIELDS: ReadonlySet<string> = new Set([
-  ...READER_TEXT_FIELDS,
+  ...NON_ADDRESS_FIELDS,
   "versionNotes",
-  "id",
   "url",
   "cardsDocumentUrl",
   "reviewsDocumentUrl",
@@ -392,11 +417,21 @@ export function linksGuestPod(value: unknown): boolean {
   return addressesGuestBut(value, OWN_PLACE_FIELDS);
 }
 
-function addressesGuestBut(value: unknown, skipped: ReadonlySet<string>): boolean {
-  if (typeof value === "string") return isGuestPodIri(value) || namesGuestPod(value);
+function isOrNamesGuestPod(text: string): boolean {
+  return isGuestPodIri(text) || namesGuestPod(text);
+}
+
+function addressesGuestBut(
+  value: unknown,
+  skipped: ReadonlySet<string>,
+  named: (text: string) => boolean = isOrNamesGuestPod,
+): boolean {
+  if (typeof value === "string") return named(value);
   if (typeof value !== "object" || value === null) return false;
   return Object.entries(value).some(
-    ([field, held]) => !skipped.has(field) && addressesGuestBut(held, skipped),
+    ([field, held]) =>
+      !skipped.has(field) &&
+      addressesGuestBut(held, skipped, WHOLE_IRI_FIELDS.has(field) ? isGuestPodIri : named),
   );
 }
 

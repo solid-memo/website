@@ -367,10 +367,10 @@ describe("adding a guest's study to an instance", () => {
     ).toBe(true);
   });
 
-  it("skips as reader text exactly the fields that are, in a deck, a card, a wrong option and a review state", () => {
-    // Every field, true when it is text for the reader: a field added to one of these types fails to typecheck until it is placed here.
+  it("skips exactly the fields that hold no address, in a deck, a card, a wrong option and a review state", () => {
+    // Every field, true when it holds no address (text for the reader, a fragment id): a field added to one of these types fails to typecheck until it is placed here.
     const deckFields: Record<keyof Deck, boolean> = {
-      id: false,
+      id: true,
       url: false,
       title: true,
       cardsDocumentUrl: false,
@@ -393,7 +393,7 @@ describe("adding a guest's study to an instance", () => {
       pictureHosts: false,
     };
     const cardFields: Record<keyof Card, boolean> = {
-      id: false,
+      id: true,
       url: false,
       createdAt: false,
       formatVersion: false,
@@ -414,7 +414,7 @@ describe("adding a guest's study to an instance", () => {
       subjects: false,
     };
     const distractorFields: Record<keyof Distractor, boolean> = {
-      id: false,
+      id: true,
       text: true,
       note: true,
       retired: false,
@@ -423,7 +423,7 @@ describe("adding a guest's study to an instance", () => {
       keyof ReviewState | keyof FsrsState | keyof ReviewSnapshot | keyof FsrsSnapshot,
       boolean
     > = {
-      cardId: false,
+      cardId: true,
       direction: false,
       easeFactor: false,
       intervalDays: false,
@@ -438,8 +438,75 @@ describe("adding a guest's study to an instance", () => {
     };
     const statesFields: Record<keyof ReviewStates, boolean> = { sm2: false, fsrs: false };
     for (const fields of [deckFields, cardFields, distractorFields, stateFields, statesFields])
-      for (const [field, readerText] of Object.entries(fields))
-        expect(addressesGuest({ [field]: `${GUEST_ORIGIN}x` }), field).toBe(!readerText);
+      for (const [field, noAddress] of Object.entries(fields))
+        expect(addressesGuest({ [field]: `${GUEST_ORIGIN}x` }), field).toBe(!noAddress);
+  });
+
+  it("leaves out a fragment id that spells the guest's pod, at keep and in outside data alike (GHSA-rjcx-rf29-3q2j)", () => {
+    const spelled = `${GUEST_ORIGIN}c1`;
+    const card = { id: spelled, front: { en: "Q" }, back: { en: "A" } };
+    const distractor = { id: spelled, text: { en: "No" } };
+    const state = { cardId: spelled, direction: "front-to-back" };
+    const added = deck("deck-1", TARGET);
+    for (const check of [addressesGuest, linksGuestPod]) {
+      expect(check([added, [card], { sm2: [], fsrs: [] }]), "card").toBe(false);
+      expect(check([added, [{ id: "c1", distractors: [distractor] }]]), "distractor").toBe(false);
+      expect(check([added, [], { sm2: [state], fsrs: [] }]), "SM-2 state").toBe(false);
+      expect(check([added, [], { sm2: [], fsrs: [state] }]), "FSRS-6 state").toBe(false);
+    }
+  });
+
+  it("still finds the guest's pod in a card that has such an id, and in a deck's own address", () => {
+    const spelled = `${GUEST_ORIGIN}c1`;
+    const added = deck("deck-1", TARGET);
+    const card = { id: spelled, front: { en: "Q" } };
+    for (const link of [
+      { frontImageUrl: `${GUEST_ORIGIN}p.png` },
+      { subjects: [`${GUEST_ORIGIN}a`] },
+      { fromRelease: `${GUEST_ORIGIN}r.ttl` },
+    ]) {
+      expect(addressesGuest([added, [{ ...card, ...link }]]), JSON.stringify(link)).toBe(true);
+      expect(linksGuestPod([added, [{ ...card, ...link }]]), JSON.stringify(link)).toBe(true);
+    }
+    for (const own of [
+      { url: `${GUEST_INSTANCE_URL}catalog.ttl#deck-1` },
+      { cardsDocumentUrl: `${GUEST_INSTANCE_URL}decks/deck-1.ttl` },
+      { reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/deck-1.ttl` },
+    ])
+      expect(addressesGuest([{ ...added, ...own }]), JSON.stringify(own)).toBe(true);
+  });
+
+  it("reads the address of a release or a chapter as one whole IRI, at keep and in outside data alike (GHSA-rjcx-rf29-3q2j)", () => {
+    const release = "https://publisher.example/releases/a/v1.ttl";
+    const added = deck("deck-1", TARGET);
+    for (const spelled of [
+      `${release}?u=${GUEST_ORIGIN}x`,
+      `https://publisher.example/${GUEST_ORIGIN}a/v1.ttl`,
+      `${release}#${GUEST_ORIGIN}ch1`,
+    ])
+      for (const check of [addressesGuest, linksGuestPod]) {
+        expect(check([{ ...added, sourceUrl: spelled }]), `deck ${spelled}`).toBe(false);
+        expect(check([added, [{ id: "c1", fromRelease: spelled }]]), `card ${spelled}`).toBe(false);
+        expect(check([{ ...added, completedChapters: [spelled] }]), `chapter ${spelled}`).toBe(
+          false,
+        );
+      }
+    for (const whole of [`${GUEST_ORIGIN}r.ttl`, "HTTPS://GUEST.solid-memo.invalid:443/r"])
+      for (const check of [addressesGuest, linksGuestPod]) {
+        expect(check([{ ...added, sourceUrl: whole }]), `deck ${whole}`).toBe(true);
+        expect(check([added, [{ id: "c1", fromRelease: whole }]]), `card ${whole}`).toBe(true);
+        expect(check([{ ...added, completedChapters: [release, whole] }]), `chapter ${whole}`).toBe(
+          true,
+        );
+      }
+  });
+
+  it("still finds an address inside any other field beside a release's whole IRI", () => {
+    const release = `https://publisher.example/r.ttl?u=${GUEST_ORIGIN}x`;
+    const picture = `https://${GUEST_ORIGIN}p.png`;
+    expect(addressesGuest([{ sourceUrl: release, license: picture }])).toBe(true);
+    expect(addressesGuest([{ fromRelease: release, frontImageUrl: picture }])).toBe(true);
+    expect(linksGuestPod([{ fromRelease: release, frontImageUrl: picture }])).toBe(true);
   });
 
   it("finds outside data that links to the guest's pod, but not by its own places, which an import gives anew (GHSA-hc3p-fpwj-fvjp)", () => {
