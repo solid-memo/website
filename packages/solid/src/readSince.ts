@@ -8,17 +8,32 @@ import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { getSolidDatasetOrNull, readDatasetSince, UNCHANGED, versionOf } from "./datasets";
 
 /**
- * Whether a version can go in a request's If-None-Match: the characters
- * of a header value (RFC 9110, field-value). A version a pod just gave
- * always can, having come in a header; one read back from a digest, which
- * anyone may have written, need not, and Headers throws on it.
+ * The longest stored version that goes in a request. Servers refuse a
+ * request whose headers are too long, and a read they refuse fails on
+ * every visit. A pod's own ETags are far shorter.
  */
-const SENDABLE_VERSION = /^[\t\x20-\x7e\x80-\xff]*$/;
+const MAX_SENT_VERSION_LENGTH = 512;
+
+/** One entity tag (RFC 9110, entity-tag): optionally weak, quoted, of etagc characters. */
+const ENTITY_TAG = /^(?:W\/)?"[\x21\x23-\x7e\x80-\xff]*"$/;
+
+/**
+ * Whether a version can go in a request's If-None-Match: one entity tag
+ * of a bounded length. A version read back from a digest, which anyone
+ * may have written, need not be one: Headers throws on some values, a
+ * server refuses a long one, and `*` matches any document there is.
+ */
+function isSendable(version: string | undefined): version is string {
+  return (
+    version !== undefined && version.length <= MAX_SENT_VERSION_LENGTH && ENTITY_TAG.test(version)
+  );
+}
 
 /**
  * A document's dataset unless it is still at `version` (see Since): a
  * conditional read with the version known, a plain one without. A version
- * that cannot be sent counts as none, so what the read gives replaces it.
+ * that cannot be sent (see isSendable), ABSENT_VERSION among them, counts
+ * as none, so what the read gives replaces it.
  * A document there is none of is at ABSENT_VERSION, with a null dataset.
  */
 export async function readSince(
@@ -26,10 +41,9 @@ export async function readSince(
   version: string | undefined,
   fetch: typeof globalThis.fetch,
 ): Promise<Since<Dataset | null>> {
-  const read =
-    version === undefined || version === ABSENT_VERSION || !SENDABLE_VERSION.test(version)
-      ? await getSolidDatasetOrNull(url, fetch)
-      : await readDatasetSince(url, version, fetch);
+  const read = isSendable(version)
+    ? await readDatasetSince(url, version, fetch)
+    : await getSolidDatasetOrNull(url, fetch);
   const unchanged = read === UNCHANGED || (read === null && version === ABSENT_VERSION);
   if (unchanged) return { unchanged: true };
   if (read === null) return { unchanged: false, value: null, version: ABSENT_VERSION };

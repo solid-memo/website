@@ -153,11 +153,23 @@ describe("reading a document since a version", () => {
   });
 });
 
-describe("a stored version that cannot be sent as a header value", () => {
+describe("a stored version that is not one bounded entity tag", () => {
   it.each([
     ["a newline", "a\nb"],
     ["a NUL", "a\u0000b"],
     ["a character above U+00FF", "\u20ac"],
+    ["the wildcard", "*"],
+    ["an empty version", ""],
+    ["an unquoted tag", "v1"],
+    ["an unquoted weak tag", "W/v1"],
+    ["a lowercase weak prefix", 'w/"v1"'],
+    ["an unterminated tag", '"v1'],
+    ["a quote inside the tag", '"a"b"'],
+    ["a space inside the tag", '"a b"'],
+    ["a list of tags", '"a", "b"'],
+    ["a trailing newline", '"v1"\n'],
+    ["a tag one character over the limit", `"${"a".repeat(511)}"`],
+    ["a tag at the term limit", `"${"a".repeat(16_381)}"`],
   ])("reads the document plainly for %s, and gives its real version", async (_, version) => {
     const pod = await podWithDeck();
     const read = await readSince(CARDS, version, pod.fetch);
@@ -169,10 +181,37 @@ describe("a stored version that cannot be sent as a header value", () => {
     ["a strong ETag", '"v1"'],
     ["a weak ETag", 'W/"v1"'],
     ["a character up to U+00FF", '"\u00e9"'],
+    ["an empty tag", '""'],
+    ["a tag at the limit", `"${"a".repeat(510)}"`],
+    ["a weak tag at the limit", `W/"${"a".repeat(508)}"`],
   ])("still asks conditionally with %s", async (_, version) => {
     const pod = await podWithDeck();
     await readSince(CARDS, version, pod.fetch);
     expect(pod.requests).toEqual([expect.objectContaining({ ifNoneMatch: version })]);
+  });
+
+  it("reads a document on a server that refuses a request with long headers", async () => {
+    const pod = await podWithDeck();
+    const refusing: typeof globalThis.fetch = (input, init) => {
+      const sent = new Request(input, init).headers.get("If-None-Match");
+      return sent !== null && sent.length > 8_000
+        ? Promise.resolve(new Response(null, { status: 431 }))
+        : pod.fetch(input, init);
+    };
+    await pod.put(
+      DIGEST,
+      `${PREFIXES}
+      <#r1> a sm:DocumentReceipt ; sm:formatVersion 1 ;
+        sm:receiptOf <${CARDS}> ; sm:documentVersion "\\"${"a".repeat(16_000)}\\"" .`,
+    );
+    const digests = createSolidDigestRepository({ fetch: pod.fetch });
+    const planted = (await digests.readDigest(INSTANCE))!.receipts[CARDS]!.version;
+    expect(planted).toHaveLength(16_002);
+
+    await expect(readSince(CARDS, planted, refusing)).resolves.toMatchObject({
+      unchanged: false,
+      version: pod.etag(CARDS),
+    });
   });
 
   it("is written over with the version the read gave", async () => {
