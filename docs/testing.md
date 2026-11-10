@@ -115,7 +115,8 @@ instead: LWS alone. The image is built from code nobody has reviewed, on CI's ru
 machine of anyone who runs `SOLID_SERVERS=all`. Its dependencies'
 install scripts don't run, and its final stage keeps only what the
 server runs. GitHub's dependency review doesn't see the lockfile it
-installs from. css-lws goes once a
+installs from. A person approves each newer commit on Renovate's
+Dependency Dashboard before Renovate proposes it. css-lws goes once a
 Community Solid Server release has LWS, or when its commit can't be
 fetched any more: a commit that can't be fetched fails the `contract`
 job of every pull request.
