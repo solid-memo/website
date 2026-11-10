@@ -61,3 +61,13 @@ is only a hint, but every address in an instance is the app's to choose
 by address, and a type index names the instance. LWS has an open issue
 for a creation at a name the client chooses
 ([w3c/lws-protocol#173](https://github.com/w3c/lws-protocol/issues/173)).
+
+## Sign-in
+
+An LWS storage takes a Bearer token that its authorization server
+issues for the OpenID Connect ID token. The app's own Solid client
+([solid-memo-client.md](solid-memo-client.md#linked-web-storage)) does
+that exchange when a storage answers 401 with an LWS challenge, and
+keeps one token for each storage. Inrupt's sign-in client gives the
+app the ID token only in the address that ends the session, so a build that signs in to an LWS storage is made with
+`SOLID_CLIENT=solid-memo-client`.

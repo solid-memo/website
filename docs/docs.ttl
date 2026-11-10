@@ -82,7 +82,7 @@
     schema:isPartOf <#the-code> ;
     schema:position 46 ;
     schema:learningResourceType "explanation" ;
-    dcterms:abstract "how the app works on a Linked Web Storage server: finding the storage, and why it needs the Solid Protocol's requests too."@en .
+    dcterms:abstract "how the app works on a Linked Web Storage server: finding the storage, why it needs the Solid Protocol's requests too, and signing in with a token exchange."@en .
 
 <testing.md>
     a schema:TechArticle ;

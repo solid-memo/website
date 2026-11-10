@@ -131,9 +131,10 @@ not extractable, and binds the tokens to it. The browser keeps
 | IndexedDB, database `solid-memo-oidc`, store `session` | the session a reload restores: the issuer, the client, the redirect URL, the DPoP key pair as `CryptoKey` objects, the WebID, and the refresh token when the provider gave one |
 | IndexedDB, database `solid-memo-oidc`, store `registrations` | the clients providers registered the app as, by issuer and redirect URL; logout keeps them |
 | `sessionStorage`, `solid-memo:oidc-login` | during a login, the request under way: the issuer, the client, the redirect URL, the PKCE code verifier, the `state` and the `nonce`, and for a silent restore the page it left; removed when the provider sends the learner back |
-| memory | the access token, and when it expires |
+| memory | the access token and the ID token, and when each expires; the [Linked Web Storage](#linked-web-storage) storages the session met, each with its authorization server and its token, and when that expires |
 
-The access token is never stored. IndexedDB keeps the key pair as
+The access token, the ID token and the LWS tokens are never stored. A
+logout, or a new login, drops them with the session they belong to. IndexedDB keeps the key pair as
 `CryptoKey` objects, which `localStorage`, holding only text, can't.
 
 ### Restore, refresh and logout
@@ -173,7 +174,9 @@ The session's requests are in
   The access token is refreshed 30 seconds before it expires. Without
   a refresh token, the session ends once the access token expired, and
   the next request goes without one
-  ([authentication.md](authentication.md#an-expired-session)).
+  ([authentication.md](authentication.md#an-expired-session)). A
+  request to an LWS storage carries a Bearer token instead
+  ([below](#linked-web-storage)).
 - **A refresh, a login's save and the clear after a refused silent
   restore** hold the Web Lock `solid-memo:oidc-session`. A browser
   without Web Locks queues them within its tab. So two tabs never
@@ -198,6 +201,106 @@ The session's requests are in
   the lock. A refresh under way stores its tokens only while the
   session it read is still stored, in one IndexedDB transaction, so it
   can't bring back a session a logout cleared.
+
+## Linked Web Storage
+
+A storage that speaks Linked Web Storage (LWS) authorization takes
+neither the DPoP-bound access token nor a DPoP proof. It takes a
+Bearer token its authorization server issues for the session's ID
+token, in an OAuth 2.0 Token Exchange
+([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)). The session gets
+one in [lwsAuth.ts](../packages/solid-memo-client/src/lwsAuth.ts),
+under its fetch in `oidcSession.ts`, so authFetch sees only the final
+answer. The flow follows the
+[LWS Protocol 1.0](https://www.w3.org/TR/lws10-core/)
+working draft:
+
+1. **The challenge.** A request goes with the access token, as to any
+   Solid server. A 401 is an LWS challenge when its `WWW-Authenticate`
+   has a `Bearer` challenge with `resource_metadata`
+   ([RFC 9728](https://www.rfc-editor.org/rfc/rfc9728)). Its `Link`
+   header names the storage, with relation
+   `https://www.w3.org/ns/lws#storage`. The
+   requested URL must be within that storage: on its origin, its path
+   the storage's or below it.
+2. **The checks,** LWS's "Discovery Validation by a Client", before the
+   ID token goes anywhere. The `resource_metadata` URL has the
+   requested URL's scheme and authority, and its document names the
+   requested URL as its `resource`. Its first `authorization_servers`
+   entry is the authorization server. The storage's description,
+   asked for as `application/lws+cid`, is a `Storage` with a
+   `StorageRoot` service on the requested URL's scheme and authority.
+3. **The authorization server's metadata** comes from its
+   `/.well-known/lws-configuration`, placed before the issuer's path as
+   [RFC 8414](https://www.rfc-editor.org/rfc/rfc8414) places a
+   well-known path. Its `issuer` is the one asked for, and its token
+   endpoint is `https:`, or `http:` to this machine, on the issuer's
+   origin. Where it lists its grant types and subject token types, the
+   lists include the token exchange and the ID token.
+4. **The exchange** posts the token exchange grant with the storage as
+   `resource` and the ID token as `subject_token`, of type
+   `urn:ietf:params:oauth:token-type:id_token`. The client
+   authenticates as it does at login, and the request carries no DPoP
+   proof. The answer must be a `Bearer` token.
+5. **The request again,** once, with `Authorization: Bearer` and no
+   `DPoP` header, keeping the caller's method, body, headers, redirect
+   mode and signal. A body the first try used up, a `Request`'s or a
+   stream, isn't sent again. The session still learns the storage, so the
+   next request to it goes with its token.
+
+A failed check, or an exchange the authorization server refuses, sends
+nothing further: the caller gets the 401 as it came. The checks read
+each document as no one, follow no redirect, and refuse one past 64 KiB,
+since any server that answers 401 names them. A check or an
+exchange that can't reach its server fails the request, as a dropped
+connection does. The checks' requests are given up after 30 seconds,
+or as soon as the caller's signal aborts. The exchange is given up
+after 30 seconds. A caller whose signal aborts stops waiting for it,
+and the other requests waiting for it still get its token.
+
+### The storage's token
+
+- **Kept** per storage, in memory, on the session: a logout or a new
+  login drops them all. A request to a URL within a storage met
+  before, the innermost one, goes with the storage's token first.
+- **Renewed** 30 seconds before it expires, and one exchange at a time
+  per storage: the requests that wait share it.
+- **Refused** with a 401: the session drops the token, exchanges once
+  more, and sends the request again once. A second 401 goes to the
+  caller. A token exchanged for this request isn't exchanged
+  again.
+- **Not asked for again** with an ID token the authorization server
+  refused for that storage. The session exchanges again once it has
+  another ID token.
+- **Sent only within its storage.** A Bearer token, unlike a DPoP one,
+  works for whoever holds it, and the app's fetch reaches other
+  servers than the user's storages. A request with it follows no
+  redirect: it fails when the caller asked for `redirect: "error"`, as
+  authFetch does, and otherwise comes back as the redirect it got. So
+  the token never goes to another origin, or outside the storage's
+  path on the same server.
+
+### The ID token
+
+The ID token comes with the login's tokens, and with a refresh's when
+the provider sends a new one. A refresh that brings none keeps the one
+the session has. When the ID token is about to expire, the session
+refreshes first, until a refresh brings no ID token. With no ID token,
+or an expired one, the session exchanges nothing and the 401 goes to
+the caller. A reload restores the session with a refresh, so after a
+reload the session has an ID token only from a provider that sends one
+with refreshed tokens.
+
+### The trust rule
+
+The session sends the ID token only to an authorization server on the
+origin of its own identity provider. The ID token's audience is the
+app, so any LWS authorization server that trusts the identity provider
+takes it as proof of the user. A storage that named an authorization
+server of its own choosing would get a credential good at every
+storage behind that provider. An LWS deployment whose authorization
+server isn't on the identity provider's origin isn't supported yet:
+its storages answer 401, as to no one.
 
 ## The public-read grant
 
@@ -248,6 +351,13 @@ Both pass the same contract. Beyond it, this client differs:
   keys. OpenID Connect allows this for a token the client receives from
   the token endpoint over TLS
   ([OpenID Connect Core 1.0, 3.1.3.7](https://openid.net/specs/openid-connect-core-1_0.html#IDTokenValidation)).
+- **Linked Web Storage** works on this client only. The exchange needs
+  the ID token, which `@inrupt/solid-client-authn-browser` 5 gives the
+  app only in the address of an identity provider's logout, and from
+  no refresh. Inrupt's client sends a DPoP request to an LWS storage,
+  which reads it as no one's. Using an LWS storage needs a build
+  with `SOLID_CLIENT=solid-memo-client`
+  ([above](#linked-web-storage)).
 - **IndexedDB is required:** in a browser that refuses it, sign-in
   fails. Nothing falls back to a session that lasts only for the page.
 - **A dynamic registration is kept** until the site's data is cleared.

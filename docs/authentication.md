@@ -423,6 +423,13 @@ sent to such an address would name another server. The test is on the
 parsed address, so every spelling of a `//` at the start of the path is
 caught, and a path with one further along (`/a//b`) isn't refused here.
 
+On `solid-memo-client`, a storage that speaks Linked Web Storage gets a
+Bearer token the client exchanges the ID token for, sent within that
+storage only. The client answers its challenge, and sends the request
+again, before authFetch sees the response
+([solid-memo-client.md](solid-memo-client.md#linked-web-storage)).
+Inrupt's sign-in client gives the app no ID token short of ending the session, so it can't.
+
 When a request fails and wasn't aborted, authFetch asks the same
 address with a HEAD as no one, the redirect not followed:
 
@@ -454,6 +461,12 @@ session is gone. authFetch announces it
   The 401 names the token invalid (`invalid_token` in
   `WWW-Authenticate`). The own storages are those the user's profile
   names, read as no one, and those entered on this page.
+
+On `solid-memo-client`, a 401 from a Linked Web Storage storage reaches
+authFetch only after the client tried to answer its challenge: a token
+exchange, and the request sent again. A storage's token the storage
+refuses is exchanged anew once first, so an expired one ends no
+session.
 
 A 401 from any other server, such as an instance the user registered
 in someone else's pod, says nothing of the session. The caller reads
