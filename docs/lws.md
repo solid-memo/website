@@ -4,7 +4,8 @@ Solid Memo is written for the Solid Protocol. The W3C's Linked Web
 Storage (LWS) Working Group is writing its successor,
 [LWS Protocol 1.0](https://www.w3.org/TR/lws10-core/), still a Working
 Draft. This page explains how the app works on a storage that speaks
-LWS, and why each part is made the way it is.
+LWS, and why each part is made the way it is. The servers it's tested
+on are in [testing.md](testing.md).
 
 ## What differs
 
@@ -20,8 +21,10 @@ doesn't ask a server to give:
 | Sign-in | Solid-OIDC, a DPoP-bound access token | The OpenID Connect ID token exchanged for a Bearer token for each storage |
 | A release anyone can read | Web Access Control or Access Control Policies | Nothing yet |
 
-A server can speak both. The app doesn't work on a server that refuses
-the Solid Protocol's requests
+A server can speak both. The Community Solid Server with LWS
+(`css-lws`) does, and answers every request the app makes as a Solid
+pod does. So does its LWS-alone configuration (`css-lws-only`). The app
+doesn't work on a server that refuses the Solid Protocol's requests
 ([why](#why-the-app-needs-solid-requests)).
 
 ## Finding the storage
@@ -54,7 +57,8 @@ a 406.
 ## Why the app needs Solid requests
 
 The app makes each request as the Solid Protocol has it, and doesn't
-translate it for a server that refuses them. Translating them would help only part of the way: an
+translate it for a server that refuses them. Every server it's tested
+on takes them. Translating them would help only part of the way: an
 LWS server names a new resource itself, and the name a client asks for
 is only a hint, but every address in an instance is the app's to choose
 ([data-model.md](data-model.md)). A catalog names its decks' documents

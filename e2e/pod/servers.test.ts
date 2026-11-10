@@ -231,6 +231,12 @@ describe("the names in the tests", () => {
       pivot: expect.stringMatching(/^Pivot \d+\.\d+\.\d+ \(Community Solid Server 7\.\d+\.\d+\)$/),
       nextcloud: expect.stringMatching(/^Solid-Nextcloud [0-9a-f]{8} \(Nextcloud 32\.\d+\.\d+\)$/),
       jss: expect.stringMatching(/^JavaScript Solid Server \d+\.\d+\.\d+$/),
+      "css-lws": expect.stringMatching(
+        /^Community Solid Server with LWS 8\.\d+\.\d+(-[\w.]+)? \([0-9a-f]{8}\)$/,
+      ),
+      "css-lws-only": expect.stringMatching(
+        /^Community Solid Server with LWS only 8\.\d+\.\d+(-[\w.]+)? \([0-9a-f]{8}\)$/,
+      ),
     });
   });
 });
