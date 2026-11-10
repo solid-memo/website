@@ -29,6 +29,16 @@ export function withinCatalogLimit<L extends readonly unknown[]>(links: L): L {
   return links;
 }
 
+/**
+ * Refuse, as catalogFull, one more deck in a catalog that has
+ * MAX_CATALOG_LINKS `decks` already: past that, none of them would be
+ * read (withinCatalogLimit), so an add never takes an instance there.
+ */
+export function refuseFullDeckList(decks: readonly unknown[]): void {
+  if (decks.length >= MAX_CATALOG_LINKS)
+    throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
+}
+
 /** What the catalog links by `predicate`, in the order it names them; none without a catalog, and catalogTooManyLinks past MAX_CATALOG_LINKS. */
 export async function catalogLinks(
   instanceUrl: string,

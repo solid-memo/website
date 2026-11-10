@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { chosenDistractorIn, type Answer } from "./answer";
-import type { Deck, Distractor } from "./deck";
+import { AppError } from "./appError";
+import { MAX_CATALOG_LINKS, type Deck, type Distractor } from "./deck";
 import type { DeckGroup, DeckTree, GraftNode, TreeNode } from "./deckTree";
 import type { StepPart } from "./deckUpgrade";
 import type { Instance } from "./instance";
@@ -177,6 +178,17 @@ export function guestMergePlan(
     })),
     drafts,
   };
+}
+
+/**
+ * Refuse, as guestMergeTooManyDecks, adding `adding` of a guest's decks
+ * to an instance that has `decks` already, when together they would be
+ * more than MAX_CATALOG_LINKS: past that, none of the instance's decks
+ * would be read (GHSA-34c3-mmhj-7w2h).
+ */
+export function refuseGuestMergePastLimit(decks: number, adding: number): void {
+  if (decks + adding > MAX_CATALOG_LINKS)
+    throw new AppError("guestMergeTooManyDecks", { limit: MAX_CATALOG_LINKS });
 }
 
 /**

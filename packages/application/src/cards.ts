@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  MAX_CATALOG_LINKS,
   validateCardContent,
   type Card,
   type CardContent,
@@ -193,7 +194,8 @@ export interface CardUseCases {
    * reviews document; then its entry in the catalog, so the deck shows
    * only once it is whole. Each write is checked against the shapes.
    * A failure after the cards document deletes the documents the import
-   * wrote, which no entry names.
+   * wrote, which no entry names. An instance with MAX_CATALOG_LINKS
+   * decks already is refused (catalogFull) before anything is written.
    * Then the deck's schedule in the digest is brought up to date. The
    * deck as written.
    */
@@ -522,6 +524,9 @@ export function createCardUseCases({
     },
     async importDeckFile(instanceUrl, file, { withProgress }) {
       let decks = await deckRepository.listDecks(instanceUrl);
+      // A catalog with no room for its entry is refused before the deck's documents are written.
+      if (decks.length >= MAX_CATALOG_LINKS)
+        throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
       for (let attempt = 1; ; attempt++) {
         const { deck, cards, reviews, fsrsReviews } = importedDeck(instanceUrl, file.content, {
           withProgress,

@@ -89,7 +89,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { linksGuestPod } from "@solid-memo/domain/guest";
 import { finishCutOffImport, unsent } from "@solid-memo/application/writes";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
-import { withinCatalogLimit } from "./catalogLinks";
+import { refuseFullDeckList, withinCatalogLimit } from "./catalogLinks";
 
 /**
  * A card to write, by its id: a new card is stamped with the time of
@@ -251,6 +251,7 @@ export function createSolidDeckRepository({
         const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
         if (getThing(dataset, deck.url) !== null)
           throw new PreconditionFailedError(deck.url, "absent");
+        refuseFullDeckList(toDecks(dataset, catalogUrl));
         const updated = withOwnTerms(withDeck(dataset, written), deck);
         try {
           // If-Match the read above: the catalog changed elsewhere meanwhile is read and the entry added again.
@@ -927,7 +928,8 @@ export function createSolidDeckRepository({
 
   /**
    * Add a deck's catalog entry, with the chapters of a course it
-   * completed and its card language; refused (alreadyExists) when the catalog has one of its URL.
+   * completed and its card language; refused (alreadyExists) when the catalog has one of its URL,
+   * and (catalogFull) when it has MAX_CATALOG_LINKS decks already.
    */
   async function registerDeck(deck: Deck): Promise<Deck> {
     const entry = await catalogWithEntry(deck);
@@ -937,12 +939,14 @@ export function createSolidDeckRepository({
 
   /**
    * The catalog as it is now with the deck's entry added, and the subjects
-   * that adds, for the write check; refused (alreadyExists) when it has one of its URL.
+   * that adds, for the write check; refused (alreadyExists) when it has one of its URL,
+   * and (catalogFull) when it has MAX_CATALOG_LINKS decks already.
    */
   async function catalogWithEntry(deck: Deck) {
     const catalogUrl = documentUrlOf(deck.url);
     const read = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
     if (getThing(read, deck.url) !== null) throw new AppError("alreadyExists", { url: deck.url });
+    refuseFullDeckList(toDecks(read, catalogUrl));
     const dataset = withOwnTerms(withDeck(read, deck), deck);
     return { catalogUrl, dataset, subjects: deckSubjects(dataset, deck) };
   }

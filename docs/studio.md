@@ -1532,8 +1532,8 @@ entries of each kind: decks, drafts and releases
 ([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
 it reads none of that kind and says why (`catalogTooManyLinks`), with
 a hint to remove the instance unless the user knows who keeps it. A
-draft or release the catalog has no room for is refused before it's
-written (`catalogFull`), so the Studio never takes an instance past
+deck, draft or release the catalog has no room for is refused before
+it's written (`catalogFull`), so the Studio never takes an instance past
 what it reads. A draft's folder may list at most `MAX_DRAFT_DOCUMENTS`
 (1,000) documents, and the drafts at most `MAX_DRAFT_DOCUMENTS_IN_ALL`
 (5,000) together; past either, they aren't read

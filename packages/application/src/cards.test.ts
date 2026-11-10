@@ -5,7 +5,12 @@
 import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
-import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
+import {
+  CARD_FORMAT_VERSION,
+  MAX_CATALOG_LINKS,
+  type Card,
+  type Deck,
+} from "@solid-memo/domain/deck";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { sm2s, instance, deck, card, libraryContent, makeDeps, session } from "./testing/fakePorts";
@@ -1203,6 +1208,19 @@ describe("cards", () => {
       const imported = await useCases.importDeckFile(instance.url, file, { withProgress: false });
       expect(imported.completedChapters).toBeUndefined();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+    });
+
+    it("refuses a deck for an instance with MAX_CATALOG_LINKS decks before it writes anything (GHSA-34c3-mmhj-7w2h)", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValueOnce(
+        Array.from({ length: MAX_CATALOG_LINKS }, (_, at) => ({ ...deck, id: `deck-${at}` })),
+      );
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toMatchObject({ code: "catalogFull", vars: { limit: MAX_CATALOG_LINKS } });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
     });
 
     it("gives the deck a fresh id when a cards document is at its URL already, once", async () => {

@@ -116,6 +116,20 @@ function catalogWithDeck() {
   );
 }
 
+/** A catalog of `count` decks, listed-0 on: none at another test deck's URL. */
+function catalogOfDecks(count: number) {
+  return datasetOfTurtle(
+    CATALOG,
+    Array.from(
+      { length: count },
+      (_, at) =>
+        `<${CATALOG}#listed-${at}> a <${SM.Deck}>; <${DCTERMS.title}> "Deck ${at}";
+          <${SM.cardsDocument}> <${INSTANCE}decks/listed-${at}.ttl>;
+          <${SM.reviewsDocument}> <${INSTANCE}reviews/listed-${at}.ttl>.`,
+    ).join("\n"),
+  );
+}
+
 /** A document as the pod serves it, parsed from its Turtle. */
 // A valid date-time whose year is past what a JavaScript date holds.
 const OUT_OF_RANGE = '"300000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>';
@@ -157,21 +171,9 @@ describe("listDecks", () => {
   });
 
   it("refuses a catalog with more decks than MAX_CATALOG_LINKS, as catalogTooManyLinks", async () => {
-    const decks = (count: number) =>
-      Array.from(
-        { length: count },
-        (_, at) =>
-          `<${CATALOG}#deck-${at}> a <${SM.Deck}>; <${DCTERMS.title}> "Deck ${at}";
-            <${SM.cardsDocument}> <${INSTANCE}decks/deck-${at}.ttl>;
-            <${SM.reviewsDocument}> <${INSTANCE}reviews/deck-${at}.ttl>.`,
-      ).join("\n");
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      await datasetOfTurtle(CATALOG, decks(MAX_CATALOG_LINKS)),
-    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
     await expect(makeRepository().listDecks(INSTANCE)).resolves.toHaveLength(MAX_CATALOG_LINKS);
-    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
-      await datasetOfTurtle(CATALOG, decks(MAX_CATALOG_LINKS + 1)),
-    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS + 1));
     await expect(makeRepository().listDecks(INSTANCE)).rejects.toMatchObject({
       code: "catalogTooManyLinks",
       vars: { limit: MAX_CATALOG_LINKS },
@@ -613,6 +615,20 @@ describe("addDeck", () => {
     expect(writeDocument).not.toHaveBeenCalled();
   });
 
+  it("refuses an entry where the catalog has MAX_CATALOG_LINKS decks, writing nothing (GHSA-34c3-mmhj-7w2h)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS - 1));
+    await makeRepository().addDeck(added);
+    expect(writeDocument).toHaveBeenCalledOnce();
+
+    vi.mocked(writeDocument).mockReset();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    await expect(makeRepository().addDeck(added)).rejects.toMatchObject({
+      code: "catalogFull",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
   const preconditionFailed = () =>
     Object.assign(new Error("412 Precondition Failed"), { statusCode: 412 });
 
@@ -821,6 +837,25 @@ describe("createDeck", () => {
   });
 });
 
+describe("registerDeck", () => {
+  it("refuses a deck past MAX_CATALOG_LINKS, writing nothing, so the decks stay listed (GHSA-34c3-mmhj-7w2h)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    const repository = makeRepository();
+    const extra: Deck = {
+      ...deck,
+      id: "deck-new",
+      url: `${CATALOG}#deck-new`,
+      cardsDocumentUrl: `${INSTANCE}decks/deck-new.ttl`,
+      reviewsDocumentUrl: `${INSTANCE}reviews/deck-new.ttl`,
+    };
+    const full = { code: "catalogFull", vars: { limit: MAX_CATALOG_LINKS } };
+    await expect(repository.registerDeck(extra)).rejects.toMatchObject(full);
+    await expect(repository.createDeck(INSTANCE, { en: "One more" })).rejects.toMatchObject(full);
+    expect(writeDocument).not.toHaveBeenCalled();
+    await expect(repository.listDecks(INSTANCE)).resolves.toHaveLength(MAX_CATALOG_LINKS);
+  });
+});
+
 describe("importDeck", () => {
   const content: LibraryDeckContent = {
     url: "https://solid-memo.com/decks/capitals/v1.ttl",
@@ -980,6 +1015,14 @@ describe("importDeck", () => {
 
     await expect(makeRepository().importDeck(INSTANCE, content)).rejects.toThrow("403");
     expect(writeDocument).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes nothing to a catalog with MAX_CATALOG_LINKS decks (GHSA-34c3-mmhj-7w2h)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    await expect(makeRepository().importDeck(INSTANCE, content)).rejects.toMatchObject({
+      code: "catalogFull",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("writes nothing when the entry would be refused", async () => {

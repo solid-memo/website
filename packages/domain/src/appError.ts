@@ -61,7 +61,7 @@ export const ERROR_TEMPLATES = {
   catalogTooManyLinks:
     "This instance's catalog lists more decks, drafts or releases than Solid Memo reads ({limit} of each at most). Remove the instance unless you know who keeps it.",
   catalogFull:
-    "This instance's catalog already lists as many drafts or releases as Solid Memo reads ({limit} of each), so it can't list another.",
+    "This instance's catalog already lists as many decks, drafts or releases as Solid Memo reads ({limit} of each), so it can't list another.",
   draftTooManyDocuments:
     "This draft or file has too many chapters, or this instance's drafts have too many documents together, for Solid Memo to read ({limit} documents at most), so this wasn't done. Use fewer chapters, or delete the draft; if you don't know who keeps this instance, remove it.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
@@ -127,6 +127,8 @@ export const ERROR_TEMPLATES = {
     "A newer version of Solid Memo saved part of your study in this browser, so this version does not add it to your Pod. Reload the page to get the latest version.",
   guestStudyTooLarge:
     "Your study in this browser holds more than Solid Memo adds to a Pod, so none of it was added to your Pod. It is still here.",
+  guestMergeTooManyDecks:
+    "Adding these decks would give this instance more decks than Solid Memo reads ({limit} at most), so none of your study was added to your Pod. It is still here. Leave some decks out, or choose another instance.",
   guestStudyChanged:
     "Your study in this browser changed while it was being added, perhaps in another tab, so it is kept here. Try again to add what changed.",
   instanceChangedDuringCopy:
