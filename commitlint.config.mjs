@@ -44,6 +44,16 @@
  * the deploy runs only after it. A commit commitlint otherwise skips,
  * such as a revert, is checked for them too.
  *
+ * No commit holds what would change how CHANGELOG.md is linted: an HTML
+ * comment's `<!--`, `-->` or `--!>`, or a spell checker's directive, in
+ * upper or lower case, anywhere in its message. The release copies a
+ * commit's subject and its `BREAKING CHANGE:` footer into that file, whose
+ * generated entries are exempt from the linters only through directives
+ * in the file itself, so a directive in an entry would turn a linter back
+ * on and fail CI on the release commit, after the tag and with no deploy.
+ * `npm run check:merges` reads every commit's whole message for them too,
+ * as commitlint skips some commits and can read only part of a message.
+ *
  * A `chore(release)` header is semantic-release's alone, on the release
  * commit it pushes onto main (docs/releasing.md#what-a-release-does), so
  * a commit of a pull request or a branch may not have it. commitlint
@@ -90,6 +100,26 @@ function noSkipKeyword({ raw }) {
   return [
     !SKIP_KEYWORD.test(raw),
     "the message must not hold a keyword that makes GitHub skip CI, such as `[skip ci]` or a `skip-checks:` trailer: CI and the deploy must run on main (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
+ * What a linter of CHANGELOG.md would read as a directive, as
+ * markdownlint and the spell checker write them: an HTML comment, or
+ * the spell checker's own marker, which it reads outside a comment too.
+ * A comment ends at `--!>` as well as `-->`, as browsers read it.
+ * The marker starts at a word boundary, except that the end of the
+ * `cspell:disable` region the file opens is read straight after a word.
+ */
+export const CHANGELOG_DIRECTIVE = /<!--|--!?>|\b(?:spell-?checker|c?spell)::?|cspell:\s*enable\b/i;
+
+/**
+ * @param {{ raw: string }} commit
+ */
+function noChangelogDirective({ raw }) {
+  return [
+    !CHANGELOG_DIRECTIVE.test(raw),
+    "the message must not hold an HTML comment's `<!--`, `-->` or `--!>`, or a spell checker's directive: the release copies it into CHANGELOG.md, whose linters would read it (CONTRIBUTING.md#commit-messages)",
   ];
 }
 
@@ -146,6 +176,7 @@ export default {
         "references-or-renovate": referencesOrRenovate,
         "not-a-release": notARelease,
         "no-skip-keyword": noSkipKeyword,
+        "no-changelog-directive": noChangelogDirective,
       },
     },
   ],
@@ -157,5 +188,6 @@ export default {
     "references-or-renovate": [2, "always"],
     "not-a-release": [2, "always"],
     "no-skip-keyword": [2, "always"],
+    "no-changelog-directive": [2, "always"],
   },
 };

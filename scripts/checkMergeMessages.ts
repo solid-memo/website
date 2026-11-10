@@ -4,8 +4,8 @@
 
 /**
  * `npm run check:merges -- --base <git ref> --head <git ref> [--queue]`:
- * the commits between the two that commitlint does not read hold nothing
- * that the tools after them would act on
+ * the commits between the two hold nothing that the tools after them
+ * would act on and commitlint does not catch
  * (docs/releasing.md#what-a-merge-commit-decides). CI's commits job runs
  * it on a pull request's commits, and with `--queue` on what a merge queue
  * run built.
@@ -22,6 +22,13 @@
  * release, so it may not say it breaks: that takes a commit commitlint
  * reads. It still releases what it otherwise would.
  *
+ * No commit may hold what would change how CHANGELOG.md is linted
+ * (CHANGELOG_DIRECTIVE, from commitlint.config.mjs): the release writes a
+ * commit's subject and footer there, so an HTML comment or a spell
+ * checker's directive would fail CI on the release commit. The check
+ * reads every commit's whole message for that, the ones commitlint reads
+ * included, as commitlint can read only part of a message.
+ *
  * With `--queue` the range must hold a merge commit, as each run of the
  * queue builds one. The release leaves out merge commits by their
  * parents, so a queue that merged any other way would fail here rather
@@ -36,9 +43,13 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { saysBreaking } from "./checkBreaking.ts";
 
-const { SKIP_KEYWORD, skippedByCommitlint } = (await import(
+const { CHANGELOG_DIRECTIVE, SKIP_KEYWORD, skippedByCommitlint } = (await import(
   new URL("../commitlint.config.mjs", import.meta.url).href
-)) as { SKIP_KEYWORD: RegExp; skippedByCommitlint(message: string): boolean };
+)) as {
+  CHANGELOG_DIRECTIVE: RegExp;
+  SKIP_KEYWORD: RegExp;
+  skippedByCommitlint(message: string): boolean;
+};
 
 /** What is wrong with a merge commit's message, if anything. */
 function problemsOfMerge(message: string): string[] {
@@ -49,12 +60,19 @@ function problemsOfMerge(message: string): string[] {
   return problems;
 }
 
-/** What is wrong with a commit's message, if anything. */
-export function problemsOf(message: string, merge: boolean): string[] {
-  if (merge) return problemsOfMerge(message);
+/** What is wrong with the message of a commit with one parent, if anything. */
+function problemsOfCommit(message: string): string[] {
   return skippedByCommitlint(message) && saysBreaking(message)
     ? ["says it breaks, and commitlint skips it"]
     : [];
+}
+
+/** What is wrong with a commit's message, if anything. */
+export function problemsOf(message: string, merge: boolean): string[] {
+  const problems = merge ? problemsOfMerge(message) : problemsOfCommit(message);
+  if (CHANGELOG_DIRECTIVE.test(message))
+    problems.push("holds an HTML comment or a spell checker's directive");
+  return problems;
 }
 
 /** A commit between the two refs. */
@@ -113,7 +131,7 @@ export function main(argv: readonly string[], io: MergesIo): number {
     for (const problem of problems) io.log(problem);
     if (problems.length > 0) {
       io.log(
-        "A merge commit's message holds the pull request's title: change the title, then add the pull request to the queue again. A change that breaks says so in a commit commitlint reads (docs/releasing.md#what-a-merge-commit-decides).",
+        "A merge commit's message holds the pull request's title: change the title, then add the pull request to the queue again. A change that breaks says so in a commit commitlint reads, and any other commit refused here is reworded (docs/releasing.md#what-a-merge-commit-decides).",
       );
       return 1;
     }

@@ -162,6 +162,52 @@ Refs: #1`),
     }
   });
 
+  // The release copies a commit's subject and its footer into CHANGELOG.md,
+  // whose generated entries are exempt from the linters only through
+  // directives in the file.
+  it("fails a commit that holds a directive for CHANGELOG.md's linters, anywhere", async () => {
+    const directives = [
+      "<!-- cspell:enable --> <!-- markdownlint-enable -->",
+      "<!-- markdownlint-enable -->",
+      "<!-- a note",
+      "a note -->",
+      "a note --!>",
+      "cspell:enable",
+      "CSpell::Enable",
+      "cspell: locale de",
+      "spell:locale de",
+      "spellchecker: flagWords the",
+      "spell-checker:enable",
+      "xcspell:enable",
+      "x_cspell: enable",
+    ];
+    for (const directive of directives) {
+      expect(await errors(`fix(ui): tidy the footer ${directive}\n\n${why}\n\nCloses: #1`)).toEqual(
+        ["no-changelog-directive"],
+      );
+      expect(await errors(`fix(ui): tidy the footer\n\n${why} ${directive}\n\nCloses: #1`)).toEqual(
+        ["no-changelog-directive"],
+      );
+      expect(
+        await errors(
+          `fix(ui)!: tidy the footer\n\n${why}\n\nBREAKING CHANGE: ${directive}\nCloses: #1`,
+        ),
+      ).toEqual(["no-changelog-directive"]);
+    }
+  });
+
+  it("passes what only looks like a directive", async () => {
+    for (const words of [
+      "a -> b <- c",
+      "the --force flag and <!- half a marker",
+      "keep the spelling",
+      "the misspell: rule",
+      "chore(cspell) words",
+    ]) {
+      expect(await errors(`fix(ui): ${words}\n\n${why}\n\nCloses: #1`)).toEqual([]);
+    }
+  });
+
   it("still skips a revert and a fixup, as commitlint does by default", async () => {
     expect(await errors('Revert "fix: keep the deck\'s title"')).toEqual([]);
     expect(await errors("fixup! fix: keep the deck's title")).toEqual([]);

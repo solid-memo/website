@@ -154,6 +154,16 @@ releases. It may not say it breaks: on a pull request and in the queue,
 `npm run check:merges` fails on such a commit that has the `!` or the
 footer. A change that breaks says so in a commit commitlint reads.
 
+The notes are written from commits' messages, and `CHANGELOG.md` keeps
+its generated entries out of Markdown and spelling lint with directives
+in the file. So no commit may hold an HTML comment's `<!--`, `-->` or
+`--!>`, or a spell checker's directive, anywhere in its message. An
+entry that held one would turn a linter back on, and CI would fail on the release commit
+after the tag. commitlint refuses a message that holds one, and
+`npm run check:merges` reads every commit's whole message for one too,
+merge commits and commits commitlint skips included, as commitlint can
+miss part of a message.
+
 ## How CI holds to it
 
 [`api/`](../api/README.md) holds the public API, one promise a line: the
