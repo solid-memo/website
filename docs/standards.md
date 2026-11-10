@@ -20,6 +20,7 @@ Every specification below is open; the drafts and de facto ones are in
 | [Type Indexes](https://solid.github.io/type-indexes/) | 1.0.0 | Editor's draft | Finding and registering an instance: [`typeIndex.ts`](../packages/solid/src/typeIndex.ts) ([data-model.md](data-model.md#registrations)) | Yes (draft) |
 | [Web Access Control](https://solidproject.org/TR/wac) and [Access Control Policy](https://solidproject.org/TR/acp) | WAC 1.0.0; ACP 0.9.0 | W3C Solid Community Group drafts | Making a published release public: [`solidReleasePublisher.ts`](../packages/solid/src/solidReleasePublisher.ts), through `@inrupt/solid-client`'s universal access in [`client/access.ts`](../packages/solid/src/client/access.ts), which speaks whichever the pod uses ([boundaries.md](boundaries.md)) | Yes (draft) |
 | [Linked Data Platform](https://www.w3.org/TR/ldp/) | 1.0 | W3C Recommendation | Containers in the pod and the guest's pod: [`localPod.ts`](../packages/solid/src/localPod.ts) ([guest-mode.md](guest-mode.md)) | Yes |
+| [Linked Web Storage Protocol](https://www.w3.org/TR/lws10-core/) | 1.0 | W3C Working Draft | A storage that speaks LWS: finding it ([`lwsStorage.ts`](../packages/solid/src/lwsStorage.ts)), on a server that takes the Solid Protocol's requests too ([lws.md](lws.md)) | Yes (draft) |
 
 ## Linked data
 

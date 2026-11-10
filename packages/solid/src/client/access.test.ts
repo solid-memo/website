@@ -26,6 +26,17 @@ describe("accessFetch", () => {
     expect(fetch).toHaveBeenLastCalledWith(RELEASE, { method: "PUT", body: "<#a> <#b> <#c>." });
   });
 
+  it("asks for Turtle on a read that asks for nothing, as the app reads a folder, and leaves an Accept given be", async () => {
+    const fetch = vi.fn(async () => new Response(null));
+    await accessFetch(fetch)(RELEASE, { method: "HEAD" });
+    expect(fetch).toHaveBeenLastCalledWith(RELEASE, {
+      method: "HEAD",
+      headers: { accept: "text/turtle, */*;q=0.1" },
+    });
+    await accessFetch(fetch)(RELEASE, { headers: { Accept: "application/ld+json" } });
+    expect(fetch).toHaveBeenLastCalledWith(RELEASE, { headers: { Accept: "application/ld+json" } });
+  });
+
   it("reads an Access Control Resource not written yet as one that says only what it is, and leaves every other answer be", async () => {
     const ACR = `${RELEASE}.acr`;
     const type = '<http://www.w3.org/ns/solid/acp#AccessControlResource>; rel="type"';
