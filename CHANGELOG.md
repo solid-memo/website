@@ -21,6 +21,22 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.1.1](https://github.com/solid-memo/website/compare/v7.1.0...v7.1.1) (2026-11-10)
+
+### Bug Fixes
+
+* **application:** keep the guest's study offer to the guest's pod ([f7ba79f](https://github.com/solid-memo/website/commit/f7ba79f936afab6097d68ed820aff5ba13e81721))
+* **guest:** keep a deck whose fragment ids spell the guest's pod ([15ee194](https://github.com/solid-memo/website/commit/15ee194713108fc947c88e8b534f8a74e841f31b))
+* **release:** keep lint directives out of the release notes ([d4b4c5e](https://github.com/solid-memo/website/commit/d4b4c5eda52b9e54eb8064947b69134932ce9fe8))
+* **review:** write a state's due day back only as a real date ([0293e49](https://github.com/solid-memo/website/commit/0293e4941e28c0bd77a10102eb0f2d551d49106c))
+* **solid:** hold a draft to the documents it can be read with ([66dcc23](https://github.com/solid-memo/website/commit/66dcc23b77f7b9a47e68af6aa6d1fab59e1fdc5c))
+* **solid:** keep digest subjects short and write refused changes apart ([9b29e5c](https://github.com/solid-memo/website/commit/9b29e5cb1202dc2813395f90e3116b28176aa231))
+* **solid:** send a stored version only as one bounded entity tag ([2fa171b](https://github.com/solid-memo/website/commit/2fa171b6f8a1540f8702bfbff824148c0055942b))
+* **studio:** bound what the command palette ranks ([54ce3dd](https://github.com/solid-memo/website/commit/54ce3dd3f3cf01f02cd87d451e575749b0a0347b))
+* **studio:** compare graphs entry by entry for the kept layout ([36660ff](https://github.com/solid-memo/website/commit/36660ff17a1e41a768a8abe826f3c1d255082af8))
+* **studio:** find a draft edit's documents from what it changed ([7cc50a8](https://github.com/solid-memo/website/commit/7cc50a8dc8f00ecd46d5ad373a19c7d005b06df0))
+* **ui:** work out a course's progress once in the course strip ([818e7cd](https://github.com/solid-memo/website/commit/818e7cd9fa1eafad5dcd7a1a4b36b3603994a20d))
+
 ## [7.1.0](https://github.com/solid-memo/website/compare/v7.0.2...v7.1.0) (2026-11-10)
 
 ### Features
