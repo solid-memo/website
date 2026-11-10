@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import { deleteInstanceData } from "./instanceData";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
+import { MAX_DRAFT_DOCUMENTS } from "./solidReleaseDraftRepository";
 
 const ROOT = "https://pod.example/";
 const INSTANCE = `${ROOT}solid-memo/main/`;
@@ -136,6 +137,24 @@ describe("deleteInstanceData", () => {
       `${INSTANCE}drafts/`,
     ]);
     expect(await p.exists(elsewhere)).toBe(true);
+  });
+
+  it("deletes a draft past the limit on what is read of one, and goes on with the rest of the instance", async () => {
+    const p = pod();
+    const draft = `${INSTANCE}drafts/solid/v1/`;
+    await seedInstance(p, `<#catalog> <${SM}releaseDraft> <drafts/solid/v1/release.ttl> .`);
+    await p.put(`${draft}release.ttl`, `<> a <${SM}Deck> .`);
+    await Promise.all(
+      Array.from({ length: MAX_DRAFT_DOCUMENTS }, (_, at) =>
+        p.put(`${draft}chapter-c${at}.ttl`, `<#c${at}> a <${SM}Chapter> .`),
+      ),
+    );
+    await expect(deleteInstanceData(INSTANCE, p.fetch)).resolves.toEqual({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+    expect((await p.urls()).filter((url) => url.startsWith(INSTANCE))).toEqual([]);
   });
 
   it("finds no draft in a catalog document without the catalog", async () => {

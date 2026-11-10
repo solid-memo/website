@@ -1532,8 +1532,15 @@ written (`catalogFull`), so the Studio never takes an instance past
 what it reads. A draft's folder may list at most `MAX_DRAFT_DOCUMENTS`
 (1,000) documents, and the drafts at most `MAX_DRAFT_DOCUMENTS_IN_ALL`
 (5,000) together; past either, they aren't read
-(`draftTooManyDocuments`). A draft's own documents are read a few at a
-time too
+(`draftTooManyDocuments`). Making a draft, or an edit, that would take
+it past the first limit, counting the release document, is refused
+before anything is written; an edit that fails partway may still leave
+it past. A draft past the limit can't be opened, but it can be deleted,
+on its own or with its instance. Deleting lists the draft's folder
+without the limit, for any instance: each delete stays inside that
+folder, and only the user starts one. The instance's data check and
+graph read only the release document of such a draft and go on with the
+rest. A draft's own documents are read a few at a time too
 ([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)).
 
 Each draft that can be read links to its [overview](#a-drafts-overview),

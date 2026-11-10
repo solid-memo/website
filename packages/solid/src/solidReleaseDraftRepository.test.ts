@@ -123,6 +123,67 @@ function chapterNamed(draft: ReleaseDraft, id: string): ReleaseDraft {
   };
 }
 
+/** The course fixture with more chapters, each in its own document, for `total` documents in all (its release, cards and two chapters' among them). */
+function courseOfDocuments(total: number): ReleaseDraft {
+  const draft = course();
+  const [chapter] = draft.chapters;
+  return {
+    ...draft,
+    chapters: [
+      ...draft.chapters,
+      ...Array.from({ length: total - 4 }, (_, at) => ({
+        ...chapter!,
+        id: `extra-${at}`,
+        data: { ...chapter!.data, reviewQuestion: [] },
+      })),
+    ],
+  };
+}
+
+/** Writes, as another app or an earlier version might have, a draft of the catalog's whose folder lists more than MAX_DRAFT_DOCUMENTS documents. */
+async function seedOverLimitDraft(pod: Awaited<ReturnType<typeof draftPod>>): Promise<string[]> {
+  await pod.put(
+    CATALOG,
+    `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> <${DRAFT}> .`,
+  );
+  await pod.put(DRAFT, `<> a <${SM}Deck> .`);
+  const chapters = Array.from({ length: MAX_DRAFT_DOCUMENTS }, (_, at) => `chapter-c${at}`);
+  await Promise.all(
+    chapters.map((name) => pod.put(`${CONTAINER}${name}.ttl`, `<#${name}> a <${SM}Chapter> .`)),
+  );
+  return [DRAFT, ...chapters.map((name) => `${CONTAINER}${name}.ttl`)];
+}
+
+/** A repository over a catalog linking `count` drafts whose folders each list `documents` documents, and the folders it has read so far. */
+async function podOfListedDrafts(count: number, documents: number) {
+  const pod = await draftPod();
+  const drafts = Array.from({ length: count }, (_, at) => draftUrlOf(INSTANCE, `d${at}`, 1));
+  await pod.put(
+    CATALOG,
+    `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> ${drafts
+      .map((url) => `<${url}>`)
+      .join(" , ")} .`,
+  );
+  const listing = turtleAt(
+    `<> <http://www.w3.org/ns/ldp#contains> <release.ttl> ${Array.from(
+      { length: documents - 1 },
+      (_, at) => `, <chapter-c${at}.ttl>`,
+    ).join(" ")} .`,
+  );
+  const listed: string[] = [];
+  const listingDrafts = (async (input, init) => {
+    const url = String(input);
+    if (!drafts.some((draft) => url === new URL(".", draft).href)) return pod.fetch(input, init);
+    listed.push(url);
+    return listing(input, init);
+  }) as typeof globalThis.fetch;
+  const repository = createSolidReleaseDraftRepository({
+    fetch: listingDrafts,
+    releaseFetch: siteFetch,
+  });
+  return { repository, drafts, listed };
+}
+
 /** An id that names, as a chapter's document, one outside the draft's container. */
 const ESCAPING_ID = "a/../../../../../../elsewhere/x";
 
@@ -155,6 +216,89 @@ describe("create", () => {
     ]);
     const { draft } = await pod.repository.read(DRAFT);
     expect(sorted(draft)).toEqual(sorted(course()));
+  });
+
+  it("refuses a draft of more than MAX_DRAFT_DOCUMENTS documents before writing anything, which no read could take back", async () => {
+    const pod = await draftPod();
+    await expect(
+      pod.repository.create(INSTANCE, courseOfDocuments(MAX_DRAFT_DOCUMENTS + 1)),
+    ).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS },
+    });
+    expect(writes(pod)).toEqual([]);
+    await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
+  });
+
+  it("refuses a release file of too many chapters before writing anything, its draft being one no read could take", async () => {
+    const text = readFileSync(join(DECKS_ROOT, "academy-award-best-picture/v1.ttl"), "utf8");
+    const chapters = Array.from(
+      { length: MAX_DRAFT_DOCUMENTS + 1 },
+      (_, at) => `<#c${at}> a <${SM}Chapter> .`,
+    ).join("\n");
+    const pod = await draftPod({ checked: true });
+    const useCases = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: {} as never,
+      deckLibrary: {} as never,
+      shapeValidator: pod.validator,
+      fileExchange: {
+        open: async () => ({ name: "release.ttl", text: `${text}\n${chapters}\n` }),
+        save: () => undefined,
+      },
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    await expect(
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "fromFile" },
+        "https://pod.example/profile/card#me",
+      ),
+    ).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS },
+    });
+    expect(writes(pod)).toEqual([]);
+  });
+
+  it("refuses the next version of a release of too many chapters before writing anything", async () => {
+    const other = "https://elsewhere.example/public/releases/x/v1.ttl";
+    const text = readFileSync(
+      join(DECKS_ROOT, "academy-award-best-picture/v1.ttl"),
+      "utf8",
+    ).replace(
+      "@base <https://solid-memo.com/decks/academy-award-best-picture/v1.ttl>",
+      `@base <${other}>`,
+    );
+    const chapters = Array.from(
+      { length: MAX_DRAFT_DOCUMENTS + 1 },
+      (_, at) => `<#c${at}> a <${SM}Chapter> .`,
+    ).join("\n");
+    const pod = await draftPod();
+    const useCases = createReleaseDraftUseCases({
+      releaseDraftRepository: createSolidReleaseDraftRepository({
+        fetch: pod.fetch,
+        releaseFetch: turtleFetch(`${text}\n${chapters}\n`),
+      }),
+      deckRepository: {} as never,
+      deckLibrary: {} as never,
+      shapeValidator: pod.validator,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    await expect(
+      useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "nextVersionOf", url: other },
+        "https://pod.example/profile/card#me",
+      ),
+    ).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS },
+    });
+    expect(writes(pod)).toEqual([]);
   });
 
   it("keeps a chapter with its steps, questions and their distractors, and the cards asked nowhere in the cards document", async () => {
@@ -375,37 +519,36 @@ describe("list and documents", () => {
     });
   });
 
-  it("refuse drafts that list more documents than MAX_DRAFT_DOCUMENTS_IN_ALL together, reading no more of them", async () => {
+  it("reads a draft past MAX_DRAFT_DOCUMENTS as its release document alone, the other drafts' documents still found", async () => {
     const pod = await draftPod();
-    const drafts = Array.from({ length: 20 }, (_, at) => draftUrlOf(INSTANCE, `d${at}`, 1));
-    await pod.put(
-      CATALOG,
-      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}releaseDraft> ${drafts
-        .map((url) => `<${url}>`)
-        .join(" , ")} .`,
-    );
-    const listing = turtleAt(
-      `<> <http://www.w3.org/ns/ldp#contains> <release.ttl> ${Array.from(
-        { length: MAX_DRAFT_DOCUMENTS - 1 },
-        (_, at) => `, <chapter-c${at}.ttl>`,
-      ).join(" ")} .`,
-    );
-    const listed: string[] = [];
-    const listing20 = (async (input, init) => {
-      const url = String(input);
-      if (!drafts.some((draft) => url === new URL(".", draft).href)) return pod.fetch(input, init);
-      listed.push(url);
-      return listing(input, init);
-    }) as typeof globalThis.fetch;
-    const repository = createSolidReleaseDraftRepository({
-      fetch: listing20,
-      releaseFetch: siteFetch,
-    });
+    await seedOverLimitDraft(pod);
+    const other = rebaseDraft(courseDraft(), draftUrlOf(INSTANCE, "other", 1));
+    await pod.repository.create(INSTANCE, other);
+    const documents = await pod.repository.documents(INSTANCE);
+    expect(documents).toContain(DRAFT);
+    expect(documents).toContain(other.url);
+    expect(documents.filter((url) => url.startsWith(CONTAINER))).toEqual([DRAFT]);
+  });
+
+  it("refuse drafts that list more documents than MAX_DRAFT_DOCUMENTS_IN_ALL together, reading no more of them", async () => {
+    const { repository, drafts, listed } = await podOfListedDrafts(20, MAX_DRAFT_DOCUMENTS);
     await expect(repository.documents(INSTANCE)).rejects.toMatchObject({
       code: "draftTooManyDocuments",
       vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
     });
     expect(listed.length).toBeLessThan(drafts.length);
+  });
+
+  it("count a draft past MAX_DRAFT_DOCUMENTS as that many towards MAX_DRAFT_DOCUMENTS_IN_ALL, reading no more drafts past it", async () => {
+    const fitting = MAX_DRAFT_DOCUMENTS_IN_ALL / MAX_DRAFT_DOCUMENTS;
+    const few = await podOfListedDrafts(fitting, MAX_DRAFT_DOCUMENTS + 1);
+    await expect(few.repository.documents(INSTANCE)).resolves.toEqual(few.drafts);
+    const many = await podOfListedDrafts(20, MAX_DRAFT_DOCUMENTS + 1);
+    await expect(many.repository.documents(INSTANCE)).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    expect(many.listed.length).toBeLessThan(many.drafts.length);
   });
 
   it("read a few drafts at a time, however many the catalog links", async () => {
@@ -536,6 +679,38 @@ describe("applyChanges", () => {
     const { draft, version } = await pod.repository.read(DRAFT);
     return { pod, draft, version, from: pod.requests.length };
   }
+
+  it("refuses a change that would take the draft past MAX_DRAFT_DOCUMENTS documents, writing nothing", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, courseOfDocuments(MAX_DRAFT_DOCUMENTS));
+    const { draft, version } = await pod.repository.read(DRAFT);
+    const from = pod.requests.length;
+    const after = changed(draft, { kind: "addChapter", id: "ch-c", text: { title: { en: "C" } } });
+    await expect(pod.repository.applyChanges(draft, after, version)).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS },
+    });
+    expect(writes(pod, from)).toEqual([]);
+  });
+
+  it("makes a change that brings as many documents as it takes away, at MAX_DRAFT_DOCUMENTS documents", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, courseOfDocuments(MAX_DRAFT_DOCUMENTS));
+    const { draft, version } = await pod.repository.read(DRAFT);
+    await pod.repository.applyChanges(
+      draft,
+      changed(
+        draft,
+        { kind: "addChapter", id: "ch-c", text: { title: { en: "C" } } },
+        { kind: "delete", of: "chapter", id: "extra-0" },
+      ),
+      version,
+    );
+    const documents = await draftDocumentsIn(DRAFT, pod.fetch);
+    expect(documents).toHaveLength(MAX_DRAFT_DOCUMENTS);
+    expect(documents).toContain(`${CONTAINER}chapter-ch-c.ttl`);
+    expect(documents).not.toContain(`${CONTAINER}chapter-extra-0.ttl`);
+  });
 
   it("refuses a change to an id no draft can have, writing nothing", async () => {
     const { pod, draft, version, from } = await opened();
@@ -1684,6 +1859,20 @@ describe("delete", () => {
     await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
     expect((await pod.urls()).filter((url) => !before.includes(url))).toEqual([]);
     expect((await pod.urls()).some((url) => url.includes("/drafts/"))).toBe(false);
+  });
+
+  it("deletes a draft past MAX_DRAFT_DOCUMENTS, which no read takes, with its link", async () => {
+    const pod = await draftPod();
+    const documents = await seedOverLimitDraft(pod);
+    await expect(pod.repository.read(DRAFT)).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+    });
+    const summary = (await pod.repository.list(INSTANCE))[0]!;
+    await expect(pod.repository.delete(summary)).resolves.toEqual({ keptDocuments: [] });
+    const left = await pod.urls();
+    expect(documents.filter((url) => left.includes(url))).toEqual([]);
+    expect(left.some((url) => url.includes("/drafts/"))).toBe(false);
+    await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
   });
 
   it("keeps what else is in its folder, and the folder", async () => {
