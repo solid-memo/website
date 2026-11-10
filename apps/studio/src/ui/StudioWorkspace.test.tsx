@@ -33,12 +33,17 @@ import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/cour
 import { narrowScreen, wideScreen } from "../test/media";
 import { answer, dialog } from "../test/dialogs";
 
+vi.mock("@solid-memo/domain/release/releaseDraft", async (original) => {
+  const actual = await original<typeof import("@solid-memo/domain/release/releaseDraft")>();
+  return { ...actual, applyDraftChanges: vi.fn(actual.applyDraftChanges) };
+});
+
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
 
 function renderWorkspace(useCases: UseCases) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+  const view = render(
     <QueryClientProvider client={queryClient}>
       {/* As the site's shell names the app at the Studio's routes (STUDIO in ui's App.tsx). */}
       <AppName.Provider value="studio.name">
@@ -48,6 +53,7 @@ function renderWorkspace(useCases: UseCases) {
       </AppName.Provider>
     </QueryClientProvider>,
   );
+  return { ...view, queryClient };
 }
 
 /** The release check of the Studio's Markdown, as the screens pass it on. */
@@ -1649,6 +1655,23 @@ describe("StudioWorkspace", () => {
       expect(status.getByText("Saving the draft…")).toBeInTheDocument();
       expect(await status.findByText("Draft saved")).toBeInTheDocument();
       expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the very draft each keystroke made, whichever of its screens read it", async () => {
+      window.history.replaceState(
+        null,
+        "",
+        studioRouteToHash({ screen: "chapter", draftUrl: DRAFT_URL, chapter: "ch-pods" }),
+      );
+      // The workspace reads the draft for its trail, and the chapter's editor edits it.
+      const { queryClient } = renderWorkspace(draftUseCases());
+      const title = await screen.findByRole("textbox", { name: "Title" });
+      await waitFor(() => expect(title).toBeEnabled());
+      for (const value of ["P", "Po", "Pod"]) {
+        fireEvent.input(title, { target: { value } });
+        const made = vi.mocked(applyDraftChanges).mock.results.at(-1)!.value;
+        expect(queryClient.getQueryData(["releaseDraft", DRAFT_URL])).toBe(made);
+      }
     });
 
     it("says in the status bar that the draft's last change was not saved, when its write failed", async () => {

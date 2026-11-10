@@ -1762,9 +1762,17 @@ Every edit is made at once on the screen, then written in the pod
   (`changedDocuments` in
   [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) has
   been still for 0.8 seconds (`DEBOUNCE_MS`). Changes typed in that
-  time are written together. A change of several documents (a move,
-  say) is written at once. What waits is the draft's, not an editor's:
-  the screen's editor and the outline share it. Leaving the screen, or an
+  time are written together. The documents a change writes are found
+  from the records it replaced, not from the whole draft. Where the
+  draft's records go (its layout) is worked out again only when a
+  change moves one, and once for each draft read from the pod, the one
+  a save returns included, the first time an edit needs it. The layout
+  is kept from one edit to the next, since every screen that reads
+  the draft keeps the draft the edit made, not a copy
+  (`releaseDraftQuery`). After that, a keystroke compares the records
+  it replaced alone. A change of several documents (a move, say) is
+  written at once. What waits is the draft's, not an editor's: the
+  screen's editor and the outline share it. Leaving the screen, or an
   edit that isn't typing, such as a move in the outline, writes what
   waits first. No write's draft is put on the screen while typing
   waits that it doesn't hold.
