@@ -98,8 +98,8 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
  * how many all of an instance's drafts may list together. A container's
  * listing is data anyone may have written, as is the catalog naming the
  * drafts; past either, the drafts' documents are refused
- * (draftTooManyDocuments), not read. A draft made or changed past the
- * first is refused before anything is written (a change that fails
+ * (draftTooManyDocuments), not read. A draft made or changed past
+ * either is refused before anything is written (a change that fails
  * partway may still leave it past).
  * One already past it is read as no draft (the instance's check reads
  * its release document alone), but it can still be deleted
@@ -159,6 +159,29 @@ export function createSolidReleaseDraftRepository({
   }
 
   const documentsOf = (draftUrl: string) => draftDocumentsIn(draftUrl, fetch);
+
+  /**
+   * draftTooManyDocuments, before anything is written, when the documents
+   * the instance's other drafts list, each counted as `documents` counts
+   * it, and the `count` of the draft at `draftUrl` would pass
+   * MAX_DRAFT_DOCUMENTS_IN_ALL together: past it, no read of the drafts
+   * would take them. Stopped as soon as they pass it.
+   */
+  async function refuseTooManyInAll(
+    instanceUrl: string,
+    draftUrl: string,
+    count: number,
+  ): Promise<void> {
+    let listed = count;
+    await mapAtOnce(await linked(instanceUrl), async ({ url }) => {
+      if (url === draftUrl) return;
+      // Read before it is added to: `listed` is added to by the others' reads meanwhile.
+      const urls = await listedDocumentsIn(url, fetch);
+      listed += Math.min(urls.length, MAX_DRAFT_DOCUMENTS);
+      if (listed > MAX_DRAFT_DOCUMENTS_IN_ALL)
+        throw new AppError("draftTooManyDocuments", { limit: MAX_DRAFT_DOCUMENTS_IN_ALL });
+    });
+  }
 
   /** A draft's documents, read now. */
   async function readDocuments(
@@ -283,6 +306,8 @@ export function createSolidReleaseDraftRepository({
       const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
       if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null)
         throw new AppError("noCatalogToUpdate");
+      // Nor one that would take the instance's drafts past what a read of them takes together.
+      await refuseTooManyInAll(instanceUrl, draft.url, byDocument.size);
       // The release document first: a draft whose place is taken stops there, having written nothing.
       const written: string[] = [];
       try {
@@ -327,11 +352,15 @@ export function createSolidReleaseDraftRepository({
         return { url, stored, dataset, made, emptied };
       });
       // No more documents than the draft could be read with again: nothing of the change is written.
-      refuseTooManyDocuments(
+      const count =
         read.documents.size +
-          changes.filter(({ stored }) => stored === undefined).length -
-          changes.filter(({ emptied }) => emptied).length,
-      );
+        changes.filter(({ stored }) => stored === undefined).length -
+        changes.filter(({ emptied }) => emptied).length;
+      refuseTooManyDocuments(count);
+      // Nor, when it adds documents, more than the instance's drafts could be read with together.
+      // Only a draft at a draft's place is read for an edit (the Studio's drafts are its catalog's).
+      if (count > read.documents.size)
+        await refuseTooManyInAll(draftPlaceOf(before.url)!.instanceUrl, before.url, count);
       for (const { url, stored, dataset, made, emptied } of changes) {
         await checkWrite(dataset, shapedSubjects(made.map(({ entry }) => entry)), "draft");
         if (emptied) {

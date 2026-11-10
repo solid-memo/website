@@ -154,7 +154,7 @@ async function seedOverLimitDraft(pod: Awaited<ReturnType<typeof draftPod>>): Pr
   return [DRAFT, ...chapters.map((name) => `${CONTAINER}${name}.ttl`)];
 }
 
-/** A repository over a catalog linking `count` drafts whose folders each list `documents` documents, and the folders it has read so far. */
+/** A repository over a catalog linking `count` drafts whose folders each list `documents` documents, its pod, and the folders it has read so far. */
 async function podOfListedDrafts(count: number, documents: number) {
   const pod = await draftPod();
   const drafts = Array.from({ length: count }, (_, at) => draftUrlOf(INSTANCE, `d${at}`, 1));
@@ -181,7 +181,7 @@ async function podOfListedDrafts(count: number, documents: number) {
     fetch: listingDrafts,
     releaseFetch: siteFetch,
   });
-  return { repository, drafts, listed };
+  return { pod, repository, drafts, listed };
 }
 
 /** An id that names, as a chapter's document, one outside the draft's container. */
@@ -228,6 +228,44 @@ describe("create", () => {
     });
     expect(writes(pod)).toEqual([]);
     await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
+  });
+
+  it("refuses a draft that would take the instance's drafts past MAX_DRAFT_DOCUMENTS_IN_ALL together before writing anything, so they can all still be read (GHSA-wv72-2w72-m4gp)", async () => {
+    const { pod, repository } = await podOfListedDrafts(
+      MAX_DRAFT_DOCUMENTS_IN_ALL / MAX_DRAFT_DOCUMENTS - 1,
+      MAX_DRAFT_DOCUMENTS,
+    );
+    // One more draft as large as a draft may be fits in all.
+    await repository.create(INSTANCE, courseOfDocuments(MAX_DRAFT_DOCUMENTS));
+    const from = pod.requests.length;
+    const other = rebaseDraft(courseDraft(), draftUrlOf(INSTANCE, "other", 1));
+    await expect(repository.create(INSTANCE, other)).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    expect(writes(pod, from)).toEqual([]);
+    await expect(repository.documents(INSTANCE)).resolves.toHaveLength(MAX_DRAFT_DOCUMENTS_IN_ALL);
+  });
+
+  it("makes a draft that takes the instance's drafts to MAX_DRAFT_DOCUMENTS_IN_ALL together, and none past it, a draft past its own limit counted as that limit", async () => {
+    const drafts = MAX_DRAFT_DOCUMENTS_IN_ALL / MAX_DRAFT_DOCUMENTS;
+    const below = await podOfListedDrafts(drafts, MAX_DRAFT_DOCUMENTS - 1);
+    await expect(
+      below.repository.create(INSTANCE, courseOfDocuments(drafts + 1)),
+    ).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    await below.repository.create(INSTANCE, courseOfDocuments(drafts));
+    await expect(below.repository.documents(INSTANCE)).resolves.toHaveLength(
+      MAX_DRAFT_DOCUMENTS_IN_ALL,
+    );
+    const past = await podOfListedDrafts(drafts, MAX_DRAFT_DOCUMENTS + 1);
+    await expect(past.repository.create(INSTANCE, course())).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    expect(writes(past.pod)).toEqual([]);
   });
 
   it("refuses a release file of too many chapters before writing anything, its draft being one no read could take", async () => {
@@ -691,6 +729,34 @@ describe("applyChanges", () => {
       vars: { limit: MAX_DRAFT_DOCUMENTS },
     });
     expect(writes(pod, from)).toEqual([]);
+  });
+
+  it("refuses a change that adds documents past MAX_DRAFT_DOCUMENTS_IN_ALL for the instance's drafts together, writing nothing, and makes one that adds none without counting them", async () => {
+    const drafts = MAX_DRAFT_DOCUMENTS_IN_ALL / MAX_DRAFT_DOCUMENTS;
+    const { pod, repository, listed } = await podOfListedDrafts(drafts, MAX_DRAFT_DOCUMENTS - 1);
+    await repository.create(INSTANCE, courseOfDocuments(drafts));
+    const { draft, version } = await repository.read(DRAFT);
+    const from = pod.requests.length;
+    const counted = listed.length;
+    const added = changed(draft, { kind: "addChapter", id: "ch-c", text: { title: { en: "C" } } });
+    await expect(repository.applyChanges(draft, added, version)).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    expect(writes(pod, from)).toEqual([]);
+    expect(listed.length).toBeGreaterThan(counted);
+    const before = listed.length;
+    await repository.applyChanges(
+      draft,
+      changed(
+        draft,
+        { kind: "addChapter", id: "ch-c", text: { title: { en: "C" } } },
+        { kind: "delete", of: "chapter", id: "extra-0" },
+      ),
+      version,
+    );
+    expect(listed.length).toBe(before);
+    await expect(repository.documents(INSTANCE)).resolves.toHaveLength(MAX_DRAFT_DOCUMENTS_IN_ALL);
   });
 
   it("makes a change that brings as many documents as it takes away, at MAX_DRAFT_DOCUMENTS documents", async () => {

@@ -63,7 +63,7 @@ export const ERROR_TEMPLATES = {
   catalogFull:
     "This instance's catalog already lists as many decks, drafts or releases as Solid Memo reads ({limit} of each), so it can't list another.",
   draftTooManyDocuments:
-    "This draft or file has too many chapters, or this instance's drafts have too many documents together, for Solid Memo to read ({limit} documents at most), so this wasn't done. Use fewer chapters, or delete the draft; if you don't know who keeps this instance, remove it.",
+    "This draft or file has too many chapters, or this instance's drafts have too many documents together, for Solid Memo to read ({limit} documents at most), so this wasn't done. Use fewer chapters, or delete drafts you no longer need in the Studio. Remove the instance only if its drafts aren't yours and you don't know who keeps it.",
   noMetaToUpdate: "This instance has no description to update. Reload the page and try again.",
   webIdEmpty: "Enter your WebID.",
   webIdInvalidUrl:

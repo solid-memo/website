@@ -1669,7 +1669,7 @@
     "noCatalogToUpdate": "Diese Instanz hat noch keinen Katalog. Aktualisiere die Instanz zuerst in Solid Memo.",
     "catalogTooManyLinks": "Der Katalog dieser Instanz listet mehr Stapel, Entwürfe oder Ausgaben, als Solid Memo liest (höchstens {limit} von jeder Art). Entferne die Instanz, wenn du nicht weißt, wer sie pflegt.",
     "catalogFull": "Der Katalog dieser Instanz listet schon so viele Stapel, Entwürfe oder Ausgaben, wie Solid Memo liest (je {limit}), deshalb kann er keine weiteren listen.",
-    "draftTooManyDocuments": "Dieser Entwurf oder diese Datei hat zu viele Kapitel, oder die Entwürfe dieser Instanz haben zusammen zu viele Dokumente, als dass Solid Memo sie lesen könnte (höchstens {limit} Dokumente), daher wurde das nicht gemacht. Verwende weniger Kapitel oder lösche den Entwurf; wenn du nicht weißt, wer diese Instanz pflegt, entferne sie.",
+    "draftTooManyDocuments": "Dieser Entwurf oder diese Datei hat zu viele Kapitel, oder die Entwürfe dieser Instanz haben zusammen zu viele Dokumente, als dass Solid Memo sie lesen könnte (höchstens {limit} Dokumente), daher wurde das nicht gemacht. Verwende weniger Kapitel oder lösche im Studio Entwürfe, die du nicht mehr brauchst. Entferne die Instanz nur, wenn die Entwürfe nicht deine sind und du nicht weißt, wer sie pflegt.",
     "noMetaToUpdate": "Diese Instanz hat keine Beschreibung, die sich aktualisieren lässt. Lade die Seite neu und versuche es erneut.",
     "webIdEmpty": "Gib deine WebID ein.",
     "webIdInvalidUrl": "Das ist keine gültige URL. Eine WebID sieht z. B. so aus: https://you.example/profile/card#me.",

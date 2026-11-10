@@ -1744,7 +1744,7 @@
     "noCatalogToUpdate": "Esta instancia aún no tiene catálogo. Actualiza primero la instancia en Solid Memo.",
     "catalogTooManyLinks": "El catálogo de esta instancia enumera más mazos, borradores o publicaciones de los que Solid Memo lee (como mucho {limit} de cada tipo). Quita la instancia a menos que sepas quién la mantiene.",
     "catalogFull": "El catálogo de esta instancia ya enumera tantos mazos, borradores o publicaciones como lee Solid Memo ({limit} de cada tipo), así que no puede enumerar otro.",
-    "draftTooManyDocuments": "Este borrador o archivo tiene demasiados capítulos, o los borradores de esta instancia tienen demasiados documentos en conjunto, para que Solid Memo los lea (como mucho {limit} documentos), así que no se ha hecho. Usa menos capítulos o elimina el borrador; si no sabes quién mantiene esta instancia, quítala.",
+    "draftTooManyDocuments": "Este borrador o archivo tiene demasiados capítulos, o los borradores de esta instancia tienen demasiados documentos en conjunto, para que Solid Memo los lea (como mucho {limit} documentos), así que no se ha hecho. Usa menos capítulos o elimina en el Studio los borradores que ya no necesites. Quita la instancia solo si los borradores no son tuyos y no sabes quién la mantiene.",
     "noMetaToUpdate": "Esta instancia no tiene ninguna descripción que actualizar. Vuelve a cargar la página e inténtalo de nuevo.",
     "webIdEmpty": "Escribe tu WebID.",
     "webIdInvalidUrl": "Esa URL no es válida. Un WebID tiene este aspecto: https://you.example/profile/card#me.",
