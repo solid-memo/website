@@ -5,7 +5,8 @@ Storage (LWS) Working Group is writing its successor,
 [LWS Protocol 1.0](https://www.w3.org/TR/lws10-core/), still a Working
 Draft. This page explains how the app works on a storage that speaks
 LWS, and why each part is made the way it is. The servers it's tested
-on are in [testing.md](testing.md).
+on are in [testing.md](testing.md), and what the tests find on them in
+[interop.md](interop.md).
 
 ## What differs
 
