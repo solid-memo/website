@@ -518,7 +518,8 @@ test("deleting an instance keeps another app's data in a deck's document, and sa
     "04 · Another app keeps data of its own in the deck's document",
     async () => {
       const said = /v1\.ttl#cardsDocument>\s+<([^>]+)>/.exec(await user.read(catalog));
-      cards = said![1]!;
+      // Relative to the catalog where the server writes its Turtle so (CSS with Linked Web Storage).
+      cards = new URL(said![1]!, catalog).href;
       const served = (await user.read(cards)).replace(/^200 /, "");
       await user.put(cards, `${served}\n<#note-${runId}> <https://other.example/says> "mine" .\n`);
     },
