@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.1.0](https://github.com/solid-memo/website/compare/v7.0.2...v7.1.0) (2026-11-10)
+
+### Features
+
+* **solid-memo-client:** sign in to a Linked Web Storage storage ([99747db](https://github.com/solid-memo/website/commit/99747db647ee46d6fcd2fe0d8d26fcc7b0c8ed94)), closes [#594](https://github.com/solid-memo/website/issues/594)
+* **solid:** find a Linked Web Storage storage as its server links it ([926e482](https://github.com/solid-memo/website/commit/926e4828cfe6f7f05fd0cb737e73f8531007351f)), closes [#594](https://github.com/solid-memo/website/issues/594)
+
 ## [7.0.2](https://github.com/solid-memo/website/compare/v7.0.1...v7.0.2) (2026-11-10)
 
 ### Bug Fixes
