@@ -5,6 +5,8 @@
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
+import { AppError } from "@solid-memo/domain/appError";
+import type { HttpError } from "./client/interface";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
   ABSENT_VERSION,
@@ -24,6 +26,7 @@ import { MAX_DRAFT_DOCUMENTS_IN_ALL } from "./solidReleaseDraftRepository";
 import { readSince } from "./readSince";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidDigestRepository } from "./solidDigestRepository";
+import { toScheduleThing } from "./mappers/digestMapper";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { fakePod } from "./testing/fakePod";
@@ -510,6 +513,271 @@ describe("the instance's digest in the pod", () => {
     await expect(digests.updateDigest(INSTANCE, learn)).rejects.toThrow();
     await digests.updateDigest(INSTANCE, learn);
     expect(await digests.readDigest(INSTANCE)).toEqual(learned());
+  });
+
+  describe("a deck whose address is near the term limit", () => {
+    const longDeck = `${INSTANCE}catalog.ttl#${"d".repeat(16_370 - `${INSTANCE}catalog.ttl#`.length)}`;
+    const longSchedule = { ...schedule, deck: longDeck };
+    const others = (draft: Parameters<DigestChange>[0], name: string) =>
+      addReceipt(draft, `${INSTANCE}decks/${name}.ttl`, `"${name}"`, { latestFormat: true });
+
+    it("is listed, and its schedule is written with what is queued beside it and read back", async () => {
+      const pod = fakePod();
+      await pod.put(
+        `${INSTANCE}catalog.ttl`,
+        `<${longDeck}> a <${SM}Deck>; <http://purl.org/dc/terms/title> "Long";
+           <${SM}cardsDocument> <${INSTANCE}decks/d.ttl>;
+           <${SM}reviewsDocument> <${INSTANCE}reviews/d.ttl>.`,
+      );
+      const listed = await createSolidDeckRepository({
+        fetch: pod.fetch,
+        now: () => new Date(),
+        randomId: () => "x",
+      }).listDecks(INSTANCE);
+      expect(listed[0]?.url).toBe(longDeck);
+
+      const { checkSubjects } = createShaclShapeValidator({
+        fetch: pod.fetch,
+        shapesFetch,
+        ...SHAPE_SOURCES,
+      });
+      const digests = createSolidDigestRepository({
+        fetch: pod.fetch,
+        checkWrite: checkSubjects,
+      });
+      const results = await Promise.allSettled([
+        digests.updateDigest(INSTANCE, (draft) => others(draft, "x")),
+        digests.updateDigest(INSTANCE, (draft) => setSchedule(draft, longSchedule)),
+        digests.updateDigest(INSTANCE, (draft) => others(draft, "y")),
+      ]);
+      expect(results.map((r) => r.status)).toEqual(["fulfilled", "fulfilled", "fulfilled"]);
+      const read = (await digests.readDigest(INSTANCE))!;
+      expect(read.schedules[longDeck]).toEqual(longSchedule);
+      expect(Object.keys(read.receipts)).toHaveLength(2);
+
+      // Written again, it replaces itself at the same subject.
+      const changed = { ...longSchedule, cardsVersion: '"v2"' };
+      await digests.updateDigest(INSTANCE, (draft) => setSchedule(draft, changed));
+      expect((await digests.readDigest(INSTANCE))!.schedules[longDeck]).toEqual(changed);
+      const subjects = new Set(pod.triples(DIGEST)!.map((t) => t.split(" ")[0]));
+      expect([...subjects].filter((s) => s!.includes("#schedule"))).toHaveLength(1);
+      expect([...subjects].every((s) => s!.length < 256)).toBe(true);
+    });
+
+    it("moves a schedule stored under its spelled-out name to its hashed one when written", async () => {
+      const midDeck = `${INSTANCE}catalog.ttl#${"m".repeat(400)}`;
+      const midSchedule = { ...schedule, deck: midDeck };
+      const old = `${DIGEST}#schedule-catalog.ttl-${"m".repeat(400)}`;
+      const pod = fakePod();
+      await saveDataset(
+        DIGEST,
+        setThing(createSolidDataset(), toScheduleThing(old, midSchedule, null)),
+        pod.fetch,
+      );
+      const digests = createSolidDigestRepository({ fetch: pod.fetch });
+      const changed = { ...midSchedule, cardsVersion: '"v2"' };
+      await digests.updateDigest(INSTANCE, (draft) => setSchedule(draft, changed));
+      const subjects = new Set(pod.triples(DIGEST)!.map((t) => t.split(" ")[0]));
+      expect([...subjects].some((s) => s!.includes("schedule~sha256-"))).toBe(true);
+      expect([...subjects].some((s) => s!.includes("schedule-catalog"))).toBe(false);
+      expect((await digests.readDigest(INSTANCE))!.schedules[midDeck]).toEqual(changed);
+    });
+  });
+
+  describe("changes written together, when the write is refused", () => {
+    const receiptOf = (name: string) => `${INSTANCE}decks/${name}.ttl`;
+    const receipt =
+      (name: string): DigestChange =>
+      (draft) =>
+        addReceipt(draft, receiptOf(name), `"${name}"`, { latestFormat: true });
+    /**
+     * A write of one change, then `names` queued behind it, which go in
+     * one write; `beforeThatWrite` runs just before it is sent, and
+     * `onCheck` just before each write is sent, with how many were.
+     */
+    function queuedBehindOne(
+      pod: ReturnType<typeof fakePod>,
+      beforeThatWrite: () => void,
+      { names = ["a", "b"], onCheck = () => undefined } = {} as {
+        names?: string[];
+        onCheck?: (checks: number) => void;
+      },
+    ) {
+      let checks = 0;
+      const digests = createSolidDigestRepository({
+        fetch: pod.fetch,
+        wait: async () => undefined,
+        checkWrite: async () => {
+          if (++checks === 2) beforeThatWrite();
+          onCheck(checks);
+        },
+      });
+      void digests.updateDigest(INSTANCE, receipt("lead"));
+      return {
+        digests,
+        settled: Promise.allSettled(
+          names.map((name) => digests.updateDigest(INSTANCE, receipt(name))),
+        ),
+      };
+    }
+    const statusesOf = (results: PromiseSettledResult<void>[]) =>
+      results.map((r) => (r.status === "fulfilled" ? 200 : (r.reason as HttpError).statusCode));
+    const writes = (pod: ReturnType<typeof fakePod>) =>
+      pod.requests.filter((r) => r.method !== "GET").length;
+    const refusing = (name: string) => async (_: unknown, subjects: readonly string[]) => {
+      if (subjects.some((subject) => subject.includes(`-${name}.ttl`))) {
+        throw new AppError("termTooLong", { limit: 1 });
+      }
+    };
+
+    it("fails only the refused one, the others written", async () => {
+      const pod = fakePod();
+      const digests = createSolidDigestRepository({
+        fetch: pod.fetch,
+        checkWrite: refusing("bad"),
+      });
+      const results = await Promise.allSettled([
+        digests.updateDigest(INSTANCE, receipt("first")),
+        digests.updateDigest(INSTANCE, receipt("bad")),
+        digests.updateDigest(INSTANCE, receipt("good")),
+        digests.updateDigest(INSTANCE, receipt("also")),
+      ]);
+      // The refused one is the first of its batch written alone, and the others still are.
+      expect(results.map((r) => r.status)).toEqual([
+        "fulfilled",
+        "rejected",
+        "fulfilled",
+        "fulfilled",
+      ]);
+      expect((results[1] as PromiseRejectedResult).reason).toMatchObject({ code: "termTooLong" });
+      expect(Object.keys((await digests.readDigest(INSTANCE))!.receipts)).toEqual(
+        ["first", "good", "also"].map(receiptOf),
+      );
+    });
+
+    it("stops writing them one at a time when the pod refuses the first alone the same way, as over its quota", async () => {
+      const pod = fakePod();
+      const { settled } = queuedBehindOne(pod, () => undefined, {
+        names: ["a", "b", "c"],
+        // Every write but the first is answered 413.
+        onCheck: (checks) => checks > 1 && pod.failNext("PATCH", DIGEST, 413),
+      });
+      expect(statusesOf(await settled)).toEqual([413, 413, 413]);
+      // The first alone, the three together, then only the first of them.
+      expect(writes(pod)).toBe(3);
+    });
+
+    it("stops writing them one at a time when the pod refuses two alike, the batch refused by the app", async () => {
+      const pod = fakePod();
+      let checks = 0;
+      const digests = createSolidDigestRepository({
+        fetch: pod.fetch,
+        wait: async () => undefined,
+        checkWrite: async (dataset, subjects) => {
+          // Every write but the first is answered 413, as by a pod over its quota.
+          if (++checks > 1) pod.failNext("PATCH", DIGEST, 413);
+          await refusing("bad")(dataset, subjects);
+        },
+      });
+      void digests.updateDigest(INSTANCE, receipt("lead"));
+      const results = await Promise.allSettled(
+        ["a", "bad", "b", "c", "d"].map((name) => digests.updateDigest(INSTANCE, receipt(name))),
+      );
+      expect(
+        results.map((r) =>
+          r.status === "fulfilled" ? 200 : ((r.reason as HttpError).statusCode ?? r.reason.code),
+        ),
+      ).toEqual([413, "termTooLong", 413, 413, 413]);
+      // The first alone, then a and b alone; the batch and bad alone are refused before they are sent.
+      expect(writes(pod)).toBe(3);
+    });
+
+    it("writes each alone once one is written, though another is refused the same way", async () => {
+      const pod = fakePod();
+      const { digests, settled } = queuedBehindOne(pod, () => pod.failNext("PATCH", DIGEST, 422), {
+        names: ["a", "b", "c"],
+        onCheck: (checks) => checks === 4 && pod.failNext("PATCH", DIGEST, 422),
+      });
+      expect(statusesOf(await settled)).toEqual([200, 422, 200]);
+      expect(writes(pod)).toBe(5);
+      expect(Object.keys((await digests.readDigest(INSTANCE))!.receipts)).toEqual(
+        ["lead", "a", "c"].map(receiptOf),
+      );
+    });
+
+    it("writes each alone when the first alone is refused otherwise", async () => {
+      const pod = fakePod();
+      const { settled } = queuedBehindOne(pod, () => pod.failNext("PATCH", DIGEST, 422), {
+        names: ["a", "b"],
+        onCheck: (checks) => checks === 3 && pod.failNext("PATCH", DIGEST, 400),
+      });
+      expect(statusesOf(await settled)).toEqual([400, 200]);
+      expect(writes(pod)).toBe(4);
+    });
+
+    for (const status of [400, 409, 413, 422]) {
+      it(`fails them together when reading the digest is answered ${status}`, async () => {
+        const pod = fakePod();
+        const { settled } = queuedBehindOne(pod, () => undefined, {
+          onCheck: (checks) => checks === 1 && pod.failNext("GET", DIGEST, status),
+        });
+        expect(statusesOf(await settled)).toEqual([status, status]);
+        expect(pod.requests.filter((r) => r.method === "GET")).toHaveLength(2);
+        expect(writes(pod)).toBe(1);
+      });
+    }
+
+    for (const status of [400, 409, 413, 422]) {
+      it(`writes them one at a time when the pod answers ${status}`, async () => {
+        const pod = fakePod();
+        const { digests, settled } = queuedBehindOne(pod, () =>
+          pod.failNext("PATCH", DIGEST, status),
+        );
+        expect((await settled).map((r) => r.status)).toEqual(["fulfilled", "fulfilled"]);
+        // The first alone, the two together and refused, then each of them.
+        expect(writes(pod)).toBe(4);
+        expect(Object.keys((await digests.readDigest(INSTANCE))!.receipts)).toEqual(
+          ["lead", "a", "b"].map(receiptOf),
+        );
+      });
+    }
+
+    for (const status of [500, 401, 403]) {
+      it(`fails them together when the pod answers ${status}, as each alone would`, async () => {
+        const pod = fakePod();
+        const { settled } = queuedBehindOne(pod, () => pod.failNext("PATCH", DIGEST, status));
+        expect((await settled).map((r) => r.status)).toEqual(["rejected", "rejected"]);
+        expect(writes(pod)).toBe(2);
+      });
+    }
+
+    it("fails them together when the request itself fails", async () => {
+      const pod = fakePod();
+      let checks = 0;
+      const digests = createSolidDigestRepository({
+        fetch: pod.fetch,
+        checkWrite: async () => {
+          if (++checks === 2) throw new TypeError("Failed to fetch");
+        },
+      });
+      void digests.updateDigest(INSTANCE, receipt("lead"));
+      const results = await Promise.allSettled([
+        digests.updateDigest(INSTANCE, receipt("a")),
+        digests.updateDigest(INSTANCE, receipt("b")),
+      ]);
+      expect(results.map((r) => r.status)).toEqual(["rejected", "rejected"]);
+      expect(checks).toBe(2);
+    });
+
+    it("fails them together on a version conflict that does not end", async () => {
+      const pod = fakePod();
+      const { settled } = queuedBehindOne(pod, () => {
+        for (let i = 0; i < 6; i++) pod.failNext("PATCH", DIGEST, 412);
+      });
+      expect((await settled).map((r) => r.status)).toEqual(["rejected", "rejected"]);
+      // The first write, then the two together, six times in all.
+      expect(writes(pod)).toBe(7);
+    });
   });
 
   it("reads a schedule of format 1 as SM-2's, and writes it over in format 2", async () => {

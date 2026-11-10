@@ -4,6 +4,7 @@
 
 import type { Deck } from "./deck";
 import { isOfStudyDayRange } from "./answer";
+import { sha256Hex } from "./sha256";
 import { documentUrlOf } from "./subjectUrl";
 
 /**
@@ -333,11 +334,19 @@ export function monthOfHistoryUrl(instanceUrl: string, url: string): string | nu
   return month !== undefined && isOfStudyDayRange(`${month}-28`) ? month : null;
 }
 
+/** The longest `where` a digest subject spells out (digestSubjectOf). */
+const MAX_DIGEST_WHERE = 256;
+
 /**
  * The digest subject about a document, a deck or a month of the answer
  * log (by its document), `#<kind>-<where>`: where
  * it is under the instance, else its whole URL, with every character
- * but letters, digits, ".", "_" and "-" made a "-".
+ * but letters, digits, ".", "_" and "-" made a "-". Past
+ * MAX_DIGEST_WHERE characters it is `#<kind>~sha256-<hash>`, a hash of
+ * `where`: a subject has to stay shorter than the term limit however
+ * long the deck's or document's IRI is, and no `where` spelled out can
+ * be spelled with a "~". What an entry is about is read from the entry;
+ * its subject only has to be its own (toDigest).
  */
 export function digestSubjectOf(
   instanceUrl: string,
@@ -346,7 +355,22 @@ export function digestSubjectOf(
 ): string {
   const container = ensureTrailingSlash(instanceUrl);
   const where = target.startsWith(container) ? target.slice(container.length) : target;
-  return `${digestUrlOf(instanceUrl)}#${kind}-${where.replace(/[^A-Za-z0-9._-]/g, "-")}`;
+  const digest = digestUrlOf(instanceUrl);
+  if (where.length > MAX_DIGEST_WHERE) {
+    return `${digest}#${kind}~sha256-${sha256Hex(codeUnitsOf(where))}`;
+  }
+  return `${digest}#${kind}-${where.replace(/[^A-Za-z0-9._-]/g, "-")}`;
+}
+
+/** `text`'s UTF-16 code units as bytes, low byte first: no two strings give the same, unlike UTF-8, which has no bytes for a lone surrogate. */
+function codeUnitsOf(text: string): Uint8Array {
+  const bytes = new Uint8Array(text.length * 2);
+  for (let i = 0; i < text.length; i++) {
+    const unit = text.charCodeAt(i);
+    bytes[2 * i] = unit & 0xff;
+    bytes[2 * i + 1] = unit >>> 8;
+  }
+  return bytes;
 }
 
 /** The instance's catalog: the dcat:Catalog subject of its catalog document. */

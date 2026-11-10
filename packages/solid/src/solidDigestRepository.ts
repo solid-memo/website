@@ -11,6 +11,8 @@ import {
   type DigestChange,
   type InstanceDigest,
 } from "@solid-memo/domain/studyDigest";
+import { AppError } from "@solid-memo/domain/appError";
+import { HttpError } from "./client/interface";
 import { editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import {
@@ -41,7 +43,46 @@ export interface SolidDigestRepositoryDeps {
 const ATTEMPTS = 6;
 const PAUSE_MS = 50;
 
+/** What a pod answers when it will not take what a write says, as opposed to who asks or how it is doing. */
+const REFUSED_STATUSES = new Set([400, 409, 413, 422]);
+
+/**
+ * Whether a write, once the digest was read and changed, may have been
+ * refused for what one of its changes says: the app refused a term or a
+ * shape, or the pod answered with one of REFUSED_STATUSES. Not a version
+ * conflict and not a request that failed, which each change alone would
+ * meet the same way; a failed read of the digest is never asked about
+ * (write). A pod that refuses every write alike is found by the
+ * changes first written alone (settleApart).
+ */
+function isRefusal(error: unknown): boolean {
+  if (error instanceof PreconditionFailedError) return false;
+  if (error instanceof HttpError) return REFUSED_STATUSES.has(error.statusCode);
+  return error instanceof AppError;
+}
+
+/** A write refused for what it says (isRefusal), and why. */
+class Refused {
+  constructor(readonly reason: unknown) {}
+}
+
+/** The status the pod refused a write with (isRefusal), or undefined when it was refused otherwise or not at all. */
+const podRefusalOf = (error: unknown) =>
+  error instanceof Refused && error.reason instanceof HttpError
+    ? error.reason.statusCode
+    : undefined;
+
+/** What a write failed with, as its callers are told. */
+const reasonOf = (error: unknown) => (error instanceof Refused ? error.reason : error);
+
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
+/** A change waiting to be written, and who to tell how it went. */
+interface Waiting {
+  change: DigestChange;
+  done: () => void;
+  failed: (e: unknown) => void;
+}
 
 /**
  * Each instance's digest as its digest.ttl (domain/studyDigest.ts). A
@@ -52,20 +93,16 @@ const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
  * to one copy of what was read (changedDigest), so many of them take
  * time that grows with the digest and their number, not their product.
  * What is written is kept to what a digest is read with, the entries
- * just changed kept first (keepWithinLimits).
+ * just changed kept first (keepWithinLimits). Changes refused together
+ * are written again one at a time, so only the one refused fails
+ * (isRefusal, settleApart).
  */
 export function createSolidDigestRepository({
   fetch,
   checkWrite = noWriteCheck,
   wait = sleep,
 }: SolidDigestRepositoryDeps): DigestRepository {
-  const queues = new Map<
-    string,
-    {
-      waiting: { change: DigestChange; done: () => void; failed: (e: unknown) => void }[];
-      writing: boolean;
-    }
-  >();
+  const queues = new Map<string, { waiting: Waiting[]; writing: boolean }>();
 
   async function write(instanceUrl: string, changes: DigestChange[]): Promise<void> {
     const url = digestUrlOf(instanceUrl);
@@ -82,11 +119,12 @@ export function createSolidDigestRepository({
         next,
       );
       if (subjects.length === 0) return;
-      await checkWrite(updated, subjects, "pod");
       try {
+        await checkWrite(updated, subjects, "pod");
         await saveDataset(url, updated, fetch);
         return;
       } catch (error) {
+        if (isRefusal(error)) throw new Refused(error);
         if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
       }
     }
@@ -95,18 +133,58 @@ export function createSolidDigestRepository({
   async function drain(instanceUrl: string): Promise<void> {
     const queue = queues.get(instanceUrl)!;
     while (queue.waiting.length > 0) {
-      const batch = queue.waiting.splice(0);
-      try {
-        await write(
-          instanceUrl,
-          batch.map(({ change }) => change),
-        );
-        for (const { done } of batch) done();
-      } catch (error) {
-        for (const { failed } of batch) failed(error);
-      }
+      await settle(instanceUrl, queue.waiting.splice(0));
     }
     queue.writing = false;
+  }
+
+  async function settle(instanceUrl: string, batch: Waiting[]): Promise<void> {
+    try {
+      await write(
+        instanceUrl,
+        batch.map(({ change }) => change),
+      );
+      for (const { done } of batch) done();
+    } catch (error) {
+      if (error instanceof Refused && batch.length > 1) {
+        await settleApart(instanceUrl, batch, error);
+      } else for (const { failed } of batch) failed(reasonOf(error));
+    }
+  }
+
+  /**
+   * `batch`, refused together (`refusal`), written a change at a time,
+   * so only the one refused fails. Until one is written, a pod that
+   * refuses one alone with an answer it gave already, to the batch or
+   * to one before, is taken to refuse every write alike (over its
+   * quota, say), and the rest fail with it unwritten: such a pod is
+   * asked to write twice more at most. A change the app refuses never
+   * stops the others, and once one is written, each is.
+   */
+  async function settleApart(
+    instanceUrl: string,
+    batch: Waiting[],
+    refusal: Refused,
+  ): Promise<void> {
+    const answered = new Set([podRefusalOf(refusal)]);
+    let written = false;
+    for (const [i, { change, done, failed }] of batch.entries()) {
+      try {
+        await write(instanceUrl, [change]);
+        done();
+        written = true;
+      } catch (error) {
+        const why = reasonOf(error);
+        failed(why);
+        const status = podRefusalOf(error);
+        if (written || status === undefined) continue;
+        if (answered.has(status)) {
+          for (const rest of batch.slice(i + 1)) rest.failed(why);
+          return;
+        }
+        answered.add(status);
+      }
+    }
   }
 
   return {

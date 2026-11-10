@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import {
@@ -130,6 +131,43 @@ describe("the digest", () => {
     expect(digestSubjectOf(instance, "receipt", "https://other.example/d.ttl")).toBe(
       "https://pod.example/solid-memo/main/digest.ttl#receipt-https---other.example-d.ttl",
     );
+  });
+
+  it("spells out a subject's place up to 256 characters, whatever the place holds", () => {
+    const where = `decks/${"d".repeat(246)}.ttl`;
+    expect(where).toHaveLength(256);
+    expect(digestSubjectOf(instance, "receipt", `${instance}/${where}`)).toBe(
+      `https://pod.example/solid-memo/main/digest.ttl#receipt-${where.replace("/", "-")}`,
+    );
+  });
+
+  it("names a subject by a hash of its place past 256 characters, of a fixed length", () => {
+    const short = digestSubjectOf(
+      instance,
+      "schedule",
+      `${instance}/catalog.ttl#${"d".repeat(245)}`,
+    );
+    const long = digestSubjectOf(
+      instance,
+      "schedule",
+      `${instance}/catalog.ttl#${"d".repeat(16_000)}`,
+    );
+    expect(short).toMatch(/#schedule~sha256-[0-9a-f]{64}$/);
+    expect(long).toMatch(/#schedule~sha256-[0-9a-f]{64}$/);
+    expect(long).toHaveLength(short.length);
+    expect(short).toBe(
+      `https://pod.example/solid-memo/main/digest.ttl#schedule~sha256-${createHash("sha256")
+        .update(`catalog.ttl#${"d".repeat(245)}`, "utf16le")
+        .digest("hex")}`,
+    );
+  });
+
+  it("gives two long places different subjects, also where a spelled-out name would be the same", () => {
+    const base = `${instance}/catalog.ttl#${"d".repeat(300)}`;
+    const subject = (target: string) => digestSubjectOf(instance, "schedule", target);
+    expect(subject(`${base}a-b`)).not.toBe(subject(`${base}a/b`));
+    expect(subject(`${base}\uD800`)).not.toBe(subject(`${base}\uD801`));
+    expect(subject(base)).not.toBe(digestSubjectOf(instance, "receipt", base));
   });
 
   it("keeps the answer log in a document per study month, and knows which month a document is for", () => {
