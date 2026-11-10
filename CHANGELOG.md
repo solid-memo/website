@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.0.2](https://github.com/solid-memo/website/compare/v7.0.1...v7.0.2) (2026-11-10)
+
+### Bug Fixes
+
+* **deps:** update dependency @tanstack/react-query to ^5.107.1 ([7fd85fe](https://github.com/solid-memo/website/commit/7fd85fe18012617ea5b263a3cba39d8e01c23afd))
+
 ## [7.0.1](https://github.com/solid-memo/website/compare/v7.0.0...v7.0.1) (2026-11-09)
 
 ### Bug Fixes
