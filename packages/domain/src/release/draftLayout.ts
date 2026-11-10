@@ -4,7 +4,14 @@
 
 import { ensureTrailingSlash, hasDotSegment, isDocumentIn } from "../instanceLayout.ts";
 import type { LangText } from "../langText.ts";
-import { canonical, idIn, iriIn, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  canonical,
+  type DraftNode,
+  type DraftTriple,
+  idIn,
+  iriIn,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 
 /**
  * Where a draft keeps its documents (docs/data-model.md, Drafts): the
@@ -212,42 +219,190 @@ export function draftDocuments(draft: ReleaseDraft): Map<string, DraftDocument> 
   return places;
 }
 
-/** What each document of the draft holds, by its URL, as strings to compare by: the records and statements draftDocuments puts there. */
-function documentContents(draft: ReleaseDraft): Map<string, string[]> {
-  const places = draftDocuments(draft);
-  const contents = new Map<string, string[]>();
-  const put = (place: DraftDocument, value: unknown) => {
-    const url = draftDocumentUrl(draft.url, place);
-    const held = contents.get(url);
-    if (held === undefined) contents.set(url, [canonical(value)]);
-    else held.push(canonical(value));
-  };
-  const release: DraftDocument = { kind: "release" };
-  put(release, [draft.course, draft.root]);
-  for (const node of draft.agents) put(release, ["agents", node.id, node.data]);
-  for (const node of draft.distributions) put(release, ["distributions", node.id, node.data]);
-  for (const list of ["chapters", "steps", "cards", "distractors"] as const) {
-    for (const node of draft[list] as readonly { id: string; data: unknown }[])
-      put(places.get(iriIn(draft, node.id))!, [list, node.id, node.data]);
+/** draftDocuments of a draft, made once per draft: a draft is never changed in place, an edit makes a new one. */
+const placesOfDraft = new WeakMap<ReleaseDraft, ReadonlyMap<string, DraftDocument>>();
+
+function placesOf(draft: ReleaseDraft): ReadonlyMap<string, DraftDocument> {
+  let places = placesOfDraft.get(draft);
+  if (places === undefined) {
+    places = draftDocuments(draft);
+    placesOfDraft.set(draft, places);
   }
-  for (const triple of draft.triples) put(places.get(triple.subject)!, triple);
-  return contents;
+  return places;
+}
+
+/** The lists of records that draftDocuments places, and the statements. */
+const PLACED = ["chapters", "steps", "cards", "distractors", "triples"] as const;
+/** Every list of the draft: agents and distributions are always in the release document. */
+const LISTED = ["agents", "distributions", ...PLACED] as const;
+type Listed = (typeof LISTED)[number];
+type Item = DraftNode<unknown> | DraftTriple;
+
+/**
+ * What of an item draftDocuments reads to place the draft's subjects:
+ * lists whose items say the same of it, in the same order, lay a draft
+ * out the same way.
+ */
+function placing(list: Listed, item: Item): string {
+  if (list === "triples") {
+    const { subject, object } = item as DraftTriple;
+    return JSON.stringify([subject, object.kind === "blank" ? object.value : null]);
+  }
+  const { id, data } = item as DraftNode<Record<string, unknown>>;
+  switch (list) {
+    case "chapters":
+      return JSON.stringify([id, data.reviewQuestion]);
+    case "steps":
+      return JSON.stringify([id, data.chapter, data.checkedBy]);
+    case "cards":
+      return JSON.stringify([id, data.distractor]);
+    default:
+      return id;
+  }
 }
 
 /**
- * The documents a change of the draft writes, from `before` to `after`,
- * by URL: those whose records or statements differ, a document made or
- * emptied among them. A change of a chapter's text writes its document
- * alone; a move of chapters writes each it numbers again.
+ * How a list of the draft differs from `before` to `after`, by its
+ * items' identity: an edit makes a new list, but keeps the items it
+ * doesn't change. The items only `before` has (`removed`), those only
+ * `after` has (`added`), and whether the items between the ends both
+ * keep say the same of where the draft's subjects go (placing).
+ */
+function listChange(
+  list: Listed,
+  before: readonly Item[],
+  after: readonly Item[],
+): { list: Listed; removed: Item[]; added: Item[]; samePlacing: boolean } {
+  let start = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) start++;
+  let endBefore = before.length;
+  let endAfter = after.length;
+  while (endBefore > start && endAfter > start && before[endBefore - 1] === after[endAfter - 1]) {
+    endBefore--;
+    endAfter--;
+  }
+  const was = before.slice(start, endBefore);
+  const now = after.slice(start, endAfter);
+  const left = new Map<Item, number>();
+  for (const item of was) left.set(item, (left.get(item) ?? 0) + 1);
+  const added = now.filter((item) => {
+    const count = left.get(item) ?? 0;
+    left.set(item, count - 1);
+    return count === 0;
+  });
+  const removed = was.filter((item) => {
+    const count = left.get(item)!;
+    left.set(item, count - 1);
+    return count > 0;
+  });
+  const samePlacing =
+    list === "agents" ||
+    list === "distributions" ||
+    (was.length === now.length &&
+      was.every((item, at) => placing(list, item) === placing(list, now[at]!)));
+  return { list, removed, added, samePlacing };
+}
+
+/** A draft and where its subjects go, laid out only when asked. */
+interface Layout {
+  draft: ReleaseDraft;
+  places: () => ReadonlyMap<string, DraftDocument>;
+}
+
+/** The URL of the document an item of the draft is in. */
+function documentOf({ draft, places }: Layout, list: Listed, item: Item): string {
+  if (list === "agents" || list === "distributions") return draft.url;
+  const subject =
+    list === "triples"
+      ? (item as DraftTriple).subject
+      : iriIn(draft, (item as DraftNode<unknown>).id);
+  return draftDocumentUrl(draft.url, places().get(subject)!);
+}
+
+/** An item as its document holds it, to compare by. */
+function recordOf(list: Listed, item: Item): unknown {
+  if (list === "triples") return item;
+  const { id, data } = item as DraftNode<unknown>;
+  return [list, id, data];
+}
+
+/**
+ * What each document loses and gains, as strings to compare by; those
+ * that cancel out are no change.
+ */
+class Delta {
+  private readonly documents = new Map<string, Map<string, number>>();
+
+  count(url: string, value: unknown, by: number): void {
+    const key = canonical(value);
+    const held = this.documents.get(url) ?? new Map<string, number>();
+    held.set(key, (held.get(key) ?? 0) + by);
+    this.documents.set(url, held);
+  }
+
+  /** The documents something was lost from or gained in. */
+  changed(): string[] {
+    return [...this.documents]
+      .filter(([, held]) => [...held.values()].some((by) => by !== 0))
+      .map(([url]) => url);
+  }
+}
+
+/** Each item the change kept that a new layout moves: it writes the document it leaves and the one it enters. */
+function countMoved(
+  delta: Delta,
+  was: Layout,
+  now: Layout,
+  changes: readonly { list: Listed; added: Item[] }[],
+): void {
+  for (const list of PLACED) {
+    const added = new Set(changes.find((change) => change.list === list)?.added);
+    for (const item of now.draft[list] as readonly Item[]) {
+      if (added.has(item)) continue;
+      const from = documentOf(was, list, item);
+      const to = documentOf(now, list, item);
+      if (from === to) continue;
+      delta.count(from, recordOf(list, item), -1);
+      delta.count(to, recordOf(list, item), 1);
+    }
+  }
+}
+
+/**
+ * The documents a change of the draft writes, from `before` to `after`
+ * (applyDraftChanges, which keeps its URL), by URL: those whose records
+ * or statements differ, a document made or emptied among them. A change
+ * of a chapter's text writes its document alone; a move of chapters
+ * writes each it numbers again.
+ *
+ * Only what the change made is looked into: the records and statements
+ * the change replaced (by identity, as listChange finds them) are
+ * compared, and the draft is laid out afresh only when one of them
+ * says something new of where subjects go; each record it then moves
+ * writes the documents it leaves and enters. Typing in a field of a
+ * large draft so costs no more than the field.
  */
 export function changedDocuments(before: ReleaseDraft, after: ReleaseDraft): string[] {
-  const was = documentContents(before);
-  const now = documentContents(after);
-  const same = (a: string[] | undefined, b: string[] | undefined) =>
-    JSON.stringify(a?.sort()) === JSON.stringify(b?.sort());
-  return [...new Set([...was.keys(), ...now.keys()])].filter(
-    (url) => !same(was.get(url), now.get(url)),
+  const delta = new Delta();
+  if (before.course !== after.course || before.root !== after.root) {
+    delta.count(before.url, [before.course, before.root], -1);
+    delta.count(after.url, [after.course, after.root], 1);
+  }
+  const changes = LISTED.filter((list) => before[list] !== after[list]).map((list) =>
+    listChange(list, before[list], after[list]),
   );
+  const moved = changes.some((change) => !change.samePlacing);
+  const was: Layout = { draft: before, places: () => placesOf(before) };
+  const now: Layout = { draft: after, places: () => (moved ? placesOf(after) : was.places()) };
+  for (const { list, removed, added } of changes) {
+    for (const item of removed) delta.count(documentOf(was, list, item), recordOf(list, item), -1);
+    for (const item of added) delta.count(documentOf(now, list, item), recordOf(list, item), 1);
+  }
+  if (moved) countMoved(delta, was, now, changes);
+  // A layout the change keeps is the next edit's too.
+  const known = placesOfDraft.get(before);
+  if (!moved && known !== undefined) placesOfDraft.set(after, known);
+  return delta.changed();
 }
 
 /**

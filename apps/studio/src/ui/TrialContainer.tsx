@@ -25,7 +25,7 @@ import { boundedQueryKeyHash } from "@solid-memo/ui/queryKeys";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { StudyContainer } from "@solid-memo/ui/StudyContainer";
-import { useDraftEditor } from "./draftEditor";
+import { releaseDraftQuery, useDraftEditor } from "./draftEditor";
 import { answerChapter, answerQueue, jumpToChapter } from "./trialActions";
 import { TrialControls } from "./TrialControls";
 import { TrialScreen } from "./TrialScreen";
@@ -91,11 +91,7 @@ export function TrialContainer({
     mutationFn: async (from: ReleaseDraft | null) => {
       const draft: ReleaseDraft =
         from ??
-        (await queryClient.fetchQuery({
-          queryKey: queryKeys.releaseDraft(draftUrl),
-          queryFn: () => useCases.getReleaseDraft(draftUrl),
-          staleTime: 0,
-        }));
+        (await queryClient.fetchQuery({ ...releaseDraftQuery(useCases, draftUrl), staleTime: 0 }));
       return { draft, opening: await useCases.openTrial(draft, instanceUrl) };
     },
     onMutate: () => {

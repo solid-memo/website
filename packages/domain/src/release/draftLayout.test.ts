@@ -5,11 +5,18 @@
 import { describe, expect, it } from "vitest";
 import { growth } from "../testing/growth.ts";
 import { card, courseDraft, DRAFT, link, of } from "../testing/releaseDraft.ts";
-import { applyDraftChanges, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  applyDraftChanges,
+  canonical,
+  type DraftChange,
+  isRefusal,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 import {
   cardsDocumentOf,
   changedDocuments,
   chapterDocumentOf,
+  type DraftDocument,
   draftContainerOf,
   draftDocuments,
   draftDocumentUrl,
@@ -259,6 +266,152 @@ describe("changedDocuments", () => {
       8,
     );
     expect(ratio).toBeLessThan(4);
+  });
+});
+
+describe("changedDocuments, against the whole draft laid out", () => {
+  /** What changedDocuments once did per keystroke: every record and statement of both drafts, put where draftDocuments says. */
+  function wholeContents(draft: ReleaseDraft): Map<string, string[]> {
+    const places = draftDocuments(draft);
+    const contents = new Map<string, string[]>();
+    const put = (place: DraftDocument, value: unknown) => {
+      const url = draftDocumentUrl(draft.url, place);
+      contents.set(url, [...(contents.get(url) ?? []), canonical(value)]);
+    };
+    put({ kind: "release" }, [draft.course, draft.root]);
+    for (const list of ["agents", "distributions"] as const)
+      for (const node of draft[list]) put({ kind: "release" }, [list, node.id, node.data]);
+    for (const list of ["chapters", "steps", "cards", "distractors"] as const)
+      for (const node of draft[list] as readonly { id: string; data: unknown }[])
+        put(places.get(of(node.id))!, [list, node.id, node.data]);
+    for (const triple of draft.triples) put(places.get(triple.subject)!, triple);
+    return contents;
+  }
+  function wholeChange(before: ReleaseDraft, after: ReleaseDraft): string[] {
+    const was = wholeContents(before);
+    const now = wholeContents(after);
+    const same = (a: string[] = [], b: string[] = []) =>
+      JSON.stringify(a.sort()) === JSON.stringify(b.sort());
+    return [...new Set([...was.keys(), ...now.keys()])]
+      .filter((url) => !same(was.get(url), now.get(url)))
+      .sort();
+  }
+
+  const base = courseDraft();
+  const blankLink = (subject: string, value: string) => ({
+    subject,
+    predicate: "https://other.example/has",
+    object: { kind: "blank" as const, value },
+  });
+  // The loose card names a blank node, which names another.
+  const draft: ReleaseDraft = {
+    ...base,
+    triples: [
+      ...base.triples,
+      blankLink(of("q-loose"), "b0"),
+      blankLink("_:b0", "b1"),
+      link("_:b1", "https://other.example/is", "https://other.example/v"),
+    ],
+  };
+  const changes: DraftChange[] = [
+    { kind: "setMeta", meta: { title: { en: "Solid!" } } },
+    { kind: "setMeta", meta: { title: { en: "Solid" } } },
+    { kind: "setAgent", id: "ada", agent: { name: "Ada" } },
+    { kind: "addChapter", id: "ch-c", at: 0 },
+    { kind: "editChapter", id: "ch-a", text: { title: { en: "Aa" } } },
+    { kind: "editChapter", id: "ch-a", text: { title: { en: "A" } } },
+    { kind: "moveChapter", id: "ch-b", to: 0 },
+    { kind: "addStep", id: "ch-b-1", chapter: "ch-b" },
+    { kind: "editStep", id: "ch-a-1", text: { theory: { en: "Uno" } } },
+    { kind: "moveStep", id: "ch-a-2", chapter: "ch-b", to: 0 },
+    { kind: "addCard", id: "q-new", card: { front: { en: "new" }, back: { en: "new!" } } },
+    { kind: "editCard", id: "q-loose", card: { front: { en: "lost" }, back: { en: "lost!" } } },
+    { kind: "addQuestion", card: "q-loose", place: { kind: "review", chapter: "ch-b" } },
+    { kind: "moveQuestion", card: "q-a-1a", place: null },
+    { kind: "moveQuestion", card: "q-a-1a", place: { kind: "step", step: "ch-a-2" } },
+    {
+      kind: "addDistractor",
+      card: "q-loose",
+      id: "q-loose-d1",
+      distractor: { text: { en: "No" } },
+    },
+    { kind: "editDistractor", id: "q-a-1a-d2", distractor: { text: { en: "No 2" } } },
+    { kind: "retire", of: "chapter", id: "ch-a" },
+    { kind: "delete", of: "card", id: "q-loose" },
+    { kind: "delete", of: "chapter", id: "ch-a" },
+  ];
+
+  it("names the documents a layout of the whole draft would, for each kind of change", () => {
+    for (const change of changes) {
+      const after = applyDraftChanges(draft, [change]);
+      if (isRefusal(after)) throw new Error(`${change.kind} refused: ${after.refused}`);
+      expect(changedDocuments(draft, after).sort(), JSON.stringify(change)).toEqual(
+        wholeChange(draft, after),
+      );
+    }
+    // The agent added, then gone again: no document changes.
+    const ada = applyDraftChanges(draft, [changes[2]!]) as ReleaseDraft;
+    const gone = applyDraftChanges(ada, [{ kind: "setAgent", id: "ada", agent: null }]);
+    expect(changedDocuments(ada, gone as ReleaseDraft)).toEqual([DRAFT]);
+    expect(changedDocuments(draft, gone as ReleaseDraft)).toEqual([]);
+    // A list made anew, its items the same: no document changes.
+    expect(changedDocuments(draft, { ...draft, cards: [...draft.cards] })).toEqual([]);
+    // Statements made anew, the same: no document changes.
+    expect(
+      changedDocuments(draft, {
+        ...draft,
+        triples: draft.triples.map((triple) => ({ ...triple })),
+      }),
+    ).toEqual([]);
+    // Statements moved, not changed: their documents don't change.
+    expect(
+      changedDocuments(draft, { ...draft, triples: [...draft.triples].reverse() }).sort(),
+    ).toEqual(wholeChange(draft, { ...draft, triples: [...draft.triples].reverse() }));
+    // The loose card's blank nodes go with it into the chapter that asks it.
+    const asked = applyDraftChanges(draft, [changes[12]!]) as ReleaseDraft;
+    expect(draftDocuments(asked).get("_:b1")).toEqual({ kind: "chapter", chapter: "ch-b" });
+    expect(changedDocuments(draft, asked).sort()).toEqual(
+      [cardsDocumentOf(DRAFT), chapterDocumentOf(DRAFT, "ch-b")].sort(),
+    );
+  });
+
+  it("looks only into what a keystroke changed, however large the draft", () => {
+    // Each record counts the times it is read whole, as a comparison reads it.
+    let read = 0;
+    const counted = <T extends object>(data: T): T => ({
+      ...data,
+      toJSON() {
+        read++;
+        return data;
+      },
+    });
+    const cards = Array.from({ length: 1_000 }, (_, n) => ({
+      id: `q-${n}`,
+      data: counted(card(`${n}`)),
+    }));
+    const large: ReleaseDraft = { ...draft, cards: [...draft.cards, ...cards] };
+    let before = large;
+    for (const change of [
+      { kind: "setMeta", meta: { title: { en: "S" } } },
+      { kind: "setMeta", meta: { title: { en: "So" } } },
+      { kind: "editChapter", id: "ch-a", text: { title: { en: "A1" } } },
+      { kind: "editStep", id: "ch-a-1", text: { theory: { en: "One1" } } },
+      { kind: "editCard", id: "q-loose", card: { front: { en: "l" }, back: { en: "l!" } } },
+      { kind: "editDistractor", id: "q-a-1a-d1", distractor: { text: { en: "N" } } },
+    ] as DraftChange[]) {
+      const after = applyDraftChanges(before, [change]) as ReleaseDraft;
+      expect(changedDocuments(before, after), change.kind).toHaveLength(1);
+      before = after;
+    }
+    expect(read).toBe(0);
+    // A change of the layout reads only the records it moves.
+    const moved = applyDraftChanges(before, [
+      { kind: "addQuestion", card: "q-7", place: { kind: "step", step: "ch-a-1" } },
+    ]) as ReleaseDraft;
+    expect(changedDocuments(before, moved).sort()).toEqual(
+      [cardsDocumentOf(DRAFT), chapterDocumentOf(DRAFT, "ch-a")].sort(),
+    );
+    expect(read).toBe(2);
   });
 });
 

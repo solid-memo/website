@@ -84,6 +84,7 @@ import {
   type StudioRoute,
 } from "./router";
 import { queryKeys } from "./queryKeys";
+import { releaseDraftQuery } from "./draftEditor";
 
 // The Studio's messages, which the page adds to its own when it fetches this chunk (apps/web/src/App.tsx).
 export { STUDIO_CATALOGS } from "./catalogs";
@@ -878,10 +879,8 @@ function useRouteReads(
   const draftUrl = route !== null && isDraftRoute(route) ? route.draftUrl : null;
   // The draft's editors share this query (useDraftEditor): it is read once, and changed as they edit it.
   const draftQuery = useQuery({
-    queryKey: queryKeys.releaseDraft(draftUrl ?? ""),
-    queryFn: () => useCases.getReleaseDraft(draftUrl!),
+    ...releaseDraftQuery(useCases, draftUrl ?? ""),
     enabled: draftUrl !== null && activeInstance !== null,
-    staleTime: Infinity,
   });
   const activeDraft = draftUrl === null ? null : (draftQuery.data ?? null);
   const draftSubject = activeDraft === null ? null : subjectOf(activeDraft, route!);

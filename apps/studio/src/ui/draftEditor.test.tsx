@@ -18,6 +18,11 @@ import { DEBOUNCE_MS, draftScope, useDraftEditor, type DraftEditor } from "./dra
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 import { queryKeys } from "./queryKeys";
 
+vi.mock("@solid-memo/domain/release/releaseDraft", async (original) => {
+  const actual = await original<typeof import("@solid-memo/domain/release/releaseDraft")>();
+  return { ...actual, applyDraftChanges: vi.fn(actual.applyDraftChanges) };
+});
+
 let editor: DraftEditor;
 let other: DraftEditor;
 
@@ -170,6 +175,22 @@ describe("useDraftEditor", () => {
       await vi.advanceTimersByTimeAsync(0);
     });
     expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the very draft each keystroke made, so the next one finds its layout known", async () => {
+    const { queryClient } = await renderEditor({
+      editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)),
+    });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    for (const title of ["A", "Ap", "App"]) {
+      act(() => {
+        editor.edit([rename(title)], { debounce: true });
+      });
+      const madeDraft = vi.mocked(applyDraftChanges).mock.results.at(-1)!.value;
+      expect(queryClient.getQueryData(queryKeys.releaseDraft(DRAFT_URL))).toBe(madeDraft);
+    }
+    const kept = queryClient.getQueryData<ReleaseDraft>(queryKeys.releaseDraft(DRAFT_URL))!;
+    expect(kept.chapters.find((node) => node.id === "ch-apps")!.data.title).toEqual({ en: "App" });
   });
 
   it("refuses a change the draft refuses, and makes nothing of one that changes nothing", async () => {
