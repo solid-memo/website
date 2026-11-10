@@ -919,23 +919,41 @@ export function createLayout(graph: InstanceGraph): Layout {
   };
 }
 
-const identities = new WeakMap<InstanceGraph, string>();
-
 /**
  * What a graph is, in full: every node's id, kind and blank label and
- * every edge's ends, predicate and kind, in order, as text that two graphs share only
- * when they are the same. So a layout kept from before is used only for
- * the graph it was made of; a short hash of these could be made to match
- * for another graph. Made once for each graph object.
+ * every edge's ends, predicate and kind, in order, in two lists of the
+ * graph's own strings. A list of references, not text: the terms of a
+ * graph read from elsewhere can add up to more than a single string can
+ * hold.
  */
-export function graphIdentity(graph: InstanceGraph): string {
+export interface GraphIdentity {
+  readonly nodes: readonly (string | undefined)[];
+  readonly edges: readonly string[];
+}
+
+const identities = new WeakMap<InstanceGraph, GraphIdentity>();
+
+/** A graph's identity (sameGraph compares two). Made once for each graph object. */
+export function graphIdentity(graph: InstanceGraph): GraphIdentity {
   let identity = identities.get(graph);
   if (identity === undefined) {
-    identity = JSON.stringify([
-      graph.nodes.map((node) => [node.id, node.kind, node.term ?? null]),
-      graph.edges.map((edge) => [edge.from, edge.predicate, edge.to, edge.kind]),
-    ]);
+    identity = {
+      nodes: graph.nodes.flatMap((node) => [node.id, node.kind, node.term]),
+      edges: graph.edges.flatMap((edge) => [edge.from, edge.predicate, edge.to, edge.kind]),
+    };
     identities.set(graph, identity);
   }
   return identity;
+}
+
+const sameEntries = <T>(a: readonly T[], b: readonly T[]) =>
+  a.length === b.length && a.every((entry, at) => entry === b[at]);
+
+/**
+ * Whether two identities are of the same graph, entry by entry. So a
+ * layout kept from before is used only for the graph it was made of; a
+ * short hash of these could be made to match for another graph.
+ */
+export function sameGraph(a: GraphIdentity, b: GraphIdentity): boolean {
+  return sameEntries(a.nodes, b.nodes) && sameEntries(a.edges, b.edges);
 }

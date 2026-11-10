@@ -2687,7 +2687,9 @@ that says how far it is (**Placing the nodes**). A layout done is kept
 for the page's life, so coming back to the same graph draws it at
 once. It's kept with the whole graph it was made of, every node's id
 and kind and every edge. It's used only for a graph the same in all of
-these; any other graph, however like it, is laid out afresh. A node the drawing has no position for is left out,
+these; any other graph, however like it, is laid out afresh. The two are
+compared entry by entry, not as one text, which long IRIs could make too
+long for the browser to hold. A node the drawing has no position for is left out,
 with its edges, rather than drawn nowhere. An instance of the
 library's ten largest decks with a hundred answers each (about 14,500
 nodes and 50,000 edges) is laid out and routed in about a tenth of a

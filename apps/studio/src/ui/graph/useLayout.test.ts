@@ -4,6 +4,7 @@
 
 import { act, renderHook } from "@testing-library/preact";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { InstanceGraph } from "@solid-memo/domain/instanceGraph";
 import { forget } from "@solid-memo/ui/remembered";
 import { collidingGraphs, largeGraph, smallGraph } from "../../test/graph";
 import { createLayout } from "./layout";
@@ -96,6 +97,47 @@ describe("useLayout", () => {
     expect([...after.result.current.laid!.positions.keys()].sort()).toEqual(
       second.nodes.map((node) => node.id).sort(),
     );
+  });
+
+  it("goes on with a layout under way when the same graph comes as a new object", async () => {
+    const { result, rerender } = renderHook(
+      ({ graph }) => useLayout("a", graph, true, slowClock()),
+      { initialProps: { graph: smallGraph() } },
+    );
+    await later(0);
+    await later(1);
+    const progress = result.current.progress;
+    expect(progress).toBeGreaterThan(0);
+    rerender({ graph: smallGraph() });
+    expect(result.current.progress).toBe(progress);
+    await later(1);
+    expect(result.current.progress).toBeGreaterThan(progress);
+  });
+
+  it("lays out afresh when the graph changes under it", async () => {
+    const { result, rerender } = renderHook(
+      ({ graph }) => useLayout("a", graph, true, slowClock()),
+      { initialProps: { graph: smallGraph() } },
+    );
+    await later(0);
+    await later(1);
+    expect(result.current.progress).toBeGreaterThan(0);
+    rerender({ graph: largeGraph(3) });
+    await later(0);
+    expect(result.current.progress).toBe(0);
+  });
+
+  it("does not throw on a graph whose terms together are longer than a string can be", () => {
+    const long = "x".repeat(2 ** 28);
+    const node: InstanceGraph["nodes"][number] = {
+      id: long,
+      kind: "resource",
+      types: [],
+      literals: [],
+    };
+    const graph: InstanceGraph = { nodes: [node, node, node], edges: [] };
+    const { result } = renderHook(() => useLayout("b", graph, false));
+    expect(result.current).toEqual({ laid: null, progress: 0 });
   });
 
   it("does not run while the graph is not to be drawn", async () => {
