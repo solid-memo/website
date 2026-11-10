@@ -79,4 +79,23 @@ app the ID token only in the address that ends the session, so a build that sign
 ## How it's tested
 
 [The signed-in tests](testing.md#the-signed-in-tests) sign in to an LWS
-storage without a browser, on both servers.
+storage without a browser. [The user journeys](testing.md#user-journeys)
+sign in with one, in Chromium, on both servers. `JOURNEY_SERVER=css-lws`
+or `css-lws-only` runs them against that server's signed-in instance:
+the fork's own configuration behind TLS, with a storage for each pod.
+The app is built with `SOLID_CLIENT=solid-memo-client`.
+
+Some journeys read or write the pod themselves, as another app or to
+check what the app left. There the harness does what the app does: it
+logs the account in on the authorization-code flow and exchanges its ID
+token for the storage's token (`harness/podToken.ts`). The Solid-OIDC
+token that client credentials give is no LWS storage's.
+
+**Why the harness reads the server's keys first.** The fork makes the
+key it signs tokens with the first time it needs one. On a newly started
+server, several token exchanges at once can each make a key, and the
+server keeps only one of them. A token signed with any other key is then
+refused ("signature verification failed"). So the harness reads the
+server's keys (`/.well-known/lws/jwks`) once before the journeys start.
+That read makes the key, and every exchange after it uses the same one.
+The fix belongs in the fork.

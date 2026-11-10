@@ -439,6 +439,13 @@ need Docker and the browsers
 Firefox and WebKit, with their system libraries). CI runs them as a gate
 ([below](#deterministic-and-timing-dependent-jobs)).
 
+`JOURNEY_SERVER` names another server to run them against: `css-lws` or
+`css-lws-only`, the advisory servers above with Linked Web Storage, as
+their signed-in instances behind TLS
+([harness/journeyServer.ts](../e2e/journeys/harness/journeyServer.ts)),
+from the image e2e/pod builds. The app signs in to them only when built
+with `SOLID_CLIENT=solid-memo-client` ([lws.md](lws.md#how-its-tested)).
+
 Further journeys go through:
 
 - a deck added by link whose cards name pictures on its author's

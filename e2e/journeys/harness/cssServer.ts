@@ -10,15 +10,19 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { request } from "@playwright/test";
+import { journeyServer } from "./journeyServer.ts";
 
 /**
- * The Community Solid Server 7 the journeys log in to and keep their pods
- * on: css/compose.yml, behind TLS at https://127.0.0.1:<port>/, one per
- * run. Patterned on e2e/pod/servers.ts, which runs its servers over http.
+ * The Solid server the journeys log in to and keep their pods on, behind
+ * TLS at https://127.0.0.1:<port>/, one per run: the Community Solid
+ * Server 7 of css/compose.yml, or the one JOURNEY_SERVER names
+ * (journeyServer.ts). Patterned on e2e/pod/servers.ts, which runs its
+ * servers over http.
  */
 
 const HERE = join(import.meta.dirname, "..");
-const COMPOSE_FILE = join(HERE, "css", "compose.yml");
+export const SERVER = journeyServer(process.env.JOURNEY_SERVER, HERE);
+const COMPOSE_FILE = SERVER.compose;
 export const LOGS = join(HERE, "logs");
 export const CSS_LOG = join(LOGS, "css.log");
 /** Which checkout the containers belong to, so two worktrees' runs keep apart. */
@@ -34,8 +38,15 @@ export interface StartedCss {
   stop: () => Promise<void>;
 }
 
-/** Pulls the images unless they are here. */
+/**
+ * Pulls the images unless they are here; a Linked Web Storage server's,
+ * which no registry has, e2e/pod builds (or tags, from its cache).
+ */
 export async function prepare(): Promise<void> {
+  if (SERVER.lws) {
+    await run(process.execPath, [join(HERE, "..", "pod", "servers.ts"), "prepare", SERVER.id], {});
+    return;
+  }
   await docker(
     [
       "compose",
@@ -97,6 +108,10 @@ export async function startCss(): Promise<StartedCss> {
   const url = `https://127.0.0.1:${env.E2E_PORT}/`;
   try {
     await untilUp(`${url}.well-known/openid-configuration`);
+    // Its first token exchanges, side by side, may each make a signing
+    // key, and all but one token are then refused: reading its keys
+    // first makes the one (docs/lws.md#how-its-tested).
+    if (SERVER.lws) await untilUp(`${url}.well-known/lws/jwks`);
   } catch (error) {
     await stop().catch(() => {});
     throw error;
@@ -140,8 +155,18 @@ function follow(project: string, env: Record<string, string>): ChildProcess {
 
 /** Runs docker, resolving with what it printed; rejecting with it if it fails. */
 function docker(args: string[], env: Record<string, string>, cwd = HERE): Promise<string> {
+  return run("docker", args, env, cwd);
+}
+
+/** Runs `command`, resolving with what it printed; rejecting with it if it fails. */
+function run(
+  command: string,
+  args: string[],
+  env: Record<string, string>,
+  cwd = HERE,
+): Promise<string> {
   return new Promise((resolve, reject) => {
-    const child = spawn("docker", args, {
+    const child = spawn(command, args, {
       cwd,
       env: { ...process.env, ...env },
       stdio: ["ignore", "pipe", "pipe"],
@@ -152,14 +177,14 @@ function docker(args: string[], env: Record<string, string>, cwd = HERE): Promis
     child.on("error", (error) =>
       reject(
         new Error(
-          `docker could not be run (${error.message}); the journeys start their Solid server in it (docs/testing.md).`,
+          `${command} could not be run (${error.message}); the journeys start their Solid server in Docker (docs/testing.md).`,
         ),
       ),
     );
     child.on("close", (code) =>
       code === 0
         ? resolve(out)
-        : reject(new Error(`docker ${args.join(" ")} failed (${code}):\n${out}`)),
+        : reject(new Error(`${command} ${args.join(" ")} failed (${code}):\n${out}`)),
     );
   });
 }
@@ -213,7 +238,7 @@ if (import.meta.main) {
     for (const signal of ["SIGINT", "SIGTERM"] as const)
       process.once(signal, () => void stop().finally(() => process.exit(0)));
     console.log(
-      `Community Solid Server 7 at ${url} (its log: ${CSS_LOG}). Run the journeys against it with\n  JOURNEY_SERVER_URL=${url} npm run journeys\nCtrl-C stops it.`,
+      `${SERVER.name} at ${url} (its log: ${CSS_LOG}). Run the journeys against it with\n  JOURNEY_SERVER_URL=${url} npm run journeys\nCtrl-C stops it.`,
     );
     await new Promise(() => {});
   } else {
