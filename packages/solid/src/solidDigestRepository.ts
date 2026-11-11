@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, type NamedSubject, createSolidDataset, removeThings } from "./client/rdf";
+import {
+  type Dataset,
+  type NamedSubject,
+  createSolidDataset,
+  removeThings,
+  setThings,
+} from "./client/rdf";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
 import {
@@ -13,7 +19,6 @@ import {
 } from "@solid-memo/domain/studyDigest";
 import { AppError } from "@solid-memo/domain/appError";
 import { HttpError } from "./client/interface";
-import { editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
 import {
   type DigestSubjects,
@@ -214,11 +219,15 @@ export function createSolidDigestRepository({
 /**
  * The digest document holding `next`: only the subjects that differ
  * from `stored` are written or removed, all in one edit of the dataset
- * (datasetEdit.ts), so a write takes time that grows with the document
+ * (setThings), so a write takes time that grows with the document
  * and its subjects, not their product. What is dropped is removed at
  * each subject it was read from, as is any other subject a rewritten
  * one was read from, so none is left to be read again, and every subject
- * the digest was read without (toDigest).
+ * the digest was read without (toDigest). An entry is written in place
+ * of whatever its subject said, read as that entry or not, the digest
+ * being derived data: nothing else said there (another class, a value
+ * the entry's shape does not have, a newer format) is kept, so none of
+ * it can stop the entry from being written.
  */
 function withDigest(
   instanceUrl: string,
@@ -234,21 +243,21 @@ function withDigest(
     dropped: [],
   };
   const differs = (a: unknown, b: unknown) => JSON.stringify(a) !== JSON.stringify(b);
-  const sets: { url: string; make: (existing: NamedSubject | null) => NamedSubject }[] = [];
+  const sets: NamedSubject[] = [];
   const gone: string[] = [...readAt.dropped];
   function plan<T>(
     kind: "receipt" | "schedule" | "month",
     was: Record<string, T>,
     now: Record<string, T>,
     at: Map<string, string[]>,
-    toThing: (url: string, value: T, existing: NamedSubject | null) => NamedSubject,
+    toThing: (url: string, value: T) => NamedSubject,
   ): void {
     for (const [key, value] of Object.entries(now)) {
       // An entry no change replaced is the one read (changedDigest).
       if (was[key] === value || !differs(was[key], value)) continue;
       const url = digestSubjectOf(instanceUrl, kind, key);
       for (const other of at.get(key) ?? []) if (other !== url) gone.push(other);
-      sets.push({ url, make: (existing) => toThing(url, value, existing) });
+      sets.push(toThing(url, value));
     }
     for (const key of Object.keys(was)) {
       if (Object.hasOwn(now, key)) continue;
@@ -258,10 +267,8 @@ function withDigest(
   plan("receipt", before.receipts, next.receipts, readAt.receipts, toReceiptThing);
   plan("schedule", before.schedules, next.schedules, readAt.schedules, toScheduleThing);
   plan("month", before.months, next.months, readAt.months, toMonthSummaryThing);
-  const edit = editOf(removeThings(dataset, gone));
-  for (const { url, make } of sets) edit.setThing(make(edit.getThing(url)));
   return {
-    updated: edit.done(),
+    updated: setThings(removeThings(dataset, gone), sets),
     subjects: [...new Set([...sets.map(({ url }) => url), ...gone])],
   };
 }

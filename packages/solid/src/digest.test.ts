@@ -610,7 +610,7 @@ describe("the instance's digest in the pod", () => {
       const pod = fakePod();
       await saveDataset(
         DIGEST,
-        setThing(createSolidDataset(), toScheduleThing(old, midSchedule, null)),
+        setThing(createSolidDataset(), toScheduleThing(old, midSchedule)),
         pod.fetch,
       );
       const digests = createSolidDigestRepository({ fetch: pod.fetch });
@@ -935,6 +935,106 @@ describe("the instance's digest in the pod", () => {
     expect(await createSolidDigestRepository({ fetch: pod.fetch }).readDigest(INSTANCE)).toEqual(
       emptyDigest(),
     );
+  });
+
+  describe("a subject at an entry's own address", () => {
+    const CATALOG = `${INSTANCE}catalog.ttl`;
+    const learnReceipt = (document: string) => (draft: Parameters<DigestChange>[0]) =>
+      addReceipt(draft, document, '"v1"', { latestFormat: true });
+
+    const asEntry = `sm:receiptOf <catalog.ttl> ; sm:documentVersion "v0"`;
+    it.each([
+      ["of a class whose shape is closed", `a sm:ColorSet ; <https://other.example/x> 1`],
+      ["of a newer format, short of a field", `a sm:DocumentReceipt ; sm:formatVersion 9`],
+      [
+        "read as the entry but also of a class whose shape is closed",
+        `a sm:DocumentReceipt, sm:ColorSet ; sm:formatVersion 1 ; ${asEntry}`,
+      ],
+      [
+        "read as the entry but with a value its shape does not have",
+        `a sm:DocumentReceipt ; sm:formatVersion 1 ; ${asEntry} ; <https://other.example/x> 1`,
+      ],
+      [
+        "read as the entry of a newer format, also of another class",
+        `a sm:DocumentReceipt, sm:ColorSet ; sm:formatVersion 9 ; ${asEntry}`,
+      ],
+    ])(
+      "is written over when it is %s, and every change is written",
+      async (_, planted) => {
+        const pod = fakePod();
+        await pod.put(DIGEST, `${PREFIXES}<#receipt-catalog.ttl> ${planted} .`);
+        const { checkSubjects } = createShaclShapeValidator({
+          fetch: pod.fetch,
+          shapesFetch,
+          ...SHAPE_SOURCES,
+        });
+        const digests = createSolidDigestRepository({
+          fetch: pod.fetch,
+          checkWrite: checkSubjects,
+        });
+        const results = await Promise.allSettled(
+          [REVIEWS, CATALOG, CARDS].map((document) =>
+            digests.updateDigest(INSTANCE, learnReceipt(document)),
+          ),
+        );
+        expect(results.map((r) => r.status)).toEqual(["fulfilled", "fulfilled", "fulfilled"]);
+        const { receipts } = (await digests.readDigest(INSTANCE))!;
+        expect(Object.keys(receipts).sort()).toEqual([CARDS, CATALOG, REVIEWS].sort());
+        expect(receipts[CATALOG].version).toBe('"v1"');
+        const written = pod.triples(DIGEST)!.join("\n");
+        expect(written).not.toContain("other.example");
+        expect(written).not.toContain("ColorSet");
+        expect(written).not.toContain('"9"');
+      },
+      60_000,
+    );
+
+    it("keeps a value that is a blank node, which stops no write", async () => {
+      const pod = fakePod();
+      await pod.put(
+        DIGEST,
+        `${PREFIXES}<#receipt-catalog.ttl> a sm:DocumentReceipt ; sm:formatVersion 1 ; ${asEntry} ;
+           sm:documentVersion [ a sm:ColorSet ] ;
+           <https://other.example/x> [ a sm:DocumentReceipt, sm:ColorSet ; sm:formatVersion 9 ] .`,
+      );
+      const { checkSubjects } = createShaclShapeValidator({
+        fetch: pod.fetch,
+        shapesFetch,
+        ...SHAPE_SOURCES,
+      });
+      const digests = createSolidDigestRepository({ fetch: pod.fetch, checkWrite: checkSubjects });
+      for (const round of [1, 2]) {
+        const results = await Promise.allSettled(
+          [REVIEWS, CATALOG, CARDS].map((document) =>
+            digests.updateDigest(INSTANCE, (draft) =>
+              addReceipt(draft, document, `"v${round}"`, { latestFormat: true }),
+            ),
+          ),
+        );
+        expect(results.map((r) => r.status)).toEqual(["fulfilled", "fulfilled", "fulfilled"]);
+        const { receipts } = (await digests.readDigest(INSTANCE))!;
+        expect(Object.keys(receipts).sort()).toEqual([CARDS, CATALOG, REVIEWS].sort());
+        expect(receipts[CATALOG].version).toBe(`"v${round}"`);
+      }
+      // A write names no blank node, so it can't remove one (data-model.md).
+      expect(pod.triples(DIGEST)!.join("\n")).toContain("ColorSet");
+    }, 60_000);
+
+    it("is written over when a newer app wrote it as that entry, the digest being derived", async () => {
+      const pod = fakePod();
+      await pod.put(
+        DIGEST,
+        `${PREFIXES}<#receipt-catalog.ttl> a sm:DocumentReceipt ;
+           sm:formatVersion 9 ; ${asEntry} ; <https://other.example/x> 1 .`,
+      );
+      const digests = createSolidDigestRepository({ fetch: pod.fetch });
+      expect((await digests.readDigest(INSTANCE))!.receipts[CATALOG]).toBeDefined();
+      await digests.updateDigest(INSTANCE, learnReceipt(CATALOG));
+      expect((await digests.readDigest(INSTANCE))!.receipts[CATALOG].version).toBe('"v1"');
+      const written = pod.triples(DIGEST)!.join("\n");
+      expect(written).not.toContain("other.example");
+      expect(written).not.toContain('"9"');
+    });
   });
 
   /** A schedule of format 1 of the deck `deckUrl`, at the subject `#<id>`. */

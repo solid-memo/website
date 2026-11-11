@@ -161,26 +161,21 @@ export function toDigest(
   return { digest, subjects };
 }
 
-export function toReceiptThing(
-  url: string,
-  receipt: DocumentReceipt,
-  existing: NamedSubject | null,
-): NamedSubject {
-  return recordThing(url, DOCUMENT_RECEIPT_V1, receiptToRecord(receipt), existing);
+/**
+ * The receipt's subject at `url`, built new rather than onto what `url`
+ * held: the digest is derived data, so nothing else said there is kept
+ * (withDigest in solidDigestRepository.ts).
+ */
+export function toReceiptThing(url: string, receipt: DocumentReceipt): NamedSubject {
+  return recordThing(url, DOCUMENT_RECEIPT_V1, receiptToRecord(receipt), null);
 }
 
-export function toScheduleThing(
-  url: string,
-  schedule: StoredSchedule,
-  existing: NamedSubject | null,
-): NamedSubject {
-  return recordThing(url, DECK_SCHEDULE_V2, scheduleToRecord(schedule), existing);
+/** The schedule's subject at `url`, built new as toReceiptThing builds a receipt's. */
+export function toScheduleThing(url: string, schedule: StoredSchedule): NamedSubject {
+  return recordThing(url, DECK_SCHEDULE_V2, scheduleToRecord(schedule), null);
 }
 
-export function toMonthSummaryThing(
-  url: string,
-  summary: StoredMonthSummary,
-  existing: NamedSubject | null,
-): NamedSubject {
-  return recordThing(url, MONTH_SUMMARY_V1, monthSummaryToRecord(summary), existing);
+/** The month summary's subject at `url`, built new as toReceiptThing builds a receipt's. */
+export function toMonthSummaryThing(url: string, summary: StoredMonthSummary): NamedSubject {
+  return recordThing(url, MONTH_SUMMARY_V1, monthSummaryToRecord(summary), null);
 }
