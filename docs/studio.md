@@ -1497,7 +1497,9 @@ are read afresh.
 
 The deck is written as any deck Solid Memo writes: wrong options named
 with `sm:distractor` and `schema:suggestedAnswer`, states naming their
-card in the new deck. It needs no type-index registration: the
+card in the new deck. A state's due day that isn't a real date is
+written as the day of its last review, as a move does, and a snapshot
+with such a day is left out. It needs no type-index registration: the
 instance's own leads to it (`data-model.md`). While the data
 check is under way, or the catalog is set aside, the import is held
 ([below](#data-set-aside)); a file can still be read.

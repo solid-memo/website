@@ -4,10 +4,12 @@
 
 import { planCardTransfer } from "@solid-memo/domain/cardTransfer";
 import type { Deck } from "@solid-memo/domain/deck";
+import { deckFileBaseOf, importedDeck } from "@solid-memo/domain/deckFile";
 import { switchedStates } from "@solid-memo/domain/schedulerSwitch";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { describe, expect, it } from "vitest";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
+import { createSolidDeckArchive } from "./solidDeckArchive";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 
 /**
@@ -117,5 +119,32 @@ describe("a due day that is no date, written back", () => {
       every: true,
     });
     expect(writes).toEqual([target.reviewsDocumentUrl]);
+  });
+
+  it("imports a deck file with its progress", async () => {
+    const file = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+<#d> a sm:Deck ; <http://purl.org/dc/terms/title> "T" ; sm:formatVersion 1 ;
+  sm:cardsDocument <decks/d.ttl> ; sm:reviewsDocument <reviews/d.ttl> .
+<decks/d.ttl#c1> a sm:Card ; sm:front "F" ; sm:back "B" ; sm:formatVersion 1 .
+${stateOf("c1", "zzz", 2).replace("<#c1>", "<reviews/d.ttl#c1>").replace("../decks", "decks")}`;
+    const content = await createSolidDeckArchive({ fetch: globalThis.fetch }).readDeckFile(
+      file,
+      "turtle",
+      deckFileBaseOf("d.ttl"),
+    );
+    const imported = importedDeck(INSTANCE, content, {
+      withProgress: true,
+      decks: [],
+      freshId: "deck-x",
+      now: NOW.toISOString(),
+    });
+    expect(imported.reviews.map((state) => state.due)).toEqual(["2026-11-01"]);
+    const { repository, writes } = podOf("");
+    await repository.applyReviewChanges(imported.deck, {
+      save: imported.reviews,
+      remove: [],
+      fsrs: { save: imported.fsrsReviews, remove: [] },
+    });
+    expect(writes).toEqual([imported.deck.reviewsDocumentUrl]);
   });
 });

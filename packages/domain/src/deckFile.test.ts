@@ -158,6 +158,23 @@ describe("importedDeck", () => {
     expect(importedDeck(INSTANCE, content(), options).fsrsReviews).toEqual([]);
   });
 
+  it("writes a due day that is no date as the day of the last review", () => {
+    const fsrs: FsrsState = {
+      cardId: "card-1",
+      direction: "front-to-back",
+      stability: 4,
+      difficulty: 5,
+      due: "soon",
+      firstReviewedAt: state.firstReviewedAt,
+      lastReviewedAt: state.lastReviewedAt,
+      formatVersion: 1,
+    };
+    const file = content({ reviews: [{ ...state, due: "zzz" }], fsrsReviews: [fsrs] });
+    const { reviews, fsrsReviews } = importedDeck(INSTANCE, file, options);
+    expect(reviews).toEqual([{ ...state, due: "2025-01-29" }]);
+    expect(fsrsReviews).toEqual([{ ...fsrs, due: "2025-01-29" }]);
+  });
+
   it("keeps at most MAX_COMPLETED_CHAPTERS completed chapters, each once, the course's first", () => {
     const others = Array.from(
       { length: MAX_COMPLETED_CHAPTERS + 1 },
