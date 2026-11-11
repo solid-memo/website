@@ -92,9 +92,10 @@ Decisions fixed in code (and tests):
   and difficulty, and both schedulers' snapshots, are read bounded too.
   Whatever writes a state back as read (an undo, a day's reset, a
   format update, a reschedule or move in the Studio) then writes
-  numbers the write check accepts. An undo or a format update writes a
-  due day that isn't a real date as the day of the state's last review,
-  so the prompt falls due again by the next study day. Every number
+  numbers the write check accepts. A due day that isn't a real date is
+  written as the day of the state's last review by an undo, a format
+  update or an import with progress. The prompt falls due again by the
+  next study day. Every number
   is written without an exponent, which no `xsd:integer` or `xsd:decimal` has. The estimate
   FSRS-6 makes from an SM-2 state is bounded the same way. A state
   from elsewhere, such as a deck file with progress, then still gives

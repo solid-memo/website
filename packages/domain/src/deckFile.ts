@@ -12,6 +12,7 @@ import {
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "./instanceLayout";
 import { shown } from "./langText";
 import type { FsrsState, ReviewState } from "./review";
+import { withWritableDueDays } from "./scheduling";
 
 /**
  * A deck as a file (docs/studio.md#import-and-export): the deck's entry,
@@ -128,7 +129,8 @@ const DECK_ID = /^deck-[A-Za-z0-9_-]+$/;
  * (`<id>-cards`, distributionUrlOf) is a deck's or a distribution's
  * subject already, or the id is none this app would give: then it gets
  * `freshId`. Its documents are the instance's
- * own (`decks/<id>.ttl`, `reviews/<id>.ttl`). Cards keep their ids,
+ * own (`decks/<id>.ttl`, `reviews/<id>.ttl`). The review states kept
+ * are written as withWritableDueDays has them. Cards keep their ids,
  * their creation times and whether they are retired. A deck the file
  * says nothing of the creation of is created `now`.
  */
@@ -183,8 +185,10 @@ export function importedDeck(
   return {
     deck,
     cards,
-    reviews: withProgress ? (content.reviews ?? []) : [],
-    fsrsReviews: withProgress ? (content.fsrsReviews ?? []) : [],
+    reviews: withProgress ? (content.reviews ?? []).map((state) => withWritableDueDays(state)) : [],
+    fsrsReviews: withProgress
+      ? (content.fsrsReviews ?? []).map((state) => withWritableDueDays(state))
+      : [],
   };
 }
 
