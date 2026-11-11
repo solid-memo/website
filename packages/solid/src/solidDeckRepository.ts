@@ -43,7 +43,7 @@ import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { isDeckOutdated, isOutdated, upgradeCard, upgradeDeck } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
-import { CARD_V7 } from "@solid-memo/vocab/descriptors.generated";
+import { CARD_V7, DECK_V6 } from "@solid-memo/vocab/descriptors.generated";
 import {
   applyDeckTreeEdit,
   buildTree,
@@ -83,7 +83,13 @@ import { createDeckDocumentGuard } from "./deckPlace";
 import { editOf, type DatasetEdit } from "./datasetEdit";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
-import { readDatetime, recordThing, unlessNewer, unlessTyped } from "./records";
+import {
+  readDatetime,
+  recordThing,
+  unlessNewer,
+  unlessTyped,
+  withoutForeignShapedClasses,
+} from "./records";
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { linksGuestPod } from "@solid-memo/domain/guest";
@@ -622,7 +628,12 @@ export function createSolidDeckRepository({
       if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
       const changed = change(stored);
       if (changed === null) return stored;
-      const entry = changed.edit(buildThing(unlessNewer(getThing(dataset!, deck.url)!)));
+      // A class another app gave the entry that a shape asks something of goes, as recordThing drops it.
+      const entry = changed.edit(
+        buildThing(
+          withoutForeignShapedClasses(unlessNewer(getThing(dataset!, deck.url)!), DECK_V6),
+        ),
+      );
       const updated = setThing(dataset!, entry.build());
       if (checked) await checkWrite(updated, [deck.url], "pod");
       try {

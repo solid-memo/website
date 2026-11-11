@@ -10,7 +10,8 @@ import type { StoredPreferences } from "@solid-memo/domain/preferences";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { toPreferences, toPreferencesThing } from "./mappers/preferencesMapper";
-import { unlessNewer } from "./records";
+import { PREFERENCES_V6 } from "@solid-memo/vocab/descriptors.generated";
+import { unlessNewer, withoutForeignShapedClasses } from "./records";
 import { SM } from "./vocab";
 
 export interface SolidPreferencesRepositoryDeps {
@@ -91,7 +92,9 @@ export function createSolidPreferencesRepository({
       )
         return "unchanged";
       const subject = buildThing(
-        existing === null ? toPreferencesThing(url, created!, null) : unlessNewer(existing),
+        existing === null
+          ? toPreferencesThing(url, created!, null)
+          : withoutForeignShapedClasses(unlessNewer(existing), PREFERENCES_V6),
       ).removeAll(SM.connectedScreenSkipped);
       const updated = setThing(
         dataset ?? createSolidDataset(),

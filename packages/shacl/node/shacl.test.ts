@@ -17,6 +17,7 @@ import {
 import { parseTurtle, readTurtleTree } from "@solid-memo/turtle/rdf";
 import { VOCAB_BASE } from "@solid-memo/vocab/tooling/sources";
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
+import { DCAT_AP_SHAPED_CLASSES, PROFILES } from "../src/profiles.ts";
 
 const ROOT = VOCAB_ROOT;
 const DC = "http://purl.org/dc/terms/";
@@ -908,5 +909,47 @@ describe("vendor/", async () => {
       const bytes = await readFile(`${ROOT}vendor/${path}`);
       expect(createHash("sha256").update(bytes).digest("hex"), path).toBe(sha256);
     }
+  });
+});
+
+describe("DCAT_AP_SHAPED_CLASSES", () => {
+  it("names each class a shape of the vendored DCAT-AP profile holds to properties", async () => {
+    const SH = "http://www.w3.org/ns/shacl#";
+    const quads = (
+      await Promise.all(
+        PROFILES["dcat-ap"].map(async (path) =>
+          parseTurtle(await readFile(`${ROOT}vendor/${path}`, "utf8"), "https://example.org/"),
+        ),
+      )
+    ).flat();
+    const withProperties = new Set(
+      quads.filter((q) => q.predicate.value === `${SH}property`).map((q) => q.subject.value),
+    );
+    const shaped = quads
+      .filter(
+        (q) => q.predicate.value === `${SH}targetClass` && withProperties.has(q.subject.value),
+      )
+      .map((q) => q.object.value);
+    expect([...new Set(shaped)].sort()).toEqual([...DCAT_AP_SHAPED_CLASSES].sort());
+    // The shapes left out ask nothing of a subject: no constraint of their own, and open.
+    const leftOut = new Set(
+      quads
+        .filter(
+          (q) => q.predicate.value === `${SH}targetClass` && !withProperties.has(q.subject.value),
+        )
+        .map((q) => q.subject.value),
+    );
+    const stated = quads
+      .filter((q) => leftOut.has(q.subject.value))
+      .map((q) =>
+        q.predicate.value === `${SH}closed` ? `closed ${q.object.value}` : q.predicate.value,
+      );
+    expect([...new Set(stated)].sort()).toEqual(
+      [
+        "closed false",
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        `${SH}targetClass`,
+      ].sort(),
+    );
   });
 });

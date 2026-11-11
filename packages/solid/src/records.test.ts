@@ -12,22 +12,26 @@ import {
   getLiteralAll,
   getStringNoLocale,
   getStringNoLocaleAll,
+  getTermAll,
   getThing,
   getUrl,
   getUrlAll,
   setThing,
   toRdfJsDataset,
 } from "./client/rdf";
-import { datasetOfTurtle, getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
+import {
+  datasetFrom,
+  datasetOfTurtle,
+  getStringWithLocale,
+  getStringWithLocaleAll,
+} from "./testing/datasets";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
-import {
-  readShapeTree,
-  SHAPE_SOURCES,
-  shapesFetch,
-} from "@solid-memo/vocab/tooling/testing/shapeSources";
+import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { deckSubjects, toCards, toDecks, withDeck } from "./mappers/deckMapper";
+import { toPreferencesThing } from "./mappers/preferencesMapper";
 import { toReviewStates, withReviewStates } from "./mappers/reviewStateMapper";
+import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import type { Literal, Quad } from "@rdfjs/types";
 import { describe, expect, it, vi } from "vitest";
@@ -46,7 +50,6 @@ import {
   LIBRARY_DECK_V5,
   PREFERENCES_V2,
   REVIEW_STATE_V2,
-  SHAPES,
 } from "@solid-memo/vocab/descriptors.generated";
 import {
   applyRecord,
@@ -66,6 +69,8 @@ import { integerLiteral } from "./testing/literals";
 
 const URL_ = "https://pod.example/x.ttl#it";
 const EX = "https://example.com/ns#";
+const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
+const DCAT_DATASET = "http://www.w3.org/ns/dcat#Dataset";
 
 /**
  * A valid xsd:dateTime past the year 275760, which a JavaScript date
@@ -194,20 +199,13 @@ describe("recordThing and readRecord", () => {
     expect(getInteger(thing, SM.formatVersion)).toBe(1);
   });
 
-  it("drop a class another app gave the subject whose shape is closed, as no write would pass it, and keep other classes", async () => {
-    const classes = (await readShapeTree())
-      .filter((file) => file.turtle.includes("sh:closed true"))
-      .map(
-        (file) =>
-          Object.values(SHAPES)
-            .flatMap((versions) => Object.values(versions))
-            .find((descriptor) => descriptor.shapeDocument === file.path)?.targetClass,
-      );
-    // CLOSED_CLASSES in records.ts names these.
-    expect(classes).toEqual([SM.ColorSet]);
+  it("drop each class a shape asks something of that another app gave the subject, as no write would pass it, and keep other classes", () => {
     const existing = buildThing(createThing({ url: URL_ }))
       .addIri(RDF.type, `${EX}Thing`)
       .addIri(RDF.type, SM.ColorSet)
+      .addIri(RDF.type, SM.Card)
+      .addIri(RDF.type, FOAF_AGENT)
+      .addIri(RDF.type, DCAT_DATASET)
       .addIri(RDF.type, `${EX}Other`)
       .build();
     expect(getUrlAll(recordThing(URL_, THING, FULL, existing), RDF.type)).toEqual([
@@ -215,9 +213,11 @@ describe("recordThing and readRecord", () => {
       `${EX}Other`,
       `${EX}Extra`,
     ]);
-    expect(getUrlAll(recordThing(URL_, COLOR_SET_V1, {}, existing), RDF.type)).toContain(
+    expect(getUrlAll(recordThing(URL_, COLOR_SET_V1, {}, existing), RDF.type)).toEqual([
+      `${EX}Thing`,
       SM.ColorSet,
-    );
+      `${EX}Other`,
+    ]);
   });
 
   it("refuse to write over a subject a newer version of the app wrote, and write over one at this app's version or older", () => {
@@ -971,4 +971,116 @@ describe("a date of any year a date holds", () => {
       "2026-09-21T10:00:00.123Z",
     ]);
   });
+});
+
+describe("a class another app gave a subject Solid Memo writes", () => {
+  const INSTANCE = "https://pod.example/solid-memo/a/";
+  const PREFERENCES = `${INSTANCE}preferences.ttl`;
+  const CARDS = `${INSTANCE}decks/d1/cards.ttl`;
+  const REVIEWS = `${INSTANCE}decks/d1/reviews.ttl`;
+  const FOAF_DOCUMENT = "http://xmlns.com/foaf/0.1/Document";
+  const { checkSubjects } = createShaclShapeValidator({
+    fetch: vi.fn() as never,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
+
+  it.each([
+    [FOAF_AGENT, []],
+    [SM.Card, []],
+    [DCAT_DATASET, []],
+    [FOAF_DOCUMENT, [FOAF_DOCUMENT]],
+  ])(
+    "saves preferences also typed %s, keeping only a class no shape asks anything of",
+    async (type, kept) => {
+      const url = `${PREFERENCES}#it`;
+      const stored = buildThing(toPreferencesThing(url, DEFAULT_PREFERENCES, null))
+        .addIri(RDF.type, type)
+        .build();
+      const saved = setThing(
+        setThing(datasetFrom(PREFERENCES), stored),
+        toPreferencesThing(url, { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 }, stored),
+      );
+      await expect(checkSubjects(saved, [url], "pod")).resolves.toBeUndefined();
+      expect(getUrlAll(getThing(saved, url)!, RDF.type)).toEqual([SM.Preferences, ...kept]);
+    },
+  );
+
+  it("saves preferences that another app gave more classes than the check reads, keeping as many as it reads", async () => {
+    const url = `${PREFERENCES}#it`;
+    const many = Array.from({ length: 40 }, (_, i) => `https://ex.org/T${i}`);
+    const typed = buildThing(toPreferencesThing(url, DEFAULT_PREFERENCES, null));
+    for (const type of many) typed.addIri(RDF.type, type);
+    const stored = typed.build();
+    const saved = setThing(
+      setThing(datasetFrom(PREFERENCES), stored),
+      toPreferencesThing(url, { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 }, stored),
+    );
+    await expect(checkSubjects(saved, [url], "pod")).resolves.toBeUndefined();
+    expect(getUrlAll(getThing(saved, url)!, RDF.type)).toEqual([
+      SM.Preferences,
+      ...many.slice(0, 31),
+    ]);
+  });
+
+  it.each([
+    [
+      "31 classes and two literals",
+      [...Array.from({ length: 31 }, (_, i) => `<https://ex.org/T${i}>`), '"x1"', '"x2"'],
+      Array.from({ length: 31 }, (_, i) => `https://ex.org/T${i}`),
+    ],
+    ["33 literals", Array.from({ length: 33 }, (_, i) => `"L${i}"`), []],
+    ["33 blank nodes", Array.from({ length: 33 }, (_, i) => `_:b${i}`), []],
+  ])(
+    "saves preferences another app typed with %s, keeping only classes",
+    async (_, types, kept) => {
+      const url = `${PREFERENCES}#it`;
+      const stored = await datasetOfTurtle(
+        PREFERENCES,
+        `<${url}> a <${SM.Preferences}>, ${types.join(", ")} .\n`,
+      );
+      const saved = setThing(
+        stored,
+        toPreferencesThing(
+          url,
+          { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 },
+          getThing(stored, url),
+        ),
+      );
+      await expect(checkSubjects(saved, [url], "pod")).resolves.toBeUndefined();
+      const thing = getThing(saved, url)!;
+      expect(getTermAll(thing, RDF.type).every((term) => term.termType === "NamedNode")).toBe(true);
+      expect(getUrlAll(thing, RDF.type)).toEqual([SM.Preferences, ...kept]);
+    },
+  );
+
+  it.each([FOAF_AGENT, SM.Card, DCAT_DATASET])(
+    "grades a card whose review state is also typed %s",
+    async (type) => {
+      const dataset = await datasetOfTurtle(
+        REVIEWS,
+        `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+<${REVIEWS}#a> a sm:ReviewState, <${type}> ; sm:formatVersion 2 ; sm:reviewOf <${CARDS}#a> ;
+  sm:reviewDirection sm:frontToBack ; sm:easeFactor 2.5 ; sm:intervalDays 3 ; sm:repetitions 2 ;
+  sm:due "2026-02-02" ; sm:firstReviewedAt "2026-01-01T00:00:00Z"^^xsd:dateTime ;
+  sm:lastReviewedAt "2026-01-01T00:00:00Z"^^xsd:dateTime .
+`,
+      );
+      const documents = { id: "d1", cardsDocumentUrl: CARDS, reviewsDocumentUrl: REVIEWS } as never;
+      const [state] = toReviewStates(dataset, documents).sm2;
+      const written = withReviewStates(
+        dataset,
+        documents,
+        { sm2: [{ ...state!, intervalDays: 8, repetitions: 3 }] },
+        () => "x",
+      );
+      await expect(
+        checkSubjects(written.dataset, written.subjects, "pod"),
+      ).resolves.toBeUndefined();
+      expect(getUrlAll(getThing(written.dataset, `${REVIEWS}#a`)!, RDF.type)).toEqual([
+        SM.ReviewState,
+      ]);
+    },
+  );
 });

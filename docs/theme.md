@@ -300,7 +300,9 @@ it's read and painted:
 - **What another app adds doesn't stop a save.** A color set is
   written afresh with only its colors, so a property another app added
   to it is dropped rather than refused by the closed shape. If another
-  app made the palette a color set too, that class is dropped as well.
+  app made the palette a color set too, that class is dropped as well,
+  as is any other class a shape asks something of on a subject the app
+  writes ([shapes.md](shapes.md#conventions)).
   A color set is written where the palette names it only when that
   subject is a color set and nothing else, and no other palette names
   it. Otherwise it goes to `#palette-<id>-light` or `-dark`, or the

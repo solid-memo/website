@@ -33,7 +33,8 @@ import {
   type VersionedRecord,
 } from "@solid-memo/vocab/types.generated";
 import type { FieldDescriptor, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
-import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { DCAT_AP_SHAPED_CLASSES } from "@solid-memo/shacl/profiles";
 import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
 
@@ -399,20 +400,62 @@ function addValue(
 }
 
 /**
- * The classes whose shape is closed (sh:closed in ns/shapes): a subject
- * typed with one is checked against that shape, which allows only its
- * own properties, so a subject of another kind that kept such a type
- * could never be written again.
+ * The classes a shape asks something of: Solid Memo's own shapes' and
+ * the standard ones it writes (foaf:Agent, dcat:Catalog, ...), and each
+ * class a shape of the DCAT-AP profile holds to properties
+ * (DCAT_AP_SHAPED_CLASSES: dcat:Dataset, dcat:DataService, ...). The
+ * write check holds a subject to the shape of every such class it has,
+ * so a subject of another kind that kept one could never be written
+ * again (GHSA-6wqw-rpq8-v2cq, GHSA-h3xx-5m22-28jw).
  */
-const CLOSED_CLASSES: readonly string[] = [SM.ColorSet];
+const SHAPED_CLASSES: ReadonlySet<string> = new Set([
+  ...ALL_SHAPES.map((d) => d.targetClass),
+  ...DCAT_AP_SHAPED_CLASSES,
+]);
+
+/**
+ * The most classes the write check reads a subject by: one with more
+ * is checked as having none, which no write of it passes
+ * (MAX_TYPES_PER_NODE in packages/shacl/src/engine.ts).
+ */
+const MAX_CLASSES = 32;
+
+/**
+ * The subject with each class a shape asks something of that another
+ * app gave it dropped (SHAPED_CLASSES), unless it is one of the
+ * descriptor's own: what this app writes of the subject is held to its
+ * own shapes alone. A class no shape asks anything of (a foaf:Document)
+ * stays, as long as the subject, with its own classes, has no more
+ * than the write check reads it by (MAX_CLASSES); the ones past that
+ * are dropped too, and so is a value of rdf:type that is no IRI.
+ */
+export function withoutForeignShapedClasses(
+  thing: NamedSubject,
+  descriptor: ShapeDescriptor,
+): NamedSubject {
+  const own = new Set([descriptor.targetClass, ...descriptor.additionalTypes]);
+  let room = MAX_CLASSES - own.size;
+  const kept: string[] = [];
+  for (const type of new Set(getUrlAll(thing, RDF.type))) {
+    if (own.has(type)) kept.push(type);
+    else if (!SHAPED_CLASSES.has(type) && room > 0) {
+      kept.push(type);
+      room--;
+    }
+  }
+  // A value of rdf:type that is no IRI (a literal, a blank node) names
+  // no class, yet the check counts it against MAX_CLASSES: it goes too.
+  return buildThing(thing).removeAll(RDF.type).setIriAll(RDF.type, kept).build();
+}
 
 /**
  * The subject as this app writes it: the existing subject (so unknown
  * triples survive) or a new one, typed once with its class and any
  * further types its shape names, with the record applied, the values
- * the shape fixes set and the shape's version stamped. A class whose
- * shape is closed (CLOSED_CLASSES) that another app gave the subject is
- * dropped, unless it is the subject's own.
+ * the shape fixes set and the shape's version stamped. A class a shape
+ * asks something of that another app gave the subject is dropped,
+ * unless it is the subject's own, and so is any other class past the
+ * most the write check reads (withoutForeignShapedClasses).
  *
  * A tab running an older version of the app is stopped here from
  * writing over what a newer one wrote: an existing subject stamped with a
@@ -436,15 +479,12 @@ export function recordThing<T>(
       writes: descriptor.version,
     });
   }
-  const thing = existing ?? createThing({ url });
+  const thing =
+    existing === null ? createThing({ url }) : withoutForeignShapedClasses(existing, descriptor);
   const builder = buildThing(thing);
   const types = getUrlAll(thing, RDF.type);
-  const own = [descriptor.targetClass, ...descriptor.additionalTypes];
-  for (const type of own) {
+  for (const type of [descriptor.targetClass, ...descriptor.additionalTypes]) {
     if (!types.includes(type)) builder.addIri(RDF.type, type);
-  }
-  for (const type of types) {
-    if (CLOSED_CLASSES.includes(type) && !own.includes(type)) builder.removeUrl(RDF.type, type);
   }
   applyRecord(builder, descriptor, record);
   for (const fixed of descriptor.fixedValues) builder.setIri(fixed.predicate, fixed.value);
