@@ -77,6 +77,7 @@ describe("isLinkableUrl", () => {
     "https://alice.example/profile/card#me",
     "http://localhost:3000/pod/",
     "mailto:alice@example.org",
+    "https://pod.example/search?q=1#top",
   ])("accepts %s", (value) => {
     expect(isLinkableUrl(value)).toBe(true);
   });
@@ -89,6 +90,9 @@ describe("isLinkableUrl", () => {
     "https://pod.example\u2215card@evil.example/x",
     "https://user:secret@pod.example/",
     "http://:secret@pod.example/",
+    "mailto:boss@corp.example?cc=x@evil.example",
+    "mailto:boss@corp.example?subject=Invoice&body=Please%20pay",
+    "mailto:boss@corp.example#fragment",
   ])("rejects %j", (value) => {
     expect(isLinkableUrl(value)).toBe(false);
   });

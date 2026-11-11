@@ -13,7 +13,8 @@ import { useI18n } from "./i18n";
  * A URL shown to the user is always clickable — provided it is safe to
  * follow. URLs mostly come from pod data, so anything but http(s)/mailto
  * renders as plain text instead of a link, as does one with a user name or
- * password before its host, which would hide the host it leads to. With
+ * password before its host, which would hide the host it leads to, and a
+ * mailto: one with a query or fragment, which would fill in the mail. With
  * no text of its own, it reads its address with the hidden characters
  * shown as markers (visibleControls); a web address that does not name
  * the host it opens as the URL parser reads it (namesItsHost), such as one

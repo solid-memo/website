@@ -47,6 +47,16 @@ describe("ExternalLink", () => {
     );
   });
 
+  it("shows a mailto: URL with header fields or a fragment as plain text", () => {
+    const url =
+      "mailto:boss@corp.example?cc=x@evil.example&subject=Invoice&body=Please%20pay%20IBAN%20XX00";
+    const { rerender } = render(<ExternalLink url={url} />);
+    expect(screen.queryByRole("link")).toBeNull();
+    expect(screen.getByText(url)).toBeInTheDocument();
+    rerender(<ExternalLink url="mailto:boss@corp.example#note" />);
+    expect(screen.queryByRole("link")).toBeNull();
+  });
+
   it("renders an unsafe URL as plain text, never as a link", () => {
     render(<ExternalLink url="javascript:alert(1)" class="hint" />);
     expect(screen.queryByRole("link")).toBeNull();
