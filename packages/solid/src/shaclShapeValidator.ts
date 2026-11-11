@@ -6,6 +6,7 @@ import {
   type Dataset,
   type Subject,
   asUrl,
+  changesOf,
   datasetFromQuads,
   getThing,
   getThingAll,
@@ -113,6 +114,118 @@ function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
     violation.value !== undefined &&
     violation.value.split("#")[0] !== focusNode.split("#")[0]
   );
+}
+
+/** A subject's IRI values of a predicate, by which pickShapes tells shapes with fixed values apart. */
+function valuesOf(thing: Subject): (predicate: string) => string[] {
+  return (predicate) => getUrlAll(thing, predicate);
+}
+
+/**
+ * The predicates Solid Memo writes on a subject of a pod: its classes,
+ * its format stamp, and the fields of the shapes it is read by there
+ * (pickShapes), besides the terms of its own vocabulary; null for a
+ * subject no shape is picked for, of which it writes nothing. The
+ * writer keeps every other value of a subject as it found it (records.ts
+ * recordThing), so those are another app's.
+ */
+function writtenPredicates(thing: Subject): Set<string> | null {
+  const pick = pickShapes(
+    getUrlAll(thing, RDF.type),
+    storedVersionOf(thing),
+    "pod",
+    valuesOf(thing),
+  );
+  if (pick.kind !== "shapes") return null;
+  const written = new Set<string>([RDF.type, SM.formatVersion]);
+  for (const descriptor of pick.descriptors) {
+    for (const field of descriptor.fields) written.add(field.predicate);
+  }
+  return written;
+}
+
+/**
+ * Whether a result is DCAT-AP's class check on a value of a property
+ * Solid Memo writes, other than a catalog's or deck group's members
+ * (isMemberElsewhere, isForeignMember).
+ */
+function isClassOfValue({ constraint, path }: Violation): boolean {
+  return constraint === "Class" && !MEMBER_LINKS.includes(path);
+}
+
+/**
+ * The values a write adds to the document, by the path of their
+ * subject, predicate and value (PathMap), as setThing records them
+ * (changesOf): a value the document held as it was read, which the
+ * writer only keeps, is not one of them. Nor is a blank node: the
+ * recorded changes leave out every triple that names one (rdf.ts
+ * quadsOf), so the class check on a blank-node value is a warning in
+ * the write check too. Solid Memo adds values by IRI or as literals
+ * (SubjectBuilder has no blank-node value), so a blank node there is
+ * one the writer kept as it read it.
+ */
+function addedValues(dataset: Dataset): PathMap<true> {
+  const added = new PathMap<true>();
+  for (const q of changesOf(dataset)?.additions ?? []) {
+    added.set([q.subject.value, q.predicate.value, q.object.value], true);
+  }
+  return added;
+}
+
+/**
+ * Whether a DCAT-AP result about a named subject of the document is
+ * about a value another app added to it, which is that app's to fix, as
+ * with a subject of its own, so it is a warning. One is a value of a
+ * predicate Solid Memo does not write on the subject (writtenPredicates),
+ * such as a dcterms:accrualPeriodicity on a deck's entry or a
+ * dcterms:type on an agent. The other is a value that fails the class
+ * check on a predicate Solid Memo writes (isClassOfValue), such as a
+ * dcat:theme that is no skos:Concept, which the reader reads back and
+ * the writer writes again; whatever the value is, the write check holds
+ * every value Solid Memo adds to its class, so one in the document is
+ * another app's. A write check passes `added` (addedValues): the class
+ * check on a value the write adds, from a release say, still counts,
+ * unless it is a blank node, which the recorded changes leave out.
+ * Each subject's predicates are worked out once per check.
+ */
+function foreignValues(
+  dataset: Dataset,
+  added = new PathMap<true>(),
+): (subject: string, violation: Violation) => boolean {
+  const written = new Map<string, Set<string> | null>();
+  return (subject, violation) => {
+    const { path, value } = violation;
+    if (path === undefined) return false;
+    let predicates = written.get(subject);
+    if (predicates === undefined) {
+      predicates = writtenPredicates(getThing(dataset, subject)!);
+      written.set(subject, predicates);
+    }
+    if (predicates === null) return false;
+    // Solid Memo's own terms outside a shape (sm:completedChapter, say) are written by it too.
+    if (!predicates.has(path) && !path.startsWith(SM_NS)) return true;
+    return isClassOfValue(violation) && !added.has([subject, path, String(value)]);
+  };
+}
+
+/**
+ * Whether a result is the engine's own about a node with more types than
+ * it reads (shacl/engine.ts overTypedViolation): its focus is the node,
+ * and its value too.
+ */
+function isOverTypedResult(focusNode: string, { builtIn, constraint, path, value }: Violation) {
+  return builtIn === true && constraint === "MaxCount" && path === RDF.type && value === focusNode;
+}
+
+/**
+ * Whether a result is DCAT-AP's class check on a value the engine read
+ * as having no type, as it reads a node with more types than it checks
+ * (`overTyped`): whatever its class, the check could not see it. The
+ * node's own result names that, so the linking subject's, a catalog's
+ * link to a member's included, is a warning.
+ */
+function isOverTypedValue(overTyped: ReadonlySet<string>, { constraint, value }: Violation) {
+  return constraint === "Class" && value !== undefined && overTyped.has(value);
 }
 
 /**
@@ -370,7 +483,10 @@ function withProfiled(
  * subjects is also checked against the DCAT-AP profile, with the
  * reference data beside it (see docs/validation.md). A subject another app wrote is
  * checked too, but marked `foreign`, its results warnings, and so are
- * the results about a catalog's link to a member another app wrote. A
+ * the results about a catalog's link to a member another app wrote, and
+ * DCAT-AP's about a value another app added to a subject of Solid
+ * Memo's, of a predicate Solid Memo does not write there, and its class
+ * check on a value with more types than the engine reads. A
  * release is wholly its publisher's: nothing in it is another app's,
  * and each of its results counts.
  */
@@ -501,14 +617,22 @@ export function createShaclShapeValidator({
     return found;
   }
 
-  /** The DCAT-AP violations of each subject of the document, by subject. */
-  async function profileViolations(data: DatasetCore): Promise<Map<string, Violation[]>> {
+  /**
+   * The DCAT-AP violations of each subject of the document, by subject,
+   * and the nodes the engine read as having no type, of too many
+   * (isOverTypedResult).
+   */
+  async function profileViolations(
+    data: DatasetCore,
+  ): Promise<{ bySubject: Map<string, Violation[]>; overTyped: Set<string> }> {
     const [{ engine, reference }, { mergeDatasets }] = await Promise.all([dcatAp(), loadEngine()]);
     const subjects = new Set([...(data as Iterable<Quad>)].map((q) => q.subject.value));
     const bySubject = new Map<string, Violation[]>();
+    const overTyped = new Set<string>();
     for (const { focusNode, ...violation } of await engine.validate(
       mergeDatasets(data as Iterable<Quad>, ...(reference as Iterable<Quad>[])),
     )) {
+      if (isOverTypedResult(focusNode, violation)) overTyped.add(focusNode);
       if (
         violation.severity !== "violation" ||
         !subjects.has(focusNode) ||
@@ -520,7 +644,7 @@ export function createShaclShapeValidator({
       if (held === undefined) bySubject.set(focusNode, [entry]);
       else held.push(entry);
     }
-    return bySubject;
+    return { bySubject, overTyped };
   }
 
   /**
@@ -547,9 +671,7 @@ export function createShaclShapeValidator({
       const thing = getThing(dataset, subject);
       if (thing === null) return [];
       const version = storedVersionOf(thing);
-      const pick = pickShapes(getUrlAll(thing, RDF.type), version, context, (predicate) =>
-        getUrlAll(thing, predicate),
-      );
+      const pick = pickShapes(getUrlAll(thing, RDF.type), version, context, valuesOf(thing));
       if (pick.kind !== "shapes") return [];
       // The write check leaves dates to the readers: none is named beside the shape's results.
       const found = await classViolations(data, subject, pick.descriptors, () => []);
@@ -571,9 +693,14 @@ export function createShaclShapeValidator({
       });
     if (profiled) {
       const asked = new Set(subjects);
-      for (const [subject, violations] of await profileViolations(data)) {
+      const isForeignValue = foreignValues(dataset, addedValues(dataset));
+      const { bySubject, overTyped } = await profileViolations(data);
+      for (const [subject, violations] of bySubject) {
         if (!asked.has(subject)) continue;
-        for (const v of violations) if (counts(subject, v)) problems.push(describe(subject, v));
+        for (const v of violations) {
+          if (counts(subject, v) && !isForeignValue(subject, v) && !isOverTypedValue(overTyped, v))
+            problems.push(describe(subject, v));
+        }
       }
     }
     return problems;
@@ -629,7 +756,7 @@ export function createShaclShapeValidator({
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
       const types = getUrlAll(thing, RDF.type);
-      const pick = pickShapes(types, version, context, (predicate) => getUrlAll(thing, predicate));
+      const pick = pickShapes(types, version, context, valuesOf(thing));
       if (pick.kind === "untyped") {
         // The document saying it is a deck's is Solid Memo's, and no stray.
         if (!isDeckBackLink(dataset, thing)) subjects.push({ url: subject, status: "untyped" });
@@ -673,7 +800,16 @@ export function createShaclShapeValidator({
       getThingAll(dataset).some((thing) =>
         getUrlAll(thing, RDF.type).some((type) => PROFILED_CLASSES.includes(type)),
       );
-    if (profiled) withProfiled(subjects, await profileViolations(data), attributed, foreign);
+    if (profiled) {
+      const isForeignValue = foreignValues(dataset);
+      const { bySubject, overTyped } = await profileViolations(data);
+      // DCAT-AP's results about a value another app added to a subject of Solid Memo's are warnings too, as is a class check on an over-typed value.
+      const attributedProfiled = (subject: string, violations: Violation[]) =>
+        attributed(subject, violations).map((v) =>
+          isForeignValue(subject, v) || isOverTypedValue(overTyped, v) ? asWarning(v) : v,
+        );
+      withProfiled(subjects, bySubject, attributedProfiled, foreign);
+    }
     return { url, status: "checked", subjects };
   }
 

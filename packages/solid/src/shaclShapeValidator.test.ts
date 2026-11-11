@@ -702,6 +702,111 @@ describe("createShaclShapeValidator", () => {
     ]);
   });
 
+  it("warns only about DCAT-AP's results on a value another app added to a subject of Solid Memo's, of a predicate Solid Memo does not write there", async () => {
+    const ACCRUAL = "http://purl.org/dc/terms/accrualPeriodicity";
+    const dataset = setThing(
+      catalog(),
+      buildThing(getThing(catalog(), `${DOC}#deck-1`)!)
+        .addIri(RDF.type, DCAT.Dataset)
+        .addStringNoLocale(ACCRUAL, "weekly")
+        .build(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset);
+    const { validator, validateNode, validate } = makeValidator();
+    validateNode.mockResolvedValue([]);
+    const result = (path?: string) => ({
+      ...(path === undefined ? {} : { path }),
+      message: { en: "wrong" },
+      severity: "violation" as const,
+      constraint: "Datatype",
+    });
+    // Another app's value; one of the deck's shape; one of Solid Memo's own outside it; one of the node itself.
+    const found = [
+      result(ACCRUAL),
+      result(DCTERMS.description),
+      result(SM.completedChapter),
+      result(),
+    ];
+    validate.mockResolvedValue(found.map((r) => ({ focusNode: `${DOC}#deck-1`, ...r })));
+    const [theirs, ...own] = found.map((r) => ({ ...r, profile: "dcat-ap" }));
+    expect((await validator.validateDocument(DOC)).subjects[0]).toMatchObject({
+      url: `${DOC}#deck-1`,
+      status: "checked",
+      violations: [{ ...theirs, severity: "warning" }, ...own],
+    });
+    const refused = validator.checkSubjects(dataset, [`${DOC}#deck-1`], "pod");
+    await expect(refused).rejects.toThrow(`<${DOC}#deck-1> (${DCTERMS.description}): DCAT-AP:`);
+    await expect(refused).rejects.toThrow(`<${DOC}#deck-1> (${SM.completedChapter}): DCAT-AP:`);
+    await expect(refused).rejects.toThrow(`<${DOC}#deck-1>: DCAT-AP:`);
+    await expect(refused).rejects.not.toThrow(ACCRUAL);
+    validate.mockResolvedValue([{ focusNode: `${DOC}#deck-1`, ...result(ACCRUAL) }]);
+    await expect(
+      validator.checkSubjects(dataset, [`${DOC}#deck-1`], "pod"),
+    ).resolves.toBeUndefined();
+  });
+
+  it("warns about DCAT-AP's class check on a value of a predicate Solid Memo writes that the write keeps, but not on one it adds or on a member", async () => {
+    // A field of the deck's shape, as dcat:theme is of a deck's entry.
+    const FIELD = DCTERMS.description;
+    const dataset = setThing(
+      setThing(
+        catalog(),
+        buildThing(getThing(catalog(), `${DOC}#deck-1`)!)
+          .addIri(RDF.type, DCAT.Dataset)
+          .addIri(FIELD, "https://x.example/added")
+          .build(),
+      ),
+      buildThing(createThing({ url: `${DOC}#described` }))
+        .addStringNoLocale("http://www.w3.org/2000/01/rdf-schema#label", "x")
+        .build(),
+    );
+    const withCatalog = setThing(
+      dataset,
+      buildThing(createThing({ url: `${DOC}#catalog` }))
+        .addIri(RDF.type, DCAT.Catalog)
+        .addIri(DCAT.dataset, `${DOC}#nowhere`)
+        .build(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(dataset);
+    const { validator, validateNode, validate } = makeValidator();
+    validateNode.mockResolvedValue([]);
+    const result = (value: string, constraint = "Class", path: string = FIELD) => ({
+      focusNode: `${DOC}#deck-1`,
+      path,
+      value,
+      message: { en: "not of its class" },
+      severity: "violation" as const,
+      constraint,
+    });
+    const check = (...args: Parameters<typeof result>) => {
+      validate.mockResolvedValue([result(...args)]);
+      return validator.checkSubjects(dataset, [`${DOC}#deck-1`], "pod");
+    };
+    // Described nowhere, described in the document, a subject of Solid Memo's, a blank node: another app's.
+    for (const value of ["https://x.example/t", `${DOC}#described`, `${DOC}#deck-1`, "_:b0"]) {
+      await expect(check(value)).resolves.toBeUndefined();
+    }
+    // One the write adds, another constraint, or a member of the document: still counted.
+    await expect(check("https://x.example/added")).rejects.toThrow(
+      `<${DOC}#deck-1> (${FIELD}): DCAT-AP:`,
+    );
+    await expect(check("https://x.example/t", "NodeKind")).rejects.toThrow(
+      `<${DOC}#deck-1> (${FIELD}): DCAT-AP:`,
+    );
+    validate.mockResolvedValue([
+      { ...result(`${DOC}#nowhere`, "Class", DCAT.dataset), focusNode: `${DOC}#catalog` },
+    ]);
+    await expect(validator.checkSubjects(withCatalog, [`${DOC}#catalog`], "pod")).rejects.toThrow(
+      `<${DOC}#catalog> (${DCAT.dataset}): DCAT-AP:`,
+    );
+    // In the document as it is read, such a value is another app's: the write check lets none in.
+    validate.mockResolvedValue([result("https://x.example/added")]);
+    expect((await validator.validateDocument(DOC)).subjects[0]).toMatchObject({
+      url: `${DOC}#deck-1`,
+      violations: [expect.objectContaining({ path: FIELD, severity: "warning" })],
+    });
+  });
+
   it("reports what another app wrote — no Solid Memo class, format stamp or link from a subject of Solid Memo's — with warnings only", async () => {
     const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
     let dataset = datasetFrom(DOC);
@@ -980,13 +1085,16 @@ describe("createShaclShapeValidator", () => {
           severity,
           profile: "dcat-ap",
         });
-      expect(violationsOf(report, `${DOC}#catalog`)).toContainEqual(notAgent("violation"));
+      // A class check on a value of a predicate the catalog writes, which a dataset with no
+      // recorded changes only keeps (isClassOfValue): another app's value, so a warning.
+      expect(violationsOf(report, `${DOC}#catalog`)).toContainEqual(notAgent("warning"));
       // The datasets are another app's, their results warnings.
       for (const subject of [`${DOC}#d0`, `${DOC}#d199`]) {
         expect(violationsOf(report, subject)).toContainEqual(notAgent("warning"));
       }
-      await expect(validator.checkSubjects(dataset, [`${DOC}#catalog`], "pod")).rejects.toThrow(
-        `<${DOC}#catalog> (${DCTERMS.publisher}): DCAT-AP:`,
+      // The publisher's own results still count in the write check.
+      await expect(validator.checkSubjects(dataset, [`${DOC}#x`], "pod")).rejects.toThrow(
+        `<${DOC}#x> (${RDF.type}): DCAT-AP:`,
       );
     }, 30_000);
 
