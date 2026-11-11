@@ -1267,7 +1267,11 @@ own pod, as a draft, before publishing it
   made, its sources) is written as it is, and kept through every edit;
   the Studio's release screen writes it as the library's releases do
   ([deck-library.md](deck-library.md#provenance),
-  [studio.md](studio.md#the-releases-metadata-and-provenance)). A
+  [studio.md](studio.md#the-releases-metadata-and-provenance)). Of the
+  classes another app gives a subject the draft reads by its shape, the
+  draft keeps only those the subject's write would keep
+  ([shapes.md](shapes.md#conventions)), so none of them stops an edit.
+  The release published from it leaves the others out too. A
   draft names the release it was published as with `sm:releasedAs`, and
   is then no longer edited. An `sm:releasedAs` at an address no release
   can have (`isPublishedReleaseUrl`, as for the catalog's releases) is

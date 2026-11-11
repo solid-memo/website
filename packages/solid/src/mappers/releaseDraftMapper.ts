@@ -41,7 +41,14 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
-import { datetimeOf, readIris, readRecord, readVersioned, recordThing } from "../records";
+import {
+  datetimeOf,
+  keptClasses,
+  readIris,
+  readRecord,
+  readVersioned,
+  recordThing,
+} from "../records";
 import { DCTERMS, SM } from "../vocab";
 
 /**
@@ -381,8 +388,24 @@ function hiddenPredicateOf(
 export function draftFromQuads(
   quads: readonly Quad[],
   url: string,
-  { refuseHidden = false }: { refuseHidden?: boolean } = {},
+  options: { refuseHidden?: boolean } = {},
 ): ReleaseDraft | null {
+  return draftReadOf(quads, url, options)?.draft ?? null;
+}
+
+/**
+ * The draft `quads` state (draftFromQuads), and which classes it does not
+ * keep: `unkept(subject, object)` holds of an rdf:type of a subject the
+ * draft reads by its shape (`subject` its key, `object` as the draft
+ * names it) that is neither one of its own nor one keptClasses keeps of
+ * the others. Publishing leaves those out of the release, as the draft
+ * it checks does (GHSA-8hh7-p2ww-mpjf).
+ */
+export function draftReadOf(
+  quads: readonly Quad[],
+  url: string,
+  { refuseHidden = false }: { refuseHidden?: boolean } = {},
+): { draft: ReleaseDraft; unkept: (subject: string, object: ReleaseTerm) => boolean } | null {
   const dataset = datasetFromQuads(quads);
   /** Each subject's statements, by its key. */
   const statements = new Map<string, Quad[]>();
@@ -480,11 +503,33 @@ export function draftFromQuads(
     own(subject, descriptor);
     nodes[list]!.push({ id, data });
   }
+  // Of the other classes a shaped subject states, only those its write
+  // keeps (keptClasses): a class a shape asks something of, one past the
+  // most the write check reads, or a type that is no IRI would stop
+  // every write of the subject (GHSA-8hh7-p2ww-mpjf).
+  const classes = new Map<string, string[]>();
+  for (const quad of quads) {
+    const subject = keyOf(quad.subject);
+    if (!owned.has(subject) || !isClass(quad)) continue;
+    const of = classes.get(subject);
+    if (of === undefined) classes.set(subject, [quad.object.value]);
+    else of.push(quad.object.value);
+  }
+  const kept = new Map(
+    [...classes].map(([subject, types]) => [
+      subject,
+      new Set(keptClasses(owned.get(subject)!.types, types)),
+    ]),
+  );
+  const unkept = (subject: string, object: ReleaseTerm) =>
+    owned.has(subject) && (object.kind !== "iri" || !kept.get(subject)!.has(object.value));
   const triples = quads
     .filter((quad) => {
-      const shaped = owned.get(keyOf(quad.subject));
+      const subject = keyOf(quad.subject);
+      const shaped = owned.get(subject);
       if (shaped === undefined) return true;
-      if (quad.predicate.value === RDF_TYPE) return !shaped.types.has(quad.object.value);
+      if (quad.predicate.value === RDF_TYPE)
+        return !shaped.types.has(quad.object.value) && !unkept(subject, termOf(quad.object));
       return !shaped.predicates.has(quad.predicate.value);
     })
     .map(
@@ -494,7 +539,7 @@ export function draftFromQuads(
         object: termOf(quad.object),
       }),
     );
-  return {
+  const draft: ReleaseDraft = {
     url,
     course: rootTypes.includes(SCHEMA_COURSE),
     root,
@@ -505,6 +550,7 @@ export function draftFromQuads(
     triples,
     published: NOTHING_PUBLISHED,
   };
+  return { draft, unkept };
 }
 
 /** One subject of a draft as its document in the pod holds it: its record, when its shape describes it, and its other statements. */
@@ -647,10 +693,36 @@ export function entryQuads(entry: DraftEntry): Quad[] {
             recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, null),
           ),
         );
-  return [
+  return withEntryClasses(entry, [
     ...shaped,
     ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
-  ];
+  ]);
+}
+
+/** Whether the quad states a class of its subject: an rdf:type that is an IRI. */
+function isClass(quad: Quad): boolean {
+  return quad.predicate.value === RDF_TYPE && quad.object.termType === "NamedNode";
+}
+
+/**
+ * The quads of an entry with the classes its subject's write would not
+ * keep left out, when its shape describes it: each its own, and of the
+ * others only those keptClasses keeps, so that what a draft writes of a
+ * shaped subject is held to its own shapes alone, whatever its
+ * statements carry (GHSA-8hh7-p2ww-mpjf). A type that is no IRI goes too.
+ */
+export function withEntryClasses(entry: DraftEntry, quads: readonly Quad[]): Quad[] {
+  if (entry.shaped === undefined) return [...quads];
+  const { descriptor } = entry.shaped;
+  const typed = (quad: Quad) =>
+    quad.predicate.value === RDF_TYPE && keyOf(quad.subject) === entry.subject;
+  const kept = new Set(
+    keptClasses(
+      [descriptor.targetClass, ...descriptor.additionalTypes],
+      quads.filter((quad) => typed(quad) && isClass(quad)).map((quad) => quad.object.value),
+    ),
+  );
+  return quads.filter((quad) => !typed(quad) || (isClass(quad) && kept.has(quad.object.value)));
 }
 
 /** Whether two entries say the same of their subject, in the same place. */

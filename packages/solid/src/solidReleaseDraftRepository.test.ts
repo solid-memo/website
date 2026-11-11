@@ -14,6 +14,7 @@ import { ruleProblems } from "@solid-memo/domain/release/releaseCheck";
 import {
   applyDraftChanges,
   blankDraft,
+  iriIn,
   isRefusal,
   type DraftChange,
   type DraftNode,
@@ -2037,6 +2038,154 @@ describe("a release with a card outside it (GHSA-67w8-qjpm-jhwp)", () => {
     expect(cards).toHaveLength(63);
     expect(cards.filter((card) => card.id === "200-ok").map((card) => card.back)).toEqual([
       { en: "OK" },
+    ]);
+  });
+});
+
+describe("a class another app gives a draft's subject (GHSA-8hh7-p2ww-mpjf)", () => {
+  const PALETTE = `${SM}Palette`;
+  const OTHER = "http://example.org/Other";
+  const CARD = `${CHAPTER_A}#q-a-2a`;
+  const typeOf = (subject: string, object: string) => `\n<${subject}> <${RDF}type> ${object} .\n`;
+
+  /** The course fixture with `turtle` added to `document` as another app would, read again. */
+  async function planted(document: string, turtle: string) {
+    const pod = await draftPod({ checked: true });
+    await pod.repository.create(INSTANCE, course());
+    await pod.put(document, `${await pod.text(document)}${turtle}`);
+    const { draft, version } = await pod.repository.read(DRAFT);
+    return { pod, draft, version };
+  }
+
+  /** The classes the draft keeps of `subject` as statements of its own. */
+  const keptTypes = (draft: ReleaseDraft, subject: string) =>
+    draft.triples
+      .filter((triple) => triple.subject === subject && triple.predicate === `${RDF}type`)
+      .map((triple) => triple.object.value);
+
+  it("leaves a shaped class on the root out, so its edit is written", async () => {
+    const { pod, draft, version } = await planted(DRAFT, typeOf(DRAFT, `<${PALETTE}>`));
+    expect(keptTypes(draft, DRAFT)).toEqual([]);
+    await pod.repository.applyChanges(
+      draft,
+      changed(draft, { kind: "setMeta", meta: { title: { en: "New" } } }),
+      version,
+    );
+    expect(await pod.text(DRAFT)).not.toContain(PALETTE);
+    const { draft: read } = await pod.repository.read(DRAFT);
+    expect(read.root.title).toEqual({ en: "New" });
+  });
+
+  it("leaves a shaped class on a card out, so its edit is written", async () => {
+    const { pod, draft, version } = await planted(CHAPTER_A, typeOf(CARD, `<${PALETTE}>`));
+    expect(keptTypes(draft, iriIn(draft, "q-a-2a"))).toEqual([]);
+    await pod.repository.applyChanges(
+      draft,
+      changed(draft, {
+        kind: "editCard",
+        id: "q-a-2a",
+        card: { front: { en: "New?" }, back: { en: "Yes" } },
+      }),
+      version,
+    );
+    expect(await pod.text(CHAPTER_A)).not.toContain(PALETTE);
+  });
+
+  it("keeps a class no shape asks anything of through an edit", async () => {
+    const { pod, draft, version } = await planted(DRAFT, typeOf(DRAFT, `<${OTHER}>`));
+    expect(keptTypes(draft, DRAFT)).toEqual([OTHER]);
+    await pod.repository.applyChanges(
+      draft,
+      changed(draft, { kind: "setMeta", meta: { title: { en: "New" } } }),
+      version,
+    );
+    const { draft: read } = await pod.repository.read(DRAFT);
+    expect(keptTypes(read, DRAFT)).toEqual([OTHER]);
+  });
+
+  it("keeps no more classes than the write check reads, and no type that is no IRI", async () => {
+    const many = Array.from({ length: 40 }, (_, at) => `<${OTHER}${at}>`).join(" , ");
+    const { pod, draft, version } = await planted(
+      DRAFT,
+      `${typeOf(DRAFT, many)}${typeOf(DRAFT, '"Deck"')}${typeOf(DRAFT, "_:b")}`,
+    );
+    const kept = keptTypes(draft, DRAFT);
+    // Its own classes (sm:Deck, dcat:Dataset) and schema:Course count first.
+    expect(kept).toHaveLength(32 - 3);
+    expect(kept.every((type) => type.startsWith(OTHER))).toBe(true);
+    await pod.repository.applyChanges(
+      draft,
+      changed(draft, { kind: "setMeta", meta: { title: { en: "New" } } }),
+      version,
+    );
+    const text = await pod.text(DRAFT);
+    expect(text).not.toContain('"Deck"');
+    const { draft: read } = await pod.repository.read(DRAFT);
+    expect(keptTypes(read, DRAFT)).toEqual(kept);
+  });
+
+  it("writes no shaped class a draft's statements carry, made or changed", async () => {
+    const carried = (draft: ReleaseDraft, subject: string): ReleaseDraft => ({
+      ...draft,
+      triples: [
+        ...draft.triples,
+        { subject, predicate: `${RDF}type`, object: { kind: "iri", value: PALETTE } },
+        { subject, predicate: `${RDF}type`, object: { kind: "blank", value: "b" } },
+      ],
+    });
+    const pod = await draftPod({ checked: true });
+    await pod.repository.create(INSTANCE, carried(course(), DRAFT));
+    expect(await pod.text(DRAFT)).not.toContain(PALETTE);
+    const { draft, version } = await pod.repository.read(DRAFT);
+    const card = iriIn(draft, "q-a-2a");
+    await pod.repository.applyChanges(
+      draft,
+      carried(
+        changed(draft, {
+          kind: "editCard",
+          id: "q-a-2a",
+          card: { front: { en: "New?" }, back: { en: "Yes" } },
+        }),
+        card,
+      ),
+      version,
+    );
+    expect(await pod.text(CHAPTER_A)).not.toContain(PALETTE);
+  });
+});
+
+describe("publishing a draft whose subject another app gave a class (GHSA-8hh7-p2ww-mpjf)", () => {
+  const PALETTE = `${SM}Palette`;
+  const OTHER = "http://example.org/Other";
+  const DISTRACTOR = `${CHAPTER_A}#q-a-1a-d1`;
+  const typeOf = (subject: string, object: string) => `\n<${subject}> <${RDF}type> ${object} .\n`;
+
+  it("leaves a class the draft does not keep out of the release, as of the draft checked", async () => {
+    const pod = await draftPod({ checked: true });
+    await pod.repository.create(INSTANCE, course());
+    await pod.put(
+      CHAPTER_A,
+      `${await pod.text(CHAPTER_A)}${typeOf(DISTRACTOR, `<${PALETTE}>`)}${typeOf(DISTRACTOR, '"Deck"')}`,
+    );
+    await pod.put(
+      DRAFT,
+      `${await pod.text(DRAFT)}${typeOf(DRAFT, `<${PALETTE}>`)}${typeOf(DRAFT, `<${OTHER}>`)}`,
+    );
+    const { version } = await pod.repository.read(DRAFT);
+    const target = `${INSTANCE}releases/solid/v1.ttl`;
+    const quads = await quadsOfTurtle(
+      await pod.repository.assemble(DRAFT, target, NOW, version),
+      target,
+    );
+    const classesOf = (subject: string) =>
+      quads
+        .filter((quad) => quad.subject.value === subject && quad.predicate.value === `${RDF}type`)
+        .map((quad) => quad.object.value);
+    expect(classesOf(target)).not.toContain(PALETTE);
+    expect(classesOf(target)).toContain(OTHER);
+    expect(classesOf(`${target}#q-a-1a-d1`)).toEqual([
+      `${SM}Distractor`,
+      "https://schema.org/Answer",
     ]);
   });
 });

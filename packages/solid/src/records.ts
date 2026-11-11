@@ -433,19 +433,36 @@ export function withoutForeignShapedClasses(
   thing: NamedSubject,
   descriptor: ShapeDescriptor,
 ): NamedSubject {
-  const own = new Set([descriptor.targetClass, ...descriptor.additionalTypes]);
-  let room = MAX_CLASSES - own.size;
+  const kept = keptClasses(
+    [descriptor.targetClass, ...descriptor.additionalTypes],
+    getUrlAll(thing, RDF.type),
+  );
+  // A value of rdf:type that is no IRI (a literal, a blank node) names
+  // no class, yet the check counts it against MAX_CLASSES: it goes too.
+  return buildThing(thing).removeAll(RDF.type).setIriAll(RDF.type, kept).build();
+}
+
+/**
+ * Of the classes a subject states (`classes`, IRIs in the order it
+ * states them), the ones it keeps when its own are `own`: each of its
+ * own, and each class no shape asks anything of (SHAPED_CLASSES) while
+ * the subject, its own classes first, stays within the most the write
+ * check reads it by (MAX_CLASSES). The rule withoutForeignShapedClasses
+ * writes a subject by, for a writer that keeps a subject's classes as
+ * statements of its own (a release draft's).
+ */
+export function keptClasses(own: Iterable<string>, classes: Iterable<string>): string[] {
+  const owned = new Set(own);
+  let room = MAX_CLASSES - owned.size;
   const kept: string[] = [];
-  for (const type of new Set(getUrlAll(thing, RDF.type))) {
-    if (own.has(type)) kept.push(type);
+  for (const type of new Set(classes)) {
+    if (owned.has(type)) kept.push(type);
     else if (!SHAPED_CLASSES.has(type) && room > 0) {
       kept.push(type);
       room--;
     }
   }
-  // A value of rdf:type that is no IRI (a literal, a blank node) names
-  // no class, yet the check counts it against MAX_CLASSES: it goes too.
-  return buildThing(thing).removeAll(RDF.type).setIriAll(RDF.type, kept).build();
+  return kept;
 }
 
 /**
