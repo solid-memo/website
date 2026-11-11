@@ -1538,6 +1538,17 @@ sequenceDiagram
 - **Read leniently.** A subject that doesn't fit its shape is left out,
   and relearned. The digest isn't one of the documents an instance is
   [checked](validation.md) by.
+- **An entry is written new.** Each entry has a subject of its own
+  name in `digest.ttl`, and a write replaces what that subject says,
+  whether the app read it as that entry or not. Another class, a value
+  the entry's shape doesn't have, or a newer format isn't kept, so none
+  of it can stop the entry from being written. A value that's a blank
+  node stays, as a write can't name one to remove it; the app neither
+  reads it nor checks it, so it stops no write either. Unlike the
+  instance's other documents, the digest doesn't refuse to write over
+  an entry a newer version of the app wrote: the digest is derived
+  data, so the newer version learns what it needs again on a later
+  visit.
 - **Read only for what an instance can have.** A receipt is read only
   for an address a document may be read at, and a schedule only for a
   deck of the instance's own catalog. At most one receipt is read for

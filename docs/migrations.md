@@ -316,7 +316,9 @@ which scheduler sets the due days:
   a format-2 schedule as format 1, may count an FSRS-6 schedule's days
   as SM-2's, and refuses to write over one; its digest writes for that
   deck fail, and it learns the deck's documents again on its next
-  visit.
+  visit. A later version writes each [digest](data-model.md#the-digest)
+  entry new, over one a newer version wrote too, so a tab of it no
+  longer fails that way.
 - **One full re-check**, as new shape files joined the rules.
 
 Preferences format 6 (vocabulary 1.22) keeps the colors and the text
@@ -431,7 +433,8 @@ Rules that hold across versions:
   stored version is above the version it writes for that kind. It
   refuses before anything is sent (`writtenByNewerApp`: "A newer
   version of Solid Memo has updated this data, so this version does not
-  save over it. Reload the page…").
+  save over it. Reload the page…"). The digest is the exception: it's
+  derived data, so each entry is written new.
 - **`unlessNewer` refuses the same for the writes that change or remove
   a subject without recording it.** These are a deck's position or
   completed chapter, a deck group's removal, the catalog's links, a
