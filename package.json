@@ -101,7 +101,7 @@
     "@semantic-release/release-notes-generator": "^14.1.1",
     "@vitest/coverage-v8": "^5.1.0",
     "conventional-changelog-conventionalcommits": "^9.3.1",
-    "cspell": "^10.4.0",
+    "cspell": "^10.4.1",
     "json5": "^2.2.3",
     "markdownlint-cli2": "^0.24.0",
     "readable-stream": "^4.8.0",
