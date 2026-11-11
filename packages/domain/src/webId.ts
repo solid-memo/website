@@ -49,13 +49,18 @@ const LINKABLE_PROTOCOLS = ["https:", "http:", "mailto:"];
 
 /**
  * True when a value read from a pod may be used as a link target: an
- * http(s) or mailto: URL with no user name or password, which would hide
- * the host it leads to. Pod data is untrusted: anything else
+ * http(s) URL with no user name or password, which would hide the host
+ * it leads to, or a mailto: URL with no query or fragment, which would
+ * fill in more of the mail than the address it shows
+ * (GHSA-hmqq-ppqh-66f9). Pod data is untrusted: anything else
  * (javascript:, data:, `user@host`, …) must stay plain text.
  */
 export function isLinkableUrl(value: string): boolean {
   const url = parseUrl(value);
-  return url !== null && LINKABLE_PROTOCOLS.includes(url.protocol) && !hasCredentials(url);
+  if (url === null || !LINKABLE_PROTOCOLS.includes(url.protocol) || hasCredentials(url)) {
+    return false;
+  }
+  return url.protocol !== "mailto:" || (url.search === "" && url.hash === "");
 }
 
 /**
