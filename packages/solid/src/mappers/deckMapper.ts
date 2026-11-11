@@ -236,7 +236,7 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   }
   const documents = new Set(decks.map((deck) => documentUrlOf(deck.url)));
   return withCatalogDatasets(
-    withoutStrayAgents(edit.done(), documents),
+    withoutStrayAgents(edit.done(), documents, foreignSubjects(dataset)),
     decks.map((deck) => deck.url),
     "add",
   );
@@ -275,8 +275,10 @@ function agentHolderOf(thing: NamedSubject | null): AgentHolder {
 /**
  * The catalog document without each of the decks, their distributions,
  * or agents only they named, and with no deck group listing one of them
- * any more. Their former siblings keep their positions: the gap is read
- * as if it were not there (domain/deckTree.ts buildTree), and the next
+ * any more. Only this app's subjects go: another app's at a
+ * distribution's IRI stays (foreignSubjects, GHSA-gvpx-j2mc-x9r9).
+ * Their former siblings keep their positions: the gap is read as if it
+ * were not there (domain/deckTree.ts buildTree), and the next
  * arrangement closes it. The entries and distributions are taken out at
  * once, the groups, stray agents and the catalog's links seen to once,
  * so that many decks (a bulk removal in the Studio) take time that grows
@@ -284,9 +286,12 @@ function agentHolderOf(thing: NamedSubject | null): AgentHolder {
  */
 export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const leaving = new Set(decks.map((deck) => deck.url));
+  const foreign = foreignSubjects(dataset);
   const removed = removeAllUnlessNewer(
     dataset,
-    decks.flatMap((deck) => [deck.url, distributionUrlOf(deck.url)]),
+    decks
+      .flatMap((deck) => [deck.url, distributionUrlOf(deck.url)])
+      .filter((url) => !foreign.has(url)),
   );
   const groups: NamedSubject[] = [];
   for (const thing of getThingAll(removed)) {
@@ -300,6 +305,7 @@ export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset 
     withoutStrayAgents(
       setThings(removed, groups),
       new Set(decks.map((deck) => documentUrlOf(deck.url))),
+      foreign,
     ),
     [...leaving],
     "remove",
@@ -428,24 +434,53 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
   return updated;
 }
 
-/** Agent nodes this app wrote (`#agent-…`) in one of `documents` that nothing in the dataset names. */
-function withoutStrayAgents(dataset: Dataset, documents: ReadonlySet<string>): Dataset {
+/** What this app writes of an agent: its class, its format stamp and its fields (AGENT_V1). */
+const AGENT_PREDICATES: readonly string[] = [
+  SM.formatVersion,
+  ...AGENT_V1.fields.map((field) => field.predicate),
+];
+
+/**
+ * The dataset without the agent nodes this app wrote (`#agent-…`) in one
+ * of `documents` that nothing in it names any longer. A node is this
+ * app's only when it was not another app's before the write (`foreign`,
+ * foreignSubjects of the document as it was read): the IRI alone never
+ * makes it one, so another app's subject at such a fragment stays
+ * (GHSA-gvpx-j2mc-x9r9). Of this app's node only the agent statements
+ * go; anything else said of it stays, and the node with it.
+ */
+function withoutStrayAgents(
+  dataset: Dataset,
+  documents: ReadonlySet<string>,
+  foreign: ReadonlySet<string>,
+): Dataset {
   const named = new Set(
     getThingAll(dataset).flatMap((thing) => [
       ...getUrlAll(thing, DCTERMS.creator),
       ...getUrlAll(thing, DCTERMS.publisher),
     ]),
   );
-  const isAgent = (url: string) => {
+  const isStray = (url: string) => {
     const hash = url.indexOf("#");
-    return hash >= 0 && url.startsWith("#agent-", hash) && documents.has(url.slice(0, hash));
+    return (
+      hash >= 0 &&
+      url.startsWith("#agent-", hash) &&
+      documents.has(url.slice(0, hash)) &&
+      !named.has(url) &&
+      !foreign.has(url)
+    );
   };
-  return removeAllUnlessNewer(
-    dataset,
-    getThingAll(dataset)
-      .map(asUrl)
-      .filter((url) => isAgent(url) && !named.has(url)),
-  );
+  const gone: string[] = [];
+  const kept: NamedSubject[] = [];
+  for (const thing of getThingAll(dataset)) {
+    if (!isStray(asUrl(thing))) continue;
+    const builder = buildThing(unlessNewer(thing)).removeUrl(RDF.type, AGENT_V1.targetClass);
+    for (const predicate of AGENT_PREDICATES) builder.removeAll(predicate);
+    const rest = builder.build();
+    if (getPropertyAll(rest).length === 0) gone.push(asUrl(thing));
+    else kept.push(rest);
+  }
+  return removeThings(setThings(dataset, kept), gone);
 }
 
 /**
