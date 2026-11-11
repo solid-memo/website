@@ -237,6 +237,28 @@ describe("the commits, as the release reads them", () => {
     expect(message).not.toMatch(SKIP_KEYWORD);
   });
 
+  // A line such as `-notes-` named a field to the parser, which put the
+  // lines after it there: notes and references as text, which stopped
+  // both plugins, and revert and type, which changed the version chosen.
+  // commitlint reads it as text, and so does the release.
+  it("reads a line that looks like a field as text, as commitlint does", async () => {
+    const withField = (subject: string, field: string) =>
+      `${subject}\n\nWhy this is.\n\n-${field}-\nanything\n\nRefs: #42`;
+    const plain = (subject: string) => `${subject}\n\nWhy this is.\n\nRefs: #42`;
+    const fields = ["notes", "references", "revert", "type", "mentions", "header"];
+    const subjects = ["fix(app): keep the title", "feat: add a deck", "docs: say why"];
+    const hash = "a".repeat(40);
+    for (const subject of subjects) {
+      const expected = await bump(plain(subject));
+      const expectedNotes = await notes({ hash, message: plain(subject) });
+      for (const field of fields) {
+        const message = withField(subject, field);
+        expect(await bump(message), message).toBe(expected);
+        expect(await notes({ hash, message }), message).toBe(expectedNotes);
+      }
+    }
+  });
+
   // Like the body of a4d7b99, which 5.2.0's notes say closes #9ba6b2 and
   // #aab4bf: the parser's own prefix takes `#` and any word after it.
   it("links only `#` and a number as an issue, not a CSS color", async () => {

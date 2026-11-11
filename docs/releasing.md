@@ -126,6 +126,13 @@ colon, as commitlint and `npm run check:breaking` read it
 ([release.config.mjs](../release.config.mjs)'s `parserOpts`). A body
 line that begins "breaking change" in a sentence isn't a footer.
 
+The release reads every other line of a body as text too, as commitlint
+does. A line such as `-notes-` used to name a field to the release's
+parser, so one in a body could stop every release or change the version
+it chose. `parserOpts` sets `fieldPattern: null`, and
+[releaseConfig.test.ts](../scripts/releaseConfig.test.ts) checks that
+such a line changes neither the version nor the notes.
+
 ### What a merge commit decides
 
 Nothing. The merge queue's merge commit holds the pull request's title
