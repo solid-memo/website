@@ -1280,6 +1280,72 @@ describe("the catalog node", () => {
     });
   });
 
+  describe("another app's subject at an agent's fragment (GHSA-gvpx-j2mc-x9r9)", () => {
+    const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+    const ORGANIZATION = "https://schema.org/Organization";
+    const NAME = "https://schema.org/name";
+    const DISTRIBUTION = "http://www.w3.org/ns/dcat#distribution";
+    const TEAM = `${CATALOG}#agent-team`;
+    const team = buildThing(createThing({ url: TEAM }))
+      .addIri(RDF.type, ORGANIZATION)
+      .addStringNoLocale(NAME, "Their team")
+      .build();
+    const other = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
+    const planted = () => setThing(withDecks(datasetFrom(CATALOG), [deck, other]), team);
+
+    it("stays through a deck's save, rename and removal", () => {
+      let dataset = planted();
+      expect(foreignSubjects(dataset).has(TEAM)).toBe(true);
+      dataset = withDeck(dataset, deck);
+      dataset = withDeck(dataset, { ...deck, title: { en: "Renamed" } });
+      dataset = withoutDecks(dataset, [other]);
+      dataset = withoutDecks(dataset, [deck]);
+      expect(getThing(dataset, TEAM)).toEqual(team);
+    });
+
+    it("stays when this app's agent at the same fragment would have been stray", () => {
+      const authored = { ...deck, authors: ["Team"] };
+      const written = withDeck(datasetFrom(CATALOG), authored);
+      expect(getThing(written, TEAM)).not.toBeNull();
+      const replaced = setThing(removeThings(written, [TEAM]), team);
+      expect(getThing(withDeck(replaced, deck), TEAM)).toEqual(team);
+    });
+
+    it("still takes this app's own agent no deck names any longer", () => {
+      const authored = { ...deck, authors: ["Team"] };
+      const written = withDecks(datasetFrom(CATALOG), [authored, other]);
+      expect(getThing(withDeck(written, deck), TEAM)).toBeNull();
+      expect(getThing(withoutDecks(written, [authored]), TEAM)).toBeNull();
+    });
+
+    it("takes only the agent statements of this app's node when another app said more of it", () => {
+      const written = withDeck(datasetFrom(CATALOG), { ...deck, authors: ["Team"] });
+      const said = setThing(
+        written,
+        buildThing(getThing(written, TEAM)!).addStringNoLocale(NAME, "Their team").build(),
+      );
+      const left = getThing(withDeck(said, deck), TEAM)!;
+      expect(getPropertyAll(left)).toEqual([NAME]);
+      expect(getStringNoLocale(left, FOAF_NAME)).toBeNull();
+    });
+
+    it("leaves another app's subject at a removed deck's distribution", () => {
+      const cards = buildThing(createThing({ url: distributionUrlOf(deck.url) }))
+        .addIri(RDF.type, ORGANIZATION)
+        .build();
+      const dataset = setThing(
+        removeThings(withDeck(datasetFrom(CATALOG), deck), [cards.url]),
+        cards,
+      );
+      const removed = withoutDecks(
+        setThing(dataset, buildThing(getThing(dataset, deck.url)!).removeAll(DISTRIBUTION).build()),
+        [deck],
+      );
+      expect(getThing(removed, deck.url)).toBeNull();
+      expect(getThing(removed, cards.url)).toEqual(cards);
+    });
+  });
+
   it("is absent from a document without one, or with one that does not fit its shape", () => {
     expect(toCatalog(datasetFrom(CATALOG), CATALOG)).toBeNull();
     const broken = setThing(

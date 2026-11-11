@@ -645,7 +645,12 @@ graph LR
     term, so the app keys it by its pieces (`TextMap` in `pathKeys.ts`)
     and refuses to write a deck or draft that would hold one. An agent
     is read by the IRI the deck names (one written under an older rule
-    is replaced on the deck's next save).
+    is replaced on the deck's next save). A deck save, rename, import,
+    format upgrade or removal takes out the agent nodes no deck names
+    any longer, but only Solid Memo's own. Another app's subject at an
+    `#agent-…` fragment stays, and of Solid Memo's node only its agent
+    statements go. A node that lost Solid Memo's format stamp counts as
+    another app's, so it stays too.
   - It may name a license (`dcterms:license`, a URL), topics
     (`dcat:theme`, concepts of the [topics](vocab.md#concept-schemes)
     scheme) and keywords (`dcat:keyword`), language-tagged since deck
