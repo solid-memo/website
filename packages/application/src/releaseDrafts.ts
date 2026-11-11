@@ -44,6 +44,7 @@ import {
 } from "@solid-memo/domain/release/releaseDiff";
 import {
   draftReleaseModel,
+  outsideCreatorsOf,
   RECORD_CLASSES,
   strayPartsOf,
 } from "@solid-memo/domain/release/draftModel";
@@ -305,17 +306,6 @@ function isOfReleaseAsRecord(
   return predicate === RDF_TYPE && object.kind === "iri" && RECORD_CLASSES.has(object.value);
 }
 
-/**
- * The release's creators (dcterms:creator) outside its records: each an
- * IRI neither the release nor one of its agents, wherever the IRI is. A
- * subject of the release that its statements type more than one class
- * of record has no record, so it is outside too (GHSA-mv57-839j-wrf6).
- */
-function outsideCreatorsOf(release: ReleaseDraft): Set<string> {
-  const agents = agentIrisOf(release);
-  return new Set(release.root.creator.filter((iri) => iri !== release.url && !agents.has(iri)));
-}
-
 /** The IRIs of the release's agents, each of which it holds a record of. */
 function agentIrisOf(release: ReleaseDraft): Set<string> {
   return new Set(release.agents.map(({ id }) => iriIn(release, id)));
@@ -426,13 +416,14 @@ function unplaced(
  * The release, or draft, to be made the draft at `url`, before it is
  * moved there: without a statement of or naming an address in the new
  * draft's container (takenBy), or of where it is published (unplaced),
- * and what only such a statement led to (ownStatements). Before the
- * move, the draft's own address is one of these too: a statement of it
- * is not one of the source's.
+ * and with only its own statements (ownStatements): nothing only such a
+ * statement led to, nor what a draft read from the pod states of a
+ * creator with no record, which an import would have dropped
+ * (GHSA-q4pr-36j5-g5m5). Before the move, the draft's own address is
+ * one of these too: a statement of it is not one of the source's.
  */
 function inItsPlace(source: ReleaseDraft, url: string): ReleaseDraft {
-  const triples = unplaced(source.triples, source, url);
-  return triples.length === source.triples.length ? source : ownStatements({ ...source, triples });
+  return ownStatements({ ...source, triples: unplaced(source.triples, source, url) });
 }
 
 /** The name a release's URL gives its series (`…/capitals/v2.ttl` → `capitals`); null when it is named otherwise. */

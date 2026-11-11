@@ -4,8 +4,9 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
+import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
 import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import { ruleProblems } from "@solid-memo/domain/release/releaseCheck";
@@ -57,6 +58,83 @@ it("publishes an imported release's creator outside it by its IRI, as the Studio
   const quads = await parseDeckFile(turtle, "turtle", target, null);
   expect(quads.filter((quad) => quad.subject.value === OUTSIDE)).toEqual([]);
   expect(toStandaloneLibraryDeck(target, datasetFromQuads(quads)).authors).toEqual([OUTSIDE]);
+});
+
+describe("a pod draft that states a name of a creator with no record (GHSA-q4pr-36j5-g5m5)", () => {
+  const FOAF = "http://xmlns.com/foaf/0.1/";
+  const markdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
+
+  /** A draft made from a library deck with a second creator outside it, then written to with what an older import kept of that creator, or another app wrote. */
+  const plantedDraft = async (statements: string) => {
+    const text = readFileSync(
+      join(DECKS_ROOT, "academy-award-best-picture/v1.ttl"),
+      "utf8",
+    ).replace(/dcterms:creator (<#[^>]+>) ;/, (_, own) => `dcterms:creator ${own}, <${OUTSIDE}> ;`);
+    const pod = await draftPod();
+    const useCases = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: {} as never,
+      deckLibrary: {} as never,
+      shapeValidator: {} as never,
+      fileExchange: { open: async () => ({ name: "release.ttl", text }), save: () => undefined },
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    const made = await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "fromFile" },
+      `${POD}profile/card#me`,
+    );
+    const url = made!.draft.url;
+    await pod.put(url, `${await (await pod.fetch(url)).text()}\n${statements}\n`);
+    return { pod, useCases, url };
+  };
+
+  it.each([
+    ["typed an agent and named", `<${OUTSIDE}> a <${FOAF}Agent> ; <${FOAF}name> "Unseen" .`],
+    ["typed an agent", `<${OUTSIDE}> a <${FOAF}Agent> .`],
+    ["named", `<${OUTSIDE}> <${FOAF}name> "Unseen" .`],
+  ])("refuses to publish it when the creator is %s", async (_, statements) => {
+    const { pod, useCases, url } = await plantedDraft(statements);
+    const draft = await useCases.getReleaseDraft(url);
+    expect(otherAuthorsOf(draft)).toEqual([OUTSIDE]);
+    expect(ruleProblems(draftReleaseModel(draft), "pod")).toContainEqual(
+      expect.objectContaining({
+        code: "strayParts",
+        severity: "error",
+        params: { parts: [OUTSIDE] },
+      }),
+    );
+    const publish = vi.fn();
+    const publishing = createReleasePublishingUseCases({
+      drafts: useCases,
+      releaseDraftRepository: pod.repository,
+      releasePublisher: { publish } as never,
+      shapeValidator: pod.validator,
+      deckLibrary: {} as never,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    const target = `${POD}public/releases/academy-award-best-picture/v1.ttl`;
+    await expect(publishing.publishRelease(url, target, markdownCheck)).rejects.toMatchObject({
+      code: "releaseHasErrors",
+    });
+    expect(publish).not.toHaveBeenCalled();
+  });
+
+  it("drops what it states of that creator from a copy, which keeps the creator by its IRI", async () => {
+    const { pod, useCases, url } = await plantedDraft(
+      `<${OUTSIDE}> a <${FOAF}Agent> ; <${FOAF}name> "Unseen" .`,
+    );
+    const copy = await useCases.copyReleaseDraft(url, INSTANCE);
+    const { draft } = await pod.repository.read(copy.url);
+    expect(draft.root.creator).toContain(OUTSIDE);
+    expect(draft.triples.filter((triple) => triple.subject === OUTSIDE)).toEqual([]);
+    expect(
+      ruleProblems(draftReleaseModel(draft), "pod").filter((p) => p.code === "strayParts"),
+    ).toEqual([]);
+  });
 });
 
 describe("a creator with no record, whatever its IRI (GHSA-mv57-839j-wrf6)", () => {
