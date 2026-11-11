@@ -252,3 +252,104 @@ describe("the deck tree in the pod", () => {
     expect(pod.triples(CATALOG)!.some((triple) => triple.includes(huge))).toBe(false);
   });
 });
+
+describe("a class another app gave a subject of the catalog document", () => {
+  const SM_CARD = "https://solid-memo.com/ns/vocab/v1.ttl#Card";
+  const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
+  const FOAF_DOCUMENT = "http://xmlns.com/foaf/0.1/Document";
+  const DATA_SERVICE = "http://www.w3.org/ns/dcat#DataService";
+  const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+  const checked = (pod: ReturnType<typeof fakePod>) =>
+    repositoryOn(
+      pod.fetch,
+      createShaclShapeValidator({ fetch: pod.fetch, shapesFetch, ...SHAPE_SOURCES }).over(pod.fetch)
+        .checkSubjects,
+    );
+  const typesOf = (pod: ReturnType<typeof fakePod>, subject: string) =>
+    pod
+      .triples(CATALOG)!
+      .filter((triple) => triple.startsWith(`<${subject}> <${RDF_TYPE}>`))
+      .map((triple) => triple.split(" ")[2]);
+
+  it.each([SM_CARD, FOAF_AGENT])(
+    "does not stop an edit of the deck tree when the catalog is also typed %s, and keeps a class no shape asks anything of",
+    async (type) => {
+      const pod = await podWith(
+        `<#catalog> a <${type}>, <${FOAF_DOCUMENT}> .
+         <https://pod.example/profile/card#me> a <${FOAF_AGENT}> ; <http://xmlns.com/foaf/0.1/name> "Me" .`,
+      );
+      const written = await checked(pod).editDeckTree(INSTANCE, {
+        kind: "combine",
+        dragged: at("c"),
+        target: at("a"),
+        group,
+      });
+      expect(shape(written.children)).toEqual([{ "group-1": ["a", "c"] }, "b"]);
+      expect(typesOf(pod, ROOT).sort()).toEqual(
+        [`<http://www.w3.org/ns/dcat#Catalog>`, `<${FOAF_DOCUMENT}>`].sort(),
+      );
+    },
+  );
+
+  const grouped = `<#catalog> dcat:catalog <#group-1> .
+     <#group-1> a sm:DeckGroup, dcat:Catalog ; sm:formatVersion 1 ; dcterms:title "Languages"@en ;
+       dcterms:description "Deck group: Languages."@en ; dcterms:publisher <https://pod.example/profile/card#me> ;
+       dcat:dataset <#a> ; sm:position 1 .
+     <#b> sm:position 0 . <#c> sm:position 2 . <#a> sm:position 0 .`;
+
+  it.each([
+    ["a move", { kind: "move", node: at("c"), to: { parent: at("group-1"), after: null } }],
+    ["a group's rename", { kind: "rename", group: at("group-1"), title: { en: "Words" } }],
+  ] as const)(
+    "does not stop %s, which leaves the catalog's links as they are, when the catalog is also typed so",
+    async (_, edit) => {
+      const pod = await podWith(
+        `${grouped}
+         <#catalog> a <${SM_CARD}>, <${FOAF_DOCUMENT}> .
+         <https://pod.example/profile/card#me> a <${FOAF_AGENT}> ; <http://xmlns.com/foaf/0.1/name> "Me" .`,
+      );
+      await checked(pod).editDeckTree(INSTANCE, edit);
+      expect(typesOf(pod, ROOT).sort()).toEqual(
+        [`<http://www.w3.org/ns/dcat#Catalog>`, `<${FOAF_DOCUMENT}>`].sort(),
+      );
+    },
+  );
+
+  it("leaves a catalog a newer app wrote as it is on an edit that keeps its links", async () => {
+    const pod = await podWith(
+      `${grouped}
+       <#catalog> a <${SM_CARD}> ; sm:formatVersion 2 .`,
+    );
+    await repositoryOn(pod.fetch).editDeckTree(INSTANCE, {
+      kind: "rename",
+      group: at("group-1"),
+      title: { en: "Words" },
+    });
+    expect(typesOf(pod, ROOT)).toContain(`<${SM_CARD}>`);
+  });
+
+  it("does not stop a save of a deck also typed with a class the DCAT-AP profile asks something of", async () => {
+    const pod = await podWith(`<#a> a <${DATA_SERVICE}>, <${FOAF_DOCUMENT}> .`);
+    const repository = checked(pod);
+    const deck = (await repository.listDecks(INSTANCE)).find((d) => d.url === at("a"))!;
+    await repository.saveDecks([{ ...deck, title: { en: "renamed" } }]);
+    expect(typesOf(pod, at("a")).sort()).toEqual(
+      [
+        `<https://solid-memo.com/ns/vocab/v1.ttl#Deck>`,
+        `<http://www.w3.org/ns/dcat#Dataset>`,
+        `<${FOAF_DOCUMENT}>`,
+      ].sort(),
+    );
+  });
+
+  it("does not stop the Studio's checked edit of a deck's completed chapters when the deck is also typed so", async () => {
+    const pod = await podWith(
+      `<#a> a <${DATA_SERVICE}> ; sm:completedChapter <https://pod.example/course.ttl#ch1> .`,
+    );
+    const repository = checked(pod);
+    const deck = (await repository.listDecks(INSTANCE)).find((d) => d.url === at("a"))!;
+    await repository.setCompletedChapters(deck, { kind: "restart" });
+    expect(typesOf(pod, at("a"))).not.toContain(`<${DATA_SERVICE}>`);
+    expect(pod.triples(CATALOG)!.some((triple) => triple.includes("completedChapter"))).toBe(false);
+  });
+});

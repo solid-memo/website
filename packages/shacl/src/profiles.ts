@@ -39,3 +39,29 @@ const SH_SPARQL = "http://www.w3.org/ns/shacl#sparql";
 export function coreOnly<Q extends Quad>(quads: readonly Q[]): Q[] {
   return quads.filter((quad) => quad.predicate.value !== SH_SPARQL);
 }
+
+/**
+ * The classes a DCAT-AP shape holds to properties (sh:property) of its
+ * own: a subject with one of them, in a document the profile checks, has
+ * to have what DCAT-AP asks of that class (a dataset's title, a data
+ * service's endpoint). The profile's other shapes ask nothing of a
+ * subject (foaf:Document). The CI test holds this list to the vendored
+ * profile.
+ */
+export const DCAT_AP_SHAPED_CLASSES: readonly string[] = [
+  "http://purl.org/dc/terms/LicenseDocument",
+  "http://purl.org/dc/terms/Location",
+  "http://purl.org/dc/terms/PeriodOfTime",
+  "http://spdx.org/rdf/terms#Checksum",
+  "http://www.w3.org/2004/02/skos/core#Concept",
+  "http://www.w3.org/2004/02/skos/core#ConceptScheme",
+  "http://www.w3.org/ns/adms#Identifier",
+  "http://www.w3.org/ns/dcat#Catalog",
+  "http://www.w3.org/ns/dcat#CatalogRecord",
+  "http://www.w3.org/ns/dcat#DataService",
+  "http://www.w3.org/ns/dcat#Dataset",
+  "http://www.w3.org/ns/dcat#DatasetSeries",
+  "http://www.w3.org/ns/dcat#Distribution",
+  "http://www.w3.org/ns/dcat#Relationship",
+  "http://xmlns.com/foaf/0.1/Agent",
+];

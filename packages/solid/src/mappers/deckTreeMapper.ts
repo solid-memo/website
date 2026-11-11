@@ -19,7 +19,7 @@ import {
 } from "@solid-memo/domain/deckGroupRecord";
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
+import { CATALOG_V1, DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import {
   readIri,
@@ -29,6 +29,7 @@ import {
   removeAllUnlessNewer,
   storedVersionOf,
   unlessNewer,
+  withoutForeignShapedClasses,
 } from "../records";
 import { DCAT, DCTERMS, RDF, SM } from "../vocab";
 import { toDecks } from "./deckMapper";
@@ -173,17 +174,25 @@ export function withTreeChanges(
     );
   }
 
-  if (changes.rootGroups !== undefined) {
-    if (root === null) throw noCatalog();
-    // Set in one call (setIriAll): a link that is no URL, which another app may have written, stays as it is.
-    edit.setThing(
-      buildThing(unlessNewer(edit.getThing(rootUrl)!))
-        .setIriAll(DCAT.catalog, [
-          ...changes.rootGroups,
-          ...foreign(getUrlAll(root, DCAT.catalog), catalogs),
-        ])
-        .build(),
+  if (changes.rootGroups !== undefined && root === null) throw noCatalog();
+  if (root !== null) {
+    // The catalog is among the subjects checked, so a class another app gave it that a shape asks
+    // something of goes on every edit, as recordThing drops it; its links change only with rootGroups.
+    // One a newer app wrote is left as it is (the check leaves it alone too), unless its links change.
+    const before = edit.getThing(rootUrl)!;
+    const kept = changes.rootGroups === undefined ? before : unlessNewer(before);
+    const catalog = buildThing(
+      storedVersionOf(kept) > CATALOG_V1.version
+        ? kept
+        : withoutForeignShapedClasses(kept, CATALOG_V1),
     );
+    // Set in one call (setIriAll): a link that is no URL, which another app may have written, stays as it is.
+    if (changes.rootGroups !== undefined)
+      catalog.setIriAll(DCAT.catalog, [
+        ...changes.rootGroups,
+        ...foreign(getUrlAll(root, DCAT.catalog), catalogs),
+      ]);
+    edit.setThing(catalog.build());
   }
 
   return { dataset: edit.done(), subjects: [...written, ...(root === null ? [] : [rootUrl])] };

@@ -101,6 +101,26 @@ check a draft's cards, distractors, agents and distributions.
   shape is color set format 1, which the app paints with
   ([theme.md](theme.md#how-a-palette-of-ones-own-is-held-safe)); a new
   color is a new color set format.
+- **A subject keeps only its own shaped classes.** The write check holds
+  a subject to the shape of every class it has, and to DCAT-AP where it
+  has a DCAT or FOAF class ([validation.md](validation.md)). Another app
+  may give a subject the app writes one more class that a shape asks
+  something of, such as `foaf:Agent` or `dcat:Dataset` on the
+  preferences, `sm:Card` on a review state, or `dcat:DataService` on a
+  deck. The writer drops that class, which no write of the subject could
+  otherwise pass. Such a class is the target class of a Solid Memo
+  shape, or of a DCAT-AP shape that holds it to properties
+  (`DCAT_AP_SHAPED_CLASSES` in
+  [profiles.ts](../packages/shacl/src/profiles.ts), which a test holds to
+  the vendored profile). A class no shape asks anything of, such as
+  `foaf:Document`, stays, but only a limited number of them. The check
+  reads a subject with more than 32 classes as having none, so the
+  writer keeps the subject's own classes and drops the others past
+  that number. A value of `rdf:type` that is no IRI, a literal or a
+  blank node, names no class but counts toward that number, so the
+  writer leaves it out of the subject it checks and writes. A
+  blank node stays in a document Solid Memo patches rather than
+  rewrites, but no write counts it again.
 - **Property shapes are named** (`<#front>`, never blank nodes) for the
   generator and the results. `sh:message` replaces cryptic engine
   text, always in exactly English and Swedish (`"…"@en`, `"…"@sv`),

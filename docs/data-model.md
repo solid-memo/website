@@ -1886,8 +1886,16 @@ by one.
   ([theme.md](theme.md#how-a-palette-of-ones-own-is-held-safe)).
   For the same reason, a palette, and any other subject written
   through `recordThing`, drops the color set's class if another app
-  gave it one. An edit that changes one value of a subject in place,
-  such as a deck's card language or completed chapters, keeps it.
+  gave it one. It drops every other class that isn't its own and that
+  a shape, or the DCAT-AP profile, asks something of
+  ([shapes.md](shapes.md#conventions)). The checked edits that change
+  a subject in place drop them too: a deck's card language or
+  completed chapters, the deck tree's catalog on any edit of the tree,
+  and the preferences when the Connected screen is marked seen. The
+  deck tree leaves a catalog a newer app wrote as it is when the edit
+  leaves its links alone. A class no shape asks anything of stays, up
+  to the number of classes the check reads a subject by; the ones past
+  that go too, and so does a value of `rdf:type` that is no IRI.
 - **Every write states what it expects to find**, as an HTTP
   precondition:
   - an edit is sent with

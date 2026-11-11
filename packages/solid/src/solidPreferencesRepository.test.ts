@@ -12,6 +12,7 @@ import {
   getStringNoLocale,
   getThing,
   getUrl,
+  getUrlAll,
   setThing,
   type SubjectBuilder,
 } from "./client/rdf";
@@ -242,6 +243,18 @@ describe("markConnectedScreen", () => {
       "written",
     );
     expect(getBoolean(saved(), SM.connectedScreenSkipped)).toBeNull();
+  });
+
+  it("drops a class a shape describes that another app gave the preferences, so the check holds them to their own shape", async () => {
+    const FOAF = "http://xmlns.com/foaf/0.1/";
+    const typed = buildThing(getThing(stored(6), SUBJECT)!)
+      .addIri(RDF.type, `${FOAF}Agent`)
+      .addIri(RDF.type, SM.Card)
+      .addIri(RDF.type, `${FOAF}Document`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(datasetFrom(DOCUMENT), typed));
+    await makeRepository().markConnectedScreen(INSTANCE, true, null);
+    expect(getUrlAll(saved(), RDF.type)).toEqual([SM.Preferences, `${FOAF}Document`]);
   });
 
   it("writes nothing when the preferences already say so", async () => {
