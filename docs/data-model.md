@@ -469,16 +469,22 @@ No document Solid Memo names has any.
   (`ownsDocument`; [below](#decks-and-cards)). Anyone who may append to
   a document can state that, so the statement alone doesn't make a
   document safe to change. It counts only for a document in the
-  instance's folder or in the storage the instance is in. That's one on
-  the instance's server where no folder between the document and the
-  first folder that holds the instance too is a storage's root (typed
-  `pim:Storage`, or named by a Linked Web Storage server). Anywhere else
-  it's unclaimed, whatever it says, and nothing is written to or
-  deleted there for the deck. A deck whose documents are in another
-  storage, even one of the user's own, is read-only until they're moved
-  into the instance's storage. When the pod doesn't answer for a folder
-  on the way, a write fails with `cannotCheck` and can be retried; the
-  data check and a removal take the document for unclaimed that time.
+  instance's folder or in the storage the instance is in. When one of
+  the user's storages holds the document or the instance, that decides
+  it: both must be in the same one. Those are the storages their
+  profile names (`pim:storage`), or else the storage's root the server
+  shows above their WebID ([discovery chain](#discovery-chain)).
+  Otherwise both must be under the same storage's root that the server
+  shows (typed `pim:Storage`, or named by a Linked Web Storage server),
+  with no other root between it and either of them. A folder that
+  holds both isn't enough: a server may hold many users' pods
+  under one root it doesn't type. Anywhere else it's unclaimed,
+  whatever it says, and nothing is written to or deleted there for the
+  deck. A deck whose documents are in another storage, even one of the
+  user's own, is read-only until they're moved into the instance's
+  storage. When the profile can't be read, or the pod doesn't answer
+  for a folder on the way, a write fails and can be retried; the data
+  check and a removal take the document for unclaimed that time.
   The storage rule doesn't tell who made the instance. So what keeps
   the rest of the document safe is what a removal takes out of it: only
   subjects that say nothing but what Solid Memo writes of a card,

@@ -28,7 +28,7 @@ import {
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { deleteContainerIfEmpty, listContainer } from "./containers";
 import { type Owned, readForRemoval, removeOwned, UNREADABLE } from "./datasets";
-import { createDeckDocumentGuard, type DeckPlace } from "./deckPlace";
+import { createDeckDocumentGuard, type DeckPlace, type UserStorages } from "./deckPlace";
 import {
   deckDocumentSubjects,
   isDeckItself,
@@ -46,8 +46,9 @@ import { RDF, SM } from "./vocab";
  *
  * 1. every deck's cards and reviews documents, as the catalog names
  *    them (`sm:cardsDocument`, `sm:reviewsDocument`), those that are the
- *    deck's to delete only (deckPlace.ts): ones that say they are the
- *    deck's, or are in the instance's own folder. The catalog is data,
+ *    deck's to delete only (deckPlace.ts, with `userStorages`): ones
+ *    that say they are the deck's, in the instance's storage, or are in
+ *    the instance's own folder. The catalog is data,
  *    and one naming a document elsewhere must not lead a delete there,
  *    nor one naming a release (a document that is a deck itself) or a
  *    draft's document anywhere lead to what is in it being removed;
@@ -85,6 +86,7 @@ import { RDF, SM } from "./vocab";
 export async function deleteInstanceData(
   instanceUrl: string,
   fetch: typeof globalThis.fetch,
+  userStorages?: UserStorages,
 ): Promise<InstanceDeletion> {
   const container = ensureTrailingSlash(instanceUrl);
   const meta = metaUrlOf(container);
@@ -93,7 +95,7 @@ export async function deleteInstanceData(
   const catalog = await readForRemoval(catalogUrl, fetch);
   const named =
     catalog === UNREADABLE || catalog === null ? [] : deckDocumentsOf(catalog, catalogUrl);
-  const guard = createDeckDocumentGuard(fetch);
+  const guard = createDeckDocumentGuard(fetch, userStorages);
   const { deletable: deckDocuments, unreadable } = await deletableDeckDocuments(named, guard);
   const history = historyContainerOf(container);
   // A month's document is one of history/'s own (monthOfHistoryUrl): no folder below it is listed.

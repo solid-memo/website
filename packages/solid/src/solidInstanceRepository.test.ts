@@ -639,7 +639,7 @@ describe("deleteInstance", () => {
     );
   });
 
-  it("deletes the data through its own fetch, the registrations through the type indexes' own", async () => {
+  it("deletes the data through its own fetch with the user's storages, the registrations through the type indexes' own", async () => {
     vi.mocked(deleteInstanceData).mockResolvedValue({
       keptFolder: null,
       keptReleases: false,
@@ -654,17 +654,19 @@ describe("deleteInstance", () => {
     const fetch = vi.fn() as unknown as typeof globalThis.fetch;
     const dataFetch = vi.fn() as unknown as typeof globalThis.fetch;
     const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const userStorages = async () => [];
     const repository = createSolidInstanceRepository({
       fetch,
       dataFetch,
       publicFetch,
       now: () => new Date(),
       randomId: () => "fixed-id",
+      userStorages,
     });
 
     await repository.deleteInstance({ webId: WEBID, instance });
 
-    expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, dataFetch);
+    expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, dataFetch, userStorages);
     expect(locateTypeIndexes).toHaveBeenCalledWith(WEBID, fetch, publicFetch);
     expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, indexFetch);
   });

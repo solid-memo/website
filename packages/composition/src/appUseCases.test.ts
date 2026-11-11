@@ -1168,6 +1168,134 @@ describe("createAppUseCases", () => {
     await digestWritten();
   });
 
+  it("gives the deck-document guard of every adapter the signed-in user's storages, found once per user, and none when no one is signed in", async () => {
+    const alice = "https://alice.example/";
+    const bob = "https://bob.example/";
+    const pod = podAt(alice, { storage: false });
+    const carol = "https://carol.example/";
+    const bobsPod = podAt(bob, { storage: false });
+    podsNetwork({ [alice]: pod, [bob]: bobsPod, [carol]: podAt(carol, { storage: false }) });
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    createAppUseCases({ ...options, indexedDB: undefined });
+    const adapters = [
+      "createSolidDeckRepository",
+      "createSolidReviewStateRepository",
+      "createSolidRepairRepository",
+      "createSolidInstanceRepository",
+    ];
+    const storagesOf = adapters.map(
+      (name) => given.get(name)!.userStorages as unknown as () => Promise<string[]>,
+    );
+    expect(new Set(storagesOf).size).toBe(1);
+    await expect(storagesOf[0]!()).resolves.toEqual([]);
+    login.webId = `${alice}profile/card#me`;
+    login.sent = [];
+    await expect(storagesOf[0]!()).resolves.toEqual([alice]);
+    await expect(storagesOf[0]!()).resolves.toEqual([alice]);
+    const profileReads = () => login.sent.filter((url) => url.startsWith(`${alice}profile/`));
+    expect(profileReads()).toHaveLength(1);
+    // Another user's are found anew, and a failed find is tried again.
+    login.webId = `${bob}profile/card#me`;
+    await expect(storagesOf[0]!()).rejects.toBeDefined();
+    await put(
+      bobsPod,
+      `${bob}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${bob}>.`,
+    );
+    await expect(storagesOf[0]!()).resolves.toEqual([bob]);
+    login.webId = `${alice}profile/card#me`;
+    await expect(storagesOf[0]!()).resolves.toEqual([alice]);
+    expect(profileReads()).toHaveLength(2);
+    // A find that fails after another user's began leaves theirs kept.
+    login.webId = `${carol}profile/card#me`;
+    const failing = storagesOf[0]!();
+    login.webId = `${alice}profile/card#me`;
+    await expect(storagesOf[0]!()).resolves.toEqual([alice]);
+    await expect(failing).rejects.toBeDefined();
+    await expect(storagesOf[0]!()).resolves.toEqual([alice]);
+    expect(profileReads()).toHaveLength(3);
+  });
+
+  it("writes a deck's document outside its instance's folder only in the user's storage holding the instance, on a server of many pods with untyped roots", {
+    timeout: 60_000,
+  }, async () => {
+    const server = "https://pod.example/";
+    const alice = `${server}alice/`;
+    const bob = `${server}bob/`;
+    const STORAGE = "http://www.w3.org/ns/pim/space#storage";
+    const IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
+    const pod = podAt(server, { storage: false });
+    const sent = podsNetwork({ [server]: pod });
+    await put(pod, `${alice}profile/card`, `<#me> <${STORAGE}> <${alice}>.`);
+    await put(pod, `${bob}profile/card`, `<#me> <${STORAGE}> <${bob}>.`);
+    const digestWritten = digestWork();
+
+    // Bob's instance, whose catalog names a document in Alice's pod that says it is the deck's.
+    login.webId = `${bob}profile/card#me`;
+    const bobs = createAppUseCases({ ...options, indexedDB: undefined });
+    const shared = await bobs.createInstance(
+      { webId: login.webId },
+      { containerUrl: `${bob}memo/`, name: "Shared", registrationTarget: "private" },
+    );
+    const made = await bobs.createDeck(shared.url, { en: "Spanish" });
+    const theirs = `${alice}notes/list.ttl`;
+    await put(
+      pod,
+      theirs,
+      `<> <${IS_PART_OF}> <${made.url}> .\n<#entry> <https://example.org/says> "mine" .`,
+    );
+    const catalog = `${bob}memo/catalog.ttl`;
+    await put(
+      pod,
+      catalog,
+      (await (await pod(catalog)).text()).replaceAll(made.cardsDocumentUrl, theirs),
+    );
+    await digestWritten();
+
+    login.webId = `${alice}profile/card#me`;
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+    await useCases.attachInstanceByUrl(session, shared.url, "private");
+    const [deck] = await useCases.listDecks(shared.url);
+    expect(deck!.cardsDocumentUrl).toBe(theirs);
+    const before = await (await pod(theirs)).text();
+    sent.length = 0;
+    await expect(
+      useCases.addCard(deck!, { front: { en: "uno" }, back: { en: "one" } }),
+    ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+    expect((await useCases.checkInstance(shared.url)).unclaimed).toEqual([
+      expect.objectContaining({ documents: [theirs] }),
+    ]);
+    expect(
+      sent.filter(({ url, method }) => url === theirs && !["GET", "HEAD"].includes(method)),
+    ).toEqual([]);
+    expect(await (await pod(theirs)).text()).toBe(before);
+
+    // Her own instance, naming a document elsewhere in her storage that says it is the deck's.
+    const own = await useCases.createInstance(session, {
+      containerUrl: `${alice}memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const mine = await useCases.createDeck(own.url, { en: "Capitals" });
+    const kort = `${alice}kort/capitals.ttl`;
+    await put(pod, kort, `<> <${IS_PART_OF}> <${mine.url}> .`);
+    const ownCatalog = `${alice}memo/catalog.ttl`;
+    await put(
+      pod,
+      ownCatalog,
+      (await (await pod(ownCatalog)).text()).replaceAll(mine.cardsDocumentUrl, kort),
+    );
+    const [listed] = await useCases.listDecks(own.url);
+    await useCases.addCard(listed!, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    expect(await (await pod(kort)).text()).toContain("Stockholm");
+    await digestWritten();
+  });
+
   it("reads no document the profile links on another server, as the user or at all", async () => {
     const alice = "https://alice.example/";
     const elsewhere = "https://elsewhere.example/";
