@@ -99,11 +99,18 @@ export const docsArchive = {
  * 5.0.0 and 5.2.0 say they close #rrggbb, #9ba6b2 and #aab4bf, colors
  * their commits' bodies named. The parser takes a RegExp's source as a
  * prefix, and reads the word after it as the issue.
+ *
+ * And no fields: the parser's own fieldPattern reads a line such as
+ * `-notes-` as the name of a field and puts the lines after it in that
+ * field, so a body could stop every release, or change the version
+ * chosen. commitlint reads such a line as text, as `fieldPattern: null`
+ * makes the release read it too, so both read a message one way.
  */
 export const parserOpts = {
   noteKeywords: ["BREAKING CHANGE", "BREAKING-CHANGE"],
   notesPattern: (keywords) => new RegExp(`^(${keywords}):\\s*(.*)`),
   issuePrefixes: [/#(?=\d+\b)/],
+  fieldPattern: null,
 };
 
 export default {
