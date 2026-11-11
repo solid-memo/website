@@ -986,13 +986,15 @@ export interface ShapeValidator {
   /**
    * The report on a document of an instance's, read as the instance's
    * documents are; a release is checked as DeckLibrary.readRelease reads
-   * it, never read again here.
+   * it, never read again here. A document that cannot be read (refused,
+   * or not data that can be read) is reported "unreadable", not thrown:
+   * only what fails the whole check, its shapes say, throws.
    */
   validateDocument(
     url: string,
     context?: Exclude<DocumentContext, "library">,
   ): Promise<DocumentReport>;
-  /** The document's report unless it is still at `version` (undefined: check it). */
+  /** The document's report unless it is still at `version` (undefined: check it); one that cannot be read as validateDocument says, with no version. */
   validateDocumentSince(
     url: string,
     version: string | undefined,

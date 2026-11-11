@@ -216,7 +216,7 @@ export function LangTextField({
   const name = (tag: string) => languageParts(tag).name;
   /** The id of an entry's text: the field's own for the main text, which its label names. */
   const textIdOf = (entry: DraftEntry) => (entry === main ? id : `${id}-${entry.id}`);
-  const nextId = () => Math.max(...draft.map((entry) => entry.id)) + 1;
+  const nextId = () => draft.reduce((max, entry) => Math.max(max, entry.id), 0) + 1;
 
   function change(next: LangTextDraft) {
     setTaken(null);

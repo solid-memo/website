@@ -933,6 +933,7 @@
     },
     "readOnly": {
       "checking": "Se están comprobando los datos de esta instancia. No se puede cambiar nada hasta que termine la comprobación.",
+      "unchecked": "No se pudieron comprobar los datos de esta instancia, así que no se puede cambiar nada hasta que se pueda. Para cambiarlos sin comprobar, elige «Solo avisar» en las preferencias de Solid Memo.",
       "blocked": "Esta instancia tiene datos no válidos y tus preferencias la mantienen cerrada hasta que se repare, así que aquí no se puede cambiar nada. {repair}",
       "deck": "Este mazo tiene datos no válidos, así que queda apartado: se muestra aquí, pero no se puede cambiar nada en él hasta que se repare. {repair}",
       "decks": "Los mazos con datos no válidos quedan apartados: no se pueden seleccionar ni cambiar hasta que se reparen. {repair}",

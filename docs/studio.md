@@ -2768,7 +2768,11 @@ with Solid Memo's workspace's queries, once and again after a repair
 ([health](#health)):
 
 - **Until the check is done**, nothing can be changed, under any policy
-  but "only warn". The screens are shown, and say so.
+  but "only warn". The screens are shown, and say so. A check that
+  can't be made holds them in the same way, their line saying so and
+  that "Warn only" in Solid Memo's preferences lets the data be
+  changed unchecked. A document the check can't read holds only what
+  it's part of, as invalid data does, and the health screen names it.
 - **A deck set aside** (under "set invalid data aside", one whose entry
   or documents have invalid data) is read-only in every screen, a line
   saying why, with a link to its health, where it's repaired. It's

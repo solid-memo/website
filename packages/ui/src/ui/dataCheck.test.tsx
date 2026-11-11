@@ -4,12 +4,16 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/preact";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { focusManager, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { InvalidDataPolicy } from "@solid-memo/domain/invalidDataPolicy";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import type { ValidationReport } from "@solid-memo/domain/validation";
+import {
+  summarize,
+  unreadableDocument,
+  type ValidationReport,
+} from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { useDataCheck } from "./dataCheck";
 
@@ -114,11 +118,20 @@ const withPolicy = (invalidDataPolicy: InvalidDataPolicy) =>
 
 describe("useDataCheck", () => {
   it("holds everything while the check is made, as under blocking the instance until the preferences are read", async () => {
-    renderProbe({ checkInstance: vi.fn(() => new Promise<ValidationReport>(() => undefined)) });
+    const checkInstance = vi.fn(() => new Promise<ValidationReport>(() => undefined));
+    renderProbe({ checkInstance });
     expect(
       screen.getByText(/policy block-instance, instance checking, bad checking/),
     ).toBeInTheDocument();
     expect(await screen.findByText(/policy block-subject, instance checking/)).toBeInTheDocument();
+    // Coming back to the tab while it is made does not make it again.
+    try {
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+    } finally {
+      focusManager.setFocused(undefined);
+    }
+    expect(checkInstance).toHaveBeenCalledTimes(1);
   });
 
   it("waits for no instance", () => {
@@ -174,12 +187,97 @@ describe("useDataCheck", () => {
     ).toBeInTheDocument();
   });
 
-  it("sets nothing aside when the check fails, and says why", async () => {
-    renderProbe({ checkInstance: vi.fn(async () => Promise.reject(new Error("offline"))) });
+  it("holds everything, as while checking, when the check fails under a policy that holds data back, and says why", async () => {
+    const failing = () => vi.fn(async () => Promise.reject(new Error("offline")));
+    for (const policy of ["block-subject", "block-instance"] as const) {
+      const { unmount } = renderProbe({
+        getPreferences: withPolicy(policy),
+        checkInstance: failing(),
+      });
+      expect(
+        await screen.findByText(
+          `policy ${policy}, instance unchecked, bad unchecked, good unchecked, arrangement open, error offline, unclaimed 0`,
+        ),
+      ).toBeInTheDocument();
+      unmount();
+    }
+    renderProbe({ getPreferences: withPolicy("warn-only"), checkInstance: failing() });
     expect(
       await screen.findByText(
-        /instance open, bad open, good open, arrangement open, error offline/,
+        /policy warn-only, instance open, bad open, good open, .*error offline/,
       ),
+    ).toBeInTheDocument();
+  });
+
+  it("makes a failed check again when the user comes back to the tab, and a check made only then", async () => {
+    const checkInstance = vi
+      .fn<UseCases["checkInstance"]>()
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValue(invalid());
+    renderProbe({ checkInstance });
+    expect(await screen.findByText(/instance unchecked, .*error offline/)).toBeInTheDocument();
+    try {
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+      expect(
+        await screen.findByText(/instance open, bad setAside, good open, .*error none/),
+      ).toBeInTheDocument();
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+      expect(checkInstance).toHaveBeenCalledTimes(2);
+    } finally {
+      focusManager.setFocused(undefined);
+    }
+  });
+
+  it("holds everything when a check made again fails, though the earlier report is kept", async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const checkInstance = vi
+      .fn<UseCases["checkInstance"]>()
+      .mockResolvedValueOnce(invalid())
+      .mockRejectedValue(new Error("offline"));
+    function Kept({ useCases }: { useCases: UseCases }) {
+      const check = useDataCheck(useCases, INSTANCE);
+      return (
+        <p>{`report ${check.report === null ? "none" : "kept"}, good ${check.readOnly(good) ?? "open"}, error ${check.error?.message ?? "none"}`}</p>
+      );
+    }
+    render(
+      <QueryClientProvider client={queryClient}>
+        <Kept useCases={makeUseCasesFake({ checkInstance })} />
+      </QueryClientProvider>,
+    );
+    expect(await screen.findByText("report kept, good open, error none")).toBeInTheDocument();
+    await queryClient.invalidateQueries();
+    expect(
+      await screen.findByText("report kept, good unchecked, error offline"),
+    ).toBeInTheDocument();
+  });
+
+  // One document the check could not read holds back only what it is part of.
+  it("sets aside only the deck naming a document the check could not read, and checks again when the user comes back", async () => {
+    const unread = summarize(INSTANCE, [
+      { url: good.cardsDocumentUrl, status: "checked", subjects: [] },
+      unreadableDocument(bad.reviewsDocumentUrl, "403 Forbidden"),
+    ]);
+    const checkInstance = vi.fn(async () => unread);
+    const { unmount } = renderProbe({ checkInstance });
+    expect(
+      await screen.findByText(
+        "policy block-subject, instance open, bad setAside, good open, arrangement open, error none, unclaimed 0",
+      ),
+    ).toBeInTheDocument();
+    try {
+      focusManager.setFocused(false);
+      focusManager.setFocused(true);
+      await vi.waitFor(() => expect(checkInstance).toHaveBeenCalledTimes(2));
+    } finally {
+      focusManager.setFocused(undefined);
+    }
+    unmount();
+    renderProbe({ getPreferences: withPolicy("block-instance"), checkInstance });
+    expect(
+      await screen.findByText(/instance blocked, bad blocked, good blocked/),
     ).toBeInTheDocument();
   });
 

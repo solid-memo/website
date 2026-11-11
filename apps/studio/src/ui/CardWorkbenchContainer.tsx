@@ -127,7 +127,7 @@ export function CardWorkbenchContainer({
   const others = useMemo(() => {
     const shares = sharesDocumentsWith(deck);
     return decks.filter((other) => check.readOnly(other) === null && !shares(other));
-  }, [deck, decks, check.policy, check.pending, check.report]);
+  }, [deck, decks, check.policy, check.unsettled, check.report]);
   const answersQuery = useQuery({
     queryKey: queryKeys.answerLog(instance.url),
     queryFn: () => useCases.loadAnswerLog(instance.url),

@@ -226,8 +226,10 @@ export function quadsOf(subject: ClientSubject, id = subject.url): Quad[] {
 /** Every quad of a dataset: the default graph's, subject by subject, then the named graphs'. */
 export function allQuads(dataset: ClientDataset): Quad[] {
   const quads: Quad[] = [];
-  for (const [id, subject] of dataset.subjects) quads.push(...quadsOf(subject, id));
-  quads.push(...dataset.named);
+  // One by one: a subject's quads spread into push would overflow its arguments when there are many.
+  for (const [id, subject] of dataset.subjects)
+    for (const quad of quadsOf(subject, id)) quads.push(quad);
+  for (const quad of dataset.named) quads.push(quad);
   return quads;
 }
 

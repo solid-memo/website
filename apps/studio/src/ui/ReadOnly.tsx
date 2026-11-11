@@ -11,7 +11,7 @@ export type ReadOnlySubject = "deck" | "decks" | "catalogue";
 
 /**
  * Why a screen changes nothing (useDataCheck): the instance's data is
- * being checked, or it is invalid, the whole instance blocked or the
+ * being checked, or could not be checked, or it is invalid, the whole instance blocked or the
  * deck (or decks, or catalog) set aside, with a link to the health
  * screen that repairs it (`healthHref`). Nothing when it may change.
  */
@@ -27,6 +27,8 @@ export function ReadOnlyNotice({
   const { t, tx } = useI18n();
   if (reason === null) return null;
   if (reason === "checking") return <p class="hint">{t("studio.readOnly.checking")}</p>;
+  // Held until the check can be made; Solid Memo's "Warn only" lets the user go on regardless.
+  if (reason === "unchecked") return <p class="warning">{t("studio.readOnly.unchecked")}</p>;
   // Blocked, it is the instance that is repaired, whatever the subject.
   const repair = (
     <a href={healthHref}>

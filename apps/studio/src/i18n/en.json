@@ -875,6 +875,7 @@
     },
     "readOnly": {
       "checking": "This instance's data is being checked. Nothing can be changed until the check is done.",
+      "unchecked": "This instance's data could not be checked, so nothing can be changed until it can. To change it unchecked, choose “Warn only” in Solid Memo's preferences.",
       "blocked": "This instance has invalid data, and your preferences keep it closed until it is repaired, so nothing can be changed here. {repair}",
       "deck": "This deck has invalid data, so it is set aside: it is shown here, but nothing in it can be changed until it is repaired. {repair}",
       "decks": "Decks with invalid data are set aside: they cannot be selected or changed until they are repaired. {repair}",

@@ -262,6 +262,8 @@ export function createInstanceCheckUseCases({
    * The check of these documents of the instance, each not checked again
    * while still at the version the digest says conformed. A receipt is
    * kept only of one that is the instance's (DigestStore.isInstances).
+   * A document that cannot be read is in the report as one
+   * (ShapeValidator), so it holds back only what it is part of.
    */
   async function checkDocuments(
     instanceUrl: string,

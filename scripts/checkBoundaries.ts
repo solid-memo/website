@@ -169,7 +169,7 @@ export const BROWSER: Record<string, RegExp> = {
  * same, from the files given: solid-memo-client reads and writes Turtle
  * with n3, which Inrupt's client bundles too, and solid's
  * client/linearDataset.ts builds the parser Inrupt's client reads
- * Turtle with, without triple terms.
+ * Turtle with, without triple terms, and the terms of a dataset's quads.
  */
 export const BROWSER_MAY_USE: Record<string, { specifier: RegExp; files: RegExp }> = {
   "solid-memo-client": { specifier: /^n3$/, files: /^src\// },

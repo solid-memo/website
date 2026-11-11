@@ -8,20 +8,32 @@ import type {
   ValidationReport,
   Violation,
 } from "@solid-memo/domain/validation";
+import { visibleControls } from "@solid-memo/markdown/parse";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n, type I18n } from "./i18n";
+
+/**
+ * Why a document could not be read, as the check gave it: a parser's
+ * message may quote the document, so its hidden characters are shown as
+ * markers (visibleControls), as a web address's are.
+ */
+export function unreadableReason(reason: string): string {
+  return visibleControls(reason);
+}
 
 /** The summary line: "All 9 documents conform" or "3 violations in 2 documents". */
 export function summaryOf(report: ValidationReport, t: I18n["t"]): string {
   const checked = report.documents.filter((d) => d.status === "checked");
   if (report.conforms) return t("validation.allConform", { count: checked.length });
-  const failing = checked.filter((d) =>
-    d.subjects.some(
-      (s) =>
-        (s.status === "checked" || s.status === "profiled") &&
-        s.violations.some((v) => v.severity === "violation"),
-    ),
-  ).length;
+  // A document the check could not read counts as one with a violation (summarize).
+  const failing =
+    checked.filter((d) =>
+      d.subjects.some(
+        (s) =>
+          (s.status === "checked" || s.status === "profiled") &&
+          s.violations.some((v) => v.severity === "violation"),
+      ),
+    ).length + report.documents.filter((d) => d.status === "unreadable").length;
   return t("validation.violationsIn", {
     violations: t("validation.violationCount", { count: report.violationCount }),
     documents: t("validation.documentCount", { count: failing }),
@@ -64,6 +76,10 @@ function DocumentView({ document }: { document: DocumentReport }) {
       </h3>
       {document.status === "missing" ? (
         <p class="hint">{t("validation.notCreated")}</p>
+      ) : document.status === "unreadable" ? (
+        <p class="warning">
+          {t("validation.unreadable", { reason: unreadableReason(document.reason) })}
+        </p>
       ) : document.subjects.length === 0 ? (
         <p class="hint">{t("validation.noSubjects")}</p>
       ) : (

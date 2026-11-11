@@ -151,7 +151,7 @@ export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): Rel
     const next = fields[index + 1];
     // After a step's last theory, how its theory is chunked.
     if (next?.subject !== subject || next.field !== SM.theory) {
-      problems.push(...theoryChunkProblems(subject, theory, check));
+      for (const found of theoryChunkProblems(subject, theory, check)) problems.push(found);
       theory = [];
     }
   });

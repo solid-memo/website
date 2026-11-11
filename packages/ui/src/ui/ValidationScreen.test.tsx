@@ -6,7 +6,11 @@ import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/preact";
 import { createI18n, I18nProvider } from "./i18n";
 import { summaryOf, ValidationScreen } from "./ValidationScreen";
-import type { ValidationReport } from "@solid-memo/domain/validation";
+import {
+  summarize,
+  unreadableDocument,
+  type ValidationReport,
+} from "@solid-memo/domain/validation";
 
 const { t } = createI18n("en");
 
@@ -193,6 +197,20 @@ describe("ValidationScreen", () => {
     expect(dataset).toHaveTextContent("written by another app; Solid Memo only warns about it:");
     expect(screen.getAllByRole("row")[1]).toHaveTextContent("warning");
     expect(screen.getAllByRole("row")[3]).toHaveTextContent("DCAT-AP: Less than 1 values");
+  });
+
+  it("names a document the check could not read, and why, its hidden characters shown, counted as one that fails", () => {
+    const unread = summarize(INSTANCE, [
+      report.documents[1]!,
+      unreadableDocument(`${INSTANCE}decks/deck-1.ttl`, "403 Forbidden\u202e"),
+    ]);
+    render(<ValidationScreen report={unread} />);
+    expect(screen.getByText("1 violation in 1 document.")).toHaveClass("warning");
+    expect(
+      screen.getByText(
+        "Solid Memo could not read this document, so it counts as invalid: 403 Forbidden⟨U+202E⟩",
+      ),
+    ).toHaveClass("warning");
   });
 
   it("says so when everything conforms", () => {

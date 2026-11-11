@@ -8,7 +8,12 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card } from "@solid-memo/domain/deck";
 import type { CardSpot, DeckHealth } from "@solid-memo/domain/deckHealth";
 import type { RepairPlan } from "@solid-memo/domain/repair";
-import { summarize, type DocumentReport, type Violation } from "@solid-memo/domain/validation";
+import {
+  summarize,
+  unreadableDocument,
+  type DocumentReport,
+  type Violation,
+} from "@solid-memo/domain/validation";
 import type { MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import {
   DeckHealthScreen,
@@ -336,6 +341,31 @@ describe("InstanceHealthScreen", () => {
     expect(screenCommands().checkAgain!.label).toBe("Check again");
     screenCommands().checkAgain!.run();
     expect(onCheck).toHaveBeenCalledTimes(2);
+  });
+
+  it("names each document the check could not read, and why, its hidden characters shown", () => {
+    const unread = `${instanceA.url}reviews/deck-1.ttl`;
+    render(
+      <WithCommands>
+        <InstanceHealthScreen
+          instance={instanceA}
+          report={summarize(instanceA.url, [unreadableDocument(unread, "403 Forbidden\u202e")])}
+          decks={[deck]}
+          checking={false}
+          onCheck={vi.fn()}
+          repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
+          deckHref={(each) => `#/health?deck=${each.id}`}
+          badge={() => null}
+        />
+      </WithCommands>,
+    );
+    const data = part("Data check");
+    expect(data).toHaveTextContent("1 violation in 1 document.");
+    const [item] = within(data).getAllByRole("listitem");
+    expect(within(item!).getByRole("link")).toHaveAttribute("href", unread);
+    expect(item).toHaveTextContent(
+      "Solid Memo could not read this document, so it counts as invalid: 403 Forbidden⟨U+202E⟩",
+    );
   });
 
   it("says while the instance is checked again, and offers no Check again in the palette then", () => {

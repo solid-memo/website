@@ -13,8 +13,14 @@ import {
   toRdfJsDataset,
 } from "./client/rdf";
 import type { DatasetCore, Quad } from "@rdfjs/types";
-import type { DocumentContext, ShapeValidator } from "@solid-memo/application/ports";
-import type { DocumentReport, SubjectReport, Violation } from "@solid-memo/domain/validation";
+import type { DocumentContext, ShapeValidator, Since } from "@solid-memo/application/ports";
+import {
+  type DocumentReport,
+  limitResults,
+  unreadableDocument,
+  type SubjectReport,
+  type Violation,
+} from "@solid-memo/domain/validation";
 import { instanceUrlOfDeck, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { isDeckDocumentAddress } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -396,7 +402,12 @@ export function createShaclShapeValidator({
     return engine;
   }
 
-  /** A subject's results against the shape of each of its classes, with the dates the app can't read that each shape names. */
+  /**
+   * A subject's results against the shape of each of its classes, with
+   * the dates the app can't read that each shape names: of each shape,
+   * as many as a check keeps (limitResults). They are added one by one,
+   * not spread into a call, whose arguments a large array would overflow.
+   */
   async function classViolations(
     data: DatasetCore,
     subject: string,
@@ -407,7 +418,8 @@ export function createShaclShapeValidator({
     for (const descriptor of descriptors) {
       const engine = await engineFor(descriptor);
       const found = await engine.validateNode(data, subject, descriptor.shapeIri);
-      violations.push(...found, ...dateViolations(descriptor, unreadable, found));
+      const results = limitResults([...found, ...dateViolations(descriptor, unreadable, found)]);
+      for (const result of results) violations.push(result);
     }
     return violations;
   }
@@ -608,8 +620,9 @@ export function createShaclShapeValidator({
           unreadableDatetimes(thing, predicate),
         )),
       ];
-      if (context === "pod" && types.includes(SM.Deck))
-        violations.push(...placeViolations(thing, url));
+      if (context === "pod" && types.includes(SM.Deck)) {
+        for (const result of limitResults(placeViolations(thing, url))) violations.push(result);
+      }
       return violations;
     };
     for (const thing of getThingAll(dataset)) {
@@ -676,13 +689,25 @@ export function createShaclShapeValidator({
     },
 
     async validateDocument(url, context = "pod"): Promise<DocumentReport> {
-      return reportOf(url, await getSolidDatasetOrNull(url, podFetch), context);
+      let dataset: Dataset | null;
+      try {
+        dataset = await getSolidDatasetOrNull(url, podFetch);
+      } catch (error) {
+        return unreadableDocument(url, reasonOf(error));
+      }
+      return reportOf(url, dataset, context);
     },
 
     validateDataset: reportOf,
 
     async validateDocumentSince(url, version, context = "pod") {
-      const since = await readSince(url, version, podFetch);
+      let since: Since<Dataset | null>;
+      try {
+        since = await readSince(url, version, podFetch);
+      } catch (error) {
+        // No version: what is not read is checked again next time.
+        return { unchanged: false, value: unreadableDocument(url, reasonOf(error)), version: null };
+      }
       return since.unchanged
         ? since
         : { ...since, value: await reportOf(url, since.value, context) };
@@ -833,4 +858,13 @@ function withSeriesEntry(
     );
   }
   return quadsOf(datasetFromQuads([...index, ...added]));
+}
+
+/** The longest reason the report keeps of a document it could not read: a parser's message may quote the document. */
+const MAX_REASON_LENGTH = 300;
+
+/** Why a document could not be read, as its read's failure says, shortened to MAX_REASON_LENGTH. */
+function reasonOf(error: unknown): string {
+  const reason = error instanceof Error ? error.message : String(error);
+  return reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH)}…` : reason;
 }

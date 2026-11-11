@@ -1643,6 +1643,7 @@
       "other": "{count} documents"
     },
     "notCreated": "Pas encore créé.",
+    "unreadable": "Solid Memo n’a pas pu lire ce document, il compte donc comme non valide : {reason}",
     "noSubjects": "Aucun sujet.",
     "untyped": "{name} — pas un sujet Solid Memo.",
     "newer": "{name} — le format {shape} {version} est plus récent que ce que connaît cette application (jusqu’à {latest}) ; ignoré.",
@@ -1684,7 +1685,8 @@
       "Closed": "La propriété n’est pas autorisée ici.",
       "DeckPlace": "L’entrée du paquet n’est pas dans le catalogue de son instance, ou elle désigne un document à une adresse qu’aucun document de paquet ne peut avoir, comme le contrôle d’accès d’une autre ressource ou l’un des documents propres de l’instance. Solid Memo ne l’utilise pas.",
       "DateTimeRange": "Solid Memo ne peut pas lire cette date : elle est trop loin dans le futur ou le passé, ou plus longue qu’une date-heure, elle est donc lue comme une absence de date.",
-      "FormatVersionRange": "Aucun format de Solid Memo n’a cette version : elle est inférieure à 1, Solid Memo ne peut donc pas lire le sujet."
+      "FormatVersionRange": "Aucun format de Solid Memo n’a cette version : elle est inférieure à 1, Solid Memo ne peut donc pas lire le sujet.",
+      "ResultLimit": "Ce sujet a, dans une vérification, plus de résultats que Solid Memo n’en liste : il affiche les 1 000 plus graves. Réparez-les, et la vérification trouvera le reste."
     }
   },
   "webIdDocument": {
@@ -1708,6 +1710,7 @@
     "checkingData": "Vérification des données de cette instance…",
     "deckSetAside": "Ce paquet est mis de côté : ses données ne sont pas conformes. Réparez-le ci-dessus pour l’utiliser à nouveau.",
     "checkFailed": "Impossible de vérifier les données de cette instance : {error}",
+    "checkFailedHeld": "Tant que la vérification ne peut pas être faite, Solid Memo retient ce qu’il retiendrait pendant la vérification. Pour utiliser les données sans vérification, choisissez « Avertir seulement » dans {preferences}.",
     "developerTools": "Outils de développement",
     "validateInstance": "Valider cette instance",
     "loadingCourse": "Chargement du cours…",

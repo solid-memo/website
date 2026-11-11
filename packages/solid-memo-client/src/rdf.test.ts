@@ -111,6 +111,15 @@ describe("datasetFromQuads", () => {
     );
   });
 
+  // Spread into a call, so many quads of one subject overflowed its arguments.
+  it("gives toRdfJsDataset every quad of a subject with 200,000 values, and of 200,000 in graphs", () => {
+    const values = Array.from({ length: 200_000 }, (_, i) => quadOf(`${URL_}#a`, term(`v${i}`)));
+    const graphed = Array.from({ length: 200_000 }, (_, i) =>
+      quadOf(`${URL_}#b`, term(`g${i}`), `${URL_}#g`),
+    );
+    expect(rdf.toRdfJsDataset(rdf.datasetFromQuads([...values, ...graphed])).size).toBe(400_000);
+  });
+
   it("gives a property's literals of one datatype together, in the order the first came", () => {
     const dataset = rdf.datasetFromQuads([
       quadOf(`${URL_}#a`, term("1", `${XSD}integer`)),

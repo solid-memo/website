@@ -9,8 +9,13 @@ import environment from "rdf-validate-shacl/src/defaultEnv.js";
 import type { Shape } from "rdf-validate-shacl/src/shapes-graph.js";
 import ValidationEngine from "rdf-validate-shacl/src/validation-engine.js";
 import { shown } from "@solid-memo/domain/langText";
-import { PathMap } from "@solid-memo/domain/pathKeys";
-import type { Violation } from "@solid-memo/domain/validation";
+import { PathMap, TextMap } from "@solid-memo/domain/pathKeys";
+import {
+  limitResults,
+  MAX_RESULTS_PER_CHECK,
+  moreSevere,
+  type Violation,
+} from "@solid-memo/domain/validation";
 
 /**
  * The SHACL engine behind every validation Solid Memo does: one subject
@@ -152,6 +157,8 @@ function termPath(term: Term): string[] {
 const MAX_NODE_CHECKS = 50;
 
 type EngineOptions = ConstructorParameters<typeof ValidationEngine>[1];
+type Constraint = Parameters<ValidationEngine["createResultFromObject"]>[1];
+type Severity = Violation["severity"];
 
 /**
  * The library's engine, counting how many times it has checked a node
@@ -163,11 +170,34 @@ type EngineOptions = ConstructorParameters<typeof ValidationEngine>[1];
  * a check take time growing with the square of their number. The
  * library's own count is turned off (maxNodeChecks 0), and this one
  * stops a check at the same number, MAX_NODE_CHECKS.
+ *
+ * It also makes at most MAX_RESULTS_PER_CHECK results of each severity
+ * about one focus node in a check, so that limitResults, which keeps
+ * the most severe first, never lacks a violation made after many
+ * warnings. A constraint on each value gives a result for each, and one
+ * such as sh:closed gives all of a node's at once, so a node with very
+ * many values would have as many results made, each with its share of
+ * the shapes copied in. Past the limit a result is left out before it
+ * is made, and `dropped` keeps the most severe left out of each node,
+ * by its value; a result no more severe than that is left out too, as
+ * limitResults would leave it, and a constraint that could give none
+ * more severe is not run for the node again. The library's own
+ * limit (maxErrors) counts only some constraints' results and stops
+ * the whole check, every node's, so it is not used.
+ *
+ * A result left out makes its constraint pass for that call. sh:or,
+ * sh:xone and qualified shapes check their members on a clone, with
+ * counts of its own, but sh:node runs on this engine, so a node reached
+ * twice in one check could pass a shape it names. None of the shapes
+ * the app checks against uses sh:node (conformance.test.ts in the solid
+ * package says so); one that does needs the limit there first.
  */
 class TermKeyedEngine extends ValidationEngine {
   // Set by initReport, which the library's constructor calls: a field
   // with an initializer would be set again after it.
   declare checks: PathMap<number>;
+  declare results: PathMap<number>;
+  declare dropped: TextMap<Severity>;
   readonly limit: number;
 
   constructor(context: SHACLValidator, options: EngineOptions, limit = MAX_NODE_CHECKS) {
@@ -176,16 +206,14 @@ class TermKeyedEngine extends ValidationEngine {
   }
 
   override clone({ recordErrorsLevel }: EngineOptions = {}): ValidationEngine {
-    return new TermKeyedEngine(
-      this.context,
-      { maxErrors: this.maxErrors, recordErrorsLevel },
-      this.limit,
-    );
+    return new TermKeyedEngine(this.context, { recordErrorsLevel }, this.limit);
   }
 
   override initReport(): void {
     super.initReport();
     this.checks = new PathMap();
+    this.results = new PathMap();
+    this.dropped = new TextMap();
   }
 
   override validateNodeAgainstShape(
@@ -193,7 +221,7 @@ class TermKeyedEngine extends ValidationEngine {
     shape: Shape,
     dataGraph: Parameters<ValidationEngine["validateNodeAgainstShape"]>[2],
   ): boolean {
-    if (!this.maxErrorsReached() && !shape.deactivated) {
+    if (!shape.deactivated) {
       const path = [...termPath(shape.shapeNode), ...termPath(focusNode)];
       const count = this.checks.get(path) ?? 0;
       if (count > this.limit) return false;
@@ -201,6 +229,53 @@ class TermKeyedEngine extends ValidationEngine {
     }
     return super.validateNodeAgainstShape(focusNode, shape, dataGraph);
   }
+
+  override validateValueNodeAgainstConstraint(
+    focusNode: Term,
+    valueNode: Term | null,
+    constraint: Constraint,
+  ): boolean {
+    const dropped = this.dropped.get(focusNode.value);
+    const severity = severityOf(constraint.shape.severity);
+    // The node has results left out at least as severe as any this one could add.
+    if (dropped !== undefined && moreSevere(dropped, severity) === dropped) return true;
+    return super.validateValueNodeAgainstConstraint(focusNode, valueNode, constraint);
+  }
+
+  override createResultFromObject(
+    validationResult: Parameters<ValidationEngine["createResultFromObject"]>[0],
+    constraint: Constraint,
+    focusNode: Term,
+    valueNode: Term | null,
+  ): ReturnType<ValidationEngine["createResultFromObject"]> {
+    if (this.normalizeValidationResult(validationResult, valueNode) !== null) {
+      const severity = severityOf(constraint.shape.severity);
+      const path = [...termPath(focusNode), severity];
+      const count = this.results.get(path) ?? 0;
+      const dropped = this.dropped.get(focusNode.value);
+      // Past the limit of its severity, or of a more severe one, whose results are kept first.
+      if (
+        count >= MAX_RESULTS_PER_CHECK ||
+        (dropped !== undefined && moreSevere(dropped, severity) === dropped)
+      ) {
+        this.dropped.set(
+          focusNode.value,
+          dropped === undefined ? severity : moreSevere(dropped, severity),
+        );
+        // The library leaves out a result of null (its types say otherwise).
+        return null as unknown as ReturnType<ValidationEngine["createResultFromObject"]>;
+      }
+      this.results.set(path, count + 1);
+    }
+    return super.createResultFromObject(validationResult, constraint, focusNode, valueNode);
+  }
+}
+
+/** A result's severity by its sh:resultSeverity: sh:Violation unless sh:Warning or sh:Info. */
+function severityOf(term: Term): Severity {
+  if (term.value === `${SH}Warning`) return "warning";
+  if (term.value === `${SH}Info`) return "info";
+  return "violation";
 }
 
 /** The result on a node with too many types: its types are not read. */
@@ -257,12 +332,7 @@ function toViolation(result: ValidationResult): Violation {
     ...(path === undefined ? {} : { path }),
     ...messageOf(result, constraint),
     ...(value === undefined ? {} : { value }),
-    severity:
-      result.severity.value === `${SH}Warning`
-        ? "warning"
-        : result.severity.value === `${SH}Info`
-          ? "info"
-          : "violation",
+    severity: severityOf(result.severity),
     constraint,
   };
 }
@@ -315,36 +385,65 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
     queue = next.catch(() => undefined);
     return next;
   }
+  const engine = validator.validationEngine as TermKeyedEngine;
   return {
     validateNode: (data, focusNode, shapeIri) =>
       oneAtATime(async () => {
         const checked = checkedData(data);
         // validateNode keeps adding to one report; start each check afresh.
-        validator.validationEngine.initReport();
+        engine.initReport();
         const report = await validator.validateNode(
           checked.data,
           namedNode(focusNode),
           namedNode(shapeIri),
         );
         const refused = checked.overTyped.has(focusNode) ? [overTypedViolation(focusNode)] : [];
-        return [...report.results.map(toViolation), ...refused].sort(byPathThenMessage);
+        return limitResults(
+          [...report.results.map(toViolation), ...refused].sort(byPathThenMessage),
+          engine.dropped.get(focusNode),
+        );
       }),
     validate: (data) =>
       oneAtATime(async () => {
         const checked = checkedData(data);
-        validator.validationEngine.initReport();
+        engine.initReport();
         const report = await validator.validate(checked.data);
-        return [
-          ...report.results.map(
-            (result): FocusedViolation => ({
-              focusNode: result.focusNode.value,
-              ...toViolation(result),
-            }),
-          ),
-          ...[...checked.overTyped].map(
-            (node): FocusedViolation => ({ focusNode: node, ...overTypedViolation(node) }),
-          ),
-        ].sort((a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b));
+        return limitedByNode(
+          [
+            ...report.results.map(
+              (result): FocusedViolation => ({
+                focusNode: result.focusNode.value,
+                ...toViolation(result),
+              }),
+            ),
+            ...[...checked.overTyped].map(
+              (node): FocusedViolation => ({ focusNode: node, ...overTypedViolation(node) }),
+            ),
+          ].sort((a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b)),
+          (node) => engine.dropped.get(node),
+        );
       }),
   };
+}
+
+/**
+ * Results sorted by node, each node's limited (limitResults) with the
+ * severity of those of it the engine left out (`dropped`).
+ */
+function limitedByNode(
+  results: readonly FocusedViolation[],
+  dropped: (node: string) => Severity | undefined,
+): FocusedViolation[] {
+  const kept: FocusedViolation[] = [];
+  let start = 0;
+  while (start < results.length) {
+    const node = results[start].focusNode;
+    let end = start + 1;
+    while (end < results.length && results[end].focusNode === node) end++;
+    for (const result of limitResults(results.slice(start, end), dropped(node))) {
+      kept.push({ ...result, focusNode: node });
+    }
+    start = end;
+  }
+  return kept;
 }

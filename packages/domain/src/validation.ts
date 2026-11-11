@@ -37,6 +37,82 @@ export interface Violation {
   profile?: "dcat-ap" | "skos";
 }
 
+/**
+ * How many results of one check Solid Memo keeps: of one subject against
+ * one shape, or of one node in a check of a whole graph. A constraint on
+ * each value gives a result for each, and data another app wrote may
+ * hold any number of values; past this, one result (resultsNotShown)
+ * says there are more, and the subject still does not conform.
+ */
+export const MAX_RESULTS_PER_CHECK = 1000;
+
+/** How severe a result is, least first. */
+const SEVERITY_RANK: Record<Violation["severity"], number> = { info: 0, warning: 1, violation: 2 };
+
+/** The most severe of two severities. */
+export function moreSevere(
+  a: Violation["severity"],
+  b: Violation["severity"],
+): Violation["severity"] {
+  return SEVERITY_RANK[b] > SEVERITY_RANK[a] ? b : a;
+}
+
+/**
+ * The result that stands for those of a check past MAX_RESULTS_PER_CHECK,
+ * as severe as the most severe of them: a subject with more warnings than
+ * are shown still conforms.
+ */
+export function resultsNotShown(severity: Violation["severity"]): Violation {
+  return {
+    message: {
+      en: `There are more results than Solid Memo shows: it lists the ${MAX_RESULTS_PER_CHECK} most severe of a check.`,
+    },
+    builtIn: true,
+    severity,
+    constraint: "ResultLimit",
+  };
+}
+
+/** Whether a result is resultsNotShown's: it says how many more there are, not what is wrong. */
+function isResultLimit(result: Violation): boolean {
+  return result.constraint === "ResultLimit" && result.builtIn === true;
+}
+
+/**
+ * A check's results: MAX_RESULTS_PER_CHECK of them, the most severe
+ * first kept (a violation is never left out for a warning), in the
+ * order given; then resultsNotShown when there are more, as severe as
+ * the most severe of those left out and of `dropped`, the severity of
+ * results the check left out before they were made, if any. A
+ * resultsNotShown already among them is folded into the one added, so
+ * results limited twice say so once.
+ */
+export function limitResults(
+  results: readonly Violation[],
+  dropped?: Violation["severity"],
+): Violation[] {
+  let severity = dropped;
+  const plain: Violation[] = [];
+  for (const result of results) {
+    if (isResultLimit(result))
+      severity = severity === undefined ? result.severity : moreSevere(severity, result.severity);
+    else plain.push(result);
+  }
+  if (plain.length <= MAX_RESULTS_PER_CHECK && severity === undefined) return plain;
+  // The indices of those kept: the most severe first, in the order given among the equally severe.
+  const order = plain
+    .map((_, index) => index)
+    .sort((a, b) => SEVERITY_RANK[plain[b].severity] - SEVERITY_RANK[plain[a].severity] || a - b);
+  const kept = new Set(order.slice(0, MAX_RESULTS_PER_CHECK));
+  let left = severity ?? "info";
+  for (const index of order.slice(MAX_RESULTS_PER_CHECK)) {
+    left = moreSevere(left, plain[index].severity);
+  }
+  const limited = plain.filter((_, index) => kept.has(index));
+  limited.push(resultsNotShown(left));
+  return limited;
+}
+
 export type SubjectReport =
   /** Checked against the shape of its class and stored version. */
   | {
@@ -61,11 +137,29 @@ export type SubjectReport =
       foreign?: true;
     };
 
-export interface DocumentReport {
-  url: string;
-  /** "missing" is a document the instance has not created yet: not a problem. */
-  status: "missing" | "checked";
-  subjects: SubjectReport[];
+export type DocumentReport =
+  | {
+      url: string;
+      /** "missing" is a document the instance has not created yet: not a problem. */
+      status: "missing" | "checked";
+      subjects: SubjectReport[];
+    }
+  /**
+   * A document the check could not read (refused, or not data it can
+   * read): what it holds is not known, so it counts as a violation
+   * (summarize), and the decks naming it are set aside.
+   */
+  | {
+      url: string;
+      status: "unreadable";
+      subjects: SubjectReport[];
+      /** Why it could not be read, as the read said. */
+      reason: string;
+    };
+
+/** The report on a document the check could not read, for `reason`. */
+export function unreadableDocument(url: string, reason: string): DocumentReport {
+  return { url, status: "unreadable", subjects: [], reason };
 }
 
 /**
@@ -93,18 +187,20 @@ export interface ValidationReport {
   documents: DocumentReport[];
   /** The decks whose documents are unclaimed, when there are any; not a violation: they block nothing. */
   unclaimed?: UnclaimedDeck[];
-  /** Results of severity "violation" across every document. */
+  /** Results of severity "violation" across every document, and each document the check could not read. */
   violationCount: number;
   conforms: boolean;
 }
 
 export function summarize(instanceUrl: string, documents: DocumentReport[]): ValidationReport {
-  const violationCount = documents
-    .flatMap((document) => document.subjects)
-    .flatMap((subject) =>
-      subject.status === "checked" || subject.status === "profiled" ? subject.violations : [],
-    )
-    .filter((violation) => violation.severity === "violation").length;
+  const violationCount =
+    documents
+      .flatMap((document) => document.subjects)
+      .flatMap((subject) =>
+        subject.status === "checked" || subject.status === "profiled" ? subject.violations : [],
+      )
+      .filter((violation) => violation.severity === "violation").length +
+    documents.filter((document) => document.status === "unreadable").length;
   return { instanceUrl, documents, violationCount, conforms: violationCount === 0 };
 }
 
@@ -124,7 +220,11 @@ function failing(subject: SubjectReport): boolean {
   );
 }
 
-/** The subjects and documents with a violation, by URL, and whether one of them is the arrangement of the deck list. */
+/**
+ * The subjects and documents with a violation, by URL, a document the
+ * check could not read among them, and whether one of them is the
+ * arrangement of the deck list (the catalog's own document unread too).
+ */
 interface Failing {
   subjects: ReadonlySet<string>;
   documents: ReadonlySet<string>;
@@ -138,17 +238,26 @@ const failingOfReport = new WeakMap<ValidationReport, Failing>();
 function failingOf(report: ValidationReport): Failing {
   let found = failingOfReport.get(report);
   if (found === undefined) {
-    const subjects = report.documents.flatMap((document) =>
+    const { documents } = report;
+    const subjects = documents.flatMap((document) =>
       document.subjects.filter(failing).map((subject) => ({ document: document.url, subject })),
     );
+    const unread = documents
+      .filter((document) => document.status === "unreadable")
+      .map((document) => document.url);
+    // The catalog's document, as instanceLayout's catalogUrlOf names it, not imported:
+    // Node's scripts run this module, and load only what is named with its extension.
+    const catalog = `${report.instanceUrl.replace(/\/?$/, "/")}catalog.ttl`;
     found = {
       subjects: new Set(subjects.map(({ subject }) => subject.url)),
-      documents: new Set(subjects.map(({ document }) => document)),
-      arrangement: subjects.some(
-        ({ subject }) =>
-          subject.status === "checked" &&
-          (subject.shape === "catalog" || subject.shape === "deckGroup"),
-      ),
+      documents: new Set([...subjects.map(({ document }) => document), ...unread]),
+      arrangement:
+        unread.includes(catalog) ||
+        subjects.some(
+          ({ subject }) =>
+            subject.status === "checked" &&
+            (subject.shape === "catalog" || subject.shape === "deckGroup"),
+        ),
     };
     failingOfReport.set(report, found);
   }
@@ -157,7 +266,8 @@ function failingOf(report: ValidationReport): Failing {
 
 /**
  * Whether the deck has invalid data — its catalog entry, or anything in
- * its cards or reviews document — which the "set invalid data aside"
+ * its cards or reviews document, or one of them the check could not
+ * read — which the "set invalid data aside"
  * policy leaves out until it is repaired. The report is walked once,
  * however many decks are asked about.
  */
