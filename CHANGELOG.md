@@ -21,6 +21,22 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.1.2](https://github.com/solid-memo/website/compare/v7.1.1...v7.1.2) (2026-11-11)
+
+### Bug Fixes
+
+* **deps:** hold tool and dev container updates for review ([e45ba0c](https://github.com/solid-memo/website/commit/e45ba0cee30e98c8dd463f7ee6434fcf8715b22b))
+* **import:** write an imported state's due day only as a real date ([ae77772](https://github.com/solid-memo/website/commit/ae77772d57f8f5ffdbb4761c80fbe5ecf42791d2))
+* **release:** check a pod draft for names of creators without a record ([e954968](https://github.com/solid-memo/website/commit/e954968edc1a89242bd383f1d0d4d7e84ff12522))
+* **release:** read commit bodies as commitlint reads them ([59e6224](https://github.com/solid-memo/website/commit/59e6224e8b13fc93c073d627b8a83985c682531e))
+* **solid-memo-client:** send the id token only to the session's issuer ([b86251f](https://github.com/solid-memo/website/commit/b86251f2130c832eaef10fbac77c7e33cf05eaa5))
+* **solid:** own a deck's document only in its instance's storage ([80c0277](https://github.com/solid-memo/website/commit/80c027785a8a9f5f1e1685083212b3a4a48d8120))
+* **solid:** refuse a deck past the catalog's deck limit ([784fa40](https://github.com/solid-memo/website/commit/784fa404252ac61c101110fb40b7e64d4ebddf49))
+* **solid:** write each digest entry new over its subject ([7e25de1](https://github.com/solid-memo/website/commit/7e25de1338cde1eb6e73ee43a94cf2076b0bf600))
+* **solid:** write palette color sets where they can be saved ([9f4074a](https://github.com/solid-memo/website/commit/9f4074a80d8bbb3462286e5f6580f7f3e93900c8))
+* **ui:** link a mailto address only without a query or fragment ([382a454](https://github.com/solid-memo/website/commit/382a454892bd29dd147344cf49c107034112afaa))
+* **validation:** bound a check's results and hold data when it fails ([5689160](https://github.com/solid-memo/website/commit/5689160a44b5d35cc580aa6fd6cd25fa4bd9ce2b))
+
 ## [7.1.1](https://github.com/solid-memo/website/compare/v7.1.0...v7.1.1) (2026-11-10)
 
 ### Bug Fixes
