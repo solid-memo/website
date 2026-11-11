@@ -9,14 +9,16 @@ import { describe, expect, it } from "vitest";
 
 /**
  * renovate.json5: Renovate merges an update on its own once CI passes only
- * where no rule holds it. A person merges every npm update, development
- * tools' included, since the build that makes the deployed site and the
- * release job run them, and an update of one can move a shipped package in
- * the lockfile; every update to a workflow's action, since some of the
- * jobs that run one hold the deploy key and other secrets; and every new
- * major version. Every new version of an npm dependency raises its range,
- * and every week the npm lockfiles are locked again, which a person merges
- * (GOVERNANCE.md#dependency-updates).
+ * where a rule lets it, and only the end-to-end test servers' images and
+ * commits are let. A person merges every other update: every npm update,
+ * development tools' included, since the build that makes the deployed
+ * site and the release job run them, and an update of one can move a
+ * shipped package in the lockfile; every update to a workflow's action,
+ * since some of the jobs that run one hold the deploy key and other
+ * secrets; the Python tools and the dev container, which run on
+ * maintainers' machines; and every new major version. Every new version of
+ * an npm dependency raises its range, and every week the npm lockfiles are
+ * locked again, which a person merges (GOVERNANCE.md#dependency-updates).
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -32,6 +34,14 @@ const config = JSON5.parse(readFileSync(join(ROOT, "renovate.json5"), "utf8")) a
   "pip-compile"?: { lockFileMaintenance?: Record<string, unknown> };
   packageRules: PackageRule[];
 };
+
+/** The dev container's configuration, and the lock file the dev container CLI writes beside it. */
+const devcontainer = JSON5.parse(
+  readFileSync(join(ROOT, ".devcontainer/devcontainer.json"), "utf8"),
+) as { image: string; features: Record<string, unknown> };
+const devcontainerLock = JSON.parse(
+  readFileSync(join(ROOT, ".devcontainer/devcontainer-lock.json"), "utf8"),
+) as { features: Record<string, { version: string; resolved: string; integrity: string }> };
 
 /** The index of the rule that raises npm dependencies' ranges. */
 const bumped = config.packageRules.findIndex(
@@ -148,8 +158,119 @@ function npmDependencies(): { packageFile: string; depName: string; depType: str
 }
 
 describe("renovate.json5", () => {
-  it("merges an update on its own unless a rule says otherwise", () => {
-    expect(config.automerge).toBe(true);
+  it("holds an update for a person unless a rule lets it merge on its own", () => {
+    expect(config.automerge).toBe(false);
+  });
+
+  it("lets one rule, for the end-to-end test servers alone, merge an update on its own", () => {
+    // The reviewed allow-list: a manager or datasource added to it is a
+    // person's decision, made here.
+    expect(config.packageRules.filter((rule) => rule.automerge === true)).toEqual([
+      {
+        matchFileNames: ["e2e/**"],
+        matchManagers: ["docker-compose", "dockerfile", "regex"],
+        matchDatasources: ["docker", "git-refs"],
+        automerge: true,
+      },
+    ]);
+  });
+
+  it("merges a minor or patch update on its own only where the allow-list names it", () => {
+    const managers = [
+      "npm",
+      "github-actions",
+      "pip-compile",
+      "devcontainer",
+      "nvm",
+      "dockerfile",
+      "docker-compose",
+      "regex",
+      "a-new-manager",
+    ];
+    const datasources = [
+      "npm",
+      "docker",
+      "pypi",
+      "git-refs",
+      "github-tags",
+      "github-release-attachments",
+      "node-version",
+      "a-new-datasource",
+    ];
+    const merged = managers.flatMap((manager) =>
+      datasources.flatMap((datasource) =>
+        ["e2e/pod/servers/jss/Dockerfile", "Dockerfile", "scripts/requirements-ci.txt"].flatMap(
+          (packageFile) =>
+            ["minor", "patch"].flatMap((updateType) => {
+              const update = { manager, datasource, packageFile, depName: "a-dep", updateType };
+              return automerges(update) ? [`${manager} ${datasource} ${packageFile}`] : [];
+            }),
+        ),
+      ),
+    );
+    expect([...new Set(merged)].sort()).toEqual([
+      "docker-compose docker e2e/pod/servers/jss/Dockerfile",
+      "docker-compose git-refs e2e/pod/servers/jss/Dockerfile",
+      "dockerfile docker e2e/pod/servers/jss/Dockerfile",
+      "dockerfile git-refs e2e/pod/servers/jss/Dockerfile",
+      "regex docker e2e/pod/servers/jss/Dockerfile",
+      "regex git-refs e2e/pod/servers/jss/Dockerfile",
+    ]);
+  });
+
+  it("holds every update of a Python tool for a person", () => {
+    for (const packageFile of ["scripts/requirements-lint.txt", "scripts/requirements-ci.txt"]) {
+      for (const depName of ["zizmor", "reuse", "pyshacl", "actionlint-py", "a-new-tool"]) {
+        for (const updateType of UPDATE_TYPES) {
+          const update = {
+            manager: "pip-compile",
+            datasource: "pypi",
+            packageFile,
+            depName,
+            updateType,
+          };
+          expect(automerges(update)).toBe(false);
+        }
+      }
+    }
+  });
+
+  it("holds every update of the dev container's image and features for a person", () => {
+    for (const depName of [
+      "mcr.microsoft.com/devcontainers/typescript-node",
+      "ghcr.io/devcontainers/features/git",
+      "ghcr.io/devcontainers/features/docker-in-docker",
+      "ghcr.io/devcontainers/features/python",
+    ]) {
+      for (const updateType of UPDATE_TYPES) {
+        const update = {
+          manager: "devcontainer",
+          datasource: "docker",
+          packageFile: ".devcontainer/devcontainer.json",
+          depName,
+          updateType,
+        };
+        expect(automerges(update)).toBe(false);
+      }
+    }
+  });
+
+  it("still merges a new commit of Nextcloud's app on its own, but not of the Linked Web Storage fork", () => {
+    const update = {
+      manager: "regex",
+      datasource: "git-refs",
+      packageFile: "e2e/pod/servers/nextcloud/Dockerfile",
+      depName: "https://github.com/pdsinterop/solid-nextcloud",
+      updateType: "digest",
+    };
+    expect(automerges(update)).toBe(true);
+    expect(
+      automerges({
+        ...update,
+        packageFile: "e2e/pod/servers/css-lws/Dockerfile",
+        depName: "https://github.com/jeswr/CommunitySolidServer",
+      }),
+    ).toBe(false);
   });
 
   it("holds every update to a workflow's action for a person", () => {
@@ -347,5 +468,35 @@ describe("renovate.json5", () => {
     expect(topic(config.npm?.lockFileMaintenance)).not.toBe(
       topic(config["pip-compile"]?.lockFileMaintenance),
     );
+  });
+});
+
+describe(".devcontainer/devcontainer.json", () => {
+  /**
+   * A feature named by its major version alone: the dev container CLI can't
+   * read a tag and a digest together, so the lock file holds the digest.
+   */
+  const MAJOR = /^([^@:\s]+):(\d+)$/;
+
+  it("pins its image by digest", () => {
+    expect(devcontainer.image).toMatch(/^[^@\s]+:[^@\s]+@sha256:[0-9a-f]{64}$/);
+  });
+
+  it("names each feature by its major version", () => {
+    const features = Object.keys(devcontainer.features);
+    expect(features.length).toBeGreaterThan(0);
+    for (const feature of features) expect(feature).toMatch(MAJOR);
+  });
+
+  it("locks each feature, and only those, to a digest of that major version", () => {
+    const features = Object.keys(devcontainer.features);
+    expect(Object.keys(devcontainerLock.features).sort()).toEqual([...features].sort());
+    for (const feature of features) {
+      const [, name, major] = MAJOR.exec(feature) ?? [];
+      const locked = devcontainerLock.features[feature];
+      expect(locked?.integrity).toMatch(/^sha256:[0-9a-f]{64}$/);
+      expect(locked?.resolved).toBe(`${name}@${locked?.integrity}`);
+      expect(locked?.version).toMatch(new RegExp(`^${major}\\.\\d+\\.\\d+$`));
+    }
   });
 });

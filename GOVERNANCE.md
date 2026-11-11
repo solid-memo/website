@@ -142,8 +142,8 @@ pull requests too ([Dependency updates](#dependency-updates)).
 [Renovate](https://docs.renovatebot.com/) proposes dependency updates
 ([renovate.json5](renovate.json5)). Each update is a pull request. CI
 can't tell a malicious version from a good one, since such a version is
-built to pass the tests, so a person merges each update that can change
-what users run or what runs with a secret:
+built to pass the tests, so a person merges each update, unless
+`renovate.json5` names it as one that merges on its own. That includes:
 
 - **Every npm package**, development tools included. The app ships the
   run-time dependencies of the workspace packages that
@@ -160,14 +160,26 @@ what users run or what runs with a secret:
   workflow names.
 - **Every action the workflows use**, since some of the jobs that run
   one hold the deploy key and other secrets.
+- **Every Python tool** pinned in `scripts/requirements-*.in`, and what
+  they need. Maintainers install and run them with their own
+  credentials, as the dev container and a weekly job on `main` do.
+- **The dev container's image and features**, which run as root while
+  the container is built. The image is pinned by its digest, and
+  `.devcontainer/devcontainer-lock.json` pins each feature by its
+  digest. Renovate doesn't update that lock file, so a person locks a
+  feature's new version (`devcontainer upgrade`) before CI passes.
+- **The Node version** in `.nvmrc`, which every job runs.
 - **Every new major version**, which may change what the tests don't
   cover.
 
-Most other updates, such as a new minor or patch version of an
-end-to-end test server's image, Renovate adds to the merge queue on its
-own once their version has been public for 3 days. The queue merges
-one only when CI passes, with no person reviewing it, so those updates
-are unreviewed changes too.
+Renovate adds two kinds of update to the merge queue on its own, once
+their version has been public for 3 days: a new minor or patch version
+of an end-to-end test server's image, and a new commit that one of
+those servers builds. Both run only in containers the tests start and
+throw away. The queue merges one only when CI passes, with no person
+reviewing it, so those updates are unreviewed changes too. Adding a
+kind of update to that list is a person's decision, and
+`scripts/renovateConfig.test.ts` checks the list.
 
 The person who merges one reads its release notes and what changed in
 the package itself, with

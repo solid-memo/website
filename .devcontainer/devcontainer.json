@@ -2,10 +2,16 @@
   "name": "Solid Memo",
   // The image's own version, then Node's: Node 24, as CI runs (.nvmrc) and
   // engines asks for. The digest fixes the image; Renovate keeps it up to
-  // date on Node 24 (renovate.json5). Turbo is the root devDependency, run
-  // through npm's scripts or npx.
+  // date on Node 24, and a person merges each update (renovate.json5).
+  // Turbo is the root devDependency, run through npm's scripts or npx.
   "image": "mcr.microsoft.com/devcontainers/typescript-node:5.2.3-24-bookworm@sha256:970eebf5b82d3800bdd9f46680e1c4c664d365d18603148540788356700ce301",
 
+  // Each feature runs as root while the container is built. It's named by
+  // its major version, and devcontainer-lock.json pins it by digest: the
+  // dev container CLI fetches that digest and checks it, so a tag pushed
+  // again changes nothing. Renovate proposes a new major version but
+  // doesn't update the lock file, so its pull request fails CI until a
+  // person locks the new version (`devcontainer upgrade`) and merges it.
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     // Docker for the end-to-end tests' servers (`npm run test:pod`, `npm
