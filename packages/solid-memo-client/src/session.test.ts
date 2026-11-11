@@ -1475,7 +1475,7 @@ describe("createSessionClient, on a Linked Web Storage storage", () => {
     ]);
   });
 
-  it("sends the ID token to no authorization server but on its identity provider's origin", async () => {
+  it("sends the ID token to no authorization server but its identity provider", async () => {
     const pod = lwsPod("https://as.example/");
     const client = await logIn();
     provider.pod = pod;
