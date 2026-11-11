@@ -665,6 +665,7 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
             key={route.instanceUrl}
             useCases={useCases}
             instance={activeInstance!}
+            webId={session.webId}
             chosen={route.deckUrls ?? []}
             // Like Home's view, which decks are checked is no Back stop.
             onChoose={(urls) =>

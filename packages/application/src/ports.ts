@@ -558,13 +558,20 @@ export type LinkedReleaseReads = Pick<
  */
 export interface DeckArchive {
   /**
-   * The deck's entry, with its agents and distribution, and every subject
-   * of its cards document, as the pod has them, at their IRIs; with
-   * `withProgress`, every subject of its reviews document and a course's
-   * completed chapters too. Throws deckGone when the catalog has no entry
-   * of it.
+   * The deck's entry, with its agents and distribution, and its cards
+   * with the distractors they name, as the pod has them, at their IRIs;
+   * with `withProgress`, the review states of those cards and a course's
+   * completed chapters too. Nothing else of its cards and reviews
+   * documents. Each of the two documents `asNoOne` names is read as no
+   * one (as listCards reads one), any other as the user: the caller
+   * says which, so none is read as the user by default. Throws deckGone
+   * when the catalog has no entry of it.
    */
-  exportDeck(deck: Deck, options: DeckFileOptions): Promise<string>;
+  exportDeck(
+    deck: Deck,
+    options: DeckFileOptions,
+    reads: { asNoOne: { cards: boolean; reviews: boolean } },
+  ): Promise<string>;
   /**
    * What a file holds: its one deck, read as the pod's are (an older
    * format brought up to date, in memory), the cards of its cards

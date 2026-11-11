@@ -31,13 +31,13 @@ import {
   type FsrsState,
   type ReviewState,
 } from "@solid-memo/domain/review";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { getSolidDatasetOrNull } from "./datasets";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
 import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
-import { toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
+import { reviewedCardIdOf, toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
 import { storedVersionOf } from "./records";
 import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
 
@@ -69,20 +69,30 @@ const KINDS: readonly { type: string; scheduler?: string; shape: ShapeName }[] =
 
 /**
  * The DeckArchive over the pod (domain/deckFile.ts). An export copies
- * triples as they are, so what another app said of the deck, its cards
- * or their states goes with them; only the deck's place among its
- * groups (sm:position) is left behind, and a course's progress unless
- * asked for. Turtle is written and read as pod documents
- * are (solidDatasetAsTurtle, parseQuads), JSON-LD read so too and
- * written here (jsonLd.ts).
+ * the deck's own subjects as they are (ownSubjectsOf), so what another
+ * app said of the deck, its cards or their states goes with them; only
+ * the deck's place among its groups (sm:position) is left behind, and a
+ * course's progress unless asked for. Nothing else of its documents goes:
+ * a deck may name a document it shares with other data. Turtle is
+ * written and read as pod documents are (solidDatasetAsTurtle,
+ * parseQuads), JSON-LD read so too and written here (jsonLd.ts). A
+ * document exportDeck is asked to read as no one is read with
+ * `publicFetch`.
  */
-export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fetch }): DeckArchive {
+export function createSolidDeckArchive({
+  fetch,
+  publicFetch,
+}: {
+  fetch: typeof globalThis.fetch;
+  publicFetch: typeof globalThis.fetch;
+}): DeckArchive {
+  const as = (noOne: boolean) => (noOne ? publicFetch : fetch);
   return {
-    async exportDeck(deck, { format, withProgress }) {
+    async exportDeck(deck, { format, withProgress }, { asNoOne }) {
       const [catalog, cards, reviews] = await Promise.all([
         getSolidDatasetOrNull(documentUrlOf(deck.url), fetch),
-        getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch),
-        withProgress ? getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch) : null,
+        getSolidDatasetOrNull(deck.cardsDocumentUrl, as(asNoOne.cards)),
+        withProgress ? getSolidDatasetOrNull(deck.reviewsDocumentUrl, as(asNoOne.reviews)) : null,
       ]);
       const entry = catalog === null ? null : getThing(catalog, deck.url);
       if (entry === null) throw new AppError("deckGone", { deck: deck.title });
@@ -93,8 +103,7 @@ export function createSolidDeckArchive({ fetch }: { fetch: typeof globalThis.fet
           ({ subject, predicate }) =>
             (subject.value === deck.url && !left.has(predicate.value)) || beside.has(subject.value),
         ),
-        ...quadsOf(cards),
-        ...quadsOf(reviews),
+        ...ownSubjectsOf(deck, cards, reviews),
       ];
       refuseUnwritable(quads);
       if (format === "jsonld") return jsonLdOf(quads, DECK_FILE_PREFIXES);
@@ -210,6 +219,63 @@ function hasNonUrlValue(quads: readonly Quad[], deckUrl: string): boolean {
     ({ subject, object }) =>
       subject.value === deckUrl && object.termType === "NamedNode" && !URL.canParse(object.value),
   );
+}
+
+/**
+ * The triples of the deck's own subjects in its two documents, read as
+ * readDeckFile reads them back: each of its cards (an sm:Card of its
+ * cards document) with the distractors it names there, and each review
+ * state of one of those cards in its reviews document; with the blank
+ * nodes they lead to (quadsAbout). Anything else either document holds
+ * is not the deck's and is left out.
+ */
+function ownSubjectsOf(deck: Deck, cards: Dataset | null, reviews: Dataset | null): Quad[] {
+  const cardThings = subjectsIn(cards, deck.cardsDocumentUrl).filter((thing) =>
+    getUrlAll(thing, RDF.type).includes(SM.Card),
+  );
+  const ids = new Set(cardThings.map((thing) => fragmentIdOf(asUrl(thing))));
+  const cardSubjects = new Set(
+    cardThings.flatMap((thing) => [asUrl(thing), ...getUrlAll(thing, SM.distractor)]),
+  );
+  const stateSubjects = new Set(
+    subjectsIn(reviews, deck.reviewsDocumentUrl)
+      .filter((thing) => ids.has(reviewedCardIdOf(thing, deck) ?? ""))
+      .map(asUrl),
+  );
+  return [
+    ...quadsAbout(quadsOf(cards), cardSubjects),
+    ...quadsAbout(quadsOf(reviews), stateSubjects),
+  ];
+}
+
+/** The subjects the document read has at its own IRIs; none of one there is none of. */
+function subjectsIn(dataset: Dataset | null, documentUrl: string): Subject[] {
+  if (dataset === null) return [];
+  return getThingAll(dataset).filter((thing) => documentUrlOf(asUrl(thing)) === documentUrl);
+}
+
+/** The triples of `subjects`, and of every blank node they lead to, in the document's order. */
+function quadsAbout(quads: readonly Quad[], subjects: ReadonlySet<string>): Quad[] {
+  const keyOf = (term: Quad["subject"] | Quad["object"]) =>
+    term.termType === "BlankNode" ? `_:${term.value}` : term.value;
+  const bySubject = new Map<string, Quad[]>();
+  for (const quad of quads) {
+    const key = keyOf(quad.subject);
+    const about = bySubject.get(key);
+    if (about === undefined) bySubject.set(key, [quad]);
+    else about.push(quad);
+  }
+  const kept = new Set(subjects);
+  const next = [...subjects];
+  for (let key = next.pop(); key !== undefined; key = next.pop()) {
+    for (const { object } of bySubject.get(key) ?? []) {
+      const blank = keyOf(object);
+      if (object.termType !== "BlankNode" || kept.has(blank)) continue;
+      kept.add(blank);
+      next.push(blank);
+    }
+  }
+  return quads.filter((quad) => kept.has(keyOf(quad.subject)));
 }
 
 /** The triples of a document read; none of one there is none of. */

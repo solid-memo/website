@@ -1163,8 +1163,12 @@ describe("an instance whose address is spelled otherwise than a request sends it
       const states = await p.reviews.listReviewStates(listed!);
       expect(states.sm2.map((one) => one.repetitions)).toEqual([2]);
 
-      const archive = createSolidDeckArchive({ fetch: p.fetch });
-      const file = await archive.exportDeck(listed!, { format: "turtle", withProgress: true });
+      const archive = createSolidDeckArchive({ fetch: p.fetch, publicFetch: p.fetch });
+      const file = await archive.exportDeck(
+        listed!,
+        { format: "turtle", withProgress: true },
+        { asNoOne: { cards: false, reviews: false } },
+      );
       const read = await archive.readDeckFile(file, "turtle", "https://example.org/deck");
       expect(read.cards).toHaveLength(2);
       expect(read.reviews).toHaveLength(1);

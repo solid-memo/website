@@ -127,11 +127,10 @@ describe("a due day that is no date, written back", () => {
   sm:cardsDocument <decks/d.ttl> ; sm:reviewsDocument <reviews/d.ttl> .
 <decks/d.ttl#c1> a sm:Card ; sm:front "F" ; sm:back "B" ; sm:formatVersion 1 .
 ${stateOf("c1", "zzz", 2).replace("<#c1>", "<reviews/d.ttl#c1>").replace("../decks", "decks")}`;
-    const content = await createSolidDeckArchive({ fetch: globalThis.fetch }).readDeckFile(
-      file,
-      "turtle",
-      deckFileBaseOf("d.ttl"),
-    );
+    const content = await createSolidDeckArchive({
+      fetch: globalThis.fetch,
+      publicFetch: globalThis.fetch,
+    }).readDeckFile(file, "turtle", deckFileBaseOf("d.ttl"));
     const imported = importedDeck(INSTANCE, content, {
       withProgress: true,
       decks: [],

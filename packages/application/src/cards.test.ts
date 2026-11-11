@@ -1115,16 +1115,52 @@ describe("cards", () => {
 
     it("saves a deck as a file named after it", async () => {
       const { deckArchive, fileExchange, useCases } = withFiles();
-      await useCases.exportDeckFile(deck, { format: "jsonld", withProgress: true });
-      expect(deckArchive.exportDeck).toHaveBeenCalledWith(deck, {
-        format: "jsonld",
-        withProgress: true,
-      });
+      await useCases.exportDeckFile(
+        instance.url,
+        deck,
+        { format: "jsonld", withProgress: true },
+        session.webId,
+      );
+      // The instance's own documents: read as the user.
+      expect(deckArchive.exportDeck).toHaveBeenCalledWith(
+        deck,
+        { format: "jsonld", withProgress: true },
+        { asNoOne: { cards: false, reviews: false } },
+      );
       expect(fileExchange.save).toHaveBeenCalledWith(
         "kanji-n5.jsonld",
         "application/ld+json",
         "<#a> <#b> <#c> .",
       );
+    });
+
+    it("exports a deck's documents as the user only in the instance's pod, any other as no one (GHSA-xcjw-3f3x-g9fc)", async () => {
+      const { deps, deckArchive, useCases } = withFiles();
+      vi.mocked(deps.storageGateway.discoverStorages).mockResolvedValue([
+        { url: "https://alice.example/", source: "profile" },
+        { url: "https://other.example/alice/", source: "profile" },
+      ]);
+      const asNoOne = async (documents: Partial<Deck>) => {
+        deckArchive.exportDeck.mockClear();
+        await useCases.exportDeckFile(
+          instance.url,
+          { ...deck, ...documents },
+          { format: "turtle", withProgress: true },
+          session.webId,
+        );
+        return (deckArchive.exportDeck.mock.calls[0] as unknown[])[2];
+      };
+      await expect(
+        asNoOne({ cardsDocumentUrl: "https://alice.example/elsewhere/deck-1.ttl" }),
+      ).resolves.toEqual({ asNoOne: { cards: false, reviews: false } });
+      expect(deps.storageGateway.discoverStorages).toHaveBeenCalledWith(session.webId);
+      // The user's own, but in a storage the instance is not in; anyone else's.
+      await expect(
+        asNoOne({ cardsDocumentUrl: "https://other.example/alice/private/notes.ttl" }),
+      ).resolves.toEqual({ asNoOne: { cards: true, reviews: false } });
+      await expect(
+        asNoOne({ reviewsDocumentUrl: "https://elsewhere.example/reviews.ttl" }),
+      ).resolves.toEqual({ asNoOne: { cards: false, reviews: true } });
     });
 
     it("reads the file the user picks, in the format its name says, at a base of its own", async () => {

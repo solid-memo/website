@@ -1633,9 +1633,17 @@ An export holds triples as the pod has them, at the pod's IRIs:
   names as its creators, its card language (`sm:deckCardLanguage`) and
   picture hosts (`sm:deckPictureHost`) among them, but not its `sm:position`, nor its `sm:completedChapter`s
   unless the progress goes too;
-- every subject of its cards document: its cards and their wrong
-  options, retired ones too, and whatever another app put there;
-- with the progress, every subject of its reviews document.
+- its cards (each `sm:Card` of its cards document) and the wrong
+  options they name, retired ones too, with whatever another app said
+  of them;
+- with the progress, the review states of those cards in its reviews
+  document.
+
+Nothing else of either document goes: a deck may name a document that
+holds more than the deck. Each of the two documents is read as the user
+only when it's the instance's (`isInInstancePod`), as a move or copy of
+cards reads its source. An instance attached from someone else's pod
+may name a document of the user's own. Any other is read as no one.
 
 Nothing is rewritten: a deck still at an older format is exported at it.
 A JSON-LD file is flattened: every subject is a node of its `@graph`,

@@ -20,7 +20,8 @@ import { queryKeys } from "./queryKeys";
 /**
  * The import and export screen's data: the instance's decks as the user
  * arranged them (Home's query). An export saves the decks one after
- * another (UseCases.exportDeckFile), saying which it is at. Opening a
+ * another (UseCases.exportDeckFile, which reads a document outside the
+ * instance's pod as no one), saying which it is at. Opening a
  * file reads it (openDeckFile); importing it (importDeckFile) writes the
  * catalog, so it waits its turn with the other writes of the catalog
  * (catalogScope), and every query of the instance's decks is read afresh
@@ -30,6 +31,7 @@ import { queryKeys } from "./queryKeys";
 export function TransferContainer({
   useCases,
   instance,
+  webId,
   chosen,
   onChoose,
   cardsHref,
@@ -37,6 +39,8 @@ export function TransferContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
+  /** The signed-in user: a deck's documents are exported as theirs only in the instance's pod. */
+  webId: string;
   /** The URLs of the decks checked to export (the route's). */
   chosen: readonly string[];
   onChoose: (urls: readonly string[]) => void;
@@ -65,7 +69,7 @@ export function TransferContainer({
       try {
         for (const [index, deck] of decks.entries()) {
           setExporting({ deck, index, total: decks.length });
-          await useCases.exportDeckFile(deck, options);
+          await useCases.exportDeckFile(instance.url, deck, options, webId);
         }
       } finally {
         setExporting(null);

@@ -1459,7 +1459,9 @@ goes too: the cards' review states and a course's completed chapters.
 (`capitals.ttl`), one after another, the screen naming the deck it's
 at. Export writes nothing to the pod. The use case `exportDeckFile`
 reads the deck's documents (`DeckArchive.exportDeck`) and hands the
-text to the browser to save (`FileExchange.save`).
+text to the browser to save (`FileExchange.save`). It reads a document
+as the user only when it's in the instance's pod, any other as no one,
+and the file holds only the deck's own cards and review states.
 
 Browsers ask before a page's second download, and save none of the
 rest on a no. The app can't tell, so after several decks the screen

@@ -143,8 +143,12 @@ describe("createSolidDeckArchive", () => {
   for (const format of ["turtle", "jsonld"] as const satisfies readonly DeckFileFormat[]) {
     it(`reads back in ${format} what it exports, progress and all`, async () => {
       const { pod, deck, cards, states } = await podWithDeck();
-      const archive = createSolidDeckArchive({ fetch: pod.fetch });
-      const text = await archive.exportDeck(deck, { format, withProgress: true });
+      const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+      const text = await archive.exportDeck(
+        deck,
+        { format, withProgress: true },
+        { asNoOne: { cards: false, reviews: false } },
+      );
       expect(text).toContain(FOREIGN);
       const read = await archive.readDeckFile(text, format, `${DECK_FILE_BASE}deck`);
       expect(read).toEqual({
@@ -165,8 +169,12 @@ describe("createSolidDeckArchive", () => {
 
   it("leaves the progress and the deck's place behind unless asked", async () => {
     const { pod, deck, cards } = await podWithDeck();
-    const archive = createSolidDeckArchive({ fetch: pod.fetch });
-    const text = await archive.exportDeck(deck, { format: "turtle", withProgress: false });
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    const text = await archive.exportDeck(
+      deck,
+      { format: "turtle", withProgress: false },
+      { asNoOne: { cards: false, reviews: false } },
+    );
     expect(text).not.toContain("position");
     expect(text).not.toContain("completedChapter");
     // The card language is the learner's choice of how the deck reads, not progress: it goes along.
@@ -187,8 +195,12 @@ describe("createSolidDeckArchive", () => {
   ]) {
     it(`refuses a deck whose ${predicate} is an IRI no URL parser takes, before anything is written (GHSA-5hqv-c3r3-7mx9)`, async () => {
       const { pod, deck } = await podWithDeck();
-      const archive = createSolidDeckArchive({ fetch: pod.fetch });
-      const text = await archive.exportDeck(deck, { format: "turtle", withProgress: true });
+      const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+      const text = await archive.exportDeck(
+        deck,
+        { format: "turtle", withProgress: true },
+        { asNoOne: { cards: false, reviews: false } },
+      );
       const base = `${DECK_FILE_BASE}deck`;
       await expect(
         archive.readDeckFile(
@@ -210,10 +222,14 @@ describe("createSolidDeckArchive", () => {
   it("writes JSON-LD with its context in full, as compact IRIs and value objects", async () => {
     const { pod, deck } = await podWithDeck();
     const json = JSON.parse(
-      await createSolidDeckArchive({ fetch: pod.fetch }).exportDeck(deck, {
-        format: "jsonld",
-        withProgress: true,
-      }),
+      await createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch }).exportDeck(
+        deck,
+        {
+          format: "jsonld",
+          withProgress: true,
+        },
+        { asNoOne: { cards: false, reviews: false } },
+      ),
     );
     expect(json["@context"].sm).toBe(SM_NS);
     const entry = json["@graph"].find((node: { "@id": string }) => node["@id"] === deck.url);
@@ -228,14 +244,135 @@ describe("createSolidDeckArchive", () => {
     });
   });
 
+  it("exports only the deck's own subjects of its documents, and reads them back (GHSA-xcjw-3f3x-g9fc)", async () => {
+    const { pod, deck, cards, states } = await podWithDeck();
+    const card = cards[0]!.url;
+    // What else the documents hold: another subject, a state of a card of another deck, and what another app said of a card through a blank node.
+    await pod.put(
+      deck.cardsDocumentUrl,
+      [
+        ...pod.triples(deck.cardsDocumentUrl)!,
+        `<${deck.cardsDocumentUrl}#note> <https://example.org/text> "not of the deck" .`,
+        `<${card}> <https://example.org/rated> _:rating .`,
+        `_:rating <https://example.org/stars> "4" ; <https://example.org/self> _:rating ; <https://example.org/by> _:rater .`,
+      ].join("\n"),
+    );
+    await pod.put(
+      deck.reviewsDocumentUrl,
+      [
+        ...pod.triples(deck.reviewsDocumentUrl)!,
+        `<${deck.reviewsDocumentUrl}#other> a <${SM.ReviewState}> ; <${SM_NS}reviewOf> <${INSTANCE}decks/other.ttl#x> .`,
+        `<${deck.reviewsDocumentUrl}#diary> <https://example.org/text> "not of the deck" .`,
+      ].join("\n"),
+    );
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    const text = await archive.exportDeck(
+      deck,
+      { format: "turtle", withProgress: true },
+      { asNoOne: { cards: false, reviews: false } },
+    );
+    expect(text).not.toContain("not of the deck");
+    expect(text).not.toContain("#other");
+    expect(text).toContain("https://example.org/stars");
+    const read = await archive.readDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
+    expect(read).toMatchObject({
+      cards,
+      reviews: states.sm2,
+      fsrsReviews: states.fsrs,
+      dropped: [],
+    });
+  });
+
+  it("exports the deck's entry alone when its cards document is gone", async () => {
+    const { pod, deck } = await podWithDeck();
+    const gone = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/gone.ttl` };
+    const text = await createSolidDeckArchive({
+      fetch: pod.fetch,
+      publicFetch: pod.fetch,
+    }).exportDeck(
+      gone,
+      {
+        format: "turtle",
+        withProgress: true,
+      },
+      { asNoOne: { cards: false, reviews: false } },
+    );
+    expect(text).toContain(deck.url);
+    expect(text).not.toContain(`${deck.cardsDocumentUrl}#`);
+    expect(text).not.toContain(`${deck.reviewsDocumentUrl}#`);
+  });
+
+  it("reads a document it is asked to as no one, and copies none of what is not the deck's (GHSA-xcjw-3f3x-g9fc)", async () => {
+    const ATTACKER = "https://attacker.example/memo/";
+    const STORAGE = "https://victim.example/";
+    const PRIVATE = `${STORAGE}private/notes.ttl`;
+    const REVIEWS = `${STORAGE}private/reviews.ttl`;
+    // What each server holds; the private documents answer only the user.
+    const server: Record<string, { body: string; ownerOnly?: boolean }> = {
+      [`${ATTACKER}catalog.ttl`]: {
+        body: `<#deck> a <${SM.Deck}>; <${SM_NS}cardsDocument> <${PRIVATE}>; <${SM_NS}reviewsDocument> <${REVIEWS}>.`,
+      },
+      [PRIVATE]: {
+        ownerOnly: true,
+        body: `<${PRIVATE}#note> <https://example.org/text> "private note".`,
+      },
+      [REVIEWS]: {
+        ownerOnly: true,
+        body: `<${REVIEWS}#log> <https://example.org/text> "private log".`,
+      },
+    };
+    const reads: { url: string; asUser: boolean }[] = [];
+    const serve = (asUser: boolean) =>
+      (async (input: RequestInfo | URL) => {
+        const url = String(input);
+        reads.push({ url, asUser });
+        const doc = server[url];
+        if (doc === undefined) return new Response(null, { status: 404 });
+        if (doc.ownerOnly === true && !asUser) return new Response(null, { status: 401 });
+        const response = new Response(doc.body, {
+          status: 200,
+          headers: { "Content-Type": "text/turtle" },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      }) as typeof globalThis.fetch;
+    const deck = {
+      url: `${ATTACKER}catalog.ttl#deck`,
+      title: "Course deck",
+      cardsDocumentUrl: PRIVATE,
+      reviewsDocumentUrl: REVIEWS,
+    } as unknown as Deck;
+    const export_ = (asNoOne: { cards: boolean; reviews: boolean }) =>
+      createSolidDeckArchive({ fetch: serve(true), publicFetch: serve(false) }).exportDeck(
+        deck,
+        { format: "turtle", withProgress: true },
+        { asNoOne },
+      );
+    // Read as no one, as the use case asks for a document outside the instance's pod: one kept from everyone is no file at all.
+    await expect(export_({ cards: true, reviews: true })).rejects.toThrow();
+    expect(reads.filter(({ url }) => url !== `${ATTACKER}catalog.ttl`)).toEqual([
+      { url: PRIVATE, asUser: false },
+      { url: REVIEWS, asUser: false },
+    ]);
+    // Read as the user, nothing of either document is the deck's: none of it goes.
+    const text = await export_({ cards: false, reviews: false });
+    expect(text).toContain(deck.url);
+    expect(text).not.toContain("private note");
+    expect(text).not.toContain("private log");
+  });
+
   it("refuses to export a deck its catalog no longer lists", async () => {
     const { pod, deck } = await podWithDeck();
-    const archive = createSolidDeckArchive({ fetch: pod.fetch });
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
     await expect(
-      archive.exportDeck({ ...deck, url: `${deck.url}-gone` } as Deck, {
-        format: "turtle",
-        withProgress: false,
-      }),
+      archive.exportDeck(
+        { ...deck, url: `${deck.url}-gone` } as Deck,
+        {
+          format: "turtle",
+          withProgress: false,
+        },
+        { asNoOne: { cards: false, reviews: false } },
+      ),
     ).rejects.toMatchObject({
       code: "deckGone",
     });
@@ -243,6 +380,7 @@ describe("createSolidDeckArchive", () => {
       archive.exportDeck(
         { ...deck, url: "https://pod.example/elsewhere/catalog.ttl#d" },
         { format: "turtle", withProgress: false },
+        { asNoOne: { cards: false, reviews: false } },
       ),
     ).rejects.toMatchObject({ code: "deckGone" });
   });
@@ -293,11 +431,10 @@ describe("a deck file's wrong options, imported", () => {
         sm:distractor ${urls.map((url) => `<${url}>`).join(", ")} .
       ${options}`;
     const pod = fakePod();
-    const read = await createSolidDeckArchive({ fetch: pod.fetch }).readDeckFile(
-      file,
-      "turtle",
-      `${DECK_FILE_BASE}deck.ttl`,
-    );
+    const read = await createSolidDeckArchive({
+      fetch: pod.fetch,
+      publicFetch: pod.fetch,
+    }).readDeckFile(file, "turtle", `${DECK_FILE_BASE}deck.ttl`);
     const { deck, cards } = importedDeck(INSTANCE, read, {
       withProgress: false,
       decks: [],
@@ -335,9 +472,8 @@ describe("a deck file's wrong options, imported", () => {
 });
 
 describe("readDeckFile", () => {
-  const archive = createSolidDeckArchive({
-    fetch: (() => Promise.reject(new Error("no reads"))) as unknown as typeof fetch,
-  });
+  const noReads = (() => Promise.reject(new Error("no reads"))) as unknown as typeof fetch;
+  const archive = createSolidDeckArchive({ fetch: noReads, publicFetch: noReads });
   const base = `${DECK_FILE_BASE}old.ttl`;
 
   it("brings older formats up to date, resolves relative IRIs, and says what it left out", async () => {
@@ -623,9 +759,13 @@ describe("readDeckFile", () => {
 
   it("leaves out text in a language the pod's parser cannot read, so the imported deck reads back", async () => {
     const { pod, deck } = await podWithDeck();
-    const archive = createSolidDeckArchive({ fetch: pod.fetch });
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
     const json = JSON.parse(
-      await archive.exportDeck(deck, { format: "jsonld", withProgress: false }),
+      await archive.exportDeck(
+        deck,
+        { format: "jsonld", withProgress: false },
+        { asNoOne: { cards: false, reviews: false } },
+      ),
     );
     const entry = json["@graph"].find((node: { "@id": string }) => node["@id"] === deck.url);
     for (const key of ["dcterms:title", "dcterms:description", "dcat:keyword"]) {
