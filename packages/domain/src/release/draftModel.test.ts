@@ -8,7 +8,7 @@ import { growth } from "../testing/growth";
 import { courseDraft, deckDraft, DRAFT, link, of } from "../testing/releaseDraft";
 import { courseProblems } from "./courseRules";
 import { draftReleaseModel } from "./draftModel";
-import type { ReleaseDraft } from "./releaseDraft";
+import type { DraftTriple, ReleaseDraft } from "./releaseDraft";
 import { publishedIds } from "./releaseModel";
 
 const PROV = "http://www.w3.org/ns/prov#";
@@ -294,6 +294,38 @@ describe("draftReleaseModel", () => {
       ],
     };
     expect(draftReleaseModel(draft).strays).toEqual([of("both"), deck.url]);
+  });
+
+  it("names as strays the creators it holds no record of that its statements type an agent or name, wherever they are (GHSA-q4pr-36j5-g5m5)", () => {
+    const deck = deckDraft();
+    const FOAF = "http://xmlns.com/foaf/0.1/";
+    const outside = "https://elsewhere.example/people#x";
+    const named = (subject: string): DraftTriple => ({
+      subject,
+      predicate: `${FOAF}name`,
+      object: { kind: "literal", value: "Unseen", language: "", datatype: "" },
+    });
+    const draft: ReleaseDraft = {
+      ...deck,
+      root: {
+        ...deck.root,
+        creator: [of("anna"), outside, of("own"), "https://elsewhere.example/q", deck.url],
+      },
+      agents: [{ id: "anna", data: { name: "Anna" } }],
+      triples: [
+        ...deck.triples,
+        named(of("anna")),
+        named(outside),
+        link(outside, RDF_TYPE, `${FOAF}Agent`),
+        named(of("own")),
+        link("https://elsewhere.example/q", RDF_TYPE, "https://example.org/Thing"),
+        named("https://elsewhere.example/unnamed-creator"),
+        named(deck.url),
+      ],
+    };
+    expect(draftReleaseModel(draft).strays).toEqual([outside, of("own")]);
+    const moved = "https://pod.example/releases/solid/v1.ttl";
+    expect(draftReleaseModel(draft, moved).strays).toEqual([outside, `${moved}#own`]);
   });
 
   it("names a distractor two cards share once", () => {

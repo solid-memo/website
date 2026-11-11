@@ -6,6 +6,7 @@ import type { LangText, LangTexts } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   idIn,
+  iriIn,
   PROV,
   RDF_TYPE,
   SCHEMA_COURSE,
@@ -16,6 +17,7 @@ import {
   DCAT_NS,
   FOAF_AGENT,
   FOAF_MBOX,
+  FOAF_NAME,
   VCARD_NS,
   type ReleaseDistractor,
   type ReleaseModel,
@@ -230,7 +232,7 @@ export function draftReleaseModel(draft: ReleaseDraft, url: string = draft.url):
       ...statements(SM.distractor),
     ],
     textFormats: [...formatted, ...statements(SM.textFormat)],
-    strays: strayPartsOf(draft).map(at),
+    strays: [...new Set([...strayPartsOf(draft), ...namedOutsideCreatorsOf(draft)])].map(at),
   };
 }
 
@@ -270,6 +272,40 @@ export function strayPartsOf(draft: Pick<ReleaseDraft, "url" | "triples">): stri
         .map(({ subject }) => subject),
     ),
   ];
+}
+
+/**
+ * The draft's creators (dcterms:creator) outside its records: each an
+ * IRI neither the draft nor one of its agents, wherever the IRI is. The
+ * Studio shows such a creator by its IRI, so a name stated of it would
+ * be an author learners see and no one here does (GHSA-wjqr-hw63-jf4c).
+ * A subject the draft's statements type more than one class of record
+ * has no record, so it is outside too (GHSA-mv57-839j-wrf6).
+ */
+export function outsideCreatorsOf(
+  draft: Pick<ReleaseDraft, "url" | "root" | "agents">,
+): Set<string> {
+  const agents = new Set(draft.agents.map(({ id }) => iriIn(draft, id)));
+  return new Set(draft.root.creator.filter((iri) => iri !== draft.url && !agents.has(iri)));
+}
+
+/**
+ * The draft's creators outside its records (outsideCreatorsOf) its
+ * statements type a foaf:Agent or give a foaf:name, each once, in order:
+ * learners would read such a creator as an author by a name the Studio
+ * never shows, so the release check reports it, as it does a stray part
+ * (GHSA-q4pr-36j5-g5m5).
+ */
+function namedOutsideCreatorsOf(draft: ReleaseDraft): string[] {
+  const outside = outsideCreatorsOf(draft);
+  return draft.triples
+    .filter(
+      ({ subject, predicate, object }) =>
+        outside.has(subject) &&
+        (predicate === FOAF_NAME ||
+          (predicate === RDF_TYPE && object.kind === "iri" && object.value === FOAF_AGENT)),
+    )
+    .map(({ subject }) => subject);
 }
 
 /** The other types the statements give the release: those its record does not. */

@@ -196,7 +196,9 @@ export interface ReleaseModel {
   /**
    * Every subject typed a card, chapter, step or distractor that is no
    * part of the release, each once: one outside its document (not a
-   * fragment of it) and, in a draft, one its records do not hold.
+   * fragment of it) and, in a draft, one its records do not hold, and a
+   * creator it holds no record of that its statements type an agent or
+   * name (draftReleaseModel).
    */
   strays: string[];
 }

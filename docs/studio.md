@@ -1676,6 +1676,13 @@ dropped as well, from the release and those documents, with any
 `foaf:name` of it. A release holds no such record, so the Studio would
 show no such name.
 
+A draft in the pod can still hold statements of such a creator: one
+made before they were dropped, or written to by another app. The
+release check names that creator among the parts the draft doesn't
+hold (`strayParts`) when the draft states it's an agent or gives it a
+`foaf:name`, so the draft can't be published. A copy of the draft
+drops those statements, as a new draft does.
+
 Also dropped is a statement of, or naming, an address in the
 new draft's folder, its own release document's too, before the
 release's subjects are moved there. Read back from the pod, that
@@ -1964,7 +1971,9 @@ becomes: the rules `npm run library:check` runs on `decks/`
     or wrong options the draft doesn't hold as its parts
     (`strayParts`): ones outside the release, or whose records can't
     be read. So are the release or one of its subjects stated to be an
-    agent or a distribution with no record of it. No editor shows them,
+    agent or a distribution with no record of it, and a creator with no
+    agent record that's stated to be an agent or given a name
+    ([Drafts](#drafts)). No editor shows them,
     but the release would publish them, so a draft that holds one can't
     be published;
   - what a release needs that a draft may lack (`readinessProblems`): a
