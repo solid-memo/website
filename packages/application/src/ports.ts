@@ -612,7 +612,8 @@ export interface ReleaseDraftRepository {
    * draftIdUnsupported, with nothing written, for a draft with an id no
    * draft can have (DRAFT_ID); and draftTooManyDocuments, with nothing
    * written, for a draft of more documents than a read of one takes
-   * (MAX_DRAFT_DOCUMENTS).
+   * (MAX_DRAFT_DOCUMENTS), or than a read of the instance's drafts takes
+   * with theirs (MAX_DRAFT_DOCUMENTS_IN_ALL).
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
@@ -641,7 +642,9 @@ export interface ReleaseDraftRepository {
    * version, or not by this repository; draftIdUnsupported, with nothing
    * written, when `after` has an id no draft can have (DRAFT_ID);
    * draftTooManyDocuments, with nothing written, when `after` would have
-   * more documents than a read of a draft takes (MAX_DRAFT_DOCUMENTS).
+   * more documents than a read of a draft takes (MAX_DRAFT_DOCUMENTS), or
+   * would add documents past what a read of the instance's drafts takes
+   * together (MAX_DRAFT_DOCUMENTS_IN_ALL).
    */
   applyChanges(before: ReleaseDraft, after: ReleaseDraft, version: string): Promise<void>;
   /**
