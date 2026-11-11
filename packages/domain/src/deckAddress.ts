@@ -47,10 +47,11 @@ export function isDeckDocumentAddress(instanceUrl: string, url: string): boolean
  * of them one of the instance's own documents, and in a guest's pod
  * exactly when the catalog is (isDeckDocumentAddress). Where they are is
  * otherwise free; whether one may be written to is what it says
- * (ownsDocument), and only in the user's own pod (the credential gate,
- * docs/boundaries.md). A deck the catalog names otherwise is not read,
- * written or deleted through (docs/data-model.md, "Where an instance's
- * documents are").
+ * (ownsDocument), only in the instance's folder or the storage the
+ * instance is in (packages/solid/src/deckPlace.ts standing), and only
+ * in the user's own pod (the credential gate, docs/boundaries.md). A
+ * deck the catalog names otherwise is not read, written or deleted
+ * through (docs/data-model.md, "Where an instance's documents are").
  */
 export function isDeckInPlace(
   deck: Pick<Deck, "url" | "cardsDocumentUrl" | "reviewsDocumentUrl">,

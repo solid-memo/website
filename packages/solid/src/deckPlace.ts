@@ -18,6 +18,7 @@ import {
   ensureTrailingSlash,
   instanceUrlOfDeck,
   isDocumentIn,
+  isInFolder,
   isSameUrl,
   ownsDocument,
 } from "@solid-memo/domain/instanceLayout";
@@ -50,9 +51,12 @@ export type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "revie
  * instance's documents are"):
  *
  * - "owned": it says it is the deck's (`<> dcterms:isPartOf <entry>`),
- *   wherever it is (the app's fetch, the credential gate, still writes
- *   nothing outside the user's own pod: ownPodGate.ts), and it is not a
- *   deck itself (isDeckItself);
+ *   it is in the instance's folder or in the storage the instance is in
+ *   (isInInstanceStorage: anyone who may only append to a document can
+ *   make it say so, so that alone never lets the deck of an instance
+ *   elsewhere write to it or delete it), and it is not a deck itself
+ *   (isDeckItself); the app's fetch, the credential gate, still writes
+ *   nothing outside the user's own pod (ownPodGate.ts);
  * - "adoptable": it does not yet, nor that it is any other deck's (of
  *   this instance or another, deckBackLinksOf), but it is in the
  *   instance's folder and that folder is the instance's own (not a
@@ -118,40 +122,74 @@ function withPartOf(dataset: Dataset, url: string, deckUrl: string): Dataset {
  * so. Whether the instance's folder is its own is asked once per folder.
  */
 export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
-  const dedicated = new Map<string, Promise<boolean>>();
+  const storageRoots = new Map<string, Promise<boolean>>();
 
   /**
-   * Whether the folder is an instance's own: not a pod's root (`/`), nor
-   * a storage's (the Solid Protocol's `pim:Storage` link), which hold
-   * the user's other data too. Asked of the pod once per folder; a
+   * Whether the folder is a storage's root: the Solid Protocol's
+   * `pim:Storage` link, or the root a Linked Web Storage server names in
+   * its description (lwsStorage.ts). Asked of the pod once per folder; a
    * failed ask (cannotCheck) is asked again.
    */
-  function isDedicatedFolder(folder: string): Promise<boolean> {
-    let known = dedicated.get(folder);
+  function isStorageRoot(folder: string): Promise<boolean> {
+    let known = storageRoots.get(folder);
     if (known === undefined) {
       known = (async () => {
-        if (new URL(folder).pathname === "/") return false;
         // Turtle asked for, as the app reads a folder: an LWS server may answer a storage's root otherwise, without its Solid links.
         const response = await fetch(folder, {
           method: "HEAD",
           headers: { Accept: TURTLE_FIRST },
         });
-        // An answer that says nothing of the folder (401, 429, 503) is asked again, never kept as "not its own".
+        // An answer that says nothing of the folder (401, 429, 503) is asked again, never kept.
         if (!response.ok)
           throw new AppError("cannotCheck", { url: folder, status: response.status });
-        if (hasStorageLink(response.headers.get("Link"))) return false;
-        // A Linked Web Storage server names a storage's root in its description (lwsStorage.ts), not with a type.
+        if (hasStorageLink(response.headers.get("Link"))) return true;
+        // A Linked Web Storage server names a storage's root in its description, not with a type.
         const [storage] = linkTargets(response, LWS_STORAGE_REL, folder);
-        if (storage === undefined) return true;
+        if (storage === undefined) return false;
         const roots = await storageRootsOf(storage, fetch);
-        // A description that can't be read says nothing of the folder: asked again, never kept as its own.
+        // A description that can't be read says nothing of the folder: asked again, never kept.
         if (roots === null) throw new AppError("cannotCheck", { url: folder, status: 0 });
-        return !roots.some((root) => isSameUrl(root, folder));
+        return roots.some((root) => isSameUrl(root, folder));
       })();
-      known.catch(() => dedicated.delete(folder));
-      dedicated.set(folder, known);
+      known.catch(() => storageRoots.delete(folder));
+      storageRoots.set(folder, known);
     }
     return known;
+  }
+
+  /**
+   * Whether the folder is an instance's own: not a pod's root (`/`), nor
+   * a storage's (isStorageRoot), which hold the user's other data too.
+   */
+  async function isDedicatedFolder(folder: string): Promise<boolean> {
+    return new URL(folder).pathname !== "/" && !(await isStorageRoot(folder));
+  }
+
+  /**
+   * Whether the document at `url` is in the storage the instance is in:
+   * the folders from the document's up to the first that holds the
+   * instance too are none of them a storage's root (isStorageRoot), the
+   * server's root (`/`) counting as one's. A document on another server
+   * is not, and nothing is asked. A folder the pod does not answer for
+   * leaves it not shown to be: `lenient`, so the document is kept as it
+   * is; otherwise cannotCheck, so that a write may be tried again.
+   */
+  async function isInInstanceStorage(
+    url: string,
+    instance: string,
+    lenient: boolean,
+  ): Promise<boolean> {
+    const document = new URL(canonicalUrlOf(url)!);
+    if (!isInFolder(instance, new URL("/", document).href)) return false;
+    try {
+      for (let folder = new URL(".", document).href; ; folder = new URL("..", folder).href) {
+        if (isInFolder(instance, folder)) return true;
+        if (await isStorageRoot(folder)) return false;
+      }
+    } catch (error) {
+      if (lenient) return false;
+      throw error;
+    }
   }
 
   /** The instance the deck's entry is in, as a request sends its address; the deck must be one that can be used (isDeckInPlace), else deckGone. */
@@ -161,16 +199,38 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
   }
 
   /** Where the document at `url` stands for the deck, given what is there (null: no document). */
-  async function standing(
+  function standing(
     deck: DeckPlace,
     url: string,
     dataset: Dataset | null,
   ): Promise<DocumentStanding> {
+    return standingOf(deck, url, dataset, true);
+  }
+
+  /**
+   * Where the document stands (standing). `lenient`: one outside the
+   * instance's folder whose storage the pod does not answer for is
+   * unclaimed, as a check or a removal keeps it; otherwise cannotCheck,
+   * as a write is refused for now rather than called not the deck's.
+   */
+  async function standingOf(
+    deck: DeckPlace,
+    url: string,
+    dataset: Dataset | null,
+    lenient: boolean,
+  ): Promise<DocumentStanding> {
     const instance = instanceOf(deck);
     if (isDraftDocument(url) || (dataset !== null && isDeckItself(dataset, url)))
       return "unclaimed";
+    if (!isDocumentIn(url, instance)) {
+      // Saying it is the deck's makes it so only in the instance's storage: anyone who may append to a document can say it.
+      const owned =
+        dataset !== null &&
+        ownsDocument(partOfOf(dataset, url), deck.url) &&
+        (await isInInstanceStorage(url, instance, lenient));
+      return owned ? "owned" : "unclaimed";
+    }
     if (dataset !== null && ownsDocument(partOfOf(dataset, url), deck.url)) return "owned";
-    if (!isDocumentIn(url, instance)) return "unclaimed";
     if (dataset === null) return "adoptable";
     if (deckBackLinksOf(dataset, url).length > 0) return "unclaimed";
     return (await isDedicatedFolder(instance)) ? "adoptable" : "unclaimed";
@@ -292,7 +352,7 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
      */
     async writable(deck: DeckPlace, url: string, dataset: Dataset): Promise<Dataset> {
       const read = isReadFrom(dataset, url) ? dataset : null;
-      if ((await standing(deck, url, read)) === "unclaimed")
+      if ((await standingOf(deck, url, read, false)) === "unclaimed")
         throw new AppError("deckDocumentUnclaimed", { deck: deck.title });
       return withPartOf(dataset, url, deck.url);
     },
