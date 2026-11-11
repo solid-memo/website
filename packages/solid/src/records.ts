@@ -399,10 +399,20 @@ function addValue(
 }
 
 /**
+ * The classes whose shape is closed (sh:closed in ns/shapes): a subject
+ * typed with one is checked against that shape, which allows only its
+ * own properties, so a subject of another kind that kept such a type
+ * could never be written again.
+ */
+const CLOSED_CLASSES: readonly string[] = [SM.ColorSet];
+
+/**
  * The subject as this app writes it: the existing subject (so unknown
  * triples survive) or a new one, typed once with its class and any
  * further types its shape names, with the record applied, the values
- * the shape fixes set and the shape's version stamped.
+ * the shape fixes set and the shape's version stamped. A class whose
+ * shape is closed (CLOSED_CLASSES) that another app gave the subject is
+ * dropped, unless it is the subject's own.
  *
  * A tab running an older version of the app is stopped here from
  * writing over what a newer one wrote: an existing subject stamped with a
@@ -429,8 +439,12 @@ export function recordThing<T>(
   const thing = existing ?? createThing({ url });
   const builder = buildThing(thing);
   const types = getUrlAll(thing, RDF.type);
-  for (const type of [descriptor.targetClass, ...descriptor.additionalTypes]) {
+  const own = [descriptor.targetClass, ...descriptor.additionalTypes];
+  for (const type of own) {
     if (!types.includes(type)) builder.addIri(RDF.type, type);
+  }
+  for (const type of types) {
+    if (CLOSED_CLASSES.includes(type) && !own.includes(type)) builder.removeUrl(RDF.type, type);
   }
   applyRecord(builder, descriptor, record);
   for (const fixed of descriptor.fixedValues) builder.setIri(fixed.predicate, fixed.value);

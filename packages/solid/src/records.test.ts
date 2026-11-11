@@ -21,7 +21,11 @@ import {
 import { datasetOfTurtle, getStringWithLocale, getStringWithLocaleAll } from "./testing/datasets";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
-import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
+import {
+  readShapeTree,
+  SHAPE_SOURCES,
+  shapesFetch,
+} from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { deckSubjects, toCards, toDecks, withDeck } from "./mappers/deckMapper";
 import { toReviewStates, withReviewStates } from "./mappers/reviewStateMapper";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
@@ -34,6 +38,7 @@ import {
   CARD_V4,
   CARD_V5,
   CARD_V7,
+  COLOR_SET_V1,
   DECK_V2,
   DECK_V4,
   DECK_V6,
@@ -41,6 +46,7 @@ import {
   LIBRARY_DECK_V5,
   PREFERENCES_V2,
   REVIEW_STATE_V2,
+  SHAPES,
 } from "@solid-memo/vocab/descriptors.generated";
 import {
   applyRecord,
@@ -186,6 +192,32 @@ describe("recordThing and readRecord", () => {
     expect(getStringNoLocale(thing, `${EX}foreign`)).toBe("kept");
     expect(getStringNoLocale(thing, `${EX}gone`)).toBeNull();
     expect(getInteger(thing, SM.formatVersion)).toBe(1);
+  });
+
+  it("drop a class another app gave the subject whose shape is closed, as no write would pass it, and keep other classes", async () => {
+    const classes = (await readShapeTree())
+      .filter((file) => file.turtle.includes("sh:closed true"))
+      .map(
+        (file) =>
+          Object.values(SHAPES)
+            .flatMap((versions) => Object.values(versions))
+            .find((descriptor) => descriptor.shapeDocument === file.path)?.targetClass,
+      );
+    // CLOSED_CLASSES in records.ts names these.
+    expect(classes).toEqual([SM.ColorSet]);
+    const existing = buildThing(createThing({ url: URL_ }))
+      .addIri(RDF.type, `${EX}Thing`)
+      .addIri(RDF.type, SM.ColorSet)
+      .addIri(RDF.type, `${EX}Other`)
+      .build();
+    expect(getUrlAll(recordThing(URL_, THING, FULL, existing), RDF.type)).toEqual([
+      `${EX}Thing`,
+      `${EX}Other`,
+      `${EX}Extra`,
+    ]);
+    expect(getUrlAll(recordThing(URL_, COLOR_SET_V1, {}, existing), RDF.type)).toContain(
+      SM.ColorSet,
+    );
   });
 
   it("refuse to write over a subject a newer version of the app wrote, and write over one at this app's version or older", () => {
