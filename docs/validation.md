@@ -182,9 +182,10 @@ flowchart LR
   subjects linking to a node with many types would take time growing
   with the square of the document. The node has one result more, a
   violation on `rdf:type` that says its types weren't read, and a
-  subject that asks for its class finds it of none. The rest of the
-  document is checked as usual, and a result about another app's node
-  is a warning, as any other.
+  subject that asks for its class finds it of none. In a pod,
+  DCAT-AP's class result on the linking subject is a warning. The rest
+  of the document is checked as usual, and a result about another
+  app's node is a warning, as any other.
 - The engine checks `xsd:decimal`, `xsd:float` and `xsd:double`
   literals with patterns of its own, which it registers in the
   library's datatype checks (`rdf-validate-datatype`). The library's
@@ -262,6 +263,11 @@ pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
   [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)).
   A member of the same document still must be a `dcat:Dataset` or
   `dcat:Catalog`.
+- In a pod, DCAT-AP's result about a property Solid Memo doesn't
+  write on one of its subjects is a warning, as another app's value
+  ([below](#data-another-app-wrote)). So is its class check on a
+  value of a property Solid Memo writes, other than a catalog's
+  member, unless a write adds that value and it's no blank node.
 - In node (`npm run library`, the tests), `validateProfile`
   ([packages/shacl/node/shacl.ts](../packages/shacl/node/shacl.ts))
   fails on any violation about a subject of the document, and, for
@@ -422,6 +428,52 @@ drop-dangling-members repair, and writing the catalog whole, keep such
 a link. A link to a subject of the document that nothing describes is
 still the catalog's own problem.
 
+A value another app added to one of Solid Memo's subjects is that
+app's data as well. The writer keeps every value of a property the
+subject's shape doesn't own, so another app's values survive a save.
+DCAT-AP constrains some of those properties, such as
+`dcterms:accrualPeriodicity` or a second `dcterms:publisher` on a deck's
+entry, or a second `dcterms:type` on an agent that several decks name.
+A DCAT-AP result about such a property is a warning, in the check and
+the write check alike (`foreignValues` in
+[shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)).
+The deck isn't set aside, and its entry, its agents and its
+distribution can still be saved and upgraded, with the value kept. The
+properties Solid Memo writes are the subject's classes, its format
+stamp, the fields of the shapes it's read by, and Solid Memo's own
+terms (`sm:completedChapter`, say). A result about one of those, or
+one with no property, still counts. A subject no shape is read by
+keeps every result.
+
+Another app may also add a value to a property Solid Memo writes,
+such as a `dcat:theme` on a deck's entry that the deck's shape takes
+but that isn't a `skos:Concept`. The reader reads it back and the
+writer writes it again, so a result about it would refuse every write
+of the entry. The write check holds each value a write adds to its
+class, a theme copied from a release say, so a value in the document
+that fails the class check is another app's. So DCAT-AP's class check
+on a value of such a property is a warning in the check
+(`isClassOfValue`). It's a warning in the write check too, unless the
+write adds that value (`addedValues`, from the dataset's recorded
+changes). The recorded changes leave out every triple that names a
+blank node, so the class check on a blank-node value is a warning in
+the write check even when the write adds it. Solid Memo adds values
+by IRI or as literals, never as a blank node, so a blank-node value
+there is one it kept as it read it. Nothing may describe the value,
+the document may describe it as something else, or it may be one of
+Solid Memo's subjects in a role it never has. The class check on a
+catalog's link to a member of the document that nothing describes
+still counts, as above. So does every other DCAT-AP result about a
+property Solid Memo writes, such as a second value where DCAT-AP
+allows one.
+
+Another app may give a node that a subject of Solid Memo's links
+to more `rdf:type` statements than the engine reads, so the engine
+checks it as having none. DCAT-AP's class check on a link to such a
+node, a catalog's link to a member included, is then a warning in
+both checks (`isOverTypedValue`), and the node's own result names the
+problem.
+
 ## The write check
 
 Every repository write is checked: a deck, its agents and
@@ -429,7 +481,9 @@ distribution, the catalog, cards, review states, preferences, a
 palette and its color sets, the instance record. Only the subjects the
 write touches are checked, so an old problem elsewhere in the document
 doesn't block it. They're checked against their shapes, and in a
-document with DCAT subjects, against DCAT-AP (`checkSubjects` in
+document with DCAT subjects, against DCAT-AP, where a result about
+[another app's value](#data-another-app-wrote) is a warning
+(`checkSubjects` in
 [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),
 wired into the repositories as `checkWrite` in
 [appUseCases.ts](../packages/composition/src/appUseCases.ts)). A write
