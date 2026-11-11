@@ -803,11 +803,13 @@ The maintainer made these choices, each recorded where it applies.
      [CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)).
    - deploy.yml deploys only the commit a version tag names
      ([deployment.md](deployment.md)).
-8. **Renovate.** Updates are merged automatically through pull requests
-   (`automergeType: 'pr'`) once CI passes. Renovate can't approve its
-   own pull requests and gets no bypass: once `main` requires an
-   approval, a maintainer approves each update before automerge. If
-   that's too many approvals, automerge is narrowed, not the review
+8. **Renovate.** A person merges each update, except the end-to-end
+   test servers' images and commits, which are merged automatically
+   through pull requests (`automergeType: 'pr'`) once CI passes.
+   Renovate can't approve its own pull requests and gets no bypass:
+   once `main` requires an approval, a maintainer approves each update
+   before automerge. If that's too many approvals, automerge is
+   narrowed, not the review
    ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)).
 9. **Formatting.** Biome, with a line width of 100
    ([style.md](style.md#formatting)).
