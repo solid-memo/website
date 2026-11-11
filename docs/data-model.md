@@ -889,8 +889,12 @@ A catalog is data anyone may have written, so the app reads at most
 `MAX_CATALOG_LINKS` (1,000) decks of it, in the deck list and its
 arrangement, the statistics and the format update as in the Studio
 ([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
-it reads none of them and says why (`catalogTooManyLinks`). The same
-limit holds for its links to drafts and releases
+it reads none of them and says why (`catalogTooManyLinks`). So no deck
+is added past it. A new deck, a copy from a link or a course, or a
+deck file is refused before anything is written once the catalog has
+that many (`catalogFull`). A guest's decks that would take it past
+them are refused too (`guestMergeTooManyDecks`).
+The same limit holds for its links to drafts and releases
 ([Drafts and releases](#drafts-and-releases)). The deck list works out
 the study counts of three decks at a time (`getStudyCounts` in
 [study.ts](../packages/application/src/study.ts)), each reading the

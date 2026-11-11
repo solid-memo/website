@@ -220,13 +220,19 @@ export interface DeckRepository {
    * shape is left as it is. Whether anything was written.
    */
   upgradeDecks(instanceUrl: string, catalog: Catalog | null): Promise<boolean>;
-  /** A new, empty deck by that title. */
+  /**
+   * A new, empty deck by that title. Every way of adding a deck
+   * (createDeck, registerDeck, importDeck, addDeck) refuses it, writing
+   * nothing, as catalogFull when the catalog has MAX_CATALOG_LINKS decks
+   * already: none of them would be read past that.
+   */
   createDeck(instanceUrl: string, title: LangText): Promise<Deck>;
   /**
    * Add a deck's entry to its catalog, its course progress
    * (sm:completedChapter) with it: a deck made from a file, whose cards
    * and reviews documents are written already. Throws alreadyExists,
-   * writing nothing, when the catalog has an entry of its URL.
+   * writing nothing, when the catalog has an entry of its URL, and
+   * catalogFull when it has MAX_CATALOG_LINKS decks.
    */
   registerDeck(deck: Deck): Promise<Deck>;
   /** Replaces the deck's title; cards and review state are untouched. */
@@ -377,7 +383,8 @@ export interface DeckRepository {
    * of the catalog document (If-Match the read; created when there is
    * none), read and made again on a 412, a few times at most. Refuses
    * (createdElsewhere, writing nothing) when the catalog has an entry at
-   * the deck's URL. The deck as written.
+   * the deck's URL, and (catalogFull) when it has MAX_CATALOG_LINKS
+   * decks. The deck as written.
    */
   addDeck(deck: Deck): Promise<Deck>;
   /** The deck as its catalog entry says now; null when it has none (any more). */

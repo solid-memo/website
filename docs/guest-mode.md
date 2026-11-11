@@ -162,7 +162,10 @@ It runs these steps:
    wrote (`guestStudyTooNew`). Nor from a study with deck groups when a
    newer version wrote the instance's
    [arrangement](data-model.md#deck-groups) (`deckTreeTooNew`), refused
-   before any deck is written.
+   before any deck is written. Nor when the kept decks, but any an
+   earlier run added, would give the instance more decks than its
+   catalog is read with (`guestMergeTooManyDecks`,
+   [data-model.md](data-model.md#the-catalog)).
 2. **decks:** each kept deck becomes a new deck of the instance, in the
    guest's order ([data-model.md](data-model.md#decks-and-cards)):
    - a new id (`deck-<uuid>`), with its cards and reviews documents

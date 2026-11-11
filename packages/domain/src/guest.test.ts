@@ -4,7 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import type { Answer } from "./answer";
-import type { Card, Deck, Distractor } from "./deck";
+import { AppError } from "./appError";
+import { MAX_CATALOG_LINKS, type Card, type Deck, type Distractor } from "./deck";
 import type { DeckTree } from "./deckTree";
 import type { LibraryDeckContent } from "./library";
 import type { FsrsSnapshot, FsrsState, ReviewSnapshot, ReviewState, ReviewStates } from "./review";
@@ -24,6 +25,7 @@ import {
   guestDeckStamp,
   guestMergeKey,
   guestMergePlan,
+  refuseGuestMergePastLimit,
   isGuestPodIri,
   isGuestUrl,
   mergedAnswer,
@@ -86,6 +88,14 @@ describe("adding a guest's study to an instance", () => {
       ],
       drafts: 2,
     });
+  });
+
+  it("refuses adding a guest's decks that would take the instance past MAX_CATALOG_LINKS decks", () => {
+    expect(() => refuseGuestMergePastLimit(MAX_CATALOG_LINKS - 2, 2)).not.toThrow();
+    expect(() => refuseGuestMergePastLimit(MAX_CATALOG_LINKS, 0)).not.toThrow();
+    expect(() => refuseGuestMergePastLimit(MAX_CATALOG_LINKS - 2, 3)).toThrow(
+      new AppError("guestMergeTooManyDecks", { limit: MAX_CATALOG_LINKS }),
+    );
   });
 
   it("makes a guest deck a new deck of the instance, everything it says kept but its id, documents and format", () => {

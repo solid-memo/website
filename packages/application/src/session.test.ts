@@ -17,7 +17,12 @@ import { courseDraft } from "@solid-memo/domain/testing/releaseDraft";
 import { draftSummaryOf, draftUrlOf } from "@solid-memo/domain/release/draftLayout";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
+import {
+  DECK_FORMAT_VERSION,
+  MAX_CATALOG_LINKS,
+  type Card,
+  type Deck,
+} from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
@@ -1727,6 +1732,46 @@ describe("guests", () => {
           { kind: "deck", url: `${TARGET}catalog.ttl#deck-n2` },
         ],
       });
+    });
+
+    it("mergeGuestStudy refuses, before writing anything, decks past what the instance's catalog is read with, counting none an earlier run added (GHSA-34c3-mmhj-7w2h)", async () => {
+      const { deps, journal } = mergeDeps();
+      const before = added("deck-earlier", course);
+      const others = Array.from({ length: MAX_CATALOG_LINKS - 3 }, (_, at) => ({
+        ...targetDeck,
+        id: `deck-other-${at}`,
+        url: `${TARGET}catalog.ttl#deck-other-${at}`,
+      }));
+      vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+        url === GUEST_INSTANCE_URL ? [course, own] : [...others, targetDeck, before],
+      );
+      // Both of the guest's decks would be new: one more than the catalog is read with.
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({
+        ok: false,
+        step: "read",
+        error: new AppError("guestMergeTooManyDecks", { limit: MAX_CATALOG_LINKS }),
+        added: [],
+      });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+      expect(deps.answerLog.appendAll).not.toHaveBeenCalled();
+      // Left out, or added by an earlier run, a deck takes no room.
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target, {
+          skip: [course.url],
+        }),
+      ).toMatchObject({ ok: true, added: [added("deck-n1", own)] });
+      vi.mocked(deps.deckRepository.addDeck).mockClear();
+      journal.set(
+        `${course.url} added to ${TARGET}`,
+        JSON.stringify({ url: before.url, stamp: stampOf(course) }),
+      );
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({ ok: true });
+      expect(deps.deckRepository.addDeck).toHaveBeenCalledOnce();
     });
 
     it("mergeGuestStudy refuses, before writing anything, to make groups in an arrangement a newer version wrote", async () => {

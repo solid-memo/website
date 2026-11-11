@@ -30,6 +30,7 @@ import {
   graftOfGuestTree,
   guestMergeKey,
   guestMergePlan,
+  refuseGuestMergePastLimit,
   isGuestUrl,
   linksGuestPod,
   mergedAnswer,
@@ -146,6 +147,8 @@ export interface SessionUseCases {
    * are not carried over. A failure leaves every deck added whole, and
    * the guest's study as it was; run again, a deck or draft already
    * added from this device, and unchanged since, is not added twice.
+   * Decks that would give `target` more than MAX_CATALOG_LINKS are
+   * refused before any is written (guestMergeTooManyDecks).
    */
   mergeGuestStudy(
     session: Session,
@@ -458,7 +461,21 @@ export function createSessionUseCases({
   /**
    * The copy of a guest's deck or draft that a run from this device made
    * before (its journal note under `key`), when the note's stamp is `stamp`
-   * and the copy is still among `existing`; otherwise a new copy, noted.
+   * and the copy is still among `existing`; undefined otherwise.
+   */
+  function journaledBefore<T extends { url: string }>(
+    key: string,
+    stamp: string,
+    existing: readonly T[],
+  ): T | undefined {
+    const note = decodeGuestMergeNote(updateJournal.staging(key));
+    return note?.stamp === stamp
+      ? existing.find((candidate) => candidate.url === note.url)
+      : undefined;
+  }
+  /**
+   * The copy a run from this device made before (journaledBefore);
+   * otherwise a new copy, noted.
    */
   async function journaledGuestCopy<T extends { url: string }>(
     key: string,
@@ -466,9 +483,7 @@ export function createSessionUseCases({
     existing: readonly T[],
     copy: () => Promise<T>,
   ): Promise<T> {
-    const note = decodeGuestMergeNote(updateJournal.staging(key));
-    const before =
-      note?.stamp === stamp ? existing.find((candidate) => candidate.url === note.url) : undefined;
+    const before = journaledBefore(key, stamp, existing);
     if (before !== undefined) return before;
     const made = await copy();
     updateJournal.begin(key, encodeGuestMergeNote({ url: made.url, stamp }));
@@ -765,13 +780,22 @@ export function createSessionUseCases({
           await Promise.all(months.map((month) => answerLog.readMonth(source, month)))
         ).flat();
         const chosen = decks.filter((deck) => !skip.includes(deck.url));
+        const keyOf = (deck: Deck) => guestMergeKey(deck.url, targetUrl);
+        const stampOf = (deck: Deck) => guestDeckStamp(deck, (url) => versions.get(url) ?? "");
+        // More decks than the instance's catalog is read with are refused before any is written; one an earlier run added is there already.
+        refuseGuestMergePastLimit(
+          targetDecks.length,
+          chosen.filter(
+            (deck) => journaledBefore(keyOf(deck), stampOf(deck), targetDecks) === undefined,
+          ).length,
+        );
 
         // Each deck whole, one after another: its documents, its entry, then its answers.
         progress.finished("decks", chosen.length);
         const into = new Map<string, Deck>();
         for (const deck of chosen) {
-          const key = guestMergeKey(deck.url, targetUrl);
-          const stamp = guestDeckStamp(deck, (url) => versions.get(url) ?? "");
+          const key = keyOf(deck);
+          const stamp = stampOf(deck);
           // Added from this device before, its entry and documents unchanged since: there it is.
           const merged = await journaledGuestCopy(key, stamp, targetDecks, () =>
             addGuestDeck(deck, targetUrl),
