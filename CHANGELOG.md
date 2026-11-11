@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.1.4](https://github.com/solid-memo/website/compare/v7.1.3...v7.1.4) (2026-11-11)
+
+### Bug Fixes
+
+* **solid:** bound a deck's document storage by the user's storages ([5b7c209](https://github.com/solid-memo/website/commit/5b7c2090e23e906dad23e44abb344da0e496f00d))
+* **solid:** drop another app's shaped classes when writing a subject ([bfe7da9](https://github.com/solid-memo/website/commit/bfe7da95822eab5b681ee61bb3956c3abe57ba3d))
+* **solid:** remove only Solid Memo's own stray agent nodes ([37bb2f3](https://github.com/solid-memo/website/commit/37bb2f30c799f646dbdd87e9b5a387d5d3286a37))
+* **validation:** warn about DCAT-AP results on another app's values ([3b01237](https://github.com/solid-memo/website/commit/3b01237b50ab4ed202163763d108acc4fce2de3d))
+
 ## [7.1.3](https://github.com/solid-memo/website/compare/v7.1.2...v7.1.3) (2026-11-11)
 
 ### Bug Fixes
