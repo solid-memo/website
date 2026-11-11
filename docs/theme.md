@@ -297,6 +297,22 @@ it's read and painted:
   reads `solid-memo:palette-colors` for the theme it sets, and paints
   only roles a palette may paint, by name, with `#rrggbb` values;
   anything else in the key paints nothing.
+- **What another app adds doesn't stop a save.** A color set is
+  written afresh with only its colors, so a property another app added
+  to it is dropped rather than refused by the closed shape. If another
+  app made the palette a color set too, that class is dropped as well.
+  A color set is written where the palette names it only when that
+  subject is a color set and nothing else, and no other palette names
+  it. Otherwise it goes to `#palette-<id>-light` or `-dark`, or the
+  next of `-light-2`, `-light-3`, … that's free. A subject a newer
+  version of the app wrote isn't free. So a save never turns the
+  palette or another subject into a color set, nor changes another
+  palette's colors (`withPalette` in
+  [paletteMapper.ts](../packages/solid/src/mappers/paletteMapper.ts)).
+  The subject the palette named before stays in the document as it
+  was, no longer named by the palette. A color set the palette names
+  that a newer version of the app wrote still stops the save, as any
+  subject a newer version wrote does.
 - **Unreadable text isn't painted.** Another app may write a palette
   whose text is below 3:1 on the background or on a surface
   (`isReadable`). Read from the pod or the device, it's shown as its

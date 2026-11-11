@@ -14,7 +14,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { ColorSetV1 } from "@solid-memo/vocab/types.generated";
 import { COLOR_SET_V1, PALETTE_V1 } from "@solid-memo/vocab/descriptors.generated";
-import { readVersioned, recordThing } from "../records";
+import { readVersioned, recordThing, storedVersionOf, unlessNewer } from "../records";
 import { RDF, SM } from "../vocab";
 
 /**
@@ -67,10 +67,38 @@ export function toPalettes(dataset: Dataset, documentUrl: string): CustomPalette
 }
 
 /**
+ * The color sets `place` may write a palette's colors at: a subject of
+ * the document that is nothing yet, or only a color set (sm:ColorSet and
+ * no other class), that no other palette names. Writing anywhere else
+ * would turn another subject into a color set, the palette itself among
+ * them, or paint over another palette's colors.
+ */
+function placeableBy(
+  dataset: Dataset,
+  documentUrl: string,
+  palette: string,
+): (iri: string) => boolean {
+  const others = getThingAll(dataset)
+    .filter((thing) => asUrl(thing) !== palette && getUrlAll(thing, RDF.type).includes(SM.Palette))
+    .flatMap((thing) => [...getUrlAll(thing, SM.lightColors), ...getUrlAll(thing, SM.darkColors)]);
+  return (iri) => {
+    if (!isIn(iri, documentUrl) || others.includes(iri)) return false;
+    const thing = getThing(dataset, iri);
+    if (thing === null) return true;
+    const types = getUrlAll(thing, RDF.type);
+    return types.length === 1 && types[0] === SM.ColorSet;
+  };
+}
+
+/**
  * The document with the palette written in place, its color sets
- * beside it, and the subjects written: each where the palette names it
- * in the document, else at `<palette>-light` and `<palette>-dark`.
- * Triples this app does not know survive (recordThing).
+ * beside it, and the subjects written. A color set is written where the
+ * palette names it in the document when it may be (placeableBy), else at
+ * `<palette>-light` and `<palette>-dark`, or the first of `-light-2`,
+ * `-light-3`, … that may be and that no newer version of the app wrote.
+ * The palette keeps the triples this app does not know, but not a class
+ * whose shape is closed (recordThing); a color set is written afresh,
+ * with only its colors, as its shape is closed.
  */
 export function withPalette(
   dataset: Dataset,
@@ -79,11 +107,22 @@ export function withPalette(
 ): { dataset: Dataset; subjects: string[] } {
   const existing = getThing(dataset, palette.url);
   const read = existing === null ? null : readVersioned(existing, "palette");
-  const place = (theme: "light" | "dark") => {
+  const placeable = placeableBy(dataset, documentUrl, palette.url);
+  const place = (theme: "light" | "dark", taken?: string) => {
+    const may = (iri: string) => iri !== palette.url && iri !== taken && placeable(iri);
     const named = read?.record.data[theme === "light" ? "lightColors" : "darkColors"];
-    return named !== undefined && isIn(named, documentUrl) ? named : `${palette.url}-${theme}`;
+    if (named !== undefined && may(named)) return named;
+    // A subject the palette does not name is not its to refuse a save over: one a newer version of the app wrote is passed by.
+    const free = (iri: string) => {
+      const stored = getThing(dataset, iri);
+      return may(iri) && (stored === null || storedVersionOf(stored) <= COLOR_SET_V1.version);
+    };
+    let url = `${palette.url}-${theme}`;
+    for (let n = 2; !free(url); n++) url = `${palette.url}-${theme}-${n}`;
+    return url;
   };
-  const [light, dark] = [place("light"), place("dark")];
+  const light = place("light");
+  const dark = place("dark", light);
   let updated = setThing(
     dataset,
     recordThing(palette.url, PALETTE_V1, paletteToRecord(palette, light, dark), existing),
@@ -92,10 +131,10 @@ export function withPalette(
     [light, palette.light],
     [dark, palette.dark],
   ] as const) {
-    updated = setThing(
-      updated,
-      recordThing(url, COLOR_SET_V1, colorSetToRecord(colors), getThing(updated, url)),
-    );
+    // A color set a newer version of the app wrote is not written over (unlessNewer).
+    const stored = getThing(updated, url);
+    if (stored !== null) unlessNewer(stored);
+    updated = setThing(updated, recordThing(url, COLOR_SET_V1, colorSetToRecord(colors), null));
   }
   return { dataset: updated, subjects: [palette.url, light, dark] };
 }

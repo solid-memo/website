@@ -1837,6 +1837,15 @@ by one.
   wrong options' are removed from the source, triples another app put
   on them included. A copy leaves those triples in the source and
   doesn't carry them over.
+- A palette's color set is written afresh too, with only its colors:
+  its shape is the one closed shape, so a triple another app added
+  would have every later save refused. It's written only at a subject
+  that's a color set and nothing else, which no other palette names
+  ([theme.md](theme.md#how-a-palette-of-ones-own-is-held-safe)).
+  For the same reason, a palette, and any other subject written
+  through `recordThing`, drops the color set's class if another app
+  gave it one. An edit that changes one value of a subject in place,
+  such as a deck's card language or completed chapters, keeps it.
 - **Every write states what it expects to find**, as an HTTP
   precondition:
   - an edit is sent with
