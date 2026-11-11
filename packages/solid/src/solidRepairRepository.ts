@@ -19,7 +19,12 @@ import { dueDayOfInstant } from "@solid-memo/domain/scheduling";
 import { boundedSm2State, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import { type DatasetEdit, editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
-import { createDeckDocumentGuard, type DeckPlace, isDraftDocument } from "./deckPlace";
+import {
+  createDeckDocumentGuard,
+  type DeckPlace,
+  isDraftDocument,
+  type UserStorages,
+} from "./deckPlace";
 import { foreignSubjects, isDeckItself } from "./ownership";
 import { readDatetime, readText, unlessNewer, unreadableDatetimes, XSD_DATETIME } from "./records";
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
@@ -52,10 +57,13 @@ const FSRS_SNAPSHOT = [
  */
 export function createSolidRepairRepository({
   fetch,
+  userStorages,
 }: {
   fetch: typeof globalThis.fetch;
+  /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
+  userStorages?: UserStorages;
 }): RepairRepository {
-  const guard = createDeckDocumentGuard(fetch);
+  const guard = createDeckDocumentGuard(fetch, userStorages);
 
   /** Whether the document just read is one no repair writes to. A draft's release document is a deck too, and is repaired as the draft's. */
   async function isLeftAlone(

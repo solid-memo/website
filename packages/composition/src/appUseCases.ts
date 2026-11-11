@@ -222,6 +222,32 @@ export function createAppUseCases({
       return storage;
     },
   };
+  /**
+   * The storages of the signed-in user, none when no one is: the ones
+   * their profile names (pim:storage), or else the storage's root the
+   * server shows above their WebID (discoverStorages). A deck's document
+   * outside its instance's folder is the deck's only in one of these
+   * that holds the instance too, or under one root the server shows
+   * (deckPlace.ts). A server may hold many users' pods under one root it
+   * does not type. Found once per user, so that a removal over many
+   * decks reads the profile once; a failed find is tried again.
+   */
+  let foundStorages: { user: string; storages: Promise<string[]> } | undefined;
+  function userStorages(): Promise<string[]> {
+    const user = session.webId();
+    if (user === undefined) return Promise.resolve([]);
+    if (foundStorages?.user !== user) {
+      const storages = storageGateway
+        .discoverStorages(user)
+        .then((found) => found.map(({ url }) => url));
+      // Only this user's find is forgotten: another's may have begun since.
+      storages.catch(() => {
+        if (foundStorages?.storages === storages) foundStorages = undefined;
+      });
+      foundStorages = { user, storages };
+    }
+    return foundStorages.storages;
+  }
   const podInstances = createSolidInstanceRepository({
     fetch: podFetch,
     dataFetch,
@@ -229,6 +255,7 @@ export function createAppUseCases({
     checkWrite,
     now,
     randomId,
+    userStorages,
   });
   const instanceRepository: typeof podInstances = {
     ...podInstances,
@@ -316,6 +343,7 @@ export function createAppUseCases({
       checkWrite,
       now,
       randomId,
+      userStorages,
     }),
     deckLibrary: createSolidDeckLibrary({
       fetch: siteFetch,
@@ -332,9 +360,10 @@ export function createAppUseCases({
       // never from a guest's pod, which is this browser's.
       publicFetch: createPodFence(foreignReads(noOneFetch)),
       checkWrite,
+      userStorages,
     }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: dataFetch }),
+    repairRepository: createSolidRepairRepository({ fetch: dataFetch, userStorages }),
     instanceCopier,
     updateJournal: createLocalStorageUpdateJournal(),
     logoutChannel: createLogoutChannel(),

@@ -19,6 +19,7 @@ import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/dom
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
 import { getSolidDatasetOrNull, readDataset, removeOwned, saveDataset } from "./datasets";
 import { subjectsOfClasses } from "./ownership";
+import type { UserStorages } from "./deckPlace";
 import { deleteInstanceData } from "./instanceData";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { toInstance, toInstanceMeta, toInstanceMetaThing } from "./mappers/instanceMapper";
@@ -58,6 +59,8 @@ export interface SolidInstanceRepositoryDeps {
   randomId: () => string;
   /** Checks what is about to be written; see writeCheck.ts. */
   checkWrite?: WriteCheck;
+  /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
+  userStorages?: UserStorages;
 }
 
 export function createSolidInstanceRepository({
@@ -66,6 +69,7 @@ export function createSolidInstanceRepository({
   publicFetch = anonymousFetch,
   now,
   randomId,
+  userStorages,
   checkWrite = noWriteCheck,
 }: SolidInstanceRepositoryDeps): InstanceRepository {
   /**
@@ -239,7 +243,7 @@ export function createSolidInstanceRepository({
 
     async deleteInstance({ webId, instance }) {
       const url = ensureTrailingSlash(instance.url);
-      const deletion = await deleteInstanceData(url, dataFetch);
+      const deletion = await deleteInstanceData(url, dataFetch, userStorages);
       await removeRegistrations(webId, url);
       return deletion;
     },

@@ -79,7 +79,7 @@ import {
   withSuggestedAnswers,
 } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
-import { createDeckDocumentGuard } from "./deckPlace";
+import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
 import { editOf, type DatasetEdit } from "./datasetEdit";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
@@ -122,6 +122,8 @@ export interface SolidDeckRepositoryDeps {
   randomId: () => string;
   /** Checks what is about to be written; see writeCheck.ts. */
   checkWrite?: WriteCheck;
+  /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
+  userStorages?: UserStorages;
 }
 
 /**
@@ -149,8 +151,9 @@ export function createSolidDeckRepository({
   now,
   randomId,
   checkWrite = noWriteCheck,
+  userStorages,
 }: SolidDeckRepositoryDeps): DeckRepository {
-  const guard = createDeckDocumentGuard(fetch);
+  const guard = createDeckDocumentGuard(fetch, userStorages);
 
   /** Save a document once the subjects the write touched are checked. */
   async function save(

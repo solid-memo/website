@@ -116,12 +116,30 @@ function withPartOf(dataset: Dataset, url: string, deckUrl: string): Dataset {
 }
 
 /**
+ * The storages of whoever is signed in: the ones their profile names
+ * (pim:storage), or else the storage's root the server shows above
+ * their WebID; none when no one is signed in. Asked on every check, so
+ * a caller keeps what it found. The deck-document guard counts a
+ * document outside an instance's folder in the instance's storage only
+ * in one of these that holds both, or under one storage's root the
+ * server shows (isInInstanceStorage).
+ */
+export type UserStorages = () => Promise<readonly string[]>;
+
+/** No storage of the user's known: only a root the server shows counts. */
+const noStorages: UserStorages = async () => [];
+
+/**
  * The guard every write to and every delete of a deck's cards or reviews
  * document passes first, over the pod `fetch`: whether the document is
  * the deck's to change (DocumentStanding), and the claim that makes one
- * so. Whether the instance's folder is its own is asked once per folder.
+ * so. `userStorages` gives the signed-in user's storages. Whether the
+ * instance's folder is its own is asked once per folder.
  */
-export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
+export function createDeckDocumentGuard(
+  fetch: typeof globalThis.fetch,
+  userStorages: UserStorages = noStorages,
+) {
   const storageRoots = new Map<string, Promise<boolean>>();
 
   /**
@@ -166,13 +184,29 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
   }
 
   /**
-   * Whether the document at `url` is in the storage the instance is in:
-   * the folders from the document's up to the first that holds the
-   * instance too are none of them a storage's root (isStorageRoot), the
-   * server's root (`/`) counting as one's. A document on another server
-   * is not, and nothing is asked. A folder the pod does not answer for
+   * The storage's root the folder is in: the folder itself or the
+   * nearest folder above it that is a storage's root (isStorageRoot);
+   * null when there is none up to the server's root (`/`), which a
+   * server that types no root leaves.
+   */
+  async function rootOf(folder: string): Promise<string | null> {
+    for (let at = folder; ; at = new URL("..", at).href) {
+      if (await isStorageRoot(at)) return at;
+      if (new URL(at).pathname === "/") return null;
+    }
+  }
+
+  /**
+   * Whether the document at `url` is in the storage the instance is in.
+   * One of the user's storages (userStorages) that holds either decides
+   * it: in the same one, or not. Otherwise both must have one storage's
+   * root (rootOf), shown by the server; a folder both are in is not
+   * enough, as a server may hold the storages of many under one root
+   * it does not type. A document on another server is not, and nothing
+   * is asked. A storage list or a folder the pod does not answer for
    * leaves it not shown to be: `lenient`, so the document is kept as it
-   * is; otherwise cannotCheck, so that a write may be tried again.
+   * is; otherwise the error (a profile's as cannotCheck), so that a
+   * write may be tried again.
    */
   async function isInInstanceStorage(
     url: string,
@@ -182,10 +216,22 @@ export function createDeckDocumentGuard(fetch: typeof globalThis.fetch) {
     const document = new URL(canonicalUrlOf(url)!);
     if (!isInFolder(instance, new URL("/", document).href)) return false;
     try {
-      for (let folder = new URL(".", document).href; ; folder = new URL("..", folder).href) {
-        if (isInFolder(instance, folder)) return true;
-        if (await isStorageRoot(folder)) return false;
-      }
+      // A profile that can't be read is a check that could not be made: tried again, as a folder's is.
+      const storages = await userStorages().catch(() => {
+        throw new AppError("cannotCheck", { url: instance, status: 0 });
+      });
+      const holding = storages.filter(
+        (storage) => isDocumentIn(url, storage) || isInFolder(instance, storage),
+      );
+      if (holding.length > 0)
+        return holding.some(
+          (storage) => isDocumentIn(url, storage) && isInFolder(instance, storage),
+        );
+      const root = await rootOf(new URL(".", document).href);
+      // The instance under that root too, with no root of its own below it.
+      return (
+        root !== null && isInFolder(instance, root) && isSameUrl(root, (await rootOf(instance))!)
+      );
     } catch (error) {
       if (lenient) return false;
       throw error;

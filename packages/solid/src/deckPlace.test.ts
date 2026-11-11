@@ -607,6 +607,7 @@ describe("a deck whose document says it is the deck's, outside the instance's fo
       cardsDocumentUrl: `${ROOT}bob/kort/spanish.ttl`,
       reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
     };
+    await p.put(`${BOB}catalog.ttl`, "");
     await p.put(deck.cardsDocumentUrl, `<> <${IS_PART_OF}> <${deck.url}> .`);
     const ours = await datasetOfTurtle(deck.cardsDocumentUrl, `<> <${IS_PART_OF}> <${deck.url}> .`);
     let busy = true;
@@ -639,6 +640,7 @@ describe("a deck whose document says it is the deck's, outside the instance's fo
     );
     await p.put(`${ROOT}alice/public/guestbook.ttl`, "");
     await p.put(`${ROOT}bob/kort/spanish.ttl`, "");
+    await p.put(`${BOB}catalog.ttl`, "");
     const asked: string[] = [];
     let busy = false;
     const storages = [`${ROOT}alice/`, `${ROOT}bob/`];
@@ -670,6 +672,78 @@ describe("a deck whose document says it is the deck's, outside the instance's fo
       guard.standing(deck, "https://elsewhere.example/bob/kort/spanish.ttl", ours),
     ).resolves.toBe("unclaimed");
     expect(asked).toEqual([]);
+  });
+
+  describe("on a server that holds the pods of many under one root it does not type", () => {
+    const deck = {
+      url: `${ROOT}attacker/memo/catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${ROOT}victim/x/doc.ttl`,
+      reviewsDocumentUrl: `${ROOT}attacker/memo/reviews/deck-1.ttl`,
+    };
+    const doc = `${ROOT}victim/x/doc.ttl`;
+    const mine = `${ROOT}attacker/kort/spanish.ttl`;
+
+    /** A guard over a server whose folders `typed` alone are typed as a storage's root, each folder asked kept in `asked`. */
+    function guardOn(typed: string[], userStorages?: () => Promise<readonly string[]>) {
+      const asked: string[] = [];
+      const fetch = (async (input) => {
+        const url = String(input);
+        asked.push(url);
+        const headers: Record<string, string> = typed.includes(url)
+          ? { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' }
+          : {};
+        return new Response(null, { headers });
+      }) as typeof globalThis.fetch;
+      return { guard: createDeckDocumentGuard(fetch, userStorages), asked };
+    }
+
+    it("is no deck's in another pod there, though the server's root holds both, and a write to it is refused", async () => {
+      const says = await datasetOfTurtle(doc, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard, asked } = guardOn([]);
+      await expect(guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      // Every folder up to the server's root is asked, that root too: none is shown to be a storage's.
+      expect(asked).toEqual([`${ROOT}victim/x/`, `${ROOT}victim/`, ROOT]);
+      await expect(guard.writable(deck, doc, says)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+      // Nor is one in the instance's own pod, which the server does not show either.
+      const ours = await datasetOfTurtle(mine, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      await expect(guard.standing(deck, mine, ours)).resolves.toBe("unclaimed");
+    });
+
+    it("is the deck's in the user's storage that holds the instance too, and no deck's in another of theirs", async () => {
+      const ours = await datasetOfTurtle(mine, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const says = await datasetOfTurtle(doc, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard, asked } = guardOn([], async () => [`${ROOT}attacker/`, `${ROOT}victim/`]);
+      await expect(guard.standing(deck, mine, ours)).resolves.toBe("owned");
+      await expect(guard.writable(deck, mine, ours)).resolves.toBeDefined();
+      await expect(guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      // The user's storages decide it: no folder is asked.
+      expect(asked).toEqual([]);
+      // A storage of the user's that holds the document alone decides it too, whatever the server types.
+      const typed = guardOn([ROOT], async () => [`${ROOT}victim/`]);
+      await expect(typed.guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      expect(typed.asked).toEqual([]);
+    });
+
+    it("is no deck's under the root the server shows when the instance has a root of its own below it", async () => {
+      const says = await datasetOfTurtle(doc, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard } = guardOn([ROOT, `${ROOT}attacker/`]);
+      await expect(guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      // Under one root the server shows, with none below it, it is the deck's.
+      await expect(guardOn([ROOT]).guard.standing(deck, doc, says)).resolves.toBe("owned");
+    });
+
+    it("leaves it no deck's when the user's storages cannot be found, and refuses a write for now", async () => {
+      const ours = await datasetOfTurtle(mine, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const failed = new Error("profile unreadable");
+      const { guard } = guardOn([`${ROOT}attacker/`], () => Promise.reject(failed));
+      await expect(guard.standing(deck, mine, ours)).resolves.toBe("unclaimed");
+      await expect(guard.writable(deck, mine, ours)).rejects.toMatchObject({
+        code: "cannotCheck",
+      });
+    });
   });
 });
 

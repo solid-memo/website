@@ -14,7 +14,7 @@ import {
   PreconditionFailedError,
   saveDataset,
 } from "./datasets";
-import { createDeckDocumentGuard } from "./deckPlace";
+import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
 import {
@@ -33,6 +33,8 @@ export interface SolidReviewStateRepositoryDeps {
   checkWrite?: WriteCheck;
   /** A new subject's id, for a state whose named subject is another's (see withReviewStates). */
   randomId?: () => string;
+  /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
+  userStorages?: UserStorages;
 }
 
 /** The states of a deck without a reviews document: none. */
@@ -49,8 +51,9 @@ export function createSolidReviewStateRepository({
   publicFetch = fetch,
   checkWrite = noWriteCheck,
   randomId = () => crypto.randomUUID(),
+  userStorages,
 }: SolidReviewStateRepositoryDeps): ReviewStateRepository {
-  const guard = createDeckDocumentGuard(fetch);
+  const guard = createDeckDocumentGuard(fetch, userStorages);
 
   /**
    * Save a deck's reviews document, saying whose it is (`<>
