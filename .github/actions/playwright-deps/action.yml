@@ -62,6 +62,10 @@ runs:
     # Playwright's list, less what the image has, which it names after
     # asking apt (`--dry-run`, which exits 1 when it names any), then
     # those packages downloaded, the files kept apart from apt's own.
+    # Apt answers from the image's package lists, so the mirror is asked
+    # for fresh ones only when something is to be downloaded, or when
+    # those lists can't answer: a job missing nothing, as one without
+    # the fonts is, never reaches it.
     - if: steps.cache.outputs.cache-hit != 'true'
       shell: bash
       env:
@@ -75,19 +79,27 @@ runs:
           done
           return 1
         }
-        apt update
-        listed=$(npx playwright install-deps --dry-run "$BROWSER") || true
-        case $listed in
-          *"All system dependencies are installed."*) packages=() ;;
-          *"Missing system dependencies"*) mapfile -t packages < <(sed -n 's/^  //p' <<< "$listed") ;;
-          *) echo "$listed"; exit 1 ;;
-        esac
+        updated=false
+        missing() {
+          listed=$(npx playwright install-deps --dry-run "$BROWSER") || true
+          case $listed in
+            *"All system dependencies are installed."*) packages=() ;;
+            *"Missing system dependencies"*) mapfile -t packages < <(sed -n 's/^  //p' <<< "$listed") ;;
+            *) return 1 ;;
+          esac
+        }
+        if ! missing; then
+          apt update
+          updated=true
+          missing || { echo "$listed"; exit 1; }
+        fi
         if [[ $FONTS == false ]]; then
           mapfile -t packages < <(printf '%s\n' "${packages[@]}" | grep -Ev '^(x?fonts-|$)' || true)
         fi
         echo "Missing: ${#packages[@]} packages"
         sudo apt-get clean
         if (( ${#packages[@]} )); then
+          [[ $updated == true ]] || apt update
           apt install -y --no-install-recommends --download-only "${packages[@]}"
         fi
         mkdir -p ~/.cache/playwright-deps
