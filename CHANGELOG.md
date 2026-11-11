@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.1.3](https://github.com/solid-memo/website/compare/v7.1.2...v7.1.3) (2026-11-11)
+
+### Bug Fixes
+
+* **solid:** hold drafts to their total document limit on write ([72a9222](https://github.com/solid-memo/website/commit/72a9222a7e985fb06c64cdc0c15c5d82aa6ed875))
+
 ## [7.1.2](https://github.com/solid-memo/website/compare/v7.1.1...v7.1.2) (2026-11-11)
 
 ### Bug Fixes
