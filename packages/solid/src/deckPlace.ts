@@ -177,10 +177,25 @@ export function createDeckDocumentGuard(
 
   /**
    * Whether the folder is an instance's own: not a pod's root (`/`), nor
-   * a storage's (isStorageRoot), which hold the user's other data too.
+   * a storage's root or a folder above one, which hold the user's other
+   * data too. A storage's root is one of the user's storages
+   * (userStorages), which a server that holds many users' pods on one
+   * origin may leave untyped, or one the server shows (isStorageRoot).
+   * A storage list the pod does not answer for leaves it not shown to
+   * be: `lenient`, so the instance's documents are read and kept as
+   * they are; otherwise cannotCheck, so that a write may be tried again.
    */
-  async function isDedicatedFolder(folder: string): Promise<boolean> {
-    return new URL(folder).pathname !== "/" && !(await isStorageRoot(folder));
+  async function isDedicatedFolder(folder: string, lenient: boolean): Promise<boolean> {
+    if (new URL(folder).pathname === "/") return false;
+    let storages: readonly string[];
+    try {
+      storages = await userStorages();
+    } catch {
+      if (lenient) return false;
+      throw new AppError("cannotCheck", { url: folder, status: 0 });
+    }
+    if (storages.some((storage) => isInFolder(ensureTrailingSlash(storage), folder))) return false;
+    return !(await isStorageRoot(folder));
   }
 
   /**
@@ -279,7 +294,7 @@ export function createDeckDocumentGuard(
     if (dataset !== null && ownsDocument(partOfOf(dataset, url), deck.url)) return "owned";
     if (dataset === null) return "adoptable";
     if (deckBackLinksOf(dataset, url).length > 0) return "unclaimed";
-    return (await isDedicatedFolder(instance)) ? "adoptable" : "unclaimed";
+    return (await isDedicatedFolder(instance, lenient)) ? "adoptable" : "unclaimed";
   }
 
   /**
@@ -299,7 +314,7 @@ export function createDeckDocumentGuard(
     const found: string[] = [];
     for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
       if (found.some((other) => isSameUrl(other, url))) continue;
-      if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance))) continue;
+      if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance, true))) continue;
       if (await unclaimedAsRead([deck], url)) found.push(url);
     }
     return found;
@@ -383,7 +398,8 @@ export function createDeckDocumentGuard(
     async removal(deck: DeckPlace, url: string): Promise<"deletable" | "unclaimed" | "unreadable"> {
       const instance = instanceOf(deck);
       if (isDraftDocument(url)) return "unclaimed";
-      if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance))) return "deletable";
+      if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance, true)))
+        return "deletable";
       const dataset = await readToRemove(deck, url);
       if (dataset === UNREADABLE) return "unreadable";
       return (await standing(deck, url, dataset)) === "unclaimed" ? "unclaimed" : "deletable";
