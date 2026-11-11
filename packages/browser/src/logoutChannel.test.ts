@@ -5,8 +5,12 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CHANNEL, createLogoutChannel, KEY } from "./logoutChannel";
 
-/** A tick for the BroadcastChannel to deliver, and a little more. */
-const delivered = () => new Promise((resolve) => setTimeout(resolve, 20));
+/**
+ * Until the BroadcastChannel has delivered to `listener`, however busy the
+ * machine: a fixed wait was too short on a loaded CI runner.
+ */
+const delivered = (listener: ReturnType<typeof vi.fn>) =>
+  vi.waitFor(() => expect(listener).toHaveBeenCalled(), { timeout: 5000 });
 
 function noChannel(): BroadcastChannel {
   throw new DOMException("The operation is insecure.", "SecurityError");
@@ -78,7 +82,7 @@ describe("createLogoutChannel", () => {
       there.listen(heardThere);
 
       here.announce();
-      await delivered();
+      await delivered(heardThere);
 
       expect(heardThere).toHaveBeenCalledOnce();
       expect(heardHere).not.toHaveBeenCalled();
@@ -91,10 +95,13 @@ describe("createLogoutChannel", () => {
       there.listen(heard);
       const stray = new BroadcastChannel(CHANNEL);
 
+      // A channel delivers one sender's messages in order: once the logout
+      // after it is heard, the stray message has been heard too.
       stray.postMessage({ not: "logout" });
-      await delivered();
+      stray.postMessage("logout");
+      await delivered(heard);
 
-      expect(heard).not.toHaveBeenCalled();
+      expect(heard).toHaveBeenCalledOnce();
       stray.close();
       close();
     });
@@ -104,9 +111,12 @@ describe("createLogoutChannel", () => {
       const heard = vi.fn();
       const stop = there.listen(heard);
       stop();
+      // On the same channel, so the one message reaches both listeners or neither.
+      const stillListening = vi.fn();
+      there.listen(stillListening);
 
       here.announce();
-      await delivered();
+      await delivered(stillListening);
 
       expect(heard).not.toHaveBeenCalled();
       close();
@@ -136,7 +146,7 @@ describe("createLogoutChannel", () => {
       const heard = vi.fn();
       const stop = there.listen(heard);
       here.announce();
-      await delivered();
+      await delivered(heard);
       expect(heard).toHaveBeenCalledOnce();
       stop();
     });
