@@ -69,6 +69,21 @@ describe("markdownProblems", () => {
     expect(markdownProblems(wide, PROSE)).toEqual([{ code: "largeTable", source: wide }]);
   });
 
+  it("names hidden characters in code or a link shown as its source", () => {
+    expect(
+      markdownProblems(`${"> ".repeat(MAX_DEPTH - 1)}\`if (a\u202e) b\u200b\``, PROSE),
+    ).toEqual([
+      { code: "tooDeep", source: "`if (a\u202e) b\u200b`" },
+      { code: "hiddenControl", controls: ["⟨U+202E⟩", "⟨U+200B⟩"], in: "code" },
+    ]);
+    // A link shown as its source is no link, in a field that takes none too.
+    const link = "[pay\u202elapyap.com](https://x.example/)";
+    expect(markdownProblems(`${"> ".repeat(MAX_DEPTH - 2)}${link}`, SIDE)).toEqual([
+      { code: "tooDeep", source: link },
+      { code: "hiddenControl", controls: ["⟨U+202E⟩"], in: "link" },
+    ]);
+  });
+
   it("passes what nests to the limit but shows as written, plain text", () => {
     const list = Array.from(
       { length: MAX_DEPTH - 1 },

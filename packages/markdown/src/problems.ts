@@ -95,6 +95,13 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
         if (controls.length > 0) problems.push({ code: "hiddenControl", controls, in: "code" });
         break;
       }
+      case "deepControls":
+        problems.push({
+          code: "hiddenControl",
+          controls: hiddenControls(note.source),
+          in: note.in,
+        });
+        break;
       case "link": {
         let url = urls.get(note.url);
         if (url === undefined) {

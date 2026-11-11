@@ -429,10 +429,65 @@ describe("parseMarkdown", () => {
     ]);
   });
 
-  it("shows an autolink's text nested past MAX_DEPTH as its URL, without its angle brackets", () => {
-    expect(
-      JSON.stringify(parseMarkdown(`${"> ".repeat(MAX_DEPTH - 2)}<https://x.example>`)),
-    ).toContain('"children":[{"type":"text","value":"https://x.example"}]');
+  /** The blocks of a text nested in `quotes` block quotes, unwrapped. */
+  const inQuotes = (quotes: number, markdown: string): MdBlock[] => {
+    let blocks = parseMarkdown(`${"> ".repeat(quotes)}${markdown}`)!;
+    for (let level = 0; level < quotes; level++)
+      blocks = (blocks[0] as Extract<MdBlock, { type: "quote" }>).children;
+    return blocks;
+  };
+
+  it("shows a link whose text would nest past MAX_DEPTH as its source, not a link", () => {
+    expect(inQuotes(MAX_DEPTH - 2, "<https://x.example>")).toEqual([
+      paragraph(text("<https://x.example>")),
+    ]);
+    expect(inQuotes(MAX_DEPTH - 2, "[pay\u202elapyap.com\u200b](https://x.example/)")).toEqual([
+      paragraph(text("[pay⟨U+202E⟩lapyap.com⟨U+200B⟩](https://x.example/)")),
+    ]);
+    // A level up, it is a link, its text with markers as ever.
+    expect(inQuotes(MAX_DEPTH - 3, "[pay\u202elapyap.com](https://x.example/)")).toEqual([
+      paragraph({
+        type: "link",
+        url: "https://x.example/",
+        children: [text("pay⟨U+202E⟩lapyap.com")],
+      }),
+    ]);
+  });
+
+  it("shows the hidden characters of what shows as its source as markers", () => {
+    // Code nested past MAX_DEPTH, a span and a block.
+    expect(inQuotes(MAX_DEPTH - 1, "`if (a\u202e) b\u200b`")).toEqual([
+      paragraph(text("`if (a⟨U+202E⟩) b⟨U+200B⟩`")),
+    ]);
+    expect(inQuotes(MAX_DEPTH - 2, "`if (a\u202e) b`")).toEqual([
+      paragraph({ type: "inlineCode", value: "if (a⟨U+202E⟩) b" }),
+    ]);
+    expect(JSON.stringify(parseMarkdown(`${"> ".repeat(MAX_DEPTH)}    a\u202e`))).toContain(
+      '"value":"    a⟨U+202E⟩"',
+    );
+    // Text in a followed link's text, past MAX_DEPTH.
+    expect(inQuotes(MAX_DEPTH - 3, "[*a\u202e*](https://x.example/)")).toEqual([
+      paragraph({
+        type: "link",
+        url: "https://x.example/",
+        children: [{ type: "emphasis", children: [text("a⟨U+202E⟩")] }],
+      }),
+    ]);
+    // Raw HTML, in a link's text or not, and a table past its caps.
+    expect(parseMarkdown('[a<i title="\u202e">](https://x.example/) <b title="\u202e">')).toEqual([
+      paragraph(
+        {
+          type: "link",
+          url: "https://x.example/",
+          children: [text("a"), text('<i title="⟨U+202E⟩">')],
+        },
+        text(" "),
+        text('<b title="⟨U+202E⟩">'),
+      ),
+    ]);
+    expect(parseMarkdown("<div>\u202e</div>")).toEqual([paragraph(text("<div>⟨U+202E⟩</div>"))]);
+    const wide = `|${" a\u202e |".repeat(MAX_TABLE_COLUMNS + 1)}\n|${"-|".repeat(MAX_TABLE_COLUMNS + 1)}`;
+    expect(JSON.stringify(parseMarkdown(wide))).not.toContain("\u202e");
   });
 });
 
@@ -686,6 +741,48 @@ describe("inspectMarkdown", () => {
     expect(notesOf(`${"> ".repeat(MAX_DEPTH - 1)}a`)).toEqual([]);
     expect(notesOf(`${"> ".repeat(MAX_DEPTH - 1)}&amp;`)).toEqual([
       { type: "tooDeep", source: "&amp;" },
+    ]);
+  });
+  it("notes the hidden characters of code or a link shown as its source, outside a link", () => {
+    const deep = (markdown: string) => notesOf(`${"> ".repeat(MAX_DEPTH - 1)}${markdown}`);
+    expect(deep("`a\u202e`")).toEqual([
+      { type: "tooDeep", source: "`a\u202e`" },
+      { type: "deepControls", in: "code", source: "`a\u202e`" },
+    ]);
+    const link = "[pay\u202elapyap.com](https://x.example/)";
+    expect(notesOf(`${"> ".repeat(MAX_DEPTH - 2)}${link}`)).toEqual([
+      { type: "tooDeep", source: link },
+      { type: "deepControls", in: "link", source: link },
+    ]);
+    expect(notesOf(`${"> ".repeat(MAX_DEPTH - 2)}[a](https://x.example/)`)).toEqual([
+      { type: "tooDeep", source: "[a](https://x.example/)" },
+    ]);
+    // Text with a hidden character no longer shows as written; raw HTML is neither code nor a link.
+    expect(deep("a\u202e")).toEqual([{ type: "tooDeep", source: "a\u202e" }]);
+    expect(deep('a <b title="\u202e">')).toEqual([
+      { type: "tooDeep", source: '<b title="\u202e">' },
+    ]);
+    // Code in a list or a table nested past MAX_DEPTH.
+    const quotes = "> ".repeat(MAX_DEPTH);
+    expect(notesOf(`${quotes}- \`a\u202e\``)).toEqual([
+      { type: "tooDeep", source: "- `a\u202e`" },
+      { type: "deepControls", in: "code", source: "- `a\u202e`" },
+    ]);
+    const table = `| \`a\u202e\` |\n${quotes}|-|`;
+    expect(notesOf(`${quotes}${table}`)).toEqual([
+      { type: "tooDeep", source: table },
+      { type: "deepControls", in: "code", source: table },
+    ]);
+    // In a followed link's text, the link's note holds them.
+    expect(notesOf(`${"> ".repeat(MAX_DEPTH - 3)}[*a\u202e*](https://x.example/)`)).toEqual([
+      {
+        type: "link",
+        url: "https://x.example/",
+        text: "a\u202e",
+        source: "[*a\u202e*](https://x.example/)",
+        autolink: false,
+      },
+      { type: "tooDeep", source: "a\u202e" },
     ]);
   });
 });
