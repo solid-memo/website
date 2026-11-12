@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.2.1](https://github.com/solid-memo/website/compare/v7.2.0...v7.2.1) (2026-11-12)
+
+### Bug Fixes
+
+* **solid:** bound the whole read of a pod document, its body too ([1722aef](https://github.com/solid-memo/website/commit/1722aef69e8d84c92ff0df2166834dc93fe240fc))
+
 ## [7.2.0](https://github.com/solid-memo/website/compare/v7.1.5...v7.2.0) (2026-11-12)
 
 ### Features
