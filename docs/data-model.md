@@ -1264,7 +1264,9 @@ own pod, as a draft, before publishing it
   belong to no shape, so `CatalogV1` keeps them through every write.
   Only a link to a draft's place in the same instance is followed. A
   learner's app reads `sm:publishedRelease` in a creator's shared
-  catalog to find newer versions of a release it added from a link.
+  catalog to find newer versions of a release it added from a link,
+  only in the instance the release's address names, and only those
+  links in it ([deck-library.md](deck-library.md#from-a-link)).
 - **A draft is checked as a draft.** Its deck, chapters and steps are
   checked against the draft shapes, which don't yet ask what only a
   published release needs; its cards and distractors as anywhere else

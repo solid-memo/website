@@ -8,7 +8,9 @@ import {
   isEarlierVersionBeside,
   isPublishedReleaseUrl,
   isReleaseContainer,
+  isReleaseOfSameInstance,
   releaseFileName,
+  releaseInstanceOf,
   releasePlaceOf,
   releasesContainerOf,
   releaseUrlIn,
@@ -51,6 +53,43 @@ describe("where a release is published", () => {
 
   it("saves a release as a file named after it", () => {
     expect(releaseFileName("capitals", 3)).toBe("capitals-v3.ttl");
+  });
+});
+
+describe("the instance a release was published from (GHSA-hx4f-4hjp-g2f3)", () => {
+  const V1 = `${INSTANCE}releases/capitals/v1.ttl`;
+
+  it("is the folder above the releases folder its address names, or none", () => {
+    expect(releaseInstanceOf(V1)).toBe(INSTANCE);
+    expect(releaseInstanceOf("https://pod.example/releases/capitals/v1.ttl")).toBe(
+      "https://pod.example/",
+    );
+    // Published in another folder, or at an address no release has.
+    expect(releaseInstanceOf("https://pod.example/public/capitals/v1.ttl")).toBeNull();
+    expect(releaseInstanceOf("https://pod.example/capitals/v1.ttl")).toBeNull();
+    expect(releaseInstanceOf(`${INSTANCE}releases/capitals/v1.ttl?x=1`)).toBeNull();
+  });
+
+  it("holds the instance's releases, under any name, and no others", () => {
+    expect(isReleaseOfSameInstance(V1, `${INSTANCE}releases/capitals/v2.ttl`)).toBe(true);
+    expect(isReleaseOfSameInstance(V1, `${INSTANCE}releases/capitals-2/v3.ttl`)).toBe(true);
+    expect(isReleaseOfSameInstance(V1, `${INSTANCE}public/capitals/v3.ttl`)).toBe(true);
+    // Another instance, a folder above, another origin.
+    expect(
+      isReleaseOfSameInstance(V1, "https://pod.example/solid-memo/other/releases/capitals/v2.ttl"),
+    ).toBe(false);
+    expect(isReleaseOfSameInstance(V1, "https://pod.example/releases/capitals/v2.ttl")).toBe(false);
+    expect(
+      isReleaseOfSameInstance(V1, "https://evil.example/solid-memo/main/releases/capitals/v2.ttl"),
+    ).toBe(false);
+    // An address no release has, or a release whose address names no instance.
+    expect(isReleaseOfSameInstance(V1, `${INSTANCE}releases/capitals/v2.ttl#x`)).toBe(false);
+    expect(
+      isReleaseOfSameInstance(
+        "https://pod.example/public/capitals/v1.ttl",
+        "https://pod.example/public/capitals/v2.ttl",
+      ),
+    ).toBe(false);
   });
 });
 

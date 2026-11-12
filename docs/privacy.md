@@ -145,7 +145,9 @@ The browser contacts these, each when it's needed:
   the learner's own cards, wherever their pictures are. For a deck added
   by link, they're only the hosts the learner chose
   ([below](#pictures-on-a-deck-added-by-link)).
-- **The address of a deck or release added by link**
+- **The address of a deck or release added by link**, and, to look
+  for its newer version, the folders above it up to its instance and
+  a storage description one of them links to
   ([deck-library.md](deck-library.md#from-a-link)).
 - **The server of a release a Studio draft follows**, or whose next
   version the Studio starts, once a page load. It's asked as no one,

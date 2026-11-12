@@ -6,6 +6,7 @@ import {
   ensureTrailingSlash,
   hasEmptySegment,
   isCanonicalUrl,
+  isDocumentIn,
   isPlainHttpUrl,
 } from "../instanceLayout.ts";
 import { draftPlaceOf } from "./draftLayout.ts";
@@ -68,6 +69,33 @@ export function isPublishedReleaseUrl(url: string): boolean {
   if (!isCanonicalUrl(url) || !isPlainHttpUrl(url) || hasEmptySegment(url)) return false;
   const { username, password } = new URL(url);
   return username === "" && password === "" && releasePlaceOf(url) !== null;
+}
+
+/**
+ * The instance a release's address says it was published from: the
+ * folder `<instance>` of `<instance>releases/<name>/v<N>.ttl`, where an
+ * instance publishes unless its creator chooses another folder
+ * (releasesContainerOf). Null for a release published elsewhere, or an
+ * address no release has (isPublishedReleaseUrl): its address names no
+ * instance.
+ */
+export function releaseInstanceOf(url: string): string | null {
+  if (!isPublishedReleaseUrl(url)) return null;
+  const releases = new URL("..", url);
+  if (!releases.pathname.endsWith("/releases/")) return null;
+  return new URL("..", releases).href;
+}
+
+/**
+ * Whether `other` is at an address a release may have
+ * (isPublishedReleaseUrl) in the folder of the instance the release at
+ * `url` was published from (releaseInstanceOf): on its origin, and of
+ * the same creator's, as far as an address tells. False when the
+ * release's address names no instance.
+ */
+export function isReleaseOfSameInstance(url: string, other: string): boolean {
+  const instance = releaseInstanceOf(url);
+  return instance !== null && isPublishedReleaseUrl(other) && isDocumentIn(other, instance);
 }
 
 /**

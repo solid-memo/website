@@ -1221,12 +1221,23 @@ flowchart LR
 - **Newer versions** of a release from a link may be listed by the
   creator's catalog, which links what its instance published
   (`sm:publishedRelease`, [data-model.md](data-model.md)).
+  The lookup stays within the release's own instance. A release's
+  address names it: `<instance>releases/<name>/vN.ttl`
+  (`releaseInstanceOf` in
+  [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)).
   `DeckLibrary.publishedBeside` takes the first catalog that links the
-  release in the folders above it, nearest first and eight folders at
-  most, read as anyone reads them. Of its links, it keeps only those at
-  an address a release may have (`isPublishedReleaseUrl`, which refuses
-  an empty segment and user info), as the user's own catalog does. Of
-  those links, the app reads only some, and
+  release in the folders above it, nearest first, up to that instance's
+  folder, read as anyone reads them. It never climbs above a folder the
+  server types a storage (`pim:Storage`) or a Linked Web Storage
+  description names as one. A release published in
+  another folder names no instance, so no catalog is looked for, and
+  whether a newer version is out isn't known. Of the catalog's links,
+  it keeps only those at an address a release may have
+  (`isPublishedReleaseUrl`, which refuses an empty segment and user
+  info), as the user's own catalog does, and only those in that
+  catalog's folder. The use cases take a newer release only from the
+  copy's instance too (`isReleaseOfSameInstance`), whatever series
+  another release claims. Of those links, the app reads only some, and
   never one the copy's release lists. First come those named as the
   copy's release (`…/<name>/vN.ttl`): 16 at most, one at a time, the
   highest version first, until one is a newer release of the same

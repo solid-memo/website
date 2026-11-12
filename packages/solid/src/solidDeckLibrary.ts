@@ -8,7 +8,8 @@ import type { CourseOutline } from "@solid-memo/domain/course";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
-import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
+import { isPublishedReleaseUrl, releaseInstanceOf } from "@solid-memo/domain/release/releasePlace";
+import { isDocumentIn } from "@solid-memo/domain/instanceLayout";
 import { AppError } from "@solid-memo/domain/appError";
 import { releaseHost } from "@solid-memo/domain/library";
 import { catalogLinks } from "./catalogLinks";
@@ -29,6 +30,7 @@ import {
   shownReadError,
   type TooLarge,
 } from "./releaseReadError";
+import { isStorageRootAt } from "./deckPlace";
 import { SM } from "./vocab";
 
 export interface SolidDeckLibraryDeps {
@@ -506,7 +508,9 @@ function releaseReads({
     },
 
     async publishedBeside(url) {
-      for (const folder of foldersAbove(url)) {
+      const instance = releaseInstanceOf(url);
+      if (instance === null) return null;
+      for (const folder of foldersUpTo(url, instance)) {
         // An instance's catalog is `<instance>catalog.ttl`; one that cannot be read is no answer.
         const links = await turn(folder, () =>
           linked(folder, ({ fetch }) =>
@@ -514,35 +518,45 @@ function releaseReads({
           ),
         ).catch((): string[] => []);
         // The catalog is data its creator wrote: of its links, only those at an address a release may have are
-        // read, and may become a copy's source (isPublishedReleaseUrl), as the user's own catalog's are.
-        if (links.includes(url)) return links.filter(isPublishedReleaseUrl);
+        // read, and may become a copy's source (isPublishedReleaseUrl), as the user's own catalog's are, and of
+        // those only the ones in the catalog's own folder, so in the release's instance.
+        if (links.includes(url))
+          return links.filter((link) => isPublishedReleaseUrl(link) && isDocumentIn(link, folder));
+        // A storage's root is its owner's: what is above it is someone else's.
+        if (folder !== instance && (await isStorageRoot(folder))) return null;
       }
       return null;
     },
   };
+
+  /**
+   * Whether the folder is a storage's root (isStorageRootAt), asked as
+   * anyone asks; a folder the server says nothing of is not shown to be.
+   */
+  function isStorageRoot(folder: string): Promise<boolean> {
+    return turn(folder, () =>
+      linked(folder, ({ fetch }) =>
+        readWithin(folder, fetch, (fetch) => isStorageRootAt(folder, fetch)),
+      ),
+    ).catch(() => false);
+  }
 }
 
 /** The check a read of a release is held to (DeckLibrary.readRelease's `accept`). */
 type Accept = (report: DocumentReport) => void;
 
 /**
- * How many folders above a release publishedBeside looks for its
- * creator's catalog in: a release is published at
- * `<instance>releases/<name>/v<N>.ttl` unless its creator chooses
- * another folder, so the catalog is three folders up; whoever made the
- * link chose the address, and each folder is one more read.
+ * The folders publishedBeside looks for a release's creator's catalog
+ * in, nearest first: the release's own, `<instance>releases/<name>/`,
+ * up to the instance's (releaseInstanceOf), whose catalog links what it
+ * published. Nothing above the instance is its creator's to say.
  */
-const MAX_CATALOG_LEVELS = 8;
-
-/** The folders above a document, nearest first, up to its host's root or MAX_CATALOG_LEVELS. */
-function foldersAbove(url: string): string[] {
+function foldersUpTo(url: string, instance: string): string[] {
   const folders: string[] = [];
-  for (let folder = new URL(".", url); folders.length < MAX_CATALOG_LEVELS; ) {
-    folders.push(folder.href);
-    if (folder.pathname === "/") break;
-    folder = new URL("..", folder);
+  for (let folder = new URL(".", url).href; ; folder = new URL("..", folder).href) {
+    folders.push(folder);
+    if (folder === instance) return folders;
   }
-  return folders;
 }
 
 /** The release's document at `url`, read with `fetch` within RELEASE_READ_MS (readWithin). */
