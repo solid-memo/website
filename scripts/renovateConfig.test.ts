@@ -168,7 +168,7 @@ describe("renovate.json5", () => {
     expect(config.packageRules.filter((rule) => rule.automerge === true)).toEqual([
       {
         matchFileNames: ["e2e/**"],
-        matchManagers: ["docker-compose", "dockerfile", "regex"],
+        matchManagers: ["docker-compose", "dockerfile", "custom.regex"],
         matchDatasources: ["docker", "git-refs"],
         automerge: true,
       },
@@ -184,7 +184,7 @@ describe("renovate.json5", () => {
       "nvm",
       "dockerfile",
       "docker-compose",
-      "regex",
+      "custom.regex",
       "a-new-manager",
     ];
     const datasources = [
@@ -209,12 +209,12 @@ describe("renovate.json5", () => {
       ),
     );
     expect([...new Set(merged)].sort()).toEqual([
+      "custom.regex docker e2e/pod/servers/jss/Dockerfile",
+      "custom.regex git-refs e2e/pod/servers/jss/Dockerfile",
       "docker-compose docker e2e/pod/servers/jss/Dockerfile",
       "docker-compose git-refs e2e/pod/servers/jss/Dockerfile",
       "dockerfile docker e2e/pod/servers/jss/Dockerfile",
       "dockerfile git-refs e2e/pod/servers/jss/Dockerfile",
-      "regex docker e2e/pod/servers/jss/Dockerfile",
-      "regex git-refs e2e/pod/servers/jss/Dockerfile",
     ]);
   });
 
@@ -257,7 +257,7 @@ describe("renovate.json5", () => {
 
   it("still merges a new commit of Nextcloud's app on its own, but not of the Linked Web Storage fork", () => {
     const update = {
-      manager: "regex",
+      manager: "custom.regex",
       datasource: "git-refs",
       packageFile: "e2e/pod/servers/nextcloud/Dockerfile",
       depName: "https://github.com/pdsinterop/solid-nextcloud",
@@ -331,7 +331,7 @@ describe("renovate.json5", () => {
     // The workflows' regex manager takes whatever datasource a comment names.
     for (const updateType of UPDATE_TYPES) {
       const update = {
-        manager: "regex",
+        manager: "custom.regex",
         datasource: "npm",
         packageFile: ".github/workflows/ci.yml",
         depName: "a-new-tool",
@@ -380,7 +380,7 @@ describe("renovate.json5", () => {
 
   it("holds every update of a tool a workflow downloads for a person", () => {
     const update = {
-      manager: "regex",
+      manager: "custom.regex",
       datasource: "github-release-attachments",
       packageFile: ".github/workflows/ci.yml",
       depName: "owner/tool",
