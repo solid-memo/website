@@ -14,7 +14,12 @@ import {
   toRdfJsDataset,
 } from "./client/rdf";
 import type { DatasetCore, Quad } from "@rdfjs/types";
-import type { DocumentContext, ShapeValidator, Since } from "@solid-memo/application/ports";
+import type {
+  DocumentContext,
+  ReadBudget,
+  ShapeValidator,
+  Since,
+} from "@solid-memo/application/ports";
 import {
   type DocumentReport,
   limitResults,
@@ -824,10 +829,10 @@ export function createShaclShapeValidator({
       }
     },
 
-    async validateDocument(url, context = "pod"): Promise<DocumentReport> {
+    async validateDocument(url, context = "pod", budget?: ReadBudget): Promise<DocumentReport> {
       let dataset: Dataset | null;
       try {
-        dataset = await getSolidDatasetOrNull(url, podFetch);
+        dataset = await withinBudget(budget, () => getSolidDatasetOrNull(url, podFetch));
       } catch (error) {
         return unreadableDocument(url, reasonOf(error));
       }
@@ -836,10 +841,10 @@ export function createShaclShapeValidator({
 
     validateDataset: reportOf,
 
-    async validateDocumentSince(url, version, context = "pod") {
+    async validateDocumentSince(url, version, context = "pod", budget?: ReadBudget) {
       let since: Since<Dataset | null>;
       try {
-        since = await readSince(url, version, podFetch);
+        since = await withinBudget(budget, () => readSince(url, version, podFetch));
       } catch (error) {
         // No version: what is not read is checked again next time.
         return { unchanged: false, value: unreadableDocument(url, reasonOf(error)), version: null };
@@ -998,6 +1003,19 @@ function withSeriesEntry(
 
 /** The longest reason the report keeps of a document it could not read: a parser's message may quote the document. */
 const MAX_REASON_LENGTH = 300;
+
+/**
+ * What the read gives, or podNoAnswer once `budget` is spent before it
+ * does: a check gives up on a document it has no time left to read, and
+ * names it unreadable.
+ */
+async function withinBudget<T>(budget: ReadBudget | undefined, read: () => Promise<T>): Promise<T> {
+  if (budget === undefined) return read();
+  const spent = Symbol("spent");
+  const done = await budget.spend<T | typeof spent>(spent, read);
+  if (done === spent) throw new AppError("podNoAnswer");
+  return done;
+}
 
 /** Why a document could not be read, as its read's failure says, shortened to MAX_REASON_LENGTH. */
 function reasonOf(error: unknown): string {

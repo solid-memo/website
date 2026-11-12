@@ -38,6 +38,7 @@ import {
   saveDataset,
   UNREADABLE,
 } from "./datasets";
+import type { ReadBudget } from "@solid-memo/application/ports";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { deckBackLinksOf, isDeckItself } from "./ownership";
 import { hasStorageLink } from "./solidStorageGateway";
@@ -150,30 +151,6 @@ export async function isStorageRootAt(
   const roots = await storageRootsOf(storage, fetch);
   if (roots === null) throw new AppError("cannotCheck", { url: folder, status: 0 });
   return roots.some((root) => isSameUrl(root, folder));
-}
-
-/**
- * What `work` gives, or `otherwise` once `budget` is spent, whichever
- * comes first: none is started after it. A work given up on may go on,
- * within its own read deadlines (readDeadline.ts), but nothing waits on
- * it any longer.
- */
-async function untilSpent<T>(
-  budget: AbortSignal,
-  otherwise: T,
-  work: () => Promise<T>,
-): Promise<T> {
-  if (budget.aborted) return otherwise;
-  let stop: (() => void) | undefined;
-  const spent = new Promise<T>((resolve) => {
-    stop = () => resolve(otherwise);
-    budget.addEventListener("abort", stop, { once: true });
-  });
-  try {
-    return await Promise.race([work(), spent]);
-  } finally {
-    budget.removeEventListener("abort", stop!);
-  }
 }
 
 /**
@@ -334,9 +311,9 @@ export function createDeckDocumentGuard(
    * read as RDF is unclaimed. Both are read at once. One outside the
    * instance's folder, which may be on anyone's server, is read within
    * `budget`, if given: once it is spent, one not yet read counts as
-   * unreadable, so unclaimed, as it then is for a check (untilSpent).
+   * unreadable, so unclaimed, as it then is for a check (ReadBudget).
    */
-  async function unclaimed(deck: DeckPlace, budget?: AbortSignal): Promise<string[]> {
+  async function unclaimed(deck: DeckPlace, budget?: ReadBudget): Promise<string[]> {
     if (!isDeckInPlace(deck)) return [];
     const instance = instanceOf(deck);
     const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
@@ -347,7 +324,7 @@ export function createDeckDocumentGuard(
         if (!isDocumentIn(url, instance))
           return budget === undefined
             ? unclaimedAsRead([deck], url)
-            : untilSpent(budget, true, () => unclaimedAsRead([deck], url));
+            : budget.spend(true, () => unclaimedAsRead([deck], url));
         return !(await isDedicatedFolder(instance, true)) && unclaimedAsRead([deck], url);
       }),
     );

@@ -1167,6 +1167,75 @@ describe("createAppUseCases", () => {
     await digestWritten();
   });
 
+  it("settles the data check within its budget when the decks' documents outside the instance's folder answer the first read and drip on the next", {
+    timeout: 180_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const elsewhere = `${alice}elsewhere/`;
+    const pod = podAt(alice);
+    // Each document there is read once as it is, then sent a little at a time with no end.
+    const reads = new Map<string, number>();
+    podsNetwork({
+      [alice]: (input, init) => {
+        const url = String(input instanceof Request ? input.url : input);
+        const method = init?.method ?? "GET";
+        if (!url.startsWith(elsewhere) || method !== "GET") return pod(input, init);
+        reads.set(url, (reads.get(url) ?? 0) + 1);
+        return reads.get(url)! > 1 ? dripping(input, init) : pod(input, init);
+      },
+    });
+    login.webId = `${alice}profile/card#me`;
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    const digestWritten = digestWork();
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const instance = await useCases.createInstance(
+      { webId: login.webId },
+      { containerUrl: `${alice}memo/`, name: "Main", registrationTarget: "private" },
+    );
+    // The catalog names the decks' documents in the user's pod, outside the instance's folder, each saying it is its deck's: more than are read at once.
+    const catalog = `${alice}memo/catalog.ttl`;
+    const planted: string[] = [];
+    for (let at = 0; at < 14; at++) {
+      const made = await useCases.createDeck(instance.url, { en: `Rivers ${at}` });
+      const [cards, reviews] = [`${elsewhere}${at}/cards.ttl`, `${elsewhere}${at}/reviews.ttl`];
+      for (const url of [cards, reviews]) {
+        await put(pod, url, `<> <http://purl.org/dc/terms/isPartOf> <${made.url}>.`);
+        planted.push(url);
+      }
+      await put(
+        pod,
+        catalog,
+        (await (await pod(catalog)).text())
+          .replaceAll(made.cardsDocumentUrl, cards)
+          .replaceAll(made.reviewsDocumentUrl, reviews),
+      );
+    }
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const started = Date.now();
+    const check = useCases.checkInstance(instance.url);
+    await untilSettled([check], 30 * 60_000);
+    // One budget for all the check's reads of them, the shape check's too.
+    expect(Date.now() - started).toBeLessThanOrEqual(70_000);
+    vi.useRealTimers();
+    const report = await check;
+    // Each was claimed, then not read in time: named unreadable, its deck set aside, not waited on.
+    expect(report.unclaimed ?? []).toEqual([]);
+    expect(
+      report.documents
+        .filter(({ status }) => status === "unreadable")
+        .map(({ url }) => url)
+        .sort(),
+    ).toEqual(planted.sort());
+    await digestWritten();
+  });
+
   it("claims no document of the user's pod for an instance attached from someone else's, and those of the user's own instance in another folder", {
     timeout: 60_000,
   }, async () => {

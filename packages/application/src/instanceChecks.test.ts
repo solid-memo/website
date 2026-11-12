@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import type { ReleaseDraftRepository } from "./ports";
+import type { ReadBudget, ReleaseDraftRepository } from "./ports";
 import { createUseCases } from "./useCases";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
@@ -114,6 +114,7 @@ describe("instance checks", () => {
       expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
         [deck],
         deck.cardsDocumentUrl,
+        undefined,
       );
     });
 
@@ -198,6 +199,7 @@ describe("instance checks", () => {
       urls[0],
       undefined,
       "pod",
+      undefined,
     );
 
     const digest = first.stored()!;
@@ -214,11 +216,13 @@ describe("instance checks", () => {
       urls[0],
       undefined,
       "pod",
+      undefined,
     );
     expect(again.deps.shapeValidator.validateDocumentSince).toHaveBeenCalledWith(
       urls[1],
       `v-${urls[1]}`,
       "pod",
+      undefined,
     );
   });
   it("checks the instance's drafts against the draft shapes, in the quick check and the full one", async () => {
@@ -237,12 +241,18 @@ describe("instance checks", () => {
       drafts[0],
       undefined,
       "draft",
+      undefined,
     );
     await useCases.validateInstance(instance.url);
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(drafts[1], "draft");
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+      drafts[1],
+      "draft",
+      undefined,
+    );
     expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
       `${instance.url}catalog.ttl`,
       "pod",
+      undefined,
     );
   });
   it("names the decks whose documents are unclaimed, and checks those documents not, in every check", async () => {
@@ -286,13 +296,9 @@ describe("instance checks", () => {
     }));
     deps.deckRepository.listDecks = vi.fn(async () => many);
     // Each read outside the instance ends only when the budget is spent, as the adapter's does (deckPlace.ts).
-    deps.deckRepository.unclaimedDocuments = vi.fn(async (one, budget) => {
-      const documents = [one.cardsDocumentUrl, one.reviewsDocumentUrl];
-      if (budget!.aborted) return documents;
-      return new Promise<string[]>((resolve) =>
-        budget!.addEventListener("abort", () => resolve(documents)),
-      );
-    });
+    deps.deckRepository.unclaimedDocuments = vi.fn(async (one, budget) =>
+      budget!.spend([one.cardsDocumentUrl, one.reviewsDocumentUrl], () => new Promise(() => {})),
+    );
     vi.useFakeTimers();
     try {
       const check = useCases.checkInstance(instance.url);
@@ -303,6 +309,148 @@ describe("instance checks", () => {
       await vi.advanceTimersByTimeAsync(1);
       expect((await check).unclaimed).toHaveLength(1000);
       expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("checks the documents outside the instance's folder within that same budget, in every check: those not read by then are unreadable, and the check settles", async () => {
+    const { deps, useCases } = setup();
+    const outside = {
+      ...deck,
+      cardsDocumentUrl: "https://slow.example/cards.ttl",
+      reviewsDocumentUrl: "https://slow.example/reviews.ttl",
+    };
+    deps.deckRepository.listDecks = vi.fn(async () => [outside]);
+    // Claimed at once, then read again with no end, as a server that drips its answer may make it.
+    const stalled = <T>(budget: ReadBudget, value: T) =>
+      budget.spend(value, () => new Promise<T>(() => {}));
+    const budgets: (ReadBudget | undefined)[] = [];
+    deps.shapeValidator.validateDocumentSince = vi.fn(async (url, _version, _context, budget) => {
+      budgets.push(budget);
+      if (budget === undefined)
+        return {
+          unchanged: false as const,
+          value: { url, status: "checked" as const, subjects: [] },
+          version: null,
+        };
+      return stalled(budget, {
+        unchanged: false as const,
+        value: unreadableDocument(url, "podNoAnswer"),
+        version: null,
+      });
+    });
+    deps.shapeValidator.validateDocument = vi.fn(async (url, _context, budget) => {
+      budgets.push(budget);
+      return budget === undefined
+        ? { url, status: "checked" as const, subjects: [] }
+        : stalled(budget, unreadableDocument(url, "podNoAnswer"));
+    });
+    // Read again before a repair, it would be found unclaimed, but the budget is spent by then.
+    deps.deckRepository.isUnclaimedAsRead = vi.fn(async (_decks, _url, budget) =>
+      budget === undefined ? true : budget.spend(false, async () => true),
+    );
+    vi.useFakeTimers();
+    try {
+      for (const run of [
+        () => useCases.checkInstance(instance.url),
+        () => useCases.validateInstance(instance.url),
+        async () =>
+          (
+            await useCases.checkDeck(instance.url, outside, {
+              plain: (value) => value,
+              check: () => [],
+            })
+          ).report,
+      ]) {
+        budgets.length = 0;
+        const check = run();
+        let settled = false;
+        void check.finally(() => (settled = true));
+        await vi.advanceTimersByTimeAsync(59_999);
+        expect(settled).toBe(false);
+        await vi.advanceTimersByTimeAsync(1);
+        const report = await check;
+        expect(
+          report.documents.filter(({ status }) => status === "unreadable").map(({ url }) => url),
+        ).toEqual([outside.cardsDocumentUrl, outside.reviewsDocumentUrl]);
+        expect(deckSetAside(report, outside)).toBe(true);
+        // The instance's own documents are read as before, the others within one budget.
+        expect(budgets.filter((budget) => budget !== undefined)).toHaveLength(2);
+        expect(new Set(budgets.filter((budget) => budget !== undefined)).size).toBe(1);
+        expect(budgets).toContain(undefined);
+        expect(vi.getTimerCount()).toBe(0);
+      }
+      expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
+        [outside],
+        outside.cardsDocumentUrl,
+        expect.objectContaining({ spend: expect.any(Function) }),
+      );
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+  it("spends the budget only while a document outside the instance's folder is read: slow reads of the instance's own documents leave those outside checked, in every check", async () => {
+    const { deps, useCases } = setup();
+    const outside = {
+      ...deck,
+      id: "outside",
+      url: `${instance.url}catalog.ttl#outside`,
+      cardsDocumentUrl: "https://elsewhere.example/cards.ttl",
+      reviewsDocumentUrl: "https://elsewhere.example/reviews.ttl",
+    };
+    deps.deckRepository.listDecks = vi.fn(async () => [deck, outside]);
+    const later = <T>(ms: number, value: T) =>
+      new Promise<T>((resolve) => setTimeout(() => resolve(value), ms));
+    // The instance's own documents take far longer in all than the budget; those outside answer at once.
+    const SLOW_MS = 100_000;
+    const FAST_MS = 1_000;
+    deps.deckRepository.unclaimedDocuments = vi.fn(async (one, budget) =>
+      one === outside
+        ? budget!.spend([one.cardsDocumentUrl, one.reviewsDocumentUrl], () => later(FAST_MS, []))
+        : later(SLOW_MS, []),
+    );
+    const checked = (url: string) => ({ url, status: "checked" as const, subjects: [] });
+    deps.shapeValidator.validateDocumentSince = vi.fn(async (url, _version, _context, budget) =>
+      budget === undefined
+        ? later(SLOW_MS, { unchanged: false as const, value: checked(url), version: null })
+        : budget.spend(
+            {
+              unchanged: false as const,
+              value: unreadableDocument(url, "podNoAnswer"),
+              version: null,
+            },
+            () => later(FAST_MS, { unchanged: false as const, value: checked(url), version: null }),
+          ),
+    );
+    deps.shapeValidator.validateDocument = vi.fn(async (url, _context, budget) =>
+      budget === undefined
+        ? later(SLOW_MS, checked(url))
+        : budget.spend(unreadableDocument(url, "podNoAnswer"), () => later(FAST_MS, checked(url))),
+    );
+    vi.useFakeTimers();
+    try {
+      for (const run of [
+        () => useCases.checkInstance(instance.url),
+        () => useCases.validateInstance(instance.url),
+        async () =>
+          (
+            await useCases.checkDeck(instance.url, outside, {
+              plain: (value) => value,
+              check: () => [],
+            })
+          ).report,
+      ]) {
+        const check = run();
+        await vi.advanceTimersByTimeAsync(10 * SLOW_MS);
+        const report = await check;
+        expect(report.documents.filter(({ status }) => status === "unreadable")).toEqual([]);
+        expect(report.documents.map(({ url }) => url)).toEqual(
+          expect.arrayContaining([outside.cardsDocumentUrl, outside.reviewsDocumentUrl]),
+        );
+        expect(report.unclaimed).toBeUndefined();
+        expect(deckSetAside(report, outside)).toBe(false);
+        expect(vi.getTimerCount()).toBe(0);
+      }
     } finally {
       vi.useRealTimers();
     }

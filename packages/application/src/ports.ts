@@ -409,18 +409,19 @@ export interface DeckRepository {
    * (docs/data-model.md, "Where an instance's documents are"): read, never
    * written to or deleted, until the user claims them. Writes nothing.
    * One outside the instance's folder, on anyone's server, is read within
-   * `budget` if given: once it is aborted, one not read by then counts as
+   * `budget` if given: once it is spent, one not read by then counts as
    * unreadable, so unclaimed.
    */
-  unclaimedDocuments(deck: Deck, budget?: AbortSignal): Promise<string[]>;
+  unclaimedDocuments(deck: Deck, budget?: ReadBudget): Promise<string[]>;
   /**
    * Whether the document, read now, is unclaimed for every one of the
    * decks that name it: unlike unclaimedDocuments, it says so of one in
    * the instance's own folder too, a release or another deck's document
    * there, which the check then leaves out. One that cannot be read is
-   * not, so that the check keeps what it found. Writes nothing.
+   * not, so that the check keeps what it found; nor is one not read
+   * before `budget`, if given, is spent. Writes nothing.
    */
-  isUnclaimedAsRead(decks: readonly Deck[], url: string): Promise<boolean>;
+  isUnclaimedAsRead(decks: readonly Deck[], url: string, budget?: ReadBudget): Promise<boolean>;
   /**
    * Claim the deck's unclaimed documents, as the user confirmed: each is
    * marked as the deck's, in one write made only while it is as read;
@@ -998,23 +999,42 @@ export interface InstanceGraphReader {
  */
 export type DocumentContext = "pod" | "draft" | "library";
 
+/**
+ * A budget of time for some reads, as one data check has for those of
+ * documents outside the instance's folder (readBudget.ts): what a read
+ * gives, or `otherwise` once the budget is spent before it does. None is
+ * started after it is spent. A read given up on may go on, within its
+ * own read deadlines, but nothing waits on it any longer.
+ */
+export interface ReadBudget {
+  spend<T>(otherwise: T, read: () => Promise<T>): Promise<T>;
+}
+
 export interface ShapeValidator {
   /**
    * The report on a document of an instance's, read as the instance's
    * documents are; a release is checked as DeckLibrary.readRelease reads
    * it, never read again here. A document that cannot be read (refused,
    * or not data that can be read) is reported "unreadable", not thrown:
-   * only what fails the whole check, its shapes say, throws.
+   * only what fails the whole check, its shapes say, throws. With
+   * `budget`, one not read before it is spent is reported unreadable
+   * too, as a server that did not answer in time.
    */
   validateDocument(
     url: string,
     context?: Exclude<DocumentContext, "library">,
+    budget?: ReadBudget,
   ): Promise<DocumentReport>;
-  /** The document's report unless it is still at `version` (undefined: check it); one that cannot be read as validateDocument says, with no version. */
+  /**
+   * The document's report unless it is still at `version` (undefined:
+   * check it); one that cannot be read as validateDocument says, with no
+   * version. With `budget`, as validateDocument says of it.
+   */
   validateDocumentSince(
     url: string,
     version: string | undefined,
     context?: DocumentContext,
+    budget?: ReadBudget,
   ): Promise<Since<DocumentReport>>;
   /**
    * What the shapes say of a draft as the release it will be, published
