@@ -1688,6 +1688,7 @@
     "restoreNotReturned": "Din leverantör skickade inte tillbaka dig, så Solid Memo slutade återställa din session. Gå tillbaka till din leverantör, logga in igen eller välj en annan leverantör.",
     "webIdIssuerNotListed": "Din WebID-profil anger inte leverantören du loggade in hos, så Solid Memo avslutade sessionen för säkerhets skull. Lägg till leverantören i din profil, eller logga in hos en som profilen anger.",
     "webIdTooLong": "Din leverantör anger ett WebID som är längre än Solid Memo godtar (högst {limit} tecken), så Solid Memo avslutade sessionen för säkerhets skull. Logga in hos en annan leverantör.",
+    "webIdUnusable": "Din leverantör anger ett WebID som Solid Memo inte kan kontrollera, eftersom det inte är en säker https://-adress till en Pod, så Solid Memo avslutade sessionen för säkerhets skull. Logga in hos en annan leverantör.",
     "profileNoSubject": "Din profil beskriver inte dig, så Solid Memo kan inte anteckna i den var dina data finns. Kontrollera profilen hos din Pod-leverantör och försök sedan igen.",
     "privateTypeIndexNotLinked": "Solid Memo kunde inte länka sin privata lista över dina data från din profil. Kontrollera att Solid Memo får ändra din profil och försök sedan igen.",
     "publicTypeIndexNotLinked": "Solid Memo kunde inte länka sin publika lista över dina data från din profil. Kontrollera att Solid Memo får ändra din profil och försök sedan igen.",

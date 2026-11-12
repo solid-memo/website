@@ -361,6 +361,11 @@ every restore, with either sign-in client, in one place in the gateway.
   that long is far beyond any real one, and beyond the longest address
   Solid Memo accepts as a document's base; the storage lookup derives
   addresses from its path.
+- A WebID that no pod could serve ends the session before anything is
+  read too, and shows `webIdUnusable`. Such a WebID isn't an https URL,
+  has a user name or password in it, or can't be written in Turtle
+  (`isSecureUrl`), or lies in the guest's or a trial's pod, which only
+  this browser holds.
 - The gateway reads the WebID document as no one, under
   `PROFILE_LIMITS`, asking the pod rather than the browser's cache.
 - It looks for the session's issuer among the `solid:oidcIssuer`
@@ -369,11 +374,12 @@ every restore, with either sign-in client, in one place in the gateway.
 - A profile that can be read and doesn't list the issuer ends the
   session, which then shows `webIdIssuerNotListed`. The learner can
   add the provider to their profile, or log in at one it lists.
-- A session stays if the profile can't be read, in a few seconds at
-  most. A slow, absent or private pod locks no one out, so the check
-  says only what a profile that answers says. The check comes once the
-  sign-in client has restored, so `RESTORE_DEADLINE_MS` doesn't cover
-  it: its own few seconds add to the loading screen.
+- A session stays if the profile can't be read in a few seconds at
+  most. Only a WebID that a pod could serve gets this far, so a slow,
+  absent or private pod locks no one out, and the check says only what
+  a profile that answers says. The check comes once the sign-in client
+  has restored, so `RESTORE_DEADLINE_MS` doesn't cover it: its own few
+  seconds add to the loading screen.
 - A session also stays if the client can't name its issuer, which
   takes the client's own record of the session being gone. That session
   hasn't passed the check: it was never made.
