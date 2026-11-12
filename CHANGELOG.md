@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.3.1](https://github.com/solid-memo/website/compare/v7.3.0...v7.3.1) (2026-11-12)
+
+### Performance Improvements
+
+* **ui:** show a study session's day on the today strip at once ([5a34c77](https://github.com/solid-memo/website/commit/5a34c77dcacb1f88641fc0043bf9c52d10350ba3)), closes [#759](https://github.com/solid-memo/website/issues/759)
+
 ## [7.3.0](https://github.com/solid-memo/website/compare/v7.2.3...v7.3.0) (2026-11-12)
 
 ### Features
