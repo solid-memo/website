@@ -78,7 +78,14 @@ and after any of npm's own options. It fails on
 `ignore-scripts` in the `.npmrc` isn't `true`, as npm reads the last.
 
 `npm run check:dependencies` checks the lockfile, `package-lock.json`,
-for what an install fetches. It fails on any package that:
+for what an install fetches. It checks every other lockfile npm installs
+from the same way: Renovate's in `scripts/renovate/` and each end-to-end
+test server's in `e2e/pod/servers/`, each against its own `package.json`.
+Those packages aren't shipped and are installed with `--ignore-scripts`,
+so the maturity rule, the `.npmrc` rule and the list of install scripts
+below hold for the root's lockfile alone. A test fails on a
+`package-lock.json` or an `npm-shrinkwrap.json` the check doesn't read.
+The check fails on any package that:
 
 - comes from anywhere but the tarball `https://registry.npmjs.org/`
   serves for that package's own name and version, such as a git

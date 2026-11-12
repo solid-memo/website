@@ -1019,14 +1019,15 @@ uv pip compile --generate-hashes --universal --python-version=3.11 scripts/requi
 ```
 
 CI's `check` job and the release job run `npm audit signatures` right
-after `npm ci --ignore-scripts`. For each installed version from a
-registry, it fetches the registry's record of that version. It checks
-the registry's signature over its name, version and integrity hash,
-with the public keys [Sigstore](https://www.sigstore.dev/) publishes
-for the registry, or the registry's own when Sigstore has none. A
-version that has attestations, such as provenance naming the repository
-commit and the workflow that built it, has them checked with Sigstore
-and against that hash. The command fails on:
+after `npm ci --ignore-scripts`, and the Pending updates workflow runs
+it on Renovate's own install in `scripts/renovate/`. For each installed
+version from a registry, it fetches the registry's record of that
+version. It checks the registry's signature over its name, version and
+integrity hash, with the public keys [Sigstore](https://www.sigstore.dev/)
+publishes for the registry, or the registry's own when Sigstore has
+none. A version that has attestations, such as provenance naming the
+repository commit and the workflow that built it, has them checked with
+Sigstore and against that hash. The command fails on:
 
 - an invalid signature or attestation;
 - a signature or attestation whose key isn't among the registry's keys,
@@ -1041,10 +1042,13 @@ versions had provenance when this one has none. The command checks the
 registry's record, not what was installed: it doesn't compare that hash
 with the lockfile's or with the installed files, so a lockfile whose
 hash was changed passes it. `npm ci` compares each download with the
-lockfile's hash, and `check:dependencies` that each package fetched comes from
-the npm registry's tarball of its own name and version. Nor does a
-signature make a package safe: a hijacked maintainer account still
-publishes a validly signed version.
+lockfile's hash, and `check:dependencies` that each package fetched
+comes from the npm registry's tarball of its own name and version. It
+checks every lockfile npm installs from: the root's
+`package-lock.json`, the one in `scripts/renovate/` and each end-to-end
+test server's in `e2e/pod/servers/`. Nor does a signature make a
+package safe: a hijacked maintainer account still publishes a validly
+signed version.
 
 The [Pending updates workflow](../.github/workflows/pending-updates.yml)
 runs every 3 hours and by hand, never on a pull request. It keeps a
@@ -1054,8 +1058,8 @@ Renovate may propose each update still waiting for its release age, as
 runs Renovate on the checkout with `--platform=local --dry-run=lookup`,
 which reads no repository API and changes nothing. The job installs
 Renovate from its own lockfile in `scripts/renovate/`, without install
-scripts, and holds no secret: its token only reads. Its `comment` job,
-the only one that writes, runs
+scripts, checks its packages' signatures, and holds no secret: its
+token only reads. Its `comment` job, the only one that writes, runs
 [scripts/pendingUpdates.ts](../scripts/pendingUpdates.ts), which needs no
 npm package. The script reads the report's release dates and the wait in
 `renovate.json5`, and writes or edits its own comment on the dashboard.
@@ -1175,12 +1179,15 @@ checks of the repository as a whole, plain Node scripts in
 - `check:dependencies`
   ([checkDependencies.ts](../scripts/checkDependencies.ts)): the app
   ships only released versions of other code, or the exceptions in
-  [vendor-code.md](vendor-code.md#maturity). Every package the
-  lockfile has fetched is the npm registry's tarball of its own name
-  and version with its integrity hash, and its location and version
-  have an exact shape. Links lead only to the workspace. There's no
-  install script but the listed ones and no `npm-shrinkwrap.json`, and
-  the root `.npmrc` turns install scripts off ([vendor-code.md](vendor-code.md#installing)).
+  [vendor-code.md](vendor-code.md#maturity). Every package that the
+  root's lockfile, Renovate's in `scripts/renovate/` or an end-to-end
+  test server's has fetched is the npm registry's tarball of its own
+  name and version with its integrity hash, and its location and
+  version have an exact shape. Links lead only to the workspace, and
+  there's no `npm-shrinkwrap.json`. The root's lockfile has no install
+  script but the listed ones, and the root `.npmrc` turns install
+  scripts off; the others are installed with `--ignore-scripts`
+  ([vendor-code.md](vendor-code.md#installing)).
 - `check:reuse` ([checkReuse.ts](../scripts/checkReuse.ts)): every
   library deck version is licensed in [REUSE.toml](../REUSE.toml) as its
   own `dcterms:license` says ([style.md](style.md#licenses)).

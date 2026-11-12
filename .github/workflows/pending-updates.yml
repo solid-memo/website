@@ -29,7 +29,9 @@ jobs:
   # repository's API, and --dry-run=lookup changes nothing. The token is
   # for the versions and dates of the dependencies on GitHub (actions,
   # git commits). Renovate is installed from its own lockfile, without
-  # install scripts, at a version public for 3 days (scripts/renovate/).
+  # install scripts, at a version public for 3 days (scripts/renovate/),
+  # and its packages' registry signatures are checked before it runs
+  # (docs/testing.md#the-workflows).
   lookup:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -45,6 +47,7 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/renovate/package-lock.json
       - run: npm ci --ignore-scripts --prefix scripts/renovate
+      - run: npm audit signatures --prefix scripts/renovate
       - env:
           GITHUB_COM_TOKEN: ${{ github.token }}
           LOG_LEVEL: info

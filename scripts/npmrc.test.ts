@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { LOCKFILE_DIRS } from "./checkDependencies.ts";
 
 /**
  * .npmrc: npm resolves no package, an update's own or one it pulls in, to a
@@ -16,16 +17,6 @@ import { describe, expect, it } from "vitest";
  */
 
 const ROOT = join(import.meta.dirname, "..");
-
-/** Each directory npm installs a package-lock.json from. */
-const PREFIXES = [
-  ".",
-  "e2e/pod/servers/jss",
-  "e2e/pod/servers/nss/5",
-  "e2e/pod/servers/nss/6",
-  "e2e/pod/servers/pivot",
-  "scripts/renovate",
-];
 
 /** A directory's npm settings as npm reads them, without the caller's. */
 function npmConfig(prefix: string, key: string): string {
@@ -39,7 +30,7 @@ function npmConfig(prefix: string, key: string): string {
   }).trim();
 }
 
-describe.each(PREFIXES)(".npmrc in %s", (prefix) => {
+describe.each(LOCKFILE_DIRS)(".npmrc in %s", (prefix) => {
   it("waits as long as Renovate does for every package npm resolves", () => {
     const renovate = readFileSync(join(ROOT, "renovate.json5"), "utf8");
     const days = /^ {4}minimumReleaseAge: '(\d+) days',$/m.exec(renovate)?.[1];

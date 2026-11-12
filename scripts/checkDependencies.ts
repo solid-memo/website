@@ -26,6 +26,13 @@
  * that can mean nothing else, links lead only to the workspace, and none
  * but the ones in INSTALL_SCRIPTS asks to run a script when installed;
  * each of those must be named in docs/vendor-code.md and still ask.
+ *
+ * The other lockfiles npm installs from (LOCKFILE_DIRS: the Renovate the
+ * Pending updates workflow runs, and each end-to-end test server) are held
+ * to the same rules of where a package comes from and what it may claim.
+ * The maturity rule and the install-script rules stay with the root: those
+ * packages are not shipped, and each is installed with `--ignore-scripts`
+ * on npm's command line.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -68,6 +75,20 @@ export const INSTALL_SCRIPTS: Record<string, string> = {
   fsevents:
     "File watching on macOS, an optional dependency of Vite and others; its package carries the binary built, which its script only builds again.",
 };
+
+/**
+ * Each directory npm installs a package-lock.json from: the workspace's root,
+ * each end-to-end test server, and the Renovate the Pending updates workflow
+ * runs. A test checks that no other package-lock.json is in the repository.
+ */
+export const LOCKFILE_DIRS = [
+  ".",
+  "e2e/pod/servers/jss",
+  "e2e/pod/servers/nss/5",
+  "e2e/pod/servers/nss/6",
+  "e2e/pod/servers/pivot",
+  "scripts/renovate",
+];
 
 /** Where every package in the lockfile comes from. */
 const REGISTRY = "https://registry.npmjs.org/";
@@ -117,7 +138,8 @@ type InstallContext = {
   lock: Lockfile;
   manifest: (location: string) => Manifest | undefined;
   aliases: Set<string>;
-  installScripts: Record<string, string>;
+  /** The allowed install scripts, or undefined for a lockfile installed with `--ignore-scripts`. */
+  installScripts: Record<string, string> | undefined;
   withScripts: Set<string>;
 };
 
@@ -200,7 +222,11 @@ function fetchedProblems(
     problems.push(`${location}: no integrity hash.`);
   }
   if (entry.hasInstallScript === true) withScripts.add(name);
-  if (entry.hasInstallScript === true && !(name in installScripts)) {
+  if (
+    entry.hasInstallScript === true &&
+    installScripts !== undefined &&
+    !(name in installScripts)
+  ) {
     problems.push(
       `${location}: has an install script, which does not run: depend on another package, or add it to INSTALL_SCRIPTS in scripts/checkDependencies.ts.`,
     );
@@ -272,7 +298,43 @@ function entryProblems(location: string, entry: LockEntry, context: InstallConte
   return fetchedProblems(location, entry, installed, context);
 }
 
-/** What is wrong with how the lockfile's packages are installed; none when the check passes. */
+/** What is wrong with the lockfile's entries, each one where it is fetched from and what it claims. */
+function entriesProblems(
+  lock: Lockfile,
+  manifest: (location: string) => Manifest | undefined,
+  installScripts: Record<string, string> | undefined,
+  withScripts: Set<string>,
+): string[] {
+  const aliases = workspaceAliases(lock, manifest);
+  const context = { lock, manifest, aliases, installScripts, withScripts };
+  const problems: string[] = [];
+  for (const [location, entry] of Object.entries(lock.packages)) {
+    problems.push(
+      ...rangeProblems(location, entry, aliases),
+      ...entryProblems(location, entry, context),
+    );
+  }
+  return problems;
+}
+
+/**
+ * What is wrong with how another lockfile's packages are installed (LOCKFILE_DIRS), each problem
+ * under the lockfile's path; none when the check passes. Its packages are installed with
+ * `--ignore-scripts` on npm's command line, so an install script is no problem here.
+ */
+export function lockfileProblems(
+  lock: Lockfile,
+  dir: string,
+  manifest: (location: string) => Manifest | undefined,
+): string[] {
+  const problems =
+    Object.keys(lock.packages).length === 0
+      ? ["lists no packages."]
+      : entriesProblems(lock, manifest, undefined, new Set());
+  return problems.map((problem) => `${join(dir, "package-lock.json")}: ${problem}`);
+}
+
+/** What is wrong with how the root lockfile's packages are installed; none when the check passes. */
 export function installProblems(
   lock: Lockfile,
   npmrc: string,
@@ -282,8 +344,6 @@ export function installProblems(
 ): string[] {
   const problems: string[] = [];
   const withScripts = new Set<string>();
-  const aliases = workspaceAliases(lock, manifest);
-  const context = { lock, manifest, aliases, installScripts, withScripts };
   // npm reads the last `ignore-scripts` of the file, spaces around `=` or not.
   const ignoreScripts = npmrc
     .split("\n")
@@ -295,12 +355,7 @@ export function installProblems(
   if (Object.keys(lock.packages).length === 0) {
     problems.push("package-lock.json: lists no packages.");
   }
-  for (const [location, entry] of Object.entries(lock.packages)) {
-    problems.push(
-      ...rangeProblems(location, entry, aliases),
-      ...entryProblems(location, entry, context),
-    );
-  }
+  problems.push(...entriesProblems(lock, manifest, installScripts, withScripts));
   for (const name of Object.keys(installScripts)) {
     if (!withScripts.has(name)) {
       problems.push(
@@ -415,39 +470,46 @@ export function dependencyProblems(
   return problems;
 }
 
+/** How the check reads the repository; `dir` is one of LOCKFILE_DIRS. */
 export type DependenciesIo = {
-  lockfile(): Lockfile;
+  lockfile(dir: string): Lockfile;
   vendorDoc(): string;
   npmrc(): string;
-  manifest(location: string): Manifest | undefined;
-  hasShrinkwrap(): boolean;
+  manifest(dir: string, location: string): Manifest | undefined;
+  hasShrinkwrap(dir: string): boolean;
   log(message: string): void;
 };
 
 export function defaultIo(root: string): DependenciesIo {
   return {
-    lockfile: () => JSON.parse(readFileSync(join(root, "package-lock.json"), "utf8")) as Lockfile,
+    lockfile: (dir) =>
+      JSON.parse(readFileSync(join(root, dir, "package-lock.json"), "utf8")) as Lockfile,
     vendorDoc: () => readFileSync(join(root, "docs/vendor-code.md"), "utf8"),
     npmrc: () => readFileSync(join(root, ".npmrc"), "utf8"),
-    manifest: (location) => {
-      const path = join(root, location, "package.json");
+    manifest: (dir, location) => {
+      const path = join(root, dir, location, "package.json");
       return existsSync(path) ? (JSON.parse(readFileSync(path, "utf8")) as Manifest) : undefined;
     },
-    hasShrinkwrap: () => existsSync(join(root, "npm-shrinkwrap.json")),
+    hasShrinkwrap: (dir) => existsSync(join(root, dir, "npm-shrinkwrap.json")),
     log: (message) => console.log(message),
   };
 }
 
 /** Exit code: 0 when the app ships only released versions, or allowed ones, installed as they should be. */
 export function main(io: DependenciesIo): number {
-  const lock = io.lockfile();
+  const lock = io.lockfile(".");
   const vendorDoc = io.vendorDoc();
+  const manifestIn = (dir: string) => (location: string) => io.manifest(dir, location);
   const problems = [
     ...dependencyProblems(lock, SHIPPED, ALLOWED, vendorDoc),
-    ...installProblems(lock, io.npmrc(), INSTALL_SCRIPTS, vendorDoc, io.manifest),
-    ...(io.hasShrinkwrap()
-      ? ["npm-shrinkwrap.json: `npm ci` prefers it to package-lock.json, the file checked here."]
-      : []),
+    ...installProblems(lock, io.npmrc(), INSTALL_SCRIPTS, vendorDoc, manifestIn(".")),
+    ...LOCKFILE_DIRS.filter((dir) => dir !== ".").flatMap((dir) =>
+      lockfileProblems(io.lockfile(dir), dir, manifestIn(dir)),
+    ),
+    ...LOCKFILE_DIRS.filter((dir) => io.hasShrinkwrap(dir)).map(
+      (dir) =>
+        `${join(dir, "npm-shrinkwrap.json")}: \`npm ci\` prefers it to package-lock.json, the file checked here.`,
+    ),
   ];
   for (const problem of problems) io.log(problem);
   if (problems.length > 0) return 1;
