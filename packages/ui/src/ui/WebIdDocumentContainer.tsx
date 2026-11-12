@@ -13,8 +13,8 @@ import { queryKeys } from "./queryKeys";
 
 /**
  * Developer tool: the raw WebID document of the logged-in user. Only
- * mounted while developer mode is on, so the profile is not even fetched
- * otherwise.
+ * mounted while developer mode is on; it shares its query with the
+ * masthead's name after a restored session.
  */
 export function WebIdDocumentContainer({
   useCases,

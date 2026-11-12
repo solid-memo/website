@@ -4,6 +4,7 @@
 
 import type { ComponentChildren, ComponentType } from "preact";
 import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { profileNameOf, type SolidAccount } from "@solid-memo/domain/account";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Locale } from "@solid-memo/domain/locale";
 import {
@@ -313,6 +314,26 @@ function restoreUnanswered(error: unknown): boolean {
   );
 }
 
+/**
+ * The learner's name for the masthead: the account's, once discovered
+ * after a login; read from the WebID document alone when a restored
+ * session skips discovery.
+ */
+function useProfileName(
+  useCases: UseCases,
+  session: Session | null,
+  connecting: boolean,
+  account: SolidAccount | undefined,
+): string | undefined {
+  const profileNameQuery = useQuery({
+    queryKey: queryKeys.webIdDocument(session?.webId ?? ""),
+    queryFn: () => useCases.viewWebIdDocument(session!),
+    select: (document) => profileNameOf(document, session!.webId),
+    enabled: session !== null && session.guest !== true && !connecting && account === undefined,
+  });
+  return account?.name ?? profileNameQuery.data;
+}
+
 function AppContent({
   useCases,
   source,
@@ -397,6 +418,7 @@ function AppContent({
     queryFn: () => useCases.discoverAccount(session!),
     enabled: session !== null && connecting,
   });
+  const profileName = useProfileName(useCases, session, connecting, accountQuery.data);
   const connected = useConnectedScreen({
     useCases,
     session,
@@ -599,13 +621,11 @@ function AppContent({
           <p
             class="session-line"
             title={
-              accountQuery.data?.name === undefined
-                ? undefined
-                : t("app.loggedInAs", { name: accountQuery.data.name })
+              profileName === undefined ? undefined : t("app.loggedInAs", { name: profileName })
             }
           >
             {tx("app.loggedInAs", {
-              name: <ExternalLink url={session.webId}>{accountQuery.data?.name}</ExternalLink>,
+              name: <ExternalLink url={session.webId}>{profileName}</ExternalLink>,
             })}
           </p>
         )}
