@@ -5,6 +5,7 @@
 import { useState } from "preact/hooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import { AppError } from "@solid-memo/domain/appError";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
@@ -16,6 +17,11 @@ import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitc
 import { useI18n } from "./i18n";
 import { queryKeys } from "./queryKeys";
 
+/** Whether a save was refused over stored preferences that do not fit their shape. */
+function misfitRefused(error: unknown): boolean {
+  return error instanceof AppError && error.code === "preferencesMisfit";
+}
+
 /**
  * Owns the preferences query/mutation for one instance. Saved with the
  * scheduler they hold, the preferences go back to the deck list. A
@@ -26,7 +32,9 @@ import { queryKeys } from "./queryKeys";
  * failed or did not finish keeps the learner's choices. Whether logging
  * in shows the Connected screen is offered when `offersConnectedScreen`,
  * and saved first, only when the learner changed it: a form read before
- * it changed elsewhere does not undo that.
+ * it changed elsewhere does not undo that. Stored preferences that do
+ * not fit their shape are said to, and replaced only when the learner
+ * says so in that notice.
  */
 export function PreferencesContainer({
   useCases,
@@ -55,6 +63,11 @@ export function PreferencesContainer({
     queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
   });
+  // A save refused over ones that do not fit says so too (misfitRefused), so the confirmation is always offered.
+  const misfitQuery = useQuery({
+    queryKey: queryKeys.preferencesMisfit(instance.url),
+    queryFn: () => useCases.preferencesMisfit(instance.url),
+  });
   // The palettes the user designed: none offered while they cannot be read.
   const palettesQuery = useQuery({
     queryKey: queryKeys.palettes(instance.url),
@@ -76,22 +89,26 @@ export function PreferencesContainer({
       preferences,
       stored,
       connectedScreen = null,
+      replaceMisfit = false,
     }: {
       preferences: StudyPreferences;
       stored: Scheduler;
       connectedScreen?: { shown: boolean; read: boolean } | null;
+      /** Whether they replace stored preferences that do not fit their shape. */
+      replaceMisfit?: boolean;
     }): Promise<SwitchOutcome | null> => {
       // Queued before the save, which waits for it.
       if (connectedScreen !== null && connectedScreen.shown !== connectedScreen.read)
         await useCases.chooseConnectedScreen(instance.url, connectedScreen.shown);
+      const options = { replaceMisfit };
       if (preferences.scheduler === stored)
-        return useCases.savePreferences(instance.url, preferences).then(() => null);
+        return useCases.savePreferences(instance.url, preferences, options).then(() => null);
       // Only a switch to FSRS-6 writes the decks, and takes long enough to show how far it is.
       if (preferences.scheduler === "sm2")
-        return useCases.switchScheduler(instance.url, preferences);
+        return useCases.switchScheduler(instance.url, preferences, undefined, options);
       setEnded(null);
       setProgress({ step: "read", done: 0, total: 0 });
-      return useCases.switchScheduler(instance.url, preferences, setProgress);
+      return useCases.switchScheduler(instance.url, preferences, setProgress, options);
     },
     onSuccess: async (outcome, { preferences, stored }) => {
       // A switch changes the due days, which every view of the decks shows: all of it is read again.
@@ -140,14 +157,16 @@ export function PreferencesContainer({
       preferences={submitted ?? preferencesQuery.data}
       palettes={palettesQuery.data}
       connectedScreenShown={connectedScreenQuery.data}
+      misfit={misfitQuery.data === true || misfitRefused(saveMutation.error)}
       busy={saveMutation.isPending}
       error={errorText(saveMutation.error)}
-      onSave={(preferences, shown) => {
+      onSave={(preferences, shown, replaceMisfit) => {
         setSubmitted(preferences);
         saveMutation.mutate({
           preferences,
           stored: preferencesQuery.data!.scheduler,
           connectedScreen: shown === undefined ? null : { shown, read: connectedScreenQuery.data! },
+          replaceMisfit,
         });
       }}
     />

@@ -123,13 +123,17 @@ function policyOption(
  * FSRS-6 is chosen, and the answer buttons only while SM-2 is, as FSRS-6
  * always uses the four; each keeps its value meanwhile. Whether logging
  * in shows the Connected screen is offered when it is given, and saved
- * with them.
+ * with them. When the stored preferences do not fit their shape
+ * (`misfit`), the form shows the defaults in their place, says so, and
+ * asks whether saving replaces them: unless the learner checks it, the
+ * save is refused (preferencesMisfit) and they are kept.
  */
 export function PreferencesScreen({
   instanceUrl,
   preferences,
   palettes = [],
   connectedScreenShown,
+  misfit = false,
   busy,
   error,
   onSave,
@@ -143,10 +147,20 @@ export function PreferencesScreen({
    * preferences say; not offered while undefined (a guest's, or not read).
    */
   connectedScreenShown?: boolean;
+  /** Whether the stored preferences do not fit their shape, so `preferences` are the defaults shown in their place. */
+  misfit?: boolean;
   busy: boolean;
   error: ErrorText | null;
-  /** Save the preferences, with whether logging in shows the Connected screen when it is offered. */
-  onSave: (preferences: StudyPreferences, connectedScreenShown: boolean | undefined) => void;
+  /**
+   * Save the preferences, with whether logging in shows the Connected
+   * screen when it is offered, and whether they replace stored ones
+   * that do not fit their shape.
+   */
+  onSave: (
+    preferences: StudyPreferences,
+    connectedScreenShown: boolean | undefined,
+    replaceMisfit: boolean,
+  ) => void;
 }) {
   const { t, locale } = useI18n();
   const { choose: chooseLocale, failure: localeFailure } = useChooseLocale();
@@ -183,6 +197,7 @@ export function PreferencesScreen({
   // The learner's choice once made; until then, as the preferences say, read after the form showed too.
   const [connectedChoice, setConnectedChoice] = useState<boolean | null>(null);
   const showsConnected = connectedChoice ?? connectedScreenShown;
+  const [replaceMisfit, setReplaceMisfit] = useState(false);
   const [invalidDataPolicy, setInvalidDataPolicy] = useState<InvalidDataPolicy>(
     preferences.invalidDataPolicy,
   );
@@ -210,6 +225,7 @@ export function PreferencesScreen({
         textSize,
       },
       showsConnected,
+      misfit && replaceMisfit,
     );
   }
 
@@ -219,6 +235,21 @@ export function PreferencesScreen({
         <h2>{t("preferences.heading")}</h2>
       </header>
       <form onSubmit={handleSubmit}>
+        {misfit && (
+          <div class="warning">
+            <p id="pref-misfit-notice">{t("preferences.misfit.notice")}</p>
+            <label>
+              <input
+                type="checkbox"
+                checked={replaceMisfit}
+                onChange={(e) => setReplaceMisfit(e.currentTarget.checked)}
+                aria-describedby="pref-misfit-notice"
+                disabled={busy}
+              />
+              {t("preferences.misfit.replace")}
+            </label>
+          </div>
+        )}
         {/* Each group's hint is its description, heard as focus enters it. */}
         <fieldset aria-describedby="pref-language-hint">
           <legend>{t("preferences.language.legend")}</legend>

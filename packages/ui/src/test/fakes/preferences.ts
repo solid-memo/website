@@ -42,6 +42,7 @@ export function makePreferenceUseCasesFake(
       instanceTextSize: vi.fn(async () => null),
       chooseTextSize: vi.fn(async () => undefined),
       getPreferences: vi.fn(async () => DEFAULT_PREFERENCES),
+      preferencesMisfit: vi.fn(async () => false),
       savePreferences: vi.fn(async () => undefined),
       switchScheduler: vi.fn(async () => ({
         switched: true,

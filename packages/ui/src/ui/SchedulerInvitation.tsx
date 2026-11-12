@@ -69,8 +69,9 @@ export function SchedulerInvitation({
  * Invites a learner whose instance is on SM-2 to switch to FSRS-6
  * (invitesToFsrs), a guest among them: nothing while FSRS-6 sets the due
  * days, once "Not now" was answered (it is kept in the preferences, so
- * on every device), or while the preferences load or cannot be read; the
- * deck list works without it. "Switch to FSRS-6" runs switchScheduler
+ * on every device), or while the preferences load or cannot be read, or
+ * do not fit their shape (the defaults shown in their place are not the
+ * learner's); the deck list works without it. "Switch to FSRS-6" runs switchScheduler
  * with the preferences as they are but for the scheduler, and the theme
  * this device shows (with none stored, the defaults' "system" is not the
  * learner's choice), its progress
@@ -100,6 +101,12 @@ export function SchedulerInvitationContainer({
   const preferencesQuery = useQuery({
     queryKey: queryKeys.preferences(instance.url),
     queryFn: () => useCases.getPreferences(instance.url),
+    refetchOnWindowFocus: false,
+  });
+  // Not offered while the stored preferences do not fit their shape: the defaults shown in their place are not the learner's.
+  const misfitQuery = useQuery({
+    queryKey: queryKeys.preferencesMisfit(instance.url),
+    queryFn: () => useCases.preferencesMisfit(instance.url),
     refetchOnWindowFocus: false,
   });
 
@@ -138,7 +145,12 @@ export function SchedulerInvitationContainer({
     );
   }
   const preferences = preferencesQuery.data;
-  if (preferences === undefined || !invitesToFsrs(preferences) || dismissMutation.isSuccess)
+  if (
+    preferences === undefined ||
+    misfitQuery.data !== false ||
+    !invitesToFsrs(preferences) ||
+    dismissMutation.isSuccess
+  )
     return null;
   return (
     <SchedulerInvitation

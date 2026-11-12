@@ -289,6 +289,15 @@ describe("instances", () => {
       expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();
     });
 
+    it("planMigration leaves preferences that do not fit their shape to the data check", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue("misfit");
+      const useCases = createUseCases(deps);
+      await expect(useCases.planMigration(instance.url)).resolves.toMatchObject({
+        preferencesOutdated: false,
+      });
+    });
+
     const META = `${instance.url}meta.ttl`;
     const PREFERENCES = `${instance.url}preferences.ttl`;
     const CATALOG = `${instance.url}catalog.ttl`;

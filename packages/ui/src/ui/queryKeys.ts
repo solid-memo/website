@@ -66,6 +66,8 @@ export const queryKeys = {
   allPreferences: () => ["preferences"],
   /** An instance's preferences: under allPreferences. */
   preferences: (instanceUrl: string | null) => [...queryKeys.allPreferences(), instanceUrl],
+  /** Whether an instance's stored preferences do not fit their shape: under preferences, so a save reads it again. */
+  preferencesMisfit: (instanceUrl: string) => [...queryKeys.preferences(instanceUrl), "misfit"],
   /** Whether logging in skips the Connected screen, for a WebID's instances: under allPreferences. */
   connectedScreen: (webId: string | undefined) => [
     ...queryKeys.allPreferences(),

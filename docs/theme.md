@@ -29,7 +29,8 @@ flowchart LR
   A new instance is made with the choices shown at the time. One made
   before gets them at the user's first save of the study preferences,
   which saves what's shown then; until then a choice is kept on the
-  device alone.
+  device alone. So it is while the stored preferences don't fit their
+  shape ([validation.md](validation.md#the-invalid-data-policy)).
 - **On the device**, by the `ThemePreference`, `PalettePreference` and
   `TextSizePreference` ports
   ([localStorageThemePreference.ts](../packages/browser/src/localStorageThemePreference.ts),

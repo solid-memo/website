@@ -1353,6 +1353,10 @@
       "mode": "Utvecklarläge",
       "hint": "Visar utvecklarverktyg: ditt råa WebID-dokument under appen, och en kontroll av den här instansens dokument mot Solid Memos former."
     },
+    "misfit": {
+      "notice": "Dina sparade inställningar passar inte formen som Solid Memo läser, så här visas standardvärdena, och de används när du studerar. Kryssa i rutan nedan för att ersätta dem med det som visas här när du sparar.",
+      "replace": "Ersätt de sparade inställningarna"
+    },
     "save": "Spara"
   },
   "paletteEditor": {
@@ -1668,6 +1672,7 @@
     "paletteContrastLow": "Några färger har mindre kontrast än de behöver. Välj andra, eller använd dem ändå.",
     "catalogNeedsDescription": "Katalogen behöver en beskrivning.",
     "noCatalogToUpdate": "Den här instansen har ingen katalog än. Uppdatera instansen i Solid Memo först.",
+    "preferencesMisfit": "Dina sparade inställningar passar inte formen som Solid Memo läser, så de ändrades inte. För att spara de här i stället, kryssa i ”Ersätt de sparade inställningarna” och spara igen.",
     "catalogMisfit": "Den här instansens katalog passar inte formen som Solid Memo läser, så Solid Memo lämnar den som den är. Instansens datakontroll visar vad som är fel med den.",
     "catalogTooManyLinks": "Den här instansens katalog listar fler kortlekar, utkast eller utgåvor än Solid Memo läser (högst {limit} av varje). Ta bort instansen om du inte vet vem som sköter den.",
     "catalogFull": "Den här instansens katalog listar redan så många kortlekar, utkast eller utgåvor som Solid Memo läser ({limit} av varje), så den kan inte lista fler.",

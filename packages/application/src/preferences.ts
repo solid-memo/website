@@ -149,9 +149,17 @@ export interface PreferenceUseCases {
   /**
    * The stored preferences; the defaults when none are stored, SM-2's
    * among them (DEFAULT_PREFERENCES): an instance with none was made
-   * before a new one stated its own, and studies by SM-2.
+   * before a new one stated its own, and studies by SM-2. The defaults
+   * too while the stored ones do not fit their shape (preferencesMisfit).
    */
   getPreferences(instanceUrl: string): Promise<StudyPreferences>;
+  /**
+   * Whether the instance's stored preferences do not fit their shape (a
+   * value their shape does not list, or one missing): invalid data,
+   * which the data check reports, and which no save replaces unless the
+   * user says to (`replaceMisfit`).
+   */
+  preferencesMisfit(instanceUrl: string): Promise<boolean>;
   /**
    * Save the preferences, but for the scheduler: the stored one stays
    * (SM-2 when none is stored), as only switchScheduler can change it,
@@ -161,9 +169,15 @@ export interface PreferenceUseCases {
    * know while the preferences given show Standard. The theme, the
    * palette and the text size are kept on this device too. The save
    * waits for a choice of theme, palette or text size still being
-   * written to the instance.
+   * written to the instance. Stored preferences that do not fit their
+   * shape are refused (preferencesMisfit) unless `replaceMisfit`: the
+   * user said to replace them with these.
    */
-  savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
+  savePreferences(
+    instanceUrl: string,
+    preferences: StudyPreferences,
+    options?: { replaceMisfit?: boolean },
+  ): Promise<void>;
   /**
    * Save the preferences with the scheduler they name (docs/srs.md,
    * "Switching the scheduler"). To SM-2 the preferences are all there is
@@ -180,19 +194,24 @@ export interface PreferenceUseCases {
    * savePreferences keeps them), so until then SM-2 sets the due
    * days and the switch can be run again; then each deck's schedule in
    * the digest is brought up to date (a failure there leaves the switch
-   * done).
+   * done). Stored preferences that do not fit their shape are refused
+   * (preferencesMisfit) before any deck is written, unless
+   * `replaceMisfit`, as savePreferences refuses them.
    */
   switchScheduler(
     instanceUrl: string,
     preferences: StudyPreferences,
     onProgress?: (progress: SwitchProgress) => void,
+    options?: { replaceMisfit?: boolean },
   ): Promise<SwitchOutcome>;
   /**
    * Remember in the preferences that the learner answered "Not now" to
    * the invitation to switch to FSRS-6, so the deck list does not show
    * it again. The rest stays as stored; with none stored, the defaults
    * with the theme, the palette and the text size this device shows are
-   * saved with it.
+   * saved with it. Stored preferences that do not fit their shape gain
+   * the answer alone (markSchedulerInvitationDismissed), never the
+   * defaults.
    */
   dismissSchedulerInvitation(instanceUrl: string): Promise<void>;
   /**
@@ -424,18 +443,34 @@ export function createPreferenceUseCases({
       );
     },
     getPreferences: preferenceStore.get,
-    async savePreferences(instanceUrl, preferences) {
+    preferencesMisfit: preferenceStore.isMisfit,
+    async savePreferences(instanceUrl, preferences, { replaceMisfit = false } = {}) {
       preferenceStore.keepAppearance(instanceUrl, preferences);
       // Read after a choice still being written, so the save is not refused for the version it made.
       await preferenceStore.afterAppearanceWrites(instanceUrl);
       const stored = await preferenceStore.get(instanceUrl);
-      await preferencesRepository.savePreferences(instanceUrl, {
-        ...withInvitationAnswer(preferences, stored),
-        scheduler: stored.scheduler,
-        palette: savedPalette(instanceUrl, stored, preferences),
-      });
+      // Refused by the repository over preferences that do not fit their shape, unless the user said to replace them.
+      await preferencesRepository.savePreferences(
+        instanceUrl,
+        {
+          ...withInvitationAnswer(preferences, stored),
+          scheduler: stored.scheduler,
+          palette: savedPalette(instanceUrl, stored, preferences),
+        },
+        { replaceMisfit },
+      );
     },
-    async switchScheduler(instanceUrl, preferences, onProgress = () => undefined) {
+    async switchScheduler(
+      instanceUrl,
+      preferences,
+      onProgress = () => undefined,
+      { replaceMisfit = false } = {},
+    ) {
+      // Before any deck is written, once a choice of how the app is shown is: the preferences would not be saved.
+      if (!replaceMisfit) {
+        await preferenceStore.afterAppearanceWrites(instanceUrl);
+        if (await preferenceStore.isMisfit(instanceUrl)) throw new AppError("preferencesMisfit");
+      }
       const progress = stepReporter<SwitchStep>("read", SWITCH_STEPS.length, onProgress);
       progress.start();
       // Switching to SM-2 writes no deck: its states are up to date already.
@@ -484,10 +519,14 @@ export function createPreferenceUseCases({
         preferenceStore.keepAppearance(instanceUrl, preferences);
         await preferenceStore.afterAppearanceWrites(instanceUrl);
         const stored = await preferenceStore.get(instanceUrl);
-        await preferencesRepository.savePreferences(instanceUrl, {
-          ...withInvitationAnswer(preferences, stored),
-          palette: savedPalette(instanceUrl, stored, preferences),
-        });
+        await preferencesRepository.savePreferences(
+          instanceUrl,
+          {
+            ...withInvitationAnswer(preferences, stored),
+            palette: savedPalette(instanceUrl, stored, preferences),
+          },
+          { replaceMisfit },
+        );
         outcome.switched = true;
         await Promise.all(
           listed.map((deck) => digestStore.refresh(instanceUrl, deck).catch(() => undefined)),
@@ -499,6 +538,9 @@ export function createPreferenceUseCases({
     async dismissSchedulerInvitation(instanceUrl) {
       await preferenceStore.afterAppearanceWrites(instanceUrl);
       const stored = await preferencesRepository.getPreferences(instanceUrl);
+      // Ones that do not fit their shape gain the answer alone, as the Connected screen's choice is written.
+      if (stored === "misfit")
+        return preferencesRepository.markSchedulerInvitationDismissed(instanceUrl);
       const preferences =
         stored?.preferences ??
         preferenceStore.withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);

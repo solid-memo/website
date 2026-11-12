@@ -132,6 +132,19 @@ describe("SchedulerInvitationContainer", () => {
     expect(unreadable.container.querySelector("main")).toBeEmptyDOMElement();
   });
 
+  it("shows nothing while the stored preferences do not fit their shape: the defaults in their place are not the learner's", async () => {
+    const { container, queryClient } = renderContainer(
+      withPreferences(DEFAULT_PREFERENCES, { preferencesMisfit: vi.fn(async () => true) }),
+    );
+    await preferencesSettled(queryClient);
+    await waitFor(() =>
+      expect(queryClient.getQueryState(["preferences", instance.url, "misfit"])?.status).toBe(
+        "success",
+      ),
+    );
+    expect(container.querySelector("main")).toBeEmptyDOMElement();
+  });
+
   it("remembers Not now in the preferences, and is gone at once", async () => {
     let settle: () => void = () => undefined;
     const useCases = withPreferences(DEFAULT_PREFERENCES, {

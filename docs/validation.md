@@ -331,6 +331,23 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
   and whether the arrangement fails, are read from a report once and
   kept with it. Each deck's answer is then a lookup, however large the
   report.
+- **Preferences that don't fit their shape are kept.** Preferences
+  with a value their shape doesn't list, or without one it asks for,
+  read as a misfit, not as none (`getPreferences`). So do ones whose
+  format version isn't an integer, or that hold a value only a later
+  format has: read as the older format, the migration would put the
+  defaults in that value's place. The app studies by the defaults
+  meanwhile, but no write puts the defaults over them. "Not now" to
+  the invitation to FSRS-6 adds only its answer, as the Connected
+  screen's choice does
+  ([onboarding.md](onboarding.md#skipping-the-connected-screen)), and
+  the invitation stays hidden. The write check may refuse that write
+  while the stored preferences still don't fit, and nothing is lost
+  then. A choice of theme, palette or text size stays on the device.
+  The format update leaves them as they are.
+  Preferences says they don't fit, and a save or a switch of scheduler
+  is refused (`preferencesMisfit`) unless the learner checks "Replace
+  the saved preferences" there.
 - **The default applies only where no policy is stated**: an instance
   whose preferences were never saved, and preferences format 2, which
   the [step to format 3](migrations.md) gives the default. Format 3 and

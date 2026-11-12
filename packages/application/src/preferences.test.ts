@@ -215,19 +215,27 @@ describe("preferences", () => {
         palette: `${SM}standardPalette`,
       });
       expect(useCases.paletteChoice()).toBe("standard");
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
-        ...DEFAULT_PREFERENCES,
-        palette: LATER_PALETTE,
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        INSTANCE,
+        {
+          ...DEFAULT_PREFERENCES,
+          palette: LATER_PALETTE,
+        },
+        { replaceMisfit: false },
+      );
       await useCases.savePreferences(INSTANCE, {
         ...DEFAULT_PREFERENCES,
         palette: `${SM}highContrastPalette`,
       });
       expect(useCases.paletteChoice()).toBe("high-contrast");
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
-        ...DEFAULT_PREFERENCES,
-        palette: `${SM}highContrastPalette`,
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        INSTANCE,
+        {
+          ...DEFAULT_PREFERENCES,
+          palette: `${SM}highContrastPalette`,
+        },
+        { replaceMisfit: false },
+      );
     });
 
     describe("of the user's own", () => {
@@ -371,10 +379,14 @@ describe("preferences", () => {
         const customPalettePreference = deviceCopy(READING);
         const useCases = createUseCases({ ...deps, palettePreference, customPalettePreference });
         await useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, palette: READING.url });
-        expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
-          ...DEFAULT_PREFERENCES,
-          palette: READING.url,
-        });
+        expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+          INSTANCE,
+          {
+            ...DEFAULT_PREFERENCES,
+            palette: READING.url,
+          },
+          { replaceMisfit: false },
+        );
         // The device keeps it as it was chosen.
         expect(useCases.customPaletteChoice()).toEqual(READING);
         expect(useCases.paletteChoice()).toBe("parchment");
@@ -382,10 +394,14 @@ describe("preferences", () => {
           ...DEFAULT_PREFERENCES,
           palette: `${SM}standardPalette`,
         });
-        expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
-          ...DEFAULT_PREFERENCES,
-          palette: `${SM}standardPalette`,
-        });
+        expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+          INSTANCE,
+          {
+            ...DEFAULT_PREFERENCES,
+            palette: `${SM}standardPalette`,
+          },
+          { replaceMisfit: false },
+        );
         expect(useCases.customPaletteChoice()).toBeNull();
       });
 
@@ -498,10 +514,14 @@ describe("preferences", () => {
     fail(new Error("412"));
     await expect(chosen).rejects.toThrow("412");
     await saved;
-    expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(INSTANCE, {
-      ...DEFAULT_PREFERENCES,
-      newCardsPerDay: 9,
-    });
+    expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+      INSTANCE,
+      {
+        ...DEFAULT_PREFERENCES,
+        newCardsPerDay: 9,
+      },
+      { replaceMisfit: false },
+    );
   });
   it("switches the scheduler and dismisses the invitation once a choice of how the app is shown is written", async () => {
     const INSTANCE = "https://pod.example/solid-memo/main/";
@@ -729,6 +749,66 @@ describe("preferences", () => {
       schedulerInvitationDismissed: true,
     });
   });
+  describe("stored preferences that do not fit their shape", () => {
+    const misfit = () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue("misfit");
+      return { deps, useCases };
+    };
+
+    it("read as the defaults, said to be a misfit, and as no appearance", async () => {
+      const { useCases } = misfit();
+      await expect(useCases.preferencesMisfit(instance.url)).resolves.toBe(true);
+      await expect(useCases.getPreferences(instance.url)).resolves.toEqual(DEFAULT_PREFERENCES);
+      await expect(useCases.instanceTheme(instance.url)).resolves.toBeNull();
+      await expect(useCases.instancePalette(instance.url)).resolves.toBeNull();
+      await expect(useCases.instanceTextSize(instance.url)).resolves.toBeNull();
+      await expect(setup().useCases.preferencesMisfit(instance.url)).resolves.toBe(false);
+    });
+
+    it("take no choice of how the app is shown", async () => {
+      const { deps, useCases } = misfit();
+      await useCases.chooseTheme("dark", instance.url);
+      await useCases.chooseTextSize("large", instance.url);
+      expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+    });
+
+    it("gain only the answer to the invitation, never the defaults", async () => {
+      const { deps, useCases } = misfit();
+      await useCases.dismissSchedulerInvitation(instance.url);
+      expect(deps.preferencesRepository.markSchedulerInvitationDismissed).toHaveBeenCalledWith(
+        instance.url,
+      );
+      expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+    });
+
+    it("are replaced by a save only when the user says so", async () => {
+      const { deps, useCases } = misfit();
+      await useCases.savePreferences(instance.url, DEFAULT_PREFERENCES, { replaceMisfit: true });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
+        instance.url,
+        DEFAULT_PREFERENCES,
+        { replaceMisfit: true },
+      );
+    });
+
+    it("refuse a switch of scheduler before any deck is written, unless the user says to replace them", async () => {
+      const { deps, useCases } = misfit();
+      const fsrs = { ...DEFAULT_PREFERENCES, scheduler: "fsrs6" as const };
+      await expect(useCases.switchScheduler(instance.url, fsrs)).rejects.toMatchObject({
+        code: "preferencesMisfit",
+      });
+      expect(deps.deckRepository.listDecks).not.toHaveBeenCalled();
+      expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
+
+      await expect(
+        useCases.switchScheduler(instance.url, fsrs, undefined, { replaceMisfit: true }),
+      ).resolves.toMatchObject({ switched: true });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, fsrs, {
+        replaceMisfit: true,
+      });
+    });
+  });
   it("dismissSchedulerInvitation writes nothing when it was dismissed already", async () => {
     const deps = makeDeps();
     vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
@@ -828,6 +908,7 @@ describe("preferences", () => {
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
       instance.url,
       preferences,
+      { replaceMisfit: false },
     );
   });
   describe("switchScheduler", () => {
@@ -895,7 +976,9 @@ describe("preferences", () => {
       expect(made[0]!.stability).toBe(nextMemory(null, 3, 0).stability);
       // The preferences last, then each deck's schedule from its documents.
       const saved = vi.mocked(deps.preferencesRepository.savePreferences);
-      expect(saved).toHaveBeenCalledExactlyOnceWith(instance.url, fsrsPrefs);
+      expect(saved).toHaveBeenCalledExactlyOnceWith(instance.url, fsrsPrefs, {
+        replaceMisfit: false,
+      });
       const savedAt = saved.mock.invocationCallOrder[0]!;
       for (const order of vi.mocked(deps.reviewStateRepository.writeFsrsStates).mock
         .invocationCallOrder)
@@ -977,25 +1060,34 @@ describe("preferences", () => {
       expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
         instance.url,
         DEFAULT_PREFERENCES,
+        { replaceMisfit: false },
       );
     });
 
     it("savePreferences keeps the stored scheduler, SM-2 when none is stored", async () => {
       const { deps, useCases } = setup();
       await useCases.savePreferences(instance.url, fsrsPrefs);
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
-        ...fsrsPrefs,
-        scheduler: "sm2",
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        instance.url,
+        {
+          ...fsrsPrefs,
+          scheduler: "sm2",
+        },
+        { replaceMisfit: false },
+      );
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue({
         preferences: fsrsPrefs,
         formatVersion: 5,
       });
       await useCases.savePreferences(instance.url, DEFAULT_PREFERENCES);
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
-        ...DEFAULT_PREFERENCES,
-        scheduler: "fsrs6",
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        instance.url,
+        {
+          ...DEFAULT_PREFERENCES,
+          scheduler: "fsrs6",
+        },
+        { replaceMisfit: false },
+      );
     });
 
     it("keeps a stored Not now through a save or a switch made from preferences read before it", async () => {
@@ -1006,15 +1098,23 @@ describe("preferences", () => {
       });
       const read = { ...DEFAULT_PREFERENCES, newCardsPerDay: 7 };
       await useCases.savePreferences(instance.url, read);
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
-        ...read,
-        schedulerInvitationDismissed: true,
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        instance.url,
+        {
+          ...read,
+          schedulerInvitationDismissed: true,
+        },
+        { replaceMisfit: false },
+      );
       await useCases.switchScheduler(instance.url, read);
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
-        ...read,
-        schedulerInvitationDismissed: true,
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        instance.url,
+        {
+          ...read,
+          schedulerInvitationDismissed: true,
+        },
+        { replaceMisfit: false },
+      );
     });
 
     it("keeps a stored palette this version does not know through a switch that shows Standard", async () => {
@@ -1025,10 +1125,14 @@ describe("preferences", () => {
         formatVersion: 6,
       });
       await useCases.switchScheduler(instance.url, DEFAULT_PREFERENCES);
-      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(instance.url, {
-        ...DEFAULT_PREFERENCES,
-        palette: own,
-      });
+      expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
+        instance.url,
+        {
+          ...DEFAULT_PREFERENCES,
+          palette: own,
+        },
+        { replaceMisfit: false },
+      );
     });
   });
 
@@ -1298,6 +1402,7 @@ describe("preferences", () => {
       expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
         instance.url,
         DEFAULT_PREFERENCES,
+        { replaceMisfit: false },
       );
       expect(deps.preferencesRepository.markConnectedScreen).not.toHaveBeenCalled();
     });

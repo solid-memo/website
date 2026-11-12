@@ -95,7 +95,8 @@ device:
   preferences gets new ones (the defaults, as this device shows the
   app) only when its meta document reads, so nothing's written at a
   registration whose instance is gone. Preferences that don't fit
-  their shape gain only the choice, which still counts.
+  their shape gain only the choice, which still counts, never the
+  defaults ([validation.md](validation.md#the-invalid-data-policy)).
 - **An instance not saved keeps showing it.** Preferences of a newer
   format are never written (`writtenByNewerApp`), and a write may fail:
   the screen shows until a write succeeds (for a newer format, after an
