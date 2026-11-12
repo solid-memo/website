@@ -578,18 +578,20 @@ describe("instances", () => {
       });
     });
 
-    it("writes only where the name is not yet the new one, and no catalog there is none of", async () => {
+    it("writes only where the name is not yet the new one, and no catalog there is none of, nor one that does not fit its shape", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...meta, name: "Languages" });
       vi.mocked(deps.deckRepository.readCatalog)
         .mockResolvedValueOnce({ ...catalog, title: "Languages" })
-        .mockResolvedValueOnce(null);
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce("misfit");
       const useCases = createUseCases(deps);
+      await useCases.renameInstance(session, instance, "Languages");
       await useCases.renameInstance(session, instance, "Languages");
       await useCases.renameInstance(session, instance, "Languages");
       expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
-      expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledTimes(2);
+      expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledTimes(3);
     });
 
     it("reads and writes each document again while it changes elsewhere", async () => {
@@ -640,6 +642,18 @@ describe("instances", () => {
         createUseCases(deps).describeCatalog(instance.url, { description: "x" }),
       ).rejects.toMatchObject({
         code: "noCatalogToUpdate",
+      });
+      expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+    });
+
+    it("refuses one that does not fit its shape, writing nothing", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue("misfit");
+      await expect(createUseCases(deps).readCatalog(instance.url)).resolves.toBe("misfit");
+      await expect(
+        createUseCases(deps).describeCatalog(instance.url, { description: "x" }),
+      ).rejects.toMatchObject({
+        code: "catalogMisfit",
       });
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
     });

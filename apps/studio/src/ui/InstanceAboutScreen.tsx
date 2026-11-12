@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import type { Catalog, CatalogAbout } from "@solid-memo/domain/catalog";
+import type { Catalog, CatalogAbout, CatalogRead } from "@solid-memo/domain/catalog";
 import type { Instance } from "@solid-memo/domain/instance";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { ExternalLink } from "@solid-memo/ui/ExternalLink";
@@ -17,7 +17,8 @@ import { ReadOnlyScope } from "./ReadOnly";
  * name, kept in several places (UseCases.renameInstance); and the
  * catalog's description and license. The catalog's publisher, the
  * pod's owner, is shown, never edited, as is where the instance is. An
- * instance without a catalog (not updated yet) says so instead. Its
+ * instance without a catalog (not updated yet) says so instead, as does
+ * one whose catalog does not fit its shape, which is not edited. Its
  * study preferences are set in Solid Memo (`preferencesHref`). The
  * catalog form starts again from each new read of the catalog, as
  * a rename can change its description. While the instance may not be
@@ -38,8 +39,8 @@ export function InstanceAboutScreen({
   onDescribe,
 }: {
   instance: Instance;
-  /** The catalog as read; null when the instance has none. */
-  catalog: Catalog | null;
+  /** The catalog as read; "misfit" when it does not fit its shape; null when the instance has none. */
+  catalog: CatalogRead;
   preferencesHref: string;
   /** Why the name and catalog may not be changed now (useDataCheck); null when they may. */
   readOnly: ReadOnlyReason | null;
@@ -97,6 +98,8 @@ export function InstanceAboutScreen({
           <h3 id="instance-catalog-heading">{t("studio.instance.catalog")}</h3>
           {catalog === null ? (
             <p class="hint">{t("studio.instance.noCatalog")}</p>
+          ) : catalog === "misfit" ? (
+            <p class="hint">{t("studio.instance.misfitCatalog")}</p>
           ) : (
             <>
               <dl class="facts">

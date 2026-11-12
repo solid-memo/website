@@ -681,6 +681,7 @@
       "saveName": "Name speichern",
       "catalog": "Katalog",
       "noCatalog": "Diese Instanz hat noch keinen Katalog. Öffne sie in Solid Memo, um sie zu aktualisieren.",
+      "misfitCatalog": "Der Katalog dieser Instanz passt nicht zu der Form, die Solid Memo liest, deshalb bleibt er, wie er ist. Der Zustand der Instanz zeigt, was daran nicht stimmt.",
       "publisher": "Herausgeber",
       "description": "Beschreibung",
       "licenseHint": "Die Lizenz, unter der die Stapel angeboten werden, für Apps, die den Katalog lesen.",

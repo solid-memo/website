@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Catalog } from "./catalog";
+import type { CatalogRead } from "./catalog";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
 import { INSTANCE_FORMAT_VERSION, type InstanceMeta } from "./instance";
 import { PREFERENCES_FORMAT_VERSION, type StoredPreferences } from "./preferences";
@@ -82,7 +82,10 @@ export interface MigrationPlan {
   instanceOutdated: boolean;
   /**
    * The instance has no catalog (a dcat:Catalog of its decks, since
-   * deck format 3): the update describes it as one and registers it.
+   * deck format 3): the update describes it as one and registers it. A
+   * catalog that does not fit its shape ("misfit") is not missing: it is
+   * invalid data, which the data check reports, and the update leaves it
+   * as it is.
    */
   catalogMissing: boolean;
   /**
@@ -102,7 +105,7 @@ function oldest(versions: number[], current: number): number {
 export function planMigration(input: {
   instance: InstanceMeta | null;
   preferences: StoredPreferences | null;
-  catalog: Catalog | null;
+  catalog: CatalogRead;
   entries: { deck: Deck; cards: Card[]; reviews: ReviewState[] }[];
 }): MigrationPlan {
   const decks = input.entries

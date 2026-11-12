@@ -1743,6 +1743,7 @@
     "paletteContrastLow": "Algunos colores tienen menos contraste del que necesitan. Elige otros o úsalos de todos modos.",
     "catalogNeedsDescription": "El catálogo necesita una descripción.",
     "noCatalogToUpdate": "Esta instancia aún no tiene catálogo. Actualiza primero la instancia en Solid Memo.",
+    "catalogMisfit": "El catálogo de esta instancia no se ajusta a la forma que lee Solid Memo, así que Solid Memo lo deja como está. La comprobación de datos de la instancia indica qué le pasa.",
     "catalogTooManyLinks": "El catálogo de esta instancia enumera más mazos, borradores o publicaciones de los que Solid Memo lee (como mucho {limit} de cada tipo). Quita la instancia a menos que sepas quién la mantiene.",
     "catalogFull": "El catálogo de esta instancia ya enumera tantos mazos, borradores o publicaciones como lee Solid Memo ({limit} de cada tipo), así que no puede enumerar otro.",
     "draftTooManyDocuments": "Este borrador o archivo tiene demasiados capítulos, o los borradores de esta instancia tienen demasiados documentos en conjunto, para que Solid Memo los lea (como mucho {limit} documentos), así que no se ha hecho. Usa menos capítulos o elimina en el Studio los borradores que ya no necesites. Quita la instancia solo si los borradores no son tuyos y no sabes quién la mantiene.",

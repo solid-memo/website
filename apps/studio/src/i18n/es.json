@@ -720,6 +720,7 @@
       "saveName": "Guardar el nombre",
       "catalog": "Catálogo",
       "noCatalog": "Esta instancia aún no tiene catálogo. Ábrela en Solid Memo para actualizarla.",
+      "misfitCatalog": "El catálogo de esta instancia no se ajusta a la forma que lee Solid Memo, así que se deja como está. El diagnóstico de la instancia indica qué le pasa.",
       "publisher": "Publicado por",
       "description": "Descripción",
       "licenseHint": "La licencia con la que se ofrecen los mazos, para las aplicaciones que leen el catálogo.",

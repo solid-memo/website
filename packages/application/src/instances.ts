@@ -9,6 +9,7 @@ import {
   renamedCatalog,
   type Catalog,
   type CatalogAbout,
+  type CatalogRead,
 } from "@solid-memo/domain/catalog";
 import {
   UPDATE_STEPS,
@@ -120,7 +121,8 @@ export interface InstanceUseCases {
   /**
    * Give an instance a new name (instanceName: trimmed, not empty)
    * everywhere it is kept: its meta document, its catalog's title (and
-   * the description, while it is the one the old name gave), and its
+   * the description, while it is the one the old name gave; a catalog
+   * that does not fit its shape is left as it is), and its
    * registrations in the type indexes: the instance's, which names it in
    * the instance list, and those of its data's classes earlier versions
    * wrote. Each write is made of its document as it is then, and made
@@ -128,13 +130,18 @@ export interface InstanceUseCases {
    * all. The instance as renamed.
    */
   renameInstance(session: Session, instance: Instance, name: string): Promise<Instance>;
-  /** The instance's catalog; null when it has none (an instance not updated yet). */
-  readCatalog(instanceUrl: string): Promise<Catalog | null>;
+  /**
+   * The instance's catalog; "misfit" when it has one that does not fit
+   * its shape (invalid data, which no write here replaces); null when it
+   * has none (an instance not updated yet).
+   */
+  readCatalog(instanceUrl: string): Promise<CatalogRead>;
   /**
    * Replace the catalog's description and license (describedCatalog),
    * of the catalog as it is now, again from a fresh read when it
    * changed meanwhile, three times in all. Throws noCatalogToUpdate when
-   * the instance has no catalog. The catalog as written.
+   * the instance has no catalog, and catalogMisfit, with nothing written,
+   * when its catalog does not fit its shape. The catalog as written.
    */
   describeCatalog(instanceUrl: string, about: CatalogAbout): Promise<Catalog>;
   /**
@@ -410,7 +417,8 @@ export function createInstanceUseCases({
       });
       await again(async () => {
         const catalog = await deckRepository.readCatalog(instance.url);
-        if (catalog !== null && catalog.title !== name)
+        // One that does not fit its shape is left as it is: a write would replace what it says.
+        if (catalog !== null && catalog !== "misfit" && catalog.title !== name)
           await deckRepository.saveCatalog(instance.url, renamedCatalog(catalog, name));
       });
       await instanceRepository.renameRegistrations({
@@ -427,6 +435,7 @@ export function createInstanceUseCases({
       return again(async () => {
         const catalog = await deckRepository.readCatalog(instanceUrl);
         if (catalog === null) throw new AppError("noCatalogToUpdate", { url: instanceUrl });
+        if (catalog === "misfit") throw new AppError("catalogMisfit", { url: instanceUrl });
         const described = describedCatalog(catalog, about);
         await deckRepository.saveCatalog(instanceUrl, described);
         return described;

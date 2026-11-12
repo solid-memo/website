@@ -860,6 +860,18 @@ describe("guests", () => {
     expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
   });
 
+  it("transferGuestStudy leaves a catalog that does not fit its shape as it is", async () => {
+    const { deps } = guestDeps();
+    vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue("misfit");
+    await expect(
+      createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      }),
+    ).resolves.toMatchObject({ ok: true });
+    expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+  });
+
   it("transferGuestStudy waits for no other instance's answers on their way", async () => {
     const { deps } = guestDeps();
     const foreign = "https://other.example/solid-memo/";

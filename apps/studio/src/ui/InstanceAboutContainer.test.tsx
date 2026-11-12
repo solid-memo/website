@@ -154,6 +154,17 @@ describe("InstanceAboutContainer", () => {
     expect(screen.getByLabelText("Instance name")).toHaveValue("Deck set A");
   });
 
+  it("offers no form for a catalog that does not fit its shape, nor an update", async () => {
+    renderContainer(makeUseCasesFake({ readCatalog: vi.fn(async () => "misfit" as const) }));
+    expect(
+      await screen.findByText(
+        "This instance's catalog doesn't fit the form Solid Memo reads, so it's left as it is. The instance's health says what's wrong with it.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByLabelText("Description")).toBeNull();
+    expect(screen.getByLabelText("Instance name")).toHaveValue("Deck set A");
+  });
+
   it("says why the catalog could not be read", async () => {
     renderContainer(
       makeUseCasesFake({

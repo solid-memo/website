@@ -681,6 +681,7 @@
       "saveName": "Spara namn",
       "catalog": "Katalog",
       "noCatalog": "Den här instansen har ingen katalog än. Öppna den i Solid Memo för att uppdatera den.",
+      "misfitCatalog": "Den här instansens katalog passar inte formen som Solid Memo läser, så den lämnas som den är. Instansens hälsa visar vad som är fel med den.",
       "publisher": "Utgivare",
       "description": "Beskrivning",
       "licenseHint": "Licensen som kortlekarna erbjuds under, för appar som läser katalogen.",

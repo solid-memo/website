@@ -26,6 +26,14 @@ export interface Catalog {
   modified?: string;
 }
 
+/**
+ * An instance's catalog as read: the catalog; "misfit" when its document
+ * says something of its `#catalog` that does not fit the catalog's
+ * shape (whatever its type, or with none), which is invalid data that
+ * no write replaces; null when it says nothing of it.
+ */
+export type CatalogRead = Catalog | "misfit" | null;
+
 /** What the Studio edits of a catalog (UseCases.describeCatalog). */
 export interface CatalogAbout {
   description: string;

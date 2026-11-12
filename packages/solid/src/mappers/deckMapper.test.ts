@@ -1112,7 +1112,9 @@ describe("the catalog node", () => {
       written,
       buildThing(getThing(written, catalog.publisher.webId)!).removeAll(RDF.type).build(),
     );
-    expect(toCatalog(withoutAgent, CATALOG)?.publisher.name).toBe(catalog.publisher.webId);
+    expect((toCatalog(withoutAgent, CATALOG) as Catalog).publisher.name).toBe(
+      catalog.publisher.webId,
+    );
   });
 
   it("types its license a license document, as DCAT-AP asks, and lets go of one it no longer states", () => {
@@ -1346,15 +1348,31 @@ describe("the catalog node", () => {
     });
   });
 
-  it("is absent from a document without one, or with one that does not fit its shape", () => {
+  it("is absent from a document whose #catalog has no statements of its own", () => {
     expect(toCatalog(datasetFrom(CATALOG), CATALOG)).toBeNull();
-    const broken = setThing(
+    const named = setThing(
       datasetFrom(CATALOG),
-      buildThing(createThing({ url: `${CATALOG}#catalog` }))
-        .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
+      buildThing(createThing({ url: `${CATALOG}#group` }))
+        .addIri(DCAT.catalog, `${CATALOG}#catalog`)
         .build(),
     );
-    expect(toCatalog(broken, CATALOG)).toBeNull();
+    expect(toCatalog(named, CATALOG)).toBeNull();
+  });
+
+  it("is a misfit, not absent, when its #catalog has statements but does not fit its shape, whatever its type", () => {
+    const misfit = (...types: string[]) => {
+      const thing = types.reduce(
+        (built, type) => built.addIri(RDF.type, type),
+        buildThing(createThing({ url: `${CATALOG}#catalog` })).addStringNoLocale(
+          DCTERMS.title,
+          "Languages",
+        ),
+      );
+      return toCatalog(setThing(datasetFrom(CATALOG), thing.build()), CATALOG);
+    };
+    expect(misfit(DCAT.Catalog)).toBe("misfit");
+    expect(misfit()).toBe("misfit");
+    expect(misfit(DCAT.Dataset)).toBe("misfit");
   });
 });
 

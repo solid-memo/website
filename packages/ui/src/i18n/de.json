@@ -1668,6 +1668,7 @@
     "paletteContrastLow": "Einige Farben haben weniger Kontrast, als sie brauchen. Wähle andere oder verwende sie trotzdem.",
     "catalogNeedsDescription": "Der Katalog braucht eine Beschreibung.",
     "noCatalogToUpdate": "Diese Instanz hat noch keinen Katalog. Aktualisiere die Instanz zuerst in Solid Memo.",
+    "catalogMisfit": "Der Katalog dieser Instanz passt nicht zu der Form, die Solid Memo liest, deshalb lässt Solid Memo ihn, wie er ist. Die Datenprüfung der Instanz zeigt, was daran nicht stimmt.",
     "catalogTooManyLinks": "Der Katalog dieser Instanz listet mehr Stapel, Entwürfe oder Ausgaben, als Solid Memo liest (höchstens {limit} von jeder Art). Entferne die Instanz, wenn du nicht weißt, wer sie pflegt.",
     "catalogFull": "Der Katalog dieser Instanz listet schon so viele Stapel, Entwürfe oder Ausgaben, wie Solid Memo liest (je {limit}), deshalb kann er keine weiteren listen.",
     "draftTooManyDocuments": "Dieser Entwurf oder diese Datei hat zu viele Kapitel, oder die Entwürfe dieser Instanz haben zusammen zu viele Dokumente, als dass Solid Memo sie lesen könnte (höchstens {limit} Dokumente), daher wurde das nicht gemacht. Verwende weniger Kapitel oder lösche im Studio Entwürfe, die du nicht mehr brauchst. Entferne die Instanz nur, wenn die Entwürfe nicht deine sind und du nicht weißt, wer sie pflegt.",

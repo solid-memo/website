@@ -681,6 +681,7 @@
       "saveName": "Save name",
       "catalog": "Catalog",
       "noCatalog": "This instance has no catalog yet. Open it in Solid Memo to update it.",
+      "misfitCatalog": "This instance's catalog doesn't fit the form Solid Memo reads, so it's left as it is. The instance's health says what's wrong with it.",
       "publisher": "Publisher",
       "description": "Description",
       "licenseHint": "The license the decks are offered under, for apps that read the catalog.",

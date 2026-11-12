@@ -214,6 +214,7 @@ export function createSolidDeckRepository({
       const written = toDecks(dataset, catalogUrl).filter(isDeckOutdated).map(upgradeDeck);
       dataset = withDecks(dataset, written);
       const subjects = written.flatMap((deck) => deckSubjects(dataset, deck));
+      // Only where there is none: one that does not fit its shape is invalid data, left as it is.
       if (catalog !== null && toCatalog(dataset, catalogUrl) === null) {
         dataset = withCatalog(dataset, catalogUrl, catalog);
         subjects.push(`${catalogUrl}#catalog`, catalog.publisher.webId);
