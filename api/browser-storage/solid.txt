@@ -1,2 +1,4 @@
 sessionStorage: solid-memo:login-hash
+sessionStorage: solid-memo:login-issuer
 sessionStorage: solid-memo:provider-redirect
+sessionStorage: solid-memo:restore-attempt

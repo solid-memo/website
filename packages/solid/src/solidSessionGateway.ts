@@ -114,7 +114,7 @@ export const LOGIN_ISSUER_KEY = "solid-memo:login-issuer";
  * page load, which finds it unanswered when the provider never sent the
  * browser back.
  */
-const RESTORE_ATTEMPT_KEY = "solid-memo:restore-attempt";
+export const RESTORE_ATTEMPT_KEY = "solid-memo:restore-attempt";
 
 /**
  * A silent restore this tab set off: the provider, and when, in

@@ -87,7 +87,10 @@ would lose them for good. The palette's copy is what the next first
 paint uses.
 
 During a login, `sessionStorage` holds the page the learner was on
-(`solid-memo:login-hash`), to bring them back to it
+(`solid-memo:login-hash`), to bring them back to it. Until the next
+page load, it holds the address of the identity provider a login or a
+silent restore went to, which the provider's answer is checked against
+(`solid-memo:login-issuer`)
 ([`solidSessionGateway.ts`](../packages/solid/src/solidSessionGateway.ts)).
 While a login or a session restore is under way, it also holds the
 sign-in client's mark that this tab may have sent the learner to the

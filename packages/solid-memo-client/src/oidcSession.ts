@@ -22,6 +22,9 @@ const REFRESH_MARGIN = 30_000;
 /** The last write of the stored session in this tab, when the browser has no Web Locks. */
 let queue: Promise<unknown> = Promise.resolve();
 
+/** The Web Lock a refresh or a login's save of the stored session holds. */
+export const SESSION_LOCK = "solid-memo:oidc-session";
+
 /**
  * Runs `work` as the only refresh or login's save of the stored session
  * in this browser. So two tabs do not both spend the same refresh token
@@ -34,7 +37,7 @@ let queue: Promise<unknown> = Promise.resolve();
  */
 export function exclusively<T>(work: () => Promise<T>): Promise<T> {
   const locks = globalThis.navigator?.locks;
-  if (locks) return locks.request("solid-memo:oidc-session", work);
+  if (locks) return locks.request(SESSION_LOCK, work);
   const turn = queue.then(work, work);
   queue = turn.catch(() => {});
   return turn;

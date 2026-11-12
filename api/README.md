@@ -17,10 +17,15 @@ npm run test:unit -- packages/ui/src/ui/routes.api.test.ts -u
 | [pod-layout.txt](pod-layout.txt) | Where the data lives in a pod: its documents, the type index registrations, the profile links followed | [podLayout.api.test.ts](../packages/solid/src/podLayout.api.test.ts) |
 | [routes/app.txt](routes/app.txt) | The hashes that open the app's screens | [routes.api.test.ts](../packages/ui/src/ui/routes.api.test.ts) |
 | [routes/studio.txt](routes/studio.txt) | The hashes that open the Studio's screens | [routes.api.test.ts](../apps/studio/src/ui/routes.api.test.ts) |
-| [browser-storage/](browser-storage/) | What each package keeps in the browser: storage keys, the guest pod's IndexedDB, Web Locks | `browserStorage.api.test.ts` in each of browser, solid, ui and studio |
+| [browser-storage/](browser-storage/) | What each package keeps in the browser: storage keys, the guest pod's IndexedDB, Web Locks | `browserStorage.api.test.ts` in each of browser, solid, solid-memo-client, ui and studio |
 | [self-hosting.txt](self-hosting.txt) | The `VITE_*` variables, the build and start commands, the folder the build writes, the Client ID Document's address | [selfHosting.api.test.ts](../scripts/selfHosting.api.test.ts) |
 | [frozen/published.txt](frozen/published.txt) | Every document published from `ns/` and `vendor/`, and each shape's hash | [published.api.test.ts](../packages/vocab/tooling/published.api.test.ts) |
 | [frozen/vocab.txt](frozen/vocab.txt) | Every term of the vocabulary, with its kind, range and domain, and every topic | [vocab.api.test.ts](../packages/vocab/tooling/vocab.api.test.ts) |
+
+When the code keeps something in the browser under a name that no file
+in `browser-storage/` lists,
+[browserStorageKeys.test.ts](../scripts/browserStorageKeys.test.ts)
+fails. A new key comes with its line.
 
 `npm run check:breaking -- --base origin/main` compares these files
 with those where the branch left `main`. CI's `library` job runs it on
