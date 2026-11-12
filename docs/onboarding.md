@@ -179,7 +179,9 @@ case (no caller skips it).
 - `name`: the profile's `foaf:name` (`profileNameOf` in
   `domain/account.ts`), from the WebID document, informational too.
   When present, the masthead's "Logged in as" and the connection
-  screen show it instead of the WebID, linked to the WebID.
+  screen show it instead of the WebID, linked to the WebID. A restored
+  session skips discovery, so its masthead reads the name from the
+  WebID document alone (`queryKeys.webIdDocument(webId)`).
 
 The account lives in the react-query cache (`queryKeys.account(webId)`,
 [architecture.md](architecture.md#query-keys)) and, like all Pod data,

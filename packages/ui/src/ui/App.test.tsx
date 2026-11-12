@@ -1105,7 +1105,42 @@ describe("AppShell", () => {
     expect(useCases.discoverAccount).not.toHaveBeenCalled();
     expect(screen.getByRole("contentinfo")).toHaveTextContent("Created by antwika");
     expect(screen.queryByText("WebID document")).toBeNull();
-    expect(useCases.viewWebIdDocument).not.toHaveBeenCalled();
+  });
+
+  it("names the learner from their profile when a session is restored", async () => {
+    const useCases = makeUseCases({
+      restoreSession: vi.fn(async () => restored),
+      viewWebIdDocument: vi.fn(async () => ({
+        url: session.webId,
+        subjects: [
+          {
+            url: session.webId,
+            properties: [
+              {
+                predicate: "http://xmlns.com/foaf/0.1/name",
+                values: [
+                  {
+                    type: "literal" as const,
+                    value: "Alice",
+                    dataType: "http://www.w3.org/2001/XMLSchema#string",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      })),
+    });
+    renderApp(useCases);
+
+    expect(await screen.findByRole("link", { name: "Alice (opens in a new tab)" })).toHaveAttribute(
+      "href",
+      session.webId,
+    );
+    expect(screen.getByText(/Logged in as/)).toHaveTextContent("Logged in as Alice");
+    expect(screen.getByText(/Logged in as/)).toHaveAttribute("title", "Logged in as Alice");
+    expect(useCases.viewWebIdDocument).toHaveBeenCalledWith(session);
+    expect(useCases.discoverAccount).not.toHaveBeenCalled();
   });
 
   it("keeps the banner and main content while the instances load", async () => {
