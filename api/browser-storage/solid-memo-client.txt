@@ -1,0 +1,5 @@
+Web Locks: solid-memo:oidc-session
+indexedDB: solid-memo-oidc store registrations, keyed by issuer and redirect URL
+indexedDB: solid-memo-oidc store session, under key current: client, issuer, keys, redirectUrl, refreshToken, webId
+indexedDB: solid-memo-oidc version 1, stores registrations, session
+sessionStorage: solid-memo:oidc-login

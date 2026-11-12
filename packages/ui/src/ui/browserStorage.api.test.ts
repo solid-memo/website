@@ -3,15 +3,23 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
-import { collapsedKey, type RecentLanguageKind, recentKey } from "./remembered";
+import {
+  collapsedKey,
+  loginWebIdKey,
+  type RecentLanguageKind,
+  recentKey,
+  webIdKey,
+} from "./remembered";
 
 /** Every kind of recent language, so a kind added or dropped fails the typecheck until noted here. */
 const KINDS: Record<RecentLanguageKind, null> = { deck: null, own: null };
 
 /**
  * What this package keeps in the browser, part of the app's public API
- * (docs/releasing.md#the-public-api): the localStorage keys. A line that
- * goes, a key renamed, is a breaking change, which
+ * (docs/releasing.md#the-public-api): the localStorage keys, and the
+ * sessionStorage key a WebID to remember waits under while the
+ * identity provider has the tab. A line that goes, a key renamed, is a
+ * breaking change, which
  * `npm run check:breaking` holds to a commit that says so.
  */
 it("keeps api/browser-storage/ui.txt to what the browser keeps", async () => {
@@ -20,6 +28,8 @@ it("keeps api/browser-storage/ui.txt to what the browser keeps", async () => {
       (kind) => `localStorage: ${recentKey(kind)}`,
     ),
     `localStorage: ${collapsedKey("<instance URL>")}`,
+    `localStorage: ${webIdKey}, only when the learner asks for it`,
+    `sessionStorage: ${loginWebIdKey}, until the next page load`,
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
     "../../../../api/browser-storage/ui.txt",

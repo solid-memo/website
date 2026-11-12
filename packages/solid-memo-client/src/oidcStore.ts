@@ -27,16 +27,17 @@ export interface StoredSession {
   refreshToken?: string;
 }
 
-const DATABASE = "solid-memo-oidc";
-const SESSIONS = "session";
-const REGISTRATIONS = "registrations";
-const CURRENT = "current";
+export const DATABASE = "solid-memo-oidc";
+export const DATABASE_VERSION = 1;
+export const SESSIONS = "session";
+export const REGISTRATIONS = "registrations";
+export const CURRENT = "current";
 
 let opened: Promise<IDBDatabase> | undefined;
 
 function open(): Promise<IDBDatabase> {
   opened ??= new Promise((resolve, reject) => {
-    const request = indexedDB.open(DATABASE, 1);
+    const request = indexedDB.open(DATABASE, DATABASE_VERSION);
     request.onupgradeneeded = () => {
       request.result.createObjectStore(SESSIONS);
       request.result.createObjectStore(REGISTRATIONS);

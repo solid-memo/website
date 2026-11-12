@@ -1,3 +1,5 @@
 localStorage: solid-memo:collapsedGroups.<instance URL>
 localStorage: solid-memo:recentLanguages.deck
 localStorage: solid-memo:recentLanguages.own
+localStorage: solid-memo:webId, only when the learner asks for it
+sessionStorage: solid-memo:login-webId, until the next page load
