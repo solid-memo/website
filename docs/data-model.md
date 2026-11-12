@@ -638,7 +638,10 @@ graph LR
   - It always has a description (`dcterms:description`): what it covers
     and where its content came from. It's shown on the deck page, its
     URLs as links. A deck without one gets `"Flashcards: <title>."@en`
-    and `"Kortlek: <title>."@sv` (app-written text for any title).
+    and `"Kortlek: <title>."@sv` (app-written text for any title). A
+    title too long for the description to fit the bound on a term is
+    cut short in it, with an ellipsis after it
+    ([migrations.md](migrations.md#the-chain)).
   - It may name its authors (`dcterms:creator`), each a `foaf:Agent`
     node `#agent-<slug>` beside the deck, with `foaf:name` and a
     `mailto:` `foaf:mbox`, shown as `Name <email>`. Only a bare
@@ -1876,10 +1879,14 @@ by one.
   it holds a label to the bound with the same room as a write
   (`BlankLabels`). Either way, a term a read keeps never blocks a
   later save of the whole document, and what the app writes it can
-  read again. A document saved before the bound may hold a longer
-  text, such as a card's back, a step's theory or a catalog entry's
-  keywords. Its read now fails with a `ReadLimitError`. The app has no
-  way to shorten the text, so it has to be edited outside the app.
+  read again. A record brought up from an older format in memory is
+  held to the bound as it would be written, and one that would pass it
+  is read as not fitting its shape
+  ([migrations.md](migrations.md#the-chain)). A document saved before
+  the bound may hold a longer text, such as a card's back, a step's
+  theory or a catalog entry's keywords. Its read now fails with a
+  `ReadLimitError`. The app has no way to shorten the text, so it has
+  to be edited outside the app.
 - **What is read can be written back.** An IRI that `new URL` refuses,
   such as `<http://[x>`, is still an IRI to the Turtle parser, but the
   client library writes no such IRI. So no value the app reads into

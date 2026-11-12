@@ -68,6 +68,7 @@ import {
   toCards,
   toCatalog,
   toDecks,
+  decksWithAgentsWithinBound,
   withCatalog,
   withDeck,
   withDecks,
@@ -210,8 +211,11 @@ export function createSolidDeckRepository({
       const catalogUrl = catalogUrlOf(instanceUrl);
       const read = await getSolidDatasetOrNull(catalogUrl, fetch);
       let dataset = read ?? createSolidDataset();
-      // Each entry stored in an older format, as read and brought up to date in memory, written in this app's.
-      const written = toDecks(dataset, catalogUrl).filter(isDeckOutdated).map(upgradeDeck);
+      // Each entry stored in an older format, as read and brought up to date in memory, written in this app's; one whose agents no write would take is left as it is, not keeping the others back.
+      const written = decksWithAgentsWithinBound(
+        dataset,
+        toDecks(dataset, catalogUrl).filter(isDeckOutdated).map(upgradeDeck),
+      );
       dataset = withDecks(dataset, written);
       const subjects = written.flatMap((deck) => deckSubjects(dataset, deck));
       // Only where there is none: one that does not fit its shape is invalid data, left as it is.

@@ -20,6 +20,25 @@ export const HASHED_CHARACTERS = 16_383;
 /** What a term's longest name holds beside an IRI or a blank node's label: `_:` before it, or `<>` around it. */
 export const TERM_NAME_ROOM = 2;
 
+const QUOTE = 0x22;
+const NEWLINE = 0x0a;
+const RETURN = 0x0d;
+const ESCAPE = 0x5c;
+
+/**
+ * How many characters of a literal's text N-Triples escapes, each one
+ * written as two: `"`, `\`, a line feed and a carriage return. A term's
+ * longest name counts them twice (termKeyLength in the solid package).
+ */
+export function escapedCharacters(value: string): number {
+  let count = 0;
+  for (let at = 0; at < value.length; at++) {
+    const code = value.charCodeAt(at);
+    if (code === QUOTE || code === ESCAPE || code === NEWLINE || code === RETURN) count++;
+  }
+  return count;
+}
+
 /** Whether an IRI is longer than a term may be, as in `<>`: no document read or written holds one. */
 export function isIriPastBound(iri: string): boolean {
   return iri.length + TERM_NAME_ROOM > HASHED_CHARACTERS;

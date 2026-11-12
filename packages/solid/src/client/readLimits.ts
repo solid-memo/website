@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { BlankNode, DataFactory, Quad, Term } from "@rdfjs/types";
-import { HASHED_CHARACTERS, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
+import { escapedCharacters, HASHED_CHARACTERS, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
 import { ReadLimitError, type ReadLimits } from "./interface";
 
 /** Keys for paths of terms, each term a key of its own, for the client modules and the alternative client. */
@@ -397,21 +397,6 @@ export const MAX_TERM_CHARACTERS = HASHED_CHARACTERS;
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 const RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
-
-const QUOTE = 0x22;
-const NEWLINE = 0x0a;
-const RETURN = 0x0d;
-const ESCAPE = 0x5c;
-
-/** How many characters of a literal's text N-Triples escapes, each one written as two. */
-function escapedCharacters(value: string): number {
-  let count = 0;
-  for (let at = 0; at < value.length; at++) {
-    const code = value.charCodeAt(at);
-    if (code === QUOTE || code === ESCAPE || code === NEWLINE || code === RETURN) count++;
-  }
-  return count;
-}
 
 /**
  * How many characters a term has by the longest name a library the app

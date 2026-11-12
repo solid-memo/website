@@ -18,20 +18,24 @@ import {
   getStringByLocaleAll,
   getStringNoLocale,
   getStringNoLocaleAll,
+  getTermAll,
   getThing,
   getUrl,
   getUrlAll,
   removeThings,
 } from "./client/rdf";
 import type { DatasetEdit } from "./datasetEdit";
+import { isTermTooLong } from "./client/readLimits";
 import type { Literal, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,
   type LangText,
   type LangTexts,
+  type LatestRecord,
   type ShapeName,
   type VersionedRecord,
 } from "@solid-memo/vocab/types.generated";
+import { migrate } from "@solid-memo/domain/shapes/migrations";
 import type { FieldDescriptor, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT_AP_SHAPED_CLASSES } from "@solid-memo/shacl/profiles";
@@ -326,6 +330,36 @@ export function readVersioned<S extends ShapeName>(
   const data = readRecord(thing, descriptor);
   if (data === null) return null;
   return { storedVersion, record: { version, data } as VersionedRecord[S] };
+}
+
+/**
+ * A record read (readVersioned) brought to its shape's latest format
+ * (migrate), or null when the chain made a term longer than a term may
+ * be (isTermTooLong), measured as a write would write it: an address it
+ * builds from the subject, such as a deck's distribution or a release's
+ * series, or a text it tags, such as an untagged title written in
+ * English from format 4 on, its language tag after it. No write of such
+ * a record would be accepted, so it is read as a subject that does not
+ * fit its shape. The text the chain writes itself is kept within the
+ * bound (defaultDeckDescription). Its creators' agents are not held to
+ * it here: a deck from before format 3 names its authors, whose agents
+ * a write names anew and refuses past the bound (GHSA-4mgg-5xpp-3jx5).
+ */
+export function migrateWithinBound<S extends ShapeName>(
+  shape: S,
+  record: VersionedRecord[S],
+  context: Parameters<typeof migrate>[2],
+): LatestRecord[S] | null {
+  const data = migrate(shape, record, context);
+  const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]];
+  return writesPastBound(descriptor, data) ? null : data;
+}
+
+/** Whether a record, written as applyRecord writes it, has a term past the bound, its creators aside. */
+function writesPastBound(descriptor: ShapeDescriptor, record: unknown): boolean {
+  const fields = descriptor.fields.filter((field) => field.name !== "creator");
+  const written = applyRecord(buildThing(createThing()), { ...descriptor, fields }, record).build();
+  return fields.some((field) => getTermAll(written, field.predicate).some(isTermTooLong));
 }
 
 /**

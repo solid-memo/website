@@ -11,6 +11,7 @@ import {
   isDefaultDeckDescription,
   isDefaultDeckGroupDescription,
 } from "./dcat";
+import { HASHED_CHARACTERS } from "./pathKeys";
 
 describe("a deck's default description", () => {
   it("is English before format 4", () => {
@@ -49,6 +50,60 @@ describe("a deck's default description", () => {
       en: "Flashcards: 日本語の単語.",
       sv: "Kortlek: 日本語の単語.",
     });
+  });
+});
+
+describe("a deck's default description for a title as long as a term (GHSA-87vh-m93g-54f6)", () => {
+  // A text tagged with a two-letter language, as a term's longest name has it: in quotes, `@en` after it.
+  const ROOM = 5;
+  const loneSurrogate = /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/;
+
+  it("cuts the title short, an ellipsis after it, so that the text is no longer than a term may be", () => {
+    const title = "T".repeat(16_370);
+    const { en, sv } = defaultDeckDescriptionText({ en: title });
+    expect(en).toHaveLength(HASHED_CHARACTERS - ROOM);
+    expect(en).toMatch(/^Flashcards: T+…\.$/);
+    expect(sv).toHaveLength(HASHED_CHARACTERS - ROOM);
+    expect(sv).toMatch(/^Kortlek: T+…\.$/);
+    expect(defaultDeckDescription(title)).toBe(en);
+  });
+
+  it("keeps a title that just fits whole", () => {
+    const title = "T".repeat(HASHED_CHARACTERS - ROOM - "Flashcards: .".length);
+    expect(defaultDeckDescription(title)).toBe(`Flashcards: ${title}.`);
+    expect(defaultDeckDescription(`${title}T`)).toMatch(/…\.$/);
+  });
+
+  it("counts a character a term's name escapes as two", () => {
+    const en = defaultDeckDescription('"'.repeat(9_000));
+    const quotes = en.length - "Flashcards: ….".length;
+    expect(quotes).toBe(Math.floor((HASHED_CHARACTERS - ROOM - "Flashcards: ….".length) / 2));
+  });
+
+  it("cuts at a code point, never between the halves of a surrogate pair", () => {
+    const en = defaultDeckDescription(`a${"😀".repeat(8_190)}`);
+    expect(en).toMatch(/…\.$/);
+    expect(loneSurrogate.test(en)).toBe(false);
+    expect(en.length).toBeLessThanOrEqual(HASHED_CHARACTERS - ROOM);
+  });
+
+  it("is still known as the default, and moves to format 4 as one", () => {
+    const title = "T".repeat(16_370);
+    const description = defaultDeckDescription(title);
+    expect(isDefaultDeckDescription({ en: description }, [{ en: title }])).toBe(true);
+    expect(descriptionInFormat4(description, title)).toEqual(
+      defaultDeckDescriptionText({ en: title }),
+    );
+  });
+
+  it("knows the uncut default an older record holds, and moves it to format 4 as the cut one", () => {
+    for (const length of [16_366, 16_367, 16_368]) {
+      const title = "T".repeat(length);
+      const whole = `Flashcards: ${title}.`;
+      expect(defaultDeckDescription(title)).not.toBe(whole);
+      expect(descriptionInFormat4(whole, title)).toEqual(defaultDeckDescriptionText({ en: title }));
+      expect(isDefaultDeckDescription({ en: whole }, [{ en: title }])).toBe(true);
+    }
   });
 });
 

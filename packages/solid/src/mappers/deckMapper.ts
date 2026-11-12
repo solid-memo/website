@@ -69,6 +69,7 @@ import {
 import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
+  migrateWithinBound,
   readIri,
   readIris,
   readVersioned,
@@ -155,7 +156,10 @@ export function toDecks(dataset: Dataset, catalogUrl: string): Deck[] {
  * are hosts: the catalog is data anyone may have written, and no shape
  * checks those terms. A
  * deck from before format 3 names its creators itself ("Name <email>"),
- * which name the agents the migration gives it.
+ * which name the agents the migration gives it. A deck the migration
+ * gives a term longer than a term may be, such as its distribution or
+ * its untagged title in English, does not fit (migrateWithinBound): no
+ * save of it would be accepted.
  */
 export function toDeck(
   thing: Subject,
@@ -166,10 +170,12 @@ export function toDeck(
   const url = asUrl(thing);
   // Only a deck before format 3 names agents of its own: the document's are not copied for each deck, which made many decks and agents take quadratic time (GHSA-hcrw-cr33-jg78).
   const own = read.record.version < 3 ? read.record.data.creator : [];
+  const record = migrateWithinBound("deck", read.record, { subject: url });
+  if (record === null) return null;
   const stored = deckFromRecord(
     url,
     read.storedVersion,
-    migrate("deck", read.record, { subject: url }),
+    record,
     authorOfAgents(url, own, agentNames),
   );
   const completedChapters = boundedCompletedChapters(getUrlAll(thing, SM.completedChapter), [
@@ -262,6 +268,19 @@ function deckAgentUrls(deck: Deck, thingAt: (url: string) => NamedSubject | null
   return agentUrlsOf(deck.url, deck.authors, (url) =>
     isIriPastBound(url) ? null : agentHolderOf(thingAt(url)),
   );
+}
+
+/**
+ * The decks whose agents withDecks names within the bound on a term, in
+ * `dataset`'s document. A deck from before format 3 names its authors
+ * itself, and an agent's node, joined from the deck's address and an
+ * author's name, can be longer than any term (GHSA-4mgg-5xpp-3jx5):
+ * withDecks refuses such a deck, so a format update leaves it out, and
+ * it does not keep the others from being brought up to date.
+ */
+export function decksWithAgentsWithinBound(dataset: Dataset, decks: readonly Deck[]): Deck[] {
+  const { getThing: thingAt } = editOf(dataset);
+  return decks.filter((deck) => !deckAgentUrls(deck, thingAt).some(isIriPastBound));
 }
 
 /** What `thing` holds of an agent (AgentHolder): nothing when there is none or it says nothing an agent says, else the author it names, or "unreadable". */

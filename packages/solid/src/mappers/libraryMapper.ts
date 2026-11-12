@@ -25,7 +25,7 @@ import type {
 } from "@solid-memo/domain/library";
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { readDatetime, readVersioned, storedVersionOf } from "../records";
+import { migrateWithinBound, readDatetime, readVersioned, storedVersionOf } from "../records";
 import { agentNamesOf, authorOfAgents, distractorsOf, readCard } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
 import {
@@ -96,7 +96,10 @@ function toLibraryDeck(
   const currentThing = getThing(index, hasCurrentVersion);
   const current = currentThing === null ? null : readVersioned(currentThing, "libraryDeck");
   if (current === null) return null;
-  const release = migrate("libraryDeck", current.record, { subject: hasCurrentVersion });
+  const release = migrateWithinBound("libraryDeck", current.record, {
+    subject: hasCurrentVersion,
+  });
+  if (release === null) return null;
   const createdAt = release.created;
   const modifiedAt = release.modified;
   return {
@@ -176,10 +179,12 @@ function toLibrarySource(url: string, thing: Subject | null): LibrarySource {
  * (declared with @base) rather than the URL it was fetched from. A deck
  * or card in a newer format than this app writes is refused: importing
  * it would silently drop whatever the newer format added. Older formats
- * are brought up to the current one in memory. A release that gives two
- * of its cards and distractors one id is refused (libraryIdsRepeat): a
- * copy keeps them all as subjects of one cards document, by their ids
- * (refuseRepeatedIds). So is one at the guest's pod, or that links to it
+ * are brought up to the current one in memory; one that comes out of it
+ * with a term longer than a term may be is not a deck either
+ * (migrateWithinBound), as no copy of it could be written. A release
+ * that gives two of its cards and distractors one id is refused
+ * (libraryIdsRepeat): a copy keeps them all as subjects of one cards
+ * document, by their ids (refuseRepeatedIds). So is one at the guest's pod, or that links to it
  * by an address a copy would keep, such as a card's picture or subject
  * (releaseLinksGuestPod): a guest could not keep a copy of it
  * (GHSA-hc3p-fpwj-fvjp).
@@ -198,14 +203,18 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
   if (read === null) {
     throw new AppError("notADeck", { url });
   }
-  const cards = refuseRepeatedIds(url, toLibraryCards(url, dataset));
   const subject = asUrl(deck!);
+  const release = migrateWithinBound("libraryDeck", read.record, { subject });
+  if (release === null) {
+    throw new AppError("notADeck", { url });
+  }
+  const cards = refuseRepeatedIds(url, toLibraryCards(url, dataset));
   const own = read.record.version < 3 ? read.record.data.creator : [];
   const content = {
     ...libraryDeckFromRecord(
       url,
       read.storedVersion,
-      migrate("libraryDeck", read.record, { subject }),
+      release,
       cards,
       authorOfAgents(subject, own, agentNamesOf(dataset)),
     ),
