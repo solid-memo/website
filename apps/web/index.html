@@ -95,8 +95,9 @@
   <!-- The app, and the source code it is built from: codeRepository is a
        property of SoftwareSourceCode, not of WebApplication, so the source
        is a node of its own whose targetProduct is the app. inLanguage is
-       the languages the app speaks (docs/i18n.md): a new one goes here
-       and in src/build.test.ts, which checks these fields. -->
+       the languages the app speaks (docs/i18n.md): a new one goes here,
+       in the store listing below and in src/build.test.ts, which checks
+       these fields. -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -128,6 +129,34 @@
           "targetProduct": { "@id": "https://solid-memo.com/#app" }
         }
       ]
+    }
+  </script>
+  <!-- The app's listing in the Stucco app store for Solid apps
+       (https://store.stucco.software/schema), which reads only a block in
+       its own vocabulary: free (a price with no period), its languages
+       the same codes as inLanguage above, which src/build.test.ts checks,
+       its previews the screenshots in public/screenshots/, and its @id the
+       app's address, the url above, as the schema has no field for it. -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://store.stucco.software/schema",
+      "@id": "https://solid-memo.com/",
+      "@type": ["Application", "Solid"],
+      "title": %APP_NAME_JSON%,
+      "subtitle": "Spaced-repetition flashcards and courses",
+      "description": "A flashcard app with spaced repetition that keeps your cards and study progress in your own Pod. Comes with ready-made decks and courses, including a course on Solid fundamentals, and lets you write your own decks. Try it as a guest before connecting a Pod.",
+      "logo": "https://solid-memo.com/favicon.svg",
+      "price": { "amount": 0 },
+      "purchases": false,
+      "developer": "https://github.com/solid-memo",
+      "category": ["Education"],
+      "previews": [
+        "https://solid-memo.com/screenshots/study.png",
+        "https://solid-memo.com/screenshots/decks.png",
+        "https://solid-memo.com/screenshots/library.png",
+        "https://solid-memo.com/screenshots/statistics.png"
+      ],
+      "language": ["en", "sv", "ko", "de", "es", "fr"]
     }
   </script>
 </head>
