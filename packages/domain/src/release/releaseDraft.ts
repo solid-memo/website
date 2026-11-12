@@ -1070,25 +1070,21 @@ function deleteSubject(
   id: string,
 ): ReleaseDraft | DraftRefusal {
   if (nodeOf(draft, NODES[of], id) === undefined) return { refused: "missing", id };
-  // What goes with it: a chapter's steps, a card's distractors.
+  // What goes with it: a chapter's steps, a card's distractors, added one at a time, as
+  // however many there are, never spread into one call (docs/style.md#typescript).
   const going: { of: DraftKind; id: string }[] = [{ of, id }];
   if (of === "chapter") {
     const iri = iriIn(draft, id);
-    going.push(
-      ...draft.steps
-        .filter((node) => node.data.chapter === iri)
-        .map((node) => ({ of: "step" as const, id: node.id })),
-    );
+    for (const node of draft.steps) {
+      if (node.data.chapter === iri) going.push({ of: "step", id: node.id });
+    }
   }
   if (of === "card") {
-    going.push(
-      ...nodeOf(draft, "cards", id)!
-        .data.distractor.map((iri) => idIn(draft, iri))
-        .filter(
-          (one): one is string => one !== null && nodeOf(draft, "distractors", one) !== undefined,
-        )
-        .map((one) => ({ of: "distractor" as const, id: one })),
-    );
+    for (const iri of nodeOf(draft, "cards", id)!.data.distractor) {
+      const one = idIn(draft, iri);
+      if (one !== null && nodeOf(draft, "distractors", one) !== undefined)
+        going.push({ of: "distractor", id: one });
+    }
   }
   const published = going.find((subject) => Object.hasOwn(draft.published.ids, subject.id));
   if (published !== undefined) return { refused: "published", ...published };

@@ -133,7 +133,7 @@ export async function deleteInstanceData(
   for (const draft of catalog === UNREADABLE || catalog === null
     ? []
     : draftsOf(catalog, container)) {
-    kept.push(...(await deleteDraftResources(draft, fetch)));
+    for (const url of await deleteDraftResources(draft, fetch)) kept.push(url);
   }
   await remove(preferencesUrlOf(container), subjectsOfClasses(SM.Preferences));
   await remove(palettesUrlOf(container), subjectsOfClasses(SM.Palette, SM.ColorSet));

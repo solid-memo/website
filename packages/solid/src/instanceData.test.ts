@@ -139,6 +139,22 @@ describe("deleteInstanceData", () => {
     expect(await p.exists(elsewhere)).toBe(true);
   });
 
+  it("keeps a draft's document that holds something else as well, and says so", async () => {
+    const p = pod();
+    const draft = `${INSTANCE}drafts/solid/v1/`;
+    await seedInstance(p, `<#catalog> <${SM}releaseDraft> <drafts/solid/v1/release.ttl> .`);
+    await p.put(`${draft}release.ttl`, `<> a <${SM}Deck> .`);
+    await p.put(
+      `${draft}cards.ttl`,
+      `<#q> a <${SM}Card> . <#note> a <https://other.example/Note> .`,
+    );
+
+    const result = await deleteInstanceData(INSTANCE, p.fetch);
+    expect(result.keptDocuments).toEqual([`${draft}cards.ttl`]);
+    expect(await p.exists(`${draft}cards.ttl`)).toBe(true);
+    expect(await p.exists(`${draft}release.ttl`)).toBe(false);
+  });
+
   it("deletes a draft past the limit on what is read of one, and goes on with the rest of the instance", async () => {
     const p = pod();
     const draft = `${INSTANCE}drafts/solid/v1/`;

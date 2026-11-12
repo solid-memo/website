@@ -45,6 +45,14 @@ holds everywhere. Beyond the recommended rules:
   function's score, and a change that splits up the functions over a
   lower limit lowers it. A function is split up, never excused with a
   `biome-ignore` comment.
+- A plugin, [`biome/no-spread-push.grit`](../biome/no-spread-push.grit),
+  fails on a list spread into `push` or `unshift` in the packages' and
+  apps' `src/` code, which reads lists as long as a pod or a file makes
+  them ([below](#typescript)). It leaves out their tests, the site's
+  build (`packages/site`), the Turtle formatter (`packages/turtle`), and
+  the code outside `src/` that reads only this repository's files:
+  `packages/shacl/node`, `packages/vocab/tooling`, `scripts/` and
+  `e2e/`.
 
 **In an editor**, Biome's extension (`biomejs.biome` for VS Code, which
 [`.vscode/extensions.json`](../.vscode/extensions.json) and the dev
@@ -94,6 +102,14 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   value added (`map.set(key, [...(map.get(key) ?? []), value])`): a
   copy at each value makes the work grow with the square of the values,
   and a pod or a release can hold many under one key.
+- **No list spread into a call.** A list as long as a pod or a file
+  makes it is never spread into a call's arguments (`list.push(...more)`,
+  `Math.max(...values)`, `splice(at, 1, ...more)`): each element is one
+  argument, and past the engine's limit on arguments the call throws a
+  `RangeError`. Its elements are added one at a time in a loop, its
+  largest found with `reduce`, and a list is joined in an array literal
+  (`[...a, ...b]`), which has no such limit. Biome's plugin checks
+  `push` and `unshift`, called plainly or optionally (`list?.push`).
 - **Many subjects are written at once.** A write of many subjects to a
   dataset sets them with `setThings` or one edit (`editOf` in
   [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)), and takes

@@ -176,9 +176,8 @@ export function createSolidInstanceRepository({
       for (const index of await oldRegistrationsOf(webId, instanceUrl)) {
         if (index.classes === null) unreadableIndexes.push(index.kind);
         else
-          registrations.push(
-            ...index.classes.map((dataClass) => ({ dataClass, index: index.kind })),
-          );
+          for (const dataClass of index.classes)
+            registrations.push({ dataClass, index: index.kind });
       }
       return { registrations, unreadableIndexes };
     },

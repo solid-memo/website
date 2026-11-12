@@ -392,6 +392,15 @@ describe("deleteGroup", () => {
     expect(shape(deleteGroup(tree("a", ["g1"]), "g1"))).toEqual(["a"]);
   });
 
+  it("puts in its place a group of more members than one call takes as arguments", () => {
+    const members = Array.from({ length: 130_000 }, (_, i) => `m${i}`);
+    expect(shape(deleteGroup(tree("a", ["g1", ...members], "d"), "g1"))).toEqual([
+      "a",
+      ...members,
+      "d",
+    ]);
+  });
+
   it("changes nothing when the group has gone, or is a deck", () => {
     const sample = tree("a");
     expect(deleteGroup(sample, "gone")).toBe(sample);

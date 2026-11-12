@@ -896,8 +896,8 @@ export function createSolidDeckRepository({
       const write = toWrite(edit, item);
       if (write === null) continue;
       const written = withCardWritten(edit, deck, write.card, write.existing, writers);
-      subjects.push(...written.subjects);
-      dropped.push(...written.dropped);
+      for (const subject of written.subjects) subjects.push(subject);
+      for (const url of written.dropped) dropped.push(url);
     }
     return { subjects, dropped };
   }

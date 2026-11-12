@@ -945,7 +945,7 @@ class Build {
           if (last?.type === "text") {
             last.value += value;
             last.end = span.end;
-            last.references.push(...references);
+            for (const reference of references) last.references.push(reference);
           } else children.push({ type: "text", ...span, value, references });
           break;
         }
@@ -1008,11 +1008,19 @@ function altOf(tokens: Token[]): string {
   const stack = [...tokens].reverse();
   while (stack.length > 0) {
     const token = stack.pop()!;
-    if (token.type === "image") stack.push(...[...token.children!].reverse());
+    if (token.type === "image") pushReversed(stack, token.children!);
     else if (token.type === "softbreak") alt += "\n";
     else if (token.nesting === 0 && token.type !== "hardbreak") alt += token.content;
   }
   return alt;
+}
+
+/**
+ * Onto `stack`, `items` last first, so they come off it in order: one at
+ * a time, never spread into one call, however many (docs/style.md#typescript).
+ */
+function pushReversed<T>(stack: T[], items: readonly T[]): void {
+  for (let i = items.length - 1; i >= 0; i--) stack.push(items[i]!);
 }
 
 // Node runs this module as it is (npm run library:check), stripping its types: erasable syntax only (tsconfig.json).
@@ -1220,9 +1228,15 @@ function held(node: Node): "code" | "link" | null {
     const next = stack.pop()!;
     if (next.type === "code" || next.type === "inlineCode") return "code";
     if (next.type === "link") found = "link";
-    if (next.type === "list") stack.push(...next.items.flat());
-    else if (next.type === "table") stack.push(...next.rows.flat(2));
-    else if ("children" in next) stack.push(...next.children);
+    const inside =
+      next.type === "list"
+        ? next.items.flat()
+        : next.type === "table"
+          ? next.rows.flat(2)
+          : "children" in next
+            ? next.children
+            : [];
+    for (const one of inside) stack.push(one);
   }
   return found;
 }
@@ -1238,7 +1252,7 @@ function phrasingText(nodes: readonly Node[]): string {
     else if (node.type === "image") text += node.alt;
     else if (node.type === "break") text += " ";
     // Emphasis, strong and links: what else a link's text may hold.
-    else stack.push(...[...(node as Extract<Node, { children: Node[] }>).children].reverse());
+    else pushReversed(stack, (node as Extract<Node, { children: Node[] }>).children);
   }
   return text;
 }

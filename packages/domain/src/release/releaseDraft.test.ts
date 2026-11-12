@@ -808,6 +808,53 @@ describe("applyDraftChange", () => {
       };
       expect(made(dangling, { kind: "delete", of: "card", id: "q-x" }).cards).toEqual(draft.cards);
     });
+
+    // More than the engine takes as the arguments of one call.
+    const MANY = 130_000;
+    const manySteps = () =>
+      Array.from({ length: MANY }, (_, position) => ({
+        id: `ch-a-many-${position}`,
+        data: { theory: { en: "Many" }, chapter: of("ch-a"), position, checkedBy: [] },
+      }));
+
+    it("deletes a chapter of more steps than one call takes as arguments", () => {
+      const draft = { ...courseDraft(), steps: manySteps() };
+      const deleted = made(draft, { kind: "delete", of: "chapter", id: "ch-a" });
+      expect(deleted.chapters.map((node) => node.id)).toEqual(["ch-b"]);
+      expect(deleted.steps).toEqual([]);
+    });
+
+    it("refuses deleting such a chapter when an earlier release published one of its steps", () => {
+      const draft = {
+        ...courseDraft({ ids: { [`ch-a-many-${MANY - 1}`]: "step" }, activities: [] }),
+        steps: manySteps(),
+      };
+      expect(applyDraftChange(draft, { kind: "delete", of: "chapter", id: "ch-a" })).toEqual({
+        refused: "published",
+        of: "step",
+        id: `ch-a-many-${MANY - 1}`,
+      });
+    });
+
+    it("deletes a card of more distractors than one call takes as arguments", () => {
+      const draft = courseDraft();
+      const distractors = Array.from({ length: MANY }, (_, i) => ({
+        id: `q-a-1a-many-${i}`,
+        data: { text: { en: `No ${i}` } },
+      }));
+      const asked = {
+        ...draft,
+        cards: draft.cards.map((node) =>
+          node.id === "q-a-1a"
+            ? { ...node, data: { ...node.data, distractor: distractors.map(({ id }) => of(id)) } }
+            : node,
+        ),
+        distractors: [...draft.distractors, ...distractors],
+      };
+      const deleted = made(asked, { kind: "delete", of: "card", id: "q-a-1a" });
+      expect(deleted.cards.map((node) => node.id)).not.toContain("q-a-1a");
+      expect(deleted.distractors).toEqual(draft.distractors);
+    });
   });
 
   describe("sources", () => {

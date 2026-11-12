@@ -139,8 +139,9 @@ export function courseProblems(model: ReleaseModel): ReleaseProblem[] {
     }
     return languages;
   };
-  for (const [iri, entry] of asked)
-    problems.push(...askedProblems(iri, entry, distractors, languagesOfOption));
+  for (const [iri, entry] of asked) {
+    for (const one of askedProblems(iri, entry, distractors, languagesOfOption)) problems.push(one);
+  }
 
   // Members of the same list that share a schema:position.
   const clashes = (members: readonly { iri: string; positions: readonly string[] }[]) => {

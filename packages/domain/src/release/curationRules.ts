@@ -96,7 +96,9 @@ export function curationProblems(model: ReleaseModel, policy: LibraryPolicy): Re
   languages(`${DCTERMS_NS}description`, model.description, policy.descriptionLanguages);
   languages(`${DCAT_NS}keyword`, model.keywords, policy.keywordLanguages);
   if (policy.describedPictures) {
-    for (const card of model.cards) problems.push(...pictureProblems(card));
+    for (const card of model.cards) {
+      for (const one of pictureProblems(card)) problems.push(one);
+    }
   }
   const themes = new Set(model.themes.map((theme) => theme.value));
   for (const theme of policy.themes.filter((theme) => !themes.has(theme))) {
@@ -104,7 +106,8 @@ export function curationProblems(model: ReleaseModel, policy: LibraryPolicy): Re
       problem(model.url, { code: "missingTheme", params: { theme } }, { field: `${DCAT_NS}theme` }),
     );
   }
-  if (policy.contact !== null) problems.push(...contactProblems(model, policy.contact));
+  if (policy.contact === null) return problems;
+  for (const one of contactProblems(model, policy.contact)) problems.push(one);
   return problems;
 }
 

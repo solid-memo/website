@@ -104,6 +104,12 @@ it("asks the library's contact, a vcard:Kind, and no one's email", () => {
       field: "http://xmlns.com/foaf/0.1/mbox",
     })),
   );
+  // More than one call takes as arguments.
+  const emails = Array.from({ length: 130_000 }, (_, i) => ({
+    subject: at(`e${i}`),
+    object: iri(`mailto:e${i}@example.com`),
+  }));
+  expect(found({ emails })).toHaveLength(emails.length);
 });
 
 it("asks a description of each picture in English and every language its card's text is in", () => {
