@@ -20,6 +20,7 @@ import { DataFactory, Parser as N3Parser, type ParserOptions, Store } from "n3";
 import { ReadLimitError, type ReadLimits } from "./interface";
 import { withBoundedHeaders } from "./linkHeader";
 import {
+  blankNodeNamer,
   limitsOf,
   namesIriUnder,
   spentOf,
@@ -80,6 +81,11 @@ export async function getSolidDatasetLinear(
   });
   // solid-client parses what it returns with the parser for its type; ours is the only one it has.
   return Object.freeze({ ...described, graphs: graphsOf(collected.quads!) });
+}
+
+/** The blank nodes of one read named anew (blankNodeNamer), with n3's terms. */
+export function readBlankNodes(): (quad: Quad) => Quad {
+  return blankNodeNamer(DataFactory);
 }
 
 /**
@@ -162,7 +168,8 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
     onComplete: (callback) => parser.onComplete(callback),
     parse: (source, resourceInfo) => {
       const quads: Quad[] = [];
-      const past = quadTally(collected.limits, collected.spent);
+      const past = quadTally(collected.limits, "renamed", collected.spent);
+      const named = readBlankNodes();
       let unparsed = false;
       parser.onError(() => {
         unparsed = true;
@@ -177,7 +184,7 @@ function collectingTurtleParser(collected: Collected, url: string): Parser {
       parser.onQuad((quad) => {
         if (collected.refused !== undefined) return;
         if (past(quad)) return refuse();
-        if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(quad);
+        if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(named(quad));
       });
       // solid-client hands the text to n3's parser as it is, which reads a stream as well.
       const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);

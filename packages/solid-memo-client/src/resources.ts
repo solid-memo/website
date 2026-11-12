@@ -18,6 +18,8 @@ import {
   type SourcedDataset,
 } from "@solid-memo/solid/client/interface";
 import {
+  type BlankLabels,
+  blankNodeNamer,
   limitsOf,
   namesIriUnder,
   limitsPast,
@@ -171,16 +173,20 @@ function resourceOf(response: Response): Resource {
  * read takes in, with limits or with none (writeTurtle); nothing
  * more is kept, and `refused` says to stop the parser. A quad that
  * names an IRI kept for subjects not saved yet is tallied and not kept
- * (LOCAL_NODE).
+ * (LOCAL_NODE). A Turtle read names its blank nodes anew (blankNodeNamer)
+ * as it keeps each quad; a JSON-LD read keeps their labels, held to the
+ * bound as a write holds them (BlankLabels).
  */
 function collector(
   url: string,
   limits: ReadLimits | undefined,
   reject: (error: Error) => void,
+  labels: BlankLabels,
   spent?: ReadsSpent,
 ) {
   const quads: Quad[] = [];
-  const past = quadTally(limits, spent);
+  const past = quadTally(limits, labels, spent);
+  const named = labels === "renamed" ? blankNodeNamer(DataFactory) : (quad: Quad) => quad;
   let refused = false;
   const refuse = (): void => {
     refused = true;
@@ -195,7 +201,7 @@ function collector(
     add(quad: Quad): void {
       if (refused) return;
       if (past(quad)) refuse();
-      else if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(quad);
+      else if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(named(quad));
     },
   };
 }
@@ -216,7 +222,7 @@ function parseTurtle(
   spent?: ReadsSpent,
 ): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
-    const { quads, add, refuse, refused } = collector(baseIRI, limits, reject, spent);
+    const { quads, add, refuse, refused } = collector(baseIRI, limits, reject, "renamed", spent);
     const parser = new Parser({ ...TURTLE_OPTIONS, baseIRI });
     let failed = false;
     // n3's parser reads a stream as such an object, as its own stream parser hands it one.
@@ -261,10 +267,15 @@ function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promis
         },
       },
     });
-    const { quads, add } = collector(baseIRI, limits, (error) => {
-      parser.destroy();
-      reject(error);
-    });
+    const { quads, add } = collector(
+      baseIRI,
+      limits,
+      (error) => {
+        parser.destroy();
+        reject(error);
+      },
+      "kept",
+    );
     parser.on("data", add);
     parser.on("error", reject);
     parser.on("end", () => resolve(quads));

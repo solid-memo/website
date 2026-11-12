@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Quad, Term } from "@rdfjs/types";
+import type { BlankNode, DataFactory, Quad, Term } from "@rdfjs/types";
 import { HASHED_CHARACTERS, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
 import { ReadLimitError, type ReadLimits } from "./interface";
 
@@ -433,11 +433,82 @@ export function termKeyLength(term: Term): number {
   return value.length + 2 + Math.max(named, escapedCharacters(value) + written);
 }
 
-/** Whether a term of a quad is longer than MAX_TERM_CHARACTERS (termKeyLength). */
-function termPast({ subject, predicate, object, graph }: Quad): boolean {
-  return [subject, predicate, object, graph].some(
-    (term) => termKeyLength(term) > MAX_TERM_CHARACTERS,
-  );
+/**
+ * How many characters more a blank node's label may have as it is read
+ * back than as it is written: a parser names the labels it reads anew,
+ * n3 with a prefix of its own (`b0_`) before each.
+ */
+const BLANK_LABEL_ROOM = 32;
+
+/**
+ * Whether a term is longer than MAX_TERM_CHARACTERS (termKeyLength) as
+ * it would be read back: a blank node with BLANK_LABEL_ROOM for the
+ * prefix a parser puts before its label. A write (writableTerms.ts)
+ * refuses such a term, and so does a read that keeps its labels to
+ * write them back as they are (BlankLabels), so whatever a read keeps
+ * can be written back whole.
+ */
+export function isTermTooLong(term: Term): boolean {
+  const room = term.termType === "BlankNode" ? BLANK_LABEL_ROOM : 0;
+  return termKeyLength(term) + room > MAX_TERM_CHARACTERS;
+}
+
+/**
+ * How many reads have named their blank nodes (blankNodeNamer), so that
+ * no two in one page (or one process) name one alike. Nothing relies on
+ * it across clients: a label means nothing outside its document.
+ */
+let namingReads = 0;
+
+/**
+ * The blank nodes of one Turtle read, named anew: each label the parser gave
+ * one gets a short label of its own, the same for each mention of it. The
+ * labels are unique within one page (or one process) only, as they come
+ * from a counter of that page (namingReads): no two reads there name a
+ * blank node alike. A parser puts a prefix of its own before each label
+ * it reads (n3, `b0_`), so a label kept as read and written
+ * back would come back longer with each save of its document, to past
+ * the bound on a term (isTermTooLong): the read would refuse a document
+ * the app had written itself. A label means nothing outside its
+ * document. A quad is named once quadTally has held its labels to the
+ * bound, so no label past it keys the names. A JSON-LD read keeps its
+ * labels, held to the bound as a write holds them (BlankLabels), and a
+ * write holds them to Turtle's grammar too (writableTerms.ts).
+ */
+export function blankNodeNamer(factory: DataFactory): (quad: Quad) => Quad {
+  const prefix = `r${namingReads++}_`;
+  const names = new Map<string, BlankNode>();
+  const named = <T extends Term>(term: T): T => {
+    if (term.termType !== "BlankNode") return term;
+    let name = names.get(term.value);
+    if (name === undefined) {
+      name = factory.blankNode(`${prefix}${names.size}`);
+      names.set(term.value, name);
+    }
+    return name as T;
+  };
+  return (quad) =>
+    [quad.subject, quad.object, quad.graph].some((term) => term.termType === "BlankNode")
+      ? factory.quad(named(quad.subject), quad.predicate, named(quad.object), named(quad.graph))
+      : quad;
+}
+
+/**
+ * What a read does with the labels of its blank nodes. A Turtle read
+ * names them anew (blankNodeNamer), so a label is held to the bound as
+ * the parser gave it, its prefix included, and what is written back is
+ * the short name. A JSON-LD read keeps them, and writes them back as
+ * they are, so a label is held to the bound as a write holds it, with
+ * room for the prefix a later Turtle read puts before it (isTermTooLong).
+ * Either way, whatever a read keeps can be written back and read again.
+ */
+export type BlankLabels = "renamed" | "kept";
+
+/** Whether a term of a quad is past the bound, its blank nodes measured as `labels` says. */
+function termPast({ subject, predicate, object, graph }: Quad, labels: BlankLabels): boolean {
+  const past =
+    labels === "kept" ? isTermTooLong : (term: Term) => termKeyLength(term) > MAX_TERM_CHARACTERS;
+  return [subject, predicate, object, graph].some(past);
 }
 
 /**
@@ -465,16 +536,18 @@ export function namesIriUnder(
  * one triple, into `spent` (by default the parse's own), and its subject,
  * in this parse, where the limits bound subjects, and says whether a
  * count is now past its limit, or the triple has a term longer than
- * MAX_TERM_CHARACTERS: that, with no limits too. The set of subjects
+ * MAX_TERM_CHARACTERS, its blank nodes measured as the read keeps them
+ * (BlankLabels): that, with no limits too. The set of subjects
  * holds one past its limit at most, as a read stops there.
  */
 export function quadTally(
   limits: ReadLimits | undefined,
+  labels: BlankLabels,
   spent: ReadsSpent = noneSpent(),
 ): (quad: Quad) => boolean {
   const subjects = new Set<string>();
   return (quad) => {
-    if (termPast(quad)) return true;
+    if (termPast(quad, labels)) return true;
     if (limits === undefined) return false;
     const { subject, predicate, object, graph } = quad;
     spent.quads++;

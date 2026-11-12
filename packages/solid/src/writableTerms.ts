@@ -5,7 +5,7 @@
 import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isWritableIri } from "@solid-memo/domain/webId";
-import { MAX_TERM_CHARACTERS, termKeyLength } from "./client/readLimits";
+import { isTermTooLong, MAX_TERM_CHARACTERS } from "./client/readLimits";
 
 /** The characters a Turtle name may start with (PN_CHARS_U), as ranges of a character class. */
 const PN_CHARS_U =
@@ -86,32 +86,19 @@ export function unwritableTermOf(quad: Quad): Term | undefined {
 }
 
 /**
- * How many characters more a blank node's label may have as it is read
- * back than as it is written: a parser names the labels it reads anew,
- * n3 with a prefix of its own (`b0_`) before each.
- */
-const BLANK_LABEL_ROOM = 32;
-
-/**
- * Whether a term is longer than any read takes in (MAX_TERM_CHARACTERS),
- * as it would be read back: a document holding one could no longer be
- * read at all.
- */
-function isTooLong(term: Term): boolean {
-  const room = term.termType === "BlankNode" ? BLANK_LABEL_ROOM : 0;
-  return termKeyLength(term) + room > MAX_TERM_CHARACTERS;
-}
-
-/**
  * Throws unwritableTerm, naming the term, for the first quad with a term
  * Turtle cannot write as it is, and termTooLong for one with a term
- * longer than any read takes in.
+ * too long to be read back (isTermTooLong). A read that keeps its blank
+ * nodes' labels holds them to the same measure, and one that names them
+ * anew writes back short ones (BlankLabels), so no term a read keeps is
+ * refused here.
  */
 export function refuseUnwritable(quads: Iterable<Quad>): void {
   for (const quad of quads) {
     const term = unwritableTermOf(quad);
     if (term !== undefined) throw new AppError("unwritableTerm", { term: JSON.stringify(term) });
     const terms = [quad.subject, quad.predicate, quad.object, quad.graph];
-    if (terms.some(isTooLong)) throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
+    if (terms.some(isTermTooLong))
+      throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
   }
 }

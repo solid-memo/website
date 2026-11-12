@@ -1083,18 +1083,23 @@ flowchart LR
   datatype after it. Each `"`, `\`, line feed and carriage return in
   the text counts twice, as N-Triples escapes it. The other is its id
   in the RDF/JS libraries the app reads with: a blank node with `_:`
-  before its label, a literal with its direction too. V8, the
-  JavaScript engine of Chrome and Edge, hashes a longer string by its
-  length alone. A map keyed by many such strings of one length then
-  compares each key with every other, in time growing with the square
-  of their number. The app, and the libraries it reads data with, key
-  their maps by terms, each by one of those names. The shape engine's
-  library counts the checks of a node against a shape by one string
-  joined from the two, so the app counts them by the two terms instead,
-  and turns the library's count off. A JSON-LD deck file is refused
-  when any of its strings, an object's key among them, is longer than
-  the bound, before it is parsed: a key the file's context doesn't map
-  makes no term.
+  before its label, a literal with its direction too. The parser puts
+  a prefix of its own before each label it reads, so a label written
+  back comes back longer. A write counts a blank node 32 characters
+  more for it (`isTermTooLong`). A Turtle read names each blank node
+  anew, short, so it never writes back the label it read. A JSON-LD
+  read keeps its labels, so it counts them as a write does
+  (`BlankLabels`). V8, the JavaScript engine of Chrome and Edge,
+  hashes a longer string by its length alone. A map keyed by many
+  such strings of one length then compares each key with every other,
+  in time growing with the square of their number. The app, and the
+  libraries it reads data with, key their maps by terms, each by one
+  of those names. The shape engine's library counts the checks of a
+  node against a shape by one string joined from the two, so the app
+  counts them by the two terms instead, and turns the library's count
+  off. A JSON-LD deck file is refused when any of its strings, an
+  object's key among them, is longer than the bound, before it is
+  parsed: a key the file's context doesn't map makes no term.
   Some keys are made of several terms or texts: a problem the release
   check names, a link the shape check looks up, a part or a statement
   of a draft, a card's two sides. Each of those is a key of its own in
@@ -1120,11 +1125,12 @@ flowchart LR
   `provenanceOf` takes too). The shape check refuses a release with a
   moved IRI past the bound (`termTooLong`), as it couldn't be written
   there. The app refuses to write a longer term (`termTooLong`), so
-  whatever it writes it can read back. A document written before the
-  bound, with a longer text in it, can't be read any more: the app
-  shows the read's error and offers no way to shorten the text. The
-  longest text in `decks/` is about a third of the bound, and a test
-  fails once a term there reaches half of it.
+  whatever it writes it can read back. Each read holds a term to the
+  bound as it keeps it, so whatever it keeps it can write back. A
+  document written before the bound, with a longer text in it, can't
+  be read any more: the app shows the read's error and offers no way
+  to shorten the text. The longest text in `decks/` is about a third
+  of the bound, and a test fails once a term there reaches half of it.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the

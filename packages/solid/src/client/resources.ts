@@ -35,6 +35,7 @@ import { boundedHeadersFetch, withBoundedHeaders } from "./linkHeader";
 import {
   getSolidDatasetLinear as libraryGetSolidDatasetLinear,
   LOCAL_NODE,
+  readBlankNodes,
   turtleParser,
 } from "./linearDataset";
 import {
@@ -445,7 +446,10 @@ export function parseQuads(
 ): Promise<Quad[]> {
   return new Promise((resolve, reject) => {
     const quads: Quad[] = [];
-    const past = quadTally(limits);
+    // A Turtle read's blank nodes are named anew; JSON-LD's keep their labels, held to the bound as a write
+    // holds them (BlankLabels) and to Turtle's grammar on write.
+    const past = quadTally(limits, format === "turtle" ? "renamed" : "kept");
+    const named = format === "turtle" ? readBlankNodes() : (quad: Quad) => quad;
     let refused = false;
     const refuse = () => {
       refused = true;
@@ -460,7 +464,7 @@ export function parseQuads(
         refuse();
         return false;
       }
-      if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(quad);
+      if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(named(quad));
       return true;
     };
     const done = () => resolve(quads);

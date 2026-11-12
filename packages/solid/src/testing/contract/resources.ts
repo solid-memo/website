@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { Quad } from "@rdfjs/types";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
@@ -1022,6 +1023,60 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(quads.map((one) => [one.subject.value, one.graph.value])).toEqual([
         [`${URL_}#a`, "https://example.com/g"],
       ]);
+    });
+
+    it("names a Turtle read's blank nodes anew, short, one name for each label, none another read's", async () => {
+      // A label as read would carry the parser's prefix; written back and read again, it would grow.
+      const label = `b${"x".repeat(1_000)}`;
+      const turtle = `_:${label} <${EX}p> _:${label}, _:other, <#a> .`;
+      const blanks = (quads: Quad[]) =>
+        quads
+          .flatMap(({ subject, object }) => [subject, object])
+          .filter((term) => term.termType === "BlankNode")
+          .map((term) => term.value);
+      const first = blanks(await parseQuads(turtle, "turtle", URL_));
+      const second = blanks(await parseQuads(turtle, "turtle", URL_));
+      const [subject, object, again, other, last] = first;
+      expect([object, again, last]).toEqual([subject, subject, subject]);
+      expect(other).not.toBe(subject);
+      expect(first.every((name) => name.length < 20)).toBe(true);
+      expect(second.filter((name) => first.includes(name))).toEqual([]);
+    });
+
+    it("holds a blank node's label to the bound as the read keeps it, so what it keeps is written and read back", async () => {
+      // A Turtle read names a label anew, so it is held as the parser gave it, the parser's prefix in it. A
+      // JSON-LD read keeps it and writes it back as it is, so it is held as a write holds it: with room for
+      // the prefix a later Turtle read puts before it.
+      const turtleOf = (length: number) => `<#a> <${EX}p> _:${"x".repeat(length)}, "y" .`;
+      const jsonLdOf = (length: number) =>
+        JSON.stringify({ "@id": "#a", [`${EX}p`]: [{ "@id": `_:${"x".repeat(length)}` }, "y"] });
+      await expect(
+        parseQuads(turtleOf(MAX_TERM_CHARACTERS - 40), "turtle", URL_),
+      ).resolves.toHaveLength(2);
+      await expect(
+        parseQuads(turtleOf(MAX_TERM_CHARACTERS - 1), "turtle", URL_),
+      ).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      await expect(
+        parseQuads(jsonLdOf(MAX_TERM_CHARACTERS - 33), "jsonld", URL_),
+      ).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      for (const length of [
+        MAX_TERM_CHARACTERS - 36,
+        MAX_TERM_CHARACTERS - 35,
+        MAX_TERM_CHARACTERS - 34,
+      ]) {
+        const quads = await parseQuads(jsonLdOf(length), "jsonld", URL_);
+        const written = await solidDatasetAsTurtle(rdf.datasetFromQuads(quads));
+        await expect(
+          parseQuads(written, "turtle", URL_),
+          `label of ${length}`,
+        ).resolves.toHaveLength(2);
+        const dataset = await getSolidDatasetLinear(URL_, { fetch: turtleAt(written) });
+        expect(getThing(dataset, `${URL_}#a`), `label of ${length}`).not.toBeNull();
+      }
     });
 
     it("leaves out a quad that names an IRI kept for subjects made by name, in any format", async () => {

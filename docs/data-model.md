@@ -1853,10 +1853,18 @@ by one.
 - **No write holds a term longer than 16,383 characters**, as no read
   accepts one ([deck-library.md](deck-library.md#from-a-link)). The
   write is refused with `termTooLong` before anything is sent. A
-  document saved before the bound may hold a longer text, such as a
-  card's back, a step's theory or a catalog entry's keywords. Its read
-  now fails with a `ReadLimitError`. The app has no way to shorten the
-  text, so it has to be edited outside the app.
+  write gives a blank node 32 characters of room for the prefix a
+  parser puts before its label (`isTermTooLong`). A Turtle read gives
+  each blank node a short label of its own (`blankNodeNamer`), so the
+  label it writes back is short and doesn't grow with each save. A
+  JSON-LD read keeps its labels and writes them back as they are, so
+  it holds a label to the bound with the same room as a write
+  (`BlankLabels`). Either way, a term a read keeps never blocks a
+  later save of the whole document, and what the app writes it can
+  read again. A document saved before the bound may hold a longer
+  text, such as a card's back, a step's theory or a catalog entry's
+  keywords. Its read now fails with a `ReadLimitError`. The app has no
+  way to shorten the text, so it has to be edited outside the app.
 - **What is read can be written back.** An IRI that `new URL` refuses,
   such as `<http://[x>`, is still an IRI to the Turtle parser, but the
   client library writes no such IRI. So no value the app reads into
