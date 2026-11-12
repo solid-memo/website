@@ -530,6 +530,31 @@ describe("Workspace", () => {
     expect(await screen.findByText("indexes unreachable")).toBeInTheDocument();
   });
 
+  it("keeps the instance open when reading the list again fails", async () => {
+    let refused = false;
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    renderWorkspace(
+      makeUseCases({
+        listInstances: vi.fn(async () => {
+          if (refused) throw new Error("401 Unauthorized");
+          return [instanceA];
+        }),
+      }),
+      queryClient,
+    );
+    expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
+
+    refused = true;
+    await act(() => queryClient.refetchQueries({ queryKey: queryKeys.instances(session.webId) }));
+    // The query tells the page on a timer of its own.
+    await act(() => new Promise((resolve) => setTimeout(resolve)));
+
+    expect(queryClient.getQueryState(queryKeys.instances(session.webId))?.status).toBe("error");
+    expect(screen.getByRole("heading", { name: "Decks" })).toBeInTheDocument();
+    expect(screen.queryByText("401 Unauthorized")).toBeNull();
+    expect(window.location.hash).not.toContain("new-instance");
+  });
+
   it("goes straight home with exactly one instance, showing it in the bar", async () => {
     renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => [instanceA]) }));
     expect(await screen.findByRole("heading", { name: "Decks" })).toBeInTheDocument();
@@ -2891,6 +2916,49 @@ describe("Workspace", () => {
         "sv",
       );
       expect(document.querySelector(".card-front")).toHaveTextContent("vatten");
+    });
+
+    it("keeps a card's page open when reading its deck and cards again fails", async () => {
+      let refused = false;
+      const refuse = <T,>(read: T) => {
+        if (refused) throw new Error("401 Unauthorized");
+        return read;
+      };
+      window.history.replaceState(
+        null,
+        "",
+        routeToHash({
+          screen: "card",
+          instanceUrl: instanceA.url,
+          deckUrl: deck.url,
+          cardUrl: card.url,
+        }),
+      );
+      const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          listDecks: vi.fn(async () => refuse([deck])),
+          listCards: vi.fn(async () => refuse([card])),
+        }),
+        queryClient,
+      );
+      expect(await screen.findByRole("heading", { name: "Card" })).toBeInTheDocument();
+
+      refused = true;
+      await act(() => queryClient.refetchQueries({ queryKey: queryKeys.decks(instanceA.url) }));
+      await act(() =>
+        queryClient.refetchQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+      );
+      // The queries tell the page on a timer of their own.
+      await act(() => new Promise((resolve) => setTimeout(resolve)));
+
+      expect(queryClient.getQueryState(queryKeys.decks(instanceA.url))?.status).toBe("error");
+      expect(queryClient.getQueryState(queryKeys.cards(deck.cardsDocumentUrl))?.status).toBe(
+        "error",
+      );
+      expect(screen.getByRole("heading", { name: "Card" })).toBeInTheDocument();
+      expect(screen.queryByText("401 Unauthorized")).toBeNull();
     });
 
     it("shows a loading state, then an error, when the cards cannot be read", async () => {
