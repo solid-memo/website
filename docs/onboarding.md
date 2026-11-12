@@ -52,6 +52,14 @@ study into their Pod, in an instance they have or a new one
 onboarding: `SessionGateway.restore()` reports `origin: "login"` only
 right after a login redirect.
 
+The WebID form has a box to remember the WebID on this device,
+unchecked at first. Checked, the WebID waits in the tab's session storage
+while the learner is at their provider. When the login comes back with
+that same WebID, the browser's storage keeps it. The next landing fills
+the form with it and checks the box. A failed login keeps nothing. A
+login with the box unchecked forgets the remembered WebID, and a logout
+leaves it in place ([privacy.md](privacy.md#in-the-browser)).
+
 Onboarding ends on an instance's deck list. A new instance's empty list
 offers the deck library's course for newcomers under its heading,
 started in one click ([courses.md](courses.md#the-course-for-newcomers)).

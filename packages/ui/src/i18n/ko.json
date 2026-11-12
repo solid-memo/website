@@ -1546,7 +1546,8 @@
   "webIdForm": {
     "help": "WebID는 본인을 식별하는 웹 주소로, Pod 제공자가 발급해 줘요. 로그인은 제공자의 페이지에서 해요. Solid Memo는 비밀번호를 절대 볼 수 없어요.",
     "redirecting": "이동하는 중…",
-    "logIn": "Solid로 로그인"
+    "logIn": "Solid로 로그인",
+    "remember": "이 기기에서 내 WebID 기억하기"
   },
   "workspace": {
     "loadingInstances": "Solid Memo 인스턴스를 불러오는 중…",

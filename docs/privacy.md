@@ -68,16 +68,19 @@ before any pod is reached:
 | `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
 | `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
+| `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts` |
 | `solid-memo:collapsedGroups.<instance URL>` | which deck groups the learner folded | `remembered.ts` |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
 | `solid-memo:logout` | set and taken off at once to tell other tabs of a logout, only where the browser has no `BroadcastChannel`; holds nothing | [`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts) |
 | `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
 
 A logout leaves these keys in place, `solid-memo:palette-colors`,
-`solid-memo:collapsedGroups.<instance URL>` and
+`solid-memo:webId`, `solid-memo:collapsedGroups.<instance URL>` and
 `solid-memo:studioInstances.v1` among them. They hold no credential.
-They do hold instance, deck and draft URLs and a palette's colors and
-name, which anyone using the same browser profile can read. They stay
+They do hold instance, deck and draft URLs, a palette's colors and
+name, and a remembered WebID, which anyone using the same browser
+profile can read. That is why the WebID is kept only when the learner
+asks, and a login with the box unchecked forgets it. They stay
 because they are this device's and not the session's. The folds, saved
 views and pins are kept nowhere else, so removing them at a logout
 would lose them for good. The palette's copy is what the next first
@@ -92,6 +95,10 @@ identity provider (`solid-memo:provider-redirect`). The mark stays
 until the next restore in that tab ends, or the tab closes. Until the
 next page load, it holds the address of the provider a silent restore
 went to and when it went (`solid-memo:restore-attempt`).
+A login with the box to remember the WebID checked holds that WebID
+(`solid-memo:login-webId`, `remembered.ts`)
+until the next page load, which keeps it as `solid-memo:webId` if the
+login succeeded with it.
 The authentication library under the sign-in client
 ([`client/session.ts`](../packages/solid/src/client/session.ts),
 `@inrupt/solid-client-authn-browser`) stores in the browser what it needs to restore the session, such as

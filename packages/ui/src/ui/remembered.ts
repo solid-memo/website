@@ -4,6 +4,7 @@
 
 import { useState } from "preact/hooks";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
+import { validateWebId } from "@solid-memo/domain/webId";
 
 /** Values kept past their screen, for the life of the page. */
 const memory = new Map<string, unknown>();
@@ -117,5 +118,74 @@ export function rememberCollapsed(
     storage().setItem(collapsedKey(instanceUrl), JSON.stringify(urls));
   } catch {
     // Without storage the list unfolds again on the next visit; nothing else depends on it.
+  }
+}
+
+export const webIdKey = "solid-memo:webId";
+export const loginWebIdKey = "solid-memo:login-webId";
+
+/**
+ * The WebID the learner asked this device to remember, once a login
+ * with it succeeded (issue #741). Kept in the browser's storage, out of
+ * the pod: it is no credential, but anyone using the same browser
+ * profile can read it, which is why it is kept only when asked for.
+ * Storage that is missing, refuses or holds something other than a
+ * valid WebID remembers none.
+ */
+export function rememberedWebId(
+  storage: () => Storage = () => globalThis.localStorage,
+): string | null {
+  let stored: string | null;
+  try {
+    stored = storage().getItem(webIdKey);
+  } catch {
+    return null;
+  }
+  if (stored === null) return null;
+  const validation = validateWebId(stored);
+  return validation.ok && validation.webId === stored ? stored : null;
+}
+
+/**
+ * Notes, as the learner leaves for their provider, whether to remember
+ * the WebID they typed. Not remembering it forgets the one kept now; to
+ * remember it, it waits in the tab's session storage for the login to
+ * succeed (settleLoginWebId), so that a WebID whose login fails is
+ * never kept.
+ */
+export function noteLoginWebId(
+  webId: string,
+  remember: boolean,
+  storage: () => Storage = () => globalThis.localStorage,
+  session: () => Storage = () => globalThis.sessionStorage,
+): void {
+  try {
+    if (remember) {
+      session().setItem(loginWebIdKey, webId);
+    } else {
+      session().removeItem(loginWebIdKey);
+      storage().removeItem(webIdKey);
+    }
+  } catch {
+    // Without storage the WebID is typed again next time, as before it was offered.
+  }
+}
+
+/**
+ * After the page loads back from a login, or a load without one: keeps
+ * the WebID noted to be remembered if the login succeeded with that
+ * very WebID (`loggedInAs`, null for none), and drops the note either way.
+ */
+export function settleLoginWebId(
+  loggedInAs: string | null,
+  storage: () => Storage = () => globalThis.localStorage,
+  session: () => Storage = () => globalThis.sessionStorage,
+): void {
+  try {
+    const noted = session().getItem(loginWebIdKey);
+    session().removeItem(loginWebIdKey);
+    if (noted !== null && noted === loggedInAs) storage().setItem(webIdKey, noted);
+  } catch {
+    // Without storage nothing is remembered; the login itself is unaffected.
   }
 }

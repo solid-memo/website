@@ -1621,7 +1621,8 @@
   "webIdForm": {
     "help": "Your WebID is the web address that identifies you, given to you by your Pod provider. You will log in on your provider's own page — Solid Memo never sees your password.",
     "redirecting": "Redirecting…",
-    "logIn": "Log in with Solid"
+    "logIn": "Log in with Solid",
+    "remember": "Remember my WebID on this device"
   },
   "workspace": {
     "loadingInstances": "Loading your Solid Memo instances…",
