@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CardProgressReport, DeckProgress } from "@solid-memo/application/statistics";
+import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import type { ReviewState } from "@solid-memo/domain/review";
@@ -298,5 +299,57 @@ describe("CardProgressContainer", () => {
       await screen.findByText("Your cards' progress cannot be read just now."),
     ).toBeInTheDocument();
     expect(screen.queryByText("offline")).toBeNull();
+  });
+
+  it("shows the decks it could read, says quietly that not all could be, and reads them again while the reason may pass", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    try {
+      const noAnswer = new AppError("podNoAnswer", { url: "https://slow.example/", seconds: 10 });
+      const getCardProgress = vi
+        .fn<() => Promise<CardProgressReport>>()
+        .mockResolvedValueOnce({ ...report, leftOut: [noAnswer] })
+        .mockResolvedValue(report);
+      withQueries(
+        <CardProgressContainer
+          useCases={makeUseCasesFake({ getCardProgress })}
+          instance={INSTANCE}
+        />,
+      );
+      expect(
+        await screen.findByText("Your cards' progress cannot be read just now."),
+      ).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: "Maturity by deck" })).toBeInTheDocument();
+      vi.advanceTimersByTime(60_000);
+      await waitFor(() =>
+        expect(screen.queryByText("Your cards' progress cannot be read just now.")).toBeNull(),
+      );
+      expect(getCardProgress).toHaveBeenCalledTimes(2);
+      // Read in full, it is not read again by itself.
+      vi.advanceTimersByTime(120_000);
+      expect(getCardProgress).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("reads a progress that left a deck out for good not again by itself", async () => {
+    vi.useFakeTimers({ toFake: ["setInterval", "clearInterval"] });
+    try {
+      const gone = new AppError("deckGone", { deck: "Rivers" });
+      const getCardProgress = vi.fn(async () => ({ ...report, leftOut: [gone] }));
+      withQueries(
+        <CardProgressContainer
+          useCases={makeUseCasesFake({ getCardProgress })}
+          instance={INSTANCE}
+        />,
+      );
+      expect(
+        await screen.findByText("Your cards' progress cannot be read just now."),
+      ).toBeInTheDocument();
+      vi.advanceTimersByTime(120_000);
+      expect(getCardProgress).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

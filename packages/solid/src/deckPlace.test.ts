@@ -259,6 +259,35 @@ describe("a deck whose documents do not say they are its own", () => {
     expect(await p.urls()).toEqual(expect.arrayContaining([CARD, DIARY]));
   });
 
+  it("reads both at once, within the check's budget when they are outside the instance's folder: once it is spent, one not read counts as unclaimed, unread", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    await plant(p, deck, CARD, DIARY);
+    const [listed] = await p.decks.listDecks(BOB);
+    // A server that never answers a read of either.
+    const asked: string[] = [];
+    const decks = createSolidDeckRepository({
+      fetch: (async (input, init) => {
+        const url = String(input instanceof Request ? input.url : input);
+        if (url !== CARD && url !== DIARY) return p.fetch(input, init);
+        asked.push(url);
+        return new Promise<Response>(() => {});
+      }) as typeof globalThis.fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "id",
+    });
+    const budget = new AbortController();
+    const found = decks.unclaimedDocuments(listed!, budget.signal);
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    expect(asked).toEqual([CARD, DIARY]);
+    budget.abort();
+    await expect(found).resolves.toEqual([CARD, DIARY]);
+    // Spent before, it reads neither.
+    asked.length = 0;
+    await expect(decks.unclaimedDocuments(listed!, budget.signal)).resolves.toEqual([CARD, DIARY]);
+    expect(asked).toEqual([]);
+  });
+
   it("counts one that cannot be read as RDF as unclaimed, and leads no write there", async () => {
     const p = await pod();
     const deck = await p.decks.createDeck(BOB, { en: "Spanish" });

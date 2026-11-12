@@ -267,21 +267,30 @@ the pod fence didn't check. A write that redirects is refused
 fetch also refuses any address, read or write, that the proof of the
 user's login would name another server for (`credentialsRefused`).
 
-A read of another server, as the user or as no one, has a deadline
+A read of another server, as the user or as no one, has deadlines
 ([readDeadline.ts](../packages/solid/src/readDeadline.ts),
-`withReadDeadline`). If the server hasn't started to answer within 10
-seconds, the read is aborted and fails with `podNoAnswer`, which the app
-tries again ([style.md](style.md#typescript)). Without it, a request the
-server never answers keeps a screen loading for good. The deadline ends
-when the answer's headers arrive, so a large document takes as long as
-it needs. A read of a release added from a link has two minutes in all
-as well, its body included and its check not
-([deck-library.md](deck-library.md#from-a-link)). Its host is anyone's
-choice, and the screens that wait on it with others wait for it too. The
-guest's pod, in this browser, has no deadline. A write has none either:
-one cut off might still be saved, and only its answer says whether it
-was. Adding an answer to the log is the one exception: it's added whole,
-so one given up is added again later
+`withReadDeadline`). The server has 10 seconds to start to answer, and
+10 seconds for each next part of the body. A read of a server that isn't
+the user's pod, as no one or in an instance registered elsewhere, has
+two minutes for the whole read as well, its body included. Past any of
+them, the read is aborted and fails with `podNoAnswer`, which the app
+tries again ([style.md](style.md#typescript)). Without them, a server
+that never answers, or answers and then sends its body slowly or not at
+all, keeps a screen loading for good. A read of the user's own pod takes
+as long in all as its body keeps coming, so a large document on a slow
+connection still downloads. A catalog may name a deck's documents on any
+server, and the data check and the statistics wait on reading them.
+The check gives the documents outside the instance's folder one minute
+in all and names those it couldn't read; every other read ends at its
+own deadline ([validation.md](validation.md#flow)). The statistics
+leave a deck whose documents fail to be read out until a later read. Two minutes is far longer than the largest
+release in the library takes to download. The deck library holds a read
+of a release added from a link to two minutes of its own too, its check
+left out ([deck-library.md](deck-library.md#from-a-link)). The guest's
+pod, in this browser, has no deadline. A write has none either: one cut
+off might still be saved, and only its answer says whether it was.
+Adding an answer to the log is the one exception: it's added whole, so
+one given up is added again later
 ([data-model.md](data-model.md#the-answer-log)).
 
 The release publisher alone gets a second fetch for its access

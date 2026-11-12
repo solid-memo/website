@@ -213,8 +213,12 @@ All three ask for the months at once, and a month already being read
 is read once for all, unless an answer was written meanwhile, which
 that read may miss; then what's kept serves each. When the months can't
 be read, what is hard is left out and where the cards stand still
-shows. When the cards can't be read, a quiet line says so and the rest
-of the page works on. When the courses can't be, they're left out.
+shows. A deck whose cards can't be read is left out of where the cards
+stand, and the other decks still show under a quiet line that says
+the progress can't be read for now. When the reason may pass, the
+progress is read again each minute the page is shown. When no deck's
+cards can be read, the quiet line shows alone and the rest of the page
+works on. When the courses can't be, they're left out.
 
 ## Loading
 

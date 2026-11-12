@@ -138,6 +138,14 @@ function decksByDocument(decks: readonly Deck[]): (url: string) => readonly Deck
   };
 }
 
+/**
+ * How long one check may read, in all, the decks' documents outside
+ * their instance's folder to find which are unclaimed, in milliseconds
+ * (unclaimedDecksOf): a catalog may name a thousand of them on servers
+ * that answer slowly, and every deck page waits on the check.
+ */
+const UNCLAIMED_READS_MS = 60_000;
+
 /** The address of the document `url` is in, as a request sends it (canonicalUrlOf); null for one that is no URL. */
 function canonicalDocumentOf(url: string): string | null {
   return canonicalUrlOf(documentUrlOf(url));
@@ -221,22 +229,35 @@ export function createInstanceCheckUseCases({
       return documents.filter((_, index) => !inside[index]);
     };
   }
-  /** The decks whose documents are unclaimed, each with those documents (DeckRepository.unclaimedDocuments) and which of them may not be claimed (outsidePodTest). */
+  /**
+   * The decks whose documents are unclaimed, each with those documents
+   * (DeckRepository.unclaimedDocuments) and which of them may not be
+   * claimed (outsidePodTest). The documents outside the instance's
+   * folder, which a catalog may name on anyone's server, are read within
+   * UNCLAIMED_READS_MS in all: one not read by then counts as unclaimed,
+   * so a server that answers slowly holds the check up no longer.
+   */
   async function unclaimedDecksOf(
     instanceUrl: string,
     decks: readonly Deck[],
   ): Promise<UnclaimedDeck[]> {
     const outsidePodOf = outsidePodTest(instanceUrl);
-    const found = await mapAtOnce(decks, async (deck) => {
-      const documents = await deckRepository.unclaimedDocuments(deck);
-      return {
-        deckUrl: deck.url,
-        title: deck.title,
-        documents,
-        outsidePod: await outsidePodOf(documents),
-      };
-    });
-    return found.filter((deck) => deck.documents.length > 0);
+    const budget = new AbortController();
+    const timer = setTimeout(() => budget.abort(), UNCLAIMED_READS_MS);
+    try {
+      const found = await mapAtOnce(decks, async (deck) => {
+        const documents = await deckRepository.unclaimedDocuments(deck, budget.signal);
+        return {
+          deckUrl: deck.url,
+          title: deck.title,
+          documents,
+          outsidePod: await outsidePodOf(documents),
+        };
+      });
+      return found.filter((deck) => deck.documents.length > 0);
+    } finally {
+      clearTimeout(timer);
+    }
   }
   /**
    * The instance's documents, then its drafts': each with where it is,

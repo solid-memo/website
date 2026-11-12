@@ -132,7 +132,10 @@ export interface StatisticsUseCases {
    * (confusionsOf): of every deck of the instance, or of the one given.
    * Reads each deck's cards and review states once, and keeps its
    * schedule in the digest while at it; the log's months as
-   * getStatistics reads them, sharing what is kept.
+   * getStatistics reads them, sharing what is kept. A deck whose cards
+   * or review states cannot be read is left out, so it holds back none
+   * of the others, and why is given (leftOut); when none can be, it
+   * fails as the first such read did.
    */
   getCardProgress(
     instanceUrl: string,
@@ -213,6 +216,12 @@ export interface CardProgressReport {
   today: string;
   /** Each deck's figures, as its own caps make them. */
   decks: DeckProgress[];
+  /**
+   * Why each deck left out could not be read, its cards or its review
+   * states, as the read failed; none when every deck was read. The
+   * figures then say nothing of those decks, and a later read may.
+   */
+  leftOut?: unknown[];
 }
 
 /** Where one deck's prompts stand, and its reviews to come (CardProgressReport). */
@@ -519,7 +528,8 @@ export function createStatisticsUseCases({
           ),
         );
       })().catch(() => new Map<string, Answer[]>());
-      const progress = await Promise.all(
+      // Each deck on its own: one whose documents cannot be read is left out, not the others with it.
+      const settled = await Promise.allSettled(
         decks.map(async (one) => {
           const [{ cards, reviews, schedule }, byDeck] = await Promise.all([
             scheduleNow(instanceUrl, one, at, prefs),
@@ -552,7 +562,14 @@ export function createStatisticsUseCases({
           };
         }),
       );
-      return { today, decks: progress };
+      const progress = settled.flatMap((one) => (one.status === "fulfilled" ? [one.value] : []));
+      const leftOut = settled.flatMap((one) =>
+        one.status === "rejected" ? [one.reason as unknown] : [],
+      );
+      if (leftOut.length === 0) return { today, decks: progress };
+      // When no deck can be read, the progress cannot be either.
+      if (progress.length === 0) throw leftOut[0];
+      return { today, decks: progress, leftOut };
     },
     async getCourseStatistics(instanceUrl, at, courses) {
       if (courses.length === 0) return [];

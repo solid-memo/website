@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad } from "@rdfjs/types";
+import { AppError } from "@solid-memo/domain/appError";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
@@ -174,6 +175,36 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(quads(linear).sort()).toEqual(quads(plain).sort());
       expect(getSourceUrl(linear)).toBe(URL_);
       expect(Object.isFrozen(linear)).toBe(true);
+    });
+
+    it("fails a read whose body fails with the reason its body failed with, a read deadline's podNoAnswer among them", async () => {
+      const reason = new AppError("podNoAnswer", { url: URL_, seconds: 10 });
+      const fetch: typeof globalThis.fetch = async (input) => {
+        let sent = false;
+        const body = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            if (sent) return controller.error(reason);
+            sent = true;
+            controller.enqueue(new TextEncoder().encode(`<#a> <${EX}p> `));
+          },
+        });
+        const response = new Response(body, { headers: { "Content-Type": "text/turtle" } });
+        Object.defineProperty(response, "url", { value: String(input) });
+        return response;
+      };
+      for (const read of [getSolidDataset, getSolidDatasetLinear, readDocument]) {
+        await expect(read(URL_, { fetch })).rejects.toBe(reason);
+      }
+    });
+
+    it("reads a Turtle response with no body as an empty document", async () => {
+      const fetch: typeof globalThis.fetch = async (input) => {
+        const response = new Response(null, { headers: { "Content-Type": "text/turtle" } });
+        Object.defineProperty(response, "url", { value: String(input) });
+        return response;
+      };
+      expect(getThingAll(await getSolidDataset(URL_, { fetch }))).toEqual([]);
+      expect(getThingAll(await getSolidDatasetLinear(URL_, { fetch }))).toEqual([]);
     });
   });
 

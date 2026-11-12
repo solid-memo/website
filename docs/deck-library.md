@@ -1161,10 +1161,11 @@ flowchart LR
   and their creators' catalogs are bounded together. Four run at a time
   (`createSolidDeckLibrary`), and `listLibraryUpdates` looks up each
   release once, six at a time, whichever copies name it. Each read has
-  the read deadline a pod read has
+  the read deadlines a pod read has
   ([boundaries.md](boundaries.md#the-pod-fence)): one whose host hasn't
-  started to answer within 10 seconds fails. Each read of a release or a
-  catalog has two minutes in all, its body included, or it fails. The
+  started to answer within 10 seconds, or whose body stops for longer,
+  fails. Each read of a release or a catalog has two minutes in all, its
+  body included, or it fails. The
   check of a release read comes after and isn't counted, so a large
   release that takes long to check still passes. Either
   way it fails with `podNoAnswer`, so the learner sees that the server

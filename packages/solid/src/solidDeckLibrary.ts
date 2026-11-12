@@ -16,6 +16,7 @@ import { catalogLinks } from "./catalogLinks";
 import { ReadLimitError, type ReadLimits } from "./client/interface";
 import { getSolidDatasetLinear } from "./client/resources";
 import { limitedFetch, noneSpent, RELEASE_LIMITS, type ReadsSpent } from "./client/readLimits";
+import { WHOLE_READ_MS as RELEASE_READ_MS } from "./readDeadline";
 import {
   toCourseOutline,
   toLibraryDeckContent,
@@ -95,15 +96,6 @@ const LINKED_READ_TURN_MS = 30_000;
  * answer, and whatever is asked after them must not wait for them all.
  */
 const LINKED_READ_WAIT_MS = 120_000;
-
-/**
- * How long a read of one release's or catalog's document may take in
- * all, in milliseconds, its body too: far longer than the largest release
- * in the library takes to download, but a server that answers and then
- * sends its body slowly, or not at all, holds up no reader for good. The
- * check of a release read (validate) is not counted.
- */
-const RELEASE_READ_MS = 120_000;
 
 /**
  * The triples of accepted reads of releases from a link kept to be read

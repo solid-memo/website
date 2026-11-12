@@ -597,6 +597,22 @@ describe("the cards' progress", () => {
     const report = await useCases.getCardProgress(instance.url, now, { deck });
     expect(report.decks[0]!.introducedToday).toBe(0);
   });
+  it("leaves out a deck whose cards cannot be read, holding back none of the others, and says why", async () => {
+    const { deps, useCases } = setup();
+    const other: Deck = { ...deck, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2` };
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([other, deck]);
+    const read = deps.deckRepository.readCardsSince;
+    const noAnswer = new Error("no answer");
+    deps.deckRepository.readCardsSince = vi.fn((...args: Parameters<typeof read>) =>
+      args[0].url === other.url ? Promise.reject(noAnswer) : read(...args),
+    );
+    const report = await useCases.getCardProgress(instance.url, now);
+    expect(report.decks.map((one) => one.deck)).toEqual([deck]);
+    expect(report.leftOut).toEqual([noAnswer]);
+    // When none can be read, the progress cannot be either.
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([other]);
+    await expect(useCases.getCardProgress(instance.url, now)).rejects.toBe(noAnswer);
+  });
   it("refuses a read without a version that says unchanged, for the progress too", async () => {
     const { deps, useCases } = setup();
     deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({

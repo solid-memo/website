@@ -153,6 +153,30 @@ export async function isStorageRootAt(
 }
 
 /**
+ * What `work` gives, or `otherwise` once `budget` is spent, whichever
+ * comes first: none is started after it. A work given up on may go on,
+ * within its own read deadlines (readDeadline.ts), but nothing waits on
+ * it any longer.
+ */
+async function untilSpent<T>(
+  budget: AbortSignal,
+  otherwise: T,
+  work: () => Promise<T>,
+): Promise<T> {
+  if (budget.aborted) return otherwise;
+  let stop: (() => void) | undefined;
+  const spent = new Promise<T>((resolve) => {
+    stop = () => resolve(otherwise);
+    budget.addEventListener("abort", stop, { once: true });
+  });
+  try {
+    return await Promise.race([work(), spent]);
+  } finally {
+    budget.removeEventListener("abort", stop!);
+  }
+}
+
+/**
  * The guard every write to and every delete of a deck's cards or reviews
  * document passes first, over the pod `fetch`: whether the document is
  * the deck's to change (DocumentStanding), and the claim that makes one
@@ -307,18 +331,27 @@ export function createDeckDocumentGuard(
    * (standing), kept with that deck's cards when the deck goes
    * (ownership.ts deckDocumentSubjects), and left out of what a check
    * reports once it has read it (unclaimedAsRead). One that cannot be
-   * read as RDF is unclaimed.
+   * read as RDF is unclaimed. Both are read at once. One outside the
+   * instance's folder, which may be on anyone's server, is read within
+   * `budget`, if given: once it is spent, one not yet read counts as
+   * unreadable, so unclaimed, as it then is for a check (untilSpent).
    */
-  async function unclaimed(deck: DeckPlace): Promise<string[]> {
+  async function unclaimed(deck: DeckPlace, budget?: AbortSignal): Promise<string[]> {
     if (!isDeckInPlace(deck)) return [];
     const instance = instanceOf(deck);
-    const found: string[] = [];
-    for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
-      if (found.some((other) => isSameUrl(other, url))) continue;
-      if (isDocumentIn(url, instance) && (await isDedicatedFolder(instance, true))) continue;
-      if (await unclaimedAsRead([deck], url)) found.push(url);
-    }
-    return found;
+    const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
+      (url, at, both) => both.findIndex((other) => isSameUrl(other, url)) === at,
+    );
+    const found = await Promise.all(
+      urls.map(async (url) => {
+        if (!isDocumentIn(url, instance))
+          return budget === undefined
+            ? unclaimedAsRead([deck], url)
+            : untilSpent(budget, true, () => unclaimedAsRead([deck], url));
+        return !(await isDedicatedFolder(instance, true)) && unclaimedAsRead([deck], url);
+      }),
+    );
+    return urls.filter((_, at) => found[at]);
   }
 
   /** Whether the document, as `dataset` (null: no document) says, is unclaimed for every one of the decks (standing). */

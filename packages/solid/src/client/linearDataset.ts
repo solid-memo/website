@@ -72,12 +72,12 @@ export async function getSolidDatasetLinear(
       collected.response = response;
       collected.limits = limitsOf(response);
       collected.spent = spentOf(response);
-      return withBoundedHeaders(response);
+      return withBoundedHeaders(keepingBodyFailure(response, collected));
     },
     parsers: { "text/turtle": collectingTurtleParser(collected, url) },
   }).catch((error: unknown) => {
     // The library reports a parser's error as a plain one of its own, and the browser a body's as its own.
-    throw collected.refused ?? refusalOf(collected.response) ?? error;
+    throw collected.refused ?? refusalOf(collected.response) ?? collected.failed ?? error;
   });
   // solid-client parses what it returns with the parser for its type; ours is the only one it has.
   return Object.freeze({ ...described, graphs: graphsOf(collected.quads!) });
@@ -86,6 +86,37 @@ export async function getSolidDatasetLinear(
 /** The blank nodes of one read named anew (blankNodeNamer), with n3's terms. */
 export function readBlankNodes(): (quad: Quad) => Quad {
   return blankNodeNamer(DataFactory);
+}
+
+/**
+ * The response, its body as it is, but with the reason the body fails
+ * with, if it does, kept in `collected`: the browser fails the read of
+ * a body with an error of its own, and the reason, the podNoAnswer of a
+ * read deadline say (readDeadline.ts), would be lost. Any answer but a
+ * 200 is given as it is, as only a document's body is parsed.
+ */
+function keepingBodyFailure(response: Response, collected: Collected): Response {
+  if (response.body === null || response.status !== 200) return response;
+  const reader = response.body.getReader();
+  const body = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      const next = await reader.read().catch((error: unknown) => {
+        collected.failed = error;
+        throw error;
+      });
+      if (next.done) controller.close();
+      else controller.enqueue(next.value);
+    },
+    cancel: reader.cancel.bind(reader),
+  });
+  const kept = new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+  // A response made here has no URL of its own; the library names the resource by it.
+  Object.defineProperty(kept, "url", { value: response.url });
+  return kept;
 }
 
 /**
@@ -137,13 +168,15 @@ function tripleTermError(quad: Quad): Error | undefined {
   return new Error("The text states an RDF 1.2 triple term, which is not read.");
 }
 
-/** What a read's parser collected: its quads, and the read's response, its limits, what is spent of them and why it refused it, if it did. */
+/** What a read's parser collected: its quads, and the read's response, its limits, what is spent of them, why it refused it and why its body failed, if either did. */
 interface Collected {
   response?: Response;
   quads?: Quad[];
   limits?: ReadLimits;
   spent?: ReadsSpent;
   refused?: ReadLimitError;
+  /** What the body's read failed with, as its stream gave it (keepingBodyFailure). */
+  failed?: unknown;
 }
 
 /**

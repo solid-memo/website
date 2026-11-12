@@ -25,6 +25,10 @@ import { Loading } from "./Loading";
 import { ReaderText } from "./ReaderText";
 import { STATISTICS_STALE_MS } from "./studyFigures";
 import { queryKeys } from "./queryKeys";
+import { retryable } from "./retryable";
+
+/** How long the cards' progress waits to be read again when it left out a deck for a reason that may pass, in milliseconds. */
+const LEFT_OUT_RETRY_MS = 60_000;
 
 /**
  * Where the cards stand now, read from the decks' cards and review states
@@ -36,7 +40,8 @@ import { queryKeys } from "./queryKeys";
  * are spread; of every deck of the instance, then each deck's maturity
  * on its own, or of the one deck given, with when its new cards run
  * out. When it cannot be read a quiet line says so, and the rest of the
- * page works on.
+ * page works on; so it does above the figures when a deck's cards could
+ * not be read, and the figures leave that deck out.
  */
 export function CardProgressContainer({
   useCases,
@@ -59,7 +64,12 @@ export function CardProgressContainer({
       ) : report === undefined ? (
         <Loading label={t("statistics.progressLoading")} />
       ) : (
-        <CardProgressView useCases={useCases} report={report} byDeck={deck === undefined} />
+        <>
+          {report.leftOut !== undefined && (
+            <p class="hint">{t("statistics.progressUnavailable")}</p>
+          )}
+          <CardProgressView useCases={useCases} report={report} byDeck={deck === undefined} />
+        </>
       )}
     </section>
   );
@@ -69,7 +79,10 @@ export function CardProgressContainer({
  * The cards' progress of every deck of the instance, or of the one deck
  * given, as one query: CardProgressContainer and HardestCardsContainer
  * share what it reads. Not `enabled`, it is never read again, neither
- * on focus nor when invalidated, and keeps what it has.
+ * on focus nor when invalidated, and keeps what it has. One that left a
+ * deck out is stale at once, and read again every LEFT_OUT_RETRY_MS
+ * while the page is shown when the reason may pass (retryable), keeping
+ * what it has meanwhile.
  */
 export function useCardProgress(
   useCases: UseCases,
@@ -81,7 +94,9 @@ export function useCardProgress(
     queryKey: queryKeys.deckCardProgress(instance.url, deck?.url),
     queryFn: () =>
       useCases.getCardProgress(instance.url, new Date(), deck === undefined ? {} : { deck }),
-    staleTime: STATISTICS_STALE_MS,
+    staleTime: (query) => (query.state.data?.leftOut === undefined ? STATISTICS_STALE_MS : 0),
+    refetchInterval: (query) =>
+      query.state.data?.leftOut?.some(retryable) ? LEFT_OUT_RETRY_MS : false,
     enabled,
   });
 }

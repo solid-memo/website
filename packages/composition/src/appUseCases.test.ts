@@ -212,6 +212,21 @@ function stallingAt(origin: string, rest: typeof globalThis.fetch): typeof globa
   };
 }
 
+/**
+ * A server that answers every request with its headers and the start of
+ * a Turtle body, then sends a space every few seconds, with no end.
+ */
+const dripping: typeof globalThis.fetch = async () => {
+  let sent = 0;
+  const body = new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      if (sent++ > 0) await new Promise((resolve) => setTimeout(resolve, 5000));
+      controller.enqueue(new TextEncoder().encode(sent === 1 ? "<#a> <#b> " : " "));
+    },
+  });
+  return new Response(body, { status: 200, headers: { "Content-Type": "text/turtle" } });
+};
+
 /** Moves fake time a second at a time until every one of `work` is settled, for no more than `ms`. */
 async function untilSettled(work: Promise<unknown>[], ms: number): Promise<void> {
   let settled = 0;
@@ -1091,6 +1106,64 @@ describe("createAppUseCases", () => {
     // The user's own pod is still theirs.
     expect(login.sent).toContain(`${alice}memo/catalog.ttl`);
     // What the digest learned is written back after, into Alice's pod: until it is, the network stays.
+    await digestWritten();
+  });
+
+  it("settles the data check within its budget, and the cards' progress, when many decks' documents are on a server that answers and never sends them all", {
+    timeout: 180_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const slow = "https://slow.example/";
+    const pod = podAt(alice);
+    podsNetwork({ [alice]: pod, [slow]: dripping });
+    login.webId = `${alice}profile/card#me`;
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<${login.webId}> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    const digestWritten = digestWork();
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const instance = await useCases.createInstance(
+      { webId: login.webId },
+      { containerUrl: `${alice}memo/`, name: "Main", registrationTarget: "private" },
+    );
+    const kept = await useCases.createDeck(instance.url, { en: "Capitals" });
+    await useCases.addCard(kept, { front: { en: "Sweden" }, back: { en: "Stockholm" } });
+    // The catalog names the other decks' documents on the slow server: more than are read at once.
+    const catalog = `${alice}memo/catalog.ttl`;
+    const planted: string[][] = [];
+    for (let at = 0; at < 14; at++) {
+      const made = await useCases.createDeck(instance.url, { en: `Rivers ${at}` });
+      const [cards, reviews] = [`${slow}${at}/cards.ttl`, `${slow}${at}/reviews.ttl`];
+      planted.push([cards, reviews]);
+      await put(
+        pod,
+        catalog,
+        (await (await pod(catalog)).text())
+          .replaceAll(made.cardsDocumentUrl, cards)
+          .replaceAll(made.reviewsDocumentUrl, reviews),
+      );
+    }
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const started = Date.now();
+    const check = useCases.checkInstance(instance.url);
+    await untilSettled([check], 30 * 60_000);
+    // One budget for the check's reads of them, whatever their number.
+    expect(Date.now() - started).toBeLessThanOrEqual(70_000);
+    const progress = useCases.getCardProgress(instance.url, new Date());
+    await untilSettled([progress], 30 * 60_000);
+    vi.useRealTimers();
+    // The documents that could not be read are named, not waited on for good.
+    expect((await check).unclaimed!.map(({ documents }) => documents).sort()).toEqual(
+      planted.sort(),
+    );
+    const report = await progress;
+    expect(report.decks.map(({ deck }) => deck.url)).toEqual([kept.url]);
+    expect(report.leftOut).toHaveLength(14);
     await digestWritten();
   });
 

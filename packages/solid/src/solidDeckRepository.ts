@@ -547,8 +547,8 @@ export function createSolidDeckRepository({
       }
     },
 
-    unclaimedDocuments(deck) {
-      return guard.unclaimed(deck);
+    unclaimedDocuments(deck, budget) {
+      return guard.unclaimed(deck, budget);
     },
 
     isUnclaimedAsRead(decks, url) {
