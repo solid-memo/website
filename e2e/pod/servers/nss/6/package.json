@@ -3,7 +3,8 @@
   "private": true,
   "description": "node-solid-server 6.x, installed into the end-to-end tests' image (e2e/pod/servers/nss/Dockerfile).",
   "dependencies": {
-    "solid-server": "6.0.0"
+    "solid-server": "6.0.0",
+    "structured-headers": "npm:@cxres/structured-headers@2.0.0-nesting.0"
   },
   "allowScripts": {
     "@fastify/pre-commit": false

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { execFileSync } from "node:child_process";
+import { dirname } from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import {
   ALLOWED,
@@ -10,7 +12,9 @@ import {
   INSTALL_SCRIPTS,
   installProblems,
   isUnready,
+  LOCKFILE_DIRS,
   type Lockfile,
+  lockfileProblems,
   type Manifest,
   main,
   run,
@@ -667,8 +671,91 @@ describe("installProblems", () => {
   });
 });
 
+describe("lockfileProblems", () => {
+  const REGISTRY = "https://registry.npmjs.org";
+  const TOOL: Lockfile = {
+    packages: {
+      "": { name: "tool", dependencies: { a: "^1.0.0" } },
+      "node_modules/a": {
+        version: "1.0.0",
+        resolved: `${REGISTRY}/a/-/a-1.0.0.tgz`,
+        integrity: "sha512-x",
+        // Installed with --ignore-scripts on npm's command line, and not shipped.
+        hasInstallScript: true,
+      },
+    },
+  };
+  const ROOT_ONLY = () => ({});
+
+  it("passes on registry packages with their hashes, an install script among them", () => {
+    expect(lockfileProblems(TOOL, "scripts/tool", ROOT_ONLY)).toEqual([]);
+  });
+
+  it("fails, under the lockfile's path, on a package fetched from another package's tarball", () => {
+    const swapped: Lockfile = {
+      packages: {
+        ...TOOL.packages,
+        "node_modules/a": {
+          ...TOOL.packages["node_modules/a"],
+          resolved: `${REGISTRY}/evil/-/evil-1.0.0.tgz`,
+          integrity: "sha512-y",
+        },
+      },
+    };
+    expect(lockfileProblems(swapped, "scripts/tool", ROOT_ONLY)).toEqual([
+      `scripts/tool/package-lock.json: node_modules/a: resolved from ${REGISTRY}/evil/-/evil-1.0.0.tgz, not from ${REGISTRY}/a/-/a-1.0.0.tgz.`,
+    ]);
+  });
+
+  it("fails on a package with no hash, or with a shrinkwrap of its own", () => {
+    const { integrity: _, ...unhashed } = TOOL.packages["node_modules/a"]!;
+    const lock: Lockfile = {
+      packages: {
+        ...TOOL.packages,
+        "node_modules/a": unhashed,
+        "node_modules/b": {
+          version: "1.0.0",
+          resolved: `${REGISTRY}/b/-/b-1.0.0.tgz`,
+          integrity: "sha512-x",
+          hasShrinkwrap: true,
+        },
+      },
+    };
+    expect(lockfileProblems(lock, "e2e/server", ROOT_ONLY)).toEqual([
+      "e2e/server/package-lock.json: node_modules/a: no integrity hash.",
+      "e2e/server/package-lock.json: node_modules/b: brings a shrinkwrap of its own, which decides what is installed below it.",
+    ]);
+  });
+
+  it("fails on its root with no package.json, and on a lockfile that lists no packages", () => {
+    expect(lockfileProblems(TOOL, "gone", () => undefined)).toEqual([
+      "gone/package-lock.json: : listed as part of the workspace, but has no package.json.",
+    ]);
+    expect(lockfileProblems({ packages: {} }, "e2e/server", ROOT_ONLY)).toEqual([
+      "e2e/server/package-lock.json: lists no packages.",
+    ]);
+  });
+});
+
 describe("main", () => {
-  function fakeIo(allowedInDoc: string, npmrc = "ignore-scripts=true\n", shrinkwrap = false) {
+  /** A clean lockfile of its own for each of the other directories npm installs from. */
+  const OTHER: Lockfile = {
+    packages: {
+      "": { name: "tool" },
+      "node_modules/a": {
+        version: "1.0.0",
+        resolved: "https://registry.npmjs.org/a/-/a-1.0.0.tgz",
+        integrity: "sha512-x",
+      },
+    },
+  };
+
+  function fakeIo(
+    allowedInDoc: string,
+    npmrc = "ignore-scripts=true\n",
+    shrinkwrap: (dir: string) => boolean = () => false,
+    other: Lockfile = OTHER,
+  ) {
     const logs: string[] = [];
     const lock: Lockfile = {
       packages: {
@@ -702,11 +789,11 @@ describe("main", () => {
     };
     return {
       logs,
-      lockfile: () => lock,
+      lockfile: (dir: string) => (dir === "." ? lock : other),
       vendorDoc: () => allowedInDoc,
       npmrc: () => npmrc,
       manifest: () => ({}),
-      hasShrinkwrap: () => shrinkwrap,
+      hasShrinkwrap: shrinkwrap,
       log: (message: string) => logs.push(message),
     };
   }
@@ -729,12 +816,30 @@ describe("main", () => {
         .map((name) => `\`${name}\``)
         .join(", "),
       "ignore-scripts=true\n",
-      true,
+      (dir) => dir === "." || dir === "scripts/renovate",
     );
     expect(main(io)).toBe(1);
     expect(io.logs).toEqual([
       "npm-shrinkwrap.json: `npm ci` prefers it to package-lock.json, the file checked here.",
+      "scripts/renovate/npm-shrinkwrap.json: `npm ci` prefers it to package-lock.json, the file checked here.",
     ]);
+  });
+
+  it("checks every other lockfile npm installs from", () => {
+    const io = fakeIo(
+      [...Object.keys(ALLOWED), ...Object.keys(INSTALL_SCRIPTS)]
+        .map((name) => `\`${name}\``)
+        .join(", "),
+      "ignore-scripts=true\n",
+      () => false,
+      { packages: {} },
+    );
+    expect(main(io)).toBe(1);
+    expect(io.logs).toEqual(
+      LOCKFILE_DIRS.filter((dir) => dir !== ".").map(
+        (dir) => `${dir}/package-lock.json: lists no packages.`,
+      ),
+    );
   });
 
   it("logs each problem and returns 1", () => {
@@ -762,24 +867,51 @@ describe("the repository's app", () => {
 
   it("fails on a swapped tarball in the real lockfile", () => {
     const io = defaultIo(`${import.meta.dirname}/..`);
-    const lock = io.lockfile();
-    const clean = installProblems(lock, io.npmrc(), {}, "", io.manifest);
+    const lock = io.lockfile(".");
+    const manifest = (location: string) => io.manifest(".", location);
+    const clean = installProblems(lock, io.npmrc(), {}, "", manifest);
     const entry = lock.packages["node_modules/semver"]!;
     entry.resolved = "https://registry.npmjs.org/other/-/other-9.9.9.tgz";
     entry.integrity = "sha512-x";
-    const problems = installProblems(lock, io.npmrc(), {}, "", io.manifest);
+    const problems = installProblems(lock, io.npmrc(), {}, "", manifest);
     expect(problems.filter((line) => !clean.includes(line))).toEqual([
       `node_modules/semver: resolved from https://registry.npmjs.org/other/-/other-9.9.9.tgz, not from https://registry.npmjs.org/semver/-/semver-${entry.version}.tgz.`,
     ]);
   });
 
+  it("fails on a swapped tarball in the Pending updates workflow's Renovate lockfile", () => {
+    const io = defaultIo(`${import.meta.dirname}/..`);
+    const dir = "scripts/renovate";
+    const lock = io.lockfile(dir);
+    const manifest = (location: string) => io.manifest(dir, location);
+    expect(lockfileProblems(lock, dir, manifest)).toEqual([]);
+    const entry = lock.packages["node_modules/semver"]!;
+    entry.resolved = "https://registry.npmjs.org/other/-/other-9.9.9.tgz";
+    entry.integrity = "sha512-x";
+    expect(lockfileProblems(lock, dir, manifest)).toEqual([
+      `${dir}/package-lock.json: node_modules/semver: resolved from https://registry.npmjs.org/other/-/other-9.9.9.tgz, not from https://registry.npmjs.org/semver/-/semver-${entry.version}.tgz.`,
+    ]);
+  });
+
+  it("checks every package-lock.json and npm-shrinkwrap.json in the repository", () => {
+    const tracked = execFileSync(
+      "git",
+      ["ls-files", "--", "*package-lock.json", "*npm-shrinkwrap.json"],
+      { cwd: `${import.meta.dirname}/..`, encoding: "utf8" },
+    );
+    const dirs = new Set(tracked.split("\n").filter(Boolean).map(dirname));
+    expect([...dirs].sort()).toEqual([...LOCKFILE_DIRS].sort());
+  });
+
   it("is read from package-lock.json, docs/vendor-code.md and .npmrc", () => {
     const io = defaultIo(`${import.meta.dirname}/..`);
-    expect(io.lockfile().packages["apps/web"]?.name).toBe("@solid-memo/web");
+    expect(io.lockfile(".").packages["apps/web"]?.name).toBe("@solid-memo/web");
+    expect(io.lockfile("scripts/renovate").packages[""]?.name).toBeDefined();
     expect(io.vendorDoc()).toContain("# Vendor");
     expect(io.npmrc()).toContain("ignore-scripts=true");
-    expect(io.manifest("apps/web")?.dependencies).toBeDefined();
-    expect(io.manifest("apps/none")).toBeUndefined();
-    expect(io.hasShrinkwrap()).toBe(false);
+    expect(io.manifest(".", "apps/web")?.dependencies).toBeDefined();
+    expect(io.manifest("scripts/renovate", "")?.dependencies).toBeDefined();
+    expect(io.manifest(".", "apps/none")).toBeUndefined();
+    expect(io.hasShrinkwrap(".")).toBe(false);
   });
 });
