@@ -173,11 +173,20 @@ export interface CardUseCases {
     webId: string,
   ): Promise<CardTransferPlan>;
   /**
-   * Save the deck as a file (domain/deckFile.ts, DeckArchive.exportDeck),
-   * in `options.format`, named after its title (deckFileName), with its
-   * progress when `options.withProgress`. Writes nothing to the pod.
+   * Save the deck of the instance as a file (domain/deckFile.ts,
+   * DeckArchive.exportDeck), in `options.format`, named after its title
+   * (deckFileName), with its progress when `options.withProgress`. Each
+   * of the deck's two documents is read as `webId` only when it is the
+   * instance's (isInInstancePod), any other as no one, as transferCards
+   * reads a source: the file holds what it reads. Writes nothing to the
+   * pod.
    */
-  exportDeckFile(deck: Deck, options: DeckFileOptions): Promise<void>;
+  exportDeckFile(
+    instanceUrl: string,
+    deck: Deck,
+    options: DeckFileOptions,
+    webId: string,
+  ): Promise<void>;
   /**
    * The deck file the user picks (Turtle or JSON-LD, by its name, else
    * its text: deckFileFormatOf), read as DeckArchive.readDeckFile reads
@@ -504,8 +513,15 @@ export function createCardUseCases({
         }
       }
     },
-    async exportDeckFile(deck, options) {
-      const text = await deckArchive.exportDeck(deck, options);
+    async exportDeckFile(instanceUrl, deck, options, webId) {
+      // Saved to a file the user may hand on: each document read as the user only when it is the instance's.
+      const [cardsHere, reviewsHere] = await Promise.all([
+        isInInstancePod(storageGateway, instanceUrl, deck.cardsDocumentUrl, webId),
+        isInInstancePod(storageGateway, instanceUrl, deck.reviewsDocumentUrl, webId),
+      ]);
+      const text = await deckArchive.exportDeck(deck, options, {
+        asNoOne: { cards: !cardsHere, reviews: !reviewsHere },
+      });
       fileExchange.save(
         deckFileName(deck, options.format),
         DECK_FILE_TYPES[options.format].mediaType,

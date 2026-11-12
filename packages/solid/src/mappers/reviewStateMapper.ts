@@ -111,6 +111,15 @@ function fsrsKeyOfSubject(thing: Subject, deck: ReviewedDeck): ReviewKey | null 
   return fsrsKeyOfLinks(deck, linksOf(thing));
 }
 
+/**
+ * The id of the card a subject typed sm:ReviewState is of, SM-2 or
+ * FSRS-6, by its links alone (keyOfSubject, fsrsKeyOfSubject); null for
+ * any other subject, and for a state of a card elsewhere.
+ */
+export function reviewedCardIdOf(thing: Subject, deck: ReviewedDeck): string | null {
+  return (keyOfSubject(thing, deck) ?? fsrsKeyOfSubject(thing, deck))?.cardId ?? null;
+}
+
 const sameKey = (a: ReviewKey, b: ReviewKey) =>
   a.cardId === b.cardId && a.direction === b.direction;
 

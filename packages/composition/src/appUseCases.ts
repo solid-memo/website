@@ -379,7 +379,11 @@ export function createAppUseCases({
     ruleset,
     // Its profile is written through the fences too, as every pod write is.
     guestPod: createLocalGuestPod({ fetch: podFetch, store: guestStore }),
-    deckArchive: createSolidDeckArchive({ fetch: dataFetch }),
+    deckArchive: createSolidDeckArchive({
+      fetch: dataFetch,
+      // A deck's documents outside its instance's pod are exported as no one reads them.
+      publicFetch: createPodFence(foreignReads(noOneFetch)),
+    }),
     fileExchange: createBrowserFileExchange(),
     releaseDraftRepository: createSolidReleaseDraftRepository({
       fetch: dataFetch,
