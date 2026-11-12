@@ -139,16 +139,38 @@ describe("listInstances", () => {
     ]);
   });
 
-  it("skips missing indexes and tolerates unreadable ones", async () => {
+  it.each([
+    ["missing", Object.assign(new Error("404 Not Found"), { statusCode: 404 })],
+    ["not readable as RDF", new Error("Unexpected token")],
+  ])("skips missing indexes and takes one that is %s as none", async (_, failure) => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
       inPlaces: () => true,
       privateIndexUrl: PRIVATE_INDEX,
       publicIndexUrl: null,
     });
-    vi.mocked(readInstanceRegistrations).mockRejectedValue(new Error("403 Forbidden"));
+    vi.mocked(readInstanceRegistrations).mockRejectedValue(failure);
 
     await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([]);
+  });
+
+  it.each([
+    ["refused (401)", Object.assign(new Error("401 Unauthorized"), { statusCode: 401 })],
+    ["forbidden (403)", Object.assign(new Error("403 Forbidden"), { statusCode: 403 })],
+    ["not reached (a network failure)", new TypeError("Failed to fetch")],
+  ])("fails, rather than list none, when an index is %s", async (_, failure) => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      fetch: indexFetch,
+      inPlaces: () => true,
+      privateIndexUrl: PRIVATE_INDEX,
+      publicIndexUrl: PUBLIC_INDEX,
+    });
+    vi.mocked(readInstanceRegistrations).mockImplementation(async (index) => {
+      if (index === PUBLIC_INDEX) throw failure;
+      return [{ containerUrl: CONTAINER, title: "Main" }];
+    });
+
+    await expect(makeRepository().listInstances(WEBID)).rejects.toBe(failure);
   });
 
   it("lists the first MAX_CATALOG_LINKS instances of both indexes, a repeated one counted once", async () => {

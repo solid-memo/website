@@ -251,6 +251,21 @@ export async function getSolidDatasetOrNull(
   }
 }
 
+/**
+ * Whether a read's failure says the document is none to read: not there
+ * (404, 410), or not one the app reads (it could not be parsed, it went
+ * past its read limits, or it was refused before it was asked for). A
+ * failure that says only that it could not be read now, a refusal (401,
+ * 403), any other status or no answer at all (a network failure, a
+ * TypeError from fetch), is not: the session may have expired while the
+ * app was in the background, and what the document holds is unknown.
+ */
+export function readsAsNone(error: unknown): boolean {
+  const status = statusOf(error);
+  if (status !== undefined) return status === 404 || status === 410;
+  return !(error instanceof TypeError);
+}
+
 /** A document the pod served whole that could not be read (readForRemoval). */
 export const UNREADABLE = Symbol("unreadable");
 

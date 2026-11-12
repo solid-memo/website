@@ -24,6 +24,7 @@ import {
   getSolidDatasetOrNull,
   PreconditionFailedError,
   readDataset,
+  readsAsNone,
   saveDataset,
 } from "./datasets";
 import { ensureTrailingSlash } from "./urls";
@@ -195,7 +196,12 @@ function stripFragment(url: string): string {
   return url.split("#")[0];
 }
 
-/** The WebID subject in a document, or null if unreadable or absent. */
+/**
+ * The WebID subject in a document, or null if the document or the
+ * subject is not there (readsAsNone). A document that could not be read
+ * now fails the lookup: an index it names may be there, and taking it as
+ * none would show the user no instances.
+ */
 async function readSubjectSafely(
   documentUrl: string,
   webId: string,
@@ -204,8 +210,9 @@ async function readSubjectSafely(
   try {
     const dataset = await readDataset(documentUrl, fetch);
     return getThing(dataset, webId);
-  } catch {
-    return null;
+  } catch (error) {
+    if (readsAsNone(error)) return null;
+    throw error;
   }
 }
 

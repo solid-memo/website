@@ -129,10 +129,14 @@ describe("an instance while one of the user's type indexes fails", () => {
       <http://www.w3.org/ns/solid/terms#forClass> <https://solid-memo.com/ns/vocab/v1.ttl#Instance>;
       <http://www.w3.org/ns/solid/terms#instanceContainer> <${FOREIGN}>.`;
 
-  /** The real repository over a pod in memory, with an index that holds `body`, is missing (null), or answers `failing`. */
+  /**
+   * The real repository over a pod in memory, with an index that holds
+   * `body`, is missing (null), or answers `failing` until its `status`
+   * is cleared.
+   */
   async function indexes(
     bodies: { private: string | null; public: string | null },
-    failing?: { url: string; status: number },
+    failing?: { url: string; status?: number },
   ) {
     let etags = 0;
     const pod = createLocalPod({
@@ -151,7 +155,7 @@ describe("an instance while one of the user's type indexes fails", () => {
     if (bodies.public !== null) await put(PUBLIC, bodies.public);
     const fetch: typeof globalThis.fetch = async (input, init) => {
       const url = input instanceof Request ? input.url : String(input);
-      if (failing !== undefined && url === failing.url)
+      if (failing?.status !== undefined && url === failing.url)
         return new Response("no", { status: failing.status });
       return pod(url, init);
     };
@@ -199,24 +203,26 @@ describe("an instance while one of the user's type indexes fails", () => {
   });
 
   it("removes it from the public index, and then says the private one failed", async () => {
-    const repository = await indexes(
-      { private: NONE, public: REGISTERED },
-      { url: PRIVATE, status: 500 },
-    );
+    const failing: { url: string; status?: number } = { url: PRIVATE, status: 500 };
+    const repository = await indexes({ private: NONE, public: REGISTERED }, failing);
 
     await expect(repository.detachInstance({ webId: WEBID, instance })).rejects.toBeDefined();
 
+    // The list fails while an index can't be read, rather than leave out what it registers.
+    await expect(listed(repository)).rejects.toBeDefined();
+    failing.status = undefined;
     expect(await listed(repository)).toEqual([]);
   });
 
   it("removes it from the private index, and then says the public one failed", async () => {
-    const repository = await indexes(
-      { private: REGISTERED, public: NONE },
-      { url: PUBLIC, status: 403 },
-    );
+    const failing: { url: string; status?: number } = { url: PUBLIC, status: 403 };
+    const repository = await indexes({ private: REGISTERED, public: NONE }, failing);
 
     await expect(repository.detachInstance({ webId: WEBID, instance })).rejects.toBeDefined();
 
+    // The list fails while an index can't be read, rather than leave out what it registers.
+    await expect(listed(repository)).rejects.toBeDefined();
+    failing.status = undefined;
     expect(await listed(repository)).toEqual([]);
   });
 });
