@@ -1074,6 +1074,85 @@ describe("an instance at the pod's root, laid out flat", () => {
     ).resolves.toEqual([]);
   });
 
+  describe("on a server that holds the pods of many on one origin and types none of their roots", () => {
+    const pod = `${ROOT}alice/`;
+    const SECRET = `<#entry> <https://example.org/says> "secret" .`;
+    const at = (instance: string, document = DIARY) => ({
+      url: `${instance}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: document,
+      reviewsDocumentUrl: document,
+    });
+
+    /** A guard over a server that types no folder and holds `documents` (address to Turtle), each request kept in `asked`. */
+    function untyped(
+      userStorages: () => Promise<readonly string[]>,
+      documents: Record<string, string> = { [DIARY]: SECRET },
+    ) {
+      const asked: string[] = [];
+      const fetch = (async (input, init) => {
+        const method = init?.method ?? "GET";
+        asked.push(`${method} ${String(input)}`);
+        const body = documents[String(input)];
+        if (method === "HEAD" || body === undefined) return new Response(null, { status: 200 });
+        return new Response(body, { headers: { "Content-Type": "text/turtle", ETag: '"e1"' } });
+      }) as typeof globalThis.fetch;
+      return { guard: createDeckDocumentGuard(fetch, userStorages), asked };
+    }
+
+    it("never marks an older document as a deck's by itself at a pod's root the user's storages name", async () => {
+      const diary = await datasetOfTurtle(DIARY, SECRET);
+      // However the storage is spelled: host case, default port, no trailing slash.
+      for (const storage of [pod, "https://POD.example:443/alice"]) {
+        const { guard, asked } = untyped(async () => [storage]);
+        await expect(guard.standing(at(pod), DIARY, diary)).resolves.toBe("unclaimed");
+        await expect(guard.writable(at(pod), DIARY, diary)).rejects.toMatchObject({
+          code: "deckDocumentUnclaimed",
+        });
+        await expect(guard.removal(at(pod), DIARY)).resolves.toBe("unclaimed");
+        await expect(guard.unclaimed(at(pod))).resolves.toEqual([DIARY]);
+        // The user's storages decide it: the folder is never asked.
+        expect(asked.filter((one) => one.startsWith("HEAD"))).toEqual([]);
+      }
+    });
+
+    it("never marks one as a deck's in a folder above the user's storage either", async () => {
+      const diary = await datasetOfTurtle(DIARY, SECRET);
+      const { guard } = untyped(async () => [pod]);
+      const above = `${ROOT}pods/`;
+      const inside = `${above}alice/private/diary.ttl`;
+      const read = await datasetOfTurtle(inside, `<#entry> <https://example.org/says> "x" .`);
+      const nested = untyped(async () => [`${above}alice/`]);
+      await expect(nested.guard.standing(at(above, inside), inside, read)).resolves.toBe(
+        "unclaimed",
+      );
+      // An instance in its own folder in the user's pod still marks an older document as the deck's.
+      const own = `${pod}memo/`;
+      const mine = `${own}decks/deck-1.ttl`;
+      const older = await datasetOfTurtle(mine, cardTurtle("card-1", "uno"));
+      await expect(guard.standing(at(own, mine), mine, older)).resolves.toBe("adoptable");
+      await expect(guard.removal(at(own, mine), mine)).resolves.toBe("deletable");
+      await expect(guard.unclaimed(at(own, mine))).resolves.toEqual([]);
+      await expect(guard.standing(at(pod), DIARY, diary)).resolves.toBe("unclaimed");
+    });
+
+    it("leaves an older document no deck's when the user's storages cannot be found, and refuses a write for now", async () => {
+      const own = `${pod}memo/`;
+      const mine = `${own}decks/deck-1.ttl`;
+      const older = await datasetOfTurtle(mine, cardTurtle("card-1", "uno"));
+      const { guard } = untyped(() => Promise.reject(new Error("profile unreadable")), {
+        [mine]: cardTurtle("card-1", "uno"),
+      });
+      await expect(guard.standing(at(own, mine), mine, older)).resolves.toBe("unclaimed");
+      await expect(guard.writable(at(own, mine), mine, older)).rejects.toMatchObject({
+        code: "cannotCheck",
+        vars: { url: own, status: 0 },
+      });
+      await expect(guard.removal(at(own, mine), mine)).resolves.toBe("unclaimed");
+      await expect(guard.unclaimed(at(own, mine))).resolves.toEqual([mine]);
+    });
+  });
+
   it("asks again a folder whose storage description can't be read", async () => {
     const p = await pod();
     let heads = 0;

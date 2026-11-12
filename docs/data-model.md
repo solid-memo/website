@@ -499,9 +499,15 @@ No document Solid Memo names has any.
   and `isDraftDocument` in
   [deckPlace.ts](../packages/solid/src/deckPlace.ts)).
 - **An older document that doesn't say so** (from an earlier version, a
-  repair or a copy) is the deck's in the instance's own folder, unless
-  that folder is the root of a pod or a storage (typed `pim:Storage`).
-  There the next write states it. One that names any other catalog's
+  repair or a copy) is the deck's in the instance's own folder. That
+  folder isn't the instance's own when it's the root of a pod or a
+  storage, or a folder above one. Such a root is one of the user's
+  storages (as above), which a server may leave untyped, or a root the
+  server shows (typed `pim:Storage`, or named by a Linked Web Storage
+  server). In the instance's own folder the next write states it. When
+  the profile can't be read, a write fails and can be retried. The data
+  check and a removal then read the document, and take it for unclaimed
+  unless it says it's the deck's. One that names any other catalog's
   entry (such as a nested instance's) isn't the deck's: the app never
   adds a second owner on its own, and refuses the write
   (`deckDocumentUnclaimed`). The data check doesn't read a document in
