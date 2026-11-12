@@ -82,6 +82,7 @@ export function makeStatisticsUseCasesFake(
     {
       getStatistics: vi.fn(async () => statisticsReportOf([], "2026-09-21")),
       getTodayFigures: vi.fn(async () => todayFiguresFrom([], "2026-09-21")),
+      knownTodayFigures: vi.fn(async () => null),
       saveAnswers: vi.fn(async () => undefined),
       loadAnswerLog: vi.fn(async () => []),
       cardAnswers: vi.fn(async () => []),

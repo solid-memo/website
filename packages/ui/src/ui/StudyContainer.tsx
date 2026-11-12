@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { StudyUseCases } from "@solid-memo/application/study";
 import type { LibraryUseCases } from "@solid-memo/application/library";
 import type { MistakeReportUseCases } from "@solid-memo/application/mistakeReports";
+import type { StatisticsUseCases } from "@solid-memo/application/statistics";
 import type { GradeBasis, ReviewUndo, StudySessionQueue } from "@solid-memo/application/study";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
@@ -53,7 +54,12 @@ interface Session {
  * (StudyScreen). Each answer is graded with the preferences the queue
  * was built with (recordReview's `known`), so they are not read again
  * for it. The deck's cached queue is
- * dropped when the session ends, however it is left. Its deck links to
+ * dropped when the session ends, however it is left; one gone through to
+ * its end leaves the deck's counts at none, read again once shown, so the
+ * deck list knows at once that the deck is done for today. Each answer
+ * and undo puts the today strip's figures as they now stand in its cache
+ * (knownTodayFigures), so the strip shows them without waiting for the
+ * pod. Its deck links to
  * the deck's page, or to `deckLink` when given. A deck copied from a
  * release says where a mistake in the cards it has of the release is
  * reported (UseCases.reportPlace). It is left with whether an answer of
@@ -78,7 +84,11 @@ export function StudyContainer({
   deckLink = deckHref(instance.url, deck.url),
   random = Math.random,
 }: {
-  useCases: StudyUseCases & LibraryUseCases & MistakeReportUseCases;
+  /** Without knownTodayFigures (a Studio trial's), no today strip's figures are kept. */
+  useCases: StudyUseCases &
+    LibraryUseCases &
+    MistakeReportUseCases &
+    Partial<Pick<StatisticsUseCases, "knownTodayFigures">>;
   instance: Instance;
   deck: Deck;
   /** Called as the session is left, with whether an answer of it still stands (none undone). */
@@ -157,6 +167,7 @@ export function StudyContainer({
     onSuccess: ({ state, fsrs, undo }, { prompt, quality }) => {
       answered.current++;
       keepState(state, state);
+      keepTodayFigures();
       setSession((current) => {
         const before = { ...current!, last: null };
         const next = current!.position + 1;
@@ -188,6 +199,7 @@ export function StudyContainer({
     onMutate: (): void => answerMutation.reset(),
     onSuccess: (before, undo) => {
       keepState(undo.key, before);
+      keepTodayFigures();
       setSession((current) => ({ ...current!.last!.before, putBack: false, undone: true }));
     },
   });
@@ -197,9 +209,36 @@ export function StudyContainer({
     queryClient.setQueryData(queryKeys.reviewState(deck.reviewsDocumentUrl, key), state);
   }
 
+  /**
+   * The today strip's figures with the session's answers and undos in
+   * them, as this page knows them (knownTodayFigures), when it knows
+   * enough: shown as soon as the strip is, and read again from the pod
+   * then, as every change made has them (keepStudyFiguresFresh).
+   */
+  function keepTodayFigures() {
+    if (useCases.knownTodayFigures === undefined) return;
+    void useCases.knownTodayFigures(instance.url, now()).then(
+      (figures) => {
+        if (figures === null) return;
+        const queryKey = queryKeys.todayFigures(instance.url);
+        queryClient.setQueryData(queryKey, figures);
+        void queryClient.invalidateQueries({ queryKey });
+      },
+      () => undefined,
+    );
+  }
+
+  // Whether the session went through every prompt, for the deck's counts as it is left.
+  const finished = useRef(false);
+  finished.current = session !== null && session.position >= session.prompts.length;
   useLayoutEffect(
     () => () => {
       queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
+      if (!finished.current) return;
+      // Nothing of the deck is left today: its row and the today strip say so at once, and read it again.
+      const queryKey = queryKeys.studyCounts(deck.url);
+      queryClient.setQueryData(queryKey, { dueCount: 0, newCount: 0 });
+      void queryClient.invalidateQueries({ queryKey });
     },
     [queryClient, deck.url],
   );
