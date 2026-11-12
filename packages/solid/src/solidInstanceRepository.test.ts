@@ -31,6 +31,7 @@ import {
   removeOldRegistrations,
   renameInstanceRegistrations,
 } from "./typeIndex";
+import { ReadLimitError } from "./client/interface";
 import { datetimeLiteral } from "./records";
 import { DCTERMS, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
@@ -524,15 +525,42 @@ describe("attachInstance", () => {
   });
 
   it("rejects a container without a readable meta.ttl", async () => {
-    vi.mocked(readDocument).mockRejectedValue(new Error("404"));
+    const limits = { bytes: 1, quads: 1, characters: 1 };
+    for (const error of [
+      new Error("404"),
+      Object.assign(new Error("404"), { statusCode: 404 }),
+      Object.assign(new Error("410"), { statusCode: 410 }),
+      new ReadLimitError(`${CONTAINER}meta.ttl`, limits),
+      new SyntaxError("not Turtle"),
+    ]) {
+      vi.mocked(readDocument).mockRejectedValue(error);
+      await expect(
+        makeRepository().attachInstance({
+          webId: WEBID,
+          instanceUrl: CONTAINER,
+          registrationTarget: "private",
+        }),
+      ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
+    }
+    expect(addInstanceRegistration).not.toHaveBeenCalled();
+  });
 
-    await expect(
-      makeRepository().attachInstance({
-        webId: WEBID,
-        instanceUrl: CONTAINER,
-        registrationTarget: "private",
-      }),
-    ).rejects.toThrow("not a Solid Memo instance");
+  it("fails as the read of meta.ttl did when it may work when tried again, registering nothing", async () => {
+    const noAnswer = new AppError("podNoAnswer", { url: `${CONTAINER}meta.ttl`, seconds: 120 });
+    const serverError = Object.assign(new Error("500"), { statusCode: 500 });
+    const offline = new TypeError("Failed to fetch");
+    for (const error of [noAnswer, serverError, offline]) {
+      vi.mocked(readDocument).mockRejectedValue(error);
+      await expect(
+        makeRepository().attachInstance({
+          webId: WEBID,
+          instanceUrl: CONTAINER,
+          registrationTarget: "private",
+        }),
+      ).rejects.toBe(error);
+    }
+    expect(ensureTypeIndex).not.toHaveBeenCalled();
+    expect(addInstanceRegistration).not.toHaveBeenCalled();
   });
 
   it("registers the instance at its address as a request sends it, and no address that is not an http(s) folder's", async () => {

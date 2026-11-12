@@ -14,7 +14,7 @@ import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
 import { INSTANCE_READS_TOTAL } from "@solid-memo/solid/client/readLimits";
-import { READ_DEADLINE_MS } from "@solid-memo/solid/readDeadline";
+import { READ_DEADLINE_MS, WHOLE_READ_MS } from "@solid-memo/solid/readDeadline";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
 
@@ -1683,6 +1683,137 @@ describe("createAppUseCases", () => {
     }
     // No refused write left the page.
     expect(requests).toEqual([]);
+  });
+
+  it("gives up a read of an instance's meta document and releases on another server that never sends them all, by the deadline on the whole read", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const bob = "https://bob.example/";
+    const pod = podAt(alice);
+    const theirs = podAt(bob);
+    // Once `drip` is on, Bob's server answers each read and sends its body a little at a time, with no end.
+    let drip = false;
+    podsNetwork({
+      [alice]: pod,
+      [bob]: (input, init) =>
+        drip && (init?.method ?? "GET") === "GET" ? dripping(input, init) : theirs(input, init),
+    });
+    await put(
+      pod,
+      `${alice}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+    );
+    await put(
+      theirs,
+      `${bob}profile/card`,
+      `<#me> <http://www.w3.org/ns/pim/space#storage> <${bob}>.`,
+    );
+    const digestWritten = digestWork();
+    login.webId = `${bob}profile/card#me`;
+    const shared = await createAppUseCases({ ...options, indexedDB: undefined }).createInstance(
+      { webId: login.webId },
+      { containerUrl: `${bob}memo/`, name: "Shared", registrationTarget: "private" },
+    );
+    await digestWritten();
+
+    login.webId = `${alice}profile/card#me`;
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const session = { webId: login.webId };
+    await useCases.attachInstanceByUrl(session, shared.url, "private");
+    drip = true;
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const noAnswer = { code: "podNoAnswer" };
+    const started = Date.now();
+    const plan = useCases.planMigration(shared.url);
+    const release = useCases.createReleaseDraft(
+      shared.url,
+      { kind: "nextVersionOf", url: `${bob}memo/releases/capitals/v1.ttl` },
+      login.webId,
+    );
+    const attach = useCases.attachInstanceByUrl(session, `${bob}other/`, "private");
+    await untilSettled([plan, release, attach], 10 * 60_000);
+    expect(Date.now() - started).toBeLessThanOrEqual(WHOLE_READ_MS + READ_DEADLINE_MS);
+    vi.useRealTimers();
+    await expect(plan).rejects.toMatchObject(noAnswer);
+    // The release in the instance the user registered is read as the user.
+    await expect(release).rejects.toMatchObject(noAnswer);
+    expect(login.sent).toContain(`${bob}memo/releases/capitals/v1.ttl`);
+    // Given up, the read is one to try again, not an address with no instance.
+    await expect(attach).rejects.toMatchObject(noAnswer);
+  });
+
+  it.each([
+    ["a document", "memo/large.ttl"],
+    ["a folder", "memo/"],
+    ["the storage's root", ""],
+  ])(
+    "reads %s in the user's own storage as long as its body keeps coming",
+    {
+      timeout: 60_000,
+    },
+    async (_kind, path) => {
+      const alice = "https://alice.example/";
+      const own = `${alice}${path}`;
+      const pod = podAt(alice);
+      podsNetwork({
+        [alice]: (input, init) =>
+          String(input instanceof Request ? input.url : input) === own
+            ? dripping(input, init)
+            : pod(input, init),
+      });
+      login.webId = `${alice}profile/card#me`;
+      await put(
+        pod,
+        `${alice}profile/card`,
+        `<#me> <http://www.w3.org/ns/pim/space#storage> <${alice}>.`,
+      );
+      given.clear();
+      createAppUseCases({ ...options, indexedDB: undefined });
+      vi.useFakeTimers();
+      onTestFinished(() => {
+        vi.useRealTimers();
+      });
+      const read = given.get("createSolidInstanceRepository")!.fetch!(new Request(own));
+      await untilSettled([read], 60_000);
+      const reader = (await read).body!.getReader();
+      for (let passed = 0; passed <= WHOLE_READ_MS; passed += 5000) {
+        const next = reader.read();
+        await vi.advanceTimersByTimeAsync(5000);
+        await expect(next).resolves.toMatchObject({ done: false });
+      }
+      await reader.cancel();
+    },
+  );
+
+  it("gives up finding the user's storages by the deadline on the whole read, when their profile never ends", {
+    timeout: 60_000,
+  }, async () => {
+    const alice = "https://alice.example/";
+    const profile = `${alice}profile/card`;
+    const pod = podAt(alice);
+    podsNetwork({
+      [alice]: (input, init) =>
+        new URL(input instanceof Request ? input.url : input).pathname === "/profile/card"
+          ? dripping(input, init)
+          : pod(input, init),
+    });
+    login.webId = `${profile}#me`;
+    given.clear();
+    createAppUseCases({ ...options, indexedDB: undefined });
+    vi.useFakeTimers();
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const started = Date.now();
+    const read = given.get("createSolidInstanceRepository")!.fetch!(
+      new Request(`${alice}memo/meta.ttl`),
+    );
+    await untilSettled([read], 10 * 60_000);
+    expect(Date.now() - started).toBeLessThanOrEqual(WHOLE_READ_MS + READ_DEADLINE_MS);
   });
 
   it("follows no redirect with the user's credentials, whatever an adapter asks", async () => {

@@ -271,18 +271,24 @@ A read of another server, as the user or as no one, has deadlines
 ([readDeadline.ts](../packages/solid/src/readDeadline.ts),
 `withReadDeadline`). The server has 10 seconds to start to answer, and
 10 seconds for each next part of the body. A read of a server that isn't
-the user's pod, as no one or in an instance registered elsewhere, has
-two minutes for the whole read as well, its body included. Past any of
-them, the read is aborted and fails with `podNoAnswer`, which the app
-tries again ([style.md](style.md#typescript)). Without them, a server
-that never answers, or answers and then sends its body slowly or not at
-all, keeps a screen loading for good. A read of the user's own pod takes
-as long in all as its body keeps coming, so a large document on a slow
-connection still downloads. A catalog may name a deck's documents on any
-server, and the data check and the statistics wait on reading them.
-The check gives the documents outside the instance's folder one minute
-in all, every read of them included, and names those it couldn't read;
-every other read ends at its own deadline
+the user's pod has two minutes for the whole read as well, its body
+included. That holds for a read as no one, and for every read as the
+user outside their storages and the folders they entered on this page:
+an instance registered elsewhere, its `meta.ttl`, its deck documents
+and its releases among them. Past any of them, the read is aborted and
+fails with `podNoAnswer`, which the app tries again
+([style.md](style.md#typescript)). Without them, a server that never
+answers, or answers and then sends its body slowly or not at all, keeps
+a screen loading for good. A read of the user's own pod, a document or
+a folder, takes as long in all as its body keeps coming, so a large
+document on a slow connection still downloads. The reads that find the
+user's storages, their profile among them, have the two minutes, since
+every other read as the user waits on them. While their storages can't
+be found, every read has the two minutes. A catalog may name a deck's
+documents on any server, and the data check and the statistics wait on
+reading them. The check gives the documents outside the instance's
+folder one minute in all, every read of them included, and names those
+it couldn't read; every other read ends at its own deadline
 ([validation.md](validation.md#flow)). The statistics leave a deck
 whose documents fail to be read out until a later read. Two minutes is
 far longer than the largest release in the library takes to download.
