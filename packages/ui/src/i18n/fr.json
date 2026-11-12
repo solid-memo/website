@@ -1743,6 +1743,7 @@
     "paletteContrastLow": "Certaines couleurs ont moins de contraste qu’il ne leur en faut. Choisissez-en d’autres, ou utilisez-les quand même.",
     "catalogNeedsDescription": "Le catalogue doit avoir une description.",
     "noCatalogToUpdate": "Cette instance n’a pas encore de catalogue. Mettez d’abord l’instance à jour dans Solid Memo.",
+    "catalogMisfit": "Le catalogue de cette instance ne correspond pas à la forme que lit Solid Memo, donc Solid Memo le laisse tel quel. La vérification des données de l’instance indique ce qui ne va pas.",
     "catalogTooManyLinks": "Le catalogue de cette instance liste plus de paquets, de brouillons ou de publications que Solid Memo n’en lit (au plus {limit} de chaque sorte). Retirez l’instance, sauf si vous savez qui la tient à jour.",
     "catalogFull": "Le catalogue de cette instance liste déjà autant de paquets, de brouillons ou de publications que Solid Memo en lit ({limit} de chaque sorte) ; il ne peut donc pas en lister un autre.",
     "draftTooManyDocuments": "Ce brouillon ou ce fichier a trop de chapitres, ou les brouillons de cette instance ont trop de documents au total, pour que Solid Memo les lise (au plus {limit} documents) : cela n’a donc pas été fait. Utilisez moins de chapitres, ou supprimez dans le Studio les brouillons dont vous n’avez plus besoin. Ne retirez l’instance que si les brouillons ne sont pas les vôtres et que vous ne savez pas qui la tient à jour.",

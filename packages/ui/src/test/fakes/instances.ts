@@ -4,6 +4,7 @@
 
 import { vi } from "vitest";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION } from "@solid-memo/domain/deck";
+import { AppError } from "@solid-memo/domain/appError";
 import { describedCatalog } from "@solid-memo/domain/catalog";
 import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
@@ -74,10 +75,13 @@ export function makeInstanceUseCasesFake(
         description: "My decks.",
         publisher: { webId: `${new URL(instanceUrl).origin}/profile/card#me`, name: "Alice" },
       })),
-      // As the real one does: of the catalog as it is read.
-      describeCatalog: vi.fn(async (instanceUrl, about) =>
-        describedCatalog((await fake.readCatalog(instanceUrl))!, about),
-      ),
+      // As the real one does: of the catalog as it is read, refusing none and a misfit.
+      describeCatalog: vi.fn(async (instanceUrl, about) => {
+        const catalog = await fake.readCatalog(instanceUrl);
+        if (catalog === null) throw new AppError("noCatalogToUpdate", { url: instanceUrl });
+        if (catalog === "misfit") throw new AppError("catalogMisfit", { url: instanceUrl });
+        return describedCatalog(catalog, about);
+      }),
     } satisfies InstanceUseCases,
     overrides,
   );

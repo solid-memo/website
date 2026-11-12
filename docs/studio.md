@@ -1262,8 +1262,11 @@ Memo, and has two forms:
 - **Catalog**: its description, required, and its license, from the
   same list as a deck's (`describeCatalog`). Its publisher, the pod's
   owner, is shown, never edited. An instance without a catalog (one
-  not updated yet) says so instead. The form starts again from each
-  read of the catalog (a rename can change its description).
+  not updated yet) says so instead. So does one whose catalog doesn't
+  fit its shape: that's invalid data, which the data check reports,
+  and it's never edited or replaced (`catalogMisfit`); a rename leaves
+  it as it is. The form starts again from each read of the catalog (a
+  rename can change its description).
 
 Both forms are held until the data check is done, and while the
 catalog or a group is set aside ([below](#data-set-aside)).

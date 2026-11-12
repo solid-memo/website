@@ -33,6 +33,7 @@ import {
   catalogToRecord,
   publisherToRecord,
   type Catalog,
+  type CatalogRead,
 } from "@solid-memo/domain/catalog";
 import {
   boundedCompletedChapters,
@@ -361,14 +362,17 @@ function withCatalogDatasets(
 
 /**
  * The catalog of a catalog document, its publisher named by the agent
- * node beside it (or by the WebID when there is none); null when the
- * document has no catalog that fits its shape.
+ * node beside it (or by the WebID when there is none); "misfit" when the
+ * document's `#catalog` has statements of its own but does not fit the
+ * catalog's shape (whatever its type, or with none), which no write of a
+ * catalog replaces; null when there are none.
  */
-export function toCatalog(dataset: Dataset, documentUrl: string): Catalog | null {
+export function toCatalog(dataset: Dataset, documentUrl: string): CatalogRead {
   const url = `${documentUrl}#catalog`;
   const thing = getThing(dataset, url);
-  const read = thing === null ? null : readVersioned(thing, "catalog");
-  if (read === null) return null;
+  if (thing === null) return null;
+  const read = readVersioned(thing, "catalog");
+  if (read === null) return "misfit";
   const record = migrate("catalog", read.record, { subject: url });
   return catalogFromRecord(record, agentNamesOf(dataset).get(record.publisher) ?? record.publisher);
 }

@@ -947,9 +947,10 @@ deck's two documents, so a long list never reads all of them at once.
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;
 it has no registration of its own ([Discovery
-chain](#discovery-chain)). The whole document conforms to DCAT-AP, a
-course's deck typed `schema:Course` too ([Courses](#courses)), and a
-test holds what the app writes to it.
+chain](#discovery-chain)). A catalog that doesn't fit its shape is
+invalid data, which no write replaces with another. The whole document
+conforms to DCAT-AP, a course's deck typed `schema:Course` too
+([Courses](#courses)), and a test holds what the app writes to it.
 
 The instance's name is in the meta document's `dcterms:title`, the
 catalog's `dcterms:title`, and the `dcterms:title` of its registrations

@@ -642,6 +642,7 @@
       "saveName": "이름 저장",
       "catalog": "카탈로그",
       "noCatalog": "이 인스턴스에는 아직 카탈로그가 없어요. 업데이트하려면 Solid Memo에서 열어 주세요.",
+      "misfitCatalog": "이 인스턴스의 카탈로그가 Solid Memo가 읽는 형식에 맞지 않아서 그대로 두어요. 무엇이 잘못됐는지는 인스턴스 상태 점검에서 알 수 있어요.",
       "publisher": "게시자",
       "description": "설명",
       "licenseHint": "카탈로그를 읽는 앱에 덱을 제공하는 라이선스예요.",

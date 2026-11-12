@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Catalog } from "@solid-memo/domain/catalog";
+import type { Catalog, CatalogRead } from "@solid-memo/domain/catalog";
 import type { Locale } from "@solid-memo/domain/locale";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { CustomPalette } from "@solid-memo/domain/customPalette";
@@ -205,8 +205,11 @@ type CardToSave = CardContent & {
 
 export interface DeckRepository {
   listDecks(instanceUrl: string): Promise<Deck[]>;
-  /** The instance's catalog (catalog.ttl#catalog); null when it has none yet. */
-  readCatalog(instanceUrl: string): Promise<Catalog | null>;
+  /**
+   * The instance's catalog (catalog.ttl#catalog); "misfit" when it has
+   * one that does not fit its shape; null when it has none yet.
+   */
+  readCatalog(instanceUrl: string): Promise<CatalogRead>;
   /** Write the instance's catalog, listing every deck, creating the catalog document if need be. */
   saveCatalog(instanceUrl: string, catalog: Catalog): Promise<void>;
   /**
@@ -214,9 +217,11 @@ export interface DeckRepository {
    * stored in an older format up to this app's, in place (unknown triples
    * survive), each as read and brought up to date in memory, and write
    * `catalog` as the instance's catalog when one is given and the
-   * document has none, all in ONE save of the catalog document, made only
-   * if it is still as it was read (If-Match; created only if nothing is
-   * there, when there is no document). An entry that does not fit its
+   * document has none (no statements of `#catalog`: one that does not
+   * fit its shape, whatever its type, is left as it is), all in ONE save
+   * of the catalog document, made only if it is still as it was read
+   * (If-Match; created only if nothing is there, when there is no
+   * document). An entry that does not fit its
    * shape is left as it is. Whether anything was written.
    */
   upgradeDecks(instanceUrl: string, catalog: Catalog | null): Promise<boolean>;

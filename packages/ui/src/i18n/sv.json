@@ -1668,6 +1668,7 @@
     "paletteContrastLow": "Några färger har mindre kontrast än de behöver. Välj andra, eller använd dem ändå.",
     "catalogNeedsDescription": "Katalogen behöver en beskrivning.",
     "noCatalogToUpdate": "Den här instansen har ingen katalog än. Uppdatera instansen i Solid Memo först.",
+    "catalogMisfit": "Den här instansens katalog passar inte formen som Solid Memo läser, så Solid Memo lämnar den som den är. Instansens datakontroll visar vad som är fel med den.",
     "catalogTooManyLinks": "Den här instansens katalog listar fler kortlekar, utkast eller utgåvor än Solid Memo läser (högst {limit} av varje). Ta bort instansen om du inte vet vem som sköter den.",
     "catalogFull": "Den här instansens katalog listar redan så många kortlekar, utkast eller utgåvor som Solid Memo läser ({limit} av varje), så den kan inte lista fler.",
     "draftTooManyDocuments": "Det här utkastet eller den här filen har för många kapitel, eller så har instansens utkast tillsammans för många dokument för att Solid Memo ska läsa dem (högst {limit} dokument), så det gjordes inte. Använd färre kapitel, eller radera utkast du inte längre behöver i Studio. Ta bort instansen bara om utkasten inte är dina och du inte vet vem som sköter den.",

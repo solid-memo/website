@@ -663,7 +663,7 @@ export function createSessionUseCases({
           .map((url) => rebaseIri(url, source, target));
         progress.finished("adopt", documents.length + 1);
         const catalog = await deckRepository.readCatalog(target);
-        if (catalog !== null) {
+        if (catalog !== null && catalog !== "misfit") {
           await deckRepository.saveCatalog(target, {
             ...catalog,
             publisher: (await catalogOf(webIdDocumentRepository, session, catalog.title)).publisher,

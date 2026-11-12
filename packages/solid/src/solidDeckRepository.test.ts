@@ -784,6 +784,55 @@ describe("upgradeDecks", () => {
     expect(writeDocument).toHaveBeenCalledOnce();
   });
 
+  it("leaves a catalog that does not fit its shape as it is, its title, description and license kept", async () => {
+    const license = "https://creativecommons.org/licenses/by/4.0/";
+    const misfit = `<${CATALOG}#catalog> a <${DCAT.Catalog}>;
+      <${DCTERMS.title}> "My Korean study decks"@en;
+      <${DCTERMS.description}> "Carefully written description";
+      <${DCTERMS.publisher}> <https://alice.example/profile/card#me>;
+      <${DCTERMS.license}> <${license}>;
+      <${SM.formatVersion}> 1.`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await datasetOfTurtle(CATALOG, misfit));
+    await expect(makeRepository().readCatalog(INSTANCE)).resolves.toBe("misfit");
+    // Nothing else outdated: nothing is written.
+    await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+    // An outdated deck entry beside it: only the entry is brought up to date.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        CATALOG,
+        `${misfit}
+        <${deck.url}> a <${SM.Deck}>; <${DCTERMS.title}> "Kanji N5";
+          <${SM.cardsDocument}> <${deck.cardsDocumentUrl}>;
+          <${SM.reviewsDocument}> <${deck.reviewsDocumentUrl}>.`,
+      ),
+    );
+    await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
+    const saved = getThing(
+      vi.mocked(writeDocument).mock.calls[0]![1] as Dataset,
+      `${CATALOG}#catalog`,
+    )!;
+    expect(getStringWithLocale(saved, DCTERMS.title, "en")).toBe("My Korean study decks");
+    expect(getStringNoLocaleAll(saved, DCTERMS.title)).toEqual([]);
+    expect(getStringNoLocale(saved, DCTERMS.description)).toBe("Carefully written description");
+    expect(getUrl(saved, DCTERMS.license)).toBe(license);
+  });
+
+  it("leaves a #catalog with statements of its own as it is, whatever its type, or with none", async () => {
+    for (const type of ["", `a <${DCAT.Dataset}>;`]) {
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+        await datasetOfTurtle(
+          CATALOG,
+          `<${CATALOG}#catalog> ${type} <${DCTERMS.title}> "My Korean study decks";
+            <${DCTERMS.description}> "Carefully written description".`,
+        ),
+      );
+      await expect(makeRepository().readCatalog(INSTANCE)).resolves.toBe("misfit");
+      await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(false);
+    }
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
   it("creates the catalog document for a catalog alone, and writes nothing where there is neither", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(false);

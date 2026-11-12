@@ -558,9 +558,12 @@ flowchart TD
   state is outdated, and last `catalog.ttl`, when a deck entry is
   outdated or the catalog is missing. A missing catalog is written as
   the instance's record names it, published by the signed-in user
-  ([data-model.md](data-model.md#the-catalog)). A document two decks
-  share (another app may point two decks at one) is written for each
-  deck in turn.
+  ([data-model.md](data-model.md#the-catalog)). A catalog is missing
+  only when the document says nothing of its `#catalog`: one that
+  doesn't fit its shape, whatever its type, is invalid data, which the
+  data check reports, and the update leaves it as it is. A document two
+  decks share (another app may point two decks at one) is written for
+  each deck in turn.
 - **Each document in one conditional write.** The update reads the
   document and brings each subject stored in an older format up to date
   from that read, changing only its version. The write

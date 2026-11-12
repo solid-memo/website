@@ -720,6 +720,7 @@
       "saveName": "Enregistrer le nom",
       "catalog": "Catalogue",
       "noCatalog": "Cette instance n’a pas encore de catalogue. Ouvrez-la dans Solid Memo pour la mettre à jour.",
+      "misfitCatalog": "Le catalogue de cette instance ne correspond pas à la forme que lit Solid Memo, il est donc laissé tel quel. L’état de l’instance indique ce qui ne va pas.",
       "publisher": "Éditeur",
       "description": "Description",
       "licenseHint": "La licence sous laquelle les paquets sont proposés, pour les applications qui lisent le catalogue.",
