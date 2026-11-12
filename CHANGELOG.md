@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.2.3](https://github.com/solid-memo/website/compare/v7.2.2...v7.2.3) (2026-11-12)
+
+### Bug Fixes
+
+* **solid:** fail the instance list when an index can't be read now ([7777d85](https://github.com/solid-memo/website/commit/7777d8558f72bc57ff080d122e2c59a6f1889e89)), closes [#401](https://github.com/solid-memo/website/issues/401) [#754](https://github.com/solid-memo/website/issues/754)
+* **ui:** keep what the workspace read when reading it again fails ([1512b0f](https://github.com/solid-memo/website/commit/1512b0f37e694b643e9aceb450dd2c8ae613aa91)), closes [#754](https://github.com/solid-memo/website/issues/754)
+* **ui:** name the learner in the masthead after a restored session ([6306b56](https://github.com/solid-memo/website/commit/6306b56104fc3abbd8115f75b2dff08557ccfec9)), closes [#755](https://github.com/solid-memo/website/issues/755)
+
 ## [7.2.2](https://github.com/solid-memo/website/compare/v7.2.1...v7.2.2) (2026-11-12)
 
 ### Bug Fixes
