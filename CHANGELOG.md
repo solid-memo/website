@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.2.0](https://github.com/solid-memo/website/compare/v7.1.5...v7.2.0) (2026-11-12)
+
+### Features
+
+* **ui:** offer to remember the WebID last logged in with ([5d15273](https://github.com/solid-memo/website/commit/5d15273355ce26fb67fedaf457dbb82835ffa541)), closes [#741](https://github.com/solid-memo/website/issues/741)
+
+### Bug Fixes
+
+* **solid:** look for a linked release's newer versions in its instance ([6958262](https://github.com/solid-memo/website/commit/6958262dae49ad80e25db88d867b3e12f62344dc))
+* **solid:** measure a blank node as the read keeps it ([686e357](https://github.com/solid-memo/website/commit/686e357222863cbefdf14ee9e29c615a52eb2a39))
+
 ## [7.1.5](https://github.com/solid-memo/website/compare/v7.1.4...v7.1.5) (2026-11-12)
 
 ### Bug Fixes
