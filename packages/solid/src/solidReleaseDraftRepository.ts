@@ -36,7 +36,7 @@ import {
   type ReleaseDraftSummary,
 } from "@solid-memo/domain/release/draftLayout";
 import { seriesAbove } from "@solid-memo/domain/release/continuityRules";
-import { DCAT_NS, DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
+import { DCAT_NS, DCTERMS_NS, type ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import {
   RDF_TYPE,
   type DraftTriple,
@@ -58,8 +58,10 @@ import {
 import {
   draftEntries,
   draftFromQuads,
+  draftReadOf,
   draftIriOf,
   entryQuads,
+  withEntryClasses,
   inPlaceIn,
   keyOf,
   quadOf,
@@ -398,22 +400,35 @@ export function createSolidReleaseDraftRepository({
           // So would one of the draft's own subjects named otherwise than the draft writes it, which no read of the draft has (GHSA-8w75-jg23-rxq5).
           if (quad.subject.termType !== "BlankNode" && !inPlace(urls[at]!, quad.subject.value))
             throw new AppError("draftAliasedSubject", { subject: quad.subject.value });
-          return quadOf(
-            quad.subject.termType === "BlankNode"
-              ? `_:${label(quad.subject.value)}`
-              : to(quad.subject.value),
-            quad.predicate.value,
-            object.kind === "iri"
-              ? { kind: "iri", value: to(object.value) }
-              : object.kind === "blank"
-                ? { kind: "blank", value: label(object.value) }
-                : object,
-          );
+          // A class the draft does not keep of its subject is left out of the release, as of the draft checked (GHSA-8hh7-p2ww-mpjf).
+          const typed = classStated(quad, object, iriOf);
+          return {
+            typed,
+            quad: quadOf(
+              quad.subject.termType === "BlankNode"
+                ? `_:${label(quad.subject.value)}`
+                : to(quad.subject.value),
+              quad.predicate.value,
+              object.kind === "iri"
+                ? { kind: "iri", value: to(object.value) }
+                : object.kind === "blank"
+                  ? { kind: "blank", value: label(object.value) }
+                  : object,
+            ),
+          };
         }),
       );
       // So would a value of one of its subjects stated otherwise than its record writes it, which no read of the draft shows (GHSA-32jq-jh7h-r7v4).
-      draftFromQuads(draftNamedQuads(draftUrl, urls, datasets), draftUrl, { refuseHidden: true });
-      const quads = releaseQuadsOf(atTarget, targetUrl, issued);
+      const read = draftReadOf(draftNamedQuads(draftUrl, urls, datasets), draftUrl, {
+        refuseHidden: true,
+      });
+      const quads = releaseQuadsOf(
+        atTarget
+          .filter(({ typed }) => typed === null || !read?.unkept(typed.subject, typed.object))
+          .map(({ quad }) => quad),
+        targetUrl,
+        issued,
+      );
       const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
       return turtleOf(quads, {
         base: targetUrl,
@@ -523,6 +538,23 @@ function readNumberOf(dataset: object): number {
 /** The version of a read of a draft's documents, in order: another when any of them was read anew, or one came or went. */
 function versionOfDocuments(urls: readonly string[], datasets: readonly Dataset[]): string {
   return JSON.stringify(urls.map((url, at) => [url, readNumberOf(datasets[at]!)]));
+}
+
+/**
+ * What a statement of a draft's document says, when it states a class of
+ * a named subject: that subject and the class, as the draft names them;
+ * null otherwise.
+ */
+function classStated(
+  quad: Quad,
+  object: ReleaseTerm,
+  iriOf: (iri: string) => string,
+): { subject: string; object: ReleaseTerm } | null {
+  if (quad.subject.termType === "BlankNode" || quad.predicate.value !== RDF_TYPE) return null;
+  return {
+    subject: iriOf(quad.subject.value),
+    object: object.kind === "iri" ? { kind: "iri", value: iriOf(object.value) } : object,
+  };
 }
 
 /**
@@ -767,7 +799,8 @@ function involvesBlank(entry: DraftEntry): boolean {
  * (`existing`): its record written over what its shape owns (recordThing,
  * which refuses what a newer app wrote), the statements it said before
  * (`was`) and does not now taken out, those it says now put in; anything
- * else the document says of it kept.
+ * else the document says of it kept, but of its classes only those its
+ * write keeps (withEntryClasses).
  */
 function rewritten(
   existing: NamedSubject | null,
@@ -786,10 +819,10 @@ function rewritten(
       : quadsOf(setThing(createSolidDataset(), base)).filter(
           (quad) => !removed.has(tripleKey(tripleParts(asTriple(quad)))),
         );
-  const quads = [
+  const quads = withEntryClasses(entry, [
     ...kept,
     ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
-  ];
+  ]);
   // The entry says something of its subject (a record's type, or a statement): the subject is there.
   return getThing(datasetFromQuads(quads), entry.subject)!;
 }

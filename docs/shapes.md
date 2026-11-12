@@ -120,7 +120,12 @@ check a draft's cards, distractors, agents and distributions.
   blank node, names no class but counts toward that number, so the
   writer leaves it out of the subject it checks and writes. A
   blank node stays in a document Solid Memo patches rather than
-  rewrites, but no write counts it again.
+  rewrites, but no write counts it again. A release draft keeps another
+  app's statements of its subjects as they are. So it reads and writes
+  the classes of its deck, chapters, steps, cards, distractors, agents
+  and distributions by the same rule (`keptClasses` in
+  [records.ts](../packages/solid/src/records.ts)). Publishing leaves
+  out of the release each class the draft doesn't keep.
 - **Property shapes are named** (`<#front>`, never blank nodes) for the
   generator and the results. `sh:message` replaces cryptic engine
   text, always in exactly English and Swedish (`"…"@en`, `"…"@sv`),
