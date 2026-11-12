@@ -1251,6 +1251,16 @@ a.hint:hover {
   margin-top: 0.5rem;
 }
 
+/* The whole label is the box's to click; the box keeps its size when the label wraps. */
+.webid-login .remember-webid {
+  display: inline-flex;
+  align-items: center;
+}
+
+.webid-login .remember-webid input {
+  flex-shrink: 0;
+}
+
 .onboarding-actions {
   display: flex;
   flex-wrap: wrap;

@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { WebIdForm } from "./WebIdForm";
 import { alertTexts, statusTexts } from "../../test/liveRegions";
+import { loginWebIdKey, webIdKey } from "../remembered";
 
 function renderForm(overrides: Partial<Parameters<typeof WebIdForm>[0]> = {}) {
   const props = {
@@ -23,6 +24,11 @@ function submit(webId: string) {
 }
 
 describe("WebIdForm", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+
   it("starts empty, without someone else's WebID prefilled", () => {
     renderForm();
     expect(screen.getByLabelText("WebID")).toHaveValue("");
@@ -60,6 +66,38 @@ describe("WebIdForm", () => {
     expect(screen.getByLabelText("WebID")).toHaveAccessibleDescription(/^Your WebID is/);
   });
 
+  it("leaves the WebID unremembered unless asked", () => {
+    renderForm();
+    expect(
+      screen.getByRole("checkbox", { name: "Remember my WebID on this device" }),
+    ).not.toBeChecked();
+    submit("https://bob.example/profile/card#me");
+    expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+  });
+
+  it("notes the WebID to remember once its login succeeds", () => {
+    const { onSubmit } = renderForm();
+    fireEvent.click(screen.getByRole("checkbox", { name: "Remember my WebID on this device" }));
+    submit("https://Bob.example/profile/card#me");
+    expect(sessionStorage.getItem(loginWebIdKey)).toBe("https://bob.example/profile/card#me");
+    // Kept for good only once the login comes back.
+    expect(localStorage.getItem(webIdKey)).toBeNull();
+    expect(onSubmit).toHaveBeenCalledWith("https://bob.example/profile/card#me");
+  });
+
+  it("fills in the remembered WebID, its box checked, and forgets it when unchecked", () => {
+    localStorage.setItem(webIdKey, "https://bob.example/profile/card#me");
+    const { onSubmit } = renderForm();
+    expect(screen.getByLabelText("WebID")).toHaveValue("https://bob.example/profile/card#me");
+    const remember = screen.getByRole("checkbox", { name: "Remember my WebID on this device" });
+    expect(remember).toBeChecked();
+
+    fireEvent.click(remember);
+    fireEvent.click(screen.getByRole("button", { name: "Log in with Solid" }));
+    expect(onSubmit).toHaveBeenCalledWith("https://bob.example/profile/card#me");
+    expect(localStorage.getItem(webIdKey)).toBeNull();
+  });
+
   it("never asks for a password", () => {
     const { container } = render(<WebIdForm busy={false} onSubmit={vi.fn()} />);
     expect(container.querySelector('input[type="password"]')).toBeNull();
@@ -73,6 +111,9 @@ describe("WebIdForm", () => {
   it("disables the form and changes the button label while busy, and says so", () => {
     const { onSubmit } = renderForm({ busy: true });
     expect(screen.getByLabelText("WebID")).toBeDisabled();
+    expect(
+      screen.getByRole("checkbox", { name: "Remember my WebID on this device" }),
+    ).toBeDisabled();
     // Only aria-disabled, so it keeps the focus while the page redirects.
     const button = screen.getByRole("button", { name: "Redirecting…" });
     expect(button).toHaveAttribute("aria-disabled", "true");

@@ -1621,7 +1621,8 @@
   "webIdForm": {
     "help": "Ditt WebID är webbadressen som identifierar dig, och du får den av din Pod-leverantör. Du loggar in på leverantörens egen sida — Solid Memo ser aldrig ditt lösenord.",
     "redirecting": "Skickar dig vidare…",
-    "logIn": "Logga in med Solid"
+    "logIn": "Logga in med Solid",
+    "remember": "Kom ihåg mitt WebID på den här enheten"
   },
   "workspace": {
     "loadingInstances": "Läser in dina Solid Memo-instanser…",

@@ -7,6 +7,7 @@ import { useRef, useState } from "preact/hooks";
 import { validateWebId } from "@solid-memo/domain/webId";
 import { ErrorMessage } from "../ErrorMessage";
 import { useI18n } from "../i18n";
+import { noteLoginWebId, rememberedWebId } from "../remembered";
 
 export function WebIdForm({
   busy,
@@ -17,7 +18,9 @@ export function WebIdForm({
   onSubmit: (webId: string) => void;
 }) {
   const { t, errorText } = useI18n();
-  const [webId, setWebId] = useState("");
+  // The WebID this device was asked to remember, and with it the box that keeps it.
+  const [webId, setWebId] = useState(() => rememberedWebId() ?? "");
+  const [remember, setRemember] = useState(() => webId !== "");
   const [invalid, setInvalid] = useState<AppError | null>(null);
   const input = useRef<HTMLInputElement>(null);
 
@@ -31,6 +34,7 @@ export function WebIdForm({
       input.current!.focus();
       return;
     }
+    noteLoginWebId(validation.webId, remember);
     onSubmit(validation.webId);
   }
 
@@ -60,6 +64,15 @@ export function WebIdForm({
       <p id="webid-help" class="hint">
         {t("webIdForm.help")}
       </p>
+      <label class="remember-webid">
+        <input
+          type="checkbox"
+          checked={remember}
+          onChange={(e) => setRemember(e.currentTarget.checked)}
+          disabled={busy}
+        />
+        {t("webIdForm.remember")}
+      </label>
       <div class="onboarding-actions">
         {/* Only aria-disabled while it redirects, so it keeps the focus and its text is heard. */}
         <button type="submit" aria-disabled={busy}>

@@ -7,6 +7,11 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import {
   collapsedGroups,
   forget,
+  loginWebIdKey,
+  noteLoginWebId,
+  rememberedWebId,
+  settleLoginWebId,
+  webIdKey,
   recentLanguages,
   rememberCollapsed,
   rememberLanguage,
@@ -128,5 +133,68 @@ describe("collapsed deck groups", () => {
     };
     expect(collapsedGroups(a, refusing)).toEqual([]);
     expect(() => rememberCollapsed(a, ["x"], refusing)).not.toThrow();
+  });
+});
+
+describe("the remembered WebID", () => {
+  const webId = "https://alice.example/profile/card#me";
+  const refusing = () => {
+    throw new DOMException("refused", "SecurityError");
+  };
+
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
+
+  it("is none at first", () => {
+    expect(rememberedWebId()).toBeNull();
+  });
+
+  it("is kept once the login with it succeeds", () => {
+    noteLoginWebId(webId, true);
+    // Not before the login has come back.
+    expect(rememberedWebId()).toBeNull();
+    settleLoginWebId(webId);
+    expect(rememberedWebId()).toBe(webId);
+    expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+  });
+
+  it("is not kept when the login fails or comes back as someone else", () => {
+    noteLoginWebId(webId, true);
+    settleLoginWebId(null);
+    expect(rememberedWebId()).toBeNull();
+    expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+
+    noteLoginWebId(webId, true);
+    settleLoginWebId("https://bob.example/profile/card#me");
+    expect(rememberedWebId()).toBeNull();
+  });
+
+  it("keeps nothing for a login that was not asked to remember", () => {
+    settleLoginWebId(webId);
+    expect(rememberedWebId()).toBeNull();
+  });
+
+  it("is forgotten when a login is not asked to remember it", () => {
+    localStorage.setItem(webIdKey, webId);
+    sessionStorage.setItem(loginWebIdKey, webId);
+    noteLoginWebId(webId, false);
+    expect(rememberedWebId()).toBeNull();
+    expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+  });
+
+  it("ignores what is not a valid WebID as kept", () => {
+    localStorage.setItem(webIdKey, "http://alice.example/profile/card#me");
+    expect(rememberedWebId()).toBeNull();
+    // Valid, but not as the form would have kept it.
+    localStorage.setItem(webIdKey, ` ${webId}`);
+    expect(rememberedWebId()).toBeNull();
+  });
+
+  it("remembers none, and fails nothing, without storage", () => {
+    expect(rememberedWebId(refusing)).toBeNull();
+    expect(() => noteLoginWebId(webId, true, refusing, refusing)).not.toThrow();
+    expect(() => settleLoginWebId(webId, refusing, refusing)).not.toThrow();
   });
 });

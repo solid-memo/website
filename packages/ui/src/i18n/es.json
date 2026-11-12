@@ -1696,7 +1696,8 @@
   "webIdForm": {
     "help": "Tu WebID es la dirección web que te identifica y que te da tu proveedor de Pods. Iniciarás sesión en la propia página de tu proveedor — Solid Memo nunca ve tu contraseña.",
     "redirecting": "Redirigiendo…",
-    "logIn": "Iniciar sesión con Solid"
+    "logIn": "Iniciar sesión con Solid",
+    "remember": "Recordar mi WebID en este dispositivo"
   },
   "workspace": {
     "loadingInstances": "Cargando tus instancias de Solid Memo…",

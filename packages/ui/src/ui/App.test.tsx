@@ -23,6 +23,7 @@ import { makeUseCasesFake } from "../test/useCasesFake";
 import { MAIN_ID } from "./SkipLink";
 import { useInstanceTheme, useTheme } from "./theme";
 import { queryKeys } from "./queryKeys";
+import { loginWebIdKey, webIdKey } from "./remembered";
 import { loadLocale } from "./i18n";
 
 vi.mock("./i18n", async (actual) => {
@@ -987,6 +988,41 @@ describe("AppShell", () => {
 
     expect(loginWithWebId).toHaveBeenCalledWith(session.webId);
     expect(await screen.findByRole("button", { name: "Redirecting…" })).toBeInTheDocument();
+  });
+
+  describe("a WebID asked to be remembered", () => {
+    afterEach(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
+
+    it("is kept once the login with it has succeeded", async () => {
+      sessionStorage.setItem(loginWebIdKey, session.webId);
+      renderApp(makeUseCases({ restoreSession: vi.fn(async () => loggedIn) }));
+      await waitFor(() => expect(localStorage.getItem(webIdKey)).toBe(session.webId));
+      expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+    });
+
+    it("is not kept by a session restored without a login", async () => {
+      sessionStorage.setItem(loginWebIdKey, session.webId);
+      renderApp(makeUseCases({ restoreSession: vi.fn(async () => restored) }));
+      await waitFor(() => expect(sessionStorage.getItem(loginWebIdKey)).toBeNull());
+      expect(localStorage.getItem(webIdKey)).toBeNull();
+    });
+
+    it("is not kept when the login fails", async () => {
+      sessionStorage.setItem(loginWebIdKey, session.webId);
+      renderApp(
+        makeUseCases({
+          restoreSession: vi.fn(async () => {
+            throw new AppError("loginIssuerMissing", { issuer: "https://issuer.example/" });
+          }),
+        }),
+      );
+      expect(await screen.findByLabelText("WebID")).toHaveValue("");
+      expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+      expect(localStorage.getItem(webIdKey)).toBeNull();
+    });
   });
 
   it("logs in at a suggested provider without a WebID", async () => {
