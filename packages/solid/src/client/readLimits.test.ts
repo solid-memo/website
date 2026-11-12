@@ -8,8 +8,16 @@ import { describe, expect, it, vi } from "vitest";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { ReadLimitError } from "./interface";
 import { growth } from "@solid-memo/domain/testing/growth";
-import type { Literal, NamedNode, Quad, Quad_Object, Quad_Subject } from "@rdfjs/types";
+import type {
+  DataFactory,
+  Literal,
+  NamedNode,
+  Quad,
+  Quad_Object,
+  Quad_Subject,
+} from "@rdfjs/types";
 import {
+  blankNodeNamer,
   limitedFetch,
   limitsOf,
   MAX_TERM_CHARACTERS,
@@ -700,11 +708,39 @@ describe("writeTurtle", () => {
   });
 });
 
+describe("blankNodeNamer", () => {
+  it("names each blank node of a read once, in any place, and leaves a quad without one as it is", () => {
+    const factory = {
+      blankNode: (value: string) => blankNode(value),
+      quad: (
+        subject: Quad_Subject,
+        predicate: NamedNode,
+        object: Quad_Object,
+        graph: Quad["graph"],
+      ) => ({ ...quadOf(subject, object), predicate, graph }) as Quad,
+    } as unknown as DataFactory;
+    const named = blankNodeNamer(factory);
+    const plain = quadOf(namedNode(URL_), literal("x"));
+    expect(named(plain)).toBe(plain);
+    const graph = {
+      ...quadOf(namedNode(URL_), blankNode("b0_a")),
+      graph: blankNode("b0_g"),
+    } as Quad;
+    const [first, second] = [graph, quadOf(blankNode("b0_a"), namedNode(URL_))].map(named);
+    expect(first.subject).toEqual(namedNode(URL_));
+    expect(second.subject.value).toBe(first.object.value);
+    expect(first.graph.value).not.toBe(first.object.value);
+    // Another read names its own.
+    expect(blankNodeNamer(factory)(graph).object.value).not.toBe(first.object.value);
+  });
+});
+
 describe("quadTally", () => {
   it("says a triple with a term longer than the bound is past, with limits or with none", () => {
-    // A literal is named in quotes, a blank node with `_:` before its label, a text with its language after it.
+    // A literal is named in quotes, a blank node with `_:` before its label and room for a parser's prefix
+    // (as a write counts it: what a read keeps can be written back), a text with its language after it.
     const subject = namedNode(URL_);
-    const label = "b".repeat(MAX_TERM_CHARACTERS - 2);
+    const label = "b".repeat(MAX_TERM_CHARACTERS - 34);
     const text = "t".repeat(MAX_TERM_CHARACTERS - 5);
     // An IRI is in `<>` and a text's quotes and line breaks are escaped, as N-Triples writes them.
     const within = [
@@ -722,8 +758,18 @@ describe("quadTally", () => {
       quadOf(subject, literal(`"${"x".repeat(MAX_TERM_CHARACTERS - 3)}`)),
     ];
     for (const limits of [undefined, RELEASE_LIMITS]) {
-      expect(within.map(quadTally(limits))).toEqual([false, false, false, false, false]);
-      expect(past.map(quadTally(limits))).toEqual([true, true, true, true, true]);
+      expect(within.map(quadTally(limits, "kept"))).toEqual([false, false, false, false, false]);
+      expect(past.map(quadTally(limits, "kept"))).toEqual([true, true, true, true, true]);
+    }
+  });
+
+  it("holds a label a read names anew as the parser gave it, with no room for a prefix", () => {
+    // A Turtle read writes back the short name it gives a blank node (blankNodeNamer), not the label.
+    const at = quadOf(blankNode("b".repeat(MAX_TERM_CHARACTERS - 2)), literal("x"));
+    const past = quadOf(blankNode("b".repeat(MAX_TERM_CHARACTERS - 1)), literal("x"));
+    for (const limits of [undefined, RELEASE_LIMITS]) {
+      expect([at, past].map(quadTally(limits, "renamed"))).toEqual([false, true]);
+      expect([at].map(quadTally(limits, "kept"))).toEqual([true]);
     }
   });
 
@@ -731,14 +777,14 @@ describe("quadTally", () => {
     const quads = await parseQuads("<#a> <#p> 1, 2, 3 .", "turtle", URL_, RELEASE_LIMITS);
     const limits = { ...RELEASE_LIMITS, quads: 5 };
     const spent = noneSpent();
-    const first = quadTally(limits, spent);
-    const second = quadTally(limits, spent);
+    const first = quadTally(limits, "renamed", spent);
+    const second = quadTally(limits, "renamed", spent);
     expect(quads.map(first)).toEqual([false, false, false]);
     expect(spent.quads).toBe(3);
     expect(spent.characters).toBeGreaterThan(0);
     // Five triples at most, together.
     expect(quads.map(second)).toEqual([false, false, true]);
     // A tally of its own counts from none.
-    expect(quads.map(quadTally(limits))).toEqual([false, false, false]);
+    expect(quads.map(quadTally(limits, "kept"))).toEqual([false, false, false]);
   });
 });
