@@ -228,7 +228,7 @@ Refs: #1`),
 
   it("takes Renovate's line from the commitBody that renovate.json5 writes", () => {
     const renovate = readFileSync(join(ROOT, "renovate.json5"), "utf8");
-    const commitBody = /commitBody: '(.*)',$/m.exec(renovate)?.[1];
+    const commitBody = /commitBody: "(.*)",$/m.exec(renovate)?.[1];
     expect(commitBody).toContain(`\\n${RENOVATE_WHY}`);
     expect(renovateBody.split("\n").at(-1)?.startsWith(RENOVATE_WHY)).toBe(true);
   });

@@ -48,8 +48,12 @@
     // Its pull requests and its Dependency Dashboard carry the dependencies
     // label, so that dependency updates can be filtered in, or out, of the
     // issue and pull request lists.
-    labels: ['dependencies'],
-    dependencyDashboardLabels: ['dependencies'],
+    labels: [
+        'dependencies',
+    ],
+    dependencyDashboardLabels: [
+        'dependencies',
+    ],
     // Its commits follow Conventional Commits, as everyone's do
     // (CONTRIBUTING.md#commit-messages): config:recommended's
     // :semanticPrefixFixDepsChoreOthers makes an update of what the app
@@ -62,7 +66,7 @@
     // and where its source and release notes are: the commit is the record
     // of the decision (docs/standard-for-public-code.md, criterion 6), and
     // its pull request has the notes in full.
-    commitBody: '{{#each upgrades}}{{#if (equals updateType \'lockFileMaintenance\')}}{{#if (equals manager \'pip-compile\')}}- {{{packageFile}}}, compiled again: every package its pins need to the newest version they allow (lock file maintenance)\n{{else}}- package-lock.json: every dependency to the newest version its range allows (lock file maintenance)\n{{/if}}{{else}}- {{{depName}}} {{{displayFrom}}} → {{{displayTo}}} ({{{updateType}}}{{#if depType}}, {{{depType}}}{{/if}}) in {{{packageFile}}}{{#if sourceUrl}}; source and release notes: {{{sourceUrl}}}{{/if}}\n{{/if}}{{/each}}\nWhy: renovate.json5 keeps every dependency current, within the versions it allows, so that fixes arrive while they are small; the update was merged only after CI passed on it.',
+    commitBody: "{{#each upgrades}}{{#if (equals updateType 'lockFileMaintenance')}}{{#if (equals manager 'pip-compile')}}- {{{packageFile}}}, compiled again: every package its pins need to the newest version they allow (lock file maintenance)\n{{else}}- package-lock.json: every dependency to the newest version its range allows (lock file maintenance)\n{{/if}}{{else}}- {{{depName}}} {{{displayFrom}}} → {{{displayTo}}} ({{{updateType}}}{{#if depType}}, {{{depType}}}{{/if}}) in {{{packageFile}}}{{#if sourceUrl}}; source and release notes: {{{sourceUrl}}}{{/if}}\n{{/if}}{{/each}}\nWhy: renovate.json5 keeps every dependency current, within the versions it allows, so that fixes arrive while they are small; the update was merged only after CI passed on it.",
     // The Python tools CI installs are pinned in scripts/requirements-*.in
     // and compiled by `uv pip compile`, with what they need and every
     // file's hash, into the requirements-*.txt pip installs
@@ -77,10 +81,14 @@
     // so a person merges it, after reading what moved. A compile, Renovate's or
     // a person's, locks no version younger than 3 days (uv.toml).
     'pip-compile': {
-        managerFilePatterns: ['/^scripts/requirements-[a-z]+\\.txt$/'],
+        managerFilePatterns: [
+            '/^scripts/requirements-[a-z]+\\.txt$/',
+        ],
         lockFileMaintenance: {
             enabled: true,
-            schedule: ['* 0-3 1 * *'],
+            schedule: [
+                '* 0-3 1 * *',
+            ],
             automerge: false,
         },
     },
@@ -113,7 +121,9 @@
             enabled: true,
             branchTopic: 'npm-lock-file-maintenance',
             commitMessageExtra: '(npm)',
-            schedule: ['* 0-3 * * 1'],
+            schedule: [
+                '* 0-3 * * 1',
+            ],
             automerge: false,
             semanticCommitType: 'fix',
         },
@@ -128,7 +138,9 @@
         // file's hash in the new version with it (npm run check:actions).
         {
             customType: 'regex',
-            managerFilePatterns: ['/^\\.github/(workflows|actions)/.+\\.ya?ml$/'],
+            managerFilePatterns: [
+                '/^\\.github/(workflows|actions)/.+\\.ya?ml$/',
+            ],
             matchStrings: [
                 '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+[A-Z_]+: (?<currentValue>\\S+)\\s+[A-Z_]+_SHA256: (?<currentDigest>[0-9a-f]{64})',
             ],
@@ -137,7 +149,9 @@
         // as the branch its Dockerfile names moves on.
         {
             customType: 'regex',
-            managerFilePatterns: ['/^e2e/pod/servers/nextcloud/Dockerfile$/'],
+            managerFilePatterns: [
+                '/^e2e/pod/servers/nextcloud/Dockerfile$/',
+            ],
             matchStrings: [
                 '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) branch=(?<currentValue>\\S+)\\nARG SOLID_NEXTCLOUD_SHA=(?<currentDigest>[0-9a-f]{40})',
             ],
@@ -147,7 +161,9 @@
         // fork's branch moves on: a person approves each (below).
         {
             customType: 'regex',
-            managerFilePatterns: ['/^e2e/pod/servers/css-lws/Dockerfile$/'],
+            managerFilePatterns: [
+                '/^e2e/pod/servers/css-lws/Dockerfile$/',
+            ],
             matchStrings: [
                 '# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) branch=(?<currentValue>\\S+)\\nARG CSS_LWS_SHA=(?<currentDigest>[0-9a-f]{40})',
             ],
@@ -168,9 +184,18 @@
         // here. scripts/renovateConfig.test.ts checks that no other rule
         // merges an update on its own.
         {
-            matchFileNames: ['e2e/**'],
-            matchManagers: ['docker-compose', 'dockerfile', 'regex'],
-            matchDatasources: ['docker', 'git-refs'],
+            matchFileNames: [
+                'e2e/**',
+            ],
+            matchManagers: [
+                'docker-compose',
+                'dockerfile',
+                'custom.regex',
+            ],
+            matchDatasources: [
+                'docker',
+                'git-refs',
+            ],
             automerge: true,
         },
         // A new version of a package.json dependency raises its range to
@@ -181,8 +206,14 @@
         // packages, so their lockfile stayed on the versions first locked.
         // The pins below keep their own strategy.
         {
-            matchManagers: ['npm'],
-            matchDepTypes: ['dependencies', 'devDependencies', 'optionalDependencies'],
+            matchManagers: [
+                'npm',
+            ],
+            matchDepTypes: [
+                'dependencies',
+                'devDependencies',
+                'optionalDependencies',
+            ],
             rangeStrategy: 'bump',
         },
         // The end-to-end tests run against two majors of each Solid server,
@@ -191,43 +222,70 @@
         // node-solid-server's in the lockfile its image is built from.
         // Its tags are versions, and 8's are prereleases: read as semver.
         {
-            matchDepNames: ['solidproject/community-server'],
+            matchDepNames: [
+                'solidproject/community-server',
+            ],
             versioning: 'semver',
         },
         {
-            matchFileNames: ['e2e/pod/servers/css-6/compose.yml'],
-            matchDepNames: ['solidproject/community-server'],
+            matchFileNames: [
+                'e2e/pod/servers/css-6/compose.yml',
+            ],
+            matchDepNames: [
+                'solidproject/community-server',
+            ],
             allowedVersions: '<7',
         },
         // css-acp runs css-7's release with Access Control Policies.
         {
-            matchFileNames: ['e2e/pod/servers/css-7/compose.yml', 'e2e/pod/servers/css-acp/Dockerfile'],
-            matchDepNames: ['solidproject/community-server'],
+            matchFileNames: [
+                'e2e/pod/servers/css-7/compose.yml',
+                'e2e/pod/servers/css-acp/Dockerfile',
+            ],
+            matchDepNames: [
+                'solidproject/community-server',
+            ],
             allowedVersions: '<8',
         },
         // The user journeys log in to 7 (e2e/journeys/css/compose.yml).
         {
-            matchFileNames: ['e2e/journeys/css/compose.yml'],
-            matchDepNames: ['solidproject/community-server'],
+            matchFileNames: [
+                'e2e/journeys/css/compose.yml',
+            ],
+            matchDepNames: [
+                'solidproject/community-server',
+            ],
             allowedVersions: '<8',
         },
         // The advisory 8 follows its alphas to 8.0.0 (docs/testing.md).
         {
-            matchFileNames: ['e2e/pod/servers/css-8/compose.yml'],
-            matchDepNames: ['solidproject/community-server'],
+            matchFileNames: [
+                'e2e/pod/servers/css-8/compose.yml',
+            ],
+            matchDepNames: [
+                'solidproject/community-server',
+            ],
             allowedVersions: '>=8.0.0-0 <9',
             ignoreUnstable: false,
         },
         {
-            matchFileNames: ['e2e/pod/servers/nss/5/package.json'],
-            matchDepNames: ['solid-server'],
+            matchFileNames: [
+                'e2e/pod/servers/nss/5/package.json',
+            ],
+            matchDepNames: [
+                'solid-server',
+            ],
             allowedVersions: '<6',
         },
         // Its image runs both node-solid-server majors: Node 24, the
         // newest both support.
         {
-            matchFileNames: ['e2e/pod/servers/nss/Dockerfile'],
-            matchDepNames: ['node'],
+            matchFileNames: [
+                'e2e/pod/servers/nss/Dockerfile',
+            ],
+            matchDepNames: [
+                'node',
+            ],
             allowedVersions: '<25',
         },
         // The dev container's image keeps to Node 24, as .nvmrc and CI do.
@@ -235,14 +293,22 @@
         // (5.2.3-24-bookworm), so the rule matches the tag's end: a range
         // such as '<25' matches none of them.
         {
-            matchFileNames: ['.devcontainer/devcontainer.json'],
-            matchDepNames: ['mcr.microsoft.com/devcontainers/typescript-node'],
+            matchFileNames: [
+                '.devcontainer/devcontainer.json',
+            ],
+            matchDepNames: [
+                'mcr.microsoft.com/devcontainers/typescript-node',
+            ],
             allowedVersions: '/-24-bookworm$/',
         },
         // Pivot's image keeps to Node 22, which Pivot's own CI runs.
         {
-            matchFileNames: ['e2e/pod/servers/pivot/Dockerfile'],
-            matchDepNames: ['node'],
+            matchFileNames: [
+                'e2e/pod/servers/pivot/Dockerfile',
+            ],
+            matchDepNames: [
+                'node',
+            ],
             allowedVersions: '<23',
         },
         // The fork with Linked Web Storage is unreviewed code, built in CI
@@ -251,36 +317,56 @@
         // merges it after reading what it changes. Its image keeps to Node
         // 22, which the fork's own Dockerfile runs.
         {
-            matchFileNames: ['e2e/pod/servers/css-lws/Dockerfile'],
-            matchDepNames: ['https://github.com/jeswr/CommunitySolidServer'],
+            matchFileNames: [
+                'e2e/pod/servers/css-lws/Dockerfile',
+            ],
+            matchDepNames: [
+                'https://github.com/jeswr/CommunitySolidServer',
+            ],
             dependencyDashboardApproval: true,
             automerge: false,
         },
         {
-            matchFileNames: ['e2e/pod/servers/css-lws/Dockerfile'],
-            matchDepNames: ['node'],
+            matchFileNames: [
+                'e2e/pod/servers/css-lws/Dockerfile',
+            ],
+            matchDepNames: [
+                'node',
+            ],
             allowedVersions: '<23',
         },
         // Solid-Nextcloud's app is tested on Nextcloud 31 to 35, but only 31
         // and 32 must pass its CI.
         {
-            matchFileNames: ['e2e/pod/servers/nextcloud/Dockerfile'],
-            matchDepNames: ['nextcloud'],
+            matchFileNames: [
+                'e2e/pod/servers/nextcloud/Dockerfile',
+            ],
+            matchDepNames: [
+                'nextcloud',
+            ],
             allowedVersions: '<33',
         },
         // The JavaScript Solid Server's image keeps to Node 24. Its tag names
         // the Alpine release too (alpine3.24), and Renovate keeps to it: the
         // move to the next Alpine release is a person's change.
         {
-            matchFileNames: ['e2e/pod/servers/jss/Dockerfile'],
-            matchDepNames: ['node'],
+            matchFileNames: [
+                'e2e/pod/servers/jss/Dockerfile',
+            ],
+            matchDepNames: [
+                'node',
+            ],
             allowedVersions: '<25',
         },
         // The Community Solid Server's tags are pushed again now and then:
         // a new digest for the same version is for a person to look at.
         {
-            matchDepNames: ['solidproject/community-server'],
-            matchUpdateTypes: ['digest'],
+            matchDepNames: [
+                'solidproject/community-server',
+            ],
+            matchUpdateTypes: [
+                'digest',
+            ],
             automerge: false,
         },
         // An action runs in the workflows' jobs, and some of those hold the
@@ -292,7 +378,9 @@
         // Renovate reads comes with the tag. scripts/renovateConfig.test.ts
         // checks that no rule merges one on its own.
         {
-            matchManagers: ['github-actions'],
+            matchManagers: [
+                'github-actions',
+            ],
             automerge: false,
         },
         // A tool a workflow downloads is checked against the hash its
@@ -301,7 +389,9 @@
         // A file replaced in the release no longer matches the committed
         // hash, so the step fails until a person looks at it.
         {
-            matchDatasources: ['github-release-attachments'],
+            matchDatasources: [
+                'github-release-attachments',
+            ],
             automerge: false,
         },
         // CI cannot tell a malicious version from a good one, since such a
@@ -323,20 +413,26 @@
         // proposes it at once but sets no automerge, so this rule still
         // applies to it.
         {
-            matchManagers: ['npm'],
+            matchManagers: [
+                'npm',
+            ],
             automerge: false,
         },
         // A package from the npm registry is held wherever it is named: a
         // workflow's `# renovate:` comment may name one (customManagers
         // above), and its update is the regex manager's, not npm's.
         {
-            matchDatasources: ['npm'],
+            matchDatasources: [
+                'npm',
+            ],
             automerge: false,
         },
         // A new major version, of any package, image or tool, may change
         // what the tests do not cover.
         {
-            matchUpdateTypes: ['major'],
+            matchUpdateTypes: [
+                'major',
+            ],
             automerge: false,
         },
         // Playwright and the browser it downloads move together: one pinned
@@ -344,20 +440,27 @@
         // playwright's in packages/site/package.json (one group, as a
         // monorepo's packages), which CI keys its browser caches by.
         {
-            matchDepNames: ['@playwright/test', 'playwright'],
+            matchDepNames: [
+                '@playwright/test',
+                'playwright',
+            ],
             rangeStrategy: 'pin',
         },
         // Mermaid draws the docs' diagrams (docs/markdown.md): pinned, and
         // bumped apart from Playwright, so a change in the drawings comes
         // from one of them at a time.
         {
-            matchDepNames: ['mermaid'],
+            matchDepNames: [
+                'mermaid',
+            ],
             rangeStrategy: 'pin',
         },
         // The end-to-end tests' packages and servers ship nothing to users,
         // even what they list as dependencies: chore(deps):, no release.
         {
-            matchFileNames: ['e2e/**'],
+            matchFileNames: [
+                'e2e/**',
+            ],
             semanticCommitType: 'chore',
         },
         // The release's preset keeps to 9: 10 needs conventional-changelog-writer
@@ -365,8 +468,12 @@
         // (scripts/releaseConfig.test.ts fails on a preset it cannot render).
         // Lift this once it uses 9.
         {
-            matchFileNames: ['package.json'],
-            matchDepNames: ['conventional-changelog-conventionalcommits'],
+            matchFileNames: [
+                'package.json',
+            ],
+            matchDepNames: [
+                'conventional-changelog-conventionalcommits',
+            ],
             allowedVersions: '<10',
         },
         // The images the end-to-end tests build themselves are in no registry.
@@ -380,7 +487,9 @@
             schedule: ['* 0-3 * * 1'],
         },
         {
-            matchDepNames: ['/^localhost\\//'],
+            matchDepNames: [
+                '/^localhost\\//',
+            ],
             enabled: false,
         },
     ],
