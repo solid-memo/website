@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.1.5](https://github.com/solid-memo/website/compare/v7.1.4...v7.1.5) (2026-11-12)
+
+### Bug Fixes
+
+* **markdown:** show hidden characters in deep source as markers ([23a2915](https://github.com/solid-memo/website/commit/23a291533a4b3048f7786adc7b953b0a9d788eed))
+* **solid:** keep only the classes a draft's subject writes ([0ceb654](https://github.com/solid-memo/website/commit/0ceb6549051a2e01e85b0e82582dede135a1e3de))
+* **solid:** never count a user's storage as an instance's own folder ([174bb7c](https://github.com/solid-memo/website/commit/174bb7cd1778d2d15b433f22da52d9f6f820beea))
+* **studio:** export only a deck's own data, read as its instance allows ([c9efacc](https://github.com/solid-memo/website/commit/c9efacc44c76f1cb3cf3200cfc3f94b78e25e553))
+
 ## [7.1.4](https://github.com/solid-memo/website/compare/v7.1.3...v7.1.4) (2026-11-11)
 
 ### Bug Fixes
