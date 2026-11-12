@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.3.0](https://github.com/solid-memo/website/compare/v7.2.3...v7.3.0) (2026-11-12)
+
+### Features
+
+* **web:** list the app in the Stucco app store ([e27cb7e](https://github.com/solid-memo/website/commit/e27cb7ea5843cd8d0cf599d6467969b663891ee9)), closes [#758](https://github.com/solid-memo/website/issues/758)
+
 ## [7.2.3](https://github.com/solid-memo/website/compare/v7.2.2...v7.2.3) (2026-11-12)
 
 ### Bug Fixes
