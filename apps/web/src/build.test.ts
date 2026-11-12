@@ -378,14 +378,25 @@ describe("the first paint of a palette of the user's own", () => {
   });
 });
 
+type JsonLdNode = Record<string, unknown>;
+
+/** The page's JSON-LD block in the vocabulary of `context`, parsed. */
+function jsonLdBlock(context: string): JsonLdNode {
+  const blocks = [...dom.querySelectorAll('script[type="application/ld+json"]')].map(
+    (block) => JSON.parse(block.textContent) as JsonLdNode,
+  );
+  expect(blocks.map((block) => block["@context"])).toEqual([
+    "https://schema.org",
+    "https://store.stucco.software/schema",
+  ]);
+  return blocks.find((block) => block["@context"] === context)!;
+}
+
+/** The nodes of the page's schema.org block. */
+const schemaOrgGraph = () => jsonLdBlock("https://schema.org")["@graph"] as JsonLdNode[];
+
 describe("the page's structured data", () => {
-  type Node = Record<string, unknown>;
-  const graph = () => {
-    const blocks = dom.querySelectorAll('script[type="application/ld+json"]');
-    expect(blocks).toHaveLength(1);
-    return (JSON.parse(blocks[0]!.textContent) as { "@graph": Node[] })["@graph"];
-  };
-  const nodeOfType = (type: string) => graph().find((node) => node["@type"] === type)!;
+  const nodeOfType = (type: string) => schemaOrgGraph().find((node) => node["@type"] === type)!;
 
   it("names the app's languages, its license and its source code", () => {
     const app = nodeOfType("WebApplication");
@@ -401,6 +412,28 @@ describe("the page's structured data", () => {
     expect(source.license).toBe(app.license);
     expect(source.targetProduct).toEqual({ "@id": app["@id"] });
   });
+
+  it("lists the app in the Stucco store as a free Solid app in the languages it speaks", () => {
+    const listing = jsonLdBlock("https://store.stucco.software/schema");
+    const app = nodeOfType("WebApplication");
+    expect(listing["@id"]).toBe(app.url);
+    expect(listing["@type"]).toEqual(["Application", "Solid"]);
+    expect(listing.title).toBe(builtConfig().appName);
+    expect(listing.price).toEqual({ amount: 0 });
+    expect(listing.purchases).toBe(false);
+    expect(listing.language).toEqual(app.inLanguage);
+  });
+
+  it("shows screenshots the site serves as the listing's previews", () => {
+    const listing = jsonLdBlock("https://store.stucco.software/schema");
+    const previews = listing.previews as string[];
+    expect(previews.length).toBeGreaterThan(0);
+    for (const preview of previews) {
+      const path = new URL(preview).pathname;
+      expect(path).toMatch(/^\/screenshots\/[a-z-]+\.png$/);
+      expect(existsSync(resolve(import.meta.dirname, "../public", `.${path}`))).toBe(true);
+    }
+  });
 });
 
 describe("the page's name", () => {
@@ -414,9 +447,7 @@ describe("the page's name", () => {
     );
     expect(html).toContain(`<meta property="og:site_name" content="${inHtml}" />`);
     expect(html).toContain(`<meta property="og:title" content="${inHtml}" />`);
-    const jsonLd = dom.querySelector('script[type="application/ld+json"]')!.textContent;
-    const graph = (JSON.parse(jsonLd) as { "@graph": Record<string, unknown>[] })["@graph"];
-    expect(graph.map((node) => node.name)).toEqual([appName, appName]);
+    expect(schemaOrgGraph().map((node) => node.name)).toEqual([appName, appName]);
   });
 });
 
