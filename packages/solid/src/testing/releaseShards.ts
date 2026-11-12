@@ -46,10 +46,14 @@ export function libraryReleaseShards(): string[][] {
   );
 }
 
-/** The round trip of each release of shard `n` (from 1) of libraryReleaseShards. */
+/**
+ * The round trip of each release of shard `n` (from 1) of libraryReleaseShards.
+ * The largest releases take seconds here and over a minute in CI, where every
+ * package's tests share two cores, hence the timeout of 180 s.
+ */
 export function describeRoundTrips(n: number): void {
   describe.each(libraryReleaseShards()[n - 1]!)("decks/%s", (path) => {
-    it("comes back whole as a draft published again", { timeout: 60_000 }, async () => {
+    it("comes back whole as a draft published again", { timeout: 180_000 }, async () => {
       const { release, assembled } = await roundTrip(await draftPod(), path);
       expect(assembled).toEqual(release);
     });
