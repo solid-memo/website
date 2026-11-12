@@ -164,6 +164,14 @@ of two modules makes every key:
 - [apps/studio/src/ui/queryKeys.ts](../apps/studio/src/ui/queryKeys.ts):
   the keys only the Studio reads, built on the first.
 
+When a read that's already cached fails as it's made again, the
+workspace keeps showing what it read before. An access token may
+expire while the app is in the background, and the next read may well
+work. The workspace shows a read's error only when nothing of it is
+cached: the instances, and the decks, cards, course or library deck
+the route needs (`lookupWaiting` in
+[packages/ui/src/ui/Workspace.tsx](../packages/ui/src/ui/Workspace.tsx)).
+
 A new key goes in one of these modules, never into a screen as an
 array written out, which `npm run check:keys` refuses
 ([testing.md](testing.md#the-repositorys-own-checks)).

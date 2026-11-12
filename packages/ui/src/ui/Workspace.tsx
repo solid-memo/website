@@ -340,17 +340,20 @@ function offeredStorages(listed: readonly Storage[] | undefined, added: readonly
 /**
  * What the screen shows while a lookup the route needs loads or fails:
  * its error, or the loading label while what it looks up is missing;
- * null when the route does not need it or it is there.
+ * null when the route does not need it or it is there. What was read
+ * before stays when reading it again fails (the session may have expired
+ * while the app was in the background): only with nothing read does the
+ * error show.
  */
 function lookupWaiting(
   needed: boolean,
-  query: { error: unknown },
+  query: { data: unknown; error: unknown },
   missing: boolean,
   loadingLabel: string,
   errorText: I18n["errorText"],
 ) {
   if (!needed) return null;
-  if (query.error) {
+  if (query.error && query.data === undefined) {
     return <ErrorMessage error={errorText(query.error)} />;
   }
   return missing ? <Loading label={loadingLabel} /> : null;
@@ -735,9 +738,12 @@ export function Workspace({
 
   // While the instances, or the route's deck or card, load (or fail), the
   // site header and main landmark stay: the skip link, Log out and the
-  // theme and language choices must not come and go with the data.
+  // theme and language choices must not come and go with the data. A
+  // list read before stays when reading it again fails (the session may
+  // have expired while the app was in the background): only with none
+  // does its error show.
   const waiting = (() => {
-    if (instancesQuery.error) {
+    if (instancesQuery.error && instances === undefined) {
       return <ErrorMessage error={errorText(instancesQuery.error)} />;
     }
     if (

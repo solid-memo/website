@@ -17,7 +17,13 @@ import {
 } from "@solid-memo/domain/instance";
 import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
-import { getSolidDatasetOrNull, readDataset, removeOwned, saveDataset } from "./datasets";
+import {
+  getSolidDatasetOrNull,
+  readDataset,
+  readsAsNone,
+  removeOwned,
+  saveDataset,
+} from "./datasets";
 import { subjectsOfClasses } from "./ownership";
 import type { UserStorages } from "./deckPlace";
 import { deleteInstanceData } from "./instanceData";
@@ -333,14 +339,21 @@ async function ownTypeIndexes(
   };
 }
 
+/**
+ * The instances an index registers, none when the index is not there or
+ * not one to read (readsAsNone). An index that could not be read now
+ * fails the list, so that the list read before is kept and the user is
+ * never offered to make an instance they have.
+ */
 async function readRegistrationsSafely(
   indexUrl: string,
   fetch: typeof globalThis.fetch,
 ): Promise<InstanceRegistration[]> {
   try {
     return await readInstanceRegistrations(indexUrl, fetch);
-  } catch {
-    return [];
+  } catch (error) {
+    if (readsAsNone(error)) return [];
+    throw error;
   }
 }
 

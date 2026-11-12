@@ -133,6 +133,48 @@ describe("locateTypeIndexes", () => {
     });
   });
 
+  it.each([
+    ["gone", Object.assign(new Error("410 Gone"), { statusCode: 410 })],
+    ["not readable as RDF", new Error("Unexpected token")],
+  ])("treats a preferences file that is %s as no private index", async (_, failure) => {
+    mockDatasets({
+      [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),
+    });
+    const read = vi.mocked(readDocument).getMockImplementation()!;
+    vi.mocked(readDocument).mockImplementation(async (url, options) => {
+      if (url === PREFERENCES_FILE) throw failure;
+      return read(url, options);
+    });
+    await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toMatchObject({
+      privateIndexUrl: null,
+    });
+  });
+
+  it.each([
+    ["refused as no one (401)", Object.assign(new Error("401"), { statusCode: 401 })],
+    ["forbidden (403)", Object.assign(new Error("403"), { response: { status: 403 } })],
+    ["a server failure (503)", Object.assign(new Error("503"), { statusCode: 503 })],
+    ["no answer (a network failure)", new TypeError("Failed to fetch")],
+  ])("fails when the preferences file could not be read now: %s", async (_, failure) => {
+    mockDatasets({
+      [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),
+    });
+    vi.mocked(readDocument).mockImplementation(async (url) => {
+      if (url === PREFERENCES_FILE) throw failure;
+      return readOf(profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)));
+    });
+    await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).rejects.toBe(failure);
+  });
+
+  it("fails when an extended profile document could not be read now", async () => {
+    const refused = Object.assign(new Error("401"), { statusCode: 401 });
+    vi.mocked(readDocument).mockImplementation(async (url) => {
+      if (url === EXTENDED_PROFILE) throw refused;
+      return readOf(profileDataset((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)));
+    });
+    await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).rejects.toBe(refused);
+  });
+
   it("treats a preferences file without the WebID subject as no private index", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),
