@@ -200,10 +200,17 @@ its run's summary
 ([docs/testing.md](docs/testing.md#dependency-review)). Every update waits too:
 Renovate proposes a version only once it has been public for 3 days, so
 that a bad or malicious version can be found and pulled before it
-reaches `main`. The wait covers every package an update newly locks,
-not only the one it names. The repository's [.npmrc](.npmrc), and one
-beside each end-to-end test server's own `package-lock.json` in
-`e2e/pod/servers/`, set npm's `min-release-age` to 3 days, and
+reaches `main`. The Dependency Dashboard lists an update that is still
+waiting with no date. The [Pending updates](.github/workflows/pending-updates.yml)
+workflow keeps a comment on it up to date, every 3 hours, with the
+earliest time Renovate may propose each one: it runs Renovate itself,
+read-only, and adds the wait to each version's release date. A version with no release date waits
+until Renovate finds one, and the comment says so. The wait covers every
+package an update newly locks, not only the one it names. The
+repository's [.npmrc](.npmrc), and one beside each end-to-end test
+server's own `package-lock.json` in `e2e/pod/servers/` and beside the
+workflow's Renovate in `scripts/renovate/`, set npm's `min-release-age`
+to 3 days, and
 [uv.toml](uv.toml) sets uv's `exclude-newer` to 3 days for the
 `scripts/requirements-*.txt` it compiles. So npm and uv, whether
 Renovate or a person runs them, resolve no package to a younger

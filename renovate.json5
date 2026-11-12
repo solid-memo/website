@@ -370,6 +370,15 @@
             allowedVersions: '<10',
         },
         // The images the end-to-end tests build themselves are in no registry.
+        // The Renovate the Pending updates workflow runs read-only
+        // (scripts/renovate/) is released several times a day, and a
+        // person reads every npm update: its update is proposed once a
+        // week, like the npm lockfiles' locking.
+        {
+            matchFileNames: ['scripts/renovate/package.json'],
+            matchDepNames: ['renovate'],
+            schedule: ['* 0-3 * * 1'],
+        },
         {
             matchDepNames: ['/^localhost\\//'],
             enabled: false,
