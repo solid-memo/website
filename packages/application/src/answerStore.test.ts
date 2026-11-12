@@ -10,6 +10,7 @@ import { MAX_LOG_MONTHS, type Answer } from "@solid-memo/domain/answer";
 import { fsrsInterval, fuzzedInterval, fuzzFactor } from "@solid-memo/domain/fsrs";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
+import { createAnswerStore } from "./answerStore";
 
 describe("the answer log", () => {
   const noon = new Date(2026, 8, 21, 12, 0);
@@ -772,5 +773,102 @@ describe("the answer log", () => {
     const answers = await useCases.loadAnswerLog(instance.url);
     expect(answers.map((answer) => answer.studyDay)).toEqual(["2026-09-21", "2026-10-01"]);
     expect(log.months).toHaveBeenCalledWith(instance.url, "2026-10");
+  });
+});
+
+describe("the answers known without asking the pod", () => {
+  const noon = new Date(2026, 8, 21, 12, 0);
+  const prompt = { cardId: card.id, cardUrl: card.url, direction: "front-to-back" as const };
+  const old = (studyDay: string): Answer => ({
+    id: `answer-${studyDay}`,
+    deckUrl: deck.url,
+    cardUrl: card.url,
+    direction: "back-to-front",
+    grade: 4,
+    answeredAt: `${studyDay}T10:00:00.000Z`,
+    studyDay,
+    nextIntervalDays: 3,
+  });
+  const setup = () => {
+    const { log, byMonth } = memoryLog();
+    const append = log.append.getMockImplementation()!;
+    let id = 0;
+    const store = createAnswerStore({
+      answerLog: log,
+      reviewStateRepository: makeDeps().reviewStateRepository,
+      preferenceStore: { get: async () => DEFAULT_PREFERENCES },
+      newId: () => `id${++id}-0000-0000`,
+      now: () => noon,
+    });
+    const read = async () =>
+      store.readMonths(instance.url, await store.logMonths(instance.url, noon), () => true);
+    const grade = () => store.grade(instance.url, deck, prompt, 4, noon, { times: {} });
+    const ids = () =>
+      store.knownAnswers(instance.url, "2026-09", "2026-09")?.map((answer) => answer.id) ?? null;
+    return { log, byMonth, append, store, read, grade, ids };
+  };
+
+  it("knows nothing of a month never read, even with answers given in it", async () => {
+    const { store, grade, ids } = setup();
+    expect(ids()).toBeNull();
+    await grade();
+    await store.flush(instance.url);
+    expect(ids()).toBeNull();
+  });
+
+  it("are a month as last read with the answers given since, on their way and added, of the months asked for", async () => {
+    const { log, byMonth, append, store, read, grade, ids } = setup();
+    byMonth.set("2026-08", [old("2026-08-31")]);
+    byMonth.set("2026-09", [old("2026-09-01")]);
+    await read();
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    log.append.mockImplementationOnce(async (url, answer) => {
+      await held;
+      await append(url, answer);
+    });
+    const { undo } = await grade();
+    expect(ids()).toEqual(["answer-2026-09-01", undo.answer.id]);
+    release();
+    await store.flush(instance.url);
+    expect(ids()).toEqual(["answer-2026-09-01", undo.answer.id]);
+    expect(log.readMonthSince).toHaveBeenCalledTimes(2);
+    // The pod is still asked by the next read, which finds the month changed.
+    expect((await read()).map((answer) => answer.id)).toEqual([
+      "answer-2026-08-31",
+      "answer-2026-09-01",
+      undo.answer.id,
+    ]);
+  });
+
+  it("count an answer once that a read found before its add was answered", async () => {
+    const { log, append, store, read, grade, ids } = setup();
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => (release = resolve));
+    log.append.mockImplementationOnce(async (url, answer) => {
+      await append(url, answer);
+      await held;
+    });
+    const { undo } = await grade();
+    await read();
+    expect(ids()).toEqual([undo.answer.id]);
+    release();
+    await store.flush(instance.url);
+    expect(ids()).toEqual([undo.answer.id]);
+  });
+
+  it("lose an answer undone and the answers of a day reset, as the log does", async () => {
+    const { byMonth, store, read, grade, ids } = setup();
+    byMonth.set("2026-08", [old("2026-08-31")]);
+    byMonth.set("2026-09", [old("2026-09-01")]);
+    await read();
+    const first = await grade();
+    await store.flush(instance.url);
+    await store.withdraw(instance.url, first.undo.answer);
+    expect(ids()).toEqual(["answer-2026-09-01"]);
+    await grade();
+    await store.flush(instance.url);
+    await store.removeDay(instance.url, deck.url, "2026-09-21");
+    expect(ids()).toEqual(["answer-2026-09-01"]);
   });
 });

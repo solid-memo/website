@@ -97,8 +97,21 @@ recorded no time, the median is estimated from the pauses between
 answers, so the months are read in full. Without ETags (Node Solid
 Server), every month is read in full on every visit.
 
+After a study session, the strip doesn't wait for the pod. Each answer
+and undo puts the figures the app already knows in the strip's cache
+(`knownTodayFigures`). Those are the past months as last read, and
+this month as last read with the answers given since, even those still
+on their way to the log. The strip shows them at once and reads the pod
+again behind them. A session gone through to its end sets its deck's
+count to none the same way, so "All done for today!" and the
+celebration don't wait for the deck's count either. The strip waits
+for the pod when the app knows too little. That's before the strip was
+read that study day, or while this month's log was never read (the
+month's first session), or while no answer time was recorded.
+
 Code: [TodaySummaryContainer.tsx](../packages/ui/src/ui/TodaySummaryContainer.tsx)
-reads the figures (`getTodayFigures`) and [TodaySummary.tsx](../packages/ui/src/ui/TodaySummary.tsx)
+reads the figures (`getTodayFigures`), [StudyContainer.tsx](../packages/ui/src/ui/StudyContainer.tsx)
+puts those known after an answer in its cache, and [TodaySummary.tsx](../packages/ui/src/ui/TodaySummary.tsx)
 shows them. `monthSummaryOf` and `todayFiguresOf` in
 [studyDigest.ts](../packages/domain/src/studyDigest.ts) summarize the
 months and put the summaries together, and `todayOf` in

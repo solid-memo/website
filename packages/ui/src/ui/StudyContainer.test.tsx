@@ -21,6 +21,7 @@ import { makeUseCasesFake } from "../test/useCasesFake";
 import { todayFiguresFrom } from "../test/fakes/statistics";
 import { QUEUE_DEFAULTS } from "../test/fakes/study";
 import { RepoUrl } from "./ReportMistake";
+import { queryKeys } from "./queryKeys";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -814,6 +815,120 @@ describe("StudyContainer keeping the deck's schedule", () => {
 });
 
 describe("StudyContainer leaving for the deck list", () => {
+  const oneDue = (overrides: Partial<UseCases> = {}) =>
+    makeUseCasesFake({
+      getStudyQueue: vi.fn(async () => ({
+        due: [makePrompt("card-a", "front-a")],
+        newPrompts: [],
+        studiedToday: 0,
+        ...QUEUE_DEFAULTS,
+      })),
+      ...overrides,
+    });
+  const studiedToday = todayFiguresFrom(
+    [
+      {
+        id: "answer-1",
+        deckUrl: deck.url,
+        cardUrl: `${deck.cardsDocumentUrl}#card-a`,
+        direction: "front-to-back",
+        grade: 4,
+        answeredAt: "2026-09-21T10:00:00.000Z",
+        studyDay: "2026-09-21",
+        nextIntervalDays: 1,
+      },
+    ],
+    "2026-09-21",
+  );
+  /** The study screen, then the deck list's row and today strip, over one cache. */
+  function leaving(useCases: UseCases) {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    keepStudyFiguresFresh(queryClient);
+    queryClient.setQueryData(
+      todayFiguresQuery(useCases, instance.url).queryKey,
+      todayFiguresFrom([], "2026-09-21"),
+    );
+    queryClient.setQueryData(["studyQueue", deck.url, "counts"], { dueCount: 1, newCount: 0 });
+    const screenFor = (studying: boolean) => (
+      <QueryClientProvider client={queryClient}>
+        {studying ? (
+          <StudyContainer
+            useCases={useCases}
+            instance={instance}
+            deck={deck}
+            onExit={() => undefined}
+          />
+        ) : (
+          <>
+            <TodaySummaryContainer useCases={useCases} instance={instance} decks={[deck]} />
+            <DeckStudyActionContainer
+              useCases={useCases}
+              instance={instance}
+              deck={deck}
+              onStudy={() => undefined}
+            />
+          </>
+        )}
+      </QueryClientProvider>
+    );
+    const view = render(screenFor(true));
+    return { queryClient, leave: () => view.rerender(screenFor(false)) };
+  }
+  const never = () => new Promise<never>(() => undefined);
+
+  it("says at once that the deck and the day are done, the session gone through, while both are read again", async () => {
+    const useCases = oneDue({
+      getStudyCounts: vi.fn(never),
+      getTodayFigures: vi.fn(never),
+      knownTodayFigures: vi.fn(async () => studiedToday),
+    });
+    const { leave } = leaving(useCases);
+    await answer("4 — Good");
+    await waitFor(() => expect(useCases.knownTodayFigures).toHaveBeenCalledOnce());
+    leave();
+    expect(await screen.findByText("Done for today")).toBeInTheDocument();
+    expect(screen.getByText("All done for today!")).toBeInTheDocument();
+    expect(screen.getByText(/^1 card · /)).toBeInTheDocument();
+    expect(useCases.getStudyCounts).toHaveBeenCalled();
+    expect(useCases.getTodayFigures).toHaveBeenCalled();
+  });
+
+  it("keeps the day's figures as they were when they cannot be known without the pod", async () => {
+    const useCases = oneDue({
+      getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0 })),
+      knownTodayFigures: vi.fn(async () => {
+        throw new Error("offline");
+      }),
+    });
+    const { queryClient, leave } = leaving(useCases);
+    await answer("4 — Good");
+    await waitFor(() => expect(useCases.knownTodayFigures).toHaveBeenCalledOnce());
+    expect(queryClient.getQueryData(queryKeys.todayFigures(instance.url))).toEqual(
+      todayFiguresFrom([], "2026-09-21"),
+    );
+    leave();
+    expect(await screen.findByText("Done for today")).toBeInTheDocument();
+  });
+
+  it("knows the day's figures again after an undo", async () => {
+    const useCases = oneDue({ knownTodayFigures: vi.fn(async () => null) });
+    leaving(useCases);
+    await answer("4 — Good");
+    fireEvent.click(await undoButton());
+    await waitFor(() => expect(useCases.knownTodayFigures).toHaveBeenCalledTimes(2));
+  });
+
+  it("keeps no figures of a Studio trial, which has none", async () => {
+    const { knownTodayFigures: _, ...trial } = oneDue();
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <StudyContainer useCases={trial} instance={instance} deck={deck} onExit={() => undefined} />
+      </QueryClientProvider>,
+    );
+    await answer("4 — Good");
+    await waitFor(() => expect(trial.recordReview).toHaveBeenCalledOnce());
+  });
+
   it("lets the deck list count afresh, not show the counts from before the session", async () => {
     const useCases = makeUseCasesFake({
       getStudyQueue: vi.fn(async () => ({

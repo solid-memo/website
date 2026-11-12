@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import type { AnswerLog, DigestRepository } from "./ports";
-import { createUseCases } from "./useCases";
+import { createUseCases, type UseCases } from "./useCases";
 import { createAnswerStore } from "./answerStore";
 import { createStatisticsUseCases } from "./statistics";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
@@ -484,6 +484,78 @@ describe("the statistics of the answer log", () => {
       await expect(pages().load().getTodayFigures(instance.url, noon)).resolves.toMatchObject({
         days: [],
         medianAnswerMs: null,
+      });
+    });
+
+    describe("as this page knows them", () => {
+      const times = { recallMillis: 3000, gradeMillis: 500 };
+      const answer = (page: UseCases) =>
+        page.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon, times);
+
+      it("are those the pod gives, a session's answers in them before they are added, without asking it", async () => {
+        const { log, byMonth, load } = pages();
+        byMonth.set("2026-08", [timed("2026-08-31", "10:00:00", 4000)]);
+        byMonth.set("2026-09", [timed("2026-09-20", "10:00:00", 5000)]);
+        const page = load();
+        await expect(page.knownTodayFigures(instance.url, noon)).resolves.toBeNull();
+        await page.getTodayFigures(instance.url, noon);
+        log.readMonthSince.mockClear();
+        log.months.mockClear();
+        log.append.mockImplementationOnce(() => new Promise(() => undefined));
+        await answer(page);
+        const known = await page.knownTodayFigures(instance.url, noon);
+        expect(known).toMatchObject({ today: "2026-09-21", streaks: { current: 2 } });
+        expect(log.readMonthSince).not.toHaveBeenCalled();
+        expect(log.months).not.toHaveBeenCalled();
+        expect(known!.days.at(-1)).toMatchObject({ studyDay: "2026-09-21", answers: 1 });
+      });
+
+      it("are the pod's once the answers are added", async () => {
+        const { byMonth, load } = pages();
+        byMonth.set("2026-09", [timed("2026-09-20", "10:00:00", 5000)]);
+        const page = load();
+        await page.getTodayFigures(instance.url, noon);
+        await answer(page);
+        await answer(page);
+        const known = await page.knownTodayFigures(instance.url, noon);
+        expect(known).toEqual(await page.getTodayFigures(instance.url, noon));
+        expect(known!.days.at(-1)).toMatchObject({ studyDay: "2026-09-21", answers: 2 });
+      });
+
+      it("are none on another study day than the one last read on", async () => {
+        const { byMonth, load } = pages();
+        byMonth.set("2026-09", [timed("2026-09-20", "10:00:00", 5000)]);
+        const page = load();
+        await page.getTodayFigures(instance.url, noon);
+        await expect(
+          page.knownTodayFigures(instance.url, new Date(2026, 8, 22, 12, 0)),
+        ).resolves.toBeNull();
+      });
+
+      it("are none while this month was never read", async () => {
+        const { byMonth, load } = pages();
+        byMonth.set("2026-08", [timed("2026-08-31", "10:00:00", 4000)]);
+        const page = load();
+        await page.getTodayFigures(instance.url, noon);
+        await answer(page);
+        await expect(page.knownTodayFigures(instance.url, noon)).resolves.toBeNull();
+      });
+
+      it("are none while no time was recorded, which only every answer can estimate, and empty without an answer", async () => {
+        const untimed = pages();
+        untimed.byMonth.set("2026-09", [timed("2026-09-20", "10:00:00")]);
+        const page = untimed.load();
+        await page.getTodayFigures(instance.url, noon);
+        await expect(page.knownTodayFigures(instance.url, noon)).resolves.toBeNull();
+
+        const empty = pages();
+        empty.byMonth.set("2026-09", []);
+        const emptyPage = empty.load();
+        await emptyPage.getTodayFigures(instance.url, noon);
+        await expect(emptyPage.knownTodayFigures(instance.url, noon)).resolves.toMatchObject({
+          days: [],
+          medianAnswerMs: null,
+        });
       });
     });
   });

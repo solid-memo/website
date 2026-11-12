@@ -166,6 +166,7 @@ export function createAnswerStore({
           sent.add(head);
           await answerLog.append(instanceUrl, head);
           logWrites += 1;
+          keepOwn(instanceUrl, head);
         } catch (error) {
           if (!(error instanceof AppError && REFUSED_BEFORE_SENDING.has(error.code))) {
             if (!refusedAsAtFault(error)) return;
@@ -181,6 +182,43 @@ export function createAnswerStore({
   }
   /** Each instance's answer log as last read, by month: its answers, and the version they were read at. */
   const answerMonths = new Map<string, Map<string, { version: string; answers: Answer[] }>>();
+  /**
+   * An answer this page added to the log, into its month as kept from the
+   * last read, the version left as read: the next read still asks the
+   * pod, and only knownAnswers, which asks it nothing, sees it there. A
+   * month not kept is left so.
+   */
+  function keepOwn(instanceUrl: string, answer: Answer): void {
+    const month = answerMonths.get(instanceUrl)?.get(monthOfStudyDay(answer.studyDay));
+    if (month === undefined || month.answers.some((each) => each.id === answer.id)) return;
+    month.answers = [...month.answers, answer];
+  }
+  /** The answers `gone` picks taken off every month kept of the instance, as they are off the log. */
+  function dropOwn(instanceUrl: string, gone: (answer: Answer) => boolean): void {
+    for (const month of answerMonths.get(instanceUrl)?.values() ?? [])
+      if (month.answers.some(gone)) month.answers = month.answers.filter((each) => !gone(each));
+  }
+  /**
+   * The answers of the log's months from `from` to `until` as this page
+   * knows them, without asking the pod: each month as last read with the
+   * answers this page added to it since (keepOwn), and the answers still
+   * on their way to the log. Null while `from` was never read: a month
+   * whose document was not there yet when the log was last read is not
+   * known to be empty.
+   */
+  function knownAnswers(instanceUrl: string, from: string, until: string): Answer[] | null {
+    const known = answerMonths.get(instanceUrl);
+    if (known?.get(from) === undefined) return null;
+    const inRange = (month: string) => month >= from && month <= until;
+    const answers = [...known]
+      .filter(([month]) => inRange(month))
+      .flatMap(([, month]) => month.answers);
+    const ids = new Set(answers.map((answer) => answer.id));
+    const waiting = queueOf(instanceUrl).unlogged.filter(
+      (answer) => inRange(monthOfStudyDay(answer.studyDay)) && !ids.has(answer.id),
+    );
+    return [...answers, ...waiting];
+  }
   /**
    * The reads of a month under way, by instance, month and the writes to
    * the logs made before they began (logWrites): a read begun before a
@@ -346,6 +384,7 @@ export function createAnswerStore({
     }
     await answerLog.removeAnswer(instanceUrl, answer.studyDay, answer.id);
     logWrites += 1;
+    dropOwn(instanceUrl, (each) => each.id === answer.id);
   }
 
   /**
@@ -362,6 +401,7 @@ export function createAnswerStore({
     unlogged.splice(0, unlogged.length, ...kept);
     await answerLog.removeDay(instanceUrl, deckUrl, studyDay);
     logWrites += 1;
+    dropOwn(instanceUrl, (each) => each.deckUrl === deckUrl && each.studyDay === studyDay);
   }
 
   /** Add answers to the instance's log at once. */
@@ -373,6 +413,7 @@ export function createAnswerStore({
   return {
     flush: logInstance,
     readMonths: readLogMonths,
+    knownAnswers,
     logMonths,
     loadAll: loadAnswerLog,
     grade: applyGrade,

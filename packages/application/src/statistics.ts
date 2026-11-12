@@ -88,6 +88,18 @@ export interface StatisticsUseCases {
    */
   getTodayFigures(instanceUrl: string, now: Date): Promise<TodayFigures>;
   /**
+   * The today strip's figures as getTodayFigures gives them, of what this
+   * page already knows, without asking the pod: the months before this
+   * one as getTodayFigures last read them, and this month as last read
+   * with the answers given since, those added to the log and those still
+   * on their way (AnswerStore.knownAnswers), so a study session's answers
+   * show as soon as they are given. Null when that is not enough: before
+   * getTodayFigures read the instance on the same study day, while this
+   * month was never read, or while no time was recorded (getTodayFigures
+   * estimates one from every answer).
+   */
+  knownTodayFigures(instanceUrl: string, now: Date): Promise<TodayFigures | null>;
+  /**
    * Save the answers of the range getStatistics would read with the same
    * `options` (every column the log has, answersCsv) as a CSV file on the
    * learner's device, "solid-memo-answers-<study day>.csv": they are
@@ -301,9 +313,11 @@ export function createStatisticsUseCases({
   deckLibrary: DeckLibrary;
   fileExchange: FileExchange;
   preferenceStore: Pick<PreferenceStore, "get">;
-  answerStore: Pick<AnswerStore, "flush" | "readMonths" | "loadAll" | "logMonths">;
+  answerStore: Pick<AnswerStore, "flush" | "readMonths" | "loadAll" | "logMonths" | "knownAnswers">;
   digestStore: Pick<DigestStore, "of" | "recordSchedule" | "remember">;
 }): StatisticsUseCases {
+  /** The summaries of the months before this one getTodayFigures last read, by instance, with the study day it read them on. */
+  const pastMonths = new Map<string, { today: string; summaries: readonly MonthSummary[] }>();
   /**
    * The answers of a range of the log up to `at` (StatisticsRange), of
    * every deck or of one, answers still waiting to be added to it added
@@ -457,6 +471,7 @@ export function createStatisticsUseCases({
           (month) => month >= thisMonth && month <= lastMonth,
         ),
       ]);
+      pastMonths.set(instanceUrl, { today, summaries: past });
       const summaries = [...past, ...monthSummariesOf(current)];
       const before = Object.values(digest.months);
       if (
@@ -470,6 +485,28 @@ export function createStatisticsUseCases({
       const { answers, firstTimed } = await rangeAnswers(instanceUrl, at, {}, true);
       const ranged = answers.filter((answer) => answer.studyDay >= first);
       return { ...figures, medianAnswerMs: estimateStudyTime(ranged, firstTimed).medianAnswerMs };
+    },
+    async knownTodayFigures(instanceUrl, at) {
+      const read = pastMonths.get(instanceUrl);
+      if (read === undefined) return null;
+      const prefs = await preferenceStore.get(instanceUrl);
+      const today = studyDayOf(at, prefs.dayBoundaryHour);
+      if (today !== read.today) return null;
+      const current = answerStore.knownAnswers(
+        instanceUrl,
+        monthOfStudyDay(today),
+        lastLogMonthOf(today),
+      );
+      if (current === null) return null;
+      const first = firstDayOfMonths(today, 12);
+      const figures = todayFiguresOf(
+        [...read.summaries, ...monthSummariesOf(current)],
+        today,
+        first,
+      );
+      return figures.medianAnswerMs !== null || !figures.days.some((day) => day.studyDay >= first)
+        ? figures
+        : null;
     },
     async saveAnswers(instanceUrl, at, options = {}) {
       const { answers, today } = await rangeAnswers(instanceUrl, at, options);
