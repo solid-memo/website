@@ -1062,7 +1062,13 @@ npm package. The script reads the report's release dates and the wait in
 Renovate's report has no date for a digest update, nor for a Docker tag
 whose date Docker Hub didn't give. The comment says so rather than
 guess. Renovate's own update is proposed once a week, since it releases
-several times a day.
+several times a day. Renovate pins versions of `glob` and `minimatch`
+that have moderate advisories (GHSA-3g3m-2fjr-6pw4, GHSA-g3hv-75wg-m249),
+which the `dependency-review` job refuses. So the `overrides` in
+`scripts/renovate/package.json` lock their fixed versions, within the
+vulnerable ranges only. A lookup with them finds the same updates and
+dates as one without. They come out once Renovate needs the fixed
+versions itself.
 
 ### Dependency review
 

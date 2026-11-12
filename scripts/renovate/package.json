@@ -4,5 +4,9 @@
   "description": "Renovate, run read-only by the Pending updates workflow (.github/workflows/pending-updates.yml) to estimate when each waiting update will be proposed.",
   "dependencies": {
     "renovate": "44.222.5"
+  },
+  "overrides": {
+    "glob@>=9.0.0 <14.0.2": "^14.0.2",
+    "minimatch@>=7.0.0 <11.0.1": "^11.0.1"
   }
 }
