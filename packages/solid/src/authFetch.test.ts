@@ -13,6 +13,7 @@ import { anonymousFetch, createAuthFetch, SESSION_EXPIRED_EVENT } from "./authFe
 import { createPodFence } from "./podFence";
 import { createSolidReleasePublisher } from "./solidReleasePublisher";
 import { createSolidStorageGateway } from "./solidStorageGateway";
+import { withReadDeadline } from "./readDeadline";
 import { fakeSessionClient } from "./testing/fakeSessionClient";
 
 const URL_ = "https://pod.example/resource";
@@ -125,6 +126,52 @@ describe("createAuthFetch", () => {
       createAuthFetch(client).fetch(URL_, { method: "PUT", signal: AbortSignal.abort() }),
     ).rejects.toBe(aborted);
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("fails a read under deadlines whose address redirects and then never answers the HEAD", async () => {
+    vi.useFakeTimers();
+    try {
+      // A browser's fetch settles on the abort; a fetch that does not is ended all the same.
+      const heard = vi.fn(
+        (_input: RequestInfo | URL, init?: RequestInit) =>
+          new Promise<Response>((_resolve, reject) =>
+            init?.signal?.addEventListener("abort", () => reject(init.signal?.reason)),
+          ),
+      );
+      const deaf = vi.fn(() => new Promise<Response>(() => {}));
+      for (const stalled of [heard, deaf]) {
+        vi.stubGlobal("fetch", stalled);
+        const read = withReadDeadline(createAuthFetch(redirectingClient()).fetch, 50, 1000)(URL_);
+        const failed = expect(read).rejects.toMatchObject({ code: "podNoAnswer" });
+        await vi.advanceTimersByTimeAsync(50);
+        await failed;
+      }
+      expect(deaf).toHaveBeenCalledOnce();
+      expect(heard).toHaveBeenCalledOnce();
+      expect(heard.mock.calls[0]?.[1]).toMatchObject({
+        method: "HEAD",
+        signal: expect.any(AbortSignal),
+      });
+      expect(heard.mock.calls[0]?.[1]?.signal?.aborted).toBe(true);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("passes on the failure of a request aborted while the HEAD asked, without asking again", async () => {
+    const client = redirectingClient();
+    const caller = new AbortController();
+    const fetch = vi.fn(async () => {
+      caller.abort();
+      return opaqueRedirect();
+    });
+    vi.stubGlobal("fetch", fetch);
+
+    await expect(createAuthFetch(client).fetch(URL_, { signal: caller.signal })).rejects.toThrow(
+      "Failed to fetch",
+    );
+    expect(fetch).toHaveBeenCalledOnce();
   });
 
   it("passes on a failure that is no redirect", async () => {
