@@ -574,6 +574,40 @@ describe("the deck library", () => {
       ]);
     });
 
+    it("takes no newer release from outside the instance the copied release was published from (GHSA-hx4f-4hjp-g2f3)", async () => {
+      const deps = makeDeps();
+      // Newer releases of the copy's series, as they claim, on another origin, in another instance and above it.
+      const strangers = [
+        "https://attacker.example/releases/rivers/v99.ttl",
+        "https://bob.example/other/releases/rivers/v98.ttl",
+        "https://bob.example/releases/rivers/v97.ttl",
+      ].map((url, at) => linked(99 - at, { url }));
+      const renamed = linked(3, { url: "https://bob.example/memo/releases/rivers-2/v3.ttl" });
+      reading(deps, [linked(1), renamed, ...strangers]);
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        ...strangers.map((release) => release.url),
+      ]);
+      const copy: Deck = { ...deck, sourceUrl: `${RELEASES}v1.ttl` };
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([copy]);
+      const useCases = createUseCases(deps);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: linked(1), version: "1", newer: false, fromLink: true },
+      ]);
+      await expect(useCases.planLibraryUpgrade(copy)).resolves.toBeNull();
+      const read = vi.mocked(deps.deckLibrary.readRelease).mock.calls.map(([url]) => url);
+      expect(read.filter((url) => !url.startsWith(RELEASES))).toEqual([]);
+      // The instance's own release under another name still is one.
+      vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
+        `${RELEASES}v1.ttl`,
+        ...strangers.map((release) => release.url),
+        renamed.url,
+      ]);
+      await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
+        { deck: copy, series: renamed, version: "1", newer: true, fromLink: true },
+      ]);
+    });
+
     it("looks up a release once, however many copies name it, each copy told by what it is", async () => {
       const lookups = async (copies: number) => {
         const deps = makeDeps();
@@ -651,7 +685,10 @@ describe("the deck library", () => {
       const deps = makeDeps();
       const versions = Array.from({ length: 40 }, (_, at) => at + 2);
       reading(deps, [linked(1), ...versions.map((version) => linked(version))]);
-      const others = Array.from({ length: 20 }, (_, at) => `https://bob.example/other-${at}.ttl`);
+      const others = Array.from(
+        { length: 20 },
+        (_, at) => `https://bob.example/memo/releases/other-${at}/v1.ttl`,
+      );
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         ...others,
         ...versions.map((version) => `${RELEASES}v${version}.ttl`),
@@ -673,7 +710,10 @@ describe("the deck library", () => {
       // Named as the copy's release, but of another series.
       const unrelated = (version: number) =>
         linked(version, { seriesUrl: "https://bob.example/memo/other#series" });
-      const others = Array.from({ length: 20 }, (_, at) => `https://bob.example/other-${at}.ttl`);
+      const others = Array.from(
+        { length: 20 },
+        (_, at) => `https://bob.example/memo/releases/other-${at}/v1.ttl`,
+      );
       reading(deps, [
         linked(1),
         ...versions.map(unrelated),
@@ -809,7 +849,10 @@ describe("the deck library", () => {
       vi.mocked(deps.deckLibrary.publishedBeside).mockResolvedValue([
         `${RELEASES}v1.ttl`,
         `${RELEASES}v4.ttl`,
-        ...Array.from({ length: 8 }, (_, at) => `https://bob.example/other-${at}.ttl`),
+        ...Array.from(
+          { length: 8 },
+          (_, at) => `https://bob.example/memo/releases/other-${at}/v1.ttl`,
+        ),
       ]);
       await expect(useCases.listLibraryUpdates(instance.url)).resolves.toEqual([
         { deck: copy, series: linked(1), version: "1", newer: "unknown", fromLink: true },

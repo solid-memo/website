@@ -1420,10 +1420,12 @@ release added from a link
 ([deck-library.md](deck-library.md#from-a-link)). Its release is read,
 and its row says "From \<host>".
 
-- Its creator's catalog, found in the folders above the release and
-  read as anyone reads it, lists the releases its instance published
-  (`sm:publishedRelease`). Only links at an address a release may have
-  (`isPublishedReleaseUrl`: no empty segment, no user info) are read.
+- Its creator's catalog, found in the folders above the release, up
+  to the instance its address names, and read as anyone reads it,
+  lists the releases its instance published (`sm:publishedRelease`).
+  Only links at an address a release may have
+  (`isPublishedReleaseUrl`: no empty segment, no user info) in that
+  instance are read.
   The newest of the copy's series is its upgrade, planned and applied
   as a library copy's. The newer release's own list of releases in
   between is kept to such addresses the same way.
@@ -2378,7 +2380,11 @@ releases it, two ways.
   address the user types, at `<folder><name>/v<N>.ttl` (`releaseUrlIn`
   in [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)):
   the draft's name and version, as the library names its releases. The
-  screen shows the address before anything is written.
+  screen shows the address before anything is written. Only a release
+  in the instance's `releases/` can be offered as a newer version of
+  one a learner added from a link. A release in another folder names
+  no instance, so the learner sees it's not known whether a newer
+  version is out ([Library copies](#library-copies)).
 - **The user's word.** The user confirms that the release becomes
   public, readable by anyone with its address and never changed or
   taken back here. Publishing waits for that, for the changes above to

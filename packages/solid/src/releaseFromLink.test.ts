@@ -339,26 +339,28 @@ describe("readRelease", () => {
 });
 
 describe("publishedBeside", () => {
-  it("finds the catalog above the release that links it, nearest first, as anyone reads it", async () => {
-    const instance = "https://alice.example/solid-memo/main/";
+  const instance = "https://alice.example/solid-memo/main/";
+
+  it("finds the catalog above the release that links it, nearest first, as anyone reads it, up to its instance's", async () => {
     const fetch = serving({
       [`${RELEASES}catalog.ttl`]: 401,
-      "https://alice.example/solid-memo/main/releases/catalog.ttl": catalog(
-        "https://alice.example/solid-memo/main/releases/",
-        ["https://elsewhere.example/v1.ttl"],
-      ),
+      [`${instance}releases/catalog.ttl`]: catalog(`${instance}releases/`, [
+        "https://elsewhere.example/v1.ttl",
+      ]),
       [`${instance}catalog.ttl`]: catalog(instance, [V1, V2]),
     });
     await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toEqual([V1, V2]);
+    // Each folder below the instance's asked whether it is a storage's root before the one above it is read.
     expect(fetch.asked).toEqual([
       `${RELEASES}catalog.ttl`,
+      RELEASES,
       `${instance}releases/catalog.ttl`,
+      `${instance}releases/`,
       `${instance}catalog.ttl`,
     ]);
   });
 
   it("gives only the links at an address a release may have, as the user's own catalog's", async () => {
-    const instance = "https://alice.example/solid-memo/main/";
     const fetch = serving({
       [`${instance}catalog.ttl`]: catalog(instance, [
         V1,
@@ -371,31 +373,99 @@ describe("publishedBeside", () => {
     await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toEqual([V1, V2]);
   });
 
-  it("looks no more than eight folders up, however deep the release's address", async () => {
+  it("gives only the links in the catalog's own folder: none on another origin or in another instance (GHSA-hx4f-4hjp-g2f3)", async () => {
+    const renamed = `${instance}releases/capitals-2/v3.ttl`;
+    const fetch = serving({
+      [`${instance}catalog.ttl`]: catalog(instance, [
+        V1,
+        "https://evil.example/solid-memo/main/releases/capitals/v9.ttl",
+        "https://alice.example/solid-memo/other/releases/capitals/v9.ttl",
+        "https://alice.example/releases/capitals/v9.ttl",
+        V2,
+        renamed,
+      ]),
+    });
+    await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toEqual([V1, V2, renamed]);
+    // A catalog in the release's folder speaks for that folder alone.
+    const near = serving({ [`${RELEASES}catalog.ttl`]: catalog(RELEASES, [V1, V2, renamed]) });
+    await expect(libraryOver(near).publishedBeside(V1)).resolves.toEqual([V1, V2]);
+  });
+
+  it("reads no catalog above the release's instance, nor above a storage's root (GHSA-hx4f-4hjp-g2f3)", async () => {
+    const evil = "https://evil.example/releases/capitals/v99.ttl";
+    const above = ["https://alice.example/", "https://alice.example/solid-memo/"];
+    const fetch = serving({
+      [`${instance}catalog.ttl`]: 401,
+      ...Object.fromEntries(
+        above.map((folder) => [`${folder}catalog.ttl`, catalog(folder, [V1, evil])]),
+      ),
+    });
+    await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toBeNull();
+    expect(fetch.asked.filter((url) => !url.startsWith(instance))).toEqual([]);
+    // A folder the server types a storage: what is above it is not read.
+    const listing = serving({ [`${instance}catalog.ttl`]: catalog(instance, [V1, V2]) });
+    const storage = async (input: RequestInfo | URL, init?: RequestInit) =>
+      init?.method === "HEAD" && input === RELEASES
+        ? new Response(null, {
+            status: 200,
+            headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
+          })
+        : listing(input, init);
+    await expect(libraryOver(storage).publishedBeside(V1)).resolves.toBeNull();
+    expect(listing.asked).toEqual([`${RELEASES}catalog.ttl`]);
+    // So is the root a Linked Web Storage server names in its description.
+    const described = "https://alice.example/.storage";
+    const lws = async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "HEAD" && input === RELEASES)
+        return new Response(null, {
+          headers: { Link: `<${described}>; rel="https://www.w3.org/ns/lws#storage"` },
+        });
+      if (input === described)
+        return Response.json({
+          id: described,
+          type: "Storage",
+          service: [{ type: "StorageRoot", serviceEndpoint: RELEASES }],
+        });
+      return listing(input, init);
+    };
+    await expect(libraryOver(lws).publishedBeside(V1)).resolves.toBeNull();
+    // One that cannot be asked is not shown to be one.
+    const unasked = async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "HEAD") throw new TypeError("Failed to fetch");
+      return listing(input, init);
+    };
+    await expect(libraryOver(unasked).publishedBeside(V1)).resolves.toEqual([V1, V2]);
+  });
+
+  it("reads no catalog for a release whose address names no instance, however deep", async () => {
     const deep = `https://alice.example/${"a/".repeat(1_000)}v1.ttl`;
     const fetch = serving({
       "https://alice.example/catalog.ttl": catalog("https://alice.example/", [deep]),
+      "https://alice.example/memo/catalog.ttl": catalog("https://alice.example/memo/", [
+        "https://alice.example/memo/capitals/v1.ttl",
+      ]),
     });
     await expect(libraryOver(fetch).publishedBeside(deep)).resolves.toBeNull();
-    expect(fetch.asked).toHaveLength(8);
+    await expect(
+      libraryOver(fetch).publishedBeside("https://alice.example/memo/capitals/v1.ttl"),
+    ).resolves.toBeNull();
+    expect(fetch.asked).toEqual([]);
   });
 
   it("passes over a catalog larger than a release may be", async () => {
-    const instance = "https://alice.example/solid-memo/main/";
     const fetch = serving({
       [`${instance}catalog.ttl`]: `${catalog(instance, [V1, V2])}\n${"#".repeat(RELEASE_LIMITS.bytes)}`,
     });
     await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toBeNull();
   });
 
-  it("is null when no catalog that links the release can be read, up to the host's root", async () => {
-    const fetch = serving({ "https://alice.example/catalog.ttl": 403 });
-    await expect(
-      libraryOver(fetch).publishedBeside("https://alice.example/memo/v1.ttl"),
-    ).resolves.toBeNull();
-    expect(fetch.asked).toEqual([
-      "https://alice.example/memo/catalog.ttl",
-      "https://alice.example/catalog.ttl",
+  it("is null when no catalog that links the release can be read, up to its instance's", async () => {
+    const fetch = serving({ [`${instance}catalog.ttl`]: 403 });
+    await expect(libraryOver(fetch).publishedBeside(V1)).resolves.toBeNull();
+    expect(fetch.asked.filter((url) => url.endsWith("catalog.ttl"))).toEqual([
+      `${RELEASES}catalog.ttl`,
+      `${instance}releases/catalog.ttl`,
+      `${instance}catalog.ttl`,
     ]);
   });
 });
@@ -471,20 +541,18 @@ describe("linkedReads", () => {
 
 describe("linkedReads of a release's catalogs", () => {
   it("reads its creator's catalogs under the limits it reads releases under, with them", async () => {
-    // A catalog in each folder above the release, none of them linking it: a quarter of a release's limits each.
+    // A catalog in each folder up to the release's instance, none of them linking it: a third of a release's limits each.
     const folders = [
       RELEASES,
       "https://alice.example/solid-memo/main/releases/",
       "https://alice.example/solid-memo/main/",
-      "https://alice.example/solid-memo/",
-      "https://alice.example/",
     ];
     const fetch = serving({
       [V2]: STANDALONE,
       ...Object.fromEntries(
         folders.map((folder) => [
           `${folder}catalog.ttl`,
-          `${catalog(folder, [V1])}\n${"#".repeat(RELEASE_LIMITS.bytes / 4)}`,
+          `${catalog(folder, [V1])}\n${"#".repeat(RELEASE_LIMITS.bytes / 3)}`,
         ]),
       ),
     });
@@ -550,7 +618,7 @@ ${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, 
     {
       documents = {},
       source = bob(1),
-    }: { documents?: Record<string, string>; source?: string } = {},
+    }: { documents?: Record<string, string | number>; source?: string } = {},
   ) {
     const fetch = serving({
       "https://solid-memo.com/decks/index.ttl": "",
@@ -558,8 +626,8 @@ ${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, 
       [bob(2)]: release(2, { cards: 2, padding }),
       [bob(3)]: release(3, { cards: 3, padding }),
       [bob(4)]: release(4, { versions: [1, 2, 3, 4], cards: 4 }),
-      ...documents,
       "https://bob.example/memo/catalog.ttl": catalog("https://bob.example/memo/", listed),
+      ...documents,
     });
     const validate = vi.fn(conforming);
     const library = libraryOver(fetch, validate);
@@ -656,6 +724,36 @@ ${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, 
     await expect(updates()).resolves.toMatchObject([
       { series: { version: "1" }, version: "1", newer: "unknown", fromLink: true },
     ]);
+  });
+
+  it("is never of a release outside the copy's instance, whatever catalog links it (GHSA-hx4f-4hjp-g2f3)", async () => {
+    // Releases that claim Bob's series, of a higher version: on another origin, in another instance, above his.
+    const strangers = [
+      "https://evil.example/releases/rivers/v99.ttl",
+      "https://bob.example/other/releases/rivers/v98.ttl",
+      "https://bob.example/releases/rivers/v97.ttl",
+    ];
+    const documents = {
+      ...Object.fromEntries(
+        strangers.map((url, at) => [url, release(99 - at).replaceAll(bob(99 - at), url)]),
+      ),
+      "https://bob.example/catalog.ttl": catalog("https://bob.example/", [bob(1), ...strangers]),
+    };
+    // Bob's own catalog not shared: the one at the host's root links his release and the others.
+    const hidden = planning(0, [], {
+      documents: { ...documents, "https://bob.example/memo/catalog.ttl": 401 },
+    });
+    await expect(hidden.updates()).resolves.toMatchObject([
+      { series: { version: "1" }, version: "1", newer: "unknown", fromLink: true },
+    ]);
+    await expect(hidden.plan()).resolves.toBeNull();
+    expect(
+      hidden.fetch.asked.filter((url) => !url.startsWith("https://bob.example/memo/")),
+    ).toEqual(["https://solid-memo.com/decks/index.ttl"]);
+    // Bob's catalog linking them too: none is read, and his own newer release is still the upgrade.
+    const linking = planning(0, [bob(1), ...strangers, bob(4)], { documents });
+    await expect(linking.plan()).resolves.toMatchObject({ fromVersion: "1", toVersion: "4" });
+    expect(linking.fetch.asked.filter((url) => strangers.includes(url))).toEqual([]);
   });
 
   it("is looked up in a catalog of its creator's other decks, larger together than one release may be, reading a few of them", async () => {

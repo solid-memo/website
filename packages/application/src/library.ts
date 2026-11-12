@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { shown } from "@solid-memo/domain/langText";
-import { releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
+import { isReleaseOfSameInstance, releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
 import {
   isCopyOf,
   libraryCopiesOf,
@@ -432,7 +432,10 @@ export function createLibraryUseCases({
    * catalog links that cannot be read is passed over, and so is one the
    * copied release lists, as no newer one, and one of the library's index
    * (`library`): a copy from a link stays one, and its pictures asked
-   * about (docs/privacy.md), whatever series its release claims. Of the
+   * about (docs/privacy.md), whatever series its release claims. So is
+   * one outside the instance the copied release was published from
+   * (isReleaseOfSameInstance), whatever catalog links it: a newer
+   * release is its creator's. Of the
    * rest, those named as
    * the copied release are read one at a time, the highest version first,
    * until one is a newer release of its series: the newest. Only when
@@ -455,7 +458,11 @@ export function createLibraryUseCases({
     const { named, others } = likeliestNewer(
       url,
       [...new Set(published)].filter(
-        (other) => other !== url && !listed.has(other) && !inLibrary({ sourceUrl: other }),
+        (other) =>
+          other !== url &&
+          isReleaseOfSameInstance(url, other) &&
+          !listed.has(other) &&
+          !inLibrary({ sourceUrl: other }),
       ),
     );
     let newest = copied;

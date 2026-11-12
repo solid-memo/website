@@ -130,6 +130,29 @@ export type UserStorages = () => Promise<readonly string[]>;
 const noStorages: UserStorages = async () => [];
 
 /**
+ * Whether the folder is a storage's root, asked with `fetch`: the Solid
+ * Protocol's `pim:Storage` link, or the root a Linked Web Storage server
+ * names in its description (lwsStorage.ts). An answer that says nothing
+ * of the folder (401, 429, 503, a description that can't be read) fails
+ * with cannotCheck.
+ */
+export async function isStorageRootAt(
+  folder: string,
+  fetch: typeof globalThis.fetch,
+): Promise<boolean> {
+  // Turtle asked for, as the app reads a folder: an LWS server may answer a storage's root otherwise, without its Solid links.
+  const response = await fetch(folder, { method: "HEAD", headers: { Accept: TURTLE_FIRST } });
+  if (!response.ok) throw new AppError("cannotCheck", { url: folder, status: response.status });
+  if (hasStorageLink(response.headers.get("Link"))) return true;
+  // A Linked Web Storage server names a storage's root in its description, not with a type.
+  const [storage] = linkTargets(response, LWS_STORAGE_REL, folder);
+  if (storage === undefined) return false;
+  const roots = await storageRootsOf(storage, fetch);
+  if (roots === null) throw new AppError("cannotCheck", { url: folder, status: 0 });
+  return roots.some((root) => isSameUrl(root, folder));
+}
+
+/**
  * The guard every write to and every delete of a deck's cards or reviews
  * document passes first, over the pod `fetch`: whether the document is
  * the deck's to change (DocumentStanding), and the claim that makes one
@@ -142,33 +165,11 @@ export function createDeckDocumentGuard(
 ) {
   const storageRoots = new Map<string, Promise<boolean>>();
 
-  /**
-   * Whether the folder is a storage's root: the Solid Protocol's
-   * `pim:Storage` link, or the root a Linked Web Storage server names in
-   * its description (lwsStorage.ts). Asked of the pod once per folder; a
-   * failed ask (cannotCheck) is asked again.
-   */
+  /** Whether the folder is a storage's root (isStorageRootAt), asked of the pod once per folder; a failed ask is asked again. */
   function isStorageRoot(folder: string): Promise<boolean> {
     let known = storageRoots.get(folder);
     if (known === undefined) {
-      known = (async () => {
-        // Turtle asked for, as the app reads a folder: an LWS server may answer a storage's root otherwise, without its Solid links.
-        const response = await fetch(folder, {
-          method: "HEAD",
-          headers: { Accept: TURTLE_FIRST },
-        });
-        // An answer that says nothing of the folder (401, 429, 503) is asked again, never kept.
-        if (!response.ok)
-          throw new AppError("cannotCheck", { url: folder, status: response.status });
-        if (hasStorageLink(response.headers.get("Link"))) return true;
-        // A Linked Web Storage server names a storage's root in its description, not with a type.
-        const [storage] = linkTargets(response, LWS_STORAGE_REL, folder);
-        if (storage === undefined) return false;
-        const roots = await storageRootsOf(storage, fetch);
-        // A description that can't be read says nothing of the folder: asked again, never kept.
-        if (roots === null) throw new AppError("cannotCheck", { url: folder, status: 0 });
-        return roots.some((root) => isSameUrl(root, folder));
-      })();
+      known = isStorageRootAt(folder, fetch);
       known.catch(() => storageRoots.delete(folder));
       storageRoots.set(folder, known);
     }
