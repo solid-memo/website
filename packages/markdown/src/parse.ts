@@ -205,6 +205,8 @@ export type MdNote =
   | { type: "code"; value: string }
   | { type: "characterReference"; source: string }
   | { type: "tooDeep"; source: string }
+  /** Code or a link shown as its source (tooDeep), outside a link, whose source holds hidden characters: shown as markers. */
+  | { type: "deepControls"; in: "code" | "link"; source: string }
   | { type: "largeTable"; source: string }
   /** A heading underlined with dashes (`Text` over `---`), which reads like a line of text over a thematic break. */
   | { type: "dashHeading"; source: string };
@@ -1036,7 +1038,7 @@ class Fold {
 
   /** One block, or none for a definition, folded to what is shown. */
   private block(node: Node, depth: number): DocBlock[] {
-    if (depth >= MAX_DEPTH) {
+    if (pastDepth(node, depth)) {
       if (this.outline) this.refuse(node, `nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
       return [this.sourceParagraph(node)];
     }
@@ -1116,9 +1118,9 @@ class Fold {
   }
 
   private inline(node: Node, depth: number, inLink: boolean): MdInline | MdInline[] {
-    if (depth >= MAX_DEPTH) {
+    if (pastDepth(node, depth)) {
       if (this.outline) this.refuse(node, `nested deeper than MAX_DEPTH (${MAX_DEPTH})`);
-      return { type: "text", value: this.source(node) };
+      return { type: "text", value: this.shown(node) };
     }
     switch (node.type) {
       case "text":
@@ -1148,7 +1150,7 @@ class Fold {
       // Raw HTML ("html"), and anything else the parser could make, is shown as its source.
       default:
         if (this.outline) this.refuse(node, "raw HTML");
-        return { type: "text", value: this.source(node) };
+        return { type: "text", value: this.shown(node) };
     }
   }
 
@@ -1174,14 +1176,18 @@ class Fold {
     return line + 1;
   }
 
-  /** The Markdown a node was parsed from, as written. */
-  private source(node: Node): string {
-    return this.text.slice(node.start, node.end);
+  /**
+   * The Markdown a node was parsed from, as it is shown: as written, but
+   * for its hidden characters, which show as markers wherever source
+   * shows, as code or a link's text might be in it.
+   */
+  private shown(node: Node): string {
+    return visibleControls(this.text.slice(node.start, node.end));
   }
 
   /** A block shown as its source, its lines kept apart. */
   private sourceParagraph(node: Node): DocBlock {
-    const lines = this.source(node).split("\n");
+    const lines = this.shown(node).split("\n");
     return {
       type: "paragraph",
       children: lines.flatMap((line, index): MdInline[] =>
@@ -1191,6 +1197,34 @@ class Fold {
       ),
     };
   }
+}
+
+/**
+ * Whether a node at `depth` shows as its source: one nested past
+ * MAX_DEPTH, or a link whose own text would be, so a followed link's own
+ * text is never its source (markup nested deeper inside it can be).
+ */
+function pastDepth(node: Node, depth: number): boolean {
+  return depth >= MAX_DEPTH || (node.type === "link" && depth + 1 >= MAX_DEPTH);
+}
+
+/**
+ * What a node shown as its source is or holds that a check looks at
+ * for hidden characters: code, else a link, else nothing; walked without
+ * recursion, however deep it nests.
+ */
+function held(node: Node): "code" | "link" | null {
+  let found: "link" | null = null;
+  const stack: Node[] = [node];
+  while (stack.length > 0) {
+    const next = stack.pop()!;
+    if (next.type === "code" || next.type === "inlineCode") return "code";
+    if (next.type === "link") found = "link";
+    if (next.type === "list") stack.push(...next.items.flat());
+    else if (next.type === "table") stack.push(...next.rows.flat(2));
+    else if ("children" in next) stack.push(...next.children);
+  }
+  return found;
 }
 
 /** The text of phrasing as plain text: its text, code and raw HTML as written, a picture's alt text, a hard break a space; walked without recursion, however deep it nests. */
@@ -1212,8 +1246,10 @@ function phrasingText(nodes: readonly Node[]): string {
 /**
  * The walk inspectMarkdown makes, nesting as Fold does, so what Fold
  * shows as its source is noted once, as too deep: unless it would show
- * as it does anyway, plain text with nothing escaped or referenced.
- * Code in a link's text is not noted apart, being in the link's.
+ * as it does anyway, plain text with nothing escaped or referenced and
+ * no hidden character. Code or a link shown so is noted again when its
+ * hidden characters show as markers. Code in a link's text is not noted
+ * apart, being in the link's.
  */
 class Inspect {
   private readonly text: string;
@@ -1229,8 +1265,12 @@ class Inspect {
   }
 
   private visit(node: Node, depth: number, inLink: boolean): void {
-    if (depth >= MAX_DEPTH) {
-      if (!this.asWritten(node)) this.notes.push({ type: "tooDeep", source: this.source(node) });
+    if (pastDepth(node, depth)) {
+      const source = this.source(node);
+      if (!this.asWritten(node)) this.notes.push({ type: "tooDeep", source });
+      // In a link's text, they are in the link's note.
+      const what = inLink || hiddenControls(source).length === 0 ? null : held(node);
+      if (what !== null) this.notes.push({ type: "deepControls", in: what, source });
       return;
     }
     switch (node.type) {
@@ -1282,9 +1322,10 @@ class Inspect {
    * Whether a node Fold shows as its source shows as it would have:
    * text whose source is its value, its line endings as the parser reads
    * them, or a paragraph of one line of it (Fold keeps a source's lines
-   * apart).
+   * apart); with no hidden characters, which Fold shows as markers.
    */
   private asWritten(node: Node): boolean {
+    if (hiddenControls(this.source(node)).length > 0) return false;
     if (node.type === "text") return this.source(node).replace(/\r\n?/g, "\n") === node.value;
     return (
       node.type === "paragraph" &&

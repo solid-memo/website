@@ -84,6 +84,13 @@ describe("DataText", () => {
     const long = `*${"a".repeat(MAX_CHARS)}*`;
     expect(html(<DataText text={{ en: long }} markdown />)).toBe(`<p>${long}</p>`);
   });
+
+  it("shows hidden characters in Markdown past the parser's limits as markers, not in plain text", () => {
+    const long = `\`if (a\u202e) b\u200b\` ${"a".repeat(MAX_CHARS)}`;
+    const shown = `\`if (a⟨U+202E⟩) b⟨U+200B⟩\` ${"a".repeat(MAX_CHARS)}`;
+    expect(html(<DataText text={{ en: long }} markdown />)).toBe(`<p>${shown}</p>`);
+    expect(html(<DataText text={{ en: "a\u200cb" }} markdown={false} />)).toBe("<p>a\u200cb</p>");
+  });
 });
 
 describe("DataProse", () => {
@@ -103,6 +110,13 @@ describe("DataProse", () => {
     const long = `*${"a".repeat(MAX_CHARS)}*`;
     expect(html(<DataProse class="course-theory" text={{ en: `${long}\n\nb` }} markdown />)).toBe(
       `<div class="course-theory"><p>${long}</p><p>b</p></div>`,
+    );
+  });
+
+  it("shows hidden characters in Markdown past the parser's limits as markers", () => {
+    const long = `\`a\u202eb\` ${"a".repeat(MAX_CHARS)}`;
+    expect(html(<DataProse class="course-theory" text={{ en: long }} markdown />)).toBe(
+      `<div class="course-theory"><p>\`a⟨U+202E⟩b\` ${"a".repeat(MAX_CHARS)}</p></div>`,
     );
   });
 
@@ -170,6 +184,14 @@ describe("DataLine", () => {
   it("shows Markdown past the parser's limits as plain text", () => {
     const long = `*${"a".repeat(MAX_CHARS)}*`;
     expect(html(<DataLine text={{ en: long }} markdown />)).toBe(long);
+  });
+
+  it("shows hidden characters in Markdown past the parser's limits as markers", () => {
+    const long = `\`a\u202eb\` ${"a".repeat(MAX_CHARS)}`;
+    expect(html(<DataLine text={{ en: long }} markdown />)).toBe(
+      `\`a⟨U+202E⟩b\` ${"a".repeat(MAX_CHARS)}`,
+    );
+    expect(html(<DataLine text={{ en: "a\u202eb" }} markdown={false} />)).toBe("a\u202eb");
   });
 });
 

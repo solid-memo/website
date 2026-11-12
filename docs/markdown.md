@@ -77,11 +77,11 @@ package's own tree, folded to what the app shows:
 | In the text | In the tree |
 |---|---|
 | a heading | a paragraph in bold: data never adds to the page's outline |
-| raw HTML, block or inline | its source, as text |
+| raw HTML, block or inline | its source, as text, its hidden characters as markers |
 | a picture, inline or by reference | its alt text: never loaded or linked |
 | a reference link | a link to its definition's URL (the first definition of a label wins); definitions show nothing |
 | a code block's info string | its first word, lower-cased, when it matches `[a-z0-9+#-]{1,20}`; else none |
-| hidden characters in code or link text: every format character (Unicode category Cf, such as the bidi controls U+202A–202E and U+2066–2069, the zero-width characters U+200B–200F, U+2060 and U+FEFF, the soft hyphen U+00AD, the invisible operators U+2061–2064 and the tag characters U+E0000–E007F), and characters that show nothing or look blank yet count (the Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, the combining grapheme joiner U+034F, Khmer's U+17B4–17B5, and the variation selectors U+180B–180F, U+FE00–FE0F and U+E0100–E01EF), a picture's alt text in a link included | a visible marker such as `⟨U+202E⟩` ("Trojan Source": code that reads other than it runs) |
+| hidden characters in code or link text: every format character (Unicode category Cf, such as the bidi controls U+202A–202E and U+2066–2069, the zero-width characters U+200B–200F, U+2060 and U+FEFF, the soft hyphen U+00AD, the invisible operators U+2061–2064 and the tag characters U+E0000–E007F), and characters that show nothing or look blank yet count (the Hangul fillers U+115F, U+1160, U+3164 and U+FFA0, the combining grapheme joiner U+034F, Khmer's U+17B4–17B5, and the variation selectors U+180B–180F, U+FE00–FE0F and U+E0100–E01EF), a picture's alt text in a link included, and in anything shown as its source, however deep it nests | a visible marker such as `⟨U+202E⟩` ("Trojan Source": code that reads other than it runs) |
 | a table body row's cells past the header's | dropped, as GFM has it; a short row isn't padded |
 
 | Function | Module | What it gives |
@@ -92,7 +92,7 @@ package's own tree, folded to what the app shows:
 | `plainText(text)` | `plainText` | the text as plain text |
 | `labelText(text, max?)` | `plainText` | a short name: the plain text of its first block that shows any |
 | `liveLink(url)` | `links` | whether a link is followed, and its host |
-| `inspectMarkdown(text)` | `parse` | whether the text is one paragraph as written (a heading isn't), and notes of what the tree folds away or a check looks at: raw HTML, pictures, links (an autolink told apart), code outside a link, character references, what nests too deep to show as written, a table past its caps, a heading underlined with dashes |
+| `inspectMarkdown(text)` | `parse` | whether the text is one paragraph as written (a heading isn't), and notes of what the tree folds away or a check looks at: raw HTML, pictures, links (an autolink told apart), code outside a link, character references, what nests too deep to show as written (and code or a link there with hidden characters), a table past its caps, a heading underlined with dashes |
 | `markdownProblems(text, rule)` | `problems` | what wouldn't show as its author meant, by the [rules for a release](#rules-for-a-release), in a field held to `SIDE`, `OPTION` or `PROSE` |
 | `chunksOf(blocks)` | `chunks` | the [chunks](#chunks) blocks are shown in, split at their top-level rules |
 | `splitAtRules(blocks)` | `chunks` | the pieces between top-level rules, empty ones included |
@@ -107,7 +107,8 @@ shapes of Markdown make the parser slow.
 `MAX_WORK`.
 
 - **`MAX_CHARS`, 20,000 characters.** A longer text is plain, its
-  source still readable. The longest course text is about 2,600.
+  source still readable, its hidden characters as markers. The longest
+  course text is about 2,600.
 - **`MAX_WORK`, 40 units of the parser's work for each character** (of
   at least 1,000). Each try of one of the parser's rules, each step
   through a link's label and each token it makes is a unit, counted as
@@ -130,7 +131,8 @@ shapes of Markdown make the parser slow.
   its own. An `href` takes at most three characters for each byte, a
   percent escape, so the links a text shows hold at most a small
   multiple of its length. Past the budget the parse stops, and the text
-  is plain, so no text costs more than time linear in its length.
+  is plain, as past `MAX_CHARS`, so no text costs more than time linear
+  in its length.
   markdown-it reads most text in such time, but some shapes make it
   read the rest of a text again and again: a block quote after each
   line of a paragraph, or link openers before an unclosed declaration
@@ -141,7 +143,10 @@ shapes of Markdown make the parser slow.
   source, so every walker of the tree recurses at most 8 deep. Each
   quote, list item, paragraph, emphasis and link is a level: in seven
   quotes, a paragraph's text is the eighth level and shows as written,
-  but markup there shows as its source.
+  but markup there shows as its source. A link whose own text would be
+  that deep shows as its source too, so a followed link's own text is
+  never source; markup nested deeper inside it can be. Source shows its
+  hidden characters as markers, as code and link text do.
 - **The parser's own depth, 18 levels of blocks.** A quote is one
   level and a list two, the list and its item. Past that depth a
   container's lines are passed over a line at a time, unread, so nested
@@ -610,11 +615,11 @@ each card.
 | A link where none may be (`link`): a card's `front`, `back`, `frontLabel` and `backLabel` and a distractor's `distractorText` (fields `SIDE` and `OPTION`), an autolink `<ex:title>` or `<http://…>` included | It's in the way of the keys that reveal and grade, and of an option's `<label>`; an autolink loses its angle brackets too. The fix is code. |
 | A link the app doesn't follow (`linkNotFollowed`), in a note, a step's theory or a chapter's description (field `PROSE`) | Only `https:` without a user name or password is followed; any other shows as text. |
 | Link text that reads as an address or a host name other than the link's (`linkHost`) | Misleading text: the named host, as written, must be the link's, port included, give or take a `www.`. A percent escape or a full-width dot in it fails. `[solidproject.org](https://www.solidproject.org/)` passes; `[bank.example](https://evil.example/)` and `[github.io](https://evil.github.io/)` don't. The test is by shape, a dotted word ending in letters: "Node.js" and a file's name such as `package.json`, `v1.ttl` or `README.md` count, even as code. Other wording avoids it ("npm's documentation of package.json"). It checks data only; the defense is the host shown beside a link ([safety](#safety)). |
-| A bidi control, zero-width or other hidden character in code or a link (`hiddenControl`) | Code that reads other than it runs ("Trojan Source"); the app shows them as markers. |
+| A bidi control, zero-width or other hidden character in code or a link (`hiddenControl`), nested past `MAX_DEPTH` too | Code that reads other than it runs ("Trojan Source"); the app shows them as markers. |
 | A character reference outside code (`characterReference`), such as `&aring;` | CommonMark decodes it: it shows as "å". As code, or with its `&` escaped (`\&aring;`), it shows as typed. An unknown name, `&nosuchname;`, is text and passes. |
 | A heading underlined with dashes (`dashHeading`): a line of text with `---` right under it, no blank line between | It looks like text over a thematic break, which a blank line before the `---` makes it (ending a [chunk](#chunks) in a step's theory). That blank line, or a `##` heading, avoids it; `===` underlining passes. |
 | An option that isn't one paragraph (`notOneParagraph`): a distractor's `distractorText`, and the `back` of a card with distractors (field `OPTION`) | Options show on one line, in the inline profile, and must look alike, or the odd one out gives the answer away. A heading is no paragraph: it shows bold on a revealed back. |
-| Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past `MAX_WORK` (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it's plain text that shows as written anyway), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source. |
+| Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past `MAX_WORK` (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it's plain text that shows as written anyway, with no hidden characters), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source, its hidden characters as markers. |
 
 A step's theory is held to its chunks too: none of them empty, and as
 many in each language, so a learner who switches language keeps their

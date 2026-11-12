@@ -4,7 +4,7 @@
 
 import { cardLabel, cardLabelText, isMarkdown, type CardContent } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
-import type { MdBlock, MdPhrase } from "@solid-memo/markdown/parse";
+import { visibleControls, type MdBlock, type MdPhrase } from "@solid-memo/markdown/parse";
 import { labelText } from "@solid-memo/markdown/plainText";
 import { breakable } from "./breakable";
 import { useCardText, useCourseText } from "./cardLanguage";
@@ -27,9 +27,9 @@ import { markdownBlocks, markdownChunks, markdownPhrases } from "./markdownCache
  * Markdown that reads as a single paragraph renders as that same
  * paragraph, so a card with a word or two of code looks like any other;
  * anything more becomes a `div.md` of its blocks. Text past the
- * parser's limits is shown as plain text. The blocks are read from
- * `blocksOf`, markdownBlocks unless a list of texts longer than its cache
- * passes its own (courseDescriptionBlocks).
+ * parser's limits is shown as plain text (pastLimits). The blocks are
+ * read from `blocksOf`, markdownBlocks unless a list of texts longer
+ * than its cache passes its own (courseDescriptionBlocks).
  */
 export function DataText({
   text,
@@ -49,9 +49,10 @@ export function DataText({
   const lang = cardLang(text);
   const blocks = markdown ? blocksOf(shown) : null;
   if (blocks === null) {
+    const plain = markdown ? pastLimits(shown) : shown;
     return (
       <p class={className} lang={lang}>
-        {breaks ? breakable(shown) : shown}
+        {breaks ? breakable(plain) : plain}
       </p>
     );
   }
@@ -80,7 +81,8 @@ export function DataText({
  * shown a chunk at a time, `chunk` (0 first, below useProseChunks), the
  * chunks split at its top-level thematic breaks, which show nothing
  * themselves; the div is then a `div.md` too. Plain text, and text past
- * the parser's limits, which is shown as plain text, is one chunk.
+ * the parser's limits, which is shown as plain text (pastLimits), is one
+ * chunk.
  */
 export function DataProse({
   text,
@@ -104,7 +106,7 @@ export function DataProse({
       </div>
     );
   }
-  const paragraphs = shown
+  const paragraphs = (markdown ? pastLimits(shown) : shown)
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph !== "");
@@ -149,7 +151,18 @@ export function DataLineContent({
   const { cardText } = useCardText();
   const shown = cardText(text);
   const phrases = markdown ? phrasesOf(shown) : null;
-  return phrases === null ? <>{breakable(shown)}</> : <MarkdownInlines nodes={phrases} />;
+  if (phrases !== null) return <MarkdownInlines nodes={phrases} />;
+  return <>{breakable(markdown ? pastLimits(shown) : shown)}</>;
+}
+
+/**
+ * Markdown past the parser's limits, shown as plain text: as written, but
+ * for its hidden characters, which show as markers, as they do in code
+ * and link text and in source the parser's tree shows. Plain text keeps
+ * them as written.
+ */
+function pastLimits(text: string): string {
+  return visibleControls(text);
 }
 
 /** DataLineContent in a span marked with its language, when that is not the page's. */
