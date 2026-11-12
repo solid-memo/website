@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.2.2](https://github.com/solid-memo/website/compare/v7.2.1...v7.2.2) (2026-11-12)
+
+### Bug Fixes
+
+* **api:** list every browser storage key in the public API ([0e7e2cb](https://github.com/solid-memo/website/commit/0e7e2cb55fd1643aec7f1fd24ca2efaeaa0dff27))
+* **application:** bound every read outside the instance in one check ([8ae4f11](https://github.com/solid-memo/website/commit/8ae4f11888299d8830293e1448be08119958e278))
+* **application:** keep undone and reset answers out of the answer log ([9b373f6](https://github.com/solid-memo/website/commit/9b373f61220ffda4e7ee948e02a7a05a54567724))
+* **deps:** check every lockfile npm installs from, not the root's alone ([bae1c97](https://github.com/solid-memo/website/commit/bae1c970c9e11051c6fcb6ca4a61c93862827746))
+* **solid:** never replace a catalog that does not fit its shape ([a5aebc8](https://github.com/solid-memo/website/commit/a5aebc8b178b3f18f23b9ad1dda9c109823b15e7))
+* **solid:** refuse a session whose WebID no pod could serve ([87187d9](https://github.com/solid-memo/website/commit/87187d98a629cb94d0576e8e2ced4c726dcc0544))
+
 ## [7.2.1](https://github.com/solid-memo/website/compare/v7.2.0...v7.2.1) (2026-11-12)
 
 ### Bug Fixes
