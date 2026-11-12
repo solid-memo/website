@@ -523,7 +523,7 @@ describe("the answer log", () => {
     });
   });
 
-  it("undoes a new prompt's answer still on its way to the log: its state goes, the answer never reaches the log", async () => {
+  it("undoes a new prompt's answer whose add failed: its state goes, the answer out of the log too", async () => {
     const { deps, log, byMonth, useCases } = setup();
     log.append.mockRejectedValueOnce(new Error("offline"));
     const { undo } = await useCases.recordReview(
@@ -543,9 +543,130 @@ describe("the answer log", () => {
       save: [],
       remove: [undo.key],
     });
+    // Its add failed, but the pod may have kept it: it is taken out of the log too.
+    expect(log.removeAnswer).toHaveBeenCalledWith(instance.url, "2026-09-21", undo.answer.id);
+    await useCases.getStatistics(instance.url, noon);
+    expect(byMonth.get("2026-09") ?? []).toEqual([]);
+  });
+
+  it("asks the log to remove no answer undone that no add was ever begun for", async () => {
+    const { log, byMonth, useCases } = setup();
+    log.append
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(new Error("offline"));
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    // The first answer's add fails again, so the second's is never begun.
+    const { undo } = await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "back-to-front" },
+      5,
+      noon,
+    );
+    await useCases.undoReview(instance.url, deck, undo);
     expect(log.removeAnswer).not.toHaveBeenCalled();
     await useCases.getStatistics(instance.url, noon);
-    expect(byMonth.size).toBe(0);
+    expect(byMonth.get("2026-09")!.map((answer) => answer.direction)).toEqual(["front-to-back"]);
+  });
+
+  it("takes an undone answer out of the log when the pod stored its add but answered with an error", async () => {
+    const { log, byMonth, useCases } = setup();
+    log.append.mockImplementationOnce(async (_instanceUrl, answer) => {
+      byMonth.set(answer.studyDay.slice(0, 7), [answer]);
+      throw new AppError("addFailed", { status: 502 });
+    });
+    const { undo } = await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "front-to-back" },
+      4,
+      noon,
+    );
+    await useCases.undoReview(instance.url, deck, undo);
+    expect(log.removeAnswer).toHaveBeenCalledWith(instance.url, "2026-09-21", undo.answer.id);
+    await useCases.getStatistics(instance.url, noon);
+    expect(byMonth.get("2026-09")).toEqual([]);
+    expect(log.append).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not add a reset day's answers back that could not be added before the reset", async () => {
+    const { deps, log, byMonth, useCases } = setup();
+    log.append
+      .mockRejectedValueOnce(new AppError("addFailed", { status: 503 }))
+      .mockRejectedValueOnce(new AppError("addFailed", { status: 503 }));
+    await useCases.recordReview(instance.url, deck, { card, direction: "front-to-back" }, 4, noon);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+      sm2s([
+        {
+          cardId: card.id,
+          direction: "front-to-back",
+          easeFactor: 2.6,
+          intervalDays: 1,
+          repetitions: 1,
+          due: "2026-09-22",
+          firstReviewedAt: noon.toISOString(),
+          lastReviewedAt: noon.toISOString(),
+          formatVersion: 2,
+        },
+      ]),
+    );
+    await expect(useCases.resetStudyDay(instance.url, deck, noon)).resolves.toBe(1);
+    // The pod answers again: nothing of the reset day is left to add.
+    const other = { ...deck, url: "https://pod.example/memo/decks/other.ttl" };
+    await useCases.recordReview(instance.url, other, { card, direction: "front-to-back" }, 5, noon);
+    await useCases.getStatistics(instance.url, noon);
+    expect(log.append).toHaveBeenCalledTimes(3);
+    expect(byMonth.get("2026-09")!.map((answer) => answer.deckUrl)).toEqual([other.url]);
+  });
+
+  it("keeps the queued answers of other decks and other days when a deck's day is reset", async () => {
+    const { deps, log, byMonth, useCases } = setup();
+    const other = { ...deck, url: "https://pod.example/memo/decks/other.ttl" };
+    const yesterday = new Date(2026, 8, 20, 12, 0);
+    const failed = () => Promise.reject(new AppError("addFailed", { status: 503 }));
+    log.append
+      .mockImplementationOnce(failed)
+      .mockImplementationOnce(failed)
+      .mockImplementationOnce(failed)
+      .mockImplementationOnce(failed);
+    // Behind another deck's answer that cannot be added: the deck's of
+    // yesterday and of today.
+    await useCases.recordReview(instance.url, other, { card, direction: "front-to-back" }, 4, noon);
+    await useCases.recordReview(
+      instance.url,
+      deck,
+      { card, direction: "front-to-back" },
+      4,
+      yesterday,
+    );
+    await useCases.recordReview(instance.url, deck, { card, direction: "back-to-front" }, 4, noon);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+      sm2s([
+        {
+          cardId: card.id,
+          direction: "back-to-front",
+          easeFactor: 2.6,
+          intervalDays: 1,
+          repetitions: 1,
+          due: "2026-09-22",
+          firstReviewedAt: noon.toISOString(),
+          lastReviewedAt: noon.toISOString(),
+          formatVersion: 2,
+        },
+      ]),
+    );
+    await useCases.resetStudyDay(instance.url, deck, noon);
+    // The pod answers again: only the reset day's answer of the deck is gone.
+    await useCases.getStatistics(instance.url, noon);
+    expect(
+      byMonth
+        .get("2026-09")!
+        .map((answer) => [answer.deckUrl, answer.studyDay])
+        .sort(),
+    ).toEqual([
+      [deck.url, "2026-09-20"],
+      [other.url, "2026-09-21"],
+    ]);
   });
 
   it("is checked in the full check, one document a month, and a log with no month has no statistics", async () => {
