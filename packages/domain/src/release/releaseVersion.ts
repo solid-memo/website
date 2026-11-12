@@ -6,7 +6,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { DCAT_NS, DCTERMS_NS, type ReleaseText } from "./releaseModel.ts";
 import { publishedIdsOf, RDF_TYPE, type DraftTriple, type ReleaseDraft } from "./releaseDraft.ts";
 import { isEarlierVersionBeside } from "./releasePlace.ts";
-import { moved, rebaseDraft, withVersionsOnly } from "./releaseToDraft.ts";
+import { moved, rebaseDraft, VERSION_LINKS, withVersionsOnly } from "./releaseToDraft.ts";
 
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
@@ -80,23 +80,83 @@ export function nextVersionDraft(
  * The release with only its own versions in its series: a link of the
  * series to a version (withVersionsOnly) names the release, the version
  * it follows (`dcat:prev`, `dcat:previousVersion`) or an earlier version
- * in its folder (ownVersionOf). A release made from a file could
- * otherwise list other addresses, with notes of its choosing, as its
- * series' versions, which learners read as the creator's, and carry them
- * into every next version (GHSA-jp29-vf56-5g4g). What it states of where
- * its draft is published is the application's to drop (inItsPlace).
+ * in its folder or that version's (ownVersionOf). A release made from a
+ * file could otherwise list other addresses, with notes of its choosing,
+ * as its series' versions, which learners read as the creator's, and
+ * carry them into every next version (GHSA-jp29-vf56-5g4g). So could a
+ * draft another app writes to, published (assemble, in the repository,
+ * holds it to the same rule: GHSA-8frq-fhj8-9226). What it states of
+ * where its draft is published is the application's to drop
+ * (inItsPlace).
  */
 export function withOwnVersions(release: ReleaseDraft): ReleaseDraft {
   return withVersionsOnly(release, ownVersionOf(release));
 }
 
-/** Whether an address is one of the release's own versions, as withOwnVersions says. */
+/**
+ * Whether an address is one of the own versions of the release at
+ * `url`, as withOwnVersions says: the release, the version it follows
+ * (`dcat:prev`, `dcat:previousVersion`), or an earlier version in the
+ * folder of either, as a next version published in another folder
+ * still lists the versions before it. It takes the version followed as
+ * the release states it, as only a release is read here: a published
+ * one, or one read to be the next version's (nextVersionDraft). A pod
+ * draft's is one the release check holds to be the instance's or the
+ * library's, and the version before (previousElsewhere, previousUnread,
+ * versionNotNext): a release published from it lists only what that one
+ * does of versions lower than its own (earlierVersionsOf).
+ */
 function ownVersionOf({ url, root }: ReleaseDraft): (iri: string) => boolean {
+  const followed = [root.prev, root.previousVersion].filter(
+    (iri): iri is string => iri !== undefined,
+  );
   return (iri) =>
     iri === url ||
-    iri === root.prev ||
-    iri === root.previousVersion ||
-    isEarlierVersionBeside(url, iri);
+    followed.includes(iri) ||
+    [url, ...followed].some((version) => isEarlierVersionBeside(version, iri));
+}
+
+/**
+ * What the next version of `release`, at `url`, states of each version
+ * of its series before it (nextVersionDraft), by version: of the release
+ * itself, and of each earlier one its series lists that is its own
+ * (withOwnVersions) and that it states to be one version, lower than its
+ * own (`dcat:version`), with what the release, or the documents it links
+ * to (`linked`), say of it; a blank node it names is left out. A draft's
+ * documents are anyone's to write and no editor shows what they state of
+ * the earlier versions: a release published from one states what the
+ * release it follows says of them, and nothing else (GHSA-8frq-fhj8-9226).
+ * The release followed may be one the draft names in place of the one it
+ * was made from: what it lists is then no later version than itself.
+ */
+export function earlierVersionsOf(
+  release: ReleaseDraft,
+  url: string,
+  linked: readonly DraftTriple[] = [],
+): Map<string, DraftTriple[]> {
+  const next = nextVersionDraft(release, url, linked);
+  const series = new Set([next.root.inSeries, next.root.isVersionOf]);
+  const versions = new Map<string, DraftTriple[]>([[release.url, []]]);
+  // A link to anything but an own version is gone already (withOwnVersions).
+  for (const { subject, predicate, object } of next.triples)
+    if (series.has(subject) && VERSION_LINKS.has(predicate)) versions.set(object.value, []);
+  versions.delete(url);
+  for (const triple of next.triples)
+    if (triple.object.kind !== "blank") versions.get(triple.subject)?.push(triple);
+  // Only a version stated once, as a number lower than the release's: no later version than the one followed.
+  const own = Number(release.root.version ?? "1");
+  for (const [version, triples] of versions) {
+    const [stated, ...more] = triples.filter(({ predicate }) => predicate === `${DCAT_NS}version`);
+    const number =
+      more.length === 0 &&
+      stated?.object.kind === "literal" &&
+      /^[1-9][0-9]*$/.test(stated.object.value)
+        ? Number(stated.object.value)
+        : undefined;
+    if (version !== release.url && !(number !== undefined && number < own))
+      versions.delete(version);
+  }
+  return versions;
 }
 
 /** What an earlier version is described by: its class, title, description and version. */

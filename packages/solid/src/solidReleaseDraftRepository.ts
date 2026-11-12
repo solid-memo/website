@@ -43,8 +43,10 @@ import {
   type ReleaseDraft,
   unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
-import { moved } from "@solid-memo/domain/release/releaseToDraft";
+import { moved, VERSION_LINKS } from "@solid-memo/domain/release/releaseToDraft";
+import { earlierVersionsOf } from "@solid-memo/domain/release/releaseVersion";
 import { isIriPastBound } from "@solid-memo/domain/pathKeys";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { addCatalogLink, catalogLinks, removeCatalogLink } from "./catalogLinks";
 import { deleteContainerIfEmpty } from "./containers";
@@ -262,7 +264,7 @@ export function createSolidReleaseDraftRepository({
     return release;
   }
 
-  return {
+  const repository: ReleaseDraftRepository = {
     // A few drafts at a time: the catalog may link many (MAX_CATALOG_LINKS), each as large as a release.
     async list(instanceUrl) {
       return mapAtOnce(
@@ -422,13 +424,21 @@ export function createSolidReleaseDraftRepository({
       const read = draftReadOf(draftNamedQuads(draftUrl, urls, datasets), draftUrl, {
         refuseHidden: true,
       });
-      const quads = releaseQuadsOf(
-        atTarget
-          .filter(({ typed }) => typed === null || !read?.unkept(typed.subject, typed.object))
-          .map(({ quad }) => quad),
-        targetUrl,
-        issued,
-      );
+      const kept = atTarget
+        .filter(({ typed }) => typed === null || !read?.unkept(typed.subject, typed.object))
+        .map(({ quad }) => quad);
+      // The earlier versions as the release it follows states them, none later than that one (earlierVersionsOf).
+      // Publishing holds that one to be the instance's or the library's, and the version before (the release check:
+      // previousElsewhere, previousUnread, versionNotNext); Download .ttl reads it all the same.
+      const prev = kept.find(
+        ({ subject, predicate }) => subject.value === targetUrl && predicate.value === DCAT("prev"),
+      )?.object.value;
+      let earlier = new Map<string, DraftTriple[]>();
+      if (prev !== undefined) {
+        const followed = await repository.readRelease(prev);
+        earlier = earlierVersionsOf(followed, targetUrl, await repository.readLinked(followed));
+      }
+      const quads = releaseQuadsOf(withOwnVersionsAt(kept, targetUrl, earlier), targetUrl, issued);
       const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];
       return turtleOf(quads, {
         base: targetUrl,
@@ -513,6 +523,7 @@ export function createSolidReleaseDraftRepository({
       return { keptDocuments };
     },
   };
+  return repository;
 }
 
 /** The number of each dataset read, given once: see readNumberOf. */
@@ -875,6 +886,114 @@ function withBlankNodes(
       .flatMap(({ entry }) => entryQuads(entry)),
   ];
   return withQuads(dataset, quads);
+}
+
+/**
+ * The release at `target` with only its own versions in the series it is
+ * in (`dcat:inSeries`, `dcat:isVersionOf`), each as the release it
+ * follows states it (`earlier`, earlierVersionsOf): a link of the series
+ * to a version (`dcat:hasVersion`, `dcat:first`, …), or any other of
+ * its values that is a version, is kept only to the release or one of
+ * those; what the draft states of any version but the release, linked or
+ * at an address a release has (isPublishedReleaseUrl) beside it or in its
+ * series, is left out, and so is what only such statements led to from
+ * the release and its own subjects; and each version still linked is
+ * described as the release it follows says. A draft's documents are
+ * anyone's to write, and no editor or check shows a series' versions:
+ * published, the release would list other addresses, or the earlier
+ * versions, with notes of their choosing, as the creator's, and a
+ * learner's copy of it would take a later version there for one it
+ * already lists (GHSA-8frq-fhj8-9226).
+ */
+function withOwnVersionsAt(
+  quads: readonly Quad[],
+  target: string,
+  earlier: ReadonlyMap<string, readonly DraftTriple[]>,
+): Quad[] {
+  const of = (predicate: string) =>
+    quads
+      .filter((quad) => quad.subject.value === target && quad.predicate.value === predicate)
+      .map((quad) => quad.object.value);
+  const series = new Set([...of(DCAT("inSeries")), ...of(DCAT("isVersionOf"))]);
+  const isLink = ({ subject, predicate, object }: Quad) =>
+    subject.termType === "NamedNode" &&
+    series.has(subject.value) &&
+    VERSION_LINKS.has(predicate.value) &&
+    object.termType === "NamedNode";
+  const own = (iri: string) => iri === target || earlier.has(iri);
+  const named = (term: Quad["subject"] | Quad["object"]) =>
+    term.termType === "NamedNode" ? [term.value] : [];
+  const folderOf = (iri: string) => iri.slice(0, iri.lastIndexOf("/") + 1);
+  const statedInSeries = new Set(
+    quads
+      .filter(
+        ({ predicate, object }) =>
+          (predicate.value === DCAT("inSeries") || predicate.value === DCAT("isVersionOf")) &&
+          series.has(object.value),
+      )
+      .flatMap(({ subject }) => named(subject)),
+  );
+  // An address a release has, beside the release or stated to be in its series: one of its versions, named or not.
+  const isVersionAddress = (iri: string) =>
+    isPublishedReleaseUrl(iri) && (folderOf(iri) === folderOf(target) || statedInSeries.has(iri));
+  // Every version named but the release and the series, whose statements are the release's own: linked, or at such
+  // an address, as a subject or a value of the series.
+  const versions = new Set(
+    [
+      ...quads.filter(isLink).map(({ object }) => object.value),
+      ...earlier.keys(),
+      ...quads.flatMap(({ subject }) => named(subject)).filter(isVersionAddress),
+      ...quads
+        .filter(({ subject }) => series.has(subject.value))
+        .flatMap(({ object }) => named(object))
+        .filter(isVersionAddress),
+    ].filter((iri) => iri !== target && !iri.startsWith(`${target}#`) && !series.has(iri)),
+  );
+  const kept = quads.filter(
+    (quad) =>
+      !(quad.subject.termType === "NamedNode" && versions.has(quad.subject.value)) &&
+      (!series.has(quad.subject.value) ||
+        (VERSION_LINKS.has(quad.predicate.value)
+          ? isLink(quad) && own(quad.object.value)
+          : !named(quad.object).some((iri) => versions.has(iri) && !own(iri)))),
+  );
+  const before = reachedFrom(quads, target);
+  const after = reachedFrom(kept, target);
+  const linked = new Set(kept.filter(isLink).map(({ object }) => object.value));
+  return [
+    ...kept.filter((quad) => after.has(keyOf(quad.subject)) || !before.has(keyOf(quad.subject))),
+    ...[...earlier]
+      .filter(([version]) => linked.has(version))
+      .flatMap(([, triples]) =>
+        triples.map(({ subject, predicate, object }) => quadOf(subject, predicate, object)),
+      ),
+  ];
+}
+
+/** The subjects the release at `target` and its own subjects (`<target>#id`) lead to, at any depth, themselves among them. */
+function reachedFrom(quads: readonly Quad[], target: string): Set<string> {
+  const bySubject = new Map<string, Quad[]>();
+  for (const quad of quads) {
+    const key = keyOf(quad.subject);
+    const of = bySubject.get(key);
+    if (of === undefined) bySubject.set(key, [quad]);
+    else of.push(quad);
+  }
+  const reached = new Set<string>();
+  const queue = [...bySubject.keys()].filter(
+    (key) => key === target || key.startsWith(`${target}#`),
+  );
+  for (const key of queue) reached.add(key);
+  for (let key = queue.pop(); key !== undefined; key = queue.pop()) {
+    for (const { object } of bySubject.get(key) ?? []) {
+      if (object.termType !== "NamedNode" && object.termType !== "BlankNode") continue;
+      const next = keyOf(object);
+      if (reached.has(next)) continue;
+      reached.add(next);
+      queue.push(next);
+    }
+  }
+  return reached;
 }
 
 /**

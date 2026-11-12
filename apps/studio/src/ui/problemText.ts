@@ -285,6 +285,7 @@ export function problemMessage(
         what: t(`studio.release.counted.${problem.params.what}`),
       });
     case "previousUnread":
+    case "previousElsewhere":
       return t(key, { previous: `<${problem.params.previous}>` });
     case "libraryUnread":
       return t(key);

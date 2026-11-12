@@ -1202,6 +1202,7 @@
       "versionNotNext": "Version {version} följer inte {previous}, version {previousVersion}.",
       "seriesNotOwn": "Följer ingen utgåva men anger {series} som sin serie: en första version startar en egen serie.",
       "seriesNotPrevious": "Anger {series} som sin serie, som varken är dess egen eller ligger där {previous}, utgåvan den följer, finns: en nästa version stannar i serien för utgåvan den följer.",
+      "previousElsewhere": "Följer {previous}, som varken är en utgåva i den här instansen eller i biblioteket: en nästa version följer en av deras, eftersom dess tidigare versioner hämtas därifrån.",
       "outlineWithoutCourse": "Har kapitel eller steg, men är ingen kurs.",
       "courseWithoutChapter": "En kurs har minst ett kapitel.",
       "courseDirection": "En kurs studeras från framsida till baksida; den här anger {stated}.",

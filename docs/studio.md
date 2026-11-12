@@ -1611,8 +1611,16 @@ A new draft starts from
     and publishing makes the new release no version of it.
   - The series lists only the release's own versions
     (`withOwnVersions`): the release, the version it follows,
-    and earlier versions in its folder (`<name>/v<N>.ttl`). Any other
-    version the series lists is dropped.
+    and earlier versions in its folder or that version's
+    (`<name>/v<N>.ttl`). Any other version the series lists is
+    dropped.
+  - Such a draft can be published only when the release it follows
+    is one the instance published or the library's (the release
+    check's **Drops**, `previousElsewhere`). The next version of a
+    release in someone else's pod, or in a folder of the user's the
+    instance's catalog doesn't link, can still be started and saved
+    with **Download .ttl**. The check refuses it as an error, so it
+    can't be published in the pod.
 - **a release saved as a file**, Turtle or JSON-LD, as it is
   (`releaseToDraft` in
   [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)),
@@ -2014,7 +2022,14 @@ becomes: the rules `npm run library:check` runs on `decks/`
   (`readLibraryIndex`, `libraryProblems`).
 - **Drops**: against the release it follows, when there is one
   (`continuityProblems`): nothing dropped, no id given to another kind
-  of subject, and its version the next.
+  of subject, and its version the next. That release must be one
+  the instance published, in its `releases/` folder or linked from
+  its catalog (`sm:publishedRelease`), or in the library's index's
+  folder, and never one in its `drafts/` folder. Any other is an
+  error that isn't read (`previousElsewhere`), as a release
+  published from the draft lists the earlier versions as that
+  release states them, and another app that can write the drafts
+  could name any other.
 - **Markdown**: its text formats, its text in Markdown, and how a
   step's theory is split into chunks: none empty, and as many in each
   language (`markdownProblems`, [markdown.md](markdown.md#chunks)). The
@@ -2040,9 +2055,12 @@ becomes: the rules `npm run library:check` runs on `decks/`
 
 The library's index, or the release the draft follows, that can't be
 read is a problem of its own (`libraryUnread`, `previousUnread`), and
-the rest of the check stands. Such a check isn't kept: the screen
-checks again when it's opened again, when its window is focused, or by
-its button, as after a check that failed.
+the rest of the check stands. When whether the release the draft
+follows is the instance's or the library's can't be told, as its
+catalog or the index can't be read, it's `previousUnread`. Such a
+check isn't kept: the screen checks again when it's opened again,
+when its window is focused, or by its button, as after a check that
+failed.
 
 The draft checked is the editor's, changes not yet written included,
 each version once; the release a draft follows is read once.
@@ -2424,6 +2442,23 @@ releases it, two ways.
   A copy of the draft leaves out the statements of a subject named
   otherwise, and is refused, like the draft, for a value stated
   otherwise.
+  The release's series lists only the release and the earlier
+  versions the release it follows lists, and states of each earlier
+  version only what that release does (`earlierVersionsOf`), read from
+  that release, not from the draft. Of those, it lists only the ones
+  that release states to be a lower version than its own. A release
+  that follows none lists only its own address. Any other version the
+  draft's series lists is left out, with what the draft states of the
+  earlier versions, or of another release address beside it or in its
+  series, and what only those statements lead to. Another app can
+  write them, and no editor or check shows a series' versions. So the
+  release the draft follows must be one the instance published or the
+  library's, as the release check's **Drops** say. The check refuses
+  any other without reading it (`previousElsewhere`), and one it can't
+  read or that isn't the version before (`previousUnread`,
+  `versionNotNext`). Download .ttl, which isn't checked, leaves them
+  out the same way: it reads the release the draft follows, as no
+  one, wherever it is, so it too needs that release to be readable.
 - **Public.** Then only that document is made readable by everyone, as
   its server's access control says it: its own ACL on a server with Web
   Access Control, its ACR on one with Access Control Policies

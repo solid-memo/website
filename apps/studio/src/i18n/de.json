@@ -1202,6 +1202,7 @@
       "versionNotNext": "Version {version} folgt nicht auf {previous}, Version {previousVersion}.",
       "seriesNotOwn": "Folgt keiner Ausgabe, nennt aber {series} als ihre Reihe: Eine erste Version beginnt eine eigene Reihe.",
       "seriesNotPrevious": "Nennt {series} als ihre Reihe, die weder ihre eigene ist noch dort liegt, wo {previous} liegt, die Ausgabe, der sie folgt: Eine nächste Version bleibt in der Reihe der Ausgabe, der sie folgt.",
+      "previousElsewhere": "Folgt auf {previous}, die weder eine Ausgabe dieser Instanz noch der Bibliothek ist: Eine nächste Version folgt auf eine von deren Ausgaben, da ihre früheren Versionen von dort übernommen werden.",
       "outlineWithoutCourse": "Hat Kapitel oder Schritte, ist aber kein Kurs.",
       "courseWithoutChapter": "Ein Kurs hat mindestens ein Kapitel.",
       "courseDirection": "Ein Kurs wird von der Vorderseite zur Rückseite gelernt; hier ist {stated} angegeben.",

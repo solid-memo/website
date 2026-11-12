@@ -5,7 +5,12 @@
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT, link } from "../testing/releaseDraft.ts";
 import { rebaseDraft } from "./releaseToDraft.ts";
-import { linkedDescription, nextVersionDraft, withOwnVersions } from "./releaseVersion.ts";
+import {
+  earlierVersionsOf,
+  linkedDescription,
+  nextVersionDraft,
+  withOwnVersions,
+} from "./releaseVersion.ts";
 
 const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 const DCAT = "http://www.w3.org/ns/dcat#";
@@ -198,6 +203,11 @@ describe("withOwnVersions", () => {
     predicate: "http://www.w3.org/ns/adms#versionNotes",
     object: { kind: "literal" as const, value: "Notes", language: "", datatype: "" },
   });
+  const version = (subject: string, value: string) => ({
+    subject,
+    predicate: `${DCAT}version`,
+    object: { kind: "literal" as const, value, language: "", datatype: "" },
+  });
   /** Release 3 at V3, after version 2, its series listing versions 1 to 3, and what `more` adds. */
   const v3 = (more: ReturnType<typeof v1>["triples"] = []) => {
     const release = rebaseDraft(courseDraft(), V3);
@@ -227,6 +237,20 @@ describe("withOwnVersions", () => {
     expect(withOwnVersions(followed)).toBe(followed);
   });
 
+  it("keeps the earlier versions beside the one it follows, when it is in another folder", () => {
+    const moved = rebaseDraft(v3(), "https://pod.example/elsewhere/solid/v3.ttl");
+    expect(withOwnVersions(moved)).toBe(moved);
+    const alone = {
+      ...moved,
+      root: { ...moved.root, prev: undefined, previousVersion: undefined },
+    };
+    expect(
+      withOwnVersions(alone)
+        .triples.filter((triple) => triple.predicate === `${DCAT}hasVersion`)
+        .map((triple) => triple.object.value),
+    ).toEqual([moved.url]);
+  });
+
   it("lists no other version in its series (GHSA-jp29-vf56-5g4g)", () => {
     const planted = [
       link(SERIES, `${DCAT}hasVersion`, ELSEWHERE),
@@ -245,6 +269,52 @@ describe("withOwnVersions", () => {
     const next = nextVersionDraft(v3(planted), DRAFT);
     expect(next.triples.filter((triple) => triple.object.value === ELSEWHERE)).toEqual([]);
     expect(next.triples.filter((triple) => triple.object.value === at(4))).toEqual([]);
+  });
+
+  it("says what a next version states of each earlier version, the release among them (GHSA-8frq-fhj8-9226)", () => {
+    const blank = {
+      subject: at(1),
+      predicate: "https://p.example/more",
+      object: { kind: "blank" as const, value: "b1" },
+    };
+    const release = v3([
+      link(SERIES, `${DCAT}hasVersion`, ELSEWHERE),
+      blank,
+      version(at(1), "1"),
+      version(at(2), "2"),
+    ]);
+    const earlier = earlierVersionsOf(release, at(4));
+    expect([...earlier.keys()].sort()).toEqual([at(1), at(2), V3]);
+    expect(earlier.get(at(1))).toEqual([notes(at(1)), version(at(1), "1")]);
+    expect(earlier.get(at(2))).toEqual([version(at(2), "2")]);
+    expect(earlier.get(V3)).toContainEqual(link(V3, RDF_TYPE, `${DCAT}Dataset`));
+    expect(earlier.get(V3)).toContainEqual(
+      expect.objectContaining({ subject: V3, predicate: `${DCAT}version` }),
+    );
+    // Its series described nowhere, the release is the one earlier version, described by no one.
+    const alone = {
+      ...release,
+      root: { ...release.root, inSeries: undefined, isVersionOf: undefined },
+    };
+    expect([...earlierVersionsOf(alone, at(4))]).toEqual([[V3, []]]);
+  });
+
+  it("says nothing of a version it lists that it states to be none lower than its own (GHSA-8frq-fhj8-9226)", () => {
+    // A release a draft may name as the one it follows, in place of the one it was made from.
+    const release = v3([
+      link(SERIES, `${DCAT}hasVersion`, at(5)),
+      version(at(5), "5"),
+      version(at(1), "1"),
+      version(at(1), "2"),
+      version(at(2), "4"),
+    ]);
+    expect([...earlierVersionsOf(release, at(4)).keys()]).toEqual([V3]);
+    const fixed = v3([version(at(1), "1"), version(at(2), "2")]);
+    expect([...earlierVersionsOf(fixed, at(4)).keys()].sort()).toEqual([at(1), at(2), V3]);
+    const unnumbered = { ...fixed, root: { ...fixed.root, version: undefined } };
+    expect([...earlierVersionsOf(unnumbered, at(4)).keys()]).toEqual([V3]);
+    const unread = { ...fixed, root: { ...fixed.root, version: "three" } };
+    expect([...earlierVersionsOf(unread, at(4)).keys()]).toEqual([V3]);
   });
 
   it("describes no version a series described elsewhere lists that isn't the release's own", () => {
