@@ -639,7 +639,9 @@ most recent answer and shows that card again, unrevealed:
   one that didn't exist. A grade of the same card made on another device
   between the answer and the undo is lost.
 - **The answer leaves the log**: dropped from the queue if still
-  waiting, else removed by its id (`AnswerLog.removeAnswer`).
+  waiting, and removed by its id (`AnswerLog.removeAnswer`) unless no
+  add of it was ever begun, since a failed add may still have been
+  saved.
 - **The session goes back one step**, without the copy a low grade put
   back; the count says "Card x of y" as before, and that the answer was
   undone.
@@ -781,7 +783,9 @@ budgets. All changes go out in one save of the reviews document
 (`applyReviewChanges`), never half-applied. The deck's answers of the
 day then leave the
 [answer log](data-model.md#the-answer-log): answers still on their way
-to the log are added first, then removed with the rest. "Today" honors
+to the log are added first, then removed with the rest. Those of the
+deck and day that still couldn't be added leave the queue, so no later
+add brings them back. "Today" honors
 the instance's `dayBoundaryHour`, like the queue.
 
 In the [Studio](studio.md#card-inspector), setting a card's due day (`rescheduleState`, in

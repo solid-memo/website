@@ -142,9 +142,13 @@ export function createAnswerStore({
    * refused as at fault a few times (AT_FAULT_ATTEMPTS), which
    * `refusals` counts. No answer from the pod, a failed login, a busy
    * server or any other failure leaves it at the head, to be tried again.
+   * An add that failed may still have been stored (the pod kept it but
+   * answered late or with an error), so `sent` holds each answer an add
+   * was begun for: taking one of those back removes it from the log too.
    */
   const queues = new Map<string, { unlogged: Answer[]; logging: Promise<void> }>();
   const refusals = new WeakMap<Answer, number>();
+  const sent = new WeakSet<Answer>();
   function queueOf(instanceUrl: string) {
     let queue = queues.get(instanceUrl);
     if (queue === undefined) {
@@ -159,6 +163,7 @@ export function createAnswerStore({
       while (queue.unlogged.length > 0) {
         const head = queue.unlogged[0]!;
         try {
+          sent.add(head);
           await answerLog.append(instanceUrl, head);
           logWrites += 1;
         } catch (error) {
@@ -326,24 +331,35 @@ export function createAnswerStore({
 
   /**
    * Take an answer back (UseCases.undoReview): off the answers on their
-   * way to the log, else out of it. The instance's answers being added
-   * are waited for; any added later start only after this goes on.
+   * way to the log, and out of the log unless no add of it was ever
+   * begun (`sent`): one that failed may still have been stored. The
+   * instance's answers being added are waited for; any added later start
+   * only after this goes on.
    */
   async function withdraw(instanceUrl: string, answer: { id: string; studyDay: string }) {
     const { unlogged, logging } = queueOf(instanceUrl);
     await logging;
     const waiting = unlogged.findIndex((each) => each.id === answer.id);
-    if (waiting === -1) {
-      await answerLog.removeAnswer(instanceUrl, answer.studyDay, answer.id);
-      logWrites += 1;
-    } else {
-      unlogged.splice(waiting, 1);
+    if (waiting !== -1) {
+      const [queued] = unlogged.splice(waiting, 1);
+      if (!sent.has(queued!)) return;
     }
+    await answerLog.removeAnswer(instanceUrl, answer.studyDay, answer.id);
+    logWrites += 1;
   }
 
-  /** Remove a deck's answers of a study day from the log, those of the instance still on their way first. */
+  /**
+   * Remove a deck's answers of a study day from the log, those of the
+   * instance still on their way tried first; those of the deck and day
+   * that could not be added are dropped from the way, so no later add
+   * brings them back.
+   */
   async function removeDay(instanceUrl: string, deckUrl: string, studyDay: string) {
     await logInstance(instanceUrl);
+    // In place: a withdraw waiting for the adds holds this very list.
+    const { unlogged } = queueOf(instanceUrl);
+    const kept = unlogged.filter((each) => each.deckUrl !== deckUrl || each.studyDay !== studyDay);
+    unlogged.splice(0, unlogged.length, ...kept);
     await answerLog.removeDay(instanceUrl, deckUrl, studyDay);
     logWrites += 1;
   }

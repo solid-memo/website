@@ -71,7 +71,8 @@ export interface StudyUseCases {
   /**
    * Take back an answer recordReview gave: the prompt's state goes back
    * to how it was before (a prompt that was new loses its state), and
-   * the answer leaves the log, or the answers still on their way to it.
+   * the answer leaves the answers still on their way to the log and, if
+   * an add of it was ever begun, the log as well.
    * Resolves to the state written back, null for a prompt new again.
    */
   undoReview(instanceUrl: string, deck: Deck, undo: ReviewUndo): Promise<ReviewState | null>;
@@ -247,7 +248,7 @@ export function createStudyUseCases({
         ...back(before),
         ...(fsrs === undefined ? {} : { fsrs: back(fsrs.before) }),
       });
-      // The answer never happened: off the answers on their way to the log, else out of it.
+      // The answer never happened: off the answers on their way to the log, and out of it.
       await answerStore.withdraw(instanceUrl, answer);
       return before;
     },

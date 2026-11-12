@@ -1448,11 +1448,15 @@ nothing could rebuild it.
   alike. An answer still queued when the tab closes is lost; its
   review isn't.
 - **Resetting the day removes that deck's answers of the day**
-  (`removeDay`: read, remove, save with If-Match, again on 412).
+  (`removeDay`: read, remove, save with If-Match, again on 412), and
+  drops those still waiting to be added from the queue.
   **Undoing an answer in a session removes that one answer** by its id
-  (`removeAnswer`, the same way), or drops it while it still waits to be
-  added ([srs.md](srs.md#undoing-the-last-answer)). Nothing else removes
-  answers.
+  (`removeAnswer`, the same way), and drops it from the queue while it
+  still waits there. A failed add may still have been saved, so only an
+  answer no add was ever begun for is left out of `removeAnswer`
+  ([srs.md](srs.md#undoing-the-last-answer)). An add given up on at its
+  deadline that the pod saves only after the removal stays in the log.
+  Nothing else removes answers.
 - **A card moved to another deck leaves its answers behind.** A
   [Studio](studio.md#moving-and-copying-cards) move never rewrites the
   log: past answers keep naming the source deck and card, and in the
