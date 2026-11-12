@@ -1391,11 +1391,15 @@ jobs:
           # cspell's dictionaries; jsonify ("Public Domain", no SPDX
           # license) comes with the Pivot test server; reuse
           # (GPL-3.0-or-later by its classifiers) and its python-debian
-          # (GPL-2.0-or-later) lint the files' licenses in the docs job.
+          # (GPL-2.0-or-later) lint the files' licenses in the docs job;
+          # renovate and its @renovatebot/detect-tools (AGPL-3.0-only)
+          # and openpgp (LGPL-3.0+) run read-only, unchanged, in the
+          # Pending updates workflow (scripts/renovate/).
           allow-dependencies-licenses: >-
             pkg:npm/javascript-solid-server, pkg:npm/elkjs, pkg:npm/npm,
             pkg:npm/%40cspell/dict-django, pkg:npm/jsonify,
-            pkg:pypi/reuse, pkg:pypi/python-debian
+            pkg:pypi/reuse, pkg:pypi/python-debian, pkg:npm/renovate,
+            pkg:npm/%40renovatebot/detect-tools, pkg:npm/openpgp
           # Scorecard's scores come from another service, and the summary
           # below names every package that moved already.
           show-openssf-scorecard: false

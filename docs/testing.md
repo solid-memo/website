@@ -1104,7 +1104,8 @@ A package whose license GitHub doesn't know is reported, and doesn't
 fail the job. A package already accepted under a license that can't be
 on the list is in the job's `allow-dependencies-licenses`, with its
 reason in a comment. None of them ships in the site: an end-to-end test
-server, build and release tools, and the license linter.
+server, build and release tools, the license linter, and the Renovate
+the Pending updates workflow runs.
 
 The action checks the licenses and names the ones it refused in the
 run's summary. `npm run dependencies:review` judges the advisories, and
