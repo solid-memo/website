@@ -1046,6 +1046,24 @@ the npm registry's tarball of its own name and version. Nor does a
 signature make a package safe: a hijacked maintainer account still
 publishes a validly signed version.
 
+The [Pending updates workflow](../.github/workflows/pending-updates.yml)
+runs every 3 hours and by hand, never on a pull request. It keeps a
+comment on Renovate's Dependency Dashboard with the earliest time
+Renovate may propose each update still waiting for its release age, as
+`GOVERNANCE.md` says. Its `lookup` job
+runs Renovate on the checkout with `--platform=local --dry-run=lookup`,
+which reads no repository API and changes nothing. The job installs
+Renovate from its own lockfile in `scripts/renovate/`, without install
+scripts, and holds no secret: its token only reads. Its `comment` job,
+the only one that writes, runs
+[scripts/pendingUpdates.ts](../scripts/pendingUpdates.ts), which needs no
+npm package. The script reads the report's release dates and the wait in
+`renovate.json5`, and writes or edits its own comment on the dashboard.
+Renovate's report has no date for a digest update, nor for a Docker tag
+whose date Docker Hub didn't give. The comment says so rather than
+guess. Renovate's own update is proposed once a week, since it releases
+several times a day.
+
 ### Dependency review
 
 CI's `dependency-review` job runs GitHub's
@@ -1053,8 +1071,8 @@ CI's `dependency-review` job runs GitHub's
 on a pull request. The job compares GitHub's dependency graph of
 the pull request's base and of its head. The graph covers every
 manifest GitHub reads here: the root's `package-lock.json`, those of
-the end-to-end servers in `e2e/pod/servers/`, the
-`scripts/requirements-*.txt` and the workflows' actions. The job fails
+the end-to-end servers in `e2e/pod/servers/` and of the Renovate in
+`scripts/renovate/`, the `scripts/requirements-*.txt` and the workflows' actions. The job fails
 on a package the pull request adds, or moves to another version, that
 has either of these:
 

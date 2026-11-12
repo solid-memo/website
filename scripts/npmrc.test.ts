@@ -11,7 +11,8 @@ import { describe, expect, it } from "vitest";
  * .npmrc: npm resolves no package, an update's own or one it pulls in, to a
  * version younger than the wait renovate.json5 sets on the updates it
  * proposes (GOVERNANCE.md#dependency-updates), in the repository's npm
- * workspace and in each end-to-end test server's own lockfile beside it.
+ * workspace, in each end-to-end test server's own lockfile beside it, and
+ * in the lockfile of the Renovate the Pending updates workflow runs.
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -23,6 +24,7 @@ const PREFIXES = [
   "e2e/pod/servers/nss/5",
   "e2e/pod/servers/nss/6",
   "e2e/pod/servers/pivot",
+  "scripts/renovate",
 ];
 
 /** A directory's npm settings as npm reads them, without the caller's. */

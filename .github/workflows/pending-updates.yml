@@ -1,0 +1,83 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+name: Pending updates
+
+# Keeps one comment on Renovate's Dependency Dashboard up to date with when
+# each update still waiting for its release age will be proposed
+# (GOVERNANCE.md#dependency-updates): the dashboard lists such an update
+# with no date. The lookup job runs Renovate itself, read-only, on the
+# checked-out repository, and writes its report; the comment job reads the
+# report's release dates and edits the comment (scripts/pendingUpdates.ts).
+# It runs on a schedule and by hand, never on a pull request.
+
+on:
+  schedule:
+    - cron: "23 */3 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: pending-updates
+  cancel-in-progress: true
+
+jobs:
+  # Renovate is a large tool, so it runs in a job that holds no secret and
+  # whose token only reads: --platform=local reads the checkout, not the
+  # repository's API, and --dry-run=lookup changes nothing. The token is
+  # for the versions and dates of the dependencies on GitHub (actions,
+  # git commits). Renovate is installed from its own lockfile, without
+  # install scripts, at a version public for 3 days (scripts/renovate/).
+  lookup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: scripts/renovate/package-lock.json
+      - run: npm ci --ignore-scripts --prefix scripts/renovate
+      - env:
+          GITHUB_COM_TOKEN: ${{ github.token }}
+          LOG_LEVEL: info
+        run: >-
+          scripts/renovate/node_modules/.bin/renovate --platform=local --dry-run=lookup
+          --report-type=file --report-path="$RUNNER_TEMP/renovate-report.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: renovate-report
+          path: ${{ runner.temp }}/renovate-report.json
+          if-no-files-found: error
+          retention-days: 1
+
+  # The only job that writes: it runs the repository's own script, which
+  # needs no npm package, so nothing is installed here.
+  comment:
+    needs: lookup
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: renovate-report
+          path: ${{ runner.temp }}/report
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run pending:updates -- "$RUNNER_TEMP/report/renovate-report.json"

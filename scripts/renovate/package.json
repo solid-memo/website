@@ -1,0 +1,8 @@
+{
+  "name": "@solid-memo/renovate-lookup",
+  "private": true,
+  "description": "Renovate, run read-only by the Pending updates workflow (.github/workflows/pending-updates.yml) to estimate when each waiting update will be proposed.",
+  "dependencies": {
+    "renovate": "44.222.5"
+  }
+}

@@ -453,6 +453,29 @@ describe("renovate.json5", () => {
     expect(maintenance?.schedule).toEqual(["* 0-3 * * 1"]);
   });
 
+  it("proposes the update of the Renovate the Pending updates workflow runs once a week", () => {
+    const rules = config.packageRules.filter(
+      (rule) => JSON.stringify(rule.matchDepNames) === JSON.stringify(["renovate"]),
+    );
+    expect(rules).toEqual([
+      {
+        matchFileNames: ["scripts/renovate/package.json"],
+        matchDepNames: ["renovate"],
+        schedule: ["* 0-3 * * 1"],
+      },
+    ]);
+    expect(
+      automerges({
+        manager: "npm",
+        datasource: "npm",
+        packageFile: "scripts/renovate/package.json",
+        depName: "renovate",
+        depType: "dependencies",
+        updateType: "patch",
+      }),
+    ).toBe(false);
+  });
+
   it("keeps each .npmrc's settings under the npm settings it gives Renovate", () => {
     // Without npmrcMerge, Renovate's npm would lock without the .npmrc
     // files' 3-day wait (scripts/npmrc.test.ts).
