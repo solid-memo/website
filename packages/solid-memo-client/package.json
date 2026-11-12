@@ -23,7 +23,7 @@
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",
     "@types/n3": "^1.26.6",
-    "fake-indexeddb": "^6.2.7",
+    "fake-indexeddb": "^6.2.8",
     "happy-dom": "^21.0.4"
   }
 }
