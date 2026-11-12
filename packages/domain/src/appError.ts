@@ -95,6 +95,8 @@ export const ERROR_TEMPLATES = {
     "Your WebID profile does not name the provider you logged in at, so Solid Memo ended the session for safety. Add the provider to your profile, or log in at one it names.",
   webIdTooLong:
     "Your provider names a WebID longer than Solid Memo accepts ({limit} characters at most), so Solid Memo ended the session for safety. Log in at another provider.",
+  webIdUnusable:
+    "Your provider names a WebID Solid Memo cannot check, as it is not a secure https:// address of a Pod, so Solid Memo ended the session for safety. Log in at another provider.",
   profileNoSubject:
     "Your profile does not describe you, so Solid Memo cannot note in it where your data is. Check your profile with your Pod provider, then try again.",
   privateTypeIndexNotLinked:

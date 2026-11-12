@@ -9,6 +9,8 @@ import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";
 import { isSecureUrl } from "@solid-memo/domain/webId";
+import { isGuestPodIri } from "@solid-memo/domain/guest";
+import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { SESSION_EXPIRED_EVENT } from "./authFetch";
 import { AppError } from "@solid-memo/domain/appError";
 
@@ -29,6 +31,13 @@ const ISSUER_CHECK_DEADLINE_MS = 5_000;
  * (solidStorageGateway.ts), so a longer one is refused.
  */
 const MAX_WEBID_CHARACTERS = MAX_BASE_CHARACTERS;
+
+/**
+ * The origin of a trial's pod, which this browser alone holds, as it
+ * does the guest's (isGuestPodIri): no server holds a profile there, so
+ * a session's WebID there could never be checked.
+ */
+const TRIAL_POD_ORIGIN = new URL(TRIAL_ORIGIN).origin;
 
 /**
  * Dereference a WebID (unauthenticated). The document is read under
@@ -287,7 +296,8 @@ export function createSolidSessionGateway({
    * Ends the session and refuses it if the WebID's profile, read as no
    * one, does not name the session's issuer: a provider's word for a
    * WebID is not enough (Solid-OIDC). The session is kept if the profile
-   * can't be read, so that a slow or absent pod locks no one out.
+   * can't be read, so that a slow or absent pod locks no one out; a
+   * WebID no pod could serve is refused before (refuseUnusableWebId).
    */
   async function refuseUnlistedIssuer(webId: string, fromLogin: boolean): Promise<void> {
     const issuer = await client.sessionIssuer().catch(() => null);
@@ -311,6 +321,22 @@ export function createSolidSessionGateway({
     if (webId.length <= MAX_WEBID_CHARACTERS) return;
     await client.logout().catch(() => undefined);
     throw new AppError("webIdTooLong", { limit: MAX_WEBID_CHARACTERS, characters: webId.length });
+  }
+
+  /**
+   * Ends the session and refuses it if its WebID is not one whose profile
+   * can be read to check its issuer: an https URL with no user name or
+   * password that Turtle can write (isSecureUrl), outside the guest's
+   * pod (isGuestPodIri) and a trial's (TRIAL_POD_ORIGIN), which only
+   * this browser holds. The issuer check keeps a session whose profile
+   * can't be read only for a WebID that a pod could serve.
+   */
+  async function refuseUnusableWebId(webId: string): Promise<void> {
+    const usable =
+      isSecureUrl(webId) && !isGuestPodIri(webId) && new URL(webId).origin !== TRIAL_POD_ORIGIN;
+    if (usable) return;
+    await client.logout().catch(() => undefined);
+    throw new AppError("webIdUnusable", { webId });
   }
 
   /** Redirects the browser to the identity provider; does not return. */
@@ -416,6 +442,7 @@ export function createSolidSessionGateway({
       );
       if (webId === null) return null;
       await refuseLongWebId(webId);
+      await refuseUnusableWebId(webId);
       await refuseUnlistedIssuer(webId, fromLogin);
       // A silent restore leaves the page for the identity provider and
       // comes back without its hash; the client reports the page it left.

@@ -9,6 +9,8 @@
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
+import { GUEST_WEBID } from "@solid-memo/domain/guest";
+import { TRIAL_WEBID } from "@solid-memo/domain/release/trial";
 import { PROFILE_LIMITS } from "./client/readLimits";
 import { createSolidSessionGateway } from "./solidSessionGateway";
 import { fakePod } from "./testing/fakePod";
@@ -212,6 +214,44 @@ describe("the session's issuer in its WebID's profile", () => {
       reads.mockResolvedValue(new Response("gone", { status: 404 }));
       client.restore.mockResolvedValue({ webId: longest, fromLogin: false, restoredFrom: null });
       await expect(gateway.restore()).resolves.toMatchObject({ session: { webId: longest } });
+    });
+  });
+
+  describe("refuses and ends a session whose WebID no pod could serve", () => {
+    const unusable = [
+      GUEST_WEBID,
+      "https://GUEST.solid-memo.invalid:443/profile/card#me",
+      TRIAL_WEBID,
+      "http://alice.example/profile/card#me",
+      "https://user:secret@alice.example/profile/card#me",
+      "not a url",
+    ];
+
+    it("before it reads anything, on a login or restored", async () => {
+      for (const fromLogin of [true, false]) {
+        client.logout.mockClear();
+        const gateway = establish({ fromLogin });
+        for (const webId of unusable) {
+          client.restore.mockResolvedValue({ webId, fromLogin, restoredFrom: null });
+          await expect(gateway.restore()).rejects.toMatchObject({
+            code: "webIdUnusable",
+            detail: `webId: ${webId}`,
+          });
+        }
+        expect(client.logout).toHaveBeenCalledTimes(unusable.length);
+      }
+      expect(reads).not.toHaveBeenCalled();
+    });
+
+    it("even if ending it fails", async () => {
+      client.logout.mockRejectedValue(new Error("storage is gone"));
+      const gateway = establish();
+      client.restore.mockResolvedValue({
+        webId: GUEST_WEBID,
+        fromLogin: false,
+        restoredFrom: null,
+      });
+      await expect(gateway.restore()).rejects.toMatchObject({ code: "webIdUnusable" });
     });
   });
 

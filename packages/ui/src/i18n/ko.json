@@ -1614,6 +1614,7 @@
     "restoreNotReturned": "제공자가 다시 돌려보내 주지 않아서, Solid Memo가 세션 복원을 멈췄어요. 제공자로 돌아가거나, 다시 로그인하거나, 다른 제공자를 선택해 주세요.",
     "webIdIssuerNotListed": "WebID 프로필에 로그인한 제공자가 나와 있지 않아서, Solid Memo가 안전을 위해 세션을 끝냈어요. 프로필에 제공자를 추가하거나, 프로필에 나와 있는 제공자에서 로그인해 주세요.",
     "webIdTooLong": "제공자가 알려 준 WebID가 Solid Memo가 받아들이는 길이(최대 {limit}자)보다 길어서, Solid Memo가 안전을 위해 세션을 끝냈어요. 다른 제공자에서 로그인해 주세요.",
+    "webIdUnusable": "제공자가 알려 준 WebID가 Pod의 안전한 https:// 주소가 아니라서 Solid Memo가 확인할 수 없어, Solid Memo가 안전을 위해 세션을 끝냈어요. 다른 제공자에서 로그인해 주세요.",
     "profileNoSubject": "프로필에 사용자 정보가 없어서 Solid Memo가 데이터 위치를 프로필에 적을 수 없어요. Pod 제공자에서 프로필을 확인한 뒤 다시 시도해 주세요.",
     "privateTypeIndexNotLinked": "Solid Memo가 데이터의 비공개 목록을 프로필에 연결하지 못했어요. Solid Memo에 프로필 편집 권한이 있는지 확인한 뒤 다시 시도해 주세요.",
     "publicTypeIndexNotLinked": "Solid Memo가 데이터의 공개 목록을 프로필에 연결하지 못했어요. Solid Memo에 프로필 편집 권한이 있는지 확인한 뒤 다시 시도해 주세요.",
