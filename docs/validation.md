@@ -146,7 +146,11 @@ flowchart LR
   (`claimDeckDocuments`), for the next check. A document outside the
   instance's folder, and not in a storage of the user's found to hold
   the instance too (`isInInstancePod`), is named in `outsidePod` too,
-  and its deck gets no such button.
+  and its deck gets no such button. A check reads a deck's two
+  documents at once, and those outside the instance's folder within one
+  minute in all (`unclaimedDecksOf`). A catalog may name a thousand of
+  them on servers that answer slowly, and every deck page waits on the
+  check. One not read by then counts as unclaimed.
 - **A deck's document that isn't the deck's once read** is left out of
   the report and isn't listed as unclaimed either. That's a release in
   the instance's folder named as a deck's document, or a document there

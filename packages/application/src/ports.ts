@@ -408,8 +408,11 @@ export interface DeckRepository {
    * mark as its own by itself, being outside the instance's own folder
    * (docs/data-model.md, "Where an instance's documents are"): read, never
    * written to or deleted, until the user claims them. Writes nothing.
+   * One outside the instance's folder, on anyone's server, is read within
+   * `budget` if given: once it is aborted, one not read by then counts as
+   * unreadable, so unclaimed.
    */
-  unclaimedDocuments(deck: Deck): Promise<string[]>;
+  unclaimedDocuments(deck: Deck, budget?: AbortSignal): Promise<string[]>;
   /**
    * Whether the document, read now, is unclaimed for every one of the
    * decks that name it: unlike unclaimedDocuments, it says so of one in

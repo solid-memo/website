@@ -285,6 +285,23 @@ function parseJsonLd(text: string, baseIRI: string, limits?: ReadLimits): Promis
 }
 
 /**
+ * The text of a response's body, read from its stream: a body that
+ * fails gives the reason its stream failed with, the podNoAnswer of a
+ * read deadline say (readDeadline.ts), where a browser's `text()` gives
+ * an error of its own. A response with no body has empty text, as
+ * `text()` gives.
+ */
+async function textOf(response: Response): Promise<string> {
+  if (response.body === null) return "";
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  for (let next = await reader.read(); !next.done; next = await reader.read())
+    text += decoder.decode(next.value, { stream: true });
+  return text + decoder.decode();
+}
+
+/**
  * The quads of a document's response: a Turtle document's, parsed with
  * its URL as the base, under the limits it is read under (readLimits.ts).
  * Rejects (with no HttpError) on a response of another type, or one
@@ -303,7 +320,7 @@ async function quadsOfResponse(response: Response, resource: Resource): Promise<
     );
   }
   const limits = limitsOf(response);
-  const text = await response.text().catch((error: unknown) => {
+  const text = await textOf(response).catch((error: unknown) => {
     // A body past its limit fails as the browser fails a read; why is kept apart.
     throw refusalOf(response) ?? error;
   });

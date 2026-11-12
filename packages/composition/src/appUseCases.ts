@@ -6,7 +6,7 @@ import { createUseCases, type UseCases } from "@solid-memo/application/useCases"
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
 import { anonymousFetch } from "@solid-memo/solid/authFetch";
-import { withReadDeadline } from "@solid-memo/solid/readDeadline";
+import { READ_DEADLINE_MS, WHOLE_READ_MS, withReadDeadline } from "@solid-memo/solid/readDeadline";
 import { createSolidSession } from "@solid-memo/solid/solidSession";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { SHAPES_BASE, SITE, VOCAB_BASE } from "@solid-memo/vocab/ns";
@@ -115,7 +115,9 @@ export function createAppUseCases({
    * (docs/guest-mode.md); then to the guest's pod or, as the logged-in
    * user, to any other, following no redirect to an address the fences
    * never checked (authFetch.ts). A read of another server that gets no
-   * answer in time is given up, to be tried again (readDeadline.ts).
+   * answer in time, or whose body stops coming, is given up, to be tried
+   * again (readDeadline.ts); one of the user's own pod may take as long
+   * in all as its body keeps coming.
    */
   const writeFence = createWriteFence(
     routedFetch({
@@ -124,8 +126,12 @@ export function createAppUseCases({
       remote: withReadDeadline(session.fetch),
     }),
   );
-  /** A fetch as no one (authFetch.ts), whose reads have a deadline as the user's do. */
-  const noOneFetch = withReadDeadline(anonymousFetch);
+  /**
+   * A fetch as no one (authFetch.ts), whose reads have the deadlines the
+   * user's do and one on the whole read as well: they are of servers
+   * anyone may name.
+   */
+  const noOneFetch = withReadDeadline(anonymousFetch, READ_DEADLINE_MS, WHOLE_READ_MS);
   /**
    * What is read outside the user's storages as no one, each document
    * under FOREIGN_LIMITS and all of them within FOREIGN_READS_BUDGET
@@ -171,7 +177,10 @@ export function createAppUseCases({
       local: writeFence.fetch,
       remote: createOwnPodGate({
         fetch: writeFence.fetch,
-        instanceFetch: instanceReads(writeFence.fetch),
+        // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
+        instanceFetch: instanceReads(
+          withReadDeadline(writeFence.fetch, READ_DEADLINE_MS, WHOLE_READ_MS),
+        ),
         publicFetch: foreignReads(noOneFetch),
         webId: session.webId,
         ownFolders,
@@ -415,11 +424,15 @@ export function createAppUseCases({
  * in production, the dev or preview server's copy of the repository's
  * otherwise. Its IRIs stay the published ones, which each document
  * states as its @base; any other request, a release's from a link among
- * them, is passed on as it is, its reads with the deadline a pod read
- * has (readDeadline.ts).
+ * them, is passed on as it is, its reads with the deadlines a read as
+ * no one has (readDeadline.ts).
  */
 export function createSiteFetch(servedSite: string): typeof globalThis.fetch {
-  const elsewhere = withReadDeadline((input, init) => globalThis.fetch(input, init));
+  const elsewhere = withReadDeadline(
+    (input, init) => globalThis.fetch(input, init),
+    READ_DEADLINE_MS,
+    WHOLE_READ_MS,
+  );
   return (input, init) => {
     const url = String(input instanceof Request ? input.url : input);
     if (!url.startsWith(SITE)) return elsewhere(input, init);

@@ -275,6 +275,38 @@ describe("instance checks", () => {
       vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls.map(([url]) => url),
     ).not.toContain(deck.reviewsDocumentUrl);
   });
+  it("settles a check within one budget for reading documents on servers that answer slowly, however many the catalog names: those not read by then count as unclaimed", async () => {
+    const { deps, useCases } = setup();
+    const many = Array.from({ length: 1000 }, (_, at) => ({
+      ...deck,
+      id: `slow-${at}`,
+      url: `${instance.url}catalog.ttl#slow-${at}`,
+      cardsDocumentUrl: `https://slow.example/${at}/cards.ttl`,
+      reviewsDocumentUrl: `https://slow.example/${at}/reviews.ttl`,
+    }));
+    deps.deckRepository.listDecks = vi.fn(async () => many);
+    // Each read outside the instance ends only when the budget is spent, as the adapter's does (deckPlace.ts).
+    deps.deckRepository.unclaimedDocuments = vi.fn(async (one, budget) => {
+      const documents = [one.cardsDocumentUrl, one.reviewsDocumentUrl];
+      if (budget!.aborted) return documents;
+      return new Promise<string[]>((resolve) =>
+        budget!.addEventListener("abort", () => resolve(documents)),
+      );
+    });
+    vi.useFakeTimers();
+    try {
+      const check = useCases.checkInstance(instance.url);
+      let settled = false;
+      void check.finally(() => (settled = true));
+      await vi.advanceTimersByTimeAsync(59_999);
+      expect(settled).toBe(false);
+      await vi.advanceTimersByTimeAsync(1);
+      expect((await check).unclaimed).toHaveLength(1000);
+      expect(vi.getTimerCount()).toBe(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
   it("checks an unclaimed document in no spelling of its address", async () => {
     const { deps, useCases } = setup();
     const named = { ...deck, reviewsDocumentUrl: "https://ALICE.example/notes/n.ttl" };
