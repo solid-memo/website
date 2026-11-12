@@ -555,6 +555,7 @@ describe("the answer log", () => {
     expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
       `${instance.url}history/2026-09.ttl`,
       "pod",
+      undefined,
     );
     const plain = createUseCases(makeDeps());
     await expect(plain.getStatistics(instance.url, noon)).resolves.toMatchObject({

@@ -509,7 +509,11 @@ describe("guests", () => {
       [`${TARGET}catalog.ttl`, GUEST_ORIGIN],
       [`${TARGET}history/2026-10.ttl`, GUEST_ORIGIN],
     ]);
-    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(`${TARGET}meta.ttl`, "pod");
+    expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
+      `${TARGET}meta.ttl`,
+      "pod",
+      undefined,
+    );
     // Its sm:Instance registration is the one written: none for the classes of its data.
     expect(deps.instanceRepository.attachInstance).toHaveBeenCalledExactlyOnceWith({
       webId: session.webId,
@@ -1306,6 +1310,7 @@ describe("guests", () => {
       expect(deps.shapeValidator.validateDocument).toHaveBeenCalledWith(
         `${GUEST_INSTANCE_URL}history/2026-10.ttl`,
         "pod",
+        undefined,
       );
       const { url: _url, formatVersion: _version, ...content } = guestCard;
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(

@@ -551,9 +551,10 @@ export function createSolidDeckRepository({
       return guard.unclaimed(deck, budget);
     },
 
-    isUnclaimedAsRead(decks, url) {
-      // A read that fails says nothing of a document the check has just found faulty.
-      return guard.unclaimedAsRead(decks, url, false);
+    isUnclaimedAsRead(decks, url, budget) {
+      // A read that fails, or is not made in time, says nothing of a document the check has just found faulty.
+      const read = () => guard.unclaimedAsRead(decks, url, false);
+      return budget === undefined ? read() : budget.spend(false, read);
     },
 
     claimDocuments(deck) {

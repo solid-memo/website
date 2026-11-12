@@ -147,10 +147,18 @@ flowchart LR
   instance's folder, and not in a storage of the user's found to hold
   the instance too (`isInInstancePod`), is named in `outsidePod` too,
   and its deck gets no such button. A check reads a deck's two
-  documents at once, and those outside the instance's folder within one
-  minute in all (`unclaimedDecksOf`). A catalog may name a thousand of
-  them on servers that answer slowly, and every deck page waits on the
-  check. One not read by then counts as unclaimed.
+  documents at once. It reads those outside the instance's folder
+  within one minute in all (`OUTSIDE_READS_MS` in
+  [instanceChecks.ts](../packages/application/src/instanceChecks.ts)),
+  whatever the read is for: to find which are unclaimed, to check
+  them, or to read again one with something to repair. A catalog may
+  name a thousand of them on servers that answer slowly, and every
+  deck page waits on the check. The minute runs only while one of
+  those reads is under way, so a slow read of the instance's own
+  documents takes nothing from it. One not read by then counts as
+  unclaimed when the check looks for those, and is unreadable when the
+  check checks it. The documents in the instance's folder have no such
+  budget.
 - **A deck's document that isn't the deck's once read** is left out of
   the report and isn't listed as unclaimed either. That's a release in
   the instance's folder named as a deck's document, or a document there
@@ -340,7 +348,8 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
   aside: a review state a reader drops would be studied as new, and the
   first answer would write over its history.
 - **A document the check can't read** (refused, say, or not Turtle,
-  or past the read's limits) is in the report as unreadable, with why
+  past the read's limits, or outside the instance's folder and not
+  read within the check's minute) is in the report as unreadable, with why
   (`unreadableDocument` in
   [validation.ts](../packages/domain/src/validation.ts)). What it holds
   isn't known, so it counts as one violation, and it holds back what

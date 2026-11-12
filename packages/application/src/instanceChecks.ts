@@ -27,6 +27,7 @@ import type {
   ShapeValidator,
   RepairRepository,
   DocumentContext,
+  ReadBudget,
   ReleaseDraftRepository,
   StorageGateway,
 } from "./ports";
@@ -35,6 +36,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { TextMap } from "@solid-memo/domain/pathKeys";
 import { mapAtOnce } from "./atOnce";
+import { readBudget } from "./readBudget";
 import { noting } from "./digestStore";
 import type { DigestStore } from "./digestStore";
 import { isInInstancePod } from "./releaseDrafts";
@@ -140,11 +142,19 @@ function decksByDocument(decks: readonly Deck[]): (url: string) => readonly Deck
 
 /**
  * How long one check may read, in all, the decks' documents outside
- * their instance's folder to find which are unclaimed, in milliseconds
- * (unclaimedDecksOf): a catalog may name a thousand of them on servers
- * that answer slowly, and every deck page waits on the check.
+ * their instance's folder, in milliseconds (readBudget): to find which
+ * are unclaimed, to check them and to read again one that does not
+ * conform. A catalog may name a thousand of them on servers that answer
+ * slowly, and every deck page waits on the check. The clock runs only
+ * while one of those reads is under way, so a slow read of the
+ * instance's own documents takes nothing from it.
  */
-const UNCLAIMED_READS_MS = 60_000;
+const OUTSIDE_READS_MS = 60_000;
+
+/** The budget a read of the document is made within: the check's for one outside the instance's folder, none for one in it. */
+function budgetFor(url: string, instanceUrl: string, budget: ReadBudget): ReadBudget | undefined {
+  return isDocumentIn(url, instanceUrl) ? undefined : budget;
+}
 
 /** The address of the document `url` is in, as a request sends it (canonicalUrlOf); null for one that is no URL. */
 function canonicalDocumentOf(url: string): string | null {
@@ -189,13 +199,15 @@ export function createInstanceCheckUseCases({
       releaseDraftRepository.documents(instanceUrl),
       digestStore.of(instanceUrl),
     ]);
-    const unclaimed = await unclaimedDecksOf(instanceUrl, decks);
+    const budget = readBudget(OUTSIDE_READS_MS);
+    const unclaimed = await unclaimedDecksOf(instanceUrl, decks, budget);
     return withUnclaimed(
       await checkDocuments(
         instanceUrl,
         documentsToCheck(instanceUrl, decks, drafts, unclaimed),
         digest,
         decks,
+        budget,
       ),
       unclaimed,
     );
@@ -234,30 +246,26 @@ export function createInstanceCheckUseCases({
    * (DeckRepository.unclaimedDocuments) and which of them may not be
    * claimed (outsidePodTest). The documents outside the instance's
    * folder, which a catalog may name on anyone's server, are read within
-   * UNCLAIMED_READS_MS in all: one not read by then counts as unclaimed,
-   * so a server that answers slowly holds the check up no longer.
+   * the check's `budget` (OUTSIDE_READS_MS): one not read by then counts
+   * as unclaimed, so a server that answers slowly holds the check up no
+   * longer.
    */
   async function unclaimedDecksOf(
     instanceUrl: string,
     decks: readonly Deck[],
+    budget: ReadBudget,
   ): Promise<UnclaimedDeck[]> {
     const outsidePodOf = outsidePodTest(instanceUrl);
-    const budget = new AbortController();
-    const timer = setTimeout(() => budget.abort(), UNCLAIMED_READS_MS);
-    try {
-      const found = await mapAtOnce(decks, async (deck) => {
-        const documents = await deckRepository.unclaimedDocuments(deck, budget.signal);
-        return {
-          deckUrl: deck.url,
-          title: deck.title,
-          documents,
-          outsidePod: await outsidePodOf(documents),
-        };
-      });
-      return found.filter((deck) => deck.documents.length > 0);
-    } finally {
-      clearTimeout(timer);
-    }
+    const found = await mapAtOnce(decks, async (deck) => {
+      const documents = await deckRepository.unclaimedDocuments(deck, budget);
+      return {
+        deckUrl: deck.url,
+        title: deck.title,
+        documents,
+        outsidePod: await outsidePodOf(documents),
+      };
+    });
+    return found.filter((deck) => deck.documents.length > 0);
   }
   /**
    * The instance's documents, then its drafts': each with where it is,
@@ -284,13 +292,15 @@ export function createInstanceCheckUseCases({
    * while still at the version the digest says conformed. A receipt is
    * kept only of one that is the instance's (DigestStore.isInstances).
    * A document that cannot be read is in the report as one
-   * (ShapeValidator), so it holds back only what it is part of.
+   * (ShapeValidator), so it holds back only what it is part of; so is one
+   * outside the instance's folder not read within the check's `budget`.
    */
   async function checkDocuments(
     instanceUrl: string,
     urls: readonly { url: string; context: Exclude<DocumentContext, "library"> }[],
     digest: InstanceDigest,
     decks: readonly Deck[],
+    budget: ReadBudget,
   ): Promise<ValidationReport> {
     // A few at a time: the catalog says how many there are (MAX_CATALOG_LINKS of each kind at most).
     const documents = await mapAtOnce(urls, async ({ url, context }): Promise<DocumentReport> => {
@@ -299,6 +309,7 @@ export function createInstanceCheckUseCases({
         url,
         receipt?.conformedTo === ruleset ? receipt.version : undefined,
         context,
+        budgetFor(url, instanceUrl, budget),
       );
       if (since.unchanged) return { url, status: "checked", subjects: [] };
       // A receipt only of a document that is the instance's: one an instance from another's pod names may be the user's own.
@@ -311,7 +322,10 @@ export function createInstanceCheckUseCases({
       }
       return since.value;
     });
-    return summarize(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents));
+    return summarize(
+      instanceUrl,
+      await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget),
+    );
   }
   /**
    * The reports without those of a deck's document that its read shows
@@ -319,12 +333,15 @@ export function createInstanceCheckUseCases({
    * or removal of what the check found would write to a document that
    * is no deck's to change, a release in the instance's folder say. Only
    * a report with something to repair needs that read, so a check of an
-   * unchanged instance still downloads nothing.
+   * unchanged instance still downloads nothing. One outside the
+   * instance's folder is read within the check's `budget`, and its report
+   * kept when it is not.
    */
   async function withoutUnclaimedOnRead(
     instanceUrl: string,
     decks: readonly Deck[],
     documents: readonly DocumentReport[],
+    budget: ReadBudget,
   ): Promise<DocumentReport[]> {
     const decksOf = decksByDocument(decks);
     const left = await mapAtOnce(documents, async (document) => {
@@ -332,7 +349,11 @@ export function createInstanceCheckUseCases({
       return (
         naming.length > 0 &&
         !summarize(instanceUrl, [document]).conforms &&
-        (await deckRepository.isUnclaimedAsRead(naming, document.url))
+        (await deckRepository.isUnclaimedAsRead(
+          naming,
+          document.url,
+          budgetFor(document.url, instanceUrl, budget),
+        ))
       );
     });
     return documents.filter((_, index) => !left[index]);
@@ -347,7 +368,8 @@ export function createInstanceCheckUseCases({
       answerStore.logMonths(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
     ]);
-    const unclaimed = await unclaimedDecksOf(instanceUrl, decks);
+    const budget = readBudget(OUTSIDE_READS_MS);
+    const unclaimed = await unclaimedDecksOf(instanceUrl, decks, budget);
     const urls = [
       ...documentsToCheck(instanceUrl, decks, drafts, unclaimed),
       ...months.map((month) => ({
@@ -358,12 +380,16 @@ export function createInstanceCheckUseCases({
     let checked = 0;
     onChecked(checked, urls.length);
     const documents = await mapAtOnce(urls, async ({ url, context }) => {
-      const document = await shapeValidator.validateDocument(url, context);
+      const document = await shapeValidator.validateDocument(
+        url,
+        context,
+        budgetFor(url, instanceUrl, budget),
+      );
       onChecked(++checked, urls.length);
       return document;
     });
     return withUnclaimed(
-      summarize(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents)),
+      summarize(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget)),
       unclaimed,
     );
   }
@@ -383,27 +409,31 @@ export function createInstanceCheckUseCases({
       await deckRepository.claimDocuments(deck);
     },
     async checkDeck(instanceUrl, deck, text) {
+      const budget = readBudget(OUTSIDE_READS_MS);
       const [report, cards, release] = await Promise.all([
-        Promise.all([digestStore.of(instanceUrl), unclaimedDecksOf(instanceUrl, [deck])]).then(
-          async ([digest, unclaimed]) => {
-            const isUnclaimed = unclaimedTest(unclaimed);
-            const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
-              (url) => !isUnclaimed(url),
-            );
-            return withUnclaimed(
-              await checkDocuments(
-                instanceUrl,
-                [catalogUrlOf(instanceUrl), ...urls].map((url) => ({
-                  url,
-                  context: "pod" as const,
-                })),
-                digest,
-                [deck],
-              ),
-              unclaimed,
-            );
-          },
-        ),
+        Promise.all([
+          digestStore.of(instanceUrl),
+          unclaimedDecksOf(instanceUrl, [deck], budget),
+        ]).then(async ([digest, unclaimed]) => {
+          const isUnclaimed = unclaimedTest(unclaimed);
+          const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
+            (url) => !isUnclaimed(url),
+          );
+          return withUnclaimed(
+            await checkDocuments(
+              instanceUrl,
+              [catalogUrlOf(instanceUrl), ...urls].map((url) => ({
+                url,
+                context: "pod" as const,
+              })),
+              digest,
+              [deck],
+              budget,
+            ),
+            unclaimed,
+          );
+        }),
+        // Read as the deck's page reads it, within the read's own deadlines: it holds back this deck's health alone.
         deckRepository.listCards(deck),
         // A release that cannot be read leaves the sides to settle unknown, not the rest of the check.
         deck.sourceUrl === undefined

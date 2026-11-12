@@ -36,6 +36,8 @@ import { gradePrompt } from "@solid-memo/domain/grading";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { DocumentReport, Violation } from "@solid-memo/domain/validation";
 import { integerLiteral } from "./testing/literals";
+import { AppError } from "@solid-memo/domain/appError";
+import { readBudget } from "@solid-memo/application/readBudget";
 
 vi.mock("./datasets", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./datasets")>()),
@@ -569,6 +571,37 @@ describe("createShaclShapeValidator", () => {
     const long = await validator.validateDocument(DOC);
     expect(long).toMatchObject({ status: "unreadable", reason: `${"x".repeat(300)}…` });
     expect(loader.load).not.toHaveBeenCalled();
+  });
+
+  it("reports a document not read within the check's budget as unreadable, as a server that did not answer in time, whether read afresh or since a version", async () => {
+    const { validator, loader } = makeValidator();
+    // A read that never ends, as a server that drips its answer may make one.
+    vi.mocked(getSolidDatasetOrNull).mockReturnValue(new Promise(() => undefined));
+    const budget = readBudget(10);
+    const fresh = validator.validateDocument(DOC, "pod", budget);
+    const since = validator.validateDocumentSince(DOC, undefined, "pod", budget);
+    const reason = new AppError("podNoAnswer").message;
+    await expect(fresh).resolves.toEqual({ url: DOC, status: "unreadable", subjects: [], reason });
+    await expect(since).resolves.toEqual({
+      unchanged: false,
+      value: { url: DOC, status: "unreadable", subjects: [], reason },
+      version: null,
+    });
+    // Once it is spent, nothing more is read.
+    vi.mocked(getSolidDatasetOrNull).mockClear();
+    await expect(validator.validateDocument(DOC, "pod", budget)).resolves.toMatchObject({
+      status: "unreadable",
+    });
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+    expect(loader.load).not.toHaveBeenCalled();
+  });
+
+  it("checks a document read within the check's budget as any other", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalog());
+    const { validator } = makeValidator();
+    await expect(
+      validator.validateDocumentSince(DOC, undefined, "pod", readBudget(60_000)),
+    ).resolves.toMatchObject({ unchanged: false, value: { status: "checked" } });
   });
 
   it("fails the check when the shapes cannot be loaded, the document read", async () => {

@@ -15,6 +15,7 @@ import { datasetOfTurtle } from "./testing/datasets";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidRepairRepository } from "./solidRepairRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
+import { readBudget } from "@solid-memo/application/readBudget";
 
 const ROOT = "https://pod.example/";
 const BOB = `${ROOT}bob/solid-memo/main/`;
@@ -276,15 +277,12 @@ describe("a deck whose documents do not say they are its own", () => {
       now: () => new Date("2026-10-19T00:00:00.000Z"),
       randomId: () => "id",
     });
-    const budget = new AbortController();
-    const found = decks.unclaimedDocuments(listed!, budget.signal);
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    const budget = readBudget(20);
+    await expect(decks.unclaimedDocuments(listed!, budget)).resolves.toEqual([CARD, DIARY]);
     expect(asked).toEqual([CARD, DIARY]);
-    budget.abort();
-    await expect(found).resolves.toEqual([CARD, DIARY]);
     // Spent before, it reads neither.
     asked.length = 0;
-    await expect(decks.unclaimedDocuments(listed!, budget.signal)).resolves.toEqual([CARD, DIARY]);
+    await expect(decks.unclaimedDocuments(listed!, budget)).resolves.toEqual([CARD, DIARY]);
     expect(asked).toEqual([]);
   });
 
@@ -839,6 +837,15 @@ describe("a repair of what a data check found in a deck's document", () => {
     await expect(p.decks.isUnclaimedAsRead([listed, other], other.cardsDocumentUrl)).resolves.toBe(
       false,
     );
+    // Not read within a check's budget, it is kept as the check found it.
+    const spent = readBudget(0);
+    await spent.spend(undefined, () => new Promise(() => {}));
+    await expect(p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl, spent)).resolves.toBe(
+      false,
+    );
+    await expect(
+      p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl, readBudget(60_000)),
+    ).resolves.toBe(true);
 
     p.writes.length = 0;
     await createSolidRepairRepository({ fetch: p.fetch }).applyRepairs(
