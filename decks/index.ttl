@@ -15,7 +15,7 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-10-31T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-11-13T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
     dcat:dataset <#academy-award-best-picture> ,
@@ -8617,12 +8617,12 @@
                   "Koreanische Adjektive: die 1000 häufigsten"@de ,
                   "Adjetivos coreanos: los 1000 más comunes"@es ,
                   "Adjectifs coréens : les 1000 plus courants"@fr ;
-    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
-                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
-                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
-                        "Die 1000 häufigsten koreanischen Adjektive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu den Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln zur Alltagssprache hin angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Adjektiv auf der Rückseite in seiner Wörterbuchform auf -다 (koreanische Adjektive sind beschreibende Verben), in Hangeul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary sowie Folkets lexikon geprüft."@de ,
-                        "Los 1000 adjetivos coreanos más frecuentes, ordenados según el estudio de frecuencias de palabras del coreano escrito del Instituto Nacional de la Lengua Coreana (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso; en el reverso, el adjetivo coreano en su forma de diccionario terminada en -다 (los adjetivos coreanos son verbos descriptivos), en hangul. Significados tomados del Basic Korean Dictionary (krdict) y del Wiktionary inglés; el sueco se escribió con ayuda de IA y se contrastó con el Wiktionary coreano e inglés y el Folkets lexikon."@es ,
-                        "Les 1000 adjectifs coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de cinéma et de télévision. L’anglais et le suédois au recto, l’adjectif coréen au verso dans sa forme du dictionnaire en -다 (les adjectifs coréens sont des verbes descriptifs), en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionary anglais ; le suédois a été écrit avec l’aide de l’IA et vérifié auprès des Wiktionary coréen et anglais et du Folkets lexikon."@fr ;
+    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon. Under the revealed answer, a short Korean example sentence with its translation, in English, Swedish, German, Spanish or French; the sentences were written with the help of AI."@en ,
+                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon. Under det visade svaret står en kort koreansk exempelmening med översättning, på engelska, svenska, tyska, spanska eller franska; meningarna är skrivna med hjälp av AI."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다. 답을 보면 그 아래에 짧은 한국어 예문과 그 번역이 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 중 하나로 나옵니다. 예문은 AI의 도움을 받아 썼습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Adjektive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu den Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln zur Alltagssprache hin angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Adjektiv auf der Rückseite in seiner Wörterbuchform auf -다 (koreanische Adjektive sind beschreibende Verben), in Hangeul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary sowie Folkets lexikon geprüft. Unter der aufgedeckten Antwort steht ein kurzer koreanischer Beispielsatz mit Übersetzung, auf Englisch, Schwedisch, Deutsch, Spanisch oder Französisch; die Sätze wurden mit Hilfe von KI geschrieben."@de ,
+                        "Los 1000 adjetivos coreanos más frecuentes, ordenados según el estudio de frecuencias de palabras del coreano escrito del Instituto Nacional de la Lengua Coreana (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso; en el reverso, el adjetivo coreano en su forma de diccionario terminada en -다 (los adjetivos coreanos son verbos descriptivos), en hangul. Significados tomados del Basic Korean Dictionary (krdict) y del Wiktionary inglés; el sueco se escribió con ayuda de IA y se contrastó con el Wiktionary coreano e inglés y el Folkets lexikon. Bajo la respuesta, una vez mostrada, una breve oración de ejemplo en coreano con su traducción al inglés, sueco, alemán, español o francés; las oraciones se escribieron con ayuda de IA."@es ,
+                        "Les 1000 adjectifs coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de cinéma et de télévision. L’anglais et le suédois au recto, l’adjectif coréen au verso dans sa forme du dictionnaire en -다 (les adjectifs coréens sont des verbes descriptifs), en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionary anglais ; le suédois a été écrit avec l’aide de l’IA et vérifié auprès des Wiktionary coréen et anglais et du Folkets lexikon. Sous la réponse dévoilée, une courte phrase d’exemple en coréen avec sa traduction en anglais, suédois, allemand, espagnol ou français ; les phrases ont été rédigées avec l’aide de l’IA."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:korean ;
@@ -8645,10 +8645,11 @@
                  "adjectifs"@fr ,
                  "vocabulaire"@fr ;
     dcat:first <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/korean-adjectives/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ,
-                    <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-adjectives/v2.ttl> .
+                    <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ,
+                    <https://solid-memo.com/decks/korean-adjectives/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-adjectives/v3.ttl> .
 
 <https://solid-memo.com/decks/korean-adjectives/v1.ttl>
     a dcat:Dataset ;
@@ -8663,6 +8664,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/korean-adjectives/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Korean adjectives: the 1000 most common"@en ,
+                  "Koreanska adjektiv: de 1000 vanligaste"@sv ,
+                  "한국어 형용사: 가장 많이 쓰는 1000개"@ko ,
+                  "Koreanische Adjektive: die 1000 häufigsten"@de ,
+                  "Adjetivos coreanos: los 1000 más comunes"@es ,
+                  "Adjectifs coréens : les 1000 plus courants"@fr ;
+    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Adjektive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu den Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln zur Alltagssprache hin angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Adjektiv auf der Rückseite in seiner Wörterbuchform auf -다 (koreanische Adjektive sind beschreibende Verben), in Hangeul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary sowie Folkets lexikon geprüft."@de ,
+                        "Los 1000 adjetivos coreanos más frecuentes, ordenados según el estudio de frecuencias de palabras del coreano escrito del Instituto Nacional de la Lengua Coreana (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso; en el reverso, el adjetivo coreano en su forma de diccionario terminada en -다 (los adjetivos coreanos son verbos descriptivos), en hangul. Significados tomados del Basic Korean Dictionary (krdict) y del Wiktionary inglés; el sueco se escribió con ayuda de IA y se contrastó con el Wiktionary coreano e inglés y el Folkets lexikon."@es ,
+                        "Les 1000 adjectifs coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de cinéma et de télévision. L’anglais et le suédois au recto, l’adjectif coréen au verso dans sa forme du dictionnaire en -다 (les adjectifs coréens sont des verbes descriptifs), en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionary anglais ; le suédois a été écrit avec l’aide de l’IA et vérifié auprès des Wiktionary coréen et anglais et du Folkets lexikon."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/korean-adjectives/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Korean adjectives: the 1000 most common"@en ,
@@ -8671,21 +8690,21 @@
                   "Koreanische Adjektive: die 1000 häufigsten"@de ,
                   "Adjetivos coreanos: los 1000 más comunes"@es ,
                   "Adjectifs coréens : les 1000 plus courants"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/korean-adjectives/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/korean-adjectives/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
-                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
-                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
-                        "Die 1000 häufigsten koreanischen Adjektive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu den Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln zur Alltagssprache hin angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Adjektiv auf der Rückseite in seiner Wörterbuchform auf -다 (koreanische Adjektive sind beschreibende Verben), in Hangeul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary sowie Folkets lexikon geprüft."@de ,
-                        "Los 1000 adjetivos coreanos más frecuentes, ordenados según el estudio de frecuencias de palabras del coreano escrito del Instituto Nacional de la Lengua Coreana (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso; en el reverso, el adjetivo coreano en su forma de diccionario terminada en -다 (los adjetivos coreanos son verbos descriptivos), en hangul. Significados tomados del Basic Korean Dictionary (krdict) y del Wiktionary inglés; el sueco se escribió con ayuda de IA y se contrastó con el Wiktionary coreano e inglés y el Folkets lexikon."@es ,
-                        "Les 1000 adjectifs coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de cinéma et de télévision. L’anglais et le suédois au recto, l’adjectif coréen au verso dans sa forme du dictionnaire en -다 (les adjectifs coréens sont des verbes descriptifs), en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionary anglais ; le suédois a été écrit avec l’aide de l’IA et vérifié auprès des Wiktionary coréen et anglais et du Folkets lexikon."@fr ;
+    dcterms:description "The 1000 most frequent Korean adjectives, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean adjective on the back in its dictionary form ending in -다 (Korean adjectives are descriptive verbs), in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon. Under the revealed answer, a short Korean example sentence with its translation, in English, Swedish, German, Spanish or French; the sentences were written with the help of AI."@en ,
+                        "De 1000 vanligaste koreanska adjektiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska adjektivet på baksidan i sin grundform på -다 (koreanska adjektiv böjs som verb), med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon. Under det visade svaret står en kort koreansk exempelmening med översättning, på engelska, svenska, tyska, spanska eller franska; meningarna är skrivna med hjälp av AI."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 형용사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 형용사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다. 답을 보면 그 아래에 짧은 한국어 예문과 그 번역이 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 중 하나로 나옵니다. 예문은 AI의 도움을 받아 썼습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Adjektive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu den Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln zur Alltagssprache hin angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Adjektiv auf der Rückseite in seiner Wörterbuchform auf -다 (koreanische Adjektive sind beschreibende Verben), in Hangeul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary sowie Folkets lexikon geprüft. Unter der aufgedeckten Antwort steht ein kurzer koreanischer Beispielsatz mit Übersetzung, auf Englisch, Schwedisch, Deutsch, Spanisch oder Französisch; die Sätze wurden mit Hilfe von KI geschrieben."@de ,
+                        "Los 1000 adjetivos coreanos más frecuentes, ordenados según el estudio de frecuencias de palabras del coreano escrito del Instituto Nacional de la Lengua Coreana (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso; en el reverso, el adjetivo coreano en su forma de diccionario terminada en -다 (los adjetivos coreanos son verbos descriptivos), en hangul. Significados tomados del Basic Korean Dictionary (krdict) y del Wiktionary inglés; el sueco se escribió con ayuda de IA y se contrastó con el Wiktionary coreano e inglés y el Folkets lexikon. Bajo la respuesta, una vez mostrada, una breve oración de ejemplo en coreano con su traducción al inglés, sueco, alemán, español o francés; las oraciones se escribieron con ayuda de IA."@es ,
+                        "Les 1000 adjectifs coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de cinéma et de télévision. L’anglais et le suédois au recto, l’adjectif coréen au verso dans sa forme du dictionnaire en -다 (les adjectifs coréens sont des verbes descriptifs), en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionary anglais ; le suédois a été écrit avec l’aide de l’IA et vérifié auprès des Wiktionary coréen et anglais et du Folkets lexikon. Sous la réponse dévoilée, une courte phrase d’exemple en coréen avec sa traduction en anglais, suédois, allemand, espagnol ou français ; les phrases ont été rédigées avec l’aide de l’IA."@fr ;
     prov:wasDerivedFrom <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61> ,
                         <https://github.com/hermitdave/FrequencyWords> ,
                         <https://krdict.korean.go.kr/> ,
                         <https://en.wiktionary.org/> ,
                         <https://ko.wiktionary.org/> ,
                         <https://folkets-lexikon.csc.kth.se/folkets/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-adjectives/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-adjectives/v3.ttl#compilation> ;
     dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:korean ;
@@ -8709,23 +8728,31 @@
                  "vocabulaire"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/korean-adjectives/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ;
+    dcterms:issued "2026-11-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Every card has a short Korean example sentence under its answer, translated into English, Swedish, German, Spanish and French; no front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#korean-adjectives> ;
     dcat:isVersionOf <#korean-adjectives> ;
-    dcat:distribution <https://solid-memo.com/decks/korean-adjectives/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/korean-adjectives/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/korean-adjectives/v3.ttl#turtle> ;
     solid-memo:cardCount 1000 .
 
-<https://solid-memo.com/decks/korean-adjectives/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/korean-adjectives/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/korean-adjectives/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
 
 <https://creativecommons.org/licenses/by-sa/2.0/kr/>
     a dcterms:LicenseDocument .
@@ -8733,7 +8760,7 @@
 <https://www.kogl.or.kr/info/licenseType1.do>
     a dcterms:LicenseDocument .
 
-<https://solid-memo.com/decks/korean-adjectives/v2.ttl#compilation>
+<https://solid-memo.com/decks/korean-adjectives/v3.ttl#compilation>
     a prov:Activity .
 
 <https://github.com/bab2min/kiwipiepy>
@@ -8760,10 +8787,10 @@
     dcterms:creator "Wiktionary contributors" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
 
-<https://solid-memo.com/decks/korean-adjectives/v2.ttl#turtle>
+<https://solid-memo.com/decks/korean-adjectives/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/korean-adjectives/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/korean-adjectives/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/korean-adjectives/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -9077,12 +9104,12 @@
                   "Koreanische Substantive: die 1000 häufigsten"@de ,
                   "Sustantivos coreanos: los 1000 más comunes"@es ,
                   "Noms coréens : les 1000 plus courants"@fr ;
-    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
-                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
-                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
-                        "Die 1000 häufigsten koreanischen Substantive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln an die Alltagssprache angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Substantiv auf der Rückseite, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary und von Folkets lexikon geprüft."@de ,
-                        "Los 1000 sustantivos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el sustantivo coreano en el reverso, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wiktionary en inglés; el sueco se escribió con ayuda de IA y se comprobó con el Wiktionary en coreano y en inglés y con Folkets lexikon."@es ,
-                        "Les 1000 noms coréens les plus fréquents, classés selon l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le nom coréen au verso, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglais ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglais et dans Folkets lexikon."@fr ;
+    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon. Under the revealed answer, a short Korean example sentence with its translation, in English, Swedish, German, Spanish or French; the sentences were written with the help of AI."@en ,
+                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon. Under det visade svaret står en kort koreansk exempelmening med översättning, på engelska, svenska, tyska, spanska eller franska; meningarna är skrivna med hjälp av AI."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다. 답을 보면 그 아래에 짧은 한국어 예문과 그 번역이 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 중 하나로 나옵니다. 예문은 AI의 도움을 받아 썼습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Substantive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln an die Alltagssprache angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Substantiv auf der Rückseite, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary und von Folkets lexikon geprüft. Unter der aufgedeckten Antwort steht ein kurzer koreanischer Beispielsatz mit Übersetzung, auf Englisch, Schwedisch, Deutsch, Spanisch oder Französisch; die Sätze wurden mit Hilfe von KI geschrieben."@de ,
+                        "Los 1000 sustantivos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el sustantivo coreano en el reverso, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wiktionary en inglés; el sueco se escribió con ayuda de IA y se comprobó con el Wiktionary en coreano y en inglés y con Folkets lexikon. Bajo la respuesta, una vez mostrada, una breve oración de ejemplo en coreano con su traducción al inglés, sueco, alemán, español o francés; las oraciones se escribieron con ayuda de IA."@es ,
+                        "Les 1000 noms coréens les plus fréquents, classés selon l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le nom coréen au verso, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglais ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglais et dans Folkets lexikon. Sous la réponse dévoilée, une courte phrase d’exemple en coréen avec sa traduction en anglais, suédois, allemand, espagnol ou français ; les phrases ont été rédigées avec l’aide de l’IA."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:korean ;
@@ -9105,10 +9132,11 @@
                  "noms"@fr ,
                  "vocabulaire"@fr ;
     dcat:first <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/korean-nouns/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/korean-nouns/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/korean-nouns/v1.ttl> ,
-                    <https://solid-memo.com/decks/korean-nouns/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-nouns/v2.ttl> .
+                    <https://solid-memo.com/decks/korean-nouns/v2.ttl> ,
+                    <https://solid-memo.com/decks/korean-nouns/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-nouns/v3.ttl> .
 
 <https://solid-memo.com/decks/korean-nouns/v1.ttl>
     a dcat:Dataset ;
@@ -9123,6 +9151,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/korean-nouns/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Korean nouns: the 1000 most common"@en ,
+                  "Koreanska substantiv: de 1000 vanligaste"@sv ,
+                  "한국어 명사: 가장 많이 쓰는 1000개"@ko ,
+                  "Koreanische Substantive: die 1000 häufigsten"@de ,
+                  "Sustantivos coreanos: los 1000 más comunes"@es ,
+                  "Noms coréens : les 1000 plus courants"@fr ;
+    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Substantive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln an die Alltagssprache angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Substantiv auf der Rückseite, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary und von Folkets lexikon geprüft."@de ,
+                        "Los 1000 sustantivos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el sustantivo coreano en el reverso, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wiktionary en inglés; el sueco se escribió con ayuda de IA y se comprobó con el Wiktionary en coreano y en inglés y con Folkets lexikon."@es ,
+                        "Les 1000 noms coréens les plus fréquents, classés selon l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le nom coréen au verso, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglais ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglais et dans Folkets lexikon."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/korean-nouns/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Korean nouns: the 1000 most common"@en ,
@@ -9131,21 +9177,21 @@
                   "Koreanische Substantive: die 1000 häufigsten"@de ,
                   "Sustantivos coreanos: los 1000 más comunes"@es ,
                   "Noms coréens : les 1000 plus courants"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/korean-nouns/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/korean-nouns/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
-                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
-                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
-                        "Die 1000 häufigsten koreanischen Substantive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln an die Alltagssprache angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Substantiv auf der Rückseite, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary und von Folkets lexikon geprüft."@de ,
-                        "Los 1000 sustantivos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el sustantivo coreano en el reverso, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wiktionary en inglés; el sueco se escribió con ayuda de IA y se comprobó con el Wiktionary en coreano y en inglés y con Folkets lexikon."@es ,
-                        "Les 1000 noms coréens les plus fréquents, classés selon l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le nom coréen au verso, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglais ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglais et dans Folkets lexikon."@fr ;
+    dcterms:description "The 1000 most frequent Korean nouns, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean noun on the back, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon. Under the revealed answer, a short Korean example sentence with its translation, in English, Swedish, German, Spanish or French; the sentences were written with the help of AI."@en ,
+                        "De 1000 vanligaste koreanska substantiven, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska substantivet på baksidan, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon. Under det visade svaret står en kort koreansk exempelmening med översättning, på engelska, svenska, tyska, spanska eller franska; meningarna är skrivna med hjälp av AI."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 명사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 한국어 명사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다. 답을 보면 그 아래에 짧은 한국어 예문과 그 번역이 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 중 하나로 나옵니다. 예문은 AI의 도움을 받아 썼습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Substantive, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), mit Film- und Fernsehuntertiteln an die Alltagssprache angepasst. Englisch und Schwedisch auf der Vorderseite, das koreanische Substantiv auf der Rückseite, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischen Wiktionary; das Schwedische wurde mithilfe von KI geschrieben und anhand des koreanischen und englischen Wiktionary und von Folkets lexikon geprüft. Unter der aufgedeckten Antwort steht ein kurzer koreanischer Beispielsatz mit Übersetzung, auf Englisch, Schwedisch, Deutsch, Spanisch oder Französisch; die Sätze wurden mit Hilfe von KI geschrieben."@de ,
+                        "Los 1000 sustantivos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el sustantivo coreano en el reverso, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wiktionary en inglés; el sueco se escribió con ayuda de IA y se comprobó con el Wiktionary en coreano y en inglés y con Folkets lexikon. Bajo la respuesta, una vez mostrada, una breve oración de ejemplo en coreano con su traducción al inglés, sueco, alemán, español o francés; las oraciones se escribieron con ayuda de IA."@es ,
+                        "Les 1000 noms coréens les plus fréquents, classés selon l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le nom coréen au verso, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglais ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglais et dans Folkets lexikon. Sous la réponse dévoilée, une courte phrase d’exemple en coréen avec sa traduction en anglais, suédois, allemand, espagnol ou français ; les phrases ont été rédigées avec l’aide de l’IA."@fr ;
     prov:wasDerivedFrom <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61> ,
                         <https://github.com/hermitdave/FrequencyWords> ,
                         <https://krdict.korean.go.kr/> ,
                         <https://en.wiktionary.org/> ,
                         <https://ko.wiktionary.org/> ,
                         <https://folkets-lexikon.csc.kth.se/folkets/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-nouns/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-nouns/v3.ttl#compilation> ;
     dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:korean ;
@@ -9169,31 +9215,39 @@
                  "vocabulaire"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/korean-nouns/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/korean-nouns/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/korean-nouns/v2.ttl> ;
+    dcterms:issued "2026-11-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Every card has a short Korean example sentence under its answer, translated into English, Swedish, German, Spanish and French; no front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#korean-nouns> ;
     dcat:isVersionOf <#korean-nouns> ;
-    dcat:distribution <https://solid-memo.com/decks/korean-nouns/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/korean-nouns/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/korean-nouns/v3.ttl#turtle> ;
     solid-memo:cardCount 1000 .
 
-<https://solid-memo.com/decks/korean-nouns/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/korean-nouns/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/korean-nouns/v2.ttl#compilation>
+<https://solid-memo.com/decks/korean-nouns/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/korean-nouns/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/korean-nouns/v2.ttl#turtle>
+<https://solid-memo.com/decks/korean-nouns/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/korean-nouns/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/korean-nouns/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/korean-nouns/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/korean-nouns/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
@@ -9340,12 +9394,12 @@
                   "Koreanische Verben: die 1000 häufigsten"@de ,
                   "Verbos coreanos: los 1000 más comunes"@es ,
                   "Verbes coréens : les 1 000 plus courants"@fr ;
-    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
-                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
-                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
-                        "Die 1000 häufigsten koreanischen Verben, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), angepasst an die Alltagssprache anhand von Film- und Fernsehuntertiteln. Englisch und Schwedisch auf der Vorderseite, das koreanische Verb auf der Rückseite in seiner Wörterbuchform auf -다, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischsprachigen Wiktionary; das Schwedische wurde mit Hilfe von KI geschrieben und mit dem koreanisch- und dem englischsprachigen Wiktionary sowie Folkets lexikon abgeglichen."@de ,
-                        "Los 1000 verbos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el verbo coreano en el reverso en su forma de diccionario terminada en -다, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wikcionario en inglés; el sueco se escribió con ayuda de IA y se comprobó con los Wikcionarios en coreano y en inglés y con Folkets lexikon."@es ,
-                        "Les 1 000 verbes coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le verbe coréen au verso sous sa forme de dictionnaire en -다, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglophone ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglophone et dans Folkets lexikon."@fr ;
+    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon. Under the revealed answer, a short Korean example sentence with its translation, in English, Swedish, German, Spanish or French; the sentences were written with the help of AI."@en ,
+                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon. Under det visade svaret står en kort koreansk exempelmening med översättning, på engelska, svenska, tyska, spanska eller franska; meningarna är skrivna med hjälp av AI."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다. 답을 보면 그 아래에 짧은 한국어 예문과 그 번역이 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 중 하나로 나옵니다. 예문은 AI의 도움을 받아 썼습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Verben, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), angepasst an die Alltagssprache anhand von Film- und Fernsehuntertiteln. Englisch und Schwedisch auf der Vorderseite, das koreanische Verb auf der Rückseite in seiner Wörterbuchform auf -다, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischsprachigen Wiktionary; das Schwedische wurde mit Hilfe von KI geschrieben und mit dem koreanisch- und dem englischsprachigen Wiktionary sowie Folkets lexikon abgeglichen. Unter der aufgedeckten Antwort steht ein kurzer koreanischer Beispielsatz mit Übersetzung, auf Englisch, Schwedisch, Deutsch, Spanisch oder Französisch; die Sätze wurden mit Hilfe von KI geschrieben."@de ,
+                        "Los 1000 verbos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el verbo coreano en el reverso en su forma de diccionario terminada en -다, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wikcionario en inglés; el sueco se escribió con ayuda de IA y se comprobó con los Wikcionarios en coreano y en inglés y con Folkets lexikon. Bajo la respuesta, una vez mostrada, una breve oración de ejemplo en coreano con su traducción al inglés, sueco, alemán, español o francés; las oraciones se escribieron con ayuda de IA."@es ,
+                        "Les 1 000 verbes coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le verbe coréen au verso sous sa forme de dictionnaire en -다, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglophone ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglophone et dans Folkets lexikon. Sous la réponse dévoilée, une courte phrase d’exemple en coréen avec sa traduction en anglais, suédois, allemand, espagnol ou français ; les phrases ont été rédigées avec l’aide de l’IA."@fr ;
     dcterms:publisher <#solid-memo> ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:korean ;
@@ -9368,10 +9422,11 @@
                  "verbes"@fr ,
                  "vocabulaire"@fr ;
     dcat:first <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
-    dcat:last <https://solid-memo.com/decks/korean-verbs/v2.ttl> ;
+    dcat:last <https://solid-memo.com/decks/korean-verbs/v3.ttl> ;
     dcat:hasVersion <https://solid-memo.com/decks/korean-verbs/v1.ttl> ,
-                    <https://solid-memo.com/decks/korean-verbs/v2.ttl> ;
-    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-verbs/v2.ttl> .
+                    <https://solid-memo.com/decks/korean-verbs/v2.ttl> ,
+                    <https://solid-memo.com/decks/korean-verbs/v3.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/korean-verbs/v3.ttl> .
 
 <https://solid-memo.com/decks/korean-verbs/v1.ttl>
     a dcat:Dataset ;
@@ -9386,6 +9441,24 @@
     adms:versionNotes "First release." .
 
 <https://solid-memo.com/decks/korean-verbs/v2.ttl>
+    a dcat:Dataset ;
+    dcterms:title "Korean verbs: the 1000 most common"@en ,
+                  "Koreanska verb: de 1000 vanligaste"@sv ,
+                  "한국어 동사: 가장 많이 쓰는 1000개"@ko ,
+                  "Koreanische Verben: die 1000 häufigsten"@de ,
+                  "Verbos coreanos: los 1000 más comunes"@es ,
+                  "Verbes coréens : les 1 000 plus courants"@fr ;
+    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
+                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Verben, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), angepasst an die Alltagssprache anhand von Film- und Fernsehuntertiteln. Englisch und Schwedisch auf der Vorderseite, das koreanische Verb auf der Rückseite in seiner Wörterbuchform auf -다, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischsprachigen Wiktionary; das Schwedische wurde mit Hilfe von KI geschrieben und mit dem koreanisch- und dem englischsprachigen Wiktionary sowie Folkets lexikon abgeglichen."@de ,
+                        "Los 1000 verbos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el verbo coreano en el reverso en su forma de diccionario terminada en -다, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wikcionario en inglés; el sueco se escribió con ayuda de IA y se comprobó con los Wikcionarios en coreano y en inglés y con Folkets lexikon."@es ,
+                        "Les 1 000 verbes coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le verbe coréen au verso sous sa forme de dictionnaire en -다, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglophone ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglophone et dans Folkets lexikon."@fr ;
+    dcat:version "2" ;
+    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Title, description and keywords in German, Spanish and French as well, now that the app speaks them; no card was changed." .
+
+<https://solid-memo.com/decks/korean-verbs/v3.ttl>
     a solid-memo:Deck ,
       dcat:Dataset ;
     dcterms:title "Korean verbs: the 1000 most common"@en ,
@@ -9394,21 +9467,21 @@
                   "Koreanische Verben: die 1000 häufigsten"@de ,
                   "Verbos coreanos: los 1000 más comunes"@es ,
                   "Verbes coréens : les 1 000 plus courants"@fr ;
-    dcterms:creator <https://solid-memo.com/decks/korean-verbs/v2.ttl#anton-wiklund> ;
+    dcterms:creator <https://solid-memo.com/decks/korean-verbs/v3.ttl#anton-wiklund> ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon."@en ,
-                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon."@sv ,
-                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다."@ko ,
-                        "Die 1000 häufigsten koreanischen Verben, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), angepasst an die Alltagssprache anhand von Film- und Fernsehuntertiteln. Englisch und Schwedisch auf der Vorderseite, das koreanische Verb auf der Rückseite in seiner Wörterbuchform auf -다, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischsprachigen Wiktionary; das Schwedische wurde mit Hilfe von KI geschrieben und mit dem koreanisch- und dem englischsprachigen Wiktionary sowie Folkets lexikon abgeglichen."@de ,
-                        "Los 1000 verbos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el verbo coreano en el reverso en su forma de diccionario terminada en -다, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wikcionario en inglés; el sueco se escribió con ayuda de IA y se comprobó con los Wikcionarios en coreano y en inglés y con Folkets lexikon."@es ,
-                        "Les 1 000 verbes coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le verbe coréen au verso sous sa forme de dictionnaire en -다, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglophone ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglophone et dans Folkets lexikon."@fr ;
+    dcterms:description "The 1000 most frequent Korean verbs, ranked by the National Institute of Korean Language's survey of word frequencies in written Korean (2002), adjusted towards everyday speech with film and TV subtitles. English and Swedish on the front, the Korean verb on the back in its dictionary form ending in -다, in Hangul. Meanings from the Basic Korean Dictionary (krdict) and English Wiktionary; the Swedish was written with the help of AI and checked against Korean and English Wiktionary and Folkets lexikon. Under the revealed answer, a short Korean example sentence with its translation, in English, Swedish, German, Spanish or French; the sentences were written with the help of AI."@en ,
+                        "De 1000 vanligaste koreanska verben, rangordnade efter Nationella institutet för koreanska språkets undersökning av ordfrekvenser i skriven koreanska (2002), justerad mot vardagligt tal med undertexter från film och tv. Engelska och svenska på framsidan, det koreanska verbet på baksidan i sin grundform på -다, med hangul. Betydelser från Basic Korean Dictionary (krdict) och engelska Wiktionary; svenskan är skriven med hjälp av AI och kontrollerad mot koreanska och engelska Wiktionary samt Folkets lexikon. Under det visade svaret står en kort koreansk exempelmening med översättning, på engelska, svenska, tyska, spanska eller franska; meningarna är skrivna med hjälp av AI."@sv ,
+                        "국립국어원의 ‘현대 국어 사용 빈도 조사’(2002)로 순위를 매기고 영화·드라마 자막으로 일상 구어 쪽으로 보정한, 가장 많이 쓰는 한국어 동사 1000개입니다. 앞면에 영어와 스웨덴어, 뒷면에 ‘-다’로 끝나는 기본형 한국어 동사가 한글로 있습니다. 뜻은 한국어기초사전과 영어 위키낱말사전에서 가져왔고, 스웨덴어는 AI의 도움을 받아 쓴 뒤 한국어·영어 위키낱말사전과 Folkets lexikon으로 확인했습니다. 답을 보면 그 아래에 짧은 한국어 예문과 그 번역이 영어, 스웨덴어, 독일어, 스페인어, 프랑스어 중 하나로 나옵니다. 예문은 AI의 도움을 받아 썼습니다."@ko ,
+                        "Die 1000 häufigsten koreanischen Verben, geordnet nach der Erhebung des Nationalen Instituts für koreanische Sprache zu Worthäufigkeiten im geschriebenen Koreanisch (2002), angepasst an die Alltagssprache anhand von Film- und Fernsehuntertiteln. Englisch und Schwedisch auf der Vorderseite, das koreanische Verb auf der Rückseite in seiner Wörterbuchform auf -다, in Hangul. Bedeutungen aus dem Basic Korean Dictionary (krdict) und dem englischsprachigen Wiktionary; das Schwedische wurde mit Hilfe von KI geschrieben und mit dem koreanisch- und dem englischsprachigen Wiktionary sowie Folkets lexikon abgeglichen. Unter der aufgedeckten Antwort steht ein kurzer koreanischer Beispielsatz mit Übersetzung, auf Englisch, Schwedisch, Deutsch, Spanisch oder Französisch; die Sätze wurden mit Hilfe von KI geschrieben."@de ,
+                        "Los 1000 verbos coreanos más frecuentes, ordenados según el estudio del Instituto Nacional de la Lengua Coreana sobre la frecuencia de las palabras en el coreano escrito (2002), ajustado hacia el habla cotidiana con subtítulos de cine y televisión. Inglés y sueco en el anverso, el verbo coreano en el reverso en su forma de diccionario terminada en -다, en hangul. Significados del Basic Korean Dictionary (krdict) y del Wikcionario en inglés; el sueco se escribió con ayuda de IA y se comprobó con los Wikcionarios en coreano y en inglés y con Folkets lexikon. Bajo la respuesta, una vez mostrada, una breve oración de ejemplo en coreano con su traducción al inglés, sueco, alemán, español o francés; las oraciones se escribieron con ayuda de IA."@es ,
+                        "Les 1 000 verbes coréens les plus fréquents, classés d’après l’enquête de l’Institut national de la langue coréenne sur la fréquence des mots dans le coréen écrit (2002), ajustée vers la langue parlée de tous les jours à l’aide de sous-titres de films et de séries télévisées. L’anglais et le suédois au recto, le verbe coréen au verso sous sa forme de dictionnaire en -다, en hangeul. Sens tirés du Basic Korean Dictionary (krdict) et du Wiktionnaire anglophone ; le suédois a été rédigé avec l’aide de l’IA et vérifié dans les Wiktionnaires coréen et anglophone et dans Folkets lexikon. Sous la réponse dévoilée, une courte phrase d’exemple en coréen avec sa traduction en anglais, suédois, allemand, espagnol ou français ; les phrases ont été rédigées avec l’aide de l’IA."@fr ;
     prov:wasDerivedFrom <https://www.korean.go.kr/front_eng/down/down_02V.do?etc_seq=61> ,
                         <https://github.com/hermitdave/FrequencyWords> ,
                         <https://krdict.korean.go.kr/> ,
                         <https://en.wiktionary.org/> ,
                         <https://ko.wiktionary.org/> ,
                         <https://folkets-lexikon.csc.kth.se/folkets/> ;
-    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-verbs/v2.ttl#compilation> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/korean-verbs/v3.ttl#compilation> ;
     dcterms:created "2026-10-10T12:00:00.000Z"^^xsd:dateTime ;
     dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
                topic:korean ;
@@ -9432,31 +9505,39 @@
                  "vocabulaire"@fr ;
     dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ,
                      <http://publications.europa.eu/resource/authority/language/SWE> ,
-                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+                     <http://publications.europa.eu/resource/authority/language/KOR> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ;
     solid-memo:studyDirection solid-memo:frontToBack ;
-    solid-memo:formatVersion 5 ;
-    dcat:version "2" ;
-    dcat:prev <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
-    dcat:previousVersion <https://solid-memo.com/decks/korean-verbs/v1.ttl> ;
-    dcterms:issued "2026-10-10T00:00:00Z"^^xsd:dateTime ;
-    adms:versionNotes "Title, description and keywords in German, Spanish and French as well, now that the app speaks them; no card was changed." ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "3" ;
+    dcat:prev <https://solid-memo.com/decks/korean-verbs/v2.ttl> ;
+    dcat:previousVersion <https://solid-memo.com/decks/korean-verbs/v2.ttl> ;
+    dcterms:issued "2026-11-13T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "Every card has a short Korean example sentence under its answer, translated into English, Swedish, German, Spanish and French; no front or back was changed." ;
     dcterms:publisher <#solid-memo> ;
     dcat:inSeries <#korean-verbs> ;
     dcat:isVersionOf <#korean-verbs> ;
-    dcat:distribution <https://solid-memo.com/decks/korean-verbs/v2.ttl#turtle> ;
+    dcat:contactPoint <https://solid-memo.com/decks/korean-verbs/v3.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/korean-verbs/v3.ttl#turtle> ;
     solid-memo:cardCount 1000 .
 
-<https://solid-memo.com/decks/korean-verbs/v2.ttl#anton-wiklund>
+<https://solid-memo.com/decks/korean-verbs/v3.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
 
-<https://solid-memo.com/decks/korean-verbs/v2.ttl#compilation>
+<https://solid-memo.com/decks/korean-verbs/v3.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://solid-memo.com/decks/korean-verbs/v3.ttl#compilation>
     a prov:Activity .
 
-<https://solid-memo.com/decks/korean-verbs/v2.ttl#turtle>
+<https://solid-memo.com/decks/korean-verbs/v3.ttl#turtle>
     a dcat:Distribution ;
-    dcat:accessURL <https://solid-memo.com/decks/korean-verbs/v2.ttl> ;
-    dcat:downloadURL <https://solid-memo.com/decks/korean-verbs/v2.ttl> ;
+    dcat:accessURL <https://solid-memo.com/decks/korean-verbs/v3.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/korean-verbs/v3.ttl> ;
     dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
     dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
 
