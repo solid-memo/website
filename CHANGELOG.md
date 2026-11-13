@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.3.5](https://github.com/solid-memo/website/compare/v7.3.4...v7.3.5) (2026-11-13)
+
+### Fixes
+
+* **solid-memo-client:** fail as a failure's body fails, as the library does ([8e43511](https://github.com/solid-memo/website/commit/8e4351163cdcdaf6c3e9671d7089725443458c5e))
+* **solid:** fail the instance list when an index read times out ([60f30e0](https://github.com/solid-memo/website/commit/60f30e058fcba24266cbd54c699c52eb5e402d74)), closes [#754](https://github.com/solid-memo/website/issues/754)
+
 ## [7.3.4](https://github.com/solid-memo/website/compare/v7.3.3...v7.3.4) (2026-11-13)
 
 ### Fixes
