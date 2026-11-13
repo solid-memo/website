@@ -1314,7 +1314,7 @@ the problems, then come four parts:
   the same front and back, as plain text, in the same languages, and
   the same pictures. White space aside, case counts. The cards are
   grouped in one pass, so a deck with thousands of cards alike takes no
-  longer per card than a small one.
+  longer per card than a small one, however long their plain text.
 - **Markdown**: what the markdown package's check (`markdownProblems`)
   finds in the cards written in Markdown, field by field, by the card
   editor's hints ([markdown.md](markdown.md)), passed in by the screen

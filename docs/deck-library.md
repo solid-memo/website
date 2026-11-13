@@ -1104,17 +1104,20 @@ flowchart LR
   check names, a link the shape check looks up, a part or a statement
   of a draft, a card's two sides. Each of those is a key of its own in
   a path of them (`PathMap` in `pathKeys.ts`), never one string joined
-  from them. An agent's URL is joined from a document and an author's
-  name, and a release from before format 3 names its agents by those
-  URLs: each is kept as a path of its pieces (`TextMap`, the same
-  file). The Studio's graph names a blank node by a number for its label
-  in its document (`instanceGraphOf` in `instanceGraph.ts`), never by
-  the label joined to the document's address. The guest's pod on the
-  device stores a document as N-Triples lines, each joined from three
-  terms, so it keys a line by the path of its pieces, each no longer
-  than the bound (`TripleLines` in the `solid` package). An answer names
-  its card and the wrong option chosen in the deck's cards document as
-  it is now (`deckAnswers` in `cardHistory.ts`): an IRI joined from that
+  from them. A card's side in Markdown is compared by its plain text,
+  which can be longer than the text it comes from: a table's cells are
+  joined with `" | "`. So each such text is a path of its pieces too
+  (`piecesOf`, the same file). An agent's URL is joined from a document
+  and an author's name, and a release from before format 3 names its
+  agents by those URLs: each is kept as a path of its pieces (`TextMap`,
+  the same file). The Studio's graph names a blank node by a number for
+  its label in its document (`instanceGraphOf` in `instanceGraph.ts`),
+  never by the label joined to the document's address. The guest's pod on
+  the device stores a document as N-Triples lines, each joined from three
+  terms, so it keys a line by the path of its pieces, each no longer than
+  the bound (`TripleLines` in the `solid` package). An answer names its
+  card and the wrong option chosen in the deck's cards document as it is
+  now (`deckAnswers` in `cardHistory.ts`): an IRI joined from that
   document and a fragment. The answer statistics so count cards and wrong
   options by their fragment ids alone. Merging a guest's answers into a
   deck (`mergedAnswer` in `guest.ts`) joins IRIs the same way, but only
@@ -1127,10 +1130,10 @@ flowchart LR
   there. The app refuses to write a longer term (`termTooLong`), so
   whatever it writes it can read back. Each read holds a term to the
   bound as it keeps it, so whatever it keeps it can write back. A
-  document written before the bound, with a longer text in it, can't
-  be read any more: the app shows the read's error and offers no way
-  to shorten the text. The longest text in `decks/` is about a third
-  of the bound, and a test fails once a term there reaches half of it.
+  document written before the bound, with a longer text in it, can't be
+  read any more: the app shows the read's error and offers no way to
+  shorten the text. The longest text in `decks/` is about a third of the
+  bound, and a test fails once a term there reaches half of it.
 - The same read is checked against the library's shapes, with no login
   sent (`validateDataset(url, dataset, "library")`); the release isn't
   read again for the check. A subject that breaks its shape refuses the
