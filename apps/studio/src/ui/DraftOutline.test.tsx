@@ -192,6 +192,18 @@ describe("DraftOutline", () => {
     ]);
   });
 
+  it("names the chapters a step can move to cut short, as the question editor does", () => {
+    const title = "ж".repeat(16_000);
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "editChapter", id: "ch-apps", text: { title: { en: title } } },
+    ]) as ReleaseDraft;
+    renderOutline(draft);
+    openMenu("Step 1.1");
+    const group = within(screen.getByRole("menu")).getByRole("group", { name: "Move to chapter" });
+    expect(within(group).getByRole("menuitem")).toHaveTextContent(`${"ж".repeat(59)}…`);
+    expect(group.outerHTML).not.toContain("ж".repeat(60));
+  });
+
   it("retires a chapter or step, and deletes one never published once the user confirms", () => {
     const onEdit = vi
       .fn<Edit>()

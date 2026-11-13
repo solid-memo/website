@@ -10,7 +10,7 @@ import { fireEvent, screen } from "@testing-library/preact";
  * it in), Testing Library fires "input" for it, which a select's
  * onChange never hears.
  */
-export function choose(name: string, value: string): void {
+export function choose(name: string | RegExp, value: string): void {
   const select = screen.getByRole<HTMLSelectElement>("combobox", { name });
   select.value = value;
   fireEvent(select, new Event("change", { bubbles: true }));

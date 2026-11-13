@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMemo, useState } from "preact/hooks";
+import { useId, useMemo, useState } from "preact/hooks";
 import { choicesOf, type Choice } from "@solid-memo/domain/course";
 import type { CardContent } from "@solid-memo/domain/deck";
 import { isPublished } from "@solid-memo/domain/release/courseIds";
@@ -11,6 +11,7 @@ import {
   distractorChanges,
   draftCardOf,
   draftOutline,
+  stepPlaceOf,
 } from "@solid-memo/domain/release/draftOutline";
 import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
 import {
@@ -32,7 +33,7 @@ import { DistractorFields } from "@solid-memo/ui/DistractorFields";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
-import { DraftScope, DraftStatus } from "./DraftParts";
+import { chapterTitles, DraftScope, DraftStatus } from "./DraftParts";
 import { LifeActions } from "./LifeActions";
 
 /** A place as the select's value: `step <id>`, `review <id>`, or "" for nowhere. */
@@ -126,8 +127,54 @@ export function QuestionEditorScreen({
     onEdit([{ kind: "editCard", id: card, card: cardTextOf(content, saved.created) }]);
   }
 
-  const outline = draftOutline(draft);
-  const place = placeOf(draft, card);
+  // A course draft may have thousands of steps: its places are listed
+  // when the draft changes, not on each keystroke in the form, and a
+  // chapter is named once, over its steps, each step by its number.
+  const place = useMemo(() => placeOf(draft, card), [draft, card]);
+  const outline = useMemo(() => draftOutline(draft), [draft]);
+  const titles = useMemo(
+    () =>
+      chapterTitles(
+        outline.map(({ chapter }) => chapter),
+        readerText,
+      ),
+    [outline, readerText],
+  );
+  const places = useMemo(
+    () =>
+      outline.map(({ chapter, steps }) => (
+        <optgroup key={chapter.id} label={readerText(titles.get(chapter.id)!)}>
+          {steps.map((step, index) => (
+            <option key={step.id} value={placeValue({ kind: "step", step: step.id })}>
+              {t("studio.chapter.step", { number: index + 1 })}
+            </option>
+          ))}
+          <option value={placeValue({ kind: "review", chapter: chapter.id })}>
+            {t("studio.chapter.review")}
+          </option>
+        </optgroup>
+      )),
+    [outline, titles, t, readerText],
+  );
+  // The select closed shows only its option ("Step 3"): the place chosen,
+  // with its chapter, is said to a screen reader as part of its name.
+  const labelId = useId();
+  const chosenId = useId();
+  const chosen = useMemo(() => {
+    const at =
+      place === null
+        ? null
+        : place.kind === "review"
+          ? { chapter: place.chapter, index: -1 }
+          : stepPlaceOf(draft, place.step);
+    // A place in a chapter retired is no option of the select.
+    const title = at === null ? undefined : titles.get(at.chapter);
+    if (title === undefined) return null;
+    const chapter = readerText(title);
+    return at!.index < 0
+      ? t("studio.question.atReview", { chapter })
+      : t("studio.question.atStep", { chapter, step: at!.index + 1 });
+  }, [draft, place, titles, t, readerText]);
 
   return (
     <section>
@@ -144,9 +191,10 @@ export function QuestionEditorScreen({
         <DraftScope readOnly={readOnly} draftsHref={links.draftsHref} healthHref={links.healthHref}>
           {draft.course && (
             <label>
-              {t("studio.question.place")}
+              <span id={labelId}>{t("studio.question.place")}</span>
               <select
                 value={placeValue(place)}
+                aria-labelledby={chosen === null ? labelId : `${labelId} ${chosenId}`}
                 onChange={(event) =>
                   onEdit([
                     { kind: "moveQuestion", card, place: placeFrom(event.currentTarget.value) },
@@ -154,25 +202,14 @@ export function QuestionEditorScreen({
                 }
               >
                 <option value="">{t("studio.question.nowhere")}</option>
-                {outline.map(({ chapter, steps }) => {
-                  const title =
-                    chapter.data.title === undefined ? chapter.id : readerText(chapter.data.title);
-                  return [
-                    ...steps.map((step, index) => (
-                      <option key={step.id} value={placeValue({ kind: "step", step: step.id })}>
-                        {t("studio.question.atStep", { chapter: title, step: index + 1 })}
-                      </option>
-                    )),
-                    <option
-                      key={`review ${chapter.id}`}
-                      value={placeValue({ kind: "review", chapter: chapter.id })}
-                    >
-                      {t("studio.question.atReview", { chapter: title })}
-                    </option>,
-                  ];
-                })}
+                {places}
               </select>
             </label>
+          )}
+          {chosen !== null && (
+            <span id={chosenId} class="visually-hidden">
+              {chosen}
+            </span>
           )}
 
           <form class="card-edit" onSubmit={save}>

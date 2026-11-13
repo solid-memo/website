@@ -6,7 +6,15 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { AppError } from "@solid-memo/domain/appError";
 import { DataProse } from "@solid-memo/ui/DataText";
-import { DraftProseField, DraftScope, DraftStatus, DraftTextField, IdField } from "./DraftParts";
+import { createI18n } from "@solid-memo/ui/i18n";
+import {
+  chapterTitles,
+  DraftProseField,
+  DraftScope,
+  DraftStatus,
+  DraftTextField,
+  IdField,
+} from "./DraftParts";
 import { courseDraft } from "../test/fixtures";
 
 beforeEach(() => localStorage.clear());
@@ -16,6 +24,52 @@ function pickEnglish() {
   fireEvent.click(screen.getByRole("button", { name: "Language: not stated" }));
   fireEvent.click(screen.getByRole("radio", { name: "English (en)" }));
 }
+
+describe("chapterTitles", () => {
+  const { readerText } = createI18n("en");
+  const chapter = (id: string, title?: Record<string, string>) => ({
+    id,
+    data: title === undefined ? {} : { title },
+  });
+  const names = (chapters: ReturnType<typeof chapter>[]) => [
+    ...chapterTitles(chapters, readerText).entries(),
+  ];
+
+  it("names a chapter by its title, else by its id", () => {
+    expect(names([chapter("ch-1", { en: "Pods" }), chapter("ch-2")])).toEqual([
+      ["ch-1", { en: "Pods" }],
+      ["ch-2", { "": "ch-2" }],
+    ]);
+  });
+
+  it("cuts a long title short, at a code point, in each of its languages", () => {
+    expect(
+      names([
+        chapter("ch-1", { en: "a".repeat(60) }),
+        chapter("ch-2", { en: "b".repeat(61), sv: "c" }),
+        chapter("ch-3", { en: "𝄞".repeat(40) }),
+      ]),
+    ).toEqual([
+      ["ch-1", { en: "a".repeat(60) }],
+      ["ch-2", { en: `${"b".repeat(59)}…`, sv: "c" }],
+      ["ch-3", { en: `${"𝄞".repeat(29)}…` }],
+    ]);
+  });
+
+  it("numbers the chapters that would read the same", () => {
+    expect(
+      names([
+        chapter("ch-1", { en: `${"a".repeat(70)}1` }),
+        chapter("ch-2", { en: "Pods" }),
+        chapter("ch-3", { en: `${"a".repeat(70)}2`, sv: "b" }),
+      ]),
+    ).toEqual([
+      ["ch-1", { en: `${"a".repeat(59)}… (1)` }],
+      ["ch-2", { en: "Pods" }],
+      ["ch-3", { en: `${"a".repeat(59)}… (3)`, sv: "b (3)" }],
+    ]);
+  });
+});
 
 describe("DraftStatus", () => {
   it("says whether the changes are saved", () => {
