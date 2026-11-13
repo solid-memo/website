@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { english, inEnglish, sameText, shown, type LangText } from "./langText.ts";
+import { escapedCharacters, HASHED_CHARACTERS } from "./pathKeys.ts";
 /**
  * The DCAT side of Solid Memo's data (see docs/data-model.md): the
  * terms of the EU vocabularies it uses, and what a deck states when the
@@ -23,22 +24,71 @@ export function distributionUrlOf(deckUrl: string): string {
 }
 
 /**
+ * What a text written by the app has around it in a term's longest name
+ * (termKeyLength in the solid package): its quotes and a two-letter
+ * language tag, `@en` or `@sv`. Untagged, it has less.
+ */
+const TAGGED_TEXT_ROOM = 5;
+
+/** What a name cut short ends in (namedWithin). */
+const ELLIPSIS = "…";
+
+/** How many characters a text has in a term's longest name, its escaped ones written as two. */
+function keyedLength(text: string): number {
+  return text.length + escapedCharacters(text);
+}
+
+/**
+ * `name` between `before` and `after`, as a text the app writes: with the
+ * name cut short, at a code point and an ellipsis after it, where the
+ * whole would be longer than a term may be (HASHED_CHARACTERS, the bound
+ * on every term the app reads and writes). A name may be as long as a
+ * term, so the text around it could take it past the bound, and no
+ * write of it would be accepted.
+ */
+function namedWithin(before: string, name: string, after: string): string {
+  const room = HASHED_CHARACTERS - TAGGED_TEXT_ROOM - keyedLength(before) - keyedLength(after);
+  if (keyedLength(name) <= room) return `${before}${name}${after}`;
+  let used = keyedLength(ELLIPSIS);
+  let end = 0;
+  for (const point of name) {
+    used += keyedLength(point);
+    if (used > room) break;
+    end += point.length;
+  }
+  return `${before}${name.slice(0, end)}${ELLIPSIS}${after}`;
+}
+
+/**
  * The description a deck gets when it has none: DCAT-AP asks one of
  * every dataset, and decks made before format 3 often had none. This is
- * the English, all that formats before 4 state.
+ * the English, all that formats before 4 state. A title as long as a
+ * term is cut short in it (namedWithin), so that a deck always gets a
+ * description it can be saved with.
  */
 export function defaultDeckDescription(title: string): string {
-  return `Flashcards: ${title}.`;
+  return namedWithin("Flashcards: ", title, ".");
 }
 
 /**
  * The default description from format 4 on: in English and Swedish, the
  * Swedish naming the deck by its Swedish title when it has one, both by
  * its English title, or (format 5, a title in no English) the one shown.
+ * Each is cut short, as defaultDeckDescription's English is.
  */
 export function defaultDeckDescriptionText(title: LangText): LangText {
   const name = english(title) ?? shown(title);
-  return { en: defaultDeckDescription(name), sv: `Kortlek: ${title.sv ?? name}.` };
+  return { en: defaultDeckDescription(name), sv: namedWithin("Kortlek: ", title.sv ?? name, ".") };
+}
+
+/**
+ * Whether `text` is the English default description for `name`: as
+ * defaultDeckDescription gives it, or whole, as the app wrote it before
+ * it cut a title too long for it short. A record written then may hold
+ * that one, within the bound untagged.
+ */
+function isDefaultEnglish(text: string | undefined, name: string): boolean {
+  return text === defaultDeckDescription(name) || text === `Flashcards: ${name}.`;
 }
 
 /**
@@ -56,7 +106,7 @@ export function isDefaultDeckDescription(
     return (
       (tags === "en" ||
         (tags === "en,sv" && description.sv === defaultDeckDescriptionText(title).sv)) &&
-      description.en === defaultDeckDescription(name)
+      isDefaultEnglish(description.en, name)
     );
   });
 }
@@ -66,7 +116,7 @@ export function isDefaultDeckDescription(
  * wrote, in English and Swedish; any other as its English.
  */
 export function descriptionInFormat4(description: string, title: string): LangText {
-  return description === defaultDeckDescription(title)
+  return isDefaultEnglish(description, title)
     ? defaultDeckDescriptionText({ en: title })
     : inEnglish(description);
 }

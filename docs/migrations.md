@@ -491,6 +491,23 @@ every kind, every step is pure, the latest record passes through
 untouched, and, with the real shapes, every step's output conforms to
 the shape it moves to.
 
+A step's output is held to the bound on a term, 16,383 characters, as
+every read and write is
+([data-model.md](data-model.md#write-discipline)), each term measured
+as a write would write it. The text a step writes, the default
+description `Flashcards: <title>.`, cuts a title too long for it
+short, with an ellipsis after it, so that the description fits. Other
+terms a step makes can't be cut short. One is an address it builds
+from the subject, such as a deck's distribution or a release's series.
+Another is a text it tags, such as an untagged title that format 4
+writes in English, with `@en` after it. A deck or release whose
+migration gives it one past the bound is read as not fitting its shape
+(`migrateWithinBound`), since no write of it would be accepted. A deck
+from before format 3 names its authors itself, and a write names their
+agents anew, refusing one past the bound. The format update leaves
+such an entry as it is, so that it doesn't keep the others from being
+brought up to date.
+
 ## The pod migration
 
 The format update brings each outdated document up to this app's formats
