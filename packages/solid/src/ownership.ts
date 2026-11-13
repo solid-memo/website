@@ -213,6 +213,27 @@ function writtenBeside(dataset: Dataset, url: string, targetClass: string): Subj
   return isWritten ? thing : null;
 }
 
+/** Every class a shape of Solid Memo's describes or adds: dcat:Catalog, sm:Deck, dcat:Dataset, foaf:Agent, … */
+const SHAPED_TYPES: ReadonlySet<string> = new Set(
+  ALL_SHAPES.flatMap((shape) => [shape.targetClass, ...shape.additionalTypes]),
+);
+
+/**
+ * Whether the subject at `url` of an instance's catalog is an agent
+ * Solid Memo writes beside a deck entry as its creator: a foaf:Agent of
+ * no other class a shape describes or adds, stricter than writtenBeside
+ * by the classes shapes add, and not the catalog (isCatalogSubject). Another deck's entry, a dcat:Dataset or
+ * the catalog a deck names as its creator is none, so an export leaves
+ * it behind (solidDeckArchive.ts).
+ */
+export function isCreatorAgent(dataset: Dataset, url: string): boolean {
+  const thing = getThing(dataset, url);
+  if (thing === null || isCatalogSubject(dataset, thing)) return false;
+  const types = getUrlAll(thing, RDF.type);
+  const agent = SHAPES.agent[1].targetClass;
+  return types.includes(agent) && types.every((type) => type === agent || !SHAPED_TYPES.has(type));
+}
+
 /**
  * What of a document Solid Memo removes when it removes the document
  * (datasets.ts removeOwned): the subjects of its own (solidMemoSubjects)

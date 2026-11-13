@@ -4,6 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
+import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/domain/deckFile";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
@@ -137,6 +138,22 @@ async function podWithDeck() {
     cards: await repository.listCards(stored),
     states: await reviews.listReviewStates(stored),
   };
+}
+
+/** The subjects a deck file states something of. */
+async function subjectsOf(text: string): Promise<Set<string>> {
+  const quads = await parseDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
+  return new Set(quads.map((quad) => quad.subject.value));
+}
+
+/** The IRIs a deck file names as a subject or an object. */
+async function irisOf(text: string): Promise<Set<string>> {
+  const quads = await parseDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
+  return new Set(
+    quads.flatMap(({ subject, object }) =>
+      [subject, object].filter((term) => term.termType === "NamedNode").map((term) => term.value),
+    ),
+  );
 }
 
 describe("createSolidDeckArchive", () => {
@@ -359,6 +376,94 @@ describe("createSolidDeckArchive", () => {
     expect(text).toContain(deck.url);
     expect(text).not.toContain("private note");
     expect(text).not.toContain("private log");
+  });
+
+  it("exports as a creator only an agent, with none of another deck's entry, the catalog or the progress (GHSA-5w7q-8wcr-f9g8)", async () => {
+    const { pod, deck, cards } = await podWithDeck();
+    const catalogUrl = `${INSTANCE}catalog.ttl`;
+    const repository = createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date("2026-10-01T10:00:00.000Z"),
+      randomId: () => "other",
+    });
+    const other = await repository.createDeck(INSTANCE, { en: "Private diary" });
+    await repository.completeChapter(other, `${CHAPTER}-other`);
+    const AGENT = "http://xmlns.com/foaf/0.1/Agent";
+    const DATASET = "http://www.w3.org/ns/dcat#Dataset";
+    const CREATOR = "http://purl.org/dc/terms/creator";
+    const NAME = "http://xmlns.com/foaf/0.1/name";
+    // Nodes the deck names as its creators: another deck's entry, the
+    // catalog under two spellings, its own distribution, an agent that
+    // is a dataset too, an agent that carries what a deck's entry does,
+    // and a name.
+    await pod.put(
+      catalogUrl,
+      [
+        ...pod.triples(catalogUrl)!,
+        `<${deck.url}> <${CREATOR}> <${other.url}>, <${catalogUrl}#catalog>, <${catalogUrl}>, <${distributionUrlOf(deck.url)}>, <${catalogUrl}#dataset>, <${catalogUrl}#agent>, "Text author" .`,
+        `<${catalogUrl}#dataset> a <${AGENT}>, <${DATASET}> ; <${NAME}> "Dataset agent" .`,
+        `<${catalogUrl}#agent> a <${AGENT}> ; <${NAME}> "Planted agent" ; <${SM.position}> "1"^^<http://www.w3.org/2001/XMLSchema#integer> ; <${SM_NS}completedChapter> <${CHAPTER}-agent> .`,
+      ].join("\n"),
+    );
+    const stored = (await repository.readDeck(deck.url))!;
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    const text = await archive.exportDeck(
+      stored,
+      { format: "turtle", withProgress: false },
+      { asNoOne: { cards: false, reviews: false } },
+    );
+    expect(text).not.toContain("Private diary");
+    expect(text).not.toContain("completedChapter");
+    expect(text).not.toContain("position");
+    expect(text).not.toContain("Dataset agent");
+    // Neither these nodes nor the links to them go along.
+    const iris = await irisOf(text);
+    for (const left of [other.url, `${catalogUrl}#catalog`, catalogUrl, `${catalogUrl}#dataset`])
+      expect(iris).not.toContain(left);
+    expect(iris).toContain(`${catalogUrl}#agent`);
+    const quads = await parseDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
+    const creators = quads
+      .filter(({ predicate }) => predicate.value === CREATOR)
+      .map(({ object }) => object.value);
+    expect(creators).not.toContain(distributionUrlOf(deck.url));
+    expect(creators).toContain(`${catalogUrl}#agent`);
+    // A creator named as text, as a deck from before format 3 does, stays.
+    expect(creators).toContain("Text author");
+    // The deck's own creator and the agent go along, and the file reads back as the one deck.
+    expect(text).toContain("Planted agent");
+    const read = await archive.readDeckFile(text, "turtle", `${DECK_FILE_BASE}deck`);
+    expect(read.deck.url).toBe(deck.url);
+    expect(read.deck.authors).toEqual(expect.arrayContaining(["Anton <anton@example.com>"]));
+    expect(read.cards).toEqual(cards);
+  });
+
+  it("exports no catalog as a creator, whatever class it is said to be (GHSA-5w7q-8wcr-f9g8)", async () => {
+    const { pod, deck } = await podWithDeck();
+    const catalogUrl = `${INSTANCE}catalog.ttl`;
+    const catalog = `<${catalogUrl}#catalog>`;
+    // The catalog stated as an agent alone, as a rewrite by another app may leave it.
+    await pod.put(
+      catalogUrl,
+      [
+        ...pod
+          .triples(catalogUrl)!
+          .filter(
+            (line) =>
+              !line.startsWith(`${catalog} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>`),
+          ),
+        `${catalog} a <http://xmlns.com/foaf/0.1/Agent> .`,
+        `<${deck.url}> <http://purl.org/dc/terms/creator> ${catalog} .`,
+      ].join("\n"),
+    );
+    const text = await createSolidDeckArchive({
+      fetch: pod.fetch,
+      publicFetch: pod.fetch,
+    }).exportDeck(
+      deck,
+      { format: "turtle", withProgress: true },
+      { asNoOne: { cards: false, reviews: false } },
+    );
+    expect(await subjectsOf(text)).not.toContain(`${catalogUrl}#catalog`);
   });
 
   it("refuses to export a deck its catalog no longer lists", async () => {
