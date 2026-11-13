@@ -34,6 +34,7 @@ import {
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import { getSolidDatasetOrNull } from "./datasets";
+import { isCreatorAgent } from "./ownership";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
 import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
@@ -96,12 +97,23 @@ export function createSolidDeckArchive({
       ]);
       const entry = catalog === null ? null : getThing(catalog, deck.url);
       if (entry === null) throw new AppError("deckGone", { deck: deck.title });
-      const beside = new Set([distributionUrlOf(deck.url), ...getUrlAll(entry, DCTERMS.creator)]);
+      // A creator goes only when it is an agent as Solid Memo writes one: another deck's entry or the catalog named so stays behind, and so does the link to it; a creator named as text (before format 3) stays (GHSA-5w7q-8wcr-f9g8).
+      const creators = new Set(
+        getUrlAll(entry, DCTERMS.creator).filter((url) => isCreatorAgent(catalog!, url)),
+      );
+      const going = new Set([deck.url, distributionUrlOf(deck.url), ...creators]);
       const left = new Set<string>([SM.position, ...(withProgress ? [] : [SM.completedChapter])]);
+      const isLeftCreatorLink = ({ subject, predicate, object }: Quad) =>
+        subject.value === deck.url &&
+        predicate.value === DCTERMS.creator &&
+        object.termType !== "Literal" &&
+        !creators.has(object.value);
       const quads = [
         ...quadsOf(catalog).filter(
-          ({ subject, predicate }) =>
-            (subject.value === deck.url && !left.has(predicate.value)) || beside.has(subject.value),
+          (quad) =>
+            going.has(quad.subject.value) &&
+            !left.has(quad.predicate.value) &&
+            !isLeftCreatorLink(quad),
         ),
         ...ownSubjectsOf(deck, cards, reviews),
       ];
