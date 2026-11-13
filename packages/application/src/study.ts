@@ -260,6 +260,10 @@ export function createStudyUseCases({
       const reset = resetStudyDay(reviews.sm2, now, prefs.dayBoundaryHour);
       const count = reset.restore.length + reset.remove.length;
       if (count > 0) {
+        // The day never happened: its answers leave the log, those still on their way first.
+        // Before the states go back, so a removal that fails leaves the day to reset again,
+        // and the retry repeats both writes.
+        await answerStore.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
         // FSRS-6's states of the day go back with SM-2's, in the same save.
         const fsrs = resetFsrsStudyDay(reviews.fsrs, now, prefs.dayBoundaryHour);
         await reviewStateRepository.applyReviewChanges(deck, {
@@ -267,8 +271,6 @@ export function createStudyUseCases({
           remove: reset.remove,
           fsrs: { save: fsrs.restore, remove: fsrs.remove },
         });
-        // The day never happened: its answers leave the log too, those still on their way first.
-        await answerStore.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
       }
       return count;
     },

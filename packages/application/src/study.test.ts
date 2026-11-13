@@ -6,7 +6,8 @@ import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
-import { sm2s, promptOf, instance, deck, card, makeDeps } from "./testing/fakePorts";
+import type { Answer } from "@solid-memo/domain/answer";
+import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
 
 describe("study", () => {
   it("getStudyQueue draws new cards with the injected random source", async () => {
@@ -330,6 +331,68 @@ describe("study", () => {
           remove: [{ cardId: "introduced", direction: "front-to-back" }],
         },
       });
+    });
+
+    /** A deck reviewed today, its states kept in memory, its answer in a log in memory. */
+    function studiedToday() {
+      const deps = makeDeps();
+      let sm2: ReviewState[] = [
+        {
+          cardId: "c1",
+          direction: "front-to-back",
+          easeFactor: 2.5,
+          intervalDays: 1,
+          repetitions: 1,
+          due: "2026-09-22",
+          firstReviewedAt: now.toISOString(),
+          lastReviewedAt: now.toISOString(),
+          formatVersion: 2,
+        },
+      ];
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async () =>
+        sm2s(sm2),
+      );
+      const applyChanges = async (
+        _deck: unknown,
+        changes: { remove: { cardId: string; direction: string }[] },
+      ) => {
+        const gone = new Set(changes.remove.map((k) => `${k.cardId} ${k.direction}`));
+        sm2 = sm2.filter((s) => !gone.has(`${s.cardId} ${s.direction}`));
+      };
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockImplementation(applyChanges);
+      const { log, byMonth } = memoryLog();
+      byMonth.set("2026-09", [{ id: "a1", deckUrl: deck.url, studyDay: "2026-09-21" } as Answer]);
+      const useCases = createUseCases({ ...deps, answerLog: log });
+      return { deps, log, byMonth, useCases, states: () => sm2, applyChanges };
+    }
+
+    it("leaves the states when the log removal fails, so a retry removes both", async () => {
+      const { deps, log, byMonth, useCases, states } = studiedToday();
+      log.removeDay.mockRejectedValueOnce(new Error("412 Precondition Failed"));
+
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).rejects.toThrow("412");
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      expect(states()).toHaveLength(1);
+
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(1);
+      expect(states()).toEqual([]);
+      expect(byMonth.get("2026-09")).toEqual([]);
+    });
+
+    it("tries again when the states fail to save after the answers left the log", async () => {
+      const { deps, log, byMonth, useCases, states, applyChanges } = studiedToday();
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges)
+        .mockRejectedValueOnce(new Error("503 Service Unavailable"))
+        .mockImplementation(applyChanges);
+
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).rejects.toThrow("503");
+      expect(byMonth.get("2026-09")).toEqual([]);
+      expect(states()).toHaveLength(1);
+
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(1);
+      expect(log.removeDay).toHaveBeenCalledTimes(2);
+      expect(states()).toEqual([]);
+      expect(byMonth.get("2026-09")).toEqual([]);
     });
 
     it("writes nothing when nothing was studied today", async () => {
