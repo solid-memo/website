@@ -551,7 +551,7 @@ describe("applyRepairs", () => {
 <#deck-1> a sm:Deck, dcat:Dataset ; dcterms:title "One" .
 <#deck-2> a sm:Deck ; dcterms:title "Two" ; dcterms:creator <#agent> .
 <#deck-3> a sm:Deck ; dcterms:title "Three" .
-<#agent> dcterms:title "Named by deck 2 alone" .
+<#agent> a <http://xmlns.com/foaf/0.1/Agent> ; dcterms:title "Named by deck 2 alone" .
 <#pub> dcterms:title "The publisher" .
 `;
     const reviews = `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .

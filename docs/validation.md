@@ -399,7 +399,19 @@ a subject that one of Solid Memo's subjects names as its
 `dcterms:creator`, `dcterms:publisher` or `dcat:distribution`
 ([ownership.ts](../packages/solid/src/ownership.ts)), even when
 another app's rewrite drops its stamp. The catalog, a deck's agents
-and its distribution have no Solid Memo class.
+and its distribution have no Solid Memo class. Such a link counts only
+where Solid Memo's shapes write it. In an instance's `catalog.ttl`,
+that's a creator or a distribution on a deck, and a publisher on the
+catalog or a deck group. In a release or a draft, a document that is
+an `sm:Deck`, it's a creator, a distribution or a publisher on the
+deck, and a publisher on its series. In a deck's cards or reviews
+document, or any other, no such link counts. A subject of a Solid Memo
+class counts only the links of that class, whatever other class it
+says it has. The subject it names must be of the class the link names,
+a `foaf:Agent` or a `dcat:Distribution`, and of no other class a shape
+describes. Only the `#catalog` of a `catalog.ttl` is the catalog
+without its class. Any other subject named that way stays another
+app's.
 
 A review state of another scheduler is never Solid Memo's, whatever its
 stamp: any value of `sm:scheduler` but the `sm:sm2` and

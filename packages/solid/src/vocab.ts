@@ -82,6 +82,8 @@ export const DCAT = {
   dataset: "http://www.w3.org/ns/dcat#dataset",
   /** A catalog's sub-catalogs: in a pod, the deck groups (SM.DeckGroup) it lists. */
   catalog: "http://www.w3.org/ns/dcat#catalog",
+  /** A deck's distribution (a dcat:Distribution): where its release is fetched. */
+  distribution: "http://www.w3.org/ns/dcat#distribution",
   /** A release's version within its deck: "1", "2", … */
   version: "http://www.w3.org/ns/dcat#version",
   /** A release's contact (a vcard:Kind): where a mistake in it is reported. */
