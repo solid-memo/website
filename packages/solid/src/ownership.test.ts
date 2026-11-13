@@ -314,7 +314,7 @@ describe("isDeckItself", () => {
 });
 
 describe("draftSubjects", () => {
-  it("names the draft's subjects and every one they lead to, through blank nodes too, never one nothing leads to", async () => {
+  it("names the draft's subjects and every one of the document they lead to, through blank nodes too, never one nothing leads to", async () => {
     const release = "https://pod.example/solid-memo/a/drafts/solid/v1/release.ttl";
     const dataset = await served(
       release,
@@ -324,7 +324,7 @@ describe("draftSubjects", () => {
 <#recipe> <${SAYS}> [ <${SAYS}> "kept" ] .`,
     );
     expect(draftSubjects(dataset)).toEqual(
-      new Set([release, `${release}#source`, `${release}#series`, "https://elsewhere.example/#me"]),
+      new Set([release, `${release}#source`, `${release}#series`]),
     );
   });
 });

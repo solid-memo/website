@@ -17,28 +17,60 @@ import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
-import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM, SM_NS } from "./vocab";
 
 /**
- * The links from a subject of Solid Memo's to the subjects it writes
- * beside it: a deck's creators and distribution, a catalog's or deck
- * group's publisher.
+ * The links Solid Memo follows from a subject of its own to one it
+ * writes beside it, each with the class of what it names: a creator or
+ * publisher is a foaf:Agent, a distribution a dcat:Distribution.
  */
-const WRITTEN_BESIDE = [
-  DCTERMS.creator,
-  DCTERMS.publisher,
-  "http://www.w3.org/ns/dcat#distribution",
-];
+const WRITTEN_BESIDE: ReadonlyMap<string, string> = new Map([
+  [DCTERMS.creator, SHAPES.agent[1].targetClass],
+  [DCTERMS.publisher, SHAPES.agent[1].targetClass],
+  [DCAT.distribution, SHAPES.distribution[1].targetClass],
+]);
+
+/**
+ * Which of WRITTEN_BESIDE each class of Solid Memo's writes, by its
+ * shapes at every version that fit where `context` says, or that fit
+ * anywhere: in a pod's catalog, a deck entry its creators and
+ * distribution, a deck group and the catalog their publisher; in a
+ * release or a draft, a deck its creators, distribution and publisher,
+ * and a series its publisher. A card, a review state or any other class
+ * writes none of them, so what it names that way is never Solid Memo's.
+ */
+function writtenBesideByClass(
+  context: "pod" | "release",
+): ReadonlyMap<string, ReadonlySet<string>> {
+  const fits = (shape: ShapeDescriptor) =>
+    shape.context === "any" ||
+    (context === "pod" ? shape.context === "pod" : shape.context !== "pod");
+  const links = new Map<string, Set<string>>();
+  for (const shape of ALL_SHAPES.filter(fits)) {
+    for (const field of shape.fields) {
+      if (field.kind !== "iri" || !WRITTEN_BESIDE.has(field.predicate)) continue;
+      const written = links.get(shape.targetClass) ?? new Set<string>();
+      links.set(shape.targetClass, written.add(field.predicate));
+    }
+  }
+  return links;
+}
+
+/** WRITTEN_BESIDE by class in an instance's catalog (isCatalogDocument): a deck entry, a deck group, the catalog. */
+const WRITTEN_BESIDE_IN_CATALOG = writtenBesideByClass("pod");
+
+/** WRITTEN_BESIDE by class in a release or a draft (isDeckItself): its deck, its series. */
+const WRITTEN_BESIDE_IN_DECK = writtenBesideByClass("release");
 
 /**
  * The subjects of a document that Solid Memo wrote (see docs/validation.md
  * "Data another app wrote"): those with a Solid Memo class or its format
- * stamp, the catalog at `#catalog`, and whatever these name as their
- * creator, publisher or distribution — a catalog, an agent and a
- * distribution have no class of Solid Memo's own, and they stay Solid
- * Memo's when another app's rewrite has dropped their stamp. A review
+ * stamp, the catalog (isCatalogSubject), and what these name beside them
+ * (withWrittenBeside) — a catalog, an agent and a distribution have no
+ * class of Solid Memo's own, and they stay Solid Memo's when another
+ * app's rewrite has dropped their stamp. A review
  * state of another scheduler (isAnotherSchedulersState) is never Solid
  * Memo's. The document itself (`<>`) is when all it says is that it is
  * a deck's (isDeckBackLink). Every other subject of the document is
@@ -55,8 +87,8 @@ export function solidMemoSubjects(dataset: Dataset): Set<string> {
 function isSolidMemos(dataset: Dataset, thing: Subject): boolean {
   return (
     isDeckBackLink(dataset, thing) ||
-    (!isAnotherSchedulersState(thing) &&
-      (thing.url.endsWith("#catalog") ||
+    (!isAnotherSchedulersState(dataset, thing) &&
+      (isCatalogSubject(dataset, thing) ||
         getInteger(thing, SM.formatVersion) !== null ||
         getUrlAll(thing, RDF.type).some((type) => type.startsWith(SM_NS))))
   );
@@ -65,36 +97,120 @@ function isSolidMemos(dataset: Dataset, thing: Subject): boolean {
 /**
  * Whether the subject is a review state of another scheduler: it names
  * one (any sm:scheduler but the sm:sm2 and sm:fsrs6 IRIs), has no Solid
- * Memo class but sm:ReviewState, and is no catalog (the subject at
- * `#catalog`, or one of class dcat:Catalog). A card, deck, catalog or
+ * Memo class but sm:ReviewState, and is no catalog (isCatalogSubject,
+ * or one of class dcat:Catalog). A card, deck, catalog or
  * any other subject of a Solid Memo class is read as one whatever
  * sm:scheduler it carries, so it stays Solid Memo's and is held to its
  * shape.
  */
-function isAnotherSchedulersState(thing: Subject): boolean {
+function isAnotherSchedulersState(dataset: Dataset, thing: Subject): boolean {
   const types = getUrlAll(thing, RDF.type);
   return (
     namesAnotherScheduler(thing) &&
-    !thing.url.endsWith("#catalog") &&
+    !isCatalogSubject(dataset, thing) &&
     !types.includes(DCAT.Catalog) &&
     !types.some((type) => type.startsWith(SM_NS) && type !== SM.ReviewState)
   );
 }
 
-/** The subjects, and what they name as creator, publisher or distribution, and what those name, on. */
+/**
+ * Whether the dataset is an instance's catalog document (`…/catalog.ttl`),
+ * which holds the catalog, its deck entries and its deck groups, and no
+ * release, draft or series. It is told by the address the dataset was
+ * read from, so a catalog's dataset must keep it (getSourceUrl): one
+ * without it is read as any other document, its `#catalog` as none.
+ */
+function isCatalogDocument(dataset: Dataset): boolean {
+  return getSourceUrl(dataset)?.endsWith("/catalog.ttl") ?? false;
+}
+
+/**
+ * Whether the subject is the catalog by its address: `#catalog` of an
+ * instance's catalog document (isCatalogDocument), with or without a
+ * class. A `#catalog` of any other document is none.
+ */
+function isCatalogSubject(dataset: Dataset, thing: Subject): boolean {
+  return isCatalogDocument(dataset) && isSameUrl(thing.url, `${getSourceUrl(dataset)!}#catalog`);
+}
+
+/**
+ * The subjects, and what they name beside them, and what those name, on.
+ * A subject is followed only through a link its class writes in that
+ * document (linksWrittenOn), to a subject of the class the link names
+ * (WRITTEN_BESIDE) and of no other class a shape describes
+ * (writtenBeside): another app's node a card names as its creator, a
+ * deck entry's publisher, or a deck's creator that is a catalog, stays
+ * another app's.
+ */
 function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<string> {
-  const pending = things.map((thing) => thing.url);
-  const owned = new Set(pending);
-  for (let url = pending.pop(); url !== undefined; url = pending.pop()) {
-    const thing = getThing(dataset, url);
-    if (thing === null) continue;
-    for (const target of WRITTEN_BESIDE.flatMap((link) => getUrlAll(thing, link))) {
-      if (owned.has(target)) continue;
-      owned.add(target);
-      pending.push(target);
+  const pending = [...things];
+  const owned = new Set(things.map((thing) => thing.url));
+  for (let thing = pending.pop(); thing !== undefined; thing = pending.pop()) {
+    for (const [link, targetClass] of linksWrittenOn(dataset, thing)) {
+      for (const url of getUrlAll(thing, link)) {
+        const target = owned.has(url) ? null : writtenBeside(dataset, url, targetClass);
+        if (target === null) continue;
+        owned.add(url);
+        pending.push(target);
+      }
     }
   }
   return owned;
+}
+
+/**
+ * The links of WRITTEN_BESIDE that Solid Memo writes on `thing` in the
+ * kind of document it is in, each with the class it names: in an
+ * instance's catalog (isCatalogDocument), those of a deck entry, a deck
+ * group and the catalog; in a release or a draft (isDeckItself), those
+ * of its deck and its series; in a deck's cards or reviews document, or
+ * any other, none. They are chosen by the subject's classes of Solid
+ * Memo's (sm:Deck, sm:DeckGroup, …) when it has one, its other classes
+ * then being added by anyone who may append to the document: a card that
+ * also says it is a series is a card. Without one, they are chosen by
+ * its classes in a release or a draft (a series), and in a catalog only
+ * for the catalog itself (isCatalogSubject), with or without its class.
+ */
+function linksWrittenOn(dataset: Dataset, thing: Subject): [string, string][] {
+  const types = getUrlAll(thing, RDF.type);
+  const own = types.filter((type) => type.startsWith(SM_NS));
+  let byClass = WRITTEN_BESIDE_IN_DECK;
+  let classes = own.length > 0 ? own : types;
+  if (isCatalogDocument(dataset)) {
+    byClass = WRITTEN_BESIDE_IN_CATALOG;
+    if (own.length === 0) classes = isCatalogSubject(dataset, thing) ? [DCAT.Catalog] : [];
+  } else if (!isDeckDocument(dataset)) return [];
+  return [...WRITTEN_BESIDE].filter(([link]) =>
+    classes.some((type) => byClass.get(type)?.has(link)),
+  );
+}
+
+/**
+ * Whether the dataset is a release or a draft's release document: the
+ * document itself (`<>`) is an sm:Deck (isDeckItself). A deck's cards
+ * and reviews documents never are.
+ */
+function isDeckDocument(dataset: Dataset): boolean {
+  const url = getSourceUrl(dataset);
+  return url !== null && isDeckItself(dataset, url);
+}
+
+/** The classes Solid Memo's shapes describe: dcat:Catalog, sm:Deck, foaf:Agent, … */
+const SHAPED_CLASSES: ReadonlySet<string> = new Set(ALL_SHAPES.map((shape) => shape.targetClass));
+
+/**
+ * The subject at `url` when it is of `targetClass` and of no other
+ * class a shape describes, else null: an agent that is also a catalog
+ * or a deck, say, is none Solid Memo writes.
+ */
+function writtenBeside(dataset: Dataset, url: string, targetClass: string): Subject | null {
+  const thing = getThing(dataset, url);
+  if (thing === null) return null;
+  const types = getUrlAll(thing, RDF.type);
+  const isWritten =
+    types.includes(targetClass) &&
+    types.every((type) => type === targetClass || !SHAPED_CLASSES.has(type));
+  return isWritten ? thing : null;
 }
 
 /**
@@ -254,7 +370,9 @@ export function draftSubjects(dataset: Dataset): Set<string> {
   const reached = new Set(solidMemoSubjects(dataset));
   const pending = [...reached];
   for (let key = pending.pop(); key !== undefined; key = pending.pop()) {
-    for (const target of links.get(key) ?? []) {
+    // Every key reached is a subject of the dataset (solidMemoSubjects
+    // or one it has quads of, `links.has`), so it has its entry.
+    for (const target of links.get(key)!) {
       if (reached.has(target) || !links.has(target)) continue;
       reached.add(target);
       pending.push(target);

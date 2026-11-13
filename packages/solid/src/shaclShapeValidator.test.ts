@@ -13,6 +13,7 @@ import {
   setThing,
   type SubjectBuilder,
   toRdfJsDataset,
+  withQuads,
 } from "./client/rdf";
 import { datasetFrom, datasetOfTurtle } from "./testing/datasets";
 import { getSolidDatasetLinear } from "./client/resources";
@@ -77,7 +78,7 @@ function withBlankMember(dataset: Dataset, catalog: string, label: string): Data
       graph,
     },
   ];
-  return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+  return withQuads(dataset, quads as never);
 }
 
 /** The dataset with more values of a subject's property, each a literal of this datatype. */
@@ -1077,8 +1078,7 @@ describe("createShaclShapeValidator", () => {
     const many = (node: string, types: number) =>
       Array.from({ length: types }, (_, j) => `${node} a <#C${j}> .`);
     async function datasetOf(turtle: string[]) {
-      const quads = await quadsOfTurtle(turtle.join("\n"), DOC);
-      return fromRdfJsDataset({ [Symbol.iterator]: () => quads[Symbol.iterator]() } as never);
+      return withQuads(datasetFrom(DOC), await quadsOfTurtle(turtle.join("\n"), DOC));
     }
     const realValidator = () =>
       createShaclShapeValidator({

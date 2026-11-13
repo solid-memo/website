@@ -117,6 +117,15 @@ _:shared <${SM}text> "named by both" .`,
     expect(p.sent).toEqual([]);
   });
 
+  it("keeps a document that holds none of the subjects named to remove, sending nothing", async () => {
+    const p = await pod();
+    await p.put(foreign);
+    await expect(removeOwned(DOC, () => new Set([`${DOC}#nowhere`]), p.fetch)).resolves.toBe(
+      "kept",
+    );
+    expect(p.sent).toEqual([]);
+  });
+
   it("keeps a document with nothing of Solid Memo's in it, sending nothing", async () => {
     const p = await pod();
     await p.put(foreign);

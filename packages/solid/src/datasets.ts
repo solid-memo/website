@@ -493,11 +493,16 @@ async function removeOwnedOnce(
   return "kept";
 }
 
-/** Whether a newer version of the app wrote the subject (unlessNewer): it is never removed. */
+/**
+ * Whether a newer version of the app wrote the subject (unlessNewer): it
+ * is never removed. A subject the document does not hold has nothing to
+ * remove, and is none.
+ */
 function isNewer(dataset: Dataset, subject: string): boolean {
   const thing = getThing(dataset, subject);
+  if (thing === null) return false;
   try {
-    if (thing !== null) unlessNewer(thing);
+    unlessNewer(thing);
     return false;
   } catch {
     return true;
