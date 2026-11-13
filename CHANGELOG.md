@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.3.3](https://github.com/solid-memo/website/compare/v7.3.2...v7.3.3) (2026-11-13)
+
+### Bug Fixes
+
+* **ci:** key the cached browsers by the runner's Ubuntu version ([a854a4e](https://github.com/solid-memo/website/commit/a854a4e68ce893f63c77d121272a8b1416285356)), closes [#778](https://github.com/solid-memo/website/issues/778)
+
 ## [7.3.2](https://github.com/solid-memo/website/compare/v7.3.1...v7.3.2) (2026-11-13)
 
 ### Bug Fixes
