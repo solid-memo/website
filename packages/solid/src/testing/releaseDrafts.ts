@@ -80,9 +80,14 @@ export async function draftPod({ checked = false }: { checked?: boolean } = {}) 
   };
   await put(`${INSTANCE}catalog.ttl`, `<#catalog> a <${DCAT_CATALOG}> .`);
   const validator = createShaclShapeValidator({ fetch, shapesFetch: siteFetch, ...SHAPE_SOURCES });
+  // A release in the pod is read from it, as one the instance published; any other from the site.
+  const releaseFetch = (async (input, init) =>
+    String(input instanceof Request ? input.url : input).startsWith(POD)
+      ? fetch(input, init)
+      : siteFetch(input, init)) as typeof globalThis.fetch;
   const repository = createSolidReleaseDraftRepository({
     fetch,
-    releaseFetch: siteFetch,
+    releaseFetch,
     ...(checked ? { checkWrite: validator.checkSubjects } : {}),
   });
   return {

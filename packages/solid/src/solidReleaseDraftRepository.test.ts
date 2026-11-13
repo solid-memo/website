@@ -4,8 +4,10 @@
 
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import type { Quad } from "@rdfjs/types";
 import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
+import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
 import { newestRelease } from "@solid-memo/domain/library";
 import { courseProblems } from "@solid-memo/domain/release/courseRules";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
@@ -38,6 +40,7 @@ import {
   DECKS,
   draftPod,
   INSTANCE,
+  POD,
   quadsOfTurtle,
   roundTrip,
   siteFetch,
@@ -286,6 +289,7 @@ describe("create", () => {
         save: () => undefined,
       },
       storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
     await expect(
@@ -325,6 +329,7 @@ describe("create", () => {
       shapeValidator: pod.validator,
       fileExchange: {} as never,
       storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
     await expect(
@@ -1342,10 +1347,13 @@ describe("assemble", () => {
       code: "releaseForeignStatement",
       vars: { subject: library },
     });
-    // At another address, it is as the draft states it.
-    await expect(pod.repository.assemble(other, `${DECKS}solid/v2.ttl`, NOW)).resolves.toContain(
+    // At an address in another folder, it is as the draft states it; beside it, of a version the release follows not (GHSA-8frq-fhj8-9226).
+    await expect(pod.repository.assemble(other, `${DECKS}other/v1.ttl`, NOW)).resolves.toContain(
       `<${library}>`,
     );
+    await expect(
+      pod.repository.assemble(other, `${DECKS}solid/v2.ttl`, NOW),
+    ).resolves.not.toContain(`<${library}>`);
   });
 
   it("neither reads nor publishes a subject a draft's document names by another of its documents' address (GHSA-8w75-jg23-rxq5)", async () => {
@@ -1455,6 +1463,7 @@ describe("assemble", () => {
           save: () => undefined,
         },
         storageGateway: { discoverStorages: async () => [] },
+        releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
       const created = await useCases.createReleaseDraft(
@@ -1506,6 +1515,7 @@ describe("assemble", () => {
       shapeValidator: pod.validator,
       fileExchange: { open: async () => ({ name: "verbs.ttl", text }), save: () => undefined },
       storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
     const created = await useCases.createReleaseDraft(
@@ -1550,6 +1560,7 @@ describe("assemble", () => {
       shapeValidator: pod.validator,
       fileExchange: { open: async () => ({ name: "git.ttl", text }), save: () => undefined },
       storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: { listPublished: async () => [] },
       now: () => new Date(NOW),
     });
     const created = await useCases.createReleaseDraft(
@@ -1632,6 +1643,7 @@ describe("assemble", () => {
         shapeValidator: pod.validator,
         fileExchange: {} as never,
         storageGateway: { discoverStorages: async () => [] },
+        releasePublisher: { listPublished: async () => [] },
         now: () => new Date(NOW),
       });
       const created = await useCases.createReleaseDraft(
@@ -2186,6 +2198,328 @@ describe("publishing a draft whose subject another app gave a class (GHSA-8hh7-p
     expect(classesOf(`${target}#q-a-1a-d1`)).toEqual([
       `${SM}Distractor`,
       "https://schema.org/Answer",
+    ]);
+  });
+});
+
+describe("publishing a draft whose series another app gave versions (GHSA-8frq-fhj8-9226)", () => {
+  const DCAT = "http://www.w3.org/ns/dcat#";
+  const NOTES = "http://www.w3.org/ns/adms#versionNotes";
+  const releaseAt = (folder: string, version: number) =>
+    `${INSTANCE}${folder}/http/v${version}.ttl`;
+
+  /**
+   * The HTTP status codes deck published at each of `chain` in turn, each
+   * version after the first made from the one before as the Studio makes
+   * it, and a draft of the version after the last (the first, when there
+   * is none), with `turtle` added as another app would, of its series.
+   */
+  async function planted(
+    chain: readonly string[],
+    turtle: (draftUrl: string, series: string) => string,
+  ) {
+    const pod = await draftPod({ checked: true });
+    const release = await pod.repository.parseRelease(
+      readFileSync(join(DECKS_ROOT, "http-status-codes/v1.ttl"), "utf8"),
+      "turtle",
+    );
+    let draftUrl = draftUrlOf(INSTANCE, "http", 1);
+    const made = releaseToDraft(release, draftUrl);
+    await pod.repository.create(INSTANCE, {
+      ...made,
+      root: { ...made.root, inSeries: `${draftUrl}#series`, isVersionOf: `${draftUrl}#series` },
+    });
+    for (const [at, url] of chain.entries()) {
+      await pod.put(url, await pod.repository.assemble(draftUrl, url, NOW));
+      draftUrl = draftUrlOf(INSTANCE, "http", at + 2);
+      await pod.repository.create(
+        INSTANCE,
+        nextVersionDraft(await pod.repository.readRelease(url), draftUrl),
+      );
+    }
+    const series = chain.length === 0 ? `${draftUrl}#series` : `${chain[0]}#series`;
+    await pod.put(draftUrl, `${await pod.text(draftUrl)}${turtle(draftUrl, series)}`);
+    const { version } = await pod.repository.read(draftUrl);
+    return { pod, draftUrl, series, version };
+  }
+
+  /** The series listing `versions`, each described with notes, and a version that is no address. */
+  const listing = (series: string, versions: readonly string[]) => `
+<${series}> <${DCAT}hasVersion> "v9" ;
+  <${DCAT}last> [ <${NOTES}> "Planted" ] .
+${versions
+  .map(
+    (version) => `<${series}> <${DCAT}hasVersion> <${version}> .
+<${version}> a <${DCAT}Dataset> ;
+  <${DCAT}version> "${/v([0-9]+)\.ttl$/.exec(version)![1]}" ;
+  <${NOTES}> "Notes of ${version}" ;
+  <${SM}planted> [ <${NOTES}> "Planted" ] .
+`,
+  )
+  .join("")}`;
+
+  /** What the release at `target`, published from the draft, lists and states of each version but itself. */
+  async function published(pod: Awaited<ReturnType<typeof planted>>, target: string) {
+    const turtle = await pod.pod.repository.assemble(pod.draftUrl, target, NOW, pod.version);
+    const quads = await quadsOfTurtle(turtle, target);
+    const listed = quads
+      .filter(
+        (quad) => quad.subject.value === pod.series && quad.predicate.value === `${DCAT}hasVersion`,
+      )
+      .map((quad) => quad.object.value)
+      .sort();
+    return { turtle, quads, listed };
+  }
+
+  /** The statements of `subject`, as lines to compare. */
+  const statementsOf = (quads: readonly Quad[], subject: string) =>
+    quads
+      .filter((quad) => quad.subject.value === subject)
+      .map((quad) => `${quad.predicate.value} ${quad.object.value}`)
+      .sort();
+
+  it("lists none of them, nor what only they led to: its series lists the release alone", async () => {
+    const draft = await planted([], (_, series) =>
+      listing(series, [releaseAt("releases", 2), releaseAt("releases", 0)]),
+    );
+    const target = releaseAt("releases", 1);
+    const { turtle, listed } = await published(draft, target);
+    expect(listed).toEqual([]);
+    expect(turtle).not.toContain(releaseAt("releases", 2));
+    expect(turtle).not.toContain("Planted");
+    expect(turtle).not.toContain('"v9"');
+    const deck = toStandaloneLibraryDeck(
+      target,
+      datasetFromQuads(await quadsOfTurtle(turtle, target)),
+    );
+    expect(deck.releases.map((one) => one.url)).toEqual([target]);
+  });
+
+  it("states of the earlier versions only what the version it follows does", async () => {
+    const chain = [releaseAt("releases", 1), releaseAt("releases", 2)];
+    const draft = await planted(chain, (_, series) =>
+      listing(series, [...chain, releaseAt("releases", 4), releaseAt("other", 1)]),
+    );
+    const target = releaseAt("releases", 3);
+    const { turtle, quads, listed } = await published(draft, target);
+    expect(listed).toEqual([...chain, target].sort());
+    expect(turtle).not.toContain("Notes of");
+    expect(turtle).not.toContain("Planted");
+    expect(turtle).not.toContain(releaseAt("releases", 4));
+    expect(turtle).not.toContain(releaseAt("other", 1));
+    const before = await quadsOfTurtle(await draft.pod.text(chain[1]!), chain[1]!);
+    expect(statementsOf(quads, chain[0]!)).toEqual(statementsOf(before, chain[0]!));
+    const described = quads
+      .filter((quad) => quad.subject.value === chain[1])
+      .map((quad) => quad.predicate.value.split(/[#/]/).at(-1));
+    expect([...new Set(described)].sort()).toEqual(["description", "title", "type", "version"]);
+  });
+
+  it("keeps the versions the one it follows lists, published in another folder", async () => {
+    const chain = [releaseAt("first", 1), releaseAt("second", 2)];
+    const draft = await planted(chain, (_, series) => listing(series, chain));
+    const target = releaseAt("third", 3);
+    const { turtle, listed } = await published(draft, target);
+    expect(listed).toEqual(expect.arrayContaining(chain));
+    expect(turtle).not.toContain("Notes of");
+  });
+
+  it("states nothing of a later address the series names otherwise than as a version", async () => {
+    const chain = [releaseAt("releases", 1)];
+    const later = releaseAt("releases", 5);
+    const draft = await planted(
+      chain,
+      (_, series) => `
+<${series}> <${DCAT}next> <${later}> .
+<${later}> <${DCAT}version> "5" ;
+  <${NOTES}> "Planted" ;
+  <${DCAT}inSeries> <${series}> .
+`,
+    );
+    const { turtle, listed } = await published(draft, releaseAt("releases", 2));
+    expect(listed).toEqual([chain[0], releaseAt("releases", 2)]);
+    expect(turtle).not.toContain(later);
+    expect(turtle).not.toContain("Planted");
+  });
+
+  it("lists no later version than the one it follows, when the draft names another to follow", async () => {
+    const chain = [releaseAt("releases", 1)];
+    const { pod, draftUrl } = await planted(chain, () => "");
+    // Another release, numbered 1, whose series lists a version 3 beside it.
+    const other = releaseAt("other", 9);
+    const third = releaseAt("other", 3);
+    await pod.put(
+      other,
+      `${await pod.repository.assemble(draftUrlOf(INSTANCE, "http", 1), other, NOW)}
+<${other}#series> <${DCAT}hasVersion> <${third}> .
+<${third}> a <${DCAT}Dataset> ;
+  <http://purl.org/dc/terms/title> "HTTP status codes"@en ;
+  <${DCAT}version> "3" ;
+  <${NOTES}> "Planted" .
+`,
+    );
+    await pod.put(
+      draftUrl,
+      `${(await pod.text(draftUrl)).split(chain[0]!).join(other)}
+<${other}#series> <${DCAT}hasVersion> <${third}> .
+<${third}> a <${DCAT}Dataset> ;
+  <${DCAT}version> "3" .
+`,
+    );
+    const { draft, version } = await pod.repository.read(draftUrl);
+    expect(draft.root.prev).toBe(other);
+    const target = releaseAt("releases", 2);
+    const { turtle, listed } = await published(
+      { pod, draftUrl, series: `${other}#series`, version },
+      target,
+    );
+    expect(listed).toEqual([other, target].sort());
+    expect(turtle).not.toContain(third);
+    expect(turtle).not.toContain("Planted");
+    const deck = toStandaloneLibraryDeck(
+      target,
+      datasetFromQuads(await quadsOfTurtle(turtle, target)),
+    );
+    expect(deck.releases.map(({ url, version: number }) => [url, number]).sort()).toEqual([
+      [other, "1"],
+      [target, "2"],
+    ]);
+  });
+
+  /**
+   * The HTTP status codes deck published at `v1` and `v2` as the Studio
+   * publishes them, each with notes of its own, and a draft of version 3
+   * made from `v2`; and the Studio's use cases over the pod, for an
+   * instance whose catalog links `published`, whose publishing is caught.
+   */
+  async function publishedTwice(v1: string, v2: string, published: readonly string[]) {
+    const pod = await draftPod({ checked: true });
+    const release = await pod.repository.parseRelease(
+      readFileSync(join(DECKS_ROOT, "http-status-codes/v1.ttl"), "utf8"),
+      "turtle",
+    );
+    const d1 = draftUrlOf(INSTANCE, "http", 1);
+    const made = releaseToDraft(release, d1);
+    await pod.repository.create(INSTANCE, {
+      ...made,
+      root: { ...made.root, inSeries: `${d1}#series`, isVersionOf: `${d1}#series` },
+    });
+    await pod.put(v1, await pod.repository.assemble(d1, v1, NOW));
+    const d2 = draftUrlOf(INSTANCE, "http", 2);
+    await pod.repository.create(
+      INSTANCE,
+      nextVersionDraft(await pod.repository.readRelease(v1), d2),
+    );
+    await pod.put(d2, `${await pod.text(d2)}\n<${d2}> <${NOTES}> "Second release." .\n`);
+    await pod.put(v2, await pod.repository.assemble(d2, v2, NOW));
+    const d3 = draftUrlOf(INSTANCE, "http", 3);
+    await pod.repository.create(
+      INSTANCE,
+      nextVersionDraft(await pod.repository.readRelease(v2), d3),
+    );
+    const drafts = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: {} as never,
+      deckLibrary: { readLibraryIndex: async () => ({ url: `${DECKS}index.ttl` }) } as never,
+      shapeValidator: pod.validator,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: { listPublished: async () => [...published] },
+      now: () => new Date(NOW),
+    });
+    const publish = vi.fn(async () => ({ public: true }));
+    const publishing = createReleasePublishingUseCases({
+      drafts,
+      releaseDraftRepository: pod.repository,
+      releasePublisher: { publish } as never,
+      shapeValidator: { validateRelease: async () => [] },
+      deckLibrary: {} as never,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    return { pod, d2, d3, drafts, publishing, publish };
+  }
+
+  const markdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
+
+  it.each([
+    ["outside the instance", `${POD}elsewhere/http/v9.ttl`, false],
+    [
+      "in the instance, but neither in its releases folder nor linked",
+      releaseAt("other", 2),
+      false,
+    ],
+    ["among the drafts", `${INSTANCE}drafts/other/http/v2.ttl`, false],
+    ["among the drafts, though its catalog links it", `${INSTANCE}drafts/other/http/v2.ttl`, true],
+  ])(
+    "refuses to publish a draft that follows a release %s, and publishes nothing",
+    async (_, elsewhere, linked) => {
+      const v1 = releaseAt("releases", 1);
+      const v2 = releaseAt("releases", 2);
+      const { pod, d2, d3, drafts, publishing, publish } = await publishedTwice(
+        v1,
+        v2,
+        linked ? [v1, v2, elsewhere] : [v1, v2],
+      );
+      // Numbered 2, in a series of its own that lists v1 with other notes.
+      await pod.put(
+        elsewhere,
+        `${await pod.repository.assemble(d2, elsewhere, NOW)}
+<${elsewhere}#series> <${DCAT}hasVersion> <${v1}> .
+<${v1}> <${NOTES}> "Planted" .
+`
+          .split(`${v1}#series`)
+          .join(`${elsewhere}#series`),
+      );
+      await pod.put(
+        d3,
+        (await pod.text(d3))
+          .split(v2)
+          .join(elsewhere)
+          .split(`${v1}#series`)
+          .join(`${elsewhere}#series`),
+      );
+      const { draft } = await drafts.readReleaseDraft(d3);
+      expect(draft.root.prev).toBe(elsewhere);
+      const check = await drafts.checkReleaseDraft(draft, markdownCheck, "pod");
+      expect(check.drops).toEqual([
+        expect.objectContaining({
+          code: "previousElsewhere",
+          severity: "error",
+          params: { previous: elsewhere },
+        }),
+      ]);
+      const target = releaseAt("releases", 3);
+      await expect(publishing.publishRelease(d3, target, markdownCheck)).rejects.toMatchObject({
+        code: "releaseHasErrors",
+      });
+      expect(publish).not.toHaveBeenCalled();
+      expect(await pod.urls()).not.toContain(target);
+    },
+  );
+
+  it("publishes a draft that follows a release the instance published in another folder, with the earlier versions as they were published", async () => {
+    // Outside the instance, linked from its catalog.
+    const v1 = `${POD}public/http/v1.ttl`;
+    const v2 = `${POD}public/http/v2.ttl`;
+    const { pod, d3, publishing, publish } = await publishedTwice(v1, v2, [v1, v2]);
+    const target = releaseAt("releases", 3);
+    await publishing.publishRelease(d3, target, markdownCheck);
+    expect(publish).toHaveBeenCalledWith(INSTANCE, expect.any(String), target);
+    const turtle = (publish.mock.calls[0] as unknown as [string, string])[1];
+    const listed = async (url: string, text: string) =>
+      toStandaloneLibraryDeck(url, datasetFromQuads(await quadsOfTurtle(text, url)))
+        .releases.map(({ url: at, version, notes }) => [at, version, notes])
+        .sort();
+    // v1 as v2 published it, v2 as it published itself.
+    const before = await listed(v2, await pod.text(v2));
+    expect(before.map(([at]) => at)).toEqual([v1, v2]);
+    expect(before[1]![2]).toBe("Second release.");
+    expect(await listed(target, turtle)).toEqual([
+      before[0],
+      [v2, "2", undefined],
+      [target, "3", undefined],
     ]);
   });
 });

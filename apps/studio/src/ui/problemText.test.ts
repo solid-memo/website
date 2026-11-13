@@ -251,6 +251,11 @@ describe("problemMessage", () => {
     expect(say({ code: "libraryUnread", params: {} })).toContain(
       "The library's index could not be read",
     );
+    expect(
+      say({ code: "previousElsewhere", params: { previous: "https://other.example/v1.ttl" } }),
+    ).toBe(
+      "Follows <https://other.example/v1.ttl>, which is a release of neither this instance nor the library: a next version follows one of theirs, as its earlier versions are taken from it.",
+    );
   });
 
   it("says what a source or the release's making lacks, in English and Swedish", () => {

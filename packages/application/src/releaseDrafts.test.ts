@@ -20,6 +20,7 @@ import {
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
 import { sourcesOf } from "@solid-memo/domain/release/releaseMetadata";
+import { checkProblems } from "@solid-memo/domain/release/releaseCheck";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
@@ -32,7 +33,7 @@ import type {
   ReleaseDraftRepository,
   ShapeValidator,
 } from "./ports";
-import { createReleaseDraftUseCases } from "./releaseDrafts";
+import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const WEB_ID = "https://pod.example/profile/card#me";
@@ -71,6 +72,7 @@ function setUp({
   drafts = [] as ReleaseDraftSummary[],
   stored = courseDraft() as ReleaseDraft,
   storages = ["https://pod.example/"],
+  published = [] as string[],
 } = {}) {
   const repository = {
     list: vi.fn(async () => drafts),
@@ -106,6 +108,7 @@ function setUp({
       storages.map((url) => ({ url, source: "profile" as const })),
     ),
   };
+  const releasePublisher = { listPublished: vi.fn(async (_instanceUrl: string) => published) };
   const useCases = createReleaseDraftUseCases({
     releaseDraftRepository: repository,
     deckRepository,
@@ -113,6 +116,7 @@ function setUp({
     shapeValidator,
     fileExchange,
     storageGateway,
+    releasePublisher,
     now: () => new Date(NOW),
   });
   const created = () => repository.create.mock.calls.at(-1)![1];
@@ -123,6 +127,7 @@ function setUp({
     shapeValidator,
     fileExchange,
     storageGateway,
+    releasePublisher,
     useCases,
     created,
   };
@@ -1423,6 +1428,110 @@ describe("checkReleaseDraft", () => {
     ]);
     await useCases.checkReleaseDraft({ ...next }, markdownCheck, "pod");
     expect(repository.readRelease).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a draft that names as the release it follows one it cannot read, or not the version before (GHSA-8frq-fhj8-9226)", async () => {
+    const { useCases, repository } = setUp();
+    const draft = courseDraft();
+    // Whose series' versions publishing takes from it.
+    const V50 = V1.replace("v1.ttl", "v50.ttl");
+    const planted: ReleaseDraft = {
+      ...draft,
+      root: { ...draft.root, prev: V50, previousVersion: V50, version: "3" },
+    };
+    repository.readRelease.mockRejectedValueOnce(new AppError("releaseUnreadable", { url: V50 }));
+    const unread = await useCases.checkReleaseDraft(planted, markdownCheck, "pod");
+    expect(unread.drops).toEqual([
+      problem(
+        planted.url,
+        { code: "previousUnread", params: { previous: V50 } },
+        { related: [V50] },
+      ),
+    ]);
+    repository.readRelease.mockResolvedValueOnce({
+      ...rebaseDraft(v1, V50),
+      root: { ...rebaseDraft(v1, V50).root, version: "50" },
+    });
+    const read = await useCases.checkReleaseDraft({ ...planted }, markdownCheck, "pod");
+    expect(read.drops).toEqual([
+      problem(
+        planted.url,
+        { code: "versionNotNext", params: { version: 3, previousVersion: 50, previous: V50 } },
+        { related: [V50] },
+      ),
+    ]);
+    expect(checkProblems(read).filter((one) => one.severity === "error")).not.toEqual([]);
+  });
+
+  it("refuses a draft that follows a release the instance did not publish, which it does not read (GHSA-8frq-fhj8-9226)", async () => {
+    const following = (prev: string): ReleaseDraft => {
+      const draft = courseDraft();
+      return { ...draft, root: { ...draft.root, prev, version: "2" } };
+    };
+    const elsewhere = (prev: string) => [
+      problem(
+        following(prev).url,
+        { code: "previousElsewhere", params: { previous: prev } },
+        { related: [prev] },
+      ),
+    ];
+    const drops = async (useCases: ReleaseDraftUseCases, prev: string) =>
+      (await useCases.checkReleaseDraft(following(prev), markdownCheck, "pod")).drops;
+    // In the user's storage the instance is in, and in the instance outside its releases folder: not linked.
+    const beside = "https://pod.example/public/solid/v1.ttl";
+    const inside = `${INSTANCE}other/solid/v1.ttl`;
+    // Among the drafts no release is published, linked or not.
+    const drafted = `${INSTANCE}drafts/other/solid/v1.ttl`;
+    const { useCases, repository } = setUp({ published: [drafted] });
+    for (const prev of ["https://other.example/http/v1.ttl", beside, inside, drafted])
+      expect(await drops(useCases, prev)).toEqual(elsewhere(prev));
+    const check = await useCases.checkReleaseDraft(following(beside), markdownCheck, "pod");
+    expect(checkProblems(check).filter((one) => one.severity === "error")).toContainEqual(
+      elsewhere(beside)[0],
+    );
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    // In its releases folder, or linked from its catalog: read, and checked against.
+    const { useCases: linked, releasePublisher } = setUp({ published: [beside] });
+    expect(await drops(linked, V1)).toEqual([]);
+    expect(releasePublisher.listPublished).not.toHaveBeenCalled();
+    expect(await drops(linked, beside)).toEqual([]);
+    expect(releasePublisher.listPublished).toHaveBeenCalledWith(INSTANCE);
+  });
+
+  it("checks a draft against a release it follows only once the catalog can be read", async () => {
+    const { useCases, repository, releasePublisher } = setUp();
+    const draft = courseDraft();
+    const beside = "https://pod.example/public/solid/v1.ttl";
+    const next: ReleaseDraft = { ...draft, root: { ...draft.root, prev: beside, version: "2" } };
+    releasePublisher.listPublished.mockRejectedValueOnce(new Error("offline"));
+    expect((await useCases.checkReleaseDraft(next, markdownCheck, "pod")).drops).toEqual([
+      problem(
+        next.url,
+        { code: "previousUnread", params: { previous: beside } },
+        { related: [beside] },
+      ),
+    ]);
+    expect(repository.readRelease).not.toHaveBeenCalled();
+  });
+
+  it("checks a draft that follows a library release against it, and again when the library's index could not be read", async () => {
+    const { useCases, repository, deckLibrary } = setUp();
+    const draft = courseDraft();
+    const library = `${DECKS}solid/v1.ttl`;
+    const next: ReleaseDraft = { ...draft, root: { ...draft.root, prev: library, version: "2" } };
+    deckLibrary.readLibraryIndex.mockRejectedValueOnce(new Error("offline"));
+    const unread = await useCases.checkReleaseDraft(next, markdownCheck, "pod");
+    expect(unread.drops).toEqual([
+      problem(
+        next.url,
+        { code: "previousUnread", params: { previous: library } },
+        { related: [library] },
+      ),
+    ]);
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    const check = await useCases.checkReleaseDraft(next, markdownCheck, "pod");
+    expect(check.drops).toEqual([]);
+    expect(repository.readRelease).toHaveBeenCalledWith(library);
   });
 
   it("runs the shapes again when they failed", async () => {

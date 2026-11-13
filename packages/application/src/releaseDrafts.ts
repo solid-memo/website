@@ -13,6 +13,7 @@ import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
 import {
   draftContainerOf,
   draftNameFor,
+  draftsContainerOf,
   draftPlaceOf,
   draftUrlOf,
   type ReleaseDraftSummary,
@@ -60,7 +61,11 @@ import {
   type ReleaseCheck,
 } from "@solid-memo/domain/release/releaseCheck";
 import { FOAF_NAME, type ReleaseModel } from "@solid-memo/domain/release/releaseModel";
-import { isDraftsPlaceOnward, releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
+import {
+  isDraftsPlaceOnward,
+  releasePlaceOf,
+  releasesContainerOf,
+} from "@solid-memo/domain/release/releasePlace";
 import {
   rebaseDraft,
   releaseToDraft,
@@ -72,6 +77,7 @@ import type {
   DeckRepository,
   FileExchange,
   ReleaseDraftRepository,
+  ReleasePublisher,
   ShapeValidator,
   StorageGateway,
 } from "./ports";
@@ -467,6 +473,7 @@ export function createReleaseDraftUseCases({
   shapeValidator,
   fileExchange,
   storageGateway,
+  releasePublisher,
   now,
 }: {
   releaseDraftRepository: ReleaseDraftRepository;
@@ -475,6 +482,8 @@ export function createReleaseDraftUseCases({
   shapeValidator: ShapeValidator;
   fileExchange: FileExchange;
   storageGateway: Pick<StorageGateway, "discoverStorages">;
+  /** The releases the instance published, which a draft may follow (isFollowable). */
+  releasePublisher: Pick<ReleasePublisher, "listPublished">;
   now: () => Date;
 }): ReleaseDraftUseCases {
   /** Each release a draft follows, by URL: releases are frozen, so each is read once. */
@@ -521,6 +530,60 @@ export function createReleaseDraftUseCases({
   }
 
   /**
+   * Whether the release `prev` may be the one the draft follows, which
+   * publishing takes the series' earlier versions, and what is stated of
+   * them, from: one the instance published, in its releases folder
+   * (releasesContainerOf) or linked from its catalog
+   * (`sm:publishedRelease`), or one of the library's, in its index's
+   * folder. Never one in its drafts folder, where no release is
+   * published. Another app that can write the draft can name any
+   * release, and write one among the drafts (GHSA-8frq-fhj8-9226): only
+   * the instance's own releases, what its catalog says it published, and
+   * the library are not the draft's to write. Fails when the catalog or
+   * the library's index cannot be read.
+   */
+  async function isFollowable(draftUrl: string, prev: string): Promise<boolean> {
+    // A draft is read only at a draft's place.
+    const { instanceUrl } = draftPlaceOf(draftUrl)!;
+    if (isDocumentIn(prev, draftsContainerOf(instanceUrl))) return false;
+    if (isDocumentIn(prev, releasesContainerOf(instanceUrl))) return true;
+    if ((await releasePublisher.listPublished(instanceUrl)).includes(prev)) return true;
+    const index = await deckLibrary.readLibraryIndex();
+    return isDocumentIn(prev, new URL(".", index.url).href);
+  }
+
+  /**
+   * The draft against the release it follows (continuityProblems): one
+   * that is neither the instance's nor the library's (isFollowable) is
+   * a problem of its own (previousElsewhere), and is not read; one that
+   * cannot be read, or whose place cannot be told, is previousUnread.
+   */
+  async function dropsOf(
+    draft: ReleaseDraft,
+    model: ReleaseModel,
+    prev: string,
+  ): Promise<ReleaseProblem[]> {
+    const unread = () => [
+      problem(
+        draft.url,
+        { code: "previousUnread", params: { previous: prev } },
+        { related: [prev] },
+      ),
+    ];
+    const followable = await isFollowable(draft.url, prev).catch(() => null);
+    if (followable === null) return unread();
+    if (!followable)
+      return [
+        problem(
+          draft.url,
+          { code: "previousElsewhere", params: { previous: prev } },
+          { related: [prev] },
+        ),
+      ];
+    return releaseModel(prev).then((before) => continuityProblems(before, model), unread);
+  }
+
+  /**
    * The rules of the draft, its Markdown, and the parts that read what
    * is elsewhere: against the release it follows, and its place in the
    * library. A part that cannot read what it needs is a problem of its
@@ -534,18 +597,7 @@ export function createReleaseDraftUseCases({
     const model = draftReleaseModel(draft);
     const { prev } = draft.root;
     const [drops, library] = await Promise.all([
-      prev === undefined
-        ? []
-        : releaseModel(prev).then(
-            (before) => continuityProblems(before, model),
-            () => [
-              problem(
-                draft.url,
-                { code: "previousUnread", params: { previous: prev } },
-                { related: [prev] },
-              ),
-            ],
-          ),
+      prev === undefined ? [] : dropsOf(draft, model, prev),
       policy === "pod"
         ? []
         : libraryPlace(draft).then(

@@ -1202,6 +1202,7 @@
       "versionNotNext": "Version {version} does not follow {previous}, version {previousVersion}.",
       "seriesNotOwn": "Follows no release, yet names {series} as its series: a first version starts a series of its own.",
       "seriesNotPrevious": "Names {series} as its series, which is neither its own nor where {previous}, the release it follows, is: a next version stays in the series of the release it follows.",
+      "previousElsewhere": "Follows {previous}, which is a release of neither this instance nor the library: a next version follows one of theirs, as its earlier versions are taken from it.",
       "outlineWithoutCourse": "Has chapters or steps, but is no course.",
       "courseWithoutChapter": "A course has at least one chapter.",
       "courseDirection": "A course is studied front to back; this states {stated}.",

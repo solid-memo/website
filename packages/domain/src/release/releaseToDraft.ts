@@ -116,7 +116,7 @@ function inOwnSeries(release: ReleaseDraft): ReleaseDraft {
 }
 
 /** How a series names its versions (DCAT): each a link from the series to one. */
-const VERSION_LINKS = new Set(
+export const VERSION_LINKS: ReadonlySet<string> = new Set(
   ["first", "last", "hasVersion", "hasCurrentVersion", "prev", "previousVersion"].map(
     (name) => `${DCAT_NS}${name}`,
   ),

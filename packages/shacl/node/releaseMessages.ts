@@ -89,8 +89,10 @@ function markdownText(problem: MarkdownProblem): string {
  * results (the Studio's: the library's command words what the shapes
  * find as the shapes do), `versionNotNext`, a pod's own series
  * (`seriesNotOwn`, `seriesNotPrevious`: the command checks the
- * library, whose index places a series), and the Studio's own parts
- * not read (the command reads every release, or fails).
+ * library, whose index places a series), the release followed being
+ * neither the instance's nor the library's (`previousElsewhere`: the
+ * Studio's, for a draft), and the Studio's own parts not read (the
+ * command reads every release, or fails).
  */
 export type WordedProblem = Exclude<
   ReleaseProblem,
@@ -98,7 +100,7 @@ export type WordedProblem = Exclude<
   | ReadinessProblem
   | ShapeProblem
   | UnreadProblem
-  | { code: "versionNotNext" | "seriesNotOwn" | "seriesNotPrevious" }
+  | { code: "versionNotNext" | "seriesNotOwn" | "seriesNotPrevious" | "previousElsewhere" }
 >;
 
 /**

@@ -230,6 +230,7 @@ export function createUseCases({
     shapeValidator,
     fileExchange,
     storageGateway,
+    releasePublisher,
     now,
   });
   const instances = createInstanceUseCases({
