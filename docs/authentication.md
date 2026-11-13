@@ -437,7 +437,9 @@ again, before authFetch sees the response
 Inrupt's sign-in client gives the app no ID token short of ending the session, so it can't.
 
 When a request fails and wasn't aborted, authFetch asks the same
-address with a HEAD as no one, the redirect not followed:
+address with a HEAD as no one, the redirect not followed. The HEAD
+carries the request's signal, and a request aborted while it asks
+fails as it first did, without being sent again:
 
 - **No redirect:** the failure is passed on as it came.
 - **A read** (GET, HEAD, OPTIONS) that redirects is sent again as no

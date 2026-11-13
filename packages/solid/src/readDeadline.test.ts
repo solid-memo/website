@@ -61,6 +61,68 @@ describe("withReadDeadline", () => {
     });
   });
 
+  it("gives up on a read whose fetch never settles, even on the abort", async () => {
+    const deaf = vi.fn(() => new Promise<Response>(() => {}));
+    const idle = withReadDeadline(deaf, 50)("https://pod.example/a.ttl");
+    const whole = withReadDeadline(deaf, 50, 30)("https://pod.example/b.ttl");
+    const failed = Promise.allSettled([idle, whole]);
+    await vi.advanceTimersByTimeAsync(50);
+    expect(await failed).toMatchObject([
+      { status: "rejected", reason: { code: "podNoAnswer", vars: { seconds: 0.05 } } },
+      { status: "rejected", reason: { code: "podNoAnswer", vars: { seconds: 0.03 } } },
+    ]);
+    // Given up on, it has no deadline left to pass.
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("fails a read the caller aborts, before or while it is sent, though its fetch never settles", async () => {
+    const deaf = () => new Promise<Response>(() => {});
+    const caller = new AbortController();
+    const read = withReadDeadline(deaf, 50)("https://pod.example/a.ttl", {
+      signal: caller.signal,
+    });
+    const failed = expect(read).rejects.toBe("stopped");
+    caller.abort("stopped");
+    await failed;
+    await expect(
+      withReadDeadline(deaf, 50)("https://pod.example/a.ttl", {
+        signal: AbortSignal.abort("never sent"),
+      }),
+    ).rejects.toBe("never sent");
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("lets go of an answer that comes after the read was given up on", async () => {
+    let cancelled: unknown;
+    const fetch = withReadDeadline(
+      () =>
+        new Promise<Response>((resolve) =>
+          setTimeout(
+            () =>
+              resolve(
+                new Response(
+                  new ReadableStream({
+                    cancel: () => {
+                      cancelled = true;
+                      throw new Error("already gone");
+                    },
+                  }),
+                ),
+              ),
+            100,
+          ),
+        ),
+      50,
+    );
+    const failed = expect(fetch("https://pod.example/a.ttl")).rejects.toMatchObject({
+      code: "podNoAnswer",
+    });
+    await vi.advanceTimersByTimeAsync(50);
+    await failed;
+    await vi.advanceTimersByTimeAsync(50);
+    expect(cancelled).toBe(true);
+  });
+
   it("waits for a HEAD or OPTIONS, and a Request's own method, as for a GET", async () => {
     const fetch = withReadDeadline(silent, 50);
     const reads = [

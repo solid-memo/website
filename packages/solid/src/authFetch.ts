@@ -42,12 +42,14 @@ export const anonymousFetch: typeof globalThis.fetch = (input, init) =>
  * again with fresh credentials where a redirected request ends 401 or
  * 403, may take the user's credentials to another. When a request
  * fails, and wasn't aborted, a HEAD as no one asks whether the address
- * redirects; if it does, a read is asked again as no one, the redirect
- * followed (a public profile behind one, say), and its answer kept only
- * when it did follow one; a write is refused (`redirectRefused`). Any
- * other failure is passed on. The HEAD asks as no one, so a server that
- * sends only visitors with no login elsewhere (to a login page, say)
- * shows a failed write there as a refused redirect.
+ * redirects, aborted with the request and its failure passed on if the
+ * request is aborted meanwhile; if it does, a read is asked again as no
+ * one, the redirect followed (a public profile behind one, say), and
+ * its answer kept only when it did follow one; a write is refused
+ * (`redirectRefused`). Any other failure is passed on. The HEAD asks as
+ * no one, so a server that sends only visitors with no login elsewhere
+ * (to a login page, say) shows a failed write there as a refused
+ * redirect.
  *
  * It refuses, before anything is sent, an address the proof of the
  * user's login would name another server for (`credentialsRefused`,
@@ -90,7 +92,8 @@ export function createAuthFetch(
     try {
       response = await client.fetch(input, { ...init, redirect: "error" });
     } catch (error) {
-      if ((init?.signal ?? request?.signal)?.aborted || !(await redirects(url))) throw error;
+      const signal = init?.signal ?? request?.signal;
+      if (signal?.aborted || !(await redirects(url, signal)) || signal?.aborted) throw error;
       const method = (init?.method ?? request?.method ?? "GET").toUpperCase();
       if (!READS.has(method)) throw new AppError("redirectRefused", { method, url });
       const answer = await anonymousFetch(input, init);
@@ -128,11 +131,12 @@ function namesAnotherServer(url: string): boolean {
 /**
  * Whether `url` answers with a redirect, asked as no one and not
  * followed: a browser shows such an answer as an opaque one, other
- * runtimes by its status. False when it can't be asked.
+ * runtimes by its status. False when it can't be asked, or the
+ * request it asks for is aborted first (`signal`).
  */
-async function redirects(url: string): Promise<boolean> {
+async function redirects(url: string, signal: AbortSignal | undefined): Promise<boolean> {
   try {
-    const answer = await anonymousFetch(url, { method: "HEAD", redirect: "manual" });
+    const answer = await anonymousFetch(url, { method: "HEAD", redirect: "manual", signal });
     return answer.type === "opaqueredirect" || REDIRECTS.has(answer.status);
   } catch {
     return false;

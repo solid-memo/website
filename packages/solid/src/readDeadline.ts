@@ -11,9 +11,9 @@ export const READ_DEADLINE_MS = 10_000;
  * How long a read of a server that is not the user's may take in all,
  * in milliseconds, its body too: far longer than the largest release
  * in the library takes to download, but a server that answers and then
- * sends its body slowly holds up no reader for good. A read of the
- * user's own pod has none, so a large document on a slow connection
- * still downloads.
+ * sends its body slowly holds up no reader for good. A read in the
+ * user's own storages has none, so a large document on a slow
+ * connection still downloads.
  */
 export const WHOLE_READ_MS = 120_000;
 
@@ -34,7 +34,9 @@ const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
  * a link alike. Without them, a server that never answers, or answers
  * and then sends its body slowly or not at all, would keep a screen
  * loading for good, and a check that waits on the read would never
- * end. The first part of a body is asked for as soon as the answer
+ * end. They hold whatever the fetch it wraps does: the read fails when
+ * they pass even if that fetch never settles on the abort, and so does
+ * its body. The first part of a body is asked for as soon as the answer
  * comes, read or not, and each next one only when the reader asks for
  * it, so a reader that takes its time is not cut off for it. A write
  * has none: one cut off might still be saved, and only its answer says
@@ -72,7 +74,21 @@ export function withReadDeadline(
     wait = setTimeout(giveUp(ms), ms);
     let response: Response;
     try {
-      response = await fetch(input, { ...init, signal });
+      const answer = fetch(input, { ...init, signal });
+      // An answer that comes after the read was given up on is let go.
+      answer.then(
+        (after) => {
+          if (signal.aborted) after.body?.cancel().catch(() => undefined);
+        },
+        () => undefined,
+      );
+      const abort = aborted(signal);
+      try {
+        // The abort comes first, so a read already given up on never wins with an answer let go.
+        response = await Promise.race([abort.promise, answer]);
+      } finally {
+        abort.stop();
+      }
     } catch (error) {
       done();
       if (late === undefined || caller?.aborted) throw error;
@@ -123,4 +139,21 @@ export function withReadDeadline(
     Object.defineProperty(timed, "redirected", { value: response.redirected });
     return timed;
   };
+}
+
+/**
+ * A promise that fails as `signal` says once it is aborted, and never
+ * settles before, and a function that stops it listening once the race
+ * it is in is settled.
+ */
+function aborted(signal: AbortSignal): { promise: Promise<never>; stop: () => void } {
+  const controller = new AbortController();
+  const promise = new Promise<never>((_resolve, reject) => {
+    if (signal.aborted) reject(signal.reason);
+    signal.addEventListener("abort", () => reject(signal.reason), {
+      once: true,
+      signal: controller.signal,
+    });
+  });
+  return { promise, stop: () => controller.abort() };
 }
