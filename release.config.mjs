@@ -113,6 +113,23 @@ export const parserOpts = {
   fieldPattern: null,
 };
 
+/**
+ * The notes' sections, in this order, and the types each one lists: the
+ * preset's own, but for `fix`, which it heads "Bug Fixes". The list
+ * replaces the preset's whole: a type it leaves out, such as docs: or
+ * ci:, is left out of the notes, as the preset hides those too. The
+ * version chosen does not depend on it.
+ */
+export const presetConfig = {
+  types: [
+    { type: "feat", section: "Features" },
+    { type: "feature", section: "Features" },
+    { type: "fix", section: "Fixes" },
+    { type: "perf", section: "Performance Improvements" },
+    { type: "revert", section: "Reverts" },
+  ],
+};
+
 export default {
   branches: ["main"],
   tagFormat: "v${version}",
@@ -131,6 +148,7 @@ export default {
       {
         preset: "conventionalcommits",
         parserOpts,
+        presetConfig,
         releaseRules: [{ type: "revert", release: "patch" }],
       },
     ],

@@ -220,7 +220,7 @@ The commit's subject names what it adds, so the changelog does too:
 
 The release writes [CHANGELOG.md](../CHANGELOG.md), each version's
 entry under the file's header, newest first. `feat` commits go under
-"Features", `fix` commits under "Bug Fixes", and so on, each line a
+"Features", `fix` commits under "Fixes", and so on, each line a
 commit's subject with its scope and a link to the commit. A breaking
 change comes first, under "BREAKING CHANGES", with its footer's text.
 Commits of the other types are left out.

@@ -220,6 +220,18 @@ describe("the commits, as the release reads them", () => {
     expect(written).not.toContain("say why");
   });
 
+  it('heads fixes "Fixes" and keeps the other sections', async () => {
+    const written = await notes(
+      { hash: "a".repeat(40), message: "fix(studio): keep a draft's title\n\nWhy." },
+      { hash: "b".repeat(40), message: "perf(solid): read a deck once\n\nWhy." },
+      { hash: "c".repeat(40), message: "ci: cache the images\n\nWhy." },
+    );
+    expect(written).toContain("### Fixes");
+    expect(written).not.toContain("Bug Fixes");
+    expect(written).toContain("### Performance Improvements");
+    expect(written).not.toContain("cache the images");
+  });
+
   // The release commit's message, as @semantic-release/git fills in its
   // template: GitHub skips CI on a push whose message holds a skip
   // keyword anywhere, and the deploy runs only after CI on it.
