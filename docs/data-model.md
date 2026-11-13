@@ -94,15 +94,24 @@ flowchart LR
   `caf%E9`, is shown as written (`lastPathSegment` in
   [urls.ts](../packages/solid/src/urls.ts)). A registration that still
   can't be read as an instance is left out, and the rest of the list
-  still loads. An index or a preferences file that isn't there (404,
-  410), or that can't be parsed, counts as none. One that can't be read
-  right now fails the list: refused (401, 403), any other failure, or
-  no answer at all (`readsAsNone` in
-  [datasets.ts](../packages/solid/src/datasets.ts)). An access token may
-  expire while the app is in the background, and a list read again with
-  it must not come back empty, which would offer to create an instance
-  the user already has. The app keeps the list it read before, and shows
-  the error only when it has none. A type index is data another app may have written, and
+  still loads. An index, a preferences file or an extended profile
+  counts as none only when it isn't there (404, 410), can't be parsed
+  or goes past the read's limits, even before it's sent (`readsAsNone`
+  in [datasets.ts](../packages/solid/src/datasets.ts)). One outside
+  the profile's own places, or past the `MAX_PROFILE_DOCUMENTS` a
+  profile is read in, isn't read at all and holds none either. One
+  that can't be read right now fails the list. That's a refusal (401,
+  403), any other status, no answer in time (`podNoAnswer`) or any
+  other of the app's errors, an abort whatever its reason, no answer
+  at all, or an error caused by one of these. An address the app
+  doesn't send the user's login to (`credentialsRefused`), such as an
+  index whose path names another server, fails the list too, each
+  time it's read, until the link to the index is fixed. An access
+  token may expire while the app is in the background, or a pod may
+  be slow to answer. A list read again then must not come back empty,
+  which would offer to create an instance the user already has. The
+  app keeps the list it read before, and shows the error only when it
+  has none. A type index is data another app may have written, and
   every instance listed is read. So the app follows the first
   `MAX_CATALOG_LINKS` (1,000) instances of both indexes, the private
   one first, and the list says when it is that long.

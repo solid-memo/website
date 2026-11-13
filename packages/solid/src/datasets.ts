@@ -21,7 +21,7 @@ import {
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
 import { ReadLimitError } from "./client/interface";
-import { refusalOf } from "./client/readLimits";
+import { readThrough, refusalOf } from "./client/readLimits";
 import { deleteSolidDataset, readDocument, writeDocument } from "./client/resources";
 import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
 import { unlessNewer } from "./records";
@@ -219,10 +219,17 @@ async function fetchDataset(
   const document = documentUrlOf(url);
   const before = known.get(document);
   let read: Awaited<ReturnType<typeof readDocument>>;
+  let answered = false;
+  const noting: typeof globalThis.fetch = async (input, init) => {
+    const response = await fetch(input, init);
+    answered = true;
+    return readThrough(response, notingStreamFailure);
+  };
   try {
-    read = await readDocument(url, { fetch, ifNoneMatch: since ?? before?.etag });
+    read = await readDocument(url, { fetch: noting, ifNoneMatch: since ?? before?.etag });
   } catch (error) {
     known.delete(document);
+    if (!answered && typeof error === "object" && error !== null) UNPARSED.add(error);
     throw error;
   }
   // Asked without `since`, the version asked about is the one `before` was read at.
@@ -252,18 +259,62 @@ export async function getSolidDatasetOrNull(
 }
 
 /**
+ * The failures of reads (fetchDataset) that no parse gave: of a read
+ * the pod never answered, or of a body that failed on its way. A plain
+ * Error among them is whatever the fetch or the body's stream failed
+ * with, an abort's own reason for one, and not a parse failure.
+ */
+const UNPARSED = new WeakSet<object>();
+
+/**
+ * The stream, read through one that notes what it fails with in
+ * UNPARSED: the body of a read's answer, whatever its status, so a
+ * failure of the body of an error's answer is noted too.
+ */
+function notingStreamFailure(stream: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
+  const reader = stream.getReader();
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      const next = await reader.read().catch((error: unknown) => {
+        if (typeof error === "object" && error !== null) UNPARSED.add(error);
+        throw error;
+      });
+      if (next.done) controller.close();
+      else controller.enqueue(next.value);
+    },
+    cancel: reader.cancel.bind(reader),
+  });
+}
+
+/**
  * Whether a read's failure says the document is none to read: not there
- * (404, 410), or not one the app reads (it could not be parsed, it went
- * past its read limits, or it was refused before it was asked for). A
- * failure that says only that it could not be read now, a refusal (401,
- * 403), any other status or no answer at all (a network failure, a
- * TypeError from fetch), is not: the session may have expired while the
- * app was in the background, and what the document holds is unknown.
+ * (404, 410), or not one the app reads: past its read limits (a
+ * ReadLimitError, the read's budget refusing it before it is sent
+ * among them), or not parsed: a plain Error or a SyntaxError that a
+ * parse of a whole answer gave (the library's), whose causes, if it
+ * has any, are none too. Only these: any other failure says only that
+ * it could not be read now, and what the document holds is unknown. A
+ * refusal (401, 403) or any other status, no answer in time
+ * (podNoAnswer) or any other AppError, an abort, whatever its reason
+ * and whether it comes before the answer or while its body is read, a
+ * network failure (a TypeError from fetch), or an Error that wraps one
+ * is not none: the session may have expired while the app was in the
+ * background, or the pod may be slow to answer.
  */
 export function readsAsNone(error: unknown): boolean {
-  const status = statusOf(error);
-  if (status !== undefined) return status === 404 || status === 410;
-  return !(error instanceof TypeError);
+  const seen = new Set<unknown>();
+  for (let failure = error; !seen.has(failure); failure = (failure as Error).cause) {
+    seen.add(failure);
+    if (!(failure instanceof Error)) return false;
+    const status = statusOf(failure);
+    if (status !== undefined) return status === 404 || status === 410;
+    if (failure instanceof ReadLimitError) return true;
+    const kind = Object.getPrototypeOf(failure);
+    if (kind !== Error.prototype && kind !== SyntaxError.prototype) return false;
+    if (UNPARSED.has(failure) || failure.name !== kind.name) return false;
+    if (failure.cause === undefined) return true;
+  }
+  return false;
 }
 
 /** A document the pod served whole that could not be read (readForRemoval). */

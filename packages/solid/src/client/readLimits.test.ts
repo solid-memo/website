@@ -23,6 +23,7 @@ import {
   MAX_TERM_CHARACTERS,
   noneSpent,
   quadTally,
+  readThrough,
   refusalOf,
   RELEASE_LIMITS,
   sharedReadBudget,
@@ -199,6 +200,37 @@ describe("limitedFetch", () => {
     const response = await limitedFetch(async () => answer, LIMITS)(URL_);
     expect(response).toBe(answer);
     expect(limitsOf(response)).toBeUndefined();
+  });
+});
+
+describe("readThrough", () => {
+  const passing = (body: ReadableStream<Uint8Array>) => body.pipeThrough(new TransformStream());
+
+  it("gives the body read through the stream, its status, headers, URL and limits kept", async () => {
+    const limited = await limitedFetch(serving("0123456789".repeat(100)).fetch, LIMITS)(URL_);
+    const response = readThrough(limited, passing);
+    expect(response).not.toBe(limited);
+    expect(response).toMatchObject({ status: 200, statusText: "As sent", url: URL_ });
+    expect(response.redirected).toBe(false);
+    expect(response.headers.get("Content-Type")).toBe("text/turtle");
+    expect(limitsOf(response)).toBe(LIMITS);
+    await expect(response.text()).rejects.toBeDefined();
+    expect(refusalOf(response)).toMatchObject({ url: URL_, limits: LIMITS });
+  });
+
+  it("gives a body with no limits read through the stream, of any status", async () => {
+    const response = readThrough(new Response("text", { status: 206 }), passing);
+    expect(response.status).toBe(206);
+    expect(limitsOf(response)).toBeUndefined();
+    expect(await response.text()).toBe("text");
+  });
+
+  it("gives an answer with no body, or of a status with none, as it is", () => {
+    const none = new Response(null, { status: 204 });
+    expect(readThrough(none, passing)).toBe(none);
+    const empty = new Response("");
+    Object.defineProperty(empty, "status", { value: 304 });
+    expect(readThrough(empty, passing)).toBe(empty);
   });
 });
 

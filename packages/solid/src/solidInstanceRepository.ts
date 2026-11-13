@@ -382,7 +382,7 @@ async function readInstanceName(
   try {
     dataset = await readDataset(metaUrl, fetch);
   } catch (error) {
-    if (error instanceof AppError || !readsAsNone(error)) throw error;
+    if (!readsAsNone(error)) throw error;
     throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
   }
   const meta = getThing(dataset, `${metaUrl}#it`);
