@@ -32,6 +32,7 @@ import {
   isSafeWriteUrl,
   isSameUrl,
   monthOfHistoryUrl,
+  subjectOfDocument,
   ownsDocument,
   metaUrlOf,
   palettesUrlOf,
@@ -221,6 +222,25 @@ describe("where an instance's documents are", () => {
     expect(isSameUrl("https://Pod.example:443/a/./å", "https://pod.example/a/%C3%A5")).toBe(true);
     expect(isSameUrl("https://pod.example/a", "https://pod.example/b")).toBe(false);
     expect(isSameUrl("not an address", "not an address")).toBe(false);
+  });
+
+  it("tells a document's own subjects from those of another document it states things of", () => {
+    const own = subjectOfDocument("https://pod.example/memo/decks/deck-1.ttl");
+    expect(own("https://pod.example/memo/decks/deck-1.ttl#card-1")).toBe(true);
+    expect(own("https://pod.example/memo/decks/deck-1.ttl")).toBe(true);
+    // Another spelling of the same address is another subject: only the one fetched is its own.
+    expect(own("https://Pod.example/memo/decks/deck-1.ttl#card-1")).toBe(false);
+    expect(own("https://pod.example:443/memo/decks/deck-1.ttl#card-1")).toBe(false);
+    expect(own("https://pod.example/memo/./decks/deck-1.ttl#card-1")).toBe(false);
+    expect(own("https://elsewhere.example/x#card-1")).toBe(false);
+    expect(own("https://pod.example/memo/decks/deck-2.ttl#card-1")).toBe(false);
+    // A document spelled otherwise: that spelling, and the one fetched, are its own.
+    const spelled = subjectOfDocument("https://Pod.example:443/memo/decks/deck-1.ttl");
+    expect(spelled("https://Pod.example:443/memo/decks/deck-1.ttl#card-1")).toBe(true);
+    expect(spelled("https://pod.example/memo/decks/deck-1.ttl#card-1")).toBe(true);
+    expect(spelled("https://POD.example/memo/decks/deck-1.ttl#card-1")).toBe(false);
+    expect(subjectOfDocument("not an address")("not an address#card-1")).toBe(true);
+    expect(subjectOfDocument("not an address")("another#card-1")).toBe(false);
   });
 
   it("takes an instance's address as the user types it, as a request sends it", () => {

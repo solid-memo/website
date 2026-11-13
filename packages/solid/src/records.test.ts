@@ -904,7 +904,7 @@ describe("a date of any year a date holds", () => {
         `${PREFIXES}<${url}> a sm:Card ; sm:formatVersion 7 ; sm:front "f"@en ; sm:back "b"@en ;
   dcterms:created "${stored}"^^xsd:dateTime .`,
       );
-      const [card] = toCards(dataset);
+      const [card] = toCards(dataset, CARDS);
       expect(card!.createdAt).toBe(read);
       const edited = setThing(
         dataset,

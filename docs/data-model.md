@@ -449,10 +449,14 @@ No document Solid Memo names has any.
 - **A deck's documents are read wherever its entry names them.** Their
   folders and names are free: a user or a tool may rename `decks/` and
   `reviews/`, move the documents elsewhere in the pod, or lay the pod
-  out flat, with the instance at the pod's root. A deck can be used when
-  its entry is a subject of the instance's `catalog.ttl` and each
-  document is at an address a deck's may be (`isDeckInPlace`,
-  `isDeckDocumentAddress` in
+  out flat, with the instance at the pod's root. A moved document's
+  subjects are to name its new address. The app writes them as absolute
+  IRIs, so a copy byte for byte still names the old one. Its cards and
+  review states are then another document's subjects, which are never
+  read as the deck's. Relative IRIs (`<#card-1>`) move with the
+  document. A deck can be used when its entry is a subject of the
+  instance's `catalog.ttl` and each document is at an address a deck's
+  may be (`isDeckInPlace`, `isDeckDocumentAddress` in
   [deckAddress.ts](../packages/domain/src/deckAddress.ts)). That's plain
   http(s), with nothing a server might read as a step elsewhere (as
   above). It isn't a folder, an access control or metadata resource
@@ -799,7 +803,16 @@ graph LR
 - **Cards** are hash-fragment subjects (`#card-<uuid>`, or the library's
   own ids such as `#sweden` for imported decks) inside one document per
   deck. Fragment ids are generated once at creation and never
-  re-derived.
+  re-derived. A card's id is its fragment, so only the document's own
+  subjects are its cards (`ownSubjectsOf` in
+  [records.ts](../packages/solid/src/records.ts)). Their address is
+  spelled exactly as the deck's entry spells it, where the app writes
+  them, or as the document is fetched, as a relative IRI such as
+  `<#card-1>` is read. A fragment at both is the one the entry spells.
+  A subject at another document, or at another spelling of the same
+  address (another host case, the default port, a dot segment), is
+  never read as a card, though it shares a card's fragment. Card edits
+  and removals never reach it.
 - **Review state** lives in a separate document per deck, one subject
   per card *and direction*: `#<cardId>` for front→back (as was every
   state written before directions existed), and
@@ -823,10 +836,13 @@ graph LR
     `sm:reviewOf` into any document beside the cards named
     `<deckId>.ttl` or `<deckId>-<…>.ttl` is read by its fragment. The
     state's next write names the current cards document.
-  - **What isn't read**: a state whose `sm:reviewOf` names a subject
-    outside the deck's cards documents (another deck's card, or the
-    document's own subject). Nor one whose direction is neither way
-    (say `sm:bidirectional`), or of another scheduler: any value of
+  - **What isn't read**: a subject that isn't the reviews document's
+    own, by the cards' rule above, whatever it says, which removing a
+    card leaves too. A state whose
+    `sm:reviewOf` names a subject outside the deck's cards documents
+    (another deck's card, or the document's own subject). Nor one whose
+    direction is neither way (say `sm:bidirectional`), or of another
+    scheduler: any value of
     `sm:scheduler` but the `sm:sm2` and `sm:fsrs6` IRIs, a literal too.
     Absent means SM-2. Another scheduler's state is never read, written
     over or removed, the [check](validation.md#data-another-app-wrote)
@@ -1382,7 +1398,9 @@ nothing could rebuild it.
   `history/<YYYY-MM>.ttl` (`historyUrlOf`, by the study day's month, so
   a day is never split). A year of statistics is twelve GETs whatever
   the number of decks; reading it again is a `304` for each month that
-  didn't change.
+  didn't change. Only the month document's own subjects are its
+  answers, by the cards' rule: a subject of another document, or at
+  another spelling of its address, isn't one, and isn't removed as one.
   A document whose name isn't a month 01 to 12 of the days
   `shiftStudyDay` keeps in order isn't one of the log's
   (`monthOfHistoryUrl`). No read takes in a month after that of the

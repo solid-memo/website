@@ -141,6 +141,30 @@ describe("createSolidAnswerLog", () => {
     );
   });
 
+  it("reads only the month document's own subjects as its answers, never another document's at an answer's id", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const own = answer("2026-09-21");
+    const moved = answer("2026-09-22");
+    await log.append(INSTANCE, own);
+    await log.append(INSTANCE, moved);
+    const lines = fake.documents.get(SEPTEMBER)!;
+    for (const line of [...lines].filter((one) => one.startsWith(`<${SEPTEMBER}#${moved.id}>`))) {
+      lines.delete(line);
+      lines.add(line.replace(`<${SEPTEMBER}#`, "<https://elsewhere.example/x#"));
+    }
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([own]);
+    const since = await log.readMonthSince(INSTANCE, "2026-09", undefined);
+    expect(since.unchanged === false && since.value).toEqual([own]);
+    // Nor is one removed as the month's answer: only the month's own subject is.
+    await log.removeAnswer(INSTANCE, "2026-09-22", moved.id);
+    expect(
+      [...fake.documents.get(SEPTEMBER)!].some((one) =>
+        one.startsWith(`<https://elsewhere.example/x#${moved.id}>`),
+      ),
+    ).toBe(true);
+  });
+
   it("adds a course's multiple-choice answer with its mode and the wrong option chosen, and reads them back", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });

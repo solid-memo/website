@@ -38,6 +38,7 @@ import {
   ensureTrailingSlash,
   canonicalUrlOf,
   reviewsContainerOf,
+  subjectOfDocument,
 } from "@solid-memo/domain/instanceLayout";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
@@ -333,12 +334,14 @@ export function createSolidDeckRepository({
         asNoOne ? publicFetch : fetch,
       );
       if (dataset === null) return [];
-      return toCards(dataset);
+      return toCards(dataset, deck.cardsDocumentUrl);
     },
 
     async readCardsSince(deck, version, { asNoOne = false } = {}) {
       const read = await readSince(deck.cardsDocumentUrl, version, asNoOne ? publicFetch : fetch);
-      return mapSince(read, (dataset) => (dataset === null ? [] : toCards(dataset)));
+      return mapSince(read, (dataset) =>
+        dataset === null ? [] : toCards(dataset, deck.cardsDocumentUrl),
+      );
     },
 
     async addCard(deck, content): Promise<Card> {
@@ -395,7 +398,7 @@ export function createSolidDeckRepository({
       const written = withCards(
         dataset,
         deck,
-        toCards(dataset).filter(isOutdated),
+        toCards(dataset, deck.cardsDocumentUrl).filter(isOutdated),
         (edit, card) => ({
           card: upgradeCard(card),
           existing: edit.getThing(card.url),
@@ -525,7 +528,15 @@ export function createSolidDeckRepository({
 
     async removeCard(deck, card): Promise<void> {
       guard.assertUsable(deck);
+      // Only a card of the deck's own cards document is removed, with the review states of its
+      // fragment: another subject that shares its id is no card of the deck (ownSubjectsOf).
+      if (!subjectOfDocument(deck.cardsDocumentUrl)(card.url))
+        throw new AppError("cardGone", { card: card.url });
+      const cardId = fragmentIdOf(card.url);
       const cards = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+      const named = `${deck.cardsDocumentUrl}#${cardId}`;
+      if (card.url !== named && cards !== null && getThing(cards, named) !== null)
+        throw new AppError("cardGone", { card: card.url });
       const reviews = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       // Both documents are held to the guard before either is written.
       const cardsWritten =
@@ -540,8 +551,8 @@ export function createSolidDeckRepository({
               deck.reviewsDocumentUrl,
               // Its states both ways, whether they name it (sm:reviewOf) or are named after it.
               withoutReviewStates(reviews, deck, [
-                { cardId: card.id, direction: "front-to-back" },
-                { cardId: card.id, direction: "back-to-front" },
+                { cardId, direction: "front-to-back" },
+                { cardId, direction: "back-to-front" },
               ]),
             );
       for (const [url, written] of [

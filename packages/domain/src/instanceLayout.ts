@@ -193,6 +193,25 @@ export function isSameUrl(a: string, b: string): boolean {
 }
 
 /**
+ * Whether a subject is one of the document at `documentUrl`, and not a
+ * subject of another document that this one merely states things of: a
+ * fragment is an id only in its own document, so another document's
+ * `#card-1` is never this one's. Its document is spelled exactly as
+ * `documentUrl` is, as the app writes its subjects, or exactly as the
+ * document is fetched (canonicalUrlOf), as a relative IRI is read. Any
+ * other spelling of the same address (another host case, the default
+ * port, a dot segment) is another subject of the dataset, which would
+ * share a fragment with one of the document's own.
+ */
+export function subjectOfDocument(documentUrl: string): (subjectUrl: string) => boolean {
+  const fetched = canonicalUrlOf(documentUrl);
+  return (subjectUrl) => {
+    const document = documentUrlOf(subjectUrl);
+    return document === documentUrl || document === fetched;
+  };
+}
+
+/**
  * What no deck's document has in its path, as a request sends it: a
  * `;` (a path parameter to some servers), an encoded slash, backslash or
  * percent sign, a NUL, an overlong UTF-8 byte, an IIS `%u` escape, a
