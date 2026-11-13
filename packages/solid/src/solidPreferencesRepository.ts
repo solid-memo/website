@@ -6,7 +6,8 @@ import { buildThing, createSolidDataset, getBoolean, getThing, setThing } from "
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";
-import type { StoredPreferences } from "@solid-memo/domain/preferences";
+import type { PreferencesRead } from "@solid-memo/domain/preferences";
+import { AppError } from "@solid-memo/domain/appError";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { toPreferences, toPreferencesThing } from "./mappers/preferencesMapper";
@@ -25,27 +26,56 @@ export function createSolidPreferencesRepository({
   checkWrite = noWriteCheck,
 }: SolidPreferencesRepositoryDeps): PreferencesRepository {
   return {
-    async getPreferences(instanceUrl): Promise<StoredPreferences | null> {
+    async getPreferences(instanceUrl): Promise<PreferencesRead> {
       const documentUrl = preferencesUrlOf(instanceUrl);
       const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
       if (dataset === null) return null;
       const subject = getThing(dataset, `${documentUrl}#it`);
       if (subject === null) return null;
-      return toPreferences(subject);
+      return toPreferences(subject) ?? "misfit";
     },
 
-    /** Rewrites the subject in place, so triples this app does not know survive. */
-    async savePreferences(instanceUrl, preferences): Promise<void> {
+    /**
+     * Rewrites the subject in place, so triples this app does not know
+     * survive. One that does not fit its shape is refused unless the
+     * user said to replace it: read as none, it would be overwritten
+     * with what was shown in its place, the defaults.
+     */
+    async savePreferences(instanceUrl, preferences, { replaceMisfit = false } = {}): Promise<void> {
       const documentUrl = preferencesUrlOf(instanceUrl);
       const dataset = (await getSolidDatasetOrNull(documentUrl, fetch)) ?? createSolidDataset();
       const url = `${documentUrl}#it`;
-      const updated = setThing(
-        dataset,
-        toPreferencesThing(url, preferences, getThing(dataset, url)),
-      );
+      const existing = getThing(dataset, url);
+      if (existing !== null && !replaceMisfit && toPreferences(existing) === null)
+        throw new AppError("preferencesMisfit");
+      const updated = setThing(dataset, toPreferencesThing(url, preferences, existing));
       await checkWrite(updated, [url], "pod");
       // One PUT of the whole document, If-Match the read above: node-solid-server stores a boolean a PATCH
       // inserts as false, so "Not now" (schedulerInvitationDismissed) and the developer settings would not hold.
+      await saveDataset(documentUrl, updated, fetch, { whole: true });
+    },
+
+    /**
+     * Sets the one triple on the subject as stored, whatever its format,
+     * as markConnectedScreen does, so preferences that do not fit their
+     * shape are not rewritten with the defaults.
+     */
+    async markSchedulerInvitationDismissed(instanceUrl) {
+      const documentUrl = preferencesUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
+      const url = `${documentUrl}#it`;
+      const existing = dataset === null ? null : getThing(dataset, url);
+      if (existing === null || getBoolean(existing, SM.schedulerInvitationDismissed) === true)
+        return;
+      const updated = setThing(
+        dataset!,
+        buildThing(withoutForeignShapedClasses(unlessNewer(existing), PREFERENCES_V6))
+          .removeAll(SM.schedulerInvitationDismissed)
+          .addBoolean(SM.schedulerInvitationDismissed, true)
+          .build(),
+      );
+      await checkWrite(updated, [url], "pod");
+      // One PUT of the whole document, If-Match the read above, as savePreferences writes it.
       await saveDataset(documentUrl, updated, fetch, { whole: true });
     },
 

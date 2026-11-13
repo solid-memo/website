@@ -84,6 +84,16 @@ export interface StoredPreferences {
 }
 
 /**
+ * An instance's preferences as read: the stored preferences; "misfit"
+ * when its preferences document says something of its `#it` that does
+ * not fit the preferences' shape (a value its shape does not list, one
+ * missing, whatever its type or with none), which is invalid data no
+ * save replaces unless the user says to; null when it says nothing of
+ * it, or there is no document.
+ */
+export type PreferencesRead = StoredPreferences | "misfit" | null;
+
+/**
  * What an instance's preferences mean when it has none stored: an
  * instance made before this version, which never saved them, and whose
  * review states are SM-2's. So SM-2, as it always was: a default never

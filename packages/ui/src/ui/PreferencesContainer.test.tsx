@@ -11,6 +11,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { DEFAULT_PREFERENCES, type StudyPreferences } from "@solid-memo/domain/preferences";
 import type { SwitchOutcome, SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
 import { makeUseCasesFake } from "../test/useCasesFake";
+import { AppError } from "@solid-memo/domain/appError";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -56,6 +57,37 @@ describe("PreferencesContainer", () => {
     expect(await screen.findByText("prefs unreachable")).toBeInTheDocument();
   });
 
+  it("says the stored preferences do not fit their shape, and replaces them once the learner says so", async () => {
+    const useCases = makeUseCasesFake({
+      preferencesMisfit: vi.fn(async () => true),
+      savePreferences: vi.fn(async (_url, _preferences, options) => {
+        if (options?.replaceMisfit !== true) throw new AppError("preferencesMisfit");
+      }),
+    });
+    const { onBack } = renderContainer(useCases, false);
+    fireEvent.submit((await screen.findByRole("button", { name: "Save" })).closest("form")!);
+    expect(await screen.findByText(/so they weren't changed/)).toBeInTheDocument();
+    expect(onBack).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText("Replace the saved preferences"));
+    fireEvent.submit(screen.getByRole("button", { name: "Save" }).closest("form")!);
+    await waitFor(() => expect(onBack).toHaveBeenCalledOnce());
+    expect(useCases.savePreferences).toHaveBeenLastCalledWith(instance.url, DEFAULT_PREFERENCES, {
+      replaceMisfit: true,
+    });
+  });
+
+  it("offers to replace them when a save is refused over ones found not to fit since the form showed", async () => {
+    const useCases = makeUseCasesFake({
+      savePreferences: vi.fn(async () => {
+        throw new AppError("preferencesMisfit");
+      }),
+    });
+    renderContainer(useCases, false);
+    expect(screen.queryByLabelText("Replace the saved preferences")).toBeNull();
+    fireEvent.submit((await screen.findByRole("button", { name: "Save" })).closest("form")!);
+    expect(await screen.findByLabelText("Replace the saved preferences")).not.toBeChecked();
+  });
+
   it("saves and returns to the deck list", async () => {
     const useCases = makeUseCasesFake();
     const { onBack, queryClient } = renderContainer(useCases);
@@ -71,20 +103,24 @@ describe("PreferencesContainer", () => {
       expect(onBack).toHaveBeenCalledOnce();
     });
     expect(queryClient.getQueryData(queueKey)).toBeUndefined();
-    expect(useCases.savePreferences).toHaveBeenCalledWith(instance.url, {
-      newCardsPerDay: 7,
-      maxReviewsPerDay: 200,
-      dayBoundaryHour: 4,
-      answerScale: "sm2",
-      developerMode: false,
-      invalidDataPolicy: "block-subject" as const,
-      theme: "system",
-      scheduler: "sm2",
-      desiredRetention: 0.9,
-      schedulerInvitationDismissed: false,
-      palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
-      textSize: "default",
-    });
+    expect(useCases.savePreferences).toHaveBeenCalledWith(
+      instance.url,
+      {
+        newCardsPerDay: 7,
+        maxReviewsPerDay: 200,
+        dayBoundaryHour: 4,
+        answerScale: "sm2",
+        developerMode: false,
+        invalidDataPolicy: "block-subject" as const,
+        theme: "system",
+        scheduler: "sm2",
+        desiredRetention: 0.9,
+        schedulerInvitationDismissed: false,
+        palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
+        textSize: "default",
+      },
+      { replaceMisfit: false },
+    );
   });
 
   describe("the Connected screen", () => {
@@ -184,6 +220,7 @@ describe("PreferencesContainer", () => {
         instance.url,
         fsrsPrefs,
         expect.any(Function),
+        { replaceMisfit: false },
       );
       expect(useCases.savePreferences).not.toHaveBeenCalled();
       report({ step: "decks", done: 1, total: 3, part: { done: 1, total: 2 } });
@@ -274,7 +311,12 @@ describe("PreferencesContainer", () => {
       await waitFor(() => {
         expect(onBack).toHaveBeenCalledOnce();
       });
-      expect(useCases.switchScheduler).toHaveBeenCalledWith(instance.url, DEFAULT_PREFERENCES);
+      expect(useCases.switchScheduler).toHaveBeenCalledWith(
+        instance.url,
+        DEFAULT_PREFERENCES,
+        undefined,
+        { replaceMisfit: false },
+      );
       expect(screen.queryByRole("region", { name: "Switching to FSRS-6" })).toBeNull();
     });
 
@@ -300,6 +342,7 @@ describe("PreferencesContainer", () => {
         instance.url,
         { ...fsrsPrefs, newCardsPerDay: 7, desiredRetention: 0.85 },
         expect.any(Function),
+        { replaceMisfit: false },
       );
     });
   });

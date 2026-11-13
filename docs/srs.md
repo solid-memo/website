@@ -366,7 +366,12 @@ preferences screen does. "Not now" is stored in the preferences
 the invitation doesn't come back on any device, and a save of the
 preferences keeps it. It's hidden under FSRS-6,
 and shows again after a switch back to SM-2 unless the learner answered
-"Not now".
+"Not now". It's hidden too while the stored preferences don't fit their
+shape, as the SM-2 it would offer to replace is only the defaults
+shown in their place. "Not now" then adds only its answer to them
+([validation.md](validation.md#the-invalid-data-policy)). The write
+check may refuse that write while they still don't fit, and nothing
+is lost then.
 
 #### Switching the scheduler
 

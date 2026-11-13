@@ -1353,6 +1353,10 @@
       "mode": "Entwicklermodus",
       "hint": "Zeigt Entwicklerwerkzeuge: dein rohes WebID-Dokument unter der App und eine Prüfung der Dokumente dieser Instanz anhand der Formen von Solid Memo."
     },
+    "misfit": {
+      "notice": "Deine gespeicherten Einstellungen passen nicht zu der Form, die Solid Memo liest, deshalb werden hier und beim Lernen die Standardwerte verwendet. Um sie beim Speichern durch das zu ersetzen, was hier steht, setze unten das Häkchen.",
+      "replace": "Gespeicherte Einstellungen ersetzen"
+    },
     "save": "Speichern"
   },
   "paletteEditor": {
@@ -1668,6 +1672,7 @@
     "paletteContrastLow": "Einige Farben haben weniger Kontrast, als sie brauchen. Wähle andere oder verwende sie trotzdem.",
     "catalogNeedsDescription": "Der Katalog braucht eine Beschreibung.",
     "noCatalogToUpdate": "Diese Instanz hat noch keinen Katalog. Aktualisiere die Instanz zuerst in Solid Memo.",
+    "preferencesMisfit": "Deine gespeicherten Einstellungen passen nicht zu der Form, die Solid Memo liest, deshalb wurden sie nicht geändert. Um stattdessen diese zu speichern, wähle „Gespeicherte Einstellungen ersetzen“ und speichere erneut.",
     "catalogMisfit": "Der Katalog dieser Instanz passt nicht zu der Form, die Solid Memo liest, deshalb lässt Solid Memo ihn, wie er ist. Die Datenprüfung der Instanz zeigt, was daran nicht stimmt.",
     "catalogTooManyLinks": "Der Katalog dieser Instanz listet mehr Stapel, Entwürfe oder Ausgaben, als Solid Memo liest (höchstens {limit} von jeder Art). Entferne die Instanz, wenn du nicht weißt, wer sie pflegt.",
     "catalogFull": "Der Katalog dieser Instanz listet schon so viele Stapel, Entwürfe oder Ausgaben, wie Solid Memo liest (je {limit}), deshalb kann er keine weiteren listen.",

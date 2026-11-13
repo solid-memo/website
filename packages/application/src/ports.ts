@@ -25,7 +25,7 @@ import type {
   RegistrationTarget,
 } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
-import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
+import type { PreferencesRead, StudyPreferences } from "@solid-memo/domain/preferences";
 import type { GradedPrompt, PromptStates } from "@solid-memo/domain/grading";
 import type { FsrsState, ReviewKey, ReviewState, ReviewStates } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
@@ -865,11 +865,34 @@ export interface ReviewStateRepository {
 /** Driven port: per-instance study preferences. */
 export interface PreferencesRepository {
   /**
-   * The stored preferences with their format version; null when the
+   * The stored preferences with their format version; "misfit" when the
+   * preferences document says something of its `#it` that does not fit
+   * the preferences' shape; null when it says nothing of it, or the
    * instance has no preferences document yet.
    */
-  getPreferences(instanceUrl: string): Promise<StoredPreferences | null>;
-  savePreferences(instanceUrl: string, preferences: StudyPreferences): Promise<void>;
+  getPreferences(instanceUrl: string): Promise<PreferencesRead>;
+  /**
+   * Write the preferences on the subject as stored, every triple their
+   * shape does not own kept, in ONE save of the whole document made only
+   * if it is still as it was read (If-Match). Preferences stored that do
+   * not fit their shape are refused (preferencesMisfit), before anything
+   * is sent, unless `replaceMisfit`: the user said to replace them.
+   */
+  savePreferences(
+    instanceUrl: string,
+    preferences: StudyPreferences,
+    options?: { replaceMisfit?: boolean },
+  ): Promise<void>;
+  /**
+   * Remember that the learner answered "Not now" to the invitation to
+   * switch to FSRS-6 (sm:schedulerInvitationDismissed true) on the
+   * preferences as stored, whether or not they fit their shape, every
+   * other triple kept, in ONE save of the whole document made only if it
+   * is still as it was read (If-Match). Preferences of a newer format are
+   * refused (writtenByNewerApp). Nothing is written when there is no
+   * preferences subject, or it says so already.
+   */
+  markSchedulerInvitationDismissed(instanceUrl: string): Promise<void>;
   /**
    * For the format update: bring the preferences up to this app's format,
    * in place (unknown triples survive), in ONE save of the document made

@@ -1421,6 +1421,10 @@
       "mode": "Modo de desarrollador",
       "hint": "Muestra las herramientas de desarrollador: tu documento WebID sin procesar debajo de la aplicación y una comprobación de los documentos de esta instancia con las formas de Solid Memo."
     },
+    "misfit": {
+      "notice": "Tus preferencias guardadas no se ajustan a la forma que lee Solid Memo, así que aquí se muestran los valores predeterminados, y son los que se usan al estudiar. Para sustituirlas por lo que ves aquí al guardar, marca la casilla de abajo.",
+      "replace": "Sustituir las preferencias guardadas"
+    },
     "save": "Guardar"
   },
   "paletteEditor": {
@@ -1743,6 +1747,7 @@
     "paletteContrastLow": "Algunos colores tienen menos contraste del que necesitan. Elige otros o úsalos de todos modos.",
     "catalogNeedsDescription": "El catálogo necesita una descripción.",
     "noCatalogToUpdate": "Esta instancia aún no tiene catálogo. Actualiza primero la instancia en Solid Memo.",
+    "preferencesMisfit": "Tus preferencias guardadas no se ajustan a la forma que lee Solid Memo, así que no se han cambiado. Para guardar estas en su lugar, marca «Sustituir las preferencias guardadas» y vuelve a guardar.",
     "catalogMisfit": "El catálogo de esta instancia no se ajusta a la forma que lee Solid Memo, así que Solid Memo lo deja como está. La comprobación de datos de la instancia indica qué le pasa.",
     "catalogTooManyLinks": "El catálogo de esta instancia enumera más mazos, borradores o publicaciones de los que Solid Memo lee (como mucho {limit} de cada tipo). Quita la instancia a menos que sepas quién la mantiene.",
     "catalogFull": "El catálogo de esta instancia ya enumera tantos mazos, borradores o publicaciones como lee Solid Memo ({limit} de cada tipo), así que no puede enumerar otro.",

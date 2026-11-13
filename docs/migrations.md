@@ -16,7 +16,9 @@ and the notice the user sees is in
 ## Versions
 
 Every subject Solid Memo writes carries `sm:formatVersion`. A missing
-one means 1, the format that predates the field. `LATEST_VERSION` in
+one means 1, the format that predates the field; preferences without
+one that hold a value only a later format has don't fit
+([validation.md](validation.md#the-invalid-data-policy)). `LATEST_VERSION` in
 the generated [shapes module](../packages/vocab/src/types.generated.ts)
 is what the app writes today; `DECK_FORMAT_VERSION` and friends are
 aliases of it.
@@ -409,7 +411,7 @@ migration and moved no format version:
 - **Read apart from the shape.** This version reads it on the
   preferences whatever their format, and whether or not they fit their
   shape (`connectedScreenSkipped`): a choice written on preferences that
-  don't fit counts, though the preferences read as none.
+  don't fit counts, though the preferences read as a misfit.
 - **No re-check.** No shape file changed, and the check doesn't read
   the term.
 

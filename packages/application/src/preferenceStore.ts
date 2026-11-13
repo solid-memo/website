@@ -7,6 +7,7 @@ import { isPaletteOf } from "@solid-memo/domain/instanceLayout";
 import {
   DEFAULT_PREFERENCES,
   shownPalette,
+  type PreferencesRead,
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
@@ -17,6 +18,11 @@ import type {
   TextSizePreference,
   ThemePreference,
 } from "./ports";
+
+/** Stored preferences that fit their shape; null for none, and for ones that do not. */
+function fitting(read: PreferencesRead): StoredPreferences | null {
+  return read === "misfit" ? null : read;
+}
 
 /**
  * An instance's preferences as the use cases share them: read once for
@@ -38,9 +44,12 @@ export function createPreferenceStore({
   customPalettePreference: CustomPalettePreference;
   textSizePreference: TextSizePreference;
 }) {
-  const preferenceReads = new Map<string, Promise<StoredPreferences | null>>();
-  /** An instance's stored preferences, one read for callers that ask at once. */
-  function readStoredPreferences(instanceUrl: string): Promise<StoredPreferences | null> {
+  const preferenceReads = new Map<string, Promise<PreferencesRead>>();
+  /**
+   * An instance's stored preferences as read ("misfit" when they do not
+   * fit their shape), one read for callers that ask at once.
+   */
+  function readPreferences(instanceUrl: string): Promise<PreferencesRead> {
     const inFlight = preferenceReads.get(instanceUrl);
     if (inFlight !== undefined) return inFlight;
     const read = preferencesRepository
@@ -49,10 +58,23 @@ export function createPreferenceStore({
     preferenceReads.set(instanceUrl, read);
     return read;
   }
+  /** An instance's stored preferences; null when there are none, or they do not fit their shape. */
+  function readStoredPreferences(instanceUrl: string): Promise<StoredPreferences | null> {
+    return readPreferences(instanceUrl).then(fitting);
+  }
+  /**
+   * An instance's preferences: the defaults when none are stored, and
+   * while the stored ones do not fit their shape, which are kept as they
+   * are (a save replaces them only when the user says to).
+   */
   function getPreferences(instanceUrl: string): Promise<StudyPreferences> {
     return readStoredPreferences(instanceUrl).then(
       (stored) => stored?.preferences ?? DEFAULT_PREFERENCES,
     );
+  }
+  /** Whether an instance's stored preferences do not fit their shape. */
+  function isMisfit(instanceUrl: string): Promise<boolean> {
+    return readPreferences(instanceUrl).then((read) => read === "misfit");
   }
   /**
    * Each instance's writes of its preferences, one after another: the
@@ -80,14 +102,15 @@ export function createPreferenceStore({
    * Write a choice of how the app is shown into an instance's
    * preferences, in its turn (inTurn): `changed` gives the preferences
    * with the choice in them, or null when they already hold it. Nothing
-   * is written while the instance has no preferences.
+   * is written while the instance has no preferences, nor while the
+   * ones stored do not fit their shape.
    */
   function writeAppearance(
     instanceUrl: string,
     changed: (preferences: StudyPreferences) => StudyPreferences | null,
   ): Promise<void> {
     return inTurn(instanceUrl, async () => {
-      const stored = await preferencesRepository.getPreferences(instanceUrl);
+      const stored = fitting(await preferencesRepository.getPreferences(instanceUrl));
       const next = stored === null ? null : changed(stored.preferences);
       if (next === null) return;
       await preferencesRepository.savePreferences(instanceUrl, next);
@@ -137,6 +160,7 @@ export function createPreferenceStore({
   return {
     stored: readStoredPreferences,
     get: getPreferences,
+    isMisfit,
     inTurn,
     writeAppearance,
     afterAppearanceWrites,

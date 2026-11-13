@@ -58,6 +58,8 @@ export const ERROR_TEMPLATES = {
     "Some colors have less contrast than they need. Choose others, or use them anyway.",
   catalogNeedsDescription: "The catalog needs a description.",
   noCatalogToUpdate: "This instance has no catalog yet. Update the instance in Solid Memo first.",
+  preferencesMisfit:
+    "Your saved preferences don't fit the form Solid Memo reads, so they weren't changed. To save these instead, check \"Replace the saved preferences\" and save again.",
   catalogMisfit:
     "This instance's catalog doesn't fit the form Solid Memo reads, so Solid Memo leaves it as it is. The instance's data check says what's wrong with it.",
   catalogTooManyLinks:

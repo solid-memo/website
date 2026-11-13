@@ -98,7 +98,11 @@ describe("PreferencesScreen", () => {
     expect(onChoose).toHaveBeenCalledWith("system");
     expect(onSave).not.toHaveBeenCalled();
     fireEvent.submit(container.querySelector("form")!);
-    expect(onSave).toHaveBeenCalledWith({ ...DEFAULT_PREFERENCES, theme: "dark" }, undefined);
+    expect(onSave).toHaveBeenCalledWith(
+      { ...DEFAULT_PREFERENCES, theme: "dark" },
+      undefined,
+      false,
+    );
   });
 
   describe("colors and text size", () => {
@@ -208,6 +212,7 @@ describe("PreferencesScreen", () => {
           textSize: "larger",
         },
         undefined,
+        false,
       );
     });
 
@@ -230,7 +235,7 @@ describe("PreferencesScreen", () => {
       );
       expect(screen.getByRole("radio", { name: /^Standard/ })).toBeChecked();
       fireEvent.submit(container.querySelector("form")!);
-      expect(onSave).toHaveBeenCalledWith(preferences, undefined);
+      expect(onSave).toHaveBeenCalledWith(preferences, undefined, false);
     });
 
     it("says nothing of it otherwise", () => {
@@ -329,6 +334,7 @@ describe("PreferencesScreen", () => {
             palette: READING.url,
           },
           undefined,
+          false,
         );
         const reset = screen.getByRole("button", { name: "Reset colors" });
         expect(reset.closest("[data-palette]")).toHaveAttribute("data-palette", "standard");
@@ -359,6 +365,7 @@ describe("PreferencesScreen", () => {
           palette: "https://solid-memo.com/ns/vocab/v1.ttl#standardPalette",
         },
         undefined,
+        false,
       );
     });
 
@@ -459,7 +466,27 @@ describe("PreferencesScreen", () => {
         desiredRetention: 0.85,
       },
       undefined,
+      false,
     );
+  });
+
+  it("says when the stored preferences do not fit their shape, and saves over them only once the learner says so", () => {
+    const { props, container } = renderScreen({ misfit: true });
+    const replace = screen.getByLabelText("Replace the saved preferences");
+    expect(replace.closest(".warning")).toHaveTextContent(/don't fit the form Solid Memo reads/);
+    expect(replace).not.toBeChecked();
+    expect(replace).toHaveAccessibleDescription(/check the box below/);
+    fireEvent.submit(container.querySelector("form")!);
+    expect(props.onSave).toHaveBeenLastCalledWith(DEFAULT_PREFERENCES, undefined, false);
+    fireEvent.click(replace);
+    fireEvent.submit(container.querySelector("form")!);
+    expect(props.onSave).toHaveBeenLastCalledWith(DEFAULT_PREFERENCES, undefined, true);
+  });
+
+  it("says nothing of it, and never replaces, when the preferences fit", () => {
+    const { container } = renderScreen();
+    expect(screen.queryByLabelText("Replace the saved preferences")).toBeNull();
+    expect(container.querySelector(".warning")).toBeNull();
   });
 
   it("keeps the stored retention when SM-2 is chosen again after the field was changed", () => {
@@ -468,7 +495,7 @@ describe("PreferencesScreen", () => {
     fireEvent.input(screen.getByLabelText("Desired retention (%)"), { target: { value: "50" } });
     fireEvent.click(screen.getByLabelText(/^SM-2/));
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES, undefined);
+    expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES, undefined, false);
   });
 
   it("prefills FSRS-6 and its retention, and keeps them as they are", () => {
@@ -481,7 +508,7 @@ describe("PreferencesScreen", () => {
     expect(screen.getByLabelText(/^FSRS-6/)).toBeChecked();
     expect(screen.getByLabelText("Desired retention (%)")).toHaveValue(97);
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onSave).toHaveBeenCalledWith(preferences, undefined);
+    expect(props.onSave).toHaveBeenCalledWith(preferences, undefined, false);
   });
 
   it("keeps developer mode off by default", () => {
@@ -512,7 +539,7 @@ describe("PreferencesScreen", () => {
       expect(screen.getByRole("checkbox", { name: SHOW })).not.toBeChecked();
       fireEvent.click(screen.getByRole("checkbox", { name: SHOW }));
       fireEvent.submit(container.querySelector("form")!);
-      expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES, true);
+      expect(props.onSave).toHaveBeenCalledWith(DEFAULT_PREFERENCES, true, false);
       cleanup();
       renderScreen({ connectedScreenShown: true, busy: true });
       expect(screen.getByRole("checkbox", { name: SHOW })).toBeDisabled();
@@ -537,6 +564,7 @@ describe("PreferencesScreen", () => {
         desiredRetention: 0.9,
       },
       undefined,
+      false,
     );
   });
 
@@ -557,6 +585,7 @@ describe("PreferencesScreen", () => {
         answerScale: "minimal",
       },
       undefined,
+      false,
     );
   });
 
@@ -582,6 +611,7 @@ describe("PreferencesScreen", () => {
         invalidDataPolicy: "block-instance",
       },
       undefined,
+      false,
     );
   });
 
@@ -613,6 +643,7 @@ describe("PreferencesScreen", () => {
         textSize: "default",
       },
       undefined,
+      false,
     );
   });
 

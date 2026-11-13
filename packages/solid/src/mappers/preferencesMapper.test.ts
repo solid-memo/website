@@ -114,6 +114,30 @@ describe("toPreferences", () => {
       .build();
     expect(toPreferences(card)).toBeNull();
   });
+
+  it("is null for an older format holding a value only a later one has, or a version not an integer", () => {
+    const format2 = () =>
+      buildThing(createThing({ url: SUBJECT }))
+        .addIri(RDF.type, SM.Preferences)
+        .addLiteral(SM.newCardsPerDay, integerLiteral(10))
+        .addLiteral(SM.maxReviewsPerDay, integerLiteral(50))
+        .addLiteral(SM.dayBoundaryHour, integerLiteral(2))
+        .addStringNoLocale(SM.answerScale, "minimal")
+        .addBoolean(SM.developerMode, true);
+    expect(
+      toPreferences(format2().addLiteral(SM.formatVersion, integerLiteral(2)).build()),
+    ).not.toBeNull();
+    expect(
+      toPreferences(
+        format2()
+          .addLiteral(SM.formatVersion, integerLiteral(2))
+          .addIri(SM.studyScheduler, SM.fsrs6)
+          .build(),
+      ),
+    ).toBeNull();
+    expect(toPreferences(format2().addIri(SM.textSize, SM.largeTextSize).build())).toBeNull();
+    expect(toPreferences(format2().addStringNoLocale(SM.formatVersion, "2").build())).toBeNull();
+  });
 });
 
 describe("toPreferencesThing", () => {

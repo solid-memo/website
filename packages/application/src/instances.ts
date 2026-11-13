@@ -265,7 +265,13 @@ export function createInstanceUseCases({
         reviews: reviews.unchanged ? [] : reviews.value.sm2,
       };
     });
-    return planMigration({ instance, preferences, catalog, entries });
+    // Preferences that do not fit their shape are invalid data, which the data check reports: no update writes them.
+    return planMigration({
+      instance,
+      preferences: preferences === "misfit" ? null : preferences,
+      catalog,
+      entries,
+    });
   }
   /**
    * The documents the format update brings up to this app's formats, as

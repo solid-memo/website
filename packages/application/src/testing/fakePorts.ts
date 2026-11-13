@@ -220,6 +220,7 @@ export function makeDeps() {
   const preferencesRepository: PreferencesRepository = {
     getPreferences: vi.fn(async () => null),
     savePreferences: vi.fn(async () => undefined),
+    markSchedulerInvitationDismissed: vi.fn(async () => undefined),
     upgradePreferences: vi.fn(async () => true),
     connectedScreenSkipped: vi.fn(async () => false),
     markConnectedScreen: vi.fn(async (): Promise<"written" | "unchanged" | "none"> => "written"),

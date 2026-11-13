@@ -1285,6 +1285,10 @@
       "mode": "개발자 모드",
       "hint": "개발자 도구를 표시해요. 앱 아래에 WebID 원본 문서를 보여 주고, 이 인스턴스의 문서를 Solid Memo의 셰이프로 검사해요."
     },
+    "misfit": {
+      "notice": "저장된 설정이 Solid Memo가 읽는 형식에 맞지 않아서, 여기에는 기본값이 표시되고 학습에도 기본값이 쓰여요. 저장할 때 여기 보이는 내용으로 바꾸려면 아래 확인란을 선택하세요.",
+      "replace": "저장된 설정 바꾸기"
+    },
     "save": "저장"
   },
   "paletteEditor": {
@@ -1593,6 +1597,7 @@
     "paletteContrastLow": "일부 색의 대비가 필요한 만큼 되지 않아요. 다른 색을 고르거나 그대로 사용하세요.",
     "catalogNeedsDescription": "카탈로그에 설명을 입력해 주세요.",
     "noCatalogToUpdate": "이 인스턴스에는 아직 카탈로그가 없어요. 먼저 Solid Memo에서 인스턴스를 업데이트해 주세요.",
+    "preferencesMisfit": "저장된 설정이 Solid Memo가 읽는 형식에 맞지 않아서 바꾸지 않았어요. 대신 이 설정을 저장하려면 ‘저장된 설정 바꾸기’를 선택하고 다시 저장해 주세요.",
     "catalogMisfit": "이 인스턴스의 카탈로그가 Solid Memo가 읽는 형식에 맞지 않아서 Solid Memo는 그대로 두어요. 무엇이 잘못됐는지는 인스턴스의 데이터 검사에서 알 수 있어요.",
     "catalogTooManyLinks": "이 인스턴스의 카탈로그에 Solid Memo가 읽는 것보다 많은 덱, 초안 또는 릴리스가 있어요(종류마다 최대 {limit}개). 누가 관리하는지 모른다면 인스턴스를 삭제해 주세요.",
     "catalogFull": "이 인스턴스의 카탈로그에 이미 Solid Memo가 읽는 만큼의 덱, 초안 또는 릴리스가 있어서(종류마다 {limit}개) 더 추가할 수 없어요.",
