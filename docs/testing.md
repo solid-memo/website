@@ -579,7 +579,10 @@ and `JOURNEY_SERVER_URL` pointing at a server that
 `npm run css -w @solid-memo/e2e-journeys` keeps up.
 
 **In CI the browsers and their system libraries come from GitHub's
-cache**, the browsers under Playwright's version. A headless shell the
+cache**, the browsers under the runner's Ubuntu version (`ImageOS`)
+and Playwright's version. Playwright builds WebKit for each Ubuntu
+version, so a runner of a newer one must not restore an older one's
+build. A headless shell the
 cache lacks is downloaded and checked against its pinned SHA-256
 ([headless-shell](../.github/actions/headless-shell/action.yml),
 `check:shell` in

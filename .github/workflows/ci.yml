@@ -718,13 +718,19 @@ jobs:
         with:
           path: ${{ steps.images.outputs.file }}
           key: ${{ steps.images.outputs.key }}
+      # The browsers' key holds the runner's Ubuntu version (ImageOS), as
+      # Playwright builds WebKit for each: a runner of a new Ubuntu must
+      # not restore the old one's. The runner's variable, which the env
+      # context lacks.
       - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "os=${ImageOS:?}" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: browsers
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browser }}
+          key: playwright-${{ steps.playwright.outputs.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.browser }}
       - if: steps.browsers.outputs.cache-hit != 'true'
         run: npx playwright install ${{ matrix.browser }}
       - uses: ./.github/actions/playwright-deps
@@ -736,7 +742,7 @@ jobs:
         id: also
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.also }}
+          key: playwright-${{ steps.playwright.outputs.os }}-${{ steps.playwright.outputs.version }}-${{ matrix.also }}
       - if: matrix.also && steps.also.outputs.cache-hit != 'true'
         run: npx playwright install ${{ matrix.also }}
       - if: matrix.also
@@ -1013,7 +1019,7 @@ jobs:
           browsers=()
           # The journeys matrix's caches.
           for name in chromium firefox webkit; do
-            cached "playwright-$RUNNER_OS-$version-$name" || browsers+=("$name")
+            cached "playwright-$ImageOS-$version-$name" || browsers+=("$name")
           done
           # The headless shell check and site draw the docs' diagrams in,
           # under the chromium action's key, by site's playwright.
@@ -1119,7 +1125,7 @@ jobs:
           if [ "$BROWSERS" = shell ]; then
             echo "key=playwright-headless-shell-$RUNNER_OS-$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
           else
-            echo "key=playwright-$RUNNER_OS-$(node -p "require('@playwright/test/package.json').version")-$BROWSERS" >> "$GITHUB_OUTPUT"
+            echo "key=playwright-${ImageOS:?}-$(node -p "require('@playwright/test/package.json').version")-$BROWSERS" >> "$GITHUB_OUTPUT"
           fi
       # A browser listed for its system libraries alone is in the cache
       # already, and only looked up.
