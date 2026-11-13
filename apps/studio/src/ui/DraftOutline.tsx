@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { createPortal } from "preact";
-import { useRef, useState } from "preact/hooks";
+import { useMemo, useRef, useState } from "preact/hooks";
 import type { Anchor } from "@solid-memo/domain/deckTree";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -26,6 +26,7 @@ import { useFlip } from "@solid-memo/ui/deckTree/useFlip";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { MoveItems } from "@solid-memo/ui/MoveItems";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { chapterTitles } from "./DraftParts";
 import { useConfirm } from "./shell/ConfirmDialog";
 
 /** A course's outline: its chapters at the top, its steps in a chapter, and no new groups. */
@@ -91,20 +92,31 @@ export function DraftOutline({
   const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   // A draft started from a release may have thousands of chapters, steps
-  // and cards: each row's node is looked up by its key, not looked for.
-  const outline = draftOutline(draft);
+  // and cards: each row's node is looked up by its key, not looked for,
+  // and the outline is worked out when the draft changes, not on every
+  // render (a menu opened, a drag).
   // The rows a drag froze may name one the draft has since retired.
-  const chapterNodes = new Map(draft.chapters.map((node) => [node.id, node]));
-  const chapterTitle = (id: string): LangText => chapterNodes.get(id)!.data.title ?? { "": id };
-  const stepNodes = new Map(draft.steps.map((node) => [node.id, node]));
+  const chapterNodes = useMemo(
+    () => new Map(draft.chapters.map((node) => [node.id, node])),
+    [draft],
+  );
+  const chapterTitle = (id: string): LangText => titleOf(chapterNodes.get(id)!);
+  const stepNodes = useMemo(() => new Map(draft.steps.map((node) => [node.id, node])), [draft]);
   const cardOf = (id: string) => draftCardOf(draft, id);
   const stepLabel = (chapter: number, step: number) =>
     t("studio.outline.stepNumber", { chapter: chapter + 1, step: step + 1 });
-  const nodes: OutlineNode[] = outline.map(({ chapter, steps }, at) => ({
-    key: chapter.id,
-    title: chapterTitle(chapter.id),
-    children: steps.map((step, index) => ({ key: step.id, title: { "": stepLabel(at, index) } })),
-  }));
+  const nodes = useMemo<OutlineNode[]>(
+    () =>
+      draftOutline(draft).map(({ chapter, steps }, at) => ({
+        key: chapter.id,
+        title: titleOf(chapter),
+        children: steps.map((step, index) => ({
+          key: step.id,
+          title: { "": t("studio.outline.stepNumber", { chapter: at + 1, step: index + 1 }) },
+        })),
+      })),
+    [draft, t],
+  );
   const frozen = useRef<OutlineNode[] | null>(null);
 
   /**
@@ -147,6 +159,15 @@ export function DraftOutline({
   if (dragging) frozen.current ??= nodes;
   else frozen.current = null;
   const shown = frozen.current ?? nodes;
+  // A row's menu names the chapters it can move to as the question
+  // editor names them: cut short, once for the outline (chapterTitles).
+  const menuNodes = useMemo(() => {
+    const titles = chapterTitles(
+      shown.map((node) => ({ id: node.key, data: { title: node.title } })),
+      readerText,
+    );
+    return shown.map((node) => ({ ...node, title: titles.get(node.key)! }));
+  }, [shown, readerText]);
   const flip = useFlip(listRef, draft);
 
   function dragOf(key: string): RowDrag | undefined {
@@ -200,7 +221,7 @@ export function DraftOutline({
         onClose={() => setMenu(null)}
       >
         <MoveItems
-          nodes={shown}
+          nodes={menuNodes}
           nodeKey={key}
           readOnly={readOnly}
           fits={(parent) => (of === "chapter" ? parent === null : parent !== null)}
@@ -351,6 +372,11 @@ function ProblemBadge({ count, name, href }: { count: number; name: string; href
       <span class="visually-hidden"> {t("studio.check.badgeOf", { name })}</span>
     </a>
   );
+}
+
+/** A chapter's title, else its id. */
+function titleOf(chapter: { id: string; data: { title?: LangText } }): LangText {
+  return chapter.data.title ?? { "": chapter.id };
 }
 
 /** The title of a chapter or step of the outline shown, by its key. */

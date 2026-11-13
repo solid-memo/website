@@ -30,6 +30,58 @@ export function refusalText(refusal: DraftRefusal, t: I18n["t"]): string {
   });
 }
 
+/** The most characters of a chapter's title a label shows (chapterTitles). */
+const CHAPTER_LABEL = 60;
+
+/** A text cut at a code point to at most CHAPTER_LABEL characters, "…" included. */
+function shortened(text: string): string {
+  if (text.length <= CHAPTER_LABEL) return text;
+  let end = 0;
+  for (const point of text) {
+    if (end + point.length > CHAPTER_LABEL - 1) break;
+    end += point.length;
+  }
+  return `${text.slice(0, end)}…`;
+}
+
+/**
+ * The titles a list of a draft's chapters (in the outline's order) names
+ * them by: each its title, or its id when it has none, cut at a code
+ * point to at most CHAPTER_LABEL characters, "…" included, in each of
+ * its languages; and where two then read the same, each of those
+ * followed by its place in the list, "(2)". A title may be as long as a
+ * term, and a list of a draft's places or cards names a chapter many
+ * times over.
+ */
+export function chapterTitles(
+  chapters: readonly { id: string; data: { title?: LangText } }[],
+  readerText: I18n["readerText"],
+): Map<string, LangText> {
+  const short = chapters.map(({ id, data }) =>
+    Object.fromEntries(
+      Object.entries(data.title ?? { "": id }).map(([lang, text]) => [lang, shortened(text)]),
+    ),
+  );
+  const seen = new Map<string, number>();
+  for (const title of short) {
+    const name = readerText(title);
+    seen.set(name, (seen.get(name) ?? 0) + 1);
+  }
+  return new Map(
+    chapters.map(({ id }, at) => {
+      const title = short[at]!;
+      return [
+        id,
+        seen.get(readerText(title))! > 1
+          ? Object.fromEntries(
+              Object.entries(title).map(([lang, text]) => [lang, `${text} (${at + 1})`]),
+            )
+          : title,
+      ];
+    }),
+  );
+}
+
 /**
  * Whether the draft's changes are written: "Saving…" while some wait
  * or are being written, else "All changes saved."; or why the last

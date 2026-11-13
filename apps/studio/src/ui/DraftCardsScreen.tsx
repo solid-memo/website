@@ -10,6 +10,8 @@ import {
   draftCardRows,
   type DraftCardFilter,
   type DraftCardRow,
+  draftOutline,
+  retiredChapters,
   stepPlaceOf,
 } from "@solid-memo/domain/release/draftOutline";
 import type { QuestionPlace, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -18,7 +20,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Pager, paginate } from "@solid-memo/ui/Pager";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
-import { DraftScope, DraftStatus } from "./DraftParts";
+import { chapterTitles, DraftScope, DraftStatus } from "./DraftParts";
 import { NewQuestionForm } from "./NewQuestionForm";
 import type { DraftCardColumn } from "./router";
 import { BulkBar } from "./shell/BulkBar";
@@ -111,15 +113,16 @@ export function DraftCardsScreen({
     [draft, view.filter, view.language],
   );
   const languages = useMemo(() => draftCardLanguages(draft), [draft]);
-  const chapterTitles = useMemo(
-    () => new Map(draft.chapters.map((node) => [node.id, node.data.title])),
-    [draft],
-  );
+  // A title may be as long as a term: a chapter is named cut short, once for all its cards.
+  const chapterNames = useMemo(() => {
+    const titles = chapterTitles(
+      [...draftOutline(draft).map(({ chapter }) => chapter), ...retiredChapters(draft)],
+      readerText,
+    );
+    return new Map([...titles].map(([id, title]) => [id, readerText(title)]));
+  }, [draft, readerText]);
   const placeText = useMemo(() => {
-    const chapterName = (id: string) => {
-      const title = chapterTitles.get(id);
-      return title === undefined ? id : readerText(title);
-    };
+    const chapterName = (id: string) => chapterNames.get(id)!;
     const placeName = (place: QuestionPlace | null) => {
       if (place === null) return t("studio.question.nowhere");
       if (place.kind === "review")
@@ -133,7 +136,7 @@ export function DraftCardsScreen({
       row.asked > 1
         ? t("studio.draftCards.askedTimes", { count: row.asked })
         : placeName(row.place);
-  }, [draft, chapterTitles, t, readerText]);
+  }, [draft, chapterNames, t]);
   const languageName = (tag: string) =>
     tag === "unstated" ? t("studio.draftCards.unstated") : tag;
   // The route is parsed anew when only its page changes: compared by what the sort says.

@@ -1856,7 +1856,8 @@ code in `ui`:
   `deckTree/dropZones.ts`) keep a chapter at the top and a step in a
   chapter, and make no new group of two.
 - **The row's menu** (`MoveItems`): up, down, and, for a step, to
-  another chapter. It retires the chapter or step too, or deletes one
+  another chapter, named as a question's place names it (`chapterTitles`,
+  [below](#a-question)). It retires the chapter or step too, or deletes one
   no release published, once the user confirms.
 
 Each move is a `moveChapter` or `moveStep` change (`outlineMove` in
@@ -1908,7 +1909,14 @@ last.
 A question's screen
 ([`QuestionEditorContainer`](../apps/studio/src/ui/QuestionEditorContainer.tsx))
 says where the card is asked: a step, a chapter's final review, or
-nowhere yet; choosing another moves it there (`moveQuestion`). Its
+nowhere yet; choosing another moves it there (`moveQuestion`). The
+choices group each chapter's steps and final review under the
+chapter's title, each step by its number. A chapter is named once, cut
+short when it's long (`chapterTitles`, which numbers two chapters that
+would then read the same). The choices are listed again when the draft
+changes, not as the user types. As the closed select shows only the
+step, its name for a screen reader (`aria-labelledby`) is its label
+and the place chosen, with its chapter. Its
 content is Solid Memo's card editor (`CardContentFields`), saved by
 Save; its wrong options are the inspector's (`DistractorFields`, each
 change saved as it's made: `distractorChanges`). A preview asks
@@ -1921,7 +1929,8 @@ scrolls on a screen 80rem wide or more, else under it.
 A draft's cards
 ([`DraftCardsContainer`](../apps/studio/src/ui/DraftCardsContainer.tsx))
 are a table, a row each, by id: its front (a link to its editor), its
-back, where it's asked, its wrong options in use, and its id. The URL
+back, where it's asked (its chapter's title cut short, as above), its
+wrong options in use, and its id. The URL
 holds the view ([above](#routes)).
 
 - The filters keep the cards asked nowhere (in a course), asked from

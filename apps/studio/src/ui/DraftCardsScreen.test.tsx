@@ -145,6 +145,20 @@ describe("DraftCardsScreen", () => {
     expect(within(table()).getByRole("link", { name: "q-pic" })).toBeInTheDocument();
   });
 
+  it("names a place in a chapter of a long title by the title cut short", () => {
+    const draft = courseDraft();
+    renderScreen({
+      ...draft,
+      chapters: draft.chapters.map((node) => ({
+        ...node,
+        data: { ...node.data, title: { en: "ж".repeat(16_000) } },
+      })),
+    });
+    // The two titles read the same cut short: each is numbered.
+    expect(screen.getByText(`${"ж".repeat(59)}… (1), step 1`)).toBeInTheDocument();
+    expect(screen.getByText(`${"ж".repeat(59)}… (1), final review`)).toBeInTheDocument();
+  });
+
   it("filters them by what the URL says, back to the first page on a change", () => {
     const { onView } = renderScreen(courseDraft(), {
       filter: "fewDistractors",

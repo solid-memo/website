@@ -10,12 +10,19 @@ import {
   blankDraft,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
+import { draftOutline } from "@solid-memo/domain/release/draftOutline";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { optionPhrases } from "@solid-memo/ui/markdownCache";
 import type { DraftEditor } from "./draftEditor";
 import { QuestionEditorScreen } from "./QuestionEditorScreen";
 import { choose } from "../test/choose";
 import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
+
+// Counts the outlines the place selector is listed from, listing them as ever.
+vi.mock("@solid-memo/domain/release/draftOutline", async (actual) => {
+  const outline = await actual<typeof import("@solid-memo/domain/release/draftOutline")>();
+  return { ...outline, draftOutline: vi.fn(outline.draftOutline) };
+});
 
 // Counts the options the preview reads, reading them as ever.
 vi.mock("@solid-memo/ui/markdownCache", async (actual) => {
@@ -43,6 +50,16 @@ function renderScreen(
   return { onEdit, onDeleted };
 }
 
+/** The place selector's chapters, each with its options' texts. */
+const places = (select: HTMLSelectElement) =>
+  [...select.querySelectorAll("optgroup")].map((group) => [
+    group.label,
+    [...group.querySelectorAll("option")].map((option) => option.text),
+  ]);
+
+/** The place selector, named "Asked" and the place chosen, if any. */
+const asked = () => screen.getByRole<HTMLSelectElement>("combobox", { name: /^Asked/ });
+
 const preview = () => screen.getByRole("heading", { name: "As the course asks it" }).parentElement!;
 
 beforeEach(() => localStorage.clear());
@@ -52,24 +69,23 @@ describe("QuestionEditorScreen", () => {
   it("says where the card is asked, and moves it", () => {
     const { onEdit } = renderScreen("q-pods-1a");
     expect(screen.getByRole("heading", { level: 2, name: "What holds data?" })).toBeInTheDocument();
-    const place = screen.getByRole<HTMLSelectElement>("combobox", { name: "Asked" });
+    const place = asked();
     expect(place.value).toBe("step ch-pods-1");
-    expect([...place.options].map((option) => option.text)).toEqual([
-      "Nowhere yet",
-      "Pods, step 1",
-      "Pods, step 2",
-      "Pods, final review",
-      "Apps, final review",
+    expect(place).toHaveAccessibleName("Asked Pods, step 1");
+    expect(place.options[0]!.text).toBe("Nowhere yet");
+    expect(places(place)).toEqual([
+      ["Pods", ["Step 1", "Step 2", "Final review"]],
+      ["Apps", ["Final review"]],
     ]);
-    choose("Asked", "review ch-apps");
+    choose(/^Asked/, "review ch-apps");
     expect(onEdit).toHaveBeenLastCalledWith([
       { kind: "moveQuestion", card: "q-pods-1a", place: { kind: "review", chapter: "ch-apps" } },
     ]);
-    choose("Asked", "step ch-pods-2");
+    choose(/^Asked/, "step ch-pods-2");
     expect(onEdit).toHaveBeenLastCalledWith([
       { kind: "moveQuestion", card: "q-pods-1a", place: { kind: "step", step: "ch-pods-2" } },
     ]);
-    choose("Asked", "");
+    choose(/^Asked/, "");
     expect(onEdit).toHaveBeenLastCalledWith([
       { kind: "moveQuestion", card: "q-pods-1a", place: null },
     ]);
@@ -80,7 +96,9 @@ describe("QuestionEditorScreen", () => {
       { kind: "addCard", id: "q-1", card: { front: { en: "Loose" }, back: { en: "Yes" } } },
     ]) as ReleaseDraft;
     renderScreen("q-1", draft);
-    expect(screen.getByRole<HTMLSelectElement>("combobox", { name: "Asked" }).value).toBe("");
+    const place = asked();
+    expect(place.value).toBe("");
+    expect(place).toHaveAccessibleName("Asked");
   });
 
   it("names a chapter of no title by its id, and a review question's place", () => {
@@ -91,9 +109,67 @@ describe("QuestionEditorScreen", () => {
         node.id === "ch-apps" ? { ...node, data: { ...node.data, title: undefined } } : node,
       ),
     });
-    const place = screen.getByRole<HTMLSelectElement>("combobox", { name: "Asked" });
+    const place = asked();
     expect(place.value).toBe("review ch-pods");
-    expect([...place.options].map((option) => option.text)).toContain("ch-apps, final review");
+    expect(place).toHaveAccessibleName("Asked Pods, final review");
+    expect(places(place)[1]).toEqual(["ch-apps", ["Final review"]]);
+  });
+
+  it("numbers the chapters whose names would read the same once cut short", () => {
+    const long = "a".repeat(70);
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "editChapter", id: "ch-pods", text: { title: { en: `${long} pods` } } },
+      { kind: "editChapter", id: "ch-apps", text: { title: { en: `${long} apps` } } },
+    ]) as ReleaseDraft;
+    renderScreen("q-pods-1a", draft);
+    const place = asked();
+    expect(places(place).map(([label]) => label)).toEqual([
+      `${"a".repeat(59)}… (1)`,
+      `${"a".repeat(59)}… (2)`,
+    ]);
+    expect(place).toHaveAccessibleName(`Asked ${"a".repeat(59)}… (1), step 1`);
+  });
+
+  it("says no place of a chapter retired", () => {
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "retire", of: "chapter", id: "ch-pods" },
+    ]) as ReleaseDraft;
+    renderScreen("q-pods-1a", draft);
+    expect(asked()).toHaveAccessibleName("Asked");
+    cleanup();
+    renderScreen("q-pods-r01", draft);
+    expect(asked()).toHaveAccessibleName("Asked");
+  });
+
+  it("names a chapter once over its many steps, cut short, and lists them once while the user types", () => {
+    const title = "ж".repeat(16_000);
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "editChapter", id: "ch-apps", text: { title: { en: title } } },
+      ...Array.from({ length: 500 }, (_, index) => ({
+        kind: "addStep" as const,
+        id: `ch-apps-${index + 1}`,
+        chapter: "ch-apps",
+      })),
+    ]) as ReleaseDraft;
+    const listed = vi.mocked(draftOutline);
+    listed.mockClear();
+    renderScreen("q-pods-1a", draft);
+    const place = asked();
+    const [, [label, steps]] = places(place) as [unknown, [string, string[]]];
+    expect(label).toBe(`${"ж".repeat(59)}…`);
+    expect(steps).toHaveLength(501);
+    expect(steps.slice(-2)).toEqual(["Step 500", "Final review"]);
+    expect(place.outerHTML).not.toContain("ж".repeat(60));
+    const option = place.options[3]!;
+    expect(listed).toHaveBeenCalledTimes(1);
+    fireEvent.input(screen.getByRole("textbox", { name: "Front" }), {
+      target: { value: "What keeps data?" },
+    });
+    fireEvent.input(screen.getByRole("textbox", { name: "Front" }), {
+      target: { value: "What keeps the data?" },
+    });
+    expect(listed).toHaveBeenCalledTimes(1);
+    expect(place.options[3]).toBe(option);
   });
 
   it("saves the card's content by Save, keeping when it was made and how it is written", () => {
@@ -229,7 +305,7 @@ describe("QuestionEditorScreen", () => {
       ...deck,
       published: { ids: { w1: "card" }, activities: [] },
     });
-    expect(screen.queryByRole("combobox", { name: "Asked" })).toBeNull();
+    expect(screen.queryByRole("combobox", { name: /^Asked/ })).toBeNull();
     expect(screen.getByText(/Retired ·/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Delete" })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Restore" }));
