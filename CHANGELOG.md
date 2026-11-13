@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.3.2](https://github.com/solid-memo/website/compare/v7.3.1...v7.3.2) (2026-11-13)
+
+### Bug Fixes
+
+* **application:** never replace preferences that do not fit their shape ([0658720](https://github.com/solid-memo/website/commit/0658720942d2976e06c36d377b9d73cb0c89088e))
+* **composition:** bound the whole read of an instance elsewhere ([2d4b44e](https://github.com/solid-memo/website/commit/2d4b44eb181f20b3eb0d6fd4ce1a69bae729bfa1))
+* **domain:** delete a chapter or card of any number of parts ([f8d7a7d](https://github.com/solid-memo/website/commit/f8d7a7df52feea422445415523c2803e79cb3162))
+* **solid:** hold the read deadlines when the fetch ignores the abort ([e5456ef](https://github.com/solid-memo/website/commit/e5456efe0caa8137399adb3cd49077fa40862070))
+* **solid:** keep records brought up from an older format within the term bound ([ceedee3](https://github.com/solid-memo/website/commit/ceedee3bf405ac51a6ff0ce56ad26b4c276b8256))
+* **solid:** publish only a series' own versions from a pod draft ([10e6223](https://github.com/solid-memo/website/commit/10e6223db92199bd590454f7847623bab3c332cf))
+
 ## [7.3.1](https://github.com/solid-memo/website/compare/v7.3.0...v7.3.1) (2026-11-12)
 
 ### Performance Improvements
