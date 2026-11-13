@@ -69,7 +69,9 @@ export function DeckDetailContainer({
   const queryClient = useQueryClient();
   const resetDayMutation = useMutation({
     mutationFn: () => useCases.resetStudyDay(instance.url, deck, new Date()),
-    onSuccess: async () => {
+    // A failed reset may still have removed the day's answers from the log, so what was read
+    // before it is refreshed either way.
+    onSettled: async () => {
       await queryClient.invalidateQueries({
         queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
       });

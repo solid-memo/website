@@ -120,28 +120,29 @@ describe("DeckDetailContainer", () => {
     expect(screen.queryByRole("button", { name: "Reset today's study" })).toBeNull();
   });
 
-  it("shows an error when the reset fails, and keeps the day", async () => {
+  it("shows an error when the reset fails, keeps the day and reads it again", async () => {
     vi.stubGlobal(
       "confirm",
       vi.fn(() => true),
     );
-    renderContainer(
-      makeUseCasesFake({
-        listCards: vi.fn(async () => [card]),
-        getStudyQueue: vi.fn(async () => ({
-          due: [],
-          newPrompts: [],
-          studiedToday: 2,
-          ...QUEUE_DEFAULTS,
-        })),
-        resetStudyDay: vi.fn(async () => {
-          throw new Error("reset refused");
-        }),
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [card]),
+      getStudyQueue: vi.fn(async () => ({
+        due: [],
+        newPrompts: [],
+        studiedToday: 2,
+        ...QUEUE_DEFAULTS,
+      })),
+      resetStudyDay: vi.fn(async () => {
+        throw new Error("reset refused");
       }),
-    );
+    });
+    renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: "Reset today's study" }));
     expect(await screen.findByText("reset refused")).toBeInTheDocument();
     expect(screen.getByText("2 cards studied today.")).toBeInTheDocument();
+    // The failed reset may have changed the pod, so the queue is read again.
+    expect(useCases.getStudyQueue).toHaveBeenCalledTimes(2);
   });
 
   it("shows an error when the study queue fails", async () => {

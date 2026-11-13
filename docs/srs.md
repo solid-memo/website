@@ -784,13 +784,15 @@ flowchart LR
 ```
 
 Restoring `lastReviewedAt` and `firstReviewedAt` frees today's
-budgets. All changes go out in one save of the reviews document
-(`applyReviewChanges`), never half-applied. The deck's answers of the
-day then leave the
+budgets. First the deck's answers of the day leave the
 [answer log](data-model.md#the-answer-log): answers still on their way
 to the log are added first, then removed with the rest. Those of the
 deck and day that still couldn't be added leave the queue, so no later
-add brings them back. "Today" honors
+add brings them back. Then the state changes go out in one save of the
+reviews document (`applyReviewChanges`), never half-applied. The two
+writes aren't one: in this order, a reset that fails at either leaves
+today's states, and with them the reset, and trying again repeats
+both. Removing the day's answers again changes nothing. "Today" honors
 the instance's `dayBoundaryHour`, like the queue.
 
 In the [Studio](studio.md#card-inspector), setting a card's due day (`rescheduleState`, in
