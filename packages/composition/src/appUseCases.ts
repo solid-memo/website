@@ -32,6 +32,7 @@ import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorag
 import { createLogoutChannel } from "@solid-memo/browser/logoutChannel";
 import { createIndexedDbResourceStore } from "@solid-memo/browser/indexedDbResourceStore";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
+import { isInFolder } from "@solid-memo/domain/instanceLayout";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
@@ -157,9 +158,30 @@ export function createAppUseCases({
     scope: (url) => new URL(url).origin,
     total: INSTANCE_READS_TOTAL,
   });
-  const podFetch = createPodFence(writeFence.fetch);
+  /** The user's fetch, with a deadline on the whole read too, as a read as no one has. */
+  const elsewhereFetch = withReadDeadline(writeFence.fetch, READ_DEADLINE_MS, WHOLE_READ_MS);
+  /**
+   * The user's fetch, whose reads outside the user's storages and the
+   * folders they entered or made on this page have a deadline on the
+   * whole read too, as a read as no one has: an instance they registered
+   * or attached elsewhere, its meta document and its releases, may be on
+   * any server. A read in their storages, a document or a folder, takes
+   * as long as its body keeps coming; while they cannot be found, every
+   * read has the deadline.
+   */
+  const userFetch = routedFetch({
+    origin: GUEST_ORIGIN,
+    local: writeFence.fetch,
+    remote: async (input, init) => {
+      const url = input instanceof Request ? input.url : String(input);
+      const storages = await userStorages().catch(() => []);
+      const own = [...storages, ...entered].some((folder) => isInFolder(url, folder));
+      return (own ? writeFence.fetch : elsewhereFetch)(input, init);
+    },
+  });
+  const podFetch = createPodFence(userFetch);
   /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
-  const shareFetch = createPodFence(writeFence.fetch, { accessControl: true });
+  const shareFetch = createPodFence(userFetch, { accessControl: true });
   /**
    * The fetch of the adapters that read and write an instance's data,
    * whose catalog may name a deck's documents on any server: behind the
@@ -178,9 +200,7 @@ export function createAppUseCases({
       remote: createOwnPodGate({
         fetch: writeFence.fetch,
         // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
-        instanceFetch: instanceReads(
-          withReadDeadline(writeFence.fetch, READ_DEADLINE_MS, WHOLE_READ_MS),
-        ),
+        instanceFetch: instanceReads(elsewhereFetch),
         publicFetch: foreignReads(noOneFetch),
         webId: session.webId,
         ownFolders,
@@ -206,8 +226,14 @@ export function createAppUseCases({
     fetch: noOneFetch,
     profileStorages: getProfileStorages,
   });
+  /**
+   * The user's storages are found with the user's fetch with the
+   * deadline on the whole read: userFetch waits for the storages they
+   * find before each of its requests, so a profile that never ends
+   * would hold all of them up otherwise.
+   */
   const podStorages = createSolidStorageGateway({
-    fetch: podFetch,
+    fetch: createPodFence(elsewhereFetch),
     profileStorages: getProfileStorages,
   });
   /**

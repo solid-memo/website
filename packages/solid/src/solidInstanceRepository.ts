@@ -368,6 +368,12 @@ async function saveMetaDocument(
   await saveDataset(metaUrl, dataset, fetch);
 }
 
+/**
+ * The name in the instance's `meta.ttl`: notAnInstanceNoMeta when there
+ * is no such document to read there (readsAsNone), and any other failure
+ * as it is, podNoAnswer among them, as the read may well work when tried
+ * again.
+ */
 async function readInstanceName(
   instanceUrl: string,
   fetch: typeof globalThis.fetch,
@@ -376,7 +382,8 @@ async function readInstanceName(
   let dataset: Awaited<ReturnType<typeof readDataset>>;
   try {
     dataset = await readDataset(metaUrl, fetch);
-  } catch {
+  } catch (error) {
+    if (error instanceof AppError || !readsAsNone(error)) throw error;
     throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
   }
   const meta = getThing(dataset, `${metaUrl}#it`);
