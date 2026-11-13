@@ -1757,7 +1757,8 @@ A draft changes by `DraftChange`s
 - the release's metadata and its agents;
 - its chapters and steps: added, edited, moved, retired, restored or
   deleted, the chapters and steps in use numbered 0, 1, … again;
-- cards and their wrong options, and where a question is asked;
+- cards and their wrong options, and where a question is asked. A
+  card deleted takes along only the wrong options no other card names;
 - its sources, and the checks it had.
 
 A change is refused, writing nothing, for:
@@ -1919,7 +1920,12 @@ step, its name for a screen reader (`aria-labelledby`) is its label
 and the place chosen, with its chapter. Its
 content is Solid Memo's card editor (`CardContentFields`), saved by
 Save; its wrong options are the inspector's (`DistractorFields`, each
-change saved as it's made: `distractorChanges`). A preview asks
+change saved as it's made: `distractorChanges`). A wrong option
+belongs to one card, as in a deck
+([data-model.md](data-model.md#wrong-options)). One that another card
+names too, as an imported file may have, is only taken off this card
+when deleted here (`unlinkDistractor`), and stays on the others. A
+preview asks
 the card as the course does (`CourseQuestion`, with `MultipleChoice`),
 as typed, to answer and ask again: beside the form and in sight as it
 scrolls on a screen 80rem wide or more, else under it.

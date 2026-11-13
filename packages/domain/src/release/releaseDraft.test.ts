@@ -5,7 +5,16 @@
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { growth } from "../testing/growth.ts";
-import { card, courseDraft, deckDraft, DRAFT, link, NOW, of } from "../testing/releaseDraft.ts";
+import {
+  card,
+  courseDraft,
+  deckDraft,
+  DRAFT,
+  link,
+  NOW,
+  of,
+  sharedDistractorDraft,
+} from "../testing/releaseDraft.ts";
 import {
   contactOf,
   activitiesOf,
@@ -621,6 +630,31 @@ describe("applyDraftChange", () => {
     });
   });
 
+  describe("unlinking a distractor", () => {
+    it("takes it off one card, keeping it for the other cards that name it", () => {
+      const draft = made(sharedDistractorDraft(2), {
+        kind: "unlinkDistractor",
+        card: "w0",
+        id: "d",
+      });
+      expect(draft.cards.map((node) => node.data.distractor)).toEqual([[], [of("d")]]);
+      expect(draft.distractors.map((node) => node.id)).toEqual(["d"]);
+    });
+
+    it("refuses a card the draft does not have, or one that does not name it", () => {
+      expect(
+        applyDraftChange(courseDraft(), { kind: "unlinkDistractor", card: "q-z", id: "q-a-1a-d1" }),
+      ).toEqual({ refused: "missing", id: "q-a-1a-d1" });
+      expect(
+        applyDraftChange(courseDraft(), {
+          kind: "unlinkDistractor",
+          card: "q-a-2a",
+          id: "q-a-1a-d1",
+        }),
+      ).toEqual({ refused: "missing", id: "q-a-1a-d1" });
+    });
+  });
+
   describe("retiring and restoring", () => {
     it("retires a chapter, numbering those in use again, and restores it", () => {
       const retired = made(courseDraft(), { kind: "retire", of: "chapter", id: "ch-a" });
@@ -726,6 +760,15 @@ describe("applyDraftChange", () => {
       expect(
         made(courseDraft(), { kind: "delete", of: "card", id: "q-a-r01" }).chapters[0]!.data
           .reviewQuestion,
+      ).toEqual([]);
+    });
+
+    it("deletes a card, keeping a distractor another card names too", () => {
+      const draft = made(sharedDistractorDraft(2), { kind: "delete", of: "card", id: "w1" });
+      expect(draft.cards).toEqual([{ id: "w0", data: card("w0", { distractor: [of("d")] }) }]);
+      expect(draft.distractors.map((node) => node.id)).toEqual(["d"]);
+      expect(
+        made(draft, { kind: "delete", of: "card", id: "w0" }).distractors.map((node) => node.id),
       ).toEqual([]);
     });
 

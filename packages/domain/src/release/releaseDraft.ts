@@ -302,6 +302,8 @@ export type DraftChange =
   | { kind: "moveQuestion"; card: string; place: QuestionPlace | null }
   | { kind: "addDistractor"; card: string; id: string; distractor: DistractorText }
   | { kind: "editDistractor"; id: string; distractor: DistractorText }
+  /** A card no longer names a distractor that another card still names; the distractor stays. */
+  | { kind: "unlinkDistractor"; card: string; id: string }
   | { kind: "retire"; of: DraftKind; id: string }
   | { kind: "restore"; of: DraftKind; id: string }
   /** Delete a subject no earlier release published, with what is part of it. */
@@ -520,6 +522,8 @@ function changedDraft(draft: ReleaseDraft, change: DraftChange): ReleaseDraft | 
         ...defined(change.distractor),
         ...(data.deprecated === true ? { deprecated: true } : {}),
       }));
+    case "unlinkDistractor":
+      return unlinkDistractor(draft, change.card, change.id);
     case "retire":
     case "restore": {
       const edited = editNode(draft, NODES[change.of], change.id, (data) =>
@@ -1034,6 +1038,34 @@ function addDistractor(
   );
 }
 
+/**
+ * The distractors (by IRI) that cards other than this one name. A
+ * distractor belongs to one card (docs/data-model.md): one that another
+ * card names too is unlinked from this card, never deleted with it.
+ */
+export function distractorsOfOtherCards(draft: ReleaseDraft, card: string): Set<string> {
+  const named = new Set<string>();
+  for (const node of draft.cards) {
+    if (node.id === card) continue;
+    for (const iri of node.data.distractor) named.add(iri);
+  }
+  return named;
+}
+
+function unlinkDistractor(
+  draft: ReleaseDraft,
+  card: string,
+  id: string,
+): ReleaseDraft | DraftRefusal {
+  const iri = iriIn(draft, id);
+  if (!nodeOf(draft, "cards", card)?.data.distractor.includes(iri))
+    return { refused: "missing", id };
+  return editNode(draft, "cards", card, (data) => ({
+    ...data,
+    distractor: data.distractor.filter((one) => one !== iri),
+  }));
+}
+
 // --- Deleting
 
 /** The draft without the subjects (by IRI) and every statement of them or naming them. */
@@ -1070,8 +1102,9 @@ function deleteSubject(
   id: string,
 ): ReleaseDraft | DraftRefusal {
   if (nodeOf(draft, NODES[of], id) === undefined) return { refused: "missing", id };
-  // What goes with it: a chapter's steps, a card's distractors, added one at a time, as
-  // however many there are, never spread into one call (docs/style.md#typescript).
+  // What goes with it: a chapter's steps, a card's distractors no other card
+  // names, added one at a time, as however many there are, never spread into
+  // one call (docs/style.md#typescript).
   const going: { of: DraftKind; id: string }[] = [{ of, id }];
   if (of === "chapter") {
     const iri = iriIn(draft, id);
@@ -1080,7 +1113,10 @@ function deleteSubject(
     }
   }
   if (of === "card") {
+    // A distractor another card names too stays, for that card.
+    const shared = distractorsOfOtherCards(draft, id);
     for (const iri of nodeOf(draft, "cards", id)!.data.distractor) {
+      if (shared.has(iri)) continue;
       const one = idIn(draft, iri);
       if (one !== null && nodeOf(draft, "distractors", one) !== undefined)
         going.push({ of: "distractor", id: one });

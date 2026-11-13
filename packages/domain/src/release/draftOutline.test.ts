@@ -378,6 +378,19 @@ describe("distractorChanges", () => {
       { kind: "addDistractor", card: "nowhere", id: "n-d1", distractor: { text: { en: "n" } } },
     ]);
   });
+  it("only unlinks from the card an option another card names too, never deleting it", () => {
+    const shared = sharedDistractorDraft(2);
+    const changes = distractorChanges(shared, "w1", []);
+    expect(changes).toEqual([{ kind: "unlinkDistractor", card: "w1", id: "d" }]);
+    const draft = changed(shared, ...changes);
+    expect(draft.cards.map((node) => node.data.distractor)).toEqual([[of("d")], []]);
+    expect(draft.distractors.map((node) => node.id)).toEqual(["d"]);
+    // Once no other card names it, it is deleted.
+    expect(distractorChanges(draft, "w0", [])).toEqual([
+      { kind: "delete", of: "distractor", id: "d" },
+    ]);
+  });
+
   it("compares many wrong options in time that grows with them, not with their square", () => {
     const ratio = growth(
       (count) => {
