@@ -827,7 +827,8 @@ function router(tree: Tree, placed: Placed): (edge: GraphEdge) => Route {
       a = up[a]!;
       b = up[b]!;
     }
-    head.push(a, ...tail.reverse());
+    head.push(a);
+    for (let i = tail.length - 1; i >= 0; i--) head.push(tail[i]!);
   };
   /** The points of `between` a bundle's curve goes through: past a hub as wide as half the drawing or more, the middle above all: it is far from most of what it holds; and past one it would turn back at, the curve looping. */
   const throughOf = (between: number[]) => {

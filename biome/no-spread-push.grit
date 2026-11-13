@@ -1,0 +1,20 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+// A list spread into `push` or `unshift` passes each element as one
+// argument, and past the engine's limit on arguments the call throws:
+// a list as long as a pod or a file makes it is added one element at a
+// time instead (docs/style.md#typescript).
+language js
+
+`$callee($args)` where {
+  $callee <: JsStaticMemberExpression(member = $method),
+  $method <: or { `push`, `unshift` },
+  $args <: some `...$items`,
+  register_diagnostic(
+    span=$args,
+    message="A spread into push or unshift throws past the engine's limit on arguments: add each element in a loop.",
+    severity="error"
+  )
+}

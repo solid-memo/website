@@ -260,6 +260,24 @@ describe("courseProblems", () => {
     });
   }
 
+  it("lists a problem of each distractor of a card with more of them than one call takes as arguments", () => {
+    const count = 130_000;
+    const problems = courseProblems(
+      course({
+        cards: [
+          card("q-1", {
+            back: [text("Svar", "sv")],
+            distractors: Array.from({ length: count }, (_, i) => iri(at(`q-1-${i}`))),
+          }),
+        ],
+        chapters: [chapter("ch-1", 0)],
+        steps: [step("s-1", "ch-1", 0, ["q-1"])],
+        distractors: Array.from({ length: count }, (_, i) => distractor(`q-1-${i}`)),
+      }),
+    );
+    expect(problems.filter((one) => one.code === "distractorLanguages")).toHaveLength(count);
+  });
+
   it("names a few of the languages a distractor lacks and counts the rest", () => {
     const problems = courseProblems(manyLanguages(400));
     expect(problems).toHaveLength(400);

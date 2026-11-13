@@ -190,10 +190,14 @@ function withChildren(tree: DeckTree, parent: ParentId, children: readonly TreeN
   return { ...tree, children: replace(tree.children) };
 }
 
-function spliced<T>(items: readonly T[], index: number, remove: number, ...add: T[]): T[] {
-  const copy = [...items];
-  copy.splice(index, remove, ...add);
-  return copy;
+/** `items` with `remove` of them from `index` on put in place of `add`, however many: copied, never spread into a call (docs/style.md#typescript). */
+function spliced<T>(
+  items: readonly T[],
+  index: number,
+  remove: number,
+  add: readonly T[] = [],
+): T[] {
+  return [...items.slice(0, index), ...add, ...items.slice(index + remove)];
 }
 
 /** The tree without a node that is in it. */
@@ -221,7 +225,7 @@ export function moveNode(tree: DeckTree, id: string, to: Anchor): DeckTree {
   const after = to.after === null ? -1 : siblings.findIndex((node) => nodeId(node) === to.after);
   const index = to.after !== null && after === -1 ? siblings.length : after + 1;
   if (to.parent === from.parent && index === from.index) return tree;
-  return withChildren(rest, to.parent, spliced(siblings, index, 0, from.node));
+  return withChildren(rest, to.parent, spliced(siblings, index, 0, [from.node]));
 }
 
 /**
@@ -250,7 +254,7 @@ export function combine(
   const rest = without(tree, from);
   const at = locate(rest, target)!;
   const node: TreeNode = { kind: "group", group, children: [at.node, from.node] };
-  return withChildren(rest, at.parent, spliced(childrenOf(rest, at.parent)!, at.index, 1, node));
+  return withChildren(rest, at.parent, spliced(childrenOf(rest, at.parent)!, at.index, 1, [node]));
 }
 
 /**
@@ -263,7 +267,7 @@ export function deleteGroup(tree: DeckTree, url: string): DeckTree {
   return withChildren(
     tree,
     at.parent,
-    spliced(childrenOf(tree, at.parent)!, at.index, 1, ...at.node.children),
+    spliced(childrenOf(tree, at.parent)!, at.index, 1, at.node.children),
   );
 }
 
@@ -293,7 +297,7 @@ export function renameGroup(tree: DeckTree, url: string, title: LangText): DeckT
   if (at === undefined) throw changed();
   if (sameText(at.node.group.title, title)) return tree;
   const node: TreeNode = { ...at.node, group: { ...at.node.group, title } };
-  return withChildren(tree, at.parent, spliced(childrenOf(tree, at.parent)!, at.index, 1, node));
+  return withChildren(tree, at.parent, spliced(childrenOf(tree, at.parent)!, at.index, 1, [node]));
 }
 
 /**

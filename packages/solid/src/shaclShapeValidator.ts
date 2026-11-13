@@ -990,9 +990,12 @@ function withSeriesEntry(
         language: "",
         datatype: XSD_INTEGER,
       }),
-      ...release
-        .filter((q) => q.subject.value === asUrl && copied.includes(q.predicate.value))
-        .map((q) => quadOf(series, q.predicate.value, termOf(q.object))),
+    );
+    for (const q of release) {
+      if (q.subject.value === asUrl && copied.includes(q.predicate.value))
+        added.push(quadOf(series, q.predicate.value, termOf(q.object)));
+    }
+    added.push(
       link(series, `${DCAT_NS}first`, asUrl),
       link(series, `${DCAT_NS}last`, asUrl),
       link(series, `${DCAT_NS}hasCurrentVersion`, asUrl),

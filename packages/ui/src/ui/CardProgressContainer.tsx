@@ -193,7 +193,7 @@ function CaughtUpTile({ report }: { report: CardProgressReport }) {
       />
     );
   }
-  const latest = Math.max(0, ...(days as number[]));
+  const latest = (days as number[]).reduce((most, day) => Math.max(most, day), 0);
   return latest === 0 ? (
     <StatTile
       label={label}

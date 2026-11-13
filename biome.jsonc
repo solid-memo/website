@@ -244,6 +244,23 @@
       },
     },
     {
+      // The packages' and apps' code reads lists as long as a pod or a file makes them, so it
+      // never spreads one into push or unshift (docs/style.md#typescript); the site's build, the
+      // Turtle formatter and the code outside src/ (packages/shacl/node, packages/vocab/tooling,
+      // scripts/, e2e/) read only this repository's files.
+      "includes": [
+        "packages/*/src/**",
+        "apps/*/src/**",
+        "!packages/site/**",
+        "!packages/turtle/**",
+        "!**/*.test.ts",
+        "!**/*.test.tsx",
+      ],
+      "plugins": [
+        "./biome/no-spread-push.grit",
+      ],
+    },
+    {
       "includes": [
         "e2e/journeys/**",
       ],
