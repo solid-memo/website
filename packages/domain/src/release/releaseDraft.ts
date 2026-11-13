@@ -13,7 +13,7 @@ import type {
   LangText,
 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { EDUCATION_THEME, TURTLE_MEDIA_TYPE } from "../dcat.ts";
+import { EDUCATION_THEME, namedWithin, TURTLE_MEDIA_TYPE } from "../dcat.ts";
 import { jsonPath, PathMap, pathKeys } from "../pathKeys.ts";
 import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
 
@@ -1266,6 +1266,9 @@ export function activitiesOf(draft: ReleaseDraft): string[] {
 /**
  * How a check reads in the record, in English or Swedish (another
  * language reads as English): never a human review, in its own words.
+ * The text the user gave is cut short where the words around it would
+ * take it past the bound on a term (namedWithin), so the check can still
+ * be saved; a text that fits is written whole, as it always was.
  */
 const CHECK_WORDING: Record<
   "en" | "sv",
@@ -1277,26 +1280,34 @@ const CHECK_WORDING: Record<
   en: {
     machine: {
       label: (label) => label,
-      scope: (scope) => `Scope: ${scope}; a machine check, not a human review.`,
+      scope: (scope) => namedWithin("Scope: ", scope, "; a machine check, not a human review."),
     },
     ai: {
-      label: (label) => `${label} (AI)`,
-      scope: (scope) => `Scope: ${scope}; an AI check, not a human review.`,
+      label: (label) => namedWithin("", label, " (AI)"),
+      scope: (scope) => namedWithin("Scope: ", scope, "; an AI check, not a human review."),
     },
-    outcome: (outcome) => `Outcome: ${outcome}`,
+    outcome: (outcome) => namedWithin("Outcome: ", outcome, ""),
   },
   sv: {
     machine: {
       label: (label) => label,
       scope: (scope) =>
-        `Omfattning: ${scope}; en maskinell kontroll, inte en granskning av en människa.`,
+        namedWithin(
+          "Omfattning: ",
+          scope,
+          "; en maskinell kontroll, inte en granskning av en människa.",
+        ),
     },
     ai: {
-      label: (label) => `${label} (AI)`,
+      label: (label) => namedWithin("", label, " (AI)"),
       scope: (scope) =>
-        `Omfattning: ${scope}; en kontroll av AI, inte en granskning av en människa.`,
+        namedWithin(
+          "Omfattning: ",
+          scope,
+          "; en kontroll av AI, inte en granskning av en människa.",
+        ),
     },
-    outcome: (outcome) => `Utfall: ${outcome}`,
+    outcome: (outcome) => namedWithin("Utfall: ", outcome, ""),
   },
 };
 
@@ -1568,12 +1579,14 @@ function namesIn(names: readonly string[], and: string): string {
  * The attribution of a release's making, in English or Swedish (another
  * language reads as English): "Compiled by <names>", with or without
  * "with the help of AI". It says who compiled it, never that anyone
- * reviewed it.
+ * reviewed it. The names are cut short where they would take it past
+ * the bound on a term (namedWithin), so it can still be saved; names
+ * that fit are written whole, as they always were.
  */
 export function attributionText(names: readonly string[], ai: boolean, language: string): string {
   return language === "sv"
-    ? `Sammanställd av ${namesIn(names, "och")}${ai ? " med hjälp av AI" : ""}.`
-    : `Compiled by ${namesIn(names, "and")}${ai ? " with the help of AI" : ""}.`;
+    ? namedWithin("Sammanställd av ", namesIn(names, "och"), ai ? " med hjälp av AI." : ".")
+    : namedWithin("Compiled by ", namesIn(names, "and"), ai ? " with the help of AI." : ".");
 }
 
 /**

@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { AppError } from "./appError";
+import { HASHED_CHARACTERS } from "./pathKeys";
 import {
   catalogFromRecord,
   catalogToRecord,
@@ -99,5 +100,20 @@ describe("renamedCatalog", () => {
 
   it("keeps a description of the user's own", () => {
     expect(renamedCatalog(catalog, "Languages")).toEqual({ ...catalog, title: "Languages" });
+  });
+
+  it("cuts a name as long as a term short in the description, and knows the uncut one an older catalog holds (GHSA-g598-pfpq-4whv)", () => {
+    const long = "n".repeat(16_370);
+    const description = defaultCatalogDescription(long);
+    expect(description.length).toBeLessThanOrEqual(HASHED_CHARACTERS - 5);
+    expect(description).toMatch(/^Flashcard decks of the Solid Memo instance n+…\.$/);
+    const whole = {
+      ...catalog,
+      title: long,
+      description: `Flashcard decks of the Solid Memo instance ${long}.`,
+    };
+    expect(renamedCatalog(whole, "Languages").description).toBe(
+      defaultCatalogDescription("Languages"),
+    );
   });
 });

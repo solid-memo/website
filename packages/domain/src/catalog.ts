@@ -4,7 +4,7 @@
 
 import { TOPICS } from "@solid-memo/vocab/concepts.generated";
 import { AppError } from "./appError";
-import { DATA_THEME_SCHEME } from "./dcat";
+import { DATA_THEME_SCHEME, namedWithin } from "./dcat";
 import { chosenLicense } from "./license";
 import type { AgentV1, CatalogV1 } from "@solid-memo/vocab/types.generated";
 
@@ -40,9 +40,25 @@ export interface CatalogAbout {
   license?: string;
 }
 
-/** The description a catalog gets: DCAT-AP asks one of every catalog. */
+/**
+ * The description a catalog gets: DCAT-AP asks one of every catalog. A
+ * name as long as a term may be is cut short in it (namedWithin), so the
+ * catalog can still be saved.
+ */
 export function defaultCatalogDescription(title: string): string {
-  return `Flashcard decks of the Solid Memo instance ${title}.`;
+  return namedWithin("Flashcard decks of the Solid Memo instance ", title, ".");
+}
+
+/**
+ * Whether a catalog's description is the default one for `title`: as
+ * defaultCatalogDescription gives it, or whole, as the app wrote it
+ * before it cut a name too long for it short.
+ */
+function isDefaultCatalogDescription(description: string, title: string): boolean {
+  return (
+    description === defaultCatalogDescription(title) ||
+    description === `Flashcard decks of the Solid Memo instance ${title}.`
+  );
 }
 
 /**
@@ -68,10 +84,9 @@ export function renamedCatalog(catalog: Catalog, name: string): Catalog {
   return {
     ...catalog,
     title: name,
-    description:
-      catalog.description === defaultCatalogDescription(catalog.title)
-        ? defaultCatalogDescription(name)
-        : catalog.description,
+    description: isDefaultCatalogDescription(catalog.description, catalog.title)
+      ? defaultCatalogDescription(name)
+      : catalog.description,
   };
 }
 

@@ -46,7 +46,7 @@ function keyedLength(text: string): number {
  * term, so the text around it could take it past the bound, and no
  * write of it would be accepted.
  */
-function namedWithin(before: string, name: string, after: string): string {
+export function namedWithin(before: string, name: string, after: string): string {
   const room = HASHED_CHARACTERS - TAGGED_TEXT_ROOM - keyedLength(before) - keyedLength(after);
   if (keyedLength(name) <= room) return `${before}${name}${after}`;
   let used = keyedLength(ELLIPSIS);
@@ -125,19 +125,29 @@ export function descriptionInFormat4(description: string, title: string): LangTe
  * The description a deck group gets: DCAT-AP asks one of every
  * catalog, and the user only names a group. In English and Swedish, as
  * a deck's, the Swedish naming the group by its Swedish name when it has
- * one, both by its English name, else the one shown.
+ * one, both by its English name, else the one shown. Each is cut short,
+ * as a deck's is (namedWithin), so a group named as long as a term may
+ * be still gets a description it can be saved with.
  */
 export function defaultDeckGroupDescription(title: LangText): LangText {
   const name = english(title) ?? shown(title);
-  return { en: `Deck group: ${name}.`, sv: `Kortleksgrupp: ${title.sv ?? name}.` };
+  return {
+    en: namedWithin("Deck group: ", name, "."),
+    sv: namedWithin("Kortleksgrupp: ", title.sv ?? name, "."),
+  };
 }
 
 /**
  * Whether a group's description is the default one for its name (in
  * English, with or without its Swedish): not text the user wrote, so a
- * rename may give the group the default for its new name.
+ * rename may give the group the default for its new name. The default
+ * may also be whole, as the app wrote it before it cut a name too long
+ * for it short.
  */
 export function isDefaultDeckGroupDescription(description: LangText, title: LangText): boolean {
-  const generated = defaultDeckGroupDescription(title);
-  return sameText(description, generated) || sameText(description, { en: generated.en! });
+  const name = english(title) ?? shown(title);
+  const whole = { en: `Deck group: ${name}.`, sv: `Kortleksgrupp: ${title.sv ?? name}.` };
+  return [defaultDeckGroupDescription(title), whole].some(
+    (generated) => sameText(description, generated) || sameText(description, { en: generated.en }),
+  );
 }

@@ -970,7 +970,9 @@ list, beside any an earlier version wrote for its data. Renaming it in
 the Studio (`renameInstance`, [studio.md](studio.md#the-instance))
 writes them all, each document read and written again on a 412. A
 catalog description the old name gave (`defaultCatalogDescription`)
-follows the new name; one the user wrote stays.
+follows the new name; one the user wrote stays. A name too long for that
+description to fit the bound on a term is cut short in it, with an
+ellipsis after it.
 
 A deck's description, topics and keywords are edited in its Browser
 ("Describe deck") and on its about screen in the Studio, the keywords as
@@ -1019,6 +1021,12 @@ such).
   imported decks get none.
 - **An empty group stays** until the user removes it; removing a group
   moves its members, in order, into its place in its parent.
+- **A group's description is generated**: `"Deck group: <name>."@en`
+  and `"Kortleksgrupp: <name>."@sv`, written anew whenever an edit
+  writes the group, unless it holds text the user wrote. A name too long
+  for the description to fit the bound on a term is cut short in it,
+  with an ellipsis after it, as in a deck's. The whole text an earlier
+  version wrote still counts as the generated one.
 - `sm:position` on a deck and the catalog's `dcat:catalog` belong to no
   shape (`DeckV6` and `CatalogV1` are unchanged), so writing a deck or
   the catalog keeps them.
