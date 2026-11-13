@@ -13,6 +13,7 @@ import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../de
 import { sameText, type LangText } from "../langText.ts";
 import { LEAST_DISTRACTORS } from "./courseRules.ts";
 import {
+  distractorsOfOtherCards,
   idIn,
   iriIn,
   liveChapters,
@@ -223,7 +224,8 @@ export function cardTextOf(content: CardContent, created: string): CardText {
 /**
  * The changes that make a card's wrong options `next` (DistractorFields
  * gives them so): one added, its text or note changed, retired or
- * restored, or deleted.
+ * restored, or deleted; one another card names too is only unlinked
+ * from this card.
  */
 export function distractorChanges(
   draft: ReleaseDraft,
@@ -259,9 +261,16 @@ export function distractorChanges(
       });
     }
   }
+  // One another card names too is only unlinked from this card (docs/data-model.md).
+  let shared: Set<string> | undefined;
   for (const distractor of current) {
-    if (!kept.has(distractor.id))
-      changes.push({ kind: "delete", of: "distractor", id: distractor.id });
+    if (kept.has(distractor.id)) continue;
+    shared ??= distractorsOfOtherCards(draft, card);
+    changes.push(
+      shared.has(iriIn(draft, distractor.id))
+        ? { kind: "unlinkDistractor", card, id: distractor.id }
+        : { kind: "delete", of: "distractor", id: distractor.id },
+    );
   }
   return changes;
 }
