@@ -23,7 +23,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.3.2](https://github.com/solid-memo/website/compare/v7.3.1...v7.3.2) (2026-11-13)
 
-### Bug Fixes
+### Fixes
 
 * **application:** never replace preferences that do not fit their shape ([0658720](https://github.com/solid-memo/website/commit/0658720942d2976e06c36d377b9d73cb0c89088e))
 * **composition:** bound the whole read of an instance elsewhere ([2d4b44e](https://github.com/solid-memo/website/commit/2d4b44eb181f20b3eb0d6fd4ce1a69bae729bfa1))
@@ -46,7 +46,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.2.3](https://github.com/solid-memo/website/compare/v7.2.2...v7.2.3) (2026-11-12)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** fail the instance list when an index can't be read now ([7777d85](https://github.com/solid-memo/website/commit/7777d8558f72bc57ff080d122e2c59a6f1889e89)), closes [#401](https://github.com/solid-memo/website/issues/401) [#754](https://github.com/solid-memo/website/issues/754)
 * **ui:** keep what the workspace read when reading it again fails ([1512b0f](https://github.com/solid-memo/website/commit/1512b0f37e694b643e9aceb450dd2c8ae613aa91)), closes [#754](https://github.com/solid-memo/website/issues/754)
@@ -54,7 +54,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.2.2](https://github.com/solid-memo/website/compare/v7.2.1...v7.2.2) (2026-11-12)
 
-### Bug Fixes
+### Fixes
 
 * **api:** list every browser storage key in the public API ([0e7e2cb](https://github.com/solid-memo/website/commit/0e7e2cb55fd1643aec7f1fd24ca2efaeaa0dff27))
 * **application:** bound every read outside the instance in one check ([8ae4f11](https://github.com/solid-memo/website/commit/8ae4f11888299d8830293e1448be08119958e278))
@@ -65,7 +65,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.2.1](https://github.com/solid-memo/website/compare/v7.2.0...v7.2.1) (2026-11-12)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** bound the whole read of a pod document, its body too ([1722aef](https://github.com/solid-memo/website/commit/1722aef69e8d84c92ff0df2166834dc93fe240fc))
 
@@ -75,14 +75,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **ui:** offer to remember the WebID last logged in with ([5d15273](https://github.com/solid-memo/website/commit/5d15273355ce26fb67fedaf457dbb82835ffa541)), closes [#741](https://github.com/solid-memo/website/issues/741)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** look for a linked release's newer versions in its instance ([6958262](https://github.com/solid-memo/website/commit/6958262dae49ad80e25db88d867b3e12f62344dc))
 * **solid:** measure a blank node as the read keeps it ([686e357](https://github.com/solid-memo/website/commit/686e357222863cbefdf14ee9e29c615a52eb2a39))
 
 ## [7.1.5](https://github.com/solid-memo/website/compare/v7.1.4...v7.1.5) (2026-11-12)
 
-### Bug Fixes
+### Fixes
 
 * **markdown:** show hidden characters in deep source as markers ([23a2915](https://github.com/solid-memo/website/commit/23a291533a4b3048f7786adc7b953b0a9d788eed))
 * **solid:** keep only the classes a draft's subject writes ([0ceb654](https://github.com/solid-memo/website/commit/0ceb6549051a2e01e85b0e82582dede135a1e3de))
@@ -91,7 +91,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.1.4](https://github.com/solid-memo/website/compare/v7.1.3...v7.1.4) (2026-11-11)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** bound a deck's document storage by the user's storages ([5b7c209](https://github.com/solid-memo/website/commit/5b7c2090e23e906dad23e44abb344da0e496f00d))
 * **solid:** drop another app's shaped classes when writing a subject ([bfe7da9](https://github.com/solid-memo/website/commit/bfe7da95822eab5b681ee61bb3956c3abe57ba3d))
@@ -100,13 +100,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.1.3](https://github.com/solid-memo/website/compare/v7.1.2...v7.1.3) (2026-11-11)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** hold drafts to their total document limit on write ([72a9222](https://github.com/solid-memo/website/commit/72a9222a7e985fb06c64cdc0c15c5d82aa6ed875))
 
 ## [7.1.2](https://github.com/solid-memo/website/compare/v7.1.1...v7.1.2) (2026-11-11)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** hold tool and dev container updates for review ([e45ba0c](https://github.com/solid-memo/website/commit/e45ba0cee30e98c8dd463f7ee6434fcf8715b22b))
 * **import:** write an imported state's due day only as a real date ([ae77772](https://github.com/solid-memo/website/commit/ae77772d57f8f5ffdbb4761c80fbe5ecf42791d2))
@@ -122,7 +122,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.1.1](https://github.com/solid-memo/website/compare/v7.1.0...v7.1.1) (2026-11-10)
 
-### Bug Fixes
+### Fixes
 
 * **application:** keep the guest's study offer to the guest's pod ([f7ba79f](https://github.com/solid-memo/website/commit/f7ba79f936afab6097d68ed820aff5ba13e81721))
 * **guest:** keep a deck whose fragment ids spell the guest's pod ([15ee194](https://github.com/solid-memo/website/commit/15ee194713108fc947c88e8b534f8a74e841f31b))
@@ -145,13 +145,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [7.0.2](https://github.com/solid-memo/website/compare/v7.0.1...v7.0.2) (2026-11-10)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @tanstack/react-query to ^5.107.1 ([7fd85fe](https://github.com/solid-memo/website/commit/7fd85fe18012617ea5b263a3cba39d8e01c23afd))
 
 ## [7.0.1](https://github.com/solid-memo/website/compare/v7.0.0...v7.0.1) (2026-11-09)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** work out a deck's transfer targets once per read ([dea5803](https://github.com/solid-memo/website/commit/dea58031fe98b2d3fe94a31c0497e1e7fcce8f53))
 
@@ -165,7 +165,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **ui:** let the user remove old type index registrations ([c21ab91](https://github.com/solid-memo/website/commit/c21ab91eeaa66df95834ae8d208394a83f9b4daa)), closes [#644](https://github.com/solid-memo/website/issues/644)
 
-### Bug Fixes
+### Fixes
 
 * **ci:** tie each lockfile entry to its own registry tarball ([abe49c7](https://github.com/solid-memo/website/commit/abe49c7e2e0ed99275cc89dd4922e8904d0aa3cb))
 * **domain:** keep a malformed due day out of a deck's schedule ([a906814](https://github.com/solid-memo/website/commit/a9068145d84033c3a8cc280d2fa2e6e6fa174866))
@@ -179,13 +179,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.38](https://github.com/solid-memo/website/compare/v6.29.37...v6.29.38) (2026-11-09)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency preact to ^11.2.0 ([e7899ea](https://github.com/solid-memo/website/commit/e7899eab2b3d913ad6480c6afcf82f891e96b0fd))
 
 ## [6.29.37](https://github.com/solid-memo/website/compare/v6.29.36...v6.29.37) (2026-11-09)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** read a release's sources the same way in the Studio ([5c752b5](https://github.com/solid-memo/website/commit/5c752b58bc54995011f2ab49765189f570508d7c))
 * **markdown:** charge a block rule's try for what it reads ([55150c4](https://github.com/solid-memo/website/commit/55150c40c5a97766b9e70c6ce5a3238b203e94b4))
@@ -195,7 +195,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.36](https://github.com/solid-memo/website/compare/v6.29.35...v6.29.36) (2026-11-08)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** list only a release's own versions in its series ([dedc6b4](https://github.com/solid-memo/website/commit/dedc6b48279919262d343dd94037c0dbc868599c))
 * **solid:** bound the reads of documents outside the user's storages ([f674c3a](https://github.com/solid-memo/website/commit/f674c3a8c68a44b7a698ffb132d6a2d122bce6c4))
@@ -203,14 +203,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.35](https://github.com/solid-memo/website/compare/v6.29.34...v6.29.35) (2026-11-08)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** give the instance graph's blank nodes short ids ([ef2a2bd](https://github.com/solid-memo/website/commit/ef2a2bd8b117122157b50adbff4db5b68d1f5e1d))
 * **solid:** read a subject typed as deck and group as a deck only ([95b30b7](https://github.com/solid-memo/website/commit/95b30b7a5128359586def2f1d2437455de036f8f))
 
 ## [6.29.34](https://github.com/solid-memo/website/compare/v6.29.33...v6.29.34) (2026-11-08)
 
-### Bug Fixes
+### Fixes
 
 * **application:** check a next version's draft for guest-pod links ([901b022](https://github.com/solid-memo/website/commit/901b0229670d59d94d48ff6c9e15dc9f0e79e738))
 * **application:** set aside an answer the log can never add ([f96216d](https://github.com/solid-memo/website/commit/f96216d5d36c94aa1cf22363b2a9c2cb0150adb5))
@@ -218,13 +218,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.33](https://github.com/solid-memo/website/compare/v6.29.32...v6.29.33) (2026-11-08)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @tanstack/react-query to ^5.106.1 ([3c19d2d](https://github.com/solid-memo/website/commit/3c19d2d9c2f3bca56fb657bbd06bde7c58b8f525))
 
 ## [6.29.32](https://github.com/solid-memo/website/compare/v6.29.31...v6.29.32) (2026-11-08)
 
-### Bug Fixes
+### Fixes
 
 * **application:** look up unclaimed documents once per address ([ecc9653](https://github.com/solid-memo/website/commit/ecc965346a866af528f9ad3292edeed225a98fc3))
 * **domain:** read a deck group position too large to hold as none ([61f11e5](https://github.com/solid-memo/website/commit/61f11e534d77ae778a051606c584777f3ebfc8c3))
@@ -241,28 +241,28 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.30](https://github.com/solid-memo/website/compare/v6.29.29...v6.29.30) (2026-11-08)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @tanstack/react-query to ^5.106.0 ([b20a576](https://github.com/solid-memo/website/commit/b20a5762eb4a7b03575318fbcf034f95f0572915))
 * **solid:** check a session's issuer against the WebID's profile ([88a627f](https://github.com/solid-memo/website/commit/88a627f9f8b7ae51fb36f5ef5d7b798f594ff69c))
 
 ## [6.29.29](https://github.com/solid-memo/website/compare/v6.29.28...v6.29.29) (2026-11-07)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** give the session restore a deadline and a way out ([be7fb7f](https://github.com/solid-memo/website/commit/be7fb7f448f756ab4e1d6e877c85430b34641f7b))
 * **solid:** let any instance be removed from the list ([ad7da16](https://github.com/solid-memo/website/commit/ad7da16cb6fdab564ad7ddaa3c72fd9b8d84f18d))
 
 ## [6.29.28](https://github.com/solid-memo/website/compare/v6.29.27...v6.29.28) (2026-11-07)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** stop a deck's removal when a document cannot be read ([82d46c6](https://github.com/solid-memo/website/commit/82d46c6392f7a569bea5474ad57ef067618a9524))
 * **statistics:** cap the blocks by deck and a card's history rows ([ccfbcb2](https://github.com/solid-memo/website/commit/ccfbcb20c13bbf7da44ac5dcb48ebd09471a45f1))
 
 ## [6.29.27](https://github.com/solid-memo/website/compare/v6.29.26...v6.29.27) (2026-11-07)
 
-### Bug Fixes
+### Fixes
 
 * **application:** say a claim keeps to storages found to hold the instance ([0340629](https://github.com/solid-memo/website/commit/03406299962c68816eab116732273c15f0b3bef2))
 * **application:** say a course answer keeps a card the deck has ([0ce7df3](https://github.com/solid-memo/website/commit/0ce7df368a996faaeee4a953234445166fa2360f))
@@ -281,7 +281,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.26](https://github.com/solid-memo/website/compare/v6.29.25...v6.29.26) (2026-11-07)
 
-### Bug Fixes
+### Fixes
 
 * **application:** claim a deck's documents only in the instance's pod ([375f98c](https://github.com/solid-memo/website/commit/375f98c202396f23f32030404c24f9c3cde5039b))
 * **application:** keep a card the deck has when a course question is answered ([65681a8](https://github.com/solid-memo/website/commit/65681a8c7ff040d5c5fda9230680a91ee77e0b0d))
@@ -301,25 +301,25 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.25](https://github.com/solid-memo/website/compare/v6.29.24...v6.29.25) (2026-11-07)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** make a release public on a private ACP pod ([0ad7ddb](https://github.com/solid-memo/website/commit/0ad7ddb364c190029e11754e5753c1df9e9f8e88)), closes [#614](https://github.com/solid-memo/website/issues/614)
 
 ## [6.29.24](https://github.com/solid-memo/website/compare/v6.29.23...v6.29.24) (2026-11-06)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @tanstack/react-query to ^5.105.3 ([1d3310d](https://github.com/solid-memo/website/commit/1d3310d73e6eda0d1c4da650f1be4081778aad37))
 
 ## [6.29.23](https://github.com/solid-memo/website/compare/v6.29.22...v6.29.23) (2026-11-05)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @tanstack/react-query to ^5.105.2 ([f31b7ea](https://github.com/solid-memo/website/commit/f31b7eafc0f7f2bc2d166c149c6774a0e867891a))
 
 ## [6.29.22](https://github.com/solid-memo/website/compare/v6.29.21...v6.29.22) (2026-11-05)
 
-### Bug Fixes
+### Fixes
 
 * **application:** keep each instance's unlogged answers apart ([1a8e7bb](https://github.com/solid-memo/website/commit/1a8e7bb020be84d3114813619e3f9ad884649385))
 * **domain:** count answers by card and option fragment ids ([d14031f](https://github.com/solid-memo/website/commit/d14031f485c393b2151cda1887782cafbc91d6b7))
@@ -337,13 +337,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.21](https://github.com/solid-memo/website/compare/v6.29.20...v6.29.21) (2026-11-05)
 
-### Bug Fixes
+### Fixes
 
 * **application:** check a release from a link on each page's first read ([d5eb090](https://github.com/solid-memo/website/commit/d5eb090703e53b2ac03cd61329b26c3532456347))
 
 ## [6.29.20](https://github.com/solid-memo/website/compare/v6.29.19...v6.29.20) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** name colliding authors' agent nodes in linear time ([1f83256](https://github.com/solid-memo/website/commit/1f83256dedd08c7ffe69da042a102ba8f0867e6e))
 * **domain:** read answer numbers bounded ([de23dab](https://github.com/solid-memo/website/commit/de23dabb87f956f0643bde5317aab1ccae231861))
@@ -353,7 +353,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.19](https://github.com/solid-memo/website/compare/v6.29.18...v6.29.19) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **application:** drop what an imported release states of an outside creator ([71e8ca3](https://github.com/solid-memo/website/commit/71e8ca32e4ac1afe474771866f3f90ecb734fc6e))
 * **domain:** read review-state numbers bounded and write them plainly ([164fb04](https://github.com/solid-memo/website/commit/164fb04f8d10448d70a29377c070b6d786f50efe))
@@ -364,38 +364,38 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.18](https://github.com/solid-memo/website/compare/v6.29.17...v6.29.18) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** bound the length of a term on every read and write ([a9982dd](https://github.com/solid-memo/website/commit/a9982dd73ca57dc9af492adb3517ee5982074de3))
 
 ## [6.29.17](https://github.com/solid-memo/website/compare/v6.29.16...v6.29.17) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @tanstack/react-query to ^5.105.1 ([9a2a0ea](https://github.com/solid-memo/website/commit/9a2a0eaf8e0f500a6850af8c2a0c932d7d6913c5))
 * **solid:** rewrite the catalog once for a bulk deck action ([87d605a](https://github.com/solid-memo/website/commit/87d605aefd680732d37d6030d16398baa7e13e44))
 
 ## [6.29.16](https://github.com/solid-memo/website/compare/v6.29.15...v6.29.16) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** check a picture's languages in linear time ([7af526b](https://github.com/solid-memo/website/commit/7af526bc73fe9945b52dfe01d62d00bf62e85e18))
 
 ## [6.29.15](https://github.com/solid-memo/website/compare/v6.29.14...v6.29.15) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **release:** check a shared distractor once, not once per card ([a5f31d3](https://github.com/solid-memo/website/commit/a5f31d337b6c4b01a17deef585e09678657cf88f))
 
 ## [6.29.14](https://github.com/solid-memo/website/compare/v6.29.13...v6.29.14) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** list the answer log's months from history/ alone, bounded ([a539f47](https://github.com/solid-memo/website/commit/a539f47642388e1eee8af8c3d02b783f661404a1))
 
 ## [6.29.13](https://github.com/solid-memo/website/compare/v6.29.12...v6.29.13) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **deploy:** publish the journeys' report only as plain files ([13392d3](https://github.com/solid-memo/website/commit/13392d38e85074babf4ed8d6854350dd70ecdfa8))
 * **digest:** keep only an instance's own decks in its digest ([f5e3a06](https://github.com/solid-memo/website/commit/f5e3a06e385d4384e08bed602bb7e19e7040d949))
@@ -403,74 +403,74 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.29.12](https://github.com/solid-memo/website/compare/v6.29.11...v6.29.12) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency preact to ^11.1.1 ([d8d9f14](https://github.com/solid-memo/website/commit/d8d9f148b1f35a71bce398d7699a8cf453448ec3))
 
 ## [6.29.11](https://github.com/solid-memo/website/compare/v6.29.10...v6.29.11) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **composition:** read the user's profile once at a time when looking up their folders ([1f28705](https://github.com/solid-memo/website/commit/1f28705c4930cab3d3844af6d6b9a941466ecbe8)), closes [#545](https://github.com/solid-memo/website/issues/545) [#547](https://github.com/solid-memo/website/issues/547) [#548](https://github.com/solid-memo/website/issues/548) [#547](https://github.com/solid-memo/website/issues/547)
 
 ## [6.29.10](https://github.com/solid-memo/website/compare/v6.29.9...v6.29.10) (2026-11-04)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** name a guest's pod only from a guest's own instance ([7b4cc4a](https://github.com/solid-memo/website/commit/7b4cc4a204b1afe8644a61bd307f8d3816e7f2cd))
 
 ## [6.29.9](https://github.com/solid-memo/website/compare/v6.29.8...v6.29.9) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * bound a course's completed chapters and edit them linearly ([f9f2cfa](https://github.com/solid-memo/website/commit/f9f2cfaabb3ddd6ce22d32b04bdad36558633c8a))
 
 ## [6.29.8](https://github.com/solid-memo/website/compare/v6.29.7...v6.29.8) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **digest:** bound the digest read and make changes without copying it ([990cff9](https://github.com/solid-memo/website/commit/990cff93849f1ca277894ed824541833a6d04630))
 
 ## [6.29.7](https://github.com/solid-memo/website/compare/v6.29.6...v6.29.7) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **guest:** check only addresses for leftover guest-pod references ([0fc4570](https://github.com/solid-memo/website/commit/0fc45700bd6119e2e414d630a0e77b942209c0d0))
 
 ## [6.29.6](https://github.com/solid-memo/website/compare/v6.29.5...v6.29.6) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read the profile's documents under read limits ([da839b5](https://github.com/solid-memo/website/commit/da839b5b587842ff63793ccf69c1f3da2aa7dc17))
 
 ## [6.29.5](https://github.com/solid-memo/website/compare/v6.29.4...v6.29.5) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **shacl:** read a node of too many types as having none ([ba68b0e](https://github.com/solid-memo/website/commit/ba68b0e4131fac708055f6a36f664022258a2b9d))
 * **studio:** move or copy cards only as the instance may read them ([ebfbdb2](https://github.com/solid-memo/website/commit/ebfbdb2435be3490d9327365f9babd8f2526fb9e))
 
 ## [6.29.4](https://github.com/solid-memo/website/compare/v6.29.3...v6.29.4) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** copy into a draft only what the instance may read ([ce7dfd9](https://github.com/solid-memo/website/commit/ce7dfd918bb3af7762c2412407d1d4bee6cb0fd5))
 
 ## [6.29.3](https://github.com/solid-memo/website/compare/v6.29.2...v6.29.3) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read no triple terms in Turtle, as in JSON-LD ([da3b4f8](https://github.com/solid-memo/website/commit/da3b4f8c637408f12e05d916563a99b9f2ec8386))
 
 ## [6.29.2](https://github.com/solid-memo/website/compare/v6.29.1...v6.29.2) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** read the subjects marked Markdown once per check ([c3b9f03](https://github.com/solid-memo/website/commit/c3b9f03b89bc126af18a2f764766ecababf53087))
 
 ## [6.29.1](https://github.com/solid-memo/website/compare/v6.29.0...v6.29.1) (2026-11-03)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** keep SM-2's six grade buttons within a narrow screen ([11d7059](https://github.com/solid-memo/website/commit/11d7059eb5dd4ecbbd0e1f1541143a1be1d1dce9)), closes [#530](https://github.com/solid-memo/website/issues/530)
 * **ui:** name each grade button by all it shows, its interval too ([c12edec](https://github.com/solid-memo/website/commit/c12edeccde3e27a78cc2e921bea36aa799375689)), closes [#530](https://github.com/solid-memo/website/issues/530)
@@ -483,7 +483,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.28.1](https://github.com/solid-memo/website/compare/v6.28.0...v6.28.1) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** bound what the Studio reads of an instance's catalog ([e26d585](https://github.com/solid-memo/website/commit/e26d585dd29d8376a47f3c0daf32849c9cb5cec2))
 
@@ -493,7 +493,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **ui:** bring the logo in, one color at a time, as it loads ([719bcc9](https://github.com/solid-memo/website/commit/719bcc9cd792ba7eeaca6a4478978063fe78c5a5)), closes [#522](https://github.com/solid-memo/website/issues/522)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** name a deck's languages once and offer at most 100 ([04c82ae](https://github.com/solid-memo/website/commit/04c82ae0aa89fb8a240d3b0fff07243d27449205))
 
@@ -505,7 +505,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.26.3](https://github.com/solid-memo/website/compare/v6.26.2...v6.26.3) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **application:** read only the answer log's plausible months ([0953d68](https://github.com/solid-memo/website/commit/0953d68258f59e51c6e4a3e7a7108951765c2893))
 * **domain:** bound the languages a distractor problem lists ([e1357c0](https://github.com/solid-memo/website/commit/e1357c0b7fb14e75f6a050c0a5adbb6e6e4c7884))
@@ -513,7 +513,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.26.2](https://github.com/solid-memo/website/compare/v6.26.1...v6.26.2) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **application:** keep a cut-off guest move's folder once it is in use ([92b6012](https://github.com/solid-memo/website/commit/92b60125ccb2e20dc9ef158501b61ab11ab31fd4))
 * **domain:** upgrade only the cards a deck took from its releases ([875b191](https://github.com/solid-memo/website/commit/875b1914a5edd4448d47d3294c197917afcb157d))
@@ -521,7 +521,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.26.1](https://github.com/solid-memo/website/compare/v6.26.0...v6.26.1) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse long relative or dotted IRIs in a Turtle text ([9d8b66d](https://github.com/solid-memo/website/commit/9d8b66d749a79accc42450fdd93f2c797df3beec))
 
@@ -533,45 +533,45 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.25.18](https://github.com/solid-memo/website/compare/v6.25.17...v6.25.18) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** lock file maintenance (npm) ([e1517fd](https://github.com/solid-memo/website/commit/e1517fd04a470d614020c0088a113f555478531f))
 
 ## [6.25.17](https://github.com/solid-memo/website/compare/v6.25.16...v6.25.17) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** list a draft's sources in one pass over its statements ([592136c](https://github.com/solid-memo/website/commit/592136c25766c36b6e6b10d61ea7a61e6f58cd83))
 
 ## [6.25.16](https://github.com/solid-memo/website/compare/v6.25.15...v6.25.16) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** rename and remove an instance's registrations in one edit ([4d83d4f](https://github.com/solid-memo/website/commit/4d83d4ff7cec12971b8df404ae23d34eea5d5076))
 
 ## [6.25.15](https://github.com/solid-memo/website/compare/v6.25.14...v6.25.15) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** let Renovate's npm lock lockfiles that hold npm again ([4f25f22](https://github.com/solid-memo/website/commit/4f25f226d08b7f2a2d8c4ed718be251832c54730)), closes [npm/cli#9800](https://github.com/npm/cli/issues/9800) [#502](https://github.com/solid-memo/website/issues/502)
 
 ## [6.25.14](https://github.com/solid-memo/website/compare/v6.25.13...v6.25.14) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** bound the document addresses the Studio graph draws ([9dde2c0](https://github.com/solid-memo/website/commit/9dde2c09f66674ead008390835ac728de85faea4))
 * **studio:** reuse a kept graph layout only for the same graph ([a89f652](https://github.com/solid-memo/website/commit/a89f652b2400407ed8c53891fa2306b17a788e66))
 
 ## [6.25.13](https://github.com/solid-memo/website/compare/v6.25.12...v6.25.13) (2026-11-02)
 
-### Bug Fixes
+### Fixes
 
 * **ci:** check the Chromium headless shell against a pinned SHA-256 ([4dccefe](https://github.com/solid-memo/website/commit/4dccefea15d4e3d77f83e202b1a0b632e42b4f8e))
 * **solid:** bound the publisher's reads of a release and its access control ([b700946](https://github.com/solid-memo/website/commit/b700946514a73a9a8bf6bbd6cece1aaa0c1d214a))
 
 ## [6.25.12](https://github.com/solid-memo/website/compare/v6.25.11...v6.25.12) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **markdown:** count heading underlines inside quotes and list items ([efde2af](https://github.com/solid-memo/website/commit/efde2af23bc217f271f7c711487bb5a21fbffa77))
 * **solid:** read a linked copy's upgrade under one release's limits ([e847612](https://github.com/solid-memo/website/commit/e84761298734a3e95dcbe2ca6e8ce9f2cd21205e))
@@ -579,68 +579,68 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.25.11](https://github.com/solid-memo/website/compare/v6.25.10...v6.25.11) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** apply a document's instance-check repairs in one edit ([cacf01f](https://github.com/solid-memo/website/commit/cacf01fbf4a106aa706954cdc9e9296ae8f78866))
 
 ## [6.25.10](https://github.com/solid-memo/website/compare/v6.25.9...v6.25.10) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** look a draft's cards and wrong options up by id ([1a1f45d](https://github.com/solid-memo/website/commit/1a1f45d15cdd0c49f4356de5e677743e0f67b7d7))
 
 ## [6.25.9](https://github.com/solid-memo/website/compare/v6.25.8...v6.25.9) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** use no type index outside the profile's places ([58af60e](https://github.com/solid-memo/website/commit/58af60e9c1008c11400b8fe0c3134ac6a609d817))
 
 ## [6.25.8](https://github.com/solid-memo/website/compare/v6.25.7...v6.25.8) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read a hand-written relative base and a meta just written ([af768d1](https://github.com/solid-memo/website/commit/af768d14735dcbe28a8e09b035fa31782c20e0e2))
 * **solid:** read instance documents outside the storages under limits ([4c9849f](https://github.com/solid-memo/website/commit/4c9849fdc739bded80bba25ce53ec27acb88267e))
 
 ## [6.25.7](https://github.com/solid-memo/website/compare/v6.25.6...v6.25.7) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** refuse a draft whose documents state what it does not read ([ef5aa14](https://github.com/solid-memo/website/commit/ef5aa1489348cbc64a7d40eec4fc4c7a4ec92fae))
 
 ## [6.25.6](https://github.com/solid-memo/website/compare/v6.25.5...v6.25.6) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** let go of a catalog's old licenses in one pass ([df39c55](https://github.com/solid-memo/website/commit/df39c5558b5bc49627fa259f736404ee94d0bf19))
 
 ## [6.25.5](https://github.com/solid-memo/website/compare/v6.25.4...v6.25.5) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** bound a JSON-LD base and terms as a Turtle base is bounded ([53b0a83](https://github.com/solid-memo/website/commit/53b0a833b2d116f855af4bdbf6a3d5c27823fc42))
 
 ## [6.25.4](https://github.com/solid-memo/website/compare/v6.25.3...v6.25.4) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency @inrupt/solid-client-authn-browser to ^5.0.3 ([1070735](https://github.com/solid-memo/website/commit/1070735990efa16ff038907853224ad1fe71693c))
 
 ## [6.25.3](https://github.com/solid-memo/website/compare/v6.25.2...v6.25.3) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read a document's agent names once for all its decks ([4ecfb5f](https://github.com/solid-memo/website/commit/4ecfb5f9171480293d67c7377c56d62054781a7b))
 
 ## [6.25.2](https://github.com/solid-memo/website/compare/v6.25.1...v6.25.2) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **markdown:** show a text with unclosed spans or many lists as plain ([098d18f](https://github.com/solid-memo/website/commit/098d18f371fd52f4471403910ee79705e3a392c6))
 
 ## [6.25.1](https://github.com/solid-memo/website/compare/v6.25.0...v6.25.1) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** bound Turtle declarations and stop the parse at a limit ([93369ed](https://github.com/solid-memo/website/commit/93369ede7a07e513159bb0c21b16a2485ff6981b))
 * **solid:** end the session only on a 401 that says it expired ([402f109](https://github.com/solid-memo/website/commit/402f109d37545fde7f75386e410e435c9c97c15e))
@@ -651,13 +651,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **ui:** give the maker's note as one paragraph about the goal ([33acce4](https://github.com/solid-memo/website/commit/33acce482d15a381d8256bd1ccf2a47808f06283)), closes [#469](https://github.com/solid-memo/website/issues/469)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** write the digest in one edit and remove by read subject ([05ce9fc](https://github.com/solid-memo/website/commit/05ce9fc4a63828dfa34e38149af1338577da5263))
 
 ## [6.24.3](https://github.com/solid-memo/website/compare/v6.24.2...v6.24.3) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **markdown:** count lazy lines per paragraph, by item indentation ([101b705](https://github.com/solid-memo/website/commit/101b7056ebfcb879476a47606d01224ce8ea7726))
 * **solid:** write a rearranged deck tree to its document at once ([7a8efd3](https://github.com/solid-memo/website/commit/7a8efd3d648da959636311fe10ce2a45df9e2f02))
@@ -665,7 +665,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.24.2](https://github.com/solid-memo/website/compare/v6.24.1...v6.24.2) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **library:** refuse a linked release in a format no shape checks ([49551c4](https://github.com/solid-memo/website/commit/49551c40da0d1637b87b03716ea3976fb10783b1))
 * **studio:** index the cards once to link the health screen's results ([07cc74e](https://github.com/solid-memo/website/commit/07cc74e2c78155904e99b496b820d8a938c4fb24))
@@ -673,7 +673,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.24.1](https://github.com/solid-memo/website/compare/v6.24.0...v6.24.1) (2026-11-01)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** bound review snapshots so a grade can always be saved ([84e1ff6](https://github.com/solid-memo/website/commit/84e1ff6a17df8ef51a10299332c471c0d2b37905))
 * **domain:** read what fails in a validation report once per report ([11383e5](https://github.com/solid-memo/website/commit/11383e54e50d024ab0f3a4d4ea47d54f3d1061a9))
@@ -688,7 +688,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.23.1](https://github.com/solid-memo/website/compare/v6.23.0...v6.23.1) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** give the maker's note on the landing the cards' background ([c26d89f](https://github.com/solid-memo/website/commit/c26d89fbf4b2812523695d3f1650fc8f57438e8c)), closes [#446](https://github.com/solid-memo/website/issues/446)
 
@@ -711,13 +711,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 * **decks:** add a course on open source and open content licenses ([9339c86](https://github.com/solid-memo/website/commit/9339c86a279528f0bc27025705941ee9ee9bd956)), closes [#425](https://github.com/solid-memo/website/issues/425)
 * **decks:** add a course on reading Hangul ([9dbf268](https://github.com/solid-memo/website/commit/9dbf268c6168b4e12002d9270c3f493826d73312)), closes [#423](https://github.com/solid-memo/website/issues/423)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read only release addresses from a creator's links ([368f9fe](https://github.com/solid-memo/website/commit/368f9fef3e0a98cfc0e476326167c28403b3f3bf))
 
 ## [6.20.4](https://github.com/solid-memo/website/compare/v6.20.3...v6.20.4) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** leave an error's details out of the report link ([eda612e](https://github.com/solid-memo/website/commit/eda612e7d0979541d743b6e9ef5fa13588153b98))
 * **domain:** renumber a draft's outline in one pass ([bc4ab04](https://github.com/solid-memo/website/commit/bc4ab048550c7b2bb60a2d8d53021fc077d2e7c9))
@@ -725,7 +725,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.20.3](https://github.com/solid-memo/website/compare/v6.20.2...v6.20.3) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** find a bulk edit's cards, states and free ids in one pass ([8bd630e](https://github.com/solid-memo/website/commit/8bd630e9f9b08a7b5f20901c331ab1f159dfd9d3))
 * **domain:** find a release's authors among its agents by id ([c78b238](https://github.com/solid-memo/website/commit/c78b238690727819a4f930738ed7c8c474b72723))
@@ -733,7 +733,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.20.2](https://github.com/solid-memo/website/compare/v6.20.1...v6.20.2) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **markdown:** show a text with too many block quotes as plain text ([b9dc67c](https://github.com/solid-memo/website/commit/b9dc67c99c482dcba19c3df3ff2022a6e3f42c63))
 * **solid:** never write one deck's author over another's agent node ([d0e2459](https://github.com/solid-memo/website/commit/d0e2459c659c2f9ba35613ea8ed60c7bc410d620))
@@ -741,7 +741,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.20.1](https://github.com/solid-memo/website/compare/v6.20.0...v6.20.1) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** read a month summary only when its days are of its month ([58e1ccd](https://github.com/solid-memo/website/commit/58e1ccd28a51e4480c5a25cc8a32222425191a1b))
 * **shacl:** check decimal and floating-point literals in linear time ([345030c](https://github.com/solid-memo/website/commit/345030cd2be4ab3ed7b73c8d9ae640d76cf94d40))
@@ -761,13 +761,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.18.2](https://github.com/solid-memo/website/compare/v6.18.1...v6.18.2) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** give up on a pod read the server never answers ([4c03fc7](https://github.com/solid-memo/website/commit/4c03fc75798776ce5afb555e49f9b02330d31f97)), closes [#419](https://github.com/solid-memo/website/issues/419)
 
 ## [6.18.1](https://github.com/solid-memo/website/compare/v6.18.0...v6.18.1) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **decks:** show The Night Café again in Famous paintings ([b4b6487](https://github.com/solid-memo/website/commit/b4b648747ca9659c7828386de594fd24b14d8d23)), closes [#397](https://github.com/solid-memo/website/issues/397)
 
@@ -779,38 +779,38 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.17.34](https://github.com/solid-memo/website/compare/v6.17.33...v6.17.34) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** update dependency preact to ^11.1.0 ([171a860](https://github.com/solid-memo/website/commit/171a86037814dcc97968c4b6b823b877b8d14d1b))
 
 ## [6.17.33](https://github.com/solid-memo/website/compare/v6.17.32...v6.17.33) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** refuse a card transfer between decks over one document ([d0d0027](https://github.com/solid-memo/website/commit/d0d0027240a5a1c97c7c5b2030e056a03d24876a))
 * **studio:** look up a draft's subjects once per draft ([069704d](https://github.com/solid-memo/website/commit/069704d04aa9972604d2ef18accf7e24e147045a))
 
 ## [6.17.32](https://github.com/solid-memo/website/compare/v6.17.31...v6.17.32) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** remove only distractors a card no longer names ([652f6f8](https://github.com/solid-memo/website/commit/652f6f8b2fe2db99424b3d0886e4be1c69ef6b98))
 
 ## [6.17.31](https://github.com/solid-memo/website/compare/v6.17.30...v6.17.31) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** link a draft's release only at a release's address ([8bd995d](https://github.com/solid-memo/website/commit/8bd995dd294f10310ed462ebdbdc0dfa01c87c91))
 
 ## [6.17.30](https://github.com/solid-memo/website/compare/v6.17.29...v6.17.30) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** key the Markdown caches by a hash, not by the whole text ([86ae5fc](https://github.com/solid-memo/website/commit/86ae5fc70125ce33fd9a0971184dce516beddc96))
 
 ## [6.17.29](https://github.com/solid-memo/website/compare/v6.17.28...v6.17.29) (2026-10-31)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** read a draft's statements once for the release check ([83666e6](https://github.com/solid-memo/website/commit/83666e6c322556bec6c06bdd54450e41f4011d07))
 * **domain:** read out-of-range day boundaries and limits as defaults ([eebe03b](https://github.com/solid-memo/website/commit/eebe03b3ec37342900066d2f45ff1e8a758e54f2))
@@ -819,21 +819,21 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.17.28](https://github.com/solid-memo/website/compare/v6.17.27...v6.17.28) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** gather lists under a key in place, not by copying them ([aa925bc](https://github.com/solid-memo/website/commit/aa925bc503aa0f4694bbe95bedbcf22cd61705e8))
 * **ui:** parse each course chapter description once ([6a6c4be](https://github.com/solid-memo/website/commit/6a6c4bed2b5db1517944b7db4da22dbc1d41cedb))
 
 ## [6.17.27](https://github.com/solid-memo/website/compare/v6.17.26...v6.17.27) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **markdown:** remember each text's label ([c9cb8ee](https://github.com/solid-memo/website/commit/c9cb8ee1ec0daa950d83a220ba31539e5022285a))
 * **solid:** keep card and distractor ids of a deck apart ([be6f7de](https://github.com/solid-memo/website/commit/be6f7deb899ca9596cebc918f6fab5f3877baf8b))
 
 ## [6.17.26](https://github.com/solid-memo/website/compare/v6.17.25...v6.17.26) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** keep sm-2 ease factor and interval within bounds ([c0439df](https://github.com/solid-memo/website/commit/c0439df7e33c7aa09113d9aa8e84d521f1bca17f))
 * **domain:** link a deck author only to a bare address ([38dafcc](https://github.com/solid-memo/website/commit/38dafcca6f589a3375ce1b9258baf16f622a450f))
@@ -841,63 +841,63 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.17.25](https://github.com/solid-memo/website/compare/v6.17.24...v6.17.25) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** check, show and import one read of a linked release ([c655172](https://github.com/solid-memo/website/commit/c655172d44bd7a51f1a88f9cdf8875b02ad3f907))
 
 ## [6.17.24](https://github.com/solid-memo/website/compare/v6.17.23...v6.17.24) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** check a pod document against its shapes in linear time ([ba6d631](https://github.com/solid-memo/website/commit/ba6d631377b6ee74c37ffbfff8b54756efa4261f))
 
 ## [6.17.23](https://github.com/solid-memo/website/compare/v6.17.22...v6.17.23) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse a write from a read that a save has written over ([2448697](https://github.com/solid-memo/website/commit/244869704ed5557df581aa8a4c46dc57e9a03087))
 * **statistics:** bound the study days the charts walk ([3d30b73](https://github.com/solid-memo/website/commit/3d30b739ea9c8ff20e1036b0b4da3fa949802f26))
 
 ## [6.17.22](https://github.com/solid-memo/website/compare/v6.17.21...v6.17.22) (2026-10-30)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read a release's parts from its own document alone ([1820d1e](https://github.com/solid-memo/website/commit/1820d1eac365ab25983f7d674383f5111ac33f16))
 
 ## [6.17.21](https://github.com/solid-memo/website/compare/v6.17.20...v6.17.21) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **deps:** lock every package to the newest version its range allows ([71653cc](https://github.com/solid-memo/website/commit/71653cc638031a57d5e949c9ecd5a67cdbfef927)), closes [#379](https://github.com/solid-memo/website/issues/379)
 
 ## [6.17.20](https://github.com/solid-memo/website/compare/v6.17.19...v6.17.20) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** complete only a login redirect this tab set off ([2b12f64](https://github.com/solid-memo/website/commit/2b12f64c693cb0d1d42f65c20e037c9dc1473623))
 * **studio:** stop the graph's settling as the graph goes ([275a8f7](https://github.com/solid-memo/website/commit/275a8f708398296eed73eab4aa2c88ecad708112)), closes [#375](https://github.com/solid-memo/website/issues/375) [#375](https://github.com/solid-memo/website/issues/375)
 
 ## [6.17.19](https://github.com/solid-memo/website/compare/v6.17.18...v6.17.19) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse JSON-LD terms defined by more than an IRI ([e1b823a](https://github.com/solid-memo/website/commit/e1b823ae3f64e0bd901d1e483332c4b4c5212664))
 
 ## [6.17.18](https://github.com/solid-memo/website/compare/v6.17.17...v6.17.18) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** lay out drafts in one pass however long their chains ([364c573](https://github.com/solid-memo/website/commit/364c5738bdd4550d065529f29f8c8e4f082bc89c))
 
 ## [6.17.17](https://github.com/solid-memo/website/compare/v6.17.16...v6.17.17) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **solid-memo-client:** check the provider's endpoint URLs before use ([9bcca8d](https://github.com/solid-memo/website/commit/9bcca8d38c04ccd8f1043f0f09a596b672122aaa))
 
 ## [6.17.16](https://github.com/solid-memo/website/compare/v6.17.15...v6.17.16) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** group cards that say the same without copying the groups ([9c45c5e](https://github.com/solid-memo/website/commit/9c45c5e7be15b460be1c0e9bea62ef80dc930ebe))
 * **studio:** bound how deep the graph view hangs a node ([9ba838f](https://github.com/solid-memo/website/commit/9ba838f8e865f652dea2dc3f55796f473268ede1))
@@ -905,95 +905,95 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.17.15](https://github.com/solid-memo/website/compare/v6.17.14...v6.17.15) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** write long blank-node chains without deep recursion ([bce6774](https://github.com/solid-memo/website/commit/bce67747e7f57935c61f8caa21e29e67a9d0fd44))
 
 ## [6.17.14](https://github.com/solid-memo/website/compare/v6.17.13...v6.17.14) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** read extended profiles as the user only in the profile's places ([f025f1d](https://github.com/solid-memo/website/commit/f025f1d22f7e62b6a31e26b4c3f48c90aa87ca0a))
 * **solid:** require the issuer on every identity provider's answer ([eca1227](https://github.com/solid-memo/website/commit/eca1227151d669479573d8eedcc879b823739d52))
 
 ## [6.17.13](https://github.com/solid-memo/website/compare/v6.17.12...v6.17.13) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **ci:** build the deployed site without the Actions cache ([ff4261b](https://github.com/solid-memo/website/commit/ff4261b1172bbfc041ce39243a073aead90e5eb6))
 * **decks:** check the taxonomy's ids and times before writing them ([dc24d64](https://github.com/solid-memo/website/commit/dc24d6481664be1bdda3de29ae0e5eda0e9f3366))
 
 ## [6.17.12](https://github.com/solid-memo/website/compare/v6.17.11...v6.17.12) (2026-10-29)
 
-### Bug Fixes
+### Fixes
 
 * **shacl:** drop a document's rdfs:subClassOf statements before a check ([db7ea9a](https://github.com/solid-memo/website/commit/db7ea9a2871a70ab32a91746dd3b74ee489fc0dc))
 
 ## [6.17.11](https://github.com/solid-memo/website/compare/v6.17.10...v6.17.11) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **library:** bound the releases read in between for an upgrade from a link ([f1c0922](https://github.com/solid-memo/website/commit/f1c0922f626ccbe77e5d37e4d93c35579776d1be))
 
 ## [6.17.10](https://github.com/solid-memo/website/compare/v6.17.9...v6.17.10) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse release versions too large to number a draft ([459493f](https://github.com/solid-memo/website/commit/459493f3683d026e574c30655f764aee3c65e341))
 
 ## [6.17.9](https://github.com/solid-memo/website/compare/v6.17.8...v6.17.9) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** keep a release's back-link out of drafts and deck documents ([1796658](https://github.com/solid-memo/website/commit/17966587398b4a0b0c0f3ceba182e9ef2becff7e))
 * **ui:** follow a release's contact link as its other links are followed ([e5cdded](https://github.com/solid-memo/website/commit/e5cddedad00b514a76442f12526cace6ac87c047))
 
 ## [6.17.8](https://github.com/solid-memo/website/compare/v6.17.7...v6.17.8) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **web:** serve a self-unregistering worker at the old trace viewer's address ([40a2f6f](https://github.com/solid-memo/website/commit/40a2f6fbe134541e4271ca8809203b96dc435f9a))
 
 ## [6.17.7](https://github.com/solid-memo/website/compare/v6.17.6...v6.17.7) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** build a course's outline in one pass over its steps ([880c551](https://github.com/solid-memo/website/commit/880c551a9e621af0a994d85f869c775af56c0ccc))
 
 ## [6.17.6](https://github.com/solid-memo/website/compare/v6.17.5...v6.17.6) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **application:** skip an unclaimed document in every spelling of its address ([c6367a9](https://github.com/solid-memo/website/commit/c6367a9709a462b4596522e54b957f960c7129bb))
 
 ## [6.17.5](https://github.com/solid-memo/website/compare/v6.17.4...v6.17.5) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse JSON-LD contexts below the top level of a deck file ([2d41bc0](https://github.com/solid-memo/website/commit/2d41bc078b56cd884426a9592bcb22d973daa30f))
 
 ## [6.17.4](https://github.com/solid-memo/website/compare/v6.17.3...v6.17.4) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **solid-memo-client:** refresh only a stored session from the tab's own provider ([19e9b7d](https://github.com/solid-memo/website/commit/19e9b7d2e98c368cee278a008d629eecec05a450))
 
 ## [6.17.3](https://github.com/solid-memo/website/compare/v6.17.2...v6.17.3) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **ci:** restore nothing from the Actions cache in the release workflow ([342267a](https://github.com/solid-memo/website/commit/342267a42fc8cb0a2cbe4bb1c767716e0cb80089))
 * **solid:** read a date-time only once it is wholly one ([f610e33](https://github.com/solid-memo/website/commit/f610e33fd210cc5a0905e6a92720e86b1f3ca007))
 
 ## [6.17.2](https://github.com/solid-memo/website/compare/v6.17.1...v6.17.2) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** bound what a release, a deck file and the deck groups take in ([66ebd85](https://github.com/solid-memo/website/commit/66ebd857620ac8fd65e828a147f8f7fbba84ee61))
 
 ## [6.17.1](https://github.com/solid-memo/website/compare/v6.17.0...v6.17.1) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** follow no redirect with the user's credentials ([d327d9c](https://github.com/solid-memo/website/commit/d327d9c3a7c811e3c5ce2d8e463c8e1105425b6d))
 * **ui:** show where a link in deck text leads, as its address is written ([bbd322d](https://github.com/solid-memo/website/commit/bbd322d9bdee16eaab172f79ec2281d941c4ba02))
@@ -1004,27 +1004,27 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **decks:** finish the Korean at the Table story in ten chapters ([48194b9](https://github.com/solid-memo/website/commit/48194b9b7deb2d762ce75d8a18d0697c9fe3eb25)), closes [#132](https://github.com/solid-memo/website/issues/132) [#132](https://github.com/solid-memo/website/issues/132)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** read a stated count in one pass ([3c32139](https://github.com/solid-memo/website/commit/3c321396bee9a46eb12008fbb88a33a20582ec81))
 * **domain:** read an author literal in one pass ([dad6c8e](https://github.com/solid-memo/website/commit/dad6c8e29126d084785ad7d6226e49f48ecbeb13))
 
 ## [6.16.3](https://github.com/solid-memo/website/compare/v6.16.2...v6.16.3) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** ask only a course release's own cards as its questions ([b6f88fe](https://github.com/solid-memo/website/commit/b6f88fe70669f6703c320d4572f719f5beae4ce8))
 
 ## [6.16.2](https://github.com/solid-memo/website/compare/v6.16.1...v6.16.2) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** look language tags and draft ids up as data, not properties ([6284ac6](https://github.com/solid-memo/website/commit/6284ac6a44eb380f1113e11e9618d17133bc5b9c))
 * **solid:** read JSON-LD with a parser that fetches no context ([3b9acf8](https://github.com/solid-memo/website/commit/3b9acf8f5b3da622b953955400db9b92d148df03))
 
 ## [6.16.1](https://github.com/solid-memo/website/compare/v6.16.0...v6.16.1) (2026-10-28)
 
-### Bug Fixes
+### Fixes
 
 * **application:** fill in release languages only for library copies ([06e80d8](https://github.com/solid-memo/website/commit/06e80d82050145f9cf3403297aab230d6b14535a))
 * **composition:** send credentials for an instance's data only into the user's own pod ([8b9b674](https://github.com/solid-memo/website/commit/8b9b67405ec20b1e983d4c0d4971072b3e6f28e6))
@@ -1045,19 +1045,19 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.14.3](https://github.com/solid-memo/website/compare/v6.14.2...v6.14.3) (2026-10-26)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse terms Turtle cannot write, so an import adds no statements ([8874a04](https://github.com/solid-memo/website/commit/8874a04af467784c8e7c168f5d1f18e11e85a830))
 
 ## [6.14.2](https://github.com/solid-memo/website/compare/v6.14.1...v6.14.2) (2026-10-26)
 
-### Bug Fixes
+### Fixes
 
 * **composition:** read a release outside the user's own pod as no one ([c77f899](https://github.com/solid-memo/website/commit/c77f8999bf11546f6b5fff783da261b94736f53e))
 
 ## [6.14.1](https://github.com/solid-memo/website/compare/v6.14.0...v6.14.1) (2026-10-26)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** read a desired retention outside its range as the default ([010a784](https://github.com/solid-memo/website/commit/010a78491ec5c4ff9c78cdadc09dd113607bea09))
 * **solid:** leave out an answer whose study day is not a real date ([ed96cb3](https://github.com/solid-memo/website/commit/ed96cb36c9979cf3450a1be9446f209b9d8bd6a7))
@@ -1095,14 +1095,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.10.2](https://github.com/solid-memo/website/compare/v6.10.1...v6.10.2) (2026-10-25)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** make a missing type index only in the user's own storage ([28776ed](https://github.com/solid-memo/website/commit/28776edef313156f0efd999767d7ec065b50bd44))
 * **ui:** open the instance creator only with a storage the user chose ([4c1c87b](https://github.com/solid-memo/website/commit/4c1c87b94fa05ddd7e054b321a36f4a748a1cae6))
 
 ## [6.10.1](https://github.com/solid-memo/website/compare/v6.10.0...v6.10.1) (2026-10-25)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** keep a file's named graphs off Object.prototype ([b988164](https://github.com/solid-memo/website/commit/b988164af74db30a847255c0309b4ff63c05282f))
 
@@ -1147,7 +1147,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **site:** drop the docs' list of versions ([47a6beb](https://github.com/solid-memo/website/commit/47a6bebcccf281b62e8f22a64404b664ccb089db)), closes [#280](https://github.com/solid-memo/website/issues/280)
 
-### Bug Fixes
+### Fixes
 
 * **site:** link the site by its address from a release's archived docs ([051bd8b](https://github.com/solid-memo/website/commit/051bd8b0982f5601981691b25f3d810ee92364d9)), closes [#280](https://github.com/solid-memo/website/issues/280)
 
@@ -1157,7 +1157,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **library:** name and filter by the languages of a deck's cards ([d8f931b](https://github.com/solid-memo/website/commit/d8f931b98c695ca413f5efddd74473060e517291)), closes [#282](https://github.com/solid-memo/website/issues/282)
 
-### Bug Fixes
+### Fixes
 
 * **release:** count only `#` and a number as an issue a commit refers to ([5064209](https://github.com/solid-memo/website/commit/50642092a9dc6d8944c53b8f30074386fc42f143)), closes [#281](https://github.com/solid-memo/website/issues/281)
 
@@ -1167,7 +1167,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 * **domain:** offer every suggested provider for creating a Pod ([bc566ff](https://github.com/solid-memo/website/commit/bc566ffe9f8444c0d275fb29100b7830dd19f74c)), closes [#283](https://github.com/solid-memo/website/issues/283)
 
-### Bug Fixes
+### Fixes
 
 * **ci:** ask for a provider's sign-up page as a browser does ([4ea9ab8](https://github.com/solid-memo/website/commit/4ea9ab8acb527b7f031eca7fa05d2bc5c251c2b4)), closes [#283](https://github.com/solid-memo/website/issues/283)
 
@@ -1194,7 +1194,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.3.1](https://github.com/solid-memo/website/compare/v6.3.0...v6.3.1) (2026-10-23)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** show an error that won't go away at once instead of retrying ([2419b50](https://github.com/solid-memo/website/commit/2419b5025196310ce5be95402c0cd59ca42f3d49)), closes [#260](https://github.com/solid-memo/website/issues/260)
 
@@ -1223,7 +1223,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [6.0.2](https://github.com/solid-memo/website/compare/v6.0.1...v6.0.2) (2026-10-23)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** name only what a format update adds since the oldest version ([1110310](https://github.com/solid-memo/website/commit/1110310d4354ed7f77417e8dc73dbf29c5c562be)), closes [#248](https://github.com/solid-memo/website/issues/248)
 
@@ -1265,7 +1265,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [5.3.2](https://github.com/solid-memo/website/compare/v5.3.1...v5.3.2) (2026-10-22)
 
-### Bug Fixes
+### Fixes
 
 * **decks:** ask nine more Solid questions for one answer ([cf74ac8](https://github.com/solid-memo/website/commit/cf74ac81e1ab6bb04383a25a1500fc12ecdb29fb)), closes [#231](https://github.com/solid-memo/website/issues/231)
 * **decks:** ask the hash WebID review question for one answer ([209ad1c](https://github.com/solid-memo/website/commit/209ad1c7c581fef13aec786995990a7b4382cecd)), closes [#231](https://github.com/solid-memo/website/issues/231)
@@ -1274,7 +1274,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 
 ## [5.3.1](https://github.com/solid-memo/website/compare/v5.3.0...v5.3.1) (2026-10-21)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** keep deck names readable in a narrow deck list ([913cb38](https://github.com/solid-memo/website/commit/913cb383a6ca84249d00c8ab2339402d81b0605a)), closes [#221](https://github.com/solid-memo/website/issues/221)
 
@@ -1291,7 +1291,7 @@ changed: see [docs/vocab.md](docs/vocab.md),
 * **ui:** make End session the next step and Undo a quiet one ([6cbf227](https://github.com/solid-memo/website/commit/6cbf227a6c34be3bc71e58dc2a1b0157cefdd13e)), closes [#219](https://github.com/solid-memo/website/issues/219)
 * **ui:** show the statistics by deck as a block a deck ([4d037fd](https://github.com/solid-memo/website/commit/4d037fdbe9814c453bbd2e902ec547d5cd3cf2b3)), closes [#223](https://github.com/solid-memo/website/issues/223)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** keep the sidebar's faint pin at 3:1 ([fc9783a](https://github.com/solid-memo/website/commit/fc9783aff1e8c773b887567c5c7e0140a3de22ce)), closes [#216](https://github.com/solid-memo/website/issues/216)
 * **ui:** draw the drop line's label on the primary fill ([67adfea](https://github.com/solid-memo/website/commit/67adfea41f2ece0ec12433c40cf44971bb7f1c94)), closes [#216](https://github.com/solid-memo/website/issues/216)
@@ -1325,7 +1325,7 @@ the invitation to FSRS-6 until it is reloaded.
 * **vocab:** design a palette of one's own, kept in the pod ([ecdd5a4](https://github.com/solid-memo/website/commit/ecdd5a40c6c84ba1b20f8ed52e4eb1e31fa1c365)), closes [#rrggbb](https://github.com/solid-memo/website/issues/rrggbb) [#rrggbb](https://github.com/solid-memo/website/issues/rrggbb) [#211](https://github.com/solid-memo/website/issues/211)
 * **vocab:** keep the palette and the text size in the pod's preferences ([d7e4071](https://github.com/solid-memo/website/commit/d7e4071e41d25ca57a2456e5af6258f0a3e0daea)), closes [#211](https://github.com/solid-memo/website/issues/211)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** scale the panes' size limits with the root font size ([821ff3e](https://github.com/solid-memo/website/commit/821ff3ef89c152605a732812f90fa77933f3b3c3)), closes [#211](https://github.com/solid-memo/website/issues/211)
 * **ui:** keep a later choice of colors over the read of an earlier one ([8d4dff2](https://github.com/solid-memo/website/commit/8d4dff2cc02c97510dc146844befedfeb905ff52)), closes [#211](https://github.com/solid-memo/website/issues/211)
@@ -1339,19 +1339,19 @@ the invitation to FSRS-6 until it is reloaded.
 
 ## [4.1.3](https://github.com/solid-memo/website/compare/v4.1.2...v4.1.3) (2026-10-20)
 
-### Bug Fixes
+### Fixes
 
 * **web:** unregister the old journeys report's service workers ([786bdea](https://github.com/solid-memo/website/commit/786bdea71787fe07f5eb444a49a24934a09d5774))
 
 ## [4.1.2](https://github.com/solid-memo/website/compare/v4.1.1...v4.1.2) (2026-10-20)
 
-### Bug Fixes
+### Fixes
 
 * **ui:** take the landing page's logo back to the first step ([7ebfcca](https://github.com/solid-memo/website/commit/7ebfccacae755f59750f8cad1dc7ba74ce6d7d8d)), closes [#205](https://github.com/solid-memo/website/issues/205)
 
 ## [4.1.1](https://github.com/solid-memo/website/compare/v4.1.0...v4.1.1) (2026-10-20)
 
-### Bug Fixes
+### Fixes
 
 * **solid:** refuse unsafe pod writes in one fence ([38a0d12](https://github.com/solid-memo/website/commit/38a0d12ffa324282424617f80e423134c3fe3bfe))
 * **solid:** use a catalog-named document only where it is the deck's own ([64b3269](https://github.com/solid-memo/website/commit/64b3269cd2a4354a46389a9834d5da2fe992f83d))
@@ -1403,7 +1403,7 @@ it reads that deck's documents again on each visit.
 
 * **library:** ask every app language of a library deck's title, description and keywords ([5054f6b](https://github.com/solid-memo/website/commit/5054f6bd03a97654b9fdbb3b93009bff737b5571)), closes [#172](https://github.com/solid-memo/website/issues/172)
 
-### Bug Fixes
+### Fixes
 
 * **ci:** keep step outputs out of scripts and Pages rights in their jobs ([c443861](https://github.com/solid-memo/website/commit/c44386186575db49b7a40476ce860852b8d43837)), closes [#170](https://github.com/solid-memo/website/issues/170) [#170](https://github.com/solid-memo/website/issues/170)
 * **solid:** bring outdated deck entries up through upgradeDeck ([57d3960](https://github.com/solid-memo/website/commit/57d3960bd04cf681b706fa82506331ea7eef06ab)), closes [#168](https://github.com/solid-memo/website/issues/168)
@@ -1416,13 +1416,13 @@ it reads that deck's documents again on each visit.
 
 * **studio:** write a release's contact from the release screen ([711a5d1](https://github.com/solid-memo/website/commit/711a5d18e031f25ec53068d32577dd6bf6901481)), closes [#166](https://github.com/solid-memo/website/issues/166)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** flag a missing library contact and any email in the library check ([ca7e48e](https://github.com/solid-memo/website/commit/ca7e48e7bc4ffcf08f9c6d58c0fcb8b676b73b53)), closes [#166](https://github.com/solid-memo/website/issues/166)
 
 ## [3.10.1](https://github.com/solid-memo/website/compare/v3.10.0...v3.10.1) (2026-10-17)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** mark a card side's cell field with the side's language ([9a66983](https://github.com/solid-memo/website/commit/9a669832cf2d8aee90a53c237167482a23dcbd17)), closes [#149](https://github.com/solid-memo/website/issues/149)
 * **ui:** give the small targets axe finds 24px of room ([c674c53](https://github.com/solid-memo/website/commit/c674c53a0132eeeb4463c9e45f455cfe99d9e731)), closes [#149](https://github.com/solid-memo/website/issues/149)
@@ -1467,7 +1467,7 @@ it reads that deck's documents again on each visit.
 
 ## [3.6.1](https://github.com/solid-memo/website/compare/v3.6.0...v3.6.1) (2026-10-17)
 
-### Bug Fixes
+### Fixes
 
 * **application:** keep the note of a cut-off guest move on a failed retry ([d2a1f68](https://github.com/solid-memo/website/commit/d2a1f685f1e8f41b887e3f94fab4e0386c2691b9)), closes [#140](https://github.com/solid-memo/website/issues/140)
 * **ui:** offer a cut-off guest move's copy for removal when logged in ([301301b](https://github.com/solid-memo/website/commit/301301bc443d6d929d264f4f1453656e01499dd2)), closes [#140](https://github.com/solid-memo/website/issues/140)
@@ -1544,13 +1544,13 @@ to be imported.
 
 ## [2.1.2](https://github.com/solid-memo/website/compare/v2.1.1...v2.1.2) (2026-10-16)
 
-### Bug Fixes
+### Fixes
 
 * **studio:** keep hidden text inside the panes that scroll ([485ba46](https://github.com/solid-memo/website/commit/485ba46443e52076b7c6fa7a4446293561d44c7f)), closes [#110](https://github.com/solid-memo/website/issues/110)
 
 ## [2.1.1](https://github.com/solid-memo/website/compare/v2.1.0...v2.1.1) (2026-10-16)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** find the guest's pod in a text by the origin its URLs parse to ([01e9fb6](https://github.com/solid-memo/website/commit/01e9fb6e82e3413fdb61c57791deb6e2d7ddf6e8)), closes [#102](https://github.com/solid-memo/website/issues/102)
 
@@ -1562,7 +1562,7 @@ to be imported.
 
 ## [2.0.1](https://github.com/solid-memo/website/compare/v2.0.0...v2.0.1) (2026-10-15)
 
-### Bug Fixes
+### Fixes
 
 * **release:** count only a BREAKING CHANGE: footer as written; 2.0.0 broke nothing ([41444fc](https://github.com/solid-memo/website/commit/41444fc3fbaf4d997a163020f536c2d430c8b5e7)), closes [#84](https://github.com/solid-memo/website/issues/84)
 
@@ -1585,7 +1585,7 @@ edited before 1.0.0.
 * **studio:** edit a release's themes on the release screen ([f95c429](https://github.com/solid-memo/website/commit/f95c429d8076c25a0b3194f51ec0eb3906bcf489)), closes [#69](https://github.com/solid-memo/website/issues/69)
 * **studio:** group a release's themes, and nest narrower topics ([fb9501f](https://github.com/solid-memo/website/commit/fb9501fd36359e14589f0e43870daa98c9243229)), closes [#69](https://github.com/solid-memo/website/issues/69)
 
-### Bug Fixes
+### Fixes
 
 * **domain:** start every new draft about education (EDUC) ([19617f4](https://github.com/solid-memo/website/commit/19617f428c5254792837f84385366137db2c331d)), closes [#69](https://github.com/solid-memo/website/issues/69)
 
@@ -1603,7 +1603,7 @@ edited before 1.0.0.
 
 ## [1.0.1](https://github.com/solid-memo/website/compare/v1.0.0...v1.0.1) (2026-10-14)
 
-### Bug Fixes
+### Fixes
 
 * keep the last edit's deck arrangement over a read still in flight ([ec57855](https://github.com/solid-memo/website/commit/ec57855c47b278f33bd775a80cfb558137c37409))
 
