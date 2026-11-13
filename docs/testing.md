@@ -1131,7 +1131,7 @@ lets through as carried over.
 
 Dependabot auto-triage rules, a repository setting in Settings ›
 Advanced Security › Dependabot auto-triage rules, dismiss the alerts on
-the end-to-end servers' lockfiles, one rule for each:
+the end-to-end servers' lock files, one rule for each:
 `e2e/pod/servers/jss/package-lock.json`,
 `e2e/pod/servers/nss/5/package-lock.json`,
 `e2e/pod/servers/nss/6/package-lock.json` and
@@ -1142,9 +1142,9 @@ server's next release, which Renovate proposes. A rule has no criterion
 for malware, so it can't leave a malware alert out: one on those paths
 is dismissed with the rest, and the dismissed alerts are where it
 shows. The root's `package-lock.json`, which locks the end-to-end
-tests' own packages, has no rule. The servers' Dockerfiles need none,
-as Dependabot alerts don't cover Docker images. A new server in
-`e2e/pod/servers/` with a lockfile of its own gets a rule of its own.
+tests' own packages, has no rule. The servers' Docker images need
+none, as Dependabot alerts don't cover them. A new server in
+`e2e/pod/servers/` with a lock file of its own gets a rule of its own.
 
 ### Code scanning
 
