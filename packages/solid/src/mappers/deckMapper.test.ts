@@ -772,7 +772,7 @@ describe("toCard", () => {
       { id: "d2", text: { "": "404" } },
       { id: "retired", text: { "": "500" }, retired: true },
     ]);
-    expect(toCards(dataset)).toHaveLength(1);
+    expect(toCards(dataset, CARDS_DOC)).toHaveLength(1);
     expect(toDistractor(card)).toBeNull();
   });
 
@@ -785,9 +785,25 @@ describe("toCard", () => {
 ${card("good")}
 ${card("odd", " ; sm:distractor <http://[x>")}`,
     );
-    const cards = toCards(dataset);
+    const cards = toCards(dataset, CARDS_DOC);
     expect(cards.map((one) => one.url)).toEqual([`${CARDS_DOC}#good`, `${CARDS_DOC}#odd`]);
     expect(cards[1]!.distractors).toBeUndefined();
+  });
+
+  it("reads only the document's own subjects as its cards, never another document's that shares their ids", async () => {
+    const elsewhere = "https://elsewhere.example/x";
+    const card = (subject: string, front: string) =>
+      `<${subject}> a sm:Card ; sm:formatVersion 7 ; sm:front "${front}"@en ; sm:back "B"@en .`;
+    const dataset = await datasetOfTurtle(
+      CARDS_DOC,
+      `@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+${card("#card-1", "Own")}
+${card(`${elsewhere}#card-1`, "Planted")}`,
+    );
+    expect(toCards(dataset, CARDS_DOC).map((one) => [one.url, one.front.en])).toEqual([
+      [`${CARDS_DOC}#card-1`, "Own"],
+    ]);
+    expect(toCards(dataset, elsewhere).map((one) => one.url)).toEqual([`${elsewhere}#card-1`]);
   });
 
   /** A document of `count` cards that all name one distractor, written in `languages` languages. */
@@ -810,7 +826,7 @@ ${card("odd", " ; sm:distractor <http://[x>")}`,
 
   it("gives the cards of a document that name one distractor one object of it", () => {
     const dataset = sharedDistractor(3, 2);
-    const [first, ...rest] = toCards(dataset).map((card) => card.distractors![0]);
+    const [first, ...rest] = toCards(dataset, CARDS_DOC).map((card) => card.distractors![0]);
     expect(first!.text).toEqual({ "en-x-l0": "wrong 0", "en-x-l1": "wrong 1" });
     for (const distractor of rest) expect(distractor).toBe(first);
     const card = getThing(dataset, `${CARDS_DOC}#card-0`)!;
@@ -826,7 +842,7 @@ ${card("odd", " ; sm:distractor <http://[x>")}`,
       (count) => {
         const dataset = sharedDistractor(count, count);
         // A document is read once, so each run maps a copy of it not read yet.
-        return () => toCards(Object.freeze({ ...dataset }));
+        return () => toCards(Object.freeze({ ...dataset }), CARDS_DOC);
       },
       100,
       8,

@@ -2,14 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  type Dataset,
-  createSolidDataset,
-  getThingAll,
-  removeThings,
-  setThing,
-  setThings,
-} from "./client/rdf";
+import { type Dataset, createSolidDataset, removeThings, setThing, setThings } from "./client/rdf";
 import type { AnswerLog } from "@solid-memo/application/ports";
 import {
   isOfStudyMonth,
@@ -34,17 +27,19 @@ import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { mapSince, readSince } from "./readSince";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { READ_DEADLINE_MS } from "./readDeadline";
-import { unlessNewer } from "./records";
+import { ownSubjectsOf, unlessNewer } from "./records";
 
 /**
- * The answers of a month's document (none when there is none), each that
- * fits its shape and is of the month (isOfStudyMonth): the statistics
- * count every day from the first answer's to the last's.
+ * The answers of a month's document at `url` (none when there is none),
+ * each of its own subjects (ownSubjectsOf: an answer's id is its
+ * fragment, which a subject of another document may share) that fits its
+ * shape and is of the month (isOfStudyMonth): the statistics count every
+ * day from the first answer's to the last's.
  */
-function answersIn(month: string, dataset: Dataset | null): Answer[] {
+function answersIn(url: string, month: string, dataset: Dataset | null): Answer[] {
   return dataset === null
     ? []
-    : getThingAll(dataset).flatMap((thing) => {
+    : ownSubjectsOf(dataset, url).flatMap((thing) => {
         const answer = toAnswer(thing);
         return answer !== null && isOfStudyMonth(answer.studyDay, month) ? [answer] : [];
       });
@@ -82,7 +77,8 @@ export function createSolidAnswerLog({
     for (let attempt = 1; ; attempt++) {
       const dataset = await getSolidDatasetOrNull(url, fetch);
       if (dataset === null) return;
-      const picked = getThingAll(dataset).filter((thing) => {
+      // Only the month document's own answers, as they are read (answersIn).
+      const picked = ownSubjectsOf(dataset, url).filter((thing) => {
         const answer = toAnswer(thing);
         return answer !== null && which(answer);
       });
@@ -142,13 +138,14 @@ export function createSolidAnswerLog({
     },
 
     async readMonth(instanceUrl, month) {
-      return answersIn(month, await getSolidDatasetOrNull(historyUrlOf(instanceUrl, month), fetch));
+      const url = historyUrlOf(instanceUrl, month);
+      return answersIn(url, month, await getSolidDatasetOrNull(url, fetch));
     },
 
     async readMonthSince(instanceUrl, month, version) {
-      return mapSince(
-        await readSince(historyUrlOf(instanceUrl, month), version, fetch),
-        (dataset) => answersIn(month, dataset),
+      const url = historyUrlOf(instanceUrl, month);
+      return mapSince(await readSince(url, version, fetch), (dataset) =>
+        answersIn(url, month, dataset),
       );
     },
 

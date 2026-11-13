@@ -70,6 +70,7 @@ import type { CardV7 } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
   migrateWithinBound,
+  ownSubjectsOf,
   readIri,
   readIris,
   readVersioned,
@@ -546,9 +547,14 @@ export function readCard(thing: Subject): { storedVersion: number; data: CardV7 
   };
 }
 
-/** Every card of a cards document. */
-export function toCards(dataset: Dataset): Card[] {
-  return getThingAll(dataset)
+/**
+ * Every card of the cards document at `documentUrl`: its own subjects
+ * alone (ownSubjectsOf). A card's id is its fragment, so a subject of
+ * another document the cards document states things of, which may
+ * share a card's fragment, is never read as one of its cards.
+ */
+export function toCards(dataset: Dataset, documentUrl: string): Card[] {
+  return ownSubjectsOf(dataset, documentUrl)
     .map((thing) => toCard(thing, dataset))
     .filter((card): card is Card => card !== null);
 }

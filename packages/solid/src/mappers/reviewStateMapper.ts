@@ -8,7 +8,6 @@ import {
   type Subject,
   asUrl,
   getTermAll,
-  getThingAll,
   getUrl,
   getUrlAll,
 } from "../client/rdf";
@@ -39,7 +38,7 @@ import {
 } from "@solid-memo/domain/reviewRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
-import { readVersioned, recordThing, removeAllUnlessNewer } from "../records";
+import { ownSubjectsOf, readVersioned, recordThing, removeAllUnlessNewer } from "../records";
 import { RDF, SM } from "../vocab";
 
 /**
@@ -169,14 +168,20 @@ interface Read<T> {
   state: T;
 }
 
-/** Each state of the document `read` maps a subject to, with its subject: one per card and direction (pickReviewStates, the subject `named` names first). */
+/**
+ * Each state of the document `read` maps a subject to, with its subject:
+ * one per card and direction (pickReviewStates, the subject `named`
+ * names first). Only the reviews document's own subjects are read
+ * (ownSubjectsOf): one of another document is never a state of the
+ * deck's, though its fragment names one of the deck's cards.
+ */
 function readOf<T extends ReviewKey>(
   dataset: Dataset,
   documents: ReviewDocuments,
   read: (thing: Subject, deck: ReviewedDeck) => T | null,
   named: (reviewsDocumentUrl: string, key: ReviewKey) => string,
 ): Read<T>[] {
-  const states = getThingAll(dataset).flatMap((thing) => {
+  const states = ownSubjectsOf(dataset, documents.reviewsDocumentUrl).flatMap((thing) => {
     const state = read(thing, documents);
     return state === null
       ? []
@@ -376,7 +381,9 @@ export function withoutReadReviewStates(
  * directions (a card removed, by hand or by an upgrade): every subject
  * typed sm:ReviewState that is an SM-2 state of one, by its links or the
  * fragment rule, or this app's FSRS-6 state of one, by its links, read
- * or not. Another scheduler's states, and any other subject, stay.
+ * or not, of the reviews document's own subjects (ownSubjectsOf).
+ * Another scheduler's states, a subject of another document, and any
+ * other subject, stay.
  */
 export function withoutReviewStates(
   dataset: Dataset,
@@ -386,7 +393,7 @@ export function withoutReviewStates(
   const removed = new Set(keys.map(reviewKeyOf));
   return removeAllUnlessNewer(
     dataset,
-    getThingAll(dataset)
+    ownSubjectsOf(dataset, documents.reviewsDocumentUrl)
       .filter((thing) => {
         const key = keyOfSubject(thing, documents) ?? fsrsKeyOfSubject(thing, documents);
         return key !== null && removed.has(reviewKeyOf(key));

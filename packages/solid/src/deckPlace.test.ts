@@ -241,7 +241,9 @@ describe("a deck whose documents do not say they are its own", () => {
     p.writes.length = 0;
     const unclaimed = { code: "deckDocumentUnclaimed", vars: { deck: deck.title } };
     await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject(unclaimed);
-    await expect(p.decks.removeCard(listed!, card)).rejects.toMatchObject(unclaimed);
+    await expect(
+      p.decks.removeCard(listed!, { ...card, url: `${CARD}#${card.id}` }),
+    ).rejects.toMatchObject(unclaimed);
     await expect(
       p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
     ).rejects.toMatchObject(unclaimed);
@@ -969,11 +971,14 @@ describe("an instance at the pod's root, laid out flat", () => {
     await p.reviews.createReviewStates(deck, { sm2: [], fsrs: [] });
     expect(await backLinks(p, deck.reviewsDocumentUrl, deck)).toBe(1);
 
-    // Moved to the root, renamed, with the catalog's links changed: the back-link moves with them.
+    // Moved to the root, renamed, with the catalog's links changed: the back-link and the subjects move with them.
     const cards = `${ROOT}spanish-cards.ttl`;
     const reviews = `${ROOT}spanish-reviews.ttl`;
     const moved = async (from: string, to: string) =>
-      p.put(to, (await p.text(from)).replaceAll(`<${from}>`, `<${to}>`));
+      p.put(
+        to,
+        (await p.text(from)).replaceAll(`<${from}>`, `<${to}>`).replaceAll(`<${from}#`, `<${to}#`),
+      );
     await moved(deck.cardsDocumentUrl, cards);
     await moved(deck.reviewsDocumentUrl, reviews);
     await plant(p, deck, cards, reviews, ROOT);
