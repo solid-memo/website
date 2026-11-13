@@ -1311,6 +1311,18 @@ describe("the attribution", () => {
     expect(attributionText(["Ann"], false, "de")).toBe("Compiled by Ann.");
   });
 
+  it("is recognized when names too long for it are cut short in it (GHSA-g598-pfpq-4whv)", () => {
+    const long = "n".repeat(16_000);
+    const draft = made(authored(courseDraft(), long, long), {
+      kind: "setAttribution",
+      attribution: { ai: true },
+    });
+    const [english, swedish] = comments(draft, of("compilation")).map((term) => term.value);
+    expect(english).toMatch(/^Compiled by n+ and n+… with the help of AI\.$/u);
+    expect(swedish).toMatch(/^Sammanställd av n+ och n+… med hjälp av AI\.$/u);
+    expect(attributionOf(draft)).toEqual({ ai: true, text: english });
+  });
+
   it("names the authors, as the making of the release states it, with or without AI", () => {
     const draft = authored(courseDraft(), "Ann", "Bo");
     expect(
@@ -1512,6 +1524,30 @@ describe("readCheckActivity", () => {
       ),
     };
     expect(readCheckActivity(short, "review-1")).toBeNull();
+  });
+
+  it("reads back a check whose texts are as long as a term may be, cut short as recorded (GHSA-g598-pfpq-4whv)", () => {
+    const long = "x".repeat(16_378);
+    for (const language of ["en", "sv"])
+      for (const kind of ["machine", "ai"] as const) {
+        const activity = { ...check, check: kind, language, scope: long, outcome: long };
+        const draft = made(courseDraft(), { kind: "addCheckActivity", id: "review-1", activity });
+        const read = readCheckActivity(draft, "review-1")!;
+        expect(read.scope).toMatch(/^x+…$/u);
+        expect(read.outcome).toMatch(/^x+…$/u);
+        expect(checkActivityTriples(of("review-1"), read)).toEqual(
+          checkActivityTriples(of("review-1"), activity),
+        );
+        const named = { ...check, check: kind, language, label: long };
+        const labelled = made(courseDraft(), {
+          kind: "addCheckActivity",
+          id: "review-1",
+          activity: named,
+        });
+        expect(readCheckActivity(labelled, "review-1")!.label).toBe(
+          kind === "ai" ? `${long.slice(0, 16_372)}…` : long,
+        );
+      }
   });
 });
 

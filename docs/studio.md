@@ -2313,7 +2313,8 @@ the library's releases are
     without "with the help of AI", in English and Swedish ("Sammanställd
     av …"): two `rdfs:comment`s of the release's own making
     (`setAttribution`). It needs an author to name, and is written
-    again whenever the authors change.
+    again whenever the authors change. Names too long for it to fit the
+    bound on a term are cut short in it, with an ellipsis after them.
   - Only a comment worded exactly so, for the authors the release
     names, is read as the attribution: a note starting "Compiled by
     hand…" stays a note.
@@ -2355,7 +2356,9 @@ the library's releases are
 - **Checks**: each check this version had, by a machine or by AI, with
   what it looked at, its scope, its outcome, the day it ended and its
   language. It's recorded in words that say it was no human review
-  (`checkActivityTriples`). An activity written otherwise can be
+  (`checkActivityTriples`). A text too long for those words to fit the
+  bound on a term is cut short in them, with an ellipsis after it, and
+  read back so. An activity written otherwise can be
   deleted, not edited (`readCheckActivity` reads only what the Studio
   writes). Those carried from earlier versions are listed apart, and
   never changed.

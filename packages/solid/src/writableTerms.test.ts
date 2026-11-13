@@ -4,7 +4,11 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { renamedCatalog } from "@solid-memo/domain/catalog";
+import { deckGroupToRecord } from "@solid-memo/domain/deckGroupRecord";
+import type { LangText } from "@solid-memo/domain/langText";
+import { attributionText, checkActivityTriples } from "@solid-memo/domain/release/releaseDraft";
+import { MAX_TERM_CHARACTERS, termKeyLength } from "./client/readLimits";
 import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
 
 const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
@@ -123,6 +127,88 @@ describe("refuseUnwritable", () => {
       expect(() => refuseUnwritable([past])).toThrow(
         expect.objectContaining({ code: "termTooLong", vars: { limit } }),
       );
+    }
+  });
+});
+
+describe("a default description the app writes for a name as long as a term (GHSA-g598-pfpq-4whv)", () => {
+  const GROUP = "https://pod.example/memo/catalog.ttl#group";
+  const PUBLISHER = "https://pod.example/profile/card#me";
+
+  it("is writable for a group whose name the read kept, in English or Swedish", () => {
+    for (const length of [16_362, 16_363, 16_366, 16_370, 16_378]) {
+      const titles: LangText[] = [
+        { en: "Group", sv: "å".repeat(length) },
+        { en: "g".repeat(length) },
+      ];
+      for (const title of titles) {
+        // As another app may have stored the group: the English-only default description.
+        const previous = {
+          title,
+          description: { en: `Deck group: ${title.en}.` },
+          publisher: PUBLISHER,
+          dataset: [],
+          catalog: [],
+        };
+        // What a tree edit that touches the group writes.
+        const { description } = deckGroupToRecord(
+          { group: { url: GROUP, title }, decks: [], groups: [] },
+          PUBLISHER,
+          previous,
+        );
+        for (const [language, text] of Object.entries(description)) {
+          const term = literal(text ?? "", language);
+          expect(termKeyLength(term)).toBeLessThanOrEqual(MAX_TERM_CHARACTERS);
+          expect(() => refuseUnwritable([quad(term)])).not.toThrow();
+        }
+      }
+    }
+  });
+
+  it("is writable for a catalog whose instance has a name as long as a term", () => {
+    const old = "n".repeat(16_370);
+    const catalog = {
+      title: old,
+      description: `Flashcard decks of the Solid Memo instance ${old}.`,
+      publisher: { webId: PUBLISHER, name: "Alice" },
+    };
+    for (const length of [16_330, 16_340, 16_370, 16_381]) {
+      const { description } = renamedCatalog(catalog, "m".repeat(length));
+      expect(termKeyLength(literal(description))).toBeLessThanOrEqual(MAX_TERM_CHARACTERS);
+      expect(() => refuseUnwritable([quad(literal(description))])).not.toThrow();
+    }
+  });
+
+  it("is writable for a release's check and attribution around texts as long as a term", () => {
+    const writable = (text: string, language: string) => {
+      const term = literal(text, language);
+      expect(termKeyLength(term)).toBeLessThanOrEqual(MAX_TERM_CHARACTERS);
+      expect(() => refuseUnwritable([quad(term)])).not.toThrow();
+    };
+    for (const length of [16_330, 16_350, 16_370, 16_378]) {
+      const text = "t".repeat(length);
+      for (const language of ["en", "sv"]) {
+        for (const check of ["machine", "ai"] as const) {
+          const said = checkActivityTriples("https://pod.example/memo/release.ttl#review-1", {
+            check,
+            label: check === "ai" ? text : "Checks",
+            scope: text,
+            outcome: text,
+            endedAt: "2026-11-13T12:00:00Z",
+            language,
+          });
+          for (const { object } of said)
+            if (object.kind === "literal" && object.language !== "")
+              writable(object.value, object.language);
+        }
+        for (const ai of [false, true]) {
+          writable(attributionText([text], ai, language), language);
+          writable(
+            attributionText([text.slice(0, length / 2), text, "Bo"], ai, language),
+            language,
+          );
+        }
+      }
     }
   });
 });

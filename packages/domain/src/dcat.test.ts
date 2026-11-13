@@ -193,3 +193,32 @@ describe("a deck group's default description", () => {
     expect(isDefaultDeckGroupDescription({ sv: "Kortleksgrupp: Språk." }, title)).toBe(false);
   });
 });
+
+describe("a deck group's default description for a name as long as a term (GHSA-g598-pfpq-4whv)", () => {
+  // A text tagged with a two-letter language, as a term's longest name has it: in quotes, `@sv` after it.
+  const ROOM = 5;
+
+  it("cuts the name short in English and Swedish, so that each is no longer than a term may be", () => {
+    for (const length of [16_362, 16_363, 16_370, 16_378]) {
+      const { en, sv } = defaultDeckGroupDescription({ en: "Group", sv: "å".repeat(length) });
+      expect(en).toBe("Deck group: Group.");
+      expect(sv!.length).toBeLessThanOrEqual(HASHED_CHARACTERS - ROOM);
+      expect(sv).toMatch(/^Kortleksgrupp: å+…?\.$/);
+    }
+    const { en, sv } = defaultDeckGroupDescription({ en: "g".repeat(16_370) });
+    expect(en).toHaveLength(HASHED_CHARACTERS - ROOM);
+    expect(en).toMatch(/^Deck group: g+…\.$/);
+    expect(sv).toHaveLength(HASHED_CHARACTERS - ROOM);
+  });
+
+  it("knows the cut default and the uncut one an older record holds, with or without its Swedish", () => {
+    const title = { en: "Group", sv: "å".repeat(16_370) };
+    const whole = { en: "Deck group: Group.", sv: `Kortleksgrupp: ${title.sv}.` };
+    expect(defaultDeckGroupDescription(title).sv).not.toBe(whole.sv);
+    expect(isDefaultDeckGroupDescription(defaultDeckGroupDescription(title), title)).toBe(true);
+    expect(isDefaultDeckGroupDescription(whole, title)).toBe(true);
+    const name = "g".repeat(16_370);
+    expect(isDefaultDeckGroupDescription({ en: `Deck group: ${name}.` }, { en: name })).toBe(true);
+    expect(isDefaultDeckGroupDescription({ en: "Deck group: g." }, { en: name })).toBe(false);
+  });
+});
