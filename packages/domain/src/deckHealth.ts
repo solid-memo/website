@@ -14,7 +14,7 @@ import {
   type Deck,
 } from "./deck";
 import { unlikeRelease } from "./deckLanguages";
-import { TextMap } from "./pathKeys";
+import { PathMap, piecesOf, TextMap } from "./pathKeys";
 import type { FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
 import { reviewKeyOf } from "./reviewRecord";
@@ -254,13 +254,17 @@ export function cardSpotsOf(deck: Deck, cards: readonly Card[]): CardSpotOf {
 }
 
 /**
- * A side's parts as compared: how many texts it has, then each
- * language's tag and plain text, white space collapsed, in the order of
- * their tags; then whether it has a picture, and its picture. Each part
- * is a key of its own (duplicateCardsOf), never joined into one string:
- * V8 hashes a string longer than 16,383 characters by its length alone,
- * so a map keyed by many such strings of one length finds a key only by
- * comparing it with every other. A text read is held to that length.
+ * A side's parts as compared: how many texts it has, then for each
+ * language, in the order of their tags, its tag, the length of its plain
+ * text with white space collapsed and that text in pieces (piecesOf);
+ * then whether it has a picture, and its picture. Each part is a step of
+ * a path (duplicateCardsOf), never joined into one string: V8 hashes a
+ * string longer than 16,383 characters by its length alone, so a map
+ * keyed by many such strings of one length finds a key only by comparing
+ * it with every other. A text read is held to that length, but its plain
+ * text is not: Markdown's plain text can be longer than the text, as a
+ * table's cells are joined with " | ". The length says where a text's
+ * pieces end.
  */
 function sideParts(
   text: Readonly<Record<string, string>>,
@@ -268,15 +272,14 @@ function sideParts(
   plain: (text: string) => string,
 ): string[] {
   const texts = Object.entries(text)
-    .map(([tag, value]) => [tag, plain(value).replace(/\s+/g, " ").trim()])
-    .sort(([a], [b]) => (a! < b! ? -1 : 1));
-  return [String(texts.length), ...texts.flat(), image === undefined ? "" : "image", image ?? ""];
-}
-
-/** A step of the cards' parts (duplicateCardsOf): the steps that go on from it, and the cards whose parts end there. */
-interface PartStep {
-  readonly next: Map<string, PartStep>;
-  cards?: Card[];
+    .map(([tag, value]) => [tag, plain(value).replace(/\s+/g, " ").trim()] as const)
+    .sort(([a], [b]) => (a < b ? -1 : 1));
+  return [
+    String(texts.length),
+    ...texts.flatMap(([tag, value]) => [tag, String(value.length), ...piecesOf(value)]),
+    image === undefined ? "" : "image",
+    image ?? "",
+  ];
 }
 
 /**
@@ -290,28 +293,18 @@ export function duplicateCardsOf(
   cards: readonly Card[],
   plain: (text: string) => string,
 ): Card[][] {
-  const root: PartStep = { next: new Map() };
-  const groups: Card[][] = [];
+  const groups = new PathMap<Card[]>();
   for (const card of activeCards(cards)) {
     const read = isMarkdown(card.textFormat) ? plain : (text: string) => text;
-    let step = root;
-    for (const part of [
+    const path = [
       ...sideParts(card.front, card.frontImageUrl, read),
       ...sideParts(card.back, card.backImageUrl, read),
-    ]) {
-      let next = step.next.get(part);
-      if (next === undefined) {
-        next = { next: new Map() };
-        step.next.set(part, next);
-      }
-      step = next;
-    }
-    if (step.cards === undefined) {
-      step.cards = [card];
-      groups.push(step.cards);
-    } else step.cards.push(card);
+    ];
+    const group = groups.get(path);
+    if (group === undefined) groups.set(path, [card]);
+    else group.push(card);
   }
-  return groups.filter((group) => group.length > 1);
+  return [...groups.values()].filter((group) => group.length > 1);
 }
 
 /**

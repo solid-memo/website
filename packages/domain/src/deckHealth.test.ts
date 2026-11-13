@@ -420,6 +420,49 @@ describe("duplicateCardsOf", () => {
     expect(ratio).toBeLessThan(4);
   });
 
+  it("compares a plain text longer than V8 hashes all of by its pieces, each text's end kept", () => {
+    const long = "x".repeat(16_383);
+    const cards = [
+      card("a", { front: { a: `${long}b`, c: "" } }),
+      card("b", { front: { a: long, b: "c" } }),
+      card("c", { front: { en: `${long}${long}y` } }),
+      card("d", { front: { en: `${long}${long}z` } }),
+      card("e", { front: { en: `${long}${long}y` } }),
+    ].map((each) => ({ ...each, back: { sv: "x" } }));
+    expect(
+      duplicateCardsOf(cards, text.plain).map((group) => group.map((each) => each.id)),
+    ).toEqual([["c", "e"]]);
+  });
+
+  it("groups cards in Markdown whose plain text is longer than the text in time linear in the cards", () => {
+    // Sides as long as a text read may be (16,383 characters), whose
+    // plain text is longer, as Markdown's joins a table's cells with
+    // " | ": past the length V8 hashes all of, so keyed whole, each would
+    // be compared with every other of its length.
+    const row = Array(20).fill("a").join("|");
+    const side = (i: number) =>
+      `${row}\n${"x".repeat(16_383 - row.length - 7)}${String(i).padStart(6, "0")}`;
+    // Stands in for the markdown package's plainText, which joins a
+    // table's cells with " | " (plainText.ts): domain can't import it.
+    const tableCells = (value: string) => value.replaceAll("|", " | ");
+    expect(tableCells(side(0)).length).toBeGreaterThan(16_383);
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) =>
+          card(`c${i}`, {
+            front: { en: side(i) },
+            back: { sv: side(i) },
+            textFormat: SM.markdown,
+          }),
+        );
+        return () => duplicateCardsOf(cards, tableCells);
+      },
+      50,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
   it("groups many cards that say the same in time linear in the cards", () => {
     // Eight times the cards, all alike, must take less than four times as
     // long as an eighth of them done eight times over (testing.md): copying

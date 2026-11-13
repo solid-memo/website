@@ -10,7 +10,9 @@
  * other, in time that grows with the square of their number. A term the
  * app reads is held to that length (MAX_TERM_CHARACTERS); strings
  * joined from several could be past it, so a key of several is a path
- * of them, never one string. A string joined elsewhere, whose parts the
+ * of them, never one string. Text made from a term, such as the plain
+ * text of a text in Markdown, can be longer than the term: it is keyed
+ * by its pieces (piecesOf). A string joined elsewhere, whose parts the
  * code that keys it does not have, is a key of pieces (TextMap).
  */
 
@@ -104,7 +106,7 @@ export class PathMap<V> {
 }
 
 /** A string as a path (PathMap) of pieces short enough for V8 to hash all of: the same path only for the same string. */
-function piecesOf(text: string): string[] {
+export function piecesOf(text: string): string[] {
   const pieces: string[] = [];
   for (let start = 0; start < text.length; start += HASHED_CHARACTERS) {
     pieces.push(text.slice(start, start + HASHED_CHARACTERS));
