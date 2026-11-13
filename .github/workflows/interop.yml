@@ -144,13 +144,16 @@ jobs:
       - run: npx turbo run build --filter=@solid-memo/web
         env:
           DOCS_DIAGRAMS: skip
+      # The journeys' key (ci.yml), so the entry main saves is restored.
       - id: playwright
-        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+          echo "os=${ImageOS:?}" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: browsers
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}-chromium
+          key: playwright-${{ steps.playwright.outputs.os }}-${{ steps.playwright.outputs.version }}-chromium
       - if: steps.browsers.outputs.cache-hit != 'true'
         run: npx playwright install chromium
       - uses: ./.github/actions/playwright-deps
