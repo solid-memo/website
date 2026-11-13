@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.3.4](https://github.com/solid-memo/website/compare/v7.3.3...v7.3.4) (2026-11-13)
+
+### Fixes
+
+* **domain:** keep a deck group's default description within the term bound ([601c301](https://github.com/solid-memo/website/commit/601c3013ea88772e6459bbf7aaa52283633dab7b))
+* **domain:** key deck health's duplicate check by pieces of plain text ([73de713](https://github.com/solid-memo/website/commit/73de713e5de5b19a52a55b5e669b83f1c4717e2c))
+* **release:** head fix commits "Fixes" in the release notes ([8d2b61a](https://github.com/solid-memo/website/commit/8d2b61adbe545e5fce42da11d5bca45a985a57f5)), closes [#770](https://github.com/solid-memo/website/issues/770)
+* **solid:** adopt a linked node only through a link Solid Memo writes ([1478862](https://github.com/solid-memo/website/commit/1478862c3535713b30d302b2f76dcd366032d0d9))
+* **solid:** read a deck's cards only from its own cards document ([0719da2](https://github.com/solid-memo/website/commit/0719da29abba0ef9affb241f42739fe7bb55c257))
+* **studio:** name a chapter once in the question editor's places ([d8c3910](https://github.com/solid-memo/website/commit/d8c3910727fcabdffc8c14d4f4afe88ad53b7bfc))
+
 ## [7.3.3](https://github.com/solid-memo/website/compare/v7.3.2...v7.3.3) (2026-11-13)
 
 ### Bug Fixes
