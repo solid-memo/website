@@ -4,6 +4,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resourcesContract } from "@solid-memo/solid/testing/contract/resources";
+import { HttpError } from "@solid-memo/solid/client/interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
 
@@ -67,16 +68,19 @@ describe("requests", () => {
     expect(rdf.getThingAll(dataset)).toHaveLength(1);
   });
 
-  it("fail with an empty body where the failure's body cannot be read", async () => {
+  it("fail as the body of a failure fails, where it cannot be read", async () => {
+    const reason = new Error("cut off");
     const broken = new ReadableStream({
       start(controller) {
-        controller.error(new Error("cut off"));
+        controller.error(reason);
       },
     });
     const { fetch } = pod(() => new Response(broken, { status: 500, statusText: "Broken" }));
-    await expect(resources.getSolidDataset(URL_, { fetch })).rejects.toThrow(
-      `Fetching the Resource at [${URL_}] failed: [500] [Broken] .`,
-    );
+    const failure = await resources
+      .getSolidDataset(URL_, { fetch })
+      .catch((error: unknown) => error);
+    expect(failure).not.toBeInstanceOf(HttpError);
+    expect(String(failure)).toContain(reason.message);
   });
 });
 
