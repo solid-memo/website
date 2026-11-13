@@ -197,6 +197,27 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       }
     });
 
+    it("fails a read whose failure's body fails as its body failed, not as an HttpError of the failure", async () => {
+      const reason = new AppError("podNoAnswer", { url: URL_, seconds: 10 });
+      for (const status of [404, 500]) {
+        const fetch: typeof globalThis.fetch = async (input) => {
+          const body = new ReadableStream<Uint8Array>({
+            start: (controller) => controller.enqueue(new TextEncoder().encode("Not ")),
+            pull: (controller) => controller.error(reason),
+          });
+          const response = new Response(body, { status });
+          Object.defineProperty(response, "url", { value: String(input) });
+          return response;
+        };
+        for (const read of [getSolidDataset, getSolidDatasetLinear, readDocument]) {
+          // The runtime's own Response may give the reason itself, or an error of its own that names it.
+          const failure = await read(URL_, { fetch }).catch((error: unknown) => error);
+          expect(failure).not.toBeInstanceOf(HttpError);
+          expect(String(failure)).toContain(reason.message);
+        }
+      }
+    });
+
     it("reads a Turtle response with no body as an empty document", async () => {
       const fetch: typeof globalThis.fetch = async (input) => {
         const response = new Response(null, { headers: { "Content-Type": "text/turtle" } });

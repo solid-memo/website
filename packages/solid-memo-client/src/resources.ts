@@ -129,13 +129,15 @@ function normalizeUrl(url: string, trailingSlash?: boolean): string {
   return normalized.href;
 }
 
-/** The response, when it is a success; an HttpError saying what failed and how otherwise. */
+/**
+ * The response, when it is a success; an HttpError saying what failed
+ * and how otherwise, its body in the message. A body that fails on its
+ * way fails as the library's does, with the reason it failed with (a
+ * read deadline's podNoAnswer, say): it is no answer of the server's.
+ */
 async function succeeded(response: Response, what: string): Promise<Response> {
   if (response.ok) return response;
-  const body = await response
-    .clone()
-    .text()
-    .catch(() => "");
+  const body = await response.clone().text();
   throw new HttpError(
     `${what} failed: [${response.status}] [${response.statusText}] ${body}.`,
     response,

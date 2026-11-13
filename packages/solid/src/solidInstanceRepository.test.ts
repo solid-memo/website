@@ -75,9 +75,10 @@ function metaWith(...others: ReturnType<typeof createThing>[]) {
 
 function makeRepository(
   checkWrite?: Parameters<typeof createSolidInstanceRepository>[0]["checkWrite"],
+  fetch = vi.fn() as unknown as typeof globalThis.fetch,
 ) {
   return createSolidInstanceRepository({
-    fetch: vi.fn() as unknown as typeof globalThis.fetch,
+    fetch,
     now: () => new Date("2026-09-21T10:00:00.000Z"),
     randomId: () => "fixed-id",
     ...(checkWrite === undefined ? {} : { checkWrite }),
@@ -159,6 +160,7 @@ describe("listInstances", () => {
     ["refused (401)", Object.assign(new Error("401 Unauthorized"), { statusCode: 401 })],
     ["forbidden (403)", Object.assign(new Error("403 Forbidden"), { statusCode: 403 })],
     ["not reached (a network failure)", new TypeError("Failed to fetch")],
+    ["not answered in time", new AppError("podNoAnswer", { url: PUBLIC_INDEX })],
   ])("fails, rather than list none, when an index is %s", async (_, failure) => {
     vi.mocked(locateTypeIndexes).mockResolvedValue({
       fetch: indexFetch,
@@ -533,9 +535,13 @@ describe("attachInstance", () => {
       new ReadLimitError(`${CONTAINER}meta.ttl`, limits),
       new SyntaxError("not Turtle"),
     ]) {
-      vi.mocked(readDocument).mockRejectedValue(error);
+      // As the pod answered: a failure before any answer says nothing of the document.
+      vi.mocked(readDocument).mockImplementation(async (url, { fetch }) => {
+        await fetch(url);
+        throw error;
+      });
       await expect(
-        makeRepository().attachInstance({
+        makeRepository(undefined, async () => new Response("")).attachInstance({
           webId: WEBID,
           instanceUrl: CONTAINER,
           registrationTarget: "private",

@@ -16,6 +16,7 @@ import {
   setThing,
   type SubjectBuilder,
 } from "./client/rdf";
+import { AppError } from "@solid-memo/domain/appError";
 import { readDocument, writeDocument } from "./client/resources";
 import { datasetFrom, readOf, writtenAsGiven } from "./testing/datasets";
 import {
@@ -142,10 +143,13 @@ describe("locateTypeIndexes", () => {
     });
     const read = vi.mocked(readDocument).getMockImplementation()!;
     vi.mocked(readDocument).mockImplementation(async (url, options) => {
-      if (url === PREFERENCES_FILE) throw failure;
-      return read(url, options);
+      if (url !== PREFERENCES_FILE) return read(url, options);
+      // As the pod answered: a failure before any answer says nothing of the document.
+      await options.fetch(url);
+      throw failure;
     });
-    await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toMatchObject({
+    const answering = vi.fn(async () => new Response("")) as unknown as typeof globalThis.fetch;
+    await expect(locateTypeIndexes(WEBID, answering, answering)).resolves.toMatchObject({
       privateIndexUrl: null,
     });
   });
@@ -155,6 +159,8 @@ describe("locateTypeIndexes", () => {
     ["forbidden (403)", Object.assign(new Error("403"), { response: { status: 403 } })],
     ["a server failure (503)", Object.assign(new Error("503"), { statusCode: 503 })],
     ["no answer (a network failure)", new TypeError("Failed to fetch")],
+    ["no answer in time", new AppError("podNoAnswer", { url: PREFERENCES_FILE })],
+    ["an abort", new DOMException("The operation was aborted.", "AbortError")],
   ])("fails when the preferences file could not be read now: %s", async (_, failure) => {
     mockDatasets({
       [WEBID]: profileDataset((t) => t.addIri(PIM.preferencesFile, PREFERENCES_FILE)),

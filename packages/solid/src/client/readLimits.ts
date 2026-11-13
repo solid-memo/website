@@ -353,6 +353,30 @@ export function sharedReadBudget({
   };
 }
 
+/**
+ * The response with its body read through `through`, a stream of its
+ * own made of the response's, read under the limits the response is
+ * (limitedFetch), if any, and with its status, headers and URL; as it
+ * is when it has no body.
+ */
+export function readThrough(
+  response: Response,
+  through: (body: ReadableStream<Uint8Array>) => ReadableStream<Uint8Array>,
+): Response {
+  if (response.body === null || NULL_BODY_STATUSES.has(response.status)) return response;
+  const passed = new Response(through(response.body), {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+  // A response made here has no URL of its own; the library names the document by it.
+  Object.defineProperty(passed, "url", { value: response.url });
+  Object.defineProperty(passed, "redirected", { value: response.redirected });
+  const read = READS.get(response);
+  if (read !== undefined) READS.set(passed, read);
+  return passed;
+}
+
 /** The limits a response is read under: limitedFetch's, or none. */
 export function limitsOf(response: Response): ReadLimits | undefined {
   return READS.get(response)?.limits;
