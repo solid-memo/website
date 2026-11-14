@@ -270,6 +270,7 @@ describe("CardWorkbenchContainer", () => {
       ["fire"],
       { kind: "retire" },
       expect.objectContaining({ save: [expect.objectContaining({ id: "fire", retired: true })] }),
+      expect.any(Function),
     );
     // Read afresh: the card says it is retired.
     await waitFor(() => expect(screen.getByRole("row", { name: /fire/ })).toHaveClass("retired"));
@@ -321,6 +322,42 @@ describe("CardWorkbenchContainer", () => {
     fireEvent.click(undo);
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent("This was changed elsewhere"),
+    );
+  });
+
+  it("offers to undo a delete whose cards were written though its review states' write failed", async () => {
+    const useCases = makeUseCasesFake({
+      listCards: vi.fn(async () => [water, fire]),
+      listDeckReviewStates: vi.fn(async () => ({ sm2: [dueToday], fsrs: [] })),
+    });
+    vi.mocked(useCases.editCards).mockImplementation(
+      async (_instance, _deck, _ids, _edit, plan, cardsWritten) => {
+        cardsWritten!(plan);
+        throw new Error("Pod unreachable");
+      },
+    );
+    renderContainer(useCases);
+    fireEvent.click(await screen.findByRole("checkbox", { name: "Select fire" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Selected cards" })).getByRole("button", {
+        name: "Delete",
+      }),
+    );
+    fireEvent.click(
+      within(screen.getByRole("dialog", { name: "Delete the selected cards" })).getByRole(
+        "button",
+        { name: "Delete" },
+      ),
+    );
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Pod unreachable"));
+    const undo = await screen.findByRole("button", { name: "Undo" });
+    await waitFor(() => expect(undo).toBeEnabled());
+    fireEvent.click(undo);
+    expect(await screen.findByText("Undone: the cards are as they were.")).toBeInTheDocument();
+    expect(useCases.undoCardEdit).toHaveBeenCalledWith(
+      instanceA.url,
+      deck,
+      expect.objectContaining({ remove: ["fire"] }),
     );
   });
 

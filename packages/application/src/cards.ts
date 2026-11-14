@@ -96,7 +96,10 @@ export interface CardUseCases {
    * planned again, up to three times in all; once that plan is not the
    * one previewed, changedElsewhere, and nothing is written. Nothing is written when the plan saves and
    * removes nothing. The deck's own entry is untouched, as updateCard
-   * leaves it. Resolves to the plan as written, whose inverse undoes it.
+   * leaves it. Resolves to the plan as written, whose inverse undoes it;
+   * `cardsWritten` hears of that plan once the cards document is
+   * written, so that an edit whose reviews write then fails can still be
+   * undone.
    */
   editCards(
     instanceUrl: string,
@@ -104,11 +107,15 @@ export interface CardUseCases {
     ids: readonly string[],
     edit: CardEdit,
     previewed: CardEditPlan,
+    cardsWritten?: (plan: CardEditPlan) => void,
   ): Promise<CardEditPlan>;
   /**
    * Undo an edit editCards made, the same way: its inverse is written
    * while the cards are as the edit left them (planUndo), else
-   * changedElsewhere and nothing is written.
+   * changedElsewhere and nothing is written. A deleted card already back
+   * as it was is not written again, so an undo whose reviews write
+   * failed can be made again and writes the deleted cards' review states
+   * again, those from before the edit.
    */
   undoCardEdit(instanceUrl: string, deck: Deck, plan: CardEditPlan): Promise<void>;
   /**
@@ -284,13 +291,15 @@ export function createCardUseCases({
    * changes `plan` makes of the cards and review states as they are now,
    * in one conditional write of the cards document, again from a fresh
    * read when it changed meanwhile; then one write of the reviews
-   * document, and the digest brought up to date. Resolves to the
-   * changes written.
+   * document, again when it changed meanwhile, and the digest brought up
+   * to date. `cardsWritten` hears of the changes once the cards are
+   * written, before the reviews are. Resolves to the changes written.
    */
   async function writeCardEdit<T extends CardChanges>(
     instanceUrl: string,
     deck: Deck,
     plan: (cards: Card[], reviews: ReviewState[]) => T,
+    cardsWritten: (changes: T) => void = () => undefined,
   ): Promise<T> {
     for (let attempt = 1; ; attempt++) {
       const [read, reviews] = await Promise.all([
@@ -298,19 +307,36 @@ export function createCardUseCases({
         reviewStateRepository.listReviewStates(deck),
       ]);
       const changes = plan(read.value, reviews.sm2);
-      if (changes.save.length === 0 && changes.remove.length === 0) return changes;
-      try {
-        await deckRepository.applyCardChanges(
-          deck,
-          { save: changes.save, remove: changes.remove },
-          wholeAt(read.version),
-        );
-      } catch (error) {
-        if (cardsChangedElsewhere(error) && attempt < CARD_EDIT_ATTEMPTS) continue;
-        throw error;
+      const cardsChange = changes.save.length > 0 || changes.remove.length > 0;
+      const reviewsChange = changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0;
+      if (!cardsChange && !reviewsChange) return changes;
+      if (cardsChange) {
+        try {
+          await deckRepository.applyCardChanges(
+            deck,
+            { save: changes.save, remove: changes.remove },
+            wholeAt(read.version),
+          );
+        } catch (error) {
+          if (cardsChangedElsewhere(error) && attempt < CARD_EDIT_ATTEMPTS) continue;
+          throw error;
+        }
       }
+      cardsWritten(changes);
       // A card joins before its state, and leaves before it: no state is ever without its card for long.
-      if (changes.reviewSaves.length > 0 || changes.reviewRemovals.length > 0) {
+      if (reviewsChange) await writeCardEditReviews(deck, changes);
+      // The edit is made: a digest left behind is brought up to date by the next deck list.
+      await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
+      return changes;
+    }
+  }
+  /**
+   * A bulk edit's write of the reviews document (writeCardEdit), made
+   * again from a fresh read while it keeps changing elsewhere (412).
+   */
+  async function writeCardEditReviews(deck: Deck, changes: CardChanges): Promise<void> {
+    for (let attempt = 1; ; attempt++) {
+      try {
         // A card removed takes every state it has with it, SM-2's and FSRS-6's, as removing a card does;
         // another scheduler's stays. Undone, its SM-2 states come back, and FSRS-6 estimates from them.
         await reviewStateRepository.applyReviewChanges(deck, {
@@ -318,10 +344,10 @@ export function createCardUseCases({
           remove: changes.reviewRemovals,
           every: true,
         });
+        return;
+      } catch (error) {
+        if (!cardsChangedElsewhere(error) || attempt === CARD_EDIT_ATTEMPTS) throw error;
       }
-      // The edit is made: a digest left behind is brought up to date by the next deck list.
-      await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
-      return changes;
     }
   }
   /**
@@ -458,13 +484,18 @@ export function createCardUseCases({
         .map((card) => card.id);
       return ids.length === 0 ? 0 : deckRepository.stateCardLanguages(deck, ids, stated);
     },
-    editCards(instanceUrl, deck, ids, edit, previewed) {
-      return writeCardEdit(instanceUrl, deck, (cards, reviews) => {
-        const plan = planCardEdit(cards, ids, edit, reviews);
-        if (!sameCardEditPlan(plan, previewed))
-          throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
-        return plan;
-      });
+    editCards(instanceUrl, deck, ids, edit, previewed, cardsWritten) {
+      return writeCardEdit(
+        instanceUrl,
+        deck,
+        (cards, reviews) => {
+          const plan = planCardEdit(cards, ids, edit, reviews);
+          if (!sameCardEditPlan(plan, previewed))
+            throw new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
+          return plan;
+        },
+        cardsWritten,
+      );
     },
     async undoCardEdit(instanceUrl, deck, plan) {
       await writeCardEdit(instanceUrl, deck, (cards) => {

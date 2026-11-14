@@ -538,17 +538,35 @@ describe("sameCardEditPlan", () => {
 describe("planUndo", () => {
   it("is the inverse while the cards are as the plan left them", () => {
     const plan = planCardEdit([live, card("other")], ["live", "other"], { kind: "retire" });
-    expect(planUndo([...plan.save, card("new")], plan)).toBe(plan.inverse);
+    expect(planUndo([...plan.save, card("new")], plan)).toEqual(plan.inverse);
     const removal = planCardEdit([live, card("other")], ["live"], { kind: "remove" });
-    expect(planUndo([card("other")], removal)).toBe(removal.inverse);
+    expect(planUndo([card("other")], removal)).toEqual(removal.inverse);
   });
 
-  it("is null once a card changed since, or came back", () => {
+  it("writes only the review states once the removed cards are back as they were", () => {
+    const other = card("other");
+    const removal = planCardEdit([live, other], ["live", "other"], { kind: "remove" }, [
+      state("live"),
+      state("other", "back-to-front"),
+    ]);
+    // An undo stopped after its cards write, made again: the states still missing, and only those cards.
+    expect(planUndo([live, other], removal)).toEqual({
+      ...removal.inverse,
+      save: [],
+    });
+    expect(planUndo([live], removal)).toEqual({ ...removal.inverse, save: [other] });
+    // A retire's card back as it was is not one the undo wrote: it changed since.
+    const retired = planCardEdit([live], ["live"], { kind: "retire" });
+    expect(planUndo([live], retired)).toBeNull();
+  });
+
+  it("is null once a card changed since, or came back otherwise", () => {
     const plan = planCardEdit([live], ["live"], { kind: "retire" });
     expect(planUndo([live], plan)).toBeNull();
     expect(planUndo([], plan)).toBeNull();
     const removal = planCardEdit([live], ["live"], { kind: "remove" });
-    expect(planUndo([live], removal)).toBeNull();
+    expect(planUndo([{ ...live, front: { en: "changed" } }], removal)).toBeNull();
+    expect(planUndo([{ ...live, retired: true }], removal)).toBeNull();
   });
 });
 
