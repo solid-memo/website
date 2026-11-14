@@ -77,6 +77,13 @@ Pod has more than one, then a name for your instance and where in your
 Pod to keep it. After that, logging in takes you straight to your
 decks. "Log out", at the top, ends the session.
 
+Solid Memo also asks which type index lists the instance: a list in
+your profile that tells apps where your data is. It recommends your
+private one, and offers to create one if you have none. When your Pod
+has several, each says what Solid Memo knows of it, such as one that
+anyone can read. You can enter another type index in your Pod by its
+address too.
+
 ## On every screen
 
 - **At the top**: the Solid Memo logo, which takes you home; the

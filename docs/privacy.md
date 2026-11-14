@@ -24,9 +24,9 @@ release or a card's picture, as they are, and never fetches them, in
 the pod or not.
 
 The pod's server decides who else may read them. Solid Memo registers
-only the instance in a type index, the **private** one unless the
-learner chooses the public one, and none of its data by itself
-([data-model.md](data-model.md#discovery-chain)). Only a release the
+only the instance in a type index, a **private** one unless the
+learner chooses a public one, and none of its data by itself
+([data-model.md](data-model.md#choosing-a-type-index)). Only a release the
 learner publishes from the Studio is public; it carries the authors'
 names, and their email addresses when given.
 

@@ -128,6 +128,7 @@ export function makeDeps() {
     getRegistrationOptions: vi.fn(async () => ({
       privateIndexExists: true,
       publicIndexExists: false,
+      indexes: [],
     })),
     createInstance: vi.fn(async () => instance),
     attachInstance: vi.fn(async () => instance),

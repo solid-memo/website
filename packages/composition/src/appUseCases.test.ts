@@ -1467,6 +1467,9 @@ describe("createAppUseCases", () => {
     expect(await useCases.getRegistrationOptions(session)).toEqual({
       privateIndexExists: true,
       publicIndexExists: false,
+      indexes: [
+        expect.objectContaining({ url: `${alice}settings/private.ttl`, kinds: ["private"] }),
+      ],
     });
     expect(await useCases.listStorages(session)).toEqual([expect.objectContaining({ url: alice })]);
     expect(login.sent).toContain(`${alice}settings/private.ttl`);

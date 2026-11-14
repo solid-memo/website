@@ -5903,3 +5903,12 @@ table.deck-statistics caption {
   border: 1px dashed var(--border);
   border-radius: var(--radius);
 }
+
+/* A type index's notes and cautions in the registration chooser, under its radio. */
+.registration-target-notes {
+  margin: 0 0 0.5rem 1.6rem;
+}
+
+.registration-target-notes .warning {
+  margin: 0.25rem 0;
+}

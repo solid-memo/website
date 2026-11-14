@@ -69,6 +69,7 @@ describe("instances", () => {
     await expect(useCases.getRegistrationOptions(session)).resolves.toEqual({
       privateIndexExists: true,
       publicIndexExists: false,
+      indexes: [],
     });
     expect(deps.instanceRepository.getRegistrationOptions).toHaveBeenCalledWith(session.webId);
   });

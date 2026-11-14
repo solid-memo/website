@@ -5,6 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { InstanceCreator } from "./InstanceCreator";
+import { REGISTRATION_OPTIONS } from "../test/fakes/instances";
 import type { Storage } from "@solid-memo/domain/storage";
 
 const storage: Storage = { url: "https://pod.example/", source: "profile" };
@@ -12,7 +13,7 @@ const storage: Storage = { url: "https://pod.example/", source: "profile" };
 function renderCreator(overrides: Partial<Parameters<typeof InstanceCreator>[0]> = {}) {
   const props = {
     storage,
-    options: { privateIndexExists: true, publicIndexExists: true },
+    options: REGISTRATION_OPTIONS,
     busy: false,
     error: null,
     onCreate: vi.fn(),
@@ -37,13 +38,13 @@ describe("InstanceCreator", () => {
     fireEvent.input(screen.getByLabelText("Location"), {
       target: { value: " https://pod.example/solid-memo/japanese/ " },
     });
-    fireEvent.click(screen.getByLabelText("Public type index"));
+    fireEvent.click(screen.getByLabelText(/^Public type index/));
     fireEvent.submit(container.querySelector("form")!);
 
     expect(props.onCreate).toHaveBeenCalledWith({
       containerUrl: "https://pod.example/solid-memo/japanese/",
       name: "Japanese study",
-      registrationTarget: "public",
+      registrationTarget: { indexUrl: "https://pod.example/settings/publicTypeIndex.ttl" },
     });
   });
 

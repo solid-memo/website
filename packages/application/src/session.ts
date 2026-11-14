@@ -269,8 +269,12 @@ export function createSessionUseCases({
    * type index of theirs already there, or one that can be made in a
    * storage their WebID leads to, never beside the study (typeIndex.ts),
    * so a move that could not end is refused before anything is copied.
+   * One the user entered by its address is checked as the study is
+   * registered in it, once copied: a move to one that is not a type index
+   * of theirs is taken back then, as any move that fails.
    */
   async function ensureRegistrable(webId: string, target: RegistrationTarget): Promise<void> {
+    if (typeof target !== "string") return;
     const options = await instanceRepository.getRegistrationOptions(webId);
     const exists = target === "private" ? options.privateIndexExists : options.publicIndexExists;
     if (!exists && (await storageGateway.discoverStorages(webId)).length === 0) {

@@ -122,12 +122,10 @@ describe("the WebID document's readers", () => {
     );
     const link = `<${WEBID}> <http://www.w3.org/ns/solid/terms#publicTypeIndex> <https://alice.example/settings/publicTypeIndex.ttl> .\n`;
     await pod.put(extended, `${filler(PROFILE_LIMITS.quads)}${link}`);
-    await expect(locateTypeIndexes(WEBID, fetch, fetch)).resolves.toMatchObject({
-      publicIndexUrl: null,
-    });
+    await expect(locateTypeIndexes(WEBID, fetch, fetch)).resolves.toMatchObject({ links: [] });
     await pod.put(extended, link);
     await expect(locateTypeIndexes(WEBID, fetch, fetch)).resolves.toMatchObject({
-      publicIndexUrl: "https://alice.example/settings/publicTypeIndex.ttl",
+      links: [{ url: "https://alice.example/settings/publicTypeIndex.ttl", kind: "public" }],
     });
   });
 });
