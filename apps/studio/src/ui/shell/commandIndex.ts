@@ -12,6 +12,7 @@ import { studioRouteToHash, type StudioRoute } from "../router";
 import type { WorkItem } from "./prefs";
 import { keysOf } from "./shortcuts";
 import { draftNameOf } from "./titles";
+import { searchedText } from "../searchText";
 import {
   sectionHome,
   SIDEBAR_SECTIONS,
@@ -166,12 +167,6 @@ export interface CommandSection {
   commands: Command[];
 }
 
-/**
- * How much of an entry's name is matched, in UTF-16 code units: a name as
- * long as a card's front can be costs no more to search than one this long.
- */
-const MATCHED_LENGTH = 200;
-
 /** An entry of the palette with its name as rankCommands matches it: its start, folded. */
 export interface IndexedCommand {
   command: Command;
@@ -182,7 +177,7 @@ export interface IndexedCommand {
 export function indexCommands(commands: readonly Command[]): IndexedCommand[] {
   return commands.map((command) => ({
     command,
-    name: folded(command.label.slice(0, MATCHED_LENGTH)),
+    name: searchedText(command.label),
   }));
 }
 
@@ -200,7 +195,7 @@ interface ShownCommand {
  * every other but the cards, in their order. Else those whose name holds the
  * letters typed in their order (matchScore), case and accents aside, the
  * best first, and their groups in the order of their best. A name is matched
- * by its start alone (MATCHED_LENGTH).
+ * by its start alone (searchedText).
  */
 export function rankCommands(
   entries: readonly IndexedCommand[],

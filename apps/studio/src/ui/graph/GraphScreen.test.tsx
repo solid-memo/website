@@ -4,12 +4,19 @@
 
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { InstanceGraph } from "@solid-memo/domain/instanceGraph";
+import { instanceGraphOf, type InstanceGraph } from "@solid-memo/domain/instanceGraph";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import { forget } from "@solid-memo/ui/remembered";
 import { instanceA } from "../../test/fixtures";
 import { CARD, CARDS, largeGraph, REVIEW, smallGraph } from "../../test/graph";
 import { WithKeys } from "../../test/keys";
+import { searchedText } from "../searchText";
 import { GraphScreen } from "./GraphScreen";
+
+vi.mock("../searchText", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../searchText")>();
+  return { searchedText: vi.fn(actual.searchedText) };
+});
 
 function show(graph: InstanceGraph = smallGraph(), selected: string | null = null) {
   const onSelect = vi.fn();
@@ -167,6 +174,39 @@ describe("GraphScreen", () => {
     expect(screen.getByRole("button", { name: "_:b0" })).toBeInTheDocument();
     fireEvent.input(search, { target: { value: blank.id } });
     expect(screen.queryByRole("button", { name: "_:b0" })).toBeNull();
+  });
+
+  it("matches a node by the start of its address and of its name, folded once, not for each letter", () => {
+    const long = `${CARDS}#long-${"é".repeat(16_000)}-tail`;
+    const graph = instanceGraphOf({
+      instanceUrl: instanceA.url,
+      storages: ["https://pod.example/"],
+      documents: [
+        {
+          url: CARDS,
+          found: true,
+          triples: [
+            {
+              subject: long,
+              predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+              object: { kind: "iri", value: SM.Card },
+            },
+          ],
+        },
+      ],
+    });
+    show(graph);
+    const folds = vi.mocked(searchedText).mock.calls.length;
+    const search = screen.getByRole("searchbox", { name: "Find a node" });
+    for (const typed of ["LONG", "LONG-É", `long-${"e".repeat(100)}`]) {
+      fireEvent.input(search, { target: { value: typed } });
+      expect(screen.getByRole("status")).toHaveTextContent("1 node found");
+    }
+    // Typing folds no node again: they were folded when the graph was shown.
+    expect(vi.mocked(searchedText).mock.calls.length).toBe(folds);
+    // Past the start of its address and of its name, a node is not searched.
+    fireEvent.input(search, { target: { value: "e-tail" } });
+    expect(screen.getByRole("status")).toHaveTextContent("No node shown matches");
   });
 
   it("lists the first nodes found, and says how many more there are", () => {
