@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.6](https://github.com/solid-memo/website/compare/v7.4.5...v7.4.6) (2026-11-14)
+
+### Fixes
+
+* **domain:** gather a draft's taken ids once per draft ([a534c4a](https://github.com/solid-memo/website/commit/a534c4a5de492cddb088714d8459e9fb72a37d0e))
+* **markdown:** charge tokens and padded cells to the parser's budget ([c03c7b5](https://github.com/solid-memo/website/commit/c03c7b5c1595fb4e0964f2ca527db4a27c7cdced))
+
 ## [7.4.5](https://github.com/solid-memo/website/compare/v7.4.4...v7.4.5) (2026-11-14)
 
 ### Fixes
