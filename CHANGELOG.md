@@ -21,6 +21,18 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.0](https://github.com/solid-memo/website/compare/v7.3.5...v7.4.0) (2026-11-14)
+
+### Features
+
+* **decks:** show a Korean example sentence under each word ([2637689](https://github.com/solid-memo/website/commit/263768996b9ab148cf2132ea6666397947de4525)), closes [#780](https://github.com/solid-memo/website/issues/780)
+
+### Fixes
+
+* **application:** remove the day's answers before resetting its states ([85d04f0](https://github.com/solid-memo/website/commit/85d04f0fb7968e43f27b45b4251b5d3514759370))
+* **domain:** keep a draft's shared wrong option on its other cards ([9d2a8bc](https://github.com/solid-memo/website/commit/9d2a8bcc7aee6134b2737e80679bab8e3753e589))
+* **solid:** export only an agent as a deck's creator ([4729e33](https://github.com/solid-memo/website/commit/4729e330145351e3e1a2f03f1350633aac848095))
+
 ## [7.3.5](https://github.com/solid-memo/website/compare/v7.3.4...v7.3.5) (2026-11-13)
 
 ### Fixes
