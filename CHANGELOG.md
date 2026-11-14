@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.4](https://github.com/solid-memo/website/compare/v7.4.3...v7.4.4) (2026-11-14)
+
+### Fixes
+
+* **solid:** bound the parser's work on a JSON-LD deck file ([2b80383](https://github.com/solid-memo/website/commit/2b803837a0f53cb925a1c4a697a404406a67d644))
+* **solid:** place a palette's color sets in linear time ([00b18fd](https://github.com/solid-memo/website/commit/00b18fd0f347d712a29f535841b2854c3ff82c2f))
+
 ## [7.4.3](https://github.com/solid-memo/website/compare/v7.4.2...v7.4.3) (2026-11-14)
 
 ### Fixes
