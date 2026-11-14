@@ -155,8 +155,8 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
     draftSubject,
   } = useRouteReads(useCases, session, route);
   const mine = useInstancePrefs(activeInstance?.url ?? null);
-  // The deck or the draft the route is about, as the sidebar lists those opened last.
-  const opened = openedOf(deckUrl, draftUrl);
+  // The deck or the draft the route is about, once the instance is read to have it, as the sidebar lists those opened last.
+  const opened = openedOf(activeDeck, activeDraft);
   const open: Open = {
     instanceUrl,
     instance: activeInstance,
@@ -970,10 +970,14 @@ function deckUrlOf(route: StudioRoute | null): string | null {
   }
 }
 
-/** The deck or the draft the route is about, as the sidebar lists those opened last. */
-function openedOf(deckUrl: string | null, draftUrl: string | null): WorkItem | null {
-  if (deckUrl !== null) return { kind: "deck", url: deckUrl };
-  if (draftUrl !== null) return { kind: "draft", url: draftUrl };
+/**
+ * The deck or the draft the route is about, as the sidebar lists those
+ * opened last: only one the instance is read to have, never a URL the
+ * route names alone.
+ */
+function openedOf(deck: Deck | null, draft: { url: string } | null): WorkItem | null {
+  if (deck !== null) return { kind: "deck", url: deck.url };
+  if (draft !== null) return { kind: "draft", url: draft.url };
   return null;
 }
 

@@ -1523,6 +1523,50 @@ describe("StudioWorkspace", () => {
     expect(await inMain().findByRole("alert")).toHaveTextContent("Catalog unreadable");
   });
 
+  it("lists as opened lately only a deck or a draft the instance has, never one its link names alone", async () => {
+    const opened = () =>
+      JSON.parse(localStorage.getItem("solid-memo:studioInstances.v1") ?? "{}")[instanceA.url]
+        ?.recent;
+    window.history.replaceState(
+      null,
+      "",
+      studioRouteToHash({ screen: "cards", deckUrl: `${instanceA.url}catalog.ttl#gone` }),
+    );
+    const decks = renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [kanji]),
+      }),
+    );
+    expect(await screen.findByRole("rowheader", { name: "Kanji N5" })).toBeInTheDocument();
+    expect(opened()).toBeUndefined();
+    window.location.hash = studioRouteToHash({ screen: "cards", deckUrl: kanji.url });
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    expect(
+      await within(await screen.findByRole("list", { name: "Recently opened" })).findByRole(
+        "link",
+        { name: "Kanji N5" },
+      ),
+    ).toBeInTheDocument();
+    expect(opened()).toEqual([{ kind: "deck", url: kanji.url }]);
+    decks.unmount();
+    window.history.replaceState(
+      null,
+      "",
+      studioRouteToHash({ screen: "draft", draftUrl: DRAFT_URL }),
+    );
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        getReleaseDraft: vi.fn(async () => {
+          throw new AppError("draftGone");
+        }),
+      }),
+    );
+    expect(await inMain().findByRole("alert")).toHaveTextContent("That draft no longer exists.");
+    expect(opened()).toEqual([{ kind: "deck", url: kanji.url }]);
+  });
+
   it("says why the decks could not be read on the workbench, and in the sidebar, but not on Home", async () => {
     window.history.replaceState(
       null,
