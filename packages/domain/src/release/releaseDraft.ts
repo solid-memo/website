@@ -14,7 +14,7 @@ import type {
 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { EDUCATION_THEME, namedWithin, TURTLE_MEDIA_TYPE } from "../dcat.ts";
-import { jsonPath, PathMap, pathKeys } from "../pathKeys.ts";
+import { PathMap, pathKeys } from "../pathKeys.ts";
 import type { ReleaseKind, ReleaseTerm, ReleaseText } from "./releaseModel.ts";
 
 /**
@@ -176,10 +176,18 @@ export function turtleDistribution(url: string): DistributionV1 {
 
 /** The fragment id of every subject of the draft, of a record or a triple, and of every IRI of it a statement names. */
 export function idsInUse(draft: ReleaseDraft): Set<string> {
+  return idsStartingWith(draft, "");
+}
+
+/**
+ * The ids of idsInUse that start with `start`, gathered without taking
+ * the fragment of any other IRI apart.
+ */
+function idsStartingWith(draft: ReleaseDraft, start: string): Set<string> {
   const ids = new Set<string>();
+  const prefix = iriIn(draft, start);
   const note = (iri: string) => {
-    const id = idIn(draft, iri);
-    if (id !== null) ids.add(id);
+    if (iri.startsWith(prefix)) ids.add(iri.slice(draft.url.length + 1));
   };
   for (const nodes of [
     draft.agents,
@@ -189,7 +197,7 @@ export function idsInUse(draft: ReleaseDraft): Set<string> {
     draft.cards,
     draft.distractors,
   ]) {
-    for (const node of nodes) ids.add(node.id);
+    for (const node of nodes) if (node.id.startsWith(start)) ids.add(node.id);
   }
   for (const triple of draft.triples) {
     note(triple.subject);
@@ -371,6 +379,12 @@ export function isRefusal(result: ReleaseDraft | DraftRefusal): result is DraftR
  * that only statements the change took out named goes with them. What
  * an activity carried from an earlier release states is never changed:
  * a change that would is refused (carriedActivity).
+ *
+ * A change keeps each statement it leaves alone as the same object, so
+ * what it took out is found by identity, and only the blank nodes that
+ * names are looked at further: no statement is compared by its value.
+ * What remains of the cost beyond the change is a few cheap passes over
+ * the statements.
  */
 export function applyDraftChange(
   draft: ReleaseDraft,
@@ -378,9 +392,15 @@ export function applyDraftChange(
 ): ReleaseDraft | DraftRefusal {
   const next = changedDraft(draft, change);
   if (isRefusal(next) || next.triples === draft.triples) return next;
-  const triples = withoutOrphans(next.triples, draft.triples);
+  const triples = withoutOrphans(next.triples, removedFrom(draft.triples, next.triples));
   const rewritten = rewrittenActivity(draft, triples);
   return rewritten === null ? { ...next, triples } : { refused: "carriedActivity", id: rewritten };
+}
+
+/** The statements of `before` that `after` no longer has, the same object, in their order. */
+function removedFrom(before: readonly DraftTriple[], after: readonly DraftTriple[]): DraftTriple[] {
+  const kept = new Set(after);
+  return before.filter((triple) => !kept.has(triple));
 }
 
 /**
@@ -401,16 +421,32 @@ export function triplesBySubject(
   return of;
 }
 
-/** The first activity carried from an earlier release whose statements `triples` changes, by id; null when none. */
+/**
+ * The first activity carried from an earlier release whose statements
+ * `triples` changes, by id; null when none. Only the activities that are
+ * subjects of a statement taken out or put in are compared, and none
+ * when the draft carries none.
+ */
 function rewrittenActivity(draft: ReleaseDraft, triples: readonly DraftTriple[]): string | null {
-  const activities = new Set(draft.published.activities.map((id) => iriIn(draft, id)));
+  if (draft.published.activities.length === 0) return null;
+  const touched = new Set(
+    [...removedFrom(draft.triples, triples), ...removedFrom(triples, draft.triples)].map(
+      (triple) => triple.subject,
+    ),
+  );
+  const activities = new Set(
+    draft.published.activities.map((id) => iriIn(draft, id)).filter((iri) => touched.has(iri)),
+  );
+  if (activities.size === 0) return null;
   const was = triplesBySubject(draft.triples, activities);
   const now = triplesBySubject(triples, activities);
   const said = (of: Map<string, DraftTriple[]>, iri: string) =>
     JSON.stringify((of.get(iri) ?? []).map(keyOfTriple).sort());
   return (
     draft.published.activities.find(
-      (id) => said(was, iriIn(draft, id)) !== said(now, iriIn(draft, id)),
+      (id) =>
+        activities.has(iriIn(draft, id)) &&
+        said(was, iriIn(draft, id)) !== said(now, iriIn(draft, id)),
     ) ?? null
   );
 }
@@ -420,15 +456,6 @@ function keyOfTriple(triple: DraftTriple): string {
   return JSON.stringify([triple.subject, triple.predicate, triple.object]);
 }
 
-/**
- * A statement as a path of its subject, predicate and object, each part
- * a key of its own (PathMap), to look it up by: a statement as one
- * string (keyOfTriple) could be longer than a term may be.
- */
-function pathOfTriple(triple: DraftTriple): string[] {
-  return [triple.subject, triple.predicate, ...jsonPath(triple.object)];
-}
-
 /** The blank node a term is, by its `_:` label; null for any other term. */
 function blankOf(term: ReleaseTerm): string | null {
   return term.kind === "blank" ? `_:${term.value}` : null;
@@ -436,17 +463,19 @@ function blankOf(term: ReleaseTerm): string | null {
 
 /**
  * `kept` without the statements of blank nodes that only statements of
- * `before` it lacks named, however deep. Each blank node is looked at
- * once a statement naming it goes: it goes too when no statement kept
- * names it any more, and the blank nodes its statements name are looked
- * at in turn.
+ * `removed` named, however deep. Each blank node is looked at once a
+ * statement naming it goes: it goes too when no statement kept names it
+ * any more, and the blank nodes its statements name are looked at in
+ * turn. When `removed` names none, `kept` is all there is to it.
  */
 function withoutOrphans(
   kept: readonly DraftTriple[],
-  before: readonly DraftTriple[],
-): DraftTriple[] {
-  const keys = new PathMap<true>();
-  for (const triple of kept) keys.set(pathOfTriple(triple), true);
+  removed: readonly DraftTriple[],
+): readonly DraftTriple[] {
+  const named = (triples: readonly DraftTriple[]) =>
+    triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null);
+  const looked = named(removed);
+  if (looked.length === 0) return kept;
   const naming = new Map<string, number>();
   const subjects = new Set<string>();
   for (const triple of kept) {
@@ -455,9 +484,6 @@ function withoutOrphans(
     subjects.add(triple.subject);
   }
   const of = triplesBySubject(kept, subjects);
-  const named = (triples: readonly DraftTriple[]) =>
-    triples.map((triple) => blankOf(triple.object)).filter((blank) => blank !== null);
-  const looked = named(before.filter((triple) => !keys.has(pathOfTriple(triple))));
   const orphans = new Set<string>();
   for (let blank = looked.pop(); blank !== undefined; blank = looked.pop()) {
     if (orphans.has(blank) || (naming.get(blank) ?? 0) > 0) continue;
@@ -1577,7 +1603,8 @@ export function contactOf(draft: ReleaseDraft): string | null {
 /**
  * The draft with its contact set: what it said of a contact before goes,
  * with what it stated of each contact point; the new one is `#contact`,
- * or the first free id after it.
+ * or the first free id after it. Only the ids in use that start as
+ * `contact` does are gathered, as only those can stand in its way.
  */
 function setContact(draft: ReleaseDraft, url: string | null): ReleaseDraft {
   const points = new Set(contactPointsOf(draft));
@@ -1587,7 +1614,7 @@ function setContact(draft: ReleaseDraft, url: string | null): ReleaseDraft {
       !points.has(triple.subject),
   );
   if (url === null) return { ...draft, triples };
-  const used = idsInUse({ ...draft, triples });
+  const used = idsStartingWith({ ...draft, triples }, CONTACT_ID);
   let id = CONTACT_ID;
   for (let n = 2; used.has(id); n++) id = `${CONTACT_ID}-${n}`;
   const point = iriIn(draft, id);
