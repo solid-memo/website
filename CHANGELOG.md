@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.5](https://github.com/solid-memo/website/compare/v7.4.4...v7.4.5) (2026-11-14)
+
+### Fixes
+
+* **domain:** find what a draft change took out by identity ([866cd19](https://github.com/solid-memo/website/commit/866cd196ff0d3981a0521de1fd854a28c48ff78f))
+
 ## [7.4.4](https://github.com/solid-memo/website/compare/v7.4.3...v7.4.4) (2026-11-14)
 
 ### Fixes
