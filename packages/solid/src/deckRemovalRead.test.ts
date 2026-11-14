@@ -349,3 +349,87 @@ describe("removing a deck when a read of one of its documents fails", () => {
     expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
   });
 });
+
+const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
+const VERSION = `<${SM_NS}formatVersion>`;
+const INTEGER = "<http://www.w3.org/2001/XMLSchema#integer>";
+
+/** The deck's catalog document, as `change` rewrites its N-Triples. */
+async function plant(p: ReturnType<typeof pod>, deck: Deck, change: (text: string) => string) {
+  const catalog = documentUrlOf(deck.url);
+  const text = await (await p.local(catalog)).text();
+  const written = await p.local(catalog, {
+    method: "PUT",
+    headers: { "Content-Type": "text/turtle" },
+    body: change(text),
+  });
+  expect(written.ok).toBe(true);
+}
+
+describe("removing a deck the catalog names in a newer format", () => {
+  it("removes it when a group a newer version wrote lists it, leaving that group as it is", async () => {
+    const p = pod(answering(503));
+    const deck = await p.deck();
+    const group = `<${documentUrlOf(deck.url)}#newer>`;
+    await plant(
+      p,
+      deck,
+      (text) =>
+        `${text}${group} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <${SM_NS}DeckGroup> .
+${group} ${VERSION} "99"^^${INTEGER} .
+${group} <http://www.w3.org/ns/dcat#dataset> <${deck.url}> .
+`,
+    );
+
+    await expect(p.decks.removeDeck(deck)).resolves.toEqual({ keptDocuments: [] });
+
+    expect(await p.decks.listDecks(INSTANCE)).toEqual([]);
+    expect(await p.status(deck.cardsDocumentUrl)).toBe(404);
+    expect(await p.status(deck.reviewsDocumentUrl)).toBe(404);
+    const left = await (await p.local(documentUrlOf(deck.url))).text();
+    expect(left).toContain(`${group} <http://www.w3.org/ns/dcat#dataset> <${deck.url}>`);
+  });
+
+  const NEWER: readonly (readonly [string, (deck: Deck) => (text: string) => string])[] = [
+    [
+      "its entry",
+      (deck) => (text) =>
+        text.replace(`<${deck.url}> ${VERSION} "6"`, `<${deck.url}> ${VERSION} "99"`),
+    ],
+    [
+      "the catalog that lists it",
+      (deck) => (text) => {
+        const catalog = `<${documentUrlOf(deck.url)}#catalog>`;
+        return `${text}${catalog} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/dcat#Catalog> .
+${catalog} ${VERSION} "99"^^${INTEGER} .
+${catalog} <http://www.w3.org/ns/dcat#dataset> <${deck.url}> .
+`;
+      },
+    ],
+    [
+      "an agent only it names",
+      (deck) => (text) => {
+        const agent = `<${documentUrlOf(deck.url)}#agent-newer>`;
+        return `${text}<${deck.url}> <http://purl.org/dc/terms/creator> ${agent} .
+${agent} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Agent> .
+${agent} ${VERSION} "99"^^${INTEGER} .
+${agent} <http://xmlns.com/foaf/0.1/name> "Newer" .
+`;
+      },
+    ],
+  ];
+
+  for (const [label, change] of NEWER) {
+    it(`refuses before any document is deleted when a newer version wrote ${label}`, async () => {
+      const p = pod(answering(503));
+      const deck = await p.deck();
+      await plant(p, deck, change(deck));
+
+      await expect(p.decks.removeDeck(deck)).rejects.toMatchObject({ code: "writtenByNewerApp" });
+
+      expect((await p.decks.listDecks(INSTANCE)).map(({ url }) => url)).toEqual([deck.url]);
+      expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
+      expect(await p.status(deck.reviewsDocumentUrl)).toBe(200);
+    });
+  }
+});
