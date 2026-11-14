@@ -312,6 +312,9 @@ it's read and painted:
   palette or another subject into a color set, nor changes another
   palette's colors (`withPalette` in
   [paletteMapper.ts](../packages/solid/src/mappers/paletteMapper.ts)).
+  Each address is told free or taken in one step, however many color
+  sets other palettes name, so the search takes time that grows with
+  the document, not with its square.
   The subject the palette named before stays in the document as it
   was, no longer named by the palette. A color set the palette names
   that a newer version of the app wrote still stops the save, as any

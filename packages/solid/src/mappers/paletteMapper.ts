@@ -78,11 +78,19 @@ function placeableBy(
   documentUrl: string,
   palette: string,
 ): (iri: string) => boolean {
-  const others = getThingAll(dataset)
-    .filter((thing) => asUrl(thing) !== palette && getUrlAll(thing, RDF.type).includes(SM.Palette))
-    .flatMap((thing) => [...getUrlAll(thing, SM.lightColors), ...getUrlAll(thing, SM.darkColors)]);
+  // A set, so each address tried is told taken in one step, however many other palettes name.
+  const others = new Set(
+    getThingAll(dataset)
+      .filter(
+        (thing) => asUrl(thing) !== palette && getUrlAll(thing, RDF.type).includes(SM.Palette),
+      )
+      .flatMap((thing) => [
+        ...getUrlAll(thing, SM.lightColors),
+        ...getUrlAll(thing, SM.darkColors),
+      ]),
+  );
   return (iri) => {
-    if (!isIn(iri, documentUrl) || others.includes(iri)) return false;
+    if (!isIn(iri, documentUrl) || others.has(iri)) return false;
     const thing = getThing(dataset, iri);
     if (thing === null) return true;
     const types = getUrlAll(thing, RDF.type);
@@ -96,6 +104,9 @@ function placeableBy(
  * palette names it in the document when it may be (placeableBy), else at
  * `<palette>-light` and `<palette>-dark`, or the first of `-light-2`,
  * `-light-3`, … that may be and that no newer version of the app wrote.
+ * Each address tried is refused by a subject of the document or a color
+ * set another palette names, each in one step, so the search ends in
+ * time that grows with the document, not with its square.
  * The palette keeps the triples this app does not know, but not a class
  * whose shape is closed (recordThing); a color set is written afresh,
  * with only its colors, as its shape is closed.
