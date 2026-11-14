@@ -9,7 +9,7 @@
 # seed is a root that lets anyone read and write, and the root ACL
 # template solid-server 6.0.0 copies on first start but does not ship.
 # What the server stores stays in the container, gone with it.
-FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9
+FROM node:24.22.3-bookworm-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54
 ARG MAJOR
 WORKDIR /srv/solid
 COPY ${MAJOR}/package.json ${MAJOR}/package-lock.json ./
