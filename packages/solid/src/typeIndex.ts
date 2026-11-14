@@ -399,7 +399,9 @@ async function readableByAnyone(url: string, publicFetch: Fetch): Promise<boolea
  *
  * - of a kind, the user's best of that kind (rankedFor) they can read
  *   now; when there is none, a new one, made in their own storage and
- *   linked from their profile (createTypeIndex);
+ *   linked from their profile (createTypeIndex), and a public one made
+ *   readable by anyone with `share`, so that other apps find what it
+ *   registers;
  * - by its address, one the profile links, or else one in the profile's
  *   own places that the user can read and that says it is a
  *   solid:TypeIndex, then linked from the profile as the kind its type
@@ -412,6 +414,7 @@ export async function ensureTypeIndex(
   nearUrl: string,
   fetch: Fetch,
   publicFetch: Fetch,
+  share: (indexUrl: string) => Promise<boolean>,
 ): Promise<{ url: string; fetch: Fetch }> {
   const indexes = await locateTypeIndexes(webId, fetch, publicFetch);
   if (typeof target !== "string") {
@@ -422,7 +425,10 @@ export async function ensureTypeIndex(
   }
   const best = rankedFor(await readTypeIndexChoices(indexes, publicFetch), target)[0];
   if (best !== undefined) return { url: best.url, fetch: indexes.fetch };
-  return { url: await createTypeIndex(target, webId, nearUrl, fetch), fetch: indexes.fetch };
+  const url = await createTypeIndex(target, webId, nearUrl, fetch);
+  // A public index no one else can read is one no other app finds: whether the grant took is seen in the next choice.
+  if (target === "public") await share(url);
+  return { url, fetch: indexes.fetch };
 }
 
 /**

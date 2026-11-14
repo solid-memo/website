@@ -7,9 +7,10 @@ import { ACCESS_CONTROL_LIMITS, limitedFetch } from "./client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
 
 /**
- * The fetch that makes the document at `target` public
- * (docs/boundaries.md "Access control"), kept to what that may touch,
- * whatever the servers' answers name (`rel="acl"`, a redirect): a request to another origin than the
+ * The fetch that makes the document at `target` public (a release, or a
+ * public type index the app made; docs/boundaries.md "Access control"),
+ * kept to what that may touch, whatever the servers' answers name
+ * (`rel="acl"`, a redirect): a request to another origin than the
  * document's is refused, and so is any but a read (GET, HEAD) of another
  * resource than the document's own access control, beside it
  * (`<document>.acl`, its ACL; or `<document>.acr`, its ACR), which every

@@ -26,9 +26,11 @@ the pod or not.
 The pod's server decides who else may read them. Solid Memo registers
 only the instance in a type index, a **private** one unless the
 learner chooses a public one, and none of its data by itself
-([data-model.md](data-model.md#choosing-a-type-index)). Only a release the
-learner publishes from the Studio is public; it carries the authors'
-names, and their email addresses when given.
+([data-model.md](data-model.md#choosing-a-type-index)). A public type
+index the app creates is readable by everyone, so other apps find what
+it registers: the instance's name and address, not its data. Only a
+release the learner publishes from the Studio is public; it carries the
+authors' names, and their email addresses when given.
 
 Each answer in the log records the card, when, and how well. Since
 vocabulary 1.19, it records too how long the learner took to recall

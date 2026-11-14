@@ -844,9 +844,12 @@ describe("readTypeIndexChoices", () => {
 
 describe("ensureTypeIndex", () => {
   const near = "https://alice.example/x/";
+  const share = vi.fn(async () => true);
   const storageFetch = vi.fn(
     async () => new Response(null, { status: 200 }),
   ) as unknown as typeof globalThis.fetch;
+
+  beforeEach(() => share.mockClear());
 
   it("of a kind, registers in the best index of it the user can read, creating nothing", async () => {
     // The preferences file's index, ranked above the one the profile links itself.
@@ -862,12 +865,13 @@ describe("ensureTypeIndex", () => {
       [PRIVATE_INDEX]: indexDocument(PRIVATE_INDEX, [SOLID.TypeIndex, SOLID.UnlistedDocument]),
     });
     await expect(
-      ensureTypeIndex("private", WEBID, near, noFetch, answeringAnyone(401)),
+      ensureTypeIndex("private", WEBID, near, noFetch, answeringAnyone(401), share),
     ).resolves.toEqual({ url: PRIVATE_INDEX, fetch: expect.any(Function) });
     expect(writeDocument).not.toHaveBeenCalled();
+    expect(share).not.toHaveBeenCalled();
   });
 
-  it("of a kind, creates a private index when the one linked cannot be read", async () => {
+  it("of a kind, creates a private index when the one linked cannot be read, sharing nothing", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) =>
         t
@@ -876,18 +880,20 @@ describe("ensureTypeIndex", () => {
       ),
     });
     await expect(
-      ensureTypeIndex("private", WEBID, near, storageFetch, answeringAnyone(401)),
+      ensureTypeIndex("private", WEBID, near, storageFetch, answeringAnyone(401), share),
     ).resolves.toEqual({ url: PRIVATE_INDEX, fetch: expect.any(Function) });
     expect(vi.mocked(writeDocument).mock.calls.map(([url]) => url)).toContain(PRIVATE_INDEX);
+    expect(share).not.toHaveBeenCalled();
   });
 
-  it("of a kind, creates a public index when there is none", async () => {
+  it("of a kind, creates a public index readable by anyone when there is none", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) => t.addIri(PIM.storage, "https://alice.example/")),
     });
     await expect(
-      ensureTypeIndex("public", WEBID, near, storageFetch, answeringAnyone(401)),
+      ensureTypeIndex("public", WEBID, near, storageFetch, answeringAnyone(401), share),
     ).resolves.toEqual({ url: PUBLIC_INDEX, fetch: expect.any(Function) });
+    expect(share).toHaveBeenCalledExactlyOnceWith(PUBLIC_INDEX);
   });
 
   it("creates the user's own index when the profile's is outside its own places", async () => {
@@ -899,7 +905,7 @@ describe("ensureTypeIndex", () => {
       ),
     });
     await expect(
-      ensureTypeIndex("private", WEBID, near, storageFetch, answeringAnyone(401)),
+      ensureTypeIndex("private", WEBID, near, storageFetch, answeringAnyone(401), share),
     ).resolves.toEqual({ url: PRIVATE_INDEX, fetch: expect.any(Function) });
     expect(vi.mocked(writeDocument).mock.calls.map(([url]) => url)).toContain(PRIVATE_INDEX);
   });
@@ -912,7 +918,7 @@ describe("ensureTypeIndex", () => {
         [WEBID]: profileDataset((t) => t.addIri(SOLID.publicTypeIndex, PUBLIC_INDEX)),
       });
       await expect(
-        ensureTypeIndex({ indexUrl: PUBLIC_INDEX }, WEBID, near, noFetch, noFetch),
+        ensureTypeIndex({ indexUrl: PUBLIC_INDEX }, WEBID, near, noFetch, noFetch, share),
       ).resolves.toEqual({ url: PUBLIC_INDEX, fetch: expect.any(Function) });
       expect(vi.mocked(readDocument).mock.calls.map(([url]) => url)).toEqual([WEBID]);
       expect(writeDocument).not.toHaveBeenCalled();
@@ -925,19 +931,20 @@ describe("ensureTypeIndex", () => {
     ])("links one of the user's from the profile as %s", async (_, types, kind) => {
       mockDatasets({ [WEBID]: profileDataset(), [entered]: indexDocument(entered, types) });
       await expect(
-        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch),
+        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
       ).resolves.toEqual({ url: entered, fetch: expect.any(Function) });
       const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
       expect(url).toBe(PROFILE_DOC);
       const predicate = kind === "public" ? SOLID.publicTypeIndex : SOLID.privateTypeIndex;
       expect(getUrl(getThing(saved as Dataset, WEBID)!, predicate)).toBe(entered);
+      expect(share).not.toHaveBeenCalled();
     });
 
     it("refuses one outside the profile's own places, reading nothing of it", async () => {
       const elsewhere = "https://elsewhere.example/index.ttl";
       mockDatasets({ [WEBID]: profileDataset() });
       await expect(
-        ensureTypeIndex({ indexUrl: elsewhere }, WEBID, near, noFetch, noFetch),
+        ensureTypeIndex({ indexUrl: elsewhere }, WEBID, near, noFetch, noFetch, share),
       ).rejects.toMatchObject({ code: "typeIndexOutsidePod" });
       expect(vi.mocked(readDocument).mock.calls.map(([url]) => url)).toEqual([WEBID]);
       expect(writeDocument).not.toHaveBeenCalled();
@@ -949,7 +956,7 @@ describe("ensureTypeIndex", () => {
         [entered]: indexDocument(entered, [SOLID.ListedDocument]),
       });
       await expect(
-        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch),
+        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
       ).rejects.toMatchObject({ code: "notATypeIndex" });
       expect(writeDocument).not.toHaveBeenCalled();
     });
@@ -964,7 +971,7 @@ describe("ensureTypeIndex", () => {
         return readOf(profileDataset());
       });
       await expect(
-        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch),
+        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
       ).rejects.toMatchObject({ code: "notATypeIndex" });
     });
 
@@ -975,7 +982,7 @@ describe("ensureTypeIndex", () => {
         return readOf(profileDataset());
       });
       await expect(
-        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch),
+        ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
       ).rejects.toBe(failure);
     });
   });

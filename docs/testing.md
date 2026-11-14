@@ -372,6 +372,8 @@ The tests check that:
 - a release the owner publishes reads with no login, and no one else can
   change it or its access control, while the rest of the instance stays
   private;
+- a public type index the app creates reads with no login, and no one
+  else can change it, while its folder stays private;
 - making a document public changes what the stranger gets, on Web Access
   Control and on Access Control Policies (`css-acp`);
 - the app sees the 403 when the stranger publishes or makes public;

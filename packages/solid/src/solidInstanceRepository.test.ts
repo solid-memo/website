@@ -266,6 +266,56 @@ describe("getRegistrationOptions", () => {
   });
 });
 
+describe("a public type index the app creates", () => {
+  /** The share the repository hands ensureTypeIndex, as a creation hands it. */
+  async function shareOf(
+    deps: Partial<Parameters<typeof createSolidInstanceRepository>[0]>,
+  ): Promise<(url: string) => Promise<boolean>> {
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PUBLIC_INDEX, fetch: indexFetch });
+    await createSolidInstanceRepository({
+      fetch: vi.fn() as unknown as typeof globalThis.fetch,
+      now: () => new Date(),
+      randomId: () => "id",
+      ...deps,
+    }).createInstance({
+      webId: WEBID,
+      containerUrl: CONTAINER,
+      name: "Main",
+      registrationTarget: "public",
+    });
+    return vi.mocked(ensureTypeIndex).mock.calls[0][5];
+  }
+
+  it("is made readable by anyone with the grant, through a fetch kept to its own access control", async () => {
+    const grantPublicRead = vi.fn(async () => true);
+    const shareFetch = vi.fn(
+      async () => new Response(null, { status: 201 }),
+    ) as unknown as typeof globalThis.fetch;
+    const share = await shareOf({ grantPublicRead, shareFetch });
+
+    await expect(share(PUBLIC_INDEX)).resolves.toBe(true);
+    const [url, { fetch }] = grantPublicRead.mock.calls[0] as unknown as [
+      string,
+      { fetch: typeof globalThis.fetch },
+    ];
+    expect(url).toBe(PUBLIC_INDEX);
+    await fetch(`${PUBLIC_INDEX}.acl`, { method: "PUT" });
+    expect(shareFetch).toHaveBeenCalledOnce();
+    await expect(fetch(PRIVATE_INDEX, { method: "PUT" })).rejects.toThrow(
+      "Not the document's to change",
+    );
+  });
+
+  it("is left as it is made when there is no grant, or the grant fails", async () => {
+    await expect((await shareOf({}))(PUBLIC_INDEX)).resolves.toBe(false);
+    vi.mocked(ensureTypeIndex).mockReset();
+    const failing = vi.fn(async () => {
+      throw new Error("refused");
+    });
+    await expect((await shareOf({ grantPublicRead: failing }))(PUBLIC_INDEX)).resolves.toBe(false);
+  });
+});
+
 describe("an instance registered in several indexes of a kind", () => {
   const older = "https://alice.example/settings/privateTypeIndex";
   const several = (): TypeIndexes => ({
@@ -360,6 +410,7 @@ describe("createInstance", () => {
       "private",
       WEBID,
       CONTAINER,
+      expect.any(Function),
       expect.any(Function),
       expect.any(Function),
     );
@@ -483,6 +534,7 @@ describe("attachInstance", () => {
       CONTAINER,
       expect.anything(),
       expect.anything(),
+      expect.any(Function),
     );
     expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
       PRIVATE_INDEX,

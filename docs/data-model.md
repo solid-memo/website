@@ -157,10 +157,14 @@ flowchart LR
   warns the user, who chooses to create the private index (a document
   under `<storage>settings/` plus a profile link) or to register
   publicly. A kind counts as missing when no index of it can be read.
-  The index goes in a storage the WebID leads to (never one typed by
-  hand): the instance's, else the first. It never goes on the server of
-  an instance elsewhere (attached by URL, or in a storage typed by
-  hand).
+  A public index the app creates is made readable by everyone with the
+  public-read grant, as a published release is
+  ([boundaries.md](boundaries.md#access-control)). Other apps then find
+  what it registers. When the grant fails, the index is kept as it is,
+  and the choice says no one else can read it. The index goes in a
+  storage the WebID leads to (never one typed by hand): the instance's,
+  else the first. It never goes on the server of an instance elsewhere
+  (attached by URL, or in a storage typed by hand).
   Without such a storage the index isn't created (`typeIndexNoStorage`,
   `ownStorageFor` in `typeIndex.ts`).
   The link goes in the WebID document when it's writable, else in the

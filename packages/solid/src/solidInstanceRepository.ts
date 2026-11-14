@@ -4,7 +4,7 @@
 
 import { anonymousFetch } from "./authFetch";
 import { deleteContainer } from "./client/resources";
-import { FOREIGN_LIMITS, limitedFetch } from "./client/readLimits";
+import { FOREIGN_LIMITS, limitedFetch, NO_SIZE_LIMITS } from "./client/readLimits";
 import { createSolidDataset, getThing, setThing } from "./client/rdf";
 import type { InstanceRepository } from "@solid-memo/application/ports";
 import {
@@ -15,6 +15,8 @@ import {
   type OldRegistrations,
 } from "@solid-memo/domain/instance";
 import { rankedChoices, type TypeIndexKind } from "@solid-memo/domain/typeIndexChoice";
+import type { GrantPublicRead } from "./client/access";
+import { accessControlFetch } from "./accessControlFetch";
 import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
 import {
@@ -67,6 +69,19 @@ export interface SolidInstanceRepositoryDeps {
   checkWrite?: WriteCheck;
   /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
   userStorages?: UserStorages;
+  /**
+   * The grant that makes a public type index the app creates readable by
+   * anyone (client/access.ts), so other apps find what it registers;
+   * none by default, as for a guest's pod, which no one else reads.
+   */
+  grantPublicRead?: GrantPublicRead;
+  /**
+   * What the grant writes the new index's own access control through,
+   * behind the pod fence's access-control mode (podFence.ts); `fetch`
+   * when unset. Only the index's own ACL or ACR is let through
+   * (accessControlFetch).
+   */
+  shareFetch?: typeof globalThis.fetch;
 }
 
 export function createSolidInstanceRepository({
@@ -77,6 +92,8 @@ export function createSolidInstanceRepository({
   randomId,
   userStorages,
   checkWrite = noWriteCheck,
+  grantPublicRead,
+  shareFetch = fetch,
 }: SolidInstanceRepositoryDeps): InstanceRepository {
   /**
    * An instance's meta document is read under limits: a folder anyone
@@ -88,6 +105,18 @@ export function createSolidInstanceRepository({
    * version.
    */
   const metaFetch = limitedFetch(fetch, FOREIGN_LIMITS);
+
+  /** Make a public type index the app created readable by anyone: whether the pod says it now is. */
+  async function share(indexUrl: string): Promise<boolean> {
+    if (grantPublicRead === undefined) return false;
+    try {
+      return await grantPublicRead(indexUrl, {
+        fetch: accessControlFetch(shareFetch, indexUrl, NO_SIZE_LIMITS),
+      });
+    } catch {
+      return false;
+    }
+  }
 
   return {
     async listInstances(webId): Promise<Instance[]> {
@@ -138,7 +167,14 @@ export function createSolidInstanceRepository({
           : error;
       });
       try {
-        const index = await ensureTypeIndex(registrationTarget, webId, url, fetch, publicFetch);
+        const index = await ensureTypeIndex(
+          registrationTarget,
+          webId,
+          url,
+          fetch,
+          publicFetch,
+          share,
+        );
         await addInstanceRegistration(
           index.url,
           { instanceUrl: url, title: name },
@@ -158,7 +194,14 @@ export function createSolidInstanceRepository({
       const url = instanceAddressOf(instanceUrl);
       if (!isInstanceAddress(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
       const name = await readInstanceName(url, metaFetch);
-      const index = await ensureTypeIndex(registrationTarget, webId, url, fetch, publicFetch);
+      const index = await ensureTypeIndex(
+        registrationTarget,
+        webId,
+        url,
+        fetch,
+        publicFetch,
+        share,
+      );
       await addInstanceRegistration(
         index.url,
         { instanceUrl: url, title: name },
