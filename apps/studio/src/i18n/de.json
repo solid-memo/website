@@ -1588,6 +1588,10 @@
         "kind": "Art",
         "document": "Definiert in",
         "types": "Klassen",
+        "moreTypes": {
+          "one": "und {count} weitere",
+          "other": "und {count} weitere"
+        },
         "pages": "Seiten der Knoten"
       },
       "edges": {
@@ -1614,10 +1618,6 @@
         "showAll": {
           "one": "Die {count} Verbindung zeigen",
           "other": "Alle {count} Verbindungen zeigen"
-        },
-        "showAllTypes": {
-          "one": "Die {count} Klasse zeigen",
-          "other": "Alle {count} Klassen zeigen"
         },
         "showAllValues": {
           "one": "Den {count} Wert zeigen",

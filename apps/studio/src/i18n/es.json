@@ -1671,6 +1671,11 @@
         "kind": "Tipo",
         "document": "Definido en",
         "types": "Clases",
+        "moreTypes": {
+          "one": "y {count} más",
+          "many": "y {count} más",
+          "other": "y {count} más"
+        },
         "pages": "Páginas de nodos"
       },
       "edges": {
@@ -1698,11 +1703,6 @@
           "one": "Mostrar el {count} enlace",
           "many": "Mostrar los {count} de enlaces",
           "other": "Mostrar los {count} enlaces"
-        },
-        "showAllTypes": {
-          "one": "Mostrar la {count} clase",
-          "many": "Mostrar las {count} de clases",
-          "other": "Mostrar las {count} clases"
         },
         "showAllValues": {
           "one": "Mostrar el {count} valor",

@@ -183,23 +183,22 @@ describe("GraphNodePane", () => {
     expect(screen.queryByRole("button", { name: /^Show all/ })).toBeNull();
   });
 
-  it("lists the first classes and values of many, and all on asking", () => {
+  it("lists the classes the graph keeps and how many more, and the first values of many, and all on asking", () => {
     pane(CARD, crowdedGraph(60));
     const types = () => screen.getAllByRole("button", { name: /#Class\d+$/ });
     const values = () => list("Values").querySelectorAll(":scope > div");
-    expect(types()).toHaveLength(50);
+    expect(types()).toHaveLength(32);
+    expect(screen.getByText("and 28 more")).toBeInTheDocument();
     expect(values()).toHaveLength(50);
-    fireEvent.click(screen.getByRole("button", { name: "Show all 60 types" }));
-    expect(types()).toHaveLength(60);
-    expect(types()[50]).toHaveFocus();
+    expect(screen.queryByRole("button", { name: /types$/ })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Show all 60 values" }));
     expect(values()).toHaveLength(60);
     // A value is no button: the first it showed takes the focus itself.
     expect(values()[50]).toHaveFocus();
-    expect(screen.queryByRole("button", { name: /^Show all 60 (types|values)$/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Show all 60 values" })).toBeNull();
   });
 
-  it("shows a node's first classes and values again when another is selected", () => {
+  it("shows a node's first values again when another is selected", () => {
     const graph = crowdedGraph(60);
     function Walk() {
       const [id, setId] = useState(CARD);
@@ -207,18 +206,13 @@ describe("GraphNodePane", () => {
     }
     cleanup();
     render(<Walk />);
-    const types = () => screen.getAllByRole("button", { name: /#Class\d+$/ });
     const values = () => list("Values").querySelectorAll(":scope > div");
-    fireEvent.click(screen.getByRole("button", { name: "Show all 60 types" }));
     fireEvent.click(screen.getByRole("button", { name: "Show all 60 values" }));
-    expect(types()).toHaveLength(60);
     expect(values()).toHaveLength(60);
     // Another node of as many: its lists start at their first again.
     fireEvent.click(within(list("Links from it")).getByRole("button", { name: "sweden-d1" }));
     expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent(/sweden-d1$/);
-    expect(types()).toHaveLength(50);
     expect(values()).toHaveLength(50);
-    expect(screen.getByRole("button", { name: "Show all 60 types" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Show all 60 values" })).toBeInTheDocument();
   });
 });

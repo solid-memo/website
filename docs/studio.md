@@ -2643,6 +2643,13 @@ edge.
   longer than 2,048 characters or more than 32 parts deep. That's far
   past any address Solid Memo makes, and each folder on the way would be
   a node of its own.
+- A node keeps its first 32 classes (`rdf:type`), the same bound the
+  shapes check uses, and a count of the rest. That's far more than any
+  Solid Memo document gives one, and the aside, the table, the node's
+  group, its color and which labels show first all go through its
+  classes. These read only the classes it keeps, so a node that states
+  a class of Solid Memo's after 32 others is drawn with no group. Its
+  links to the rest are still edges of the graph.
 - A document that can't be read (refused, say, or not Turtle) is drawn
   as such, and the rest as read.
 
@@ -2837,7 +2844,8 @@ line, and brought into sight.
 **The aside** (Node) shows the node selected:
 
 - its address (a blank node's label), its kind, the document that
-  defines it, and its classes;
+  defines it, and its classes: the first 32, and how many more it has.
+  Its links from it name every one;
 - the values the documents state of it, each with its language tag as
   BCP 47 writes it (`@en`, `@sv` or `@en-GB`, though the data is read
   in lower case) or its datatype (`xsd:date`). The document a value is
@@ -2845,7 +2853,7 @@ line, and brought into sight.
 - its links from it and to it. Each is a button that selects the
   node at its other end and moves the focus to that node's heading.
 
-Its classes, its values and each list of links show 50 at first and
+Its values and each list of links show 50 at first and
 all on asking, the focus moving to the first new one, so a node with a
 great many of them still opens at once.
 
@@ -2856,8 +2864,9 @@ a screen not wide. The aside shares the screen's query.
 **Show as a table** shows the nodes and the edges the filters show as
 two [`DataTable`](#card-workbench)s, 100 rows a page. A node row has
 its name and address, its kind, the document that defines it and its
-classes; an edge row, where it's from, its link and where it goes. A
-name, or Enter on its row, selects its node.
+first 3 classes, with how many more it has; an edge row, where it's
+from, its link and where it goes. A name, or Enter on its row, selects
+its node.
 
 ## Data set aside
 

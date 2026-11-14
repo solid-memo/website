@@ -94,8 +94,10 @@ export interface GraphNode {
   blank?: true;
   /** For a blank node: its term in its document, `_:<label>`. */
   term?: string;
-  /** Its classes (rdf:type), as the documents read state them. */
+  /** Its classes (rdf:type), as the documents read state them: the first TYPES_KEPT of them. */
   types: string[];
+  /** How many more classes the documents state of it than `types` keeps; none when it keeps them all. */
+  typesLeftOut?: number;
   /** The literals the documents read state of it, a leaf's too. */
   literals: GraphLiteral[];
 }
@@ -150,6 +152,18 @@ const VOCABULARIES = [
 const LICENSES = new Set(KNOWN_LICENSES);
 const LICENSE = `${DCTERMS_NS}license`;
 const LICENSE_DOCUMENT = `${DCTERMS_NS}LicenseDocument`;
+
+/**
+ * The most classes a node keeps: far more than any Solid Memo or DCAT-AP
+ * document gives one, the same bound the shapes check uses
+ * (MAX_TYPES_PER_NODE in packages/shacl/src/engine.ts). The documents
+ * are anyone's to write, and every view of a node (its aside, its row
+ * in the table, its group, color and label rank) goes through its
+ * classes, so a node stating a great many would cost each of them time
+ * and room growing with their number. Its edges to them are all kept,
+ * each one as any other edge.
+ */
+const TYPES_KEPT = 32;
 
 /** The id of a term a document states (GraphNode's `id`). */
 type IdOf = (term: string, document: string) => string;
@@ -322,6 +336,10 @@ export function instanceGraphOf({
     edge(document, id, "", "containment");
   }
 
+  const typeOf = (node: GraphNode, type: string) => {
+    if (node.types.length < TYPES_KEPT) node.types.push(type);
+    else node.typesLeftOut = (node.typesLeftOut ?? 0) + 1;
+  };
   const terms = termsOf(documents);
   const nodeOf = (id: string): GraphNode =>
     nodes.get(id) ?? add({ id, kind: leafKind(id, root, pods, terms) });
@@ -336,7 +354,7 @@ export function instanceGraphOf({
       const to = nodeOf(idOf(object.kind === "blank" ? `_:${object.value}` : object.value, url));
       const kind = to.kind === "vocabularyLeaf" ? "vocabulary" : "link";
       const made = edge(from.id, to.id, predicate, kind);
-      if (made && predicate === RDF_TYPE && object.kind === "iri") from.types.push(to.id);
+      if (made && predicate === RDF_TYPE && object.kind === "iri") typeOf(from, to.id);
     }
   }
   return { nodes: [...nodes.values()], edges: [...edges.values()] };

@@ -383,6 +383,23 @@ describe("instanceGraphOf", () => {
     expect(of.edges.filter((each) => each.predicate === TYPE)).toHaveLength(1);
   });
 
+  it("keeps a node's first classes of a great many, and counts the rest", () => {
+    const deck = `${CATALOG}#deck-1`;
+    const classes = Array.from({ length: 5_000 }, (_, at) => `https://elsewhere.example/v#C${at}`);
+    const of = graph([
+      found(CATALOG, [
+        ...classes.map((type) => triple(deck, TYPE, iri(type))),
+        // A class stated again is still counted once.
+        triple(deck, TYPE, iri(classes[4_999]!)),
+      ]),
+    ]);
+    expect(node(of, deck)).toMatchObject({ types: classes.slice(0, 32), typesLeftOut: 4_968 });
+    // Each class is still a node, and an edge to it.
+    expect(of.edges.filter((each) => each.from === deck && each.predicate === TYPE)).toHaveLength(
+      5_000,
+    );
+  });
+
   it("leaves out a document outside the instance", () => {
     const outside = `${STORAGE}elsewhere/release.ttl`;
     const of = graph([found(outside, [triple(`${outside}#deck`, TITLE, text("Not ours"))])]);

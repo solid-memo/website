@@ -8,7 +8,7 @@ import { instanceGraphOf, type InstanceGraph } from "@solid-memo/domain/instance
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { forget } from "@solid-memo/ui/remembered";
 import { instanceA } from "../../test/fixtures";
-import { CARD, CARDS, largeGraph, REVIEW, smallGraph } from "../../test/graph";
+import { CARD, CARDS, crowdedGraph, largeGraph, REVIEW, smallGraph } from "../../test/graph";
 import { WithKeys } from "../../test/keys";
 import { searchedText } from "../searchText";
 import { GraphScreen } from "./GraphScreen";
@@ -215,6 +215,18 @@ describe("GraphScreen", () => {
     // card-1, card-1-d1, and card-10 to card-19 and theirs, with their review states.
     expect(within(screen.getByRole("list")).getAllByRole("button")).toHaveLength(10);
     expect(screen.getByText(/^and \d+ more: type more to narrow them down$/)).toBeInTheDocument();
+  });
+
+  it("names a node's first classes in its row, and how many more it has", () => {
+    show(crowdedGraph(5_000));
+    fireEvent.click(box("Show as a table"));
+    const nodes = screen.getByRole("table", { name: "Nodes of the graph" });
+    const row = within(nodes)
+      .getAllByRole("row")
+      .find((each) => within(each).queryByText(CARD) !== null)!;
+    const types = within(row).getAllByRole("cell").at(-1)!;
+    const named = [0, 1, 2].map((n) => `https://vocab.example/ns#Class${n}`).join(", ");
+    expect(types.textContent).toBe(`${named}, and 4,997 more`);
   });
 
   it("shows the nodes and the edges as tables, a page at a time, a node's name selecting it", () => {
