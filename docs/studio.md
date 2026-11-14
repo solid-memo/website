@@ -866,8 +866,10 @@ review states of deleted cards in one write of the reviews document,
 then the deck's schedule in the digest. When the cards document
 changed meanwhile, or was made since it was read as absent, it reads
 it and plans again, three times in all. Once that plan isn't the one
-the user previewed, it stops with "changed elsewhere", writing nothing. The
-deck's catalog entry is untouched. The end-to-end tests hold this
+the user previewed, it stops with "changed elsewhere", writing nothing.
+When the reviews document changed meanwhile, or was made since it
+was read as absent, it writes the review states again, three times in all. The deck's catalog entry is
+untouched. The end-to-end tests hold this
 against real servers, a change made by another app during the edit
 included
 ([cardEdits.integration.test.ts](../e2e/pod/src/cardEdits.integration.test.ts)).
@@ -875,8 +877,15 @@ included
 After an edit, the status line says what it did, and **Undo** undoes
 it: `undoCardEdit` writes the plan's inverse the same way, the deleted
 cards' review states included, only while the cards are as the edit
-left them. The plan is kept in the page only, so Undo goes with the
-next edit, another deck, or leaving the page.
+left them. Undo is offered once the cards are written, even when the
+review states' write after it fails. An undo whose review states'
+write failed can be made again: a deleted card already back as it was
+counts as the edit left it, and isn't written again. Each undo
+writes all the deleted cards' review states, so it puts back the
+states from before the delete, even when a card it brought back was
+graded in between. The plan is kept in the page
+only, so Undo goes with the next edit, another deck, or leaving the
+page.
 
 No edit takes a backup first: Solid Memo keeps none
 ([migrations.md](migrations.md#the-backup)).

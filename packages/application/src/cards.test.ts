@@ -212,6 +212,91 @@ describe("cards", () => {
       });
     });
 
+    it("undoes a delete again once its reviews write failed, writing only the states still missing", async () => {
+      const edit = { kind: "remove" } as const;
+      const removal = await setup().useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        edit,
+        planCardEdit([one, two], ["one"], edit),
+      );
+      // The cards are written back, then the reviews write fails.
+      const stopped = setup([two]);
+      vi.mocked(stopped.deps.reviewStateRepository.applyReviewChanges).mockRejectedValueOnce(
+        new Error("offline"),
+      );
+      await expect(stopped.useCases.undoCardEdit(instance.url, deck, removal)).rejects.toThrow(
+        "offline",
+      );
+      // Made again with the cards back as they were: the states are written, the cards left alone.
+      const again = setup([one, two]);
+      await again.useCases.undoCardEdit(instance.url, deck, removal);
+      expect(again.deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(again.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(deck, {
+        save: [reviewed],
+        remove: [],
+        every: true,
+      });
+      expect(again.deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledOnce();
+    });
+
+    it("writes the reviews document again while it changed or was made meanwhile, three times in all", async () => {
+      const edit = { kind: "remove" } as const;
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges)
+        .mockRejectedValueOnce(changed())
+        .mockRejectedValueOnce(new AppError("createdElsewhere", { url: deck.reviewsDocumentUrl }));
+      await useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        edit,
+        planCardEdit([one, two], ["one"], edit),
+      );
+      expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledTimes(3);
+
+      const busy = setup();
+      vi.mocked(busy.deps.reviewStateRepository.applyReviewChanges).mockRejectedValue(changed());
+      await expect(
+        busy.useCases.editCards(
+          instance.url,
+          deck,
+          ["one"],
+          edit,
+          planCardEdit([one, two], ["one"], edit),
+        ),
+      ).rejects.toMatchObject({ code: "changedElsewhere" });
+      expect(busy.deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
+      expect(busy.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledTimes(3);
+    });
+
+    it("tells of a delete once its cards are written, so a failed reviews write can still be undone", async () => {
+      const edit = { kind: "remove" } as const;
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.applyReviewChanges).mockRejectedValue(
+        new Error("offline"),
+      );
+      const cardsWritten = vi.fn();
+      await expect(
+        useCases.editCards(
+          instance.url,
+          deck,
+          ["one"],
+          edit,
+          planCardEdit([one, two], ["one"], edit),
+          cardsWritten,
+        ),
+      ).rejects.toThrow("offline");
+      expect(cardsWritten).toHaveBeenCalledOnce();
+      expect(cardsWritten.mock.calls[0]![0]).toMatchObject({
+        remove: ["one"],
+        inverse: { save: [one], reviewSaves: [reviewed] },
+      });
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledOnce();
+    });
+
     it("writes nothing when the edit changes no card", async () => {
       const { deps, useCases } = setup();
       const edit = { kind: "restore" } as const;

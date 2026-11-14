@@ -221,7 +221,11 @@ export function CardWorkbenchContainer({
       ids: readonly string[];
       edit: CardEdit;
       plan: CardEditPlan;
-    }) => useCases.editCards(instance.url, deck, ids, edit, plan),
+    }) =>
+      // Undo is offered once the cards are written, even when their review states' write then fails.
+      useCases.editCards(instance.url, deck, ids, edit, plan, (written) =>
+        setLastEdit({ edit, plan: written }),
+      ),
     onMutate: starting,
     onSuccess: (written, { edit }) => setLastEdit({ edit, plan: written }),
     onError: (error) => setFailure(error),

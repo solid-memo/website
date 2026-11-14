@@ -338,16 +338,29 @@ function sameCard(a: Card, b: Card): boolean {
  * The changes that undo a plan made: its inverse, while the deck's
  * `cards` are as the plan left them (each card it saved as it saved it,
  * each it removed still gone); null once one changed since, which an
- * undo would overwrite.
+ * undo would overwrite. A removed card already back as the inverse
+ * holds it counts as left too, and is not written again: an undo
+ * stopped after its cards write is made again, and writes all the
+ * removed cards' review states again, as they were before the edit.
  */
 export function planUndo(cards: readonly Card[], plan: CardEditPlan): CardChanges | null {
   const byId = new Map(cards.map((card) => [card.id, card]));
+  const removed = new Set(plan.remove);
+  const back = new Set(
+    plan.inverse.save
+      .filter((was) => {
+        const card = byId.get(was.id);
+        return card !== undefined && removed.has(was.id) && sameCard(card, was);
+      })
+      .map((was) => was.id),
+  );
   const asLeft =
     plan.save.every((saved) => {
       const card = byId.get(saved.id);
       return card !== undefined && sameCard(card, saved);
-    }) && plan.remove.every((id) => !byId.has(id));
-  return asLeft ? plan.inverse : null;
+    }) && plan.remove.every((id) => back.has(id) || !byId.has(id));
+  if (!asLeft) return null;
+  return { ...plan.inverse, save: plan.inverse.save.filter((was) => !back.has(was.id)) };
 }
 
 /** A text of a card a find and replace may change. */
