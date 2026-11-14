@@ -8,8 +8,6 @@ import { MAX_CATALOG_LINKS, type Deck, type Distractor } from "./deck";
 import type { DeckGroup, DeckTree, GraftNode, TreeNode } from "./deckTree";
 import type { StepPart } from "./deckUpgrade";
 import type { Instance } from "./instance";
-import { isIriPastBound } from "./pathKeys";
-import { namedFsrsSubject } from "./reviewRecord";
 import {
   cardsContainerOf,
   catalogUrlOf,
@@ -217,21 +215,17 @@ export function mergedDeck(
 
 /**
  * Whether the guest's card `cardId` can be added to the deck `to`: its
- * IRI in `to`'s cards document can be written (chosenDistractorIn), and
- * so can the longest name its review states take in `to`'s reviews
- * document, its FSRS-6 state from back to front. Its id came from a
- * release and fit under the guest's shorter address; a card that does
- * not fit is left out, with its review states and its answers, as it
- * could be neither written nor studied there.
+ * IRI in `to`'s cards document can be written (chosenDistractorIn). Its
+ * id came from a release and fit under the guest's shorter address; a
+ * card that does not fit is left out, with its review states and its
+ * answers, as it could be neither written nor studied there. A review
+ * state whose name after the card would be too long in `to`'s reviews
+ * document is written at a short subject of its own (newSubjectFor in
+ * the solid package's reviewStateMapper.ts), so it does not leave the
+ * card out.
  */
-export function cardFitsDeck(
-  cardId: string,
-  to: Pick<Deck, "cardsDocumentUrl" | "reviewsDocumentUrl">,
-): boolean {
-  return (
-    chosenDistractorIn(to.cardsDocumentUrl, cardId) !== undefined &&
-    !isIriPastBound(namedFsrsSubject(to.reviewsDocumentUrl, { cardId, direction: "back-to-front" }))
-  );
+export function cardFitsDeck(cardId: string, to: Pick<Deck, "cardsDocumentUrl">): boolean {
+  return chosenDistractorIn(to.cardsDocumentUrl, cardId) !== undefined;
 }
 
 /**

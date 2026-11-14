@@ -184,10 +184,12 @@ It runs these steps:
      FSRS-6 states come as they are;
    - a card's id, or a distractor's, comes from a release and may fit
      under the guest's short address but not under the new deck's. A
-     card whose IRI there, or the longest its review states take
-     (`#<id>@back-to-front@fsrs6`), would be longer than a term may be
-     is left out, with its review states and its answers: it could be
-     neither written nor studied there (`cardFitsDeck`). Such a
+     card whose IRI there would be longer than a term may be is left
+     out, with its review states and its answers: it could be neither
+     written nor studied there (`cardFitsDeck`). A review state whose
+     name after its card (`#<id>@back-to-front@fsrs6` the longest)
+     would be too long is written at a short subject of its own, which
+     names its card, and the card is kept. Such a
      distractor is left out, not the card (`movedCard`). A course still
      asks the card with its release's options, which it reads from the
      release;

@@ -8,8 +8,10 @@ import { AppError } from "./appError";
 import { MAX_CATALOG_LINKS, type Card, type Deck, type Distractor } from "./deck";
 import type { DeckTree } from "./deckTree";
 import type { LibraryDeckContent } from "./library";
+import { isIriPastBound } from "./pathKeys";
 import type { FsrsSnapshot, FsrsState, ReviewSnapshot, ReviewState, ReviewStates } from "./review";
 import { rebaseDraft } from "./release/releaseToDraft";
+import { namedFsrsSubject } from "./reviewRecord";
 import { card as draftCard, courseDraft } from "./testing/releaseDraft";
 import {
   addressesGuest,
@@ -174,19 +176,27 @@ describe("adding a guest's study to an instance", () => {
     });
   });
 
-  it("adds a card only when its IRI, and its review states' longest, can be written in the deck it was added as", () => {
+  it("adds a card only when its IRI can be written in the deck it was added as", () => {
     const from = deck("deck-g1");
     const to = deck("deck-n", `${TARGET}${"p".repeat(200)}/`);
-    // The longest name a card's states take: its FSRS-6 state from back to front.
-    const room = 16_383 - 2 - "@back-to-front@fsrs6".length - 1;
-    const fits = "c".repeat(room - from.reviewsDocumentUrl.length);
+    const fits = "c".repeat(16_383 - 2 - from.cardsDocumentUrl.length - 1);
 
     expect(cardFitsDeck("q-1", to)).toBe(true);
     expect(cardFitsDeck(fits, from)).toBe(true);
     expect(cardFitsDeck(fits, to)).toBe(false);
-    // Its own IRI fits; that of its FSRS-6 state from back to front does not.
     expect(cardFitsDeck(`${fits}c`, from)).toBe(false);
     expect(cardFitsDeck("q 1", to)).toBe(false);
+    // Its IRI fits, its FSRS-6 state's name from back to front would not: kept, that state
+    // written at a short subject of its own.
+    const named = "c".repeat(
+      16_383 - 2 - "@back-to-front@fsrs6".length - from.reviewsDocumentUrl.length,
+    );
+    const longest = namedFsrsSubject(from.reviewsDocumentUrl, {
+      cardId: named,
+      direction: "back-to-front",
+    });
+    expect(isIriPastBound(longest)).toBe(true);
+    expect(cardFitsDeck(named, from)).toBe(true);
   });
 
   it("adds a card without a wrong option whose IRI in the deck it was added as would be too long", () => {

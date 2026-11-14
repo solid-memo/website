@@ -880,8 +880,12 @@ graph LR
     of another app's `#state-7f3a` edits it in place. A state not yet in
     the document goes to the subject the fragment rule names, unless
     that subject is another's (another card's state, another
-    scheduler's, any other app's subject); then it goes to a new
-    `#review-<uuid>` that names its card. A subject the fragment rule
+    scheduler's, any other app's subject) or is too long. A card id that
+    fills the card's address, as a deck file or release can carry, makes
+    the named subject, with `@back-to-front` and `@fsrs6` after it,
+    longer than a term may be ([write discipline](#write-discipline)).
+    Then the state goes to a new `#review-<uuid>` that names its card,
+    and is read and written there from then on. A subject the fragment rule
     names for the same card and direction that can't be read (half a
     snapshot, say) is written over. An FSRS-6 state goes the same way,
     to the subject named for it. A grade under FSRS-6 writes both states
