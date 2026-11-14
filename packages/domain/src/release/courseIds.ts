@@ -10,7 +10,10 @@ import {
   DRAFT_ID,
   idIn,
   idsInUse,
+  iriIn,
   type DraftNode,
+  type DraftTriple,
+  type PublishedIds,
   type QuestionPlace,
   type ReleaseDraft,
 } from "./releaseDraft.ts";
@@ -31,13 +34,92 @@ import {
  * (questionIdBefore).
  */
 
+/**
+ * Each draft's taken ids, gathered once per draft: a draft is never
+ * changed in place (an edit makes a new one), and the forms that suggest
+ * and check an id ask on each keystroke.
+ */
+const takenOf = new WeakMap<ReleaseDraft, ReadonlySet<string>>();
+
+/** What of a draft its taken ids were last gathered from, besides its statements, and the ids. */
+interface Gathered {
+  readonly url: string;
+  readonly root: ReleaseDraft["root"];
+  readonly lists: readonly (readonly DraftNode<unknown>[])[];
+  readonly published: PublishedIds;
+  readonly taken: ReadonlySet<string>;
+}
+
+/**
+ * The taken ids last gathered over each list of statements. An edit of a
+ * chapter's, a step's or the release's text makes a new draft that keeps
+ * its statements and its ids: its taken ids are the last ones, and are
+ * not gathered again from every statement.
+ */
+const gatheredOver = new WeakMap<readonly DraftTriple[], Gathered>();
+
+/** The draft's lists of records, whose ids idsInUse takes. */
+function listsOf(draft: ReleaseDraft): readonly (readonly DraftNode<unknown>[])[] {
+  return [
+    draft.agents,
+    draft.distributions,
+    draft.chapters,
+    draft.steps,
+    draft.cards,
+    draft.distractors,
+  ];
+}
+
+/** The IRIs of the draft's subjects a value of the root names, in order. */
+function namedIn(value: unknown, prefix: string): string[] {
+  return (Array.isArray(value) ? value : [value]).filter(
+    (one): one is string => typeof one === "string" && one.startsWith(prefix),
+  );
+}
+
+/** Whether `draft` has the ids `was` was gathered from: its records' and its root's, by what changed only. */
+function sameIds(was: Gathered, draft: ReleaseDraft): boolean {
+  if (was.url !== draft.url || was.published !== draft.published) return false;
+  const lists = listsOf(draft);
+  const sameList = (before: readonly DraftNode<unknown>[], after: readonly DraftNode<unknown>[]) =>
+    before === after ||
+    (before.length === after.length && before.every((node, i) => node.id === after[i]!.id));
+  if (!was.lists.every((list, i) => sameList(list, lists[i]!))) return false;
+  if (was.root === draft.root) return true;
+  const prefix = iriIn(draft, "");
+  const before = new Map<string, unknown>(Object.entries(was.root));
+  const after = new Map<string, unknown>(Object.entries(draft.root));
+  for (const key of new Set([...before.keys(), ...after.keys()])) {
+    if (before.get(key) === after.get(key)) continue;
+    const then = namedIn(before.get(key), prefix);
+    const now = namedIn(after.get(key), prefix);
+    if (then.length !== now.length || then.some((iri, i) => iri !== now[i])) return false;
+  }
+  return true;
+}
+
 /** Every id the draft has, or a release before it published: none of them is a new subject's. */
-export function takenIds(draft: ReleaseDraft): Set<string> {
-  return new Set([
-    ...idsInUse(draft),
-    ...Object.keys(draft.published.ids),
-    ...draft.published.activities,
-  ]);
+export function takenIds(draft: ReleaseDraft): ReadonlySet<string> {
+  const known = takenOf.get(draft);
+  if (known !== undefined) return known;
+  const was = gatheredOver.get(draft.triples);
+  let taken: ReadonlySet<string>;
+  if (was !== undefined && sameIds(was, draft)) taken = was.taken;
+  else {
+    const gathered = idsInUse(draft);
+    for (const id of Object.keys(draft.published.ids)) gathered.add(id);
+    for (const id of draft.published.activities) gathered.add(id);
+    taken = gathered;
+  }
+  takenOf.set(draft, taken);
+  gatheredOver.set(draft.triples, {
+    url: draft.url,
+    root: draft.root,
+    lists: listsOf(draft),
+    published: draft.published,
+    taken,
+  });
+  return taken;
 }
 
 /** Why `id` cannot be a new subject's: none a subject can have, or one taken; null when it can. */
@@ -85,9 +167,55 @@ export function idBetween(
   return null;
 }
 
+/**
+ * What was found in each set of taken ids, by what was looked for: a set
+ * is never changed (takenIds), and finding an id may go over many of it.
+ */
+const foundIn = new WeakMap<ReadonlySet<string>, Map<string, string | null>>();
+
+/** What `find` finds in `taken`, found once per set and `key`. */
+function foundOnce<T extends string | null>(
+  taken: ReadonlySet<string>,
+  key: string,
+  find: () => T,
+): T {
+  let found = foundIn.get(taken);
+  if (found === undefined) {
+    found = new Map();
+    foundIn.set(taken, found);
+  }
+  if (found.has(key)) return found.get(key) as T;
+  const id = find();
+  found.set(key, id);
+  return id;
+}
+
 /** `prefix` then 1, 2, …: the first that is none of `taken`, after the highest `prefix<n>` taken (nextNumberedId). */
 function numbered(prefix: string, taken: ReadonlySet<string>, width = 1): string {
-  return nextNumberedId(prefix, taken, /^[0-9]{1,15}$/, width);
+  return foundOnce(taken, JSON.stringify(["numbered", prefix, width]), () =>
+    nextNumberedId(prefix, taken, /^[0-9]{1,15}$/, width),
+  );
+}
+
+/** idBetween over a set of taken ids (takenIds), found once per set. */
+function between(before: string, after: string | null, taken: ReadonlySet<string>): string | null {
+  return foundOnce(taken, JSON.stringify(["between", before, after]), () =>
+    idBetween(before, after, taken),
+  );
+}
+
+/** `first`, else `prefix` then `n`, `n + 1`, …: the first that is none of `taken` (takenIds), found once per set. */
+export function firstFree(
+  taken: ReadonlySet<string>,
+  first: string,
+  prefix: string,
+  n: number,
+): string {
+  return foundOnce(taken, JSON.stringify(["free", first, prefix, n]), () => {
+    let id = first;
+    for (let next = n; taken.has(id); next++) id = `${prefix}${next}`;
+    return id;
+  });
 }
 
 /** What a chapter's ids name: `ch-why-solid` → `why-solid`; another id as it is. */
@@ -101,9 +229,7 @@ export function chapterIdFor(draft: ReleaseDraft, title: LangText): string {
   const slug = slugOf(shown(title, ["en"]));
   if (slug === "") return numbered("ch-", taken);
   const base = `ch-${slug}`;
-  let id = base;
-  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
-  return id;
+  return firstFree(taken, base, `${base}-`, 2);
 }
 
 /** A new step's id in a chapter: `<chapter>-<n>`, after the highest such id taken. */
@@ -158,7 +284,7 @@ export function questionIdFor(draft: ReleaseDraft, place: QuestionPlace | null):
   const lettered = [..."abcdefghijklmnopqrstuvwxyz"]
     .map((letter) => `${base}${letter}`)
     .find((id) => !taken.has(id) && (last === null || id > last));
-  return lettered ?? idBetween(last ?? base, null, taken);
+  return lettered ?? between(last ?? base, null, taken)!;
 }
 
 /** The cards asked at `place`, by id, in the order they are asked: their ids'. */
@@ -195,7 +321,7 @@ export function questionIdBefore(
           .map((letter) => `${base}${letter}`)
           .find((id) => !taken.has(id) && id > lower && id < next)
       : undefined;
-  return lettered ?? idBetween(lower, next, taken);
+  return lettered ?? between(lower, next, taken);
 }
 
 /** Whether a subject of the draft was published by a release before it: it is then retired, never deleted. */

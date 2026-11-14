@@ -16,18 +16,17 @@
  */
 export function nextNumberedId(
   prefix: string,
-  taken: Iterable<string>,
+  taken: ReadonlySet<string>,
   counted: RegExp,
   width = 1,
 ): string {
-  const ids = new Set(taken);
   let highest = 0;
-  for (const id of ids) {
+  for (const id of taken) {
     const n = id.startsWith(prefix) ? id.slice(prefix.length) : "";
     if (counted.test(n)) highest = Math.max(highest, Number(n));
   }
   const idOf = (n: number) => `${prefix}${String(n).padStart(width, "0")}`;
   let n = highest + 1;
-  while (ids.has(idOf(n))) n++;
+  while (taken.has(idOf(n))) n++;
   return idOf(n);
 }

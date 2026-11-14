@@ -2002,6 +2002,14 @@ names them:
 A number of more than 15 digits in an id already there isn't counted,
 and a number already taken is skipped.
 
+The forms suggest and check an id on each keystroke, and typing in a
+chapter's, a step's or the course's text beside them makes a new
+version of the draft each time. So the ids taken are gathered once for
+each version of the draft, and a version that keeps every id of the
+one before it, as an edit of text does, keeps its ids taken too. Each
+id suggested is found once for those ids. Gathering them again on each
+keystroke would go over every statement of the draft as the user types.
+
 The user may write another. The field says at once when an id is none
 a subject can have, or one the draft or a release before it has. A new
 question's id sorts after the step's last; past `z`, it's the last's

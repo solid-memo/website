@@ -61,7 +61,7 @@ export function tidiedDistractor(
  * was published may be.
  */
 export function nextDistractorId(cardId: string, used: Iterable<string>): string {
-  return nextNumberedId(`${cardId}-d`, used, /^[1-9][0-9]{0,14}$/);
+  return nextNumberedId(`${cardId}-d`, new Set(used), /^[1-9][0-9]{0,14}$/);
 }
 
 /**
