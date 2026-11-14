@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { buildThing, createSolidDataset, getThing } from "../client/rdf";
+import { HASHED_CHARACTERS, isIriPastBound, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
 import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import {
   namesAnotherScheduler,
@@ -273,5 +274,28 @@ describe("FSRS-6 state mapping", () => {
       `${REVIEWS_DOC}#card-1@back-to-front`,
       `${REVIEWS_DOC}#card-1@back-to-front@fsrs6`,
     ]);
+  });
+
+  it("is written at a new subject, read as any other, when the one named after its card is too long", () => {
+    // The card's IRI fits; its back-to-front states' named subjects, longer, do not.
+    const cardId = "c".repeat(HASHED_CHARACTERS - TERM_NAME_ROOM - CARDS_DOC.length - 1);
+    expect(isIriPastBound(`${CARDS_DOC}#${cardId}`)).toBe(false);
+    const sm2: ReviewState = { ...state, cardId, direction: "back-to-front" };
+    const ids = ["a", "b"];
+    const both = withReviewStates(
+      createSolidDataset(),
+      documents,
+      { sm2: [sm2], fsrs: [{ ...fsrs, cardId }] },
+      () => ids.shift()!,
+    );
+    expect(both.subjects).toEqual([`${REVIEWS_DOC}#review-a`, `${REVIEWS_DOC}#review-b`]);
+    expect(toReviewState(getThing(both.dataset, both.subjects[0]!)!, documents)).toEqual(sm2);
+    expect(toFsrsState(getThing(both.dataset, both.subjects[1]!)!, documents)).toEqual({
+      ...fsrs,
+      cardId,
+    });
+    // Written again, each stays where it was read from.
+    const again = withReviewStates(both.dataset, documents, { sm2: [sm2] }, () => "unused");
+    expect(again.subjects).toEqual([`${REVIEWS_DOC}#review-a`]);
   });
 });

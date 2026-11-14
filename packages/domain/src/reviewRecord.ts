@@ -25,7 +25,9 @@ import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
  * and is read by those links alone, never by its subject's name. This
  * app writes it at `#<cardId>@fsrs6` (front→back) or
  * `#<cardId>@back-to-front@fsrs6`, beside the SM-2 state of the same
- * prompt.
+ * prompt. A state of either kind whose named subject is taken, or too
+ * long, goes elsewhere (newSubjectFor in the solid package's
+ * reviewStateMapper.ts).
  */
 
 export const BACK_TO_FRONT_SUFFIX = "@back-to-front";

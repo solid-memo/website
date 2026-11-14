@@ -398,7 +398,7 @@ export function createSessionUseCases({
     ]);
     // A card is written by its fragment id, in this app's format, at the time it was made;
     // without a wrong option too long under the deck's address (movedCard). A card whose
-    // own names there would be too long is left out, with its states (cardFitsDeck).
+    // IRI there would be too long is left out, with its states (cardFitsDeck).
     const fits = ({ cardId }: { cardId: string }) => cardFitsDeck(cardId, deck);
     const content = cards
       .filter((card) => fits({ cardId: card.id }))

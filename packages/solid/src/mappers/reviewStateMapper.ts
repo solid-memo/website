@@ -36,6 +36,7 @@ import {
   type ReviewedDeck,
   type ReviewLinks,
 } from "@solid-memo/domain/reviewRecord";
+import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
 import { ownSubjectsOf, readVersioned, recordThing, removeAllUnlessNewer } from "../records";
@@ -243,7 +244,11 @@ const FSRS_KIND: Kind<FsrsState> = {
  * same kind, card and direction that cannot be read (written over, as
  * before); else, when that subject is another's (a state of another card
  * by its sm:reviewOf, of another kind or scheduler, another app's
- * subject), a new subject `#review-<id>`, which names its card.
+ * subject), or longer than a term may be (isIriPastBound: a card id
+ * near that bound, which a deck file or release can carry, makes the
+ * named subject, with its suffixes, longer than the card's IRI), a new
+ * subject `#review-<id>`, which names its card. A state is read by its
+ * links, whatever its subject is called, so either is read alike.
  */
 function newSubjectFor<T>(
   edit: DatasetEdit<Dataset>,
@@ -253,12 +258,12 @@ function newSubjectFor<T>(
   newId: () => string,
 ): string {
   const named = kind.named(documents.reviewsDocumentUrl, key);
+  const fresh = () => `${documents.reviewsDocumentUrl}#review-${newId()}`;
+  if (isIriPastBound(named)) return fresh();
   const there = edit.getThing(named);
   if (there === null) return named;
   const thereKey = kind.keyOf(there, documents);
-  return thereKey !== null && sameKey(thereKey, key)
-    ? named
-    : `${documents.reviewsDocumentUrl}#review-${newId()}`;
+  return thereKey !== null && sameKey(thereKey, key) ? named : fresh();
 }
 
 /** The states to write: SM-2's, and FSRS-6's, left out when there are none. */
