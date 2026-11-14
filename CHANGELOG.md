@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.5.0](https://github.com/solid-memo/website/compare/v7.4.6...v7.5.0) (2026-11-14)
+
+### Features
+
+* let the user choose among every type index of theirs ([97acb81](https://github.com/solid-memo/website/commit/97acb81113370b0d48bd8109eb563a442202ee13)), closes [#643](https://github.com/solid-memo/website/issues/643)
+* **solid:** make a public type index the app creates readable by anyone ([a4ba5a6](https://github.com/solid-memo/website/commit/a4ba5a628bb77422af32a113a02c90d77701319b)), closes [#643](https://github.com/solid-memo/website/issues/643)
+
 ## [7.4.6](https://github.com/solid-memo/website/compare/v7.4.5...v7.4.6) (2026-11-14)
 
 ### Fixes
