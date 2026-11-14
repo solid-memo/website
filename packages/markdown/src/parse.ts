@@ -88,15 +88,16 @@ export const MAX_TABLE_CELLS = 2_000;
 
 /**
  * The most work the parser may do on a text, for each of its characters
- * (and as if it had at least WORK_FLOOR): a try of one of its rules, a
- * step through a link's label, or a token it makes, is one unit of work,
- * as is each byte of a link's or a picture's destination in UTF-8, for
- * each time it is used, counted as it is done. A try that reads past
- * what its one unit covers costs what it reads: a silent try of a rule
- * that reads on through its line (see reads) a unit for each character
- * of its line past TRY_READ, and a block quote's try or a link
- * reference definition's for each line it reads on through, as both may
- * read lines that rules after them read again.
+ * (and as if it had at least WORK_FLOOR): a try of one of its rules, or
+ * a step through a link's label, is one unit of work, as is each byte of
+ * a link's or a picture's destination in UTF-8, for each time it is
+ * used, and a token it makes is TOKEN_WORK units, counted as it is
+ * done. A try that reads past what its one unit covers costs what it
+ * reads: a silent try of a rule that reads on through its line (see
+ * reads) a unit for each character of its line past TRY_READ, and a
+ * block quote's try or a link reference definition's for each line it
+ * reads on through, as both may read lines that rules after them read
+ * again.
  * What a try reads otherwise is its own line, or lines that its block,
  * or a paragraph read there instead, then holds, once for each level of
  * blocks they are in (up to NESTING). Past it, the text is shown as
@@ -105,9 +106,18 @@ export const MAX_TABLE_CELLS = 2_000;
  * shapes, such as a block quote after each line of a paragraph, make it
  * read the rest of the text again and again: this bounds them, whatever
  * their shape, without predicting it. Repository Markdown lifts it with
- * MAX_CHARS.
+ * MAX_CHARS. Text in decks/ takes at most about 2 units a character, so
+ * whatever a text holds, what the parser reads costs a small multiple of
+ * such text of its length.
  */
-const MAX_WORK = 40;
+const MAX_WORK = 12;
+/**
+ * The units of work of a token the parser makes: making one, and the
+ * node it becomes, takes about as long as that many tries of a rule, so
+ * text that makes many tokens from few characters, such as the cells
+ * markdown-it pads a table's short rows with, costs what it takes.
+ */
+const TOKEN_WORK = 8;
 const WORK_FLOOR = 1_000;
 
 /** The first word of a code block's info string, when it looks like a language name. */
@@ -361,12 +371,12 @@ md.inline.State = class extends md.inline.State {
   pendingFrom = 0;
 
   override pushPending(): Token {
-    spend();
+    spend(TOKEN_WORK);
     return unread(super.pushPending(), true);
   }
 
   override push(type: string, tag: string, nesting: -1 | 0 | 1): Token {
-    spend();
+    spend(TOKEN_WORK);
     return unread(super.push(type, tag, nesting), false);
   }
 };
@@ -472,7 +482,7 @@ md.block.State = class extends md.block.State {
   }
 
   override push(type: string, tag: string, nesting: -1 | 0 | 1): Token {
-    spend();
+    spend(TOKEN_WORK);
     const token = unread(super.push(type, tag, nesting), false);
     unspanned.push(token);
     return token;
@@ -625,7 +635,8 @@ const MAX_AUTOCOMPLETED_CELLS = 65_536;
 
 /**
  * Where a table at `startLine`, of `columns` columns, ends, and how many
- * cells it has, a row's past the header's not counted: its rows as
+ * cells it has: `columns` for each row, as markdown-it makes them, a
+ * short row's padded with empty cells and a long row's cut. Its rows as
  * markdown-it's table rule reads them, up to a line its container
  * leaves, a block that interrupts it, a blank line, indented code, or
  * the row that would take it past MAX_AUTOCOMPLETED_CELLS.
@@ -651,7 +662,7 @@ function tableRows(
     const row = cellsOf(state.src, start, state.eMarks[line]!).length;
     padded += columns - row;
     if (padded > MAX_AUTOCOMPLETED_CELLS) break;
-    cells += Math.min(row, columns);
+    cells += columns;
   }
   state.parentType = parentType;
   return { end: line, cells };

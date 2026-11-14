@@ -174,6 +174,17 @@ describe("parseMarkdown", () => {
     expect(parseMarkdown(`${tall}| 1 | 2 |\n`)![0]!.type).toBe("paragraph");
   });
 
+  it("counts the cells markdown-it pads a short row with toward the cell cap", () => {
+    const rows = MAX_TABLE_CELLS / 2;
+    const tall = `| a | b |\n|-|-|\n${"| 1 | 2 |\n".repeat(rows - 1)}`;
+    // A bare `|` writes no cell, but its row is padded to the header's two.
+    expect(parseMarkdown(`${tall}|\n`)![0]!.type).toBe("paragraph");
+    const header = `${"|a".repeat(MAX_TABLE_COLUMNS)}|\n${"|-".repeat(MAX_TABLE_COLUMNS)}|\n`;
+    const bare = `${header}${"|\n".repeat(MAX_TABLE_CELLS / MAX_TABLE_COLUMNS)}`;
+    expect(parseMarkdown(bare)![0]!.type).toBe("paragraph");
+    expect(inspectMarkdown(bare)!.notes).toEqual([{ type: "largeTable", source: bare.trimEnd() }]);
+  });
+
   it("shows raw HTML as its source text, block and inline", () => {
     expect(parseMarkdown("<div>\n<script>alert(1)</script>\n</div>")).toEqual([
       paragraph(
@@ -253,10 +264,10 @@ describe("parseMarkdown", () => {
     // 1,000 UTF-16 code units of each, used `uses` times.
     const text = (unit: string, uses: number) =>
       `${"[a][r] ".repeat(uses)}\n\n[r]: https://r.example/${unit.repeat(1_000 / unit.length)}`;
-    for (const unit of ["a", "é", "😀"]) expect(parseMarkdown(text(unit, 20))).not.toBeNull();
-    expect(parseMarkdown(text("€", 20))).toBeNull();
-    expect(parseMarkdown(text("a", 30))).not.toBeNull();
-    for (const unit of ["é", "😀"]) expect(parseMarkdown(text(unit, 30))).toBeNull();
+    for (const unit of ["a", "é", "😀"]) expect(parseMarkdown(text(unit, 5))).not.toBeNull();
+    expect(parseMarkdown(text("€", 5))).toBeNull();
+    expect(parseMarkdown(text("a", 10))).not.toBeNull();
+    for (const unit of ["é", "😀"]) expect(parseMarkdown(text(unit, 10))).toBeNull();
   });
 
   it("reads the corpus's look-alikes as CommonMark has them", () => {
@@ -356,7 +367,7 @@ describe("parseMarkdown", () => {
     const tried = (times: number, line: string) =>
       parseMarkdown(`${"a\n> # b\n".repeat(times)}${line}`);
     const long = (start: string) => `${start}${" ".repeat(16_000)}x`;
-    expect(tried(20, `<a${" b".repeat(8_000)}`)).not.toBeNull();
+    expect(tried(5, `<a${" b".repeat(8_000)}`)).not.toBeNull();
     for (const start of ["<a", "~~~", "```", "-", "*", "+", "1."])
       expect(tried(50, long(start))).toBeNull();
     // A line that starts as none of their blocks costs a try a unit, however long.
@@ -982,5 +993,60 @@ describe("pathological input", () => {
       ratio,
       `${Math.round(took / 1000)} ms against ${Math.round(base / 1000)} ms of prose; the text took ${ratio.toFixed(1)} times its first ${times}th read ${times} times`,
     ).toBeLessThan(limit);
+  });
+});
+
+/**
+ * What the work budget (MAX_WORK) lets a text cost: the costliest shapes
+ * of Markdown the parser reads take within `most` times what text like
+ * a course's step takes at the same length, the costliest kind of text
+ * in decks/ (headings, paragraphs with markup and links, short lists).
+ * A shape that goes past the budget stops there, and is bounded alike.
+ * CPU time, the best of five runs, as in the tests above.
+ */
+describe("the cost of a text the parser reads", () => {
+  const most = 7;
+  const time = (markdown: string) => {
+    let took = Infinity;
+    for (let round = 0; round < 5; round++) {
+      took = Math.min(
+        took,
+        cpuTime(() => parseMarkdown(markdown)),
+      );
+    }
+    return took;
+  };
+  const fill = (unit: string) => unit.repeat(Math.floor(MAX_CHARS / unit.length));
+  const header = `${"|a".repeat(MAX_TABLE_COLUMNS)}|\n${"|-".repeat(MAX_TABLE_COLUMNS)}|\n`;
+  it.each([
+    ["headings", fill("# a\n")],
+    ["empty headings", fill("#\n")],
+    ["setext headings", fill("a\n=\n")],
+    ["lists of one-word items", fill("- word\n")],
+    ["lists of one-letter items", fill("- a\n")],
+    ["lists ended by paragraphs", fill("+ a\n\nb\n")],
+    ["block quotes among paragraphs", fill("a\n>\n")],
+    ["block quotes and lists nested 16 deep", fill(`${"> - ".repeat(8)}a\n`)],
+    ["emphasis", fill("*a* ")],
+    ["mixed delimiters", fill("*_")],
+    ["table headers", fill(`${header}\n`)],
+    ["tables of empty rows", fill(`${header}${"|\n".repeat(45)}\n`)],
+    ["tables at the cell cap", fill(`${header}${"a\n".repeat(99)}\n`)],
+    ["tables of empty rows among prose", fill(`${header}${"|\n".repeat(5)}\nPlain words.\n\n`)],
+    [
+      "tables of full rows",
+      fill(`${header}${`${"|b".repeat(MAX_TABLE_COLUMNS)}|\n`.repeat(99)}\n`),
+    ],
+  ])("reads %s within a small multiple of real text", { timeout: 60_000 }, (_, input) => {
+    const base = time(
+      fill(
+        "## A heading\n\nA paragraph of a step, with **a term**, `code` and [a link](https://example.org/a).\n\n- A first item\n- A second item\n\n",
+      ),
+    );
+    const took = time(input);
+    expect(
+      took / base,
+      `${Math.round(took / 1000)} ms against ${Math.round(base / 1000)} ms of text like a course's`,
+    ).toBeLessThan(most);
   });
 });
