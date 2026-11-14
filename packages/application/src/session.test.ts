@@ -749,6 +749,21 @@ describe("guests", () => {
     expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
   });
 
+  it("transferGuestStudy leaves a type index the user entered by its address to be checked as the study is registered in it", async () => {
+    const { deps } = guestDeps();
+    vi.mocked(deps.storageGateway.discoverStorages).mockResolvedValue([]);
+    const registrationTarget = { indexUrl: "https://alice.example/old/index.ttl" };
+    const outcome = await createUseCases(deps).transferGuestStudy(session, guestInstance, {
+      containerUrl: TARGET,
+      registrationTarget,
+    });
+    expect(outcome).toMatchObject({ ok: true });
+    expect(deps.instanceRepository.getRegistrationOptions).not.toHaveBeenCalled();
+    expect(deps.instanceRepository.attachInstance).toHaveBeenCalledWith(
+      expect.objectContaining({ registrationTarget }),
+    );
+  });
+
   it("transferGuestStudy refuses before it copies anything a study whose log has as many months as are taken in", async () => {
     const { deps } = guestDeps();
     const answerLog: AnswerLog = {

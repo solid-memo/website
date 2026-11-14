@@ -107,6 +107,10 @@ export const ERROR_TEMPLATES = {
     "Solid Memo could not link its public list of your data from your profile. Check that Solid Memo may edit your profile, then try again.",
   typeIndexNoStorage:
     "Your profile names no storage of yours, so Solid Memo has nowhere to keep its list of your data. Ask your Pod provider to add your Pod's storage to your profile, then try again.",
+  typeIndexOutsidePod:
+    "That type index is not in your Pod, so Solid Memo won't register your instance there. Enter the address of a type index in your own Pod.",
+  notATypeIndex:
+    "Solid Memo cannot use that address as a type index: it cannot be read, or it does not say it is a type index. Check the address, then try again.",
   storageInaccessible:
     "Solid Memo cannot open that storage. Check the address, and that you are logged in with the account that owns it.",
   notAnInstanceNoMeta:

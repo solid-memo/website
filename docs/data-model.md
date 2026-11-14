@@ -52,8 +52,8 @@ flowchart LR
     accTitle: The discovery chain
     accDescr: From the WebID, the app follows the storage and the private and public type indexes to the instance container, and from the instance's folder to the rest of its data.
     W[WebID] -->|pim:storage| S[Storage root]
-    W -->|solid:privateTypeIndex<br/>directly or via pim:preferencesFile| PTI[Private type index]
-    W -->|solid:publicTypeIndex| PUB[Public type index]
+    W -->|solid:privateTypeIndex<br/>directly and via pim:preferencesFile| PTI[Private type indexes]
+    W -->|solid:publicTypeIndex| PUB[Public type indexes]
     PTI -->|solid:TypeRegistration<br/>forClass sm:Instance| I1[Instance container]
     PUB -->|solid:TypeRegistration<br/>forClass sm:Instance| I2[Instance container]
     I1 -->|the folder's layout| D1["catalog.ttl, decks/, reviews/,<br/>history/, drafts/"]
@@ -72,7 +72,8 @@ flowchart LR
   ([solidStorageGateway.ts](../packages/solid/src/solidStorageGateway.ts));
   else a URL typed by hand. 0, 1 or N storages are handled.
 - **Instances**: one `solid:TypeRegistration` per instance,
-  `solid:forClass sm:Instance`, in the private type index by default,
+  `solid:forClass sm:Instance`, in the type index the user chooses
+  ([below](#choosing-a-type-index)),
   its `dcterms:title` naming the instance (harmless extra triples): the
   only registration Solid
   Memo reads to find its instances. Reading accepts
@@ -113,8 +114,8 @@ flowchart LR
   app keeps the list it read before, and shows the error only when it
   has none. A type index is data another app may have written, and
   every instance listed is read. So the app follows the first
-  `MAX_CATALOG_LINKS` (1,000) instances of both indexes, the private
-  one first, and the list says when it is that long.
+  `MAX_CATALOG_LINKS` (1,000) instances of all the indexes, the private
+  ones first, and the list says when it is that long.
 - **The rest of an instance's data** has no registration: the catalog,
   the decks, cards, review states, answers and drafts are reached from
   the instance, at the places its folder's layout gives them
@@ -133,25 +134,37 @@ flowchart LR
   [typeIndex.integration.test.ts](../e2e/pod/src/typeIndex.integration.test.ts)
   reads the registration back from real servers.
 - **Type index links** are read from the WebID subject in the WebID
-  document and in its extended profile documents (`rdfs:seeAlso` /
-  `foaf:isPrimaryTopicOf`), plus `pim:preferencesFile` for the private
-  one. Only the documents on the WebID's origin, on its document's
-  origin or in a storage the WebID document names are read; a link to
-  one anywhere else is left alone
+  document and in every extended profile document (`rdfs:seeAlso` /
+  `foaf:isPrimaryTopicOf`), and private ones in the
+  `pim:preferencesFile` too, where the Type Indexes specification keeps
+  them. A public link in the preferences file is left out: the file is
+  private, so no other app finds it there. A pod made long ago may link
+  several indexes of a kind, such as one an app wrote at
+  `/settings/privateTypeIndex` and one the preferences file names at
+  `/settings/privateTypeIndex.ttl`. So every link is kept, each kind's
+  once by address and no more than `MAX_PROFILE_DOCUMENTS` of them
+  (`locateTypeIndexes`). Only the documents on the WebID's origin, on
+  its document's origin or in a storage the profile names are read; a
+  link to one anywhere else is left alone
   ([boundaries.md](boundaries.md#the-credential-gate)). Each is read
   under `PROFILE_LIMITS`, no more than `MAX_PROFILE_DOCUMENTS` extended
   profile documents: a WebID document past them fails the lookup, and
-  any other is left out. An index found
-  outside those places may be someone else's: the app takes it as
-  missing, so nothing in it is read or written, no instance it registers
-  is listed, and the user may create their own. Of several links, one
-  in those places wins.
+  any other is left out. An index linked outside those places may be
+  someone else's: the app leaves the link out, so nothing in it is read
+  or written, no instance it registers is listed, and the user may
+  create their own.
 - **Missing indexes** are normal on Community Solid Server pods. The app
   warns the user, who chooses to create the private index (a document
   under `<storage>settings/` plus a profile link) or to register
-  publicly. The index goes in a storage the WebID leads to (never one
-  typed by hand): the instance's, else the first, never the server of an
-  instance elsewhere (attached by URL, or in a storage typed by hand).
+  publicly. A kind counts as missing when no index of it can be read.
+  A public index the app creates is made readable by everyone with the
+  public-read grant, as a published release is
+  ([boundaries.md](boundaries.md#access-control)). Other apps then find
+  what it registers. When the grant fails, the index is kept as it is,
+  and the choice says no one else can read it. The index goes in a
+  storage the WebID leads to (never one typed by hand): the instance's,
+  else the first. It never goes on the server of an instance elsewhere
+  (attached by URL, or in a storage typed by hand).
   Without such a storage the index isn't created (`typeIndexNoStorage`,
   `ownStorageFor` in `typeIndex.ts`).
   The link goes in the WebID document when it's writable, else in the
@@ -162,11 +175,19 @@ flowchart LR
   loudly, with no local fallback, and the new container is cleaned up.
   An instance is registered in the index the user chose, and in no
   other.
+- **An index entered by its address** is used as it is when the profile
+  links it. Any other must be in the profile's own places
+  (`typeIndexOutsidePod`), readable by the user and typed
+  `solid:TypeIndex` (`notATypeIndex`). The app finds its instances only
+  in the indexes the profile links, so it then links this one from the
+  profile: as public when it's typed `solid:ListedDocument`, as private
+  otherwise (`adoptTypeIndex`).
 - **Deleting an instance** deletes what Solid Memo wrote in its
   container and nothing else (`deleteInstanceData` in
-  [instanceData.ts](../packages/solid/src/instanceData.ts)), then
-  removes its registrations from both type indexes: its `sm:Instance`
-  one and any an earlier version wrote for its data (below). In order:
+  [instanceData.ts](../packages/solid/src/instanceData.ts)). Then it
+  removes its registrations from every type index of the user's: its
+  `sm:Instance` one and any an earlier version wrote for its data
+  (below). In order:
   1. each deck's cards and reviews documents as the catalog names them,
      if they're the deck's: they say so, or they're in the instance's
      own folder (below). A release (a document whose `<>` is an
@@ -235,10 +256,11 @@ flowchart LR
   and the use case refuses it (`instanceOutsideStorages`) with nothing
   sent there.
 - **Removing an instance from the list** (`detachInstance`) removes its
-  registrations from both type indexes, as deleting does (below), and
-  nothing else. It reads and writes only those indexes, so no request
-  goes to the instance's server and it works whatever that
-  server answers. Each index is tried whatever the other answers, and
+  registrations from every type index of the user's, as deleting does
+  (below), and nothing else. An instance found in any of them is
+  removed from all of them. It reads and writes only those indexes, so
+  no request goes to the instance's server and it works whatever that
+  server answers. Each index is tried whatever the others answer, and
   one that's missing has nothing to remove; a failure is reported once
   both were tried, and the list is read again either way.
 
@@ -254,6 +276,49 @@ flowchart LR
   until the page reloads, as does the folder in another open tab. An
   instance's meta document is always read as the user, but once the
   instance is off the list, only attaching it again reads that document.
+
+### Choosing a type index
+
+Creating an instance, adding one by its address or moving a guest's
+study offers every type index of the user's they can read now
+(`getRegistrationOptions`, `readTypeIndexChoices` in
+[typeIndex.ts](../packages/solid/src/typeIndex.ts)), ranked
+(`rankedFor` in
+[typeIndexChoice.ts](../packages/domain/src/typeIndexChoice.ts)). One
+that can't be read, whatever the reason, isn't offered. Each index of a
+kind is ranked in this order:
+
+1. one that already holds a Solid Memo instance;
+2. the one the preferences file links (private only);
+3. one typed as its kind (`solid:UnlistedDocument` for private,
+   `solid:ListedDocument` for public) before one that says neither;
+4. otherwise by address, never by the order of a profile's triples.
+
+Three things move an index to the end of its kind. From last: a type
+that says it's the other kind, a document linked as both kinds, and a
+public index no one else can read. The best
+private index is preselected as *Recommended*
+([RegistrationTargetChooser.tsx](../packages/ui/src/ui/RegistrationTargetChooser.tsx)).
+A kind the user has none of is offered as one to create. The user may
+enter any other type index of theirs by its address
+([above](#discovery-chain)). A target of a kind alone (`"private"`,
+`"public"`) registers in the best index of that kind, or creates one
+(`ensureTypeIndex`).
+
+Each index is also read as no one (`HEAD`, `readableByAnyone`), and the
+chooser says what may make it the wrong one:
+
+- a public index no one else can read: other apps don't find what it
+  registers;
+- a private index anyone can read: everything it registers can be
+  seen by anyone;
+- an index typed as the other kind;
+- one document linked as both kinds, offered once: who may read it is
+  unclear.
+
+Each public choice says what public means: anyone can see that the
+instance exists, its name and where it is, and who can open it is
+still decided by its access settings.
 
 ### Registrations
 

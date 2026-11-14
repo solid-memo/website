@@ -242,7 +242,7 @@ async function typeIndexLinkLines(): Promise<string[]> {
       await pod.put(PROFILE, filled(profile));
       if (other !== undefined) await pod.put(elsewhere, filled(other));
       const found = await locateTypeIndexes(WEBID, pod.fetch, pod.fetch);
-      if ((kind === "private" ? found.privateIndexUrl : found.publicIndexUrl) === index)
+      if (found.links.some((found) => found.kind === kind && found.url === index))
         lines.push(`WebID: its ${kind} type index found by solid:${kind}TypeIndex in ${place}`);
     }
   }

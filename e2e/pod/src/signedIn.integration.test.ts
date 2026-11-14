@@ -7,8 +7,8 @@
 /**
  * What the open servers of every other test can't show (docs/testing.md,
  * The signed-in tests): on each server's instance that isn't open, its
- * owner gets in, no one else does, and a release is public while the rest
- * stays private. Every request of a signed-in user goes through the app's
+ * owner gets in, no one else does, and a release, or a public type index
+ * the app creates, is public while the rest stays private. Every request of a signed-in user goes through the app's
  * authFetch and pod fences, with a token the harness got without a browser
  * (signedIn.ts), sent DPoP-bound as the app sends it. A small suite: the
  * open servers' tests cover what the app does with the data.
@@ -16,7 +16,9 @@
 import { randomUUID } from "node:crypto";
 import { afterEach, beforeAll, describe, expect, inject, it, vi } from "vitest";
 import { createAuthFetch, SESSION_EXPIRED_EVENT } from "@solid-memo/solid/authFetch";
+import { accessControlFetch } from "@solid-memo/solid/accessControlFetch";
 import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { NO_SIZE_LIMITS } from "@solid-memo/solid/client/readLimits";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 import { clientOf } from "../signedInClient.ts";
@@ -203,6 +205,32 @@ describe.each<SignedInServer>(SERVERS)("signed in on $name", (server) => {
     expect(await contents(release)).toBe(before);
     expect(await contents(accessControl)).toBe(controlBefore);
     expect(await publisher.listPublished(instance)).toEqual([release]);
+  });
+
+  it("makes a public type index the app creates readable by anyone and changeable by no one else, its folder staying private", async () => {
+    const folder = new URL(`index-${randomUUID()}/settings/`, owner.pod).href;
+    const index = `${folder}publicTypeIndex.ttl`;
+    const solid = "http://www.w3.org/ns/solid/terms#";
+    const body = `<> a <${solid}TypeIndex>, <${solid}ListedDocument> .`;
+    expect((await ownerFetch(index, { method: "PUT", headers: TURTLE, body })).status).toBe(201);
+    const before = await contents(index);
+    // As the instance repository makes it public: the share fetch, kept to the index's own access control.
+    const fetch = createAuthFetch(clientOf(ownerSession), {
+      ownStorages: async () => [owner.pod],
+    }).fetch;
+    const shareFetch = createPodFence(fetch, { accessControl: true });
+    expect(
+      await grantPublicRead(index, {
+        fetch: accessControlFetch(shareFetch, index, NO_SIZE_LIMITS),
+      }),
+    ).toBe(true);
+    for (const { who, fetch: theirs, refusal } of others) {
+      expect(await statusOf(theirs, index), `${who} reads the index`).toBe(200);
+      for (const { method, init } of CHANGES)
+        expect(await statusOf(theirs, index, init), `${who}: ${method} the index`).toBe(refusal);
+      expect(await statusOf(theirs, folder), `${who} reads its folder`).toBe(refusal);
+    }
+    expect(await contents(index)).toBe(before);
   });
 
   it("changes what the stranger gets when the app makes a document public, and nothing else about it", async () => {

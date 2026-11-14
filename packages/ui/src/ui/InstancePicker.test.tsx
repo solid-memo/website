@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { statusTexts } from "../test/liveRegions";
 import { InstancePicker } from "./InstancePicker";
+import { REGISTRATION_OPTIONS } from "../test/fakes/instances";
 import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 
@@ -17,7 +18,7 @@ const instances: Instance[] = [
 function renderPicker(overrides: Partial<Parameters<typeof InstancePicker>[0]> = {}) {
   const props = {
     instances,
-    options: { privateIndexExists: true, publicIndexExists: true },
+    options: REGISTRATION_OPTIONS,
     busy: false,
     error: null,
     onSelect: vi.fn(),
@@ -98,9 +99,11 @@ describe("InstancePicker", () => {
     fireEvent.input(screen.getByLabelText("Instance container URL"), {
       target: { value: " https://pod.example/solid-memo/c/ " },
     });
-    fireEvent.click(screen.getByLabelText("Public type index"));
+    fireEvent.click(screen.getByLabelText(/^Public type index/));
     fireEvent.submit(container.querySelector("form")!);
-    expect(props.onAttach).toHaveBeenCalledWith("https://pod.example/solid-memo/c/", "public");
+    expect(props.onAttach).toHaveBeenCalledWith("https://pod.example/solid-memo/c/", {
+      indexUrl: "https://pod.example/settings/publicTypeIndex.ttl",
+    });
   });
 
   it("disables controls while busy and shows errors", () => {

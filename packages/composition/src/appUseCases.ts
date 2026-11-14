@@ -180,7 +180,11 @@ export function createAppUseCases({
     },
   });
   const podFetch = createPodFence(userFetch);
-  /** The release publisher's alone, for a release's own access control: the pod fence lets it write a document's ACL or ACR. */
+  /**
+   * The release publisher's and the instance repository's alone, for the
+   * own access control of a release, or of a public type index the app
+   * made: the pod fence lets it write a document's ACL or ACR.
+   */
   const shareFetch = createPodFence(userFetch, { accessControl: true });
   /**
    * The fetch of the adapters that read and write an instance's data,
@@ -291,6 +295,8 @@ export function createAppUseCases({
     now,
     randomId,
     userStorages,
+    grantPublicRead,
+    shareFetch,
   });
   const instanceRepository: typeof podInstances = {
     ...podInstances,

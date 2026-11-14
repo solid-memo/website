@@ -1467,6 +1467,9 @@ describe("createAppUseCases", () => {
     expect(await useCases.getRegistrationOptions(session)).toEqual({
       privateIndexExists: true,
       publicIndexExists: false,
+      indexes: [
+        expect.objectContaining({ url: `${alice}settings/private.ttl`, kinds: ["private"] }),
+      ],
     });
     expect(await useCases.listStorages(session)).toEqual([expect.objectContaining({ url: alice })]);
     expect(login.sent).toContain(`${alice}settings/private.ttl`);
@@ -1639,7 +1642,7 @@ describe("createAppUseCases", () => {
     }
   });
 
-  it("puts every pod adapter's writes behind the pod fence, and lets only the release publisher write an access control", async () => {
+  it("puts every pod adapter's writes behind the pod fence, and lets only the release publisher and the instance repository write an access control", async () => {
     given.clear();
     createAppUseCases({ ...options, indexedDB: undefined });
     expect(given.size).toBe(15);
@@ -1681,6 +1684,8 @@ describe("createAppUseCases", () => {
     ]) {
       await expect(shareFetch!(url, { method: "PUT" }), url).rejects.toMatchObject(refused);
     }
+    // The instance repository makes a public type index it creates readable through that same fetch.
+    expect(given.get("createSolidInstanceRepository")!.shareFetch).toBe(shareFetch);
     // No refused write left the page.
     expect(requests).toEqual([]);
   });

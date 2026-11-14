@@ -32,8 +32,14 @@ import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
 import { createPlacesFetch, isInPlaces, profilePlacesOf } from "./profilePlaces";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
+import type { TypeIndexChoice, TypeIndexKind } from "@solid-memo/domain/typeIndexChoice";
+import { rankedFor } from "@solid-memo/domain/typeIndexChoice";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import { OLD_REGISTRATION_CLASSES, type OldRegistrationClass } from "@solid-memo/domain/instance";
+import {
+  OLD_REGISTRATION_CLASSES,
+  type OldRegistrationClass,
+  type RegistrationTarget,
+} from "@solid-memo/domain/instance";
 import {
   cardsContainerOf,
   catalogNodeUrlOf,
@@ -45,11 +51,23 @@ import {
 import { draftsContainerOf } from "@solid-memo/domain/release/draftLayout";
 
 type Fetch = typeof globalThis.fetch;
-export type TypeIndexKind = "private" | "public";
+
+/** A link from the user's profile to a type index of theirs (locateTypeIndexes). */
+export interface TypeIndexLink {
+  url: string;
+  kind: TypeIndexKind;
+  /** Whether the preferences file links it (a private index alone). */
+  fromPreferences: boolean;
+}
 
 export interface TypeIndexes {
-  privateIndexUrl: string | null;
-  publicIndexUrl: string | null;
+  /**
+   * Every type index the profile links in its own places, each kind's
+   * once by address, the private ones first, no more than
+   * MAX_PROFILE_DOCUMENTS of each kind. One outside them may be someone
+   * else's, so nothing in it is the user's, and it is left out.
+   */
+  links: TypeIndexLink[];
   /**
    * What the indexes are read and written through: as the user in the
    * profile's own places (profilePlacesOf: the WebID's origin, its
@@ -58,23 +76,27 @@ export interface TypeIndexes {
    */
   fetch: Fetch;
   /**
-   * Whether `url` is in the profile's own places. An index outside them
-   * may be someone else's, so nothing in it is the user's: the instance
-   * repository takes it as none (ownTypeIndexes), and ensureTypeIndex
-   * makes the user's own instead.
+   * Whether `url` is in the profile's own places: an index entered by
+   * its address outside them is refused (ensureTypeIndex).
    */
   inPlaces: (url: string) => boolean;
 }
 
 /**
- * Locate both type indexes for a WebID. Links are looked up on the WebID
- * subject in the WebID document and in any extended profile documents
- * (rdfs:seeAlso / foaf:isPrimaryTopicOf — e.g. Inrupt PodSpaces keeps a
- * read-only WebID document and a writable profile in the pod). The
- * private index is additionally looked up in the pim:preferencesFile
- * (per spec). Only the documents in the profile's own places are read,
- * as the user; a link to a document anywhere else, someone else's, is
- * left alone. `publicFetch` reads an index outside those places.
+ * Every link to a type index of the WebID's (docs/data-model.md
+ * "Discovery chain"): solid:privateTypeIndex and solid:publicTypeIndex
+ * on the WebID subject in the WebID document and in every extended
+ * profile document (rdfs:seeAlso / foaf:isPrimaryTopicOf, e.g. Inrupt
+ * PodSpaces keeps a read-only WebID document and a writable profile in
+ * the pod), and solid:privateTypeIndex in the pim:preferencesFile, where
+ * the specification keeps the private index. A public link there is left
+ * out: the file is private, so no one else finds it. A pod made long ago
+ * may link several of a kind, the one an app wrote first and the one
+ * another wrote later, so each is kept, and the user chooses
+ * (rankedFor). Only the documents in the profile's own places are read,
+ * as the user, and only the links into them are kept: a document
+ * anywhere else may be someone else's. `publicFetch` reads anything
+ * outside those places.
  */
 export async function locateTypeIndexes(
   webId: string,
@@ -86,52 +108,46 @@ export async function locateTypeIndexes(
   const documentUrl = getSourceUrl(profileDataset);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
-    return {
-      privateIndexUrl: null,
-      publicIndexUrl: null,
-      ...placesOf(profilePlacesOf(webId, documentUrl, []), fetch, publicFetch),
-    };
+    return { links: [], ...placesOf(profilePlacesOf(webId, documentUrl, []), fetch, publicFetch) };
   }
 
-  let publicIndexUrl = getUrl(profile, SOLID.publicTypeIndex);
-  let privateIndexUrl = getUrl(profile, SOLID.privateTypeIndex);
-  const ownPlaces = profilePlacesOf(webId, documentUrl, [profile]);
   const subjects = [profile];
-  // Done once both indexes are found and in the profile's places: an
-  // extended profile may name the storage an index is in.
-  const located = (): boolean => {
-    const places = profilePlacesOf(webId, documentUrl, subjects);
-    return [publicIndexUrl, privateIndexUrl].every(
-      (url) => url !== null && isInPlaces(url, places),
-    );
-  };
-
   for (const extendedProfileUrl of extendedProfileUrls(webId, profile, profileDataset)) {
-    if (located()) break;
     const subject = await readSubjectSafely(extendedProfileUrl, webId, profileFetch);
-    if (subject === null) continue;
-    subjects.push(subject);
-    publicIndexUrl ??= getUrl(subject, SOLID.publicTypeIndex);
-    privateIndexUrl ??= getUrl(subject, SOLID.privateTypeIndex);
+    if (subject !== null) subjects.push(subject);
   }
-
-  if (privateIndexUrl === null) {
-    const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
-    if (preferencesFileUrl !== null && isInPlaces(preferencesFileUrl, ownPlaces)) {
-      const subject = await readSubjectSafely(preferencesFileUrl, webId, profileFetch);
-      privateIndexUrl = subject === null ? null : getUrl(subject, SOLID.privateTypeIndex);
-    }
-  }
-
+  // An extended profile may name the storage an index or the preferences file is in.
   const places = profilePlacesOf(webId, documentUrl, subjects);
-  // Of several links, one in the profile's own places: the index the app made beside one elsewhere.
-  const ownLink = (predicate: string): string | null =>
-    subjects
-      .flatMap((subject) => getUrlAll(subject, predicate))
-      .find((url) => isInPlaces(url, places)) ?? null;
+
+  const preferences: Subject[] = [];
+  const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
+  if (preferencesFileUrl !== null && isInPlaces(preferencesFileUrl, places)) {
+    const subject = await readSubjectSafely(preferencesFileUrl, webId, profileFetch);
+    if (subject !== null) preferences.push(subject);
+  }
+
+  const linksOf = (
+    kind: TypeIndexKind,
+    predicate: string,
+    preferenceSubjects: readonly Subject[],
+  ): TypeIndexLink[] => {
+    const fromPreferences = new Set(
+      preferenceSubjects.flatMap((subject) => getUrlAll(subject, predicate)),
+    );
+    const urls = [
+      ...subjects.flatMap((subject) => getUrlAll(subject, predicate)),
+      ...fromPreferences,
+    ].filter((url) => isInPlaces(url, places));
+    return [...new Set(urls)]
+      .slice(0, MAX_PROFILE_DOCUMENTS)
+      .map((url) => ({ url, kind, fromPreferences: fromPreferences.has(url) }));
+  };
   return {
-    privateIndexUrl: ownLink(SOLID.privateTypeIndex) ?? privateIndexUrl,
-    publicIndexUrl: ownLink(SOLID.publicTypeIndex) ?? publicIndexUrl,
+    links: [
+      ...linksOf("private", SOLID.privateTypeIndex, preferences),
+      // The preferences file is private: a public link there is no one else's to find.
+      ...linksOf("public", SOLID.publicTypeIndex, []),
+    ],
     ...placesOf(places, fetch, publicFetch),
   };
 }
@@ -309,24 +325,143 @@ function describeFailure(documentUrl: string, error: unknown): string {
 }
 
 /**
- * Find the target index, creating it (and its profile link) if missing
- * or outside the profile's own places (TypeIndexes.inPlaces); and what
- * it is read and written through (TypeIndexes).
+ * The type indexes the profile links (locateTypeIndexes) that the user
+ * can read now, each once, with what each says it is and holds, and
+ * whether anyone may read it without logging in, asked of `publicFetch`
+ * (docs/data-model.md "Choosing a type index"). One that cannot be read,
+ * whatever the reason, is left out: nothing can be registered in it.
+ */
+export async function readTypeIndexChoices(
+  indexes: TypeIndexes,
+  publicFetch: Fetch,
+): Promise<TypeIndexChoice[]> {
+  const urls = [...new Set(indexes.links.map((link) => link.url))];
+  const choices = await Promise.all(
+    urls.map(async (url): Promise<TypeIndexChoice | null> => {
+      const links = indexes.links.filter((link) => link.url === url);
+      let dataset: SourcedDataset;
+      try {
+        dataset = await readDataset(url, indexes.fetch);
+      } catch {
+        return null;
+      }
+      const kinds = links.map((link) => link.kind);
+      return {
+        url,
+        kinds,
+        fromPreferences: links.some((link) => link.fromPreferences),
+        typeFit: kinds.length > 1 ? "none" : typeFitOf(typesOf(dataset, url), kinds[0]),
+        holdsInstances: instanceRegistrationsIn(dataset).length > 0,
+        readableByAnyone: await readableByAnyone(url, publicFetch),
+      };
+    }),
+  );
+  return choices.filter((choice) => choice !== null);
+}
+
+/** The types the document at `url` gives itself. */
+function typesOf(dataset: Dataset, url: string): string[] {
+  const document = getThing(dataset, documentUrlOf(url));
+  return document === null ? [] : getUrlAll(document, RDF.type);
+}
+
+/** Which kind of type index each document type says a document is. */
+const KIND_TYPES = {
+  private: SOLID.UnlistedDocument,
+  public: SOLID.ListedDocument,
+} satisfies Record<TypeIndexKind, string>;
+
+function typeFitOf(types: readonly string[], kind: TypeIndexKind): TypeIndexChoice["typeFit"] {
+  if (types.includes(KIND_TYPES[kind])) return "match";
+  const other = kind === "private" ? "public" : "private";
+  return types.includes(KIND_TYPES[other]) ? "other" : "none";
+}
+
+/**
+ * Whether a read of `url` as no one is let through: false when it is
+ * refused or the document is not there to anyone (401, 403, 404), null
+ * when the server says nothing that tells, or does not answer.
+ */
+async function readableByAnyone(url: string, publicFetch: Fetch): Promise<boolean | null> {
+  try {
+    const response = await publicFetch(url, { method: "HEAD" });
+    if (response.ok) return true;
+    return [401, 403, 404].includes(response.status) ? false : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The type index to register an instance in, for `target`
+ * (RegistrationTarget), and what it is read and written through
+ * (TypeIndexes):
+ *
+ * - of a kind, the user's best of that kind (rankedFor) they can read
+ *   now; when there is none, a new one, made in their own storage and
+ *   linked from their profile (createTypeIndex), and a public one made
+ *   readable by anyone with `share`, so that other apps find what it
+ *   registers;
+ * - by its address, one the profile links, or else one in the profile's
+ *   own places that the user can read and that says it is a
+ *   solid:TypeIndex, then linked from the profile as the kind its type
+ *   says (adoptTypeIndex), as Solid Memo finds its instances only in the
+ *   indexes the profile links.
  */
 export async function ensureTypeIndex(
-  kind: TypeIndexKind,
+  target: RegistrationTarget,
   webId: string,
   nearUrl: string,
   fetch: Fetch,
   publicFetch: Fetch,
+  share: (indexUrl: string) => Promise<boolean>,
 ): Promise<{ url: string; fetch: Fetch }> {
   const indexes = await locateTypeIndexes(webId, fetch, publicFetch);
-  const found = kind === "public" ? indexes.publicIndexUrl : indexes.privateIndexUrl;
-  const existing = found !== null && indexes.inPlaces(found) ? found : null;
-  return {
-    url: existing ?? (await createTypeIndex(kind, webId, nearUrl, fetch)),
-    fetch: indexes.fetch,
-  };
+  if (typeof target !== "string") {
+    return {
+      url: await adoptTypeIndex(target.indexUrl, webId, indexes, fetch),
+      fetch: indexes.fetch,
+    };
+  }
+  const best = rankedFor(await readTypeIndexChoices(indexes, publicFetch), target)[0];
+  if (best !== undefined) return { url: best.url, fetch: indexes.fetch };
+  const url = await createTypeIndex(target, webId, nearUrl, fetch);
+  // A public index no one else can read is one no other app finds: whether the grant took is seen in the next choice.
+  if (target === "public") await share(url);
+  return { url, fetch: indexes.fetch };
+}
+
+/**
+ * A type index the user entered by its address: one the profile links
+ * as it is; else one in the profile's own places (typeIndexOutsidePod),
+ * that the user can read and that says it is a solid:TypeIndex
+ * (notATypeIndex), then linked from the profile, as public when it says
+ * it is a solid:ListedDocument and as private otherwise. A read that
+ * may work when tried again fails as it did.
+ */
+async function adoptTypeIndex(
+  indexUrl: string,
+  webId: string,
+  indexes: TypeIndexes,
+  fetch: Fetch,
+): Promise<string> {
+  if (indexes.links.some((link) => link.url === indexUrl)) return indexUrl;
+  if (!indexes.inPlaces(indexUrl)) throw new AppError("typeIndexOutsidePod", { url: indexUrl });
+  let dataset: SourcedDataset;
+  try {
+    dataset = await readDataset(indexUrl, indexes.fetch);
+  } catch (error) {
+    const status = (error as { statusCode?: number }).statusCode;
+    if (readsAsNone(error) || status === 401 || status === 403) {
+      throw new AppError("notATypeIndex", { url: indexUrl });
+    }
+    throw error;
+  }
+  const types = typesOf(dataset, indexUrl);
+  if (!types.includes(SOLID.TypeIndex)) throw new AppError("notATypeIndex", { url: indexUrl });
+  const kind = types.includes(SOLID.ListedDocument) ? "public" : "private";
+  await linkTypeIndexFromProfile(kind, webId, indexUrl, fetch);
+  return indexUrl;
 }
 
 export interface InstanceRegistration {
@@ -344,7 +479,11 @@ export async function readInstanceRegistrations(
   indexUrl: string,
   fetch: Fetch,
 ): Promise<InstanceRegistration[]> {
-  const dataset = await readDataset(indexUrl, fetch);
+  return instanceRegistrationsIn(await readDataset(indexUrl, fetch));
+}
+
+/** The sm:Instance registrations in a type index document (readInstanceRegistrations). */
+function instanceRegistrationsIn(dataset: Dataset): InstanceRegistration[] {
   const registrations: InstanceRegistration[] = [];
   for (const thing of getThingAll(dataset)) {
     const types = getUrlAll(thing, RDF.type);

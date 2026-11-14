@@ -286,13 +286,16 @@ describe("GuestStudyOffer", () => {
     expect(announced.textContent).toBe("");
     const location = await screen.findByLabelText("Location in your Pod");
     await waitFor(() => expect(location).toHaveValue("https://alice.example/solid-memo/main/"));
-    fireEvent.click(screen.getByLabelText("Public type index"));
+    fireEvent.click(screen.getByLabelText(/^Public type index/));
     fireEvent.click(screen.getByRole("button", { name: "Move it" }));
     await waitFor(() =>
       expect(transferGuestStudy).toHaveBeenCalledWith(
         session,
         guestInstance,
-        { containerUrl: "https://alice.example/solid-memo/main/", registrationTarget: "public" },
+        {
+          containerUrl: "https://alice.example/solid-memo/main/",
+          registrationTarget: { indexUrl: "https://pod.example/settings/publicTypeIndex.ttl" },
+        },
         expect.any(Function),
       ),
     );

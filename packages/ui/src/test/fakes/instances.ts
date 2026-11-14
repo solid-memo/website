@@ -9,6 +9,31 @@ import { describedCatalog } from "@solid-memo/domain/catalog";
 import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
 import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import type { InstanceUseCases } from "@solid-memo/application/instances";
+import type { RegistrationOptions } from "@solid-memo/domain/instance";
+
+/** A private and a public type index, both as they should be: the user's options when they have one of each. */
+export const REGISTRATION_OPTIONS: RegistrationOptions = {
+  privateIndexExists: true,
+  publicIndexExists: true,
+  indexes: [
+    {
+      url: "https://pod.example/settings/privateTypeIndex.ttl",
+      kinds: ["private"],
+      fromPreferences: true,
+      typeFit: "match",
+      holdsInstances: false,
+      readableByAnyone: false,
+    },
+    {
+      url: "https://pod.example/settings/publicTypeIndex.ttl",
+      kinds: ["public"],
+      fromPreferences: false,
+      typeFit: "match",
+      holdsInstances: false,
+      readableByAnyone: true,
+    },
+  ],
+};
 
 /**
  * The use cases of the instances, faked (a `vi.fn` each), as the real
@@ -30,10 +55,7 @@ export function makeInstanceUseCasesFake(
         source: "manual" as const,
       })),
       listInstances: vi.fn(async () => []),
-      getRegistrationOptions: vi.fn(async () => ({
-        privateIndexExists: true,
-        publicIndexExists: true,
-      })),
+      getRegistrationOptions: vi.fn(async () => REGISTRATION_OPTIONS),
       createInstance: vi.fn(async () => ({
         url: "https://pod.example/solid-memo/main/",
         name: "Main",

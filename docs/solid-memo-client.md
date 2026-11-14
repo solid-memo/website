@@ -310,7 +310,8 @@ provider isn't supported yet: its storages answer 401, as to no one.
 
 `grantPublicRead`
 ([access.ts](../packages/solid-memo-client/src/access.ts)) makes a
-published release readable by everyone, on Web Access Control (WAC) or
+published release, or a public type index the app creates, readable by
+everyone, on Web Access Control (WAC) or
 Access Control Policies (ACP), as Inrupt's universal access does
 ([boundaries.md](boundaries.md#access-control)):
 

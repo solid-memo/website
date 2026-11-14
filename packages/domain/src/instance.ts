@@ -4,6 +4,7 @@
 
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { AppError } from "./appError";
+import type { TypeIndexChoice, TypeIndexKind } from "./typeIndexChoice";
 
 /** One Solid Memo data location (a container in a pod). */
 export interface Instance {
@@ -39,12 +40,21 @@ export interface InstanceMeta {
   replacedAt?: string;
 }
 
-/** Which type index an instance is (or will be) registered in. */
-export type RegistrationTarget = "private" | "public";
+/**
+ * Which type index an instance is (or will be) registered in: of a kind,
+ * the user's best index of that kind (rankedFor), or a new one when
+ * they have none; or one by its address, which must be in the user's own
+ * places and say it is a type index (docs/data-model.md "Choosing a type
+ * index").
+ */
+export type RegistrationTarget = TypeIndexKind | { indexUrl: string };
 
+/** The type indexes an instance may be registered in, for the UI's choice. */
 export interface RegistrationOptions {
   privateIndexExists: boolean;
   publicIndexExists: boolean;
+  /** Every one the user can read, ranked (rankedChoices). */
+  indexes: TypeIndexChoice[];
 }
 
 /**
@@ -92,8 +102,8 @@ export type OldRegistrationClass = (typeof OLD_REGISTRATION_CLASSES)[number];
 
 /** The registrations earlier versions wrote for an instance's data that are still in the user's type indexes. */
 export interface OldRegistrations {
-  /** The private index's first, each index's in OLD_REGISTRATION_CLASSES order. */
-  registrations: { dataClass: OldRegistrationClass; index: RegistrationTarget }[];
-  /** The user's type indexes that could not be read: what they hold is not known, and nothing is removed from them. */
-  unreadableIndexes: RegistrationTarget[];
+  /** The private indexes' first, each index's in OLD_REGISTRATION_CLASSES order. */
+  registrations: { dataClass: OldRegistrationClass; index: TypeIndexKind }[];
+  /** The kinds of the user's type indexes that could not be read: what they hold is not known, and nothing is removed from them. */
+  unreadableIndexes: TypeIndexKind[];
 }

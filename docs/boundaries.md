@@ -200,19 +200,25 @@ needs no library of its own:
 
 ## Access control
 
-The app changes access in one place only: a published release becomes
-readable by everyone ([studio.md](studio.md#publishing-a-release)).
-Only the `ReleasePublisher` port's adapter,
+The app changes access in two places only: a published release becomes
+readable by everyone ([studio.md](studio.md#publishing-a-release)), and
+so does a public type index the app creates
+([data-model.md](data-model.md#discovery-chain)). Only two adapters
+make that write: the `ReleasePublisher` port's,
 [solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
-makes that write, with the grant it is given:
+and the `InstanceRepository` port's,
+[solidInstanceRepository.ts](../packages/solid/src/solidInstanceRepository.ts).
+Each makes it with the grant it's given, through
+[accessControlFetch.ts](../packages/solid/src/accessControlFetch.ts),
+which lets the grant write only that document's own ACL or ACR.
 [client/access.ts](../packages/solid/src/client/access.ts) has
 `@inrupt/solid-client`'s `universalAccess.setPublicAccess`, read only,
-for the release's document, writing its own ACL (Web Access Control) or
-ACR (Access Control Policies). The publisher's fetch refuses another
-origin, or a write of anything but `<release>.acl` or `<release>.acr`,
-whatever the server names as the release's access control. No folder's
+for the document, writing its own ACL (Web Access Control) or ACR
+(Access Control Policies). That fetch refuses another origin, or a
+write of anything but `<document>.acl` or `<document>.acr`, whatever
+the server names as the document's access control. No folder's
 access control changes. With `SOLID_CLIENT=solid-memo-client`, the
-grant is `solid-memo-client`'s `access.ts`, which writes the release's own ACL
+grant is `solid-memo-client`'s `access.ts`, which writes the document's own ACL
 or ACR with `fetch` and `n3`
 ([solid-memo-client.md](solid-memo-client.md#the-public-read-grant)).
 
