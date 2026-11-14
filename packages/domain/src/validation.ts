@@ -221,14 +221,26 @@ function failing(subject: SubjectReport): boolean {
 }
 
 /**
- * The subjects and documents with a violation, by URL, a document the
- * check could not read among them, and whether one of them is the
+ * The deck entries and documents with a violation, by URL, a document
+ * the check could not read among them, and whether one of them is the
  * arrangement of the deck list (the catalog's own document unread too).
+ * An entry or the arrangement counts only from the catalog's document,
+ * where the deck list reads them: a subject that another document states
+ * of the same IRI counts only through that document.
  */
 interface Failing {
-  subjects: ReadonlySet<string>;
+  entries: ReadonlySet<string>;
   documents: ReadonlySet<string>;
   arrangement: boolean;
+}
+
+/** An address as a request sends it, as instanceLayout's canonicalUrlOf gives it; null for text that is none. */
+function hrefOf(text: string): string | null {
+  try {
+    return new URL(text).href;
+  } catch {
+    return null;
+  }
 }
 
 /** Each report's failing subjects and documents; assumes a report is never changed in place, since reports are rebuilt immutably. */
@@ -239,21 +251,26 @@ function failingOf(report: ValidationReport): Failing {
   let found = failingOfReport.get(report);
   if (found === undefined) {
     const { documents } = report;
-    const subjects = documents.flatMap((document) =>
-      document.subjects.filter(failing).map((subject) => ({ document: document.url, subject })),
-    );
+    // The catalog's document, as instanceLayout's catalogUrlOf names it, not imported:
+    // Node's scripts run this module, and load only what is named with its extension.
+    const catalog = hrefOf(`${report.instanceUrl.replace(/\/?$/, "/")}catalog.ttl`);
+    const isCatalog = (url: string) => catalog !== null && hrefOf(url) === catalog;
+    const subjects = documents.flatMap((document) => {
+      const inCatalog = isCatalog(document.url);
+      return document.subjects
+        .filter(failing)
+        .map((subject) => ({ document: document.url, inCatalog, subject }));
+    });
     const unread = documents
       .filter((document) => document.status === "unreadable")
       .map((document) => document.url);
-    // The catalog's document, as instanceLayout's catalogUrlOf names it, not imported:
-    // Node's scripts run this module, and load only what is named with its extension.
-    const catalog = `${report.instanceUrl.replace(/\/?$/, "/")}catalog.ttl`;
+    const ofCatalog = subjects.filter(({ inCatalog }) => inCatalog);
     found = {
-      subjects: new Set(subjects.map(({ subject }) => subject.url)),
+      entries: new Set(ofCatalog.map(({ subject }) => subject.url)),
       documents: new Set([...subjects.map(({ document }) => document), ...unread]),
       arrangement:
-        unread.includes(catalog) ||
-        subjects.some(
+        unread.some(isCatalog) ||
+        ofCatalog.some(
           ({ subject }) =>
             subject.status === "checked" &&
             (subject.shape === "catalog" || subject.shape === "deckGroup"),
@@ -272,9 +289,9 @@ function failingOf(report: ValidationReport): Failing {
  * however many decks are asked about.
  */
 export function deckSetAside(report: ValidationReport, deck: Deck): boolean {
-  const { subjects, documents } = failingOf(report);
+  const { entries, documents } = failingOf(report);
   return (
-    subjects.has(deck.url) ||
+    entries.has(deck.url) ||
     documents.has(deck.cardsDocumentUrl) ||
     documents.has(deck.reviewsDocumentUrl)
   );

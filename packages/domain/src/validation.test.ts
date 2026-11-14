@@ -190,6 +190,71 @@ describe("what fails, and the decks set aside for it", () => {
     expect(arrangementSetAside(unread)).toBe(false);
   });
 
+  it("takes a deck's entry, and the arrangement, as failing only from the catalog's document", () => {
+    const broken = [{ message: { en: "x" }, severity: "violation" as const, constraint: "Class" }];
+    // deck-1's cards document states a failing subject at deck-2's entry IRI, and a failing deck group.
+    const stated = summarize(INSTANCE, [
+      { url: `${INSTANCE}catalog.ttl`, status: "checked", subjects: [] },
+      {
+        url: `${INSTANCE}decks/deck-1.ttl`,
+        status: "checked",
+        subjects: [
+          {
+            url: `${INSTANCE}catalog.ttl#deck-2`,
+            status: "checked",
+            shape: "card",
+            version: 2,
+            violations: broken,
+          },
+          {
+            url: `${INSTANCE}catalog.ttl#group-1`,
+            status: "checked",
+            shape: "deckGroup",
+            version: 1,
+            violations: broken,
+          },
+        ],
+      },
+    ]);
+    expect(deckSetAside(stated, deck("deck-1"))).toBe(true);
+    expect(deckSetAside(stated, deck("deck-2"))).toBe(false);
+    expect(arrangementSetAside(stated)).toBe(false);
+    // The catalog's document as a request sends it, however the report spells it.
+    const inCatalog = summarize(INSTANCE, [
+      {
+        url: "HTTPS://POD.example:443/solid-memo/a/catalog.ttl",
+        status: "checked",
+        subjects: [
+          {
+            url: `${INSTANCE}catalog.ttl#deck-2`,
+            status: "checked",
+            shape: "deck",
+            version: 3,
+            violations: broken,
+          },
+          {
+            url: `${INSTANCE}catalog.ttl#group-1`,
+            status: "checked",
+            shape: "deckGroup",
+            version: 1,
+            violations: broken,
+          },
+        ],
+      },
+    ]);
+    expect(deckSetAside(inCatalog, deck("deck-2"))).toBe(true);
+    expect(deckSetAside(inCatalog, deck("deck-1"))).toBe(false);
+    expect(arrangementSetAside(inCatalog)).toBe(true);
+  });
+
+  it("takes no document as the catalog's of an instance whose address is no URL", () => {
+    const report = summarize("not a url", [unreadableDocument("not a url/catalog.ttl", "x")]);
+    expect(arrangementSetAside(report)).toBe(false);
+    expect(deckSetAside(report, { ...deck("deck-1"), url: "not a url/catalog.ttl#deck-1" })).toBe(
+      false,
+    );
+  });
+
   it("walks the report once, however many decks are asked about, and again for a new report", () => {
     let walks = 0;
     const counted = (from: typeof report): typeof report => ({
