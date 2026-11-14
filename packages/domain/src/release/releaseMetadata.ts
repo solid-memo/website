@@ -4,7 +4,7 @@
 
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
 import { TextMap } from "../pathKeys.ts";
-import { takenIds } from "./courseIds.ts";
+import { firstFree, takenIds } from "./courseIds.ts";
 import { slugOf } from "./draftLayout.ts";
 import { RDFS_COMMENT } from "./provenanceRules.ts";
 import {
@@ -61,9 +61,7 @@ export function otherAuthorsOf(draft: ReleaseDraft): string[] {
 export function agentIdFor(draft: ReleaseDraft, name: string): string {
   const taken = takenIds(draft);
   const base = slugOf(name) || "author";
-  let id = base;
-  for (let n = 2; taken.has(id); n++) id = `${base}-${n}`;
-  return id;
+  return firstFree(taken, base, `${base}-`, 2);
 }
 
 /**
@@ -336,8 +334,5 @@ export function checksOf(draft: ReleaseDraft): CheckView[] {
 
 /** A new check's id: `check-1`, `check-2`, … the first free. */
 export function checkIdFor(draft: ReleaseDraft): string {
-  const taken = takenIds(draft);
-  let n = 1;
-  while (taken.has(`check-${n}`)) n++;
-  return `check-${n}`;
+  return firstFree(takenIds(draft), "check-1", "check-", 2);
 }

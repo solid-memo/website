@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { cpuTime } from "../testing/growth.ts";
 import { courseDraft, deckDraft, of } from "../testing/releaseDraft.ts";
 import {
   chapterIdFor,
@@ -17,7 +18,15 @@ import {
   stepIdFor,
   takenIds,
 } from "./courseIds.ts";
-import { DRAFT_ID, NOTHING_PUBLISHED, type ReleaseDraft } from "./releaseDraft.ts";
+import {
+  applyDraftChanges,
+  DRAFT_ID,
+  idsInUse,
+  isRefusal,
+  NOTHING_PUBLISHED,
+  type DraftRefusal,
+  type ReleaseDraft,
+} from "./releaseDraft.ts";
 
 const published = {
   ids: { "ch-gone": "chapter" as const, "q-a-1b": "card" as const },
@@ -38,6 +47,121 @@ describe("takenIds and idProblem", () => {
     expect(idProblem(draft, "ch-gone")).toBe("taken");
     expect(idProblem(draft, "-c")).toBe("invalid");
     expect(idProblem(draft, "a b")).toBe("invalid");
+  });
+
+  it("gathers a draft's taken ids once, and an edited draft's afresh", () => {
+    const draft = courseDraft(published);
+    expect(takenIds(draft)).toBe(takenIds(draft));
+    const edited: ReleaseDraft = {
+      ...draft,
+      chapters: [...draft.chapters, { id: "ch-new", data: draft.chapters[0]!.data }],
+    };
+    expect(takenIds(edited)).not.toBe(takenIds(draft));
+    expect(takenIds(edited).has("ch-new")).toBe(true);
+    expect(takenIds(draft).has("ch-new")).toBe(false);
+  });
+
+  it("keeps the taken ids over an edit of text, and gathers them again when an id changes", () => {
+    const draft = courseDraft(published);
+    const text = (edited: ReleaseDraft | DraftRefusal) => {
+      if (isRefusal(edited)) throw new Error(edited.refused);
+      return edited;
+    };
+    const chapter = text(
+      applyDraftChanges(draft, [{ kind: "editChapter", id: "ch-a", text: { title: { en: "A" } } }]),
+    );
+    const step = text(
+      applyDraftChanges(chapter, [
+        { kind: "editStep", id: "ch-a-1", text: { theory: { en: "T" } } },
+      ]),
+    );
+    const meta = text(
+      applyDraftChanges(step, [{ kind: "setMeta", meta: { title: { en: "Course" } } }]),
+    );
+    expect(takenIds(chapter)).toBe(takenIds(draft));
+    expect(takenIds(step)).toBe(takenIds(draft));
+    expect(takenIds(meta)).toBe(takenIds(draft));
+    const added = text(applyDraftChanges(meta, [{ kind: "addChapter", id: "ch-new" }]));
+    expect(takenIds(added).has("ch-new")).toBe(true);
+    // The same statements and records, another root naming another subject of the draft.
+    const named: ReleaseDraft = {
+      ...added,
+      root: { ...added.root, wasDerivedFrom: [of("elsewhere")] },
+    };
+    expect(takenIds(named).has("elsewhere")).toBe(true);
+    const other: ReleaseDraft = {
+      ...named,
+      root: { ...named.root, wasDerivedFrom: [of("other")] },
+    };
+    expect(takenIds(other).has("other")).toBe(true);
+    expect(takenIds(other).has("elsewhere")).toBe(false);
+    const renamed: ReleaseDraft = {
+      ...other,
+      cards: other.cards.map((card, i) => (i === 0 ? { ...card, id: "q-renamed" } : card)),
+    };
+    expect(takenIds(renamed).has("q-renamed")).toBe(true);
+    const back: ReleaseDraft = { ...renamed, cards: other.cards };
+    expect(takenIds(back).has("q-renamed")).toBe(false);
+    expect(takenIds({ ...back, cards: [...back.cards] })).toBe(takenIds(back));
+    const moved: ReleaseDraft = { ...named, url: "https://example.org/other.ttl" };
+    expect(takenIds(moved).has("ch-a")).toBe(true);
+    expect(takenIds(moved).has("elsewhere")).toBe(false);
+    const republished: ReleaseDraft = { ...named, published: NOTHING_PUBLISHED };
+    expect(takenIds(republished).has("ch-gone")).toBe(false);
+    expect(takenIds({ ...republished, root: { ...republished.root } })).toBe(takenIds(republished));
+  });
+
+  it("suggests and checks ids on each keystroke in about one pass over the draft's statements", () => {
+    // The New question and New chapter forms suggest and check an id on
+    // each keystroke, and typing in a chapter's, a step's or the
+    // course's text beside them makes a new draft each time. Gathering
+    // the taken ids for each, or going again over the many ids a
+    // suggestion steps past (q-a-1a1, q-a-1a2, … after q-a-1b to
+    // q-a-1z), would go over every statement of the draft each time,
+    // many times one pass; a ratio, not a budget in milliseconds, holds
+    // on any machine (testing.md).
+    const base = courseDraft(published);
+    const statement = (subject: string, object: string) => ({
+      subject: of(subject),
+      predicate: "https://example.org/p",
+      object: { kind: "iri" as const, value: of(object) },
+    });
+    const draft: ReleaseDraft = {
+      ...base,
+      triples: [
+        ...base.triples,
+        ...[..."cdefghijklmnopqrstuvwxyz"].map((letter) => statement(`q-a-1${letter}`, "o")),
+        ...Array.from({ length: 10_000 }, (_, n) => statement(`q-a-1a${n + 1}`, `o${n}`)),
+      ],
+    };
+    expect(questionIdFor(draft, { kind: "step", step: "ch-a-1" })).toBe("q-a-1a10001");
+    const reference = Math.min(...Array.from({ length: 5 }, () => cpuTime(() => idsInUse(draft))));
+    const keystrokes = 40;
+    const rounds = Array.from({ length: 5 }, () => {
+      // New statements, as a draft loaded again has: none of its ids gathered yet.
+      let typed: ReleaseDraft = { ...draft, triples: [...draft.triples] };
+      const drafts = Array.from({ length: keystrokes }, (_, key) => {
+        const edited = applyDraftChanges(typed, [
+          { kind: "editChapter", id: "ch-a", text: { title: { en: `Chapter ${key}` } } },
+        ]);
+        if (isRefusal(edited)) throw new Error(edited.refused);
+        typed = edited;
+        return edited;
+      });
+      return cpuTime(() => {
+        for (const [key, one] of drafts.entries()) {
+          questionIdFor(one, { kind: "step", step: "ch-a-1" });
+          questionIdBefore(one, { kind: "step", step: "ch-a-1" }, "q-a-1a");
+          questionIdFor(one, null);
+          questionIdFor(one, { kind: "review", chapter: "ch-a" });
+          chapterIdFor(one, { en: "A" });
+          chapterIdFor(one, {});
+          stepIdFor(one, "ch-a");
+          idProblem(one, `q-${key}`);
+        }
+      });
+    });
+    expect(Math.min(...rounds) / reference).toBeLessThan(4);
   });
 
   it("knows what an earlier release published", () => {
