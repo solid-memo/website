@@ -29,6 +29,7 @@ import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import { folded } from "@solid-memo/domain/langText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useRemembered } from "@solid-memo/ui/remembered";
+import { searchedText } from "../searchText";
 import { GraphTables } from "./GraphTables";
 import { GraphView } from "./GraphView";
 import {
@@ -105,6 +106,31 @@ function GraphDrawing({
   );
 }
 
+/** A node with the texts the search matches it by (searchedText). */
+interface SearchedNode {
+  node: GraphNode;
+  texts: string[];
+}
+
+/**
+ * The nodes as the search matches them: each by its address (a blank node
+ * by its term and its document's address, not the number the graph gives
+ * it) and its name, each of those by its start alone (searchedText).
+ * Worked out when the nodes shown or their names change, not for each
+ * letter typed.
+ */
+function searchIndex(
+  nodes: readonly GraphNode[],
+  labels: ReadonlyMap<string, string>,
+): SearchedNode[] {
+  return nodes.map((node) => ({
+    node,
+    texts: (node.term === undefined ? [node.id] : [node.term, node.document!])
+      .concat(labels.get(node.id)!)
+      .map(searchedText),
+  }));
+}
+
 /** A node's kind, in words. */
 export function kindText(node: GraphNode, t: ReturnType<typeof useI18n>["t"]): string {
   if (node.unreadable === true) return t("studio.graph.kind.unreadable");
@@ -149,15 +175,16 @@ export function GraphScreen({
   );
   const wanted = folded(search.trim());
   // The whole graph the filters show, the neighbors' too: a node found becomes the one whose they are.
-  const found =
-    wanted === ""
-      ? []
-      : filtered.nodes.filter((node) =>
-          // A blank node by its term and its document's address, not the number the graph gives it.
-          (node.term === undefined ? [node.id] : [node.term, node.document!])
-            .concat(labels.get(node.id)!)
-            .some((text) => folded(text).includes(wanted)),
-        );
+  const searched = useMemo(() => searchIndex(filtered.nodes, labels), [filtered, labels]);
+  const found = useMemo(
+    () =>
+      wanted === ""
+        ? []
+        : searched
+            .filter(({ texts }) => texts.some((text) => text.includes(wanted)))
+            .map(({ node }) => node),
+    [searched, wanted],
+  );
 
   const toggle = (group: NodeGroup) =>
     setFilters((current) => ({

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useEffect, useId, useState } from "preact/hooks";
+import { useEffect, useId, useMemo, useState } from "preact/hooks";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -19,6 +19,24 @@ import { ProblemCount } from "./ProblemCount";
 import { draftNameOf } from "./titles";
 import { deckOf, sectionHome, sectionOf, SIDEBAR_SECTIONS } from "./workspaceLayout";
 import { queryKeys } from "../queryKeys";
+import { searchedText } from "../searchText";
+
+/** A name's texts, in each language it has, as the filter matches them (searchedText). */
+function searchedTexts(...texts: (LangText | string)[]): string[] {
+  return texts
+    .flatMap((text) => (typeof text === "string" ? [text] : Object.values(text)))
+    .map(searchedText);
+}
+
+/** The items whose name holds what was typed (`wanted`, folded); undefined while they are not read. */
+function kept<T>(
+  items: readonly { item: T; texts: readonly string[] }[] | undefined,
+  wanted: string,
+): T[] | undefined {
+  return items
+    ?.filter(({ texts }) => texts.some((text) => text.includes(wanted)))
+    .map(({ item }) => item);
+}
 
 /**
  * The sidebar's content, in the shell's `nav` (StudioShell): first the
@@ -72,12 +90,21 @@ export function StudioSidebar({
   const deckUrl = deckOf(route);
   const draftUrl = "draftUrl" in route ? route.draftUrl : null;
   const wanted = folded(filter.trim());
-  const kept = (...texts: (LangText | string)[]) =>
-    texts
-      .flatMap((text) => (typeof text === "string" ? [text] : Object.values(text)))
-      .some((text) => folded(text).includes(wanted));
-  const decks = decksQuery.data?.filter((deck) => kept(deck.title));
-  const drafts = draftsQuery.data?.filter((draft) => kept(draft.title, draft.name));
+  // Each name folded once, by its start (searchedText), when the decks or drafts are read, not for each letter typed.
+  const deckNames = useMemo(
+    () => decksQuery.data?.map((deck) => ({ item: deck, texts: searchedTexts(deck.title) })),
+    [decksQuery.data],
+  );
+  const draftNames = useMemo(
+    () =>
+      draftsQuery.data?.map((draft) => ({
+        item: draft,
+        texts: searchedTexts(draft.title, draft.name),
+      })),
+    [draftsQuery.data],
+  );
+  const decks = useMemo(() => kept(deckNames, wanted), [deckNames, wanted]);
+  const drafts = useMemo(() => kept(draftNames, wanted), [draftNames, wanted]);
   const href = (to: StudioRoute) => studioRouteToHash(to);
   const draftName = (draft: ReleaseDraftSummary) => draftNameOf(draft, { t, readerText });
   const isPinned = (item: WorkItem) => pinned.some((each) => sameItem(each, item));

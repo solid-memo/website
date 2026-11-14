@@ -299,6 +299,16 @@ describe("ReleasesScreen", () => {
     expect(screen.getByText("No release matches “rivers”.")).toBeInTheDocument();
   });
 
+  it("filters a release by the start of its name and address alone", () => {
+    const long = `https://pod.example/public/${"é".repeat(16_000)}-tail.ttl`;
+    renderScreen({ releases: [{ url: long, public: false }] });
+    const filter = screen.getByRole("searchbox", { name: "Filter by name or address" });
+    fireEvent.input(filter, { target: { value: `public/${"E".repeat(100)}` } });
+    expect(screen.getAllByRole("rowheader")).toHaveLength(1);
+    fireEvent.input(filter, { target: { value: "-tail" } });
+    expect(screen.queryByRole("table")).toBeNull();
+  });
+
   it("says a release on another server was not checked, and offers no way to make it public", () => {
     const other = "https://other.example/releases/solid/v1.ttl";
     renderScreen({ releases: [{ url: other, public: null }] });

@@ -15,6 +15,7 @@ import { ExternalLink } from "@solid-memo/ui/ExternalLink";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { searchedText } from "./searchText";
 import { useConfirm } from "./shell/ConfirmDialog";
 import { DataTable } from "./shell/DataTable";
 import { nextSort, sortedRows, type TableSort } from "./shell/tableModel";
@@ -101,13 +102,22 @@ export function ReleasesScreen({
     [t, readerText],
   );
   const wanted = folded(filter.trim());
+  // Each release's name and address folded once, by their start (searchedText), not for each letter typed.
+  const searched = useMemo(
+    () =>
+      releases.map((release) => ({
+        release,
+        texts: [nameOf(release.url), release.url].map(searchedText),
+      })),
+    [releases, nameOf],
+  );
   // Filtered and sorted when the releases or the view change, not on every render.
   const found = useMemo(
     () =>
-      releases.filter((release) =>
-        [nameOf(release.url), release.url].some((text) => folded(text).includes(wanted)),
-      ),
-    [releases, wanted, nameOf],
+      searched
+        .filter(({ texts }) => texts.some((text) => text.includes(wanted)))
+        .map(({ release }) => release),
+    [searched, wanted],
   );
   const shown = useMemo(
     () =>

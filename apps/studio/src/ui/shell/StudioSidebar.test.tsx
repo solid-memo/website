@@ -176,6 +176,25 @@ describe("StudioSidebar", () => {
     ).toEqual(["Solid"]);
   });
 
+  it("filters a deck and a draft by the start of their names alone", async () => {
+    const long = `Kanji ${"é".repeat(16_000)} tail`;
+    renderSidebar(
+      { screen: "home", instanceUrl },
+      {
+        listDecks: vi.fn(async () => [makeDeck("deck-1", { en: long })]),
+        listReleaseDrafts: vi.fn(async () => [{ ...solid, title: { en: long } }]),
+      },
+    );
+    await loaded();
+    const filter = screen.getByRole("searchbox", { name: "Filter decks and drafts" });
+    fireEvent.input(filter, { target: { value: `kanji ${"e".repeat(100)}` } });
+    expect(within(decks()).getAllByRole("link")).toHaveLength(1);
+    expect(within(drafts()).getAllByRole("link")).toHaveLength(1);
+    fireEvent.input(filter, { target: { value: "tail" } });
+    expect(screen.getByText("No decks.")).toBeInTheDocument();
+    expect(screen.getByText("No drafts.")).toBeInTheDocument();
+  });
+
   it("counts the problems the instance's check found beside its health, and checks nothing itself", async () => {
     const queryClient = new QueryClient();
     const report = (violationCount: number): ValidationReport => ({

@@ -93,7 +93,8 @@ It takes the whole window, and the window doesn't scroll:
   - Under the sections are the instance's decks, each at its cards, and
     its drafts, each at its overview with its version, the one shown
     marked, from the screens' own queries. A filter keeps those whose
-    name holds its text, case and accents aside.
+    name holds its text in its first 200 characters, case and accents
+    aside.
   - Above the decks are those opened last on any of their screens
     (Recently opened, five at most, the last first), less those pinned.
     Each has a pin (**Pin** *name*, pressed while pinned). Pinned ones
@@ -437,7 +438,10 @@ nothing from the pod. The entries and their rank come from
 - An entry matches when its name holds the letters typed in their
   order, case and accents aside ("kn5" finds Kanji N5).
 - Only the first 200 characters of a name are searched, so a name as
-  long as a card's front costs no more than one of 200 characters.
+  long as a card's front costs no more than one of 200 characters. The
+  graph's search, the releases' filter and the sidebar's do the same
+  ([`searchText.ts`](../apps/studio/src/ui/searchText.ts)), each
+  folding its names once, not again for each letter typed.
 - A letter at the start of a word, or right after the one before,
   counts for more, and a shorter name a little, up to 200
   characters. The best 50 come
@@ -2596,8 +2600,8 @@ a column's name sorting it, then the other way, then as the catalog
 lists them, and **Enter** opening the release at the cursor. That does
 as its link does, or nothing when it has no link: **j** and **k** then
 leave the focus on the page's body, and go on from that row. A filter
-keeps the releases whose name or address holds its text, case and
-accents aside.
+keeps the releases whose name or address holds its text in its first
+200 characters, case and accents aside.
 The sidebar and the drafts screen link to it ("Published releases"
 there). A learner adds a release in Solid Memo by the link copied here
 ([deck-library.md](deck-library.md#from-a-link)).
@@ -2671,7 +2675,9 @@ small square, and the table of edges names each.
 - **Find a node**, by its name or its address, among the nodes the
   filters show, beyond the neighbors too: ten at most, Enter selecting
   the first, the focus staying in the search. A blank node is found by
-  its label or its document's address.
+  its label or its document's address. Only the first 200 characters of
+  a name or an address are searched, made ready once when the nodes the
+  filters show change, not again for each letter typed.
 - **Cards**, **Wrong options**, **Review states**, **Answers** and
   **Leaves** ("in your Pod", "outside your Pod", and found in no
   document), each shown or hidden, all shown at first.
