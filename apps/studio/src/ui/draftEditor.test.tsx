@@ -132,6 +132,36 @@ describe("useDraftEditor", () => {
     expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [rename("A"), rename("Ap")]);
   });
 
+  it("writes the last of a run of keystrokes in the making notes or the contact, in its place", async () => {
+    const { useCases } = await renderEditor({
+      editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)),
+    });
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    const notes = (en: string): DraftChange => ({ kind: "setMakingNotes", notes: { en } });
+    const contact = (url: string): DraftChange => ({ kind: "setContact", url });
+    const typed = [
+      ...["N", "No", "Not", "Note"].map(notes),
+      ...["https://a.example/", "https://ab.example/"].map(contact),
+      notes("Notes"),
+      // Notes of no text leave the making the notes before them made: both are written.
+      notes(" "),
+    ];
+    for (const change of typed)
+      act(() => {
+        editor.edit([change], { debounce: true });
+      });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(DEBOUNCE_MS);
+    });
+    expect(useCases.editReleaseDraft).toHaveBeenCalledTimes(1);
+    expect(useCases.editReleaseDraft).toHaveBeenCalledWith(DRAFT_URL, [
+      notes("Note"),
+      contact("https://ab.example/"),
+      notes("Notes"),
+      notes(" "),
+    ]);
+  });
+
   it("writes what waits before a change that is not typing, and when the screen goes", async () => {
     const { useCases, view } = await renderEditor({
       editReleaseDraft: vi.fn(async (_url, changes) => made(courseDraft(), changes)),

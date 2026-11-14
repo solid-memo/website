@@ -92,14 +92,31 @@ export interface DraftEditor {
    * Make changes: at once on the screen, then in the pod. With
    * `debounce` (typing), the write waits until the document has had no
    * other for DEBOUNCE_MS; the changes of that time are written
-   * together. A change refused at once (an id taken, say) is not made,
-   * and its refusal returned; else null.
+   * together, a field's change that only replaces the one typed just
+   * before it (lastWins) in its place. A change refused at once (an id
+   * taken, say) is not made, and its refusal returned; else null.
    */
   edit: (changes: readonly DraftChange[], options?: { debounce?: boolean }) => DraftRefusal | null;
   /** Changes are waiting to be written, or being written. */
   saving: boolean;
   /** The last write that failed, until the next edit. */
   failure: DraftFailure | null;
+}
+
+/**
+ * Whether `change` makes `before`, the change just before it, as if it
+ * had never been made, so that only `change` need be written: the
+ * contact set again, or the notes of the release's making set again to
+ * some text. Notes with none are not: notes typed before them may have
+ * made the release's own making, which they leave.
+ */
+function lastWins(before: DraftChange | undefined, change: DraftChange): boolean {
+  if (before?.kind !== change.kind) return false;
+  if (change.kind === "setContact") return true;
+  return (
+    change.kind === "setMakingNotes" &&
+    Object.values(change.notes).some((text) => text.trim() !== "")
+  );
 }
 
 /** Changes waiting for their document to be still for a moment. */
@@ -255,8 +272,11 @@ export function useDraftEditor(useCases: UseCases, draftUrl: string): DraftEdito
     const documentUrl = documents[0]!;
     const held = waiting.documents.get(documentUrl);
     if (held !== undefined) clearTimeout(held.timer);
+    const waited = held?.changes ?? [];
+    // A keystroke's change that only replaces the one before it takes its place: a write makes each change it is given.
+    const replaced = changes.length === 1 && lastWins(waited.at(-1), changes[0]!);
     waiting.documents.set(documentUrl, {
-      changes: [...(held?.changes ?? []), ...changes],
+      changes: [...(replaced ? waited.slice(0, -1) : waited), ...changes],
       timer: setTimeout(() => flush(documentUrl), DEBOUNCE_MS),
     });
     told();
