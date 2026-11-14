@@ -329,7 +329,8 @@ const DECK_FILE_LIMITS: ReadLimits = {
  * The file's triples, its relative IRIs resolved against `baseUrl`;
  * deckFileUnreadable when it does not parse, deckFileTooLarge when it
  * is larger than `limits` allow (its characters, which are no more than
- * its bytes, then its triples and their terms: quadTally); no limits for
+ * its bytes, a JSON-LD text's values (refuseRemoteContexts), then its
+ * triples and their terms: quadTally); no limits for
  * a text from the user's own pod, which is then unreadable when its base
  * or prefix declarations are past what any read takes in, or it nests
  * too deep (writeTurtle). A deck file is triples: statements in
@@ -345,7 +346,7 @@ export function parseDeckFile(
   const tooLarge = () => new AppError("deckFileTooLarge", { ...limits });
   if (limits !== null && text.length > limits.bytes) throw tooLarge();
   // The depth is checked, in refuseRemoteContexts, before anything recurses into the document.
-  const checked = format === "jsonld" ? refuseRemoteContexts(text, baseUrl) : text;
+  const checked = format === "jsonld" ? refuseRemoteContexts(text, baseUrl, limits) : text;
   return parseQuads(checked, format, baseUrl, limits ?? undefined).then(
     (parsed) => parsed.filter((quad) => quad.graph.termType === "DefaultGraph"),
     (error: unknown) => {
