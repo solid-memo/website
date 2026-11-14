@@ -1881,6 +1881,26 @@ describe("readRelease and parseRelease", () => {
     }
   });
 
+  it("refuse a JSON-LD file of values that make no triple, or of values that take more work than a release's triples may (GHSA-96cg-w2x5-fpf4)", async () => {
+    const pod = await draftPod();
+    const text = (values: unknown[]) =>
+      JSON.stringify({
+        "@id": `${DECKS}capitals/v1.ttl`,
+        "@type": `${SM}Deck`,
+        [`${SM}studyDirection`]: { "@id": `${SM}frontToBack` },
+        [`${SM}p`]: values,
+      });
+    await expect(
+      pod.repository.parseRelease(text(Array(5_000).fill(null)), "jsonld"),
+    ).rejects.toMatchObject({ code: "deckFileUnreadable" });
+    await expect(
+      pod.repository.parseRelease(text([[[[[[[[[Array(1_000_000).fill("a")]]]]]]]]]), "jsonld"),
+    ).rejects.toMatchObject({ code: "deckFileUnreadable" });
+    await expect(
+      pod.repository.parseRelease(text(Array(4 * RELEASE_LIMITS.quads).fill(0)), "jsonld"),
+    ).rejects.toMatchObject({ code: "deckFileTooLarge", vars: RELEASE_LIMITS });
+  });
+
   it("refuse a file with a term Turtle cannot write as it is, which a draft would keep (GHSA-x937-hx25-qfp4)", async () => {
     const pod = await draftPod();
     for (const extra of [
