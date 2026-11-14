@@ -1788,6 +1788,18 @@ An import reads the file as the pod is read, with the same mappers:
 - JSON nested deeper than 12 levels is refused (`deckFileUnreadable`),
   before anything else reads it: the JSON-LD parser takes time far
   beyond linear in the depth, and a file this app exports nests 5;
+- JSON-LD with more than 4,096 values that make no triple, or that sit
+  in an array in another array, is refused (`deckFileUnreadable`)
+  before it's parsed. A value makes no triple when it's `null`, an
+  empty array or object, or a string, number or boolean where a node
+  belongs, in `@graph`, `@included` or the top-level array. A value
+  object whose `@value` is `null` counts, and the empty array of an
+  `@list`, which is `rdf:nil`, doesn't. A `@set` object counts as the
+  array it holds, under an alias too. The values of an array in another
+  array outside a list may make triples, but the parser takes the
+  longer over each the deeper the arrays nest. JSON-LD writes no array
+  in an array but for a list of lists, which counts neither. A file
+  this app exports holds none;
 - a JSON-LD RDF-star annotation (`@annotation`, or a term defined as
   it) or triple term (an `@id`, or a term defined as it, given an
   object or an array that holds one) is refused (`deckFileUnreadable`).
@@ -1828,8 +1840,23 @@ An import reads the file as the pod is read, with the same mappers:
   quoted in a card's text doesn't count. So is a file with
   a term longer than 16,383 characters, as every document the app
   reads is, and a JSON-LD file with a string or key that long, which
-  is refused before it's parsed. A
-  release file the Studio opens is held to a release's limits
+  is refused before it's parsed. So is a JSON-LD file whose values take
+  the parser more work than 26 units for each triple the limits allow,
+  counted before it's parsed. Each value, an array element or object
+  member, takes 8, or 2 when it's a string, number or boolean given to
+  `@id`, `@type`, `@value`, `@language` or `@direction`. A member under
+  a key that's no keyword takes 2 more, and any other string, number or
+  boolean 4 more. Every value takes 1 more for each container above it,
+  and 4 more for each array it sits in directly in another, a `@set`
+  object counting as its array. The parser takes time over each value,
+  whether it makes a triple or not, and the more the deeper it sits. A
+  file this app exports takes some 20 to 30 for each triple, the more
+  the more of its literals have a language or a datatype. So such a file
+  may be refused with somewhat fewer triples than the limits allow,
+  still more than a deck of tens of thousands of cards holds. A file of
+  values that make few triples or none may still take the parser about
+  half as long again as one of the most triples allowed. A release file
+  the Studio opens is held to a release's limits
   ([deck-library.md](deck-library.md#from-a-link));
 - a triple with a term Turtle can't write as it is is left out (below).
 

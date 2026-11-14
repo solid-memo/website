@@ -14,8 +14,12 @@ const EX = "https://example.org/ns#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 
+/** Why a document of too many values that make no triple, or that nest in arrays, is refused. */
+const nothingReason =
+  "The file has more than 4096 values that state nothing, or that sit in an array in another array.";
+
 /** The check of a document read with no base of its own. */
-const refuseRemoteContexts = (text: string) => refuseIn(text, "");
+const refuseRemoteContexts = (text: string) => refuseIn(text, "", null);
 
 const iri = (value: string) => ({ termType: "NamedNode", value }) as Term;
 const blank = (value: string) => ({ termType: "BlankNode", value }) as Term;
@@ -276,11 +280,11 @@ describe("refuseRemoteContexts", () => {
       "The file declares a JSON-LD @base that is not plain, or longer than 512 characters.";
     const text = (base: string) => JSON.stringify({ "@context": { "@base": base }, "@id": "n" });
     // An absolute base replaces the document's; a relative one adds to it.
-    expect(() => refuseIn(text(`https://pod.example/${"b".repeat(490)}`), url)).not.toThrow();
-    expect(() => refuseIn(text(`${"b".repeat(200)}/`), url)).toThrow(
+    expect(() => refuseIn(text(`https://pod.example/${"b".repeat(490)}`), url, null)).not.toThrow();
+    expect(() => refuseIn(text(`${"b".repeat(200)}/`), url, null)).toThrow(
       expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }),
     );
-    expect(() => refuseIn(text("b/"), `https://pod.example/${"a".repeat(512)}`)).toThrow(
+    expect(() => refuseIn(text("b/"), `https://pod.example/${"a".repeat(512)}`, null)).toThrow(
       expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }),
     );
   });
@@ -298,6 +302,126 @@ describe("refuseRemoteContexts", () => {
         refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
       ).toThrow(expect.objectContaining({ code: "deckFileUnreadable", vars: { reason } }));
     }
+  });
+
+  it("refuses more values that make no triple than a few thousand, before the parser reads them (GHSA-96cg-w2x5-fpf4)", () => {
+    const refused = expect.objectContaining({
+      code: "deckFileUnreadable",
+      vars: { reason: nothingReason },
+    });
+    const values = (value: string, count: number) =>
+      `{"@context":{"ex":"${EX}"},"@id":"ex:s","ex:p":[${Array(count).fill(value).join(",")}]}`;
+    for (const value of ["null", "[]", "{}", '{"@value":null}', '{"@set":[]}']) {
+      expect(() => refuseRemoteContexts(values(value, 4_096))).not.toThrow();
+      expect(() => refuseRemoteContexts(values(value, 4_097))).toThrow(refused);
+      // A file of nothing else, as large as a deck file may be, is refused too.
+      expect(() => refuseRemoteContexts(values(value, 100_000))).toThrow(refused);
+    }
+    // A string, number or boolean where a node belongs states nothing either.
+    for (const key of ["@graph", "@included"]) {
+      const nodes = (count: number) =>
+        `{"@context":{"ex":"${EX}"},"${key}":[${Array(count).fill('"a"').join(",")}]}`;
+      expect(() => refuseRemoteContexts(nodes(4_096))).not.toThrow();
+      expect(() => refuseRemoteContexts(nodes(4_097))).toThrow(refused);
+    }
+    expect(() => refuseRemoteContexts(`[${Array(4_097).fill("1").join(",")}]`)).toThrow(refused);
+    expect(() =>
+      refuseRemoteContexts(
+        `{"@graph":{"@id":"${EX}s","${EX}p":[${Array(10_000).fill("true").join(",")}]}}`,
+      ),
+    ).not.toThrow();
+    // The empty array of an `@list`, or of a list in it, is rdf:nil, a triple.
+    expect(() => refuseRemoteContexts(values('{"@list":[]}', 10_000))).not.toThrow();
+    expect(() => refuseRemoteContexts(values('{"@list":[[[]]]}', 10_000))).not.toThrow();
+  });
+
+  it("refuses more values in an array in another array than a few thousand, which take the parser the more time the deeper they nest (GHSA-96cg-w2x5-fpf4)", () => {
+    const refused = expect.objectContaining({
+      code: "deckFileUnreadable",
+      vars: { reason: nothingReason },
+    });
+    const nested = (key: string, depth: number, count: number) =>
+      `{"@context":{"ex":"${EX}"},"@id":"ex:s","${key}":${"[".repeat(depth - 1)}[${Array(count).fill('"a"').join(",")}]${"]".repeat(depth - 1)}}`;
+    for (const key of ["@graph", "ex:p", "zz"]) {
+      // Each array in another counts, and each value in one.
+      expect(() => refuseRemoteContexts(nested(key, 2, 4_096))).not.toThrow();
+      expect(() => refuseRemoteContexts(nested(key, 2, 4_097))).toThrow(refused);
+      expect(() => refuseRemoteContexts(nested(key, 11, 4_087))).not.toThrow();
+      expect(() => refuseRemoteContexts(nested(key, 11, 4_088))).toThrow(refused);
+      expect(() => refuseRemoteContexts(nested(key, 11, 1_000_000))).toThrow(refused);
+    }
+    // In one array, or in an object in an array, they don't count, but where nodes belong.
+    expect(() => refuseRemoteContexts(nested("ex:p", 1, 10_000))).not.toThrow();
+    expect(() => refuseRemoteContexts(nested("zz", 1, 10_000))).not.toThrow();
+    const strings = Array(10_000).fill('"a"').join(",");
+    const inObjects = `{"@context":{"ex":"${EX}"},"@id":"ex:s","ex:p":[{"ex:q":[{"ex:q":[${strings}]}]}]}`;
+    expect(() => refuseRemoteContexts(inObjects)).not.toThrow();
+    // A `@set` object is the array it holds, under an alias too.
+    for (const set of ["@set", "s"]) {
+      const inSets = `{"@context":{"ex":"${EX}","s":"@set"},"@id":"ex:s","ex:p":[{"${set}":[{"${set}":[${strings}]}]}]}`;
+      expect(() => refuseRemoteContexts(inSets)).toThrow(refused);
+    }
+    // Nor do lists of lists.
+    const lists = `{"@context":{"ex":"${EX}"},"@id":"ex:s","ex:p":{"@list":[[[${Array(10_000).fill('"a"').join(",")}]]]}}`;
+    expect(() => refuseRemoteContexts(lists)).not.toThrow();
+  });
+
+  it("refuses strings where nodes belong in `@set` objects as in arrays, at any depth (GHSA-96cg-w2x5-fpf4)", () => {
+    const refused = expect.objectContaining({
+      code: "deckFileUnreadable",
+      vars: { reason: nothingReason },
+    });
+    const graph = (depth: number, count: number) =>
+      `{"@context":{"ex":"${EX}"},"@graph":${'{"@set":['.repeat(depth)}${Array(count).fill('"a"').join(",")}${"]}".repeat(depth)}}`;
+    for (const depth of [1, 2, 5]) {
+      // Each string counts, and each `@set` object, and its array, in an array in another.
+      const sets = 2 * Math.max(0, depth - 2);
+      expect(() => refuseRemoteContexts(graph(depth, 4_096 - sets))).not.toThrow();
+      expect(() => refuseRemoteContexts(graph(depth, 4_097 - sets))).toThrow(refused);
+      expect(() => refuseRemoteContexts(graph(depth, 1_000_000))).toThrow(refused);
+    }
+    // A node in a `@set` where nodes belong is one, and states something.
+    const nodes = `{"@context":{"ex":"${EX}"},"@graph":{"@set":[${Array(10_000).fill('{"ex:p":"a"}').join(",")}]}}`;
+    expect(() => refuseRemoteContexts(nodes)).not.toThrow();
+  });
+
+  it("refuses values that take more work than the limits allow for each triple, as too large, the more work the deeper they sit, and counts none with no limits (GHSA-96cg-w2x5-fpf4)", async () => {
+    const limits = { bytes: 1024 * 1024, quads: 100, characters: 1024 * 1024 };
+    const tooLarge = expect.objectContaining({ code: "deckFileTooLarge", vars: limits });
+    const strings = (count: number) => Array.from({ length: count }, (_, at) => `"v${at}"`).join();
+    const text = (values: string) => `{"@context":{"ex":"${EX}"},"@id":"ex:s","ex:p":${values}}`;
+    // 2,600 in all: 47 for the document, its context, its prefix, the id and the array, then 14 for each
+    // string: 8, 4 for a literal, and 2 for the two containers above it.
+    expect(() => refuseIn(text(`[${strings(182)}]`), "", limits)).not.toThrow();
+    expect(() => refuseIn(text(`[${strings(183)}]`), "", limits)).toThrow(tooLarge);
+    expect(() => refuseIn(text(`[${strings(10_000)}]`), "", null)).not.toThrow();
+    // In an array in another, 19 each: 4 more for that array, 1 for the container; in a `@set` object in
+    // one too, 21.
+    expect(() => refuseIn(text(`[[${strings(133)}]]`), "", limits)).not.toThrow();
+    expect(() => refuseIn(text(`[[${strings(134)}]]`), "", limits)).toThrow(tooLarge);
+    const sets = (count: number) => text(`{"@set":[{"@set":[${strings(count)}]}]}`);
+    expect(() => refuseIn(sets(120), "", limits)).not.toThrow();
+    expect(() => refuseIn(sets(121), "", limits)).toThrow(tooLarge);
+    // A value object is a value, 10, and its value and language 5 each, as keywords' strings, under an alias
+    // too; its index takes a literal's work, 15.
+    const values = (count: number, value: string, context = "") =>
+      `{"@context":{"ex":"${EX}"${context}},"@id":"ex:s","ex:p":[${Array(count).fill(value).join()}]}`;
+    const tagged = '{"@value":"a","@language":"en"}';
+    expect(() => refuseIn(values(127, tagged), "", limits)).not.toThrow();
+    expect(() => refuseIn(values(128, tagged), "", limits)).toThrow(tooLarge);
+    const aliased = (count: number) => values(count, '{"v":"a","@language":"en"}', ',"v":"@value"');
+    expect(() => refuseIn(aliased(127), "", limits)).not.toThrow();
+    expect(() => refuseIn(aliased(128), "", limits)).toThrow(tooLarge);
+    const indexed = '{"@value":"a","@index":"i"}';
+    expect(() => refuseIn(values(85, indexed), "", limits)).not.toThrow();
+    expect(() => refuseIn(values(86, indexed), "", limits)).toThrow(tooLarge);
+    // The app's own file takes less work for each triple it states.
+    const quads = Array.from({ length: 100 }, (_, at) =>
+      quad(iri(`${EX}s${at % 10}`), `${EX}p`, literal(`v${at}`, at % 2 === 0 ? "en" : "")),
+    );
+    const written = jsonLdOf(quads, { ex: EX });
+    expect(() => refuseIn(written, "", limits)).not.toThrow();
+    expect(await parseQuads(written, "jsonld", EX)).toHaveLength(100);
   });
 
   it("gives the document it checked, a key named twice as JSON.parse keeps it", () => {

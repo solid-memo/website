@@ -4,6 +4,7 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
+import type { ReadLimits } from "./client/interface";
 import { MAX_BASE_CHARACTERS, MAX_TERM_CHARACTERS, plainBase } from "./client/readLimits";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -93,6 +94,77 @@ function termValue(term: Term, compact: (iri: string) => string): Value {
  * nested some hundreds of levels holds the tab for minutes.
  */
 const MAX_JSON_DEPTH = 12;
+
+/**
+ * The work a value takes the JSON-LD parser, in units: VALUE_WORK for
+ * each value, but KEYWORD_WORK for a string, number or boolean that
+ * names a node or a type, or is a literal's value, language or direction
+ * (a member of CHEAP_KEYWORDS, under an alias too), which the parser
+ * takes far less time over; TERM_WORK more for a member of an object
+ * under a key that's no keyword, which the parser expands; LITERAL_WORK
+ * more for any other string, number or boolean, which the parser makes
+ * a term of or drops; one more for each container above the value; and
+ * NESTED_ARRAY_WORK more for each array it sits in directly in another
+ * (a `@set` object counting as the array it holds). The parser takes
+ * time for every value, one that makes no triple too, which the bound on
+ * the triples (quadTally) never sees, and the more the deeper the value
+ * sits: over each container above it, and far more over each array in
+ * an array.
+ */
+const VALUE_WORK = 8;
+const KEYWORD_WORK = 2;
+const TERM_WORK = 2;
+const LITERAL_WORK = 4;
+const NESTED_ARRAY_WORK = 4;
+const CHEAP_KEYWORDS = new Set(["@id", "@type", "@value", "@language", "@direction"]);
+
+/**
+ * How much work (VALUE_WORK) a deck file may take for each triple its
+ * read limits allow. A file this app exports takes some 20 to 30 for
+ * each triple, the more the more of its literals are value objects, so
+ * one may be refused with somewhat fewer triples than the limits allow.
+ * At the limits, a file's triples take the parser some time already,
+ * and one of values that make few triples or none, or that sit deep in
+ * arrays, may take about half as long again.
+ */
+const WORK_PER_QUAD = 26;
+
+/**
+ * How many values a deck file may hold that make no triple, `null` (a
+ * value object's `@value` among them), an empty array or object (not a
+ * list's, which is `rdf:nil`) and a string, number or boolean where a
+ * node belongs, or that sit in an array in another array outside a
+ * list. A file this app exports holds none, and one another tool writes
+ * a few at most: JSON-LD writes no array in an array but for a list of
+ * lists. They take the parser more time than other values for the work
+ * they're charged (VALUE_WORK), so few are allowed with no limits too.
+ */
+const MAX_EMPTY_VALUES = 4_096;
+
+/**
+ * Where a JSON value sits: an object's member, or an element of an array
+ * that is one; the document or a `@graph` or `@included` member, where
+ * nodes belong, or an element of an array that is one; the array of an
+ * `@list`, or an element of a list (an array in it a list too); or an
+ * element of an array that is itself an element outside a list. A
+ * `@set` object's member sits where the object does.
+ */
+type Place = "member" | "element" | "nodes" | "node" | "list" | "listed" | "nested";
+
+/**
+ * A value the walk of refuseRemoteContexts is to visit: how many
+ * containers are above it, where it sits (Place), how many arrays it
+ * sits in directly, one in the next (a `@set` object counting as the
+ * array it holds), and whether it is an object's member under a term
+ * (a key that's no keyword) or under one of CHEAP_KEYWORDS, or neither.
+ */
+type Pending = {
+  value: unknown;
+  depth: number;
+  place: Place;
+  arrays: number;
+  key: "term" | "cheap" | "other";
+};
 
 /**
  * How many contexts a top-level node's `@context` may list: a file this
@@ -189,8 +261,13 @@ function refuseLongStrings(text: string): void {
  * nested deeper than MAX_JSON_DEPTH too, before anything recurses into
  * it, an RDF-star annotation or triple term (refuseTripleTerms),
  * which the parser is also told not to read, and a string longer than a
- * term may be (refuseLongStrings), before JSON.parse reads it. Throws
- * deckFileUnreadable, as for text that is no JSON at all.
+ * term may be (refuseLongStrings), before JSON.parse reads it, and more
+ * than MAX_EMPTY_VALUES values that make no triple or sit in nested
+ * arrays (valueTally). Throws deckFileUnreadable, as for text that is no
+ * JSON at all; and deckFileTooLarge for values that take the parser more
+ * work than WORK_PER_QUAD for each triple `limits` allow, when there are
+ * limits: the parser takes time for each value, whether it makes a
+ * triple or not, the more the deeper it sits (valueTally).
  *
  * Gives the document checked, written again: the parser is to read that
  * text, not the file's, so that both see the same document. A key named
@@ -199,7 +276,11 @@ function refuseLongStrings(text: string): void {
  * first in it (written): the parser reads the text as it streams, which
  * it can only with the context before the rest.
  */
-export function refuseRemoteContexts(text: string, baseUrl: string): string {
+export function refuseRemoteContexts(
+  text: string,
+  baseUrl: string,
+  limits: ReadLimits | null,
+): string {
   refuseLongStrings(text);
   let json: unknown;
   try {
@@ -208,32 +289,113 @@ export function refuseRemoteContexts(text: string, baseUrl: string): string {
     throw new AppError("deckFileUnreadable", { reason: String(error) });
   }
   const topLevel = new Set(Array.isArray(json) ? json : [json]);
-  // The terms the contexts alias to `@id`, and the keys given an object (alone or in an array), in the whole
-  // document: an `@id` that is an object is a triple.
+  // The keywords the contexts alias terms to, in the whole document, and the keys given an object (alone
+  // or in an array): an `@id` that is an object is a triple.
+  const aliases = new Map<string, string>();
+  const keyword = (key: string) => aliases.get(key) ?? key;
   const ids = new Set(["@id"]);
   const givenObjects = new Set<string>();
+  const tally = valueTally(limits);
   // A walk of its own, not a recursion, which a file nested deeper than the call stack would end.
-  const pending: [value: unknown, depth: number][] = [[json, 0]];
+  const pending: Pending[] = [{ value: json, depth: 0, place: "nodes", arrays: 0, key: "other" }];
   while (pending.length > 0) {
-    const [value, depth] = pending.pop()!;
+    const visit = pending.pop()!;
+    tally(visit);
+    const { value, depth } = visit;
     if (typeof value !== "object" || value === null) continue;
     if (depth === MAX_JSON_DEPTH) {
       throw new AppError("deckFileUnreadable", {
         reason: `The file nests deeper than ${MAX_JSON_DEPTH} levels.`,
       });
     }
-    for (const [key, child] of Object.entries(value)) {
-      if (key === "@context") {
-        for (const alias of refuseContext(child, topLevel.has(value), baseUrl)) ids.add(alias);
+    // The node's context first, for its aliases to name the keywords of its other keys.
+    if ("@context" in value) {
+      const context = (value as { "@context": unknown })["@context"];
+      for (const [term, aliased] of refuseContext(context, topLevel.has(value), baseUrl)) {
+        aliases.set(term, aliased);
+        if (aliased === "@id") ids.add(term);
       }
+    }
+    for (const [key, child] of Object.entries(value)) {
       if (key === "@annotation") refuseTripleTerms();
       if (holdsObject(child)) givenObjects.add(key);
-      pending.push([child, depth + 1]);
+      const aliased = keyword(key);
+      pending.push({
+        value: child,
+        depth: depth + 1,
+        key: keyOf(value, aliased),
+        ...placeIn(visit, aliased),
+      });
     }
   }
   if ([...ids].some((id) => givenObjects.has(id))) refuseTripleTerms();
   // Only now, the depth known to be within MAX_JSON_DEPTH: written recurses.
   return written(json);
+}
+
+/**
+ * A count of a document's values as refuseRemoteContexts walks them,
+ * which throws deckFileUnreadable at the value past MAX_EMPTY_VALUES that
+ * makes no triple (makesNothing), and deckFileTooLarge at the value past
+ * WORK_PER_QUAD of work for each triple `limits` allow, none with no
+ * limits. A value's work is as VALUE_WORK says.
+ */
+function valueTally(limits: ReadLimits | null): (visit: Pending) => void {
+  const maxWork = limits === null ? Number.POSITIVE_INFINITY : WORK_PER_QUAD * limits.quads;
+  let work = 0;
+  let empty = 0;
+  return ({ value, depth, place, arrays, key }) => {
+    const scalar = typeof value !== "object" || value === null;
+    if (key === "cheap" && scalar) work += KEYWORD_WORK;
+    else work += VALUE_WORK + (key === "term" ? TERM_WORK : 0);
+    if (scalar && value !== null && key !== "cheap") work += LITERAL_WORK;
+    work += depth + NESTED_ARRAY_WORK * Math.max(0, arrays - 1);
+    if (work > maxWork) throw new AppError("deckFileTooLarge", { ...limits });
+    if (!makesNothing(value, place) || ++empty <= MAX_EMPTY_VALUES) return;
+    throw new AppError("deckFileUnreadable", {
+      reason: `The file has more than ${MAX_EMPTY_VALUES} values that state nothing, or that sit in an array in another array.`,
+    });
+  };
+}
+
+/** How the member `keyword` (a key, its alias resolved) of a container is keyed (Pending). */
+function keyOf(parent: object, keyword: string): Pending["key"] {
+  if (Array.isArray(parent)) return "other";
+  if (CHEAP_KEYWORDS.has(keyword)) return "cheap";
+  return keyword.startsWith("@") ? "other" : "term";
+}
+
+/**
+ * Whether a JSON value counts toward MAX_EMPTY_VALUES: it sits in an
+ * array in another array outside a list, or makes no triple however it
+ * is read, `null`, an empty array or object but for a list's, which is
+ * `rdf:nil`, or a string, number or boolean where a node belongs.
+ */
+function makesNothing(value: unknown, place: Place): boolean {
+  if (value === null || place === "nested") return true;
+  if (typeof value !== "object") return place === "nodes" || place === "node";
+  const listed = place === "list" || place === "listed";
+  return !listed && Object.keys(value).length === 0;
+}
+
+/**
+ * Where the member `keyword` (a key, its alias resolved) of a container
+ * sits (Place), and how many arrays it sits in directly: a `@set`
+ * object's member where the object does, as its array were the object.
+ */
+function placeIn(
+  { value: parent, place, arrays }: Pending,
+  keyword: string,
+): { place: Place; arrays: number } {
+  if (!Array.isArray(parent)) {
+    if (keyword === "@set") return { place, arrays };
+    if (keyword === "@list") return { place: "list", arrays: 0 };
+    const nodes = keyword === "@graph" || keyword === "@included";
+    return { place: nodes ? "nodes" : "member", arrays: 0 };
+  }
+  if (place === "list" || place === "listed") return { place: "listed", arrays: arrays + 1 };
+  if (place === "member") return { place: "element", arrays: arrays + 1 };
+  return { place: place === "nodes" ? "node" : "nested", arrays: arrays + 1 };
 }
 
 /** Whether a value is an object, or an array that holds one. */
@@ -276,9 +438,13 @@ function written(value: unknown): string {
  * plain terms (plainTerm) that name no term of the node's contexts
  * (chained), and at most MAX_CONTEXT_CHARACTERS in all, and none an
  * alias of `@annotation` (refuseTripleTerms). Gives the terms it aliases
- * to `@id`.
+ * to keywords, with the keywords.
  */
-function refuseContext(context: unknown, onTopLevelNode: boolean, baseUrl: string): string[] {
+function refuseContext(
+  context: unknown,
+  onTopLevelNode: boolean,
+  baseUrl: string,
+): [term: string, keyword: string][] {
   const contexts = Array.isArray(context) ? context : [context];
   if (contexts.some(remote)) {
     throw new AppError("deckFileUnreadable", {
@@ -317,7 +483,7 @@ function refuseContext(context: unknown, onTopLevelNode: boolean, baseUrl: strin
     });
   }
   if (entries.some(([, value]) => value === "@annotation")) refuseTripleTerms();
-  return entries.flatMap(([key, value]) => (value === "@id" ? [key] : []));
+  return entries.filter(([key, value]) => !key.startsWith("@") && value.startsWith("@"));
 }
 
 /**

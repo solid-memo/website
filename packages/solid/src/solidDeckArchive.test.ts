@@ -1000,6 +1000,59 @@ describe("readDeckFile", () => {
     }
   });
 
+  it("refuses JSON-LD of values that make no triple, or of values that take more work than its triples may, before the parser reads it (GHSA-96cg-w2x5-fpf4)", () => {
+    const nested = (key: string, value: string, count: number) =>
+      `{"@context":{"ex":"${SM_NS}"},"@id":"#deck","${key}":${"[".repeat(9)}[${Array(count).fill(value).join(",")}]${"]".repeat(9)}}`;
+    // Thrown, not rejected: the parser never reads the file.
+    for (const [key, value] of [
+      ["ex:p", "[]"],
+      ["ex:p", "null"],
+      ["ex:p", '{"@value":null}'],
+      ["@graph", '"a"'],
+      ["zz", "0"],
+    ]) {
+      expect(() => parseDeckFile(nested(key!, value!, 3_000_000), "jsonld", base)).toThrow(
+        expect.objectContaining({
+          code: "deckFileUnreadable",
+          vars: {
+            reason:
+              "The file has more than 4096 values that state nothing, or that sit in an array in another array.",
+          },
+        }),
+      );
+    }
+    // Strings where nodes belong count in `@set` objects as in arrays.
+    const sets = `{"@graph":${'{"@set":['.repeat(10)}${Array(3_000_000).fill('"a"').join(",")}${"]}".repeat(10)}}`;
+    expect(() => parseDeckFile(sets, "jsonld", base)).toThrow(
+      expect.objectContaining({ code: "deckFileUnreadable" }),
+    );
+    const values = `{"ex:p":[${Array(4_000_000).fill("0").join(",")}]}`;
+    expect(() => parseDeckFile(values, "jsonld", base)).toThrow(
+      expect.objectContaining({
+        code: "deckFileTooLarge",
+        vars: expect.objectContaining({ quads: 1_000_000 }),
+      }),
+    );
+  });
+
+  it("reads an exported deck with a few values that make no triple, as another tool may write them", async () => {
+    const { pod, deck, cards } = await podWithDeck();
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    const text = await archive.exportDeck(
+      deck,
+      { format: "jsonld", withProgress: false },
+      { asNoOne: { cards: false, reviews: false } },
+    );
+    const json = JSON.parse(text);
+    for (const node of json["@graph"]) {
+      node["sm:nothing"] = null;
+      node["sm:empty"] = [{ "@value": null }, [], {}];
+    }
+    const read = await archive.readDeckFile(JSON.stringify(json), "jsonld", base);
+    expect(read.deck.id).toBe(deck.id);
+    expect(read.cards).toEqual(cards);
+  });
+
   it("refuses a file larger than a deck file may be, in characters, triples or their terms, though larger than a release may be", async () => {
     const bytes = 64 * 1024 * 1024;
     const quads = 1_000_000;
