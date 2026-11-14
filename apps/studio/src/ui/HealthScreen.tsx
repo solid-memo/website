@@ -41,8 +41,8 @@ export interface RepairActions {
   error: ErrorText | null;
 }
 
-/** A subject of a check, and the predicate a result names, as a link to where it is fixed (or to the subject itself). */
-type SubjectLink = (subjectUrl: string, path?: string) => ComponentChildren;
+/** A subject of a check, the document it was found in, and the predicate a result names, as a link to where it is fixed (or to the subject itself). */
+type SubjectLink = (subjectUrl: string, documentUrl: string, path?: string) => ComponentChildren;
 
 /**
  * What a check of the instance's documents found (`report`): its
@@ -70,7 +70,7 @@ function DataCheckSection({
       subject.status === "checked" || subject.status === "profiled"
         ? subject.violations
             .filter((v) => v.severity !== "info")
-            .map((violation) => ({ subject: subject.url, violation }))
+            .map((violation) => ({ subject: subject.url, document: document.url, violation }))
         : [],
     ),
   );
@@ -86,9 +86,9 @@ function DataCheckSection({
       <p class={summaryClass(report)}>{summaryOf(report, t)}</p>
       {results.length > 0 && (
         <ul class="studio-health-list">
-          {results.map(({ subject, violation }, index) => (
+          {results.map(({ subject, document, violation }, index) => (
             <li key={index}>
-              {link(subject, violation.path)}:{" "}
+              {link(subject, document, violation.path)}:{" "}
               <Result violation={violation} severity={severityLabel(violation.severity)} />
             </li>
           ))}
@@ -110,7 +110,7 @@ function DataCheckSection({
           <ul>
             {plan.repairs.map((repair) => (
               <li key={`${repair.kind} ${repair.subjectUrl}`}>
-                {labels[repair.kind]}: {link(repair.subjectUrl)}
+                {labels[repair.kind]}: {link(repair.subjectUrl, repair.documentUrl)}
               </li>
             ))}
           </ul>
@@ -127,7 +127,7 @@ function DataCheckSection({
           <ul>
             {plan.unrepairable.map((problem) => (
               <li key={problem.subjectUrl}>
-                {link(problem.subjectUrl)}{" "}
+                {link(problem.subjectUrl, problem.documentUrl)}{" "}
                 <button
                   class="danger"
                   aria-label={t("studio.health.remove", { subject: problem.subjectUrl })}
@@ -265,7 +265,7 @@ export function DeckHealthScreen({
   const about = (text: string) => (held ? text : <a href={aboutHref}>{text}</a>);
   const toSpot = held ? null : spotHref;
   const spotOf = useMemo(() => cardSpotsOf(deck, cards), [deck, cards]);
-  const link: SubjectLink = (subjectUrl, path) => {
+  const link: SubjectLink = (subjectUrl, _documentUrl, path) => {
     if (subjectUrl === deck.url) return about(t("studio.health.deckEntry"));
     if (subjectUrl === distributionUrlOf(deck.url))
       return about(t("studio.health.deckDistribution"));
@@ -389,9 +389,9 @@ export function InstanceHealthScreen({
 }) {
   const { t, readerText } = useI18n();
   useCheckAgain(checking, onCheck);
-  const deckOf = useMemo(() => deckOfSubjectsIn(decks), [decks]);
-  const link: SubjectLink = (subjectUrl) => {
-    const deck = deckOf(subjectUrl);
+  const deckOf = useMemo(() => deckOfSubjectsIn(instance.url, decks), [instance.url, decks]);
+  const link: SubjectLink = (subjectUrl, documentUrl) => {
+    const deck = deckOf(subjectUrl, documentUrl);
     return deck === undefined ? (
       <ExternalLink url={subjectUrl} />
     ) : (

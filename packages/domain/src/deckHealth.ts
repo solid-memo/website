@@ -14,6 +14,7 @@ import {
   type Deck,
 } from "./deck";
 import { unlikeRelease } from "./deckLanguages";
+import { canonicalUrlOf, catalogUrlOf } from "./instanceLayout";
 import { PathMap, piecesOf, TextMap } from "./pathKeys";
 import type { FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
@@ -170,20 +171,28 @@ export function withDeckReport(
 }
 
 /**
- * The deck of an instance a subject is about (`deckOfSubjectsIn`): the
- * deck whose entry or distribution it is, or whose cards or reviews
- * document holds it; undefined for any other subject.
+ * The deck of an instance a subject is about (`deckOfSubjectsIn`), given
+ * the document it was found in: the deck whose entry or distribution it
+ * is, when it was found in the instance's catalog, or the deck whose
+ * cards or reviews document it was found in; undefined for any other
+ * subject.
  */
-export type DeckOfSubject = (subjectUrl: string) => Deck | undefined;
+export type DeckOfSubject = (subjectUrl: string, documentUrl: string) => Deck | undefined;
 
 /**
  * Which of the instance's decks each subject is about, for the
- * instance's health screen. The decks' entries, distributions and
- * documents are indexed once, so each lookup takes constant time however
- * many decks and subjects there are; where a subject matches more than
- * one deck, the first in the decks' order wins.
+ * instance's health screen. A subject counts as a deck's entry or
+ * distribution only when it was found in the catalog's document, where
+ * the deck list reads them, compared as a request sends both addresses;
+ * any other subject counts only through the document it was found in,
+ * as the data check sets decks aside (`deckSetAside`). The decks'
+ * entries, distributions and documents are indexed once, so each lookup
+ * takes constant time however many decks and subjects there are; where
+ * a subject matches more than one deck, the first in the decks' order
+ * wins.
  */
-export function deckOfSubjectsIn(decks: readonly Deck[]): DeckOfSubject {
+export function deckOfSubjectsIn(instanceUrl: string, decks: readonly Deck[]): DeckOfSubject {
+  const catalog = canonicalUrlOf(catalogUrlOf(instanceUrl));
   const bySubject = new Map<string, number>();
   const byDocument = new Map<string, number>();
   const first = (map: Map<string, number>, key: string, index: number) => {
@@ -195,10 +204,11 @@ export function deckOfSubjectsIn(decks: readonly Deck[]): DeckOfSubject {
     first(byDocument, deck.cardsDocumentUrl, index);
     first(byDocument, deck.reviewsDocumentUrl, index);
   });
-  return (subjectUrl) => {
+  return (subjectUrl, documentUrl) => {
+    const inCatalog = catalog !== null && canonicalUrlOf(documentUrl) === catalog;
     const index = Math.min(
-      bySubject.get(subjectUrl) ?? Number.POSITIVE_INFINITY,
-      byDocument.get(documentUrlOf(subjectUrl)) ?? Number.POSITIVE_INFINITY,
+      (inCatalog ? bySubject.get(subjectUrl) : undefined) ?? Number.POSITIVE_INFINITY,
+      byDocument.get(documentUrl) ?? Number.POSITIVE_INFINITY,
     );
     return decks[index];
   };

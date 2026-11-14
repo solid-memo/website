@@ -35,7 +35,14 @@ import { subclassCycle, subclassDiamond } from "@solid-memo/shacl/testing/subcla
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { gradePrompt } from "@solid-memo/domain/grading";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
-import type { DocumentReport, Violation } from "@solid-memo/domain/validation";
+import {
+  arrangementSetAside,
+  deckSetAside,
+  summarize,
+  type DocumentReport,
+  type Violation,
+} from "@solid-memo/domain/validation";
+import type { Deck } from "@solid-memo/domain/deck";
 import { integerLiteral } from "./testing/literals";
 import { AppError } from "@solid-memo/domain/appError";
 import { readBudget } from "@solid-memo/application/readBudget";
@@ -301,6 +308,45 @@ describe("createShaclShapeValidator", () => {
         expect.objectContaining({ path: SM.reviewsDocument, constraint: "MinCount" }),
       ],
     });
+  });
+
+  // What one deck's document states of another deck's entry, or of a deck group, holds back that deck alone.
+  it("sets aside only the deck whose document states a failing deck entry or deck group", async () => {
+    const instance = "https://pod.example/solid-memo/a/";
+    const deckOf = (id: string) =>
+      ({
+        url: `${instance}catalog.ttl#${id}`,
+        cardsDocumentUrl: `${instance}decks/${id}-cards.ttl`,
+        reviewsDocumentUrl: `${instance}decks/${id}-reviews.ttl`,
+      }) as Deck;
+    const [deckA, deckB] = [deckOf("deck-a"), deckOf("deck-b")];
+    const turtle = `
+@prefix sm: <${SM_NS}> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+<> dcterms:isPartOf <${deckA.url}> .
+<${deckB.url}> a sm:Card .
+<${instance}catalog.ttl#group-x> a sm:DeckGroup .
+`;
+    const validator = createShaclShapeValidator({ fetch: vi.fn(), shapesFetch, ...SHAPE_SOURCES });
+    const cards = await validator.validateDataset(
+      deckA.cardsDocumentUrl,
+      await datasetOfTurtle(deckA.cardsDocumentUrl, turtle),
+      "pod",
+    );
+    expect(cards.subjects).toEqual([
+      expect.objectContaining({ url: deckB.url, status: "checked", shape: "card" }),
+      expect.objectContaining({ status: "checked", shape: "deckGroup" }),
+    ]);
+    const report = summarize(instance, [
+      { url: `${instance}catalog.ttl`, status: "checked", subjects: [] },
+      cards,
+      { url: deckB.cardsDocumentUrl, status: "checked", subjects: [] },
+      { url: deckB.reviewsDocumentUrl, status: "checked", subjects: [] },
+    ]);
+    expect(report.conforms).toBe(false);
+    expect(deckSetAside(report, deckA)).toBe(true);
+    expect(deckSetAside(report, deckB)).toBe(false);
+    expect(arrangementSetAside(report)).toBe(false);
   });
 
   it("is the same validator over another fetch's documents: its shapes and engines made once", async () => {

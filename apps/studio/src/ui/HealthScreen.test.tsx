@@ -343,6 +343,50 @@ describe("InstanceHealthScreen", () => {
     expect(onCheck).toHaveBeenCalledTimes(2);
   });
 
+  it("links a subject found outside the catalog to the deck of the document it was found in", () => {
+    // The other deck's entry, stated in this deck's cards document, is this deck's.
+    const instanceReport = summarize(instanceA.url, [
+      document(deck.cardsDocumentUrl, [checked(other.url, [missing])]),
+    ]);
+    render(
+      <WithCommands>
+        <InstanceHealthScreen
+          instance={instanceA}
+          report={instanceReport}
+          decks={[deck, other]}
+          checking={false}
+          onCheck={vi.fn()}
+          repairs={actions({
+            plan: {
+              repairs: [
+                {
+                  kind: "remove-subject",
+                  documentUrl: deck.cardsDocumentUrl,
+                  subjectUrl: other.url,
+                  version: 1,
+                },
+              ],
+              unrepairable: [
+                {
+                  documentUrl: deck.cardsDocumentUrl,
+                  subjectUrl: other.url,
+                  violations: [missing],
+                },
+              ],
+            },
+          })}
+          deckHref={(each) => `#/health?deck=${each.id}`}
+          badge={() => null}
+        />
+      </WithCommands>,
+    );
+    const data = part("Data check");
+    expect(within(data).queryByRole("link", { name: "in Verbs" })).toBeNull();
+    const inDeck = within(data).getAllByRole("link", { name: "in Kanji N5" });
+    expect(inDeck).toHaveLength(3);
+    for (const link of inDeck) expect(link).toHaveAttribute("href", "#/health?deck=deck-1");
+  });
+
   it("names each document the check could not read, and why, its hidden characters shown", () => {
     const unread = `${instanceA.url}reviews/deck-1.ttl`;
     render(

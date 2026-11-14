@@ -331,6 +331,14 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
   and whether the arrangement fails, are read from a report once and
   kept with it. Each deck's answer is then a lookup, however large the
   report.
+- **A deck entry or deck group counts only from the catalog**: the deck
+  list reads them from the catalog's document, so only a failing
+  subject found there sets a deck's entry or the arrangement aside. A
+  failing subject found in any other document, whatever its IRI, counts
+  only through its own document: it sets aside the deck whose cards or
+  reviews document it is in, if any. A deck's own check (`checkDeck`)
+  and the Studio's health screen (`deckOfSubjectsIn`) count a subject
+  the same way.
 - **Preferences that don't fit their shape are kept.** Preferences
   with a value their shape doesn't list, or without one it asks for,
   read as a misfit, not as none (`getPreferences`). So do ones whose

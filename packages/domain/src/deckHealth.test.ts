@@ -304,23 +304,46 @@ describe("deckOfSubjectsIn", () => {
     reviewsDocumentUrl: "https://pod.example/a/reviews/e.ttl",
   };
 
-  it("finds the deck whose entry, distribution or documents a subject is of", () => {
-    const deckOf = deckOfSubjectsIn([deck, other]);
-    expect(deckOf(other.url)).toBe(other);
-    expect(deckOf(distributionUrlOf(other.url))).toBe(other);
-    expect(deckOf(`${other.cardsDocumentUrl}#c1`)).toBe(other);
-    expect(deckOf(`${other.reviewsDocumentUrl}#c1-review`)).toBe(other);
-    expect(deckOf(`${CARDS}#c1`)).toBe(deck);
-    expect(deckOf(`${CATALOG}#catalog`)).toBeUndefined();
-    expect(deckOf("https://pod.example/elsewhere.ttl")).toBeUndefined();
+  const INSTANCE = "https://pod.example/a/";
+
+  it("finds the deck whose entry or distribution in the catalog, or whose documents, a subject is of", () => {
+    const deckOf = deckOfSubjectsIn(INSTANCE, [deck, other]);
+    expect(deckOf(other.url, CATALOG)).toBe(other);
+    expect(deckOf(distributionUrlOf(other.url), CATALOG)).toBe(other);
+    expect(deckOf(`${other.cardsDocumentUrl}#c1`, other.cardsDocumentUrl)).toBe(other);
+    expect(deckOf(`${other.reviewsDocumentUrl}#c1-review`, other.reviewsDocumentUrl)).toBe(other);
+    expect(deckOf(`${CARDS}#c1`, CARDS)).toBe(deck);
+    expect(deckOf(`${CATALOG}#catalog`, CATALOG)).toBeUndefined();
+    expect(deckOf("https://pod.example/elsewhere.ttl", "https://pod.example/elsewhere.ttl")).toBe(
+      undefined,
+    );
+  });
+
+  it("counts a subject found outside the catalog only through the document it was found in", () => {
+    const deckOf = deckOfSubjectsIn(INSTANCE, [deck, other]);
+    // The other deck's entry and distribution, stated in this deck's cards document.
+    expect(deckOf(other.url, CARDS)).toBe(deck);
+    expect(deckOf(distributionUrlOf(other.url), CARDS)).toBe(deck);
+    // A subject of the other deck's cards document, found in this deck's.
+    expect(deckOf(`${other.cardsDocumentUrl}#c1`, CARDS)).toBe(deck);
+    // Found in a document of no deck.
+    expect(deckOf(other.url, "https://pod.example/a/drafts/x.ttl")).toBeUndefined();
+  });
+
+  it("knows the catalog however a request would spell its address", () => {
+    const deckOf = deckOfSubjectsIn("https://POD.example/a", [deck, other]);
+    expect(deckOf(other.url, "https://pod.example/a/./catalog.ttl")).toBe(other);
+    expect(deckOfSubjectsIn("not a url", [deck, other])(other.url, CATALOG)).toBeUndefined();
   });
 
   it("takes the first deck in the decks' order when a subject matches more than one", () => {
     // The second deck's entry lies in the first deck's cards document.
     const twin: Deck = { ...other, url: `${CARDS}#entry` };
-    expect(deckOfSubjectsIn([deck, twin])(twin.url)).toBe(deck);
-    expect(deckOfSubjectsIn([twin, deck])(twin.url)).toBe(twin);
-    expect(deckOfSubjectsIn([deck, { ...deck }])(`${CARDS}#c1`)).toBe(deck);
+    const catalogTwin: Deck = { ...other, url: deck.url };
+    expect(deckOfSubjectsIn(INSTANCE, [deck, catalogTwin])(deck.url, CATALOG)).toBe(deck);
+    expect(deckOfSubjectsIn(INSTANCE, [catalogTwin, deck])(deck.url, CATALOG)).toBe(catalogTwin);
+    expect(deckOfSubjectsIn(INSTANCE, [twin, deck])(twin.url, CARDS)).toBe(deck);
+    expect(deckOfSubjectsIn(INSTANCE, [deck, { ...deck }])(`${CARDS}#c1`, CARDS)).toBe(deck);
   });
 
   it("finds the decks of many subjects in time linear in the decks and subjects", () => {
@@ -343,8 +366,8 @@ describe("deckOfSubjectsIn", () => {
           (_, i) => `https://pod.example/a/other/${i}.ttl#x`,
         );
         return () => {
-          const deckOf = deckOfSubjectsIn(decks);
-          for (const subject of subjects) deckOf(subject);
+          const deckOf = deckOfSubjectsIn(INSTANCE, decks);
+          for (const subject of subjects) deckOf(subject, CATALOG);
         };
       },
       1000,

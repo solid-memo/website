@@ -1358,8 +1358,11 @@ check of the whole instance. A check overtaken by another
 The instance's health is the check run when it's opened
 (`checkInstance`, the same query as Home's), with its repairs, then
 every deck with its badge, a link to its own health, as is a result
-about a deck. The decks are indexed once for those links
-(`deckOfSubjectsIn`), so each is a lookup, not a search through them.
+about a deck. A result is about a deck as the data check sets decks
+aside: through its entry only when it was found in the catalog, and
+otherwise through the document it was found in. The decks are indexed
+once for those links (`deckOfSubjectsIn`), so each is a lookup, not a
+search through them.
 A badge checks its deck once, and what it finds holds its
 deck too. A repair or a removal here reads every check of the instance
 afresh (their queries are under its key); on a deck's health, only the
