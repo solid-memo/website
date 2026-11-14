@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.3](https://github.com/solid-memo/website/compare/v7.4.2...v7.4.3) (2026-11-14)
+
+### Fixes
+
+* **domain:** bound the classes a graph node keeps and its table row shows ([1ab67a4](https://github.com/solid-memo/website/commit/1ab67a420c9425c31caa0729c5a60bf7926ba8ac))
+* **solid:** keep review state subjects within the term limit ([fb3ae3a](https://github.com/solid-memo/website/commit/fb3ae3a96de5ef029cba65eddfdecaed4be1929f))
+
 ## [7.4.2](https://github.com/solid-memo/website/compare/v7.4.1...v7.4.2) (2026-11-14)
 
 ### Fixes
