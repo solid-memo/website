@@ -109,10 +109,11 @@ shapes of Markdown make the parser slow.
 - **`MAX_CHARS`, 20,000 characters.** A longer text is plain, its
   source still readable, its hidden characters as markers. The longest
   course text is about 2,600.
-- **`MAX_WORK`, 40 units of the parser's work for each character** (of
-  at least 1,000). Each try of one of the parser's rules, each step
-  through a link's label and each token it makes is a unit, counted as
-  the parser works. A try that reads more than its one unit covers
+- **`MAX_WORK`, 12 units of the parser's work for each character** (of
+  at least 1,000). Each try of one of the parser's rules and each step
+  through a link's label is a unit, counted as the parser works. Each
+  token it makes is 8 units (`TOKEN_WORK`), as making one takes about as
+  long as that many tries. A try that reads more than its one unit covers
   costs what it reads. A block rule's silent try asks whether a line
   ends the block before it. It costs a unit for each character it reads
   past its first 8, as the tries of raw HTML, a fence, a thematic
@@ -137,8 +138,12 @@ shapes of Markdown make the parser slow.
   read the rest of a text again and again: a block quote after each
   line of a paragraph, or link openers before an unclosed declaration
   such as `<!X`. The budget stops them whatever their shape. A text in
-  `decks/` takes at most about 1 unit a character, and a list of
-  one-word items about 8.
+  `decks/` takes at most about 2 units a character, and a list of
+  one-word items about 11. So whatever a text holds, the parser reads it
+  in a small multiple of the time such text of its length takes. Dense
+  Markdown of more than about 1,000 characters may show as plain text:
+  a table of one-character cells written without spaces, or a long list
+  of one-letter items. The same written with spaces reads.
 - **`MAX_DEPTH`, 8.** Blocks and phrasing nested deeper show as their
   source, so every walker of the tree recurses at most 8 deep. Each
   quote, list item, paragraph, emphasis and link is a level: in seven
@@ -154,8 +159,9 @@ shapes of Markdown make the parser slow.
   a block past `MAX_DEPTH`, which shows as its source, whole, and ends
   where it would have.
 - **Tables:** a table of more than 20 columns (the header's) or 2,000
-  cells shows as its source. Its rows are found but not read, as
-  markdown-it would fill each short row of a wide table with cells.
+  cells shows as its source. Every row counts as many cells as the
+  header has, a short row's included, as markdown-it fills it with empty
+  cells. The rows of such a table are found but not read.
 - **`labelText`** reads one run of lines up to a blank line at a time,
   going on only while what it has read shows no text (a rule, a
   definition), at most 2,000 characters in all. A label costs the same
@@ -175,7 +181,10 @@ length cap. Each reads within 25 times what plain prose of the same
 length takes, or within 4 times what its first eighth takes read eight
 times over. Time linear in the length gives about once, quadratic time
 about eight. Both are CPU time, which a busy CI runner doesn't stretch
-as it does the time on the clock.
+as it does the time on the clock. The costliest shapes the budget lets
+through, such as a heading on each line, lists of one-word items and
+tables of empty rows, each read within 7 times what text like a
+course's step of the same length takes.
 
 ### Chunks
 
