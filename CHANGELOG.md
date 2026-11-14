@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.1](https://github.com/solid-memo/website/compare/v7.4.0...v7.4.1) (2026-11-14)
+
+### Fixes
+
+* **studio:** list as opened lately only decks the instance has ([06e8ea1](https://github.com/solid-memo/website/commit/06e8ea144333db682c3910c9d8b20d9cd864be98))
+
 ## [7.4.0](https://github.com/solid-memo/website/compare/v7.3.5...v7.4.0) (2026-11-14)
 
 ### Features
