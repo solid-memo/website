@@ -215,8 +215,12 @@ compact), and changes no history entry. The same key keeps:
 Each instance's own state is under another key
 (`solid-memo:studioInstances.v1`, by the instance's URL): the views
 saved of Home and of the workbench (Saved views, below), the decks and
-drafts pinned, and those opened last. Storage that refuses keeps them
-for the page's life only.
+drafts pinned, and those opened last. A deck or a draft counts as
+opened once the instance is read to have it, never because a link
+names it. No URL longer than a term may be is kept, nor a saved view
+whose name or query is longer; one stored before is left out as the
+key is read, and the key is written back without it then. Storage that
+refuses keeps them for the page's life only.
 
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)).

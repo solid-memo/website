@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { beforeEach, describe, expect, it } from "vitest";
+import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_PREFS,
   instancePrefs,
@@ -230,6 +231,100 @@ describe("what the device keeps of an instance", () => {
     };
     expect(instancePrefs(a, refusing)).toEqual(NO_INSTANCE_PREFS);
     expect(() => rememberInstancePrefs(a, kept, refusing)).not.toThrow();
+  });
+
+  describe("keeps no URL longer than a term may be", () => {
+    const long: WorkItem = {
+      kind: "deck",
+      url: `${a}catalog.ttl#${"a".repeat(HASHED_CHARACTERS)}`,
+    };
+    const longest: WorkItem = {
+      kind: "deck",
+      url: `${a}${"a".repeat(HASHED_CHARACTERS - a.length)}`,
+    };
+    const longInstance = `${a}${"a".repeat(HASHED_CHARACTERS)}/`;
+
+    it("neither lists it as opened nor pins it", () => {
+      expect(openedNow([kanji], long)).toEqual([kanji]);
+      expect(togglePin([kanji], long)).toEqual([kanji]);
+      expect(openedNow([kanji], longest)).toEqual([longest, kanji]);
+      expect(togglePin([kanji], longest)).toEqual([kanji, longest]);
+    });
+
+    it("leaves it out as it notes an instance's, and notes no instance of such a URL", () => {
+      rememberInstancePrefs(a, {
+        ...NO_INSTANCE_PREFS,
+        pinned: [long, kanji],
+        recent: [long, solid],
+      });
+      rememberInstancePrefs(longInstance, kept);
+      expect(JSON.parse(localStorage.getItem(INSTANCES)!)).toEqual({
+        [a]: { ...NO_INSTANCE_PREFS, pinned: [kanji], recent: [solid] },
+      });
+    });
+
+    it("leaves out one kept before as it reads, and drops it from the storage then, once", () => {
+      localStorage.setItem(
+        INSTANCES,
+        JSON.stringify({
+          [a]: { ...kept, pinned: [long, kanji], recent: [long, solid, kanji] },
+          [b]: { ...NO_INSTANCE_PREFS, recent: [long] },
+          [longInstance]: kept,
+        }),
+      );
+      expect(instancePrefs(a)).toEqual(kept);
+      const cleaned = { [a]: kept, [b]: NO_INSTANCE_PREFS };
+      expect(JSON.parse(localStorage.getItem(INSTANCES)!)).toEqual(cleaned);
+      const setItem = vi.spyOn(Storage.prototype, "setItem");
+      try {
+        expect(instancePrefs(b)).toEqual(NO_INSTANCE_PREFS);
+        expect(instancePrefs(longInstance)).toEqual(NO_INSTANCE_PREFS);
+        expect(setItem).not.toHaveBeenCalled();
+      } finally {
+        setItem.mockRestore();
+      }
+      expect(JSON.parse(localStorage.getItem(INSTANCES)!)).toEqual(cleaned);
+    });
+
+    it("reads what it keeps when the storage refuses to drop the rest", () => {
+      const stored = JSON.stringify({ [a]: { ...kept, recent: [long, solid, kanji] } });
+      const refusingWrites = () =>
+        ({
+          getItem: () => stored,
+          setItem: () => {
+            throw new DOMException("full", "QuotaExceededError");
+          },
+        }) as unknown as Storage;
+      expect(instancePrefs(a, refusingWrites)).toEqual(kept);
+    });
+
+    it("keeps no saved view whose name or query is longer", () => {
+      const longText = "a".repeat(HASHED_CHARACTERS + 1);
+      const longestText = "a".repeat(HASHED_CHARACTERS);
+      const views = {
+        home: [
+          { name: longText, params: "show=due" },
+          { name: "Due", params: "show=due" },
+          { name: longestText, params: longestText },
+        ],
+        cards: [
+          { name: "Leeches", params: `q=${longText}` },
+          { name: "Leeches", params: "state=leech" },
+        ],
+      };
+      const keptViews = {
+        home: [
+          { name: "Due", params: "show=due" },
+          { name: longestText, params: longestText },
+        ],
+        cards: [{ name: "Leeches", params: "state=leech" }],
+      };
+      rememberInstancePrefs(a, { ...NO_INSTANCE_PREFS, views });
+      expect(JSON.parse(localStorage.getItem(INSTANCES)!)[a].views).toEqual(keptViews);
+      localStorage.setItem(INSTANCES, JSON.stringify({ [a]: { ...NO_INSTANCE_PREFS, views } }));
+      expect(instancePrefs(a).views).toEqual(keptViews);
+      expect(JSON.parse(localStorage.getItem(INSTANCES)!)[a].views).toEqual(keptViews);
+    });
   });
 
   it("pins an item at the end, and unpins it", () => {

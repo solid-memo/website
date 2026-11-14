@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
 import {
   ASIDE_WIDTH,
   clampSize,
@@ -188,15 +189,55 @@ export const RECENT_ITEMS = 5;
 
 export const INSTANCE_KEY = "solid-memo:studioInstances.v1";
 
-/** Every instance's, as stored: by the instance's URL; none when the storage holds something else. */
-function storedInstances(storage: () => Storage): Record<string, unknown> {
+/**
+ * The longest URL the device keeps, of an instance, a deck or a draft,
+ * and the longest name or query of a saved view: the bound on a term
+ * the app reads (HASHED_CHARACTERS, the solid package's
+ * MAX_TERM_CHARACTERS). A longer URL names nothing the app could have
+ * read, and no view the user saves needs more, so neither is kept, and
+ * one kept before is left out as it is read.
+ */
+const MAX_KEPT_TEXT = HASHED_CHARACTERS;
+
+/** Whether the device keeps a URL, a view's name or its query: one no longer than MAX_KEPT_TEXT. */
+function keptText(text: string): boolean {
+  return text.length <= MAX_KEPT_TEXT;
+}
+
+/**
+ * Every instance's, as stored, by the instance's URL, each read as
+ * instancePrefs reads it: none when the storage holds something else,
+ * and none of an instance whose URL the device does not keep. When the
+ * storage holds more than that, what is read is written back in its
+ * place, once, so what the device does not keep leaves the storage
+ * without waiting for the next change.
+ */
+function storedInstances(storage: () => Storage): Map<string, InstancePrefs> {
+  let raw: string;
+  let stored: unknown;
   try {
-    const stored: unknown = JSON.parse(storage().getItem(INSTANCE_KEY) ?? "{}");
-    return typeof stored === "object" && stored !== null && !Array.isArray(stored)
-      ? (stored as Record<string, unknown>)
-      : {};
+    raw = storage().getItem(INSTANCE_KEY) ?? "{}";
+    stored = JSON.parse(raw);
   } catch {
-    return {};
+    return new Map();
+  }
+  if (typeof stored !== "object" || stored === null || Array.isArray(stored)) return new Map();
+  const instances = new Map(
+    Object.entries(stored).flatMap(([instanceUrl, prefs]) =>
+      keptText(instanceUrl) ? [[instanceUrl, prefsOf(prefs)] as const] : [],
+    ),
+  );
+  const cleaned = JSON.stringify(Object.fromEntries(instances));
+  if (cleaned !== raw) writeInstances(storage, cleaned);
+  return instances;
+}
+
+/** Writes every instance's, as text; storage that refuses keeps what it had. */
+function writeInstances(storage: () => Storage, value: string): void {
+  try {
+    storage().setItem(INSTANCE_KEY, value);
+  } catch {
+    // Without storage the views, the pins and the decks opened last go with the page; nothing else depends on them.
   }
 }
 
@@ -210,7 +251,11 @@ export function instancePrefs(
   instanceUrl: string,
   storage: () => Storage = () => globalThis.localStorage,
 ): InstancePrefs {
-  const stored = storedInstances(storage)[instanceUrl];
+  return storedInstances(storage).get(instanceUrl) ?? NO_INSTANCE_PREFS;
+}
+
+/** An instance's, as stored: each part on its own, what is not one left out. */
+function prefsOf(stored: unknown): InstancePrefs {
   const { views, pinned, recent } =
     typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
   const byTable =
@@ -224,19 +269,25 @@ export function instancePrefs(
   };
 }
 
-/** The views stored, those that are: a name and a query's parameters, as text. */
+/** The views stored, those that are: a name and a query's parameters, as text, each one the device keeps. */
 function savedViews(value: unknown): SavedView[] {
   return listOf(value).flatMap((view) =>
-    typeof view.name === "string" && view.name !== "" && typeof view.params === "string"
+    typeof view.name === "string" &&
+    view.name !== "" &&
+    keptText(view.name) &&
+    typeof view.params === "string" &&
+    keptText(view.params)
       ? [{ name: view.name, params: view.params }]
       : [],
   );
 }
 
-/** The items stored, those that are: a deck's or a draft's URL. */
+/** The items stored, those that are: a deck's or a draft's URL, one the device keeps. */
 function workItems(value: unknown): WorkItem[] {
   return listOf(value).flatMap((item) =>
-    (item.kind === "deck" || item.kind === "draft") && typeof item.url === "string"
+    (item.kind === "deck" || item.kind === "draft") &&
+    typeof item.url === "string" &&
+    keptText(item.url)
       ? [{ kind: item.kind, url: item.url }]
       : [],
   );
@@ -251,20 +302,19 @@ function listOf(value: unknown): Record<string, unknown>[] {
     : [];
 }
 
-/** Notes what the device keeps of an instance, the others' kept as they are. */
+/**
+ * Notes what the device keeps of an instance, the others' kept as they
+ * are read (instancePrefs): an instance, a view or an item the device
+ * does not keep is left out, of the others too.
+ */
 export function rememberInstancePrefs(
   instanceUrl: string,
   prefs: InstancePrefs,
   storage: () => Storage = () => globalThis.localStorage,
 ): void {
-  try {
-    storage().setItem(
-      INSTANCE_KEY,
-      JSON.stringify({ ...storedInstances(storage), [instanceUrl]: prefs }),
-    );
-  } catch {
-    // Without storage the views, the pins and the decks opened last go with the page; nothing else depends on them.
-  }
+  const instances = storedInstances(storage);
+  if (keptText(instanceUrl)) instances.set(instanceUrl, prefsOf(prefs));
+  writeInstances(storage, JSON.stringify(Object.fromEntries(instances)));
 }
 
 /** Whether two items are the same deck or draft. */
@@ -272,14 +322,15 @@ export function sameItem(a: WorkItem, b: WorkItem): boolean {
   return a.kind === b.kind && a.url === b.url;
 }
 
-/** The items pinned with one pinned at the end, or, pinned already, no longer. */
+/** The items pinned with one pinned at the end, or, pinned already, no longer; one the device does not keep is not pinned. */
 export function togglePin(pinned: readonly WorkItem[], item: WorkItem): WorkItem[] {
-  return pinned.some((each) => sameItem(each, item))
-    ? pinned.filter((each) => !sameItem(each, item))
-    : [...pinned, item];
+  if (pinned.some((each) => sameItem(each, item)))
+    return pinned.filter((each) => !sameItem(each, item));
+  return keptText(item.url) ? [...pinned, item] : [...pinned];
 }
 
-/** The items opened last with one opened now: first, once, as many as the device keeps. */
+/** The items opened last with one opened now: first, once, as many as the device keeps; one it does not keep is not listed. */
 export function openedNow(recent: readonly WorkItem[], item: WorkItem): WorkItem[] {
+  if (!keptText(item.url)) return [...recent];
   return [item, ...recent.filter((each) => !sameItem(each, item))].slice(0, RECENT_ITEMS);
 }
