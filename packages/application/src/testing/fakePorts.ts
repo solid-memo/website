@@ -276,6 +276,7 @@ export function makeDeps() {
   const updateJournal = {
     begin: vi.fn(),
     end: vi.fn(),
+    sources: vi.fn((): string[] => []),
     staging: vi.fn((_sourceUrl: string): string | null => null),
     run: vi.fn((_sourceUrl: string): (() => void) => vi.fn()),
     watch: vi.fn(),

@@ -18,6 +18,7 @@ import type { ReleaseDraftSummary } from "./release/draftLayout";
 import type { ReleaseDraft } from "./release/releaseDraft";
 import { rebaseDraft } from "./release/releaseToDraft";
 import type { Session } from "./session";
+import { sha256Hex } from "./sha256";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -458,10 +459,12 @@ export function draftAddressesGuest(draft: ReleaseDraft): boolean {
 /**
  * A note, kept on the device while a guest's study is being added
  * (UpdateJournal), of what a guest's deck or deck group was added to an
- * instance as (`url`), and `stamp`, what it was made from: for a deck,
- * its catalog entry and the versions of its cards and reviews documents
- * as they were read (guestDeckStamp); for a group, the whole arrangement
- * of the guest's groups around the decks added. Adding the study again
+ * instance as (`url`), and `stamp`, the digest (guestMergeStamp) of what
+ * it was made from: for a deck, its catalog entry and the versions of
+ * its cards and reviews documents as they were read (guestDeckStamp);
+ * for a group, the whole arrangement of the guest's groups around the
+ * decks added. The digest keeps a note small, however much a deck's
+ * entry holds. Adding the study again
  * finds a deck whose stamp matches there and adds only its answers, which
  * changes nothing that is there, and makes a group whose stamp matches
  * under the same URL, which a graft already made leaves as it is. A deck
@@ -480,27 +483,51 @@ export interface GuestMergeNote {
  * none).
  */
 export function guestDeckStamp(deck: Deck, versionOf: (url: string) => string): string {
-  return JSON.stringify({
-    entry: {
-      ...deck,
-      completedChapters:
-        deck.completedChapters === undefined ? undefined : [...deck.completedChapters].sort(),
-    },
-    cards: versionOf(deck.cardsDocumentUrl),
-    reviews: versionOf(deck.reviewsDocumentUrl),
-  });
+  return guestMergeStamp(
+    JSON.stringify({
+      entry: {
+        ...deck,
+        completedChapters:
+          deck.completedChapters === undefined ? undefined : [...deck.completedChapters].sort(),
+      },
+      cards: versionOf(deck.cardsDocumentUrl),
+      reviews: versionOf(deck.reviewsDocumentUrl),
+    }),
+  );
 }
+
+/** What a note keeps of what a deck, group or draft was made from: its SHA-256, in hexadecimal. */
+export function guestMergeStamp(madeFrom: string): string {
+  return sha256Hex(new TextEncoder().encode(madeFrom));
+}
+
+const STAMP = /^[0-9a-f]{64}$/;
+const ADDED_TO = " added to ";
 
 /** Under what the note of a guest's deck or group added to an instance is kept. */
 export function guestMergeKey(guestUrl: string, instanceUrl: string): string {
-  return `${guestUrl} added to ${ensureTrailingSlash(instanceUrl)}`;
+  return `${guestUrl}${ADDED_TO}${ensureTrailingSlash(instanceUrl)}`;
+}
+
+/**
+ * The guest's deck, group or draft a journal entry is the note of
+ * (guestMergeKey); null for an entry of another kind, such as a move's,
+ * whose key is a URL alone.
+ */
+export function guestMergeSourceOf(key: string): string | null {
+  const at = key.indexOf(ADDED_TO);
+  return at === -1 ? null : key.slice(0, at);
 }
 
 export function encodeGuestMergeNote(note: GuestMergeNote): string {
   return JSON.stringify(note);
 }
 
-/** The note as kept; null when there is none, or none this app can read. */
+/**
+ * The note as kept; null when there is none, or none this app can read.
+ * A note an earlier version kept holds what was made from whole, not its
+ * digest: read as its digest, so a run it noted is still found.
+ */
 export function decodeGuestMergeNote(text: string | null): GuestMergeNote | null {
   if (text === null) return null;
   let value: unknown;
@@ -510,7 +537,9 @@ export function decodeGuestMergeNote(text: string | null): GuestMergeNote | null
     return null;
   }
   const note = value as Partial<GuestMergeNote> | null;
-  return typeof note?.url === "string" && typeof note.stamp === "string"
-    ? { url: note.url, stamp: note.stamp }
-    : null;
+  if (typeof note?.url !== "string" || typeof note.stamp !== "string") return null;
+  return {
+    url: note.url,
+    stamp: STAMP.test(note.stamp) ? note.stamp : guestMergeStamp(note.stamp),
+  };
 }

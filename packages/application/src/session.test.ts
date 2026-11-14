@@ -11,6 +11,7 @@ import {
   GUEST_SESSION,
   GUEST_WEBID,
   guestDeckStamp,
+  guestMergeStamp,
 } from "@solid-memo/domain/guest";
 import { createUseCases } from "./useCases";
 import { courseDraft } from "@solid-memo/domain/testing/releaseDraft";
@@ -390,6 +391,34 @@ describe("guests", () => {
     const { deps, guestPod } = guestDeps();
     await createUseCases(deps).discardGuest();
     expect(guestPod.discard).toHaveBeenCalledOnce();
+  });
+
+  /** A note of a guest's deck added, a move's entry, and a note of a deck of a guest's instance gone. */
+  const NOTED = [
+    `${GUEST_INSTANCE_URL}catalog.ttl#deck-1 added to ${TARGET}`,
+    GUEST_INSTANCE_URL,
+    `${GUEST_ORIGIN}gone/catalog.ttl#deck-1 added to ${TARGET}`,
+  ];
+
+  it("discardGuest forgets every note of a guest's deck, group or draft added, once the guest's pod is deleted, and no move's entry", async () => {
+    const { deps, guestPod } = guestDeps();
+    vi.mocked(deps.updateJournal.sources).mockReturnValue(NOTED);
+    vi.mocked(guestPod.discard).mockRejectedValueOnce(new Error("blocked"));
+    await expect(createUseCases(deps).discardGuest()).rejects.toThrow("blocked");
+    expect(deps.updateJournal.end).not.toHaveBeenCalled();
+    await createUseCases(deps).discardGuest();
+    expect(deps.updateJournal.end.mock.calls).toEqual([[NOTED[0]], [NOTED[2]]]);
+  });
+
+  it("findGuestStudy forgets the notes of a guest's instance no longer here, and every one when no guest studied here", async () => {
+    const { deps } = guestDeps();
+    vi.mocked(deps.updateJournal.sources).mockReturnValue(NOTED);
+    await createUseCases(deps).findGuestStudy();
+    expect(deps.updateJournal.end.mock.calls).toEqual([[NOTED[2]]]);
+    deps.updateJournal.end.mockClear();
+    vi.mocked(deps.guestPod.exists).mockResolvedValue(false);
+    await createUseCases(deps).findGuestStudy();
+    expect(deps.updateJournal.end.mock.calls).toEqual([[NOTED[0]], [NOTED[2]]]);
   });
 
   it("findGuestStudy lists the guest's instances with their decks counted; null when no guest studied here", async () => {
@@ -1268,6 +1297,7 @@ describe("guests", () => {
       const updateJournal = {
         begin: vi.fn((key: string, value: string) => void journal.set(key, value)),
         end: vi.fn((key: string) => void journal.delete(key)),
+        sources: vi.fn(() => [...journal.keys()]),
         staging: vi.fn((key: string) => journal.get(key) ?? null),
         run: vi.fn(() => () => undefined),
         watch: vi.fn(),
@@ -1284,12 +1314,15 @@ describe("guests", () => {
     /** A guest's deck's stamp as read with mergeDeps: the course's documents listed, the other deck's not. */
     const stampOf = (of: Deck) =>
       guestDeckStamp(of, (url) => (of.url === course.url ? `version of ${url}` : ""));
-    /** The guest's arrangement around the decks it was added as, as a group's note stamps it. */
-    const arrangementOf = (first: Deck, second: Deck) =>
+    /** The guest's arrangement around the decks it was added as, as an earlier version's group note kept it whole. */
+    const wholeArrangementOf = (first: Deck, second: Deck) =>
       JSON.stringify([
         { kind: "group", group: GROUP, children: [{ kind: "deck", url: first.url }] },
         { kind: "deck", url: second.url },
       ]);
+    /** The guest's arrangement around the decks it was added as, as a group's note stamps it. */
+    const arrangementOf = (first: Deck, second: Deck) =>
+      guestMergeStamp(wholeArrangementOf(first, second));
 
     it("planGuestMerge lists the guest's decks with the instance's from the same release, and counts the guest's drafts", async () => {
       const { deps } = mergeDeps();
@@ -1510,7 +1543,9 @@ describe("guests", () => {
         GUEST_DRAFT,
         `${GUEST_INSTANCE_URL}drafts/solid/v1/chapter-ch-a.ttl`,
       ];
-      const stamp = DRAFT_DOCUMENTS.map((url) => `${url} version of ${url}`).join("\n");
+      const stamp = guestMergeStamp(
+        DRAFT_DOCUMENTS.map((url) => `${url} version of ${url}`).join("\n"),
+      );
       const copyNamed = (name: string) => draftUrlOf(TARGET, name, 1);
 
       /** mergeDeps with the guest's draft, its documents listed, and the instance's drafts `targetDrafts`. */
@@ -2112,6 +2147,106 @@ describe("guests", () => {
         await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
       ).toMatchObject({ ok: true, tidied: false });
       expect([...journal.keys()]).toEqual([
+        `${course.url} added to ${TARGET}`,
+        `${own.url} added to ${TARGET}`,
+        `${GROUP.url} added to ${TARGET}`,
+      ]);
+    });
+
+    it("mergeGuestStudy finds a deck and groups an earlier version noted whole, and adds neither again", async () => {
+      const { deps, journal } = mergeDeps();
+      const before = added("deck-earlier", course);
+      vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+        url === GUEST_INSTANCE_URL ? [course] : [targetDeck, before],
+      );
+      vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({
+        readOnly: false,
+        children: [{ kind: "group", group: GROUP, children: [{ kind: "deck", deck: course }] }],
+      });
+      journal.set(
+        `${course.url} added to ${TARGET}`,
+        JSON.stringify({
+          url: before.url,
+          stamp: JSON.stringify({
+            entry: course,
+            cards: `version of ${course.cardsDocumentUrl}`,
+            reviews: `version of ${course.reviewsDocumentUrl}`,
+          }),
+        }),
+      );
+      const arrangement = JSON.stringify([
+        { kind: "group", group: GROUP, children: [{ kind: "deck", url: before.url }] },
+      ]);
+      journal.set(
+        `${GROUP.url} added to ${TARGET}`,
+        JSON.stringify({ url: `${TARGET}catalog.ttl#group-earlier`, stamp: arrangement }),
+      );
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({ ok: true, added: [before] });
+      expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+      expect(deps.deckRepository.editDeckTree).toHaveBeenCalledWith(TARGET, {
+        kind: "graft",
+        nodes: [
+          {
+            kind: "group",
+            group: { url: `${TARGET}catalog.ttl#group-earlier`, title: GROUP.title },
+            children: [{ kind: "deck", url: before.url }],
+          },
+        ],
+      });
+      // Noted again as a digest.
+      expect(deps.updateJournal.begin).toHaveBeenCalledWith(
+        `${GROUP.url} added to ${TARGET}`,
+        JSON.stringify({
+          url: `${TARGET}catalog.ttl#group-earlier`,
+          stamp: guestMergeStamp(arrangement),
+        }),
+      );
+    });
+
+    it("mergeGuestStudy keeps notes of a fixed size, however much a deck's entry holds, and forgets a discarded study's", async () => {
+      const { deps, journal } = mergeDeps();
+      const keywords = Array.from({ length: 300 }, (_, i) => `${i}${"k".repeat(16_000)}`);
+      const large = { ...course, keywords: { en: keywords } };
+      vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+        url === GUEST_INSTANCE_URL ? [large, own] : [targetDeck],
+      );
+      // The merge is cut off after the decks are added: their notes stay, for a retry.
+      vi.mocked(deps.instanceCopier.listResources)
+        .mockResolvedValueOnce(RESOURCES)
+        .mockResolvedValueOnce([]);
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({
+        ok: false,
+        step: "verify",
+        added: [added("deck-n1", large), added("deck-n2", own)],
+      });
+      expect(journal.size).toBe(3);
+      for (const note of journal.values()) expect(note.length).toBeLessThan(256);
+      expect(JSON.parse(journal.get(`${large.url} added to ${TARGET}`)!)).toEqual({
+        url: `${TARGET}catalog.ttl#deck-n1`,
+        stamp: stampOf(large),
+      });
+      await createUseCases(deps).discardGuest();
+      expect(journal.size).toBe(0);
+    });
+
+    it("mergeGuestStudy forgets the notes of what the guest's study no longer holds, and keeps others", async () => {
+      const { deps, journal } = mergeDeps();
+      const notes = {
+        gone: `${GUEST_INSTANCE_URL}catalog.ttl#deck-gone added to ${TARGET}`,
+        draftGone: `${GUEST_INSTANCE_URL}drafts/old/v1/release.ttl added to ${TARGET}`,
+        elsewhere: `${GUEST_ORIGIN}other/catalog.ttl#deck-1 added to ${TARGET}`,
+        move: GUEST_INSTANCE_URL,
+      };
+      for (const key of Object.values(notes)) journal.set(key, "{}");
+      vi.mocked(deps.instanceRepository.deleteInstance).mockRejectedValue(new Error("offline"));
+      await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+      expect([...journal.keys()]).toEqual([
+        notes.elsewhere,
+        notes.move,
         `${course.url} added to ${TARGET}`,
         `${own.url} added to ${TARGET}`,
         `${GROUP.url} added to ${TARGET}`,

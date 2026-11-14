@@ -26,6 +26,8 @@ import {
   graftOfGuestTree,
   guestDeckStamp,
   guestMergeKey,
+  guestMergeSourceOf,
+  guestMergeStamp,
   guestMergePlan,
   refuseGuestMergePastLimit,
   isGuestPodIri,
@@ -260,11 +262,15 @@ describe("adding a guest's study to an instance", () => {
       completedChapters: [`${RELEASE}#ch-2`, `${RELEASE}#ch-1`],
     });
     const stamp = guestDeckStamp(course, versionOf);
-    expect(JSON.parse(stamp)).toEqual({
-      entry: { ...course, completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] },
-      cards: '"c1"',
-      reviews: "",
-    });
+    expect(stamp).toBe(
+      guestMergeStamp(
+        JSON.stringify({
+          entry: { ...course, completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] },
+          cards: '"c1"',
+          reviews: "",
+        }),
+      ),
+    );
     expect(
       guestDeckStamp(
         { ...course, completedChapters: [`${RELEASE}#ch-1`, `${RELEASE}#ch-2`] },
@@ -273,8 +279,17 @@ describe("adding a guest's study to an instance", () => {
     ).toBe(stamp);
     expect(guestDeckStamp({ ...course, title: { en: "Renamed" } }, versionOf)).not.toBe(stamp);
     expect(guestDeckStamp(course, () => '"c2"')).not.toBe(stamp);
-    expect(JSON.parse(guestDeckStamp(deck("deck-g2"), versionOf)).entry).not.toHaveProperty(
-      "completedChapters",
+    expect(guestDeckStamp(deck("deck-g2"), versionOf)).toBe(
+      guestMergeStamp(JSON.stringify({ entry: deck("deck-g2"), cards: '"c1"', reviews: "" })),
+    );
+  });
+
+  it("stamps what a deck was made from with a digest of a fixed size, however much its entry holds", () => {
+    const keywords = Array.from({ length: 300 }, (_, i) => `${i}${"k".repeat(16_000)}`);
+    const stamp = guestDeckStamp({ ...deck("deck-g3"), keywords: { en: keywords } }, () => "");
+    expect(stamp).toMatch(/^[0-9a-f]{64}$/);
+    expect(guestMergeStamp("")).toBe(
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     );
   });
 
@@ -611,8 +626,16 @@ describe("adding a guest's study to an instance", () => {
     expect(guestMergeKey(`${GUEST_INSTANCE_URL}catalog.ttl#deck-1`, TARGET.slice(0, -1))).toBe(
       `${GUEST_INSTANCE_URL}catalog.ttl#deck-1 added to ${TARGET}`,
     );
-    const note = { url: `${TARGET}catalog.ttl#deck-n`, stamp: '"1"\n"2"' };
+    expect(guestMergeSourceOf(`${GUEST_INSTANCE_URL}catalog.ttl#deck-1 added to ${TARGET}`)).toBe(
+      `${GUEST_INSTANCE_URL}catalog.ttl#deck-1`,
+    );
+    expect(guestMergeSourceOf(GUEST_INSTANCE_URL)).toBeNull();
+    const note = { url: `${TARGET}catalog.ttl#deck-n`, stamp: guestMergeStamp('"1"\n"2"') };
     expect(decodeGuestMergeNote(encodeGuestMergeNote(note))).toEqual(note);
+    // An earlier version's note, holding what was made from whole, reads as its digest.
+    expect(
+      decodeGuestMergeNote(encodeGuestMergeNote({ url: note.url, stamp: '"1"\n"2"' })),
+    ).toEqual(note);
     expect(decodeGuestMergeNote(null)).toBeNull();
     expect(decodeGuestMergeNote("{")).toBeNull();
     expect(decodeGuestMergeNote("null")).toBeNull();
