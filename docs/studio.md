@@ -1781,6 +1781,16 @@ A draft changes by `DraftChange`s
   card deleted takes along only the wrong options no other card names;
 - its sources, and the checks it had.
 
+A blank node only the statements a change took out named goes with
+them. A change keeps each statement it leaves alone as it was, so what
+it took out is found by identity, without comparing every statement by
+its value, and only the blank nodes those name are looked at. Whether
+it rewrites an activity carried from an earlier release is asked only
+of the activities among the subjects of what it took out or put in.
+What a change still does over the whole draft is a few cheap passes
+over its statements, so a keystroke in the release's notes or contact
+grows with the draft only by those.
+
 A change is refused, writing nothing, for:
 
 - deleting what an earlier release published (it's retired instead);
@@ -1822,7 +1832,12 @@ Every edit is made at once on the screen, then written in the pod
   (`changedDocuments` in
   [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) has
   been still for 0.8 seconds (`DEBOUNCE_MS`). Changes typed in that
-  time are written together. The documents a change writes are found
+  time are written together. A keystroke in the contact replaces the
+  change before it when that is of the same field: the last one is what
+  stays, so the write makes it once, not once per keystroke. So does one
+  in the notes of the release's making that leaves some text. Notes left
+  empty don't, as notes typed before may have given the release a making
+  of its own, which they keep. The documents a change writes are found
   from the records it replaced, not from the whole draft. Where the
   draft's records go (its layout) is worked out again only when a
   change moves one, and once for each draft read from the pod, the one

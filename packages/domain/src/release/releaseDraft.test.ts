@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { growth } from "../testing/growth.ts";
+import { cpuTime, growth } from "../testing/growth.ts";
 import {
   card,
   courseDraft,
@@ -1216,6 +1216,17 @@ describe("the contact", () => {
     ]);
   });
 
+  it("takes an id after the ones a record has or a statement names", () => {
+    const draft = courseDraft();
+    const taken = {
+      ...draft,
+      agents: [...draft.agents, { ...draft.agents[0]!, id: "contact" }],
+      triples: [...draft.triples, link(DRAFT, RDF_TYPE, of("contact-2"))],
+    };
+    const set = made(taken, { kind: "setContact", url: "https://a.example/" });
+    expect(set.triples.slice(-3)).toEqual(contact("contact-3", "https://a.example/"));
+  });
+
   it("is the page of the first contact point that names one", () => {
     const draft = courseDraft();
     const named = {
@@ -1720,6 +1731,30 @@ describe("blank nodes", () => {
     ]);
   });
 
+  it("stay when the change puts back an equal statement naming them", () => {
+    const draft = courseDraft();
+    const said = {
+      predicate: "https://p.example/sum",
+      object: { kind: "blank" as const, value: "b0" },
+    };
+    const inner = {
+      subject: "_:b0",
+      predicate: "https://p.example/value",
+      object: { kind: "iri" as const, value: "https://p.example/v" },
+    };
+    const withBlank = {
+      ...draft,
+      triples: [...draft.triples, { subject: "https://source.example/", ...said }, inner],
+    };
+    const again = made(withBlank, {
+      kind: "setSource",
+      iri: "https://source.example/",
+      source: { statements: [said], derivedFrom: true, used: false },
+    });
+    expect(again.triples).toContainEqual(inner);
+    expect(again.triples).toContainEqual({ subject: "https://source.example/", ...said });
+  });
+
   it("go with a long chain, however its statements are ordered, in time that grows with it", () => {
     const draft = courseDraft();
     const chained = (depth: number) => {
@@ -1754,6 +1789,7 @@ describe("blank nodes", () => {
 });
 
 describe("how an earlier release was made", () => {
+  const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
   const V1 = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
   /** The next version of the course fixture, whose compilation was associated with `#alice` and used `<https://source.example/>`. */
   function next(): ReleaseDraft {
@@ -1822,6 +1858,63 @@ describe("how an earlier release was made", () => {
         made(unnumbered, { kind: "addCheckActivity", id: "review-1", activity: check }),
       ),
     ).toEqual([of("compilation"), of("revision-1")]);
+  });
+
+  it("is refused only for the activity a change rewrites, not one it puts back as it was", () => {
+    const draft = next();
+    const two = {
+      ...draft,
+      published: { ...draft.published, activities: ["revision-0", ...draft.published.activities] },
+    };
+    expect(applyDraftChange(two, { kind: "setAgent", id: "alice", agent: null })).toEqual({
+      refused: "carriedActivity",
+      id: "compilation",
+    });
+    expect(
+      applyDraftChange(draft, { kind: "setSource", iri: of("compilation"), source: null }),
+    ).toEqual({ refused: "carriedActivity", id: "compilation" });
+    const statements = compilation(draft)
+      .reverse()
+      .map(({ predicate, object }) => ({ predicate, object }));
+    const again = made(draft, {
+      kind: "setSource",
+      iri: of("compilation"),
+      source: { statements, derivedFrom: true, used: false },
+    });
+    expect(compilation(again)).toEqual(compilation(draft).reverse());
+  });
+
+  it("is checked, with the notes or the contact set, in a few cheap passes over the draft's statements, however many it has", () => {
+    // A keystroke in the notes or the contact goes over the draft's
+    // statements a few times, as idsInUse goes over them once. Finding
+    // what it took out by its value, or comparing every statement of an
+    // activity carried from an earlier release, takes many times as
+    // long; a ratio, not a budget in milliseconds, holds on any machine
+    // (testing.md).
+    const base = next();
+    const draft: ReleaseDraft = {
+      ...base,
+      triples: [
+        ...base.triples,
+        ...Array.from({ length: 20_000 }, (_, n) => ({
+          subject: of(`x${n}`),
+          predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+          object: { kind: "literal" as const, value: `c${n}`, language: "", datatype: XSD_STRING },
+        })),
+      ],
+    };
+    const best = (work: () => unknown) => {
+      let took = Infinity;
+      for (let round = 0; round < 5; round++) took = Math.min(took, cpuTime(work));
+      return took;
+    };
+    const reference = best(() => idsInUse(draft));
+    for (const change of [
+      { kind: "setMakingNotes", notes: { en: "A note" } },
+      { kind: "setContact", url: "https://contact.example/" },
+    ] satisfies DraftChange[]) {
+      expect(best(() => made(draft, change)) / reference).toBeLessThan(6);
+    }
   });
 
   it("keeps what an earlier activity used and was associated with, refusing to remove an agent it names", () => {
