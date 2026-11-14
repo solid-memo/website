@@ -740,96 +740,97 @@ export function StudioWorkspace({ useCases, session, banner, children }: Workspa
 
   return (
     <AskFirst.Provider value={asked.ask}>
-      <StudioShell
-        banner={banner}
-        backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
-        route={route}
-        instances={instances ?? []}
-        instance={activeInstance}
-        switcher={
-          activeInstance !== null && (
-            <InstanceSwitcher instances={instances!} instance={activeInstance} />
-          )
-        }
-        sidebar={
-          activeInstance === null ? null : (
-            <StudioSidebar
-              useCases={useCases}
-              instance={activeInstance}
-              route={route!}
-              pinned={mine.prefs.pinned}
-              recent={mine.prefs.recent}
-              onPin={(item) =>
-                mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))
-              }
+      {/* One gate for the screen, the card beside it and the rest of the shell: a host chosen in one is chosen in all. */}
+      <ScreenPictures useCases={useCases} deck={activeDeck} draftUrl={draftUrl}>
+        <StudioShell
+          banner={banner}
+          backHref={instanceUrl === null ? "#/" : decksHref(instanceUrl)}
+          route={route}
+          instances={instances ?? []}
+          instance={activeInstance}
+          switcher={
+            activeInstance !== null && (
+              <InstanceSwitcher instances={instances!} instance={activeInstance} />
+            )
+          }
+          sidebar={
+            activeInstance === null ? null : (
+              <StudioSidebar
+                useCases={useCases}
+                instance={activeInstance}
+                route={route!}
+                pinned={mine.prefs.pinned}
+                recent={mine.prefs.recent}
+                onPin={(item) =>
+                  mine.change((prefs) => ({ ...prefs, pinned: togglePin(prefs.pinned, item) }))
+                }
+              />
+            )
+          }
+          tabs={tabs?.tabs ?? []}
+          draftUrl={draftUrl}
+          aside={
+            split && waiting === null
+              ? {
+                  label: t("studio.card.detail"),
+                  content: (
+                    <div ref={detailRef} class="screen">
+                      {inspector(route as CardRoute)}
+                    </div>
+                  ),
+                  detail: {
+                    closeLabel: t("studio.card.close"),
+                    onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))),
+                  },
+                }
+              : aside === null
+                ? null
+                : { label: t(ASIDE_LABELS[aside]), content: asideFor(aside, route!) }
+          }
+          problems={found.problems}
+          pinned={mine.prefs.pinned}
+          status={
+            found.publish !== null && (
+              <PublishState
+                readiness={found.publish}
+                releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })}
+              />
+            )
+          }
+          onGo={(to) => unsaved.guard(() => navigate(to))}
+        >
+          {children}
+          {unsaved.dialog}
+          {asked.dialog}
+          {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
+          {tabs !== null && (
+            <ContextTabs
+              label={t(`studio.tabs.${tabs.of}`)}
+              tabs={tabs.tabs.map((tab) => ({
+                key: tab.key,
+                href: studioRouteToHash(tab.route),
+                label:
+                  tab.key === "check" && checkCount > 0 ? (
+                    <>
+                      {t("studio.tabs.check")} <ProblemCount count={checkCount} />
+                    </>
+                  ) : (
+                    t(`studio.tabs.${tab.key}`)
+                  ),
+                current: tab.current,
+              }))}
             />
-          )
-        }
-        tabs={tabs?.tabs ?? []}
-        draftUrl={draftUrl}
-        aside={
-          split && waiting === null
-            ? {
-                label: t("studio.card.detail"),
-                content: (
-                  <div ref={detailRef} class="screen">
-                    {inspector(route as CardRoute)}
-                  </div>
-                ),
-                detail: {
-                  closeLabel: t("studio.card.close"),
-                  onClose: () => unsaved.guard(() => navigate(workbenchOf(route as CardRoute))),
-                },
-              }
-            : aside === null
-              ? null
-              : { label: t(ASIDE_LABELS[aside]), content: asideFor(aside, route!) }
-        }
-        problems={found.problems}
-        pinned={mine.prefs.pinned}
-        status={
-          found.publish !== null && (
-            <PublishState
-              readiness={found.publish}
-              releaseHref={studioRouteToHash({ screen: "release", draftUrl: draftUrl! })}
-            />
-          )
-        }
-        onGo={(to) => unsaved.guard(() => navigate(to))}
-      >
-        {children}
-        {unsaved.dialog}
-        {asked.dialog}
-        {waiting === null && <Breadcrumbs crumbs={crumbs} toHash={studioRouteToHash} />}
-        {tabs !== null && (
-          <ContextTabs
-            label={t(`studio.tabs.${tabs.of}`)}
-            tabs={tabs.tabs.map((tab) => ({
-              key: tab.key,
-              href: studioRouteToHash(tab.route),
-              label:
-                tab.key === "check" && checkCount > 0 ? (
-                  <>
-                    {t("studio.tabs.check")} <ProblemCount count={checkCount} />
-                  </>
-                ) : (
-                  t(`studio.tabs.${tab.key}`)
-                ),
-              current: tab.current,
-            }))}
-          />
-        )}
-        <div ref={screenRef} class="screen">
-          <UnsavedEdits.Provider value={unsaved.report}>
-            {/* A deck's screens show its cards in its card language first; no deck's, as usual. */}
-            <CardLanguage language={activeDeck?.cardLanguage}>
-              <ScreenPictures useCases={useCases} deck={activeDeck} draftUrl={draftUrl}>
+          )}
+          <div ref={screenRef} class="screen">
+            <UnsavedEdits.Provider value={unsaved.report}>
+              {/* A deck's screens show its cards in its card language first; no deck's, as usual. */}
+              <CardLanguage language={activeDeck?.cardLanguage}>
                 {waiting ?? screenFor(route!)}
-              </ScreenPictures>
-            </CardLanguage>
-          </UnsavedEdits.Provider>
-        </div>
-      </StudioShell>
+              </CardLanguage>
+            </UnsavedEdits.Provider>
+          </div>
+        </StudioShell>
+      </ScreenPictures>
     </AskFirst.Provider>
   );
 }
@@ -929,7 +930,11 @@ interface Open {
   subject: boolean | null;
 }
 
-/** The screens below it, whose pictures are held as their draft's, or as their deck's (docs/privacy.md). */
+/**
+ * The shell below it, whose pictures are held as their draft's, or as
+ * their deck's (docs/privacy.md): its screen's and the card's beside it
+ * alike.
+ */
 function ScreenPictures({
   useCases,
   deck,
@@ -941,12 +946,11 @@ function ScreenPictures({
   draftUrl: string | null;
   children: ComponentChildren;
 }) {
-  return draftUrl === null ? (
-    <DeckPictures useCases={useCases} deck={deck ?? undefined}>
-      {children}
+  // Both, always, so a route from a deck's screens to a draft's keeps the shell below as it is.
+  return (
+    <DeckPictures useCases={useCases} deck={draftUrl === null ? (deck ?? undefined) : undefined}>
+      <DraftPictures draftUrl={draftUrl}>{children}</DraftPictures>
     </DeckPictures>
-  ) : (
-    <DraftPictures draftUrl={draftUrl}>{children}</DraftPictures>
   );
 }
 

@@ -313,6 +313,15 @@ describe("a draft's pictures", () => {
     expect(other.container.querySelector("img")).toBeNull();
     expect(screen.getByRole("button", { name: SHOW })).toBeInTheDocument();
   });
+
+  it("leave the gate above them in place with no draft", async () => {
+    const { container } = renderGated(
+      linked,
+      <DraftPictures draftUrl={null}>{face}</DraftPictures>,
+    );
+    expect(await screen.findByRole("button", { name: SHOW })).toBeInTheDocument();
+    expect(container.querySelector("img")).toBeNull();
+  });
 });
 
 describe("a list of a linked deck's cards", () => {
