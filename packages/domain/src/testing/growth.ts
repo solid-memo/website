@@ -108,7 +108,7 @@ async function cpuTimeAsync(work: () => Promise<unknown>): Promise<number> {
 }
 
 /** The CPU time `work` takes, in microseconds. */
-function cpuTime(work: () => unknown): number {
+export function cpuTime(work: () => unknown): number {
   const started = process.cpuUsage();
   work();
   const { user, system } = process.cpuUsage(started);
