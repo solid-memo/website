@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.4.2](https://github.com/solid-memo/website/compare/v7.4.1...v7.4.2) (2026-11-14)
+
+### Fixes
+
+* **application:** let a failed undo of a card delete be made again ([e6326b5](https://github.com/solid-memo/website/commit/e6326b5125f22ea92ba5c34bf7815a5d5a588a2b))
+* **domain:** count a deck entry or deck group only from the catalog ([5c7eee5](https://github.com/solid-memo/website/commit/5c7eee5bf3531eee1ed7966023f7834a5058039d))
+* **studio:** fold graph search texts once and by their start ([30636c2](https://github.com/solid-memo/website/commit/30636c2aa29f035893c00e3af1c03eb71d06766d))
+
 ## [7.4.1](https://github.com/solid-memo/website/compare/v7.4.0...v7.4.1) (2026-11-14)
 
 ### Fixes
