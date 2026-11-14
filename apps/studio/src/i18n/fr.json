@@ -1671,6 +1671,11 @@
         "kind": "Nature",
         "document": "Défini dans",
         "types": "Classes",
+        "moreTypes": {
+          "one": "et {count} de plus",
+          "many": "et {count} de plus",
+          "other": "et {count} de plus"
+        },
         "pages": "Pages de nœuds"
       },
       "edges": {
@@ -1698,11 +1703,6 @@
           "one": "Afficher le {count} lien",
           "many": "Afficher les {count} de liens",
           "other": "Afficher les {count} liens"
-        },
-        "showAllTypes": {
-          "one": "Afficher la {count} classe",
-          "many": "Afficher les {count} de classes",
-          "other": "Afficher les {count} classes"
         },
         "showAllValues": {
           "one": "Afficher la {count} valeur",

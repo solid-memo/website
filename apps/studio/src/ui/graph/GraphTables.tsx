@@ -5,7 +5,7 @@
 /**
  * The graph as tables, in place of the drawing (GraphScreen): its nodes
  * (each by its name, with its kind, the document that defines it and its
- * classes) and its edges (from, link, to), both as the filters show
+ * first classes) and its edges (from, link, to), both as the filters show
  * them, a page of each at a time. A node's name selects it, as does
  * Enter on its row, and opens it in the aside, as a click on it in the
  * drawing does.
@@ -21,9 +21,21 @@ import { shortName, type ShownGraph } from "./graphModel";
 /** How many rows a table's page holds. */
 const ROWS_A_PAGE = 100;
 
+/** How many of a node's classes its row names, before how many more it has. */
+const TYPES_IN_A_CELL = 3;
+
 /** The name of a link: its predicate in short; a document's subjects, which no statement links, by the word for it. */
 export function predicateText(predicate: string, t: ReturnType<typeof useI18n>["t"]): string {
   return predicate === "" ? t("studio.graph.defines") : shortName(predicate);
+}
+
+/** A node's first classes in short, and how many more it has, those the graph left out too. */
+function typesText(node: GraphNode, t: ReturnType<typeof useI18n>["t"]): string {
+  const more = node.types.length - TYPES_IN_A_CELL + (node.typesLeftOut ?? 0);
+  const named = node.types.slice(0, TYPES_IN_A_CELL).map(shortName);
+  return (more > 0 ? [...named, t("studio.graph.nodes.moreTypes", { count: more })] : named).join(
+    ", ",
+  );
 }
 
 export function GraphTables({
@@ -78,7 +90,7 @@ export function GraphTables({
           {
             key: "types",
             label: t("studio.graph.nodes.types"),
-            cell: (node) => node.types.map(shortName).join(", "),
+            cell: (node) => typesText(node, t),
           },
         ]}
         onOpen={(node) => onSelect(node.id)}

@@ -10,10 +10,11 @@
  * not its own) and its links, from it and
  * to it, each a button that selects the node at its other end. A leaf
  * says why it was not read; an IRI no document defines, that it was
- * named and found nowhere. A long list of links, classes or values shows
- * its first entries, and all on asking, the focus going to the first
- * entry shown then. The node and its links are found in an index built
- * once for the graph.
+ * named and found nowhere. The classes are the ones the graph keeps
+ * (instanceGraphOf), and how many more there are. A long list of links
+ * or values shows its first entries, and all on asking, the focus going
+ * to the first entry shown then. The node and its links are found in an
+ * index built once for the graph.
  * Following a link from the aside moves the focus to the heading of the
  * node it goes to, so the graph can be walked link by link.
  */
@@ -27,7 +28,7 @@ import { nodeIndexOf, shortName } from "./graphModel";
 import { kindText, useLabels } from "./GraphScreen";
 import { predicateText } from "./GraphTables";
 
-/** How many entries a list (links, classes, values) shows before it is asked for all. */
+/** How many entries a list (links, values) shows before it is asked for all. */
 const LINKS_AT_FIRST = 50;
 
 /** Why a node was not read, or found; none for one read. */
@@ -201,26 +202,19 @@ export function GraphNodePane({
         {node.types.length > 0 && (
           <>
             <dt>{t("studio.graph.nodes.types")}</dt>
-            <FirstOf
-              key={`types ${node.id}`}
-              items={node.types}
-              more={(count) => t("studio.graph.node.showAllTypes", { count })}
-              render={(listed, list, button) => (
-                <dd ref={list}>
-                  {listed.map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      class="graph-link"
-                      onClick={() => follow(type)}
-                    >
-                      {shortName(type)}
-                    </button>
-                  ))}
-                  {button}
-                </dd>
+            <dd>
+              {node.types.map((type) => (
+                <button key={type} type="button" class="graph-link" onClick={() => follow(type)}>
+                  {shortName(type)}
+                </button>
+              ))}
+              {/* The graph keeps a node's first classes: its links from it name every one. */}
+              {node.typesLeftOut !== undefined && (
+                <span class="hint">
+                  {t("studio.graph.nodes.moreTypes", { count: node.typesLeftOut })}
+                </span>
               )}
-            />
+            </dd>
           </>
         )}
       </dl>
