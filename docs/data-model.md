@@ -156,7 +156,9 @@ flowchart LR
 - **Missing indexes** are normal on Community Solid Server pods. The app
   warns the user, who chooses to create the private index (a document
   under `<storage>settings/` plus a profile link) or to register
-  publicly. A kind counts as missing when no index of it can be read.
+  publicly. A kind counts as missing when no index of it is there or
+  readable by the user (401, 403 count as not readable); any other
+  failed read fails the choice.
   A public index the app creates is made readable by everyone with the
   public-read grant, as a published release is
   ([boundaries.md](boundaries.md#access-control)). Other apps then find
@@ -170,8 +172,10 @@ flowchart LR
   The link goes in the WebID document when it's writable, else in the
   first extended profile that accepts it (on Inrupt PodSpaces the WebID
   document on `id.inrupt.com` is read-only, and `<storage>profile` is
-  writable). An index document already at the target URL is adopted,
-  not overwritten. If registration fails, instance creation fails
+  writable). A document already at the target URL is adopted when it's
+  typed `solid:TypeIndex` (`notATypeIndex` otherwise), not overwritten,
+  and who may read it is left as it is: only an index the app writes
+  gets the public-read grant. If registration fails, instance creation fails
   loudly, with no local fallback, and the new container is cleaned up.
   An instance is registered in the index the user chose, and in no
   other.
@@ -288,8 +292,11 @@ study offers every type index of the user's they can read now
 [typeIndex.ts](../packages/solid/src/typeIndex.ts)), ranked
 (`rankedFor` in
 [typeIndexChoice.ts](../packages/domain/src/typeIndexChoice.ts)). One
-that can't be read, whatever the reason, isn't offered. Each index of a
-kind is ranked in this order:
+that isn't there, or that the user may not read (401, 403), isn't
+offered. Any other failed read (a timeout, a server error) fails the
+choices, as it may work when tried again: an index left out for it
+would be offered as one to create. Each index of a kind is ranked in
+this order:
 
 1. one that already holds a Solid Memo instance;
 2. the one the preferences file links (private only);

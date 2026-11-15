@@ -455,7 +455,7 @@ describe("createTypeIndex", () => {
     mockDatasets({ [WEBID]: profileDataset() });
     const fetch = storageAwareFetch("https://alice.example/");
 
-    const indexUrl = await createTypeIndex(
+    const { url: indexUrl, created } = await createTypeIndex(
       "private",
       WEBID,
       "https://alice.example/solid-memo/main/",
@@ -463,6 +463,7 @@ describe("createTypeIndex", () => {
     );
 
     expect(indexUrl).toBe(PRIVATE_INDEX);
+    expect(created).toBe(true);
     const [firstSaveUrl, indexDataset] = vi.mocked(writeDocument).mock.calls[0];
     expect(firstSaveUrl).toBe(PRIVATE_INDEX);
     const indexThing = getThing(indexDataset as Dataset, PRIVATE_INDEX)!;
@@ -478,7 +479,7 @@ describe("createTypeIndex", () => {
     mockDatasets({ [WEBID]: profileDataset() });
     const fetch = storageAwareFetch("https://alice.example/");
 
-    const indexUrl = await createTypeIndex(
+    const { url: indexUrl, created } = await createTypeIndex(
       "public",
       WEBID,
       "https://alice.example/solid-memo/main/",
@@ -486,6 +487,7 @@ describe("createTypeIndex", () => {
     );
 
     expect(indexUrl).toBe(PUBLIC_INDEX);
+    expect(created).toBe(true);
     const [, indexDataset] = vi.mocked(writeDocument).mock.calls[0];
     const indexThing = getThing(indexDataset as Dataset, PUBLIC_INDEX)!;
     expect(getUrlAll(indexThing, RDF.type)).toContain(SOLID.ListedDocument);
@@ -517,7 +519,7 @@ describe("createTypeIndex", () => {
 
     await expect(
       createTypeIndex("public", WEBID, "https://attacker.example/open/", fetch),
-    ).resolves.toBe(PUBLIC_INDEX);
+    ).resolves.toEqual({ url: PUBLIC_INDEX, created: true });
     const saveUrls = vi.mocked(writeDocument).mock.calls.map(([url]) => url);
     expect(saveUrls).toEqual([PUBLIC_INDEX, PROFILE_DOC]);
     expect(vi.mocked(fetch).mock.calls.map(([url]) => String(url))).not.toContain(
@@ -535,10 +537,10 @@ describe("createTypeIndex", () => {
 
     await expect(
       createTypeIndex("private", WEBID, `${work}solid-memo/main/`, noFetch),
-    ).resolves.toBe(`${work}settings/privateTypeIndex.ttl`);
+    ).resolves.toEqual({ url: `${work}settings/privateTypeIndex.ttl`, created: true });
     await expect(
       createTypeIndex("private", WEBID, "https://attacker.example/open/", noFetch),
-    ).resolves.toBe(PRIVATE_INDEX);
+    ).resolves.toEqual({ url: PRIVATE_INDEX, created: true });
   });
 
   it("keeps walking when a HEAD request fails", async () => {
@@ -556,12 +558,12 @@ describe("createTypeIndex", () => {
 
     await expect(
       createTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
-    ).resolves.toBe(PRIVATE_INDEX);
+    ).resolves.toEqual({ url: PRIVATE_INDEX, created: true });
   });
 
   it("adopts an existing index document instead of overwriting it", async () => {
     const leftover = setThing(
-      datasetFrom(PRIVATE_INDEX),
+      indexDocument(PRIVATE_INDEX, [SOLID.TypeIndex]),
       buildThing(createThing({ url: `${PRIVATE_INDEX}#sm-inst-old` }))
         .addIri(RDF.type, SOLID.TypeRegistration)
         .build(),
@@ -571,10 +573,20 @@ describe("createTypeIndex", () => {
 
     await expect(
       createTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
-    ).resolves.toBe(PRIVATE_INDEX);
+    ).resolves.toEqual({ url: PRIVATE_INDEX, created: false });
 
     const saveUrls = vi.mocked(writeDocument).mock.calls.map(([url]) => url);
     expect(saveUrls).toEqual([PROFILE_DOC]);
+  });
+
+  it("refuses, writing nothing, a document there that does not say it is a type index", async () => {
+    mockDatasets({ [WEBID]: profileDataset(), [PUBLIC_INDEX]: indexDocument(PUBLIC_INDEX, []) });
+    const fetch = storageAwareFetch("https://alice.example/");
+
+    await expect(
+      createTypeIndex("public", WEBID, "https://alice.example/x/", fetch),
+    ).rejects.toMatchObject({ code: "notATypeIndex" });
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("rethrows a non-404 failure when probing for an existing index", async () => {
@@ -622,7 +634,7 @@ describe("createTypeIndex", () => {
 
       await expect(
         createTypeIndex("private", WEBID, "https://alice.example/x/", fetch),
-      ).resolves.toBe(PRIVATE_INDEX);
+      ).resolves.toEqual({ url: PRIVATE_INDEX, created: true });
 
       const saveUrls = vi.mocked(writeDocument).mock.calls.map(([url]) => url);
       expect(saveUrls).toEqual([PRIVATE_INDEX, PROFILE_DOC, EXTENDED_PROFILE]);
@@ -823,7 +835,19 @@ describe("readTypeIndexChoices", () => {
     expect(publicFetch).toHaveBeenCalledWith(PUBLIC_INDEX, { method: "HEAD" });
   });
 
-  it("leaves out an index the user cannot read, whatever the reason", async () => {
+  it.each([
+    ["not there (404)", Object.assign(new Error("404"), { statusCode: 404 })],
+    ["refused (401)", Object.assign(new Error("401"), { statusCode: 401 })],
+    ["forbidden (403)", Object.assign(new Error("403"), { statusCode: 403 })],
+    [
+      "forbidden, as its response says (403)",
+      Object.assign(new Error("403"), { response: { status: 403 } }),
+    ],
+    [
+      "refused, as its cause says (401)",
+      new Error("read failed", { cause: Object.assign(new Error("401"), { statusCode: 401 }) }),
+    ],
+  ])("leaves out an index that is %s", async (_, failure) => {
     vi.mocked(readDocument).mockImplementation(async (url) => {
       if (url === WEBID)
         return readOf(
@@ -831,7 +855,7 @@ describe("readTypeIndexChoices", () => {
             t.addIri(SOLID.privateTypeIndex, OLDER).addIri(SOLID.privateTypeIndex, PRIVATE_INDEX),
           ),
         );
-      if (url === OLDER) throw Object.assign(new Error("403"), { statusCode: 403 });
+      if (url === OLDER) throw failure;
       return readOf(indexDocument(PRIVATE_INDEX, [SOLID.TypeIndex]));
     });
     const indexes = await locateTypeIndexes(WEBID, noFetch, noFetch);
@@ -839,6 +863,32 @@ describe("readTypeIndexChoices", () => {
     await expect(readTypeIndexChoices(indexes, answeringAnyone(404))).resolves.toEqual([
       expect.objectContaining({ url: PRIVATE_INDEX, typeFit: "none", readableByAnyone: false }),
     ]);
+  });
+
+  const cyclic = new Error("cyclic");
+  cyclic.cause = cyclic;
+  it.each([
+    ["a server failure (503)", Object.assign(new Error("503"), { statusCode: 503 })],
+    [
+      "a server failure, as its response says (503)",
+      Object.assign(new Error("503"), { response: { status: 503 } }),
+    ],
+    ["a network failure", new TypeError("fetch failed")],
+    ["a failure whose causes go round", cyclic],
+  ])("fails as a read did when it may work when tried again: %s", async (_, failure) => {
+    vi.mocked(readDocument).mockImplementation(async (url) => {
+      if (url === WEBID)
+        return readOf(
+          profileDataset((t) =>
+            t.addIri(SOLID.privateTypeIndex, OLDER).addIri(SOLID.privateTypeIndex, PRIVATE_INDEX),
+          ),
+        );
+      if (url === OLDER) throw failure;
+      return readOf(indexDocument(PRIVATE_INDEX, [SOLID.TypeIndex]));
+    });
+    const indexes = await locateTypeIndexes(WEBID, noFetch, noFetch);
+
+    await expect(readTypeIndexChoices(indexes, answeringAnyone(404))).rejects.toBe(failure);
   });
 });
 
@@ -894,6 +944,44 @@ describe("ensureTypeIndex", () => {
       ensureTypeIndex("public", WEBID, near, storageFetch, answeringAnyone(401), share),
     ).resolves.toEqual({ url: PUBLIC_INDEX, fetch: expect.any(Function) });
     expect(share).toHaveBeenCalledExactlyOnceWith(PUBLIC_INDEX);
+  });
+
+  it("of a kind, adopts a public index already where it would make one, sharing nothing", async () => {
+    // The profile links no public index, but one only its owner may read is at the conventional path.
+    mockDatasets({
+      [WEBID]: profileDataset((t) => t.addIri(PIM.storage, "https://alice.example/")),
+      [PUBLIC_INDEX]: indexDocument(
+        PUBLIC_INDEX,
+        [SOLID.TypeIndex],
+        ["https://alice.example/journal/"],
+      ),
+    });
+    await expect(
+      ensureTypeIndex("public", WEBID, near, storageFetch, answeringAnyone(401), share),
+    ).resolves.toEqual({ url: PUBLIC_INDEX, fetch: expect.any(Function) });
+    expect(vi.mocked(writeDocument).mock.calls.map(([url]) => url)).toEqual([PROFILE_DOC]);
+    expect(share).not.toHaveBeenCalled();
+  });
+
+  it("of a kind, creates nothing when the one linked may work when tried again", async () => {
+    // The linked index answers 503; an index the app could adopt is at the conventional path.
+    const linked = "https://alice.example/elsewhere/publicTypeIndex.ttl";
+    const failure = Object.assign(new Error("503"), { statusCode: 503 });
+    vi.mocked(readDocument).mockImplementation((async (url: string) => {
+      if (url === WEBID)
+        return readOf(
+          profileDataset((t) =>
+            t.addIri(PIM.storage, "https://alice.example/").addIri(SOLID.publicTypeIndex, linked),
+          ),
+        );
+      if (url === PUBLIC_INDEX) return readOf(indexDocument(PUBLIC_INDEX, [SOLID.TypeIndex]));
+      throw failure;
+    }) as never);
+    await expect(
+      ensureTypeIndex("public", WEBID, near, storageFetch, answeringAnyone(401), share),
+    ).rejects.toBe(failure);
+    expect(writeDocument).not.toHaveBeenCalled();
+    expect(share).not.toHaveBeenCalled();
   });
 
   it("creates the user's own index when the profile's is outside its own places", async () => {

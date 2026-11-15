@@ -26,6 +26,7 @@ import {
   readDataset,
   readsAsNone,
   saveDataset,
+  statusOf,
 } from "./datasets";
 import { ensureTrailingSlash } from "./urls";
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
@@ -237,20 +238,25 @@ async function readSubjectSafely(
  * the profile, in one of the user's own storages (ownStorageFor), never
  * where the instance it is made for happens to be: an index on a server
  * someone else runs would be where every Solid app reads the user's
- * registrations and writes theirs. An index document already at that URL
- * (e.g. left behind by an earlier run whose profile link failed) is
- * adopted as-is rather than overwritten. Throws if either write fails.
+ * registrations and writes theirs. A document already at that URL (e.g.
+ * left behind by an earlier run whose profile link failed) is adopted as
+ * it is, content and access control alike, when it says it is a
+ * solid:TypeIndex (notATypeIndex), rather than overwritten; `created`
+ * says whether the document is a new one. Throws if either write fails.
  */
 export async function createTypeIndex(
   kind: TypeIndexKind,
   webId: string,
   nearUrl: string,
   fetch: Fetch,
-): Promise<string> {
+): Promise<{ url: string; created: boolean }> {
   const storageRoot = await ownStorageFor(nearUrl, webId, fetch);
   const indexUrl = `${storageRoot}settings/${kind}TypeIndex.ttl`;
 
   const existing = await getSolidDatasetOrNull(indexUrl, fetch);
+  if (existing !== null && !typesOf(existing, indexUrl).includes(SOLID.TypeIndex)) {
+    throw new AppError("notATypeIndex", { url: indexUrl });
+  }
   if (existing === null) {
     const indexDocument = setThing(
       createSolidDataset(),
@@ -262,7 +268,7 @@ export async function createTypeIndex(
     await saveDataset(indexUrl, indexDocument, fetch);
   }
   await linkTypeIndexFromProfile(kind, webId, indexUrl, fetch);
-  return indexUrl;
+  return { url: indexUrl, created: existing === null };
 }
 
 /**
@@ -328,8 +334,11 @@ function describeFailure(documentUrl: string, error: unknown): string {
  * The type indexes the profile links (locateTypeIndexes) that the user
  * can read now, each once, with what each says it is and holds, and
  * whether anyone may read it without logging in, asked of `publicFetch`
- * (docs/data-model.md "Choosing a type index"). One that cannot be read,
- * whatever the reason, is left out: nothing can be registered in it.
+ * (docs/data-model.md "Choosing a type index"). One that is not there or
+ * not one to read (readsAsNone), or that the user may not read (401,
+ * 403), is left out: nothing can be registered in it. Any other failure
+ * fails the choices, as the read may work when tried again, and an index
+ * left out for it would be offered as one to create.
  */
 export async function readTypeIndexChoices(
   indexes: TypeIndexes,
@@ -342,8 +351,9 @@ export async function readTypeIndexChoices(
       let dataset: SourcedDataset;
       try {
         dataset = await readDataset(url, indexes.fetch);
-      } catch {
-        return null;
+      } catch (error) {
+        if (readsAsNone(error) || refusesReading(error)) return null;
+        throw error;
       }
       const kinds = links.map((link) => link.kind);
       return {
@@ -357,6 +367,25 @@ export async function readTypeIndexChoices(
     }),
   );
   return choices.filter((choice) => choice !== null);
+}
+
+/**
+ * Whether a read failed because the user may not read the document (401,
+ * 403): the first status on the failure or its causes, found as
+ * readsAsNone finds it.
+ */
+function refusesReading(error: unknown): boolean {
+  const seen = new Set<unknown>();
+  for (
+    let failure = error;
+    failure instanceof Error && !seen.has(failure);
+    failure = failure.cause
+  ) {
+    seen.add(failure);
+    const status = statusOf(failure);
+    if (status !== undefined) return status === 401 || status === 403;
+  }
+  return false;
 }
 
 /** The types the document at `url` gives itself. */
@@ -399,9 +428,10 @@ async function readableByAnyone(url: string, publicFetch: Fetch): Promise<boolea
  *
  * - of a kind, the user's best of that kind (rankedFor) they can read
  *   now; when there is none, a new one, made in their own storage and
- *   linked from their profile (createTypeIndex), and a public one made
- *   readable by anyone with `share`, so that other apps find what it
- *   registers;
+ *   linked from their profile (createTypeIndex), and a public one it
+ *   wrote made readable by anyone with `share`, so that other apps find
+ *   what it registers; a document already there is adopted with its
+ *   access control left as it is;
  * - by its address, one the profile links, or else one in one of the
  *   user's own storages that the user can read and that says it is a
  *   solid:TypeIndex, then linked from the profile as the kind its type
@@ -425,9 +455,10 @@ export async function ensureTypeIndex(
   }
   const best = rankedFor(await readTypeIndexChoices(indexes, publicFetch), target)[0];
   if (best !== undefined) return { url: best.url, fetch: indexes.fetch };
-  const url = await createTypeIndex(target, webId, nearUrl, fetch);
+  const { url, created } = await createTypeIndex(target, webId, nearUrl, fetch);
   // A public index no one else can read is one no other app finds: whether the grant took is seen in the next choice.
-  if (target === "public") await share(url);
+  // One already there may hold what its owner keeps from others: who may read it is theirs to say.
+  if (target === "public" && created) await share(url);
   return { url, fetch: indexes.fetch };
 }
 
