@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.2](https://github.com/solid-memo/website/compare/v7.6.1...v7.6.2) (2026-11-15)
+
+### Fixes
+
+* **journeys:** list a container that Linked Web Storage alone describes ([4083a85](https://github.com/solid-memo/website/commit/4083a858f924e87f1a85b5ec08997410c3825ce6)), closes [#812](https://github.com/solid-memo/website/issues/812) [#822](https://github.com/solid-memo/website/issues/822)
+
 ## [7.6.1](https://github.com/solid-memo/website/compare/v7.6.0...v7.6.1) (2026-11-15)
 
 ### Fixes
