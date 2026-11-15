@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { agentUrlsOf } from "./agentRecord";
 import { growth } from "./testing/growth";
 import { LONG_AGENTS } from "./testing/longAgents";
-import type { Deck, Distractor } from "./deck";
+import { MAX_DECK_METADATA, type Deck, type Distractor } from "./deck";
 import {
   cardContentFromRecord,
   cardFromRecord,
@@ -77,6 +77,15 @@ describe("deck records", () => {
       maxReviewsPerDay: 0,
     });
     expect(deckFromRecord(deck.url, 3, record, byAgent)).toEqual(full);
+  });
+
+  it("read no more of a deck's metadata than a deck may have, so its next write leaves the rest out", () => {
+    const many = Array.from({ length: MAX_DECK_METADATA + 1 }, (_, i) => `https://a.example/${i}`);
+    const record = { ...deckToRecord(deck), creator: many, theme: many, keyword: { ko: many } };
+    const read = deckFromRecord(deck.url, 6, record, byAgent);
+    expect(read.authors).toEqual(many.slice(0, MAX_DECK_METADATA));
+    expect(read.themes).toEqual(many.slice(0, MAX_DECK_METADATA));
+    expect(read.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
   });
 
   it("round-trip a title and description in every language they are in", () => {
@@ -530,6 +539,20 @@ describe("library deck records", () => {
     );
     expect(content.title).toEqual({ sv: "Huvudstäder", en: "Capitals" });
     expect(content.description).toEqual({ en: "From Wikipedia." });
+  });
+
+  it("keep no more of a release's metadata than a deck may have, the first in order", () => {
+    const many = Array.from({ length: MAX_DECK_METADATA + 1 }, (_, i) => `https://a.example/${i}`);
+    const content = libraryDeckFromRecord(
+      RELEASE,
+      4,
+      { ...release, creator: many, theme: many, keyword: { ko: many } },
+      [],
+      byAgent,
+    );
+    expect(content.authors).toEqual(many.slice(0, MAX_DECK_METADATA));
+    expect(content.themes).toEqual(many.slice(0, MAX_DECK_METADATA));
+    expect(content.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
   });
 
   it("carry the license, version notes and modification time when stated", () => {

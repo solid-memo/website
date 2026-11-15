@@ -19,6 +19,7 @@ import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { ResourceStore } from "@solid-memo/application/ports";
+import { MAX_DECK_METADATA, MAX_DECK_METADATA_CHARACTERS } from "@solid-memo/domain/deck";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -257,6 +258,208 @@ describe("a deck imported from the library", () => {
       `<${listed!.url}> <${KEYWORD}> "huvudstäder"@sv .`,
       `<${listed!.url}> <${KEYWORD}> "länder"@sv .`,
     ]);
+  });
+});
+
+/** More of a release's metadata than a deck keeps: keywords in a language, and authors. */
+const BULK = Array.from(
+  { length: MAX_DECK_METADATA + 20 },
+  (_, i) => `
+<> <${KEYWORD}> "k${i}"@ko ;
+    <${DCTERMS}creator> <#agent-${i}> .
+<#agent-${i}> a <http://xmlns.com/foaf/0.1/Agent> ;
+    <http://xmlns.com/foaf/0.1/name> "Author ${i}" .
+`,
+).join("");
+
+/** Metadata longer than a deck keeps in all (MAX_DECK_METADATA_CHARACTERS): long keywords, titles and authors' names. */
+const LONG = Array.from(
+  { length: 50 },
+  (_, i) => `
+<> <${KEYWORD}> "${i}${"k".repeat(10_000)}"@en ;
+    <${DCTERMS}title> "${"t".repeat(5_000)}"@x-l${i} ;
+    <${DCTERMS}creator> <#long-${i}> .
+<#long-${i}> a <http://xmlns.com/foaf/0.1/Agent> ;
+    <http://xmlns.com/foaf/0.1/name> "${i}${"a".repeat(10_000)}" .
+`,
+).join("");
+
+/**
+ * Titles of `subject` that, after its titles "Capitals"@en and
+ * "Huvudstäder"@sv, take every character a deck keeps
+ * (MAX_DECK_METADATA_CHARACTERS), as N-Triples.
+ */
+function titleLines(subject: string): string[] {
+  const big = Array.from({ length: 4 }, (_, i) => [`x-l${i}`, "t".repeat(16_000)] as const);
+  const used =
+    "enCapitalssvHuvudstäder".length +
+    big.reduce((sum, [tag, text]) => sum + tag.length + text.length, 0);
+  const last = ["x-m", "t".repeat(MAX_DECK_METADATA_CHARACTERS - used - "x-m".length)] as const;
+  return [...big, last].map(([tag, text]) => `${subject} <${DCTERMS}title> "${text}"@${tag} .`);
+}
+
+/** Those titles of a release, as Turtle added to it. */
+const FULL_TITLE = (subject: string) => `\n${titleLines(subject).join("\n")}\n`;
+
+/** The library as the site publishes it, with `bulk` added to the release at `url`. */
+function withBulk(url: string, bulk = BULK): typeof fetch {
+  return async (input, init) => {
+    const response = await siteFetch(input, init);
+    if (String(input) !== url) return response;
+    const changed = new Response(`${await response.text()}${bulk}`, {
+      headers: { "content-type": "text/turtle" },
+    });
+    return Object.defineProperty(changed, "url", { value: url });
+  };
+}
+
+/** The catalog's triples of the deck at `deckUrl` with `predicate`. */
+async function entryTriples(store: ResourceStore, deckUrl: string, predicate: string) {
+  return (await everyTriple(store)).filter((line) =>
+    line.startsWith(`<${deckUrl}> <${predicate}> `),
+  );
+}
+
+describe("a library deck's metadata, bounded in the catalog", () => {
+  it("keeps no more of a release's keywords and authors than a deck may have", {
+    timeout: 60_000,
+  }, async () => {
+    const { useCases, store } = await app(withBulk(TAGGED_RELEASE));
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+
+    const deck = await useCases.importLibraryDeck(instance.url, {
+      url: TAGGED_RELEASE,
+    } as LibraryDeck);
+
+    expect(deck.authors).toHaveLength(MAX_DECK_METADATA);
+    const [listed] = await useCases.listDecks(instance.url);
+    expect(listed!.keywords!.ko).toHaveLength(MAX_DECK_METADATA);
+    expect(listed!.keywords!.en).toEqual(["capitals", "countries"]);
+    const korean = (await entryTriples(store, deck.url, KEYWORD)).filter((line) =>
+      line.endsWith('"@ko .'),
+    );
+    expect(korean).toHaveLength(MAX_DECK_METADATA);
+    expect(await entryTriples(store, deck.url, `${DCTERMS}creator`)).toHaveLength(
+      MAX_DECK_METADATA,
+    );
+    expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
+  });
+
+  it("keeps no longer metadata of a release than a deck may have", {
+    timeout: 60_000,
+  }, async () => {
+    const { useCases, store } = await app(withBulk(TAGGED_RELEASE, LONG));
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+
+    const deck = await useCases.importLibraryDeck(instance.url, {
+      url: TAGGED_RELEASE,
+    } as LibraryDeck);
+
+    const [listed] = await useCases.listDecks(instance.url);
+    const metadata = [
+      ...Object.entries(listed!.title).flat(),
+      ...Object.entries(listed!.description ?? {}).flat(),
+      ...listed!.authors,
+      ...(listed!.themes ?? []),
+      ...Object.entries(listed!.keywords ?? {}).flat(2),
+    ];
+    expect(metadata.join("").length).toBeLessThanOrEqual(MAX_DECK_METADATA_CHARACTERS);
+    // What the entry holds, in characters: the release's long values are cut or left out.
+    const catalog = await store.get(deck.url.slice(0, deck.url.indexOf("#")));
+    const characters = catalog?.kind === "rdf" ? catalog.triples.join("").length : Infinity;
+    // LONG adds more than a million characters to the release.
+    expect(characters).toBeLessThan(150_000);
+    expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
+  });
+
+  it("keeps the description's first language when the title's languages fill the bound", {
+    timeout: 60_000,
+  }, async () => {
+    const { useCases, store } = await app(withBulk(TAGGED_RELEASE, FULL_TITLE("<>")));
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+
+    const deck = await useCases.importLibraryDeck(instance.url, {
+      url: TAGGED_RELEASE,
+    } as LibraryDeck);
+
+    expect(Object.keys(deck.title)).toHaveLength(7);
+    expect(deck.description).toEqual({ en: "Capitals of the world." });
+    expect(await entryTriples(store, deck.url, `${DCTERMS}description`)).toEqual([
+      `<${deck.url}> <${DCTERMS}description> "Capitals of the world."@en .`,
+    ]);
+    expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
+  });
+
+  it("saves an entry written before with more metadata than a deck keeps, its description kept", {
+    timeout: 60_000,
+  }, async () => {
+    const { useCases, store } = await app();
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const imported = await useCases.importLibraryDeck(instance.url, {
+      url: TAGGED_RELEASE,
+    } as LibraryDeck);
+    // The entry as one written before the bound: titles that fill it.
+    const catalogUrl = imported.url.slice(0, imported.url.indexOf("#"));
+    const catalog = await store.get(catalogUrl);
+    if (catalog?.kind !== "rdf") throw new Error("no catalog");
+    await store.set(catalogUrl, {
+      ...catalog,
+      etag: `"${crypto.randomUUID()}"`,
+      triples: [...catalog.triples, ...titleLines(`<${imported.url}>`)],
+    });
+
+    const [listed] = await useCases.listDecks(instance.url);
+    await useCases.setDeckDirection(listed!, "back-to-front");
+
+    expect(await entryTriples(store, imported.url, `${DCTERMS}description`)).toEqual([
+      `<${imported.url}> <${DCTERMS}description> "Capitals of the world."@en .`,
+    ]);
+    expect(await entryTriples(store, imported.url, `${DCTERMS}title`)).toHaveLength(7);
+    expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
+  });
+
+  it("keeps no more of a newer release's keywords than a deck may have through an upgrade", {
+    timeout: 60_000,
+  }, async () => {
+    const { useCases, store } = await app();
+    const instance = await useCases.createInstance(ALICE, {
+      containerUrl: `${POD}solid-memo/`,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const deck = await useCases.importLibraryDeck(instance.url, {
+      url: `${SITE}decks/capitals-of-the-world/v1.ttl`,
+    } as LibraryDeck);
+
+    const { outcome } = await upgrade(
+      store,
+      withBulk(`${SITE}decks/capitals-of-the-world/v4.ttl`),
+      instance.url,
+      deck.url,
+    );
+
+    expect(outcome).toMatchObject({ ok: true });
+    const korean = (await entryTriples(store, deck.url, KEYWORD)).filter((line) =>
+      line.endsWith('"@ko .'),
+    );
+    expect(korean).toHaveLength(MAX_DECK_METADATA);
+    expect((await useCases.validateInstance(instance.url)).conforms).toBe(true);
   });
 });
 
