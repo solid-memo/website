@@ -181,23 +181,48 @@ function colorsOf(value: unknown): PaletteColors {
   );
 }
 
-/** A name's text by language tag: only text, under a tag of letters, digits and hyphens. */
+/** The most languages a palette's name is kept in; any more are left out. */
+export const MAX_PALETTE_NAME_LANGUAGES = 32;
+
+/**
+ * The most code points a palette's name is kept with in one language; the
+ * rest is cut. The editor's name field takes as many UTF-16 code units,
+ * never more code points, so what it saves is kept whole.
+ */
+export const MAX_PALETTE_NAME_CHARACTERS = 200;
+
+/** `text` cut to MAX_PALETTE_NAME_CHARACTERS code points, never inside one. */
+function cutName(text: string): string {
+  if (text.length <= MAX_PALETTE_NAME_CHARACTERS) return text;
+  return Array.from(text.slice(0, 2 * MAX_PALETTE_NAME_CHARACTERS))
+    .slice(0, MAX_PALETTE_NAME_CHARACTERS)
+    .join("");
+}
+
+/**
+ * A name's text by language tag: only text, under a tag of letters,
+ * digits and hyphens, in at most MAX_PALETTE_NAME_LANGUAGES languages,
+ * each cut to MAX_PALETTE_NAME_CHARACTERS code points.
+ */
 function titleOf(value: unknown): LangText {
   if (typeof value !== "object" || value === null) return {};
   return Object.fromEntries(
-    Object.entries(value as Record<string, unknown>).filter(
-      (entry): entry is [string, string] =>
-        /^[a-z0-9-]{0,35}$/.test(entry[0]) && typeof entry[1] === "string",
-    ),
+    Object.entries(value as Record<string, unknown>)
+      .filter(
+        (entry): entry is [string, string] =>
+          /^[a-z0-9-]{0,35}$/.test(entry[0]) && typeof entry[1] === "string",
+      )
+      .slice(0, MAX_PALETTE_NAME_LANGUAGES)
+      .map(([tag, text]) => [tag, cutName(text)]),
   );
 }
 
 /**
  * A palette from what was read, its pod's record or the device's copy,
  * held to the rules again: its address a string, its base a built-in
- * palette (Standard for any other), and only the listed roles' colors,
- * each `#rrggbb`, every other value left out. Null when it has no
- * address.
+ * palette (Standard for any other), only the listed roles' colors,
+ * each `#rrggbb`, every other value left out, and a name of bounded
+ * size (titleOf). Null when it has no address.
  */
 export function parsePalette(value: unknown): CustomPalette | null {
   if (typeof value !== "object" || value === null) return null;

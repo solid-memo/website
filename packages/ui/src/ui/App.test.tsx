@@ -448,6 +448,25 @@ describe("AppShell", () => {
       await waitFor(() => expect(root.style.getPropertyValue("--text")).toBe("#111111"));
     });
 
+    it("paints the device's copy of a palette, kept without its name, no more when the pod has the same colors", async () => {
+      const root = document.documentElement;
+      const useCases = renderAppearance(
+        {
+          customPaletteChoice: vi.fn(() => ({ ...READING, title: {} })),
+          paletteChoice: vi.fn(() => "parchment" as const),
+          instancePalette: vi.fn(async () => ({ palette: "parchment" as const, custom: READING })),
+        },
+        InstanceAppearanceWorkspace,
+      );
+      expect(await screen.findByText(/^Palette: reading over parchment/)).toBeInTheDocument();
+      expect(root.style.getPropertyValue("--text")).toBe("#2b2118");
+      root.style.setProperty("--text", "#000000");
+      // The pod's palette, its name included, is read: the same colors are not painted again.
+      await waitFor(() => expect(useCases.instancePalette).toHaveBeenCalled());
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      expect(root.style.getPropertyValue("--text")).toBe("#000000");
+    });
+
     it("shows no earlier choice that a read begun before a later one brings back", async () => {
       const reads: ((size: "default" | "large" | "largest") => void)[] = [];
       const writes: (() => void)[] = [];

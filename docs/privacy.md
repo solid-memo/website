@@ -66,7 +66,7 @@ before any pod is reached:
 | `solid-memo:language` | the chosen language | [`localStorageLanguagePreference.ts`](../packages/browser/src/localStorageLanguagePreference.ts) |
 | `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageThemePreference.ts`](../packages/browser/src/localStorageThemePreference.ts) |
 | `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | [`localStoragePalettePreference.ts`](../packages/browser/src/localStoragePalettePreference.ts) |
-| `solid-memo:palette-colors` | a chosen custom palette's colors and name, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
+| `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
 | `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
 | `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
@@ -79,8 +79,8 @@ before any pod is reached:
 A logout leaves these keys in place, `solid-memo:palette-colors`,
 `solid-memo:webId`, `solid-memo:collapsedGroups.<instance URL>` and
 `solid-memo:studioInstances.v1` among them. They hold no credential.
-They do hold instance, deck and draft URLs, a palette's colors and
-name, and a remembered WebID, which anyone using the same browser
+They do hold instance, deck, draft and palette URLs, a palette's
+colors, and a remembered WebID, which anyone using the same browser
 profile can read. That is why the WebID is kept only when the learner
 asks, and a login with the box unchecked forgets it. They stay
 because they are this device's and not the session's. The folds, saved

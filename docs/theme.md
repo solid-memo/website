@@ -264,8 +264,8 @@ the page.
   format, and it follows the user to every device as a built-in
   palette does.
 - **On the device**, `solid-memo:palette` holds its base. For the first
-  paint, `solid-memo:palette-colors` holds the palette and the colors
-  to paint in each theme
+  paint, `solid-memo:palette-colors` holds the palette's address, its
+  base and the colors to paint in each theme, but not its name
   ([localStorageCustomPalettePreference.ts](../packages/browser/src/localStorageCustomPalettePreference.ts),
   the `CustomPalettePreference` port). Opening the instance copies the
   pod's palette there; choosing a built-in palette removes it.
@@ -294,6 +294,13 @@ it's read and painted:
   No CSS text, `url()` or `var()` from the pod or the device's copy
   reaches a style. The swatches and the editor's preview are painted
   the same way.
+- **What's kept is small.** A palette's name is kept in at most 32
+  languages, each cut to 200 Unicode code points (`parsePalette`). The
+  editor's name field takes 200 UTF-16 code units, never more code
+  points, and saves the name in the page's language first, so it's
+  kept whole. The device keeps no name at all. A value under
+  `solid-memo:palette-colors` above a fixed size is neither written nor
+  read, so the pod's palette can't fill the browser's storage.
 - **The first paint checks again.** The script in `apps/web/index.html`
   reads `solid-memo:palette-colors` for the theme it sets, and paints
   only roles a palette may paint, by name, with `#rrggbb` values;

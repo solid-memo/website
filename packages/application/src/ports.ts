@@ -1184,7 +1184,11 @@ export interface PalettePreference {
  * then in the palette's base until the instance is read.
  */
 export interface CustomPalettePreference {
-  /** The palette kept; null when none is (a built-in palette is shown, or it was forgotten). */
+  /**
+   * The palette kept, without its name (an empty title: only what the
+   * first paint needs is kept); null when none is (a built-in palette is
+   * shown, or it was forgotten).
+   */
   chosen(): CustomPalette | null;
   /** Keep this palette, or none. */
   choose(palette: CustomPalette | null): void;
