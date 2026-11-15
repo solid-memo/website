@@ -30,6 +30,8 @@ import {
   graftOfGuestTree,
   guestMergeKey,
   guestMergePlan,
+  guestMergeSourceOf,
+  guestMergeStamp,
   refuseGuestMergePastLimit,
   isGuestUrl,
   linksGuestPod,
@@ -46,6 +48,7 @@ import {
   type GuestTransferStep,
 } from "@solid-memo/domain/guest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
+import type { TreeNode } from "@solid-memo/domain/deckTree";
 import type {
   DeckRepository,
   InstanceRepository,
@@ -478,6 +481,17 @@ export function createSessionUseCases({
       : undefined;
   }
   /**
+   * Forget each note of a guest's deck, group or draft added
+   * (GuestMergeNote) whose guest's `keep` does not keep; a move's entry
+   * stays.
+   */
+  function forgetGuestMergeNotes(keep: (guestUrl: string) => boolean): void {
+    for (const key of updateJournal.sources()) {
+      const guestUrl = guestMergeSourceOf(key);
+      if (guestUrl !== null && !keep(guestUrl)) updateJournal.end(key);
+    }
+  }
+  /**
    * The copy a run from this device made before (journaledBefore);
    * otherwise a new copy, noted.
    */
@@ -599,12 +613,20 @@ export function createSessionUseCases({
       }
       return GUEST_SESSION;
     },
-    discardGuest() {
-      return guestPod.discard();
+    async discardGuest() {
+      await guestPod.discard();
+      // Notes of a study no longer here would match nothing.
+      forgetGuestMergeNotes(() => false);
     },
     async findGuestStudy() {
-      if (!(await guestPod.exists())) return null;
+      // Notes of a study no longer here, or of an instance no longer in it, would match nothing.
+      if (!(await guestPod.exists())) {
+        forgetGuestMergeNotes(() => false);
+        return null;
+      }
       const instances = await guestPodInstances();
+      const held = instances.map(({ url }) => ensureTrailingSlash(url));
+      forgetGuestMergeNotes((guestUrl) => held.some((url) => guestUrl.startsWith(url)));
       return {
         instances: await Promise.all(
           instances.map(async (instance) => ({
@@ -777,6 +799,15 @@ export function createSessionUseCases({
             releaseDraftRepository.list(source),
             releaseDraftRepository.list(targetUrl),
           ]);
+        // Notes of a deck, group or draft the guest's study no longer holds would match nothing.
+        const guestHolds = new Set([
+          ...decks.map(({ url }) => url),
+          ...groupsOf(tree.children),
+          ...guestDrafts.map(({ url }) => url),
+        ]);
+        forgetGuestMergeNotes(
+          (guestUrl) => !guestUrl.startsWith(source) || guestHolds.has(guestUrl),
+        );
         // Groups to make in an arrangement a newer version wrote could not be: refused before anything is written.
         if (targetTree.readOnly && tree.children.some((node) => node.kind === "group"))
           throw new AppError("deckTreeTooNew");
@@ -785,7 +816,11 @@ export function createSessionUseCases({
         ).flat();
         const chosen = decks.filter((deck) => !skip.includes(deck.url));
         const keyOf = (deck: Deck) => guestMergeKey(deck.url, targetUrl);
-        const stampOf = (deck: Deck) => guestDeckStamp(deck, (url) => versions.get(url) ?? "");
+        // Each deck's stamp once: its entry may be long.
+        const stamps = new Map(
+          chosen.map((deck) => [deck.url, guestDeckStamp(deck, (url) => versions.get(url) ?? "")]),
+        );
+        const stampOf = (deck: Deck) => stamps.get(deck.url)!;
         // More decks than the instance's catalog is read with are refused before any is written; one an earlier run added is there already.
         refuseGuestMergePastLimit(
           targetDecks.length,
@@ -821,7 +856,9 @@ export function createSessionUseCases({
 
         // The guest's groups, new, around the decks added; each under the URL an earlier run gave it, if that run arranged the same.
         progress.finished("arrange");
-        const arrangement = JSON.stringify(graftOfGuestTree(tree, into, (group) => group.url));
+        const arrangement = guestMergeStamp(
+          JSON.stringify(graftOfGuestTree(tree, into, (group) => group.url)),
+        );
         const nodes = graftOfGuestTree(tree, into, (group) => {
           const key = guestMergeKey(group.url, targetUrl);
           const note = decodeGuestMergeNote(updateJournal.staging(key));
@@ -838,10 +875,12 @@ export function createSessionUseCases({
         for (const draft of guestDrafts) {
           const key = guestMergeKey(draft.url, targetUrl);
           const container = draftContainerOf(draft.url);
-          const stamp = [...versions]
-            .filter(([url]) => url.startsWith(container))
-            .map(([url, version]) => `${url} ${version}`)
-            .join("\n");
+          const stamp = guestMergeStamp(
+            [...versions]
+              .filter(([url]) => url.startsWith(container))
+              .map(([url, version]) => `${url} ${version}`)
+              .join("\n"),
+          );
           // Copied from this device before, its documents unchanged since, and the copy still there: there it is.
           const copy = await journaledGuestCopy(key, stamp, targetDrafts, () =>
             drafts.copyReleaseDraft(draft.url, targetUrl),
@@ -900,4 +939,11 @@ export function createSessionUseCases({
       updateJournal.end(source);
     },
   };
+}
+
+/** The URL of each group among the nodes, nested ones too. */
+function groupsOf(nodes: readonly TreeNode[]): string[] {
+  return nodes.flatMap((node) =>
+    node.kind === "group" ? [node.group.url, ...groupsOf(node.children)] : [],
+  );
 }

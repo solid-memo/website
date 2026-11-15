@@ -259,7 +259,8 @@ names there) are in the instance.
 
 Trying again adds what isn't there yet. As each deck is added, and
 before each group is, this browser's update journal notes
-(`GuestMergeNote`) the new deck or group and what it was made from:
+(`GuestMergeNote`) the new deck or group and a SHA-256 digest of what
+it was made from:
 
 - for a deck, the guest's catalog entry and the versions of the guest's
   documents it was read at;
@@ -285,9 +286,22 @@ On the next run:
   links, isn't copied again; otherwise it's copied anew, under the next
   free name.
 
-A merge that deletes the guest's study forgets the notes. A discarded
-study's notes stay, matching no later guest's decks, which have new
-URLs.
+A digest keeps a note small, however much a deck's entry holds. A note
+an earlier version kept, holding what the deck or group was made from
+whole, is rewritten as its digest as the app starts, before anyone signs
+in, so a run it noted is still found.
+
+A merge that deletes the guest's study forgets the notes. So does
+discarding the guest's study, and looking for one when the guest's pod
+is gone. Looking for a guest's study also forgets the notes of a
+guest's instance no longer in the pod, and a merge first forgets those
+of a deck, group or draft the study no longer holds. A move's entry is
+left as it is.
+
+The journal keeps no entry, key and value together, longer than 65,536
+characters. One longer isn't written, and the source's earlier entry
+goes. An entry that long that an earlier version kept, and that isn't a
+note it can rewrite short, is dropped as the app starts.
 
 ### As a new instance
 

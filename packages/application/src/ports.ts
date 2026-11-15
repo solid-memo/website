@@ -1221,11 +1221,14 @@ export interface SeenHighlights {
  * (the browser), so an update cut off half-way (a closed tab) can be
  * found: a guest's study being moved into its new folder, or each
  * guest's deck already added to an instance (domain/guest.ts
- * GuestMergeNote). Best effort: it may forget.
+ * GuestMergeNote). Best effort: it may forget, and keeps no entry
+ * longer than a bound it sets.
  */
 export interface UpdateJournal {
   begin(sourceUrl: string, stagingUrl: string): void;
   end(sourceUrl: string): void;
+  /** The source of each entry the journal keeps; none when it cannot be read. */
+  sources(): string[];
   /** What an unfinished update of the source was writing; null when none. */
   staging(sourceUrl: string): string | null;
   /**

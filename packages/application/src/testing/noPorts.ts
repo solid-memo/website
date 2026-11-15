@@ -92,6 +92,7 @@ const NO_LOGOUT_CHANNEL: LogoutChannel = {
 const NO_JOURNAL: UpdateJournal = {
   begin: () => undefined,
   end: () => undefined,
+  sources: () => [],
   staging: () => null,
   run: () => () => undefined,
   watch: () => undefined,
