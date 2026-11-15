@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.5.2](https://github.com/solid-memo/website/compare/v7.5.1...v7.5.2) (2026-11-15)
+
+### Fixes
+
+* **domain:** strip more address forms from error details ([2e779ba](https://github.com/solid-memo/website/commit/2e779baf4c16148350420389a022eda6525cfbc1))
+* **solid:** accept a type index entered by address only in own storage ([886a960](https://github.com/solid-memo/website/commit/886a960cf976c7bc98f77f72b414e2e0533f1798))
+
 ## [7.5.1](https://github.com/solid-memo/website/compare/v7.5.0...v7.5.1) (2026-11-15)
 
 ### Fixes
