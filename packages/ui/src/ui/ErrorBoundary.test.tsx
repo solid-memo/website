@@ -185,7 +185,7 @@ describe("ErrorReport", () => {
     expect(screen.getByText(/paste the copied details into it/)).toBeInTheDocument();
   });
 
-  it("keeps the details as the error came up, whatever route follows", () => {
+  it("keeps the details and the link as the error came up, whatever route follows", () => {
     function Shown() {
       const [, setCount] = useState(0);
       return (
@@ -201,6 +201,8 @@ describe("ErrorReport", () => {
     window.location.hash = "#/preferences";
     fireEvent.click(screen.getByRole("button", { name: "Again" }));
     expect(screen.getByText(/^Version:/)).toHaveTextContent("Route: #/study?deck=");
+    const where = new URL(screen.getByRole("link", { name: /Report it/ }).getAttribute("href")!);
+    expect(where.searchParams.get("where")).toBe("#/study?deck=");
   });
 
   it("marks the details as English in another language", () => {

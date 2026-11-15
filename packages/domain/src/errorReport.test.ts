@@ -10,7 +10,7 @@ import {
   routeOf,
   withoutAddresses,
 } from "./errorReport";
-import { growth } from "./testing/growth";
+import { cpuTime, growth } from "./testing/growth";
 
 const REPO = "https://github.com/solid-memo/website";
 const SITE = "https://solid-memo.com/";
@@ -205,6 +205,53 @@ describe("withoutAddresses", () => {
     expect(ratio).toBeLessThan(4);
   });
 
+  it("passes over a word of schemes and encodings that are no address about as fast as a word without them", () => {
+    // Undoing much of the rest of the word again at each scheme took
+    // hundreds of times as long as a word without one.
+    const best = (text: string) =>
+      Math.min(...Array.from({ length: 5 }, () => cpuTime(() => withoutAddresses(text, SITE))));
+    const length = 72_000;
+    best("a".repeat(length));
+    const plain = best("a".repeat(length));
+    for (const unit of ["http%2525", "https%25"]) {
+      const word = unit.repeat(length / unit.length);
+      expect(best(word) / plain).toBeLessThan(40);
+    }
+  });
+
+  it("takes out an address that starts a long way into a word of schemes that are none", () => {
+    expect(
+      withoutAddresses(`${"http%25".repeat(40)}https:\\u002F\\u002Fpod.example/alice x`, SITE),
+    ).toBe(`${"http%25".repeat(40)}<address> x`);
+    expect(withoutAddresses(`${"https%25".repeat(5)}https:pod.example/alice`, SITE)).toBe(
+      `${"https%25".repeat(5)}<address>`,
+    );
+  });
+
+  it("takes out the whole of an address too long to be read whole for its host", () => {
+    expect(
+      withoutAddresses(`https:\\u002F\\u002Fuser:${"p".repeat(600)}@pod.example/alice`, SITE),
+    ).toBe("<address>");
+    expect(withoutAddresses(`https://user:${"p".repeat(600)}@pod.example/alice x`, SITE)).toBe(
+      "<address> x",
+    );
+    expect(withoutAddresses(`https:user:${"p".repeat(600)}@pod.example/alice`, SITE)).toBe(
+      "<address>",
+    );
+    expect(withoutAddresses(`https%3Auser%3A${"p".repeat(600)}%40pod.example%2Falice`, SITE)).toBe(
+      "<address>",
+    );
+    expect(withoutAddresses(`https:user:${"p".repeat(600)}@[2001:db8::1]/alice`, SITE)).toBe(
+      "<address>",
+    );
+    expect(
+      withoutAddresses(
+        `https:user:${"p".repeat(100)}https:${"q".repeat(500)}@pod.example/alice`,
+        SITE,
+      ),
+    ).toBe("<address>");
+  });
+
   it("keeps the path of the site's own scripts, without a query or a hash", () => {
     expect(withoutAddresses(`at f (${SITE}assets/index.js?v=1#top:1:2)`, SITE)).toBe(
       "at f (assets/index.js)",
@@ -234,6 +281,29 @@ describe("routeOf", () => {
 
   it("takes an address out of a hash typed in by hand", () => {
     expect(routeOf(`#/${POD}`, SITE)).toBe("#/<address>");
+    expect(routeOf(`#/study?https:user:${"p".repeat(600)}@pod.example/alice=1`, SITE)).toBe(
+      "#/study?<address>=",
+    );
+  });
+
+  it("cuts a long path and long names short, and keeps the first names", () => {
+    expect(routeOf(`#/${"a".repeat(800)}`, SITE)).toBe(`#/${"a".repeat(499)}…`);
+    expect(routeOf(`#/study?${"k".repeat(1000)}=1&deck=x`, SITE)).toBe(
+      `#/study?${"k".repeat(499)}…=&deck=`,
+    );
+    const keys = Array.from({ length: 30 }, (_, n) => `k${n}`);
+    expect(routeOf(`#/study?${keys.map((key) => `${key}=1`).join("&")}`, SITE)).toBe(
+      `#/study?${keys
+        .slice(0, 20)
+        .map((key) => `${key}=`)
+        .join("&")}`,
+    );
+  });
+
+  it("leaves out the word a long path is cut in, and never splits a character", () => {
+    expect(routeOf(`#/${"a".repeat(2000)}`, SITE)).toBe("#/…");
+    expect(routeOf(`#/${"a".repeat(498)}😀${"b".repeat(100)}`, SITE)).toBe(`#/${"a".repeat(498)}…`);
+    expect(routeOf(`${"a".repeat(2000)}?k=1`, SITE)).toBe("…?k=");
   });
 });
 
@@ -275,13 +345,40 @@ describe("errorDetails", () => {
   });
 
   it("shortens a long message and keeps the first frames", () => {
-    const error = new Error("x".repeat(2000));
+    const error = new Error("x ".repeat(1000));
     error.stack = Array.from({ length: 40 }, (_, i) => `f${i}@${SITE}a.js:${i}:1`).join("\n");
     const lines = errorDetails(error, PLACE).split("\n");
     expect(lines[2]).toHaveLength("Error: ".length + 500);
     expect(lines[2]?.endsWith("…")).toBe(true);
     expect(lines.slice(3)).toHaveLength(12);
     expect(lines[3]).toBe("f0@a.js:0:1");
+  });
+
+  it("shortens a long frame", () => {
+    const error = new Error("broken");
+    error.stack = `${"f".repeat(800)}@${SITE}a.js:1:1`;
+    const frame = errorDetails(error, PLACE).split("\n")[3];
+    expect(frame).toBe(`${"f".repeat(499)}…`);
+  });
+
+  it("reads a word that ends exactly where the reading stops", () => {
+    // "Error: " and the address take 990 characters, "abc" the last 3 read.
+    const message = `https://pod.example/${"a".repeat(969)} abc rest`;
+    const line = errorDetails(new Error(message), PLACE).split("\n")[2];
+    expect(line).toBe("Error: Error: <address> abc…");
+  });
+
+  it("takes out an address the cut falls in, or that the cut would split", () => {
+    const at = (message: string) => errorDetails(new Error(message), PLACE).split("\n")[2];
+    // An address across MAX_TEXT is read whole before the details are cut.
+    const across = at(`${"word ".repeat(95)}alice@pod.example.org${" more".repeat(20)}`);
+    expect(across).not.toContain("alice");
+    expect(across).toContain("<address>");
+    // An address across the end of what is read is left out with its word,
+    // even when the addresses before it leave room for it in the details.
+    const read = at(`${POD}${"p".repeat(600)} ${"word ".repeat(68)}alice@pod.example.org rest`);
+    expect(read).not.toContain("alice");
+    expect(read).toBe(`Error: Error: <address> ${"word ".repeat(67)}word…`);
   });
 });
 
