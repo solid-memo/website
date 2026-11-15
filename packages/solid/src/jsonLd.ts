@@ -266,11 +266,13 @@ function refuseLongStrings(text: string): void {
  * which the parser is also told not to read, and a string longer than a
  * term may be (refuseLongStrings), before JSON.parse reads it, and more
  * than MAX_EMPTY_VALUES values that make no triple or sit in nested
- * arrays (valueTally). Throws deckFileUnreadable, as for text that is no
- * JSON at all; and deckFileTooLarge for values that take the parser more
- * work than WORK_PER_QUAD for each triple `limits` allow, when there are
- * limits: the parser takes time for each value, whether it makes a
- * triple or not, the more the deeper it sits (valueTally).
+ * arrays (valueTally), and a member the parser reports as an error and
+ * reads on past (refuseInvalid). Throws deckFileUnreadable, as for
+ * text that is no JSON at all; and deckFileTooLarge for values that
+ * take the parser more work than WORK_PER_QUAD for each triple `limits`
+ * allow, when there are limits: the parser takes time for each value,
+ * whether it makes a triple or not, the more the deeper it sits
+ * (valueTally).
  *
  * Gives the document checked, written again: the parser is to read that
  * text, not the file's, so that both see the same document. A key named
@@ -297,6 +299,8 @@ export function refuseRemoteContexts(
   const ids = new Set(["@id"]);
   const givenObjects = new Set<string>();
   const tally = valueTally(limits);
+  // The contexts, whose members are terms and their IRIs, not values the parser reads.
+  const contexts = new Set<unknown>();
   // A walk of its own, not a recursion, which a file nested deeper than the call stack would end.
   const pending: Pending[] = [
     { value: json, depth: 0, place: "nodes", arrays: 0, key: "other", aliases: new Map() },
@@ -313,16 +317,16 @@ export function refuseRemoteContexts(
     }
     // The node's context first, for its aliases to name the keywords of its other keys, and of
     // the values in it alone: not of another top-level node's, as the parser reads them.
-    let { aliases } = visit;
-    if ("@context" in value) {
-      const context = (value as { "@context": unknown })["@context"];
-      const own = new Map(aliases);
-      for (const [term, aliased] of refuseContext(context, topLevel.has(value), baseUrl)) {
-        own.set(term, aliased);
-        if (aliased === "@id") ids.add(term);
-      }
-      aliases = own;
-    }
+    const aliases =
+      "@context" in value
+        ? withContext(value, visit.aliases, {
+            onTopLevelNode: topLevel.has(value),
+            baseUrl,
+            ids,
+            contexts,
+          })
+        : visit.aliases;
+    if (!Array.isArray(value) && !contexts.has(value)) refuseInvalid(value, aliases);
     for (const [key, child] of Object.entries(value)) {
       if (key === "@annotation") refuseTripleTerms();
       if (holdsObject(child)) givenObjects.add(key);
@@ -339,6 +343,28 @@ export function refuseRemoteContexts(
   if ([...ids].some((id) => givenObjects.has(id))) refuseTripleTerms();
   // Only now, the depth known to be within MAX_JSON_DEPTH: written recurses.
   return written(json);
+}
+
+/**
+ * The aliases over an object's members, `aliases` with those its own
+ * context gives (refuseContext): the terms aliased to `@id` noted in
+ * `ids`, and the context, and each it lists, in `contexts`.
+ */
+function withContext(
+  value: { "@context"?: unknown },
+  aliases: ReadonlyMap<string, string>,
+  seen: { onTopLevelNode: boolean; baseUrl: string; ids: Set<string>; contexts: Set<unknown> },
+): ReadonlyMap<string, string> {
+  const context = value["@context"];
+  for (const one of Array.isArray(context) ? [context, ...context] : [context]) {
+    seen.contexts.add(one);
+  }
+  const own = new Map(aliases);
+  for (const [term, aliased] of refuseContext(context, seen.onTopLevelNode, seen.baseUrl)) {
+    own.set(term, aliased);
+    if (aliased === "@id") seen.ids.add(term);
+  }
+  return own;
 }
 
 /**
@@ -404,6 +430,85 @@ function placeIn(
   if (place === "list" || place === "listed") return { place: "listed", arrays: arrays + 1 };
   if (place === "member") return { place: "element", arrays: arrays + 1 };
   return { place: place === "nodes" ? "node" : "nested", arrays: arrays + 1 };
+}
+
+/**
+ * Throws deckFileUnreadable for an object's members (`aliases` resolved)
+ * that the parser reports as an error and then reads on past: an `@id`
+ * that is no string (one that is an object is a triple term,
+ * refuseTripleTerms), or two of them in one object; a `@type` that is no
+ * string or array of strings; an `@index` that is no string; a
+ * `@reverse` that is no object, or one holding a keyword (a context
+ * there is refused anyway, refuseContext); an `@included` member that
+ * is no node object (a value or list object, say); a `@nest` member
+ * that is no object, or one holding a `@value`, or an `@id` (the node's
+ * second), a `@set` object's members and an array's in it counting as
+ * the keyword's (members); and a `@list` beside any key but `@index`.
+ * Each such error takes the parser far more time than a triple, and
+ * makes none, so the bound on the values (valueTally) would not bound
+ * the time. A file this app exports holds none of them.
+ */
+function refuseInvalid(object: object, aliases: ReadonlyMap<string, string>): void {
+  const keywordsOf = (one: object) => Object.keys(one).map((key) => aliases.get(key) ?? key);
+  // The objects an `@included` or `@nest` holds, each null where it holds no object.
+  const objects = (child: unknown) => members(child, aliases).map(plainObject);
+  const holdsNone = (child: unknown, ...keywords: string[]) =>
+    objects(child).every(
+      (one) => one !== null && !keywordsOf(one).some((key) => keywords.includes(key)),
+    );
+  const valid = ([key, child]: [string, unknown]): boolean => {
+    switch (aliases.get(key) ?? key) {
+      case "@id":
+        return typeof child === "string" || holdsObject(child);
+      case "@type":
+        return (Array.isArray(child) ? child : [child]).every((one) => typeof one === "string");
+      case "@index":
+        return typeof child === "string";
+      case "@reverse": {
+        const reverse = plainObject(child);
+        return reverse !== null && !keywordsOf(reverse).some((key) => key.startsWith("@"));
+      }
+      case "@included":
+        return holdsNone(child, "@value", "@list");
+      case "@nest":
+        return holdsNone(child, "@value", "@id");
+      default:
+        return true;
+    }
+  };
+  const keywords = keywordsOf(object);
+  const ids = keywords.filter((keyword) => keyword === "@id").length;
+  const list =
+    keywords.includes("@list") && !keywords.every((key) => key === "@list" || key === "@index");
+  if (Object.entries(object).every(valid) && ids <= 1 && !list) return;
+  throw new AppError("deckFileUnreadable", {
+    reason: "The file gives a JSON-LD keyword a value it may not have.",
+  });
+}
+
+/**
+ * The members of an `@included` or `@nest` value as the parser reads
+ * them: the elements of an array, and of the array a `@set` object
+ * holds (`aliases` resolved), one in the next as far as they go. A walk
+ * of its own, not a recursion, as for refuseRemoteContexts.
+ */
+function members(value: unknown, aliases: ReadonlyMap<string, string>): unknown[] {
+  const found: unknown[] = [];
+  const pending = [value];
+  while (pending.length > 0) {
+    const one = pending.pop();
+    const object = plainObject(one) as Record<string, unknown> | null;
+    const set = Object.keys(object ?? {}).find((key) => (aliases.get(key) ?? key) === "@set");
+    if (Array.isArray(one)) for (const element of one) pending.push(element);
+    else if (set === undefined) found.push(one);
+    else pending.push(object![set]);
+  }
+  return found;
+}
+
+/** The value as an object that is no array, or null. */
+function plainObject(value: unknown): object | null {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value : null;
 }
 
 /** Whether a value is an object, or an array that holds one. */
@@ -511,16 +616,18 @@ function baseLength(baseUrl: string, declared: string[]): number {
 }
 
 /**
- * Whether a context's value is a compact IRI whose prefix (the part
- * before the first `:`) is a term of the node's contexts. The parser
- * expands such a value through that term, and that term's through the
- * next, with no bound on how deep, so two terms through each other (or
- * one through itself) build an IRI without end. A file this app exports
- * states its namespaces in full.
+ * Whether a context's value is a term of the node's contexts, or a
+ * compact IRI whose prefix (the part before the first `:`) is one. The
+ * parser expands such a value through that term, and that term's through
+ * the next, with no bound on how deep, so two terms through each other
+ * (or one through itself) build an IRI without end. A term so defined
+ * as one that names a keyword names that keyword too, which the aliases
+ * refuseContext gives would miss. A file this app exports states its
+ * namespaces in full.
  */
 function chained(value: string, terms: Set<string>): boolean {
   const colon = value.indexOf(":");
-  return colon >= 0 && terms.has(value.slice(0, colon));
+  return terms.has(value) || (colon >= 0 && terms.has(value.slice(0, colon)));
 }
 
 /**

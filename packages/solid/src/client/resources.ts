@@ -498,9 +498,12 @@ export function parseQuads(
  * its other keys (refuseRemoteContexts writes it so), or the text does
  * not parse: otherwise the parser holds every node to the end, then
  * matches each against every typed one, time growing with their square.
- * The text is written in parts (textChunks), and the parser destroyed
- * once `onQuad` says not to go on, so that it reads no further than the
- * part it is in.
+ * The text is written in parts (textChunks), each in a task of its own
+ * (taskQueue), and the parser destroyed once `onQuad` says not to go on
+ * or at its first error, so that it reads no further than the part it
+ * is in. The parser reports some errors and reads on, each taking it far
+ * more time than a triple; and the parts written at once would hold the
+ * tab for all the work they queue, past the error that ends the parse.
  */
 function parseJsonLd(
   text: string,
@@ -522,13 +525,52 @@ function parseJsonLd(
       load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
     },
   });
+  let stopped = false;
+  const stop = () => {
+    stopped = true;
+    parser.destroy();
+  };
   parser.on("data", (quad: Quad) => {
-    if (!onQuad(quad)) parser.destroy();
+    if (!onQuad(quad)) stop();
   });
-  parser.on("error", onError);
+  parser.on("error", (error: Error) => {
+    stop();
+    onError(error);
+  });
   parser.on("end", done);
-  for (const chunk of textChunks(text)) parser.write(chunk);
-  parser.end();
+  const tasks = taskQueue();
+  (async () => {
+    try {
+      for (const chunk of textChunks(text)) {
+        parser.write(chunk);
+        await tasks.next();
+        if (stopped) break;
+      }
+    } finally {
+      tasks.close();
+    }
+    if (!stopped) parser.end();
+  })().catch(onError);
+}
+
+/**
+ * A wait for the next task of the event loop, after the microtasks
+ * queued so far, the parser's work on what it was written among them:
+ * a message to itself, which a browser delivers at once, where a
+ * timeout nested this deep waits some milliseconds.
+ */
+function taskQueue(): { next: () => Promise<void>; close: () => void } {
+  const channel = new MessageChannel();
+  let resume: () => void;
+  channel.port1.onmessage = () => resume();
+  return {
+    next: () =>
+      new Promise((resolve) => {
+        resume = resolve;
+        channel.port2.postMessage(null);
+      }),
+    close: () => channel.port1.close(),
+  };
 }
 
 /** The URL of the document a dataset was read from or saved to; null for one built here. */

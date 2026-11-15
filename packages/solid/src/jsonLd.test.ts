@@ -8,6 +8,7 @@ import { growth } from "@solid-memo/domain/testing/growth";
 import { jsonLdOf, refuseRemoteContexts as refuseIn } from "./jsonLd";
 import { termOf } from "./ntriples";
 import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import type { ReadLimits } from "./client/interface";
 import { parseQuads } from "./client/resources";
 
 const EX = "https://example.org/ns#";
@@ -41,6 +42,27 @@ async function triplesOf(text: string): Promise<string[]> {
   return quads
     .map((q) => `${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`)
     .sort();
+}
+
+/**
+ * The least CPU time, of three reads, that checking a deck file and
+ * parsing what passes takes, until the main thread is free again: the
+ * parser may still work after its promise settles.
+ */
+async function cpuUntilFree(text: string, limits: ReadLimits): Promise<number> {
+  let least = Infinity;
+  for (let round = 0; round < 3; round++) {
+    const started = process.cpuUsage();
+    try {
+      await parseQuads(refuseIn(text, EX, limits), "jsonld", EX, limits);
+    } catch {
+      // Refused, or not parsed: the time until then counts all the same.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const { user, system } = process.cpuUsage(started);
+    least = Math.min(least, user + system);
+  }
+  return least;
 }
 
 describe("jsonLdOf", () => {
@@ -297,6 +319,9 @@ describe("refuseRemoteContexts", () => {
       { ex: EX, p: "ex:p" },
       [{ ex: EX }, { "@vocab": "ex:" }],
       { ex: EX, "@base": "ex:a/" },
+      // A term defined as another, which may name a keyword.
+      { "x:y": "@included", b: "x:y" },
+      { "x:y": EX, b: "x:y" },
     ]) {
       expect(() =>
         refuseRemoteContexts(JSON.stringify({ "@context": context, "@id": "n" })),
@@ -317,13 +342,12 @@ describe("refuseRemoteContexts", () => {
       // A file of nothing else, as large as a deck file may be, is refused too.
       expect(() => refuseRemoteContexts(values(value, 100_000))).toThrow(refused);
     }
-    // A string, number or boolean where a node belongs states nothing either.
-    for (const key of ["@graph", "@included"]) {
-      const nodes = (count: number) =>
-        `{"@context":{"ex":"${EX}"},"${key}":[${Array(count).fill('"a"').join(",")}]}`;
-      expect(() => refuseRemoteContexts(nodes(4_096))).not.toThrow();
-      expect(() => refuseRemoteContexts(nodes(4_097))).toThrow(refused);
-    }
+    // A string, number or boolean where a node belongs states nothing either (in `@included`, it is
+    // refused as invalid at once).
+    const nodes = (count: number) =>
+      `{"@context":{"ex":"${EX}"},"@graph":[${Array(count).fill('"a"').join(",")}]}`;
+    expect(() => refuseRemoteContexts(nodes(4_096))).not.toThrow();
+    expect(() => refuseRemoteContexts(nodes(4_097))).toThrow(refused);
     expect(() => refuseRemoteContexts(`[${Array(4_097).fill("1").join(",")}]`)).toThrow(refused);
     expect(() =>
       refuseRemoteContexts(
@@ -436,6 +460,81 @@ describe("refuseRemoteContexts", () => {
         nodesThen ? `[${nodes(count)},${context}]` : `[${context},${nodes(count)}]`;
       expect(() => refuseIn(text(14), "", limits)).not.toThrow();
       expect(() => refuseIn(text(15), "", limits)).toThrow(tooLarge);
+    }
+  });
+
+  it("refuses a keyword given a value the parser reports as an error and reads on past, however the keyword is named (GHSA-c6fr-r6fm-4hjm)", () => {
+    const refused = expect.objectContaining({
+      code: "deckFileUnreadable",
+      vars: { reason: "The file gives a JSON-LD keyword a value it may not have." },
+    });
+    const context = {
+      ex: EX,
+      i: "@id",
+      t: "@type",
+      inc: "@included",
+      n: "@nest",
+      v: "@value",
+      s: "@set",
+    };
+    const node = (members: object) => JSON.stringify({ "@context": context, ...members });
+    for (const members of [
+      { "@graph": [{ "@id": 5 }] },
+      { "@graph": [{ i: null }] },
+      { "@id": ["ex:a"] },
+      { "@id": "ex:a", i: "ex:b" },
+      { "@id": "ex:a", t: 5 },
+      { "@id": "ex:a", "@type": ["ex:T", ["ex:U"]] },
+      { "@id": "ex:a", "@index": 5 },
+      { "@id": "ex:a", "@reverse": "ex:b" },
+      { "@id": "ex:a", "@reverse": { "@id": "ex:b" } },
+      { "@id": "ex:a", inc: "s" },
+      { "@id": "ex:a", "@included": [{ "@id": "ex:b" }, { v: "s" }] },
+      { "@id": "ex:a", "@included": { "@list": [] } },
+      { "@id": "ex:a", n: "x" },
+      { "@id": "ex:a", "@nest": [{ "ex:p": "s" }, null] },
+      { "@id": "ex:a", "@nest": { v: "s" } },
+      { "@id": "ex:a", "@nest": { i: "ex:b" } },
+      // A `@set` object's members are the keyword's, in an array in it too, under an alias as well.
+      { "@id": "ex:a", "@included": { "@set": [{ "@value": "v" }] } },
+      { "@id": "ex:a", inc: { s: ["s"] } },
+      { "@id": "ex:a", "@included": [{ "@set": [[{ "@id": "ex:b" }, "s"]] }] },
+      { "@id": "ex:a", "@nest": { "@set": [{ "@value": "v" }] } },
+      { "@id": "ex:a", n: { s: { s: ["s"] } } },
+      { "@id": "ex:a", "@nest": { "@set": [{ "@id": "ex:b" }] } },
+      { "@id": "ex:a", "ex:p": { "@list": ["s"], "@id": "ex:b" } },
+      { "@id": "ex:a", "ex:p": { "@list": ["s"], "ex:q": "s" } },
+    ]) {
+      expect(() => refuseRemoteContexts(node(members))).toThrow(refused);
+    }
+    // The same keywords given what the parser reads, and a context's own members, which name them.
+    const valid = node({
+      "@id": "ex:a",
+      t: ["ex:T", "ex:U"],
+      "@index": "i",
+      "@reverse": { "ex:p": { i: "ex:b" } },
+      inc: [{ i: "ex:c", "ex:p": "s" }, { s: [{ i: "ex:d" }] }],
+      n: [{ "ex:q": "s", "@type": "ex:V" }, { "@set": [{ "ex:q": "t" }] }],
+      "ex:r": { "@list": ["s"], "@index": "j" },
+    });
+    expect(() => refuseRemoteContexts(valid)).not.toThrow();
+  });
+
+  it("refuses up front a file of keywords given values the parser reports as errors, which would take it longer than an exported file at the same limits (GHSA-c6fr-r6fm-4hjm)", async () => {
+    const quads = 2_000;
+    const limits = { bytes: 64 * 1024 * 1024, quads, characters: 64 * 1024 * 1024 };
+    const exported = jsonLdOf(
+      Array.from({ length: quads }, (_, at) =>
+        quad(iri(`${EX}s${at % 100}`), `${EX}p`, literal(`v${at}`, at % 2 === 0 ? "en" : "")),
+      ),
+      { ex: EX },
+    );
+    // As many values as the bound on the work let through at these limits before.
+    const ids = `{"@graph":[${Array(3_400).fill('{"@id":5}').join()}]}`;
+    const included = `{"@context":{"x:y":"@included","b":"x:y"},"@id":"${EX}x","b":[${Array(3_600).fill('"s"').join()}]}`;
+    const base = await cpuUntilFree(exported, limits);
+    for (const text of [ids, included]) {
+      expect(await cpuUntilFree(text, limits)).toBeLessThan(base);
     }
   });
 

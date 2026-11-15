@@ -1050,7 +1050,8 @@ flowchart LR
   and `@vocab` are refused (`deckFileUnreadable`) past it, counted with
   the release's own address. Its terms and prefixes are refused past
   their bound or when defined through another term, as a deck file's
-  are, and so is an RDF-star annotation or triple term
+  are. So are a keyword given a value the parser reports as an error
+  and an RDF-star annotation or triple term
   ([data-model.md](data-model.md#decks-as-files)). A Turtle release
   with a triple term, an annotation or a reifier doesn't parse
   (`releaseUnreadable`), however it's read: the parser reads none, as
