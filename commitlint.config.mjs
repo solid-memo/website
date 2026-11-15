@@ -124,6 +124,86 @@ function noChangelogDirective({ raw }) {
 }
 
 /**
+ * What the release copies from a message into CHANGELOG.md: the header,
+ * and a breaking change's footer, from the first line that starts one
+ * (as release.config.mjs's notesPattern finds it) to the end. The header
+ * is found as conventional-commits-parser finds it, which both commitlint
+ * and the release use: it drops every line that starts with `gpg:`, as
+ * git writes a signature's check, and the blank lines before the first
+ * other one. A line of spaces counts as blank here, so the check reads
+ * one line too many, never one too few.
+ *
+ * @param {string} message
+ */
+function changelogTextOf(message) {
+  const lines = message.split(/\r?\n/).filter((line) => !/^\s*gpg:/.test(line));
+  const header = lines.findIndex((line) => line.trim() !== "");
+  const footer = lines.findIndex((line) => /^BREAKING[ -]CHANGE:/.test(line));
+  return [lines[header] ?? "", ...(footer === -1 ? [] : lines.slice(footer))].join("\n");
+}
+
+/**
+ * What CHANGELOG.md would render as a link or an image, whose target CI's
+ * link check reads: an inline or reference-style link or image
+ * (`[text](target)`, `![alt](target)`, `[text][ref]`), a reference's
+ * definition (`[ref]: target`) or a `file:` address. A definition is
+ * refused wherever it stands, not only at the start of a line: the
+ * release puts each entry in a list item, so one may follow a list
+ * marker, a quote's `>` or any indentation, and it then makes a shortcut
+ * `[ref]` anywhere in the file a link.
+ */
+const MARKDOWN_LINK = /\][([:]|<file:|\bfile:\/\//i;
+
+/**
+ * Whether the text holds an HTML tag with an attribute, which the link
+ * check reads for any attribute and on any element. Its name is read as
+ * HTML reads it: a letter after `<`, then anything up to a space, a `/`
+ * or a `>`. The tag is found by the space after its name and any later
+ * `>`, so a quoted `>` in an earlier attribute cannot hide a later one,
+ * while a `<` that never closes, as in `a<b and c`, is left alone. It
+ * reads each character once, however many tags never close.
+ *
+ * @param {string} text
+ */
+function holdsTagWithAttribute(text) {
+  const end = text.lastIndexOf(">");
+  let at = 0;
+  while (at < end) {
+    const open = text.indexOf("<", at);
+    if (open === -1 || open >= end) return false;
+    at = open + 1;
+    if (!/[a-z]/i.test(text[at])) continue;
+    // Both runs stop at the last `>` at the latest.
+    while (!/[\s/>]/.test(text[at])) at++;
+    const name = at;
+    while (/[\s/]/.test(text[at])) at++;
+    if (at > name && text[at] !== ">") return true;
+  }
+  return false;
+}
+
+/**
+ * Whether the text the release copies from a message into CHANGELOG.md
+ * holds a link or an image.
+ *
+ * @param {string} message
+ */
+export function holdsChangelogLink(message) {
+  const text = changelogTextOf(message);
+  return MARKDOWN_LINK.test(text) || holdsTagWithAttribute(text);
+}
+
+/**
+ * @param {{ raw: string }} commit
+ */
+function noChangelogLink({ raw }) {
+  return [
+    !holdsChangelogLink(raw),
+    "the header and a breaking change's footer must not hold a Markdown link, image or reference definition, such as `[text](docs/page.md)` or `[text]: docs/page.md`, or an HTML tag with an attribute: the release copies them into CHANGELOG.md, whose link check would read it; name the page in plain text instead (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
  * The header semantic-release titles its release commit with
  * (release.config.mjs), in upper or lower case and with or without a `!`.
  *
@@ -177,6 +257,7 @@ export default {
         "not-a-release": notARelease,
         "no-skip-keyword": noSkipKeyword,
         "no-changelog-directive": noChangelogDirective,
+        "no-changelog-link": noChangelogLink,
       },
     },
   ],
@@ -189,5 +270,6 @@ export default {
     "not-a-release": [2, "always"],
     "no-skip-keyword": [2, "always"],
     "no-changelog-directive": [2, "always"],
+    "no-changelog-link": [2, "always"],
   },
 };

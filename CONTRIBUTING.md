@@ -137,14 +137,20 @@ they refuse a message that holds one of GitHub's keywords that skip CI
 case: CI runs on every push to `main`, and the deploy only after it.
 They refuse an HTML comment's `<!--`, `-->` or `--!>` and a spell
 checker's directive anywhere in a message too: the release copies the message
-into `CHANGELOG.md`, whose linters would read them.
+into `CHANGELOG.md`, whose linters would read them. And they refuse a
+Markdown link, image or reference definition, such as
+`[text](docs/page.md)` or `[text]: docs/page.md`, or an HTML tag with an
+attribute, in a header or a breaking change's footer, the parts the
+release copies, and inside a code span there too: name the page in
+plain text there, and link it in the body.
 The merge queue refuses those keywords, comment markers and directives
 in a pull request's title too, and a title that starts as a breaking
 change's footer, as the merge commit holds the title
 ([docs/releasing.md](docs/releasing.md#what-a-merge-commit-decides)).
 A commit commitlint skips, such as a revert, may not say it breaks.
 `npm run check:merges` reads every commit's whole message for a comment
-marker or a directive, as commitlint can miss part of one.
+marker or a directive, as commitlint can miss part of one, and every
+commit's header and breaking change's footer for a link.
 `npm run lint:commits` lints the commits since `origin/main`, so from a
 fork, sync the fork's `main` with this repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the

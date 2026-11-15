@@ -1314,7 +1314,10 @@ the pages in `docs/`, and CI's `docs` job the rest:
   ([lychee.toml](../lychee.toml)). The
   [Links workflow](../.github/workflows/links.yml) checks the web's
   addresses weekly and by hand, apart from any change. A broken one is
-  fixed, or excluded in `lychee.toml` with a reason.
+  fixed, or excluded in `lychee.toml` with a reason. `CHANGELOG.md` is
+  checked only there: the release writes it on `main`, so a link of a
+  released entry that failed would fail every change after it
+  ([releasing.md](releasing.md#the-changelog)).
 - **publiccode.yml**: once the repository has one, the
   [publiccode.yml parser](https://github.com/italia/publiccode-parser-go)
   validates it against the standard, and the files it names. The Links

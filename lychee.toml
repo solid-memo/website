@@ -5,7 +5,8 @@
 # lychee's settings for the links in the project's Markdown
 # (docs/testing.md#documentation): CI checks the files and anchors they
 # point at on every change (--offline), and every web address weekly
-# (.github/workflows/links.yml).
+# (.github/workflows/links.yml). The weekly run checks CHANGELOG.md too,
+# which the run on every change leaves out (.github/workflows/ci.yml).
 
 # A link to a heading must find it.
 include_fragments = "full"

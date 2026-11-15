@@ -233,6 +233,16 @@ a number counts as an issue ([release.config.mjs](../release.config.mjs)'s
 The site's footer links to the changelog on `main`
 ([Footer.tsx](../packages/ui/src/ui/Footer.tsx)).
 
+The notes keep a commit's header and a breaking change's footer as
+Markdown, so a link or an image there stays one in `CHANGELOG.md`.
+commitlint and `npm run check:merges` refuse there
+`[text](target)`, `![alt](target)`, `[text][ref]`, a reference's
+definition `[ref]:` wherever it stands, a `file:` address, and an HTML
+tag with any attribute, its name read as HTML reads it. The body may
+link, as the notes leave it out. CI's `docs` job leaves `CHANGELOG.md`
+out of its link check too ([testing.md](testing.md#documentation)), so
+an entry already released can't fail every later pull request.
+
 A subject says, in plain words, what changed for users, other apps or
 people who run their own copy. Nobody edits an entry by hand: a mistake
 stays, and the next version's entry can correct it. The header is

@@ -125,6 +125,56 @@ describe("problemsOf", () => {
     expect(problemsOf("fix: the misspell: rule, a -> b\n\nRefs: #1", false)).toEqual([]);
   });
 
+  // The release writes a commit's header and a breaking change's footer
+  // into CHANGELOG.md as Markdown, and the docs job checks its links.
+  const link = "holds a link or an image in its header or a breaking change's footer";
+
+  it.each([
+    "fix(studio): keep the order, as [the Studio page](docs/no-such-page.md) says",
+    "fix(studio): keep the order, as [the Studio page](docs/studio.md#no-such-heading) says",
+    "fix: show ![a picture](docs/no-such-image.png)",
+    "fix: keep the order, as [the Studio page][studio] says",
+    "fix: keep the order, as <file:docs/studio.md> says",
+    'fix: show <img srcset="docs/no-such-image.png">',
+    'fix: keep the order, as <a title=">" href="docs/x.md">the page</a> says',
+    "fix: keep [x]: docs/x.md",
+  ])("refuses a link or an image in a header: %s", (header) => {
+    expect(problemsOf(`${header}\n\nRefs: #1`, false)).toEqual([link]);
+    expect(problemsOf(`Revert "${header}"`, false)).toEqual([link]);
+  });
+
+  it("refuses a link in the header the parser finds after gpg: or blank lines", () => {
+    for (const before of ["gpg: Signature made today\n", "\n"]) {
+      expect(
+        problemsOf(
+          `${before}fix(studio): keep [the page](docs/no-such.md) in order\n\nRefs: #1`,
+          false,
+        ),
+      ).toEqual([link]);
+    }
+  });
+
+  it("refuses a link in a breaking change's footer, on any of its lines", () => {
+    expect(
+      problemsOf("fix!: tidy\n\nKeep it.\n\nBREAKING CHANGE: see [the page](docs/x.md)", false),
+    ).toEqual([link]);
+    expect(
+      problemsOf(
+        "fix!: tidy\n\nKeep it.\n\nBREAKING CHANGE: see [the page]\n[the page]: docs/x.md",
+        false,
+      ),
+    ).toEqual([link]);
+    expect(
+      problemsOf("fix!: tidy\n\nKeep it.\n\nBREAKING CHANGE: see [r]\n\n    [r]: docs/x.md", false),
+    ).toEqual([link]);
+  });
+
+  it("passes a link in the body, and brackets and parentheses that are no link", () => {
+    expect(problemsOf("fix: tidy\n\nSee [the page](docs/x.md).\n\nRefs: #1", false)).toEqual([]);
+    expect(problemsOf("fix: keep [front] and (back), arr[0] (x)\n\nRefs: #1", false)).toEqual([]);
+    expect(problemsOf(merge("fix: keep [front] (docs/x.md)"), true)).toEqual([]);
+  });
+
   it("says both when both are there", () => {
     expect(problemsOf(merge("BREAKING CHANGE: tidy [skip ci]"), true)).toHaveLength(2);
   });
