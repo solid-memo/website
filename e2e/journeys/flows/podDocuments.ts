@@ -8,7 +8,9 @@ import type { Page } from "@playwright/test";
  * Documents a journey writes to a pod itself, with plain requests, as
  * Solid Memo would have written them, and answers of the server a
  * journey changes: what pod-safety.journey.ts and the errors tour
- * (tour-errors.journey.ts) set up the app to meet.
+ * (tour-errors.journey.ts) set up the app to meet, and the documents an
+ * older version of Solid Memo left, which format-update.journey.ts and
+ * the learner's tour (tour-learner.journey.ts) have the app update.
  */
 
 export const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
@@ -31,6 +33,90 @@ export interface Writer {
 /** The instance's `meta.ttl`, as Solid Memo writes it. */
 export function metaOf(name: string): string {
   return `${PREFIXES}<#it> a sm:Instance ; dcterms:title "${name}" ; dcterms:created ${CREATED} ; sm:formatVersion 2 .`;
+}
+
+/**
+ * The instance's `meta.ttl` as an older version of Solid Memo wrote it:
+ * no format version, which is instance format 1.
+ */
+export function olderMetaOf(name: string): string {
+  return `${PREFIXES}<#it> a sm:Instance ; dcterms:title "${name}" ; dcterms:created ${CREATED} .`;
+}
+
+/** What writeOlderInstance wrote, by document. */
+export interface OlderInstance {
+  meta: string;
+  preferences: string;
+  catalog: string;
+  capitalsCards: string;
+  capitalsReviews: string;
+  planetsCards: string;
+  planetsReviews: string;
+}
+
+/**
+ * The UTC day `offset` days from today, `YYYY-MM-DD`. A journey takes
+ * days at least 5 away from today: the browser's time zone and the study
+ * day's turn at 4 a.m. then never move one across today.
+ */
+function day(offset: number): string {
+  return new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10);
+}
+
+/**
+ * The instance at `instance` as an older version of Solid Memo left it,
+ * written over its documents, as the pod tests seed it
+ * (e2e/pod/src/instanceUpdate.integration.test.ts): a record of format 1,
+ * preferences of format 1, a catalog with no catalog in it, holding two
+ * decks of format 2, `capitals` studied front to back and `planets` back
+ * to front. The capitals' cards are of format 1 or state none, one with
+ * a triple of another app's, and two of them have review states of
+ * format 1, one due today and one not; the third is new. The planets'
+ * one card is new. Its text is ASCII, as the pod tests' is.
+ */
+export async function writeOlderInstance(
+  writer: Writer,
+  instance: string,
+  {
+    name,
+    capitals,
+    planets,
+    runId,
+  }: { name: string; capitals: string; planets: string; runId: string },
+): Promise<OlderInstance> {
+  const documents: OlderInstance = {
+    meta: `${instance}meta.ttl`,
+    preferences: `${instance}preferences.ttl`,
+    catalog: `${instance}catalog.ttl`,
+    capitalsCards: `${instance}decks/deck-a.ttl`,
+    capitalsReviews: `${instance}reviews/deck-a.ttl`,
+    planetsCards: `${instance}decks/deck-b.ttl`,
+    planetsReviews: `${instance}reviews/deck-b.ttl`,
+  };
+  const at = (offset: number) => `"${day(offset)}T10:00:00Z"^^xsd:dateTime`;
+  const bodies: Record<keyof OlderInstance, string> = {
+    meta: olderMetaOf(name),
+    preferences: `${PREFIXES}<#it> a sm:Preferences ; sm:newCardsPerDay 20 ; sm:maxReviewsPerDay 200 ; sm:dayBoundaryHour 4 .`,
+    catalog: `${PREFIXES}<#deck-a> a sm:Deck ; dcterms:title "${capitals}" ; sm:formatVersion 2 ;
+  sm:direction "front-to-back" ;
+  sm:cardsDocument <${documents.capitalsCards}> ; sm:reviewsDocument <${documents.capitalsReviews}> .
+<#deck-b> a sm:Deck ; dcterms:title "${planets}" ; sm:formatVersion 2 ;
+  sm:direction "back-to-front" ;
+  sm:cardsDocument <${documents.planetsCards}> ; sm:reviewsDocument <${documents.planetsReviews}> .`,
+    capitalsCards: `${PREFIXES}<#se> a sm:Card ; sm:front "Sweden ${runId}" ; sm:back "Stockholm" ;
+  <https://other-app.example/ns#note> "kept by another app" .
+<#no> a sm:Card ; sm:front "Norway ${runId}" ; sm:back "Oslo" ; sm:formatVersion 1 ; dcterms:created ${CREATED} .
+<#fi> a sm:Card ; sm:front "Finland ${runId}" ; sm:back "Helsinki" ; sm:formatVersion 1 .`,
+    capitalsReviews: `${PREFIXES}<#se> a sm:ReviewState ; sm:easeFactor 2.5 ; sm:intervalDays 6 ; sm:repetitions 2 ;
+  sm:due "${day(-5)}" ; sm:firstReviewedAt ${at(-20)} ; sm:lastReviewedAt ${at(-11)} .
+<#no> a sm:ReviewState ; sm:easeFactor 2.6 ; sm:intervalDays 30 ; sm:repetitions 3 ;
+  sm:due "${day(25)}" ; sm:firstReviewedAt ${at(-40)} ; sm:lastReviewedAt ${at(-5)} .`,
+    planetsCards: `${PREFIXES}<#mars> a sm:Card ; sm:front "Mars ${runId}" ; sm:back "Red planet ${runId}" .`,
+    planetsReviews: PREFIXES,
+  };
+  for (const key of Object.keys(documents) as (keyof OlderInstance)[])
+    await writer.put(documents[key], bodies[key], "text/turtle");
+  return documents;
 }
 
 export interface DeckEntry {

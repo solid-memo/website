@@ -492,6 +492,14 @@ Further journeys go through:
 - trying Solid Memo as a guest and moving the study into a new
   instance in the pod, the move first cut off and its partial copy
   removed;
+- an instance an older version of Solid Memo left in the pod: its
+  decks, cards and review states are read as they are, and the format
+  update is offered. Not now writes nothing. An update cut off by leaving
+  the page leaves the rest offered on the next opening. A document
+  changed elsewhere meanwhile is left and named until Try again. After a
+  reload, nothing is offered, and the decks, cards, directions and
+  progress are as they were
+  ([format-update.journey.ts](../e2e/journeys/journeys/format-update.journey.ts));
 - a screen that fails while it renders (the Studio's code swapped for
   code that throws): "Something went wrong" under the working header,
   its details copied, its report link with only Where and Version

@@ -71,6 +71,13 @@ export class DeckDetail extends Screen {
     );
   }
 
+  /** `due` cards are due today, and `count` new are left to introduce within today's budget. */
+  async expectDueAndNew(due: number, count: number): Promise<void> {
+    await expect(this.page.getByRole("main")).toContainText(
+      this.t("deckDetail.dueAndNew", { due: this.t("common.cardCount", { count: due }), count }),
+    );
+  }
+
   /** Nothing is left to study today, and `studied` cards were studied today. */
   async expectAllStudied(studied: number): Promise<void> {
     await expect(this.page.getByRole("main")).toContainText(this.t("deckDetail.allStudied"));

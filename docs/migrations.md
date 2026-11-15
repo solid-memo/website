@@ -679,6 +679,12 @@ change are skipped. The tests start a Community Solid Server in memory;
 `SOLID_SERVER_URL` points them at another server that lets anyone read
 and write. `npm test` doesn't run them.
 
+A user journey
+([format-update.journey.ts](../e2e/journeys/journeys/format-update.journey.ts))
+runs the same update through the notice in the built app, against
+Community Solid Server 7. It covers a tab closed part-way, which the pod
+tests can't: the next opening offers only the rest.
+
 ### The backup
 
 The format update keeps no backup: each document is in a format the

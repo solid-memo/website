@@ -4,6 +4,7 @@
 
 import { test } from "../fixtures.ts";
 import { logInToInstance } from "../flows/logIn.ts";
+import { olderMetaOf } from "../flows/podDocuments.ts";
 import { zonesAcrossTheDayTurn } from "../harness/timezone.ts";
 
 /**
@@ -22,8 +23,10 @@ import { zonesAcrossTheDayTurn } from "../harness/timezone.ts";
  * cards and studied; and the next study day, for the welcome back, on a
  * second device in a time zone past the study day's turn at 4 a.m.,
  * where it is the same moment (the Solid server checks each request's
- * clock). The tour asserts only what it needs to reach each screen: the
- * journeys test the rest.
+ * clock). The second instance's record is then written as an older
+ * version of Solid Memo wrote it, so the format update is offered. The
+ * tour asserts only what it needs to reach each screen: the journeys
+ * test the rest.
  */
 const zones = zonesAcrossTheDayTurn(new Date());
 test.use({ timezoneId: zones.before });
@@ -31,6 +34,7 @@ test.use({ timezoneId: zones.before });
 test("the learner screens in every palette and theme @tour-learner", async ({
   app,
   account,
+  otherApp,
   runId,
   newDevice,
 }) => {
@@ -252,6 +256,18 @@ test("the learner screens in every palette and theme @tour-learner", async ({
         await morning.instancePicker.expectInstances([guestInstance, second.name]);
       },
       { screen: "instance-picker" },
+    );
+
+    await morning.step(
+      "23 · The second instance's record in an older format: the format update is offered",
+      async () => {
+        await otherApp.put(`${second.folder}meta.ttl`, olderMetaOf(second.name), "text/turtle");
+        // A page load: the update's plan, read in step 21, is kept for the session.
+        await morning.chrome.openAtItsAddress();
+        await morning.instancePicker.open(second.name);
+        await morning.formatUpdate.expectOffered({ decks: [], instance: true });
+      },
+      { screen: "decks.format-update" },
     );
   });
 });

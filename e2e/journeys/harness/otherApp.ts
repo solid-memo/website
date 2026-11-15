@@ -16,6 +16,8 @@ import { podToken } from "./podToken.ts";
 export interface OtherApp {
   /** Writes a document of its own at `url`, made or replaced. */
   put(url: string, body: string, contentType: string): Promise<void>;
+  /** The document at `url`, as the pod serves it as Turtle. */
+  read(url: string): Promise<string>;
   /** The status the pod answers a read of `url` with: 200 while it is there, 404 once it is gone. */
   status(url: string): Promise<number>;
 }
@@ -36,6 +38,16 @@ export function otherApp(api: APIRequestContext, server: string, account: CssAcc
         throw new Error(
           `The other app could not write ${url}: ${response.status()} ${await response.text()}`,
         );
+    },
+    async read(url) {
+      const response = await api.get(url, {
+        headers: { ...(await headers()), accept: "text/turtle" },
+      });
+      if (!response.ok())
+        throw new Error(
+          `The other app could not read ${url}: ${response.status()} ${await response.text()}`,
+        );
+      return response.text();
     },
     async status(url) {
       return (await api.get(url, { headers: await headers() })).status();
