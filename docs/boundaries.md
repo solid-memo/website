@@ -451,6 +451,11 @@ an index registers is the user's, so no instance in it joins the
 folders the gate sends credentials to. A profile whose index is on
 another server names that storage (`pim:storage`) for the app to use
 it. Of several links to an index, the app takes one in those places.
+These places say where the profile may be read, not where the app may
+point it. One server may keep many users' pods on the WebID's origin,
+so an index the user enters by its address is linked from the profile
+only when it's in one of the user's own storages
+([data-model.md](data-model.md#discovery-chain)).
 
 ## Further rules
 

@@ -176,8 +176,11 @@ flowchart LR
   An instance is registered in the index the user chose, and in no
   other.
 - **An index entered by its address** is used as it is when the profile
-  links it. Any other must be in the profile's own places
-  (`typeIndexOutsidePod`), readable by the user and typed
+  links it. Any other must be in one of the user's own storages, those
+  their profile names (`pim:storage`) or else the one their WebID is in
+  (`typeIndexOutsidePod`). The WebID's origin isn't enough: one server
+  may keep many users' pods on it. The index must also be readable by
+  the user and typed
   `solid:TypeIndex` (`notATypeIndex`). The app finds its instances only
   in the indexes the profile links, so it then links this one from the
   profile: as public when it's typed `solid:ListedDocument`, as private

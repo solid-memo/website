@@ -402,8 +402,8 @@ async function readableByAnyone(url: string, publicFetch: Fetch): Promise<boolea
  *   linked from their profile (createTypeIndex), and a public one made
  *   readable by anyone with `share`, so that other apps find what it
  *   registers;
- * - by its address, one the profile links, or else one in the profile's
- *   own places that the user can read and that says it is a
+ * - by its address, one the profile links, or else one in one of the
+ *   user's own storages that the user can read and that says it is a
  *   solid:TypeIndex, then linked from the profile as the kind its type
  *   says (adoptTypeIndex), as Solid Memo finds its instances only in the
  *   indexes the profile links.
@@ -433,11 +433,15 @@ export async function ensureTypeIndex(
 
 /**
  * A type index the user entered by its address: one the profile links
- * as it is; else one in the profile's own places (typeIndexOutsidePod),
- * that the user can read and that says it is a solid:TypeIndex
- * (notATypeIndex), then linked from the profile, as public when it says
- * it is a solid:ListedDocument and as private otherwise. A read that
- * may work when tried again fails as it did.
+ * as it is; else one in the profile's own places and in one of the
+ * user's own storages (ownStorages, typeIndexOutsidePod), that the user
+ * can read and that says it is a solid:TypeIndex (notATypeIndex), then
+ * linked from the profile, as public when it says it is a
+ * solid:ListedDocument and as private otherwise. The profile's places
+ * hold the whole origin of the WebID, which on a server that keeps many
+ * users' pods on one origin holds theirs too: they say where the
+ * profile may be read, never where an index the profile links may be.
+ * A read that may work when tried again fails as it did.
  */
 async function adoptTypeIndex(
   indexUrl: string,
@@ -446,7 +450,9 @@ async function adoptTypeIndex(
   fetch: Fetch,
 ): Promise<string> {
   if (indexes.links.some((link) => link.url === indexUrl)) return indexUrl;
-  if (!indexes.inPlaces(indexUrl)) throw new AppError("typeIndexOutsidePod", { url: indexUrl });
+  if (!indexes.inPlaces(indexUrl) || !isInPlaces(indexUrl, await ownStorages(webId, fetch))) {
+    throw new AppError("typeIndexOutsidePod", { url: indexUrl });
+  }
   let dataset: SourcedDataset;
   try {
     dataset = await readDataset(indexUrl, indexes.fetch);
@@ -775,18 +781,26 @@ export async function renameInstanceRegistrations(
 
 /**
  * The user's own storage to keep a type index in, of those their WebID
- * leads to (discoverStorages: pim:storage in their profile, or else the
- * one the WebID's own address is in): the one `url` is in, or else the
- * first. Throws when the WebID leads to none.
+ * leads to (ownStorages): the one `url` is in, or else the first.
+ * Throws when the WebID leads to none.
  */
 async function ownStorageFor(url: string, webId: string, fetch: Fetch): Promise<string> {
-  const storages = (
+  const storages = await ownStorages(webId, fetch);
+  const storage = storages.find((root) => url.startsWith(root)) ?? storages[0];
+  if (storage === undefined) throw new AppError("typeIndexNoStorage", { webId });
+  return storage;
+}
+
+/**
+ * The user's own storages, those their WebID leads to
+ * (discoverStorages: pim:storage in their profile, or else the one the
+ * WebID's own address is in), each a folder's address.
+ */
+async function ownStorages(webId: string, fetch: Fetch): Promise<string[]> {
+  return (
     await createSolidStorageGateway({
       fetch,
       profileStorages: getProfileStorages,
     }).discoverStorages(webId)
   ).map((storage) => ensureTrailingSlash(storage.url));
-  const storage = storages.find((root) => url.startsWith(root)) ?? storages[0];
-  if (storage === undefined) throw new AppError("typeIndexNoStorage", { webId });
-  return storage;
 }
