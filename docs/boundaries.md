@@ -202,8 +202,8 @@ needs no library of its own:
 
 The app changes access in two places only: a published release becomes
 readable by everyone ([studio.md](studio.md#publishing-a-release)), and
-so does a public type index the app creates
-([data-model.md](data-model.md#discovery-chain)). Only two adapters
+so does a public type index the app creates, never one already there
+that it adopts ([data-model.md](data-model.md#discovery-chain)). Only two adapters
 make that write: the `ReleasePublisher` port's,
 [solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
 and the `InstanceRepository` port's,

@@ -663,7 +663,8 @@ function strong(etag: string | undefined): string | undefined {
   return etag === undefined || etag.startsWith("W/") ? undefined : etag;
 }
 
-function statusOf(error: unknown): number | undefined {
+/** The HTTP status a failure carries: its statusCode, else its response's status. */
+export function statusOf(error: unknown): number | undefined {
   const candidate = error as { statusCode?: number; response?: { status?: number } };
   return candidate.statusCode ?? candidate.response?.status;
 }
