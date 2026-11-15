@@ -190,8 +190,9 @@ Studio draft ([below](#decks-and-drafts-from-elsewhere)):
   The card shows its text, the picture's description and **Show
   pictures from** the host, which says what showing them means. A list
   has the choice above it and an empty frame in each picture's place.
-  Adding the release shows no card's picture, and that screen says they
-  stay hidden.
+  In the Studio, a card open beside its deck's cards shares the list's
+  choice. Adding the release shows no card's picture, and that screen
+  says they stay hidden.
 - The choice is for one deck and one host. A picture from another host,
   which an upgrade may bring, asks again. It's kept with the deck in
   the pod (`sm:deckPictureHost` on its catalog entry,

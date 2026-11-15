@@ -649,6 +649,39 @@ describe("StudioWorkspace", () => {
     },
   );
 
+  it("holds a linked deck's pictures back in the card beside its cards too, until the learner chooses their host", async () => {
+    wideScreen();
+    const PICTURE = "https://author.example/p/water.svg";
+    const BACK_PICTURE = "https://author.example/p/water-back.svg";
+    const linked = { ...kanji, sourceUrl: "https://author.example/decks/kanji/v1.ttl" };
+    const card = {
+      ...makeCard(kanji, "water"),
+      frontImageUrl: PICTURE,
+      backImageUrl: BACK_PICTURE,
+    };
+    window.history.replaceState(
+      null,
+      "",
+      studioRouteToHash({ screen: "card", deckUrl: kanji.url, cardUrl: card.url }),
+    );
+    renderWorkspace(
+      makeUseCasesFake({
+        listInstances: vi.fn(async () => [instanceA]),
+        listDecks: vi.fn(async () => [linked]),
+        listCards: vi.fn(async () => [card]),
+      }),
+    );
+    const detail = await screen.findByRole("complementary", { name: "Card" });
+    const [show] = await within(detail).findAllByRole("button", {
+      name: "Show pictures from author.example",
+    });
+    expect(document.querySelector(`img[src="${PICTURE}"]`)).toBeNull();
+    expect(document.querySelector(`img[src="${BACK_PICTURE}"]`)).toBeNull();
+    fireEvent.click(show);
+    await waitFor(() => expect(detail.querySelector(`img[src="${PICTURE}"]`)).not.toBeNull());
+    expect(detail.querySelector(`img[src="${BACK_PICTURE}"]`)).not.toBeNull();
+  });
+
   it("opens a deck's schedule from its tabs, its trail through its cards, its leeches linked to their history and to the workbench", async () => {
     const card = makeCard(kanji, "water");
     window.history.replaceState(

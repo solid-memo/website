@@ -156,24 +156,31 @@ export function DeckPictures({
  * every draft asks about a picture's host, as a linked deck does, and a
  * choice lasts for the page: a draft is published as it is written, so
  * none is kept in it.
+ *
+ * With no draft (null), the gate above it holds, so a shell that goes
+ * from a deck's screens to a draft's and back keeps what it holds.
  */
 export function DraftPictures({
   draftUrl,
   children,
 }: {
-  draftUrl: string;
+  draftUrl: string | null;
   children: ComponentChildren;
 }) {
   const pageChoices = usePageChoices();
-  const gate: PictureGate = {
-    access: (url) => {
-      const host = pictureHost(url);
-      return host === null || pageChoices.has(draftUrl, host) ? "show" : { host };
-    },
-    allow: (host) => pageChoices.add(draftUrl, host),
-    busy: false,
-    error: null,
-  };
+  const above = usePictureGate();
+  const gate: PictureGate | null =
+    draftUrl === null
+      ? above
+      : {
+          access: (url) => {
+            const host = pictureHost(url);
+            return host === null || pageChoices.has(draftUrl, host) ? "show" : { host };
+          },
+          allow: (host) => pageChoices.add(draftUrl, host),
+          busy: false,
+          error: null,
+        };
   return <PicturesContext.Provider value={gate}>{children}</PicturesContext.Provider>;
 }
 
