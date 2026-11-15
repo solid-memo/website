@@ -508,6 +508,16 @@ Further journeys go through:
   longer name it, its answers stay in the answer log, and a reload finds
   it so
   ([card-removal.journey.ts](../e2e/journeys/journeys/card-removal.journey.ts));
+- two tabs and two devices writing to one pod at once
+  ([concurrent-writes.journey.ts](../e2e/journeys/journeys/concurrent-writes.journey.ts)).
+  A guest who answers in one tab while the other moves the study into
+  the pod is refused, and the move ends with the study as it was. On
+  two devices, each sees the other's progress after a reload. Answering
+  a card the other device has answered meanwhile builds on that answer:
+  the pod refuses the stale write, and the app reads the deck's reviews
+  again and answers on them. A replace in the Studio, previewed before the
+  other device edited a card in it, is refused as changed elsewhere,
+  then made again with both edits kept;
 - a screen that fails while it renders (the Studio's code swapped for
   code that throws): "Something went wrong" under the working header,
   its details copied, its report link with only Where and Version
