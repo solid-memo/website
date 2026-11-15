@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.5.1](https://github.com/solid-memo/website/compare/v7.5.0...v7.5.1) (2026-11-15)
+
+### Fixes
+
+* **application:** keep guest merge notes small and short-lived ([d7a2366](https://github.com/solid-memo/website/commit/d7a23669e50b168bfb199d9bac97a409ae87d5c6))
+* **solid:** make a deck removal's catalog before deleting its documents ([ca782d0](https://github.com/solid-memo/website/commit/ca782d0fd75290d4b8cc43611b624e200d80d997))
+* **studio:** gate pictures in the card beside the card list ([193046c](https://github.com/solid-memo/website/commit/193046c31527c863ded0c63840c19d92f2bc76a7))
+
 ## [7.5.0](https://github.com/solid-memo/website/compare/v7.4.6...v7.5.0) (2026-11-14)
 
 ### Features
