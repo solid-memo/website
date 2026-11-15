@@ -18,21 +18,30 @@ export const MAX_DOCUMENTS = 1000;
 /** Each request's, so a server that hangs does not hold up the report for long. */
 const TIMEOUT_MS = 5_000;
 
-/** The resources a container lists, from its JSON-LD (expanded or not). */
+/**
+ * The resources a container lists, from its JSON-LD (expanded or not):
+ * the Solid Protocol's `ldp:contains`, or Linked Web Storage's `items`,
+ * each with its `id` (https://www.w3.org/ns/lws/v1), as a server with
+ * Linked Web Storage alone lists them.
+ */
 export function containedIn(jsonld: unknown, container: string): string[] {
   const nodes = Array.isArray(jsonld) ? jsonld : [jsonld];
   const found = new Set<string>();
   for (const node of nodes as Record<string, unknown>[]) {
     if (node === null || typeof node !== "object") continue;
-    const id = node["@id"];
+    const id = node["@id"] ?? node.id;
     if (id !== undefined && new URL(String(id), container).href !== container) continue;
-    const contains = node[LDP_CONTAINS] ?? node.contains ?? node["ldp:contains"];
+    const contains = node[LDP_CONTAINS] ?? node.contains ?? node["ldp:contains"] ?? node.items;
     for (const item of Array.isArray(contains)
       ? contains
       : contains === undefined
         ? []
         : [contains]) {
-      const ref = typeof item === "string" ? item : (item as { "@id"?: unknown })["@id"];
+      const { "@id": ldpId, id: lwsId } = (typeof item === "object" ? item : {}) as {
+        "@id"?: unknown;
+        id?: unknown;
+      };
+      const ref = typeof item === "string" ? item : (ldpId ?? lwsId);
       if (typeof ref === "string") found.add(new URL(ref, container).href);
     }
   }

@@ -22,6 +22,21 @@ describe("containedIn", () => {
     expect(containedIn({ "ldp:contains": [{ "@id": "y/" }] }, POD)).toEqual([`${POD}y/`]);
   });
 
+  it("reads Linked Web Storage's items, as a server with it alone lists them", () => {
+    const lws = {
+      "@context": "https://www.w3.org/ns/lws/v1",
+      id: POD,
+      type: "Container",
+      totalItems: 2,
+      items: [
+        { id: `${POD}history/2026-11.ttl`, type: "DataResource", format: "text/turtle" },
+        { id: `${POD}decks/`, type: "Container" },
+      ],
+    };
+    expect(containedIn(lws, POD)).toEqual([`${POD}decks/`, `${POD}history/2026-11.ttl`]);
+    expect(containedIn({ ...lws, id: `${POD}other/` }, POD)).toEqual([]);
+  });
+
   it("ignores what other nodes contain, and nodes that are not objects", () => {
     expect(
       containedIn(
