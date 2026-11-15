@@ -1206,9 +1206,12 @@ jobs:
       # files are there to check.
       - run: pip install --require-hashes -r scripts/requirements-lint.txt
       - run: npm run lint:reuse
+      # CHANGELOG.md is left out: the release writes it on main, after the
+      # change that wrote an entry passed, so a link there that failed
+      # would fail every later change instead. links.yml checks it weekly.
       - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
         with:
-          args: --offline '**/*.md'
+          args: --offline --exclude-path '^CHANGELOG\.md$' '**/*.md'
           output: ${{ runner.temp }}/lychee.md
           jobSummary: false
       - uses: ./.github/actions/publiccode

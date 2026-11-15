@@ -27,7 +27,10 @@
  * commit's subject and footer there, so an HTML comment or a spell
  * checker's directive would fail CI on the release commit. The check
  * reads every commit's whole message for that, the ones commitlint reads
- * included, as commitlint can read only part of a message.
+ * included, as commitlint can read only part of a message. Nor may the
+ * header or a breaking change's footer, the text the release copies there,
+ * hold a link or an image (holdsChangelogLink, from the same file), whose
+ * target the link check would read.
  *
  * With `--queue` the range must hold a merge commit, as each run of the
  * queue builds one. The release leaves out merge commits by their
@@ -43,13 +46,13 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { saysBreaking } from "./checkBreaking.ts";
 
-const { CHANGELOG_DIRECTIVE, SKIP_KEYWORD, skippedByCommitlint } = (await import(
-  new URL("../commitlint.config.mjs", import.meta.url).href
-)) as {
-  CHANGELOG_DIRECTIVE: RegExp;
-  SKIP_KEYWORD: RegExp;
-  skippedByCommitlint(message: string): boolean;
-};
+const { CHANGELOG_DIRECTIVE, SKIP_KEYWORD, holdsChangelogLink, skippedByCommitlint } =
+  (await import(new URL("../commitlint.config.mjs", import.meta.url).href)) as {
+    CHANGELOG_DIRECTIVE: RegExp;
+    SKIP_KEYWORD: RegExp;
+    holdsChangelogLink(message: string): boolean;
+    skippedByCommitlint(message: string): boolean;
+  };
 
 /** What is wrong with a merge commit's message, if anything. */
 function problemsOfMerge(message: string): string[] {
@@ -72,6 +75,8 @@ export function problemsOf(message: string, merge: boolean): string[] {
   const problems = merge ? problemsOfMerge(message) : problemsOfCommit(message);
   if (CHANGELOG_DIRECTIVE.test(message))
     problems.push("holds an HTML comment or a spell checker's directive");
+  if (holdsChangelogLink(message))
+    problems.push("holds a link or an image in its header or a breaking change's footer");
   return problems;
 }
 

@@ -17,9 +17,9 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = join(import.meta.dirname, "..");
 
-const { RENOVATE_WHY } = (await import(
+const { RENOVATE_WHY, holdsChangelogLink } = (await import(
   new URL("../commitlint.config.mjs", import.meta.url).href
-)) as { RENOVATE_WHY: string };
+)) as { RENOVATE_WHY: string; holdsChangelogLink(message: string): boolean };
 const config = await load({}, { cwd: ROOT });
 
 async function errors(message: string): Promise<string[]> {
@@ -206,6 +206,108 @@ Refs: #1`),
     ]) {
       expect(await errors(`fix(ui): ${words}\n\n${why}\n\nCloses: #1`)).toEqual([]);
     }
+  });
+
+  // CHANGELOG.md renders the header and a breaking change's footer as
+  // Markdown, and CI's link check reads every link and image there.
+  const links = [
+    "as [the Studio page](docs/no-such-page.md) says",
+    "as [the Studio page](docs/studio.md#no-such-heading) says",
+    "with ![a picture](docs/no-such-image.png)",
+    "as [the Studio page][studio] says",
+    "as [the Studio page][] says",
+    "as <file:docs/studio.md> says",
+    "as file:///docs/studio.md says",
+    'as <a href="docs/studio.md">the Studio page</a> says',
+    "as <IMG SRC=docs/no-such-image.png> shows",
+    'with <img srcset="docs/no-such-image.png">',
+    'as <blockquote cite="docs/studio.md">it</blockquote> says',
+    'with <object data="docs/no-such-file.pdf"></object>',
+    'with <video poster="docs/no-such-image.png"></video>',
+    'with <form action="docs/studio.md"></form>',
+    'as <a title=">" href="docs/studio.md">the Studio page</a> says',
+    "as <img/src=docs/no-such-image.png> shows",
+    "with [studio]: docs/studio.md",
+  ];
+
+  it("fails a link or an image in the header", async () => {
+    for (const link of links) {
+      expect(await errors(`fix(studio): keep the order, ${link}\n\n${why}\n\nCloses: #1`)).toEqual([
+        "no-changelog-link",
+      ]);
+    }
+  });
+
+  // The parser that commitlint and the release share drops `gpg:` lines
+  // and leading blank lines before it reads the header.
+  it("fails a link in the header the parser finds after gpg: or blank lines", async () => {
+    for (const before of ["gpg: Signature made today\n", "\n", "\n\n", "\n  gpg: x\ngpg: y\n"]) {
+      expect(
+        await errors(
+          `${before}fix(studio): keep [the Studio page](docs/no-such-page.md) in order\n\n${why}\n\nCloses: #1`,
+        ),
+      ).toEqual(["no-changelog-link"]);
+    }
+    expect(holdsChangelogLink("gpg: [the page](docs/x.md)\n\n")).toBe(false);
+  });
+
+  it("fails a link or an image in a breaking change's footer, on any of its lines", async () => {
+    for (const footer of [
+      ...links.map((link) => `BREAKING CHANGE: keep the order, ${link}`),
+      "BREAKING-CHANGE: keep the order, as [the Studio page] says\n[the Studio page]: docs/studio.md",
+      "BREAKING CHANGE: keep the order, as [studio] says\n\n    [studio]: docs/studio.md",
+      "BREAKING CHANGE: keep the order, as [studio] says\n\t[studio]: docs/studio.md",
+      "BREAKING CHANGE: keep the order, as [studio] says\n> - [studio]: docs/studio.md",
+      "BREAKING CHANGE: keep the order, as [studio] says\n1. [studio\n]: docs/studio.md",
+      'BREAKING CHANGE: keep the order, as <a\nhref="docs/studio.md">the Studio page</a> says',
+      // HTML ends a tag's name only at a space, a `/` or a `>`.
+      'BREAKING CHANGE: keep the order\n<div>\n<x:a href="docs/no-such-page.md">the page</x:a>\n</div>',
+      'BREAKING CHANGE: keep the order\n<div>\n<a" href="docs/no-such-page.md">the page</a>\n</div>',
+      'BREAKING CHANGE: keep the order\n<div>\n<a_b href="docs/no-such-page.md">the page</a_b>\n</div>',
+    ]) {
+      expect(
+        await errors(`fix(studio)!: keep the order\n\n${why}\n\n${footer}\nCloses: #1`),
+      ).toEqual(["no-changelog-link"]);
+    }
+  });
+
+  it("passes a link in the body, which the release leaves out of CHANGELOG.md", async () => {
+    expect(
+      await errors(
+        `fix(studio): keep the order\n\n${why} See [the Studio page](docs/studio.md).\n[studio]: docs/studio.md\n\nCloses: #1`,
+      ),
+    ).toEqual([]);
+  });
+
+  it("passes brackets and parentheses that are no link", async () => {
+    for (const words of [
+      "keep a card's [front] and (back)",
+      "read arr[0] (the first)",
+      "keep the order (docs/studio.md)",
+      "keep the order, as [the Studio page] (docs/studio.md) says",
+      "name the file: docs/studio.md, in a <dialog>",
+      "keep x<y and z",
+      "keep a <br/> and a <br />",
+    ]) {
+      expect(await errors(`fix(ui): ${words}\n\n${why}\n\nCloses: #1`)).toEqual([]);
+      expect(
+        await errors(`fix(ui)!: ${words}\n\n${why}\n\nBREAKING CHANGE: ${words}\nCloses: #1`),
+      ).toEqual([]);
+    }
+  });
+
+  it("reads a long message of tags that never close in linear time", () => {
+    const timed = (runs: number) => {
+      const message = `fix(ui)!: keep the order\n\n${why}\n\nBREAKING CHANGE: ${"<a b".repeat(runs)}`;
+      const started = performance.now();
+      expect(holdsChangelogLink(message)).toBe(false);
+      expect(holdsChangelogLink(`${message}>`)).toBe(true);
+      return performance.now() - started;
+    };
+    timed(20_000);
+    // Ten times the input takes about ten times as long, where a check
+    // that read each tag again would take about a hundred times as long.
+    expect(timed(200_000)).toBeLessThan(40 * timed(20_000) + 50);
   });
 
   it("still skips a revert and a fixup, as commitlint does by default", async () => {
