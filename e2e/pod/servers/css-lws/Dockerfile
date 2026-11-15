@@ -11,7 +11,7 @@
 FROM node:22.23.5-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS build
 # Renovate proposes newer commits of the branch for a person to approve (renovate.json5).
 # renovate: datasource=git-refs depName=https://github.com/jeswr/CommunitySolidServer branch=feat/lws-next-major
-ARG CSS_LWS_SHA=ef6d664f1253662cbfcb0f1786fe45d32849e067
+ARG CSS_LWS_SHA=ed404e97f5177d94f683f76b658b6e9492737f97
 ARG CSS_LWS_VERSION=8.0.0-alpha.3
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates git && rm -rf /var/lib/apt/lists/*
 WORKDIR /community-server
