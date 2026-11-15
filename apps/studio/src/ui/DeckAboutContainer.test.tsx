@@ -29,6 +29,14 @@ const kanji: Deck = {
   description: { en: "Characters." },
 };
 
+/** A text in 150 languages, qaa to qft (private use): more than a picker suggests (LANGUAGE_CHOICE_LIMIT). */
+const MANY_LANGUAGES = Object.fromEntries(
+  Array.from({ length: 150 }, (_, i) => [
+    `q${String.fromCharCode(97 + Math.floor(i / 26))}${String.fromCharCode(97 + (i % 26))}`,
+    "x",
+  ]),
+);
+
 function renderContainer(useCases: UseCases, deck: Deck = kanji, instance = instanceA) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   const invalidate = vi.spyOn(queryClient, "invalidateQueries");
@@ -112,6 +120,15 @@ describe("DeckAboutContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Rename" }));
     fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.getByRole("button", { name: "Rename" })).toBeInTheDocument();
+  });
+
+  it("suggests at most LANGUAGE_CHOICE_LIMIT of the deck's languages for its name", async () => {
+    renderContainer(makeUseCasesFake(), { ...kanji, description: MANY_LANGUAGES });
+    fireEvent.click(await screen.findByRole("button", { name: "Rename" }));
+    fireEvent.click(document.getElementById("deck-name-language-0")!);
+    const tags = screen.getAllByRole("radio").map((radio) => radio.getAttribute("value"));
+    expect(tags).toContain("qdu");
+    expect(tags).not.toContain("qdv");
   });
 
   it("describes the deck", async () => {

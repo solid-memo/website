@@ -25,7 +25,7 @@ import {
   type DraftEntry,
   type LangTextDraft,
 } from "./LangTextField";
-import type { LanguageRole } from "./LanguagePicker";
+import { textLanguages, type LanguageRole } from "./LanguagePicker";
 import { CardPreview, MarkdownHelp, readsDifferently, useEntryHints } from "./MarkdownEditing";
 import { recentLanguages } from "./remembered";
 
@@ -160,7 +160,8 @@ function fieldOf(invalid: CardFieldsError): string | undefined {
  * forms use it: the language new text of each group starts in — the one
  * the deck's cards usually have, and for the user's own text, failing
  * that, the one last chosen for it on this device — and the languages
- * each group's pickers suggest first: that one, then the deck name's.
+ * each group's pickers suggest first: that one, then the deck name's
+ * (textLanguages, so at most LANGUAGE_CHOICE_LIMIT).
  */
 export function cardLanguageHints(languages: DeckLanguages, title: LangText): CardLanguageHints {
   const defaults: CardLanguageDefaults = {
@@ -170,7 +171,7 @@ export function cardLanguageHints(languages: DeckLanguages, title: LangText): Ca
   };
   const suggest = (group: LanguageGroup) => [
     ...(defaults[group] === undefined ? [] : [defaults[group]]),
-    ...Object.keys(title),
+    ...textLanguages(title),
   ];
   return {
     defaults,

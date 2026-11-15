@@ -932,11 +932,12 @@ Its four tabs are links, the one shown marked (`aria-current`):
   how often a learner chose it (from the card's answers), to edit,
   retire, restore or delete.
   "Add a wrong option" writes a new one, in the back's language to
-  start with. Each change is saved as it's made, as one write of the
-  card (`updateCard`) naming each option with `sm:distractor` and
+  start with. Its language picker suggests the back's languages, at
+  most `LANGUAGE_CHOICE_LIMIT` (100) of them, the first by tag. Each
+  change is saved as it's made, as one write of the card
+  (`updateCard`) naming each option with `sm:distractor` and
   `schema:suggestedAnswer` alike, and the status line says so. An
-  option being written stays open
-  until it's saved.
+  option being written stays open until it's saved.
 - **Schedule**: the card's review state in each direction the deck
   studies, and in one it no longer does while a state is kept there
   ([`CardScheduleContainer`](../apps/studio/src/ui/CardScheduleContainer.tsx)).
@@ -1977,6 +1978,9 @@ holds the view ([above](#routes)).
 - The filters keep the cards asked nowhere (in a course), asked from
   two places, with fewer than two wrong options in use, or retired.
 - The language keeps those with text in it on their front or back.
+  It offers the languages of the cards' fronts and backs, and the
+  URL's own. Past `LANGUAGE_CHOICE_LIMIT` (100) it offers the most
+  used ones only, as the card workbench does.
 - A column's name sorts by it, then the other way, then by id again,
   from the first page. A page holds 50.
 

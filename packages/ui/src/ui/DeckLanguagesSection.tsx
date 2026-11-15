@@ -8,7 +8,7 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckLanguages, StatedLanguages } from "@solid-memo/domain/deckLanguages";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
-import { LanguagePicker } from "./LanguagePicker";
+import { LanguagePicker, textLanguages } from "./LanguagePicker";
 
 type Side = "front" | "back";
 
@@ -142,7 +142,7 @@ export function DeckLanguagesSection({
                     id={pickerId(side)}
                     value={chosen[side]}
                     role={side}
-                    suggestions={[languages[side], ...Object.keys(deck.title)].filter(
+                    suggestions={[languages[side], ...textLanguages(deck.title)].filter(
                       (tag) => tag !== undefined,
                     )}
                     errorId={missing === side ? "deck-languages-error" : undefined}

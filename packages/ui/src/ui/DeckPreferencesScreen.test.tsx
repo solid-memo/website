@@ -20,6 +20,14 @@ const deck: Deck = {
   authors: [],
 };
 
+/** A text in 150 languages, qaa to qft (private use): more than a picker suggests (LANGUAGE_CHOICE_LIMIT). */
+const MANY_LANGUAGES = Object.fromEntries(
+  Array.from({ length: 150 }, (_, i) => [
+    `q${String.fromCharCode(97 + Math.floor(i / 26))}${String.fromCharCode(97 + (i % 26))}`,
+    "x",
+  ]),
+);
+
 const SETTLED = { unstatedCounts: { front: 0, back: 0 } };
 
 function renderScreen(overrides: Partial<Parameters<typeof DeckPreferencesScreen>[0]> = {}) {
@@ -183,6 +191,15 @@ describe("DeckPreferencesScreen", () => {
     expect(screen.queryByLabelText("Deck name")).toBeNull();
     expect(confirm).not.toHaveBeenCalled();
     vi.unstubAllGlobals();
+  });
+
+  it("suggests at most LANGUAGE_CHOICE_LIMIT of the deck's languages for its name", () => {
+    renderScreen({ deck: { ...deck, title: { en: "Kanji N5" }, description: MANY_LANGUAGES } });
+    fireEvent.click(screen.getByRole("button", { name: "Rename deck" }));
+    fireEvent.click(document.getElementById("deck-name-language-0")!);
+    const tags = screen.getAllByRole("radio").map((radio) => radio.getAttribute("value"));
+    expect(tags).toContain("qdu");
+    expect(tags).not.toContain("qdv");
   });
 
   it("focuses the name's field on Rename, and Rename again on Save or Cancel", () => {

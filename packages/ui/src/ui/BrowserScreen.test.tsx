@@ -23,6 +23,14 @@ const deck: Deck = {
   authors: [],
 };
 
+/** A text in 150 languages, qaa to qft (private use): more than a picker suggests (LANGUAGE_CHOICE_LIMIT). */
+const MANY_LANGUAGES = Object.fromEntries(
+  Array.from({ length: 150 }, (_, i) => [
+    `q${String.fromCharCode(97 + Math.floor(i / 26))}${String.fromCharCode(97 + (i % 26))}`,
+    "x",
+  ]),
+);
+
 const card: Card = {
   id: "card-1",
   url: `${deck.cardsDocumentUrl}#card-1`,
@@ -96,6 +104,18 @@ describe("BrowserScreen deck editing", () => {
       keywords: { en: ["kanji", "N5"] },
     });
     expect(screen.getByRole("button", { name: "Describe deck" })).toBeInTheDocument();
+  });
+
+  it("suggests at most LANGUAGE_CHOICE_LIMIT of the deck's languages for its description and keywords", () => {
+    renderScreen({ deck: { ...deck, title: MANY_LANGUAGES } });
+    fireEvent.click(screen.getByRole("button", { name: "Describe deck" }));
+    for (const field of ["deck-description", "deck-keywords"]) {
+      fireEvent.click(document.getElementById(`${field}-language-0`)!);
+      const tags = screen.getAllByRole("radio").map((radio) => radio.getAttribute("value"));
+      expect(tags).toContain("qdv");
+      expect(tags).not.toContain("qdw");
+      fireEvent.click(screen.getByRole("button", { name: "Done" }));
+    }
   });
 
   it("shows only what a deck states, and cancels describing", () => {

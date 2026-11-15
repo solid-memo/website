@@ -7,7 +7,8 @@ import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { I18nProvider } from "./i18n";
-import { LanguagePicker, languageTextId, type LanguageRole } from "./LanguagePicker";
+import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
+import { LanguagePicker, languageTextId, textLanguages, type LanguageRole } from "./LanguagePicker";
 import { rememberLanguage } from "./remembered";
 
 /** A picker that keeps what is chosen, as a form would. */
@@ -412,5 +413,24 @@ describe("LanguagePicker", () => {
       expect(screen.queryByRole("group")).toBeNull();
       expect(button).toHaveFocus();
     });
+  });
+});
+
+describe("textLanguages", () => {
+  it("gives the texts' stated tags in order, each once, untagged text and no text aside", () => {
+    expect(textLanguages({ sv: "a", "": "b" }, undefined, { en: ["c"], sv: "d" })).toEqual([
+      "en",
+      "sv",
+    ]);
+  });
+
+  it("keeps the most used past LANGUAGE_CHOICE_LIMIT", () => {
+    const many = Object.fromEntries(
+      Array.from({ length: LANGUAGE_CHOICE_LIMIT + 1 }, (_, i) => [`x-t${1000 + i}`, "a"]),
+    );
+    const languages = textLanguages(many, { "x-t1100": "b" });
+    expect(languages).toHaveLength(LANGUAGE_CHOICE_LIMIT);
+    expect(languages).toContain("x-t1100");
+    expect(languages).not.toContain("x-t1099");
   });
 });

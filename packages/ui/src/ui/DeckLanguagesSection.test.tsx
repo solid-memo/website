@@ -21,6 +21,14 @@ const deck: Deck = {
   authors: [],
 };
 
+/** A text in 150 languages, qaa to qft (private use): more than a picker suggests (LANGUAGE_CHOICE_LIMIT). */
+const MANY_LANGUAGES = Object.fromEntries(
+  Array.from({ length: 150 }, (_, i) => [
+    `q${String.fromCharCode(97 + Math.floor(i / 26))}${String.fromCharCode(97 + (i % 26))}`,
+    "x",
+  ]),
+);
+
 const unstated: DeckLanguages = { back: "en", unstatedCounts: { front: 3, back: 1 } };
 
 function renderSection(overrides: Partial<Parameters<typeof DeckLanguagesSection>[0]> = {}) {
@@ -81,6 +89,17 @@ describe("DeckLanguagesSection", () => {
       "Finnish — suomi (fi)",
     ]);
     expect(radios.filter((radio) => (radio as HTMLInputElement).checked)).toEqual([]);
+  });
+
+  it("suggests at most LANGUAGE_CHOICE_LIMIT of the deck name's languages", () => {
+    renderSection({ deck: { ...deck, title: MANY_LANGUAGES } });
+    fireEvent.click(document.getElementById("deck-backs-language")!);
+    const tags = within(screen.getByRole("group", { name: "Language of the back" }))
+      .getAllByRole("radio")
+      .map((radio) => radio.getAttribute("value"));
+    expect(tags.slice(0, 2)).toEqual(["en", "qaa"]);
+    expect(tags).toContain("qdv");
+    expect(tags).not.toContain("qdw");
   });
 
   it("asks for a language before stating one, focusing the side's picker", () => {
