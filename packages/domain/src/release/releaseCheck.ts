@@ -7,7 +7,13 @@ import type { CardTextPart } from "../deck.ts";
 import { jsonPath, PathMap } from "../pathKeys.ts";
 import { ownSeriesProblems } from "./continuityRules.ts";
 import { courseProblems, readinessProblems } from "./courseRules.ts";
-import { curationProblems, podPolicy, repoPolicy, type LibraryPolicy } from "./curationRules.ts";
+import {
+  contactPointProblems,
+  curationProblems,
+  podPolicy,
+  repoPolicy,
+  type LibraryPolicy,
+} from "./curationRules.ts";
 import {
   metadataProblems,
   pathProblems,
@@ -80,14 +86,16 @@ function distinct(problems: readonly ReleaseProblem[]): ReleaseProblem[] {
 
 /**
  * The rules of a release read from its data alone: its course's, its
- * readiness, the policy's curation, its provenance's, and in a pod its
- * series, its own when it follows no release (ownSeriesProblems).
+ * readiness, the policy's curation, its one contact, its provenance's,
+ * and in a pod its series, its own when it follows no release
+ * (ownSeriesProblems).
  */
 export function ruleProblems(model: ReleaseModel, policy: CheckPolicy): ReleaseProblem[] {
   return distinct([
     ...courseProblems(model),
     ...readinessProblems(model),
     ...curationProblems(model, curationOf(policy)),
+    ...contactPointProblems(model),
     ...provenanceProblems(model),
     ...(policy === "pod" ? ownSeriesProblems(model) : []),
   ]);

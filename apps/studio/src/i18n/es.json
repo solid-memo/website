@@ -1308,6 +1308,7 @@
       "missingTheme": "Temas: falta {theme}.",
       "missingContact": "Contacto: no se indica el de la biblioteca, {contact}. Una publicación para la biblioteca lo indica, no un correo electrónico.",
       "emailNamed": "Indica un correo electrónico: una publicación para la biblioteca no indica el correo de nadie, solo el contacto de la biblioteca.",
+      "contactAmbiguous": "Contacto: indica más de un contacto, o un contacto con más de una página web, así que los estudiantes no tienen ninguno al que informar de un error. Vuelve a escribir el contacto para quedarte con uno.",
       "required": "{field}: aún no se ha indicado.",
       "previousUnread": "No se pudo leer la publicación a la que sigue, {previous}, así que no se comprueba nada con ella. Vuelve a comprobarlo más tarde.",
       "libraryUnread": "No se pudo leer el índice de la biblioteca, así que no se comprueba la ubicación del borrador en la biblioteca. Vuelve a comprobarlo más tarde.",

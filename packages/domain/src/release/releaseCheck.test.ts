@@ -72,6 +72,30 @@ describe("ruleProblems", () => {
   });
 });
 
+describe("ruleProblems' contact", () => {
+  it("names, in a pod and the library, a release whose contact learners would read as none", () => {
+    const model = draftReleaseModel(courseDraft());
+    const point = (url: string) => ({
+      point: { kind: "iri" as const, value: `${model.url}#contact` },
+      types: [],
+      urls: [{ kind: "iri" as const, value: url }],
+    });
+    const two = { ...model, contacts: [point("https://a.example/"), point("https://b.example/")] };
+    for (const policy of ["pod", "library"] as const) {
+      expect(ruleProblems(two, policy).filter((p) => p.code === "contactAmbiguous")).toEqual([
+        {
+          code: "contactAmbiguous",
+          params: {},
+          subject: model.url,
+          field: `${DCAT}contactPoint`,
+          severity: "warning",
+        },
+      ]);
+    }
+    expect(ruleProblems(model, "pod").map((p) => p.code)).not.toContain("contactAmbiguous");
+  });
+});
+
 describe("ruleProblems' growth", () => {
   it("names a problem of each of many cards, each as long as a term may be, once, in time linear in them", () => {
     // V8 hashes a string longer than 16,383 characters by its length
@@ -385,6 +409,10 @@ describe("problemTarget", () => {
       field: "publisher",
     });
     expect(target(DRAFT, { field: `${DCAT}contactPoint`, code: "missingContact" })).toEqual({
+      screen: "release",
+      field: "contact",
+    });
+    expect(target(DRAFT, { field: `${DCAT}contactPoint`, code: "contactAmbiguous" })).toEqual({
       screen: "release",
       field: "contact",
     });

@@ -16,6 +16,7 @@ import { ruleProblems } from "@solid-memo/domain/release/releaseCheck";
 import {
   applyDraftChanges,
   blankDraft,
+  contactOf,
   iriIn,
   isRefusal,
   type DraftChange,
@@ -34,7 +35,11 @@ import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { RELEASE_LIMITS } from "./client/readLimits";
 import { datasetFromQuads } from "./client/rdf";
 import { turtleAt } from "./testing/contract/rdf";
-import { toLibraryCards, toStandaloneLibraryDeck } from "./mappers/libraryMapper";
+import {
+  toLibraryCards,
+  toLibraryDeckContent,
+  toStandaloneLibraryDeck,
+} from "./mappers/libraryMapper";
 import { draftQuads } from "./mappers/releaseDraftMapper";
 import {
   DECKS,
@@ -2071,6 +2076,50 @@ describe("a release with a card outside it (GHSA-67w8-qjpm-jhwp)", () => {
     expect(cards.filter((card) => card.id === "200-ok").map((card) => card.back)).toEqual([
       { en: "OK" },
     ]);
+  });
+});
+
+describe("a release with a contact point for the Studio and another for learners (GHSA-g8xv-c484-62vx)", () => {
+  // A blank point with one page before the release's own, which names another.
+  const text = readFileSync(join(DECKS_ROOT, "arabic-adjectives/v1.ttl"), "utf8")
+    .replace(
+      "dcat:contactPoint <#contact> ;",
+      "dcat:contactPoint [ a vcard:Kind ; vcard:hasURL <https://good.example/issues> ] , <#contact> ;",
+    )
+    .replace(
+      "vcard:hasURL <https://github.com/solid-memo/website/issues>",
+      "vcard:hasURL <https://other.example/report>",
+    );
+
+  it("is read as naming no contact by the Studio and by learners alike, and the check warns of it", async () => {
+    const pod = await draftPod();
+    const summary = await pod.repository.create(
+      INSTANCE,
+      releaseToDraft(
+        await pod.repository.parseRelease(text, "turtle"),
+        draftUrlOf(INSTANCE, "arabic-adjectives", 1),
+      ),
+    );
+    const { draft } = await pod.repository.read(summary.url);
+    expect(contactOf(draft)).toBeNull();
+    expect(
+      ruleProblems(draftReleaseModel(draft), "pod").filter((p) => p.code === "contactAmbiguous"),
+    ).toMatchObject([{ subject: draft.url, severity: "warning" }]);
+    // What it would publish, as a learner reads it: no contact either.
+    const published = "https://creator.example/memo/releases/arabic/v1.ttl";
+    const read = (one: ReleaseDraft) =>
+      toLibraryDeckContent(
+        published,
+        datasetFromQuads(releaseQuadsOf(draftQuads(rebaseDraft(one, published)), published, NOW)),
+      ).contact;
+    expect(read(draft)).toBeUndefined();
+    // Setting the contact keeps one, which both then read.
+    const set = applyDraftChanges(draft, [
+      { kind: "setContact", url: "https://good.example/issues" },
+    ]);
+    if (isRefusal(set)) throw new Error("refused");
+    expect(contactOf(set)).toBe("https://good.example/issues");
+    expect(read(set)).toBe("https://good.example/issues");
   });
 });
 

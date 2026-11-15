@@ -44,6 +44,7 @@ import {
   unsupportedIdOf,
   type CheckActivity,
   type DraftChange,
+  type DraftTriple,
   type ReleaseDraft,
 } from "./releaseDraft.ts";
 import { rebaseDraft } from "./releaseToDraft.ts";
@@ -1170,6 +1171,7 @@ describe("applyDraftChange", () => {
 describe("the contact", () => {
   const VCARD = "http://www.w3.org/2006/vcard/ns#";
   const POINT = "http://www.w3.org/ns/dcat#contactPoint";
+  const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
   const contact = (id: string, url: string) => [
     link(DRAFT, POINT, of(id)),
     link(of(id), RDF_TYPE, `${VCARD}Kind`),
@@ -1227,26 +1229,108 @@ describe("the contact", () => {
     expect(set.triples.slice(-3)).toEqual(contact("contact-3", "https://a.example/"));
   });
 
-  it("is the page of the first contact point that names one", () => {
+  it("is the page of its one contact point, named or blank, that names one page", () => {
     const draft = courseDraft();
-    const named = {
+    const blank = { kind: "blank" as const, value: "b1" };
+    const with_ = (...triples: DraftTriple[]) => ({
       ...draft,
-      triples: [
-        ...draft.triples,
-        link(DRAFT, POINT, of("first")),
-        link(of("first"), `${VCARD}hasEmail`, "mailto:a@example.org"),
-        ...contact("second", "https://b.example/"),
-        ...contact("third", "https://c.example/"),
-      ],
-    };
-    expect(contactOf(named)).toBe("https://b.example/");
+      triples: [...draft.triples, ...triples],
+    });
+    expect(contactOf(with_(...contact("contact", "https://a.example/")))).toBe(
+      "https://a.example/",
+    );
+    expect(
+      contactOf(
+        with_(
+          { subject: DRAFT, predicate: POINT, object: blank },
+          {
+            subject: "_:b1",
+            predicate: `${VCARD}hasURL`,
+            object: { kind: "iri", value: "https://a.example/" },
+          },
+        ),
+      ),
+    ).toBe("https://a.example/");
+    // A page that is no address, beside the one that is, is not a page learners follow.
+    expect(
+      contactOf(
+        with_(...contact("contact", "https://a.example/"), {
+          subject: of("contact"),
+          predicate: `${VCARD}hasURL`,
+          object: {
+            kind: "literal",
+            value: "https://b.example/",
+            language: "",
+            datatype: XSD_STRING,
+          },
+        }),
+      ),
+    ).toBe("https://a.example/");
+  });
+
+  it("is none for more than one contact point or page, or a point that is text, as learners read it", () => {
+    const draft = courseDraft();
+    const with_ = (...triples: DraftTriple[]) => ({
+      ...draft,
+      triples: [...draft.triples, ...triples],
+    });
+    // A blank point with one page, and a named one with another (GHSA-g8xv-c484-62vx).
+    expect(
+      contactOf(
+        with_(
+          { subject: DRAFT, predicate: POINT, object: { kind: "blank", value: "b1" } },
+          {
+            subject: "_:b1",
+            predicate: `${VCARD}hasURL`,
+            object: { kind: "iri", value: "https://a.example/" },
+          },
+          ...contact("contact", "https://b.example/"),
+        ),
+      ),
+    ).toBeNull();
+    expect(
+      contactOf(
+        with_(
+          ...contact("first", "https://a.example/"),
+          ...contact("second", "https://b.example/"),
+        ),
+      ),
+    ).toBeNull();
+    expect(
+      contactOf(
+        with_(
+          ...contact("contact", "https://a.example/"),
+          link(of("contact"), `${VCARD}hasURL`, "https://b.example/"),
+        ),
+      ),
+    ).toBeNull();
+    expect(
+      contactOf(
+        with_(
+          link(DRAFT, POINT, of("first")),
+          link(of("first"), `${VCARD}hasEmail`, "mailto:a@example.org"),
+        ),
+      ),
+    ).toBeNull();
+    expect(
+      contactOf(
+        with_(
+          {
+            subject: DRAFT,
+            predicate: POINT,
+            object: { kind: "literal", value: of("contact"), language: "", datatype: XSD_STRING },
+          },
+          link(of("contact"), `${VCARD}hasURL`, "https://a.example/"),
+        ),
+      ),
+    ).toBeNull();
   });
 
   it("is found in time that grows with the contact points, not their square", () => {
-    // Eight times the contact points, none naming a page, must take less
-    // than four times as long as an eighth of them done eight times over
-    // (testing.md): looking through every statement for each point would
-    // take about eight times as long.
+    // Eight times the contact points must take less than four times as
+    // long as an eighth of them done eight times over (testing.md):
+    // looking through every statement for each point would take about
+    // eight times as long.
     const points = (count: number): ReleaseDraft => {
       const draft = courseDraft();
       return {

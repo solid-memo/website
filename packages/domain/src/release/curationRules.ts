@@ -192,6 +192,27 @@ function pictureProblems(card: ReleaseCard): ReleaseProblem[] {
   ];
 }
 
+/**
+ * A release that names more than one contact point, or a point that
+ * names more than one web page, whatever the policy: the Studio and
+ * learners read it as naming no contact (`contactOf`), so "Report a
+ * mistake" has no page to lead to, and the creator is told, as the
+ * Contact field shows none. A warning: setting the contact again keeps
+ * one (GHSA-g8xv-c484-62vx).
+ */
+export function contactPointProblems(model: ReleaseModel): ReleaseProblem[] {
+  const pages = model.contacts[0]?.urls.filter((url) => url.kind === "iri") ?? [];
+  return model.contacts.length > 1 || pages.length > 1
+    ? [
+        problem(
+          model.url,
+          { code: "contactAmbiguous", params: {} },
+          { field: `${DCAT_NS}contactPoint`, severity: "warning" },
+        ),
+      ]
+    : [];
+}
+
 /** A release's contact, unless it names `contact`, and each email it names. */
 function contactProblems(model: ReleaseModel, contact: string): ReleaseProblem[] {
   const named = model.contacts.some(
