@@ -1519,6 +1519,19 @@ describe("AppShell", () => {
       expect(useCases.findGuestStudy).not.toHaveBeenCalled();
     });
 
+    it("starts a guest's study at once from a link to a release, without the landing page", async () => {
+      window.history.replaceState(
+        null,
+        "",
+        "#/try?url=https%3A%2F%2Fbob.example%2Freleases%2Frivers%2Fv1.ttl",
+      );
+      const useCases = makeUseCases();
+      renderApp(useCases);
+      expect(await screen.findByText(/You are trying Solid Memo as a guest/)).toBeInTheDocument();
+      expect(useCases.startGuest).toHaveBeenCalledWith("My study");
+      window.history.replaceState(null, "", window.location.pathname);
+    });
+
     describe("from a link to a library deck", () => {
       const link = "#/try?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Findex.ttl%23capitals";
       afterEach(() => {

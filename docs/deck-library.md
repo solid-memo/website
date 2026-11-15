@@ -996,6 +996,10 @@ flowchart LR
   document with no fragment (`releaseUrlOf`). It goes into the URL as
   the URL standard writes it (a host in capitals or a default port
   aside), so Back and a bookmark work and copies name a release one way.
+- Once the release is shown, **Copy link** copies a link to it for
+  anyone, `#/try?url=…`, that names no instance: someone not logged in
+  opens it as a guest, ready to add
+  ([routing.md](routing.md#a-link-to-a-release)).
 - `readReleaseFromLink` reads the document with no index
   (`DeckLibrary.readRelease`, `toStandaloneLibraryDeck` in
   [libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)):

@@ -1657,6 +1657,7 @@
     "validateInstance": "Validate this instance",
     "loadingCourse": "Loading the course…",
     "tryChooseInstance": "Which instance should {deck} open in?",
+    "tryReleaseChooseInstance": "Which instance should the deck published on {host} open in?",
     "triedUnknown": "The deck that link leads to is not in the library. Here is what the library has."
   },
   "errors": {

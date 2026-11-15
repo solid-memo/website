@@ -27,7 +27,7 @@ import { ReportMistake } from "./ReportMistake";
  * shown comes from the library index, or from a release added from a
  * link (`host`, where it is published, then said, with what it is), so
  * any link in it shows where it leads (DataLink). A release from a link has no
- * card list or preview to link to, nor a link to the deck to copy. A
+ * card list or preview to link to; its link to copy is to the release (`#/try?url=`). A
  * mistake in the release is reported where `reportPlace` says
  * (ReportMistake): to the library for one the library's index lists,
  * however it was reached, else to the contact the release names, if any.
@@ -53,7 +53,7 @@ export function LibraryDeckScreen({
   browseHref?: string;
   /** URL of the deck's preview, which tries its cards before import; none for a release from a link. */
   previewHref?: string;
-  /** The address anyone can open the deck at (`#/try`), to copy; none for a release from a link. */
+  /** The address anyone can open the deck at (`#/try`), to copy. */
   shareUrl?: string;
   /**
    * The instance already holds a copy; a second one is still allowed,

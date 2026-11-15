@@ -2563,6 +2563,12 @@ asks first, in a ConfirmDialog that names the release and says the
 Studio can't make it private again, both on the release screen and in
 the releases screen's table.
 
+A public release's screen has **Copy a link to try it**. It copies
+Solid Memo's link to the release for anyone, `#/try?url=…`, on the page
+the Studio shares with it
+([routing.md](routing.md#a-link-to-a-release)). Someone not logged in
+opens it as a guest, ready to add.
+
 **Make it public** acts only on a release that meets all of these, and
 **Start the next version** reads one as the user only when it meets
 the last, as a draft of a deck reads the deck's cards:

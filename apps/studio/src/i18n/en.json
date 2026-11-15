@@ -1470,6 +1470,8 @@
       "releasedAt": "This draft was released at {url}.",
       "askingPublic": "Asking whether anyone can read it…",
       "public": "Anyone with its address can read it.",
+      "copyTryLink": "Copy a link to try it",
+      "tryLinkHint": "Anyone can open it in Solid Memo, without an account, and add it.",
       "private": "Only you can read it: your Pod did not make it public. Try again, or make it readable by everyone with your Pod provider's tools.",
       "makePublic": "Make it public",
       "makePublicConfirm": "Anyone with its address will be able to read {release}. The Studio can't make it private again.",

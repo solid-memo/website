@@ -146,6 +146,25 @@ export class DraftEditor extends Screen {
   }
 
   /**
+   * "Copy a link to try it", on a public release's screen: Solid Memo's
+   * link to the release for anyone (#/try?url=), which names no
+   * instance, as the Studio wrote it to the clipboard.
+   */
+  async copyTryLink(): Promise<string> {
+    return this.intent("Copy a link to try the release", () =>
+      this.copied(async () => {
+        const part = this.publishPart;
+        await expect(part.getByText(this.t("studio.publish.public"))).toBeVisible();
+        await expect(part.getByText(this.t("studio.publish.tryLinkHint"))).toBeVisible();
+        await part
+          .getByRole("button", { name: this.t("studio.publish.copyTryLink"), exact: true })
+          .click();
+        await expect(part.getByText(this.t("studio.releases.copied"))).toBeVisible();
+      }),
+    );
+  }
+
+  /**
    * Publishes the draft as `publish` does, but the pod does not make it
    * public: the screen says only the user can read it, and offers to
    * make it public. Its address.

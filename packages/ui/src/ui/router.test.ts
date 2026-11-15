@@ -20,6 +20,7 @@ import {
   statisticsHref,
   studioHref,
   tryHref,
+  tryReleaseHref,
   type RouteRef,
   useHashRoute,
 } from "./router";
@@ -181,6 +182,7 @@ const roundTrips: RouteRef[] = [
   },
   { screen: "validation", instanceUrl: "https://pod.example/solid-memo/a/" },
   { screen: "try", libraryDeckUrl: "https://solid-memo.com/decks/index.ttl#capitals" },
+  { screen: "tryRelease", url: "https://alice.example/releases/capitals/v1.ttl" },
 ];
 
 describe("routeToHash / parseHash", () => {
@@ -292,6 +294,11 @@ describe("routeToHash / parseHash", () => {
     "#/validate",
     "#/try",
     "#/try?instance=a",
+    "#/try?url=",
+    "#/try?url=release.ttl",
+    "#/try?url=ftp%3A%2F%2Falice.example%2Fv1.ttl",
+    "#/try?url=https%3A%2F%2Falice.example%2Fv1.ttl%23deck",
+    "#/try?url=https%3A%2F%2Falice.example%2Freleases%2F",
   ])("rejects invalid hash %j", (hash) => {
     expect(parseHash(hash)).toBeNull();
   });
@@ -320,6 +327,31 @@ describe("tryHref", () => {
     expect(tryHref("https://solid-memo.com/decks/index.ttl#capitals")).toBe(
       "#/try?deck=https%3A%2F%2Fsolid-memo.com%2Fdecks%2Findex.ttl%23capitals",
     );
+  });
+});
+
+describe("tryReleaseHref", () => {
+  it("is the hash URL of a release from a link that names no instance", () => {
+    expect(tryReleaseHref("https://alice.example/releases/capitals/v1.ttl")).toBe(
+      "#/try?url=https%3A%2F%2Falice.example%2Freleases%2Fcapitals%2Fv1.ttl",
+    );
+  });
+});
+
+describe("a link for anyone (#/try)", () => {
+  it("keeps a release's link as the URL standard writes it", () => {
+    expect(parseHash("#/try?url=HTTPS%3A%2F%2FAlice.Example%3A443%2Fv1.ttl")).toEqual({
+      screen: "tryRelease",
+      url: "https://alice.example/v1.ttl",
+    });
+  });
+
+  it("takes the library deck when it names both", () => {
+    expect(
+      parseHash(
+        "#/try?deck=https%3A%2F%2Fsolid-memo.com%2Fd.ttl&url=https%3A%2F%2Fa.example%2Fv1.ttl",
+      ),
+    ).toEqual({ screen: "try", libraryDeckUrl: "https://solid-memo.com/d.ttl" });
   });
 });
 

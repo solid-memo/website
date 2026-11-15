@@ -169,8 +169,24 @@ describe("ReleasePublishScreen", () => {
     expect(startNext.run).not.toHaveBeenCalled();
   });
 
+  it("copies a public release's link for anyone to try it in Solid Memo", async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    renderScreen({ draft: released(), isPublic: true });
+    expect(
+      screen.getByText("Anyone can open it in Solid Memo, without an account, and add it."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Copy a link to try it" }));
+    expect(await screen.findByText("Link copied.")).toBeInTheDocument();
+    expect(writeText).toHaveBeenCalledWith(
+      `${window.location.origin}${window.location.pathname}#/try?url=${encodeURIComponent(TARGET)}`,
+    );
+    Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
+  });
+
   it("says a release is not public, and tries again to make it so", () => {
     const { makePublic } = renderScreen({ draft: released(), isPublic: false });
+    expect(screen.queryByRole("button", { name: "Copy a link to try it" })).toBeNull();
     expect(
       screen.getByText(/Only you can read it: your Pod did not make it public/),
     ).toBeInTheDocument();

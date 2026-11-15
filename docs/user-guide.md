@@ -275,7 +275,11 @@ adjectives.
 - **Add from a link** adds a deck or a course someone published in
   their own Pod. Paste the link, and Solid Memo shows what it is and
   where it's published before you add it
-  ([deck-library.md](deck-library.md#from-a-link)).
+  ([deck-library.md](deck-library.md#from-a-link)). Its **Copy link**
+  copies a link anyone can open, as a library deck's does. In the
+  Studio, a public release's screen has **Copy a link to try it**, which
+  copies the same link
+  ([studio.md](studio.md#publishing-a-release)).
 
 ## Courses
 
@@ -524,6 +528,7 @@ ones in the [online report](https://journeys.solid-memo.com/).
 | Writing a course in the Studio, trying it and publishing it | studio-course.journey.ts, first journey | 05–11 |
 | Trying the app as a guest, and moving the study into a pod | [guest.journey.ts](../e2e/journeys/journeys/guest.journey.ts) | 02–11 |
 | A library deck's link, opened in another browser as a guest | [try-link.journey.ts](../e2e/journeys/journeys/try-link.journey.ts) | 02–05 |
+| A release's link copied in the Studio, opened in another browser as a guest | studio-course.journey.ts, first journey | 12–14 |
 | A screen that breaks: "Something went wrong", its details and its report | [render-error.journey.ts](../e2e/journeys/journeys/render-error.journey.ts) | 02–06 |
 | Dark, High contrast and Larger, kept in the Pod and found on a second device | [returning-learner.journey.ts](../e2e/journeys/journeys/returning-learner.journey.ts) | 03–05, 08–11 |
 | A palette of one's own with too little contrast, used anyway and found on a third device, then reset | returning-learner.journey.ts | 12–14 |

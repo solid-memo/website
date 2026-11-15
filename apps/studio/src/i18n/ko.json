@@ -1393,6 +1393,8 @@
       "releasedAt": "이 초안은 {url}에 릴리스되었어요.",
       "askingPublic": "누구나 읽을 수 있는지 확인하는 중…",
       "public": "주소를 아는 사람은 누구나 읽을 수 있어요.",
+      "copyTryLink": "체험 링크 복사",
+      "tryLinkHint": "누구나 계정 없이 Solid Memo에서 열어 추가할 수 있어요.",
       "private": "나만 읽을 수 있어요. Pod가 공개로 설정하지 않았어요. 다시 시도하거나, Pod 제공자의 도구로 누구나 읽을 수 있게 설정해 주세요.",
       "makePublic": "공개하기",
       "makePublicConfirm": "주소를 아는 사람은 누구나 {release}을(를) 읽을 수 있게 돼요. Studio에서는 다시 비공개로 바꿀 수 없어요.",

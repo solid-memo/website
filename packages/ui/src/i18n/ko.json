@@ -1582,6 +1582,7 @@
     "validateInstance": "이 인스턴스 검증",
     "loadingCourse": "코스를 불러오는 중…",
     "tryChooseInstance": "{deck}을(를) 어느 인스턴스에서 열까요?",
+    "tryReleaseChooseInstance": "{host}에 게시된 덱을 어느 인스턴스에서 열까요?",
     "triedUnknown": "링크가 가리키는 덱이 라이브러리에 없어요. 라이브러리에 있는 덱은 다음과 같아요."
   },
   "errors": {

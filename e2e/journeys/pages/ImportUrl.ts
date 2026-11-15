@@ -50,9 +50,41 @@ export class ImportUrl extends Screen {
     });
   }
 
+  /**
+   * Opens a link to a release (`#/try?url=`) in a browser where no one is
+   * logged in: no landing page, but the release shown on this screen, a
+   * course, in a guest's study, in place of the link, so Back leaves the
+   * app rather than returning to the link, which would go on to it again.
+   */
+  async followLinkToCourse(link: string, url: string, title: string): Promise<void> {
+    await this.intent(`Follow the link to ${title}`, async () => {
+      // The page the link was followed from; not the browser's blank
+      // first page, which Firefox drops from the history.
+      const from = new URL("robots.txt", link).href;
+      await this.page.goto(from);
+      await this.page.goto(link);
+      await this.expectShown(url, title, "kindCourse");
+      await this.app.chrome.expectGuest();
+      await expect(this.page).toHaveURL(/#\/import-url\?/);
+      await this.page.goBack();
+      await expect(this.page).toHaveURL(from);
+      await this.page.goForward();
+      await this.expectShown(url, title, "kindCourse");
+    });
+  }
+
   private async show(url: string, title: string, kind: "kindCourse" | "kindDeck"): Promise<void> {
     await this.page.getByRole("textbox", { name: this.t("importUrl.label") }).fill(url);
     await this.page.getByRole("button", { name: this.t("importUrl.show"), exact: true }).click();
+    await this.expectShown(url, title, kind);
+  }
+
+  /** The release at `url` shown: its title, the host it is on, and what it is. */
+  private async expectShown(
+    url: string,
+    title: string,
+    kind: "kindCourse" | "kindDeck",
+  ): Promise<void> {
     await expect(
       this.page.getByRole("heading", { level: 2, name: title, exact: true }),
     ).toBeVisible();

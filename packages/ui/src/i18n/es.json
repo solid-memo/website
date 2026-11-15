@@ -1732,6 +1732,7 @@
     "validateInstance": "Validar esta instancia",
     "loadingCourse": "Cargando el curso…",
     "tryChooseInstance": "¿En qué instancia quieres abrir {deck}?",
+    "tryReleaseChooseInstance": "¿En qué instancia quieres abrir el mazo publicado en {host}?",
     "triedUnknown": "El mazo al que lleva el enlace no está en la biblioteca. Esto es lo que tiene la biblioteca."
   },
   "errors": {

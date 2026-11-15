@@ -17,7 +17,7 @@ import { Loading } from "./Loading";
  * library's page shows one, with the host it is published on and what
  * it is, and lines saying it is not the library's and that its cards'
  * pictures stay hidden until the learner chooses to show them
- * (DeckPictures). It is added as the library's are: a deck imported, a
+ * (DeckPictures), and a link to it anyone can open (`shareUrl`). It is added as the library's are: a deck imported, a
  * course started (`onAdd`), once the read shown is the latest: not while
  * it is read again, nor after that failed, when what would be added may
  * not be what is shown.
@@ -33,6 +33,7 @@ export function ImportUrlScreen({
   onShow,
   onAdd,
   reportPlace,
+  shareUrl,
 }: {
   /** The link pasted, as the URL has it; none yet. */
   url?: string;
@@ -52,6 +53,8 @@ export function ImportUrlScreen({
   onAdd: () => void;
   /** Where a mistake in the release is reported (UseCases.reportPlace); none while it is read. */
   reportPlace?: ReportPlace;
+  /** The address anyone can open the release at (`#/try?url=`), to copy; none with no link yet. */
+  shareUrl?: string;
 }) {
   const { t } = useI18n();
   // A link no URL parser takes names no host: the link itself says where it is published.
@@ -97,6 +100,7 @@ export function ImportUrlScreen({
             onImport={onAdd}
             onStartCourse={onAdd}
             reportPlace={reportPlace}
+            shareUrl={shareUrl}
           />
         </>
       )}

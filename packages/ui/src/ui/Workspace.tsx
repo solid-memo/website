@@ -788,6 +788,12 @@ export function Workspace({
       (onTry && (!triedSettled || instances.length < 2) ? (
         <Loading label={t("workspace.loadingLibrary")} />
       ) : null) ??
+      // A link to a release goes on at once with fewer than two
+      // instances: the picker, which reads the user's type indexes, is
+      // never drawn on the way.
+      (route.screen === "tryRelease" && instances.length < 2 ? (
+        <Loading label={t("workspace.loadingInstances")} />
+      ) : null) ??
       lookupWaiting(
         needsLibraryCard,
         libraryCardsQuery,
@@ -835,6 +841,21 @@ export function Workspace({
             }
             newInstanceHref={routeToHash({ screen: "storagePicker" })}
             onOpen={openTried}
+          />
+        );
+      case "tryRelease":
+        // Only reached with several instances: the learner chooses one to add it in.
+        return (
+          <InstancePickerContainer
+            useCases={useCases}
+            session={session}
+            instances={instances}
+            // The route's url is an http(s) link (releaseUrlOf), so it names a host.
+            purpose={t("workspace.tryReleaseChooseInstance", { host: new URL(route.url).host })}
+            newInstanceHref={routeToHash({ screen: "storagePicker" })}
+            onOpen={(instance) =>
+              replace({ screen: "importUrl", instanceUrl: instance.url, url: route.url })
+            }
           />
         );
       case "instanceCreator":
