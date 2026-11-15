@@ -196,3 +196,37 @@ describe("the headers that describe a resource, over the library", () => {
     expect(handed.every((response) => response.headers.get("Link") === null)).toBe(true);
   });
 });
+
+describe("parseQuads, of JSON-LD the parser reports errors in", () => {
+  /**
+   * The least CPU time, of three parses of `text`, until the main thread
+   * is free again: the parser may still work after its promise settles.
+   */
+  async function cpuUntilFree(text: string): Promise<number> {
+    let least = Infinity;
+    for (let round = 0; round < 3; round++) {
+      const started = process.cpuUsage();
+      await resources.parseQuads(text, "jsonld", "https://pod.example/").catch(() => []);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const { user, system } = process.cpuUsage(started);
+      least = Math.min(least, user + system);
+    }
+    return least;
+  }
+
+  it("rejects at the first error and reads no further than the part it is in (GHSA-c6fr-r6fm-4hjm)", async () => {
+    const count = 4_000;
+    const graph = (node: (at: number) => string) =>
+      `{"@context":{"ex":"https://example.org/ns#"},"@graph":[${Array.from({ length: count }, (_, at) => node(at)).join()}]}`;
+    const nodes = graph((at) => `{"@id":"ex:s${at}","ex:p":"v${at}"}`);
+    const errors = graph(() => '{"@id":5}');
+    await expect(
+      resources.parseQuads(nodes, "jsonld", "https://pod.example/"),
+    ).resolves.toHaveLength(count);
+    await expect(resources.parseQuads(errors, "jsonld", "https://pod.example/")).rejects.toThrow(
+      "Found illegal @id '5'",
+    );
+    // The parser would take longer over the errors than over the nodes, did it read them all.
+    expect(await cpuUntilFree(errors)).toBeLessThan((await cpuUntilFree(nodes)) / 2);
+  });
+});

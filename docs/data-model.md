@@ -1887,17 +1887,35 @@ An import reads the file as the pod is read, with the same mappers:
   an IRI that may be short. A file this app exports states short
   namespaces with a scheme;
 - a JSON-LD term, `@base` or `@vocab` is refused (`deckFileUnreadable`)
-  when it's a compact IRI whose prefix, the part before its first `:`,
-  is a term of the node's contexts. The parser expands such a term
-  through the other with no bound on how deep, so two terms defined
-  through each other, or one through itself, never end. A file this
+  when it's another term of the node's contexts, or a compact IRI whose
+  prefix, the part before its first `:`, is one. The parser expands
+  such a term through the other with no bound on how deep, so two terms
+  defined through each other, or one through itself, never end. A term
+  defined as one that names a keyword names that keyword too, which the
+  checks below would read as a plain term. A file this
   app exports states each namespace in full. With the base bounded and
   each term defined in full, at most 512 characters, the limits below
   bound the time;
 - the parser reads the document as it streams, each object written
   again with its context first. A parser that held every node to the
   end would match each against every typed one, in time growing with
-  the square of the nodes;
+  the square of the nodes. It gets the text in parts of 4,096
+  characters, each in a task of its own, and no more after its first
+  error, so a parse that fails leaves the tab free after the part it
+  failed in;
+- a JSON-LD keyword given a value the parser reports as an error is
+  refused (`deckFileUnreadable`) before it's parsed, under an alias
+  too. These are an `@id` that's no string, or a second one in an
+  object, and a `@type` that's no string or array of strings. So are an
+  `@index` that's no string and a `@reverse` that's no object or holds
+  a keyword. So are an `@included` member that's no node object, a
+  `@nest` member that's no object or holds `@value` or `@id`, and a
+  `@list` beside any key but `@index`. A `@set` object's members, and
+  an array's in it, count as members of the keyword it sits under. The
+  parser reports such an error and reads on, and each takes it far
+  longer than a triple, which the bound on the work below doesn't
+  count. As with the checks below, it covers the whole
+  document, a `@json` literal too. A file this app exports holds none;
 - JSON nested deeper than 12 levels is refused (`deckFileUnreadable`),
   before anything else reads it: the JSON-LD parser takes time far
   beyond linear in the depth, and a file this app exports nests 5;
