@@ -708,6 +708,10 @@ export function createSolidDeckRepository({
    * instance's folder that fails to be read stops the removal before the
    * entries are written, so they still name what is left and the removal
    * can be made again; a document already gone by then counts as removed.
+   * An entry, a distribution, an agent only the removed decks name or
+   * the catalog node a newer version of the app wrote refuses the
+   * removal (writtenByNewerApp) before anything is deleted: the catalog
+   * to write is made first.
    */
   async function removeDecks(decks: readonly Deck[]): Promise<KeptDocuments> {
     const keptDocuments: string[] = [];
@@ -729,12 +733,14 @@ export function createSolidDeckRepository({
       // Each document's decks found at once, and the entries told once, not per document.
       const decksAt = decksByDocument(usable);
       const entries = deckDocumentSubjects([...leaving]);
+      // The catalog as it will be written, before any document goes: what it refuses (writtenByNewerApp) leaves them all.
+      const catalog = dataset === null ? null : withoutDecks(dataset, inDocument);
       for (const url of unused) {
         const removal = await removeIfTheirs(url, decksAt.get(canonicalUrlOf(url)!)!, entries);
         if (removal === "kept") keptDocuments.push(url);
       }
-      if (dataset === null) continue;
-      await saveDataset(catalogUrl, withoutDecks(dataset, inDocument), fetch);
+      if (catalog === null) continue;
+      await saveDataset(catalogUrl, catalog, fetch);
     }
     return { keptDocuments };
   }

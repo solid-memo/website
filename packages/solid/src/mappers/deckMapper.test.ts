@@ -1454,6 +1454,17 @@ describe("the arrangement's triples (deck groups)", () => {
     expect(withoutDecks(dataset, [deck])).toEqual(dataset);
   });
 
+  it("leave a group a newer version wrote as it is, and still lose the deck", () => {
+    const newer = buildThing(getThing(arranged(), GROUP)!)
+      .addLiteral(SM.formatVersion, integerLiteral(99))
+      .build();
+    const stored = setThing(arranged(), newer);
+    const dataset = withoutDecks(stored, [deck]);
+    expect(getThing(dataset, GROUP)).toEqual(getThing(stored, GROUP));
+    expect(getThing(dataset, deck.url)).toBeNull();
+    expect(toDecks(dataset, CATALOG).map(({ url }) => url)).toEqual([other.url]);
+  });
+
   it("lose many removed decks at once as one at a time", () => {
     const once = withoutDecks(arranged(), [deck, other]);
     expect(getUrlAll(getThing(once, GROUP)!, DCAT.dataset)).toEqual([]);

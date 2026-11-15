@@ -644,7 +644,10 @@ No document Solid Memo names has any.
   of a deck's document in the instance's folder stops the removal, or the
   instance's deletion, before the catalog is written. The entry stays, the
   error is shown, and trying again finishes it, a document already gone
-  (404, 410) counting as removed. A document outside the instance's
+  (404, 410) counting as removed. A deck's removal makes the new catalog
+  before it deletes any document, so an entry, a distribution, an agent
+  only the removed decks name or the catalog node a newer version wrote
+  refuses it (`writtenByNewerApp`) with every document still there. A document outside the instance's
   folder may be anyone's and may never answer, so a failed read doesn't
   hold the deck back: it's kept whole, the result names it
   (`keptDocuments`), and the entry goes. The same holds for one the pod
@@ -1179,7 +1182,8 @@ applies the edit to `catalog.ttl` as the pod holds it then:
   stop the move;
 - **removing a deck** removes it from every group's `dcat:dataset` too,
   in the same write; its siblings keep their positions, and the next
-  arrangement closes the gap.
+  arrangement closes the gap. A group a newer version wrote keeps its
+  link, which reads as no member once the deck is gone.
 
 **Several decks at once.** The Studio changes several decks in one write
 of `catalog.ttl` ([studio.md](studio.md)). A move into a group is one

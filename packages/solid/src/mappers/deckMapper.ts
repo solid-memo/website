@@ -66,7 +66,7 @@ import {
   DISTRACTOR_V1,
   DISTRIBUTION_V1,
 } from "@solid-memo/vocab/descriptors.generated";
-import type { CardV7 } from "@solid-memo/vocab/types.generated";
+import { type CardV7, LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
   migrateWithinBound,
@@ -76,6 +76,7 @@ import {
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
+  storedVersionOf,
   unlessNewer,
   unlessTyped,
 } from "../records";
@@ -295,9 +296,14 @@ function agentHolderOf(thing: NamedSubject | null): AgentHolder {
 
 /**
  * The catalog document without each of the decks, their distributions,
- * or agents only they named, and with no deck group listing one of them
- * any more. Only this app's subjects go: another app's at a
- * distribution's IRI stays (foreignSubjects, GHSA-gvpx-j2mc-x9r9).
+ * or agents only they named, and with no deck group this app writes
+ * listing one of them any more. Only this app's subjects go: another
+ * app's at a distribution's IRI stays (foreignSubjects,
+ * GHSA-gvpx-j2mc-x9r9), and a group in a newer format than this app's
+ * keeps its links, which the layout reads as no member once the deck is
+ * gone (GHSA-x9mp-vw7v-rpwg). An entry, a distribution, an agent only
+ * the removed decks name or the catalog node a newer version of the app
+ * wrote is refused (writtenByNewerApp).
  * Their former siblings keep their positions: the gap is read as if it
  * were not there (domain/deckTree.ts buildTree), and the next
  * arrangement closes it. The entries and distributions are taken out at
@@ -319,8 +325,10 @@ export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset 
     if (!getUrlAll(thing, RDF.type).includes(SM.DeckGroup)) continue;
     const listed = getUrlAll(thing, DCAT.dataset);
     const kept = listed.filter((url) => !leaving.has(url));
-    if (kept.length === listed.length) continue;
-    groups.push(buildThing(unlessNewer(thing)).setIriAll(DCAT.dataset, kept).build());
+    // A group a newer version of the app wrote is left as it is: its link to a deck gone reads as no member.
+    if (kept.length === listed.length || storedVersionOf(thing) > LATEST_VERSION.deckGroup)
+      continue;
+    groups.push(buildThing(thing).setIriAll(DCAT.dataset, kept).build());
   }
   return withCatalogDatasets(
     withoutStrayAgents(
