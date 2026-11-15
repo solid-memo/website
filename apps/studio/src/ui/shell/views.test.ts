@@ -18,6 +18,7 @@ import {
   viewOf,
   withCardView,
   withoutView,
+  SAVED_VIEWS,
   withSavedView,
   withView,
   type DeckFacts,
@@ -154,6 +155,13 @@ describe("the saved views", () => {
       { name: "Due", params: "show=courses" },
       kanji,
     ]);
+  });
+
+  it("save no view past as many as the device keeps, though one of a name taken is still replaced", () => {
+    const full = Array.from({ length: SAVED_VIEWS }, (_, n) => ({ name: `${n}`, params: "" }));
+    expect(withSavedView(full, "Kanji", "q=kanji")).toEqual(full);
+    expect(withSavedView(full, "0", "q=kanji")[0]).toEqual({ name: "0", params: "q=kanji" });
+    expect(withSavedView(full.slice(1), "Kanji", "q=kanji")).toEqual([...full.slice(1), kanji]);
   });
 
   it("rename a view where it is, another of the new name giving way", () => {

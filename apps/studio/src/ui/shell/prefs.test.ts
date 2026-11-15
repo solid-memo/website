@@ -327,6 +327,131 @@ describe("what the device keeps of an instance", () => {
     });
   });
 
+  describe("keeps a bounded number of instances, and of their pins and views", () => {
+    const KEPT_INSTANCES = 20;
+    const STORED_CHARACTERS = 256 * 1024;
+    const instance = (n: number) => `https://pod.example/${n}/`;
+    const stored = () => Object.keys(JSON.parse(localStorage.getItem(INSTANCES)!));
+
+    /** A browser's storage that refuses a write past its quota, as localStorage does. */
+    function quotaStorage(quota = 5_000_000): Storage {
+      const map = new Map<string, string>();
+      const used = () => [...map].reduce((n, [k, v]) => n + k.length + v.length, 0);
+      return {
+        get length() {
+          return map.size;
+        },
+        key: (index: number) => [...map.keys()][index] ?? null,
+        getItem: (key: string) => map.get(key) ?? null,
+        setItem: (key: string, value: string) => {
+          const old = map.has(key) ? key.length + map.get(key)!.length : 0;
+          if (used() - old + key.length + value.length > quota)
+            throw new DOMException("full", "QuotaExceededError");
+          map.set(key, value);
+        },
+        removeItem: (key: string) => void map.delete(key),
+        clear: () => map.clear(),
+      };
+    }
+
+    it("keeps the instances noted last, the last first, and lets the oldest go", () => {
+      for (let n = 0; n < KEPT_INSTANCES; n++) rememberInstancePrefs(instance(n), kept);
+      expect(stored()).toHaveLength(KEPT_INSTANCES);
+      expect(stored()[0]).toBe(instance(KEPT_INSTANCES - 1));
+      rememberInstancePrefs(instance(0), kept);
+      rememberInstancePrefs(instance(KEPT_INSTANCES), kept);
+      expect(stored()).toHaveLength(KEPT_INSTANCES);
+      expect(stored().slice(0, 2)).toEqual([instance(KEPT_INSTANCES), instance(0)]);
+      expect(instancePrefs(instance(1))).toEqual(NO_INSTANCE_PREFS);
+      expect(instancePrefs(instance(0))).toEqual(kept);
+    });
+
+    it("stays far below the browser's quota, so the storage takes other writes", () => {
+      const storage = quotaStorage();
+      const long = (tag: string) => `https://pod.example/${tag}/`.padEnd(HASHED_CHARACTERS, "a");
+      for (let n = 0; n < 60; n++) {
+        const recent = Array.from({ length: RECENT_ITEMS }, (_, d) => ({
+          kind: "deck" as const,
+          url: long(`i${n}d${d}`),
+        }));
+        rememberInstancePrefs(long(`i${n}`), { ...NO_INSTANCE_PREFS, recent }, () => storage);
+      }
+      const value = storage.getItem(INSTANCES)!;
+      expect(value.length).toBeLessThanOrEqual(STORED_CHARACTERS);
+      expect(Object.keys(JSON.parse(value))[0]).toBe(long("i59"));
+      expect(instancePrefs(long("i59"), () => storage).recent).toHaveLength(RECENT_ITEMS);
+      expect(instancePrefs(long("i0"), () => storage)).toEqual(NO_INSTANCE_PREFS);
+      expect(() => storage.setItem("another", "x".repeat(100_000))).not.toThrow();
+    });
+
+    const oversized = (): InstancePrefs => ({
+      ...NO_INSTANCE_PREFS,
+      views: {
+        home: Array.from({ length: 50 }, (_, n) => ({
+          name: `${n}`,
+          params: "a".repeat(HASHED_CHARACTERS),
+        })),
+        cards: [],
+      },
+    });
+
+    it("keeps no instance that alone would not fit", () => {
+      rememberInstancePrefs(a, oversized());
+      expect(stored()).toEqual([]);
+    });
+
+    it("keeps the other instances when the one noted would not fit", () => {
+      rememberInstancePrefs(b, kept);
+      rememberInstancePrefs(a, oversized());
+      expect(stored()).toEqual([b]);
+      expect(instancePrefs(b)).toEqual(kept);
+    });
+
+    it("keeps the rest of a value stored before whose first instance would not fit", () => {
+      localStorage.setItem(INSTANCES, JSON.stringify({ [a]: oversized(), [b]: kept }));
+      expect(instancePrefs(b)).toEqual(kept);
+      expect(stored()).toEqual([b]);
+    });
+
+    it("drops what is past its bounds from a value stored before, as it reads", () => {
+      const many = Object.fromEntries(
+        Array.from({ length: KEPT_INSTANCES + 5 }, (_, n) => [instance(n), kept]),
+      );
+      localStorage.setItem(INSTANCES, JSON.stringify(many));
+      expect(instancePrefs(instance(0))).toEqual(kept);
+      expect(stored()).toEqual(Object.keys(many).slice(0, KEPT_INSTANCES));
+      const filler = Array.from({ length: 100 }, (_, n) => ({
+        kind: "deck",
+        url: `${b}${n}`.padEnd(HASHED_CHARACTERS, "a"),
+      }));
+      localStorage.setItem(
+        INSTANCES,
+        JSON.stringify({ [a]: kept, [b]: { ...NO_INSTANCE_PREFS, pinned: filler } }),
+      );
+      expect(instancePrefs(a)).toEqual(kept);
+      expect(stored()).toEqual([a]);
+      expect(localStorage.getItem(INSTANCES)!.length).toBeLessThanOrEqual(STORED_CHARACTERS);
+    });
+
+    it("keeps no more pins and saved views than it keeps of each", () => {
+      const items = Array.from(
+        { length: 105 },
+        (_, n): WorkItem => ({ kind: "deck", url: `${a}decks/${n}.ttl` }),
+      );
+      const views = Array.from({ length: 55 }, (_, n) => ({ name: `${n}`, params: "" }));
+      rememberInstancePrefs(a, {
+        views: { home: views, cards: views },
+        pinned: items,
+        recent: [],
+      });
+      const read = instancePrefs(a);
+      expect(read.pinned).toEqual(items.slice(0, 100));
+      expect(read.views).toEqual({ home: views.slice(0, 50), cards: views.slice(0, 50) });
+      expect(togglePin(items.slice(0, 100), kanji)).toEqual(items.slice(0, 100));
+      expect(togglePin(items.slice(0, 99), kanji)).toEqual([...items.slice(0, 99), kanji]);
+    });
+  });
+
   it("pins an item at the end, and unpins it", () => {
     expect(togglePin([kanji], solid)).toEqual([kanji, solid]);
     expect(togglePin([kanji, solid], { ...kanji })).toEqual([solid]);

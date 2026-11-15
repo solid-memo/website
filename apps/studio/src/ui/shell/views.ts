@@ -136,10 +136,14 @@ export function paramsText(params: Record<string, string>): string {
   return new URLSearchParams(params).toString();
 }
 
+/** How many saved views of each table the device keeps for an instance (prefs.ts), the first saved first. */
+export const SAVED_VIEWS = 50;
+
 /**
  * The saved views with one saved under `name` (trimmed): a name is a
  * view's own, so one saved under a name taken replaces that view, where
- * it was; another is added at the end.
+ * it was; another is added at the end, unless there are as many as the
+ * device keeps (SAVED_VIEWS), when it is not saved.
  */
 export function withSavedView(
   views: readonly SavedView[],
@@ -149,7 +153,9 @@ export function withSavedView(
   const view = { name: name.trim(), params };
   return views.some((each) => each.name === view.name)
     ? views.map((each) => (each.name === view.name ? view : each))
-    : [...views, view];
+    : views.length < SAVED_VIEWS
+      ? [...views, view]
+      : [...views];
 }
 
 /** The saved views with one renamed (`from`), where it was: another of the new name gives way to it. */
