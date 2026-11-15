@@ -10,8 +10,9 @@ import { Screen } from "./Screen.ts";
  * The offer to keep a guest's study, made above the workspace to a user
  * who logged in where a guest studied in this browser
  * (docs/guest-mode.md): "Move it into my Pod", then the form of where
- * to (a new instance, for a user who has none), the move step by step,
- * and how it ended; above them, the partial copy a move cut off by a
+ * to (a new instance, for a user who has none), the move step by step
+ * (held while it copies, for another tab to act meanwhile), and how it
+ * ended; above them, the partial copy a move cut off by a
  * closed tab left, with the button that removes it.
  */
 export class GuestOffer extends Screen {
@@ -82,18 +83,7 @@ export class GuestOffer extends Screen {
     await this.intent(
       "Close the tab while the move copies, and open Solid Memo again",
       async () => {
-        let writes = 0;
-        let held!: () => void;
-        const holding = new Promise<void>((resolve) => {
-          held = resolve;
-        });
-        await this.page.route(`${location}**`, async (route) => {
-          if (["GET", "HEAD"].includes(route.request().method())) return route.fallback();
-          writes += 1;
-          if (writes <= written) return route.fallback();
-          // Never answered: the page is left waiting for it.
-          held();
-        });
+        const { holding } = await this.holdWritesAfter(location, written);
         await this.startMove(location);
         await holding;
         await expect(this.progress).toContainText(this.t("guestOffer.step.copy"));
@@ -102,6 +92,66 @@ export class GuestOffer extends Screen {
         await expect(this.leftover).toBeVisible({ timeout: 30_000 });
       },
     );
+  }
+
+  /**
+   * Starts the move to `location` and holds it while it copies: the Pod's
+   * answer to the move's write after `written`, and to each write after
+   * it, waits until `release` is called. It returns once the progress
+   * says the copy is under way. `release` lets the writes through and
+   * waits for the move to end as `moveIntoPod`'s does.
+   */
+  async holdMove(location: string, written: number): Promise<{ release(): Promise<void> }> {
+    return this.intent(
+      "Start moving the study into the Pod, and hold it while it copies",
+      async () => {
+        let free!: () => void;
+        const released = new Promise<void>((resolve) => {
+          free = resolve;
+        });
+        const { holding } = await this.holdWritesAfter(location, written, released);
+        await this.startMove(location);
+        await holding;
+        await expect(this.progress).toContainText(this.t("guestOffer.step.copy"));
+        return {
+          release: () =>
+            this.intent("Let the move go on", async () => {
+              free();
+              await this.expectMoved();
+              await this.page.unrouteAll({ behavior: "ignoreErrors" });
+            }),
+        };
+      },
+    );
+  }
+
+  /**
+   * Holds back the Pod's answer to the write to `location` after
+   * `written`, and to each write after it: until `release` resolves, or,
+   * without one, for good (the page is left waiting). `holding` resolves
+   * once the first is held.
+   */
+  private async holdWritesAfter(
+    location: string,
+    written: number,
+    release?: Promise<void>,
+  ): Promise<{ holding: Promise<void> }> {
+    let writes = 0;
+    let held!: () => void;
+    const holding = new Promise<void>((resolve) => {
+      held = resolve;
+    });
+    await this.page.route(`${location}**`, async (route) => {
+      if (["GET", "HEAD"].includes(route.request().method())) return route.fallback();
+      writes += 1;
+      if (writes <= written) return route.fallback();
+      held();
+      // Without a release, never answered: the page is left waiting for it.
+      if (release === undefined) return;
+      await release;
+      return route.fallback();
+    });
+    return { holding };
   }
 
   /** The panel says a move was cut off, its partial copy left at `url`; "Remove it" removes it, and the panel goes. */
@@ -126,11 +176,16 @@ export class GuestOffer extends Screen {
   async moveIntoPod(location: string): Promise<void> {
     await this.intent("Move the study into the Pod", async () => {
       await this.startMove(location);
-      await expect(
-        this.page.getByRole("status").filter({ hasText: this.t("guestOffer.moved") }),
-      ).toHaveText(this.t("guestOffer.moved"), { timeout: 60_000 });
-      await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
-      await expect(this.region).toBeHidden();
+      await this.expectMoved();
     });
+  }
+
+  /** The move is done: the app says so and opens the instance's decks, the offer gone. */
+  private async expectMoved(): Promise<void> {
+    await expect(
+      this.page.getByRole("status").filter({ hasText: this.t("guestOffer.moved") }),
+    ).toHaveText(this.t("guestOffer.moved"), { timeout: 60_000 });
+    await this.app.chrome.expectBreadcrumbHere("breadcrumbs.decks");
+    await expect(this.region).toBeHidden();
   }
 }

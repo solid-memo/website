@@ -8,6 +8,12 @@ import { chooseLanguageOf } from "./languages.ts";
 import { Screen } from "./Screen.ts";
 import { cellOf } from "./tables.ts";
 
+/** The whole text a find and replace changes, before and after. */
+interface ReplacedText {
+  before: string;
+  after: string;
+}
+
 /**
  * Solid Memo Studio, in Solid Memo's page at #/studio (docs/studio.md):
  * its old address, its landing page (the same login as Solid Memo's,
@@ -832,30 +838,109 @@ export class Studio extends Screen {
   /**
    * Finds and replaces in the selected cards: the preview shows the text
    * before and after, and the status line says how many cards changed
-   * once the user confirms.
+   * once the user confirms. `texts` is the first text changed, before and
+   * after, when it is more than `find` and `replace`.
    */
-  async findAndReplace(find: string, replace: string, changes: number): Promise<void> {
+  async findAndReplace(
+    find: string,
+    replace: string,
+    changes: number,
+    texts?: ReplacedText,
+  ): Promise<void> {
     await this.intent(`Replace ${find} with ${replace} in the selected cards`, async () => {
-      await this.pickBulk(
-        this.cardBulk,
-        "studio.bulk.groups.editCards",
-        "studio.cardBulk.findReplace",
-      );
-      const form = this.page.getByRole("form", { name: this.t("studio.cardBulk.findReplace") });
-      await form.getByRole("textbox", { name: this.t("studio.cardBulk.find") }).fill(find);
-      await form
-        .getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") })
-        .fill(replace);
-      const preview = form.getByRole("region", { name: this.t("studio.cardBulk.preview") });
-      await expect(
-        preview.getByText(this.t("studio.cardBulk.changes", { count: changes })),
-      ).toBeVisible();
-      await expect(preview.getByRole("deletion").first()).toHaveText(find);
-      await expect(preview.getByRole("insertion").first()).toHaveText(replace);
-      await form
-        .getByRole("button", { name: this.t("studio.cardBulk.confirmReplace", { count: changes }) })
-        .click();
+      await this.previewReplace(find, replace, changes, texts);
+      await this.confirmReplace(changes);
       await this.expectStatus(this.t("studio.cardBulk.done.replaceText", { count: changes }));
+    });
+  }
+
+  /**
+   * Opens the find and replace of the selected cards and fills it in: the
+   * preview shows how many cards would change, and the first text it
+   * changes before and after: exactly `find` and `replace`, or the whole
+   * texts `texts` when the match is part of a longer text. Nothing is
+   * written yet.
+   */
+  async previewReplace(
+    find: string,
+    replace: string,
+    changes: number,
+    texts: ReplacedText = { before: find, after: replace },
+  ): Promise<void> {
+    await this.intent(
+      `Preview replacing ${find} with ${replace} in the selected cards`,
+      async () => {
+        await this.pickBulk(
+          this.cardBulk,
+          "studio.bulk.groups.editCards",
+          "studio.cardBulk.findReplace",
+        );
+        await this.replaceForm
+          .getByRole("textbox", { name: this.t("studio.cardBulk.find") })
+          .fill(find);
+        await this.replaceForm
+          .getByRole("textbox", { name: this.t("studio.cardBulk.replaceWith") })
+          .fill(replace);
+        await expect(
+          this.replacePreview.getByText(this.t("studio.cardBulk.changes", { count: changes })),
+        ).toBeVisible();
+        // The text changed, the words around the match with it.
+        await expect(this.replacePreview.getByRole("deletion").first()).toHaveText(texts.before);
+        await expect(this.replacePreview.getByRole("insertion").first()).toHaveText(texts.after);
+      },
+    );
+  }
+
+  /**
+   * Confirms the replace previewed, after a card in it changed elsewhere:
+   * nothing is written. The workbench reads the cards again, and the
+   * preview, still open, is made again of them: the text it changes is
+   * now `changed`, the changed card's. Cancel closes it. The workbench then says the cards
+   * changed elsewhere, says nothing was replaced, and lists `changed`.
+   */
+  async confirmReplaceRefused(deck: string, changed: string, changes: number): Promise<void> {
+    await this.intent("Confirm the replace, refused: a card changed elsewhere", async () => {
+      await this.confirmReplace(changes);
+      await expect(this.replacePreview.getByRole("deletion").first()).toHaveText(changed);
+      await this.replaceForm
+        .getByRole("button", { name: this.t("studio.bulk.cancel"), exact: true })
+        .click();
+      await expect(this.replaceForm).toHaveCount(0);
+      await expect(
+        this.page.getByRole("alert").filter({ hasText: this.t("errors.changedElsewhere") }),
+      ).toBeVisible();
+      await expect(
+        this.page.getByRole("status").filter({
+          hasText: this.t("studio.cardBulk.done.replaceText", { count: changes }),
+        }),
+      ).toHaveCount(0);
+      await expect(
+        this.cards(deck).getByRole("rowheader").filter({ hasText: changed }),
+      ).toHaveCount(1);
+    });
+  }
+
+  /** The find and replace's form, in its dialog. */
+  private get replaceForm(): Locator {
+    return this.page.getByRole("form", { name: this.t("studio.cardBulk.findReplace") });
+  }
+
+  /** What the replace would change, before it is confirmed. */
+  private get replacePreview(): Locator {
+    return this.replaceForm.getByRole("region", { name: this.t("studio.cardBulk.preview") });
+  }
+
+  /** Confirms the replace previewed, of `changes` cards. */
+  private async confirmReplace(changes: number): Promise<void> {
+    await this.replaceForm
+      .getByRole("button", { name: this.t("studio.cardBulk.confirmReplace", { count: changes }) })
+      .click();
+  }
+
+  /** The workbench lists exactly the fronts `fronts`, in order. */
+  async expectCardFronts(deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`See ${fronts.join(", ")} in the workbench`, async () => {
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
     });
   }
 
@@ -889,6 +974,43 @@ export class Studio extends Screen {
     });
   }
 
+  /**
+   * Deletes the selected cards (their fronts `fronts`) with the bulk
+   * bar's Delete, confirmed: the status line says so and their rows are
+   * gone. Undo is offered once the cards are written, and enabled once
+   * their progress is too: what is waited for before the method returns.
+   */
+  async deleteSelectedCards(deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`Delete ${fronts.join(", ")}`, async () => {
+      await this.cardBulk
+        .getByRole("button", { name: this.t("studio.cardBulk.remove"), exact: true })
+        .click();
+      await this.confirm(
+        "studio.confirm.deleteCards",
+        this.tp("studio.cardBulk.removeConfirm", { count: fronts.length }),
+        "studio.cardBulk.remove",
+      );
+      await this.expectStatus(this.t("studio.cardBulk.done.remove", { count: fronts.length }));
+      for (const front of fronts)
+        await expect(
+          this.cards(deck).getByRole("rowheader", { name: front, exact: true }),
+        ).toHaveCount(0);
+      await expect(
+        this.page.getByRole("button", { name: this.t("studio.cardBulk.undo"), exact: true }),
+      ).toBeEnabled();
+    });
+  }
+
+  /** The workbench lists exactly the fronts `fronts`, in order, and offers no Undo: no edit of this page to undo. */
+  async expectCardsWithoutUndo(deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`See ${fronts.join(", ")} in the workbench, with no Undo`, async () => {
+      await this.expectCardFronts(deck, fronts);
+      await expect(
+        this.page.getByRole("button", { name: this.t("studio.cardBulk.undo"), exact: true }),
+      ).toHaveCount(0);
+    });
+  }
+
   /** Undoes the last edit of the cards: the cards are as they were, the fronts named in use again. */
   async undoCardEdit(deck: string, fronts: string[]): Promise<void> {
     await this.intent("Undo the last edit of the cards", async () => {
@@ -919,6 +1041,28 @@ export class Studio extends Screen {
       await expect(
         this.page.getByLabel(this.t("cardContentFields.front"), { exact: true }),
       ).toHaveValue(front);
+    });
+  }
+
+  /**
+   * Removes the inspected card with its Remove card, saying yes in the
+   * Studio's own dialog: the workbench comes back, listing the fronts
+   * `left`. Beside the workbench on a wide screen, the inspector is not
+   * in the main content, so the button is found in the page (its name is
+   * the inspector's only).
+   */
+  async removeInspectedCard(deck: string, front: string, left: string[]): Promise<void> {
+    await this.intent(`Remove the inspected card ${front}`, async () => {
+      await this.page
+        .getByRole("button", { name: this.t("card.removeButton"), exact: true })
+        .click();
+      await this.confirm(
+        "card.removeHeading",
+        this.tp("card.removeConfirm", { card: front }),
+        "card.removeAction",
+      );
+      await expect(this.page).toHaveURL(/#\/studio\/cards\?deck=/);
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(left);
     });
   }
 

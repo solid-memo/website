@@ -89,6 +89,46 @@ export class CardEditor extends Screen {
     });
   }
 
+  /**
+   * The next interval each answer in the card's history set, newest
+   * first, as the table's "Next interval" column says it ("6 days", …):
+   * what tells a grade built on the one before it from one that is not.
+   */
+  async historyNext(): Promise<string[]> {
+    return this.intent("Read the next intervals in the card's history", async () => {
+      const table = this.page
+        .getByRole("main")
+        .getByRole("table", { name: this.t("card.historyAnswers"), exact: true });
+      await expect(table).toBeVisible();
+      const next = [];
+      for (const row of await table
+        .getByRole("row")
+        .filter({ has: this.page.getByRole("cell") })
+        .all())
+        next.push(
+          (await (await cellOf(table, row, this.t("card.historyNext"))).innerText()).trim(),
+        );
+      return next;
+    });
+  }
+
+  /**
+   * Removes the card on its own page, saying yes to the browser's
+   * question (Solid Memo asks with window.confirm): the app goes back to
+   * the deck's Browser, which lists exactly the fronts `left`.
+   */
+  async remove(deck: string, front: string, left: readonly string[]): Promise<void> {
+    await this.intent(`Remove the card ${front} on its page`, async () => {
+      this.app.expectDialog(this.tp("card.removeConfirm", { card: front }));
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("card.removeButton"), exact: true })
+        .click();
+      await this.app.deckBrowser.expectDeck(deck);
+      await this.app.deckBrowser.expectFronts(left);
+    });
+  }
+
   /** Replaces the front's text and saves; "Saved." tells it took. */
   async saveFront(front: string): Promise<void> {
     await this.intent("Edit the front and save", async () => {

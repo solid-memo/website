@@ -492,6 +492,32 @@ Further journeys go through:
 - trying Solid Memo as a guest and moving the study into a new
   instance in the pod, the move first cut off and its partial copy
   removed;
+- an instance an older version of Solid Memo left in the pod: its
+  decks, cards and review states are read as they are, and the format
+  update is offered. Not now writes nothing. An update cut off by leaving
+  the page leaves the rest offered on the next opening. A document
+  changed elsewhere meanwhile is left and named until Try again. After a
+  reload, nothing is offered, and the decks, cards, directions and
+  progress are as they were
+  ([format-update.journey.ts](../e2e/journeys/journeys/format-update.journey.ts));
+- removing cards: one never studied from a deck's Browser, one studied
+  from its own page, one in the Studio's card inspector, and the two
+  left deleted in its card workbench, undone, then one deleted for good.
+  Each card leaves the lists and the counts, and the one never studied
+  leaves the study session. Its deck's cards and reviews documents no
+  longer name it, its answers stay in the answer log, and a reload finds
+  it so
+  ([card-removal.journey.ts](../e2e/journeys/journeys/card-removal.journey.ts));
+- two tabs and two devices writing to one pod at once
+  ([concurrent-writes.journey.ts](../e2e/journeys/journeys/concurrent-writes.journey.ts)).
+  A guest who answers in one tab while the other moves the study into
+  the pod is refused, and the move ends with the study as it was. On
+  two devices, each sees the other's progress after a reload. Answering
+  a card the other device has answered meanwhile builds on that answer:
+  the pod refuses the stale write, and the app reads the deck's reviews
+  again and answers on them. A replace in the Studio, previewed before the
+  other device edited a card in it, is refused as changed elsewhere,
+  then made again with both edits kept;
 - a screen that fails while it renders (the Studio's code swapped for
   code that throws): "Something went wrong" under the working header,
   its details copied, its report link with only Where and Version
@@ -736,9 +762,10 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
 
 - **Fixtures** ([fixtures.ts](../e2e/journeys/fixtures.ts)): `account`
   is a fresh account, pod and WebID, and `runId` names what the run
-  makes. `otherApp` writes to the pod as another app. `app` is the app
-  as page objects, and `newDevice` opens it in a browser context of its
-  own, as on a second device.
+  makes. `otherApp` writes to the pod as another app, and reads it with
+  plain requests (`read`, `status`, `triples`, `contents`), as the
+  card-removal journey does. `app` is the app as page objects, and `newDevice` opens it in a
+  browser context of its own, as on a second device.
 - **Page objects** ([pages/](../e2e/journeys/pages/)): one per screen,
   registered on [App.ts](../e2e/journeys/pages/App.ts). Their methods
   are what a user does, each a step in the report. They find elements

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { expect, type Locator } from "@playwright/test";
+import { expect, type Locator, type Response } from "@playwright/test";
 import type { AnswerScale } from "./Preferences.ts";
 import { escapeRegExp } from "../harness/strings.ts";
 import { Screen } from "./Screen.ts";
@@ -169,6 +169,54 @@ export class Study extends Screen {
       await this.gradeButton(grade).click();
       if (position < total) await this.expectPosition(position + 1, total);
       else await expect(this.finishedMessage).toBeVisible();
+    });
+  }
+
+  /**
+   * Answers the revealed card, and the app refuses to save it: the study
+   * screen's alert says why (`errors.{code}`), and the same card is still
+   * shown.
+   */
+  async answerRefused(grade: Grade, code: string): Promise<void> {
+    await this.intent(`Answer ${grade}, refused`, async () => {
+      const { position, total } = await this.position();
+      await this.gradeButton(grade).click();
+      await expect(this.page.getByRole("main").getByRole("alert")).toContainText(
+        this.t(`errors.${code}`),
+      );
+      await this.expectPosition(position, total);
+    });
+  }
+
+  /**
+   * Answers the revealed card after another device answered it: the
+   * grade is saved on the deck's reviews document as this page read it
+   * (its If-Match), which the Pod refuses (412) as it changed since; the
+   * app reads it again and grades on it, and says nothing. `location` is
+   * the instance's address: its reviews documents are under `reviews/`,
+   * its answer log under `history/`. The method returns once the answer
+   * is in the log, which the app writes a moment after the grade, so
+   * that a reload right after it loses nothing.
+   */
+  async gradeOverNewerAnswer(grade: Grade, location: string): Promise<void> {
+    await this.intent(`Answer ${grade} over an answer given elsewhere`, async () => {
+      const written = (response: Response) => response.request().method() !== "GET";
+      const refused = this.page.waitForResponse(
+        (response) =>
+          written(response) &&
+          response.status() === 412 &&
+          response.url().startsWith(`${location}reviews/`),
+      );
+      const logged = this.page.waitForResponse(
+        (response) =>
+          written(response) && response.ok() && response.url().startsWith(`${location}history/`),
+      );
+      await this.grade(grade);
+      await refused;
+      await logged;
+      await expect(
+        this.page.getByRole("main").getByRole("alert").filter({ hasText: /\S/ }),
+      ).toHaveCount(0);
     });
   }
 

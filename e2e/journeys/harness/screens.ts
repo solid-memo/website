@@ -21,6 +21,7 @@ export const TOURS = {
     "decks.guest",
     "decks.scheduler-invitation",
     "decks.welcome-back",
+    "decks.format-update",
     "decks.group",
     "guest-offer",
     "guest-offer.leftover",
