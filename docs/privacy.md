@@ -280,8 +280,13 @@ other scripts, and `blob:`, `data:`, `mailto:`, `tel:` and `urn:`
 values. An error's message can still quote other text, such as a
 card's, a host name written without its `https://`, or an address
 split across words or encoded in a way the app doesn't undo. The
-details appear under "Technical details" for the learner to read
-before sending.
+details stay short. Of the message, each frame of the stack, the
+route's path and each name in its query, the app reads only the first
+thousand or so characters, without the word they end in. It cuts what
+is left to a few hundred once the addresses are stripped. Only the
+stack's first frames and the query's first names are kept. The details
+appear under "Technical details" for the learner to read before
+sending.
 
 ## What the project has published
 

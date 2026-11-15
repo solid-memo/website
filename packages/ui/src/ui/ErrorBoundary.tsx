@@ -121,15 +121,18 @@ export function SomethingWentWrong({
  * How a learner hands an error on, if they like: Copy details, Report it
  * (the bug form, its Where and Version filled in, for the learner to
  * paste the details into), and the details themselves folded away, to
- * read or copy by hand. The details are taken as the error came up,
- * every address taken out of them (domain/errorReport.ts). They leave
+ * read or copy by hand. The details and the link are made once, as the
+ * error came up, every address taken out of them (domain/errorReport.ts). They leave
  * the browser only if the learner pastes them into a report and sends it.
  */
 export function ErrorReport({ error, source }: { error: unknown; source: SiteSource }) {
   const { t, partLang } = useI18n();
-  const [{ place, details }] = useState(() => {
+  const [{ details, reportUrl }] = useState(() => {
     const place = errorPlace(source);
-    return { place, details: errorDetails(error, place) };
+    return {
+      details: errorDetails(error, place),
+      reportUrl: errorReportUrl(source.repoUrl, place),
+    };
   });
   const [copied, setCopied] = useState<boolean | null>(null);
   async function copy() {
@@ -146,7 +149,7 @@ export function ErrorReport({ error, source }: { error: unknown; source: SiteSou
         <button type="button" onClick={() => void copy()}>
           {t("crash.copy")}
         </button>
-        <ExternalLink url={errorReportUrl(source.repoUrl, place)}>{t("crash.report")}</ExternalLink>
+        <ExternalLink url={reportUrl}>{t("crash.report")}</ExternalLink>
       </p>
       <p role="status" class="hint">
         {copied !== null && t(copied ? "crash.copied" : "crash.copyFailed")}

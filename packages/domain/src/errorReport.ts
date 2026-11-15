@@ -21,8 +21,23 @@ export interface ErrorPlace {
 /** The issue form an error is reported with: the repository's .github/ISSUE_TEMPLATE/bug.yml. */
 const BUG_FORM = "bug.yml";
 
-/** Longest an error's message is kept; a message can quote a whole document. */
-const MAX_MESSAGE = 500;
+/**
+ * Longest an error's message, a frame of its stack, the route's path or
+ * a name in its query is kept, once every address is taken out of it: a
+ * message can quote a whole document, and a link can hold a hash as long
+ * as the browser takes.
+ */
+const MAX_TEXT = 500;
+
+/**
+ * How much of such a text is read to take its addresses out: past
+ * MAX_TEXT, so that an address that starts before the cut is read whole
+ * and the text is still about MAX_TEXT long once its addresses are out.
+ */
+const MAX_READ = 2 * MAX_TEXT;
+
+/** The route's first query names, which say which screen it was; more only lengthen the details. */
+const MAX_KEYS = 20;
 
 /** The stack's first frames, which say where it broke; more only lengthen the copied details. */
 const MAX_FRAMES = 12;
@@ -57,10 +72,18 @@ const JSON_ESCAPE = /\\(?:u00(?:2f|5c)|[/\\])/gi;
 const PERCENT = /%([0-7][\da-f])/gi;
 
 /**
- * How much of a word after its scheme is undone to tell whether it is
- * an address: enough for a host, its escapes and its encodings.
+ * How much of a word from its scheme on is undone to tell whether it is
+ * an address: enough for a host, its user and password, their escapes
+ * and their encodings.
  */
-const WINDOW = 2048;
+const WINDOW = 512;
+
+/**
+ * How far into a window a later scheme is judged with it, by the rest of
+ * the window (at least half of one): a word's text is undone about twice
+ * at most, however many schemes it holds.
+ */
+const JUDGED = WINDOW / 2;
 
 /** How many times JSON escapes and percent-encodings are undone, one inside the other. */
 const UNDO_ROUNDS = 8;
@@ -117,29 +140,67 @@ function addressEnd(text: string, start: number, end: number): number {
 }
 
 /**
+ * The first of `starts`, schemes in `text` before `end`, where an http(s)
+ * address starts: the text from it to `end`, undone (undone), is an
+ * address the URL parser takes, and not one in the site's own folder.
+ * When `end` cuts the word short, any scheme whose text, undone, starts
+ * like an address (`https:`, with or without slashes) is taken for one
+ * too, though the parser does not take it, since what is cut off could
+ * make it one (a long password before the host). The text between two
+ * schemes is undone once for all of them, as it undoes the same
+ * whichever scheme it is read from: a scheme's letters are part of no
+ * escape or encoding.
+ */
+function addressAmong(text: string, starts: number[], end: number, site: string, cut: boolean) {
+  const pieces = starts.map((start, i) =>
+    undone(text.slice(start, starts[i + 1] ?? end)).replaceAll("\\", "/"),
+  );
+  let rest = pieces.join("");
+  let started: number | undefined;
+  for (const [i, piece] of pieces.entries()) {
+    if (!rest.startsWith(site)) {
+      if (isWebAddress(rest)) return started ?? starts[i];
+      if (cut && started === undefined && /^https?:/i.test(rest)) started = starts[i];
+    }
+    rest = rest.slice(piece.length);
+  }
+  return started;
+}
+
+/**
  * `text` with every http(s) address in it taken out, however it is
  * written: its slashes escaped as in JSON or with backslashes, encoded
  * once or more, with one slash or none, and with any character in its
- * path. An address is the rest of its word from its scheme on, when
- * that, undone (undone), is an address the URL parser takes; an address
- * in the site's own folder is left for ADDRESS. Only the start of the
- * rest is undone, so the text is gone through in time linear in its
- * length.
+ * path. An address is the rest of its word from its scheme on, when its
+ * start, undone, is or may be an address (addressAmong); an address in the site's
+ * own folder is left for ADDRESS. A window of the word is undone for its
+ * first scheme and those in its first half, and the next window starts
+ * past them, so the text is gone through in time linear in its length,
+ * however many schemes it holds.
  */
 function withoutWebAddresses(text: string, site: string): string {
+  const schemes = Array.from(text.matchAll(HTTP), ({ index }) => index);
   let kept = "";
   let from = 0;
   let wordEnd = 0;
-  for (const { index: start } of text.matchAll(HTTP)) {
-    if (start < from) continue;
+  let next = 0;
+  while (next < schemes.length) {
+    const start = schemes[next] as number;
     if (start >= wordEnd) {
       SPACE.lastIndex = start;
       wordEnd = SPACE.exec(text)?.index ?? text.length;
     }
-    const rest = undone(text.slice(start, Math.min(wordEnd, start + WINDOW))).replaceAll("\\", "/");
-    if (rest.startsWith(site) || !isWebAddress(rest)) continue;
-    kept += `${text.slice(from, start)}<address>`;
-    from = addressEnd(text, start, wordEnd);
+    const end = Math.min(wordEnd, start + WINDOW);
+    let last = next + 1;
+    while ((schemes[last] ?? end) < Math.min(end, start + JUDGED)) last += 1;
+    const at = addressAmong(text, schemes.slice(next, last), end, site, end < wordEnd);
+    if (at === undefined) {
+      next = last;
+      continue;
+    }
+    kept += `${text.slice(from, at)}<address>`;
+    from = addressEnd(text, at, wordEnd);
+    while ((schemes[next] ?? from) < from) next += 1;
   }
   return kept + text.slice(from);
 }
@@ -161,15 +222,46 @@ export function withoutAddresses(text: string, site: string): string {
 /**
  * The route a hash is at, without its query's values, which are the
  * addresses of the instance, the deck or the card it shows:
- * `#/study?instance=&deck=`. The start (`#/`) for no hash.
+ * `#/study?instance=&deck=`. The start (`#/`) for no hash. Its path
+ * and each name have their addresses taken out and are cut short
+ * (shortened), and its first names are kept.
  */
 export function routeOf(hash: string, site: string): string {
   if (hash === "" || hash === "#") return "#/";
   const at = hash.indexOf("?");
-  if (at === -1) return withoutAddresses(hash, site);
-  const keys = [...new URLSearchParams(hash.slice(at + 1)).keys()];
-  const query = keys.map((key) => `${withoutAddresses(key, site)}=`).join("&");
-  return `${withoutAddresses(hash.slice(0, at), site)}?${query}`;
+  if (at === -1) return pathOf(hash, site);
+  const keys = [...new URLSearchParams(hash.slice(at + 1)).keys()].slice(0, MAX_KEYS);
+  const query = keys.map((key) => `${shortened(key, site)}=`).join("&");
+  return `${pathOf(hash.slice(0, at), site)}?${query}`;
+}
+
+/** A route's path, shortened, its start (`#/`) kept even when the rest is left out. */
+function pathOf(path: string, site: string): string {
+  return path.startsWith("#/") ? `#/${shortened(path.slice(2), site)}` : shortened(path, site);
+}
+
+/**
+ * `text` with every address taken out (withoutAddresses), then cut to
+ * MAX_TEXT, an ellipsis ending it when it was cut. Only its first
+ * MAX_READ characters are read, so its length does not add to the work,
+ * and the word they end in is left out: an address cut there might no
+ * longer read as one. The cut after never splits a character.
+ */
+function shortened(text: string, site: string): string {
+  let read = text;
+  if (text.length > MAX_READ) {
+    let cut = MAX_READ;
+    // A word that ends at the cut is read whole.
+    if (!/\s/.test(text.charAt(cut))) {
+      while (cut > 0 && !/\s/.test(text.charAt(cut - 1))) cut -= 1;
+    }
+    read = text.slice(0, cut).trimEnd();
+  }
+  const kept = withoutAddresses(read, site);
+  if (read === text && kept.length <= MAX_TEXT) return kept;
+  let end = Math.min(kept.length, MAX_TEXT - 1);
+  if (/[\uD800-\uDBFF]/.test(kept.charAt(end - 1))) end -= 1;
+  return `${kept.slice(0, end)}…`;
 }
 
 /** What was thrown, as its name and message, then its stack's frames (when it has a stack). */
@@ -193,13 +285,11 @@ function describe(error: unknown): { message: string; frames: string[] } {
  */
 export function errorDetails(error: unknown, place: ErrorPlace): string {
   const { message, frames } = describe(error);
-  const shortMessage =
-    message.length > MAX_MESSAGE ? `${message.slice(0, MAX_MESSAGE - 1)}…` : message;
   return [
     `Version: ${versionOf(place)}`,
     `Route: ${routeOf(place.hash, place.site)}`,
-    `Error: ${withoutAddresses(shortMessage, place.site)}`,
-    ...frames.slice(0, MAX_FRAMES).map((frame) => withoutAddresses(frame, place.site)),
+    `Error: ${shortened(message, place.site)}`,
+    ...frames.slice(0, MAX_FRAMES).map((frame) => shortened(frame, place.site)),
   ].join("\n");
 }
 
