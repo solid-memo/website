@@ -21,6 +21,18 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.1](https://github.com/solid-memo/website/compare/v7.6.0...v7.6.1) (2026-11-15)
+
+### Fixes
+
+* **browser:** keep a custom palette on the device without its name ([6cb76b9](https://github.com/solid-memo/website/commit/6cb76b9442014fcc4f33600eb76be4df1d68d24b))
+* **domain:** bound a deck's metadata in the catalog ([1de5f40](https://github.com/solid-memo/website/commit/1de5f40e24c90cf532f1f016e42842062cd8de48))
+* **domain:** bound the text that error details redact ([285b30e](https://github.com/solid-memo/website/commit/285b30eb2b95c1ddd70d9f4d2d4e8acd0d4e17c0))
+* **solid:** use a linked type index only in own storage ([24b06c0](https://github.com/solid-memo/website/commit/24b06c0051e572e1b3498f1a130fea1ec3d17ab2))
+* **studio:** bound what the device keeps of each instance as a whole ([b7e88ea](https://github.com/solid-memo/website/commit/b7e88ea2434ea9d7d12c026785a930a432fecd57))
+* **ui:** bound the line breaks added after slashes in card text ([71dd0a1](https://github.com/solid-memo/website/commit/71dd0a1cd2c9549ec7a8989f1f1bc0ff81c20c78))
+* **ui:** cap the language choices of a draft's cards and deck pickers ([2a0dfd4](https://github.com/solid-memo/website/commit/2a0dfd4f5335efa72bf1bd1b0892127e9f245fe5))
+
 ## [7.6.0](https://github.com/solid-memo/website/compare/v7.5.3...v7.6.0) (2026-11-15)
 
 ### Features
