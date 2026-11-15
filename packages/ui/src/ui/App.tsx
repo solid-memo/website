@@ -237,9 +237,13 @@ export function AppShell({
   /** The palette a read of the instance shows; a palette of the user's own read again the same is kept as it is, and not painted again. */
   function adoptPalette(shown: ShownPalette) {
     setPalette(shown.palette);
-    // Compared as the rules have them (parsePalette): the same colors in any order are the same palette.
-    const same = (palette: CustomPalette | null) =>
-      JSON.stringify(palette && parsePalette(palette));
+    // Compared as the rules have them (parsePalette), without the name,
+    // which the device's copy doesn't keep: the same colors in any order
+    // are the same palette.
+    const same = (palette: CustomPalette | null) => {
+      const parsed = palette && parsePalette(palette);
+      return JSON.stringify(parsed && { ...parsed, title: {} });
+    };
     setCustomPalette((was) => (same(was) === same(shown.custom) ? was : shown.custom));
   }
 

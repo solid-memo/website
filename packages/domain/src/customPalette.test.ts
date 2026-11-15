@@ -77,6 +77,18 @@ describe("parsePalette", () => {
     });
   });
 
+  it("keeps a name in at most 32 languages, each cut to 200 code points", () => {
+    const title = Object.fromEntries(
+      Array.from({ length: 300 }, (_, at) => [`x-${at}`, "A".repeat(16_000)]),
+    );
+    const kept = parsePalette({ ...READING, title })!.title;
+    expect(Object.keys(kept)).toEqual(Object.keys(title).slice(0, 32));
+    for (const text of Object.values(kept)) expect(text).toBe("A".repeat(200));
+    // Cut between code points, not inside one.
+    const name = parsePalette({ ...READING, title: { en: "😀".repeat(250) } })!.title.en;
+    expect(name).toBe("😀".repeat(200));
+  });
+
   it("bases one on Standard when its base is no palette this version has", () => {
     expect(parsePalette({ ...READING, basedOn: "sepia" })?.basedOn).toBe("standard");
     expect(parsePalette({ ...READING, basedOn: undefined, title: null })).toEqual({

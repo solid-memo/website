@@ -29,13 +29,14 @@ const READING: CustomPalette = {
 };
 
 describe("createLocalStorageCustomPalettePreference", () => {
-  it("keeps the palette, and the colors to paint in each theme for the first paint", () => {
+  it("keeps the palette's address and base, and the colors to paint in each theme for the first paint", () => {
     const storage = memoryStorage();
     const preference = createLocalStorageCustomPalettePreference(() => storage);
     expect(preference.chosen()).toBeNull();
     preference.choose(READING);
-    expect(preference.chosen()).toEqual(READING);
+    expect(preference.chosen()).toEqual({ ...READING, title: {} });
     const kept = JSON.parse(storage.getItem("solid-memo:palette-colors")!);
+    expect(Object.keys(kept)).toEqual(["url", "basedOn", "light", "dark"]);
     // The text, and the roles mixed from it: a hovered surface's, a strong border's, a pressed button's, a link's hover.
     expect(Object.keys(kept.light)).toEqual([
       "--text",
@@ -45,6 +46,46 @@ describe("createLocalStorageCustomPalettePreference", () => {
       "--link-hover-bg",
     ]);
     expect(kept.dark).toEqual({});
+  });
+
+  it("keeps no name, however large the palette's name is", () => {
+    const storage = memoryStorage();
+    const preference = createLocalStorageCustomPalettePreference(() => storage);
+    const title = Object.fromEntries(
+      Array.from({ length: 300 }, (_, at) => [`x-${at}`, "A".repeat(16_000)]),
+    );
+    preference.choose({ ...READING, title });
+    const kept = storage.getItem("solid-memo:palette-colors")!;
+    expect(kept.length).toBeLessThan(2000);
+    expect(kept).not.toContain("AAAA");
+    expect(preference.chosen()).toEqual({ ...READING, title: {} });
+  });
+
+  it("keeps no value too large to read back", () => {
+    const storage = memoryStorage();
+    const preference = createLocalStorageCustomPalettePreference(() => storage);
+    preference.choose(READING);
+    preference.choose({ ...READING, url: `https://pod.example/${"a".repeat(9000)}#p` });
+    expect(storage.getItem("solid-memo:palette-colors")).toBeNull();
+  });
+
+  it("reads a palette an earlier version kept whole, without its name", () => {
+    const storage = memoryStorage();
+    storage.setItem("solid-memo:palette-colors", JSON.stringify({ palette: READING }));
+    expect(createLocalStorageCustomPalettePreference(() => storage).chosen()).toEqual({
+      ...READING,
+      title: {},
+    });
+  });
+
+  it("drops a kept value above its size, and reads it no more", () => {
+    const storage = memoryStorage();
+    storage.setItem(
+      "solid-memo:palette-colors",
+      JSON.stringify({ palette: { ...READING, title: { en: "A".repeat(10_000) } } }),
+    );
+    expect(createLocalStorageCustomPalettePreference(() => storage).chosen()).toBeNull();
+    expect(storage.getItem("solid-memo:palette-colors")).toBeNull();
   });
 
   it("keeps none as no key at all", () => {
@@ -59,10 +100,11 @@ describe("createLocalStorageCustomPalettePreference", () => {
     const storage = memoryStorage();
     storage.setItem(
       "solid-memo:palette-colors",
-      JSON.stringify({ palette: { ...READING, light: { "--text": "red; x: url(y)" } } }),
+      JSON.stringify({ ...READING, light: { "--text": "red; x: url(y)" } }),
     );
     expect(createLocalStorageCustomPalettePreference(() => storage).chosen()).toEqual({
       ...READING,
+      title: {},
       light: {},
     });
     for (const text of ["not json", "{}", "null"]) {

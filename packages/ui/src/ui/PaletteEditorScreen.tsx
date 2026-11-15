@@ -6,6 +6,8 @@ import { useId, useMemo, useState } from "preact/hooks";
 import {
   checkPalette,
   effectiveColors,
+  MAX_PALETTE_NAME_CHARACTERS,
+  MAX_PALETTE_NAME_LANGUAGES,
   PALETTE_ROLES,
   paletteVerdict,
   type CustomPalette,
@@ -114,8 +116,14 @@ export function PaletteEditorScreen({
   function draft(): PaletteDraft {
     return {
       url: palette?.url ?? null,
-      // The name in the page's language, the others it has kept.
-      title: { ...palette?.title, [locale]: name.trim() },
+      // The name in the page's language first, then the others it has
+      // kept, so reading it back keeps the one just typed.
+      title: Object.fromEntries(
+        [
+          [locale, name.trim()],
+          ...Object.entries(palette?.title ?? {}).filter(([tag]) => tag !== locale),
+        ].slice(0, MAX_PALETTE_NAME_LANGUAGES),
+      ),
       basedOn,
       light: colors.light,
       dark: colors.dark,
@@ -144,6 +152,7 @@ export function PaletteEditorScreen({
           type="text"
           value={name}
           onInput={(event) => setName(event.currentTarget.value)}
+          maxLength={MAX_PALETTE_NAME_CHARACTERS}
           required
           disabled={busy}
         />

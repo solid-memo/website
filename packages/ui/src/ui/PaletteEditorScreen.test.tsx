@@ -4,7 +4,11 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
-import type { CustomPalette } from "@solid-memo/domain/customPalette";
+import {
+  MAX_PALETTE_NAME_LANGUAGES,
+  parsePalette,
+  type CustomPalette,
+} from "@solid-memo/domain/customPalette";
 import { PaletteEditorScreen } from "./PaletteEditorScreen";
 import { I18nProvider } from "./i18n";
 import { ThemeProvider } from "./theme";
@@ -100,6 +104,20 @@ describe("PaletteEditorScreen", () => {
       },
       false,
     );
+  });
+
+  it("keeps the name just typed when the palette has its name in many languages", () => {
+    const title = Object.fromEntries(
+      Array.from({ length: MAX_PALETTE_NAME_LANGUAGES }, (_, at) => [`x-${at}`, "Other"]),
+    );
+    const { onSave, container } = renderEditor({ palette: { ...READING, title } });
+    fireEvent.input(screen.getByLabelText("Name"), { target: { value: "Reading" } });
+    fireEvent.submit(container.querySelector("form")!);
+    const saved = onSave.mock.calls[0]![0];
+    expect(Object.keys(saved.title)).toHaveLength(MAX_PALETTE_NAME_LANGUAGES);
+    expect(Object.keys(saved.title)[0]).toBe("en");
+    // Read back, its name in the page's language is the one just typed.
+    expect(parsePalette(saved)!.title.en).toBe("Reading");
   });
 
   it("asks before it saves a pair with less contrast than it needs: only Use anyway saves it", () => {
