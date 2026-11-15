@@ -889,6 +889,43 @@ export class Studio extends Screen {
     });
   }
 
+  /**
+   * Deletes the selected cards (their fronts `fronts`) with the bulk
+   * bar's Delete, confirmed: the status line says so and their rows are
+   * gone. Undo is offered once the cards are written, and enabled once
+   * their progress is too: what is waited for before the method returns.
+   */
+  async deleteSelectedCards(deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`Delete ${fronts.join(", ")}`, async () => {
+      await this.cardBulk
+        .getByRole("button", { name: this.t("studio.cardBulk.remove"), exact: true })
+        .click();
+      await this.confirm(
+        "studio.confirm.deleteCards",
+        this.tp("studio.cardBulk.removeConfirm", { count: fronts.length }),
+        "studio.cardBulk.remove",
+      );
+      await this.expectStatus(this.t("studio.cardBulk.done.remove", { count: fronts.length }));
+      for (const front of fronts)
+        await expect(
+          this.cards(deck).getByRole("rowheader", { name: front, exact: true }),
+        ).toHaveCount(0);
+      await expect(
+        this.page.getByRole("button", { name: this.t("studio.cardBulk.undo"), exact: true }),
+      ).toBeEnabled();
+    });
+  }
+
+  /** The workbench lists exactly the fronts `fronts`, in order, and offers no Undo: no edit of this page to undo. */
+  async expectCardsWithoutUndo(deck: string, fronts: string[]): Promise<void> {
+    await this.intent(`See ${fronts.join(", ")} in the workbench, with no Undo`, async () => {
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(fronts);
+      await expect(
+        this.page.getByRole("button", { name: this.t("studio.cardBulk.undo"), exact: true }),
+      ).toHaveCount(0);
+    });
+  }
+
   /** Undoes the last edit of the cards: the cards are as they were, the fronts named in use again. */
   async undoCardEdit(deck: string, fronts: string[]): Promise<void> {
     await this.intent("Undo the last edit of the cards", async () => {
@@ -919,6 +956,28 @@ export class Studio extends Screen {
       await expect(
         this.page.getByLabel(this.t("cardContentFields.front"), { exact: true }),
       ).toHaveValue(front);
+    });
+  }
+
+  /**
+   * Removes the inspected card with its Remove card, saying yes in the
+   * Studio's own dialog: the workbench comes back, listing the fronts
+   * `left`. Beside the workbench on a wide screen, the inspector is not
+   * in the main content, so the button is found in the page (its name is
+   * the inspector's only).
+   */
+  async removeInspectedCard(deck: string, front: string, left: string[]): Promise<void> {
+    await this.intent(`Remove the inspected card ${front}`, async () => {
+      await this.page
+        .getByRole("button", { name: this.t("card.removeButton"), exact: true })
+        .click();
+      await this.confirm(
+        "card.removeHeading",
+        this.tp("card.removeConfirm", { card: front }),
+        "card.removeAction",
+      );
+      await expect(this.page).toHaveURL(/#\/studio\/cards\?deck=/);
+      await expect(this.cards(deck).getByRole("rowheader")).toHaveText(left);
     });
   }
 

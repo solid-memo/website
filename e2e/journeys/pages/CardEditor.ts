@@ -89,6 +89,23 @@ export class CardEditor extends Screen {
     });
   }
 
+  /**
+   * Removes the card on its own page, saying yes to the browser's
+   * question (Solid Memo asks with window.confirm): the app goes back to
+   * the deck's Browser, which lists exactly the fronts `left`.
+   */
+  async remove(deck: string, front: string, left: readonly string[]): Promise<void> {
+    await this.intent(`Remove the card ${front} on its page`, async () => {
+      this.app.expectDialog(this.tp("card.removeConfirm", { card: front }));
+      await this.page
+        .getByRole("main")
+        .getByRole("button", { name: this.t("card.removeButton"), exact: true })
+        .click();
+      await this.app.deckBrowser.expectDeck(deck);
+      await this.app.deckBrowser.expectFronts(left);
+    });
+  }
+
   /** Replaces the front's text and saves; "Saved." tells it took. */
   async saveFront(front: string): Promise<void> {
     await this.intent("Edit the front and save", async () => {

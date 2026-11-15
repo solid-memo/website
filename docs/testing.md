@@ -500,6 +500,14 @@ Further journeys go through:
   reload, nothing is offered, and the decks, cards, directions and
   progress are as they were
   ([format-update.journey.ts](../e2e/journeys/journeys/format-update.journey.ts));
+- removing cards: one never studied from a deck's Browser, one studied
+  from its own page, one in the Studio's card inspector, and the two
+  left deleted in its card workbench, undone, then one deleted for good.
+  Each card leaves the lists and the counts, and the one never studied
+  leaves the study session. Its deck's cards and reviews documents no
+  longer name it, its answers stay in the answer log, and a reload finds
+  it so
+  ([card-removal.journey.ts](../e2e/journeys/journeys/card-removal.journey.ts));
 - a screen that fails while it renders (the Studio's code swapped for
   code that throws): "Something went wrong" under the working header,
   its details copied, its report link with only Where and Version
@@ -744,9 +752,10 @@ test("a learner's first deck @smoke", async ({ app, account, runId }) => {
 
 - **Fixtures** ([fixtures.ts](../e2e/journeys/fixtures.ts)): `account`
   is a fresh account, pod and WebID, and `runId` names what the run
-  makes. `otherApp` writes to the pod as another app. `app` is the app
-  as page objects, and `newDevice` opens it in a browser context of its
-  own, as on a second device.
+  makes. `otherApp` writes to the pod as another app, and reads it with
+  plain requests (`read`, `status`, `triples`, `contents`), as the
+  card-removal journey does. `app` is the app as page objects, and `newDevice` opens it in a
+  browser context of its own, as on a second device.
 - **Page objects** ([pages/](../e2e/journeys/pages/)): one per screen,
   registered on [App.ts](../e2e/journeys/pages/App.ts). Their methods
   are what a user does, each a step in the report. They find elements

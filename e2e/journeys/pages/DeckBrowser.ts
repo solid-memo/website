@@ -107,6 +107,43 @@ export class DeckBrowser extends Screen {
     if (lang !== undefined) await expect(cell.locator(`[lang="${lang}"]`)).toHaveCount(1);
   }
 
+  /**
+   * Removes the card whose front is `front` with its row's button, saying
+   * yes to the browser's question: the status line says so, the focus is
+   * on the link of the card now in its row (the last row, if it was
+   * last), and the table lists exactly the fronts `left`, at least one.
+   */
+  async removeCard(front: string, left: readonly string[]): Promise<void> {
+    await this.intent(`Remove the card ${front} from the Browser`, async () => {
+      this.app.expectDialog(this.tp("browser.removeConfirm", { card: front }));
+      const table = this.page.getByRole("main").getByRole("table");
+      const row = await this.cardRows.evaluateAll(
+        (rows, text) => rows.findIndex((tr) => tr.querySelector("a")?.textContent?.includes(text)),
+        front,
+      );
+      expect(row, `${front}'s row`).toBeGreaterThanOrEqual(0);
+      await table
+        .getByRole("button", {
+          name: this.t("browser.removeCardLabel", { card: front }),
+          exact: true,
+        })
+        .click();
+      await expect(
+        this.page
+          .getByRole("status")
+          .filter({ hasText: this.t("browser.removed", { card: front }) }),
+      ).toHaveCount(1);
+      await expect(
+        this.cardRows
+          .nth(Math.min(row, left.length - 1))
+          .getByRole("link")
+          .first(),
+        "the card now in the removed card's row",
+      ).toBeFocused();
+      await this.expectFronts(left);
+    });
+  }
+
   /** The table lists exactly these fronts (in any order). */
   async expectFronts(fronts: readonly string[]): Promise<void> {
     await expect(this.cardRows).toHaveCount(fronts.length);

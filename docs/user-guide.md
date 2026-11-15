@@ -536,3 +536,4 @@ ones in the [online report](https://journeys.solid-memo.com/).
 | Updating a library deck to its new release, keeping progress | [library-upgrade.journey.ts](../e2e/journeys/journeys/library-upgrade.journey.ts) | 04–10 |
 | Undoing an answer, and resetting today's study | [reset-day.journey.ts](../e2e/journeys/journeys/reset-day.journey.ts) | 07–12 |
 | Reloading in the middle of a study session | [study-reload.journey.ts](../e2e/journeys/journeys/study-reload.journey.ts) | 05–10 |
+| Removing a card, in Solid Memo and the Studio, and undoing a delete | [card-removal.journey.ts](../e2e/journeys/journeys/card-removal.journey.ts) | 04–12 |

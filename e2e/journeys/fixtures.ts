@@ -28,7 +28,7 @@ import { App } from "./pages/App.ts";
  * - `account`, a fresh account, pod and WebID on it; when the journey
  *   fails, its pod's content is attached (pod-dump.ttl);
  * - `otherApp`, an app other than Solid Memo writing to that pod for the
- *   WebID (harness/otherApp.ts);
+ *   WebID, and reading it with plain requests (harness/otherApp.ts);
  * - `app`, the page objects (pages/App.ts), journey steps among them;
  * - `newDevice`, which opens the app again in a browser of its own (a
  *   new context: no cookies, no storage), as on a second device, and
