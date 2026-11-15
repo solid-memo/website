@@ -52,7 +52,7 @@ import {
   withoutUnnamedDistractors,
   withoutDecks,
 } from "./deckMapper";
-import type { Deck, Distractor } from "@solid-memo/domain/deck";
+import { MAX_DECK_METADATA, type Deck, type Distractor } from "@solid-memo/domain/deck";
 import { editOf } from "../datasetEdit";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "../vocab";
 import { integerLiteral } from "../testing/literals";
@@ -552,7 +552,11 @@ describe("a deck's agents at URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", (
     ({ subject, authors }) => {
       const dataset = datasetFrom(CATALOG);
       const three = authors(3);
-      const deck = { url: subject, authors: [...three, three[0]!] } as Deck;
+      const deck = {
+        url: subject,
+        title: { en: "t" },
+        authors: [...three, three[0]!],
+      } as Partial<Deck> as Deck;
       expect(deckSubjects(dataset, deck)).toEqual([
         subject,
         distributionUrlOf(subject),
@@ -560,7 +564,11 @@ describe("a deck's agents at URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", (
       ]);
       const ratio = growth(
         (count) => {
-          const many = { url: subject, authors: authors(count) } as Deck;
+          const many = {
+            url: subject,
+            title: { en: "t" },
+            authors: authors(count),
+          } as Partial<Deck> as Deck;
           return () => deckSubjects(dataset, many);
         },
         240,
@@ -1638,5 +1646,48 @@ describe("the agents of a catalog's decks", () => {
     const [creator] = getUrlAll(getThing(onUntyped, deck.url)!, DCTERMS.creator);
     expect(creator).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
     expect(authorsOf(onUntyped)).toEqual({ "deck-1": deck.authors });
+  });
+});
+
+describe("a deck's metadata in the catalog (GHSA-cr5j-7hg4-ccvr)", () => {
+  const KEYWORD = "http://www.w3.org/ns/dcat#keyword";
+  const deck: Deck = {
+    id: "deck-1",
+    url: `${CATALOG}#deck-1`,
+    title: { en: "Capitals" },
+    cardsDocumentUrl: CARDS_DOC,
+    reviewsDocumentUrl: REVIEWS_DOC,
+    createdAt: "",
+    formatVersion: 6,
+    direction: "front-to-back",
+    authors: [],
+  };
+  const many = Array.from({ length: MAX_DECK_METADATA + 20 }, (_, i) => `k${i}`);
+  const keywordsIn = (dataset: Dataset) =>
+    [...toRdfJsDataset(dataset).match(null, null, null)].filter(
+      (quad) => quad.predicate.value === KEYWORD,
+    );
+
+  it("writes no more of it than a deck keeps, naming as subjects the agents it writes", () => {
+    const authored = { ...deck, authors: many.map((name) => `Author ${name}`) };
+    const dataset = withDeck(datasetFrom(CATALOG), { ...authored, keywords: { ko: many } });
+    const agents = getUrlAll(getThing(dataset, deck.url)!, DCTERMS.creator);
+    expect(agents).toHaveLength(MAX_DECK_METADATA);
+    expect(keywordsIn(dataset)).toHaveLength(MAX_DECK_METADATA);
+    expect(deckSubjects(dataset, authored).sort()).toEqual(
+      [deck.url, distributionUrlOf(deck.url), ...agents].sort(),
+    );
+  });
+
+  it("leaves out what an entry holds past it on the deck's next write", () => {
+    let dataset = withDeck(datasetFrom(CATALOG), deck);
+    let entry = buildThing(getThing(dataset, deck.url)!);
+    for (const keyword of many) entry = entry.addStringWithLocale(KEYWORD, keyword, "ko");
+    dataset = setThing(dataset, entry.build());
+    const [read] = toDecks(dataset, CATALOG);
+    expect(read!.keywords!.ko).toEqual(many.slice(0, MAX_DECK_METADATA));
+
+    const written = withDeck(dataset, { ...read!, title: { en: "Renamed" } });
+    expect(keywordsIn(written)).toHaveLength(MAX_DECK_METADATA);
   });
 });

@@ -427,6 +427,134 @@ export function boundedCompletedChapters(
   return unique.filter((url) => kept.has(url));
 }
 
+/**
+ * How much metadata a deck keeps: at most this many authors, themes,
+ * languages of its title, of its description and of its keywords, and
+ * keywords in one language. A release, a deck file and a catalog are
+ * data anyone may have written, no shape bounds these lists, and the
+ * catalog holds every deck's entry and is read and written whole; past
+ * the bound, the last values are left out (withBoundedMetadata). It is
+ * well above what any deck needs.
+ */
+export const MAX_DECK_METADATA = 100;
+
+/** How many keywords a deck keeps in all its languages together (boundedKeywords). */
+export const MAX_DECK_KEYWORDS = 1000;
+
+/**
+ * How many characters of metadata a deck keeps in all: its authors,
+ * themes, keywords and the languages and texts of its title and
+ * description together. No shape bounds how long they are either; past
+ * the bound, the values that would not fit are left out
+ * (withBoundedMetadata). It is well above what any deck needs.
+ */
+export const MAX_DECK_METADATA_CHARACTERS = 65_536;
+
+/** The metadata of a deck or a release that MAX_DECK_METADATA bounds. */
+interface DeckMetadata {
+  title: LangText;
+  description?: LangText;
+  authors: string[];
+  themes?: string[];
+  keywords?: LangTexts;
+}
+
+/** The characters of metadata a deck may still keep (MAX_DECK_METADATA_CHARACTERS). */
+interface Budget {
+  left: number;
+}
+
+/** Whether `characters` more fit in `budget`, which they take if they do. */
+function fits(budget: Budget, characters: number): boolean {
+  if (characters > budget.left) return false;
+  budget.left -= characters;
+  return true;
+}
+
+/**
+ * The deck (or release) with no more metadata than MAX_DECK_METADATA,
+ * MAX_DECK_KEYWORDS and MAX_DECK_METADATA_CHARACTERS allow: the first
+ * languages of its title, of its description, its first authors, themes
+ * and keywords, in that order and in their stored order, each while it
+ * fits, so the same deck is always cut the same way. The first language
+ * of the title and of the description is always kept, as a deck's shape
+ * requires both (the term bound limits how long they are). A deck within
+ * the bounds keeps all of it.
+ */
+export function withBoundedMetadata<T extends DeckMetadata>(deck: T): T {
+  const budget = { left: MAX_DECK_METADATA_CHARACTERS };
+  const title = boundedText(deck.title, budget, true);
+  const description =
+    deck.description === undefined ? undefined : boundedText(deck.description, budget, true);
+  const authors = boundedList(deck.authors, budget);
+  const themes = deck.themes === undefined ? undefined : boundedList(deck.themes, budget);
+  return {
+    ...deck,
+    title,
+    authors,
+    ...(description === undefined ? {} : { description }),
+    ...(themes === undefined ? {} : { themes }),
+    ...(deck.keywords === undefined ? {} : { keywords: boundedKeywords(deck.keywords, budget) }),
+  };
+}
+
+/**
+ * The first MAX_DECK_METADATA (or `max`) of `values` that fit in
+ * `budget`, in order: a list as a deck keeps it (withBoundedMetadata).
+ */
+export function boundedList(
+  values: readonly string[],
+  budget: Budget = { left: MAX_DECK_METADATA_CHARACTERS },
+  max = MAX_DECK_METADATA,
+): string[] {
+  const kept: string[] = [];
+  for (const value of values) {
+    if (kept.length === max) break;
+    if (fits(budget, value.length)) kept.push(value);
+  }
+  return kept;
+}
+
+/** The first MAX_DECK_METADATA languages of `text` that fit in `budget`; the first one always, when `first`. */
+function boundedText(text: LangText, budget: Budget, first = false): LangText {
+  const kept = Object.entries(text)
+    .slice(0, MAX_DECK_METADATA)
+    .filter(([tag, value], i) => {
+      const characters = tag.length + value.length;
+      if (i > 0 || !first) return fits(budget, characters);
+      budget.left = Math.max(0, budget.left - characters);
+      return true;
+    });
+  return Object.fromEntries(kept);
+}
+
+/**
+ * The keywords a deck keeps: those of its first MAX_DECK_METADATA
+ * languages, the first MAX_DECK_METADATA of each, and no more than
+ * MAX_DECK_KEYWORDS in all, each language and keyword while it fits in
+ * `budget`, in stored order. A language is kept only with a keyword.
+ */
+export function boundedKeywords(
+  keywords: LangTexts,
+  budget: Budget = { left: MAX_DECK_METADATA_CHARACTERS },
+): Record<string, string[]> {
+  const kept: [string, string[]][] = [];
+  let left = MAX_DECK_KEYWORDS;
+  for (const [tag, list] of Object.entries(keywords).slice(0, MAX_DECK_METADATA)) {
+    if (left === 0) break;
+    if (!fits(budget, tag.length)) continue;
+    const taken = boundedList(list, budget, Math.min(MAX_DECK_METADATA, left));
+    if (taken.length === 0) {
+      // A language none of whose keywords fit is left out, and its tag not charged.
+      budget.left += tag.length;
+      continue;
+    }
+    left -= taken.length;
+    kept.push([tag, taken]);
+  }
+  return Object.fromEntries(kept);
+}
+
 /** The cards in use: all but the retired ones, which are kept but never studied. */
 export function activeCards<T extends { retired?: true }>(cards: readonly T[]): T[] {
   return cards.filter((card) => card.retired !== true);

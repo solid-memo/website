@@ -21,6 +21,7 @@ import {
   DECK_FORMAT_VERSION,
   DEFAULT_DECK_DIRECTION,
   boundedCompletedChapters,
+  withBoundedMetadata,
   type Card,
   type CardContent,
   type Deck,
@@ -798,7 +799,7 @@ export function createSolidDeckRepository({
   ): Deck {
     const base = ensureTrailingSlash(instanceUrl);
     const id = `deck-${randomId()}`;
-    return {
+    return withBoundedMetadata({
       id,
       url: `${catalogUrlOf(base)}#${id}`,
       title,
@@ -816,7 +817,7 @@ export function createSolidDeckRepository({
         ? {}
         : { keywords: copyKeywords(source.keywords) }),
       ...(source?.isCourse === true ? { course: true as const } : {}),
-    };
+    });
   }
 
   /**
@@ -1023,10 +1024,11 @@ export function createSolidDeckRepository({
     if (read === null || stored === undefined || !sameDeckState(stored, current)) {
       throw new AppError("deckChangedDuringUpgrade", { url: current.url });
     }
-    const written: Deck = {
+    // No more metadata than a deck keeps, whatever the newer release brings (withBoundedMetadata).
+    const written: Deck = withBoundedMetadata({
       ...withDeckChanges(stored, current, next),
       formatVersion: DECK_FORMAT_VERSION,
-    };
+    });
     const dataset = withDeck(read, written);
     return { catalogUrl, dataset, subjects: deckSubjects(dataset, written), written };
   }

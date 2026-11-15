@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  boundedKeywords,
+  boundedList,
   CARD_FORMAT_VERSION,
   type Card,
   type CardContent,
@@ -14,7 +16,7 @@ import {
 import { sameOutline, type CourseOutline } from "./course";
 import type { LibraryCard, LibraryDeckContent, LibraryRelease } from "./library";
 import { isDefaultDeckDescription } from "./dcat";
-import { copyKeywords, noKeywords, sameKeywords, type LangTexts } from "./keywords";
+import { noKeywords, sameKeywords, type LangTexts } from "./keywords";
 import { sameText, type LangText } from "./langText";
 
 /** What of a deck itself a library release says: how it is studied, and what it says of itself. */
@@ -183,14 +185,18 @@ function withLanguagesOf(mine: LangText, release: LangText): LangText | undefine
   return added.length === 0 ? undefined : { ...release, ...mine };
 }
 
-/** Keywords as an upgrade leaves them: the release's, when the copy still has the older release's; else undefined. */
+/**
+ * Keywords as an upgrade leaves them: the release's, as many as a deck
+ * keeps (boundedKeywords), when the copy still has the older release's;
+ * else undefined.
+ */
 function upgradedKeywords(
   mine: LangTexts | undefined,
   before: LangTexts,
   after: LangTexts,
 ): LangTexts | undefined {
   return sameKeywords(mine, before) && !sameKeywords(before, after)
-    ? copyKeywords(after)
+    ? boundedKeywords(after)
     : undefined;
 }
 
@@ -199,13 +205,17 @@ function sameList(a: readonly string[], b: readonly string[]): boolean {
   return a.length === b.length && [...a].sort().join("\n") === [...b].sort().join("\n");
 }
 
-/** A list as an upgrade leaves it: the release's, when the copy still has the older release's; else undefined. */
+/**
+ * A list as an upgrade leaves it: the release's, as many as a deck keeps
+ * (boundedList), when the copy still has the older release's; else
+ * undefined.
+ */
 function upgradedList(
   mine: readonly string[] | undefined,
   before: readonly string[],
   after: readonly string[],
 ): string[] | undefined {
-  return sameList(mine ?? [], before) && !sameList(before, after) ? [...after] : undefined;
+  return sameList(mine ?? [], before) && !sameList(before, after) ? boundedList(after) : undefined;
 }
 
 /**

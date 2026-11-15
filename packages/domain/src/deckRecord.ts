@@ -5,7 +5,14 @@
 import { agentToRecord, agentUrlsOf } from "./agentRecord";
 import { directionOfConcept, conceptOfDirection } from "./concepts";
 import { defaultDeckDescriptionText, distributionUrlOf, TURTLE_MEDIA_TYPE } from "./dcat";
-import { isEmptyText, type Card, type CardContent, type Deck, type Distractor } from "./deck";
+import {
+  isEmptyText,
+  withBoundedMetadata,
+  type Card,
+  type CardContent,
+  type Deck,
+  type Distractor,
+} from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import { copyKeywords, noKeywords } from "./keywords";
 import { TextMap } from "./pathKeys";
@@ -36,7 +43,8 @@ export function deckFromRecord(
   data: DeckV6,
   authorOf: AuthorOf,
 ): Deck {
-  return {
+  // Bounded as read: a catalog that holds more is cut on the deck's next write.
+  return withBoundedMetadata({
     id: fragmentIdOf(url),
     url,
     title: data.title,
@@ -55,7 +63,7 @@ export function deckFromRecord(
     ...(noKeywords(data.keyword) ? {} : { keywords: copyKeywords(data.keyword) }),
     ...(usableCap(data.newCardsPerDay) ? { newCardsPerDay: data.newCardsPerDay } : {}),
     ...(usableCap(data.maxReviewsPerDay) ? { maxReviewsPerDay: data.maxReviewsPerDay } : {}),
-  };
+  });
 }
 
 /**
@@ -254,7 +262,7 @@ export function libraryDeckFromRecord(
   cards: LibraryCard[],
   authorOf: AuthorOf,
 ): LibraryDeckContent {
-  return {
+  return withBoundedMetadata({
     url,
     title: data.title,
     formatVersion: storedVersion,
@@ -269,5 +277,5 @@ export function libraryDeckFromRecord(
     themes: [...data.theme],
     keywords: copyKeywords(data.keyword),
     cards,
-  };
+  });
 }

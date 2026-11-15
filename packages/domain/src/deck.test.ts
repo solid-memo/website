@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
   boundedCompletedChapters,
+  boundedKeywords,
   cardLabel,
   cardLabelText,
   isDeckDirection,
@@ -16,6 +17,10 @@ import {
   studyDirections,
   validateCardContent,
   MAX_COMPLETED_CHAPTERS,
+  MAX_DECK_KEYWORDS,
+  MAX_DECK_METADATA,
+  MAX_DECK_METADATA_CHARACTERS,
+  withBoundedMetadata,
   type Card,
 } from "./deck";
 
@@ -680,5 +685,124 @@ describe("boundedCompletedChapters", () => {
   it("past the bound with the course's alone, leaves out the oldest", () => {
     const own = Array.from({ length: MAX_COMPLETED_CHAPTERS + 2 }, (_, i) => `${RELEASE}#ch-${i}`);
     expect(boundedCompletedChapters([...junk(3), ...own], [RELEASE])).toEqual(own.slice(2));
+  });
+});
+
+describe("withBoundedMetadata", () => {
+  const values = (prefix: string, count: number) =>
+    Array.from({ length: count }, (_, i) => `${prefix}${i}`);
+  const texts = (count: number) =>
+    Object.fromEntries(values("x-", count).map((tag) => [tag, `In ${tag}`]));
+
+  it("leaves a deck within the bounds as it is", () => {
+    const deck = {
+      title: { en: "Capitals", sv: "Huvudstäder" },
+      description: { en: "Capitals of the world." },
+      authors: ["Anton"],
+      themes: ["https://topic.example/geography"],
+      keywords: { en: ["capitals"], sv: ["huvudstäder"] },
+      sourceUrl: "https://lib.example/capitals/v1.ttl",
+    };
+    expect(withBoundedMetadata(deck)).toEqual(deck);
+    expect(withBoundedMetadata({ title: { en: "Bare" }, authors: [] })).toEqual({
+      title: { en: "Bare" },
+      authors: [],
+    });
+  });
+
+  it("keeps the first values of each list and the first languages of each text, in order", () => {
+    const authors = values("Author ", MAX_DECK_METADATA + 5);
+    const themes = values("https://topic.example/t", MAX_DECK_METADATA + 5);
+    const bounded = withBoundedMetadata({
+      title: texts(MAX_DECK_METADATA + 5),
+      description: texts(MAX_DECK_METADATA + 1),
+      authors,
+      themes,
+      keywords: { ko: values("k", MAX_DECK_METADATA * 3) },
+    });
+    expect(bounded.authors).toEqual(authors.slice(0, MAX_DECK_METADATA));
+    expect(bounded.themes).toEqual(themes.slice(0, MAX_DECK_METADATA));
+    expect(Object.keys(bounded.title)).toEqual(values("x-", MAX_DECK_METADATA));
+    expect(Object.keys(bounded.description!)).toHaveLength(MAX_DECK_METADATA);
+    expect(bounded.keywords).toEqual({ ko: values("k", MAX_DECK_METADATA) });
+  });
+  it("keeps values while they fit in MAX_DECK_METADATA_CHARACTERS, in order", () => {
+    const quarter = (prefix: string) => prefix.padEnd(MAX_DECK_METADATA_CHARACTERS / 4, "x");
+    const bounded = withBoundedMetadata({
+      title: { en: "Deck", sv: quarter("title ") },
+      description: { en: quarter("description ") },
+      authors: [quarter("author "), "Anton", quarter("another ")],
+      themes: ["https://topic.example/geography"],
+      keywords: { en: ["capitals", quarter("keyword ")], sv: ["huvudstäder"] },
+    });
+    expect(bounded.title).toEqual({ en: "Deck", sv: quarter("title ") });
+    expect(bounded.description).toEqual({ en: quarter("description ") });
+    expect(bounded.authors).toEqual([quarter("author "), "Anton"]);
+    expect(bounded.themes).toEqual(["https://topic.example/geography"]);
+    expect(bounded.keywords).toEqual({ en: ["capitals"], sv: ["huvudstäder"] });
+  });
+
+  it("keeps the title's first language, however long, and nothing past the bound", () => {
+    const long = "t".repeat(MAX_DECK_METADATA_CHARACTERS + 1);
+    const bounded = withBoundedMetadata({
+      title: { en: long, sv: "Kort" },
+      description: { en: "d" },
+      authors: ["Anton"],
+      themes: ["https://topic.example/geography"],
+      keywords: { en: ["capitals"] },
+    });
+    expect(bounded).toEqual({
+      title: { en: long },
+      description: { en: "d" },
+      authors: [],
+      themes: [],
+      keywords: {},
+    });
+  });
+
+  it("keeps the description's first language when the title's languages fill the bound", () => {
+    // The title's two languages take every character the bound allows.
+    const rest = "t".repeat(MAX_DECK_METADATA_CHARACTERS - "enDeckfr".length);
+    const bounded = withBoundedMetadata({
+      title: { en: "Deck", fr: rest },
+      description: { en: "About the deck.", sv: "Om leken." },
+      authors: ["Anton"],
+    });
+    expect(bounded.title).toEqual({ en: "Deck", fr: rest });
+    expect(bounded.description).toEqual({ en: "About the deck." });
+    expect(bounded.authors).toEqual([]);
+  });
+});
+
+describe("boundedKeywords", () => {
+  it("keeps a language only when one of its keywords fits, charging its tag only then", () => {
+    const budget = { left: 12 };
+    expect(boundedKeywords({ en: [], ko: ["much too long"], sv: ["kort"] }, budget)).toEqual({
+      sv: ["kort"],
+    });
+    expect(budget.left).toBe(12 - "sv".length - "kort".length);
+  });
+
+  it("keeps the keywords of the first languages, no more than MAX_DECK_KEYWORDS in all", () => {
+    const tags = Array.from({ length: MAX_DECK_METADATA + 1 }, (_, i) => `x-${i}`);
+    const keywords = Object.fromEntries(
+      tags.map((tag) => [tag, Array.from({ length: MAX_DECK_METADATA }, (_, i) => `${tag} ${i}`)]),
+    );
+    const bounded = boundedKeywords(keywords);
+    const full = MAX_DECK_KEYWORDS / MAX_DECK_METADATA;
+    expect(Object.keys(bounded)).toEqual(tags.slice(0, full));
+    expect(Object.values(bounded).flat()).toHaveLength(MAX_DECK_KEYWORDS);
+  });
+
+  it("cuts the language that reaches MAX_DECK_KEYWORDS short", () => {
+    const many = Array.from({ length: MAX_DECK_METADATA }, (_, i) => `k${i}`);
+    const keywords = Object.fromEntries(
+      Array.from({ length: MAX_DECK_KEYWORDS / MAX_DECK_METADATA }, (_, i) => [`x-${i}`, many]),
+    );
+    const bounded = boundedKeywords({ en: ["first"], ...keywords });
+    expect(bounded.en).toEqual(["first"]);
+    expect(bounded[`x-${MAX_DECK_KEYWORDS / MAX_DECK_METADATA - 1}`]).toHaveLength(
+      MAX_DECK_METADATA - 1,
+    );
   });
 });

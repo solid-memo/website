@@ -8,6 +8,7 @@ import {
   DECK_FORMAT_VERSION,
   type Card,
   type Deck,
+  withBoundedMetadata,
 } from "./deck";
 import { catalogUrlOf, documentsInUse, ensureTrailingSlash } from "./instanceLayout";
 import { shown } from "./langText";
@@ -132,7 +133,8 @@ const DECK_ID = /^deck-[A-Za-z0-9_-]+$/;
  * own (`decks/<id>.ttl`, `reviews/<id>.ttl`). The review states kept
  * are written as withWritableDueDays has them. Cards keep their ids,
  * their creation times and whether they are retired. A deck the file
- * says nothing of the creation of is created `now`.
+ * says nothing of the creation of is created `now`. It keeps no more of
+ * the deck's metadata than a deck may have (withBoundedMetadata).
  */
 export function importedDeck(
   instanceUrl: string,
@@ -158,7 +160,7 @@ export function importedDeck(
   const id = free ? file.id : freshId;
   const [cardsDocumentUrl, reviewsDocumentUrl] = documentsOf(id) as [string, string];
   const { completedChapters, ...rest } = file;
-  const deck: Deck = {
+  const deck: Deck = withBoundedMetadata({
     ...rest,
     id,
     url: `${catalogUrlOf(base)}#${id}`,
@@ -174,7 +176,7 @@ export function importedDeck(
           ]),
         }
       : {}),
-  };
+  });
   const cards = content.cards.map(
     (card): Card => ({
       ...card,

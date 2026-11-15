@@ -7,6 +7,7 @@ import {
   CARD_FORMAT_VERSION,
   DECK_FORMAT_VERSION,
   MAX_COMPLETED_CHAPTERS,
+  MAX_DECK_METADATA,
   type Card,
   type Deck,
 } from "./deck";
@@ -137,6 +138,17 @@ describe("importedDeck", () => {
       { ...card, url: `${INSTANCE}decks/deck-a.ttl#card-1`, formatVersion: CARD_FORMAT_VERSION },
     ]);
     expect(reviews).toEqual([state]);
+  });
+
+  it("keeps no more of the deck's metadata than a deck may have", () => {
+    const many = Array.from({ length: MAX_DECK_METADATA + 1 }, (_, i) => `k${i}`);
+    const file = content({
+      deck: deck("deck-a", { authors: many, themes: many, keywords: { ko: many } }),
+    });
+    const { deck: imported } = importedDeck(INSTANCE, file, options);
+    expect(imported.authors).toEqual(many.slice(0, MAX_DECK_METADATA));
+    expect(imported.themes).toEqual(many.slice(0, MAX_DECK_METADATA));
+    expect(imported.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
   });
 
   it("keeps the FSRS-6 states with the progress", () => {

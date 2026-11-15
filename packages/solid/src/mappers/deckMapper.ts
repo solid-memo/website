@@ -37,6 +37,7 @@ import {
 } from "@solid-memo/domain/catalog";
 import {
   boundedCompletedChapters,
+  withBoundedMetadata,
   type Card,
   type Deck,
   type Distractor,
@@ -218,11 +219,13 @@ export function withDeck(dataset: Dataset, deck: Deck): Dataset {
  * brought to this app's format) take time that grows with them and the
  * document, not their product. An agent's node longer than any term is
  * refused here (termTooLong), as the write would refuse it, before the
- * edits and the dataset are keyed by it (GHSA-4mgg-5xpp-3jx5).
+ * edits and the dataset are keyed by it (GHSA-4mgg-5xpp-3jx5). Each
+ * deck is written with no more metadata than a deck keeps
+ * (withBoundedMetadata), however it came to hold more.
  */
 export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const edit = editOf(dataset);
-  for (const deck of decks) {
+  for (const deck of decks.map(withBoundedMetadata)) {
     const creator = deckAgentUrls(deck, edit.getThing);
     if (creator.some(isIriPastBound)) {
       throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
@@ -254,7 +257,9 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
 /** The subjects a deck is written as in `dataset` (withDeck's): its entry, its distribution and its agents. */
 export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
   const agents = new TextMap<string>();
-  for (const url of deckAgentUrls(deck, (url) => getThing(dataset, url))) agents.set(url, url);
+  // Only the authors withDecks writes (withBoundedMetadata).
+  for (const url of deckAgentUrls(withBoundedMetadata(deck), (url) => getThing(dataset, url)))
+    agents.set(url, url);
   return [deck.url, distributionUrlOf(deck.url), ...agents.values()];
 }
 

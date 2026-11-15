@@ -1065,6 +1065,12 @@ flowchart LR
   limits as a release
   ([boundaries.md](boundaries.md#the-credential-gate)). A deck file has
   limits of its own, in `data-model.md`.
+- A release's authors, topics, keywords, title and description go into
+  the catalog with the deck. So a release's content keeps no more of
+  them, and no more characters of them in all, than a deck keeps
+  (`withBoundedMetadata`, in [data-model.md](data-model.md#decks-and-cards)),
+  on an import and an upgrade alike. A release with more is still read;
+  the rest is left out.
 - The headers that describe a resource, `Link` and `WAC-Allow`, are
   bounded on every response the app reads a document, file or access
   control from, a release's or any other

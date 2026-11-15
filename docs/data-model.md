@@ -770,6 +770,23 @@ graph LR
     scheme) and keywords (`dcat:keyword`), language-tagged since deck
     format 6, several per language; untagged ones saved before are kept,
     their language unknown.
+  - No shape bounds how many authors, topics, keywords or languages of
+    its title and description an entry holds, or how long they are, and
+    the catalog is read and written whole. So the app keeps at most
+    `MAX_DECK_METADATA` (100) of each: authors, topics, languages of the
+    title, of the description and of the keywords, and keywords in one
+    language. It keeps at most `MAX_DECK_KEYWORDS` (1,000) keywords in
+    all, and at most `MAX_DECK_METADATA_CHARACTERS` (65,536) characters
+    of them all together, the first language of the title and of the
+    description always, as the shape requires both
+    (`withBoundedMetadata`, [deck.ts](../packages/domain/src/deck.ts)).
+    All are far more than any deck in `decks/` has. Past the bound it
+    keeps the first values that fit: the title's languages, the
+    description's, the authors, topics and keywords, in that order and
+    in their stored order, and a keywords' language only with a keyword. A release's content, a deck file's import, a
+    new entry, an upgrade and a read keep them so. Every write of an
+    entry leaves out what it held past the bound, so an entry saved
+    before holds it until the deck is next saved.
   - Its cards document is its `dcat:distribution` (`#deck-X-cards`, with
     `dcat:accessURL`).
   - A deck copied from the [deck library](deck-library.md), or from a

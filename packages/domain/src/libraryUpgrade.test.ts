@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { CourseOutline } from "./course";
-import type { Card, Deck, Distractor } from "./deck";
+import { MAX_DECK_METADATA, type Card, type Deck, type Distractor } from "./deck";
 import type { LibraryCard, LibraryDeckContent } from "./library";
 import {
   applyLibraryUpgrade,
@@ -1234,6 +1234,13 @@ describe("the deck's texts in an upgrade", () => {
       title: { en: "World flags", sv: "Världens flaggor" },
       keywords: { en: ["flags"], sv: ["flaggor"] },
     });
+  });
+
+  it("takes no more of a release's keywords and themes than a deck may have", () => {
+    const many = Array.from({ length: MAX_DECK_METADATA + 1 }, (_, i) => `https://t.example/${i}`);
+    const bulky = plan(copy, flags(2, { keywords: { ko: many }, themes: many }))!;
+    expect(bulky.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
+    expect(bulky.themes).toEqual(many.slice(0, MAX_DECK_METADATA));
   });
 
   it("keeps a title the user changed, adding the release's languages only while it says what the release says", () => {
