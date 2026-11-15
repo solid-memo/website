@@ -18,8 +18,8 @@
     // CI cannot tell a malicious version from a good one, since such a
     // version is made to pass the tests: a person merges every update
     // (GOVERNANCE.md#dependency-updates), unless the first of the
-    // packageRules below lets it merge on its own, and only the images and
-    // commits of the end-to-end tests' servers are there. Such an update is
+    // packageRules below lets it merge on its own, and only new versions
+    // of the end-to-end tests' servers' images are there. Such an update is
     // merged through a pull request once CI's ci-ok check passes, as
     // anyone's change is (docs/testing.md#continuous-integration): the pull
     // request is where the update's commit links to. The rules after that
@@ -39,7 +39,8 @@
     // at once: Renovate's vulnerabilityAlerts lift the age by default, and
     // say so here too, should that default change. npm and uv still lock
     // no version younger than 3 days, so a maintainer locks such a fix by
-    // hand.
+    // hand. A new digest under an unchanged version has no date to wait
+    // on, and is proposed at once, for a person (the digest rule below).
     minimumReleaseAge: '3 days',
     internalChecksFilter: 'strict',
     vulnerabilityAlerts: {
@@ -171,18 +172,18 @@
     ],
     packageRules: [
         // The only updates that merge on their own once CI passes: a new
-        // image, or a new commit to build, for an end-to-end test server,
-        // which runs only in a container the tests start and throw away
-        // (docs/testing.md). Every other update waits for a person: the
-        // npm packages and the workflows' actions, which run where the
-        // deploy key is; the Python tools in scripts/requirements-*.in,
-        // which maintainers install and run with their own credentials,
-        // as the dev container and the weekly taxonomy job on main do;
-        // the dev container's image and features, which run as root while
-        // it is built; and the Node version in .nvmrc, which every job
-        // runs. A manager added later is held too, until a person adds it
-        // here. scripts/renovateConfig.test.ts checks that no other rule
-        // merges an update on its own.
+        // version of an end-to-end test server's image, which runs only in a
+        // container the tests start and throw away (docs/testing.md). A new
+        // digest, of an image or of a commit to build, is held below. Every
+        // other update waits for a person: the npm packages and the workflows'
+        // actions, which run where the deploy key is; the Python tools in
+        // scripts/requirements-*.in, which maintainers install and run with
+        // their own credentials, as the dev container and the weekly taxonomy
+        // job on main do; the dev container's image and features, which run as
+        // root while it is built; and the Node version in .nvmrc, which every
+        // job runs. A manager added later is held too, until a person adds it
+        // here. scripts/renovateConfig.test.ts checks that no other rule merges
+        // an update on its own.
         {
             matchFileNames: [
                 'e2e/**',
@@ -194,7 +195,6 @@
             ],
             matchDatasources: [
                 'docker',
-                'git-refs',
             ],
             automerge: true,
         },
@@ -358,15 +358,20 @@
             ],
             allowedVersions: '<25',
         },
-        // The Community Solid Server's tags are pushed again now and then:
-        // a new digest for the same version is for a person to look at.
+        // A new digest under an unchanged version (an image's tag pushed
+        // again, a new commit on a branch a server builds) has no release
+        // date Renovate can read, and by default Renovate never proposes
+        // an update with no date while minimumReleaseAge is set. Such an
+        // update is proposed when Renovate finds it ('timestamp-optional'),
+        // and one that has a date still waits the 3 days. Without the wait,
+        // nothing gives others time to find a bad build, so a person merges
+        // every digest update, after reading what it changes
+        // (GOVERNANCE.md#dependency-updates).
         {
-            matchDepNames: [
-                'solidproject/community-server',
-            ],
             matchUpdateTypes: [
                 'digest',
             ],
+            minimumReleaseAgeBehaviour: 'timestamp-optional',
             automerge: false,
         },
         // An action runs in the workflows' jobs, and some of those hold the

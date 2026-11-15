@@ -9,8 +9,9 @@ import { describe, expect, it } from "vitest";
 
 /**
  * renovate.json5: Renovate merges an update on its own once CI passes only
- * where a rule lets it, and only the end-to-end test servers' images and
- * commits are let. A person merges every other update: every npm update,
+ * where a rule lets it, and only new versions of the end-to-end test
+ * servers' images are let; a new digest under an unchanged version, which
+ * has no release date to wait on, is proposed at once and held. A person merges every other update: every npm update,
  * development tools' included, since the build that makes the deployed
  * site and the release job run them, and an update of one can move a
  * shipped package in the lockfile; every update to a workflow's action,
@@ -169,7 +170,7 @@ describe("renovate.json5", () => {
       {
         matchFileNames: ["e2e/**"],
         matchManagers: ["docker-compose", "dockerfile", "custom.regex"],
-        matchDatasources: ["docker", "git-refs"],
+        matchDatasources: ["docker"],
         automerge: true,
       },
     ]);
@@ -210,11 +211,8 @@ describe("renovate.json5", () => {
     );
     expect([...new Set(merged)].sort()).toEqual([
       "custom.regex docker e2e/pod/servers/jss/Dockerfile",
-      "custom.regex git-refs e2e/pod/servers/jss/Dockerfile",
       "docker-compose docker e2e/pod/servers/jss/Dockerfile",
-      "docker-compose git-refs e2e/pod/servers/jss/Dockerfile",
       "dockerfile docker e2e/pod/servers/jss/Dockerfile",
-      "dockerfile git-refs e2e/pod/servers/jss/Dockerfile",
     ]);
   });
 
@@ -255,7 +253,7 @@ describe("renovate.json5", () => {
     }
   });
 
-  it("still merges a new commit of Nextcloud's app on its own, but not of the Linked Web Storage fork", () => {
+  it("holds a new commit of Nextcloud's app and of the Linked Web Storage fork for a person", () => {
     const update = {
       manager: "custom.regex",
       datasource: "git-refs",
@@ -263,7 +261,7 @@ describe("renovate.json5", () => {
       depName: "https://github.com/pdsinterop/solid-nextcloud",
       updateType: "digest",
     };
-    expect(automerges(update)).toBe(true);
+    expect(automerges(update)).toBe(false);
     expect(
       automerges({
         ...update,
@@ -271,6 +269,46 @@ describe("renovate.json5", () => {
         depName: "https://github.com/jeswr/CommunitySolidServer",
       }),
     ).toBe(false);
+  });
+
+  it("proposes a digest update with no release date, and holds every digest update for a person", () => {
+    // Renovate's default, 'timestamp-required', never proposes an update
+    // with no date while minimumReleaseAge is set: an image's tag pushed
+    // again, or a new commit on a branch, would wait forever.
+    const digest = config.packageRules.filter(
+      (rule) => JSON.stringify(rule.matchUpdateTypes) === JSON.stringify(["digest"]),
+    );
+    expect(digest).toEqual([
+      {
+        matchUpdateTypes: ["digest"],
+        minimumReleaseAgeBehaviour: "timestamp-optional",
+        automerge: false,
+      },
+    ]);
+    expect(config.packageRules.indexOf(digest[0]!)).toBeGreaterThan(0);
+    for (const update of [
+      {
+        manager: "docker-compose",
+        datasource: "docker",
+        packageFile: "e2e/pod/servers/compose.tls.yml",
+        depName: "caddy",
+      },
+      {
+        manager: "dockerfile",
+        datasource: "docker",
+        packageFile: "e2e/pod/servers/nextcloud/Dockerfile",
+        depName: "nextcloud",
+      },
+      {
+        manager: "docker-compose",
+        datasource: "docker",
+        packageFile: "e2e/journeys/css/compose.yml",
+        depName: "solidproject/community-server",
+      },
+    ]) {
+      expect(automerges({ ...update, updateType: "digest" })).toBe(false);
+      expect(automerges({ ...update, updateType: "patch" })).toBe(true);
+    }
   });
 
   it("holds every update to a workflow's action for a person", () => {

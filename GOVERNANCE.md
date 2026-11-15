@@ -171,13 +171,17 @@ built to pass the tests, so a person merges each update, unless
 - **The Node version** in `.nvmrc`, which every job runs.
 - **Every new major version**, which may change what the tests don't
   cover.
+- **Every new digest under an unchanged version**: an image's tag
+  pushed again, or a new commit on a branch that an end-to-end test
+  server builds. Renovate can't read a release date for one, so it
+  can't wait the 3 days below, and proposes it as soon as it finds it.
 
-Renovate adds two kinds of update to the merge queue on its own, once
-their version has been public for 3 days: a new minor or patch version
-of an end-to-end test server's image, and a new commit that one of
-those servers builds. Both run only in containers the tests start and
-throw away. The queue merges one only when CI passes, with no person
-reviewing it, so those updates are unreviewed changes too. Adding a
+Renovate adds one kind of update to the merge queue on its own, once
+its version has been public for 3 days: a new minor or patch version
+of an end-to-end test server's image. It runs only in containers the
+tests start and throw away. The queue merges one only when CI passes,
+with no person reviewing it, so those updates are unreviewed changes
+too. Adding a
 kind of update to that list is a person's decision, and
 `scripts/renovateConfig.test.ts` checks the list.
 
@@ -205,7 +209,8 @@ waiting with no date. The [Pending updates](.github/workflows/pending-updates.ym
 workflow keeps a comment on it up to date, every 3 hours, with the
 earliest time Renovate may propose each one: it runs Renovate itself,
 read-only, and adds the wait to each version's release date. A version with no release date waits
-until Renovate finds one, and the comment says so. The wait covers every
+until Renovate finds one, and the comment says so, except a new digest
+under an unchanged version, which a person merges instead. The wait covers every
 package an update newly locks, not only the one it names. The
 repository's [.npmrc](.npmrc), and one beside each end-to-end test
 server's own `package-lock.json` in `e2e/pod/servers/` and beside the

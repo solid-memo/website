@@ -15,8 +15,8 @@
  * branch, whether it waits (`pendingChecks`) and its version's release date
  * (`releaseTimestamp`). The earliest time Renovate may propose a branch is
  * its newest release date plus the wait. A version with no release date
- * waits until Renovate finds one; a digest update's date is not in the
- * report. A branch the dashboard still lists as waiting, but which this run
+ * waits until Renovate finds one, except a digest update, which Renovate
+ * proposes with no date (renovate.json5's digest rule). A branch the dashboard still lists as waiting, but which this run
  * no longer holds back, is past its age and is proposed on the Renovate
  * app's next run. A branch with a pull request already is left out.
  *
@@ -92,8 +92,6 @@ export type Branch = {
   released?: number;
   /** A version in it with no release date. */
   undated: boolean;
-  /** A digest update in it, whose date the report doesn't give. */
-  digest: boolean;
 };
 
 /** Text from the report or the repository, safe in a table cell's code span. */
@@ -122,9 +120,9 @@ function add(branch: Branch, depName: string, update: Update): Branch {
   branch.pending ||= update.pendingChecks === true;
   if (update.releaseTimestamp !== undefined) {
     branch.released = Math.max(branch.released ?? 0, Date.parse(update.releaseTimestamp));
-  } else if (digest) {
-    branch.digest = true;
-  } else {
+  } else if (!digest || update.pendingChecks === true) {
+    // Renovate proposes a digest update with no date, unless something
+    // else holds it.
     branch.undated = true;
   }
   return branch;
@@ -141,7 +139,6 @@ export function branches(report: Report): Map<string, Branch> {
       updates: [],
       pending: false,
       undated: false,
-      digest: false,
     };
     found.set(name, add(branch, depName, update));
   }
@@ -201,14 +198,8 @@ function row(name: string, branch: Branch | undefined, age: number, now: number)
   if (!branch.pending) return { order: 0, cells: cells("—", NEXT_RUN) };
   if (branch.undated) {
     return {
-      order: Number.MAX_SAFE_INTEGER - 2,
-      cells: cells("—", "no release date: waits until Renovate finds one"),
-    };
-  }
-  if (branch.digest) {
-    return {
       order: Number.MAX_SAFE_INTEGER - 1,
-      cells: cells("unknown", "a digest update: its date is not in the report"),
+      cells: cells("—", "no release date: waits until Renovate finds one"),
     };
   }
   const earliest = branch.released! + age;
