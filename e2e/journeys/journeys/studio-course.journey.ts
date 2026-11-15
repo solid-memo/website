@@ -36,13 +36,24 @@ const COURSE = {
  * statistics, are as they were: the trial is played in a sandbox. They
  * say how the course was made, then publish it to their pod, saying it
  * will be public: someone with no login reads it, and the releases list
- * it. Managing an instance's decks in the Studio is studio.journey.ts's.
+ * it. Back on its release screen, they copy a link to try it (docs/routing.md,
+ * A link to a release), which a friend opens in a browser of their own,
+ * where no one has used Solid Memo: they land on the release's page as a
+ * guest, at once, copy the same link from there, start the course and
+ * find it in their deck list, saying where it came from. Managing an
+ * instance's decks in the Studio is studio.journey.ts's.
+ *
+ * What the link catches: one that names the publisher's instance, which
+ * no one else can open; the landing page shown instead of a guest's
+ * study started; and the link left in the history, or not followed on to
+ * the release once the guest's instance is made.
  */
 test("write a course in the Studio, try it, and publish it to the pod @studio", async ({
   app,
   account,
   runId,
   playwright,
+  newDevice,
 }) => {
   const instance = `Courses ${runId}`;
   const deck = `Studied ${runId}`;
@@ -206,6 +217,41 @@ test("write a course in the Studio, try it, and publish it to the pod @studio", 
       published = { url, title: authored };
     },
     { screen: "studio.releases" },
+  );
+
+  const { url } = published!;
+  let link = "";
+  await app.step(
+    "12 · Copy a link to try the course from its release screen",
+    async () => {
+      await app.studio.openDrafts(instance);
+      await app.draftEditor.openDraft(authored);
+      await app.draftEditor.openRelease();
+      link = await app.draftEditor.copyTryLink();
+      expect(new URL(link).hash).toBe(`#/try?url=${encodeURIComponent(url)}`);
+    },
+    { screen: "studio.draft.release" },
+  );
+
+  const friend = await newDevice();
+
+  await friend.step(
+    "13 · In a browser of their own, follow the link: the course, as a guest, and the same link to copy",
+    async () => {
+      await friend.importUrl.followLinkToCourse(link, url, authored);
+      expect(await friend.libraryDeck.copyLink()).toBe(link);
+    },
+    { screen: "import-url" },
+  );
+
+  await friend.step(
+    "14 · Start the course: the deck list says where it came from",
+    async () => {
+      await friend.importUrl.startCourse(authored);
+      await friend.chrome.breadcrumb("breadcrumbs.decks");
+      await friend.decks.expectDeckFrom(authored, new URL(url).host);
+    },
+    { screen: "decks.guest" },
   );
 });
 

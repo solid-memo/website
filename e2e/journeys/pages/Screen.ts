@@ -31,6 +31,26 @@ export abstract class Screen {
     return new Intl.NumberFormat(this.app.locale, { style: "percent" }).format(part / whole);
   }
 
+  /**
+   * What the app writes to the clipboard when `copy` clicks its button.
+   * Only Chromium lets a page read the clipboard back, or needs a
+   * permission to write it, so the text is taken from the app's call to
+   * write it, in every engine alike.
+   */
+  protected async copied(copy: () => Promise<void>): Promise<string> {
+    if (this.page.context().browser()?.browserType().name() === "chromium")
+      await this.page.context().grantPermissions(["clipboard-write"]);
+    await this.page.evaluate(() => {
+      const write = navigator.clipboard.writeText.bind(navigator.clipboard);
+      navigator.clipboard.writeText = (text) => {
+        document.documentElement.dataset.copied = text;
+        return write(text);
+      };
+    });
+    await copy();
+    return this.page.evaluate(() => document.documentElement.dataset.copied ?? "");
+  }
+
   protected intent<T>(title: string, body: () => Promise<T>): Promise<T> {
     return test.step(title, body, { box: true });
   }

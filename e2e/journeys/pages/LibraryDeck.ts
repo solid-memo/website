@@ -39,30 +39,17 @@ export class LibraryDeck extends Screen {
     });
   }
 
-  /**
-   * "Copy link": the link to the deck that names no instance, as the app
-   * wrote it to the clipboard. Only Chromium lets a page read the
-   * clipboard back, or needs a permission to write it, so the link is
-   * taken from the app's call to write it, in every engine alike.
-   */
+  /** "Copy link": the link to the deck that names no instance, as the app wrote it to the clipboard. */
   async copyLink(): Promise<string> {
-    return this.intent("Copy the deck's link", async () => {
-      if (this.page.context().browser()?.browserType().name() === "chromium")
-        await this.page.context().grantPermissions(["clipboard-write"]);
-      await this.page.evaluate(() => {
-        const write = navigator.clipboard.writeText.bind(navigator.clipboard);
-        navigator.clipboard.writeText = (text) => {
-          document.documentElement.dataset.copied = text;
-          return write(text);
-        };
-      });
-      await this.page
-        .getByRole("main")
-        .getByRole("button", { name: this.t("libraryDeck.copyLink"), exact: true })
-        .click();
-      await expect(this.page.getByRole("main")).toContainText(this.t("libraryDeck.linkCopied"));
-      return this.page.evaluate(() => document.documentElement.dataset.copied ?? "");
-    });
+    return this.intent("Copy the deck's link", () =>
+      this.copied(async () => {
+        await this.page
+          .getByRole("main")
+          .getByRole("button", { name: this.t("libraryDeck.copyLink"), exact: true })
+          .click();
+        await expect(this.page.getByRole("main")).toContainText(this.t("libraryDeck.linkCopied"));
+      }),
+    );
   }
 
   /**
