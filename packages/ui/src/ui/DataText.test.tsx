@@ -16,6 +16,7 @@ import {
   plainDataText,
   useProseChunks,
 } from "./DataText";
+import { MAX_BREAKS } from "./breakable";
 import { CardLanguage, CourseLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
 
@@ -53,6 +54,19 @@ describe("DataText", () => {
     expect(html(<DataText text={{ de: "a\n\nb" }} markdown class="card-note" />)).toBe(
       '<div class="md card-note" lang="de"><p>a</p><p>b</p></div>',
     );
+  });
+
+  it("renders text of many slashes as a bounded number of nodes, Markdown or plain", () => {
+    for (const en of ["/".repeat(16000), "a/".repeat(8000)]) {
+      for (const markdown of [true, false]) {
+        const { container } = render(<DataText text={{ en }} markdown={markdown} breaks />);
+        const walker = document.createTreeWalker(container);
+        let nodes = 0;
+        while (walker.nextNode()) nodes++;
+        expect(nodes).toBeLessThanOrEqual(2 * MAX_BREAKS + 2);
+        expect(container.textContent).toBe(en);
+      }
+    }
   });
 
   it("shows card text in the deck's card language first, as DataLine does, but not prose", () => {
