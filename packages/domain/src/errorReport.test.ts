@@ -109,6 +109,102 @@ describe("withoutAddresses", () => {
     expect(ratio).toBeLessThan(4);
   });
 
+  it("takes out an address on an IPv6 host or with parentheses in its path", () => {
+    expect(
+      withoutAddresses("Failed at https://[fd00::1]:8443/alice/profile/card#me now", SITE),
+    ).toBe("Failed at <address> now");
+    expect(withoutAddresses("see https://pod.example/(private)/notes.ttl", SITE)).toBe(
+      "see <address>",
+    );
+    expect(withoutAddresses("(see https://pod.example/alice/card).", SITE)).toBe(
+      "(see <address>).",
+    );
+  });
+
+  it("takes out an address with escaped slashes, encoded twice or more, or with one slash", () => {
+    expect(withoutAddresses('{"error":"https:\\/\\/pod.example\\/alice\\/card"}', SITE)).toBe(
+      '{"error":"<address>"}',
+    );
+    expect(withoutAddresses("x https%253A%252F%252Fpod.example%252Falice%252F y", SITE)).toBe(
+      "x <address> y",
+    );
+    expect(withoutAddresses("x https%25253a%25252f%25252fpod.example y", SITE)).toBe(
+      "x <address> y",
+    );
+    expect(withoutAddresses("https:/pod.example/alice", SITE)).toBe("<address>");
+    expect(withoutAddresses("Failed at https://pod.example/alice now", SITE)).toBe(
+      "Failed at <address> now",
+    );
+  });
+
+  it("takes out the whole address when a bracket or a parenthesis comes later in it", () => {
+    expect(withoutAddresses("https://alice@[fd00::1]:8443/alice/card", SITE)).toBe("<address>");
+    expect(withoutAddresses("https://pod.example/?next=https://[fd00::1]/alice", SITE)).toBe(
+      "<address>",
+    );
+    expect(withoutAddresses("https://pod.example/a[1]/secret", SITE)).toBe("<address>");
+    expect(withoutAddresses("https://pod.example/a(b(c)d)/secret", SITE)).toBe("<address>");
+    expect(withoutAddresses("https://pod.example/a{b}/secret x", SITE)).toBe("<address> x");
+    expect(withoutAddresses("https://pod.example/alice's/card", SITE)).toBe("<address>");
+  });
+
+  it("takes out an address escaped or encoded in other ways, or written with backslashes or no slash", () => {
+    expect(withoutAddresses('{"e":"https:\\\\\\/\\\\\\/pod.example\\\\\\/alice"}', SITE)).toBe(
+      '{"e":"<address>"}',
+    );
+    expect(withoutAddresses("https:\\u002F\\u002Fpod.example\\u002Falice", SITE)).toBe("<address>");
+    expect(withoutAddresses("https%3A%2Fpod.example%2Falice", SITE)).toBe("<address>");
+    expect(withoutAddresses("https%3A//pod.example/alice", SITE)).toBe("<address>");
+    expect(withoutAddresses("https:%2F%2Fpod.example/alice", SITE)).toBe("<address>");
+    expect(withoutAddresses("https:\\\\pod.example\\\\alice", SITE)).toBe("<address>");
+    expect(withoutAddresses("https:pod.example/alice", SITE)).toBe("<address>");
+    expect(withoutAddresses("HTTPS://POD.EXAMPLE/ALICE", SITE)).toBe("<address>");
+  });
+
+  it("keeps the brackets and stops around an address that are the sentence's", () => {
+    expect(withoutAddresses("x (https://pod.example/a(b)) y", SITE)).toBe("x (<address>) y");
+    expect(withoutAddresses("[https://pod.example/x], {https://pod.example/y}.", SITE)).toBe(
+      "[<address>], {<address>}.",
+    );
+    expect(withoutAddresses("<https://pod.example/x>", SITE)).toBe("<<address>>");
+  });
+
+  it("takes out an address after the site's own in the same word", () => {
+    expect(withoutAddresses(`${SITE}assets/x.js?u=https://alice@[fd00::1]/card:1:2`, SITE)).toBe(
+      "assets/x.js<address>",
+    );
+  });
+
+  it("leaves a scheme with no address after it as it is", () => {
+    expect(withoutAddresses("httpd stopped; https is off", SITE)).toBe(
+      "httpd stopped; https is off",
+    );
+  });
+
+  it("passes over a long run of schemes, escapes and encodings in time linear in its length", () => {
+    const ratio = growth(
+      (length) => {
+        const text = `${"https:/(".repeat(length / 16)}${"a(https%25\\".repeat(length / 24)}`;
+        return () => withoutAddresses(text, SITE);
+      },
+      20_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("passes over a long run of parentheses and encodings that close no address in time linear in its length", () => {
+    const ratio = growth(
+      (length) => {
+        const text = `https://x/(${"a".repeat(length / 2)} https%${"25".repeat(length / 4)}`;
+        return () => withoutAddresses(text, SITE);
+      },
+      20_000,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
   it("keeps the path of the site's own scripts, without a query or a hash", () => {
     expect(withoutAddresses(`at f (${SITE}assets/index.js?v=1#top:1:2)`, SITE)).toBe(
       "at f (assets/index.js)",

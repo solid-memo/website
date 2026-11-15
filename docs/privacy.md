@@ -272,12 +272,16 @@ The app first strips every address from the details, except the
 paths of the site's own scripts, which show where the code broke
 ([`errorReport.ts`](../packages/domain/src/errorReport.ts)). It strips
 web addresses, such as a pod's, a WebID's, a deck's or a card's, with
-any token in their query. It strips email addresses, including ones
-in other scripts, and `blob:`, `data:`, `mailto:`, `tel:` and `urn:`
+any token in their query. An `http:` or `https:` address goes to the
+end of its word, also when its host is an IPv6 one, its path holds
+brackets or quotes, its slashes are escaped or missing, or it's
+URL-encoded once or more. It strips email addresses, including ones in
+other scripts, and `blob:`, `data:`, `mailto:`, `tel:` and `urn:`
 values. An error's message can still quote other text, such as a
-card's or a host name written without its `https://`. The details
-appear under "Technical details" for the learner to read before
-sending.
+card's, a host name written without its `https://`, or an address
+split across words or encoded in a way the app doesn't undo. The
+details appear under "Technical details" for the learner to read
+before sending.
 
 ## What the project has published
 
