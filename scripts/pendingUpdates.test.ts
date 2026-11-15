@@ -139,21 +139,18 @@ describe("branches", () => {
         pending: true,
         released: Date.parse("2026-11-11T20:00:00.000Z"),
         undated: false,
-        digest: false,
       },
       {
         name: "renovate/caddy-2.11.9",
         updates: ["`caddy` → `digest e40b94d`"],
         pending: true,
-        undated: false,
-        digest: true,
+        undated: true,
       },
       {
         name: "renovate/node-24.x",
         updates: ["`node` → `24.22.3`"],
         pending: true,
         undated: true,
-        digest: false,
       },
     ]);
   });
@@ -260,7 +257,14 @@ describe("comment", () => {
       ...options,
       runUrl: "https://github.com/solid-memo/website/actions/runs/7",
       dashboard: {
-        pending: ["renovate/past", "renovate/gone", "renovate/open", "renovate/a", "renovate/idle"],
+        pending: [
+          "renovate/past",
+          "renovate/gone",
+          "renovate/open",
+          "renovate/a",
+          "renovate/idle",
+          "renovate/moved",
+        ],
         open: ["renovate/open"],
       },
       branches: branches(
@@ -271,6 +275,11 @@ describe("comment", () => {
           update("d", { releaseTimestamp: "2026-11-09T11:00:00.000Z" }),
           update("undated", {}),
           update("digest", { updateType: "digest", newDigest: "abcdef0123" }),
+          update("moved", {
+            updateType: "digest",
+            newDigest: "0123456789",
+            pendingChecks: false,
+          }),
           update("past", { pendingChecks: false, releaseTimestamp: "2026-11-01T00:00:00.000Z" }),
           update("open", { releaseTimestamp: "2026-11-11T00:00:00.000Z" }),
           update("idle", { pendingChecks: false }),
@@ -284,13 +293,14 @@ describe("comment", () => {
       "| Update | Branch | Released | Earliest | When |",
       "| --- | --- | --- | --- | --- |",
       "| `idle` → `2.0.0` | `renovate/idle` | — | — | past its age: on Renovate's next run |",
+      "| `moved` → `digest 0123456` | `renovate/moved` | — | — | past its age: on Renovate's next run |",
       "| `past` → `2.0.0` | `renovate/past` | 2026-11-01 00:00 UTC | — | past its age: on Renovate's next run |",
       "| `d` → `2.0.0` | `renovate/d` | 2026-11-09 11:00 UTC | 2026-11-12 11:00 UTC | past its age: on Renovate's next run |",
       "| `c` → `2.0.0` | `renovate/c` | 2026-11-09 12:30 UTC | 2026-11-12 12:30 UTC | in under an hour |",
       "| `a` → `2.0.0` | `renovate/a` | 2026-11-11 18:30 UTC | 2026-11-14 18:30 UTC | in 2 d 6 h |",
       "| `b` → `2.0.0` | `renovate/b` | 2026-11-12 11:30 UTC | 2026-11-15 11:30 UTC | in 2 d 23 h |",
+      "| `digest` → `digest abcdef0` | `renovate/digest` | — | — | no release date: waits until Renovate finds one |",
       "| `undated` → `2.0.0` | `renovate/undated` | — | — | no release date: waits until Renovate finds one |",
-      "| `digest` → `digest abcdef0` | `renovate/digest` | — | unknown | a digest update: its date is not in the report |",
       "| — | `renovate/gone` | — | — | not found by this run |",
       "",
     ]);
