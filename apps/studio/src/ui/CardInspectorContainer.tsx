@@ -17,6 +17,7 @@ import { cardName } from "@solid-memo/ui/DataText";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { publishedDistractorIds, useDeckRelease } from "@solid-memo/ui/deckRelease";
 import { DistractorFields } from "@solid-memo/ui/DistractorFields";
+import { textLanguages } from "@solid-memo/ui/LanguagePicker";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
@@ -114,6 +115,9 @@ export function CardInspectorContainer({
     () => (answers === undefined ? undefined : distractorPicksOf(answers)),
     [answers],
   );
+  // The wrong options' languages to suggest: the back's, at most
+  // LANGUAGE_CHOICE_LIMIT of them (textLanguages), untagged text aside.
+  const backLanguages = useMemo(() => textLanguages(card.back), [card.back]);
   const saveMutation = useMutation({
     mutationFn: (distractors: Distractor[]) =>
       useCases.updateCard(deck, card, { ...card, distractors }),
@@ -168,7 +172,7 @@ export function CardInspectorContainer({
               back={card.back}
               textFormat={card.textFormat}
               busy={saveMutation.isPending}
-              suggestions={Object.keys(card.back).filter((tag) => tag !== "")}
+              suggestions={backLanguages}
               picks={picks}
               arrival={field}
               onChange={(distractors) =>

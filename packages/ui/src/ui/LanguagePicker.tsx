@@ -5,6 +5,7 @@
 import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
+import { languageChoices } from "@solid-memo/domain/cardQuery";
 import { canonicalTag, NO_LANGUAGE } from "@solid-memo/domain/languageTag";
 import { composing } from "./composing";
 import { ErrorMessage } from "./ErrorMessage";
@@ -66,6 +67,20 @@ function recentKinds(role: LanguageRole): RecentLanguageKind[] {
  */
 export function languageTextId(id: string): string {
   return `${id}-text`;
+}
+
+/**
+ * The languages of a deck's texts, for a picker to suggest: their stated
+ * tags, in order (languageChoices, so at most LANGUAGE_CHOICE_LIMIT, the
+ * most used), untagged text aside. Texts with very many language tags
+ * would otherwise make the picker too long to draw and to use.
+ */
+export function textLanguages(...texts: (object | undefined)[]): string[] {
+  const counts = new Map<string, number>();
+  for (const text of texts)
+    for (const tag of Object.keys(text ?? {}))
+      if (tag !== "") counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  return languageChoices(counts);
 }
 
 /**

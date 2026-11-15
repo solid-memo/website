@@ -8,6 +8,7 @@ import type {
   DraftChapterV1,
   DraftStepV1,
 } from "@solid-memo/vocab/types.generated";
+import { countTags, languageChoices, UNSTATED } from "../cardQuery.ts";
 import type { CardContent, Distractor } from "../deck.ts";
 import { cardContentFromRecord, cardToRecord, distractorFromRecord } from "../deckRecord.ts";
 import { sameText, type LangText } from "../langText.ts";
@@ -364,16 +365,19 @@ export function draftCardRows(
     .sort(byId);
 }
 
-/** The languages of the draft's cards' fronts and backs, for the table's filter: stated ones by tag, `unstated` last when a side has none. */
+/**
+ * The languages of the draft's cards' fronts and backs, for the table's
+ * filter: stated ones by tag (languageChoices, so at most
+ * LANGUAGE_CHOICE_LIMIT, the most used), UNSTATED last when a side has
+ * none.
+ */
 export function draftCardLanguages(draft: ReleaseDraft): string[] {
-  const tags = new Set(
-    draft.cards.flatMap((node) => [
-      ...Object.keys(node.data.front ?? {}),
-      ...Object.keys(node.data.back ?? {}),
-    ]),
+  const counts = countTags(
+    draft.cards.flatMap((node) => [node.data.front ?? {}, node.data.back ?? {}]),
   );
-  const stated = [...tags].filter((tag) => tag !== "").sort();
-  return tags.has("") ? [...stated, "unstated"] : stated;
+  const unstated = counts.delete("");
+  const stated = languageChoices(counts);
+  return unstated ? [...stated, UNSTATED] : stated;
 }
 
 /** Where a step in use is in its chapter: the chapter's id, and the step's place among its steps from 0. */

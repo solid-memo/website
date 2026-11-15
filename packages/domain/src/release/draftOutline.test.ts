@@ -26,6 +26,7 @@ import {
   stepPlaceOf,
 } from "./draftOutline.ts";
 import { growth } from "../testing/growth.ts";
+import { LANGUAGE_CHOICE_LIMIT } from "../cardQuery.ts";
 import { applyDraftChanges, type ReleaseDraft } from "./releaseDraft.ts";
 
 const course = courseDraft();
@@ -562,5 +563,24 @@ describe("the table of a draft's cards", () => {
         ],
       }),
     ).toEqual([]);
+  });
+
+  it("offers at most LANGUAGE_CHOICE_LIMIT languages, the most used, unstated last", () => {
+    const tag = (i: number) => `x-${String(i).padStart(4, "0")}`;
+    const front = Object.fromEntries(
+      Array.from({ length: LANGUAGE_CHOICE_LIMIT * 20 }, (_, i) => [tag(i), "a"]),
+    );
+    const offered = draftCardLanguages({
+      ...course,
+      cards: [
+        { id: "many", data: { front, back: { "": "b" }, distractor: [], subject: [] } },
+        { id: "en", data: { front: { en: "c" }, back: { en: "d" }, distractor: [], subject: [] } },
+      ],
+    });
+    expect(offered).toHaveLength(LANGUAGE_CHOICE_LIMIT + 1);
+    expect(offered[0]).toBe("en");
+    expect(offered.at(-1)).toBe("unstated");
+    expect(offered).toContain(tag(0));
+    expect(offered).not.toContain(tag(LANGUAGE_CHOICE_LIMIT));
   });
 });

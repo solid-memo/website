@@ -5,7 +5,9 @@
 import { describe, expect, it } from "vitest";
 import type { CardContent } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
 import {
+  cardLanguageHints,
   checkDraft,
   draftChanged,
   draftOf,
@@ -168,5 +170,21 @@ describe("draftChanged", () => {
     ["Markdown", { markdown: true }],
   ])("says a draft is changed by %s", (_, change) => {
     expect(draftChanged({ ...from, ...change }, from)).toBe(true);
+  });
+});
+
+describe("cardLanguageHints", () => {
+  it("suggests the side's language, then at most LANGUAGE_CHOICE_LIMIT of the deck name's", () => {
+    const title = Object.fromEntries(
+      Array.from({ length: LANGUAGE_CHOICE_LIMIT + 50 }, (_, i) => [`x-t${1000 + i}`, "a"]),
+    );
+    const { suggestions } = cardLanguageHints(
+      { front: "fi", own: "sv", unstatedCounts: { front: 0, back: 0 } },
+      { ...title, "": "b" },
+    );
+    expect(suggestions.front).toHaveLength(1 + LANGUAGE_CHOICE_LIMIT);
+    expect(suggestions.front.slice(0, 2)).toEqual(["fi", "x-t1000"]);
+    expect(suggestions.own[0]).toBe("sv");
+    expect(suggestions.back).not.toContain("x-t1100");
   });
 });

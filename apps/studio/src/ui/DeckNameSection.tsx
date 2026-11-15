@@ -16,6 +16,7 @@ import {
   useMissingLanguage,
   type LangTextDraft,
 } from "@solid-memo/ui/LangTextField";
+import { textLanguages } from "@solid-memo/ui/LanguagePicker";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 
 /**
@@ -81,7 +82,7 @@ export function DeckNameSection({
             label={t("deckPreferences.deckName")}
             role="deckName"
             draft={draft}
-            suggestions={Object.keys({ ...deck.title, ...deck.description })}
+            suggestions={textLanguages(deck.title, deck.description)}
             translationsOpen
             required
             disabled={busy}

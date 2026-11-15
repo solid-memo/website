@@ -21,6 +21,7 @@ import {
   type LangTextDraft,
 } from "./LangTextField";
 import { linkify } from "./linkify";
+import { textLanguages } from "./LanguagePicker";
 import { recentLanguages } from "./remembered";
 import { useI18n } from "./i18n";
 import { ReaderText, ReaderTexts } from "./ReaderText";
@@ -145,7 +146,7 @@ export function DeckAboutSection({
         label={t("deckAbout.description")}
         role="description"
         draft={draft.description}
-        suggestions={Object.keys({ ...deck.description, ...deck.title })}
+        suggestions={textLanguages(deck.description, deck.title)}
         multiline
         translationsOpen
         required
@@ -186,9 +187,7 @@ export function DeckAboutSection({
         label={t("deckAbout.keywords")}
         role="keywords"
         draft={draft.keywords}
-        suggestions={Object.keys({ ...deck.keywords, ...deck.description, ...deck.title }).filter(
-          (tag) => tag !== "",
-        )}
+        suggestions={textLanguages(deck.keywords, deck.description, deck.title)}
         hint={
           <p id="deck-keywords-hint" class="hint field-hint">
             {t("deckAbout.keywordsHint")}

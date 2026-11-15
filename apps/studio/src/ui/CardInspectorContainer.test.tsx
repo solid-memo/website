@@ -7,6 +7,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/pr
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Answer } from "@solid-memo/domain/answer";
+import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
@@ -237,6 +238,24 @@ describe("CardInspectorContainer", () => {
         "This wrong option is in the release the deck came from, so it cannot be deleted. Retire it instead.",
       ),
     ).toBeInTheDocument();
+  });
+
+  it("suggests at most LANGUAGE_CHOICE_LIMIT of the back's languages for a wrong option", () => {
+    // "qaa", "qab"…: tags reserved for local use, in the order of their numbers.
+    const letter = (n: number) => String.fromCharCode(97 + n);
+    const tag = (i: number) => `q${letter(Math.floor(i / 26))}${letter(i % 26)}`;
+    const back = Object.fromEntries(
+      Array.from({ length: LANGUAGE_CHOICE_LIMIT * 2 }, (_, i) => [tag(i), "water"]),
+    );
+    renderContainer(makeUseCasesFake(), { shown: { ...card, back: { ...back, "": "water" } } });
+    fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
+    fireEvent.click(document.getElementById("distractor-text-language-0")!);
+    const offered = [...document.querySelectorAll<HTMLInputElement>("input[type=radio]")].map(
+      (radio) => radio.value,
+    );
+    expect(offered).toContain(tag(0));
+    expect(offered).not.toContain(tag(LANGUAGE_CHOICE_LIMIT));
+    expect(offered.filter((value) => value.startsWith("q"))).toHaveLength(LANGUAGE_CHOICE_LIMIT);
   });
 
   it("says when the card has no wrong options", () => {

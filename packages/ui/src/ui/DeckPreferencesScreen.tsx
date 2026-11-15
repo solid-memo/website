@@ -13,6 +13,7 @@ import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type I18n, type ErrorText } from "./i18n";
 import { ReaderText } from "./ReaderText";
+import { textLanguages } from "./LanguagePicker";
 import { DeckCardLanguageForm } from "./DeckCardLanguageForm";
 import { DeckLanguagesSection } from "./DeckLanguagesSection";
 import {
@@ -280,7 +281,7 @@ export function DeckPreferencesScreen({
             label={t("deckPreferences.deckName")}
             role="deckName"
             draft={deckName}
-            suggestions={Object.keys({ ...deck.title, ...deck.description })}
+            suggestions={textLanguages(deck.title, deck.description)}
             translationsOpen
             required
             disabled={busy}
