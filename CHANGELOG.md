@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.5.3](https://github.com/solid-memo/website/compare/v7.5.2...v7.5.3) (2026-11-15)
+
+### Fixes
+
+* **solid:** grant public read only on a public type index the app wrote ([0d75fdc](https://github.com/solid-memo/website/commit/0d75fdc61db2d1861fc689dcf41d3d905caafcaa))
+
 ## [7.5.2](https://github.com/solid-memo/website/compare/v7.5.1...v7.5.2) (2026-11-15)
 
 ### Fixes
