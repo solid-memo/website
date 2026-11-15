@@ -219,9 +219,17 @@ saved of Home and of the workbench (Saved views, below), the decks and
 drafts pinned, and those opened last. A deck or a draft counts as
 opened once the instance is read to have it, never because a link
 names it. No URL longer than a term may be is kept, nor a saved view
-whose name or query is longer; one stored before is left out as the
-key is read, and the key is written back without it then. Storage that
-refuses keeps them for the page's life only.
+whose name or query is longer. The key as a whole stays far below what
+the browser lets the site keep, so other keys always have room. It holds
+the 20 instances noted last, the last first, with at most 100 pins and
+50 saved views of each table each; one more pin or saved view isn't
+made. In all it holds at most 262,144 characters: an instance that
+doesn't fit after those noted later is left out, and the next is tried.
+An instance left out loses its pins, its saved views and the decks and
+drafts opened last on this device. What is past these bounds in a value
+stored before is left out as the key is read, and the key is written
+back without it then. Storage that refuses keeps them for the page's
+life only.
 
 **Keys.** The Studio has one listener of keys, in its shell
 ([`shell/useShortcuts.ts`](../apps/studio/src/ui/shell/useShortcuts.ts)).

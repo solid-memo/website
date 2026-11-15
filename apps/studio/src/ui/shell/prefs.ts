@@ -11,7 +11,7 @@ import {
   type PaneSize,
   scaledPane,
 } from "./splitter";
-import { VIEW_TABLES, type SavedView, type ViewTable } from "./views";
+import { SAVED_VIEWS, VIEW_TABLES, type SavedView, type ViewTable } from "./views";
 
 /** How tightly the Studio's rows and controls are packed: compact (about 28px), or comfortable (44px, for touch). */
 export type Density = "compact" | "comfortable";
@@ -187,6 +187,25 @@ export const NO_INSTANCE_PREFS: InstancePrefs = {
 /** How many of the decks and drafts opened last the device keeps for an instance. */
 export const RECENT_ITEMS = 5;
 
+/** How many pins the device keeps for an instance, the first pinned first; one more is not pinned. */
+const PINNED_ITEMS = 100;
+
+/** How many instances the device keeps, those noted last first; one noted before them is let go. */
+const KEPT_INSTANCES = 20;
+
+/**
+ * The most characters the key holds, every instance's together: far
+ * below what the browser lets a site keep, so the key never fills that
+ * and leaves no room for the rest. Instances are let go, those noted
+ * longest ago first, until what is left fits.
+ */
+const STORED_CHARACTERS = 256 * 1024;
+
+/**
+ * Versioned, like the layout's key. The instances are stored in the
+ * order they were noted last, the last first; a value stored before
+ * that order was kept is read in its own order.
+ */
 export const INSTANCE_KEY = "solid-memo:studioInstances.v1";
 
 /**
@@ -207,10 +226,11 @@ function keptText(text: string): boolean {
 /**
  * Every instance's, as stored, by the instance's URL, each read as
  * instancePrefs reads it: none when the storage holds something else,
- * and none of an instance whose URL the device does not keep. When the
- * storage holds more than that, what is read is written back in its
- * place, once, so what the device does not keep leaves the storage
- * without waiting for the next change.
+ * and none of an instance whose URL the device does not keep, nor more
+ * instances than it keeps (kept). When the storage holds more than
+ * that, what is read is written back in its place, once, so what the
+ * device does not keep leaves the storage without waiting for the next
+ * change.
  */
 function storedInstances(storage: () => Storage): Map<string, InstancePrefs> {
   let raw: string;
@@ -222,7 +242,7 @@ function storedInstances(storage: () => Storage): Map<string, InstancePrefs> {
     return new Map();
   }
   if (typeof stored !== "object" || stored === null || Array.isArray(stored)) return new Map();
-  const instances = new Map(
+  const instances = kept(
     Object.entries(stored).flatMap(([instanceUrl, prefs]) =>
       keptText(instanceUrl) ? [[instanceUrl, prefsOf(prefs)] as const] : [],
     ),
@@ -230,6 +250,28 @@ function storedInstances(storage: () => Storage): Map<string, InstancePrefs> {
   const cleaned = JSON.stringify(Object.fromEntries(instances));
   if (cleaned !== raw) writeInstances(storage, cleaned);
   return instances;
+}
+
+/**
+ * The instances the device keeps of those given, the last noted first:
+ * at most KEPT_INSTANCES of them, each one that still fits in
+ * STORED_CHARACTERS with those kept before it, as JSON.stringify writes
+ * them; one that does not is left out, and the next is tried.
+ */
+function kept(instances: Iterable<readonly [string, InstancePrefs]>): Map<string, InstancePrefs> {
+  const keeping = new Map<string, InstancePrefs>();
+  let characters = "{}".length;
+  for (const [instanceUrl, prefs] of instances) {
+    if (keeping.size === KEPT_INSTANCES) break;
+    // `"url":{…}`, and the comma before it when it is not the first.
+    const entry =
+      JSON.stringify({ [instanceUrl]: prefs }).length - "{}".length + (keeping.size > 0 ? 1 : 0);
+    // One that does not fit is skipped, not the end: those after it may still fit.
+    if (characters + entry > STORED_CHARACTERS) continue;
+    keeping.set(instanceUrl, prefs);
+    characters += entry;
+  }
+  return keeping;
 }
 
 /** Writes every instance's, as text; storage that refuses keeps what it had. */
@@ -262,9 +304,9 @@ function prefsOf(stored: unknown): InstancePrefs {
     typeof views === "object" && views !== null ? (views as Record<string, unknown>) : {};
   return {
     views: Object.fromEntries(
-      VIEW_TABLES.map((table) => [table, savedViews(byTable[table])]),
+      VIEW_TABLES.map((table) => [table, savedViews(byTable[table]).slice(0, SAVED_VIEWS)]),
     ) as Record<ViewTable, SavedView[]>,
-    pinned: workItems(pinned),
+    pinned: workItems(pinned).slice(0, PINNED_ITEMS),
     recent: workItems(recent).slice(0, RECENT_ITEMS),
   };
 }
@@ -303,17 +345,21 @@ function listOf(value: unknown): Record<string, unknown>[] {
 }
 
 /**
- * Notes what the device keeps of an instance, the others' kept as they
- * are read (instancePrefs): an instance, a view or an item the device
- * does not keep is left out, of the others too.
+ * Notes what the device keeps of an instance, as the one noted last,
+ * the others' kept as they are read (instancePrefs): an instance, a
+ * view or an item the device does not keep is left out, of the others
+ * too, and the instances noted longest ago are let go when there are
+ * more than the device keeps, or more than fit (kept).
  */
 export function rememberInstancePrefs(
   instanceUrl: string,
   prefs: InstancePrefs,
   storage: () => Storage = () => globalThis.localStorage,
 ): void {
-  const instances = storedInstances(storage);
-  if (keptText(instanceUrl)) instances.set(instanceUrl, prefsOf(prefs));
+  const others = [...storedInstances(storage)].filter(([url]) => url !== instanceUrl);
+  const instances = kept(
+    keptText(instanceUrl) ? [[instanceUrl, prefsOf(prefs)] as const, ...others] : others,
+  );
   writeInstances(storage, JSON.stringify(Object.fromEntries(instances)));
 }
 
@@ -322,11 +368,15 @@ export function sameItem(a: WorkItem, b: WorkItem): boolean {
   return a.kind === b.kind && a.url === b.url;
 }
 
-/** The items pinned with one pinned at the end, or, pinned already, no longer; one the device does not keep is not pinned. */
+/**
+ * The items pinned with one pinned at the end, or, pinned already, no
+ * longer; one the device does not keep is not pinned, nor one more than
+ * it keeps.
+ */
 export function togglePin(pinned: readonly WorkItem[], item: WorkItem): WorkItem[] {
   if (pinned.some((each) => sameItem(each, item)))
     return pinned.filter((each) => !sameItem(each, item));
-  return keptText(item.url) ? [...pinned, item] : [...pinned];
+  return keptText(item.url) && pinned.length < PINNED_ITEMS ? [...pinned, item] : [...pinned];
 }
 
 /** The items opened last with one opened now: first, once, as many as the device keeps; one it does not keep is not listed. */
