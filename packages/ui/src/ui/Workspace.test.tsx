@@ -2206,6 +2206,79 @@ describe("Workspace", () => {
     });
   });
 
+  describe("a link to a release (#/try?url=)", () => {
+    const url = "https://bob.example/releases/rivers/v1.ttl";
+    const rivers = {
+      url,
+      ...firstRelease(url),
+      title: { en: "Rivers" },
+      cardCount: 2,
+      languages: [],
+      authors: [],
+      direction: "front-to-back" as const,
+      sources: [],
+    };
+    const follow = () =>
+      window.history.replaceState(null, "", routeToHash({ screen: "tryRelease", url }));
+    const importUrl = (instanceUrl: string) =>
+      routeToHash({ screen: "importUrl", instanceUrl, url });
+
+    it("shows it to add in the learner's one instance, in place of the link", async () => {
+      follow();
+      const length = window.history.length;
+      const getRegistrationOptions = vi.fn();
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA]),
+          readReleaseFromLink: vi.fn(async () => rivers),
+          getRegistrationOptions,
+        }),
+      );
+
+      expect(await screen.findByRole("heading", { name: "Rivers" })).toBeInTheDocument();
+      expect(
+        screen.getByText(/This is not in Solid Memo's library: it is published on bob.example/),
+      ).toBeInTheDocument();
+      expect(window.location.hash).toBe(importUrl(instanceA.url));
+      expect(window.history.length).toBe(length);
+      // The instance picker, which reads the type indexes, was never drawn on the way.
+      expect(getRegistrationOptions).not.toHaveBeenCalled();
+    });
+
+    it("asks which instance to add it in, naming its host, when the learner has several", async () => {
+      follow();
+      renderWorkspace(
+        makeUseCases({
+          listInstances: vi.fn(async () => [instanceA, instanceB]),
+          readReleaseFromLink: vi.fn(async () => rivers),
+        }),
+      );
+
+      expect(
+        await screen.findByText("Which instance should the deck published on bob.example open in?"),
+      ).toBeInTheDocument();
+      const nav = screen.getByRole("navigation", { name: "Breadcrumb" });
+      expect(within(nav).getByRole("link", { name: "Instances" })).toHaveAttribute(
+        "aria-current",
+        "page",
+      );
+      const length = window.history.length;
+      fireEvent.click(screen.getByRole("button", { name: "Deck set B" }));
+      expect(await screen.findByRole("heading", { name: "Rivers" })).toBeInTheDocument();
+      expect(window.location.hash).toBe(importUrl(instanceB.url));
+      expect(window.history.length).toBe(length);
+    });
+
+    it("goes to the storage picker with no instance", async () => {
+      follow();
+      renderWorkspace(makeUseCases({ listInstances: vi.fn(async () => []) }));
+
+      await waitFor(() =>
+        expect(window.location.hash).toBe(routeToHash({ screen: "storagePicker" })),
+      );
+    });
+  });
+
   it("shows the error when the library cannot be read for a deck's page", async () => {
     window.history.replaceState(
       null,

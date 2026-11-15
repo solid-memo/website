@@ -53,6 +53,11 @@ describe("breadcrumbsFor", () => {
     expect(breadcrumbsFor(tried, NO_NAMES)).toEqual([{ label: "Instances", route: tried }]);
   });
 
+  it("names a link to a release, where it asks which instance to open it in, Instances", () => {
+    const tried: RouteRef = { screen: "tryRelease", url: "https://alice.example/v1.ttl" };
+    expect(breadcrumbsFor(tried, NO_NAMES)).toEqual([{ label: "Instances", route: tried }]);
+  });
+
   it("puts instance-level screens under Decks", () => {
     const deckCreator: RouteRef = { screen: "deckCreator", instanceUrl };
     expect(breadcrumbsFor(deckCreator, NO_NAMES)).toEqual([

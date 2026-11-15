@@ -62,7 +62,9 @@ guest pod exists in this browser.
 A link to a library deck, `#/try?deck=…`, is for anyone and doesn't
 wait for "Try it without logging in": without a session, the app starts
 a guest's study as that button does and opens the deck there
-([routing.md](routing.md#a-link-to-a-library-deck)). A browser with a
+([routing.md](routing.md#a-link-to-a-library-deck)). So does a link to
+a release published outside the library, `#/try?url=…`, which opens it
+to add ([routing.md](routing.md#a-link-to-a-release)). A browser with a
 guest pod goes on with it (`restoreSession` returns the guest's
 session), and the deck opens in the guest's instance. A logged-in
 user's opens it in their own. A guest's study that can't start leaves the

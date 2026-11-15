@@ -1732,6 +1732,7 @@
     "validateInstance": "Valider cette instance",
     "loadingCourse": "Chargement du cours…",
     "tryChooseInstance": "Dans quelle instance ouvrir {deck} ?",
+    "tryReleaseChooseInstance": "Dans quelle instance ouvrir le paquet publié sur {host} ?",
     "triedUnknown": "Le paquet vers lequel mène ce lien n’est pas dans la bibliothèque. Voici ce qu’elle contient."
   },
   "errors": {

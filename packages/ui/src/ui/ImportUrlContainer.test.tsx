@@ -141,6 +141,19 @@ describe("ImportUrlContainer", () => {
     expect(onCourseStarted).not.toHaveBeenCalled();
   });
 
+  it("copies the release's link for anyone: this page's address, with its #/try link", async () => {
+    const writeText = vi.fn(async () => undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    renderContainer(makeUseCasesFake({ readReleaseFromLink: vi.fn(async () => rivers) }), RIVERS);
+    fireEvent.click(await screen.findByRole("button", { name: "Copy link" }));
+    await waitFor(() =>
+      expect(writeText).toHaveBeenCalledWith(
+        `${window.location.origin}${window.location.pathname}#/try?url=${encodeURIComponent(RIVERS)}`,
+      ),
+    );
+    Object.defineProperty(navigator, "clipboard", { value: undefined, configurable: true });
+  });
+
   it("names the link itself where a release is published when no URL parser takes it", async () => {
     const odd = { ...rivers, url: "http://[x" };
     renderContainer(makeUseCasesFake({ readReleaseFromLink: vi.fn(async () => odd) }), RIVERS);

@@ -283,6 +283,23 @@ describe("resolveRoute", () => {
     });
   });
 
+  describe("a link to a release (#/try?url=)", () => {
+    const url = "https://alice.example/releases/capitals/v1.ttl";
+    const route: RouteRef = { screen: "tryRelease", url };
+
+    it("goes on to adding it in the only instance", () => {
+      expect(resolve(route, {})).toEqual(go({ screen: "importUrl", instanceUrl, url }));
+    });
+
+    it("stays for the learner to choose among several instances", () => {
+      expect(resolve(route, { instances: [instanceA, instanceB] })).toBeNull();
+    });
+
+    it("goes to the storage picker with no instance", () => {
+      expect(resolve(route, { instances: [] })).toEqual(go({ screen: "storagePicker" }));
+    });
+  });
+
   describe("a course", () => {
     const courseRoute: RouteRef = { screen: "course", instanceUrl, deckUrl };
     const chapter = (chapterUrl: string): RouteRef => ({

@@ -10,6 +10,7 @@ import { isCopyOf, releaseUrlOf, type LibraryDeck } from "@solid-memo/domain/lib
 import { useI18n } from "./i18n";
 import { ImportUrlScreen } from "./ImportUrlScreen";
 import { queryKeys } from "./queryKeys";
+import { tryReleaseHref } from "./router";
 
 /**
  * Owns adding a release from a link (UseCases.readReleaseFromLink, then
@@ -17,7 +18,7 @@ import { queryKeys } from "./queryKeys";
  * each time the screen opens (and the same link shown again), as an
  * address may hold anything; then the release shown is added: a deck
  * imported, which returns to the deck list, or a course started, which
- * opens it.
+ * opens it. Its link to copy is the one shown, for anyone (#/try?url=).
  */
 export function ImportUrlContainer({
   useCases,
@@ -93,6 +94,11 @@ export function ImportUrlContainer({
       }}
       onAdd={() => addMutation.mutate(release!)}
       reportPlace={reportQuery.data}
+      shareUrl={
+        url === undefined
+          ? undefined
+          : `${window.location.origin}${window.location.pathname}${tryReleaseHref(url)}`
+      }
     />
   );
 }

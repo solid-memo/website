@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { releaseUrlOf } from "@solid-memo/domain/library";
 import type { StorageSource } from "@solid-memo/domain/storage";
 import { hashParams as params, parsePage, useHashRouter } from "./routerCore";
 
@@ -105,7 +106,12 @@ export type RouteRef =
   /** A library deck from a link anyone can open (docs/routing.md, A link
       to a library deck): it names no instance, and goes on to the deck's
       page in one of the learner's, as a guest if need be. */
-  | { screen: "try"; libraryDeckUrl: string };
+  | { screen: "try"; libraryDeckUrl: string }
+  /** A release from a link (docs/deck-library.md, From a link) that anyone
+      can open (docs/routing.md, A link to a release): it names no
+      instance, and goes on to adding it in one of the learner's, as a
+      guest if need be. */
+  | { screen: "tryRelease"; url: string };
 
 /**
  * The cards the Browser narrows its list down to: those with a side that
@@ -285,6 +291,8 @@ export function routeToHash(ref: RouteRef): string {
       return `#/validate${params({ instance: ref.instanceUrl })}`;
     case "try":
       return `#/try${params({ deck: ref.libraryDeckUrl })}`;
+    case "tryRelease":
+      return `#/try${params({ url: ref.url })}`;
   }
 }
 
@@ -335,6 +343,14 @@ export function libraryDeckHref(instanceUrl: string, libraryDeckUrl: string): st
  */
 export function tryHref(libraryDeckUrl: string): string {
   return routeToHash({ screen: "try", libraryDeckUrl });
+}
+
+/**
+ * Hash URL of a release from a link for anyone: what its page's "Copy
+ * link" copies. It names no instance, so it opens in any browser.
+ */
+export function tryReleaseHref(url: string): string {
+  return routeToHash({ screen: "tryRelease", url });
 }
 
 /** Hash URL of a library deck's preview: what its Preview button opens. */
@@ -399,6 +415,18 @@ function paletteRoute(instanceUrl: string, paletteUrl: string | null): RouteRef 
     : { screen: "palette", instanceUrl, paletteUrl };
 }
 
+/**
+ * A link for anyone (#/try): to a library deck by its `deck`, or else to
+ * a release from a link by its `url`, which must be one a learner can add
+ * (releaseUrlOf) and is kept as the URL standard writes it, as
+ * #/import-url keeps it; null for neither.
+ */
+function tryRoute(deckUrl: string | null, url: string | null): RouteRef | null {
+  if (deckUrl !== null) return { screen: "try", libraryDeckUrl: deckUrl };
+  const releaseUrl = url === null ? null : releaseUrlOf(url);
+  return releaseUrl === null ? null : { screen: "tryRelease", url: releaseUrl };
+}
+
 /** Parse a location hash; null for anything that isn't a valid route. */
 export function parseHash(hash: string): RouteRef | null {
   const [path, search] = hash.replace(/^#/, "").split("?");
@@ -419,7 +447,7 @@ export function parseHash(hash: string): RouteRef | null {
       return { screen: "instanceCreator", storageUrl, source };
     }
     case "/try":
-      return deckUrl === null ? null : { screen: "try", libraryDeckUrl: deckUrl };
+      return tryRoute(deckUrl, query.get("url"));
     default:
       return instanceUrl === null ? null : parseInstanceRoute(path, query, instanceUrl, deckUrl);
   }

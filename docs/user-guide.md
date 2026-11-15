@@ -275,7 +275,9 @@ adjectives.
 - **Add from a link** adds a deck or a course someone published in
   their own Pod. Paste the link, and Solid Memo shows what it is and
   where it's published before you add it
-  ([deck-library.md](deck-library.md#from-a-link)).
+  ([deck-library.md](deck-library.md#from-a-link)). Its **Copy link**
+  copies a link anyone can open, as a library deck's does: share a deck
+  you published from the Studio this way.
 
 ## Courses
 

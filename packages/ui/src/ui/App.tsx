@@ -288,12 +288,13 @@ export function AppShell({
 }
 
 /**
- * Whether a hash is a link to a library deck (#/try), which anyone may
- * follow: without a session, it starts a guest's study
+ * Whether a hash is a link to a library deck or a release (#/try), which
+ * anyone may follow: without a session, it starts a guest's study
  * (docs/guest-mode.md), or opens the one this browser has.
  */
 function opensAsGuest(hash: string): boolean {
-  return parseHash(hash)?.screen === "try";
+  const screen = parseHash(hash)?.screen;
+  return screen === "try" || screen === "tryRelease";
 }
 
 /** The login screen's error once the session expired: not a failure to report, but why the user is back. */
@@ -450,7 +451,7 @@ function AppContent({
     }
   }
 
-  // A link to a library deck followed on the landing page, the page not
+  // A link to a library deck or a release followed on the landing page, the page not
   // loaded again, starts a guest's study as one that loads the page does.
   useEffect(() => {
     if (checkingSession || session !== null || busy) return;

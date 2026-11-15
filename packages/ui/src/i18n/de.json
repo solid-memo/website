@@ -1657,6 +1657,7 @@
     "validateInstance": "Diese Instanz prüfen",
     "loadingCourse": "Kurs wird geladen…",
     "tryChooseInstance": "In welcher Instanz soll „{deck}“ geöffnet werden?",
+    "tryReleaseChooseInstance": "In welcher Instanz soll der auf {host} veröffentlichte Stapel geöffnet werden?",
     "triedUnknown": "Der Stapel, zu dem der Link führt, ist nicht in der Bibliothek. Das hier hat die Bibliothek."
   },
   "errors": {

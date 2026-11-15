@@ -108,6 +108,7 @@ route with an unknown deck, card, chapter or value goes instead.
 | `#/deck-statistics?instance=…&deck=…[&range=…][&view=…]` | one deck's [statistics](statistics.md#a-decks-own-figures): the same tabs over its answers alone, with its own activity calendar and no figures by deck. Trail: Decks › *deck* › Statistics. Linked as "More statistics" from the deck's page |
 | `#/validate?instance=…` | developer tool: the instance's documents checked against the shapes ([validation.md](validation.md)); shows how to turn developer mode on when it's off |
 | `#/try?deck=…` | a [link to a library deck](#a-link-to-a-library-deck) that names no instance, for anyone to open. `deck` as for `#/library-deck` |
+| `#/try?url=…` | a [link to a release](#a-link-to-a-release) from a link that names no instance, for anyone to open. `url` as for `#/import-url`, which must be an http(s) address of a document with no fragment; with `deck` too, the link is to the library deck |
 
 ## Resolution and fallbacks
 
@@ -157,7 +158,8 @@ flowchart LR
      only instance, the instance picker with several, the storage picker
      with none.
   2. **A link to a library deck** (`#/try`), once the library is read:
-     [as below](#a-link-to-a-library-deck).
+     [as below](#a-link-to-a-library-deck). **A link to a release**
+     (`#/try?url=`): [as below](#a-link-to-a-release).
   3. **An unknown instance**: the instance picker, or the storage picker
      with none.
   4. **An unknown deck**: that instance's deck list.
@@ -186,9 +188,10 @@ flowchart LR
 
 ## A link to a library deck
 
-Every other route names an instance, which only its owner can open (a
-guest's, under `guest.solid-memo.invalid`, exists in their browser
-alone). A library deck's page copies a link that names
+Every other route but a [link to a release](#a-link-to-a-release)
+names an instance, which only its owner can open (a guest's, under
+`guest.solid-memo.invalid`, exists in their browser alone). A library
+deck's page copies a link that names
 none, `#/try?deck=…` (`tryHref`), for anyone to open:
 
 ```mermaid
@@ -222,6 +225,41 @@ flowchart TD
   too, with its error, saying nothing of the deck.
 - **A course** opens at its library page like any deck, to start, or
   to continue when the instance has it.
+
+## A link to a release
+
+A release published outside the library, such as one the
+[Studio](studio.md#publishing-a-release) publishes in its creator's pod, has a
+link for anyone too: `#/try?url=…` (`tryReleaseHref`), which **Copy
+link** copies on its page from a link
+([deck-library.md](deck-library.md#from-a-link)). It goes as a link to a
+library deck goes, with no library to read:
+
+```mermaid
+flowchart TD
+    accTitle: Following a link to a release
+    accDescr: Without a session, the link starts a guest's study first; then it goes on to adding the release in the learner's instance, or the one they choose, or to the storage picker when there is none.
+    link["#/try?url=…"] --> session{"a session?"}
+    session -->|no| guest["a guest's study starts, or the one in this browser goes on"]
+    session -->|yes| count
+    guest --> count{"instances"}
+    count -->|none| storages["#/storages: make one"]
+    count -->|one| add["#/import-url?url=… in that instance"]
+    count -->|several| picker["the instance picker: which to open it in"] --> add
+```
+
+- **Without a session**, `AppShell` starts a guest's study, as for a
+  link to a library deck.
+- **Then** `Workspace` reads the instances. With one, it opens
+  `#/import-url` there with the link filled in; with several, the
+  instance picker asks which to open it in, naming the host it's
+  published on. Each *replaces* the link, so Back doesn't return to it.
+  With none, it goes to the storage picker to make one.
+- **The release** is read and shown as any release from a link is: it
+  says it isn't the library's and where it's published, its pictures
+  stay hidden, and it's refused when it links to a guest's pod
+  ([guest-mode.md](guest-mode.md#what-comes-from-outside)). Nothing is
+  added until the learner presses import or start.
 
 ## Breadcrumbs
 

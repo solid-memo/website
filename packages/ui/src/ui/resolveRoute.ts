@@ -126,6 +126,14 @@ function tryRedirect(instances: readonly Instance[], libraryDeck: Lookup<Library
   return instances.length === 0 ? go({ screen: "storagePicker" }) : null;
 }
 
+/** A link to a release (#/try?url=): on to adding it in an only instance, or to make one. */
+function tryReleaseRedirect(instances: readonly Instance[], url: string) {
+  if (instances.length === 1) {
+    return go({ screen: "importUrl", instanceUrl: instances[0]!.url, url });
+  }
+  return instances.length === 0 ? go({ screen: "storagePicker" }) : null;
+}
+
 /**
  * For a course's routes: a deck that is no copy of a release, to its page;
  * a chapter the course does not have or still locked, to the course; a
@@ -183,7 +191,7 @@ function lookupRedirect(route: RouteRef, loaded: Loaded): Redirect | null {
  * Where a route goes instead of opening, given what the workspace has read
  * for it so far; null while it opens, or what decides it is still being
  * read. The rules go in the order a route is resolved: no route, then a
- * link to a library deck (#/try), the instance, the deck, the statistics'
+ * link to a library deck or a release (#/try), the instance, the deck, the statistics'
  * range and tab, the card, the library deck, the library card and the
  * course; the storage picker with a single storage goes on to the
  * instance creator, and the instance creator with a storage the picker
@@ -194,6 +202,7 @@ export function resolveRoute(route: RouteRef | null, loaded: Loaded): Redirect |
   const { instances } = loaded;
   if (instances === undefined) return null;
   if (route?.screen === "try") return tryRedirect(instances, loaded.libraryDeck);
+  if (route?.screen === "tryRelease") return tryReleaseRedirect(instances, route.url);
   const redirect = instanceRedirect(route, instances) ?? lookupRedirect(route!, loaded);
   if (redirect !== null) return redirect;
   if (route!.screen === "storagePicker" && loaded.storages?.length === 1) {
