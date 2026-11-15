@@ -63,10 +63,12 @@ export interface TypeIndexLink {
 
 export interface TypeIndexes {
   /**
-   * Every type index the profile links in its own places, each kind's
-   * once by address, the private ones first, no more than
-   * MAX_PROFILE_DOCUMENTS of each kind. One outside them may be someone
-   * else's, so nothing in it is the user's, and it is left out.
+   * Every type index the profile links in one of the user's own
+   * storages (ownStorages; the profile's own places when they cannot be
+   * found, locateTypeIndexes), each kind's once by address, the private
+   * ones first, no more than MAX_PROFILE_DOCUMENTS of each kind. One
+   * anywhere else may be someone else's, even on the WebID's own origin,
+   * so nothing in it is the user's, and it is left out.
    */
   links: TypeIndexLink[];
   /**
@@ -77,10 +79,15 @@ export interface TypeIndexes {
    */
   fetch: Fetch;
   /**
-   * Whether `url` is in the profile's own places: an index entered by
-   * its address outside them is refused (ensureTypeIndex).
+   * Whether an index at `url` may be written to: whether it is in the
+   * profile's own places and in one of the user's own storages
+   * (ownStorages), or, when the server shows none, in the WebID's own
+   * pod (podOfWebId). When the storages could not be looked up now, none
+   * is. An index anywhere else is never chosen, registered in, retitled
+   * or cleaned (ensureTypeIndex, solidInstanceRepository.ts), even one
+   * the profile links.
    */
-  inPlaces: (url: string) => boolean;
+  inOwnStorage: (url: string) => boolean;
 }
 
 /**
@@ -95,21 +102,32 @@ export interface TypeIndexes {
  * may link several of a kind, the one an app wrote first and the one
  * another wrote later, so each is kept, and the user chooses
  * (rankedFor). Only the documents in the profile's own places are read,
- * as the user, and only the links into them are kept: a document
- * anywhere else may be someone else's. `publicFetch` reads anything
- * outside those places.
+ * as the user, the preferences file only in one of the user's own
+ * storages (ownStorages), and only the links into those storages are
+ * kept: the places hold the whole origin of the WebID, which on a server
+ * that keeps many users' pods on one origin holds theirs too, and a
+ * document anywhere else may be someone else's. Such a server shows
+ * each user's storage, so when the WebID leads to none, or the lookup
+ * fails now, the places stand in for the storages, to read: an index is
+ * written to only where inOwnStorage says. With `forWriting`, a lookup that
+ * fails now fails the indexes too. `publicFetch` reads anything outside
+ * the places.
  */
 export async function locateTypeIndexes(
   webId: string,
   fetch: Fetch,
   publicFetch: Fetch,
+  { forWriting = false }: { forWriting?: boolean } = {},
 ): Promise<TypeIndexes> {
   const profileFetch = profileFetchOf(fetch);
   const profileDataset = await readDataset(webId, profileFetch);
   const documentUrl = getSourceUrl(profileDataset);
   const profile = getThing(profileDataset, webId);
   if (profile === null) {
-    return { links: [], ...placesOf(profilePlacesOf(webId, documentUrl, []), fetch, publicFetch) };
+    return {
+      links: [],
+      ...placesOf(profilePlacesOf(webId, documentUrl, []), [], fetch, publicFetch),
+    };
   }
 
   const subjects = [profile];
@@ -119,10 +137,19 @@ export async function locateTypeIndexes(
   }
   // An extended profile may name the storage an index or the preferences file is in.
   const places = profilePlacesOf(webId, documentUrl, subjects);
+  // null: the storages could not be looked up now.
+  let storages: string[] | null = null;
+  try {
+    storages = await ownStorages(webId, fetch);
+  } catch (error) {
+    if (forWriting) throw error;
+  }
+  const bound = storages !== null && storages.length > 0 ? storages : places;
+  const isOwn = (url: string) => isInPlaces(url, places) && isInPlaces(url, bound);
 
   const preferences: Subject[] = [];
   const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
-  if (preferencesFileUrl !== null && isInPlaces(preferencesFileUrl, places)) {
+  if (preferencesFileUrl !== null && isOwn(preferencesFileUrl)) {
     const subject = await readSubjectSafely(preferencesFileUrl, webId, profileFetch);
     if (subject !== null) preferences.push(subject);
   }
@@ -138,7 +165,7 @@ export async function locateTypeIndexes(
     const urls = [
       ...subjects.flatMap((subject) => getUrlAll(subject, predicate)),
       ...fromPreferences,
-    ].filter((url) => isInPlaces(url, places));
+    ].filter(isOwn);
     return [...new Set(urls)]
       .slice(0, MAX_PROFILE_DOCUMENTS)
       .map((url) => ({ url, kind, fromPreferences: fromPreferences.has(url) }));
@@ -149,19 +176,45 @@ export async function locateTypeIndexes(
       // The preferences file is private: a public link there is no one else's to find.
       ...linksOf("public", SOLID.publicTypeIndex, []),
     ],
-    ...placesOf(places, fetch, publicFetch),
+    ...placesOf(places, writableOf(webId, storages), fetch, publicFetch),
   };
 }
 
-/** The indexes' fetch and place check (TypeIndexes) for the profile's own `places`. */
+/**
+ * Where a type index may be written to (TypeIndexes inOwnStorage): the
+ * user's own `storages`; when the server shows none, the WebID's own pod
+ * (podOfWebId), as the origin may hold other users' pods too; nowhere
+ * when the storages could not be looked up now (null).
+ */
+function writableOf(webId: string, storages: readonly string[] | null): readonly string[] {
+  if (storages === null) return [];
+  return storages.length > 0 ? storages : [podOfWebId(webId)];
+}
+
+/**
+ * The folder the WebID's own pod is taken to be in when the server shows
+ * no storage: the WebID document's folder, or the one above it when that
+ * is `profile/`, as in `<pod>profile/card#me`.
+ */
+function podOfWebId(webId: string): string {
+  const { origin, pathname } = new URL(webId);
+  const folder = pathname.slice(0, pathname.lastIndexOf("/") + 1);
+  return `${origin}${folder.endsWith("/profile/") ? folder.slice(0, -"profile/".length) : folder}`;
+}
+
+/**
+ * The indexes' fetch and write check (TypeIndexes) for the profile's
+ * own `places` and where an index may be written to (`writable`).
+ */
 function placesOf(
   places: readonly string[],
+  writable: readonly string[],
   fetch: Fetch,
   publicFetch: Fetch,
-): Pick<TypeIndexes, "fetch" | "inPlaces"> {
+): Pick<TypeIndexes, "fetch" | "inOwnStorage"> {
   return {
     fetch: createPlacesFetch(places, fetch, publicFetch),
-    inPlaces: (url) => isInPlaces(url, places),
+    inOwnStorage: (url) => isInPlaces(url, places) && isInPlaces(url, writable),
   };
 }
 
@@ -250,7 +303,8 @@ export async function createTypeIndex(
   nearUrl: string,
   fetch: Fetch,
 ): Promise<{ url: string; created: boolean }> {
-  const storageRoot = await ownStorageFor(nearUrl, webId, fetch);
+  const storages = await ownStorages(webId, fetch);
+  const storageRoot = ownStorageFor(nearUrl, storages, webId);
   const indexUrl = `${storageRoot}settings/${kind}TypeIndex.ttl`;
 
   const existing = await getSolidDatasetOrNull(indexUrl, fetch);
@@ -267,7 +321,7 @@ export async function createTypeIndex(
     );
     await saveDataset(indexUrl, indexDocument, fetch);
   }
-  await linkTypeIndexFromProfile(kind, webId, indexUrl, fetch);
+  await linkTypeIndexFromProfile(kind, webId, indexUrl, fetch, (url) => isInPlaces(url, storages));
   return { url: indexUrl, created: existing === null };
 }
 
@@ -275,14 +329,16 @@ export async function createTypeIndex(
  * Add the type index link to the WebID subject. The WebID document is
  * tried first; when it is not writable (e.g. Inrupt PodSpaces, whose
  * WebID documents live on a read-only identity broker) the extended
- * profile documents are tried in turn. Throws if no candidate accepts
- * the write.
+ * profile documents in one of the user's own storages (`isOwn`) are tried
+ * in turn: one elsewhere on the WebID's origin may be someone else's.
+ * Throws if no candidate accepts the write.
  */
 async function linkTypeIndexFromProfile(
   kind: TypeIndexKind,
   webId: string,
   indexUrl: string,
   fetch: Fetch,
+  isOwn: (url: string) => boolean,
 ): Promise<void> {
   const profileFetch = profileFetchOf(fetch);
   const profileDataset = await readDataset(webId, profileFetch);
@@ -304,7 +360,7 @@ async function linkTypeIndexFromProfile(
     failures.push(describeFailure(getSourceUrl(profileDataset), error));
   }
 
-  for (const documentUrl of extendedProfileUrls(webId, profile, profileDataset)) {
+  for (const documentUrl of extendedProfileUrls(webId, profile, profileDataset).filter(isOwn)) {
     try {
       const dataset = await readDataset(documentUrl, profileFetch);
       const subject = getThing(dataset, webId) ?? createThing({ url: webId });
@@ -426,17 +482,18 @@ async function readableByAnyone(url: string, publicFetch: Fetch): Promise<boolea
  * (RegistrationTarget), and what it is read and written through
  * (TypeIndexes):
  *
- * - of a kind, the user's best of that kind (rankedFor) they can read
- *   now; when there is none, a new one, made in their own storage and
+ * - of a kind, the user's best of that kind (rankedFor) that they can
+ *   read now and that may be written to (TypeIndexes inOwnStorage);
+ *   when there is none, a new one, made in their own storage and
  *   linked from their profile (createTypeIndex), and a public one it
  *   wrote made readable by anyone with `share`, so that other apps find
  *   what it registers; a document already there is adopted with its
  *   access control left as it is;
- * - by its address, one the profile links, or else one in one of the
- *   user's own storages that the user can read and that says it is a
- *   solid:TypeIndex, then linked from the profile as the kind its type
- *   says (adoptTypeIndex), as Solid Memo finds its instances only in the
- *   indexes the profile links.
+ * - by its address, one in one of the user's own storages: one the
+ *   profile links, or else one that the user can read and that says it
+ *   is a solid:TypeIndex, then linked from the profile as the kind its
+ *   type says (adoptTypeIndex), as Solid Memo finds its instances only
+ *   in the indexes the profile links.
  */
 export async function ensureTypeIndex(
   target: RegistrationTarget,
@@ -446,14 +503,17 @@ export async function ensureTypeIndex(
   publicFetch: Fetch,
   share: (indexUrl: string) => Promise<boolean>,
 ): Promise<{ url: string; fetch: Fetch }> {
-  const indexes = await locateTypeIndexes(webId, fetch, publicFetch);
+  // An index chosen here is written to: the user's storages that cannot be found now fail the choice.
+  const indexes = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting: true });
   if (typeof target !== "string") {
     return {
       url: await adoptTypeIndex(target.indexUrl, webId, indexes, fetch),
       fetch: indexes.fetch,
     };
   }
-  const best = rankedFor(await readTypeIndexChoices(indexes, publicFetch), target)[0];
+  const writable = indexes.links.filter((link) => indexes.inOwnStorage(link.url));
+  const choices = await readTypeIndexChoices({ ...indexes, links: writable }, publicFetch);
+  const best = rankedFor(choices, target)[0];
   if (best !== undefined) return { url: best.url, fetch: indexes.fetch };
   const { url, created } = await createTypeIndex(target, webId, nearUrl, fetch);
   // A public index no one else can read is one no other app finds: whether the grant took is seen in the next choice.
@@ -463,16 +523,16 @@ export async function ensureTypeIndex(
 }
 
 /**
- * A type index the user entered by its address: one the profile links
- * as it is; else one in the profile's own places and in one of the
- * user's own storages (ownStorages, typeIndexOutsidePod), that the user
- * can read and that says it is a solid:TypeIndex (notATypeIndex), then
- * linked from the profile, as public when it says it is a
- * solid:ListedDocument and as private otherwise. The profile's places
- * hold the whole origin of the WebID, which on a server that keeps many
- * users' pods on one origin holds theirs too: they say where the
- * profile may be read, never where an index the profile links may be.
- * A read that may work when tried again fails as it did.
+ * A type index the user entered by its address, in the profile's own
+ * places and in one of the user's own storages (TypeIndexes
+ * inOwnStorage, typeIndexOutsidePod), linked from the profile or not:
+ * one the profile links as it is; else one that the user can read and
+ * that says it is a solid:TypeIndex (notATypeIndex), then linked from
+ * the profile, as public when it says it is a solid:ListedDocument and
+ * as private otherwise. The profile's places hold the whole origin of
+ * the WebID, which on a server that keeps many users' pods on one origin
+ * holds theirs too: they say where the profile may be read, never where
+ * an index may be. A read that may work when tried again fails as it did.
  */
 async function adoptTypeIndex(
   indexUrl: string,
@@ -480,10 +540,10 @@ async function adoptTypeIndex(
   indexes: TypeIndexes,
   fetch: Fetch,
 ): Promise<string> {
-  if (indexes.links.some((link) => link.url === indexUrl)) return indexUrl;
-  if (!indexes.inPlaces(indexUrl) || !isInPlaces(indexUrl, await ownStorages(webId, fetch))) {
+  if (!indexes.inOwnStorage(indexUrl)) {
     throw new AppError("typeIndexOutsidePod", { url: indexUrl });
   }
+  if (indexes.links.some((link) => link.url === indexUrl)) return indexUrl;
   let dataset: SourcedDataset;
   try {
     dataset = await readDataset(indexUrl, indexes.fetch);
@@ -497,7 +557,7 @@ async function adoptTypeIndex(
   const types = typesOf(dataset, indexUrl);
   if (!types.includes(SOLID.TypeIndex)) throw new AppError("notATypeIndex", { url: indexUrl });
   const kind = types.includes(SOLID.ListedDocument) ? "public" : "private";
-  await linkTypeIndexFromProfile(kind, webId, indexUrl, fetch);
+  await linkTypeIndexFromProfile(kind, webId, indexUrl, fetch, indexes.inOwnStorage);
   return indexUrl;
 }
 
@@ -811,12 +871,11 @@ export async function renameInstanceRegistrations(
 }
 
 /**
- * The user's own storage to keep a type index in, of those their WebID
- * leads to (ownStorages): the one `url` is in, or else the first.
- * Throws when the WebID leads to none.
+ * The user's own storage to keep a type index in, of the `storages`
+ * their WebID leads to (ownStorages): the one `url` is in, or else the
+ * first. Throws when the WebID leads to none.
  */
-async function ownStorageFor(url: string, webId: string, fetch: Fetch): Promise<string> {
-  const storages = await ownStorages(webId, fetch);
+function ownStorageFor(url: string, storages: readonly string[], webId: string): string {
   const storage = storages.find((root) => url.startsWith(root)) ?? storages[0];
   if (storage === undefined) throw new AppError("typeIndexNoStorage", { webId });
   return storage;

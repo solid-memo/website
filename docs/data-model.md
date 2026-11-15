@@ -146,13 +146,28 @@ flowchart LR
   (`locateTypeIndexes`). Only the documents on the WebID's origin, on
   its document's origin or in a storage the profile names are read; a
   link to one anywhere else is left alone
-  ([boundaries.md](boundaries.md#the-credential-gate)). Each is read
+  ([boundaries.md](boundaries.md#the-credential-gate)). The
+  preferences file is read only in one of the user's own storages,
+  those their profile names (`pim:storage`) or else the one their WebID
+  is in, or in those places when no storage is found. Each is read
   under `PROFILE_LIMITS`, no more than `MAX_PROFILE_DOCUMENTS` extended
   profile documents: a WebID document past them fails the lookup, and
-  any other is left out. An index linked outside those places may be
-  someone else's: the app leaves the link out, so nothing in it is read
-  or written, no instance it registers is listed, and the user may
-  create their own.
+  any other is left out. An index outside the user's own storages may
+  be someone else's, even on the WebID's origin, since one server may
+  keep many users' pods on it. So the app leaves a link to it out:
+  nothing in it is read or written, no instance it registers is listed,
+  and the user may create their own. Such a server shows each user's
+  storage. When the storage lookup fails or finds none, the app still
+  reads every index linked in the profile's own places, and lists the
+  instances they register, but writes less:
+  - When the WebID leads to no storage, the app writes only to an index
+    in the WebID's own pod: the folder of the WebID document, or the
+    folder above it when that's `profile/`. Only such an index is
+    chosen by kind, accepted by its address, registered in, retitled
+    on a rename or cleaned of an instance's registrations.
+  - When the lookup fails, the app writes to no index. Choosing one to
+    register in, retitling an instance's registrations and removing
+    them fail as the lookup did, and work when it works again.
 - **Missing indexes** are normal on Community Solid Server pods. The app
   warns the user, who chooses to create the private index (a document
   under `<storage>settings/` plus a profile link) or to register
@@ -170,7 +185,8 @@ flowchart LR
   Without such a storage the index isn't created (`typeIndexNoStorage`,
   `ownStorageFor` in `typeIndex.ts`).
   The link goes in the WebID document when it's writable, else in the
-  first extended profile that accepts it (on Inrupt PodSpaces the WebID
+  first extended profile in one of the user's own storages that accepts
+  it (on Inrupt PodSpaces the WebID
   document on `id.inrupt.com` is read-only, and `<storage>profile` is
   writable). A document already at the target URL is adopted when it's
   typed `solid:TypeIndex` (`notATypeIndex` otherwise), not overwritten,
@@ -179,12 +195,13 @@ flowchart LR
   loudly, with no local fallback, and the new container is cleaned up.
   An instance is registered in the index the user chose, and in no
   other.
-- **An index entered by its address** is used as it is when the profile
-  links it. Any other must be in one of the user's own storages, those
-  their profile names (`pim:storage`) or else the one their WebID is in
-  (`typeIndexOutsidePod`). The WebID's origin isn't enough: one server
-  may keep many users' pods on it. The index must also be readable by
-  the user and typed
+- **An index entered by its address** must be in one of the user's own
+  storages, those their profile names (`pim:storage`) or else the one
+  their WebID is in (`typeIndexOutsidePod`), linked from the profile or
+  not. The WebID's origin isn't enough: one server may keep many users'
+  pods on it. Without a storage, the WebID's own pod stands in, as
+  above. One the profile links is used as it is. Any other must
+  also be readable by the user and typed
   `solid:TypeIndex` (`notATypeIndex`). The app finds its instances only
   in the indexes the profile links, so it then links this one from the
   profile: as public when it's typed `solid:ListedDocument`, as private

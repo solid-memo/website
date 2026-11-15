@@ -50,11 +50,16 @@ const PRIVATE_INDEX = "https://alice.example/settings/privateTypeIndex.ttl";
 const PUBLIC_INDEX = "https://alice.example/settings/publicTypeIndex.ttl";
 const PREFERENCES_FILE = "https://alice.example/settings/prefs.ttl";
 const EXTENDED_PROFILE = "https://alice.example/profile";
+const STORAGE_ROOT = "https://alice.example/";
 
 const noFetch = vi.fn() as unknown as typeof globalThis.fetch;
 
+/** Alice's WebID document, naming her storage, with `build` applied. */
 function profileDataset(build: (thing: SubjectBuilder) => SubjectBuilder = (t) => t): Dataset {
-  return setThing(datasetFrom(PROFILE_DOC), build(buildThing(createThing({ url: WEBID }))).build());
+  return setThing(
+    datasetFrom(PROFILE_DOC),
+    build(buildThing(createThing({ url: WEBID })).addIri(PIM.storage, STORAGE_ROOT)).build(),
+  );
 }
 
 /** A document at `documentUrl` holding the WebID subject with `build` applied. */
@@ -81,6 +86,11 @@ beforeEach(() => {
   vi.mocked(writeDocument).mockReset();
 });
 
+/** Every document read, each once: the storage lookup reads the WebID document again. */
+function documentsRead(): Set<string> {
+  return new Set(vi.mocked(readDocument).mock.calls.map(([url]) => url));
+}
+
 /** The links locateTypeIndexes finds, as it gives them. */
 async function linksFound(
   fetch: typeof globalThis.fetch = noFetch,
@@ -104,7 +114,7 @@ describe("locateTypeIndexes", () => {
     });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
-      inPlaces: expect.any(Function),
+      inOwnStorage: expect.any(Function),
       links: [privateLink(PRIVATE_INDEX), publicLink(PUBLIC_INDEX)],
     });
   });
@@ -113,7 +123,7 @@ describe("locateTypeIndexes", () => {
     mockDatasets({ [WEBID]: datasetFrom(PROFILE_DOC) });
     await expect(locateTypeIndexes(WEBID, noFetch, noFetch)).resolves.toEqual({
       fetch: expect.any(Function),
-      inPlaces: expect.any(Function),
+      inOwnStorage: expect.any(Function),
       links: [],
     });
   });
@@ -306,7 +316,7 @@ describe("locateTypeIndexes", () => {
       [WEBID]: profileDataset((t) => t.addIri(FOAF.isPrimaryTopicOf, PROFILE_DOC)),
     });
     await expect(linksFound()).resolves.toEqual([]);
-    expect(readDocument).toHaveBeenCalledTimes(1);
+    expect(documentsRead()).toEqual(new Set([WEBID]));
   });
 
   it("treats an unreadable extended profile as linking nothing", async () => {
@@ -322,6 +332,20 @@ describe("locateTypeIndexes outside the profile's own places", () => {
   const STORAGE = "https://storage.example/alice/";
   const STORED_PROFILE = `${STORAGE}profile`;
 
+  /**
+   * A server that answers the extended profile, naming STORAGE, as the
+   * storage lookup reads it, and any other request with nothing.
+   */
+  function extendedProfileServer() {
+    return vi.fn<typeof globalThis.fetch>(async (input) =>
+      String(input) === EXTENDED_PROFILE
+        ? new Response(`<${WEBID}> <${PIM.storage}> <${STORAGE}> .`, {
+            headers: { "Content-Type": "text/turtle" },
+          })
+        : new Response(""),
+    );
+  }
+
   it("reads no document the profile links on another server, as the user or at all", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) =>
@@ -333,7 +357,7 @@ describe("locateTypeIndexes outside the profile's own places", () => {
       [ELSEWHERE]: subjectDocument(ELSEWHERE, (t) => t.addIri(SOLID.publicTypeIndex, PUBLIC_INDEX)),
     });
     await expect(linksFound()).resolves.toEqual([]);
-    expect(vi.mocked(readDocument).mock.calls.map(([url]) => url)).toEqual([WEBID]);
+    expect(documentsRead()).toEqual(new Set([WEBID]));
   });
 
   it("reads one in a storage the WebID document names, on another server", async () => {
@@ -365,7 +389,7 @@ describe("locateTypeIndexes outside the profile's own places", () => {
         t.addIri(SOLID.privateTypeIndex, `${STORAGE}settings/privateTypeIndex.ttl`),
       ),
     });
-    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(new Response(""));
+    const fetch = extendedProfileServer();
     const publicFetch = vi.fn<typeof globalThis.fetch>();
     const { fetch: indexFetch, links } = await locateTypeIndexes(WEBID, fetch, publicFetch);
 
@@ -383,9 +407,10 @@ describe("locateTypeIndexes outside the profile's own places", () => {
       [WEBID]: profileDataset((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)),
       [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE, (t) => t.addIri(PIM.storage, STORAGE)),
     });
-    const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(new Response(""));
+    const fetch = extendedProfileServer();
     const publicFetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(new Response(""));
     const { fetch: indexFetch } = await locateTypeIndexes(WEBID, fetch, publicFetch);
+    fetch.mockClear();
 
     // The WebID's origin, and a storage the extended profile names.
     await indexFetch(PUBLIC_INDEX);
@@ -404,15 +429,16 @@ describe("locateTypeIndexes outside the profile's own places", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("says which addresses are in the profile's own places", async () => {
+  it("says which addresses are in the user's own storages", async () => {
     mockDatasets({
       [WEBID]: profileDataset((t) => t.addIri(PIM.storage, STORAGE)),
     });
-    const { inPlaces } = await locateTypeIndexes(WEBID, noFetch, noFetch);
+    const { inOwnStorage } = await locateTypeIndexes(WEBID, noFetch, noFetch);
 
-    expect(inPlaces(PUBLIC_INDEX)).toBe(true);
-    expect(inPlaces(`${STORAGE}settings/privateTypeIndex.ttl`)).toBe(true);
-    expect(inPlaces(`${ELSEWHERE}/publicTypeIndex.ttl`)).toBe(false);
+    expect(inOwnStorage(PUBLIC_INDEX)).toBe(true);
+    expect(inOwnStorage(`${STORAGE}settings/privateTypeIndex.ttl`)).toBe(true);
+    expect(inOwnStorage("https://storage.example/bob/settings/privateTypeIndex.ttl")).toBe(false);
+    expect(inOwnStorage(`${ELSEWHERE}/publicTypeIndex.ttl`)).toBe(false);
   });
 
   it("of several links, keeps those in the profile's own places alone", async () => {
@@ -441,6 +467,11 @@ describe("locateTypeIndexes outside the profile's own places", () => {
 });
 
 describe("createTypeIndex", () => {
+  /** Alice's WebID document, naming no storage: hers is found by walking up from it. */
+  function bareProfile(build: (thing: SubjectBuilder) => SubjectBuilder = (t) => t): Dataset {
+    return subjectDocument(PROFILE_DOC, build);
+  }
+
   function storageAwareFetch(storageRoot: string): typeof globalThis.fetch {
     return vi.fn(async (input: RequestInfo | URL) => {
       const headers = new Headers();
@@ -452,7 +483,7 @@ describe("createTypeIndex", () => {
   }
 
   it("creates a private index under the storage and links it from the profile", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({ [WEBID]: bareProfile() });
     const fetch = storageAwareFetch("https://alice.example/");
 
     const { url: indexUrl, created } = await createTypeIndex(
@@ -476,7 +507,7 @@ describe("createTypeIndex", () => {
   });
 
   it("creates a public index typed as a ListedDocument", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({ [WEBID]: bareProfile() });
     const fetch = storageAwareFetch("https://alice.example/");
 
     const { url: indexUrl, created } = await createTypeIndex(
@@ -497,7 +528,7 @@ describe("createTypeIndex", () => {
   });
 
   it("refuses, writing nothing, when the WebID leads to no storage", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({ [WEBID]: bareProfile() });
     const fetch = vi.fn(async () => new Response(null, { status: 200 })) as typeof globalThis.fetch;
 
     await expect(
@@ -507,7 +538,7 @@ describe("createTypeIndex", () => {
   });
 
   it("keeps the index in the user's storage, not on the server of an instance elsewhere", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({ [WEBID]: bareProfile() });
     // Both servers say where a storage is; only the WebID's is the user's.
     const fetch = vi.fn(async (input: RequestInfo | URL) => {
       const headers = new Headers();
@@ -530,7 +561,7 @@ describe("createTypeIndex", () => {
   it("uses the storage the profile names that the instance is in, else the first", async () => {
     const work = "https://work.example/alice/";
     mockDatasets({
-      [WEBID]: profileDataset((t) =>
+      [WEBID]: bareProfile((t) =>
         t.addIri(PIM.storage, "https://alice.example/").addIri(PIM.storage, work),
       ),
     });
@@ -544,7 +575,7 @@ describe("createTypeIndex", () => {
   });
 
   it("keeps walking when a HEAD request fails", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({ [WEBID]: bareProfile() });
     const fetch = vi
       .fn<typeof globalThis.fetch>()
       .mockRejectedValueOnce(new Error("network"))
@@ -568,7 +599,7 @@ describe("createTypeIndex", () => {
         .addIri(RDF.type, SOLID.TypeRegistration)
         .build(),
     );
-    mockDatasets({ [WEBID]: profileDataset(), [PRIVATE_INDEX]: leftover });
+    mockDatasets({ [WEBID]: bareProfile(), [PRIVATE_INDEX]: leftover });
     const fetch = storageAwareFetch("https://alice.example/");
 
     await expect(
@@ -580,7 +611,7 @@ describe("createTypeIndex", () => {
   });
 
   it("refuses, writing nothing, a document there that does not say it is a type index", async () => {
-    mockDatasets({ [WEBID]: profileDataset(), [PUBLIC_INDEX]: indexDocument(PUBLIC_INDEX, []) });
+    mockDatasets({ [WEBID]: bareProfile(), [PUBLIC_INDEX]: indexDocument(PUBLIC_INDEX, []) });
     const fetch = storageAwareFetch("https://alice.example/");
 
     await expect(
@@ -590,9 +621,9 @@ describe("createTypeIndex", () => {
   });
 
   it("rethrows a non-404 failure when probing for an existing index", async () => {
-    mockDatasets({ [WEBID]: profileDataset() });
+    mockDatasets({ [WEBID]: bareProfile() });
     vi.mocked(readDocument).mockImplementation((async (url: string) => {
-      if (url === WEBID) return readOf(profileDataset());
+      if (url === WEBID) return readOf(bareProfile());
       throw Object.assign(new Error("boom"), { statusCode: 500 });
     }) as never);
     const fetch = storageAwareFetch("https://alice.example/");
@@ -624,7 +655,7 @@ describe("createTypeIndex", () => {
 
     it("links the index from the extended profile instead", async () => {
       mockDatasets({
-        [WEBID]: profileDataset((t) =>
+        [WEBID]: bareProfile((t) =>
           t.addIri(RDFS.seeAlso, EXTENDED_PROFILE).addIri(FOAF.isPrimaryTopicOf, EXTENDED_PROFILE),
         ),
         [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE),
@@ -645,7 +676,7 @@ describe("createTypeIndex", () => {
 
     it("creates the WebID subject in an extended profile that lacks it", async () => {
       mockDatasets({
-        [WEBID]: profileDataset((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)),
+        [WEBID]: bareProfile((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)),
         [EXTENDED_PROFILE]: datasetFrom(EXTENDED_PROFILE),
       });
       rejectSavesTo(PROFILE_DOC);
@@ -661,7 +692,7 @@ describe("createTypeIndex", () => {
 
     it("reports every failed document when no profile accepts the link", async () => {
       mockDatasets({
-        [WEBID]: profileDataset((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)),
+        [WEBID]: bareProfile((t) => t.addIri(RDFS.seeAlso, EXTENDED_PROFILE)),
         [EXTENDED_PROFILE]: subjectDocument(EXTENDED_PROFILE),
       });
       rejectSavesTo(PROFILE_DOC, EXTENDED_PROFILE);
@@ -680,7 +711,7 @@ describe("createTypeIndex", () => {
 
     it("never reads or writes an extended profile on another server", async () => {
       mockDatasets({
-        [WEBID]: profileDataset((t) => t.addIri(RDFS.seeAlso, "https://elsewhere.example/doc")),
+        [WEBID]: bareProfile((t) => t.addIri(RDFS.seeAlso, "https://elsewhere.example/doc")),
         "https://elsewhere.example/doc": subjectDocument("https://elsewhere.example/doc"),
       });
       rejectSavesTo(PROFILE_DOC);
@@ -697,7 +728,7 @@ describe("createTypeIndex", () => {
     });
 
     it("still fails when the WebID document is read-only and has no extended profile", async () => {
-      mockDatasets({ [WEBID]: profileDataset() });
+      mockDatasets({ [WEBID]: bareProfile() });
       rejectSavesTo(PROFILE_DOC);
       const fetch = storageAwareFetch("https://alice.example/");
 
@@ -716,7 +747,7 @@ describe("createTypeIndex", () => {
     });
 
     it("describes non-Error rejections too", async () => {
-      mockDatasets({ [WEBID]: profileDataset() });
+      mockDatasets({ [WEBID]: bareProfile() });
       vi.mocked(writeDocument).mockImplementation((async (url: string, dataset: Dataset) => {
         if (url === PROFILE_DOC) throw "nope";
         return writtenAsGiven(url, dataset);
@@ -1010,7 +1041,7 @@ describe("ensureTypeIndex", () => {
       await expect(
         ensureTypeIndex({ indexUrl: PUBLIC_INDEX }, WEBID, near, noFetch, noFetch, share),
       ).resolves.toEqual({ url: PUBLIC_INDEX, fetch: expect.any(Function) });
-      expect(vi.mocked(readDocument).mock.calls.map(([url]) => url)).toEqual([WEBID]);
+      expect(documentsRead()).toEqual(new Set([WEBID]));
       expect(writeDocument).not.toHaveBeenCalled();
     });
 
@@ -1036,7 +1067,7 @@ describe("ensureTypeIndex", () => {
       await expect(
         ensureTypeIndex({ indexUrl: elsewhere }, WEBID, near, noFetch, noFetch, share),
       ).rejects.toMatchObject({ code: "typeIndexOutsidePod" });
-      expect(vi.mocked(readDocument).mock.calls.map(([url]) => url)).toEqual([WEBID]);
+      expect(documentsRead()).toEqual(new Set([WEBID]));
       expect(writeDocument).not.toHaveBeenCalled();
     });
 
@@ -1051,8 +1082,194 @@ describe("ensureTypeIndex", () => {
             })
           : new Response(null),
       ) as unknown as typeof globalThis.fetch;
-      const hostProfile = () =>
-        setThing(datasetFrom(profileDoc), buildThing(createThing({ url: webId })).build());
+      const hostProfile = (build: (thing: SubjectBuilder) => SubjectBuilder = (t) => t) =>
+        setThing(datasetFrom(profileDoc), build(buildThing(createThing({ url: webId }))).build());
+      const prefs = "https://host.example/alice/settings/prefs.ttl";
+      const ownIndex = "https://host.example/alice/settings/privateTypeIndex.ttl";
+      const theirIndex = "https://host.example/bob/idx.ttl";
+
+      /**
+       * Alice's pod, her own index empty, and Bob's index, holding an
+       * instance, linked from the WebID document or her preferences file.
+       */
+      function linkedToTheirs(from: "profile" | "preferences") {
+        mockDatasets({
+          [webId]: hostProfile((t) =>
+            from === "profile"
+              ? t
+                  .addIri(SOLID.privateTypeIndex, ownIndex)
+                  .addIri(SOLID.privateTypeIndex, theirIndex)
+              : t.addIri(SOLID.privateTypeIndex, ownIndex).addIri(PIM.preferencesFile, prefs),
+          ),
+          [prefs]: setThing(
+            datasetFrom(prefs),
+            buildThing(createThing({ url: webId }))
+              .addIri(SOLID.privateTypeIndex, theirIndex)
+              .build(),
+          ),
+          [ownIndex]: indexDocument(ownIndex, [SOLID.TypeIndex, SOLID.UnlistedDocument]),
+          [theirIndex]: indexDocument(
+            theirIndex,
+            [SOLID.TypeIndex, SOLID.UnlistedDocument],
+            ["https://host.example/bob/planted/"],
+          ),
+        });
+      }
+
+      describe.each([
+        ["the WebID document", "profile"],
+        ["the preferences file", "preferences"],
+      ] as const)("with another user's index linked from %s", (_, from) => {
+        it("leaves it out of the links", async () => {
+          linkedToTheirs(from);
+          const { links } = await locateTypeIndexes(webId, server, noFetch);
+          expect(links.map((link) => link.url)).toEqual([ownIndex]);
+        });
+
+        it("of a kind, registers in the user's own, never reading theirs", async () => {
+          linkedToTheirs(from);
+          await expect(
+            ensureTypeIndex("private", webId, near, server, answeringAnyone(401), share),
+          ).resolves.toEqual({ url: ownIndex, fetch: expect.any(Function) });
+          expect(documentsRead()).not.toContain(theirIndex);
+          expect(writeDocument).not.toHaveBeenCalled();
+        });
+
+        it("by its address, refuses it, reading nothing of it and changing no profile", async () => {
+          linkedToTheirs(from);
+          await expect(
+            ensureTypeIndex({ indexUrl: theirIndex }, webId, near, server, noFetch, share),
+          ).rejects.toMatchObject({ code: "typeIndexOutsidePod" });
+          expect(documentsRead()).not.toContain(theirIndex);
+          expect(writeDocument).not.toHaveBeenCalled();
+        });
+      });
+
+      describe("when the user's storages cannot be found", () => {
+        /** A server that shows no storage. */
+        const bare = vi.fn(async () => new Response(null)) as unknown as typeof globalThis.fetch;
+        /** The WebID document read once, then failing, as a storage lookup reading it again would. */
+        function profileReadOnce() {
+          let reads = 0;
+          vi.mocked(readDocument).mockImplementation((async (url: string) => {
+            if (url === webId && reads++ === 0) {
+              return readOf(hostProfile((t) => t.addIri(SOLID.privateTypeIndex, ownIndex)));
+            }
+            throw Object.assign(new Error(`503 ${url}`), { statusCode: 503 });
+          }) as never);
+        }
+
+        it("keeps the links in the profile's own places when the WebID leads to none, writing only in its own pod", async () => {
+          linkedToTheirs("profile");
+          const { links, inOwnStorage } = await locateTypeIndexes(webId, bare, noFetch);
+          expect(links.map((link) => link.url)).toEqual([ownIndex, theirIndex]);
+          expect(inOwnStorage(ownIndex)).toBe(true);
+          expect(inOwnStorage(theirIndex)).toBe(false);
+        });
+
+        it("takes the WebID document's folder as its own pod when it is no profile/ folder", async () => {
+          const rootWebId = "https://host.example/alice/card#me";
+          mockDatasets({
+            [rootWebId]: setThing(
+              datasetFrom("https://host.example/alice/card"),
+              buildThing(createThing({ url: rootWebId })).build(),
+            ),
+          });
+          const { inOwnStorage } = await locateTypeIndexes(rootWebId, bare, noFetch);
+          expect(inOwnStorage(ownIndex)).toBe(true);
+          expect(inOwnStorage(theirIndex)).toBe(false);
+        });
+
+        it("keeps them when the lookup fails now, to list what is there, writing in none", async () => {
+          profileReadOnce();
+          const { links, inOwnStorage } = await locateTypeIndexes(webId, bare, noFetch);
+          expect(links.map((link) => link.url)).toEqual([ownIndex]);
+          expect(inOwnStorage(ownIndex)).toBe(false);
+        });
+
+        it("fails them for writing when the lookup fails now", async () => {
+          profileReadOnce();
+          await expect(
+            locateTypeIndexes(webId, bare, noFetch, { forWriting: true }),
+          ).rejects.toMatchObject({ statusCode: 503 });
+        });
+
+        describe.each([
+          ["the WebID document", "profile"],
+          ["the preferences file", "preferences"],
+        ] as const)("with another user's index linked from %s", (_, from) => {
+          it("of a kind, registers in the user's own, never reading theirs", async () => {
+            linkedToTheirs(from);
+            await expect(
+              ensureTypeIndex("private", webId, near, bare, answeringAnyone(401), share),
+            ).resolves.toEqual({ url: ownIndex, fetch: expect.any(Function) });
+            expect(documentsRead()).not.toContain(theirIndex);
+            expect(writeDocument).not.toHaveBeenCalled();
+          });
+
+          it("by its address, refuses it, reading nothing of it and changing no profile", async () => {
+            linkedToTheirs(from);
+            await expect(
+              ensureTypeIndex({ indexUrl: theirIndex }, webId, near, bare, noFetch, share),
+            ).rejects.toMatchObject({ code: "typeIndexOutsidePod" });
+            expect(documentsRead()).not.toContain(theirIndex);
+            expect(writeDocument).not.toHaveBeenCalled();
+          });
+
+          it("by its address, registers in the user's own linked one as it is", async () => {
+            linkedToTheirs(from);
+            await expect(
+              ensureTypeIndex({ indexUrl: ownIndex }, webId, near, bare, noFetch, share),
+            ).resolves.toEqual({ url: ownIndex, fetch: expect.any(Function) });
+            expect(documentsRead()).not.toContain(ownIndex);
+            expect(writeDocument).not.toHaveBeenCalled();
+          });
+        });
+
+        it("chooses no index to register in when the lookup fails now", async () => {
+          profileReadOnce();
+          await expect(
+            ensureTypeIndex("private", webId, near, bare, noFetch, share),
+          ).rejects.toMatchObject({ statusCode: 503 });
+          expect(writeDocument).not.toHaveBeenCalled();
+        });
+      });
+
+      it("reads no preferences file in another user's pod", async () => {
+        const theirPrefs = "https://host.example/bob/prefs.ttl";
+        mockDatasets({
+          [webId]: hostProfile((t) => t.addIri(PIM.preferencesFile, theirPrefs)),
+          [theirPrefs]: setThing(
+            datasetFrom(theirPrefs),
+            buildThing(createThing({ url: webId }))
+              .addIri(SOLID.privateTypeIndex, ownIndex)
+              .build(),
+          ),
+        });
+        await expect(locateTypeIndexes(webId, server, noFetch)).resolves.toMatchObject({
+          links: [],
+        });
+        expect(documentsRead()).not.toContain(theirPrefs);
+      });
+
+      it("links no index from an extended profile in another user's pod", async () => {
+        const theirProfile = "https://host.example/bob/profile";
+        mockDatasets({
+          [webId]: hostProfile((t) => t.addIri(RDFS.seeAlso, theirProfile)),
+          [theirProfile]: setThing(
+            datasetFrom(theirProfile),
+            buildThing(createThing({ url: webId })).build(),
+          ),
+        });
+        vi.mocked(writeDocument).mockImplementation((async (url: string, dataset: Dataset) => {
+          if (url === profileDoc) throw new Error(`Storing the Resource at [${url}] failed: [405]`);
+          return writtenAsGiven(url, dataset);
+        }) as never);
+        await expect(createTypeIndex("private", webId, near, server)).rejects.toMatchObject({
+          code: "privateTypeIndexNotLinked",
+        });
+        expect(vi.mocked(writeDocument).mock.calls.map(([url]) => url)).not.toContain(theirProfile);
+      });
 
       it("refuses one in another user's pod, reading nothing of it and changing no profile", async () => {
         const theirs = "https://host.example/bob/settings/idx.ttl";

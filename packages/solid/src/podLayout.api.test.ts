@@ -55,11 +55,19 @@ function named(iri: string): string {
   return iri.startsWith(INSTANCE) ? `<instance>${iri.slice(INSTANCE.length)}` : `<${iri}>`;
 }
 
-/** A pod for the examples, which a WebID with its fragment reads as the WebID document. */
+/**
+ * A pod for the examples, which a WebID with its fragment reads as the
+ * WebID document, and whose storage root says it is one in a Link
+ * header, as the Solid Protocol has it.
+ */
 function examplePod() {
   const pod = fakePod();
-  const fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
-    pod.fetch(String(input).split("#")[0]!, init)) as typeof globalThis.fetch;
+  const fetch = (async (input: RequestInfo | URL, init?: RequestInit) =>
+    String(input) === STORAGE && init?.method === "HEAD"
+      ? new Response(null, {
+          headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
+        })
+      : pod.fetch(String(input).split("#")[0]!, init)) as typeof globalThis.fetch;
   return { ...pod, fetch };
 }
 
@@ -280,15 +288,8 @@ async function storageLines(): Promise<string[]> {
   }
   const walked = examplePod();
   await walked.put(PROFILE, "");
-  // The storage root says it is one in a Link header, as the Solid Protocol has it.
-  const fetch = (async (input: RequestInfo | URL, init?: RequestInit) =>
-    String(input) === STORAGE && init?.method === "HEAD"
-      ? new Response(null, {
-          headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
-        })
-      : walked.fetch(input, init)) as typeof globalThis.fetch;
   const [byLink] = await createSolidStorageGateway({
-    fetch,
+    fetch: walked.fetch,
     profileStorages: getProfileStorages,
   }).discoverStorages(WEBID);
   if (byLink?.url === STORAGE && byLink.source === "linkHeader")
