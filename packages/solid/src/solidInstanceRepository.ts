@@ -214,7 +214,7 @@ export function createSolidInstanceRepository({
     async readOldRegistrations({ webId, instanceUrl }): Promise<OldRegistrations> {
       const registrations: OldRegistrations["registrations"] = [];
       const unreadableIndexes: TypeIndexKind[] = [];
-      for (const index of await oldRegistrationsOf(webId, instanceUrl)) {
+      for (const index of await oldRegistrationsOf(webId, instanceUrl, false)) {
         if (index.classes === null) {
           if (!unreadableIndexes.includes(index.kind)) unreadableIndexes.push(index.kind);
         } else
@@ -227,9 +227,9 @@ export function createSolidInstanceRepository({
 
     async removeOldRegistrations({ webId, instanceUrl }) {
       const failures: unknown[] = [];
-      for (const index of await oldRegistrationsOf(webId, instanceUrl)) {
-        // One that could not be read is not written to; one that holds none is not written either.
-        if (index.classes === null || index.classes.length === 0) continue;
+      for (const index of await oldRegistrationsOf(webId, instanceUrl, true)) {
+        // One that could not be read is not written to; one that holds none, or that may not be written to, is not written either.
+        if (!index.writable || index.classes === null || index.classes.length === 0) continue;
         try {
           await removeOldRegistrations(index.url, instanceUrl, index.fetch);
         } catch (error) {
@@ -241,8 +241,8 @@ export function createSolidInstanceRepository({
     },
 
     async renameRegistrations({ webId, instanceUrl, title }) {
-      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
-      for (const indexUrl of indexUrlsOf(locations)) {
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting: true });
+      for (const indexUrl of writableIndexUrlsOf(locations)) {
         await renameInstanceRegistrations(
           indexUrl,
           { containerUrl: instanceUrl, title },
@@ -304,13 +304,16 @@ export function createSolidInstanceRepository({
    * Each of the user's own type indexes (locateTypeIndexes), the private
    * ones first, with the classes of the instance's data it holds a
    * registration of that earlier versions wrote (readOldRegistrations):
-   * none when the index is not there (404), null when it cannot be read.
+   * none when the index is not there (404), null when it cannot be read;
+   * and whether it may be written to (TypeIndexes inOwnStorage). When
+   * `forWriting`, a storage lookup that fails now fails them.
    */
   async function oldRegistrationsOf(
     webId: string,
     instanceUrl: string,
+    forWriting: boolean,
   ): Promise<OldRegistrationsIndex[]> {
-    const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+    const locations = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting });
     const indexes: OldRegistrationsIndex[] = [];
     for (const { kind, url } of locations.links) {
       // A profile that names one document as both indexes has it read once, as the private one.
@@ -321,23 +324,30 @@ export function createSolidInstanceRepository({
       } catch (error) {
         classes = (error as { statusCode?: number }).statusCode === 404 ? [] : null;
       }
-      indexes.push({ kind, url, fetch: locations.fetch, classes });
+      indexes.push({
+        kind,
+        url,
+        fetch: locations.fetch,
+        classes,
+        writable: locations.inOwnStorage(url),
+      });
     }
     return indexes;
   }
 
   /**
    * Drop the registrations of the instance's data from every type index
-   * of the user's own the profile links (locateTypeIndexes), reading and
-   * writing only those: an instance found in any of them is removed from
-   * all of them. Each is tried whatever the others answer, one that isn't
+   * of the user's own the profile links (locateTypeIndexes) that may be
+   * written to (writableIndexUrlsOf), reading and writing only those: an
+   * instance found in any of them is removed from all of them. A storage
+   * lookup that fails now fails this, writing nothing. Each is tried whatever the others answer, one that isn't
    * there having nothing to remove, as the list reads each on its own;
    * the first failure is thrown once all were tried.
    */
   async function removeRegistrations(webId: string, url: string): Promise<void> {
-    const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+    const locations = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting: true });
     const failures: unknown[] = [];
-    for (const indexUrl of indexUrlsOf(locations)) {
+    for (const indexUrl of writableIndexUrlsOf(locations)) {
       try {
         await removeInstanceRegistrations(indexUrl, url, locations.fetch);
       } catch (error) {
@@ -354,11 +364,23 @@ type OldRegistrationsIndex = {
   url: string;
   fetch: typeof globalThis.fetch;
   classes: OldRegistrationClass[] | null;
+  /** Whether it may be written to (TypeIndexes inOwnStorage). */
+  writable: boolean;
 };
 
 /** Every type index the profile links (locateTypeIndexes), each once, the private ones first. */
 function indexUrlsOf(indexes: TypeIndexes): string[] {
   return [...new Set(indexes.links.map((link) => link.url))];
+}
+
+/**
+ * The type indexes the profile links (indexUrlsOf) that may be written
+ * to (TypeIndexes inOwnStorage): one elsewhere may be someone else's,
+ * even on the WebID's origin, so the instance's registrations there are
+ * neither retitled nor removed.
+ */
+function writableIndexUrlsOf(indexes: TypeIndexes): string[] {
+  return indexUrlsOf(indexes).filter((url) => indexes.inOwnStorage(url));
 }
 
 /**

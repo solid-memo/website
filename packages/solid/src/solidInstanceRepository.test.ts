@@ -74,7 +74,7 @@ const indexFetch = vi.fn() as unknown as typeof globalThis.fetch;
 function located(
   privateUrl: string | null,
   publicUrl: string | null,
-  inPlaces: (url: string) => boolean = () => true,
+  inOwnStorage: (url: string) => boolean = () => true,
 ): TypeIndexes {
   const links = [
     ...(privateUrl === null
@@ -84,7 +84,7 @@ function located(
       ? []
       : [{ url: publicUrl, kind: "public" as const, fromPreferences: false }]),
   ];
-  return { links: links.filter((link) => inPlaces(link.url)), fetch: indexFetch, inPlaces };
+  return { links: links.filter((link) => inOwnStorage(link.url)), fetch: indexFetch, inOwnStorage };
 }
 
 /** The meta.ttl a creation wrote, as read back: the instance's #it, and `others`. */
@@ -325,7 +325,7 @@ describe("an instance registered in several indexes of a kind", () => {
       { url: PUBLIC_INDEX, kind: "public", fromPreferences: false },
     ],
     fetch: indexFetch,
-    inPlaces: () => true,
+    inOwnStorage: () => true,
   });
 
   it("is listed once, and removed and renamed in every one", async () => {
@@ -771,7 +771,9 @@ describe("deleteInstance", () => {
     await repository.deleteInstance({ webId: WEBID, instance });
 
     expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, dataFetch, userStorages);
-    expect(locateTypeIndexes).toHaveBeenCalledWith(WEBID, fetch, publicFetch);
+    expect(locateTypeIndexes).toHaveBeenCalledWith(WEBID, fetch, publicFetch, {
+      forWriting: true,
+    });
     expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, indexFetch);
   });
 
@@ -859,8 +861,10 @@ describe("removing registrations when an index fails", () => {
 });
 
 describe("old registrations", () => {
-  const bothIndexes = (inPlaces: (url: string) => boolean = () => true) =>
-    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX, inPlaces));
+  const bothIndexes = (inOwnStorage: (url: string) => boolean = () => true) =>
+    vi
+      .mocked(locateTypeIndexes)
+      .mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX, inOwnStorage));
   const args = { webId: WEBID, instanceUrl: CONTAINER };
 
   it("says which each of the user's own indexes holds, the private one's first", async () => {
@@ -1177,5 +1181,86 @@ describe("a type index outside the profile's own places", () => {
     expect(vi.mocked(removeInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
       PRIVATE_INDEX,
     ]);
+  });
+});
+
+describe("a linked type index that may not be written to", () => {
+  /**
+   * Both indexes linked, as when the storage lookup failed or the server
+   * shows none, only the private one in what may be written to.
+   */
+  const publicNotWritable = (): TypeIndexes => ({
+    links: [
+      { url: PRIVATE_INDEX, kind: "private", fromPreferences: false },
+      { url: PUBLIC_INDEX, kind: "public", fromPreferences: false },
+    ],
+    fetch: indexFetch,
+    inOwnStorage: (url) => url === PRIVATE_INDEX,
+  });
+
+  it("is listed from, and read for old registrations", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(publicNotWritable());
+    vi.mocked(readInstanceRegistrations).mockResolvedValue([]);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+
+    await makeRepository().listInstances(WEBID);
+    await expect(
+      makeRepository().readOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).resolves.toEqual({
+      registrations: [
+        { dataClass: "card", index: "private" },
+        { dataClass: "card", index: "public" },
+      ],
+      unreadableIndexes: [],
+    });
+    expect(vi.mocked(readInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+      PUBLIC_INDEX,
+    ]);
+  });
+
+  it("is neither renamed in, unregistered from, nor cleaned", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(publicNotWritable());
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const repository = makeRepository();
+
+    await repository.renameRegistrations({ webId: WEBID, instanceUrl: CONTAINER, title: "New" });
+    await repository.detachInstance({ webId: WEBID, instance: { url: CONTAINER, name: "Main" } });
+    await repository.removeOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER });
+
+    for (const write of [
+      renameInstanceRegistrations,
+      removeInstanceRegistrations,
+      removeOldRegistrations,
+    ]) {
+      expect(vi.mocked(write).mock.calls.map((call) => call[0])).toEqual([PRIVATE_INDEX]);
+    }
+  });
+
+  it("writes nothing when the user's storages cannot be looked up now", async () => {
+    const failure = Object.assign(new Error("503"), { statusCode: 503 });
+    vi.mocked(locateTypeIndexes).mockImplementation(async (_webId, _fetch, _public, options) => {
+      if (options?.forWriting) throw failure;
+      return publicNotWritable();
+    });
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const repository = makeRepository();
+    const instance = { url: CONTAINER, name: "Main" };
+
+    await expect(
+      repository.renameRegistrations({ webId: WEBID, instanceUrl: CONTAINER, title: "New" }),
+    ).rejects.toBe(failure);
+    await expect(repository.detachInstance({ webId: WEBID, instance })).rejects.toBe(failure);
+    await expect(
+      repository.removeOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).rejects.toBe(failure);
+    await expect(
+      repository.readOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).resolves.toMatchObject({ unreadableIndexes: [] });
+    expect(renameInstanceRegistrations).not.toHaveBeenCalled();
+    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
+    expect(removeOldRegistrations).not.toHaveBeenCalled();
   });
 });
