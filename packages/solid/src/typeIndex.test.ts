@@ -912,6 +912,8 @@ describe("ensureTypeIndex", () => {
 
   describe("by its address", () => {
     const entered = "https://alice.example/old/index.ttl";
+    /** Alice's profile, naming her storage. */
+    const ownProfile = () => profileDataset((t) => t.addIri(PIM.storage, "https://alice.example/"));
 
     it("registers in one the profile links as it is, reading nothing of it", async () => {
       mockDatasets({
@@ -929,7 +931,7 @@ describe("ensureTypeIndex", () => {
       ["a private one, when it says neither", [SOLID.TypeIndex], "private"],
       ["a public one, when it says it is", [SOLID.TypeIndex, SOLID.ListedDocument], "public"],
     ])("links one of the user's from the profile as %s", async (_, types, kind) => {
-      mockDatasets({ [WEBID]: profileDataset(), [entered]: indexDocument(entered, types) });
+      mockDatasets({ [WEBID]: ownProfile(), [entered]: indexDocument(entered, types) });
       await expect(
         ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
       ).resolves.toEqual({ url: entered, fetch: expect.any(Function) });
@@ -942,7 +944,7 @@ describe("ensureTypeIndex", () => {
 
     it("refuses one outside the profile's own places, reading nothing of it", async () => {
       const elsewhere = "https://elsewhere.example/index.ttl";
-      mockDatasets({ [WEBID]: profileDataset() });
+      mockDatasets({ [WEBID]: ownProfile() });
       await expect(
         ensureTypeIndex({ indexUrl: elsewhere }, WEBID, near, noFetch, noFetch, share),
       ).rejects.toMatchObject({ code: "typeIndexOutsidePod" });
@@ -950,9 +952,51 @@ describe("ensureTypeIndex", () => {
       expect(writeDocument).not.toHaveBeenCalled();
     });
 
+    describe("on a server that keeps many users' pods on one origin", () => {
+      const webId = "https://host.example/alice/profile/card#me";
+      const profileDoc = "https://host.example/alice/profile/card";
+      /** A server that shows https://host.example/alice/ as a storage's root. */
+      const server = vi.fn(async (input: RequestInfo | URL) =>
+        String(input) === "https://host.example/alice/"
+          ? new Response(null, {
+              headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
+            })
+          : new Response(null),
+      ) as unknown as typeof globalThis.fetch;
+      const hostProfile = () =>
+        setThing(datasetFrom(profileDoc), buildThing(createThing({ url: webId })).build());
+
+      it("refuses one in another user's pod, reading nothing of it and changing no profile", async () => {
+        const theirs = "https://host.example/bob/settings/idx.ttl";
+        mockDatasets({
+          [webId]: hostProfile(),
+          [theirs]: indexDocument(theirs, [SOLID.TypeIndex, SOLID.UnlistedDocument]),
+        });
+        await expect(
+          ensureTypeIndex({ indexUrl: theirs }, webId, near, server, noFetch, share),
+        ).rejects.toMatchObject({ code: "typeIndexOutsidePod" });
+        expect(vi.mocked(readDocument).mock.calls.map(([url]) => url)).not.toContain(theirs);
+        expect(writeDocument).not.toHaveBeenCalled();
+      });
+
+      it("links one in the user's own pod from the profile", async () => {
+        const own = "https://host.example/alice/settings/idx.ttl";
+        mockDatasets({
+          [webId]: hostProfile(),
+          [own]: indexDocument(own, [SOLID.TypeIndex, SOLID.UnlistedDocument]),
+        });
+        await expect(
+          ensureTypeIndex({ indexUrl: own }, webId, near, server, noFetch, share),
+        ).resolves.toEqual({ url: own, fetch: expect.any(Function) });
+        const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
+        expect(url).toBe(profileDoc);
+        expect(getUrl(getThing(saved as Dataset, webId)!, SOLID.privateTypeIndex)).toBe(own);
+      });
+    });
+
     it("refuses a document that does not say it is a type index", async () => {
       mockDatasets({
-        [WEBID]: profileDataset(),
+        [WEBID]: ownProfile(),
         [entered]: indexDocument(entered, [SOLID.ListedDocument]),
       });
       await expect(
@@ -968,7 +1012,7 @@ describe("ensureTypeIndex", () => {
     ])("refuses one that is %s", async (_, failure) => {
       vi.mocked(readDocument).mockImplementation(async (url) => {
         if (url === entered) throw failure;
-        return readOf(profileDataset());
+        return readOf(ownProfile());
       });
       await expect(
         ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
@@ -979,7 +1023,7 @@ describe("ensureTypeIndex", () => {
       const failure = Object.assign(new Error("503"), { statusCode: 503 });
       vi.mocked(readDocument).mockImplementation(async (url) => {
         if (url === entered) throw failure;
-        return readOf(profileDataset());
+        return readOf(ownProfile());
       });
       await expect(
         ensureTypeIndex({ indexUrl: entered }, WEBID, near, noFetch, noFetch, share),
