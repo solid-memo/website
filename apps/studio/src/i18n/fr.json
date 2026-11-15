@@ -1547,6 +1547,8 @@
       "releasedAt": "Ce brouillon a été publié à l’adresse {url}.",
       "askingPublic": "Vérification de qui peut la lire…",
       "public": "Toute personne disposant de son adresse peut la lire.",
+      "copyTryLink": "Copier un lien pour l’essayer",
+      "tryLinkHint": "Tout le monde peut l’ouvrir dans Solid Memo, sans compte, et l’ajouter.",
       "private": "Vous seul pouvez la lire : votre Pod ne l’a pas rendue publique. Réessayez, ou rendez-la lisible par tous avec les outils de votre fournisseur de Pod.",
       "makePublic": "La rendre publique",
       "makePublicConfirm": "Toute personne qui a son adresse pourra lire {release}. Le Studio ne peut pas la rendre privée de nouveau.",

@@ -276,8 +276,10 @@ adjectives.
   their own Pod. Paste the link, and Solid Memo shows what it is and
   where it's published before you add it
   ([deck-library.md](deck-library.md#from-a-link)). Its **Copy link**
-  copies a link anyone can open, as a library deck's does: share a deck
-  you published from the Studio this way.
+  copies a link anyone can open, as a library deck's does. In the
+  Studio, a public release's screen has **Copy a link to try it**, which
+  copies the same link
+  ([studio.md](studio.md#publishing-a-release)).
 
 ## Courses
 

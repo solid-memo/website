@@ -20,6 +20,13 @@ describe("CopyLink", () => {
     expect(writeText).toHaveBeenCalledWith(URL);
   });
 
+  it("names its button as it is told to", () => {
+    render(<CopyLink url={URL} label="Copy it" text="Copy a link to try it" />);
+    expect(screen.getByRole("button", { name: "Copy it" })).toHaveTextContent(
+      "Copy a link to try it",
+    );
+  });
+
   it("says when the browser will not copy it", async () => {
     vi.stubGlobal("navigator", {});
     render(<CopyLink url={URL} label="Copy it" />);

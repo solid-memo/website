@@ -1547,6 +1547,8 @@
       "releasedAt": "Este borrador se publicó en {url}.",
       "askingPublic": "Comprobando si cualquiera puede leerla…",
       "public": "Cualquiera con su dirección puede leerla.",
+      "copyTryLink": "Copiar un enlace para probarla",
+      "tryLinkHint": "Cualquiera puede abrirla en Solid Memo, sin cuenta, y añadirla.",
       "private": "Solo tú puedes leerla: tu Pod no la hizo pública. Inténtalo de nuevo, o haz que todo el mundo pueda leerla con las herramientas de tu proveedor de Pods.",
       "makePublic": "Hacerla pública",
       "makePublicConfirm": "Cualquiera que tenga su dirección podrá leer {release}. El Studio no puede volver a hacerla privada.",

@@ -16,6 +16,7 @@ import type { ReadOnlyReason } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { ExternalLink } from "@solid-memo/ui/ExternalLink";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
+import { tryReleaseHref } from "@solid-memo/ui/router";
 import { CopyLink } from "./CopyLink";
 import { ReadOnlyNotice } from "./ReadOnly";
 import { useActivity } from "./shell/activity";
@@ -274,7 +275,18 @@ function Released({
       {isPublic === undefined ? (
         <p class="hint">{t("studio.publish.askingPublic")}</p>
       ) : isPublic ? (
-        <p>{t("studio.publish.public")}</p>
+        <>
+          <p>{t("studio.publish.public")}</p>
+          {/* Solid Memo's link for anyone (#/try?url=), on the page the Studio shares with it. */}
+          <p>
+            <CopyLink
+              url={`${window.location.origin}${window.location.pathname}${tryReleaseHref(url)}`}
+              label={t("studio.publish.copyTryLink")}
+              text={t("studio.publish.copyTryLink")}
+            />{" "}
+            <span class="hint">{t("studio.publish.tryLinkHint")}</span>
+          </p>
+        </>
       ) : (
         <>
           <p class="warning">{t("studio.publish.private")}</p>
