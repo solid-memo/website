@@ -230,8 +230,32 @@ it on every pull request, in the merge queue and on every push to
 - **A commit that says it breaks** while no line went is noted, and
   passes: removing a feature changes no file.
 
-A line added needs nothing. Review covers what no file can hold: a
-feature removed, or a reader that keeps its format but reads less of it.
+A line added needs nothing. Review covers what no file can hold, such
+as a feature removed.
+
+The same job runs earlier releases' own code against the change
+(`npm run check:exchange`,
+[exchangePods.ts](../scripts/exchangePods.ts)). The snapshots show
+that the change reads what earlier code wrote; only an earlier
+release's code can show that it still reads and saves what the change
+writes. A pod is exchanged with the first release that has the
+exchange's runner
+([podExchange.ts](../packages/solid/src/testing/podExchange.ts)),
+and with the first release of each major version after it, each
+checked out from its tag with its own dependencies:
+
+1. The release writes a pod, with its own scenario.
+2. The change uses it as a learner would the day after. Nothing the pod
+   said of a subject may be gone.
+3. The release reads it and saves it back. Every value it reads, the
+   change read the same; no save is refused; each document says what it
+   said.
+
+The first exchange is with the change itself, so the runner is tried
+before any release has it. A release's side of the exchange is run as
+that release has it, for good. So the steps keep their names, as do
+the two variables that name the step and the folder, and the three
+files a pod and its records are passed in.
 
 ## What has versions of its own
 

@@ -4,7 +4,8 @@
 
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { ResourceStore } from "@solid-memo/application/ports";
-import type { Deck } from "@solid-memo/domain/deck";
+import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
+import type { DeckGroup, TreeNode } from "@solid-memo/domain/deckTree";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { builtInColors, PALETTE_ROLES } from "@solid-memo/domain/customPalette";
 import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
@@ -323,12 +324,13 @@ export function documentsOf(snapshot: string): Map<string, string[]> {
   return documents;
 }
 
-/** An app over a pod that holds a snapshot's documents, at the instant the scenario ended. */
+/** An app over a pod that holds a snapshot's documents, at the instant the scenario ended, or at `now`. */
 export async function appOver(
   snapshot: string,
   written?: (method: string, url: string) => Promise<void>,
+  now: Date = SCENARIO_END,
 ) {
-  const app = wiredApp({ now: () => SCENARIO_END, written });
+  const app = wiredApp({ now: () => now, written });
   for (const [url, lines] of documentsOf(snapshot)) {
     const response = await app.fetch(url, {
       method: "PUT",
@@ -400,4 +402,141 @@ export async function recordsOf(u: UseCases): Promise<unknown> {
       })),
     ),
   });
+}
+
+/** The groups among the nodes of a deck tree, nested ones too. */
+function groupsOf(nodes: readonly TreeNode[]): DeckGroup[] {
+  return nodes.flatMap((node) =>
+    node.kind === "group" ? [node.group, ...groupsOf(node.children)] : [],
+  );
+}
+
+/** What a card says, as an edit of it gives it. */
+function contentOf(card: Card): CardContent {
+  const {
+    id: _id,
+    url: _url,
+    formatVersion: _format,
+    createdAt: _at,
+    retired: _retired,
+    fromRelease: _from,
+    ...content
+  } = card;
+  return content;
+}
+
+/**
+ * Saves back what the app reads of the scenario's pod, each as it read
+ * it: the instance's name, the preferences, the palettes, each deck's
+ * entry and cards, each group, and each draft not yet published. A pod
+ * the app reads whole says the same after as before. A save the app
+ * refuses, as of a subject in a format newer than its own, throws.
+ */
+export async function saveBack(u: UseCases): Promise<void> {
+  const I = SCENARIO_INSTANCE;
+  const [instance] = await u.listInstances(SESSION);
+  await u.renameInstance(SESSION, instance!, instance!.name);
+  await u.savePreferences(I, await u.getPreferences(I));
+  for (const palette of await u.listPalettes(I))
+    await u.savePalette(I, palette, { useAnyway: true });
+  for (const deck of await u.listDecks(I)) {
+    await u.renameDeck(deck, deck.title);
+    for (const card of await u.listCards(deck)) await u.updateCard(deck, card, contentOf(card));
+  }
+  for (const group of groupsOf((await u.listDeckTree(I)).children)) {
+    await u.editDeckTree(I, { kind: "rename", group: group.url, title: group.title });
+  }
+  for (const { url, releasedAs } of await u.listReleaseDrafts(I)) {
+    if (releasedAs !== undefined) continue;
+    const { root } = await u.getReleaseDraft(url);
+    await u.editReleaseDraft(url, [{ kind: "setMeta", meta: { title: root.title } }]);
+  }
+}
+
+/** The day after the scenario ended, when another version uses its pod (usePod). */
+export const USED_AT = new Date("2026-11-02T12:00:00.000Z");
+
+/**
+ * Uses the scenario's pod as a learner would the day after, through
+ * whatever this version of the app writes: each deck renamed and paced,
+ * a card changed and one added, what is due and new studied, a deck
+ * made, the preferences, a palette and a group changed. It only adds
+ * and changes, and removes nothing, so that whatever the pod said
+ * before of a subject it still says something of after (lostTerms). It
+ * finds what it uses by reading the pod, which another version may have
+ * written.
+ */
+export async function usePod(u: UseCases, now: Date = USED_AT): Promise<void> {
+  const I = SCENARIO_INSTANCE;
+  const [instance] = await u.listInstances(SESSION);
+  await u.renameInstance(SESSION, instance!, `${instance!.name}, used`);
+  const prefs = await u.getPreferences(I);
+  await u.savePreferences(I, { ...prefs, maxReviewsPerDay: prefs.maxReviewsPerDay + 1 });
+  for (const palette of await u.listPalettes(I)) {
+    await u.savePalette(
+      I,
+      { ...palette, title: { ...palette.title, en: "Used" } },
+      { useAnyway: true },
+    );
+  }
+  for (const group of groupsOf((await u.listDeckTree(I)).children)) {
+    await u.editDeckTree(I, {
+      kind: "rename",
+      group: group.url,
+      title: { ...group.title, en: "Used" },
+    });
+  }
+  for (const listed of await u.listDecks(I)) {
+    // A course's cards are its release's: its copy is studied, and left as it is.
+    const own = listed.sourceUrl === undefined;
+    let deck = listed;
+    if (own) {
+      deck = await u.renameDeck(deck, { ...deck.title, en: `${deck.title.en ?? "Deck"}, used` });
+      deck = await u.setDeckPace(deck, { newCardsPerDay: 9, maxReviewsPerDay: 90 });
+      const [card] = (await u.listCards(deck)).filter(({ retired }) => retired !== true);
+      if (card !== undefined) {
+        const content = contentOf(card);
+        await u.updateCard(deck, card, { ...content, front: { ...content.front, en: "Used" } });
+      }
+      await u.addCard(deck, { front: { en: "Added" }, back: { en: "Later" } });
+    }
+    const queue = await u.getStudyQueue(I, deck, now);
+    for (const prompt of [...queue.due, ...queue.newPrompts]) {
+      await u.recordReview(I, deck, prompt, 4, now, { recallMillis: 1000, gradeMillis: 200 });
+    }
+  }
+  const made = await u.createDeck(I, { en: "Made later" });
+  await u.addCard(made, { front: { en: "One" }, back: { en: "Ett" } });
+}
+
+/**
+ * What a pod no longer says of a subject it said something of: each
+ * `subject property` pair of `before` (a snapshot) that `after` has no
+ * statement of, in the same document. The digest is left out, as it is
+ * worked out from the rest. A use of a pod that only adds and changes
+ * (usePod) loses none: one that does dropped what it did not know.
+ */
+export function lostTerms(before: string, after: string): string[] {
+  const pairsOf = (lines: readonly string[]) =>
+    new Set(lines.map((line) => /^(\S+ <[^>]*>) /.exec(line)![1]!));
+  const now = documentsOf(after);
+  const lost: string[] = [];
+  for (const [url, lines] of documentsOf(before)) {
+    if (url === `${SCENARIO_INSTANCE}digest.ttl`) continue;
+    const kept = pairsOf(now.get(url) ?? []);
+    for (const pair of pairsOf(lines)) if (!kept.has(pair)) lost.push(`${url}: ${pair}`);
+  }
+  return lost;
+}
+
+/** The documents of `before` that `after` does not hold with the same statements, the digest aside. */
+export function changedDocuments(before: string, after: string): string[] {
+  const now = documentsOf(after);
+  return [...documentsOf(before)]
+    .filter(
+      ([url, lines]) =>
+        url !== `${SCENARIO_INSTANCE}digest.ttl` &&
+        JSON.stringify(now.get(url)) !== JSON.stringify(lines),
+    )
+    .map(([url]) => url);
 }

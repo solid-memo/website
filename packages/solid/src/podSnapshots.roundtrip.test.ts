@@ -26,20 +26,20 @@ import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { beforeAll, describe, expect, it } from "vitest";
-import type { DeckGroup, TreeNode } from "@solid-memo/domain/deckTree";
 import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import {
   appOver,
+  changedDocuments,
   documentsOf,
   recordsOf,
+  saveBack,
   SCENARIO_INSTANCE,
   snapshotOf,
   writeScenarioPod,
 } from "./testing/podScenario";
-import { SESSION } from "./testing/wiredApp";
 import { RDF } from "./vocab";
 
 const PODS = join(VOCAB_ROOT, "fixtures/pods/");
@@ -128,39 +128,7 @@ describe.each(kept)("snapshot %i", (number) => {
     const I = SCENARIO_INSTANCE;
     // Nothing in it is in a format this app would bring up to date.
     expect(await u.planMigration(I)).toMatchObject({ decks: [] });
-    const [instance] = await u.listInstances(SESSION);
-    await u.renameInstance(SESSION, instance!, instance!.name);
-    await u.savePreferences(I, await u.getPreferences(I));
-    for (const palette of await u.listPalettes(I))
-      await u.savePalette(I, palette, { useAnyway: true });
-    for (const deck of await u.listDecks(I)) {
-      await u.renameDeck(deck, deck.title);
-      const cards = await u.listCards(deck);
-      for (const card of cards) {
-        const {
-          id: _id,
-          url: _url,
-          formatVersion: _format,
-          createdAt: _at,
-          retired: _retired,
-          fromRelease: _from,
-          ...content
-        } = card;
-        await u.updateCard(deck, card, content);
-      }
-    }
-    const groups = (nodes: readonly TreeNode[]): DeckGroup[] =>
-      nodes.flatMap((node) =>
-        node.kind === "group" ? [node.group, ...groups(node.children)] : [],
-      );
-    for (const group of groups((await u.listDeckTree(I)).children)) {
-      await u.editDeckTree(I, { kind: "rename", group: group.url, title: group.title });
-    }
-    for (const { url, releasedAs } of await u.listReleaseDrafts(I)) {
-      if (releasedAs !== undefined) continue;
-      const { root } = await u.getReleaseDraft(url);
-      await u.editReleaseDraft(url, [{ kind: "setMeta", meta: { title: root.title } }]);
-    }
+    await saveBack(u);
     await app.settled();
     // The documents written, each kind of them: none was left alone as already saying it.
     const writtenTo = new Set(saved.map((request) => request.split(" ")[1]!.slice(I.length)));
@@ -168,12 +136,9 @@ describe.each(kept)("snapshot %i", (number) => {
     expect(writtenTo).toContain("preferences.ttl");
     expect(writtenTo).toContain("palettes.ttl");
     expect(writtenTo).toContain("catalog.ttl");
-    const after = documentsOf(await snapshotOf(app.store));
-    for (const [url, lines] of documentsOf(snapshot)) {
-      // The digest is worked out from the rest, at the versions the documents had in the pod
-      // that wrote it: in this one they have others, so it is made again.
-      if (url !== `${I}digest.ttl`) expect(after.get(url), url).toEqual(lines);
-    }
+    // The digest aside: it is worked out from the rest, at the versions the documents had in
+    // the pod that wrote it, and in this one they have others, so it is made again.
+    expect(changedDocuments(snapshot, await snapshotOf(app.store))).toEqual([]);
   });
 });
 

@@ -338,13 +338,18 @@ jobs:
   # since then naming the library's contact and no email. The public
   # API (docs/releasing.md#how-ci-holds-to-it): no line of api/ gone
   # unless a commit says the change breaks, and none of api/frozen/ at
-  # all. It needs the whole history, which check does not, so it is a
-  # job of its own. Deterministic.
+  # all. Earlier releases' own code
+  # (docs/releasing.md#what-never-changes): a pod is exchanged with
+  # the first release that has the exchange's runner and the first of
+  # each major version after it, each checked out from its tag with
+  # its own dependencies, which read and save what this change wrote.
+  # It needs the whole history and the tags, which check does not, so
+  # it is a job of its own. Deterministic.
   library:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -393,6 +398,11 @@ jobs:
         env:
           BASE: ${{ steps.base.outputs.sha }}
         run: npm run check:breaking -- --base "$BASE"
+      # After both, whatever they found. The checkout above fetched every
+      # tag with the history.
+      - name: npm run check:exchange
+        if: success() || failure()
+        run: npm run check:exchange
 
   # The vocabulary, the deck library and pod catalog documents, checked
   # again by an independent SHACL engine (pySHACL), SPARQL constraints
