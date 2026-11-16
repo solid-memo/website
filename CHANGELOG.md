@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.6](https://github.com/solid-memo/website/compare/v7.6.5...v7.6.6) (2026-11-16)
+
+### Fixes
+
+* **ci:** draw the release's diagrams in a job without the deploy key ([66f09b8](https://github.com/solid-memo/website/commit/66f09b85e2ef995dea35d88538c0f5f0425a76a2))
+* **domain:** look at a shared author's agent nodes once per write ([d2c3670](https://github.com/solid-memo/website/commit/d2c3670f8b5adade640dcb3177ff78f5ae363e73))
+* **solid:** take a user's storages only from their own profile ([7c31cfc](https://github.com/solid-memo/website/commit/7c31cfcdbabb8d6e33f889768d666ce42b24bfd5))
+* **studio:** list a bounded number of a release's authors and sources ([6bd2060](https://github.com/solid-memo/website/commit/6bd20604d391f66958ccb6e3519e8dd3c47505ec))
+
 ## [7.6.5](https://github.com/solid-memo/website/compare/v7.6.4...v7.6.5) (2026-11-16)
 
 ### Fixes
