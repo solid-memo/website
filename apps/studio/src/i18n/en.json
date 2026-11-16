@@ -1378,6 +1378,14 @@
       "authorsHint": "The people who compiled the release, kept in the release itself.",
       "noAuthors": "No authors yet.",
       "otherAuthors": "Also named, by address only, and kept as they are: {authors}",
+      "authorsMore": {
+        "one": "And {count} more author the release states, not listed here; it stays in the release.",
+        "other": "And {count} more authors the release states, not listed here; they stay in the release."
+      },
+      "otherAuthorsMore": {
+        "one": "And {count} more named by address only, not listed here; it stays in the release.",
+        "other": "And {count} more named by address only, not listed here; they stay in the release."
+      },
       "authorName": "Name",
       "authorEmail": "Email (optional)",
       "saveAuthor": "Save",

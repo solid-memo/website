@@ -21,6 +21,7 @@ import {
   applyDraftChange,
   applyDraftChanges,
   attributionOf,
+  attributionPreview,
   attributionText,
   authorNames,
   blankDraft,
@@ -1447,6 +1448,16 @@ describe("the attribution", () => {
       "Sammanställd av Ann, Bo och Cy med hjälp av AI.",
     );
     expect(attributionText(["Ann"], false, "de")).toBe("Compiled by Ann.");
+  });
+
+  it("is previewed with the first names and how many more, as the release still states every name", () => {
+    const names = ["Ann", "Bo", "Cy", "Di"];
+    expect(attributionPreview(names, false, "en", 4)).toBe(attributionText(names, false, "en"));
+    expect(attributionPreview(names, true, "en", 2)).toBe(
+      "Compiled by Ann, Bo and 2 more with the help of AI.",
+    );
+    expect(attributionPreview(names, false, "sv", 1)).toBe("Sammanställd av Ann och 3 till.");
+    expect(attributionPreview(names, false, "de", 3)).toBe("Compiled by Ann, Bo, Cy and 1 more.");
   });
 
   it("is recognized when names too long for it are cut short in it (GHSA-g598-pfpq-4whv)", () => {

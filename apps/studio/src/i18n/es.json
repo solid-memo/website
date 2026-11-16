@@ -1453,6 +1453,16 @@
       "authorsHint": "Las personas que recopilaron la publicación, guardadas en la propia publicación.",
       "noAuthors": "Aún no hay ninguna persona autora.",
       "otherAuthors": "También figuran, solo por su dirección, y se conservan tal como están: {authors}",
+      "authorsMore": {
+        "one": "Y {count} autor más que indica la publicación, sin listar aquí; sigue en la publicación.",
+        "many": "Y {count} autores más que indica la publicación, sin listar aquí; siguen en la publicación.",
+        "other": "Y {count} autores más que indica la publicación, sin listar aquí; siguen en la publicación."
+      },
+      "otherAuthorsMore": {
+        "one": "Y {count} más que figura solo por su dirección, sin listar aquí; sigue en la publicación.",
+        "many": "Y {count} más que figuran solo por su dirección, sin listar aquí; siguen en la publicación.",
+        "other": "Y {count} más que figuran solo por su dirección, sin listar aquí; siguen en la publicación."
+      },
       "authorName": "Nombre",
       "authorEmail": "Correo electrónico (opcional)",
       "saveAuthor": "Guardar",

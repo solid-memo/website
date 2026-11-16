@@ -1666,6 +1666,25 @@ export function attributionText(names: readonly string[], ai: boolean, language:
 }
 
 /**
+ * The attribution as a preview of it shows it: attributionText with the
+ * first `limit` names, then how many more there are ("12 more", in
+ * Swedish "12 till") in place of the rest. The release states it with
+ * every name (attributionText); this only keeps a long list of authors
+ * short where it is shown.
+ */
+export function attributionPreview(
+  names: readonly string[],
+  ai: boolean,
+  language: string,
+  limit: number,
+): string {
+  if (names.length <= limit) return attributionText(names, ai, language);
+  const more = names.length - limit;
+  const rest = language === "sv" ? `${more} till` : `${more} more`;
+  return attributionText([...names.slice(0, limit), rest], ai, language);
+}
+
+/**
  * The attributions attributionText writes for the draft's authors, in
  * English and Swedish, by language and text: whether each says AI
  * helped. A comment is an attribution only when it is one of these, so
