@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen, within } from "@testing-library/preact";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
 import { problem, type ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
   applyDraftChanges,
@@ -11,8 +11,13 @@ import {
   type DraftRefusal,
   type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
-import { DraftOutline } from "./DraftOutline";
-import { courseDraft } from "../test/fixtures";
+import {
+  DraftOutline,
+  OUTLINE_LIMIT,
+  OUTLINE_QUESTION_LIMIT,
+  OUTLINE_ROW_LIMIT,
+} from "./DraftOutline";
+import { courseDraft, LONGEST_COURSE, longCourseDraft, wideCourseDraft } from "../test/fixtures";
 import { answer, dialog } from "../test/dialogs";
 
 type Edit = (changes: DraftChange[]) => DraftRefusal | null;
@@ -272,6 +277,164 @@ describe("DraftOutline", () => {
   });
 });
 
+describe("DraftOutline of a long course", () => {
+  it("shows at most OUTLINE_LIMIT steps of a chapter and OUTLINE_QUESTION_LIMIT questions of a step, the rest a link to their screen", () => {
+    renderOutline(longCourseDraft({ steps: 3000, questions: 3000 }));
+    expect(document.querySelectorAll(".outline-step")).toHaveLength(OUTLINE_LIMIT);
+    expect(screen.getByText("3,000 steps")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "2,950 more steps" })).toHaveAttribute(
+      "href",
+      "#/chapter/ch-0",
+    );
+    expect(document.querySelectorAll(".outline-questions > li")).toHaveLength(
+      OUTLINE_QUESTION_LIMIT + 1,
+    );
+    expect(screen.getByRole("link", { name: "2,990 more questions" })).toHaveAttribute(
+      "href",
+      "#/step/st-0",
+    );
+  });
+
+  it("shows OUTLINE_LIMIT chapters at first, and as many more each time the user asks", () => {
+    renderOutline(longCourseDraft({ chapters: 120 }));
+    const chapters = () => document.querySelectorAll(".deck-group").length;
+    expect(chapters()).toBe(OUTLINE_LIMIT);
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more" }));
+    expect(chapters()).toBe(2 * OUTLINE_LIMIT);
+    fireEvent.click(screen.getByRole("button", { name: "Show 20 more" }));
+    expect(chapters()).toBe(120);
+    expect(screen.queryByRole("button", { name: /^Show/ })).toBeNull();
+  });
+});
+
+describe("DraftOutline of a wide and deep course", () => {
+  const count = (selector: string) => document.querySelectorAll(selector).length;
+
+  it("shows OUTLINE_ROW_LIMIT steps and questions in all for each page of chapters, however long they are", () => {
+    renderOutline(wideCourseDraft({ chapters: 300, steps: 60, questions: 20 }));
+    // The first chapters share the steps; the others link to their screens.
+    const full = OUTLINE_ROW_LIMIT / OUTLINE_LIMIT;
+    expect(count(".outline-step")).toBe(OUTLINE_ROW_LIMIT);
+    expect(count(".outline-questions a[href^='#/question/']")).toBe(OUTLINE_ROW_LIMIT);
+    expect(screen.getAllByRole("link", { name: "10 more steps" })).toHaveLength(full);
+    expect(screen.getAllByRole("link", { name: "60 more steps" })).toHaveLength(
+      OUTLINE_LIMIT - full,
+    );
+    expect(screen.getAllByRole("link", { name: "10 more questions" })).toHaveLength(
+      OUTLINE_ROW_LIMIT / OUTLINE_QUESTION_LIMIT,
+    );
+    expect(screen.getAllByRole("link", { name: "20 more questions" })).toHaveLength(
+      OUTLINE_ROW_LIMIT - OUTLINE_ROW_LIMIT / OUTLINE_QUESTION_LIMIT,
+    );
+    // A chapter, a step, a question and a step's "more questions": no more rows than that.
+    const rows = OUTLINE_LIMIT + 3 * OUTLINE_ROW_LIMIT;
+    expect(count("li")).toBe(rows);
+    expect(count("a")).toBeLessThanOrEqual(2 * rows);
+    expect(count("button")).toBeLessThanOrEqual(rows);
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more" }));
+    expect(count(".deck-group")).toBe(2 * OUTLINE_LIMIT);
+    expect(count(".outline-step")).toBe(2 * OUTLINE_ROW_LIMIT);
+    expect(count("li")).toBe(2 * rows);
+  });
+
+  it("shows every step and question of a course as long as the project's longest", () => {
+    renderOutline(
+      wideCourseDraft({ chapters: LONGEST_COURSE.length, steps: LONGEST_COURSE, questions: 2 }),
+    );
+    const steps = LONGEST_COURSE.reduce((all, one) => all + one, 0);
+    expect(count(".deck-group")).toBe(LONGEST_COURSE.length);
+    expect(count(".outline-step")).toBe(steps);
+    expect(count(".outline-questions a[href^='#/question/']")).toBe(2 * steps);
+    expect(screen.queryByRole("link", { name: /more (steps|questions)$/ })).toBeNull();
+    expect(screen.getByRole("link", { name: "Step 17.9" })).toBeInTheDocument();
+  });
+
+  it("shows and marks the chapter, step or question the page edits, however far down", () => {
+    const draft = wideCourseDraft({ chapters: 120, steps: 60, questions: 20 });
+    renderOutline(draft, { currentKey: "st-110-59" });
+    expect(screen.getByRole("link", { name: "Chapter 110" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Step 111.60" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    expect(screen.getByRole("link", { name: "59 more steps" })).toHaveAttribute(
+      "href",
+      "#/chapter/ch-110",
+    );
+    expect(count(".deck-group")).toBe(OUTLINE_LIMIT + 1);
+    cleanup();
+    renderOutline(draft, { currentKey: "ch-80" });
+    expect(screen.getByRole("link", { name: "Chapter 80" })).toHaveAttribute(
+      "aria-current",
+      "page",
+    );
+    cleanup();
+    // Ids sort as text: q-0-0-9 is the last of its step's.
+    renderOutline(draft, { currentKey: "q-0-0-9" });
+    expect(screen.getByRole("link", { name: "q-0-0-9" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByRole("link", { name: "9 more questions" })).toHaveLength(1);
+  });
+
+  it("shows and marks a question the page edits by the step that asks it, however far down", () => {
+    const draft = wideCourseDraft({ chapters: 120, steps: 60, questions: 20 });
+    // In a chapter past those shown, and in a step past those shown of the first.
+    for (const [card, step] of [
+      ["q-110-59-0", "Step 111.60"],
+      ["q-0-55-3", "Step 1.56"],
+    ] as const) {
+      renderOutline(draft, { currentKey: card });
+      expect(screen.getByRole("link", { name: step })).not.toHaveAttribute("aria-current");
+      expect(screen.getByRole("link", { name: card })).toHaveAttribute("aria-current", "page");
+      cleanup();
+    }
+  });
+
+  it("shows the chapter that asks a question in its final review only, however far down", () => {
+    const draft = wideCourseDraft({ chapters: 120, steps: 1, questions: 0 });
+    const reviewed = {
+      ...draft,
+      chapters: draft.chapters.map((node) =>
+        node.id === "ch-110"
+          ? { ...node, data: { ...node.data, reviewQuestion: [`${draft.url}#q-110-r01`] } }
+          : node,
+      ),
+    };
+    renderOutline(reviewed, { currentKey: "q-110-r01" });
+    expect(screen.getByRole("link", { name: "Chapter 110" })).toBeInTheDocument();
+    expect(count(".deck-group")).toBe(OUTLINE_LIMIT + 1);
+    cleanup();
+    // A question nothing asks: the outline's first chapters only.
+    renderOutline(reviewed, { currentKey: "q-unasked" });
+    expect(count(".deck-group")).toBe(OUTLINE_LIMIT);
+  });
+
+  it("moves a step or chapter cut short among all of them, from its menu", () => {
+    const { onEdit } = renderOutline(wideCourseDraft({ chapters: 60, steps: 60, questions: 0 }));
+    // Step 1.50, the last shown of its chapter: its next is the 51st.
+    openMenu("Step 1.50");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "st-0-49", chapter: "ch-0", to: 50 },
+    ]);
+    // To another chapter: at its end, after the steps it doesn't show.
+    openMenu("Step 2.1");
+    const into = within(screen.getByRole("menu")).getByRole("group", { name: "Move to chapter" });
+    // The chapters shown, and no others.
+    expect(within(into).getAllByRole("menuitem")).toHaveLength(OUTLINE_LIMIT - 1);
+    fireEvent.click(within(into).getByRole("menuitem", { name: "Chapter 0" }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "st-1-0", chapter: "ch-0", to: 60 },
+    ]);
+    // Chapter 50, the last shown: its next is the 51st.
+    openMenu("Chapter 49");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Move down" }));
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "moveChapter", id: "ch-49", to: 50 }]);
+    openMenu("Chapter 49");
+    fireEvent.click(screen.getByRole("menuitem", { name: "Move up" }));
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "moveChapter", id: "ch-49", to: 48 }]);
+  });
+});
+
 describe("DraftOutline dragging", () => {
   const listTop = 100;
   /** The page's y of row `index` (in the order shown), `offset` pixels into it. */
@@ -360,6 +523,67 @@ describe("DraftOutline dragging", () => {
     // Under the last step: after Apps, a level up.
     fireEvent.pointerMove(window, at(yOf(4, 60)));
     expect(line().dataset.label).toBe("after Apps");
+  });
+
+  it("drops a step at the end of a chapter cut short, or into its header, at the chapter's end", () => {
+    const { onEdit } = renderOutline(longCourseDraft({ chapters: 2, steps: 60 }));
+    // Rows: Chapter 0 0; its steps 1 to 50, 1.2 lifted; Chapter 1 51.
+    lift("Step 1.2", 2);
+    fireEvent.pointerMove(window, at(yOf(50, 44)));
+    expect(line().dataset.label).toBe("in Chapter 0");
+    fireEvent.pointerUp(window, at(yOf(50, 44)));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "st-1", chapter: "ch-0", to: 59 },
+    ]);
+  });
+
+  it("drops a step right after the step the page edits, shown past those of its chapter shown", () => {
+    const { onEdit } = renderOutline(longCourseDraft({ chapters: 2, steps: 60 }), {
+      currentKey: "st-55",
+    });
+    // Rows: Chapter 0 0; its steps 1 to 50, 1.2 lifted; 1.56 51; Chapter 1 52.
+    lift("Step 1.2", 2);
+    fireEvent.pointerMove(window, at(yOf(51, 44)));
+    fireEvent.pointerUp(window, at(yOf(51, 44)));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "st-1", chapter: "ch-0", to: 55 },
+    ]);
+    lift("Step 1.2", 2);
+    fireEvent.pointerMove(window, at(yOf(50, 44)));
+    fireEvent.pointerUp(window, at(yOf(50, 44)));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "st-1", chapter: "ch-0", to: 49 },
+    ]);
+  });
+
+  it("drops a step into a chapter none of whose steps are shown, at its end", () => {
+    const shown = OUTLINE_ROW_LIMIT / OUTLINE_LIMIT;
+    const { onEdit } = renderOutline(
+      wideCourseDraft({ chapters: shown + 2, steps: OUTLINE_LIMIT + 10, questions: 0 }),
+    );
+    // Rows: each chapter shown in full is its header and OUTLINE_LIMIT
+    // steps; then Chapter `shown`, none of its steps shown, and its slot.
+    const header = shown * (OUTLINE_LIMIT + 1);
+    lift("Step 1.2", 2);
+    fireEvent.pointerMove(window, at(yOf(header)));
+    expect(row(`ch-${shown}`)).toHaveClass("drop-into");
+    fireEvent.pointerUp(window, at(yOf(header)));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveStep", id: "st-0-1", chapter: `ch-${shown}`, to: OUTLINE_LIMIT + 10 },
+    ]);
+  });
+
+  it("keeps drawing a lifted outline when the draft retires one of its steps", () => {
+    const { rerender } = renderOutline();
+    lift("Step 1.2", 2);
+    rerender(
+      applyDraftChanges(courseDraft(), [
+        { kind: "retire", of: "step", id: "ch-pods-1" },
+      ]) as ReleaseDraft,
+    );
+    expect(row("ch-pods-1")).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "Escape" });
+    expect(row("ch-pods-1")).toBeNull();
   });
 
   it("comes to nothing when the draft no longer has the place a drop is aimed at", () => {

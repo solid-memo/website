@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useMemo } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import { isPublished, questionsOfStep } from "@solid-memo/domain/release/courseIds";
 import { chapterOfStep, draftCardOf } from "@solid-memo/domain/release/draftOutline";
@@ -14,7 +15,9 @@ import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { DraftProseField, DraftScope, DraftStatus } from "./DraftParts";
 import { LifeActions } from "./LifeActions";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 import { NewQuestionForm } from "./NewQuestionForm";
+import { ShowMore, usePage } from "./ReleaseLists";
 
 /**
  * A step of a course draft (docs/studio.md, A step): its theory, in
@@ -25,7 +28,8 @@ import { NewQuestionForm } from "./NewQuestionForm";
  * ids), and a new one, its id after the last; and the step retired,
  * restored or deleted (one an earlier release published is only
  * retired). Opened at a field (`field`, from the release check), that
- * field is where the user arrives.
+ * field is where the user arrives. Its questions show OUTLINE_LIMIT at
+ * first, and as many more each time the user asks.
  */
 export function StepEditorScreen({
   draft,
@@ -51,9 +55,17 @@ export function StepEditorScreen({
   const chapter = chapterOfStep(draft, step);
   const chapterData =
     chapter === null ? undefined : draft.chapters.find((node) => node.id === chapter)!.data;
-  const number =
-    chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step);
+  // The step's number, worked out when the chapters or steps change, not on each edit of its theory.
+  const number = useMemo(
+    () => (chapter === null ? -1 : liveSteps(draft, chapter).findIndex((node) => node.id === step)),
+    // liveSteps reads only these.
+    [draft.url, draft.chapters, draft.steps, chapter, step],
+  );
   const name = number === -1 ? step : t("studio.chapter.step", { number: number + 1 });
+  const questions = usePage(
+    useMemo(() => questionsOfStep(draft, step), [draft, step]),
+    OUTLINE_LIMIT,
+  );
 
   return (
     <section>
@@ -114,7 +126,7 @@ export function StepEditorScreen({
           </h3>
           <p class="hint">{t("studio.step.questionsHint")}</p>
           <ol>
-            {questionsOfStep(draft, step).map((card) => {
+            {questions.shown.map((card) => {
               const found = draftCardOf(draft, card);
               return (
                 <li key={card}>
@@ -125,6 +137,7 @@ export function StepEditorScreen({
               );
             })}
           </ol>
+          <ShowMore more={questions.more} limit={OUTLINE_LIMIT} onShow={questions.showMore} />
           <NewQuestionForm
             id="step-new-question"
             draft={draft}

@@ -1033,6 +1033,16 @@
         "many": "{count} d’étapes",
         "other": "{count} étapes"
       },
+      "moreSteps": {
+        "one": "{count} étape de plus",
+        "many": "{count} d’étapes de plus",
+        "other": "{count} étapes de plus"
+      },
+      "moreQuestions": {
+        "one": "{count} question de plus",
+        "many": "{count} de questions de plus",
+        "other": "{count} questions de plus"
+      },
       "actions": "Actions pour {name}",
       "moveTo": "Déplacer vers le chapitre",
       "inChapter": "dans {chapter}",
@@ -1071,6 +1081,18 @@
       "retired": "Archivée",
       "place": "Posée",
       "nowhere": "Nulle part pour l’instant",
+      "chapter": "Chapitre",
+      "elsewhere": "Pas dans ce chapitre",
+      "moreChapters": {
+        "one": "Afficher {count} chapitre de plus",
+        "many": "Afficher {count} de chapitres de plus",
+        "other": "Afficher {count} chapitres de plus"
+      },
+      "moreSteps": {
+        "one": "Afficher {count} étape de plus",
+        "many": "Afficher {count} d’étapes de plus",
+        "other": "Afficher {count} étapes de plus"
+      },
       "atStep": "{chapter}, étape {step}",
       "atReview": "{chapter}, révision finale",
       "preview": "Telle que le cours la pose",
@@ -1139,6 +1161,11 @@
       "notAskedThere": "Cet identifiant ne se classe pas à cet endroit : la question ne serait donc pas posée là où l’indique « La poser ». Saisissez-en un qui convient.",
       "retire": "Archiver",
       "restore": "Réactiver",
+      "showMore": {
+        "one": "Afficher {count} de plus",
+        "many": "Afficher {count} de plus",
+        "other": "Afficher {count} de plus"
+      },
       "delete": "Supprimer",
       "published": "Une publication antérieure contient cet élément : la progression d’un apprenant peut donc y faire référence. Il peut être archivé, mais jamais supprimé.",
       "life": {
@@ -1183,6 +1210,11 @@
       },
       "errors": "Erreurs",
       "warnings": "Avertissements",
+      "more": {
+        "one": "Et {count} autre problème, non listé ici.",
+        "many": "Et {count} d’autres problèmes, non listés ici.",
+        "other": "Et {count} autres problèmes, non listés ici."
+      },
       "shapesHeading": "Formes",
       "shapesHint": "Les formes, ainsi que les profils DCAT-AP et SKOS, vérifient la publication en tant que données publiées. Elles prennent du temps sur un brouillon volumineux : elles ne s’exécutent donc que sur demande.",
       "shapesRun": "Vérifier au regard des formes",

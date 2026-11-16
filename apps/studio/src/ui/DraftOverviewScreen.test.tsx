@@ -15,7 +15,8 @@ import { problem } from "@solid-memo/domain/release/problems";
 import type { DraftField } from "@solid-memo/domain/release/releaseCheck";
 import { AppError } from "@solid-memo/domain/appError";
 import { DraftOverviewScreen, type OverviewCheck } from "./DraftOverviewScreen";
-import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
+import { OUTLINE_LIMIT } from "./DraftOutline";
+import { courseDraft, DRAFT_URL, draftLinks, longCourseDraft } from "../test/fixtures";
 
 const idle = { saving: false, failure: null };
 
@@ -191,6 +192,23 @@ describe("DraftOverviewScreen", () => {
     );
     fireEvent.click(within(retired).getAllByRole("button", { name: "Restore" })[0]!);
     expect(onEdit).toHaveBeenCalledWith([{ kind: "restore", of: "chapter", id: "ch-apps" }]);
+  });
+
+  it("lists OUTLINE_LIMIT of many chapters retired at first, and more at a button", () => {
+    const draft = longCourseDraft({ chapters: 120 });
+    renderScreen({
+      ...draft,
+      chapters: draft.chapters.map((node, at) =>
+        at === 0 ? node : { ...node, data: { ...node.data, deprecated: true } },
+      ),
+    });
+    const retired = screen.getByRole("heading", { name: "Retired chapters" })
+      .nextElementSibling as HTMLElement;
+    expect(within(retired).getAllByRole("listitem")).toHaveLength(OUTLINE_LIMIT);
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more" }));
+    expect(within(retired).getAllByRole("listitem")).toHaveLength(2 * OUTLINE_LIMIT);
+    fireEvent.click(screen.getByRole("button", { name: "Show 19 more" }));
+    expect(within(retired).getAllByRole("listitem")).toHaveLength(119);
   });
 
   it("adds a deck's cards here, and names a draft of no title", () => {

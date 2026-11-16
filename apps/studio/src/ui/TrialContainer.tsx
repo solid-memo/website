@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import {
   QueryClient,
   QueryClientProvider,
@@ -188,6 +188,10 @@ function TrialPlay({
     enabled: draft.course,
   });
   const course = courseQuery.data;
+  const chapters = useMemo(
+    () => course?.outline.chapters.map((one) => ({ id: one.id, title: one.title })) ?? [],
+    [course],
+  );
   const shown = course?.outline.chapters.find((one) => one.id === chapter) ?? null;
   // Answers go to the chapter shown, else to the one to take next: none once the course is done.
   const answered =
@@ -260,7 +264,8 @@ function TrialPlay({
     <>
       <TrialControls
         coursePage={draft.course ? links.courseHref : null}
-        chapters={course?.outline.chapters.map((one) => ({ id: one.id, title: one.title })) ?? []}
+        chapters={chapters}
+        current={shown?.id}
         answerHint={!draft.course ? "deck" : answered === null ? null : "course"}
         days={days}
         busy={act.isPending}

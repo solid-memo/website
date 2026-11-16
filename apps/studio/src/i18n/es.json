@@ -1033,6 +1033,16 @@
         "many": "{count} de pasos",
         "other": "{count} pasos"
       },
+      "moreSteps": {
+        "one": "{count} paso más",
+        "many": "{count} de pasos más",
+        "other": "{count} pasos más"
+      },
+      "moreQuestions": {
+        "one": "{count} pregunta más",
+        "many": "{count} de preguntas más",
+        "other": "{count} preguntas más"
+      },
       "actions": "Acciones para {name}",
       "moveTo": "Mover al capítulo",
       "inChapter": "en {chapter}",
@@ -1071,6 +1081,18 @@
       "retired": "Retirada",
       "place": "Se pregunta en",
       "nowhere": "Todavía en ningún sitio",
+      "chapter": "Capítulo",
+      "elsewhere": "No en este capítulo",
+      "moreChapters": {
+        "one": "Mostrar {count} capítulo más",
+        "many": "Mostrar {count} de capítulos más",
+        "other": "Mostrar {count} capítulos más"
+      },
+      "moreSteps": {
+        "one": "Mostrar {count} paso más",
+        "many": "Mostrar {count} de pasos más",
+        "other": "Mostrar {count} pasos más"
+      },
       "atStep": "{chapter}, paso {step}",
       "atReview": "{chapter}, repaso final",
       "preview": "Tal como la pregunta el curso",
@@ -1139,6 +1161,11 @@
       "notAskedThere": "Este ID no se ordena ahí, así que la pregunta no se haría donde dice «Preguntarla»: escribe uno que sí lo haga.",
       "retire": "Retirar",
       "restore": "Recuperar",
+      "showMore": {
+        "one": "Mostrar {count} más",
+        "many": "Mostrar {count} más",
+        "other": "Mostrar {count} más"
+      },
       "delete": "Eliminar",
       "published": "Una publicación anterior ya lo publicó, así que el progreso de quien estudia puede nombrarlo: se puede retirar, pero nunca eliminar.",
       "life": {
@@ -1183,6 +1210,11 @@
       },
       "errors": "Errores",
       "warnings": "Advertencias",
+      "more": {
+        "one": "Y {count} problema más, sin listar aquí.",
+        "many": "Y {count} de problemas más, sin listar aquí.",
+        "other": "Y {count} problemas más, sin listar aquí."
+      },
       "shapesHeading": "Formas",
       "shapesHint": "Las formas, y los perfiles DCAT-AP y SKOS, comprueban la publicación como datos publicados. En un borrador grande tardan un rato, así que solo se ejecutan cuando lo pides.",
       "shapesRun": "Comprobar con las formas",

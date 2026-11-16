@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 
 /** Most days a trial is moved ahead at once. */
 export const MOST_DAYS = 3650;
@@ -16,11 +17,14 @@ export const MOST_DAYS = 3650;
  * it); answers given at once, all right or all wrong, to what is asked
  * now (`answerHint` says what); the days the trial's clock is moved
  * ahead, and more of them. While one of them runs, `busy`, none can be
- * used; `error` is why the last one failed.
+ * used; `error` is why the last one failed. The chapter select lists
+ * the first OUTLINE_LIMIT chapters, and as many more each time the user
+ * asks, with the chapter in view (`current`) wherever it is.
  */
 export function TrialControls({
   coursePage,
   chapters,
+  current,
   answerHint,
   days,
   busy,
@@ -33,6 +37,8 @@ export function TrialControls({
   coursePage: string | null;
   /** A course's chapters, each by its id and title; none for a deck. */
   chapters: readonly { id: string; title: LangText }[];
+  /** The chapter in view, by its id, if any. */
+  current?: string | undefined;
   /** What the answers go to; null when nothing is asked now (a course finished). */
   answerHint: "course" | "deck" | null;
   days: number;
@@ -44,6 +50,14 @@ export function TrialControls({
 }) {
   const { t, errorText, readerText } = useI18n();
   const [ahead, setAhead] = useState(1);
+  const [count, setCount] = useState(OUTLINE_LIMIT);
+  const [picked, setPicked] = useState<string | null>(null);
+  const listed = useMemo(() => {
+    const shown = chapters.slice(0, count);
+    const at = current === undefined ? -1 : chapters.findIndex((one) => one.id === current);
+    if (at >= count) shown.push(chapters[at]!);
+    return { shown, more: chapters.length - shown.length };
+  }, [chapters, count, current]);
 
   return (
     <section class="trial-controls" aria-labelledby="trial-controls">
@@ -64,14 +78,27 @@ export function TrialControls({
             >
               <label>
                 {t("studio.trial.chapter")}
-                <select name="chapter">
-                  {chapters.map((one) => (
+                <select
+                  name="chapter"
+                  value={picked ?? current}
+                  onChange={(event) => setPicked(event.currentTarget.value)}
+                >
+                  {listed.shown.map((one) => (
                     <option key={one.id} value={one.id}>
                       {readerText(one.title)}
                     </option>
                   ))}
                 </select>
               </label>{" "}
+              {listed.more > 0 && (
+                <>
+                  <button type="button" onClick={() => setCount((was) => was + OUTLINE_LIMIT)}>
+                    {t("studio.question.moreChapters", {
+                      count: Math.min(listed.more, OUTLINE_LIMIT),
+                    })}
+                  </button>{" "}
+                </>
+              )}
               <button type="submit">{t("studio.trial.jump")}</button>
               <span class="hint"> {t("studio.trial.jumpHint")}</span>
             </form>

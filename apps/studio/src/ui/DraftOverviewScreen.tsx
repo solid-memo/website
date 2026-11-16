@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { LangText } from "@solid-memo/domain/langText";
 import { chapterIdFor } from "@solid-memo/domain/release/courseIds";
 import { retiredChapters } from "@solid-memo/domain/release/draftOutline";
@@ -21,9 +21,10 @@ import {
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
-import { DraftOutline } from "./DraftOutline";
+import { DraftOutline, OUTLINE_LIMIT } from "./DraftOutline";
 import { DraftScope, DraftStatus, DraftTextField, IdField, idUsable } from "./DraftParts";
 import { NewQuestionForm } from "./NewQuestionForm";
+import { ShowMore, usePage } from "./ReleaseLists";
 
 /** What a draft's screens link to. */
 export interface DraftLinks {
@@ -80,7 +81,11 @@ export function DraftOverviewScreen({
   const { t, readerText, errorText } = useI18n();
   const held = readOnly !== null;
   const title = draft.root.title ?? {};
-  const retired = retiredChapters(draft);
+  // A draft started from a release may have any number of chapters retired.
+  const retired = usePage(
+    useMemo(() => retiredChapters(draft), [draft.chapters]),
+    OUTLINE_LIMIT,
+  );
 
   return (
     <section>
@@ -152,11 +157,11 @@ export function DraftOverviewScreen({
               onEdit={(changes) => onEdit(changes)}
             />
             <NewChapterForm draft={draft} onAdd={(changes) => onEdit(changes) === null} />
-            {retired.length > 0 && (
+            {retired.shown.length > 0 && (
               <>
                 <h4>{t("studio.draft.retiredChapters")}</h4>
                 <ul>
-                  {retired.map((node) => (
+                  {retired.shown.map((node) => (
                     <li key={node.id}>
                       <a href={links.chapterHref(node.id)}>
                         {node.data.title === undefined ? node.id : readerText(node.data.title)}
@@ -170,6 +175,7 @@ export function DraftOverviewScreen({
                     </li>
                   ))}
                 </ul>
+                <ShowMore more={retired.more} limit={OUTLINE_LIMIT} onShow={retired.showMore} />
               </>
             )}
           </section>

@@ -358,6 +358,37 @@ describe("DeckAboutContainer", () => {
     );
   });
 
+  it("lists a course's chapters 50 at a time", async () => {
+    const course = makeCourse();
+    const [chapter] = course.outline.chapters;
+    const [progress] = course.progress.chapters;
+    const many = {
+      ...course,
+      outline: {
+        ...course.outline,
+        chapters: Array.from({ length: 120 }, (_, at) => ({
+          ...chapter!,
+          id: `ch-${at}`,
+          url: `${chapter!.url}-${at}`,
+          title: { en: `Chapter ${at}` },
+        })),
+      },
+      progress: { ...course.progress, chapters: Array<typeof progress>(120).fill(progress) },
+    };
+    const useCases = makeUseCasesFake({
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getCourse: vi.fn(async () => many),
+    });
+    renderContainer(useCases, many.deck, courseInstance);
+    const section = await screen.findByRole("region", { name: "Course progress" });
+    const listed = () => section.querySelectorAll(".studio-chapters > li").length;
+    await waitFor(() => expect(listed()).toBe(50));
+    fireEvent.click(within(section).getByRole("button", { name: "Show 50 more" }));
+    fireEvent.click(within(section).getByRole("button", { name: "Show 20 more" }));
+    expect(listed()).toBe(120);
+    expect(within(section).queryByRole("button", { name: /^Show/ })).toBeNull();
+  });
+
   it("says while a course is read, and why it could not be", async () => {
     let fail: (error: Error) => void = () => undefined;
     const useCases = makeUseCasesFake({

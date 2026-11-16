@@ -20,7 +20,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { deckHealthQuery } from "./HealthBadge";
 import { placeText } from "./HealthScreen";
-import { listedProblems, ProblemList } from "./ProblemList";
+import { listedProblems, ProblemList, shownProblems } from "./ProblemList";
 import { publishErrors, useReleaseCheck } from "./releaseCheck";
 import {
   isDraftRoute,
@@ -92,7 +92,8 @@ export function useWorkspaceProblems(
       problems: {
         count: found?.length,
         blocking,
-        routes: (found ?? []).map((problem) =>
+        // Only those the list shows: a draft can have any number.
+        routes: shownProblems(found ?? []).map((problem) =>
           targetRoute(draft.url, problemTarget(draft, problem)),
         ),
         list: (

@@ -7,18 +7,25 @@ import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
   groupProblems,
   problemTarget,
+  type ProblemGroup,
   type ProblemTarget,
 } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { problemMessage, subjectName } from "./problemText";
+import { bounded } from "./ReleaseLists";
+
+/** At most how many problems of each severity ProblemList lists; past it, it says how many more there are. */
+export const PROBLEM_LIMIT = 50;
 
 /**
  * A draft's problems (docs/studio.md, The release check), by severity
  * and then by what they are in (groupProblems), each list named by its
  * severity: each subject links to its editor (`targetHref`), and each
  * problem to its field there. The release check shows them, and the
- * Studio's dock.
+ * Studio's dock. A draft can have any number of problems: each severity
+ * lists at most PROBLEM_LIMIT of them (shownGroups) and says how many more
+ * there are.
  */
 export function ProblemList({
   draft,
@@ -39,7 +46,7 @@ export function ProblemList({
   };
   return (
     <>
-      {groupProblems(problems).map((group) => (
+      {shownGroups(problems).map((group) => (
         <section key={group.severity} aria-labelledby={`${id}-${group.severity}`}>
           <h3 id={`${id}-${group.severity}`}>
             {t(group.severity === "error" ? "studio.check.errors" : "studio.check.warnings")}
@@ -63,15 +70,34 @@ export function ProblemList({
               </li>
             ))}
           </ul>
+          {group.more > 0 && <p class="hint">{t("studio.check.more", { count: group.more })}</p>}
         </section>
       ))}
     </>
   );
 }
 
-/** The problems in the order ProblemList shows them: errors first, each subject's together. */
+/** The problems in the order ProblemList lists them: errors first, each subject's together. */
 export function listedProblems(problems: readonly ReleaseProblem[]): ReleaseProblem[] {
   return groupProblems(problems).flatMap((group) =>
+    group.subjects.flatMap((subject) => subject.problems),
+  );
+}
+
+/** The groups ProblemList shows: the first PROBLEM_LIMIT problems of each severity, and how many more it has. */
+function shownGroups(problems: readonly ReleaseProblem[]): (ProblemGroup & { more: number })[] {
+  return groupProblems(problems).map((group) => {
+    const { shown, more } = bounded(
+      group.subjects.flatMap((subject) => subject.problems),
+      PROBLEM_LIMIT,
+    );
+    return { ...groupProblems(shown)[0]!, more };
+  });
+}
+
+/** The problems ProblemList shows, in its order: those the dock's links go through (F8). */
+export function shownProblems(problems: readonly ReleaseProblem[]): ReleaseProblem[] {
+  return shownGroups(problems).flatMap((group) =>
     group.subjects.flatMap((subject) => subject.problems),
   );
 }

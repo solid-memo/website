@@ -11,7 +11,6 @@ import {
   distractorChanges,
   draftCardOf,
   draftOutline,
-  stepPlaceOf,
 } from "@solid-memo/domain/release/draftOutline";
 import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
 import {
@@ -34,6 +33,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import type { DraftLinks } from "./DraftOverviewScreen";
 import { chapterTitles, DraftScope, DraftStatus } from "./DraftParts";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 import { LifeActions } from "./LifeActions";
 
 /** A place as the select's value: `step <id>`, `review <id>`, or "" for nowhere. */
@@ -52,6 +52,164 @@ function placeFrom(value: string): QuestionPlace | null {
     : kind === "review"
       ? { kind: "review", chapter: id! }
       : null;
+}
+
+/**
+ * Where a course's question is asked, chosen in two parts: a chapter,
+ * then a place in it (nowhere, one of its steps, or its final review),
+ * so every step of every chapter can be chosen however many there are.
+ * A draft started from a release may have thousands of chapters and
+ * steps: the chapter select lists the first OUTLINE_LIMIT chapters, and
+ * as many more each time the user asks, the place select the chapter's
+ * first OUTLINE_LIMIT steps, and as many more each time; each lists the
+ * place chosen wherever it is. They are listed when the chapters or
+ * steps change, or the user asks for more, not on each keystroke in the
+ * form nor each edit to a card, and a chapter is named cut short
+ * (chapterTitles).
+ */
+function PlaceChoice({
+  draft,
+  place,
+  onMove,
+}: {
+  draft: ReleaseDraft;
+  place: QuestionPlace | null;
+  onMove: (place: QuestionPlace | null) => void;
+}) {
+  const { t, readerText } = useI18n();
+  const outline = useMemo(
+    () => draftOutline(draft),
+    // draftOutline reads only these.
+    [draft.url, draft.chapters, draft.steps],
+  );
+  const titles = useMemo(
+    () =>
+      chapterTitles(
+        outline.map(({ chapter }) => chapter),
+        readerText,
+      ),
+    [outline, readerText],
+  );
+  const value = placeValue(place);
+  // The place's chapter and step in the outline: -1 for none, or a chapter retired.
+  const [placeAt, placeStep] = useMemo(() => {
+    const [kind, id] = value.split(" ");
+    for (const [at, { chapter, steps }] of outline.entries()) {
+      if (kind === "review" && chapter.id === id) return [at, -1];
+      const step = kind === "step" ? steps.findIndex((node) => node.id === id) : -1;
+      if (step >= 0) return [at, step];
+    }
+    return [-1, -1];
+  }, [outline, value]);
+  const [picked, setPicked] = useState<string | null>(null);
+  const [chapterCount, setChapterCount] = useState(OUTLINE_LIMIT);
+  const [stepCount, setStepCount] = useState(OUTLINE_LIMIT);
+  const pickedAt = useMemo(
+    () => (picked === null ? -1 : outline.findIndex(({ chapter }) => chapter.id === picked)),
+    [outline, picked],
+  );
+  // The chapter chosen: the one the user picked, else the place's, else the first.
+  const at = pickedAt >= 0 ? pickedAt : placeAt >= 0 ? placeAt : outline.length > 0 ? 0 : -1;
+  const chapters = useMemo(() => {
+    const ats = outline.slice(0, chapterCount).map((_, index) => index);
+    if (at >= chapterCount) ats.push(at);
+    return {
+      options: ats.map((index) => {
+        const { id } = outline[index]!.chapter;
+        return (
+          <option key={id} value={id}>
+            {readerText(titles.get(id)!)}
+          </option>
+        );
+      }),
+      more: outline.length - ats.length,
+    };
+  }, [outline, chapterCount, at, titles, readerText]);
+  const steps = useMemo(() => {
+    if (at < 0) return { options: null, more: 0 };
+    const { chapter, steps: all } = outline[at]!;
+    const ats = all.slice(0, stepCount).map((_, index) => index);
+    if (placeAt === at && placeStep >= stepCount) ats.push(placeStep);
+    return {
+      options: (
+        <>
+          {ats.map((index) => (
+            <option key={all[index]!.id} value={placeValue({ kind: "step", step: all[index]!.id })}>
+              {t("studio.chapter.step", { number: index + 1 })}
+            </option>
+          ))}
+          <option value={placeValue({ kind: "review", chapter: chapter.id })}>
+            {t("studio.chapter.review")}
+          </option>
+        </>
+      ),
+      more: all.length - ats.length,
+    };
+  }, [outline, at, stepCount, placeAt, placeStep, t]);
+  // The select closed shows only its option ("Step 3"): the place chosen,
+  // with its chapter, is said to a screen reader as part of its name.
+  const labelId = useId();
+  const chosenId = useId();
+  const chosen = useMemo(() => {
+    if (placeAt < 0) return null;
+    const chapter = readerText(titles.get(outline[placeAt]!.chapter.id)!);
+    return placeStep < 0
+      ? t("studio.question.atReview", { chapter })
+      : t("studio.question.atStep", { chapter, step: placeStep + 1 });
+  }, [outline, placeAt, placeStep, titles, t, readerText]);
+
+  // Whether the place select lists the place chosen: nowhere, or a place in the chapter chosen.
+  const here = value === "" || (placeAt >= 0 && placeAt === at);
+
+  return (
+    <>
+      {at >= 0 && (
+        <label>
+          {t("studio.question.chapter")}
+          <select
+            value={outline[at]!.chapter.id}
+            onChange={(event) => {
+              setPicked(event.currentTarget.value);
+              setStepCount(OUTLINE_LIMIT);
+            }}
+          >
+            {chapters.options}
+          </select>
+        </label>
+      )}
+      {chapters.more > 0 && (
+        <button type="button" onClick={() => setChapterCount((was) => was + OUTLINE_LIMIT)}>
+          {t("studio.question.moreChapters", { count: Math.min(chapters.more, OUTLINE_LIMIT) })}
+        </button>
+      )}
+      <label>
+        <span id={labelId}>{t("studio.question.place")}</span>
+        <select
+          value={here ? value : "elsewhere"}
+          aria-labelledby={chosen === null ? labelId : `${labelId} ${chosenId}`}
+          onChange={(event) => onMove(placeFrom(event.currentTarget.value))}
+        >
+          <option value="">{t("studio.question.nowhere")}</option>
+          {!here && (
+            <option value="elsewhere" disabled>
+              {t("studio.question.elsewhere")}
+            </option>
+          )}
+          {steps.options}
+        </select>
+      </label>
+      {steps.more > 0 && (
+        <button type="button" onClick={() => setStepCount((was) => was + OUTLINE_LIMIT)}>
+          {t("studio.question.moreSteps", { count: Math.min(steps.more, OUTLINE_LIMIT) })}
+        </button>
+      )}
+      {chosen !== null && (
+        <span id={chosenId} class="visually-hidden">
+          {chosen}
+        </span>
+      )}
+    </>
+  );
 }
 
 /** The order the preview offers the options in: as they come, so the same card shows the same each time it is drawn. */
@@ -127,54 +285,7 @@ export function QuestionEditorScreen({
     onEdit([{ kind: "editCard", id: card, card: cardTextOf(content, saved.created) }]);
   }
 
-  // A course draft may have thousands of steps: its places are listed
-  // when the draft changes, not on each keystroke in the form, and a
-  // chapter is named once, over its steps, each step by its number.
   const place = useMemo(() => placeOf(draft, card), [draft, card]);
-  const outline = useMemo(() => draftOutline(draft), [draft]);
-  const titles = useMemo(
-    () =>
-      chapterTitles(
-        outline.map(({ chapter }) => chapter),
-        readerText,
-      ),
-    [outline, readerText],
-  );
-  const places = useMemo(
-    () =>
-      outline.map(({ chapter, steps }) => (
-        <optgroup key={chapter.id} label={readerText(titles.get(chapter.id)!)}>
-          {steps.map((step, index) => (
-            <option key={step.id} value={placeValue({ kind: "step", step: step.id })}>
-              {t("studio.chapter.step", { number: index + 1 })}
-            </option>
-          ))}
-          <option value={placeValue({ kind: "review", chapter: chapter.id })}>
-            {t("studio.chapter.review")}
-          </option>
-        </optgroup>
-      )),
-    [outline, titles, t, readerText],
-  );
-  // The select closed shows only its option ("Step 3"): the place chosen,
-  // with its chapter, is said to a screen reader as part of its name.
-  const labelId = useId();
-  const chosenId = useId();
-  const chosen = useMemo(() => {
-    const at =
-      place === null
-        ? null
-        : place.kind === "review"
-          ? { chapter: place.chapter, index: -1 }
-          : stepPlaceOf(draft, place.step);
-    // A place in a chapter retired is no option of the select.
-    const title = at === null ? undefined : titles.get(at.chapter);
-    if (title === undefined) return null;
-    const chapter = readerText(title);
-    return at!.index < 0
-      ? t("studio.question.atReview", { chapter })
-      : t("studio.question.atStep", { chapter, step: at!.index + 1 });
-  }, [draft, place, titles, t, readerText]);
 
   return (
     <section>
@@ -190,26 +301,11 @@ export function QuestionEditorScreen({
       <div class="studio-editor">
         <DraftScope readOnly={readOnly} draftsHref={links.draftsHref} healthHref={links.healthHref}>
           {draft.course && (
-            <label>
-              <span id={labelId}>{t("studio.question.place")}</span>
-              <select
-                value={placeValue(place)}
-                aria-labelledby={chosen === null ? labelId : `${labelId} ${chosenId}`}
-                onChange={(event) =>
-                  onEdit([
-                    { kind: "moveQuestion", card, place: placeFrom(event.currentTarget.value) },
-                  ])
-                }
-              >
-                <option value="">{t("studio.question.nowhere")}</option>
-                {places}
-              </select>
-            </label>
-          )}
-          {chosen !== null && (
-            <span id={chosenId} class="visually-hidden">
-              {chosen}
-            </span>
+            <PlaceChoice
+              draft={draft}
+              place={place}
+              onMove={(to) => onEdit([{ kind: "moveQuestion", card, place: to }])}
+            />
           )}
 
           <form class="card-edit" onSubmit={save}>

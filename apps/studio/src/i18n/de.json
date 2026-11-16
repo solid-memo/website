@@ -972,6 +972,14 @@
         "one": "{count} Schritt",
         "other": "{count} Schritte"
       },
+      "moreSteps": {
+        "one": "{count} weiterer Schritt",
+        "other": "{count} weitere Schritte"
+      },
+      "moreQuestions": {
+        "one": "{count} weitere Frage",
+        "other": "{count} weitere Fragen"
+      },
       "actions": "Aktionen für {name}",
       "moveTo": "In Kapitel verschieben",
       "inChapter": "in {chapter}",
@@ -1010,6 +1018,16 @@
       "retired": "Ausgemustert",
       "place": "Gestellt",
       "nowhere": "Noch nirgends",
+      "chapter": "Kapitel",
+      "elsewhere": "Nicht in diesem Kapitel",
+      "moreChapters": {
+        "one": "Noch {count} Kapitel anzeigen",
+        "other": "Noch {count} Kapitel anzeigen"
+      },
+      "moreSteps": {
+        "one": "Noch {count} Schritt anzeigen",
+        "other": "Noch {count} Schritte anzeigen"
+      },
       "atStep": "{chapter}, Schritt {step}",
       "atReview": "{chapter}, Abschlusswiederholung",
       "preview": "So, wie der Kurs sie stellt",
@@ -1075,6 +1093,10 @@
       "notAskedThere": "Diese ID wird dort nicht einsortiert, daher würde die Frage nicht dort gestellt, wo „Stellen“ es angibt: Schreib eine, die passt.",
       "retire": "Ausmustern",
       "restore": "Zurückholen",
+      "showMore": {
+        "one": "Noch {count} anzeigen",
+        "other": "Noch {count} anzeigen"
+      },
       "delete": "Löschen",
       "published": "Eine frühere Ausgabe hat dies veröffentlicht, daher kann der Fortschritt von Lernenden darauf verweisen: Es lässt sich ausmustern, aber nie löschen.",
       "life": {
@@ -1118,6 +1140,10 @@
       },
       "errors": "Fehler",
       "warnings": "Warnungen",
+      "more": {
+        "one": "Und {count} weiteres Problem, hier nicht aufgeführt.",
+        "other": "Und {count} weitere Probleme, hier nicht aufgeführt."
+      },
       "shapesHeading": "Formen",
       "shapesHint": "Die Formen und die Profile DCAT-AP und SKOS prüfen die Ausgabe als veröffentlichte Daten. Bei einem großen Entwurf dauert das eine Weile, daher laufen sie nur auf Anfrage.",
       "shapesRun": "Anhand der Formen prüfen",

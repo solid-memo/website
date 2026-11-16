@@ -972,6 +972,14 @@
         "one": "{count} steg",
         "other": "{count} steg"
       },
+      "moreSteps": {
+        "one": "{count} steg till",
+        "other": "{count} steg till"
+      },
+      "moreQuestions": {
+        "one": "{count} fråga till",
+        "other": "{count} frågor till"
+      },
       "actions": "Åtgärder för {name}",
       "moveTo": "Flytta till kapitel",
       "inChapter": "i {chapter}",
@@ -1010,6 +1018,16 @@
       "retired": "Ur bruk",
       "place": "Ställs",
       "nowhere": "Ingenstans än",
+      "chapter": "Kapitel",
+      "elsewhere": "Inte i det här kapitlet",
+      "moreChapters": {
+        "one": "Visa {count} kapitel till",
+        "other": "Visa {count} kapitel till"
+      },
+      "moreSteps": {
+        "one": "Visa {count} steg till",
+        "other": "Visa {count} steg till"
+      },
       "atStep": "{chapter}, steg {step}",
       "atReview": "{chapter}, slutrepetition",
       "preview": "Så som kursen ställer den",
@@ -1075,6 +1093,10 @@
       "notAskedThere": "Det här id:t sorteras inte där, så frågan skulle inte ställas där ”Ställ den” säger: skriv ett som gör det.",
       "retire": "Ta ur bruk",
       "restore": "Återställ",
+      "showMore": {
+        "one": "Visa {count} till",
+        "other": "Visa {count} till"
+      },
       "delete": "Ta bort",
       "published": "En tidigare utgåva gav ut det här, så en elevs framsteg kan nämna det: det kan tas ur bruk, aldrig tas bort.",
       "life": {
@@ -1118,6 +1140,10 @@
       },
       "errors": "Fel",
       "warnings": "Varningar",
+      "more": {
+        "one": "Och {count} problem till, inte listat här.",
+        "other": "Och {count} problem till, inte listade här."
+      },
       "shapesHeading": "Former",
       "shapesHint": "Formerna, och profilerna DCAT-AP och SKOS, kontrollerar utgåvan som publicerade data. De tar en stund på ett stort utkast, så de körs bara när du ber om det.",
       "shapesRun": "Kontrollera mot formerna",

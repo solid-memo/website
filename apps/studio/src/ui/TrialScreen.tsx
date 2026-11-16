@@ -9,14 +9,17 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { problemMessage, subjectName } from "./problemText";
+import { bounded } from "./ReleaseLists";
 import { useScreenKeys } from "./shell/useShortcuts";
 
 /**
  * A draft's trial (docs/studio.md, The trial): what it is, the way to
  * start it over or to play the draft as it is now, then the trial being
  * set up, why it could not be (`error`), the problems that keep the
- * draft from being played (each a link to its field), or the trial
+ * draft from being played (each a link to its field, at most
+ * PROBLEM_LIMIT of them, and how many more there are), or the trial
  * itself (`children`). The digits are the trial's, as they are a
  * learner's (a grade, an option), never the draft's tabs: a digit the
  * trial has no use for just then does nothing.
@@ -49,6 +52,7 @@ export function TrialScreen({
   useScreenKeys((event, key) => {
     if (/^[1-9]$/.test(key)) event.preventDefault();
   });
+  const listed = problems === null ? null : bounded(problems, PROBLEM_LIMIT);
   return (
     <section>
       <header>
@@ -67,11 +71,11 @@ export function TrialScreen({
         <Loading label={t("studio.trial.opening")} />
       ) : error ? (
         <ErrorMessage error={errorText(error)} />
-      ) : problems !== null ? (
+      ) : listed !== null ? (
         <>
           <p>{t("studio.trial.notReady")}</p>
           <ul class="studio-health-list release-problems">
-            {problems.map((problem, index) => (
+            {listed.shown.map((problem, index) => (
               <li key={index}>
                 {subjectName(draft, problem.subject, i18n)}:{" "}
                 <a href={targetHref(problemTarget(draft, problem))}>
@@ -80,6 +84,7 @@ export function TrialScreen({
               </li>
             ))}
           </ul>
+          {listed.more > 0 && <p class="hint">{t("studio.check.more", { count: listed.more })}</p>}
         </>
       ) : (
         children
