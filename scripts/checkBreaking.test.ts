@@ -137,26 +137,51 @@ describe("verdict", () => {
   });
 });
 
-function fakeIo(head: string, commits: Commit[], fail?: Error): BreakingIo & { logged: string[] } {
+type Fake = {
+  fail?: Error;
+  /** The latest release tag. */
+  release?: string;
+  /** The routes file at a commit, when not the default. */
+  at?: Record<string, string>;
+  /** The commits since a commit, when not `commits`. */
+  since?: Record<string, Commit[]>;
+};
+
+function fakeIo(
+  head: string,
+  commits: Commit[],
+  fake: Fake = {},
+): BreakingIo & { logged: string[] } {
   const logged: string[] = [];
   return {
     logged,
     mergeBase: (ref) => {
-      if (fail !== undefined) throw fail;
+      if (fake.fail !== undefined) throw fake.fail;
       return `${ref}-base`;
     },
-    filesAt: (at) => new Map([[ROUTES, at === "main-base" ? "home: #/decks\n" : ""]]),
+    filesAt: (at) =>
+      new Map([[ROUTES, fake.at?.[at] ?? (at === "main-base" ? "home: #/decks\n" : "")]]),
     files: () => new Map([[ROUTES, head]]),
-    commitsSince: () => commits,
+    commitsSince: (at) => fake.since?.[at] ?? commits,
+    lastRelease: () => fake.release,
     log: (message) => logged.push(message),
   };
 }
 
 describe("main", () => {
   it("passes when every line is kept", () => {
+    const io = fakeIo("home: #/decks\n", [], { release: "v1" });
+    expect(main(["node", "--base", "main"], io)).toBe(0);
+    expect(io.logged).toEqual([
+      "The public API keeps every line it had at main-bas, or says why not.",
+    ]);
+  });
+
+  it("says when there is no release tag to check from", () => {
     const io = fakeIo("home: #/decks\n", []);
     expect(main(["node", "--base", "main"], io)).toBe(0);
     expect(io.logged).toEqual([
+      "No release tag found; checked from the base only.",
       "The public API keeps every line it had at main-bas, or says why not.",
     ]);
   });
@@ -168,7 +193,39 @@ describe("main", () => {
   });
 
   it("logs its notes and passes", () => {
-    const io = fakeIo("", [commit("feat!: x\n\nBREAKING CHANGE: y")]);
+    const io = fakeIo("", [commit("feat!: x\n\nBREAKING CHANGE: y")], { release: "v1" });
+    expect(main(["node", "--base", "main"], io)).toBe(0);
+    expect(io.logged).toHaveLength(3);
+  });
+
+  it("checks again from the last release tag, as the release reads the commits", () => {
+    // The branch lost nothing; a commit merged since v1 lost a line, and
+    // the commit that said it breaks is reverted here.
+    const io = fakeIo("", [], {
+      release: "v1",
+      at: { "main-base": "", "v1-base": "home: #/decks\n" },
+    });
+    expect(main(["node", "--base", "main"], io)).toBe(1);
+    expect(io.logged[0]).toBe(
+      "Since the last release, v1, as the release reads the commits from there (a commit that a later one reverts says nothing):",
+    );
+    expect(io.logged[1]).toBe(`${ROUTES}: "home: #/decks" is gone.`);
+  });
+
+  it("passes when a commit since the last release says it breaks", () => {
+    const io = fakeIo("", [], {
+      release: "v1",
+      at: { "main-base": "", "v1-base": "home: #/decks\n" },
+      since: { "v1-base": [commit("feat!: x\n\nBREAKING CHANGE: y")] },
+    });
+    expect(main(["node", "--base", "main"], io)).toBe(0);
+    expect(io.logged).toEqual([
+      "The public API keeps every line it had at main-bas, or says why not.",
+    ]);
+  });
+
+  it("checks once when the last release is the base", () => {
+    const io = fakeIo("", [commit("feat!: x\n\nBREAKING CHANGE: y")], { release: "main" });
     expect(main(["node", "--base", "main"], io)).toBe(0);
     expect(io.logged).toHaveLength(3);
   });
@@ -188,7 +245,7 @@ describe("main", () => {
   });
 
   it("fails with git's message when git fails", () => {
-    const io = fakeIo("", [], new Error("fatal: Not a valid object name nowhere"));
+    const io = fakeIo("", [], { fail: new Error("fatal: Not a valid object name nowhere") });
     expect(main(["node", "--base", "nowhere"], io)).toBe(1);
     expect(io.logged).toEqual(["fatal: Not a valid object name nowhere"]);
   });
@@ -271,6 +328,108 @@ describe("defaultIo", () => {
         message: "feat!: move home\n\nBREAKING CHANGE: bookmarks break",
       },
     ]);
+  });
+
+  // As the release reads them (scripts/reverts.ts): a revert leaves out
+  // the commit it names only when its change undoes that commit's.
+  describe("reads the commits as the release does", () => {
+    const declared = "feat!: move home\n\nBREAKING CHANGE: bookmarks break";
+    const verdictOf = () => {
+      const logged: string[] = [];
+      const io = { ...defaultIo(repo), log: (line: string) => logged.push(line) };
+      return { code: main(["node", "--base", "main"], io), logged };
+    };
+    const start = () => {
+      repo = mkdtempSync(join(tmpdir(), "breaking-"));
+      git("init", "-q", "-b", "main");
+      write(ROUTES, "home: #/decks\n");
+      git("add", ".");
+      git("commit", "-q", "-m", "chore: start");
+      git("switch", "-q", "-c", "topic");
+      write(ROUTES, "home: #/home\n");
+      git("commit", "-q", "-am", declared);
+      return git("rev-parse", "HEAD");
+    };
+
+    it("drops a breaking commit that git revert undoes, so a line gone later needs its own", () => {
+      start();
+      git("revert", "--no-edit", "HEAD");
+      write(ROUTES, "home: #/start\n");
+      git("commit", "-q", "-am", "feat: start at home");
+      expect(defaultIo(repo).commitsSince(git("rev-parse", "main"))).toEqual([
+        { hash: git("rev-parse", "HEAD"), message: "feat: start at home" },
+      ]);
+      const { code, logged } = verdictOf();
+      expect(code).toBe(1);
+      expect(logged).toContain(`${ROUTES}: "home: #/decks" is gone.`);
+    });
+
+    it("checks from the last release a revert of a breaking commit merged before the branch", () => {
+      repo = mkdtempSync(join(tmpdir(), "breaking-"));
+      git("init", "-q", "-b", "main");
+      write(ROUTES, "home: #/decks\n");
+      git("add", ".");
+      git("commit", "-q", "-m", "chore: start");
+      git("tag", "v1.0.0");
+      expect(defaultIo(repo).lastRelease()).toBe("v1.0.0");
+      // One pull request, merged: it breaks, and says so.
+      write(ROUTES, "home: #/home\n");
+      git("commit", "-q", "-am", declared);
+      // The next: git revert of that commit, then the same line gone again.
+      git("switch", "-q", "-c", "topic");
+      git("revert", "--no-edit", "HEAD");
+      write(ROUTES, "home: #/home\n");
+      git("commit", "-q", "-am", "feat: start at home");
+      const { code, logged } = verdictOf();
+      expect(code).toBe(1);
+      expect(logged).toEqual([
+        "Since the last release, v1.0.0, as the release reads the commits from there (a commit that a later one reverts says nothing):",
+        `${ROUTES}: "home: #/decks" is gone.`,
+        expect.stringContaining("A line of api/ went"),
+      ]);
+      // Said again, the change is declared.
+      git("commit", "-q", "--amend", "-m", declared);
+      expect(verdictOf().code).toBe(0);
+    });
+
+    it("finds no release in a repository with no release tag", () => {
+      start();
+      git("tag", "other");
+      git("tag", "v2.0.0-beta.1");
+      expect(defaultIo(repo).lastRelease()).toBeUndefined();
+    });
+
+    it("finds the highest release HEAD has, not the nearest", () => {
+      start();
+      git("tag", "v1.10.0");
+      git("switch", "-q", "-c", "side");
+      write("other.txt", "x\n");
+      git("add", ".");
+      git("commit", "-q", "-m", "fix: on the side");
+      git("tag", "v1.9.0");
+      git("switch", "-q", "topic");
+      write("more.txt", "x\n");
+      git("add", ".");
+      git("commit", "-q", "-m", "feat: more");
+      git("tag", "v3.0.0");
+      git("reset", "-q", "--hard", "HEAD~1");
+      git("merge", "-q", "--no-edit", "side");
+      expect(git("describe", "--tags", "--abbrev=0", "--match", "v[0-9]*", "HEAD")).toBe("v1.9.0");
+      expect(defaultIo(repo).lastRelease()).toBe("v1.10.0");
+    });
+
+    it("keeps a breaking commit that a revert only names, as the release does", () => {
+      const named = start();
+      const message = `Revert "feat!: move home"\n\nThis reverts commit ${named}.`;
+      git("commit", "-q", "--allow-empty", "-m", message);
+      expect(defaultIo(repo).commitsSince(git("rev-parse", "main"))).toEqual([
+        { hash: git("rev-parse", "HEAD"), message },
+        { hash: named, message: declared },
+      ]);
+      const { code, logged } = verdictOf();
+      expect(code).toBe(0);
+      expect(logged).toContain(`Declared breaking by ${named.slice(0, 8)} feat!: move home.`);
+    });
   });
 
   it("logs to the console", () => {

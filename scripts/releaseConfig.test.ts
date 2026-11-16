@@ -2,10 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { existsSync, readFileSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { join, matchesGlob } from "node:path";
 import { describe, expect, it } from "vitest";
-import { saysBreaking } from "./checkBreaking.ts";
+import { defaultIo, saysBreaking } from "./checkBreaking.ts";
+import releaseWithoutMerges from "./releaseWithoutMerges.ts";
 import { ASSETS_DIR, archivePath } from "./docsArchive.ts";
 
 /**
@@ -183,6 +186,57 @@ describe("the commits, as the release reads them", () => {
     ];
     for (const message of messages) {
       expect((await bump(message)) === "major", message).toBe(saysBreaking(message));
+    }
+  });
+
+  // A revert takes a commit out of the release only when its change
+  // undoes it (scripts/reverts.ts), and check:breaking reads the range
+  // the same way, so a breaking commit counts in both or in neither.
+  it("agrees with npm run check:breaking on a revert of a breaking commit", async () => {
+    const breaking = "feat(api)!: drop the old deck address\n\nBREAKING CHANGE: old links break.";
+    for (const genuine of [true, false]) {
+      const cwd = mkdtempSync(join(tmpdir(), "release-"));
+      const git = (...args: string[]) =>
+        execFileSync(
+          "git",
+          [
+            "-c",
+            "user.name=t",
+            "-c",
+            "user.email=t@example.org",
+            "-c",
+            "commit.gpgsign=false",
+            ...args,
+          ],
+          { cwd, encoding: "utf8" },
+        ).trim();
+      try {
+        git("init", "-q", "-b", "main");
+        writeFileSync(join(cwd, "a"), "1");
+        git("add", "a");
+        git("commit", "-qm", "chore: start");
+        const base = git("rev-parse", "HEAD");
+        writeFileSync(join(cwd, "a"), "2");
+        git("commit", "-qam", breaking);
+        const named = git("rev-parse", "HEAD");
+        if (genuine) git("revert", "--no-edit", "HEAD");
+        else {
+          const revert = `Revert "feat(api)!: drop the old deck address"\n\nThis reverts commit ${named}.`;
+          git("commit", "-q", "--allow-empty", "-m", revert);
+        }
+        const commits = defaultIo(cwd).commitsSince(base);
+        const release = await releaseWithoutMerges.analyzeCommits(options(wrapper), {
+          commits: git("rev-list", `${base}..HEAD`)
+            .split("\n")
+            .map((hash) => ({ hash, message: git("log", "-1", "--format=%B", hash) })),
+          cwd,
+          logger,
+        });
+        expect(release === "major", `genuine: ${genuine}`).toBe(!genuine);
+        expect(commits.some(({ message }) => saysBreaking(message))).toBe(!genuine);
+      } finally {
+        rmSync(cwd, { recursive: true, force: true });
+      }
     }
   });
 

@@ -143,6 +143,13 @@ export default {
     // types release nothing. The preset counts a revert only by the
     // "This reverts commit <sha>." line that git revert writes, so the
     // rule makes a revert: commit without it release too.
+    //
+    // The plugins leave out a commit that such a line names, and the
+    // revert with it, but read only the message: the wrapper lets a
+    // revert name a commit only when its change undoes that commit's
+    // (scripts/reverts.ts), so a message alone cannot take a breaking
+    // change out of the release. npm run check:breaking reads the
+    // commits the same way, from its base and from the last release tag.
     [
       "./scripts/releaseWithoutMerges.ts",
       {

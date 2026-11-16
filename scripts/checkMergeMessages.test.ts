@@ -184,6 +184,7 @@ describe("main", () => {
   function io(
     messages: Record<string, string>,
     single: readonly string[] = [],
+    undone: readonly string[] = [],
   ): MergesIo & { logged: string[] } {
     const logged: string[] = [];
     const commits: RangeCommit[] = Object.keys(messages).map((hash) => ({
@@ -194,6 +195,7 @@ describe("main", () => {
       logged,
       commitsBetween: () => commits,
       messageOf: (hash) => messages[hash]!,
+      undoes: (revert, named) => undone.includes(`${revert} ${named}`),
       log: (message) => logged.push(message),
     };
   }
@@ -250,6 +252,26 @@ describe("main", () => {
     expect(fake.logged[3]).toMatch(/^f holds an HTML comment/);
     expect(fake.logged[4]).toContain("change the title");
     expect(fake.logged.join("\n")).not.toContain("the title's text");
+  });
+
+  it("fails on a revert whose change does not undo the commit it names", () => {
+    const fake = io(
+      {
+        r: 'Revert "feat!: x"\n\nThis reverts commit a1.',
+        s: "revert: feat!: y\n\nThis reverts commit a2.",
+        t: 'Revert "feat: z"\n\nThis reverts commit a3.',
+        u: 'Revert "feat: z"',
+        m: merge('Revert "feat!: x"\n\nThis reverts commit a1.'),
+      },
+      ["r", "s", "t", "u"],
+      ["t a3"],
+    );
+    expect(main(args, fake)).toBe(1);
+    expect(fake.logged.slice(0, -1)).toEqual([
+      "r says it reverts a commit whose change it does not undo.",
+      "s says it reverts a commit whose change it does not undo.",
+    ]);
+    expect(fake.logged.at(-1)).toContain("git revert");
   });
 
   it("names only the commit when its message names no pull request", () => {
@@ -357,6 +379,58 @@ describe("defaultIo", () => {
     expect(log).toHaveBeenCalledWith(`${head} says it breaks, and commitlint skips it.`);
     expect(main(["node", "--base", base, "--head", head, "--queue"], defaultIo(cwd))).toBe(1);
     expect(log).toHaveBeenCalledWith(expect.stringContaining("no merge commit"));
+    log.mockRestore();
+  });
+});
+
+describe("defaultIo's undoes", () => {
+  let repo: string | undefined;
+
+  afterEach(() => {
+    if (repo) rmSync(repo, { recursive: true, force: true });
+    repo = undefined;
+  });
+
+  it("passes git revert, and fails a revert that only says so", () => {
+    repo = mkdtempSync(join(tmpdir(), "merges-"));
+    const cwd = repo;
+    const git = (...args: string[]) =>
+      execFileSync(
+        "git",
+        [
+          "-c",
+          "user.name=t",
+          "-c",
+          "user.email=t@example.org",
+          "-c",
+          "commit.gpgsign=false",
+          ...args,
+        ],
+        { cwd, encoding: "utf8" },
+      ).trim();
+    git("init", "-q", "-b", "main");
+    writeFileSync(join(cwd, "a"), "1");
+    git("add", "a");
+    git("commit", "-qm", "chore: start");
+    const base = git("rev-parse", "HEAD");
+    writeFileSync(join(cwd, "a"), "2");
+    git("commit", "-qam", "feat!: x\n\nBREAKING CHANGE: y");
+    const named = git("rev-parse", "HEAD");
+    git("revert", "--no-edit", "HEAD");
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    expect(main(["node", "--base", base, "--head", "HEAD"], defaultIo(cwd))).toBe(0);
+    git(
+      "commit",
+      "-q",
+      "--allow-empty",
+      "-m",
+      `Revert "feat!: x"\n\nThis reverts commit ${named}.`,
+    );
+    const head = git("rev-parse", "HEAD");
+    expect(main(["node", "--base", base, "--head", head], defaultIo(cwd))).toBe(1);
+    expect(log).toHaveBeenCalledWith(
+      `${head} says it reverts a commit whose change it does not undo.`,
+    );
     log.mockRestore();
   });
 });

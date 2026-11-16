@@ -147,7 +147,10 @@ The merge queue refuses those keywords, comment markers and directives
 in a pull request's title too, and a title that starts as a breaking
 change's footer, as the merge commit holds the title
 ([docs/releasing.md](docs/releasing.md#what-a-merge-commit-decides)).
-A commit commitlint skips, such as a revert, may not say it breaks.
+A commit commitlint skips, such as a revert, may not say it breaks, and
+a revert that names a commit undoes that commit's change, as
+`git revert` makes it
+([docs/releasing.md](docs/releasing.md#reverts)).
 `npm run check:merges` reads every commit's whole message for a comment
 marker or a directive, as commitlint can miss part of one, and every
 commit's header and breaking change's footer for a link.

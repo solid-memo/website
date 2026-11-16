@@ -22,6 +22,11 @@
  * release, so it may not say it breaks: that takes a commit commitlint
  * reads. It still releases what it otherwise would.
  *
+ * A commit with one parent whose message says it reverts a commit (the
+ * release's revert pattern, as `git revert` writes it) must undo that
+ * commit's change (undoes, from reverts.ts). The release reads any other
+ * as a revert of nothing, so the commit it names still counts.
+ *
  * No commit may hold what would change how CHANGELOG.md is linted
  * (CHANGELOG_DIRECTIVE, from commitlint.config.mjs): the release writes a
  * commit's subject and footer there, so an HTML comment or a spell
@@ -45,6 +50,7 @@ import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { saysBreaking } from "./checkBreaking.ts";
+import { gitAt, revertOf, undoes } from "./reverts.ts";
 
 const { CHANGELOG_DIRECTIVE, SKIP_KEYWORD, holdsChangelogLink, skippedByCommitlint } =
   (await import(new URL("../commitlint.config.mjs", import.meta.url).href)) as {
@@ -93,6 +99,8 @@ export interface MergesIo {
   commitsBetween(base: string, head: string): RangeCommit[];
   /** A commit's whole message. */
   messageOf(hash: string): string;
+  /** Whether the change of commit `revert` undoes that of the commit `named` names. */
+  undoes(revert: string, named: string): boolean;
   log(message: string): void;
 }
 
@@ -129,14 +137,17 @@ export function main(argv: readonly string[], io: MergesIo): number {
     }
     const problems = commits.flatMap(({ hash, merge }) => {
       const message = io.messageOf(hash);
-      return problemsOf(message, merge).map(
-        (problem) => `${nameOf(hash, message, merge)} ${problem}.`,
-      );
+      const found = problemsOf(message, merge);
+      const revert = merge ? undefined : revertOf(message);
+      if (revert !== undefined && !io.undoes(hash, revert.hash)) {
+        found.push("says it reverts a commit whose change it does not undo");
+      }
+      return found.map((problem) => `${nameOf(hash, message, merge)} ${problem}.`);
     });
     for (const problem of problems) io.log(problem);
     if (problems.length > 0) {
       io.log(
-        "A merge commit's message holds the pull request's title: change the title, then add the pull request to the queue again. A change that breaks says so in a commit commitlint reads, and any other commit refused here is reworded (docs/releasing.md#what-a-merge-commit-decides).",
+        "A merge commit's message holds the pull request's title: change the title, then add the pull request to the queue again. A change that breaks says so in a commit commitlint reads, a revert is made with git revert, and any other commit refused here is reworded (docs/releasing.md#what-a-merge-commit-decides).",
       );
       return 1;
     }
@@ -153,6 +164,7 @@ export function defaultIo(repo: string): MergesIo {
   const git = (...args: string[]) =>
     execFileSync("git", ["-C", repo, ...args], { encoding: "utf8", maxBuffer: 1 << 28 });
   return {
+    undoes: (revert, named) => undoes(gitAt(repo), revert, named),
     // Each line is a commit's hash, then its parents'.
     commitsBetween: (base, head) =>
       git("rev-list", "--parents", "--end-of-options", `${base}..${head}`)

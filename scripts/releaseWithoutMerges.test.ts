@@ -120,6 +120,105 @@ describe("releaseWithoutMerges", () => {
     expect(await plugin.analyzeCommits(options, context)).toBe("patch");
   });
 
+  /**
+   * A history on main: its commits from `base`, newest first, as
+   * semantic-release gets them, after `steps` run in a new repository.
+   */
+  async function history(steps: (git: (...args: string[]) => string, cwd: string) => void) {
+    const cwd = mkdtempSync(join(tmpdir(), "release-"));
+    repos.push(cwd);
+    const git = (...args: string[]) =>
+      execFileSync(
+        "git",
+        [
+          "-c",
+          "user.name=t",
+          "-c",
+          "user.email=t@example.org",
+          "-c",
+          "commit.gpgsign=false",
+          ...args,
+        ],
+        { cwd, encoding: "utf8" },
+      ).trim();
+    git("init", "-q", "-b", "main");
+    writeFileSync(join(cwd, "a"), "1");
+    git("add", "a");
+    git("commit", "-qm", "chore: start");
+    const base = git("rev-parse", "HEAD");
+    steps(git, cwd);
+    return {
+      commits: await getCommits(base, "HEAD", { cwd }),
+      cwd,
+      logger,
+      options: { repositoryUrl: "https://github.com/solid-memo/website" },
+      lastRelease: { gitTag: "v1.0.0", version: "1.0.0" },
+      nextRelease: { gitTag: "v2.0.0", version: "2.0.0" },
+    };
+  }
+
+  const header = "feat(api)!: drop the old deck address";
+  const breaking = `${header}\n\nThe old address is gone.\n\nBREAKING CHANGE: old links no longer open.`;
+
+  // A revert is matched to the commit it names by its message, so its
+  // change must undo that commit's for the two to leave the release.
+  it("leaves out a breaking commit that git revert undoes, and its revert", async () => {
+    const context = await history((git, cwd) => {
+      writeFileSync(join(cwd, "a"), "2");
+      git("commit", "-qam", breaking);
+      git("revert", "--no-edit", "HEAD");
+    });
+    expect(context.commits).toHaveLength(2);
+    expect(await plugin.analyzeCommits(options, context)).toBeNull();
+    expect(await plugin.generateNotes(options, context)).not.toContain("BREAKING CHANGES");
+  });
+
+  it("keeps a breaking commit that a revert only names, and still releases the revert", async () => {
+    const context = await history((git, cwd) => {
+      writeFileSync(join(cwd, "a"), "2");
+      git("commit", "-qam", breaking);
+      const named = git("rev-parse", "HEAD");
+      git(
+        "commit",
+        "-q",
+        "--allow-empty",
+        "-m",
+        `Revert "${header}"\n\nThis reverts commit ${named}.`,
+      );
+      writeFileSync(join(cwd, "b"), "1");
+      git("add", "b");
+      git("commit", "-qm", "feat(api): open decks at the new address");
+    });
+    expect(await plugin.analyzeCommits(options, context)).toBe("major");
+    const notes = await plugin.generateNotes(options, context);
+    expect(notes).toContain("BREAKING CHANGES");
+    expect(notes).toContain("old links no longer open.");
+    expect(notes).toContain("drop the old deck address");
+    expect(notes).toContain("open decks at the new address");
+  });
+
+  it("keeps a breaking commit whose revert differs from the undoing only in whitespace", async () => {
+    const context = await history((git, cwd) => {
+      writeFileSync(join(cwd, "a"), "2");
+      git("commit", "-qam", breaking);
+      const named = git("rev-parse", "HEAD");
+      // The start was "1": this puts it back with a space.
+      writeFileSync(join(cwd, "a"), "1 ");
+      git("commit", "-qam", `Revert "${header}"\n\nThis reverts commit ${named}.`);
+    });
+    expect(context.commits).toHaveLength(2);
+    expect(await plugin.analyzeCommits(options, context)).toBe("major");
+    expect(await plugin.generateNotes(options, context)).toContain("old links no longer open.");
+  });
+
+  it("keeps a revert of a commit from before the range, which releases a patch", async () => {
+    const context = await history((git) => {
+      git("revert", "--no-edit", "HEAD");
+    });
+    expect(context.commits).toHaveLength(1);
+    expect(await plugin.analyzeCommits(options, context)).toBe("patch");
+  });
+
   it("releases nothing when there are no commits", async () => {
     const context = await merged(chore, queued("chore: a title"));
     expect(await plugin.analyzeCommits(options, { ...context, commits: [] })).toBeNull();

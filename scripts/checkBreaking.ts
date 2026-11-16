@@ -20,10 +20,20 @@
  * The base is where the branch left `<git ref>` (their merge base), so a
  * line that the ref gained since then is not taken for one the branch
  * lost.
+ *
+ * The commits are read as the release reads them: a commit that a later
+ * one truly reverts says nothing, as the release leaves both out
+ * (scripts/reverts.ts). A revert that only says so takes nothing back.
+ *
+ * The release reads every commit since the last release tag, not only
+ * the branch's, so when the base check passes, the same check runs again
+ * from that tag: a commit merged earlier that said it breaks, and that a
+ * commit here reverts, no longer covers a line gone since the release.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { asReleased, gitAt } from "./reverts.ts";
 
 /** Files by their path in the repository, each with its text. */
 export type Files = ReadonlyMap<string, string>;
@@ -121,10 +131,14 @@ export interface BreakingIo {
   filesAt(commit: string): Files;
   /** The files of api/ in the working tree. */
   files(): Files;
-  /** The commits from `commit` to HEAD, merges aside. */
+  /** The commits from `commit` to HEAD, merges aside, as the release reads them. */
   commitsSince(commit: string): Commit[];
+  /** The highest release tag HEAD has, as the release finds it; undefined for none. */
+  lastRelease(): string | undefined;
   log(message: string): void;
 }
+
+const NO_RELEASE = "No release tag found; checked from the base only.";
 
 const USAGE = "Usage: npm run check:breaking -- --base <git ref>";
 
@@ -143,12 +157,53 @@ export function main(argv: readonly string[], io: BreakingIo): number {
     for (const note of notes) io.log(note);
     for (const problem of problems) io.log(problem);
     if (problems.length > 0) return 1;
+    const sinceRelease = releaseProblems(io, base);
+    for (const problem of sinceRelease) io.log(problem);
+    if (sinceRelease.length > 0) return 1;
     io.log(`The public API keeps every line it had at ${base.slice(0, 8)}, or says why not.`);
     return 0;
   } catch (error) {
     io.log((error as Error).message);
     return 1;
   }
+}
+
+/**
+ * What the check finds from the last release tag, which is what the
+ * release reads; nothing when it is the base, or there is no tag, which
+ * it says.
+ */
+function releaseProblems(io: BreakingIo, base: string): string[] {
+  const tag = io.lastRelease();
+  if (tag === undefined) {
+    io.log(NO_RELEASE);
+    return [];
+  }
+  const release = io.mergeBase(tag);
+  if (release === base) return [];
+  const lost = lostLines(io.filesAt(release), io.files());
+  const { problems } = verdict(lost, io.commitsSince(release));
+  if (problems.length === 0) return [];
+  return [
+    `Since the last release, ${tag}, as the release reads the commits from there (a commit that a later one reverts says nothing):`,
+    ...problems,
+  ];
+}
+
+/** A release tag: `v` and a version, with no pre-release or build. */
+const RELEASE_TAG = /^v\d+\.\d+\.\d+$/;
+
+/**
+ * The highest release among the tags, by its version, as semantic-release
+ * finds the last release among the tags HEAD has: not the nearest, which
+ * after a merge can be an older one. Numbers compare as numbers, so
+ * v1.10.0 is above v1.9.0.
+ */
+function highestRelease(tags: readonly string[]): string | undefined {
+  return tags
+    .map((tag) => tag.trim())
+    .filter((tag) => RELEASE_TAG.test(tag))
+    .sort((a, b) => b.localeCompare(a, "en", { numeric: true }))[0];
 }
 
 /** The io of the repository at `repo`. */
@@ -173,14 +228,18 @@ export function defaultIo(repo: string): BreakingIo {
           .map((path) => [path, readFileSync(join(repo, path), "utf8")]),
       ),
     commitsSince: (commit) =>
-      git("log", "--no-merges", "--format=%H%x1f%B%x1e", `${commit}..HEAD`)
-        .split("\x1e")
-        .map((entry) => entry.trim())
-        .filter((entry) => entry !== "")
-        .map((entry) => {
-          const [hash, message] = entry.split("\x1f");
-          return { hash, message: message.trim() };
-        }),
+      asReleased(
+        git("log", "--no-merges", "--format=%H%x1f%B%x1e", `${commit}..HEAD`)
+          .split("\x1e")
+          .map((entry) => entry.trim())
+          .filter((entry) => entry !== "")
+          .map((entry) => {
+            const [hash, message] = entry.split("\x1f");
+            return { hash, message: message.trim() };
+          }),
+        gitAt(repo),
+      ),
+    lastRelease: () => highestRelease(git("tag", "--merged", "HEAD").split("\n")),
     log: (message) => console.log(message),
   };
 }

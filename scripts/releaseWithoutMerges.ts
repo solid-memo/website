@@ -15,6 +15,12 @@
  * in too, as a revert still releases, and `npm run check:merges` keeps
  * it from saying it breaks.
  *
+ * A revert leaves out the commit it names, and itself, only when its
+ * change undoes that commit (scripts/reverts.ts): the plugins match a
+ * revert by its message alone, so any other revert is handed on with no
+ * hash to match. It still releases a patch, and the commit it names
+ * counts as if it were not there, a breaking change among them.
+ *
  * A merge commit is told by its parents, whatever its message says, so
  * this does not rest on the wording GitHub gives it. The parser's
  * `mergePattern` would not do: it makes the line after a merge's subject
@@ -24,8 +30,9 @@
  * (scripts/releaseWithoutMerges.test.ts loads it the same way).
  */
 import { execFileSync } from "node:child_process";
+import { gitAt, withRevertsChecked } from "./reverts.ts";
 
-type Context = { commits: readonly { hash: string }[]; cwd: string };
+type Context = { commits: readonly { hash: string; message: string }[]; cwd: string };
 
 /** The context with the merge commits left out. A hash git cannot read stops the release. */
 function withoutMerges<C extends Context>(context: C): C {
@@ -40,21 +47,27 @@ function withoutMerges<C extends Context>(context: C): C {
   return { ...context, commits: context.commits.filter(({ hash }) => !merges.includes(hash)) };
 }
 
+/** The commits the plugins read: merges aside, and only true reverts matched to a commit. */
+function asRead<C extends Context>(context: C): C {
+  const commits = withoutMerges(context).commits;
+  return { ...context, commits: withRevertsChecked(commits, gitAt(context.cwd)) };
+}
+
 // Untyped modules: imported by a name TypeScript does not resolve.
 const ANALYZER = "@semantic-release/commit-analyzer";
 const NOTES_GENERATOR = "@semantic-release/release-notes-generator";
 
 export default {
-  async analyzeCommits(config: unknown, context: Context): Promise<string | null> {
+  async analyzeCommits<C extends Context>(config: unknown, context: C): Promise<string | null> {
     const { analyzeCommits } = (await import(ANALYZER)) as {
       analyzeCommits(config: unknown, context: unknown): Promise<string | null>;
     };
-    return analyzeCommits(config, withoutMerges(context));
+    return analyzeCommits(config, asRead(context));
   },
-  async generateNotes(config: unknown, context: Context): Promise<string> {
+  async generateNotes<C extends Context>(config: unknown, context: C): Promise<string> {
     const { generateNotes } = (await import(NOTES_GENERATOR)) as {
       generateNotes(config: unknown, context: unknown): Promise<string>;
     };
-    return generateNotes(config, withoutMerges(context));
+    return generateNotes(config, asRead(context));
   },
 };
