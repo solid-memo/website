@@ -553,14 +553,19 @@ flowchart TD
   at a version the instance's [digest](data-model.md#the-digest) says
   has nothing outdated isn't read again. The result is cached for the
   session per instance.
-- **The user decides.** The notice names what's outdated and which
-  formats this app now writes. For each kind, it says what the steps
-  after the oldest version found added (`oldestFormat` in the plan, the
-  step tables in
+- **The user decides.** The notice says in two short sentences that some
+  data is stored in a newer way, that cards, review history and settings
+  stay as they are, and that nothing changes until the update starts.
+  It lists what's outdated: the instance record, the catalog, the
+  preferences, and each deck with what's outdated in it. What the new
+  formats add is folded away, a sentence per kind, without version
+  numbers: what the steps after the oldest version found added (`oldestFormat`
+  in the plan, the step tables in
   [MigrationNotice.tsx](../packages/ui/src/ui/MigrationNotice.tsx)).
   It says a deck without a description gets one only when a deck entry
-  older than deck format 3 is outdated. Its button opens a confirmation,
-  which says:
+  older than deck format 3 is outdated. How the update keeps the data
+  safe isn't on the notice: its button opens a confirmation, which
+  says:
   - the documents are updated one by one, each where it is, in one
     write the pod makes whole or not at all;
   - where the pod checks this, a write is made only if nothing else

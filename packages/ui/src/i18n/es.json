@@ -1126,40 +1126,20 @@
   "migrationNotice": {
     "region": "Actualización de formato",
     "heading": "Tus datos necesitan una actualización de formato.",
-    "stored": {
-      "one": "Se guarda en un formato anterior: {outdated}.",
-      "many": "Se guardan en un formato anterior: {outdated}.",
-      "other": "Se guardan en un formato anterior: {outdated}."
-    },
-    "writes": "Solid Memo ahora escribe {formats}.",
-    "howItWorks": "La actualización pone al día cada documento por separado, donde está, uno tras otro, cada uno en una sola escritura que tu Pod aplica entera o no aplica en absoluto. Todos los documentos se pueden leer en todo momento, estén actualizados o no; uno que no se pueda actualizar ahora se deja como está, y puedes intentarlo de nuevo. Todas las direcciones siguen siendo las mismas; los nombres de los mazos, el texto de las tarjetas, los sentidos de estudio, tu historial de repasos y tus ajustes se quedan como están.",
+    "body": "Solid Memo ahora guarda parte de tus datos en un formato más reciente. Tus tarjetas, tu historial de repasos y tus ajustes se quedan como están, y nada cambia hasta que inicies la actualización.",
+    "whatsNew": "Qué añaden los nuevos formatos",
     "newDescriptions": "Un mazo sin descripción recibe una breve que puedes cambiar.",
     "listAnd": "{rest} y {last}",
-    "instanceRecord": "el registro de la instancia",
-    "instanceCatalogue": "el catálogo de la instancia",
-    "yourPreferences": "tus preferencias",
-    "deckEntries": {
-      "one": "{count} entrada de mazo",
-      "many": "{count} de entradas de mazo",
-      "other": "{count} entradas de mazo"
-    },
     "reviewStates": {
       "one": "{count} estado de repaso",
       "many": "{count} de estados de repaso",
       "other": "{count} estados de repaso"
     },
-    "inDecks": {
-      "one": "un mazo",
-      "many": "{count} de mazos",
-      "other": "{count} mazos"
-    },
-    "countIn": "{what} en {decks}",
-    "instanceFormat": "el formato de instancia {version}",
-    "catalogueFormat": "un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT",
-    "preferencesFormat": "el formato de preferencias {version}, que guarda {added}",
-    "deckFormat": "el formato de mazo {version}, que {added}",
-    "cardFormat": "el formato de tarjeta {version}, que {added}",
-    "reviewFormat": "el formato de estado de repaso {version}, que {added}",
+    "catalogueFormat": "Solid Memo ahora mantiene un catálogo de los mazos de cada instancia, que otras aplicaciones leen como un catálogo DCAT.",
+    "preferencesFormat": "El formato de preferencias ahora guarda {added}.",
+    "deckFormat": "El formato de mazo ahora {added}.",
+    "cardFormat": "El formato de tarjeta ahora {added}.",
+    "reviewFormat": "El formato de estado de repaso ahora {added}.",
     "deckAdded": {
       "direction": "indica en qué sentido se estudia un mazo",
       "dcat": "describe los mazos con los estándares DCAT y SKOS",

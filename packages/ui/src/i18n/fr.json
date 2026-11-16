@@ -1126,40 +1126,20 @@
   "migrationNotice": {
     "region": "Mise à jour du format",
     "heading": "Vos données ont besoin d’une mise à jour du format.",
-    "stored": {
-      "one": "Un ancien format est encore utilisé pour {outdated}.",
-      "many": "Un ancien format est encore utilisé pour {outdated}.",
-      "other": "Un ancien format est encore utilisé pour {outdated}."
-    },
-    "writes": "Solid Memo écrit désormais {formats}.",
-    "howItWorks": "La mise à jour actualise chaque document séparément, là où il se trouve, l’un après l’autre, chacun en une seule écriture que votre Pod applique entièrement ou pas du tout. Chaque document reste lisible tout du long, mis à jour ou non ; un document qui ne peut pas être mis à jour maintenant reste tel quel, et vous pouvez réessayer. Toutes les adresses restent les mêmes ; les noms des paquets, le texte des cartes, les sens d’étude, votre historique des révisions et vos préférences restent inchangés.",
+    "body": "Solid Memo enregistre désormais une partie de vos données sous une forme plus récente. Vos cartes, votre historique des révisions et vos préférences restent tels quels, et rien ne change avant que vous ne lanciez la mise à jour.",
+    "whatsNew": "Ce qu’apportent les nouveaux formats",
     "newDescriptions": "Un paquet sans description en reçoit une courte, que vous pouvez modifier.",
     "listAnd": "{rest} et {last}",
-    "instanceRecord": "la fiche de l’instance",
-    "instanceCatalogue": "le catalogue de l’instance",
-    "yourPreferences": "vos préférences",
-    "deckEntries": {
-      "one": "{count} fiche de paquet",
-      "many": "{count} de fiches de paquet",
-      "other": "{count} fiches de paquet"
-    },
     "reviewStates": {
       "one": "{count} état de révision",
       "many": "{count} d’états de révision",
       "other": "{count} états de révision"
     },
-    "inDecks": {
-      "one": "un paquet",
-      "many": "{count} de paquets",
-      "other": "{count} paquets"
-    },
-    "countIn": "{what} dans {decks}",
-    "instanceFormat": "le format d’instance {version}",
-    "catalogueFormat": "un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT",
-    "preferencesFormat": "le format de préférences {version}, qui enregistre {added}",
-    "deckFormat": "le format de paquet {version}, qui {added}",
-    "cardFormat": "le format de carte {version}, qui {added}",
-    "reviewFormat": "le format d’état de révision {version}, qui {added}",
+    "catalogueFormat": "Solid Memo tient désormais un catalogue des paquets de chaque instance, que d’autres applications lisent comme un catalogue DCAT.",
+    "preferencesFormat": "Désormais, le format de préférences enregistre {added}.",
+    "deckFormat": "Désormais, le format de paquet {added}.",
+    "cardFormat": "Désormais, le format de carte {added}.",
+    "reviewFormat": "Désormais, le format d’état de révision {added}.",
     "deckAdded": {
       "direction": "indique dans quel sens un paquet s’étudie",
       "dcat": "décrit les paquets avec les normes DCAT et SKOS",
@@ -1169,7 +1149,7 @@
       "keywordLanguages": "permet d’écrire les mots-clés d’un paquet dans n’importe quelle langue que vous indiquez"
     },
     "cardAdded": {
-      "pictures": "ajoute les images sur les cartes",
+      "pictures": "permet d’ajouter des images aux cartes",
       "notes": "ajoute une note sous chaque face et une étiquette au-dessus du verso",
       "retired": "permet à un paquet de la bibliothèque d’archiver une carte qu’il n’utilise plus",
       "textLanguages": "permet d’écrire le texte d’une carte dans n’importe quelle langue que vous indiquez",

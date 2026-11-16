@@ -1067,36 +1067,19 @@
   "migrationNotice": {
     "region": "Formataktualisierung",
     "heading": "Deine Daten brauchen eine Formataktualisierung.",
-    "stored": {
-      "one": "In einem älteren Format gespeichert: {outdated}.",
-      "other": "In einem älteren Format gespeichert: {outdated}."
-    },
-    "writes": "Solid Memo schreibt jetzt {formats}.",
-    "howItWorks": "Die Aktualisierung bringt jedes Dokument einzeln auf den neuesten Stand, dort, wo es liegt, eines nach dem anderen, jedes in einem einzigen Schreibvorgang, den dein Pod ganz oder gar nicht ausführt. Jedes Dokument bleibt dabei lesbar, ob aktualisiert oder nicht; eines, das sich gerade nicht aktualisieren lässt, bleibt, wie es ist, und du kannst es erneut versuchen. Alle Adressen bleiben gleich; Stapelnamen, Kartentexte, Lernrichtungen, dein Wiederholungsverlauf und deine Einstellungen bleiben, wie sie sind.",
+    "body": "Solid Memo speichert einen Teil deiner Daten jetzt auf eine neuere Weise. Deine Karten, dein Wiederholungsverlauf und deine Einstellungen bleiben, wie sie sind, und es ändert sich nichts, bis du die Aktualisierung startest.",
+    "whatsNew": "Was die neuen Formate bringen",
     "newDescriptions": "Ein Stapel ohne Beschreibung bekommt eine kurze, die du ändern kannst.",
     "listAnd": "{rest} und {last}",
-    "instanceRecord": "der Instanzeintrag",
-    "instanceCatalogue": "der Katalog der Instanz",
-    "yourPreferences": "deine Einstellungen",
-    "deckEntries": {
-      "one": "{count} Stapeleintrag",
-      "other": "{count} Stapeleinträge"
-    },
     "reviewStates": {
       "one": "{count} Wiederholungsstand",
       "other": "{count} Wiederholungsstände"
     },
-    "inDecks": {
-      "one": "einem Stapel",
-      "other": "{count} Stapeln"
-    },
-    "countIn": "{what} in {decks}",
-    "instanceFormat": "das Instanzformat {version}",
-    "catalogueFormat": "einen Katalog der Stapel jeder Instanz, den andere Apps als DCAT-Katalog lesen",
-    "preferencesFormat": "das Einstellungsformat {version}, das {added} speichert",
-    "deckFormat": "das Stapelformat {version}, das {added}",
-    "cardFormat": "das Kartenformat {version}, das {added}",
-    "reviewFormat": "das Format {version} für Wiederholungsstände, das {added}",
+    "catalogueFormat": "Neu ist ein Katalog der Stapel jeder Instanz, den andere Apps als DCAT-Katalog lesen.",
+    "preferencesFormat": "Neu im Einstellungsformat ist, dass es {added} speichert.",
+    "deckFormat": "Neu im Stapelformat ist, dass es {added}.",
+    "cardFormat": "Neu im Kartenformat ist, dass es {added}.",
+    "reviewFormat": "Neu im Format für Wiederholungsstände ist, dass es {added}.",
     "deckAdded": {
       "direction": "festhält, in welche Richtung ein Stapel gelernt wird",
       "dcat": "Stapel mit den Standards DCAT und SKOS beschreibt",

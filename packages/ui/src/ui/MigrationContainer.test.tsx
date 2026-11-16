@@ -104,15 +104,11 @@ describe("MigrationContainer", () => {
   it("asks before updating, and does nothing when the user says not now", async () => {
     const useCases = makeUseCasesFake({ planMigration: vi.fn(async () => outdated) });
     renderContainer(useCases);
-    // Shown with the screen, the notice leaves the focus be; it says how the update goes.
+    // Shown with the screen, the notice leaves the focus be; how the update goes is the confirmation's to say.
     const notice = await screen.findByRole("region", { name: "Format update" });
     expect(notice).not.toHaveFocus();
-    expect(notice).toHaveTextContent(
-      "Updating brings each document up to date on its own, where it is, one after another",
-    );
-    expect(notice).toHaveTextContent(
-      "one that cannot be updated now is left as it is, and you can try again",
-    );
+    expect(notice).toHaveTextContent("nothing changes until you start the update.");
+    expect(notice).not.toHaveTextContent("is left as it is, and you can try again");
     expect(notice).not.toHaveTextContent(/backup|copy/);
     fireEvent.click(screen.getByRole("button", { name: "Update 1 deck" }));
     // The question takes the notice's place and its focus, read out as its description.
@@ -123,6 +119,7 @@ describe("MigrationContainer", () => {
     expect(confirm).toHaveTextContent(
       "Every document can be read throughout, whether it is updated yet or not.",
     );
+    expect(confirm).toHaveTextContent("is left as it is, and you can try again");
     expect(confirm).toHaveTextContent(
       "where your Pod checks this, only if nothing else changed it since Solid Memo read it.",
     );

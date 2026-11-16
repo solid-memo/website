@@ -1067,42 +1067,25 @@
   "migrationNotice": {
     "region": "Formatuppdatering",
     "heading": "Dina data behöver en formatuppdatering.",
-    "stored": {
-      "one": "{outdated} sparas i ett äldre format.",
-      "other": "{outdated} sparas i ett äldre format."
-    },
-    "writes": "Solid Memo skriver nu {formats}.",
-    "howItWorks": "Uppdateringen gör varje dokument aktuellt för sig, där det ligger, ett i taget, vart och ett i en enda skrivning som din Pod gör helt eller inte alls. Varje dokument går att läsa hela tiden, uppdaterat eller inte; ett som inte kan uppdateras nu lämnas som det är, och du kan försöka igen. Alla adresser förblir desamma; kortleksnamn, korttext, riktningar, din repetitionshistorik och dina inställningar förblir som de är.",
+    "body": "Solid Memo sparar nu en del av dina data på ett nyare sätt. Dina kort, din repetitionshistorik och dina inställningar förblir som de är, och inget ändras förrän du startar uppdateringen.",
+    "whatsNew": "Vad de nya formaten tillför",
     "newDescriptions": "En kortlek utan beskrivning får en kort beskrivning som du kan ändra.",
     "listAnd": "{rest} och {last}",
-    "instanceRecord": "instansposten",
-    "instanceCatalogue": "instansens katalog",
-    "yourPreferences": "dina inställningar",
-    "deckEntries": {
-      "one": "{count} kortlekspost",
-      "other": "{count} kortleksposter"
-    },
     "reviewStates": {
       "one": "{count} repetitionstillstånd",
       "other": "{count} repetitionstillstånd"
     },
-    "inDecks": {
-      "one": "en kortlek",
-      "other": "{count} kortlekar"
-    },
-    "countIn": "{what} i {decks}",
-    "instanceFormat": "instansformat {version}",
-    "catalogueFormat": "en katalog över varje instans kortlekar, som andra appar läser som en DCAT-katalog",
-    "preferencesFormat": "inställningsformat {version}, som sparar {added}",
-    "deckFormat": "kortleksformat {version}, som {added}",
-    "cardFormat": "kortformat {version}, som {added}",
-    "reviewFormat": "repetitionstillståndsformat {version}, som {added}",
+    "catalogueFormat": "Solid Memo för nu en katalog över varje instans kortlekar, som andra appar läser som en DCAT-katalog.",
+    "preferencesFormat": "Inställningsformatet sparar nu {added}.",
+    "deckFormat": "Kortleksformatet {added}.",
+    "cardFormat": "Kortformatet {added}.",
+    "reviewFormat": "Repetitionstillståndsformatet {added}.",
     "deckAdded": {
       "direction": "anger åt vilket håll en kortlek studeras",
       "dcat": "beskriver kortlekar med standarderna DCAT och SKOS",
       "description": "ger varje kortlek en beskrivning",
       "titleLanguages": "låter en kortleks titel och beskrivning finnas på flera språk",
-      "titleWithoutEnglish": "inte längre kräver engelska i en kortleks titel och beskrivning",
+      "titleWithoutEnglish": "kräver inte längre engelska i en kortleks titel och beskrivning",
       "keywordLanguages": "låter en kortleks nyckelord vara på valfritt språk som du anger"
     },
     "cardAdded": {
@@ -1110,7 +1093,7 @@
       "notes": "lägger till en anteckning under varje sida och en etikett ovanför baksidan",
       "retired": "låter en bibliotekskortlek ta ur bruk ett kort den inte längre använder",
       "textLanguages": "låter ett korts text vara på valfritt språk som du anger",
-      "notesWithoutEnglish": "inte längre kräver engelska i ett korts anteckningar och etikett",
+      "notesWithoutEnglish": "kräver inte längre engelska i ett korts anteckningar och etikett",
       "frontLabel": "lägger till en etikett ovanför ett korts framsida",
       "subjects": "behåller vad ett kort handlar om"
     },

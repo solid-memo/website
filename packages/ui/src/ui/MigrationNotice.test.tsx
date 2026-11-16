@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
-import { describeFormats, describeOutdated, MigrationNotice } from "./MigrationNotice";
+import { describeFormats, MigrationNotice } from "./MigrationNotice";
 import { createI18n, I18nProvider } from "./i18n";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import type { MigrationPlan } from "@solid-memo/domain/migration";
@@ -67,46 +67,6 @@ function renderNotice(overrides: Partial<Parameters<typeof MigrationNotice>[0]> 
   return { ...view, props };
 }
 
-describe("describeOutdated", () => {
-  it("names everything outdated, whichever there is", () => {
-    expect(describeOutdated(plan, t)).toBe(
-      "2 deck entries, 255 cards in 2 decks and 1 review state in one deck".replace(
-        "1 review state",
-        "30 review states",
-      ),
-    );
-    expect(
-      describeOutdated(
-        {
-          decks: [{ deck, deckOutdated: true, cardCount: 0, reviewCount: 0 }],
-          deckCount: 1,
-          cardCount: 0,
-          reviewCount: 0,
-          ...nothing,
-        },
-        t,
-      ),
-    ).toBe("1 deck entry");
-    expect(
-      describeOutdated(
-        {
-          decks: [{ deck, deckOutdated: false, cardCount: 1, reviewCount: 1 }],
-          deckCount: 0,
-          cardCount: 1,
-          reviewCount: 1,
-          preferencesOutdated: true,
-          instanceOutdated: true,
-          catalogMissing: false,
-          oldestFormat: { ...latest, card: 1, reviewState: 1, preferences: 1 },
-        },
-        t,
-      ),
-    ).toBe(
-      "the instance record, your preferences, 1 card in one deck and 1 review state in one deck",
-    );
-  });
-});
-
 describe("a missing catalog", () => {
   const catalogOnly: MigrationPlan = {
     decks: [],
@@ -119,15 +79,11 @@ describe("a missing catalog", () => {
     oldestFormat: latest,
   };
 
-  it("is named in what is outdated, in the formats, on the list and on the button", () => {
-    expect(describeOutdated(catalogOnly, t)).toBe("the instance's catalog");
-    expect(describeFormats(catalogOnly, t)).toBe(
-      "a catalog of each instance's decks, which other apps read as a DCAT catalog",
-    );
+  it("is named in the formats, on the list and on the button", () => {
+    expect(describeFormats(catalogOnly, t)).toEqual([
+      "Solid Memo now keeps a catalog of each instance's decks, which other apps read as a DCAT catalog.",
+    ]);
     renderNotice({ plan: catalogOnly });
-    expect(screen.getByRole("region")).toHaveTextContent(
-      "the instance's catalog is stored in an older format.",
-    );
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "Catalog of the decks",
     ]);
@@ -136,10 +92,12 @@ describe("a missing catalog", () => {
 });
 
 describe("describeFormats", () => {
-  it("names the formats the plan touches, with what each added since format 1", () => {
-    expect(describeFormats(plan, t)).toBe(
-      "deck format 6, which states which way a deck is studied, describes decks with the DCAT and SKOS standards, gives every deck a description, lets a deck's title and description be in several languages, no longer requires English in a deck's title and description and lets a deck's keywords be in any language you state, card format 7, which adds pictures on cards, adds a note under each side and a label above the back, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state, no longer requires English in a card's notes and label, adds a label above a card's front and keeps what a card is about and review-state format 2, which keeps the day's undo snapshot whole or not at all",
-    );
+  it("says what each format the plan touches added since format 1, a sentence each", () => {
+    expect(describeFormats(plan, t)).toEqual([
+      "The deck format now states which way a deck is studied, describes decks with the DCAT and SKOS standards, gives every deck a description, lets a deck's title and description be in several languages, no longer requires English in a deck's title and description and lets a deck's keywords be in any language you state. A deck without a description gets a short one you can change.",
+      "The card format now adds pictures on cards, adds a note under each side and a label above the back, lets a library deck retire a card it no longer uses, lets a card's text be in any language you state, no longer requires English in a card's notes and label, adds a label above a card's front and keeps what a card is about.",
+      "The review-state format now keeps the day's undo snapshot whole or not at all.",
+    ]);
     expect(
       describeFormats(
         {
@@ -154,9 +112,9 @@ describe("describeFormats", () => {
         },
         t,
       ),
-    ).toBe(
-      "instance format 2 and preferences format 6, which records every setting, what to do with invalid data, the theme, the scheduler, the colors and the text size",
-    );
+    ).toEqual([
+      "The preferences format now records every setting, what to do with invalid data, the theme, the scheduler, the colors and the text size.",
+    ]);
   });
 
   it("names only what the steps after the oldest version found added", () => {
@@ -165,9 +123,11 @@ describe("describeFormats", () => {
         { ...plan, oldestFormat: { deck: 5, card: 6, reviewState: 1, preferences: 1 } },
         t,
       ),
-    ).toBe(
-      "deck format 6, which lets a deck's keywords be in any language you state, card format 7, which keeps what a card is about and review-state format 2, which keeps the day's undo snapshot whole or not at all",
-    );
+    ).toEqual([
+      "The deck format now lets a deck's keywords be in any language you state.",
+      "The card format now keeps what a card is about.",
+      "The review-state format now keeps the day's undo snapshot whole or not at all.",
+    ]);
     expect(
       describeFormats(
         {
@@ -179,14 +139,42 @@ describe("describeFormats", () => {
         },
         t,
       ),
-    ).toBe(
-      "preferences format 6, which records the scheduler, the colors and the text size and card format 7, which adds a label above a card's front and keeps what a card is about",
-    );
+    ).toEqual([
+      "The preferences format now records the scheduler, the colors and the text size.",
+      "The card format now adds a label above a card's front and keeps what a card is about.",
+    ]);
+  });
+
+  it("says a deck without a description gets one only for decks from before deck format 3", () => {
+    const described = "A deck without a description gets a short one you can change.";
+    const cardless = { ...plan, cardCount: 0, reviewCount: 0 };
+    expect(describeFormats({ ...cardless, oldestFormat: { ...latest, deck: 2 } }, t)).toEqual([
+      `The deck format now describes decks with the DCAT and SKOS standards, gives every deck a description, lets a deck's title and description be in several languages, no longer requires English in a deck's title and description and lets a deck's keywords be in any language you state. ${described}`,
+    ]);
+    expect(describeFormats({ ...cardless, oldestFormat: { ...latest, deck: 3 } }, t)).toEqual([
+      "The deck format now lets a deck's title and description be in several languages, no longer requires English in a deck's title and description and lets a deck's keywords be in any language you state.",
+    ]);
+  });
+
+  it("has nothing to say of the instance record alone", () => {
+    expect(
+      describeFormats(
+        {
+          decks: [],
+          deckCount: 0,
+          cardCount: 0,
+          reviewCount: 0,
+          ...nothing,
+          instanceOutdated: true,
+        },
+        t,
+      ),
+    ).toEqual([]);
   });
 
   it("reads a version below 1 as format 1, as the data is read", () => {
     const cardsOnly = { ...plan, deckCount: 0, reviewCount: 0 };
-    expect(describeFormats({ ...cardsOnly, oldestFormat: { ...latest, card: 0 } }, t)).toBe(
+    expect(describeFormats({ ...cardsOnly, oldestFormat: { ...latest, card: 0 } }, t)).toEqual(
       describeFormats({ ...cardsOnly, oldestFormat: { ...latest, card: 1 } }, t),
     );
   });
@@ -210,8 +198,8 @@ describe("describeFormats", () => {
         },
         t,
       );
-      expect(described).toMatch(/, which \S/);
-      expect(described).not.toMatch(/\s$/);
+      expect(described).toHaveLength(1);
+      expect(described[0]).toMatch(/ now (?:records )?\S.*\S\.$/);
     }
   });
 });
@@ -221,10 +209,9 @@ describe("MigrationNotice", () => {
     const { props } = renderNotice();
     const region = screen.getByRole("region", { name: "Format update" });
     expect(region).toHaveTextContent(
-      "2 deck entries, 255 cards in 2 decks and 30 review states in one deck are stored in an older format.",
+      "Your data needs a format update. Solid Memo now stores some of your data in a newer way. Your cards, review history and settings stay as they are, and nothing changes until you start the update.",
     );
-    expect(region).toHaveTextContent("Solid Memo now writes deck format 6");
-    expect(region).toHaveTextContent("card format 7");
+    expect(region).not.toHaveTextContent("format 6");
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
       "Kanji N5 — deck entry, 12 cards",
       "Capitals — 243 cards, 30 review states",
@@ -236,14 +223,30 @@ describe("MigrationNotice", () => {
     expect(props.onMigrate).toHaveBeenCalledOnce();
   });
 
-  it("says a deck without a description gets one only for decks from before deck format 3", () => {
-    const described = "A deck without a description gets a short one you can change.";
-    const { unmount } = renderNotice();
-    expect(screen.getByRole("region")).toHaveTextContent(described);
-    unmount();
-    renderNotice({ plan: { ...plan, oldestFormat: { ...plan.oldestFormat, deck: 3 } } });
-    expect(screen.getByRole("region")).toHaveTextContent("stay as they are.");
-    expect(screen.getByRole("region")).not.toHaveTextContent(described);
+  it("folds away what the new formats add, a paragraph each", () => {
+    const { container } = renderNotice();
+    const details = container.querySelector("details");
+    expect(details).not.toBeNull();
+    expect(details?.open).toBe(false);
+    expect(details?.querySelector("summary")).toHaveTextContent("What the new formats add");
+    expect([...(details?.querySelectorAll("p") ?? [])].map((p) => p.textContent)).toEqual(
+      describeFormats(plan, t),
+    );
+  });
+
+  it("folds nothing away when only the instance record is outdated", () => {
+    const { container } = renderNotice({
+      plan: {
+        decks: [],
+        deckCount: 0,
+        cardCount: 0,
+        reviewCount: 0,
+        ...nothing,
+        instanceOutdated: true,
+      },
+    });
+    expect(container.querySelector("details")).toBeNull();
+    expect(screen.getByRole("button", { name: "Update the instance record" })).toBeEnabled();
   });
 
   it("phrases a single card in a single deck", () => {
@@ -256,9 +259,9 @@ describe("MigrationNotice", () => {
         ...nothing,
       },
     });
-    expect(screen.getByRole("region")).toHaveTextContent(
-      "1 card in one deck is stored in an older format.",
-    );
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Kanji N5 — 1 card",
+    ]);
     expect(screen.getByRole("button", { name: "Update 1 deck" })).toBeEnabled();
   });
 
@@ -298,9 +301,9 @@ describe("MigrationNotice", () => {
         oldestFormat: { ...latest, preferences: 1 },
       },
     });
-    expect(screen.getByRole("region")).toHaveTextContent(
-      "your preferences is stored in an older format.",
-    );
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
+      "Preferences",
+    ]);
     expect(screen.getByRole("button", { name: "Update preferences" })).toBeEnabled();
   });
 
@@ -318,8 +321,9 @@ describe("MigrationNotice", () => {
     );
     const region = screen.getByRole("region", { name: "Formatuppdatering" });
     expect(region).toHaveTextContent(
-      "2 kortleksposter, 255 kort i 2 kortlekar och 30 repetitionstillstånd i en kortlek sparas i ett äldre format.",
+      "Dina data behöver en formatuppdatering. Solid Memo sparar nu en del av dina data på ett nyare sätt.",
     );
+    expect(region).toHaveTextContent("Repetitionstillståndsformatet");
     expect(screen.getByRole("button", { name: "Uppdatera 3 kortlekar" })).toBeEnabled();
   });
 });
