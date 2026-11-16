@@ -168,11 +168,11 @@ export const ERROR_TEMPLATES = {
   deckTreeChanged:
     "Your decks were rearranged elsewhere, perhaps in another tab or app, so this change was not made. The list now shows them as they are.",
   writtenByNewerApp:
-    "A newer version of Solid Memo has updated this data, so this version does not save over it. Reload the page to get the latest version.",
+    "A newer version of Solid Memo has updated this data, so this version does not save over it. Use a newer version of Solid Memo instead.",
   idTakenInDeck:
     "Solid Memo did not save this: it would have mixed up the cards and wrong options of this deck. Nothing was changed.",
   deckTreeTooNew:
-    "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Reload the page to get the latest version.",
+    "A newer version of Solid Memo arranged these decks, so this one cannot rearrange them. Use a newer version of Solid Memo instead.",
   createdElsewhere:
     "This was created elsewhere, perhaps in another tab or app, just as Solid Memo was about to create it, so nothing was saved. Reload the page and try again.",
   alreadyExists: "Something is already kept at that place in your Pod. Choose another place.",
@@ -194,9 +194,9 @@ export const ERROR_TEMPLATES = {
   releaseLinksGuestPod:
     "This release links to the guest's study in this browser, which no release may, so Solid Memo does not read it. Ask its creator to check it.",
   libraryDeckTooNew:
-    "This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
+    "This deck is in a newer format than this version of Solid Memo can read. Use a newer version of Solid Memo instead.",
   libraryCardTooNew:
-    "A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.",
+    "A card in this deck is in a newer format than this version of Solid Memo can read. Use a newer version of Solid Memo instead.",
   deckFileUnreadable:
     "Solid Memo cannot read that file. Choose a Turtle or JSON-LD file exported from Solid Memo.",
   notADeckFile:
@@ -204,7 +204,7 @@ export const ERROR_TEMPLATES = {
   deckFileLinksGuestPod:
     "That file links to the guest's study in this browser, which no deck may, so it was not imported. Choose another file.",
   deckFileTooNew:
-    "That file was written by a newer version of Solid Memo, so this one cannot import it. Reload the page to get the latest version.",
+    "That file was written by a newer version of Solid Memo, so this one cannot import it. Use a newer version of Solid Memo instead.",
   deckFileTooLarge:
     "That file is larger than any deck Solid Memo reads, so it was not read. Choose a smaller file.",
   noGuestPod: "There is no guest study on this device.",
