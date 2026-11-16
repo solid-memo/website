@@ -58,6 +58,27 @@ npm run screenshots   # retake the app's screenshots on a phone's screen (below)
 npm run check:providers   # the Pod providers onboarding suggests answer with their issuers (needs the network)
 ```
 
+### On your own machine
+
+`npm run check` runs Turbo's tasks ten at a time, and Vitest starts a
+worker for every CPU but one in each run. On a machine with many CPUs
+and little memory, that's hundreds of workers. Off CI, each run starts
+only as many workers as its share of three quarters of the memory holds
+([vitest.shared.ts](../vitest.shared.ts)): one each, with
+ten tasks at once on 15 GB. CI keeps Vitest's default.
+
+Two settings make it quicker, in a contributor's shell profile:
+
+```sh
+export TURBO_CONCURRENCY=4   # Turbo's tasks at once, so each run gets more workers (4 each on 15 GB)
+export TURBO_CACHE_DIR="$HOME/.cache/turbo/solid-memo"   # one cache for every checkout and worktree
+```
+
+Turbo keeps its cache in each checkout's `.turbo/cache` by default, so a
+new worktree runs every task again. A cache shared between them runs
+only the tasks whose inputs changed. Its entries are keyed by those
+inputs, not by where the checkout is.
+
 `npm run test:pod` runs `e2e/pod/` against each Solid server
 [servers.ts](../e2e/pod/servers.ts) knows, which its global setup
 ([globalSetup.ts](../e2e/pod/globalSetup.ts)) starts in Docker, on a

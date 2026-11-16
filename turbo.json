@@ -3,6 +3,9 @@
   "globalEnv": [
     "SOLID_CLIENT"
   ],
+  "globalPassThroughEnv": [
+    "TURBO_CONCURRENCY"
+  ],
   "globalDependencies": [
     "scripts/solidClient.ts"
   ],

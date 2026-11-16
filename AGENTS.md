@@ -27,6 +27,9 @@ This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
   `pip install -r scripts/requirements-ci.txt`), and `npm run lint:workflows`
   too when `.github/` changed (it needs
   `pip install -r scripts/requirements-lint.txt`).
+- **On a shared machine**, run it with `TURBO_CONCURRENCY=4`, and share
+  Turbo's cache between checkouts with `TURBO_CACHE_DIR`
+  ([docs/testing.md](docs/testing.md#on-your-own-machine)).
 - **Generated files** (`packages/vocab/src/*.generated.ts`) are never
   edited by hand: change `ns/` and run `npm run generate`.
 - **Turtle**: after editing a `.ttl` file, run `npm run format:turtle`; after
