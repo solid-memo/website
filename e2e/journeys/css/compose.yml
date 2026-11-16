@@ -13,7 +13,7 @@
 # keeps the server on 7.
 services:
   tls:
-    image: caddy:2.11.9@sha256:0c2243efcf437ab7f7a978f1027fcf0d4f9be8a75df27b1b3fbc5dbe0ffa8cf0
+    image: caddy:2.11.9@sha256:4e2425f6009577e7c651010f16679c28f7d12df3e7b1914f941a7a3370746b3c
     command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile", "--adapter", "caddyfile"]
     environment: { E2E_PORT: "${E2E_PORT:?}" }
     volumes: ["./Caddyfile:/etc/caddy/Caddyfile:ro"]
