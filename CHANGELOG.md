@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.11](https://github.com/solid-memo/website/compare/v7.6.10...v7.6.11) (2026-11-16)
+
+### Fixes
+
+* **release:** count a revert only when its change undoes its commit ([2d33af4](https://github.com/solid-memo/website/commit/2d33af4bff7831b7464a1a1d5c5e1197e3675611))
+* **studio:** show a bounded part of a course draft's lists ([c3f3c67](https://github.com/solid-memo/website/commit/c3f3c678aba2fd0023fcb9eb6e6c66779b085e12))
+* **ui:** list a bounded number of a release's sources and their authors ([de1167d](https://github.com/solid-memo/website/commit/de1167d481f1d2d7eab5ebbe7691c73bc034ba2b))
+
 ## [7.6.10](https://github.com/solid-memo/website/compare/v7.6.9...v7.6.10) (2026-11-16)
 
 ### Fixes
