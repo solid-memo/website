@@ -13,12 +13,14 @@ npm run test:unit -- packages/ui/src/ui/routes.api.test.ts -u
 
 | File | What it promises | Written by |
 |---|---|---|
-| [formats.txt](formats.txt) | For each kind of data, the format version the app writes and the oldest it reads | [formats.api.test.ts](../packages/domain/src/shapes/migrations/formats.api.test.ts) |
-| [pod-layout.txt](pod-layout.txt) | Where the data lives in a pod: its documents, the type index registrations, the profile links followed | [podLayout.api.test.ts](../packages/solid/src/podLayout.api.test.ts) |
+| [formats.txt](formats.txt) | For each kind of data, the oldest format version the app reads | [formats.api.test.ts](../packages/domain/src/shapes/migrations/formats.api.test.ts) |
 | [routes/app.txt](routes/app.txt) | The hashes that open the app's screens | [routes.api.test.ts](../packages/ui/src/ui/routes.api.test.ts) |
 | [routes/studio.txt](routes/studio.txt) | The hashes that open the Studio's screens | [routes.api.test.ts](../apps/studio/src/ui/routes.api.test.ts) |
 | [browser-storage/](browser-storage/) | What each package keeps in the browser: storage keys, the guest pod's IndexedDB, Web Locks | `browserStorage.api.test.ts` in each of browser, solid, solid-memo-client, ui and studio |
 | [self-hosting.txt](self-hosting.txt) | The `VITE_*` variables, the build and start commands, the folder the build writes, the Client ID Document's address | [selfHosting.api.test.ts](../scripts/selfHosting.api.test.ts) |
+| [frozen/formats.txt](frozen/formats.txt) | For each kind of data, the format version the app writes, which never moves | [formats.api.test.ts](../packages/domain/src/shapes/migrations/formats.api.test.ts) |
+| [frozen/pod-layout.txt](frozen/pod-layout.txt) | Where the data lives in a pod: its documents, the type index registrations, the profile links followed | [podLayout.api.test.ts](../packages/solid/src/podLayout.api.test.ts) |
+| [frozen/browser-storage/](frozen/browser-storage/) | The version of each IndexedDB database | `browserStorage.api.test.ts` in each of browser and solid-memo-client |
 | [frozen/published.txt](frozen/published.txt) | Every document published from `ns/` and `vendor/`, and each shape's hash | [published.api.test.ts](../packages/vocab/tooling/published.api.test.ts) |
 | [frozen/vocab.txt](frozen/vocab.txt) | Every term of the vocabulary, with its kind, range and domain, and every topic | [vocab.api.test.ts](../packages/vocab/tooling/vocab.api.test.ts) |
 
@@ -34,5 +36,9 @@ each with its own base ([releasing.md](../docs/releasing.md#how-ci-holds-to-it))
 A line gone from a file here fails it, unless a commit says the change
 breaks, or says why it does not in a
 `Contract-Change: not-breaking <reason>` trailer. A line gone from
-`frozen/` fails it whatever the commits say. A line added is a promise
-added, and needs nothing.
+`frozen/` fails it whatever the commits say: what is published stays
+published, and the formats, the place of the data in a pod and the
+databases' versions never move, so that an older version of the app
+keeps working on what a newer one saved
+([releasing.md](../docs/releasing.md#what-never-changes)). A line added
+is a promise added, and needs nothing.

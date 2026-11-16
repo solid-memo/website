@@ -985,31 +985,39 @@ shared with a friend, and checks that:
 - the keywords the user changed are kept, and a deck an earlier version
   moved to documents of its own is upgraded where they are.
 
-## Adding a format version
+## Adding data without a format version
 
-1. Write `ns/shapes/<class>/v<N+1>.ttl`: copy `v<N>.ttl`, change the
-   `@base` to its own address and the version assertion to
-   `sh:hasValue N+1`, and add or change the properties. Add any new
-   terms to the [vocabulary](vocab.md). A shape's `sh:name` version must
-   match its file's, with no gaps, so a class whose shape shares a file
-   with another's moves to a folder of its own when only it gets a new
-   version. Library deck 5 is
-   `ns/shapes/library-deck/v5.ttl`, a self-contained copy of
-   `LibraryDeckV4` from `ns/shapes/deck/v4.ttl`.
-2. `npm run generate`: the new record type, descriptor and
-   `LATEST_VERSION` appear.
-3. Add `packages/domain/src/shapes/migrations/<class>/<N>-to-<N+1>.ts`
-   and register it in `migrations/index.ts`.
-4. Adjust `<class>FromRecord` / `<class>ToRecord` in
-   `packages/domain/src/` if the model changed, and the writers that
-   build the record.
-5. Add fixtures under `packages/vocab/fixtures/<class>/v<N+1>/` and the
-   conformance fixture; document the version in the table above.
-6. For a deck, card, review state or preferences version, say what the
-   step added, which the format update notice names. Add a message
-   under `migrationNotice` in every [message file](i18n.md), and its key
-   at the end of the class's step table in
-   [MigrationNotice.tsx](../packages/ui/src/ui/MigrationNotice.tsx).
+No kind of data gets a further format version: an app refuses to save
+over a format newer than its own, so each new format shut every earlier
+version of the app out of what a later one saved
+([releasing.md](releasing.md#what-never-changes)). The formats in the
+table above are the ones every later version writes, and the steps
+between them stay, for pods an older version wrote.
+[formats.api.test.ts](../packages/domain/src/shapes/migrations/formats.api.test.ts)
+fails when a format rises, and `npm run check:breaking` fails on the
+line that would go from `api/frozen/formats.txt`, whatever the commit
+says.
 
-The chain test, the conformance test, the drift check and the plan and
-notice tests fail until all of that agrees. Nothing else needs touching.
+Data added later goes one of the four ways of the
+[versioning policy](vocab.md#versioning-policy):
+
+1. **A term outside every shape.** Add the term to the
+   [vocabulary](vocab.md#adding-a-term). Read and write it in the
+   subject's mapper, beside the record, as
+   [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts) does
+   for `sm:deckCardLanguage`. A missing value means the default, and
+   it needs no migration.
+2. **A new class.** Write `ns/shapes/<class>/v1.ttl` and run
+   `npm run generate`: the record type, the descriptor and its entry in
+   `LATEST_VERSION` appear, at format 1. Add fixtures under
+   `packages/vocab/fixtures/<class>/v1/`, and the class to the
+   [shapes' table](shapes.md#version-by-version).
+3. **A new scheduler's review state**: a shape of its own, as the
+   second way, with `sm:scheduler` fixed to the new concept
+   ([shapes.md](shapes.md)).
+4. **A new choice in a closed list**: the first way, with the owned
+   term left at a value older versions accept.
+
+Whichever way, an older version of the app keeps running on the same
+pod, as it is: check what it does with the new data when it edits,
+copies, exports or removes the subject beside it.

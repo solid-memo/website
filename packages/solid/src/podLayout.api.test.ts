@@ -304,12 +304,13 @@ async function storageLines(): Promise<string[]> {
  * (docs/releasing.md#the-public-api, docs/data-model.md): how it gets
  * from a WebID to the storage and the type indexes, the registrations an
  * instance's data has in them, and the names of the documents and
- * folders in an instance, relative to an example instance. A line that
- * goes, a document or folder moved or renamed, a registration changed
- * or a link no longer followed, is a breaking change, which
- * `npm run check:breaking` holds to a commit that says so.
+ * folders in an instance, relative to an example instance. The data
+ * never moves: an older version looks for it where it was, so a line
+ * that goes, a document or folder moved or renamed, a registration
+ * changed or a link no longer followed, fails `npm run check:breaking`
+ * whatever a commit says.
  */
-it("keeps api/pod-layout.txt to where the data is in the pod", async () => {
+it("keeps api/frozen/pod-layout.txt to where the data is in the pod", async () => {
   const draft = draftUrlOf(INSTANCE, "solid", 2);
   const lines = [
     ...(await storageLines()),
@@ -328,5 +329,7 @@ it("keeps api/pod-layout.txt to where the data is in the pod", async () => {
     `draft: the cards no chapter asks in ${named(cardsDocumentOf(draft))}`,
     `release: version 2 of the release "solid" published from an instance in ${named(releaseUrlIn(releasesContainerOf(INSTANCE), "solid", 2))}`,
   ];
-  await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot("../../../api/pod-layout.txt");
+  await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
+    "../../../api/frozen/pod-layout.txt",
+  );
 });

@@ -56,8 +56,11 @@ Open an issue, and wait for a reply, before you change:
 
 Pods, other apps and copies of decks depend on these, so a change is
 hard to take back. Published versions are never edited: a published
-`decks/*/vN.ttl` or `ns/shapes/*/vN.ttl` stays as it is, and a change ships
-as the next version. A small fix elsewhere, such as a typo or an obvious
+`decks/*/vN.ttl` or `ns/shapes/*/vN.ttl` stays as it is. A change to a
+deck ships as its next version. A shape gets no next version, and the
+format the app writes never moves, so that older versions of the app
+keep working on the same pod: data added later goes where
+[docs/vocab.md](docs/vocab.md#versioning-policy) says. A small fix elsewhere, such as a typo or an obvious
 bug, needs no issue.
 
 ## Making a change

@@ -1,0 +1,1 @@
+indexedDB: solid-memo-guest-pod version 1

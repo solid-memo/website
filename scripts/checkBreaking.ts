@@ -15,7 +15,10 @@
  *   or say why it does not (a `Contract-Change: not-breaking <reason>`
  *   trailer).
  * - api/frozen/: a line never goes, breaking or not. A published shape
- *   is never edited, nor a published file removed.
+ *   is never edited, nor a published file removed, and the format a
+ *   kind of data is written in, the place of the data in a pod and the
+ *   version of a database in the browser never move: an older version
+ *   of the app could not save, find or open what a newer one left.
  *
  * The base is where the branch left `<git ref>` (their merge base), so a
  * line that the ref gained since then is not taken for one the branch
@@ -109,7 +112,25 @@ export function verdict(
   return { problems, notes };
 }
 
+/** What to do instead, for each file of api/frozen/ that holds the data where it is; any other lists what is published. */
+const HELD: readonly [file: string, why: string][] = [
+  [
+    `${FROZEN}formats.txt`,
+    "an older version of the app does not save over a format newer than its own, so a format never moves (docs/vocab.md#versioning-policy); add the data as a term outside every shape, or as a new kind in format 1.",
+  ],
+  [
+    `${FROZEN}pod-layout.txt`,
+    "an older version of the app looks for the data where it was, so it never moves (docs/releasing.md#what-never-changes); keep the place, and add a new one beside it.",
+  ],
+  [
+    `${FROZEN}browser-storage/`,
+    "a tab of an older version cannot open a database a newer one raised, so its version never moves (docs/releasing.md#what-never-changes); keep what is new in a database of its own.",
+  ],
+];
+
 function neverWhy(file: string): string {
+  const held = HELD.find(([path]) => file.startsWith(path));
+  if (held !== undefined) return held[1];
   return `${file} lists what is published once and for all (docs/releasing.md#what-has-versions-of-its-own); publish a new version instead.`;
 }
 

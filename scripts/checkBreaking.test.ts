@@ -125,6 +125,25 @@ describe("verdict", () => {
     ]);
   });
 
+  it.each([
+    ["api/frozen/formats.txt", "card: written in format 7", "so a format never moves"],
+    ["api/frozen/pod-layout.txt", "digest: kept in <instance>digest.ttl", "so it never moves"],
+    [
+      "api/frozen/browser-storage/browser.txt",
+      "indexedDB: solid-memo-guest-pod version 1",
+      "so its version never moves",
+    ],
+  ])("says of a line gone from %s what to do instead", (file, line, why) => {
+    const { problems } = verdict(
+      [{ file, line }],
+      [commit("feat!: move it\n\nBREAKING CHANGE: x")],
+    );
+    expect(problems).toHaveLength(1);
+    expect(problems[0]).toContain(`${file}: "${line}" is gone, and never may be: `);
+    expect(problems[0]).toContain(why);
+    expect(problems[0]).not.toContain("publish a new version");
+  });
+
   it("notes a commit that says it breaks when no line of api/ went", () => {
     const { problems, notes } = verdict(
       [],

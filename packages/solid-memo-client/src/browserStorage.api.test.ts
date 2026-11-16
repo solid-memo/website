@@ -45,3 +45,14 @@ it("keeps api/browser-storage/solid-memo-client.txt to what the browser keeps", 
     "../../../api/browser-storage/solid-memo-client.txt",
   );
 });
+
+/**
+ * The version of the session's database, which never moves: a tab of an
+ * older version cannot open a database a newer one raised. A line that
+ * goes fails `npm run check:breaking` whatever a commit says.
+ */
+it("keeps api/frozen/browser-storage/solid-memo-client.txt to the database's version", async () => {
+  await expect(`indexedDB: ${DATABASE} version ${DATABASE_VERSION}\n`).toMatchFileSnapshot(
+    "../../../api/frozen/browser-storage/solid-memo-client.txt",
+  );
+});

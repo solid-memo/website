@@ -100,7 +100,10 @@ check a draft's cards, distractors, agents and distributions.
   readers ignore them and writers edit subjects in place. The one closed
   shape is color set format 1, which the app paints with
   ([theme.md](theme.md#how-a-palette-of-ones-own-is-held-safe)); a new
-  color is a new color set format.
+  color needs a new class, as no format moves
+  ([vocab.md](vocab.md#versioning-policy)).
+  [published.api.test.ts](../packages/vocab/tooling/published.api.test.ts)
+  fails on any other closed shape.
 - **A subject keeps only its own shaped classes.** The write check holds
   a subject to the shape of every class it has, and to DCAT-AP where it
   has a DCAT or FOAF class ([validation.md](validation.md)). Another app
@@ -284,6 +287,8 @@ proves for every version and migration step.
   crosscheck` ([validation.md](validation.md#the-ci-cross-check)).
 - **Browser**: the developer tool ([validation.md](validation.md)).
 
-## Adding a version
+## Adding a shape
 
-See [migrations.md](migrations.md#adding-a-format-version).
+A class that has a shape gets no further version, and a new class gets
+one at format 1. See
+[migrations.md](migrations.md#adding-data-without-a-format-version).

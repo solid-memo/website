@@ -104,20 +104,53 @@ A value from a fixed set is a
   be written is deprecated (`owl:deprecated true`, with
   `dcterms:isReplacedBy`, and `@deprecated` on its constant), not
   removed: `sm:direction` gave way to `sm:studyDirection` in 1.6.
-- **A published shape is never edited.** A term a shape gains, even an
-  optional one, goes into the shape's next version, which the app then
-  writes: a new format, and so a breaking change of the app
-  ([releasing.md](releasing.md#what-counts-as-breaking)). This holds
-  from the app's 1.0.0. Before it, shapes were edited in place: an
+- **A published shape is never edited, and no format moves.** The
+  format a kind of data is written in stays what it is, and a class
+  gets no further shape version
+  ([releasing.md](releasing.md#what-never-changes)). An app refuses to
+  save over a format newer than its own, so each new format shut every
+  earlier version of the app out of what a later one saved. Data added
+  later goes where a version that doesn't know it can safely ignore
+  it, or can't see it. There are four ways, and no other:
+  - **An optional term outside every shape.** A term written on a
+    subject outside its shape isn't owned or checked by it, and every
+    writer of the subject keeps it: `sm:position` (1.13), a deck's
+    place on the [arranged deck list](data-model.md#deck-groups), is
+    outside `DeckV6`. A reader reads it whatever the subject's format
+    version, and a missing value means the default.
+  - **A new class**, in format 1, for data an older version must not
+    touch. Its subject links to the subject it belongs to, and no term
+    a shape owns leads to it: an older version removes a link from a
+    catalog or a group to a class it doesn't know.
+  - **For a review state, a new concept of `sm:scheduler`**, in a
+    shape of its own in format 1, as FSRS-6 has (1.21, below). An older version takes such a
+    state for another app's and leaves it alone. Only `sm:scheduler`
+    hides a subject this way: a value of any other term that a shape
+    fixes leaves an older version reading the subject as its class's
+    plain one.
+  - **A new choice in a closed list** (a theme, a scheduler in the
+    preferences, a study direction) is two terms. The term the shape
+    owns keeps a value older versions accept. An optional term outside
+    the shape holds the choice, with the owned value it was written
+    beside. A reader takes the choice only while the owned value is
+    still that one, so a change an older version made wins.
+
+  What a learner alone should see is never a term on a deck or a card:
+  an export copies every term of both
+  ([data-model.md](data-model.md#decks-as-files)). It goes on a subject
+  of its own, as a review state does. A change that fits none of the
+  four ways is a new namespace (below).
+
+  Formats did move before this rule. Until the app's 1.0.0, shapes
+  were edited in place: an
   optional term a reader could ignore at no loss joined a shape's
   current format without a bump, though the vocabulary moved to the
   next 1.x. The deck's study caps (`sm:deckNewCardsPerDay`,
   `sm:deckMaxReviewsPerDay`, 1.7) and picture descriptions
-  (`sm:frontImageDescription`, `sm:backImageDescription`, 1.12) did so. A
-  term written on a subject outside its shape isn't owned or checked by
-  it and moves no format, and every writer of the subject keeps it:
-  `sm:position` (1.13), a deck's place on the
-  [arranged deck list](data-model.md#deck-groups), is outside `DeckV6`.
+  (`sm:frontImageDescription`, `sm:backImageDescription`, 1.12) did so.
+  From 1.0.0 to 6.0.0, a term a shape gained went into the shape's next
+  version, a new format: card formats 6 and 7, preferences formats 5
+  and 6 and deck schedule format 2 came that way.
   Since 1.13
   ([shapes.md](shapes.md#version-by-version) has each format):
   - 1.14: `sm:distractor` joined card format 5, and `sm:answerMode`
@@ -171,8 +204,10 @@ A value from a fixed set is a
   through a save and shows the standard colors, so a later palette, or
   one of the user's own, needs no new format. A scheme whose shape
   lists its concepts (`sm:studyDirection`, `sm:theme`, `sm:textSize`,
-  `sm:reviewDirection`) is an `iriEnum`, where a new concept is a new
-  format. `sm:scheduler` lists none either, but an unknown concept
+  `sm:reviewDirection`) is an `iriEnum`. An older version reads a
+  subject with a concept outside the list as one that doesn't fit, so
+  a new choice goes in a term outside the shape, the fourth way above.
+  `sm:scheduler` lists none either, but an unknown concept
   isn't taken for the default: it says the state's fields belong to
   another algorithm, so the state is another app's.
 - **Which concept is the app's default is the app's, not the
@@ -427,9 +462,10 @@ instance's `palettes.ttl` ([theme.md](theme.md#palettes-of-ones-own)):
   one need no new format.
 - **A color is a string, not a CSS value**: one per color role
   ([theme.md](theme.md#color-roles)), written `#rrggbb`, an opaque
-  color in sRGB. No property takes text that could be any CSS. A role
-  added later is a new property, and a new format of the color set,
-  whose shape is closed.
+  color in sRGB. No property takes text that could be any CSS. The
+  color set's shape is closed and its format never moves
+  ([Versioning policy](#versioning-policy)), so a role added later is a
+  property of a new class.
 - **Two color sets, not two sets of properties**: a palette's light and
   dark colors are each a subject with the same properties.
 
@@ -509,5 +545,7 @@ emits them into the build and serves them in dev.
    on drift, as does the drift test in
    `packages/vocab/tooling/generate.test.ts`.
 3. Use it in a [shape](shapes.md): the fixture test checks that every
-   `sm:` predicate a shape uses is declared here. The term goes into
-   the shape's next version ([Versioning policy](#versioning-policy)).
+   `sm:` predicate a shape uses is declared here. Only a new class's
+   shape takes a term: a published shape is never edited and gets no
+   next version, so a term for a class that has one is written outside
+   its shape ([Versioning policy](#versioning-policy)).
