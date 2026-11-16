@@ -45,7 +45,10 @@ describe("libraryReleaseShards", () => {
 
   it("has a round-trip file for each shard, and none more", () => {
     const src = join(import.meta.dirname, "..");
-    const files = readdirSync(src).filter((file) => file.includes(".roundtrip.test."));
+    // The releases' round trips: the task has the pod snapshots' test too.
+    const files = readdirSync(src).filter(
+      (file) => file.startsWith("releaseDrafts.") && file.includes(".roundtrip.test."),
+    );
     const expected = Array.from(
       { length: ROUND_TRIP_FILES },
       (_, i) => `releaseDrafts.${i + 1}.roundtrip.test.ts`,

@@ -149,6 +149,19 @@ commit says:
 What is published never changes either: a shape, a vocabulary term, a
 deck version ([below](#what-has-versions-of-its-own)).
 
+A later version also reads no less of a pod than the version that
+wrote it. Each pod the app has written is kept as a snapshot, in
+`packages/vocab/fixtures/pods/<n>.nt`, with what the app read of it
+then beside it (`<n>.records.json`). One scenario writes a pod that
+holds every kind of data, each with every term its shape names. When
+the app writes that pod differently, the result is the next snapshot,
+and the earlier ones stay. For each snapshot, the current app reads
+every value the records hold, and saving them back leaves each document
+saying what it said
+([podSnapshots.roundtrip.test.ts](../packages/solid/src/podSnapshots.roundtrip.test.ts)).
+`api/frozen/pods.txt` holds each file's hash, so a snapshot edited or
+removed fails `check:breaking` whatever a commit says.
+
 ### What a merge commit decides
 
 Nothing. The merge queue's merge commit holds the pull request's title

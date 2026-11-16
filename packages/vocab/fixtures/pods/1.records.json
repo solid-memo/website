@@ -1,0 +1,2866 @@
+{
+  "instances": [
+    {
+      "url": "https://alice.example/solid-memo/main/",
+      "name": "Main study"
+    }
+  ],
+  "catalog": {
+    "title": "Main study",
+    "description": "Everything I study.",
+    "publisher": {
+      "webId": "https://alice.example/profile/card#me",
+      "name": "Alice"
+    },
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "modified": "2026-01-01T00:00:00.000Z"
+  },
+  "tree": {
+    "children": [
+      {
+        "kind": "deck",
+        "deck": {
+          "id": "deck-id-0021",
+          "url": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+          "title": {
+            "sv": "Nordens huvudstäder",
+            "en": "Nordic capitals"
+          },
+          "cardsDocumentUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl",
+          "reviewsDocumentUrl": "https://alice.example/solid-memo/main/reviews/deck-id-0021.ttl",
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 6,
+          "direction": "bidirectional",
+          "authors": [
+            "Alice <alice@example.org>"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "description": {
+            "sv": "Nordens huvudstäder.",
+            "en": "The capitals of the Nordic countries."
+          },
+          "themes": [
+            "https://solid-memo.com/ns/vocab/topics.ttl#geography"
+          ],
+          "keywords": {
+            "en": [
+              "capitals"
+            ],
+            "sv": [
+              "huvudstäder"
+            ]
+          },
+          "newCardsPerDay": 5,
+          "maxReviewsPerDay": 50,
+          "cardLanguage": "en",
+          "pictureHosts": [
+            "upload.wikimedia.org"
+          ]
+        }
+      },
+      {
+        "kind": "group",
+        "group": {
+          "url": "https://alice.example/solid-memo/main/catalog.ttl#group-id-0045",
+          "title": {
+            "en": "Geography"
+          }
+        },
+        "children": [
+          {
+            "kind": "group",
+            "group": {
+              "url": "https://alice.example/solid-memo/main/catalog.ttl#group-id-0046",
+              "title": {
+                "en": "Europe"
+              }
+            },
+            "children": [
+              {
+                "kind": "deck",
+                "deck": {
+                  "id": "deck-id-0038",
+                  "url": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0038",
+                  "title": {
+                    "en": "Other"
+                  },
+                  "cardsDocumentUrl": "https://alice.example/solid-memo/main/decks/deck-id-0038.ttl",
+                  "reviewsDocumentUrl": "https://alice.example/solid-memo/main/reviews/deck-id-0038.ttl",
+                  "createdAt": "2026-10-31T12:00:00.000Z",
+                  "formatVersion": 6,
+                  "direction": "front-to-back",
+                  "authors": [
+                    "Alice <alice@example.org>"
+                  ],
+                  "license": "https://creativecommons.org/licenses/by/4.0/",
+                  "description": {
+                    "sv": "Nordens huvudstäder.",
+                    "en": "The capitals of the Nordic countries."
+                  },
+                  "themes": [
+                    "https://solid-memo.com/ns/vocab/topics.ttl#geography"
+                  ],
+                  "keywords": {
+                    "en": [
+                      "capitals"
+                    ],
+                    "sv": [
+                      "huvudstäder"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "deck",
+        "deck": {
+          "id": "deck-id-0097",
+          "url": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0097",
+          "title": {
+            "en": "Solid"
+          },
+          "cardsDocumentUrl": "https://alice.example/solid-memo/main/decks/deck-id-0097.ttl",
+          "reviewsDocumentUrl": "https://alice.example/solid-memo/main/reviews/deck-id-0097.ttl",
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 6,
+          "direction": "front-to-back",
+          "authors": [
+            "Alice <alice@example.org>"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "description": {
+            "sv": "Vad Solid är.",
+            "en": "What Solid is, in two chapters."
+          },
+          "sourceUrl": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+          "themes": [
+            "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+          ],
+          "keywords": {
+            "en": [
+              "solid"
+            ],
+            "sv": [
+              "solid"
+            ]
+          },
+          "course": true,
+          "completedChapters": [
+            "https://alice.example/solid-memo/main/releases/solid/v1.ttl#ch-pods"
+          ]
+        }
+      }
+    ],
+    "readOnly": false
+  },
+  "decks": [
+    {
+      "deck": {
+        "id": "deck-id-0021",
+        "url": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+        "title": {
+          "sv": "Nordens huvudstäder",
+          "en": "Nordic capitals"
+        },
+        "cardsDocumentUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl",
+        "reviewsDocumentUrl": "https://alice.example/solid-memo/main/reviews/deck-id-0021.ttl",
+        "createdAt": "2026-10-31T12:00:00.000Z",
+        "formatVersion": 6,
+        "direction": "bidirectional",
+        "authors": [
+          "Alice <alice@example.org>"
+        ],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "description": {
+          "sv": "Nordens huvudstäder.",
+          "en": "The capitals of the Nordic countries."
+        },
+        "themes": [
+          "https://solid-memo.com/ns/vocab/topics.ttl#geography"
+        ],
+        "keywords": {
+          "en": [
+            "capitals"
+          ],
+          "sv": [
+            "huvudstäder"
+          ]
+        },
+        "newCardsPerDay": 5,
+        "maxReviewsPerDay": 50,
+        "cardLanguage": "en",
+        "pictureHosts": [
+          "upload.wikimedia.org"
+        ]
+      },
+      "cards": [
+        {
+          "id": "card-id-0025",
+          "url": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0025",
+          "front": {
+            "sv": "Sverige",
+            "en": "Sweden"
+          },
+          "back": {
+            "en": "Stockholm",
+            "sv": "Stockholm"
+          },
+          "frontImageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Flag_of_Sweden.svg",
+          "backImageUrl": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Flag_of_Sweden.svg",
+          "frontImageDescription": {
+            "en": "A yellow cross on blue"
+          },
+          "backImageDescription": {
+            "en": "A yellow cross on blue"
+          },
+          "frontLabel": {
+            "en": "Country"
+          },
+          "frontNote": {
+            "en": "A kingdom"
+          },
+          "backLabel": {
+            "en": "Capital"
+          },
+          "backNote": {
+            "en": "Since the 1400s"
+          },
+          "distractors": [
+            {
+              "id": "wrong-oslo",
+              "text": {
+                "en": "Oslo"
+              },
+              "note": {
+                "en": "Norway's"
+              }
+            }
+          ],
+          "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown",
+          "subjects": [
+            "http://www.wikidata.org/entity/Q34"
+          ],
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 7
+        },
+        {
+          "id": "card-id-0029",
+          "url": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0029",
+          "front": {
+            "en": "Norway"
+          },
+          "back": {
+            "en": "Oslo"
+          },
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 7
+        },
+        {
+          "id": "card-id-0031",
+          "url": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0031",
+          "front": {
+            "en": "Denmark"
+          },
+          "back": {
+            "en": "Copenhagen"
+          },
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 7,
+          "retired": true
+        }
+      ],
+      "reviewStates": {
+        "sm2": [
+          {
+            "cardId": "card-id-0025",
+            "direction": "front-to-back",
+            "easeFactor": 2.5,
+            "intervalDays": 6,
+            "repetitions": 2,
+            "due": "2026-11-07",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-11-01T12:00:00.000Z",
+            "formatVersion": 2,
+            "previous": {
+              "easeFactor": 2.5,
+              "intervalDays": 1,
+              "repetitions": 1,
+              "due": "2026-11-01",
+              "lastReviewedAt": "2026-10-31T12:00:00.000Z"
+            }
+          },
+          {
+            "cardId": "card-id-0025",
+            "direction": "back-to-front",
+            "easeFactor": 2.5,
+            "intervalDays": 6,
+            "repetitions": 2,
+            "due": "2026-11-07",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-11-01T12:00:00.000Z",
+            "formatVersion": 2,
+            "previous": {
+              "easeFactor": 2.5,
+              "intervalDays": 1,
+              "repetitions": 1,
+              "due": "2026-11-01",
+              "lastReviewedAt": "2026-10-31T12:00:00.000Z"
+            }
+          },
+          {
+            "cardId": "card-id-0029",
+            "direction": "front-to-back",
+            "easeFactor": 2.5,
+            "intervalDays": 1,
+            "repetitions": 1,
+            "due": "2026-11-01",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-10-31T12:00:00.000Z",
+            "formatVersion": 2
+          },
+          {
+            "cardId": "card-id-0029",
+            "direction": "back-to-front",
+            "easeFactor": 2.5,
+            "intervalDays": 1,
+            "repetitions": 1,
+            "due": "2026-11-01",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-10-31T12:00:00.000Z",
+            "formatVersion": 2
+          }
+        ],
+        "fsrs": [
+          {
+            "cardId": "card-id-0025",
+            "direction": "back-to-front",
+            "stability": 7.315300744077294,
+            "difficulty": 2.1112142357853942,
+            "due": "2026-11-09",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-11-01T12:00:00.000Z",
+            "formatVersion": 1,
+            "previous": {
+              "stability": 2.3065,
+              "difficulty": 2.118103970459015,
+              "due": "2026-11-01",
+              "lastReviewedAt": "2026-10-31T12:00:00.000Z"
+            }
+          },
+          {
+            "cardId": "card-id-0025",
+            "direction": "front-to-back",
+            "stability": 7.315300744077294,
+            "difficulty": 2.1112142357853942,
+            "due": "2026-11-09",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-11-01T12:00:00.000Z",
+            "formatVersion": 1,
+            "previous": {
+              "stability": 2.3065,
+              "difficulty": 2.118103970459015,
+              "due": "2026-11-01",
+              "lastReviewedAt": "2026-10-31T12:00:00.000Z"
+            }
+          },
+          {
+            "cardId": "card-id-0029",
+            "direction": "back-to-front",
+            "stability": 2.3065,
+            "difficulty": 2.118103970459015,
+            "due": "2026-11-02",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-10-31T12:00:00.000Z",
+            "formatVersion": 1
+          },
+          {
+            "cardId": "card-id-0029",
+            "direction": "front-to-back",
+            "stability": 2.3065,
+            "difficulty": 2.118103970459015,
+            "due": "2026-11-02",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-10-31T12:00:00.000Z",
+            "formatVersion": 1
+          }
+        ]
+      },
+      "course": null
+    },
+    {
+      "deck": {
+        "id": "deck-id-0038",
+        "url": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0038",
+        "title": {
+          "en": "Other"
+        },
+        "cardsDocumentUrl": "https://alice.example/solid-memo/main/decks/deck-id-0038.ttl",
+        "reviewsDocumentUrl": "https://alice.example/solid-memo/main/reviews/deck-id-0038.ttl",
+        "createdAt": "2026-10-31T12:00:00.000Z",
+        "formatVersion": 6,
+        "direction": "front-to-back",
+        "authors": [
+          "Alice <alice@example.org>"
+        ],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "description": {
+          "sv": "Nordens huvudstäder.",
+          "en": "The capitals of the Nordic countries."
+        },
+        "themes": [
+          "https://solid-memo.com/ns/vocab/topics.ttl#geography"
+        ],
+        "keywords": {
+          "en": [
+            "capitals"
+          ],
+          "sv": [
+            "huvudstäder"
+          ]
+        }
+      },
+      "cards": [
+        {
+          "id": "card-id-0042",
+          "url": "https://alice.example/solid-memo/main/decks/deck-id-0038.ttl#card-id-0042",
+          "front": {
+            "en": "Finland"
+          },
+          "back": {
+            "en": "Helsinki"
+          },
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 7
+        }
+      ],
+      "reviewStates": {
+        "sm2": [],
+        "fsrs": []
+      },
+      "course": null
+    },
+    {
+      "deck": {
+        "id": "deck-id-0097",
+        "url": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0097",
+        "title": {
+          "en": "Solid"
+        },
+        "cardsDocumentUrl": "https://alice.example/solid-memo/main/decks/deck-id-0097.ttl",
+        "reviewsDocumentUrl": "https://alice.example/solid-memo/main/reviews/deck-id-0097.ttl",
+        "createdAt": "2026-10-31T12:00:00.000Z",
+        "formatVersion": 6,
+        "direction": "front-to-back",
+        "authors": [
+          "Alice <alice@example.org>"
+        ],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "description": {
+          "sv": "Vad Solid är.",
+          "en": "What Solid is, in two chapters."
+        },
+        "sourceUrl": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+        "themes": [
+          "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+        ],
+        "keywords": {
+          "en": [
+            "solid"
+          ],
+          "sv": [
+            "solid"
+          ]
+        },
+        "course": true,
+        "completedChapters": [
+          "https://alice.example/solid-memo/main/releases/solid/v1.ttl#ch-pods"
+        ]
+      },
+      "cards": [
+        {
+          "id": "q-pods-1",
+          "url": "https://alice.example/solid-memo/main/decks/deck-id-0097.ttl#q-pods-1",
+          "front": {
+            "en": "What stores your data?"
+          },
+          "back": {
+            "en": "A pod"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-1-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-pods-1-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "createdAt": "2026-10-31T12:00:00.000Z",
+          "formatVersion": 7,
+          "fromRelease": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+        }
+      ],
+      "reviewStates": {
+        "sm2": [
+          {
+            "cardId": "q-pods-1",
+            "direction": "front-to-back",
+            "easeFactor": 2.5,
+            "intervalDays": 1,
+            "repetitions": 0,
+            "due": "2026-11-01",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-10-31T12:00:00.000Z",
+            "formatVersion": 2
+          }
+        ],
+        "fsrs": [
+          {
+            "cardId": "q-pods-1",
+            "direction": "front-to-back",
+            "stability": 0.212,
+            "difficulty": 6.4133,
+            "due": "2026-11-01",
+            "firstReviewedAt": "2026-10-31T12:00:00.000Z",
+            "lastReviewedAt": "2026-10-31T12:00:00.000Z",
+            "formatVersion": 1
+          }
+        ]
+      },
+      "course": {
+        "outline": {
+          "releaseUrl": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+          "chapters": [
+            {
+              "id": "ch-pods",
+              "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#ch-pods",
+              "position": 0,
+              "title": {
+                "en": "Pods"
+              },
+              "description": {
+                "en": "Where data lives."
+              },
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown",
+              "steps": [
+                {
+                  "id": "st-pods-1",
+                  "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#st-pods-1",
+                  "position": 0,
+                  "theory": {
+                    "en": "A pod stores your data."
+                  },
+                  "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown",
+                  "questionIds": [
+                    "q-pods-1"
+                  ]
+                },
+                {
+                  "id": "st-pods-2",
+                  "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#st-pods-2",
+                  "position": 1,
+                  "theory": {
+                    "en": "You choose who reads it."
+                  },
+                  "questionIds": [
+                    "q-pods-2"
+                  ]
+                }
+              ],
+              "reviewQuestionIds": [
+                "q-pods-3"
+              ]
+            },
+            {
+              "id": "ch-apps",
+              "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#ch-apps",
+              "position": 1,
+              "title": {
+                "en": "Apps"
+              },
+              "steps": [
+                {
+                  "id": "st-apps-1",
+                  "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#st-apps-1",
+                  "position": 0,
+                  "theory": {
+                    "en": "Apps ask for access."
+                  },
+                  "questionIds": [
+                    "q-apps-1"
+                  ]
+                }
+              ],
+              "reviewQuestionIds": []
+            }
+          ]
+        },
+        "cards": {
+          "q-pods-3": {
+            "id": "q-pods-3",
+            "front": {
+              "en": "Where does data live?"
+            },
+            "back": {
+              "en": "In a pod"
+            },
+            "distractors": [
+              {
+                "id": "q-pods-3-d1",
+                "text": {
+                  "en": "Something else"
+                }
+              },
+              {
+                "id": "q-pods-3-d2",
+                "text": {
+                  "en": "Nothing"
+                }
+              }
+            ],
+            "formatVersion": 7
+          },
+          "q-apps-1": {
+            "id": "q-apps-1",
+            "front": {
+              "en": "What do apps ask for?"
+            },
+            "back": {
+              "en": "Access"
+            },
+            "distractors": [
+              {
+                "id": "q-apps-1-d1",
+                "text": {
+                  "en": "Something else"
+                }
+              },
+              {
+                "id": "q-apps-1-d2",
+                "text": {
+                  "en": "Nothing"
+                }
+              }
+            ],
+            "formatVersion": 7
+          },
+          "q-pods-1": {
+            "id": "q-pods-1",
+            "front": {
+              "en": "What stores your data?"
+            },
+            "back": {
+              "en": "A pod"
+            },
+            "distractors": [
+              {
+                "id": "q-pods-1-d1",
+                "text": {
+                  "en": "Something else"
+                }
+              },
+              {
+                "id": "q-pods-1-d2",
+                "text": {
+                  "en": "Nothing"
+                }
+              }
+            ],
+            "formatVersion": 7
+          },
+          "q-pods-2": {
+            "id": "q-pods-2",
+            "front": {
+              "en": "Who chooses who reads it?"
+            },
+            "back": {
+              "en": "You"
+            },
+            "distractors": [
+              {
+                "id": "q-pods-2-d1",
+                "text": {
+                  "en": "Something else"
+                }
+              },
+              {
+                "id": "q-pods-2-d2",
+                "text": {
+                  "en": "Nothing"
+                }
+              }
+            ],
+            "formatVersion": 7
+          }
+        },
+        "answeredCardIds": [
+          "q-pods-1"
+        ],
+        "release": {
+          "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+          "title": {
+            "en": "Solid"
+          },
+          "formatVersion": 6,
+          "authors": [
+            "Alice <alice@example.org>"
+          ],
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "description": {
+            "sv": "Vad Solid är.",
+            "en": "What Solid is, in two chapters."
+          },
+          "direction": "front-to-back",
+          "version": "1",
+          "seriesUrl": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+          "versionNotes": "The first version.",
+          "modifiedAt": "2026-10-31T12:00:00.000Z",
+          "themes": [
+            "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+          ],
+          "keywords": {
+            "en": [
+              "solid"
+            ],
+            "sv": [
+              "solid"
+            ]
+          },
+          "cards": [
+            {
+              "id": "q-pods-3",
+              "front": {
+                "en": "Where does data live?"
+              },
+              "back": {
+                "en": "In a pod"
+              },
+              "distractors": [
+                {
+                  "id": "q-pods-3-d1",
+                  "text": {
+                    "en": "Something else"
+                  }
+                },
+                {
+                  "id": "q-pods-3-d2",
+                  "text": {
+                    "en": "Nothing"
+                  }
+                }
+              ],
+              "formatVersion": 7
+            },
+            {
+              "id": "q-apps-1",
+              "front": {
+                "en": "What do apps ask for?"
+              },
+              "back": {
+                "en": "Access"
+              },
+              "distractors": [
+                {
+                  "id": "q-apps-1-d1",
+                  "text": {
+                    "en": "Something else"
+                  }
+                },
+                {
+                  "id": "q-apps-1-d2",
+                  "text": {
+                    "en": "Nothing"
+                  }
+                }
+              ],
+              "formatVersion": 7
+            },
+            {
+              "id": "q-pods-1",
+              "front": {
+                "en": "What stores your data?"
+              },
+              "back": {
+                "en": "A pod"
+              },
+              "distractors": [
+                {
+                  "id": "q-pods-1-d1",
+                  "text": {
+                    "en": "Something else"
+                  }
+                },
+                {
+                  "id": "q-pods-1-d2",
+                  "text": {
+                    "en": "Nothing"
+                  }
+                }
+              ],
+              "formatVersion": 7
+            },
+            {
+              "id": "q-pods-2",
+              "front": {
+                "en": "Who chooses who reads it?"
+              },
+              "back": {
+                "en": "You"
+              },
+              "distractors": [
+                {
+                  "id": "q-pods-2-d1",
+                  "text": {
+                    "en": "Something else"
+                  }
+                },
+                {
+                  "id": "q-pods-2-d2",
+                  "text": {
+                    "en": "Nothing"
+                  }
+                }
+              ],
+              "formatVersion": 7
+            }
+          ],
+          "isCourse": true
+        }
+      }
+    }
+  ],
+  "preferences": {
+    "newCardsPerDay": 7,
+    "maxReviewsPerDay": 200,
+    "dayBoundaryHour": 4,
+    "answerScale": "sm2",
+    "developerMode": true,
+    "invalidDataPolicy": "block-subject",
+    "theme": "dark",
+    "scheduler": "fsrs6",
+    "desiredRetention": 0.9,
+    "schedulerInvitationDismissed": true,
+    "palette": "https://alice.example/solid-memo/main/palettes.ttl#palette-id-0049",
+    "textSize": "large"
+  },
+  "theme": "dark",
+  "textSize": "large",
+  "palette": {
+    "palette": "standard",
+    "custom": {
+      "url": "https://alice.example/solid-memo/main/palettes.ttl#palette-id-0049",
+      "title": {
+        "en": "Mine"
+      },
+      "basedOn": "standard",
+      "light": {
+        "--bg": "#f7f6f1",
+        "--surface": "#ffffff",
+        "--surface-sunken": "#fbfaf5",
+        "--text": "#16202a",
+        "--text-muted": "#545c68",
+        "--border": "#e4e1d5",
+        "--control-border": "#858072",
+        "--primary": "#2c6b3d",
+        "--primary-fill": "#2c6b3d",
+        "--on-primary": "#ffffff",
+        "--link": "#25603a",
+        "--danger": "#c42d18",
+        "--warning-text": "#7a5800",
+        "--grade-0": "#d63a25",
+        "--grade-1": "#e2662a",
+        "--grade-2": "#e8932a",
+        "--grade-3": "#d9b11c",
+        "--grade-4": "#7fb13c",
+        "--grade-5": "#2f8a4a"
+      },
+      "dark": {
+        "--bg": "#11171e",
+        "--surface": "#19212b",
+        "--surface-sunken": "#151c25",
+        "--text": "#ecebe4",
+        "--text-muted": "#aab4bf",
+        "--border": "#2a3644",
+        "--control-border": "#66788d",
+        "--primary": "#4fae6a",
+        "--primary-fill": "#2a7340",
+        "--on-primary": "#ffffff",
+        "--link": "#74cc8e",
+        "--danger": "#ff8a75",
+        "--warning-text": "#f1d283",
+        "--grade-0": "#d63a25",
+        "--grade-1": "#e2662a",
+        "--grade-2": "#e8932a",
+        "--grade-3": "#d9b11c",
+        "--grade-4": "#7fb13c",
+        "--grade-5": "#2f8a4a"
+      }
+    }
+  },
+  "palettes": [
+    {
+      "url": "https://alice.example/solid-memo/main/palettes.ttl#palette-id-0049",
+      "title": {
+        "en": "Mine"
+      },
+      "basedOn": "standard",
+      "light": {
+        "--bg": "#f7f6f1",
+        "--surface": "#ffffff",
+        "--surface-sunken": "#fbfaf5",
+        "--text": "#16202a",
+        "--text-muted": "#545c68",
+        "--border": "#e4e1d5",
+        "--control-border": "#858072",
+        "--primary": "#2c6b3d",
+        "--primary-fill": "#2c6b3d",
+        "--on-primary": "#ffffff",
+        "--link": "#25603a",
+        "--danger": "#c42d18",
+        "--warning-text": "#7a5800",
+        "--grade-0": "#d63a25",
+        "--grade-1": "#e2662a",
+        "--grade-2": "#e8932a",
+        "--grade-3": "#d9b11c",
+        "--grade-4": "#7fb13c",
+        "--grade-5": "#2f8a4a"
+      },
+      "dark": {
+        "--bg": "#11171e",
+        "--surface": "#19212b",
+        "--surface-sunken": "#151c25",
+        "--text": "#ecebe4",
+        "--text-muted": "#aab4bf",
+        "--border": "#2a3644",
+        "--control-border": "#66788d",
+        "--primary": "#4fae6a",
+        "--primary-fill": "#2a7340",
+        "--on-primary": "#ffffff",
+        "--link": "#74cc8e",
+        "--danger": "#ff8a75",
+        "--warning-text": "#f1d283",
+        "--grade-0": "#d63a25",
+        "--grade-1": "#e2662a",
+        "--grade-2": "#e8932a",
+        "--grade-3": "#d9b11c",
+        "--grade-4": "#7fb13c",
+        "--grade-5": "#2f8a4a"
+      }
+    }
+  ],
+  "connectedScreenShown": false,
+  "answers": [
+    {
+      "id": "answer-20261031T120000000Z-id-0063",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0025",
+      "direction": "back-to-front",
+      "grade": 4,
+      "answeredAt": "2026-10-31T12:00:00.000Z",
+      "studyDay": "2026-10-31",
+      "nextIntervalDays": 2,
+      "recallMillis": 1200,
+      "gradeMillis": 300,
+      "utcOffsetMinutes": 0
+    },
+    {
+      "id": "answer-20261031T120000000Z-id-0065",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0025",
+      "direction": "front-to-back",
+      "grade": 4,
+      "answeredAt": "2026-10-31T12:00:00.000Z",
+      "studyDay": "2026-10-31",
+      "nextIntervalDays": 2,
+      "recallMillis": 1200,
+      "gradeMillis": 300,
+      "utcOffsetMinutes": 0
+    },
+    {
+      "id": "answer-20261031T120000000Z-id-0075",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0029",
+      "direction": "back-to-front",
+      "grade": 4,
+      "answeredAt": "2026-10-31T12:00:00.000Z",
+      "studyDay": "2026-10-31",
+      "nextIntervalDays": 2,
+      "recallMillis": 1200,
+      "gradeMillis": 300,
+      "utcOffsetMinutes": 0
+    },
+    {
+      "id": "answer-20261031T120000000Z-id-0078",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0029",
+      "direction": "front-to-back",
+      "grade": 4,
+      "answeredAt": "2026-10-31T12:00:00.000Z",
+      "studyDay": "2026-10-31",
+      "nextIntervalDays": 2,
+      "recallMillis": 1200,
+      "gradeMillis": 300,
+      "utcOffsetMinutes": 0
+    },
+    {
+      "id": "answer-20261031T120000000Z-id-0104",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0097",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0097.ttl#q-pods-1",
+      "direction": "front-to-back",
+      "grade": 1,
+      "answeredAt": "2026-10-31T12:00:00.000Z",
+      "studyDay": "2026-10-31",
+      "nextIntervalDays": 1,
+      "mode": "multiple-choice",
+      "chosenDistractor": "https://alice.example/solid-memo/main/decks/deck-id-0097.ttl#q-pods-1-d1",
+      "recallMillis": 900,
+      "utcOffsetMinutes": 0
+    },
+    {
+      "id": "answer-20261101T120000000Z-id-0108",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0025",
+      "direction": "front-to-back",
+      "grade": 4,
+      "answeredAt": "2026-11-01T12:00:00.000Z",
+      "studyDay": "2026-11-01",
+      "priorIntervalDays": 1,
+      "nextIntervalDays": 8,
+      "recallMillis": 1200,
+      "gradeMillis": 300,
+      "priorDue": "2026-11-01",
+      "utcOffsetMinutes": 0
+    },
+    {
+      "id": "answer-20261101T120000000Z-id-0112",
+      "deckUrl": "https://alice.example/solid-memo/main/catalog.ttl#deck-id-0021",
+      "cardUrl": "https://alice.example/solid-memo/main/decks/deck-id-0021.ttl#card-id-0025",
+      "direction": "back-to-front",
+      "grade": 4,
+      "answeredAt": "2026-11-01T12:00:00.000Z",
+      "studyDay": "2026-11-01",
+      "priorIntervalDays": 1,
+      "nextIntervalDays": 8,
+      "recallMillis": 1200,
+      "gradeMillis": 300,
+      "priorDue": "2026-11-01",
+      "utcOffsetMinutes": 0
+    }
+  ],
+  "drafts": [
+    {
+      "summary": {
+        "url": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl",
+        "instanceUrl": "https://alice.example/solid-memo/main/",
+        "name": "capitals",
+        "version": 1,
+        "readable": true,
+        "title": {
+          "en": "Capitals",
+          "sv": "Huvudstäder"
+        },
+        "course": false
+      },
+      "draft": {
+        "url": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl",
+        "course": false,
+        "root": {
+          "title": {
+            "en": "Capitals",
+            "sv": "Huvudstäder"
+          },
+          "description": {
+            "sv": "Nordens huvudstäder.",
+            "en": "The capitals of the Nordic countries."
+          },
+          "created": "2026-11-01T12:00:00.000Z",
+          "creator": [
+            "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl#agent-alice-alice-example-org"
+          ],
+          "publisher": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl#agent-alice-alice-example-org",
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "studyDirection": "https://solid-memo.com/ns/vocab/v1.ttl#bidirectional",
+          "theme": [
+            "http://publications.europa.eu/resource/authority/data-theme/EDUC",
+            "https://solid-memo.com/ns/vocab/topics.ttl#geography"
+          ],
+          "keyword": {
+            "en": [
+              "capitals"
+            ],
+            "sv": [
+              "huvudstäder"
+            ]
+          },
+          "language": [],
+          "version": "1",
+          "inSeries": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl#series",
+          "isVersionOf": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl#series",
+          "distribution": [
+            "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl#turtle"
+          ],
+          "wasDerivedFrom": []
+        },
+        "agents": [
+          {
+            "id": "agent-alice-alice-example-org",
+            "data": {
+              "name": "Alice",
+              "mbox": "mailto:alice@example.org"
+            }
+          }
+        ],
+        "distributions": [
+          {
+            "id": "turtle",
+            "data": {
+              "accessUrl": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl",
+              "downloadUrl": "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl",
+              "mediaType": "https://www.iana.org/assignments/media-types/text/turtle",
+              "format": "http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE"
+            }
+          }
+        ],
+        "chapters": [],
+        "steps": [],
+        "cards": [
+          {
+            "id": "card-id-0025",
+            "data": {
+              "front": {
+                "sv": "Sverige",
+                "en": "Sweden"
+              },
+              "back": {
+                "en": "Stockholm",
+                "sv": "Stockholm"
+              },
+              "frontImage": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Flag_of_Sweden.svg",
+              "backImage": "https://upload.wikimedia.org/wikipedia/commons/4/4c/Flag_of_Sweden.svg",
+              "frontImageDescription": {
+                "en": "A yellow cross on blue"
+              },
+              "backImageDescription": {
+                "en": "A yellow cross on blue"
+              },
+              "frontNote": {
+                "en": "A kingdom"
+              },
+              "frontLabel": {
+                "en": "Country"
+              },
+              "backLabel": {
+                "en": "Capital"
+              },
+              "backNote": {
+                "en": "Since the 1400s"
+              },
+              "created": "2026-10-31T12:00:00.000Z",
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/capitals/v1/release.ttl#wrong-oslo"
+              ],
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown",
+              "subject": [
+                "http://www.wikidata.org/entity/Q34"
+              ]
+            }
+          },
+          {
+            "id": "card-id-0029",
+            "data": {
+              "front": {
+                "en": "Norway"
+              },
+              "back": {
+                "en": "Oslo"
+              },
+              "created": "2026-10-31T12:00:00.000Z",
+              "distractor": [],
+              "subject": []
+            }
+          },
+          {
+            "id": "card-id-0031",
+            "data": {
+              "front": {
+                "en": "Denmark"
+              },
+              "back": {
+                "en": "Copenhagen"
+              },
+              "created": "2026-10-31T12:00:00.000Z",
+              "deprecated": true,
+              "distractor": [],
+              "subject": []
+            }
+          }
+        ],
+        "distractors": [
+          {
+            "id": "wrong-oslo",
+            "data": {
+              "text": {
+                "en": "Oslo"
+              },
+              "note": {
+                "en": "Norway's"
+              }
+            }
+          }
+        ],
+        "triples": [
+          {
+            "subject": "https://creativecommons.org/licenses/by/4.0/",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://purl.org/dc/terms/LicenseDocument"
+            }
+          }
+        ],
+        "published": {
+          "ids": {},
+          "activities": []
+        }
+      }
+    },
+    {
+      "summary": {
+        "url": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl",
+        "instanceUrl": "https://alice.example/solid-memo/main/",
+        "name": "solid",
+        "version": 1,
+        "readable": true,
+        "title": {
+          "en": "Solid"
+        },
+        "course": true,
+        "releasedAs": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+      },
+      "draft": {
+        "url": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl",
+        "course": true,
+        "root": {
+          "title": {
+            "en": "Solid"
+          },
+          "description": {
+            "sv": "Vad Solid är.",
+            "en": "What Solid is, in two chapters."
+          },
+          "created": "2026-10-31T12:00:00.000Z",
+          "creator": [
+            "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#alice"
+          ],
+          "publisher": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#alice",
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "studyDirection": "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack",
+          "theme": [
+            "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+          ],
+          "keyword": {
+            "en": [
+              "solid"
+            ],
+            "sv": [
+              "solid"
+            ]
+          },
+          "language": [
+            "http://publications.europa.eu/resource/authority/language/ENG"
+          ],
+          "version": "1",
+          "versionNotes": "The first version.",
+          "inSeries": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#series",
+          "isVersionOf": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#series",
+          "distribution": [
+            "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#turtle"
+          ],
+          "wasDerivedFrom": [],
+          "releasedAs": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+        },
+        "agents": [
+          {
+            "id": "alice",
+            "data": {
+              "name": "Alice",
+              "mbox": "mailto:alice@example.org"
+            }
+          }
+        ],
+        "distributions": [
+          {
+            "id": "turtle",
+            "data": {
+              "accessUrl": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl",
+              "downloadUrl": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl",
+              "mediaType": "https://www.iana.org/assignments/media-types/text/turtle",
+              "format": "http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE"
+            }
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-apps",
+            "data": {
+              "title": {
+                "en": "Apps"
+              },
+              "course": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl",
+              "position": 1,
+              "reviewQuestion": []
+            }
+          },
+          {
+            "id": "ch-pods",
+            "data": {
+              "title": {
+                "en": "Pods"
+              },
+              "description": {
+                "en": "Where data lives."
+              },
+              "course": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl",
+              "position": 0,
+              "reviewQuestion": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-3"
+              ],
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown"
+            }
+          }
+        ],
+        "steps": [
+          {
+            "id": "st-apps-1",
+            "data": {
+              "theory": {
+                "en": "Apps ask for access."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-apps-1"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#ch-apps",
+              "position": 0
+            }
+          },
+          {
+            "id": "st-pods-1",
+            "data": {
+              "theory": {
+                "en": "A pod stores your data."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-1"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#ch-pods",
+              "position": 0,
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown"
+            }
+          },
+          {
+            "id": "st-pods-2",
+            "data": {
+              "theory": {
+                "en": "You choose who reads it."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-2"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#ch-pods",
+              "position": 1
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "q-apps-1",
+            "data": {
+              "front": {
+                "en": "What do apps ask for?"
+              },
+              "back": {
+                "en": "Access"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-apps-1-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-apps-1-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-3",
+            "data": {
+              "front": {
+                "en": "Where does data live?"
+              },
+              "back": {
+                "en": "In a pod"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-3-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-3-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-1",
+            "data": {
+              "front": {
+                "en": "What stores your data?"
+              },
+              "back": {
+                "en": "A pod"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-1-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-1-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-2",
+            "data": {
+              "front": {
+                "en": "Who chooses who reads it?"
+              },
+              "back": {
+                "en": "You"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-2-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v1/release.ttl#q-pods-2-d2"
+              ],
+              "subject": []
+            }
+          }
+        ],
+        "distractors": [
+          {
+            "id": "q-apps-1-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-apps-1-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-3-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-3-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-1-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-1-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-2-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-2-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          }
+        ],
+        "triples": [
+          {
+            "subject": "https://creativecommons.org/licenses/by/4.0/",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://purl.org/dc/terms/LicenseDocument"
+            }
+          }
+        ],
+        "published": {
+          "ids": {},
+          "activities": []
+        }
+      }
+    },
+    {
+      "summary": {
+        "url": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl",
+        "instanceUrl": "https://alice.example/solid-memo/main/",
+        "name": "solid",
+        "version": 2,
+        "readable": true,
+        "title": {
+          "en": "Solid"
+        },
+        "course": true,
+        "releasedAs": "https://alice.example/solid-memo/main/releases/solid/v2.ttl"
+      },
+      "draft": {
+        "url": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl",
+        "course": true,
+        "root": {
+          "title": {
+            "en": "Solid"
+          },
+          "description": {
+            "sv": "Vad Solid är.",
+            "en": "What Solid is, in two chapters."
+          },
+          "created": "2026-10-31T12:00:00.000Z",
+          "creator": [
+            "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#alice"
+          ],
+          "publisher": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#alice",
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "studyDirection": "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack",
+          "theme": [
+            "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+          ],
+          "keyword": {
+            "en": [
+              "solid"
+            ],
+            "sv": [
+              "solid"
+            ]
+          },
+          "language": [
+            "http://publications.europa.eu/resource/authority/language/ENG"
+          ],
+          "version": "2",
+          "versionNotes": "Without the chapter on apps.",
+          "inSeries": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+          "isVersionOf": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+          "prev": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+          "previousVersion": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+          "distribution": [
+            "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#turtle"
+          ],
+          "wasDerivedFrom": [],
+          "releasedAs": "https://alice.example/solid-memo/main/releases/solid/v2.ttl"
+        },
+        "agents": [
+          {
+            "id": "alice",
+            "data": {
+              "name": "Alice",
+              "mbox": "mailto:alice@example.org"
+            }
+          }
+        ],
+        "distributions": [
+          {
+            "id": "turtle",
+            "data": {
+              "accessUrl": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl",
+              "downloadUrl": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl",
+              "mediaType": "https://www.iana.org/assignments/media-types/text/turtle",
+              "format": "http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE"
+            }
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-apps",
+            "data": {
+              "title": {
+                "en": "Apps"
+              },
+              "course": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl",
+              "position": 1,
+              "reviewQuestion": [],
+              "deprecated": true
+            }
+          },
+          {
+            "id": "ch-pods",
+            "data": {
+              "title": {
+                "en": "Pods"
+              },
+              "description": {
+                "en": "Where data lives."
+              },
+              "course": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl",
+              "position": 0,
+              "reviewQuestion": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-3"
+              ],
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown"
+            }
+          }
+        ],
+        "steps": [
+          {
+            "id": "st-apps-1",
+            "data": {
+              "theory": {
+                "en": "Apps ask for access."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-apps-1"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#ch-apps",
+              "position": 0
+            }
+          },
+          {
+            "id": "st-pods-1",
+            "data": {
+              "theory": {
+                "en": "A pod stores your data."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-1"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#ch-pods",
+              "position": 0,
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown"
+            }
+          },
+          {
+            "id": "st-pods-2",
+            "data": {
+              "theory": {
+                "en": "You choose who reads it."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-2"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#ch-pods",
+              "position": 1,
+              "deprecated": true
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "q-apps-1",
+            "data": {
+              "front": {
+                "en": "What do apps ask for?"
+              },
+              "back": {
+                "en": "Access"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-apps-1-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-apps-1-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-3",
+            "data": {
+              "front": {
+                "en": "Where does data live?"
+              },
+              "back": {
+                "en": "In a pod"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-3-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-3-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-1",
+            "data": {
+              "front": {
+                "en": "What stores your data?"
+              },
+              "back": {
+                "en": "A pod"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-1-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-1-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-2",
+            "data": {
+              "front": {
+                "en": "Who chooses who reads it?"
+              },
+              "back": {
+                "en": "You"
+              },
+              "deprecated": true,
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-2-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v2/release.ttl#q-pods-2-d2"
+              ],
+              "subject": []
+            }
+          }
+        ],
+        "distractors": [
+          {
+            "id": "q-apps-1-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-apps-1-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-3-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-3-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-1-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-1-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-2-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              },
+              "deprecated": true
+            }
+          },
+          {
+            "id": "q-pods-2-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          }
+        ],
+        "triples": [
+          {
+            "subject": "https://creativecommons.org/licenses/by/4.0/",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://purl.org/dc/terms/LicenseDocument"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#Dataset"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#DatasetSeries"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "https://solid-memo.com/ns/vocab/v1.ttl#formatVersion",
+            "object": {
+              "kind": "literal",
+              "value": "3",
+              "language": "",
+              "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "Vad Solid är.",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "What Solid is, in two chapters.",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/publisher",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#alice"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/title",
+            "object": {
+              "kind": "literal",
+              "value": "Solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#keyword",
+            "object": {
+              "kind": "literal",
+              "value": "solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#keyword",
+            "object": {
+              "kind": "literal",
+              "value": "solid",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#theme",
+            "object": {
+              "kind": "iri",
+              "value": "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#first",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#hasCurrentVersion",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#hasVersion",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#last",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#Dataset"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "Vad Solid är.",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "What Solid is, in two chapters.",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://purl.org/dc/terms/title",
+            "object": {
+              "kind": "literal",
+              "value": "Solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://www.w3.org/ns/dcat#version",
+            "object": {
+              "kind": "literal",
+              "value": "1",
+              "language": "",
+              "datatype": "http://www.w3.org/2001/XMLSchema#string"
+            }
+          }
+        ],
+        "published": {
+          "ids": {
+            "q-pods-3": "card",
+            "q-apps-1": "card",
+            "q-pods-1": "card",
+            "q-pods-2": "card",
+            "ch-apps": "chapter",
+            "ch-pods": "chapter",
+            "st-apps-1": "step",
+            "st-pods-1": "step",
+            "st-pods-2": "step",
+            "q-pods-3-d1": "distractor",
+            "q-pods-3-d2": "distractor",
+            "q-apps-1-d1": "distractor",
+            "q-apps-1-d2": "distractor",
+            "q-pods-1-d1": "distractor",
+            "q-pods-1-d2": "distractor",
+            "q-pods-2-d1": "distractor",
+            "q-pods-2-d2": "distractor"
+          },
+          "activities": []
+        }
+      }
+    },
+    {
+      "summary": {
+        "url": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl",
+        "instanceUrl": "https://alice.example/solid-memo/main/",
+        "name": "solid",
+        "version": 3,
+        "readable": true,
+        "title": {
+          "en": "Solid"
+        },
+        "course": true
+      },
+      "draft": {
+        "url": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl",
+        "course": true,
+        "root": {
+          "title": {
+            "en": "Solid"
+          },
+          "description": {
+            "sv": "Vad Solid är.",
+            "en": "What Solid is, in two chapters."
+          },
+          "created": "2026-10-31T12:00:00.000Z",
+          "creator": [
+            "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#alice"
+          ],
+          "publisher": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#alice",
+          "license": "https://creativecommons.org/licenses/by/4.0/",
+          "studyDirection": "https://solid-memo.com/ns/vocab/v1.ttl#frontToBack",
+          "theme": [
+            "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+          ],
+          "keyword": {
+            "en": [
+              "solid"
+            ],
+            "sv": [
+              "solid"
+            ]
+          },
+          "language": [
+            "http://publications.europa.eu/resource/authority/language/ENG"
+          ],
+          "version": "3",
+          "inSeries": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+          "isVersionOf": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+          "prev": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+          "previousVersion": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+          "distribution": [
+            "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#turtle"
+          ],
+          "wasDerivedFrom": []
+        },
+        "agents": [
+          {
+            "id": "alice",
+            "data": {
+              "name": "Alice",
+              "mbox": "mailto:alice@example.org"
+            }
+          }
+        ],
+        "distributions": [
+          {
+            "id": "turtle",
+            "data": {
+              "accessUrl": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl",
+              "downloadUrl": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl",
+              "mediaType": "https://www.iana.org/assignments/media-types/text/turtle",
+              "format": "http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE"
+            }
+          }
+        ],
+        "chapters": [
+          {
+            "id": "ch-apps",
+            "data": {
+              "title": {
+                "en": "Apps"
+              },
+              "course": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl",
+              "position": 1,
+              "reviewQuestion": [],
+              "deprecated": true
+            }
+          },
+          {
+            "id": "ch-pods",
+            "data": {
+              "title": {
+                "en": "Pods"
+              },
+              "description": {
+                "en": "Where data lives."
+              },
+              "course": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl",
+              "position": 0,
+              "reviewQuestion": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-3"
+              ],
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown"
+            }
+          }
+        ],
+        "steps": [
+          {
+            "id": "st-apps-1",
+            "data": {
+              "theory": {
+                "en": "Apps ask for access."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-apps-1"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#ch-apps",
+              "position": 0
+            }
+          },
+          {
+            "id": "st-pods-1",
+            "data": {
+              "theory": {
+                "en": "A pod stores your data."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-1"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#ch-pods",
+              "position": 0,
+              "textFormat": "https://solid-memo.com/ns/vocab/v1.ttl#markdown"
+            }
+          },
+          {
+            "id": "st-pods-2",
+            "data": {
+              "theory": {
+                "en": "You choose who reads it."
+              },
+              "checkedBy": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-2"
+              ],
+              "chapter": "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#ch-pods",
+              "position": 1,
+              "deprecated": true
+            }
+          }
+        ],
+        "cards": [
+          {
+            "id": "q-apps-1",
+            "data": {
+              "front": {
+                "en": "What do apps ask for?"
+              },
+              "back": {
+                "en": "Access"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-apps-1-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-apps-1-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-3",
+            "data": {
+              "front": {
+                "en": "Where does data live?"
+              },
+              "back": {
+                "en": "In a pod"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-3-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-3-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-1",
+            "data": {
+              "front": {
+                "en": "What stores your data?"
+              },
+              "back": {
+                "en": "A pod"
+              },
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-1-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-1-d2"
+              ],
+              "subject": []
+            }
+          },
+          {
+            "id": "q-pods-2",
+            "data": {
+              "front": {
+                "en": "Who chooses who reads it?"
+              },
+              "back": {
+                "en": "You"
+              },
+              "deprecated": true,
+              "distractor": [
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-2-d1",
+                "https://alice.example/solid-memo/main/drafts/solid/v3/release.ttl#q-pods-2-d2"
+              ],
+              "subject": []
+            }
+          }
+        ],
+        "distractors": [
+          {
+            "id": "q-apps-1-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-apps-1-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-3-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-3-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-1-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              }
+            }
+          },
+          {
+            "id": "q-pods-1-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          },
+          {
+            "id": "q-pods-2-d1",
+            "data": {
+              "text": {
+                "en": "Something else"
+              },
+              "deprecated": true
+            }
+          },
+          {
+            "id": "q-pods-2-d2",
+            "data": {
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          }
+        ],
+        "triples": [
+          {
+            "subject": "https://creativecommons.org/licenses/by/4.0/",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://purl.org/dc/terms/LicenseDocument"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#Dataset"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#DatasetSeries"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "https://solid-memo.com/ns/vocab/v1.ttl#formatVersion",
+            "object": {
+              "kind": "literal",
+              "value": "3",
+              "language": "",
+              "datatype": "http://www.w3.org/2001/XMLSchema#integer"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "Vad Solid är.",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "What Solid is, in two chapters.",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/publisher",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v2.ttl#alice"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://purl.org/dc/terms/title",
+            "object": {
+              "kind": "literal",
+              "value": "Solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#keyword",
+            "object": {
+              "kind": "literal",
+              "value": "solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#keyword",
+            "object": {
+              "kind": "literal",
+              "value": "solid",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#theme",
+            "object": {
+              "kind": "iri",
+              "value": "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#first",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#hasCurrentVersion",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v2.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#hasVersion",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v2.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#hasVersion",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v1.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+            "predicate": "http://www.w3.org/ns/dcat#last",
+            "object": {
+              "kind": "iri",
+              "value": "https://alice.example/solid-memo/main/releases/solid/v2.ttl"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#Dataset"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "Vad Solid är.",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "What Solid is, in two chapters.",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+            "predicate": "http://purl.org/dc/terms/title",
+            "object": {
+              "kind": "literal",
+              "value": "Solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+            "predicate": "http://www.w3.org/ns/dcat#version",
+            "object": {
+              "kind": "literal",
+              "value": "2",
+              "language": "",
+              "datatype": "http://www.w3.org/2001/XMLSchema#string"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": {
+              "kind": "iri",
+              "value": "http://www.w3.org/ns/dcat#Dataset"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "Vad Solid är.",
+              "language": "sv",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://purl.org/dc/terms/description",
+            "object": {
+              "kind": "literal",
+              "value": "What Solid is, in two chapters.",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://purl.org/dc/terms/title",
+            "object": {
+              "kind": "literal",
+              "value": "Solid",
+              "language": "en",
+              "datatype": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"
+            }
+          },
+          {
+            "subject": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "predicate": "http://www.w3.org/ns/dcat#version",
+            "object": {
+              "kind": "literal",
+              "value": "1",
+              "language": "",
+              "datatype": "http://www.w3.org/2001/XMLSchema#string"
+            }
+          }
+        ],
+        "published": {
+          "ids": {
+            "q-pods-3": "card",
+            "q-apps-1": "card",
+            "q-pods-1": "card",
+            "q-pods-2": "card",
+            "ch-apps": "chapter",
+            "ch-pods": "chapter",
+            "st-apps-1": "step",
+            "st-pods-1": "step",
+            "st-pods-2": "step",
+            "q-pods-3-d1": "distractor",
+            "q-pods-3-d2": "distractor",
+            "q-apps-1-d1": "distractor",
+            "q-apps-1-d2": "distractor",
+            "q-pods-1-d1": "distractor",
+            "q-pods-1-d2": "distractor",
+            "q-pods-2-d1": "distractor",
+            "q-pods-2-d2": "distractor"
+          },
+          "activities": []
+        }
+      }
+    }
+  ],
+  "releases": [
+    {
+      "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+      "release": {
+        "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+        "title": {
+          "en": "Solid"
+        },
+        "authors": [
+          "Alice <alice@example.org>"
+        ],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "description": {
+          "sv": "Vad Solid är.",
+          "en": "What Solid is, in two chapters."
+        },
+        "direction": "front-to-back",
+        "version": "1",
+        "seriesUrl": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+        "versionNotes": "The first version.",
+        "modifiedAt": "2026-10-31T12:00:00.000Z",
+        "themes": [
+          "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+        ],
+        "keywords": {
+          "en": [
+            "solid"
+          ],
+          "sv": [
+            "solid"
+          ]
+        },
+        "isCourse": true,
+        "releases": [
+          {
+            "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "version": "1",
+            "issued": "2026-10-31T12:00:00.000Z",
+            "notes": "The first version."
+          }
+        ],
+        "cardCount": 4,
+        "languages": [
+          "http://publications.europa.eu/resource/authority/language/ENG"
+        ],
+        "createdAt": "2026-10-31T12:00:00.000Z",
+        "sources": []
+      },
+      "cards": [
+        {
+          "id": "q-pods-3",
+          "front": {
+            "en": "Where does data live?"
+          },
+          "back": {
+            "en": "In a pod"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-3-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-pods-3-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        },
+        {
+          "id": "q-apps-1",
+          "front": {
+            "en": "What do apps ask for?"
+          },
+          "back": {
+            "en": "Access"
+          },
+          "distractors": [
+            {
+              "id": "q-apps-1-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-apps-1-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        },
+        {
+          "id": "q-pods-1",
+          "front": {
+            "en": "What stores your data?"
+          },
+          "back": {
+            "en": "A pod"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-1-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-pods-1-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        },
+        {
+          "id": "q-pods-2",
+          "front": {
+            "en": "Who chooses who reads it?"
+          },
+          "back": {
+            "en": "You"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-2-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-pods-2-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        }
+      ]
+    },
+    {
+      "url": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+      "release": {
+        "url": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+        "title": {
+          "en": "Solid"
+        },
+        "authors": [
+          "Alice <alice@example.org>"
+        ],
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "description": {
+          "sv": "Vad Solid är.",
+          "en": "What Solid is, in two chapters."
+        },
+        "direction": "front-to-back",
+        "version": "2",
+        "seriesUrl": "https://alice.example/solid-memo/main/releases/solid/v1.ttl#series",
+        "versionNotes": "Without the chapter on apps.",
+        "modifiedAt": "2026-11-01T12:00:00.000Z",
+        "themes": [
+          "http://publications.europa.eu/resource/authority/data-theme/EDUC"
+        ],
+        "keywords": {
+          "en": [
+            "solid"
+          ],
+          "sv": [
+            "solid"
+          ]
+        },
+        "isCourse": true,
+        "releases": [
+          {
+            "url": "https://alice.example/solid-memo/main/releases/solid/v1.ttl",
+            "version": "1"
+          },
+          {
+            "url": "https://alice.example/solid-memo/main/releases/solid/v2.ttl",
+            "version": "2",
+            "issued": "2026-11-01T12:00:00.000Z",
+            "notes": "Without the chapter on apps."
+          }
+        ],
+        "cardCount": 3,
+        "languages": [
+          "http://publications.europa.eu/resource/authority/language/ENG"
+        ],
+        "createdAt": "2026-10-31T12:00:00.000Z",
+        "sources": []
+      },
+      "cards": [
+        {
+          "id": "q-pods-3",
+          "front": {
+            "en": "Where does data live?"
+          },
+          "back": {
+            "en": "In a pod"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-3-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-pods-3-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        },
+        {
+          "id": "q-apps-1",
+          "front": {
+            "en": "What do apps ask for?"
+          },
+          "back": {
+            "en": "Access"
+          },
+          "distractors": [
+            {
+              "id": "q-apps-1-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-apps-1-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        },
+        {
+          "id": "q-pods-1",
+          "front": {
+            "en": "What stores your data?"
+          },
+          "back": {
+            "en": "A pod"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-1-d1",
+              "text": {
+                "en": "Something else"
+              }
+            },
+            {
+              "id": "q-pods-1-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7
+        },
+        {
+          "id": "q-pods-2",
+          "front": {
+            "en": "Who chooses who reads it?"
+          },
+          "back": {
+            "en": "You"
+          },
+          "distractors": [
+            {
+              "id": "q-pods-2-d1",
+              "text": {
+                "en": "Something else"
+              },
+              "retired": true
+            },
+            {
+              "id": "q-pods-2-d2",
+              "text": {
+                "en": "Nothing"
+              }
+            }
+          ],
+          "formatVersion": 7,
+          "retired": true
+        }
+      ]
+    }
+  ]
+}
