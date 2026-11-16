@@ -190,6 +190,43 @@ releases. It may not say it breaks: on a pull request and in the queue,
 `npm run check:merges` fails on such a commit that has the `!` or the
 footer. A change that breaks says so in a commit commitlint reads.
 
+### Reverts
+
+A revert that `git revert` writes names the commit it takes back, in a
+line `This reverts commit <hash>.`, and the release leaves out both the
+revert and that commit. The release's plugins match the two by the
+message alone. So the release also checks with git that the revert's
+change undoes the commit's change, and it ignores the line when the
+change doesn't. The two changes are compared by their patch ids,
+verbatim: whitespace counts, so a change that differs from the undoing
+only in its spaces doesn't undo it
+([reverts.ts](../scripts/reverts.ts), called by
+[releaseWithoutMerges.ts](../scripts/releaseWithoutMerges.ts)). Patch
+ids leave out line numbers, so a change that puts the same lines back
+at another place, with the same context, counts as undoing the commit
+too. `npm run check:breaking` still compares `api/` itself and finds a
+line of it that is gone. A revert that doesn't undo its commit still
+releases a patch, and the commit it names counts as usual, a breaking
+one too. `npm run check:breaking` reads the commits in the
+same way, so a breaking commit that a revert undoes no longer declares
+a line of `api/` gone, and one that a revert only names still does. Its
+base can be later than the last release, so it checks again from the
+last release tag, the commits the release reads
+([below](#how-ci-holds-to-it)). On a
+pull request and in the queue, `npm run check:merges` fails on a commit
+that says it reverts a commit whose change it doesn't undo: make the
+revert with `git revert`, or reword it as a `revert:` commit without
+that line.
+
+The check can refuse a revert that `git revert` wrote, in two cases.
+When a rebase rewrites the commit that the revert names, the hash in
+its line no longer names a commit on the branch. When the revert's
+conflicts are resolved by hand, its change is no longer that commit's
+change undone. After a rebase, revert the commit as it is on the branch
+now. After resolving conflicts, reword the commit without the
+`This reverts commit` line: the commit it took back then still counts
+in the release, and a breaking one still needs its declaration.
+
 The notes are written from commits' messages, and `CHANGELOG.md` keeps
 its generated entries out of Markdown and spelling lint with directives
 in the file. So no commit may hold an HTML comment's `<!--`, `-->` or
@@ -222,7 +259,17 @@ it on every pull request, in the merge queue and on every push to
   the change breaks (`!` and its footer), or gives a trailer
   `Contract-Change: not-breaking <reason>`. The reason is that the old
   line still holds: an old hash still opens its screen, or a key's old
-  value is still read.
+  value is still read. A commit that a later one reverts counts only
+  as the release counts it ([above](#reverts)).
+- **A line gone since the last release** fails the check in the same
+  way, read from the last release tag to `HEAD`, the commits the
+  release reads. The last release is found as semantic-release finds
+  it: the highest version among the `v<major>.<minor>.<patch>` tags
+  that `HEAD` has, not the nearest one. So a breaking commit merged
+  before the base, and reverted since, no longer covers a line that
+  went again after it. With no release tag yet, the check says so
+  ("No release tag found; checked from the base only.") and reads from
+  the base alone.
 - **A line of `api/frozen/` gone** fails the check, whatever the
   commits say. A format written never moves, nor does the data in a
   pod. A published address keeps answering, a published shape
