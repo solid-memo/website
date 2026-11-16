@@ -21,6 +21,7 @@ npm run test:unit -- packages/ui/src/ui/routes.api.test.ts -u
 | [frozen/formats.txt](frozen/formats.txt) | For each kind of data, the format version the app writes, which never moves | [formats.api.test.ts](../packages/domain/src/shapes/migrations/formats.api.test.ts) |
 | [frozen/pod-layout.txt](frozen/pod-layout.txt) | Where the data lives in a pod: its documents, the type index registrations, the profile links followed | [podLayout.api.test.ts](../packages/solid/src/podLayout.api.test.ts) |
 | [frozen/browser-storage/](frozen/browser-storage/) | The version of each IndexedDB database | `browserStorage.api.test.ts` in each of browser and solid-memo-client |
+| [frozen/pods.txt](frozen/pods.txt) | Every pod snapshot, and what the app read of it when it was made, each with its hash | [podSnapshots.roundtrip.test.ts](../packages/solid/src/podSnapshots.roundtrip.test.ts) |
 | [frozen/published.txt](frozen/published.txt) | Every document published from `ns/` and `vendor/`, and each shape's hash | [published.api.test.ts](../packages/vocab/tooling/published.api.test.ts) |
 | [frozen/vocab.txt](frozen/vocab.txt) | Every term of the vocabulary, with its kind, range and domain, and every topic | [vocab.api.test.ts](../packages/vocab/tooling/vocab.api.test.ts) |
 
@@ -39,6 +40,8 @@ breaks, or says why it does not in a
 `frozen/` fails it whatever the commits say: what is published stays
 published, and the formats, the place of the data in a pod and the
 databases' versions never move, so that an older version of the app
-keeps working on what a newer one saved
+keeps working on what a newer one saved; and a snapshot of a pod stays
+as it was made, so that a newer version is shown to read what an older
+one saved
 ([releasing.md](../docs/releasing.md#what-never-changes)). A line added
 is a promise added, and needs nothing.

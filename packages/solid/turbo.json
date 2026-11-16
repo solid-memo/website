@@ -16,6 +16,7 @@
     "test:roundtrip": {
       "inputs": [
         "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/api/frozen/pods.txt",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
         "$TURBO_ROOT$/packages/solid-memo-client/src/**",

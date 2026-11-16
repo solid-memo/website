@@ -102,7 +102,10 @@ export function wiredApp({
   now = () => new Date(),
   written = async () => undefined,
   site = siteOf(),
+  newId = () => crypto.randomUUID(),
 }: {
+  /** Fresh identifiers, a document's version among them; random unless a test needs the same pod every time. */
+  newId?: () => string;
   store?: ResourceStore;
   guestStore?: ResourceStore;
   now?: () => Date;
@@ -120,7 +123,7 @@ export function wiredApp({
   /** Resolves once the app has no request under way: an answer on its way to the log is in it. */
   settled: () => Promise<void>;
 } {
-  const newEtag = () => `"${crypto.randomUUID()}"`;
+  const newEtag = () => `"${newId()}"`;
   const pods = routedFetch({
     origin: GUEST_ORIGIN,
     local: createLocalPod({ root: GUEST_ORIGIN, store: guestStore, newEtag }),
@@ -155,7 +158,7 @@ export function wiredApp({
   site.use(fetch);
   const { shapeValidator, deckLibrary, fetch: siteFetch } = site;
   const checkWrite = shapeValidator.checkSubjects;
-  const ids = { now, randomId: () => crypto.randomUUID() };
+  const ids = { now, randomId: newId };
   const userStorages = async () => [POD];
   const grantPublicRead = async () => false;
   const saved: ExchangedFile[] = [];
@@ -208,6 +211,9 @@ export function wiredApp({
     guestPod: createLocalGuestPod({ fetch, store: guestStore }),
     writeFence,
     now,
+    newId,
+    // The first of what there is to choose from, every time.
+    random: () => 0,
     deckArchive: createSolidDeckArchive({ fetch, publicFetch: fetch }),
     fileExchange: {
       save: (name, _mediaType, text) => void saved.push({ name, text }),

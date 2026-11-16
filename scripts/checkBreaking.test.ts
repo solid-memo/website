@@ -128,6 +128,7 @@ describe("verdict", () => {
   it.each([
     ["api/frozen/formats.txt", "card: written in format 7", "so a format never moves"],
     ["api/frozen/pod-layout.txt", "digest: kept in <instance>digest.ttl", "so it never moves"],
+    ["api/frozen/pods.txt", "pods/1.nt sha256:00", "so its snapshot is never edited or removed"],
     [
       "api/frozen/browser-storage/browser.txt",
       "indexedDB: solid-memo-guest-pod version 1",

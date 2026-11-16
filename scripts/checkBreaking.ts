@@ -123,6 +123,10 @@ const HELD: readonly [file: string, why: string][] = [
     "an older version of the app looks for the data where it was, so it never moves (docs/releasing.md#what-never-changes); keep the place, and add a new one beside it.",
   ],
   [
+    `${FROZEN}pods.txt`,
+    "a pod a version of the app wrote is read by every later one, so its snapshot is never edited or removed (docs/releasing.md#what-never-changes); leave it as it is, and let the test add the next one.",
+  ],
+  [
     `${FROZEN}browser-storage/`,
     "a tab of an older version cannot open a database a newer one raised, so its version never moves (docs/releasing.md#what-never-changes); keep what is new in a database of its own.",
   ],
