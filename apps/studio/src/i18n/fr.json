@@ -1453,6 +1453,16 @@
       "authorsHint": "Les personnes qui ont compilé la publication, conservées dans la publication elle-même.",
       "noAuthors": "Aucun auteur pour l’instant.",
       "otherAuthors": "Également cités, par leur adresse seule, et conservés tels quels : {authors}",
+      "authorsMore": {
+        "one": "Et {count} autre auteur indiqué par la publication, non listé ici ; il reste dans la publication.",
+        "many": "Et {count} autres auteurs indiqués par la publication, non listés ici ; ils restent dans la publication.",
+        "other": "Et {count} autres auteurs indiqués par la publication, non listés ici ; ils restent dans la publication."
+      },
+      "otherAuthorsMore": {
+        "one": "Et {count} autre cité par son adresse seule, non listé ici ; il reste dans la publication.",
+        "many": "Et {count} autres cités par leur adresse seule, non listés ici ; ils restent dans la publication.",
+        "other": "Et {count} autres cités par leur adresse seule, non listés ici ; ils restent dans la publication."
+      },
       "authorName": "Nom",
       "authorEmail": "Adresse e-mail (facultatif)",
       "saveAuthor": "Enregistrer",

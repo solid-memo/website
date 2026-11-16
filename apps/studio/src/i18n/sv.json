@@ -1378,6 +1378,14 @@
       "authorsHint": "De som sammanställde utgåvan, sparade i själva utgåvan.",
       "noAuthors": "Inga upphovspersoner än.",
       "otherAuthors": "Nämns också, bara med adress, och behålls som de är: {authors}",
+      "authorsMore": {
+        "one": "Och {count} upphovsperson till som utgåvan anger, inte listad här; den finns kvar i utgåvan.",
+        "other": "Och {count} upphovspersoner till som utgåvan anger, inte listade här; de finns kvar i utgåvan."
+      },
+      "otherAuthorsMore": {
+        "one": "Och {count} till som nämns bara med adress, inte listad här; den finns kvar i utgåvan.",
+        "other": "Och {count} till som nämns bara med adress, inte listade här; de finns kvar i utgåvan."
+      },
       "authorName": "Namn",
       "authorEmail": "E-post (valfritt)",
       "saveAuthor": "Spara",

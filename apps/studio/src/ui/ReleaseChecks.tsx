@@ -2,12 +2,23 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { CheckActivity, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseText } from "@solid-memo/domain/release/releaseModel";
 import { checkIdFor, checksOf, type CheckView } from "@solid-memo/domain/release/releaseMetadata";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
+import { bounded, MoreInRelease } from "./ReleaseLists";
+
+/**
+ * At most how many of this version's checks the screen lists, and as
+ * many of those carried from earlier versions; past it, it says how many
+ * more there are. Those it doesn't list stay in the release.
+ */
+export const CHECK_LIMIT = 50;
+
+/** At most how many comments of a check (its scope and outcome, as a rule) the screen shows. */
+export const COMMENT_LIMIT = 10;
 
 /** A check's form: its fields as typed, its day as a date input gives it. */
 interface CheckForm {
@@ -41,8 +52,8 @@ function activityOf(form: CheckForm, before: CheckActivity | null): CheckActivit
  * provenance): this version's, each recorded by machine or AI, never as a
  * human review (checkActivityTriples words it so), edited or deleted;
  * one written otherwise is only deleted. Those carried from earlier
- * versions are shown as they are, never edited. A new check is recorded
- * under them, `#check-<n>`.
+ * versions are shown as they are, never edited. At most CHECK_LIMIT of
+ * each are listed. A new check is recorded under them, `#check-<n>`.
  */
 export function ReleaseChecks({
   draft,
@@ -52,9 +63,19 @@ export function ReleaseChecks({
   onEdit: DraftEditor["edit"];
 }) {
   const { t, locale } = useI18n();
-  const checks = checksOf(draft);
-  const own = checks.filter((check) => !check.carried);
-  const carried = checks.filter((check) => check.carried);
+  const { own, carried } = useMemo(() => {
+    const checks = checksOf(draft);
+    return {
+      own: bounded(
+        checks.filter((check) => !check.carried),
+        CHECK_LIMIT,
+      ),
+      carried: bounded(
+        checks.filter((check) => check.carried),
+        CHECK_LIMIT,
+      ),
+    };
+  }, [draft]);
   const [editing, setEditing] = useState<string | null>(null);
   const today = new Date().toISOString().slice(0, 10);
   const blank: CheckForm = {
@@ -68,11 +89,11 @@ export function ReleaseChecks({
   return (
     <>
       <p class="hint">{t("studio.release.checksHint")}</p>
-      {own.length === 0 ? (
+      {own.shown.length === 0 ? (
         <p>{t("studio.release.noChecks")}</p>
       ) : (
         <ul class="release-checks">
-          {own.map((check) =>
+          {own.shown.map((check) =>
             editing === check.id && check.activity !== null ? (
               <li key={check.id}>
                 <CheckFormFields
@@ -127,6 +148,7 @@ export function ReleaseChecks({
           )}
         </ul>
       )}
+      <MoreInRelease count={own.more} />
       <CheckFormFields
         id="release-new-check"
         legend={t("studio.release.newCheck")}
@@ -138,17 +160,18 @@ export function ReleaseChecks({
           ]) === null
         }
       />
-      {carried.length > 0 && (
+      {carried.shown.length > 0 && (
         <>
           <h4>{t("studio.release.carried")}</h4>
           <p class="hint">{t("studio.release.carriedHint")}</p>
           <ul class="release-checks">
-            {carried.map((check) => (
+            {carried.shown.map((check) => (
               <li key={check.id}>
                 <CheckSummary check={check} />
               </li>
             ))}
           </ul>
+          <MoreInRelease count={carried.more} />
         </>
       )}
     </>
@@ -160,9 +183,14 @@ function nameOf(check: CheckView): string {
   return check.label[0]?.value ?? check.id;
 }
 
-/** A check as its record says it: its label, when it ended, and its comments (its scope and outcome), each in its language. */
+/**
+ * A check as its record says it: its label, when it ended, and its
+ * first COMMENT_LIMIT comments (its scope and outcome), each in its
+ * language.
+ */
 function CheckSummary({ check }: { check: CheckView }) {
   const { partLang } = useI18n();
+  const comments = bounded(check.comments, COMMENT_LIMIT);
   const said = (text: ReleaseText) => <span lang={partLang(text.language)}>{text.value}</span>;
   return (
     <>
@@ -170,11 +198,12 @@ function CheckSummary({ check }: { check: CheckView }) {
         <strong>{check.label.length === 0 ? check.id : said(check.label[0]!)}</strong>
         {check.endedAt !== "" && <> · {check.endedAt.slice(0, 10)}</>}
       </p>
-      {check.comments.map((comment, index) => (
+      {comments.shown.map((comment, index) => (
         <p key={index} class="hint">
           {said(comment)}
         </p>
       ))}
+      <MoreInRelease count={comments.more} />
     </>
   );
 }

@@ -2375,8 +2375,9 @@ the library's releases are
     ([curationRules.ts](../packages/domain/src/release/curationRules.ts)).
     The app reads it to say where a mistake is reported
     ([deck-library.md](deck-library.md#reporting-a-mistake)).
-  - The publisher is one of the release's agents, or the one it names
-    elsewhere.
+  - The publisher is one of the release's first `AUTHOR_LIMIT` agents,
+    or the one it names now: by name when it is an agent of the draft,
+    else by its IRI.
 - **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
   `dcterms:creator`s, each with a name and an optional email
   ([releaseMetadata.ts](../packages/domain/src/release/releaseMetadata.ts)).
@@ -2384,6 +2385,14 @@ the library's releases are
   none. Removing an author removes its
   agent too, unless it publishes the release or a statement names it.
   Authors named by address only are kept as they are.
+  A draft with more than `AUTHOR_LIMIT` authors lists only the first
+  `AUTHOR_LIMIT`, each with its form, and at most as many named by
+  address only
+  ([`ReleaseAuthors`](../apps/studio/src/ui/ReleaseAuthors.tsx)). Under
+  each list a note says how many more of that kind the release names.
+  The release keeps every author, listed or not. An author added past
+  the limit goes last, so it isn't listed until earlier ones are
+  removed.
   Each author is found among the agents by its id, which the draft's
   agents are indexed by once, not looked through for each author. A
   test keeps the time this takes growing in step with the number of
@@ -2395,6 +2404,9 @@ the library's releases are
     (`setAttribution`). It needs an author to name, and is written
     again whenever the authors change. Names too long for it to fit the
     bound on a term are cut short in it, with an ellipsis after them.
+    Past `AUTHOR_LIMIT` authors, the choices on the screen name the
+    first ones and say how many more ("and 12 more", `attributionPreview`);
+    the attribution the release states is written as before.
   - Only a comment worded exactly so, for the authors the release
     names, is read as the attribution: a note starting "Compiled by
     hand…" stays a note.
@@ -2430,7 +2442,12 @@ the library's releases are
     it states stays while an earlier version's making uses it.
   - Deleting an activity of this version takes with it what the draft
     states of a source only that activity used.
-  - Only the source being edited has a form.
+  - Only the source being edited has a form. The screen lists at most
+    `SOURCE_LIMIT` sources
+    ([`ReleaseSources`](../apps/studio/src/ui/ReleaseSources.tsx)), and
+    under them says how many more the release states; those it doesn't
+    list stay in the release. A source added past the limit goes last,
+    so it isn't listed until earlier ones are removed.
   - A new source is an `http:` or `https:` address the release doesn't
     name yet.
 - **Checks**: each check this version had, by a machine or by AI, with
@@ -2442,6 +2459,12 @@ the library's releases are
   deleted, not edited (`readCheckActivity` reads only what the Studio
   writes). Those carried from earlier versions are listed apart, and
   never changed.
+  - The screen lists at most `CHECK_LIMIT` checks of this version, as
+    many carried from earlier ones, and at most `COMMENT_LIMIT` comments
+    of each check
+    ([`ReleaseChecks`](../apps/studio/src/ui/ReleaseChecks.tsx)). Under
+    each list it says how many more the release states; the release
+    keeps them all.
 
 ### What the check asks of a release's provenance
 

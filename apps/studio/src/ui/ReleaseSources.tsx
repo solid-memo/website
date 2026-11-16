@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import {
   sourceChange,
@@ -15,6 +15,14 @@ import {
 import { licenseLabel } from "@solid-memo/domain/license";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
+import { bounded, MoreInRelease } from "./ReleaseLists";
+
+/**
+ * At most how many sources the screen lists, each as its line; past it,
+ * it says how many more there are. Those it doesn't list stay in the
+ * release.
+ */
+export const SOURCE_LIMIT = 50;
 
 const BLANK: SourceForm = {
   title: "",
@@ -33,7 +41,8 @@ const BLANK: SourceForm = {
  * it), or removed. A source only an earlier version's making used has
  * nothing of this version's to remove: that making still names it. A
  * long list of sources stays light: only the one being edited has a
- * form. A new source is added under them.
+ * form, and at most SOURCE_LIMIT are listed. A new source is added
+ * under them.
  */
 export function ReleaseSources({
   draft,
@@ -43,16 +52,16 @@ export function ReleaseSources({
   onEdit: DraftEditor["edit"];
 }) {
   const { t } = useI18n();
-  const sources = sourcesOf(draft);
+  const sources = useMemo(() => bounded(sourcesOf(draft), SOURCE_LIMIT), [draft]);
   const [editing, setEditing] = useState<string | null>(null);
   return (
     <>
       <p class="hint">{t("studio.release.sourcesHint")}</p>
-      {sources.length === 0 ? (
+      {sources.shown.length === 0 ? (
         <p>{t("studio.release.noSources")}</p>
       ) : (
         <ul class="release-sources">
-          {sources.map((source) => (
+          {sources.shown.map((source) => (
             <li key={source.iri}>
               {editing === source.iri ? (
                 <SourceEditor
@@ -74,6 +83,7 @@ export function ReleaseSources({
           ))}
         </ul>
       )}
+      <MoreInRelease count={sources.more} />
       <NewSourceForm draft={draft} onEdit={onEdit} />
     </>
   );

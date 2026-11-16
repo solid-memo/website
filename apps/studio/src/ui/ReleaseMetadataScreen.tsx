@@ -10,7 +10,7 @@ import { LIBRARY_CONTACT } from "@solid-memo/domain/release/curationRules";
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
 import {
   attributionOf,
-  attributionText,
+  attributionPreview,
   authorNames,
   contactOf,
   idIn,
@@ -23,8 +23,9 @@ import { ReaderText } from "@solid-memo/ui/ReaderText";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import { DraftScope, DraftStatus, DraftTextField } from "./DraftParts";
 import { LicenseSelect } from "./LicenseSelect";
-import { ReleaseAuthors } from "./ReleaseAuthors";
+import { AUTHOR_LIMIT, ReleaseAuthors } from "./ReleaseAuthors";
 import { ReleaseChecks } from "./ReleaseChecks";
+import { bounded, MoreInRelease } from "./ReleaseLists";
 import { ReleaseSources } from "./ReleaseSources";
 
 /**
@@ -224,18 +225,9 @@ function useChoices(chosen: readonly string[], known: ReadonlySet<string>) {
     const outside = [...set].filter((iri) => !known.has(iri));
     return {
       has: (iri: string) => set.has(iri),
-      others: {
-        shown: outside.slice(0, OTHER_CHOICE_LIMIT),
-        more: Math.max(0, outside.length - OTHER_CHOICE_LIMIT),
-      },
+      others: bounded(outside, OTHER_CHOICE_LIMIT),
     };
   }, [chosen, known]);
-}
-
-/** How many more IRIs outside the tables the release states than the screen lists, if any. */
-function MoreOthers({ count }: { count: number }) {
-  const { t } = useI18n();
-  return count > 0 ? <p class="hint">{t("studio.release.othersMore", { count })}</p> : null;
 }
 
 /**
@@ -284,7 +276,7 @@ function Languages({
           {option.name}
         </label>
       ))}
-      <MoreOthers count={others.more} />
+      <MoreInRelease count={others.more} />
     </fieldset>
   );
 }
@@ -357,7 +349,7 @@ function Themes({
           {others.shown.map((iri) => (
             <div key={iri}>{option(iri, iri)}</div>
           ))}
-          <MoreOthers count={others.more} />
+          <MoreInRelease count={others.more} />
         </fieldset>
       )}
     </fieldset>
@@ -424,7 +416,11 @@ function Contact({
   );
 }
 
-/** Who publishes the release (dcterms:publisher): one of its agents, the one it names elsewhere, or none. */
+/**
+ * Who publishes the release (dcterms:publisher): one of its first
+ * AUTHOR_LIMIT agents, the one it names now (by name if it is an agent
+ * of the draft, else by IRI), or none.
+ */
 function Publisher({
   draft,
   arrival,
@@ -436,12 +432,19 @@ function Publisher({
 }) {
   const { t } = useI18n();
   const current = draft.root.publisher;
-  const agents = draft.agents.map((node) => ({
-    iri: `${draft.url}#${node.id}`,
-    name: node.data.name,
-  }));
-  const other =
-    current !== undefined && !agents.some((agent) => agent.iri === current) ? current : null;
+  const { agents, other } = useMemo(() => {
+    const all = draft.agents.map((node) => ({
+      iri: `${draft.url}#${node.id}`,
+      name: node.data.name,
+    }));
+    const agents = all.slice(0, AUTHOR_LIMIT);
+    if (current === undefined || agents.some((agent) => agent.iri === current))
+      return { agents, other: null };
+    return {
+      agents,
+      other: all.find((agent) => agent.iri === current) ?? { iri: current, name: current },
+    };
+  }, [draft.agents, draft.url, current]);
   return (
     <>
       <label for="release-publisher">{t("studio.release.publisher")}</label>
@@ -461,7 +464,7 @@ function Publisher({
             {agent.name}
           </option>
         ))}
-        {other !== null && <option value={other}>{other}</option>}
+        {other !== null && <option value={other.iri}>{other.name}</option>}
       </select>
       <p id="release-publisher-hint" class="hint field-hint">
         {t("studio.release.publisherHint")}
@@ -474,7 +477,9 @@ function Publisher({
  * The attribution of the release's making: none, "Compiled by <its
  * authors>", or that "with the help of AI", each shown as the reader's
  * language words it; the release states it in English and Swedish. It
- * needs an author to name.
+ * needs an author to name. Past AUTHOR_LIMIT authors, the choices name
+ * the first and say how many more (attributionPreview); what the
+ * release states is written as before.
  */
 function Attribution({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEditor["edit"] }) {
   const { t, locale } = useI18n();
@@ -488,12 +493,12 @@ function Attribution({ draft, onEdit }: { draft: ReleaseDraft; onEdit: DraftEdit
     { value: "none", label: t("studio.release.attributionNone"), attribution: null },
     {
       value: "compiled",
-      label: none ? null : attributionText(names, false, locale),
+      label: none ? null : attributionPreview(names, false, locale, AUTHOR_LIMIT),
       attribution: { ai: false },
     },
     {
       value: "ai",
-      label: none ? null : attributionText(names, true, locale),
+      label: none ? null : attributionPreview(names, true, locale, AUTHOR_LIMIT),
       attribution: { ai: true },
     },
   ];

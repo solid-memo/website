@@ -13,7 +13,10 @@ import {
 import type { ReleaseField } from "@solid-memo/domain/release/releaseCheck";
 import { createI18n, I18nProvider } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
+import { AUTHOR_LIMIT } from "./ReleaseAuthors";
+import { CHECK_LIMIT, COMMENT_LIMIT } from "./ReleaseChecks";
 import { languageNameOf, OTHER_CHOICE_LIMIT, ReleaseMetadataScreen } from "./ReleaseMetadataScreen";
+import { SOURCE_LIMIT } from "./ReleaseSources";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 
 const idle = { saving: false, failure: null };
@@ -255,6 +258,62 @@ describe("ReleaseMetadataScreen", () => {
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { publisher: at("ann") } }]);
     fireEvent.change(publisher, { target: { value: "" } });
     expect(onEdit).toHaveBeenLastCalledWith([{ kind: "setMeta", meta: { publisher: null } }]);
+  });
+
+  it("lists at most AUTHOR_LIMIT authors, of those named by address and of the publisher's choices, saying how many more", () => {
+    const count = 4000;
+    const ids = Array.from({ length: count }, (_, index) => `a${index}`);
+    const byAddress = Array.from(
+      { length: count },
+      (_, index) => `https://people.example/${index}`,
+    );
+    const last = at(ids[count - 1]!);
+    const draft = with_(
+      courseDraft(),
+      ...ids.map((id): DraftChange => ({ kind: "setAgent", id, agent: { name: `Author ${id}` } })),
+      { kind: "setMeta", meta: { creator: [...ids.map(at), ...byAddress], publisher: last } },
+    );
+    const onEdit = renderScreen(draft);
+    const more = (count - AUTHOR_LIMIT).toLocaleString("en");
+    const authors = screen.getByRole("heading", { name: "Authors" }).closest("section")!;
+    expect(within(authors).getAllByRole("button", { name: /^Remove / })).toHaveLength(AUTHOR_LIMIT);
+    expect(
+      within(authors).getByText(
+        `And ${more} more authors the release states, not listed here; they stay in the release.`,
+      ),
+    ).toBeInTheDocument();
+    expect(
+      within(authors).getByText(
+        `And ${more} more named by address only, not listed here; they stay in the release.`,
+      ),
+    ).toBeInTheDocument();
+    expect(authors.querySelectorAll("*").length).toBeLessThan(AUTHOR_LIMIT * 20);
+    expect(
+      within(authors)
+        .getByText(/^Also named, by address only/)
+        .textContent!.match(/https:\/\/people\.example\//g),
+    ).toHaveLength(AUTHOR_LIMIT);
+    const publisher = screen.getByRole("combobox", { name: "Publisher" });
+    expect(within(publisher).getAllByRole("option")).toHaveLength(AUTHOR_LIMIT + 2);
+    expect(publisher).toHaveValue(last);
+    expect(
+      within(publisher).getByRole("option", { name: `Author ${ids[count - 1]}` }),
+    ).toBeInTheDocument();
+    const shown = ids.slice(0, AUTHOR_LIMIT).map((id) => `Author ${id}`);
+    const compiled = screen.getByRole("radio", {
+      name: `Compiled by ${shown.join(", ")} and ${count - AUTHOR_LIMIT} more.`,
+    });
+    expect(
+      screen.getByRole("radio", {
+        name: `Compiled by ${shown.join(", ")} and ${count - AUTHOR_LIMIT} more with the help of AI.`,
+      }),
+    ).toBeInTheDocument();
+    fireEvent.click(within(authors).getByRole("button", { name: "Remove Author a0" }));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+    fireEvent.click(compiled);
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setAttribution", attribution: { ai: false } },
+    ]);
   });
 
   it("saves the contact once it is a web address, clears it when emptied, and offers the library's", () => {
@@ -841,6 +900,78 @@ describe("ReleaseMetadataScreen's checks", () => {
     expect(within(carried).getByText("Facts (AI)")).toBeInTheDocument();
     expect(within(carried).getByText("bare")).toBeInTheDocument();
     expect(within(carried).queryByRole("button", { name: /Edit|Remove/ })).toBeNull();
+  });
+
+  it("lists at most SOURCE_LIMIT sources, saying how many more, and still edits, removes and adds one", () => {
+    const count = 4000;
+    const base = authoredDraft();
+    const iris = Array.from({ length: count }, (_, index) => `https://source.example/${index}`);
+    const draft: ReleaseDraft = {
+      ...base,
+      root: { ...base.root, wasDerivedFrom: [...base.root.wasDerivedFrom, ...iris] },
+    };
+    const onEdit = renderScreen(draft);
+    const sources = screen.getByRole("heading", { name: "Sources" }).closest("section")!;
+    expect(within(sources).getAllByRole("button", { name: /^Remove / })).toHaveLength(SOURCE_LIMIT);
+    expect(sources.querySelectorAll("*").length).toBeLessThan(SOURCE_LIMIT * 20);
+    expect(
+      within(sources).getByText(
+        `And ${(count + 1 - SOURCE_LIMIT).toLocaleString("en")} more the release states, not listed here; they stay in the release.`,
+      ),
+    ).toBeInTheDocument();
+    fireEvent.click(within(sources).getByRole("button", { name: "Remove Wiki" }));
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "setSource", iri: "https://wiki.example/", source: null },
+    ]);
+    fireEvent.click(within(sources).getByRole("button", { name: `Edit ${iris[0]}` }));
+    fireEvent.click(
+      within(within(sources).getByRole("group", { name: iris[0] })).getByRole("button", {
+        name: "Save the source",
+      }),
+    );
+    expect(onEdit).toHaveBeenCalledTimes(2);
+    const add = within(sources).getByRole("group", { name: "New source" });
+    fireEvent.input(within(add).getByRole("textbox", { name: "Address" }), {
+      target: { value: iris[count - 1] },
+    });
+    fireEvent.click(within(add).getByRole("button", { name: "Add the source" }));
+    expect(onEdit).toHaveBeenCalledTimes(2);
+    expect(within(add).getByRole("alert")).not.toBeEmptyDOMElement();
+  });
+
+  it("lists at most CHECK_LIMIT checks of this version and of earlier ones, and COMMENT_LIMIT comments of each, saying how many more", () => {
+    const count = 3000;
+    const base = courseDraft();
+    const activity = (id: string) => ({
+      subject: at(id),
+      predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+      object: { kind: "iri" as const, value: `${PROV}Activity` },
+    });
+    const own = Array.from({ length: count }, (_, index) => `own-${index}`);
+    const earlier = Array.from({ length: count }, (_, index) => `earlier-${index}`);
+    const comments = Array.from({ length: count }, (_, index) => ({
+      subject: at(own[0]!),
+      predicate: "http://www.w3.org/2000/01/rdf-schema#comment",
+      object: plain(`Comment ${index}`),
+    }));
+    const draft: ReleaseDraft = {
+      ...base,
+      triples: [...base.triples, ...[...own, ...earlier].map(activity), ...comments],
+      published: { ids: {}, activities: earlier },
+    };
+    const onEdit = renderScreen(draft);
+    const checks = screen.getByRole("heading", { name: "Checks" }).closest("section")!;
+    expect(within(checks).getAllByRole("button", { name: /^Remove / })).toHaveLength(CHECK_LIMIT);
+    expect(within(checks).getAllByText(/^Comment /)).toHaveLength(COMMENT_LIMIT);
+    const carried = screen.getByRole("heading", { name: "From earlier versions" }).parentElement!;
+    expect(within(carried).getAllByText(/^earlier-/)).toHaveLength(CHECK_LIMIT);
+    const more = (n: number) =>
+      `And ${n.toLocaleString("en")} more the release states, not listed here; they stay in the release.`;
+    expect(within(checks).getAllByText(more(count - CHECK_LIMIT))).toHaveLength(2);
+    expect(within(checks).getByText(more(count - COMMENT_LIMIT))).toBeInTheDocument();
+    expect(checks.querySelectorAll("*").length).toBeLessThan(CHECK_LIMIT * 40);
+    fireEvent.click(within(checks).getByRole("button", { name: "Remove own-1" }));
+    expect(onEdit).toHaveBeenLastCalledWith([{ kind: "deleteActivity", id: "own-1" }]);
   });
 });
 

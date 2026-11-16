@@ -1303,6 +1303,12 @@
       "authorsHint": "릴리스를 만든 사람들이에요. 릴리스 안에 저장돼요.",
       "noAuthors": "아직 저자가 없어요.",
       "otherAuthors": "주소로만 지정되어 있고 그대로 유지되는 저자: {authors}",
+      "authorsMore": {
+        "other": "릴리스에 적힌 저자가 {count}명 더 있어요. 여기에는 나열하지 않지만 릴리스에는 그대로 남아요."
+      },
+      "otherAuthorsMore": {
+        "other": "주소로만 지정된 저자가 {count}명 더 있어요. 여기에는 나열하지 않지만 릴리스에는 그대로 남아요."
+      },
       "authorName": "이름",
       "authorEmail": "이메일(선택)",
       "saveAuthor": "저장",

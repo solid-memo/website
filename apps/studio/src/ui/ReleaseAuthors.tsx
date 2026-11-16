@@ -15,8 +15,17 @@ import {
 } from "@solid-memo/domain/release/releaseMetadata";
 import { useI18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
+import { bounded } from "./ReleaseLists";
 
 const MAILTO = "mailto:";
+
+/**
+ * At most how many authors the screen lists, each with its form, and
+ * how many of those named by address only; past it, it says how many
+ * more there are. Those it doesn't list stay in the release. The
+ * publisher's choices are bounded by it too (ReleaseMetadataScreen.tsx).
+ */
+export const AUTHOR_LIMIT = 50;
 
 /** An agent as its form holds it: a name, and an email without its `mailto:`. */
 function agentOf(name: string, email: string): AgentV1 {
@@ -36,7 +45,8 @@ function emailOf(agent: AgentV1): string {
  * renamed or removed, and a new one added last. A change of them writes
  * the attribution again for the authors it leaves (releaseMetadata.ts).
  * Authors with no record in the draft, in another document or among its
- * own subjects, are named by address, and kept as they are.
+ * own subjects, are named by address, and kept as they are. At most
+ * AUTHOR_LIMIT of each are listed.
  */
 export function ReleaseAuthors({
   draft,
@@ -47,17 +57,20 @@ export function ReleaseAuthors({
 }) {
   const { t } = useI18n();
   const { authors, others } = useMemo(
-    () => ({ authors: authorsOf(draft), others: otherAuthorsOf(draft) }),
+    () => ({
+      authors: bounded(authorsOf(draft), AUTHOR_LIMIT),
+      others: bounded(otherAuthorsOf(draft), AUTHOR_LIMIT),
+    }),
     [draft],
   );
   return (
     <>
       <p class="hint">{t("studio.release.authorsHint")}</p>
-      {authors.length === 0 ? (
+      {authors.shown.length === 0 ? (
         <p>{t("studio.release.noAuthors")}</p>
       ) : (
         <ul class="release-authors">
-          {authors.map((node) => (
+          {authors.shown.map((node) => (
             <li key={node.id}>
               <AuthorForm
                 id={`release-author-${node.id}`}
@@ -69,12 +82,26 @@ export function ReleaseAuthors({
           ))}
         </ul>
       )}
-      {others.length > 0 && (
-        <p class="hint">{t("studio.release.otherAuthors", { authors: others.join(", ") })}</p>
+      <More count={authors.more} message="studio.release.authorsMore" />
+      {others.shown.length > 0 && (
+        <p class="hint">{t("studio.release.otherAuthors", { authors: others.shown.join(", ") })}</p>
       )}
+      <More count={others.more} message="studio.release.otherAuthorsMore" />
       <NewAuthorForm draft={draft} onEdit={onEdit} />
     </>
   );
+}
+
+/** How many more authors, or of those named by address only, the release names than the screen lists, if any. */
+function More({
+  count,
+  message,
+}: {
+  count: number;
+  message: "studio.release.authorsMore" | "studio.release.otherAuthorsMore";
+}) {
+  const { t } = useI18n();
+  return count > 0 ? <p class="hint">{t(message, { count })}</p> : null;
 }
 
 /** An author's name and email, saved by its button once changed; and its removal. */

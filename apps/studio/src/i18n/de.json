@@ -1378,6 +1378,14 @@
       "authorsHint": "Die Personen, die die Ausgabe zusammengestellt haben, gespeichert in der Ausgabe selbst.",
       "noAuthors": "Noch keine Personen.",
       "otherAuthors": "Ebenfalls genannt, nur mit Adresse, und unverändert beibehalten: {authors}",
+      "authorsMore": {
+        "one": "Und {count} weitere Autorin oder weiterer Autor, die die Ausgabe angibt, hier nicht aufgeführt; sie bleibt in der Ausgabe.",
+        "other": "Und {count} weitere Autorinnen und Autoren, die die Ausgabe angibt, hier nicht aufgeführt; sie bleiben in der Ausgabe."
+      },
+      "otherAuthorsMore": {
+        "one": "Und {count} weiteres, nur mit Adresse genannt, hier nicht aufgeführt; es bleibt in der Ausgabe.",
+        "other": "Und {count} weitere, nur mit Adresse genannt, hier nicht aufgeführt; sie bleiben in der Ausgabe."
+      },
       "authorName": "Name",
       "authorEmail": "E-Mail (optional)",
       "saveAuthor": "Speichern",
