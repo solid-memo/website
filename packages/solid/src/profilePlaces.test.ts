@@ -4,20 +4,25 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { buildThing, createThing } from "./client/rdf";
-import { createPlacesFetch, isInPlaces, profilePlacesOf, readNothing } from "./profilePlaces";
+import {
+  createPlacesFetch,
+  isInPlaces,
+  ownProfileArea,
+  profilePlacesOf,
+  readNothing,
+  storageUrlsOf,
+} from "./profilePlaces";
 import { PIM } from "./vocab";
 
 const WEBID = "https://id.example/alice#me";
 
 describe("profilePlacesOf", () => {
-  it("is the WebID's origin, its document's, and the storages the subjects name", () => {
+  it("is the WebID's origin, its document's, and the storages the WebID document names", () => {
     const me = buildThing(createThing({ url: WEBID }))
       .addIri(PIM.storage, "https://storage.example/alice/")
-      .build();
-    const more = buildThing(createThing({ url: WEBID }))
       .addIri(PIM.storage, "https://backup.example/alice")
       .build();
-    expect(profilePlacesOf(WEBID, "https://profile.example/alice/card", [me, more])).toEqual([
+    expect(profilePlacesOf(WEBID, "https://profile.example/alice/card", me)).toEqual([
       "https://id.example/",
       "https://profile.example/",
       "https://storage.example/alice/",
@@ -25,8 +30,45 @@ describe("profilePlacesOf", () => {
     ]);
   });
 
-  it("leaves out a document address that is none", () => {
-    expect(profilePlacesOf(WEBID, "", [])).toEqual(["https://id.example/"]);
+  it("leaves out a document address that is none, and a subject that is not there", () => {
+    expect(profilePlacesOf(WEBID, "", null)).toEqual(["https://id.example/"]);
+  });
+});
+
+describe("ownProfileArea", () => {
+  it("is the user's storages, or the WebID's own pod when none is known", () => {
+    expect(ownProfileArea(WEBID, ["https://storage.example/alice/"])).toEqual([
+      "https://storage.example/alice/",
+    ]);
+    expect(ownProfileArea("https://pod.example/alice/profile/card#me", [])).toEqual([
+      "https://pod.example/alice/",
+    ]);
+    expect(ownProfileArea("https://pod.example/people/alice/card#me", [])).toEqual([
+      "https://pod.example/people/alice/",
+    ]);
+  });
+
+  it("is nowhere when no storage is known and the WebID's own pod would be the whole origin", () => {
+    expect(ownProfileArea("https://pod.example/alice#me", [])).toEqual([]);
+    expect(ownProfileArea("https://pod.example/profile/card#me", [])).toEqual([]);
+    expect(ownProfileArea("urn:x:y", [])).toEqual([]);
+    expect(ownProfileArea("https://pod.example/alice#me", ["https://pod.example/"])).toEqual([
+      "https://pod.example/",
+    ]);
+  });
+});
+
+describe("storageUrlsOf", () => {
+  it("takes each storage as a request sends it, once, and leaves out text that is no URL", () => {
+    expect(
+      storageUrlsOf([
+        "https://pod.example/alice/",
+        "https://POD.example/alice/./",
+        "https://pod.example/alice/../mallory/",
+        "https://pod.example/alice/%2e%2E/mallory/",
+        "not a url",
+      ]),
+    ).toEqual(["https://pod.example/alice/", "https://pod.example/mallory/"]);
   });
 });
 

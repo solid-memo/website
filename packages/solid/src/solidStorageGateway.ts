@@ -4,16 +4,23 @@
 
 import type { StorageGateway } from "@solid-memo/application/ports";
 import type { Storage } from "@solid-memo/domain/storage";
-import { getThing } from "./client/rdf";
+import { getThing, getUrlAll } from "./client/rdf";
 import {
   limitedFetch,
   MAX_PROFILE_DOCUMENTS,
   noneSpent,
   PROFILE_LIMITS,
 } from "./client/readLimits";
-import { getSourceUrl, type ProfileStorages } from "./client/resources";
+import type { ProfileStorages } from "./client/resources";
 import { readDataset } from "./datasets";
-import { createPlacesFetch, profilePlacesOf, readNothing } from "./profilePlaces";
+import {
+  createPlacesFetch,
+  isInPlaces,
+  ownProfileArea,
+  readNothing,
+  storageUrlsOf,
+} from "./profilePlaces";
+import { PIM } from "./vocab";
 import { isInFolder } from "@solid-memo/domain/instanceLayout";
 import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
@@ -39,28 +46,40 @@ export function createSolidStorageGateway({
     async discoverStorages(webId): Promise<Storage[]> {
       // The WebID document read through `fetch`, as every pod read is, never
       // the browser's own, which cannot reach the guest's pod
-      // (docs/guest-mode.md), and handed to the lookup. The documents it
-      // names as more of the profile are read as the user in the profile's
-      // own places alone, and any other is not read (profilePlacesOf). The
-      // WebID document is read under PROFILE_LIMITS, and the others, no
-      // more than MAX_PROFILE_DOCUMENTS of them, under PROFILE_LIMITS
-      // together, so that many documents hold up a sign-in no more than one.
-      // Only a document sent counts: one outside the places, not read, does not.
+      // (docs/guest-mode.md). The user's storages are those it names
+      // (pim:storage) or, when it names none, the one its server shows it is
+      // in (walkUpToStorage). The documents it names as more of the profile
+      // are read as the user in those storages alone, or in the WebID's own
+      // pod when none is known (ownProfileArea), and any other is not read:
+      // elsewhere on the WebID's origin may be another user's pod. Such a
+      // document adds a storage only inside one already known. Each storage
+      // is taken as a request sends it, once (storageUrlsOf). The WebID
+      // document is read under PROFILE_LIMITS, and the others, no more than
+      // MAX_PROFILE_DOCUMENTS of them, under PROFILE_LIMITS together, so that
+      // many documents hold up a sign-in no more than one. Only a document
+      // sent counts: one outside the area, not read, does not.
       const webIdProfile = await readDataset(webId, profileFetch);
       const me = getThing(webIdProfile, webId);
-      const places = profilePlacesOf(webId, getSourceUrl(webIdProfile), me === null ? [] : [me]);
-      const fromProfile = await profileStorages(webId, {
-        fetch: limitedFetch(
-          createPlacesFetch(places, atMost(MAX_PROFILE_DOCUMENTS, fetch), readNothing),
-          PROFILE_LIMITS,
-          noneSpent(),
-        ),
-        webIdProfile,
-      });
-      if (fromProfile.length > 0) {
-        return fromProfile.map((url) => ({ url, source: "profile" }));
-      }
-      return (await walkUpToStorage(webId, fetch)).map((url) => ({ url, source: "linkHeader" }));
+      const named = storageUrlsOf(me === null ? [] : getUrlAll(me, PIM.storage));
+      const known = named.length > 0 ? named : storageUrlsOf(await walkUpToStorage(webId, fetch));
+      const area = ownProfileArea(webId, known);
+      const fromProfile = storageUrlsOf(
+        await profileStorages(webId, {
+          fetch: limitedFetch(
+            createPlacesFetch(area, atMost(MAX_PROFILE_DOCUMENTS, fetch), readNothing),
+            PROFILE_LIMITS,
+            noneSpent(),
+          ),
+          webIdProfile,
+        }),
+      );
+      // A storage the profile names, in the WebID document or inside a storage already known, is the profile's.
+      const profileNamed = new Set([...named, ...fromProfile]);
+      const urls = new Set([...known, ...fromProfile.filter((url) => isInPlaces(url, area))]);
+      return [...urls].map((url) => ({
+        url,
+        source: profileNamed.has(url) ? "profile" : "linkHeader",
+      }));
     },
 
     async probeStorage(url): Promise<Storage> {

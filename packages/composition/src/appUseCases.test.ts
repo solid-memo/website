@@ -1545,7 +1545,8 @@ describe("createAppUseCases", () => {
   it("moves a guest's study into a folder the user enters, though their profile names no storage", {
     timeout: 60_000,
   }, async () => {
-    const alice = "https://alice.example/";
+    // The WebID's own pod is its folder on a shared origin: at the origin's root it would be none.
+    const alice = "https://pods.example/alice/";
     const pod = podAt(alice, { storage: false });
     podsNetwork({ [alice]: pod });
     const webId = `${alice}profile/card#me`;

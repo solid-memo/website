@@ -20,30 +20,30 @@ import { ReadLimitError } from "./client/interface";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { fakePod } from "./testing/fakePod";
 
-const CARD = "https://alice.example/profile/card";
+const CARD = "https://pod.example/alice/profile/card";
 const WEBID = `${CARD}#me`;
-const EXTENDED = "https://alice.example/settings/extended.ttl";
+const EXTENDED = "https://pod.example/alice/settings/extended.ttl";
 const PIM_STORAGE = "http://www.w3.org/ns/pim/space#storage";
 
 /** `count` plain triples, then the WebID's storage, `storage`. */
-function extended(count: number, storage = "https://alice.example/"): string {
+function extended(count: number, storage = "https://pod.example/alice/"): string {
   let ttl = "";
   for (let i = 0; i < count; i++) ttl += `<#s${i}> <http://example.org/p> "value ${i}" .\n`;
   return `${ttl}<${WEBID}> <${PIM_STORAGE}> <${storage}> .\n`;
 }
 
 /** The `i`th of many further profile documents, and the storage it names. */
-const further = (i: number) => `https://alice.example/settings/extended-${i}.ttl`;
-const storageOf = (i: number) => `https://alice.example/storage-${i}/`;
+const further = (i: number) => `https://pod.example/alice/settings/extended-${i}.ttl`;
+const storageOf = (i: number) => `https://pod.example/alice/storage-${i}/`;
 
 /**
  * A pod whose WebID document names its own storage and `documents` further
  * profile documents of `count` triples each, each naming a storage of
- * its own, and how many requests the gateway sent.
+ * its own inside it, and how many requests the gateway sent.
  */
 async function manyProfilesPod(documents: number, count: number, card = "") {
   const pod = fakePod();
-  card += `<#me> <${PIM_STORAGE}> <https://storage.example/alice/> .\n`;
+  card += `<#me> <${PIM_STORAGE}> <https://pod.example/alice/> .\n`;
   for (let i = 0; i < documents; i++) {
     card += `<#me> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <${further(i)}> .\n`;
     await pod.put(further(i), extended(count, storageOf(i)));
@@ -82,7 +82,7 @@ async function profilePod(count: number, card = "") {
 describe("discoverStorages", () => {
   it("finds the storages an extended profile names", async () => {
     await expect((await profilePod(3)).discoverStorages(WEBID)).resolves.toEqual([
-      { url: "https://alice.example/", source: "profile" },
+      { url: "https://pod.example/alice/", source: "profile" },
     ]);
   });
 
@@ -101,11 +101,38 @@ describe("discoverStorages", () => {
   it("leaves out an extended profile past the limits, the WebID document's storages still found", async () => {
     const gateway = await profilePod(
       PROFILE_LIMITS.quads,
-      `<#me> <${PIM_STORAGE}> <https://storage.example/alice/> .\n`,
+      `<#me> <${PIM_STORAGE}> <https://pod.example/alice/>, <https://storage.example/alice/> .\n`,
     );
     await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+      { url: "https://pod.example/alice/", source: "profile" },
       { url: "https://storage.example/alice/", source: "profile" },
     ]);
+  });
+
+  it("takes the storage the WebID document names on another origin, and reads more of the profile there alone", async () => {
+    const pod = fakePod();
+    const more = "https://storage.example/alice/profile/more.ttl";
+    await pod.put(
+      CARD,
+      `<#me> <${PIM_STORAGE}> <https://storage.example/alice/>;
+        <http://www.w3.org/2000/01/rdf-schema#seeAlso> <${more}>, <${EXTENDED}> .\n`,
+    );
+    await pod.put(more, extended(1, "https://storage.example/alice/backup/"));
+    await pod.put(EXTENDED, extended(1));
+    const sent: string[] = [];
+    const gateway = createSolidStorageGateway({
+      fetch: (input, init) => {
+        sent.push(String(input));
+        return documentsOf(pod)(input, init);
+      },
+      profileStorages: getProfileStorages,
+    });
+    await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+      { url: "https://storage.example/alice/", source: "profile" },
+      { url: "https://storage.example/alice/backup/", source: "profile" },
+    ]);
+    expect(sent).toContain(more);
+    expect(sent).not.toContain(EXTENDED);
   });
 
   it("refuses a WebID document past the limits", async () => {
@@ -123,7 +150,7 @@ describe("discoverStorages", () => {
     const documents = 8;
     const { gateway } = await manyProfilesPod(documents, PROFILE_LIMITS.quads / 2);
     const found = (await gateway.discoverStorages(WEBID)).map(({ url }) => url);
-    expect(found).toContain("https://storage.example/alice/");
+    expect(found).toContain("https://pod.example/alice/");
     expect(found.length).toBeLessThanOrEqual(2);
   });
 
@@ -131,13 +158,13 @@ describe("discoverStorages", () => {
     const { gateway, sent } = await manyProfilesPod(MAX_PROFILE_DOCUMENTS + 4, 1);
     const found = (await gateway.discoverStorages(WEBID)).map(({ url }) => url);
     expect(found).toEqual([
-      "https://storage.example/alice/",
+      "https://pod.example/alice/",
       ...Array.from({ length: MAX_PROFILE_DOCUMENTS }, (_, i) => storageOf(i)),
     ]);
     expect(sent).not.toContain(further(MAX_PROFILE_DOCUMENTS));
-    expect(sent.filter((url) => url.startsWith("https://alice.example/settings/"))).toHaveLength(
-      MAX_PROFILE_DOCUMENTS,
-    );
+    expect(
+      sent.filter((url) => url.startsWith("https://pod.example/alice/settings/")),
+    ).toHaveLength(MAX_PROFILE_DOCUMENTS);
   });
 
   it("counts only the further profile documents it sends to MAX_PROFILE_DOCUMENTS", async () => {
@@ -148,7 +175,7 @@ describe("discoverStorages", () => {
     }
     const { gateway, sent } = await manyProfilesPod(1, 1, outside);
     const found = (await gateway.discoverStorages(WEBID)).map(({ url }) => url);
-    expect(found).toEqual(["https://storage.example/alice/", storageOf(0)]);
+    expect(found).toEqual(["https://pod.example/alice/", storageOf(0)]);
     expect(sent.some((url) => url.startsWith("https://elsewhere.example/"))).toBe(false);
   });
 });
