@@ -2543,7 +2543,7 @@ releases it, two ways.
   outside a field's list. No editor or check would see the
   difference, so the Studio doesn't open that draft either. A subject
   in a format newer than the Studio's is refused too, with the
-  message to reload the page (`writtenByNewerApp`). Each value a shape owns is published as the value
+  message to use a newer version (`writtenByNewerApp`). Each value a shape owns is published as the value
   the check saw.
   Download .ttl refuses these the same way, at the library's address.
   A copy of the draft leaves out the statements of a subject named

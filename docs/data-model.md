@@ -1440,7 +1440,8 @@ own pod, as a draft, before publishing it
   integer or date-time not written as one. No editor shows the
   difference and no check sees it, but publishing would write it. A
   subject in a newer format than the app reads is refused as a newer
-  app's (`writtenByNewerApp`), whose message asks for a reload.
+  app's (`writtenByNewerApp`), whose message says to use a newer
+  version.
 - **Links on the catalog.** `sm:releaseDraft` names a draft's release
   document, and `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's catalog, they

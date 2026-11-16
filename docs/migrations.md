@@ -435,7 +435,7 @@ Rules that hold across versions:
   stored version is above the version it writes for that kind. It
   refuses before anything is sent (`writtenByNewerApp`: "A newer
   version of Solid Memo has updated this data, so this version does not
-  save over it. Reload the page…"). The digest is the exception: it's
+  save over it. Use a newer version of Solid Memo instead."). The digest is the exception: it's
   derived data, so each entry is written new.
 - **`unlessNewer` refuses the same for the writes that change or remove
   a subject without recording it.** These are a deck's position or

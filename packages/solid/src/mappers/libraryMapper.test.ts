@@ -564,7 +564,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
-      `This deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\nurl: ${DOC}\nversion: 7\nlatest: 6`,
+      `This deck is in a newer format than this version of Solid Memo can read. Use a newer version of Solid Memo instead.\nurl: ${DOC}\nversion: 7\nlatest: 6`,
     );
   });
 
@@ -686,7 +686,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
       ),
     );
     expect(() => toLibraryDeckContent(DOC, dataset)).toThrow(
-      `A card in this deck is in a newer format than this version of Solid Memo can read. Reload the page to get the latest version.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 8\nlatest: 7`,
+      `A card in this deck is in a newer format than this version of Solid Memo can read. Use a newer version of Solid Memo instead.\ncard: ${DOC}#se\nurl: ${DOC}\nversion: 8\nlatest: 7`,
     );
   });
 

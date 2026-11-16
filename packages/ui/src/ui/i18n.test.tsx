@@ -47,6 +47,48 @@ describe("the message files", () => {
   );
 });
 
+describe("the messages for data a newer version wrote", () => {
+  /** How each language asks for a reload. */
+  const RELOAD: Record<string, RegExp> = {
+    en: /reload/i,
+    sv: /läs in sidan|ladda om/i,
+    ko: /새로고침/,
+    de: /lade die seite neu|neu laden/i,
+    es: /vuelve a cargar|recarga/i,
+    fr: /recharge/i,
+  };
+  const TOO_NEW = [
+    "writtenByNewerApp",
+    "deckTreeTooNew",
+    "libraryDeckTooNew",
+    "libraryCardTooNew",
+    "deckFileTooNew",
+  ] as const;
+
+  // No format moves any more (docs/vocab.md#versioning-policy), so only another deployment's
+  // newer data brings these up, and a reload brings back the same version there.
+  it.each([
+    ["en", en],
+    ["sv", sv],
+    ["ko", ko],
+    ["de", de],
+    ["es", es],
+    ["fr", fr],
+  ])("say in %s to use a newer version, never to reload", (locale, messages) => {
+    const texts = [messages.deckList.readOnly, ...TOO_NEW.map((code) => messages.errors[code])];
+    expect(texts).toHaveLength(6);
+    for (const text of texts) expect(text).not.toMatch(RELOAD[locale]!);
+    // One sentence says what to do, the same in each of them.
+    expect(
+      new Set(texts.map((text) => text.slice(text.lastIndexOf(". ", text.length - 2) + 2))).size,
+    ).toBe(1);
+  });
+
+  it("keep the reload for a guest's study, which is this browser's and this deployment's", () => {
+    expect(en.errors.guestStudyTooNew).toMatch(RELOAD.en!);
+  });
+});
+
 describe("the source", () => {
   it("asks only for messages English has", () => {
     const known = new Set(Object.keys(shape(en)));
