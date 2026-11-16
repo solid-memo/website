@@ -42,3 +42,16 @@ it("keeps api/frozen/published.txt to the documents published", async () => {
     "../../../api/frozen/published.txt",
   );
 });
+
+/**
+ * Every shape but the color set's is open: a subject may hold triples
+ * its shape does not name, which is where data added later goes
+ * (docs/vocab.md#versioning-policy). A closed shape would have every
+ * version of the app that checks against it refuse such a subject.
+ */
+it("finds no closed shape but the color set's", async () => {
+  const closed = (await readTurtleTree(NS_ROOT))
+    .filter(({ turtle }) => /\bsh:closed\s+true\b/.test(turtle))
+    .map(({ path }) => path);
+  expect(closed).toEqual(["shapes/color-set/v1.ttl"]);
+});

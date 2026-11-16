@@ -264,8 +264,11 @@ in a pull request.
 - **The vocabulary** grows by adding terms. A term that should no
   longer be written is deprecated, never removed, and a breaking change
   is a new namespace ([docs/vocab.md](docs/vocab.md#versioning-policy)).
-- **The shapes** gain versions; a published `ns/shapes/*/vN.ttl` is
-  never edited ([docs/shapes.md](docs/shapes.md)).
+- **The shapes**: a published `ns/shapes/*/vN.ttl` is never edited,
+  and a class gets no further version, so that older versions of the
+  app keep saving what newer ones saved; a new kind of data gets a
+  shape of its own
+  ([docs/vocab.md](docs/vocab.md#versioning-policy)).
 - **The decks** gain versions; a published `decks/*/vN.ttl` is never
   edited or removed, and a card that should go is retired
   ([docs/deck-library.md](docs/deck-library.md#publishing-a-new-version)).

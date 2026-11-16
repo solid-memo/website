@@ -26,7 +26,7 @@ takes the largest bump among the commits since the last version:
 
 | Bump | When | Commits | Example |
 |---|---|---|---|
-| Major (1.4.2 → 2.0.0) | Anything breaking ([below](#what-counts-as-breaking)) | `!` after the type, or a `BREAKING CHANGE:` footer | A deck format 8 the app writes; a configuration variable renamed |
+| Major (1.4.2 → 2.0.0) | Anything breaking ([below](#what-counts-as-breaking)) | `!` after the type, or a `BREAKING CHANGE:` footer | A format the app stops reading; a configuration variable renamed |
 | Minor (1.4.2 → 1.5.0) | A new feature | `feat` | A new screen; a new deck in the library; a new configuration variable |
 | Patch (1.4.2 → 1.4.3) | Fixes, and changes nobody has to act on | `fix`, `perf`, `revert` (or GitHub's `Revert "…"`) | A bug fixed; a translation corrected; a dependency the app ships updated |
 | None | Nothing users see | `docs`, `test`, `refactor`, `style`, `build`, `ci`, `chore` | A page of the docs; a test; a development tool updated |
@@ -85,15 +85,8 @@ A change to [the public API](#the-public-api) is breaking when this
 app's older or newer versions, another app that reads the same pod, or
 someone who runs their own copy has to act or loses something:
 
-- **A new format version the app writes**
-  ([migrations.md](migrations.md)). The app brings older data up to it,
-  but an older app then refuses to save over what the newer one wrote
-  (`writtenByNewerApp`, [data-model.md](data-model.md)) and refuses a
-  deck file in the newer format (`deckFileTooNew`).
 - **Data the app stops reading**: dropping the migration from an older
   format, so a pod never updated can no longer be opened.
-- **A move of the data in the pod**: another folder, another type index
-  registration, other document names.
 - **A change for those who run their own copy**: a configuration variable
   renamed or removed, a changed build command or output folder
   ([deployment.md](deployment.md)).
@@ -113,9 +106,8 @@ copy now needs.
 
 A new vocabulary term that no shape names isn't breaking
 ([vocab.md](vocab.md#versioning-policy)), nor is a new deck or deck
-version. A term a shape gains, even an optional one, goes in the
-shape's next version, since a published shape is never edited: a new
-format version, and so breaking. A breaking change is agreed in an issue
+version. Some changes are never made, in a breaking version or any
+other ([below](#what-never-changes)). A breaking change is agreed in an issue
 first ([CONTRIBUTING.md](../CONTRIBUTING.md#open-an-issue-first)) and
 says so in its commit, with `!` and a `BREAKING CHANGE:` footer that
 tells users what to do.
@@ -132,6 +124,30 @@ parser, so one in a body could stop every release or change the version
 it chose. `parserOpts` sets `fieldPattern: null`, and
 [releaseConfig.test.ts](../scripts/releaseConfig.test.ts) checks that
 such a line changes neither the version nor the notes.
+
+### What never changes
+
+Several versions of Solid Memo can use one pod: a fork, a copy someone
+runs themselves, a tab opened before a deploy. So that each keeps
+working on what another saved, three things never move, whatever a
+commit says:
+
+- **The format a kind of data is written in.** An app refuses to save
+  over a format newer than its own (`writtenByNewerApp`,
+  [data-model.md](data-model.md)), so a format raised would shut every
+  earlier version out of what a later one saved. Every release since
+  6.0.0 writes the same formats. Data added later needs no new format
+  ([vocab.md](vocab.md#versioning-policy) says where it goes), and a new
+  kind of data starts at format 1.
+- **Where the data is in a pod**: the folders, the document names, the
+  type index registrations and the links followed from a WebID. An
+  older version looks for the data where it was.
+- **The version of a database in the browser**, the guest pod's and
+  the session's. A tab of an older version can't open a database a
+  newer one raised.
+
+What is published never changes either: a shape, a vocabulary term, a
+deck version ([below](#what-has-versions-of-its-own)).
 
 ### What a merge commit decides
 
@@ -174,8 +190,10 @@ miss part of a message.
 ## How CI holds to it
 
 [`api/`](../api/README.md) holds the public API, one promise a line: the
-formats the app writes and reads, where data lives in a pod, the hashes,
-what the app keeps in the browser and what a copy relies on. `api/frozen/` holds the
+formats the app reads, the hashes,
+what the app keeps in the browser and what a copy relies on. `api/frozen/` holds
+[what never changes](#what-never-changes): the formats the app writes,
+where data lives in a pod, the databases' versions, the
 published documents and the vocabulary's terms. Each file is written by
 a test in the package whose code it reads, so a change to a promise
 fails that test until the file is written again (`npm run test:unit --
@@ -193,7 +211,8 @@ it on every pull request, in the merge queue and on every push to
   line still holds: an old hash still opens its screen, or a key's old
   value is still read.
 - **A line of `api/frozen/` gone** fails the check, whatever the
-  commits say: a published address keeps answering, a published shape
+  commits say. A format written never moves, nor does the data in a
+  pod. A published address keeps answering, a published shape
   is never edited, a term is never taken back.
 - **A commit that says it breaks** while no line went is noted, and
   passes: removing a feature changes no file.
@@ -209,12 +228,12 @@ its own rules, and none follows the app's number:
 | What | Its version | Rules |
 |---|---|---|
 | The vocabulary | `v1` in its IRI, and `owl:versionInfo` (1.28) in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) | Terms are only added ([vocab.md](vocab.md#versioning-policy)) |
-| The shapes | `ns/shapes/<class>/v<N>.ttl`, one file per format version | A published version is never edited ([shapes.md](shapes.md)) |
-| Format versions | `sm:formatVersion` on every subject the app writes | [migrations.md](migrations.md) |
+| The shapes | `ns/shapes/<class>/v<N>.ttl`, one file per format version | A published version is never edited, and a class gets no further version ([shapes.md](shapes.md)) |
+| Format versions | `sm:formatVersion` on every subject the app writes | The format a kind is written in never moves ([above](#what-never-changes), [migrations.md](migrations.md)) |
 | The library's decks | `decks/<name>/v<N>.ttl` | A published version is never edited ([deck-library.md](deck-library.md#publishing-a-new-version)) |
 
 The commit's subject names what it adds, so the changelog does too:
-"write deck format 8", "add a term to vocabulary 1.21".
+"add a term to vocabulary 1.21", "add version 3 of the capitals deck".
 
 ## The changelog
 
