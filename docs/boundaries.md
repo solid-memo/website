@@ -353,8 +353,9 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   lookup runs at every load, as the app lists the user's instances.
   The storage lookup holds the documents the WebID document names as
   more of the profile to them all together, and reads no more than
-  `MAX_PROFILE_DOCUMENTS` of them: one outside the profile's places
-  isn't read and doesn't count. The type index lookup holds each of
+  `MAX_PROFILE_DOCUMENTS` of them. One outside the user's own storages,
+  or the WebID's own pod when none is found, isn't read and doesn't
+  count. The type index lookup holds each of
   them, and the preferences file, to `PROFILE_LIMITS` on its own, and
   reads no more than `MAX_PROFILE_DOCUMENTS` of them too. A WebID
   document past them fails the sign-in and the lookup, and a further
@@ -440,17 +441,22 @@ of the user's that holds it.
 For the profile and the type indexes, the profile's own places stand
 in for the gate
 ([profilePlaces.ts](../packages/solid/src/profilePlaces.ts)): the
-WebID's origin, its document's, and the storages the profile names.
-A document the profile links (`rdfs:seeAlso`, `foaf:isPrimaryTopicOf`,
-`pim:preferencesFile`) is read as the user only in those places, and
-one anywhere else isn't read at all, nor taken as part of the profile.
+WebID's origin, its document's, and the storages the WebID document
+names. A document the profile links (`rdfs:seeAlso`,
+`foaf:isPrimaryTopicOf`, `pim:preferencesFile`) is read as the user
+only in one of the user's own storages, or in the WebID's own pod when
+none is found. When that pod would be the whole origin, as for a WebID
+document at its root, no such document is read. One anywhere else
+isn't read at all, nor taken as part of the profile. A storage such a
+document names counts only inside a storage already found.
 A type index outside them may be someone else's, so the app takes it
 as no index at all: it reads nothing in it, writes nothing there, and
 offers to create the user's own, as for a missing index. Nothing such
 an index registers is the user's, so no instance in it joins the
 folders the gate sends credentials to. A profile whose index is on
-another server names that storage (`pim:storage`) for the app to use
-it. Of several links to an index, the app takes one in those places.
+another server names that storage (`pim:storage`) in the WebID
+document for the app to use it. Of several links to an index, the app
+takes one in those places.
 These places say where the profile may be read, not where the app may
 point it. One server may keep many users' pods on the WebID's origin,
 so the app takes a type index, linked or entered by its address, only
@@ -458,8 +464,9 @@ when it's in one of the user's own storages
 ([data-model.md](data-model.md#discovery-chain)). It reads the
 preferences file and writes a link into an extended profile only there
 too. When no storage can be found, it still reads the indexes in those
-places, but writes only to one in the WebID's own pod, and to none
-when the lookup failed.
+places, but writes only to one in the WebID's own pod. It writes to
+none when that pod would be the whole origin, or when the lookup
+failed.
 
 ## Further rules
 

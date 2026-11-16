@@ -15,7 +15,7 @@ doesn't ask a server to give:
 
 | The app needs | Solid Protocol | LWS |
 |---|---|---|
-| The user's storage | `pim:storage` in the profile, or the folder typed `pim:Storage` | A `Link` with `rel="https://www.w3.org/ns/lws#storage"` on every answer, and the storage's description (`application/lws+cid`), which names its root container |
+| The user's storage | `pim:storage` in the WebID document, or the folder typed `pim:Storage`, and ones nested inside them that an extended profile names | A `Link` with `rel="https://www.w3.org/ns/lws#storage"` on every answer, and the storage's description (`application/lws+cid`), which names its root container |
 | A folder's contents | Turtle, `ldp:contains` | `application/lws+json`, page by page |
 | A new document at a name the app chooses | PUT with `If-None-Match: *` | POST to its container, which names it; the name asked for is a hint |
 | An edit of a document | SPARQL Update or N3 Patch | JSON Patch, or the whole document again with PUT |
@@ -30,9 +30,9 @@ doesn't work on a server that refuses the Solid Protocol's requests
 
 ## Finding the storage
 
-The app reads `pim:storage` from the user's profile first. Without one,
-it walks from the WebID's document up its folders and asks each with a
-HEAD. A Solid folder typed `pim:Storage` is the storage. An LWS answer
+The app reads `pim:storage` from the user's WebID document first.
+Without one, it walks from the WebID's document up its folders and
+asks each with a HEAD. A Solid folder typed `pim:Storage` is the storage. An LWS answer
 links its storage instead; the app reads that storage's description
 and takes the root container it names, if the WebID's document is in
 it ([lwsStorage.ts](../packages/solid/src/lwsStorage.ts),

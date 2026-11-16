@@ -28,6 +28,23 @@ function description(id: string, root: string) {
   };
 }
 
+const ALICE = "https://alice.example/";
+const POD_CARD = "https://pod.example/alice/profile/card";
+const POD_WEBID = `${POD_CARD}#me`;
+
+/** Alice's WebID document, naming `storages` (pim:storage). */
+function cardNaming(...storages: string[]) {
+  return datasetOfTurtle(
+    CARD,
+    storages.map((url) => `<#me> <http://www.w3.org/ns/pim/space#storage> <${url}> .`).join("\n"),
+  );
+}
+
+/** Alice's WebID document in a pod on an origin that holds other users' pods too, naming no storage. */
+function podCard() {
+  return datasetOfTurtle(POD_CARD, "<#me> a <http://xmlns.com/foaf/0.1/Person> .");
+}
+
 function headResponse(linkHeader?: string): Response {
   const headers = new Headers();
   if (linkHeader !== undefined) {
@@ -61,13 +78,14 @@ describe("createSolidStorageGateway", () => {
   });
 
   describe("discoverStorages", () => {
-    it("returns profile storages when pim:storage triples exist", async () => {
-      profileStorages.mockResolvedValue(["https://alice.example/", "https://backup.example/"]);
+    it("takes the storages the WebID document names, and asks no server for one", async () => {
+      vi.mocked(readDataset).mockResolvedValue(await cardNaming(ALICE, "https://backup.example/"));
+      profileStorages.mockResolvedValue([ALICE, "https://backup.example/"]);
       const fetch = vi.fn();
       const gateway = createSolidStorageGateway({ fetch, profileStorages });
 
       await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
-        { url: "https://alice.example/", source: "profile" },
+        { url: ALICE, source: "profile" },
         { url: "https://backup.example/", source: "profile" },
       ]);
       expect(fetch).not.toHaveBeenCalled();
@@ -78,36 +96,158 @@ describe("createSolidStorageGateway", () => {
       });
     });
 
-    it("reads more of the profile as the user in its own places alone, and nothing anywhere else", async () => {
-      vi.mocked(readDataset).mockResolvedValue(
-        await datasetOfTurtle(
-          "https://alice.example/profile/card",
-          "<#me> <http://www.w3.org/ns/pim/space#storage> <https://storage.example/alice/> .",
-        ),
-      );
-      profileStorages.mockResolvedValue(["https://alice.example/"]);
+    it("takes a storage more of the profile names only inside one already known", async () => {
+      vi.mocked(readDataset).mockResolvedValue(await cardNaming(ALICE));
+      profileStorages.mockResolvedValue([
+        ALICE,
+        "https://alice.example/more/",
+        "https://alice.example/more/",
+        "https://bob.example/",
+        "https://alice.example.evil.example/",
+      ]);
+      const gateway = createSolidStorageGateway({ fetch: vi.fn(), profileStorages });
+
+      await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+        { url: ALICE, source: "profile" },
+        { url: "https://alice.example/more/", source: "profile" },
+      ]);
+    });
+
+    it("reads more of the profile as the user in the user's own storages alone, and nothing anywhere else", async () => {
+      vi.mocked(readDataset).mockResolvedValue(await cardNaming("https://storage.example/alice/"));
+      profileStorages.mockResolvedValue([]);
       const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(new Response(""));
       await createSolidStorageGateway({ fetch, profileStorages }).discoverStorages(WEBID);
       const profileFetch = profileStorages.mock.calls[0]![1].fetch!;
 
-      // The WebID's origin, and a storage its document names, are the user's.
-      await profileFetch("https://alice.example/profile/extended");
+      // A storage the WebID document names is the user's.
       await profileFetch("https://storage.example/alice/profile");
       expect(fetch.mock.calls.map(([url]) => url)).toEqual([
-        "https://alice.example/profile/extended",
         "https://storage.example/alice/profile",
       ]);
-      // A document the profile links anywhere else is not read at all.
+      // A document the profile links anywhere else, even on the WebID's own origin, is not read at all.
       fetch.mockClear();
-      await expect(profileFetch("https://elsewhere.example/doc")).rejects.toThrow(
+      await expect(profileFetch("https://alice.example/profile/extended")).rejects.toThrow(
         "outside the profile's own places",
       );
+      await expect(profileFetch("https://elsewhere.example/doc")).rejects.toThrow();
       await expect(profileFetch("https://storage.example/bob/profile")).rejects.toThrow();
       expect(fetch).not.toHaveBeenCalled();
     });
 
+    it("reads more of the profile in the storage the server shows when the WebID document names none", async () => {
+      vi.mocked(readDataset).mockResolvedValue(await podCard());
+      profileStorages.mockResolvedValue([
+        "https://pod.example/alice/more/",
+        "https://pod.example/mallory/",
+        "https://evil.example/",
+      ]);
+      const fetch = vi.fn<typeof globalThis.fetch>(async (input) =>
+        String(input) === "https://pod.example/alice/"
+          ? headResponse(STORAGE_LINK)
+          : headResponse(),
+      );
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await expect(gateway.discoverStorages(POD_WEBID)).resolves.toEqual([
+        { url: "https://pod.example/alice/", source: "linkHeader" },
+        { url: "https://pod.example/alice/more/", source: "profile" },
+      ]);
+      const profileFetch = profileStorages.mock.calls[0]![1].fetch!;
+      fetch.mockClear();
+      await profileFetch("https://pod.example/alice/shared.ttl");
+      await expect(profileFetch("https://pod.example/mallory/shared.ttl")).rejects.toThrow(
+        "outside the profile's own places",
+      );
+      expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+        "https://pod.example/alice/shared.ttl",
+      ]);
+    });
+
+    it("reads more of the profile in the WebID's own pod when no storage is known", async () => {
+      vi.mocked(readDataset).mockResolvedValue(await podCard());
+      profileStorages.mockResolvedValue(["https://pod.example/alice/", "https://pod.example/"]);
+      const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await expect(gateway.discoverStorages(POD_WEBID)).resolves.toEqual([
+        { url: "https://pod.example/alice/", source: "profile" },
+      ]);
+      const profileFetch = profileStorages.mock.calls[0]![1].fetch!;
+      fetch.mockClear();
+      await profileFetch("https://pod.example/alice/settings/more");
+      await expect(profileFetch("https://pod.example/mallory/shared.ttl")).rejects.toThrow();
+      expect(fetch).toHaveBeenCalledOnce();
+    });
+
+    it("takes a storage the WebID document names on another origin, and more of the profile inside it", async () => {
+      vi.mocked(readDataset).mockResolvedValue(await cardNaming("https://storage.example/alice/"));
+      profileStorages.mockResolvedValue([
+        "https://storage.example/alice/",
+        "https://storage.example/alice/more/",
+        "https://storage.example/bob/",
+        ALICE,
+      ]);
+      const fetch = vi.fn();
+      const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+      await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+        { url: "https://storage.example/alice/", source: "profile" },
+        { url: "https://storage.example/alice/more/", source: "profile" },
+      ]);
+      expect(fetch).not.toHaveBeenCalled();
+    });
+
+    it("takes each storage once, as a request sends it, so no other spelling leads out of one", async () => {
+      vi.mocked(readDataset).mockResolvedValue(
+        await cardNaming("https://pod.example/alice/", "https://POD.example/alice/./"),
+      );
+      profileStorages.mockResolvedValue([
+        "https://pod.example/alice/",
+        "https://pod.example/alice/../mallory/",
+        "https://pod.example/alice/%2e%2e/mallory/",
+        "https://pod.example/alice/more/../more/",
+        "https://pod.example/alice/more/",
+      ]);
+      const gateway = createSolidStorageGateway({ fetch: vi.fn(), profileStorages });
+
+      await expect(gateway.discoverStorages(WEBID)).resolves.toEqual([
+        { url: "https://pod.example/alice/", source: "profile" },
+        { url: "https://pod.example/alice/more/", source: "profile" },
+      ]);
+    });
+
+    it.each(["https://pod.example/alice#me", "https://pod.example/profile/card#me"])(
+      "reads no more of the profile and takes no storage from it when %s names none and the server shows none",
+      async (webId) => {
+        vi.mocked(readDataset).mockResolvedValue(
+          await datasetOfTurtle(
+            webId.split("#")[0]!,
+            `<${webId}> a <http://xmlns.com/foaf/0.1/Person> .`,
+          ),
+        );
+        profileStorages.mockResolvedValue([
+          "https://pod.example/mallory/",
+          "https://pod.example/",
+          "https://evil.example/",
+        ]);
+        const fetch = vi.fn<typeof globalThis.fetch>().mockResolvedValue(headResponse());
+        const gateway = createSolidStorageGateway({ fetch, profileStorages });
+
+        await expect(gateway.discoverStorages(webId)).resolves.toEqual([]);
+        const profileFetch = profileStorages.mock.calls[0]![1].fetch!;
+        fetch.mockClear();
+        await expect(profileFetch("https://pod.example/mallory/shared.ttl")).rejects.toThrow(
+          "outside the profile's own places",
+        );
+        await expect(profileFetch("https://pod.example/extended.ttl")).rejects.toThrow();
+        expect(fetch).not.toHaveBeenCalled();
+      },
+    );
+
     it("reads the profile's documents through the fetch given, under PROFILE_LIMITS", async () => {
-      profileStorages.mockResolvedValue(["https://alice.example/"]);
+      vi.mocked(readDataset).mockResolvedValue(await cardNaming(ALICE));
+      profileStorages.mockResolvedValue([ALICE]);
       const fetch = vi
         .fn<typeof globalThis.fetch>()
         .mockImplementation(async () => new Response("<#me> <#p> <#o> ."));

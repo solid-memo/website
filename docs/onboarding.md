@@ -171,9 +171,10 @@ case (no caller skips it).
 [SolidAccount](../packages/domain/src/account.ts) `{ webId, name?, podUrl?, oidcIssuer? }`:
 
 - `podUrl`: the first result of `StorageGateway.discoverStorages`, from
-  the profile's `pim:storage` (`http://www.w3.org/ns/pim/space#storage`)
-  links, falling back to the Solid Protocol's storage `Link`-header
-  walk-up. The user never types it, and the app never assumes it from
+  the WebID document's `pim:storage`
+  (`http://www.w3.org/ns/pim/space#storage`) links, falling back to the
+  Solid Protocol's storage `Link`-header walk-up. An extended profile
+  adds a storage only inside one already found. The user never types it, and the app never assumes it from
   the provider or the WebID's origin.
 - `oidcIssuer`: the profile's `solid:oidcIssuer`, informational: a
   failed lookup doesn't fail discovery.

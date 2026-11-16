@@ -60,17 +60,32 @@ flowchart LR
     I2 -->|the folder's layout| D1
 ```
 
-- **Storage**: `pim:storage` triples in the (extended) profile. That's
-  the WebID document and the documents it names as more of the profile
-  (`rdfs:seeAlso`, `foaf:isPrimaryTopicOf`, `foaf:primaryTopic`). The
-  WebID document is read under `PROFILE_LIMITS`, and the others under
-  them all together, no more than `MAX_PROFILE_DOCUMENTS` of them
-  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)). Else
-  the Solid Protocol's Link-header walk-up from the WebID URL
-  (`rel="type"` targeting `pim:Storage`, capital S), which asks the
-  WebID document and its nearest `MAX_STORAGE_ANCESTORS` (8) containers
+- **Storage**: `pim:storage` triples on the WebID in the WebID
+  document. Else the Solid Protocol's Link-header walk-up from the
+  WebID URL (`rel="type"` targeting `pim:Storage`, capital S), which
+  asks the WebID document and its nearest `MAX_STORAGE_ANCESTORS` (8)
+  containers
   ([solidStorageGateway.ts](../packages/solid/src/solidStorageGateway.ts));
-  else a URL typed by hand. 0, 1 or N storages are handled.
+  else a URL typed by hand. The documents the WebID document names as
+  more of the profile (`rdfs:seeAlso`, `foaf:isPrimaryTopicOf`,
+  `foaf:primaryTopic`) count only inside those storages, or inside the
+  WebID's own pod when none is found (`ownProfileArea` in
+  [profilePlaces.ts](../packages/solid/src/profilePlaces.ts)). That
+  pod is the folder of the WebID document, or the one above it when
+  that's `profile/`. This takes that folder to be the user's own pod,
+  so a server that keeps many users' WebID documents in one shared
+  folder, and shows no storage, isn't covered. When that's the origin's
+  root, which may hold other users' pods too, none of these documents
+  is read.
+  Elsewhere on the WebID's origin a document may be in another user's
+  pod, so it isn't read. Such a document adds a storage only inside one
+  already found, never one on another origin. Each storage is taken as
+  a request sends it, its dot segments resolved, and once. The WebID
+  document is read under `PROFILE_LIMITS`, and the others under them
+  all together,
+  no more than `MAX_PROFILE_DOCUMENTS` of them
+  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)). 0, 1
+  or N storages are handled.
 - **Instances**: one `solid:TypeRegistration` per instance,
   `solid:forClass sm:Instance`, in the type index the user chooses
   ([below](#choosing-a-type-index)),
@@ -98,9 +113,11 @@ flowchart LR
   still loads. An index, a preferences file or an extended profile
   counts as none only when it isn't there (404, 410), can't be parsed
   or goes past the read's limits, even before it's sent (`readsAsNone`
-  in [datasets.ts](../packages/solid/src/datasets.ts)). One outside
-  the profile's own places, or past the `MAX_PROFILE_DOCUMENTS` a
-  profile is read in, isn't read at all and holds none either. One
+  in [datasets.ts](../packages/solid/src/datasets.ts)). An extended
+  profile or a preferences file outside the user's own storages, or
+  the WebID's own pod when none is found (`ownProfileArea`), or one
+  past the `MAX_PROFILE_DOCUMENTS` a profile is read in, isn't read at
+  all and holds none either. One
   that can't be read right now fails the list. That's a refusal (401,
   403), any other status, no answer in time (`podNoAnswer`) or any
   other of the app's errors, an abort whatever its reason, no answer
@@ -134,8 +151,8 @@ flowchart LR
   [typeIndex.integration.test.ts](../e2e/pod/src/typeIndex.integration.test.ts)
   reads the registration back from real servers.
 - **Type index links** are read from the WebID subject in the WebID
-  document and in every extended profile document (`rdfs:seeAlso` /
-  `foaf:isPrimaryTopicOf`), and private ones in the
+  document and in the extended profile documents (`rdfs:seeAlso` /
+  `foaf:isPrimaryTopicOf`) the app reads, and private ones in the
   `pim:preferencesFile` too, where the Type Indexes specification keeps
   them. A public link in the preferences file is left out: the file is
   private, so no other app finds it there. A pod made long ago may link
@@ -143,15 +160,14 @@ flowchart LR
   `/settings/privateTypeIndex` and one the preferences file names at
   `/settings/privateTypeIndex.ttl`. So every link is kept, each kind's
   once by address and no more than `MAX_PROFILE_DOCUMENTS` of them
-  (`locateTypeIndexes`). Only the documents on the WebID's origin, on
-  its document's origin or in a storage the profile names are read; a
-  link to one anywhere else is left alone
-  ([boundaries.md](boundaries.md#the-credential-gate)). The
-  preferences file is read only in one of the user's own storages,
-  those their profile names (`pim:storage`) or else the one their WebID
-  is in, or in those places when no storage is found. Each is read
-  under `PROFILE_LIMITS`, no more than `MAX_PROFILE_DOCUMENTS` extended
-  profile documents: a WebID document past them fails the lookup, and
+  (`locateTypeIndexes`). Only the extended profile documents in the
+  user's own storages, or in the WebID's own pod when none is found,
+  are read, as for the storage; a link to one anywhere else is left
+  alone ([boundaries.md](boundaries.md#the-credential-gate)). The
+  preferences file is read only where those are: in one of the user's
+  own storages, or in the WebID's own pod when no storage is found.
+  Each is read under `PROFILE_LIMITS`, no more than
+  `MAX_PROFILE_DOCUMENTS` extended profile documents: a WebID document past them fails the lookup, and
   any other is left out. An index outside the user's own storages may
   be someone else's, even on the WebID's origin, since one server may
   keep many users' pods on it. So the app leaves a link to it out:
@@ -164,7 +180,9 @@ flowchart LR
     in the WebID's own pod: the folder of the WebID document, or the
     folder above it when that's `profile/`. Only such an index is
     chosen by kind, accepted by its address, registered in, retitled
-    on a rename or cleaned of an instance's registrations.
+    on a rename or cleaned of an instance's registrations. When that
+    pod would be the origin's root, which may hold other users' pods
+    too, the app writes to no index.
   - When the lookup fails, the app writes to no index. Choosing one to
     register in, retitling an instance's registrations and removing
     them fail as the lookup did, and work when it works again.
@@ -196,11 +214,12 @@ flowchart LR
   An instance is registered in the index the user chose, and in no
   other.
 - **An index entered by its address** must be in one of the user's own
-  storages, those their profile names (`pim:storage`) or else the one
-  their WebID is in (`typeIndexOutsidePod`), linked from the profile or
-  not. The WebID's origin isn't enough: one server may keep many users'
-  pods on it. Without a storage, the WebID's own pod stands in, as
-  above. One the profile links is used as it is. Any other must
+  storages, those their WebID document names (`pim:storage`) or else
+  the one the server shows their WebID is in (`typeIndexOutsidePod`),
+  linked from the profile or not. The WebID's origin isn't enough: one
+  server may keep many users' pods on it. Without a storage, the
+  WebID's own pod stands in, as above, unless it would be the origin's
+  root. One the profile links is used as it is. Any other must
   also be readable by the user and typed
   `solid:TypeIndex` (`notATypeIndex`). The app finds its instances only
   in the indexes the profile links, so it then links this one from the
@@ -584,9 +603,10 @@ No document Solid Memo names has any.
   document safe to change. It counts only for a document in the
   instance's folder or in the storage the instance is in. When one of
   the user's storages holds the document or the instance, that decides
-  it: both must be in the same one. Those are the storages their
-  profile names (`pim:storage`), or else the storage's root the server
-  shows above their WebID ([discovery chain](#discovery-chain)).
+  it: both must be in the same one. Those are the storages their WebID
+  document names (`pim:storage`), or else the storage's root the server
+  shows above their WebID, with any an extended profile names inside
+  one of those ([discovery chain](#discovery-chain)).
   Otherwise both must be under the same storage's root that the server
   shows (typed `pim:Storage`, or named by a Linked Web Storage server),
   with no other root between it and either of them. A folder that

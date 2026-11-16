@@ -30,7 +30,13 @@ import {
 } from "./datasets";
 import { ensureTrailingSlash } from "./urls";
 import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
-import { createPlacesFetch, isInPlaces, profilePlacesOf } from "./profilePlaces";
+import {
+  createPlacesFetch,
+  isInPlaces,
+  ownProfileArea,
+  profilePlacesOf,
+  storageUrlsOf,
+} from "./profilePlaces";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { AppError } from "@solid-memo/domain/appError";
 import type { TypeIndexChoice, TypeIndexKind } from "@solid-memo/domain/typeIndexChoice";
@@ -74,15 +80,16 @@ export interface TypeIndexes {
   /**
    * What the indexes are read and written through: as the user in the
    * profile's own places (profilePlacesOf: the WebID's origin, its
-   * document's, and the storages the profile names), any other read as
-   * no one and any other write refused (`writeOutsidePod`).
+   * document's, and the storages the WebID document names), any other
+   * read as no one and any other write refused (`writeOutsidePod`).
    */
   fetch: Fetch;
   /**
    * Whether an index at `url` may be written to: whether it is in the
    * profile's own places and in one of the user's own storages
    * (ownStorages), or, when the server shows none, in the WebID's own
-   * pod (podOfWebId). When the storages could not be looked up now, none
+   * pod (ownProfileArea), and none when that pod would be the whole
+   * origin. When the storages could not be looked up now, none
    * is. An index anywhere else is never chosen, registered in, retitled
    * or cleaned (ensureTypeIndex, solidInstanceRepository.ts), even one
    * the profile links.
@@ -101,15 +108,17 @@ export interface TypeIndexes {
  * out: the file is private, so no one else finds it. A pod made long ago
  * may link several of a kind, the one an app wrote first and the one
  * another wrote later, so each is kept, and the user chooses
- * (rankedFor). Only the documents in the profile's own places are read,
- * as the user, the preferences file only in one of the user's own
- * storages (ownStorages), and only the links into those storages are
- * kept: the places hold the whole origin of the WebID, which on a server
- * that keeps many users' pods on one origin holds theirs too, and a
- * document anywhere else may be someone else's. Such a server shows
- * each user's storage, so when the WebID leads to none, or the lookup
- * fails now, the places stand in for the storages, to read: an index is
- * written to only where inOwnStorage says. With `forWriting`, a lookup that
+ * (rankedFor). Only the extended profile documents and the preferences
+ * file in one of the user's own storages (ownStorages) are read, as the
+ * user, or, when the storages are not known, in those the WebID document
+ * names or the WebID's own pod (ownProfileArea), and only
+ * the links into those storages are kept: the places hold the whole
+ * origin of the WebID, which on a server that keeps many users' pods on
+ * one origin holds theirs too, and a document anywhere else may be
+ * someone else's. Such a server shows each user's storage, so when the
+ * WebID leads to none, or the lookup fails now, the places stand in for
+ * the storages, to read: an index is written to only where inOwnStorage
+ * says. With `forWriting`, a lookup that
  * fails now fails the indexes too. `publicFetch` reads anything outside
  * the places.
  */
@@ -126,17 +135,12 @@ export async function locateTypeIndexes(
   if (profile === null) {
     return {
       links: [],
-      ...placesOf(profilePlacesOf(webId, documentUrl, []), [], fetch, publicFetch),
+      ...placesOf(profilePlacesOf(webId, documentUrl, null), [], fetch, publicFetch),
     };
   }
 
-  const subjects = [profile];
-  for (const extendedProfileUrl of extendedProfileUrls(webId, profile, profileDataset)) {
-    const subject = await readSubjectSafely(extendedProfileUrl, webId, profileFetch);
-    if (subject !== null) subjects.push(subject);
-  }
-  // An extended profile may name the storage an index or the preferences file is in.
-  const places = profilePlacesOf(webId, documentUrl, subjects);
+  // Only the WebID document names the storages the places hold: an extended profile may be someone else's.
+  const places = profilePlacesOf(webId, documentUrl, profile);
   // null: the storages could not be looked up now.
   let storages: string[] | null = null;
   try {
@@ -144,12 +148,26 @@ export async function locateTypeIndexes(
   } catch (error) {
     if (forWriting) throw error;
   }
+  // An extended profile is read only in the user's own storages, or, when they are not known, in the
+  // storages the WebID document names or the WebID's own pod (ownProfileArea).
+  const area = ownProfileArea(webId, storages ?? storageUrlsOf(getUrlAll(profile, PIM.storage)));
+  const subjects = [profile];
+  for (const extendedProfileUrl of extendedProfileUrls(webId, profile, profileDataset)) {
+    if (!isInPlaces(extendedProfileUrl, area)) continue;
+    const subject = await readSubjectSafely(extendedProfileUrl, webId, profileFetch);
+    if (subject !== null) subjects.push(subject);
+  }
   const bound = storages !== null && storages.length > 0 ? storages : places;
   const isOwn = (url: string) => isInPlaces(url, places) && isInPlaces(url, bound);
 
+  // The preferences file, as an extended profile, is read only in the user's own storages or the WebID's own pod.
   const preferences: Subject[] = [];
   const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
-  if (preferencesFileUrl !== null && isOwn(preferencesFileUrl)) {
+  if (
+    preferencesFileUrl !== null &&
+    isInPlaces(preferencesFileUrl, places) &&
+    isInPlaces(preferencesFileUrl, area)
+  ) {
     const subject = await readSubjectSafely(preferencesFileUrl, webId, profileFetch);
     if (subject !== null) preferences.push(subject);
   }
@@ -183,23 +201,12 @@ export async function locateTypeIndexes(
 /**
  * Where a type index may be written to (TypeIndexes inOwnStorage): the
  * user's own `storages`; when the server shows none, the WebID's own pod
- * (podOfWebId), as the origin may hold other users' pods too; nowhere
- * when the storages could not be looked up now (null).
+ * (ownProfileArea), as the origin may hold other users' pods too, and
+ * nowhere when that pod would be the whole origin; nowhere when the
+ * storages could not be looked up now (null).
  */
 function writableOf(webId: string, storages: readonly string[] | null): readonly string[] {
-  if (storages === null) return [];
-  return storages.length > 0 ? storages : [podOfWebId(webId)];
-}
-
-/**
- * The folder the WebID's own pod is taken to be in when the server shows
- * no storage: the WebID document's folder, or the one above it when that
- * is `profile/`, as in `<pod>profile/card#me`.
- */
-function podOfWebId(webId: string): string {
-  const { origin, pathname } = new URL(webId);
-  const folder = pathname.slice(0, pathname.lastIndexOf("/") + 1);
-  return `${origin}${folder.endsWith("/profile/") ? folder.slice(0, -"profile/".length) : folder}`;
+  return storages === null ? [] : ownProfileArea(webId, storages);
 }
 
 /**
@@ -251,7 +258,7 @@ function extendedProfileUrls(
   profileDataset: SourcedDataset,
 ): string[] {
   const documentUrl = getSourceUrl(profileDataset);
-  const places = profilePlacesOf(webId, documentUrl, [profile]);
+  const places = profilePlacesOf(webId, documentUrl, profile);
   const self = new Set([stripFragment(profile.url), stripFragment(documentUrl)]);
   const urls = [
     ...getUrlAll(profile, RDFS.seeAlso),
