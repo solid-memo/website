@@ -790,8 +790,9 @@ graph LR
     instead (`#agent-jane-doe-jane-example-org-<hash>`). When that node
     is taken too, a count follows the hash: the lowest whose node is
     free or holds that author. The counted nodes of one such name are
-    looked at once for all the authors that share it, so the time grows
-    with the authors and the nodes, not their product. A node's URL,
+    looked at once for all the authors that share it, in all the decks
+    one write brings to the catalog. So the time grows with the
+    authors, decks and nodes, not their product. A node's URL,
     joined from the document and the name, can be longer than any
     term, so the app keys it by its pieces (`TextMap` in `pathKeys.ts`)
     and refuses to write a deck or draft that would hold one. An agent

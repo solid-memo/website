@@ -65,6 +65,7 @@ import { deckDocumentSubjects } from "./ownership";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import {
   deckSubjects,
+  decksSubjects,
   toDistractor,
   toCard,
   toCards,
@@ -219,7 +220,7 @@ export function createSolidDeckRepository({
         toDecks(dataset, catalogUrl).filter(isDeckOutdated).map(upgradeDeck),
       );
       dataset = withDecks(dataset, written);
-      const subjects = written.flatMap((deck) => deckSubjects(dataset, deck));
+      const subjects = decksSubjects(dataset, written);
       // Only where there is none: one that does not fit its shape is invalid data, left as it is.
       if (catalog !== null && toCatalog(dataset, catalogUrl) === null) {
         dataset = withCatalog(dataset, catalogUrl, catalog);
@@ -687,11 +688,7 @@ export function createSolidDeckRepository({
       );
       if (gone !== undefined) throw new AppError("deckGone", { deck: gone.title });
       const updated = withDecks(dataset!, inDocument);
-      await save(
-        catalogUrl,
-        updated,
-        inDocument.flatMap((deck) => deckSubjects(updated, deck)),
-      );
+      await save(catalogUrl, updated, decksSubjects(updated, inDocument));
     }
     return written;
   }

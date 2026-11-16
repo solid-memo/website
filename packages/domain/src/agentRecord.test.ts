@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import type { AgentV1 } from "@solid-memo/vocab/types.generated";
 import {
   type AgentHolder,
+  agentNodesOf,
   agentToRecord,
   agentUrlOf,
   agentUrlsOf,
@@ -188,6 +189,107 @@ describe("agentUrlsOf", () => {
   });
 });
 
+describe("agentNodesOf (GHSA-rm3f-655c-28wq)", () => {
+  const names = collidingNames("Jane", 6);
+  const hashed = `${CATALOG}#agent-${names[0]!.toLowerCase()}-${hashOf(names[0]!)}`;
+  // Authors of one name: alike but for spaces, a mailbox, and a slug that is one of its counted nodes.
+  const pool = [
+    ...names.slice(0, 10),
+    ` ${names[3]!} `,
+    `${names[4]!} <jane@example.org>`,
+    `${names[0]!.toLowerCase()} ${hashOf(names[0]!)} 3`,
+    "Anton",
+    "—",
+  ];
+  const holders: AgentHolder[] = [
+    null,
+    "unreadable",
+    agentToRecord(names[20]!),
+    agentToRecord(names[5]!),
+    agentToRecord(names[1]!),
+  ];
+
+  /** A sequence of numbers below `below`, the same on every run. */
+  function picker(seed: number): (below: number) => number {
+    let state = seed;
+    return (below) => {
+      state = (state * 1_103_515_245 + 12_345) % 2_147_483_648;
+      return state % below;
+    };
+  }
+
+  function authorsOf(pick: (below: number) => number): string[] {
+    return Array.from({ length: 1 + pick(6) }, () => pool[pick(pool.length)]!);
+  }
+
+  it("names each subject's nodes as agentUrlsOf alone does, however many share them", () => {
+    for (let seed = 1; seed <= 8; seed++) {
+      const pick = picker(seed);
+      const held = new Map<string, AgentHolder>();
+      for (let count = 2; count < 14; count++) {
+        held.set(`${hashed}-${count}`, holders[pick(holders.length)]!);
+      }
+      held.set(hashed, agentToRecord(names[7]!));
+      const holderAt = (url: string) => held.get(url) ?? null;
+      const nodes = agentNodesOf(holderAt);
+      for (let deck = 0; deck < 30; deck++) {
+        const subject = `${CATALOG}#deck-${deck}`;
+        const authors = authorsOf(pick);
+        const urls = nodes.urlsOf(subject, authors);
+        expect(urls).toEqual(agentUrlsOf(subject, authors, holderAt));
+        expect(urls).toEqual(probedUrlsOf(subject, authors, holderAt));
+      }
+    }
+  });
+
+  it("looks again at a node written between two subjects", () => {
+    for (let seed = 1; seed <= 8; seed++) {
+      const pick = picker(seed);
+      const held = new Map<string, AgentHolder>();
+      const holderAt = (url: string) => held.get(url) ?? null;
+      const nodes = agentNodesOf(holderAt);
+      for (let deck = 0; deck < 30; deck++) {
+        const subject = `${CATALOG}#deck-${deck}`;
+        const authors = authorsOf(pick);
+        const urls = nodes.urlsOf(subject, authors);
+        expect(urls).toEqual(agentUrlsOf(subject, authors, holderAt));
+        expect(urls).toEqual(probedUrlsOf(subject, authors, holderAt));
+        // Written as withDecks writes a deck's agents, and another node changed besides.
+        const changed = urls.map((url, i) => {
+          held.set(url, agentToRecord(authors[i]!));
+          return url;
+        });
+        const other = `${hashed}-${2 + pick(10)}`;
+        held.set(other, holders[pick(holders.length)]!);
+        for (const url of [...changed, other, `${hashed}-99`]) nodes.written(url);
+      }
+    }
+  });
+
+  it("takes time that grows with the subjects and the nodes, not their product", () => {
+    // Eight times the subjects over eight times the nodes take about as
+    // long as an eighth of them eight times over; looking at every node
+    // again for each subject would take eight times as long.
+    const ratio = growth(
+      (count) => {
+        const held = new Map<string, AgentV1>([[hashed, agentToRecord(names[1]!)]]);
+        held.set(agentUrlOf(CATALOG, names[0]!), agentToRecord(names[2]!));
+        for (let at = 2; at < count + 2; at++) {
+          held.set(`${hashed}-${at}`, agentToRecord(`Planted ${at}`));
+        }
+        const subjects = Array.from({ length: count }, (_, deck) => `${CATALOG}#deck-${deck}`);
+        return () => {
+          const nodes = agentNodesOf((url) => held.get(url) ?? null);
+          for (const subject of subjects) nodes.urlsOf(subject, [names[0]!]);
+        };
+      },
+      256,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+});
+
 describe("agentUrlsOf with URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", () => {
   it("names the same nodes as with short ones, an author named twice one node", () => {
     const authors = longNames(3);
@@ -238,7 +340,9 @@ function probedUrlsOf(
       return holder === null || (holder !== "unreadable" && sameAgent(holder, record));
     };
     const first = agentUrlOf(subjectUrl, author);
-    const hashed = /-[0-9a-f]{6}$/.test(first) ? first : `${first}-${hashOf(author)}`;
+    const hashed = /-[0-9a-f]{6}$/.test(first)
+      ? first
+      : `${first}-${hashOf(author.trim().normalize("NFC"))}`;
     let url = free(first) ? first : hashed;
     for (let count = 2; !free(url); count++) url = `${hashed}-${count}`;
     taken.set(url, record);

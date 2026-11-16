@@ -23,7 +23,8 @@ import { MAX_TERM_CHARACTERS } from "../client/readLimits";
 import { editOf, type DatasetEdit } from "../datasetEdit";
 import {
   agentUrlOf,
-  agentUrlsOf,
+  type AgentNodes,
+  agentNodesOf,
   authorFromAgentRecord,
   type AgentHolder,
 } from "@solid-memo/domain/agentRecord";
@@ -225,8 +226,9 @@ export function withDeck(dataset: Dataset, deck: Deck): Dataset {
  */
 export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const edit = editOf(dataset);
+  const nodes = agentNodesIn(edit.getThing);
   for (const deck of decks.map(withBoundedMetadata)) {
-    const creator = deckAgentUrls(deck, edit.getThing);
+    const creator = nodes.urlsOf(deck.url, deck.authors);
     if (creator.some(isIriPastBound)) {
       throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
     }
@@ -245,6 +247,7 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
         edit.getThing(distribution.url),
       ),
     );
+    for (const url of [deck.url, ...creator, distribution.url]) nodes.written(url);
   }
   const documents = new Set(decks.map((deck) => documentUrlOf(deck.url)));
   return withCatalogDatasets(
@@ -256,25 +259,37 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
 
 /** The subjects a deck is written as in `dataset` (withDeck's): its entry, its distribution and its agents. */
 export function deckSubjects(dataset: Dataset, deck: Deck): string[] {
-  const agents = new TextMap<string>();
-  // Only the authors withDecks writes (withBoundedMetadata).
-  for (const url of deckAgentUrls(withBoundedMetadata(deck), (url) => getThing(dataset, url)))
-    agents.set(url, url);
-  return [deck.url, distributionUrlOf(deck.url), ...agents.values()];
+  return decksSubjects(dataset, [deck]);
 }
 
 /**
- * The agent node of each of a deck's authors in its catalog document,
- * whose subjects `thingAt` finds (agentUrlsOf): a node that holds
- * another author's name or mailbox is never written over, as every deck
- * of the document names its authors' nodes, and the next one is taken.
- * A node longer than any term holds nothing, and is not looked for: the
- * dataset's subjects are the keys of an object, which would key it too.
+ * The subjects each of the decks is written as in `dataset` (withDecks'),
+ * one deck after another, as deckSubjects gives them: the agent nodes of
+ * the dataset are looked at once for all of them (agentNodesOf).
  */
-function deckAgentUrls(deck: Deck, thingAt: (url: string) => NamedSubject | null): string[] {
-  return agentUrlsOf(deck.url, deck.authors, (url) =>
-    isIriPastBound(url) ? null : agentHolderOf(thingAt(url)),
-  );
+export function decksSubjects(dataset: Dataset, decks: readonly Deck[]): string[] {
+  const nodes = agentNodesIn((url) => getThing(dataset, url));
+  return decks.flatMap((deck) => {
+    const agents = new TextMap<string>();
+    // Only the authors withDecks writes (withBoundedMetadata).
+    const { url, authors } = withBoundedMetadata(deck);
+    for (const agent of nodes.urlsOf(url, authors)) agents.set(agent, agent);
+    return [deck.url, distributionUrlOf(deck.url), ...agents.values()];
+  });
+}
+
+/**
+ * The agent nodes of a catalog document, whose subjects `thingAt` finds
+ * (agentNodesOf), each deck's authors named by urlsOf: a node that
+ * holds another author's name or mailbox is never written over, as
+ * every deck of the document names its authors' nodes, and the next one
+ * is taken. A node longer than any term holds nothing, and is not looked
+ * for: the dataset's subjects are the keys of an object, which would key
+ * it too. One for all the decks of a pass, so that many decks that share
+ * an author look at its nodes once (GHSA-rm3f-655c-28wq).
+ */
+function agentNodesIn(thingAt: (url: string) => NamedSubject | null): AgentNodes {
+  return agentNodesOf((url) => (isIriPastBound(url) ? null : agentHolderOf(thingAt(url))));
 }
 
 /**
@@ -286,8 +301,8 @@ function deckAgentUrls(deck: Deck, thingAt: (url: string) => NamedSubject | null
  * it does not keep the others from being brought up to date.
  */
 export function decksWithAgentsWithinBound(dataset: Dataset, decks: readonly Deck[]): Deck[] {
-  const { getThing: thingAt } = editOf(dataset);
-  return decks.filter((deck) => !deckAgentUrls(deck, thingAt).some(isIriPastBound));
+  const nodes = agentNodesIn(editOf(dataset).getThing);
+  return decks.filter((deck) => !nodes.urlsOf(deck.url, deck.authors).some(isIriPastBound));
 }
 
 /** What `thing` holds of an agent (AgentHolder): nothing when there is none or it says nothing an agent says, else the author it names, or "unreadable". */

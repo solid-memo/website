@@ -67,7 +67,7 @@ export type AgentHolder = AgentV1 | null | "unreadable";
  * named it first; the same author named twice is one node.
  *
  * The counted nodes of each hashed name are looked at once, however
- * many authors share it (countedUrl), so that the time grows with the
+ * many authors share it (AgentNodes), so that the time grows with the
  * authors and the nodes, not their product: names that fold to one slug
  * and share a hash are easy to make. A node's URL, joined from the
  * document and the author's name, can be longer than any term, so no
@@ -78,63 +78,169 @@ export function agentUrlsOf(
   authors: readonly string[],
   holderAt: (url: string) => AgentHolder = () => null,
 ): string[] {
-  const taken = new TextMap<AgentV1>();
-  const holderOf = (url: string): AgentHolder => taken.get(url) ?? holderAt(url);
+  return agentNodesOf(holderAt).urlsOf(subjectUrl, authors);
+}
+
+/**
+ * The agent nodes of a dataset, as agentUrlsOf names them for one
+ * subject after another: what the counted nodes hold is looked at once
+ * for all of them, so that many decks of one document that share an
+ * author take time that grows with the decks and the nodes, not their
+ * product. urlsOf gives each call the nodes agentUrlsOf would give it
+ * on its own; when a node is written between two calls, `written` has
+ * what it holds looked at again.
+ */
+export interface AgentNodes {
+  urlsOf(subjectUrl: string, authors: readonly string[]): string[];
+  written(url: string): void;
+}
+
+/** AgentNodes over the nodes whose holders `holderAt` gives. */
+export function agentNodesOf(holderAt: (url: string) => AgentHolder): AgentNodes {
   const counted = new TextMap<CountedNodes>();
-  return authors.map((author) => {
-    const record = agentToRecord(author);
-    const free = (url: string) => {
-      const holder = holderOf(url);
-      return holder === null || (holder !== "unreadable" && sameAgent(holder, record));
-    };
-    const first = agentUrlOf(subjectUrl, author);
-    const hashed = agentFragmentOf(author).hashed ? first : `${first}-${authorHashOf(author)}`;
-    let url: string;
-    if (free(first)) url = first;
-    else if (free(hashed)) url = hashed;
-    else {
-      const nodes = counted.get(hashed) ?? { next: 2, holders: new PathMap() };
-      counted.set(hashed, nodes);
-      url = countedUrl(hashed, record, nodes, holderOf);
-    }
-    taken.set(url, record);
-    return url;
-  });
+  const looked = new TextMap<LookedNode>();
+  const look = (nodes: CountedNodes): void => {
+    const count = nodes.next++;
+    const node = { nodes, count, holder: holderAt(`${nodes.hashed}-${count}`) };
+    looked.set(`${nodes.hashed}-${count}`, node);
+    place(node, insertCount);
+  };
+  return {
+    urlsOf(subjectUrl, authors) {
+      const taken = new TextMap<AgentV1>();
+      const freeTaken = new Map<CountedNodes, FreeTaken>();
+      const holderOf = (url: string): AgentHolder => taken.get(url) ?? holderAt(url);
+      return authors.map((author) => {
+        const record = agentToRecord(author);
+        const free = (url: string) => {
+          const holder = holderOf(url);
+          return holder === null || (holder !== "unreadable" && sameAgent(holder, record));
+        };
+        const first = agentUrlOf(subjectUrl, author);
+        const hashed = agentFragmentOf(author).hashed ? first : `${first}-${authorHashOf(author)}`;
+        let url: string;
+        if (free(first)) url = first;
+        else if (free(hashed)) url = hashed;
+        else {
+          const nodes = counted.get(hashed) ?? {
+            hashed,
+            next: 2,
+            holders: new PathMap(),
+            free: [],
+          };
+          counted.set(hashed, nodes);
+          const call = freeTaken.get(nodes) ?? { taken, at: 0, holders: new PathMap() };
+          freeTaken.set(nodes, call);
+          url = countedUrl(nodes, record, call, look);
+        }
+        taken.set(url, record);
+        return url;
+      });
+    },
+    written(url) {
+      const node = looked.get(url);
+      if (node === undefined) return;
+      const holder = holderAt(url);
+      if (sameHolder(holder, node.holder)) return;
+      place(node, removeCount);
+      node.holder = holder;
+      place(node, insertCount);
+    },
+  };
 }
 
 /**
  * The counted nodes of one hashed name looked at so far: every count
- * from 2 to before `next` holds an author or an agent no author is
- * written over, and `holders` gives the lowest of them each author
- * holds. A node that holds an author keeps holding that author.
+ * from 2 to before `next`, the ones free in `free` and the ones that
+ * hold an author under that author in `holders`, each list from the
+ * lowest count up. An agent no author is written over is in neither.
  */
 interface CountedNodes {
+  hashed: string;
   next: number;
+  holders: PathMap<number[]>;
+  free: number[];
+}
+
+/** A counted node looked at, and what it held then. */
+interface LookedNode {
+  nodes: CountedNodes;
+  count: number;
+  holder: AgentHolder;
+}
+
+/**
+ * The free counted nodes of one hashed name that the authors of one
+ * call took (`taken`, by URL): every free count before `at` is taken,
+ * and `holders` gives the lowest of them each author took.
+ */
+interface FreeTaken {
+  taken: TextMap<AgentV1>;
+  at: number;
   holders: PathMap<number>;
 }
 
 /**
- * The lowest counted node of `hashed` that is free or holds `record`'s
- * author: one the nodes looked at hold, else the next ones are looked
- * at, each once.
+ * The lowest counted node of `nodes` that is free or holds `record`'s
+ * author, `call` saying which free nodes the authors before it in the
+ * same call were given: the lowest the nodes looked at hold, have free
+ * or gave this author, else the next ones are looked at (`look`), each
+ * once.
  */
 function countedUrl(
-  hashed: string,
-  record: AgentV1,
   nodes: CountedNodes,
-  holderOf: (url: string) => AgentHolder,
+  record: AgentV1,
+  call: FreeTaken,
+  look: (nodes: CountedNodes) => void,
 ): string {
   const key = agentPath(record);
-  const held = nodes.holders.get(key);
-  if (held !== undefined) return `${hashed}-${held}`;
   for (;;) {
-    const count = nodes.next++;
-    const holder = holderOf(`${hashed}-${count}`) ?? record;
-    if (holder === "unreadable") continue;
-    const holds = agentPath(holder);
-    if (!nodes.holders.has(holds)) nodes.holders.set(holds, count);
-    if (sameAgent(holder, record)) return `${hashed}-${count}`;
+    for (let count = nodes.free[call.at]; count !== undefined; count = nodes.free[++call.at]) {
+      const taker = call.taken.get(`${nodes.hashed}-${count}`);
+      if (taker === undefined) break;
+      const path = agentPath(taker);
+      call.holders.set(path, call.holders.get(path) ?? count);
+    }
+    const counts = [nodes.free[call.at], nodes.holders.get(key)?.[0], call.holders.get(key)];
+    const found = counts.filter((count) => count !== undefined);
+    if (found.length > 0) return `${nodes.hashed}-${Math.min(...found)}`;
+    look(nodes);
   }
+}
+
+/** Puts a looked-at node's count in, or takes it out of (`change`), the list of what it holds. */
+function place(node: LookedNode, change: (counts: number[], count: number) => void): void {
+  const { nodes, count, holder } = node;
+  if (holder === "unreadable") return;
+  if (holder === null) {
+    change(nodes.free, count);
+    return;
+  }
+  const key = agentPath(holder);
+  const counts = nodes.holders.get(key) ?? [];
+  nodes.holders.set(key, counts);
+  change(counts, count);
+}
+
+/** Inserts `count` into the ascending `counts`, from the end: a count looked at for the first time is the highest. */
+function insertCount(counts: number[], count: number): void {
+  let at = counts.length;
+  while (at > 0 && counts[at - 1]! > count) at--;
+  counts.splice(at, 0, count);
+}
+
+/** Takes `count` out of `counts`, keeping the rest in order; a count that is not there leaves them as they are. */
+function removeCount(counts: number[], count: number): void {
+  let to = 0;
+  for (const kept of counts) if (kept !== count) counts[to++] = kept;
+  counts.length = to;
+}
+
+/** Whether two holders say the same of a node. */
+function sameHolder(a: AgentHolder, b: AgentHolder): boolean {
+  return a === null || b === null || a === "unreadable" || b === "unreadable"
+    ? a === b
+    : sameAgent(a, b);
 }
 
 /** One path (PathMap) per author, as sameAgent tells them apart. */
