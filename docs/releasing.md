@@ -377,10 +377,11 @@ semantic-release:
    `releaseDate`) and [`CITATION.cff`](../CITATION.cff) (`version`,
    `date-released`), with `npm run release:version`
    ([releaseVersion.ts](../scripts/releaseVersion.ts));
-4. renders the version's docs as pages, with every diagram the job
-   drew in Chromium before semantic-release started
+4. renders the version's docs as pages, with every diagram the
+   workflow's `draw` job drew in Chromium
    (`npm run docs:archive -- --draw`), into
-   `release-assets/docs-X.Y.Z.tar.gz`, with `npm run docs:archive`
+   `release-assets/docs-X.Y.Z.tar.gz`, with
+   `npm run docs:archive -- X.Y.Z --drawn`, which starts no browser
    ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). git
    ignores the archive, so the release commit leaves it out;
 5. commits the five files of steps 2 and 3 to `main` as
@@ -523,18 +524,42 @@ The maintainer sets it up once, before the workflow first runs on
 past it, so this key stays the repository's only deploy key with write
 access: any other is added without "Allow write access".
 
-The job holds the key briefly:
+GitHub hands a job its environment's secrets when the job starts, and
+the runner keeps them for the whole job, so every step of the release
+job can read the key, not only the steps that name it. What the job
+runs is kept to what the release needs:
 
+- The docs' diagrams are drawn in Chromium by the workflow's `draw`
+  job, which names no environment and holds no secret, with a token
+  that can only read and a checkout that keeps no credentials
+  (`npm run docs:archive -- --draw`). It keeps the drawings as an
+  artifact of the run. The release job downloads that run's artifact,
+  and runs no browser and installs nothing with apt. With
+  `npm run docs:archive -- --drawn`, it checks that every drawing is
+  there and passes the checks the site's build makes (`checkSvg`, and
+  the font's notice). The archive semantic-release renders takes them
+  from the drawings' cache the same way, drawing nothing. A drawing
+  that isn't there fails the release before anything is pushed.
+- The `draw` job chooses the drawings the release archive carries, so
+  their integrity rests on those checks alone: `checkSvg` and the
+  font's notice. The release job doesn't draw them again to compare.
+- Both jobs check out `main`'s tip. When `main` moves between them and
+  the newer commit changes a diagram, or what draws it, its drawing
+  isn't in the artifact: `--drawn` fails the run before anything is
+  pushed, and the run that the newer commit starts releases it.
+- The artifact is kept for 7 days. Re-running only the failed release
+  job works within them; after that, the download fails, and the
+  maintainer re-runs all the run's jobs, or runs the workflow by hand.
 - The checkout keeps no credentials, so the key isn't in the git config
-  while the job installs the dependencies and Chromium.
-- `npm ci --ignore-scripts` runs no package's install script; Chromium
-  comes from the Chromium action, which downloads its headless shell
-  and checks the file against the SHA-256 committed in
+  while the job installs the dependencies.
+- `npm ci --ignore-scripts` runs no package's install script. In the
+  `draw` job, Chromium comes from the Chromium action, which downloads
+  its headless shell and checks the file against the SHA-256 committed in
   [.github/actions/headless-shell](../.github/actions/headless-shell/action.yml).
   Playwright's own download checks no hash, so it isn't used, and
   `npm run check:shell` holds the pin to Playwright's version.
-- `npm audit signatures` runs next, before Chromium is downloaded and
-  semantic-release runs with the key. It fails unless every installed
+- `npm audit signatures` runs next, in both jobs, before Chromium is
+  downloaded and before semantic-release runs. It fails unless every installed
   version from a registry has the registry's valid signature, and any
   attestation it has, such as its provenance, verifies
   ([testing.md](testing.md#the-workflows)). It checks the registry's
@@ -560,17 +585,12 @@ The job holds the key briefly:
   Playwright doesn't want, and the job can't attach that tag's docs.
   The download is the same step as the headless-shell action's, which
   `npm run check:shell` checks too.
-- No browser runs while the key is on disk. Before the secret is read,
-  `npm run docs:archive -- --draw` draws the docs' diagrams into the
-  drawings' cache, and the next step removes the browser. The archive
-  semantic-release renders draws from that cache. A diagram that isn't
-  there would need Chromium, which is gone, so the release fails
-  before anything is pushed.
-- Only the step that runs semantic-release reads the secret. It writes
-  the key to a file that git's `ssh` reads (`GIT_SSH_COMMAND`), with
-  GitHub's host keys from its API, and removes the file when the step
-  ends. semantic-release checks that it can push before anything else
-  and pushes in its prepare step, so the key stays for the whole run.
+- Only the step that runs semantic-release writes the key where git
+  reads it: a file that git's `ssh` reads (`GIT_SSH_COMMAND`), with
+  GitHub's host keys from its API, removed when the step ends.
+  semantic-release checks that it can push before anything else and
+  pushes in its prepare step, so the key stays on disk for the whole
+  run.
 
 That step renders the repository's docs while the key is there, with
 the drawings kept, to pack the archive, and it loads Vite. These are

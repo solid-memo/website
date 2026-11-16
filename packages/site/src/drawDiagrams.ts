@@ -75,9 +75,12 @@ export async function drawInputs(): Promise<DrawInputs> {
  * (DOCS_DIAGRAMS=skip) draws none and starts no browser, with a warning,
  * so what a build makes depends on the setting alone, which Turbo hashes,
  * not on whether Chromium is there; `optional`, the dev server's, draws
- * when Chromium starts and warns when it does not.
+ * when Chromium starts and warns when it does not; `cached`, the release
+ * job's archive (docs/releasing.md#the-deploy-key), takes every drawing
+ * from the cache, and fails when one is not there, never starting a
+ * browser.
  */
-export type DrawMode = "required" | "optional" | "skip";
+export type DrawMode = "required" | "optional" | "skip" | "cached";
 
 /** The mode `DOCS_DIAGRAMS` asks a build for: `skip`, or `required` when unset. */
 export function diagramMode(env: Record<string, string | undefined>): "required" | "skip" {
@@ -160,7 +163,8 @@ const launchFailed = (count: number, error: unknown) =>
  * When Chromium does not start, `required` throws, naming the command
  * that installs it; `optional` warns and returns null: no drawings.
  * `skip` returns null at once, with a warning, reading no cache and
- * starting no browser.
+ * starting no browser. `cached` throws when a drawing is not in the
+ * cache, or is there but checkSvg refuses it, and starts no browser.
  */
 export async function drawDiagrams(
   diagrams: readonly Diagram[],
@@ -190,6 +194,11 @@ export async function drawDiagrams(
       if (cached !== null && checkSvg(cached) === null) drawn.get(diagram.hash)![theme] = cached;
       else missing.push({ diagram, theme });
     }
+  }
+  if (missing.length > 0 && mode === "cached") {
+    throw new Error(
+      `${missing.length} of the docs' drawings are not in the drawings' cache, and none is drawn: no browser is started.`,
+    );
   }
   if (missing.length > 0) {
     let browser: DrawingBrowser;

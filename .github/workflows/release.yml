@@ -28,17 +28,19 @@ name: Release
 # workflow. A push with the key does, so CI runs on the release commit,
 # the deploy after it puts the new version on the site (deploy.yml deploys
 # only a commit a version tag names). This workflow skips that run:
-# nothing has been committed since the release commit's own tag, so a
-# release job there would install everything and set up Chromium only for
-# semantic-release to find nothing. The key is a secret of the release
+# nothing has been committed since the release commit's own tag, so the
+# draw and release jobs there would install everything and draw the
+# diagrams only for semantic-release to find nothing. The key is a secret of the release
 # environment, which allows only main, so a workflow pushed on any other
 # branch cannot read it, as it could a repository secret.
 #
-# The GitHub release carries the version's docs, rendered and drawn in
-# Chromium in the release's prepare step (npm run docs:archive), and
-# attested as this workflow's on main, so whoever downloads them can
-# check where they came from. The job that holds the key runs Chromium and Mermaid for
-# it; docs/releasing.md says why that is accepted. When the archive could
+# The GitHub release carries the version's docs, rendered in the
+# release's prepare step (npm run docs:archive), and attested as this
+# workflow's on main, so whoever downloads them can check where they
+# came from. Their diagrams are drawn in Chromium by the draw job, which
+# holds no secret; the release job, which holds the key, takes the
+# drawings from it and runs no browser and no apt
+# (docs/releasing.md#the-deploy-key). When the archive could
 # not be attached or attested, run this by hand with the version's tag,
 # and the docs job renders, attests and attaches it, and publishes the
 # release if it is a draft, without the key
@@ -115,10 +117,17 @@ jobs:
           fi
           echo "entries=$entries" >> "$GITHUB_OUTPUT"
 
-  release:
-    # After the queue job, which a run by hand skips: !cancelled() lets
-    # the release job run when a job it needs was skipped, and a push run
-    # releases only once that job has found the queue empty.
+  # The docs' diagrams, drawn in Chromium for the release job's archive
+  # (npm run docs:archive -- --draw), for the runs the release job runs
+  # for. Every step of a job that names the release environment can read
+  # the deploy key, as GitHub hands a job its secrets when it starts, so
+  # the browser, its download and its system libraries, which apt
+  # installs, run here instead: no environment, no secret, a token that
+  # can only read, and a checkout that keeps no credentials. It keeps
+  # the drawings as an artifact of this run, which the release job
+  # checks before it uses them. Nothing comes from GitHub's cache, as
+  # the drawings go into the release's archive.
+  draw:
     needs: queue
     if: >-
       !cancelled() && (
@@ -133,9 +142,62 @@ jobs:
        needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))
     runs-on: ubuntu-latest
     # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
-    # apt-get four tries of three minutes) before semantic-release
-    # starts, so a stall never cuts a release short.
-    timeout-minutes: 42
+    # apt-get four tries of three minutes).
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      # main's tip, as the release job checks out: a drawing is kept by
+      # its diagram's source and what draws it, so one that main's newer
+      # tip changed is missing there, and fails it before anything is
+      # pushed.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm ci --ignore-scripts
+      - run: npm audit signatures
+      # Chromium, downloaded and checked against a committed SHA-256, with
+      # its system libraries from Ubuntu's signed mirror, not restored from
+      # the cache.
+      - uses: ./.github/actions/chromium
+        with:
+          cache: false
+      # npm ci emptied the drawings' cache, so it holds this run's
+      # drawings alone, each checked as the archive checks it.
+      - run: npm run docs:archive -- --draw
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docs-drawings
+          path: node_modules/.cache/solid-memo-docs-diagrams/
+          include-hidden-files: true
+          if-no-files-found: error
+          # Room to re-run only a failed release job (docs/releasing.md#the-deploy-key).
+          retention-days: 7
+
+  release:
+    # After the queue and draw jobs, which a run by hand skips the first
+    # of: !cancelled() lets the release job run when a job it needs was
+    # skipped, and a push run releases only once the queue job has found
+    # the queue empty. It releases only with the draw job's drawings.
+    needs: [queue, draw]
+    if: >-
+      !cancelled() && needs.draw.result == 'success' && (
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
+       inputs.tag == '') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository &&
+       !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): ') &&
+       needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: write
       actions: read
@@ -153,9 +215,12 @@ jobs:
     concurrency:
       group: release
       cancel-in-progress: false
-    # Its secret is the key. Each run is recorded as a deployment to it:
-    # GitHub's docs do not say that its limit to main holds with
-    # deployment: false.
+    # Its secret is the key. GitHub hands it to the job when the job
+    # starts, so every step of the job can read it, not only the steps
+    # that name it: the job runs no browser and installs nothing with
+    # apt (docs/releasing.md#the-deploy-key). Each run is recorded as a
+    # deployment to it: GitHub's docs do not say that its limit to main
+    # holds with deployment: false.
     environment: release
     steps:
       # A copy without the key, such as a fork, releases nothing, and says
@@ -174,9 +239,9 @@ jobs:
           fi
       # main's tip, not the commit CI checked: semantic-release releases
       # the branch, and pushes onto it. The whole history and every tag,
-      # to find the last release and the commits since. Without the key,
-      # and keeping no credentials: the key is given to semantic-release
-      # alone, below, not to the steps that install and download.
+      # to find the last release and the commits since. Keeping no
+      # credentials: only semantic-release's step, below, writes the key
+      # where git reads it.
       - if: steps.key.outputs.set == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -232,41 +297,37 @@ jobs:
           fi
           echo "release=true" >> "$GITHUB_OUTPUT"
       # No package's install script runs here (docs/releasing.md#the-deploy-key):
-      # the release needs none, and Chromium comes from the action below.
+      # the release needs none, and no browser runs here.
       - if: steps.tip.outputs.release == 'true'
         run: npm ci --ignore-scripts
       # Every installed version is signed by the registry, and its
-      # attestations verify, as in CI's check job, before Chromium is
-      # downloaded and semantic-release runs with the key
-      # (docs/releasing.md#the-deploy-key).
+      # attestations verify, as in CI's check job, before semantic-release
+      # runs (docs/releasing.md#the-deploy-key).
       - if: steps.tip.outputs.release == 'true'
         run: npm audit signatures
-      # Chromium, which the docs' Mermaid diagrams are drawn in, for the
-      # archive the GitHub release carries (npm run docs:archive):
-      # downloaded and checked against a committed SHA-256, with its
-      # system libraries from Ubuntu's signed mirror, not restored from
-      # the cache.
+      # The draw job's drawings, into the drawings' cache, which npm ci
+      # emptied. No run-id: the artifact of this run, which only the draw
+      # job uploads.
       - if: steps.tip.outputs.release == 'true'
-        uses: ./.github/actions/chromium
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          cache: false
-      # The diagrams drawn now, before the key is written, and kept in
-      # their cache, which the archive in the release's prepare step
-      # draws from. Then the browser is removed, so no browser runs while
-      # the key is on disk: a diagram drawn only then fails the release
-      # before anything is pushed.
+          name: docs-drawings
+          path: node_modules/.cache/solid-memo-docs-diagrams
+      # Every drawing the archive holds is there and passes the checks the
+      # site's build makes (checkSvg, and the font's notice); --drawn
+      # draws nothing and starts no browser, as the archive in the
+      # release's prepare step does too (release.config.mjs).
       - if: steps.tip.outputs.release == 'true'
-        run: npm run docs:archive -- --draw
-      - if: steps.tip.outputs.release == 'true'
-        name: No browser beside the key
-        run: rm -rf "$HOME/.cache/ms-playwright"
+        name: The drawings are all there
+        run: npm run docs:archive -- --drawn
       # Pushes the release commit and the tag over SSH, with the key, and
       # makes the GitHub release with the run's token. The key is written
       # to a file for this step alone, which git's ssh reads
       # (GIT_SSH_COMMAND), and removed when it ends; the git config never
       # holds it. semantic-release checks it can push before anything
-      # else, and pushes in its prepare step, so the key is there for the
-      # whole run, the docs' archive included, which draws nothing new.
+      # else, and pushes in its prepare step, so the key is on disk for
+      # the whole run, the docs' archive included, which draws nothing
+      # (--drawn).
       # GitHub's host keys come from its API, over HTTPS, as
       # actions/checkout would have set them.
       - if: steps.tip.outputs.release == 'true'

@@ -383,7 +383,11 @@ An archive is rendered once, by that release's own code. It draws
 every diagram in Chromium, ignoring `DOCS_DIAGRAMS`, and fails without
 Chromium unless every drawing is in the drawings' cache already.
 `npm run docs:archive -- --draw` draws and checks them so, and writes
-no archive: the release job runs it before it writes the deploy key
+no archive: the release workflow's `draw` job runs it, with no secret.
+With `--drawn`, alone or after the version, nothing is drawn and no
+browser is started: every drawing must be in the cache, or it fails.
+The release job, which holds the deploy key, checks the `draw` job's
+drawings so, and semantic-release's archive takes them so
 ([releasing.md](releasing.md#the-deploy-key)). It checks each drawing
 as the build does (`checkSvg`, and the font's notice in it), then
 packs them with the system's `tar`. The

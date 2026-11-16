@@ -247,6 +247,31 @@ describe("drawDiagrams", () => {
     );
   });
 
+  it("under cached, takes every drawing from the cache, and never starts a browser", async () => {
+    const fake = fakeBrowser();
+    const diagrams = diagramsFrom(block("A --> B"), block("B --> C"));
+    const first = await drawDiagrams(diagrams.slice(0, 1), {
+      inputs,
+      cacheDir,
+      launch: fake.launch,
+    });
+    const launch = vi.fn<Launch>(async () => fake.browser);
+    const options = { inputs, cacheDir, mode: "cached" as const, launch };
+    expect(await drawDiagrams(diagrams.slice(0, 1), options)).toEqual(first);
+    await expect(drawDiagrams(diagrams, options)).rejects.toThrow(
+      "2 of the docs' drawings are not in the drawings' cache, and none is drawn: no browser is started.",
+    );
+    // A cached drawing that checkSvg refuses counts as not there.
+    await writeFile(
+      join(cacheDir, `${diagrams[0]!.keys.dark}.svg`),
+      '<svg viewBox="0 0 1 1"><script/></svg>',
+    );
+    await expect(drawDiagrams(diagrams.slice(0, 1), options)).rejects.toThrow(
+      "1 of the docs' drawings are not in the drawings' cache",
+    );
+    expect(launch).not.toHaveBeenCalled();
+  });
+
   it("draws nothing for a page without diagrams", async () => {
     expect(await drawDiagrams([], { inputs, cacheDir })).toEqual(new Map());
   });
