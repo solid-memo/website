@@ -1138,8 +1138,9 @@ The domain plans the transfer
   it was taken from (`sm:fromRelease`): in the target it's the user's
   card, which an upgrade of a deck added from a link leaves as it is
   ([migrations.md](migrations.md#catching-up-with-the-library)).
-- Triples another app put on the card or its wrong options aren't
-  copied, and a move removes them from the source with the card
+- What the card and its wrong options say beyond what Solid Memo
+  knows of them goes with them: a term a later version of the app
+  added, or another app's
   ([data-model.md](data-model.md#write-discipline)).
 - With **Keep their progress**, the card's review states go with it,
   under its id in the target, their snapshot for resetting the study

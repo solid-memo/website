@@ -22,6 +22,7 @@ import {
   withGradedReviewState,
   withoutReadReviewStates,
   withoutReviewStates,
+  carriedStatesOf,
   withReviewStates,
 } from "./mappers/reviewStateMapper";
 
@@ -122,7 +123,10 @@ export function createSolidReviewStateRepository({
       await saveReviews(deck, written);
     },
 
-    async applyReviewChanges(deck, { save, remove, fsrs = NO_FSRS, every = false }): Promise<void> {
+    async applyReviewChanges(
+      deck,
+      { save, remove, fsrs = NO_FSRS, every = false, carried },
+    ): Promise<void> {
       const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
       // No document, nothing to remove: one is made only for states to save (a card moved in, with them).
       if (read === null && save.length + fsrs.save.length === 0) return;
@@ -133,7 +137,21 @@ export function createSolidReviewStateRepository({
         deck,
         every ? { fsrs: fsrs.remove } : { sm2: remove, fsrs: fsrs.remove },
       );
-      const written = withReviewStates(without, deck, { sm2: save, fsrs: fsrs.save }, randomId);
+      // A state copied from another deck starts from what that deck's document says of it.
+      const source =
+        carried === undefined
+          ? null
+          : await getSolidDatasetOrNull(
+              carried.deck.reviewsDocumentUrl,
+              carried.asNoOne === true ? publicFetch : fetch,
+            );
+      const written = withReviewStates(
+        without,
+        deck,
+        { sm2: save, fsrs: fsrs.save },
+        randomId,
+        source === null ? undefined : carriedStatesOf(source, carried!.deck, carried!.ids),
+      );
       await saveReviews(deck, written);
     },
 

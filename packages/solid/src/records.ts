@@ -16,6 +16,7 @@ import {
   getDecimal,
   getInteger,
   getLiteralAll,
+  getPropertyAll,
   getStringByLocaleAll,
   getStringNoLocale,
   getStringNoLocaleAll,
@@ -544,6 +545,33 @@ export function recordThing<T>(
   applyRecord(builder, descriptor, record);
   for (const fixed of descriptor.fixedValues) builder.setIri(fixed.predicate, fixed.value);
   return builder.setInteger(SM.formatVersion, descriptor.version).build();
+}
+
+/**
+ * A subject at `url` that says what `source` says, but for the
+ * properties in `without`: what a copy of a subject in another document
+ * starts from (recordThing's `existing`), so what its source says beyond
+ * what this app knows of it goes with it. This app then writes what it
+ * knows over it, and refuses a source a newer version wrote, as it would
+ * in place. Each value is carried as it is. A value that is a blank
+ * node is left out, as what it says stays in the source's document, and
+ * so is an IRI the client library writes none of (readIris).
+ */
+export function carriedTo(
+  source: Subject,
+  url: string,
+  without: readonly string[] = [],
+): NamedSubject {
+  const builder = buildThing(createThing({ url }));
+  for (const predicate of getPropertyAll(source)) {
+    if (without.includes(predicate)) continue;
+    for (const term of getTermAll(source, predicate)) {
+      if (term.termType === "Literal") builder.addLiteral(predicate, term);
+      else if (term.termType === "NamedNode" && URL.canParse(term.value))
+        builder.addIri(predicate, term.value);
+    }
+  }
+  return builder.build();
 }
 
 /**

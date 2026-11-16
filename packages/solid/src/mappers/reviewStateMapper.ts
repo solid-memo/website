@@ -8,6 +8,7 @@ import {
   type Subject,
   asUrl,
   getTermAll,
+  getThing,
   getUrl,
   getUrlAll,
 } from "../client/rdf";
@@ -39,7 +40,13 @@ import {
 import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
-import { ownSubjectsOf, readVersioned, recordThing, removeAllUnlessNewer } from "../records";
+import {
+  carriedTo,
+  ownSubjectsOf,
+  readVersioned,
+  recordThing,
+  removeAllUnlessNewer,
+} from "../records";
 import { RDF, SM } from "../vocab";
 
 /**
@@ -272,21 +279,54 @@ export interface StatesToWrite {
   fsrs?: readonly FsrsState[];
 }
 
+/** The state of each kind another reviews document holds of a prompt, which a copy of it starts from; null for none. */
+export interface CarriedStates {
+  sm2: (key: ReviewKey) => Subject | null;
+  fsrs: (key: ReviewKey) => Subject | null;
+}
+
+const NOTHING_CARRIED: CarriedStates = { sm2: () => null, fsrs: () => null };
+
+/**
+ * The states a copy of cards starts from: for a prompt of a card in the
+ * target, by the id the card has there, the state of each kind that
+ * `source`, the reviews document it was copied from, holds of the card
+ * it is a copy of (`ids`: the id there, by the id in the target).
+ */
+export function carriedStatesOf(
+  source: Dataset,
+  documents: ReviewDocuments,
+  ids: Readonly<Record<string, string>>,
+): CarriedStates {
+  const read = readBoth(source, documents);
+  const lookup = (states: readonly Read<unknown>[]) => {
+    const urls = new Map(states.map(({ url, key }) => [reviewKeyOf(key), url]));
+    return ({ cardId, direction }: ReviewKey) => {
+      if (!Object.hasOwn(ids, cardId)) return null;
+      const url = urls.get(reviewKeyOf({ cardId: ids[cardId]!, direction }));
+      return url === undefined ? null : getThing(source, url);
+    };
+  };
+  return { sm2: lookup(read.sm2), fsrs: lookup(read.fsrs) };
+}
+
 /**
  * The reviews document with each state written in this app's format: a
  * state read from the document onto the subject it was read from,
- * whatever that is called; any other at the subject newSubjectFor gives.
- * The document is read once, however many states are written. Returns
- * the subjects written, the SM-2 states' then the FSRS-6 states', each
- * in their order.
+ * whatever that is called; any other at the subject newSubjectFor gives,
+ * starting from the state `carried` has for it, when nothing is there
+ * (carriedTo). The document is read once, however many states are
+ * written. Returns the subjects written, the SM-2 states' then the
+ * FSRS-6 states', each in their order.
  */
 export function withReviewStates(
   dataset: Dataset,
   documents: ReviewDocuments,
   states: StatesToWrite,
   newId: () => string,
+  carried: CarriedStates = NOTHING_CARRIED,
 ): { dataset: Dataset; subjects: string[] } {
-  return writeBoth(dataset, documents, readBoth(dataset, documents), states, newId);
+  return writeBoth(dataset, documents, readBoth(dataset, documents), states, newId, carried);
 }
 
 /**
@@ -320,10 +360,19 @@ function writeBoth(
   read: { sm2: readonly Read<ReviewState>[]; fsrs: readonly Read<FsrsState>[] },
   states: StatesToWrite,
   newId: () => string,
+  carried: CarriedStates = NOTHING_CARRIED,
 ): { dataset: Dataset; subjects: string[] } {
   const edit = editOf(dataset);
-  const sm2 = writeStates(edit, documents, SM2_KIND, read.sm2, states.sm2, newId);
-  const fsrs = writeStates(edit, documents, FSRS_KIND, read.fsrs, states.fsrs ?? [], newId);
+  const sm2 = writeStates(edit, documents, SM2_KIND, read.sm2, states.sm2, newId, carried.sm2);
+  const fsrs = writeStates(
+    edit,
+    documents,
+    FSRS_KIND,
+    read.fsrs,
+    states.fsrs ?? [],
+    newId,
+    carried.fsrs,
+  );
   return { dataset: edit.done(), subjects: [...sm2, ...fsrs] };
 }
 
@@ -340,6 +389,7 @@ function writeStates<T extends ReviewKey>(
   read: readonly { url: string; key: ReviewKey }[],
   states: readonly T[],
   newId: () => string,
+  carried: (key: ReviewKey) => Subject | null,
 ): string[] {
   const subjectOf = new Map(read.map(({ url, key }) => [reviewKeyOf(key), url]));
   const subjects: string[] = [];
@@ -347,7 +397,10 @@ function writeStates<T extends ReviewKey>(
     const subject =
       subjectOf.get(reviewKeyOf(state)) ?? newSubjectFor(edit, documents, kind, state, newId);
     subjectOf.set(reviewKeyOf(state), subject);
-    edit.setThing(kind.thing(documents, state, edit.getThing(subject), subject));
+    const there = edit.getThing(subject);
+    const from = there === null ? carried(state) : null;
+    const existing = from === null ? there : carriedTo(from, subject);
+    edit.setThing(kind.thing(documents, state, existing, subject));
     subjects.push(subject);
   }
   return subjects;

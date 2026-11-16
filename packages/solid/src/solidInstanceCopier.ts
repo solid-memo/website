@@ -16,6 +16,7 @@ import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
 import { deleteContainerRecursively, listContainerTree } from "./containers";
 import { PreconditionFailedError, saveDataset } from "./datasets";
 import { AppError } from "@solid-memo/domain/appError";
+import { SM, SM_NS } from "./vocab";
 
 type Fetch = typeof globalThis.fetch;
 
@@ -65,6 +66,9 @@ function createOnly(fetch: Fetch): Fetch {
     return fetch(input, { ...init, headers });
   };
 }
+
+/** Every term of Solid Memo's vocabulary this app knows: its properties, classes and concepts. */
+const KNOWN_TERMS: ReadonlySet<string> = new Set(Object.values(SM));
 
 /** An IRI moved: renamed, or under the container moved. */
 function moveIri(iri: string, move: ContainerMove): string {
@@ -183,6 +187,21 @@ export function createSolidInstanceCopier({
       const quads = toRdfJsDataset(await getSolidDatasetLinear(url, { fetch })) as Iterable<Quad>;
       for (const quad of quads) {
         if ([quad.subject, quad.predicate, quad.object, quad.graph].some(named)) return true;
+      }
+      return false;
+    },
+
+    async namesLaterTerm(url) {
+      const response = await head(url);
+      if (!response.ok) throw new AppError("cannotCheck", { url, status: response.status });
+      if (!(response.headers.get("Content-Type") ?? "").startsWith("text/turtle")) return false;
+      const later = (term: Term) =>
+        term.termType === "NamedNode" &&
+        term.value.startsWith(SM_NS) &&
+        !KNOWN_TERMS.has(term.value);
+      const quads = toRdfJsDataset(await getSolidDatasetLinear(url, { fetch })) as Iterable<Quad>;
+      for (const quad of quads) {
+        if (later(quad.predicate) || later(quad.object)) return true;
       }
       return false;
     },

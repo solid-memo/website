@@ -452,8 +452,18 @@ export function createSessionUseCases({
     if ((await answerStore.logMonths(source)).length >= MAX_LOG_MONTHS)
       throw new AppError("guestStudyTooLarge");
   }
-  /** Throw unless the guest's study conforms, whole, none of it written by a newer version of this app. */
-  async function ensureGuestStudyReadable(source: string): Promise<void> {
+  /**
+   * Throw unless the guest's study conforms, whole, none of it written
+   * by a newer version of this app: no subject in a newer format, and no
+   * document of `resources` with a term of the vocabulary this app does
+   * not know (namesLaterTerm). Adding a study writes what this app reads
+   * of it, so what a later version added would be left behind, and gone
+   * with the guest's study.
+   */
+  async function ensureGuestStudyReadable(
+    source: string,
+    resources: readonly string[],
+  ): Promise<void> {
     await ensureGuestLogWhole(source);
     const report = await checks.validateInstance(source);
     if (!report.conforms) throw new AppError("guestStudyInvalid", { count: report.violationCount });
@@ -463,6 +473,10 @@ export function createSessionUseCases({
       )
     ) {
       throw new AppError("guestStudyTooNew");
+    }
+    for (const url of resources) {
+      if (!url.endsWith("/") && (await instanceCopier.namesLaterTerm(url)))
+        throw new AppError("guestStudyTooNew");
     }
   }
   /**
@@ -787,7 +801,7 @@ export function createSessionUseCases({
         progress.start(2);
         const resources = await listed();
         const versions = await versionsOf(resources);
-        await ensureGuestStudyReadable(source);
+        await ensureGuestStudyReadable(source, resources);
         progress.stepped();
         const [decks, tree, months, targetDecks, targetTree, guestDrafts, targetDrafts] =
           await Promise.all([
