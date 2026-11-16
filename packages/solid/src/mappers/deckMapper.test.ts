@@ -36,9 +36,12 @@ import { growth } from "@solid-memo/domain/testing/growth";
 import { LONG_SUBJECT, longNames, namesOf } from "@solid-memo/domain/testing/longAgents";
 import { agentUrlOf } from "@solid-memo/domain/agentRecord";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
+import { isDeckOutdated, upgradeDeck } from "@solid-memo/domain/migration";
 import { MAX_TERM_CHARACTERS } from "../client/readLimits";
 import {
   deckSubjects,
+  decksSubjects,
+  decksWithAgentsWithinBound,
   toCard,
   toCards,
   toCatalog,
@@ -1646,6 +1649,91 @@ describe("the agents of a catalog's decks", () => {
     const [creator] = getUrlAll(getThing(onUntyped, deck.url)!, DCTERMS.creator);
     expect(creator).toMatch(new RegExp(`^${SLUG}-[0-9a-f]{6}$`));
     expect(authorsOf(onUntyped)).toEqual({ "deck-1": deck.authors });
+  });
+});
+
+describe("many decks that share an author over counted nodes others hold (GHSA-rm3f-655c-28wq)", () => {
+  // The author "x": its slug node and its hashed node hold other names,
+  // and so do its first `nodes` counted nodes.
+  const HASHED = `${CATALOG}#agent-x-fd0c50`;
+  const turtle = (decks: number, nodes: number) =>
+    [
+      "@prefix dcterms: <http://purl.org/dc/terms/> .",
+      "@prefix foaf: <http://xmlns.com/foaf/0.1/> .",
+      "@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .",
+      '<#agent-q> a foaf:Agent ; foaf:name "x" .',
+      '<#agent-x> a foaf:Agent ; foaf:name "y" .',
+      '<#agent-x-fd0c50> a foaf:Agent ; foaf:name "z" .',
+      ...Array.from(
+        { length: nodes },
+        (_, i) => `<#agent-x-fd0c50-${i + 2}> foaf:name "n${i + 2}" .`,
+      ),
+      ...Array.from(
+        { length: decks },
+        (_, i) =>
+          `<#deck-${i}> a sm:Deck ; sm:formatVersion 5 ; dcterms:title "D${i}"@en ; dcterms:description "d"@en ; sm:studyDirection sm:frontToBack ; sm:cardsDocument <decks/d${i}.ttl> ; sm:reviewsDocument <reviews/d${i}.ttl> ; dcterms:creator <#agent-q> .`,
+      ),
+    ].join("\n");
+
+  /** A catalog's format update (upgradeDecks): the decks it writes, the document and the subjects it saves. */
+  function upgraded(dataset: Dataset) {
+    const written = decksWithAgentsWithinBound(
+      dataset,
+      toDecks(dataset, CATALOG).filter(isDeckOutdated).map(upgradeDeck),
+    );
+    const updated = withDecks(dataset, written);
+    return { written, updated, subjects: decksSubjects(updated, written) };
+  }
+
+  it("names the nodes each deck alone would, one node for one author", async () => {
+    const dataset = await datasetOfTurtle(CATALOG, turtle(6, 5));
+    const others = [[], ["x <x@example.org>"], ["n3"], ["x", "y"], ["z <z@example.org>"], []];
+    const decks = toDecks(dataset, CATALOG)
+      .map(upgradeDeck)
+      .map((deck, i) => ({ ...deck, authors: [...deck.authors, ...others[i]!] }));
+    const kept = decksWithAgentsWithinBound(dataset, decks);
+    expect(kept).toEqual(decks.filter((deck) => decksWithAgentsWithinBound(dataset, [deck])[0]));
+    const updated = withDecks(dataset, kept);
+    // As written one deck after another, each with its own look at the nodes.
+    const oneByOne = kept.reduce<Dataset>((written, deck) => withDecks(written, [deck]), dataset);
+    expect(stateOf(updated).quads).toEqual(stateOf(oneByOne).quads);
+    for (const deck of kept) {
+      expect(getUrlAll(getThing(updated, deck.url)!, DCTERMS.creator)[0]).toBe(`${HASHED}-7`);
+      expect(deckSubjects(updated, deck).slice(2).sort()).toEqual(
+        getUrlAll(getThing(updated, deck.url)!, DCTERMS.creator).sort(),
+      );
+    }
+    expect(decksSubjects(updated, kept)).toEqual(
+      kept.flatMap((deck) => deckSubjects(updated, deck)),
+    );
+  });
+
+  it("brings them to this app's format in time that grows with the decks and the nodes, not their product", {
+    timeout: 180_000,
+  }, async () => {
+    // Eight times the decks over eight times the nodes take about as long
+    // as an eighth of them eight times over; looking at every node again
+    // for each deck would take eight times as long.
+    const SIZE = 100;
+    const datasets = new Map(
+      await Promise.all(
+        [SIZE, 8 * SIZE].map(
+          async (count) => [count, await datasetOfTurtle(CATALOG, turtle(count, count))] as const,
+        ),
+      ),
+    );
+    const { written, subjects } = upgraded(datasets.get(SIZE)!);
+    expect(written).toHaveLength(SIZE);
+    expect(subjects).toContain(`${HASHED}-${SIZE + 2}`);
+    const ratio = growth(
+      (count) => {
+        const dataset = datasets.get(count)!;
+        return () => upgraded(dataset);
+      },
+      SIZE,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
   });
 });
 
