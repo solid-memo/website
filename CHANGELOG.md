@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.4](https://github.com/solid-memo/website/compare/v7.6.3...v7.6.4) (2026-11-16)
+
+### Fixes
+
+* **ci:** keep links out of the changelog's entries ([7fdfccd](https://github.com/solid-memo/website/commit/7fdfccdbf0c8d81905c6ca8e8694fab0b2c1fc3e))
+* **domain:** read a release's contact the same way in the Studio ([dd8c992](https://github.com/solid-memo/website/commit/dd8c992c90e0d2a31fcdd653b9b68e7092791b9a))
+* **solid:** refuse JSON-LD values the parser reads on past as errors ([c303f56](https://github.com/solid-memo/website/commit/c303f56e3ec3526d85165073ff887ffd9d6a5cd0))
+
 ## [7.6.3](https://github.com/solid-memo/website/compare/v7.6.2...v7.6.3) (2026-11-15)
 
 ### Fixes
