@@ -140,6 +140,8 @@ export type CurationProblem =
   | { code: "missingContact"; params: { contact: string } }
   /** An email (foaf:mbox) of the subject, which the policy asks no release to name. */
   | { code: "emailNamed"; params: Record<string, never> }
+  /** More than one contact point (dcat:contactPoint), or a point with more than one web page (vcard:hasURL): learners read it as no contact (contactPointProblems). */
+  | { code: "contactAmbiguous"; params: Record<string, never> }
   /** A source that does not say what it is, whose it is, or on what terms it was used. */
   | { code: "sourceUndescribed"; params: { missing: SourceDetail[] } }
   /** A source with more than one title, or a title or creator that is not plain text, which learners would read otherwise than the Studio shows it. */

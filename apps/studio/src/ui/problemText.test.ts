@@ -232,6 +232,9 @@ describe("problemMessage", () => {
     expect(say({ code: "emailNamed", params: {} })).toBe(
       "Names an email: a release for the library names no one's email, only the library's contact.",
     );
+    expect(say({ code: "contactAmbiguous", params: {} })).toBe(
+      "Contact: names more than one contact, or a contact with more than one web page, so learners get none to report a mistake to. Enter the contact again to keep one.",
+    );
     expect(say({ code: "required", params: {} }, `${DCTERMS}publisher`)).toBe(
       "Publisher: not stated yet.",
     );

@@ -1308,6 +1308,7 @@
       "missingTheme": "Thèmes : {theme} est manquant.",
       "missingContact": "Contact : celui de la bibliothèque, {contact}, n'est pas indiqué. Une publication pour la bibliothèque l'indique, pas une adresse e-mail.",
       "emailNamed": "Indique une adresse e-mail : une publication pour la bibliothèque n'indique l'adresse e-mail de personne, seulement le contact de la bibliothèque.",
+      "contactAmbiguous": "Contact : indique plus d’un contact, ou un contact avec plus d’une page web, si bien que les apprenants n’en ont aucun à qui signaler une erreur. Saisissez de nouveau le contact pour n’en garder qu’un.",
       "required": "{field} : à renseigner.",
       "previousUnread": "Impossible de lire la publication qu’elle suit, {previous} : rien n’est donc vérifié par rapport à elle. Vérifiez à nouveau plus tard.",
       "libraryUnread": "Impossible de lire l’index de la bibliothèque : la place du brouillon dans la bibliothèque n’est donc pas vérifiée. Vérifiez à nouveau plus tard.",

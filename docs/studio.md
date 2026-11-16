@@ -2069,6 +2069,11 @@ becomes: the rules `npm run library:check` runs on `decks/`
     a series, a distribution, the theme EDUC, and each chapter's and
     step's fields the draft shapes relax;
   - the policy's curation (`curationProblems`);
+  - its one contact, in either policy (`contactPointProblems`): a
+    warning of more than one contact point, or a point with more than
+    one web page (`contactAmbiguous`). Learners read such a release as
+    naming no contact, so **Report a mistake** has no page to lead to
+    ([deck-library.md](deck-library.md#reporting-a-mistake));
   - how the release says it was made (`provenanceProblems`,
     [below](#what-the-check-asks-of-a-releases-provenance));
   - the draft's series (the pod policy only; `ownSeriesProblems` in
@@ -2360,7 +2365,12 @@ the library's releases are
     the release's one `dcat:contactPoint`, `#contact`, a `vcard:Kind`
     with that `vcard:hasURL` ([deck-library.md](deck-library.md#contact)).
     It's saved once it's an http(s) address, and the contact it
-    replaces goes with what it stated. **Use the library's contact**
+    replaces goes with what it stated, every contact point the release
+    named. The field reads the contact as learners do (`contactOf`):
+    the one contact point, named or blank, with one web page. A release
+    that names more than one contact point, or a point with more than
+    one web page, names no contact, and the field is empty; the release
+    check warns of it (`contactAmbiguous`). **Use the library's contact**
     fills in `LIBRARY_CONTACT`
     ([curationRules.ts](../packages/domain/src/release/curationRules.ts)).
     The app reads it to say where a mistake is reported

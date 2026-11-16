@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { Quad_Object } from "@rdfjs/types";
 import {
   type Dataset,
   type Subject,
@@ -9,6 +10,7 @@ import {
   getInteger,
   getStringNoLocale,
   getStringNoLocaleAll,
+  getTermAll,
   getThing,
   getThingAll,
   getUrl,
@@ -135,15 +137,26 @@ function courseOf(release: Subject): { isCourse?: true } {
 
 /**
  * The web page a release's contact names (docs/deck-library.md,
- * Contact): its dcat:contactPoint's vcard:hasURL, read from the
- * release's own document. None when it names no contact, or a contact
- * with no web page, such as the email the library's older versions name.
+ * Contact): the vcard:hasURL of its one dcat:contactPoint, named or
+ * blank, read from the release's own document. None when it names no
+ * contact, a contact with no web page, such as the email the library's
+ * older versions name, or more than one contact point or page: the
+ * Studio reads it the same way (`contactOf` in the domain's
+ * releaseDraft.ts), so "Report a mistake" never leads elsewhere than
+ * the contact the release's creator saw.
  */
 function contactOf(release: Subject, dataset: Dataset): { contact?: string } {
-  const point = getUrl(release, DCAT.contactPoint);
-  const thing = point === null ? null : getThing(dataset, point);
-  const url = thing === null ? null : getUrl(thing, VCARD.hasURL);
-  return url === null ? {} : { contact: url };
+  const points = getTermAll(release, DCAT.contactPoint);
+  if (points.length !== 1) return {};
+  const thing = subjectAt(dataset, points[0]!);
+  const urls = thing === null ? [] : getUrlAll(thing, VCARD.hasURL);
+  return urls.length === 1 ? { contact: urls[0]! } : {};
+}
+
+/** The subject a term names in the dataset: an IRI's or a blank node's; null for a literal. */
+function subjectAt(dataset: Dataset, term: Quad_Object): Subject | null {
+  if (term.termType === "BlankNode") return getThing(dataset, `_:${term.value}`);
+  return term.termType === "NamedNode" ? getThing(dataset, term.value) : null;
 }
 
 /** A release by URL, with what the index says about it (maybe nothing). */

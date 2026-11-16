@@ -6,7 +6,13 @@ import { expect, it } from "vitest";
 import { LOCALES } from "../locale";
 import { growth } from "../testing/growth";
 import { at, card, iri, model, RELEASE, text } from "../testing/releaseModel";
-import { curationProblems, LIBRARY_CONTACT, podPolicy, repoPolicy } from "./curationRules";
+import {
+  contactPointProblems,
+  curationProblems,
+  LIBRARY_CONTACT,
+  podPolicy,
+  repoPolicy,
+} from "./curationRules";
 
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const EDUC = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
@@ -110,6 +116,38 @@ it("asks the library's contact, a vcard:Kind, and no one's email", () => {
     object: iri(`mailto:e${i}@example.com`),
   }));
   expect(found({ emails })).toHaveLength(emails.length);
+});
+
+it("warns of more than one contact point, or a point with more than one web page (GHSA-g8xv-c484-62vx)", () => {
+  const found = (contacts: ReturnType<typeof model>["contacts"]) =>
+    contactPointProblems(model({ contacts })).map(({ code, subject, field, severity }) => ({
+      code,
+      subject,
+      field,
+      severity,
+    }));
+  const ambiguous = [
+    {
+      code: "contactAmbiguous",
+      subject: RELEASE,
+      field: "http://www.w3.org/ns/dcat#contactPoint",
+      severity: "warning",
+    },
+  ];
+  expect(found([])).toEqual([]);
+  expect(found([contact(LIBRARY_CONTACT)])).toEqual([]);
+  // A page that is text is no page learners follow.
+  expect(
+    found([{ ...contact(LIBRARY_CONTACT), urls: [iri(LIBRARY_CONTACT), text("x", "")] }]),
+  ).toEqual([]);
+  expect(found([contact("https://example.com/other"), contact(LIBRARY_CONTACT)])).toEqual(
+    ambiguous,
+  );
+  expect(
+    found([
+      { ...contact(LIBRARY_CONTACT), urls: [iri(LIBRARY_CONTACT), iri("https://x.example/")] },
+    ]),
+  ).toEqual(ambiguous);
 });
 
 it("asks a description of each picture in English and every language its card's text is in", () => {

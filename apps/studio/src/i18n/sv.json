@@ -1238,6 +1238,7 @@
       "missingTheme": "Teman: saknar {theme}.",
       "missingContact": "Kontakt: bibliotekets, {contact}, anges inte. En utgåva för biblioteket anger den, inte en e-postadress.",
       "emailNamed": "Anger en e-postadress: en utgåva för biblioteket anger ingens e-postadress, bara bibliotekets kontakt.",
+      "contactAmbiguous": "Kontakt: anger mer än en kontakt, eller en kontakt med mer än en webbsida, så elever får ingen att rapportera ett fel till. Ange kontakten igen för att behålla en.",
       "required": "{field}: inte angivet än.",
       "previousUnread": "Utgåvan den följer, {previous}, kunde inte läsas, så inget kontrolleras mot den. Kontrollera igen senare.",
       "libraryUnread": "Bibliotekets index kunde inte läsas, så utkastets plats i biblioteket kontrolleras inte. Kontrollera igen senare.",

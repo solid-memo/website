@@ -481,6 +481,33 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
     ).not.toHaveProperty("contact");
   });
 
+  it("reads a contact from its one point, named or blank, with one web page, and none from more (GHSA-g8xv-c484-62vx)", async () => {
+    const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
+    const turtle = await readFile(
+      `${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`,
+      "utf8",
+    );
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const contactOf = async (statements: string) =>
+      toLibraryDeckContent(url, await datasetOf(`${turtle}\n${statements}\n`, url)).contact;
+    const good = "https://good.example/issues";
+    const other = "https://other.example/report";
+    expect(await contactOf(`<> dcat:contactPoint [ <${VCARD}hasURL> <${good}> ] .`)).toBe(good);
+    expect(
+      await contactOf(
+        `<> dcat:contactPoint [ <${VCARD}hasURL> <${good}> ] , <#contact> .\n<#contact> <${VCARD}hasURL> <${other}> .`,
+      ),
+    ).toBeUndefined();
+    expect(
+      await contactOf(
+        `<> dcat:contactPoint <#contact> .\n<#contact> <${VCARD}hasURL> <${good}> , <${other}> .`,
+      ),
+    ).toBeUndefined();
+    expect(
+      await contactOf(`<> dcat:contactPoint "${good}" .\n<${good}> <${VCARD}hasURL> <${good}> .`),
+    ).toBeUndefined();
+  });
+
   it("refuses a release at the guest's pod, or that links to it by an address in it (GHSA-hc3p-fpwj-fvjp)", async () => {
     const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
     const turtle = await readFile(

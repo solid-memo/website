@@ -1587,17 +1587,30 @@ function contactPointsOf(draft: ReleaseDraft): string[] {
     );
 }
 
-/** The web page the release's contact names (its first contact point's vcard:hasURL); null when it names none. */
+/**
+ * The web page the release's contact names: the vcard:hasURL of its one
+ * dcat:contactPoint, named or blank, when that point names one page.
+ * Null when it names none, or more than one point or page, which
+ * learners read as no contact too (`contactOf` in the solid package's
+ * libraryMapper.ts), so the Studio never shows a contact other than the
+ * one "Report a mistake" leads to; the release check says so
+ * (`contactAmbiguous`).
+ */
 export function contactOf(draft: ReleaseDraft): string | null {
-  const points = contactPointsOf(draft);
-  const of = triplesBySubject(draft.triples, new Set(points));
-  for (const point of points) {
-    const url = of
-      .get(point)
-      ?.find((triple) => triple.predicate === `${VCARD}hasURL` && triple.object.kind === "iri");
-    if (url !== undefined) return url.object.value;
-  }
-  return null;
+  const points = draft.triples.filter(
+    (triple) => triple.subject === draft.url && triple.predicate === DCAT_CONTACT_POINT,
+  );
+  if (points.length !== 1) return null;
+  const { object } = points[0]!;
+  if (object.kind === "literal") return null;
+  const subject = object.kind === "blank" ? `_:${object.value}` : object.value;
+  const urls = draft.triples.filter(
+    (triple) =>
+      triple.subject === subject &&
+      triple.predicate === `${VCARD}hasURL` &&
+      triple.object.kind === "iri",
+  );
+  return urls.length === 1 ? urls[0]!.object.value : null;
 }
 
 /**

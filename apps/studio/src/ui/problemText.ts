@@ -266,6 +266,7 @@ export function problemMessage(
     case "missingContact":
       return t(key, { contact: problem.params.contact });
     case "emailNamed":
+    case "contactAmbiguous":
       return t(key);
     case "required":
       return t(key, { field });
