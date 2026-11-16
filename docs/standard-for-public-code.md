@@ -53,7 +53,8 @@ first version, 1.0.0, is stable ([releasing.md](releasing.md)).
 Since 2026-10-13, `main` has released 26 versions, 1.0.0 to 3.11.0,
 and 3.0.0 is the first that breaks something (#119). Since #151 the
 release job holds its key only while semantic-release runs, and every
-action is pinned to a commit. CodeQL's five alerts on `main` were fixed
+action is pinned to a commit. (Correction: every step of that job could
+read the key, as [releasing.md](releasing.md#the-deploy-key) now says.) CodeQL's five alerts on `main` were fixed
 in pull requests (#96, #99 to #102), and one a pull request's own scan
 raised in that pull request (#158). The criteria below cover the rest:
 the merge queue, the `release` environment, the commit and

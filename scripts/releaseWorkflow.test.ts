@@ -14,9 +14,12 @@ import { describe, expect, it } from "vitest";
  * is deployed (docs/deployment.md#the-build-ci-tested): ci.yml's site
  * job and deploy.yml's build job. And the deploy ships CI's site only
  * once its files match the site job's attestation, which no other job
- * of a run can make. ci.yml's check job and the release job check the
- * registry's signatures of what they install, the release job before
- * Chromium and the key (docs/testing.md#the-workflows). A push run
+ * of a run can make. ci.yml's check job and the release workflow's draw
+ * and release jobs check the registry's signatures of what they install,
+ * the draw job before Chromium (docs/testing.md#the-workflows). The
+ * release job, every step of which can read the deploy key, runs no
+ * browser and no apt: the draw job, which holds nothing, draws the
+ * docs' diagrams for it (docs/releasing.md#the-deploy-key). A push run
  * releases only while the merge queue is empty, which a job that holds
  * nothing asks (docs/releasing.md#what-a-release-does).
  */
@@ -44,8 +47,8 @@ const workflow = jobs(read(".github/workflows/release.yml"));
 const release = [...workflow.values()].flatMap((job) => steps(job, 6));
 
 describe("release.yml", () => {
-  it("has the queue, release and docs jobs", () => {
-    expect([...workflow.keys()]).toEqual(["queue", "release", "docs"]);
+  it("has the queue, draw, release and docs jobs", () => {
+    expect([...workflow.keys()]).toEqual(["queue", "draw", "release", "docs"]);
   });
 
   // The queue job runs on workflow_run, beside the job that holds the
@@ -61,12 +64,17 @@ describe("release.yml", () => {
   // A run by hand releases main's tip whatever the queue holds; a push
   // run, only once the queue job found it empty.
   it("releases after a push run only when the merge queue is empty", () => {
+    for (const name of ["draw", "release"]) {
+      const job = workflow.get(name) ?? "";
+      expect(job).toContain(
+        "needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))",
+      );
+    }
+    expect(workflow.get("draw")).toMatch(/^ {4}needs: queue$/m);
+    expect(workflow.get("draw")).toMatch(/^ {6}!cancelled\(\) && \($/m);
     const job = workflow.get("release") ?? "";
-    expect(job).toMatch(/^ {4}needs: queue$/m);
-    expect(job).toMatch(/^ {6}!cancelled\(\) && \($/m);
-    expect(job).toContain(
-      "needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))",
-    );
+    expect(job).toMatch(/^ {4}needs: \[queue, draw\]$/m);
+    expect(job).toMatch(/^ {6}!cancelled\(\) && needs\.draw\.result == 'success' && \($/m);
   });
 
   it("uses no cache action", () => {
@@ -75,15 +83,15 @@ describe("release.yml", () => {
 
   it("sets up Node without npm's cache", () => {
     const setups = release.filter((step) => step.includes("uses: actions/setup-node@"));
-    expect(setups).toHaveLength(3);
+    expect(setups).toHaveLength(4);
     for (const step of setups) {
       expect(step).not.toMatch(/^\s+cache:/m);
       expect(step).toMatch(/^\s+package-manager-cache: false$/m);
     }
   });
 
-  it("installs Chromium and its system libraries without the cache in the release job", () => {
-    const local = steps(workflow.get("release") ?? "", 6).filter((step) =>
+  it("installs Chromium and its system libraries without the cache in the draw job", () => {
+    const local = steps(workflow.get("draw") ?? "", 6).filter((step) =>
       /uses: \.\/\.github\/actions\//.test(step),
     );
     expect(local.map((step) => step.match(/uses: (\S+)/)?.[1])).toEqual([
@@ -110,26 +118,57 @@ describe("release.yml", () => {
     expect(docs[shell + 1]).toBe(installs[0]);
   });
 
-  // The diagrams are drawn, and the browser removed, before the key is
-  // written: the archive semantic-release makes draws from their cache.
-  it("runs no browser while the deploy key is on disk", () => {
-    const job = steps(workflow.get("release") ?? "", 6);
+  // GitHub hands a job its environment's secrets when it starts, so any
+  // step of the release job could read the key: the diagrams are drawn
+  // in a job that holds nothing, and the release job runs no browser.
+  it("draws the diagrams in a job that holds nothing, and uploads them", () => {
+    const draw = workflow.get("draw") ?? "";
+    expect(draw).toMatch(/^ {4}permissions:\n {6}contents: read\n {4}steps:$/m);
+    expect(draw).not.toMatch(/secrets\.|environment:|github\.token|GH_TOKEN/);
+    const job = steps(draw, 6);
     const at = (text: string) => job.findIndex((step) => step.includes(text));
-    const installed = at("uses: ./.github/actions/chromium");
-    const drawn = at("run: npm run docs:archive -- --draw");
-    const removed = at("name: No browser beside the key");
+    expect(job[at("uses: actions/checkout@")]).toMatch(/^ {10}persist-credentials: false$/m);
+    const drawn = at("run: npm run docs:archive -- --draw\n");
+    const uploaded = at("uses: actions/upload-artifact@");
+    expect(drawn).toBeGreaterThan(at("uses: ./.github/actions/chromium"));
+    expect(uploaded).toBe(drawn + 1);
+    expect(job[uploaded]).toMatch(/^ {10}name: docs-drawings$/m);
+    expect(job[uploaded]).toMatch(
+      /^ {10}path: node_modules\/\.cache\/solid-memo-docs-diagrams\/$/m,
+    );
+  });
+
+  it("runs no browser and no apt in the job that holds the deploy key", () => {
+    const release = workflow.get("release") ?? "";
+    expect(release).toMatch(/^ {4}environment: release$/m);
+    const code = release
+      .split("\n")
+      .filter((line) => !/^\s*#/.test(line))
+      .join("\n");
+    expect(code).not.toMatch(
+      /\.\/\.github\/actions\/|playwright|\bapt(-get)?\b|chromium|--draw\b/i,
+    );
+    const job = steps(release, 6);
+    const at = (text: string) => job.findIndex((step) => step.includes(text));
+    // The drawings of this run alone, which only the draw job uploads,
+    // checked before semantic-release, whose archive draws nothing.
+    const downloaded = at("uses: actions/download-artifact@");
+    expect(job[downloaded]).toMatch(/^ {10}name: docs-drawings$/m);
+    expect(job[downloaded]).toMatch(
+      /^ {10}path: node_modules\/\.cache\/solid-memo-docs-diagrams$/m,
+    );
+    expect(job[downloaded]).not.toMatch(/run-id|github-token|repository:/);
+    const checked = at("name: The drawings are all there");
+    expect(checked).toBe(downloaded + 1);
+    expect(job[checked]).toMatch(/^ {8}run: npm run docs:archive -- --drawn$/m);
     const released = at("name: npx semantic-release");
-    expect(installed).toBeGreaterThan(-1);
-    expect(drawn).toBe(installed + 1);
-    expect(removed).toBe(drawn + 1);
-    expect(released).toBe(removed + 1);
-    expect(job[removed]).toMatch(/^ {8}run: rm -rf "\$HOME\/\.cache\/ms-playwright"$/m);
+    expect(released).toBe(checked + 1);
     const keyed = job.filter((step) => step.includes("secrets.SEMANTIC_RELEASE_KEY"));
     expect(keyed.map((step) => job.indexOf(step))).toEqual([
       at("name: The deploy key is set"),
       released,
     ]);
-    expect(job[released]).not.toMatch(/playwright|docs:archive/);
+    expect(job[released]).not.toMatch(/docs:archive/);
   });
 });
 
@@ -305,7 +344,15 @@ describe("npm audit signatures", () => {
     expect(check[installed + 1]).toMatch(audit);
   });
 
-  it("runs right after the install in the release job, before Chromium and semantic-release", () => {
+  it("runs right after the install in the draw job, before Chromium", () => {
+    const job = steps(workflow.get("draw") ?? "", 6);
+    const installed = at(job, install);
+    expect(installed).toBeGreaterThan(-1);
+    expect(job[installed + 1]).toMatch(audit);
+    expect(at(job, "uses: ./.github/actions/chromium")).toBe(installed + 2);
+  });
+
+  it("runs right after the install in the release job, before semantic-release", () => {
     const job = steps(workflow.get("release") ?? "", 6);
     const installed = at(job, install);
     expect(installed).toBeGreaterThan(-1);
@@ -313,8 +360,7 @@ describe("npm audit signatures", () => {
     expect(audited).toMatch(audit);
     expect(audited).toMatch(/^if: steps\.tip\.outputs\.release == 'true'$/m);
     expect(audited).not.toContain("secrets.");
-    expect(at(job, "uses: ./.github/actions/chromium")).toBe(installed + 2);
-    expect(at(job, "name: npx semantic-release")).toBeGreaterThan(installed + 2);
+    expect(at(job, "name: npx semantic-release")).toBeGreaterThan(installed + 1);
   });
 });
 

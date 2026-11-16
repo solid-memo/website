@@ -58,20 +58,28 @@ const fakeDraw: Draw = async (diagrams) =>
     ]),
   );
 
-/** The repository's own docs, drawn by `draw`, packed under `root`; what is logged. */
+/**
+ * The repository's own docs, drawn by `draw`, packed under `root`; what
+ * is logged, and whether each draw could start a browser.
+ */
 function io(
   draw: Draw = fakeDraw,
   docs: DocsIo = repositoryIo(),
-): ArchiveIo & { logged: string[] } {
+): ArchiveIo & { logged: string[]; browsers: boolean[] } {
   const logged: string[] = [];
+  const browsers: boolean[] = [];
   return {
     ...defaultIo(root),
     docs,
     repoUrl: () => REPO,
     inputs: async () => inputs,
-    draw: () => draw,
+    draw: (_, browser) => {
+      browsers.push(browser);
+      return draw;
+    },
     log: (message) => void logged.push(message),
     logged,
+    browsers,
   };
 }
 
@@ -82,16 +90,24 @@ describe("docsArchive", () => {
     expect(archivePath("2.2.0")).toBe("release-assets/docs-2.2.0.tar.gz");
   });
 
-  it.each([[[]], [["v2.2.0"]], [["2.2"]], [["2.2.0", "2.3.0"]], [["--draw", "2.2.0"]]])(
-    "asks for one version, MAJOR.MINOR.PATCH (%j)",
-    async (args) => {
-      const archive = io();
-      expect(await main(["node", ...args], archive)).toBe(2);
-      expect(archive.logged).toEqual([
-        "Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> | --draw",
-      ]);
-    },
-  );
+  it.each([
+    [[]],
+    [["v2.2.0"]],
+    [["2.2"]],
+    [["2.2.0", "2.3.0"]],
+    [["--draw", "2.2.0"]],
+    [["--drawn", "2.2.0"]],
+    [["2.2.0", "--draw"]],
+    [["2.2.0", "--drawn", "--drawn"]],
+    [["v2.2.0", "--drawn"]],
+    [["--draw", "--drawn"]],
+  ])("asks for one version, MAJOR.MINOR.PATCH (%j)", async (args) => {
+    const archive = io();
+    expect(await main(["node", ...args], archive)).toBe(2);
+    expect(archive.logged).toEqual([
+      "Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> [--drawn] | --draw | --drawn",
+    ]);
+  });
 
   it("packs the docs as the release carries them, under docs/, with every drawing and the font's license", async () => {
     const archive = { ...io(), origin: () => "https://memo.example" };
@@ -128,6 +144,51 @@ describe("docsArchive", () => {
     expect(archive.logged).toEqual([
       `release-assets/docs-2.2.0.tar.gz: the docs of 2.2.0, ${entries.length} files, ${svgs.length} drawings.`,
     ]);
+  });
+
+  it("with --drawn after the version, packs the docs with drawings from the cache alone", async () => {
+    const archive = io();
+    expect(await main(["node", "2.2.0", "--drawn"], archive)).toBe(0);
+    expect(archive.browsers).toEqual([false]);
+    expect(existsSync(join(root, archivePath("2.2.0")))).toBe(true);
+  });
+
+  it("starts a browser only when asked to draw", async () => {
+    const archive = io();
+    await main(["node", "2.2.0"], archive);
+    await main(["node", "--draw"], archive);
+    expect(archive.browsers).toEqual([true, true]);
+  });
+
+  it("with --drawn alone, checks the drawings in the cache, and writes no archive", async () => {
+    const archive = io();
+    expect(await main(["node", "--drawn"], archive)).toBe(0);
+    expect(archive.browsers).toEqual([false]);
+    expect(existsSync(join(root, "release-assets"))).toBe(false);
+    expect(archive.logged).toEqual([
+      expect.stringMatching(
+        /^The docs' \d+ drawings are all in the drawings' cache, and pass the checks\.$/,
+      ),
+    ]);
+  });
+
+  it("with --drawn alone, fails on a drawing that is not safe to serve", async () => {
+    const archive = io(
+      async (diagrams) =>
+        new Map(
+          diagrams.map((diagram) => [
+            diagram.hash,
+            {
+              light: '<svg viewBox="0 0 1 1"><script/></svg>',
+              dark: drawing(diagram.title, "dark"),
+            },
+          ]),
+        ),
+    );
+    expect(await main(["node", "--drawn"], archive)).toBe(1);
+    expect(archive.logged[0]).toMatch(
+      /^The docs' diagrams are not drawn:\n {2}docs\/.*\.svg: has a <script> element/,
+    );
   });
 
   it("writes nothing when the diagrams were not drawn", async () => {
@@ -216,7 +277,34 @@ describe("docsArchive", () => {
       ),
       inputs,
     );
-    await expect(archive.draw(inputs)(diagrams)).rejects.toThrow("needs Chromium");
+    await expect(archive.draw(inputs, true)(diagrams)).rejects.toThrow("needs Chromium");
+  });
+
+  it("without a browser, takes the drawings from the cache alone, and never launches one", async () => {
+    const launch = vi.fn(async () => {
+      throw new Error("not to be launched");
+    });
+    const archive = defaultIo(root, { cacheDir: join(root, "cache"), launch });
+    const diagrams = diagramsOf(
+      "docs/page.md",
+      ["```mermaid", "flowchart LR", "  accTitle: T", "  accDescr: D.", "  A --> B", "```"].join(
+        "\n",
+      ),
+      inputs,
+    );
+    await expect(archive.draw(inputs, false)(diagrams)).rejects.toThrow(
+      "2 of the docs' drawings are not in the drawings' cache, and none is drawn: no browser is started.",
+    );
+    mkdirSync(join(root, "cache"));
+    for (const theme of ["light", "dark"] as const) {
+      writeFileSync(join(root, "cache", `${diagrams[0]!.keys[theme]}.svg`), drawing("T", theme));
+    }
+    const drawn = await archive.draw(inputs, false)(diagrams);
+    expect(drawn?.get(diagrams[0]!.hash)).toEqual({
+      light: drawing("T", "light"),
+      dark: drawing("T", "dark"),
+    });
+    expect(launch).not.toHaveBeenCalled();
   });
 
   it("logs to the console, and is left alone by a run without a version", async () => {
@@ -226,7 +314,9 @@ describe("docsArchive", () => {
     const process = { argv: ["node"], exitCode: undefined as number | string | null | undefined };
     await run(process);
     expect(process.exitCode).toBe(2);
-    expect(log).toHaveBeenCalledWith("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> | --draw");
+    expect(log).toHaveBeenCalledWith(
+      "Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> [--drawn] | --draw | --drawn",
+    );
     log.mockRestore();
   });
 });

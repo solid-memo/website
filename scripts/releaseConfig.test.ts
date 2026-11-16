@@ -68,13 +68,14 @@ describe("release.config.mjs", () => {
       }
     ).scripts;
     // Each step only when the one before it passed, and each given the
-    // version.
+    // version; the archive with --drawn, as the job that runs it holds
+    // the deploy key and starts no browser (docs/releasing.md#the-deploy-key).
     const steps = command.split(" && ").map((step) => {
-      const match = /^npm run (\S+) -- \$\{nextRelease\.version\}$/.exec(step);
+      const match = /^npm run (\S+) -- \$\{nextRelease\.version\}( --drawn)?$/.exec(step);
       expect(match, step).not.toBeNull();
-      return match![1]!;
+      return `${match![1]!}${match![2] ?? ""}`;
     });
-    expect(steps).toEqual(["release:version", "docs:archive"]);
+    expect(steps).toEqual(["release:version", "docs:archive --drawn"]);
     expect(scripts["release:version"]).toContain("scripts/releaseVersion.ts");
     expect(scripts["docs:archive"]).toContain("scripts/docsArchive.ts");
   });

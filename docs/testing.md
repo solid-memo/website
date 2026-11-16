@@ -629,11 +629,11 @@ over days). The release workflow's jobs restore nothing from the cache
 and always ask the mirror
 ([releasing.md](releasing.md#the-deploy-key)), as do CI's `site` job
 and the deploy's build, which make the site that's deployed
-([deployment.md](deployment.md#the-build-ci-tested)). The release
-job, the `site` job and that build, which use the Chromium action,
-leave out the system's fonts, the only packages the runner image
-lacks, so they have nothing to download: the diagrams carry their own
-font ([markdown.md](markdown.md#the-diagrams-font)).
+([deployment.md](deployment.md#the-build-ci-tested)). The `site` job,
+that build and the release workflow's `draw` job use the Chromium
+action. They leave out the system's fonts, the only packages the
+runner image lacks, so they have nothing to download: the diagrams
+carry their own font ([markdown.md](markdown.md#the-diagrams-font)).
 
 The journeys run the same way every time:
 
@@ -1050,8 +1050,9 @@ uv pip compile --generate-hashes --universal --python-version=3.9 scripts/requir
 uv pip compile --generate-hashes --universal --python-version=3.11 scripts/requirements-lint.in --output-file=scripts/requirements-lint.txt
 ```
 
-CI's `check` job and the release job run `npm audit signatures` right
-after `npm ci --ignore-scripts`, and the Pending updates workflow runs
+CI's `check` job and the release workflow's `draw` and `release` jobs
+run `npm audit signatures` right after `npm ci --ignore-scripts`, and
+the Pending updates workflow runs
 it on Renovate's own install in `scripts/renovate/`. For each installed
 version from a registry, it fetches the registry's record of that
 version. It checks the registry's signature over its name, version and

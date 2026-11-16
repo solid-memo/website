@@ -159,14 +159,16 @@ export default {
     // workspace is private, and nothing is published to npm.
     ["@semantic-release/npm", { npmPublish: false }],
     // publiccode.yml's and CITATION.cff's version and date; then the
-    // version's docs, drawn in Chromium, as an archive the GitHub release
-    // carries. A failure here stops the release before anything is
-    // pushed.
+    // version's docs, as an archive the GitHub release carries, with the
+    // drawings release.yml's draw job made in Chromium: --drawn takes
+    // them from the drawings' cache and starts no browser, as the job
+    // that runs this holds the deploy key. A failure here stops the
+    // release before anything is pushed.
     [
       "@semantic-release/exec",
       {
         prepareCmd:
-          "npm run release:version -- ${nextRelease.version} && npm run docs:archive -- ${nextRelease.version}",
+          "npm run release:version -- ${nextRelease.version} && npm run docs:archive -- ${nextRelease.version} --drawn",
       },
     ],
     [

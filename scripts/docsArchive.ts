@@ -18,9 +18,14 @@
  *
  * `npm run docs:archive -- --draw` draws and checks the diagrams as an
  * archive would hold them, keeping them in the drawings' cache, and
- * writes no archive: the release job draws them so before it writes the
- * deploy key, and its archive then needs no browser
- * (docs/releasing.md#the-deploy-key).
+ * writes no archive: release.yml's draw job draws them so, with no
+ * secret, for the release job, which holds the deploy key and runs no
+ * browser (docs/releasing.md#the-deploy-key).
+ *
+ * With `--drawn`, alone or after the version, nothing is drawn and no
+ * browser is started: every drawing must be in the drawings' cache, and
+ * pass the checks, or it fails. The release job checks the drawings it
+ * is given so, and its archive takes them from the cache so.
  */
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
@@ -58,8 +63,8 @@ export type ArchiveIo = {
   origin(): string | null;
   /** What the drawings depend on besides their source. */
   inputs(): Promise<DrawInputs>;
-  /** Draws the diagrams, failing when they cannot be. */
-  draw(inputs: DrawInputs): Draw;
+  /** Draws the diagrams, failing when they cannot be; with `browser` false, takes them all from the cache, or fails. */
+  draw(inputs: DrawInputs, browser: boolean): Draw;
   /** Packs the files, by their path below `docs/`, into the archive at `path` from the repository's root. */
   pack(files: ReadonlyMap<string, string>, path: string): Promise<void>;
   log(message: string): void;
@@ -80,9 +85,15 @@ export function defaultIo(
     repoUrl: () => siteConfig(loadEnv("production", join(root, "apps/web"), "VITE_")).repoUrl,
     origin: () => siteOrigin(join(root, "CNAME")),
     inputs: drawInputs,
-    // `required`, whatever DOCS_DIAGRAMS says: without Chromium, it fails.
-    draw: (inputs) => (diagrams) =>
-      drawDiagrams(diagrams, { inputs, cacheDir, mode: "required", launch }),
+    // `required`, whatever DOCS_DIAGRAMS says: without Chromium, it
+    // fails. Without a browser, `cached`: a drawing not in the cache fails.
+    draw: (inputs, browser) => (diagrams) =>
+      drawDiagrams(diagrams, {
+        inputs,
+        cacheDir,
+        mode: browser ? "required" : "cached",
+        launch,
+      }),
     async pack(files, path) {
       const staging = await mkdtemp(join(tmpdir(), "solid-memo-docs-archive-"));
       try {
@@ -127,21 +138,38 @@ export function archiveProblems(
   return problems;
 }
 
-/** Exit code: 0 when the archive is written, or with `--draw` when the diagrams are drawn. */
+/** What the arguments ask for, or null when they ask for nothing known. */
+function parse(
+  args: readonly string[],
+): { version: string; drawOnly: boolean; browser: boolean } | null {
+  // Drawing only, the version names no file and is shown in no page kept.
+  if (args.length === 1 && (args[0] === "--draw" || args[0] === "--drawn")) {
+    return { version: "0.0.0", drawOnly: true, browser: args[0] === "--draw" };
+  }
+  const browser = args.length === 1;
+  const version = args[0];
+  if (!browser && (args.length !== 2 || args[1] !== "--drawn")) return null;
+  if (version === undefined || !isReleaseVersion(version)) return null;
+  return { version, drawOnly: false, browser };
+}
+
+/**
+ * Exit code: 0 when the archive is written, or with `--draw` when the
+ * diagrams are drawn, or with `--drawn` alone when they are all in the
+ * cache and pass the checks.
+ */
 export async function main(argv: readonly string[], io: ArchiveIo): Promise<number> {
   // `node -e` puts the node binary first and drops the `--`.
-  const args = argv.slice(1);
-  const drawOnly = args[0] === "--draw";
-  // Drawing only, the version names no file and is shown in no page kept.
-  const version = drawOnly ? "0.0.0" : args[0];
-  if (args.length !== 1 || version === undefined || !isReleaseVersion(version)) {
-    io.log("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> | --draw");
+  const asked = parse(argv.slice(1));
+  if (asked === null) {
+    io.log("Usage: npm run docs:archive -- <MAJOR.MINOR.PATCH> [--drawn] | --draw | --drawn");
     return 2;
   }
+  const { version, drawOnly, browser } = asked;
   const path = archivePath(version);
   try {
     const inputs = await io.inputs();
-    const draw = io.draw(inputs);
+    const draw = io.draw(inputs, browser);
     let drawn = true;
     const files = await renderDocsSite({
       io: io.docs,
@@ -165,7 +193,11 @@ export async function main(argv: readonly string[], io: ArchiveIo): Promise<numb
     }
     const drawings = [...files.keys()].filter((name) => name.endsWith(".svg")).length;
     if (drawOnly) {
-      io.log(`The docs' ${drawings} drawings are drawn, and kept for the archive.`);
+      io.log(
+        browser
+          ? `The docs' ${drawings} drawings are drawn, and kept for the archive.`
+          : `The docs' ${drawings} drawings are all in the drawings' cache, and pass the checks.`,
+      );
       return 0;
     }
     await io.pack(files, path);
