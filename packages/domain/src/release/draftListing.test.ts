@@ -4,6 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { MAX_DECK_METADATA } from "../deck";
+import { MAX_LISTED_SOURCES } from "../library";
 import { growth } from "../testing/growth";
 import { namesOf } from "../testing/longAgents";
 import {
@@ -179,6 +181,36 @@ describe("draftLibraryDeck", () => {
       },
     });
     expect(listed.sources).toEqual(draftLibraryDeck(draft).sources);
+  });
+
+  it("keeps no more authors, sources or authors of a source than learners' listing does (GHSA-46q4-pmpc-mj5j)", () => {
+    const draft = withSources(5_000);
+    const source = "https://many.example/0";
+    const names = Array.from({ length: 5_000 }, (_, n) => `Author ${n}`);
+    const many: ReleaseDraft = {
+      ...draft,
+      root: { ...draft.root, creator: names },
+      triples: [
+        ...draft.triples,
+        ...names.map((value) => ({
+          subject: source,
+          predicate: `${DCTERMS}creator`,
+          object: { kind: "literal" as const, value, language: "", datatype: XSD_STRING },
+        })),
+      ],
+    };
+    const listed = draftLibraryDeck(many);
+    expect(listed.authors).toEqual(names.slice(0, MAX_DECK_METADATA));
+    expect(listed.sources).toHaveLength(MAX_LISTED_SOURCES);
+    expect(listed.sourceCount).toBe(draft.root.wasDerivedFrom.length);
+    const first = listed.sources.find((one) => one.url === source)!;
+    expect(first.authors).toEqual(names.slice(0, MAX_DECK_METADATA));
+    expect(listed.authorCount).toBe(5_000);
+    expect(first.authorCount).toBe(5_000);
+    // The release whole has no counts of sources or authors: it has no sources, and keeps its first authors.
+    const content = draftLibraryContent(many, listed);
+    expect(content).not.toHaveProperty("sourceCount");
+    expect(content).not.toHaveProperty("authorCount");
   });
 
   it("lists in time that grows with how many sources the draft has", () => {

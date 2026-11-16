@@ -725,6 +725,12 @@
       "stopped": "Bilder von {host} sind wieder ausgeblendet."
     }
   },
+  "authorNames": {
+    "more": {
+      "one": "und {count} weitere",
+      "other": "und {count} weitere"
+    }
+  },
   "deckProvenance": {
     "by": "Von {authors}",
     "updated": "Aktualisiert am {date}"
@@ -944,6 +950,10 @@
     "sourceCount": {
       "one": "{count} Quelle",
       "other": "{count} Quellen"
+    },
+    "sourcesMore": {
+      "one": "Und {count} weitere Quelle, die hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Quellen, die hier nicht aufgeführt sind."
     },
     "import": "Stapel importieren",
     "importing": "Wird importiert…",

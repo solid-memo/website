@@ -725,6 +725,12 @@
       "stopped": "Pictures from {host} are hidden again."
     }
   },
+  "authorNames": {
+    "more": {
+      "one": "and {count} more",
+      "other": "and {count} more"
+    }
+  },
   "deckProvenance": {
     "by": "By {authors}",
     "updated": "Updated {date}"
@@ -944,6 +950,10 @@
     "sourceCount": {
       "one": "{count} source",
       "other": "{count} sources"
+    },
+    "sourcesMore": {
+      "one": "And {count} more source, not listed here.",
+      "other": "And {count} more sources, not listed here."
     },
     "import": "Import this deck",
     "importing": "Importing…",

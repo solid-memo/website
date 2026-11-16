@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useMemo } from "preact/hooks";
 import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -15,12 +16,13 @@ const nothing = () => undefined;
  * A draft as the library lists the release it will be (docs/studio.md,
  * The listing preview): its row in the library's list (LibraryDeckRow)
  * and its own page (LibraryDeckScreen), as Solid Memo shows them, built
- * from the draft alone (draftLibraryDeck). Both are inert: a picture of
- * what learners will see, nothing in it to follow or press.
+ * from the draft alone (draftLibraryDeck), made once per draft. Both are
+ * inert: a picture of what learners will see, nothing in it to follow or
+ * press.
  */
 export function ListingPreviewScreen({ draft }: { draft: ReleaseDraft }) {
   const { t } = useI18n();
-  const deck = draftLibraryDeck(draft);
+  const deck = useMemo(() => draftLibraryDeck(draft), [draft]);
   return (
     <section>
       <header>

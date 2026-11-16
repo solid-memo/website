@@ -693,6 +693,11 @@
       "stopped": "{host}의 그림이 다시 숨겨졌습니다."
     }
   },
+  "authorNames": {
+    "more": {
+      "other": "외 {count}명"
+    }
+  },
   "deckProvenance": {
     "by": "저자: {authors}",
     "updated": "{date} 업데이트"
@@ -894,6 +899,9 @@
     },
     "sourceCount": {
       "other": "출처 {count}개"
+    },
+    "sourcesMore": {
+      "other": "이 밖에 출처 {count}개가 더 있어요. 여기에는 나오지 않아요."
     },
     "import": "이 덱 가져오기",
     "importing": "가져오는 중…",

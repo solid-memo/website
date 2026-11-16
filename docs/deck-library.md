@@ -911,7 +911,17 @@ flowchart LR
   reader's language, the release (version, date, notes), authors,
   license, dates and sources. More than five sources are folded into a
   disclosure, closed, that says how many there are, so a long list
-  doesn't push the buttons below it far down. It has an import button,
+  doesn't push the buttons below it far down. A release may state any
+  number of sources, and no shape bounds them, so a listing keeps the
+  first `MAX_LISTED_SOURCES` (100), each with its first
+  `MAX_DECK_METADATA` (100) authors, and as many of the release's own
+  authors. It keeps how many sources the release states, and how
+  many authors it and each source name, when that is more than it
+  keeps (`boundedSources` and `withBoundedListing` in
+  `domain/library.ts`). The page
+  draws at most `LIST_LIMIT` (50) sources, and 50 authors of the deck
+  or of a source, then says how many more the release states
+  ([`bounded`](../packages/ui/src/ui/bounded.ts)). It has an import button,
   "Browse cards" (a read-only, paged list fetched from the release
   document) and "Copy link", which copies a link that names no instance
   ([routing.md](routing.md#a-link-to-a-library-deck)).

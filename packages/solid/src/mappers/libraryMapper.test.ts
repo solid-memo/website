@@ -16,6 +16,8 @@ import {
 import { getSolidDataset, parseQuads } from "../client/resources";
 import { datasetFrom } from "../testing/datasets";
 import { answersCsv } from "@solid-memo/domain/answerCsv";
+import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
+import { MAX_LISTED_SOURCES } from "@solid-memo/domain/library";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { longNames, namesOf } from "@solid-memo/domain/testing/longAgents";
 import { toAnswer, toAnswerThing } from "./answerMapper";
@@ -25,6 +27,7 @@ import {
   toLibraryDeckContent,
   toLibraryDecks,
   toLibraryIndexView,
+  toStandaloneLibraryDeck,
 } from "./libraryMapper";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
@@ -92,6 +95,18 @@ const INDEX_TURTLE = `
    dcat:hasVersion <u/v1.ttl> ; dcat:hasCurrentVersion <u/v1.ttl> .
 `;
 
+/** Statements that name `count` more sources and authors of `release`, and `count` more authors of `source`. */
+function manySources(release: string, source: string, count: number): string {
+  const urls = Array.from({ length: count }, (_, n) => `<https://many.example/${n}>`);
+  const agents = Array.from({ length: count }, (_, n) => `<https://many.example/agent/${n}>`);
+  const authors = Array.from({ length: count }, (_, n) => `"Author ${n}"`);
+  return `
+<${release}> <http://www.w3.org/ns/prov#wasDerivedFrom> ${urls.join(", ")} .
+<${release}> <http://purl.org/dc/terms/creator> ${agents.join(", ")} .
+<${source}> <http://purl.org/dc/terms/creator> ${authors.join(", ")} .
+`;
+}
+
 describe("toLibraryDecks", () => {
   it("lists each series of the catalog by its current release, with every release, oldest first", async () => {
     const index = await datasetFromIndex(INDEX_TURTLE);
@@ -139,6 +154,28 @@ describe("toLibraryDecks", () => {
         ],
       },
     ]);
+  });
+
+  it("lists no more sources, nor authors of a source, than a listing keeps, and says how many sources (GHSA-46q4-pmpc-mj5j)", async () => {
+    const index = await datasetFromIndex(
+      `${INDEX_TURTLE}${manySources("https://solid-memo.com/decks/capitals/v2.ttl", WIKIPEDIA, 2_000)}`,
+    );
+    const [deck] = toLibraryDecks(index);
+    expect(deck!.sources).toHaveLength(MAX_LISTED_SOURCES);
+    expect(deck!.sourceCount).toBe(2_003);
+    expect(deck!.sources[0]!.authors).toHaveLength(MAX_DECK_METADATA);
+    expect(deck!.sources[0]!.authors[0]).toBe("Wikipedia contributors");
+    expect(deck!.sources[0]!.authorCount).toBe(2_001);
+    expect(deck!.sources[1]).not.toHaveProperty("authorCount");
+    // The release's own authors are kept as a release added by link keeps them.
+    expect(deck!.authors).toHaveLength(MAX_DECK_METADATA);
+    expect(deck!.authorCount).toBe(2_002);
+  });
+
+  it("says no count of authors of a release, or of a source, that names no more than it keeps", async () => {
+    const [deck] = toLibraryDecks(await datasetFromIndex(INDEX_TURTLE));
+    expect(deck).not.toHaveProperty("authorCount");
+    expect(deck!.sources.filter((source) => "authorCount" in source)).toEqual([]);
   });
 
   it("reads a library deck 5 release's keywords per language, as its series states them", async () => {
@@ -944,5 +981,33 @@ describe("a release's card id in the answers CSV", () => {
     const row = answersCsv([answer!]).split("\r\n")[1]!;
     expect(row).toContain(`#c${encoded}${formula}${encoded},`);
     expect(row).not.toContain(separator);
+  });
+});
+
+describe("toStandaloneLibraryDeck", () => {
+  const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
+  const fixture = () =>
+    readFile(`${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`, "utf8");
+
+  it("lists every source and author of a release within the bound, and says no count", async () => {
+    const deck = toStandaloneLibraryDeck(url, await datasetOf(await fixture(), url));
+    expect(deck).not.toHaveProperty("sourceCount");
+    expect(deck).not.toHaveProperty("authorCount");
+  });
+
+  it("lists no more sources, nor authors of a source, than a listing keeps, and says how many sources (GHSA-46q4-pmpc-mj5j)", async () => {
+    const source = "https://many.example/0";
+    const turtle = `${await fixture()}${manySources(url, source, 5_000)}`;
+    const deck = toStandaloneLibraryDeck(url, await datasetOf(turtle, url));
+    const before = toStandaloneLibraryDeck(url, await datasetOf(await fixture(), url)).sources;
+    expect(deck.sources).toHaveLength(MAX_LISTED_SOURCES);
+    expect(deck.sourceCount).toBe(before.length + 5_000);
+    const first = deck.sources.find((one) => one.url === source)!;
+    expect(first.authors).toEqual(
+      Array.from({ length: MAX_DECK_METADATA }, (_, n) => `Author ${n}`),
+    );
+    expect(first.authorCount).toBe(5_000);
+    expect(deck.authors).toHaveLength(MAX_DECK_METADATA);
+    expect(deck.authorCount).toBe(5_001);
   });
 });

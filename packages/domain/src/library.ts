@@ -3,7 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { EU_LANGUAGES, TOPICS } from "@solid-memo/vocab/concepts.generated";
-import type { CardContent, Deck, DeckDirection } from "./deck";
+import {
+  boundedList,
+  MAX_DECK_METADATA,
+  withBoundedMetadata,
+  type CardContent,
+  type Deck,
+  type DeckDirection,
+} from "./deck";
 import { languageTagOf } from "./euLanguages";
 import { allKeywords, type LangTexts } from "./keywords";
 import type { LangText } from "./langText";
@@ -40,7 +47,10 @@ export interface LibraryDeck {
    * none when it states none, as a release published elsewhere may.
    */
   languages: string[];
+  /** Its authors: its first MAX_DECK_METADATA (withBoundedListing). */
   authors: string[];
+  /** How many authors the release names, when more than `authors` lists. */
+  authorCount?: number;
   license?: string;
   /** A sentence or two about the deck, in every language it states it in. */
   description?: LangText;
@@ -50,8 +60,10 @@ export interface LibraryDeck {
   createdAt?: string;
   /** When the deck was last changed (ISO 8601), when it says. */
   modifiedAt?: string;
-  /** Where its content came from, as the deck states. */
+  /** Where its content came from, as the deck states: its first MAX_LISTED_SOURCES (boundedSources). */
   sources: LibrarySource[];
+  /** How many sources the release states, when more than `sources` lists. */
+  sourceCount?: number;
   /**
    * Set when the current release is a course (also typed schema:Course,
    * see docs/courses.md): chapters of steps whose questions are its
@@ -80,8 +92,57 @@ export interface LibraryRelease {
 export interface LibrarySource {
   url: string;
   title?: string;
+  /** Its authors: its first MAX_DECK_METADATA (boundedSources). */
   authors: string[];
+  /** How many authors the release names of it, when more than `authors` lists. */
+  authorCount?: number;
   license?: string;
+}
+
+/**
+ * How many sources of a release a listing keeps. A release may state
+ * any number, and no shape bounds them; past the bound, the last are
+ * left out, and the listing says how many there are (boundedSources).
+ * It is well above what any deck needs.
+ */
+export const MAX_LISTED_SOURCES = MAX_DECK_METADATA;
+
+/**
+ * A release's sources as a listing keeps them: the first
+ * MAX_LISTED_SOURCES of `urls`, each as `describe` says, with its first
+ * authors as a deck keeps its own (boundedList), and how many it states
+ * when that is more.
+ */
+export function boundedSources(
+  urls: readonly string[],
+  describe: (url: string) => LibrarySource,
+): Pick<LibraryDeck, "sources" | "sourceCount"> {
+  const sources = urls.slice(0, MAX_LISTED_SOURCES).map((url) => {
+    const source = describe(url);
+    return { ...source, ...listedAuthors(boundedList(source.authors), source.authors.length) };
+  });
+  return urls.length > MAX_LISTED_SOURCES ? { sources, sourceCount: urls.length } : { sources };
+}
+
+/**
+ * The authors a listing keeps of `total`, and how many there are when
+ * that is more than it keeps, so a page can say how many it leaves out.
+ */
+export function listedAuthors(
+  authors: string[],
+  total: number,
+): { authors: string[]; authorCount?: number } {
+  return authors.length < total ? { authors, authorCount: total } : { authors };
+}
+
+/**
+ * A release as a listing keeps it: no more of its metadata than a deck
+ * keeps (withBoundedMetadata), and how many authors it names when that
+ * is more than it keeps (listedAuthors).
+ */
+export function withBoundedListing(deck: LibraryDeck): LibraryDeck {
+  const bounded = withBoundedMetadata(deck);
+  return { ...bounded, ...listedAuthors(bounded.authors, deck.authors.length) };
 }
 
 /** A library deck's full content: one release, fetched when it is imported. */

@@ -757,6 +757,13 @@
       "stopped": "Las imágenes de {host} vuelven a estar ocultas."
     }
   },
+  "authorNames": {
+    "more": {
+      "one": "y {count} más",
+      "many": "y {count} más",
+      "other": "y {count} más"
+    }
+  },
   "deckProvenance": {
     "by": "De {authors}",
     "updated": "Actualizado el {date}"
@@ -994,6 +1001,11 @@
       "one": "{count} fuente",
       "many": "{count} de fuentes",
       "other": "{count} fuentes"
+    },
+    "sourcesMore": {
+      "one": "Y {count} fuente más, que no aparece aquí.",
+      "many": "Y {count} de fuentes más, que no aparecen aquí.",
+      "other": "Y {count} fuentes más, que no aparecen aquí."
     },
     "import": "Importar este mazo",
     "importing": "Importando…",

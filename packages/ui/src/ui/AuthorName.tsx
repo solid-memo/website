@@ -4,7 +4,9 @@
 
 import { Fragment } from "preact";
 import { parseAuthor } from "@solid-memo/domain/author";
+import { bounded } from "./bounded";
 import { ExternalLink } from "./ExternalLink";
+import { useI18n } from "./i18n";
 
 /**
  * An author as a deck names them. "Name <email>" shows the name as a
@@ -19,16 +21,23 @@ export function AuthorName({ author }: { author: string }) {
   return <ExternalLink url={`mailto:${pathname}`}>{name}</ExternalLink>;
 }
 
-/** Several authors, comma-separated. */
-export function AuthorNames({ authors }: { authors: string[] }) {
+/**
+ * Several authors, comma-separated: the first LIST_LIMIT of them, then
+ * how many more there are of `count` in all (bounded), as a release may
+ * name any number and a listing keeps only its first (authorCount).
+ */
+export function AuthorNames({ authors, count }: { authors: string[]; count?: number }) {
+  const { t } = useI18n();
+  const { shown, more } = bounded(authors, count);
   return (
     <>
-      {authors.map((author, i) => (
+      {shown.map((author, i) => (
         <Fragment key={author}>
           {i > 0 && ", "}
           <AuthorName author={author} />
         </Fragment>
       ))}
+      {more > 0 && `${shown.length > 0 ? " " : ""}${t("authorNames.more", { count: more })}`}
     </>
   );
 }

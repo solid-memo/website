@@ -757,6 +757,13 @@
       "stopped": "Les images de {host} sont de nouveau masquées."
     }
   },
+  "authorNames": {
+    "more": {
+      "one": "et {count} autre",
+      "many": "et {count} de plus",
+      "other": "et {count} autres"
+    }
+  },
   "deckProvenance": {
     "by": "Par {authors}",
     "updated": "Mis à jour le {date}"
@@ -994,6 +1001,11 @@
       "one": "{count} source",
       "many": "{count} de sources",
       "other": "{count} sources"
+    },
+    "sourcesMore": {
+      "one": "Et {count} autre source, qui n’apparaît pas ici.",
+      "many": "Et {count} de sources de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres sources, qui n’apparaissent pas ici."
     },
     "import": "Importer ce paquet",
     "importing": "Importation…",

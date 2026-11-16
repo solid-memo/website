@@ -725,6 +725,12 @@
       "stopped": "Bilder från {host} är dolda igen."
     }
   },
+  "authorNames": {
+    "more": {
+      "one": "och {count} till",
+      "other": "och {count} till"
+    }
+  },
   "deckProvenance": {
     "by": "Av {authors}",
     "updated": "Uppdaterad {date}"
@@ -944,6 +950,10 @@
     "sourceCount": {
       "one": "{count} källa",
       "other": "{count} källor"
+    },
+    "sourcesMore": {
+      "one": "Och {count} källa till, som inte listas här.",
+      "other": "Och {count} källor till, som inte listas här."
     },
     "import": "Importera kortleken",
     "importing": "Importerar…",
