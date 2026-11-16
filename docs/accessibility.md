@@ -160,10 +160,10 @@ A planned gap links to its issue; an issue for another is welcome
 ## Report a barrier
 
 A learner who finds Solid Memo or the Studio hard or impossible to use
-with their setup can
-[open an issue](https://github.com/solid-memo/website/issues/new/choose)
-with the bug report form. The issue should say what they tried, what
-happened, and what they use: browser, screen reader or other assistive
-technology, and device. It's labeled `accessibility` and handled as a bug.
+with their setup can report it with the
+[accessibility barrier form](https://github.com/solid-memo/website/issues/new?template=accessibility.yml).
+It asks what they tried, what happened, and what they use: browser,
+screen reader or other assistive technology, and device. It labels the
+issue `accessibility`, and the barrier is handled as a bug.
 Discussions are open for a question or an idea
 ([CONTRIBUTING.md](../CONTRIBUTING.md)).
