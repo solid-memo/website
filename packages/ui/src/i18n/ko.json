@@ -1008,32 +1008,18 @@
   "migrationNotice": {
     "region": "형식 업데이트",
     "heading": "데이터 형식을 업데이트해야 해요.",
-    "stored": {
-      "other": "다음 데이터가 이전 형식으로 저장되어 있어요: {outdated}."
-    },
-    "writes": "이제 Solid Memo는 다음 형식으로 데이터를 저장해요: {formats}.",
-    "howItWorks": "업데이트는 각 문서를 있는 자리에서 하나씩 따로 최신 상태로 만들어요. 문서마다 한 번의 쓰기로 처리하고, Pod는 이 쓰기를 전부 반영하거나 전혀 반영하지 않아요. 모든 문서는 업데이트 여부와 관계없이 그동안 계속 읽을 수 있어요. 지금 업데이트할 수 없는 문서는 그대로 두고, 다시 시도할 수 있어요. 모든 주소는 그대로예요. 덱 이름, 카드 텍스트, 학습 방향, 복습 기록, 설정도 그대로 유지돼요.",
+    "body": "이제 Solid Memo는 데이터 일부를 새로운 방식으로 저장해요. 카드, 복습 기록, 설정은 그대로 유지되고, 업데이트를 시작하기 전에는 아무것도 바뀌지 않아요.",
+    "whatsNew": "새 형식에서 달라진 점",
     "newDescriptions": "설명이 없는 덱에는 직접 바꿀 수 있는 짧은 설명이 붙어요.",
     "listAnd": "{rest} 및 {last}",
-    "instanceRecord": "인스턴스 레코드",
-    "instanceCatalogue": "인스턴스의 카탈로그",
-    "yourPreferences": "설정",
-    "deckEntries": {
-      "other": "덱 항목 {count}개"
-    },
     "reviewStates": {
       "other": "복습 상태 {count}개"
     },
-    "inDecks": {
-      "other": "덱 {count}개"
-    },
-    "countIn": "{decks}에 있는 {what}",
-    "instanceFormat": "인스턴스 형식 {version}",
-    "catalogueFormat": "다른 앱이 DCAT 카탈로그로 읽는 인스턴스별 덱 카탈로그",
-    "preferencesFormat": "설정 형식 {version}(새로 기록하는 항목: {added})",
-    "deckFormat": "덱 형식 {version}(달라진 점: {added})",
-    "cardFormat": "카드 형식 {version}(달라진 점: {added})",
-    "reviewFormat": "복습 상태 형식 {version}(달라진 점: {added})",
+    "catalogueFormat": "이제 Solid Memo는 인스턴스마다 덱 카탈로그를 만들고, 다른 앱은 이를 DCAT 카탈로그로 읽어요.",
+    "preferencesFormat": "설정 형식에 새로 기록하는 항목: {added}.",
+    "deckFormat": "덱 형식에서 달라진 점: {added}.",
+    "cardFormat": "카드 형식에서 달라진 점: {added}.",
+    "reviewFormat": "복습 상태 형식에서 달라진 점: {added}.",
     "deckAdded": {
       "direction": "덱의 학습 방향 기록",
       "dcat": "DCAT·SKOS 표준으로 덱 정보 기술",

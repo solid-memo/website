@@ -2,11 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION } from "@solid-memo/domain/deck";
-import { INSTANCE_FORMAT_VERSION } from "@solid-memo/domain/instance";
 import type { MigrationPlan } from "@solid-memo/domain/migration";
-import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
-import { REVIEW_STATE_FORMAT_VERSION } from "@solid-memo/domain/review";
 import { ErrorMessage } from "./ErrorMessage";
 import { usePanelFocus } from "./panelFocus";
 import { useI18n, type I18n, type ErrorText, type MessageKey } from "./i18n";
@@ -20,37 +16,6 @@ function list(parts: string[], t: I18n["t"]): string {
         rest: parts.slice(0, -1).join(", "),
         last: parts[parts.length - 1],
       });
-}
-
-/**
- * What is outdated, as a subject: "2 deck entries, 255 cards in 3 decks
- * and your preferences". Never empty for a plan the notice shows.
- */
-export function describeOutdated(plan: MigrationPlan, t: I18n["t"]): string {
-  const parts: string[] = [];
-  if (plan.instanceOutdated) parts.push(t("migrationNotice.instanceRecord"));
-  if (plan.catalogMissing) parts.push(t("migrationNotice.instanceCatalogue"));
-  if (plan.preferencesOutdated) parts.push(t("migrationNotice.yourPreferences"));
-  if (plan.deckCount > 0) parts.push(t("migrationNotice.deckEntries", { count: plan.deckCount }));
-  if (plan.cardCount > 0) {
-    const decks = plan.decks.filter(({ cardCount }) => cardCount > 0).length;
-    parts.push(
-      t("migrationNotice.countIn", {
-        what: t("common.cardCount", { count: plan.cardCount }),
-        decks: t("migrationNotice.inDecks", { count: decks }),
-      }),
-    );
-  }
-  if (plan.reviewCount > 0) {
-    const decks = plan.decks.filter(({ reviewCount }) => reviewCount > 0).length;
-    parts.push(
-      t("migrationNotice.countIn", {
-        what: t("migrationNotice.reviewStates", { count: plan.reviewCount }),
-        decks: t("migrationNotice.inDecks", { count: decks }),
-      }),
-    );
-  }
-  return list(parts, t);
 }
 
 /**
@@ -93,50 +58,50 @@ function addedSince(steps: readonly (readonly MessageKey[])[], from: number, t: 
   );
 }
 
-/** What the formats the plan touches added since the oldest version it found of each. */
-export function describeFormats(plan: MigrationPlan, t: I18n["t"]): string {
+/** Deck format 3 gave every deck a description: a deck from before gets one. */
+const DESCRIBED_DECK_FORMAT = 3;
+
+/**
+ * What the formats the plan touches added since the oldest version it
+ * found of each, a sentence per format, without version numbers: "The
+ * card format now adds a label above a card's front …". The instance
+ * record's format added nothing to name, so it has none.
+ */
+export function describeFormats(plan: MigrationPlan, t: I18n["t"]): string[] {
   const { oldestFormat } = plan;
-  const parts: string[] = [];
-  if (plan.instanceOutdated)
-    parts.push(t("migrationNotice.instanceFormat", { version: INSTANCE_FORMAT_VERSION }));
-  if (plan.catalogMissing) parts.push(t("migrationNotice.catalogueFormat"));
+  const sentences: string[] = [];
+  if (plan.catalogMissing) sentences.push(t("migrationNotice.catalogueFormat"));
   if (plan.preferencesOutdated) {
-    parts.push(
+    sentences.push(
       t("migrationNotice.preferencesFormat", {
-        version: PREFERENCES_FORMAT_VERSION,
         added: addedSince(PREFERENCES_STEPS, oldestFormat.preferences, t),
       }),
     );
   }
   if (plan.deckCount > 0) {
-    parts.push(
-      t("migrationNotice.deckFormat", {
-        version: DECK_FORMAT_VERSION,
-        added: addedSince(DECK_STEPS, oldestFormat.deck, t),
-      }),
+    const deckFormat = t("migrationNotice.deckFormat", {
+      added: addedSince(DECK_STEPS, oldestFormat.deck, t),
+    });
+    sentences.push(
+      oldestFormat.deck < DESCRIBED_DECK_FORMAT
+        ? `${deckFormat} ${t("migrationNotice.newDescriptions")}`
+        : deckFormat,
     );
   }
   if (plan.cardCount > 0) {
-    parts.push(
-      t("migrationNotice.cardFormat", {
-        version: CARD_FORMAT_VERSION,
-        added: addedSince(CARD_STEPS, oldestFormat.card, t),
-      }),
+    sentences.push(
+      t("migrationNotice.cardFormat", { added: addedSince(CARD_STEPS, oldestFormat.card, t) }),
     );
   }
   if (plan.reviewCount > 0) {
-    parts.push(
+    sentences.push(
       t("migrationNotice.reviewFormat", {
-        version: REVIEW_STATE_FORMAT_VERSION,
         added: addedSince(REVIEW_STATE_STEPS, oldestFormat.reviewState, t),
       }),
     );
   }
-  return list(parts, t);
+  return sentences;
 }
-
-/** Deck format 3 gave every deck a description: a deck from before gets one. */
-const DESCRIBED_DECK_FORMAT = 3;
 
 /** The button label: "Update 3 decks and preferences". */
 function updateLabel(plan: MigrationPlan, t: I18n["t"]): string {
@@ -152,8 +117,10 @@ function updateLabel(plan: MigrationPlan, t: I18n["t"]): string {
 /**
  * Tells the user their data is stored in an older format, what an update
  * would touch, and lets them start it. Nothing happens until they do:
- * the app works on the old format meanwhile. Shown with the screen, it
- * leaves the focus be; back from the confirmation (`focus`), it takes it.
+ * the app works on the old format meanwhile. What the new formats add is
+ * folded away, and how the update keeps the data safe is said by the
+ * confirmation that follows. Shown with the screen, it leaves the focus
+ * be; back from the confirmation (`focus`), it takes it.
  */
 export function MigrationNotice({
   plan,
@@ -171,14 +138,7 @@ export function MigrationNotice({
 }) {
   const { t } = useI18n();
   const ref = usePanelFocus<HTMLDivElement>(focus);
-  const singular =
-    plan.deckCount +
-      plan.cardCount +
-      plan.reviewCount +
-      Number(plan.preferencesOutdated) +
-      Number(plan.instanceOutdated) +
-      Number(plan.catalogMissing) ===
-    1;
+  const formats = describeFormats(plan, t);
   return (
     <div
       ref={ref}
@@ -188,16 +148,7 @@ export function MigrationNotice({
       tabIndex={-1}
     >
       <p>
-        <strong>{t("migrationNotice.heading")}</strong>{" "}
-        {t("migrationNotice.stored", {
-          count: singular ? 1 : 2,
-          outdated: describeOutdated(plan, t),
-        })}{" "}
-        {t("migrationNotice.writes", { formats: describeFormats(plan, t) })}{" "}
-        {t("migrationNotice.howItWorks")}
-        {plan.oldestFormat.deck < DESCRIBED_DECK_FORMAT && (
-          <> {t("migrationNotice.newDescriptions")}</>
-        )}
+        <strong>{t("migrationNotice.heading")}</strong> {t("migrationNotice.body")}
       </p>
       <ul>
         {plan.instanceOutdated && <li>{t("migrationNotice.itemInstanceRecord")}</li>}
@@ -216,6 +167,14 @@ export function MigrationNotice({
           </li>
         ))}
       </ul>
+      {formats.length > 0 && (
+        <details>
+          <summary>{t("migrationNotice.whatsNew")}</summary>
+          {formats.map((sentence) => (
+            <p key={sentence}>{sentence}</p>
+          ))}
+        </details>
+      )}
       <button class="primary" onClick={onMigrate} disabled={busy}>
         {busy ? t("migrationNotice.updating") : updateLabel(plan, t)}
       </button>

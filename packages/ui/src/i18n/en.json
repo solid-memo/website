@@ -1067,36 +1067,19 @@
   "migrationNotice": {
     "region": "Format update",
     "heading": "Your data needs a format update.",
-    "stored": {
-      "one": "{outdated} is stored in an older format.",
-      "other": "{outdated} are stored in an older format."
-    },
-    "writes": "Solid Memo now writes {formats}.",
-    "howItWorks": "Updating brings each document up to date on its own, where it is, one after another, each in a single write that your Pod makes whole or not at all. Every document can be read throughout, updated or not; one that cannot be updated now is left as it is, and you can try again. Every address stays the same; deck names, card text, directions, your review history and your settings stay as they are.",
+    "body": "Solid Memo now stores some of your data in a newer way. Your cards, review history and settings stay as they are, and nothing changes until you start the update.",
+    "whatsNew": "What the new formats add",
     "newDescriptions": "A deck without a description gets a short one you can change.",
     "listAnd": "{rest} and {last}",
-    "instanceRecord": "the instance record",
-    "instanceCatalogue": "the instance's catalog",
-    "yourPreferences": "your preferences",
-    "deckEntries": {
-      "one": "{count} deck entry",
-      "other": "{count} deck entries"
-    },
     "reviewStates": {
       "one": "{count} review state",
       "other": "{count} review states"
     },
-    "inDecks": {
-      "one": "one deck",
-      "other": "{count} decks"
-    },
-    "countIn": "{what} in {decks}",
-    "instanceFormat": "instance format {version}",
-    "catalogueFormat": "a catalog of each instance's decks, which other apps read as a DCAT catalog",
-    "preferencesFormat": "preferences format {version}, which records {added}",
-    "deckFormat": "deck format {version}, which {added}",
-    "cardFormat": "card format {version}, which {added}",
-    "reviewFormat": "review-state format {version}, which {added}",
+    "catalogueFormat": "Solid Memo now keeps a catalog of each instance's decks, which other apps read as a DCAT catalog.",
+    "preferencesFormat": "The preferences format now records {added}.",
+    "deckFormat": "The deck format now {added}.",
+    "cardFormat": "The card format now {added}.",
+    "reviewFormat": "The review-state format now {added}.",
     "deckAdded": {
       "direction": "states which way a deck is studied",
       "dcat": "describes decks with the DCAT and SKOS standards",
