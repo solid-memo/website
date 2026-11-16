@@ -10,7 +10,9 @@ import { solidClientPlugin } from "./scripts/solidClient.ts";
  * The test setup every package shares (docs/testing.md): each package's
  * own code at 100% coverage, test helpers (`src/testing/`, `src/test/`)
  * excepted. `environment` is "node" unless the package runs in the
- * browser; `include` lists what counts, beyond `src/`.
+ * browser; `include` lists what counts, beyond `src/`. `workerGb` is
+ * about what each of its test workers takes at most, in GB, where it's
+ * more than WORKER_GB (testWorkers, below).
  *
  * A test may take 60 s, not vitest's 5: CI runs every package's tests at
  * once, coverage on, on a runner that takes some tests fifty times as
@@ -26,11 +28,13 @@ export function packageConfig({
   include = [],
   exclude = [],
   test = {},
+  workerGb = WORKER_GB,
 }: {
   environment?: "node" | "happy-dom";
   include?: string[];
   exclude?: string[];
   test?: NonNullable<ViteUserConfig["test"]>;
+  workerGb?: number;
 } = {}) {
   return defineConfig({
     plugins: [solidClientPlugin()],
@@ -42,6 +46,7 @@ export function packageConfig({
         concurrency: process.env.TURBO_CONCURRENCY,
         cpus: availableParallelism(),
         memoryGb: totalmem() / 2 ** 30,
+        workerGb,
       }),
       ...test,
       coverage: {
@@ -66,8 +71,9 @@ export function packageConfig({
  * 24 CPUs and 15 GB, `npm run check` could start some 230 workers, which ran the
  * machine out of memory. So, off CI, the runs share three quarters of the
  * memory instead: a run's own process takes about RUN_GB and each of its
- * workers about WORKER_GB (`ui`'s tests, with coverage and four workers,
- * took 1.8 GB). A run has one worker at least, and no more than Vitest's
+ * workers about WORKER_GB, or what its package says (`ui`'s tests took
+ * 1.3 GB with four workers, `studio`'s 2.7 GB, `solid`'s 5.9 GB). A run
+ * has one worker at least, and no more than Vitest's
  * default. CI keeps that default: its runners' four CPUs hold each run to
  * three workers already.
  */
@@ -75,7 +81,7 @@ export function packageConfig({
 /** About what a Vitest run's own process takes, in GB. */
 const RUN_GB = 0.75;
 
-/** About what each of its workers takes, in GB. */
+/** About what each of its workers takes, in GB, unless its package says more. */
 const WORKER_GB = 0.5;
 
 /** The share of the memory the runs may take together. */
@@ -104,6 +110,7 @@ export function testWorkers({
   concurrency,
   cpus,
   memoryGb,
+  workerGb = WORKER_GB,
 }: {
   /** CI, as the environment has it. */
   ci: string | undefined;
@@ -113,10 +120,12 @@ export function testWorkers({
   cpus: number;
   /** The machine's memory, in GB (os.totalmem()). */
   memoryGb: number;
+  /** About what each worker takes, in GB. */
+  workerGb?: number;
 }): number | undefined {
   if (ci !== undefined && ci !== "") return undefined;
   const tasks = turboTasks(concurrency, cpus);
   const share = (memoryGb * MEMORY_SHARE - tasks * RUN_GB) / tasks;
   const vitestDefault = Math.max(cpus - 1, 1);
-  return Math.min(Math.max(Math.floor(share / WORKER_GB), 1), vitestDefault);
+  return Math.min(Math.max(Math.floor(share / workerGb), 1), vitestDefault);
 }

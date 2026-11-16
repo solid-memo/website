@@ -46,6 +46,11 @@ describe("testWorkers", () => {
     expect(testWorkers({ ci: undefined, concurrency: "1", cpus: 1, memoryGb: 64 })).toBe(1);
   });
 
+  it("gives fewer workers to a package whose workers take more", () => {
+    expect(testWorkers({ ci: undefined, concurrency: "4", ...LAPTOP, workerGb: 1.5 })).toBe(1);
+    expect(testWorkers({ ci: undefined, concurrency: "1", ...LAPTOP, workerGb: 1.5 })).toBe(7);
+  });
+
   it("gives one worker at least, however little memory there is", () => {
     expect(testWorkers({ ci: undefined, concurrency: "10", cpus: 24, memoryGb: 4 })).toBe(1);
   });

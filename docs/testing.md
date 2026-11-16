@@ -65,12 +65,14 @@ worker for every CPU but one in each run. On a machine with many CPUs
 and little memory, that's hundreds of workers. Off CI, each run starts
 only as many workers as its share of three quarters of the memory holds
 ([vitest.shared.ts](../vitest.shared.ts)): one each, with
-ten tasks at once on 15 GB. CI keeps Vitest's default.
+ten tasks at once on 15 GB. A package whose workers take more than
+about 0.5 GB says how much (`workerGb`), and its runs start fewer:
+`solid`'s take about 1.5 GB. CI keeps Vitest's default.
 
 Two settings make it quicker, in a contributor's shell profile:
 
 ```sh
-export TURBO_CONCURRENCY=4   # Turbo's tasks at once, so each run gets more workers (4 each on 15 GB)
+export TURBO_CONCURRENCY=4   # Turbo's tasks at once, so each run gets more workers (4 each on 15 GB, solid's 1)
 export TURBO_CACHE_DIR="$HOME/.cache/turbo/solid-memo"   # one cache for every checkout and worktree
 ```
 
