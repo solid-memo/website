@@ -69,8 +69,9 @@ same, for learners, authors, technologists and decision makers:
 [solid-memo.com/about](https://solid-memo.com/about/).
 It aims to meet [WCAG 2.2](https://www.w3.org/TR/WCAG22/), the W3C's
 accessibility guidelines, at level AA, with a keyboard and a screen
-reader as well: what is checked, the gaps known and how to report a
-barrier are in [docs/accessibility.md](docs/accessibility.md).
+reader as well. [ACCESSIBILITY.md](ACCESSIBILITY.md) says how to report
+a barrier and what happens next; what is checked and the gaps known are
+in [docs/accessibility.md](docs/accessibility.md).
 
 | Your decks | Studying a card | A course's chapter |
 | --- | --- | --- |
