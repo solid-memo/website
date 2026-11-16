@@ -911,6 +911,12 @@
       "stepCount": {
         "other": "{count}단계"
       },
+      "moreSteps": {
+        "other": "단계 {count}개 더"
+      },
+      "moreQuestions": {
+        "other": "질문 {count}개 더"
+      },
       "actions": "{name} 작업",
       "moveTo": "챕터로 옮기기",
       "inChapter": "{chapter} 안",
@@ -949,6 +955,14 @@
       "retired": "사용 중지됨",
       "place": "나오는 곳",
       "nowhere": "아직 없음",
+      "chapter": "챕터",
+      "elsewhere": "이 챕터에 없음",
+      "moreChapters": {
+        "other": "챕터 {count}개 더 보기"
+      },
+      "moreSteps": {
+        "other": "단계 {count}개 더 보기"
+      },
       "atStep": "{chapter}, 단계 {step}",
       "atReview": "{chapter}, 마무리 복습",
       "preview": "코스에서 나오는 모습",
@@ -1011,6 +1025,9 @@
       "notAskedThere": "이 id는 그 자리에 정렬되지 않아서, 질문이 ‘나오는 위치’에 적힌 곳에 나오지 않아요. 그 자리에 정렬되는 id를 써 주세요.",
       "retire": "사용 중지",
       "restore": "복원",
+      "showMore": {
+        "other": "{count}개 더 보기"
+      },
       "delete": "삭제",
       "published": "이전 릴리스에서 게시한 항목이라 학습자의 진행 상황에 들어 있을 수 있어요. 사용 중지할 수는 있지만 삭제할 수는 없어요.",
       "life": {
@@ -1053,6 +1070,9 @@
       },
       "errors": "오류",
       "warnings": "경고",
+      "more": {
+        "other": "문제가 {count}개 더 있지만 여기에는 나열하지 않아요."
+      },
       "shapesHeading": "셰이프",
       "shapesHint": "셰이프와 DCAT-AP, SKOS 프로필은 릴리스를 게시된 데이터로 보고 검사해요. 초안이 크면 시간이 걸리기 때문에 요청할 때만 실행돼요.",
       "shapesRun": "셰이프로 검사",

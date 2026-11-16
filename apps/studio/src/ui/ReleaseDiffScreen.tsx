@@ -15,7 +15,9 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type MessageKey } from "@solid-memo/ui/i18n";
 import { describeChanges } from "@solid-memo/ui/LibraryUpgradeNotice";
 import { Loading } from "@solid-memo/ui/Loading";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { problemMessage, subjectName } from "./problemText";
+import { bounded } from "./ReleaseLists";
 
 /** Where the diff links: a subject's place in the draft's editors. */
 export interface ReleaseDiffLinks {
@@ -53,6 +55,8 @@ export function subjectTarget(
  * changes, retires or restores (a link each to its editor), and what a
  * learner's copy of the release would get from it, progress lost
  * included. A draft of a first release follows none, which it says.
+ * It lists at most PROBLEM_LIMIT of the rules broken, and says how many
+ * more there are.
  */
 export function ReleaseDiffScreen({
   draft,
@@ -101,6 +105,7 @@ function DiffBody({
   const i18n = useI18n();
   const { t } = i18n;
   const { previous, problems, upgrade } = diff;
+  const rules = bounded(problems, PROBLEM_LIMIT);
   const { about, subjects, unchanged } = diff.diff;
   const previousVersion = previous.root.version ?? "1";
   const statusOf = ({ status, alsoChanged }: SubjectChange) =>
@@ -113,11 +118,14 @@ function DiffBody({
         {problems.length === 0 ? (
           <p>{t("studio.diff.rulesKept")}</p>
         ) : (
-          <ul class="release-problems">
-            {problems.map((problem, index) => (
-              <li key={index}>{problemMessage(problem, draft, i18n)}</li>
-            ))}
-          </ul>
+          <>
+            <ul class="release-problems">
+              {rules.shown.map((problem, index) => (
+                <li key={index}>{problemMessage(problem, draft, i18n)}</li>
+              ))}
+            </ul>
+            {rules.more > 0 && <p class="hint">{t("studio.check.more", { count: rules.more })}</p>}
+          </>
         )}
       </section>
       <section aria-labelledby="diff-about">

@@ -5,7 +5,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { NewQuestionForm } from "./NewQuestionForm";
-import { courseDraft } from "../test/fixtures";
+import { OUTLINE_LIMIT } from "./DraftOutline";
+import { courseDraft, longCourseDraft } from "../test/fixtures";
 
 beforeEach(() => localStorage.clear());
 afterEach(() => vi.useRealTimers());
@@ -89,6 +90,22 @@ describe("NewQuestionForm", () => {
     expect(onAdd).toHaveBeenCalledTimes(1);
     expect(error()).toHaveTextContent("");
     expect(screen.getByRole("textbox", { name: "Front" })).toHaveValue("Front");
+  });
+
+  it("offers to ask it before the first OUTLINE_LIMIT cards of a place that asks many", () => {
+    render(
+      <NewQuestionForm
+        id="nq"
+        draft={longCourseDraft({ steps: 1, questions: 3000 })}
+        place={{ kind: "step", step: "st-0" }}
+        legend="New question"
+        onAdd={vi.fn(() => true)}
+      />,
+    );
+    const where = screen.getByRole<HTMLSelectElement>("combobox", { name: "Ask it" });
+    expect(where.options).toHaveLength(OUTLINE_LIMIT + 2);
+    expect(where.options[OUTLINE_LIMIT + 1]!).toHaveTextContent("2,950 more questions");
+    expect(where.options[OUTLINE_LIMIT + 1]!.disabled).toBe(true);
   });
 
   it("asks it before another card of the place, under an id that sorts there", () => {

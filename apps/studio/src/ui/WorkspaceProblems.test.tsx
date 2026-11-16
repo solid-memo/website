@@ -2,12 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ComponentChildren } from "preact";
 import { describe, expect, it } from "vitest";
+import { renderHook, waitFor } from "@testing-library/preact";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import type { UseCases } from "@solid-memo/application/useCases";
 import type { DeckHealth } from "@solid-memo/domain/deckHealth";
+import { problem } from "@solid-memo/domain/release/problems";
 import { createI18n } from "@solid-memo/ui/i18n";
 import type { MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
-import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
-import { deckProblemsOf } from "./WorkspaceProblems";
+import { courseDraft, instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
+import { PROBLEM_LIMIT } from "./ProblemList";
+import { deckProblemsOf, useWorkspaceProblems } from "./WorkspaceProblems";
 
 const en = createI18n("en");
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -65,5 +71,35 @@ describe("deckProblemsOf", () => {
   it("lists nothing of a healthy deck, nor of the languages it could not check", () => {
     expect(deckProblemsOf(kanji, health({}), en)).toEqual([]);
     expect(deckProblemsOf(kanji, health({ unstated: null }), en)).toEqual([]);
+  });
+});
+
+describe("useWorkspaceProblems", () => {
+  it("counts all of a draft's problems, and goes (F8) only through those the dock lists", async () => {
+    const draft = courseDraft();
+    const rules = (["error", "warning"] as const).flatMap((severity) =>
+      Array.from({ length: 3000 }, (_, at) =>
+        problem(`${draft.url}#${severity}-${at}`, { code: "noBack", params: {} }, { severity }),
+      ),
+    );
+    const useCases = {
+      checkReleaseDraft: async () => ({ rules, library: [], drops: [], markdown: [], shapes: [] }),
+    } as unknown as UseCases;
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { result } = renderHook(
+      () =>
+        useWorkspaceProblems(
+          useCases,
+          { screen: "draft", draftUrl: draft.url },
+          { deck: null, draft },
+        ),
+      {
+        wrapper: ({ children }: { children?: ComponentChildren }) => (
+          <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        ),
+      },
+    );
+    await waitFor(() => expect(result.current.problems!.count).toBe(6000));
+    expect(result.current.problems!.routes).toHaveLength(2 * PROBLEM_LIMIT);
   });
 });

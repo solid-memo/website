@@ -8,7 +8,8 @@ import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { DraftEditor } from "./draftEditor";
 import { StepEditorScreen } from "./StepEditorScreen";
-import { courseDraft, draftLinks } from "../test/fixtures";
+import { OUTLINE_LIMIT } from "./DraftOutline";
+import { courseDraft, draftLinks, longCourseDraft } from "../test/fixtures";
 import { answer } from "../test/dialogs";
 
 function renderScreen(
@@ -176,5 +177,16 @@ describe("StepEditorScreen", () => {
     expect(screen.getByRole("heading", { name: "Questions that check it" })).toHaveAttribute(
       "data-arrival",
     );
+  });
+});
+
+describe("StepEditorScreen of a long step", () => {
+  it("lists OUTLINE_LIMIT of its questions at first, and more when asked", () => {
+    renderScreen("st-0", longCourseDraft({ steps: 1, questions: 3000 }));
+    const questions = () =>
+      screen.getByRole("region", { name: "Questions that check it" }).querySelectorAll("ol > li");
+    expect(questions()).toHaveLength(OUTLINE_LIMIT);
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more" }));
+    expect(questions()).toHaveLength(2 * OUTLINE_LIMIT);
   });
 });

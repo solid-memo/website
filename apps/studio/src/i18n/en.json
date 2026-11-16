@@ -972,6 +972,14 @@
         "one": "{count} step",
         "other": "{count} steps"
       },
+      "moreSteps": {
+        "one": "{count} more step",
+        "other": "{count} more steps"
+      },
+      "moreQuestions": {
+        "one": "{count} more question",
+        "other": "{count} more questions"
+      },
       "actions": "Actions for {name}",
       "moveTo": "Move to chapter",
       "inChapter": "in {chapter}",
@@ -1010,6 +1018,16 @@
       "retired": "Retired",
       "place": "Asked",
       "nowhere": "Nowhere yet",
+      "chapter": "Chapter",
+      "elsewhere": "Not in this chapter",
+      "moreChapters": {
+        "one": "Show {count} more chapter",
+        "other": "Show {count} more chapters"
+      },
+      "moreSteps": {
+        "one": "Show {count} more step",
+        "other": "Show {count} more steps"
+      },
       "atStep": "{chapter}, step {step}",
       "atReview": "{chapter}, final review",
       "preview": "As the course asks it",
@@ -1075,6 +1093,10 @@
       "notAskedThere": "This id does not sort there, so the question would not be asked where “Ask it” says: write one that does.",
       "retire": "Retire",
       "restore": "Restore",
+      "showMore": {
+        "one": "Show {count} more",
+        "other": "Show {count} more"
+      },
       "delete": "Delete",
       "published": "An earlier release published this, so a learner's progress may name it: it can be retired, never deleted.",
       "life": {
@@ -1118,6 +1140,10 @@
       },
       "errors": "Errors",
       "warnings": "Warnings",
+      "more": {
+        "one": "And {count} more problem, not listed here.",
+        "other": "And {count} more problems, not listed here."
+      },
       "shapesHeading": "Shapes",
       "shapesHint": "The shapes, and the DCAT-AP and SKOS profiles, check the release as published data. They take a while on a large draft, so they run only when asked.",
       "shapesRun": "Check against the shapes",

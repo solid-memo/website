@@ -7,6 +7,7 @@ import { fireEvent, render, screen } from "@testing-library/preact";
 import { problem } from "@solid-memo/domain/release/problems";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 import { WithKeys } from "../test/keys";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { TrialScreen } from "./TrialScreen";
 
 function renderScreen(props: Partial<Parameters<typeof TrialScreen>[0]> = {}) {
@@ -79,5 +80,19 @@ describe("TrialScreen", () => {
     );
     expect(screen.getByRole("listitem")).toHaveTextContent(/^Apps: /);
     expect(screen.queryByText("The trial")).toBeNull();
+  });
+
+  it("lists at most PROBLEM_LIMIT of them, and says how many more there are", () => {
+    const targetHref = vi.fn(() => "#/x");
+    renderScreen({
+      problems: Array.from({ length: 3000 }, (_, at) =>
+        problem(`${DRAFT_URL}#s-${at}`, { code: "noBack", params: {} }),
+      ),
+      targetHref,
+    });
+    expect(screen.getAllByRole("listitem")).toHaveLength(PROBLEM_LIMIT);
+    expect(screen.getAllByRole("link")).toHaveLength(PROBLEM_LIMIT);
+    expect(targetHref).toHaveBeenCalledTimes(PROBLEM_LIMIT);
+    expect(screen.getByText("And 2,950 more problems, not listed here.")).toBeInTheDocument();
   });
 });

@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 import { TrialControls } from "./TrialControls";
 
 const chapters = [
@@ -67,5 +68,20 @@ describe("TrialControls", () => {
     expect(screen.getByRole("group")).toBeDisabled();
     expect(screen.getByRole("status")).toHaveTextContent("Working…");
     expect(screen.getByRole("alert")).toHaveTextContent("offline");
+  });
+
+  it("lists the first OUTLINE_LIMIT chapters, more at a button, and the chapter in view wherever it is", () => {
+    const many = Array.from({ length: 3000 }, (_, at) => ({
+      id: `ch-${at}`,
+      title: { en: `Chapter ${at}` },
+    }));
+    const { onJump } = renderControls({ chapters: many, current: "ch-2000" });
+    const select = screen.getByRole("combobox", { name: "Chapter" });
+    expect(within(select).getAllByRole("option")).toHaveLength(OUTLINE_LIMIT + 1);
+    expect(select).toHaveValue("ch-2000");
+    fireEvent.click(screen.getByRole("button", { name: "Open the chapter" }));
+    expect(onJump).toHaveBeenCalledWith("ch-2000");
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more chapters" }));
+    expect(within(select).getAllByRole("option")).toHaveLength(2 * OUTLINE_LIMIT + 1);
   });
 });

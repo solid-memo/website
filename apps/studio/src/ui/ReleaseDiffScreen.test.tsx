@@ -8,6 +8,7 @@ import type { DraftDiff } from "@solid-memo/application/releaseDrafts";
 import { AppError } from "@solid-memo/domain/appError";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
+import { problem } from "@solid-memo/domain/release/problems";
 import type { ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import { releaseDiff, simulateLearnerUpgrade } from "@solid-memo/domain/release/releaseDiff";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -15,6 +16,7 @@ import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { subjectName } from "./problemText";
 import { ReleaseDiffScreen, subjectTarget } from "./ReleaseDiffScreen";
 
@@ -49,6 +51,21 @@ describe("ReleaseDiffScreen", () => {
       screen.getByRole("heading", { level: 2, name: "Changes since the previous version" }),
     ).toBeInTheDocument();
     expect(screen.getByText(/follows no release/)).toBeInTheDocument();
+  });
+
+  it("lists at most PROBLEM_LIMIT of the rules broken, and says how many more there are", () => {
+    const draft = nextVersionDraft(v1(), DRAFT_URL);
+    renderScreen(draft, {
+      ...diffOf(draft),
+      problems: Array.from({ length: 3000 }, (_, at) =>
+        problem(`${DRAFT_URL}#s-${at}`, { code: "noBack", params: {} }),
+      ),
+    });
+    const rules = screen.getByRole("region", { name: "Rules of the series" });
+    expect(within(rules).getAllByRole("listitem")).toHaveLength(PROBLEM_LIMIT);
+    expect(
+      within(rules).getByText("And 2,950 more problems, not listed here."),
+    ).toBeInTheDocument();
   });
 
   it("shows that it is comparing, or why it could not", () => {

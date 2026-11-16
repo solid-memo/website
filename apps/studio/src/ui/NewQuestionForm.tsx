@@ -23,6 +23,7 @@ import {
 } from "@solid-memo/ui/LangTextField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { idUsable, IdField } from "./DraftParts";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 
 /** A new side's draft: empty, in the language last chosen for a card's own text. */
 function emptySide(): LangTextDraft {
@@ -34,7 +35,8 @@ function emptySide(): LangTextDraft {
  * final review) or nowhere yet (a deck's card): its front and back, each
  * in the languages the user states, and its id, as the id assistant
  * suggests it (questionIdFor) unless the user writes another. Where the
- * place asks others, the user may ask it before one of them: its id is
+ * place asks others, the user may ask it before one of them (the first
+ * OUTLINE_LIMIT, as a place can ask any number): its id is
  * then one that sorts there (questionIdBefore), as the place asks its
  * cards in the order of their ids; an id the user writes that sorts
  * elsewhere is asked there, and the form says so. Adding it
@@ -146,7 +148,7 @@ export function NewQuestionForm({
               }}
             >
               <option value="">{t("studio.draftEdit.askedLast")}</option>
-              {asked.map((card) => {
+              {asked.slice(0, OUTLINE_LIMIT).map((card) => {
                 const found = draftCardOf(draft, card);
                 const name =
                   found === null ? card : cardName({ ...found.content, id: card }, readerText);
@@ -156,6 +158,11 @@ export function NewQuestionForm({
                   </option>
                 );
               })}
+              {asked.length > OUTLINE_LIMIT && (
+                <option disabled>
+                  {t("studio.outline.moreQuestions", { count: asked.length - OUTLINE_LIMIT })}
+                </option>
+              )}
             </select>
           </>
         )}

@@ -403,10 +403,10 @@ has two tabs, a tablist (Left and Right go from one to the other):
   [`shell/activity.ts`](../apps/studio/src/ui/shell/activity.ts)), but
   not what it shows as it opens.
 
-F8 goes to the field of the next problem in the Problems list, Shift+F8
-to the one before, as a link does, round from either end. It counts
-from the problem gone to last while its page is shown, so two problems
-in one field are each gone to, else from the page shown
+F8 goes to the field of the next problem the Problems list shows,
+Shift+F8 to the one before, as a link does, round from either end. It
+counts from the problem gone to last while its page is shown, so two
+problems in one field are each gone to, else from the page shown
 (`stepProblem` in
 [`shell/workspaceLayout.ts`](../apps/studio/src/ui/shell/workspaceLayout.ts)).
 
@@ -1263,7 +1263,8 @@ Solid Memo. Each part has its own form and status line:
 - **Languages**: its card sides whose language isn't stated, set as in
   Solid Memo (`DeckLanguagesSection` in `ui`).
 - **Course progress**, for a copy of a course: its chapters in order,
-  each done, open or locked. A chapter done can be marked not done, and
+  each done, open or locked, 50 at first and 50 more at a button, as a
+  release can have any number. A chapter done can be marked not done, and
   the course restarted, once the user confirms. A chapter completed
   that the release no longer has is listed by its id, to mark not done
   too, the first 20 of them, and a count of the rest. Answers and
@@ -1881,10 +1882,10 @@ The overview
 ([`DraftOverviewContainer`](../apps/studio/src/ui/DraftOverviewContainer.tsx))
 names the draft, its kind and version, and edits its title and
 description. For a course, it shows the outline, adds a chapter (its
-title, and its id), and lists the chapters retired, to restore. It
-counts the draft's cards, with a link to their table (a deck's cards
-are added here), and the problems the release check finds (for a pod,
-the shapes left out).
+title, and its id), and lists the chapters retired, to restore, 50 at
+first and 50 more at a button. It counts the draft's cards, with a link
+to their table (a deck's cards are added here), and the problems the
+release check finds (for a pod, the shapes left out).
 
 ### The outline
 
@@ -1901,9 +1902,11 @@ code in `ui`:
   `deckTree/dropZones.ts`) keep a chapter at the top and a step in a
   chapter, and make no new group of two.
 - **The row's menu** (`MoveItems`): up, down, and, for a step, to
-  another chapter, named as a question's place names it (`chapterTitles`,
-  [below](#a-question)). It retires the chapter or step too, or deletes one
-  no release published, once the user confirms.
+  another chapter the outline shows, named as a question's place names
+  it (`chapterTitles`, [below](#a-question)). Up and down go past the
+  rows the outline doesn't show, and a step moved to a chapter goes to
+  its end. It retires the chapter or step too, or deletes one no
+  release published, once the user confirms.
 
 Each move is a `moveChapter` or `moveStep` change (`outlineMove` in
 [draftOutline.ts](../packages/domain/src/release/draftOutline.ts)). A
@@ -1912,6 +1915,24 @@ comes to nothing, and says so.
 
 A chapter, step or question the release check finds problems in has a
 badge beside it ("2 problems"), a link to the check.
+
+A draft started from a release can have any number of chapters, steps
+and questions, so the outline is cut short (`outlinePart`). It shows
+50 chapters at first (`OUTLINE_LIMIT`), and a button shows 50 more.
+For each 50 chapters shown it shows at most 500 steps
+(`OUTLINE_ROW_LIMIT`), at most 50 of a chapter, the first chapters'
+first, and at most 500 questions, 10 of a step
+(`OUTLINE_QUESTION_LIMIT`), however long the chapters are. A course
+as long as the project's longest shows in full. The rest of a chapter
+or a step is a link to its screen ("12 more steps"). The chapter, step
+or question the page shown edits is shown wherever it is, a step past
+those shown last of its chapter's. A question is shown under the first
+step that asks it. For one asked only in a chapter's final review, which
+the outline lists no questions of, that chapter is shown. A step dropped after the last step
+shown of a chapter cut short goes to the chapter's end. One dropped on
+a chapter's header goes to its end when none of its steps are shown,
+and to its start otherwise. One dropped right after the step the page
+edits goes there.
 
 On a course draft's other screens the outline is in the aside
 ([`OutlineAside`](../apps/studio/src/ui/OutlineAside.tsx),
@@ -1933,7 +1954,8 @@ with Markdown" (`sm:textFormat` of the chapter). A preview shows it as
 the course's screen does, beside the field on a screen 80rem wide or
 more, else under it. The screen orders the chapter's steps, up or
 down, adds one, and restores one retired. It lists the questions asked
-only in the chapter's final review, and adds one.
+only in the chapter's final review, and adds one. Each of these lists
+shows 50 at first (`OUTLINE_LIMIT`), and a button shows 50 more.
 
 ### A step
 
@@ -1945,9 +1967,9 @@ where it wouldn't show as meant, by the rules of prose (`PROSE`,
 [markdown.md](markdown.md)). A preview, beside it on a screen 80rem
 wide or more, else under it, shows the theory as the course player
 does (`ProseField` in `ui`, with the player's `DataProse`). The screen
-lists the questions that check the step, and adds one: its front and
-back, its id, and the question it's asked before, if not after the
-last.
+lists the questions that check the step, 50 at first and 50 more at a
+button, and adds one: its front and back, its id, and the question
+it's asked before, if not after the last.
 
 ### A question
 
@@ -1955,24 +1977,28 @@ A question's screen
 ([`QuestionEditorContainer`](../apps/studio/src/ui/QuestionEditorContainer.tsx))
 says where the card is asked: a step, a chapter's final review, or
 nowhere yet; choosing another moves it there (`moveQuestion`). The
-choices group each chapter's steps and final review under the
-chapter's title, each step by its number. A chapter is named once, cut
-short when it's long (`chapterTitles`, which numbers two chapters that
-would then read the same). The choices are listed again when the draft
-changes, not as the user types. As the closed select shows only the
-step, its name for a screen reader (`aria-labelledby`) is its label
-and the place chosen, with its chapter. Its
-content is Solid Memo's card editor (`CardContentFields`), saved by
-Save; its wrong options are the inspector's (`DistractorFields`, each
-change saved as it's made: `distractorChanges`). A wrong option
-belongs to one card, as in a deck
+place is chosen in two parts (`PlaceChoice`): a chapter, then a place
+in it, its steps by their numbers and its final review, so every step
+of every chapter can be chosen. The chapter select lists 50 chapters at
+first (`OUTLINE_LIMIT`), the place select 50 of the chapter's steps,
+and a button beside each shows 50 more; each lists the place chosen
+wherever it is. While another chapter is chosen, the place select says
+the question isn't in it. A chapter is named cut short when it's long
+(`chapterTitles`, which numbers two chapters that would then read the
+same). The choices are listed again when the draft's chapters or steps
+change, not as the user types. As the closed select shows only the
+step, its name for a screen reader (`aria-labelledby`) is its label and
+the place chosen, with its chapter. Its content is Solid Memo's card
+editor (`CardContentFields`), saved by Save; its wrong options are the
+inspector's (`DistractorFields`, each change saved as it's made:
+`distractorChanges`). A wrong option belongs to one card, as in a deck
 ([data-model.md](data-model.md#wrong-options)). One that another card
 names too, as an imported file may have, is only taken off this card
 when deleted here (`unlinkDistractor`), and stays on the others. A
-preview asks
-the card as the course does (`CourseQuestion`, with `MultipleChoice`),
-as typed, to answer and ask again: beside the form and in sight as it
-scrolls on a screen 80rem wide or more, else under it.
+preview asks the card as the course does (`CourseQuestion`, with
+`MultipleChoice`), as typed, to answer and ask again: beside the form
+and in sight as it scrolls on a screen 80rem wide or more, else under
+it.
 
 ### A draft's cards
 
@@ -2027,13 +2053,14 @@ a subject can have, or one the draft or a release before it has. A new
 question's id sorts after the step's last; past `z`, it's the last's
 id with a number after it.
 
-A new question may instead be asked before one already asked ("Ask
-it", `questionIdBefore`). Its id then sorts between that one and the
-one before it: a free letter when there is one, else an id from
-`idBetween`. Before the first, the place's own name (`q-<topic>-<n>`,
-`q-<topic>-r00`) is the lower end. When no id sorts there, the form
-says so, and the user writes one. An id the user writes is asked where
-it sorts, and the form says when that isn't where "Ask it" says.
+A new question may instead be asked before one already asked ("Ask it",
+`questionIdBefore`), one of the place's first 50. Its id then sorts
+between that one and the one before it: a free letter when there is
+one, else an id from `idBetween`. Before the first, the place's own
+name (`q-<topic>-<n>`, `q-<topic>-r00`) is the lower end. When no id
+sorts there, the form says so, and the user writes one. An id the user
+writes is asked where it sorts, and the form says when that isn't where
+"Ask it" says.
 
 `idBetween` finds a free id that sorts between two others, by code
 unit: a number after the first when one fits, else one made code unit
@@ -2161,7 +2188,10 @@ the reader's language (`studio.problem.<code>`,
 by severity, then by what they're in, in two lists, Errors and
 Warnings. Each subject links to its editor, and each problem to its
 field there (`problemTarget`), focused; a wrong option's problem opens
-its question at it, and counts under it in the outline's badges.
+its question at it, and counts under it in the outline's badges. A
+draft can have any number of problems, so each list shows at most
+`PROBLEM_LIMIT` (50) and says how many more there are; the counts and
+badges count them all.
 
 Not every problem can be fixed in the Studio yet, so a new draft's
 problem count may not reach zero:
@@ -2249,7 +2279,9 @@ A draft that can't be played is refused, with what blocks it
 (`trialProblems`), each a link to its field: the course's rules, and
 what the player needs of a release (its title, and each chapter's and
 step's fields). The release's publisher,
-version, series, distribution and theme don't block it.
+version, series, distribution and theme don't block it. A draft can
+have any number of these problems, so the list shows at most
+`PROBLEM_LIMIT` (50) and says how many more there are.
 
 The course's screens link to the trial's routes, by `CourseLinks` in
 `ui` ([courseLinks.ts](../packages/ui/src/ui/courseLinks.ts)), which
@@ -2260,7 +2292,9 @@ Its controls (`TrialControls`):
 
 - **Open a chapter**, as a learner who completed every chapter before
   it (the course restarted, then each one before it completed), the
-  answers given kept.
+  answers given kept. The chapter select lists 50 chapters at first
+  (`OUTLINE_LIMIT`), a button shows 50 more, and the chapter in view
+  is listed wherever it is.
 - **Answer all right, or all wrong**: every question of the chapter in
   view, or of the one to take next (its steps', then its review's), a
   wrong answer its first wrong option. A chapter answered right is
@@ -2286,7 +2320,8 @@ screen (still at its address) says so. The use case is
 which reads the release once and fails when it can't be read. It
 shows:
 
-- **Rules of the series**: the check's drops (`continuityProblems`).
+- **Rules of the series**: the check's drops (`continuityProblems`),
+  at most `PROBLEM_LIMIT` (50) of them, and how many more there are.
 - **What it says of itself**: which of its title, description,
   keywords, themes, study direction, license, authors, languages and
   sources changed, and whether it became a course or a deck

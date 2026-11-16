@@ -8,12 +8,18 @@ import type { Anchor } from "@solid-memo/domain/deckTree";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, stepQuestions } from "@solid-memo/domain/release/courseIds";
-import { draftCardOf, draftOutline, outlineMove } from "@solid-memo/domain/release/draftOutline";
+import {
+  draftCardOf,
+  draftOutline,
+  outlineMove,
+  type OutlineChapter,
+} from "@solid-memo/domain/release/draftOutline";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
-import type {
-  DraftChange,
-  DraftRefusal,
-  ReleaseDraft,
+import {
+  type DraftChange,
+  type DraftRefusal,
+  iriIn,
+  type ReleaseDraft,
 } from "@solid-memo/domain/release/releaseDraft";
 import { ActionsMenu, MenuItem, MenuSeparator } from "@solid-memo/ui/ActionsMenu";
 import { cardName, plainDataText } from "@solid-memo/ui/DataText";
@@ -27,6 +33,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { MoveItems } from "@solid-memo/ui/MoveItems";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { chapterTitles } from "./DraftParts";
+import { ShowMore } from "./ReleaseLists";
 import { useConfirm } from "./shell/ConfirmDialog";
 
 /** A course's outline: its chapters at the top, its steps in a chapter, and no new groups. */
@@ -34,6 +41,102 @@ export const OUTLINE_RULES: DropRules = {
   combine: false,
   depths: (source) => (source.kind === "group" ? { min: 0, max: 0 } : { min: 1, max: 1 }),
 };
+
+/**
+ * At most how many chapters the outline shows at first, and as many
+ * more each time the user asks (a page); at most how many steps it shows
+ * of a chapter; and how many of each list the chapter and step screens
+ * show at first. A draft started from a release can have any number of
+ * them.
+ */
+export const OUTLINE_LIMIT = 50;
+
+/**
+ * At most how many steps the outline shows for each page of chapters, over
+ * its chapters, and at most how many questions, over its steps: the rest
+ * of a chapter or a step is a link to its screen. The limits of each list
+ * don't multiply: a page of the outline stays this small, however long
+ * its chapters are, and a course as long as the project's own fits on
+ * one.
+ */
+export const OUTLINE_ROW_LIMIT = 500;
+
+/** At most how many questions the outline shows of a step. */
+export const OUTLINE_QUESTION_LIMIT = 10;
+
+/** How many steps, or questions, the outline shows at most over its first `chapters`: OUTLINE_ROW_LIMIT for each page. */
+function rowBudget(chapters: number): number {
+  return Math.ceil(chapters / OUTLINE_LIMIT) * OUTLINE_ROW_LIMIT;
+}
+
+/** A chapter of the part of the outline a list shows: where it is, its steps shown, each with where it is, and how many it has. */
+interface ShownChapter extends OutlineChapter {
+  at: number;
+  shown: { step: OutlineChapter["steps"][number]; at: number }[];
+}
+
+/**
+ * The chapter or step of the outline that shows `key`, the chapter's,
+ * step's or question's id the page edits: a chapter or step itself; for a
+ * question, the first step that asks it, else the first chapter that asks
+ * it in its final review (which the outline lists no questions of); null
+ * for none, or one the outline has not.
+ */
+function outlineAnchor(
+  draft: ReleaseDraft,
+  outline: readonly OutlineChapter[],
+  key: string | null,
+): string | null {
+  if (key === null) return null;
+  const iri = iriIn(draft, key);
+  for (const { chapter, steps } of outline) {
+    if (chapter.id === key) return key;
+    for (const step of steps)
+      if (step.id === key || step.data.checkedBy.includes(iri)) return step.id;
+  }
+  return (
+    outline.find(({ chapter }) => chapter.data.reviewQuestion.includes(iri))?.chapter.id ?? null
+  );
+}
+
+/**
+ * The part of a course's outline the outline shows: its first
+ * `chapters`, and of them at most OUTLINE_LIMIT steps of a chapter and
+ * rowBudget(chapters) in all, first come first shown; and the chapter or
+ * step `current` names (the one the page edits), wherever it is, a step
+ * past those shown last of its chapter's. `more` counts the chapters past
+ * the first `chapters`.
+ */
+function outlinePart(
+  outline: readonly OutlineChapter[],
+  chapters: number,
+  current: string | null,
+): { chapters: ShownChapter[]; more: number } {
+  let here = -1;
+  let hereStep = -1;
+  if (current !== null)
+    for (const [at, { chapter, steps }] of outline.entries()) {
+      hereStep = chapter.id === current ? -1 : steps.findIndex((step) => step.id === current);
+      if (chapter.id === current || hereStep >= 0) {
+        here = at;
+        break;
+      }
+    }
+  const picked = outline.slice(0, chapters).map((_, at) => at);
+  if (here >= chapters) picked.push(here);
+  let left = rowBudget(chapters);
+  return {
+    chapters: picked.map((at) => {
+      const { chapter, steps } = outline[at]!;
+      const take = Math.min(steps.length, OUTLINE_LIMIT, left);
+      left -= take;
+      const shown = steps.slice(0, take).map((step, index) => ({ step, at: index }));
+      if (at === here && hereStep >= take) shown.push({ step: steps[hereStep]!, at: hereStep });
+      return { chapter, steps, at, shown };
+    }),
+    more: Math.max(0, outline.length - chapters),
+  };
+}
 
 /**
  * A course draft's outline (docs/studio.md, The outline): its
@@ -51,7 +154,11 @@ export const OUTLINE_RULES: DropRules = {
  * while the draft cannot be changed (`readOnly`). A chapter, step or
  * question the release check finds problems in has a badge counting
  * them, a link to the check, or (`badgeHref`) to where the first of them
- * is fixed. The one the page shown edits (`currentKey`) is marked.
+ * is fixed. The one the page shown edits (`currentKey`) is marked, and
+ * shown however far down it is: a question under the step that asks it
+ * (outlineAnchor). A long outline is cut short
+ * (outlinePart, rowBudget, OUTLINE_QUESTION_LIMIT): what it doesn't
+ * show is a link to its chapter's or step's screen.
  */
 export function DraftOutline({
   draft,
@@ -92,31 +199,62 @@ export function DraftOutline({
   const [menu, setMenu] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   // A draft started from a release may have thousands of chapters, steps
-  // and cards: each row's node is looked up by its key, not looked for,
-  // and the outline is worked out when the draft changes, not on every
-  // render (a menu opened, a drag).
+  // and cards: the outline is worked out when its chapters or steps
+  // change, not on every render (a menu opened, a drag, an edit to a
+  // card or the title), and only a bounded part of it is drawn
+  // (outlinePart, rowBudget).
   // The rows a drag froze may name one the draft has since retired.
   const chapterNodes = useMemo(
     () => new Map(draft.chapters.map((node) => [node.id, node])),
-    [draft],
+    [draft.chapters],
   );
   const chapterTitle = (id: string): LangText => titleOf(chapterNodes.get(id)!);
-  const stepNodes = useMemo(() => new Map(draft.steps.map((node) => [node.id, node])), [draft]);
+  const stepNodes = useMemo(
+    () => new Map(draft.steps.map((node) => [node.id, node])),
+    [draft.steps],
+  );
   const cardOf = (id: string) => draftCardOf(draft, id);
-  const stepLabel = (chapter: number, step: number) =>
-    t("studio.outline.stepNumber", { chapter: chapter + 1, step: step + 1 });
-  const nodes = useMemo<OutlineNode[]>(
-    () =>
-      draftOutline(draft).map(({ chapter, steps }, at) => ({
+  const outline = useMemo(
+    () => draftOutline(draft),
+    // draftOutline reads only these.
+    [draft.url, draft.chapters, draft.steps],
+  );
+  // The rows shown; each chapter's steps in all, by its key; and each step's questions shown.
+  const [chapterLimit, setChapterLimit] = useState(OUTLINE_LIMIT);
+  // Where the page edited is: worked out when it or the outline changes.
+  const anchor = useMemo(
+    () => outlineAnchor(draft, outline, currentKey),
+    // outlineAnchor reads only the draft's url, which the outline follows.
+    [outline, currentKey],
+  );
+  const { nodes, chaptersShown, questionsOf, moreChapters } = useMemo(() => {
+    const part = outlinePart(outline, chapterLimit, anchor);
+    let left = rowBudget(chapterLimit);
+    const questionsOf = new Map<string, { shown: string[]; more: number }>();
+    for (const { shown } of part.chapters)
+      for (const { step } of shown) {
+        // stepQuestions reads only the draft's url, which the outline follows.
+        const all = stepQuestions(draft, step);
+        const take = Math.min(all.length, OUTLINE_QUESTION_LIMIT, left);
+        left -= take;
+        const listed = all.slice(0, take);
+        if (currentKey !== null && all.indexOf(currentKey) >= take) listed.push(currentKey);
+        questionsOf.set(step.id, { shown: listed, more: all.length - listed.length });
+      }
+    return {
+      nodes: part.chapters.map<OutlineNode>(({ chapter, at, shown }) => ({
         key: chapter.id,
         title: titleOf(chapter),
-        children: steps.map((step, index) => ({
-          key: step.id,
-          title: { "": t("studio.outline.stepNumber", { chapter: at + 1, step: index + 1 }) },
+        children: shown.map((step) => ({
+          key: step.step.id,
+          title: { "": t("studio.outline.stepNumber", { chapter: at + 1, step: step.at + 1 }) },
         })),
       })),
-    [draft, t],
-  );
+      chaptersShown: new Map(part.chapters.map((chapter) => [chapter.chapter.id, chapter])),
+      questionsOf,
+      moreChapters: part.more,
+    };
+  }, [outline, chapterLimit, anchor, currentKey, t]);
   const frozen = useRef<OutlineNode[] | null>(null);
 
   /**
@@ -134,11 +272,28 @@ export function DraftOutline({
     if (onEdit([change]) === null) setAnnouncement(t("studio.outline.moved"));
   }
 
-  /** A drop: the outline's rules make no group, so it is a place, or into a chapter. */
+  /**
+   * A drop: the outline's rules make no group, so it is a place, or into
+   * a chapter. After the last step shown of a chapter cut short it is
+   * the chapter's end, after the steps not shown too, and so is a drop
+   * into the header of a chapter none of whose steps are shown (into the
+   * header of one that shows some, it is the chapter's start); but after
+   * the step the page edits, shown past those of its chapter shown, it is
+   * right after that step.
+   */
   function dropped(source: string, target: DropTarget) {
+    const { to } = target as Exclude<DropTarget, { kind: "combine" }>;
+    const chapter = to.parent === null ? undefined : chaptersShown.get(to.parent);
+    const last = chapter?.shown.at(-1);
+    const cut =
+      chapter !== undefined &&
+      chapter.shown.length < chapter.steps.length &&
+      (last === undefined
+        ? to.after === null
+        : last.at === chapter.shown.length - 1 && to.after === last.step.id);
     move(
       source,
-      (target as Exclude<DropTarget, { kind: "combine" }>).to,
+      cut ? { parent: to.parent, after: chapter.steps.at(-1)!.id } : to,
       drag.ghostRef.current!.getBoundingClientRect(),
     );
   }
@@ -159,15 +314,41 @@ export function DraftOutline({
   if (dragging) frozen.current ??= nodes;
   else frozen.current = null;
   const shown = frozen.current ?? nodes;
-  // A row's menu names the chapters it can move to as the question
-  // editor names them: cut short, once for the outline (chapterTitles).
-  const menuNodes = useMemo(() => {
+  /**
+   * What an open row's menu moves among: the chapters shown, and the
+   * row's neighbors in the whole outline, two before it and one after
+   * (the steps of its chapter, for a step), so a move up or down, or to
+   * another chapter's end (after its last step, shown or not), is the
+   * move the whole outline makes. The chapters are named as the question
+   * editor names them: cut short (chapterTitles).
+   */
+  function menuOutline(key: string): OutlineNode[] {
+    const here = outline.findIndex(
+      ({ chapter, steps }) => chapter.id === key || steps.some((step) => step.id === key),
+    );
+    const isChapter = outline[here]!.chapter.id === key;
+    const around = (at: number) => [Math.max(0, at - 2), at + 2] as const;
+    const ats = new Set([...chaptersShown.values()].map(({ at }) => at));
+    if (isChapter) for (let at = around(here)[0]; at < around(here)[1]; at++) ats.add(at);
+    ats.add(here);
+    const picked = [...ats]
+      .filter((at) => at < outline.length)
+      .sort((a, b) => a - b)
+      .map((at) => outline[at]!);
     const titles = chapterTitles(
-      shown.map((node) => ({ id: node.key, data: { title: node.title } })),
+      picked.map(({ chapter }) => chapter),
       readerText,
     );
-    return shown.map((node) => ({ ...node, title: titles.get(node.key)! }));
-  }, [shown, readerText]);
+    return picked.map(({ chapter, steps }) => {
+      const at = steps.findIndex((step) => step.id === key);
+      const children = at < 0 ? steps.slice(-1) : steps.slice(...around(at));
+      return {
+        key: chapter.id,
+        title: titles.get(chapter.id)!,
+        children: children.map((step) => ({ key: step.id, title: { "": step.id } })),
+      };
+    });
+  }
   const flip = useFlip(listRef, draft);
 
   function dragOf(key: string): RowDrag | undefined {
@@ -221,7 +402,7 @@ export function DraftOutline({
         onClose={() => setMenu(null)}
       >
         <MoveItems
-          nodes={menuNodes}
+          nodes={menu === key ? menuOutline(key) : []}
           nodeKey={key}
           readOnly={readOnly}
           fits={(parent) => (of === "chapter" ? parent === null : parent !== null)}
@@ -245,9 +426,16 @@ export function DraftOutline({
           <p>{t("studio.outline.empty")}</p>
         ) : (
           <ul class="deck-list" aria-label={t("studio.draft.outline")}>
-            {shown.map((chapter, at) => {
+            {shown.map((chapter) => {
               const name = readerText(chapter.title);
               const steps = chapter.children!;
+              // A chapter a drag's rows name may be gone from the draft.
+              const stepCount = chaptersShown.get(chapter.key)?.steps.length ?? steps.length;
+              const moreSteps = (
+                <a href={chapterHref(chapter.key)} draggable={false}>
+                  {t("studio.outline.moreSteps", { count: stepCount - steps.length })}
+                </a>
+              );
               return (
                 <li
                   key={chapter.key}
@@ -271,22 +459,21 @@ export function DraftOutline({
                       <ReaderText text={chapter.title} />
                     </a>
                     {badge(chapter.key, name)}
-                    <span class="hint">
-                      {t("studio.outline.stepCount", { count: steps.length })}
-                    </span>
+                    <span class="hint">{t("studio.outline.stepCount", { count: stepCount })}</span>
                     {rowMenu(chapter.key, name, "chapter")}
                   </div>
                   {steps.length === 0 ? (
                     <p class="hint deck-group-empty" data-row-key={slotKey(chapter.key)}>
-                      {t("studio.outline.noSteps")}
+                      {stepCount === 0 ? t("studio.outline.noSteps") : moreSteps}
                     </p>
                   ) : (
                     <ul class="deck-list" style="--depth: 1">
-                      {steps.map((step, index) => {
-                        const label = stepLabel(at, index);
-                        const node = stepNodes.get(step.key)!;
-                        const { data } = node;
+                      {steps.map((step) => {
+                        const label = readerText(step.title);
+                        const { data } = stepNodes.get(step.key)!;
                         const theory = readerText(data.theory ?? {});
+                        // A row frozen by a drag may be one the draft has since retired.
+                        const questions = questionsOf.get(step.key) ?? { shown: [], more: 0 };
                         return (
                           <li
                             key={step.key}
@@ -314,7 +501,7 @@ export function DraftOutline({
                                   : plainDataText(theory, isMarkdown(data.textFormat), 80)}
                               </span>
                               <ul class="outline-questions">
-                                {stepQuestions(draft, node).map((card) => {
+                                {questions.shown.map((card) => {
                                   const found = cardOf(card);
                                   const question =
                                     found === null
@@ -333,6 +520,15 @@ export function DraftOutline({
                                     </li>
                                   );
                                 })}
+                                {questions.more > 0 && (
+                                  <li>
+                                    <a href={stepHref(step.key)} draggable={false}>
+                                      {t("studio.outline.moreQuestions", {
+                                        count: questions.more,
+                                      })}
+                                    </a>
+                                  </li>
+                                )}
                               </ul>
                             </div>
                             {rowMenu(step.key, label, "step")}
@@ -341,6 +537,9 @@ export function DraftOutline({
                       })}
                     </ul>
                   )}
+                  {steps.length > 0 && stepCount > steps.length && (
+                    <p class="hint deck-group-empty">{moreSteps}</p>
+                  )}
                 </li>
               );
             })}
@@ -348,6 +547,11 @@ export function DraftOutline({
         )}
         <div ref={drag.lineRef} class="drop-line" aria-hidden="true" hidden />
       </div>
+      <ShowMore
+        more={moreChapters}
+        limit={OUTLINE_LIMIT}
+        onShow={() => setChapterLimit((was) => was + OUTLINE_LIMIT)}
+      />
       {dragging &&
         createPortal(
           <div ref={drag.ghostRef} class="drag-ghost" aria-hidden="true">

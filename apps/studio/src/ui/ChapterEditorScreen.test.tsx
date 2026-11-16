@@ -8,7 +8,8 @@ import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ChapterEditorScreen, proseFormat } from "./ChapterEditorScreen";
 import type { DraftEditor } from "./draftEditor";
-import { courseDraft, draftLinks } from "../test/fixtures";
+import { OUTLINE_LIMIT } from "./DraftOutline";
+import { courseDraft, draftLinks, longCourseDraft } from "../test/fixtures";
 import { answer, dialog } from "../test/dialogs";
 
 function renderScreen(
@@ -270,5 +271,26 @@ describe("ChapterEditorScreen", () => {
     cleanup();
     at("review");
     expect(screen.getByRole("heading", { name: "Final review" })).toHaveAttribute("data-arrival");
+  });
+});
+
+describe("ChapterEditorScreen of a long chapter", () => {
+  it("lists OUTLINE_LIMIT of its steps, retired steps and review questions at first, and more when asked", () => {
+    renderScreen("ch-0", longCourseDraft({ steps: 3000, retired: 3000, review: 3000 }));
+    const steps = screen.getByRole("region", { name: "Steps" });
+    const counts = () => [
+      steps.querySelectorAll("ol.draft-order > li").length,
+      within(steps).getByRole("heading", { name: "Retired steps" }).nextElementSibling!
+        .childElementCount,
+      screen.getByRole("region", { name: "Final review" }).querySelectorAll("ul > li").length,
+    ];
+    expect(counts()).toEqual([OUTLINE_LIMIT, OUTLINE_LIMIT, OUTLINE_LIMIT]);
+    const more = () => screen.getAllByRole("button", { name: "Show 50 more" });
+    expect(more()).toHaveLength(3);
+    fireEvent.click(more()[0]!);
+    expect(counts()).toEqual([2 * OUTLINE_LIMIT, OUTLINE_LIMIT, OUTLINE_LIMIT]);
+    fireEvent.click(more()[1]!);
+    fireEvent.click(more()[2]!);
+    expect(counts()).toEqual([2 * OUTLINE_LIMIT, 2 * OUTLINE_LIMIT, 2 * OUTLINE_LIMIT]);
   });
 });

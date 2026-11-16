@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useState } from "preact/hooks";
+import { useMemo, useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
 import { isPublished, reviewQuestionsOf, stepIdFor } from "@solid-memo/domain/release/courseIds";
@@ -30,6 +30,8 @@ import {
 } from "./DraftParts";
 import { LifeActions } from "./LifeActions";
 import { NewQuestionForm } from "./NewQuestionForm";
+import { OUTLINE_LIMIT } from "./DraftOutline";
+import { ShowMore, usePage } from "./ReleaseLists";
 
 /**
  * The text format prose of a draft states, as its Markdown toggle sets
@@ -50,7 +52,9 @@ export function proseFormat(markdown: boolean, was: string | undefined): string 
  * review, and a new one; and the chapter retired, restored or deleted
  * (one an earlier release published is only retired). Opened at a field
  * (`field`, from the release check), that field is where the user
- * arrives.
+ * arrives. Each of its lists shows OUTLINE_LIMIT at first, and as many
+ * more each time the user asks: a draft started from a release can have
+ * any number.
  */
 export function ChapterEditorScreen({
   draft,
@@ -79,9 +83,15 @@ export function ChapterEditorScreen({
     description: data.description,
     textFormat: data.textFormat,
   };
-  const number = liveChapters(draft).findIndex((node) => node.id === chapter);
-  const steps = liveSteps(draft, chapter);
-  const retired = retiredSteps(draft, chapter);
+  // Worked out when the draft changes, not on each key typed in the new step's id.
+  const chapters = useMemo(() => liveChapters(draft), [draft]);
+  const number = chapters.findIndex((node) => node.id === chapter);
+  const steps = useMemo(() => liveSteps(draft, chapter), [draft, chapter]);
+  const retired = useMemo(() => retiredSteps(draft, chapter), [draft, chapter]);
+  const review = useMemo(() => reviewQuestionsOf(draft, chapter), [draft, chapter]);
+  const stepPage = usePage(steps, OUTLINE_LIMIT);
+  const retiredPage = usePage(retired, OUTLINE_LIMIT);
+  const reviewPage = usePage(review, OUTLINE_LIMIT);
   const name = data.title === undefined ? chapter : readerText(data.title);
   const [stepId, setStepId] = useState<string | null>(null);
   const newStep = stepId ?? stepIdFor(draft, chapter);
@@ -111,7 +121,7 @@ export function ChapterEditorScreen({
             ? t("studio.chapter.retired")
             : t("studio.chapter.number", {
                 number: number + 1,
-                count: liveChapters(draft).length,
+                count: chapters.length,
               })}{" "}
           <code>{chapter}</code>
         </p>
@@ -160,7 +170,7 @@ export function ChapterEditorScreen({
             <p class="hint">{t("studio.outline.noSteps")}</p>
           ) : (
             <ol class="draft-order">
-              {steps.map((step, index) => {
+              {stepPage.shown.map((step, index) => {
                 const label = t("studio.chapter.step", { number: index + 1 });
                 return (
                   <li key={step.id}>
@@ -190,6 +200,7 @@ export function ChapterEditorScreen({
               })}
             </ol>
           )}
+          <ShowMore more={stepPage.more} limit={OUTLINE_LIMIT} onShow={stepPage.showMore} />
           <form class="card-edit" onSubmit={addStep}>
             <fieldset>
               <legend>{t("studio.chapter.newStep")}</legend>
@@ -201,7 +212,7 @@ export function ChapterEditorScreen({
             <>
               <h4>{t("studio.chapter.retiredSteps")}</h4>
               <ul>
-                {retired.map((step) => (
+                {retiredPage.shown.map((step) => (
                   <li key={step.id}>
                     <a href={links.stepHref(step.id)}>
                       <code>{step.id}</code>
@@ -215,6 +226,11 @@ export function ChapterEditorScreen({
                   </li>
                 ))}
               </ul>
+              <ShowMore
+                more={retiredPage.more}
+                limit={OUTLINE_LIMIT}
+                onShow={retiredPage.showMore}
+              />
             </>
           )}
         </section>
@@ -229,7 +245,7 @@ export function ChapterEditorScreen({
           </h3>
           <p class="hint">{t("studio.chapter.reviewHint")}</p>
           <ul>
-            {reviewQuestionsOf(draft, chapter).map((card) => {
+            {reviewPage.shown.map((card) => {
               const found = draftCardOf(draft, card);
               return (
                 <li key={card}>
@@ -240,6 +256,7 @@ export function ChapterEditorScreen({
               );
             })}
           </ul>
+          <ShowMore more={reviewPage.more} limit={OUTLINE_LIMIT} onShow={reviewPage.showMore} />
           <NewQuestionForm
             id="chapter-new-question"
             draft={draft}

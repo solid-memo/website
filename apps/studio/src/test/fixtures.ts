@@ -202,6 +202,93 @@ export function courseDraft(): ReleaseDraft {
   ]) as ReleaseDraft;
 }
 
+/**
+ * A course draft as long as a release can make one: `chapters` chapters
+ * (ch-0, …), the first with `steps` steps (st-0, …) and `retired` retired
+ * ones, its final review asking `review` cards and its first step asked
+ * by `questions` cards (ids only, as a release can name cards it lacks).
+ */
+export function longCourseDraft({
+  chapters = 1,
+  steps = 0,
+  retired = 0,
+  review = 0,
+  questions = 0,
+}: {
+  chapters?: number;
+  steps?: number;
+  retired?: number;
+  review?: number;
+  questions?: number;
+}): ReleaseDraft {
+  const course = courseDraft();
+  const iri = (id: string) => `${course.url}#${id}`;
+  const ids = (prefix: string, count: number) =>
+    Array.from({ length: count }, (_, at) => iri(`${prefix}-${at}`));
+  const chapter = course.chapters[0]!.data;
+  const step = course.steps[0]!.data;
+  return {
+    ...course,
+    chapters: Array.from({ length: chapters }, (_, at) => ({
+      id: `ch-${at}`,
+      data: {
+        ...chapter,
+        title: { en: `Chapter ${at}` },
+        position: at,
+        reviewQuestion: at === 0 ? ids("rq", review) : [],
+      },
+    })),
+    steps: Array.from({ length: steps + retired }, (_, at) => ({
+      id: `st-${at}`,
+      data: {
+        ...step,
+        chapter: iri("ch-0"),
+        position: at,
+        checkedBy: at === 0 ? ids("q", questions) : [],
+        ...(at < steps ? {} : { deprecated: true }),
+      },
+    })),
+  };
+}
+
+/**
+ * A course draft wide and deep at once: `chapters` chapters (ch-0, …),
+ * each with `steps` steps (st-<chapter>-<n>), or as many as `steps`
+ * gives each, each asked by `questions` cards (q-<chapter>-<n>-<k>,
+ * ids only).
+ */
+export function wideCourseDraft({
+  chapters,
+  steps,
+  questions,
+}: {
+  chapters: number;
+  steps: number | readonly number[];
+  questions: number;
+}): ReleaseDraft {
+  const course = longCourseDraft({ chapters });
+  const iri = (id: string) => `${course.url}#${id}`;
+  const step = courseDraft().steps[0]!.data;
+  const counts = typeof steps === "number" ? Array<number>(chapters).fill(steps) : steps;
+  return {
+    ...course,
+    steps: counts.flatMap((count, chapter) =>
+      Array.from({ length: count }, (_, n) => ({
+        id: `st-${chapter}-${n}`,
+        data: {
+          ...step,
+          chapter: iri(`ch-${chapter}`),
+          position: n,
+          checkedBy: Array.from({ length: questions }, (_, k) => iri(`q-${chapter}-${n}-${k}`)),
+        },
+      })),
+    ),
+  };
+}
+
+/** How many steps each chapter has in a course as long as the project's longest, Solid fundamentals: 17 chapters, 193 steps. */
+export const LONGEST_COURSE = [11, 18, 12, 11, 12, 11, 12, 11, 12, 11, 12, 11, 10, 10, 10, 10, 9];
+
 /** What a draft's screens link to, in their tests. */
 export const draftLinks = {
   draftsHref: "#/drafts",

@@ -16,7 +16,14 @@ import { optionPhrases } from "@solid-memo/ui/markdownCache";
 import type { DraftEditor } from "./draftEditor";
 import { QuestionEditorScreen } from "./QuestionEditorScreen";
 import { choose } from "../test/choose";
-import { courseDraft, DRAFT_URL, draftLinks } from "../test/fixtures";
+import { OUTLINE_LIMIT } from "./DraftOutline";
+import {
+  courseDraft,
+  DRAFT_URL,
+  draftLinks,
+  LONGEST_COURSE,
+  wideCourseDraft,
+} from "../test/fixtures";
 
 // Counts the outlines the place selector is listed from, listing them as ever.
 vi.mock("@solid-memo/domain/release/draftOutline", async (actual) => {
@@ -36,29 +43,29 @@ function renderScreen(
   onEdit = vi.fn<DraftEditor["edit"]>(() => null),
 ) {
   const onDeleted = vi.fn();
-  render(
+  const screenOf = (shown: ReleaseDraft) => (
     <QuestionEditorScreen
-      draft={draft}
+      draft={shown}
       card={card}
       readOnly={null}
       status={{ saving: false, failure: null }}
       links={draftLinks}
       onEdit={onEdit}
       onDeleted={onDeleted}
-    />,
+    />
   );
-  return { onEdit, onDeleted };
+  const view = render(screenOf(draft));
+  return { onEdit, onDeleted, rerender: (next: ReleaseDraft) => view.rerender(screenOf(next)) };
 }
 
-/** The place selector's chapters, each with its options' texts. */
-const places = (select: HTMLSelectElement) =>
-  [...select.querySelectorAll("optgroup")].map((group) => [
-    group.label,
-    [...group.querySelectorAll("option")].map((option) => option.text),
-  ]);
+/** A select's options' texts. */
+const texts = (select: HTMLSelectElement) => [...select.options].map((option) => option.text);
 
 /** The place selector, named "Asked" and the place chosen, if any. */
 const asked = () => screen.getByRole<HTMLSelectElement>("combobox", { name: /^Asked/ });
+
+/** The chapter whose places the place selector lists. */
+const chapterOf = () => screen.getByRole<HTMLSelectElement>("combobox", { name: "Chapter" });
 
 const preview = () => screen.getByRole("heading", { name: "As the course asks it" }).parentElement!;
 
@@ -72,18 +79,22 @@ describe("QuestionEditorScreen", () => {
     const place = asked();
     expect(place.value).toBe("step ch-pods-1");
     expect(place).toHaveAccessibleName("Asked Pods, step 1");
-    expect(place.options[0]!.text).toBe("Nowhere yet");
-    expect(places(place)).toEqual([
-      ["Pods", ["Step 1", "Step 2", "Final review"]],
-      ["Apps", ["Final review"]],
-    ]);
-    choose(/^Asked/, "review ch-apps");
-    expect(onEdit).toHaveBeenLastCalledWith([
-      { kind: "moveQuestion", card: "q-pods-1a", place: { kind: "review", chapter: "ch-apps" } },
-    ]);
+    expect(chapterOf().value).toBe("ch-pods");
+    expect(texts(chapterOf())).toEqual(["Pods", "Apps"]);
+    expect(texts(place)).toEqual(["Nowhere yet", "Step 1", "Step 2", "Final review"]);
     choose(/^Asked/, "step ch-pods-2");
     expect(onEdit).toHaveBeenLastCalledWith([
       { kind: "moveQuestion", card: "q-pods-1a", place: { kind: "step", step: "ch-pods-2" } },
+    ]);
+    // Another chapter: its places, the card still where it is.
+    choose("Chapter", "ch-apps");
+    expect(onEdit).toHaveBeenCalledTimes(1);
+    expect(texts(asked())).toEqual(["Nowhere yet", "Not in this chapter", "Final review"]);
+    expect(asked().value).toBe("elsewhere");
+    expect(asked()).toHaveAccessibleName("Asked Pods, step 1");
+    choose(/^Asked/, "review ch-apps");
+    expect(onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveQuestion", card: "q-pods-1a", place: { kind: "review", chapter: "ch-apps" } },
     ]);
     choose(/^Asked/, "");
     expect(onEdit).toHaveBeenLastCalledWith([
@@ -99,6 +110,8 @@ describe("QuestionEditorScreen", () => {
     const place = asked();
     expect(place.value).toBe("");
     expect(place).toHaveAccessibleName("Asked");
+    expect(chapterOf().value).toBe("ch-pods");
+    expect(texts(place)).toEqual(["Nowhere yet", "Step 1", "Step 2", "Final review"]);
   });
 
   it("names a chapter of no title by its id, and a review question's place", () => {
@@ -112,7 +125,7 @@ describe("QuestionEditorScreen", () => {
     const place = asked();
     expect(place.value).toBe("review ch-pods");
     expect(place).toHaveAccessibleName("Asked Pods, final review");
-    expect(places(place)[1]).toEqual(["ch-apps", ["Final review"]]);
+    expect(texts(chapterOf())).toEqual(["Pods", "ch-apps"]);
   });
 
   it("numbers the chapters whose names would read the same once cut short", () => {
@@ -122,12 +135,8 @@ describe("QuestionEditorScreen", () => {
       { kind: "editChapter", id: "ch-apps", text: { title: { en: `${long} apps` } } },
     ]) as ReleaseDraft;
     renderScreen("q-pods-1a", draft);
-    const place = asked();
-    expect(places(place).map(([label]) => label)).toEqual([
-      `${"a".repeat(59)}… (1)`,
-      `${"a".repeat(59)}… (2)`,
-    ]);
-    expect(place).toHaveAccessibleName(`Asked ${"a".repeat(59)}… (1), step 1`);
+    expect(texts(chapterOf())).toEqual([`${"a".repeat(59)}… (1)`, `${"a".repeat(59)}… (2)`]);
+    expect(asked()).toHaveAccessibleName(`Asked ${"a".repeat(59)}… (1), step 1`);
   });
 
   it("says no place of a chapter retired", () => {
@@ -136,9 +145,20 @@ describe("QuestionEditorScreen", () => {
     ]) as ReleaseDraft;
     renderScreen("q-pods-1a", draft);
     expect(asked()).toHaveAccessibleName("Asked");
+    expect(asked().value).toBe("elsewhere");
+    expect(texts(chapterOf())).toEqual(["Apps"]);
     cleanup();
     renderScreen("q-pods-r01", draft);
     expect(asked()).toHaveAccessibleName("Asked");
+    cleanup();
+    // No chapter left: only nowhere.
+    renderScreen(
+      "q-pods-1a",
+      applyDraftChanges(draft, [{ kind: "retire", of: "chapter", id: "ch-apps" }]) as ReleaseDraft,
+    );
+    expect(screen.queryByRole("combobox", { name: "Chapter" })).toBeNull();
+    expect(texts(asked())).toEqual(["Nowhere yet", "Not in this chapter"]);
+    expect(asked().value).toBe("elsewhere");
   });
 
   it("names a chapter once over its many steps, cut short, and lists them once while the user types", () => {
@@ -154,12 +174,16 @@ describe("QuestionEditorScreen", () => {
     const listed = vi.mocked(draftOutline);
     listed.mockClear();
     renderScreen("q-pods-1a", draft);
-    const place = asked();
-    const [, [label, steps]] = places(place) as [unknown, [string, string[]]];
+    const [, label] = texts(chapterOf());
     expect(label).toBe(`${"ж".repeat(59)}…`);
-    expect(steps).toHaveLength(501);
-    expect(steps.slice(-2)).toEqual(["Step 500", "Final review"]);
-    expect(place.outerHTML).not.toContain("ж".repeat(60));
+    expect(chapterOf().outerHTML).not.toContain("ж".repeat(60));
+    choose("Chapter", "ch-apps");
+    const place = asked();
+    // The first OUTLINE_LIMIT steps, and as many more each time the user asks.
+    expect(place.options).toHaveLength(OUTLINE_LIMIT + 3);
+    expect(texts(place).slice(-2)).toEqual(["Step 50", "Final review"]);
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more steps" }));
+    expect(place.options).toHaveLength(2 * OUTLINE_LIMIT + 3);
     const option = place.options[3]!;
     expect(listed).toHaveBeenCalledTimes(1);
     fireEvent.input(screen.getByRole("textbox", { name: "Front" }), {
@@ -170,6 +194,63 @@ describe("QuestionEditorScreen", () => {
     });
     expect(listed).toHaveBeenCalledTimes(1);
     expect(place.options[3]).toBe(option);
+  });
+
+  it("lists a bounded part of a long course's chapters and steps, the place chosen among them, and more as asked", () => {
+    const draft = applyDraftChanges(wideCourseDraft({ chapters: 300, steps: 60, questions: 0 }), [
+      { kind: "addCard", id: "q-far", card: { front: { en: "Far" }, back: { en: "Away" } } },
+      { kind: "addQuestion", card: "q-far", place: { kind: "step", step: "st-250-55" } },
+    ]) as ReleaseDraft;
+    const listed = vi.mocked(draftOutline);
+    listed.mockClear();
+    const view = renderScreen("q-far", draft);
+    const place = asked();
+    expect(place.value).toBe("step st-250-55");
+    expect(place).toHaveAccessibleName("Asked Chapter 250, step 56");
+    // The first OUTLINE_LIMIT chapters and the place's; its chapter's
+    // first OUTLINE_LIMIT steps and the place's, nowhere and the review.
+    expect(chapterOf().value).toBe("ch-250");
+    expect(chapterOf().options).toHaveLength(OUTLINE_LIMIT + 1);
+    expect(texts(place).slice(-3)).toEqual(["Step 50", "Step 56", "Final review"]);
+    expect(place.options).toHaveLength(OUTLINE_LIMIT + 3);
+    fireEvent.click(screen.getByRole("button", { name: "Show 9 more steps" }));
+    expect(place.options).toHaveLength(60 + 2);
+    expect(screen.queryByRole("button", { name: /more steps$/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more chapters" }));
+    expect(chapterOf().options).toHaveLength(2 * OUTLINE_LIMIT + 1);
+    // Another chapter: its first OUTLINE_LIMIT steps again.
+    choose("Chapter", "ch-99");
+    expect(texts(asked())).toHaveLength(OUTLINE_LIMIT + 3);
+    expect(asked().value).toBe("elsewhere");
+    choose(/^Asked/, "step st-99-49");
+    expect(view.onEdit).toHaveBeenLastCalledWith([
+      { kind: "moveQuestion", card: "q-far", place: { kind: "step", step: "st-99-49" } },
+    ]);
+    // An edit to a card lists them no more.
+    view.rerender(
+      applyDraftChanges(draft, [
+        { kind: "addCard", id: "q-near", card: { front: { en: "Near" }, back: { en: "By" } } },
+      ]) as ReleaseDraft,
+    );
+    expect(listed).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers every step of every chapter of a course as long as the project's longest as a place", () => {
+    const draft = applyDraftChanges(
+      wideCourseDraft({ chapters: LONGEST_COURSE.length, steps: LONGEST_COURSE, questions: 0 }),
+      [{ kind: "addCard", id: "q-any", card: { front: { en: "Any" }, back: { en: "Where" } } }],
+    ) as ReleaseDraft;
+    renderScreen("q-any", draft);
+    expect(chapterOf().options).toHaveLength(LONGEST_COURSE.length);
+    for (const [chapter, steps] of LONGEST_COURSE.entries()) {
+      choose("Chapter", `ch-${chapter}`);
+      expect([...asked().options].map((option) => option.value)).toEqual([
+        "",
+        ...Array.from({ length: steps }, (_, n) => `step st-${chapter}-${n}`),
+        `review ch-${chapter}`,
+      ]);
+    }
+    expect(screen.queryByRole("button", { name: /^Show/ })).toBeNull();
   });
 
   it("saves the card's content by Save, keeping when it was made and how it is written", () => {

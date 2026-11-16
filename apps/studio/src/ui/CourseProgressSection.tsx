@@ -8,6 +8,7 @@ import { fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n, type ErrorText } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { ShowMore, usePage } from "./ReleaseLists";
 import { useConfirm } from "./shell/ConfirmDialog";
 
 /**
@@ -16,6 +17,12 @@ import { useConfirm } from "./shell/ConfirmDialog";
  * the rest are only counted.
  */
 const LISTED_GONE_CHAPTERS = 20;
+
+/**
+ * How many of the course's chapters are listed at first, and as many
+ * more each time the user asks: a release can have any number of them.
+ */
+const LISTED_CHAPTERS = 50;
 
 /**
  * The completed chapters whose fragment id is no chapter of the outline,
@@ -37,7 +44,8 @@ function goneChapters(completed: readonly string[], inOutline: ReadonlySet<strin
  * the course restarted, once the user confirms: no chapter done. A
  * chapter the deck completed that the release no longer has (retired)
  * is listed by its id, to mark not done too, up to LISTED_GONE_CHAPTERS
- * of them and a count of the rest. Answers and review states
+ * of them and a count of the rest. The chapters are listed
+ * LISTED_CHAPTERS at a time. Answers and review states
  * stay as they are either way. While the course is read the section
  * says so, and why it could not be (`unreadable`).
  */
@@ -54,6 +62,7 @@ export function CourseProgressSection({
 }) {
   const { t, readerText } = useI18n();
   const { ask, dialog } = useConfirm();
+  const chapters = usePage(course?.outline.chapters ?? [], LISTED_CHAPTERS);
 
   if (course === undefined) {
     return (
@@ -88,7 +97,7 @@ export function CourseProgressSection({
     <section aria-labelledby="course-progress-heading">
       <h3 id="course-progress-heading">{t("studio.about.progress")}</h3>
       <ol class="studio-chapters">
-        {course.outline.chapters.map((chapter, index) => {
+        {chapters.shown.map((chapter, index) => {
           const { state } = course.progress.chapters[index]!;
           return (
             <li key={chapter.id}>
@@ -99,6 +108,7 @@ export function CourseProgressSection({
           );
         })}
       </ol>
+      <ShowMore more={chapters.more} limit={LISTED_CHAPTERS} onShow={chapters.showMore} />
       {gone.length > 0 && (
         <>
           <p>{t("studio.about.goneChapters")}</p>
