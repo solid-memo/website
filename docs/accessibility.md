@@ -164,6 +164,8 @@ with their setup can report it with the
 [accessibility barrier form](https://github.com/solid-memo/website/issues/new?template=accessibility.yml).
 It asks what they tried, what happened, and what they use: browser,
 screen reader or other assistive technology, and device. It labels the
-issue `accessibility`, and the barrier is handled as a bug.
+issue `accessibility`, and the barrier is handled as a bug. How a
+report is answered, and how its severity is set, is in
+[ACCESSIBILITY.md](../ACCESSIBILITY.md#report-a-barrier).
 Discussions are open for a question or an idea
 ([CONTRIBUTING.md](../CONTRIBUTING.md)).

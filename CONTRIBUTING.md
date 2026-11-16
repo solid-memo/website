@@ -87,6 +87,9 @@ The code follows the [style guide](docs/style.md), the
 [Biome](https://biomejs.dev/) formats and lints the code: run
 `npm run format` before you commit, and `npm run check` fails on what it
 would still change ([docs/style.md](docs/style.md#formatting)).
+A change to what the app shows, or how it's used, works with the
+keyboard alone, zoomed in and on a narrow screen, as
+[ACCESSIBILITY.md](ACCESSIBILITY.md#what-a-change-needs) says.
 
 **Text formats.** Keep the repository diff-friendly: code in TypeScript,
 data in Turtle, docs in Markdown, configuration in JSON or YAML. Do not
