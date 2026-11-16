@@ -127,10 +127,11 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * it again.
  *
  * The target's cards document keeps its own links: the cards written
- * there are its deck's, and hold only what this app knows of a card
- * (a move drops the triples another app put on it), but the release it
- * came from (`fromRelease`): in the target it is the user's card, which
- * no upgrade of the target's series changes (libraryUpgrade.ts). With `keepProgress`, a card's review states go
+ * there are its deck's. A card takes with it what its subject says
+ * beyond what this app knows of a card (carriedIdsOf), but not the
+ * release it came from (`fromRelease`): in the target it is the user's
+ * card, which no upgrade of the target's series changes
+ * (libraryUpgrade.ts). With `keepProgress`, a card's review states go
  * with it, under its id in the target, where they are written naming the
  * card there (sm:reviewOf); a card present in the target
  * keeps a state it has there. Without, a card new to the target starts
@@ -217,6 +218,32 @@ export function planCardTransfer(
     if (mode === "move") plan.source.remove.push(card.id);
   }
   return plan;
+}
+
+/**
+ * The subjects a transfer writes anew in the target's cards document,
+ * each by its fragment id there, with the fragment id of the subject of
+ * the source's it is a copy of: the cards the target did not hold, and
+ * their distractors, in their order. What the source's subject says
+ * beyond what this app knows of a card goes with it
+ * (DeckRepository.applyCardChanges).
+ */
+export function carriedIdsOf(
+  plan: CardTransferPlan,
+  sourceCards: readonly Card[],
+): Record<string, string> {
+  const written = new Map(plan.target.save.map((card) => [card.id, card]));
+  const carried: Record<string, string> = {};
+  for (const { from, to, present } of plan.cards) {
+    if (present) continue;
+    carried[to] = from;
+    // The first card of the id, as the plan takes it.
+    const theirs = sourceCards.find((card) => card.id === from)?.distractors ?? [];
+    (written.get(to)?.distractors ?? []).forEach((distractor, at) => {
+      carried[distractor.id] = theirs[at]!.id;
+    });
+  }
+  return carried;
 }
 
 /**

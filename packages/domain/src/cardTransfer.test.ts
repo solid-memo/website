@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import {
+  carriedIdsOf,
   planCardTransfer,
   sharesDocuments,
   sharesDocumentsWith,
@@ -107,6 +108,43 @@ describe("sharesDocumentsWith", () => {
     const shares = sharesDocumentsWith(source);
     for (const n of [1, 2, 3]) shares({ ...TARGET, url: `${TARGET.url}${n}` });
     expect(reads).toBe(1);
+  });
+});
+
+describe("carriedIdsOf", () => {
+  it("names the source's subject for each card written anew and its distractors, by their ids in the target", () => {
+    const source = [a, b, card("a", { distractors: [{ id: "later", text: { sv: "z" } }] })];
+    const kept = planCardTransfer(
+      { ...SOURCE, cards: source, states: [] },
+      { ...TARGET, cards: [], states: [] },
+      ["a", "b"],
+      copy,
+    );
+    expect(carriedIdsOf(kept, source)).toEqual({ a: "a", "a-d1": "a-d1", "a-d3": "a-d3", b: "b" });
+
+    // Renumbered where the target uses the card's id: each distractor by its place among the card's.
+    const renumbered = planCardTransfer(
+      { ...SOURCE, cards: source, states: [] },
+      { ...TARGET, cards: [card("a", { front: { en: "other" } })], states: [] },
+      ["a"],
+      copy,
+    );
+    expect(carriedIdsOf(renumbered, source)).toEqual({
+      "a-2": "a",
+      "a-2-d1": "a-d1",
+      "a-2-d2": "a-d3",
+    });
+  });
+
+  it("names none for a card the target holds already, which is not written again", () => {
+    const plan = planCardTransfer(
+      { ...SOURCE, cards: [b], states: [] },
+      { ...TARGET, cards: [b], states: [] },
+      ["b"],
+      copy,
+    );
+    expect(plan.cards).toEqual([{ from: "b", to: "b", present: true }]);
+    expect(carriedIdsOf(plan, [b])).toEqual({});
   });
 });
 

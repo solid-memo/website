@@ -5,6 +5,7 @@
 import {
   type Dataset,
   type NamedSubject,
+  type Subject,
   type SubjectBuilder,
   buildThing,
   createSolidDataset,
@@ -89,6 +90,7 @@ import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import {
   readDatetime,
+  carriedTo,
   recordThing,
   unlessNewer,
   unlessTyped,
@@ -431,7 +433,7 @@ export function createSolidDeckRepository({
       return stated.length;
     },
 
-    async applyCardChanges(deck, changes, { whole, version } = {}): Promise<void> {
+    async applyCardChanges(deck, changes, { whole, version, carried } = {}): Promise<void> {
       const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
       // Changes made from an earlier read go only to the document as it was then: a later edit is not undone.
       if (
@@ -443,7 +445,25 @@ export function createSolidDeckRepository({
           version === ABSENT_VERSION ? "absent" : "unchanged",
         );
       }
-      const changed = withCardChanges(read ?? createSolidDataset(), deck, changes);
+      // A card copied from another deck starts from what that deck's document says of it.
+      const source =
+        carried === undefined
+          ? null
+          : await getSolidDatasetOrNull(
+              carried.deck.cardsDocumentUrl,
+              carried.asNoOne === true ? publicFetch : fetch,
+            );
+      const changed = withCardChanges(
+        read ?? createSolidDataset(),
+        deck,
+        changes,
+        source === null
+          ? undefined
+          : (id) => {
+              if (!Object.hasOwn(carried!.ids, id)) return null;
+              return getThing(source, `${carried!.deck.cardsDocumentUrl}#${carried!.ids[id]}`);
+            },
+      );
       await saveCardsDocument(deck, changed.dataset, changed.subjects, { whole });
     },
 
@@ -833,9 +853,19 @@ export function createSolidDeckRepository({
       save: (CardContent & { id: string; createdAt?: string; retired?: true })[];
       remove: string[];
     },
+    carried: (id: string) => Subject | null = () => null,
   ): { dataset: Dataset; subjects: string[] } {
     const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
     const edit = editOf(dataset);
+    // A card or a distractor the document does not hold starts from the subject it is a copy of,
+    // without the release that one came from and the distractors it names, which are its deck's.
+    for (const card of saved) {
+      for (const { id } of [card, ...(card.distractors ?? [])]) {
+        const from = edit.getThing(urlOf(id)) === null ? carried(id) : null;
+        if (from !== null)
+          edit.setThing(carriedTo(from, urlOf(id), [SM.fromRelease, SM.distractor]));
+      }
+    }
     // Distractors no card names any longer go once all are written: one moved to another card stays.
     const written = writeCards(edit, deck, saved, (_, card) => {
       const existing = edit.getThing(urlOf(card.id));

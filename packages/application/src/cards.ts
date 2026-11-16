@@ -28,6 +28,7 @@ import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import type { FsrsState, ReviewKey, ReviewState, ReviewStates } from "@solid-memo/domain/review";
 import { isStudyDay, rescheduleStates, resetStates } from "@solid-memo/domain/reviewStateEdits";
 import {
+  carriedIdsOf,
   planCardTransfer,
   sharesDocuments,
   type CardTransferPlan,
@@ -414,12 +415,21 @@ export function createCardUseCases({
       ids,
       options,
     );
+    // What the source says of a card beyond what this app knows goes with it, and with its states.
+    const cardIds = Object.fromEntries(plan.cards.map((card) => [card.to, card.from]));
     // The target first: a move stopped here leaves the cards in both decks, never in neither.
     if (plan.target.save.length > 0) {
       await deckRepository.applyCardChanges(
         to,
         { save: plan.target.save, remove: [] },
-        wholeAt(targetCards.version),
+        {
+          ...wholeAt(targetCards.version),
+          carried: {
+            deck: from,
+            asNoOne: asNoOne.cards,
+            ids: carriedIdsOf(plan, sourceCards.value),
+          },
+        },
       );
     }
     if (plan.target.reviewSaves.length > 0 || plan.target.reviewRemovals.length > 0) {
@@ -428,6 +438,7 @@ export function createCardUseCases({
         remove: plan.target.reviewRemovals,
         fsrs: { save: plan.target.fsrsSaves, remove: plan.target.fsrsRemovals },
         every: true,
+        carried: { deck: from, asNoOne: asNoOne.reviews, ids: cardIds },
       });
     }
     // The source's states before its cards: a move stopped between leaves the cards in the

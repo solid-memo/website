@@ -700,6 +700,8 @@ describe("cards", () => {
     };
     const changed = () => new AppError("changedElsewhere", { url: deck.cardsDocumentUrl });
     const { url: _url, formatVersion: _formatVersion, ...oneWritten } = one;
+    /** The source deck, read as the user, and the ids there of what the target is given. */
+    const carriedFrom = (ids: Record<string, string>) => ({ deck, asNoOne: false, ids });
 
     /** The source holds one and two, the target what `held` says; each cards document read at a new version. */
     function setup(held: Card[] = []) {
@@ -732,7 +734,12 @@ describe("cards", () => {
       expect(plan.cards).toEqual([{ from: "one", to: "one", present: false }]);
       const { applyCardChanges } = deps.deckRepository;
       expect(vi.mocked(applyCardChanges).mock.calls).toEqual([
-        [target, { save: [oneWritten], remove: [] }, { whole: true, version: "v2" }],
+        // What the source says of the card beyond what the app knows goes with it.
+        [
+          target,
+          { save: [oneWritten], remove: [] },
+          { whole: true, version: "v2", carried: carriedFrom({ one: "one" }) },
+        ],
         [deck, { save: [], remove: ["one"] }, { whole: true, version: "v1" }],
       ]);
       expect(vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls).toEqual([
@@ -743,6 +750,7 @@ describe("cards", () => {
             remove: [],
             fsrs: { save: [studiedFsrs], remove: [] },
             every: true,
+            carried: carriedFrom({ one: "one" }),
           },
         ],
         // The source's every state of the card goes: its FSRS-6 one too.
@@ -774,7 +782,7 @@ describe("cards", () => {
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledExactlyOnceWith(
         target,
         { save: [expect.objectContaining({ id: "two" })], remove: [] },
-        { whole: true, version: "v2" },
+        { whole: true, version: "v2", carried: carriedFrom({ two: "two" }) },
       );
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalledWith(
@@ -890,7 +898,7 @@ describe("cards", () => {
       expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
         target,
         { save: [oneWritten], remove: [] },
-        { whole: true, version: "v4" },
+        { whole: true, version: "v4", carried: carriedFrom({ one: "one" }) },
       );
     });
 
@@ -911,7 +919,7 @@ describe("cards", () => {
       expect(deps.deckRepository.applyCardChanges).toHaveBeenLastCalledWith(
         target,
         { save: [oneWritten], remove: [] },
-        { whole: true, version: "v4" },
+        { whole: true, version: "v4", carried: carriedFrom({ one: "one" }) },
       );
 
       vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValue(changed());

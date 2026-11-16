@@ -271,6 +271,7 @@ export function makeDeps() {
     isUnchanged: vi.fn(async () => true),
     versionOf: vi.fn(async (url: string): Promise<string | null> => `version of ${url}`),
     namesIriAt: vi.fn(async () => false),
+    namesLaterTerm: vi.fn(async () => false),
     deleteRecursively: vi.fn(async () => undefined),
   };
   const updateJournal = {

@@ -2157,12 +2157,40 @@ by one.
   call too (`setIriAll` and `setStringAll` of a subject's builder). An
   add at each value would copy the list so far. The edit and its
   save then take time that grows with the document.
-- A card moved to another deck in the
-  [Studio](studio.md#moving-and-copying-cards) is written afresh in the
-  target with only what Solid Memo knows of it. Its subject and its
-  wrong options' are removed from the source, triples another app put
-  on them included. A copy leaves those triples in the source and
-  doesn't carry them over.
+- A card moved or copied to another deck in the
+  [Studio](studio.md#moving-and-copying-cards) takes with it what its
+  subject says beyond what Solid Memo knows of a card: a term a later
+  version of the app added, or another app's. So do its wrong options
+  and the review states that go with it. The copy starts from the
+  source's subject (`carriedTo` in `records.ts`), then is written as
+  an edit in place writes one. Two links don't go, as they are the
+  source deck's: the release the card came from and the wrong options
+  it names there. A value that is a blank node stays behind, as what it
+  says is in the source's document. A card a newer version of the app
+  wrote is refused, as an edit of it is. A move removes the source's
+  subjects whole. A review state of a scheduler the app doesn't know
+  stays in the source's reviews document.
+- **A write keeps what it doesn't own**, and a test holds every use
+  case to it
+  ([writes.preserve.test.ts](../packages/solid/src/writes.preserve.test.ts),
+  [testing.md](testing.md#strategy-per-layer)). It seeds a pod with what a
+  later version may add ([vocab.md](vocab.md#versioning-policy)): a
+  term outside every shape on each subject, a subject of a new class in
+  each document, and a review state of a new scheduler beside each
+  state. After every write, each is still there, unless the use case
+  removes its subject, which is what was asked. Three kinds of write
+  can't carry such data, and say so:
+  - Adding a guest's study to an instance writes what the app reads of
+    it, so a study that holds a term of the vocabulary the app doesn't
+    know isn't added, and stays on the device
+    ([guest-mode.md](guest-mode.md)).
+  - A release states only what its shapes describe, so a draft with a
+    subject of a class the app doesn't know isn't published.
+  - An import, from a file or the library, writes what the app reads of
+    its source.
+
+  Deleting an instance or a draft removes Solid Memo's subjects, those
+  of a class a later version added among them.
 - A palette's color set is written afresh too, with only its colors:
   its shape is the one closed shape, so a triple another app added
   would have every later save refused. It's written only at a subject

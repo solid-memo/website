@@ -160,8 +160,12 @@ It runs these steps:
    fence keeps the guest's instance read-only meanwhile. The whole
    instance, answer log included, is checked against the shapes.
    Nothing is added from a study that doesn't fully conform
-   (`guestStudyInvalid`), or that has a subject a newer app version
-   wrote (`guestStudyTooNew`). Nor from a study with deck groups when a
+   (`guestStudyInvalid`), or that a newer app version wrote
+   (`guestStudyTooNew`). Such a study has a subject in a newer format,
+   or a document that uses a term of the vocabulary this version
+   doesn't know (`namesLaterTerm`). Adding writes what this version reads of
+   each deck, so what a later one said beside it would be left behind,
+   and go with the guest's study. Nor from a study with deck groups when a
    newer version wrote the instance's
    [arrangement](data-model.md#deck-groups) (`deckTreeTooNew`), refused
    before any deck is written. Nor when the kept decks, but any an

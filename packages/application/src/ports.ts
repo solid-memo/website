@@ -195,6 +195,21 @@ export interface InstanceRepository {
  */
 export type Since<T> = { unchanged: true } | { unchanged: false; value: T; version: string | null };
 
+/**
+ * Where subjects a write makes anew were copied or moved from: the deck
+ * that holds them, and for each one written, by its id, the id of the
+ * one it is a copy of there. A subject made anew starts from what its
+ * source says, so what a later version of the app, or another app, said
+ * of it beyond what this app knows goes with it; what this app knows it
+ * writes as it is given. `asNoOne` reads the source's document as no
+ * one, as the caller read it.
+ */
+export interface CarriedFrom {
+  deck: Deck;
+  asNoOne?: boolean;
+  ids: Readonly<Record<string, string>>;
+}
+
 /** A card to write by its fragment id (DeckRepository.applyCardChanges). */
 type CardToSave = CardContent & {
   id: string;
@@ -362,7 +377,11 @@ export interface DeckRepository {
    * (readCardsSince), the changes are written only while the document is
    * still at it: one changed since (changedElsewhere) or created since is
    * not written, as changes made on another read of it would undo what
-   * changed.
+   * changed. With `carried`, a card or a distractor the document does
+   * not hold yet starts from the subject of the source's cards document
+   * it is a copy of (CarriedFrom, by fragment id), but for the release
+   * that one came from and the distractors it names, which are the
+   * source's.
    */
   applyCardChanges(
     deck: Deck,
@@ -370,7 +389,7 @@ export interface DeckRepository {
       save: CardToSave[];
       remove: string[];
     },
-    options?: { whole?: boolean; version?: string },
+    options?: { whole?: boolean; version?: string; carried?: CarriedFrom },
   ): Promise<void>;
   /**
    * Write the card only when the deck has no card it can read at its
@@ -828,7 +847,10 @@ export interface ReviewStateRepository {
    * `remove` SM-2's, `fsrs.remove` FSRS-6's. With `every`, a key of
    * `remove` loses every state of it, SM-2's and this app's FSRS-6's,
    * read or not, as removing a card does (a card forgotten, removed or
-   * moved away). Another scheduler's state stays either way.
+   * moved away). Another scheduler's state stays either way. With
+   * `carried`, a state written at a new subject starts from the state
+   * of its kind the source's reviews document holds of the card it is a
+   * copy of (CarriedFrom, by card id) in its direction.
    */
   applyReviewChanges(
     deck: Deck,
@@ -837,6 +859,7 @@ export interface ReviewStateRepository {
       remove: ReviewKey[];
       fsrs?: { save: FsrsState[]; remove: ReviewKey[] };
       every?: boolean;
+      carried?: CarriedFrom;
     },
   ): Promise<void>;
   /**
@@ -1127,6 +1150,14 @@ export interface InstanceCopier {
    * takes byte for byte (copyResource).
    */
   namesIriAt(url: string, origin: string): Promise<boolean>;
+  /**
+   * Whether the document uses a term of Solid Memo's vocabulary that
+   * this app does not know, as a property, a class or a concept: data a
+   * later version of the app added (docs/vocab.md "Versioning policy"),
+   * which this one would leave behind where it copies what it reads
+   * rather than the document. A file that is not RDF uses none.
+   */
+  namesLaterTerm(url: string): Promise<boolean>;
   /**
    * Delete a container and everything below it; one that is gone counts
    * as deleted. Only for a copy this app made whole, at a URL it found

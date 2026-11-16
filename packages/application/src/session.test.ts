@@ -1934,6 +1934,26 @@ describe("guests", () => {
       expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
     });
 
+    it("mergeGuestStudy adds nothing from a study with a term of the vocabulary this app does not know", async () => {
+      // Adding writes what this app reads of a deck: what a later version said beside it would be left, and go with the study.
+      const { deps } = mergeDeps();
+      const cards = `${guestInstance.url}decks/deck-1.ttl`;
+      vi.mocked(deps.instanceCopier.listResources).mockResolvedValue([
+        `${guestInstance.url}decks/`,
+        cards,
+      ]);
+      vi.mocked(deps.instanceCopier.namesLaterTerm).mockImplementation(
+        async (url) => url === cards,
+      );
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({ ok: false, step: "read", error: new AppError("guestStudyTooNew") });
+      // A folder is not asked: it holds no statements of its own.
+      expect(vi.mocked(deps.instanceCopier.namesLaterTerm).mock.calls).toEqual([[cards]]);
+      expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
+    });
+
     it("mergeGuestStudy adds nothing from a study whose log has as many months as are taken in", async () => {
       const { deps } = mergeDeps();
       const months = Array.from({ length: MAX_LOG_MONTHS }, (_, i) => `${1900 + i}-01`);

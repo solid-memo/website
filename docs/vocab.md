@@ -111,7 +111,9 @@ A value from a fixed set is a
   save over a format newer than its own, so each new format shut every
   earlier version of the app out of what a later one saved. Data added
   later goes where a version that doesn't know it can safely ignore
-  it, or can't see it. There are four ways, and no other:
+  it, or can't see it. There are four ways, and no other. Each adds a
+  term to this vocabulary, so a version that doesn't know the term can
+  tell a later one wrote it:
   - **An optional term outside every shape.** A term written on a
     subject outside its shape isn't owned or checked by it, and every
     writer of the subject keeps it: `sm:position` (1.13), a deck's
