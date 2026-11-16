@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.9](https://github.com/solid-memo/website/compare/v7.6.8...v7.6.9) (2026-11-16)
+
+### Fixes
+
+* **solid:** keep what a write does not own, and hold every use case to it ([1299354](https://github.com/solid-memo/website/commit/1299354de7eed1f8544c628de3eb8b266b4d2ea9)), closes [#845](https://github.com/solid-memo/website/issues/845)
+
 ## [7.6.8](https://github.com/solid-memo/website/compare/v7.6.7...v7.6.8) (2026-11-16)
 
 ### Fixes
