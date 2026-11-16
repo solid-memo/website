@@ -49,6 +49,8 @@ export function createDraftDeckLibrary(draft: ReleaseDraft): DeckLibrary {
         releases: _releases,
         cardCount: _cardCount,
         sources: _sources,
+        sourceCount: _sourceCount,
+        authorCount: _authorCount,
         createdAt: _createdAt,
         ...about
       } = listed();

@@ -9,6 +9,7 @@ import { licenseLabel } from "@solid-memo/domain/license";
 import { NEW_TAB, newTab } from "../test/links";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
+import { LIST_LIMIT } from "./bounded";
 import { I18nProvider } from "./i18n";
 import { RepoUrl } from "./ReportMistake";
 
@@ -205,6 +206,71 @@ describe("LibraryDeckScreen", () => {
     renderScreen({ deck: { ...capitals, sources } });
     expect(fact("Sources").querySelector("details")).toBeNull();
     expect(within(fact("Sources")).getAllByRole("listitem")).toHaveLength(5);
+  });
+
+  it("draws no more than a bounded list of sources, and of a source's authors, with how many more there are (GHSA-46q4-pmpc-mj5j)", () => {
+    const many = 5_000;
+    const authors = Array.from({ length: many }, (_, i) => `Author ${i}`);
+    const sources = Array.from({ length: many }, (_, i) => ({
+      url: `https://example.org/source-${i}`,
+      authors: i === 0 ? authors : [`Author ${i}`],
+    }));
+    renderScreen({ deck: { ...capitals, sources, sourceCount: 390_000 } });
+    const disclosure = fact("Sources").querySelector("details")!;
+    expect(within(disclosure).getByText("390,000 sources").tagName).toBe("SUMMARY");
+    expect(within(disclosure).getAllByRole("listitem")).toHaveLength(LIST_LIMIT);
+    expect(disclosure).toHaveTextContent(
+      `And ${(390_000 - LIST_LIMIT).toLocaleString("en")} more sources, not listed here.`,
+    );
+    const first = within(disclosure).getAllByRole("listitem")[0]!;
+    expect(first).toHaveTextContent(
+      `Author ${LIST_LIMIT - 1} and ${(many - LIST_LIMIT).toLocaleString("en")} more`,
+    );
+    expect(first).not.toHaveTextContent(`Author ${LIST_LIMIT},`);
+    expect(disclosure.querySelectorAll("*").length).toBeLessThan(LIST_LIMIT * 20);
+  });
+
+  it("draws a bounded number of authors for a listing's most sources, each with most authors, and how many more each names (GHSA-46q4-pmpc-mj5j)", () => {
+    const named = 5_000;
+    // As a listing keeps a release that names thousands: its first 100 of each, and how many there are.
+    const authorsOf = (who: string) =>
+      Array.from({ length: 100 }, (_, i) => `${who} ${i} <${who.toLowerCase()}${i}@example.org>`);
+    const sources = Array.from({ length: 100 }, (_, i) => ({
+      url: `https://example.org/source-${i}`,
+      authors: authorsOf(`Source${i}`),
+      authorCount: named,
+    }));
+    renderScreen({
+      deck: {
+        ...capitals,
+        authors: authorsOf("Deck"),
+        authorCount: named,
+        sources,
+        sourceCount: named,
+      },
+    });
+    const more = `and ${(named - LIST_LIMIT).toLocaleString("en")} more`;
+    expect(fact("Authors")).toHaveTextContent(more);
+    const lines = within(fact("Sources").querySelector("details")!).getAllByRole("listitem");
+    expect(lines).toHaveLength(LIST_LIMIT);
+    for (const line of lines) expect(line).toHaveTextContent(more);
+    // The deck's own LIST_LIMIT authors, and LIST_LIMIT of each of LIST_LIMIT sources: no more.
+    expect(document.querySelectorAll('a[href^="mailto:"]')).toHaveLength(
+      LIST_LIMIT * (LIST_LIMIT + 1),
+    );
+  });
+
+  it("says how many authors a release names when its listing kept none of them, for the deck and a source (GHSA-46q4-pmpc-mj5j)", () => {
+    renderScreen({
+      deck: {
+        ...capitals,
+        authors: [],
+        authorCount: 3_000,
+        sources: [{ url: "https://example.org/source", authors: [], authorCount: 2_000 }],
+      },
+    });
+    expect(fact("Authors").textContent).toBe("and 3,000 more");
+    expect(fact("Source")).toHaveTextContent("— and 2,000 more");
   });
 
   it("folds more than five sources into a closed disclosure that names how many", () => {

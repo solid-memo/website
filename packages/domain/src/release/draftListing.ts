@@ -7,7 +7,15 @@ import { directionOfConcept } from "../concepts.ts";
 import { CARD_FORMAT_VERSION, type Distractor } from "../deck.ts";
 import { distractorFromRecord, libraryCardFromRecord } from "../deckRecord.ts";
 import { copyKeywords } from "../keywords.ts";
-import type { LibraryCard, LibraryDeck, LibraryDeckContent, LibrarySource } from "../library.ts";
+import {
+  boundedSources,
+  MAX_LISTED_SOURCES,
+  withBoundedListing,
+  type LibraryCard,
+  type LibraryDeck,
+  type LibraryDeckContent,
+  type LibrarySource,
+} from "../library.ts";
 import { TextMap } from "../pathKeys.ts";
 import { iriIn, type ReleaseDraft, triplesBySubject } from "./releaseDraft.ts";
 import { DCTERMS_NS, isPlainText } from "./releaseModel.ts";
@@ -18,21 +26,24 @@ import { DCTERMS_NS, isPlainText } from "./releaseModel.ts";
  * from the draft alone. It is the only release of its series here, its
  * cards those in use, its authors named by the agents the draft
  * describes, and its sources by what the draft says of them, gathered
- * in one pass over its statements.
+ * in one pass over its statements. It keeps no more of its metadata
+ * (withBoundedListing) and sources (boundedSources) than learners'
+ * listing of the release does.
  */
 export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
   const { root } = draft;
   const names = new TextMap<string>();
   for (const agent of draft.agents) names.set(iriIn(draft, agent.id), agent.data.name);
   // A source named twice is listed once, as the release's statements would name it.
-  const sources = new Set(root.wasDerivedFrom);
-  const saying = triplesBySubject(draft.triples, sources);
+  const named = [...new Set(root.wasDerivedFrom)];
+  // What it says of those it lists alone (boundedSources).
+  const saying = triplesBySubject(draft.triples, new Set(named.slice(0, MAX_LISTED_SOURCES)));
   const said = (subject: string, predicate: string) =>
     (saying.get(subject) ?? [])
       .filter((triple) => triple.predicate === predicate)
       .map((triple) => triple.object);
   const version = root.version ?? "1";
-  return {
+  return withBoundedListing({
     url: draft.url,
     seriesUrl: root.inSeries ?? draft.url,
     version,
@@ -57,7 +68,7 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
     direction: directionOfConcept(root.studyDirection)!,
     ...(root.created === undefined ? {} : { createdAt: root.created }),
     ...(root.modified === undefined ? {} : { modifiedAt: root.modified }),
-    sources: [...sources].map((url): LibrarySource => {
+    ...boundedSources(named, (url): LibrarySource => {
       // Its title and authors as learners read them: plain text only.
       const title = said(url, `${DCTERMS_NS}title`).find(isPlainText);
       const license = said(url, `${DCTERMS_NS}license`).find((term) => term.kind === "iri");
@@ -71,7 +82,7 @@ export function draftLibraryDeck(draft: ReleaseDraft): LibraryDeck {
       };
     }),
     ...(draft.course ? { isCourse: true as const } : {}),
-  };
+  });
 }
 
 /**
@@ -92,6 +103,8 @@ export function draftLibraryContent(
     cardCount: _cardCount,
     languages: _languages,
     sources: _sources,
+    sourceCount: _sourceCount,
+    authorCount: _authorCount,
     createdAt: _createdAt,
     isCourse,
     ...about

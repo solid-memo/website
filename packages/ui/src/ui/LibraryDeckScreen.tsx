@@ -7,6 +7,7 @@ import { keywordsIn } from "@solid-memo/domain/keywords";
 import { topicLabels, type LibraryDeck, type LibrarySource } from "@solid-memo/domain/library";
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
 import { AuthorNames } from "./AuthorName";
+import { bounded } from "./bounded";
 import { cardLanguageNames } from "./cardLanguageNames";
 import { ErrorMessage } from "./ErrorMessage";
 import { DataLink, LicenseLink } from "./DataLink";
@@ -74,6 +75,7 @@ export function LibraryDeckScreen({
   const { t, locale, readerText, readerLang, formatDate, directionLabel, languageParts } =
     useI18n();
   const topics = topicLabels(deck.themes);
+  const authorCount = deck.authorCount ?? deck.authors.length;
   const languages = cardLanguageNames(deck, languageParts);
   /** Only those in the reader's language: none in it, no keywords shown. */
   const keywords = keywordsIn(deck.keywords, locale);
@@ -151,11 +153,11 @@ export function LibraryDeckScreen({
             <dd>{deck.versionNotes}</dd>
           </>
         )}
-        {deck.authors.length > 0 && (
+        {authorCount > 0 && (
           <>
-            <dt>{t("libraryDeck.authors", { count: deck.authors.length })}</dt>
+            <dt>{t("libraryDeck.authors", { count: authorCount })}</dt>
             <dd>
-              <AuthorNames authors={deck.authors} />
+              <AuthorNames authors={deck.authors} count={deck.authorCount} />
             </dd>
           </>
         )}
@@ -179,14 +181,7 @@ export function LibraryDeckScreen({
             <dd>{formatDate(deck.modifiedAt)}</dd>
           </>
         )}
-        {deck.sources.length > 0 && (
-          <>
-            <dt>{t("libraryDeck.sources", { count: deck.sources.length })}</dt>
-            <dd>
-              <SourceList sources={deck.sources} />
-            </dd>
-          </>
-        )}
+        <SourcesFact deck={deck} />
       </dl>
       <div class="actions">
         {deck.isCourse === true ? (
@@ -263,22 +258,45 @@ function ShareLink({ url }: { url: string }) {
 /** More sources than this are folded away, so they don't push the buttons below them far down. */
 const SOURCES_SHOWN = 5;
 
-/** A release's sources, each on its own line; a long list behind a disclosure, closed. */
-function SourceList({ sources }: { sources: LibrarySource[] }) {
+/** The release's sources, under a term that says how many it states; nothing when it states none. */
+function SourcesFact({ deck }: { deck: LibraryDeck }) {
   const { t } = useI18n();
-  const list = (
-    <ul class="sources">
-      {sources.map((source) => (
-        <li key={source.url}>
-          <SourceLine source={source} />
-        </li>
-      ))}
-    </ul>
+  if (deck.sources.length === 0) return null;
+  const count = deck.sourceCount ?? deck.sources.length;
+  return (
+    <>
+      <dt>{t("libraryDeck.sources", { count })}</dt>
+      <dd>
+        <SourceList sources={deck.sources} count={count} />
+      </dd>
+    </>
   );
-  if (sources.length <= SOURCES_SHOWN) return list;
+}
+
+/**
+ * A release's sources, `count` in all, each on its own line: the first
+ * LIST_LIMIT of them, then how many more there are (bounded), as a
+ * release may state any number; a long list behind a disclosure, closed.
+ */
+function SourceList({ sources, count }: { sources: LibrarySource[]; count: number }) {
+  const { t } = useI18n();
+  const { shown, more } = bounded(sources, count);
+  const list = (
+    <>
+      <ul class="sources">
+        {shown.map((source) => (
+          <li key={source.url}>
+            <SourceLine source={source} />
+          </li>
+        ))}
+      </ul>
+      {more > 0 && <p class="hint">{t("libraryDeck.sourcesMore", { count: more })}</p>}
+    </>
+  );
+  if (count <= SOURCES_SHOWN) return list;
   return (
     <details>
-      <summary>{t("libraryDeck.sourceCount", { count: sources.length })}</summary>
+      <summary>{t("libraryDeck.sourceCount", { count })}</summary>
       {list}
     </details>
   );
@@ -290,7 +308,7 @@ function SourceList({ sources }: { sources: LibrarySource[] }) {
  * states them.
  */
 function SourceLine({ source }: { source: LibrarySource }) {
-  const hasAuthors = source.authors.length > 0;
+  const hasAuthors = (source.authorCount ?? source.authors.length) > 0;
   const hasLicense = source.license !== undefined;
   return (
     <>
@@ -298,7 +316,7 @@ function SourceLine({ source }: { source: LibrarySource }) {
       {(hasAuthors || hasLicense) && (
         <span class="hint">
           {" — "}
-          {hasAuthors && <AuthorNames authors={source.authors} />}
+          {hasAuthors && <AuthorNames authors={source.authors} count={source.authorCount} />}
           {hasAuthors && hasLicense && " · "}
           {hasLicense && <LicenseLink url={source.license!} />}
         </span>

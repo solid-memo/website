@@ -2199,7 +2199,9 @@ library's list (`LibraryDeckRow`) and its own page
 draft alone (`draftLibraryDeck` in
 [draftListing.ts](../packages/domain/src/release/draftListing.ts)),
 each source's title and authors read as learners read them, plain text
-only. Both are inert: nothing in them to follow or press.
+only, and no more of its metadata and sources than learners' listing
+keeps (`withBoundedListing`, `boundedSources`). Both are inert:
+nothing in them to follow or press.
 
 ## The trial
 

@@ -19,11 +19,14 @@ import {
 import { directionOfConcept } from "@solid-memo/domain/concepts";
 import { copyKeywords } from "@solid-memo/domain/keywords";
 import { libraryCardFromRecord, libraryDeckFromRecord } from "@solid-memo/domain/deckRecord";
-import type {
-  LibraryCard,
-  LibraryDeck,
-  LibraryRelease,
-  LibrarySource,
+import {
+  boundedSources,
+  listedAuthors,
+  withBoundedListing,
+  type LibraryCard,
+  type LibraryDeck,
+  type LibraryRelease,
+  type LibrarySource,
 } from "@solid-memo/domain/library";
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
@@ -104,7 +107,8 @@ function toLibraryDeck(
   if (release === null) return null;
   const createdAt = release.created;
   const modifiedAt = release.modified;
-  return {
+  // No more of its metadata than a release added by link keeps (toStandaloneLibraryDeck).
+  return withBoundedListing({
     url: hasCurrentVersion,
     seriesUrl,
     version: release.version,
@@ -123,11 +127,11 @@ function toLibraryDeck(
     ...(modifiedAt === undefined ? {} : { modifiedAt }),
     themes: [...release.theme],
     keywords: copyKeywords(release.keyword),
-    sources: release.wasDerivedFrom.map((sourceUrl) =>
+    ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
       toLibrarySource(sourceUrl, getThing(index, sourceUrl)),
     ),
     ...courseOf(currentThing!),
-  };
+  });
 }
 
 /** `isCourse` for a release that is also typed schema:Course. */
@@ -242,7 +246,9 @@ export function toLibraryDeckContent(url: string, dataset: Dataset): LibraryDeck
 /**
  * A release as its one document describes it, with no index (a release
  * added from a link, docs/deck-library.md): its content as an import
- * reads it (toLibraryDeckContent), its sources and creation time, its
+ * reads it (toLibraryDeckContent) with how many authors it names, its
+ * sources (as many as a listing keeps, boundedSources) and creation
+ * time, its
  * live cards counted, and every version of its series the document
  * describes (library deck format 6 describes its series in it) at an
  * address a release may have (isPublishedReleaseUrl), else the release
@@ -278,7 +284,9 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
     cardCount: cards.filter((card) => card.retired !== true).length,
     languages: [...release.language],
     ...(release.created === undefined ? {} : { createdAt: release.created }),
-    sources: release.wasDerivedFrom.map((sourceUrl) =>
+    // Its content keeps its first authors (libraryDeckFromRecord): how many it names, when more.
+    ...listedAuthors(content.authors, release.creator.length),
+    ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
       toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
     ),
   };

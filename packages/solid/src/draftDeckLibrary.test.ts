@@ -25,6 +25,27 @@ describe("createDraftDeckLibrary", () => {
     expect((await createDraftDeckLibrary(deckDraft()).readLibraryIndex()).publisher).toBeNull();
   });
 
+  it("reads the release whole with no counts a listing keeps, however many sources and authors it names (GHSA-46q4-pmpc-mj5j)", async () => {
+    const draft = deckDraft();
+    const count = 500;
+    const many = {
+      ...draft,
+      root: {
+        ...draft.root,
+        creator: Array.from({ length: count }, (_, n) => `https://many.example/agent/${n}`),
+        wasDerivedFrom: Array.from({ length: count }, (_, n) => `https://many.example/${n}`),
+      },
+    };
+    const library = createDraftDeckLibrary(many);
+    const [listed] = await library.listLibraryDecks();
+    expect(listed).toMatchObject({ sourceCount: count, authorCount: count });
+    const content = await library.fetchLibraryDeck(DRAFT);
+    expect(content).not.toHaveProperty("sources");
+    expect(content).not.toHaveProperty("sourceCount");
+    expect(content).not.toHaveProperty("authorCount");
+    expect(content.authors).toEqual(listed!.authors);
+  });
+
   it("reads the draft's cards and outline as a release's", async () => {
     const library = createDraftDeckLibrary(playableCourseDraft());
     const content = await library.fetchLibraryDeck(DRAFT);
