@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Literal, Quad } from "@rdfjs/types";
+import type { Literal, NamedNode, Quad } from "@rdfjs/types";
 
 /**
  * The client modules' interface: the types their operations take and
@@ -83,6 +83,14 @@ export interface SubjectBuilder {
    * stay. One call for a list of any length (setIriAll).
    */
   removeLiteralAll(property: string, datatype: string, values: readonly string[]): SubjectBuilder;
+  /**
+   * Each property's values in `values` added, as addLiteral adds a
+   * literal (its datatype, or its language) and addIri an IRI; its
+   * other values, and the subject's other properties, stay. One call for
+   * any number of properties and values, where an add at each value
+   * takes time in the square of them.
+   */
+  addAll(values: ReadonlyMap<string, readonly (Literal | NamedNode)[]>): SubjectBuilder;
   /** The subject with every triple added. */
   build(): NamedSubject;
 }
