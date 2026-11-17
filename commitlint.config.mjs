@@ -54,6 +54,23 @@
  * `npm run check:merges` reads every commit's whole message for them too,
  * as commitlint skips some commits and can read only part of a message.
  *
+ * No commit holds a character that one tool reads as the end of a line
+ * and another does not, or that git's own output could be split on: a
+ * control character other than a tab or a line feed (a carriage return
+ * only right before a line feed), or a Unicode line or paragraph
+ * separator. The release's parser splits a message into lines only at a
+ * line feed, so a line that such a character seems to start could be
+ * read one way by a person or a script and another way by the release.
+ * `npm run check:merges` reads every commit's whole message for them
+ * too.
+ *
+ * No commit holds the text the release reads its commits from git's
+ * output by, `==FIELD==` or `==END==`: it asks git for every commit's
+ * fields in one log, with that text between them, and splits it there,
+ * so a message that held it would be read by the release as another
+ * message, or another commit's, than the one written. `npm run
+ * check:merges` reads every commit's whole message for it too.
+ *
  * A `chore(release)` header is semantic-release's alone, on the release
  * commit it pushes onto main (docs/releasing.md#what-a-release-does), so
  * a commit of a pull request or a branch may not have it. commitlint
@@ -204,6 +221,41 @@ function noChangelogLink({ raw }) {
 }
 
 /**
+ * A character that one reader takes for the end of a line and another
+ * does not, or one that could pass for a separator in git's output: any
+ * control character but a tab, a line feed, and a carriage return right
+ * before a line feed; and the Unicode line and paragraph separators.
+ */
+export const HIDDEN_BREAK = /(?![\t\n\r])[\p{Cc}\u2028\u2029]|\r(?!\n)/u;
+
+/**
+ * @param {{ raw: string }} commit
+ */
+function noHiddenBreak({ raw }) {
+  return [
+    !HIDDEN_BREAK.test(raw),
+    "the message must not hold a control character other than a tab or a line feed, a carriage return that is not right before a line feed, or a Unicode line or paragraph separator: the release reads a line only up to a line feed, so the message would say one thing to a reader and another to the release (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
+ * The text git-log-parser, which semantic-release reads its commits
+ * with, puts between a commit's fields in git's output (`==FIELD==`) and
+ * after its last (`==END==`), and splits the output at.
+ */
+export const LOG_SEPARATOR = /==(?:FIELD|END)==/;
+
+/**
+ * @param {{ raw: string }} commit
+ */
+function noLogSeparator({ raw }) {
+  return [
+    !LOG_SEPARATOR.test(raw),
+    "the message must not hold `==FIELD==` or `==END==`: the release splits git's output at them, so it would read another message than this one (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
  * The header semantic-release titles its release commit with
  * (release.config.mjs), in upper or lower case and with or without a `!`.
  *
@@ -258,6 +310,8 @@ export default {
         "no-skip-keyword": noSkipKeyword,
         "no-changelog-directive": noChangelogDirective,
         "no-changelog-link": noChangelogLink,
+        "no-hidden-break": noHiddenBreak,
+        "no-log-separator": noLogSeparator,
       },
     },
   ],
@@ -271,5 +325,7 @@ export default {
     "no-skip-keyword": [2, "always"],
     "no-changelog-directive": [2, "always"],
     "no-changelog-link": [2, "always"],
+    "no-hidden-break": [2, "always"],
+    "no-log-separator": [2, "always"],
   },
 };

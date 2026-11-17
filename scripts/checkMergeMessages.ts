@@ -37,6 +37,11 @@
  * hold a link or an image (holdsChangelogLink, from the same file), whose
  * target the link check would read.
  *
+ * Nor may any commit hold a character that one reader takes for the end
+ * of a line and the release does not (HIDDEN_BREAK, from the same file),
+ * which commitlint refuses in the commits it reads, nor the text the
+ * release splits git's output at (LOG_SEPARATOR, from the same file).
+ *
  * With `--queue` the range must hold a merge commit, as each run of the
  * queue builds one. The release leaves out merge commits by their
  * parents, so a queue that merged any other way would fail here rather
@@ -52,13 +57,21 @@ import { parseArgs } from "node:util";
 import { saysBreaking } from "./checkBreaking.ts";
 import { gitAt, revertOf, undoes } from "./reverts.ts";
 
-const { CHANGELOG_DIRECTIVE, SKIP_KEYWORD, holdsChangelogLink, skippedByCommitlint } =
-  (await import(new URL("../commitlint.config.mjs", import.meta.url).href)) as {
-    CHANGELOG_DIRECTIVE: RegExp;
-    SKIP_KEYWORD: RegExp;
-    holdsChangelogLink(message: string): boolean;
-    skippedByCommitlint(message: string): boolean;
-  };
+const {
+  CHANGELOG_DIRECTIVE,
+  HIDDEN_BREAK,
+  LOG_SEPARATOR,
+  SKIP_KEYWORD,
+  holdsChangelogLink,
+  skippedByCommitlint,
+} = (await import(new URL("../commitlint.config.mjs", import.meta.url).href)) as {
+  CHANGELOG_DIRECTIVE: RegExp;
+  HIDDEN_BREAK: RegExp;
+  LOG_SEPARATOR: RegExp;
+  SKIP_KEYWORD: RegExp;
+  holdsChangelogLink(message: string): boolean;
+  skippedByCommitlint(message: string): boolean;
+};
 
 /** What is wrong with a merge commit's message, if anything. */
 function problemsOfMerge(message: string): string[] {
@@ -83,6 +96,10 @@ export function problemsOf(message: string, merge: boolean): string[] {
     problems.push("holds an HTML comment or a spell checker's directive");
   if (holdsChangelogLink(message))
     problems.push("holds a link or an image in its header or a breaking change's footer");
+  if (HIDDEN_BREAK.test(message))
+    problems.push("holds a control character or a line separator other than a line feed");
+  if (LOG_SEPARATOR.test(message))
+    problems.push("holds the text the release splits git's output at");
   return problems;
 }
 

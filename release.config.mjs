@@ -142,7 +142,11 @@ export default {
     // change (`!` or a BREAKING CHANGE: footer) a major one; the other
     // types release nothing. The preset counts a revert only by the
     // "This reverts commit <sha>." line that git revert writes, so the
-    // rule makes a revert: commit without it release too.
+    // first rule makes a revert: commit without it release too. The
+    // analyzer reads the preset's own rules only when none of these
+    // matches, and takes the largest of those that do, so the second
+    // keeps a revert: commit that says it breaks a major one, as npm
+    // run check:breaking counts it.
     //
     // The plugins leave out a commit that such a line names, and the
     // revert with it, but read only the message: the wrapper lets a
@@ -156,7 +160,10 @@ export default {
         preset: "conventionalcommits",
         parserOpts,
         presetConfig,
-        releaseRules: [{ type: "revert", release: "patch" }],
+        releaseRules: [
+          { type: "revert", release: "patch" },
+          { type: "revert", breaking: true, release: "major" },
+        ],
       },
     ],
     ["@semantic-release/changelog", { changelogFile: "CHANGELOG.md", changelogTitle }],

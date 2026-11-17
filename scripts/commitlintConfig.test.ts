@@ -196,6 +196,37 @@ Refs: #1`),
     }
   });
 
+  // The release's parser ends a line only at a line feed, so a character
+  // another reader takes for the end of one would let a message say one
+  // thing to it and another to the release.
+  it("fails a control character or a line separator other than a line feed", async () => {
+    const hidden = ["\u2028", "\u2029", "\u0085", "\r", "\x1e\x1f", "\0", "\x1b", "\x7f"];
+    for (const character of hidden) {
+      const breaking = `feat(app): change the deck page\n\n${why}${character}BREAKING CHANGE: x\n\nCloses: #12`;
+      expect(await errors(breaking), JSON.stringify(character)).toEqual(["no-hidden-break"]);
+      expect(await errors(`fix(app): tidy ${character} it\n\n${why}\n\nCloses: #12`)).toContain(
+        "no-hidden-break",
+      );
+    }
+  });
+
+  // The release splits git's output at this text, so a message that held
+  // it would be read as another.
+  it("fails the text the release splits git's output at", async () => {
+    for (const separator of ["==FIELD==", "==END=="]) {
+      const message = `feat(app): change the deck page\n\n${why}${separator}x\n\nCloses: #12`;
+      expect(await errors(message), separator).toEqual(["no-log-separator"]);
+      expect(await errors(`fix(app): tidy ${separator}\n\n${why}\n\nCloses: #12`)).toContain(
+        "no-log-separator",
+      );
+    }
+    expect(await errors(`fix(app): tidy ==FIELD and END==\n\n${why}\n\nCloses: #12`)).toEqual([]);
+  });
+
+  it("passes a tab, and a carriage return right before a line feed", async () => {
+    expect(await errors(`fix(app): tidy\r\n\r\n${why}\tYes.\r\n\r\nCloses: #12\r\n`)).toEqual([]);
+  });
+
   it("passes what only looks like a directive", async () => {
     for (const words of [
       "a -> b <- c",

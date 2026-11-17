@@ -114,6 +114,25 @@ describe("problemsOf", () => {
     ]);
   });
 
+  it("refuses a control character or a line separator in any commit, skipped or merged", () => {
+    const hidden = "holds a control character or a line separator other than a line feed";
+    for (const character of ["\u2028", "\r", "\x1e"]) {
+      expect(problemsOf(`fixup! chore: x\n\nWhy.${character}More.`, false)).toEqual([hidden]);
+      expect(problemsOf(`fix: x\n\nWhy.${character}More.\n\nRefs: #1`, false)).toEqual([hidden]);
+      expect(problemsOf(merge(`fix: x ${character} y`), true)).toEqual([hidden]);
+    }
+    expect(problemsOf("fix: x\r\n\r\nWhy.\tMore.\r\n\r\nRefs: #1", false)).toEqual([]);
+  });
+
+  it("refuses the text the release splits git's output at in any commit, skipped or merged", () => {
+    const separated = "holds the text the release splits git's output at";
+    for (const separator of ["==FIELD==", "==END=="]) {
+      expect(problemsOf(`fixup! chore: x\n\nWhy.${separator}More.`, false)).toEqual([separated]);
+      expect(problemsOf(`fix: x\n\nWhy.${separator}More.\n\nRefs: #1`, false)).toEqual([separated]);
+      expect(problemsOf(merge(`fix: x ${separator} y`), true)).toEqual([separated]);
+    }
+  });
+
   it("refuses a directive in a commit commitlint reads", () => {
     expect(problemsOf("fix: tidy <!-- the footer\n\nRefs: #1", false)).toEqual([
       "holds an HTML comment or a spell checker's directive",

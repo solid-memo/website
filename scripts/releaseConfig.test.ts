@@ -131,6 +131,8 @@ describe("the commits, as the release reads them", () => {
     expect(await bump("Add a deck, before Conventional Commits")).toBeNull();
     expect(await bump("docs: say why", "fix(deps): update dependency n3 to v2")).toBe("patch");
     expect(await bump("revert: take back the deck filter")).toBe("patch");
+    expect(await bump("revert(app)!: take back the deck filter")).toBe("major");
+    expect(await bump("revert: x\n\nBREAKING CHANGE: an older app refuses it.")).toBe("major");
     expect(await bump('Revert "feat: x"\n\nThis reverts commit abcdef1.')).toBe("patch");
     expect(await bump("fix: a bug", "feat(decks): add the Vim commands")).toBe("minor");
     expect(await bump("feat(ns)!: write deck format 8")).toBe("major");
@@ -183,9 +185,22 @@ describe("the commits, as the release reads them", () => {
       "feat: write deck format 8\n\nBREAKING CHANGE: an older app refuses it.",
       "fix: a bug\n\nBREAKING-CHANGE: an older app refuses it.",
       "feat(ns)!: write deck format 8",
+      "feat(ns)!:write deck format 8",
+      "revert: take back the deck filter",
+      "revert(app)!: take back the deck filter",
+      "revert: x\n\nBREAKING CHANGE: an older app refuses it.",
+      "feat: write deck format 8\r\n\r\nBREAKING CHANGE: an older app refuses it.",
+      // A footer or a header after a character that the release does not
+      // end a line at.
+      ...["\u2028", "\u2029", "\u0085", "\r", "\x1e\x1f"].flatMap((between) => [
+        `feat(app): change the deck page\n\nIt changes.${between}BREAKING CHANGE: x\n\nCloses: #12`,
+        `feat(app): change the deck page\n\nIt changes.${between}feat!: x\n\nCloses: #12`,
+      ]),
     ];
     for (const message of messages) {
-      expect((await bump(message)) === "major", message).toBe(saysBreaking(message));
+      expect((await bump(message)) === "major", JSON.stringify(message)).toBe(
+        saysBreaking(message),
+      );
     }
   });
 
