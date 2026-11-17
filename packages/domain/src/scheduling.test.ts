@@ -18,7 +18,11 @@ import {
   withWritableDueDays,
   writableDueDay,
 } from "./scheduling";
-import type { ReviewQuality } from "./review";
+import {
+  FSRS_REVIEW_STATE_FORMAT_VERSION,
+  REVIEW_STATE_FORMAT_VERSION,
+  type ReviewQuality,
+} from "./review";
 import type { Card, StudyDirection } from "./deck";
 import { DEFAULT_PREFERENCES, type StudyPreferences } from "./preferences";
 import type { FsrsState, ReviewState } from "./review";
@@ -514,6 +518,19 @@ describe("resetStudyDay", () => {
       remove: [],
     });
   });
+  it("leaves out a state a newer version wrote, and resets the others", () => {
+    const newer = REVIEW_STATE_FORMAT_VERSION + 1;
+    const restored = { ...review("b", "2026-09-27", now, yesterday), previous: morning };
+    const reviews = [
+      { ...review("a", "2026-09-27", now, yesterday), previous: morning, formatVersion: newer },
+      { ...review("c", "2026-09-22", now), formatVersion: newer },
+      restored,
+      review("d", "2026-09-22", now),
+    ];
+    const { restore, remove } = resetStudyDay(reviews, now, 4);
+    expect(restore.map((state) => state.cardId)).toEqual(["b"]);
+    expect(remove).toEqual([{ cardId: "d", direction: "front-to-back" }]);
+  });
 });
 
 describe("interleave", () => {
@@ -634,6 +651,18 @@ describe("resetFsrsStudyDay", () => {
       restore: [],
       remove: [key],
     });
+  });
+
+  it("leaves out a state a newer version wrote", () => {
+    const formatVersion = FSRS_REVIEW_STATE_FORMAT_VERSION + 1;
+    const newer = [
+      { ...fsrs(now, yesterday, true), formatVersion },
+      { ...fsrs(now, now), cardId: "b", formatVersion },
+    ];
+    expect(resetFsrsStudyDay(newer, now, 4)).toEqual({ restore: [], remove: [] });
+    expect(resetFsrsStudyDay([...newer, fsrs(now, yesterday, true)], now, 4).restore).toHaveLength(
+      1,
+    );
   });
 });
 

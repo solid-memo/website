@@ -30,6 +30,7 @@ import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { SM } from "./vocab";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { resetStudyDay } from "@solid-memo/domain/scheduling";
+import { createStudyUseCases } from "@solid-memo/application/study";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { decimalLiteral } from "./testing/literals";
@@ -909,6 +910,87 @@ describe("states with numbers out of range", () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(older));
     await expect(checkedRepository().upgradeReviewStates(deck)).resolves.toBe(true);
     expect(writeDocument).toHaveBeenCalledOnce();
+  });
+});
+
+describe("a day's reset, beside a state a newer version wrote", () => {
+  const now = new Date("2026-09-21T12:00:00.000Z");
+  const today = now.toISOString();
+  const morning = {
+    easeFactor: 2.5,
+    intervalDays: 6,
+    repetitions: 2,
+    due: "2026-09-21",
+    lastReviewedAt: state.firstReviewedAt,
+  };
+  /** Reviewed today, after a first review before it (restored) or today (removed). */
+  const sm2Of = (cardId: string, firstToday: boolean): ReviewState => ({
+    ...state,
+    cardId,
+    lastReviewedAt: today,
+    ...(firstToday ? { firstReviewedAt: today } : { previous: morning }),
+  });
+  const fsrsOf = (cardId: string, firstToday: boolean): FsrsState => ({
+    ...fsrs,
+    cardId,
+    lastReviewedAt: today,
+    ...(firstToday
+      ? { firstReviewedAt: today }
+      : {
+          previous: {
+            stability: 3.2,
+            difficulty: 5.4,
+            due: "2026-09-21",
+            lastReviewedAt: state.firstReviewedAt,
+          },
+        }),
+  });
+  const newer = (thing: ReturnType<typeof stateAt>) =>
+    buildThing(thing).setInteger(SM.formatVersion, 99).build();
+
+  it.each([
+    ["restored", false],
+    ["removed", true],
+  ])("leaves it as it is and resets the others, where it would be %s", async (_, firstToday) => {
+    const newerSm2 = newer(named(sm2Of("card-2", firstToday)));
+    const newerFsrs = newer(namedFsrs(fsrsOf("card-2", firstToday)));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      documentOf(
+        named(sm2Of("card-1", false)),
+        namedFsrs(fsrsOf("card-1", false)),
+        newerSm2,
+        newerFsrs,
+      ),
+    );
+    const removeDay = vi.fn(async () => undefined);
+    const study = createStudyUseCases({
+      deckRepository: {} as never,
+      reviewStateRepository: makeRepository(),
+      preferenceStore: { get: async () => ({ dayBoundaryHour: 0 }) } as never,
+      digestStore: {} as never,
+      answerStore: { grade: vi.fn(), withdraw: vi.fn(), removeDay },
+      random: Math.random,
+    });
+
+    await expect(study.resetStudyDay(INSTANCE, deck, now)).resolves.toBe(1);
+    expect(removeDay).toHaveBeenCalledOnce();
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const saved = savedDataset();
+    expect(toReviewState(getThing(saved, newerSm2.url)!, deck)).toEqual(
+      toReviewState(newerSm2, deck),
+    );
+    expect(toFsrsState(getThing(saved, newerFsrs.url)!, deck)).toEqual(
+      toFsrsState(newerFsrs, deck),
+    );
+    const card1 = { cardId: "card-1", direction: "front-to-back" } as const;
+    const restored = toReviewState(
+      getThing(saved, namedReviewSubject(deck.reviewsDocumentUrl, card1))!,
+      deck,
+    );
+    expect(restored).toMatchObject({ lastReviewedAt: state.firstReviewedAt, due: "2026-09-21" });
+    expect(
+      toFsrsState(getThing(saved, namedFsrsSubject(deck.reviewsDocumentUrl, card1))!, deck),
+    ).toMatchObject({ stability: 3.2, lastReviewedAt: state.firstReviewedAt });
   });
 });
 

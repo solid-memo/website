@@ -6,7 +6,8 @@ it's in. This page says how the app brings old data up to the format
 it writes now, leaves data from a newer version alone, and updates a
 deck copied from the library to its newer release. Answers are the
 exception to leaving newer data alone when a day is reset or an answer
-undone: they're removed whole.
+undone: they're removed whole. A review state a newer version wrote
+isn't: resetting a day leaves it out and resets the other cards.
 
 The formats are the [shapes](shapes.md). The steps between them are the
 migration modules in
@@ -449,6 +450,13 @@ Rules that hold across versions:
   version for that shape's kind. Answers are the exception: they're
   never rewritten, only added and removed whole, so resetting a day or
   undoing an answer removes one a newer version wrote too.
+- **Resetting a day leaves a newer review state out.** A state of the
+  day stamped above the version this app writes, SM-2's or FSRS-6's,
+  is neither restored nor removed (`resetStudyDay`, `resetFsrsStudyDay`
+  in [scheduling.ts](../packages/domain/src/scheduling.ts)). It stays as
+  the newer version wrote it, and the other cards' states go back in
+  the same save. One such state used to make the whole reset fail
+  after the day's answers were removed.
 - **A tab opened before a deploy** can't write older formats over what
   the update wrote, unless its version predates these guards. The
   library import refuses newer data too, with a clear message.

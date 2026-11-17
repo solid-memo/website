@@ -769,7 +769,10 @@ reviewed today gets its snapshot back. One introduced today is removed,
 as is one first written today from an estimate. So is one with a
 snapshot whose due day isn't a real date or whose last review is
 outside the years 0 to 9999; the next review
-estimates it again from the restored SM-2 state.
+estimates it again from the restored SM-2 state. Neither reset touches
+a state a newer version of the app wrote: it stays as that version
+wrote it, and the other cards still reset
+([migrations.md](migrations.md#versions)).
 
 ```mermaid
 flowchart LR
