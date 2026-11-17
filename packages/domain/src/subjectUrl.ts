@@ -11,3 +11,12 @@ export function fragmentIdOf(subjectUrl: string): string {
 export function documentUrlOf(subjectUrl: string): string {
   return subjectUrl.split("#")[0];
 }
+
+/**
+ * Whether two URLs name subjects of the same document: their document
+ * URLs (documentUrlOf) are one. A document's own URL, with no fragment,
+ * names a subject of that document too.
+ */
+export function isSameDocument(url: string, other: string): boolean {
+  return documentUrlOf(url) === documentUrlOf(other);
+}

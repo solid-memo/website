@@ -30,7 +30,7 @@ import {
 } from "@solid-memo/domain/validation";
 import { instanceUrlOfDeck, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { isDeckDocumentAddress } from "@solid-memo/domain/deckAddress";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, isSameDocument } from "@solid-memo/domain/subjectUrl";
 import { boundedHeadersFetch } from "./client/linkHeader";
 import { jsonPath, PathMap } from "@solid-memo/domain/pathKeys";
 import { getSolidDatasetOrNull } from "./datasets";
@@ -110,15 +110,16 @@ const MEMBER_LINKS: readonly (string | undefined)[] = [
  * DCAT-AP's class check on a member a catalog or deck group lists from
  * another document (a dataset another app added): the member's class is
  * stated where it is described, which this document cannot show, so the
- * check says nothing about it. A member of the same document is still
- * held to its class.
+ * check says nothing about it. A member of the same document, the
+ * document's own URL among them (isSameDocument), is still held to its
+ * class; the drop-dangling-members repair goes by the same rule.
  */
 function isMemberElsewhere(focusNode: string, violation: ResultTerms): boolean {
   return (
     violation.constraint === "Class" &&
     MEMBER_LINKS.includes(violation.path) &&
     violation.value !== undefined &&
-    violation.value.split("#")[0] !== focusNode.split("#")[0]
+    !isSameDocument(violation.value, focusNode)
   );
 }
 

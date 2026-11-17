@@ -244,9 +244,10 @@ describe("withTreeChanges", () => {
   });
 
   it("keeps a member link to a dataset or catalog it cannot read, or elsewhere, and drops one to what is gone", async () => {
+    // The document's own URL (<>) is no node elsewhere: it is of this document, which describes nothing there.
     const dataset = await document(
       rootTtl(
-        "; dcat:catalog <#group-x>, <#group-odd>, <#group-bare>, <#gone>, <https://elsewhere.example/c#g>",
+        "; dcat:catalog <#group-x>, <#group-odd>, <#group-bare>, <#gone>, <>, <https://elsewhere.example/c#g>",
       ) +
         deckTtl("a") +
         deckTtl("b") +
@@ -254,8 +255,8 @@ describe("withTreeChanges", () => {
         groupTtl(
           "group-x",
           "X",
-          `; dcat:dataset <#a>, <#broken>, <#gone-deck>, <#group-odd>, <https://elsewhere.example/d#d> ;
-           dcat:catalog <#b>, <#group-odd>, <#group-bare>, <#gone-group>`,
+          `; dcat:dataset <#a>, <#broken>, <#gone-deck>, <#group-odd>, <>, <https://elsewhere.example/d#d> ;
+           dcat:catalog <#b>, <#group-odd>, <#group-bare>, <#gone-group>, <>`,
         ) +
         // A deck that does not fit its shape, and groups that do not fit their own, one not even typed a catalog.
         `<#broken> a sm:Deck, dcat:Dataset .\n<#group-odd> a sm:DeckGroup, dcat:Catalog ; dcterms:title "Odd"@en .\n` +
@@ -272,7 +273,7 @@ describe("withTreeChanges", () => {
     );
     expect(getUrlAll(x, DCAT.catalog)).toEqual([at("group-odd"), at("group-bare")]);
     // The catalog's list of groups is left alone until the top level changes.
-    expect(getUrlAll(getThing(written, ROOT)!, DCAT.catalog)).toHaveLength(5);
+    expect(getUrlAll(getThing(written, ROOT)!, DCAT.catalog)).toHaveLength(6);
 
     const removed = edited(dataset, { kind: "removeGroup", group: at("group-x") }).dataset;
     expect(getUrlAll(getThing(removed, ROOT)!, DCAT.catalog).sort()).toEqual(

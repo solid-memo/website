@@ -493,10 +493,13 @@ describe("applyRepairs", () => {
           .addUrl(DCAT.catalog, `${CATALOG}#group-1`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-gone`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-old`)
+          // The document's own URL is a subject of the document too, and it describes none.
+          .addUrl(DCAT.dataset, CATALOG)
           .build(),
         group(`${CATALOG}#group-1`)
           .addUrl(DCAT.dataset, `${CATALOG}#deck-1`)
           .addUrl(DCAT.dataset, `${CATALOG}#deck-gone`)
+          .addUrl(DCAT.catalog, CATALOG)
           .addUrl(DCAT.dataset, `${CATALOG}#group-2`)
           .addUrl(DCAT.catalog, `${CATALOG}#group-2`)
           .addUrl(DCAT.catalog, `${CATALOG}#deck-1`)
