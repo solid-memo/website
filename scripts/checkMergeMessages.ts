@@ -41,6 +41,9 @@
  * of a line and the release does not (HIDDEN_BREAK, from the same file),
  * which commitlint refuses in the commits it reads, nor the text the
  * release splits git's output at (LOG_SEPARATOR, from the same file).
+ * Nor may a commit's author or committer name or email hold either: git
+ * writes them in the same output, before the hash and the message, and
+ * commitlint never reads them.
  *
  * With `--queue` the range must hold a merge commit, as each run of the
  * queue builds one. The release leaves out merge commits by their
@@ -103,6 +106,18 @@ export function problemsOf(message: string, merge: boolean): string[] {
   return problems;
 }
 
+/** What is wrong with a commit's author and committer names and emails, if anything. */
+function problemsOfIdentity(identity: readonly string[]): string[] {
+  const problems: string[] = [];
+  if (identity.some((part) => HIDDEN_BREAK.test(part)))
+    problems.push("has an author or committer whose name or email holds a control character");
+  if (identity.some((part) => LOG_SEPARATOR.test(part)))
+    problems.push(
+      "has an author or committer whose name or email holds the text the release splits git's output at",
+    );
+  return problems;
+}
+
 /** A commit between the two refs. */
 export interface RangeCommit {
   hash: string;
@@ -116,6 +131,8 @@ export interface MergesIo {
   commitsBetween(base: string, head: string): RangeCommit[];
   /** A commit's whole message. */
   messageOf(hash: string): string;
+  /** A commit's author name and email, then its committer's. */
+  identityOf(hash: string): string[];
   /** Whether the change of commit `revert` undoes that of the commit `named` names. */
   undoes(revert: string, named: string): boolean;
   log(message: string): void;
@@ -154,7 +171,7 @@ export function main(argv: readonly string[], io: MergesIo): number {
     }
     const problems = commits.flatMap(({ hash, merge }) => {
       const message = io.messageOf(hash);
-      const found = problemsOf(message, merge);
+      const found = [...problemsOf(message, merge), ...problemsOfIdentity(io.identityOf(hash))];
       const revert = merge ? undefined : revertOf(message);
       if (revert !== undefined && !io.undoes(hash, revert.hash)) {
         found.push("says it reverts a commit whose change it does not undo");
@@ -164,7 +181,7 @@ export function main(argv: readonly string[], io: MergesIo): number {
     for (const problem of problems) io.log(problem);
     if (problems.length > 0) {
       io.log(
-        "A merge commit's message holds the pull request's title: change the title, then add the pull request to the queue again. A change that breaks says so in a commit commitlint reads, a revert is made with git revert, and any other commit refused here is reworded (docs/releasing.md#what-a-merge-commit-decides).",
+        "A merge commit's message holds the pull request's title: change the title, then add the pull request to the queue again. A change that breaks says so in a commit commitlint reads, a revert is made with git revert, a commit whose author or committer is refused is made again under another name or email, and any other commit refused here is reworded (docs/releasing.md#what-a-merge-commit-decides).",
       );
       return 1;
     }
@@ -193,6 +210,11 @@ export function defaultIo(repo: string): MergesIo {
         }),
     // One commit at a time: a separator could be written in a message.
     messageOf: (hash) => git("log", "-1", "--format=%B", "--end-of-options", hash),
+    // Split at NUL, which git never lets a name or an email hold.
+    identityOf: (hash) =>
+      git("log", "-1", "--format=%an%x00%ae%x00%cn%x00%ce", "--end-of-options", hash)
+        .replace(/\n$/, "")
+        .split("\0"),
     log: (message) => console.log(message),
   };
 }

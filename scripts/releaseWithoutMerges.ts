@@ -26,31 +26,92 @@
  * `mergePattern` would not do: it makes the line after a merge's subject
  * the commit's header, so a title could choose the version that way.
  *
+ * The plugins read each commit as git holds it, by its hash, not as
+ * semantic-release read it: that comes from one run of git log split at
+ * a text that a commit's author or committer could hold, and so could
+ * name another commit or message. When the two differ, nothing is
+ * released.
+ *
  * A default export, as semantic-release takes the plugin by its path
  * (scripts/releaseWithoutMerges.test.ts loads it the same way).
  */
-import { execFileSync } from "node:child_process";
-import { gitAt, withRevertsChecked } from "./reverts.ts";
+import { type Git, gitAt, withRevertsChecked } from "./reverts.ts";
 
-type Context = { commits: readonly { hash: string; message: string }[]; cwd: string };
+/** A commit as the plugins read it, every field read from git by its hash. */
+type ReadCommit = { hash: string; message: string; committerDate: Date };
 
-/** The context with the merge commits left out. A hash git cannot read stops the release. */
-function withoutMerges<C extends Context>(context: C): C {
-  const merges = execFileSync("git", ["rev-list", "--no-walk", "--merges", "--stdin"], {
-    cwd: context.cwd,
-    input: context.commits.map(({ hash }) => `${hash}\n`).join(""),
-    encoding: "utf8",
-    // In the error that stops the release, not on the terminal as well.
-    stdio: "pipe",
-    maxBuffer: 1 << 28,
-  }).split("\n");
-  return { ...context, commits: context.commits.filter(({ hash }) => !merges.includes(hash)) };
+type Release = { gitHead?: string | undefined; [field: string]: unknown };
+
+type Context = {
+  commits: readonly { hash: string; message: string }[];
+  cwd: string;
+  /** The commit each release is at, among what else semantic-release says of it. */
+  lastRelease?: Release | undefined;
+  nextRelease?: Release | undefined;
+};
+
+/**
+ * The commits since the last release, newest first, as git holds them:
+ * the range semantic-release reads (lib/get-commits.js), each commit
+ * told a merge by its parents.
+ */
+function rangeOf(context: Context, git: Git): { hash: string; merge: boolean }[] {
+  const to = context.nextRelease?.gitHead ?? "HEAD";
+  const from = context.lastRelease?.gitHead;
+  return git(["rev-list", "--parents", "--end-of-options", from ? `${from}..${to}` : to])
+    .split("\n")
+    .filter((line) => line !== "")
+    .map((line) => {
+      const [hash, ...parents] = line.split(" ");
+      return { hash: hash!, merge: parents.length > 1 };
+    });
 }
 
-/** The commits the plugins read: merges aside, and only true reverts matched to a commit. */
+/**
+ * A commit read from git by its hash. The date comes first, in a form
+ * with no line feed, and the message, the one field of free text, last,
+ * so no text in it can pass for another field.
+ */
+function readCommit(git: Git, hash: string): ReadCommit {
+  const [date, ...message] = git(["log", "-1", "--format=%cI%n%B", "--end-of-options", hash]).split(
+    "\n",
+  );
+  return { hash, message: message.join("\n").trim(), committerDate: new Date(date!) };
+}
+
+/**
+ * Whether semantic-release read the commits git holds: the same hashes,
+ * each once, and each with git's message. It reads them all from one
+ * run of git log, which it splits at a text (`==FIELD==`) that a commit
+ * could hold where no check reads it, such as its author's name.
+ */
+function readAsGitHolds(context: Context, commits: readonly ReadCommit[]): boolean {
+  const messages = new Map(commits.map(({ hash, message }) => [hash, message]));
+  return (
+    context.commits.length === commits.length &&
+    new Set(context.commits.map(({ hash }) => hash)).size === commits.length &&
+    context.commits.every(({ hash, message }) => messages.get(hash) === message.trim())
+  );
+}
+
+/**
+ * The commits the plugins read: those since the last release, read from
+ * git by their hashes, merges aside, and only true reverts matched to a
+ * commit. A range that semantic-release read otherwise, or one git
+ * cannot read, stops the release.
+ */
 function asRead<C extends Context>(context: C): C {
-  const commits = withoutMerges(context).commits;
-  return { ...context, commits: withRevertsChecked(commits, gitAt(context.cwd)) };
+  const git = gitAt(context.cwd);
+  const range = rangeOf(context, git);
+  const read = range.map(({ hash }) => readCommit(git, hash));
+  if (!readAsGitHolds(context, read)) {
+    throw new Error(
+      "The commits semantic-release read since the last release are not the ones git holds, so nothing is released (docs/releasing.md#when-a-release-fails).",
+    );
+  }
+  const merges = new Set(range.filter(({ merge }) => merge).map(({ hash }) => hash));
+  const commits = read.filter(({ hash }) => !merges.has(hash));
+  return { ...context, commits: withRevertsChecked(commits, git) };
 }
 
 // Untyped modules: imported by a name TypeScript does not resolve.

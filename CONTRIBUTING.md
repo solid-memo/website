@@ -154,7 +154,9 @@ right before a line feed, and a Unicode line or paragraph separator:
 the release ends a line only at a line feed, so a line such a character
 seems to start would read one way to you and another to the release.
 Nor may a message hold `==FIELD==` or `==END==`, the text the release
-splits git's output at to read its commits.
+splits git's output at to read its commits. The release reads each
+message from git by its commit's hash as well, and stops when the two
+readings differ.
 The merge queue refuses those keywords, comment markers and directives
 in a pull request's title too, and a title that starts as a breaking
 change's footer, as the merge commit holds the title
@@ -166,7 +168,10 @@ a revert that names a commit undoes that commit's change, as
 `npm run check:merges` reads every commit's whole message for a comment
 marker, a directive, such a character or the release's separators, as
 commitlint can miss part of one, and every commit's header and
-breaking change's footer for a link.
+breaking change's footer for a link. It reads every commit's author
+and committer name and email for the release's separators and control
+characters too, which commitlint never reads: make such a commit again
+under a plain name and email.
 `npm run lint:commits` lints the commits since `origin/main`, so from a
 fork, sync the fork's `main` with this repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the

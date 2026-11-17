@@ -200,8 +200,9 @@ export function defaultIo(repo: string, env: GateEnv, fetch: typeof globalThis.f
     event: env.GITHUB_EVENT_NAME ?? "",
     ref: env.GITHUB_REF ?? "",
     head: () => {
-      const [sha, parents, subject] = git("log", "-1", "--format=%H%x1f%P%x1f%s", "HEAD").split(
-        "\x1f",
+      // Split at NUL, which git never lets a subject hold.
+      const [sha, parents, subject] = git("log", "-1", "--format=%H%x00%P%x00%s", "HEAD").split(
+        "\0",
       );
       return { sha: sha!, subject: subject!, parents: parents!.split(" ").filter(Boolean) };
     },

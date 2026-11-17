@@ -246,6 +246,7 @@ describe("the commits, as the release reads them", () => {
             .map((hash) => ({ hash, message: git("log", "-1", "--format=%B", hash) })),
           cwd,
           logger,
+          lastRelease: { gitHead: base },
         });
         expect(release === "major", `genuine: ${genuine}`).toBe(!genuine);
         expect(commits.some(({ message }) => saysBreaking(message))).toBe(!genuine);

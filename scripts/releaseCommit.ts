@@ -139,19 +139,29 @@ export function defaultIo(repo: string, main: string): ReleaseCommitIo {
     execFileSync("git", ["-C", repo, ...args], { encoding: "utf8" }).trim();
   const lines = (text: string) => text.split("\n").filter((line) => line !== "");
   return {
-    firstParents: () =>
-      lines(
-        git("log", "--first-parent", "--format=%H%x1f%P%x1f%an <%ae>%x1f%cn <%ce>%x1f%s", main),
-      ).map((line) => {
-        const [sha, parents, author, committer, subject] = line.split("\x1f");
-        return {
-          sha: sha!,
+    // Five fields to a commit, each ended by NUL, which git never lets a
+    // name, an email or a subject hold, so no text in one can pass for
+    // another.
+    firstParents: () => {
+      const fields = git(
+        "log",
+        "--first-parent",
+        "--format=%H%x00%P%x00%an <%ae>%x00%cn <%ce>%x00%s%x00",
+        main,
+      ).split("\0");
+      const commits: Commit[] = [];
+      for (let at = 0; at + 5 <= fields.length; at += 5) {
+        const [sha, parents, author, committer, subject] = fields.slice(at, at + 5);
+        commits.push({
+          sha: sha!.trim(),
           parents: parents!.split(" ").filter(Boolean),
           author: author!,
           committer: committer!,
           subject: subject!,
-        };
-      }),
+        });
+      }
+      return commits;
+    },
     changed: (sha) => lines(git("diff", "--name-only", `${sha}^`, sha)),
     tags: (sha) => lines(git("tag", "--points-at", sha)),
     tagged: (name) => {
