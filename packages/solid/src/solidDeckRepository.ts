@@ -723,10 +723,9 @@ export function createSolidDeckRepository({
    * instance's folder that fails to be read stops the removal before the
    * entries are written, so they still name what is left and the removal
    * can be made again; a document already gone by then counts as removed.
-   * An entry, a distribution, an agent only the removed decks name or
-   * the catalog node a newer version of the app wrote refuses the
-   * removal (writtenByNewerApp) before anything is deleted: the catalog
-   * to write is made first.
+   * An entry, a distribution or the catalog node a newer version of the
+   * app wrote refuses the removal (writtenByNewerApp) before anything is
+   * deleted: the catalog to write is made first.
    */
   async function removeDecks(decks: readonly Deck[]): Promise<KeptDocuments> {
     const keptDocuments: string[] = [];

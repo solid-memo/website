@@ -802,7 +802,12 @@ graph LR
     any longer, but only Solid Memo's own. Another app's subject at an
     `#agent-…` fragment stays, and of Solid Memo's node only its agent
     statements go. A node that lost Solid Memo's format stamp counts as
-    another app's, so it stays too.
+    another app's, so it stays too. A node at an agent's IRI stamped
+    above the agent format this app writes, whatever its classes, is
+    a newer version's. A catalog write never removes or rewrites it,
+    whether or not a deck the write saves or removes named it. A deck
+    saved over such a node names its author's next node; the newer
+    node stays as it is.
   - It may name a license (`dcterms:license`, a URL), topics
     (`dcat:theme`, concepts of the [topics](vocab.md#concept-schemes)
     scheme) and keywords (`dcat:keyword`), language-tagged since deck
@@ -835,8 +840,9 @@ graph LR
     deck is a copy of no release, and the next write of that deck's
     entry leaves the link out.
 
-  Agents no deck names any more go with the deck that named them. The
-  Studio edits the authors and the license (`setDeckProvenance`,
+  Agents no deck names any more go with the deck that named them,
+  unless a newer version wrote the agent's node. The Studio edits the
+  authors and the license (`setDeckProvenance`,
   [deckProvenance.ts](../packages/domain/src/deckProvenance.ts)). Two
   authors that would share an agent node are refused, and a license is
   one of `KNOWN_LICENSES`
