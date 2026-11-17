@@ -32,6 +32,12 @@
  * name another commit or message. When the two differ, nothing is
  * released.
  *
+ * The range ends where semantic-release read it, the first time a step
+ * asks. Once @semantic-release/git has made the release commit, it moves
+ * `nextRelease.gitHead` to that commit and writes the notes again, with
+ * the commits it read before: a range to the new head would hold the
+ * release commit too, which semantic-release never read.
+ *
  * A default export, as semantic-release takes the plugin by its path
  * (scripts/releaseWithoutMerges.test.ts loads it the same way).
  */
@@ -50,13 +56,31 @@ type Context = {
   nextRelease?: Release | undefined;
 };
 
+/** The head each run read its commits up to, by its repository and last release. */
+const readHeads = new Map<string, string>();
+
+/**
+ * The commit semantic-release read the range up to: the release's head,
+ * or HEAD, when a step first asks, and the same commit at every step
+ * after, whatever the head has moved to since.
+ */
+function readTo(context: Context, git: Git): string {
+  const run = `${context.cwd}\0${context.lastRelease?.gitHead ?? ""}`;
+  const known = readHeads.get(run);
+  if (known !== undefined) return known;
+  const to = context.nextRelease?.gitHead ?? "HEAD";
+  const head = git(["rev-parse", "--verify", "--end-of-options", `${to}^{commit}`]).trim();
+  readHeads.set(run, head);
+  return head;
+}
+
 /**
  * The commits since the last release, newest first, as git holds them:
  * the range semantic-release reads (lib/get-commits.js), each commit
  * told a merge by its parents.
  */
 function rangeOf(context: Context, git: Git): { hash: string; merge: boolean }[] {
-  const to = context.nextRelease?.gitHead ?? "HEAD";
+  const to = readTo(context, git);
   const from = context.lastRelease?.gitHead;
   return git(["rev-list", "--parents", "--end-of-options", from ? `${from}..${to}` : to])
     .split("\n")
