@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.19](https://github.com/solid-memo/website/compare/v7.6.18...v7.6.19) (2026-11-17)
+
+### Fixes
+
+* finish or refuse a card move before anything is written ([f5e8ffa](https://github.com/solid-memo/website/commit/f5e8ffa4aaf84913fe90aceeca927e58a0eaeeba))
+* **studio:** show a bounded part of a deck's health problems ([36f47fc](https://github.com/solid-memo/website/commit/36f47fc1c062e8b5eae7d293fa1b8e9498b83e43))
+
 ## [7.6.18](https://github.com/solid-memo/website/compare/v7.6.17...v7.6.18) (2026-11-17)
 
 ### Fixes
