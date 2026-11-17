@@ -1070,6 +1070,14 @@
     },
     "removedCards": "Kort som uppdateringen tar bort",
     "retiredCards": "Kort som uppdateringen tar ur bruk",
+    "moreCards": {
+      "one": "Och {count} kort till, som inte listas här.",
+      "other": "Och {count} kort till, som inte listas här."
+    },
+    "moreNotes": {
+      "one": "Och anteckningarna för {count} utgåva till, som inte listas här.",
+      "other": "Och anteckningarna för {count} utgåvor till, som inte listas här."
+    },
     "releaseNote": "Utgåva {version}: {notes}",
     "update": "Uppdatera till utgåva {version}",
     "updating": "Uppdaterar…"

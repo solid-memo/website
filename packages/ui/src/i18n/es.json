@@ -1131,6 +1131,16 @@
     },
     "removedCards": "Tarjetas que la actualización elimina",
     "retiredCards": "Tarjetas que la actualización retira",
+    "moreCards": {
+      "one": "Y {count} tarjeta más, que no aparece aquí.",
+      "many": "Y {count} de tarjetas más, que no aparecen aquí.",
+      "other": "Y {count} tarjetas más, que no aparecen aquí."
+    },
+    "moreNotes": {
+      "one": "Y las notas de {count} versión más, que no aparecen aquí.",
+      "many": "Y las notas de {count} de versiones más, que no aparecen aquí.",
+      "other": "Y las notas de {count} versiones más, que no aparecen aquí."
+    },
     "releaseNote": "Versión {version}: {notes}",
     "update": "Actualizar a la versión {version}",
     "updating": "Actualizando…"

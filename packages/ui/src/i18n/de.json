@@ -1070,6 +1070,14 @@
     },
     "removedCards": "Karten, die das Update entfernt",
     "retiredCards": "Karten, die das Update ausmustert",
+    "moreCards": {
+      "one": "Und {count} weitere Karte, die hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Karten, die hier nicht aufgeführt sind."
+    },
+    "moreNotes": {
+      "one": "Und die Hinweise zu {count} weiteren Ausgabe, die hier nicht aufgeführt sind.",
+      "other": "Und die Hinweise zu {count} weiteren Ausgaben, die hier nicht aufgeführt sind."
+    },
     "releaseNote": "Ausgabe {version}: {notes}",
     "update": "Auf Ausgabe {version} aktualisieren",
     "updating": "Wird aktualisiert…"

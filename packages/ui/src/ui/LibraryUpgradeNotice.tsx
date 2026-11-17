@@ -4,6 +4,7 @@
 
 import { activeCards, type Card } from "@solid-memo/domain/deck";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
+import { bounded } from "./bounded";
 import { CardRowFront } from "./CardFace";
 import { HiddenPicturesNotice } from "./deckPictures";
 import { ErrorMessage } from "./ErrorMessage";
@@ -87,18 +88,46 @@ export function historyKept(plan: LibraryUpgradePlan, t: I18n["t"]): string {
 const OPEN_CARD_LIST = 10;
 
 /**
+ * The notes of the releases an update brings, one for each release
+ * between the two versions: the first LIST_LIMIT of them, then how many
+ * more there are (bounded), as a series may hold any number of
+ * releases; nothing when there are none.
+ */
+export function ReleaseNotes({ notes }: { notes: LibraryUpgradePlan["notes"] }) {
+  const { t } = useI18n();
+  if (notes.length === 0) return null;
+  const { shown, more } = bounded(notes);
+  return (
+    <>
+      <ul>
+        {shown.map((note) => (
+          <li key={note.version}>
+            {t("libraryUpgradeNotice.releaseNote", { version: note.version, notes: note.notes })}
+          </li>
+        ))}
+      </ul>
+      {more > 0 && <p class="hint">{t("libraryUpgradeNotice.moreNotes", { count: more })}</p>}
+    </>
+  );
+}
+
+/**
  * The fronts of the cards an update removes or retires, under `label`,
  * so that the user sees which of their cards it takes out of study
- * before agreeing to it; nothing when there are none.
+ * before agreeing to it: the first LIST_LIMIT of them, then how many
+ * more there are (bounded), as a release may hold any number; nothing
+ * when there are none.
  */
 function CardFronts({ label, cards }: { label: string; cards: readonly Card[] }) {
+  const { t } = useI18n();
   if (cards.length === 0) return null;
+  const { shown, more } = bounded(cards);
   return (
     <details open={cards.length <= OPEN_CARD_LIST}>
       <summary>{label}</summary>
-      <HiddenPicturesNotice urls={cards.map((card) => card.frontImageUrl)} />
+      <HiddenPicturesNotice urls={shown.map((card) => card.frontImageUrl)} />
       <ul>
-        {cards.map((card) => (
+        {shown.map((card) => (
           <li key={card.id}>
             <CardRowFront
               front={card.front}
@@ -110,6 +139,7 @@ function CardFronts({ label, cards }: { label: string; cards: readonly Card[] })
           </li>
         ))}
       </ul>
+      {more > 0 && <p class="hint">{t("libraryUpgradeNotice.moreCards", { count: more })}</p>}
     </details>
   );
 }
@@ -153,15 +183,7 @@ export function LibraryUpgradeNotice({
       </p>
       <CardFronts label={t("libraryUpgradeNotice.removedCards")} cards={plan.remove} />
       <CardFronts label={t("libraryUpgradeNotice.retiredCards")} cards={plan.retire} />
-      {plan.notes.length > 0 && (
-        <ul>
-          {plan.notes.map((note) => (
-            <li key={note.version}>
-              {t("libraryUpgradeNotice.releaseNote", { version: note.version, notes: note.notes })}
-            </li>
-          ))}
-        </ul>
-      )}
+      <ReleaseNotes notes={plan.notes} />
       <button class="primary" onClick={onUpgrade} disabled={busy}>
         {busy
           ? t("libraryUpgradeNotice.updating")

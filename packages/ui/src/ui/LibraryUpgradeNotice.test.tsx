@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
+import { LIST_LIMIT } from "./bounded";
 import { createI18n, I18nProvider } from "./i18n";
 import { describeChanges, LibraryUpgradeNotice } from "./LibraryUpgradeNotice";
 
@@ -216,6 +217,31 @@ describe("LibraryUpgradeNotice", () => {
     const removed = screen.getByText("Cards the update removes").closest("details")!;
     expect(removed).not.toHaveAttribute("open");
     expect(removed.querySelectorAll("li")).toHaveLength(11);
+  });
+
+  it("lists at most LIST_LIMIT of the cards it removes or retires, and says how many more", () => {
+    const many = (prefix: string, length: number) =>
+      Array.from({ length }, (_, at) => card(`${prefix}-${at}`));
+    renderNotice({
+      plan: { ...plan, retire: many("old", 51), remove: many("gone", 2000), notes: [] },
+    });
+    const removed = screen.getByText("Cards the update removes").closest("details")!;
+    expect(removed.querySelectorAll("li")).toHaveLength(LIST_LIMIT);
+    expect(removed).toHaveTextContent("And 1,950 more cards, not listed here.");
+    const retired = screen.getByText("Cards the update retires").closest("details")!;
+    expect(retired.querySelectorAll("li")).toHaveLength(LIST_LIMIT);
+    expect(retired).toHaveTextContent("And 1 more card, not listed here.");
+  });
+
+  it("lists the notes of at most LIST_LIMIT releases, and says how many more", () => {
+    const notes = Array.from({ length: 2000 }, (_, at) => ({
+      version: String(at + 2),
+      notes: `Note ${at + 2}.`,
+    }));
+    renderNotice({ plan: { ...plan, remove: [], retire: [], notes } });
+    const region = screen.getByRole("region", { name: "Newer library release" });
+    expect(region.querySelectorAll("li")).toHaveLength(LIST_LIMIT);
+    expect(region).toHaveTextContent("And the notes of 1,950 more releases, not listed here.");
   });
 
   it("says nothing of removals, kept cards or notes when there are none, and counts kept cards", () => {
