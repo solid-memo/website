@@ -793,6 +793,11 @@
         },
         "healthy": "Sin problemas",
         "failed": "Sin comprobar"
+      },
+      "moreCards": {
+        "one": "y {count} tarjeta más",
+        "many": "y {count} de tarjetas más",
+        "other": "y {count} tarjetas más"
       }
     },
     "library": {

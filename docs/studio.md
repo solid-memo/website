@@ -386,7 +386,12 @@ has two tabs, a tablist (Left and Right go from one to the other):
     data is one line, a link to the deck's health. Each unstated
     language, group of cards that say the same, and Markdown finding
     links to its field. The dock, shown at a deck's problems,
-    checks it if neither a Home badge nor its health screen has.
+    checks it if neither a Home badge nor its health screen has. A
+    deck can have any number of these, so the dock lists at most
+    `PROBLEM_LIMIT` (50) and says how many more there are. It works
+    out their text and their links once for each check, and F8 goes
+    through those it lists. The count in the tab and the status bar
+    counts them all.
   - Off a deck's or a draft's screens the tab says where problems are
     listed.
 - **Activity** lists what the screens said they did since the page was
@@ -1352,7 +1357,17 @@ the problems, then come four parts:
   editor's hints ([markdown.md](markdown.md)), passed in by the screen
   (`deckTextCheck` in `ui`, which checks a text once by each rule). A
   wrong option that several cards share (by its id) is checked once, and
-  what it finds is listed at the first of those cards.
+  what it finds is listed at the first of those cards. One text can give
+  thousands of findings, so the health keeps at most
+  `MARKDOWN_TEXT_LIMIT` (20) of each text and `MARKDOWN_DECK_LIMIT`
+  (500) in all, and counts the rest (`markdownMore`).
+
+A deck can have any number of problems, so each of the last three
+parts shows at most `PROBLEM_LIMIT` (50) of them and says how many more
+there are. A group of cards that say the same names at most
+`DUPLICATE_CARD_LIMIT` (10) of its cards and says how many more it
+has. The summary, the line on unstated sides and the repair button
+count them all.
 
 Above them, on a deck's health and the instance's, a deck whose
 documents are unclaimed (they don't say they're the deck's, and are
@@ -1367,8 +1382,8 @@ the instance too (`isInInstancePod`), has no such button: the notice
 says which document and why.
 
 The badge on [Home](#home) counts every violation (warnings aside),
-side to settle, group of cards that say the same, and Markdown finding
-(`healthProblemCount`).
+side to settle, group of cards that say the same, and Markdown finding,
+those the health doesn't keep too (`healthProblemCount`).
 
 While the deck is held (set aside, or the instance blocked:
 [below](#data-set-aside)), every place is

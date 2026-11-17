@@ -13,6 +13,7 @@ import { createI18n } from "@solid-memo/ui/i18n";
 import type { MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { courseDraft, instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 import { PROBLEM_LIMIT } from "./ProblemList";
+import { queryKeys } from "./queryKeys";
 import { deckProblemsOf, useWorkspaceProblems } from "./WorkspaceProblems";
 
 const en = createI18n("en");
@@ -25,6 +26,7 @@ const health = (part: Partial<DeckHealth<MarkdownProblem>>): DeckHealth<Markdown
   unstated: [],
   duplicates: [],
   markdown: [],
+  markdownMore: 0,
   ...part,
 });
 
@@ -46,7 +48,7 @@ describe("deckProblemsOf", () => {
         ],
       }),
       en,
-    );
+    ).shown;
     expect(found.map((one) => one.text)).toEqual([
       "1 problem in the deck's data",
       "water, front: its language is not stated",
@@ -64,13 +66,36 @@ describe("deckProblemsOf", () => {
   it("names the cards in the deck's card language first", () => {
     const swedish = { ...kanji, cardLanguage: "sv" };
     const vatten = { ...water, front: { en: "water", sv: "vatten" } };
-    const found = deckProblemsOf(swedish, health({ duplicates: [[vatten, fire]] }), en);
+    const found = deckProblemsOf(swedish, health({ duplicates: [[vatten, fire]] }), en).shown;
     expect(found.map((one) => one.text)).toEqual(["vatten: says the same as another card"]);
   });
 
   it("lists nothing of a healthy deck, nor of the languages it could not check", () => {
-    expect(deckProblemsOf(kanji, health({}), en)).toEqual([]);
-    expect(deckProblemsOf(kanji, health({ unstated: null }), en)).toEqual([]);
+    expect(deckProblemsOf(kanji, health({}), en)).toEqual({ shown: [], more: 0 });
+    expect(deckProblemsOf(kanji, health({ unstated: null }), en)).toEqual({ shown: [], more: 0 });
+  });
+
+  it("works out only the first PROBLEM_LIMIT, and counts the rest, those the health does not hold too", () => {
+    const spot = { card: water, place: { tab: "content", part: "front" } } as const;
+    const found = deckProblemsOf(
+      kanji,
+      health({
+        report: invalidReport([kanji]),
+        unstated: Array.from({ length: 30 }, () => spot),
+        duplicates: Array.from({ length: 3000 }, () => [fire, water]),
+        markdown: Array.from({ length: 500 }, () => ({
+          ...spot,
+          language: "en",
+          finding: { code: "html", source: "<i>" } as const,
+        })),
+        markdownMore: 100_000,
+      }),
+      en,
+    );
+    expect(found.shown).toHaveLength(PROBLEM_LIMIT);
+    expect(found.shown[0]!.text).toBe("1 problem in the deck's data");
+    expect(found.shown.at(-1)!.text).toBe("fire: says the same as another card");
+    expect(found.more).toBe(1 + 30 + 3000 + 500 + 100_000 - PROBLEM_LIMIT);
   });
 });
 
@@ -101,5 +126,33 @@ describe("useWorkspaceProblems", () => {
     );
     await waitFor(() => expect(result.current.problems!.count).toBe(6000));
     expect(result.current.problems!.routes).toHaveLength(2 * PROBLEM_LIMIT);
+  });
+
+  it("counts all of a deck's problems, and goes (F8) only through those the dock lists", () => {
+    const client = new QueryClient();
+    const spot = { card: water, place: { tab: "content", part: "front" } } as const;
+    client.setQueryData(
+      queryKeys.deckHealth(instanceA.url, kanji.url, kanji.cardsDocumentUrl),
+      health({ unstated: Array.from({ length: 5000 }, () => spot), markdownMore: 7 }),
+    );
+    const { result, rerender } = renderHook(
+      () =>
+        useWorkspaceProblems(
+          {} as UseCases,
+          { screen: "about", deckUrl: kanji.url },
+          { deck: kanji, draft: null },
+        ),
+      {
+        wrapper: ({ children }: { children?: ComponentChildren }) => (
+          <QueryClientProvider client={client}>{children}</QueryClientProvider>
+        ),
+      },
+    );
+    expect(result.current.problems!.count).toBe(5007);
+    const routes = result.current.problems!.routes;
+    expect(routes).toHaveLength(PROBLEM_LIMIT);
+    // Worked out once for each health found, not on each drawing.
+    rerender();
+    expect(result.current.problems!.routes).toBe(routes);
   });
 });

@@ -17,10 +17,12 @@ import {
 import type { MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import {
   DeckHealthScreen,
+  DUPLICATE_CARD_LIMIT,
   InstanceHealthScreen,
   placeText,
   type RepairActions,
 } from "./HealthScreen";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 
@@ -98,12 +100,14 @@ const health: DeckHealth<MarkdownProblem> = {
       finding,
     },
   ],
+  markdownMore: 0,
 };
 const fine: DeckHealth<MarkdownProblem> = {
   report: summarize(instanceA.url, [document(deck.cardsDocumentUrl, [])]),
   unstated: [],
   duplicates: [],
   markdown: [],
+  markdownMore: 0,
 };
 
 function actions(overrides: Partial<RepairActions> = {}): RepairActions {
@@ -280,6 +284,46 @@ describe("DeckHealthScreen", () => {
     expect(within(part("Markdown")).getAllByRole("listitem")[0]).toHaveTextContent(
       "water, note under the back (English)",
     );
+  });
+
+  it("lists a bounded number of each list of a deck's problems, saying how many more", () => {
+    const many = Array.from({ length: PROBLEM_LIMIT + 70 }, (_, i) => i);
+    const cards = Array.from({ length: DUPLICATE_CARD_LIMIT + 5 }, (_, i) =>
+      makeCard(deck, `same-${i}`),
+    );
+    const finding: MarkdownProblem = { code: "html", source: "<i>" };
+    const big: DeckHealth<MarkdownProblem> = {
+      report: summarize(instanceA.url, [document(deck.cardsDocumentUrl, [])]),
+      unstated: many.map(() => ({ card: fire, place: { tab: "content", part: "front" } })),
+      duplicates: [cards, ...many.map((i) => [makeCard(deck, `a${i}`), makeCard(deck, `b${i}`)])],
+      markdown: many.map(() => ({
+        card: water,
+        place: { tab: "content", part: "front" },
+        language: "en",
+        finding,
+      })),
+      markdownMore: 1000,
+    };
+    renderDeck(big, actions({ plan: { repairs: [], unrepairable: [] } }));
+    const more = "And 70 more problems, not listed here.";
+    const languages = part("Languages");
+    expect(languages).toHaveTextContent(`${many.length} card sides state no language.`);
+    expect(within(languages).getAllByRole("listitem")).toHaveLength(PROBLEM_LIMIT);
+    expect(within(languages).getByText(more)).toBeInTheDocument();
+    const duplicates = part("Cards that say the same");
+    const groups = within(duplicates).getAllByRole("listitem");
+    expect(groups).toHaveLength(PROBLEM_LIMIT);
+    expect(
+      within(duplicates).getByText("And 71 more problems, not listed here."),
+    ).toBeInTheDocument();
+    expect(groups[0]).toHaveTextContent(`The same card ${cards.length} times:`);
+    expect(groups[0]).toHaveTextContent(/, same-9 and 5 more cards$/);
+    expect(within(groups[0]!).getAllByRole("link")).toHaveLength(DUPLICATE_CARD_LIMIT);
+    const markdown = part("Markdown");
+    expect(within(markdown).getAllByRole("listitem")).toHaveLength(PROBLEM_LIMIT);
+    expect(
+      within(markdown).getByText("And 1,070 more problems, not listed here."),
+    ).toBeInTheDocument();
   });
 
   it("says so when nothing is wrong at all", () => {

@@ -69,8 +69,17 @@ export interface DeckHealth<F extends MarkdownFinding = MarkdownFinding> {
   unstated: CardSpot[] | null;
   /** Cards in use that say the same, each group in the deck's order (duplicateCardsOf). */
   duplicates: Card[][];
+  /** What the Markdown check found, up to MARKDOWN_TEXT_LIMIT of a text and MARKDOWN_DECK_LIMIT in all (cardMarkdownProblems). */
   markdown: CardMarkdownProblem<F>[];
+  /** How many more findings the Markdown check made than `markdown` holds. */
+  markdownMore: number;
 }
+
+/** At most how many findings of one text the deck's health holds: a dense text can give thousands. */
+export const MARKDOWN_TEXT_LIMIT = 20;
+
+/** At most how many findings of the Markdown check the deck's health holds in all. */
+export const MARKDOWN_DECK_LIMIT = 500;
 
 /** The text predicates of a card, by the part of its content they hold. */
 const PARTS: ReadonlyMap<string, CardTextPart> = new Map([
@@ -328,12 +337,17 @@ export function duplicateCardsOf(
  * given at the first of those cards: it is known by its id, which names
  * one subject of the cards document (writeDistractors), so a copy of it
  * per card is checked once too.
+ *
+ * A text can give any number of findings, so it holds at most
+ * MARKDOWN_TEXT_LIMIT of each text's, and MARKDOWN_DECK_LIMIT in all,
+ * and counts the rest (`more`), so the counts stay whole.
  */
 export function cardMarkdownProblems<F extends MarkdownFinding>(
   cards: readonly Card[],
   check: DeckTextCheck<F>["check"],
-): CardMarkdownProblem<F>[] {
+): { problems: CardMarkdownProblem<F>[]; more: number } {
   const problems: CardMarkdownProblem<F>[] = [];
+  let more = 0;
   const add = (
     card: Card,
     place: CardPlace,
@@ -342,7 +356,14 @@ export function cardMarkdownProblems<F extends MarkdownFinding>(
   ) => {
     for (const [language, value] of Object.entries(text ?? {})) {
       if (value.trim() === "") continue;
-      for (const finding of check(value, rule)) problems.push({ card, place, language, finding });
+      const found = check(value, rule);
+      const take = Math.min(
+        found.length,
+        MARKDOWN_TEXT_LIMIT,
+        MARKDOWN_DECK_LIMIT - problems.length,
+      );
+      for (const finding of found.slice(0, take)) problems.push({ card, place, language, finding });
+      more += found.length - take;
     }
   };
   const checked = new Set<string>();
@@ -366,7 +387,7 @@ export function cardMarkdownProblems<F extends MarkdownFinding>(
       );
     }
   }
-  return problems;
+  return { problems, more };
 }
 
 /**
@@ -398,11 +419,13 @@ export function deckHealth<F extends MarkdownFinding>(
   release: readonly (CardContent & { id: string })[] | undefined,
   text: DeckTextCheck<F>,
 ): DeckHealth<F> {
+  const markdown = cardMarkdownProblems(cards, text.check);
   return {
     report: deckReport(report, deck),
     unstated: release === undefined ? null : unstatedSides(cards, release),
     duplicates: duplicateCardsOf(cards, text.plain),
-    markdown: cardMarkdownProblems(cards, text.check),
+    markdown: markdown.problems,
+    markdownMore: markdown.more,
   };
 }
 
@@ -410,13 +433,14 @@ export function deckHealth<F extends MarkdownFinding>(
  * How many problems a deck's health counts, as its badge says: each
  * violation of a shape (warnings aside), each side whose language is
  * not stated, each group of cards that say the same, and each finding
- * in text written in Markdown.
+ * in text written in Markdown, those it does not hold too.
  */
 export function healthProblemCount(health: DeckHealth<MarkdownFinding>): number {
   return (
     health.report.violationCount +
     (health.unstated?.length ?? 0) +
     health.duplicates.length +
-    health.markdown.length
+    health.markdown.length +
+    health.markdownMore
   );
 }

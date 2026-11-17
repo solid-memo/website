@@ -117,6 +117,19 @@ describe("HealthContainer", () => {
     );
   });
 
+  it("works out the repairs of a check once, however often the screen is drawn again", async () => {
+    const useCases = makeUseCasesFake({ planRepair: vi.fn(() => plan) });
+    renderContainer(useCases, deck);
+    const remove = await screen.findByRole("button", {
+      name: `Remove ${plan.unrepairable[0]!.subjectUrl}`,
+    });
+    for (let i = 0; i < 3; i++) {
+      fireEvent.click(remove);
+      answer("Remove it from your pod", "Cancel");
+    }
+    expect(useCases.planRepair).toHaveBeenCalledTimes(1);
+  });
+
   it("links a deck set aside to none of its forms, which change nothing, and says why; its repairs stay", async () => {
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [makeCard(deck, "c1")]),

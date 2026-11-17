@@ -751,6 +751,10 @@
         },
         "healthy": "No problems",
         "failed": "Not checked"
+      },
+      "moreCards": {
+        "one": "and {count} more card",
+        "other": "and {count} more cards"
       }
     },
     "library": {
