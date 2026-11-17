@@ -74,7 +74,7 @@ export function resultsNotShown(severity: Violation["severity"]): Violation {
 }
 
 /** Whether a result is resultsNotShown's: it says how many more there are, not what is wrong. */
-function isResultLimit(result: Violation): boolean {
+export function isResultLimit(result: Violation): boolean {
   return result.constraint === "ResultLimit" && result.builtIn === true;
 }
 
@@ -85,30 +85,33 @@ function isResultLimit(result: Violation): boolean {
  * the most severe of those left out and of `dropped`, the severity of
  * results the check left out before they were made, if any. A
  * resultsNotShown already among them is folded into the one added, so
- * results limited twice say so once.
+ * results limited twice say so once. How severe a result counts as is
+ * `rank`'s, its own severity unless the caller will report it as less
+ * severe (a violation on another app's value, which it shows as a
+ * warning): such results cannot make the one added a violation.
  */
-export function limitResults(
-  results: readonly Violation[],
+export function limitResults<T extends Violation>(
+  results: readonly T[],
   dropped?: Violation["severity"],
+  rank: (result: T) => Violation["severity"] = (result) => result.severity,
 ): Violation[] {
   let severity = dropped;
-  const plain: Violation[] = [];
+  const plain: T[] = [];
   for (const result of results) {
     if (isResultLimit(result))
       severity = severity === undefined ? result.severity : moreSevere(severity, result.severity);
     else plain.push(result);
   }
   if (plain.length <= MAX_RESULTS_PER_CHECK && severity === undefined) return plain;
+  const ranks = plain.map((result) => SEVERITY_RANK[rank(result)]);
   // The indices of those kept: the most severe first, in the order given among the equally severe.
-  const order = plain
-    .map((_, index) => index)
-    .sort((a, b) => SEVERITY_RANK[plain[b].severity] - SEVERITY_RANK[plain[a].severity] || a - b);
+  const order = plain.map((_, index) => index).sort((a, b) => ranks[b] - ranks[a] || a - b);
   const kept = new Set(order.slice(0, MAX_RESULTS_PER_CHECK));
   let left = severity ?? "info";
   for (const index of order.slice(MAX_RESULTS_PER_CHECK)) {
-    left = moreSevere(left, plain[index].severity);
+    left = moreSevere(left, rank(plain[index]));
   }
-  const limited = plain.filter((_, index) => kept.has(index));
+  const limited: Violation[] = plain.filter((_, index) => kept.has(index));
   limited.push(resultsNotShown(left));
   return limited;
 }

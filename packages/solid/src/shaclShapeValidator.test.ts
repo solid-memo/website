@@ -1569,6 +1569,104 @@ describe("createShaclShapeValidator", () => {
       );
     });
 
+    describe("with more DCAT-AP results than a check keeps", () => {
+      const INSTANCE_URL = "https://pod.example/solid-memo/a/";
+      const ACCRUAL = "http://purl.org/dc/terms/accrualPeriodicity";
+      const SPATIAL = "http://purl.org/dc/terms/spatial";
+      const THEME = "http://www.w3.org/ns/dcat#theme";
+      const KEYWORD = "http://www.w3.org/ns/dcat#keyword";
+      const entry = setThing(
+        datasetFrom(DOC),
+        buildThing(createThing({ url: `${DOC}#deck-1` }))
+          .addIri(RDF.type, SM.Deck)
+          .addIri(RDF.type, DCAT.Dataset)
+          .addStringNoLocale(DCTERMS.title, "Capitals")
+          .addStringNoLocale(DCTERMS.description, "Capitals.")
+          .addIri(SM.studyDirection, SM.bidirectional)
+          .addIri(SM.cardsDocument, `${INSTANCE_URL}cards/deck-1.ttl`)
+          .addIri(SM.reviewsDocument, `${INSTANCE_URL}reviews/deck-1.ttl`)
+          .addLiteral(SM.formatVersion, integerLiteral(3))
+          .build(),
+      );
+      const catalogDocument = withCatalog(datasetFrom(DOC), DOC, {
+        title: "Main",
+        description: "My decks.",
+        publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+      });
+      /** The dataset with `count` IRI values of `predicate` on `subject`, none of the class DCAT-AP asks for. */
+      const withValues = (dataset: Dataset, subject: string, predicate: string, count: number) => {
+        let thing = buildThing(getThing(dataset, subject)!);
+        for (let i = 0; i < count; i++)
+          thing = thing.addIri(predicate, `https://other.example/v${i}`);
+        return setThing(dataset, thing.build());
+      };
+      /** The dataset as read from the pod: the values in it, none added by a write. */
+      const asRead = (dataset: Dataset) => fromRdfJsDataset(toRdfJsDataset(dataset));
+      const reportOn = async (dataset: Dataset) => {
+        vi.mocked(getSolidDatasetOrNull).mockResolvedValue(asRead(dataset) as never);
+        return summarize(INSTANCE_URL, [await validator.validateDocument(DOC)]);
+      };
+      /** The severities of DCAT-AP's ResultLimit results in the report on `subject`. */
+      const limitsOf = (report: Awaited<ReturnType<typeof reportOn>>, subject: string) =>
+        report.documents
+          .flatMap((document) => document.subjects)
+          .filter((s) => s.url === subject)
+          .flatMap((s) => ("violations" in s ? s.violations : []))
+          .filter((v) => v.profile === "dcat-ap" && v.constraint === "ResultLimit")
+          .map((v) => v.severity);
+      const deck = { url: `${DOC}#deck-1` } as Deck;
+
+      // A ResultLimit of their results set the deck aside, and refused every write of it.
+      it("warns only about values another app added to a deck's entry, however many", async () => {
+        for (const [predicate, count] of [
+          [ACCRUAL, 1],
+          [ACCRUAL, 1000],
+          [ACCRUAL, 1001],
+          [THEME, 1001],
+        ] as const) {
+          const dataset = withValues(entry, `${DOC}#deck-1`, predicate, count);
+          const report = await reportOn(dataset);
+          expect(deckSetAside(report, deck)).toBe(false);
+          // Past the limit, with the entry's other results, the report still says results were left out, as a warning.
+          expect(limitsOf(report, `${DOC}#deck-1`)).toEqual(count < 1000 ? [] : ["warning"]);
+          await expect(
+            validator.checkSubjects(asRead(dataset), [`${DOC}#deck-1`], "pod"),
+          ).resolves.toBeUndefined();
+        }
+      }, 120_000);
+
+      it("warns only about values another app added to the catalog, however many", async () => {
+        for (const count of [1, 1000, 1001]) {
+          const dataset = withValues(catalogDocument, `${DOC}#catalog`, SPATIAL, count);
+          expect(arrangementSetAside(await reportOn(dataset))).toBe(false);
+          await expect(
+            validator.checkSubjects(asRead(dataset), [`${DOC}#catalog`], "pod"),
+          ).resolves.toBeUndefined();
+        }
+      }, 120_000);
+
+      it("still refuses a deck's entry with more of its own violations than a check keeps", async () => {
+        // Values the write adds are Solid Memo's, held to their class.
+        const added = withValues(entry, `${DOC}#deck-1`, THEME, 1001);
+        await expect(validator.checkSubjects(added, [`${DOC}#deck-1`], "pod")).rejects.toThrow(
+          `<${DOC}#deck-1>: DCAT-AP: There are more results than Solid Memo shows`,
+        );
+      }, 120_000);
+
+      it("still sets aside a deck's entry with more of its own violations than a check keeps, among another app's values", async () => {
+        // Keywords that are no literals are Solid Memo's to fix; the values of accrualPeriodicity are another app's.
+        const dataset = withValues(
+          withValues(entry, `${DOC}#deck-1`, KEYWORD, 1001),
+          `${DOC}#deck-1`,
+          ACCRUAL,
+          1001,
+        );
+        const report = await reportOn(dataset);
+        expect(limitsOf(report, `${DOC}#deck-1`)).toEqual(["violation"]);
+        expect(deckSetAside(report, deck)).toBe(true);
+      }, 120_000);
+    });
+
     it("holds a catalog's members of its own document to their class, not those another document describes or another app wrote", async () => {
       const written = withCatalog(datasetFrom(DOC), DOC, {
         title: "Main",

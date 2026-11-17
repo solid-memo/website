@@ -416,4 +416,17 @@ describe("limitResults", () => {
       "info",
     );
   });
+
+  it("ranks results as the caller will report them, so ones it shows as warnings never make it a violation", () => {
+    const theirs = (i: number): Violation => ({ ...result(i), path: "https://other.example/p" });
+    const ownLast = [...Array.from({ length: 1001 }, (_, i) => theirs(i)), result(0)];
+    const rank = (one: Violation) => (one.path === undefined ? one.severity : "warning");
+    const limited = limitResults(ownLast, undefined, rank);
+    // The caller's own violation is kept ahead of the others, and those left out are warnings.
+    expect(limited).toContainEqual(result(0));
+    expect(limited.at(-1)).toMatchObject({ constraint: "ResultLimit", severity: "warning" });
+    // Its own violations left out still make it a violation.
+    const own = Array.from({ length: 1001 }, (_, i) => result(i));
+    expect(limitResults([...ownLast, ...own], undefined, rank).at(-1)?.severity).toBe("violation");
+  });
 });

@@ -7,7 +7,7 @@ import { DataFactory as environment } from "n3";
 import { datasetFromTurtle } from "./testing/turtle";
 import type { Literal, Quad } from "@rdfjs/types";
 import ValidationEngine from "rdf-validate-shacl/src/validation-engine.js";
-import { createEngine, mapIris, mergeDatasets } from "./engine";
+import { createEngine, type Demoted, mapIris, mergeDatasets } from "./engine";
 import { subclassCycle, subclassDiamond } from "./testing/subclassTangle";
 import { readSiteTurtle, SHAPES_BASE } from "@solid-memo/vocab/tooling/sources";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
@@ -618,6 +618,9 @@ describe("the results of one check", () => {
 <#hint> sh:path <${EX}hint> ; sh:datatype xsd:decimal ; sh:severity sh:Warning .
 <#strict> sh:path <${EX}strict> ; sh:datatype xsd:decimal .
 <#hints> a sh:NodeShape ; sh:property <#hint> .
+<#both> a sh:NodeShape ; sh:targetClass <${EX}B> ;
+    sh:property <#hint>, <#strict>, [ sh:path <${EX}theirs> ; sh:datatype xsd:decimal ; sh:maxCount 1 ] .
+<#literal> a sh:NodeShape ; sh:targetClass <${EX}L> ; sh:nodeKind sh:Literal .
 `;
   const limited = async () => createEngine(await datasetFromTurtle(LIMITED, SHAPES_URL));
   /** A subject with `count` values of ex:ease (or another property), none a decimal. */
@@ -773,6 +776,87 @@ describe("the results of one check", () => {
     expect(results).toHaveLength(1001);
     expect(results.slice(0, 1000).every((result) => result.severity === "violation")).toBe(true);
     expect(results.at(-1)).toEqual(notShown);
+  });
+
+  describe("with the violations the caller will report as warnings named", () => {
+    const both = (subject: string, theirs: number, own: number): Quad[] => [
+      environment.quad(
+        environment.namedNode(subject),
+        environment.namedNode(RDF_TYPE),
+        environment.namedNode(`${EX}B`),
+      ),
+      ...eases(subject, theirs, `${EX}theirs`),
+      ...eases(subject, own, `${EX}strict`),
+      ...eases(subject, 2, `${EX}hint`),
+    ];
+    const asked: { focusNode: string; path?: string; value?: string; constraint: string }[] = [];
+    const demoted: Demoted = (focusNode, result, overTyped) => {
+      asked.push({ focusNode, ...result });
+      return result.path === `${EX}theirs` && overTyped.size === 0;
+    };
+
+    it("counts them as warnings, so many of them never leave one out as a violation", async () => {
+      const e = await limited();
+      const subject = `${DATA_URL}#b`;
+      for (const theirs of [1000, 1001, 5000]) {
+        asked.length = 0;
+        let results: { severity: string; constraint: string }[] = [];
+        const count = await made(async () => {
+          results = await e.validate(mergeDatasets(both(subject, theirs, 1)), demoted);
+        });
+        // Their results, and the subject's own violation, which is kept ahead of them.
+        expect(count).toBeLessThanOrEqual(1003);
+        expect(results).toContainEqual(
+          expect.objectContaining({ constraint: "Datatype", path: `${EX}strict` }),
+        );
+        expect(results.at(-1)).toEqual({ focusNode: subject, ...notShown, severity: "warning" });
+      }
+      // Each violation is named by the terms the result is made with; a warning is not asked about.
+      expect(asked).toContainEqual({
+        focusNode: subject,
+        path: `${EX}theirs`,
+        value: "x0",
+        constraint: "Datatype",
+      });
+      expect(asked).toContainEqual({
+        focusNode: subject,
+        path: `${EX}theirs`,
+        constraint: "MaxCount",
+      });
+      expect(asked.some((result) => result.path === `${EX}hint`)).toBe(false);
+    });
+
+    it("still says there are more as a violation when the subject's own violations are left out", async () => {
+      const e = await limited();
+      const subject = `${DATA_URL}#b`;
+      const results = await e.validate(mergeDatasets(both(subject, 1500, 1001)), demoted);
+      expect(results.at(-1)).toEqual({ focusNode: subject, ...notShown });
+      expect(results.filter((result) => result.path === `${EX}strict`)).toHaveLength(1000);
+    });
+
+    it("names the results of a node shape by the path and value each gives, if any", async () => {
+      const e = await limited();
+      const subject = `${DATA_URL}#c`;
+      const node = `${DATA_URL}#n`;
+      asked.length = 0;
+      const typedAs = (s: string, type: string) =>
+        environment.quad(
+          environment.namedNode(s),
+          environment.namedNode(RDF_TYPE),
+          environment.namedNode(`${EX}${type}`),
+        );
+      await e.validate(
+        mergeDatasets([typedAs(subject, "C"), ...extras(subject, 1), typedAs(node, "L")]),
+        demoted,
+      );
+      expect(asked).toContainEqual({
+        focusNode: subject,
+        path: `${EX}extra0`,
+        value: "x",
+        constraint: "Closed",
+      });
+      expect(asked).toContainEqual({ focusNode: node, value: node, constraint: "NodeKind" });
+    });
   });
 
   it("keeps a violation found after 1,000 warnings, the warnings left out said as a warning", async () => {
