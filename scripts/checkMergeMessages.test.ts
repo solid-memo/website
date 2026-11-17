@@ -204,6 +204,7 @@ describe("main", () => {
     messages: Record<string, string>,
     single: readonly string[] = [],
     undone: readonly string[] = [],
+    identities: Record<string, string[]> = {},
   ): MergesIo & { logged: string[] } {
     const logged: string[] = [];
     const commits: RangeCommit[] = Object.keys(messages).map((hash) => ({
@@ -214,6 +215,7 @@ describe("main", () => {
       logged,
       commitsBetween: () => commits,
       messageOf: (hash) => messages[hash]!,
+      identityOf: (hash) => identities[hash] ?? ["t", "t@example.org", "t", "t@example.org"],
       undoes: (revert, named) => undone.includes(`${revert} ${named}`),
       log: (message) => logged.push(message),
     };
@@ -299,6 +301,32 @@ describe("main", () => {
     expect(fake.logged[0]).toMatch(/^a holds a line/);
   });
 
+  it.each([
+    ["an author's name", ["a==FIELD==b", "t@example.org", "t", "t@example.org"]],
+    ["an author's email", ["t", "t==END==@example.org", "t", "t@example.org"]],
+    ["a committer's name", ["t", "t@example.org", "==FIELD==", "t@example.org"]],
+    ["a committer's email", ["t", "t@example.org", "t", "t@example.org==FIELD=="]],
+  ])("fails on a commit whose identity holds the release's separator: %s", (_, identity) => {
+    const fake = io({ a: "fix: a bug" }, ["a"], [], { a: identity });
+    expect(main(args, fake)).toBe(1);
+    expect(fake.logged[0]).toBe(
+      "a has an author or committer whose name or email holds the text the release splits git's output at.",
+    );
+    expect(fake.logged.at(-1)).toContain("another name or email");
+    expect(fake.logged.join("\n")).not.toContain("==");
+  });
+
+  it("fails on a commit whose identity holds a control character, and passes a tab", () => {
+    const fake = io({ a: "fix: a bug", b: "fix: a bug" }, ["a", "b"], [], {
+      a: ["t\x1fu", "t@example.org", "t", "t@example.org"],
+      b: ["t\tu", "t@example.org", "t", "t@example.org"],
+    });
+    expect(main(args, fake)).toBe(1);
+    expect(fake.logged.slice(0, -1)).toEqual([
+      "a has an author or committer whose name or email holds a control character.",
+    ]);
+  });
+
   it.each([[["node"]], [["node", "--base", "b"]], [["node", "--head", "h"]]])(
     "gives the usage when a ref is missing: %j",
     (argv) => {
@@ -371,6 +399,56 @@ describe("defaultIo", () => {
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
     expect(main(["node", "--base", base, "--head", head], io)).toBe(1);
     expect(log).toHaveBeenCalledWith(`${head} (#1) holds a keyword that makes GitHub skip CI.`);
+    log.mockRestore();
+  });
+
+  // The PoC of GHSA-773g-964f-cx3x: an author's name that holds the
+  // separator, with an honest message.
+  it("reads each commit's author and committer, and refuses the separator in one", () => {
+    repo = mkdtempSync(join(tmpdir(), "merges-"));
+    const cwd = repo;
+    const git = (args: string[], env: Record<string, string> = {}) =>
+      execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.org", ...args], {
+        cwd,
+        encoding: "utf8",
+        env: { ...process.env, ...env },
+      }).trim();
+    git(["init", "-q", "-b", "main"]);
+    writeFileSync(join(cwd, "a"), "1");
+    git(["add", "a"]);
+    git(["commit", "-qm", "chore: start"]);
+    const base = git(["rev-parse", "HEAD"]);
+    git(["commit", "-q", "--allow-empty", "-m", "fix: an ordinary commit"]);
+    const decoy = git(["rev-parse", "HEAD"]);
+    const name = [
+      "x",
+      "p1",
+      "p2",
+      "p3",
+      "p4",
+      "p5",
+      "p6",
+      "p7",
+      decoy,
+      "feat: a thing",
+      "",
+      "x",
+    ].join("==FIELD==");
+    writeFileSync(join(cwd, "a"), "2");
+    git(["commit", "-qam", "feat!: drop a line\n\nBREAKING CHANGE: it is gone."], {
+      GIT_AUTHOR_NAME: name,
+      GIT_COMMITTER_EMAIL: "c@example.org",
+    });
+    const head = git(["rev-parse", "HEAD"]);
+
+    const io = defaultIo(cwd);
+    expect(io.identityOf(head)).toEqual([name, "t@example.org", "t", "c@example.org"]);
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    expect(main(["node", "--base", base, "--head", head], io)).toBe(1);
+    expect(log).toHaveBeenCalledWith(
+      `${head} has an author or committer whose name or email holds the text the release splits git's output at.`,
+    );
+    expect(log).not.toHaveBeenCalledWith(expect.stringContaining(decoy));
     log.mockRestore();
   });
 

@@ -65,7 +65,7 @@ describe("releaseWithoutMerges", () => {
       cwd,
       logger,
       options: { repositoryUrl: "https://github.com/solid-memo/website" },
-      lastRelease: { gitTag: "v1.0.0", version: "1.0.0" },
+      lastRelease: { gitTag: "v1.0.0", version: "1.0.0", gitHead: base },
       nextRelease: { gitTag: "v1.1.0", version: "1.1.0" },
     };
   }
@@ -152,7 +152,7 @@ describe("releaseWithoutMerges", () => {
       cwd,
       logger,
       options: { repositoryUrl: "https://github.com/solid-memo/website" },
-      lastRelease: { gitTag: "v1.0.0", version: "1.0.0" },
+      lastRelease: { gitTag: "v1.0.0", version: "1.0.0", gitHead: base },
       nextRelease: { gitTag: "v2.0.0", version: "2.0.0" },
     };
   }
@@ -220,14 +220,98 @@ describe("releaseWithoutMerges", () => {
   });
 
   it("releases nothing when there are no commits", async () => {
-    const context = await merged(chore, queued("chore: a title"));
-    expect(await plugin.analyzeCommits(options, { ...context, commits: [] })).toBeNull();
+    const context = await history(() => {});
+    expect(context.commits).toEqual([]);
+    expect(await plugin.analyzeCommits(options, context)).toBeNull();
   });
 
-  it("stops the release when git cannot read a commit", async () => {
+  it("reads the whole history when there is no release yet, up to the release's head", async () => {
+    const context = await history((git) => {
+      git("commit", "-q", "--allow-empty", "-m", "fix: an ordinary commit");
+    });
+    const head = context.commits[0]!.hash;
+    const commits = await getCommits("", head, { cwd: context.cwd });
+    expect(commits).toHaveLength(2);
+    const first = { ...context, commits, lastRelease: {}, nextRelease: { gitHead: head } };
+    expect(await plugin.analyzeCommits(options, first)).toBe("patch");
+    expect(await plugin.generateNotes(options, first)).toContain("an ordinary commit");
+  });
+
+  it("stops the release when git cannot read a commit, or the range", async () => {
     const context = await merged(chore, queued("chore: a title"));
     const commits = [{ hash: "0".repeat(40), message: "feat: a deck" }];
     await expect(plugin.analyzeCommits(options, { ...context, commits })).rejects.toThrow();
+    const lastRelease = { gitHead: "0".repeat(40) };
+    await expect(plugin.analyzeCommits(options, { ...context, lastRelease })).rejects.toThrow();
+  });
+
+  /** The commits semantic-release read, changed by `change`, against the history. */
+  async function misread(change: (commits: Commit[]) => Commit[]) {
+    const context = await history((git, cwd) => {
+      writeFileSync(join(cwd, "a"), "2");
+      git("commit", "-qam", breaking);
+      git("commit", "-q", "--allow-empty", "-m", "fix: an ordinary commit");
+    });
+    return { ...context, commits: change(context.commits) };
+  }
+
+  it.each<[string, (commits: Commit[]) => Commit[]]>([
+    ["a commit left out", (commits) => commits.slice(1)],
+    ["a commit read twice", ([first, ...rest]) => [first!, first!, ...rest.slice(1)]],
+    [
+      "a commit given another's message",
+      ([first, second]) => [first!, { ...second!, message: "feat: x" }],
+    ],
+    [
+      "a commit not in the range",
+      (commits) => [...commits, { hash: "f".repeat(40), message: "fix: x" }],
+    ],
+  ])("stops the release when semantic-release read the range otherwise: %s", async (_, change) => {
+    const context = await misread(change);
+    const stopped = /not the ones git holds/;
+    await expect(plugin.analyzeCommits(options, context)).rejects.toThrow(stopped);
+    await expect(plugin.generateNotes(options, context)).rejects.toThrow(stopped);
+  });
+
+  // An author's or committer's identity is written before the hash and
+  // the message in the output semantic-release splits: one that holds
+  // the separator could make it read another commit's.
+  it("never releases a commit as semantic-release misread it from an identity", async () => {
+    const field = "==FIELD==";
+    const context = await history((git, cwd) => {
+      git("commit", "-q", "--allow-empty", "-m", "fix: an ordinary commit");
+      const decoy = git("rev-parse", "HEAD");
+      const name = [
+        "x",
+        "p1",
+        "p2",
+        "p3",
+        "p4",
+        "p5",
+        "p6",
+        "p7",
+        decoy,
+        "feat: add a small thing",
+        "",
+        "2026-11-17 10:00:00 +0000",
+        "x",
+      ].join(field);
+      writeFileSync(join(cwd, "a"), "2");
+      execFileSync("git", ["-c", "commit.gpgsign=false", "commit", "-qam", breaking], {
+        cwd,
+        env: {
+          ...process.env,
+          GIT_AUTHOR_NAME: name,
+          GIT_AUTHOR_EMAIL: "x@example.org",
+          GIT_COMMITTER_NAME: "t",
+          GIT_COMMITTER_EMAIL: "t@example.org",
+        },
+      });
+    });
+    // semantic-release read the decoy where the breaking commit is.
+    expect(context.commits.map(({ message }) => message)).not.toContain(breaking);
+    await expect(plugin.analyzeCommits(options, context)).rejects.toThrow(/not the ones git holds/);
+    await expect(plugin.generateNotes(options, context)).rejects.toThrow(/not the ones git holds/);
   });
 
   // In a process of its own, as a release runs it: Node reads the file as

@@ -250,6 +250,30 @@ describe("defaultIo, on a repository with a pull request's commit titled as a re
       `::notice::${made} is titled as a release commit, but is not one: its author is Test <test@example.org>, not ${BOT}.`,
     );
   });
+
+  // A name may hold any character but NUL, a line feed, < and >, so the
+  // fields are read apart at NUL: a name with another separator in it
+  // stays one name.
+  it("reads a name that holds a separator as one name", () => {
+    write("package.json", '{"version":"1.0.2"}\n');
+    git(["commit", "-qam", "chore(release): 1.0.2"], {
+      ...bot,
+      GIT_AUTHOR_NAME: "x\x1fgithub-actions[bot]",
+    });
+    const [commit] = io("HEAD").firstParents();
+    expect(commit).toEqual({
+      sha: git(["rev-parse", "HEAD"]),
+      parents: [git(["rev-parse", "HEAD^"])],
+      author: "x\x1fgithub-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>",
+      committer: BOT,
+      subject: "chore(release): 1.0.2",
+    });
+    const all = io("HEAD").firstParents();
+    expect(all.map(({ sha }) => sha)).toEqual(
+      git(["rev-list", "--first-parent", "HEAD"]).split("\n"),
+    );
+    expect(all.at(-1)?.subject).toBe("feat: start");
+  });
 });
 
 describe("run", () => {

@@ -125,10 +125,18 @@ some other characters for the end of a line. So commitlint, and
 `npm run check:merges` for every commit, refuse a control character
 other than a tab or a line feed, a carriage return that isn't right
 before a line feed, and a Unicode line or paragraph separator.
-The release reads its commits from one `git log`, split at `==FIELD==`
-between a commit's fields and `==END==` after its last, so a message
-that held either would read as another. commitlint and
-`npm run check:merges` refuse both too.
+semantic-release reads its commits from one `git log`, split at
+`==FIELD==` between a commit's fields and `==END==` after its last. A
+commit's author and committer name and email are among those fields,
+and so is its message, so text in one could read as another field, or
+as another commit. So the release's plugin
+([releaseWithoutMerges.ts](../scripts/releaseWithoutMerges.ts)) reads
+each commit's message from git by its hash, and releases nothing when
+what semantic-release read differs from what git holds. commitlint
+and `npm run check:merges` refuse both separators in a message too, and
+`npm run check:merges` refuses them, and a control character, in every
+commit's author and committer name and email, which commitlint never
+reads.
 
 The release reads every other line of a body as text too, as commitlint
 does. A line such as `-notes-` used to name a field to the release's
@@ -749,6 +757,12 @@ canceled run is handled by what it left behind, as in the cases below.
   couldn't write, docs that couldn't be rendered or drawn, Chromium
   that wouldn't start): nothing was pushed, and the next run releases
   as usual.
+- **The commits semantic-release read aren't the ones git holds**:
+  nothing was released, and every run stops the same way, as the
+  commits stay in the range. `npm run check:merges -- --base <last tag>
+  --head main` names the commit whose author or committer it refuses
+  ([What counts as breaking](#what-counts-as-breaking)); the maintainer
+  agrees in an issue how to release past it.
 - **The push was refused**: `main` moved on while the release ran, or
   the deploy key, its secret in the `release` environment or the bypass
   is missing. Nothing was tagged, and the next run releases from the
