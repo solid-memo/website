@@ -170,6 +170,10 @@ export function makeDeps() {
     upgradeCards: vi.fn(async () => true),
     stateCardLanguages: vi.fn(async (_deck, ids) => ids.length),
     applyCardChanges: vi.fn(async () => undefined),
+    // As the real one does: applyCardChanges's write, sent when the function given is called.
+    prepareCardChanges: vi.fn(
+      async (d, changes, options) => () => deckRepository.applyCardChanges(d, changes, options),
+    ),
     addCardIfAbsent: vi.fn(async () => true),
     importDeck: vi.fn(async () => deck),
     addDeck: vi.fn(async (added) => added),
@@ -236,6 +240,10 @@ export function makeDeps() {
     }),
     createReviewStates: vi.fn(async () => undefined),
     applyReviewChanges: vi.fn(async () => undefined),
+    // As the real one does: applyReviewChanges's write, sent when the function given is called.
+    prepareReviewChanges: vi.fn(
+      async (d, changes) => () => reviewStateRepository.applyReviewChanges(d, changes),
+    ),
     upgradeReviewStates: vi.fn(async () => true),
     // As the real one does: the states made of those stored, which listReviewStates gives.
     writeFsrsStates: vi.fn(async (d, edit) => {

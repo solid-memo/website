@@ -142,8 +142,9 @@ const DIRECTIONS: readonly StudyDirection[] = ["front-to-back", "back-to-front"]
  * without an SM-2 state beside it counts for nothing (effectiveStates),
  * so it is not carried, but it is removed as a state left at its id is.
  * A move then removes the cards from the source, with their states
- * (every SM-2 and FSRS-6 state of them, read or not, when written:
- * UseCases.transferCards); a copy leaves the
+ * (every SM-2 and FSRS-6 state of them, read or not, but an unread
+ * one a newer version wrote, when written: UseCases.transferCards);
+ * a copy leaves the
  * source as it is. The states are those read, joined to their cards by
  * sm:reviewOf (domain/reviewRecord.ts): another scheduler's are never
  * among them, and stay where they are. A due day that is no real date

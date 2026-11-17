@@ -42,6 +42,7 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
 import {
   carriedTo,
+  isWrittenByNewer,
   ownSubjectsOf,
   readVersioned,
   recordThing,
@@ -441,7 +442,12 @@ export function withoutReadReviewStates(
  * fragment rule, or this app's FSRS-6 state of one, by its links, read
  * or not, of the reviews document's own subjects (ownSubjectsOf).
  * Another scheduler's states, a subject of another document, and any
- * other subject, stay.
+ * other subject, stay. So does a state a newer version of the app wrote
+ * (isWrittenByNewer) that is not the one read of its card and
+ * direction: this app never removes one, and no write needs it gone, so
+ * it is left as it is rather than refused (GHSA-7x88-hfwx-whvj). The
+ * state read is the card's progress the removal is for: one a newer
+ * version wrote is refused (writtenByNewerApp), as it is everywhere.
  */
 export function withoutReviewStates(
   dataset: Dataset,
@@ -449,12 +455,18 @@ export function withoutReviewStates(
   keys: readonly ReviewKey[],
 ): Dataset {
   const removed = new Set(keys.map(reviewKeyOf));
+  const read = readBoth(dataset, documents);
+  const readAt = new Set([...read.sm2, ...read.fsrs].map(({ url }) => url));
   return removeAllUnlessNewer(
     dataset,
     ownSubjectsOf(dataset, documents.reviewsDocumentUrl)
       .filter((thing) => {
         const key = keyOfSubject(thing, documents) ?? fsrsKeyOfSubject(thing, documents);
-        return key !== null && removed.has(reviewKeyOf(key));
+        return (
+          key !== null &&
+          removed.has(reviewKeyOf(key)) &&
+          (readAt.has(asUrl(thing)) || !isWrittenByNewer(thing))
+        );
       })
       .map(asUrl),
   );

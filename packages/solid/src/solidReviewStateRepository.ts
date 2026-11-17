@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { type Dataset, createSolidDataset } from "./client/rdf";
-import type { ReviewStateRepository } from "@solid-memo/application/ports";
+import type { ReviewChanges, ReviewStateRepository } from "@solid-memo/application/ports";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { PromptStates } from "@solid-memo/domain/grading";
 import type { ReviewKey, ReviewStates } from "@solid-memo/domain/review";
@@ -64,11 +64,67 @@ export function createSolidReviewStateRepository({
    */
   async function saveReviews(
     deck: Deck,
-    { dataset, subjects }: { dataset: Dataset; subjects: readonly string[] },
+    written: { dataset: Dataset; subjects: readonly string[] },
   ): Promise<void> {
+    await saveDataset(deck.reviewsDocumentUrl, await checkedReviews(deck, written), fetch);
+  }
+
+  /** The reviews document saveReviews sends, once checked as it checks it; nothing is sent. */
+  async function checkedReviews(
+    deck: Deck,
+    { dataset, subjects }: { dataset: Dataset; subjects: readonly string[] },
+  ): Promise<Dataset> {
     const written = await guard.writable(deck, deck.reviewsDocumentUrl, dataset);
     await checkWrite(written, subjects, "pod");
-    await saveDataset(deck.reviewsDocumentUrl, written, fetch);
+    return written;
+  }
+
+  /**
+   * The reviews document as applyReviewChanges writes it, with the
+   * subjects written; null when nothing is written (no document, and no
+   * state to save). Refuses what applyReviewChanges refuses.
+   */
+  async function changed(
+    deck: Deck,
+    { save, remove, fsrs = NO_FSRS, every = false, carried }: ReviewChanges,
+  ): Promise<{ dataset: Dataset; subjects: string[] } | null> {
+    const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
+    // No document, nothing to remove: one is made only for states to save (a card moved in, with them).
+    if (read === null && save.length + fsrs.save.length === 0) return null;
+    const dataset = read ?? createSolidDataset();
+    // A card's every state goes with `every`; else, and for FSRS-6's removals, only the state read.
+    const without = withoutReadReviewStates(
+      every ? withoutReviewStates(dataset, deck, remove) : dataset,
+      deck,
+      every ? { fsrs: fsrs.remove } : { sm2: remove, fsrs: fsrs.remove },
+    );
+    // A state copied from another deck starts from what that deck's document says of it.
+    const source =
+      carried === undefined
+        ? null
+        : await getSolidDatasetOrNull(
+            carried.deck.reviewsDocumentUrl,
+            carried.asNoOne === true ? publicFetch : fetch,
+          );
+    return withReviewStates(
+      without,
+      deck,
+      { sm2: save, fsrs: fsrs.save },
+      randomId,
+      source === null ? undefined : carriedStatesOf(source, carried!.deck, carried!.ids),
+    );
+  }
+
+  /** The write applyReviewChanges makes, read, refused and checked, but not sent (ReviewStateRepository). */
+  async function prepareReviewChanges(
+    deck: Deck,
+    changes: ReviewChanges,
+  ): Promise<() => Promise<void>> {
+    const written = await changed(deck, changes);
+    if (written === null) return async () => undefined;
+    const checked = await checkedReviews(deck, written);
+    // If-Match the read: a document changed since is not written over.
+    return () => saveDataset(deck.reviewsDocumentUrl, checked, fetch);
   }
 
   return {
@@ -123,37 +179,11 @@ export function createSolidReviewStateRepository({
       await saveReviews(deck, written);
     },
 
-    async applyReviewChanges(
-      deck,
-      { save, remove, fsrs = NO_FSRS, every = false, carried },
-    ): Promise<void> {
-      const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
-      // No document, nothing to remove: one is made only for states to save (a card moved in, with them).
-      if (read === null && save.length + fsrs.save.length === 0) return;
-      const dataset = read ?? createSolidDataset();
-      // A card's every state goes with `every`; else, and for FSRS-6's removals, only the state read.
-      const without = withoutReadReviewStates(
-        every ? withoutReviewStates(dataset, deck, remove) : dataset,
-        deck,
-        every ? { fsrs: fsrs.remove } : { sm2: remove, fsrs: fsrs.remove },
-      );
-      // A state copied from another deck starts from what that deck's document says of it.
-      const source =
-        carried === undefined
-          ? null
-          : await getSolidDatasetOrNull(
-              carried.deck.reviewsDocumentUrl,
-              carried.asNoOne === true ? publicFetch : fetch,
-            );
-      const written = withReviewStates(
-        without,
-        deck,
-        { sm2: save, fsrs: fsrs.save },
-        randomId,
-        source === null ? undefined : carriedStatesOf(source, carried!.deck, carried!.ids),
-      );
-      await saveReviews(deck, written);
+    async applyReviewChanges(deck, changes): Promise<void> {
+      await (await prepareReviewChanges(deck, changes))();
     },
+
+    prepareReviewChanges,
 
     async writeFsrsStates(deck, edit): Promise<void> {
       for (let attempt = 1; ; attempt++) {

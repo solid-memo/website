@@ -218,6 +218,19 @@ type CardToSave = CardContent & {
   fromRelease?: string;
 };
 
+/** The cards DeckRepository.applyCardChanges saves of a deck, and the ids of those it removes. */
+export interface CardChanges {
+  save: CardToSave[];
+  remove: string[];
+}
+
+/** How DeckRepository.applyCardChanges writes a deck's cards document. */
+export interface CardChangeOptions {
+  whole?: boolean;
+  version?: string;
+  carried?: CarriedFrom;
+}
+
 export interface DeckRepository {
   listDecks(instanceUrl: string): Promise<Deck[]>;
   /**
@@ -383,14 +396,19 @@ export interface DeckRepository {
    * that one came from and the distractors it names, which are the
    * source's.
    */
-  applyCardChanges(
+  applyCardChanges(deck: Deck, changes: CardChanges, options?: CardChangeOptions): Promise<void>;
+  /**
+   * The write applyCardChanges makes, with the document read, and
+   * refused and checked as applyCardChanges refuses and checks it, but
+   * not sent: the function returned sends it, If-Match that read. For a
+   * write made after another, so that what would refuse it refuses it
+   * before the first, and what is sent is what was checked.
+   */
+  prepareCardChanges(
     deck: Deck,
-    changes: {
-      save: CardToSave[];
-      remove: string[];
-    },
-    options?: { whole?: boolean; version?: string; carried?: CarriedFrom },
-  ): Promise<void>;
+    changes: CardChanges,
+    options?: CardChangeOptions,
+  ): Promise<() => Promise<void>>;
   /**
    * Write the card only when the deck has no card it can read at its
    * fragment id, in one write of the cards document as applyCardChanges
@@ -792,6 +810,15 @@ export interface FileExchange {
   open(accept: string): Promise<{ name: string; text: string } | null>;
 }
 
+/** The states applyReviewChanges saves and removes of a deck, and where a state carried starts from. */
+export interface ReviewChanges {
+  save: ReviewState[];
+  remove: ReviewKey[];
+  fsrs?: { save: FsrsState[]; remove: ReviewKey[] };
+  every?: boolean;
+  carried?: CarriedFrom;
+}
+
 /**
  * Driven port: review state, stored separately from card content: each
  * prompt's SM-2 state and, once FSRS-6 has scheduled it, its FSRS-6
@@ -847,21 +874,24 @@ export interface ReviewStateRepository {
    * `remove` SM-2's, `fsrs.remove` FSRS-6's. With `every`, a key of
    * `remove` loses every state of it, SM-2's and this app's FSRS-6's,
    * read or not, as removing a card does (a card forgotten, removed or
-   * moved away). Another scheduler's state stays either way. With
+   * moved away), but for one a newer version of the app wrote that is
+   * not the one read, which stays. Another scheduler's state stays
+   * either way. With
    * `carried`, a state written at a new subject starts from the state
    * of its kind the source's reviews document holds of the card it is a
    * copy of (CarriedFrom, by card id) in its direction.
    */
-  applyReviewChanges(
-    deck: Deck,
-    changes: {
-      save: ReviewState[];
-      remove: ReviewKey[];
-      fsrs?: { save: FsrsState[]; remove: ReviewKey[] };
-      every?: boolean;
-      carried?: CarriedFrom;
-    },
-  ): Promise<void>;
+  applyReviewChanges(deck: Deck, changes: ReviewChanges): Promise<void>;
+  /**
+   * The write applyReviewChanges makes, with what it reads read, and
+   * refused and checked as applyReviewChanges refuses and checks it (a
+   * state it would remove or carry that a newer version of the app
+   * wrote: writtenByNewerApp), but not sent: the function returned sends
+   * it, If-Match the read. For a write made after another, so that what
+   * would refuse it refuses it before the first, and what is sent is
+   * what was checked.
+   */
+  prepareReviewChanges(deck: Deck, changes: ReviewChanges): Promise<() => Promise<void>>;
   /**
    * Write the FSRS-6 states `edit` makes of the deck's states as its
    * reviews document holds them now, in ONE edit made only if it is
