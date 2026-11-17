@@ -233,12 +233,15 @@ export function carriedIdsOf(
   sourceCards: readonly Card[],
 ): Record<string, string> {
   const written = new Map(plan.target.save.map((card) => [card.id, card]));
+  // The first card of each id, as the plan takes it: found in one step,
+  // not by a pass over the source for each card.
+  const first = new Map<string, Card>();
+  for (const card of sourceCards) if (!first.has(card.id)) first.set(card.id, card);
   const carried: Record<string, string> = {};
   for (const { from, to, present } of plan.cards) {
     if (present) continue;
     carried[to] = from;
-    // The first card of the id, as the plan takes it.
-    const theirs = sourceCards.find((card) => card.id === from)?.distractors ?? [];
+    const theirs = first.get(from)?.distractors ?? [];
     (written.get(to)?.distractors ?? []).forEach((distractor, at) => {
       carried[distractor.id] = theirs[at]!.id;
     });

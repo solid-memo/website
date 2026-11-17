@@ -146,6 +146,50 @@ describe("carriedIdsOf", () => {
     expect(plan.cards).toEqual([{ from: "b", to: "b", present: true }]);
     expect(carriedIdsOf(plan, [b])).toEqual({});
   });
+
+  it("names the first card of an id the source holds more than once, as the plan takes it", () => {
+    const later = card("x", { distractors: [{ id: "x-d1", text: { sv: "z" } }] });
+    const source = [card("x"), later];
+    const plan = planCardTransfer(
+      { ...SOURCE, cards: source, states: [] },
+      { ...TARGET, cards: [], states: [] },
+      ["x"],
+      copy,
+    );
+    expect(carriedIdsOf(plan, source)).toEqual({ x: "x" });
+
+    const first = [later, card("x")];
+    const withDistractor = planCardTransfer(
+      { ...SOURCE, cards: first, states: [] },
+      { ...TARGET, cards: [], states: [] },
+      ["x"],
+      copy,
+    );
+    expect(carriedIdsOf(withDistractor, first)).toEqual({ x: "x", "x-d1": "x-d1" });
+  });
+
+  it("names the subjects of many cards taken from a large source in time that grows with them, not their product", () => {
+    // Each card written anew is found among the source's cards: a pass
+    // over the source for each would take eight times as long for eight
+    // times both.
+    const ratio = growth(
+      (count) => {
+        const cards = Array.from({ length: count }, (_, i) =>
+          card(`c${i}`, { distractors: [{ id: `c${i}-d1`, text: { sv: `w${i}` } }] }),
+        );
+        const plan = planCardTransfer(
+          { ...SOURCE, cards, states: [] },
+          { ...TARGET, cards: [], states: [] },
+          cards.map(({ id }) => id),
+          copy,
+        );
+        return () => carriedIdsOf(plan, cards);
+      },
+      1500,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("planCardTransfer", () => {
