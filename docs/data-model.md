@@ -927,7 +927,10 @@ graph LR
   adds or removes one, on the entry as it is then (If-Match). A new
   entry is written with the deck's, a reader drops a value that's no
   host, a library upgrade keeps them, and a release drafted from the
-  deck leaves them behind. A release never sets them: reading one
+  deck leaves them behind. A deck keeps at most 100
+  (`MAX_PICTURE_HOSTS`), each at most 253 characters: a read and a
+  deck file's import keep the first, and choosing one past that drops
+  the one chosen first. A release never sets them: reading one
   doesn't read the term. In a catalog outside the learner's own pod the
   term isn't believed, as that pod's owner writes it, and nothing is
   written of a choice there.
