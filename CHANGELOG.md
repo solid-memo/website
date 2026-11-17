@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.17](https://github.com/solid-memo/website/compare/v7.6.16...v7.6.17) (2026-11-17)
+
+### Fixes
+
+* **domain:** leave a newer review state out of a day's reset ([be712da](https://github.com/solid-memo/website/commit/be712da8b62c83f34c44115d4d70288800cee2a2))
+* **solid:** leave an agent node a newer version wrote in the catalog ([294a61a](https://github.com/solid-memo/website/commit/294a61ab58f352e51214efbdf0bec7e0971cf185))
+* **ui,studio:** bound and defer the lists of the data-check notice ([61018d5](https://github.com/solid-memo/website/commit/61018d53c16f42fa49eb41b43a08aa81eefa2d35))
+* **ui:** bound the lists of a library upgrade's plan ([8b235b7](https://github.com/solid-memo/website/commit/8b235b7972aa5b5c223b4d4bf3b64bc25e2963e9))
+
 ## [7.6.16](https://github.com/solid-memo/website/compare/v7.6.15...v7.6.16) (2026-11-17)
 
 ### Fixes
