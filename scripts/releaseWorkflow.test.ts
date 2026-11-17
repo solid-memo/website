@@ -425,6 +425,15 @@ describe("ci.yml's check:merges", () => {
     expect(queue).toContain('run: npm run check:merges -- --base "$BASE" --head "$HEAD" --queue');
   });
 
+  // It reads messages with the release's parser, a package.
+  it("installs the packages first, in the queue too", () => {
+    const install = commits.findIndex(
+      (text) => text.includes("event_name == 'merge_group'") && text.includes("run: npm ci"),
+    );
+    expect(install).toBeGreaterThan(-1);
+    expect(install).toBeLessThan(commits.indexOf(step("merge_group")[0] as string));
+  });
+
   it("reads a pull request's commits", () => {
     const [pull, ...rest] = step("pull_request");
     expect(rest).toEqual([]);

@@ -26,9 +26,9 @@ takes the largest bump among the commits since the last version:
 
 | Bump | When | Commits | Example |
 |---|---|---|---|
-| Major (1.4.2 → 2.0.0) | Anything breaking ([below](#what-counts-as-breaking)) | `!` after the type, or a `BREAKING CHANGE:` footer | A format the app stops reading; a configuration variable renamed |
+| Major (1.4.2 → 2.0.0) | Anything breaking ([below](#what-counts-as-breaking)) | `!` after the type, or a `BREAKING CHANGE:` footer, whatever the type, `revert` included | A format the app stops reading; a configuration variable renamed |
 | Minor (1.4.2 → 1.5.0) | A new feature | `feat` | A new screen; a new deck in the library; a new configuration variable |
-| Patch (1.4.2 → 1.4.3) | Fixes, and changes nobody has to act on | `fix`, `perf`, `revert` (or GitHub's `Revert "…"`) | A bug fixed; a translation corrected; a dependency the app ships updated |
+| Patch (1.4.2 → 1.4.3) | Fixes, and changes nobody has to act on | `fix`, `perf`, `revert` unless it says it breaks (or GitHub's `Revert "…"`) | A bug fixed; a translation corrected; a dependency the app ships updated |
 | None | Nothing users see | `docs`, `test`, `refactor`, `style`, `build`, `ci`, `chore` | A page of the docs; a test; a development tool updated |
 
 A push with only commits of the last kind releases nothing, and the next
@@ -117,6 +117,18 @@ The release reads the footer only as written: `BREAKING CHANGE:` or
 colon, as commitlint and `npm run check:breaking` read it
 ([release.config.mjs](../release.config.mjs)'s `parserOpts`). A body
 line that begins "breaking change" in a sentence isn't a footer.
+`npm run check:breaking` reads a message with the release's own parser,
+the copy the commit analyzer imports, and its options. So it finds a
+`!` or a footer where the release does. The parser ends a line only at
+a line feed. Another reader could take
+some other characters for the end of a line. So commitlint, and
+`npm run check:merges` for every commit, refuse a control character
+other than a tab or a line feed, a carriage return that isn't right
+before a line feed, and a Unicode line or paragraph separator.
+The release reads its commits from one `git log`, split at `==FIELD==`
+between a commit's fields and `==END==` after its last, so a message
+that held either would read as another. commitlint and
+`npm run check:merges` refuse both too.
 
 The release reads every other line of a body as text too, as commitlint
 does. A line such as `-notes-` used to name a field to the release's

@@ -12,8 +12,9 @@
  * - A file of api/: a line may go only in a breaking change, so when
  *   one that was there at the base is gone, a commit since the base must
  *   say it breaks (`!` after its type, or a `BREAKING CHANGE:` footer),
- *   or say why it does not (a `Contract-Change: not-breaking <reason>`
- *   trailer).
+ *   whatever its type, as the release makes any such commit a major
+ *   version, a `revert:` one too, or say why it does not (a
+ *   `Contract-Change: not-breaking <reason>` trailer).
  * - api/frozen/: a line never goes, breaking or not. A published shape
  *   is never edited, nor a published file removed, and the format a
  *   kind of data is written in, the place of the data in a pod and the
@@ -24,8 +25,10 @@
  * line that the ref gained since then is not taken for one the branch
  * lost.
  *
- * The commits are read as the release reads them: a commit that a later
- * one truly reverts says nothing, as the release leaves both out
+ * The commits are read as the release reads them: each message by the
+ * release's own parser, with its options, so a `!` or a footer counts
+ * where it does for the release; and a commit that a later one truly
+ * reverts says nothing, as the release leaves both out
  * (scripts/reverts.ts). A revert that only says so takes nothing back.
  *
  * The release reads every commit since the last release tag, not only
@@ -35,8 +38,47 @@
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { asReleased, gitAt } from "./reverts.ts";
+
+type Parser = { parse(message: string): { notes: unknown[] } };
+
+/**
+ * The release's parser, set up as the release sets it up: the copy of
+ * conventional-commits-parser that the commit analyzer itself imports,
+ * which may be another version than the one at the top of
+ * node_modules, with the preset's options, then release.config.mjs's
+ * over them, as the analyzer merges them. scripts/releaseConfig.test.ts
+ * runs the analyzer on the same messages as saysBreaking, to keep the
+ * two in step.
+ */
+const PARSER = await (async () => {
+  const { parserOpts, presetConfig } = (await import(
+    new URL("../release.config.mjs", import.meta.url).href
+  )) as { parserOpts: object; presetConfig: unknown };
+  // Untyped modules: imported by a name TypeScript does not resolve.
+  const preset = "conventional-changelog-conventionalcommits";
+  const { default: createPreset } = (await import(preset)) as {
+    default(config: unknown): { parser: object };
+  };
+  // Found as Node finds it from the analyzer's own file: the package
+  // exports only an ES module, which require.resolve does not take.
+  const analyzer = createRequire(import.meta.url).resolve("@semantic-release/commit-analyzer");
+  const name = "conventional-commits-parser";
+  const dir = createRequire(analyzer)
+    .resolve.paths(name)!
+    .map((nodeModules) => join(nodeModules, name))
+    .find((path) => existsSync(join(path, "package.json"))) as string;
+  const { exports } = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as {
+    exports: { import: string };
+  };
+  const { CommitParser } = (await import(pathToFileURL(join(dir, exports.import)).href)) as {
+    CommitParser: new (options: object) => Parser;
+  };
+  return new CommitParser({ ...createPreset(presetConfig).parser, ...parserOpts });
+})();
 
 /** Files by their path in the repository, each with its text. */
 export type Files = ReadonlyMap<string, string>;
@@ -73,14 +115,28 @@ function linesOf(text: string): string[] {
   return text.split("\n").filter((line) => line !== "");
 }
 
-/** Whether a commit says it breaks, as semantic-release reads it. */
+/**
+ * Whether a commit says it breaks, as semantic-release reads it: its
+ * parser, with the release's options, finds a note, from `!` after the
+ * type or from a `BREAKING CHANGE:` footer, in a line as the parser
+ * splits the message into lines. A message with nothing in it the
+ * release skips.
+ */
 export function saysBreaking(message: string): boolean {
-  return /^\w+(\([^)]*\))?!:/.test(message) || /^BREAKING[ -]CHANGE:/m.test(message);
+  return message.trim() !== "" && PARSER.parse(message).notes.length > 0;
 }
 
-/** The reason a commit gives for a line of api/ it removes without breaking anything. */
+/**
+ * The reason a commit gives for a line of api/ it removes without
+ * breaking anything, on a line of its own as the release's parser
+ * splits a message into lines.
+ */
 export function notBreakingReason(message: string): string | undefined {
-  return /^Contract-Change: not-breaking\s+(\S.*)$/m.exec(message)?.[1];
+  for (const line of message.split(/\r?\n/)) {
+    const reason = /^Contract-Change: not-breaking\s+(\S.*)$/.exec(line)?.[1];
+    if (reason !== undefined) return reason;
+  }
+  return undefined;
 }
 
 function subjectOf(commit: Commit): string {
@@ -252,16 +308,16 @@ export function defaultIo(repo: string): BreakingIo {
           .filter((path) => existsSync(join(repo, path)))
           .map((path) => [path, readFileSync(join(repo, path), "utf8")]),
       ),
+    // One commit at a time: a separator could be written in a message.
     commitsSince: (commit) =>
       asReleased(
-        git("log", "--no-merges", "--format=%H%x1f%B%x1e", `${commit}..HEAD`)
-          .split("\x1e")
-          .map((entry) => entry.trim())
-          .filter((entry) => entry !== "")
-          .map((entry) => {
-            const [hash, message] = entry.split("\x1f");
-            return { hash, message: message.trim() };
-          }),
+        git("rev-list", "--no-merges", "--end-of-options", `${commit}..HEAD`)
+          .split("\n")
+          .filter((hash) => hash !== "")
+          .map((hash) => ({
+            hash,
+            message: git("log", "-1", "--format=%B", "--end-of-options", hash).trim(),
+          })),
         gitAt(repo),
       ),
     lastRelease: () => highestRelease(git("tag", "--merged", "HEAD").split("\n")),

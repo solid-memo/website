@@ -148,15 +148,15 @@ export function defaultIo(repo: string): ClosesIo {
     execFileSync("git", ["-C", repo, ...args], { encoding: "utf8", maxBuffer: 1 << 28 });
   return {
     mergeBase: (ref, head) => git("merge-base", "--end-of-options", ref, head).trim(),
+    // One commit at a time: a separator could be written in a message.
     commitsSince: (commit, head) =>
-      git("log", "--no-merges", "--format=%H%x1f%B%x1e", "--end-of-options", `${commit}..${head}`)
-        .split("\x1e")
-        .map((entry) => entry.trim())
-        .filter((entry) => entry !== "")
-        .map((entry) => {
-          const [hash, message] = entry.split("\x1f");
-          return { hash, message: message.trim() };
-        }),
+      git("rev-list", "--no-merges", "--end-of-options", `${commit}..${head}`)
+        .split("\n")
+        .filter((hash) => hash !== "")
+        .map((hash) => ({
+          hash,
+          message: git("log", "-1", "--format=%B", "--end-of-options", hash).trim(),
+        })),
     readFile: (path) => readFileSync(path, "utf8"),
     log: (message) => console.log(message),
   };

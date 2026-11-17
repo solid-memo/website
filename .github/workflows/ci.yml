@@ -1296,25 +1296,21 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      # The script imports no package, so the queue installs nothing.
-      - if: github.event_name == 'merge_group'
+      # The merge commits are read with the release's own parser
+      # (scripts/checkBreaking.ts), so the queue installs too.
+      - if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
-          package-manager-cache: false
+          cache: npm
+      - if: github.event_name == 'pull_request' || github.event_name == 'merge_group'
+        run: npm ci --ignore-scripts
       - if: github.event_name == 'merge_group'
         name: npm run check:merges -- --base <base> --head <head> --queue
         env:
           BASE: ${{ github.event.merge_group.base_sha }}
           HEAD: ${{ github.event.merge_group.head_sha }}
         run: npm run check:merges -- --base "$BASE" --head "$HEAD" --queue
-      - if: github.event_name == 'pull_request'
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      - if: github.event_name == 'pull_request'
-        run: npm ci --ignore-scripts
       - if: github.event_name == 'pull_request'
         name: npx commitlint --from <base> --to <head>
         env:

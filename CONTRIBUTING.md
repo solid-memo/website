@@ -148,7 +148,13 @@ Markdown link, image or reference definition, such as
 `[text](docs/page.md)` or `[text]: docs/page.md`, or an HTML tag with an
 attribute, in a header or a breaking change's footer, the parts the
 release copies, and inside a code span there too: name the page in
-plain text there, and link it in the body.
+plain text there, and link it in the body. And they refuse a control
+character other than a tab or a line feed, a carriage return that isn't
+right before a line feed, and a Unicode line or paragraph separator:
+the release ends a line only at a line feed, so a line such a character
+seems to start would read one way to you and another to the release.
+Nor may a message hold `==FIELD==` or `==END==`, the text the release
+splits git's output at to read its commits.
 The merge queue refuses those keywords, comment markers and directives
 in a pull request's title too, and a title that starts as a breaking
 change's footer, as the merge commit holds the title
@@ -158,8 +164,9 @@ a revert that names a commit undoes that commit's change, as
 `git revert` makes it
 ([docs/releasing.md](docs/releasing.md#reverts)).
 `npm run check:merges` reads every commit's whole message for a comment
-marker or a directive, as commitlint can miss part of one, and every
-commit's header and breaking change's footer for a link.
+marker, a directive, such a character or the release's separators, as
+commitlint can miss part of one, and every commit's header and
+breaking change's footer for a link.
 `npm run lint:commits` lints the commits since `origin/main`, so from a
 fork, sync the fork's `main` with this repository's first, or run
 `npx commitlint --from upstream/main --to HEAD`, with `upstream` the
@@ -191,7 +198,7 @@ Closes: #42
   | `feat` | Something users, other apps or people who run their own copy can do that they could not | A minor version (1.1.0) |
   | `fix` | Something that did not work as it should, a dependency the app ships updated included (`fix(deps)`) | A patch (1.0.1) |
   | `perf` | The same, faster or lighter | A patch |
-  | `revert` | A commit taken back | A patch |
+  | `revert` | A commit taken back | A patch, or a major version when it says it breaks |
   | `docs` | The docs alone | Nothing |
   | `test` | The tests alone | Nothing |
   | `refactor` | The code, with nothing changed for users | Nothing |

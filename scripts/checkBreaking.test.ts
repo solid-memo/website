@@ -20,6 +20,15 @@ import {
   verdict,
 } from "./checkBreaking.ts";
 
+// Untyped modules: imported by a name TypeScript does not resolve.
+const GIT = "semantic-release/lib/git.js";
+const { getCommits } = (await import(GIT)) as {
+  getCommits(from: string, to: string, options: { cwd: string }): Promise<Commit[]>;
+};
+const { LOG_SEPARATOR } = (await import(
+  new URL("../commitlint.config.mjs", import.meta.url).href
+)) as { LOG_SEPARATOR: RegExp };
+
 const ROUTES = "api/routes/app.txt";
 const PUBLISHED = "api/frozen/published.txt";
 
@@ -61,6 +70,20 @@ describe("saysBreaking", () => {
     expect(saysBreaking("feat: add a hash")).toBe(false);
     expect(saysBreaking("fix: say why!: it is not")).toBe(false);
     expect(saysBreaking("docs: what a BREAKING CHANGE: footer says")).toBe(false);
+    expect(saysBreaking("feat!:no space")).toBe(false);
+    expect(saysBreaking("")).toBe(false);
+  });
+
+  // The release's parser splits a message into lines only at a line
+  // feed (a carriage return before it aside), and reads a footer only at
+  // the start of one of those lines.
+  it("reads a line where the release's parser does", () => {
+    expect(saysBreaking("feat: drop\r\n\r\nBREAKING CHANGE: links break")).toBe(true);
+    for (const between of ["\u2028", "\u2029", "\u0085", "\r", "\x1e\x1f"]) {
+      const footer = `feat: drop\n\nIt changes.${between}BREAKING CHANGE: links break`;
+      expect(saysBreaking(footer), JSON.stringify(between)).toBe(false);
+      expect(saysBreaking(`feat: drop\n\nIt changes.${between}feat!: x`)).toBe(false);
+    }
   });
 });
 
@@ -76,6 +99,17 @@ describe("notBreakingReason", () => {
   it("wants a reason", () => {
     expect(notBreakingReason("refactor: x\n\nContract-Change: not-breaking")).toBeUndefined();
     expect(notBreakingReason("refactor: x")).toBeUndefined();
+  });
+
+  it("reads the trailer only on a line of its own", () => {
+    expect(
+      notBreakingReason("refactor: x\r\n\r\nContract-Change: not-breaking it still opens\r\n"),
+    ).toBe("it still opens");
+    for (const between of ["\u2028", "\r"]) {
+      expect(
+        notBreakingReason(`refactor: x\n\nWhy.${between}Contract-Change: not-breaking y`),
+      ).toBeUndefined();
+    }
   });
 });
 
@@ -410,6 +444,59 @@ describe("defaultIo", () => {
       // Said again, the change is declared.
       git("commit", "-q", "--amend", "-m", declared);
       expect(verdictOf().code).toBe(0);
+    });
+
+    // Each message read on its own: a separator git's output could be
+    // split on, written in a message, makes no commit of its own.
+    it("reads a message whole, whatever it holds", () => {
+      repo = mkdtempSync(join(tmpdir(), "breaking-"));
+      git("init", "-q", "-b", "main");
+      write(ROUTES, "home: #/decks\n");
+      git("add", ".");
+      git("commit", "-q", "-m", "chore: start");
+      git("switch", "-q", "-c", "topic");
+      write(ROUTES, "home: #/home\n");
+      const message = "feat: move home\n\nIt moves.\x1e\x1ffeat!: x\n\nRefs: #1";
+      git("commit", "-q", "-am", message);
+      expect(defaultIo(repo).commitsSince(git("rev-parse", "main"))).toEqual([
+        { hash: git("rev-parse", "HEAD"), message },
+      ]);
+      const { code, logged } = verdictOf();
+      expect(code).toBe(1);
+      expect(logged).toContain(`${ROUTES}: "home: #/decks" is gone.`);
+    });
+
+    // The release reads its commits with git-log-parser, from one log it
+    // splits at its own separators: it reads a message as the check does,
+    // but for one that holds such a separator, which commitlint and
+    // check:merges refuse.
+    it("reads each commit as the release does, but for a message that holds its separator", async () => {
+      repo = mkdtempSync(join(tmpdir(), "breaking-"));
+      git("init", "-q", "-b", "main");
+      git("commit", "-q", "--allow-empty", "-m", "chore: start");
+      const base = git("rev-parse", "HEAD");
+      for (const message of [
+        "feat!: move home\n\nIt moves.\tYes.\n\nBREAKING CHANGE: bookmarks break\n\nRefs: #1",
+        "fix: tidy\n\nIt moves.\x1e\x1ffeat!: x\n\nRefs: #2",
+      ])
+        git("commit", "-q", "--allow-empty", "-m", message);
+      const released = async () =>
+        (await getCommits(base, "HEAD", { cwd: repo })).map(({ hash, message }) => ({
+          hash,
+          message,
+        }));
+      const checked = defaultIo(repo).commitsSince(base);
+      expect(await released()).toEqual(checked);
+
+      const separated = `feat!: move\n\nIt moves.==FIELD==${base}==FIELD==feat: harmless==FIELD==\n\nBREAKING CHANGE: x\n\nRefs: #3`;
+      expect(LOG_SEPARATOR.test(separated)).toBe(true);
+      git("commit", "-q", "--allow-empty", "-m", separated);
+      const [read] = await released();
+      expect(read).toEqual({ hash: base, message: "feat: harmless" });
+      expect(defaultIo(repo).commitsSince(base)[0]).toEqual({
+        hash: git("rev-parse", "HEAD"),
+        message: separated,
+      });
     });
 
     it("finds no release in a repository with no release tag", () => {

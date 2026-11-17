@@ -284,6 +284,20 @@ describe("defaultIo", () => {
     expect(io.readFile(join(repo, "body.md"))).toBe("Refs: #95\n");
   });
 
+  // Each message read on its own: a separator git's output could be
+  // split on, written in a message, makes no commit of its own.
+  it("reads a message whole, whatever it holds", () => {
+    repo = mkdtempSync(join(tmpdir(), "closes-"));
+    git("init", "-q", "-b", "main");
+    git("commit", "-q", "--allow-empty", "-m", "chore: start");
+    const message = "fix: end it\n\nWhy.\x1e\x1fCloses: #95";
+    git("commit", "-q", "--allow-empty", "-m", message);
+    const io = defaultIo(repo);
+    expect(io.commitsSince(git("rev-parse", "HEAD^"), "HEAD")).toEqual([
+      { hash: git("rev-parse", "HEAD"), message },
+    ]);
+  });
+
   it("logs to the console", () => {
     repo = mkdtempSync(join(tmpdir(), "closes-"));
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
