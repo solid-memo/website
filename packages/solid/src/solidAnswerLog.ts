@@ -27,7 +27,7 @@ import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { mapSince, readSince } from "./readSince";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { READ_DEADLINE_MS } from "./readDeadline";
-import { ownSubjectsOf, unlessNewer } from "./records";
+import { ownSubjectsOf } from "./records";
 
 /**
  * The answers of a month's document at `url` (none when there is none),
@@ -72,7 +72,14 @@ export function createSolidAnswerLog({
   fetch: typeof globalThis.fetch;
   checkWrite?: WriteCheck;
 }): AnswerLog {
-  /** Remove the answers of a month's document that `which` picks, unless another write keeps getting in first. */
+  /**
+   * Remove the answers of a month's document that `which` picks, unless
+   * another write keeps getting in first. Each goes whole, whatever its
+   * format: an answer is never rewritten, only added and removed, and one
+   * a newer version wrote is read as an answer (toAnswer), so it is
+   * removed as one too. Refusing it (unlessNewer) would keep the app's
+   * own answers of the day from being removed with it.
+   */
   async function removeAnswers(url: string, which: (answer: Answer) => boolean): Promise<void> {
     for (let attempt = 1; ; attempt++) {
       const dataset = await getSolidDatasetOrNull(url, fetch);
@@ -84,7 +91,7 @@ export function createSolidAnswerLog({
       });
       if (picked.length === 0) return;
       try {
-        await saveDataset(url, removeThings(dataset, picked.map(unlessNewer)), fetch);
+        await saveDataset(url, removeThings(dataset, picked), fetch);
         return;
       } catch (error) {
         if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
