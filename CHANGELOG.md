@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.12](https://github.com/solid-memo/website/compare/v7.6.11...v7.6.12) (2026-11-17)
+
+### Fixes
+
+* **domain:** find each transferred card's source in one step ([604fe95](https://github.com/solid-memo/website/commit/604fe9501abcc78a7b4cd4a839d1094e556fa4ed))
+* **solid:** bound the hosts a deck shows pictures from ([5beff25](https://github.com/solid-memo/website/commit/5beff25c49add241467975eab754684dede108cd))
+* **solid:** look for later vocabulary terms only where a term goes ([5cb73c8](https://github.com/solid-memo/website/commit/5cb73c8415827ad9ba52ae9a3a8c26a638145ede))
+
 ## [7.6.11](https://github.com/solid-memo/website/compare/v7.6.10...v7.6.11) (2026-11-16)
 
 ### Fixes
