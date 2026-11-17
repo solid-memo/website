@@ -450,6 +450,39 @@
     "preferences": "Préférences",
     "repair": "Réparer"
   },
+  "dataCheckLists": {
+    "problems": "Les problèmes, document par document",
+    "moreDocuments": {
+      "one": "Et {count} autre document, qui n’apparaît pas ici.",
+      "many": "Et {count} de documents de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres documents, qui n’apparaissent pas ici."
+    },
+    "moreEntries": {
+      "one": "Et {count} autre sujet ou document, qui n’apparaît pas ici.",
+      "many": "Et {count} de sujets ou documents de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres sujets ou documents, qui n’apparaissent pas ici."
+    },
+    "moreResults": {
+      "one": "Et {count} autre résultat, qui n’apparaît pas ici.",
+      "many": "Et {count} de résultats de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres résultats, qui n’apparaissent pas ici."
+    },
+    "moreRepairs": {
+      "one": "Et {count} autre problème que Solid Memo peut réparer, qui n’apparaît pas ici.",
+      "many": "Et {count} de problèmes de plus que Solid Memo peut réparer, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres problèmes que Solid Memo peut réparer, qui n’apparaissent pas ici."
+    },
+    "moreProblems": {
+      "one": "Et {count} autre problème qui demande votre décision, qui n’apparaît pas ici.",
+      "many": "Et {count} de problèmes de plus qui demandent votre décision, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres problèmes qui demandent votre décision, qui n’apparaissent pas ici."
+    },
+    "showMore": {
+      "one": "Afficher {count} de plus",
+      "many": "Afficher {count} de plus",
+      "other": "Afficher {count} de plus"
+    }
+  },
   "unclaimedDecks": {
     "region": "Paquets à confirmer",
     "heading": "Solid Memo ne modifie rien dans les documents de ces paquets tant qu’ils ne sont pas marqués comme ceux des paquets.",
@@ -1559,7 +1592,6 @@
     "needDecision": "Ces éléments demandent votre décision : corrigez-les dans le document ou supprimez-les.",
     "problem": "{subject} dans {document} : {messages}",
     "removeButton": "Supprimer",
-    "fullReport": "Rapport complet",
     "action": {
       "describeDeck": "Donner au paquet la description par défaut",
       "directDeck": "Étudier le paquet du recto vers le verso",

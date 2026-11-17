@@ -432,6 +432,27 @@
     "preferences": "설정",
     "repair": "복구"
   },
+  "dataCheckLists": {
+    "problems": "문제를 문서별로 보기",
+    "moreDocuments": {
+      "other": "이 밖에 문서 {count}개가 더 있어요. 여기에는 나오지 않아요."
+    },
+    "moreEntries": {
+      "other": "이 밖에 대상이나 문서 {count}개가 더 있어요. 여기에는 나오지 않아요."
+    },
+    "moreResults": {
+      "other": "이 밖에 결과 {count}건이 더 있어요. 여기에는 나오지 않아요."
+    },
+    "moreRepairs": {
+      "other": "이 밖에 Solid Memo가 복구할 수 있는 문제 {count}건이 더 있어요. 여기에는 나오지 않아요."
+    },
+    "moreProblems": {
+      "other": "이 밖에 직접 결정해야 하는 문제 {count}건이 더 있어요. 여기에는 나오지 않아요."
+    },
+    "showMore": {
+      "other": "{count}개 더 보기"
+    }
+  },
   "unclaimedDecks": {
     "region": "확인할 덱",
     "heading": "이 덱들의 문서가 덱의 것으로 표시되지 않는 한 Solid Memo는 그 문서에서 아무것도 바꾸지 않아요.",
@@ -1417,7 +1438,6 @@
     "needDecision": "다음 항목은 직접 결정해야 해요. 문서에서 고치거나 삭제해 주세요.",
     "problem": "{document}의 {subject}: {messages}",
     "removeButton": "삭제",
-    "fullReport": "전체 보고서",
     "action": {
       "describeDeck": "덱에 기본 설명 넣기",
       "directDeck": "덱을 앞면 → 뒷면 방향으로 학습하기",

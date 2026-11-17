@@ -8,6 +8,7 @@ import type { InvalidDataPolicy } from "@solid-memo/domain/invalidDataPolicy";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { useI18n } from "./i18n";
+import { LazyDetails } from "./LazyDetails";
 import { ReaderTexts } from "./ReaderText";
 import { RepairContainer } from "./RepairContainer";
 import { routeToHash } from "./router";
@@ -16,8 +17,10 @@ import { routeToHash } from "./router";
  * Tells the user that data in the instance does not conform, and what
  * the app does about it under their policy, with the repair a click
  * away. Under "block the instance" the notice takes the workspace's
- * place; otherwise it sits above it. What another app wrote is never in
- * it: the check reports that as warnings, which need no notice.
+ * place; otherwise it sits above it, the repair drawn only once opened
+ * (LazyDetails), as the notice sits above every screen. What another
+ * app wrote is never in it: the check reports that as warnings, which
+ * need no notice.
  */
 export function DataCheckNotice({
   useCases,
@@ -61,10 +64,9 @@ export function DataCheckNotice({
       {policy === "block-instance" ? (
         <RepairContainer useCases={useCases} instance={instance} report={report} />
       ) : (
-        <details>
-          <summary>{t("dataCheckNotice.repair")}</summary>
+        <LazyDetails summary={t("dataCheckNotice.repair")}>
           <RepairContainer useCases={useCases} instance={instance} report={report} />
-        </details>
+        </LazyDetails>
       )}
     </div>
   );

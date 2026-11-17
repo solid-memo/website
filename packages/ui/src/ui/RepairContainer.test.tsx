@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
-import type { ValidationReport } from "@solid-memo/domain/validation";
+import { summarize, type ValidationReport } from "@solid-memo/domain/validation";
 import { DataCheckNotice } from "./DataCheckNotice";
 import { I18nProvider } from "./i18n";
 import { RepairContainer } from "./RepairContainer";
@@ -117,6 +117,68 @@ describe("RepairContainer", () => {
     expect(await screen.findByText("write refused")).toBeInTheDocument();
   });
 
+  it("lists at most 50 of what it can repair and of what needs a decision, and repairs them all", async () => {
+    const many = (prefix: string, count: number) =>
+      Array.from({ length: count }, (_, index) => `${prefix}${index}`);
+    const repairs = many("deck-", 51).map(repair);
+    const useCases = makeUseCasesFake({
+      planRepair: vi.fn(() => ({
+        repairs,
+        unrepairable: many(`${problem.subjectUrl}-`, 52).map((subjectUrl) => ({
+          ...problem,
+          subjectUrl,
+        })),
+      })),
+    });
+    renderRepair(useCases);
+    expect(screen.getAllByRole("listitem")).toHaveLength(100);
+    expect(
+      screen.getByText("And 1 more problem Solid Memo can repair, not listed here."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("And 2 more problems that need your decision, not listed here."),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Repair 51 problems" }));
+    await waitFor(() => {
+      expect(useCases.applyRepairs).toHaveBeenCalledWith(instance.url, repairs);
+    });
+  });
+
+  it("names at most 50 results of a problem that needs a decision", () => {
+    const results = Array.from({ length: 52 }, (_, index) => ({
+      ...problem.violations[0]!,
+      message: { en: `Result ${index}.` },
+    }));
+    const useCases = makeUseCasesFake({
+      planRepair: vi.fn(() => ({
+        repairs: [],
+        unrepairable: [{ ...problem, violations: results }],
+      })),
+    });
+    renderRepair(useCases);
+    const item = screen.getByRole("listitem");
+    expect(item).toHaveTextContent("Result 49.");
+    expect(item).not.toHaveTextContent("Result 50.");
+    expect(item).toHaveTextContent("And 2 more results, not listed here.");
+  });
+
+  it("plans the repair once for a report, however often it is drawn", () => {
+    const useCases = makeUseCasesFake({
+      planRepair: vi.fn(() => ({ repairs: [repair("deck-1")], unrepairable: [] })),
+    });
+    const queryClient = new QueryClient();
+    const view = (label: string) => (
+      <QueryClientProvider client={queryClient}>
+        <p>{label}</p>
+        <RepairContainer useCases={useCases} instance={instance} report={report} />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(view("first"));
+    rerender(view("second"));
+    expect(screen.getByText("second")).toBeInTheDocument();
+    expect(useCases.planRepair).toHaveBeenCalledOnce();
+  });
+
   it("shows progress while repairing", async () => {
     const useCases = makeUseCasesFake({
       planRepair: vi.fn(() => ({ repairs: [repair("deck-1")], unrepairable: [] })),
@@ -167,5 +229,68 @@ describe("DataCheckNotice", () => {
     );
     expect(screen.getByText("Kanji")).toHaveAttribute("lang", "en");
     expect(screen.getByText(/Huvudstäder/)).not.toHaveAttribute("lang");
+  });
+
+  it("draws the repair, and only what is wrong of the report, once opened", async () => {
+    const catalog = `${instance.url}catalog.ttl`;
+    const strays = Array.from({ length: 1000 }, (_, index) => ({
+      url: `${catalog}#x${index}`,
+      status: "untyped" as const,
+    }));
+    const failing = { ...problem.violations[0]!, path: "http://purl.org/dc/terms/description" };
+    const large = summarize(instance.url, [
+      {
+        url: catalog,
+        status: "checked",
+        subjects: [
+          ...strays,
+          {
+            url: `${catalog}#deck-1`,
+            status: "checked",
+            shape: "deck",
+            version: 3,
+            violations: [failing],
+          },
+        ],
+      },
+    ]);
+    const useCases = makeUseCasesFake({
+      planRepair: vi.fn(() => ({ repairs: [], unrepairable: [] })),
+    });
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <DataCheckNotice
+          useCases={useCases}
+          instance={instance}
+          report={large}
+          policy="block-subject"
+          setAside={[]}
+          arrangementSetAside={false}
+        />
+      </QueryClientProvider>,
+    );
+    const notice = screen.getByRole("region", { name: "Data check" });
+    expect(useCases.planRepair).not.toHaveBeenCalled();
+    expect(notice.querySelectorAll("li")).toHaveLength(0);
+    const open = (summary: HTMLElement, to = true) => {
+      const details = summary.closest("details")!;
+      details.open = to;
+      fireEvent(details, new Event("toggle"));
+    };
+    open(within(notice).getByText("Repair"));
+    await waitFor(() => {
+      expect(useCases.planRepair).toHaveBeenCalledWith(large);
+    });
+    expect(notice.querySelectorAll("li")).toHaveLength(0);
+    open(await within(notice).findByText("The problems, document by document"));
+    const items = await within(notice).findAllByRole("listitem");
+    expect(items).toHaveLength(1);
+    expect(items[0]).toHaveTextContent(`${catalog}#deck-1`);
+    expect(notice).not.toHaveTextContent("not a Solid Memo subject");
+    open(within(notice).getByText("Repair"), false);
+    await waitFor(() => {
+      expect(notice.querySelectorAll("li")).toHaveLength(0);
+    });
+    expect(notice.querySelector("details")).not.toHaveAttribute("open");
   });
 });
