@@ -237,6 +237,31 @@ describe("releaseWithoutMerges", () => {
     expect(await plugin.generateNotes(options, first)).toContain("an ordinary commit");
   });
 
+  // As semantic-release runs it: @semantic-release/git's prepare makes
+  // the release commit, moves nextRelease.gitHead to it and writes the
+  // notes again with the commits read before it.
+  it("writes the notes again once the release commit is made, from the range it read", async () => {
+    let git: (...args: string[]) => string = () => "";
+    const context = await history((run, cwd) => {
+      git = run;
+      writeFileSync(join(cwd, "a"), "2");
+      git("commit", "-qam", "fix: an ordinary commit");
+    });
+    expect(await plugin.analyzeCommits(options, context)).toBe("patch");
+    const nextRelease = { ...context.nextRelease, gitHead: git("rev-parse", "HEAD") };
+    const before = await plugin.generateNotes(options, { ...context, nextRelease });
+    expect(before).toContain("an ordinary commit");
+
+    writeFileSync(join(context.cwd, "a"), "3");
+    git("commit", "-qam", "chore(release): 2.0.0");
+    const released = { ...nextRelease, gitHead: git("rev-parse", "HEAD") };
+    expect(await plugin.generateNotes(options, { ...context, nextRelease: released })).toBe(before);
+
+    // The range read before still holds the release to what git holds.
+    const misread = { ...context, commits: [], nextRelease: released };
+    await expect(plugin.generateNotes(options, misread)).rejects.toThrow(/not the ones git holds/);
+  });
+
   it("stops the release when git cannot read a commit, or the range", async () => {
     const context = await merged(chore, queued("chore: a title"));
     const commits = [{ hash: "0".repeat(40), message: "feat: a deck" }];
