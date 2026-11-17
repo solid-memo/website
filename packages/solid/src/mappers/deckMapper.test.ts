@@ -52,6 +52,7 @@ import {
   withDeck,
   withDecks,
   writeDistractors,
+  withoutCardSubjects,
   withoutUnnamedDistractors,
   withoutDecks,
 } from "./deckMapper";
@@ -987,6 +988,29 @@ describe("writeDistractors", () => {
     ].reduce((current, thing) => setThing(current, thing), datasetFrom(CARDS_DOC));
     const after = withoutUnnamedDistractors(dataset, [...urls, `${CARDS_DOC}#missing`]);
     for (const url of urls) expect(getThing(after, url)).not.toBeNull();
+  });
+
+  it("leaves a subject a newer version wrote that is no card, and refuses a card it wrote", async () => {
+    // GHSA-7x88-hfwx-whvj: no removal of a card needs such a subject gone or rewritten.
+    const dataset = await datasetOfTurtle(
+      CARDS_DOC,
+      `<#namer> a <${SM.Card}> ; <${SM.distractor}> <#named> .
+<#named> a <${SM.Distractor}> ; <${SM.formatVersion}> 99 .
+<#unnamed> a <${SM.Distractor}> ; <${SM.formatVersion}> 99 .
+<#newerCard> a <${SM.Card}> ; <${SM.formatVersion}> 99 .`,
+    );
+    const at = (id: string) => `${CARDS_DOC}#${id}`;
+    const named = getThing(dataset, at("named"));
+    const unnamed = getThing(dataset, at("unnamed"));
+    const without = withoutCardSubjects(dataset, [at("named"), at("unnamed"), at("missing")]);
+    expect(getThing(without, at("named"))).toEqual(named);
+    expect(getThing(without, at("unnamed"))).toEqual(unnamed);
+    expect(getThing(withoutUnnamedDistractors(dataset, [at("unnamed")]), at("unnamed"))).toEqual(
+      unnamed,
+    );
+    expect(() => withoutCardSubjects(dataset, [at("newerCard")])).toThrow(
+      expect.objectContaining({ code: "writtenByNewerApp" }),
+    );
   });
 
   it("retires a distractor, and restores it, keeping it named", () => {

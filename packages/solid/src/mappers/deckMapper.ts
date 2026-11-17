@@ -71,6 +71,7 @@ import {
 import { type CardV7, LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
+  isWrittenByNewer,
   migrateWithinBound,
   ownSubjectsOf,
   readIri,
@@ -712,12 +713,16 @@ function distractorNamers(dataset: Dataset): Map<string, number> {
  * names, unless a card still names it: a distractor belongs to the one
  * card that names it, so a card's never goes with another's. Only an
  * sm:Distractor that is not an sm:Card is removed (isDistractorOnly):
- * a card, or another app's subject, a card names is never removed.
+ * a card, or another app's subject, a card names is never removed. Nor
+ * is one a newer version of the app wrote (isWrittenByNewer): no write
+ * needs it gone, so it is left as it is rather than refused, and a
+ * card is never kept from being removed or moved by it
+ * (GHSA-7x88-hfwx-whvj).
  */
 export function withoutUnnamedDistractors(dataset: Dataset, urls: readonly string[]): Dataset {
   if (urls.length === 0) return dataset;
   const namers = distractorNamers(dataset);
-  return removeAllUnlessNewer(
+  return removeThings(
     dataset,
     urls.filter((url) => isUnnamed(namers, url) && isDistractorOnly(dataset, url)),
   );
@@ -728,11 +733,12 @@ function isUnnamed(namers: ReadonlyMap<string, number>, url: string): boolean {
   return !namers.has(url);
 }
 
-/** Whether the subject at `url` is typed sm:Distractor and not sm:Card. */
+/** Whether the subject at `url` is typed sm:Distractor and not sm:Card, and this app wrote it (not isWrittenByNewer). */
 function isDistractorOnly(dataset: Dataset, url: string): boolean {
   const thing = getThing(dataset, url);
-  const types = thing === null ? [] : getUrlAll(thing, RDF.type);
-  return types.includes(SM.Distractor) && !types.includes(SM.Card);
+  if (thing === null) return false;
+  const types = getUrlAll(thing, RDF.type);
+  return types.includes(SM.Distractor) && !types.includes(SM.Card) && !isWrittenByNewer(thing);
 }
 
 /**
@@ -740,7 +746,11 @@ function isDistractorOnly(dataset: Dataset, url: string): boolean {
  * earlier version left typed both a card and a distractor, which
  * another card names as its distractor, loses only its card statements
  * (the sm:Card type and the card properties no distractor has), so the
- * card that names it keeps its distractor.
+ * card that names it keeps its distractor. A subject at one of `urls`
+ * that is no card and that a newer version of the app wrote
+ * (isWrittenByNewer) is no card the removal is for: no write needs it
+ * gone or rewritten, so it is left as it is (GHSA-7x88-hfwx-whvj). A
+ * card a newer version wrote is refused (writtenByNewerApp).
  */
 export function withoutCardSubjects(dataset: Dataset, urls: readonly string[]): Dataset {
   let namers: Map<string, number> | undefined;
@@ -748,10 +758,10 @@ export function withoutCardSubjects(dataset: Dataset, urls: readonly string[]): 
   const kept: NamedSubject[] = [];
   for (const url of urls) {
     const thing = getThing(dataset, url);
-    const named =
-      thing !== null &&
-      getUrlAll(thing, RDF.type).includes(SM.Distractor) &&
-      (namers ??= distractorNamers(dataset)).has(url);
+    if (thing === null) continue;
+    const types = getUrlAll(thing, RDF.type);
+    if (!types.includes(SM.Card) && isWrittenByNewer(thing)) continue;
+    const named = types.includes(SM.Distractor) && (namers ??= distractorNamers(dataset)).has(url);
     if (named) kept.push(distractorOnly(unlessNewer(thing)));
     else removed.push(url);
   }

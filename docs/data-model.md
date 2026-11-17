@@ -1049,7 +1049,9 @@ graph LR
   removal deletes both documents and the catalog subject. Card removal
   removes every `sm:ReviewState` of the card, both ways and read or not
   (SM-2's by `sm:reviewOf` or the fragment rule, FSRS-6's by their
-  links), and no other subject (another scheduler's state stays). The
+  links), and no other subject (another scheduler's state stays). A
+  state a newer version wrote that the app doesn't read stays too, as
+  above. The
   Studio's edits do the same ([studio.md](studio.md#review-state)), as
   does a card moved away or forgotten (`applyReviewChanges` with
   `every`).

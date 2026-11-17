@@ -859,7 +859,12 @@ The edits are:
   Nothing's written until the user confirms.
 - **Delete**, with every SM-2 and FSRS-6 state of each card, read or
   not, once the user confirms. Another scheduler's state stays
-  ([data-model.md](data-model.md#decks-and-cards)). Undone, the cards'
+  ([data-model.md](data-model.md#decks-and-cards)), as does a state a
+  newer version wrote that the app doesn't read
+  ([migrations.md](migrations.md#versions)). Both writes, of the cards
+  and the reviews document, are made and checked before the first is
+  sent, so a card or a state a newer version wrote that the delete
+  would rewrite stops it with nothing written. Undone, the cards'
   SM-2 states come back, and FSRS-6 estimates its own from them at the
   next review.
 - **Set due date** and **Forget progress**, of the cards' review states
@@ -1163,8 +1168,10 @@ The domain plans the transfer
   `sm:distractor` and `schema:suggestedAnswer` alike, each typed
   `sm:Distractor` and `schema:Answer`.
 - A move then removes the cards from the source, with every SM-2 and
-  FSRS-6 state they have, read or not. A copy leaves the source as it
-  is. Another scheduler's states are never moved, copied or removed;
+  FSRS-6 state they have, read or not, but for a state a newer version
+  wrote that the app doesn't read, which stays
+  ([migrations.md](migrations.md#versions)). A copy leaves the source
+  as it is. Another scheduler's states are never moved, copied or removed;
   they stay in the source, naming the card there.
 - Past answers keep naming the source, so a moved card's history
   starts again in the target
@@ -1186,7 +1193,16 @@ neither, and making it again finishes it. The plan names the same ids
 each time, and a card the target holds already under its id, saying
 the same, isn't written again (its state there is kept). Two cards of
 the source saying the same are never both found at one id. The
-source's states go before its cards. The end-to-end tests hold this
+source's states go before its cards. All four writes, of both decks'
+cards and reviews documents, are made and checked before the first is
+sent, so a card or a state one would refuse stops the move with
+nothing written. That's a card or a state a newer version of the app
+wrote that the move would rewrite: a moved card, or the state the app
+reads of one. Any other
+card's subject or state a newer version wrote, such as a distractor,
+stays where it is and doesn't stop the move. Each write is then sent
+If-Match the read it was made from, so a document changed since has
+the move planned again. The end-to-end tests hold this
 against real servers, and include a move stopped before the source's
 cards were written
 ([cardTransfer.integration.test.ts](../e2e/pod/src/cardTransfer.integration.test.ts)).

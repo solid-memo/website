@@ -15,7 +15,7 @@ import {
 } from "./client/rdf";
 import type { LangText } from "@solid-memo/domain/langText";
 import { copyKeywords, noKeywords, type LangTexts } from "@solid-memo/domain/keywords";
-import type { DeckRepository } from "@solid-memo/application/ports";
+import type { CardChangeOptions, CardChanges, DeckRepository } from "@solid-memo/application/ports";
 import type { KeptDocuments } from "@solid-memo/domain/instance";
 import {
   CARD_FORMAT_VERSION,
@@ -183,9 +183,64 @@ export function createSolidDeckRepository({
     subjects: readonly string[],
     options?: { whole?: boolean },
   ): Promise<void> {
+    const written = await checkedCardsDocument(deck, dataset, subjects);
+    await saveDataset(deck.cardsDocumentUrl, written, fetch, options);
+  }
+
+  /** The cards document saveCardsDocument sends, once checked as it checks it; nothing is sent. */
+  async function checkedCardsDocument(
+    deck: Deck,
+    dataset: Dataset,
+    subjects: readonly string[],
+  ): Promise<Dataset> {
     assertDistractorsOwnedOnce(dataset, subjects);
     const written = await guard.writable(deck, deck.cardsDocumentUrl, dataset);
-    await save(deck.cardsDocumentUrl, written, subjects, options);
+    await checkWrite(written, subjects, "pod");
+    return written;
+  }
+
+  /**
+   * The write applyCardChanges makes, read, refused and checked as it
+   * is, but not sent: the function returned sends it (DeckRepository).
+   */
+  async function prepareCardChanges(
+    deck: Deck,
+    changes: CardChanges,
+    { whole, version, carried }: CardChangeOptions = {},
+  ): Promise<() => Promise<void>> {
+    const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
+    // Changes made from an earlier read go only to the document as it was then: a later edit is not undone.
+    if (
+      version !== undefined &&
+      (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version
+    ) {
+      throw new PreconditionFailedError(
+        deck.cardsDocumentUrl,
+        version === ABSENT_VERSION ? "absent" : "unchanged",
+      );
+    }
+    // A card copied from another deck starts from what that deck's document says of it.
+    const source =
+      carried === undefined
+        ? null
+        : await getSolidDatasetOrNull(
+            carried.deck.cardsDocumentUrl,
+            carried.asNoOne === true ? publicFetch : fetch,
+          );
+    const changed = withCardChanges(
+      read ?? createSolidDataset(),
+      deck,
+      changes,
+      source === null
+        ? undefined
+        : (id) => {
+            if (!Object.hasOwn(carried!.ids, id)) return null;
+            return getThing(source, `${carried!.deck.cardsDocumentUrl}#${carried!.ids[id]}`);
+          },
+    );
+    const written = await checkedCardsDocument(deck, changed.dataset, changed.subjects);
+    // If-Match the read above: a document changed since is not written over.
+    return () => saveDataset(deck.cardsDocumentUrl, written, fetch, { whole });
   }
 
   return {
@@ -433,39 +488,11 @@ export function createSolidDeckRepository({
       return stated.length;
     },
 
-    async applyCardChanges(deck, changes, { whole, version, carried } = {}): Promise<void> {
-      const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
-      // Changes made from an earlier read go only to the document as it was then: a later edit is not undone.
-      if (
-        version !== undefined &&
-        (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version
-      ) {
-        throw new PreconditionFailedError(
-          deck.cardsDocumentUrl,
-          version === ABSENT_VERSION ? "absent" : "unchanged",
-        );
-      }
-      // A card copied from another deck starts from what that deck's document says of it.
-      const source =
-        carried === undefined
-          ? null
-          : await getSolidDatasetOrNull(
-              carried.deck.cardsDocumentUrl,
-              carried.asNoOne === true ? publicFetch : fetch,
-            );
-      const changed = withCardChanges(
-        read ?? createSolidDataset(),
-        deck,
-        changes,
-        source === null
-          ? undefined
-          : (id) => {
-              if (!Object.hasOwn(carried!.ids, id)) return null;
-              return getThing(source, `${carried!.deck.cardsDocumentUrl}#${carried!.ids[id]}`);
-            },
-      );
-      await saveCardsDocument(deck, changed.dataset, changed.subjects, { whole });
+    async applyCardChanges(deck, changes, options): Promise<void> {
+      await (await prepareCardChanges(deck, changes, options))();
     },
+
+    prepareCardChanges,
 
     async addCardIfAbsent(deck, card): Promise<boolean> {
       const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);

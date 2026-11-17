@@ -212,6 +212,64 @@ describe("cards", () => {
       });
     });
 
+    it("makes and checks both writes of a delete before it sends the first", async () => {
+      const { deps, useCases } = setup();
+      const edit = { kind: "remove" } as const;
+      await useCases.editCards(
+        instance.url,
+        deck,
+        ["one"],
+        edit,
+        planCardEdit([one, two], ["one"], edit),
+      );
+      const { prepareCardChanges, applyCardChanges } = deps.deckRepository;
+      const { prepareReviewChanges, applyReviewChanges } = deps.reviewStateRepository;
+      expect(vi.mocked(prepareCardChanges).mock.calls).toEqual(
+        vi.mocked(applyCardChanges).mock.calls,
+      );
+      expect(vi.mocked(prepareReviewChanges).mock.calls).toEqual(
+        vi.mocked(applyReviewChanges).mock.calls,
+      );
+      expect(
+        Math.max(
+          ...vi.mocked(prepareCardChanges).mock.invocationCallOrder,
+          ...vi.mocked(prepareReviewChanges).mock.invocationCallOrder,
+        ),
+      ).toBeLessThan(vi.mocked(applyCardChanges).mock.invocationCallOrder[0]!);
+    });
+
+    it.each([
+      ["the reviews", "reviews"],
+      ["the cards", "cards"],
+    ] as const)(
+      "writes nothing of a delete when a write of %s would be refused",
+      async (_, document) => {
+        const { deps, useCases } = setup();
+        const refused = new AppError("writtenByNewerApp", { url: deck.url });
+        const refuse = async () => {
+          throw refused;
+        };
+        if (document === "reviews")
+          vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mockImplementation(refuse);
+        else vi.mocked(deps.deckRepository.prepareCardChanges).mockImplementation(refuse);
+        const edit = { kind: "remove" } as const;
+        const cardsWritten = vi.fn();
+        await expect(
+          useCases.editCards(
+            instance.url,
+            deck,
+            ["one"],
+            edit,
+            planCardEdit([one, two], ["one"], edit),
+            cardsWritten,
+          ),
+        ).rejects.toBe(refused);
+        expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+        expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+        expect(cardsWritten).not.toHaveBeenCalled();
+      },
+    );
+
     it("undoes a delete again once its reviews write failed, writing only the states still missing", async () => {
       const edit = { kind: "remove" } as const;
       const removal = await setup().useCases.editCards(
@@ -756,6 +814,21 @@ describe("cards", () => {
         // The source's every state of the card goes: its FSRS-6 one too.
         [deck, { save: [], remove: [{ cardId: "one", direction: "front-to-back" }], every: true }],
       ]);
+      // Every write is made, and checked, before the first is sent.
+      const { prepareReviewChanges } = deps.reviewStateRepository;
+      const { prepareCardChanges } = deps.deckRepository;
+      expect(vi.mocked(prepareReviewChanges).mock.calls).toEqual(
+        vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls,
+      );
+      expect(vi.mocked(prepareCardChanges).mock.calls).toEqual(
+        vi.mocked(applyCardChanges).mock.calls,
+      );
+      expect(
+        Math.max(
+          ...vi.mocked(prepareReviewChanges).mock.invocationCallOrder,
+          ...vi.mocked(prepareCardChanges).mock.invocationCallOrder,
+        ),
+      ).toBeLessThan(vi.mocked(applyCardChanges).mock.invocationCallOrder[0]!);
       expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
         target,
         undefined,
@@ -764,6 +837,33 @@ describe("cards", () => {
         deck,
         undefined,
       );
+    });
+
+    it.each([
+      ["the source's reviews", "reviews"],
+      ["the source's cards", "cards"],
+    ] as const)("writes nothing when a write of %s would be refused", async (_, document) => {
+      const { deps, useCases } = setup();
+      const refused = new AppError("writtenByNewerApp", { url: deck.url });
+      const refuseSource = async (d: Deck) => {
+        if (d.url === deck.url) throw refused;
+        return async () => undefined;
+      };
+      if (document === "reviews")
+        vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mockImplementation(refuseSource);
+      else vi.mocked(deps.deckRepository.prepareCardChanges).mockImplementation(refuseSource);
+      await expect(
+        useCases.transferCards(
+          instance.url,
+          deck,
+          target,
+          ["one"],
+          { mode: "move", keepProgress: true },
+          session.webId,
+        ),
+      ).rejects.toBe(refused);
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
     it("copies cards without progress, leaving the source and its digest as they are", async () => {
