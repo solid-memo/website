@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.13](https://github.com/solid-memo/website/compare/v7.6.12...v7.6.13) (2026-11-17)
+
+### Fixes
+
+* **shacl:** count results on another app's values as warnings toward the cap ([91cb3f0](https://github.com/solid-memo/website/commit/91cb3f0cc1418e6c0683d48d4c89017d4aa0d20d))
+* **solid:** carry a copied subject's values in one call ([da36126](https://github.com/solid-memo/website/commit/da36126d734c1dc75553b42f17a953d43b2c3ed1))
+* **solid:** remove a day's answers whatever format they were written in ([6396880](https://github.com/solid-memo/website/commit/6396880c2c04d8eec3db2ae791c3e343a5e37651))
+* **studio:** count a cards document's active cards once per read ([5a7321c](https://github.com/solid-memo/website/commit/5a7321ca6faa5f3695d568ce85837aa4b24bcac6))
+
 ## [7.6.12](https://github.com/solid-memo/website/compare/v7.6.11...v7.6.12) (2026-11-17)
 
 ### Fixes
