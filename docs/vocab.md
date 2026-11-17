@@ -509,8 +509,8 @@ learner's preference.
 deck's catalog entry, is a host whose pictures the learner chose to
 show on a deck copied from a release outside the library's index
 ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)). A reader
-keeps only a value written as a URL's host is, and a catalog outside
-the learner's own pod isn't believed.
+keeps only a value written as a URL's host is, at most 100 of them,
+and a catalog outside the learner's own pod isn't believed.
 
 ## License
 

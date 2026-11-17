@@ -5,8 +5,8 @@
 /**
  * Decks are changed and removed in time that grows with them and their
  * cards, not their square, against a pod in memory: a deck removed from
- * a document another app wrote in, and many decks of a catalog changed
- * and removed at once.
+ * a document another app wrote in, many decks of a catalog changed
+ * and removed at once, and a deck whose entry names many picture hosts.
  *
  * Eight times as many must take less than four times as long as an
  * eighth of them done eight times over (testing.md); what puts the input
@@ -15,6 +15,7 @@
  * a file of its own so that they run at once.
  */
 import { describe, expect, it } from "vitest";
+import { MAX_PICTURE_HOSTS } from "@solid-memo/domain/deckPictures";
 import { growthAfterSetup } from "@solid-memo/domain/testing/growth";
 import {
   INSTANCE,
@@ -23,6 +24,7 @@ import {
   put,
   read,
   catalogOfDecks,
+  SM,
 } from "./testing/deckWrites";
 
 // Each test does its work many times over, at up to thousands of cards: a
@@ -82,6 +84,28 @@ describe("card writes", { timeout: 180_000 }, () => {
         };
       },
       100,
+      8,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("list and change a deck whose entry names many picture hosts in time that grows with them, not their square (GHSA-jmrw-gq3f-r4g6)", async () => {
+    const ratio = await growthAfterSetup(
+      (count) => async () => {
+        const { fetch, repository } = await catalogOfDecks(1);
+        const catalogUrl = `${INSTANCE}catalog.ttl`;
+        const hosts = Array.from({ length: count }, (_, i) => `"h${i}.example"`).join(", ");
+        const named = `<${catalogUrl}#deck-0> <${SM}deckPictureHost> ${hosts} .`;
+        await put(fetch, catalogUrl, `${await read(fetch, catalogUrl)}\n${named}`);
+        return async () => {
+          const [deck] = await repository.listDecks(INSTANCE);
+          expect(deck!.pictureHosts).toHaveLength(MAX_PICTURE_HOSTS);
+          const changed = await repository.setPictureHost(deck!, "new.example", true);
+          expect(changed.pictureHosts).toHaveLength(MAX_PICTURE_HOSTS);
+          expect(changed.pictureHosts!.at(-1)).toBe("new.example");
+        };
+      },
+      1000,
       8,
     );
     expect(ratio).toBeLessThan(4);

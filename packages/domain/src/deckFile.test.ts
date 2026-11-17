@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { MAX_PICTURE_HOSTS } from "./deckPictures";
 import { describe, expect, it } from "vitest";
 import {
   CARD_FORMAT_VERSION,
@@ -149,6 +150,15 @@ describe("importedDeck", () => {
     expect(imported.authors).toEqual(many.slice(0, MAX_DECK_METADATA));
     expect(imported.themes).toEqual(many.slice(0, MAX_DECK_METADATA));
     expect(imported.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
+  });
+
+  it("keeps the file's picture hosts, the first MAX_PICTURE_HOSTS of them (GHSA-jmrw-gq3f-r4g6)", () => {
+    const hosts = Array.from({ length: 2 * MAX_PICTURE_HOSTS }, (_, i) => `h${i}.example`);
+    const file = content({ deck: deck("deck-a", { pictureHosts: hosts }) });
+    const { deck: imported } = importedDeck(INSTANCE, file, options);
+    expect(imported.pictureHosts).toEqual(hosts.slice(0, MAX_PICTURE_HOSTS));
+    const few = content({ deck: deck("deck-a", { pictureHosts: ["a.example"] }) });
+    expect(importedDeck(INSTANCE, few, options).deck.pictureHosts).toEqual(["a.example"]);
   });
 
   it("keeps the FSRS-6 states with the progress", () => {

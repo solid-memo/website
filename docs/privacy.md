@@ -198,7 +198,8 @@ Studio draft ([below](#decks-and-drafts-from-elsewhere)):
   the pod (`sm:deckPictureHost` on its catalog entry,
   [data-model.md](data-model.md#decks-and-cards)), never set by a
   release, and the deck's Preferences page lists the hosts, each with
-  a button to stop showing its pictures.
+  a button to stop showing its pictures. A deck keeps at most 100
+  hosts: past that, choosing another drops the one chosen first.
 - Once a host is chosen, it sees a request for each picture it serves
   as the card comes up: the IP address, the user agent, the address
   asked for and the time. The answer's picture is
@@ -236,10 +237,11 @@ the library's by an upgrade.
   draft is published as it's written.
 - **A deck read from a file** is what the file says. One that names a
   release outside the index stays a linked deck, and keeps the hosts
-  the file states as chosen, so a file from someone else can carry
-  pictures from any host and state its own choice. One that names no
-  release, or a release of the library, loads its pictures as the
-  learner's own do. A file is only as trustworthy as whoever gave it.
+  the file states as chosen, up to the 100 a deck keeps. So a file
+  from someone else can carry pictures from any host and state its own
+  choice. One that names no release, or a release of the library,
+  loads its pictures as the learner's own do. A file is only as
+  trustworthy as whoever gave it.
 
 ## No analytics, no cookies, no tracking
 

@@ -8,6 +8,7 @@ import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./la
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { tidiedDistractor } from "./distractors";
+import { storedPictureHosts } from "./deckPictures";
 import { documentUrlOf } from "./subjectUrl";
 import { isHttpUrl, isWritableIri } from "./webId";
 
@@ -457,6 +458,7 @@ interface DeckMetadata {
   authors: string[];
   themes?: string[];
   keywords?: LangTexts;
+  pictureHosts?: readonly string[];
 }
 
 /** The characters of metadata a deck may still keep (MAX_DECK_METADATA_CHARACTERS). */
@@ -476,7 +478,8 @@ function fits(budget: Budget, characters: number): boolean {
  * MAX_DECK_KEYWORDS and MAX_DECK_METADATA_CHARACTERS allow: the first
  * languages of its title, of its description, its first authors, themes
  * and keywords, in that order and in their stored order, each while it
- * fits, so the same deck is always cut the same way. The first language
+ * fits, so the same deck is always cut the same way, and its first
+ * MAX_PICTURE_HOSTS picture hosts (storedPictureHosts). The first language
  * of the title and of the description is always kept, as a deck's shape
  * requires both (the term bound limits how long they are). A deck within
  * the bounds keeps all of it.
@@ -495,6 +498,9 @@ export function withBoundedMetadata<T extends DeckMetadata>(deck: T): T {
     ...(description === undefined ? {} : { description }),
     ...(themes === undefined ? {} : { themes }),
     ...(deck.keywords === undefined ? {} : { keywords: boundedKeywords(deck.keywords, budget) }),
+    ...(deck.pictureHosts === undefined
+      ? {}
+      : { pictureHosts: storedPictureHosts(deck.pictureHosts) }),
   };
 }
 

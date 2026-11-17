@@ -32,7 +32,7 @@ import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { editCompletedChapters as completedChaptersAfter } from "@solid-memo/domain/course";
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
 import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
-import { withPictureHost } from "@solid-memo/domain/deckPictures";
+import { storedPictureHosts, withPictureHost } from "@solid-memo/domain/deckPictures";
 import {
   cardsContainerOf,
   catalogUrlOf,
@@ -536,13 +536,10 @@ export function createSolidDeckRepository({
         if ((stored.pictureHosts ?? []).includes(host) === shown) return null;
         const changed = withPictureHost(stored, host, shown);
         return {
-          edit: (entry) => {
-            let edited = entry.removeAll(SM.deckPictureHost);
-            for (const kept of changed.pictureHosts ?? []) {
-              edited = edited.addStringNoLocale(SM.deckPictureHost, kept);
-            }
-            return edited;
-          },
+          edit: (entry) =>
+            entry
+              .removeAll(SM.deckPictureHost)
+              .setStringAll(SM.deckPictureHost, hostStrings(changed.pictureHosts)),
           deck: changed,
         };
       });
@@ -1066,7 +1063,8 @@ export function createSolidDeckRepository({
    * release is typed), the chapters it completed (sm:completedChapter,
    * as completeChapter adds one, bounded as a read bounds them), the card language
    * (sm:deckCardLanguage, as setCardLanguage sets it) and the hosts whose
-   * pictures it shows (sm:deckPictureHost, as setPictureHost adds them).
+   * pictures it shows (sm:deckPictureHost, as setPictureHost adds them,
+   * bounded as a read bounds them).
    */
   function withOwnTerms(dataset: Dataset, deck: Deck): Dataset {
     const entry = getThing(dataset, deck.url)!;
@@ -1082,9 +1080,9 @@ export function createSolidDeckRepository({
     }
     if (deck.cardLanguage !== undefined)
       builder = builder.addStringNoLocale(SM.deckCardLanguage, deck.cardLanguage);
-    for (const host of deck.pictureHosts ?? []) {
-      builder = builder.addStringNoLocale(SM.deckPictureHost, host);
-    }
+    // The whole list in one call (setStringAll), never more than a read keeps.
+    if (deck.pictureHosts !== undefined)
+      builder = builder.setStringAll(SM.deckPictureHost, hostStrings(deck.pictureHosts));
     return setThing(dataset, builder.build());
   }
 
@@ -1109,6 +1107,14 @@ export function createSolidDeckRepository({
       ? thing
       : buildThing(thing).setIri(SM.fromRelease, card.fromRelease).build();
   }
+}
+
+/**
+ * A deck's picture hosts as setStringAll writes them, plain strings, no
+ * more than a read keeps (storedPictureHosts).
+ */
+function hostStrings(hosts: readonly string[] = []): { value: string; language: string }[] {
+  return storedPictureHosts(hosts).map((value) => ({ value, language: "" }));
 }
 
 /**

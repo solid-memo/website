@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { CARD_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { DECK_FILE_BASE, type DeckFileFormat, importedDeck } from "@solid-memo/domain/deckFile";
+import { MAX_PICTURE_HOSTS } from "@solid-memo/domain/deckPictures";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
@@ -902,6 +903,41 @@ describe("readDeckFile", () => {
     const decks = await repository.listDecks(INSTANCE);
     expect(decks.map((listed) => listed.title)).toEqual([deck.title, deck.title]);
     expect(await repository.listCards(decks[1]!)).toHaveLength(read.cards.length);
+  });
+
+  it("imports a deck file's picture hosts up to the bound, into the deck and the catalog (GHSA-jmrw-gq3f-r4g6)", async () => {
+    const { pod, deck } = await podWithDeck();
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    const text = await archive.exportDeck(
+      deck,
+      { format: "turtle", withProgress: false },
+      { asNoOne: { cards: false, reviews: false } },
+    );
+    const hosts = Array.from({ length: 5 * MAX_PICTURE_HOSTS }, (_, i) => `h${i}.example`);
+    const named = `<${deck.url}> <${SM.deckPictureHost}> ${hosts.map((host) => `"${host}"`).join(", ")} .`;
+    const read = await archive.readDeckFile(`${text}\n${named}`, "turtle", `${DECK_FILE_BASE}deck`);
+    expect(read.deck.pictureHosts).toHaveLength(MAX_PICTURE_HOSTS);
+    const repository = createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date("2026-10-02T10:00:00.000Z"),
+      randomId: () => "id",
+    });
+    const imported = importedDeck(INSTANCE, read, {
+      withProgress: false,
+      decks: await repository.listDecks(INSTANCE),
+      freshId: "imported",
+      now: "2026-10-02T10:00:00.000Z",
+    });
+    // A file's own choice of hosts is kept, as a deck's export reads back.
+    expect(imported.deck.pictureHosts).toEqual(read.deck.pictureHosts);
+    await repository.applyCardChanges(imported.deck, { save: imported.cards, remove: [] });
+    await repository.registerDeck(imported.deck);
+    const catalog = await (await pod.fetch(`${INSTANCE}catalog.ttl`)).text();
+    expect(catalog.match(/"h\d+\.example"/g)).toHaveLength(MAX_PICTURE_HOSTS);
+    const listed = (await repository.listDecks(INSTANCE)).find(
+      (one) => one.url === imported.deck.url,
+    );
+    expect(new Set(listed!.pictureHosts)).toEqual(new Set(read.deck.pictureHosts));
   });
 
   it("refuses JSON-LD whose context would be fetched from elsewhere", async () => {

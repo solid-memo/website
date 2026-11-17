@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError } from "./appError";
+import { MAX_PICTURE_HOSTS } from "./deckPictures";
 import { describe, expect, it } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import {
@@ -726,6 +727,17 @@ describe("withBoundedMetadata", () => {
     expect(Object.keys(bounded.description!)).toHaveLength(MAX_DECK_METADATA);
     expect(bounded.keywords).toEqual({ ko: values("k", MAX_DECK_METADATA) });
   });
+
+  it("keeps the first MAX_PICTURE_HOSTS picture hosts, in order (GHSA-jmrw-gq3f-r4g6)", () => {
+    const hosts = values("h", MAX_PICTURE_HOSTS + 5).map((host) => `${host}.example`);
+    const bounded = withBoundedMetadata({
+      title: { en: "Deck" },
+      authors: [],
+      pictureHosts: hosts,
+    });
+    expect(bounded.pictureHosts).toEqual(hosts.slice(0, MAX_PICTURE_HOSTS));
+  });
+
   it("keeps values while they fit in MAX_DECK_METADATA_CHARACTERS, in order", () => {
     const quarter = (prefix: string) => prefix.padEnd(MAX_DECK_METADATA_CHARACTERS / 4, "x");
     const bounded = withBoundedMetadata({
