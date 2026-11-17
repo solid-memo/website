@@ -577,6 +577,43 @@ describe("createSolidAnswerLog", () => {
     expect(await log.readMonth(INSTANCE, "2026-09")).toHaveLength(2);
   });
 
+  /** Adds a copy of the answer `id` of September, named `copy` and stamped with a newer format version. */
+  function plantNewer(documents: Map<string, Set<string>>, id: string, copy: string) {
+    const lines = documents.get(SEPTEMBER)!;
+    for (const line of [...lines]) {
+      if (!line.startsWith(`<${SEPTEMBER}#${id}>`)) continue;
+      const planted = line.replace(`<${SEPTEMBER}#${id}>`, `<${SEPTEMBER}#${copy}>`);
+      lines.add(planted.includes("formatVersion") ? planted.replace(/"1"/, '"2"') : planted);
+    }
+  }
+
+  it("removes a day's answers whole, those a newer version wrote too", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const own = answer("2026-09-21");
+    const kept = answer("2026-09-20");
+    for (const given of [own, kept]) await log.append(INSTANCE, given);
+    plantNewer(fake.documents, own.id, "newer");
+    expect((await log.readMonth(INSTANCE, "2026-09")).map((read) => read.id)).toContain("newer");
+    await log.removeDay(INSTANCE, DECK, "2026-09-21");
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([kept]);
+    expect([...fake.documents.get(SEPTEMBER)!].some((line) => line.includes("#newer>"))).toBe(
+      false,
+    );
+  });
+
+  it("removes one answer by its id whole, one a newer version wrote too", async () => {
+    const fake = pod();
+    const log = createSolidAnswerLog({ fetch: fake.fetch });
+    const undone = answer("2026-09-21");
+    await log.append(INSTANCE, undone);
+    plantNewer(fake.documents, undone.id, "newer");
+    await log.removeAnswer(INSTANCE, "2026-09-21", undone.id);
+    expect((await log.readMonth(INSTANCE, "2026-09")).map((read) => read.id)).toEqual(["newer"]);
+    await log.removeAnswer(INSTANCE, "2026-09-21", "newer");
+    await expect(log.readMonth(INSTANCE, "2026-09")).resolves.toEqual([]);
+  });
+
   it("removes a day again when another write came first, and gives up after three tries", async () => {
     const fake = pod();
     const log = createSolidAnswerLog({ fetch: fake.fetch });

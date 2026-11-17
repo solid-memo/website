@@ -1645,7 +1645,9 @@ nothing could rebuild it.
   answer no add was ever begun for is left out of `removeAnswer`
   ([srs.md](srs.md#undoing-the-last-answer)). An add given up on at its
   deadline that the pod saves only after the removal stays in the log.
-  Nothing else removes answers.
+  Nothing else removes answers. Both remove an answer whole, whatever
+  its format: it's read as an answer, it's never rewritten, and one a
+  newer version wrote doesn't stop the removal.
 - **A card moved to another deck leaves its answers behind.** A
   [Studio](studio.md#moving-and-copying-cards) move never rewrites the
   log: past answers keep naming the source deck and card, and in the

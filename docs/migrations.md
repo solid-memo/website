@@ -4,7 +4,9 @@ A pod (the learner's own Solid storage) may hold data an older version
 of Solid Memo wrote, and every stored item says which format version
 it's in. This page says how the app brings old data up to the format
 it writes now, leaves data from a newer version alone, and updates a
-deck copied from the library to its newer release.
+deck copied from the library to its newer release. Answers are the
+exception to leaving newer data alone when a day is reset or an answer
+undone: they're removed whole.
 
 The formats are the [shapes](shapes.md). The steps between them are the
 migration modules in
@@ -440,11 +442,13 @@ Rules that hold across versions:
 - **`unlessNewer` refuses the same for the writes that change or remove
   a subject without recording it.** These are a deck's position or
   completed chapter, a deck group's removal, the catalog's links, a
-  repair, and the removal of a card, a distractor, a review state, a
-  deck entry or a day's answers. It refuses a subject stamped above
+  repair, and the removal of a card, a distractor, a review state or a
+  deck entry. It refuses a subject stamped above
   every version this app writes for its class. Where a shape fixes
   values the subject has (an FSRS-6 review state), the bound is the
-  version for that shape's kind.
+  version for that shape's kind. Answers are the exception: they're
+  never rewritten, only added and removed whole, so resetting a day or
+  undoing an answer removes one a newer version wrote too.
 - **A tab opened before a deploy** can't write older formats over what
   the update wrote, unless its version predates these guards. The
   library import refuses newer data too, with a clear message.
