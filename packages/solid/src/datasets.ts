@@ -24,7 +24,7 @@ import { ReadLimitError } from "./client/interface";
 import { readThrough, refusalOf } from "./client/readLimits";
 import { deleteSolidDataset, readDocument, writeDocument } from "./client/resources";
 import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
-import { unlessNewer } from "./records";
+import { isWrittenByNewer } from "./records";
 import { refuseUnwritable } from "./writableTerms";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
@@ -551,13 +551,7 @@ async function removeOwnedOnce(
  */
 function isNewer(dataset: Dataset, subject: string): boolean {
   const thing = getThing(dataset, subject);
-  if (thing === null) return false;
-  try {
-    unlessNewer(thing);
-    return false;
-  } catch {
-    return true;
-  }
+  return thing !== null && isWrittenByNewer(thing);
 }
 
 /**

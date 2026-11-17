@@ -447,9 +447,15 @@ Rules that hold across versions:
   deck entry. It refuses a subject stamped above
   every version this app writes for its class. Where a shape fixes
   values the subject has (an FSRS-6 review state), the bound is the
-  version for that shape's kind. Answers are the exception: they're
-  never rewritten, only added and removed whole, so resetting a day or
-  undoing an answer removes one a newer version wrote too.
+  version for that shape's kind. Two removals leave such a subject as
+  it is and go on, as no write needs it gone. One removes what's Solid
+  Memo's from a document (`removeOwned`). The other removes the agent
+  nodes no deck names any more. An agent node stamped above the agent
+  format, whatever its classes, is never removed or rewritten by a
+  catalog write: a deck saved over it names its author's next node.
+  Answers are the exception: they're never rewritten, only added and
+  removed whole, so resetting a day or undoing an answer removes one a
+  newer version wrote too.
 - **Resetting a day leaves a newer review state out.** A state of the
   day stamped above the version this app writes, SM-2's or FSRS-6's,
   is neither restored nor removed (`resetStudyDay`, `resetFsrsStudyDay`

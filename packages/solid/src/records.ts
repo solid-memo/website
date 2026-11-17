@@ -587,6 +587,22 @@ function isCarried(term: Quad_Object): term is Literal | NamedNode {
  * class this app writes is not its to judge, and passes.
  */
 export function unlessNewer<T extends Subject>(thing: T): T {
+  const newer = newerThanWritten(thing);
+  if (newer !== null) throw new AppError("writtenByNewerApp", { url: thing.url, ...newer });
+  return thing;
+}
+
+/**
+ * Whether a newer version of the app wrote the subject, as unlessNewer
+ * judges it: for the writes that may pass such a subject by, and leave
+ * it as it is, where it is no subject the write is of.
+ */
+export function isWrittenByNewer(thing: Subject): boolean {
+  return newerThanWritten(thing) !== null;
+}
+
+/** The subject's stored version and the latest this app writes for it, when the one is above the other (unlessNewer); else null. */
+function newerThanWritten(thing: Subject): { version: number; writes: number } | null {
   const types = getUrlAll(thing, RDF.type);
   const latest = (Object.keys(LATEST_VERSION) as ShapeName[])
     .map((shape) => (SHAPES[shape] as Record<number, ShapeDescriptor>)[LATEST_VERSION[shape]])
@@ -594,9 +610,7 @@ export function unlessNewer<T extends Subject>(thing: T): T {
   const fixed = latest.filter((d) => d.fixedValues.length > 0);
   const writes = Math.max(0, ...(fixed.length > 0 ? fixed : latest).map((d) => d.version));
   const version = storedVersionOf(thing);
-  if (writes > 0 && version > writes)
-    throw new AppError("writtenByNewerApp", { url: thing.url, version, writes });
-  return thing;
+  return writes > 0 && version > writes ? { version, writes } : null;
 }
 
 /**

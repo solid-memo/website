@@ -406,17 +406,6 @@ ${catalog} <http://www.w3.org/ns/dcat#dataset> <${deck.url}> .
 `;
       },
     ],
-    [
-      "an agent only it names",
-      (deck) => (text) => {
-        const agent = `<${documentUrlOf(deck.url)}#agent-newer>`;
-        return `${text}<${deck.url}> <http://purl.org/dc/terms/creator> ${agent} .
-${agent} <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Agent> .
-${agent} ${VERSION} "99"^^${INTEGER} .
-${agent} <http://xmlns.com/foaf/0.1/name> "Newer" .
-`;
-      },
-    ],
   ];
 
   for (const [label, change] of NEWER) {

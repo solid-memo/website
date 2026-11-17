@@ -202,12 +202,13 @@ export function toDeck(
  * The catalog document with a deck written in this app's format, onto
  * its existing subject when there is one (so unknown triples survive),
  * with its creators' agent nodes and its distribution beside it, and
- * listed by the catalog. Agents no deck names any more are removed.
- * The terms outside the deck's shape (sm:position, sm:completedChapter,
- * sm:deckCardLanguage) and the entry's other types (a course's
- * schema:Course) are kept as the entry has them, whatever the deck
- * says: a deck read before one changed cannot undo it by a save of its
- * own fields.
+ * listed by the catalog. Agents no deck names any more are removed,
+ * except a node a newer version wrote: that one is never removed or
+ * rewritten, it stays as it is. The terms outside the deck's shape
+ * (sm:position, sm:completedChapter, sm:deckCardLanguage) and the
+ * entry's other types (a course's schema:Course) are kept as the entry
+ * has them, whatever the deck says: a deck read before one changed
+ * cannot undo it by a save of its own fields.
  */
 export function withDeck(dataset: Dataset, deck: Deck): Dataset {
   return withDecks(dataset, [deck]);
@@ -283,9 +284,11 @@ export function decksSubjects(dataset: Dataset, decks: readonly Deck[]): string[
  * (agentNodesOf), each deck's authors named by urlsOf: a node that
  * holds another author's name or mailbox is never written over, as
  * every deck of the document names its authors' nodes, and the next one
- * is taken. A node longer than any term holds nothing, and is not looked
- * for: the dataset's subjects are the keys of an object, which would key
- * it too. One for all the decks of a pass, so that many decks that share
+ * is taken. A node a newer version of the app wrote is never written
+ * over either, whatever it holds: the author is given its next node. A
+ * node longer than any term holds nothing, and is not looked for: the
+ * dataset's subjects are the keys of an object, which would key it
+ * too. One for all the decks of a pass, so that many decks that share
  * an author look at its nodes once (GHSA-rm3f-655c-28wq).
  */
 function agentNodesIn(thingAt: (url: string) => NamedSubject | null): AgentNodes {
@@ -305,9 +308,17 @@ export function decksWithAgentsWithinBound(dataset: Dataset, decks: readonly Dec
   return decks.filter((deck) => !nodes.urlsOf(deck.url, deck.authors).some(isIriPastBound));
 }
 
-/** What `thing` holds of an agent (AgentHolder): nothing when there is none or it says nothing an agent says, else the author it names, or "unreadable". */
+/**
+ * What `thing` holds of an agent (AgentHolder): nothing when there is
+ * none or it says nothing an agent says, else the author it names, or
+ * "unreadable". A node a newer version of the app wrote
+ * (isAgentByNewer) is "unreadable", whatever it says: no author is
+ * written onto it, and a deck saved over it names its author's next
+ * node (GHSA-hqvj-6p8f-vqfx).
+ */
 function agentHolderOf(thing: NamedSubject | null): AgentHolder {
   if (thing === null) return null;
+  if (isAgentByNewer(thing)) return "unreadable";
   const said = getPropertyAll(thing);
   if (!AGENT_V1.fields.some((field) => said.includes(field.predicate))) return null;
   const read = readVersioned(thing, "agent");
@@ -321,9 +332,9 @@ function agentHolderOf(thing: NamedSubject | null): AgentHolder {
  * app's at a distribution's IRI stays (foreignSubjects,
  * GHSA-gvpx-j2mc-x9r9), and a group in a newer format than this app's
  * keeps its links, which the layout reads as no member once the deck is
- * gone (GHSA-x9mp-vw7v-rpwg). An entry, a distribution, an agent only
- * the removed decks name or the catalog node a newer version of the app
- * wrote is refused (writtenByNewerApp).
+ * gone (GHSA-x9mp-vw7v-rpwg). An entry, a distribution or the catalog
+ * node a newer version of the app wrote is refused (writtenByNewerApp);
+ * an agent node a newer version wrote stays as it is.
  * Their former siblings keep their positions: the gap is read as if it
  * were not there (domain/deckTree.ts buildTree), and the next
  * arrangement closes it. The entries and distributions are taken out at
@@ -486,6 +497,17 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
   return updated;
 }
 
+/**
+ * Whether a newer version of the app wrote the node at an agent's URL:
+ * it is stamped above the agent format this app writes (AGENT_V1),
+ * whatever its classes, as the agent's write (recordThing) judges it.
+ * Such a node is never removed or rewritten by a catalog write, and
+ * never refuses one (GHSA-hqvj-6p8f-vqfx).
+ */
+function isAgentByNewer(thing: Subject): boolean {
+  return storedVersionOf(thing) > AGENT_V1.version;
+}
+
 /** What this app writes of an agent: its class, its format stamp and its fields (AGENT_V1). */
 const AGENT_PREDICATES: readonly string[] = [
   SM.formatVersion,
@@ -499,7 +521,12 @@ const AGENT_PREDICATES: readonly string[] = [
  * foreignSubjects of the document as it was read): the IRI alone never
  * makes it one, so another app's subject at such a fragment stays
  * (GHSA-gvpx-j2mc-x9r9). Of this app's node only the agent statements
- * go; anything else said of it stays, and the node with it.
+ * go; anything else said of it stays, and the node with it. A node a
+ * newer version of the app wrote is never removed or rewritten: it
+ * stays as it is (isAgentByNewer), whether or not a deck the write
+ * saves or removes named it, as removeOwned leaves one. Leaving it
+ * rewrites nothing of the newer version's, and refusing it would keep
+ * decks from being written (GHSA-hqvj-6p8f-vqfx).
  */
 function withoutStrayAgents(
   dataset: Dataset,
@@ -525,8 +552,9 @@ function withoutStrayAgents(
   const gone: string[] = [];
   const kept: NamedSubject[] = [];
   for (const thing of getThingAll(dataset)) {
-    if (!isStray(asUrl(thing))) continue;
-    const builder = buildThing(unlessNewer(thing)).removeUrl(RDF.type, AGENT_V1.targetClass);
+    // One a newer version of the app wrote stays as it is.
+    if (!isStray(asUrl(thing)) || isAgentByNewer(thing)) continue;
+    const builder = buildThing(thing).removeUrl(RDF.type, AGENT_V1.targetClass);
     for (const predicate of AGENT_PREDICATES) builder.removeAll(predicate);
     const rest = builder.build();
     if (getPropertyAll(rest).length === 0) gone.push(asUrl(thing));
