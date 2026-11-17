@@ -1009,6 +1009,12 @@
     },
     "removedCards": "업데이트로 삭제되는 카드",
     "retiredCards": "업데이트로 사용 중지되는 카드",
+    "moreCards": {
+      "other": "이 밖에 카드 {count}장이 더 있어요. 여기에는 나오지 않아요."
+    },
+    "moreNotes": {
+      "other": "이 밖에 릴리스 {count}개의 노트가 더 있어요. 여기에는 나오지 않아요."
+    },
     "releaseNote": "릴리스 {version}: {notes}",
     "update": "릴리스 {version}(으)로 업데이트",
     "updating": "업데이트하는 중…"

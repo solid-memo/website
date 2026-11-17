@@ -13,10 +13,11 @@ import { CardLanguage, useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { DeckUpgradeProgress, type DeckUpgradeScreenStep } from "@solid-memo/ui/DeckUpgrade";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { describeChanges, historyKept } from "@solid-memo/ui/LibraryUpgradeNotice";
+import { describeChanges, historyKept, ReleaseNotes } from "@solid-memo/ui/LibraryUpgradeNotice";
 import { LoadingDots } from "@solid-memo/ui/Loading";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { bounded } from "./ReleaseLists";
 import { BulkBar } from "./shell/BulkBar";
 import { DataTable } from "./shell/DataTable";
 import { NO_SELECTION, type Selection } from "./shell/tableModel";
@@ -314,7 +315,14 @@ export function LibraryPlanScreen({ row }: { row: CopyRow | null }) {
   );
 }
 
-/** Everything an upgrade would do: what it keeps, the releases' notes, and the cards each change touches. */
+/**
+ * How many of the cards one change touches the plan lists: an upgrade
+ * can touch any number, so each list is bounded so and says how many
+ * more there are.
+ */
+const PLAN_CARD_LIMIT = 50;
+
+/** Everything an upgrade would do: what it keeps, the releases' notes (ReleaseNotes, bounded too), and the cards each change touches (PLAN_CARD_LIMIT of each). */
 function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
   const { t } = useI18n();
   const { cardText } = useCardText();
@@ -324,26 +332,22 @@ function PlanDetails({ plan }: { plan: LibraryUpgradePlan }) {
         {historyKept(plan, t)}
         {plan.kept.length > 0 && ` ${t("libraryUpgradeNotice.kept", { count: plan.kept.length })}`}
       </p>
-      {plan.notes.length > 0 && (
-        <ul>
-          {plan.notes.map((note) => (
-            <li key={note.version}>
-              {t("libraryUpgradeNotice.releaseNote", { version: note.version, notes: note.notes })}
-            </li>
-          ))}
-        </ul>
-      )}
+      <ReleaseNotes notes={plan.notes} />
       {CHANGES.map((kind) => {
         const cards: readonly (Card | LibraryCard)[] = plan[kind];
+        const { shown, more } = bounded(cards, PLAN_CARD_LIMIT);
         return (
           cards.length > 0 && (
             <div key={kind}>
               <h4>{t(`studio.library.cards.${kind}`, { count: cards.length })}</h4>
               <ul>
-                {cards.map((card) => (
+                {shown.map((card) => (
                   <li key={card.id}>{cardName(card, cardText)}</li>
                 ))}
               </ul>
+              {more > 0 && (
+                <p class="hint">{t("libraryUpgradeNotice.moreCards", { count: more })}</p>
+              )}
             </div>
           )
         );

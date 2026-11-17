@@ -203,6 +203,44 @@ describe("LibraryCopiesScreen", () => {
     ).toEqual(["Release 2: Norway added.", "Norway", "Sweden", "latvia"]);
   });
 
+  it("lists at most 50 of the cards each change touches, and says how many more", () => {
+    const many = (prefix: string, length: number) =>
+      Array.from({ length }, (_, at) => ({
+        id: `${prefix}-${at}`,
+        front: { en: `${prefix} ${at}` },
+        back: {},
+        formatVersion: 3,
+      }));
+    const big = { ...makePlan(old), notes: [], add: many("new", 2000), change: many("edit", 51) };
+    render(
+      <LibraryPlanScreen
+        row={{ copy: { deck: old, series: capitals, version: "1", newer: true }, plan: big }}
+      />,
+    );
+    const lists = within(screen.getByRole("region", { name: "Capitals" })).getAllByRole("list");
+    expect(lists.map((list) => within(list).getAllByRole("listitem").length)).toEqual([50, 50, 1]);
+    expect(lists[0]!.parentElement).toHaveTextContent("And 1,950 more cards, not listed here.");
+    expect(lists[1]!.parentElement).toHaveTextContent("And 1 more card, not listed here.");
+    expect(lists[2]!.parentElement).not.toHaveTextContent("not listed here");
+  });
+
+  it("lists the notes of at most 50 releases, and says how many more", () => {
+    const notes = Array.from({ length: 51 }, (_, at) => ({
+      version: String(at + 2),
+      notes: `Note ${at + 2}.`,
+    }));
+    const long = { ...makePlan(old), notes, add: [], change: [] };
+    render(
+      <LibraryPlanScreen
+        row={{ copy: { deck: old, series: capitals, version: "1", newer: true }, plan: long }}
+      />,
+    );
+    const region = screen.getByRole("region", { name: "Capitals" });
+    const [list] = within(region).getAllByRole("list");
+    expect(within(list!).getAllByRole("listitem")).toHaveLength(50);
+    expect(region).toHaveTextContent("And the notes of 1 more release, not listed here.");
+  });
+
   it("names the cards of a copy's plan in its card language first", () => {
     const swedish = { ...old, cardLanguage: "sv" };
     const svPlan = {

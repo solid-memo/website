@@ -1428,8 +1428,10 @@ in the aside (named Upgrade), with the rest of its plan: what history is
 kept, the new releases' notes, and its cards. Those are added, changed,
 retired, brought back, removed, left as the user has them, or given what
 the release says they're about (`about`: every card of a release that
-changes only that). That copy isn't in the URL: on
-another screen and back, none is shown until the cursor moves.
+changes only that). Each of those lists names at most 50 cards, and
+the notes at most 50 releases, and says how many more there are, as an
+upgrade can touch any number. That copy isn't in the URL: on another
+screen and back, none is shown until the cursor moves.
 
 The copies that can be upgraded are selected by their checkbox, or all
 at once; a copy set aside can't be, nor any until the data check is

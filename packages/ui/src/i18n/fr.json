@@ -1131,6 +1131,16 @@
     },
     "removedCards": "Cartes que la mise à jour supprime",
     "retiredCards": "Cartes que la mise à jour archive",
+    "moreCards": {
+      "one": "Et {count} autre carte, qui n’apparaît pas ici.",
+      "many": "Et {count} de cartes de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres cartes, qui n’apparaissent pas ici."
+    },
+    "moreNotes": {
+      "one": "Et les notes de {count} autre version, qui n’apparaissent pas ici.",
+      "many": "Et les notes de {count} de versions de plus, qui n’apparaissent pas ici.",
+      "other": "Et les notes de {count} autres versions, qui n’apparaissent pas ici."
+    },
     "releaseNote": "Version {version} : {notes}",
     "update": "Mettre à jour vers la version {version}",
     "updating": "Mise à jour…"

@@ -783,7 +783,10 @@ and each card they write names the release from then on.
 
 The notice names the cards an upgrade removes and those it retires by
 their fronts (`LibraryUpgradeNotice`), so the user sees which cards
-leave study before agreeing.
+leave study before agreeing. Each list shows at most `LIST_LIMIT` (50)
+fronts ([`bounded`](../packages/ui/src/ui/bounded.ts)) and says how many
+more there are, as a release can hold any number of cards; the sentence
+above it counts them all.
 
 Retiring isn't a change of the card's content, so it applies to cards
 the user changed too. A library release never removes a card any more:
@@ -859,7 +862,8 @@ wrote changes. That applies only to a copy of a series the library's
 index lists. A release added from a link stays on its creator's server,
 which can change it at any time, so a copy of one gets new languages
 only from an upgrade the user agrees to. The notice lists
-the notes of every release in between.
+the notes of the releases in between, at most `LIST_LIMIT` (50) of
+them, and says how many more there are.
 
 Nothing is offered for a release that isn't newer, uses a card format
 this app doesn't know, or would change nothing. A copy already as the

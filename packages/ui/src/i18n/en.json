@@ -1070,6 +1070,14 @@
     },
     "removedCards": "Cards the update removes",
     "retiredCards": "Cards the update retires",
+    "moreCards": {
+      "one": "And {count} more card, not listed here.",
+      "other": "And {count} more cards, not listed here."
+    },
+    "moreNotes": {
+      "one": "And the notes of {count} more release, not listed here.",
+      "other": "And the notes of {count} more releases, not listed here."
+    },
     "releaseNote": "Release {version}: {notes}",
     "update": "Update to release {version}",
     "updating": "Updating…"
