@@ -30,8 +30,12 @@ import {
   unreadableReason,
   ViolationMessage,
 } from "@solid-memo/ui/ValidationScreen";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { bounded } from "./ReleaseLists";
 import { useScreenCommands } from "./shell/useScreenCommands";
+
+/** At most how many cards of a group that say the same the deck's health names; past it, it says how many more. */
+export const DUPLICATE_CARD_LIMIT = 10;
 
 /** What can be repaired of what a check found, and the actions that repair it. */
 export interface RepairActions {
@@ -184,6 +188,12 @@ function MoreProblems({
   return count > 0 ? <p class="hint">{t(message, { count })}</p> : null;
 }
 
+/** How many more of a list there are than the screen lists, if any. */
+function More({ count }: { count: number }) {
+  const { t } = useI18n();
+  return count > 0 ? <p class="hint">{t("studio.check.more", { count })}</p> : null;
+}
+
 /** One result of a check: its message, a warning saying so. */
 function Result({ violation, severity }: { violation: Violation; severity: string }) {
   return (
@@ -267,7 +277,11 @@ function Part({
  * linking to the field of the card inspector it is about, the deck's
  * entry and its distribution to its about screen), the sides that state no language, the
  * cards that say the same, and the text in Markdown that would not show
- * as meant, each linking to its field (`spotHref`). "Check again" reads
+ * as meant, each linking to its field (`spotHref`); a deck can have any
+ * number of these, so each list shows at most PROBLEM_LIMIT (a group
+ * DUPLICATE_CARD_LIMIT of its cards) and says how many more there are;
+ * the summary, the line on unstated sides and the repair button count
+ * them all. "Check again" reads
  * it all afresh. While the deck is held (`held`: set aside, or the whole
  * instance blocked), its forms change nothing, so the places are named,
  * not linked, and a line says so: the repairs and removals here are the
@@ -315,6 +329,9 @@ export function DeckHealthScreen({
     );
   };
   const unstated = health.unstated;
+  const unstatedShown = bounded(unstated ?? [], PROBLEM_LIMIT);
+  const duplicates = bounded(health.duplicates, PROBLEM_LIMIT);
+  const markdown = bounded(health.markdown, PROBLEM_LIMIT);
   return (
     <section>
       <header>
@@ -354,12 +371,13 @@ export function DeckHealthScreen({
           {!held && <a href={aboutHref}>{t("studio.health.unstatedLink")}</a>}
         </p>
         <ul class="studio-health-list">
-          {unstated?.map((spot, index) => (
+          {unstatedShown.shown.map((spot, index) => (
             <li key={index}>
               <SpotLink spot={spot} spotHref={toSpot} />
             </li>
           ))}
         </ul>
+        <More count={unstatedShown.more} />
       </Part>
       <Part
         id="health-duplicates"
@@ -368,18 +386,11 @@ export function DeckHealthScreen({
       >
         <p class="hint">{t("studio.health.duplicatesHint")}</p>
         <ul class="studio-health-list">
-          {health.duplicates.map((group) => (
-            <li key={group[0]!.id}>
-              {t("studio.health.duplicateGroup", { count: group.length })}{" "}
-              {group.map((card, index) => (
-                <span key={card.id}>
-                  {index > 0 && ", "}
-                  <SpotLink spot={{ card, place: { tab: "content" } }} spotHref={toSpot} />
-                </span>
-              ))}
-            </li>
+          {duplicates.shown.map((group) => (
+            <DuplicateGroup key={group[0]!.id} group={group} spotHref={toSpot} />
           ))}
         </ul>
+        <More count={duplicates.more} />
       </Part>
       <Part
         id="health-markdown"
@@ -388,15 +399,40 @@ export function DeckHealthScreen({
       >
         <p class="hint">{t("studio.health.markdownHint")}</p>
         <ul class="studio-health-list">
-          {health.markdown.map((problem, index) => (
+          {markdown.shown.map((problem, index) => (
             <li key={index}>
               <SpotLink spot={problem} spotHref={toSpot} language={problem.language} />:{" "}
               {problemText(problem.finding, t)}
             </li>
           ))}
         </ul>
+        <More count={markdown.more + health.markdownMore} />
       </Part>
     </section>
+  );
+}
+
+/** A group of cards that say the same, counting them all, naming the first DUPLICATE_CARD_LIMIT. */
+function DuplicateGroup({
+  group,
+  spotHref,
+}: {
+  group: readonly Card[];
+  spotHref: ((spot: CardSpot) => string) | null;
+}) {
+  const { t } = useI18n();
+  const { shown, more } = bounded(group, DUPLICATE_CARD_LIMIT);
+  return (
+    <li>
+      {t("studio.health.duplicateGroup", { count: group.length })}{" "}
+      {shown.map((card, index) => (
+        <span key={card.id}>
+          {index > 0 && ", "}
+          <SpotLink spot={{ card, place: { tab: "content" } }} spotHref={spotHref} />
+        </span>
+      ))}
+      {more > 0 && ` ${t("studio.health.moreCards", { count: more })}`}
+    </li>
   );
 }
 

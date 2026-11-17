@@ -709,6 +709,9 @@
         },
         "healthy": "문제 없음",
         "failed": "검사 안 됨"
+      },
+      "moreCards": {
+        "other": "카드 {count}개 더"
       }
     },
     "library": {

@@ -751,6 +751,10 @@
         },
         "healthy": "Inga problem",
         "failed": "Inte kontrollerad"
+      },
+      "moreCards": {
+        "one": "och {count} kort till",
+        "other": "och {count} kort till"
       }
     },
     "library": {

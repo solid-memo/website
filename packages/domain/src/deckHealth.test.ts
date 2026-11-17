@@ -16,6 +16,8 @@ import {
   deckReport,
   duplicateCardsOf,
   healthProblemCount,
+  MARKDOWN_DECK_LIMIT,
+  MARKDOWN_TEXT_LIMIT,
   unstatedSides,
   withDeckReport,
   type DeckTextCheck,
@@ -522,7 +524,7 @@ describe("cardMarkdownProblems", () => {
     const plain = card("p", { front: { en: "[a]" } });
     const retired = card("r", { textFormat: SM.markdown, front: { en: "[a]" }, retired: true });
     expect(
-      cardMarkdownProblems([plain, marked, retired], text.check).map(
+      cardMarkdownProblems([plain, marked, retired], text.check).problems.map(
         ({ card, place, language, finding }) => [card.id, place, language, finding.rule],
       ),
     ).toEqual([
@@ -549,7 +551,7 @@ describe("cardMarkdownProblems", () => {
       card(`c${i}`, { textFormat: SM.markdown, distractors: [shared] }),
     );
     const check = vi.fn(text.check);
-    const found = cardMarkdownProblems(cards, check);
+    const { problems: found } = cardMarkdownProblems(cards, check);
     // Each card's front and back, and the shared option's texts and note once: not once per card.
     expect(check).toHaveBeenCalledTimes(cards.length * 2 + languages + 1);
     expect(found.map(({ card, place }) => [card.id, place.tab])).toEqual(
@@ -575,8 +577,32 @@ describe("cardMarkdownProblems", () => {
 
   it("holds the back of a card without wrong options as a side", () => {
     const marked = card("m", { textFormat: SM.markdown, back: { en: "[b]" } });
-    expect(cardMarkdownProblems([marked], text.check).map(({ finding }) => finding.rule)).toEqual([
-      "side",
+    expect(
+      cardMarkdownProblems([marked], text.check).problems.map(({ finding }) => finding.rule),
+    ).toEqual(["side"]);
+  });
+
+  it("holds a bounded number of findings of each text and of the deck, and counts the rest", () => {
+    // One finding for each "[" in a text, as dense Markdown gives one for each tag.
+    const each: DeckTextCheck<{ code: string }>["check"] = (value) =>
+      Array.from(value.matchAll(/\[/g), () => ({ code: "link" }));
+    const dense = "[a] ".repeat(4000);
+    const cards = Array.from({ length: 40 }, (_, i) =>
+      card(`c${i}`, {
+        textFormat: SM.markdown,
+        front: { en: dense },
+        back: { en: dense },
+        frontNote: { en: "[one]" },
+      }),
+    );
+    const { problems, more } = cardMarkdownProblems(cards, each);
+    expect(problems).toHaveLength(MARKDOWN_DECK_LIMIT);
+    expect(problems.length + more).toBe(cards.length * (4000 * 2 + 1));
+    // Each text gives its first findings, so the next field's come too.
+    expect(problems.slice(0, MARKDOWN_TEXT_LIMIT * 2 + 1).map(({ place }) => place)).toEqual([
+      ...Array.from({ length: MARKDOWN_TEXT_LIMIT }, () => ({ tab: "content", part: "front" })),
+      ...Array.from({ length: MARKDOWN_TEXT_LIMIT }, () => ({ tab: "content", part: "back" })),
+      { tab: "content", part: "frontNote" },
     ]);
   });
 });
@@ -612,7 +638,24 @@ describe("deckHealth", () => {
     expect(health.unstated).toHaveLength(2);
     expect(health.duplicates.map((group) => group.map((each) => each.id))).toEqual([["a", "b"]]);
     expect(health.markdown).toHaveLength(1);
+    expect(health.markdownMore).toBe(0);
     expect(healthProblemCount(health)).toBe(5);
+  });
+
+  it("counts the Markdown findings it does not hold", () => {
+    const dense = card("d", {
+      textFormat: SM.markdown,
+      front: { en: "[x]" },
+      back: { en: "[y]" },
+    });
+    const each: DeckTextCheck<{ code: string }> = {
+      plain: text.plain,
+      check: () => Array.from({ length: MARKDOWN_TEXT_LIMIT + 3 }, () => ({ code: "link" })),
+    };
+    const health = deckHealth(deck, report, [dense], [], each);
+    expect(health.markdown).toHaveLength(MARKDOWN_TEXT_LIMIT * 2);
+    expect(health.markdownMore).toBe(6);
+    expect(healthProblemCount(health)).toBe(1 + (MARKDOWN_TEXT_LIMIT + 3) * 2);
   });
 
   it("does not know which sides to settle when the release could not be read", () => {

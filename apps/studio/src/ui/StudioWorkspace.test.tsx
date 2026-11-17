@@ -16,6 +16,7 @@ import { forget } from "@solid-memo/ui/remembered";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { parseStudioHash, studioRouteToHash } from "./router";
 import { StudioWorkspace } from "./StudioWorkspace";
+import { PROBLEM_LIMIT } from "./ProblemList";
 import { choose } from "../test/choose";
 import { DECK as GRAPH_DECK, smallGraph } from "../test/graph";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
@@ -779,6 +780,42 @@ describe("StudioWorkspace", () => {
         field: "front",
       }),
     );
+  });
+
+  it("lists a bounded number of a deck's problems in the dock, and counts them all", async () => {
+    const water = makeCard(kanji, "water");
+    window.history.replaceState(
+      null,
+      "",
+      studioRouteToHash({ screen: "about", deckUrl: kanji.url }),
+    );
+    localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ dock: true }));
+    const useCases = makeUseCasesFake({
+      listInstances: vi.fn(async () => [instanceA]),
+      listDecks: vi.fn(async () => [kanji]),
+      listCards: vi.fn(async () => [water]),
+    });
+    const checkDeck = vi.mocked(useCases.checkDeck);
+    const healthy = await checkDeck.getMockImplementation()!(instanceA.url, kanji, {
+      plain: String,
+      check: () => [],
+    });
+    checkDeck.mockImplementation(async () => ({
+      ...healthy,
+      unstated: Array.from({ length: 3000 }, () => ({
+        card: water,
+        place: { tab: "content", part: "front" } as const,
+      })),
+      markdownMore: 2,
+    }));
+    renderWorkspace(useCases);
+    const dock = within(await screen.findByRole("region", { name: "Panel" }));
+    expect(await dock.findByText("And 2,952 more problems, not listed here.")).toBeInTheDocument();
+    expect(within(dock.getByRole("list", { name: "Problems" })).getAllByRole("link")).toHaveLength(
+      PROBLEM_LIMIT,
+    );
+    const status = within(screen.getByRole("complementary", { name: "Studio status" }));
+    expect(await status.findByRole("button", { name: "3,002 problems" })).toBeInTheDocument();
   });
 
   it("says in the dock when a deck is healthy, and why its health could not be checked", async () => {

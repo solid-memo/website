@@ -8,7 +8,8 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { ComponentChildren } from "preact";
-import type { Unrepairable } from "@solid-memo/domain/repair";
+import { useMemo } from "preact/hooks";
+import type { RepairPlan, Unrepairable } from "@solid-memo/domain/repair";
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
@@ -74,7 +75,9 @@ export function HealthContainer({
 /**
  * The repairs of what a check found (`report`), the removal of a subject
  * once the user confirms it (in `dialog`, which the screen shows); after
- * either, the checks under `checkKey` are read afresh.
+ * either, the checks under `checkKey` are read afresh. The plan is
+ * worked out once for each report, not on each drawing, as a check can
+ * find any number of problems.
  */
 function useRepairs(
   useCases: UseCases,
@@ -84,8 +87,15 @@ function useRepairs(
   const { t, errorText } = useI18n();
   const repairMutation = useRepairMutation(useCases, instance.url, checkKey);
   const { ask, dialog } = useConfirm();
+  const planOf = useMemo(() => {
+    let last: { report: ValidationReport; plan: RepairPlan } | undefined;
+    return (report: ValidationReport) => {
+      if (last?.report !== report) last = { report, plan: useCases.planRepair(report) };
+      return last.plan;
+    };
+  }, [useCases]);
   const repairs = (report: ValidationReport) => {
-    const plan = useCases.planRepair(report);
+    const plan = planOf(report);
     return {
       plan,
       busy: repairMutation.isPending,

@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { skipToken, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "preact/hooks";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { healthProblemCount, type CardSpot, type DeckHealth } from "@solid-memo/domain/deckHealth";
@@ -20,7 +21,7 @@ import { Loading } from "@solid-memo/ui/Loading";
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { deckHealthQuery } from "./HealthBadge";
 import { placeText } from "./HealthScreen";
-import { listedProblems, ProblemList, shownProblems } from "./ProblemList";
+import { listedProblems, PROBLEM_LIMIT, ProblemList, shownProblems } from "./ProblemList";
 import { publishErrors, useReleaseCheck } from "./releaseCheck";
 import {
   isDraftRoute,
@@ -53,7 +54,8 @@ type Health = DeckHealth<MarkdownProblem>;
  * A deck's are what its health found (deckHealthQuery), as the badges
  * and its health screen check it: read here only from what they found,
  * and checked only when the dock shows them (DeckProblems), so a deck's
- * screens make no check of their own.
+ * screens make no check of their own. Its routes are those the dock
+ * lists (deckProblemsOf), worked out once for each health found.
  */
 export function useWorkspaceProblems(
   useCases: UseCases,
@@ -64,7 +66,8 @@ export function useWorkspaceProblems(
   draft: ReleaseProblem[] | undefined;
   publish: PublishReadiness | null;
 } {
-  const i18n = useI18n();
+  // Its text, kept from one drawing to the next (I18nProvider), not the context's object.
+  const { t, cardReader } = useI18n();
   const queryClient = useQueryClient();
   const draftRoute = route !== null && isDraftRoute(route) ? route : null;
   const draft = draftRoute === null ? null : shown.draft;
@@ -83,6 +86,13 @@ export function useWorkspaceProblems(
         : deckHealthQuery(useCases, queryClient, instanceUrlOfDeck(deck.url), deck).queryKey,
     queryFn: skipToken,
   });
+  const deckRoutes = useMemo(
+    () =>
+      deck === null || health.data === undefined
+        ? []
+        : deckProblemsOf(deck, health.data, { t, cardReader }).shown.map((one) => one.route),
+    [deck, health.data, t, cardReader],
+  );
 
   if (draft !== null) {
     const found = check.data === undefined ? undefined : listedProblems(checkProblems(check.data));
@@ -116,10 +126,8 @@ export function useWorkspaceProblems(
     return {
       problems: {
         count: health.data === undefined ? undefined : healthProblemCount(health.data),
-        routes:
-          health.data === undefined
-            ? []
-            : deckProblemsOf(deck, health.data, i18n).map((one) => one.route),
+        // Only those the list shows: a deck's health can find any number.
+        routes: deckRoutes,
         list: <DeckProblems useCases={useCases} deck={deck} />,
       },
       draft: undefined,
@@ -190,13 +198,15 @@ export interface DeckProblem {
  * of its data in one line, at the deck's health; then each side whose
  * language is not stated, each group of cards that say the same (at its
  * first card) and each finding in its Markdown, at its field of the card
- * inspector.
+ * inspector. A deck's health can find any number, so only the first
+ * PROBLEM_LIMIT are worked out (`shown`), and `more` counts the rest, the
+ * Markdown findings the health does not hold too.
  */
 export function deckProblemsOf(
   deck: Deck,
   health: Health,
   { t, cardReader }: Pick<I18n, "t" | "cardReader">,
-): DeckProblem[] {
+): { shown: DeckProblem[]; more: number } {
   const at = (spot: CardSpot) => spotRoute(deck.url, spot);
   // Its cards named as its screens show them: in its card language first.
   const { cardText } = cardReader(deck.cardLanguage);
@@ -207,49 +217,58 @@ export function deckProblemsOf(
     instanceUrl: instanceUrlOfDeck(deck.url),
     deckUrl: deck.url,
   };
-  const data: DeckProblem[] =
-    violationCount === 0
-      ? []
-      : [{ text: t("studio.dock.deckData", { count: violationCount }), route: atHealth }];
-  return [
-    ...data,
-    ...(health.unstated ?? []).map((spot) => ({
-      text: t("studio.dock.unstated", { place: place(spot) }),
-      route: at(spot),
-    })),
-    ...health.duplicates.map((group) => {
-      const spot: CardSpot = { card: group[0]!, place: { tab: "content" } };
-      return { text: t("studio.dock.duplicate", { place: place(spot) }), route: at(spot) };
-    }),
-    ...health.markdown.map((problem) => ({
-      text: `${place(problem)}: ${problemText(problem.finding, t)}`,
-      route: at(problem),
-    })),
-  ];
+  const shown: DeckProblem[] = [];
+  let all = 0;
+  const take = <T,>(list: readonly T[], one: (item: T) => DeckProblem) => {
+    all += list.length;
+    for (const item of list.slice(0, PROBLEM_LIMIT - shown.length)) shown.push(one(item));
+  };
+  take(violationCount === 0 ? [] : [violationCount], (count) => ({
+    text: t("studio.dock.deckData", { count }),
+    route: atHealth,
+  }));
+  take(health.unstated ?? [], (spot) => ({
+    text: t("studio.dock.unstated", { place: place(spot) }),
+    route: at(spot),
+  }));
+  take(health.duplicates, (group) => {
+    const spot: CardSpot = { card: group[0]!, place: { tab: "content" } };
+    return { text: t("studio.dock.duplicate", { place: place(spot) }), route: at(spot) };
+  });
+  take(health.markdown, (problem) => ({
+    text: `${place(problem)}: ${problemText(problem.finding, t)}`,
+    route: at(problem),
+  }));
+  return { shown, more: all + health.markdownMore - shown.length };
 }
 
-/** A deck's problems in the dock: its health, checked if no screen has yet, each a link to where it is fixed. */
+/** A deck's problems in the dock: its health, checked if no screen has yet, each a link to where it is fixed; at most PROBLEM_LIMIT, and how many more there are. */
 function DeckProblems({ useCases, deck }: { useCases: UseCases; deck: Deck }) {
-  const i18n = useI18n();
-  const { t, errorText } = i18n;
+  const { t, cardReader, errorText } = useI18n();
   const health = useQuery(
     deckHealthQuery(useCases, useQueryClient(), instanceUrlOfDeck(deck.url), deck),
   );
-  if (health.data === undefined)
+  const found = useMemo(
+    () => (health.data === undefined ? null : deckProblemsOf(deck, health.data, { t, cardReader })),
+    [deck, health.data, t, cardReader],
+  );
+  if (found === null)
     return health.error ? (
       <ErrorMessage error={errorText(health.error)} />
     ) : (
       <Loading label={t("studio.dock.checking")} />
     );
-  const found = deckProblemsOf(deck, health.data, i18n);
-  if (found.length === 0) return <p class="hint">{t("studio.dock.none")}</p>;
+  if (found.shown.length === 0) return <p class="hint">{t("studio.dock.none")}</p>;
   return (
-    <ul class="studio-health-list" aria-label={t("studio.dock.problems")}>
-      {found.map((one, index) => (
-        <li key={index}>
-          <a href={studioRouteToHash(one.route)}>{one.text}</a>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul class="studio-health-list" aria-label={t("studio.dock.problems")}>
+        {found.shown.map((one, index) => (
+          <li key={index}>
+            <a href={studioRouteToHash(one.route)}>{one.text}</a>
+          </li>
+        ))}
+      </ul>
+      {found.more > 0 && <p class="hint">{t("studio.check.more", { count: found.more })}</p>}
+    </>
   );
 }

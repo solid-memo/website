@@ -20,6 +20,7 @@ const healthy: DeckHealth = {
   unstated: [],
   duplicates: [],
   markdown: [],
+  markdownMore: 0,
 };
 const twins = [makeCard(deck, "a"), makeCard(deck, "b")];
 
