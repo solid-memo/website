@@ -40,6 +40,7 @@ it("drops many month summaries in time that grows with them, not their square", 
     },
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);
@@ -71,6 +72,7 @@ it("notes many receipts at once in time that grows with them and the digest, not
     },
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);

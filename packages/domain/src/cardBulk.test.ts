@@ -139,6 +139,7 @@ describe("planCardEdit", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -436,6 +437,7 @@ describe("planCardEdit, a distractor several cards share", () => {
       },
       100,
       8,
+      4,
     );
 
   it("replaces in it in time that grows with the cards and its texts, not with their product", () => {

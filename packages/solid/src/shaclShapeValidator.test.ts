@@ -1025,6 +1025,7 @@ describe("createShaclShapeValidator", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1053,6 +1054,7 @@ describe("createShaclShapeValidator", () => {
       (count) => () => validator.validateDataset(release, datasets.get(count)!, "library"),
       125,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   }, 60_000);
@@ -1085,6 +1087,7 @@ describe("createShaclShapeValidator", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1722,6 +1725,7 @@ describe("createShaclShapeValidator", () => {
         },
         4000,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -2331,6 +2335,7 @@ describe("validateRelease", () => {
       },
       50,
       4,
+      2.5,
     );
     expect(ratio).toBeLessThan(2.5);
   }, 180_000);

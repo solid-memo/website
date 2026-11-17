@@ -50,6 +50,7 @@ describe("PathMap", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -96,6 +97,7 @@ describe("TextMap", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

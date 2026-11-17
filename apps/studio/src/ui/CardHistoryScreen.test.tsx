@@ -225,6 +225,7 @@ describe("CardHistoryScreen", () => {
       },
       50,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

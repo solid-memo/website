@@ -310,6 +310,7 @@ describe("the figures of a large log", () => {
       },
       answers.length / 16,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

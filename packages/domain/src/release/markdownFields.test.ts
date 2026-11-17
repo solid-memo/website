@@ -262,6 +262,7 @@ describe("markdownProblems' growth", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -289,6 +290,7 @@ describe("markdownProblems' growth with a shared distractor", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

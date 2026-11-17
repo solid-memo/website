@@ -225,6 +225,7 @@ describe("a course's outline", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -380,6 +381,7 @@ describe("a learner's progress", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

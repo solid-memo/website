@@ -5,8 +5,8 @@
 /**
  * How many times longer work takes on an input `times` as large than on
  * the small input done `times` over: about 1 for a linear pass, about
- * `times` for a quadratic one. Each is the best of five runs, the two
- * taken in turn after a run to warm up. A wall-clock budget would depend
+ * `times` for a quadratic one. Each is the best of up to five runs, the
+ * two taken in turn after a run to warm up. A wall-clock budget would depend
  * on the machine: CI runs the tests, coverage on, many times slower than a
  * laptop. The ratio does not.
  *
@@ -22,6 +22,10 @@
  * make even a linear pass look quadratic (a ratio of 17 for 4, with every
  * package's tests run at once on two cores).
  *
+ * The runs stop early once the ratio is under half of `limit`, the
+ * bound the test holds it to (`clear`): all five rounds are needed only
+ * near the limit, where the noise of a busy machine could tip it.
+ *
  * `prepare` builds the input of a size and returns the work to time, so
  * building it is not timed.
  */
@@ -29,6 +33,7 @@ export function growth(
   prepare: (size: number) => () => unknown,
   size: number,
   times: number,
+  limit: number,
 ): number {
   const small = prepare(size);
   const large = prepare(size * times);
@@ -41,6 +46,7 @@ export function growth(
   for (let round = 0; round < 5; round++) {
     fast = Math.min(fast, cpuTime(smalls));
     slow = Math.min(slow, cpuTime(large));
+    if (clear(slow / fast, limit)) break;
   }
   return slow / fast;
 }
@@ -54,6 +60,7 @@ export async function growthAsync(
   prepare: (size: number) => () => Promise<unknown>,
   size: number,
   times: number,
+  limit: number,
 ): Promise<number> {
   const small = prepare(size);
   const large = prepare(size * times);
@@ -66,6 +73,7 @@ export async function growthAsync(
   for (let round = 0; round < 5; round++) {
     fast = Math.min(fast, await cpuTimeAsync(smalls));
     slow = Math.min(slow, await cpuTimeAsync(large));
+    if (clear(slow / fast, limit)) break;
   }
   return slow / fast;
 }
@@ -81,6 +89,7 @@ export async function growthAfterSetup(
   prepare: (size: number) => () => Promise<() => Promise<unknown>>,
   size: number,
   times: number,
+  limit: number,
 ): Promise<number> {
   const small = prepare(size);
   const large = prepare(size * times);
@@ -95,8 +104,22 @@ export async function growthAfterSetup(
   for (let round = 0; round < 5; round++) {
     fast = Math.min(fast, await smalls());
     slow = Math.min(slow, await cpuTimeAsync(await large()));
+    if (clear(slow / fast, limit)) break;
   }
   return slow / fast;
+}
+
+/**
+ * Whether a ratio is far enough under `limit` that more rounds can't
+ * change the outcome: under half of it. More rounds only take the best of
+ * each run, which a busy machine can't make faster than the work is; a
+ * ratio that looks too low comes only from small runs it slowed down.
+ * Under half the limit, that takes small runs twice as slow as they are,
+ * and four times for a pass in the square of the input, which comes out
+ * about `times` (8, against a limit of 4).
+ */
+function clear(ratio: number, limit: number): boolean {
+  return ratio < limit / 2;
 }
 
 /** The CPU time `work` takes until its promise settles, in microseconds. */

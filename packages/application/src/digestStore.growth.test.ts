@@ -51,6 +51,7 @@ it("notes many receipts in a digest of many in time that grows with them, not th
     },
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);

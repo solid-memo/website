@@ -318,6 +318,7 @@ describe("distractorIssues", () => {
       },
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

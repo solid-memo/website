@@ -57,6 +57,7 @@ it("stores a document of many long lines in time that grows with them, not their
     },
     250,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 180_000);
@@ -77,6 +78,7 @@ it("changes a document of many long lines in time that grows with them, not thei
     },
     250,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 180_000);

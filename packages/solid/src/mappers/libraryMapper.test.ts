@@ -642,6 +642,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
           },
           240,
           8,
+          4,
         );
         expect(ratio).toBeLessThan(4);
       },
@@ -822,6 +823,7 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
       },
       100,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

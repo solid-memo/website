@@ -117,6 +117,7 @@ describe("graphsOf", () => {
       },
       100,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -248,6 +248,7 @@ it("checks a picture in time that grows with its card's languages, not with thei
     },
     1000,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 });
@@ -276,6 +277,7 @@ it("checks a picture described in long tags in time that grows with their number
     },
     256,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 });
@@ -311,6 +313,7 @@ it("asks no description in a language longer than a language subtag, nor keeps o
     },
     4_000,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 });

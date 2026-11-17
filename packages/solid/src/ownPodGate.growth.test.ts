@@ -35,6 +35,7 @@ it("reads each of many instances on servers of their own in time that grows with
     },
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);

@@ -129,6 +129,7 @@ describe("isRepeat, isScoredReview and isLapse", () => {
       },
       year.length / 16,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

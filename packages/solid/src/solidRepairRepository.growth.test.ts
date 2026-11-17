@@ -70,6 +70,7 @@ it("drops many review states' snapshots in time that grows with them, not their 
     ),
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);
@@ -84,6 +85,7 @@ it("removes many decks and their memberships in time that grows with them, not t
     ),
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);
@@ -113,6 +115,7 @@ it("drops many unreadable dates of one deck in time that grows with them, not th
     },
     2000,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);

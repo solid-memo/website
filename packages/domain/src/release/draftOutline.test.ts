@@ -74,6 +74,7 @@ describe("the outline", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -139,6 +140,7 @@ describe("the outline", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -272,6 +274,7 @@ describe("a card of the draft", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -289,6 +292,7 @@ describe("a card of the draft", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -314,6 +318,7 @@ describe("a card of the draft", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -410,6 +415,7 @@ describe("distractorChanges", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -540,6 +546,7 @@ describe("the table of a draft's cards", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

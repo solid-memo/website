@@ -431,6 +431,7 @@ describe("the statistics of the answer log", () => {
         },
         1000,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });

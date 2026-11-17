@@ -689,6 +689,7 @@ describe("readDeckFile", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -983,6 +984,7 @@ describe("readDeckFile", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1005,6 +1007,7 @@ describe("readDeckFile", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

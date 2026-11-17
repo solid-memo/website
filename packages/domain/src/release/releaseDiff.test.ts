@@ -334,6 +334,7 @@ describe("simulateLearnerUpgrade", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -364,6 +365,7 @@ describe("simulateLearnerUpgrade", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

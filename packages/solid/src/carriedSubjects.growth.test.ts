@@ -119,6 +119,7 @@ describe("a subject copied from another deck", { timeout: 180_000 }, () => {
         },
         SIZE[many],
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -151,6 +152,7 @@ describe("a subject copied from another deck", { timeout: 180_000 }, () => {
         },
         SIZE[many],
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });

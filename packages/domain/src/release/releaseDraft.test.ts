@@ -748,6 +748,7 @@ describe("applyDraftChange", () => {
         },
         1000,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -1352,6 +1353,7 @@ describe("the contact", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1418,6 +1420,7 @@ describe("the license", () => {
       },
       100,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1627,6 +1630,7 @@ describe("the notes of the making", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1878,6 +1882,7 @@ describe("blank nodes", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -2122,6 +2127,7 @@ describe("mergedDraft", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -2149,6 +2155,7 @@ describe("mergedDraft", () => {
       },
       100,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -2194,6 +2201,7 @@ describe("mergedDraft", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -2225,6 +2233,7 @@ describe("the card of a wrong option", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -259,6 +259,7 @@ describe("boundedQueryKeyHash", () => {
       },
       125,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

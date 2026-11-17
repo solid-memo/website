@@ -154,6 +154,7 @@ describe("authors", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -183,6 +184,7 @@ describe("otherAuthorsOf with agent IRIs longer than any term", () => {
         },
         250,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     },
@@ -427,6 +429,7 @@ describe("sources", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -468,6 +471,7 @@ describe("sources", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -543,6 +547,7 @@ describe("checks", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

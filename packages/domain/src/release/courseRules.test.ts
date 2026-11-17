@@ -304,6 +304,7 @@ describe("courseProblems", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -346,6 +347,7 @@ describe("courseProblems", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -409,6 +411,7 @@ describe("courseProblems", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

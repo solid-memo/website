@@ -358,6 +358,7 @@ describe("provenanceProblems", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

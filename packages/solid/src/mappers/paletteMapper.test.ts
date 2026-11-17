@@ -54,6 +54,7 @@ describe("withPalette", () => {
       },
       size,
       times,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -445,6 +445,7 @@ describe("queryCards", () => {
       },
       625,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -50,6 +50,7 @@ it("renames many registrations of an instance in time that grows with them, not 
     ),
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);
@@ -59,6 +60,7 @@ it("removes many registrations of an instance in time that grows with them, not 
     onIndex((fetch) => removeInstanceRegistrations(INDEX, INSTANCE, fetch)),
     300,
     8,
+    4,
   );
   expect(ratio).toBeLessThan(4);
 }, 120_000);

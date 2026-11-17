@@ -262,6 +262,7 @@ describe("withOnlyTheirBlankNodes", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -283,6 +284,7 @@ describe("withOnlyTheirBlankNodes", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

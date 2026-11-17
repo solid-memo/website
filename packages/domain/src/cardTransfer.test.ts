@@ -187,6 +187,7 @@ describe("carriedIdsOf", () => {
       },
       1500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -649,6 +650,7 @@ describe("planCardTransfer", () => {
       },
       1500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -670,6 +672,7 @@ describe("planCardTransfer", () => {
       },
       1500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -697,6 +700,7 @@ describe("planCardTransfer", () => {
       },
       400,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

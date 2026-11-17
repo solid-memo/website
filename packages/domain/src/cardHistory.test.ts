@@ -145,6 +145,7 @@ describe("lapseIndex", () => {
       },
       years.length / 16,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -225,6 +226,7 @@ describe("hardestCardsOf", () => {
       },
       all.length / 16,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -356,6 +358,7 @@ describe("the answers of a deck, their card and wrong option names as long as a 
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

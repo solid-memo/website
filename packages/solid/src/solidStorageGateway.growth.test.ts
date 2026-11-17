@@ -94,6 +94,7 @@ describe("discoverStorages", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   }, 120_000);

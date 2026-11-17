@@ -169,6 +169,7 @@ describe("estimateStudyTime", () => {
       },
       2_500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

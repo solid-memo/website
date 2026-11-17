@@ -5,8 +5,9 @@
 /**
  * How many times longer work takes on an input `times` as large than on
  * the small input done `times` over: about 1 for a linear pass, about
- * `times` for a quadratic one. Each is the best of five runs, the two
- * taken in turn after a run to warm up. The same measure as `growth` in
+ * `times` for a quadratic one. Each is the best of up to five runs, the
+ * two taken in turn after a run to warm up, stopping early once the ratio
+ * is under half of `limit`, the bound the test holds it to. The same measure as `growth` in
  * the domain package's tests (packages/domain/src/testing/growth.ts),
  * which says why each choice; this package imports no other.
  *
@@ -23,6 +24,7 @@ export function growth(
   prepare: (size: number) => () => unknown,
   size: number,
   times: number,
+  limit: number,
 ): number {
   const small = prepare(size);
   const large = prepare(size * times);
@@ -35,6 +37,7 @@ export function growth(
   for (let round = 0; round < 5; round++) {
     fast = Math.min(fast, cpuTime(smalls));
     slow = Math.min(slow, cpuTime(large));
+    if (slow / fast < limit / 2) break;
   }
   return slow / fast;
 }
