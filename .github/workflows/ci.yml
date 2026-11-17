@@ -106,9 +106,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: npm run ci:gate
 
-  # npm run check:ci. Deterministic. Its growth tests time CPU work, but as
-  # the ratio of two runs on the same runner, which a busy runner leaves
-  # about the same (packages/domain/src/testing/growth.ts).
+  # npm run check:ci, but for the growth tests, which the growth job
+  # runs. Deterministic.
   check:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
@@ -195,6 +194,31 @@ jobs:
           retention-days: 7
           if-no-files-found: error
           overwrite: true
+
+  # The growth tests (npm run test:growth): work that must take time
+  # growing with its input, not its square, timed as the ratio of two
+  # runs' CPU time on the same runner, which a busy runner leaves about
+  # the same (packages/domain/src/testing/growth.ts). A job of its own,
+  # beside check, so that check's tests don't wait for theirs, and
+  # without coverage, which slows them and which check's tests measure
+  # whole. No Turbo cache: they run on every run, as a cache of their
+  # own would need main's, saved from the queue's run as check's is.
+  # Deterministic.
+  growth:
+    needs: gate
+    if: needs.gate.outputs.jobs == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run test:growth
 
   # Main's older Turbo caches, deleted once check or reuse has saved its
   # own, which was built on them, and they would count toward the
@@ -1484,6 +1508,27 @@ jobs:
           RUN: ${{ github.run_id }}
         run: gh run cancel "$RUN"
 
+  # As fail-fast-check, for growth. Deterministic.
+  fail-fast-growth:
+    name: fail fast (growth)
+    needs: growth
+    if: >-
+      failure() && needs.growth.result == 'failure' &&
+      github.ref != 'refs/heads/main' &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel the run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RUN: ${{ github.run_id }}
+        run: gh run cancel "$RUN"
+
   # As fail-fast-check, for site. Deterministic.
   fail-fast-site:
     name: fail fast (site)
@@ -1666,8 +1711,8 @@ jobs:
   ci-ok:
     if: always()
     needs:
-      [gate, check, site, library, crosscheck, pod, contract, journeys, docs, workflows, commits,
-       reuse, release-files, dependency-review]
+      [gate, check, growth, site, library, crosscheck, pod, contract, journeys, docs, workflows,
+       commits, reuse, release-files, dependency-review]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -1676,7 +1721,8 @@ jobs:
           RESULTS: ${{ join(needs.*.result, ' ') }}
           GATE: ${{ needs.gate.result }}
           TESTS: >-
-            ${{ needs.check.result }} ${{ needs.site.result }} ${{ needs.library.result }}
+            ${{ needs.check.result }} ${{ needs.growth.result }} ${{ needs.site.result }}
+            ${{ needs.library.result }}
             ${{ needs.crosscheck.result }} ${{ needs.pod.result }} ${{ needs.contract.result }}
             ${{ needs.journeys.result }} ${{ needs.docs.result }}
             ${{ needs.workflows.result }} ${{ needs.commits.result }}

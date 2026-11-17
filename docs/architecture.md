@@ -73,7 +73,8 @@ files (`i18n/<locale>.json`).
 ## Tasks
 
 `turbo.json` runs each package's `typecheck`, `test`, `test:roundtrip`
-(`solid`'s, [testing.md](testing.md)), `generate:check`,
+(`solid`'s, [testing.md](testing.md)), `test:growth` (`solid`'s and
+`application`'s growth tests), `generate:check`,
 `format:turtle:check`, `library:check` and `build` in dependency
 order, cached by input: the files of the task's package and its
 dependencies. The few that read `ns/` or `decks/` add them

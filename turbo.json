@@ -85,6 +85,16 @@
       ],
       "outputLogs": "new-only"
     },
+    "test:growth": {
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/vitest.shared.ts"
+      ],
+      "dependsOn": [
+        "transit"
+      ],
+      "outputLogs": "new-only"
+    },
     "test:pod": {
       "cache": false,
       "env": [

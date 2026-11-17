@@ -13,6 +13,13 @@
         "$TURBO_ROOT$/packages/solid-memo-client/package.json"
       ]
     },
+    "test:growth": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/packages/solid-memo-client/src/**",
+        "$TURBO_ROOT$/packages/solid-memo-client/package.json"
+      ]
+    },
     "test:roundtrip": {
       "inputs": [
         "$TURBO_EXTENDS$",

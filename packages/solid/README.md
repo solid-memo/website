@@ -42,7 +42,7 @@ Tests mock the client modules, not the libraries.
 ## Tests
 
 ```sh
-npx turbo run typecheck test test:roundtrip --filter=@solid-memo/solid   # 100% coverage, and every library release through a draft
+npx turbo run typecheck test test:roundtrip test:growth --filter=@solid-memo/solid   # 100% coverage, every library release through a draft, and the growth tests
 npm run test:unit -- packages/solid/src/typeIndex.test.ts   # one file, from the root
 npm run test:pod   # against real Solid servers in Docker (e2e/pod)
 ```
