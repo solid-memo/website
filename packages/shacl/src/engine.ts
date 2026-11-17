@@ -33,11 +33,35 @@ export interface FocusedViolation extends Violation {
   focusNode: string;
 }
 
+/** What a caller tells a result by, before the engine makes it (Demoted). */
+export type ResultTerms = Pick<Violation, "path" | "value" | "constraint">;
+
+/**
+ * Whether the caller will report a violation about `focusNode` as less
+ * than one: a warning, say, as a result on a value another app added.
+ * `overTyped` holds the nodes of the data the check reads as having no
+ * type, of too many (MAX_TYPES_PER_NODE): the engine passes its own
+ * (checked.overTyped), while a caller that tells its warnings again
+ * afterwards reads them from the over-typed results it kept; where the
+ * two differ, one of them counts the result as a violation, so a
+ * mismatch fails closed for the results kept.
+ */
+export type Demoted = (
+  focusNode: string,
+  result: ResultTerms,
+  overTyped: ReadonlySet<string>,
+) => boolean;
+
 export interface ShapeEngine {
   /** Every result of checking `focusNode` against `shapeIri`; empty when it conforms. */
   validateNode(data: DatasetCore, focusNode: string, shapeIri: string): Promise<Violation[]>;
-  /** Every result of checking the whole of `data` against every targeted shape. */
-  validate(data: DatasetCore): Promise<FocusedViolation[]>;
+  /**
+   * Every result of checking the whole of `data` against every targeted
+   * shape. A violation `demoted` names counts as a warning toward the
+   * limit on a node's results (MAX_RESULTS_PER_CHECK), so that many of
+   * them never stand for one violation more of the node.
+   */
+  validate(data: DatasetCore, demoted?: Demoted): Promise<FocusedViolation[]>;
 }
 
 const SH = "http://www.w3.org/ns/shacl#";
@@ -181,7 +205,11 @@ type Severity = Violation["severity"];
  * is made, and `dropped` keeps the most severe left out of each node,
  * by its value; a result no more severe than that is left out too, as
  * limitResults would leave it, and a constraint that could give none
- * more severe is not run for the node again. The library's own
+ * more severe is not run for the node again. A violation the caller
+ * will report as a warning (`demoted`, Demoted) counts as a warning:
+ * many results on values another app added leave out, past the limit,
+ * only results as severe as those, and the node's own violations past
+ * the limit are still left out as violations. The library's own
  * limit (maxErrors) counts only some constraints' results and stops
  * the whole check, every node's, so it is not used.
  *
@@ -199,6 +227,8 @@ class TermKeyedEngine extends ValidationEngine {
   declare results: PathMap<number>;
   declare dropped: TextMap<Severity>;
   readonly limit: number;
+  /** The violations the caller will report as warnings, in a check of a whole graph. */
+  demoted: ((focusNode: string, result: ResultTerms) => boolean) | undefined;
 
   constructor(context: SHACLValidator, options: EngineOptions, limit = MAX_NODE_CHECKS) {
     super(context, { ...options, maxNodeChecks: 0 });
@@ -248,8 +278,9 @@ class TermKeyedEngine extends ValidationEngine {
     focusNode: Term,
     valueNode: Term | null,
   ): ReturnType<ValidationEngine["createResultFromObject"]> {
-    if (this.normalizeValidationResult(validationResult, valueNode) !== null) {
-      const severity = severityOf(constraint.shape.severity);
+    const normalized = this.normalizeValidationResult(validationResult, valueNode);
+    if (normalized !== null) {
+      const severity = this.countedSeverity(normalized, constraint, focusNode, valueNode);
       const path = [...termPath(focusNode), severity];
       const count = this.results.get(path) ?? 0;
       const dropped = this.dropped.get(focusNode.value);
@@ -269,6 +300,35 @@ class TermKeyedEngine extends ValidationEngine {
     }
     return super.createResultFromObject(validationResult, constraint, focusNode, valueNode);
   }
+
+  /**
+   * The severity a result counts as toward the limit: its own, or a
+   * warning for a violation the caller will report as one (demoted),
+   * told by the terms the result is made with.
+   */
+  countedSeverity(
+    normalized: { path?: Term; value?: Term | null },
+    constraint: Constraint,
+    focusNode: Term,
+    valueNode: Term | null,
+  ): Severity {
+    const severity = severityOf(constraint.shape.severity);
+    if (severity !== "violation" || this.demoted === undefined) return severity;
+    // As the library makes the result: the result's own path and value, else the shape's and the node's.
+    const path = (normalized.path ?? constraint.shape.path?.term)?.value;
+    const value = (normalized.value ?? valueNode)?.value;
+    const result: ResultTerms = {
+      ...(path === undefined ? {} : { path }),
+      ...(value === undefined ? {} : { value }),
+      constraint: componentName(constraint.component.node.value),
+    };
+    return this.demoted(focusNode.value, result) ? "warning" : severity;
+  }
+}
+
+/** A constraint component's name, as a result gives it: "MinCount" for sh:MinCountConstraintComponent. */
+function componentName(iri: string): string {
+  return localName(iri).replace(/ConstraintComponent$/, "");
 }
 
 /** A result's severity by its sh:resultSeverity: sh:Violation unless sh:Warning or sh:Info. */
@@ -322,10 +382,7 @@ function localName(iri: string): string {
 type ValidationResult = Awaited<ReturnType<SHACLValidator["validate"]>>["results"][number];
 
 function toViolation(result: ValidationResult): Violation {
-  const constraint = localName(result.sourceConstraintComponent.value).replace(
-    /ConstraintComponent$/,
-    "",
-  );
+  const constraint = componentName(result.sourceConstraintComponent.value);
   const path = result.path?.value;
   const value = result.value?.value;
   return {
@@ -392,6 +449,7 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
         const checked = checkedData(data);
         // validateNode keeps adding to one report; start each check afresh.
         engine.initReport();
+        engine.demoted = undefined;
         const report = await validator.validateNode(
           checked.data,
           namedNode(focusNode),
@@ -403,10 +461,14 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
           engine.dropped.get(focusNode),
         );
       }),
-    validate: (data) =>
+    validate: (data, demoted) =>
       oneAtATime(async () => {
         const checked = checkedData(data);
+        const isDemoted =
+          demoted &&
+          ((node: string, result: ResultTerms) => demoted(node, result, checked.overTyped));
         engine.initReport();
+        engine.demoted = isDemoted;
         const report = await validator.validate(checked.data);
         return limitedByNode(
           [
@@ -421,6 +483,10 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
             ),
           ].sort((a, b) => a.focusNode.localeCompare(b.focusNode) || byPathThenMessage(a, b)),
           (node) => engine.dropped.get(node),
+          (result) =>
+            result.severity === "violation" && isDemoted?.(result.focusNode, result)
+              ? "warning"
+              : result.severity,
         );
       }),
   };
@@ -428,11 +494,13 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
 
 /**
  * Results sorted by node, each node's limited (limitResults) with the
- * severity of those of it the engine left out (`dropped`).
+ * severity of those of it the engine left out (`dropped`), each ranked
+ * as the caller will report it (`rank`).
  */
 function limitedByNode(
   results: readonly FocusedViolation[],
   dropped: (node: string) => Severity | undefined,
+  rank: (result: FocusedViolation) => Severity,
 ): FocusedViolation[] {
   const kept: FocusedViolation[] = [];
   let start = 0;
@@ -440,7 +508,7 @@ function limitedByNode(
     const node = results[start].focusNode;
     let end = start + 1;
     while (end < results.length && results[end].focusNode === node) end++;
-    for (const result of limitResults(results.slice(start, end), dropped(node))) {
+    for (const result of limitResults(results.slice(start, end), dropped(node), rank)) {
       kept.push({ ...result, focusNode: node });
     }
     start = end;

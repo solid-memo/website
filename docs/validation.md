@@ -230,7 +230,13 @@ flowchart LR
   as severe as any it could give. Past the limit, one more result
   (`ResultLimit`) says there are more. It's as severe as the most
   severe of those left out, so a subject with too many violations still
-  doesn't conform, and one with only too many warnings still does. The
+  doesn't conform, and one with only too many warnings still does. In
+  a check against a profile, the caller names the violations it
+  reports as warnings, such as those on another app's values
+  (`Demoted` in `engine.ts`). Those count as warnings toward the
+  limit, so however many there are, they leave out only warnings, and
+  the `ResultLimit` after them is a warning too. A node's own
+  violations past the limit still make it a violation. The
   library's own limit (`maxErrors`) isn't used: it counts only some
   constraints' results, and stops the whole check, every node's, not
   one node's. The places a deck entry names (`DeckPlace`, above) are
@@ -493,7 +499,11 @@ properties Solid Memo writes are the subject's classes, its format
 stamp, the fields of the shapes it's read by, and Solid Memo's own
 terms (`sm:completedChapter`, say). A result about one of those, or
 one with no property, still counts. A subject no shape is read by
-keeps every result.
+keeps every result. However many results another app's values give,
+they count as warnings toward the limit on a check's results
+(above), so they never add a `ResultLimit` that counts: the report
+still shows that one, as a warning. One past the limit of the
+subject's own violations still counts.
 
 Another app may also add a value to a property Solid Memo writes,
 such as a `dcat:theme` on a deck's entry that the deck's shape takes

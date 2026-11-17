@@ -22,6 +22,7 @@ import type {
 } from "@solid-memo/application/ports";
 import {
   type DocumentReport,
+  isResultLimit,
   limitResults,
   unreadableDocument,
   type SubjectReport,
@@ -38,7 +39,7 @@ import { isUnreadableDatetime, storedVersionOf, unreadableDatetimes } from "./re
 import type { WriteCheck, WriteContext } from "./writeCheck";
 import { foreignSubjects, isDeckBackLink } from "./ownership";
 import { RDF, SM, SM_NS } from "./vocab";
-import type { ShapeEngine } from "@solid-memo/shacl/engine";
+import type { Demoted, ResultTerms, ShapeEngine } from "@solid-memo/shacl/engine";
 import { coreOnly } from "@solid-memo/shacl/profiles";
 import { pickShapes, type ShapePick } from "@solid-memo/shacl/registry";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
@@ -112,7 +113,7 @@ const MEMBER_LINKS: readonly (string | undefined)[] = [
  * check says nothing about it. A member of the same document is still
  * held to its class.
  */
-function isMemberElsewhere(focusNode: string, violation: Violation): boolean {
+function isMemberElsewhere(focusNode: string, violation: ResultTerms): boolean {
   return (
     violation.constraint === "Class" &&
     MEMBER_LINKS.includes(violation.path) &&
@@ -154,7 +155,7 @@ function writtenPredicates(thing: Subject): Set<string> | null {
  * Solid Memo writes, other than a catalog's or deck group's members
  * (isMemberElsewhere, isForeignMember).
  */
-function isClassOfValue({ constraint, path }: Violation): boolean {
+function isClassOfValue({ constraint, path }: ResultTerms): boolean {
   return constraint === "Class" && !MEMBER_LINKS.includes(path);
 }
 
@@ -191,19 +192,21 @@ function addedValues(dataset: Dataset): PathMap<true> {
  * another app's. A write check passes `added` (addedValues): the class
  * check on a value the write adds, from a release say, still counts,
  * unless it is a blank node, which the recorded changes leave out.
- * Each subject's predicates are worked out once per check.
+ * Each subject's predicates are worked out once per check. A subject
+ * the document does not name (a blank node) has none of another app's.
  */
 function foreignValues(
   dataset: Dataset,
   added = new PathMap<true>(),
-): (subject: string, violation: Violation) => boolean {
+): (subject: string, violation: ResultTerms) => boolean {
   const written = new Map<string, Set<string> | null>();
   return (subject, violation) => {
     const { path, value } = violation;
     if (path === undefined) return false;
     let predicates = written.get(subject);
     if (predicates === undefined) {
-      predicates = writtenPredicates(getThing(dataset, subject)!);
+      const thing = getThing(dataset, subject);
+      predicates = thing === null ? null : writtenPredicates(thing);
       written.set(subject, predicates);
     }
     if (predicates === null) return false;
@@ -229,7 +232,7 @@ function isOverTypedResult(focusNode: string, { builtIn, constraint, path, value
  * node's own result names that, so the linking subject's, a catalog's
  * link to a member's included, is a warning.
  */
-function isOverTypedValue(overTyped: ReadonlySet<string>, { constraint, value }: Violation) {
+function isOverTypedValue(overTyped: ReadonlySet<string>, { constraint, value }: ResultTerms) {
   return constraint === "Class" && value !== undefined && overTyped.has(value);
 }
 
@@ -261,7 +264,7 @@ function isForeignMember(
   blank: PathMap<true>,
   foreign: ReadonlySet<string>,
   focusNode: string,
-  violation: Violation,
+  violation: ResultTerms,
 ): boolean {
   const { path, value } = violation;
   if (!MEMBER_LINKS.includes(path) || value === undefined) return false;
@@ -625,21 +628,32 @@ export function createShaclShapeValidator({
   /**
    * The DCAT-AP violations of each subject of the document, by subject,
    * and the nodes the engine read as having no type, of too many
-   * (isOverTypedResult).
+   * (isOverTypedResult). `notCounted` names the violations about a
+   * subject the caller reports as warnings, or not at all: the engine
+   * counts them as warnings toward its limit on a subject's results, so
+   * that many results on another app's values never leave one out as a
+   * violation, while the subject's own past the limit still do. Of the
+   * warnings, only a ResultLimit is kept, so the report still says
+   * results were left out.
    */
   async function profileViolations(
     data: DatasetCore,
+    notCounted: Demoted,
   ): Promise<{ bySubject: Map<string, Violation[]>; overTyped: Set<string> }> {
     const [{ engine, reference }, { mergeDatasets }] = await Promise.all([dcatAp(), loadEngine()]);
     const subjects = new Set([...(data as Iterable<Quad>)].map((q) => q.subject.value));
     const bySubject = new Map<string, Violation[]>();
     const overTyped = new Set<string>();
+    const demoted: Demoted = (focusNode, result, overTypedNodes) =>
+      subjects.has(focusNode) &&
+      (isMemberElsewhere(focusNode, result) || notCounted(focusNode, result, overTypedNodes));
     for (const { focusNode, ...violation } of await engine.validate(
       mergeDatasets(data as Iterable<Quad>, ...(reference as Iterable<Quad>[])),
+      demoted,
     )) {
       if (isOverTypedResult(focusNode, violation)) overTyped.add(focusNode);
       if (
-        violation.severity !== "violation" ||
+        (violation.severity !== "violation" && !isResultLimit(violation)) ||
         !subjects.has(focusNode) ||
         isMemberElsewhere(focusNode, violation)
       )
@@ -699,11 +713,16 @@ export function createShaclShapeValidator({
     if (profiled) {
       const asked = new Set(subjects);
       const isForeignValue = foreignValues(dataset, addedValues(dataset));
-      const { bySubject, overTyped } = await profileViolations(data);
+      // Those on another app's values do not count, nor does a warning (a ResultLimit past only those).
+      const notCounted: Demoted = (subject, v, overTyped) =>
+        isForeignMember(blank, foreign, subject, v) ||
+        isForeignValue(subject, v) ||
+        isOverTypedValue(overTyped, v);
+      const { bySubject, overTyped } = await profileViolations(data, notCounted);
       for (const [subject, violations] of bySubject) {
         if (!asked.has(subject)) continue;
         for (const v of violations) {
-          if (counts(subject, v) && !isForeignValue(subject, v) && !isOverTypedValue(overTyped, v))
+          if (v.severity === "violation" && !notCounted(subject, v, overTyped))
             problems.push(describe(subject, v));
         }
       }
@@ -807,12 +826,15 @@ export function createShaclShapeValidator({
       );
     if (profiled) {
       const isForeignValue = foreignValues(dataset);
-      const { bySubject, overTyped } = await profileViolations(data);
       // DCAT-AP's results about a value another app added to a subject of Solid Memo's are warnings too, as is a class check on an over-typed value.
+      const isForeignResult: Demoted = (subject, v, overTyped) =>
+        foreign.has(subject) ||
+        isForeignMember(blank, foreign, subject, v) ||
+        isForeignValue(subject, v) ||
+        isOverTypedValue(overTyped, v);
+      const { bySubject, overTyped } = await profileViolations(data, isForeignResult);
       const attributedProfiled = (subject: string, violations: Violation[]) =>
-        attributed(subject, violations).map((v) =>
-          isForeignValue(subject, v) || isOverTypedValue(overTyped, v) ? asWarning(v) : v,
-        );
+        violations.map((v) => (isForeignResult(subject, v, overTyped) ? asWarning(v) : v));
       withProfiled(subjects, bySubject, attributedProfiled, foreign);
     }
     return { url, status: "checked", subjects };
