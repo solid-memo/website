@@ -341,3 +341,25 @@ export const SM = {
   /** The Free Spaced Repetition Scheduler, version 6: a memory stability in days, a difficulty from 1 to 10 and a due day, chosen so that the chance of recalling the card on that day is the desired retention. (Added in 1.21.) */
   fsrs6: `${SM_NS}fsrs6`,
 } as const;
+
+/**
+ * The properties whose values are concepts (`rdfs:range skos:Concept`):
+ * where an IRI of this vocabulary names a concept of one of its schemes,
+ * not any resource.
+ */
+export const SM_CONCEPT_PROPERTIES: readonly string[] = [
+  SM.textFormat,
+  SM.studyDirection,
+  SM.reviewDirection,
+  SM.scheduler,
+  SM.invalidDataPolicy,
+  SM.theme,
+  SM.studyScheduler,
+  SM.palette,
+  SM.textSize,
+  SM.basedOn,
+  SM.scheduledDirection,
+  SM.scheduledWith,
+  SM.answeredDirection,
+  SM.answerMode,
+];

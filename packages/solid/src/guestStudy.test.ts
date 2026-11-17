@@ -11,12 +11,12 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { DECKS_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { DeckLibrary, ResourceStore } from "@solid-memo/application/ports";
-import { GUEST_ORIGIN, GUEST_SESSION } from "@solid-memo/domain/guest";
+import { GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID } from "@solid-memo/domain/guest";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalGuestPod } from "./localGuestPod";
 import { createLocalPod } from "./localPod";
@@ -31,6 +31,7 @@ import { createSolidInstanceCopier } from "./solidInstanceCopier";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidRepairRepository } from "./solidRepairRepository";
+import { createSolidReleaseDraftRepository } from "./solidReleaseDraftRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { getProfileStorages } from "./client/resources";
@@ -91,7 +92,7 @@ async function addTriples(store: ResourceStore, document: string, lines: string[
   });
 }
 
-async function app(deckLibrary?: DeckLibrary) {
+async function app(deckLibrary?: DeckLibrary, file?: { name: string; text: string }) {
   const newEtag = () => `"${crypto.randomUUID()}"`;
   const guestStore = createMemoryResourceStore();
   const guestFetch = createLocalPod({ root: GUEST_ORIGIN, store: guestStore, newEtag });
@@ -137,6 +138,10 @@ async function app(deckLibrary?: DeckLibrary) {
     shapeValidator,
     repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
+    releaseDraftRepository: createSolidReleaseDraftRepository({ fetch: podFetch, checkWrite }),
+    ...(file === undefined
+      ? {}
+      : { fileExchange: { open: async () => file, save: () => undefined } }),
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),
     guestPod: createLocalGuestPod({ fetch: guestFetch, store: guestStore }),
@@ -346,6 +351,35 @@ describe("a guest's study", () => {
     expect((await useCases.listDecks(TARGET)).map(({ title }) => title)).toEqual([
       { en: "Capitals" },
     ]);
+  });
+
+  it("adds a study with a draft made from a release that states a term of the vocabulary this app does not know, the draft whole (GHSA-24fp-g7xv-5j4v)", async () => {
+    const later = `<${SM_NS}laterNote> "y"`;
+    const text = `${readFileSync(join(DECKS_ROOT, "academy-award-best-picture/v1.ttl"), "utf8")}
+<> ${later} .
+`;
+    const { useCases, guestStore, aliceStore } = await app(undefined, { name: "v1.ttl", text });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const made = await useCases.createReleaseDraft(
+      guestInstance!.url,
+      { kind: "fromFile" },
+      GUEST_WEBID,
+    );
+    // The draft keeps what the release states of itself, the term too.
+    expect(await everyTriple(guestStore)).toContain(`<${made!.draft.url}> ${later} .`);
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: TARGET,
+      name: "Main",
+      registrationTarget: "private",
+    });
+
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true, tidied: true });
+    // Copied with it: nothing a later version could have written is left behind.
+    const copy = made!.draft.url.replace(guestInstance!.url, TARGET);
+    expect(await everyTriple(aliceStore)).toContain(`<${copy}> ${later} .`);
   });
 
   it("adds an answer whose wrong option would be too long in the instance's longer address, without that option", async () => {
