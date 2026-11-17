@@ -16,7 +16,7 @@ import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
 import { deleteContainerRecursively, listContainerTree } from "./containers";
 import { PreconditionFailedError, saveDataset } from "./datasets";
 import { AppError } from "@solid-memo/domain/appError";
-import { SM, SM_NS } from "./vocab";
+import { RDF, SM, SM_CONCEPT_PROPERTIES, SM_NS } from "./vocab";
 
 type Fetch = typeof globalThis.fetch;
 
@@ -69,6 +69,33 @@ function createOnly(fetch: Fetch): Fetch {
 
 /** Every term of Solid Memo's vocabulary this app knows: its properties, classes and concepts. */
 const KNOWN_TERMS: ReadonlySet<string> = new Set(Object.values(SM));
+
+/**
+ * The properties an object of which names a term of the vocabulary: a
+ * subject's class, and each property whose values are concepts of its
+ * schemes. An object of any other property is a resource, whatever its
+ * IRI, such as a card's subject or picture.
+ */
+const TERM_VALUED: ReadonlySet<string> = new Set([RDF.type, ...SM_CONCEPT_PROPERTIES]);
+
+/** Whether the term is an IRI of Solid Memo's vocabulary that this app does not know. */
+function isLaterTerm(term: Term): boolean {
+  return (
+    term.termType === "NamedNode" && term.value.startsWith(SM_NS) && !KNOWN_TERMS.has(term.value)
+  );
+}
+
+/**
+ * Whether the statement uses a term this app does not know where only a
+ * term of the vocabulary goes: as its property, or as the class or the
+ * concept it names.
+ */
+function usesLaterTerm(quad: Quad): boolean {
+  return (
+    isLaterTerm(quad.predicate) ||
+    (TERM_VALUED.has(quad.predicate.value) && isLaterTerm(quad.object))
+  );
+}
 
 /** An IRI moved: renamed, or under the container moved. */
 function moveIri(iri: string, move: ContainerMove): string {
@@ -195,13 +222,9 @@ export function createSolidInstanceCopier({
       const response = await head(url);
       if (!response.ok) throw new AppError("cannotCheck", { url, status: response.status });
       if (!(response.headers.get("Content-Type") ?? "").startsWith("text/turtle")) return false;
-      const later = (term: Term) =>
-        term.termType === "NamedNode" &&
-        term.value.startsWith(SM_NS) &&
-        !KNOWN_TERMS.has(term.value);
       const quads = toRdfJsDataset(await getSolidDatasetLinear(url, { fetch })) as Iterable<Quad>;
       for (const quad of quads) {
-        if (later(quad.predicate) || later(quad.object)) return true;
+        if (usesLaterTerm(quad)) return true;
       }
       return false;
     },

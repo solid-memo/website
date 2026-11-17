@@ -151,7 +151,23 @@ export const SM = {
   /** A picture. (Added in 1.1.) */
   image: \`\${SM_NS}image\`,
 } as const;
+
+/**
+ * The properties whose values are concepts (\`rdfs:range skos:Concept\`):
+ * where an IRI of this vocabulary names a concept of one of its schemes,
+ * not any resource.
+ */
+export const SM_CONCEPT_PROPERTIES: readonly string[] = [
+];
 `,
+    );
+  });
+
+  it("lists the properties whose values are concepts", () => {
+    const direction = `sm:direction a owl:ObjectProperty ; rdfs:label "direction" ; rdfs:comment "A way." ;
+  rdfs:range skos:Concept ; skos:historyNote "Added in 1.1." .`;
+    expect(renderVocabConstants(parseVocab(`${HEAD}${ONTOLOGY}${TERMS}${direction}`))).toContain(
+      "export const SM_CONCEPT_PROPERTIES: readonly string[] = [\n  SM.direction,\n];\n",
     );
   });
 });

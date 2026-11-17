@@ -7,7 +7,7 @@
  * docs/vocab.md); the external vocabularies below are not ours to
  * publish and stay hand-written.
  */
-export { SM, SM_NS } from "@solid-memo/vocab/vocab.generated";
+export { SM, SM_CONCEPT_PROPERTIES, SM_NS } from "@solid-memo/vocab/vocab.generated";
 
 const SOLID_NS = "http://www.w3.org/ns/solid/terms#";
 export const SOLID = {

@@ -66,7 +66,13 @@ import type {
   ReleaseDraftRepository,
 } from "./ports";
 import type { ReleaseDraftUseCases } from "./releaseDrafts";
-import { draftContainerOf, type ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
+import {
+  draftContainerOf,
+  draftPlaceOf,
+  isDraftDocumentName,
+  RELEASE_DOCUMENT,
+  type ReleaseDraftSummary,
+} from "@solid-memo/domain/release/draftLayout";
 import { AppError } from "@solid-memo/domain/appError";
 import { MAX_LOG_MONTHS } from "@solid-memo/domain/answer";
 import type { InstanceCheckUseCases } from "./instanceChecks";
@@ -458,7 +464,10 @@ export function createSessionUseCases({
    * document of `resources` with a term of the vocabulary this app does
    * not know (namesLaterTerm). Adding a study writes what this app reads
    * of it, so what a later version added would be left behind, and gone
-   * with the guest's study.
+   * with the guest's study. A document of one of the guest's drafts is
+   * not asked: a draft is copied with what this app reads of it
+   * (copyReleaseDraft), which keeps statements in terms it does not
+   * know, as a draft made from a release keeps what the release states.
    */
   async function ensureGuestStudyReadable(
     source: string,
@@ -475,9 +484,21 @@ export function createSessionUseCases({
       throw new AppError("guestStudyTooNew");
     }
     for (const url of resources) {
-      if (!url.endsWith("/") && (await instanceCopier.namesLaterTerm(url)))
+      if (
+        !url.endsWith("/") &&
+        !isDraftDocumentOf(source, url) &&
+        (await instanceCopier.namesLaterTerm(url))
+      )
         throw new AppError("guestStudyTooNew");
     }
+  }
+  /** Whether `url` is a document of a draft of the instance at `source`, which a draft is read from and copied with. */
+  function isDraftDocumentOf(source: string, url: string): boolean {
+    const container = draftContainerOf(url);
+    return (
+      isDraftDocumentName(url.slice(container.length)) &&
+      draftPlaceOf(`${container}${RELEASE_DOCUMENT}`)?.instanceUrl === source
+    );
   }
   /**
    * The copy of a guest's deck or draft that a run from this device made

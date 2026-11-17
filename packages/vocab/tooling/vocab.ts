@@ -140,5 +140,19 @@ export function renderVocabConstants(vocab: Vocab): string {
     lines.push(`  ${term.name}: \`\${SM_NS}${term.name}\`,`);
   }
   lines.push("} as const;", "");
+  const conceptProperties = vocab.terms.filter(
+    (term) => term.kind === "property" && term.range === `${SKOS}Concept`,
+  );
+  lines.push(
+    "/**",
+    " * The properties whose values are concepts (`rdfs:range skos:Concept`):",
+    " * where an IRI of this vocabulary names a concept of one of its schemes,",
+    " * not any resource.",
+    " */",
+    "export const SM_CONCEPT_PROPERTIES: readonly string[] = [",
+    ...conceptProperties.map((term) => `  SM.${term.name},`),
+    "];",
+    "",
+  );
   return lines.join("\n");
 }

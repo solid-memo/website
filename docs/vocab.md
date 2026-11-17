@@ -40,7 +40,8 @@ flowchart LR
 
 `SM` in [vocab.ts](../packages/solid/src/vocab.ts) re-exports the
 generated constants, each with its term's comment and history note as
-JSDoc. The external vocabularies there
+JSDoc, and `SM_CONCEPT_PROPERTIES`, the properties whose range is
+`skos:Concept`. The external vocabularies there
 ([Solid terms](https://www.w3.org/ns/solid/terms),
 [PIM space](https://www.w3.org/ns/pim/space),
 [Dublin Core terms](https://www.dublincore.org/specifications/dublin-core/dcmi-terms/),

@@ -1152,7 +1152,10 @@ export interface InstanceCopier {
   namesIriAt(url: string, origin: string): Promise<boolean>;
   /**
    * Whether the document uses a term of Solid Memo's vocabulary that
-   * this app does not know, as a property, a class or a concept: data a
+   * this app does not know where only a term goes: as a property, as a
+   * subject's class, or as the value of a property whose values are
+   * concepts. An IRI of the vocabulary as the value of any other
+   * property is a resource like any other. Such a term is data a
    * later version of the app added (docs/vocab.md "Versioning policy"),
    * which this one would leave behind where it copies what it reads
    * rather than the document. A file that is not RDF uses none.

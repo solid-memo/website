@@ -254,6 +254,41 @@ describe("namesLaterTerm", () => {
     expect(await copier({ [url]: turtle(known) }).namesLaterTerm(url)).toBe(false);
   });
 
+  it("does not count an IRI of the vocabulary that a property takes as any resource", async () => {
+    const DCTERMS = "http://purl.org/dc/terms/";
+    const iri = `${SM_NS}laterTopic`;
+    for (const open of [
+      `${card} ; <${DCTERMS}subject> <${iri}> .`,
+      `${card} ; <${SM.fromRelease}> <${iri}> .`,
+      `${card} . <${iri}> <${OTHER}note> "x" .`,
+    ]) {
+      expect(await copier({ [url]: turtle(open) }).namesLaterTerm(url)).toBe(false);
+    }
+  });
+
+  it("does not count a card's subject that a release names in the vocabulary, once the card is in the guest's pod", async () => {
+    const { pod, decks } = app();
+    await decks.applyCardChanges(
+      target,
+      {
+        save: [
+          {
+            id: "one",
+            front: { en: "One" },
+            back: { sv: "Ett" },
+            subjects: [`${SM_NS}laterTopic`],
+            fromRelease: "https://library.example/v1.ttl",
+          },
+        ],
+        remove: [],
+      },
+      { whole: true },
+    );
+    expect(pod.triples(target.cardsDocumentUrl)!.join("\n")).toContain(`${SM_NS}laterTopic`);
+    const copier = createSolidInstanceCopier({ fetch: pod.fetch });
+    expect(await copier.namesLaterTerm(target.cardsDocumentUrl)).toBe(false);
+  });
+
   it("does not look at a file that is not Turtle, and fails when the resource cannot be read", async () => {
     const files = copier({
       [`${INSTANCE}a.png`]: { type: "image/png", body: `${SM_NS}later` },

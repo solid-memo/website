@@ -163,10 +163,18 @@ It runs these steps:
    (`guestStudyInvalid`), or that a newer app version wrote
    (`guestStudyTooNew`). Such a study has a subject in a newer format,
    or a document that uses a term of the vocabulary this version
-   doesn't know (`namesLaterTerm`). Adding writes what this version reads of
+   doesn't know (`namesLaterTerm`) where only a term goes. That's a
+   property, a subject's class, or the value of a property whose
+   values are concepts (`rdfs:range skos:Concept`, such as
+   `sm:scheduler`). An IRI of the vocabulary as the value of any other
+   property, such as a card's `dcterms:subject`, is a resource like any
+   other and doesn't count. Adding writes what this version reads of
    each deck, so what a later one said beside it would be left behind,
-   and go with the guest's study. Nor from a study with deck groups when a
-   newer version wrote the instance's
+   and go with the guest's study. A draft's documents aren't asked: a
+   draft is copied with what this version reads of it, which keeps
+   statements in terms it doesn't know, as a draft made from a release
+   keeps what the release states. Nor from a study with deck groups
+   when a newer version wrote the instance's
    [arrangement](data-model.md#deck-groups) (`deckTreeTooNew`), refused
    before any deck is written. Nor when the kept decks, but any an
    earlier run added, would give the instance more decks than its

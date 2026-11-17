@@ -1954,6 +1954,26 @@ describe("guests", () => {
       expect(deps.instanceRepository.deleteInstance).not.toHaveBeenCalled();
     });
 
+    it("mergeGuestStudy does not ask a document of the guest's drafts for a later term, which its copy keeps", async () => {
+      const { deps } = mergeDeps();
+      const draft = `${guestInstance.url}drafts/capitals/v2/`;
+      const other = `${guestInstance.url}drafts/capitals/v2/notes.ttl`;
+      vi.mocked(deps.instanceCopier.listResources).mockResolvedValue([
+        `${draft}release.ttl`,
+        `${draft}cards.ttl`,
+        `${draft}chapter-one.ttl`,
+        other,
+        `https://elsewhere.example/drafts/capitals/v2/release.ttl`,
+      ]);
+      vi.mocked(deps.instanceCopier.namesLaterTerm).mockResolvedValue(false);
+      await createUseCases(deps).mergeGuestStudy(session, guestInstance, target);
+      // Only what is no draft's document of the guest's study is asked.
+      expect(vi.mocked(deps.instanceCopier.namesLaterTerm).mock.calls).toEqual([
+        [other],
+        [`https://elsewhere.example/drafts/capitals/v2/release.ttl`],
+      ]);
+    });
+
     it("mergeGuestStudy adds nothing from a study whose log has as many months as are taken in", async () => {
       const { deps } = mergeDeps();
       const months = Array.from({ length: MAX_LOG_MONTHS }, (_, i) => `${1900 + i}-01`);
