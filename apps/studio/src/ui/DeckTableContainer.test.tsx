@@ -6,6 +6,7 @@ import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
+import type { Card } from "@solid-memo/domain/deck";
 import type { DeckTableView } from "@solid-memo/domain/deckTable";
 import type { DeckTree } from "@solid-memo/domain/deckTree";
 import type { LibraryDeck } from "@solid-memo/domain/library";
@@ -19,14 +20,18 @@ import { choose } from "../test/choose";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 import { answer, pick } from "../test/dialogs";
 import { shownText } from "../test/names";
+import { queryKeys } from "./queryKeys";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
 const languages = { url: `${instanceA.url}catalog.ttl#group-1`, title: { en: "Languages" } };
 
-function renderContainer(useCases: UseCases, view: DeckTableView = { filter: "" }) {
-  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(
+function renderContainer(
+  useCases: UseCases,
+  view: DeckTableView = { filter: "" },
+  queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } }),
+) {
+  const container = (view: DeckTableView) => (
     <QueryClientProvider client={queryClient}>
       <DeckTableContainer
         useCases={useCases}
@@ -47,8 +52,10 @@ function renderContainer(useCases: UseCases, view: DeckTableView = { filter: "" 
         deckHref={(deck) => `#/deck?deck=${deck.id}`}
         cardsHref={(deck) => `#/browse?deck=${deck.id}`}
       />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+  const rendered = render(container(view));
+  return { ...rendered, rerender: (next: DeckTableView) => rendered.rerender(container(next)) };
 }
 
 const cells = (row: HTMLElement) => within(row).getAllByRole("cell").map(shownText);
@@ -266,6 +273,52 @@ describe("DeckTableContainer", () => {
     );
     expect(screen.getByRole("checkbox", { name: "Select Deck 0" })).toBeDisabled();
     expect(walks).toBe(1);
+  });
+
+  it("counts the cards in use of a read once, for all the decks that share it, and again for a new read", async () => {
+    const decks = Array.from({ length: 30 }, (_, i) => ({
+      ...makeDeck(`deck-${i}`, { en: `Deck ${i}` }),
+      cardsDocumentUrl: `${instanceA.url}decks/shared.ttl`,
+    }));
+    let looks = 0;
+    // A card that counts each time it's asked whether it's retired.
+    const counted = (id: string, retired = false): Card => {
+      const card = makeCard(decks[0]!, id, retired);
+      return {
+        ...card,
+        get retired() {
+          looks += 1;
+          return card.retired;
+        },
+      } as Card;
+    };
+    const cards = [counted("a"), counted("b"), counted("c", true)];
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => decks),
+      listCards: vi.fn(async () => cards),
+    });
+    // The cards kept as read, so that their looks are the container's alone.
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false, structuralSharing: false } },
+    });
+    const { rerender } = renderContainer(useCases, { filter: "" }, queryClient);
+    const row = await screen.findByRole("row", { name: /Deck 29/ });
+    await waitFor(() => expect(cells(row).at(-1)).toBe("2 cards of Deck 29"));
+    expect(useCases.listCards).toHaveBeenCalledTimes(1);
+    // Typing in the filter renders the table again, and counts nothing again.
+    rerender({ filter: "Deck" });
+    rerender({ filter: "Deck 2" });
+    expect(screen.getByRole("row", { name: /Deck 29/ })).toBeInTheDocument();
+    expect(looks).toBe(cards.length);
+
+    // A new read of the document is counted once, and every row shows it.
+    const next = [counted("d"), counted("e"), counted("f"), counted("g", true)];
+    queryClient.setQueryData(queryKeys.cards(decks[0]!.cardsDocumentUrl), next);
+    await waitFor(() =>
+      expect(cells(screen.getByRole("row", { name: /Deck 29/ })).at(-1)).toBe("3 cards of Deck 29"),
+    );
+    expect(cells(screen.getByRole("row", { name: /Deck 2\b/ })).at(-1)).toBe("3 cards of Deck 2");
+    expect(looks).toBe(cards.length + next.length);
   });
 
   it("moves no deck into a group that a newer version arranged", async () => {

@@ -5,7 +5,7 @@
 import { useMemo, useState } from "preact/hooks";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { activeCards, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
+import { activeCards, type Card, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import { deckPreferences, type DeckPace } from "@solid-memo/domain/deckPace";
 import {
   groupsOfDecks,
@@ -35,6 +35,24 @@ type Bulk =
   | { kind: "pace"; decks: readonly Deck[]; pace: DeckPace }
   | { kind: "direction"; decks: readonly Deck[]; direction: DeckDirection }
   | { kind: "remove"; decks: readonly Deck[] };
+
+/**
+ * How many of a read of cards are in use, counted once for each read: the
+ * decks that share a cards document share its read, and so its count, and
+ * a render that brings no new read counts nothing again.
+ *
+ * A read of cards is immutable: its count is kept per array, so a change
+ * must come as a new read (a new array), never as an edit in place.
+ */
+const activeCounts = new WeakMap<readonly Card[], number>();
+function activeCount(cards: readonly Card[]): number {
+  let count = activeCounts.get(cards);
+  if (count === undefined) {
+    count = activeCards(cards).length;
+    activeCounts.set(cards, count);
+  }
+  return count;
+}
 
 /**
  * Home's data: the instance's decks as the user arranged them (the same
@@ -192,7 +210,7 @@ export function DeckTableContainer({
       deck,
       groups: groups.get(deck.url)!,
       figures: {
-        ...(cards.data === undefined ? {} : { cards: activeCards(cards.data).length }),
+        ...(cards.data === undefined ? {} : { cards: activeCount(cards.data) }),
         ...(counts.data === undefined
           ? {}
           : { due: counts.data.dueCount, new: counts.data.newCount }),
