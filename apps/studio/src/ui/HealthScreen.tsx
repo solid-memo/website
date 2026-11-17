@@ -30,6 +30,7 @@ import {
   unreadableReason,
   ViolationMessage,
 } from "@solid-memo/ui/ValidationScreen";
+import { bounded } from "./ReleaseLists";
 import { useScreenCommands } from "./shell/useScreenCommands";
 
 /** What can be repaired of what a check found, and the actions that repair it. */
@@ -50,7 +51,8 @@ type SubjectLink = (subjectUrl: string, documentUrl: string, path?: string) => C
  * `link` names it, and each document it could not read, then what
  * Solid Memo can repair (one button for all), and the subjects no
  * repair covers, each to remove once the user confirms (the container
- * asks).
+ * asks). A check can find any number of problems, so each list shows
+ * the first DATA_CHECK_LIMIT and says how many more there are.
  */
 function DataCheckSection({
   report,
@@ -65,28 +67,41 @@ function DataCheckSection({
 }) {
   const { t, severityLabel } = useI18n();
   const labels = repairLabels(t);
-  const results = report.documents.flatMap((document) =>
-    document.subjects.flatMap((subject) =>
-      subject.status === "checked" || subject.status === "profiled"
-        ? subject.violations
-            .filter((v) => v.severity !== "info")
-            .map((violation) => ({ subject: subject.url, document: document.url, violation }))
-        : [],
-    ),
-  );
-  // A document the check could not read: what it holds is not known, so it is named on its own.
-  const unreadable = report.documents.flatMap((document) =>
-    document.status === "unreadable" ? [document] : [],
+  const { results, unreadable } = useMemo(
+    () => ({
+      results: bounded(
+        report.documents.flatMap((document) =>
+          document.subjects.flatMap((subject) =>
+            subject.status === "checked" || subject.status === "profiled"
+              ? subject.violations
+                  .filter((v) => v.severity !== "info")
+                  .map((violation) => ({ subject: subject.url, document: document.url, violation }))
+              : [],
+          ),
+        ),
+        DATA_CHECK_LIMIT,
+      ),
+      // A document the check could not read: what it holds is not known, so it is named on its own.
+      unreadable: bounded(
+        report.documents.flatMap((document) =>
+          document.status === "unreadable" ? [document] : [],
+        ),
+        DATA_CHECK_LIMIT,
+      ),
+    }),
+    [report],
   );
   const { plan, busy } = repairs;
+  const repairable = bounded(plan.repairs, DATA_CHECK_LIMIT);
+  const unrepairable = bounded(plan.unrepairable, DATA_CHECK_LIMIT);
   return (
     <section aria-labelledby="health-data">
       <h3 id="health-data">{t("studio.health.dataHeading")}</h3>
       <p class="hint">{hint}</p>
       <p class={summaryClass(report)}>{summaryOf(report, t)}</p>
-      {results.length > 0 && (
+      {results.shown.length > 0 && (
         <ul class="studio-health-list">
-          {results.map(({ subject, document, violation }, index) => (
+          {results.shown.map(({ subject, document, violation }, index) => (
             <li key={index}>
               {link(subject, document, violation.path)}:{" "}
               <Result violation={violation} severity={severityLabel(violation.severity)} />
@@ -94,9 +109,10 @@ function DataCheckSection({
           ))}
         </ul>
       )}
-      {unreadable.length > 0 && (
+      <MoreProblems message="dataCheckLists.moreResults" count={results.more} />
+      {unreadable.shown.length > 0 && (
         <ul class="studio-health-list">
-          {unreadable.map((document) => (
+          {unreadable.shown.map((document) => (
             <li key={document.url}>
               <ExternalLink url={document.url} />:{" "}
               {t("validation.unreadable", { reason: unreadableReason(document.reason) })}
@@ -104,16 +120,18 @@ function DataCheckSection({
           ))}
         </ul>
       )}
+      <MoreProblems message="dataCheckLists.moreDocuments" count={unreadable.more} />
       {plan.repairs.length > 0 && (
         <>
           <p>{t("repair.canRepair")}</p>
           <ul>
-            {plan.repairs.map((repair) => (
+            {repairable.shown.map((repair) => (
               <li key={`${repair.kind} ${repair.subjectUrl}`}>
                 {labels[repair.kind]}: {link(repair.subjectUrl, repair.documentUrl)}
               </li>
             ))}
           </ul>
+          <MoreProblems message="dataCheckLists.moreRepairs" count={repairable.more} />
           <button class="primary" onClick={repairs.onRepair} disabled={busy}>
             {busy
               ? t("repair.repairing")
@@ -125,7 +143,7 @@ function DataCheckSection({
         <>
           <p>{t("studio.health.removeHint")}</p>
           <ul>
-            {plan.unrepairable.map((problem) => (
+            {unrepairable.shown.map((problem) => (
               <li key={problem.subjectUrl}>
                 {link(problem.subjectUrl, problem.documentUrl)}{" "}
                 <button
@@ -139,11 +157,31 @@ function DataCheckSection({
               </li>
             ))}
           </ul>
+          <MoreProblems message="dataCheckLists.moreProblems" count={unrepairable.more} />
         </>
       )}
       <ErrorMessage error={repairs.error} />
     </section>
   );
+}
+
+/** How many of a data check's lists DataCheckSection draws at most. */
+const DATA_CHECK_LIMIT = 50;
+
+/** How many more of a data check's list there are than DataCheckSection draws, if any. */
+function MoreProblems({
+  message,
+  count,
+}: {
+  message:
+    | "dataCheckLists.moreResults"
+    | "dataCheckLists.moreDocuments"
+    | "dataCheckLists.moreRepairs"
+    | "dataCheckLists.moreProblems";
+  count: number;
+}) {
+  const { t } = useI18n();
+  return count > 0 ? <p class="hint">{t(message, { count })}</p> : null;
 }
 
 /** One result of a check: its message, a warning saying so. */

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen } from "@testing-library/preact";
 import { createI18n, I18nProvider } from "./i18n";
 import { summaryOf, ValidationScreen } from "./ValidationScreen";
 import {
@@ -231,6 +231,92 @@ describe("ValidationScreen", () => {
     render(<ValidationScreen report={report} summary={false} />);
     expect(screen.queryByText("2 violations in 1 document.")).toBeNull();
     expect(screen.getByText("Not created yet.")).toBeInTheDocument();
+  });
+
+  it("lists the subjects and documents a page at a time, and starts again for a new report", () => {
+    const catalog = `${INSTANCE}catalog.ttl`;
+    const strays = Array.from({ length: 120 }, (_, index) => ({
+      url: `${catalog}#x${index}`,
+      status: "untyped" as const,
+    }));
+    const others = Array.from({ length: 50 }, (_, index) => ({
+      url: `${INSTANCE}x${index}.ttl`,
+      status: "missing" as const,
+      subjects: [],
+    }));
+    const large = summarize(INSTANCE, [
+      { url: catalog, status: "checked", subjects: strays },
+      ...others,
+    ]);
+    const { rerender } = render(<ValidationScreen report={large} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(50);
+    expect(
+      screen.getByText("And 120 more subjects or documents, not listed here.", { exact: false }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more" }));
+    expect(screen.getAllByRole("listitem")).toHaveLength(100);
+    fireEvent.click(screen.getByRole("button", { name: "Show 50 more" }));
+    expect(screen.getAllByRole("listitem")).toHaveLength(120);
+    expect(screen.getByText(`${INSTANCE}x29.ttl`, { exact: false })).toBeInTheDocument();
+    expect(screen.queryByText(`${INSTANCE}x30.ttl`, { exact: false })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Show 20 more" }));
+    expect(screen.getByText(`${INSTANCE}x49.ttl`, { exact: false })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Show/ })).toBeNull();
+    rerender(<ValidationScreen report={{ ...large }} />);
+    expect(screen.getAllByRole("listitem")).toHaveLength(50);
+  });
+
+  it("lists at most 50 results of a subject, and 50 subjects in all of what is wrong", () => {
+    const results = Array.from({ length: 60 }, (_, index) => ({
+      path: "http://purl.org/dc/terms/title",
+      message: { en: `Result ${index}` },
+      severity: "violation" as const,
+      constraint: "MinCount",
+    }));
+    const documents = Array.from({ length: 60 }, (_, index) => ({
+      url: `${INSTANCE}decks/deck-${index}.ttl`,
+      status: "checked" as const,
+      subjects: [
+        {
+          url: `${INSTANCE}decks/deck-${index}.ttl#it`,
+          status: "checked" as const,
+          shape: "deck" as const,
+          version: 3,
+          violations: results,
+        },
+      ],
+    }));
+    const { container } = render(
+      <ValidationScreen report={summarize(INSTANCE, documents)} problemsOnly />,
+    );
+    expect(screen.getAllByRole("listitem")).toHaveLength(50);
+    expect(container.querySelectorAll("tbody tr")).toHaveLength(50 * 50);
+    expect(
+      screen.getAllByText("And 10 more results, not listed here.", { exact: false }),
+    ).toHaveLength(50);
+    expect(
+      screen.getByText("And 10 more subjects or documents, not listed here.", { exact: false }),
+    ).toBeInTheDocument();
+  });
+
+  it("lists only what is wrong, for the data-check notice", () => {
+    const unread = `${INSTANCE}reviews/deck-1.ttl`;
+    render(
+      <ValidationScreen
+        report={{
+          ...report,
+          documents: [...report.documents, unreadableDocument(unread, "500")],
+        }}
+        problemsOnly
+      />,
+    );
+    expect(screen.queryByText("Not created yet.")).toBeNull();
+    expect(screen.queryByText("No subjects.")).toBeNull();
+    expect(screen.queryByText(`${INSTANCE}preferences.ttl`, { exact: false })).toBeNull();
+    const items = screen.getAllByRole("listitem").map((item) => item.textContent);
+    expect(items).toHaveLength(1);
+    expect(items[0]).toContain("deck format 2:");
+    expect(screen.getByText(unread, { exact: false })).toBeInTheDocument();
   });
 
   it("speaks Swedish", () => {

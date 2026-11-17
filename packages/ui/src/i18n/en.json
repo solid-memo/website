@@ -441,6 +441,33 @@
     "preferences": "Preferences",
     "repair": "Repair"
   },
+  "dataCheckLists": {
+    "problems": "The problems, document by document",
+    "moreDocuments": {
+      "one": "And {count} more document, not listed here.",
+      "other": "And {count} more documents, not listed here."
+    },
+    "moreEntries": {
+      "one": "And {count} more subject or document, not listed here.",
+      "other": "And {count} more subjects or documents, not listed here."
+    },
+    "moreResults": {
+      "one": "And {count} more result, not listed here.",
+      "other": "And {count} more results, not listed here."
+    },
+    "moreRepairs": {
+      "one": "And {count} more problem Solid Memo can repair, not listed here.",
+      "other": "And {count} more problems Solid Memo can repair, not listed here."
+    },
+    "moreProblems": {
+      "one": "And {count} more problem that needs your decision, not listed here.",
+      "other": "And {count} more problems that need your decision, not listed here."
+    },
+    "showMore": {
+      "one": "Show {count} more",
+      "other": "Show {count} more"
+    }
+  },
   "unclaimedDecks": {
     "region": "Decks to confirm",
     "heading": "Solid Memo changes nothing in these decks' documents unless they are marked as the decks' own.",
@@ -1488,7 +1515,6 @@
     "needDecision": "These need your decision: fix them in the document, or remove them.",
     "problem": "{subject} in {document}: {messages}",
     "removeButton": "Remove",
-    "fullReport": "The full report",
     "action": {
       "describeDeck": "Give the deck the default description",
       "directDeck": "Study the deck front to back",

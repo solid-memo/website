@@ -441,6 +441,33 @@
     "preferences": "Einstellungen",
     "repair": "Reparieren"
   },
+  "dataCheckLists": {
+    "problems": "Die Probleme, Dokument für Dokument",
+    "moreDocuments": {
+      "one": "Und {count} weiteres Dokument, das hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Dokumente, die hier nicht aufgeführt sind."
+    },
+    "moreEntries": {
+      "one": "Und {count} weiteres Subjekt oder Dokument, das hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Subjekte oder Dokumente, die hier nicht aufgeführt sind."
+    },
+    "moreResults": {
+      "one": "Und {count} weiteres Ergebnis, das hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Ergebnisse, die hier nicht aufgeführt sind."
+    },
+    "moreRepairs": {
+      "one": "Und {count} weiteres Problem, das Solid Memo reparieren kann, hier nicht aufgeführt.",
+      "other": "Und {count} weitere Probleme, die Solid Memo reparieren kann, hier nicht aufgeführt."
+    },
+    "moreProblems": {
+      "one": "Und {count} weiteres Problem, über das du entscheiden musst, hier nicht aufgeführt.",
+      "other": "Und {count} weitere Probleme, über die du entscheiden musst, hier nicht aufgeführt."
+    },
+    "showMore": {
+      "one": "{count} weiteres anzeigen",
+      "other": "{count} weitere anzeigen"
+    }
+  },
   "unclaimedDecks": {
     "region": "Zu bestätigende Stapel",
     "heading": "Solid Memo ändert nichts an den Dokumenten dieser Stapel, solange sie nicht als eigene Dokumente der Stapel markiert sind.",
@@ -1488,7 +1515,6 @@
     "needDecision": "Über diese musst du entscheiden: Korrigiere sie im Dokument oder entferne sie.",
     "problem": "{subject} in {document}: {messages}",
     "removeButton": "Entfernen",
-    "fullReport": "Vollständiger Bericht",
     "action": {
       "describeDeck": "Dem Stapel die Standardbeschreibung geben",
       "directDeck": "Den Stapel von der Vorderseite zur Rückseite lernen",

@@ -441,6 +441,33 @@
     "preferences": "Inställningar",
     "repair": "Reparera"
   },
+  "dataCheckLists": {
+    "problems": "Problemen, dokument för dokument",
+    "moreDocuments": {
+      "one": "Och {count} dokument till, som inte listas här.",
+      "other": "Och {count} dokument till, som inte listas här."
+    },
+    "moreEntries": {
+      "one": "Och {count} subjekt eller dokument till, som inte listas här.",
+      "other": "Och {count} subjekt eller dokument till, som inte listas här."
+    },
+    "moreResults": {
+      "one": "Och {count} resultat till, som inte listas här.",
+      "other": "Och {count} resultat till, som inte listas här."
+    },
+    "moreRepairs": {
+      "one": "Och {count} problem till som Solid Memo kan reparera, som inte listas här.",
+      "other": "Och {count} problem till som Solid Memo kan reparera, som inte listas här."
+    },
+    "moreProblems": {
+      "one": "Och {count} problem till som behöver ditt beslut, som inte listas här.",
+      "other": "Och {count} problem till som behöver ditt beslut, som inte listas här."
+    },
+    "showMore": {
+      "one": "Visa {count} till",
+      "other": "Visa {count} till"
+    }
+  },
   "unclaimedDecks": {
     "region": "Kortlekar att bekräfta",
     "heading": "Solid Memo ändrar inget i de här kortlekarnas dokument så länge de inte är markerade som kortlekarnas egna.",
@@ -1488,7 +1515,6 @@
     "needDecision": "De här behöver ditt beslut: rätta dem i dokumentet eller ta bort dem.",
     "problem": "{subject} i {document}: {messages}",
     "removeButton": "Ta bort",
-    "fullReport": "Hela rapporten",
     "action": {
       "describeDeck": "Ge kortleken standardbeskrivningen",
       "directDeck": "Studera kortleken från framsida till baksida",

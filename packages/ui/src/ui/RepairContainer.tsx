@@ -3,14 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import { Fragment } from "preact";
+import { useMemo } from "preact/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { RepairKind, Unrepairable } from "@solid-memo/domain/repair";
 import type { ValidationReport } from "@solid-memo/domain/validation";
+import { bounded } from "./bounded";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n, type I18n } from "./i18n";
+import { LazyDetails } from "./LazyDetails";
 import { summaryOf, ValidationScreen, ViolationMessage } from "./ValidationScreen";
 import { queryKeys } from "./queryKeys";
 
@@ -64,7 +67,10 @@ export function useRepairMutation(
  * What an instance check found, and the way out (see docs/validation.md):
  * one button repairs every problem with a safe answer; each problem left
  * is named, with its document linked, and can be removed — the user's
- * call, confirmed first. The full report is a click away.
+ * call, confirmed first. The report's problems are a click away, drawn
+ * only once opened. A check can find any number of problems, so each
+ * list shows the first LIST_LIMIT (bounded) and says how many more
+ * there are; the button repairs them all.
  */
 export function RepairContainer({
   useCases,
@@ -76,7 +82,7 @@ export function RepairContainer({
   report: ValidationReport;
 }) {
   const { t, tx, errorText } = useI18n();
-  const plan = useCases.planRepair(report);
+  const plan = useMemo(() => useCases.planRepair(report), [useCases, report]);
   const repairMutation = useRepairMutation(useCases, instance.url);
 
   function remove(problem: Unrepairable) {
@@ -92,21 +98,27 @@ export function RepairContainer({
     }
   }
 
+  const summary = useMemo(() => summaryOf(report, t), [report, t]);
   const busy = repairMutation.isPending;
   const labels = repairLabels(t);
+  const repairs = bounded(plan.repairs);
+  const unrepairable = bounded(plan.unrepairable);
   return (
     <div class="repair">
-      <p>{summaryOf(report, t)}</p>
+      <p>{summary}</p>
       {plan.repairs.length > 0 && (
         <>
           <p>{t("repair.canRepair")}</p>
           <ul>
-            {plan.repairs.map((repair) => (
+            {repairs.shown.map((repair) => (
               <li key={`${repair.kind} ${repair.subjectUrl}`}>
                 {labels[repair.kind]}: <ExternalLink url={repair.subjectUrl} />
               </li>
             ))}
           </ul>
+          {repairs.more > 0 && (
+            <p class="hint">{t("dataCheckLists.moreRepairs", { count: repairs.more })}</p>
+          )}
           <button
             class="primary"
             onClick={() => repairMutation.mutate(plan.repairs)}
@@ -122,17 +134,12 @@ export function RepairContainer({
         <>
           <p>{t("repair.needDecision")}</p>
           <ul>
-            {plan.unrepairable.map((problem) => (
+            {unrepairable.shown.map((problem) => (
               <li key={problem.subjectUrl}>
                 {tx("repair.problem", {
                   subject: <ExternalLink url={problem.subjectUrl} />,
                   document: <ExternalLink url={problem.documentUrl} />,
-                  messages: problem.violations.map((violation, index) => (
-                    <Fragment key={index}>
-                      {index > 0 && " "}
-                      <ViolationMessage violation={violation} />
-                    </Fragment>
-                  )),
+                  messages: <ProblemMessages problem={problem} />,
                 })}{" "}
                 <button class="danger" onClick={() => remove(problem)} disabled={busy}>
                   {t("repair.removeButton")}
@@ -140,13 +147,36 @@ export function RepairContainer({
               </li>
             ))}
           </ul>
+          {unrepairable.more > 0 && (
+            <p class="hint">{t("dataCheckLists.moreProblems", { count: unrepairable.more })}</p>
+          )}
         </>
       )}
       <ErrorMessage error={errorText(repairMutation.error)} />
-      <details>
-        <summary>{t("repair.fullReport")}</summary>
-        <ValidationScreen report={report} />
-      </details>
+      <LazyDetails summary={t("dataCheckLists.problems")}>
+        <ValidationScreen report={report} summary={false} problemsOnly />
+      </LazyDetails>
     </div>
+  );
+}
+
+/**
+ * What the check says about a problem no repair covers: a subject can
+ * have any number of results, so at most LIST_LIMIT of them (bounded),
+ * and how many more there are.
+ */
+function ProblemMessages({ problem }: { problem: Unrepairable }) {
+  const { t } = useI18n();
+  const { shown, more } = bounded(problem.violations);
+  return (
+    <>
+      {shown.map((violation, index) => (
+        <Fragment key={index}>
+          {index > 0 && " "}
+          <ViolationMessage violation={violation} />
+        </Fragment>
+      ))}
+      {more > 0 && ` ${t("dataCheckLists.moreResults", { count: more })}`}
+    </>
   );
 }

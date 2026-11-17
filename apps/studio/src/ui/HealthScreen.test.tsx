@@ -431,3 +431,53 @@ describe("InstanceHealthScreen", () => {
     expect(screenCommands()).toEqual({});
   });
 });
+
+describe("DataCheckSection", () => {
+  it("lists at most 50 of each of what a check found, saying how many more there are", () => {
+    const many = <T,>(count: number, make: (index: number) => T) =>
+      Array.from({ length: count }, (_, index) => make(index));
+    const catalog = `${instanceA.url}catalog.ttl`;
+    const subjects = many(51, (index) => `${catalog}#x${index}`);
+    render(
+      <WithCommands>
+        <InstanceHealthScreen
+          instance={instanceA}
+          report={summarize(instanceA.url, [
+            document(
+              catalog,
+              subjects.map((url) => checked(url, [missing])),
+            ),
+            ...many(52, (index) => unreadableDocument(`${instanceA.url}x${index}.ttl`, "500")),
+          ])}
+          decks={[]}
+          checking={false}
+          onCheck={vi.fn()}
+          repairs={actions({
+            plan: {
+              repairs: subjects.map((subjectUrl) => ({
+                kind: "describe-deck",
+                documentUrl: catalog,
+                subjectUrl,
+                version: 3,
+              })),
+              unrepairable: [...subjects, `${catalog}#y`, `${catalog}#z`].map((subjectUrl) => ({
+                documentUrl: catalog,
+                subjectUrl,
+                violations: [missing],
+              })),
+            },
+          })}
+          deckHref={() => "#"}
+          badge={() => null}
+        />
+      </WithCommands>,
+    );
+    const data = part("Data check");
+    expect(within(data).getAllByRole("listitem")).toHaveLength(200);
+    expect(data).toHaveTextContent("And 1 more result, not listed here.");
+    expect(data).toHaveTextContent("And 2 more documents, not listed here.");
+    expect(data).toHaveTextContent("And 1 more problem Solid Memo can repair, not listed here.");
+    expect(data).toHaveTextContent("And 3 more problems that need your decision, not listed here.");
+    expect(within(data).getByRole("button", { name: "Repair 51 problems" })).toBeInTheDocument();
+  });
+});

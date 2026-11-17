@@ -323,6 +323,12 @@ The summary line says "All 9 documents conform" or "3 violations
 in 2 documents". A subject is checked in its *stored* format, so outdated
 but valid data passes. The [format update](migrations.md) is separate.
 
+A document can hold any number of subjects, and a report any number of
+documents, so the report lists `LIST_LIMIT` (50) subjects and documents
+in all at a time ([`usePaged`](../packages/ui/src/ui/bounded.ts)). It
+says how many more there are, and shows more on request. A subject can have
+any number of results, so each lists at most `LIST_LIMIT` of them.
+
 ## The invalid data policy
 
 `validateInstance` runs when an instance is opened (`Workspace`, query
@@ -336,6 +342,17 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
 | Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice with the repair in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
 | Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's repaired, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
+
+The notice sits above every screen, so what it lists is bounded. Unless
+the policy blocks the instance, its repair is drawn only once the user
+opens it (`LazyDetails`). The repair is planned once per report. It
+lists at most `LIST_LIMIT` (50) of the problems it can repair and of
+those that need a decision, and of each one's results, saying how many
+more there are; the button repairs them all. Below them, the report's
+problems are drawn only once opened: the documents the check couldn't
+read and the subjects with results, never the conforming or untyped
+ones, paged as in the full report. The Studio's [health](studio.md#health) screen
+lists at most 50 of each of its data check's lists too.
 
 - **What fails is gathered once per report**: the screens ask about
   each deck on every render, so the failing subjects and documents,
