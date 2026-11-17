@@ -614,7 +614,11 @@ is a table with a row per deck. Its columns are:
   counts them (from the study digest when it's fresh);
 - when it last changed (`dcterms:modified`, else when it was made);
 - its cards, retired ones aside, a link to its cards in the
-  [workbench](#card-workbench).
+  [workbench](#card-workbench). They're counted once for each read of
+  the cards document: decks that share one share its count, and a
+  render that reads nothing new, a letter typed in the filter or a
+  move of the cursor, counts nothing again. So a read of cards
+  is never changed in place: a change comes as a new read.
 
 Beside a deck's name are its problems ([health](#health)), "3
 problems", a link to the deck's health, and for a copy with a newer
