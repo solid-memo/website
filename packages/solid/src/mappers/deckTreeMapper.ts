@@ -19,6 +19,7 @@ import {
 } from "@solid-memo/domain/deckGroupRecord";
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
+import { isSameDocument } from "@solid-memo/domain/subjectUrl";
 import { CATALOG_V1, DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import {
@@ -91,8 +92,9 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
  * catalog's `dcat:catalog` and the decks' `sm:position` are triples no
  * shape owns, written as they are. A member link to a node the layout
  * does not have is kept only when it names a dataset (or catalog) the
- * document says is one, or a node in another document; a link to what
- * is gone is dropped as its list is written. The removals are made at
+ * document says is one, or a node in another document (isSameDocument:
+ * the document's own URL is in it); a link to what is gone is dropped as
+ * its list is written. The removals are made at
  * once, and so are the subjects written (setThings): a subject at a
  * time would copy the whole document at each, in the square of the
  * groups and decks a rearrangement renumbers.
@@ -117,7 +119,7 @@ export function withTreeChanges(
   const catalogs = new Set([...typed(DCAT.Catalog), ...typed(SM.DeckGroup)]);
   /** The links to keep beside the layout's own: to what the document says is of that kind, or what is elsewhere. */
   const foreign = (links: readonly string[], kind: ReadonlySet<string>) =>
-    links.filter((url) => !known.has(url) && (kind.has(url) || !url.startsWith(`${catalogUrl}#`)));
+    links.filter((url) => !known.has(url) && (kind.has(url) || !isSameDocument(url, catalogUrl)));
 
   const rootUrl = `${catalogUrl}#catalog`;
   const root = getThing(dataset, rootUrl);

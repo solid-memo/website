@@ -16,6 +16,7 @@ import type { RepairRepository } from "@solid-memo/application/ports";
 import { defaultDeckDescription, defaultDeckDescriptionText } from "@solid-memo/domain/dcat";
 import type { Repair, RepairKind } from "@solid-memo/domain/repair";
 import { dueDayOfInstant } from "@solid-memo/domain/scheduling";
+import { isSameDocument } from "@solid-memo/domain/subjectUrl";
 import { boundedSm2State, INITIAL_SM2_STATE } from "@solid-memo/domain/sm2";
 import { type DatasetEdit, editOf } from "./datasetEdit";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
@@ -144,7 +145,7 @@ function repaired(dataset: Dataset, documentUrl: string, repairs: readonly Repai
       unlinked.add(repair.subjectUrl);
       foreign = null;
     } else if (repair.kind === "drop-dangling-members") {
-      edit.setThing(withoutDanglingMembers(current, foreignNow(), documentUrl, thing));
+      edit.setThing(withoutDanglingMembers(current, foreignNow(), thing));
     } else {
       edit.setThing(repairedThing(thing, { ...repair, kind: repair.kind }));
     }
@@ -208,15 +209,16 @@ function withoutLinks(
 
 /**
  * A catalog or deck group without its links to subjects of its own
- * document that the document does not describe as decks or groups. A
- * member in another document (a dataset another app listed) is described
- * there, and its link stays, as does one another app described in this
- * document, whatever its class.
+ * document that the document does not describe as decks or groups, the
+ * document's own URL among them: the members the data check holds to
+ * their class, by the same rule (isSameDocument). A member in another
+ * document (a dataset another app listed) is described there, and its
+ * link stays, as does one another app described in this document,
+ * whatever its class.
  */
 function withoutDanglingMembers(
   current: (url: string) => NamedSubject | null,
   foreign: ReadonlySet<string>,
-  documentUrl: string,
   thing: NamedSubject,
 ): NamedSubject {
   const describes = (url: string, types: string[]) => {
@@ -232,7 +234,7 @@ function withoutDanglingMembers(
       builder.setIriAll(
         link,
         getUrlAll(thing, link).filter(
-          (url) => !url.startsWith(`${documentUrl}#`) || describes(url, types),
+          (url) => !isSameDocument(url, thing.url) || describes(url, types),
         ),
       ),
     buildThing(thing),

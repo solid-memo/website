@@ -58,7 +58,7 @@ import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, isSameDocument } from "@solid-memo/domain/subjectUrl";
 import {
   AGENT_V1,
   ALL_SHAPES,
@@ -446,7 +446,7 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
   const foreign = foreignSubjects(dataset);
   const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
     (link) =>
-      documentUrlOf(link) !== documentUrl ||
+      !isSameDocument(link, documentUrl) ||
       isTyped(dataset, link, DCAT.Dataset) ||
       foreign.has(link),
   );

@@ -280,7 +280,12 @@ pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
   [write check](#the-write-check) alike (`isMemberElsewhere` in
   [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)).
   A member of the same document still must be a `dcat:Dataset` or
-  `dcat:Catalog`.
+  `dcat:Catalog`. A member is of the same document when its IRI without
+  the fragment is the document's, so the document's own IRI (`<>`)
+  counts as one (`isSameDocument` in
+  [subjectUrl.ts](../packages/domain/src/subjectUrl.ts)). The
+  drop-dangling-members repair, and writing the catalog or a deck
+  group, go by the same rule.
 - In a pod, DCAT-AP's result about a property Solid Memo doesn't
   write on one of its subjects is a warning, as another app's value
   ([below](#data-another-app-wrote)). So is its class check on a
@@ -481,8 +486,9 @@ sh:IRI`). Either way, the result about the link is a warning, in the
 check and the write check alike: the catalog still conforms, the
 arrangement stays editable, and no repair unlinks the member. The
 drop-dangling-members repair, and writing the catalog whole, keep such
-a link. A link to a subject of the document that nothing describes is
-still the catalog's own problem.
+a link. A link to a subject of the document that nothing describes,
+the document's own IRI among them, is still the catalog's own problem,
+which that repair removes.
 
 A value another app added to one of Solid Memo's subjects is that
 app's data as well. The writer keeps every value of a property the
@@ -604,7 +610,7 @@ written in the subject's own stored format:
 | A review state with half an undo snapshot (an SM-2 or an FSRS-6 state's) | The snapshot dropped (as the review-state 1 → 2 migration does), the four terms of an FSRS-6 state's or the five of an SM-2 state's |
 | A malformed due day | Recomputed from the last review and the bounded interval, or a long-past day, due at once, when those give no real day |
 | An agent without a name | Named after its IRI |
-| A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document doesn't describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
+| A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document doesn't describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped, a link to the document's own IRI among them (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
 | A date the app can't read (`DateTimeRange`) of a field the subject's shape and format make optional | Those dates dropped, every such date of the subject in one repair; a readable value of the same field, and every other field, are kept |
 | A review state's undo snapshot with a date the app can't read | The snapshot dropped, as for half a snapshot |
 
