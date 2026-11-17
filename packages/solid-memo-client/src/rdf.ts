@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DatasetCore, Literal, Quad, Quad_Object } from "@rdfjs/types";
+import type { DatasetCore, Literal, NamedNode, Quad, Quad_Object } from "@rdfjs/types";
 import { DataFactory, Store } from "n3";
 import type {
   Changes,
@@ -413,6 +413,17 @@ class Builder implements SubjectBuilder {
       (one) =>
         !(one.termType === "Literal" && one.datatype.value === datatype && removed.has(one.value)),
     );
+  }
+
+  addAll(values: ReadonlyMap<string, readonly (Literal | NamedNode)[]>): this {
+    // Each add is in place, so the whole takes time in the values.
+    for (const [property, terms] of values) {
+      for (const term of terms) {
+        if (term.termType === "Literal") this.addLiteral(property, term);
+        else this.addIri(property, term.value);
+      }
+    }
+    return this;
   }
 
   build(): NamedSubject {

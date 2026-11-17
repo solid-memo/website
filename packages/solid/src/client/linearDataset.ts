@@ -9,6 +9,7 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import type {
+  BlankNode,
   DatasetCore,
   Literal,
   Quad,
@@ -373,6 +374,32 @@ function addSubjectQuads(
       }
     }
   }
+}
+
+/**
+ * A property's literals as RDF/JS terms, language strings first, in the
+ * order the library's getLiteralAll gives them, but added one by one:
+ * the library joins the list so far to those of each language and
+ * datatype, which takes time in the square of how many of them a
+ * property has.
+ */
+export function literalsOf(objects: Objects | undefined): Literal[] {
+  const literals: Literal[] = [];
+  for (const [locale, values] of Object.entries(objects?.langStrings ?? {})) {
+    for (const value of values) literals.push(DataFactory.literal(value, locale));
+  }
+  for (const [dataType, values] of Object.entries(objects?.literals ?? {})) {
+    const type = DataFactory.namedNode(dataType);
+    for (const value of values) literals.push(DataFactory.literal(value, type));
+  }
+  return literals;
+}
+
+/** A property's blank nodes as RDF/JS terms, as the library's getTermAll gives them: one it holds nested with no label. */
+export function blankNodesOf(objects: Objects | undefined): BlankNode[] {
+  return (objects?.blankNodes ?? []).map((blankNode) =>
+    DataFactory.blankNode(typeof blankNode === "string" ? blankNode.slice(2) : undefined),
+  );
 }
 
 /** An RDF/JS dataset of quads, the kind the library's toRdfJsDataset gives. */

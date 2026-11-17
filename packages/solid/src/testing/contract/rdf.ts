@@ -78,9 +78,12 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     getDatetime,
     getDecimal,
     getLiteralAll,
+    getPropertyAll,
     getStringByLocaleAll,
     getInteger,
     getStringNoLocale,
+    getStringNoLocaleAll,
+    getTermAll,
     getThing,
     getThingAll,
     getUrlAll,
@@ -343,6 +346,111 @@ export function rdfContract({ rdf, resources }: DataClient): void {
           return () => buildThing(subject).setStringAll(P, strings).build();
         },
         100,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
+  describe("addAll", () => {
+    const P = `${EX}p`;
+    const Q = `${EX}q`;
+    const iri = (value: string) => ({ termType: "NamedNode", value }) as never;
+    const literal = (value: string, language = "") => text(value, language) as never;
+
+    it("add each property's values as the adds add them, and keep the subject's others", () => {
+      const subject = buildThing(createThing({ url: `${URL_}#a` }))
+        .addIri(P, `${EX}x`)
+        .addStringNoLocale(P, "plain")
+        .addStringWithLocale(P, "tagged", "en")
+        .addLiteral(P, integerLiteral(7))
+        .addStringNoLocale(`${EX}other`, "kept")
+        .build();
+      const added = buildThing(subject)
+        .addAll(
+          new Map([
+            [P, [iri(`${EX}y`), literal("more"), literal("again", "en"), literal("mer", "SV")]],
+            [Q, [integerLiteral(8) as never, iri(`${EX}z`)]],
+            [`${EX}none`, []],
+          ]),
+        )
+        .build();
+      expect(getUrlAll(added, P)).toEqual([`${EX}x`, `${EX}y`]);
+      expect(getStringNoLocaleAll(added, P)).toEqual(["plain", "more"]);
+      expect(getStringByLocaleAll(added, P)).toEqual(
+        new Map([
+          ["en", ["tagged", "again"]],
+          ["sv", ["mer"]],
+        ]),
+      );
+      expect(getInteger(added, P)).toBe(7);
+      expect(getInteger(added, Q)).toBe(8);
+      expect(getUrlAll(added, Q)).toEqual([`${EX}z`]);
+      expect(getStringNoLocale(added, `${EX}other`)).toBe("kept");
+      expect(getPropertyAll(added)).not.toContain(`${EX}none`);
+      expect(() => buildThing(subject).addAll(new Map([[P, [iri("not a URL")]]]))).toThrow();
+    });
+
+    it("keep a blank node the property has", async () => {
+      const subject = getThing(await read(), `${URL_}#a`)!;
+      const added = buildThing(subject)
+        .addAll(new Map([[`${EX}note`, [literal("more")]]]))
+        .build();
+      expect(getTermAll(added, `${EX}note`).map((term) => term.termType)).toEqual([
+        "Literal",
+        "BlankNode",
+      ]);
+    });
+
+    it("take time that grows with the properties and values, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const values = new Map(
+            Array.from({ length: count }, (_, i) => [
+              `${EX}p${i}`,
+              [literal(`v${i}`), literal(`v${i}`, "en"), iri(`${EX}v${i}`)],
+            ]),
+          );
+          values.set(
+            P,
+            Array.from({ length: count }, (_, i) => literal(`w${i}`)),
+          );
+          const subject = createThing({ url: `${URL_}#a` });
+          return () => buildThing(subject).addAll(values).build();
+        },
+        1000,
+        8,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
+  describe("getTermAll and getLiteralAll", () => {
+    const P = `${EX}p`;
+    const typed = (value: string, datatype: string) =>
+      ({
+        termType: "Literal",
+        value,
+        language: "",
+        datatype: { termType: "NamedNode", value: datatype },
+      }) as never;
+
+    it("take time that grows with a property's languages and datatypes, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const values = Array.from({ length: count }, (_, i) => [
+            text(`v${i}`, `en-x${i}`) as never,
+            typed(`v${i}`, `${EX}t${i}`),
+          ]).flat();
+          const subject = buildThing(createThing({ url: `${URL_}#a` }))
+            .addAll(new Map([[P, values]]))
+            .build();
+          return () => {
+            expect(getTermAll(subject, P)).toHaveLength(2 * count);
+            expect(getLiteralAll(subject, P)).toHaveLength(2 * count);
+          };
+        },
+        5000,
         8,
       );
       expect(ratio).toBeLessThan(4);

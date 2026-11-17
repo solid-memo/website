@@ -3,12 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import {
+  getLiteralAll as libraryGetLiteralAll,
+  getTermAll as libraryGetTermAll,
   removeThing as libraryRemoveThing,
   type SolidDataset,
   setThing as librarySetThing,
   toRdfJsDataset as libraryToRdfJsDataset,
 } from "@inrupt/solid-client";
-import type { Quad } from "@rdfjs/types";
+import type { Quad, Term } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import { rdfContract } from "../testing/contract/rdf";
 import type { Subject } from "./interface";
@@ -49,6 +51,37 @@ describe("propertiesOf, of the library's subjects", () => {
       },
       { predicate: `${EX}q`, values: [] },
     ]);
+  });
+});
+
+describe("getTermAll and getLiteralAll, beside the library's own", () => {
+  /** A term's parts, a blank node the library names afresh as `_:new`. */
+  const parts = (term: Term) =>
+    term.termType === "Literal"
+      ? [term.termType, term.value, term.language, term.direction ?? "", term.datatype.value]
+      : [term.termType, term.termType === "BlankNode" && term.value !== "b0" ? "new" : term.value];
+
+  it("give the library's terms, in its order, of every kind of value", () => {
+    const subject = {
+      type: "Subject",
+      url: `${URL_}#a`,
+      predicates: {
+        [`${EX}p`]: {
+          namedNodes: ["https://iri.example/x", "https://iri.example/y"],
+          literals: { [`${XSD}integer`]: ["42", "7"], [`${XSD}string`]: ["plain"] },
+          langStrings: { en: ["hello", "hi"], "ar--rtl": ["مرحبا"], sv: ["hej"] },
+          blankNodes: ["_:b0", { predicates: {} } as never],
+        },
+      },
+    } as Subject;
+    const ours = rdf.getTermAll(subject, `${EX}p`).map(parts);
+    expect(ours).toHaveLength(11);
+    expect(ours).toEqual(libraryGetTermAll(subject as never, `${EX}p`).map(parts));
+    expect(rdf.getLiteralAll(subject, `${EX}p`).map(parts)).toEqual(
+      libraryGetLiteralAll(subject as never, `${EX}p`).map(parts),
+    );
+    expect(rdf.getTermAll(subject, `${EX}none`)).toEqual([]);
+    expect(rdf.getLiteralAll(subject, `${EX}none`)).toEqual([]);
   });
 });
 

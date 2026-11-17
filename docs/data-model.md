@@ -2160,16 +2160,19 @@ by one.
   a time would copy the whole document at each, in time growing with the
   square of its subjects. A list of values of one subject, such as a
   card's distractors or the catalog's links to its decks, is set in one
-  call too (`setIriAll` and `setStringAll` of a subject's builder). An
-  add at each value would copy the list so far. The edit and its
-  save then take time that grows with the document.
+  call too (`setIriAll` and `setStringAll` of a subject's builder). So
+  is every value of a subject copied from another document (`addAll`),
+  read in one pass however many languages and datatypes they are in
+  (`getTermAll`). An add at each value would copy the list so far. The
+  edit and its save then take time that grows with the document.
 - A card moved or copied to another deck in the
   [Studio](studio.md#moving-and-copying-cards) takes with it what its
   subject says beyond what Solid Memo knows of a card: a term a later
   version of the app added, or another app's. So do its wrong options
   and the review states that go with it. The copy starts from the
-  source's subject (`carriedTo` in `records.ts`), then is written as
-  an edit in place writes one. Two links don't go, as they are the
+  source's subject (`carriedTo` in `records.ts`), all its values added
+  in one call, however many it has, then is written as an edit in
+  place writes one. Two links don't go, as they are the
   source deck's: the release the card came from and the wrong options
   it names there. A value that is a blank node stays behind, as what it
   says is in the source's document. A card a newer version of the app

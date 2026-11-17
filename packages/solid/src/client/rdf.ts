@@ -15,12 +15,11 @@ import {
   getDatetime as libraryGetDatetime,
   getDecimal as libraryGetDecimal,
   getInteger as libraryGetInteger,
-  getLiteralAll as libraryGetLiteralAll,
   getPropertyAll as libraryGetPropertyAll,
   getStringByLocaleAll as libraryGetStringByLocaleAll,
   getStringNoLocale as libraryGetStringNoLocale,
   getStringNoLocaleAll as libraryGetStringNoLocaleAll,
-  getTermAll as libraryGetTermAll,
+  getNamedNodeAll as libraryGetNamedNodeAll,
   getThing as libraryGetThing,
   getThingAll as libraryGetThingAll,
   getUrl as libraryGetUrl,
@@ -37,7 +36,7 @@ import {
   type WithChangeLog,
   type WithServerResourceInfo,
 } from "@inrupt/solid-client";
-import type { DatasetCore, Literal, Quad, Quad_Object } from "@rdfjs/types";
+import type { DatasetCore, Literal, NamedNode, Quad, Quad_Object } from "@rdfjs/types";
 import { likeDataset, solidDataset, thing } from "./inrupt";
 import type {
   Changes,
@@ -50,7 +49,14 @@ import type {
   Subject,
   SubjectBuilder,
 } from "./interface";
-import { graphsOf, LOCAL_NODE, quadsOfGraphs, rdfJsDatasetOf } from "./linearDataset";
+import {
+  blankNodesOf,
+  graphsOf,
+  LOCAL_NODE,
+  literalsOf,
+  quadsOfGraphs,
+  rdfJsDatasetOf,
+} from "./linearDataset";
 import { pathKeys } from "./readLimits";
 
 /**
@@ -390,9 +396,10 @@ export function createThing(options?: { url: string } | { name?: string }): Name
 /**
  * A builder of a subject's triples, starting from what `subject` says.
  * Each call is the library's own (its buildThing makes the same calls),
- * but setIriAll, setStringAll and removeLiteralAll, which it has none of: there the
- * property's values are made once, where the library's adds copy them
- * at every value. The library takes its own subjects as values, which
+ * but setIriAll, setStringAll, removeLiteralAll and addAll, which it has
+ * none of: there the property's values, and for addAll the subject's
+ * properties, are made once, where the library's adds copy them at
+ * every value. The library takes its own subjects as values, which
  * every subject here is (inrupt.ts).
  */
 export function buildThing(subject: Subject): SubjectBuilder {
@@ -548,9 +555,74 @@ class Builder implements SubjectBuilder {
     }));
   }
 
+  addAll(values: ReadonlyMap<string, readonly (Literal | NamedNode)[]>): this {
+    const predicates = new Map(Object.entries(this.#thing.predicates));
+    for (const [property, terms] of values) {
+      if (terms.length === 0) continue;
+      const lists = listsOf(predicates.get(property));
+      // Each as the library's add writes it, to a subject with nothing
+      // said of it, so that it costs the same however many came before.
+      for (const term of terms) {
+        const written =
+          term.termType === "Literal"
+            ? libraryAddLiteral(PROBE, property, term)
+            : libraryAddUrl(PROBE, property, term.value);
+        addTo(lists, written.predicates[property]);
+      }
+      predicates.set(property, predicateOf(lists));
+    }
+    return this.#with((subject) =>
+      Object.freeze({ ...subject, predicates: Object.freeze(Object.fromEntries(predicates)) }),
+    );
+  }
+
   build(): NamedSubject {
     return this.#thing as ThingPersisted;
   }
+}
+
+/** A property's values as addAll gathers them, in lists it adds to in place. */
+interface Lists {
+  namedNodes: string[];
+  literals: Map<string, string[]>;
+  langStrings: Map<string, string[]>;
+  blankNodes: Predicate["blankNodes"];
+}
+
+function listsOf(predicate: Predicate = {}): Lists {
+  const copied = (values: Readonly<Record<string, readonly string[]>> = {}) =>
+    new Map(Object.entries(values).map(([key, list]) => [key, [...list]]));
+  return {
+    namedNodes: [...(predicate.namedNodes ?? [])],
+    literals: copied(predicate.literals),
+    langStrings: copied(predicate.langStrings),
+    blankNodes: predicate.blankNodes,
+  };
+}
+
+/** One value, as the library writes it for a property, added to the lists. */
+function addTo(lists: Lists, written: Predicate): void {
+  for (const iri of written.namedNodes ?? []) lists.namedNodes.push(iri);
+  for (const [kind, values] of [
+    [lists.literals, written.literals],
+    [lists.langStrings, written.langStrings],
+  ] as const) {
+    for (const [key, list] of Object.entries(values ?? {})) {
+      const kept = kind.get(key);
+      if (kept === undefined) kind.set(key, [...list]);
+      else for (const value of list) kept.push(value);
+    }
+  }
+}
+
+/** The lists as a property's values, as the library holds them. */
+function predicateOf({ namedNodes, literals, langStrings, blankNodes }: Lists): Predicate {
+  return {
+    ...(namedNodes.length > 0 ? { namedNodes } : {}),
+    ...(literals.size > 0 ? { literals: Object.fromEntries(literals) } : {}),
+    ...(langStrings.size > 0 ? { langStrings: Object.fromEntries(langStrings) } : {}),
+    ...(blankNodes === undefined ? {} : { blankNodes }),
+  };
 }
 
 /** A value as the library takes it: an IRI, or one of its own subjects. */
@@ -619,14 +691,26 @@ export function getDatetime(subject: Subject, property: string): Date | null {
   return libraryGetDatetime(thing(subject), property);
 }
 
-/** Every literal the subject has for the property, language tags in lower case. */
+/**
+ * Every literal the subject has for the property, language tags in
+ * lower case, as the library gives them, in one pass (literalsOf).
+ */
 export function getLiteralAll(subject: Subject, property: string): Literal[] {
-  return libraryGetLiteralAll(thing(subject), property);
+  return literalsOf(thing(subject).predicates[property]);
 }
 
-/** Every value the subject has for the property, as RDF/JS terms. */
+/**
+ * Every value the subject has for the property, as RDF/JS terms: IRIs,
+ * then literals, then blank nodes, as the library gives them, in one
+ * pass (literalsOf).
+ */
 export function getTermAll(subject: Subject, property: string): Quad_Object[] {
-  return libraryGetTermAll(thing(subject), property);
+  const objects = thing(subject).predicates[property];
+  return [
+    ...libraryGetNamedNodeAll(thing(subject), property),
+    ...literalsOf(objects),
+    ...blankNodesOf(objects),
+  ];
 }
 
 /** Every property the subject has a value for. */

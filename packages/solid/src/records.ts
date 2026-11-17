@@ -29,7 +29,7 @@ import {
 } from "./client/rdf";
 import type { DatasetEdit } from "./datasetEdit";
 import { isTermTooLong } from "./client/readLimits";
-import type { Literal, Term } from "@rdfjs/types";
+import type { Literal, NamedNode, Quad_Object, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,
   type LangText,
@@ -562,16 +562,19 @@ export function carriedTo(
   url: string,
   without: readonly string[] = [],
 ): NamedSubject {
-  const builder = buildThing(createThing({ url }));
+  // Every value gathered first and added in one call (addAll), as an
+  // add at each value takes time in the square of the subject's values.
+  const values = new Map<string, (Literal | NamedNode)[]>();
   for (const predicate of getPropertyAll(source)) {
     if (without.includes(predicate)) continue;
-    for (const term of getTermAll(source, predicate)) {
-      if (term.termType === "Literal") builder.addLiteral(predicate, term);
-      else if (term.termType === "NamedNode" && URL.canParse(term.value))
-        builder.addIri(predicate, term.value);
-    }
+    values.set(predicate, getTermAll(source, predicate).filter(isCarried));
   }
-  return builder.build();
+  return buildThing(createThing({ url })).addAll(values).build();
+}
+
+/** Whether carriedTo carries a value: a literal, or an IRI that is a URL. */
+function isCarried(term: Quad_Object): term is Literal | NamedNode {
+  return term.termType === "Literal" || (term.termType === "NamedNode" && URL.canParse(term.value));
 }
 
 /**

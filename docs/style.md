@@ -117,7 +117,11 @@ With `verbatimModuleSyntax`, a type is imported with `import type` or
   call at a time copies the whole document every time. A subject's
   many values for one property are set in one call of its builder
   (`setIriAll`, `setStringAll`), not an add or a remove at each, which
-  copies the values so far.
+  copies the values so far. Values of many properties read from a
+  document are added in one call too (`addAll`), as an add at each
+  copies the subject's properties so far. A property's values are
+  read in one pass (`getTermAll`), not joined to the list so far at
+  each language or datatype.
 - **Avoid `any`**, and use a non-null assertion (`!`) only where the code
   has checked the value right before, or in a test.
 - **Tests** sit beside their module, as `name.test.ts`, and keep every
