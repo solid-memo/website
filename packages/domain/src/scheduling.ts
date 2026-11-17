@@ -5,6 +5,8 @@
 import { activeCards, promptsOf, type Card, type DeckDirection, type Prompt } from "./deck";
 import type { StudyPreferences } from "./preferences";
 import {
+  FSRS_REVIEW_STATE_FORMAT_VERSION,
+  REVIEW_STATE_FORMAT_VERSION,
   reviewKeyOf,
   type DueState,
   type FsrsState,
@@ -246,6 +248,11 @@ export interface StudyDayReset {
  * is not a real date or its last review is outside the years a grade
  * carries over) cannot be restored; it is made due today instead, so
  * it can at least be studied again.
+ *
+ * A state a newer version of the app wrote (its format above the one
+ * this app writes) is left out: it stays as that version wrote it, as
+ * this app never changes or removes newer data (docs/migrations.md),
+ * and the other cards' reset goes ahead without it.
  */
 export function resetStudyDay(
   reviews: ReviewState[],
@@ -257,6 +264,7 @@ export function resetStudyDay(
 
   const reset: StudyDayReset = { restore: [], remove: [] };
   for (const review of reviews) {
+    if (review.formatVersion > REVIEW_STATE_FORMAT_VERSION) continue;
     if (!isToday(review.lastReviewedAt)) continue;
     if (isToday(review.firstReviewedAt)) {
       reset.remove.push({ cardId: review.cardId, direction: review.direction });
@@ -285,7 +293,8 @@ export interface FsrsStudyDayReset {
  * snapshot. One introduced today goes, as its SM-2 state does; so does
  * one without a snapshot (first written today from an estimate), or
  * with one boundedFsrsSnapshot drops, which the next review estimates
- * again from the SM-2 state restored.
+ * again from the SM-2 state restored. A state a newer version of the
+ * app wrote is left out, as resetStudyDay leaves out an SM-2 one.
  */
 export function resetFsrsStudyDay(
   states: readonly FsrsState[],
@@ -296,6 +305,7 @@ export function resetFsrsStudyDay(
   const isToday = (instant: string) => studyDayOf(new Date(instant), dayBoundaryHour) === today;
   const reset: FsrsStudyDayReset = { restore: [], remove: [] };
   for (const state of states) {
+    if (state.formatVersion > FSRS_REVIEW_STATE_FORMAT_VERSION) continue;
     if (!isToday(state.lastReviewedAt)) continue;
     const { previous, ...rest } = state;
     const snapshot = previous && boundedFsrsSnapshot(previous);

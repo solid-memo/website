@@ -1034,7 +1034,9 @@ graph LR
     direction it undoes; a second state of the same stays, and is read
     from then on. FSRS-6's states of the day go back in the same save:
     restored to their snapshot, or removed when introduced that day or
-    without one ([srs.md](srs.md#resetting-the-day)).
+    without one ([srs.md](srs.md#resetting-the-day)). A state a newer
+    version wrote is left as it is, and the others still go back
+    ([migrations.md](migrations.md#versions)).
 
   Card edits and review updates never touch each other's documents.
 - Cards and reviews documents are created lazily on first write. Deck
