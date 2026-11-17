@@ -309,6 +309,21 @@
       "one": "Choisie {count} fois",
       "many": "Choisie {count} de fois",
       "other": "Choisie {count} fois"
+    },
+    "earlier": {
+      "one": "{count} mauvaise réponse précédente, qui n’apparaît pas ici.",
+      "many": "{count} de mauvaises réponses précédentes, qui n’apparaissent pas ici.",
+      "other": "{count} mauvaises réponses précédentes, qui n’apparaissent pas ici."
+    },
+    "more": {
+      "one": "Et {count} autre mauvaise réponse, qui n’apparaît pas ici.",
+      "many": "Et {count} de mauvaises réponses de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres mauvaises réponses, qui n’apparaissent pas ici."
+    },
+    "moreIssues": {
+      "one": "Et {count} autre point à vérifier, qui n’apparaît pas ici.",
+      "many": "Et {count} de points de plus à vérifier, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres points à vérifier, qui n’apparaissent pas ici."
     }
   },
   "cardCreator": {
@@ -2363,5 +2378,17 @@
     "reading": "Lecture et vérification de la publication…",
     "notLibrary": "Ce contenu ne fait pas partie de la bibliothèque de Solid Memo : il est publié sur {host}. Solid Memo a vérifié qu’il pouvait le lire, pas ce qu’il dit. Votre copie garde en mémoire sa provenance, et rien n’est écrit là-bas.",
     "picturesHidden": "Les images de ses cartes restent masquées jusqu'à ce que vous choisissiez de les afficher, car chaque image est une requête au serveur qui l'héberge."
+  },
+  "courseChapters": {
+    "earlier": {
+      "one": "{count} chapitre précédent, qui n’apparaît pas ici.",
+      "many": "{count} de chapitres précédents, qui n’apparaissent pas ici.",
+      "other": "{count} chapitres précédents, qui n’apparaissent pas ici."
+    },
+    "more": {
+      "one": "Et {count} autre chapitre, qui n’apparaît pas ici.",
+      "many": "Et {count} de chapitres de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres chapitres, qui n’apparaissent pas ici."
+    }
   }
 }

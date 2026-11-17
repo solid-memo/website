@@ -517,6 +517,33 @@ describe("multiple-choice questions", () => {
     ]);
   });
 
+  it("offer the back and at most five distractors in use, however many the card has", () => {
+    const many: CardContent = {
+      ...card,
+      distractors: [
+        { id: "retired", text: { en: "Retired" }, retired: true },
+        ...Array.from({ length: 20_000 }, (_, at) => ({
+          id: `d${at}`,
+          text: { en: `Wrong ${at}` },
+        })),
+      ],
+    };
+    const choices = choicesOf(many, Math.random);
+    expect(choices).toHaveLength(6);
+    expect(choices.filter((choice) => choice.correct)).toHaveLength(1);
+    expect(new Set(choices.map((choice) => choice.key)).size).toBe(6);
+    expect(choices.map((choice) => choice.key)).not.toContain("distractor:retired");
+    // The options picked come from the random source, as their order does.
+    expect(choicesOf(many, last).map((choice) => choice.key)).toEqual([
+      "back",
+      "distractor:d0",
+      "distractor:d1",
+      "distractor:d2",
+      "distractor:d3",
+      "distractor:d4",
+    ]);
+  });
+
   it("offer only the back of a card without distractors", () => {
     expect(choicesOf({ front: { en: "Q" }, back: { en: "A" } }, first)).toEqual([
       { key: "back", text: { en: "A" }, correct: true },

@@ -91,6 +91,9 @@ and, under them, the card's **wrong options**. These are the other answers of a
   One the deck's library release published is only ever retired.
 - Hints under the options point out too few options for a course,
   and an option whose languages don't match the back's.
+- A course release can give a card any number of wrong options, so the
+  list shows at most `LIST_LIMIT` (50) of them, and the hints at most
+  50 too, each with a line for how many more there are.
 
 Save writes the card and its wrong options at once. "Remove card" asks
 first, then returns to the Browser. An unknown card falls back to the

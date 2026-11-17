@@ -354,12 +354,28 @@ export interface Choice {
   note?: LangText;
 }
 
-/** The options a card is asked with: its back and each of its distractors in use (a retired one is never offered), shuffled by `random`. */
+/**
+ * How many wrong options a question offers at most. A release can give a
+ * card any number of distractors, and every option offered is drawn;
+ * this is well above the three a course of the library gives each.
+ */
+const MAX_OFFERED_DISTRACTORS = 5;
+
+/**
+ * The options a card is asked with: its back and each of its distractors
+ * in use (a retired one is never offered), shuffled by `random`. Of more
+ * than MAX_OFFERED_DISTRACTORS in use, as many are picked by `random`.
+ */
 export function choicesOf(card: CardContent, random: () => number): Choice[] {
+  const inUse = activeCards(card.distractors ?? []);
+  const offered =
+    inUse.length > MAX_OFFERED_DISTRACTORS
+      ? shuffle(inUse, random).slice(0, MAX_OFFERED_DISTRACTORS)
+      : inUse;
   return shuffle(
     [
       { key: "back", text: card.back, correct: true },
-      ...activeCards(card.distractors ?? []).map(
+      ...offered.map(
         (distractor): Choice => ({
           key: `distractor:${distractor.id}`,
           text: distractor.text,

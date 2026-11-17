@@ -10,6 +10,7 @@ import type { ChapterState } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Quiz } from "@solid-memo/domain/statistics";
+import { boundedAround } from "./bounded";
 import { useCopies } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
@@ -21,8 +22,10 @@ import { queryKeys } from "./queryKeys";
  * How the learner's courses have gone: each course, a link to its page,
  * with its chapters completed out of all, and a table of its chapters,
  * where each stands and its graded course answers of the last twelve
- * study months, the share right with the count it is of. Nothing without
- * a course.
+ * study months, the share right with the count it is of. A release can
+ * state any number of chapters, so a table has at most LIST_LIMIT rows,
+ * around the chapter to go on with (boundedAround), and says how many
+ * chapters come before and after them. Nothing without a course.
  */
 export function CourseStatisticsView({
   instanceUrl,
@@ -60,6 +63,10 @@ function CourseResults({ course, href }: { course: CourseStatistics; href: strin
     answers === 0
       ? "–"
       : t("statistics.quizShare", { percent: formatPercent(right / answers), count: answers });
+  const { shown, start, more } = boundedAround(
+    chapters,
+    chapters.findIndex((chapter) => chapter.state === "open"),
+  );
   return (
     <>
       <h4 id={headingId}>
@@ -69,6 +76,7 @@ function CourseResults({ course, href }: { course: CourseStatistics; href: strin
       </h4>
       <p class="hint">{t("course.chaptersDone", { done, count: chapters.length })}</p>
       <progress value={done} max={chapters.length} aria-labelledby={headingId} />
+      {start > 0 && <p class="hint">{t("courseChapters.earlier", { count: start })}</p>}
       {/* A chapter's title can be long: the table scrolls on a phone, the titles kept in view. */}
       <div class="table-scroll" role="region" aria-labelledby={headingId} tabIndex={0}>
         <table class="deck-statistics">
@@ -80,7 +88,7 @@ function CourseResults({ course, href }: { course: CourseStatistics; href: strin
             </tr>
           </thead>
           <tbody>
-            {chapters.map((chapter) => (
+            {shown.map((chapter) => (
               <tr key={chapter.url}>
                 <th scope="row">
                   <ReaderText text={chapter.title} />
@@ -92,6 +100,7 @@ function CourseResults({ course, href }: { course: CourseStatistics; href: strin
           </tbody>
         </table>
       </div>
+      {more > 0 && <p class="hint">{t("courseChapters.more", { count: more })}</p>}
     </>
   );
 }

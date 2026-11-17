@@ -304,6 +304,18 @@
     "picks": {
       "one": "{count}-mal gewählt",
       "other": "{count}-mal gewählt"
+    },
+    "earlier": {
+      "one": "{count} frühere falsche Antwortmöglichkeit, die hier nicht aufgeführt ist.",
+      "other": "{count} frühere falsche Antwortmöglichkeiten, die hier nicht aufgeführt sind."
+    },
+    "more": {
+      "one": "Und {count} weitere falsche Antwortmöglichkeit, die hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere falsche Antwortmöglichkeiten, die hier nicht aufgeführt sind."
+    },
+    "moreIssues": {
+      "one": "Und {count} weiterer Punkt, der einen Blick wert ist und hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Punkte, die einen Blick wert sind und hier nicht aufgeführt sind."
     }
   },
   "cardCreator": {
@@ -2238,5 +2250,15 @@
     "reading": "Die Ausgabe wird gelesen und geprüft…",
     "notLibrary": "Das ist nicht in der Bibliothek von Solid Memo: Es ist auf {host} veröffentlicht. Solid Memo hat geprüft, dass es sich lesen lässt, nicht was darin steht. Deine Kopie merkt sich, woher sie stammt, und dort wird nichts geschrieben.",
     "picturesHidden": "Bilder auf den Karten bleiben ausgeblendet, bis du sie anzeigen lässt, denn jedes Bild ist eine Anfrage an den Server, auf dem es liegt."
+  },
+  "courseChapters": {
+    "earlier": {
+      "one": "{count} früheres Kapitel, das hier nicht aufgeführt ist.",
+      "other": "{count} frühere Kapitel, die hier nicht aufgeführt sind."
+    },
+    "more": {
+      "one": "Und {count} weiteres Kapitel, das hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Kapitel, die hier nicht aufgeführt sind."
+    }
   }
 }

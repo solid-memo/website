@@ -5,6 +5,7 @@
 import type { ComponentChildren } from "preact";
 import type { CourseChapter } from "@solid-memo/domain/course";
 import { isMarkdown } from "@solid-memo/domain/deck";
+import { bounded } from "./bounded";
 import { DataText } from "./DataText";
 import { useI18n } from "./i18n";
 import { CourseText } from "./ReaderText";
@@ -12,9 +13,10 @@ import { CourseText } from "./ReaderText";
 /**
  * A try of a library course before adding it: its chapters, each title
  * a link to that chapter, with its description and how many steps it
- * has; or, once one is opened, that chapter (`children`, the chapter
- * player) under a link back to the chapters. Nothing is recorded, as
- * the hint above says.
+ * has, the first LIST_LIMIT of them and how many more there are
+ * (bounded), as a release can state any number; or, once one is opened,
+ * that chapter (`children`, the chapter player) under a link back to the
+ * chapters. Nothing is recorded, as the hint above says.
  */
 export function CoursePreviewScreen({
   courseName,
@@ -39,6 +41,7 @@ export function CoursePreviewScreen({
   onExit: () => void;
 }) {
   const { t, tx } = useI18n();
+  const { shown, more } = bounded(chapters);
   return (
     <section class="course-preview">
       <header>
@@ -59,27 +62,30 @@ export function CoursePreviewScreen({
         <>
           <p class="hint">{t("coursePreview.hint")}</p>
           {children === undefined ? (
-            <ol class="course-chapters">
-              {chapters.map((chapter, index) => (
-                <li key={chapter.url} class="course-chapter">
-                  <h3>
-                    <span class="course-chapter-number">
-                      {t("course.chapterNumber", { number: index + 1 })}
-                    </span>{" "}
-                    <a href={chapterHref(chapter)}>
-                      <CourseText text={chapter.title} />
-                    </a>
-                  </h3>
-                  {chapter.description !== undefined && (
-                    <DataText
-                      text={chapter.description}
-                      markdown={isMarkdown(chapter.textFormat)}
-                    />
-                  )}
-                  <p class="hint">{t("coursePreview.steps", { count: chapter.steps.length })}</p>
-                </li>
-              ))}
-            </ol>
+            <>
+              <ol class="course-chapters">
+                {shown.map((chapter, index) => (
+                  <li key={chapter.url} class="course-chapter">
+                    <h3>
+                      <span class="course-chapter-number">
+                        {t("course.chapterNumber", { number: index + 1 })}
+                      </span>{" "}
+                      <a href={chapterHref(chapter)}>
+                        <CourseText text={chapter.title} />
+                      </a>
+                    </h3>
+                    {chapter.description !== undefined && (
+                      <DataText
+                        text={chapter.description}
+                        markdown={isMarkdown(chapter.textFormat)}
+                      />
+                    )}
+                    <p class="hint">{t("coursePreview.steps", { count: chapter.steps.length })}</p>
+                  </li>
+                ))}
+              </ol>
+              {more > 0 && <p class="hint">{t("courseChapters.more", { count: more })}</p>}
+            </>
           ) : (
             <>
               <p>

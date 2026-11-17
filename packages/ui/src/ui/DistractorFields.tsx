@@ -19,6 +19,7 @@ import { shownTag, type LangText } from "@solid-memo/domain/langText";
 import type { MdPhrase } from "@solid-memo/markdown/parse";
 import { OPTION, PROSE } from "@solid-memo/markdown/problems";
 import { useAskFirst } from "./askFirst";
+import { bounded, boundedAround } from "./bounded";
 import { useCardText } from "./cardLanguage";
 import { DataLine, plainDataText } from "./DataText";
 import { ErrorMessage } from "./ErrorMessage";
@@ -73,10 +74,14 @@ interface Editing {
  * deck is its user's. With `picks`, each option says how often a learner
  * chose it, as the answer log tells.
  *
- * A card may have thousands of options. Each one's Markdown is parsed once
- * for as long as the card is shown (optionPhrases), and writing an option,
- * or anything else that draws this list again, draws again only the options
- * that change (OptionRow).
+ * A card may have thousands of options, as a course release may give a
+ * card a learner answers. The list shows at most LIST_LIMIT of them, from
+ * the first or around the one the screen was opened at (boundedAround),
+ * and says how many come before and after them; so do the issues under it
+ * (bounded). Each one's Markdown is parsed once for as long as the card is
+ * shown (optionPhrases), and writing an option, or anything else that
+ * draws this list again, draws again only the options that change
+ * (OptionRow).
  */
 export function DistractorFields({
   cardId,
@@ -278,6 +283,13 @@ export function DistractorFields({
     return distractorIssues({ back, distractors }, "pod").flatMap(issueText);
   }, [back, distractors, t, languageLabel, cardText, markdown]);
 
+  const arrivalAt = useMemo(
+    () => (arrival === undefined ? -1 : distractors.findIndex(({ id }) => id === arrival)),
+    [distractors, arrival],
+  );
+  const listed = boundedAround(distractors, arrivalAt);
+  const shownIssues = bounded(issues);
+
   const editor = (state: Editing) => (
     <div class="distractor-editor" onKeyDown={onKeyDown}>
       <LangTextField
@@ -345,36 +357,47 @@ export function DistractorFields({
       {distractors.length === 0 ? (
         <p class="hint">{t("distractorFields.none")}</p>
       ) : (
-        <ul class="distractor-list" aria-describedby="distractor-fields-hint">
-          {distractors.map((distractor, at) =>
-            editing?.id === distractor.id ? (
-              <li key={distractor.id}>{editor(editing)}</li>
-            ) : (
-              <OptionRow
-                key={distractor.id}
-                distractor={distractor}
-                at={at}
-                markdown={markdown}
-                phrasesOf={phrasesOf}
-                busy={busy}
-                editingAny={editing !== null}
-                picked={picks === undefined ? undefined : (picks.get(distractor.id) ?? 0)}
-                arrival={distractor.id === arrival}
-                actions={actions}
-              />
-            ),
+        <>
+          {listed.start > 0 && (
+            <p class="hint">{t("distractorFields.earlier", { count: listed.start })}</p>
           )}
-        </ul>
+          <ul class="distractor-list" aria-describedby="distractor-fields-hint">
+            {listed.shown.map((distractor, shownAt) =>
+              editing?.id === distractor.id ? (
+                <li key={distractor.id}>{editor(editing)}</li>
+              ) : (
+                <OptionRow
+                  key={distractor.id}
+                  distractor={distractor}
+                  at={listed.start + shownAt}
+                  markdown={markdown}
+                  phrasesOf={phrasesOf}
+                  busy={busy}
+                  editingAny={editing !== null}
+                  picked={picks === undefined ? undefined : (picks.get(distractor.id) ?? 0)}
+                  arrival={distractor.id === arrival}
+                  actions={actions}
+                />
+              ),
+            )}
+          </ul>
+          {listed.more > 0 && (
+            <p class="hint">{t("distractorFields.more", { count: listed.more })}</p>
+          )}
+        </>
       )}
       <ErrorMessage id="distractor-fields-error" error={errorText(refusal)} />
       {issues.length > 0 && (
         <ul class="distractor-issues" aria-label={t("distractorFields.issues")}>
-          {issues.map((issue) => (
+          {shownIssues.shown.map((issue) => (
             <li key={issue} class="warning">
               {issue}
             </li>
           ))}
         </ul>
+      )}
+      {shownIssues.more > 0 && (
+        <p class="hint">{t("distractorFields.moreIssues", { count: shownIssues.more })}</p>
       )}
       {editing?.id === null ? (
         editor(editing)

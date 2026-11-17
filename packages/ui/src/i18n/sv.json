@@ -304,6 +304,18 @@
     "picks": {
       "one": "Valt {count} gång",
       "other": "Valt {count} gånger"
+    },
+    "earlier": {
+      "one": "{count} tidigare felaktigt alternativ, som inte listas här.",
+      "other": "{count} tidigare felaktiga alternativ, som inte listas här."
+    },
+    "more": {
+      "one": "Och {count} felaktigt alternativ till, som inte listas här.",
+      "other": "Och {count} felaktiga alternativ till, som inte listas här."
+    },
+    "moreIssues": {
+      "one": "Och {count} sak till som är värd att se över, som inte listas här.",
+      "other": "Och {count} saker till som är värda att se över, som inte listas här."
     }
   },
   "cardCreator": {
@@ -2238,5 +2250,15 @@
     "reading": "Läser och kontrollerar utgåvan…",
     "notLibrary": "Den här finns inte i Solid Memos bibliotek: den är publicerad på {host}. Solid Memo har kontrollerat att den går att läsa, inte vad den säger. Din kopia minns var den kom ifrån, och inget skrivs där.",
     "picturesHidden": "Bilderna på korten förblir dolda tills du väljer att visa dem, eftersom varje bild är en begäran till servern den ligger på."
+  },
+  "courseChapters": {
+    "earlier": {
+      "one": "{count} tidigare kapitel, som inte listas här.",
+      "other": "{count} tidigare kapitel, som inte listas här."
+    },
+    "more": {
+      "one": "Och {count} kapitel till, som inte listas här.",
+      "other": "Och {count} kapitel till, som inte listas här."
+    }
   }
 }

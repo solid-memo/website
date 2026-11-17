@@ -309,6 +309,21 @@
       "one": "Elegida {count} vez",
       "many": "Elegida {count} de veces",
       "other": "Elegida {count} veces"
+    },
+    "earlier": {
+      "one": "{count} opción incorrecta anterior, que no aparece aquí.",
+      "many": "{count} de opciones incorrectas anteriores, que no aparecen aquí.",
+      "other": "{count} opciones incorrectas anteriores, que no aparecen aquí."
+    },
+    "more": {
+      "one": "Y {count} opción incorrecta más, que no aparece aquí.",
+      "many": "Y {count} de opciones incorrectas más, que no aparecen aquí.",
+      "other": "Y {count} opciones incorrectas más, que no aparecen aquí."
+    },
+    "moreIssues": {
+      "one": "Y {count} punto más que conviene revisar, que no aparece aquí.",
+      "many": "Y {count} de puntos más que conviene revisar, que no aparecen aquí.",
+      "other": "Y {count} puntos más que conviene revisar, que no aparecen aquí."
     }
   },
   "cardCreator": {
@@ -2363,5 +2378,17 @@
     "reading": "Leyendo y comprobando la publicación…",
     "notLibrary": "Esto no está en la biblioteca de Solid Memo: está publicado en {host}. Solid Memo ha comprobado que puede leerlo, no lo que dice. Tu copia recuerda de dónde viene, y no se escribe nada allí.",
     "picturesHidden": "Las imágenes de sus tarjetas siguen ocultas hasta que decidas mostrarlas, porque cada imagen es una petición al servidor donde está."
+  },
+  "courseChapters": {
+    "earlier": {
+      "one": "{count} capítulo anterior, que no aparece aquí.",
+      "many": "{count} de capítulos anteriores, que no aparecen aquí.",
+      "other": "{count} capítulos anteriores, que no aparecen aquí."
+    },
+    "more": {
+      "one": "Y {count} capítulo más, que no aparece aquí.",
+      "many": "Y {count} de capítulos más, que no aparecen aquí.",
+      "other": "Y {count} capítulos más, que no aparecen aquí."
+    }
   }
 }

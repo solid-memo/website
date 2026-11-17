@@ -5,6 +5,7 @@
 import type { ComponentChildren } from "preact";
 import { useMemo } from "preact/hooks";
 import type {
+  ChapterProgress,
   ChapterState,
   CourseChapter,
   CourseOutline,
@@ -12,6 +13,7 @@ import type {
 } from "@solid-memo/domain/course";
 import { isMarkdown } from "@solid-memo/domain/deck";
 import type { LangText } from "@solid-memo/domain/langText";
+import { boundedAround } from "./bounded";
 import type { CompletedChapter } from "./CourseContainer";
 import { Confetti } from "./Confetti";
 import { DataText } from "./DataText";
@@ -46,7 +48,10 @@ const SPARKLES = 8;
  * chapter's description may be in Markdown (its `textFormat`), each
  * parsed once for the release, however many chapters there are and
  * however often the page is opened (courseDescriptionBlocks); its title
- * is always plain. Once every chapter is
+ * is always plain. A release can state any number of chapters, so the
+ * page draws at most LIST_LIMIT of them, around the one to go on with
+ * (boundedAround), and says how many come before and after them. Once
+ * every chapter is
  * done, the course says it is finished, with a link back to the decks
  * where there are any (none in the Studio's trial). Beside the way on,
  * or back, a secondary button leads to the deck library where there is
@@ -84,8 +89,8 @@ export function CourseScreen({
   progress: CourseProgress;
   /** The learner has answered a question of it. */
   started: boolean;
-  /** Where a chapter's title links. */
-  chapterHref: (chapter: CourseChapter) => string;
+  /** Where a chapter's title links, given where the learner stands in it. */
+  chapterHref: (chapter: CourseChapter, progress: ChapterProgress) => string;
   /** Where to go on; absent once every chapter is done. */
   continueHref?: string;
   /** The instance's deck list, which a finished course links back to; no link without one. */
@@ -105,8 +110,14 @@ export function CourseScreen({
     () => courseDescriptionBlocks(outline.releaseUrl),
     [outline.releaseUrl],
   );
+  // A chapter just completed is cheered for above the list wherever it is,
+  // but sparkles only when it is among the chapters shown.
   const completed = outline.chapters.find((chapter) => chapter.url === justCompleted?.chapterUrl);
   const doneCount = progress.chapters.filter((chapter) => chapter.state === "done").length;
+  const { shown, start, more } = boundedAround(
+    outline.chapters,
+    progress.chapters.findIndex((chapter) => chapter.state === "open"),
+  );
   const library =
     libraryHref === undefined ? null : (
       <a class="button" href={libraryHref}>
@@ -171,9 +182,12 @@ export function CourseScreen({
             {library}
           </div>
         )}
-        <ol class="course-chapters">
-          {outline.chapters.map((chapter, index) => {
-            const { state, doneStepIds } = progress.chapters[index]!;
+        {start > 0 && <p class="hint">{t("courseChapters.earlier", { count: start })}</p>}
+        <ol class="course-chapters" start={start + 1}>
+          {shown.map((chapter, at) => {
+            const index = start + at;
+            const chapterProgress = progress.chapters[index]!;
+            const { state, doneStepIds } = chapterProgress;
             return (
               <li
                 key={chapter.url}
@@ -186,7 +200,7 @@ export function CourseScreen({
                   {state === "locked" ? (
                     <CourseText text={chapter.title} />
                   ) : (
-                    <a href={chapterHref(chapter)}>
+                    <a href={chapterHref(chapter, chapterProgress)}>
                       <CourseText text={chapter.title} />
                     </a>
                   )}
@@ -218,6 +232,7 @@ export function CourseScreen({
             );
           })}
         </ol>
+        {more > 0 && <p class="hint">{t("courseChapters.more", { count: more })}</p>}
       </section>
       {completed !== undefined && justCompleted!.finishedCourse && <Confetti />}
     </>
