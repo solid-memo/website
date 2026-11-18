@@ -54,7 +54,9 @@ export interface ReleasePublishingUseCases {
    * released (`sm:releasedAs`), and no longer changed. The draft is
    * read once, and checked, made a release and marked released as it was
    * then: changed elsewhere since, it is changedElsewhere, before the
-   * release is written or after, the draft then left unmarked. A
+   * release is written or after, the draft then left unmarked. A draft
+   * a newer app wrote, its root as well, is refused as it is read
+   * (writtenByNewerApp): it could not be marked released. A
    * publishing cut short after the release is written is finished by
    * publishing again at the same address, the draft unchanged: the
    * release there is this one (ReleasePublisher.publish), unless another

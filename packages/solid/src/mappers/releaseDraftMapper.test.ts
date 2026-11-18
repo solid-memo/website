@@ -334,6 +334,18 @@ ${STEP} ; schema:position 1 ; owl:deprecated false .
     );
   });
 
+  it("refuses a root a newer app wrote with the reload message, and reads it as a release (GHSA-9grp-qx53-cphh)", async () => {
+    const newer = ROOT.replace("formatVersion 1", "formatVersion 2");
+    await expect(read(`${newer} .`)).rejects.toEqual(
+      expect.objectContaining({
+        code: "writtenByNewerApp",
+        vars: { url: DRAFT, version: 2, writes: 1 },
+      }),
+    );
+    const release = draftFromQuads(await quadsOfTurtle(`${PREFIXES}${newer} .`, DRAFT), DRAFT);
+    expect(release?.root.title).toEqual({ en: "Solid" });
+  });
+
   it("refuses a value its record reads otherwise than it is stated: an ill-formed number", async () => {
     await expect(
       read(`${ROOT} .\n${CARD.replace("formatVersion 7", 'formatVersion "7junk"^^xsd:integer')} .`),

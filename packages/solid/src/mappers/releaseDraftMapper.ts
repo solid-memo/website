@@ -48,6 +48,7 @@ import {
   readRecord,
   readVersioned,
   recordThing,
+  storedVersionOf,
 } from "../records";
 import { DCTERMS, SM } from "../vocab";
 
@@ -382,8 +383,10 @@ function hiddenPredicateOf(
  * (GHSA-32jq-jh7h-r7v4). So each value of such a predicate that is
  * published holds what its record does. What publishing writes of the
  * root itself is not compared (UNPUBLISHED_ROOT_PREDICATES). A subject
- * stamped with a newer format than this app reads it in is refused as
- * a newer app's (writtenByNewerApp): reloading the page reads it.
+ * stamped with a newer format than this app reads it in, the root among
+ * them, is refused as a newer app's (writtenByNewerApp): reloading the
+ * page reads it. So a draft whose root this app could not mark released
+ * is not published (GHSA-9grp-qx53-cphh).
  */
 export function draftFromQuads(
   quads: readonly Quad[],
@@ -391,6 +394,14 @@ export function draftFromQuads(
   options: { refuseHidden?: boolean } = {},
 ): ReleaseDraft | null {
   return draftReadOf(quads, url, options)?.draft ?? null;
+}
+
+/**
+ * A subject of a draft stamped with a newer format than this app writes
+ * it in, refused as a newer app's (writtenByNewerApp), when `refuse`.
+ */
+function refuseNewer(refuse: boolean, url: string, version: number, writes: number): void {
+  if (refuse && version > writes) throw new AppError("writtenByNewerApp", { url, version, writes });
 }
 
 /**
@@ -458,6 +469,9 @@ export function draftReadOf(
       ? null
       : readRecord(rootThing, DRAFT_DECK_V1);
   if (read === null) return null;
+  // Its root too, as a newer app's: marking it released would be
+  // refused after the release is out (GHSA-9grp-qx53-cphh).
+  refuseNewer(refuseHidden, url, storedVersionOf(rootThing!), DRAFT_DECK_V1.version);
   // Of every sm:releasedAs the draft states, one at a release's address, whatever their order.
   const { releasedAs: _first, ...rest } = read;
   const releasedAs = getUrlAll(rootThing!, SM.releasedAs).find(isPublishedReleaseUrl);
@@ -479,13 +493,7 @@ export function draftReadOf(
     const read = readVersioned(thing, shape);
     if (read === null) continue;
     // Read in the latest format this app knows, a newer one would be published in that one: the reload message, not a value to remove.
-    if (refuseHidden && read.storedVersion > read.record.version) {
-      throw new AppError("writtenByNewerApp", {
-        url: subject,
-        version: read.storedVersion,
-        writes: read.record.version,
-      });
-    }
+    refuseNewer(refuseHidden, subject, read.storedVersion, read.record.version);
     const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[read.record.version]!;
     const data = migrate(shape, read.record, { subject });
     // What a card stamped below format 7 is about (`dcterms:subject`, as a
