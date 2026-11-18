@@ -21,6 +21,21 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.7.0](https://github.com/solid-memo/website/compare/v7.6.20...v7.7.0) (2026-11-18)
+
+### Features
+
+* **studio:** badge a paused deck in the Studio's deck table ([068dd28](https://github.com/solid-memo/website/commit/068dd28db66702a74c92a2f8564f21c73f0ca39b)), closes [#873](https://github.com/solid-memo/website/issues/873)
+* **study:** catch up on a paused deck's backlog, what may be saved first ([7ad5e4a](https://github.com/solid-memo/website/commit/7ad5e4a4657ab67daab78782515796258142f8e4)), closes [#873](https://github.com/solid-memo/website/issues/873)
+* **study:** keep a paused deck out of the day's study, its course with it ([a2d59f5](https://github.com/solid-memo/website/commit/a2d59f5dd6e38deaf283915f70613b5e4c40aea8)), closes [#873](https://github.com/solid-memo/website/issues/873)
+* **ui:** pause and resume a deck from the deck list ([4a8ac0d](https://github.com/solid-memo/website/commit/4a8ac0df77c79bc2c48935bcffc4628ca69fe2a5)), closes [#873](https://github.com/solid-memo/website/issues/873)
+* **vocab:** keep a deck's pause in the pod, in vocabulary 1.29 ([d7c47c4](https://github.com/solid-memo/website/commit/d7c47c424a1ecb256a5423df0f8e7d158403e46a)), closes [#873](https://github.com/solid-memo/website/issues/873)
+
+### Fixes
+
+* **statistics:** hold a paused deck's reviews back in the forecast ([4c239fd](https://github.com/solid-memo/website/commit/4c239fdaa282306022977b49b9ce3f2e8e859714)), closes [#873](https://github.com/solid-memo/website/issues/873)
+* **study:** read resumed decks for the welcome back in turns ([315744a](https://github.com/solid-memo/website/commit/315744af8f62fc533d73bf26fa305f2671dc426f)), closes [#873](https://github.com/solid-memo/website/issues/873)
+
 ## [7.6.20](https://github.com/solid-memo/website/compare/v7.6.19...v7.6.20) (2026-11-18)
 
 ### Fixes
