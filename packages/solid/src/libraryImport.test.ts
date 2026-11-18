@@ -678,9 +678,10 @@ describe("a library deck's documents, through its import and an upgrade", () => 
     const before = await everyTriple(store);
 
     const refused = await upgrade(store, site, instance.url, deck.url);
+    // Refused as its writes are made and checked, before the first is sent.
     expect(refused.outcome).toMatchObject({
       ok: false,
-      step: "cards",
+      step: "read",
       error: expect.objectContaining({ code: "deckDocumentUnclaimed" }),
       changed: false,
     });
@@ -703,6 +704,39 @@ describe("a library deck's documents, through its import and an upgrade", () => 
     ).toEqual([kept]);
     expect(await backLinks(store, upgraded!.cardsDocumentUrl, deck.url)).toBe(1);
     expect(await backLinks(store, upgraded!.reviewsDocumentUrl, deck.url)).toBe(1);
+  });
+
+  it("is refused with nothing written, each time, when a removed card's review state was written by a newer version", {
+    timeout: 60_000,
+  }, async () => {
+    const { store, instance, deck, removed, site } = await studiedDeck(POD);
+    // The removed card's state, stamped as a newer version of the app writes it.
+    const reviews = await store.get(deck.reviewsDocumentUrl);
+    if (reviews?.kind !== "rdf") throw new Error("no reviews document");
+    const subject = (line: string) => line.slice(0, line.indexOf(" "));
+    const states = new Set(
+      reviews.triples.filter((line) => line.includes(`#${removed}>`)).map(subject),
+    );
+    const version = `<${SM_NS}formatVersion> `;
+    const stamped = reviews.triples.map((line) =>
+      states.has(subject(line)) && line.includes(version)
+        ? `${line.slice(0, line.indexOf(version) + version.length)}"99"^^<http://www.w3.org/2001/XMLSchema#integer> .`
+        : line,
+    );
+    expect(stamped).not.toEqual(reviews.triples);
+    await store.set(deck.reviewsDocumentUrl, { ...reviews, triples: stamped });
+    const before = await everyTriple(store);
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const { outcome } = await upgrade(store, site, instance.url, deck.url);
+      expect(outcome).toMatchObject({
+        ok: false,
+        step: "read",
+        error: expect.objectContaining({ code: "writtenByNewerApp" }),
+        changed: false,
+      });
+      expect(await everyTriple(store)).toEqual(before);
+    }
   });
 });
 
