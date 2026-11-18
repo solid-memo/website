@@ -42,16 +42,20 @@ export class DeckList extends Screen {
   /**
    * The link that opens the deck named `name` (its row's name), "New
    * release" after it or not (a copy whose release the library has a
-   * newer one of).
+   * newer one of), and its pause after that.
    */
   deckLink(name: string): Locator {
     return this.tree.getByRole("link", { name: this.named(name) });
   }
 
-  /** The name `name`, "New release" after it or not (`newer` true: after it). */
+  /**
+   * The name `name`, "New release" after it or not (`newer` true: after
+   * it), then "Paused" or "Paused until {day}" while the deck is paused.
+   */
   private named(name: string, newer?: boolean): RegExp {
     const release = `\\s*${escapeRegExp(this.t("deckList.newerRelease"))}`;
-    return new RegExp(`^${escapeRegExp(name)}(${release})${newer ? "" : "?"}$`);
+    const paused = `(\\s*(${this.tp("deckList.paused").source.slice(1, -1)}|${this.tp("deckList.pausedUntil").source.slice(1, -1)}))?`;
+    return new RegExp(`^${escapeRegExp(name)}(${release})${newer ? "" : "?"}${paused}$`);
   }
 
   /** The row of the deck named `name`: the innermost list item holding its link. */
@@ -341,6 +345,74 @@ export class DeckList extends Screen {
   async expectToReview(name: string, count: number): Promise<void> {
     await expect(this.row(name)).toContainText(this.t("common.toReview", { count }));
     await expect(this.studyButton(name)).toBeVisible();
+  }
+
+  /**
+   * Pauses the deck from its actions menu, in the dialog that opens:
+   * until the learner resumes it, or until `until` ("YYYY-MM-DD"), the
+   * dialog saying how much of the deck is likely still remembered then.
+   */
+  async pause(name: string, until?: string): Promise<void> {
+    await this.intent(`Pause ${name}${until === undefined ? "" : ` until ${until}`}`, async () => {
+      await this.app.groups.actionsButton(name).click();
+      await this.page
+        .getByRole("menu", { name: this.t("deckList.actions", { name }), exact: true })
+        .getByRole("menuitem", { name: this.t("deckList.pause"), exact: true })
+        .click();
+      const dialog = this.page.getByRole("dialog", {
+        name: this.t("pauseDeck.heading", { deck: name }),
+        exact: true,
+      });
+      await expect(dialog).toBeVisible();
+      if (until === undefined) {
+        await expect(
+          dialog.getByText(this.tp("pauseDeck.outlookAfter", { days: 30 })),
+        ).toBeVisible();
+      } else {
+        await dialog
+          .getByRole("radio", { name: this.t("pauseDeck.resumeOn"), exact: true })
+          .check();
+        await dialog.getByLabel(this.t("pauseDeck.day"), { exact: true }).fill(until);
+        await expect(
+          dialog.getByText(this.tp("pauseDeck.outlookOn", { day: this.longDate(until) })),
+        ).toBeVisible();
+      }
+      await dialog.getByRole("button", { name: this.t("pauseDeck.pause"), exact: true }).click();
+      await expect(dialog).toBeHidden();
+    });
+  }
+
+  /** Resumes the paused deck from its actions menu. */
+  async resume(name: string): Promise<void> {
+    await this.intent(`Resume ${name}`, async () => {
+      await this.app.groups.actionsButton(name).click();
+      await this.page
+        .getByRole("menu", { name: this.t("deckList.actions", { name }), exact: true })
+        .getByRole("menuitem", { name: this.t("deckList.resume"), exact: true })
+        .click();
+      await expect(this.row(name)).not.toContainText(this.t("deckList.paused"));
+    });
+  }
+
+  /**
+   * The deck's row says it is paused, until it is resumed or until
+   * `until` ("YYYY-MM-DD"), and offers nothing to study.
+   */
+  async expectPaused(name: string, until?: string): Promise<void> {
+    await expect(this.row(name)).toContainText(
+      until === undefined
+        ? this.t("deckList.paused")
+        : this.t("deckList.pausedUntil", { day: this.longDate(until) }),
+    );
+    await expect(this.studyButton(name)).toBeHidden();
+  }
+
+  /** A day, "YYYY-MM-DD", written out as the app writes it ("March 15, 2026"). */
+  private longDate(day: string): string {
+    return new Date(day).toLocaleDateString(this.app.locale, {
+      dateStyle: "long",
+      timeZone: "UTC",
+    });
   }
 
   /** The names of the decks shown, in the order shown; with `among`, only those. */

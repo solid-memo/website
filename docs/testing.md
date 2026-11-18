@@ -497,6 +497,10 @@ Further journeys go through:
   leaves it logged out when reloaded;
 - resetting today's study on a deck's page: its cards, today's budget
   of new cards and the statistics come back as before the session;
+- pausing a deck from the deck list until a day, kept through a reload
+  and badged in the Studio, then resuming it, and pausing it until
+  resumed
+  ([pause-deck.journey.ts](../e2e/journeys/journeys/pause-deck.journey.ts));
 - coming back on the next study day to review a deck, forgetting some
   cards, and reading recall, lapses and the hardest cards in the
   statistics, with no leech to cram yet. Unit tests cover cramming: a

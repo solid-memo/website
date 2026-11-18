@@ -162,6 +162,33 @@ export class Studio extends Screen {
     });
   }
 
+  /**
+   * Home badges the deck as paused, until it is resumed or until `until`
+   * ("YYYY-MM-DD"), with nothing due today.
+   */
+  async expectPaused(instance: string, deck: string, until?: string): Promise<void> {
+    await this.intent(`See ${deck} paused in the Studio`, async () => {
+      const day =
+        until === undefined
+          ? undefined
+          : new Date(until).toLocaleDateString(this.app.locale, {
+              dateStyle: "long",
+              timeZone: "UTC",
+            });
+      await expect(this.row(instance, deck).getByRole("rowheader")).toContainText(
+        day === undefined
+          ? this.t("studio.decks.badge.paused")
+          : this.t("studio.decks.badge.pausedUntil", { day }),
+      );
+      const due = await cellOf(
+        this.decks(instance),
+        this.row(instance, deck),
+        this.t("studio.decks.due"),
+      );
+      await expect(due).toHaveText("0");
+    });
+  }
+
   /** Home does not list the deck: the instance has none by that name. */
   async expectNoDeck(instance: string, deck: string): Promise<void> {
     await this.intent(`See no ${deck} in the Studio`, async () => {
