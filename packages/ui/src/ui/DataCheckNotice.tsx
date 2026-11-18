@@ -7,6 +7,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { InvalidDataPolicy } from "@solid-memo/domain/invalidDataPolicy";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { ValidationReport } from "@solid-memo/domain/validation";
+import { bounded } from "./bounded";
 import { useI18n } from "./i18n";
 import { LazyDetails } from "./LazyDetails";
 import { ReaderTexts } from "./ReaderText";
@@ -18,7 +19,9 @@ import { routeToHash } from "./router";
  * the app does about it under their policy, with the repair a click
  * away. Under "block the instance" the notice takes the workspace's
  * place; otherwise it sits above it, the repair drawn only once opened
- * (LazyDetails), as the notice sits above every screen. What another
+ * (LazyDetails), as the notice sits above every screen; for the same
+ * reason it names the first LIST_LIMIT decks set aside (bounded) and
+ * says how many more there are. What another
  * app wrote is never in it: the check reports that as warnings, which
  * need no notice.
  */
@@ -41,6 +44,7 @@ export function DataCheckNotice({
 }) {
   const { t, tx } = useI18n();
   const preferences = routeToHash({ screen: "preferences", instanceUrl: instance.url });
+  const named = bounded(setAside);
   const consequence =
     policy === "block-instance"
       ? t("dataCheckNotice.blockInstance")
@@ -48,7 +52,12 @@ export function DataCheckNotice({
         ? setAside.length === 0
           ? t("dataCheckNotice.restKeepsWorking")
           : tx("dataCheckNotice.setAside", {
-              names: <ReaderTexts texts={setAside} />,
+              names: (
+                <>
+                  <ReaderTexts texts={named.shown} />
+                  {named.more > 0 && ` ${t("dataCheckNotice.setAsideMore", { count: named.more })}`}
+                </>
+              ),
               count: setAside.length,
             })
         : t("dataCheckNotice.keepsWorking");

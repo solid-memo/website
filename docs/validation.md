@@ -143,7 +143,9 @@ flowchart LR
   check and the
   Studio's Health screen show them (`UnclaimedDecksNotice`) with "These
   are this deck's documents", which claims them once the user confirms
-  (`claimDeckDocuments`), for the next check. A document outside the
+  (`claimDeckDocuments`), for the next check. Above every screen of the
+  instance, the notice lists at most `LIST_LIMIT` (50) such decks and
+  says how many more there are. A document outside the
   instance's folder, and not in a storage of the user's found to hold
   the instance too (`isInInstancePod`), is named in `outsidePod` too,
   and its deck gets no such button. A check reads a deck's two
@@ -343,7 +345,9 @@ conform is a preference, `sm:invalidDataPolicy`, a concept of
 | Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's repaired, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
 
-The notice sits above every screen, so what it lists is bounded. Unless
+The notice sits above every screen, so what it lists is bounded. It
+names at most `LIST_LIMIT` (50) of the decks set aside and says how many
+more there are. Unless
 the policy blocks the instance, its repair is drawn only once the user
 opens it (`LazyDetails`). The repair is planned once per report. It
 lists at most `LIST_LIMIT` (50) of the problems it can repair and of

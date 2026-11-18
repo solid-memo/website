@@ -12,6 +12,7 @@ import { summarize, type ValidationReport } from "@solid-memo/domain/validation"
 import { DataCheckNotice } from "./DataCheckNotice";
 import { I18nProvider } from "./i18n";
 import { RepairContainer } from "./RepairContainer";
+import { LIST_LIMIT } from "./bounded";
 import { makeUseCasesFake } from "../test/useCasesFake";
 
 const instance: Instance = { url: "https://pod.example/solid-memo/a/", name: "Main" };
@@ -210,6 +211,28 @@ describe("DataCheckNotice", () => {
     expect(screen.getByRole("region", { name: "Data check" })).toHaveTextContent(
       "Kanji, Capitals are set aside until repaired",
     );
+  });
+
+  it("names at most LIST_LIMIT decks set aside, and how many more there are", () => {
+    const titles = Array.from({ length: LIST_LIMIT + 2 }, (_, index) => ({ en: `Deck ${index}` }));
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <DataCheckNotice
+          useCases={makeUseCasesFake()}
+          instance={instance}
+          report={report}
+          policy="block-subject"
+          setAside={titles}
+          arrangementSetAside={false}
+        />
+      </QueryClientProvider>,
+    );
+    const region = screen.getByRole("region", { name: "Data check" });
+    expect(region).toHaveTextContent(
+      `Deck ${LIST_LIMIT - 1} and 2 more are set aside until repaired`,
+    );
+    expect(region).not.toHaveTextContent(`Deck ${LIST_LIMIT},`);
+    expect(region).not.toHaveTextContent(`Deck ${LIST_LIMIT + 1}`);
   });
 
   it("marks a set-aside deck's name with its language when that is not the page's", () => {

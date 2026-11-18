@@ -9,6 +9,7 @@ import type {
   UpdateStep,
 } from "@solid-memo/domain/instanceUpdate";
 import { useId } from "preact/hooks";
+import { bounded } from "./bounded";
 import { useI18n, type I18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
 import { StepProgress } from "./StepProgress";
@@ -114,7 +115,9 @@ export function documentName(
  * each with why, how many it did update, and that every document can be
  * read as it is, updated or not; trying again updates only what is still
  * outdated. It takes the progress's place and its focus, so it is read
- * out.
+ * out. Like the notice it follows, it sits above every screen, so it
+ * lists the first LIST_LIMIT documents left (bounded) and says how many
+ * more there are.
  */
 export function InstanceUpdateResult({
   outcome,
@@ -130,6 +133,7 @@ export function InstanceUpdateResult({
   const ref = usePanelFocus<HTMLDivElement>();
   const whyId = useId();
   const { updated, failed } = outcome;
+  const listed = bounded(failed);
   return (
     <div
       ref={ref}
@@ -144,7 +148,7 @@ export function InstanceUpdateResult({
           <strong>{t("instanceUpdate.notFinished", { count: failed.length })}</strong>
         </p>
         <ul>
-          {failed.map((failure) => (
+          {listed.shown.map((failure) => (
             <li key={failure.url}>
               {tx("instanceUpdate.failedItem", {
                 document: documentName(failure, i18n),
@@ -153,6 +157,9 @@ export function InstanceUpdateResult({
             </li>
           ))}
         </ul>
+        {listed.more > 0 && (
+          <p class="hint">{t("dataCheckLists.moreDocuments", { count: listed.more })}</p>
+        )}
         <p>
           {updated.length > 0 && `${t("instanceUpdate.updatedAlso", { count: updated.length })} `}
           {t("instanceUpdate.retryHint")}

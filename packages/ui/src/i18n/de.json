@@ -101,7 +101,11 @@
     "advisory": "Mehr dazu in der {link}.",
     "advisoryLink": "Sicherheitsmeldung {id} (auf Englisch)",
     "opensInNewTab": "(öffnet sich in einem neuen Tab)",
-    "reportMistake": "Fehler melden"
+    "reportMistake": "Fehler melden",
+    "moreDecks": {
+      "one": "Und {count} weiterer Stapel, der hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Stapel, die hier nicht aufgeführt sind."
+    }
   },
   "footer": {
     "createdBy": "Erstellt von {author}",
@@ -447,6 +451,10 @@
     "setAside": {
       "one": "{names} wird bis zur Reparatur zurückgestellt; alles andere funktioniert weiter.",
       "other": "{names} werden bis zur Reparatur zurückgestellt; alles andere funktioniert weiter."
+    },
+    "setAsideMore": {
+      "one": "und {count} weiterer",
+      "other": "und {count} weitere"
     },
     "keepsWorking": "Solid Memo arbeitet trotzdem damit weiter.",
     "arrangementSetAside": "Die Stapelliste lässt sich erst wieder neu anordnen, wenn ihre Anordnung repariert ist.",

@@ -9,6 +9,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import { AppError } from "@solid-memo/domain/appError";
 import type { UnclaimedDeck } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "../test/useCasesFake";
+import { LIST_LIMIT } from "./bounded";
 import { UnclaimedDecksNotice } from "./UnclaimedDecksNotice";
 
 const INSTANCE = "https://pod.example/";
@@ -96,5 +97,19 @@ describe("UnclaimedDecksNotice", () => {
     expect(await screen.findByRole("button", { name: "Marking…" })).toBeDisabled();
     fail(new AppError("changedElsewhere", { url: SPANISH.documents[0]! }));
     expect(await screen.findByRole("alert")).toBeInTheDocument();
+  });
+
+  it("lists at most LIST_LIMIT decks, and says how many more there are", () => {
+    const decks = Array.from({ length: LIST_LIMIT + 3 }, (_, index) => ({
+      ...SPANISH,
+      deckUrl: `${INSTANCE}catalog.ttl#deck-${index}`,
+      title: { en: `Deck ${index}` },
+    }));
+    renderNotice(makeUseCasesFake(), decks);
+    expect(screen.getAllByText(/its documents don't say they belong to this deck/)).toHaveLength(
+      LIST_LIMIT,
+    );
+    expect(screen.queryByText(`Deck ${LIST_LIMIT}`)).toBeNull();
+    expect(screen.getByText("And 3 more decks, not listed here.")).toBeInTheDocument();
   });
 });

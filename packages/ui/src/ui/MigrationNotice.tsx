@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { MigrationPlan } from "@solid-memo/domain/migration";
+import { bounded } from "./bounded";
 import { ErrorMessage } from "./ErrorMessage";
 import { usePanelFocus } from "./panelFocus";
 import { useI18n, type I18n, type ErrorText, type MessageKey } from "./i18n";
@@ -120,7 +121,9 @@ function updateLabel(plan: MigrationPlan, t: I18n["t"]): string {
  * the app works on the old format meanwhile. What the new formats add is
  * folded away, and how the update keeps the data safe is said by the
  * confirmation that follows. Shown with the screen, it leaves the focus
- * be; back from the confirmation (`focus`), it takes it.
+ * be; back from the confirmation (`focus`), it takes it. It sits above
+ * every screen of the instance, so it lists the first LIST_LIMIT decks
+ * (bounded) and says how many more there are.
  */
 export function MigrationNotice({
   plan,
@@ -139,6 +142,7 @@ export function MigrationNotice({
   const { t } = useI18n();
   const ref = usePanelFocus<HTMLDivElement>(focus);
   const formats = describeFormats(plan, t);
+  const decks = bounded(plan.decks);
   return (
     <div
       ref={ref}
@@ -154,7 +158,7 @@ export function MigrationNotice({
         {plan.instanceOutdated && <li>{t("migrationNotice.itemInstanceRecord")}</li>}
         {plan.catalogMissing && <li>{t("migrationNotice.itemCatalogue")}</li>}
         {plan.preferencesOutdated && <li>{t("migrationNotice.itemPreferences")}</li>}
-        {plan.decks.map(({ deck, deckOutdated, cardCount, reviewCount }) => (
+        {decks.shown.map(({ deck, deckOutdated, cardCount, reviewCount }) => (
           <li key={deck.url}>
             <ReaderText text={deck.title} /> —{" "}
             {[
@@ -167,6 +171,7 @@ export function MigrationNotice({
           </li>
         ))}
       </ul>
+      {decks.more > 0 && <p class="hint">{t("common.moreDecks", { count: decks.more })}</p>}
       {formats.length > 0 && (
         <details>
           <summary>{t("migrationNotice.whatsNew")}</summary>
