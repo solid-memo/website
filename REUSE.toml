@@ -61,6 +61,7 @@ SPDX-License-Identifier = "MIT"
 # version's dcterms:license is the one named here (docs/deck-library.md).
 [[annotations]]
 path = [
+    "decks/a-year-in-sweden/*.ttl",
     "decks/academy-award-best-picture/*.ttl",
     "decks/brain-regions/*.ttl",
     "decks/capitals-of-the-world/*.ttl",

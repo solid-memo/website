@@ -15,10 +15,11 @@
     dcterms:title "Solid Memo deck library" ;
     dcterms:description "Ready-made flashcard decks to import into your own Solid pod." ;
     dcterms:publisher <#solid-memo> ;
-    dcterms:modified "2026-11-13T00:00:00Z"^^xsd:dateTime ;
+    dcterms:modified "2026-11-18T00:00:00Z"^^xsd:dateTime ;
     dcat:themeTaxonomy <http://publications.europa.eu/resource/authority/data-theme> ,
                        <https://solid-memo.com/ns/vocab/topics.ttl> ;
-    dcat:dataset <#academy-award-best-picture> ,
+    dcat:dataset <#a-year-in-sweden> ,
+                 <#academy-award-best-picture> ,
                  <#arabic-adjectives> ,
                  <#arabic-basics> ,
                  <#arabic-nouns> ,
@@ -138,6 +139,210 @@
 <#solid-memo>
     a foaf:Agent ;
     foaf:name "Solid Memo" .
+
+<#a-year-in-sweden>
+    a dcat:DatasetSeries ,
+      dcat:Dataset ;
+    solid-memo:formatVersion 3 ;
+    dcterms:title "A Year in Sweden"@en ,
+                  "Ett år i Sverige"@sv ,
+                  "Ein Jahr in Schweden"@de ,
+                  "Un año en Suecia"@es ,
+                  "Une année en Suède"@fr ,
+                  "스웨덴에서의 1년"@ko ;
+    dcterms:description "Everyday Swedish told as one story over the course of a year. Sam has just moved from Canada to Uppsala for a new job, and Elin, who lives across the landing, becomes a friend; over ten chapters they go from a first fika to midsummer: shopping for dinner, the building's shared laundry room, a first day at work, picking mushrooms in the woods, a visit to the health center, Lucia and Christmas, a weekend with Elin's family in Dalarna, planning midsummer and midsummer itself. You learn to say who you are, to treat and be treated, to ask for things in shops, to book a laundry time, to talk with colleagues, to tell what you did, to say where it hurts, to accept and decline invitations, to thank your hosts, to give your opinion and to say what you would do, along with the grammar beneath them: the verb in second place, en and ett, the ending for the, plurals, adjectives that agree, helping verbs, the past, perfect and future, comparison, sin and hans, particle verbs and the conditional. For beginners who know a few words, up to about B1; Basic Swedish is a good start. 10 chapters of short dialogue steps, each step a scene, a grammar point or another way the scene goes, followed by multiple-choice questions. Each chapter ends with a review, and every question you answer becomes a card in your deck. The steps are in English, with the dialogues in Swedish; the answers are in English, German, Spanish, French and Korean. Written with the help of AI; checked against the US Foreign Service Institute's Swedish Basic Course (public domain), Wikidata and English Wiktionary, as of November 2026."@en ,
+                        "Vardagssvenska berättad som en enda historia som sträcker sig över ett år. Sam har just flyttat från Kanada till Uppsala för ett nytt jobb, och Elin, som bor mittemot, blir en vän; under tio kapitel går de från en första fika till midsommar: att handla till en middag, husets gemensamma tvättstuga, en första dag på jobbet, att plocka svamp i skogen, ett besök på vårdcentralen, lucia och jul, en helg hos Elins familj i Dalarna, att planera midsommar och till sist själva midsommarafton. Du lär dig att säga vem du är, att bjuda och bli bjuden, att fråga efter saker i affärer, att boka en tvättid, att prata med kollegor, att berätta vad du har gjort, att säga var det gör ont, att tacka ja och nej till inbjudningar, att tacka värdfolket, att säga vad du tycker och vad du skulle göra, och grammatiken bakom: verbet på andra plats, en och ett, bestämd form, plural, adjektiv som böjs, hjälpverb, preteritum, perfekt och futurum, komparation, sin och hans, partikelverb och konditionalis. För nybörjare som kan några ord, upp till ungefär B1; Grundläggande svenska är en bra början. 10 kapitel med korta dialogsteg, vart och ett en scen, en grammatikpunkt eller ett annat sätt scenen kan gå till, följt av flervalsfrågor. Varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Stegen är på engelska, med dialogerna på svenska; svaren finns på engelska, tyska, spanska, franska och koreanska. Skriven med hjälp av AI; kontrollerad mot amerikanska Foreign Service Institutes Swedish Basic Course (fri från upphovsrätt), Wikidata och engelska Wiktionary, så som de var i november 2026."@sv ,
+                        "Schwedisch im Alltag, erzählt als eine Geschichte im Lauf eines Jahres. Sam ist gerade für eine neue Stelle aus Kanada nach Uppsala gezogen, und Elin, die auf demselben Stockwerk gegenüber wohnt, wird eine Freundin; in zehn Kapiteln geht es von einer ersten Fika bis Mittsommer: der Einkauf fürs Abendessen, die gemeinsame Waschküche des Hauses, ein erster Arbeitstag, Pilze sammeln im Wald, ein Besuch im Gesundheitszentrum, Lucia und Weihnachten, ein Wochenende bei Elins Familie in Dalarna, die Planung von Mittsommer und Mittsommer selbst. Dabei lernst du zu sagen, wer du bist, dich einladen zu lassen und selbst einzuladen, im Geschäft nach etwas zu fragen, eine Waschzeit zu buchen, mit Kollegen zu sprechen, zu erzählen, was du gemacht hast, zu sagen, wo es wehtut, Einladungen anzunehmen und abzulehnen, deinen Gastgebern zu danken, deine Meinung zu sagen und zu sagen, was du tun würdest, dazu die Grammatik dahinter: das Verb an zweiter Stelle, en und ett, die Endung für den bestimmten Artikel, den Plural, die Angleichung der Adjektive, Hilfsverben, Präteritum, Perfekt und Futur, die Steigerung, sin und hans, Partikelverben und den Konditional. Für Anfänger, die ein paar Wörter kennen, bis etwa B1; „Schwedisch-Grundlagen“ ist ein guter Anfang. 10 Kapitel mit kurzen Dialogschritten, jeder eine Szene, ein Grammatikpunkt oder eine andere Wendung der Szene, gefolgt von Multiple-Choice-Fragen. Jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Die Schritte sind auf Englisch, die Dialoge auf Schwedisch; die Antworten gibt es auf Englisch, Deutsch, Spanisch, Französisch und Koreanisch. Mithilfe von KI geschrieben; geprüft anhand des Swedish Basic Course des US Foreign Service Institute (gemeinfrei), Wikidata und des englischen Wiktionary, Stand November 2026."@de ,
+                        "Sueco cotidiano contado como una sola historia, a lo largo de un año. Sam acaba de mudarse de Canadá a Uppsala por un trabajo nuevo, y Elin, que vive en el piso de enfrente, se hace su amiga; a lo largo de diez capítulos pasan de una primera fika a Midsommar: la compra para una cena, la lavandería común del edificio, un primer día de trabajo, recoger setas en el bosque, una visita al centro de salud, Lucia y la Navidad, un fin de semana con la familia de Elin en Dalarna, los preparativos de Midsommar y el propio Midsommar. Aprendes a decir quién eres, a invitar y dejarte invitar, a pedir cosas en las tiendas, a reservar un turno de lavandería, a hablar con los compañeros de trabajo, a contar lo que hiciste, a decir dónde te duele, a aceptar y rechazar invitaciones, a dar las gracias a tus anfitriones, a dar tu opinión y a decir lo que harías, junto con la gramática que hay detrás: el verbo en segundo lugar, en y ett, la terminación del artículo definido, los plurales, los adjetivos que concuerdan, los verbos auxiliares, el pasado, el perfecto y el futuro, la comparación, sin y hans, los verbos con partícula y el condicional. Para principiantes que saben algunas palabras, hasta más o menos un nivel B1; Sueco básico es un buen comienzo. 10 capítulos de pasos cortos de diálogo, cada uno una escena, un punto de gramática u otra versión de la escena, seguidos de preguntas de opción múltiple. Cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. Los pasos están en inglés, con los diálogos en sueco; las respuestas están en inglés, alemán, español, francés y coreano. Escrito con ayuda de IA; comprobado con el Swedish Basic Course del Foreign Service Institute de EE. UU. (de dominio público), Wikidata y el Wikcionario en inglés, en noviembre de 2026."@es ,
+                        "Le suédois du quotidien raconté comme une seule histoire, au fil d'une année. Sam vient d'arriver du Canada à Uppsala pour un nouveau travail, et Elin, qui habite sur le même palier, devient une amie ; en dix chapitres, l'histoire va d'une première fika à la Saint-Jean : les courses pour un dîner, la buanderie commune de l'immeuble, un premier jour au travail, la cueillette de champignons en forêt, une visite au centre de santé, Lucia et Noël, un week-end dans la famille d'Elin en Dalécarlie, les préparatifs de la Saint-Jean et la Saint-Jean elle-même. Vous apprenez à dire qui vous êtes, à inviter et à vous faire inviter, à demander quelque chose dans un magasin, à réserver un créneau de lessive, à parler avec des collègues, à raconter ce que vous avez fait, à dire où vous avez mal, à accepter et à refuser une invitation, à remercier vos hôtes, à donner votre avis et à dire ce que vous feriez, ainsi que la grammaire qui se trouve derrière : le verbe en deuxième position, en et ett, la terminaison de l'article défini, les pluriels, les adjectifs qui s'accordent, les verbes auxiliaires, le passé, le parfait et le futur, la comparaison, sin et hans, les verbes à particule et le conditionnel. Pour les débutants qui connaissent déjà quelques mots, jusqu'au niveau B1 environ ; Suédois de base est un bon point de départ. 10 chapitres de courtes étapes de dialogue, chacune une scène, un point de grammaire ou une autre façon dont la scène peut se passer, suivie de questions à choix multiple. Chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Les étapes sont en anglais, avec les dialogues en suédois ; les réponses sont en anglais, en allemand, en espagnol, en français et en coréen. Rédigé avec l'aide de l'IA ; vérifié avec le Swedish Basic Course du Foreign Service Institute des États-Unis (domaine public), Wikidata et le Wiktionnaire anglais, en novembre 2026."@fr ,
+                        "일상 스웨덴어를 1년에 걸친 하나의 이야기로 배웁니다. 샘은 새 직장 때문에 캐나다에서 웁살라로 막 이사 왔고, 같은 층 맞은편에 사는 엘린과 친구가 됩니다. 열 개의 챕터에 걸쳐 두 사람은 첫 피카부터 하지 축제까지 함께합니다. 저녁 장보기, 건물의 공용 세탁실, 출근 첫날, 숲에서 버섯 따기, 보건소 방문, 루시아와 크리스마스, 달라르나에서 엘린의 가족과 보내는 주말, 하지 축제 계획, 그리고 하지 축제 당일까지 이어집니다. 자기소개하기, 대접받고 한턱내기, 가게에서 필요한 것 묻기, 세탁 시간 예약하기, 동료와 이야기하기, 한 일을 이야기하기, 어디가 아픈지 말하기, 초대를 받아들이거나 거절하기, 초대해 준 사람에게 감사하기, 의견 말하기, 자신이라면 어떻게 할지 말하기를 익히고, 그 바탕이 되는 문법인 두 번째 자리에 오는 동사, en과 ett, 정관사 어미, 복수, 형용사의 일치, 조동사, 과거·현재완료·미래, 비교, sin과 hans, 불변화사 동사, 조건법도 함께 배웁니다. 단어를 조금 아는 초보자부터 B1 정도까지를 위한 코스이며, ‘기초 스웨덴어’로 먼저 시작하면 좋습니다. 짧은 대화 단계로 이루어진 챕터 10개가 있고, 각 단계는 장면이나 문법, 또는 장면이 달리 흘러가는 경우를 다루고, 그 뒤에 객관식 문제가 이어집니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 단계는 영어로, 대화는 스웨덴어로 되어 있으며, 답은 영어, 독일어, 스페인어, 프랑스어, 한국어로 되어 있습니다. AI의 도움을 받아 썼고, 2026년 11월 기준으로 미국 국무부 외교연수원(Foreign Service Institute)의 Swedish Basic Course(퍼블릭 도메인), 위키데이터, 영어 위키낱말사전으로 확인했습니다."@ko ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:swedish ;
+    dcat:keyword "Swedish"@en ,
+                 "dialogues"@en ,
+                 "everyday life"@en ,
+                 "grammar"@en ,
+                 "beginners"@en ,
+                 "svenska"@sv ,
+                 "dialoger"@sv ,
+                 "vardag"@sv ,
+                 "grammatik"@sv ,
+                 "nybörjare"@sv ,
+                 "Schwedisch"@de ,
+                 "Dialoge"@de ,
+                 "Alltag"@de ,
+                 "Grammatik"@de ,
+                 "Anfänger"@de ,
+                 "sueco"@es ,
+                 "diálogos"@es ,
+                 "vida cotidiana"@es ,
+                 "gramática"@es ,
+                 "principiantes"@es ,
+                 "suédois"@fr ,
+                 "dialogues"@fr ,
+                 "vie quotidienne"@fr ,
+                 "grammaire"@fr ,
+                 "débutants"@fr ,
+                 "스웨덴어"@ko ,
+                 "대화"@ko ,
+                 "일상생활"@ko ,
+                 "문법"@ko ,
+                 "초보자"@ko ;
+    dcat:first <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl> ;
+    dcat:last <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl> ;
+    dcat:hasVersion <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl> ;
+    dcat:hasCurrentVersion <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl> .
+
+<https://solid-memo.com/decks/a-year-in-sweden/v1.ttl>
+    a solid-memo:Deck ,
+      dcat:Dataset ,
+      <https://schema.org/Course> ;
+    dcterms:title "A Year in Sweden"@en ,
+                  "Ett år i Sverige"@sv ,
+                  "Ein Jahr in Schweden"@de ,
+                  "Un año en Suecia"@es ,
+                  "Une année en Suède"@fr ,
+                  "스웨덴에서의 1년"@ko ;
+    dcterms:creator <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#anton-wiklund> ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:description "Everyday Swedish told as one story over the course of a year. Sam has just moved from Canada to Uppsala for a new job, and Elin, who lives across the landing, becomes a friend; over ten chapters they go from a first fika to midsummer: shopping for dinner, the building's shared laundry room, a first day at work, picking mushrooms in the woods, a visit to the health center, Lucia and Christmas, a weekend with Elin's family in Dalarna, planning midsummer and midsummer itself. You learn to say who you are, to treat and be treated, to ask for things in shops, to book a laundry time, to talk with colleagues, to tell what you did, to say where it hurts, to accept and decline invitations, to thank your hosts, to give your opinion and to say what you would do, along with the grammar beneath them: the verb in second place, en and ett, the ending for the, plurals, adjectives that agree, helping verbs, the past, perfect and future, comparison, sin and hans, particle verbs and the conditional. For beginners who know a few words, up to about B1; Basic Swedish is a good start. 10 chapters of short dialogue steps, each step a scene, a grammar point or another way the scene goes, followed by multiple-choice questions. Each chapter ends with a review, and every question you answer becomes a card in your deck. The steps are in English, with the dialogues in Swedish; the answers are in English, German, Spanish, French and Korean. Written with the help of AI; checked against the US Foreign Service Institute's Swedish Basic Course (public domain), Wikidata and English Wiktionary, as of November 2026."@en ,
+                        "Vardagssvenska berättad som en enda historia som sträcker sig över ett år. Sam har just flyttat från Kanada till Uppsala för ett nytt jobb, och Elin, som bor mittemot, blir en vän; under tio kapitel går de från en första fika till midsommar: att handla till en middag, husets gemensamma tvättstuga, en första dag på jobbet, att plocka svamp i skogen, ett besök på vårdcentralen, lucia och jul, en helg hos Elins familj i Dalarna, att planera midsommar och till sist själva midsommarafton. Du lär dig att säga vem du är, att bjuda och bli bjuden, att fråga efter saker i affärer, att boka en tvättid, att prata med kollegor, att berätta vad du har gjort, att säga var det gör ont, att tacka ja och nej till inbjudningar, att tacka värdfolket, att säga vad du tycker och vad du skulle göra, och grammatiken bakom: verbet på andra plats, en och ett, bestämd form, plural, adjektiv som böjs, hjälpverb, preteritum, perfekt och futurum, komparation, sin och hans, partikelverb och konditionalis. För nybörjare som kan några ord, upp till ungefär B1; Grundläggande svenska är en bra början. 10 kapitel med korta dialogsteg, vart och ett en scen, en grammatikpunkt eller ett annat sätt scenen kan gå till, följt av flervalsfrågor. Varje kapitel avslutas med en repetition, och varje fråga du besvarar blir ett kort i din kortlek. Stegen är på engelska, med dialogerna på svenska; svaren finns på engelska, tyska, spanska, franska och koreanska. Skriven med hjälp av AI; kontrollerad mot amerikanska Foreign Service Institutes Swedish Basic Course (fri från upphovsrätt), Wikidata och engelska Wiktionary, så som de var i november 2026."@sv ,
+                        "Schwedisch im Alltag, erzählt als eine Geschichte im Lauf eines Jahres. Sam ist gerade für eine neue Stelle aus Kanada nach Uppsala gezogen, und Elin, die auf demselben Stockwerk gegenüber wohnt, wird eine Freundin; in zehn Kapiteln geht es von einer ersten Fika bis Mittsommer: der Einkauf fürs Abendessen, die gemeinsame Waschküche des Hauses, ein erster Arbeitstag, Pilze sammeln im Wald, ein Besuch im Gesundheitszentrum, Lucia und Weihnachten, ein Wochenende bei Elins Familie in Dalarna, die Planung von Mittsommer und Mittsommer selbst. Dabei lernst du zu sagen, wer du bist, dich einladen zu lassen und selbst einzuladen, im Geschäft nach etwas zu fragen, eine Waschzeit zu buchen, mit Kollegen zu sprechen, zu erzählen, was du gemacht hast, zu sagen, wo es wehtut, Einladungen anzunehmen und abzulehnen, deinen Gastgebern zu danken, deine Meinung zu sagen und zu sagen, was du tun würdest, dazu die Grammatik dahinter: das Verb an zweiter Stelle, en und ett, die Endung für den bestimmten Artikel, den Plural, die Angleichung der Adjektive, Hilfsverben, Präteritum, Perfekt und Futur, die Steigerung, sin und hans, Partikelverben und den Konditional. Für Anfänger, die ein paar Wörter kennen, bis etwa B1; „Schwedisch-Grundlagen“ ist ein guter Anfang. 10 Kapitel mit kurzen Dialogschritten, jeder eine Szene, ein Grammatikpunkt oder eine andere Wendung der Szene, gefolgt von Multiple-Choice-Fragen. Jedes Kapitel endet mit einer Wiederholung, und jede Frage, die du beantwortest, wird zu einer Karte in deinem Stapel. Die Schritte sind auf Englisch, die Dialoge auf Schwedisch; die Antworten gibt es auf Englisch, Deutsch, Spanisch, Französisch und Koreanisch. Mithilfe von KI geschrieben; geprüft anhand des Swedish Basic Course des US Foreign Service Institute (gemeinfrei), Wikidata und des englischen Wiktionary, Stand November 2026."@de ,
+                        "Sueco cotidiano contado como una sola historia, a lo largo de un año. Sam acaba de mudarse de Canadá a Uppsala por un trabajo nuevo, y Elin, que vive en el piso de enfrente, se hace su amiga; a lo largo de diez capítulos pasan de una primera fika a Midsommar: la compra para una cena, la lavandería común del edificio, un primer día de trabajo, recoger setas en el bosque, una visita al centro de salud, Lucia y la Navidad, un fin de semana con la familia de Elin en Dalarna, los preparativos de Midsommar y el propio Midsommar. Aprendes a decir quién eres, a invitar y dejarte invitar, a pedir cosas en las tiendas, a reservar un turno de lavandería, a hablar con los compañeros de trabajo, a contar lo que hiciste, a decir dónde te duele, a aceptar y rechazar invitaciones, a dar las gracias a tus anfitriones, a dar tu opinión y a decir lo que harías, junto con la gramática que hay detrás: el verbo en segundo lugar, en y ett, la terminación del artículo definido, los plurales, los adjetivos que concuerdan, los verbos auxiliares, el pasado, el perfecto y el futuro, la comparación, sin y hans, los verbos con partícula y el condicional. Para principiantes que saben algunas palabras, hasta más o menos un nivel B1; Sueco básico es un buen comienzo. 10 capítulos de pasos cortos de diálogo, cada uno una escena, un punto de gramática u otra versión de la escena, seguidos de preguntas de opción múltiple. Cada capítulo termina con un repaso, y cada pregunta que respondes se convierte en una tarjeta de tu mazo. Los pasos están en inglés, con los diálogos en sueco; las respuestas están en inglés, alemán, español, francés y coreano. Escrito con ayuda de IA; comprobado con el Swedish Basic Course del Foreign Service Institute de EE. UU. (de dominio público), Wikidata y el Wikcionario en inglés, en noviembre de 2026."@es ,
+                        "Le suédois du quotidien raconté comme une seule histoire, au fil d'une année. Sam vient d'arriver du Canada à Uppsala pour un nouveau travail, et Elin, qui habite sur le même palier, devient une amie ; en dix chapitres, l'histoire va d'une première fika à la Saint-Jean : les courses pour un dîner, la buanderie commune de l'immeuble, un premier jour au travail, la cueillette de champignons en forêt, une visite au centre de santé, Lucia et Noël, un week-end dans la famille d'Elin en Dalécarlie, les préparatifs de la Saint-Jean et la Saint-Jean elle-même. Vous apprenez à dire qui vous êtes, à inviter et à vous faire inviter, à demander quelque chose dans un magasin, à réserver un créneau de lessive, à parler avec des collègues, à raconter ce que vous avez fait, à dire où vous avez mal, à accepter et à refuser une invitation, à remercier vos hôtes, à donner votre avis et à dire ce que vous feriez, ainsi que la grammaire qui se trouve derrière : le verbe en deuxième position, en et ett, la terminaison de l'article défini, les pluriels, les adjectifs qui s'accordent, les verbes auxiliaires, le passé, le parfait et le futur, la comparaison, sin et hans, les verbes à particule et le conditionnel. Pour les débutants qui connaissent déjà quelques mots, jusqu'au niveau B1 environ ; Suédois de base est un bon point de départ. 10 chapitres de courtes étapes de dialogue, chacune une scène, un point de grammaire ou une autre façon dont la scène peut se passer, suivie de questions à choix multiple. Chaque chapitre se termine par une révision, et chaque question à laquelle vous répondez devient une carte de votre paquet. Les étapes sont en anglais, avec les dialogues en suédois ; les réponses sont en anglais, en allemand, en espagnol, en français et en coréen. Rédigé avec l'aide de l'IA ; vérifié avec le Swedish Basic Course du Foreign Service Institute des États-Unis (domaine public), Wikidata et le Wiktionnaire anglais, en novembre 2026."@fr ,
+                        "일상 스웨덴어를 1년에 걸친 하나의 이야기로 배웁니다. 샘은 새 직장 때문에 캐나다에서 웁살라로 막 이사 왔고, 같은 층 맞은편에 사는 엘린과 친구가 됩니다. 열 개의 챕터에 걸쳐 두 사람은 첫 피카부터 하지 축제까지 함께합니다. 저녁 장보기, 건물의 공용 세탁실, 출근 첫날, 숲에서 버섯 따기, 보건소 방문, 루시아와 크리스마스, 달라르나에서 엘린의 가족과 보내는 주말, 하지 축제 계획, 그리고 하지 축제 당일까지 이어집니다. 자기소개하기, 대접받고 한턱내기, 가게에서 필요한 것 묻기, 세탁 시간 예약하기, 동료와 이야기하기, 한 일을 이야기하기, 어디가 아픈지 말하기, 초대를 받아들이거나 거절하기, 초대해 준 사람에게 감사하기, 의견 말하기, 자신이라면 어떻게 할지 말하기를 익히고, 그 바탕이 되는 문법인 두 번째 자리에 오는 동사, en과 ett, 정관사 어미, 복수, 형용사의 일치, 조동사, 과거·현재완료·미래, 비교, sin과 hans, 불변화사 동사, 조건법도 함께 배웁니다. 단어를 조금 아는 초보자부터 B1 정도까지를 위한 코스이며, ‘기초 스웨덴어’로 먼저 시작하면 좋습니다. 짧은 대화 단계로 이루어진 챕터 10개가 있고, 각 단계는 장면이나 문법, 또는 장면이 달리 흘러가는 경우를 다루고, 그 뒤에 객관식 문제가 이어집니다. 각 챕터는 복습으로 끝나고, 답한 문제는 모두 덱의 카드가 됩니다. 단계는 영어로, 대화는 스웨덴어로 되어 있으며, 답은 영어, 독일어, 스페인어, 프랑스어, 한국어로 되어 있습니다. AI의 도움을 받아 썼고, 2026년 11월 기준으로 미국 국무부 외교연수원(Foreign Service Institute)의 Swedish Basic Course(퍼블릭 도메인), 위키데이터, 영어 위키낱말사전으로 확인했습니다."@ko ;
+    prov:wasDerivedFrom <https://archive.org/details/SwedishCourseText> ,
+                        <https://www.wikidata.org/> ;
+    prov:wasGeneratedBy <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#compilation> ;
+    dcterms:created "2026-11-18T12:00:00.000Z"^^xsd:dateTime ;
+    dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> ,
+               topic:languages ,
+               topic:swedish ;
+    dcat:keyword "Swedish"@en ,
+                 "dialogues"@en ,
+                 "everyday life"@en ,
+                 "grammar"@en ,
+                 "beginners"@en ,
+                 "svenska"@sv ,
+                 "dialoger"@sv ,
+                 "vardag"@sv ,
+                 "grammatik"@sv ,
+                 "nybörjare"@sv ,
+                 "Schwedisch"@de ,
+                 "Dialoge"@de ,
+                 "Alltag"@de ,
+                 "Grammatik"@de ,
+                 "Anfänger"@de ,
+                 "sueco"@es ,
+                 "diálogos"@es ,
+                 "vida cotidiana"@es ,
+                 "gramática"@es ,
+                 "principiantes"@es ,
+                 "suédois"@fr ,
+                 "dialogues"@fr ,
+                 "vie quotidienne"@fr ,
+                 "grammaire"@fr ,
+                 "débutants"@fr ,
+                 "스웨덴어"@ko ,
+                 "대화"@ko ,
+                 "일상생활"@ko ,
+                 "문법"@ko ,
+                 "초보자"@ko ;
+    dcterms:language <http://publications.europa.eu/resource/authority/language/SWE> ,
+                     <http://publications.europa.eu/resource/authority/language/ENG> ,
+                     <http://publications.europa.eu/resource/authority/language/DEU> ,
+                     <http://publications.europa.eu/resource/authority/language/SPA> ,
+                     <http://publications.europa.eu/resource/authority/language/FRA> ,
+                     <http://publications.europa.eu/resource/authority/language/KOR> ;
+    solid-memo:studyDirection solid-memo:frontToBack ;
+    solid-memo:formatVersion 6 ;
+    dcat:version "1" ;
+    dcterms:issued "2026-11-18T00:00:00Z"^^xsd:dateTime ;
+    adms:versionNotes "First release." ;
+    dcterms:publisher <#solid-memo> ;
+    dcat:inSeries <#a-year-in-sweden> ;
+    dcat:isVersionOf <#a-year-in-sweden> ;
+    dcat:contactPoint <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#contact> ;
+    dcat:distribution <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#turtle> ;
+    solid-memo:cardCount 107 .
+
+<https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#anton-wiklund>
+    a foaf:Agent ;
+    foaf:name "Anton Wiklund" .
+
+<https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#contact>
+    a vcard:Kind ;
+    vcard:hasURL <https://github.com/solid-memo/website/issues> .
+
+<https://creativecommons.org/licenses/by-sa/4.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/mark/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://creativecommons.org/publicdomain/zero/1.0/>
+    a dcterms:LicenseDocument .
+
+<https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#turtle>
+    a dcat:Distribution ;
+    dcat:accessURL <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl> ;
+    dcat:downloadURL <https://solid-memo.com/decks/a-year-in-sweden/v1.ttl> ;
+    dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle> ;
+    dcterms:format <http://publications.europa.eu/resource/authority/file-type/RDF_TURTLE> .
+
+<https://solid-memo.com/decks/a-year-in-sweden/v1.ttl#compilation>
+    a prov:Activity .
+
+<https://archive.org/details/SwedishCourseText>
+    dcterms:title "Swedish Basic Course (Foreign Service Institute, 1982), student text as scanned on the Internet Archive (item \"Swedish Basic Course Text\")" ;
+    dcterms:creator "Ingrid Beach, Anne-Marie Carnemark, Margareta Feller and Margareta Weyl, with the editorial assistance of Allen I. Weinstein; Foreign Service Institute, U.S. Department of State" ;
+    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
+
+<https://www.wikidata.org/>
+    dcterms:title "Wikidata (Swedish lexemes and items)" ;
+    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
+    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
+    dcterms:title "Wikidata" ;
+    dcterms:creator "Wikidata contributors" ;
+    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ,
+                  "Wikidata (English lexemes and items)" ,
+                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
+                  "Wikidata (Finnish lexemes and items)" ,
+                  "Wikidata (French lexemes and items)" ,
+                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
+                  "Wikidata (German lexemes and items)" ,
+                  "Wikidata (Italian lexemes and items)" ,
+                  "Wikidata (Japanese lexemes and items)" ,
+                  "Wikidata (Korean lexemes and items)" ,
+                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
+                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
+                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
+                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
+                  "Wikidata (Portuguese lexemes and items)" ,
+                  "Wikidata (Spanish lexemes and items)" ,
+                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
+                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
+
+<https://en.wiktionary.org/>
+    dcterms:title "English Wiktionary (Swedish entries)" ;
+    dcterms:creator "Wiktionary contributors" ;
+    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
+    dcterms:title "English Wiktionary (Arabic entries, as extracted by Wiktextract on kaikki.org)" ,
+                  "English Wiktionary (English entries)" ,
+                  "English Wiktionary (Finnish entries)" ,
+                  "English Wiktionary (French entries)" ,
+                  "English Wiktionary (German entries)" ,
+                  "English Wiktionary (Italian entries)" ,
+                  "English Wiktionary (Japanese entries)" ,
+                  "English Wiktionary (Korean entries, as extracted by Wiktextract on kaikki.org)" ,
+                  "English Wiktionary (Korean entries)" ,
+                  "English Wiktionary (Korean, Swedish, German, Spanish and French entries)" ,
+                  "Wiktionary, the free dictionary (English edition)" ,
+                  "English Wiktionary (Portuguese entries)" ,
+                  "English Wiktionary" ,
+                  "English Wiktionary (Spanish entries)" .
 
 <#academy-award-best-picture>
     a dcat:DatasetSeries ,
@@ -274,12 +479,6 @@
 <https://solid-memo.com/decks/academy-award-best-picture/v2.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
-
-<https://creativecommons.org/licenses/by-sa/4.0/>
-    a dcterms:LicenseDocument .
-
-<https://creativecommons.org/publicdomain/zero/1.0/>
-    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/academy-award-best-picture/v2.ttl#compilation>
     a prov:Activity .
@@ -427,24 +626,6 @@
     dcterms:title "wordfreq 3.1.1 (Arabic word frequencies from Wikipedia, film and TV subtitles, news, the web and Twitter)" ;
     dcterms:creator "Robyn Speer" ;
     dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> .
-
-<https://en.wiktionary.org/>
-    dcterms:title "English Wiktionary (Arabic entries, as extracted by Wiktextract on kaikki.org)" ;
-    dcterms:creator "Wiktionary contributors" ;
-    dcterms:license <https://creativecommons.org/licenses/by-sa/4.0/> ;
-    dcterms:title "English Wiktionary (English entries)" ,
-                  "English Wiktionary (Finnish entries)" ,
-                  "English Wiktionary (French entries)" ,
-                  "English Wiktionary (German entries)" ,
-                  "English Wiktionary (Italian entries)" ,
-                  "English Wiktionary (Japanese entries)" ,
-                  "English Wiktionary (Korean entries, as extracted by Wiktextract on kaikki.org)" ,
-                  "English Wiktionary (Korean entries)" ,
-                  "English Wiktionary (Korean, Swedish, German, Spanish and French entries)" ,
-                  "Wiktionary, the free dictionary (English edition)" ,
-                  "English Wiktionary (Portuguese entries)" ,
-                  "English Wiktionary" ,
-                  "English Wiktionary (Spanish entries)" .
 
 <https://solid-memo.com/decks/arabic-adjectives/v1.ttl#turtle>
     a dcat:Distribution ;
@@ -963,31 +1144,6 @@
 
 <https://solid-memo.com/decks/brain-regions/v1.ttl#compilation>
     a prov:Activity .
-
-<https://www.wikidata.org/>
-    dcterms:title "Wikidata" ;
-    dcterms:creator "Wikidata contributors" ;
-    dcterms:license <https://creativecommons.org/publicdomain/zero/1.0/> ;
-    dcterms:title "Wikidata: the items of the 43 ions (one per PubChem CID), with their chemical formula (P274), PubChem CID (P662) and English and Swedish labels and aliases" ;
-    dcterms:creator "Wikidata contributors (Wikimedia Foundation)" ;
-    dcterms:title "Wikidata (English lexemes and items)" ,
-                  "Wikidata: the films' items, their labels in six languages, publication dates and cast" ,
-                  "Wikidata (Finnish lexemes and items)" ,
-                  "Wikidata (French lexemes and items)" ,
-                  "Wikidata: items of the geometric figures and theorems, their English and Swedish labels and their defining formulas (P2534)" ,
-                  "Wikidata (German lexemes and items)" ,
-                  "Wikidata (Italian lexemes and items)" ,
-                  "Wikidata (Japanese lexemes and items)" ,
-                  "Wikidata (Korean lexemes and items)" ,
-                  "Wikidata: mathematical concepts, their symbols, labels and ISO 80000-2 records" ,
-                  "Wikidata: file formats with their MIME type (P1163) and file extension (P1195)" ,
-                  "Wikidata: the items of the 46 species (taxon name P225, taxon common name P1843, Dyntaxa ID P1939, English and Swedish labels and aliases) and the item of Hedlundia intermedia" ,
-                  "Wikidata: items of the physical quantities and laws, with their English and Swedish labels, quantity symbols (P416) and defining formulas (P2534)" ,
-                  "Wikidata (Portuguese lexemes and items)" ,
-                  "Wikidata (Spanish lexemes and items)" ,
-                  "Wikidata (Swedish lexemes and items)" ,
-                  "Wikidata: items of the trigonometric functions, identities, laws and angle units, their labels, defining formulas (P2534) and conversion to SI unit (P2370)" ,
-                  "Wikidata: the mouth of the watercourse (P403) of each river, and the English and Swedish labels and aliases of the rivers and of the waters they flow into" .
 
 <https://mesh.kib.ki.se/>
     dcterms:title "Svensk MeSH 2026 (Swedish translation of Medical Subject Headings)" ;
@@ -3720,9 +3876,6 @@
 <https://solid-memo.com/decks/english-basics/v1.ttl#anton-wiklund>
     a foaf:Agent ;
     foaf:name "Anton Wiklund" .
-
-<https://creativecommons.org/publicdomain/mark/1.0/>
-    a dcterms:LicenseDocument .
 
 <https://solid-memo.com/decks/english-basics/v1.ttl#compilation>
     a prov:Activity .
@@ -18187,11 +18340,6 @@
 
 <https://solid-memo.com/decks/swedish-basics/v1.ttl#compilation>
     a prov:Activity .
-
-<https://archive.org/details/SwedishCourseText>
-    dcterms:title "Swedish Basic Course (Foreign Service Institute, 1982), student text as scanned on the Internet Archive (item \"Swedish Basic Course Text\")" ;
-    dcterms:creator "Ingrid Beach, Anne-Marie Carnemark, Margareta Feller and Margareta Weyl, with the editorial assistance of Allen I. Weinstein; Foreign Service Institute, U.S. Department of State" ;
-    dcterms:license <https://creativecommons.org/publicdomain/mark/1.0/> .
 
 <https://solid-memo.com/decks/swedish-basics/v1.ttl#turtle>
     a dcat:Distribution ;
