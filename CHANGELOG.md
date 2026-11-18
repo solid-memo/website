@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.9.1](https://github.com/solid-memo/website/compare/v7.9.0...v7.9.1) (2026-11-18)
+
+### Fixes
+
+* **solid:** check the catalog node before publishing or deleting a draft ([c0fa2cb](https://github.com/solid-memo/website/commit/c0fa2cb23af799232f0e1d76623030be47120855))
+
 ## [7.9.0](https://github.com/solid-memo/website/compare/v7.8.0...v7.9.0) (2026-11-18)
 
 ### Features
