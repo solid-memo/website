@@ -1479,7 +1479,13 @@ own pod, as a draft, before publishing it
   document, and `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's catalog, they
   belong to no shape, so `CatalogV1` keeps them through every write.
-  Only a link to a draft's place in the same instance is followed. A
+  A catalog node a newer version wrote is never changed
+  (`writtenByNewerApp`). So making a draft, deleting one and
+  publishing check the node before anything is written
+  ([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Such a
+  refusal leaves no draft unlinked, no link to a deleted draft, and no
+  release written that the catalog doesn't list. Only a link to a
+  draft's place in the same instance is followed. A
   learner's app reads `sm:publishedRelease` in a creator's shared
   catalog to find newer versions of a release it added from a link,
   only in the instance the release's address names, and only those
@@ -1547,14 +1553,16 @@ own pod, as a draft, before publishing it
   (`If-None-Match: *`). A 412 is `releaseTaken`, unless the document
   there states the same statements, its `dcterms:issued` and
   `dcterms:modified` aside, and no other draft of the instance names it:
-  then publishing goes on from there. Next, only `<release>.acl` or
+  then publishing goes on from there. Next, the catalog links it
+  (`sm:publishedRelease`, If-Match, read and made again on a 412), so
+  a link refused leaves no release public that the app can't find.
+  Then only `<release>.acl` or
   `<release>.acr` ([glossary](glossary.md#solid-and-the-web)), on the
   release's origin, gets public read and nothing else, and no other
   access control changes. Where a server names another one as the
   document's, such as the folder's, that one's left as it is and the
-  release stays private. Then the
-  catalog links it (`sm:publishedRelease`, If-Match, read and made
-  again on a 412), and the draft names it (`sm:releasedAs`), If-Match on
+  release stays private. Then the draft names it (`sm:releasedAs`),
+  If-Match on
   the version the draft was checked and assembled at
   (`changedElsewhere`). A failure after the PUT is finished by
   publishing again at the same address. The app never writes a release

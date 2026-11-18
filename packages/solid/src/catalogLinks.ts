@@ -39,25 +39,55 @@ export function refuseFullDeckList(decks: readonly unknown[]): void {
     throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
 }
 
+/** The instance's catalog node, as read; null without a catalog or without one in it. */
+export async function catalogNode(
+  instanceUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<NamedSubject | null> {
+  const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
+  return catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
+}
+
 /** What the catalog links by `predicate`, in the order it names them; none without a catalog, and catalogTooManyLinks past MAX_CATALOG_LINKS. */
 export async function catalogLinks(
   instanceUrl: string,
   predicate: string,
   fetch: typeof globalThis.fetch,
 ): Promise<string[]> {
-  const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
-  const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
+  const node = await catalogNode(instanceUrl, fetch);
   return node === null ? [] : withinCatalogLimit(getUrlAll(node, predicate));
 }
 
-/** Refuse, as catalogFull, linking `url` by `predicate` when the catalog links MAX_CATALOG_LINKS others by it already: none of them would be read. */
+/**
+ * Refuse, as writtenByNewerApp, a change to the catalog's links when a
+ * newer version of the app wrote its node, as changeCatalog would. A
+ * change that comes after other writes (a release written, a draft's
+ * documents deleted) asks this first, so a refusal leaves them undone.
+ */
+export async function refuseNewerCatalog(
+  instanceUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  const node = await catalogNode(instanceUrl, fetch);
+  if (node !== null) unlessNewer(node);
+}
+
+/**
+ * Refuse linking `url` by `predicate` where addCatalogLink would refuse
+ * it after: as noCatalogToUpdate without a catalog, as writtenByNewerApp
+ * when a newer version of the app wrote the catalog's node
+ * (refuseNewerCatalog), and as catalogFull when the catalog links
+ * MAX_CATALOG_LINKS others by it already, none of which would be read.
+ */
 export async function refuseFullCatalog(
   instanceUrl: string,
   predicate: string,
   url: string,
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
-  const links = await catalogLinks(instanceUrl, predicate, fetch);
+  const node = await catalogNode(instanceUrl, fetch);
+  if (node === null) throw new AppError("noCatalogToUpdate");
+  const links = withinCatalogLimit(getUrlAll(unlessNewer(node), predicate));
   if (!links.includes(url) && links.length >= MAX_CATALOG_LINKS)
     throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
 }

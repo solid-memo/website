@@ -132,7 +132,7 @@ export function createSolidReleasePublisher({
 
   return {
     async publish(instanceUrl, turtle, targetUrl) {
-      // Before the release is written: one the catalog has no room to link would be public, and listed nowhere.
+      // Before the release is written: one the catalog has no room to link, or whose node a newer version wrote, would be listed nowhere.
       await refuseFullCatalog(instanceUrl, SM.publishedRelease, targetUrl, dataFetch);
       const response = await fetch(targetUrl, {
         method: "PUT",
@@ -144,10 +144,10 @@ export function createSolidReleasePublisher({
           throw new AppError("releaseTaken", { url: targetUrl });
       } else if (!response.ok)
         throw new AppError("addFailed", { url: targetUrl, status: response.status });
-      const shared = await share(targetUrl);
+      // Listed before it is made public: a link refused leaves no release public that the app cannot find.
       // Through the fetch listPublished reads the catalog with, so that the write forgets the read it kept (datasets.ts).
       await addCatalogLink(instanceUrl, SM.publishedRelease, targetUrl, dataFetch);
-      return { public: shared };
+      return { public: await share(targetUrl) };
     },
 
     async makePublic(instanceUrl, url) {
