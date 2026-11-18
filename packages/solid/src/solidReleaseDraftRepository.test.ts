@@ -41,6 +41,7 @@ import {
   toStandaloneLibraryDeck,
 } from "./mappers/libraryMapper";
 import { draftQuads } from "./mappers/releaseDraftMapper";
+import { createSolidReleasePublisher } from "./solidReleasePublisher";
 import {
   DECKS,
   draftPod,
@@ -2627,5 +2628,77 @@ describe("a catalog node a newer version of the app wrote", () => {
       code: "writtenByNewerApp",
     });
     expect(writes(pod, from)).toEqual([]);
+  });
+});
+
+describe("publishing a draft whose root a newer app wrote (GHSA-9grp-qx53-cphh)", () => {
+  const TARGET = `${INSTANCE}releases/solid/v1.ttl`;
+  const STAMP = `<${SM}formatVersion> "1"`;
+  const markdownCheck = { problems: () => [], chunks: () => ({ chunks: 1, empty: 0 }) };
+
+  /** The course draft on a pod, its root stamped `version`, and publishing it, its check clean. */
+  async function publishingAt(version: number) {
+    const pod = await draftPod({ checked: true });
+    await pod.repository.create(INSTANCE, course());
+    const text = await pod.text(DRAFT);
+    expect(text).toContain(STAMP);
+    await pod.put(DRAFT, text.replace(STAMP, `<${SM}formatVersion> "${version}"`));
+    const grantPublicRead = vi.fn(async () => true);
+    const publisher = createSolidReleasePublisher({
+      fetch: pod.fetch,
+      dataFetch: pod.fetch,
+      shareFetch: pod.fetch,
+      publicFetch: pod.fetch,
+      grantPublicRead,
+    });
+    const drafts = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: {} as never,
+      deckLibrary: {} as never,
+      shapeValidator: pod.validator,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: publisher,
+      now: () => new Date(NOW),
+    });
+    const clean = { rules: [], library: [], drops: [], markdown: [], shapes: null };
+    const publishing = createReleasePublishingUseCases({
+      drafts: { readReleaseDraft: drafts.readReleaseDraft, checkReleaseDraft: async () => clean },
+      releaseDraftRepository: pod.repository,
+      releasePublisher: publisher,
+      shapeValidator: { validateRelease: async () => [] },
+      deckLibrary: {} as never,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      now: () => new Date(NOW),
+    });
+    return {
+      pod,
+      grantPublicRead,
+      publish: () => publishing.publishRelease(DRAFT, TARGET, markdownCheck),
+    };
+  }
+
+  it("publishes, lists and marks the draft released when its root is in this app's format", async () => {
+    const { pod, grantPublicRead, publish } = await publishingAt(1);
+    await publish();
+    expect(await pod.urls()).toContain(TARGET);
+    expect(grantPublicRead).toHaveBeenCalled();
+    expect(await pod.text(CATALOG)).toContain(TARGET);
+    expect(await pod.text(DRAFT)).toContain(`<${SM}releasedAs> <${TARGET}>`);
+  });
+
+  it("refuses it as a newer app's before anything is written: no release, no access, no catalog link", async () => {
+    const { pod, grantPublicRead, publish } = await publishingAt(2);
+    const catalog = await pod.text(CATALOG);
+    const from = pod.requests.length;
+    await expect(publish()).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+      vars: { url: DRAFT, version: 2, writes: 1 },
+    });
+    expect(writes(pod, from)).toEqual([]);
+    expect(grantPublicRead).not.toHaveBeenCalled();
+    expect(await pod.urls()).not.toContain(TARGET);
+    expect(await pod.text(CATALOG)).toBe(catalog);
   });
 });

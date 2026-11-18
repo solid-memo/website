@@ -2626,8 +2626,11 @@ releases it, two ways.
   outside a field's list. No editor or check would see the
   difference, so the Studio doesn't open that draft either. A subject
   in a format newer than the Studio's is refused too, with the
-  message to use a newer version (`writtenByNewerApp`). Each value a shape owns is published as the value
-  the check saw.
+  message to use a newer version (`writtenByNewerApp`). So is a draft
+  whose root is in a newer format: the Studio couldn't mark it
+  released, so it's refused before the release is written, not after
+  it's public and listed, and the Studio doesn't open it either. Each
+  value a shape owns is published as the value the check saw.
   Download .ttl refuses these the same way, at the library's address.
   A copy of the draft leaves out the statements of a subject named
   otherwise, and is refused, like the draft, for a value stated
