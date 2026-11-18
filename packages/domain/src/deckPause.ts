@@ -15,7 +15,7 @@ import { isCarriedOverInstant } from "./reviewStateEdits";
  *
  * The record stays once the deck resumes, by hand or on its day: the
  * resume day then says when the pause ended, and the cards that fell
- * due before it are the backlog the deck catches up on.
+ * due before it are the backlog the deck catches up on (backlogDayOf).
  * Pausing again replaces it.
  */
 export interface DeckPause {
@@ -52,6 +52,17 @@ export function isPaused(deck: Pick<Deck, "pause">, today: string): boolean {
 }
 
 /**
+ * The day a deck resumed on, when it was paused and is no longer on
+ * `today`: its cards due before that day fell due during the pause (or
+ * before it), the backlog it catches up on. Undefined for a deck that
+ * is paused or was never paused.
+ */
+export function backlogDayOf(deck: Pick<Deck, "pause">, today: string): string | undefined {
+  const resumesOn = deck.pause?.resumesOn;
+  return resumesOn !== undefined && resumesOn <= today ? resumesOn : undefined;
+}
+
+/**
  * The deck paused from `now`, until the learner resumes it (null) or
  * until the study day `resumesOn`, which must come after `today`.
  * Throws resumeDayInvalid on a day that is no day, today or earlier.
@@ -68,8 +79,8 @@ export function withPause(deck: Deck, now: Date, resumesOn: string | null, today
 
 /**
  * The deck resumed on `today`: its pause keeps its start, and today
- * becomes its resume day, so the backlog it left is known. A deck that
- * is not paused on `today` comes back as it is.
+ * becomes its resume day, so the backlog it left is known
+ * (backlogDayOf). A deck that is not paused on `today` comes back as it is.
  */
 export function withResume(deck: Deck, today: string): Deck {
   if (!isPaused(deck, today)) return deck;

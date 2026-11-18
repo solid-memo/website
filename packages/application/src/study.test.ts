@@ -87,6 +87,44 @@ describe("study", () => {
     expect(queue.newPrompts).toEqual([]);
     expect(queue.states).toEqual([state]);
   });
+  it("getStudyQueue takes a resumed deck's backlog most likely remembered first, nothing new while it outnumbers a day's limit", async () => {
+    const deps = makeDeps();
+    const stateOf = (cardId: string, intervalDays: number): ReviewState => ({
+      cardId,
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays,
+      repetitions: 3,
+      due: "2026-09-01",
+      firstReviewedAt: "2026-08-01T10:00:00.000Z",
+      lastReviewedAt: "2026-08-01T10:00:00.000Z",
+      formatVersion: 2,
+    });
+    const cardOf = (id: string) => ({ ...card, id, url: `${deck.cardsDocumentUrl}#${id}` });
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue(
+      ["weak", "strong", "new"].map(cardOf),
+    );
+    // Without FSRS-6 states, each memory is estimated from its SM-2 state: the longer interval holds better.
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(
+      sm2s([stateOf("weak", 2), stateOf("strong", 30)]),
+    );
+    const useCases = createUseCases(deps);
+    const resumed = {
+      ...deck,
+      maxReviewsPerDay: 1,
+      pause: { pausedAt: "2026-08-02T10:00:00.000Z", resumesOn: "2026-09-20" },
+    };
+    const queue = await useCases.getStudyQueue(instance.url, resumed, new Date(2026, 8, 21, 12, 0));
+    expect(queue.due.map((p) => p.card.id)).toEqual(["strong"]);
+    expect(queue.newPrompts).toEqual([]);
+    const roomy = await useCases.getStudyQueue(
+      instance.url,
+      { ...resumed, maxReviewsPerDay: 5 },
+      new Date(2026, 8, 21, 12, 0),
+    );
+    expect(roomy.due.map((p) => p.card.id)).toEqual(["strong", "weak"]);
+    expect(roomy.newPrompts.map((p) => p.card.id)).toEqual(["new"]);
+  });
   it("getStudyQueue goes by FSRS-6's due days when the preferences name it, else SM-2's", async () => {
     const deps = makeDeps();
     const dueCard = { ...card, id: "card-due", url: `${deck.cardsDocumentUrl}#card-due` };

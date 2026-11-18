@@ -17,6 +17,7 @@ import {
   nextMemory,
   ratingOfGrade,
   recallNow,
+  recallOn,
   retrievability,
   usableDesiredRetention,
   type FsrsMemory,
@@ -184,6 +185,49 @@ describe("recallNow", () => {
   it("is certain the same study day, and when the last review is later than now", () => {
     expect(recallNow(state, new Date(2026, 9, 5, 20), 4)).toBe(1);
     expect(recallNow(state, new Date(2026, 9, 1, 12), 4)).toBe(1);
+  });
+});
+
+describe("recallOn", () => {
+  // Instants in local time, as study days are.
+  const lastReviewedAt = new Date(2026, 9, 5, 10).toISOString();
+  const sm2: ReviewState = {
+    cardId: "a",
+    direction: "front-to-back",
+    easeFactor: 2.5,
+    intervalDays: 10,
+    repetitions: 3,
+    due: "2026-10-15",
+    firstReviewedAt: lastReviewedAt,
+    lastReviewedAt,
+    formatVersion: 2,
+  };
+  const fsrs: FsrsState = {
+    cardId: "a",
+    direction: "front-to-back",
+    stability: 4,
+    difficulty: 5,
+    due: "2026-10-09",
+    firstReviewedAt: lastReviewedAt,
+    lastReviewedAt,
+    formatVersion: 1,
+  };
+
+  it("goes by the fresh FSRS-6 state, at the study days since the last review", () => {
+    const recall = recallOn([sm2], [fsrs], "2026-10-09", 4);
+    expect(recall.get("front-to-back/a")!.stability).toBe(4);
+    expectNear(recall.get("front-to-back/a")!.recall, 0.9);
+  });
+
+  it("goes by the estimate of the SM-2 state without a fresh FSRS-6 state, and leaves out an FSRS-6 state alone", () => {
+    const stale = { ...fsrs, lastReviewedAt: new Date(2026, 9, 1, 10).toISOString() };
+    const orphan = { ...fsrs, cardId: "b" };
+    const recall = recallOn([sm2], [stale, orphan], "2026-10-05", 4);
+    expect([...recall.keys()]).toEqual(["front-to-back/a"]);
+    expect(recall.get("front-to-back/a")).toEqual({
+      recall: 1,
+      stability: memoryFromSm2(sm2).stability,
+    });
   });
 });
 

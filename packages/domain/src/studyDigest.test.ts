@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import { monthOfStudyDay, shiftStudyDay, type Answer } from "./answer";
 import type { Card, DeckDirection, StudyDirection } from "./deck";
 import { DEFAULT_PREFERENCES, type StudyPreferences } from "./preferences";
-import type { ReviewState } from "./review";
+import { reviewKeyOf, type ReviewState } from "./review";
 import { buildStudyQueue } from "./scheduling";
 import { statisticsOf, todayOf, welcomeBackOf } from "./statistics";
 import { calendarStartOf } from "./studyPatterns";
@@ -82,7 +82,14 @@ const reviews = [
   review("gone", "2026-09-20", lastWeek),
 ];
 
-function queueCounts(input: { direction: DeckDirection; prefs: StudyPreferences; at: Date }) {
+function queueCounts(input: {
+  direction: DeckDirection;
+  prefs: StudyPreferences;
+  at: Date;
+  backlogBefore?: string;
+}) {
+  // The counts do not depend on the backlog's order: any memory will do.
+  const memory = new Map(reviews.map((r) => [reviewKeyOf(r), { recall: 0.5, stability: 1 }]));
   const queue = buildStudyQueue({
     cards,
     direction: input.direction,
@@ -90,6 +97,9 @@ function queueCounts(input: { direction: DeckDirection; prefs: StudyPreferences;
     prefs: input.prefs,
     now: input.at,
     random: () => 0,
+    ...(input.backlogBefore === undefined
+      ? {}
+      : { backlog: { before: input.backlogBefore, memory } }),
   });
   return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
 }
@@ -100,7 +110,11 @@ describe("a deck schedule", () => {
     DEFAULT_PREFERENCES,
     { ...DEFAULT_PREFERENCES, newCardsPerDay: 1, maxReviewsPerDay: 2 },
     { ...DEFAULT_PREFERENCES, newCardsPerDay: 0, maxReviewsPerDay: 0 },
+    // A backlog of two or three outnumbers a day's limit of one: no new prompts.
+    { ...DEFAULT_PREFERENCES, newCardsPerDay: 2, maxReviewsPerDay: 1 },
   ];
+  // No pause; a backlog of every prompt due by today; one of those due before the 21st.
+  const backlogs = [undefined, "2026-09-21", "2026-09-22"];
 
   it.each(directions)(
     "counts what buildStudyQueue counts, on the day it was computed and later (%s)",
@@ -115,10 +129,13 @@ describe("a deck schedule", () => {
       });
       for (const prefs of caps) {
         for (const at of [now, tomorrow, later]) {
-          // Later days: nothing was reviewed since (else the reviews document, and so the schedule, would be new).
-          expect(studyCountsOf(schedule, { direction, prefs, now: at })).toEqual(
-            queueCounts({ direction, prefs, at }),
-          );
+          for (const backlogBefore of backlogs) {
+            const backlog = backlogBefore === undefined ? {} : { backlogBefore };
+            // Later days: nothing was reviewed since (else the reviews document, and so the schedule, would be new).
+            expect(studyCountsOf(schedule, { direction, prefs, now: at, ...backlog })).toEqual(
+              queueCounts({ direction, prefs, at, ...backlog }),
+            );
+          }
         }
       }
     },

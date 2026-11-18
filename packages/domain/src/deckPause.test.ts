@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
-import { isPaused, storedPause, withPause, withResume } from "./deckPause";
+import { backlogDayOf, isPaused, storedPause, withPause, withResume } from "./deckPause";
 
 const deck = { id: "deck-a", url: "https://pod.example/catalog.ttl#deck-a" } as Deck;
 const pausedAt = "2026-03-01T12:00:00.000Z";
@@ -20,7 +20,7 @@ describe("storedPause", () => {
   });
 });
 
-describe("isPaused", () => {
+describe("isPaused and backlogDayOf", () => {
   it("tells a paused deck from one that resumed, by the study day", () => {
     const open = { pause: { pausedAt } };
     const until = { pause: { pausedAt, resumesOn: "2026-03-09" } };
@@ -28,6 +28,10 @@ describe("isPaused", () => {
     expect(isPaused(open, "2030-01-01")).toBe(true);
     expect(isPaused(until, "2026-03-08")).toBe(true);
     expect(isPaused(until, "2026-03-09")).toBe(false);
+    expect(backlogDayOf({}, "2026-03-09")).toBeUndefined();
+    expect(backlogDayOf(open, "2026-03-09")).toBeUndefined();
+    expect(backlogDayOf(until, "2026-03-08")).toBeUndefined();
+    expect(backlogDayOf(until, "2026-03-20")).toBe("2026-03-09");
   });
 });
 

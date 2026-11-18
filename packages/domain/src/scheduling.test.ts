@@ -295,6 +295,56 @@ describe("buildStudyQueue", () => {
   });
 });
 
+describe("buildStudyQueue after a pause", () => {
+  const now = new Date(2026, 8, 21, 12, 0);
+  const at = new Date(2026, 7, 1, 12, 0);
+  const cards = ["low", "high", "firm", "soft", "late", "new1", "new2"].map(card);
+  const reviews = [
+    review("low", "2026-09-02", at),
+    review("high", "2026-09-05", at),
+    review("firm", "2026-09-10", at),
+    review("soft", "2026-09-10", at),
+    // Fell due after the deck resumed: on its own day, after the backlog.
+    review("late", "2026-09-20", at),
+  ];
+  const memory = new Map([
+    ["front-to-back/low", { recall: 0.2, stability: 3 }],
+    ["front-to-back/high", { recall: 0.9, stability: 40 }],
+    ["front-to-back/firm", { recall: 0.6, stability: 30 }],
+    ["front-to-back/soft", { recall: 0.6, stability: 10 }],
+    ["front-to-back/late", { recall: 0.95, stability: 50 }],
+  ]);
+  const queueWith = (prefs: StudyPreferences) =>
+    buildStudyQueue({
+      cards,
+      direction: "front-to-back",
+      reviews,
+      prefs,
+      now,
+      random: () => 0,
+      backlog: { before: "2026-09-15", memory },
+    });
+
+  it("takes the backlog first, the prompts most likely remembered first, then higher stability, then the rest by due day", () => {
+    const queue = queueWith({ ...DEFAULT_PREFERENCES, maxReviewsPerDay: 10 });
+    expect(queue.due.map((p) => p.card.id)).toEqual(["high", "firm", "soft", "low", "late"]);
+    // Four left of the backlog fit within a day's ten reviews: new prompts come again.
+    expect(queue.newPrompts).toHaveLength(2);
+  });
+
+  it("caps the day at the review limit, and introduces nothing new while the backlog outnumbers it", () => {
+    const queue = queueWith({ ...DEFAULT_PREFERENCES, maxReviewsPerDay: 3 });
+    expect(queue.due.map((p) => p.card.id)).toEqual(["high", "firm", "soft"]);
+    expect(queue.newPrompts).toEqual([]);
+  });
+
+  it("holds nothing new back under a review limit of 0, which takes no backlog", () => {
+    const queue = queueWith({ ...DEFAULT_PREFERENCES, maxReviewsPerDay: 0 });
+    expect(queue.due).toEqual([]);
+    expect(queue.newPrompts).toHaveLength(2);
+  });
+});
+
 describe("buildStudyQueue directions", () => {
   it("makes two prompts of every card in a bidirectional deck, each scheduled on its own", () => {
     const cards = [card("a"), card("b")];

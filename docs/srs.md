@@ -545,7 +545,9 @@ prompts: their review states are kept, but never due and never new.
 
 The budgets count prompts: a bidirectional deck spends two of the day's
 new-card budget on a card introduced both ways. Both budgets clamp at
-zero.
+zero. A deck paused today has neither, and one that resumed from a
+pause catches up on its backlog first
+([Pausing a deck](#pausing-a-deck)).
 
 New instances start at 5 new cards per day, with a note beside the
 field that each brings reviews later. A format-1 preferences document
@@ -841,6 +843,30 @@ On a study day before its resume day:
   ([courses.md](courses.md#the-learners-state)).
 - It stays in its place on the deck list, and it still opens in the
   Browser and the Studio; its preferences can still be edited.
+
+### Catching up after a pause
+
+A deck that resumed has a backlog: its prompts due before the day it
+resumed (`backlogDayOf`), which fell due during the pause or before it.
+While any are left, `buildStudyQueue` takes them first, then the
+prompts that fell due since, each on its own day, oldest first. The
+review limit caps them all together, so each day takes at most a day's
+reviews of the backlog, and the cards not yet due keep their due days.
+
+- **Order**: the backlog goes highest chance of recall today first,
+  then higher stability (`recallOn` in
+  [fsrs.ts](../packages/domain/src/fsrs.ts): a prompt's fresh FSRS-6
+  state, else the FSRS-6 estimate of its SM-2 state, `memoryFromSm2`,
+  whichever scheduler sets the due days). These are the cards a review
+  can still save. Short-stability cards that are probably forgotten cost
+  about the same to relearn a few days later.
+- **No new cards** come from the deck while more of the backlog is left
+  than a day's review limit takes (`holdsNewPrompts`). A limit of 0
+  takes none of it, and holds nothing back.
+
+`studyCountsOf` counts the same from the digest's due days, so the deck
+list's counts match the session. The backlog ends once none of its
+prompts is due; the pause's record stays until the deck is paused again.
 
 ### Never rewriting review state
 

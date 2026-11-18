@@ -9,7 +9,7 @@ import type { Scheduler } from "./fsrs";
 import type { StudyPreferences } from "./preferences";
 import { reviewKeyOf, type DueState } from "./review";
 import { isStudyDay } from "./reviewStateEdits";
-import { studyDayOf } from "./scheduling";
+import { holdsNewPrompts, studyDayOf } from "./scheduling";
 import {
   dailyActivity,
   retentionOf,
@@ -92,9 +92,15 @@ export function scheduleOf(input: {
  */
 export function studyCountsOf(
   schedule: DeckSchedule,
-  input: { direction: DeckDirection; prefs: StudyPreferences; now: Date },
+  input: {
+    direction: DeckDirection;
+    prefs: StudyPreferences;
+    now: Date;
+    /** For a deck that resumed from a pause, its resume day, as buildStudyQueue's backlog. */
+    backlogBefore?: string;
+  },
 ): { dueCount: number; newCount: number } | null {
-  const { direction, prefs, now } = input;
+  const { direction, prefs, now, backlogBefore } = input;
   if (
     schedule.direction !== direction ||
     schedule.dayBoundaryHour !== prefs.dayBoundaryHour ||
@@ -110,9 +116,14 @@ export function studyCountsOf(
   const due = Object.entries(schedule.dueByDay)
     .filter(([day]) => day <= today)
     .reduce((sum, [, count]) => sum + count, 0);
+  const behind = Object.entries(schedule.dueByDay)
+    .filter(([day]) => backlogBefore !== undefined && day < backlogBefore)
+    .reduce((sum, [, count]) => sum + count, 0);
   return {
     dueCount: Math.min(due, Math.max(0, prefs.maxReviewsPerDay - reviewedToday)),
-    newCount: Math.min(schedule.unreviewed, Math.max(0, prefs.newCardsPerDay - introducedToday)),
+    newCount: holdsNewPrompts(behind, prefs)
+      ? 0
+      : Math.min(schedule.unreviewed, Math.max(0, prefs.newCardsPerDay - introducedToday)),
   };
 }
 

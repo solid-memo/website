@@ -358,6 +358,38 @@ export function recallNow(
   );
 }
 
+/** A prompt's memory on a study day: its chance of recall then, and the stability it has. */
+export interface PromptRecall {
+  recall: number;
+  stability: number;
+}
+
+/**
+ * Each prompt's chance of recall on the study day `day`, by its review
+ * key (reviewKeyOf), one per SM-2 state: by its fresh FSRS-6 state, else
+ * by the FSRS-6 estimate of its SM-2 state (memoryFromSm2), as a review
+ * would build on, whichever scheduler sets the due days. The days are
+ * those from its last review to `day` (0 when `day` is no later, or the
+ * last review counts as none). An FSRS-6 state without an SM-2 state
+ * counts for nothing, as in effectiveStates.
+ */
+export function recallOn(
+  sm2: readonly ReviewState[],
+  fsrs: readonly FsrsState[],
+  day: string,
+  dayBoundaryHour: number,
+): Map<string, PromptRecall> {
+  const fsrsOf = new Map(fsrs.map((state) => [reviewKeyOf(state), state]));
+  return new Map(
+    sm2.map((state) => {
+      const own = fsrsOf.get(reviewKeyOf(state));
+      const { stability } = own !== undefined && isFresh(own, state) ? own : memoryFromSm2(state);
+      const elapsed = daysSinceReview(state.lastReviewedAt, day, dayBoundaryHour);
+      return [reviewKeyOf(state), { recall: retrievability(elapsed, stability), stability }];
+    }),
+  );
+}
+
 /**
  * The FSRS-6 state after a rating `now`, given the prompt's states
  * before it (`sm2`, `fsrs`; null when there is none). The memory builds
