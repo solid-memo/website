@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.9.2](https://github.com/solid-memo/website/compare/v7.9.1...v7.9.2) (2026-11-18)
+
+### Fixes
+
+* **solid:** refuse a draft whose root a newer app wrote before publishing ([d805444](https://github.com/solid-memo/website/commit/d805444f2ca1b1ae911ad2656758089492584341))
+
 ## [7.9.1](https://github.com/solid-memo/website/compare/v7.9.0...v7.9.1) (2026-11-18)
 
 ### Fixes
