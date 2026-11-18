@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.8.0](https://github.com/solid-memo/website/compare/v7.7.0...v7.8.0) (2026-11-18)
+
+### Features
+
+* **decks:** learn Swedish from a year of everyday dialogues ([4970e3d](https://github.com/solid-memo/website/commit/4970e3d6294ab8b500dc4e2a5c5fb8c65f846abc)), closes [#884](https://github.com/solid-memo/website/issues/884)
+
 ## [7.7.0](https://github.com/solid-memo/website/compare/v7.6.20...v7.7.0) (2026-11-18)
 
 ### Features
