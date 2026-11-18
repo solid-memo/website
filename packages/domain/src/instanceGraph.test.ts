@@ -484,6 +484,7 @@ describe("instanceGraphOf", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -499,6 +500,7 @@ describe("instanceGraphOf", () => {
       },
       2_500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

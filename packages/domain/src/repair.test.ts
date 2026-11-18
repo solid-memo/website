@@ -242,6 +242,7 @@ describe("planRepair", () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

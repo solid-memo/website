@@ -10,14 +10,18 @@
  *
  * Eight times as many must take less than four times as long as an
  * eighth of them done eight times over (testing.md); what puts the input
- * in place is not timed (growthAfterSetup). The other writes of a deck
- * are timed in the other solidDeckRepository.*.growth.test.ts files, each
- * a file of its own so that they run at once.
+ * in place is not timed (growthAfterSetup), and where it takes long, it
+ * is done once per size and the pod put back before each run (builtOnce).
+ * The other writes of a deck are timed in the other
+ * solidDeckRepository.*.growth.test.ts files, each a file of its own so
+ * that they run at once.
  */
 import { describe, expect, it } from "vitest";
 import { growthAfterSetup, growthAsync } from "@solid-memo/domain/testing/growth";
+import { builtOnce, saved } from "./testing/builtOnce";
 import {
   INSTANCE,
+  deckRepository,
   release,
   oneCard,
   sharedDistractor,
@@ -37,6 +41,7 @@ describe("card writes", { timeout: 180_000 }, () => {
       },
       600,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -49,6 +54,7 @@ describe("card writes", { timeout: 180_000 }, () => {
       },
       500,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -64,35 +70,52 @@ describe("card writes", { timeout: 180_000 }, () => {
       },
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
 
   it("remove a deck's cards in time that grows with them, not their square", async () => {
     const ratio = await growthAfterSetup(
-      (count) => async () => {
-        const content = release(count);
-        const { repository } = repositoryInPod();
-        const deck = await repository.importDeck(INSTANCE, content);
-        const ids = content.cards.map((card) => card.id);
-        return () => repository.applyCardChanges(deck, { save: [], remove: ids });
-      },
+      (count) =>
+        builtOnce(async () => {
+          const content = release(count);
+          const { fetch, store, repository } = repositoryInPod();
+          const deck = await repository.importDeck(INSTANCE, content);
+          const ids = content.cards.map((card) => card.id);
+          return {
+            restore: await saved(store),
+            start: () => {
+              const fresh = deckRepository(fetch);
+              return () => fresh.applyCardChanges(deck, { save: [], remove: ids });
+            },
+          };
+        }),
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
 
   it("change every distractor of one card in time that grows with them, not their square", async () => {
     const ratio = await growthAfterSetup(
-      (count) => async () => {
-        const { repository } = repositoryInPod();
-        const deck = await repository.importDeck(INSTANCE, oneCard(count));
-        const card = oneCard(count, count).cards[0]!;
-        return () => repository.applyCardChanges(deck, { save: [card], remove: [] });
-      },
+      (count) =>
+        builtOnce(async () => {
+          const { fetch, store, repository } = repositoryInPod();
+          const deck = await repository.importDeck(INSTANCE, oneCard(count));
+          const card = oneCard(count, count).cards[0]!;
+          return {
+            restore: await saved(store),
+            start: () => {
+              const fresh = deckRepository(fetch);
+              return () => fresh.applyCardChanges(deck, { save: [card], remove: [] });
+            },
+          };
+        }),
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

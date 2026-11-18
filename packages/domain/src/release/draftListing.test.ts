@@ -231,6 +231,7 @@ describe("draftLibraryDeck", () => {
       },
       1_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -255,6 +256,7 @@ describe("draftLibraryDeck", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -320,6 +322,7 @@ describe("draftLibraryContent", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

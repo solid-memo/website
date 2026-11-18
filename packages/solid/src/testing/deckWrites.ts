@@ -84,17 +84,23 @@ export function sharedDistractor(count: number): LibraryDeckContent {
 /** A pod in memory and a deck repository over it. */
 export function repositoryInPod() {
   let n = 0;
+  const store = createMemoryResourceStore();
   const fetch = createLocalPod({
     root: "https://pod.example/",
-    store: createMemoryResourceStore(),
+    store,
     newEtag: () => `"e${n++}"`,
   });
-  const repository = createSolidDeckRepository({
+  return { fetch, store, repository: deckRepository(fetch) };
+}
+
+/** A deck repository over the pod `fetch` answers for, as repositoryInPod's. */
+export function deckRepository(fetch: typeof globalThis.fetch) {
+  let n = 0;
+  return createSolidDeckRepository({
     fetch,
     now: () => new Date("2026-10-30T00:00:00Z"),
     randomId: () => `r${n++}`,
   });
-  return { fetch, repository };
 }
 
 /** Puts `text` (Turtle) in place of the document at `url`. */
@@ -133,12 +139,17 @@ function stateOf(i: number): ReviewState {
 
 /** A deck in a pod in memory, with `count` review states in its reviews document. */
 export async function deckWithStates(count: number) {
-  const { fetch, repository } = repositoryInPod();
+  const { fetch, store, repository } = repositoryInPod();
   const deck = await repository.importDeck(INSTANCE, release(0));
-  const reviews = createSolidReviewStateRepository({ fetch, randomId: () => "id" });
+  const reviews = reviewRepository(fetch);
   const states = Array.from({ length: count }, (_, i) => stateOf(i));
   await reviews.createReviewStates(deck, { sm2: states, fsrs: [] });
-  return { fetch, deck, reviews, states };
+  return { fetch, store, deck, states };
+}
+
+/** A review state repository over the pod `fetch` answers for, as deckWithStates's. */
+export function reviewRepository(fetch: typeof globalThis.fetch) {
+  return createSolidReviewStateRepository({ fetch, randomId: () => "id" });
 }
 
 /**
@@ -147,7 +158,7 @@ export async function deckWithStates(count: number) {
  * Studio's bulk actions find them.
  */
 export async function catalogOfDecks(count: number) {
-  const { fetch, repository } = repositoryInPod();
+  const { fetch, store, repository } = repositoryInPod();
   const entries = Array.from(
     { length: count },
     (_, i) =>
@@ -165,5 +176,5 @@ export async function catalogOfDecks(count: number) {
     const partOf = `<> <http://purl.org/dc/terms/isPartOf> <../catalog.ttl#deck-${i}> .`;
     await put(fetch, `${INSTANCE}decks/deck-${i}.ttl`, `${partOf}\n${card}`);
   }
-  return { fetch, repository };
+  return { fetch, store, repository };
 }

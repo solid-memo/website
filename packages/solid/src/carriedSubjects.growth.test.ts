@@ -58,23 +58,28 @@ const STATEMENT: Record<Many, (i: number) => string> = {
 const said = (count: number, many: Many) =>
   Array.from({ length: count }, (_, i) => STATEMENT[many](i)).join(" ; ");
 
-/** A pod whose source deck holds one card and its review state, with what another app said of each. */
-async function podWith(count: number, many: Many) {
+/**
+ * A pod whose source deck holds one card, or its review state, with what
+ * another app said of it: only the document a test reads.
+ */
+async function podWith(count: number, many: Many, document: "cards" | "reviews") {
   const pod = fakePod();
-  await pod.put(
-    source.cardsDocumentUrl,
-    `<#one> a <${SM.Card}> ; <${SM.front}> "One"@en ; <${SM.back}> "Ett"@sv ;
+  if (document === "cards")
+    await pod.put(
+      source.cardsDocumentUrl,
+      `<#one> a <${SM.Card}> ; <${SM.front}> "One"@en ; <${SM.back}> "Ett"@sv ;
       <${SM.formatVersion}> 7 ; ${said(count, many)} .`,
-  );
-  await pod.put(
-    source.reviewsDocumentUrl,
-    `<#one> a <${SM.ReviewState}> ; <${SM.easeFactor}> 2.5 ; <${SM.intervalDays}> 1 ;
+    );
+  else
+    await pod.put(
+      source.reviewsDocumentUrl,
+      `<#one> a <${SM.ReviewState}> ; <${SM.easeFactor}> 2.5 ; <${SM.intervalDays}> 1 ;
       <${SM.repetitions}> 1 ; <${SM.due}> "2026-10-31" ;
       <${SM.firstReviewedAt}> "2026-10-30T08:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
       <${SM.lastReviewedAt}> "2026-10-30T08:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
       <${SM.reviewOf}> <../decks/source.ttl#one> ; <${SM.reviewDirection}> <${SM.frontToBack}> ;
       <${SM.scheduler}> <${SM.sm2}> ; <${SM.formatVersion}> 2 ; ${said(count, many)} .`,
-  );
+    );
   const options = { fetch: pod.fetch, publicFetch: pod.fetch, randomId: () => "id" };
   return {
     pod,
@@ -106,7 +111,7 @@ describe("a subject copied from another deck", { timeout: 180_000 }, () => {
     it(`carries a card with many ${many} in time that grows with them, not their square`, async () => {
       const ratio = await growthAfterSetup(
         (count) => async () => {
-          const { pod, decks } = await podWith(count, many);
+          const { pod, decks } = await podWith(count, many, "cards");
           return async () => {
             await decks.applyCardChanges(
               target,
@@ -119,6 +124,7 @@ describe("a subject copied from another deck", { timeout: 180_000 }, () => {
         },
         SIZE[many],
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -126,7 +132,7 @@ describe("a subject copied from another deck", { timeout: 180_000 }, () => {
     it(`carries a review state with many ${many} in time that grows with them, not their square`, async () => {
       const ratio = await growthAfterSetup(
         (count) => async () => {
-          const { pod, reviews } = await podWith(count, many);
+          const { pod, reviews } = await podWith(count, many, "reviews");
           return async () => {
             await reviews.applyReviewChanges(target, {
               save: [
@@ -151,6 +157,7 @@ describe("a subject copied from another deck", { timeout: 180_000 }, () => {
         },
         SIZE[many],
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });

@@ -82,6 +82,7 @@ describe("withoutAddresses", () => {
       },
       20_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -105,6 +106,7 @@ describe("withoutAddresses", () => {
       },
       20_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -189,6 +191,7 @@ describe("withoutAddresses", () => {
       },
       20_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -201,6 +204,7 @@ describe("withoutAddresses", () => {
       },
       20_000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

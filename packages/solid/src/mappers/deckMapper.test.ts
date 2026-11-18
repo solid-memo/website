@@ -498,6 +498,7 @@ describe("toDecks over many decks and agents", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -543,6 +544,7 @@ describe("a deck's agents at URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", (
         },
         240,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     },
@@ -577,6 +579,7 @@ describe("a deck's agents at URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", (
         },
         240,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     },
@@ -618,6 +621,7 @@ describe("a deck's agents at URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", (
         },
         240,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     },
@@ -858,6 +862,7 @@ ${card(`${elsewhere}#card-1`, "Planted")}`,
       },
       100,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -1328,6 +1333,7 @@ describe("the catalog node", () => {
         },
         500,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -1570,6 +1576,7 @@ describe("the arrangement's triples (deck groups)", () => {
       },
       SIZE,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
     // The link stays, and a deck added after is listed after it.
@@ -1756,6 +1763,7 @@ describe("many decks that share an author over counted nodes others hold (GHSA-r
       },
       SIZE,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

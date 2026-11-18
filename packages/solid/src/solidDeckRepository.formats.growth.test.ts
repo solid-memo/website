@@ -39,6 +39,7 @@ describe("card writes", { timeout: 180_000 }, () => {
       },
       1200,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -61,6 +62,7 @@ describe("card writes", { timeout: 180_000 }, () => {
       },
       200,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

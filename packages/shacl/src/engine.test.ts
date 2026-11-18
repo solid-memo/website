@@ -373,6 +373,7 @@ describe("a node with many types", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   }, 180_000);
@@ -390,6 +391,7 @@ describe("a node with many types", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   }, 180_000);
@@ -598,6 +600,7 @@ describe("the checks of a node against a shape", () => {
       },
       100,
       8,
+      3,
     );
     expect(ratio).toBeLessThan(3);
   }, 180_000);

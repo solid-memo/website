@@ -988,6 +988,7 @@ describe("pathological input", () => {
       },
       Math.ceil(input.length / times),
       times,
+      limit,
     );
     expect(
       ratio,

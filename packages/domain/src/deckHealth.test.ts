@@ -121,6 +121,7 @@ describe("deckReport with agent URLs longer than any term", () => {
         },
         250,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     },
@@ -292,6 +293,7 @@ describe("cardSpotsOf", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -374,6 +376,7 @@ describe("deckOfSubjectsIn", () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -441,6 +444,7 @@ describe("duplicateCardsOf", () => {
       },
       50,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -484,6 +488,7 @@ describe("duplicateCardsOf", () => {
       },
       50,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -501,6 +506,7 @@ describe("duplicateCardsOf", () => {
       },
       2000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -305,6 +305,7 @@ describe("drawnLabel", () => {
       },
       200_000,
       16,
+      0.25,
     );
     expect(ratio).toBeLessThan(0.25);
   });

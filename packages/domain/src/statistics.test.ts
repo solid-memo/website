@@ -138,6 +138,7 @@ describe("streaksOf", () => {
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -468,6 +469,7 @@ describe("statisticsOf", () => {
       },
       year.length / 16,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

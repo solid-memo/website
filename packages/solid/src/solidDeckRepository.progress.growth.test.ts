@@ -10,16 +10,20 @@
  *
  * Eight times as many must take less than four times as long as an
  * eighth of them done eight times over (testing.md); what puts the input
- * in place is not timed (growthAfterSetup). The other writes of a deck
- * are timed in the other solidDeckRepository.*.growth.test.ts files, each
- * a file of its own so that they run at once.
+ * in place is not timed (growthAfterSetup), and where it takes long, it
+ * is done once per size and the pod put back before each run (builtOnce).
+ * The other writes of a deck are timed in the other
+ * solidDeckRepository.*.growth.test.ts files, each a file of its own so
+ * that they run at once.
  */
 import { describe, expect, it } from "vitest";
 import type { Answer } from "@solid-memo/domain/answer";
 import { growthAfterSetup } from "@solid-memo/domain/testing/growth";
 import { createSolidAnswerLog } from "./solidAnswerLog";
+import { builtOnce, saved } from "./testing/builtOnce";
 import {
   INSTANCE,
+  reviewRepository,
   SM,
   release,
   repositoryInPod,
@@ -35,31 +39,48 @@ import {
 describe("card writes", { timeout: 180_000 }, () => {
   it("bring review states in an older format to this app's in time that grows with them, not their square", async () => {
     const ratio = await growthAfterSetup(
-      (count) => async () => {
-        const { fetch, deck, reviews } = await deckWithStates(count);
-        // The same states as format 1 wrote them.
-        const text = await read(fetch, deck.reviewsDocumentUrl);
-        const older = text.replaceAll(`formatVersion> "2"`, `formatVersion> "1"`);
-        await put(fetch, deck.reviewsDocumentUrl, older);
-        return async () => {
-          expect(await reviews.upgradeReviewStates(deck)).toBe(true);
-        };
-      },
+      (count) =>
+        builtOnce(async () => {
+          const { fetch, store, deck } = await deckWithStates(count);
+          // The same states as format 1 wrote them.
+          const text = await read(fetch, deck.reviewsDocumentUrl);
+          const older = text.replaceAll(`formatVersion> "2"`, `formatVersion> "1"`);
+          await put(fetch, deck.reviewsDocumentUrl, older);
+          return {
+            restore: await saved(store),
+            start: () => {
+              const reviews = reviewRepository(fetch);
+              return async () => {
+                expect(await reviews.upgradeReviewStates(deck)).toBe(true);
+              };
+            },
+          };
+        }),
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
 
   it("remove review states in time that grows with them, not their square", async () => {
     const ratio = await growthAfterSetup(
-      (count) => async () => {
-        const { deck, reviews, states } = await deckWithStates(count);
-        const keys = states.map(({ cardId, direction }) => ({ cardId, direction }));
-        return () => reviews.applyReviewChanges(deck, { save: [], remove: keys, every: true });
-      },
+      (count) =>
+        builtOnce(async () => {
+          const { fetch, store, deck, states } = await deckWithStates(count);
+          const keys = states.map(({ cardId, direction }) => ({ cardId, direction }));
+          return {
+            restore: await saved(store),
+            start: () => {
+              const reviews = reviewRepository(fetch);
+              return () =>
+                reviews.applyReviewChanges(deck, { save: [], remove: keys, every: true });
+            },
+          };
+        }),
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -67,27 +88,35 @@ describe("card writes", { timeout: 180_000 }, () => {
   it("remove a day's answers in time that grows with them, not their square", async () => {
     const deckUrl = `${INSTANCE}catalog.ttl#deck-1`;
     const ratio = await growthAfterSetup(
-      (count) => async () => {
-        const { fetch } = repositoryInPod();
-        const log = createSolidAnswerLog({ fetch });
-        const answers = Array.from(
-          { length: count },
-          (_, i): Answer => ({
-            id: `answer-${i}`,
-            deckUrl,
-            cardUrl: `${INSTANCE}decks/deck-1.ttl#c${i}`,
-            direction: "front-to-back",
-            grade: 4,
-            answeredAt: "2026-10-30T10:00:00.000Z",
-            studyDay: "2026-10-30",
-            nextIntervalDays: 6,
-          }),
-        );
-        await log.appendAll(INSTANCE, answers);
-        return () => log.removeDay(INSTANCE, deckUrl, "2026-10-30");
-      },
+      (count) =>
+        builtOnce(async () => {
+          const { fetch, store } = repositoryInPod();
+          const log = createSolidAnswerLog({ fetch });
+          const answers = Array.from(
+            { length: count },
+            (_, i): Answer => ({
+              id: `answer-${i}`,
+              deckUrl,
+              cardUrl: `${INSTANCE}decks/deck-1.ttl#c${i}`,
+              direction: "front-to-back",
+              grade: 4,
+              answeredAt: "2026-10-30T10:00:00.000Z",
+              studyDay: "2026-10-30",
+              nextIntervalDays: 6,
+            }),
+          );
+          await log.appendAll(INSTANCE, answers);
+          return {
+            restore: await saved(store),
+            start: () => {
+              const fresh = createSolidAnswerLog({ fetch });
+              return () => fresh.removeDay(INSTANCE, deckUrl, "2026-10-30");
+            },
+          };
+        }),
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -113,6 +142,7 @@ describe("card writes", { timeout: 180_000 }, () => {
       },
       1000,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -591,6 +591,7 @@ describe("createLayout", () => {
       },
       300,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -614,6 +615,7 @@ describe("createLayout", () => {
       },
       625,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

@@ -82,7 +82,7 @@ Turbo hashes `SOLID_CLIENT` (`globalEnv`) and `scripts/solidClient.ts`
 (`globalDependencies`) into every task, so a result cached on one
 client never stands for the other. The tasks that resolve through the
 plugin have the package's `src/` and `package.json` among their
-inputs: `solid`'s `test` and `test:roundtrip`, `shacl`'s and
+inputs: `solid`'s `test`, `test:growth` and `test:roundtrip`, `shacl`'s and
 `composition`'s `test`, and `web`'s `test` and `build`. They run again
 when either changes, on either client, but not for a new release of
 one of its dependencies that only `package-lock.json` names.

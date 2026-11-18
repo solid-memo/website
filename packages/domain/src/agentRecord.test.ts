@@ -167,6 +167,7 @@ describe("agentUrlsOf", () => {
         },
         256,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -183,6 +184,7 @@ describe("agentUrlsOf", () => {
         },
         256,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     });
@@ -285,6 +287,7 @@ describe("agentNodesOf (GHSA-rm3f-655c-28wq)", () => {
       },
       256,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -309,6 +312,7 @@ describe("agentUrlsOf with URLs longer than any term (GHSA-4mgg-5xpp-3jx5)", () 
       },
       250,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

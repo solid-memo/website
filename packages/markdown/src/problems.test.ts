@@ -253,6 +253,7 @@ describe("markdownProblems", () => {
       },
       2_000,
       8,
+      4,
     );
     expect(
       ratio,

@@ -574,6 +574,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
           },
           20_000,
           8,
+          4,
         );
         expect(ratio).toBeLessThan(4);
       }
@@ -596,6 +597,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
           },
           20_000,
           8,
+          0.5,
         );
         expect(ratio).toBeLessThan(0.5);
       }
@@ -626,6 +628,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
           },
           2_000,
           8,
+          4,
         );
         expect(ratio).toBeLessThan(4);
       }
@@ -699,6 +702,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         },
         20_000,
         8,
+        0.5,
       );
       expect(ratio).toBeLessThan(0.5);
     });

@@ -1147,6 +1147,7 @@ describe("assemble with an IRI its move takes past the bound (GHSA-4mgg-5xpp-3jx
           .catch(() => undefined),
       SIZE,
       TIMES,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

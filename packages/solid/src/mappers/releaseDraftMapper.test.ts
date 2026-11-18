@@ -493,6 +493,7 @@ describe("draftEntries with an IRI longer than a term may be (GHSA-4mgg-5xpp-3jx
         },
         250,
         8,
+        4,
       );
       expect(ratio).toBeLessThan(4);
     },

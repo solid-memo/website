@@ -83,6 +83,7 @@ describe("libraryCopyTest", () => {
       },
       125,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });
@@ -149,6 +150,7 @@ describe("copiedTest", () => {
       },
       125,
       8,
+      4,
     );
     expect(ratio).toBeLessThan(4);
   });

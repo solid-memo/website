@@ -10,7 +10,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit -p .",
-    "test": "vitest run --coverage",
+    "test": "vitest run --coverage --exclude 'src/**/*.growth.test.ts'",
+    "test:growth": "vitest run .growth.test.ts",
     "test:unit": "vitest run",
     "test:watch": "vitest",
     "test:roundtrip": "vitest run --config vitest.roundtrip.config.ts",
