@@ -6,7 +6,11 @@ import { useEffect, useId } from "preact/hooks";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import type { CourseSummary } from "@solid-memo/application/courses";
 import type { UseCases } from "@solid-memo/application/useCases";
-import { courseProgress, type CourseChapter, type CourseProgress } from "@solid-memo/domain/course";
+import {
+  courseProgress,
+  type ChapterProgress,
+  type CourseChapter,
+} from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -130,8 +134,8 @@ const COURSES_READ_BEHIND = 4;
 interface CourseStanding {
   /** The chapter to go on with. */
   current: CourseChapter;
-  /** The course's progress, of that chapter alone (chapterHref looks no further). */
-  progress: CourseProgress;
+  /** Where the learner stands in that chapter. */
+  progress: ChapterProgress;
   /** Chapters completed. */
   done: number;
 }
@@ -168,7 +172,7 @@ function workOutStanding(
   if (at === -1) return undefined;
   return {
     current: outline.chapters[at]!,
-    progress: { ...progress, chapters: [progress.chapters[at]!] },
+    progress: progress.chapters[at]!,
     done: progress.chapters.filter((chapter) => chapter.state === "done").length,
   };
 }
@@ -218,7 +222,7 @@ export function CourseStripContainer({
         key: deck.url,
         title: deck.title,
         href: links.courseHref(instance.url, deck.url),
-        continueHref: chapterHref(links, instance.url, { deck, progress }, current),
+        continueHref: chapterHref(links, instance.url, deck.url, current, progress),
         started: summary.answeredCardIds.length > 0,
         done,
         count: summary.outline.chapters.length,

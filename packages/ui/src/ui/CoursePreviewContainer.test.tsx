@@ -7,6 +7,7 @@ import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { LIST_LIMIT } from "./bounded";
 import { CoursePreviewContainer } from "./CoursePreviewContainer";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import {
@@ -243,6 +244,32 @@ describe("CoursePreviewContainer", () => {
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
     expect(screen.getByRole("heading", { level: 3 })).toHaveTextContent("Chapter 1: Pods");
     expect(screen.queryByRole("link", { name: "Linked data" })).toBeNull();
+  });
+
+  it("lists at most LIST_LIMIT chapters, and how many more there are", async () => {
+    const course = makeCourse();
+    const pods = course.outline.chapters[1]!;
+    const chapters = Array.from({ length: 20_000 }, (_, at) => ({
+      ...pods,
+      id: `c${at}`,
+      url: `${RELEASE}#c${at}`,
+      position: at,
+      title: { en: `Title ${at}` },
+    }));
+    renderPreview({
+      useCases: makeUseCasesFake({
+        getLibraryCourse: vi.fn(async () => ({
+          ...course,
+          outline: { ...course.outline, chapters },
+        })),
+      }),
+    });
+
+    expect(await screen.findByRole("link", { name: "Title 0" })).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")).toHaveLength(LIST_LIMIT);
+    expect(screen.getByRole("link", { name: `Title ${LIST_LIMIT - 1}` })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: `Title ${LIST_LIMIT}` })).toBeNull();
+    expect(screen.getByText("And 19,950 more chapters, not listed here.")).toBeInTheDocument();
   });
 
   it("says so when the course has no chapters", async () => {

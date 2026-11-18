@@ -4,7 +4,7 @@
 
 import type { LibraryUseCases } from "@solid-memo/application/library";
 import type { Course } from "@solid-memo/application/courses";
-import type { CourseChapter } from "@solid-memo/domain/course";
+import type { ChapterProgress, CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useCourseLinks, type CourseLinks } from "./courseLinks";
 import { CourseScreen } from "./CourseScreen";
@@ -15,22 +15,20 @@ import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
  * not done, or its final review once they all are and it is not yet
  * completed. A completed chapter opens at its steps again, for practice;
  * one with no step (outlineOfCards) always opens at its final review.
+ * The caller has the chapter's progress at hand, so this looks up
+ * nothing, however many chapters the course has.
  */
 export function chapterHref(
   links: CourseLinks,
   instanceUrl: string,
-  course: Pick<Course, "deck" | "progress">,
+  deckUrl: string,
   chapter: CourseChapter,
+  progress: ChapterProgress,
 ): string {
-  const progress = course.progress.chapters.find((entry) => entry.url === chapter.url)!;
   const toReview =
     chapter.steps.length === 0 ||
     (progress.state === "open" && progress.resumeStepId === undefined);
-  return (toReview ? links.reviewHref : links.chapterHref)(
-    instanceUrl,
-    course.deck.url,
-    chapter.url,
-  );
+  return (toReview ? links.reviewHref : links.chapterHref)(instanceUrl, deckUrl, chapter.url);
 }
 
 /** A chapter the learner has just completed, as they come back to the course's page. */
@@ -62,9 +60,9 @@ export function CourseContainer({
 }) {
   const links = useCourseLinks();
   const instanceUrl = instance.url;
-  const current = course.outline.chapters.find(
-    (chapter) => chapter.url === course.progress.currentChapterUrl,
-  );
+  const deckUrl = course.deck.url;
+  // The chapter to go on with is the one open (courseProgress opens one at most).
+  const at = course.progress.chapters.findIndex((chapter) => chapter.state === "open");
   return (
     <CourseScreen
       title={course.release.title}
@@ -72,9 +70,19 @@ export function CourseContainer({
       outline={course.outline}
       progress={course.progress}
       started={course.answeredCardIds.length > 0}
-      chapterHref={(chapter) => chapterHref(links, instanceUrl, course, chapter)}
+      chapterHref={(chapter, progress) =>
+        chapterHref(links, instanceUrl, deckUrl, chapter, progress)
+      }
       continueHref={
-        current === undefined ? undefined : chapterHref(links, instanceUrl, course, current)
+        at === -1
+          ? undefined
+          : chapterHref(
+              links,
+              instanceUrl,
+              deckUrl,
+              course.outline.chapters[at]!,
+              course.progress.chapters[at]!,
+            )
       }
       decksHref={links.decksHref?.(instanceUrl)}
       libraryHref={links.libraryHref?.(instanceUrl)}

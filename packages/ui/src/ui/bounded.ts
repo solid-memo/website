@@ -39,3 +39,24 @@ export function usePaged<T>(all: readonly T[]): {
     showMore: () => setPaged({ all, limit: limit + LIST_LIMIT }),
   };
 }
+
+/** How many of the list before the one a window is drawn around (boundedAround) it shows too. */
+const LIST_LEAD = 5;
+
+/**
+ * At most `limit` of a list a screen draws, a window around the entry
+ * at `at` (the learner's place in it), which shows the `LIST_LEAD`
+ * before it too, and as many after it as fit; near the list's end, the
+ * last `limit`. With where the window starts, which is how many come
+ * before it, and how many come after it (`more`). With no such entry
+ * (`at` -1), the first `limit`.
+ */
+export function boundedAround<T>(
+  all: readonly T[],
+  at: number,
+  limit = LIST_LIMIT,
+): { shown: T[]; start: number; more: number } {
+  const start = Math.max(0, Math.min(at - LIST_LEAD, all.length - limit));
+  const shown = all.slice(start, start + limit);
+  return { shown, start, more: all.length - start - shown.length };
+}

@@ -99,7 +99,9 @@ domain's
   chapter's steps check, plus its review questions, each once, shuffled
   (`finalReviewQueue`).
 - The options of a question are the card's back and each of its
-  distractors, shuffled (`choicesOf`). Their text is in the reader's
+  distractors, shuffled (`choicesOf`). A release can give a card any
+  number of distractors, so a question offers at most 5 of them, picked
+  at random when there are more. Their text is in the reader's
   language, or first in the course's language (the deck's card language)
   when the learner chose one. On the course's screens, its title,
   description, chapters' titles and descriptions and steps' theory
@@ -254,6 +256,16 @@ new type-index entries ([data-model.md](data-model.md#courses)):
    are all done opens at its first step, each showing its theory again.
    The learner can't pick an earlier step to reread: the step a chapter
    opens at comes from the progress.
+
+A release can state any number of chapters, so the course's page lists
+at most `LIST_LIMIT` (50) of them (`boundedAround`). They're the
+chapter to go on with, the 5 before it and those after, or the last 50
+when it's near the end. A finished course lists its first 50. A line
+above the list
+says how many chapters come before it, and one below how many come
+after. The table of the course in the statistics shows the same
+chapters ([statistics.md](statistics.md)), and the course preview the
+first 50, with how many more there are.
 
 How each answer is graded, and when, is in
 [srs.md](srs.md#multiple-choice-answers-in-a-course), and the screens

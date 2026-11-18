@@ -2036,7 +2036,8 @@ when deleted here (`unlinkDistractor`), and stays on the others. A
 preview asks the card as the course does (`CourseQuestion`, with
 `MultipleChoice`), as typed, to answer and ask again: beside the form
 and in sight as it scrolls on a screen 80rem wide or more, else under
-it.
+it. As a question offers the back and at most five wrong options
+([courses.md](courses.md)), the preview shows at most five of them.
 
 ### A draft's cards
 

@@ -304,6 +304,18 @@
     "picks": {
       "one": "Chosen {count} time",
       "other": "Chosen {count} times"
+    },
+    "earlier": {
+      "one": "{count} earlier wrong option, not listed here.",
+      "other": "{count} earlier wrong options, not listed here."
+    },
+    "more": {
+      "one": "And {count} more wrong option, not listed here.",
+      "other": "And {count} more wrong options, not listed here."
+    },
+    "moreIssues": {
+      "one": "And {count} more thing worth a look, not listed here.",
+      "other": "And {count} more things worth a look, not listed here."
     }
   },
   "cardCreator": {
@@ -2238,5 +2250,15 @@
     "reading": "Reading and checking the release…",
     "notLibrary": "This is not in Solid Memo's library: it is published on {host}. Solid Memo checked that it can read it, not what it says. Your copy remembers where it came from, and nothing is written there.",
     "picturesHidden": "Pictures on its cards stay hidden until you choose to show them, as each picture is a request to the server it is on."
+  },
+  "courseChapters": {
+    "earlier": {
+      "one": "{count} earlier chapter, not listed here.",
+      "other": "{count} earlier chapters, not listed here."
+    },
+    "more": {
+      "one": "And {count} more chapter, not listed here.",
+      "other": "And {count} more chapters, not listed here."
+    }
   }
 }

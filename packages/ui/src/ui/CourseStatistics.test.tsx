@@ -9,6 +9,7 @@ import type { CourseStatistics } from "@solid-memo/application/statistics";
 import type { Deck } from "@solid-memo/domain/deck";
 import { courseDeck, courseInstance, courseLibraryDeck, RELEASE } from "../test/course";
 import { makeUseCasesFake } from "../test/useCasesFake";
+import { LIST_LIMIT } from "./bounded";
 import { CourseStatisticsContainer, CourseStatisticsView } from "./CourseStatistics";
 import { courseHref } from "./router";
 
@@ -77,6 +78,29 @@ describe("CourseStatisticsView", () => {
       ["RDF", "Open", "0% of 1 answer"],
       ["Pods", "Locked", "–"],
     ]);
+  });
+
+  it("shows at most LIST_LIMIT chapters of a course, around the one to go on with, and how many more there are", () => {
+    const count = 20_000;
+    const many: CourseStatistics = {
+      deck: courseDeck,
+      done: 700,
+      chapters: Array.from({ length: count }, (_, at) => ({
+        url: `${RELEASE}#c${at}`,
+        title: { en: `Title ${at}` },
+        state: at < 700 ? "done" : at === 700 ? "open" : "locked",
+        quiz: { answers: 0, right: 0 },
+      })),
+    };
+    render(<CourseStatisticsView instanceUrl={courseInstance.url} courses={[many]} />);
+    const section = screen.getByRole("region", { name: "Your courses" });
+    expect(section).toHaveTextContent("700 of 20,000 chapters done");
+    const rows = within(section).getAllByRole("row").slice(1);
+    expect(rows).toHaveLength(LIST_LIMIT);
+    expect(rows[0]).toHaveTextContent("Title 695");
+    expect(rows[5]).toHaveTextContent("Title 700Open");
+    expect(section).toHaveTextContent("695 earlier chapters, not listed here.");
+    expect(section).toHaveTextContent("And 19,255 more chapters, not listed here.");
   });
 
   it("shows nothing without a course", () => {

@@ -7,6 +7,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/pre
 import type { Distractor } from "@solid-memo/domain/deck";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { alertTexts } from "../test/liveRegions";
+import { LIST_LIMIT } from "./bounded";
 import { DistractorFields } from "./DistractorFields";
 import { I18nProvider } from "./i18n";
 
@@ -471,7 +472,8 @@ describe("DistractorFields", () => {
       const { rerender, props } = renderFields({ distractors, textFormat: SM.markdown });
       markdownWork.parses = 0;
       rerender(<DistractorFields {...props} cardId="other" />);
-      expect(markdownWork.parses).toBe(manyOptions * 2);
+      // Only the options shown, each with its note.
+      expect(markdownWork.parses).toBe(LIST_LIMIT * 2);
     });
 
     it("checks only the language typed in when an option has more languages than the cache keeps", () => {
@@ -486,6 +488,64 @@ describe("DistractorFields", () => {
       markdownWork.checks = 0;
       for (const value of ["*a", "*ab", "*abc"]) typeInEditor(value);
       expect(markdownWork.checks).toBe(3);
+    });
+  });
+
+  describe("with more options than a screen lists", () => {
+    const count = LIST_LIMIT * 4;
+    /** Options in Swedish, each worth a look on a card whose back is in English. */
+    const many = Array.from(
+      { length: count },
+      (_, i): Distractor => ({ id: `q-d${i}`, text: { sv: `fel ${i}` } }),
+    );
+    const listed = () => within(fields()).getAllByRole("listitem");
+
+    it("lists the first LIST_LIMIT and the first LIST_LIMIT issues, and says how many more there are", () => {
+      renderFields({ distractors: many });
+      const options = fields().querySelectorAll(".distractor-list > li");
+      expect(options).toHaveLength(LIST_LIMIT);
+      expect(options[0]).toHaveTextContent("fel 0");
+      expect(
+        screen.getByText(`And ${count - LIST_LIMIT} more wrong options, not listed here.`),
+      ).toBeInTheDocument();
+      expect(screen.queryByText(/earlier wrong options?, not listed here/)).toBeNull();
+      const issues = screen.getByRole("list", { name: "Worth a look" });
+      expect(within(issues).getAllByRole("listitem")).toHaveLength(LIST_LIMIT);
+      // Each option is missing the back's language and has one the back lacks: two issues.
+      expect(
+        screen.getByText(
+          `And ${count * 2 - LIST_LIMIT} more things worth a look, not listed here.`,
+        ),
+      ).toBeInTheDocument();
+      expect(listed().length).toBe(LIST_LIMIT * 2);
+    });
+
+    it("lists the options around the one the screen was opened at, and edits and deletes the ones shown", () => {
+      const confirm = vi.fn().mockReturnValue(true);
+      vi.stubGlobal("confirm", confirm);
+      const onChange = vi.fn();
+      renderFields({ distractors: many, arrival: "q-d120", onChange });
+      const options = fields().querySelectorAll(".distractor-list > li");
+      expect(options).toHaveLength(LIST_LIMIT);
+      expect(options[0]).toHaveTextContent("fel 115");
+      expect(screen.getByText("115 earlier wrong options, not listed here.")).toBeInTheDocument();
+      expect(
+        screen.getByText(`And ${count - 115 - LIST_LIMIT} more wrong options, not listed here.`),
+      ).toBeInTheDocument();
+      expect(document.getElementById("distractor-q-d120-edit")).toHaveAttribute("data-arrival");
+
+      fireEvent.click(screen.getByRole("button", { name: "Delete the wrong option “fel 130”" }));
+      const deleted = onChange.mock.calls[0]![0] as Distractor[];
+      expect(deleted).toHaveLength(count - 1);
+      expect(deleted.some(({ id }) => id === "q-d130")).toBe(false);
+
+      fireEvent.click(screen.getByRole("button", { name: "Edit the wrong option “fel 121”" }));
+      fireEvent.input(document.getElementById("distractor-text")!, {
+        target: { value: "nytt" },
+      });
+      fireEvent.click(screen.getByRole("button", { name: "Update" }));
+      const edited = onChange.mock.calls[1]![0] as Distractor[];
+      expect(edited[121]!.text).toEqual({ sv: "nytt" });
     });
   });
 
