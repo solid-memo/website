@@ -387,6 +387,18 @@ migration and moved no format version:
 - **No re-check.** No shape file changed, and the check doesn't read
   the term.
 
+A deck's pause (vocabulary 1.29, `sm:deckPausedAt` and
+`sm:deckResumesOn`, [srs.md](srs.md#pausing-a-deck)) needs no
+migration and moved no format version:
+
+- **It belongs to no shape**, as a deck's `sm:deckCardLanguage`, so
+  `DeckV6` is unchanged and every writer of the deck keeps it. This
+  version sets it only on the entry as it is then (`setPause`). An
+  older one keeps it, ignores it, and studies the deck as if it weren't
+  paused, which changes no review state either.
+- **No re-check.** No shape file changed, and the check doesn't read
+  the terms.
+
 The release a card was taken from (vocabulary 1.27, `sm:fromRelease`,
 see the library upgrades below) needs no migration and moved no format
 version:

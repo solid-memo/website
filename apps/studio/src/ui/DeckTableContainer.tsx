@@ -7,6 +7,8 @@ import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/rea
 import type { UseCases } from "@solid-memo/application/useCases";
 import { activeCards, type Card, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import { deckPreferences, type DeckPace } from "@solid-memo/domain/deckPace";
+import { isPaused } from "@solid-memo/domain/deckPause";
+import { studyDayOf } from "@solid-memo/domain/scheduling";
 import {
   groupsOfDecks,
   groupTrails,
@@ -28,6 +30,13 @@ import { HealthBadge } from "./HealthBadge";
 import { UpdateBadge } from "./UpdateBadge";
 import type { HomeQuery, HomeView, SavedView } from "./shell/views";
 import { queryKeys } from "./queryKeys";
+
+/** A paused deck's badge (DeckBadge): until it is resumed, or until the day it resumes on. */
+function pausedBadge(deck: Deck, today: string): DeckBadge[] {
+  if (!isPaused(deck, today)) return [];
+  const { resumesOn } = deck.pause!;
+  return [resumesOn === undefined ? "paused" : { pausedUntil: resumesOn }];
+}
 
 /** A bulk action on the selected decks. */
 type Bulk =
@@ -225,6 +234,7 @@ export function DeckTableContainer({
   };
   // The screen asks for a row's badges several times a render: they are made once.
   const badgesOf = new Map<Deck, DeckBadge[]>();
+  const today = studyDayOf(new Date(), preferences.dayBoundaryHour);
   const badges = (deck: Deck): DeckBadge[] => {
     let made = badgesOf.get(deck);
     if (made === undefined) {
@@ -237,6 +247,7 @@ export function DeckTableContainer({
             : [...(isCourse(deck) ? ["course" as const] : []), { from: host }]),
         ...(report !== null && deckSetAside(report, deck) ? ["invalid" as const] : []),
         ...(queries(deck).cards.isError ? ["unreadable" as const] : []),
+        ...pausedBadge(deck, today),
       ];
       badgesOf.set(deck, made);
     }

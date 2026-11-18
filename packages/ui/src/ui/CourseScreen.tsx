@@ -82,6 +82,7 @@ export function CourseScreen({
   preferencesHref,
   justCompleted,
   notice,
+  paused = false,
 }: {
   title: LangText;
   description?: LangText;
@@ -103,6 +104,8 @@ export function CourseScreen({
   justCompleted?: CompletedChapter;
   /** Shown under the blurb: the offer of a newer release. */
   notice?: ComponentChildren;
+  /** The course's deck is paused today: the course is paused with it, and offers no way on. */
+  paused?: boolean;
 }) {
   const { t, tx } = useI18n();
   const { cardText, cardLang } = useCourseText();
@@ -157,7 +160,18 @@ export function CourseScreen({
             {continueHref !== undefined && <p>{t("course.continueOrStop")}</p>}
           </div>
         )}
-        {continueHref === undefined ? (
+        {paused ? (
+          <>
+            <p class="course-paused">{t("course.paused")}</p>
+            {decksHref !== undefined && (
+              <div class="actions">
+                <a class="button primary" href={decksHref}>
+                  {t("course.backToDecks")}
+                </a>
+              </div>
+            )}
+          </>
+        ) : continueHref === undefined ? (
           <>
             <p class="course-finished">
               <CheckIcon />

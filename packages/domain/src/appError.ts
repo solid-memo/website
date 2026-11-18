@@ -46,6 +46,8 @@ export const ERROR_TEMPLATES = {
     "Two wrong options of one card have the same id, so one would replace the other. Nothing was saved. Delete one of them from the card, or, in a deck file, give each its own id.",
   dailyLimitInvalid: "A daily limit is a whole number, 0 or more.",
   dueDayInvalid: "“{day}” is not a day. Choose the day the card is due.",
+  deckPaused: "The deck “{deck}” is paused. Resume it in your deck list to go on with it.",
+  resumeDayInvalid: "“{day}” is not a day after today. Choose a later day to resume on.",
   cardTransferSameDeck: "The cards are in this deck already. Choose another deck.",
   licenseUnknown: "Choose one of the licenses offered.",
   authorEmpty: "An author needs a name.",

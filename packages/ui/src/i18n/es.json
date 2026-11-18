@@ -355,6 +355,7 @@
     "continue": "Continuar",
     "finished": "Has terminado este curso. Sus tarjetas están en tu mazo, para estudiarlas como cualquier otra. Encuentra qué aprender a continuación en la biblioteca de mazos.",
     "backToDecks": "Volver a los mazos",
+    "paused": "Este curso está en pausa junto con su mazo. Reanuda el mazo en tu lista de mazos para seguir donde lo dejaste.",
     "chapterCompleted": "¡Buen trabajo! Has completado {chapter}.",
     "courseCompleted": "¡Felicidades! Ese era el último capítulo: has completado el curso entero.",
     "continueOrStop": "Sigue con el siguiente capítulo cuando quieras, o déjalo aquí por ahora: tu progreso se conserva. Mientras tanto, puedes añadir mazos desde la biblioteca de mazos y estudiarlos también.",
@@ -622,7 +623,42 @@
     "continueCourse": "Continuar el curso",
     "fromHost": "de {host}",
     "newerRelease": "Nueva versión",
-    "fromLink": "Añadir desde un enlace"
+    "fromLink": "Añadir desde un enlace",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "paused": "En pausa",
+    "pausedUntil": "En pausa hasta el {day}"
+  },
+  "dialog": {
+    "close": "Cerrar"
+  },
+  "pauseDeck": {
+    "heading": "Pausar {deck}",
+    "intro": "Sus tarjetas quedan fuera de tu estudio diario y de tus recuentos hasta que se reanude. Tu progreso se conserva y nada de sus tarjetas cambia.",
+    "until": "Pausarlo",
+    "untilResumed": "Hasta que lo reanude",
+    "resumeOn": "Hasta un día:",
+    "day": "Día para reanudar",
+    "dayInvalid": "Elige un día posterior a hoy.",
+    "outlookOn": "Si lo reanudas el {day}, probablemente aún recordarás alrededor del {percent} de este mazo.",
+    "outlookAfter": "Después de {days} días, probablemente aún recordarás alrededor del {percent} de este mazo.",
+    "nothingStudied": "Todavía no se ha estudiado nada de este mazo, así que no hay nada que olvidar.",
+    "pause": "Pausar"
+  },
+  "comeback": {
+    "label": "Bienvenida de vuelta",
+    "left": "Te damos la bienvenida de vuelta a {deck}. Probablemente aún conservas alrededor del {percent}.",
+    "waiting": {
+      "one": "{count} repaso está esperando.",
+      "many": "{count} de repasos están esperando.",
+      "other": "{count} repasos están esperando."
+    },
+    "days": {
+      "one": "Con su límite diario, es el trabajo de un día.",
+      "many": "Con su límite diario, se reparten en {count} de días.",
+      "other": "Con su límite diario, se reparten en {count} días."
+    },
+    "feelNew": "Las tarjetas aprendidas justo antes de la pausa pueden parecer nuevas otra vez: es normal."
   },
   "studyPace": {
     "startSmall": "Cada tarjeta nueva vuelve para repasarse en los días siguientes, así que una cifra alta ahora acumula repasos después. Mejor empieza con poco y mantén el ritmo: siempre puedes subirla."
@@ -1799,6 +1835,8 @@
     "distractorIdRepeated": "Dos opciones incorrectas de una tarjeta tienen el mismo id, así que una reemplazaría a la otra. No se ha guardado nada. Elimina una de ellas de la tarjeta o, en un archivo de mazo, dale a cada una su propio id.",
     "dailyLimitInvalid": "Un límite diario es un número entero, 0 o mayor.",
     "dueDayInvalid": "«{day}» no es un día. Elige el día en que toca repasar la tarjeta.",
+    "deckPaused": "El mazo «{deck}» está en pausa. Reanúdalo en tu lista de mazos para seguir.",
+    "resumeDayInvalid": "«{day}» no es un día posterior a hoy. Elige un día más adelante para reanudar.",
     "cardTransferSameDeck": "Las tarjetas ya están en este mazo. Elige otro mazo.",
     "licenseUnknown": "Elige una de las licencias que se ofrecen.",
     "authorEmpty": "Cada persona autora necesita un nombre.",

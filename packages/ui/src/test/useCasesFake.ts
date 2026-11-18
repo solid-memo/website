@@ -7,6 +7,7 @@ import { makeSessionUseCasesFake } from "./fakes/session";
 import { makeInstanceUseCasesFake } from "./fakes/instances";
 import { makePreferenceUseCasesFake } from "./fakes/preferences";
 import { makeDeckUseCasesFake } from "./fakes/decks";
+import { makeDeckPauseUseCasesFake } from "./fakes/deckPauses";
 import { makeCardUseCasesFake } from "./fakes/cards";
 import { makeLibraryUseCasesFake } from "./fakes/library";
 import { makeMistakeReportUseCasesFake } from "./fakes/mistakeReports";
@@ -32,6 +33,7 @@ export function makeUseCasesFake(overrides: Partial<UseCases> = {}): UseCases {
   makeInstanceUseCasesFake({}, fake);
   makePreferenceUseCasesFake({}, fake);
   makeDeckUseCasesFake({}, fake);
+  makeDeckPauseUseCasesFake({}, fake);
   makeCardUseCasesFake({}, fake);
   makeLibraryUseCasesFake({}, fake);
   makeMistakeReportUseCasesFake({}, fake);

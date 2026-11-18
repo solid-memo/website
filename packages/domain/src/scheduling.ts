@@ -120,8 +120,14 @@ export function buildStudyQueue(args: {
   now: Date;
   /** Uniform [0, 1) source deciding which new prompts are introduced. */
   random: () => number;
+  /**
+   * For a deck that resumed from a pause (backlogDayOf), its resume day
+   * and each prompt's memory today (recallOn, by review key): the
+   * prompts due before that day are the backlog the pause left.
+   */
+  backlog?: Backlog;
 }): StudyQueue {
-  const { cards, direction, reviews, prefs, now, random } = args;
+  const { cards, direction, reviews, prefs, now, random, backlog } = args;
   const today = studyDayOf(now, prefs.dayBoundaryHour);
   const reviewOf = new Map(reviews.map((r) => [reviewKeyOf(r), r]));
   const prompts = promptsOf(activeCards(cards), direction);
@@ -134,21 +140,29 @@ export function buildStudyQueue(args: {
   ).length;
 
   const dueBudget = Math.max(0, prefs.maxReviewsPerDay - reviewedToday);
-  const newBudget = Math.max(0, prefs.newCardsPerDay - introducedToday);
 
   const keyOf = (prompt: Prompt) =>
     reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction });
-  const due = prompts
+  const dueOf = (prompt: Prompt) => reviewOf.get(keyOf(prompt))!.due;
+  const allDue = prompts
     .filter((prompt) => {
       const review = reviewOf.get(keyOf(prompt));
       return review !== undefined && review.due <= today;
     })
-    .sort((a, b) => {
-      const dueA = reviewOf.get(keyOf(a))!.due;
-      const dueB = reviewOf.get(keyOf(b))!.due;
-      return dueA < dueB ? -1 : dueA > dueB ? 1 : 0;
-    })
-    .slice(0, dueBudget);
+    .sort((a, b) => (dueOf(a) < dueOf(b) ? -1 : dueOf(a) > dueOf(b) ? 1 : 0));
+  // A pause's backlog first, the prompts most likely still remembered first; then the rest, oldest due first.
+  const behind = backlog === undefined ? [] : allDue.filter((p) => dueOf(p) < backlog.before);
+  // Every state has its memory (recallOn gives one per SM-2 state, as effectiveStates gives the due days).
+  const memoryOf = (prompt: Prompt) => backlog!.memory.get(keyOf(prompt))!;
+  const caughtUp = [...behind].sort((a, b) => {
+    const [ma, mb] = [memoryOf(a), memoryOf(b)];
+    return mb.recall - ma.recall || mb.stability - ma.stability;
+  });
+  const ahead = new Set(behind);
+  const due = [...caughtUp, ...allDue.filter((prompt) => !ahead.has(prompt))].slice(0, dueBudget);
+  const newBudget = holdsNewPrompts(behind.length, prefs)
+    ? 0
+    : Math.max(0, prefs.newCardsPerDay - introducedToday);
 
   const newPrompts = shuffle(
     prompts.filter((prompt) => !reviewOf.has(keyOf(prompt))),
@@ -156,6 +170,27 @@ export function buildStudyQueue(args: {
   ).slice(0, newBudget);
 
   return { due, newPrompts, studiedToday: reviewedToday };
+}
+
+/**
+ * A pause's backlog (docs/srs.md, "Catching up after a pause"): the
+ * study day the deck resumed on, and each prompt's memory today.
+ */
+export interface Backlog {
+  before: string;
+  memory: ReadonlyMap<string, { recall: number; stability: number }>;
+}
+
+/**
+ * Whether a deck's new prompts wait for a pause's backlog: while more of
+ * the prompts due before its resume day are left than a day's review
+ * limit takes. A limit of 0 takes none, and holds nothing back.
+ */
+export function holdsNewPrompts(
+  backlog: number,
+  prefs: Pick<StudyPreferences, "maxReviewsPerDay">,
+) {
+  return prefs.maxReviewsPerDay > 0 && backlog > prefs.maxReviewsPerDay;
 }
 
 /**

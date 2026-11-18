@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { DeckPause } from "./deckPause";
 import { AppError } from "./appError";
 import type { LangTexts } from "./keywords";
 import { shown, tidied, tidiedSideText, tidiedTagged, type LangText } from "./langText";
@@ -262,6 +263,14 @@ export interface Deck {
    * pod: elsewhere, whoever writes the catalog could have stated it.
    */
   pictureHosts?: readonly string[];
+  /**
+   * The deck's pause, when the learner set it aside: `sm:deckPausedAt`
+   * and `sm:deckResumesOn` on the catalog entry, triples outside the
+   * deck's shape like `sm:deckCardLanguage`. Kept once the deck resumes,
+   * its resume day then telling the backlog the pause left
+   * (deckPause.ts). Absent when the deck was never paused.
+   */
+  pause?: DeckPause;
 }
 
 /** What is on a card: its editable content, without identity. */

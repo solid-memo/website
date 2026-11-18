@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { ActionsMenu, MenuItem } from "@solid-memo/ui/ActionsMenu";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useConfirm } from "./ConfirmDialog";
-import { Dialog } from "./Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 import { renamedView, withoutView, withSavedView, type SavedView } from "./views";
 
 /**

@@ -34,7 +34,7 @@ export interface HomeQuery {
 /** What Home knows of a deck to tell the views it is in: today's due cards (or that they are still counted, or could not be), and its badges. */
 export interface DeckFacts {
   due: number | "loading" | "unreadable";
-  badges: readonly (string | { from: string })[];
+  badges: readonly (string | { from: string } | { pausedUntil: string })[];
 }
 
 /**
@@ -53,7 +53,9 @@ export function inView(view: HomeView, { due, badges }: DeckFacts): boolean {
     case "courses":
       return badges.includes("course");
     case "copies":
-      return badges.some((badge) => badge === "library" || typeof badge === "object");
+      return badges.some(
+        (badge) => badge === "library" || (typeof badge === "object" && "from" in badge),
+      );
     case "attention":
       return badges.includes("invalid") || badges.includes("unreadable");
   }

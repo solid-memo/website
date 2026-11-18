@@ -346,6 +346,7 @@
     "continue": "Weiter",
     "finished": "Du hast diesen Kurs abgeschlossen. Seine Karten sind in deinem Stapel und lassen sich wie alle anderen lernen. Was du als Nächstes lernen möchtest, findest du in der Stapelbibliothek.",
     "backToDecks": "Zurück zu den Stapeln",
+    "paused": "Dieser Kurs ist mit seinem Stapel pausiert. Setze den Stapel in deiner Stapelliste fort, um dort weiterzumachen, wo du aufgehört hast.",
     "chapterCompleted": "Gut gemacht! Du hast das Kapitel „{chapter}“ abgeschlossen.",
     "courseCompleted": "Glückwunsch! Das war das letzte Kapitel: Du hast den ganzen Kurs abgeschlossen.",
     "continueOrStop": "Mach mit dem nächsten Kapitel weiter, wenn du so weit bist, oder hör hier erst einmal auf: Dein Fortschritt bleibt erhalten. In der Zwischenzeit kannst du Stapel aus der Stapelbibliothek hinzufügen und sie ebenfalls lernen.",
@@ -599,7 +600,40 @@
     "continueCourse": "Kurs fortsetzen",
     "fromHost": "von {host}",
     "newerRelease": "Neue Ausgabe",
-    "fromLink": "Über einen Link hinzufügen"
+    "fromLink": "Über einen Link hinzufügen",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "paused": "Pausiert",
+    "pausedUntil": "Pausiert bis {day}"
+  },
+  "dialog": {
+    "close": "Schließen"
+  },
+  "pauseDeck": {
+    "heading": "{deck} pausieren",
+    "intro": "Seine Karten bleiben aus deinem täglichen Lernen und deinen Zahlen heraus, bis er fortgesetzt wird. Dein Fortschritt bleibt erhalten, und an den Karten ändert sich nichts.",
+    "until": "Pausieren",
+    "untilResumed": "Bis ich ihn fortsetze",
+    "resumeOn": "Bis zu einem Tag:",
+    "day": "Tag zum Fortsetzen",
+    "dayInvalid": "Wähle einen Tag nach heute.",
+    "outlookOn": "Wenn du am {day} fortsetzt, erinnerst du dich wahrscheinlich noch an etwa {percent} dieses Stapels.",
+    "outlookAfter": "Nach {days} Tagen erinnerst du dich wahrscheinlich noch an etwa {percent} dieses Stapels.",
+    "nothingStudied": "In diesem Stapel wurde noch nichts gelernt, also gibt es nichts zu vergessen.",
+    "pause": "Pausieren"
+  },
+  "comeback": {
+    "label": "Willkommen zurück",
+    "left": "Willkommen zurück bei {deck}. Etwa {percent} davon ist wahrscheinlich noch da.",
+    "waiting": {
+      "one": "{count} Wiederholung wartet.",
+      "other": "{count} Wiederholungen warten."
+    },
+    "days": {
+      "one": "Bei seinem Tageslimit ist das die Arbeit eines Tages.",
+      "other": "Bei seinem Tageslimit verteilen sie sich auf {count} Tage."
+    },
+    "feelNew": "Karten, die du kurz vor der Pause gelernt hast, können sich wieder neu anfühlen: Das ist zu erwarten."
   },
   "studyPace": {
     "startSmall": "Jede neue Karte kommt in den folgenden Tagen zur Wiederholung zurück. Eine hohe Zahl jetzt bedeutet also später einen Berg von Wiederholungen. Fang lieber klein an und bleib dran: Erhöhen kannst du jederzeit."
@@ -1714,6 +1748,8 @@
     "distractorIdRepeated": "Zwei falsche Antwortmöglichkeiten einer Karte haben dieselbe ID, sodass eine die andere ersetzen würde. Es wurde nichts gespeichert. Lösche eine davon aus der Karte oder gib in einer Stapeldatei jeder ihre eigene ID.",
     "dailyLimitInvalid": "Ein Tageslimit ist eine ganze Zahl ab 0.",
     "dueDayInvalid": "„{day}“ ist kein Tag. Wähle den Tag, an dem die Karte fällig ist.",
+    "deckPaused": "Der Stapel „{deck}“ ist pausiert. Setze ihn in deiner Stapelliste fort, um weiterzumachen.",
+    "resumeDayInvalid": "„{day}“ ist kein Tag nach heute. Wähle einen späteren Tag zum Fortsetzen.",
     "cardTransferSameDeck": "Die Karten sind schon in diesem Stapel. Wähle einen anderen Stapel.",
     "licenseUnknown": "Wähle eine der angebotenen Lizenzen.",
     "authorEmpty": "Jede Person braucht einen Namen.",

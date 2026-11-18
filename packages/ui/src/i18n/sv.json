@@ -346,6 +346,7 @@
     "continue": "Fortsätt",
     "finished": "Du har gått klart kursen. Dess kort finns i din kortlek, att studera som alla andra. Hitta vad du vill lära dig härnäst i kortleksbiblioteket.",
     "backToDecks": "Tillbaka till kortlekarna",
+    "paused": "Den här kursen är pausad tillsammans med sin kortlek. Återuppta kortleken i din lista över kortlekar för att fortsätta där du slutade.",
     "chapterCompleted": "Bra jobbat! Du är klar med {chapter}.",
     "courseCompleted": "Grattis! Det var sista kapitlet: du har gått klart hela kursen.",
     "continueOrStop": "Fortsätt med nästa kapitel när du är redo, eller sluta här så länge: det du har gjort sparas. Under tiden kan du lägga till kortlekar från kortleksbiblioteket och studera dem också.",
@@ -599,7 +600,40 @@
     "continueCourse": "Fortsätt kursen",
     "fromHost": "från {host}",
     "newerRelease": "Ny utgåva",
-    "fromLink": "Lägg till från en länk"
+    "fromLink": "Lägg till från en länk",
+    "pause": "Pausa",
+    "resume": "Återuppta",
+    "paused": "Pausad",
+    "pausedUntil": "Pausad till {day}"
+  },
+  "dialog": {
+    "close": "Stäng"
+  },
+  "pauseDeck": {
+    "heading": "Pausa {deck}",
+    "intro": "Kortleken hålls utanför dina dagliga studier och dina antal tills den återupptas. Dina framsteg sparas, och inget av korten ändras.",
+    "until": "Pausa den",
+    "untilResumed": "Tills jag återupptar den",
+    "resumeOn": "Till en dag:",
+    "day": "Dag att återuppta",
+    "dayInvalid": "Välj en dag efter i dag.",
+    "outlookOn": "Om du återupptar den {day} kommer du troligen fortfarande att minnas ungefär {percent} av kortleken.",
+    "outlookAfter": "Efter {days} dagar kommer du troligen fortfarande att minnas ungefär {percent} av kortleken.",
+    "nothingStudied": "Inget i den här kortleken har studerats än, så det finns inget att glömma.",
+    "pause": "Pausa"
+  },
+  "comeback": {
+    "label": "Välkommen tillbaka",
+    "left": "Välkommen tillbaka till {deck}. Ungefär {percent} av den finns troligen kvar.",
+    "waiting": {
+      "one": "{count} repetition väntar.",
+      "other": "{count} repetitioner väntar."
+    },
+    "days": {
+      "one": "Med dess dagliga gräns är det en dags arbete.",
+      "other": "Med dess dagliga gräns fördelas de över {count} dagar."
+    },
+    "feelNew": "Kort som du lärde dig strax före pausen kan kännas nya igen: det är väntat."
   },
   "studyPace": {
     "startSmall": "Varje nytt kort kommer tillbaka för repetition de följande dagarna, så ett högt antal nu ger en hög med repetitioner senare. Börja hellre smått och var regelbunden: du kan alltid öka sen."
@@ -1714,6 +1748,8 @@
     "distractorIdRepeated": "Två felaktiga alternativ på ett kort har samma id, så det ena skulle ersätta det andra. Inget sparades. Ta bort ett av dem från kortet eller ge vart och ett sitt eget id i kortleksfilen.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
     "dueDayInvalid": "”{day}” är ingen dag. Välj dagen då kortet ska repeteras.",
+    "deckPaused": "Kortleken ”{deck}” är pausad. Återuppta den i din lista över kortlekar för att fortsätta.",
+    "resumeDayInvalid": "”{day}” är ingen dag efter i dag. Välj en senare dag att fortsätta på.",
     "cardTransferSameDeck": "Korten finns redan i den här kortleken. Välj en annan kortlek.",
     "licenseUnknown": "Välj en av licenserna som erbjuds.",
     "authorEmpty": "En upphovsperson behöver ett namn.",

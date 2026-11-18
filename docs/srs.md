@@ -545,7 +545,9 @@ prompts: their review states are kept, but never due and never new.
 
 The budgets count prompts: a bidirectional deck spends two of the day's
 new-card budget on a card introduced both ways. Both budgets clamp at
-zero.
+zero. A deck paused today has neither, and one that resumed from a
+pause catches up on its backlog first
+([Pausing a deck](#pausing-a-deck)).
 
 New instances start at 5 new cards per day, with a note beside the
 field that each brings reviews later. A format-1 preferences document
@@ -816,3 +818,92 @@ answers like study answers:
 - The day's multiple-choice answers leave the answer log.
 - A chapter completed today stays completed: `sm:completedChapter` is
   on the catalog entry, which a reset doesn't touch.
+
+## Pausing a deck
+
+A learner may set one deck aside for a while: an exam is over, a trip
+ends, a course is too much right now. The pause is one record on the
+deck's catalog entry: when it began, and the study day it ends on when
+one was chosen ([data-model.md](data-model.md#decks-and-cards)). Without
+a day, the deck stays paused until the learner resumes it. On its day it
+resumes by itself, at the start of that study day; resuming by hand
+makes today that day. The record stays once the deck resumes, so the
+day it did is known; pausing again replaces it
+([deckPause.ts](../packages/domain/src/deckPause.ts)).
+
+Each deck's menu on the deck list offers **Pause**, or **Resume** for a
+deck paused today. Pause opens a small dialog: until the learner
+resumes it, or until a day after today. It shows what the pause is
+likely to cost: the deck's average chance of recall on that day, or
+after 30 days without one (`getPauseOutlook`), by `recallOn`, the
+FSRS-6 estimate of an SM-2 state where there's no fresh FSRS-6 state.
+
+### What a paused deck does
+
+On a study day before its resume day:
+
+- Its cards stay out of the study queue (`getStudyQueue` gives none),
+  and its due and new counts are none (`getStudyCounts`, which reads
+  neither of its documents). So they stay out of the day's study goal
+  and its celebration ([statistics.md](statistics.md#the-today-strip)).
+- A course's deck pauses the course with it
+  ([courses.md](courses.md#the-learners-state)).
+- It stays in its place on the deck list, on the sunken surface with
+  its name in the muted text color, still at the contrast text needs.
+  It says "Paused", with "until" its day when it has one: not by color
+  alone. It still opens in the Browser and the Studio, and its
+  preferences can still be edited.
+
+### Catching up after a pause
+
+A deck that resumed has a backlog: its prompts due before the day it
+resumed (`backlogDayOf`), which fell due during the pause or before it.
+While any are left, `buildStudyQueue` takes them first, then the
+prompts that fell due since, each on its own day, oldest first. The
+review limit caps them all together, so each day takes at most a day's
+reviews of the backlog, and the cards not yet due keep their due days.
+
+- **Order**: the backlog goes highest chance of recall today first,
+  then higher stability (`recallOn` in
+  [fsrs.ts](../packages/domain/src/fsrs.ts): a prompt's fresh FSRS-6
+  state, else the FSRS-6 estimate of its SM-2 state, `memoryFromSm2`,
+  whichever scheduler sets the due days). These are the cards a review
+  can still save. Short-stability cards that are probably forgotten cost
+  about the same to relearn a few days later.
+- **No new cards** come from the deck while more of the backlog is left
+  than a day's review limit takes (`holdsNewPrompts`). A limit of 0
+  takes none of it, and holds nothing back.
+
+`studyCountsOf` counts the same from the digest's due days, so the deck
+list's counts match the session.
+
+The deck list welcomes the deck back above the list while any of its
+backlog is due, for up to 30 days after it resumed (`getComeback`). It
+says about how much of the deck is probably still there (the average
+chance of recall today), how many reviews wait, and over how many days
+at its review limit. Cards learned shortly before the pause may feel
+new again, and it says so. Only a deck that resumed in those 30 days
+is read for it, since the pause's record stays. Those decks are read 3
+at a time, each deck's cards and review states together, like the
+study counts. Anyone who shares the catalog can mark every deck
+resumed, and the pod is still never asked for all their documents at once.
+The backlog ends once none of its
+prompts is due; the pause's record stays until the deck is paused again.
+
+### Never rewriting review state
+
+A pause never rewrites review state. Memory keeps fading while a deck
+rests, so no `due`, `lastReviewedAt`, stability or difficulty moves.
+Moving them forward by the length of the pause would:
+
+- give FSRS-6 too few elapsed days (`nextMemory`): a late success
+  would earn too little stability, and a lapse would count as on time;
+- make `recallNow` and the statistics overstate what the learner
+  remembers;
+- break the fuzz factor and the check that an FSRS-6 state is still
+  fresh, which both go by `lastReviewedAt` (`fuzzFactor`, `isFresh`).
+
+With the real elapsed days, FSRS-6 already handles the first review
+after a pause. A forgotten card falls back to a small stability. A card
+still remembered after the long gap gains more stability than one
+reviewed on time.

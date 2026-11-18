@@ -4,6 +4,8 @@
 
 import { isCopyOf } from "@solid-memo/domain/library";
 import type { Deck } from "@solid-memo/domain/deck";
+import { isPaused } from "@solid-memo/domain/deckPause";
+import { studyDayOf } from "@solid-memo/domain/scheduling";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { chosenDistractorIn, type ResponseTimes } from "@solid-memo/domain/answer";
@@ -59,7 +61,8 @@ export interface CourseUseCases {
    * learner reached the card. Writes nothing when the answer is practice
    * ("none"). The answer logged keeps how
    * long choosing took (`times`; a multiple-choice answer is not graded,
-   * so it has no grading time).
+   * so it has no grading time). A course whose deck is paused today is
+   * paused with it: its answers are refused (deckPaused) before any write.
    */
   answerCourseQuestion(
     instanceUrl: string,
@@ -203,6 +206,8 @@ export function createCourseUseCases({
           direction: prompt.direction,
         }),
       ]);
+      if (isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour)))
+        throw new AppError("deckPaused", { deck: deck.title });
       // Whether the card is due goes by what sets its due day: under FSRS-6, its state's.
       const due = current.sm2 === null ? null : promptDueOf(current.sm2, current.fsrs, prefs);
       const effect = courseAnswerEffect(due, choice.correct, now, prefs.dayBoundaryHour);

@@ -160,6 +160,13 @@ new type-index entries ([data-model.md](data-model.md#courses)):
     `v2.ttl`, `sm:completedChapter <v1.ttl#ch-…>` marks the chapter
     `v2.ttl` keeps under that id done.
 
+- **A course pauses with its deck** ([srs.md](srs.md#pausing-a-deck)).
+  While the deck is paused, the course leaves the courses to continue
+  above the deck list, its page says it's paused and offers no way on,
+  and `answerCourseQuestion` refuses an answer (`deckPaused`), so no
+  chapter or question is introduced. Resuming the deck resumes the
+  course where it stopped: the pause touches none of its progress.
+
 ## The learner's flow
 
 1. **Start.** A library deck whose release is a course is marked as one

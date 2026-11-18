@@ -56,7 +56,9 @@ sm:dayBoundaryHour: property, range xsd:integer, domain sm:Preferences
 sm:deckCardLanguage: property, range xsd:string, domain sm:Deck
 sm:deckMaxReviewsPerDay: property, range xsd:integer, domain sm:Deck
 sm:deckNewCardsPerDay: property, range xsd:integer, domain sm:Deck
+sm:deckPausedAt: property, range xsd:dateTime, domain sm:Deck
 sm:deckPictureHost: property, range xsd:string, domain sm:Deck
+sm:deckResumesOn: property, range xsd:string, domain sm:Deck
 sm:defaultTextSize: concept
 sm:desiredRetention: property, range xsd:decimal, domain sm:Preferences
 sm:developerMode: property, range xsd:boolean, domain sm:Preferences

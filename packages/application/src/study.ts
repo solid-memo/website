@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { deckPreferences } from "@solid-memo/domain/deckPace";
+import { backlogDayOf, isPaused } from "@solid-memo/domain/deckPause";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import { studyCountsOf } from "@solid-memo/domain/studyDigest";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
@@ -13,9 +14,10 @@ import {
   resetStudyDay,
   studyDayOf,
   withWritableDueDays,
+  type Backlog,
   type StudyQueue,
 } from "@solid-memo/domain/scheduling";
-import { effectiveStates } from "@solid-memo/domain/fsrs";
+import { effectiveStates, recallOn } from "@solid-memo/domain/fsrs";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import { inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
@@ -26,12 +28,13 @@ import type { DigestStore } from "./digestStore";
 export interface StudyUseCases {
   /**
    * Today's due and new cards for a deck, respecting the daily caps, with
-   * what grading them takes and their states (StudySessionQueue).
+   * what grading them takes and their states (StudySessionQueue). A deck
+   * paused today has none (docs/srs.md, "Pausing a deck").
    */
   getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudySessionQueue>;
   /**
    * How many prompts today's queue would hold, as getStudyQueue counts
-   * them; from the deck's schedule in the instance's digest when neither
+   * them (none for a deck paused today, whose documents are not read); from the deck's schedule in the instance's digest when neither
    * of its documents changed since, else from its documents (and the
    * digest is brought up to date). Each document is read as the user
    * only when it is the instance's (isInInstancePod), as no one
@@ -136,6 +139,25 @@ export interface ReviewUndo {
 const STUDY_COUNTS_AT_ONCE = READS_AT_ONCE / 2;
 
 /**
+ * The backlog a deck that resumed from a pause has today, for
+ * buildStudyQueue: its resume day and each prompt's memory today
+ * (recallOn); nothing for any other deck.
+ */
+function backlogOf(
+  deck: Deck,
+  reviews: { sm2: readonly ReviewState[]; fsrs: readonly FsrsState[] },
+  prefs: StudyPreferences,
+  now: Date,
+): { backlog?: Backlog } {
+  const today = studyDayOf(now, prefs.dayBoundaryHour);
+  const before = backlogDayOf(deck, today);
+  if (before === undefined) return {};
+  return {
+    backlog: { before, memory: recallOn(reviews.sm2, reviews.fsrs, today, prefs.dayBoundaryHour) },
+  };
+}
+
+/**
  * Study (docs/srs.md): a deck's queue for today and how many prompts it
  * holds, each answer graded by the instance's scheduler and logged, an
  * answer or the whole study day taken back, and the deck's schedule kept
@@ -163,6 +185,8 @@ export function createStudyUseCases({
       digestStore.of(instanceUrl),
       digestStore.asNoOneOf(instanceUrl, deck),
     ]);
+    // A paused deck has nothing to study today: its documents are not read, and its schedule waits.
+    if (isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour))) return { dueCount: 0, newCount: 0 };
     const studyPrefs = deckPreferences(prefs, deck);
     const kept = digest.schedules[deck.url];
     // Each of the deck's documents read as the user only when it is the instance's.
@@ -175,10 +199,12 @@ export function createStudyUseCases({
       readReviews(kept?.reviewsVersion),
     ]);
     if (kept !== undefined && cardsSince.unchanged && reviewsSince.unchanged) {
+      const backlogBefore = backlogDayOf(deck, studyDayOf(now, prefs.dayBoundaryHour));
       const counts = studyCountsOf(kept.schedule, {
         direction: deck.direction,
         prefs: studyPrefs,
         now,
+        ...(backlogBefore === undefined ? {} : { backlogBefore }),
       });
       if (counts !== null) return counts;
     }
@@ -202,6 +228,7 @@ export function createStudyUseCases({
       prefs: studyPrefs,
       now,
       random,
+      ...backlogOf(deck, reviews.value, prefs, now),
     });
     return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
   }
@@ -214,12 +241,14 @@ export function createStudyUseCases({
         preferenceStore.get(instanceUrl),
       ]);
       const queue = buildStudyQueue({
-        cards,
+        // A paused deck's cards stay out of the day's study; its states still come, for what reads them.
+        cards: isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour)) ? [] : cards,
         direction: deck.direction,
         reviews: effectiveStates(reviews.sm2, reviews.fsrs, prefs.scheduler, prefs.dayBoundaryHour),
         prefs: deckPreferences(prefs, deck),
         now,
         random,
+        ...backlogOf(deck, reviews, prefs, now),
       });
       return { ...queue, prefs, states: reviews.sm2, fsrsStates: reviews.fsrs };
     },

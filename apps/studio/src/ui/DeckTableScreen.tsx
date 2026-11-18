@@ -51,9 +51,17 @@ export type Count = number | "loading" | "unreadable";
 /**
  * What a deck is, beside its name: a copy of a library deck or of a
  * course, one of a release added from a link (the host it came from),
- * or one whose data is invalid or could not be read.
+ * one whose data is invalid or could not be read, or one paused, until
+ * it is resumed or until the day it resumes on (`pausedUntil`).
  */
-export type DeckBadge = "library" | "course" | "invalid" | "unreadable" | { from: string };
+export type DeckBadge =
+  | "library"
+  | "course"
+  | "invalid"
+  | "unreadable"
+  | "paused"
+  | { from: string }
+  | { pausedUntil: string };
 
 /** The columns of figures, aligned to compare. */
 const NUMBERS: ReadonlySet<DeckColumn> = new Set([
@@ -438,9 +446,13 @@ export function DeckTableScreen({
                     <span key={badge} class="studio-badge">
                       {t(`studio.decks.badge.${badge}`)}
                     </span>
-                  ) : (
+                  ) : "from" in badge ? (
                     <span key="from" class="studio-badge">
                       {t("studio.decks.badge.from", { host: badge.from })}
+                    </span>
+                  ) : (
+                    <span key="paused" class="studio-badge">
+                      {t("studio.decks.badge.pausedUntil", { day: formatDate(badge.pausedUntil) })}
                     </span>
                   ),
                 )}

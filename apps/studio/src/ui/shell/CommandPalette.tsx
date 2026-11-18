@@ -18,7 +18,7 @@ import {
   type Command,
   type ScreenCommand,
 } from "./commandIndex";
-import { Dialog } from "./Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 import { Keys } from "./KeyHelp";
 import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { keyOf, shortcutOf } from "./shortcuts";

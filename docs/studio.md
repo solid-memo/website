@@ -285,7 +285,8 @@ open (Columns, say), every key is the menu's.
 A field or button with a key, the one `/` goes to among them, says so to
 screen readers (`aria-keyshortcuts`). The key help is a modal dialog,
 the browser's own
-([`shell/Dialog.tsx`](../apps/studio/src/ui/shell/Dialog.tsx)); Escape
+([`Dialog.tsx`](../packages/ui/src/ui/Dialog.tsx), shared with the
+deck list); Escape
 or Close closes it, and the focus goes back where it was. A saved view
 renamed keeps the focus; one removed gives it to **+ Save view**.
 
@@ -612,6 +613,9 @@ is a table with a row per deck. Its columns are:
   - **Invalid data** when the instance's check finds a problem in its
     entry or its documents ([validation.md](validation.md));
   - **Unreadable** when its cards couldn't be read;
+  - **Paused**, or **Paused until \<day>**, while the learner has
+    paused it ([srs.md](srs.md#pausing-a-deck)): it then has no cards
+    due or new;
 - the groups it's in, outermost first, or "Top level";
 - its direction, and its pace: new cards and reviews per day. A limit
   the deck doesn't set is the instance's, marked "(instance)";
@@ -1228,6 +1232,9 @@ case `deckInsight` reads what it needs, writing nothing.
   - The reviews a day are capped by the deck's pace, else the
     instance's (`deckPreferences`), today's less what was reviewed
     today, the rest waiting for the next day.
+  - A paused deck ([srs.md](srs.md#pausing-a-deck)) has no reviews
+    before the day it resumes on, or at all while it waits to be
+    resumed: what falls due waits for that day.
   - The due days come from the deck's schedule in the
     [digest](data-model.md#the-digest) (`sm:dueOnDay`) while it's
     fresh (`freshSchedule`: the same versions, direction and day

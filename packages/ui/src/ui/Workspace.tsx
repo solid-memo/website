@@ -27,6 +27,7 @@ import { CardHistoryContainer } from "./CardHistoryContainer";
 import { CardCreatorContainer } from "./CardCreatorContainer";
 import { ChapterPlayerContainer } from "./ChapterPlayerContainer";
 import { ChapterReviewContainer } from "./ChapterReviewContainer";
+import { usePausedToday } from "./pausedToday";
 import { CourseContainer, type CompletedChapter } from "./CourseContainer";
 import { courseStripQuery } from "./CourseStrip";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
@@ -449,7 +450,10 @@ function useHomePrefetch(
   }, [homeTreeQuery.data, instanceUrl]);
   const homeDecks = decksOf(homeTreeQuery.data?.children ?? []);
   const { isCourse } = useCopies(useCases, homeDecks);
-  const homeCourses = homeDecks.filter((deck) => isCourse(deck) && !isSetAside(deck));
+  const pausedToday = usePausedToday(useCases, instanceUrl, onHome);
+  const homeCourses = homeDecks.filter(
+    (deck) => isCourse(deck) && !isSetAside(deck) && !pausedToday(deck),
+  );
   useEffect(() => {
     for (const deck of homeCourses) {
       void queryClient.prefetchQuery(courseStripQuery(useCases, deck));

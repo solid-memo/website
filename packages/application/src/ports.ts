@@ -11,6 +11,7 @@ import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
+import type { DeckPause } from "@solid-memo/domain/deckPause";
 import type { DeckFileContent, DeckFileFormat, DeckFileOptions } from "@solid-memo/domain/deckFile";
 import type { CompletedChaptersEdit, CourseOutline } from "@solid-memo/domain/course";
 import type { StatedLanguages } from "@solid-memo/domain/deckLanguages";
@@ -518,6 +519,14 @@ export interface DeckRepository {
    * then; throws deckGone when it has no entry.
    */
   setPictureHost(deck: Deck, host: string, shown: boolean): Promise<Deck>;
+  /**
+   * Set the deck's pause (`sm:deckPausedAt` and `sm:deckResumesOn`, a
+   * pause already checked), or remove it for null, on its catalog entry
+   * as it is now, as setCardLanguage edits it. The same pause writes
+   * nothing. Returns the deck as its entry says then; throws deckGone
+   * when it has no entry.
+   */
+  setPause(deck: Deck, pause: DeckPause | null): Promise<Deck>;
 }
 
 /** Driven port: the app's read-only library of ready-made decks. */

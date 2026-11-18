@@ -377,10 +377,9 @@ describe("the Studio's contrast", () => {
     ),
   ];
 
-  /** The surfaces that hold no text: the splitter's bar as it is pointed at, and a dialog's backdrop. */
+  /** The surfaces that hold no text: the splitter's bar as it is pointed at (a dialog's backdrop is ui's, in style.css). */
   const TEXTLESS: Record<string, string> = {
     "--primary": ".studio-splitter:is(:hover, :focus-visible)",
-    "--zoom-backdrop": ".studio-dialog::backdrop",
   };
 
   /** The values `body` gives the properties that color: text, backgrounds, and an SVG shape's fill and line. */

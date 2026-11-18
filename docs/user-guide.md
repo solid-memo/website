@@ -129,6 +129,10 @@ The deck list is home. From the top:
   While all your decks are courses, the strip points to the **Deck
   library**, since you can add other decks at any time
   ([courses.md](courses.md#the-learners-flow)).
+- **Welcome back**: for a deck you paused that has resumed, while
+  it still has reviews from the pause: about how much of it you
+  probably still remember, how many reviews wait and over how many
+  days. It shows for up to 30 days after the deck resumed.
 - **Try FSRS-6**: while your instance schedules with SM-2, an invitation
   to switch to FSRS-6, the recommended scheduler, whose intervals
   differ more by your answer and adapt to how late you review. **Switch
@@ -142,11 +146,34 @@ The deck list is home. From the top:
   newer release, and its page offers the update. A new instance with no
   decks offers the course for newcomers here: "Start the course".
 - Each deck's **menu**, at the end of its row, offers its preferences,
-  Rename, moves up, down and into groups, "Open in Studio", and "Delete
-  deck". Drag a deck onto another to make a group, and in and out of
-  groups. Deleting a group keeps its decks.
+  "Open in Studio", **Pause** (or **Resume**), Rename, moves up, down
+  and into groups, and "Delete deck". Drag a deck onto another to make a
+  group, and in and out of groups. Deleting a group keeps its decks.
 - At the bottom: **Create deck**, **Deck library** and **Add from a
   link**.
+
+### Pausing a deck
+
+Set a deck aside for a while with **Pause** in its menu: after an exam,
+during a trip, or when a course is too much right now. Choose **Until I
+resume it**, or **Until a day** and pick the day. The dialog says how
+much of the deck you'll likely still remember then (after 30 days
+without a day).
+
+A paused deck stays in its place, dimmed, with "Paused" (and "until"
+its day) after its name. Its cards stay out of your study, the day's
+counts and the day's goal, so finishing your other decks finishes the
+day. A course pauses with its deck and leaves **Your courses**. You can
+still open the deck, browse its cards, edit it in the Studio and change
+its preferences. Nothing about your progress changes.
+
+**Resume** in its menu brings it back today, and a deck paused until a
+day comes back by itself that morning. Your memory kept fading
+meanwhile, so the reviews that fell due wait for you. Each day takes at
+most the deck's daily review limit, the cards you most likely still
+remember first, and no new cards come from the deck until the rest fits
+in a day. Cards you learned shortly before the pause may feel new again:
+that's expected ([srs.md](srs.md#pausing-a-deck)).
 
 ## A deck's page
 

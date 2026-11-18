@@ -84,6 +84,123 @@ describe("DeckListContainer", () => {
     expect(screen.getByRole("heading", { name: "Decks" })).toBeInTheDocument();
   });
 
+  describe("pausing a deck", () => {
+    const menuItem = async (name: string, item: string) => {
+      fireEvent.click(await screen.findByRole("button", { name: `Actions for ${name}` }));
+      fireEvent.click(screen.getByRole("menuitem", { name: item }));
+    };
+
+    it("pauses a deck from its menu, then shows it paused, out of study, and resumes it", async () => {
+      let stored: Deck = deck;
+      const useCases = makeUseCasesFake({
+        listDecks: vi.fn(async () => [stored]),
+        getStudyCounts: vi.fn(async () => ({ dueCount: 3, newCount: 0 })),
+      });
+      vi.mocked(useCases.pauseDeck).mockImplementation(async (_url, paused, resumesOn) => {
+        stored = {
+          ...paused,
+          pause: {
+            pausedAt: "2026-03-01T10:00:00.000Z",
+            ...(resumesOn === null ? {} : { resumesOn }),
+          },
+        };
+        return stored;
+      });
+      vi.mocked(useCases.resumeDeck).mockImplementation(async (_url, resumed) => {
+        stored = { ...resumed, pause: { ...resumed.pause!, resumesOn: "2000-01-01" } };
+        return stored;
+      });
+      renderContainer(useCases);
+      expect(await screen.findByRole("button", { name: /^Study/ })).toBeInTheDocument();
+      await menuItem("Kanji N5", "Pause");
+      const dialog = screen.getByRole("dialog", { name: "Pause Kanji N5" });
+      fireEvent.click(within(dialog).getByRole("button", { name: "Pause" }));
+      await waitFor(() =>
+        expect(useCases.pauseDeck).toHaveBeenCalledWith(instance.url, deck, null, expect.any(Date)),
+      );
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+      const row = (await screen.findByText("Paused")).closest("li")!;
+      expect(row).toHaveClass("paused");
+      expect(within(row).queryByRole("button", { name: /^Study/ })).toBeNull();
+      await menuItem("Kanji N5", "Resume");
+      await waitFor(() => expect(useCases.resumeDeck).toHaveBeenCalled());
+      expect(await screen.findByRole("button", { name: /^Study/ })).toBeInTheDocument();
+      expect(screen.queryByText("Paused")).toBeNull();
+    });
+
+    it("says until when a deck is paused, and why a resume failed", async () => {
+      const paused = {
+        ...deck,
+        pause: { pausedAt: "2026-03-01T10:00:00.000Z", resumesOn: "9999-12-31" },
+      };
+      const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [paused]) });
+      vi.mocked(useCases.resumeDeck).mockRejectedValue(
+        new AppError("deckGone", { deck: paused.title }),
+      );
+      renderContainer(useCases);
+      expect(await screen.findByText("Paused until December 31, 9999")).toBeInTheDocument();
+      await menuItem("Kanji N5", "Resume");
+      expect(await screen.findByText(/no longer exists/)).toBeInTheDocument();
+    });
+
+    it("keeps the dialog open with the error when the pause fails, and closes it on Cancel", async () => {
+      const useCases = makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) });
+      vi.mocked(useCases.pauseDeck).mockRejectedValue(
+        new AppError("deckGone", { deck: deck.title }),
+      );
+      renderContainer(useCases);
+      await menuItem("Kanji N5", "Pause");
+      const dialog = screen.getByRole("dialog", { name: "Pause Kanji N5" });
+      fireEvent.click(within(dialog).getByRole("button", { name: "Pause" }));
+      expect(await within(dialog).findByText(/no longer exists/)).toBeInTheDocument();
+      fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
+      await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    });
+
+    it("welcomes a deck back from a pause above the list, while its backlog lasts", async () => {
+      const today = new Date();
+      const day = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+      const resumed = { ...deck, pause: { pausedAt: "2000-01-01T00:00:00.000Z", resumesOn: day } };
+      const long = {
+        ...deck,
+        id: "deck-2",
+        url: `${instance.url}catalog.ttl#deck-2`,
+        title: { en: "Verbs" },
+        pause: { pausedAt: "2000-01-01T00:00:00.000Z", resumesOn: "2000-02-01" },
+      };
+      const useCases = makeUseCasesFake({
+        listDecks: vi.fn(async () => [resumed, long, deck]),
+        getComeback: vi.fn(async () => ({ recall: 0.74, waiting: 212, days: 6 })),
+      });
+      renderContainer(useCases);
+      const notes = await screen.findByRole("region", { name: "Welcome back" });
+      expect(notes).toHaveTextContent(
+        "Welcome back to Kanji N5. About 74% of it is probably still there. 212 reviews are waiting. At its daily limit, they’re spread over 6 days. Cards learned shortly before the pause may feel new again: that’s expected.",
+      );
+      // Only a deck that resumed lately is read for it.
+      expect(useCases.getComeback).toHaveBeenCalledOnce();
+    });
+
+    it("says no days when a deck's limit takes no reviews, and nothing once its backlog is done", async () => {
+      const today = new Date();
+      const day = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-01`;
+      const resumed = { ...deck, pause: { pausedAt: "2000-01-01T00:00:00.000Z", resumesOn: day } };
+      const other = { ...resumed, id: "deck-2", url: `${instance.url}catalog.ttl#deck-2` };
+      const useCases = makeUseCasesFake({
+        listDecks: vi.fn(async () => [resumed, other]),
+        getComeback: vi.fn(async (_url, one) =>
+          one.url === resumed.url ? { recall: 0.5, waiting: 1, days: null } : null,
+        ),
+      });
+      renderContainer(useCases);
+      const notes = await screen.findByRole("region", { name: "Welcome back" });
+      expect(notes).toHaveTextContent(
+        "Welcome back to Kanji N5. About 50% of it is probably still there. 1 review is waiting. Cards learned",
+      );
+      expect(within(notes).getAllByText(/Welcome back to/)).toHaveLength(1);
+    });
+  });
+
   it("shows an error when listing decks fails", async () => {
     renderContainer(
       makeUseCasesFake({
@@ -166,7 +283,7 @@ describe("DeckListContainer", () => {
     expect(useCases.listLibraryDecks).toHaveBeenCalledOnce();
   });
 
-  it("shows the courses to go on with above the list: neither one finished, set aside, nor unreadable", async () => {
+  it("shows the courses to go on with above the list: neither one finished, set aside, paused, nor unreadable", async () => {
     const copy = (n: number, title: string): Deck => ({
       ...deck,
       id: `deck-${n}`,
@@ -178,8 +295,10 @@ describe("DeckListContainer", () => {
     const finished = { ...copy(3, "Finished"), completedChapters: [CH1, CH2] };
     const setAside = copy(4, "Aside");
     const unreadable = copy(5, "Unreadable");
+    // Paused with its deck: no way on, until the deck resumes.
+    const paused = { ...copy(6, "Paused"), pause: { pausedAt: "2026-01-01T00:00:00.000Z" } };
     const useCases = makeUseCasesFake({
-      listDecks: vi.fn(async () => [deck, going, finished, setAside, unreadable]),
+      listDecks: vi.fn(async () => [deck, going, finished, setAside, unreadable, paused]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
       getCourseSummary: vi.fn(async (d: Deck) => {
         if (d === unreadable) throw new Error("course unreachable");
@@ -212,6 +331,7 @@ describe("DeckListContainer", () => {
     expect(within(strip).queryByRole("link", { name: "Deck library" })).toBeNull();
     await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalledTimes(3));
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(setAside);
+    expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(paused);
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(deck);
     // The whole course, with its cards, is read behind the strip, of the course it shows only.
     await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledWith(going));

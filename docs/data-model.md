@@ -472,6 +472,8 @@ isn't written.
 │                        in first (sm:deckCardLanguage, outside the
 │                        shape); the hosts whose pictures it shows
 │                        (sm:deckPictureHost, outside the shape);
+│                        a pause (sm:deckPausedAt, sm:deckResumesOn,
+│                        outside the shape);
 │                        beside each deck its
 │                        dcat:Distribution (#deck-X-cards) and the
 │                        foaf:Agent nodes of its creators (#agent-…);
@@ -940,6 +942,24 @@ graph LR
   doesn't read the term. In a catalog outside the learner's own pod the
   term isn't believed, as that pod's owner writes it, and nothing is
   written of a choice there.
+- **Pause**: a learner may set a deck aside for a while
+  ([srs.md](srs.md#pausing-a-deck)). The pause is two terms on the
+  catalog entry: `sm:deckPausedAt`, an `xsd:dateTime`, when it began,
+  and `sm:deckResumesOn`, the study day it ends on, a plain
+  `"YYYY-MM-DD"` string as a review state's `sm:due` is. Without a resume
+  day the deck stays paused until the learner resumes it. Resuming
+  keeps the record and sets the resume day to the day it resumed, so
+  the cards that fell due before that day are known as the backlog the
+  pause left; pausing again replaces it. Nothing else is written: no
+  review state moves.
+  Like `sm:deckCardLanguage` it belongs to no shape, every other write
+  of the deck keeps it as the entry has it, and only `setPause` sets or
+  removes it, on the entry as it is then (If-Match). A reader drops a
+  start that's no instant of the years 0 to 9999 (and with it the
+  pause), and a resume day that's no day, which leaves the deck paused
+  until resumed. A guest's deck moved to an instance keeps it, while an
+  export leaves it behind and an import from a deck file never brings
+  a deck in paused: the pause is the learner's, of the pod it's in.
 - **Format versions**: every subject the app writes carries
   `sm:formatVersion`, the version of its class's [shape](shapes.md) it
   conforms to. The instance is at 1, decks at 3 (DCAT), cards at 2
@@ -1848,7 +1868,8 @@ An export holds triples as the pod has them, at the pod's IRIs:
 
 - the deck's entry in `catalog.ttl`, its distribution and the agents it
   names as its creators, its card language (`sm:deckCardLanguage`) and
-  picture hosts (`sm:deckPictureHost`) among them. A creator goes only
+  picture hosts (`sm:deckPictureHost`) among them, but not its pause
+  (`sm:deckPausedAt`, `sm:deckResumesOn`). A creator goes only
   when it's an agent as Solid Memo writes one: a `foaf:Agent` of no
   other class a shape describes or adds, and not the catalog
   (`isCreatorAgent` in

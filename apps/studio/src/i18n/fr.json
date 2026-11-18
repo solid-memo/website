@@ -182,7 +182,9 @@
         "course": "Cours",
         "invalid": "Données non valides",
         "unreadable": "Illisible",
-        "from": "De {host}"
+        "from": "De {host}",
+        "paused": "En pause",
+        "pausedUntil": "En pause jusqu’au {day}"
       },
       "healthOf": "dans {deck}"
     },

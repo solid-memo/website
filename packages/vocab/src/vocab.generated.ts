@@ -1,6 +1,6 @@
 /* Generated from ns/vocab/v1.ttl by `npm run generate`. Do not edit: change the source and regenerate. */
 
-/** Solid Memo's own vocabulary, version 1.28 (see docs/vocab.md). */
+/** Solid Memo's own vocabulary, version 1.29 (see docs/vocab.md). */
 export const SM_NS = "https://solid-memo.com/ns/vocab/v1.ttl#";
 
 export const SM = {
@@ -60,6 +60,10 @@ export const SM = {
   deckCardLanguage: `${SM_NS}deckCardLanguage`,
   /** A host, as a URL writes it with any port that is not the default, whose pictures the learner chose to show on the cards of this deck, one value per host. Only a deck copied from a release outside the library's index, in the learner's own pod, reads it: a picture from any other host stays hidden on it, and nothing is requested from that host. The learner's choice alone sets it, never a release, and in a catalog outside the learner's pod it is not believed. Absent means none chosen. (Added in 1.28. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
   deckPictureHost: `${SM_NS}deckPictureHost`,
+  /** When the learner paused this deck: set it aside for a while, so that its cards stay out of the day's study and its counts. No review state changes while it rests, as memory keeps fading. The pause lasts until the study day of deckResumesOn, or, without one, until the learner resumes the deck. A resumed deck keeps it, with deckResumesOn the day it resumed. Absent means the deck was never paused. (Added in 1.29. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  deckPausedAt: `${SM_NS}deckPausedAt`,
+  /** The study day, as a plain "YYYY-MM-DD" string as due is, a paused deck resumes on, at the start of that day; on a deck that resumed, the day it did, so its cards that fell due before that day are known as the backlog the pause left. Only with deckPausedAt. Absent on a paused deck means it stays paused until the learner resumes it. (Added in 1.29. On a deck it is outside the deck format, without a version bump: an older reader ignores it and an older writer keeps it.) */
+  deckResumesOn: `${SM_NS}deckResumesOn`,
   /** Text on the front of the card. (Since 1.0.) */
   front: `${SM_NS}front`,
   /** Text on the back of the card. (Since 1.0.) */

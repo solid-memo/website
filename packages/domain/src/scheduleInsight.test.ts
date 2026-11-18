@@ -129,6 +129,36 @@ describe("forecastOf", () => {
   });
 });
 
+describe("forecastOf for a paused deck", () => {
+  const due = { "2026-10-01": 2, "2026-10-09": 3, "2026-10-10": 1, "2026-10-12": 4 };
+
+  it("holds every review back until the day it resumes on, then lets them through at the cap", () => {
+    const forecast = forecastOf(schedule({ dueByDay: due }), {
+      today: "2026-10-09",
+      days: 4,
+      maxReviewsPerDay: 4,
+      pause: { resumesOn: "2026-10-11" },
+    });
+    expect(forecast).toEqual([
+      { studyDay: "2026-10-09", due: 5, reviews: 0 },
+      { studyDay: "2026-10-10", due: 1, reviews: 0 },
+      { studyDay: "2026-10-11", due: 0, reviews: 4 },
+      { studyDay: "2026-10-12", due: 4, reviews: 4 },
+    ]);
+    expect(daysToClearOf(forecast)).toBeNull();
+  });
+
+  it("lets none through while it waits to be resumed", () => {
+    const forecast = forecastOf(schedule({ dueByDay: due }), {
+      today: "2026-10-09",
+      days: 2,
+      maxReviewsPerDay: 4,
+      pause: { resumesOn: null },
+    });
+    expect(forecast.map((day) => day.reviews)).toEqual([0, 0]);
+  });
+});
+
 describe("overdueOf", () => {
   it("counts the prompts due before today, not today's", () => {
     const due = { "2026-10-01": 2, "2026-10-08": 3, "2026-10-09": 1, "2026-10-12": 4 };

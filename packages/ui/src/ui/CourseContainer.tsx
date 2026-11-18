@@ -3,12 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import type { LibraryUseCases } from "@solid-memo/application/library";
+import type { UseCases } from "@solid-memo/application/useCases";
 import type { Course } from "@solid-memo/application/courses";
 import type { ChapterProgress, CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useCourseLinks, type CourseLinks } from "./courseLinks";
 import { CourseScreen } from "./CourseScreen";
 import { LibraryUpgradeContainer } from "./LibraryUpgradeContainer";
+import { usePausedToday } from "./pausedToday";
 
 /**
  * Where a chapter of the course is taken up: its steps, from the first
@@ -45,7 +47,8 @@ export interface CompletedChapter {
  * back from its final review. A newer release of the course is offered
  * here as on the deck's page (LibraryUpgradeContainer), since the
  * learner comes here, not there. Its chapters link where the course
- * links say (useCourseLinks).
+ * links say (useCourseLinks). A course whose deck is paused today is
+ * paused with it (usePausedToday): its page offers no way on.
  */
 export function CourseContainer({
   useCases,
@@ -53,7 +56,7 @@ export function CourseContainer({
   course,
   justCompleted,
 }: {
-  useCases: LibraryUseCases;
+  useCases: LibraryUseCases & Pick<UseCases, "getPreferences">;
   instance: Instance;
   course: Course;
   justCompleted?: CompletedChapter;
@@ -63,6 +66,7 @@ export function CourseContainer({
   const deckUrl = course.deck.url;
   // The chapter to go on with is the one open (courseProgress opens one at most).
   const at = course.progress.chapters.findIndex((chapter) => chapter.state === "open");
+  const paused = usePausedToday(useCases, instanceUrl)(course.deck);
   return (
     <CourseScreen
       title={course.release.title}
@@ -88,6 +92,7 @@ export function CourseContainer({
       libraryHref={links.libraryHref?.(instanceUrl)}
       preferencesHref={links.preferencesHref?.(instanceUrl, course.deck.url)}
       justCompleted={justCompleted}
+      paused={paused}
       notice={
         <LibraryUpgradeContainer useCases={useCases} instance={instance} deck={course.deck} />
       }

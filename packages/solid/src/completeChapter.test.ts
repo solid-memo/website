@@ -363,6 +363,66 @@ describe("the hosts whose pictures the deck shows", () => {
   });
 });
 
+describe("the deck's pause", () => {
+  const PAUSE_TERMS = [
+    "<https://solid-memo.com/ns/vocab/v1.ttl#deckPausedAt>",
+    "<https://solid-memo.com/ns/vocab/v1.ttl#deckResumesOn>",
+  ];
+  const pauseIn = (pod: ReturnType<typeof fakePod>) =>
+    pod
+      .triples(CATALOG)!
+      .filter((triple) => PAUSE_TERMS.some((term) => triple.includes(term)))
+      .map((triple) => triple.split(" ").slice(1).join(" "))
+      .sort();
+  const pause = { pausedAt: "2026-03-01T12:00:00.000Z" };
+
+  it("sets the pause on the entry in one write, If-Match the read, then its resume day, then removes it", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    expect(await repository.setPause(deck, pause)).toMatchObject({ pause });
+    expect(writes(pod)).toEqual([
+      expect.objectContaining({ method: "PATCH", url: CATALOG, ifMatch: '"v1"', status: 205 }),
+    ]);
+    expect(pauseIn(pod)).toEqual([
+      `${PAUSE_TERMS[0]} "2026-03-01T12:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .`,
+    ]);
+    const resumed = { ...pause, resumesOn: "2026-03-09" };
+    await repository.setPause(deck, resumed);
+    expect(pauseIn(pod)).toHaveLength(2);
+    expect((await repository.readDeck(deck.url))?.pause).toEqual(resumed);
+    // A pause without a resume day takes the old day away.
+    await repository.setPause(deck, pause);
+    expect((await repository.readDeck(deck.url))?.pause).toEqual(pause);
+    const none = await repository.setPause(deck, null);
+    expect(none).not.toHaveProperty("pause");
+    expect(pauseIn(pod)).toEqual([]);
+  });
+
+  it("writes nothing for what the entry says, and throws deckGone for a deck it has none of", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await repository.setPause(deck, null);
+    expect(writes(pod)).toEqual([]);
+    await repository.setPause(deck, pause);
+    pod.clearRequests();
+    // The same instant, written another way.
+    await repository.setPause(deck, { pausedAt: "2026-03-01T12:00:00Z" });
+    expect(writes(pod)).toEqual([]);
+    await expect(
+      repository.setPause({ ...deck, url: `${CATALOG}#gone` }, pause),
+    ).rejects.toMatchObject({ code: "deckGone" });
+  });
+
+  it("is kept by every save of a deck read before it was set", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await repository.setPause(deck, { ...pause, resumesOn: "2026-03-09" });
+    await repository.renameDeck(deck, { en: "Solid, renamed" });
+    await repository.saveDeck({ ...deck, newCardsPerDay: 5 });
+    expect(pauseIn(pod)).toHaveLength(2);
+  });
+});
+
 describe("registerDeck", () => {
   it("adds a deck's entry with the chapters it completed, in one checked write", async () => {
     const pod = await podWithCourse();

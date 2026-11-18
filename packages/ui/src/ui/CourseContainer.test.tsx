@@ -260,6 +260,29 @@ describe("CourseContainer", () => {
     expect(document.querySelector(".course-cheer, .course-sparkles, .confetti")).toBeNull();
   });
 
+  it("says the course is paused with its deck, with the way back to the decks and no way on", () => {
+    const course = makeCourse(["q-1"], []);
+    render(
+      <Page
+        course={{
+          ...course,
+          deck: { ...course.deck, pause: { pausedAt: "2026-01-01T00:00:00.000Z" } },
+        }}
+      />,
+    );
+    expect(
+      screen.getByText(
+        "This course is paused with its deck. Resume the deck in your deck list to go on where you stopped.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Back to decks" })).toHaveAttribute(
+      "href",
+      decksHref(instanceUrl),
+    );
+    expect(screen.queryByRole("link", { name: "Continue" })).toBeNull();
+    expect(screen.queryByText(/^You have finished this course/)).toBeNull();
+  });
+
   it("cheers a chapter just completed, with sparkles on it, above the way on to the next", () => {
     render(
       <Page

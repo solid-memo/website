@@ -196,6 +196,8 @@ A value from a fixed set is a
     ([migrations.md](migrations.md#catching-up-with-the-library)).
   - 1.28: `sm:deckPictureHost`, outside `DeckV6`
     ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)).
+  - 1.29: `sm:deckPausedAt` and `sm:deckResumesOn`, outside `DeckV6`
+    ([data-model.md](data-model.md#decks-and-cards)).
   - Another vocabulary's term that a shape takes moves no vocabulary
     version: card format 7 took `dcterms:subject`, what a card is about
     ([deck-library.md](deck-library.md#what-a-card-is-about)).
@@ -512,6 +514,13 @@ show on a deck copied from a release outside the library's index
 ([privacy.md](privacy.md#pictures-on-a-deck-added-by-link)). A reader
 keeps only a value written as a URL's host is, at most 100 of them,
 and a catalog outside the learner's own pod isn't believed.
+
+`sm:deckPausedAt` and `sm:deckResumesOn` (1.29), on the deck's catalog
+entry, are a deck the learner paused: when, as an `xsd:dateTime`, and
+until which study day. The day is a plain `"YYYY-MM-DD"` string as
+`sm:due` is, since a study day is a calendar label, not an instant. A resumed deck
+keeps them, the resume day then the day it resumed
+([srs.md](srs.md#pausing-a-deck)).
 
 ## License
 
