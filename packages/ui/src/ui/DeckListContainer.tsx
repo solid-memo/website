@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { useState } from "preact/hooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { decksOf } from "@solid-memo/domain/deckTree";
@@ -9,7 +11,11 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { CourseStripContainer } from "./CourseStrip";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
-import { usePausedToday } from "./pausedToday";
+import { isPaused } from "@solid-memo/domain/deckPause";
+import { ComebackNotes } from "./ComebackNotes";
+import { PauseDeckDialog } from "./PauseDeckDialog";
+import { useStudyToday } from "./pausedToday";
+import { queryKeys } from "./queryKeys";
 import { useCopies, useDeckTreeEditor } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
@@ -47,7 +53,10 @@ import {
  * (WhatsNewContainer), until closed. A study session just left with an
  * answer (`celebrate`) is celebrated in today's strip once nothing is
  * left to study today (TodaySummary). A deck paused today
- * (usePausedToday) is left out of today's strip and of the course strip.
+ * (useStudyToday) is left out of today's strip and of the course strip;
+ * its menu offers to resume it, any other deck's to pause it
+ * (PauseDeckDialog). A deck that resumed from a pause is welcomed back
+ * above the list while its backlog lasts (ComebackNotes).
  */
 export function DeckListContainer({
   useCases,
@@ -76,8 +85,27 @@ export function DeckListContainer({
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
   const decks = decksOf(treeQuery.data?.children ?? []);
   const { isCourse, linkedHost, newerRelease, readsRefused } = useCopies(useCases, decks);
-  const pausedToday = usePausedToday(useCases, instance.url);
+  const today = useStudyToday(useCases, instance.url);
+  const pausedToday = (deck: Deck) => isPaused(deck, today);
   const studied = (deck: Deck) => !isSetAside(deck) && !pausedToday(deck);
+  const queryClient = useQueryClient();
+  /** The deck whose pause dialog is open. */
+  const [pausing, setPausing] = useState<Deck | null>(null);
+  // The deck's entry changed, and with it what it counts today: its queue, counts and comeback.
+  const refresh = (deck: Deck) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.studyQueue(deck.url) }),
+    ]);
+  const pauseMutation = useMutation({
+    mutationFn: ({ deck, resumesOn }: { deck: Deck; resumesOn: string | null }) =>
+      useCases.pauseDeck(instance.url, deck, resumesOn, new Date()),
+    onSettled: (_paused, _error, { deck }) => refresh(deck),
+  });
+  const resumeMutation = useMutation({
+    mutationFn: (deck: Deck) => useCases.resumeDeck(instance.url, deck, new Date()),
+    onSettled: (_resumed, _error, deck) => refresh(deck),
+  });
 
   if (treeQuery.error) {
     return <ErrorMessage error={errorText(treeQuery.error)} />;
@@ -102,7 +130,9 @@ export function DeckListContainer({
         libraryHref={decks.every(isCourse) ? libraryHref(instance.url) : undefined}
         readsRefused={readsRefused}
       />
+      <ComebackNotes useCases={useCases} instanceUrl={instance.url} decks={decks} today={today} />
       <SchedulerInvitationContainer useCases={useCases} instance={instance} />
+      <ErrorMessage error={errorText(resumeMutation.error)} />
       <DeckListScreen
         {...editor}
         arrangementSetAside={arrangementSetAside}
@@ -117,10 +147,18 @@ export function DeckListContainer({
           routeToHash({ screen: "deckPreferences", instanceUrl: instance.url, deckUrl: deck.url })
         }
         studioHref={studioHref(instance.url)}
+        pause={{
+          pausedToday,
+          onPause: (deck) => {
+            pauseMutation.reset();
+            setPausing(deck);
+          },
+          onResume: (deck) => resumeMutation.mutate(deck),
+        }}
         renderStudyAction={(deck) =>
           isSetAside(deck) ? (
             <span class="hint">{t("deckList.setAside")}</span>
-          ) : (
+          ) : pausedToday(deck) ? null : (
             <DeckStudyActionContainer
               useCases={useCases}
               instance={instance}
@@ -140,6 +178,23 @@ export function DeckListContainer({
           )
         }
       />
+      {pausing !== null && (
+        <PauseDeckDialog
+          useCases={useCases}
+          instanceUrl={instance.url}
+          deck={pausing}
+          today={today}
+          busy={pauseMutation.isPending}
+          error={errorText(pauseMutation.error)}
+          onPause={(resumesOn) =>
+            pauseMutation.mutateAsync({ deck: pausing, resumesOn }).then(
+              () => true,
+              () => false,
+            )
+          }
+          onClose={() => setPausing(null)}
+        />
+      )}
     </>
   );
 }

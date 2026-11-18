@@ -600,7 +600,38 @@
     "continueCourse": "Continue course",
     "fromHost": "from {host}",
     "newerRelease": "New release",
-    "fromLink": "Add from a link"
+    "fromLink": "Add from a link",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Paused",
+    "pausedUntil": "Paused until {day}"
+  },
+  "pauseDeck": {
+    "heading": "Pause {deck}",
+    "intro": "Its cards stay out of your daily study and its counts until it resumes. Your progress is kept, and nothing about its cards changes.",
+    "until": "Pause it",
+    "untilResumed": "Until I resume it",
+    "resumeOn": "Until a day:",
+    "day": "Day to resume on",
+    "dayInvalid": "Choose a day after today.",
+    "outlookOn": "If you resume on {day}, you’ll likely still remember about {percent} of this deck.",
+    "outlookAfter": "After {days} days, you’ll likely still remember about {percent} of this deck.",
+    "nothingStudied": "Nothing in this deck has been studied yet, so there is nothing to forget.",
+    "pause": "Pause",
+    "cancel": "Cancel"
+  },
+  "comeback": {
+    "label": "Welcome back",
+    "left": "Welcome back to {deck}. About {percent} of it is probably still there.",
+    "waiting": {
+      "one": "{count} review is waiting.",
+      "other": "{count} reviews are waiting."
+    },
+    "days": {
+      "one": "At its daily limit, that’s one day’s work.",
+      "other": "At its daily limit, they’re spread over {count} days."
+    },
+    "feelNew": "Cards learned shortly before the pause may feel new again: that’s expected."
   },
   "studyPace": {
     "startSmall": "Every new card comes back for reviews in the days that follow, so a high number now piles up reviews later. Better to start small and be consistent: you can always raise it."

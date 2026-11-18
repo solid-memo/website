@@ -600,7 +600,38 @@
     "continueCourse": "Kurs fortsetzen",
     "fromHost": "von {host}",
     "newerRelease": "Neue Ausgabe",
-    "fromLink": "Über einen Link hinzufügen"
+    "fromLink": "Über einen Link hinzufügen",
+    "pause": "Pausieren",
+    "resume": "Fortsetzen",
+    "paused": "Pausiert",
+    "pausedUntil": "Pausiert bis {day}"
+  },
+  "pauseDeck": {
+    "heading": "{deck} pausieren",
+    "intro": "Seine Karten bleiben aus deinem täglichen Lernen und deinen Zahlen heraus, bis er fortgesetzt wird. Dein Fortschritt bleibt erhalten, und an den Karten ändert sich nichts.",
+    "until": "Pausieren",
+    "untilResumed": "Bis ich ihn fortsetze",
+    "resumeOn": "Bis zu einem Tag:",
+    "day": "Tag zum Fortsetzen",
+    "dayInvalid": "Wähle einen Tag nach heute.",
+    "outlookOn": "Wenn du am {day} fortsetzt, erinnerst du dich wahrscheinlich noch an etwa {percent} dieses Stapels.",
+    "outlookAfter": "Nach {days} Tagen erinnerst du dich wahrscheinlich noch an etwa {percent} dieses Stapels.",
+    "nothingStudied": "In diesem Stapel wurde noch nichts gelernt, also gibt es nichts zu vergessen.",
+    "pause": "Pausieren",
+    "cancel": "Abbrechen"
+  },
+  "comeback": {
+    "label": "Willkommen zurück",
+    "left": "Willkommen zurück bei {deck}. Etwa {percent} davon ist wahrscheinlich noch da.",
+    "waiting": {
+      "one": "{count} Wiederholung wartet.",
+      "other": "{count} Wiederholungen warten."
+    },
+    "days": {
+      "one": "Bei seinem Tageslimit ist das die Arbeit eines Tages.",
+      "other": "Bei seinem Tageslimit verteilen sie sich auf {count} Tage."
+    },
+    "feelNew": "Karten, die du kurz vor der Pause gelernt hast, können sich wieder neu anfühlen: Das ist zu erwarten."
   },
   "studyPace": {
     "startSmall": "Jede neue Karte kommt in den folgenden Tagen zur Wiederholung zurück. Eine hohe Zahl jetzt bedeutet also später einen Berg von Wiederholungen. Fang lieber klein an und bleib dran: Erhöhen kannst du jederzeit."

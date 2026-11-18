@@ -623,7 +623,40 @@
     "continueCourse": "Continuar el curso",
     "fromHost": "de {host}",
     "newerRelease": "Nueva versión",
-    "fromLink": "Añadir desde un enlace"
+    "fromLink": "Añadir desde un enlace",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "paused": "En pausa",
+    "pausedUntil": "En pausa hasta el {day}"
+  },
+  "pauseDeck": {
+    "heading": "Pausar {deck}",
+    "intro": "Sus tarjetas quedan fuera de tu estudio diario y de tus recuentos hasta que se reanude. Tu progreso se conserva y nada de sus tarjetas cambia.",
+    "until": "Pausarlo",
+    "untilResumed": "Hasta que lo reanude",
+    "resumeOn": "Hasta un día:",
+    "day": "Día para reanudar",
+    "dayInvalid": "Elige un día posterior a hoy.",
+    "outlookOn": "Si lo reanudas el {day}, probablemente aún recordarás alrededor del {percent} de este mazo.",
+    "outlookAfter": "Después de {days} días, probablemente aún recordarás alrededor del {percent} de este mazo.",
+    "nothingStudied": "Todavía no se ha estudiado nada de este mazo, así que no hay nada que olvidar.",
+    "pause": "Pausar",
+    "cancel": "Cancelar"
+  },
+  "comeback": {
+    "label": "Bienvenida de vuelta",
+    "left": "Te damos la bienvenida de vuelta a {deck}. Probablemente aún conservas alrededor del {percent}.",
+    "waiting": {
+      "one": "{count} repaso está esperando.",
+      "many": "{count} de repasos están esperando.",
+      "other": "{count} repasos están esperando."
+    },
+    "days": {
+      "one": "Con su límite diario, es el trabajo de un día.",
+      "many": "Con su límite diario, se reparten en {count} de días.",
+      "other": "Con su límite diario, se reparten en {count} días."
+    },
+    "feelNew": "Las tarjetas aprendidas justo antes de la pausa pueden parecer nuevas otra vez: es normal."
   },
   "studyPace": {
     "startSmall": "Cada tarjeta nueva vuelve para repasarse en los días siguientes, así que una cifra alta ahora acumula repasos después. Mejor empieza con poco y mantén el ritmo: siempre puedes subirla."

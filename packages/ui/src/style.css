@@ -2072,6 +2072,78 @@ html.drag-active {
   text-decoration: none;
 }
 
+/* A paused deck (docs/srs.md, "Pausing a deck"): its row on the sunken
+   surface, its name and icon in the muted text color, which keeps the
+   contrast text needs; and in words, "Paused", not by color alone. */
+.deck-list .deck-row.paused {
+  background: var(--surface-sunken);
+}
+
+.deck-list .deck-row.paused .deck-open {
+  color: var(--text-muted);
+}
+
+.deck-list .deck-paused {
+  display: inline-block;
+  margin-inline-start: 0.5em;
+  padding: 0 0.45em;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-indent: 0;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+/* Pausing a deck: a small modal dialog over the deck list. */
+.pause-dialog {
+  width: min(32rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 4rem);
+  padding: 0.75rem 1rem 1rem;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+.pause-dialog::backdrop {
+  background: var(--zoom-backdrop);
+}
+
+.pause-dialog h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+}
+
+.pause-dialog fieldset {
+  margin: 0 0 0.5rem;
+  padding: 0;
+  border: 0;
+}
+
+.pause-dialog label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+}
+
+.pause-dialog input[type="date"] {
+  margin-inline-start: 1.6rem;
+  max-width: calc(100% - 1.6rem);
+}
+
+/* A deck back from a pause, welcomed above the list while its backlog lasts. */
+.comeback-notes {
+  margin: 0 0 1rem;
+  padding: 0.25rem 0.9rem;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

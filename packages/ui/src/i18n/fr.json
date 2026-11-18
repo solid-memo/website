@@ -623,7 +623,40 @@
     "continueCourse": "Continuer le cours",
     "fromHost": "de {host}",
     "newerRelease": "Nouvelle version",
-    "fromLink": "Ajouter depuis un lien"
+    "fromLink": "Ajouter depuis un lien",
+    "pause": "Mettre en pause",
+    "resume": "Reprendre",
+    "paused": "En pause",
+    "pausedUntil": "En pause jusqu’au {day}"
+  },
+  "pauseDeck": {
+    "heading": "Mettre {deck} en pause",
+    "intro": "Ses cartes restent hors de votre étude quotidienne et de vos comptes jusqu’à sa reprise. Votre progression est conservée, et rien ne change dans ses cartes.",
+    "until": "Le mettre en pause",
+    "untilResumed": "Jusqu’à ce que je le reprenne",
+    "resumeOn": "Jusqu’à un jour :",
+    "day": "Jour de reprise",
+    "dayInvalid": "Choisissez un jour postérieur à aujourd’hui.",
+    "outlookOn": "Si vous reprenez le {day}, vous vous souviendrez probablement encore d’environ {percent} de ce paquet.",
+    "outlookAfter": "Après {days} jours, vous vous souviendrez probablement encore d’environ {percent} de ce paquet.",
+    "nothingStudied": "Rien de ce paquet n’a encore été étudié : il n’y a rien à oublier.",
+    "pause": "Mettre en pause",
+    "cancel": "Annuler"
+  },
+  "comeback": {
+    "label": "Bon retour",
+    "left": "Bon retour dans {deck}. Environ {percent} de ce paquet est probablement encore là.",
+    "waiting": {
+      "one": "{count} révision vous attend.",
+      "many": "{count} de révisions vous attendent.",
+      "other": "{count} révisions vous attendent."
+    },
+    "days": {
+      "one": "À sa limite quotidienne, c’est le travail d’une journée.",
+      "many": "À sa limite quotidienne, elles se répartissent sur {count} de jours.",
+      "other": "À sa limite quotidienne, elles se répartissent sur {count} jours."
+    },
+    "feelNew": "Les cartes apprises juste avant la pause peuvent sembler nouvelles : c’est normal."
   },
   "studyPace": {
     "startSmall": "Chaque nouvelle carte revient en révision les jours suivants : un nombre élevé maintenant fera s’accumuler les révisions plus tard. Mieux vaut commencer petit et étudier régulièrement : vous pourrez toujours augmenter ce nombre."

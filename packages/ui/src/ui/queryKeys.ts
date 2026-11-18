@@ -61,6 +61,14 @@ export const queryKeys = {
   studyQueue: (deckUrl: string | null) => [...queryKeys.allStudyQueues(), deckUrl],
   /** A deck's study counts for its deck-list row: under studyQueue, so whatever drops the queue drops them too. */
   studyCounts: (deckUrl: string | null) => [...queryKeys.studyQueue(deckUrl), "counts"],
+  /** What pausing a deck until a day (null: for a while) is likely to cost: under studyQueue, as it reads the deck's reviews. */
+  pauseOutlook: (deckUrl: string, day: string | null) => [
+    ...queryKeys.studyQueue(deckUrl),
+    "pauseOutlook",
+    day,
+  ],
+  /** What is likely left of a deck that resumed from a pause: under studyQueue, so a session's end reads it again. */
+  comeback: (deckUrl: string) => [...queryKeys.studyQueue(deckUrl), "comeback"],
 
   /** Every instance's preferences. */
   allPreferences: () => ["preferences"],

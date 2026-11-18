@@ -103,6 +103,7 @@ export function DeckListScreen({
   renderStudyAction,
   createDeckHref,
   offer,
+  pause,
 }: {
   tree: DeckTree;
   /** The catalog or a deck group has invalid data, set aside: the list cannot be rearranged. */
@@ -162,6 +163,15 @@ export function DeckListScreen({
    * course for newcomers): next after the heading in reading and Tab order.
    */
   offer?: ComponentChildren;
+  /**
+   * Pausing a deck, offered in its menu (Pause, or Resume for a deck
+   * paused today), its row shown inactive while it is; none in the Studio.
+   */
+  pause?: {
+    pausedToday: (deck: Deck) => boolean;
+    onPause: (deck: Deck) => void;
+    onResume: (deck: Deck) => void;
+  };
 }) {
   const { t, locale, readerText } = useI18n();
   const readOnly = tree.readOnly || arrangementSetAside || checking;
@@ -481,6 +491,17 @@ export function DeckListScreen({
         {node.kind === "deck" && studioHref !== undefined && (
           <MenuLink href={studioHref}>{t("studio.open")}</MenuLink>
         )}
+        {node.kind === "deck" &&
+          pause !== undefined &&
+          (pause.pausedToday(node.deck) ? (
+            <MenuItem disabled={busy || held} onSelect={() => pause.onResume(node.deck)}>
+              {t("deckList.resume")}
+            </MenuItem>
+          ) : (
+            <MenuItem disabled={busy || held} onSelect={() => pause.onPause(node.deck)}>
+              {t("deckList.pause")}
+            </MenuItem>
+          ))}
         {/* A group's name is the arrangement's, a deck's its own. */}
         <MenuItem disabled={busy || held} onSelect={() => setNaming(key)}>
           {t("deckList.rename")}
@@ -524,6 +545,7 @@ export function DeckListScreen({
           naming={naming === node.deck.url}
           onNamed={(name, refocus) => renamedDeck(node.deck, name, refocus)}
           menu={actionsMenu(node, parent)}
+          paused={pause?.pausedToday(node.deck) === true}
         />
       ) : (
         <DeckGroupItem

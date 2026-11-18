@@ -831,6 +831,13 @@ makes today that day. The record stays once the deck resumes, so the
 day it did is known; pausing again replaces it
 ([deckPause.ts](../packages/domain/src/deckPause.ts)).
 
+Each deck's menu on the deck list offers **Pause**, or **Resume** for a
+deck paused today. Pause opens a small dialog: until the learner
+resumes it, or until a day after today. It shows what the pause is
+likely to cost: the deck's average chance of recall on that day, or
+after 30 days without one (`getPauseOutlook`), by `recallOn`, the
+FSRS-6 estimate of an SM-2 state where there's no fresh FSRS-6 state.
+
 ### What a paused deck does
 
 On a study day before its resume day:
@@ -841,8 +848,11 @@ On a study day before its resume day:
   and its celebration ([statistics.md](statistics.md#the-today-strip)).
 - A course's deck pauses the course with it
   ([courses.md](courses.md#the-learners-state)).
-- It stays in its place on the deck list, and it still opens in the
-  Browser and the Studio; its preferences can still be edited.
+- It stays in its place on the deck list, on the sunken surface with
+  its name in the muted text color, still at the contrast text needs.
+  It says "Paused", with "until" its day when it has one: not by color
+  alone. It still opens in the Browser and the Studio, and its
+  preferences can still be edited.
 
 ### Catching up after a pause
 
@@ -865,7 +875,15 @@ reviews of the backlog, and the cards not yet due keep their due days.
   takes none of it, and holds nothing back.
 
 `studyCountsOf` counts the same from the digest's due days, so the deck
-list's counts match the session. The backlog ends once none of its
+list's counts match the session.
+
+The deck list welcomes the deck back above the list while any of its
+backlog is due, for up to 30 days after it resumed (`getComeback`). It
+says about how much of the deck is probably still there (the average
+chance of recall today), how many reviews wait, and over how many days
+at its review limit. Cards learned shortly before the pause may feel
+new again, and it says so. Only a deck that resumed in those 30 days is read for it, since
+the pause's record stays. The backlog ends once none of its
 prompts is due; the pause's record stays until the deck is paused again.
 
 ### Never rewriting review state

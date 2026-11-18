@@ -600,7 +600,38 @@
     "continueCourse": "Fortsätt kursen",
     "fromHost": "från {host}",
     "newerRelease": "Ny utgåva",
-    "fromLink": "Lägg till från en länk"
+    "fromLink": "Lägg till från en länk",
+    "pause": "Pausa",
+    "resume": "Återuppta",
+    "paused": "Pausad",
+    "pausedUntil": "Pausad till {day}"
+  },
+  "pauseDeck": {
+    "heading": "Pausa {deck}",
+    "intro": "Kortleken hålls utanför dina dagliga studier och dina antal tills den återupptas. Dina framsteg sparas, och inget av korten ändras.",
+    "until": "Pausa den",
+    "untilResumed": "Tills jag återupptar den",
+    "resumeOn": "Till en dag:",
+    "day": "Dag att återuppta",
+    "dayInvalid": "Välj en dag efter i dag.",
+    "outlookOn": "Om du återupptar den {day} kommer du troligen fortfarande att minnas ungefär {percent} av kortleken.",
+    "outlookAfter": "Efter {days} dagar kommer du troligen fortfarande att minnas ungefär {percent} av kortleken.",
+    "nothingStudied": "Inget i den här kortleken har studerats än, så det finns inget att glömma.",
+    "pause": "Pausa",
+    "cancel": "Avbryt"
+  },
+  "comeback": {
+    "label": "Välkommen tillbaka",
+    "left": "Välkommen tillbaka till {deck}. Ungefär {percent} av den finns troligen kvar.",
+    "waiting": {
+      "one": "{count} repetition väntar.",
+      "other": "{count} repetitioner väntar."
+    },
+    "days": {
+      "one": "Med dess dagliga gräns är det en dags arbete.",
+      "other": "Med dess dagliga gräns fördelas de över {count} dagar."
+    },
+    "feelNew": "Kort som du lärde dig strax före pausen kan kännas nya igen: det är väntat."
   },
   "studyPace": {
     "startSmall": "Varje nytt kort kommer tillbaka för repetition de följande dagarna, så ett högt antal nu ger en hög med repetitioner senare. Börja hellre smått och var regelbunden: du kan alltid öka sen."

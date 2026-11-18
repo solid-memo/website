@@ -42,6 +42,7 @@ export function DeckRow({
   naming,
   onNamed,
   menu,
+  paused = false,
 }: {
   deck: Deck;
   /** How many groups the deck is in. */
@@ -59,14 +60,18 @@ export function DeckRow({
   onNamed: (name: string | null, refocus: boolean) => void;
   /** Its actions menu (ActionsMenu). */
   menu: ComponentChildren;
+  /** The deck is paused today: the row looks inactive, and says so in words, until when too. */
+  paused?: boolean;
 }) {
-  const { t, readerText } = useI18n();
+  const { t, readerText, formatDate } = useI18n();
+  const resumesOn = deck.pause?.resumesOn;
+  const classes = [
+    "deck-row",
+    ...(drag === undefined ? [] : [DRAG_CLASS[drag]]),
+    ...(paused ? ["paused"] : []),
+  ];
   return (
-    <li
-      class={drag === undefined ? "deck-row" : `deck-row ${DRAG_CLASS[drag]}`}
-      data-row-key={deck.url}
-      style={`--depth: ${depth}`}
-    >
+    <li class={classes.join(" ")} data-row-key={deck.url} style={`--depth: ${depth}`}>
       {naming ? (
         <NameEditor
           initial={readerText(deck.title)}
@@ -81,6 +86,13 @@ export function DeckRow({
             <span class="hint deck-source">{t("deckList.fromHost", { host: fromHost })}</span>
           )}
           {newerRelease && <span class="deck-release">{t("deckList.newerRelease")}</span>}
+          {paused && (
+            <span class="deck-paused">
+              {resumesOn === undefined
+                ? t("deckList.paused")
+                : t("deckList.pausedUntil", { day: formatDate(resumesOn) })}
+            </span>
+          )}
         </a>
       )}
       <span class="deck-meta">{action}</span>

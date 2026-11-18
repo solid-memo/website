@@ -306,7 +306,7 @@ export function createUseCases({
       now,
     }),
     ...createDeckUseCases({ deckRepository, newId }),
-    ...createDeckPauseUseCases({ deckRepository, preferenceStore }),
+    ...createDeckPauseUseCases({ deckRepository, reviewStateRepository, preferenceStore }),
     ...createCardUseCases({
       deckRepository,
       reviewStateRepository,

@@ -439,6 +439,10 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
     void (await u.setDeckPictureHost(copy, "upload.wikimedia.org", true)),
   pauseDeck: async ({ u, capitals }) =>
     void (await u.pauseDeck(INSTANCE, capitals, null, new Date("2026-03-01T12:00:00Z"))),
+  getPauseOutlook: async ({ u, capitals }) =>
+    void (await u.getPauseOutlook(INSTANCE, capitals, null, new Date("2026-03-01T12:00:00Z"))),
+  getComeback: async ({ u, capitals }) =>
+    void (await u.getComeback(INSTANCE, capitals, new Date("2026-03-01T12:00:00Z"))),
   resumeDeck: async ({ u, capitals }) => {
     const paused = await u.pauseDeck(INSTANCE, capitals, null, new Date("2026-03-01T12:00:00Z"));
     await u.resumeDeck(INSTANCE, paused, new Date("2026-03-02T12:00:00Z"));
