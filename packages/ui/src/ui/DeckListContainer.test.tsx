@@ -153,7 +153,7 @@ describe("DeckListContainer", () => {
       const dialog = screen.getByRole("dialog", { name: "Pause Kanji N5" });
       fireEvent.click(within(dialog).getByRole("button", { name: "Pause" }));
       expect(await within(dialog).findByText(/no longer exists/)).toBeInTheDocument();
-      fireEvent.click(within(dialog).getByRole("button", { name: "Cancel" }));
+      fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
       await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
     });
 

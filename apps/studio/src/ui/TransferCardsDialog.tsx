@@ -6,7 +6,7 @@ import { useState } from "preact/hooks";
 import type { TransferMode } from "@solid-memo/domain/cardTransfer";
 import type { Deck } from "@solid-memo/domain/deck";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { Dialog } from "./shell/Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 
 /** A move or copy of the selected cards, as the user chose it. */
 export interface CardTransfer {

@@ -16,7 +16,7 @@ import type { Card } from "@solid-memo/domain/deck";
 import { useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { Dialog } from "./shell/Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 
 /**
  * Find and replace in the selected cards, with a preview: as the user

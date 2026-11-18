@@ -2,21 +2,21 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useEffect, useId, useRef, useState } from "preact/hooks";
+import { useId, useRef, useState } from "preact/hooks";
 import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { OUTLOOK_DAYS } from "@solid-memo/application/deckPauses";
 import { isCountableDay, shiftStudyDay } from "@solid-memo/domain/answer";
 import type { Deck } from "@solid-memo/domain/deck";
+import { Dialog } from "./Dialog";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { queryKeys } from "./queryKeys";
 import { ReaderText } from "./ReaderText";
 
 /**
- * Pausing a deck, in a modal dialog: the browser's own `<dialog>`, which
- * keeps the focus in it and closes on Escape, the focus then back where
- * it was. The learner pauses it until they resume it, or until a day
+ * Pausing a deck, in a modal dialog (Dialog), which closes on Escape or
+ * its Close, the focus then back where it was. The learner pauses it until they resume it, or until a day
  * after today they pick. Beside the choice, what the pause is likely to
  * cost: the deck's average chance of recall on that day, or after
  * OUTLOOK_DAYS without one (getPauseOutlook). `onPause` makes the pause
@@ -47,19 +47,12 @@ export function PauseDeckDialog({
 }) {
   const { t, tx, formatDate, formatPercent } = useI18n();
   const ref = useRef<HTMLDialogElement>(null);
-  const headingId = useId();
   const outlookId = useId();
   const [onDay, setOnDay] = useState(false);
   const tomorrow = shiftStudyDay(today, 1);
   const [day, setDay] = useState(tomorrow);
   // A day the field holds that the pause would take: a day after today.
   const chosen = onDay ? (isCountableDay(day) && day > today ? day : undefined) : null;
-
-  useEffect(() => {
-    const opener = document.activeElement as HTMLElement;
-    ref.current!.showModal();
-    return () => opener.focus();
-  }, []);
 
   const outlookQuery = useQuery({
     queryKey: queryKeys.pauseOutlook(deck.url, chosen ?? null),
@@ -78,8 +71,12 @@ export function PauseDeckDialog({
   }
 
   return (
-    <dialog ref={ref} class="pause-dialog" aria-labelledby={headingId} onClose={onClose}>
-      <h2 id={headingId}>{tx("pauseDeck.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
+    <Dialog
+      heading={tx("pauseDeck.heading", { deck: <ReaderText text={deck.title} /> })}
+      class="pause-dialog"
+      dialogRef={ref}
+      onClose={onClose}
+    >
       <p>{t("pauseDeck.intro")}</p>
       <form
         onSubmit={(event) => {
@@ -129,11 +126,8 @@ export function PauseDeckDialog({
           <button type="submit" class="primary" aria-disabled={busy || chosen === undefined}>
             {t("pauseDeck.pause")}
           </button>
-          <button type="button" onClick={() => ref.current!.close()}>
-            {t("pauseDeck.cancel")}
-          </button>
         </div>
       </form>
-    </dialog>
+    </Dialog>
   );
 }

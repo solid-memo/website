@@ -2096,8 +2096,8 @@ html.drag-active {
   text-decoration: none;
 }
 
-/* Pausing a deck: a small modal dialog over the deck list. */
-.pause-dialog {
+/* A modal dialog (Dialog), the deck list's and the Studio's: its heading beside its Close. */
+.dialog {
   width: min(32rem, calc(100vw - 2rem));
   max-height: calc(100dvh - 4rem);
   padding: 0.75rem 1rem 1rem;
@@ -2108,15 +2108,23 @@ html.drag-active {
   box-shadow: var(--shadow);
 }
 
-.pause-dialog::backdrop {
+.dialog::backdrop {
   background: var(--zoom-backdrop);
 }
 
-.pause-dialog h2 {
-  margin-top: 0;
+.dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dialog > header h2 {
+  margin: 0.5rem 0;
   font-size: 1.2rem;
 }
 
+/* Pausing a deck: until it is resumed, or a day. */
 .pause-dialog fieldset {
   margin: 0 0 0.5rem;
   padding: 0;

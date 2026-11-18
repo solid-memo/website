@@ -285,7 +285,8 @@ open (Columns, say), every key is the menu's.
 A field or button with a key, the one `/` goes to among them, says so to
 screen readers (`aria-keyshortcuts`). The key help is a modal dialog,
 the browser's own
-([`shell/Dialog.tsx`](../apps/studio/src/ui/shell/Dialog.tsx)); Escape
+([`Dialog.tsx`](../packages/ui/src/ui/Dialog.tsx), shared with the
+deck list); Escape
 or Close closes it, and the focus goes back where it was. A saved view
 renamed keeps the focus; one removed gives it to **+ Save view**.
 

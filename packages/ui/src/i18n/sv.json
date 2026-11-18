@@ -606,6 +606,9 @@
     "paused": "Pausad",
     "pausedUntil": "Pausad till {day}"
   },
+  "dialog": {
+    "close": "Stäng"
+  },
   "pauseDeck": {
     "heading": "Pausa {deck}",
     "intro": "Kortleken hålls utanför dina dagliga studier och dina antal tills den återupptas. Dina framsteg sparas, och inget av korten ändras.",
@@ -617,8 +620,7 @@
     "outlookOn": "Om du återupptar den {day} kommer du troligen fortfarande att minnas ungefär {percent} av kortleken.",
     "outlookAfter": "Efter {days} dagar kommer du troligen fortfarande att minnas ungefär {percent} av kortleken.",
     "nothingStudied": "Inget i den här kortleken har studerats än, så det finns inget att glömma.",
-    "pause": "Pausa",
-    "cancel": "Avbryt"
+    "pause": "Pausa"
   },
   "comeback": {
     "label": "Välkommen tillbaka",

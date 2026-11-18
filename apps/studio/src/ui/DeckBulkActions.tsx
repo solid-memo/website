@@ -9,7 +9,7 @@ import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import { ActionsMenu, MenuItem } from "@solid-memo/ui/ActionsMenu";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { useConfirm } from "./shell/ConfirmDialog";
-import { Dialog } from "./shell/Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 
 /** Why no deck can be moved into a group: a newer version arranged them, or the arrangement has invalid data, set aside. */
 export type MoveLock = "newerVersion" | "setAside";

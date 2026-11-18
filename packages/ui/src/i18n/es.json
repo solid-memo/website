@@ -629,6 +629,9 @@
     "paused": "En pausa",
     "pausedUntil": "En pausa hasta el {day}"
   },
+  "dialog": {
+    "close": "Cerrar"
+  },
   "pauseDeck": {
     "heading": "Pausar {deck}",
     "intro": "Sus tarjetas quedan fuera de tu estudio diario y de tus recuentos hasta que se reanude. Tu progreso se conserva y nada de sus tarjetas cambia.",
@@ -640,8 +643,7 @@
     "outlookOn": "Si lo reanudas el {day}, probablemente aún recordarás alrededor del {percent} de este mazo.",
     "outlookAfter": "Después de {days} días, probablemente aún recordarás alrededor del {percent} de este mazo.",
     "nothingStudied": "Todavía no se ha estudiado nada de este mazo, así que no hay nada que olvidar.",
-    "pause": "Pausar",
-    "cancel": "Cancelar"
+    "pause": "Pausar"
   },
   "comeback": {
     "label": "Bienvenida de vuelta",

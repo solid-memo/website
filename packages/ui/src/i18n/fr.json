@@ -629,6 +629,9 @@
     "paused": "En pause",
     "pausedUntil": "En pause jusqu’au {day}"
   },
+  "dialog": {
+    "close": "Fermer"
+  },
   "pauseDeck": {
     "heading": "Mettre {deck} en pause",
     "intro": "Ses cartes restent hors de votre étude quotidienne et de vos comptes jusqu’à sa reprise. Votre progression est conservée, et rien ne change dans ses cartes.",
@@ -640,8 +643,7 @@
     "outlookOn": "Si vous reprenez le {day}, vous vous souviendrez probablement encore d’environ {percent} de ce paquet.",
     "outlookAfter": "Après {days} jours, vous vous souviendrez probablement encore d’environ {percent} de ce paquet.",
     "nothingStudied": "Rien de ce paquet n’a encore été étudié : il n’y a rien à oublier.",
-    "pause": "Mettre en pause",
-    "cancel": "Annuler"
+    "pause": "Mettre en pause"
   },
   "comeback": {
     "label": "Bon retour",

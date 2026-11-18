@@ -6,7 +6,7 @@ import type { ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import type { LossQuestion } from "@solid-memo/ui/askFirst";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { Dialog } from "./Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 
 /** A choice a ConfirmDialog offers: its button, and what it does. The first takes the focus. */
 export interface ConfirmChoice {

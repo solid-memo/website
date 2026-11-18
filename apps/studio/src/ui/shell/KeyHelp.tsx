@@ -4,7 +4,7 @@
 
 import { Fragment } from "preact";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { Dialog } from "./Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 import { SHORTCUTS, type ShortcutId, type ShortcutScope } from "./shortcuts";
 
 const SCOPES: readonly ShortcutScope[] = ["studio", "table"];

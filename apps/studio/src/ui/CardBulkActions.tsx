@@ -13,7 +13,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { FindReplaceDialog } from "./FindReplaceDialog";
 import { useConfirm } from "./shell/ConfirmDialog";
-import { Dialog } from "./shell/Dialog";
+import { Dialog } from "@solid-memo/ui/Dialog";
 import { TransferCardsDialog, type CardTransfer } from "./TransferCardsDialog";
 
 /** The form an edit opens, to say how: in a dialog. */

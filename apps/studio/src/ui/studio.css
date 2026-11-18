@@ -1061,25 +1061,25 @@
 }
 
 /* A dialog's form: a field a line, under its label. */
-:root[data-surface="studio"] .studio-dialog form label {
+:root[data-surface="studio"] .dialog form label {
   display: block;
   margin-bottom: 0.5rem;
 }
 
-:root[data-surface="studio"] .studio-dialog form :is(select, input:not([type="checkbox"])) {
+:root[data-surface="studio"] .dialog form :is(select, input:not([type="checkbox"])) {
   display: block;
   margin-top: 0.25rem;
   max-width: 100%;
 }
 
-:root[data-surface="studio"] .studio-dialog form .studio-check {
+:root[data-surface="studio"] .dialog form .studio-check {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   margin-right: 1rem;
 }
 
-:root[data-surface="studio"] .studio-dialog fieldset {
+:root[data-surface="studio"] .dialog fieldset {
   margin: 0 0 0.5rem;
   padding: 0;
   border: 0;
@@ -1351,30 +1351,12 @@
   outline: none;
 }
 
-/* A dialog over the workspace (Dialog), its heading beside its Close. */
-:root[data-surface="studio"] .studio-dialog {
+/* A dialog over the workspace (Dialog): wider than the deck list's, its headings closer. */
+:root[data-surface="studio"] .dialog {
   width: min(36rem, calc(100vw - 2rem));
-  max-height: calc(100dvh - 4rem);
-  padding: 0.75rem 1rem 1rem;
-  color: var(--text);
-  background: var(--surface);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  box-shadow: var(--shadow);
 }
 
-:root[data-surface="studio"] .studio-dialog::backdrop {
-  background: var(--zoom-backdrop);
-}
-
-:root[data-surface="studio"] .studio-dialog > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-:root[data-surface="studio"] .studio-dialog :is(h2, h3) {
+:root[data-surface="studio"] .dialog :is(h2, h3) {
   margin: 0.5rem 0;
 }
 
@@ -1402,7 +1384,7 @@
 }
 
 /* The palette: near the top, so it stays put as the entries that match come and go. */
-:root[data-surface="studio"] .studio-dialog:has(.studio-palette-input) {
+:root[data-surface="studio"] .dialog:has(.studio-palette-input) {
   margin-block-start: 10dvh;
 }
 

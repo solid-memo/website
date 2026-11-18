@@ -106,11 +106,11 @@ describe("PauseDeckDialog", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("The deck could not be paused.");
   });
 
-  it("does nothing while the pause is being written, and closes on Cancel", () => {
+  it("does nothing while the pause is being written, and closes on Close", () => {
     const { onPause, onClose } = open({ busy: true });
     fireEvent.click(screen.getByRole("button", { name: "Pause" }));
     expect(onPause).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onClose).toHaveBeenCalled();
   });
 

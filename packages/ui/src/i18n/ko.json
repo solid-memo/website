@@ -583,6 +583,9 @@
     "paused": "일시 정지됨",
     "pausedUntil": "{day}까지 일시 정지됨"
   },
+  "dialog": {
+    "close": "닫기"
+  },
   "pauseDeck": {
     "heading": "{deck} 일시 정지",
     "intro": "다시 시작할 때까지 이 덱의 카드는 매일의 학습과 개수에서 빠져요. 진행 상황은 그대로 남고, 카드는 아무것도 바뀌지 않아요.",
@@ -594,8 +597,7 @@
     "outlookOn": "{day}에 다시 시작하면 이 덱의 약 {percent}를 여전히 기억하고 있을 거예요.",
     "outlookAfter": "{days}일 후에도 이 덱의 약 {percent}를 여전히 기억하고 있을 거예요.",
     "nothingStudied": "이 덱은 아직 학습한 것이 없어서 잊을 것도 없어요.",
-    "pause": "일시 정지",
-    "cancel": "취소"
+    "pause": "일시 정지"
   },
   "comeback": {
     "label": "다시 오신 걸 환영해요",

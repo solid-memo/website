@@ -606,6 +606,9 @@
     "paused": "Pausiert",
     "pausedUntil": "Pausiert bis {day}"
   },
+  "dialog": {
+    "close": "Schließen"
+  },
   "pauseDeck": {
     "heading": "{deck} pausieren",
     "intro": "Seine Karten bleiben aus deinem täglichen Lernen und deinen Zahlen heraus, bis er fortgesetzt wird. Dein Fortschritt bleibt erhalten, und an den Karten ändert sich nichts.",
@@ -617,8 +620,7 @@
     "outlookOn": "Wenn du am {day} fortsetzt, erinnerst du dich wahrscheinlich noch an etwa {percent} dieses Stapels.",
     "outlookAfter": "Nach {days} Tagen erinnerst du dich wahrscheinlich noch an etwa {percent} dieses Stapels.",
     "nothingStudied": "In diesem Stapel wurde noch nichts gelernt, also gibt es nichts zu vergessen.",
-    "pause": "Pausieren",
-    "cancel": "Abbrechen"
+    "pause": "Pausieren"
   },
   "comeback": {
     "label": "Willkommen zurück",

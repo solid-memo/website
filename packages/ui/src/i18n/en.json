@@ -606,6 +606,9 @@
     "paused": "Paused",
     "pausedUntil": "Paused until {day}"
   },
+  "dialog": {
+    "close": "Close"
+  },
   "pauseDeck": {
     "heading": "Pause {deck}",
     "intro": "Its cards stay out of your daily study and its counts until it resumes. Your progress is kept, and nothing about its cards changes.",
@@ -617,8 +620,7 @@
     "outlookOn": "If you resume on {day}, you’ll likely still remember about {percent} of this deck.",
     "outlookAfter": "After {days} days, you’ll likely still remember about {percent} of this deck.",
     "nothingStudied": "Nothing in this deck has been studied yet, so there is nothing to forget.",
-    "pause": "Pause",
-    "cancel": "Cancel"
+    "pause": "Pause"
   },
   "comeback": {
     "label": "Welcome back",
