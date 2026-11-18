@@ -102,7 +102,13 @@ export function createSolidDeckArchive({
         getUrlAll(entry, DCTERMS.creator).filter((url) => isCreatorAgent(catalog!, url)),
       );
       const going = new Set([deck.url, distributionUrlOf(deck.url), ...creators]);
-      const left = new Set<string>([SM.position, ...(withProgress ? [] : [SM.completedChapter])]);
+      // A pause is the learner's, of this pod: a deck file never arrives paused.
+      const left = new Set<string>([
+        SM.position,
+        SM.deckPausedAt,
+        SM.deckResumesOn,
+        ...(withProgress ? [] : [SM.completedChapter]),
+      ]);
       const isLeftCreatorLink = ({ subject, predicate, object }: Quad) =>
         subject.value === deck.url &&
         predicate.value === DCTERMS.creator &&

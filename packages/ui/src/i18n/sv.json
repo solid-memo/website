@@ -1714,6 +1714,7 @@
     "distractorIdRepeated": "Två felaktiga alternativ på ett kort har samma id, så det ena skulle ersätta det andra. Inget sparades. Ta bort ett av dem från kortet eller ge vart och ett sitt eget id i kortleksfilen.",
     "dailyLimitInvalid": "En daglig gräns är ett heltal, 0 eller mer.",
     "dueDayInvalid": "”{day}” är ingen dag. Välj dagen då kortet ska repeteras.",
+    "resumeDayInvalid": "”{day}” är ingen dag efter i dag. Välj en senare dag att fortsätta på.",
     "cardTransferSameDeck": "Korten finns redan i den här kortleken. Välj en annan kortlek.",
     "licenseUnknown": "Välj en av licenserna som erbjuds.",
     "authorEmpty": "En upphovsperson behöver ett namn.",

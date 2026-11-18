@@ -152,6 +152,13 @@ describe("importedDeck", () => {
     expect(imported.keywords).toEqual({ ko: many.slice(0, MAX_DECK_METADATA) });
   });
 
+  it("never brings a deck in paused", () => {
+    const file = content({
+      deck: deck("deck-a", { pause: { pausedAt: "2026-03-01T12:00:00.000Z" } }),
+    });
+    expect(importedDeck(INSTANCE, file, options).deck).not.toHaveProperty("pause");
+  });
+
   it("keeps the file's picture hosts, the first MAX_PICTURE_HOSTS of them (GHSA-jmrw-gq3f-r4g6)", () => {
     const hosts = Array.from({ length: 2 * MAX_PICTURE_HOSTS }, (_, i) => `h${i}.example`);
     const file = content({ deck: deck("deck-a", { pictureHosts: hosts }) });

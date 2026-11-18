@@ -45,6 +45,7 @@ import {
 } from "@solid-memo/domain/deck";
 import { cardLanguageTag } from "@solid-memo/domain/deckCardLanguage";
 import { storedPictureHosts } from "@solid-memo/domain/deckPictures";
+import { storedPause } from "@solid-memo/domain/deckPause";
 import {
   cardFromRecord,
   deckAgents,
@@ -74,6 +75,7 @@ import {
   isWrittenByNewer,
   migrateWithinBound,
   ownSubjectsOf,
+  readDatetime,
   readIri,
   readIris,
   readVersioned,
@@ -158,7 +160,8 @@ export function toDecks(dataset: Dataset, catalogUrl: string): Deck[] {
  * them, its release's kept first), and a deck the language its card text is shown in first
  * (sm:deckCardLanguage), kept only when it names a language, and the
  * hosts whose pictures it shows (sm:deckPictureHost), kept only when they
- * are hosts: the catalog is data anyone may have written, and no shape
+ * are hosts, and a paused deck its pause (sm:deckPausedAt and
+ * sm:deckResumesOn, as storedPause keeps them): the catalog is data anyone may have written, and no shape
  * checks those terms. A
  * deck from before format 3 names its creators itself ("Name <email>"),
  * which name the agents the migration gives it. A deck the migration
@@ -189,6 +192,10 @@ export function toDeck(
   const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);
   const cardLanguage = storedLanguage === null ? undefined : cardLanguageTag(storedLanguage);
   const pictureHosts = storedPictureHosts(getStringNoLocaleAll(thing, SM.deckPictureHost));
+  const pause = storedPause(
+    readDatetime(thing, SM.deckPausedAt)?.toISOString() ?? null,
+    getStringNoLocale(thing, SM.deckResumesOn),
+  );
   return {
     ...stored,
     // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
@@ -196,6 +203,7 @@ export function toDeck(
     ...(completedChapters.length === 0 ? {} : { completedChapters }),
     ...(cardLanguage === undefined ? {} : { cardLanguage }),
     ...(pictureHosts.length === 0 ? {} : { pictureHosts }),
+    ...(pause === undefined ? {} : { pause }),
   };
 }
 

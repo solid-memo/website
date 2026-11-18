@@ -816,3 +816,31 @@ answers like study answers:
 - The day's multiple-choice answers leave the answer log.
 - A chapter completed today stays completed: `sm:completedChapter` is
   on the catalog entry, which a reset doesn't touch.
+
+## Pausing a deck
+
+A learner may set one deck aside for a while: an exam is over, a trip
+ends, a course is too much right now. The pause is one record on the
+deck's catalog entry: when it began, and the study day it ends on when
+one was chosen ([data-model.md](data-model.md#decks-and-cards)). Without
+a day, the deck stays paused until the learner resumes it. On its day it
+resumes by itself, at the start of that study day; resuming by hand
+makes today that day. The record stays once the deck resumes, so the
+day it did is known; pausing again replaces it
+([deckPause.ts](../packages/domain/src/deckPause.ts)).
+
+A pause never rewrites review state. Memory keeps fading while a deck
+rests, so no `due`, `lastReviewedAt`, stability or difficulty moves.
+Moving them forward by the length of the pause would:
+
+- give FSRS-6 too few elapsed days (`nextMemory`): a late success
+  would earn too little stability, and a lapse would count as on time;
+- make `recallNow` and the statistics overstate what the learner
+  remembers;
+- break the fuzz factor and the check that an FSRS-6 state is still
+  fresh, which both go by `lastReviewedAt` (`fuzzFactor`, `isFresh`).
+
+With the real elapsed days, FSRS-6 already handles the first review
+after a pause. A forgotten card falls back to a small stability. A card
+still remembered after the long gap gains more stability than one
+reviewed on time.

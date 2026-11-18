@@ -1714,6 +1714,7 @@
     "distractorIdRepeated": "Zwei falsche Antwortmöglichkeiten einer Karte haben dieselbe ID, sodass eine die andere ersetzen würde. Es wurde nichts gespeichert. Lösche eine davon aus der Karte oder gib in einer Stapeldatei jeder ihre eigene ID.",
     "dailyLimitInvalid": "Ein Tageslimit ist eine ganze Zahl ab 0.",
     "dueDayInvalid": "„{day}“ ist kein Tag. Wähle den Tag, an dem die Karte fällig ist.",
+    "resumeDayInvalid": "„{day}“ ist kein Tag nach heute. Wähle einen späteren Tag zum Fortsetzen.",
     "cardTransferSameDeck": "Die Karten sind schon in diesem Stapel. Wähle einen anderen Stapel.",
     "licenseUnknown": "Wähle eine der angebotenen Lizenzen.",
     "authorEmpty": "Jede Person braucht einen Namen.",

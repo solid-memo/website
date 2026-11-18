@@ -33,6 +33,7 @@ import { editCompletedChapters as completedChaptersAfter } from "@solid-memo/dom
 import { withStatedLanguages } from "@solid-memo/domain/deckLanguages";
 import { withCardLanguage } from "@solid-memo/domain/deckCardLanguage";
 import { storedPictureHosts, withPictureHost } from "@solid-memo/domain/deckPictures";
+import type { DeckPause } from "@solid-memo/domain/deckPause";
 import {
   cardsContainerOf,
   catalogUrlOf,
@@ -89,6 +90,7 @@ import { editOf, type DatasetEdit } from "./datasetEdit";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import {
+  datetimeLiteral,
   readDatetime,
   carriedTo,
   recordThing,
@@ -568,6 +570,17 @@ export function createSolidDeckRepository({
               .removeAll(SM.deckPictureHost)
               .setStringAll(SM.deckPictureHost, hostStrings(changed.pictureHosts)),
           deck: changed,
+        };
+      });
+    },
+
+    setPause(deck, pause) {
+      return editEntry(deck, (stored) => {
+        if (samePause(stored.pause, pause ?? undefined)) return null;
+        const { pause: _old, ...rest } = stored;
+        return {
+          edit: (entry) => withPauseTerms(entry.removeAll(SM.deckPausedAt), pause ?? undefined),
+          deck: pause === null ? rest : { ...rest, pause },
         };
       });
     },
@@ -1090,7 +1103,8 @@ export function createSolidDeckRepository({
    * as completeChapter adds one, bounded as a read bounds them), the card language
    * (sm:deckCardLanguage, as setCardLanguage sets it) and the hosts whose
    * pictures it shows (sm:deckPictureHost, as setPictureHost adds them,
-   * bounded as a read bounds them).
+   * bounded as a read bounds them), and its pause (sm:deckPausedAt and
+   * sm:deckResumesOn, as setPause sets them).
    */
   function withOwnTerms(dataset: Dataset, deck: Deck): Dataset {
     const entry = getThing(dataset, deck.url)!;
@@ -1109,6 +1123,7 @@ export function createSolidDeckRepository({
     // The whole list in one call (setStringAll), never more than a read keeps.
     if (deck.pictureHosts !== undefined)
       builder = builder.setStringAll(SM.deckPictureHost, hostStrings(deck.pictureHosts));
+    builder = withPauseTerms(builder, deck.pause);
     return setThing(dataset, builder.build());
   }
 
@@ -1189,4 +1204,24 @@ function byDocument<T extends Deck>(decks: readonly T[]): Map<string, T[]> {
     else held.push(deck);
   }
   return result;
+}
+
+/** Whether two pauses are the same: the same start, and the same resume day or none. */
+function samePause(a: DeckPause | undefined, b: DeckPause | undefined): boolean {
+  if (a === undefined || b === undefined) return a === b;
+  return Date.parse(a.pausedAt) === Date.parse(b.pausedAt) && a.resumesOn === b.resumesOn;
+}
+
+/**
+ * The entry with the pause's terms in place of its resume day: the
+ * start as an xsd:dateTime, the resume day as a plain string, as a
+ * review state's due day is. The caller removes the start, if any.
+ */
+function withPauseTerms(entry: SubjectBuilder, pause: DeckPause | undefined): SubjectBuilder {
+  const cleared = entry.removeAll(SM.deckResumesOn);
+  if (pause === undefined) return cleared;
+  const started = cleared.addLiteral(SM.deckPausedAt, datetimeLiteral(pause.pausedAt));
+  return pause.resumesOn === undefined
+    ? started
+    : started.addStringNoLocale(SM.deckResumesOn, pause.resumesOn);
 }

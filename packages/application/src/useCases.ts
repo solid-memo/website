@@ -41,6 +41,7 @@ import { createSessionUseCases, type SessionUseCases } from "./session";
 import { createInstanceUseCases, type InstanceUseCases } from "./instances";
 import { createPreferenceUseCases, type PreferenceUseCases } from "./preferences";
 import { createDeckUseCases, type DeckUseCases } from "./decks";
+import { createDeckPauseUseCases, type DeckPauseUseCases } from "./deckPauses";
 import { createCardUseCases, type CardUseCases } from "./cards";
 import { createLibraryUseCases, withLinkedReleasesChecked, type LibraryUseCases } from "./library";
 import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
@@ -68,6 +69,7 @@ export interface UseCases
     InstanceUseCases,
     PreferenceUseCases,
     DeckUseCases,
+    DeckPauseUseCases,
     CardUseCases,
     LibraryUseCases,
     MistakeReportUseCases,
@@ -304,6 +306,7 @@ export function createUseCases({
       now,
     }),
     ...createDeckUseCases({ deckRepository, newId }),
+    ...createDeckPauseUseCases({ deckRepository, preferenceStore }),
     ...createCardUseCases({
       deckRepository,
       reviewStateRepository,

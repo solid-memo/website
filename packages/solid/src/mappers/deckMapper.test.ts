@@ -226,6 +226,38 @@ describe("toDeck", () => {
     expect(toDeck(none)).not.toHaveProperty("pictureHosts");
   });
 
+  describe("the deck's pause", () => {
+    const paused = (pausedAt: string, resumesOn?: string) =>
+      deckThing((t) => {
+        const entry = t
+          .addIri(RDF.type, SM.Deck)
+          .addStringNoLocale(DCTERMS.title, "Words")
+          .addIri(SM.cardsDocument, CARDS_DOC)
+          .addIri(SM.reviewsDocument, REVIEWS_DOC)
+          .addLiteral(SM.deckPausedAt, datetimeLiteral(pausedAt));
+        return resumesOn === undefined
+          ? entry
+          : entry.addStringNoLocale(SM.deckResumesOn, resumesOn);
+      });
+
+    it("reads its start and its resume day", () => {
+      expect(toDeck(paused("2026-03-01T12:00:00Z"))?.pause).toEqual({
+        pausedAt: "2026-03-01T12:00:00.000Z",
+      });
+      expect(toDeck(paused("2026-03-01T12:00:00Z", "2026-03-09"))?.pause).toEqual({
+        pausedAt: "2026-03-01T12:00:00.000Z",
+        resumesOn: "2026-03-09",
+      });
+    });
+
+    it("drops a start that is no instant, and a resume day that is no day", () => {
+      expect(toDeck(paused("someday", "2026-03-09"))).not.toHaveProperty("pause");
+      expect(toDeck(paused("2026-03-01T12:00:00Z", "2026-02-30"))?.pause).toEqual({
+        pausedAt: "2026-03-01T12:00:00.000Z",
+      });
+    });
+  });
+
   it("keeps the provenance of an imported deck", () => {
     const thing = deckThing((t) =>
       t

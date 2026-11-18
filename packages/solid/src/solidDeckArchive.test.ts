@@ -185,6 +185,28 @@ describe("createSolidDeckArchive", () => {
     });
   }
 
+  it("leaves the deck's pause behind, progress or not", async () => {
+    const { pod, deck } = await podWithDeck();
+    await pod.put(
+      `${INSTANCE}catalog.ttl`,
+      [
+        ...pod.triples(`${INSTANCE}catalog.ttl`)!,
+        `<${deck.url}> <${SM.deckPausedAt}> "2026-03-01T12:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .`,
+        `<${deck.url}> <${SM.deckResumesOn}> "2026-03-09" .`,
+      ].join("\n"),
+    );
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    for (const withProgress of [true, false]) {
+      const text = await archive.exportDeck(
+        deck,
+        { format: "turtle", withProgress },
+        { asNoOne: { cards: false, reviews: false } },
+      );
+      expect(text).not.toContain("deckPausedAt");
+      expect(text).not.toContain("deckResumesOn");
+    }
+  });
+
   it("leaves the progress and the deck's place behind unless asked", async () => {
     const { pod, deck, cards } = await podWithDeck();
     const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });

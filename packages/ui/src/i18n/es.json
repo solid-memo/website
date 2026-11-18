@@ -1799,6 +1799,7 @@
     "distractorIdRepeated": "Dos opciones incorrectas de una tarjeta tienen el mismo id, así que una reemplazaría a la otra. No se ha guardado nada. Elimina una de ellas de la tarjeta o, en un archivo de mazo, dale a cada una su propio id.",
     "dailyLimitInvalid": "Un límite diario es un número entero, 0 o mayor.",
     "dueDayInvalid": "«{day}» no es un día. Elige el día en que toca repasar la tarjeta.",
+    "resumeDayInvalid": "«{day}» no es un día posterior a hoy. Elige un día más adelante para reanudar.",
     "cardTransferSameDeck": "Las tarjetas ya están en este mazo. Elige otro mazo.",
     "licenseUnknown": "Elige una de las licencias que se ofrecen.",
     "authorEmpty": "Cada persona autora necesita un nombre.",

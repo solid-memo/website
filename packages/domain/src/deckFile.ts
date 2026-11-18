@@ -159,7 +159,8 @@ export function importedDeck(
     !documentsOf(file.id).some((url) => used.has(url));
   const id = free ? file.id : freshId;
   const [cardsDocumentUrl, reviewsDocumentUrl] = documentsOf(id) as [string, string];
-  const { completedChapters, ...rest } = file;
+  // A pause is the learner's of the pod it was in: a deck file never arrives paused.
+  const { completedChapters, pause: _pause, ...rest } = file;
   const deck: Deck = withBoundedMetadata({
     ...rest,
     id,

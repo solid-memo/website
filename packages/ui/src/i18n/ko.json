@@ -1629,6 +1629,7 @@
     "distractorIdRepeated": "한 카드의 오답 선택지 두 개의 ID가 같아서 하나가 다른 하나를 덮어쓰게 돼요. 아무것도 저장하지 않았어요. 카드에서 하나를 삭제하거나, 덱 파일이라면 각각 다른 ID를 지정해 주세요.",
     "dailyLimitInvalid": "하루 한도는 0 이상의 정수여야 해요.",
     "dueDayInvalid": "‘{day}’은(는) 날짜가 아니에요. 카드를 복습할 날짜를 선택해 주세요.",
+    "resumeDayInvalid": "‘{day}’은(는) 오늘 이후의 날짜가 아니에요. 다시 시작할 더 늦은 날짜를 선택해 주세요.",
     "cardTransferSameDeck": "카드가 이미 이 덱에 있어요. 다른 덱을 선택해 주세요.",
     "licenseUnknown": "제시된 라이선스 중 하나를 선택해 주세요.",
     "authorEmpty": "저자 이름을 입력해 주세요.",

@@ -196,6 +196,10 @@ export function makeDeps() {
     })),
     setCompletedChapters: vi.fn(async (edited) => edited),
     setPictureHost: vi.fn(async (edited, host, shown) => withPictureHost(edited, host, shown)),
+    setPause: vi.fn(async (edited, pause) => {
+      const { pause: _old, ...rest } = edited;
+      return pause === null ? rest : { ...rest, pause };
+    }),
     setCardLanguage: vi.fn(async (edited, language) =>
       language === null ? edited : { ...edited, cardLanguage: language },
     ),
