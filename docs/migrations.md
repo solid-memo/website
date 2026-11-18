@@ -915,7 +915,11 @@ of the cards it removes (SM-2's and FSRS-6's, in one write), then its
 catalog entry, which says which release the deck is. The entry is
 checked before the first write (`checkDeckEntryUpgrade`), so one the
 [write check](validation.md#the-write-check) refuses leaves the deck as
-it was. A later failure stops it
+it was. The writes of the cards and the review states are made and
+checked before the first is sent too (`prepareCardChanges`,
+`prepareReviewChanges`). A removed card's state a newer version of the
+app wrote refuses the upgrade with nothing written. A later failure
+stops it
 where it is and puts nothing back; planned again, the upgrade is
 offered and finishes
 ([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),
@@ -929,7 +933,7 @@ still name them.
 flowchart TD
     accTitle: Upgrading a library deck
     accDescr: The upgrade reads the deck, puts its cards, drops the removed cards' review states and moves the entry to the new release, and an error stops it where it is.
-    offer["Notice: what the upgrade changes"] -->|Update to release n| read["1 read: the deck's entry and cards;<br/>the plan again must change the same cards;<br/>the review states, when cards go;<br/>the new entry checked"]
+    offer["Notice: what the upgrade changes"] -->|Update to release n| read["1 read: the deck's entry and cards;<br/>the plan again must change the same cards;<br/>the review states, when cards go;<br/>the new entry and both writes checked"]
     read --> cards["2 cards: one PUT of the whole document,<br/>If-Match the read the plan was made from<br/>(none when no card changes)"]
     cards --> reviews["3 reviews: the removed cards' states dropped,<br/>If-Match the read (none when there are none)"]
     reviews --> entry["4 entry: moved to the new release,<br/>with the deck's texts, If-Match the read"]
@@ -950,7 +954,12 @@ flowchart TD
   has review states, the reviews document isn't touched, and reviews
   saved meanwhile on another device land as before. Otherwise it's
   written in place without the removed cards' states, after the cards
-  (a state of a removed card is read as no card's).
+  (a state of a removed card is read as no card's). The write is made
+  and checked before the cards are written, and sent `If-Match` that
+  read; a reviews document changed since (a grade on another device)
+  has it made again from a fresh read. A removed card's state a newer
+  version of the app wrote refuses the upgrade before anything is
+  written.
 - **The entry is the last write.** The catalog entry
   (`prov:wasDerivedFrom`) is written once, conditionally, only while it
   says what was read (`sameDeckState`), and moves the deck to the new
@@ -972,7 +981,9 @@ flowchart TD
   wrote is taken for one the user changed. If a newer release is out by
   then, the deck is offered that one, planned with the release the
   cut-off upgrade was to. The newer one changes the cards it wrote as it
-  would its own.
+  would its own. A removed card's state a newer version of the app
+  wrote is the exception: it refuses the upgrade each time, with
+  nothing written, until that newer version applies it.
 - **Nothing is kept beside the deck**: no copy, backup or note in the
   browser, and no undoing.
 - **Sharing is untouched**: no access control is written.

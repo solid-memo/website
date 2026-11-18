@@ -304,7 +304,9 @@ const instanceOf = (deck: Deck) => deck.url.slice(0, deck.url.lastIndexOf("/") +
 /**
  * Every write to one of the documents was held to the version it was read
  * at: If-Match the ETag the server gave the last read of it, where the
- * server enforces If-Match; else made right after a read of it.
+ * server enforces If-Match; else made after a read of it, with no other
+ * write of it in between: the upgrade reads each document it writes
+ * before it sends the first write.
  */
 function expectConditional(
   sent: Recorded[],
@@ -315,7 +317,12 @@ function expectConditional(
     if (!isWrite(request) || !documents.includes(request.url)) continue;
     const named = `${request.method} ${request.url}`;
     if (!conditional.edits) {
-      expect(sent[index - 1], named).toMatchObject({ method: "GET", url: request.url });
+      // The requests to this document before it, newest first: a read of it comes before any write of it.
+      const before = sent
+        .slice(0, index)
+        .filter((earlier) => earlier.url === request.url)
+        .reverse();
+      expect(before[0], named).toMatchObject({ method: "GET", url: request.url });
       continue;
     }
     const read = sent

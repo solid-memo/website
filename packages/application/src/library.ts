@@ -36,13 +36,14 @@ import type {
   DeckLibrary,
   DeckRepository,
   LinkedReleaseReads,
+  ReviewChanges,
   ReviewStateRepository,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
 import { mapAtOnce } from "./atOnce";
 import type { Course, CourseUseCases } from "./courses";
-import { readNow, unsent } from "./writes";
+import { changedElsewhere, readNow, unsent } from "./writes";
 import { stepReporter } from "./progress";
 
 export interface LibraryUseCases {
@@ -132,8 +133,12 @@ export interface LibraryUseCases {
    * it is as the plan read it; then, when cards with review states are
    * removed, its reviews document without them; and last its catalog
    * entry, moved to the new release, only while it says what was read.
-   * Each write is one conditional write, made whole or not at all. A
-   * failure stops the upgrade where it is, nothing put back: the deck is
+   * Each write is one conditional write, made whole or not at all. The
+   * cards' and the review states' writes are made and checked before the
+   * first is sent, so one that would be refused (a removed card's state
+   * a newer version of the app wrote) refuses the upgrade with nothing
+   * written. A later failure stops the upgrade where it is, nothing put
+   * back: the deck is
    * readable, still names the release it came from, and is offered the
    * upgrade again, which finishes it. Refuses (deckChangedSinceOffer) when
    * the deck's cards no longer call for the changes the user agreed to.
@@ -391,6 +396,50 @@ export function createLibraryUseCases({
       linked: fromLink === true,
     });
   }
+  /**
+   * A library upgrade's writes of the deck's cards and of the review
+   * states of the cards it removes, each made and checked, none sent
+   * (prepareCardChanges, prepareReviewChanges): one that would be
+   * refused (a removed card's state a newer version of the app wrote)
+   * refuses the upgrade before anything is written. The cards are
+   * written whole (a PATCH of much text can be cut short,
+   * docs/testing.md), and only while the document is as the plan read
+   * it; the review states only while theirs is as read, else made again
+   * from a fresh read (a grade on another device meanwhile).
+   */
+  async function prepareUpgradeWrites(
+    deck: Deck,
+    plan: LibraryUpgradePlan,
+    version: string | null,
+    dropped: { sm2: ReviewKey[]; fsrs: ReviewKey[] },
+  ) {
+    const save = upgradedCards(plan);
+    const writeCards =
+      save.length + plan.remove.length > 0
+        ? await deckRepository.prepareCardChanges(
+            deck,
+            { save, remove: plan.remove.map((card) => card.id) },
+            { whole: true, ...(version === null ? {} : { version }) },
+          )
+        : undefined;
+    const changes: ReviewChanges = {
+      save: [],
+      remove: dropped.sm2,
+      fsrs: { save: [], remove: dropped.fsrs },
+    };
+    const prepared =
+      dropped.sm2.length + dropped.fsrs.length > 0
+        ? await reviewStateRepository.prepareReviewChanges(deck, changes)
+        : undefined;
+    const writeReviews =
+      prepared &&
+      (() =>
+        prepared().catch((error: unknown) => {
+          if (!changedElsewhere(error)) throw error;
+          return reviewStateRepository.applyReviewChanges(deck, changes);
+        }));
+    return { writeCards, writeReviews };
+  }
   async function importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck> {
     const content = await deckLibrary.fetchLibraryDeck(deck.url);
     return deckRepository.importDeck(instanceUrl, content);
@@ -600,30 +649,19 @@ export function createLibraryUseCases({
         // Checked before the first write: an entry that would be refused leaves the deck as it is.
         const upgradedEntry = applyLibraryUpgrade(deck, plan);
         await deckRepository.checkDeckEntryUpgrade(deck, upgradedEntry);
+        // Both writes made and checked before the first is sent (prepareUpgradeWrites).
+        const { writeCards, writeReviews } = await prepareUpgradeWrites(deck, plan, cards.version, {
+          sm2: dropped,
+          fsrs: droppedFsrs,
+        });
 
-        // The cards first, the deck readable with them, still naming the release it came from: written whole (a
-        // PATCH of much text can be cut short, docs/testing.md), and only while the document is as the plan read it.
+        // The cards first, the deck readable with them, still naming the release it came from.
         progress.finished("cards");
-        const save = upgradedCards(plan);
-        if (save.length + plan.remove.length > 0) {
-          await write(() =>
-            deckRepository.applyCardChanges(
-              deck,
-              { save, remove: plan.remove.map((card) => card.id) },
-              { whole: true, ...(cards.version === null ? {} : { version: cards.version }) },
-            ),
-          );
-        }
-        // Then the review states of the cards removed, when there are any.
+        if (writeCards !== undefined) await write(writeCards);
+        // Then the review states of the cards removed: made again from a fresh read when the document
+        // changed since it was read (a grade on another device).
         progress.finished("reviews");
-        if (dropped.length + droppedFsrs.length > 0)
-          await write(() =>
-            reviewStateRepository.applyReviewChanges(deck, {
-              save: [],
-              remove: dropped,
-              fsrs: { save: [], remove: droppedFsrs },
-            }),
-          );
+        if (writeReviews !== undefined) await write(writeReviews);
         // Last the entry, which moves the deck to the new release, only while it says what was read.
         progress.finished("entry");
         const upgraded = await deckRepository.upgradeDeckEntry(deck, upgradedEntry);

@@ -1628,6 +1628,55 @@ describe("library deck upgrade", () => {
     expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual(cards);
   });
 
+  it("makes and checks both writes before it sends the first", async () => {
+    const { deps, copy, plan, useCases } = await world();
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true });
+    const { prepareCardChanges, applyCardChanges } = deps.deckRepository;
+    const { prepareReviewChanges } = deps.reviewStateRepository;
+    expect(vi.mocked(prepareReviewChanges).mock.calls).toEqual([
+      [copy, { save: [], remove: [reviewOf("latvia")], fsrs: { save: [], remove: [] } }],
+    ]);
+    const firstSent = Math.min(...vi.mocked(applyCardChanges).mock.invocationCallOrder);
+    expect(vi.mocked(prepareCardChanges).mock.invocationCallOrder[0]).toBeLessThan(firstSent);
+    expect(vi.mocked(prepareReviewChanges).mock.invocationCallOrder[0]).toBeLessThan(firstSent);
+  });
+
+  it("refuses with nothing written when a removed card's review state was written by a newer version, and again when tried again", async () => {
+    const { deps, pod, copy, plan, useCases } = await world();
+    const refused = new AppError("writtenByNewerApp", { url: `${copy.reviewsDocumentUrl}#latvia` });
+    vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mockRejectedValue(refused);
+    const cards = cardsOf(pod, copy.cardsDocumentUrl);
+
+    for (const attempt of [plan, (await useCases.planLibraryUpgrade(copy))!]) {
+      await expect(useCases.applyLibraryUpgrade(copy, attempt)).resolves.toEqual({
+        ok: false,
+        step: "read",
+        error: refused,
+        changed: false,
+      });
+      expect(pod.written).toEqual([]);
+      expect(cardsOf(pod, copy.cardsDocumentUrl)).toEqual(cards);
+      expect(pod.deck).toEqual(copy);
+      expect(pod.reviews.get(copy.reviewsDocumentUrl)).toEqual([
+        reviewOf("sweden"),
+        reviewOf("latvia"),
+      ]);
+    }
+    expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+    expect(deps.deckRepository.upgradeDeckEntry).not.toHaveBeenCalled();
+  });
+
+  it("writes the removed cards' states again from a fresh read when their document changed since it was read", async () => {
+    const { deps, pod, copy, plan, useCases } = await world();
+    const apply = vi.mocked(deps.reviewStateRepository.applyReviewChanges);
+    const changed = new AppError("changedElsewhere", { url: copy.reviewsDocumentUrl });
+    apply.mockRejectedValueOnce(changed);
+    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true });
+    expect(apply).toHaveBeenCalledTimes(2);
+    expect(pod.reviews.get(copy.reviewsDocumentUrl)).toEqual([reviewOf("sweden")]);
+    expect(pod.deck).toMatchObject({ sourceUrl: plan.releaseUrl });
+  });
+
   it("stops where a write fails, nothing put back, and offered again it finishes, no card it wrote taken for the user's", async () => {
     const { deps, pod, copy, plan, useCases, v2 } = await world();
     vi.mocked(deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(
