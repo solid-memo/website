@@ -1039,7 +1039,11 @@ describe("readDeckFile", () => {
     }
   });
 
-  it("refuses JSON-LD of values that make no triple, or of values that take more work than its triples may, before the parser reads it (GHSA-96cg-w2x5-fpf4)", () => {
+  // Seven strings of millions of values, each built and checked: tens of
+  // seconds in CI, coverage on and every package's tests run at once.
+  it("refuses JSON-LD of values that make no triple, or of values that take more work than its triples may, before the parser reads it (GHSA-96cg-w2x5-fpf4)", {
+    timeout: 180_000,
+  }, () => {
     const nested = (key: string, value: string, count: number) =>
       `{"@context":{"ex":"${SM_NS}"},"@id":"#deck","${key}":${"[".repeat(9)}[${Array(count).fill(value).join(",")}]${"]".repeat(9)}}`;
     // Thrown, not rejected: the parser never reads the file.
