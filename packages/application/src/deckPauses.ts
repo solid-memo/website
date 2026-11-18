@@ -9,6 +9,7 @@ import { backlogDayOf, withPause, withResume } from "@solid-memo/domain/deckPaus
 import { effectiveStates, recallOn, type PromptRecall } from "@solid-memo/domain/fsrs";
 import { reviewKeyOf } from "@solid-memo/domain/review";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
+import { inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
 import type { PreferenceStore } from "./preferenceStore";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
@@ -90,12 +91,16 @@ export function createDeckPauseUseCases({
     return { prefs, today: studyDayOf(now, prefs.dayBoundaryHour) };
   }
 
+  // Each deck's two documents are read together, and the decks in turns:
+  // a catalog anyone sharing it may have marked every deck resumed in, as
+  // long as it is, never has all of its documents asked for at once.
+  const turn = inTurns(READS_AT_ONCE / 2);
+
   /** The deck's prompts studied, those of its cards not retired, with their recall on `day` and due days. */
   async function studied(deck: Deck, prefs: StudyPreferences, day: string) {
-    const [cards, reviews] = await Promise.all([
-      deckRepository.listCards(deck),
-      reviewStateRepository.listReviewStates(deck),
-    ]);
+    const [cards, reviews] = await turn(() =>
+      Promise.all([deckRepository.listCards(deck), reviewStateRepository.listReviewStates(deck)]),
+    );
     const recall = recallOn(reviews.sm2, reviews.fsrs, day, prefs.dayBoundaryHour);
     const dueOf = new Map(
       effectiveStates(reviews.sm2, reviews.fsrs, prefs.scheduler, prefs.dayBoundaryHour).map(

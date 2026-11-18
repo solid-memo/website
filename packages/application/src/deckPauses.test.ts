@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
+import type { Card } from "@solid-memo/domain/deck";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { createUseCases } from "./useCases";
 import { instance, deck, card, makeDeps, sm2s } from "./testing/fakePorts";
@@ -44,6 +45,30 @@ describe("deck pauses", () => {
     expect(await useCases.resumeDeck(instance.url, deck, now)).toBe(deck);
     expect(await useCases.resumeDeck(instance.url, resumed, now)).toBe(resumed);
     expect(deps.deckRepository.setPause).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads three resumed decks' documents at once at most, however many decks ask", async () => {
+    const deps = makeDeps();
+    const reads: (() => void)[] = [];
+    deps.deckRepository.listCards = vi.fn(
+      () => new Promise<Card[]>((done) => reads.push(() => done([]))),
+    );
+    const useCases = createUseCases(deps);
+    const resumed = Array.from({ length: 10 }, (_, at) => ({
+      ...deck,
+      url: `${deck.url}-${at}`,
+      pause: { pausedAt: "2026-02-01T09:00:00.000Z", resumesOn: "2026-02-28" },
+    }));
+    const comebacks = Promise.all(
+      resumed.map((one) => useCases.getComeback(instance.url, one, now)),
+    );
+    await vi.waitFor(() => expect(reads).toHaveLength(3));
+    while (reads.length > 0) {
+      reads.shift()!();
+      await new Promise((settle) => setTimeout(settle));
+    }
+    expect(await comebacks).toEqual(Array.from({ length: 10 }, () => null));
+    expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(10);
   });
 
   describe("what a pause costs, and what is left after it", () => {

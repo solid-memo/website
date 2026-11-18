@@ -882,8 +882,12 @@ backlog is due, for up to 30 days after it resumed (`getComeback`). It
 says about how much of the deck is probably still there (the average
 chance of recall today), how many reviews wait, and over how many days
 at its review limit. Cards learned shortly before the pause may feel
-new again, and it says so. Only a deck that resumed in those 30 days is read for it, since
-the pause's record stays. The backlog ends once none of its
+new again, and it says so. Only a deck that resumed in those 30 days
+is read for it, since the pause's record stays. Those decks are read 3
+at a time, each deck's cards and review states together, like the
+study counts. Anyone who shares the catalog can mark every deck
+resumed, and the pod is still never asked for all their documents at once.
+The backlog ends once none of its
 prompts is due; the pause's record stays until the deck is paused again.
 
 ### Never rewriting review state
