@@ -622,6 +622,14 @@ describe("the cards' progress", () => {
     ]);
     expect(deps.deckRepository.listDecks).not.toHaveBeenCalled();
   });
+  it("forecasts no reviews of a paused deck while it waits to be resumed, its overdue still counted", async () => {
+    const { useCases } = setup();
+    const paused = { ...deck, pause: { pausedAt: "2026-09-20T10:00:00.000Z" } };
+    const [progress] = (await useCases.getCardProgress(instance.url, now, { deck: paused })).decks;
+    expect(progress!.forecast[0]).toEqual({ studyDay: "2026-09-28", due: 1, reviews: 0 });
+    expect(progress!.forecast.every(({ reviews }) => reviews === 0)).toBe(true);
+    expect(progress!.daysToClear).toBeNull();
+  });
   it("forecasts from the digest's schedule while it is of the documents as they are, for the progress too", async () => {
     const schedule = {
       direction: deck.direction,
@@ -953,5 +961,13 @@ describe("the Studio's answer history and schedule insight", () => {
     expect(insight.forecast[2]).toEqual({ studyDay: "2026-10-11", due: 7, reviews: 7 });
     expect(insight.forecast[0]).toEqual({ studyDay: "2026-10-09", due: 0, reviews: 0 });
     expect(digestRepository.updateDigest).not.toHaveBeenCalled();
+    // Paused until the day after, the reviews wait for it.
+    const paused = {
+      ...deck,
+      pause: { pausedAt: "2026-10-01T10:00:00.000Z", resumesOn: "2026-10-12" },
+    };
+    const held = await useCases.deckInsight(instance.url, paused, at, DEFAULT_PREFERENCES);
+    expect(held.forecast[2]).toEqual({ studyDay: "2026-10-11", due: 7, reviews: 0 });
+    expect(held.forecast[3]).toEqual({ studyDay: "2026-10-12", due: 0, reviews: 7 });
   });
 });

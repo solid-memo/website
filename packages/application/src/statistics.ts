@@ -4,6 +4,7 @@
 
 import { deckPreferences } from "@solid-memo/domain/deckPace";
 import { activeCards, type Card, type Deck } from "@solid-memo/domain/deck";
+import { isPaused } from "@solid-memo/domain/deckPause";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { monthOfStudyDay, shiftStudyDay, type Answer } from "@solid-memo/domain/answer";
@@ -220,6 +221,11 @@ export interface StatisticsReport extends Statistics {
 export interface CourseStatistics extends CourseResults {
   /** The course's deck in the instance. */
   deck: Deck;
+}
+
+/** The pause a forecast holds a deck's reviews through (forecastOf): none unless it is paused today. */
+function pauseOf(deck: Deck, today: string) {
+  return isPaused(deck, today) ? { resumesOn: deck.pause!.resumesOn ?? null } : undefined;
 }
 
 /** How far along decks' prompts are (StatisticsUseCases.getCardProgress). */
@@ -527,7 +533,12 @@ export function createStatisticsUseCases({
       return {
         today,
         maxReviewsPerDay,
-        forecast: forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay }),
+        forecast: forecastOf(schedule, {
+          today,
+          days: FORECAST_DAYS,
+          maxReviewsPerDay,
+          pause: pauseOf(deck, today),
+        }),
         scheduled: states.length,
         intervals: intervalHistogram(due),
         eases: easeHistogram(states),
@@ -575,7 +586,12 @@ export function createStatisticsUseCases({
           const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);
           const states = scheduledStates(cards.value, one.direction, reviews.value.sm2);
           const due = dueStatesOf(reviews.value, prefs);
-          const forecast = forecastOf(schedule, { today, days: FORECAST_DAYS, maxReviewsPerDay });
+          const forecast = forecastOf(schedule, {
+            today,
+            days: FORECAST_DAYS,
+            maxReviewsPerDay,
+            pause: pauseOf(one, today),
+          });
           const answers = deckAnswers(byDeck.get(one.url) ?? [], one);
           const live = activeCards(cards.value);
           return {

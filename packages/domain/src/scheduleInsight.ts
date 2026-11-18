@@ -57,13 +57,23 @@ export function freshSchedule(
  * prompts' due days (the digest's sm:dueOnDay): each day what falls due,
  * and what the cap of reviews a day lets through, the rest carried over
  * to the next day, as a learner who studies each day would meet them.
- * Today's cap is what is left of it after the reviews made today.
+ * Today's cap is what is left of it after the reviews made today. A
+ * paused deck (`pause`) lets none through before the day it resumes on,
+ * or at all when it waits to be resumed (`resumesOn` null): what falls
+ * due then waits for that day.
  */
 export function forecastOf(
   schedule: DeckSchedule,
-  input: { today: string; days: number; maxReviewsPerDay: number },
+  input: {
+    today: string;
+    days: number;
+    maxReviewsPerDay: number;
+    pause?: { resumesOn: string | null };
+  },
 ): ForecastDay[] {
-  const { today, days, maxReviewsPerDay } = input;
+  const { today, days, maxReviewsPerDay, pause } = input;
+  const held = (day: string) =>
+    pause !== undefined && (pause.resumesOn === null || day < pause.resumesOn);
   const reviewedToday = schedule.studyDay === today ? schedule.reviewedOnDay : 0;
   let waiting = 0;
   return Array.from({ length: days }, (_, offset) => {
@@ -71,7 +81,11 @@ export function forecastOf(
     const due = Object.entries(schedule.dueByDay)
       .filter(([day]) => (offset === 0 ? day <= today : day === studyDay))
       .reduce((sum, [, count]) => sum + count, 0);
-    const cap = offset === 0 ? Math.max(0, maxReviewsPerDay - reviewedToday) : maxReviewsPerDay;
+    const cap = held(studyDay)
+      ? 0
+      : offset === 0
+        ? Math.max(0, maxReviewsPerDay - reviewedToday)
+        : maxReviewsPerDay;
     const reviews = Math.min(waiting + due, cap);
     waiting += due - reviews;
     return { studyDay, due, reviews };

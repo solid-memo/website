@@ -1229,6 +1229,9 @@ case `deckInsight` reads what it needs, writing nothing.
   - The reviews a day are capped by the deck's pace, else the
     instance's (`deckPreferences`), today's less what was reviewed
     today, the rest waiting for the next day.
+  - A paused deck ([srs.md](srs.md#pausing-a-deck)) has no reviews
+    before the day it resumes on, or at all while it waits to be
+    resumed: what falls due waits for that day.
   - The due days come from the deck's schedule in the
     [digest](data-model.md#the-digest) (`sm:dueOnDay`) while it's
     fresh (`freshSchedule`: the same versions, direction and day
