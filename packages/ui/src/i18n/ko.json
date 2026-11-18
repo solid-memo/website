@@ -99,7 +99,10 @@
     "advisory": "자세한 내용은 {link}에서 확인해 주세요.",
     "advisoryLink": "보안 권고 {id} (영어)",
     "opensInNewTab": "(새 탭에서 열림)",
-    "reportMistake": "오류 신고"
+    "reportMistake": "오류 신고",
+    "moreDecks": {
+      "other": "이 밖에 덱 {count}개가 더 있어요. 여기에는 나오지 않아요."
+    }
   },
   "footer": {
     "createdBy": "만든 사람: {author}",
@@ -435,6 +438,9 @@
     "restKeepsWorking": "나머지는 그대로 작동해요.",
     "setAside": {
       "other": "{names} 덱은 복구될 때까지 제외돼요. 나머지는 그대로 작동해요."
+    },
+    "setAsideMore": {
+      "other": "외 {count}개"
     },
     "keepsWorking": "Solid Memo는 이 데이터를 계속 사용해요.",
     "arrangementSetAside": "배치가 복구될 때까지 덱 목록의 순서를 바꿀 수 없어요.",

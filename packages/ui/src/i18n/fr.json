@@ -103,7 +103,12 @@
     "advisory": "Pour en savoir plus, lisez l’{link}.",
     "advisoryLink": "avis de sécurité {id} (en anglais)",
     "opensInNewTab": "(s’ouvre dans un nouvel onglet)",
-    "reportMistake": "Signaler une erreur"
+    "reportMistake": "Signaler une erreur",
+    "moreDecks": {
+      "one": "Et {count} autre paquet, qui n’apparaît pas ici.",
+      "many": "Et {count} de paquets de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres paquets, qui n’apparaissent pas ici."
+    }
   },
   "footer": {
     "createdBy": "Créé par {author}",
@@ -459,6 +464,11 @@
       "one": "Mis de côté jusqu’à réparation : {names}. Le reste continue de fonctionner.",
       "many": "Mis de côté jusqu’à réparation : {names}. Le reste continue de fonctionner.",
       "other": "Mis de côté jusqu’à réparation : {names}. Le reste continue de fonctionner."
+    },
+    "setAsideMore": {
+      "one": "et {count} autre",
+      "many": "et {count} de plus",
+      "other": "et {count} autres"
     },
     "keepsWorking": "Solid Memo continue de les utiliser.",
     "arrangementSetAside": "La liste des paquets ne peut pas être réorganisée tant que son ordre n’a pas été réparé.",

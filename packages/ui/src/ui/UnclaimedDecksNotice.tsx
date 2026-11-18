@@ -6,6 +6,7 @@ import { useState } from "preact/hooks";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { UnclaimedDeck } from "@solid-memo/domain/validation";
+import { bounded } from "./bounded";
 import { ErrorMessage } from "./ErrorMessage";
 import { ExternalLink } from "./ExternalLink";
 import { useI18n } from "./i18n";
@@ -20,8 +21,10 @@ import { queryKeys } from "./queryKeys";
  * then marks them as the deck's (UseCases.claimDeckDocuments) and reads
  * every check of the instance afresh. A deck with documents that may not
  * be claimed (`outsidePod`) has no such button, and says which and why.
- * Nothing when there are none. Solid Memo shows it with the data check;
- * the Studio, on its Health screen.
+ * Nothing when there are none. Solid Memo shows it with the data check,
+ * above every screen of the instance; the Studio, on its Health screen.
+ * So it lists the first LIST_LIMIT decks (bounded), each with its
+ * documents, at most two, and says how many more there are.
  */
 export function UnclaimedDecksNotice({
   useCases,
@@ -43,13 +46,14 @@ export function UnclaimedDecksNotice({
     },
   });
   if (decks.length === 0) return null;
+  const { shown, more } = bounded(decks);
   return (
     <div class="warning data-check" role="region" aria-label={t("unclaimedDecks.region")}>
       <p>
         <strong>{t("unclaimedDecks.heading")}</strong> {t("unclaimedDecks.hint")}
       </p>
       <ul>
-        {decks.map((deck) => (
+        {shown.map((deck) => (
           <li key={deck.deckUrl}>
             {tx("unclaimedDecks.deck", { deck: <ReaderText text={deck.title} /> })}
             <ul class="unclaimed-documents">
@@ -93,6 +97,7 @@ export function UnclaimedDecksNotice({
           </li>
         ))}
       </ul>
+      {more > 0 && <p class="hint">{t("common.moreDecks", { count: more })}</p>}
       <ErrorMessage error={errorText(claim.error)} />
     </div>
   );

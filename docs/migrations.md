@@ -595,7 +595,10 @@ flowchart TD
   data is stored in a newer way, that cards, review history and settings
   stay as they are, and that nothing changes until the update starts.
   It lists what's outdated: the instance record, the catalog, the
-  preferences, and each deck with what's outdated in it. What the new
+  preferences, and each deck with what's outdated in it. The notice
+  sits above every screen, so it lists at most `LIST_LIMIT` (50) decks
+  ([`bounded`](../packages/ui/src/ui/bounded.ts)) and says how many
+  more there are; its button counts them all. What the new
   formats add is folded away, a sentence per kind, without version
   numbers: what the steps after the oldest version found added (`oldestFormat`
   in the plan, the step tables in
@@ -646,7 +649,8 @@ flowchart TD
   everything again and says so. Otherwise it lists
   each document left — the instance record, the preferences, the
   catalog of the decks, or a deck's cards or review states — with why,
-  and how many it did update. **Try again** plans afresh and writes only
+  and how many it did update. It names at most `LIST_LIMIT` of them and
+  says how many more there are. **Try again** plans afresh and writes only
   what's still outdated. Closed, the notice shows what's left.
 - **Nothing outside the instance.** The update writes no type index
   registration. The instance's data is reached from its folder

@@ -101,7 +101,11 @@
     "advisory": "Read more in the {link}.",
     "advisoryLink": "security advisory {id}",
     "opensInNewTab": "(opens in a new tab)",
-    "reportMistake": "Report a mistake"
+    "reportMistake": "Report a mistake",
+    "moreDecks": {
+      "one": "And {count} more deck, not listed here.",
+      "other": "And {count} more decks, not listed here."
+    }
   },
   "footer": {
     "createdBy": "Created by {author}",
@@ -447,6 +451,10 @@
     "setAside": {
       "one": "{names} is set aside until repaired; the rest keeps working.",
       "other": "{names} are set aside until repaired; the rest keeps working."
+    },
+    "setAsideMore": {
+      "one": "and {count} more",
+      "other": "and {count} more"
     },
     "keepsWorking": "Solid Memo keeps working with it.",
     "arrangementSetAside": "The deck list cannot be rearranged until its arrangement is repaired.",

@@ -101,7 +101,11 @@
     "advisory": "Läs mer i {link}.",
     "advisoryLink": "säkerhetsmeddelandet {id} (på engelska)",
     "opensInNewTab": "(öppnas i en ny flik)",
-    "reportMistake": "Rapportera ett fel"
+    "reportMistake": "Rapportera ett fel",
+    "moreDecks": {
+      "one": "Och {count} kortlek till, som inte listas här.",
+      "other": "Och {count} kortlekar till, som inte listas här."
+    }
   },
   "footer": {
     "createdBy": "Skapad av {author}",
@@ -447,6 +451,10 @@
     "setAside": {
       "one": "{names} läggs åt sidan tills den är reparerad; resten fungerar som vanligt.",
       "other": "{names} läggs åt sidan tills de är reparerade; resten fungerar som vanligt."
+    },
+    "setAsideMore": {
+      "one": "och {count} till",
+      "other": "och {count} till"
     },
     "keepsWorking": "Solid Memo fortsätter att använda dem.",
     "arrangementSetAside": "Kortlekslistan kan inte ordnas om förrän dess ordning är reparerad.",

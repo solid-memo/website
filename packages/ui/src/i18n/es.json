@@ -103,7 +103,12 @@
     "advisory": "Más información en el {link}.",
     "advisoryLink": "aviso de seguridad {id} (en inglés)",
     "opensInNewTab": "(se abre en una pestaña nueva)",
-    "reportMistake": "Informar de un error"
+    "reportMistake": "Informar de un error",
+    "moreDecks": {
+      "one": "Y {count} mazo más, que no aparece aquí.",
+      "many": "Y {count} de mazos más, que no aparecen aquí.",
+      "other": "Y {count} mazos más, que no aparecen aquí."
+    }
   },
   "footer": {
     "createdBy": "Creado por {author}",
@@ -459,6 +464,11 @@
       "one": "Se aparta {names} hasta que se repare; lo demás sigue funcionando.",
       "many": "Se apartan {names} hasta que se reparen; lo demás sigue funcionando.",
       "other": "Se apartan {names} hasta que se reparen; lo demás sigue funcionando."
+    },
+    "setAsideMore": {
+      "one": "y {count} más",
+      "many": "y {count} más",
+      "other": "y {count} más"
     },
     "keepsWorking": "Solid Memo sigue trabajando con ellos.",
     "arrangementSetAside": "La lista de mazos no se puede reordenar hasta que se repare su orden.",

@@ -16,6 +16,8 @@ import type { UpdateOutcome, UpdateProgress } from "@solid-memo/domain/instanceU
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { AppError } from "@solid-memo/domain/appError";
 import { I18nProvider } from "./i18n";
+import { InstanceUpdateResult } from "./InstanceUpdate";
+import { LIST_LIMIT } from "./bounded";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -297,5 +299,27 @@ describe("MigrationContainer", () => {
     fireEvent.click(screen.getByRole("button", { name: "Start the update" }));
     expect(await screen.findByText("catalog unreadable")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Update 1 deck" })).toBeEnabled();
+  });
+});
+
+describe("InstanceUpdateResult", () => {
+  it("lists at most LIST_LIMIT documents it could not update, and says how many more there are", () => {
+    const failed = Array.from({ length: LIST_LIMIT + 5 }, (_, index) => ({
+      url: `${instance.url}decks/deck-${index}.ttl`,
+      holds: "cards" as const,
+      deck: { en: `Deck ${index}` },
+      error: "refused" as const,
+    }));
+    render(
+      <InstanceUpdateResult
+        outcome={{ updated: [], failed }}
+        onRetry={() => undefined}
+        onDismiss={() => undefined}
+      />,
+    );
+    const result = screen.getByRole("region", { name: "Update not finished" });
+    expect(within(result).getAllByRole("listitem")).toHaveLength(LIST_LIMIT);
+    expect(result).toHaveTextContent(`${LIST_LIMIT + 5} documents could not be updated now:`);
+    expect(result).toHaveTextContent("And 5 more documents, not listed here.");
   });
 });

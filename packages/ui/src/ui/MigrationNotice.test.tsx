@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { describeFormats, MigrationNotice } from "./MigrationNotice";
 import { createI18n, I18nProvider } from "./i18n";
+import { LIST_LIMIT } from "./bounded";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
 import type { MigrationPlan } from "@solid-memo/domain/migration";
 import { PREFERENCES_FORMAT_VERSION } from "@solid-memo/domain/preferences";
@@ -325,5 +326,29 @@ describe("MigrationNotice", () => {
     );
     expect(region).toHaveTextContent("Repetitionstillståndsformatet");
     expect(screen.getByRole("button", { name: "Uppdatera 3 kortlekar" })).toBeEnabled();
+  });
+});
+
+describe("many decks to update", () => {
+  it("lists at most LIST_LIMIT decks, and says how many more there are", () => {
+    const decks = Array.from({ length: LIST_LIMIT + 4 }, (_, index) => ({
+      deck: {
+        ...deck,
+        id: `deck-${index}`,
+        url: `${deck.url}-${index}`,
+        title: { en: `Deck ${index}` },
+      },
+      deckOutdated: true,
+      cardCount: 0,
+      reviewCount: 0,
+    }));
+    renderNotice({ plan: { ...plan, decks } });
+    expect(screen.getAllByRole("listitem")).toHaveLength(LIST_LIMIT);
+    expect(screen.queryByText(`Deck ${LIST_LIMIT}`)).toBeNull();
+    expect(screen.getByText("And 4 more decks, not listed here.")).toBeInTheDocument();
+    // The button still counts every deck.
+    expect(
+      screen.getByRole("button", { name: `Update ${LIST_LIMIT + 4} decks` }),
+    ).toBeInTheDocument();
   });
 });

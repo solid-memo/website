@@ -1402,7 +1402,8 @@ deck's (`claimDeckDocuments`), and the checks are read afresh. Until
 then nothing in those documents changes. A deck with a document outside
 the instance's folder, and not in a storage of the user's found to hold
 the instance too (`isInInstancePod`), has no such button: the notice
-says which document and why.
+says which document and why. It names at most 50 such decks, and says
+how many more there are.
 
 The badge on [Home](#home) counts every violation (warnings aside),
 side to settle, group of cards that say the same, and Markdown finding,
