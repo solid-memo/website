@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.9.0](https://github.com/solid-memo/website/compare/v7.8.0...v7.9.0) (2026-11-18)
+
+### Features
+
+* **decks:** read A Year in Sweden's theory in your own language ([4db9c02](https://github.com/solid-memo/website/commit/4db9c02aaa7cbbd4e8e9beb8bcd36ffb4ef29741)), closes [#884](https://github.com/solid-memo/website/issues/884)
+
+### Fixes
+
+* **application:** check a library upgrade's writes before sending any ([76651ae](https://github.com/solid-memo/website/commit/76651aea315c2254b3b8927a5da986eee9b5b1ab))
+* **ui:** bound the deck lists of the notices above every screen ([e467499](https://github.com/solid-memo/website/commit/e467499f2d7effe888bc14d0ad57b9ae8c2882cd))
+
 ## [7.8.0](https://github.com/solid-memo/website/compare/v7.7.0...v7.8.0) (2026-11-18)
 
 ### Features
