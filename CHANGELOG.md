@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.6.20](https://github.com/solid-memo/website/compare/v7.6.19...v7.6.20) (2026-11-18)
+
+### Fixes
+
+* **ui:** bound a course's chapters and a card's wrong options ([cc518c7](https://github.com/solid-memo/website/commit/cc518c7a4c975656c39046a3038b37cb2977fe0f))
+
 ## [7.6.19](https://github.com/solid-memo/website/compare/v7.6.18...v7.6.19) (2026-11-17)
 
 ### Fixes
