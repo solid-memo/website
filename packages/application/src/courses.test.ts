@@ -417,6 +417,17 @@ describe("courses", () => {
     expect(appended[0]).not.toHaveProperty("gradeMillis");
   });
 
+  it("answerCourseQuestion refuses an answer while the course's deck is paused, before any write", async () => {
+    const { deps, useCases, appended } = setup();
+    const paused = { ...courseDeck, pause: { pausedAt: "2026-01-01T00:00:00.000Z" } };
+    await expect(
+      useCases.answerCourseQuestion(instance.url, paused, question, { correct: true }, noon),
+    ).rejects.toMatchObject({ code: "deckPaused" });
+    expect(deps.deckRepository.addCardIfAbsent).not.toHaveBeenCalled();
+    expect(deps.reviewStateRepository.gradeReviewState).not.toHaveBeenCalled();
+    expect(appended).toEqual([]);
+  });
+
   it("answerCourseQuestion grades a wrong first answer 1 and names the wrong option chosen, in the deck's copy", async () => {
     const { useCases, appended } = setup();
     const answered = await useCases.answerCourseQuestion(

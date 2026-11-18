@@ -62,6 +62,31 @@ describe("study", () => {
     expect(capped.due).toEqual([]);
     expect(capped.newPrompts).toEqual([]);
   });
+  it("getStudyQueue holds nothing of a deck paused today, but still comes with its states", async () => {
+    const deps = makeDeps();
+    const state: ReviewState = {
+      cardId: card.id,
+      direction: "front-to-back",
+      easeFactor: 2.5,
+      intervalDays: 1,
+      repetitions: 1,
+      due: "2026-09-20",
+      firstReviewedAt: "2026-09-19T10:00:00.000Z",
+      lastReviewedAt: "2026-09-19T10:00:00.000Z",
+      formatVersion: 2,
+    };
+    vi.mocked(deps.deckRepository.listCards).mockResolvedValue([
+      card,
+      { ...card, id: "card-new", url: `${deck.cardsDocumentUrl}#card-new` },
+    ]);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(sm2s([state]));
+    const useCases = createUseCases(deps);
+    const paused = { ...deck, pause: { pausedAt: "2026-09-01T10:00:00.000Z" } };
+    const queue = await useCases.getStudyQueue(instance.url, paused, new Date(2026, 8, 21, 12, 0));
+    expect(queue.due).toEqual([]);
+    expect(queue.newPrompts).toEqual([]);
+    expect(queue.states).toEqual([state]);
+  });
   it("getStudyQueue goes by FSRS-6's due days when the preferences name it, else SM-2's", async () => {
     const deps = makeDeps();
     const dueCard = { ...card, id: "card-due", url: `${deck.cardsDocumentUrl}#card-due` };

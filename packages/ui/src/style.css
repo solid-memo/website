@@ -2856,8 +2856,9 @@ form.card-edit {
   font-weight: 600;
 }
 
-/* A finished course's link back to the decks, under what it says. */
-.course-finished + .actions {
+/* A finished or paused course's link back to the decks, under what it says. */
+.course-finished + .actions,
+.course-paused + .actions {
   margin-top: 0.75rem;
 }
 

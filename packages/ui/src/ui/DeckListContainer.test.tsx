@@ -166,7 +166,7 @@ describe("DeckListContainer", () => {
     expect(useCases.listLibraryDecks).toHaveBeenCalledOnce();
   });
 
-  it("shows the courses to go on with above the list: neither one finished, set aside, nor unreadable", async () => {
+  it("shows the courses to go on with above the list: neither one finished, set aside, paused, nor unreadable", async () => {
     const copy = (n: number, title: string): Deck => ({
       ...deck,
       id: `deck-${n}`,
@@ -178,8 +178,10 @@ describe("DeckListContainer", () => {
     const finished = { ...copy(3, "Finished"), completedChapters: [CH1, CH2] };
     const setAside = copy(4, "Aside");
     const unreadable = copy(5, "Unreadable");
+    // Paused with its deck: no way on, until the deck resumes.
+    const paused = { ...copy(6, "Paused"), pause: { pausedAt: "2026-01-01T00:00:00.000Z" } };
     const useCases = makeUseCasesFake({
-      listDecks: vi.fn(async () => [deck, going, finished, setAside, unreadable]),
+      listDecks: vi.fn(async () => [deck, going, finished, setAside, unreadable, paused]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
       getCourseSummary: vi.fn(async (d: Deck) => {
         if (d === unreadable) throw new Error("course unreachable");
@@ -212,6 +214,7 @@ describe("DeckListContainer", () => {
     expect(within(strip).queryByRole("link", { name: "Deck library" })).toBeNull();
     await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalledTimes(3));
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(setAside);
+    expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(paused);
     expect(useCases.getCourseSummary).not.toHaveBeenCalledWith(deck);
     // The whole course, with its cards, is read behind the strip, of the course it shows only.
     await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledWith(going));

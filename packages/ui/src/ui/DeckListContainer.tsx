@@ -9,6 +9,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { CourseStripContainer } from "./CourseStrip";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
+import { usePausedToday } from "./pausedToday";
 import { useCopies, useDeckTreeEditor } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
@@ -45,7 +46,8 @@ import {
  * The highlights of a version this browser has not shown are at the top
  * (WhatsNewContainer), until closed. A study session just left with an
  * answer (`celebrate`) is celebrated in today's strip once nothing is
- * left to study today (TodaySummary).
+ * left to study today (TodaySummary). A deck paused today
+ * (usePausedToday) is left out of today's strip and of the course strip.
  */
 export function DeckListContainer({
   useCases,
@@ -74,6 +76,8 @@ export function DeckListContainer({
   const { treeQuery, editor } = useDeckTreeEditor(useCases, instance);
   const decks = decksOf(treeQuery.data?.children ?? []);
   const { isCourse, linkedHost, newerRelease, readsRefused } = useCopies(useCases, decks);
+  const pausedToday = usePausedToday(useCases, instance.url);
+  const studied = (deck: Deck) => !isSetAside(deck) && !pausedToday(deck);
 
   if (treeQuery.error) {
     return <ErrorMessage error={errorText(treeQuery.error)} />;
@@ -88,13 +92,13 @@ export function DeckListContainer({
       <TodaySummaryContainer
         useCases={useCases}
         instance={instance}
-        decks={decks.filter((deck) => !isSetAside(deck))}
+        decks={decks.filter(studied)}
         celebrate={celebrate}
       />
       <CourseStripContainer
         useCases={useCases}
         instance={instance}
-        decks={decks.filter((deck) => isCourse(deck) && !isSetAside(deck))}
+        decks={decks.filter((deck) => isCourse(deck) && studied(deck))}
         libraryHref={decks.every(isCourse) ? libraryHref(instance.url) : undefined}
         readsRefused={readsRefused}
       />

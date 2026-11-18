@@ -6,10 +6,28 @@ import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { FsrsState } from "@solid-memo/domain/review";
+import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { sm2s, instance, deck, card } from "./testing/fakePorts";
 import { now, RULES, review, setup, learned } from "./testing/digestWorld";
 
 describe("the instance digest", () => {
+  it("counts nothing of a deck paused today, reading neither of its documents, and counts it again on its resume day", async () => {
+    const { useCases, deps } = setup();
+    const today = studyDayOf(now, DEFAULT_PREFERENCES.dayBoundaryHour);
+    const paused = { ...deck, pause: { pausedAt: "2026-01-01T00:00:00.000Z" } };
+    await expect(useCases.getStudyCounts(instance.url, paused, now)).resolves.toEqual({
+      dueCount: 0,
+      newCount: 0,
+    });
+    expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
+    expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
+    const resumed = { ...deck, pause: { ...paused.pause, resumesOn: today } };
+    await expect(useCases.getStudyCounts(instance.url, resumed, now)).resolves.toEqual({
+      dueCount: 1,
+      newCount: 1,
+    });
+  });
+
   it("counts today's study from the documents the first time, and keeps the deck's schedule", async () => {
     const { useCases, stored, digestRepository } = setup();
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({

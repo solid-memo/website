@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { deckPreferences } from "@solid-memo/domain/deckPace";
+import { isPaused } from "@solid-memo/domain/deckPause";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
 import { studyCountsOf } from "@solid-memo/domain/studyDigest";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
@@ -26,12 +27,13 @@ import type { DigestStore } from "./digestStore";
 export interface StudyUseCases {
   /**
    * Today's due and new cards for a deck, respecting the daily caps, with
-   * what grading them takes and their states (StudySessionQueue).
+   * what grading them takes and their states (StudySessionQueue). A deck
+   * paused today has none (docs/srs.md, "Pausing a deck").
    */
   getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudySessionQueue>;
   /**
    * How many prompts today's queue would hold, as getStudyQueue counts
-   * them; from the deck's schedule in the instance's digest when neither
+   * them (none for a deck paused today, whose documents are not read); from the deck's schedule in the instance's digest when neither
    * of its documents changed since, else from its documents (and the
    * digest is brought up to date). Each document is read as the user
    * only when it is the instance's (isInInstancePod), as no one
@@ -163,6 +165,8 @@ export function createStudyUseCases({
       digestStore.of(instanceUrl),
       digestStore.asNoOneOf(instanceUrl, deck),
     ]);
+    // A paused deck has nothing to study today: its documents are not read, and its schedule waits.
+    if (isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour))) return { dueCount: 0, newCount: 0 };
     const studyPrefs = deckPreferences(prefs, deck);
     const kept = digest.schedules[deck.url];
     // Each of the deck's documents read as the user only when it is the instance's.
@@ -214,7 +218,8 @@ export function createStudyUseCases({
         preferenceStore.get(instanceUrl),
       ]);
       const queue = buildStudyQueue({
-        cards,
+        // A paused deck's cards stay out of the day's study; its states still come, for what reads them.
+        cards: isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour)) ? [] : cards,
         direction: deck.direction,
         reviews: effectiveStates(reviews.sm2, reviews.fsrs, prefs.scheduler, prefs.dayBoundaryHour),
         prefs: deckPreferences(prefs, deck),

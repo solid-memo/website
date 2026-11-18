@@ -829,6 +829,21 @@ makes today that day. The record stays once the deck resumes, so the
 day it did is known; pausing again replaces it
 ([deckPause.ts](../packages/domain/src/deckPause.ts)).
 
+### What a paused deck does
+
+On a study day before its resume day:
+
+- Its cards stay out of the study queue (`getStudyQueue` gives none),
+  and its due and new counts are none (`getStudyCounts`, which reads
+  neither of its documents). So they stay out of the day's study goal
+  and its celebration ([statistics.md](statistics.md#the-today-strip)).
+- A course's deck pauses the course with it
+  ([courses.md](courses.md#the-learners-state)).
+- It stays in its place on the deck list, and it still opens in the
+  Browser and the Studio; its preferences can still be edited.
+
+### Never rewriting review state
+
 A pause never rewrites review state. Memory keeps fading while a deck
 rests, so no `due`, `lastReviewedAt`, stability or difficulty moves.
 Moving them forward by the length of the pause would:

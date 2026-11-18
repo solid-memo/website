@@ -63,6 +63,14 @@ time, as in the strip. The note changes each study day:
   today." and "Good to see you again. Your cards are ready when you
   are.".
 
+A paused deck ([srs.md](srs.md#pausing-a-deck)) counts toward none of
+this: its cards are neither left today nor in the time to go, so a
+learner whose other decks are done has reached the day's goal, gold and
+celebration included. The streak counts days with answers, and a
+paused deck can't be studied, so a day with only paused decks due isn't
+a missed day as long as the learner studies something else, or nothing
+else is due.
+
 The study day picks the note, so it stays put within a day.
 With no study day in the last 12 months there's no note. When the
 answers can't be read there's neither note nor strip, and the deck list
