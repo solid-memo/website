@@ -229,6 +229,25 @@ describe("DeckTableContainer", () => {
     );
   });
 
+  it("badges a paused deck, with the day it resumes on, and not one resumed", async () => {
+    const pausedAt = "2026-01-01T10:00:00.000Z";
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [
+        { ...kanji, pause: { pausedAt } },
+        { ...verbs, pause: { pausedAt, resumesOn: "2999-01-01" } },
+        { ...makeDeck("deck-3", { en: "Capitals" }), pause: { pausedAt, resumesOn: "2026-01-02" } },
+      ]),
+    });
+    renderContainer(useCases);
+    expect(await screen.findByRole("rowheader", { name: /Kanji N5/ })).toHaveTextContent(
+      "Kanji N5Paused",
+    );
+    expect(screen.getByRole("rowheader", { name: /Verbs/ })).toHaveTextContent(
+      "VerbsPaused until January 1, 2999",
+    );
+    expect(screen.getByRole("rowheader", { name: /Capitals/ })).toHaveTextContent(/^Capitals$/);
+  });
+
   it("leaves a deck set aside out of the bulk actions, and moves none while the arrangement is set aside", async () => {
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [kanji, verbs]),

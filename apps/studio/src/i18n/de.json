@@ -177,7 +177,9 @@
         "course": "Kurs",
         "invalid": "Ungültige Daten",
         "unreadable": "Nicht lesbar",
-        "from": "Von {host}"
+        "from": "Von {host}",
+        "paused": "Pausiert",
+        "pausedUntil": "Pausiert bis {day}"
       },
       "healthOf": "in „{deck}“"
     },

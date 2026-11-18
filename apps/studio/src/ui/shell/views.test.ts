@@ -44,6 +44,8 @@ describe("inView", () => {
     ],
     ["one with invalid data", { due: 0, badges: ["invalid"] }, ["all", "attention"]],
     ["one whose cards could not be read", { due: 0, badges: ["unreadable"] }, ["all", "attention"]],
+    ["one paused", { due: 0, badges: ["paused"] }, ["all"]],
+    ["one paused until a day", { due: 0, badges: [{ pausedUntil: "2026-12-01" }] }, ["all"]],
   ])("keeps %s in its views", (_, facts, views) => {
     expect(HOME_VIEWS.filter((view) => inView(view, facts))).toEqual(views);
   });

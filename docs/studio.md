@@ -613,6 +613,9 @@ is a table with a row per deck. Its columns are:
   - **Invalid data** when the instance's check finds a problem in its
     entry or its documents ([validation.md](validation.md));
   - **Unreadable** when its cards couldn't be read;
+  - **Paused**, or **Paused until \<day>**, while the learner has
+    paused it ([srs.md](srs.md#pausing-a-deck)): it then has no cards
+    due or new;
 - the groups it's in, outermost first, or "Top level";
 - its direction, and its pace: new cards and reviews per day. A limit
   the deck doesn't set is the instance's, marked "(instance)";

@@ -177,7 +177,9 @@
         "course": "Kurs",
         "invalid": "Ogiltiga data",
         "unreadable": "Oläslig",
-        "from": "Från {host}"
+        "from": "Från {host}",
+        "paused": "Pausad",
+        "pausedUntil": "Pausad till {day}"
       },
       "healthOf": "i {deck}"
     },
