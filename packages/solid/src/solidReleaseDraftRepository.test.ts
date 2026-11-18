@@ -2593,3 +2593,39 @@ ${versions
     ]);
   });
 });
+
+describe("a catalog node a newer version of the app wrote", () => {
+  /** The instance's catalog with its node stamped at format 2, a version above the one this app writes. */
+  async function stampedNewer(pod: Awaited<ReturnType<typeof draftPod>>) {
+    const text = await pod.text(CATALOG);
+    await pod.put(CATALOG, `${text}\n<${CATALOG}#catalog> <${SM}formatVersion> 2 .`);
+  }
+
+  it("refuses a delete, as writtenByNewerApp, before any of the draft's documents goes", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    const before = await pod.urls();
+    await stampedNewer(pod);
+    const summary = (await pod.repository.list(INSTANCE))[0]!;
+    const from = pod.requests.length;
+    await expect(pod.repository.delete(summary)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+      vars: { url: `${CATALOG}#catalog`, version: 2 },
+    });
+    expect(writes(pod, from)).toEqual([]);
+    expect(await pod.urls()).toEqual(before);
+    await expect(pod.repository.read(DRAFT)).resolves.toBeDefined();
+  });
+
+  it("refuses a new draft, as writtenByNewerApp, with nothing written", async () => {
+    const pod = await draftPod();
+    await pod.repository.create(INSTANCE, course());
+    await pod.repository.delete((await pod.repository.list(INSTANCE))[0]!);
+    await stampedNewer(pod);
+    const from = pod.requests.length;
+    await expect(pod.repository.create(INSTANCE, course())).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(writes(pod, from)).toEqual([]);
+  });
+});

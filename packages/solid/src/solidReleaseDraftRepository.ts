@@ -22,11 +22,7 @@ import { editOf } from "./datasetEdit";
 import { mapAtOnce } from "@solid-memo/application/atOnce";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
-import {
-  catalogNodeUrlOf,
-  catalogUrlOf,
-  ensureTrailingSlash,
-} from "@solid-memo/domain/instanceLayout";
+import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import {
   draftContainerOf,
   draftPlaceOf,
@@ -48,15 +44,15 @@ import { earlierVersionsOf } from "@solid-memo/domain/release/releaseVersion";
 import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { addCatalogLink, catalogLinks, removeCatalogLink } from "./catalogLinks";
-import { deleteContainerIfEmpty } from "./containers";
 import {
-  deleteDataset,
-  getSolidDatasetOrNull,
-  removeOwned,
-  readDataset,
-  saveDataset,
-} from "./datasets";
+  addCatalogLink,
+  catalogLinks,
+  catalogNode,
+  refuseNewerCatalog,
+  removeCatalogLink,
+} from "./catalogLinks";
+import { deleteContainerIfEmpty } from "./containers";
+import { deleteDataset, removeOwned, readDataset, saveDataset } from "./datasets";
 import {
   draftEntries,
   draftFromQuads,
@@ -76,7 +72,7 @@ import {
   UNPUBLISHED_ROOT_PREDICATES,
 } from "./mappers/releaseDraftMapper";
 import { draftSubjects } from "./ownership";
-import { recordThing, removeAllUnlessNewer, storedVersionOf } from "./records";
+import { recordThing, removeAllUnlessNewer, storedVersionOf, unlessNewer } from "./records";
 import { limitedFetch, pathKeys, RELEASE_LIMITS } from "./client/readLimits";
 import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
@@ -307,9 +303,10 @@ export function createSolidReleaseDraftRepository({
       }
       // One the app could not read back: nothing of it is written.
       refuseTooManyDocuments(byDocument.size);
-      const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
-      if (catalog === null || getThing(catalog, catalogNodeUrlOf(instanceUrl)) === null)
-        throw new AppError("noCatalogToUpdate");
+      const node = await catalogNode(instanceUrl, fetch);
+      if (node === null) throw new AppError("noCatalogToUpdate");
+      // Nor one the catalog would refuse to link, its node a newer version's (writtenByNewerApp).
+      unlessNewer(node);
       // Nor one that would take the instance's drafts past what a read of them takes together.
       await refuseTooManyInAll(instanceUrl, draft.url, byDocument.size);
       // The release document first: a draft whose place is taken stops there, having written nothing.
@@ -517,6 +514,8 @@ export function createSolidReleaseDraftRepository({
     },
 
     async delete(draft) {
+      // Before any document goes: a link the catalog then refuses to drop would lead to a draft no longer there.
+      await refuseNewerCatalog(draft.instanceUrl, fetch);
       const keptDocuments = await deleteDraftResources(draft.url, fetch);
       reads.delete(draft.url);
       await removeCatalogLink(draft.instanceUrl, SM.releaseDraft, draft.url, fetch);

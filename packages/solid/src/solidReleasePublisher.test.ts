@@ -138,13 +138,13 @@ async function publisherPod({
 }
 
 describe("publish", () => {
-  it("writes the release where nothing is, makes that document alone readable by everyone, and links it from the catalog", async () => {
+  it("writes the release where nothing is, links it from the catalog, and makes that document alone readable by everyone", async () => {
     const { pod, publisher, writes } = await publisherPod();
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
     expect(writes()).toEqual([
       `PUT ${RELEASE} If-None-Match`,
-      `PATCH ${RELEASE}.acl`,
       `PATCH ${CATALOG}`,
+      `PATCH ${RELEASE}.acl`,
     ]);
     expect(await pod.text(RELEASE)).toContain(
       `<${RELEASE}> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>`,
@@ -218,8 +218,8 @@ describe("publish", () => {
     ).resolves.toEqual({ public: true });
     expect(writes().slice(before)).toEqual([
       `PUT ${RELEASE} If-None-Match`,
-      `PATCH ${RELEASE}.acl`,
       `PATCH ${CATALOG}`,
+      `PATCH ${RELEASE}.acl`,
     ]);
     await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([RELEASE]);
     // Another, it is not: nor one that cannot be read.
@@ -349,8 +349,8 @@ describe("publish, with the library's grant (client/access.ts)", () => {
     await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
     expect(writes()).toEqual([
       `PUT ${RELEASE} If-None-Match`,
-      `PATCH ${RELEASE}.acl`,
       `PATCH ${CATALOG}`,
+      `PATCH ${RELEASE}.acl`,
     ]);
     const acl = await pod.text(`${RELEASE}.acl`);
     const named = [
@@ -368,8 +368,8 @@ describe("publish, with the library's grant (client/access.ts)", () => {
     // Each address once: a Solid client may write the ACR in one PATCH or in two.
     expect([...new Set(writes())]).toEqual([
       `PUT ${RELEASE} If-None-Match`,
-      `PATCH ${RELEASE}.acr`,
       `PATCH ${CATALOG}`,
+      `PATCH ${RELEASE}.acr`,
     ]);
     const acr = await pod.text(`${RELEASE}.acr`);
     expect(acr).toContain(`<${ACP}PublicAgent>`);
@@ -703,8 +703,8 @@ describe("a release already at an address, on a server that may be anyone's", ()
     });
     expect(writes()).toEqual([
       `PUT ${RELEASE} If-None-Match`,
-      `PATCH ${RELEASE}.acl`,
       `PATCH ${CATALOG}`,
+      `PATCH ${RELEASE}.acl`,
     ]);
     expect(await pod.text(`${RELEASE}.acl`)).toContain(RELEASE);
   });
@@ -791,5 +791,45 @@ describe("isPublic and listPublished", () => {
   it("lists nothing for an instance without a catalog", async () => {
     const { publisher } = await publisherPod();
     await expect(publisher.listPublished(`${POD}solid-memo/other/`)).resolves.toEqual([]);
+  });
+});
+
+describe("publish, to a catalog whose node a newer version of the app wrote", () => {
+  it("refuses the release, as writtenByNewerApp, writing nothing, and so again", async () => {
+    const { pod, publisher, writes } = await publisherPod();
+    await pod.put(
+      CATALOG,
+      `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <https://solid-memo.com/ns/vocab/v1.ttl#formatVersion> 2 .`,
+    );
+    const before = writes().length;
+    for (let attempt = 0; attempt < 2; attempt++)
+      await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+        code: "writtenByNewerApp",
+        vars: { url: `${CATALOG}#catalog`, version: 2 },
+      });
+    expect(writes().slice(before)).toEqual([]);
+    expect(await pod.urls()).not.toContain(RELEASE);
+  });
+
+  it("makes no release public that the catalog refused to link, and finishes it when published again", async () => {
+    const { pod, publisher, writes } = await publisherPod();
+    pod.failNext("PATCH", CATALOG, 500);
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toThrow();
+    expect(writes()).toEqual([`PUT ${RELEASE} If-None-Match`, `PATCH ${CATALOG}`]);
+    await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([]);
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).resolves.toEqual({ public: true });
+    await expect(publisher.listPublished(INSTANCE)).resolves.toEqual([RELEASE]);
+  });
+});
+
+describe("publish, to an instance with no catalog", () => {
+  it("refuses the release, as noCatalogToUpdate, writing nothing", async () => {
+    const { pod, publisher, writes } = await publisherPod();
+    await pod.put(CATALOG, `<#other> a <http://www.w3.org/ns/dcat#Catalog> .`);
+    const before = writes().length;
+    await expect(publisher.publish(INSTANCE, TURTLE, RELEASE)).rejects.toMatchObject({
+      code: "noCatalogToUpdate",
+    });
+    expect(writes().slice(before)).toEqual([]);
   });
 });

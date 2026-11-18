@@ -2649,6 +2649,12 @@ releases it, two ways.
   `versionNotNext`). Download .ttl, which isn't checked, leaves them
   out the same way: it reads the release the draft follows, as no
   one, wherever it is, so it too needs that release to be readable.
+- **Listed.** The catalog links it (`sm:publishedRelease`), before
+  it's made public, so a link refused leaves no public release the
+  Studio can't list. A catalog node a newer version of the app wrote
+  takes no new link, so publishing to it is refused before the
+  release is written (`writtenByNewerApp`), as deleting a draft is
+  before any of its documents goes.
 - **Public.** Then only that document is made readable by everyone, as
   its server's access control says it: its own ACL on a server with Web
   Access Control, its ACR on one with Access Control Policies
@@ -2661,7 +2667,6 @@ releases it, two ways.
     server's answers name instead.
   - Nothing of another origin is asked, nothing else is written, and a
     write follows no redirect.
-- **Listed.** The catalog links it (`sm:publishedRelease`).
 - **Frozen.** The draft names its release (`sm:releasedAs`), and
   changes no more. An `sm:releasedAs` that isn't a published release's
   address is ignored, so such a draft reads as not released, as
