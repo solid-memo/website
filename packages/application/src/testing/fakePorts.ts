@@ -148,6 +148,7 @@ export function makeDeps() {
     listDecks: vi.fn(async () => [deck]),
     readCatalog: vi.fn(async () => catalog),
     saveCatalog: vi.fn(async () => undefined),
+    checkCatalogSave: vi.fn(async () => undefined),
     createDeck: vi.fn(async () => deck),
     renameDeck: vi.fn(async () => deck),
     saveDeck: vi.fn(async (saved) => saved),

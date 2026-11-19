@@ -1161,7 +1161,9 @@ catalog's `dcterms:title`, and the `dcterms:title` of its registrations
 in each type index. Its `sm:Instance` one names it in the instance
 list, beside any an earlier version wrote for its data. Renaming it in
 the Studio (`renameInstance`, [studio.md](studio.md#the-instance))
-writes them all, each document read and written again on a 412. A
+writes them all, each document read and written again on a 412. It
+checks the catalog's write before writing anything, so a catalog a newer
+version of the app wrote refuses the rename with nothing written. A
 catalog description the old name gave (`defaultCatalogDescription`)
 follows the new name; one the user wrote stays. A name too long for that
 description to fit the bound on a term is cut short in it, with an

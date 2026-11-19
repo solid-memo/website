@@ -591,15 +591,13 @@ describe("instances", () => {
     it("writes only where the name is not yet the new one, and no catalog there is none of, nor one that does not fit its shape", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue({ ...meta, name: "Languages" });
-      vi.mocked(deps.deckRepository.readCatalog)
-        .mockResolvedValueOnce({ ...catalog, title: "Languages" })
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce("misfit");
       const useCases = createUseCases(deps);
-      await useCases.renameInstance(session, instance, "Languages");
-      await useCases.renameInstance(session, instance, "Languages");
-      await useCases.renameInstance(session, instance, "Languages");
+      for (const read of [{ ...catalog, title: "Languages" }, null, "misfit" as const]) {
+        vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(read);
+        await useCases.renameInstance(session, instance, "Languages");
+      }
       expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(deps.deckRepository.checkCatalogSave).not.toHaveBeenCalled();
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledTimes(3);
     });
@@ -611,8 +609,27 @@ describe("instances", () => {
       vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
       await createUseCases(deps).renameInstance(session, instance, "Languages");
       expect(deps.instanceRepository.readMeta).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(2);
+      // Once for the check before the first write, then once for each write.
+      expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(3);
       expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledOnce();
+    });
+
+    it("checks the catalog's write before writing anything, and writes nothing when it would be refused", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
+      vi.mocked(deps.deckRepository.checkCatalogSave).mockRejectedValue(
+        new AppError("writtenByNewerApp", { url: `${instance.url}catalog.ttl#catalog` }),
+      );
+      await expect(
+        createUseCases(deps).renameInstance(session, instance, "Languages"),
+      ).rejects.toMatchObject({ code: "writtenByNewerApp" });
+      expect(deps.deckRepository.checkCatalogSave).toHaveBeenCalledWith(instance.url, {
+        ...catalog,
+        title: "Languages",
+      });
+      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
     });
 
     it("refuses an empty name, and an instance without a meta document, writing nothing", async () => {

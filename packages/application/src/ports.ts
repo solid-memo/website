@@ -241,6 +241,13 @@ export interface DeckRepository {
   /** Write the instance's catalog, listing every deck, creating the catalog document if need be. */
   saveCatalog(instanceUrl: string, catalog: Catalog): Promise<void>;
   /**
+   * Throw what saveCatalog would (writtenByNewerApp when a newer version
+   * of the app wrote the catalog or its publisher, a failed write check),
+   * writing nothing: for a change that writes other documents before the
+   * catalog to check it first, so a refusal leaves them as they were.
+   */
+  checkCatalogSave(instanceUrl: string, catalog: Catalog): Promise<void>;
+  /**
    * For the format update: bring every deck entry of the catalog document
    * stored in an older format up to this app's, in place (unknown triples
    * survive), each as read and brought up to date in memory, and write
