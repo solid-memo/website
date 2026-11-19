@@ -22,6 +22,9 @@ const ENTRY = [
   "* **solid:** keep the deck ([abc1234](https://github.com/solid-memo/website/commit/abc1234))",
 ].join("\n");
 
+/** The time the checks run at: the day of ENTRY. */
+const NOW = new Date("2026-11-19T12:00:00Z");
+
 const OLD_ENTRIES =
   "## [1.0.0](https://github.com/solid-memo/website/compare/v0.9.0...v1.0.0) (2026-01-01)\n\n* start\n";
 
@@ -108,7 +111,7 @@ describe("addedEntry", () => {
 
 describe("unexpectedChanges", () => {
   it("finds nothing in what a release writes", () => {
-    expect(unexpectedChanges(release(), "1.0.1")).toEqual([]);
+    expect(unexpectedChanges(release(), "1.0.1", NOW)).toEqual([]);
   });
 
   // The repository's own files, with the version and date written in as
@@ -156,7 +159,7 @@ describe("unexpectedChanges", () => {
       },
     ];
     for (const change of changes) expect(change.after, change.path).not.toBe(change.before);
-    expect(unexpectedChanges(changes, version)).toEqual([]);
+    expect(unexpectedChanges(changes, version, new Date(`${date}T08:00:00Z`))).toEqual([]);
   });
 
   it("finds a file a release never writes, and one it left as it was", () => {
@@ -164,7 +167,7 @@ describe("unexpectedChanges", () => {
       ...release().filter((change) => change.path !== "CITATION.cff"),
       { path: "scripts/check.ts", before: "a", after: "b" },
     ];
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual([
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual([
       "scripts/check.ts: a release never writes it",
       "CITATION.cff: unchanged",
     ]);
@@ -174,24 +177,52 @@ describe("unexpectedChanges", () => {
     const changes = changing("package.json", (text) => `${text} `).filter(
       (change) => change.path !== "CHANGELOG.md",
     );
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual(["CHANGELOG.md: unchanged"]);
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual(["CHANGELOG.md: unchanged"]);
   });
 
   it("finds a changelog with more than one new entry under its header", () => {
     const changes = changing("CHANGELOG.md", (text) => text.replace("* start", "* begun"));
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual([
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual([
       "CHANGELOG.md: not one new entry under its header",
     ]);
   });
 
   it("finds an entry headed by another version, or with no date", () => {
-    expect(unexpectedChanges(release(), "1.0.2")).toEqual([
+    expect(unexpectedChanges(release(), "1.0.2", NOW)).toEqual([
       "CHANGELOG.md: its new entry is not headed 1.0.2 and a date",
     ]);
     const undated = changing("CHANGELOG.md", (text) => text.replace(" (2026-11-19)", ""));
-    expect(unexpectedChanges(undated, "1.0.1")).toEqual([
+    expect(unexpectedChanges(undated, "1.0.1", NOW)).toEqual([
       "CHANGELOG.md: its new entry is not headed 1.0.1 and a date",
     ]);
+  });
+
+  // The date is written by the prepare job; the day the check runs pins it.
+  it("finds a date that is no day of the calendar", () => {
+    for (const date of ["2026-13-45", "2026-02-29", "2026-11-31", "0026-11-19"]) {
+      const changes = release().map((change) => ({
+        ...change,
+        after: change.after.replaceAll("2026-11-19", date),
+      }));
+      expect(unexpectedChanges(changes, "1.0.1", NOW), date).toEqual([
+        `CHANGELOG.md: its new entry's date, ${date}, is no day of the calendar`,
+      ]);
+    }
+  });
+
+  it("finds a date that is not today, or a day either side", () => {
+    for (const now of ["2026-11-18T00:00:00Z", "2026-11-19T23:59:59Z", "2026-11-20T23:59:59Z"]) {
+      expect(unexpectedChanges(release(), "1.0.1", new Date(now)), now).toEqual([]);
+    }
+    for (const [now, today] of [
+      ["2026-11-17T23:59:59Z", "2026-11-17"],
+      ["2026-11-21T00:00:00Z", "2026-11-21"],
+      ["2027-11-19T12:00:00Z", "2027-11-19"],
+    ] as const) {
+      expect(unexpectedChanges(release(), "1.0.1", new Date(now)), now).toEqual([
+        `CHANGELOG.md: its new entry's date, 2026-11-19, is not today, ${today}, or a day either side`,
+      ]);
+    }
   });
 
   it("finds anything but the version changed in package.json and package-lock.json", () => {
@@ -204,7 +235,7 @@ describe("unexpectedChanges", () => {
       }
       return change;
     });
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual([
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual([
       "package.json: changes more than the version and the date",
       "package-lock.json: changes more than the version and the date",
     ]);
@@ -218,7 +249,7 @@ describe("unexpectedChanges", () => {
       }
       return change;
     });
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual([
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual([
       "package.json: changes more than the version and the date",
       "package-lock.json: changes more than the version and the date",
     ]);
@@ -234,7 +265,7 @@ describe("unexpectedChanges", () => {
       }
       return change;
     });
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual([
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual([
       "publiccode.yml: changes more than the version and the date",
       "CITATION.cff: changes more than the version and the date",
     ]);
@@ -244,7 +275,7 @@ describe("unexpectedChanges", () => {
     const changes = release().map((change) =>
       change.path === "publiccode.yml" ? { ...change, before: "name: x\n" } : change,
     );
-    expect(unexpectedChanges(changes, "1.0.1")).toEqual([
+    expect(unexpectedChanges(changes, "1.0.1", NOW)).toEqual([
       "publiccode.yml: changes more than the version and the date",
     ]);
   });

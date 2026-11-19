@@ -681,13 +681,18 @@ the release is three jobs, and only the one that pushes holds the key:
   ([releaseCommit.ts](../scripts/releaseCommit.ts)) checks the commit
   the tag names:
   - its parent is `main`'s tip;
+  - its version is the next patch, minor or major release after the
+    highest release tag on `main`, which the job reads from `main`'s
+    own tags, not from the bundle;
   - it's that version's release commit, by `github-actions[bot]`, as
     the deploy checks;
   - its message is its subject alone;
   - it changes only the five files, each a regular file before and
     after, and each is `main`'s with nothing but the version, the date
     and one changelog entry written in
-    ([releaseChanges.ts](../scripts/releaseChanges.ts)).
+    ([releaseChanges.ts](../scripts/releaseChanges.ts));
+  - the date in the entry's heading is a day of the calendar, and the
+    day the check runs (UTC) or a day either side.
 
   Then it pushes the commit to `main` and the tag in one
   `git push --atomic`, which isn't forced. A `main` that moved on, or a
@@ -706,8 +711,12 @@ the release is three jobs, and only the one that pushes holds the key:
 So a package that semantic-release or the docs' archive loads can't
 read the key, whatever it does. The most it could do is shape the
 release commit. The push job pushes only a commit with nothing but a
-release's changes in it, so what it could choose is the text of the
-changelog entry, and CI runs on the commit before the deploy.
+release's changes in it, with a version that follows `main`'s highest
+release tag and the run's date, give or take a day. So what it could
+choose is the text of the changelog entry, and which of the three next
+versions the release takes. The push job doesn't compare that bump with the
+commits' types, since the parser that reads them is a package. CI runs
+on the commit before the deploy.
 
 What the `prepare` job runs is still kept to what the release needs,
 since the job's output is pushed with the key:

@@ -26,7 +26,8 @@ function commit(sha: string, subject: string, overrides: Partial<Commit> = {}): 
 /**
  * An io over these first-parent commits, the files each changes, and the
  * tags; and, for a release commit not yet on main, main's tip, the
- * commits off main, their messages and their files' text.
+ * commits off main, their messages and their files' text, the tags on
+ * main (v1.0.0 unless told) and the time (2026-11-19, unless told).
  */
 function fake(
   commits: Commit[],
@@ -37,6 +38,8 @@ function fake(
     others?: Commit[];
     messages?: Record<string, string>;
     changes?: Record<string, FileChange[]>;
+    merged?: string[];
+    now?: string;
   } = {},
 ) {
   const messages: string[] = [];
@@ -51,6 +54,8 @@ function fake(
     changed: (sha) => options.changed?.[sha] ?? ["package.json", "CHANGELOG.md"],
     tags: (sha) => Object.keys(tags).filter((name) => tags[name] === sha),
     tagged: (name) => tags[name],
+    merged: () => options.merged ?? ["v1.0.0"],
+    now: () => new Date(options.now ?? "2026-11-19T12:00:00Z"),
     log: (message) => messages.push(message),
   };
   return { io, messages };
@@ -167,33 +172,38 @@ const ENTRY =
 
 /** The five files of a release of 1.0.1 on 2026-11-19, as releaseChanges.test.ts holds them. */
 function released(): FileChange[] {
+  return releasedAs("1.0.1");
+}
+
+/** The five files of a release of `version` after 1.0.0, on `date`. */
+function releasedAs(version: string, date = "2026-11-19"): FileChange[] {
+  const entry = ENTRY.replaceAll("1.0.1", version).replace("2026-11-19", date);
   const files: Change[] = [
     {
       path: "package.json",
       before: '{\n  "version": "1.0.0"\n}\n',
-      after: '{\n  "version": "1.0.1"\n}\n',
+      after: `{\n  "version": "${version}"\n}\n`,
     },
     {
       path: "package-lock.json",
       before:
         '{\n  "version": "1.0.0",\n  "packages": {\n    "": {\n      "version": "1.0.0"\n    }\n  }\n}\n',
-      after:
-        '{\n  "version": "1.0.1",\n  "packages": {\n    "": {\n      "version": "1.0.1"\n    }\n  }\n}\n',
+      after: `{\n  "version": "${version}",\n  "packages": {\n    "": {\n      "version": "${version}"\n    }\n  }\n}\n`,
     },
     {
       path: "publiccode.yml",
       before: 'softwareVersion: 1.0.0\nreleaseDate: "2026-01-01"\n',
-      after: 'softwareVersion: 1.0.1\nreleaseDate: "2026-11-19"\n',
+      after: `softwareVersion: ${version}\nreleaseDate: "${date}"\n`,
     },
     {
       path: "CITATION.cff",
       before: 'version: "1.0.0"\ndate-released: "2026-01-01"\n',
-      after: 'version: "1.0.1"\ndate-released: "2026-11-19"\n',
+      after: `version: "${version}"\ndate-released: "${date}"\n`,
     },
     {
       path: "CHANGELOG.md",
       before: `${changelogTitle}\n\n## 1.0.0\n`,
-      after: `${changelogTitle}\n\n${ENTRY}\n\n## 1.0.0\n`,
+      after: `${changelogTitle}\n\n${entry}\n\n## 1.0.0\n`,
     },
   ];
   return files.map((file) => ({ ...file, modified: true }));
@@ -254,6 +264,79 @@ describe("main next", () => {
     const { io, messages } = next({}, { changes: { r: changes } });
     expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
     expect(messages).toEqual([refusal("r adds, removes or changes the mode of package.json")]);
+  });
+
+  // The prepare job chooses the tag; main's tags choose what it may be.
+  it("refuses a version that does not follow the highest release tag on main", () => {
+    const why = (version: string, highest: string) =>
+      `${version} is not the next patch, minor or major release after ${highest}, the highest release tag on main`;
+    for (const [merged, highest] of [
+      [["v1.0.0"], "v1.0.0"],
+      [["v0.9.0", "v1.0.1", "v1.0.0", "v1.0.0-rc.1"], "v1.0.1"],
+      [["v0.10.0", "v1.0.0", "v0.9.9"], "v1.0.0"],
+      [["latest", "v1.0.0", "v01.2.0"], "v1.0.0"],
+    ] as const) {
+      for (const tag of ["v99.0.0", "v1.0.0", "v0.9.1", "v1.0.3", "v1.2.0", "v3.0.0"]) {
+        const forged = fake([tip], {
+          tags: { [tag]: "r" },
+          others: [commit("r", `chore(release): ${tag.slice(1)}`, { parents: ["a"] })],
+          merged: [...merged],
+        });
+        expect(main(["node", "next", tag], forged.io)).toBe(1);
+        expect(forged.messages).toEqual([
+          `::error::${tag} names no release commit that may be pushed onto main (${why(tag.slice(1), highest)}), so nothing is pushed (docs/releasing.md#the-deploy-key).`,
+        ]);
+      }
+    }
+    const below = next({}, { merged: ["v1.0.1", "v1.10.0", "v1.9.0"] });
+    expect(main(["node", "next", "v1.0.1"], below.io)).toBe(1);
+    expect(below.messages).toEqual([refusal(why("1.0.1", "v1.10.0"))]);
+  });
+
+  it("passes the next patch, minor or major release after the highest release tag on main", () => {
+    for (const [merged, tag] of [
+      [["v1.0.0"], "v1.0.1"],
+      [["v0.9.3", "v0.10.0"], "v0.10.1"],
+      [["v0.9.3", "v0.10.0"], "v0.11.0"],
+      [["v0.9.3", "v0.10.0"], "v1.0.0"],
+    ] as const) {
+      const version = tag.slice(1);
+      const passes = fake([tip], {
+        tags: { [tag]: "r" },
+        others: [commit("r", `chore(release): ${version}`, { parents: ["a"] })],
+        merged: [...merged],
+        changes: { r: releasedAs(version) },
+        changed: { r: released().map((change) => change.path) },
+      });
+      expect(main(["node", "next", tag], passes.io)).toBe(0);
+      expect(passes.messages).toEqual([`${tag} names r, a release commit onto main's tip.`]);
+    }
+  });
+
+  it("refuses a release when main has no release tag", () => {
+    const { io, messages } = next({}, { merged: ["latest", "v1.0"] });
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+    expect(messages).toEqual([refusal("main has no release tag for it to follow")]);
+  });
+
+  // The prepare job writes the date; the day the check runs pins it.
+  it("refuses a date that is no day of the calendar, or not today or a day either side", () => {
+    for (const now of ["2026-11-18T00:00:00Z", "2026-11-20T23:59:59Z"]) {
+      const { io } = next({}, { now });
+      expect(main(["node", "next", "v1.0.1"], io)).toBe(0);
+    }
+    const late = next({}, { now: "2026-11-21T00:00:00Z" });
+    expect(main(["node", "next", "v1.0.1"], late.io)).toBe(1);
+    expect(late.messages).toEqual([
+      refusal(
+        "r: CHANGELOG.md: its new entry's date, 2026-11-19, is not today, 2026-11-21, or a day either side",
+      ),
+    ]);
+    const forged = next({}, { changes: { r: releasedAs("1.0.1", "2026-13-45") } });
+    expect(main(["node", "next", "v1.0.1"], forged.io)).toBe(1);
+    expect(forged.messages).toEqual([
+      refusal("r: CHANGELOG.md: its new entry's date, 2026-13-45, is no day of the calendar"),
+    ]);
   });
 
   it("refuses a commit that changes more than a release writes", () => {
@@ -432,8 +515,13 @@ describe("defaultIo, on a repository with a pull request's commit titled as a re
     git(["add", "."]);
     git(["commit", "-q", "-m", "chore(release): 1.0.1", "-m", "A body."], bot);
     const sha = git(["rev-parse", "HEAD"]);
+    git(["tag", "v1.0.1", sha]);
+    git(["tag", "latest", tip]);
     const real = io();
     expect(real.head()).toBe(tip);
+    // main's own tags only: not the tag on the commit off main.
+    expect(real.merged()).toEqual(["latest", "v1.0.0"]);
+    expect(real.now()).toBeInstanceOf(Date);
     expect(real.commit(sha)).toEqual({
       sha,
       parents: [tip],

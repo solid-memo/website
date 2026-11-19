@@ -38,6 +38,10 @@
  * commit whose parent is main's tip, whose message is its subject
  * alone, and whose files are main's with nothing but the version, the
  * date and one changelog entry written in (scripts/releaseChanges.ts).
+ * The bundle chooses neither the version nor the date: the version must
+ * be the next patch, minor or major release after the highest release
+ * tag on main, read from main's own tags, and the date must be the day
+ * the check runs, or a day either side.
  *
  * `notes`, in release.yml's publish and docs jobs: prints the changelog
  * entry the tag's commit added, which is the release's notes.
@@ -46,6 +50,7 @@ import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { isRelease, strayFiles } from "./ciGate.ts";
 import { addedEntry, type Change, unexpectedChanges } from "./releaseChanges.ts";
+import { isReleaseVersion } from "./releaseVersion.ts";
 
 /** Who release.yml makes semantic-release's commits as. */
 const BOT = "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>";
@@ -83,6 +88,10 @@ export interface ReleaseCommitIo {
   tags(sha: string): string[];
   /** The commit a tag names, if it names one. */
   tagged(tag: string): string | undefined;
+  /** The tags on main's tip or in its history. */
+  merged(): string[];
+  /** The time the check runs at. */
+  now(): Date;
   log(message: string): void;
 }
 
@@ -142,6 +151,36 @@ function tag(io: ReleaseCommitIo, name: string): number {
   return 0;
 }
 
+/** A release's version as its three numbers. */
+type Version = [bigint, bigint, bigint];
+
+/** Whether version `a` is above version `b`: numbers compare as numbers, so 1.10.0 is above 1.9.0. */
+function above(a: Version, b: Version): boolean {
+  if (a[0] !== b[0]) return a[0] > b[0];
+  if (a[1] !== b[1]) return a[1] > b[1];
+  return a[2] > b[2];
+}
+
+/**
+ * The highest release among the tags, by its version, as semantic-release
+ * finds the last release among the tags main has; undefined when there
+ * is none.
+ */
+function highestRelease(tags: readonly string[]): Version | undefined {
+  return tags
+    .filter((tag) => tag.startsWith("v") && isReleaseVersion(tag.slice(1)))
+    .map((tag) => tag.slice(1).split(".").map(BigInt) as Version)
+    .reduce<Version | undefined>(
+      (highest, version) => (highest === undefined || above(version, highest) ? version : highest),
+      undefined,
+    );
+}
+
+/** The versions that may follow `version`: its next patch, minor and major release. */
+function successors([major, minor, patch]: Version): string[] {
+  return [`${major}.${minor}.${patch + 1n}`, `${major}.${minor + 1n}.0`, `${major + 1n}.0.0`];
+}
+
 /** Exit code of `next`: 1 when the tag's commit is not a release commit to push onto main's tip. */
 function next(io: ReleaseCommitIo, name: string): number {
   const refuse = (why: string) => {
@@ -152,11 +191,19 @@ function next(io: ReleaseCommitIo, name: string): number {
   };
   const sha = io.tagged(name);
   if (sha === undefined) return refuse("it names no commit");
+  const version = name.slice(1);
+  const highest = highestRelease(io.merged());
+  if (highest === undefined) return refuse("main has no release tag for it to follow");
+  if (!successors(highest).includes(version)) {
+    return refuse(
+      `${version} is not the next patch, minor or major release after v${highest.join(".")}, the highest release tag on main`,
+    );
+  }
   const commit = io.commit(sha);
   const head = io.head();
   if (commit.parents.join(" ") !== head)
     return refuse(`${sha}'s parent is not main's tip, ${head}`);
-  const why = notRelease(io, commit, name.slice(1));
+  const why = notRelease(io, commit, version);
   if (why !== undefined) return refuse(`${sha}: ${why}`);
   if (io.message(sha) !== commit.subject)
     return refuse(`${sha}'s message is more than its subject`);
@@ -164,7 +211,7 @@ function next(io: ReleaseCommitIo, name: string): number {
   const odd = changes.filter((change) => !change.modified).map((change) => change.path);
   if (odd.length > 0)
     return refuse(`${sha} adds, removes or changes the mode of ${odd.join(", ")}`);
-  const problems = unexpectedChanges(changes, name.slice(1));
+  const problems = unexpectedChanges(changes, version, io.now());
   if (problems.length > 0) return refuse(`${sha}: ${problems.join("; ")}`);
   io.log(`${name} names ${sha}, a release commit onto main's tip.`);
   return 0;
@@ -262,6 +309,8 @@ export function defaultIo(repo: string, main: string): ReleaseCommitIo {
         return undefined;
       }
     },
+    merged: () => lines(git("tag", "--list", "--merged", main)),
+    now: () => new Date(),
     log: (message) => console.log(message),
   };
 }
