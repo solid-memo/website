@@ -21,6 +21,15 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.2](https://github.com/solid-memo/website/compare/v8.0.1...v8.0.2) (2026-11-19)
+
+### Fixes
+
+* **markdown:** charge a link's drawing to the markdown budget ([b8e7432](https://github.com/solid-memo/website/commit/b8e7432c74a789634727fa9228ea359e95765125))
+* **statistics:** map a shared deck document once, not once per deck ([a9c56cb](https://github.com/solid-memo/website/commit/a9c56cbf7f105e830f69074d457f87ab6ae4b644))
+* **statistics:** show the leech lists a page at a time ([6a6a526](https://github.com/solid-memo/website/commit/6a6a526ad637a05e0794ecdff4301d1463283650))
+* **ui:** wrap a storage's address in the storage picker ([2f62c86](https://github.com/solid-memo/website/commit/2f62c861c8f7e609e92f1fe554b5cd051dacf91c)), closes [#907](https://github.com/solid-memo/website/issues/907)
+
 ## [8.0.1](https://github.com/solid-memo/website/compare/v8.0.0...v8.0.1) (2026-11-19)
 
 ### Fixes
