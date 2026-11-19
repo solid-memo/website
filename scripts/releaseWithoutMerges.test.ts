@@ -21,8 +21,10 @@ const PLUGIN = "./scripts/releaseWithoutMerges.ts";
 type Commit = { hash: string; message: string };
 type Config = { default: { plugins: [string, Record<string, unknown>][] } };
 
-// Untyped modules: imported by a name TypeScript does not resolve.
-const GIT = "semantic-release/lib/git.js";
+// semantic-release's own code is in @semantic-release/core, whose exports
+// keep lib/ to itself: its git.js is imported by its file, which TypeScript
+// does not type.
+const GIT = new URL("lib/git.js", import.meta.resolve("@semantic-release/core")).href;
 const { getCommits } = (await import(GIT)) as {
   getCommits(from: string, to: string, options: { cwd: string }): Promise<Commit[]>;
 };
@@ -343,7 +345,8 @@ describe("releaseWithoutMerges", () => {
   // it is, not as this test runner transforms it.
   it("loads as release.config.mjs names it, the way semantic-release loads it", () => {
     const script = `
-      const { loadPlugin } = await import("semantic-release/lib/plugins/utils.js");
+      const core = import.meta.resolve("@semantic-release/core");
+      const { loadPlugin } = await import(new URL("lib/plugins/utils.js", core).href);
       const plugin = await loadPlugin({ cwd: process.cwd() }, ${JSON.stringify(PLUGIN)}, {});
       console.log(Object.keys(plugin).join(" "));
     `;
