@@ -341,7 +341,9 @@ export interface DeckRepository {
   /**
    * The deck's cards, read as the instance's data is (in the user's own
    * pod as the user), or with `asNoOne`, as no one: for cards copied
-   * into a place they may not be the user's to share.
+   * into a place they may not be the user's to share. The array may be
+   * frozen and shared with the other decks that name the cards document
+   * (domain/frozen.ts), and its cards with it: never changed in place.
    */
   listCards(deck: Deck, options?: { asNoOne?: boolean }): Promise<Card[]>;
   /**
@@ -844,6 +846,8 @@ export interface ReviewStateRepository {
    * The deck's review states, read as the instance's data is (in the
    * user's own pod as the user), or with `asNoOne`, as no one: for
    * states copied into a place they may not be the user's to share.
+   * They may be frozen and shared with the other decks that name the
+   * reviews document (domain/frozen.ts): never changed in place.
    */
   listReviewStates(deck: Deck, options?: { asNoOne?: boolean }): Promise<ReviewStates>;
   /**

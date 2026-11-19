@@ -11,6 +11,8 @@ import {
   isPlanEmpty,
   isPreferencesOutdated,
   isReviewStateOutdated,
+  outdatedCardsOf,
+  outdatedReviewStatesOf,
   planMigration,
   upgradeCard,
   upgradeDeck,
@@ -233,6 +235,44 @@ describe("planMigration", () => {
       card: 4,
       reviewState: REVIEW_STATE_FORMAT_VERSION,
       preferences: 4,
+    });
+  });
+
+  it("counts frozen cards that several decks share once, for each of them", () => {
+    const shared = Object.freeze([card("a", 4), card("b", CARD_FORMAT_VERSION), card("c", 6)]);
+    const other: Deck = { ...deck, id: "deck-2", url: `${deck.url}2` };
+    const plan = planMigration({
+      ...nothingElse,
+      entries: [
+        { deck, cards: shared as Card[], reviews: [] },
+        { deck: other, cards: shared as Card[], reviews: [] },
+      ],
+    });
+    expect(plan.decks.map(({ cardCount }) => cardCount)).toEqual([2, 2]);
+    expect(plan.oldestFormat.card).toBe(4);
+    expect(outdatedCardsOf(shared)).toBe(outdatedCardsOf(shared));
+    expect(outdatedCardsOf([card("a", CARD_FORMAT_VERSION)])).toEqual({
+      count: 0,
+      oldest: CARD_FORMAT_VERSION,
+    });
+  });
+
+  it("counts frozen review states that several decks share once, for each of them", () => {
+    const shared = Object.freeze([review("a", 1), review("b", REVIEW_STATE_FORMAT_VERSION)]);
+    const other: Deck = { ...deck, id: "deck-2", url: `${deck.url}2` };
+    const plan = planMigration({
+      ...nothingElse,
+      entries: [
+        { deck, cards: [], reviews: shared as ReviewState[] },
+        { deck: other, cards: [], reviews: shared as ReviewState[] },
+      ],
+    });
+    expect(plan.decks.map(({ reviewCount }) => reviewCount)).toEqual([1, 1]);
+    expect(plan.oldestFormat.reviewState).toBe(1);
+    expect(outdatedReviewStatesOf(shared)).toBe(outdatedReviewStatesOf(shared));
+    expect(outdatedReviewStatesOf([review("a", REVIEW_STATE_FORMAT_VERSION)])).toEqual({
+      count: 0,
+      oldest: REVIEW_STATE_FORMAT_VERSION,
     });
   });
 

@@ -5,6 +5,7 @@
 import { monthOfStudyDay, type Answer } from "./answer";
 import { chainIndexOf, isLapse, isScoredReview } from "./answerChain";
 import type { Deck, Distractor } from "./deck";
+import { derivedOnce } from "./frozen";
 import { fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -122,6 +123,17 @@ export function lapseIndex(answers: readonly Answer[]): LapseIndex {
 }
 
 /**
+ * What hardestCardsOf and confusionsOf look the cards given up by, kept
+ * per array of a frozen one (derivedOnce): the cards by their fragment
+ * id, and their wrong options by id, each with its card.
+ */
+const cardsById = new WeakMap<object, unknown>();
+const optionsById = new WeakMap<object, unknown>();
+
+/** Wrong options by id, each with its card. */
+type Options<C> = Map<string, { card: C; distractor: Distractor }>;
+
+/**
  * The cards given that were forgotten in their reviews (lapses, as
  * lapseIndex counts them), the most often forgotten first, then the
  * largest share of their reviews forgotten, then by IRI; and how many
@@ -146,13 +158,23 @@ export function hardestCardsOf<C extends { url: string }>(
     count.reviews += 1;
     if (isLapse(answer, index)) count.lapses += 1;
   }
+  // Found by the counts, not by the cards: a deck's cards, which other decks may share, are looked up.
+  const byId = derivedOnce(cardsById as WeakMap<readonly C[], Map<string, C[]>>, cards, (all) => {
+    const byFragment = new Map<string, C[]>();
+    for (const card of all) {
+      const id = fragmentIdOf(card.url);
+      const same = byFragment.get(id);
+      if (same === undefined) byFragment.set(id, [card]);
+      else same.push(card);
+    }
+    return byFragment;
+  });
   return {
     reviews,
-    cards: cards
-      .flatMap((card) => {
-        const count = counts.get(fragmentIdOf(card.url));
-        return count === undefined || count.lapses === 0 ? [] : [{ card, ...count }];
-      })
+    cards: [...counts]
+      .flatMap(([id, count]) =>
+        count.lapses === 0 ? [] : (byId.get(id) ?? []).map((card) => ({ card, ...count })),
+      )
       .sort(
         (a, b) =>
           b.lapses - a.lapses ||
@@ -173,10 +195,13 @@ export function confusionsOf<C extends { url: string; distractors?: readonly Dis
   answers: readonly Answer[],
   cards: readonly C[],
 ): Confusion<C>[] {
-  const options = new Map<string, { card: C; distractor: Distractor }>();
-  for (const card of cards)
-    for (const distractor of card.distractors ?? [])
-      options.set(distractor.id, { card, distractor });
+  const options = derivedOnce(optionsById as WeakMap<readonly C[], Options<C>>, cards, (all) => {
+    const byId: Options<C> = new Map();
+    for (const card of all)
+      for (const distractor of card.distractors ?? [])
+        byId.set(distractor.id, { card, distractor });
+    return byId;
+  });
   return [...distractorPicksOf(answers)]
     .flatMap(([id, picks]) => {
       const option = options.get(id);

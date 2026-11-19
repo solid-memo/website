@@ -4,11 +4,13 @@
 
 import type { Answer } from "./answer";
 import { chainIndexOf } from "./answerChain";
-import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
+import { activeCardsOf, studyDirections, type Card, type DeckDirection } from "./deck";
 import type { Scheduler } from "./fsrs";
 import type { StudyPreferences } from "./preferences";
-import { reviewKeyOf, type DueState } from "./review";
+import type { DueState } from "./review";
 import { isStudyDay } from "./reviewStateEdits";
+import { dueBefore, dueThrough } from "./dueDays";
+import { scheduledStates } from "./scheduleInsight";
 import { holdsNewPrompts, studyDayOf } from "./scheduling";
 import {
   dailyActivity,
@@ -61,23 +63,27 @@ export function scheduleOf(input: {
 }): DeckSchedule {
   const { cards, direction, reviews, scheduler, dayBoundaryHour, now } = input;
   const studyDay = studyDayOf(now, dayBoundaryHour);
-  const reviewOf = new Map(reviews.map((r) => [reviewKeyOf(r), r]));
+  // By the deck's states, not its cards (scheduledStates): the prompts are counted, not listed.
+  const scheduled = scheduledStates(cards, direction, reviews);
+  // A state is a prompt of each card of its id (copiesOf): one, but in odd data, where buildStudyQueue
+  // has a prompt of each copy.
+  const { cards: active, copiesOf } = activeCardsOf(cards);
   const dueByDay: Record<string, number> = {};
-  let unreviewed = 0;
-  for (const prompt of promptsOf(activeCards(cards), direction)) {
-    const review = reviewOf.get(
-      reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction }),
-    );
-    if (review === undefined) unreviewed++;
+  let reviewed = 0;
+  for (const review of scheduled) {
+    const copies = copiesOf.get(review.cardId)!;
+    reviewed += copies;
     // Read leniently, a due day may be anything; the digest's shape holds only real ones, and one it refuses would take the changes written with it along.
-    else if (isStudyDay(review.due)) dueByDay[review.due] = (dueByDay[review.due] ?? 0) + 1;
+    if (isStudyDay(review.due)) dueByDay[review.due] = (dueByDay[review.due] ?? 0) + copies;
   }
+  const unreviewed = active.length * studyDirections(direction).length - reviewed;
   const onDay = (instant: string) => studyDayOf(new Date(instant), dayBoundaryHour) === studyDay;
   return {
     direction,
     dayBoundaryHour,
     scheduler,
-    dueByDay,
+    // Frozen, so that its sums are worked out once (dueDays.ts).
+    dueByDay: Object.freeze(dueByDay),
     unreviewed,
     studyDay,
     reviewedOnDay: reviews.filter((r) => onDay(r.lastReviewedAt)).length,
@@ -113,12 +119,9 @@ export function studyCountsOf(
   const sameDay = schedule.studyDay === today;
   const reviewedToday = sameDay ? schedule.reviewedOnDay : 0;
   const introducedToday = sameDay ? schedule.introducedOnDay : 0;
-  const due = Object.entries(schedule.dueByDay)
-    .filter(([day]) => day <= today)
-    .reduce((sum, [, count]) => sum + count, 0);
-  const behind = Object.entries(schedule.dueByDay)
-    .filter(([day]) => backlogBefore !== undefined && day < backlogBefore)
-    .reduce((sum, [, count]) => sum + count, 0);
+  // Looked up, not summed of every due day (dueDays.ts): decks may share one schedule.
+  const due = dueThrough(schedule.dueByDay, today);
+  const behind = backlogBefore === undefined ? 0 : dueBefore(schedule.dueByDay, backlogBefore);
   return {
     dueCount: Math.min(due, Math.max(0, prefs.maxReviewsPerDay - reviewedToday)),
     newCount: holdsNewPrompts(behind, prefs)

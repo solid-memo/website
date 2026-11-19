@@ -408,13 +408,13 @@ export function createSolidDeckRepository({
         asNoOne ? publicFetch : fetch,
       );
       if (dataset === null) return [];
-      return toCards(dataset, deck.cardsDocumentUrl);
+      return cardsOf(dataset, deck.cardsDocumentUrl);
     },
 
     async readCardsSince(deck, version, { asNoOne = false } = {}) {
       const read = await readSince(deck.cardsDocumentUrl, version, asNoOne ? publicFetch : fetch);
       return mapSince(read, (dataset) =>
-        dataset === null ? [] : toCards(dataset, deck.cardsDocumentUrl),
+        dataset === null ? [] : cardsOf(dataset, deck.cardsDocumentUrl),
       );
     },
 
@@ -1217,6 +1217,28 @@ function byDocument<T extends Deck>(decks: readonly T[]): Map<string, T[]> {
     else held.push(deck);
   }
   return result;
+}
+
+/** The cards read of each cards document, by its dataset and URL: see cardsOf. */
+const readCards = new WeakMap<Dataset, Map<string, Card[]>>();
+
+/**
+ * The cards of a cards document as read (toCards), mapped once per read
+ * and frozen: the decks that name one document share one array, which
+ * what is derived of a deck's cards then works on once (derivedOnce,
+ * domain/frozen.ts), not once per deck. A dataset never changes (each
+ * write makes a new one), so its cards stay true; a new read is a new
+ * dataset, mapped afresh.
+ */
+function cardsOf(dataset: Dataset, documentUrl: string): Card[] {
+  let byUrl = readCards.get(dataset);
+  if (byUrl === undefined) readCards.set(dataset, (byUrl = new Map()));
+  let cards = byUrl.get(documentUrl);
+  if (cards === undefined) {
+    cards = Object.freeze(toCards(dataset, documentUrl)) as Card[];
+    byUrl.set(documentUrl, cards);
+  }
+  return cards;
 }
 
 /** Whether two pauses are the same: the same start, and the same resume day or none. */

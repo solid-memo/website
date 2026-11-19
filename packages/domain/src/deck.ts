@@ -10,6 +10,7 @@ import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { tidiedDistractor } from "./distractors";
 import { storedPictureHosts } from "./deckPictures";
+import { derivedOnce } from "./frozen";
 import { documentUrlOf } from "./subjectUrl";
 import { isHttpUrl, isWritableIri } from "./webId";
 
@@ -573,6 +574,40 @@ export function boundedKeywords(
 /** The cards in use: all but the retired ones, which are kept but never studied. */
 export function activeCards<T extends { retired?: true }>(cards: readonly T[]): T[] {
   return cards.filter((card) => card.retired !== true);
+}
+
+/** A deck's cards in use (activeCards), and the place of each among them, by id. */
+export interface ActiveCards {
+  /** The cards in use, in the order given: frozen when the cards given are, never to be changed. */
+  cards: readonly Card[];
+  /** Each card's place in `cards`, by its id: the last, when cards share an id. */
+  placeOf: ReadonlyMap<string, number>;
+  /**
+   * How many of `cards` have each id: one, but in odd data, where two
+   * cards may share one (each is a prompt of the queue, promptsOf).
+   */
+  copiesOf: ReadonlyMap<string, number>;
+}
+
+const activeOf = new WeakMap<readonly Card[], ActiveCards>();
+
+/**
+ * The cards in use of a deck's cards and where each is among them:
+ * worked out once of a frozen array (derivedOnce), which the decks that
+ * name one cards document share, so what each deck then works out of
+ * them goes by its own review states and answers, not by the cards.
+ */
+export function activeCardsOf(cards: readonly Card[]): ActiveCards {
+  return derivedOnce(activeOf, cards, (all) => {
+    const active = activeCards(all);
+    const copiesOf = new Map<string, number>();
+    for (const card of active) copiesOf.set(card.id, (copiesOf.get(card.id) ?? 0) + 1);
+    return {
+      cards: Object.isFrozen(all) ? Object.freeze(active) : active,
+      placeOf: new Map(active.map((card, place) => [card.id, place])),
+      copiesOf,
+    };
+  });
 }
 
 /** A text of a card: a side's, a note, a label or a picture's description. */

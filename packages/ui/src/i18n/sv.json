@@ -1743,6 +1743,7 @@
     "catalogTooManyLinks": "Den här instansens katalog listar fler kortlekar, utkast eller utgåvor än Solid Memo läser (högst {limit} av varje). Ta bort instansen om du inte vet vem som sköter den.",
     "catalogFull": "Den här instansens katalog listar redan så många kortlekar, utkast eller utgåvor som Solid Memo läser ({limit} av varje), så den kan inte lista fler.",
     "draftTooManyDocuments": "Det här utkastet eller den här filen har för många kapitel, eller så har instansens utkast tillsammans för många dokument för att Solid Memo ska läsa dem (högst {limit} dokument), så det gjordes inte. Använd färre kapitel, eller radera utkast du inte längre behöver i Studio. Ta bort instansen bara om utkasten inte är dina och du inte vet vem som sköter den.",
+    "reviewsReadTooManyWays": "För många kortlekar i instansens katalog läser den här kortlekens repetitionsdokument på olika sätt (högst {limit}), så Solid Memo läser det inte för den här kortleken. Ta bort kortleken om du inte vet vem som sköter instansen.",
     "noMetaToUpdate": "Den här instansen har ingen beskrivning att uppdatera. Läs in sidan igen och försök på nytt.",
     "webIdEmpty": "Ange ditt WebID.",
     "webIdInvalidUrl": "Det är ingen giltig URL. Ett WebID ser ut som https://du.example/profile/card#me.",

@@ -64,6 +64,31 @@ describe("the instance digest", () => {
     });
   });
 
+  it("keeps a schedule that decks naming the same documents share once, for the first of them", async () => {
+    const { deps, useCases, stored, digestRepository } = setup();
+    // As the repositories map a read once: one frozen array of cards and one of states for both decks.
+    const cards = Object.freeze([{ ...card, formatVersion: 99 }]);
+    const reviews = Object.freeze({ sm2: Object.freeze([]), fsrs: Object.freeze([]) });
+    deps.deckRepository.readCardsSince = vi.fn(async () => ({
+      unchanged: false as const,
+      value: cards as never,
+      version: "c1",
+    }));
+    deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({
+      unchanged: false as const,
+      value: reviews as never,
+      version: "r1",
+    }));
+    const other = { ...deck, url: `${deck.url}-other` };
+    for (const one of [deck, other, deck])
+      await expect(useCases.getStudyCounts(instance.url, one, now)).resolves.toEqual({
+        dueCount: 0,
+        newCount: 1,
+      });
+    await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledTimes(3));
+    expect(Object.keys(stored()!.schedules)).toEqual([deck.url]);
+  });
+
   it("counts three decks at once at most, however many are asked for, each reading its two documents", async () => {
     const { deps, useCases } = setup();
     const read = deps.deckRepository.readCardsSince;

@@ -3,10 +3,11 @@
 // SPDX-License-Identifier: MIT
 
 import { LEECH_LAPSES, type LapseIndex } from "./cardHistory";
-import { activeCards, studyDirections, type Card, type DeckDirection } from "./deck";
+import { activeCardsOf, studyDirections, type Card, type DeckDirection } from "./deck";
 import type { Scheduler } from "./fsrs";
 import { reviewKeyOf, type DueState, type ReviewKey, type ReviewState } from "./review";
 import { shiftStudyDay } from "./answer";
+import { dueBefore, dueOn, dueThrough } from "./dueDays";
 import type { DeckSchedule, StoredSchedule } from "./studyDigest";
 
 /**
@@ -78,9 +79,9 @@ export function forecastOf(
   let waiting = 0;
   return Array.from({ length: days }, (_, offset) => {
     const studyDay = shiftStudyDay(today, offset);
-    const due = Object.entries(schedule.dueByDay)
-      .filter(([day]) => (offset === 0 ? day <= today : day === studyDay))
-      .reduce((sum, [, count]) => sum + count, 0);
+    // Looked up, not summed of every due day (dueDays.ts): decks may share one schedule.
+    const due =
+      offset === 0 ? dueThrough(schedule.dueByDay, today) : dueOn(schedule.dueByDay, studyDay);
     const cap = held(studyDay)
       ? 0
       : offset === 0
@@ -98,9 +99,7 @@ export function forecastOf(
  * with those due today.
  */
 export function overdueOf(dueByDay: Readonly<Record<string, number>>, today: string): number {
-  return Object.entries(dueByDay)
-    .filter(([day]) => day < today)
-    .reduce((sum, [, count]) => sum + count, 0);
+  return dueBefore(dueByDay, today);
 }
 
 /**
@@ -120,18 +119,28 @@ export function daysToClearOf(forecast: readonly ForecastDay[]): number | null {
   return last >= 0 && last === forecast.length - 1 ? null : last + 1;
 }
 
-/** The review states the deck schedules: of its cards in use, in the directions it studies. */
+/**
+ * The review states the deck schedules: of its cards in use, in the
+ * directions it studies, card by card, the last of each key. Found by
+ * the states, not by the cards (activeCardsOf), so that decks which
+ * share one cards document each take time by their own states.
+ */
 export function scheduledStates<T extends ReviewKey>(
   cards: readonly Card[],
   direction: DeckDirection,
   states: readonly T[],
 ): T[] {
+  const { placeOf } = activeCardsOf(cards);
+  const directions: readonly string[] = studyDirections(direction);
   const byKey = new Map(states.map((state) => [reviewKeyOf(state), state]));
-  return activeCards(cards).flatMap((card) =>
-    studyDirections(direction).flatMap(
-      (each) => byKey.get(reviewKeyOf({ cardId: card.id, direction: each })) ?? [],
-    ),
-  );
+  const placed: { state: T; at: number }[] = [];
+  for (const state of byKey.values()) {
+    const place = placeOf.get(state.cardId);
+    const turn = directions.indexOf(state.direction);
+    if (place !== undefined && turn >= 0)
+      placed.push({ state, at: place * directions.length + turn });
+  }
+  return placed.sort((a, b) => a.at - b.at).map(({ state }) => state);
 }
 
 /** A bar of a histogram: the values from `from` up to, not including, `to` (none: no end), and how many there are. */

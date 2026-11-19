@@ -61,7 +61,8 @@ export function scheduleFromRecord(data: DeckScheduleV2): StoredSchedule | null 
       direction: directionOfConcept(data.direction)!,
       dayBoundaryHour: data.dayBoundaryHour,
       scheduler: schedulerOfConcept(data.scheduler)!,
-      dueByDay,
+      // Frozen, so that its sums are worked out once (dueDays.ts).
+      dueByDay: Object.freeze(dueByDay),
       unreviewed: data.unreviewed,
       studyDay: data.studyDay,
       reviewedOnDay: data.reviewedOnDay,

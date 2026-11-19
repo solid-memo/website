@@ -141,6 +141,31 @@ describe("a deck schedule", () => {
     },
   );
 
+  it("counts what buildStudyQueue counts of cards that share an id, as odd data may have them", () => {
+    const copies = [card("a"), card("a"), card("b")];
+    const states = [review("a", "2026-09-19", lastWeek)];
+    const queue = buildStudyQueue({
+      cards: copies,
+      direction: "front-to-back",
+      reviews: states,
+      prefs: DEFAULT_PREFERENCES,
+      now,
+      random: () => 0,
+    });
+    const schedule = scheduleOf({
+      cards: copies,
+      direction: "front-to-back",
+      reviews: states,
+      scheduler: "sm2",
+      dayBoundaryHour: 4,
+      now,
+    });
+    expect(
+      studyCountsOf(schedule, { direction: "front-to-back", prefs: DEFAULT_PREFERENCES, now }),
+    ).toEqual({ dueCount: queue.due.length, newCount: queue.newPrompts.length });
+    expect(queue.due).toHaveLength(2);
+  });
+
   it("holds the prompts due by day, the new ones and the day's work", () => {
     expect(
       scheduleOf({

@@ -290,6 +290,26 @@ describe("instances", () => {
       expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();
     });
 
+    it("planMigration leaves out a deck whose reviews document is not read for it, not the others with it", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([deck, other]);
+      vi.mocked(deps.deckRepository.listCards).mockResolvedValue([old("a")]);
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) => {
+        if (d === other) throw new AppError("reviewsReadTooManyWays", { limit: 8 });
+        return sm2s([]);
+      });
+      const useCases = createUseCases(deps);
+      await expect(useCases.planMigration(instance.url)).resolves.toMatchObject({
+        decks: [{ deck, cardCount: 1 }],
+        cardCount: 1,
+      });
+      // Any other error stands.
+      vi.mocked(deps.reviewStateRepository.listReviewStates).mockRejectedValue(
+        new Error("offline"),
+      );
+      await expect(useCases.planMigration(instance.url)).rejects.toThrow("offline");
+    });
+
     it("planMigration leaves preferences that do not fit their shape to the data check", async () => {
       const deps = makeDeps();
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue("misfit");

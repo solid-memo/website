@@ -2383,6 +2383,41 @@ by one.
   three times. That cache is never asked (`cache: "no-store"`), since it
   may keep a document the pod gives a modification time and no
   `Cache-Control` for days, and answer a plain read with it.
+- **A read of a deck's document is mapped once**. Several decks may
+  name one cards document, and they share one frozen array of its cards
+  ([solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts)
+  `cardsOf`). What is worked out of the cards alone (the cards in use
+  and their places, the outdated ones, the cards by id and their wrong
+  options) is worked out once for that array (`derivedOnce` in
+  [frozen.ts](../packages/domain/src/frozen.ts)). Several decks may name
+  one reviews document too. Decks whose states are read alike, by the
+  same cards documents, share one frozen mapping of it
+  ([reviewStateMapper.ts](../packages/solid/src/mappers/reviewStateMapper.ts)
+  `sharedReviewStatesOf`). The way a deck reads it is looked up in the
+  documents its states name, sorted once for each read. A read is mapped
+  in at most `MAX_READINGS` ways, and finding those ways goes through
+  the names of the documents its states name `SCANS_OF_NAMES` times
+  over at most, all its decks together. A deck that would read it in
+  yet another way, or go through those names past that, is refused
+  (`reviewsReadTooManyWays`), and the format update leaves that deck
+  out. What a deck's cards and states give together is worked out
+  once for the decks that share both (`derivedOnceOf`), for each
+  direction, scheduler, day boundary and study day. That is the
+  schedule, the progress with its intervals and eases, the outdated
+  states, and the recall and due days of a pause's outlook and comeback. The prompts
+  of a schedule due by each day are summed once too
+  ([dueDays.ts](../packages/domain/src/dueDays.ts)), so each deck's
+  forecast, overdue prompts, study counts and backlog are lookups in
+  those sums. A course's answered cards are found once for the states,
+  and each course looks up its outline's questions. A schedule decks
+  share is kept in the digest once, for the first of them: the others
+  aren't served from the digest, and are read from their documents on
+  each visit. What stays each deck's own is small: its answers (the
+  hardest cards, the wrong options chosen, the course answers), its
+  pause and preferences, and the 30 days of its forecast. A schedule the digest kept for one deck
+  is summed for that deck alone. Each mapping is redone only on a new
+  download: a 304 gives the dataset read before, and its mapping with
+  it.
 - Reading builds the dataset in one pass
   ([linearDataset.ts](../packages/solid/src/client/linearDataset.ts)):
   `@inrupt/solid-client` copies the whole graph for every quad, which

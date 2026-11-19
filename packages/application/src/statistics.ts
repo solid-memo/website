@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { deckPreferences } from "@solid-memo/domain/deckPace";
-import { activeCards, type Card, type Deck } from "@solid-memo/domain/deck";
+import { activeCardsOf, type Card, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import { isPaused } from "@solid-memo/domain/deckPause";
+import { derivedOnceOf } from "@solid-memo/domain/frozen";
+import type { ReviewStates } from "@solid-memo/domain/review";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { monthOfStudyDay, shiftStudyDay, type Answer } from "@solid-memo/domain/answer";
@@ -268,6 +270,39 @@ export interface DeckProgress {
   confusions: Confusion<Card>[];
 }
 
+/** A deck's progress and how its intervals and eases are spread: what its cards and review states alone give. */
+interface StatesProgress {
+  progress: CardProgress;
+  intervals: Bin[];
+  eases: Bin[];
+}
+
+const statesProgress = new WeakMap<Card[], WeakMap<ReviewStates, Map<string, StatesProgress>>>();
+
+/**
+ * A deck's progress, intervals and eases of its cards and review states
+ * in `direction`: worked out once of the two as read (derivedOnceOf),
+ * which the decks that name the same two documents share, so they are
+ * worked out once for all of them, not once for each deck. Never changed
+ * once worked out.
+ */
+function statesProgressOf(
+  cards: Card[],
+  reviews: ReviewStates,
+  direction: DeckDirection,
+  prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+): StatesProgress {
+  const key = [direction, prefs.scheduler, prefs.dayBoundaryHour].join(" ");
+  return derivedOnceOf(statesProgress, cards, reviews, key, () => {
+    const due = dueStatesOf(reviews, prefs);
+    return {
+      progress: cardProgressOf({ cards, direction, reviews: reviews.sm2, due }),
+      intervals: intervalHistogram(scheduledStates(cards, direction, due)),
+      eases: easeHistogram(scheduledStates(cards, direction, reviews.sm2)),
+    };
+  });
+}
+
 /** A summary of each study month the answers are of (monthSummaryOf). */
 function monthSummariesOf(answers: readonly Answer[]): MonthSummary[] {
   const byMonth = new Map<string, Answer[]>();
@@ -529,7 +564,7 @@ export function createStatisticsUseCases({
       const states = scheduledStates(cards.value, deck.direction, reviews.value.sm2);
       const due = scheduledStates(cards.value, deck.direction, dueStatesOf(reviews.value, prefs));
       const lapses = lapseIndex(deckAnswers(answers, deck));
-      const live = new Map(activeCards(cards.value).map((card) => [card.id, card]));
+      const live = activeCardsOf(cards.value);
       return {
         today,
         maxReviewsPerDay,
@@ -544,8 +579,8 @@ export function createStatisticsUseCases({
         eases: easeHistogram(states),
         lapses,
         leeches: leechesOf(lapses).flatMap(({ cardId, lapses }) => {
-          const card = live.get(cardId);
-          return card === undefined ? [] : [{ card, lapses }];
+          const place = live.placeOf.get(cardId);
+          return place === undefined ? [] : [{ card: live.cards[place]!, lapses }];
         }),
       };
     },
@@ -584,8 +619,6 @@ export function createStatisticsUseCases({
             logged,
           ]);
           const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);
-          const states = scheduledStates(cards.value, one.direction, reviews.value.sm2);
-          const due = dueStatesOf(reviews.value, prefs);
           const forecast = forecastOf(schedule, {
             today,
             days: FORECAST_DAYS,
@@ -593,18 +626,21 @@ export function createStatisticsUseCases({
             pause: pauseOf(one, today),
           });
           const answers = deckAnswers(byDeck.get(one.url) ?? [], one);
-          const live = activeCards(cards.value);
+          // Worked out once of the cards that decks naming one cards document share (activeCardsOf).
+          const live = activeCardsOf(cards.value).cards;
+          // Worked out once for the decks that name the same cards and reviews documents.
+          const { progress, intervals, eases } = statesProgressOf(
+            cards.value,
+            reviews.value,
+            one.direction,
+            prefs,
+          );
           return {
             deck: one,
-            progress: cardProgressOf({
-              cards: cards.value,
-              direction: one.direction,
-              reviews: reviews.value.sm2,
-              due,
-            }),
+            progress,
             forecast,
-            intervals: intervalHistogram(scheduledStates(cards.value, one.direction, due)),
-            eases: easeHistogram(states),
+            intervals,
+            eases,
             overdue: overdueOf(schedule.dueByDay, today),
             daysToClear: daysToClearOf(forecast),
             newCardsPerDay,

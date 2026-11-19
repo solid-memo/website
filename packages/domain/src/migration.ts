@@ -4,6 +4,7 @@
 
 import type { CatalogRead } from "./catalog";
 import { CARD_FORMAT_VERSION, DECK_FORMAT_VERSION, type Card, type Deck } from "./deck";
+import { derivedOnce } from "./frozen";
 import { INSTANCE_FORMAT_VERSION, type InstanceMeta } from "./instance";
 import { PREFERENCES_FORMAT_VERSION, type StoredPreferences } from "./preferences";
 import { REVIEW_STATE_FORMAT_VERSION, type ReviewState } from "./review";
@@ -21,6 +22,27 @@ import { withWritableDueDays } from "./scheduling";
 /** True when the card is stored in an older format than this app writes. */
 export function isOutdated(card: Card): boolean {
   return card.formatVersion < CARD_FORMAT_VERSION;
+}
+
+const outdatedOf = new WeakMap<readonly Card[], { count: number; oldest: number }>();
+
+/**
+ * How many of a deck's cards are in an older format (isOutdated), and
+ * the oldest format among them (this app's when none is): of frozen
+ * cards, which the decks that name one cards document share, worked out
+ * once (derivedOnce).
+ */
+export function outdatedCardsOf(cards: readonly Card[]): { count: number; oldest: number } {
+  return derivedOnce(outdatedOf, cards, (all) => {
+    const outdated = all.filter(isOutdated);
+    return {
+      count: outdated.length,
+      oldest: oldest(
+        outdated.map(({ formatVersion }) => formatVersion),
+        CARD_FORMAT_VERSION,
+      ),
+    };
+  });
 }
 
 /** The card as this app writes it: the same content, current version. */
@@ -44,6 +66,30 @@ export function upgradeDeck(deck: Deck): Deck {
 /** True when the review state is stored in an older format than this app writes. */
 export function isReviewStateOutdated(state: ReviewState): boolean {
   return state.formatVersion < REVIEW_STATE_FORMAT_VERSION;
+}
+
+const outdatedStatesOf = new WeakMap<readonly ReviewState[], { count: number; oldest: number }>();
+
+/**
+ * How many of a deck's review states are in an older format
+ * (isReviewStateOutdated), and the oldest format among them (this app's
+ * when none is): of frozen states, which the decks that name one reviews
+ * document share, worked out once (derivedOnce).
+ */
+export function outdatedReviewStatesOf(states: readonly ReviewState[]): {
+  count: number;
+  oldest: number;
+} {
+  return derivedOnce(outdatedStatesOf, states, (all) => {
+    const outdated = all.filter(isReviewStateOutdated);
+    return {
+      count: outdated.length,
+      oldest: oldest(
+        outdated.map(({ formatVersion }) => formatVersion),
+        REVIEW_STATE_FORMAT_VERSION,
+      ),
+    };
+  });
 }
 
 /** The review state as this app writes it: the same state, current version, a due day that is no real date as withWritableDueDays has it. */
@@ -112,8 +158,8 @@ export function planMigration(input: {
     .map(({ deck, cards, reviews }) => ({
       deck,
       deckOutdated: isDeckOutdated(deck),
-      cardCount: cards.filter(isOutdated).length,
-      reviewCount: reviews.filter(isReviewStateOutdated).length,
+      cardCount: outdatedCardsOf(cards).count,
+      reviewCount: outdatedReviewStatesOf(reviews).count,
     }))
     .filter(
       ({ deckOutdated, cardCount, reviewCount }) =>
@@ -133,15 +179,11 @@ export function planMigration(input: {
         DECK_FORMAT_VERSION,
       ),
       card: oldest(
-        input.entries.flatMap(({ cards }) =>
-          cards.filter(isOutdated).map(({ formatVersion }) => formatVersion),
-        ),
+        input.entries.map(({ cards }) => outdatedCardsOf(cards).oldest),
         CARD_FORMAT_VERSION,
       ),
       reviewState: oldest(
-        input.entries.flatMap(({ reviews }) =>
-          reviews.filter(isReviewStateOutdated).map(({ formatVersion }) => formatVersion),
-        ),
+        input.entries.map(({ reviews }) => outdatedReviewStatesOf(reviews).oldest),
         REVIEW_STATE_FORMAT_VERSION,
       ),
       preferences: oldest(

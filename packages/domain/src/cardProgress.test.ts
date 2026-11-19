@@ -83,6 +83,16 @@ describe("cardProgressOf", () => {
     });
   });
 
+  it("counts cards that share an id, as odd data may have them, as one prompt", () => {
+    expect(
+      cardProgressOf({
+        cards: [card("a"), card("a"), card("b")],
+        direction: "front-to-back",
+        reviews: [review("a", 1, "2026-09-21")],
+      }),
+    ).toEqual({ new: 1, relearning: 0, young: 1, mature: 0 });
+  });
+
   it("goes by the interval of what sets the due day, relearning by SM-2's repetitions", () => {
     // Under FSRS-6, b's interval is 30 days and c's 5; e is still relearning.
     const due = [

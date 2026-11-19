@@ -148,7 +148,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
   state. Study never shows a card the learner hasn't reached, and an
   older app sees a plain deck.
 - **Progress is derived, not stored** (`courseProgress`):
-  - A card is answered when it has a front→back review state.
+  - A card is answered when it has a front→back review state. Only
+    the cards the outline asks count: a course whose answered cards
+    have all left the outline of its release isn't started.
   - A step is done when every card that checks it is answered. The
     learner resumes at the first step that isn't done.
   - A chapter is open once every chapter before it is completed, and

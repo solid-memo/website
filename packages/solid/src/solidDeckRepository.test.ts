@@ -1500,6 +1500,38 @@ describe("listCards", () => {
     expect(cards[0].front).toEqual({ "": "水" });
   });
 
+  it("maps one read once: decks that name one cards document share its cards, frozen", async () => {
+    const cardsOf = (url: string) =>
+      setThing(
+        datasetFrom(url),
+        buildThing(createThing({ url: `${url}#card-1` }))
+          .addIri(RDF.type, SM.Card)
+          .addStringNoLocale(SM.front, "水")
+          .addStringNoLocale(SM.back, "water")
+          .build(),
+      );
+    const read = cardsOf(deck.cardsDocumentUrl);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(read);
+    const repository = makeRepository();
+    const other: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
+    const cards = await repository.listCards(deck);
+    expect(cards).toHaveLength(1);
+    expect(Object.isFrozen(cards)).toBe(true);
+    expect(await repository.listCards(other)).toBe(cards);
+    const since = await repository.readCardsSince(other, undefined);
+    expect(!since.unchanged && since.value).toBe(cards);
+    // The same read of another document is that document's cards.
+    const elsewhere: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl` };
+    const theirs = await repository.listCards(elsewhere);
+    expect(theirs).not.toBe(cards);
+    expect(theirs).toEqual([]);
+    // A new read is mapped afresh.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsOf(deck.cardsDocumentUrl));
+    const again = await repository.listCards(deck);
+    expect(again).not.toBe(cards);
+    expect(again).toEqual(cards);
+  });
+
   it("reads a card whose creation time is past what a date holds, as one without it", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
       await datasetOfTurtle(

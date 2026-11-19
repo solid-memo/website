@@ -87,7 +87,28 @@ const course: LibraryDeck = {
 const library: DeckLibrary = {
   listLibraryDecks: async () => [course],
   fetchLibraryDeck: async () => content,
-  fetchCourseOutline: async () => ({ releaseUrl: RELEASE, chapters: [] }),
+  // The course's one chapter asks its one question: the answered cards are the outline's.
+  fetchCourseOutline: async () => ({
+    releaseUrl: RELEASE,
+    chapters: [
+      {
+        id: "ch-linked-data",
+        url: CHAPTER,
+        position: 0,
+        title: { en: "Linked data" },
+        steps: [
+          {
+            id: "s-iri",
+            url: `${RELEASE}#s-iri`,
+            position: 0,
+            theory: { en: "IRIs name things." },
+            questionIds: ["q-iri"],
+          },
+        ],
+        reviewQuestionIds: [],
+      },
+    ],
+  }),
   // The course comes with the site: its index lists it, so it is not checked as a release from a link.
   readLibraryIndex: async () => ({
     url: "https://site.example/decks/index.ttl",

@@ -18,6 +18,7 @@ import { datasetFrom } from "./testing/datasets";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { getSolidDatasetOrNull, keptDataset } from "./datasets";
 import {
+  MAX_READINGS,
   toFsrsState,
   toFsrsStateThing,
   toReviewState,
@@ -181,6 +182,98 @@ describe("listReviewStates", () => {
   it("maps stored review states", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(reviewsDataset());
     await expect(makeRepository().listReviewStates(deck)).resolves.toEqual(sm2s([state]));
+  });
+
+  it("maps one read once for the decks that read it alike, frozen", async () => {
+    const read = setThing(reviewsDataset(), namedFsrs(fsrs));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(read);
+    const repository = makeRepository();
+    const other: Deck = { ...deck, id: "deck-2", url: `${INSTANCE}catalog.ttl#deck-2` };
+    const states = await repository.listReviewStates(deck);
+    expect(states).toEqual({ sm2: [state], fsrs: [fsrs] });
+    expect(Object.isFrozen(states)).toBe(true);
+    expect(Object.isFrozen(states.sm2)).toBe(true);
+    expect(Object.isFrozen(states.fsrs)).toBe(true);
+    expect(await repository.listReviewStates(other)).toBe(states);
+    const since = await repository.readReviewStatesSince(other, undefined);
+    expect(!since.unchanged && since.value).toBe(states);
+    // A new download is mapped afresh.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(setThing(reviewsDataset(), namedFsrs(fsrs)));
+    const again = await repository.listReviewStates(deck);
+    expect(again).not.toBe(states);
+    expect(again).toEqual(states);
+  });
+
+  it("maps one read apart for a deck that reads it by other cards documents, up to MAX_READINGS ways", async () => {
+    // A state of the deck's cards as they were in an older document of its own (isCardsDocumentOf).
+    const older = `${INSTANCE}decks/deck-1-old.ttl`;
+    const moved = { ...state, cardId: "card-2" };
+    const read = setThing(
+      reviewsDataset(),
+      toReviewStateThing(
+        { ...deck, cardsDocumentUrl: older },
+        moved,
+        null,
+        `${deck.reviewsDocumentUrl}#moved`,
+      ),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(read);
+    const repository = makeRepository();
+    const own = await repository.listReviewStates(deck);
+    expect(own.sm2).toEqual([state, moved]);
+    const other: Deck = { ...deck, id: "deck-2", url: `${INSTANCE}catalog.ttl#deck-2` };
+    expect((await repository.listReviewStates(other)).sm2).toEqual([state]);
+    expect(await repository.listReviewStates(deck)).toBe(own);
+    // Each other cards document is another way of reading it: two so far.
+    const elsewhere = (n: number): Deck => ({
+      ...deck,
+      id: `deck-${n + 2}`,
+      cardsDocumentUrl: `${INSTANCE}decks/other-${n}.ttl`,
+    });
+    for (let n = 1; n <= MAX_READINGS - 2; n++)
+      expect(await repository.listReviewStates(elsewhere(n))).toEqual({ sm2: [], fsrs: [] });
+    await expect(repository.listReviewStates(elsewhere(MAX_READINGS - 1))).rejects.toMatchObject({
+      code: "reviewsReadTooManyWays",
+      vars: { limit: MAX_READINGS, document: deck.reviewsDocumentUrl },
+    });
+    // Those it has read stay as read.
+    expect(await repository.listReviewStates(other)).toEqual({ sm2: [state], fsrs: [] });
+  });
+
+  it("reads a document whose states name more than MAX_READINGS cards documents of a deck by them all, its own apart", async () => {
+    // States of the deck's cards as they were in many older documents of its own (isCardsDocumentOf).
+    const olderOf = (n: number) => `${INSTANCE}decks/deck-1-v${n}.ttl`;
+    let read = datasetFrom(deck.reviewsDocumentUrl);
+    for (let n = 0; n <= MAX_READINGS; n++)
+      read = setThing(
+        read,
+        toReviewStateThing(
+          { ...deck, cardsDocumentUrl: olderOf(n) },
+          { ...state, cardId: `card-${n}` },
+          null,
+          `${deck.reviewsDocumentUrl}#s${n}`,
+        ),
+      );
+    // And one of another deck's, whose name only starts like theirs.
+    read = setThing(
+      read,
+      toReviewStateThing(
+        { ...deck, cardsDocumentUrl: `${INSTANCE}decks/deck-10.ttl` },
+        { ...state, cardId: "elsewhere" },
+        null,
+        `${deck.reviewsDocumentUrl}#elsewhere`,
+      ),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(read);
+    const repository = makeRepository();
+    const states = await repository.listReviewStates(deck);
+    expect(states.sm2).toHaveLength(MAX_READINGS + 1);
+    expect(states.sm2.map(({ cardId }) => cardId)).not.toContain("elsewhere");
+    expect(await repository.listReviewStates({ ...deck, url: `${deck.url}-again` })).toBe(states);
+    // A deck whose cards document is one of them reads it apart, as another way.
+    const moved = await repository.listReviewStates({ ...deck, cardsDocumentUrl: olderOf(0) });
+    expect(moved).not.toBe(states);
+    expect(moved).toEqual(states);
   });
 
   it("maps the FSRS-6 states beside them, each kind on its own", async () => {
