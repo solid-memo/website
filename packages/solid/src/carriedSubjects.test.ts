@@ -168,6 +168,33 @@ describe("a card copied from another deck", () => {
     expect(written.filter((line) => line.includes("<sm:"))).toEqual([]);
   });
 
+  it("leaves behind a literal of the source's card whose datatype is no http(s) URL, and carries any other (GHSA-636q-3g97-fhhw)", async () => {
+    const { pod, decks } = app();
+    await pod.put(
+      source.cardsDocumentUrl,
+      `${sourceCards}
+       <#one> <${OTHER}note> "x"^^<sm:Deck>, "5"^^<xsd:integer>, 6, "sex"@sv .`,
+    );
+    await decks.applyCardChanges(
+      target,
+      { save: [{ ...card, distractors: [] }], remove: [] },
+      { carried: { deck: source, ids } },
+    );
+    const at = `${target.cardsDocumentUrl}#one-2`;
+    expect(
+      pod
+        .triples(target.cardsDocumentUrl)!
+        .filter((line) => line.includes(`${OTHER}note`))
+        .sort(),
+    ).toEqual(
+      [
+        noted(at),
+        `<${at}> <${OTHER}note> "6"^^<http://www.w3.org/2001/XMLSchema#integer> .`,
+        `<${at}> <${OTHER}note> "sex"@sv .`,
+      ].sort(),
+    );
+  });
+
   it("reads a source outside the pod as no one, and leaves a subject the target holds as it is", async () => {
     const { pod, decks, asNoOne } = app();
     await pod.put(source.cardsDocumentUrl, sourceCards);
@@ -226,6 +253,24 @@ describe("a review state copied from another deck", () => {
       `<${at("one-2")}> <${SM.reviewOf}> <${target.cardsDocumentUrl}#one-2> .`,
     );
     expect(asNoOne).toEqual([]);
+  });
+
+  it("leaves behind a literal of the source's state whose datatype is no http(s) URL (GHSA-636q-3g97-fhhw)", async () => {
+    const { pod, reviews } = app();
+    await pod.put(
+      source.reviewsDocumentUrl,
+      `${sourceReviews}
+       <#one> <${OTHER}note> "x"^^<sm:Deck>, "5"^^<xsd:integer> .`,
+    );
+    await reviews.applyReviewChanges(target, {
+      save: [state("one-2")],
+      remove: [],
+      carried: { deck: source, ids },
+    });
+    const written = pod.triples(target.reviewsDocumentUrl)!;
+    expect(written.filter((line) => line.includes(OTHER))).toEqual([
+      noted(`${target.reviewsDocumentUrl}#one-2`),
+    ]);
   });
 
   it("reads a source outside the pod as no one, and writes the states as the app knows them when it is gone", async () => {

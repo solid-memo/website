@@ -2223,10 +2223,11 @@ by one.
   place writes one. Two links don't go, as they are the
   source deck's: the release the card came from and the wrong options
   it names there. A value that is a blank node stays behind, as what it
-  says is in the source's document. So does a property or an IRI value
-  that isn't an `http:` or `https:` URL, such as `<sm:Deck>`, which a
-  deck file would read as the app's own term. A card a newer version of the app
-  wrote is refused, as an edit of it is. A move removes the source's
+  says is in the source's document. So does a property, an IRI value
+  or a literal whose datatype isn't an `http:` or `https:` URL, such as
+  `<sm:Deck>` or `"5"^^<xsd:integer>`, which a deck file would read as
+  the app's own term, so the deck's export refuses it. A card a newer
+  version of the app wrote is refused, as an edit of it is. A move removes the source's
   subjects whole. A review state of a scheduler the app doesn't know
   stays in the source's reviews document.
 - **A write keeps what it doesn't own**, and a test holds every use
