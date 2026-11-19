@@ -1158,7 +1158,8 @@ The domain plans the transfer
   ([migrations.md](migrations.md#catching-up-with-the-library)).
 - What the card and its wrong options say beyond what Solid Memo
   knows of them goes with them: a term a later version of the app
-  added, or another app's
+  added, or another app's. A property or an IRI value that isn't an
+  `http:` or `https:` URL stays behind
   ([data-model.md](data-model.md#write-discipline)).
 - With **Keep their progress**, the card's review states go with it,
   under its id in the target, their snapshot for resetting the study

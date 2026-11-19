@@ -6,6 +6,7 @@ import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import type { ReadLimits } from "./client/interface";
 import { MAX_BASE_CHARACTERS, MAX_TERM_CHARACTERS, plainBase } from "./client/readLimits";
+import { isPrefixedLookalike } from "./writableTerms";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
@@ -27,6 +28,12 @@ type Value =
  * its datatype. Subjects, their keys and their values are sorted, so the
  * same triples are always the same text. No vendor library writes
  * JSON-LD in the browser here (docs/boundaries.md).
+ *
+ * An IRI no prefix compacts is written as it is, and so is a subject's.
+ * One a reader would take for another term, a blank node or a keyword
+ * (isPrefixedLookalike, `sm:Deck`), which JSON-LD has no way to escape,
+ * is refused with unwritableTerm, as one Turtle cannot write is
+ * (GHSA-gxjp-m253-f2pj).
  */
 export function jsonLdOf(
   quads: Iterable<Quad>,
@@ -38,11 +45,19 @@ export function jsonLdOf(
         return `${prefix}:${iri.slice(namespace.length)}`;
       }
     }
+    return asIs(iri);
+  };
+  const asIs = (iri: string): string => {
+    if (isPrefixedLookalike(iri, prefixes)) {
+      throw new AppError("unwritableTerm", {
+        term: JSON.stringify({ termType: "NamedNode", value: iri }),
+      });
+    }
     return iri;
   };
   const nodes = new Map<string, Map<string, Value[]>>();
   for (const { subject, predicate, object } of quads) {
-    const id = idOf(subject);
+    const id = subject.termType === "BlankNode" ? blankIdOf(subject) : asIs(subject.value);
     const node = nodes.get(id) ?? new Map<string, Value[]>();
     nodes.set(id, node);
     const isType = predicate.value === RDF_TYPE && object.termType === "NamedNode";
@@ -71,13 +86,13 @@ export function jsonLdOf(
   return `${JSON.stringify({ "@context": prefixes, "@graph": graph }, null, 2)}\n`;
 }
 
-function idOf(term: Term): string {
-  return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
+function blankIdOf(term: Term): string {
+  return `_:${term.value}`;
 }
 
 function termValue(term: Term, compact: (iri: string) => string): Value {
   if (term.termType !== "Literal")
-    return { "@id": term.termType === "BlankNode" ? idOf(term) : compact(term.value) };
+    return { "@id": term.termType === "BlankNode" ? blankIdOf(term) : compact(term.value) };
   if (term.language !== "") {
     // A base direction a read kept (`"…"@ar--rtl`) is written as it is, as Turtle writes it.
     const direction = term.direction ? { "@direction": term.direction } : {};

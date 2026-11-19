@@ -123,6 +123,36 @@ describe("jsonLdOf", () => {
     expect(await triplesOf(text)).toEqual([`<${EX}a> <${EX}name> "مرحبا"@ar--rtl .`]);
   });
 
+  it("writes an IRI of a scheme no prefix of its context names as it is, which reads back the same", async () => {
+    const odd = [
+      quad(iri("urn:x:s"), "urn:x:p", iri("urn:isbn:9780000000000")),
+      quad(iri("urn:x:s"), RDF_TYPE, iri("exx:Thing")),
+      quad(iri("urn:x:s"), "urn:x:p", literal("1", "", "urn:x:type")),
+    ];
+    const text = jsonLdOf(odd, { ex: EX });
+    expect(await triplesOf(text)).toEqual(
+      odd.map((q) => `${termOf(q.subject)} ${termOf(q.predicate)} ${termOf(q.object)} .`).sort(),
+    );
+  });
+
+  // JSON-LD reads `ex:Thing` as the compact IRI of ex's Thing, `_:b` as a blank node, `ex` and `@type` as a term and a keyword (GHSA-gxjp-m253-f2pj).
+  for (const [site, odd] of [
+    ["a subject", quad(iri("ex:a"), `${EX}name`, literal("A"))],
+    ["a property", quad(iri(`${EX}a`), "ex:name", literal("A"))],
+    ["a type", quad(iri(`${EX}a`), RDF_TYPE, iri("ex:Thing"))],
+    ["a link", quad(iri(`${EX}a`), `${EX}link`, iri("ex:b"))],
+    ["a datatype", quad(iri(`${EX}a`), `${EX}count`, literal("3", "", "xsd:integer"))],
+    ["a blank node's name", quad(iri(`${EX}a`), `${EX}link`, iri("_:b"))],
+    ["a term", quad(iri(`${EX}a`), `${EX}link`, iri("ex"))],
+    ["a keyword", quad(iri(`${EX}a`), "@type", iri(`${EX}Thing`))],
+  ] as const) {
+    it(`refuses ${site} that a reader would take for another term`, () => {
+      expect(() => jsonLdOf([...quads, odd], { ex: EX, xsd: XSD })).toThrow(
+        expect.objectContaining({ code: "unwritableTerm" }),
+      );
+    });
+  }
+
   it("writes the same triples the same, whatever their order", () => {
     expect(jsonLdOf([...quads].reverse(), { ex: EX })).toBe(jsonLdOf(quads, { ex: EX }));
   });

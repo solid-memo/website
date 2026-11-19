@@ -36,7 +36,7 @@ import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generate
 import { getSolidDatasetOrNull } from "./datasets";
 import { isCreatorAgent } from "./ownership";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
-import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
+import { refusePrefixedLookalikes, refuseUnwritable, unwritableTermOf } from "./writableTerms";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
 import { reviewedCardIdOf, toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
 import { storedVersionOf } from "./records";
@@ -124,7 +124,9 @@ export function createSolidDeckArchive({
         ...ownSubjectsOf(deck, cards, reviews),
       ];
       refuseUnwritable(quads);
+      // An IRI either format would write as one of its prefixed names (`<sm:Deck>` as sm:Deck) is refused, as it would read back as another; jsonLdOf refuses one itself (GHSA-gxjp-m253-f2pj).
       if (format === "jsonld") return jsonLdOf(quads, DECK_FILE_PREFIXES);
+      refusePrefixedLookalikes(quads, DECK_FILE_PREFIXES);
       return solidDatasetAsTurtle(datasetFromQuads(quads), { prefixes: { ...DECK_FILE_PREFIXES } });
     },
 
