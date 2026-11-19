@@ -382,7 +382,9 @@ jobs:
       # by main's script: a release commit of its version whose parent is
       # main's tip, whose message is its subject alone, and whose five
       # files are main's with the version, the date and one changelog
-      # entry written in (scripts/releaseChanges.ts).
+      # entry written in (scripts/releaseChanges.ts). The version must
+      # follow the highest release tag on main, which the checkout above
+      # fetched, and the date must be the run's, give or take a day.
       - if: steps.key.outputs.set == 'true'
         name: The release commit may be pushed onto main
         env:

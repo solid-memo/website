@@ -17,9 +17,13 @@
  *   between the header and the entries before it, as
  *   @semantic-release/changelog writes it.
  *
+ * The date must be a day of the calendar, and the day the check runs
+ * (UTC) or a day either side: semantic-release writes the day it runs.
+ *
  * Whatever made the commit, it can then change no dependency, no script
  * and no other text: only the changelog entry's notes, which the
- * release's commits wrote.
+ * release's commits wrote. The version is checked against main's tags
+ * (scripts/releaseCommit.ts).
  */
 import { setKeys, TARGETS } from "./releaseVersion.ts";
 
@@ -62,6 +66,27 @@ function entryDate(entry: string, version: string): string | undefined {
   return match?.[1];
 }
 
+/** A day, in milliseconds. */
+const DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Why `date` (YYYY-MM-DD) is not a release's date on `now`: a day of the
+ * calendar on `now`'s UTC date or a day either side. Undefined when it is.
+ */
+function wrongDate(date: string, now: Date): string | undefined {
+  const [year, month, day] = date.split("-").map(Number) as [number, number, number];
+  const time = Date.UTC(year, month - 1, day);
+  const today = now.toISOString().slice(0, 10);
+  // Date.UTC rolls 2026-13-45 over into 2027, and reads year 0026 as 1926.
+  if (new Date(time).toISOString().slice(0, 10) !== date) {
+    return `CHANGELOG.md: its new entry's date, ${date}, is no day of the calendar`;
+  }
+  if (Math.abs(time - Date.parse(today)) > DAY) {
+    return `CHANGELOG.md: its new entry's date, ${date}, is not today, ${today}, or a day either side`;
+  }
+  return undefined;
+}
+
 /** package.json's version, or package-lock.json's, set to `version`. */
 function withVersion(path: string, text: string, version: string): string | undefined {
   const top = /^( {2}"version": )"[^"\n]*"/m;
@@ -90,11 +115,15 @@ function released(path: string, before: string, version: string, date: string): 
 }
 
 /**
- * Why the changes are not what a release of `version` writes: one
- * reason a file, or none when they are. `changes` holds every file the
- * commit changes, each with its text before and after.
+ * Why the changes are not what a release of `version` writes on `now`:
+ * one reason a file, or none when they are. `changes` holds every file
+ * the commit changes, each with its text before and after.
  */
-export function unexpectedChanges(changes: readonly Change[], version: string): string[] {
+export function unexpectedChanges(
+  changes: readonly Change[],
+  version: string,
+  now: Date,
+): string[] {
   const byPath = new Map(changes.map((change) => [change.path, change]));
   const problems: string[] = [];
   for (const change of changes) {
@@ -113,6 +142,11 @@ export function unexpectedChanges(changes: readonly Change[], version: string): 
   const date = entryDate(entry, version);
   if (date === undefined) {
     problems.push(`CHANGELOG.md: its new entry is not headed ${version} and a date`);
+    return problems;
+  }
+  const wrong = wrongDate(date, now);
+  if (wrong !== undefined) {
+    problems.push(wrong);
     return problems;
   }
   for (const change of changes) {
