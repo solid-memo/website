@@ -2125,6 +2125,14 @@
       "other": "Cards forgotten {count} times or more in their reviews over the last 12 months, in any deck. They keep costing reviews: open one to make it clearer or add a note."
     },
     "noLeeches": "No leeches: no card was forgotten that often.",
+    "moreLeeches": {
+      "one": "And {count} more leech, not listed here.",
+      "other": "And {count} more leeches, not listed here."
+    },
+    "showMoreLeeches": {
+      "one": "Show {count} more",
+      "other": "Show {count} more"
+    },
     "leechIn": "{forgotten}, in {deck}",
     "cramLeeches": "Cram the leeches",
     "cramLeechesHint": "Practice them now, as often as you like. Nothing is recorded, so their due dates stay the same.",

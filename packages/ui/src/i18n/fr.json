@@ -2247,6 +2247,16 @@
       "other": "Les cartes oubliées {count} fois ou plus lors de leurs révisions ces 12 derniers mois, dans n’importe quel paquet. Elles continuent de coûter des révisions : ouvrez-en une pour la rendre plus claire ou y ajouter une note."
     },
     "noLeeches": "Aucune sangsue : aucune carte n’a été oubliée aussi souvent.",
+    "moreLeeches": {
+      "one": "Et {count} autre sangsue, qui n’apparaît pas ici.",
+      "many": "Et {count} de sangsues de plus, qui n’apparaissent pas ici.",
+      "other": "Et {count} autres sangsues, qui n’apparaissent pas ici."
+    },
+    "showMoreLeeches": {
+      "one": "Afficher {count} de plus",
+      "many": "Afficher {count} de plus",
+      "other": "Afficher {count} de plus"
+    },
     "leechIn": "{forgotten}, dans {deck}",
     "cramLeeches": "Bachoter les sangsues",
     "cramLeechesHint": "Entraînez-vous dessus maintenant, autant de fois que vous le souhaitez. Rien n’est enregistré : leur date de révision ne change pas.",

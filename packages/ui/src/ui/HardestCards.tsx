@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useId } from "preact/hooks";
+import { useId, useMemo } from "preact/hooks";
 import type { DeckProgress } from "@solid-memo/application/statistics";
 import { LEECH_LAPSES, type HardCard } from "@solid-memo/domain/cardHistory";
 import { isMarkdown, type Card, type Deck } from "@solid-memo/domain/deck";
+import { LIST_LIMIT, usePaged } from "./bounded";
 import { CardLanguage } from "./cardLanguage";
 import { cardName, cardNameText, DataLine } from "./DataText";
 import { useI18n } from "./i18n";
@@ -115,7 +116,9 @@ export function HardestCards({
           ))}
         </ol>
       )}
-      {leechesOf([progress]).length > 0 && <CramLink href={cramHref(instanceUrl, deck.url)} />}
+      {hardest.cards.some((hard) => hard.lapses >= LEECH_LAPSES) && (
+        <CramLink href={cramHref(instanceUrl, deck.url)} />
+      )}
     </>
   );
 }
@@ -170,7 +173,10 @@ export function ConfusedOptions({
  * in their reviews of the last twelve months), the most forgotten first,
  * each a link to its page, with its deck and how often of how many
  * reviews, and, with one, a link to cram them all. A deck since removed
- * has no cards to name, so none of its.
+ * has no cards to name, so none of its. The answer log decides which
+ * cards are leeches, so there can be any number of them: the list shows
+ * a page of LIST_LIMIT at a time (usePaged), with a button for more,
+ * and the cram crams them all.
  */
 export function Leeches({
   instanceUrl,
@@ -181,7 +187,8 @@ export function Leeches({
 }) {
   const { t, tx } = useI18n();
   const forgotten = useForgottenText();
-  const leeches = leechesOf(decks);
+  const leeches = useMemo(() => leechesOf(decks), [decks]);
+  const { shown, more, showMore } = usePaged(leeches);
   return (
     <>
       <h4>{t("statistics.leeches")}</h4>
@@ -190,7 +197,7 @@ export function Leeches({
         <p>{t("statistics.noLeeches")}</p>
       ) : (
         <ol class="hardest-cards" aria-label={t("statistics.leeches")}>
-          {leeches.map(({ deck, hard }) => (
+          {shown.map(({ deck, hard }) => (
             <li key={hard.card.url}>
               <CardLink instanceUrl={instanceUrl} deck={deck} card={hard.card} />{" "}
               <span class="hint">
@@ -202,6 +209,14 @@ export function Leeches({
             </li>
           ))}
         </ol>
+      )}
+      {more > 0 && (
+        <p class="hint">
+          {t("statistics.moreLeeches", { count: more })}{" "}
+          <button type="button" onClick={showMore}>
+            {t("statistics.showMoreLeeches", { count: Math.min(more, LIST_LIMIT) })}
+          </button>
+        </p>
       )}
       {leeches.length > 0 && <CramLink href={cramHref(instanceUrl)} />}
     </>

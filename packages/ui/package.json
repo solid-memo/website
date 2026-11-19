@@ -30,6 +30,7 @@
     "./composing": "./src/ui/composing.ts",
     "./askFirst": "./src/ui/askFirst.ts",
     "./retryable": "./src/ui/retryable.ts",
+    "./bounded": "./src/ui/bounded.ts",
     "./test/setup": "./src/test/setup.ts",
     "./test/catalogs": "./src/test/catalogs.ts",
     "./test/useCasesFake": "./src/test/useCasesFake.ts",

@@ -483,6 +483,11 @@
       "noAnswers": "Aún no hay respuestas en el registro.",
       "leechHint": "Una sanguijuela es una tarjeta olvidada {count} veces o más. Sigue costando repasos: reescríbela, divídela o retírala.",
       "noLeeches": "Ninguna sanguijuela.",
+      "moreLeeches": {
+        "one": "Y {count} sanguijuela más, que no aparece aquí.",
+        "many": "Y {count} de sanguijuelas más, que no aparecen aquí.",
+        "other": "Y {count} sanguijuelas más, que no aparecen aquí."
+      },
       "leechLapses": {
         "one": "olvidada {count} vez",
         "many": "olvidada {count} de veces",

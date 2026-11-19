@@ -2125,6 +2125,14 @@
       "other": "Kort som glömts {count} gånger eller fler i sina repetitioner de senaste 12 månaderna, i vilken kortlek som helst. De kostar repetition efter repetition: öppna ett och gör det tydligare eller lägg till en anteckning."
     },
     "noLeeches": "Inga blodiglar: inget kort har glömts så ofta.",
+    "moreLeeches": {
+      "one": "Och {count} blodigel till, som inte listas här.",
+      "other": "Och {count} blodiglar till, som inte listas här."
+    },
+    "showMoreLeeches": {
+      "one": "Visa {count} till",
+      "other": "Visa {count} till"
+    },
     "leechIn": "{forgotten}, i {deck}",
     "cramLeeches": "Nöt blodiglarna",
     "cramLeechesHint": "Öva på dem nu, så ofta du vill. Inget sparas: de ska repeteras samma dag som förut.",

@@ -468,6 +468,10 @@
       "noAnswers": "No answers are logged yet.",
       "leechHint": "A leech is a card forgotten {count} times or more. It keeps costing reviews: rewrite it, split it or retire it.",
       "noLeeches": "No leeches.",
+      "moreLeeches": {
+        "one": "And {count} more leech, not listed here.",
+        "other": "And {count} more leeches, not listed here."
+      },
       "leechLapses": {
         "one": "forgotten {count} time",
         "other": "forgotten {count} times"

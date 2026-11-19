@@ -2247,6 +2247,16 @@
       "other": "Tarjetas olvidadas {count} veces o más en sus repasos en los últimos 12 meses, en cualquier mazo. Siguen costando repasos: abre una para hacerla más clara o añadirle una nota."
     },
     "noLeeches": "Ninguna sanguijuela: ninguna tarjeta se olvidó tantas veces.",
+    "moreLeeches": {
+      "one": "Y {count} sanguijuela más, que no aparece aquí.",
+      "many": "Y {count} de sanguijuelas más, que no aparecen aquí.",
+      "other": "Y {count} sanguijuelas más, que no aparecen aquí."
+    },
+    "showMoreLeeches": {
+      "one": "Mostrar {count} más",
+      "many": "Mostrar {count} de más",
+      "other": "Mostrar {count} más"
+    },
     "leechIn": "{forgotten}, en {deck}",
     "cramLeeches": "Repaso intensivo de las sanguijuelas",
     "cramLeechesHint": "Practícalas ahora, tantas veces como quieras. No se registra nada: siguen tocando el día que les tocaba.",

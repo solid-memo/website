@@ -483,6 +483,11 @@
       "noAnswers": "Le journal des réponses est encore vide.",
       "leechHint": "Une sangsue est une carte oubliée {count} fois ou plus. Elle continue de coûter des révisions : réécrivez-la, scindez-la ou archivez-la.",
       "noLeeches": "Aucune sangsue.",
+      "moreLeeches": {
+        "one": "Et {count} autre sangsue, qui n’apparaît pas ici.",
+        "many": "Et {count} de sangsues de plus, qui n’apparaissent pas ici.",
+        "other": "Et {count} autres sangsues, qui n’apparaissent pas ici."
+      },
       "leechLapses": {
         "one": "oubliée {count} fois",
         "many": "oubliée {count} de fois",

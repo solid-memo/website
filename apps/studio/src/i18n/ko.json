@@ -453,6 +453,9 @@
       "noAnswers": "아직 기록된 답변이 없어요.",
       "leechHint": "자주 잊는 카드는 {count}번 이상 잊은 카드예요. 계속 복습을 잡아먹으니, 다시 쓰거나 나누거나 사용 중지해 주세요.",
       "noLeeches": "자주 잊는 카드가 없어요.",
+      "moreLeeches": {
+        "other": "이 밖에 자주 잊는 카드 {count}장이 더 있어요. 여기에는 나오지 않아요."
+      },
       "leechLapses": {
         "other": "{count}번 잊음"
       },

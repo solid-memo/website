@@ -468,6 +468,10 @@
       "noAnswers": "Noch keine Antworten protokolliert.",
       "leechHint": "Eine Problemkarte ist eine Karte, die {count}-mal oder öfter vergessen wurde. Sie kostet immer wieder Wiederholungen: Formuliere sie neu, teile sie auf oder mustere sie aus.",
       "noLeeches": "Keine Problemkarten.",
+      "moreLeeches": {
+        "one": "Und {count} weitere Problemkarte, die hier nicht aufgeführt ist.",
+        "other": "Und {count} weitere Problemkarten, die hier nicht aufgeführt sind."
+      },
       "leechLapses": {
         "one": "{count}-mal vergessen",
         "other": "{count}-mal vergessen"

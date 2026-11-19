@@ -2125,6 +2125,14 @@
       "other": "Karten, die in den letzten 12 Monaten {count}-mal oder öfter in ihren Wiederholungen vergessen wurden, in jedem Stapel. Sie kosten immer wieder Wiederholungen: Öffne eine, um sie klarer zu formulieren oder eine Notiz hinzuzufügen."
     },
     "noLeeches": "Keine Problemkarten: Keine Karte wurde so oft vergessen.",
+    "moreLeeches": {
+      "one": "Und {count} weitere Problemkarte, die hier nicht aufgeführt ist.",
+      "other": "Und {count} weitere Problemkarten, die hier nicht aufgeführt sind."
+    },
+    "showMoreLeeches": {
+      "one": "{count} weiteres anzeigen",
+      "other": "{count} weitere anzeigen"
+    },
     "leechIn": "{forgotten}, in {deck}",
     "cramLeeches": "Problemkarten pauken",
     "cramLeechesHint": "Übe sie jetzt, so oft du willst. Nichts wird gespeichert: Die Karten bleiben an denselben Tagen fällig.",
