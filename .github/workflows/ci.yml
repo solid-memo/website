@@ -1445,8 +1445,10 @@ jobs:
       # The action's summary names the licenses it refused. This fails
       # on an advisory of moderate severity or worse that a version
       # which comes has and no version which goes, of the same package
-      # in the same manifest, had: one the base has already is listed,
-      # and Dependabot's alerts on main report it. It also lists every
+      # in the same manifest, had, nor a version the base's npm lock
+      # file in that manifest locks (fetched alone, by BASE): one the
+      # base has already is listed, and Dependabot's alerts on main
+      # report it. It also lists every
       # package added, changed or removed, per manifest, from the same
       # comparison, whether the licenses passed or not. gh fetches it
       # again rather than a step reading the action's output, which a
@@ -1469,6 +1471,7 @@ jobs:
           HEAD: ${{ github.event.pull_request.head.sha }}
         run: |
           changes="$RUNNER_TEMP/changes.json"
+          git fetch --depth=1 --no-tags origin "$BASE"
           gh api --paginate --slurp "repos/$REPO/dependency-graph/compare/$BASE...$HEAD?per_page=100" > "$changes"
           npm run dependencies:review -- "$changes"
 

@@ -27,7 +27,7 @@ npm run browsers  # once: Chromium's headless shell, which npm run check and npm
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
-npm run dependencies:review -- changes.json    # the advisories and the packages GitHub's comparison of two commits' dependency graphs adds, changes and removes, as tables, as CI's dependency-review job writes them; fails on an advisory the base doesn't have
+npm run dependencies:review -- changes.json    # the advisories and the packages GitHub's comparison of two commits' dependency graphs adds, changes and removes, as tables, as CI's dependency-review job writes them; fails on an advisory the base doesn't have (BASE=<commit> also reads the base's lock files)
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
 npm run lint:prose         # the docs' prose rules, per page kind (docs/style.md#the-prose-check), as npm run check runs it; -- docs/srs.md for one page
@@ -1156,9 +1156,15 @@ has either of these:
   the project can ship a package under
   ([style.md](style.md#licenses)).
 
-The base has a vulnerability already when a version of the same package
-that the pull request removes, in the same manifest, has the same
-advisory. Moving a package from one vulnerable version to another, as
+The base has a vulnerability already in either of two cases. A version
+of the same package that the pull request removes, in the same
+manifest, has the same advisory. Or the base's npm lock file in that
+manifest locks the package at a version the advisory covers. GitHub's
+comparison names only the versions that come and go. When a package's
+copy at the top of the tree moves and one nested deeper keeps the
+base's version, no version goes, so the job reads the base's lock file
+and the advisory's vulnerable versions from GitHub. Moving a package
+from one vulnerable version to another, as
 lock file maintenance does when no fixed version can be locked yet,
 leaves `main` as it was, so the job lists that advisory as carried over
 and passes. A new version that fixes one advisory and has another still
