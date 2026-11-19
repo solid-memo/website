@@ -170,9 +170,10 @@ export default {
     ["@semantic-release/npm", { npmPublish: false }],
     // publiccode.yml's and CITATION.cff's version and date; then the
     // version's docs, as an archive the GitHub release carries, with the
-    // drawings release.yml's draw job made in Chromium: --drawn takes
-    // them from the drawings' cache and starts no browser. A failure
-    // here stops the release before anything is committed.
+    // drawings release.yml's prepare job made in Chromium before
+    // semantic-release ran: --drawn takes them from the drawings' cache
+    // and starts no browser. A failure here stops the release before
+    // anything is committed.
     [
       "@semantic-release/exec",
       {

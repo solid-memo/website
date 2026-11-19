@@ -71,8 +71,8 @@ describe("release.config.mjs", () => {
       }
     ).scripts;
     // Each step only when the one before it passed, and each given the
-    // version; the archive with --drawn, as the job that runs it starts
-    // no browser: the draw job drew the diagrams.
+    // version; the archive with --drawn, which starts no browser: the
+    // job drew the diagrams before semantic-release ran.
     const steps = command.split(" && ").map((step) => {
       const match = /^npm run (\S+) -- \$\{nextRelease\.version\}( --drawn)?$/.exec(step);
       expect(match, step).not.toBeNull();

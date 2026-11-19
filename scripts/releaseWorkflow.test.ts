@@ -16,8 +16,8 @@ import { archivePath } from "./docsArchive.ts";
  * ci.yml's site job and deploy.yml's build job. And the deploy ships
  * CI's site only once its files match the site job's attestation, which
  * no other job of a run can make. ci.yml's check job and the release
- * workflow's draw and prepare jobs check the registry's signatures of
- * what they install, the draw job before Chromium
+ * workflow's prepare job check the registry's signatures of what they
+ * install, the prepare job before Chromium
  * (docs/testing.md#the-workflows). Only the push job holds the deploy
  * key, every step of which can read it: it installs nothing, loads no
  * package and runs no browser, and pushes a release commit only once
@@ -61,7 +61,7 @@ function code(job: string): string {
 
 describe("release.yml", () => {
   it("has the queue, draw, prepare, push, publish and docs jobs", () => {
-    expect([...workflow.keys()]).toEqual(["queue", "draw", "prepare", "push", "publish", "docs"]);
+    expect([...workflow.keys()]).toEqual(["queue", "prepare", "push", "publish", "docs"]);
   });
 
   // Each job asks for what it needs; only the push job holds the key.
@@ -102,17 +102,12 @@ describe("release.yml", () => {
   // A run by hand releases main's tip whatever the queue holds; a push
   // run, only once the queue job found it empty.
   it("releases after a push run only when the merge queue is empty", () => {
-    for (const name of ["draw", "prepare"]) {
-      const job = workflow.get(name) ?? "";
-      expect(job).toContain(
-        "needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))",
-      );
-    }
-    expect(workflow.get("draw")).toMatch(/^ {4}needs: queue$/m);
-    expect(workflow.get("draw")).toMatch(/^ {6}!cancelled\(\) && \($/m);
     const job = workflow.get("prepare") ?? "";
-    expect(job).toMatch(/^ {4}needs: \[queue, draw\]$/m);
-    expect(job).toMatch(/^ {6}!cancelled\(\) && needs\.draw\.result == 'success' && \($/m);
+    expect(job).toContain(
+      "needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))",
+    );
+    expect(job).toMatch(/^ {4}needs: queue$/m);
+    expect(job).toMatch(/^ {6}!cancelled\(\) && \($/m);
     expect(workflow.get("push")).toMatch(
       /^ {4}needs: prepare\n {4}if: needs\.prepare\.outputs\.tag != ''$/m,
     );
@@ -127,15 +122,15 @@ describe("release.yml", () => {
 
   it("sets up Node without npm's cache", () => {
     const setups = release.filter((step) => step.includes("uses: actions/setup-node@"));
-    expect(setups).toHaveLength(6);
+    expect(setups).toHaveLength(5);
     for (const step of setups) {
       expect(step).not.toMatch(/^\s+cache:/m);
       expect(step).toMatch(/^\s+package-manager-cache: false$/m);
     }
   });
 
-  it("installs Chromium and its system libraries without the cache in the draw job", () => {
-    const local = steps(workflow.get("draw") ?? "", 6).filter((step) =>
+  it("installs Chromium and its system libraries without the cache in the prepare job", () => {
+    const local = steps(workflow.get("prepare") ?? "", 6).filter((step) =>
       /uses: \.\/\.github\/actions\//.test(step),
     );
     expect(local.map((step) => step.match(/uses: (\S+)/)?.[1])).toEqual([
@@ -160,26 +155,6 @@ describe("release.yml", () => {
     const shell = docs.findIndex((step) => step.includes("sha256sum -c -"));
     expect(docs[shell]).toMatch(/^ {10}CHROMIUM_HEADLESS_SHELL_SHA256: [0-9a-f]{64}$/m);
     expect(docs[shell + 1]).toBe(installs[0]);
-  });
-
-  // GitHub hands a job its environment's secrets when it starts, so any
-  // step of the release job could read the key: the diagrams are drawn
-  // in a job that holds nothing, and the release job runs no browser.
-  it("draws the diagrams in a job that holds nothing, and uploads them", () => {
-    const draw = workflow.get("draw") ?? "";
-    expect(draw).toMatch(/^ {4}permissions:\n {6}contents: read\n {4}steps:$/m);
-    expect(draw).not.toMatch(/secrets\.|environment:|github\.token|GH_TOKEN/);
-    const job = steps(draw, 6);
-    const at = (text: string) => job.findIndex((step) => step.includes(text));
-    expect(job[at("uses: actions/checkout@")]).toMatch(/^ {10}persist-credentials: false$/m);
-    const drawn = at("run: npm run docs:archive -- --draw\n");
-    const uploaded = at("uses: actions/upload-artifact@");
-    expect(drawn).toBeGreaterThan(at("uses: ./.github/actions/chromium"));
-    expect(uploaded).toBe(drawn + 1);
-    expect(job[uploaded]).toMatch(/^ {10}name: docs-drawings$/m);
-    expect(job[uploaded]).toMatch(
-      /^ {10}path: node_modules\/\.cache\/solid-memo-docs-diagrams\/$/m,
-    );
   });
 
   // GitHub hands a job its environment's secrets when it starts, so any
@@ -235,19 +210,14 @@ describe("release.yml", () => {
     const job = steps(prepare, 6);
     const at = (text: string) => job.findIndex((step) => step.includes(text));
     expect(job[at("uses: actions/checkout@")]).toMatch(/^ {10}persist-credentials: false$/m);
-    // The drawings of this run alone, which only the draw job uploads,
-    // checked before semantic-release, whose archive draws nothing.
-    const downloaded = at("uses: actions/download-artifact@");
-    expect(job[downloaded]).toMatch(/^ {10}name: docs-drawings$/m);
-    expect(job[downloaded]).toMatch(
-      /^ {10}path: node_modules\/\.cache\/solid-memo-docs-diagrams$/m,
-    );
-    expect(job[downloaded]).not.toMatch(/run-id|github-token|repository:/);
-    const checked = at("name: The drawings are all there");
-    expect(checked).toBe(downloaded + 1);
-    expect(job[checked]).toMatch(/^ {8}run: npm run docs:archive -- --drawn$/m);
+    // This run's drawings, made in Chromium before semantic-release,
+    // whose archive draws nothing.
+    const drawn = at("name: Draw the docs' diagrams");
+    expect(drawn).toBe(at("uses: ./.github/actions/chromium") + 1);
+    expect(job[drawn]).toMatch(/^ {8}run: npm run docs:archive -- --draw$/m);
+    expect(job.filter((step) => step.includes("download-artifact"))).toEqual([]);
     const released = at("name: npx semantic-release");
-    expect(released).toBe(checked + 1);
+    expect(released).toBe(drawn + 1);
     expect(job[released]).not.toMatch(/TOKEN|secrets\.|docs:archive/);
     expect(job[released]).toMatch(
       /^ {10}REPOSITORY_URL: https:\/\/github\.com\/\$\{\{ github\.repository \}\}\.git$/m,
@@ -485,15 +455,7 @@ describe("npm audit signatures", () => {
     expect(check[installed + 1]).toMatch(audit);
   });
 
-  it("runs right after the install in the draw job, before Chromium", () => {
-    const job = steps(workflow.get("draw") ?? "", 6);
-    const installed = at(job, install);
-    expect(installed).toBeGreaterThan(-1);
-    expect(job[installed + 1]).toMatch(audit);
-    expect(at(job, "uses: ./.github/actions/chromium")).toBe(installed + 2);
-  });
-
-  it("runs right after the install in the prepare job, before semantic-release", () => {
+  it("runs right after the install in the prepare job, before Chromium and semantic-release", () => {
     const job = steps(workflow.get("prepare") ?? "", 6);
     const installed = at(job, install);
     expect(installed).toBeGreaterThan(-1);
@@ -501,7 +463,8 @@ describe("npm audit signatures", () => {
     expect(audited).toMatch(audit);
     expect(audited).toMatch(/^if: steps\.tip\.outputs\.release == 'true'$/m);
     expect(audited).not.toContain("secrets.");
-    expect(at(job, "name: npx semantic-release")).toBeGreaterThan(installed + 1);
+    expect(at(job, "uses: ./.github/actions/chromium")).toBe(installed + 2);
+    expect(at(job, "name: npx semantic-release")).toBeGreaterThan(installed + 2);
   });
 });
 

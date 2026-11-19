@@ -501,7 +501,7 @@ own run. When there is something to release, semantic-release:
    `date-released`), with `npm run release:version`
    ([releaseVersion.ts](../scripts/releaseVersion.ts));
 4. renders the version's docs as pages, with every diagram the
-   workflow's `draw` job drew in Chromium
+   `prepare` job drew in Chromium before it ran
    (`npm run docs:archive -- --draw`), into
    `release-assets/docs-X.Y.Z.tar.gz`, with
    `npm run docs:archive -- X.Y.Z --drawn`, which starts no browser
@@ -712,34 +712,23 @@ changelog entry, and CI runs on the commit before the deploy.
 What the `prepare` job runs is still kept to what the release needs,
 since the job's output is pushed with the key:
 
-- The docs' diagrams are drawn in Chromium by the workflow's `draw`
-  job, which names no environment and holds no secret, with a token
-  that can only read and a checkout that keeps no credentials
-  (`npm run docs:archive -- --draw`). It keeps the drawings as an
-  artifact of the run. The `prepare` job downloads that run's artifact,
-  and runs no browser and installs nothing with apt. With
-  `npm run docs:archive -- --drawn`, it checks that every drawing is
-  there and passes the checks the site's build makes (`checkSvg`, and
-  the font's notice). The archive semantic-release renders takes them
-  from the drawings' cache the same way, drawing nothing. A drawing
-  that isn't there fails the release before anything is pushed.
-- The `draw` job chooses the drawings the release archive carries, so
-  their integrity rests on those checks alone: `checkSvg` and the
-  font's notice. The `prepare` job doesn't draw them again to compare.
-- Both jobs check out `main`'s tip. When `main` moves between them and
-  the newer commit changes a diagram, or what draws it, its drawing
-  isn't in the artifact: `--drawn` fails the run before anything is
-  pushed, and the run that the newer commit starts releases it.
-- The artifacts are kept for 7 days. Re-running only a failed job works
-  within them; after that, the download fails, and the maintainer
-  re-runs all the run's jobs, or runs the workflow by hand.
-- `npm ci --ignore-scripts` runs no package's install script. In the
-  `draw` job, Chromium comes from the Chromium action, which downloads
+- The docs' diagrams are drawn in Chromium before semantic-release
+  runs (`npm run docs:archive -- --draw`), each checked as the site's
+  build checks it (`checkSvg`, and the font's notice). The archive
+  semantic-release renders takes them from the drawings' cache with
+  `--drawn`, drawing nothing. A drawing that fails its checks fails the
+  release before anything is pushed.
+- The artifacts are kept for 7 days. Re-running only a failed `push`
+  or `publish` job works within them; after that, the download fails,
+  and the maintainer re-runs all the run's jobs, or runs the workflow
+  by hand.
+- `npm ci --ignore-scripts` runs no package's install script.
+  Chromium comes from the Chromium action, which downloads
   its headless shell and checks the file against the SHA-256 committed in
   [.github/actions/headless-shell](../.github/actions/headless-shell/action.yml).
   Playwright's own download checks no hash, so it isn't used, and
   `npm run check:shell` holds the pin to Playwright's version.
-- `npm audit signatures` runs next, in both jobs, before Chromium is
+- `npm audit signatures` runs next, before Chromium is
   downloaded and before semantic-release runs. It fails unless every installed
   version from a registry has the registry's valid signature, and any
   attestation it has, such as its provenance, verifies
