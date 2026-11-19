@@ -14,16 +14,17 @@ import { queryKeys } from "./queryKeys";
 
 /**
  * A deck's health (UseCases.checkDeck), the Markdown read by the markdown
- * package. Its key is under the instance's check, so a repair, which
- * reads that afresh, reads this afresh too; with the cards document, so
- * an upgraded deck is checked anew. A badge does not check it again on
- * its own (as the instance's check is not): a repair, "Check again"
- * and opening the deck's health do. What it finds is put in the
+ * package. Its key is under the instance's check, so what reads that
+ * afresh reads this afresh too; with the cards document, so an upgraded
+ * deck is checked anew. A badge does not check it again on its own (as
+ * the instance's check is not): "Check again" and opening the deck's
+ * health do. What it finds is put in the
  * instance's check too (withDeckReport), which holds the deck
  * (useDataCheck): a deck found mended is let go, and one found broken
  * is held, without the whole instance being checked again. Only a check
  * still current is put there: one canceled as the deck is checked
- * anew (a repair, say) read the pod before, and would hold a deck mended.
+ * anew ("Check again", say) read the pod before, and would hold a deck
+ * mended.
  */
 export function deckHealthQuery(
   useCases: UseCases,

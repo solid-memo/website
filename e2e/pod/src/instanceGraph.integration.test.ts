@@ -51,7 +51,6 @@ function page() {
     sessionGateway: undefined as never,
     deckLibrary: undefined as never,
     reviewStateRepository: undefined as never,
-    repairRepository: undefined as never,
     instanceCopier: undefined as never,
     shapeValidator,
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: recording }),

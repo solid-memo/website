@@ -35,7 +35,7 @@ export interface DataCheck {
   report: ValidationReport | null;
   /** The decks whose documents the check found unclaimed, conforming or not: none until it is in. */
   unclaimed: readonly UnclaimedDeck[];
-  /** Under "set invalid data aside", a deck with invalid data: read-only until it is repaired. */
+  /** Under "set invalid data aside", a deck with invalid data: read-only until it is fixed. */
   isSetAside: (deck: Deck) => boolean;
   /** Under "set invalid data aside", the catalog or a deck group has invalid data: the arrangement is read-only. */
   arrangementSetAside: boolean;
@@ -61,7 +61,7 @@ function hasUnreadable(report: ValidationReport | undefined): boolean {
 /**
  * The check of the instance at `instanceUrl` (null: none open), the same
  * query as Solid Memo's workspace makes (queryKeys.validation(url)), so it is
- * made once, and made again after a repair; and the policy it is held to.
+ * made once; and the policy it is held to.
  */
 export function useDataCheck(useCases: UseCases, instanceUrl: string | null): DataCheck {
   const preferencesQuery = useQuery({

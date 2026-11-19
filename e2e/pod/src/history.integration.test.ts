@@ -116,7 +116,6 @@ function page() {
     preferencesRepository: createSolidPreferencesRepository({ fetch: recording }),
     reviewStateRepository: undefined as never,
     shapeValidator: undefined as never,
-    repairRepository: undefined as never,
     instanceCopier: undefined as never,
     answerLog: createSolidAnswerLog({ fetch: recording }),
     digestRepository: createSolidDigestRepository({

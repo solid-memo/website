@@ -19,7 +19,6 @@ import type {
   StorageGateway,
   WebIdDocumentRepository,
   ShapeValidator,
-  RepairRepository,
   InstanceCopier,
 } from "../ports";
 import { DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
@@ -272,9 +271,6 @@ export function makeDeps() {
     })),
     validateRelease: vi.fn(async () => []),
   };
-  const repairRepository: RepairRepository = {
-    applyRepairs: vi.fn(async () => undefined),
-  };
   const instanceCopier: InstanceCopier = {
     listResources: vi.fn(async () => [`${instance.url}decks/`, `${instance.url}meta.ttl`]),
     ensureAbsent: vi.fn(async () => undefined),
@@ -311,7 +307,6 @@ export function makeDeps() {
     preferencesRepository,
     reviewStateRepository,
     shapeValidator,
-    repairRepository,
     instanceCopier,
     updateJournal,
     now: () => new Date("2026-09-28T10:00:00.000Z"),

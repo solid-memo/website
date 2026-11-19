@@ -254,7 +254,7 @@
         "other": "Tog bort {count} kortlekar."
       },
       "export": "Exportera",
-      "moveSetAside": "Ordningen av kortlekarna har ogiltiga data, så kortlekar kan inte flyttas in i grupper förrän den är reparerad.",
+      "moveSetAside": "Ordningen av kortlekarna har ogiltiga data, så kortlekar kan inte flyttas in i grupper förrän den är rättad.",
       "groups": {
         "edit": "Redigera",
         "editCards": "Redigera de valda korten",
@@ -385,8 +385,7 @@
         "chapter": "Ta bort kapitlet",
         "step": "Ta bort steget",
         "card": "Ta bort kortet"
-      },
-      "removeData": "Ta bort det ur din pod"
+      }
     },
     "schedule": {
       "loading": "Läser in schemat…",
@@ -703,13 +702,11 @@
       "allWell": "Inget är fel med den här kortleken.",
       "dataHeading": "Datakontroll",
       "dataHint": "Kortlekens post i katalogen och dess dokument, kontrollerade mot Solid Memos former.",
-      "held": "Inget i kortleken kan ändras förrän data är reparerade, så problemen nedan namnges men länkas inte till sina formulär. Reparera det som kan repareras här, och ta bort det som ingen reparation täcker.",
+      "held": "Inget i kortleken kan ändras förrän dess data är rättade, så problemen nedan namnges men länkas inte till sina formulär.",
       "instanceDataHint": "Instansens dokument, kontrollerade mot Solid Memos former. Dokument som inte ändrats sedan de senast godkändes kontrolleras inte igen.",
       "deckEntry": "Kortlekens post",
       "deckDistribution": "Kortlekens distribution",
       "inDeck": "i {deck}",
-      "remove": "Ta bort {subject}",
-      "removeHint": "Ingen reparation täcker det här: rätta det i dokumentet eller ta bort det.",
       "decksHeading": "Kortlekar",
       "decksHint": "Varje kortlek kontrolleras när den syns på skärmen.",
       "languagesHeading": "Språk",
@@ -883,12 +880,11 @@
     "readOnly": {
       "checking": "Instansens data kontrolleras. Inget kan ändras förrän kontrollen är klar.",
       "unchecked": "Instansens data kunde inte kontrolleras, så inget kan ändras förrän de kan kontrolleras. Välj ”Varna bara” i Solid Memos inställningar för att ändra dem okontrollerade.",
-      "blocked": "Instansen har ogiltiga data, och dina inställningar håller den stängd tills de är reparerade, så inget kan ändras här. {repair}",
-      "deck": "Kortleken har ogiltiga data, så den är lagd åt sidan: den visas här, men inget i den kan ändras förrän den är reparerad. {repair}",
-      "decks": "Kortlekar med ogiltiga data är lagda åt sidan: de kan inte väljas eller ändras förrän de är reparerade. {repair}",
-      "catalogue": "Instansens katalog eller en av dess grupper har ogiltiga data, så den är lagd åt sidan: inget kan läggas till i den eller ändras i den förrän den är reparerad. {repair}",
-      "repair": "Reparera den på skärmen Hälsa.",
-      "repairDecks": "Reparera dem på skärmen Hälsa."
+      "blocked": "Instansen har ogiltiga data, och dina inställningar håller den stängd tills de är rättade utanför Solid Memo, så inget kan ändras här. {health}",
+      "deck": "Kortleken har ogiltiga data, så den är lagd åt sidan: den visas här, men inget i den kan ändras förrän den är rättad utanför Solid Memo. {health}",
+      "decks": "Kortlekar med ogiltiga data är lagda åt sidan: de kan inte väljas eller ändras förrän de är rättade utanför Solid Memo. {health}",
+      "catalogue": "Instansens katalog eller en av dess grupper har ogiltiga data, så den är lagd åt sidan: inget kan läggas till i den eller ändras i den förrän den är rättad utanför Solid Memo. {health}",
+      "health": "Se vad som inte uppfyller formerna på skärmen Hälsa."
     },
     "drafts": {
       "crumb": "Utkast",

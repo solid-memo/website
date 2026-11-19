@@ -458,12 +458,12 @@
   "dataCheckNotice": {
     "region": "Vérification des données",
     "heading": "Certaines données de {name} ne sont pas au format attendu par Solid Memo.",
-    "blockInstance": "Solid Memo n’utilisera pas cette instance tant qu’elle n’aura pas été réparée.",
+    "blockInstance": "Solid Memo n’utilisera pas cette instance tant que ces données n’auront pas été corrigées.",
     "restKeepsWorking": "Le reste continue de fonctionner.",
     "setAside": {
-      "one": "Mis de côté jusqu’à réparation : {names}. Le reste continue de fonctionner.",
-      "many": "Mis de côté jusqu’à réparation : {names}. Le reste continue de fonctionner.",
-      "other": "Mis de côté jusqu’à réparation : {names}. Le reste continue de fonctionner."
+      "one": "Mis de côté jusqu’à ce que ses données soient corrigées : {names}. Le reste continue de fonctionner.",
+      "many": "Mis de côté jusqu’à ce que leurs données soient corrigées : {names}. Le reste continue de fonctionner.",
+      "other": "Mis de côté jusqu’à ce que leurs données soient corrigées : {names}. Le reste continue de fonctionner."
     },
     "setAsideMore": {
       "one": "et {count} autre",
@@ -471,10 +471,10 @@
       "other": "et {count} autres"
     },
     "keepsWorking": "Solid Memo continue de les utiliser.",
-    "arrangementSetAside": "La liste des paquets ne peut pas être réorganisée tant que son ordre n’a pas été réparé.",
+    "arrangementSetAside": "La liste des paquets ne peut pas être réorganisée tant que son ordre n’a pas été corrigé.",
     "policyHint": "Ce qu’il advient des données non valides se règle dans {preferences}.",
     "preferences": "Préférences",
-    "repair": "Réparer"
+    "leftAsItIs": "Solid Memo laisse ces données telles quelles : elles doivent être corrigées en dehors de l’application, avec un autre outil."
   },
   "dataCheckLists": {
     "problems": "Les problèmes, document par document",
@@ -492,16 +492,6 @@
       "one": "Et {count} autre résultat, qui n’apparaît pas ici.",
       "many": "Et {count} de résultats de plus, qui n’apparaissent pas ici.",
       "other": "Et {count} autres résultats, qui n’apparaissent pas ici."
-    },
-    "moreRepairs": {
-      "one": "Et {count} autre problème que Solid Memo peut réparer, qui n’apparaît pas ici.",
-      "many": "Et {count} de problèmes de plus que Solid Memo peut réparer, qui n’apparaissent pas ici.",
-      "other": "Et {count} autres problèmes que Solid Memo peut réparer, qui n’apparaissent pas ici."
-    },
-    "moreProblems": {
-      "one": "Et {count} autre problème qui demande votre décision, qui n’apparaît pas ici.",
-      "many": "Et {count} de problèmes de plus qui demandent votre décision, qui n’apparaissent pas ici.",
-      "other": "Et {count} autres problèmes qui demandent votre décision, qui n’apparaissent pas ici."
     },
     "showMore": {
       "one": "Afficher {count} de plus",
@@ -584,7 +574,7 @@
     "startCourseNamed": "Commencer le cours {course}",
     "courseProgress": "Chapitres terminés",
     "loading": "Chargement des paquets…",
-    "setAside": "Mis de côté : ses données doivent être réparées",
+    "setAside": "Mis de côté : ses données doivent être corrigées",
     "heading": "Paquets",
     "deckCount": {
       "one": "{count} paquet",
@@ -596,7 +586,7 @@
     "libraryLink": "Bibliothèque de paquets",
     "emptyGroup": "Ce groupe est encore vide.",
     "readOnly": "Une version plus récente de Solid Memo a organisé ces paquets : ils ne peuvent donc pas être réorganisés ici. Utilisez plutôt une version plus récente de Solid Memo.",
-    "arrangementSetAside": "L’organisation de ces paquets contient des données non valides : ils ne pourront pas être réorganisés tant qu’elle n’aura pas été réparée.",
+    "arrangementSetAside": "L’organisation de ces paquets contient des données non valides : ils ne pourront pas être réorganisés tant qu’elle n’aura pas été corrigée.",
     "newGroupName": "Nouveau groupe",
     "groupName": "Nom du groupe",
     "saveName": "Enregistrer le nom",
@@ -1641,29 +1631,6 @@
     "anotherHint": "Il doit se trouver dans votre Pod et indiquer être un index de types. Solid Memo le lie depuis votre profil s’il ne l’est pas déjà.",
     "publicMeans": "Public : tout le monde peut voir que cette instance existe, son nom et où elle se trouve. Qui peut l’ouvrir reste décidé par ses réglages d’accès."
   },
-  "repair": {
-    "removeConfirm": "Supprimer <{url}> de votre Pod ? Cette action est irréversible.",
-    "canRepair": "Solid Memo peut réparer ces éléments :",
-    "repairing": "Réparation…",
-    "repairButton": {
-      "one": "Réparer {count} problème",
-      "many": "Réparer {count} de problèmes",
-      "other": "Réparer {count} problèmes"
-    },
-    "needDecision": "Ces éléments demandent votre décision : corrigez-les dans le document ou supprimez-les.",
-    "problem": "{subject} dans {document} : {messages}",
-    "removeButton": "Supprimer",
-    "action": {
-      "describeDeck": "Donner au paquet la description par défaut",
-      "directDeck": "Étudier le paquet du recto vers le verso",
-      "dropSnapshot": "Supprimer l’instantané d’annulation à moitié écrit de la révision",
-      "recomputeDue": "Recalculer la date de la prochaine révision",
-      "nameAgent": "Nommer la personne ou l’organisation d’après son adresse",
-      "dropDanglingMembers": "Supprimer les liens vers des paquets et des groupes qui n’existent plus",
-      "dropUnreadableDate": "Supprimer les dates que Solid Memo ne peut pas lire",
-      "removeSubject": "Supprimer"
-    }
-  },
   "retiredCards": {
     "showToggle": "Afficher les cartes archivées",
     "toggleHint": {
@@ -1797,7 +1764,7 @@
       "DeckPlace": "L’entrée du paquet n’est pas dans le catalogue de son instance, ou elle désigne un document à une adresse qu’aucun document de paquet ne peut avoir, comme le contrôle d’accès d’une autre ressource ou l’un des documents propres de l’instance. Solid Memo ne l’utilise pas.",
       "DateTimeRange": "Solid Memo ne peut pas lire cette date : elle est trop loin dans le futur ou le passé, ou plus longue qu’une date-heure, elle est donc lue comme une absence de date.",
       "FormatVersionRange": "Aucun format de Solid Memo n’a cette version : elle est inférieure à 1, Solid Memo ne peut donc pas lire le sujet.",
-      "ResultLimit": "Ce sujet a, dans une vérification, plus de résultats que Solid Memo n’en liste : il affiche les 1 000 plus graves. Réparez-les, et la vérification trouvera le reste."
+      "ResultLimit": "Ce sujet a, dans une vérification, plus de résultats que Solid Memo n’en liste : il affiche les 1 000 plus graves. Corrigez-les, et la vérification trouvera le reste."
     }
   },
   "webIdDocument": {
@@ -1820,7 +1787,7 @@
     "developerModeOff": "Le mode développeur est désactivé. Activez-le dans {preferences} pour vérifier cette instance par rapport aux formes de Solid Memo.",
     "preferencesLink": "Préférences",
     "checkingData": "Vérification des données de cette instance…",
-    "deckSetAside": "Ce paquet est mis de côté : ses données ne sont pas conformes. Réparez-le ci-dessus pour l’utiliser à nouveau.",
+    "deckSetAside": "Ce paquet est mis de côté : ses données ne sont pas conformes. Elles doivent être corrigées en dehors de Solid Memo avant de pouvoir l’utiliser à nouveau.",
     "checkFailed": "Impossible de vérifier les données de cette instance : {error}",
     "checkFailedHeld": "Tant que la vérification ne peut pas être faite, Solid Memo retient ce qu’il retiendrait pendant la vérification. Pour utiliser les données sans vérification, choisissez « Avertir seulement » dans {preferences}.",
     "developerTools": "Outils de développement",

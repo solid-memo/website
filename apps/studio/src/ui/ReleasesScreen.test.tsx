@@ -341,10 +341,9 @@ describe("ReleasesScreen", () => {
 
   it("says why the catalog may not be written", () => {
     renderScreen({ hold: "setAside" });
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     expect(
       screen.getByRole("button", { name: "Start the next version of solid, version 2" }),
     ).toBeDisabled();

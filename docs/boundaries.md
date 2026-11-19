@@ -321,7 +321,7 @@ given. So the adapters that read and write an instance's data get
 another fetch
 ([appUseCases.ts](../packages/composition/src/appUseCases.ts)). They're
 the decks, cards, review states, answers, preferences, palettes, the
-digest, the drafts, the instance check and its repairs, the graph, a
+digest, the drafts, the instance check, the graph, a
 deck's export, a Studio trial, and deleting an instance's data. Behind
 the [pod fence](#the-pod-fence) that fetch passes the credential gate
 ([ownPodGate.ts](../packages/solid/src/ownPodGate.ts),

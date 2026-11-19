@@ -52,7 +52,7 @@ export function LibraryCopiesContainer({
   instance: Instance;
   deckHref: (deck: Deck) => string;
   libraryHref: string;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
   /** The copy shown beside the table, by its deck's URL. */
   current?: string;

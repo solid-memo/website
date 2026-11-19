@@ -502,10 +502,9 @@ describe("DeckTableScreen", () => {
   it("selects only the decks that may be changed, saying why the others cannot be, all at once too", () => {
     render(<Harness selectable={(deck) => deck.url !== kanji.url} readOnly="setAside" />);
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health?instance=a",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health?instance=a");
     expect(screen.getByRole("checkbox", { name: "Select Kanji N5" })).toBeDisabled();
     fireEvent.click(screen.getByRole("checkbox", { name: "Select every deck shown" }));
     expect(screen.getByRole("checkbox", { name: "Select every deck shown" })).toBeChecked();

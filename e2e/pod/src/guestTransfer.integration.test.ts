@@ -36,7 +36,6 @@ import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
@@ -170,7 +169,6 @@ function app() {
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: podFetch, checkWrite }),

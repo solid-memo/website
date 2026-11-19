@@ -446,21 +446,21 @@
   "dataCheckNotice": {
     "region": "Datakontroll",
     "heading": "Vissa data i {name} har inte det format Solid Memo förväntar sig.",
-    "blockInstance": "Solid Memo använder inte den här instansen förrän den är reparerad.",
+    "blockInstance": "Solid Memo använder inte den här instansen förrän datan är rättad.",
     "restKeepsWorking": "Resten fungerar som vanligt.",
     "setAside": {
-      "one": "{names} läggs åt sidan tills den är reparerad; resten fungerar som vanligt.",
-      "other": "{names} läggs åt sidan tills de är reparerade; resten fungerar som vanligt."
+      "one": "{names} läggs åt sidan tills dess data är rättad; resten fungerar som vanligt.",
+      "other": "{names} läggs åt sidan tills deras data är rättad; resten fungerar som vanligt."
     },
     "setAsideMore": {
       "one": "och {count} till",
       "other": "och {count} till"
     },
     "keepsWorking": "Solid Memo fortsätter att använda dem.",
-    "arrangementSetAside": "Kortlekslistan kan inte ordnas om förrän dess ordning är reparerad.",
+    "arrangementSetAside": "Kortlekslistan kan inte ordnas om förrän dess ordning är rättad.",
     "policyHint": "Vad som händer med ogiltiga data ställer du in under {preferences}.",
     "preferences": "Inställningar",
-    "repair": "Reparera"
+    "leftAsItIs": "Solid Memo lämnar den här datan som den är: den måste rättas utanför appen, med ett annat verktyg."
   },
   "dataCheckLists": {
     "problems": "Problemen, dokument för dokument",
@@ -475,14 +475,6 @@
     "moreResults": {
       "one": "Och {count} resultat till, som inte listas här.",
       "other": "Och {count} resultat till, som inte listas här."
-    },
-    "moreRepairs": {
-      "one": "Och {count} problem till som Solid Memo kan reparera, som inte listas här.",
-      "other": "Och {count} problem till som Solid Memo kan reparera, som inte listas här."
-    },
-    "moreProblems": {
-      "one": "Och {count} problem till som behöver ditt beslut, som inte listas här.",
-      "other": "Och {count} problem till som behöver ditt beslut, som inte listas här."
     },
     "showMore": {
       "one": "Visa {count} till",
@@ -561,7 +553,7 @@
     "startCourseNamed": "Börja kursen {course}",
     "courseProgress": "Avklarade kapitel",
     "loading": "Läser in kortlekar…",
-    "setAside": "Lagd åt sidan: dess data behöver repareras",
+    "setAside": "Lagd åt sidan: dess data behöver rättas",
     "heading": "Kortlekar",
     "deckCount": {
       "one": "{count} kortlek",
@@ -572,7 +564,7 @@
     "libraryLink": "Kortleksbiblioteket",
     "emptyGroup": "Inget i den här gruppen än.",
     "readOnly": "En nyare version av Solid Memo har ordnat kortlekarna, så de kan inte ordnas om här. Använd en nyare version av Solid Memo i stället.",
-    "arrangementSetAside": "Ordningen av kortlekarna har ogiltig data, så de kan inte ordnas om förrän den är reparerad.",
+    "arrangementSetAside": "Ordningen av kortlekarna har ogiltig data, så de kan inte ordnas om förrän den är rättad.",
     "newGroupName": "Ny grupp",
     "groupName": "Gruppens namn",
     "saveName": "Spara namnet",
@@ -1558,28 +1550,6 @@
     "anotherHint": "Det måste finnas i din Pod och ange att det är ett typindex. Solid Memo länkar det från din profil om det inte redan är länkat.",
     "publicMeans": "Publikt: vem som helst kan se att instansen finns, vad den heter och var den ligger. Vem som får öppna den avgörs fortfarande av dess åtkomstinställningar."
   },
-  "repair": {
-    "removeConfirm": "Ta bort <{url}> från din Pod? Det går inte att ångra.",
-    "canRepair": "Solid Memo kan reparera de här:",
-    "repairing": "Reparerar…",
-    "repairButton": {
-      "one": "Reparera {count} problem",
-      "other": "Reparera {count} problem"
-    },
-    "needDecision": "De här behöver ditt beslut: rätta dem i dokumentet eller ta bort dem.",
-    "problem": "{subject} i {document}: {messages}",
-    "removeButton": "Ta bort",
-    "action": {
-      "describeDeck": "Ge kortleken standardbeskrivningen",
-      "directDeck": "Studera kortleken från framsida till baksida",
-      "dropSnapshot": "Ta bort repetitionens halvskrivna ångra-ögonblicksbild",
-      "recomputeDue": "Räkna om när kortet ska repeteras nästa gång",
-      "nameAgent": "Namnge personen eller organisationen efter dess adress",
-      "dropDanglingMembers": "Ta bort länkarna till kortlekar och grupper som inte finns kvar",
-      "dropUnreadableDate": "Ta bort datum som Solid Memo inte kan läsa",
-      "removeSubject": "Ta bort det"
-    }
-  },
   "retiredCards": {
     "showToggle": "Visa kort ur bruk",
     "toggleHint": {
@@ -1708,7 +1678,7 @@
       "DeckPlace": "Kortlekens post finns inte i instansens katalog, eller så anger den ett dokument på en adress som ingen kortleks dokument får ha, till exempel en annan resurs åtkomstkontroll eller ett av instansens egna dokument. Solid Memo använder den inte.",
       "DateTimeRange": "Solid Memo kan inte läsa det här datumet: det ligger för långt fram eller tillbaka i tiden, eller är längre än en tidpunkt är, så det läses som inget datum.",
       "FormatVersionRange": "Inget format i Solid Memo har den här versionen: den är lägre än 1, så Solid Memo kan inte läsa subjektet.",
-      "ResultLimit": "Det här subjektet har fler resultat i en kontroll än Solid Memo listar: det visar de 1 000 allvarligaste. Reparera dem, så hittar kontrollen resten."
+      "ResultLimit": "Det här subjektet har fler resultat i en kontroll än Solid Memo listar: det visar de 1 000 allvarligaste. Rätta dem, så hittar kontrollen resten."
     }
   },
   "webIdDocument": {
@@ -1731,7 +1701,7 @@
     "developerModeOff": "Utvecklarläget är av. Slå på det i {preferences} för att kontrollera den här instansen mot Solid Memos former.",
     "preferencesLink": "Inställningar",
     "checkingData": "Kontrollerar instansens data…",
-    "deckSetAside": "Kortleken är lagd åt sidan: dess data uppfyller inte formerna. Reparera den ovan för att använda den igen.",
+    "deckSetAside": "Kortleken är lagd åt sidan: dess data uppfyller inte formerna. Den måste rättas utanför Solid Memo innan kortleken kan användas igen.",
     "checkFailed": "Det gick inte att kontrollera instansens data: {error}",
     "checkFailedHeld": "Tills kontrollen kan göras håller Solid Memo tillbaka det som hålls tillbaka medan den pågår. Välj ”Varna bara” i {preferences} för att använda datan okontrollerad.",
     "developerTools": "Utvecklarverktyg",

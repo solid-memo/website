@@ -7,14 +7,12 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
-import type { RepairPlan } from "@solid-memo/domain/repair";
 import { deckHealth } from "@solid-memo/domain/deckHealth";
 import { summarize, type ValidationReport } from "@solid-memo/domain/validation";
 import { deckTextCheck } from "@solid-memo/ui/markdownCache";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
 import { HealthContainer } from "./HealthContainer";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
-import { answer, dialog } from "../test/dialogs";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 /** A check of the deck's documents that finds nothing: its catalog, cards and reviews come back with no subjects, unchanged or conforming. */
@@ -26,24 +24,6 @@ const conforming = summarize(
     subjects: [],
   })),
 );
-const plan: RepairPlan = {
-  repairs: [
-    {
-      kind: "describe-deck",
-      documentUrl: `${instanceA.url}catalog.ttl`,
-      subjectUrl: deck.url,
-      version: 3,
-    },
-  ],
-  unrepairable: [
-    {
-      documentUrl: deck.cardsDocumentUrl,
-      subjectUrl: `${deck.cardsDocumentUrl}#water`,
-      violations: [],
-    },
-  ],
-};
-
 function renderContainer(
   useCases: UseCases,
   of: Deck | null,
@@ -66,79 +46,37 @@ function renderContainer(
 }
 
 describe("HealthContainer", () => {
-  it("checks a deck, with its cards, and repairs what it can of it, reading its check afresh", async () => {
+  it("checks a deck, with its cards, offers no repair or removal, and checks it again", async () => {
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [makeCard(deck, "water"), makeCard(deck, "water")]),
-      planRepair: vi.fn(() => plan),
+      checkInstance: vi.fn(async () => invalidReport([deck])),
     });
     const { invalidate } = renderContainer(useCases, deck);
     expect(await screen.findByRole("heading", { name: "Health of Kanji N5" })).toBeInTheDocument();
     expect(useCases.checkDeck).toHaveBeenCalledWith(instanceA.url, deck, expect.anything());
-    expect(screen.getByRole("link", { name: "The deck's entry" })).toHaveAttribute(
-      "href",
-      "#/about?deck=deck-1",
-    );
-    fireEvent.click(screen.getByRole("button", { name: "Repair 1 problem" }));
-    await waitFor(() =>
-      expect(useCases.applyRepairs).toHaveBeenCalledWith(instanceA.url, plan.repairs),
-    );
+    expect(
+      await screen.findByText(
+        /Solid Memo leaves this data as it is: it must be fixed outside the app/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Repair|Remove/ })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Check again" }));
     await waitFor(() =>
       expect(invalidate).toHaveBeenCalledWith({
         queryKey: ["validation", instanceA.url, "deck", deck.url, deck.cardsDocumentUrl],
       }),
     );
-    fireEvent.click(screen.getByRole("button", { name: "Check again" }));
-    await waitFor(() => expect(useCases.checkDeck).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(useCases.checkDeck).toHaveBeenCalledTimes(2));
   });
 
-  it("removes a subject no repair covers once the user confirms", async () => {
-    const useCases = makeUseCasesFake({ planRepair: vi.fn(() => plan) });
-    renderContainer(useCases, deck);
-    const remove = await screen.findByRole("button", {
-      name: `Remove ${plan.unrepairable[0]!.subjectUrl}`,
-    });
-    fireEvent.click(remove);
-    expect(dialog("Remove it from your pod")).toHaveTextContent(
-      `Remove <${plan.unrepairable[0]!.subjectUrl}> from your pod? This cannot be undone.`,
-    );
-    answer("Remove it from your pod", "Cancel");
-    expect(useCases.applyRepairs).not.toHaveBeenCalled();
-    fireEvent.click(remove);
-    answer("Remove it from your pod", "Remove");
-    await waitFor(() =>
-      expect(useCases.applyRepairs).toHaveBeenCalledWith(instanceA.url, [
-        {
-          kind: "remove-subject",
-          documentUrl: deck.cardsDocumentUrl,
-          subjectUrl: plan.unrepairable[0]!.subjectUrl,
-          version: 1,
-        },
-      ]),
-    );
-  });
-
-  it("works out the repairs of a check once, however often the screen is drawn again", async () => {
-    const useCases = makeUseCasesFake({ planRepair: vi.fn(() => plan) });
-    renderContainer(useCases, deck);
-    const remove = await screen.findByRole("button", {
-      name: `Remove ${plan.unrepairable[0]!.subjectUrl}`,
-    });
-    for (let i = 0; i < 3; i++) {
-      fireEvent.click(remove);
-      answer("Remove it from your pod", "Cancel");
-    }
-    expect(useCases.planRepair).toHaveBeenCalledTimes(1);
-  });
-
-  it("links a deck set aside to none of its forms, which change nothing, and says why; its repairs stay", async () => {
+  it("links a deck set aside to none of its forms, which change nothing, and says why", async () => {
     const useCases = makeUseCasesFake({
       listCards: vi.fn(async () => [makeCard(deck, "c1")]),
       checkInstance: vi.fn(async () => invalidReport([deck])),
-      planRepair: vi.fn(() => plan),
     });
     renderContainer(useCases, deck);
     expect(
-      await screen.findByText(/Nothing in this deck can be changed until the data is repaired/),
+      await screen.findByText(/Nothing in this deck can be changed until its data is fixed/),
     ).toBeInTheDocument();
     expect(screen.getByText(/^c1/)).toBeInTheDocument();
     expect(
@@ -146,7 +84,6 @@ describe("HealthContainer", () => {
         .queryAllByRole("link")
         .filter((link) => /^#\/(card|about)/.test(link.getAttribute("href")!)),
     ).toEqual([]);
-    expect(screen.getByRole("button", { name: "Repair 1 problem" })).toBeEnabled();
   });
 
   it("lets a deck set aside go once Check again finds it mended in the pod, checking only the deck again", async () => {
@@ -157,46 +94,17 @@ describe("HealthContainer", () => {
     const useCases = makeUseCasesFake({
       checkInstance,
       checkDeck: checkDeck as UseCases["checkDeck"],
-      planRepair: vi.fn(() => plan),
     });
     renderContainer(useCases, deck);
     expect(
-      await screen.findByText(/Nothing in this deck can be changed until the data is repaired/),
+      await screen.findByText(/Nothing in this deck can be changed until its data is fixed/),
     ).toBeInTheDocument();
     checkDeck.mockResolvedValue(deckHealth(deck, conforming, [], [], deckTextCheck()));
     fireEvent.click(screen.getByRole("button", { name: "Check again" }));
     await waitFor(() =>
       expect(screen.queryByText(/Nothing in this deck can be changed/)).not.toBeInTheDocument(),
     );
-    expect(screen.getByRole("link", { name: "The deck's entry" })).toHaveAttribute(
-      "href",
-      "#/about?deck=deck-1",
-    );
-    expect(checkInstance).toHaveBeenCalledTimes(1);
-  });
-
-  it("lets a deck set aside go once a repair mends it, checking only the deck again", async () => {
-    const checkInstance = vi.fn(async () => invalidReport([deck]));
-    const checkDeck = vi.fn(async () =>
-      deckHealth(deck, invalidReport([deck]), [], [], deckTextCheck()),
-    );
-    const applyRepairs = vi.fn(async () => {
-      checkDeck.mockResolvedValue(deckHealth(deck, conforming, [], [], deckTextCheck()));
-    });
-    const useCases = makeUseCasesFake({
-      checkInstance,
-      checkDeck: checkDeck as UseCases["checkDeck"],
-      applyRepairs,
-      planRepair: vi.fn(() => plan),
-    });
-    renderContainer(useCases, deck);
-    expect(
-      await screen.findByText(/Nothing in this deck can be changed until the data is repaired/),
-    ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Repair 1 problem" }));
-    await waitFor(() =>
-      expect(screen.queryByText(/Nothing in this deck can be changed/)).not.toBeInTheDocument(),
-    );
+    expect(screen.getByText("Nothing is wrong with this deck.")).toBeInTheDocument();
     expect(checkInstance).toHaveBeenCalledTimes(1);
   });
 
@@ -211,7 +119,7 @@ describe("HealthContainer", () => {
     expect(useCases.checkInstance).not.toHaveBeenCalled();
   });
 
-  it("does not hold a deck again by a check made before a repair that ends after it", async () => {
+  it("does not hold a deck again by a check made before a newer one that ends after it", async () => {
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const broken = deckHealth(deck, invalidReport([deck]), [], [], deckTextCheck());
     queryClient.setQueryData(["validation", instanceA.url], invalidReport([deck]));
@@ -222,19 +130,14 @@ describe("HealthContainer", () => {
     let endStale: () => void = () => undefined;
     const stale = new Promise<typeof broken>((resolve) => (endStale = () => resolve(broken)));
     const checkDeck = vi.fn(() => stale);
-    const applyRepairs = vi.fn(async () => {
-      checkDeck.mockResolvedValue(deckHealth(deck, conforming, [], [], deckTextCheck()));
-    });
-    const useCases = makeUseCasesFake({
-      checkDeck: checkDeck as UseCases["checkDeck"],
-      applyRepairs,
-      planRepair: vi.fn(() => plan),
-    });
+    const useCases = makeUseCasesFake({ checkDeck: checkDeck as UseCases["checkDeck"] });
     renderContainer(useCases, deck, queryClient);
     expect(
-      await screen.findByText(/Nothing in this deck can be changed until the data is repaired/),
+      await screen.findByText(/Nothing in this deck can be changed until its data is fixed/),
     ).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Repair 1 problem" }));
+    // The data mended in the pod by other means, and the deck checked anew (after an update, say).
+    checkDeck.mockResolvedValue(deckHealth(deck, conforming, [], [], deckTextCheck()));
+    void queryClient.invalidateQueries({ queryKey: ["validation", instanceA.url] });
     await waitFor(() =>
       expect(screen.queryByText(/Nothing in this deck can be changed/)).not.toBeInTheDocument(),
     );

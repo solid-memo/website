@@ -31,7 +31,7 @@ export function InstanceAboutContainer({
   useCases: UseCases;
   session: Session;
   instance: Instance;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
 }) {
   const { t, errorText } = useI18n();

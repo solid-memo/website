@@ -403,10 +403,9 @@ describe("CardWorkbenchScreen", () => {
     const plan = planCardEdit([water, fire], ["water"], { kind: "retire" });
     render(<Harness readOnly="setAside" lastEdit={{ edit: { kind: "retire" }, plan }} />);
     expect(screen.getByText(/This deck has invalid data, so it is set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     fireEvent.click(screen.getByRole("checkbox", { name: "Select 水" }));
     const bulk = screen.getByRole("group", { name: "Selected cards" });
     expect(bulk).toHaveTextContent("1 card selected");

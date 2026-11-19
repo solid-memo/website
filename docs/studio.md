@@ -1361,9 +1361,9 @@ the problems, then come four parts:
     entry and its distribution). The cards and their wrong options are
     indexed once for the deck's cards, so each link is a lookup, not a
     search through them.
-  - Solid Memo's own [repairs](validation.md#repair) of these are
-    offered, and a subject no repair covers can be removed once the
-    user confirms.
+  - Solid Memo repairs and removes none of these: it leaves them as
+    they are, and says they're fixed outside the app
+    ([data that doesn't fit](validation.md#data-that-doesnt-fit)).
 - **Languages**: the card sides that state no language, of the cards
   the user may settle (`unstatedSides`, which, like
   [deckLanguages.ts](../packages/domain/src/deckLanguages.ts), leaves
@@ -1389,8 +1389,7 @@ A deck can have any number of problems, so each of the last three
 parts shows at most `PROBLEM_LIMIT` (50) of them and says how many more
 there are. A group of cards that say the same names at most
 `DUPLICATE_CARD_LIMIT` (10) of its cards and says how many more it
-has. The summary, the line on unstated sides and the repair button
-count them all.
+has. The summary and the line on unstated sides count them all.
 
 Above them, on a deck's health and the instance's, a deck whose
 documents are unclaimed (they don't say they're the deck's, and are
@@ -1411,19 +1410,18 @@ those the health doesn't keep too (`healthProblemCount`).
 
 While the deck is held (set aside, or the instance blocked:
 [below](#data-set-aside)), every place is
-named, not linked, and a line says why. The repairs and removals are
-never held; a problem no repair covers is then removed here, or
+named, not linked, and a line says why. The problems are then
 corrected in the pod by other means.
 
-What the deck's check finds (as its screen opens, after a repair, or
-on "Check again") takes the place of what the instance's check found
+What the deck's check finds (as its screen opens, or on "Check
+again") takes the place of what the instance's check found
 of that deck (`withDeckReport`), in the same place in its list. That
 result is what holds it. A deck mended is let go without a reload or a
 check of the whole instance. A check overtaken by another
-(one still running when a repair is made) is dropped.
+(one still running when the deck is checked anew) is dropped.
 
 The instance's health is the check run when it's opened
-(`checkInstance`, the same query as Home's), with its repairs, then
+(`checkInstance`, the same query as Home's), then
 every deck with its badge, a link to its own health, as is a result
 about a deck. A result is about a deck as the data check sets decks
 aside: through its entry only when it was found in the catalog, and
@@ -1431,11 +1429,12 @@ otherwise through the document it was found in. The decks are indexed
 once for those links (`deckOfSubjectsIn`), so each is a lookup, not a
 search through them.
 A badge checks its deck once, and what it finds holds its
-deck too. A repair or a removal here reads every check of the instance
-afresh (their queries are under its key); on a deck's health, only the
-deck's, which is read afresh each time its screen opens. The end-to-end
-tests hold `checkDeck` against real servers, the documents it checks
-again and a removal that clears it included
+deck too. Reading the instance's check afresh reads every check of
+the instance afresh (their queries are under its key); "Check again"
+on a deck's health reads only the deck's, which is read afresh each
+time its screen opens too. The end-to-end tests hold `checkDeck`
+against real servers, the documents it checks again and what it
+leaves as it is included
 ([deckHealth.integration.test.ts](../e2e/pod/src/deckHealth.integration.test.ts)).
 
 ## Library copies
@@ -3039,7 +3038,7 @@ its node.
 Every Studio screen holds to the check Solid Memo runs when an
 instance is opened, and to the user's invalid data policy
 ([validation.md](validation.md)). `useDataCheck` in `ui` reads both
-with Solid Memo's workspace's queries, once and again after a repair
+with Solid Memo's workspace's queries, once
 ([health](#health)):
 
 - **Until the check is done**, nothing can be changed, under any policy
@@ -3050,8 +3049,9 @@ with Solid Memo's workspace's queries, once and again after a repair
   it's part of, as invalid data does, and the health screen names it.
 - **A deck set aside** (under "set invalid data aside", one whose entry
   or documents have invalid data) is read-only in every screen, a line
-  saying why, with a link to its health, where it's repaired. It's
-  left out of every bulk action: Home and the library copies don't let
+  saying why, with a link to its health. The health screen names what
+  doesn't conform, which is fixed outside the app. It's left out of
+  every bulk action: Home and the library copies don't let
   it be selected, and moving or copying cards doesn't offer it.
 - **The arrangement set aside** (the catalog or a deck group invalid):
   Groups can't be rearranged, and Home moves no deck into a group. The

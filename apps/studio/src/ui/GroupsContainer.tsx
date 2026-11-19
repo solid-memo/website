@@ -35,7 +35,7 @@ export function GroupsContainer({
 }: {
   useCases: UseCases;
   instance: Instance;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
 }) {
   const { t, errorText } = useI18n();

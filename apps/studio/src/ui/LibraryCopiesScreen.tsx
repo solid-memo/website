@@ -97,7 +97,7 @@ export function LibraryCopiesScreen({
   readOnly: ReadOnlyReason | null;
   /** Whether a deck may be changed, so upgraded. */
   selectable: (deck: Deck) => boolean;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
   onUpgrade: (chosen: readonly { deck: Deck; plan: LibraryUpgradePlan }[]) => void;
   /** The copy shown beside the table, by its deck's URL. */

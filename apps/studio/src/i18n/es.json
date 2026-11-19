@@ -265,7 +265,7 @@
         "other": "Se eliminaron {count} mazos."
       },
       "export": "Exportar",
-      "moveSetAside": "La organización de estos mazos tiene datos no válidos, así que no se pueden mover mazos a grupos hasta que se repare.",
+      "moveSetAside": "La organización de estos mazos tiene datos no válidos, así que no se pueden mover mazos a grupos hasta que se corrija.",
       "groups": {
         "edit": "Editar",
         "editCards": "Editar las tarjetas seleccionadas",
@@ -399,8 +399,7 @@
         "chapter": "Eliminar el capítulo",
         "step": "Eliminar el paso",
         "card": "Eliminar la tarjeta"
-      },
-      "removeData": "Eliminarlo de tu Pod"
+      }
     },
     "schedule": {
       "loading": "Cargando la programación…",
@@ -743,13 +742,11 @@
       "allWell": "Este mazo no tiene ningún problema.",
       "dataHeading": "Comprobación de datos",
       "dataHint": "La entrada del mazo en el catálogo y sus documentos, comprobados con las formas de Solid Memo.",
-      "held": "No se puede cambiar nada de este mazo hasta que se reparen los datos, así que los problemas de abajo solo se nombran, sin enlace a sus formularios. Repara aquí lo que se pueda reparar y elimina lo que ninguna reparación cubra.",
+      "held": "No se puede cambiar nada de este mazo hasta que se corrijan sus datos, así que los problemas de abajo solo se nombran, sin enlace a sus formularios.",
       "instanceDataHint": "Los documentos de la instancia, comprobados con las formas de Solid Memo. Los documentos que no han cambiado desde la última vez que pasaron la comprobación no se vuelven a comprobar.",
       "deckEntry": "La entrada del mazo",
       "deckDistribution": "La distribución del mazo",
       "inDeck": "en {deck}",
-      "remove": "Eliminar {subject}",
-      "removeHint": "Ninguna reparación cubre esto: corrígelo en el documento o elimínalo.",
       "decksHeading": "Mazos",
       "decksHint": "Cada mazo se comprueba en cuanto aparece en la pantalla.",
       "languagesHeading": "Idiomas",
@@ -942,12 +939,11 @@
     "readOnly": {
       "checking": "Se están comprobando los datos de esta instancia. No se puede cambiar nada hasta que termine la comprobación.",
       "unchecked": "No se pudieron comprobar los datos de esta instancia, así que no se puede cambiar nada hasta que se pueda. Para cambiarlos sin comprobar, elige «Solo avisar» en las preferencias de Solid Memo.",
-      "blocked": "Esta instancia tiene datos no válidos y tus preferencias la mantienen cerrada hasta que se repare, así que aquí no se puede cambiar nada. {repair}",
-      "deck": "Este mazo tiene datos no válidos, así que queda apartado: se muestra aquí, pero no se puede cambiar nada en él hasta que se repare. {repair}",
-      "decks": "Los mazos con datos no válidos quedan apartados: no se pueden seleccionar ni cambiar hasta que se reparen. {repair}",
-      "catalogue": "El catálogo de la instancia o uno de sus grupos tiene datos no válidos, así que queda apartado: no se puede añadir ni cambiar nada en él hasta que se repare. {repair}",
-      "repair": "Repáralo en la pantalla Diagnóstico.",
-      "repairDecks": "Repáralos en la pantalla Diagnóstico."
+      "blocked": "Esta instancia tiene datos no válidos y tus preferencias la mantienen cerrada hasta que se corrijan fuera de Solid Memo, así que aquí no se puede cambiar nada. {health}",
+      "deck": "Este mazo tiene datos no válidos, así que queda apartado: se muestra aquí, pero no se puede cambiar nada en él hasta que se corrijan fuera de Solid Memo. {health}",
+      "decks": "Los mazos con datos no válidos quedan apartados: no se pueden seleccionar ni cambiar hasta que se corrijan fuera de Solid Memo. {health}",
+      "catalogue": "El catálogo de la instancia o uno de sus grupos tiene datos no válidos, así que queda apartado: no se puede añadir ni cambiar nada en él hasta que se corrijan fuera de Solid Memo. {health}",
+      "health": "Mira en la pantalla Diagnóstico qué no se ajusta a su forma."
     },
     "drafts": {
       "crumb": "Borradores",

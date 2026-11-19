@@ -30,7 +30,6 @@ import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import {
@@ -156,7 +155,6 @@ function page(beforeWrite: (url: string) => Promise<void> = async () => undefine
     preferencesRepository: createSolidPreferencesRepository(deps),
     reviewStateRepository: createSolidReviewStateRepository(deps),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: watching }),
     instanceCopier: createSolidInstanceCopier({ fetch: watching }),
   });
 }

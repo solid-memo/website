@@ -31,7 +31,6 @@ import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
@@ -451,7 +450,6 @@ function app(
     preferencesRepository: createSolidPreferencesRepository({ fetch: attemptingFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: attemptingFetch, checkWrite }),
     shapeValidator: validator,
-    repairRepository: createSolidRepairRepository({ fetch: attemptingFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: attemptingFetch }),
     writeFence,
   });

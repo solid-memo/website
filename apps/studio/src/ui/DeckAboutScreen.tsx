@@ -60,7 +60,7 @@ export function DeckAboutScreen({
   appHref: string;
   /** Why the deck may not be changed now (useDataCheck); null when it may. */
   readOnly: ReadOnlyReason | null;
-  /** The deck's health, where data set aside is repaired. */
+  /** The deck's health, which names what does not conform. */
   healthHref: string;
   /** The instance's limits, which a limit the deck does not set follows. */
   preferences: Pick<StudyPreferences, "newCardsPerDay" | "maxReviewsPerDay">;

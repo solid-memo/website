@@ -7,19 +7,13 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { CardSpot } from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { ComponentChildren } from "preact";
-import { useMemo } from "preact/hooks";
-import type { RepairPlan, Unrepairable } from "@solid-memo/domain/repair";
-import type { ValidationReport } from "@solid-memo/domain/validation";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
-import { useRepairMutation } from "@solid-memo/ui/RepairContainer";
 import { UnclaimedDecksNotice } from "@solid-memo/ui/UnclaimedDecksNotice";
 import { deckHealthQuery, HealthBadge } from "./HealthBadge";
-import { DeckHealthScreen, InstanceHealthScreen, type RepairActions } from "./HealthScreen";
-import { useConfirm } from "./shell/ConfirmDialog";
+import { DeckHealthScreen, InstanceHealthScreen } from "./HealthScreen";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -27,16 +21,14 @@ import { queryKeys } from "./queryKeys";
  * and its cards (the workbench's query), which name what the check of
  * its data is about; without, the instance's check (the one Home and
  * Solid Memo make when it is opened, the same query) and its decks.
- * Repairs are Solid Memo's own (planRepair, applyRepairs), of what the
- * check shown found: a deck's only, on a deck's health. A removal is
- * made once the user confirms it. After either, every check of the
- * instance is read afresh; on a deck's health, only the deck's. A deck
- * held by the instance's check (set aside, or the whole instance
- * blocked: useDataCheck) has its problems named, not linked to its
- * forms, which change nothing until then. What the deck's check finds
- * (as the screen opens, after a repair, or on "Check again") is put in
- * the instance's check (deckHealthQuery), so a deck mended, here or in
- * the pod by other means, is let go. A deck whose documents are
+ * What the check finds is named, never repaired: Solid Memo leaves it
+ * as it is, to be fixed outside the app. A deck held by the instance's
+ * check (set aside, or the whole instance blocked: useDataCheck) has
+ * its problems named, not linked to its forms, which change nothing
+ * until then. What the deck's check finds (as the screen opens, or on
+ * "Check again") is put in the instance's check (deckHealthQuery), so
+ * a deck mended in the pod by other means is let go. A deck whose
+ * documents are
  * unclaimed is named above, with the claim that lets Solid Memo change
  * them (UnclaimedDecksNotice).
  */
@@ -72,55 +64,6 @@ export function HealthContainer({
   );
 }
 
-/**
- * The repairs of what a check found (`report`), the removal of a subject
- * once the user confirms it (in `dialog`, which the screen shows); after
- * either, the checks under `checkKey` are read afresh. The plan is
- * worked out once for each report, not on each drawing, as a check can
- * find any number of problems.
- */
-function useRepairs(
-  useCases: UseCases,
-  instance: Instance,
-  checkKey: readonly unknown[],
-): { repairs: (report: ValidationReport) => RepairActions; dialog: ComponentChildren } {
-  const { t, errorText } = useI18n();
-  const repairMutation = useRepairMutation(useCases, instance.url, checkKey);
-  const { ask, dialog } = useConfirm();
-  const planOf = useMemo(() => {
-    let last: { report: ValidationReport; plan: RepairPlan } | undefined;
-    return (report: ValidationReport) => {
-      if (last?.report !== report) last = { report, plan: useCases.planRepair(report) };
-      return last.plan;
-    };
-  }, [useCases]);
-  const repairs = (report: ValidationReport) => {
-    const plan = planOf(report);
-    return {
-      plan,
-      busy: repairMutation.isPending,
-      onRepair: () => repairMutation.mutate(plan.repairs),
-      onRemove: (problem: Unrepairable) =>
-        ask({
-          heading: t("studio.confirm.removeData"),
-          text: t("repair.removeConfirm", { url: problem.subjectUrl }),
-          action: t("repair.removeButton"),
-          onConfirm: () =>
-            repairMutation.mutate([
-              {
-                kind: "remove-subject",
-                documentUrl: problem.documentUrl,
-                subjectUrl: problem.subjectUrl,
-                version: 1,
-              },
-            ]),
-        }),
-      error: errorText(repairMutation.error),
-    };
-  };
-  return { repairs, dialog };
-}
-
 function DeckHealthContainer({
   useCases,
   instance,
@@ -137,7 +80,6 @@ function DeckHealthContainer({
   const { t, errorText } = useI18n();
   const queryClient = useQueryClient();
   const health = deckHealthQuery(useCases, queryClient, instance.url, deck);
-  const { repairs, dialog } = useRepairs(useCases, instance, health.queryKey);
   const reason = useDataCheck(useCases, instance.url).readOnly(deck);
   // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
   const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
@@ -163,13 +105,11 @@ function DeckHealthContainer({
         checking={healthQuery.isFetching}
         // The deck's check alone: what it finds is put in the one that holds it.
         onCheck={() => void queryClient.invalidateQueries({ queryKey: health.queryKey })}
-        repairs={repairs(healthQuery.data.report)}
         spotHref={(spot) => spotHref(deck, spot)}
         aboutHref={aboutHref(deck)}
         // Only once the check says so: while it is made, the links stay.
         held={reason === "setAside" || reason === "blocked"}
       />
-      {dialog}
     </>
   );
 }
@@ -184,7 +124,6 @@ function InstanceHealthContainer({
   deckHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const { repairs, dialog } = useRepairs(useCases, instance, queryKeys.validation(instance.url));
   const reportQuery = useQuery({
     queryKey: queryKeys.validation(instance.url),
     queryFn: () => useCases.checkInstance(instance.url),
@@ -211,7 +150,6 @@ function InstanceHealthContainer({
         decks={decksQuery.data}
         checking={reportQuery.isFetching}
         onCheck={() => void reportQuery.refetch()}
-        repairs={repairs(reportQuery.data)}
         deckHref={deckHref}
         badge={(each) => (
           <HealthBadge
@@ -222,7 +160,6 @@ function InstanceHealthContainer({
           />
         )}
       />
-      {dialog}
     </>
   );
 }

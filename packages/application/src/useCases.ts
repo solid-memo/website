@@ -14,7 +14,6 @@ import type {
   ShapeValidator,
   AnswerLog,
   DigestRepository,
-  RepairRepository,
   InstanceCopier,
   GuestPod,
   LanguagePreference,
@@ -107,7 +106,6 @@ export interface Dependencies {
   preferencesRepository: PreferencesRepository;
   reviewStateRepository: ReviewStateRepository;
   shapeValidator: ShapeValidator;
-  repairRepository: RepairRepository;
   instanceCopier: InstanceCopier;
   /** Notes of a guest's study being moved or added to an instance, kept on this device. */
   updateJournal: UpdateJournal;
@@ -172,7 +170,6 @@ export function createUseCases({
   preferencesRepository,
   reviewStateRepository,
   shapeValidator,
-  repairRepository,
   instanceCopier,
   updateJournal,
   logoutChannel,
@@ -251,7 +248,6 @@ export function createUseCases({
     releaseDraftRepository,
     answerStore,
     shapeValidator,
-    repairRepository,
     deckLibrary,
     digestStore,
     storageGateway,

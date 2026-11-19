@@ -71,7 +71,7 @@ export function DraftsScreen({
   decks: readonly Deck[];
   /** Why no draft can be made or deleted now (useDataCheck); null when one can. */
   readOnly: ReadOnlyReason | null;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
   /** The releases the instance published. */
   releasesHref: string;

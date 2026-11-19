@@ -446,21 +446,21 @@
   "dataCheckNotice": {
     "region": "Data check",
     "heading": "Some data in {name} is not in the format Solid Memo expects.",
-    "blockInstance": "Solid Memo will not use this instance until it is repaired.",
+    "blockInstance": "Solid Memo will not use this instance until that data is fixed.",
     "restKeepsWorking": "The rest keeps working.",
     "setAside": {
-      "one": "{names} is set aside until repaired; the rest keeps working.",
-      "other": "{names} are set aside until repaired; the rest keeps working."
+      "one": "{names} is set aside until its data is fixed; the rest keeps working.",
+      "other": "{names} are set aside until their data is fixed; the rest keeps working."
     },
     "setAsideMore": {
       "one": "and {count} more",
       "other": "and {count} more"
     },
     "keepsWorking": "Solid Memo keeps working with it.",
-    "arrangementSetAside": "The deck list cannot be rearranged until its arrangement is repaired.",
+    "arrangementSetAside": "The deck list cannot be rearranged until its arrangement is fixed.",
     "policyHint": "What happens with invalid data is set in {preferences}.",
     "preferences": "Preferences",
-    "repair": "Repair"
+    "leftAsItIs": "Solid Memo leaves this data as it is: it must be fixed outside the app, with another tool."
   },
   "dataCheckLists": {
     "problems": "The problems, document by document",
@@ -475,14 +475,6 @@
     "moreResults": {
       "one": "And {count} more result, not listed here.",
       "other": "And {count} more results, not listed here."
-    },
-    "moreRepairs": {
-      "one": "And {count} more problem Solid Memo can repair, not listed here.",
-      "other": "And {count} more problems Solid Memo can repair, not listed here."
-    },
-    "moreProblems": {
-      "one": "And {count} more problem that needs your decision, not listed here.",
-      "other": "And {count} more problems that need your decision, not listed here."
     },
     "showMore": {
       "one": "Show {count} more",
@@ -561,7 +553,7 @@
     "startCourseNamed": "Start the course {course}",
     "courseProgress": "Chapters done",
     "loading": "Loading decks…",
-    "setAside": "Set aside: its data needs repair",
+    "setAside": "Set aside: its data needs fixing",
     "heading": "Decks",
     "deckCount": {
       "one": "{count} deck",
@@ -572,7 +564,7 @@
     "libraryLink": "Deck library",
     "emptyGroup": "Nothing in this group yet.",
     "readOnly": "A newer version of Solid Memo arranged these decks, so they cannot be rearranged here. Use a newer version of Solid Memo instead.",
-    "arrangementSetAside": "The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired.",
+    "arrangementSetAside": "The arrangement of these decks has invalid data, so they cannot be rearranged until it is fixed.",
     "newGroupName": "New group",
     "groupName": "Group name",
     "saveName": "Save name",
@@ -1558,28 +1550,6 @@
     "anotherHint": "It must be in your Pod and say it is a type index. Solid Memo links it from your profile if it isn't already.",
     "publicMeans": "Public: anyone can see that this instance exists, its name and where it is. Who can open it is still decided by its access settings."
   },
-  "repair": {
-    "removeConfirm": "Remove <{url}> from your pod? This cannot be undone.",
-    "canRepair": "Solid Memo can repair these:",
-    "repairing": "Repairing…",
-    "repairButton": {
-      "one": "Repair {count} problem",
-      "other": "Repair {count} problems"
-    },
-    "needDecision": "These need your decision: fix them in the document, or remove them.",
-    "problem": "{subject} in {document}: {messages}",
-    "removeButton": "Remove",
-    "action": {
-      "describeDeck": "Give the deck the default description",
-      "directDeck": "Study the deck front to back",
-      "dropSnapshot": "Drop the review's half-written undo snapshot",
-      "recomputeDue": "Recompute the review's due day",
-      "nameAgent": "Name the person or organization after their address",
-      "dropDanglingMembers": "Drop the links to decks and groups that are gone",
-      "dropUnreadableDate": "Drop the dates Solid Memo can't read",
-      "removeSubject": "Remove it"
-    }
-  },
   "retiredCards": {
     "showToggle": "Show retired cards",
     "toggleHint": {
@@ -1708,7 +1678,7 @@
       "DeckPlace": "This deck's entry is not in its instance's catalog, or it names a document at an address no deck's documents may have, such as another resource's access control or one of the instance's own documents. Solid Memo does not use it.",
       "DateTimeRange": "Solid Memo can't read this date: it is too far in the future or the past, or longer than a date-time is, so it reads as no date.",
       "FormatVersionRange": "No format of Solid Memo has this version: it is below 1, so Solid Memo can't read the subject.",
-      "ResultLimit": "This subject has more results in one check than Solid Memo lists: it shows the 1,000 most severe. Repair those, and the check finds the rest."
+      "ResultLimit": "This subject has more results in one check than Solid Memo lists: it shows the 1,000 most severe. Fix those, and the check finds the rest."
     }
   },
   "webIdDocument": {
@@ -1731,7 +1701,7 @@
     "developerModeOff": "Developer mode is off. Turn it on in {preferences} to check this instance against Solid Memo's shapes.",
     "preferencesLink": "Preferences",
     "checkingData": "Checking this instance's data…",
-    "deckSetAside": "This deck is set aside: its data does not conform. Repair it above to use it again.",
+    "deckSetAside": "This deck is set aside: its data does not conform. It must be fixed outside Solid Memo before the deck can be used again.",
     "checkFailed": "Could not check this instance's data: {error}",
     "checkFailedHeld": "Until the check can be made, Solid Memo holds back what it would while checking. To use the data unchecked, choose “Warn only” in {preferences}.",
     "developerTools": "Developer tools",

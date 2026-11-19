@@ -60,7 +60,6 @@ vi.mock(
   "@solid-memo/solid/solidReviewStateRepository",
   recorded("createSolidReviewStateRepository"),
 );
-vi.mock("@solid-memo/solid/solidRepairRepository", recorded("createSolidRepairRepository"));
 vi.mock("@solid-memo/solid/solidInstanceCopier", recorded("createSolidInstanceCopier"));
 vi.mock("@solid-memo/solid/solidDigestRepository", recorded("createSolidDigestRepository"));
 vi.mock("@solid-memo/solid/solidAnswerLog", recorded("createSolidAnswerLog"));
@@ -1326,7 +1325,6 @@ describe("createAppUseCases", () => {
     const adapters = [
       "createSolidDeckRepository",
       "createSolidReviewStateRepository",
-      "createSolidRepairRepository",
       "createSolidInstanceRepository",
     ];
     const storagesOf = adapters.map(
@@ -1646,7 +1644,7 @@ describe("createAppUseCases", () => {
   it("puts every pod adapter's writes behind the pod fence, and lets only the release publisher and the instance repository write an access control", async () => {
     given.clear();
     createAppUseCases({ ...options, indexedDB: undefined });
-    expect(given.size).toBe(15);
+    expect(given.size).toBe(14);
     const refused = { code: "writeRefused" };
     for (const [name, { fetch }] of given) {
       for (const url of [

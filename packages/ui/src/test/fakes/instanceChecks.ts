@@ -30,8 +30,6 @@ export function makeInstanceCheckUseCasesFake(
         violationCount: 0,
         conforms: true,
       })),
-      planRepair: vi.fn(() => ({ repairs: [], unrepairable: [] })),
-      applyRepairs: vi.fn(async () => undefined),
       checkInstance: vi.fn((instanceUrl) => fake.validateInstance(instanceUrl)),
       claimDeckDocuments: vi.fn(async () => undefined),
       // A deck's health, of the instance's check, its cards, and no release.

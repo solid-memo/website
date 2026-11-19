@@ -265,7 +265,7 @@
         "other": "{count} paquets supprimés."
       },
       "export": "Exporter",
-      "moveSetAside": "L’organisation de ces paquets contient des données non valides : vous ne pouvez donc pas déplacer de paquets dans des groupes tant qu’elle n’est pas réparée.",
+      "moveSetAside": "L’organisation de ces paquets contient des données non valides : vous ne pouvez donc pas déplacer de paquets dans des groupes tant qu’elle n’est pas corrigée.",
       "groups": {
         "edit": "Modifier",
         "editCards": "Modifier les cartes sélectionnées",
@@ -399,8 +399,7 @@
         "chapter": "Supprimer le chapitre",
         "step": "Supprimer l’étape",
         "card": "Supprimer la carte"
-      },
-      "removeData": "Le supprimer de votre Pod"
+      }
     },
     "schedule": {
       "loading": "Chargement de la planification…",
@@ -743,13 +742,11 @@
       "allWell": "Ce paquet ne présente aucun problème.",
       "dataHeading": "Vérification des données",
       "dataHint": "La fiche du paquet dans le catalogue et ses documents, vérifiés au regard des formes de Solid Memo.",
-      "held": "Rien dans ce paquet ne peut être modifié tant que ses données ne sont pas réparées : les problèmes ci-dessous sont donc nommés, sans lien vers leurs formulaires. Réparez ici ce qui peut l’être, et supprimez ce qu’aucune réparation ne couvre.",
+      "held": "Rien dans ce paquet ne peut être modifié tant que ses données ne sont pas corrigées : les problèmes ci-dessous sont donc nommés, sans lien vers leurs formulaires.",
       "instanceDataHint": "Les documents de l’instance, vérifiés au regard des formes de Solid Memo. Les documents inchangés depuis leur dernière vérification réussie ne sont pas vérifiés à nouveau.",
       "deckEntry": "Fiche du paquet",
       "deckDistribution": "Distribution du paquet",
       "inDeck": "dans {deck}",
-      "remove": "Supprimer {subject}",
-      "removeHint": "Aucune réparation ne couvre ce cas : corrigez-le dans le document, ou supprimez-le.",
       "decksHeading": "Paquets",
       "decksHint": "Chaque paquet est vérifié dès qu’il apparaît à l’écran.",
       "languagesHeading": "Langues",
@@ -942,12 +939,11 @@
     "readOnly": {
       "checking": "Les données de cette instance sont en cours de vérification. Rien ne peut être modifié avant la fin de la vérification.",
       "unchecked": "Les données de cette instance n’ont pas pu être vérifiées : rien ne peut donc être modifié tant qu’elles ne peuvent pas l’être. Pour les modifier sans vérification, choisissez « Avertir seulement » dans les préférences de Solid Memo.",
-      "blocked": "Cette instance contient des données non valides, et vos préférences la gardent fermée jusqu’à sa réparation : rien ne peut donc être modifié ici. {repair}",
-      "deck": "Ce paquet contient des données non valides, il est donc mis de côté : il est affiché ici, mais rien ne peut y être modifié avant sa réparation. {repair}",
-      "decks": "Les paquets aux données non valides sont mis de côté : ils ne peuvent être ni sélectionnés ni modifiés avant leur réparation. {repair}",
-      "catalogue": "Le catalogue de l’instance ou l’un de ses groupes contient des données non valides, il est donc mis de côté : rien ne peut y être ajouté ni modifié avant sa réparation. {repair}",
-      "repair": "Réparez ces données sur l’écran Santé.",
-      "repairDecks": "Réparez-les sur l’écran Santé."
+      "blocked": "Cette instance contient des données non valides, et vos préférences la gardent fermée tant qu’elles ne sont pas corrigées en dehors de Solid Memo : rien ne peut donc être modifié ici. {health}",
+      "deck": "Ce paquet contient des données non valides, il est donc mis de côté : il est affiché ici, mais rien ne peut y être modifié tant qu’elles ne sont pas corrigées en dehors de Solid Memo. {health}",
+      "decks": "Les paquets aux données non valides sont mis de côté : ils ne peuvent être ni sélectionnés ni modifiés tant que leurs données ne sont pas corrigées en dehors de Solid Memo. {health}",
+      "catalogue": "Le catalogue de l’instance ou l’un de ses groupes contient des données non valides, il est donc mis de côté : rien ne peut y être ajouté ni modifié tant qu’elles ne sont pas corrigées en dehors de Solid Memo. {health}",
+      "health": "Voyez ce qui n’est pas conforme sur l’écran Santé."
     },
     "drafts": {
       "crumb": "Brouillons",

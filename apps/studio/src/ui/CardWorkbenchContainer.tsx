@@ -96,7 +96,7 @@ export function CardWorkbenchContainer({
   onMove?: (card: Card) => void;
   /** The URLs of the cards the query keeps, in its order, as they change. */
   onRows?: (urls: readonly string[]) => void;
-  /** The deck's health, where data set aside is repaired. */
+  /** The deck's health, which names what does not conform. */
   healthHref: string;
 }) {
   const { t, errorText, locale } = useI18n();

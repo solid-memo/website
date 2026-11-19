@@ -227,8 +227,7 @@ export function datetimeOf(term: Literal): Date | null {
 
 /**
  * Whether a term is an xsd:dateTime that readDatetime does not read as
- * a date: what the instance and release checks name (DateTimeRange),
- * and what a repair of an optional one drops.
+ * a date: what the instance and release checks name (DateTimeRange).
  */
 export function isUnreadableDatetime(term: Term): boolean {
   if (term.termType !== "Literal" || term.datatype.value !== XSD_DATETIME) return false;
@@ -519,7 +518,7 @@ export function keptClasses(own: Iterable<string>, classes: Iterable<string>): s
  * (writtenByNewerApp), before anything is sent. Reading it passes it
  * through (readVersioned); only writing would lose what the newer format
  * says. Writes that change or remove a subject without recording it
- * (a position, a completed chapter, a repair, a removal) are refused the
+ * (a position, a completed chapter, a removal) are refused the
  * same way by unlessNewer.
  */
 export function recordThing<T>(

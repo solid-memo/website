@@ -322,10 +322,9 @@ describe("LibraryCopiesScreen", () => {
     expect(within(row("Capitals")).queryByRole("checkbox")).toBeNull();
     expect(screen.getByRole("checkbox", { name: "Select My capitals" })).toBeInTheDocument();
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
   });
 
   it("shows the deck a batch is updating, with its steps, and nothing to choose meanwhile", () => {

@@ -632,7 +632,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   getCourseStatistics: async ({ u, course }) =>
     void (await u.getCourseStatistics(INSTANCE, NOW, [course])),
 
-  // Checks and repairs: a later version's data is no problem, and none of it is offered for repair.
+  // Checks: a later version's data is no problem.
   validateInstance: async ({ u }) =>
     void expect(await u.validateInstance(INSTANCE)).toMatchObject({ conforms: true }),
   checkInstance: async ({ u }) =>
@@ -640,23 +640,6 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   claimDeckDocuments: async ({ u, capitals }) =>
     void (await u.claimDeckDocuments(INSTANCE, capitals.url)),
   checkDeck: async ({ u, capitals }) => void (await u.checkDeck(INSTANCE, capitals, textCheck)),
-  planRepair: async ({ u }) =>
-    void expect(u.planRepair(await u.validateInstance(INSTANCE))).toEqual({
-      repairs: [],
-      unrepairable: [],
-    }),
-  applyRepairs: async ({ u, capitals, cards }) => {
-    // The user's choice, for a subject of the app's own: it goes, and nothing beside it.
-    await u.applyRepairs(INSTANCE, [
-      {
-        kind: "remove-subject",
-        documentUrl: capitals.cardsDocumentUrl,
-        subjectUrl: cards[2]!.url,
-        version: 7,
-      },
-    ]);
-    return { removed: of(cards[2]!.url) };
-  },
 
   // Drafts and releases.
   listReleaseDrafts: async ({ u }) => void (await u.listReleaseDrafts(INSTANCE)),
@@ -711,11 +694,6 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
       u.openTrial(await u.getReleaseDraft(published.url), INSTANCE),
     ).rejects.toThrow("This app plays no trials.")),
 };
-
-/** The seeds of a subject, a later version's too. */
-function of(...subjects: string[]) {
-  return ({ subject }: Seed) => subjects.includes(subject);
-}
 
 /** A run of the app over a copy of the world's pods, with what a row runs with. */
 async function runOn(world: World, written?: () => Promise<void>) {

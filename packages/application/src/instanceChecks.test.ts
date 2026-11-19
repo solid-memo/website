@@ -30,47 +30,7 @@ vi.mock("@solid-memo/domain/instanceLayout", async (importOriginal) => {
 });
 
 describe("instance checks", () => {
-  it("planRepair plans from a report, and applyRepairs hands the repairs to the repository", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    expect(
-      useCases.planRepair({
-        instanceUrl: instance.url,
-        documents: [],
-        violationCount: 0,
-        conforms: true,
-      }),
-    ).toEqual({
-      repairs: [],
-      unrepairable: [],
-    });
-    const repairs = [
-      { kind: "describe-deck" as const, documentUrl: "d", subjectUrl: "d#x", version: 3 },
-    ];
-    await useCases.applyRepairs(instance.url, repairs);
-    expect(deps.repairRepository.applyRepairs).toHaveBeenCalledWith(repairs, expect.any(Function));
-  });
-  it("hands the repairs a lookup of the decks naming each document, in any spelling", async () => {
-    const deps = makeDeps();
-    const useCases = createUseCases(deps);
-    const twice = { ...deck, reviewsDocumentUrl: deck.cardsDocumentUrl };
-    const unusable = {
-      ...deck,
-      url: `${deck.url}-2`,
-      cardsDocumentUrl: "no url",
-      reviewsDocumentUrl: deck.cardsDocumentUrl,
-    };
-    deps.deckRepository.listDecks = vi.fn(async () => [twice, unusable]);
-    await useCases.applyRepairs(instance.url, []);
-    const decksOf = vi.mocked(deps.repairRepository.applyRepairs).mock.calls[0]![1];
-    expect(decksOf(deck.cardsDocumentUrl.replace("https://", "HTTPS://"))).toEqual([
-      twice,
-      unusable,
-    ]);
-    expect(decksOf("no url")).toEqual([]);
-    expect(decksOf(`${instance.url}catalog.ttl`)).toEqual([]);
-  });
-  describe("a deck's document with something to repair", () => {
+  describe("a deck's document with a problem", () => {
     const failing = {
       url: deck.cardsDocumentUrl,
       status: "checked" as const,
@@ -99,7 +59,7 @@ describe("instance checks", () => {
       return { deps, useCases: createUseCases(deps) };
     }
 
-    it("is left out once its read shows it is no deck's, and offers no repair or removal", async () => {
+    it("is left out once its read shows it is no deck's", async () => {
       const { deps, useCases } = reportingFailure();
       deps.deckRepository.isUnclaimedAsRead = vi.fn(async () => true);
       for (const report of [
@@ -109,7 +69,6 @@ describe("instance checks", () => {
       ]) {
         expect(report.documents.map((one) => one.url)).not.toContain(deck.cardsDocumentUrl);
         expect(report.conforms).toBe(true);
-        expect(useCases.planRepair(report).unrepairable).toEqual([]);
       }
       expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
         [deck],
@@ -122,7 +81,34 @@ describe("instance checks", () => {
       const { useCases } = reportingFailure();
       const report = await useCases.checkInstance(instance.url);
       expect(report.conforms).toBe(false);
-      expect(useCases.planRepair(report).unrepairable).toHaveLength(1);
+      expect(report.documents.map((one) => one.url)).toContain(deck.cardsDocumentUrl);
+    });
+
+    it("is read with every deck naming it, in any spelling", async () => {
+      const deps = makeDeps();
+      const useCases = createUseCases(deps);
+      const twice = { ...deck, reviewsDocumentUrl: deck.cardsDocumentUrl };
+      const unusable = {
+        ...deck,
+        url: `${deck.url}-2`,
+        cardsDocumentUrl: "no url",
+        reviewsDocumentUrl: deck.cardsDocumentUrl,
+      };
+      deps.deckRepository.listDecks = vi.fn(async () => [twice, unusable]);
+      const catalog = `${instance.url}catalog.ttl`;
+      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
+        url === deck.cardsDocumentUrl
+          ? { ...failing, url: url.replace("https://", "HTTPS://") }
+          : url === catalog
+            ? { ...failing, url: "no url" }
+            : { url, status: "checked", subjects: [] },
+      );
+      await useCases.checkInstance(instance.url);
+      expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
+        [twice, unusable],
+        deck.cardsDocumentUrl.replace("https://", "HTTPS://"),
+        undefined,
+      );
     });
 
     it("is not read again when it conforms, nor when no deck names it", async () => {
@@ -345,7 +331,7 @@ describe("instance checks", () => {
         ? { url, status: "checked" as const, subjects: [] }
         : stalled(budget, unreadableDocument(url, "podNoAnswer"));
     });
-    // Read again before a repair, it would be found unclaimed, but the budget is spent by then.
+    // Read again, it would be found unclaimed, but the budget is spent by then.
     deps.deckRepository.isUnclaimedAsRead = vi.fn(async (_decks, _url, budget) =>
       budget === undefined ? true : budget.spend(false, async () => true),
     );

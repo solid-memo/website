@@ -118,10 +118,9 @@ describe("ReleasePublishScreen", () => {
     expect(screen.getByText("Checking the draft…")).toBeInTheDocument();
     expect(screen.getByText("Checking and publishing the release…")).toBeInTheDocument();
     expect(screen.getByText("The pod is down.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     fireEvent.submit(screen.getByRole("textbox", { name: "Folder in your Pod" }).closest("form")!);
     expect(publish.run).not.toHaveBeenCalled();
   });
@@ -159,10 +158,9 @@ describe("ReleasePublishScreen", () => {
 
   it("holds starting the next version while the catalog may not be written, and says why", () => {
     const { startNext } = renderScreen({ draft: released(), isPublic: true, hold: "setAside" });
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     const button = screen.getByRole("button", { name: "Start the next version" });
     expect(button).toBeDisabled();
     fireEvent.click(button);

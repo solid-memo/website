@@ -74,7 +74,6 @@ function app() {
     preferencesRepository: createSolidPreferencesRepository({ fetch: pod.fetch }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: pod.fetch }),
     shapeValidator: undefined as never,
-    repairRepository: undefined as never,
     instanceCopier: undefined as never,
     answerLog: createSolidAnswerLog({ fetch: pod.fetch }),
   });

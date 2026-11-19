@@ -254,7 +254,7 @@
         "other": "{count} Stapel gelöscht."
       },
       "export": "Exportieren",
-      "moveSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sich Stapel erst nach der Reparatur in Gruppen verschieben.",
+      "moveSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sich Stapel erst nach der Korrektur in Gruppen verschieben.",
       "groups": {
         "edit": "Bearbeiten",
         "editCards": "Ausgewählte Karten bearbeiten",
@@ -385,8 +385,7 @@
         "chapter": "Kapitel löschen",
         "step": "Schritt löschen",
         "card": "Karte löschen"
-      },
-      "removeData": "Aus deinem Pod entfernen"
+      }
     },
     "schedule": {
       "loading": "Der Zeitplan wird geladen…",
@@ -703,13 +702,11 @@
       "allWell": "Mit diesem Stapel ist alles in Ordnung.",
       "dataHeading": "Datenprüfung",
       "dataHint": "Der Eintrag des Stapels im Katalog und seine Dokumente, geprüft anhand der Formen von Solid Memo.",
-      "held": "In diesem Stapel lässt sich bis zur Reparatur der Daten nichts ändern, daher werden die Probleme unten nur genannt und nicht mit ihren Formularen verlinkt. Repariere hier, was sich reparieren lässt, und entferne, was keine Reparatur abdeckt.",
+      "held": "In diesem Stapel lässt sich nichts ändern, bis seine Daten korrigiert sind, daher werden die Probleme unten nur genannt und nicht mit ihren Formularen verlinkt.",
       "instanceDataHint": "Die Dokumente der Instanz, geprüft anhand der Formen von Solid Memo. Dokumente, die sich seit ihrer letzten bestandenen Prüfung nicht geändert haben, werden nicht erneut geprüft.",
       "deckEntry": "Der Eintrag des Stapels",
       "deckDistribution": "Die Distribution des Stapels",
       "inDeck": "in „{deck}“",
-      "remove": "{subject} entfernen",
-      "removeHint": "Keine Reparatur deckt das ab: Korrigiere es im Dokument oder entferne es.",
       "decksHeading": "Stapel",
       "decksHint": "Jeder Stapel wird geprüft, sobald er auf dem Bildschirm erscheint.",
       "languagesHeading": "Sprachen",
@@ -883,12 +880,11 @@
     "readOnly": {
       "checking": "Die Daten dieser Instanz werden geprüft. Bis die Prüfung abgeschlossen ist, lässt sich nichts ändern.",
       "unchecked": "Die Daten dieser Instanz ließen sich nicht prüfen. Bis die Prüfung möglich ist, lässt sich daher nichts ändern. Um sie ungeprüft zu ändern, wähle „Nur warnen“ in den Einstellungen von Solid Memo.",
-      "blocked": "Diese Instanz hat ungültige Daten, und deine Einstellungen halten sie bis zur Reparatur gesperrt. Daher lässt sich hier nichts ändern. {repair}",
-      "deck": "Dieser Stapel hat ungültige Daten und ist daher zurückgestellt: Er wird hier angezeigt, aber bis zur Reparatur lässt sich darin nichts ändern. {repair}",
-      "decks": "Stapel mit ungültigen Daten sind zurückgestellt: Bis zur Reparatur lassen sie sich weder auswählen noch ändern. {repair}",
-      "catalogue": "Der Katalog der Instanz oder eine seiner Gruppen hat ungültige Daten und ist daher zurückgestellt: Bis zur Reparatur lässt sich darin nichts hinzufügen oder ändern. {repair}",
-      "repair": "Repariere es auf der Zustandsseite.",
-      "repairDecks": "Repariere sie auf der Zustandsseite."
+      "blocked": "Diese Instanz hat ungültige Daten, und deine Einstellungen halten sie gesperrt, bis sie außerhalb von Solid Memo korrigiert sind. Daher lässt sich hier nichts ändern. {health}",
+      "deck": "Dieser Stapel hat ungültige Daten und ist daher zurückgestellt: Er wird hier angezeigt, aber es lässt sich darin nichts ändern, bis die Daten außerhalb von Solid Memo korrigiert sind. {health}",
+      "decks": "Stapel mit ungültigen Daten sind zurückgestellt: Sie lassen sich weder auswählen noch ändern, bis ihre Daten außerhalb von Solid Memo korrigiert sind. {health}",
+      "catalogue": "Der Katalog der Instanz oder eine seiner Gruppen hat ungültige Daten und ist daher zurückgestellt: Es lässt sich darin nichts hinzufügen oder ändern, bis die Daten außerhalb von Solid Memo korrigiert sind. {health}",
+      "health": "Was nicht den Formen entspricht, steht auf der Zustandsseite."
     },
     "drafts": {
       "crumb": "Entwürfe",

@@ -633,8 +633,8 @@ No document Solid Memo names has any.
   (`isDeckItself` in [ownership.ts](../packages/solid/src/ownership.ts)
   and `isDraftDocument` in
   [deckPlace.ts](../packages/solid/src/deckPlace.ts)).
-- **An older document that doesn't say so** (from an earlier version, a
-  repair or a copy) is the deck's in the instance's own folder. That
+- **An older document that doesn't say so** (from an earlier version or a
+  copy) is the deck's in the instance's own folder. That
   folder isn't the instance's own when it's the root of a pod or a
   storage, or a folder above one. Such a root is one of the user's
   storages (as above), which a server may leave untyped, or a root the
@@ -647,8 +647,7 @@ No document Solid Memo names has any.
   adds a second owner on its own, and refuses the write
   (`deckDocumentUnclaimed`). The data check doesn't read a document in
   the instance's own folder to list it as unclaimed; it leaves one out
-  once it has read it and found it isn't the deck's, and a
-  [repair](validation.md#repair) makes the same decision. The folder is asked
+  once it has read it and found it isn't the deck's. The folder is asked
   once a session; when the pod doesn't answer (an error or a refusal,
   `cannotCheck`), the write fails and can be retried, and the folder is
   asked again; the document isn't taken for unclaimed. A refusal before
@@ -705,9 +704,9 @@ No document Solid Memo names has any.
   [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)), so
   nothing reads, writes or deletes through it, whatever the [invalid
   data policy](validation.md#the-invalid-data-policy). The instance
-  check reports its entry as not conforming (`DeckPlace`). Removing it
-  there, like any problem with no repair, removes the entry from the
-  catalog and no document it names. A deck handed to the adapters from
+  check reports its entry as not conforming (`DeckPlace`), and leaves
+  it as it is, to be fixed outside the app
+  ([data that doesn't fit](validation.md#data-that-doesnt-fit)). A deck handed to the adapters from
   anywhere else is held to the same rule: a write through it is
   `deckGone`, with nothing written, and removing it
   removes only its entry (`removeDecks` in
@@ -1090,9 +1089,8 @@ graph LR
   It tells Solid Memo it may change the document
   ([above](#where-an-instances-documents-are)). An import or a library
   upgrade reads and writes the cards and states as without it, and a
-  release is never written. A [repair](validation.md#repair) from the
-  data check and a copy of the instance (a guest's study moved into a
-  new instance) leave the document as it was. One untouched since
+  release is never written. A copy of the instance (a guest's study
+  moved into a new instance) leaves the document as it was. One untouched since
   vocabulary 1.16 (a reviews document, since this version) doesn't say
   it yet. Another `dcterms:isPartOf` there stays (another app may point
   two decks at one document). One naming another deck's entry is added

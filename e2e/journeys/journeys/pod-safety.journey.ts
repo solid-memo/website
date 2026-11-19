@@ -254,9 +254,8 @@ const outOf = (url: string) => "../".repeat(new URL(url).pathname.split("/").len
  * The same, the catalog naming the user's documents by addresses
  * spelled otherwise than a request sends them, which resolve outside
  * the instance: the decks are not listed, the Studio's health names
- * each entry as one Solid Memo does not use, and removing one there,
- * then taking the instance off the list, changes neither document and
- * adds none.
+ * each entry as one Solid Memo does not use, and taking the instance
+ * off the list changes neither document and adds none.
  */
 test("an instance whose catalog names documents by addresses that resolve elsewhere leaves the user's documents as they were @studio", async ({
   app,
@@ -317,16 +316,7 @@ test("an instance whose catalog names documents by addresses that resolve elsewh
   );
 
   await app.step(
-    "05 · Remove one entry from the health screen: the user's documents are as they were",
-    async () => {
-      await app.studio.removeData(entries[0]!);
-      expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
-    },
-    { screen: "studio.instance-health" },
-  );
-
-  await app.step(
-    "06 · Remove the instance from the list: the user's documents are as they were",
+    "05 · Remove the instance from the list: the user's documents are as they were",
     async () => {
       await removeFromStudio(app, name);
       expect(await dataOf(user, [profile, diary], [own])).toEqual(before);
