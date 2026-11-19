@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { Fragment, type ComponentChildren } from "preact";
-import { liveLink, namesItsHost } from "@solid-memo/markdown/links";
+import { type LiveLink, liveLink, namesItsHost } from "@solid-memo/markdown/links";
 import type { MdBlock, MdInline } from "@solid-memo/markdown/parse";
 import { breakable } from "./breakable";
 import { ExternalLink } from "./ExternalLink";
@@ -186,7 +186,7 @@ export function WebLink({
   shown,
   children,
 }: {
-  link: { href: string; host: string };
+  link: LiveLink;
   written: string;
   shown: string;
   children: ComponentChildren;
@@ -203,7 +203,7 @@ export function WebLink({
   // own first letter, so a link in Arabic reads right to left.
   return (
     <>
-      <ExternalLink url={link.href} dir={ownAddress ? "ltr" : "auto"}>
+      <ExternalLink url={link} dir={ownAddress ? "ltr" : "auto"}>
         {children}
       </ExternalLink>
       {!ownAddress && (

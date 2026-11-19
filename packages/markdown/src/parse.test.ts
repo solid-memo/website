@@ -1007,6 +1007,8 @@ describe("pathological input", () => {
  */
 describe("the cost of a text the parser reads", () => {
   const most = 7;
+  const step =
+    "## A heading\n\nA paragraph of a step, with **a term**, `code` and [a link](https://example.org/a).\n\n- A first item\n- A second item\n\n";
   const time = (markdown: string) => {
     let took = Infinity;
     for (let round = 0; round < 5; round++) {
@@ -1038,16 +1040,54 @@ describe("the cost of a text the parser reads", () => {
       "tables of full rows",
       fill(`${header}${`${"|b".repeat(MAX_TABLE_COLUMNS)}|\n`.repeat(99)}\n`),
     ],
+    ["links", fill("[a](https://b)")],
+    ["autolinks", fill("<https://b>   ")],
   ])("reads %s within a small multiple of real text", { timeout: 60_000 }, (_, input) => {
-    const base = time(
-      fill(
-        "## A heading\n\nA paragraph of a step, with **a term**, `code` and [a link](https://example.org/a).\n\n- A first item\n- A second item\n\n",
-      ),
-    );
+    const base = time(fill(step));
     const took = time(input);
     expect(
       took / base,
       `${Math.round(took / 1000)} ms against ${Math.round(base / 1000)} ms of text like a course's`,
     ).toBeLessThan(most);
+  });
+
+  // Drawing a link costs far more than its few tokens (LINK_WORK), so a
+  // text of little but links, each a few characters, is past the budget:
+  // no text it lets through holds links denser than inline links back to
+  // back, each with its URL written out.
+  const defined = (unit: string) => {
+    const head = "[a]: https://b\n\n";
+    return head + unit.repeat(Math.floor((MAX_CHARS - head.length) / unit.length));
+  };
+  it.each([
+    ["collapsed reference links", defined("[a][]")],
+    ["full reference links", defined("[a][a]")],
+    ["reference links with no text", defined("[][a]")],
+    ["emphasized reference links", defined("*[a][]*")],
+    ["collapsed reference links, a little apart", defined("[a][]xxx")],
+    ["shortcut reference links, a little apart", defined("[a] xxxx")],
+    ["shortcut reference links, a few spaces apart", defined("[a]     ")],
+    ["collapsed reference links, a few words apart", defined("[a][]xxxxxxx")],
+    ["autolinks back to back", fill("<https://b>")],
+  ])("shows a text of %s as plain text", (_, input) => {
+    expect(input.length).toBeLessThanOrEqual(MAX_CHARS);
+    expect(parseMarkdown(input)).toBeNull();
+  });
+
+  it.each([
+    ["text like a course's step", fill(step)],
+    ["a list of sources", fill("- [A source of the course](https://example.org/a/page)\n")],
+    [
+      "prose with links in each sentence",
+      fill("See [a](https://example.org/a) and [b](https://example.org/b). "),
+    ],
+    ["links", fill("[a](https://b)")],
+    ["autolinks", fill("<https://b>   ")],
+    ["reference links in prose", defined("A word or two, then [a][] and [a].\n")],
+    ["collapsed reference links as dense as links", defined("[a][]xxxxxxxxx")],
+    ["shortcut reference links as dense as links", defined("[a] xxxxxxxxxx")],
+    ["shortcut reference links as many spaces apart", defined("[a]           ")],
+  ])("reads %s, links and all, at the length cap", (_, input) => {
+    expect(parseMarkdown(input)).not.toBeNull();
   });
 });

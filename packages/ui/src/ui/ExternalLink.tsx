@@ -4,7 +4,7 @@
 
 import type { ComponentChildren } from "preact";
 import { isHttpUrl, isLinkableUrl } from "@solid-memo/domain/webId";
-import { namesItsHost } from "@solid-memo/markdown/links";
+import { type LiveLink, namesItsHost } from "@solid-memo/markdown/links";
 import { visibleControls } from "@solid-memo/markdown/parse";
 import { ExternalIcon } from "./icons";
 import { useI18n } from "./i18n";
@@ -22,7 +22,9 @@ import { useI18n } from "./i18n";
  * has it instead, punycode kept, so the text names the host the link
  * opens. A web link opens in a new tab, as it points outside the app,
  * and says so, seen and heard, so nobody is left wondering why Back does
- * nothing; a mailto: link opens the mail app and no tab at all.
+ * nothing; a mailto: link opens the mail app and no tab at all. A
+ * WebLink hands over its address as liveLink checked and parsed it, so
+ * it is neither checked nor parsed again here.
  */
 export function ExternalLink({
   url,
@@ -31,7 +33,8 @@ export function ExternalLink({
   dir,
   children,
 }: {
-  url: string;
+  /** The address, or a web link already checked and parsed: http(s), with no user name or password (WebLink). */
+  url: string | LiveLink;
   class?: string;
   title?: string;
   /** The link's own direction, isolating it from the text around it: left to right, or that of its first letter ("auto"). */
@@ -40,30 +43,31 @@ export function ExternalLink({
   children?: ComponentChildren;
 }) {
   const { t } = useI18n();
-  if (!isLinkableUrl(url)) {
+  if (typeof url === "string" && !isLinkableUrl(url)) {
     return (
       <span class={className} dir={dir}>
         {children ?? visibleControls(url)}
       </span>
     );
   }
-  if (!isHttpUrl(url)) {
+  if (typeof url === "string" && !isHttpUrl(url)) {
     return (
       <a class={className} href={url} title={title} dir={dir}>
         {children ?? visibleControls(url)}
       </a>
     );
   }
+  const href = typeof url === "string" ? url : url.href;
   return (
     <a
       class={className}
-      href={url}
+      href={href}
       title={title}
       dir={dir}
       target="_blank"
       rel="noopener noreferrer"
     >
-      {children ?? shownAddress(url)}
+      {children ?? shownAddress(href)}
       <ExternalIcon />
       <span class="visually-hidden"> {t("common.opensInNewTab")}</span>
     </a>

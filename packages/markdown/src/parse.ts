@@ -91,13 +91,13 @@ export const MAX_TABLE_CELLS = 2_000;
  * (and as if it had at least WORK_FLOOR): a try of one of its rules, or
  * a step through a link's label, is one unit of work, as is each byte of
  * a link's or a picture's destination in UTF-8, for each time it is
- * used, and a token it makes is TOKEN_WORK units, counted as it is
- * done. A try that reads past what its one unit covers costs what it
- * reads: a silent try of a rule that reads on through its line (see
- * reads) a unit for each character of its line past TRY_READ, and a
- * block quote's try or a link reference definition's for each line it
- * reads on through, as both may read lines that rules after them read
- * again.
+ * used, and a token it makes is TOKEN_WORK units, a link LINK_WORK
+ * more, counted as it is done. A try that reads past what its one unit
+ * covers costs what it reads: a silent try of a rule that reads on
+ * through its line (see reads) a unit for each character of its line
+ * past TRY_READ, and a block quote's try or a link reference
+ * definition's for each line it reads on through, as both may read
+ * lines that rules after them read again.
  * What a try reads otherwise is its own line, or lines that its block,
  * or a paragraph read there instead, then holds, once for each level of
  * blocks they are in (up to NESTING). Past it, the text is shown as
@@ -118,6 +118,18 @@ const MAX_WORK = 12;
  * markdown-it pads a table's short rows with, costs what it takes.
  */
 const TOKEN_WORK = 8;
+/**
+ * The units of work of a link, on top of its tokens: its tokens cost
+ * little to make, but drawing it (its check, its element, the icon and
+ * the words that say it opens a new tab, and the host beside it) costs
+ * many times that. Charged this much, no text the budget lets through
+ * holds links denser than inline links back to back, each with its URL
+ * written out: a text of reference links to one definition, or of
+ * autolinks, with little between them is past it. So the links a text
+ * may hold take within a small multiple of what text like a course's
+ * step of its length takes to draw.
+ */
+const LINK_WORK = 14 * TOKEN_WORK;
 const WORK_FLOOR = 1_000;
 
 /** The first word of a code block's info string, when it looks like a language name. */
@@ -432,6 +444,7 @@ for (const { name, fn, alt } of md.inline.ruler.__rules__) {
         } else if (token.start < 0) {
           token.start = start;
           token.end = state.pos;
+          if (token.type === "link_open") spend(LINK_WORK);
           if (token.type === "link_open" || token.type === "image") spendOn(token);
         }
       }
