@@ -1449,6 +1449,14 @@ dl.facts dd > details {
   font-size: 0.8rem;
 }
 
+/* A storage's address is its button: a URL has nowhere to break, so at
+   320px and the largest text it would push the page sideways. */
+.storage-list button {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
 .deck-list > li.deck-row {
   position: relative;
   display: grid;
