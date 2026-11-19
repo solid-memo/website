@@ -21,6 +21,24 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.0](https://github.com/solid-memo/website/compare/v7.9.3...v8.0.0) (2026-11-19)
+
+### ⚠ BREAKING CHANGES
+
+* **ui,studio:** Solid Memo and the Studio no longer repair or remove
+data in the pod that does not fit Solid Memo's shapes. The app sets
+such data aside or blocks the instance, as the invalid data policy
+says, warns about it and leaves it as it is. Fix such data with
+another tool, or by hand, and check again.
+
+Refs: GHSA-rjw2-h83q-h9mh
+Refs: GHSA-mv7w-pv92-w93x
+
+### Fixes
+
+* **application,solid:** check the catalog before renaming an instance ([3fdcebb](https://github.com/solid-memo/website/commit/3fdcebbe57829e6be654accb77a903c32128ff24))
+* **ui,studio:** leave data that does not fit as it is, with no repair ([28131cb](https://github.com/solid-memo/website/commit/28131cbf70ea7a83f774745c0c4814170cd400bd))
+
 ## [7.9.3](https://github.com/solid-memo/website/compare/v7.9.2...v7.9.3) (2026-11-19)
 
 ### Fixes
