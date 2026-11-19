@@ -23,7 +23,13 @@ import {
   type DeckTextCheck,
 } from "./deckHealth";
 import { growth } from "./testing/growth";
-import { summarize, withUnclaimed, type DocumentReport, type Violation } from "./validation";
+import {
+  deckSetAside,
+  summarize,
+  withUnclaimed,
+  type DocumentReport,
+  type Violation,
+} from "./validation";
 
 const CATALOG = "https://pod.example/a/catalog.ttl";
 const CARDS = "https://pod.example/a/decks/d.ttl";
@@ -180,6 +186,44 @@ describe("withDeckReport", () => {
     expect(merged.documents.map((each) => each.url)).toEqual([CATALOG, CARDS, REVIEWS, OTHER, NEW]);
     expect(merged.documents[0]).toEqual(report.documents[0]);
     expect(merged.violationCount).toBe(report.violationCount + 1);
+  });
+});
+
+describe("a document a deck names by another spelling of its address", () => {
+  const SPELLED = CARDS.replace("pod.example", "POD.example");
+  const spelled: Deck = { ...deck, cardsDocumentUrl: SPELLED, reviewsDocumentUrl: SPELLED };
+  const report = summarize(
+    "https://pod.example/a/",
+    [document(CATALOG, []), document(CARDS, [checked(`${CARDS}#c1`)])],
+    [{ url: SPELLED, of: CARDS }],
+  );
+
+  it("is counted once in the instance's report, and set aside with the deck naming it so", () => {
+    expect(report.documents).toHaveLength(2);
+    expect(report.violationCount).toBe(1);
+    expect(deckSetAside(report, spelled)).toBe(true);
+  });
+
+  it("is in the deck's part of the report once, under the address the deck names", () => {
+    const own = deckReport(report, spelled);
+    expect(own.documents.map((each) => each.url)).toEqual([CATALOG, SPELLED]);
+    expect(own.violationCount).toBe(1);
+    expect(own.spellings).toBeUndefined();
+  });
+
+  it("takes what a later check of the deck found of it in place of the document it spells", () => {
+    const merged = withDeckReport(
+      report,
+      spelled,
+      summarize("https://pod.example/a/", [document(SPELLED, [])]),
+    );
+    expect(merged.documents.map((each) => [each.url, each.subjects.length])).toEqual([
+      [CATALOG, 0],
+      [CARDS, 0],
+    ]);
+    expect(merged.spellings).toEqual(report.spellings);
+    expect(merged.conforms).toBe(true);
+    expect(deckSetAside(merged, spelled)).toBe(false);
   });
 });
 

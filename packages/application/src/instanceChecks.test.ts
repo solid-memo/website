@@ -8,6 +8,7 @@ import type { ReadBudget, ReleaseDraftRepository } from "./ports";
 import { createUseCases } from "./useCases";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
+import { deckReport } from "@solid-memo/domain/deckHealth";
 import { deckSetAside, unreadableDocument } from "@solid-memo/domain/validation";
 import { instance, deck, libraryContent, makeDeps } from "./testing/fakePorts";
 import { current, card2, setup } from "./testing/digestWorld";
@@ -109,6 +110,56 @@ describe("instance checks", () => {
         deck.cardsDocumentUrl.replace("https://", "HTTPS://"),
         undefined,
       );
+    });
+
+    it("is checked and read once however many decks name it, in whatever spelling, and reported under each", async () => {
+      const deps = makeDeps();
+      const useCases = createUseCases(deps);
+      const spelled = deck.cardsDocumentUrl.replace("alice.example", "ALICE.example");
+      const decks = Array.from({ length: 4 }, (_, index) => ({
+        ...deck,
+        id: `deck-${index}`,
+        url: `${deck.url}-${index}`,
+        cardsDocumentUrl: index === 3 ? spelled : deck.cardsDocumentUrl,
+      }));
+      deps.deckRepository.listDecks = vi.fn(async () => decks);
+      vi.mocked(deps.shapeValidator.validateDocument).mockImplementation(async (url) =>
+        url === deck.cardsDocumentUrl ? failing : { url, status: "checked", subjects: [] },
+      );
+      const onChecked = vi.fn();
+      for (const report of [
+        await useCases.checkInstance(instance.url),
+        await useCases.validateInstance(instance.url, onChecked),
+      ]) {
+        // The document once, its problems counted once, the other spelling named of it.
+        const reported = report.documents.filter((one) => one.subjects.length > 0);
+        expect(reported.map((one) => one.url)).toEqual([deck.cardsDocumentUrl]);
+        expect(report.violationCount).toBe(1);
+        expect(report.spellings).toEqual([{ url: spelled, of: deck.cardsDocumentUrl }]);
+        for (const one of decks) expect(deckSetAside(report, one)).toBe(true);
+        // Each deck's own report has the document, under the address it names.
+        const own = deckReport(report, decks[3]!);
+        expect(own.documents.find((one) => one.url === spelled)?.subjects).toBe(failing.subjects);
+        expect(own.violationCount).toBe(1);
+      }
+      expect(
+        vi
+          .mocked(deps.shapeValidator.validateDocument)
+          .mock.calls.filter(([url]) => url === deck.cardsDocumentUrl),
+      ).toHaveLength(2);
+      expect(
+        vi
+          .mocked(deps.shapeValidator.validateDocument)
+          .mock.calls.filter(([url]) => url === spelled),
+      ).toHaveLength(0);
+      expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledTimes(2);
+      expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
+        decks,
+        deck.cardsDocumentUrl,
+        undefined,
+      );
+      // The catalog, the preferences, the palettes, the meta document, the cards and the reviews: each once.
+      expect(onChecked).toHaveBeenLastCalledWith(6, 6);
     });
 
     it("is not read again when it conforms, nor when no deck names it", async () => {

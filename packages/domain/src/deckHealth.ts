@@ -115,13 +115,22 @@ const MARKDOWN_PARTS: readonly {
 export function deckReport(report: ValidationReport, deck: Deck): ValidationReport {
   const own = ownSubjectUrls(deck);
   const catalog = documentUrlOf(deck.url);
-  const documents = report.documents.flatMap((document) =>
-    document.url === catalog
-      ? [{ ...document, subjects: document.subjects.filter((subject) => own.has(subject.url)) }]
-      : document.url === deck.cardsDocumentUrl || document.url === deck.reviewsDocumentUrl
-        ? [document]
-        : [],
-  );
+  // Each of the deck's documents once, under the address the deck names it by,
+  // when the report has it under another spelling (ValidationReport.spellings).
+  const named = new Map<string, string>();
+  for (const url of [deck.cardsDocumentUrl, deck.reviewsDocumentUrl]) {
+    const of = report.spellings?.find((spelling) => spelling.url === url)?.of ?? url;
+    if (!named.has(of)) named.set(of, url);
+  }
+  const documents = report.documents.flatMap((document) => {
+    if (document.url === catalog)
+      return [
+        { ...document, subjects: document.subjects.filter((subject) => own.has(subject.url)) },
+      ];
+    const url = named.get(document.url);
+    if (url === undefined) return [];
+    return [url === document.url ? document : { ...document, url }];
+  });
   return withUnclaimed(
     summarize(report.instanceUrl, documents),
     (report.unclaimed ?? []).filter((one) => one.deckUrl === deck.url),
@@ -153,7 +162,14 @@ export function withDeckReport(
 ): ValidationReport {
   const own = ownSubjectUrls(deck);
   const catalog = documentUrlOf(deck.url);
-  const fresh = new Map(part.documents.map((document) => [document.url, document]));
+  // A document the deck names by another spelling takes the place of the one the report has it as.
+  const spelled = new Map((report.spellings ?? []).map(({ url, of }) => [url, of]));
+  const fresh = new Map(
+    part.documents.map((document) => {
+      const of = spelled.get(document.url);
+      return [of ?? document.url, of === undefined ? document : { ...document, url: of }];
+    }),
+  );
   const documents = report.documents.map((document) => {
     const update = fresh.get(document.url);
     if (update === undefined) return document;
@@ -168,10 +184,11 @@ export function withDeckReport(
   });
   const known = new Set(report.documents.map((document) => document.url));
   return withUnclaimed(
-    summarize(report.instanceUrl, [
-      ...documents,
-      ...part.documents.filter((document) => !known.has(document.url)),
-    ]),
+    summarize(
+      report.instanceUrl,
+      [...documents, ...[...fresh.values()].filter((document) => !known.has(document.url))],
+      report.spellings,
+    ),
     [
       ...(report.unclaimed ?? []).filter((one) => one.deckUrl !== deck.url),
       ...(part.unclaimed ?? []).filter((one) => one.deckUrl === deck.url),

@@ -185,9 +185,25 @@ export interface UnclaimedDeck {
   outsidePod: string[];
 }
 
+/**
+ * Another spelling of the address of a document in a report, as a deck
+ * names it (`url`), and the address it is reported under (`of`): the
+ * document is checked and reported once, however many spellings name it.
+ */
+export interface DocumentSpelling {
+  url: string;
+  of: string;
+}
+
 export interface ValidationReport {
   instanceUrl: string;
   documents: DocumentReport[];
+  /**
+   * The other spellings decks name of the documents' addresses, when
+   * there are any: each has the report of the document it spells, and is
+   * held back with it, but is not a document of its own.
+   */
+  spellings?: DocumentSpelling[];
   /** The decks whose documents are unclaimed, when there are any; not a violation: they block nothing. */
   unclaimed?: UnclaimedDeck[];
   /** Results of severity "violation" across every document, and each document the check could not read. */
@@ -195,7 +211,12 @@ export interface ValidationReport {
   conforms: boolean;
 }
 
-export function summarize(instanceUrl: string, documents: DocumentReport[]): ValidationReport {
+/** The report on these documents, and on the other spellings of their addresses (`spellings`), counting each document once. */
+export function summarize(
+  instanceUrl: string,
+  documents: DocumentReport[],
+  spellings: readonly DocumentSpelling[] = [],
+): ValidationReport {
   const violationCount =
     documents
       .flatMap((document) => document.subjects)
@@ -204,7 +225,13 @@ export function summarize(instanceUrl: string, documents: DocumentReport[]): Val
       )
       .filter((violation) => violation.severity === "violation").length +
     documents.filter((document) => document.status === "unreadable").length;
-  return { instanceUrl, documents, violationCount, conforms: violationCount === 0 };
+  return {
+    instanceUrl,
+    documents,
+    ...(spellings.length === 0 ? {} : { spellings: [...spellings] }),
+    violationCount,
+    conforms: violationCount === 0,
+  };
 }
 
 /** The report, naming the decks whose documents are unclaimed when there are any (`unclaimed`), else none. */
@@ -268,9 +295,14 @@ function failingOf(report: ValidationReport): Failing {
       .filter((document) => document.status === "unreadable")
       .map((document) => document.url);
     const ofCatalog = subjects.filter(({ inCatalog }) => inCatalog);
+    const failingDocuments = new Set([...subjects.map(({ document }) => document), ...unread]);
+    // Another spelling a deck names of a failing document's address fails with it.
+    for (const { url, of } of report.spellings ?? []) {
+      if (failingDocuments.has(of)) failingDocuments.add(url);
+    }
     found = {
       entries: new Set(ofCatalog.map(({ subject }) => subject.url)),
-      documents: new Set([...subjects.map(({ document }) => document), ...unread]),
+      documents: failingDocuments,
       arrangement:
         unread.some(isCatalog) ||
         ofCatalog.some(

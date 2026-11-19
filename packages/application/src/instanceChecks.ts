@@ -151,6 +151,52 @@ function canonicalDocumentOf(url: string): string | null {
   return canonicalUrlOf(documentUrlOf(url));
 }
 
+/** A document to check, and where it is, which picks its shapes. */
+type ToCheck = { url: string; context: Exclude<DocumentContext, "library"> };
+
+/**
+ * The documents to check, each once however many name it, in whatever
+ * spelling of its address (canonicalDocumentOf): a catalog may name one
+ * document for a thousand decks. `firsts` are the first to name each;
+ * `summary` reports them (null: left out, so no spelling of it is
+ * reported), each once, with the other spellings named of their
+ * addresses (ValidationReport.spellings), so that a deck finds its
+ * documents' reports by the addresses it names and a document's
+ * problems are counted and listed once, however it is spelled.
+ */
+function onceEach(documents: readonly ToCheck[]): {
+  firsts: ToCheck[];
+  summary: (instanceUrl: string, reports: readonly (DocumentReport | null)[]) => ValidationReport;
+} {
+  const firsts: ToCheck[] = [];
+  const at = new TextMap<number>();
+  const firstOf = documents.map((document) => {
+    const key = `${document.context} ${canonicalDocumentOf(document.url) ?? document.url}`;
+    let index = at.get(key);
+    if (index === undefined) {
+      index = firsts.push(document) - 1;
+      at.set(key, index);
+    }
+    return index;
+  });
+  return {
+    firsts,
+    summary: (instanceUrl, reports) => {
+      // Each address is listed once (instanceDocumentUrls), so each spelling is named once.
+      const spellings = documents.flatMap((document, index) => {
+        const first = firsts[firstOf[index]!]!;
+        if (reports[firstOf[index]!] === null || document.url === first.url) return [];
+        return [{ url: document.url, of: first.url }];
+      });
+      return summarize(
+        instanceUrl,
+        reports.filter((report) => report !== null),
+        spellings,
+      );
+    },
+  };
+}
+
 /**
  * The checks of an instance against Solid Memo's shapes (docs/validation.md):
  * the quick one made when it is opened, which spares a document the digest
@@ -267,7 +313,7 @@ export function createInstanceCheckUseCases({
     decks: readonly Deck[],
     drafts: readonly string[],
     unclaimed: readonly UnclaimedDeck[],
-  ): { url: string; context: Exclude<DocumentContext, "library"> }[] {
+  ): ToCheck[] {
     const isUnclaimed = unclaimedTest(unclaimed);
     return [
       ...instanceDocumentUrls(instanceUrl, decks)
@@ -277,8 +323,9 @@ export function createInstanceCheckUseCases({
     ];
   }
   /**
-   * The check of these documents of the instance, each not checked again
-   * while still at the version the digest says conformed. A receipt is
+   * The check of these documents of the instance, each once however many
+   * name it (onceEach), and not checked again while still at the version
+   * the digest says conformed. A receipt is
    * kept only of one that is the instance's (DigestStore.isInstances).
    * A document that cannot be read is in the report as one
    * (ShapeValidator), so it holds back only what it is part of; so is one
@@ -286,13 +333,14 @@ export function createInstanceCheckUseCases({
    */
   async function checkDocuments(
     instanceUrl: string,
-    urls: readonly { url: string; context: Exclude<DocumentContext, "library"> }[],
+    urls: readonly ToCheck[],
     digest: InstanceDigest,
     decks: readonly Deck[],
     budget: ReadBudget,
   ): Promise<ValidationReport> {
+    const { firsts, summary } = onceEach(urls);
     // A few at a time: the catalog says how many there are (MAX_CATALOG_LINKS of each kind at most).
-    const documents = await mapAtOnce(urls, async ({ url, context }): Promise<DocumentReport> => {
+    const documents = await mapAtOnce(firsts, async ({ url, context }): Promise<DocumentReport> => {
       const receipt = digest.receipts[url];
       const since = await shapeValidator.validateDocumentSince(
         url,
@@ -311,7 +359,7 @@ export function createInstanceCheckUseCases({
       }
       return since.value;
     });
-    return summarize(
+    return summary(
       instanceUrl,
       await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget),
     );
@@ -324,14 +372,15 @@ export function createInstanceCheckUseCases({
    * problem needs that read, so a check of an
    * unchanged instance still downloads nothing. One outside the
    * instance's folder is read within the check's `budget`, and its report
-   * kept when it is not.
+   * kept when it is not. Each report in its place, null for one left out;
+   * given each document once (onceEach), each is read once.
    */
   async function withoutUnclaimedOnRead(
     instanceUrl: string,
     decks: readonly Deck[],
     documents: readonly DocumentReport[],
     budget: ReadBudget,
-  ): Promise<DocumentReport[]> {
+  ): Promise<(DocumentReport | null)[]> {
     const decksOf = decksByDocument(decks);
     const left = await mapAtOnce(documents, async (document) => {
       const naming = decksOf(document.url);
@@ -345,7 +394,7 @@ export function createInstanceCheckUseCases({
         ))
       );
     });
-    return documents.filter((_, index) => !left[index]);
+    return documents.map((document, index) => (left[index] ? null : document));
   }
   /** Every document of the instance, its answer log's too: not checked on every visit, being large and growing. */
   async function validateInstance(
@@ -366,19 +415,20 @@ export function createInstanceCheckUseCases({
         context: "pod" as const,
       })),
     ];
+    const { firsts, summary } = onceEach(urls);
     let checked = 0;
-    onChecked(checked, urls.length);
-    const documents = await mapAtOnce(urls, async ({ url, context }) => {
+    onChecked(checked, firsts.length);
+    const documents = await mapAtOnce(firsts, async ({ url, context }) => {
       const document = await shapeValidator.validateDocument(
         url,
         context,
         budgetFor(url, instanceUrl, budget),
       );
-      onChecked(++checked, urls.length);
+      onChecked(++checked, firsts.length);
       return document;
     });
     return withUnclaimed(
-      summarize(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget)),
+      summary(instanceUrl, await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget)),
       unclaimed,
     );
   }

@@ -1277,3 +1277,21 @@ describe("an instance whose address is spelled otherwise than a request sends it
     ).resolves.toEqual([elsewhere]);
   });
 });
+
+it("finds a document the deck's whatever else it says it is part of, an address no URL too, and in any spelling of the deck's entry", async () => {
+  const deck = {
+    url: `${BOB}catalog.ttl#deck-1`,
+    title: { en: "Spanish" },
+    cardsDocumentUrl: `${BOB}cards/deck-1.ttl`,
+    reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+  };
+  const says = await datasetOfTurtle(
+    deck.cardsDocumentUrl,
+    `<> <${IS_PART_OF}> <https://pod.example:port/>, <${deck.url.replace("pod.example", "POD.example")}> .`,
+  );
+  const guard = createDeckDocumentGuard((async () => {
+    throw new Error("Not asked");
+  }) as typeof globalThis.fetch);
+  await expect(guard.standing(deck, deck.cardsDocumentUrl, says)).resolves.toBe("owned");
+  await expect(guard.unclaimedForAll([deck], deck.cardsDocumentUrl, says)).resolves.toBe(false);
+});
