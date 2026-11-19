@@ -27,9 +27,9 @@ runs:
   steps:
     - shell: bash
       env:
-        CHROMIUM_HEADLESS_SHELL_VERSION: 158.0.8127.18
-        CHROMIUM_HEADLESS_SHELL_REVISION: "1254"
-        CHROMIUM_HEADLESS_SHELL_SHA256: 18352d22cb0cdf520cbff2ad8c41391f0e02a72886cb53b0fde4bdfc4bd075d6
+        CHROMIUM_HEADLESS_SHELL_VERSION: 159.0.8154.6
+        CHROMIUM_HEADLESS_SHELL_REVISION: "1255"
+        CHROMIUM_HEADLESS_SHELL_SHA256: 77a6442fd3c8acd3bef9e1067fc26f5ef464277d22f0e8cb58dc3e4077a3e458
       run: |
         set -eo pipefail
         if [ "$RUNNER_OS" != Linux ] || [ "$RUNNER_ARCH" != X64 ]; then
