@@ -44,6 +44,7 @@ import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT_AP_SHAPED_CLASSES } from "@solid-memo/shacl/profiles";
 import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
+import { isHttpUrl } from "@solid-memo/domain/webId";
 import { subjectOfDocument } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 
@@ -555,7 +556,8 @@ export function recordThing<T>(
  * knows over it, and refuses a source a newer version wrote, as it would
  * in place. Each value is carried as it is. A value that is a blank
  * node is left out, as what it says stays in the source's document, and
- * so is an IRI the client library writes none of (readIris).
+ * so is an IRI that is no http(s) URL, as a value (isCarried) or a
+ * property.
  */
 export function carriedTo(
   source: Subject,
@@ -566,15 +568,20 @@ export function carriedTo(
   // add at each value takes time in the square of the subject's values.
   const values = new Map<string, (Literal | NamedNode)[]>();
   for (const predicate of getPropertyAll(source)) {
-    if (without.includes(predicate)) continue;
+    if (without.includes(predicate) || !isHttpUrl(predicate)) continue;
     values.set(predicate, getTermAll(source, predicate).filter(isCarried));
   }
   return buildThing(createThing({ url })).addAll(values).build();
 }
 
-/** Whether carriedTo carries a value: a literal, or an IRI that is a URL. */
+/**
+ * Whether carriedTo carries a value: a literal, or an http(s) IRI. An
+ * IRI of another scheme stays behind, as a property does: one such as
+ * `sm:Deck` names no term of the app, yet a JSON-LD file would read it
+ * as one (GHSA-gxjp-m253-f2pj).
+ */
 function isCarried(term: Quad_Object): term is Literal | NamedNode {
-  return term.termType === "Literal" || (term.termType === "NamedNode" && URL.canParse(term.value));
+  return term.termType === "Literal" || (term.termType === "NamedNode" && isHttpUrl(term.value));
 }
 
 /**

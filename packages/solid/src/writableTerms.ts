@@ -86,6 +86,50 @@ export function unwritableTermOf(quad: Quad): Term | undefined {
 }
 
 /**
+ * Whether a file written with `prefixes` would read an IRI written as
+ * it is as another term: its scheme (all of it, with no colon) is one of
+ * the prefixes (`sm:Deck`), which a Turtle writer writes as the prefixed
+ * name it looks like and JSON-LD reads as a compact IRI, or the blank
+ * node prefix `_`, or it starts with the `@` of a JSON-LD keyword.
+ * Neither format can escape it (GHSA-gxjp-m253-f2pj).
+ */
+export function isPrefixedLookalike(
+  iri: string,
+  prefixes: Readonly<Record<string, string>>,
+): boolean {
+  const colon = iri.indexOf(":");
+  const scheme = colon === -1 ? iri : iri.slice(0, colon);
+  return scheme === "_" || scheme.startsWith("@") || Object.hasOwn(prefixes, scheme);
+}
+
+/** The IRIs a quad names: its terms' and its literal's datatype. */
+function irisOf(quad: Quad): string[] {
+  return [quad.subject, quad.predicate, quad.object, quad.graph].flatMap((term) => {
+    if (term.termType === "NamedNode") return [term.value];
+    return term.termType === "Literal" ? [term.datatype.value] : [];
+  });
+}
+
+/**
+ * Throws unwritableTerm, naming the IRI, for the first quad that names
+ * one a file written with `prefixes` would read as another term
+ * (isPrefixedLookalike).
+ */
+export function refusePrefixedLookalikes(
+  quads: Iterable<Quad>,
+  prefixes: Readonly<Record<string, string>>,
+): void {
+  for (const quad of quads) {
+    const lookalike = irisOf(quad).find((iri) => isPrefixedLookalike(iri, prefixes));
+    if (lookalike !== undefined) {
+      throw new AppError("unwritableTerm", {
+        term: JSON.stringify({ termType: "NamedNode", value: lookalike }),
+      });
+    }
+  }
+}
+
+/**
  * Throws unwritableTerm, naming the term, for the first quad with a term
  * Turtle cannot write as it is, and termTooLong for one with a term
  * too long to be read back (isTermTooLong). A read that keeps its blank

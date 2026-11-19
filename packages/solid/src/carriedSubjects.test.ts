@@ -75,13 +75,17 @@ function app() {
 const noted = (subject: string) => `<${subject}> <${OTHER}note> "kept" .`;
 
 describe("carriedTo", () => {
+  // An IRI that is no http(s) URL stays behind: `sm:Deck` would read as the app's own term from a JSON-LD export (GHSA-gxjp-m253-f2pj).
   it("says what the source says at another address, each value as it is, but for what cannot be carried", async () => {
     const from = "https://pod.example/a.ttl#one";
     const dataset = await datasetOfTurtle(
       "https://pod.example/a.ttl",
       `<#one> a <${OTHER}Thing> ;
         <${OTHER}note> "kept", "behållen"@sv, 3 ;
-        <${OTHER}link> <https://pod.example/b>, <http://[x> ;
+        <${OTHER}link> <https://pod.example/b>, <http://pod.example/c>, <http://[x> ;
+        <${OTHER}scheme> <sm:Deck>, <urn:isbn:9780000000000>, <mailto:a@example.org> ;
+        <urn:x:note> "left" ;
+        <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <sm:Deck> ;
         <${OTHER}left> "out" ;
         <${OTHER}nested> [ <${OTHER}note> "in the source's document" ] .`,
     );
@@ -100,6 +104,7 @@ describe("carriedTo", () => {
     );
     expect(lines.sort()).toEqual([
       `http://www.w3.org/1999/02/22-rdf-syntax-ns#type NamedNode ${OTHER}Thing`,
+      "link NamedNode http://pod.example/c",
       "link NamedNode https://pod.example/b",
       "note Literal 3",
       "note Literal behållen sv",
@@ -143,6 +148,24 @@ describe("a card copied from another deck", () => {
       `<${at("one-2")}> <${SM.distractor}> <${at("one-2-d1")}> .`,
     ]);
     expect(asNoOne).toEqual([]);
+  });
+
+  it("leaves behind an IRI of the source's card that is no http(s) URL, as a value or a property (GHSA-gxjp-m253-f2pj)", async () => {
+    const { pod, decks } = app();
+    await pod.put(
+      source.cardsDocumentUrl,
+      `${sourceCards}
+       <#one> a <sm:Deck> ; <${OTHER}link> <sm:Card>, <${OTHER}kept> ; <sm:formatVersion> "99" .`,
+    );
+    await decks.applyCardChanges(
+      target,
+      { save: [{ ...card, distractors: [] }], remove: [] },
+      { carried: { deck: source, ids } },
+    );
+    const written = pod.triples(target.cardsDocumentUrl)!;
+    const at = `${target.cardsDocumentUrl}#one-2`;
+    expect(written).toContain(`<${at}> <${OTHER}link> <${OTHER}kept> .`);
+    expect(written.filter((line) => line.includes("<sm:"))).toEqual([]);
   });
 
   it("reads a source outside the pod as no one, and leaves a subject the target holds as it is", async () => {

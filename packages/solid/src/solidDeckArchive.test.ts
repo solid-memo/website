@@ -284,6 +284,41 @@ describe("createSolidDeckArchive", () => {
     });
   });
 
+  for (const format of ["turtle", "jsonld"] as const satisfies readonly DeckFileFormat[]) {
+    it(`refuses a ${format} export of an IRI it would write as one of its prefixed names (GHSA-gxjp-m253-f2pj)`, async () => {
+      const { pod, deck } = await podWithDeck();
+      const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+      const asNoOne = { asNoOne: { cards: false, reviews: false } };
+      const before = pod.triples(deck.cardsDocumentUrl)!;
+      // IRIs that name no term of the app, yet would read back as sm:Deck, sm:formatVersion and xsd:integer.
+      for (const planted of [
+        `<${deck.cardsDocumentUrl}#card-se> a <sm:Deck> .`,
+        `<${deck.cardsDocumentUrl}#card-se> <sm:formatVersion> "99" .`,
+        `<${deck.cardsDocumentUrl}#card-se> <${FOREIGN}> "99"^^<xsd:integer> .`,
+      ]) {
+        await pod.put(deck.cardsDocumentUrl, [...before, planted].join("\n"));
+        await expect(
+          archive.exportDeck(deck, { format, withProgress: false }, asNoOne),
+        ).rejects.toMatchObject({ code: "unwritableTerm" });
+      }
+      // An IRI of a scheme no prefix names goes as it is, and reads back the same.
+      await pod.put(
+        deck.cardsDocumentUrl,
+        [
+          ...before,
+          `<${deck.cardsDocumentUrl}#card-se> <${FOREIGN}> <urn:isbn:9780000000000> .`,
+        ].join("\n"),
+      );
+      const text = await archive.exportDeck(deck, { format, withProgress: false }, asNoOne);
+      const quads = await parseDeckFile(text, format, `${DECK_FILE_BASE}deck`);
+      expect(
+        quads
+          .filter(({ object }) => object.value === "urn:isbn:9780000000000")
+          .map((q) => q.predicate.value),
+      ).toEqual([FOREIGN]);
+    });
+  }
+
   it("exports only the deck's own subjects of its documents, and reads them back (GHSA-xcjw-3f3x-g9fc)", async () => {
     const { pod, deck, cards, states } = await podWithDeck();
     const card = cards[0]!.url;

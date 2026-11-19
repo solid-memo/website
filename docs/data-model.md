@@ -1903,6 +1903,15 @@ A JSON-LD file is flattened: every subject is a node of its `@graph`,
 and its `@context` is the prefixes the Turtle uses too (`sm`, `dcterms`,
 `dcat` and so on), written in full.
 
+An export is refused (`unwritableTerm`) when it names an IRI whose
+scheme is one of those prefixes, such as `<sm:Deck>`, which names no term
+of the app. The Turtle writer would write it as the prefixed name it
+looks like, and JSON-LD reads it as one, so the file would read back as
+other triples; neither format can escape it. So is an IRI whose scheme
+is `_`, or that starts with `@`, which JSON-LD reads as a blank node or
+a keyword (`isPrefixedLookalike` in
+[writableTerms.ts](../packages/solid/src/writableTerms.ts)).
+
 An import reads the file as the pod is read, with the same mappers:
 
 - the file must hold one deck (`sm:Deck`) that fits its shape;
@@ -2214,7 +2223,9 @@ by one.
   place writes one. Two links don't go, as they are the
   source deck's: the release the card came from and the wrong options
   it names there. A value that is a blank node stays behind, as what it
-  says is in the source's document. A card a newer version of the app
+  says is in the source's document. So does a property or an IRI value
+  that isn't an `http:` or `https:` URL, such as `<sm:Deck>`, which a
+  deck file would read as the app's own term. A card a newer version of the app
   wrote is refused, as an edit of it is. A move removes the source's
   subjects whole. A review state of a scheduler the app doesn't know
   stays in the source's reviews document.
