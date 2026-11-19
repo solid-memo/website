@@ -40,7 +40,6 @@ import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { createOwnPodFetch } from "@solid-memo/solid/ownPodFetch";
 import { createOwnPodGate, type OwnFolders } from "@solid-memo/solid/ownPodGate";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { grantPublicRead } from "@solid-memo/solid/client/access";
@@ -404,7 +403,6 @@ export function createAppUseCases({
       userStorages,
     }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: dataFetch, userStorages }),
     instanceCopier,
     updateJournal: createLocalStorageUpdateJournal(),
     logoutChannel: createLogoutChannel(),

@@ -89,7 +89,7 @@ export function CardInspectorContainer({
   tabHref: (tab: CardTab) => string;
   onTab: (tab: CardTab) => void;
   appHref: string;
-  /** The deck's health, where data set aside is repaired. */
+  /** The deck's health, which names what does not conform. */
   healthHref: string;
   /** The card is gone; leave its page. */
   onRemoved: () => void;

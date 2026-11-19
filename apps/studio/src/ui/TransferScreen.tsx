@@ -84,7 +84,7 @@ export function TransferScreen({
   onImport: (withProgress: boolean) => void;
   /** Why no deck can be imported now (useDataCheck); null when one can. */
   importReadOnly: ReadOnlyReason | null;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
   /** A deck's cards, in the workbench. */
   cardsHref: (deck: Deck) => string;

@@ -1163,7 +1163,7 @@ describe("DeckListScreen", () => {
     const { onEdit } = renderScreen(tree, { arrangementSetAside: true });
     expect(
       screen.getByText(
-        "The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired.",
+        "The arrangement of these decks has invalid data, so they cannot be rearranged until it is fixed.",
       ),
     ).toBeInTheDocument();
     expect(screen.queryByText(/A newer version of Solid Memo arranged these decks/)).toBeNull();

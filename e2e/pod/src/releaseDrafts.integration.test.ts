@@ -75,7 +75,6 @@ function page(podFetch: typeof globalThis.fetch = fetch) {
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator,
-    repairRepository: undefined as never,
     instanceCopier: undefined as never,
     ruleset: "e2e-rules",
     releaseDraftRepository: createSolidReleaseDraftRepository({

@@ -124,24 +124,13 @@ describe("Workspace", () => {
     const withPolicy = (invalidDataPolicy: "block-instance" | "block-subject" | "warn-only") =>
       vi.fn(async () => ({ ...DEFAULT_PREFERENCES, invalidDataPolicy }));
 
-    it("waits for the check, then blocks an instance with invalid data until it is repaired", async () => {
+    it("waits for the check, then blocks an instance with invalid data, leaving that data as it is", async () => {
       const pending: ((report: typeof invalid) => void)[] = [];
       const useCases = makeUseCases({
         listInstances: vi.fn(async () => [instanceA]),
         listDecks: vi.fn(async () => [deck]),
         getPreferences: withPolicy("block-instance"),
         validateInstance: vi.fn(() => new Promise<typeof invalid>((r) => pending.push(r))),
-        planRepair: vi.fn(() => ({
-          repairs: [
-            {
-              kind: "describe-deck" as const,
-              documentUrl: `${instanceA.url}catalog.ttl`,
-              subjectUrl: deck.url,
-              version: 3,
-            },
-          ],
-          unrepairable: [],
-        })),
       });
       renderWorkspace(useCases);
       expect(await screen.findByText("Checking this instance's data…")).toBeInTheDocument();
@@ -151,18 +140,15 @@ describe("Workspace", () => {
       pending.forEach((resolve) => resolve(invalid));
       const notice = await screen.findByRole("region", { name: "Data check" });
       expect(notice).toHaveTextContent(
-        "Solid Memo will not use this instance until it is repaired.",
+        "Solid Memo will not use this instance until that data is fixed.",
+      );
+      expect(notice).toHaveTextContent(
+        "Solid Memo leaves this data as it is: it must be fixed outside the app, with another tool.",
       );
       expect(screen.queryByText("Kanji N5")).toBeNull();
-      const checks = vi.mocked(useCases.validateInstance).mock.calls.length;
-      fireEvent.click(within(notice).getByRole("button", { name: "Repair 1 problem" }));
-      await waitFor(() => {
-        expect(useCases.applyRepairs).toHaveBeenCalledOnce();
-      });
-      await waitFor(() => {
-        expect(vi.mocked(useCases.validateInstance).mock.calls.length).toBeGreaterThan(checks);
-      });
-      pending.forEach((resolve) => resolve(invalid));
+      expect(within(notice).queryByRole("button")).toBeNull();
+      fireEvent.click(within(notice).getByText("The problems, document by document"));
+      expect(notice).toHaveTextContent("Less than 1 values");
     });
 
     it("keeps the preferences reachable while an instance is blocked", async () => {
@@ -222,10 +208,10 @@ describe("Workspace", () => {
       const notice = await screen.findByRole("region", { name: "Data check" });
       await waitFor(() => {
         expect(notice).toHaveTextContent(
-          "Kanji N5 is set aside until repaired; the rest keeps working.",
+          "Kanji N5 is set aside until its data is fixed; the rest keeps working.",
         );
       });
-      expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
+      expect(await screen.findByText("Set aside: its data needs fixing")).toBeInTheDocument();
       expect(screen.getByText("Capitals")).toBeInTheDocument();
     });
 
@@ -240,10 +226,10 @@ describe("Workspace", () => {
       const notice = await screen.findByRole("region", { name: "Data check" });
       await waitFor(() => {
         expect(notice).toHaveTextContent(
-          "Kanji N5 is set aside until repaired; the rest keeps working.",
+          "Kanji N5 is set aside until its data is fixed; the rest keeps working.",
         );
       });
-      expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
+      expect(await screen.findByText("Set aside: its data needs fixing")).toBeInTheDocument();
     });
 
     it("waits for the check while the preferences are read, as a user who blocks the instance would", async () => {
@@ -335,16 +321,16 @@ describe("Workspace", () => {
       const notice = await screen.findByRole("region", { name: "Data check" });
       await waitFor(() => {
         expect(notice).toHaveTextContent(
-          "The rest keeps working. The deck list cannot be rearranged until its arrangement is repaired.",
+          "The rest keeps working. The deck list cannot be rearranged until its arrangement is fixed.",
         );
       });
       expect(
         await screen.findByText(
-          "The arrangement of these decks has invalid data, so they cannot be rearranged until it is repaired.",
+          "The arrangement of these decks has invalid data, so they cannot be rearranged until it is fixed.",
         ),
       ).toBeInTheDocument();
       expect(screen.getByText("Kanji N5")).toBeInTheDocument();
-      expect(screen.queryByText("Set aside: its data needs repair")).toBeNull();
+      expect(screen.queryByText("Set aside: its data needs fixing")).toBeNull();
     });
 
     it("says a set-aside deck is set aside when it is opened", async () => {

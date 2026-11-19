@@ -44,7 +44,7 @@ export function InstanceAboutScreen({
   preferencesHref: string;
   /** Why the name and catalog may not be changed now (useDataCheck); null when they may. */
   readOnly: ReadOnlyReason | null;
-  /** The instance's health, where data set aside is repaired. */
+  /** The instance's health, which names what does not conform. */
   healthHref: string;
   busy: boolean;
   /** Whether the last save was made. */

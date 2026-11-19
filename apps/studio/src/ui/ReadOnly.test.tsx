@@ -14,7 +14,7 @@ describe("ReadOnlyNotice", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("says the data is being checked, with no link: there is nothing to repair yet", () => {
+  it("says the data is being checked, with no link: nothing is known not to conform yet", () => {
     render(<ReadOnlyNotice reason="checking" subject="deck" healthHref="#/health" />);
     expect(
       screen.getByText(/being checked\. Nothing can be changed until the check is done\./),
@@ -31,22 +31,23 @@ describe("ReadOnlyNotice", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("says what is set aside, with a link to repair it", () => {
+  it("says what is set aside until it is fixed outside the app, with a link to what does not conform", () => {
     const { unmount } = render(
       <ReadOnlyNotice reason="setAside" subject="deck" healthHref="#/health?deck=d" />,
     );
-    expect(screen.getByText(/This deck has invalid data, so it is set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health?deck=d",
+    expect(screen.getByText(/This deck has invalid data, so it is set aside/)).toHaveTextContent(
+      "until it is fixed outside Solid Memo.",
     );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health?deck=d");
     unmount();
     const decks = render(
       <ReadOnlyNotice reason="setAside" subject="decks" healthHref="#/health" />,
     );
     expect(screen.getByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Repair them on the health screen." }),
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
     ).toBeInTheDocument();
     decks.unmount();
     render(<ReadOnlyNotice reason="setAside" subject="catalogue" healthHref="#/health" />);
@@ -54,14 +55,14 @@ describe("ReadOnlyNotice", () => {
   });
 
   it.each(["deck", "decks", "catalogue"] as const)(
-    "says the whole instance is blocked, whatever the subject (%s), the instance to repair",
+    "says the whole instance is blocked, whatever the subject (%s), linking to the instance's health",
     (subject) => {
       render(<ReadOnlyNotice reason="blocked" subject={subject} healthHref="#/health" />);
       expect(
-        screen.getByText(/your preferences keep it closed until it is repaired/),
+        screen.getByText(/your preferences keep it closed until it is fixed outside Solid Memo/),
       ).toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "Repair it on the health screen." }),
+        screen.getByRole("link", { name: "See what does not conform on the health screen." }),
       ).toBeInTheDocument();
     },
   );

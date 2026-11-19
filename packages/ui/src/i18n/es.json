@@ -458,12 +458,12 @@
   "dataCheckNotice": {
     "region": "Comprobación de datos",
     "heading": "Algunos datos de {name} no están en el formato que espera Solid Memo.",
-    "blockInstance": "Solid Memo no usará esta instancia hasta que se repare.",
+    "blockInstance": "Solid Memo no usará esta instancia hasta que se corrijan esos datos.",
     "restKeepsWorking": "Lo demás sigue funcionando.",
     "setAside": {
-      "one": "Se aparta {names} hasta que se repare; lo demás sigue funcionando.",
-      "many": "Se apartan {names} hasta que se reparen; lo demás sigue funcionando.",
-      "other": "Se apartan {names} hasta que se reparen; lo demás sigue funcionando."
+      "one": "Se aparta {names} hasta que se corrijan sus datos; lo demás sigue funcionando.",
+      "many": "Se apartan {names} hasta que se corrijan sus datos; lo demás sigue funcionando.",
+      "other": "Se apartan {names} hasta que se corrijan sus datos; lo demás sigue funcionando."
     },
     "setAsideMore": {
       "one": "y {count} más",
@@ -471,10 +471,10 @@
       "other": "y {count} más"
     },
     "keepsWorking": "Solid Memo sigue trabajando con ellos.",
-    "arrangementSetAside": "La lista de mazos no se puede reordenar hasta que se repare su orden.",
+    "arrangementSetAside": "La lista de mazos no se puede reordenar hasta que se corrija su orden.",
     "policyHint": "Lo que pasa con los datos no válidos se configura en {preferences}.",
     "preferences": "Preferencias",
-    "repair": "Reparar"
+    "leftAsItIs": "Solid Memo deja estos datos tal como están: hay que corregirlos fuera de la aplicación, con otra herramienta."
   },
   "dataCheckLists": {
     "problems": "Los problemas, documento por documento",
@@ -492,16 +492,6 @@
       "one": "Y {count} resultado más, que no aparece aquí.",
       "many": "Y {count} de resultados más, que no aparecen aquí.",
       "other": "Y {count} resultados más, que no aparecen aquí."
-    },
-    "moreRepairs": {
-      "one": "Y {count} problema más que Solid Memo puede reparar, que no aparece aquí.",
-      "many": "Y {count} de problemas más que Solid Memo puede reparar, que no aparecen aquí.",
-      "other": "Y {count} problemas más que Solid Memo puede reparar, que no aparecen aquí."
-    },
-    "moreProblems": {
-      "one": "Y {count} problema más que necesita que decidas, que no aparece aquí.",
-      "many": "Y {count} de problemas más que necesitan que decidas, que no aparecen aquí.",
-      "other": "Y {count} problemas más que necesitan que decidas, que no aparecen aquí."
     },
     "showMore": {
       "one": "Mostrar {count} más",
@@ -584,7 +574,7 @@
     "startCourseNamed": "Empezar el curso {course}",
     "courseProgress": "Capítulos completados",
     "loading": "Cargando mazos…",
-    "setAside": "Apartado: sus datos necesitan reparación",
+    "setAside": "Apartado: sus datos necesitan corrección",
     "heading": "Mazos",
     "deckCount": {
       "one": "{count} mazo",
@@ -596,7 +586,7 @@
     "libraryLink": "Biblioteca de mazos",
     "emptyGroup": "Este grupo aún está vacío.",
     "readOnly": "Una versión más reciente de Solid Memo ordenó estos mazos, así que aquí no se pueden reordenar. Usa en su lugar una versión más reciente de Solid Memo.",
-    "arrangementSetAside": "El orden de estos mazos tiene datos no válidos, así que no se pueden reordenar hasta que se repare.",
+    "arrangementSetAside": "El orden de estos mazos tiene datos no válidos, así que no se pueden reordenar hasta que se corrija.",
     "newGroupName": "Grupo nuevo",
     "groupName": "Nombre del grupo",
     "saveName": "Guardar nombre",
@@ -1641,29 +1631,6 @@
     "anotherHint": "Debe estar en tu Pod e indicar que es un índice de tipos. Solid Memo lo enlaza desde tu perfil si aún no lo está.",
     "publicMeans": "Público: cualquiera puede ver que esta instancia existe, su nombre y dónde está. Quién puede abrirla lo siguen decidiendo sus ajustes de acceso."
   },
-  "repair": {
-    "removeConfirm": "¿Eliminar <{url}> de tu Pod? No se puede deshacer.",
-    "canRepair": "Solid Memo puede reparar estos:",
-    "repairing": "Reparando…",
-    "repairButton": {
-      "one": "Reparar {count} problema",
-      "many": "Reparar {count} de problemas",
-      "other": "Reparar {count} problemas"
-    },
-    "needDecision": "Estos necesitan que decidas: corrígelos en el documento o elimínalos.",
-    "problem": "{subject} en {document}: {messages}",
-    "removeButton": "Eliminar",
-    "action": {
-      "describeDeck": "Dar al mazo la descripción predeterminada",
-      "directDeck": "Estudiar el mazo de anverso a reverso",
-      "dropSnapshot": "Descartar la instantánea para deshacer que el repaso dejó a medio escribir",
-      "recomputeDue": "Volver a calcular el día del próximo repaso",
-      "nameAgent": "Dar a la persona u organización el nombre de su dirección",
-      "dropDanglingMembers": "Quitar los enlaces a mazos y grupos que ya no existen",
-      "dropUnreadableDate": "Quitar las fechas que Solid Memo no puede leer",
-      "removeSubject": "Eliminarlo"
-    }
-  },
   "retiredCards": {
     "showToggle": "Mostrar tarjetas retiradas",
     "toggleHint": {
@@ -1797,7 +1764,7 @@
       "DeckPlace": "La entrada del mazo no está en el catálogo de su instancia, o indica un documento en una dirección que ningún documento de un mazo puede tener, como el control de acceso de otro recurso o uno de los documentos propios de la instancia. Solid Memo no lo usa.",
       "DateTimeRange": "Solid Memo no puede leer esta fecha: está demasiado lejos en el futuro o en el pasado, o es más larga que una fecha y hora, así que se lee como si no hubiera fecha.",
       "FormatVersionRange": "Ningún formato de Solid Memo tiene esta versión: es menor que 1, así que Solid Memo no puede leer el sujeto.",
-      "ResultLimit": "Este sujeto tiene en una comprobación más resultados de los que Solid Memo enumera: muestra los 1000 más graves. Repáralos y la comprobación encontrará el resto."
+      "ResultLimit": "Este sujeto tiene en una comprobación más resultados de los que Solid Memo enumera: muestra los 1000 más graves. Corrígelos y la comprobación encontrará el resto."
     }
   },
   "webIdDocument": {
@@ -1820,7 +1787,7 @@
     "developerModeOff": "El modo de desarrollador está desactivado. Actívalo en {preferences} para comprobar esta instancia con las formas de Solid Memo.",
     "preferencesLink": "Preferencias",
     "checkingData": "Comprobando los datos de esta instancia…",
-    "deckSetAside": "Este mazo está apartado: sus datos no se ajustan a su forma. Repáralo arriba para volver a usarlo.",
+    "deckSetAside": "Este mazo está apartado: sus datos no se ajustan a su forma. Hay que corregirlos fuera de Solid Memo para volver a usarlo.",
     "checkFailed": "No se pudieron comprobar los datos de esta instancia: {error}",
     "checkFailedHeld": "Hasta que se pueda hacer la comprobación, Solid Memo retiene lo que retendría mientras comprueba. Para usar los datos sin comprobar, elige «Solo avisar» en {preferences}.",
     "developerTools": "Herramientas de desarrollador",

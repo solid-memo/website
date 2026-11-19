@@ -30,7 +30,6 @@ import { createSolidDigestRepository } from "./solidDigestRepository";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
-import { createSolidRepairRepository } from "./solidRepairRepository";
 import { createSolidReleaseDraftRepository } from "./solidReleaseDraftRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { createSolidStorageGateway } from "./solidStorageGateway";
@@ -136,7 +135,6 @@ async function app(deckLibrary?: DeckLibrary, file?: { name: string; text: strin
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
     releaseDraftRepository: createSolidReleaseDraftRepository({ fetch: podFetch, checkWrite }),
     ...(file === undefined

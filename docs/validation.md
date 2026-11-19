@@ -2,8 +2,7 @@
 
 Solid Memo checks that the data it reads from a Pod, and every change
 it writes, has the form the app expects. This page says what's checked
-and when, what happens to data that doesn't fit, and how it can be
-repaired.
+and when, and what happens to data that doesn't fit.
 
 Solid Memo checks the data it works on against its [shapes](shapes.md)
 and the [DCAT-AP profile](#profiles-dcat-ap-and-skos), in the browser:
@@ -14,13 +13,14 @@ and the [DCAT-AP profile](#profiles-dcat-ap-and-skos), in the browser:
   ([below](#data-another-app-wrote)).
 - **Every write is checked before it's saved**, so the app never adds
   invalid data to a pod ([write check](#the-write-check)).
-- **What can be repaired is repaired on request**; the rest is shown,
-  and can be removed ([repair](#repair)).
+- **What doesn't fit is left as it is**: the app writes nothing over
+  it, and it's fixed outside the app
+  ([data that doesn't fit](#data-that-doesnt-fit)).
 - `#/validate?instance=…` shows the full report, linked as "Validate
   this instance" at the bottom of the workspace while developer mode (a
   per-instance [preference](data-model.md#instance-layout)) is on.
 - The Studio's [health](studio.md#health) screen shows every user the
-  findings and repairs for the instance or one deck (`checkDeck`, its
+  findings for the instance or one deck (`checkDeck`, its
   entry and documents only), beside what else is wrong with a deck.
 
 No shape constrains text in Markdown, and the app shows any text
@@ -121,10 +121,10 @@ flowchart LR
   it, since that reader takes much longer on a long literal.
   It's a violation of the subject, with the date as its value. A value
   that's no date-time at all is the shape's to name, and named once.
-  The app reads an optional date as absent, and a [repair](#repair)
-  drops it. A subject that needs the date (an answer's time, a review
-  state's reviews, the instance's creation) doesn't fit its shape, and
-  is the user's to fix or remove. The release check names such a date
+  The app reads an optional date as absent. A subject that needs the
+  date (an answer's time, a review state's reviews, the instance's
+  creation) doesn't fit its shape. Either way, the date is fixed
+  outside the app. The release check names such a date
   as an error, and a release added from a link, or a copy's upgrade
   from one, that has one is refused. The write check doesn't look for
   it: the app writes no such date, and a subject that has one can
@@ -135,8 +135,8 @@ flowchart LR
   instance's own folder (the same `data-model.md` section). It's no
   violation: nothing is blocked or set aside, and the deck is still
   read and studied from. Those documents aren't
-  checked, under any spelling of their address, since a
-  repair writes to the document. Each address is compared as a
+  checked, under any spelling of their address, since they may be
+  anyone's. Each address is compared as a
   request sends it (`canonicalUrlOf`), the unclaimed ones brought to
   that form once per check, so a catalog of many decks costs one
   lookup per document, not a comparison of every pair. Solid Memo's data
@@ -153,7 +153,7 @@ flowchart LR
   within one minute in all (`OUTSIDE_READS_MS` in
   [instanceChecks.ts](../packages/application/src/instanceChecks.ts)),
   whatever the read is for: to find which are unclaimed, to check
-  them, or to read again one with something to repair. A catalog may
+  them, or to read again one with a problem. A catalog may
   name a thousand of them on servers that answer slowly, and every
   deck page waits on the check. The minute runs only while one of
   those reads is under way, so a slow read of the instance's own
@@ -167,7 +167,7 @@ flowchart LR
   that names only other decks. The check doesn't read a document
   in the instance's own folder to list it as unclaimed. It decides this
   (`DeckRepository.isUnclaimedAsRead`) only for a document with
-  something to repair. A check of an unchanged instance still downloads
+  a problem. A check of an unchanged instance still downloads
   nothing.
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled:
@@ -285,9 +285,8 @@ pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
   `dcat:Catalog`. A member is of the same document when its IRI without
   the fragment is the document's, so the document's own IRI (`<>`)
   counts as one (`isSameDocument` in
-  [subjectUrl.ts](../packages/domain/src/subjectUrl.ts)). The
-  drop-dangling-members repair, and writing the catalog or a deck
-  group, go by the same rule.
+  [subjectUrl.ts](../packages/domain/src/subjectUrl.ts)). Writing
+  the catalog or a deck group goes by the same rule.
 - In a pod, DCAT-AP's result about a property Solid Memo doesn't
   write on one of its subjects is a warning, as another app's value
   ([below](#data-another-app-wrote)). So is its class check on a
@@ -323,7 +322,7 @@ one of these:
 
 The summary line says "All 9 documents conform" or "3 violations
 in 2 documents". A subject is checked in its *stored* format, so outdated
-but valid data passes. The [format update](migrations.md) is separate.
+but valid data passes. The [format update](migrations.md#the-pod-migration) is separate.
 
 A document can hold any number of subjects, and a report any number of
 documents, so the report lists `LIST_LIMIT` (50) subjects and documents
@@ -335,27 +334,23 @@ any number of results, so each lists at most `LIST_LIMIT` of them.
 
 `validateInstance` runs when an instance is opened (`Workspace`, query
 `["validation", instance]`, shared with the developer view), and after
-a repair or a format update. What happens when the report doesn't
+a format update. What happens when the report doesn't
 conform is a preference, `sm:invalidDataPolicy`, a concept of
 `sm:InvalidDataPolicies` ([vocab.md](vocab.md#concept-schemes)):
 
 | Policy | What the app does |
 |---|---|
-| Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice with the repair in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
-| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's repaired, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
+| Block the instance (`sm:blockInstance`) | The workspace waits for the check, then shows the Data check notice in place of every screen. Preferences and the validation view stay reachable, so the policy can be changed. |
+| Set invalid data aside (`sm:blockSubject`, the default) | A deck whose entry, cards or review states don't conform is set aside (`deckSetAside`): listed as "Set aside", not offered for study, its pages saying so. When the catalog or a deck group doesn't conform, the deck list's arrangement is set aside (`arrangementSetAside`): until it's fixed, the list shows every deck but can't be rearranged, nor its groups renamed or deleted, as with a list a [newer version arranged](data-model.md#deck-groups). Any other subject that doesn't conform (a deck's agents or distribution, the catalog's publisher, the preferences, the instance record) sets nothing aside; the write check still refuses a write that leaves it not conforming. Everything else works. The notice names the decks set aside, says when the list can't be rearranged, and reports the rest. |
 | Warn only (`sm:warnOnly`) | The notice, and nothing else. |
 
 The notice sits above every screen, so what it lists is bounded. It
 names at most `LIST_LIMIT` (50) of the decks set aside and says how many
-more there are. Unless
-the policy blocks the instance, its repair is drawn only once the user
-opens it (`LazyDetails`). The repair is planned once per report. It
-lists at most `LIST_LIMIT` (50) of the problems it can repair and of
-those that need a decision, and of each one's results, saying how many
-more there are; the button repairs them all. Below them, the report's
-problems are drawn only once opened: the documents the check couldn't
-read and the subjects with results, never the conforming or untyped
-ones, paged as in the full report. The Studio's [health](studio.md#health) screen
+more there are. It says that the app leaves the data as it is, to be
+fixed outside the app. The report's problems are drawn only once the
+user opens them (`LazyDetails`): the documents the check couldn't read
+and the subjects with results, never the conforming or untyped ones,
+paged as in the full report. The Studio's [health](studio.md#health) screen
 lists at most 50 of each of its data check's lists too.
 
 - **What fails is gathered once per report**: the screens ask about
@@ -463,17 +458,14 @@ read as one whatever `sm:scheduler` it names, so it stays Solid Memo's
 and is held to its shape. Another scheduler's state only gets warnings
 ([data-model.md](data-model.md#decks-and-cards)). An FSRS-6 state,
 naming `sm:fsrs6`, is Solid Memo's own: it's checked against FSRS
-review state 1, its violations count as any other, and a
-half-written snapshot is repaired by dropping it, as an SM-2 state's
-is.
+review state 1, and its violations count as any other.
 
 Any other subject is another app's, marked `foreign`. It's checked
 against the shape its class picks (a `foaf:Agent` against `AgentV1`)
 and DCAT-AP, but every result about it is a warning. Under every
 policy it sets no deck aside, leaves the arrangement as it is and
 blocks no instance. The document holding it still conforms, and gets
-its [receipt](#flow). Only the developer report shows its results, and
-the repair offers nothing for it. A subject another app wrote with a
+its [receipt](#flow). Only the developer report shows its results. A subject another app wrote with a
 Solid Memo class is held to that class's shape.
 
 The Solid client keeps some IRIs for subjects it hasn't saved yet
@@ -505,11 +497,9 @@ isn't Solid Memo's (a `schema:Dataset`, say, which fails DCAT-AP's
 class check), or a blank node (which fails the shape's `sh:nodeKind
 sh:IRI`). Either way, the result about the link is a warning, in the
 check and the write check alike: the catalog still conforms, the
-arrangement stays editable, and no repair unlinks the member. The
-drop-dangling-members repair, and writing the catalog whole, keep such
+arrangement stays editable, and writing the catalog whole keeps such
 a link. A link to a subject of the document that nothing describes,
-the document's own IRI among them, is still the catalog's own problem,
-which that repair removes.
+the document's own IRI among them, is still the catalog's own problem.
 
 A value another app added to one of Solid Memo's subjects is that
 app's data as well. The writer keeps every value of a property the
@@ -618,36 +608,22 @@ library shape, no DCAT-AP. The check is of the read the library made
 passes is the one imported. A violation refuses the release; a warning
 doesn't.
 
-## Repair
+## Data that doesn't fit
 
-`planRepair` ([domain/repair.ts](../packages/domain/src/repair.ts))
-turns a report into repairs for the problems with one safe answer,
-written in the subject's own stored format:
+Solid Memo doesn't repair or remove what a check finds. It leaves such
+data as it is and writes no repair over it; only the
+[format update](migrations.md#the-pod-migration) rewrites data, from an older format:
 
-| Problem | Repair |
-|---|---|
-| A deck without a description | The default description, `Flashcards: <title>.` |
-| A deck without a study direction, or an unknown one | Front to back, as format 1 studied every deck |
-| A review state with half an undo snapshot (an SM-2 or an FSRS-6 state's) | The snapshot dropped (as the review-state 1 → 2 migration does), the four terms of an FSRS-6 state's or the five of an SM-2 state's |
-| A malformed due day | Recomputed from the last review and the bounded interval, or a long-past day, due at once, when those give no real day |
-| An agent without a name | Named after its IRI |
-| A catalog or [deck group](data-model.md#deck-groups) listing a deck or group the document doesn't describe (DCAT-AP's class check on `dcat:dataset` or `dcat:catalog`) | Those links dropped, a link to the document's own IRI among them (a member typed `sm:Deck` or `sm:DeckGroup` alone is kept, and so is every link to another document) |
-| A date the app can't read (`DateTimeRange`) of a field the subject's shape and format make optional | Those dates dropped, every such date of the subject in one repair; a readable value of the same field, and every other field, are kept |
-| A review state's undo snapshot with a date the app can't read | The snapshot dropped, as for half a snapshot |
-
-Every other problem is listed with its document linked, to be fixed
-there or removed after a confirmation. Removing a subject drops only
-the catalog's and the deck groups' membership links to it
-(`dcat:dataset`, `dcat:catalog`), not a deck naming it as creator or
-the catalog as publisher. `applyRepairs`
-([solidRepairRepository.ts](../packages/solid/src/solidRepairRepository.ts))
-reads each document once, applies its repairs in one edit, each to
-the subject as the repairs before it left it, and writes it once,
-then the instance is checked again. Many repairs take time that grows
-with them and the document, not their square. That read decides the
-write, as for any write to a deck's document: a release (`<> a sm:Deck`,
-other than a draft's release document) and a document unclaimed for
-every deck naming it are left as they are.
+- The check names each problem, with its document, in the Data check
+  notice, the full report and the Studio's [health](studio.md#health)
+  screen.
+- The user's [invalid data policy](#the-invalid-data-policy) decides
+  what's set aside or blocked meanwhile, and the
+  [write check](#the-write-check) still refuses a write that leaves a
+  subject not conforming.
+- The data is fixed outside the app: by hand, or with a tool made to
+  repair data in a pod. A later check, as the instance is opened again
+  or on the health screen's "Check again", lets go of what's fixed.
 
 ## The CI cross-check
 

@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { planRepair, type Repair, type RepairPlan } from "@solid-memo/domain/repair";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
   canonicalUrlOf,
@@ -25,7 +24,6 @@ import type {
   DeckLibrary,
   DeckRepository,
   ShapeValidator,
-  RepairRepository,
   DocumentContext,
   ReadBudget,
   ReleaseDraftRepository,
@@ -84,14 +82,6 @@ export interface InstanceCheckUseCases {
     deck: Deck,
     text: DeckTextCheck<F>,
   ): Promise<DeckHealth<F>>;
-  /** What the app can repair of what a check found, and what it leaves to the user. */
-  planRepair(report: ValidationReport): RepairPlan;
-  /**
-   * Apply repairs (the planned ones, or removals the user chose) to the
-   * instance's documents. A document that its read shows is not to be
-   * written is left as it is (RepairRepository).
-   */
-  applyRepairs(instanceUrl: string, repairs: readonly Repair[]): Promise<void>;
 }
 
 /**
@@ -165,16 +155,15 @@ function canonicalDocumentOf(url: string): string | null {
  * The checks of an instance against Solid Memo's shapes (docs/validation.md):
  * the quick one made when it is opened, which spares a document the digest
  * says conformed and has not changed since, the full one of every document,
- * and one deck's; the decks' unclaimed documents claimed once the user
- * confirms they are the deck's; and what the app can repair of what a check
- * found (domain/repair.ts).
+ * and one deck's; and the decks' unclaimed documents claimed once the user
+ * confirms they are the deck's. What a check finds is reported, never
+ * repaired: the app leaves that data as it is.
  */
 export function createInstanceCheckUseCases({
   deckRepository,
   releaseDraftRepository,
   answerStore,
   shapeValidator,
-  repairRepository,
   deckLibrary,
   digestStore,
   storageGateway,
@@ -185,7 +174,6 @@ export function createInstanceCheckUseCases({
   releaseDraftRepository: ReleaseDraftRepository;
   answerStore: Pick<AnswerStore, "logMonths">;
   shapeValidator: ShapeValidator;
-  repairRepository: RepairRepository;
   deckLibrary: DeckLibrary;
   digestStore: Pick<DigestStore, "of" | "remember" | "isInstances">;
   storageGateway: Pick<StorageGateway, "discoverStorages">;
@@ -270,8 +258,9 @@ export function createInstanceCheckUseCases({
   /**
    * The instance's documents, then its drafts': each with where it is,
    * which picks its shapes. An unclaimed document is not checked, in any
-   * spelling of its address (unclaimedTest): it may be anyone's, and a
-   * repair of what the check finds writes to it.
+   * spelling of its address (unclaimedTest): it may be anyone's, and
+   * what the check found there would hold back a deck for data that is
+   * not its own.
    */
   function documentsToCheck(
     instanceUrl: string,
@@ -329,10 +318,10 @@ export function createInstanceCheckUseCases({
   }
   /**
    * The reports without those of a deck's document that its read shows
-   * is unclaimed for every deck naming it (isUnclaimedAsRead): a repair
-   * or removal of what the check found would write to a document that
-   * is no deck's to change, a release in the instance's folder say. Only
-   * a report with something to repair needs that read, so a check of an
+   * is unclaimed for every deck naming it (isUnclaimedAsRead): what the
+   * check found is in a document that is no deck's, a release in the
+   * instance's folder say, and holds back no deck. Only a report with a
+   * problem needs that read, so a check of an
    * unchanged instance still downloads nothing. One outside the
    * instance's folder is read within the check's `budget`, and its report
    * kept when it is not.
@@ -444,13 +433,6 @@ export function createInstanceCheckUseCases({
             ),
       ]);
       return deckHealth(deck, report, cards, release, text);
-    },
-    planRepair(report) {
-      return planRepair(report);
-    },
-    async applyRepairs(instanceUrl, repairs) {
-      const decks = await deckRepository.listDecks(instanceUrl);
-      return repairRepository.applyRepairs(repairs, decksByDocument(decks));
     },
   };
 }

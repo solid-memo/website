@@ -100,7 +100,7 @@ describe("CardInspectorContainer", () => {
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     checked(invalidReport([deck]));
     expect(
-      await screen.findByRole("link", { name: "Repair it on the health screen." }),
+      await screen.findByRole("link", { name: "See what does not conform on the health screen." }),
     ).toHaveAttribute("href", "#/health");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(screen.getByLabelText("Back")).toBeDisabled();

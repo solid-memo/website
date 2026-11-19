@@ -165,7 +165,7 @@ export function CardWorkbenchScreen({
   lapses: LapseIndex | undefined;
   /** The answer log could not be read. */
   lapsesFailed: boolean;
-  /** The deck's health, where data set aside is repaired. */
+  /** The deck's health, which names what does not conform. */
   healthHref: string;
   query: CardQuery;
   onQuery: (query: CardQuery) => void;

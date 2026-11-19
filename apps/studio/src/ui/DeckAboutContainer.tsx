@@ -48,7 +48,7 @@ export function DeckAboutContainer({
   instance: Instance;
   deck: Deck;
   appHref: string;
-  /** The deck's health, where data set aside is repaired. */
+  /** The deck's health, which names what does not conform. */
   healthHref: string;
 }) {
   const { t, errorText } = useI18n();

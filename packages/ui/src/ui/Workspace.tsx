@@ -396,7 +396,6 @@ function instanceNotices(
       )}
       {check.report !== null && (
         <DataCheckNotice
-          useCases={useCases}
           instance={instance}
           report={check.report}
           policy={check.policy}
@@ -624,7 +623,7 @@ export function Workspace({
   // Every instance is checked against Solid Memo's shapes and DCAT-AP
   // when it is opened (docs/validation.md); what happens with invalid
   // data is the user's invalid data policy. Writes are checked as they
-  // are made, so the check runs again only after a repair or an update.
+  // are made, so the check runs again only after an update.
   // The Studio's screens hold to the same check (useDataCheck).
   const check = useDataCheck(useCases, activeInstance === null ? null : instanceUrl);
   // What the home page shows is fetched while the instance is checked (useHomePrefetch).

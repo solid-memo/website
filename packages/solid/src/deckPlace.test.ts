@@ -13,7 +13,6 @@ import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createSolidDeckArchive } from "./solidDeckArchive";
 import { datasetOfTurtle } from "./testing/datasets";
 import { createSolidDeckRepository } from "./solidDeckRepository";
-import { createSolidRepairRepository } from "./solidRepairRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { readBudget } from "@solid-memo/application/readBudget";
 
@@ -799,36 +798,21 @@ describe("a deck whose document is a deck itself: a release", () => {
   });
 });
 
-describe("a repair of what a data check found in a deck's document", () => {
-  const removal = (documentUrl: string, subjectUrl: string) => ({
-    kind: "remove-subject" as const,
-    documentUrl,
-    subjectUrl,
-    version: 6,
-  });
-
-  it("leaves a release in the instance's folder as it is, read as no deck's document", async () => {
+describe("a deck's document, as a data check reads it", () => {
+  it("reads a release in the instance's folder as no deck's document", async () => {
     const p = await pod();
     const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
     const release = `${BOB}published/v1.ttl`;
     await p.put(release, `<> a <${SM}Deck> ; <${SM}formatVersion> 6 .`);
     await plant(p, deck, release, deck.reviewsDocumentUrl);
     const [listed] = await p.decks.listDecks(BOB);
-    const before = await p.text(release);
 
     // The check of an unchanged instance still reads nothing here; a read of it says so.
     await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
     await expect(p.decks.isUnclaimedAsRead([listed!], release)).resolves.toBe(true);
-
-    p.writes.length = 0;
-    const repairs = createSolidRepairRepository({ fetch: p.fetch });
-    await repairs.applyRepairs([removal(release, release)], () => [listed!]);
-    await repairs.applyRepairs([removal(release, release)], () => []);
-    expect(p.writes).toEqual([]);
-    expect(await p.text(release)).toBe(before);
   });
 
-  it("leaves a document in the folder that names only another deck as it is", async () => {
+  it("reads a document in the folder that names only another deck as no deck's document", async () => {
     const p = await pod();
     const other = await p.decks.createDeck(BOB, { en: "Other" });
     await p.decks.addCard(other, UNO);
@@ -848,27 +832,6 @@ describe("a repair of what a data check found in a deck's document", () => {
     await expect(
       p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl, readBudget(60_000)),
     ).resolves.toBe(true);
-
-    p.writes.length = 0;
-    await createSolidRepairRepository({ fetch: p.fetch }).applyRepairs(
-      [removal(other.cardsDocumentUrl, `${other.cardsDocumentUrl}#nothing`)],
-      () => [listed],
-    );
-    expect(p.writes).toEqual([]);
-  });
-
-  it("repairs an ordinary deck's document", async () => {
-    const p = await pod();
-    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
-    const card = await p.decks.addCard(deck, UNO);
-
-    p.writes.length = 0;
-    await createSolidRepairRepository({ fetch: p.fetch }).applyRepairs(
-      [removal(deck.cardsDocumentUrl, card.url)],
-      () => [deck],
-    );
-    expect(p.writes).toHaveLength(1);
-    expect(await p.decks.listCards(deck)).toEqual([]);
   });
 });
 

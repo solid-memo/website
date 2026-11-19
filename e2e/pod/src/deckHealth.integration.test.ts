@@ -9,11 +9,10 @@
  * server: it reads the deck's entry, its cards and its reviews documents,
  * checks them against the shapes, and finds what else is wrong with its
  * cards: sides that state no language, cards that say the same, and text
- * in Markdown the check passed in finds a problem in. Removing what the
- * shapes refuse and no repair covers (UseCases.applyRepairs) clears it,
- * and a document still at the version the digest says conformed is not
- * checked again. It writes nothing but the digest's receipts and the
- * removal.
+ * in Markdown the check passed in finds a problem in. What the shapes
+ * refuse is left as it is, and a document still at the version the
+ * digest says conformed is not checked again. It writes nothing but the
+ * digest's receipts.
  */
 import { beforeAll, describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
@@ -28,7 +27,6 @@ import { createSolidDigestRepository } from "@solid-memo/solid/solidDigestReposi
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
@@ -72,7 +70,6 @@ function page() {
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator: { ...shapeValidator, validateDocumentSince },
-    repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
     writeFence,
     digestRepository: createSolidDigestRepository({ fetch: podFetch, checkWrite }),
@@ -184,27 +181,23 @@ describe.each(SERVERS)("a deck's health on $name", ({ url: server }) => {
     expect(healthProblemCount(health)).toBe(health.report.violationCount + 3);
   });
 
-  it("clears what the shapes refuse once the user removes what no repair covers", async () => {
+  it("leaves what the shapes refuse as it is, found again by the next check", async () => {
     const { instanceUrl, deck } = await seed(server);
+    const before = await (await fetch(deck.cardsDocumentUrl)).text();
     const { useCases } = page();
     const health = await useCases.checkDeck(instanceUrl, deck, text);
-    const plan = useCases.planRepair(health.report);
-    expect(plan.repairs).toEqual([]);
-    expect(plan.unrepairable.map((problem) => problem.subjectUrl)).toEqual([
-      `${deck.cardsDocumentUrl}#wren`,
-    ]);
-    await useCases.applyRepairs(
-      instanceUrl,
-      plan.unrepairable.map(({ documentUrl, subjectUrl }) => ({
-        kind: "remove-subject" as const,
-        documentUrl,
-        subjectUrl,
-        version: 1,
-      })),
-    );
+    const failing = (report: typeof health.report) =>
+      report.documents.flatMap((document) =>
+        document.subjects.flatMap((subject) =>
+          subject.status === "checked" && subject.violations.some((v) => v.severity === "violation")
+            ? [subject.url]
+            : [],
+        ),
+      );
+    expect(failing(health.report)).toEqual([`${deck.cardsDocumentUrl}#wren`]);
     const again = await page().useCases.checkDeck(instanceUrl, deck, text);
-    expect(again.report.violationCount).toBe(0);
-    expect(healthProblemCount(again)).toBe(3);
+    expect(failing(again.report)).toEqual([`${deck.cardsDocumentUrl}#wren`]);
+    expect(await (await fetch(deck.cardsDocumentUrl)).text()).toBe(before);
   });
 
   it("checks again only the documents changed since they conformed", async (context) => {

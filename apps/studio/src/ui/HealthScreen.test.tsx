@@ -7,7 +7,6 @@ import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card } from "@solid-memo/domain/deck";
 import type { CardSpot, DeckHealth } from "@solid-memo/domain/deckHealth";
-import type { RepairPlan } from "@solid-memo/domain/repair";
 import {
   summarize,
   unreadableDocument,
@@ -20,7 +19,6 @@ import {
   DUPLICATE_CARD_LIMIT,
   InstanceHealthScreen,
   placeText,
-  type RepairActions,
 } from "./HealthScreen";
 import { PROBLEM_LIMIT } from "./ProblemList";
 import { screenCommands, WithCommands } from "../test/commands";
@@ -73,19 +71,6 @@ const report = summarize(instanceA.url, [
     checked(`${deck.url}-cards`, [missing]),
   ]),
 ]);
-const plan: RepairPlan = {
-  repairs: [
-    {
-      kind: "describe-deck",
-      documentUrl: `${instanceA.url}catalog.ttl`,
-      subjectUrl: deck.url,
-      version: 3,
-    },
-  ],
-  unrepairable: [
-    { documentUrl: deck.cardsDocumentUrl, subjectUrl: water.url, violations: [missing] },
-  ],
-};
 const finding: MarkdownProblem = { code: "html", source: "<b>" };
 const health: DeckHealth<MarkdownProblem> = {
   report,
@@ -110,19 +95,10 @@ const fine: DeckHealth<MarkdownProblem> = {
   markdownMore: 0,
 };
 
-function actions(overrides: Partial<RepairActions> = {}): RepairActions {
-  return { plan, busy: false, onRepair: vi.fn(), onRemove: vi.fn(), error: null, ...overrides };
-}
-
 const spotHref = ({ card, place }: CardSpot) =>
   `#/card?card=${card.id}&tab=${place.tab}${"part" in place && place.part !== undefined ? `&part=${place.part}` : ""}${place.tab === "distractors" ? `&d=${place.distractor}` : ""}`;
 
-function renderDeck(
-  shown: DeckHealth<MarkdownProblem>,
-  repairs = actions(),
-  checking = false,
-  held = false,
-) {
+function renderDeck(shown: DeckHealth<MarkdownProblem>, checking = false, held = false) {
   const onCheck = vi.fn();
   render(
     <WithCommands>
@@ -132,14 +108,13 @@ function renderDeck(
         cards={[water, fire, twin]}
         checking={checking}
         onCheck={onCheck}
-        repairs={repairs}
         spotHref={spotHref}
         aboutHref="#/about"
         held={held}
       />
     </WithCommands>,
   );
-  return { onCheck, repairs };
+  return { onCheck };
 }
 
 const part = (name: string) => screen.getByRole("region", { name });
@@ -179,10 +154,12 @@ describe("DeckHealthScreen", () => {
     expect(onCheck).toHaveBeenCalledTimes(2);
   });
 
-  it("lists what the data check found, each linking where it is fixed, and its repairs", () => {
-    const { repairs } = renderDeck(health);
+  it("lists what the data check found, each linking where it is fixed, and offers no repair or removal", () => {
+    renderDeck(health);
     const data = part("Data check");
-    expect(within(data).getByText("4 violations in 2 documents.")).toBeInTheDocument();
+    expect(data).toHaveTextContent(
+      "4 violations in 2 documents. Solid Memo leaves this data as it is: it must be fixed outside the app, with another tool.",
+    );
     const items = within(data).getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("water, back: A card has a back.");
     expect(within(items[0]!).getByRole("link")).toHaveAttribute(
@@ -204,17 +181,7 @@ describe("DeckHealthScreen", () => {
     expect(
       within(items[4]!).getByRole("link", { name: "The deck's distribution" }),
     ).toHaveAttribute("href", "#/about");
-    expect(within(data).getByText("Solid Memo can repair these:")).toBeInTheDocument();
-    fireEvent.click(within(data).getByRole("button", { name: "Repair 1 problem" }));
-    expect(repairs.onRepair).toHaveBeenCalled();
-    fireEvent.click(within(data).getByRole("button", { name: `Remove ${water.url}` }));
-    expect(repairs.onRemove).toHaveBeenCalledWith(plan.unrepairable[0]);
-  });
-
-  it("says when a repair is made, or failed", () => {
-    renderDeck(health, actions({ busy: true, error: "The pod refused." }));
-    expect(screen.getByRole("button", { name: "Repairing…" })).toBeDisabled();
-    expect(screen.getByRole("alert")).toHaveTextContent("The pod refused.");
+    expect(within(data).queryByRole("button")).toBeNull();
   });
 
   it("lists the sides to settle, the cards that say the same, and the Markdown that would not show as meant", () => {
@@ -246,11 +213,7 @@ describe("DeckHealthScreen", () => {
   });
 
   it("says when nothing is wrong, and when the release to weigh the languages against could not be read", () => {
-    renderDeck(
-      { ...fine, unstated: null },
-      actions({ plan: { repairs: [], unrepairable: [] } }),
-      true,
-    );
+    renderDeck({ ...fine, unstated: null }, true);
     expect(screen.getByRole("status")).toHaveTextContent("");
     expect(screen.getByRole("button", { name: "Checking…" })).toBeDisabled();
     expect(screenCommands()).toEqual({});
@@ -258,12 +221,13 @@ describe("DeckHealthScreen", () => {
     expect(part("Cards that say the same")).toHaveTextContent("No two cards in use say the same.");
     expect(part("Markdown")).toHaveTextContent("shows as its author meant");
     expect(within(part("Data check")).queryByRole("list")).toBeNull();
+    expect(part("Data check")).not.toHaveTextContent("leaves this data as it is");
   });
 
-  it("names, but links to no form, the places of a deck held, saying why; its repairs and removals stay", () => {
-    const { repairs } = renderDeck(health, actions(), false, true);
+  it("names, but links to no form, the places of a deck held, saying why", () => {
+    renderDeck(health, false, true);
     expect(
-      screen.getByText(/Nothing in this deck can be changed until the data is repaired/),
+      screen.getByText(/Nothing in this deck can be changed until its data is fixed/),
     ).toBeInTheDocument();
     const data = part("Data check");
     const items = within(data).getAllByRole("listitem");
@@ -275,10 +239,6 @@ describe("DeckHealthScreen", () => {
         .getAllByRole("link")
         .map((link) => link.getAttribute("href")),
     ).toEqual([`${instanceA.url}catalog.ttl#agent-ada`]);
-    fireEvent.click(within(data).getByRole("button", { name: "Repair 1 problem" }));
-    expect(repairs.onRepair).toHaveBeenCalled();
-    fireEvent.click(within(data).getByRole("button", { name: `Remove ${water.url}` }));
-    expect(repairs.onRemove).toHaveBeenCalledWith(plan.unrepairable[0]);
     for (const name of ["Languages", "Cards that say the same", "Markdown"])
       expect(within(part(name)).queryByRole("link")).toBeNull();
     expect(within(part("Markdown")).getAllByRole("listitem")[0]).toHaveTextContent(
@@ -304,7 +264,7 @@ describe("DeckHealthScreen", () => {
       })),
       markdownMore: 1000,
     };
-    renderDeck(big, actions({ plan: { repairs: [], unrepairable: [] } }));
+    renderDeck(big);
     const more = "And 70 more problems, not listed here.";
     const languages = part("Languages");
     expect(languages).toHaveTextContent(`${many.length} card sides state no language.`);
@@ -327,7 +287,7 @@ describe("DeckHealthScreen", () => {
   });
 
   it("says so when nothing is wrong at all", () => {
-    renderDeck(fine, actions({ plan: { repairs: [], unrepairable: [] } }));
+    renderDeck(fine);
     expect(screen.getByRole("status")).toHaveTextContent("Nothing is wrong with this deck.");
     expect(part("Languages")).toHaveTextContent("Every card side states its language.");
   });
@@ -352,7 +312,6 @@ describe("InstanceHealthScreen", () => {
           decks={[deck, other]}
           checking={false}
           onCheck={onCheck}
-          repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
           deckHref={(each) => `#/health?deck=${each.id}`}
           badge={(each) => <span>badge of {each.id}</span>}
         />
@@ -400,25 +359,6 @@ describe("InstanceHealthScreen", () => {
           decks={[deck, other]}
           checking={false}
           onCheck={vi.fn()}
-          repairs={actions({
-            plan: {
-              repairs: [
-                {
-                  kind: "remove-subject",
-                  documentUrl: deck.cardsDocumentUrl,
-                  subjectUrl: other.url,
-                  version: 1,
-                },
-              ],
-              unrepairable: [
-                {
-                  documentUrl: deck.cardsDocumentUrl,
-                  subjectUrl: other.url,
-                  violations: [missing],
-                },
-              ],
-            },
-          })}
           deckHref={(each) => `#/health?deck=${each.id}`}
           badge={() => null}
         />
@@ -427,7 +367,7 @@ describe("InstanceHealthScreen", () => {
     const data = part("Data check");
     expect(within(data).queryByRole("link", { name: "in Verbs" })).toBeNull();
     const inDeck = within(data).getAllByRole("link", { name: "in Kanji N5" });
-    expect(inDeck).toHaveLength(3);
+    expect(inDeck).toHaveLength(1);
     for (const link of inDeck) expect(link).toHaveAttribute("href", "#/health?deck=deck-1");
   });
 
@@ -441,7 +381,6 @@ describe("InstanceHealthScreen", () => {
           decks={[deck]}
           checking={false}
           onCheck={vi.fn()}
-          repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
           deckHref={(each) => `#/health?deck=${each.id}`}
           badge={() => null}
         />
@@ -465,7 +404,6 @@ describe("InstanceHealthScreen", () => {
           decks={[]}
           checking
           onCheck={vi.fn()}
-          repairs={actions({ plan: { repairs: [], unrepairable: [] } })}
           deckHref={() => "#"}
           badge={() => null}
         />
@@ -496,32 +434,14 @@ describe("DataCheckSection", () => {
           decks={[]}
           checking={false}
           onCheck={vi.fn()}
-          repairs={actions({
-            plan: {
-              repairs: subjects.map((subjectUrl) => ({
-                kind: "describe-deck",
-                documentUrl: catalog,
-                subjectUrl,
-                version: 3,
-              })),
-              unrepairable: [...subjects, `${catalog}#y`, `${catalog}#z`].map((subjectUrl) => ({
-                documentUrl: catalog,
-                subjectUrl,
-                violations: [missing],
-              })),
-            },
-          })}
           deckHref={() => "#"}
           badge={() => null}
         />
       </WithCommands>,
     );
     const data = part("Data check");
-    expect(within(data).getAllByRole("listitem")).toHaveLength(200);
+    expect(within(data).getAllByRole("listitem")).toHaveLength(100);
     expect(data).toHaveTextContent("And 1 more result, not listed here.");
     expect(data).toHaveTextContent("And 2 more documents, not listed here.");
-    expect(data).toHaveTextContent("And 1 more problem Solid Memo can repair, not listed here.");
-    expect(data).toHaveTextContent("And 3 more problems that need your decision, not listed here.");
-    expect(within(data).getByRole("button", { name: "Repair 51 problems" })).toBeInTheDocument();
   });
 });

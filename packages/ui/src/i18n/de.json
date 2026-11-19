@@ -446,21 +446,21 @@
   "dataCheckNotice": {
     "region": "Datenprüfung",
     "heading": "Einige Daten in der Instanz „{name}“ haben nicht das Format, das Solid Memo erwartet.",
-    "blockInstance": "Solid Memo verwendet diese Instanz erst wieder, wenn sie repariert ist.",
+    "blockInstance": "Solid Memo verwendet diese Instanz erst wieder, wenn die Daten korrigiert sind.",
     "restKeepsWorking": "Alles andere funktioniert weiter.",
     "setAside": {
-      "one": "{names} wird bis zur Reparatur zurückgestellt; alles andere funktioniert weiter.",
-      "other": "{names} werden bis zur Reparatur zurückgestellt; alles andere funktioniert weiter."
+      "one": "{names} wird zurückgestellt, bis die Daten korrigiert sind; alles andere funktioniert weiter.",
+      "other": "{names} werden zurückgestellt, bis die Daten korrigiert sind; alles andere funktioniert weiter."
     },
     "setAsideMore": {
       "one": "und {count} weiterer",
       "other": "und {count} weitere"
     },
     "keepsWorking": "Solid Memo arbeitet trotzdem damit weiter.",
-    "arrangementSetAside": "Die Stapelliste lässt sich erst wieder neu anordnen, wenn ihre Anordnung repariert ist.",
+    "arrangementSetAside": "Die Stapelliste lässt sich erst wieder neu anordnen, wenn ihre Anordnung korrigiert ist.",
     "policyHint": "Was mit ungültigen Daten geschieht, legst du unter {preferences} fest.",
     "preferences": "Einstellungen",
-    "repair": "Reparieren"
+    "leftAsItIs": "Solid Memo lässt diese Daten, wie sie sind: Sie müssen außerhalb der App mit einem anderen Werkzeug korrigiert werden."
   },
   "dataCheckLists": {
     "problems": "Die Probleme, Dokument für Dokument",
@@ -475,14 +475,6 @@
     "moreResults": {
       "one": "Und {count} weiteres Ergebnis, das hier nicht aufgeführt ist.",
       "other": "Und {count} weitere Ergebnisse, die hier nicht aufgeführt sind."
-    },
-    "moreRepairs": {
-      "one": "Und {count} weiteres Problem, das Solid Memo reparieren kann, hier nicht aufgeführt.",
-      "other": "Und {count} weitere Probleme, die Solid Memo reparieren kann, hier nicht aufgeführt."
-    },
-    "moreProblems": {
-      "one": "Und {count} weiteres Problem, über das du entscheiden musst, hier nicht aufgeführt.",
-      "other": "Und {count} weitere Probleme, über die du entscheiden musst, hier nicht aufgeführt."
     },
     "showMore": {
       "one": "{count} weiteres anzeigen",
@@ -561,7 +553,7 @@
     "startCourseNamed": "Kurs {course} starten",
     "courseProgress": "Erledigte Kapitel",
     "loading": "Stapel werden geladen…",
-    "setAside": "Zurückgestellt: Die Daten müssen repariert werden",
+    "setAside": "Zurückgestellt: Die Daten müssen korrigiert werden",
     "heading": "Stapel",
     "deckCount": {
       "one": "{count} Stapel",
@@ -572,7 +564,7 @@
     "libraryLink": "Stapelbibliothek",
     "emptyGroup": "Diese Gruppe ist noch leer.",
     "readOnly": "Eine neuere Version von Solid Memo hat diese Stapel angeordnet, daher lassen sie sich hier nicht umsortieren. Verwende stattdessen eine neuere Version von Solid Memo.",
-    "arrangementSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sie sich erst umsortieren, wenn sie repariert ist.",
+    "arrangementSetAside": "Die Anordnung dieser Stapel enthält ungültige Daten, daher lassen sie sich erst umsortieren, wenn sie korrigiert ist.",
     "newGroupName": "Neue Gruppe",
     "groupName": "Gruppenname",
     "saveName": "Namen speichern",
@@ -1558,28 +1550,6 @@
     "anotherHint": "Er muss in deinem Pod liegen und angeben, ein Typindex zu sein. Solid Memo verweist in deinem Profil auf ihn, falls das noch nicht geschieht.",
     "publicMeans": "Öffentlich: Alle können sehen, dass es diese Instanz gibt, wie sie heißt und wo sie liegt. Wer sie öffnen darf, bestimmen weiterhin ihre Zugriffseinstellungen."
   },
-  "repair": {
-    "removeConfirm": "<{url}> aus deinem Pod entfernen? Das lässt sich nicht rückgängig machen.",
-    "canRepair": "Solid Memo kann diese reparieren:",
-    "repairing": "Wird repariert…",
-    "repairButton": {
-      "one": "{count} Problem reparieren",
-      "other": "{count} Probleme reparieren"
-    },
-    "needDecision": "Über diese musst du entscheiden: Korrigiere sie im Dokument oder entferne sie.",
-    "problem": "{subject} in {document}: {messages}",
-    "removeButton": "Entfernen",
-    "action": {
-      "describeDeck": "Dem Stapel die Standardbeschreibung geben",
-      "directDeck": "Den Stapel von der Vorderseite zur Rückseite lernen",
-      "dropSnapshot": "Halb geschriebenen Schnappschuss zum Rückgängigmachen der Wiederholung verwerfen",
-      "recomputeDue": "Fälligkeitstag der Wiederholung neu berechnen",
-      "nameAgent": "Person oder Organisation nach ihrer Adresse benennen",
-      "dropDanglingMembers": "Links zu nicht mehr vorhandenen Stapeln und Gruppen entfernen",
-      "dropUnreadableDate": "Daten entfernen, die Solid Memo nicht lesen kann",
-      "removeSubject": "Entfernen"
-    }
-  },
   "retiredCards": {
     "showToggle": "Ausgemusterte Karten anzeigen",
     "toggleHint": {
@@ -1708,7 +1678,7 @@
       "DeckPlace": "Der Eintrag des Stapels steht nicht im Katalog seiner Instanz, oder er nennt ein Dokument unter einer Adresse, die kein Dokument eines Stapels haben darf, etwa die Zugriffskontrolle einer anderen Ressource oder eines der eigenen Dokumente der Instanz. Solid Memo verwendet ihn nicht.",
       "DateTimeRange": "Solid Memo kann dieses Datum nicht lesen: Es liegt zu weit in der Zukunft oder Vergangenheit oder ist länger als ein Zeitpunkt, daher gilt es als kein Datum.",
       "FormatVersionRange": "Kein Format von Solid Memo hat diese Version: Sie ist kleiner als 1, daher kann Solid Memo das Subjekt nicht lesen.",
-      "ResultLimit": "Dieses Subjekt hat in einer Prüfung mehr Ergebnisse, als Solid Memo auflistet: Es zeigt die 1.000 schwerwiegendsten. Repariere sie, dann findet die Prüfung den Rest."
+      "ResultLimit": "Dieses Subjekt hat in einer Prüfung mehr Ergebnisse, als Solid Memo auflistet: Es zeigt die 1.000 schwerwiegendsten. Korrigiere sie, dann findet die Prüfung den Rest."
     }
   },
   "webIdDocument": {
@@ -1731,7 +1701,7 @@
     "developerModeOff": "Der Entwicklermodus ist aus. Schalte ihn unter {preferences} ein, um diese Instanz anhand der Formen von Solid Memo zu prüfen.",
     "preferencesLink": "Einstellungen",
     "checkingData": "Daten dieser Instanz werden geprüft…",
-    "deckSetAside": "Dieser Stapel ist zurückgestellt: Seine Daten entsprechen nicht den Formen. Repariere ihn oben, um ihn wieder zu verwenden.",
+    "deckSetAside": "Dieser Stapel ist zurückgestellt: Seine Daten entsprechen nicht den Formen. Sie müssen außerhalb von Solid Memo korrigiert werden, bevor der Stapel wieder verwendet werden kann.",
     "checkFailed": "Die Daten dieser Instanz konnten nicht geprüft werden: {error}",
     "checkFailedHeld": "Bis die Prüfung möglich ist, hält Solid Memo zurück, was es während der Prüfung zurückhält. Um die Daten ungeprüft zu verwenden, wähle „Nur warnen“ in den {preferences}.",
     "developerTools": "Entwicklerwerkzeuge",

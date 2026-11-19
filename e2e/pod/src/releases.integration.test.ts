@@ -77,7 +77,6 @@ function page(network: typeof globalThis.fetch = globalThis.fetch) {
     preferencesRepository: createSolidPreferencesRepository({ fetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch, checkWrite }),
     shapeValidator,
-    repairRepository: undefined as never,
     instanceCopier: undefined as never,
     ruleset: "e2e-rules",
     releaseDraftRepository: createSolidReleaseDraftRepository({

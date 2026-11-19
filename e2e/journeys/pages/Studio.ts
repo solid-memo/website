@@ -30,8 +30,7 @@ interface ReplacedText {
  * the sidebar and deleted), the releases it published, its graph (a
  * node reached by keyboard, a leaf found and its neighbors as a table),
  * the decks whose documents are to confirm as their own, and the data a
- * check finds that no repair covers, removed, on the health screen,
- * and its way back
+ * check finds, named on the health screen, and its way back
  * to Solid Memo. Its sections are reached from its sidebar, a deck's or
  * a draft's screens from their tabs.
  */
@@ -1684,23 +1683,6 @@ export class Studio extends Screen {
           .filter({ hasText: problem })
           .first(),
       ).toBeVisible();
-    });
-  }
-
-  /** Removes `subject`, which no repair covers, from the health screen, confirming: it is no longer offered. */
-  async removeData(subject: string): Promise<void> {
-    await this.intent(`Remove ${subject}`, async () => {
-      const remove = this.page.getByRole("button", {
-        name: this.t("studio.health.remove", { subject }),
-        exact: true,
-      });
-      await remove.click();
-      await this.confirm(
-        "studio.confirm.removeData",
-        new RegExp(escapeRegExp(this.t("repair.removeConfirm", { url: subject }))),
-        "repair.removeButton",
-      );
-      await expect(remove).toHaveCount(0);
     });
   }
 

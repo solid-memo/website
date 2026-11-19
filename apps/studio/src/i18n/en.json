@@ -254,7 +254,7 @@
         "other": "Deleted {count} decks."
       },
       "export": "Export",
-      "moveSetAside": "The arrangement of these decks has invalid data, so decks cannot be moved into groups until it is repaired.",
+      "moveSetAside": "The arrangement of these decks has invalid data, so decks cannot be moved into groups until it is fixed.",
       "groups": {
         "edit": "Edit",
         "editCards": "Edit the selected cards",
@@ -385,8 +385,7 @@
         "chapter": "Delete the chapter",
         "step": "Delete the step",
         "card": "Delete the card"
-      },
-      "removeData": "Remove it from your pod"
+      }
     },
     "schedule": {
       "loading": "Loading the schedule…",
@@ -703,13 +702,11 @@
       "allWell": "Nothing is wrong with this deck.",
       "dataHeading": "Data check",
       "dataHint": "The deck's entry in the catalog and its documents, checked against Solid Memo's shapes.",
-      "held": "Nothing in this deck can be changed until the data is repaired, so the problems below are named, not linked to their forms. Repair what can be repaired here, and remove what no repair covers.",
+      "held": "Nothing in this deck can be changed until its data is fixed, so the problems below are named, not linked to their forms.",
       "instanceDataHint": "The instance's documents, checked against Solid Memo's shapes. Documents unchanged since they last passed are not checked again.",
       "deckEntry": "The deck's entry",
       "deckDistribution": "The deck's distribution",
       "inDeck": "in {deck}",
-      "remove": "Remove {subject}",
-      "removeHint": "No repair covers this: fix it in the document, or remove it.",
       "decksHeading": "Decks",
       "decksHint": "Each deck is checked once it is on the screen.",
       "languagesHeading": "Languages",
@@ -883,12 +880,11 @@
     "readOnly": {
       "checking": "This instance's data is being checked. Nothing can be changed until the check is done.",
       "unchecked": "This instance's data could not be checked, so nothing can be changed until it can. To change it unchecked, choose “Warn only” in Solid Memo's preferences.",
-      "blocked": "This instance has invalid data, and your preferences keep it closed until it is repaired, so nothing can be changed here. {repair}",
-      "deck": "This deck has invalid data, so it is set aside: it is shown here, but nothing in it can be changed until it is repaired. {repair}",
-      "decks": "Decks with invalid data are set aside: they cannot be selected or changed until they are repaired. {repair}",
-      "catalogue": "The instance's catalog or one of its groups has invalid data, so it is set aside: nothing can be added to it or changed in it until it is repaired. {repair}",
-      "repair": "Repair it on the health screen.",
-      "repairDecks": "Repair them on the health screen."
+      "blocked": "This instance has invalid data, and your preferences keep it closed until it is fixed outside Solid Memo, so nothing can be changed here. {health}",
+      "deck": "This deck has invalid data, so it is set aside: it is shown here, but nothing in it can be changed until it is fixed outside Solid Memo. {health}",
+      "decks": "Decks with invalid data are set aside: they cannot be selected or changed until they are fixed outside Solid Memo. {health}",
+      "catalogue": "The instance's catalog or one of its groups has invalid data, so it is set aside: nothing can be added to it or changed in it until it is fixed outside Solid Memo. {health}",
+      "health": "See what does not conform on the health screen."
     },
     "drafts": {
       "crumb": "Drafts",

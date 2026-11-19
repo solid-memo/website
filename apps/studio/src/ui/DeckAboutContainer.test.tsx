@@ -91,7 +91,7 @@ describe("DeckAboutContainer", () => {
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeDisabled();
     checked(invalidReport([kanji]));
     expect(
-      await screen.findByRole("link", { name: "Repair it on the health screen." }),
+      await screen.findByRole("link", { name: "See what does not conform on the health screen." }),
     ).toHaveAttribute("href", "#/health");
     expect(screen.getByRole("radio", { name: "Front → back" })).toBeDisabled();
     expect(screen.getByRole("link", { name: "Open this deck in Solid Memo" })).toBeInTheDocument();

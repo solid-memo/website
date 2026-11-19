@@ -138,7 +138,7 @@ export function authorOfAgents(
  * another spelling of the same one is (isSameUrl). The catalog is data anyone may have
  * written, so a deck it names elsewhere is not one of the instance's:
  * nothing reads, writes or deletes through it, and the instance check
- * reports its entry, which a repair may remove (docs/data-model.md,
+ * reports its entry, which it leaves as it is (docs/data-model.md,
  * "Where an instance's documents are").
  */
 export function toDecks(dataset: Dataset, catalogUrl: string): Deck[] {

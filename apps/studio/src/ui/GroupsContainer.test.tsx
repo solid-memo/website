@@ -93,7 +93,7 @@ describe("GroupsContainer", () => {
         checkInstance: vi.fn(async () => invalidReport([kanji], { catalog: true })),
       }),
     );
-    expect(await screen.findByText("Set aside: its data needs repair")).toBeInTheDocument();
+    expect(await screen.findByText("Set aside: its data needs fixing")).toBeInTheDocument();
     expect(
       await screen.findByText(/The arrangement of these decks has invalid data/),
     ).toBeInTheDocument();
@@ -124,10 +124,9 @@ describe("GroupsContainer", () => {
     expect(deckActions("Kanji N5")).toEqual([false, false]);
     checked(invalidReport([kanji]));
     expect(await screen.findByText(/Decks with invalid data are set aside/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair them on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     expect(deckActions("Kanji N5")).toEqual([false, false]);
     expect(deckActions("Solid")).toEqual([true, true]);
   });
@@ -144,10 +143,9 @@ describe("GroupsContainer", () => {
       }),
     );
     expect(await screen.findByText(/your preferences keep it closed/)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     expect(deckActions("Solid")).toEqual([false, false]);
   });
 

@@ -32,7 +32,6 @@ import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { createSolidRepairRepository } from "@solid-memo/solid/solidRepairRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
@@ -76,7 +75,6 @@ function page(): UseCases {
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch: podFetch }),
     instanceCopier: createSolidInstanceCopier({ fetch: podFetch }),
     writeFence,
   });

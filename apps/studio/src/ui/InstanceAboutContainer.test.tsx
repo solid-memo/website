@@ -67,10 +67,9 @@ describe("InstanceAboutContainer", () => {
     expect(
       await screen.findByText(/catalog or one of its groups has invalid data/),
     ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Repair it on the health screen." })).toHaveAttribute(
-      "href",
-      "#/health",
-    );
+    expect(
+      screen.getByRole("link", { name: "See what does not conform on the health screen." }),
+    ).toHaveAttribute("href", "#/health");
     expect(screen.getByRole("button", { name: "Save name" })).toBeDisabled();
     expect(screen.getByLabelText("Description")).toBeDisabled();
   });

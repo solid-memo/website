@@ -112,7 +112,7 @@ const MEMBER_LINKS: readonly (string | undefined)[] = [
  * stated where it is described, which this document cannot show, so the
  * check says nothing about it. A member of the same document, the
  * document's own URL among them (isSameDocument), is still held to its
- * class; the drop-dangling-members repair goes by the same rule.
+ * class.
  */
 function isMemberElsewhere(focusNode: string, violation: ResultTerms): boolean {
   return (
@@ -280,8 +280,7 @@ function isForeignMember(
  * take elsewhere, another resource's access control or metadata, one of
  * the instance's own documents). Where the documents are is otherwise
  * free. The app leaves such a deck out (mappers/deckMapper.ts toDecks),
- * so the check names it, and a repair may remove the entry, and nothing
- * else.
+ * so the check names it, and leaves the entry as it is.
  */
 function placeViolations(thing: Subject, documentUrl: string): Violation[] {
   const instance = instanceUrlOfDeck(documentUrl);

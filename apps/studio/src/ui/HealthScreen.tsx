@@ -14,16 +14,13 @@ import {
   type DeckHealth,
 } from "@solid-memo/domain/deckHealth";
 import type { Instance } from "@solid-memo/domain/instance";
-import type { RepairPlan, Unrepairable } from "@solid-memo/domain/repair";
 import type { ValidationReport, Violation } from "@solid-memo/domain/validation";
 import { cardName } from "@solid-memo/ui/DataText";
-import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { ExternalLink } from "@solid-memo/ui/ExternalLink";
 import { useCardText } from "@solid-memo/ui/cardLanguage";
-import { useI18n, type CardReader, type ErrorText, type I18n } from "@solid-memo/ui/i18n";
+import { useI18n, type CardReader, type I18n } from "@solid-memo/ui/i18n";
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
-import { repairLabels } from "@solid-memo/ui/RepairContainer";
 import {
   summaryClass,
   summaryOf,
@@ -37,40 +34,28 @@ import { useScreenCommands } from "./shell/useScreenCommands";
 /** At most how many cards of a group that say the same the deck's health names; past it, it says how many more. */
 export const DUPLICATE_CARD_LIMIT = 10;
 
-/** What can be repaired of what a check found, and the actions that repair it. */
-export interface RepairActions {
-  plan: RepairPlan;
-  busy: boolean;
-  onRepair: () => void;
-  onRemove: (problem: Unrepairable) => void;
-  error: ErrorText | null;
-}
-
 /** A subject of a check, the document it was found in, and the predicate a result names, as a link to where it is fixed (or to the subject itself). */
 type SubjectLink = (subjectUrl: string, documentUrl: string, path?: string) => ComponentChildren;
 
 /**
  * What a check of the instance's documents found (`report`): its
  * summary, then each result, a violation or a warning, its subject as
- * `link` names it, and each document it could not read, then what
- * Solid Memo can repair (one button for all), and the subjects no
- * repair covers, each to remove once the user confirms (the container
- * asks). A check can find any number of problems, so each list shows
- * the first DATA_CHECK_LIMIT and says how many more there are.
+ * `link` names it, and each document it could not read. Solid Memo
+ * leaves what does not conform as it is: it is fixed outside the app,
+ * and the section says so. A check can find any number of problems, so
+ * each list shows the first DATA_CHECK_LIMIT and says how many more
+ * there are.
  */
 function DataCheckSection({
   report,
   hint,
   link,
-  repairs,
 }: {
   report: ValidationReport;
   hint: string;
   link: SubjectLink;
-  repairs: RepairActions;
 }) {
   const { t, severityLabel } = useI18n();
-  const labels = repairLabels(t);
   const { results, unreadable } = useMemo(
     () => ({
       results: bounded(
@@ -95,14 +80,14 @@ function DataCheckSection({
     }),
     [report],
   );
-  const { plan, busy } = repairs;
-  const repairable = bounded(plan.repairs, DATA_CHECK_LIMIT);
-  const unrepairable = bounded(plan.unrepairable, DATA_CHECK_LIMIT);
   return (
     <section aria-labelledby="health-data">
       <h3 id="health-data">{t("studio.health.dataHeading")}</h3>
       <p class="hint">{hint}</p>
-      <p class={summaryClass(report)}>{summaryOf(report, t)}</p>
+      <p class={summaryClass(report)}>
+        {summaryOf(report, t)}
+        {!report.conforms && ` ${t("dataCheckNotice.leftAsItIs")}`}
+      </p>
       {results.shown.length > 0 && (
         <ul class="studio-health-list">
           {results.shown.map(({ subject, document, violation }, index) => (
@@ -125,46 +110,6 @@ function DataCheckSection({
         </ul>
       )}
       <MoreProblems message="dataCheckLists.moreDocuments" count={unreadable.more} />
-      {plan.repairs.length > 0 && (
-        <>
-          <p>{t("repair.canRepair")}</p>
-          <ul>
-            {repairable.shown.map((repair) => (
-              <li key={`${repair.kind} ${repair.subjectUrl}`}>
-                {labels[repair.kind]}: {link(repair.subjectUrl, repair.documentUrl)}
-              </li>
-            ))}
-          </ul>
-          <MoreProblems message="dataCheckLists.moreRepairs" count={repairable.more} />
-          <button class="primary" onClick={repairs.onRepair} disabled={busy}>
-            {busy
-              ? t("repair.repairing")
-              : t("repair.repairButton", { count: plan.repairs.length })}
-          </button>
-        </>
-      )}
-      {plan.unrepairable.length > 0 && (
-        <>
-          <p>{t("studio.health.removeHint")}</p>
-          <ul>
-            {unrepairable.shown.map((problem) => (
-              <li key={problem.subjectUrl}>
-                {link(problem.subjectUrl, problem.documentUrl)}{" "}
-                <button
-                  class="danger"
-                  aria-label={t("studio.health.remove", { subject: problem.subjectUrl })}
-                  onClick={() => repairs.onRemove(problem)}
-                  disabled={busy}
-                >
-                  {t("repair.removeButton")}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <MoreProblems message="dataCheckLists.moreProblems" count={unrepairable.more} />
-        </>
-      )}
-      <ErrorMessage error={repairs.error} />
     </section>
   );
 }
@@ -177,11 +122,7 @@ function MoreProblems({
   message,
   count,
 }: {
-  message:
-    | "dataCheckLists.moreResults"
-    | "dataCheckLists.moreDocuments"
-    | "dataCheckLists.moreRepairs"
-    | "dataCheckLists.moreProblems";
+  message: "dataCheckLists.moreResults" | "dataCheckLists.moreDocuments";
   count: number;
 }) {
   const { t } = useI18n();
@@ -280,12 +221,11 @@ function Part({
  * as meant, each linking to its field (`spotHref`); a deck can have any
  * number of these, so each list shows at most PROBLEM_LIMIT (a group
  * DUPLICATE_CARD_LIMIT of its cards) and says how many more there are;
- * the summary, the line on unstated sides and the repair button count
- * them all. "Check again" reads
- * it all afresh. While the deck is held (`held`: set aside, or the whole
- * instance blocked), its forms change nothing, so the places are named,
- * not linked, and a line says so: the repairs and removals here are the
- * way out.
+ * the summary and the line on unstated sides count them all. "Check
+ * again" reads it all afresh. While the deck is held (`held`: set
+ * aside, or the whole instance blocked), its forms change nothing, so
+ * the places are named, not linked, and a line says so: its data is
+ * fixed outside the app.
  */
 export function DeckHealthScreen({
   deck,
@@ -293,7 +233,6 @@ export function DeckHealthScreen({
   cards,
   checking,
   onCheck,
-  repairs,
   spotHref,
   aboutHref,
   held = false,
@@ -304,11 +243,10 @@ export function DeckHealthScreen({
   cards: readonly Card[];
   checking: boolean;
   onCheck: () => void;
-  repairs: RepairActions;
   spotHref: (spot: CardSpot) => string;
   /** What the deck says of itself, where its entry and its languages are set. */
   aboutHref: string;
-  /** Nothing in the deck can be changed until its data is repaired (useDataCheck). */
+  /** Nothing in the deck can be changed until its data is fixed (useDataCheck). */
   held?: boolean;
 }) {
   const { t, tx } = useI18n();
@@ -349,12 +287,7 @@ export function DeckHealthScreen({
             : t("studio.health.summary", { count })}
       </p>
       {held && <p class="warning">{t("studio.health.held")}</p>}
-      <DataCheckSection
-        report={health.report}
-        hint={t("studio.health.dataHint")}
-        link={link}
-        repairs={repairs}
-      />
+      <DataCheckSection report={health.report} hint={t("studio.health.dataHint")} link={link} />
       <Part
         id="health-languages"
         heading={t("studio.health.languagesHeading")}
@@ -448,7 +381,6 @@ export function InstanceHealthScreen({
   decks,
   checking,
   onCheck,
-  repairs,
   deckHref,
   badge,
 }: {
@@ -457,7 +389,6 @@ export function InstanceHealthScreen({
   decks: readonly Deck[];
   checking: boolean;
   onCheck: () => void;
-  repairs: RepairActions;
   deckHref: (deck: Deck) => string;
   badge: (deck: Deck) => ComponentChildren;
 }) {
@@ -483,12 +414,7 @@ export function InstanceHealthScreen({
           {checking ? t("studio.health.checking") : t("studio.health.checkAgain")}
         </button>
       </header>
-      <DataCheckSection
-        report={report}
-        hint={t("studio.health.instanceDataHint")}
-        link={link}
-        repairs={repairs}
-      />
+      <DataCheckSection report={report} hint={t("studio.health.instanceDataHint")} link={link} />
       <section aria-labelledby="health-decks">
         <h3 id="health-decks">{t("studio.health.decksHeading")}</h3>
         <p class="hint">{t("studio.health.decksHint")}</p>

@@ -9,7 +9,6 @@ import type { CustomPalette } from "@solid-memo/domain/customPalette";
 import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
-import type { Repair } from "@solid-memo/domain/repair";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
 import type { DeckPause } from "@solid-memo/domain/deckPause";
 import type { DeckFileContent, DeckFileFormat, DeckFileOptions } from "@solid-memo/domain/deckFile";
@@ -1346,20 +1345,6 @@ export interface LogoutChannel {
 export interface WriteFence {
   /** Refuse every write under the container (a URL ending in "/") until the returned release is called. */
   hold(containerUrl: string): () => void;
-}
-
-/** Driven port: repairs of what an instance check found (docs/validation.md). */
-export interface RepairRepository {
-  /**
-   * Apply the repairs, one read and one write per document. `decksOf`
-   * gives the decks naming a document as theirs; a document that the
-   * read shows is not to be written is left as it is (a release, or one
-   * unclaimed for every deck naming it).
-   */
-  applyRepairs(
-    repairs: readonly Repair[],
-    decksOf: (documentUrl: string) => readonly Deck[],
-  ): Promise<void>;
 }
 
 /** Driven port: discovery of storage roots in the user's pod(s). */

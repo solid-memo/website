@@ -139,7 +139,6 @@ async function app(site: typeof fetch = siteFetch, store = createMemoryResourceS
     preferencesRepository: createSolidPreferencesRepository({ fetch: podFetch, checkWrite }),
     reviewStateRepository: createSolidReviewStateRepository({ fetch: podFetch, checkWrite }),
     shapeValidator,
-    repairRepository: undefined as never,
     instanceCopier: undefined as never,
   });
   return { useCases, store };

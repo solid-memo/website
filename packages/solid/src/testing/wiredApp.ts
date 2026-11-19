@@ -26,7 +26,6 @@ import { createSolidPaletteRepository } from "../solidPaletteRepository";
 import { createSolidPreferencesRepository } from "../solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "../solidReleaseDraftRepository";
 import { createSolidReleasePublisher } from "../solidReleasePublisher";
-import { createSolidRepairRepository } from "../solidRepairRepository";
 import { createSolidReviewStateRepository } from "../solidReviewStateRepository";
 import { createSolidStorageGateway } from "../solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "../solidWebIdDocumentRepository";
@@ -204,7 +203,6 @@ export function wiredApp({
       userStorages,
     }),
     shapeValidator,
-    repairRepository: createSolidRepairRepository({ fetch, userStorages }),
     instanceCopier: createSolidInstanceCopier({ fetch }),
     digestRepository: createSolidDigestRepository({ fetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch, checkWrite }),

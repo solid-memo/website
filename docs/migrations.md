@@ -454,8 +454,8 @@ Rules that hold across versions:
   derived data, so each entry is written new.
 - **`unlessNewer` refuses the same for the writes that change or remove
   a subject without recording it.** These are a deck's position or
-  completed chapter, a deck group's removal, the catalog's links, a
-  repair, and the removal of a card, a distractor, a review state or a
+  completed chapter, a deck group's removal, the catalog's links, and
+  the removal of a card, a distractor, a review state or a
   deck entry. It refuses a subject stamped above
   every version this app writes for its class. Where a shape fixes
   values the subject has (an FSRS-6 review state), the bound is the
@@ -746,8 +746,6 @@ original as a backup, which the copy's `meta.ttl` names
 left, is now an ordinary folder: the app no longer lists it or offers
 to restore it, and the user may delete it by hand. `meta.ttl` keeps
 `dcterms:replaces` and `dcterms:modified`, which the app ignores.
-
-Repairs edit in place, as the update does.
 
 ## Catching up with the library
 
