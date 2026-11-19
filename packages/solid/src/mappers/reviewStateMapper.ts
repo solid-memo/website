@@ -37,7 +37,10 @@ import {
   type ReviewedDeck,
   type ReviewLinks,
 } from "@solid-memo/domain/reviewRecord";
+import { AppError } from "@solid-memo/domain/appError";
 import { isIriPastBound } from "@solid-memo/domain/pathKeys";
+import { isCardsDocumentOf } from "@solid-memo/domain/deckUpgrade";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
 import {
@@ -220,6 +223,187 @@ export function toReviewStates(dataset: Dataset, documents: ReviewDocuments): Re
     sm2: read.sm2.map(({ state }) => state),
     fsrs: read.fsrs.map(({ state }) => state),
   };
+}
+
+/**
+ * The most ways of reading one read of a reviews document that
+ * sharedReviewStatesOf maps it to: a deck's cards document, and the
+ * older cards documents of the deck the document's states name
+ * (isCardsDocumentOf), are what its states are read by. Decks the app
+ * makes each have a reviews document of their own; a catalog may point
+ * many decks at one, and a way past this many is refused, as each would
+ * be mapped from the whole document.
+ */
+export const MAX_READINGS = 8;
+
+/**
+ * How many times over the names of the documents a read's states name
+ * finding the ways decks read it may go through them (startOf), all
+ * decks together: once each when no deck's id starts another's in a
+ * folder, as with the decks the app makes. Ids that do may make every
+ * deck go through the same names; past this, a deck whose way isn't
+ * found yet is refused (reviewsReadTooManyWays), so the work of a read
+ * stays a few times its names, however many decks name it.
+ */
+export const SCANS_OF_NAMES = 4;
+
+/** The ways one read of a reviews document was mapped: see sharedReviewStatesOf. */
+interface Readings {
+  /** The documents the states name their cards in (sm:reviewOf), each once, in the order of `<`. */
+  named: readonly string[];
+  /** The named documents a deck's id makes its cards documents, by where their names start (startOf). */
+  byStart: Map<string, Found>;
+  /** Each list of such documents found, by its text, numbered. */
+  lists: Map<string, number>;
+  /** The way each deck read it, by its start and cards document (readingOf). */
+  byDeck: Map<string, string>;
+  /** The states read, by the way they were read. */
+  byReading: Map<string, ReviewStates>;
+  /** The characters of named documents startOf may still go through (SCANS_OF_NAMES). */
+  budget: number;
+}
+
+/** Named documents a deck's id makes its cards documents, in order, and the number of that list. */
+interface Found {
+  urls: readonly string[];
+  number: number;
+}
+
+const readings = new WeakMap<Dataset, Map<string, Readings>>();
+
+/**
+ * The deck's review states of a read of its reviews document
+ * (toReviewStates), mapped once for each way of reading it and frozen:
+ * decks whose states are read alike, by the same cards documents, share
+ * them, and what is worked out of a deck's cards and states then is
+ * worked out once for all of them (domain/frozen.ts). A dataset never
+ * changes (each write makes a new one), so what it was mapped to stays
+ * true; a new download is a new dataset, mapped afresh. The way a deck
+ * reads it is found by a lookup in the documents its states name, sorted
+ * once a read, not by a pass over them all for each deck. Refused
+ * (reviewsReadTooManyWays) once one read is read in more than
+ * MAX_READINGS ways, or once finding the ways has gone through the
+ * names more than SCANS_OF_NAMES times over.
+ */
+export function sharedReviewStatesOf(dataset: Dataset, documents: ReviewDocuments): ReviewStates {
+  let byDocument = readings.get(dataset);
+  if (byDocument === undefined) readings.set(dataset, (byDocument = new Map()));
+  let read = byDocument.get(documents.reviewsDocumentUrl);
+  if (read === undefined) {
+    const named = namedCardsDocuments(dataset, documents);
+    read = {
+      named,
+      byStart: new Map(),
+      lists: new Map(),
+      byDeck: new Map(),
+      byReading: new Map(),
+      budget: SCANS_OF_NAMES * named.reduce((sum, url) => sum + url.length, 0),
+    };
+    byDocument.set(documents.reviewsDocumentUrl, read);
+  }
+  // A state's card is read by the deck's cards document and those of the named ones that are the deck's.
+  const reading = `${readingOf(read, documents)} ${documents.cardsDocumentUrl}`;
+  const known = read.byReading.get(reading);
+  if (known !== undefined) return known;
+  if (read.byReading.size >= MAX_READINGS) throw tooManyWays(documents);
+  const { sm2, fsrs } = toReviewStates(dataset, documents);
+  const states: ReviewStates = Object.freeze({
+    sm2: Object.freeze(sm2),
+    fsrs: Object.freeze(fsrs),
+  }) as ReviewStates;
+  read.byReading.set(reading, states);
+  return states;
+}
+
+/**
+ * The way a deck reads a read of its reviews document, beside its cards
+ * document: the named documents its id makes its cards documents
+ * (isCardsDocumentOf), its own left out, as a number. Those are the ones
+ * whose names start with its id in its cards document's folder, next to
+ * each other in the sorted names: found by a search, once for each start
+ * a read (startOf), so a deck costs a lookup, not a pass over all the
+ * named documents. Its own is left out while they are few (MAX_READINGS
+ * at most); past that, a deck whose own is among them reads it apart, as
+ * one more way. Found once for each start and cards document a read.
+ */
+function readingOf(read: Readings, documents: ReviewDocuments): string {
+  const { cardsDocumentUrl } = documents;
+  const { start, found } = startOf(read, documents);
+  const key = `${start} ${cardsDocumentUrl}`;
+  const known = read.byDeck.get(key);
+  if (known !== undefined) return known;
+  const { urls, number } = found;
+  const reading =
+    urls.length > MAX_READINGS || !urls.includes(cardsDocumentUrl)
+      ? String(number)
+      : String(
+          numberOf(
+            read,
+            urls.filter((url) => url !== cardsDocumentUrl),
+          ),
+        );
+  read.byDeck.set(key, reading);
+  return reading;
+}
+
+/**
+ * The named documents whose names start with the deck's id in its cards
+ * document's folder and that its id makes its cards documents
+ * (isCardsDocumentOf), and their number, by that start. Each name gone
+ * through is taken from the read's budget; a deck that would go past it
+ * is refused (SCANS_OF_NAMES).
+ */
+function startOf(read: Readings, documents: ReviewDocuments): { start: string; found: Found } {
+  const { cardsDocumentUrl, id } = documents;
+  const folder = cardsDocumentUrl.slice(0, cardsDocumentUrl.lastIndexOf("/") + 1);
+  const start = folder + id;
+  const known = read.byStart.get(start);
+  if (known !== undefined) return { start, found: known };
+  const { named } = read;
+  let low = 0;
+  let high = named.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (named[middle]! < start) low = middle + 1;
+    else high = middle;
+  }
+  // By the folder and id alone, as every deck of this start has it: its own cards document is readingOf's.
+  const byName = { id, cardsDocumentUrl: folder };
+  const urls: string[] = [];
+  for (let at = low; at < named.length && named[at]!.startsWith(start); at++) {
+    read.budget -= named[at]!.length;
+    if (read.budget < 0) throw tooManyWays(documents);
+    if (isCardsDocumentOf(named[at]!, byName)) urls.push(named[at]!);
+  }
+  const found = { urls, number: numberOf(read, urls) };
+  read.byStart.set(start, found);
+  return { start, found };
+}
+
+/** The refusal of a deck that would read a reviews document in yet another way. */
+function tooManyWays(documents: ReviewDocuments): AppError {
+  return new AppError("reviewsReadTooManyWays", {
+    limit: MAX_READINGS,
+    document: documents.reviewsDocumentUrl,
+  });
+}
+
+/** The number of a list of named documents, the same for the same list. */
+function numberOf(read: Readings, urls: readonly string[]): number {
+  const text = JSON.stringify(urls);
+  let number = read.lists.get(text);
+  if (number === undefined) read.lists.set(text, (number = read.lists.size));
+  return number;
+}
+
+/** The documents the states of a reviews document name their cards in (sm:reviewOf), each once, in the order of `<`. */
+function namedCardsDocuments(dataset: Dataset, documents: ReviewDocuments): string[] {
+  const named = new Set<string>();
+  for (const thing of ownSubjectsOf(dataset, documents.reviewsDocumentUrl)) {
+    const reviewOf = getUrl(thing, SM.reviewOf);
+    if (reviewOf?.includes("#") === true) named.add(documentUrlOf(reviewOf));
+  }
+  return [...named].sort((a, b) => (a < b ? -1 : 1));
 }
 
 /** How one kind of state is written: where it is named, how a subject is read as one, and its subject. */

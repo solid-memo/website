@@ -18,6 +18,7 @@ import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
 import {
+  sharedReviewStatesOf,
   toReviewStates,
   withGradedReviewState,
   withoutReadReviewStates,
@@ -133,13 +134,13 @@ export function createSolidReviewStateRepository({
         deck.reviewsDocumentUrl,
         asNoOne ? publicFetch : fetch,
       );
-      return dataset === null ? none() : toReviewStates(dataset, deck);
+      return dataset === null ? none() : sharedReviewStatesOf(dataset, deck);
     },
 
     async readReviewStatesSince(deck, version, { asNoOne = false } = {}) {
       const read = await readSince(deck.reviewsDocumentUrl, version, asNoOne ? publicFetch : fetch);
       return mapSince(read, (dataset) =>
-        dataset === null ? none() : toReviewStates(dataset, deck),
+        dataset === null ? none() : sharedReviewStatesOf(dataset, deck),
       );
     },
 

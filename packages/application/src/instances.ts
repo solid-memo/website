@@ -202,6 +202,16 @@ export async function catalogOf(
 }
 
 /**
+ * Null for a deck whose reviews document is read in more ways than are
+ * mapped (reviewsReadTooManyWays): the format update leaves that deck
+ * out. Any other error stands.
+ */
+function refusedForDeck(error: unknown): null {
+  if (error instanceof AppError && error.code === "reviewsReadTooManyWays") return null;
+  throw error;
+}
+
+/**
  * A user's instances (docs/data-model.md): found in their storages and
  * type indexes, made, attached, named, described and deleted, their data
  * registered for other apps to find, and brought up to this app's
@@ -250,23 +260,30 @@ export function createInstanceUseCases({
       return receipt?.latestFormat === true ? receipt.version : undefined;
     };
     // A few decks at a time: the catalog may list many (MAX_CATALOG_LINKS at most).
-    const entries = await mapAtOnce(decks, async (deck) => {
+    const read = await mapAtOnce(decks, async (deck) => {
       // Each of the deck's documents read as the user only when it is the instance's.
       const asNoOne = await digestStore.asNoOneOf(instanceUrl, deck);
       const [cards, reviews] = await Promise.all([
         deckRepository.readCardsSince(deck, latestVersion(deck.cardsDocumentUrl), {
           asNoOne: asNoOne.cards,
         }),
-        reviewStateRepository.readReviewStatesSince(deck, latestVersion(deck.reviewsDocumentUrl), {
-          asNoOne: asNoOne.reviews,
-        }),
+        reviewStateRepository
+          .readReviewStatesSince(deck, latestVersion(deck.reviewsDocumentUrl), {
+            asNoOne: asNoOne.reviews,
+          })
+          .catch(refusedForDeck),
       ]);
-      return {
-        deck,
-        cards: cards.unchanged ? [] : cards.value,
-        reviews: reviews.unchanged ? [] : reviews.value.sm2,
-      };
+      // A deck whose reviews document is not read for it is left out of the update, not the others with it.
+      if (reviews === null) return [];
+      return [
+        {
+          deck,
+          cards: cards.unchanged ? [] : cards.value,
+          reviews: reviews.unchanged ? [] : reviews.value.sm2,
+        },
+      ];
     });
+    const entries = read.flat();
     // Preferences that do not fit their shape are invalid data, which the data check reports: no update writes them.
     return planMigration({
       instance,

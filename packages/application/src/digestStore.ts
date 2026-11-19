@@ -3,8 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import type { Card, Deck } from "@solid-memo/domain/deck";
-import { isOutdated, isReviewStateOutdated } from "@solid-memo/domain/migration";
+import { derivedOnceOf } from "@solid-memo/domain/frozen";
+import { outdatedCardsOf, outdatedReviewStatesOf } from "@solid-memo/domain/migration";
 import { summarize } from "@solid-memo/domain/validation";
+import { studyDayOf } from "@solid-memo/domain/scheduling";
 import {
   addReceipt,
   changedDigest,
@@ -38,7 +40,15 @@ export function noting(
   return (draft) => addReceipt(draft, document, version, facts);
 }
 
-/** The deck's schedule from its documents, by the due days of the scheduler in use. */
+const schedules = new WeakMap<Card[], WeakMap<ReviewStates, Map<string, DeckSchedule>>>();
+
+/**
+ * The deck's schedule from its documents, by the due days of the
+ * scheduler in use: worked out once of the cards and review states as
+ * read (derivedOnceOf), which the decks that name the same two documents
+ * share, for each direction, scheduler, day boundary and study day. It
+ * is never changed once worked out.
+ */
 export function scheduleFrom(
   cards: { value: Card[] },
   deck: Deck,
@@ -47,14 +57,17 @@ export function scheduleFrom(
   now: Date,
 ): DeckSchedule {
   const { scheduler, dayBoundaryHour } = prefs;
-  return scheduleOf({
-    cards: cards.value,
-    direction: deck.direction,
-    reviews: effectiveStates(reviews.value.sm2, reviews.value.fsrs, scheduler, dayBoundaryHour),
-    scheduler,
-    dayBoundaryHour,
-    now,
-  });
+  const key = [deck.direction, scheduler, dayBoundaryHour, studyDayOf(now, dayBoundaryHour)];
+  return derivedOnceOf(schedules, cards.value, reviews.value, key.join(" "), () =>
+    scheduleOf({
+      cards: cards.value,
+      direction: deck.direction,
+      reviews: effectiveStates(reviews.value.sm2, reviews.value.fsrs, scheduler, dayBoundaryHour),
+      scheduler,
+      dayBoundaryHour,
+      now,
+    }),
+  );
 }
 
 /**
@@ -187,21 +200,20 @@ export function createDigestStore({
     }
   }
   /**
-   * Keeps the deck's schedule from its documents in the digest, with the
-   * receipts they earned; nothing unless both are the instance's, as
-   * `asNoOne` (asNoOneOf, worked out once by the caller) says.
+   * Keeps the deck's schedule, worked out of its documents, in the
+   * digest, with the receipts they earned; nothing unless both are the
+   * instance's, as `asNoOne` (asNoOneOf, worked out once by the caller)
+   * says.
    */
   function noteSchedule(
     instanceUrl: string,
     deck: Deck,
     cards: { value: Card[]; version: string | null },
     reviews: { value: ReviewStates; version: string | null },
-    prefs: StudyPreferences,
-    now: Date,
+    schedule: DeckSchedule,
     asNoOne: DeckPlace,
   ): void {
-    if (!keepsDeck(asNoOne)) return;
-    keepSchedule(instanceUrl, deck, cards, reviews, scheduleFrom(cards, deck, reviews, prefs, now));
+    if (keepsDeck(asNoOne)) keepSchedule(instanceUrl, deck, cards, reviews, schedule);
   }
   /**
    * Keeps a schedule already worked out in the digest, with the receipts
@@ -219,6 +231,13 @@ export function createDigestStore({
       if (keepsDeck(asNoOne)) keepSchedule(instanceUrl, deck, cards, reviews, schedule);
     });
   }
+  /**
+   * The deck each schedule worked out was kept for. Decks that name the
+   * same documents share one schedule (scheduleFrom), and it is kept for
+   * the first of them only: the digest holds each such schedule once, not
+   * once for each deck. The others work theirs out again, shared as well.
+   */
+  const keptFor = new WeakMap<DeckSchedule, string>();
   /** recordSchedule, for a deck already found to be kept (keepsDeck). */
   function keepSchedule(
     instanceUrl: string,
@@ -230,11 +249,14 @@ export function createDigestStore({
     const { version: cardsVersion } = cards;
     const { version: reviewsVersion } = reviews;
     if (cardsVersion === null || reviewsVersion === null) return;
+    const first = keptFor.get(schedule) ?? deck.url;
+    keptFor.set(schedule, first);
     remember(instanceUrl, (draft) => {
-      setSchedule(draft, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
-      if (!cards.value.some(isOutdated))
+      if (first === deck.url)
+        setSchedule(draft, { deck: deck.url, cardsVersion, reviewsVersion, schedule });
+      if (outdatedCardsOf(cards.value).count === 0)
         addReceipt(draft, deck.cardsDocumentUrl, cardsVersion, { latestFormat: true });
-      if (!reviews.value.sm2.some(isReviewStateOutdated))
+      if (outdatedReviewStatesOf(reviews.value.sm2).count === 0)
         addReceipt(draft, deck.reviewsDocumentUrl, reviewsVersion, { latestFormat: true });
     });
   }

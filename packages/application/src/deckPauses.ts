@@ -3,16 +3,30 @@
 // SPDX-License-Identifier: MIT
 
 import { shiftStudyDay } from "@solid-memo/domain/answer";
-import { activeCards, promptsOf, type Deck } from "@solid-memo/domain/deck";
+import type { Card, Deck } from "@solid-memo/domain/deck";
 import { deckPreferences } from "@solid-memo/domain/deckPace";
 import { backlogDayOf, withPause, withResume } from "@solid-memo/domain/deckPause";
 import { effectiveStates, recallOn, type PromptRecall } from "@solid-memo/domain/fsrs";
-import { reviewKeyOf } from "@solid-memo/domain/review";
+import { dueBefore } from "@solid-memo/domain/dueDays";
+import { derivedOnceOf } from "@solid-memo/domain/frozen";
+import { reviewKeyOf, type ReviewStates } from "@solid-memo/domain/review";
+import { scheduledStates } from "@solid-memo/domain/scheduleInsight";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
 import type { PreferenceStore } from "./preferenceStore";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
+
+/**
+ * A deck's prompts studied, on a day: their average chance of recall
+ * (null for none) and how many fall due on each day.
+ */
+interface Studied {
+  recall: number | null;
+  dueByDay: Readonly<Record<string, number>>;
+}
+
+const studiedOnce = new WeakMap<Card[], WeakMap<ReviewStates, Map<string, Studied>>>();
 
 /** The study days a pause without a resume day is reckoned over, for its outlook. */
 export const OUTLOOK_DAYS = 30;
@@ -96,21 +110,38 @@ export function createDeckPauseUseCases({
   // long as it is, never has all of its documents asked for at once.
   const turn = inTurns(READS_AT_ONCE / 2);
 
-  /** The deck's prompts studied, those of its cards not retired, with their recall on `day` and due days. */
-  async function studied(deck: Deck, prefs: StudyPreferences, day: string) {
+  /**
+   * The deck's prompts studied, those of its cards not retired: their
+   * average recall on `day` and their due days.
+   */
+  async function studied(deck: Deck, prefs: StudyPreferences, day: string): Promise<Studied> {
     const [cards, reviews] = await turn(() =>
       Promise.all([deckRepository.listCards(deck), reviewStateRepository.listReviewStates(deck)]),
     );
-    const recall = recallOn(reviews.sm2, reviews.fsrs, day, prefs.dayBoundaryHour);
-    const dueOf = new Map(
-      effectiveStates(reviews.sm2, reviews.fsrs, prefs.scheduler, prefs.dayBoundaryHour).map(
-        (state) => [reviewKeyOf(state), state.due],
-      ),
-    );
-    return promptsOf(activeCards(cards), deck.direction)
-      .map((prompt) => reviewKeyOf({ cardId: prompt.card.id, direction: prompt.direction }))
-      .filter((key) => recall.has(key))
-      .map((key) => ({ ...recall.get(key)!, due: dueOf.get(key)! }));
+    // By the deck's states, not its cards (scheduledStates), and once for the decks that name the same documents.
+    const key = [deck.direction, day, prefs.scheduler, prefs.dayBoundaryHour].join(" ");
+    return derivedOnceOf(studiedOnce, cards, reviews, key, () => {
+      const recall = recallOn(reviews.sm2, reviews.fsrs, day, prefs.dayBoundaryHour);
+      const dueOf = new Map(
+        effectiveStates(reviews.sm2, reviews.fsrs, prefs.scheduler, prefs.dayBoundaryHour).map(
+          (state) => [reviewKeyOf(state), state.due],
+        ),
+      );
+      const prompts = scheduledStates(cards, deck.direction, reviews.sm2)
+        .map(reviewKeyOf)
+        .filter((key) => recall.has(key));
+      // Without a prototype: a due day is read leniently and may be any text.
+      const dueByDay: Record<string, number> = Object.create(null);
+      for (const key of prompts) {
+        const due = dueOf.get(key)!;
+        dueByDay[due] = (dueByDay[due] ?? 0) + 1;
+      }
+      return {
+        recall: averageRecall(prompts.map((key) => recall.get(key)!)),
+        // Frozen, so that its sums are worked out once (dueDays.ts).
+        dueByDay: Object.freeze(dueByDay),
+      };
+    });
   }
 
   return {
@@ -126,18 +157,19 @@ export function createDeckPauseUseCases({
     async getPauseOutlook(instanceUrl, deck, resumesOn, now) {
       const { prefs, today } = await todayOf(instanceUrl, now);
       const day = resumesOn ?? shiftStudyDay(today, OUTLOOK_DAYS);
-      return { day, recall: averageRecall(await studied(deck, prefs, day)) };
+      return { day, recall: (await studied(deck, prefs, day)).recall };
     },
     async getComeback(instanceUrl, deck, now) {
       const { prefs, today } = await todayOf(instanceUrl, now);
       const before = backlogDayOf(deck, today);
       if (before === undefined || before < shiftStudyDay(today, -COMEBACK_DAYS)) return null;
-      const prompts = await studied(deck, prefs, today);
-      const waiting = prompts.filter((prompt) => prompt.due < before).length;
+      const { recall, dueByDay } = await studied(deck, prefs, today);
+      // Looked up, not counted of every prompt (dueDays.ts): decks may share their prompts.
+      const waiting = dueBefore(dueByDay, before);
       if (waiting === 0) return null;
       const { maxReviewsPerDay } = deckPreferences(prefs, deck);
       return {
-        recall: averageRecall(prompts)!,
+        recall: recall!,
         waiting,
         days: maxReviewsPerDay === 0 ? null : Math.ceil(waiting / maxReviewsPerDay),
       };

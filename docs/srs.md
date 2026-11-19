@@ -557,8 +557,18 @@ without the field means 20 ([migrations](migrations.md)).
 the deck's schedule in the instance's [digest](data-model.md#the-digest)
 while neither of its documents has changed (`studyCountsOf` in
 `domain/studyDigest.ts`, tested against `buildStudyQueue` for every
-direction and cap). A schedule holds its counts by study day: a later
-day starts with nothing reviewed or introduced.
+direction and cap). Otherwise it works the schedule out of the
+documents and counts from that the same way. A schedule goes by the
+deck's review states, not by its cards, so decks that name one cards
+document each take time by their own reviews. Decks that name the same
+two documents, read alike, share one schedule, and each deck's counts
+are looked up in the sums of its due days, worked out once
+([data-model.md](data-model.md#write-discipline)). A card id that two
+cards share counts a prompt for each copy, as the queue does. A state
+whose due day is no real day isn't counted, as the digest can't hold
+it, though the session's queue still shows it. A schedule holds its
+counts by study day: a later day starts with nothing reviewed or
+introduced.
 
 The queue is a snapshot taken at session start: the session owns its
 order (below), and a refetch never reshuffles it.

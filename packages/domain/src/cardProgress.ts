@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { activeCards, promptsOf, type Card, type DeckDirection } from "./deck";
+import { activeCardsOf, studyDirections, type Card, type DeckDirection } from "./deck";
 import { reviewKeyOf, type DueState, type ReviewState } from "./review";
 import { FORECAST_DAYS, scheduledStates, type ForecastDay } from "./scheduleInsight";
 import { MATURE_INTERVAL_DAYS, shiftStudyDay } from "./answer";
@@ -52,7 +52,8 @@ export function cardProgressOf(input: {
     (state) => (intervalOf.get(reviewKeyOf(state)) ?? state.intervalDays) < MATURE_INTERVAL_DAYS,
   ).length;
   return {
-    new: promptsOf(activeCards(cards), direction).length - states.length,
+    // By the cards' ids, as the states are: two cards of one id, which odd data may have, are one prompt here.
+    new: activeCardsOf(cards).placeOf.size * studyDirections(direction).length - states.length,
     relearning: states.length - passed.length,
     young,
     mature: passed.length - young,

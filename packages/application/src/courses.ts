@@ -20,6 +20,7 @@ import {
 } from "@solid-memo/domain/course";
 import type { DeckLibrary, DeckRepository, ReviewStateRepository } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
+import { derivedOnce } from "@solid-memo/domain/frozen";
 import { promptDueOf } from "./answerStore";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
@@ -117,13 +118,44 @@ export interface Course {
    * every question the outline asks is one of them (outlineOfCards).
    */
   cards: ReadonlyMap<string, LibraryCard>;
-  /** The cards the learner has answered: those with review state in the deck. */
+  /** The outline's cards the learner has answered: those with review state in the deck. */
   answeredCardIds: string[];
   progress: CourseProgress;
 }
 
 /** What the deck list's strip needs of a course (CourseUseCases.getCourseSummary). */
 export type CourseSummary = Pick<Course, "outline" | "answeredCardIds">;
+
+const answeredOnce = new WeakMap<readonly ReviewState[], ReadonlySet<string>>();
+
+/**
+ * The cards answered of a course's review states: a course asks front
+ * to back, so a card is answered once it has that state. Of frozen
+ * states, which the decks naming one reviews document share, found once
+ * (derivedOnce).
+ */
+function answeredOf(states: readonly ReviewState[]): ReadonlySet<string> {
+  return derivedOnce(
+    answeredOnce,
+    states,
+    (all) =>
+      new Set(
+        all.filter((state) => state.direction === "front-to-back").map(({ cardId }) => cardId),
+      ),
+  );
+}
+
+/** The cards an outline asks, each once, in its order. */
+function questionsOf(outline: CourseOutline): string[] {
+  return [
+    ...new Set(
+      outline.chapters.flatMap((chapter) => [
+        ...chapter.steps.flatMap((step) => step.questionIds),
+        ...chapter.reviewQuestionIds,
+      ]),
+    ),
+  ];
+}
 
 /**
  * Courses (docs/courses.md): a library deck whose release is a course,
@@ -154,10 +186,9 @@ export function createCourseUseCases({
       deckLibrary.fetchCourseOutline(sourceOf(deck)),
       reviewStateRepository.listReviewStates(deck),
     ]);
-    // A course asks front to back: a card is answered once it has that state.
-    const answeredCardIds = reviews.sm2
-      .filter((state) => state.direction === "front-to-back")
-      .map((state) => state.cardId);
+    // Looked up by the outline's questions, not by every state: decks may share their states.
+    const answered = answeredOf(reviews.sm2);
+    const answeredCardIds = questionsOf(outline).filter((id) => answered.has(id));
     return { outline, answeredCardIds };
   }
   async function startCourse(instanceUrl: string, course: LibraryDeck): Promise<Deck> {

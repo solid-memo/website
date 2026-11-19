@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { Card } from "./deck";
+import { activeCardsOf, type Card } from "./deck";
 import type { ReviewState } from "./review";
 import {
   daysToClearOf,
@@ -195,6 +195,55 @@ describe("scheduledStates", () => {
     const states = [state("a"), back, state("retired"), state("gone")];
     expect(scheduledStates(cards, "front-to-back", states)).toEqual([state("a")]);
     expect(scheduledStates(cards, "bidirectional", states)).toEqual([state("a"), back]);
+  });
+
+  it("gives them card by card, each card's directions in turn, the last state of each key", () => {
+    const cards = [card("a"), card("b"), card("c")];
+    const back = (id: string) => state(id, { direction: "back-to-front" });
+    const states = [back("c"), state("b"), back("a"), state("c", { intervalDays: 1 })];
+    const last = state("c", { intervalDays: 9 });
+    expect(scheduledStates(cards, "bidirectional", [...states, last])).toEqual([
+      back("a"),
+      state("b"),
+      last,
+      back("c"),
+    ]);
+  });
+});
+
+describe("activeCardsOf", () => {
+  it("gives the cards in use and the place of each among them", () => {
+    const active = activeCardsOf([card("a"), card("retired", true), card("b")]);
+    expect(active.cards).toEqual([card("a"), card("b")]);
+    expect([...active.placeOf]).toEqual([
+      ["a", 0],
+      ["b", 1],
+    ]);
+    expect([...active.copiesOf]).toEqual([
+      ["a", 1],
+      ["b", 1],
+    ]);
+  });
+
+  it("counts the cards that share an id, as odd data may have them", () => {
+    const active = activeCardsOf([card("a"), card("b"), card("a")]);
+    expect(active.placeOf.get("a")).toBe(2);
+    expect(active.copiesOf.get("a")).toBe(2);
+  });
+
+  it("works them out once of frozen cards, which decks that name one cards document share", () => {
+    const cards = Object.freeze([card("a"), card("retired", true)]);
+    const active = activeCardsOf(cards);
+    expect(activeCardsOf(cards)).toBe(active);
+    expect(Object.isFrozen(active.cards)).toBe(true);
+  });
+
+  it("works them out afresh of cards that may still change", () => {
+    const cards = [card("a")];
+    const active = activeCardsOf(cards);
+    expect(Object.isFrozen(active.cards)).toBe(false);
+    cards.push(card("b"));
+    expect(activeCardsOf(cards).cards).toEqual([card("a"), card("b")]);
   });
 });
 

@@ -5,7 +5,7 @@
 import { deckPreferences } from "@solid-memo/domain/deckPace";
 import { backlogDayOf, isPaused } from "@solid-memo/domain/deckPause";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
-import { studyCountsOf } from "@solid-memo/domain/studyDigest";
+import { studyCountsOf, type DeckSchedule } from "@solid-memo/domain/studyDigest";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import type { FsrsState, ReviewKey, ReviewQuality, ReviewState } from "@solid-memo/domain/review";
 import {
@@ -23,7 +23,7 @@ import { inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
-import type { DigestStore } from "./digestStore";
+import { scheduleFrom, type DigestStore } from "./digestStore";
 
 export interface StudyUseCases {
   /**
@@ -198,14 +198,16 @@ export function createStudyUseCases({
       readCards(kept?.cardsVersion),
       readReviews(kept?.reviewsVersion),
     ]);
-    if (kept !== undefined && cardsSince.unchanged && reviewsSince.unchanged) {
-      const backlogBefore = backlogDayOf(deck, studyDayOf(now, prefs.dayBoundaryHour));
-      const counts = studyCountsOf(kept.schedule, {
+    const backlogBefore = backlogDayOf(deck, studyDayOf(now, prefs.dayBoundaryHour));
+    const countsOf = (schedule: DeckSchedule) =>
+      studyCountsOf(schedule, {
         direction: deck.direction,
         prefs: studyPrefs,
         now,
         ...(backlogBefore === undefined ? {} : { backlogBefore }),
       });
+    if (kept !== undefined && cardsSince.unchanged && reviewsSince.unchanged) {
+      const counts = countsOf(kept.schedule);
       if (counts !== null) return counts;
     }
     const [cards, reviews] = await Promise.all([
@@ -215,22 +217,13 @@ export function createStudyUseCases({
     // A read without a version to compare is never "unchanged".
     if (cards.unchanged || reviews.unchanged)
       throw new Error("A read without a version to compare came back unchanged.");
-    digestStore.noteSchedule(instanceUrl, deck, cards, reviews, prefs, now, asNoOne);
-    const queue = buildStudyQueue({
-      cards: cards.value,
-      direction: deck.direction,
-      reviews: effectiveStates(
-        reviews.value.sm2,
-        reviews.value.fsrs,
-        prefs.scheduler,
-        prefs.dayBoundaryHour,
-      ),
-      prefs: studyPrefs,
-      now,
-      random,
-      ...backlogOf(deck, reviews.value, prefs, now),
-    });
-    return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
+    // Counted from the deck's schedule, as the digest's is, not from a queue of every prompt:
+    // it goes by the deck's review states, so decks that share one cards document don't each go
+    // through its cards (scheduleOf).
+    const schedule = scheduleFrom(cards, deck, reviews, prefs, now);
+    digestStore.noteSchedule(instanceUrl, deck, cards, reviews, schedule, asNoOne);
+    // Worked out now, of the deck's direction and today's preferences, it always counts.
+    return countsOf(schedule)!;
   }
 
   return {

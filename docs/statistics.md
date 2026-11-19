@@ -225,7 +225,16 @@ The page reads three things on their own:
 - The answers of the range (`UseCases.getStatistics`).
 - The cards and review states of every deck, with the last 12 study
   months of answers for what is hard, whatever the range
-  (`UseCases.getCardProgress`).
+  (`UseCases.getCardProgress`). Decks that name one cards document
+  share one read of it, mapped to cards once. Decks that name the same
+  reviews document too, read alike, share its mapping, their schedule,
+  and their progress with its intervals and eases, each worked out
+  once. Each deck's forecast and overdue prompts are looked up in the
+  shared schedule's sums, and only its own answers are gone through for
+  it ([data-model.md](data-model.md#write-discipline)). A card id that
+  two cards of a deck share counts once in its progress, intervals and
+  eases, where the deck list counts a prompt for each copy
+  ([srs.md](srs.md#study-days-and-the-queue)).
 - With a course among the decks, how the courses have gone
   (`UseCases.getCourseStatistics`), from the same 12 months and each
   course's outline, which the library reads once a page load. A course

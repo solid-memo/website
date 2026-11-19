@@ -201,6 +201,19 @@ describe("hardestCardsOf", () => {
     ).toEqual({ reviews: 0, cards: [] });
   });
 
+  it("gives each card given at a forgotten card's id, of frozen cards as of any", () => {
+    const answers = [reviewed(1, "c-1", 0), reviewed(1, "c-2", 0)];
+    // The same fragment in two documents: both are given.
+    const other = { url: `https://pod.example/elsewhere.ttl#c-1` };
+    const cards = Object.freeze([card("c-1"), other, card("c-3")]);
+    const expected = [
+      { card: card("c-1"), lapses: 1, reviews: 1 },
+      { card: other, lapses: 1, reviews: 1 },
+    ];
+    expect(hardestCardsOf(answers, cards).cards).toEqual(expected);
+    expect(hardestCardsOf(answers, cards).cards).toEqual(expected);
+  });
+
   it("reads the answers in one pass, however many there are", () => {
     const cards = Array.from({ length: 2_000 }, (_, n) => card(`c-${n}`));
     const answers = (count: number) =>
@@ -268,6 +281,17 @@ describe("confusionsOf", () => {
       { card: first, distractor: option("c-1-d2"), picks: 2 },
       { card: second, distractor: option("c-2-d1"), picks: 1 },
     ]);
+  });
+
+  it("finds the options of frozen cards, which decks may share, as of any", () => {
+    const first = asked("c-1", "c-1-d1");
+    const cards = Object.freeze([first]);
+    const answers = [
+      answer(1, { grade: 1, mode: "multiple-choice", chosenDistractor: `${CARDS}#c-1-d1` }),
+    ];
+    const expected = [{ card: first, distractor: option("c-1-d1"), picks: 1 }];
+    expect(confusionsOf(answers, cards)).toEqual(expected);
+    expect(confusionsOf(answers, cards)).toEqual(expected);
   });
 });
 
