@@ -484,12 +484,12 @@ needs no CI run.
 ## What a release does
 
 Like the deploy, [release.yml](../.github/workflows/release.yml) runs
-when CI has passed on a push to `main` in this repository. It runs
-semantic-release ([release.config.mjs](../release.config.mjs)) on
-`main`'s tip. When `main` has moved on since the commit CI passed on,
-it releases the tip only if CI has passed on it too, and otherwise
-leaves it to the tip's own run. When there is something to release,
-semantic-release:
+when CI has passed on a push to `main` in this repository. Its
+`prepare` job runs semantic-release
+([release.config.mjs](../release.config.mjs)) on `main`'s tip. When
+`main` has moved on since the commit CI passed on, it releases the tip
+only if CI has passed on it too, and otherwise leaves it to the tip's
+own run. When there is something to release, semantic-release:
 
 1. chooses the version from the commits since the last tag
    ([The scheme](#the-scheme)), and writes its notes;
@@ -507,18 +507,23 @@ semantic-release:
    `npm run docs:archive -- X.Y.Z --drawn`, which starts no browser
    ([deployment.md](deployment.md#a-releases-docs-as-an-archive)). git
    ignores the archive, so the release commit leaves it out;
-5. commits the five files of steps 2 and 3 to `main` as
-   `chore(release): X.Y.Z`, with no body, and pushes the commit with
-   the deploy key ([below](#the-deploy-key)). The notes are left out of
-   the message: they copy the subjects of the commits released, and a
-   skip keyword such as `[skip ci]` in one would stop CI, and so the
-   deploy, on the release commit;
-6. tags that commit `vX.Y.Z` and pushes the tag;
-7. makes a GitHub release of the tag, "Solid Memo X.Y.Z", with the
-   notes and the archive of its docs, "Documentation X.Y.Z (HTML)". It
-   makes the release as a draft, which the deploy refuses, uploads the
-   archive, then publishes it, and attests the archive as made by the
-   release workflow on `main` (`actions/attest`).
+5. commits the five files of steps 2 and 3 as `chore(release): X.Y.Z`,
+   with no body, and tags that commit `vX.Y.Z`, in a copy of the
+   repository on the runner, not on GitHub
+   ([below](#the-deploy-key)). The notes are left out of the message:
+   they copy the subjects of the commits released, and a skip keyword
+   such as `[skip ci]` in one would stop CI, and so the deploy, on the
+   release commit.
+
+Then the workflow's `push` job checks that the commit holds nothing but
+the release's changes, and pushes it to `main` and its tag at once with
+the deploy key. Its `publish` job makes a
+GitHub release of the tag, "Solid Memo X.Y.Z", with the version's
+CHANGELOG.md entry as its notes and the archive of its docs,
+"Documentation X.Y.Z (HTML)". It attests the archive as made by the
+release workflow on `main` (`actions/attest`), makes the release as a
+draft, which the deploy refuses, uploads the archive, then publishes
+the release.
 
 Zenodo archives each of the repository's GitHub releases and gives it
 a DOI. The concept DOI,
@@ -566,11 +571,15 @@ entry fails, or is removed from the queue, no push follows it, and
 `main`'s commits wait for the next merge, or for a run by hand, which
 releases `main`'s tip whatever the queue holds.
 
-Releases go one at a time (concurrency group `release`), and the
-workflow doesn't cancel a running one to start another. GitHub keeps
-only one run waiting in the group: a newer one replaces it, and
-whichever goes ahead releases the tip. A fork, or a copy without the
-deploy key, runs the workflow and releases nothing.
+Releases go one at a time, and the workflow doesn't cancel a running
+one to start another. The concurrency group, `release`, is the whole
+workflow's, so no run's `prepare` job starts between another run's
+`prepare` and `push`. GitHub keeps only one run waiting in the group: a
+newer one replaces it, and whichever goes ahead releases the tip. A run
+that can't release, such as the one CI's run on a release commit
+starts, takes a group of its own, so it never replaces a run waiting
+to release. A fork, or a copy without the deploy key, runs the workflow
+and releases nothing.
 
 A release made by mistake isn't taken back
 ([below](#when-a-release-fails)); the next version fixes the mistake.
@@ -648,15 +657,66 @@ past it, so this key stays the repository's only deploy key with write
 access: any other is added without "Allow write access".
 
 GitHub hands a job its environment's secrets when the job starts, and
-the runner keeps them for the whole job, so every step of the release
-job can read the key, not only the steps that name it. What the job
-runs is kept to what the release needs:
+the runner keeps them for the whole job, so every step of a job that
+names `release` can read the key, not only the steps that name it. So
+the release is three jobs, and only the one that pushes holds the key:
+
+- **`prepare`** runs semantic-release, with no environment, no secret
+  and a token that can only read. Its checkout keeps no credentials.
+  Before semantic-release runs, the job clones the checkout into a bare
+  copy, points git at the copy in place of GitHub's URL
+  (`url.<copy>.insteadOf`), and refuses https in the checkout
+  (`protocol.https.allow never`). semantic-release fetches from the
+  copy, checks that it can push to it, and pushes the release commit
+  and its tag there. Its notes still link to GitHub, since the URL it
+  reads is GitHub's. The job keeps the commit and its tag as a git
+  bundle, and the docs' archive, as artifacts of the run. The git notes
+  semantic-release writes stay behind: it reads a tag without them as
+  on the default channel, the only one.
+- **`push`** names the `release` environment, and holds the key. It
+  installs nothing and loads no package. It checks out `main`, sets up
+  Node, downloads the bundle and runs `main`'s own scripts, which import
+  none. It fetches only the tag from the bundle, and
+  `npm run release:commit -- next vX.Y.Z`
+  ([releaseCommit.ts](../scripts/releaseCommit.ts)) checks the commit
+  the tag names:
+  - its parent is `main`'s tip;
+  - it's that version's release commit, by `github-actions[bot]`, as
+    the deploy checks;
+  - its message is its subject alone;
+  - it changes only the five files, each a regular file before and
+    after, and each is `main`'s with nothing but the version, the date
+    and one changelog entry written in
+    ([releaseChanges.ts](../scripts/releaseChanges.ts)).
+
+  Then it pushes the commit to `main` and the tag in one
+  `git push --atomic`, which isn't forced. A `main` that moved on, or a
+  tag that's already there, refuses the whole push, so `main` never
+  holds the commit without its tag. Only that step writes the key where
+  git reads it: a file that git's `ssh` reads (`GIT_SSH_COMMAND`), with
+  GitHub's host keys from its API, removed when the step ends.
+- **`publish`** makes the GitHub release, with no environment and no
+  secret; its token can write the repository's contents and attest. It
+  checks that the tag names its version's release commit on `main`
+  (`npm run release:commit -- tag`), and takes the changelog entry that
+  commit added as the notes (`npm run release:commit -- notes`). It
+  attests the archive, makes the release as a draft, attaches the
+  archive, and only then publishes the release.
+
+So a package that semantic-release or the docs' archive loads can't
+read the key, whatever it does. The most it could do is shape the
+release commit. The push job pushes only a commit with nothing but a
+release's changes in it, so what it could choose is the text of the
+changelog entry, and CI runs on the commit before the deploy.
+
+What the `prepare` job runs is still kept to what the release needs,
+since the job's output is pushed with the key:
 
 - The docs' diagrams are drawn in Chromium by the workflow's `draw`
   job, which names no environment and holds no secret, with a token
   that can only read and a checkout that keeps no credentials
   (`npm run docs:archive -- --draw`). It keeps the drawings as an
-  artifact of the run. The release job downloads that run's artifact,
+  artifact of the run. The `prepare` job downloads that run's artifact,
   and runs no browser and installs nothing with apt. With
   `npm run docs:archive -- --drawn`, it checks that every drawing is
   there and passes the checks the site's build makes (`checkSvg`, and
@@ -665,16 +725,14 @@ runs is kept to what the release needs:
   that isn't there fails the release before anything is pushed.
 - The `draw` job chooses the drawings the release archive carries, so
   their integrity rests on those checks alone: `checkSvg` and the
-  font's notice. The release job doesn't draw them again to compare.
+  font's notice. The `prepare` job doesn't draw them again to compare.
 - Both jobs check out `main`'s tip. When `main` moves between them and
   the newer commit changes a diagram, or what draws it, its drawing
   isn't in the artifact: `--drawn` fails the run before anything is
   pushed, and the run that the newer commit starts releases it.
-- The artifact is kept for 7 days. Re-running only the failed release
-  job works within them; after that, the download fails, and the
-  maintainer re-runs all the run's jobs, or runs the workflow by hand.
-- The checkout keeps no credentials, so the key isn't in the git config
-  while the job installs the dependencies.
+- The artifacts are kept for 7 days. Re-running only a failed job works
+  within them; after that, the download fails, and the maintainer
+  re-runs all the run's jobs, or runs the workflow by hand.
 - `npm ci --ignore-scripts` runs no package's install script. In the
   `draw` job, Chromium comes from the Chromium action, which downloads
   its headless shell and checks the file against the SHA-256 committed in
@@ -708,22 +766,16 @@ runs is kept to what the release needs:
   Playwright doesn't want, and the job can't attach that tag's docs.
   The download is the same step as the headless-shell action's, which
   `npm run check:shell` checks too.
-- Only the step that runs semantic-release writes the key where git
-  reads it: a file that git's `ssh` reads (`GIT_SSH_COMMAND`), with
-  GitHub's host keys from its API, removed when the step ends.
-  semantic-release checks that it can push before anything else and
-  pushes in its prepare step, so the key stays on disk for the whole
-  run.
 
-That step renders the repository's docs while the key is there, with
-the drawings kept, to pack the archive, and it loads Vite. These are
-development dependencies that read only what is committed on `main`,
-and Playwright and Mermaid are pinned. Renovate proposes their
-updates, and those of semantic-release, its plugins and the preset
-they load, once their version has been public for 3 days, so a bad
-version can be found and pulled first. CI checks them
-([vendor-code.md](vendor-code.md)), and Renovate leaves each one
-waiting for a person, who merges it after reading what it changes
+The `prepare` job renders the repository's docs, with the drawings
+kept, to pack the archive, and it loads Vite. These are development
+dependencies that read only what is committed on `main`, and
+Playwright and Mermaid are pinned. Renovate proposes their updates, and
+those of semantic-release, its plugins and the preset they load, once
+their version has been public for 3 days, so a bad version can be found
+and pulled first. CI checks them ([vendor-code.md](vendor-code.md)),
+and Renovate leaves each one waiting for a person, who merges it after
+reading what it changes
 ([GOVERNANCE.md](../GOVERNANCE.md#dependency-updates)). The wait holds
 for every package an update newly locks, not only the one it names:
 the repository's `.npmrc` files set npm's `min-release-age` to 3 days,
@@ -731,11 +783,7 @@ and its `uv.toml` sets uv's `exclude-newer` to 3 days. Every action
 the workflows use is pinned to a commit, since a tag can be moved
 (`npm run check:actions`,
 [testing.md](testing.md#the-repositorys-own-checks)), and a person
-merges each update to one, which Renovate leaves waiting. The archive isn't
-built in a separate job without the key and attached with the run's
-token: semantic-release would then publish the release before its
-archive existed, and the deploy would serve the version without its
-docs.
+merges each update to one, which Renovate leaves waiting.
 
 Without the secret, the workflow says so and releases nothing; once it's
 set, the maintainer runs the workflow by hand (next section) to release
@@ -763,13 +811,22 @@ canceled run is handled by what it left behind, as in the cases below.
   --head main` names the commit whose author or committer it refuses
   ([What counts as breaking](#what-counts-as-breaking)); the maintainer
   agrees in an issue how to release past it.
-- **The push was refused**: `main` moved on while the release ran, or
-  the deploy key, its secret in the `release` environment or the bypass
-  is missing. Nothing was tagged, and the next run releases from the
-  new tip.
-- **The release commit is on `main`, but not its tag** (the tag's push
-  failed, or the run was canceled between the two): every run of the
-  workflow stops with an error that names the commit until it's tagged.
+- **The `push` job refused the commit** (`npm run release:commit --
+  next`, [above](#the-deploy-key)): nothing was pushed. When `main`
+  moved on while the release ran, the error says its parent isn't
+  `main`'s tip, and the next run releases from the new tip. Any other
+  error names what the commit holds that a release doesn't write:
+  something in the `prepare` job wrote it, and every run stops the same
+  way. The maintainer finds out what before anything else is released,
+  and fixes it in its own pull request.
+- **The push was refused**: `main` moved on between the check and the
+  push, or the deploy key, its secret in the `release` environment or
+  the bypass is missing. The push is atomic, so neither the commit nor
+  the tag was pushed, and the next run releases from the new tip.
+- **The release commit is on `main`, but not its tag** (it was pushed
+  by hand without its tag; the `push` job pushes both at once). Every
+  run of the workflow stops with an error that names the commit until
+  it's tagged.
   That stops semantic-release from releasing the same version again on
   top of it. Only a commit semantic-release
   made counts (`npm run release:commit`,
@@ -819,40 +876,33 @@ canceled run is handled by what it left behind, as in the cases below.
   deploys nothing and says so, and the site stays on the newer
   version.
 
-- **After the tag** (the GitHub release couldn't be made): a new run
-  finds nothing to release, and the deploy after CI on the release
-  commit fails, as the version has no GitHub release. The maintainer
-  makes the GitHub release from the tag by hand, as a draft, with the
-  version's entry in CHANGELOG.md as its notes:
-
-  ```sh
-  gh release create vX.Y.Z --draft --title "Solid Memo X.Y.Z" --notes-file notes.md
-  ```
-
-  The maintainer then attaches its docs and publishes it, as below.
-- **The release is a draft without its docs** (the archive's upload
-  failed), **or its docs aren't attested** (the attestation step
-  failed): a new run finds nothing to release. The deploy refuses a
-  draft; a published release whose archive isn't attested deploys as
-  usual, missing only the attestation. The maintainer runs the workflow
-  by hand from `main` with the version's tag (Actions › Release › Run
-  workflow, "tag" `vX.Y.Z`), while no Release run is running or
-  waiting. That run's `docs` job has its own concurrency group, so it
-  doesn't wait for a Release run. It marks the version latest when
-  it's the newest tag, and a release made while it runs would leave
-  that wrong. The job reads the tag as `refs/tags/vX.Y.Z` only, never
-  as a bare name, which a branch of the same name would win. It fails
-  unless the tag names that version's release commit on `main`, as the
-  deploy checks (`npm run release:commit`), and it checks out that
-  commit by its hash. It then renders
-  the docs from it, draws them, attests the archive, attaches it
-  with the run's token, and publishes the release if it's still a
-  draft, without the deploy key. It keeps an attested archive already on
-  the release, and renders and replaces one that isn't.
-  For a draft, the maintainer then runs the deploy by hand (Actions ›
-  Deploy to GitHub Pages › Run workflow, from `main`). The archive is
-  never uploaded by hand: only this workflow can attest it as made on
-  `main` ([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
+- **After the push** (the `publish` job failed or was canceled, so the
+  version has no GitHub release, or a draft one), **or its docs aren't
+  attested** (the attestation step failed): a new run finds nothing to
+  release. The deploy after CI on the release commit fails while the
+  version has no published release; a published release whose archive
+  isn't attested deploys as usual, missing only the attestation. The
+  maintainer runs the workflow by hand from `main` with the version's
+  tag (Actions › Release › Run workflow, "tag" `vX.Y.Z`), while no
+  Release run is running or waiting. That run's concurrency group is
+  its tag's, so it doesn't wait for a Release run. It marks the
+  version latest when it's the newest tag, and a release made while it
+  runs would leave that wrong. The `docs` job reads the tag as
+  `refs/tags/vX.Y.Z` only, never as a bare name, which a branch of the
+  same name would win. It fails unless the tag names that version's
+  release commit on `main`, as the deploy checks
+  (`npm run release:commit`). When the tag has no GitHub release, it
+  makes one as a draft, "Solid Memo X.Y.Z", with the changelog entry
+  that commit added as its notes, as the `publish` job would have. It
+  then checks out that commit by its hash, renders the docs from it,
+  draws them, attests the archive, attaches it with the run's token,
+  and publishes the release if it's still a draft, without the deploy
+  key. It keeps an attested archive already on the release, and renders
+  and replaces one that isn't. For a draft, the maintainer then runs
+  the deploy by hand (Actions › Deploy to GitHub Pages › Run workflow,
+  from `main`). The archive is never uploaded by hand: only this
+  workflow can attest it as made on `main`
+  ([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
 
 A tag is never moved or deleted once pushed, even one whose release
 went wrong: Zenodo and anyone who fetched it may already hold it.

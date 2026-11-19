@@ -5,11 +5,12 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, matchesGlob } from "node:path";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import { defaultIo, saysBreaking } from "./checkBreaking.ts";
 import releaseWithoutMerges from "./releaseWithoutMerges.ts";
-import { ASSETS_DIR, archivePath } from "./docsArchive.ts";
+import { main as releaseCommit, defaultIo as releaseCommitIo } from "./releaseCommit.ts";
 
 /**
  * release.config.mjs agrees with the files it releases
@@ -24,7 +25,6 @@ type Config = {
   changelogTitle: string;
   parserOpts: Record<string, unknown>;
   assets: string[];
-  docsArchive: { path: string; label: string };
   default: { branches: string[]; plugins: Plugin[] };
 };
 
@@ -71,8 +71,8 @@ describe("release.config.mjs", () => {
       }
     ).scripts;
     // Each step only when the one before it passed, and each given the
-    // version; the archive with --drawn, as the job that runs it holds
-    // the deploy key and starts no browser (docs/releasing.md#the-deploy-key).
+    // version; the archive with --drawn, as the job that runs it starts
+    // no browser: the draw job drew the diagrams.
     const steps = command.split(" && ").map((step) => {
       const match = /^npm run (\S+) -- \$\{nextRelease\.version\}( --drawn)?$/.exec(step);
       expect(match, step).not.toBeNull();
@@ -83,16 +83,19 @@ describe("release.config.mjs", () => {
     expect(scripts["docs:archive"]).toContain("scripts/docsArchive.ts");
   });
 
-  it("attaches the archive that npm run docs:archive writes, and nothing else", () => {
-    const github = options("@semantic-release/github");
-    expect(github.assets).toEqual([config.docsArchive]);
-    const { path, label } = config.docsArchive;
-    expect(matchesGlob(archivePath("2.2.0"), path)).toBe(true);
-    expect(matchesGlob(archivePath("10.0.12"), path)).toBe(true);
-    expect(matchesGlob(`${ASSETS_DIR}/notes-2.2.0.tar.gz`, path)).toBe(false);
-    expect(matchesGlob(`${ASSETS_DIR}/docs-2.2.0.zip`, path)).toBe(false);
-    // The plugin fills in the label, but not the path.
-    expect(label.replaceAll("${nextRelease.version}", "2.2.0")).toBe("Documentation 2.2.0 (HTML)");
+  // release.yml's publish job makes it, with no package loaded
+  // (docs/releasing.md#the-deploy-key): semantic-release runs with no
+  // token that could.
+  it("makes no GitHub release", () => {
+    const names = config.default.plugins.map(([name]) => name);
+    expect(names).not.toContain("@semantic-release/github");
+    expect(names).toEqual([
+      "./scripts/releaseWithoutMerges.ts",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      "@semantic-release/exec",
+      "@semantic-release/git",
+    ]);
   });
 
   it("publishes nothing to npm", () => {
@@ -359,4 +362,135 @@ describe("the commits, as the release reads them", () => {
     expect(written).toContain("[#216](https://github.com/solid-memo/website/issues/216)");
     for (const color of ["9ba6b2", "aab4bf", "rrggbb"]) expect(written).not.toContain(color);
   });
+});
+
+/**
+ * The prepare job's release (release.yml, docs/releasing.md#the-deploy-key):
+ * semantic-release with release.config.mjs's plugins, in a checkout whose
+ * repository URL is GitHub's, which git's url.<copy>.insteadOf points at
+ * a bare copy, with https refused. It commits and tags the release in the
+ * copy, with notes that link to GitHub; and the push job's check
+ * (npm run release:commit -- next) passes the commit, fetched from a
+ * bundle into a checkout of main's tip. The docs' archive is left out:
+ * the files a release writes are the repository's own, but for a
+ * package.json and a lockfile of one package.
+ */
+describe("a release in the prepare job, into a bare copy", () => {
+  const URL_ = "https://github.com/solid-memo/website.git";
+  const bot = "github-actions[bot]";
+  const botEmail = "41898282+github-actions[bot]@users.noreply.github.com";
+
+  it("commits and tags in the copy alone, and the push job's check passes the commit", () => {
+    const dir = mkdtempSync(join(tmpdir(), "release-prepare-"));
+    const work = join(dir, "work");
+    const copy = join(dir, "copy.git");
+    const target = join(dir, "target");
+    const git = (cwd: string, ...args: string[]) =>
+      execFileSync("git", ["-C", cwd, ...args], {
+        encoding: "utf8",
+        env: { ...process.env, HOME: dir, GIT_CONFIG_NOSYSTEM: "1" },
+      }).trim();
+    try {
+      git(dir, "init", "-q", "-b", "main", work);
+      git(work, "config", "user.name", "Test");
+      git(work, "config", "user.email", "test@example.org");
+      git(work, "config", "commit.gpgsign", "false");
+      git(work, "config", "tag.gpgsign", "false");
+      for (const file of ["CHANGELOG.md", "publiccode.yml", "CITATION.cff"]) {
+        writeFileSync(join(work, file), readFileSync(join(ROOT, file)));
+      }
+      writeFileSync(
+        join(work, "package.json"),
+        '{\n  "name": "x",\n  "version": "1.0.0",\n  "private": true\n}\n',
+      );
+      writeFileSync(
+        join(work, "package-lock.json"),
+        '{\n  "name": "x",\n  "version": "1.0.0",\n  "lockfileVersion": 3,\n  "requires": true,\n  "packages": {\n    "": {\n      "name": "x",\n      "version": "1.0.0"\n    }\n  }\n}\n',
+      );
+      writeFileSync(join(work, ".gitignore"), "release.config.mjs\nversion.mjs\n");
+      git(work, "add", ".");
+      git(work, "commit", "-q", "-m", "feat: start");
+      git(work, "tag", "v1.0.0");
+      writeFileSync(join(work, "app.txt"), "kept\n");
+      git(work, "add", ".");
+      git(work, "commit", "-q", "-m", "fix(app): keep the title\n\nWhy.\n\nRefs: #1");
+      const tip = git(work, "rev-parse", "HEAD");
+      git(dir, "clone", "-q", work, target);
+
+      // release.config.mjs as it is, but for paths from the repository,
+      // and a prepare step that writes the version alone.
+      const root = pathToFileURL(`${ROOT}/`).href;
+      writeFileSync(
+        join(work, "version.mjs"),
+        `const m = await import(${JSON.stringify(`${root}scripts/releaseVersion.ts`)});\nprocess.exitCode = m.main(["node", process.argv[2]], m.defaultIo(process.cwd()));\n`,
+      );
+      writeFileSync(
+        join(work, "release.config.mjs"),
+        `import config from ${JSON.stringify(`${root}release.config.mjs`)};
+export default {
+  ...config,
+  plugins: config.plugins.map(([name, options]) =>
+    name.startsWith("./") ? [${JSON.stringify(ROOT)} + name.slice(1), options]
+    : name === "@semantic-release/exec" ? [name, { prepareCmd: "node version.mjs \${nextRelease.version}" }]
+    : [name, options]),
+};
+`,
+      );
+
+      // As the prepare job's step does it.
+      git(dir, "clone", "-q", "--bare", work, copy);
+      git(work, "config", `url.file://${copy}.insteadOf`, URL_);
+      git(work, "config", "protocol.https.allow", "never");
+      // In a process of its own, as the job runs it: the plugins it loads
+      // are read as Node reads them, not as this test runner does.
+      execFileSync(
+        process.execPath,
+        [
+          join(ROOT, "node_modules/semantic-release/bin/semantic-release.js"),
+          "--no-ci",
+          "--repository-url",
+          URL_,
+        ],
+        {
+          cwd: work,
+          encoding: "utf8",
+          env: {
+            PATH: process.env.PATH,
+            HOME: dir,
+            GIT_CONFIG_NOSYSTEM: "1",
+            GIT_TERMINAL_PROMPT: "0",
+            GIT_AUTHOR_NAME: bot,
+            GIT_AUTHOR_EMAIL: botEmail,
+            GIT_COMMITTER_NAME: bot,
+            GIT_COMMITTER_EMAIL: botEmail,
+          },
+        },
+      );
+
+      const released = git(copy, "rev-parse", "refs/heads/main");
+      expect(git(copy, "rev-parse", `${released}^`)).toBe(tip);
+      expect(git(copy, "tag", "--points-at", released)).toBe("v1.0.1");
+      expect(git(target, "rev-parse", "HEAD")).toBe(tip);
+
+      // As the push job's checks do it.
+      const bundle = join(dir, "release.bundle");
+      git(copy, "bundle", "create", "-q", bundle, "refs/tags/v1.0.1", `^${tip}`);
+      git(target, "bundle", "verify", "--quiet", bundle);
+      git(target, "fetch", "--no-tags", "--quiet", bundle, "refs/tags/v1.0.1:refs/tags/v1.0.1");
+      const messages: string[] = [];
+      const io = { ...releaseCommitIo(target, "HEAD"), log: (m: string) => messages.push(m) };
+      expect(releaseCommit(["node", "next", "v1.0.1"], io)).toBe(0);
+      expect(messages).toEqual([`v1.0.1 names ${released}, a release commit onto main's tip.`]);
+
+      // As the publish job reads the notes, once main holds the commit.
+      git(target, "merge", "-q", "--ff-only", "refs/tags/v1.0.1");
+      messages.length = 0;
+      expect(releaseCommit(["node", "notes", "v1.0.1"], io)).toBe(0);
+      expect(messages[0]).toMatch(
+        /^## \[1\.0\.1\]\(https:\/\/github\.com\/solid-memo\/website\/compare\/v1\.0\.0\.\.\.v1\.0\.1\) \(\d{4}-\d{2}-\d{2}\)\n\n### Fixes\n\n\* \*\*app:\*\* keep the title \(\[[0-9a-f]{7}\]\(https:\/\/github\.com\/solid-memo\/website\/commit\/[0-9a-f]{40}\)\), closes \[#1\]/,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }, 120_000);
 });

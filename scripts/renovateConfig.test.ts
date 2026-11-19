@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
  * servers' images are let; a new digest under an unchanged version, which
  * has no release date to wait on, is proposed at once and held. A person merges every other update: every npm update,
  * development tools' included, since the build that makes the deployed
- * site and the release job run them, and an update of one can move a
+ * site and the release's prepare job run them, and an update of one can move a
  * shipped package in the lockfile; every update to a workflow's action,
  * since some of the jobs that run one hold the deploy key and other
  * secrets; the Python tools and the dev container, which run on
@@ -334,7 +334,7 @@ describe("renovate.json5", () => {
     expect(files).toContain("apps/web/package.json");
     expect(files).toContain("e2e/journeys/package.json");
     // A development tool that the deployed site's build runs, one that
-    // the release job runs, and one that shares shipped packages with the
+    // the release's prepare job runs, and one that shares shipped packages with the
     // app in the lockfile.
     const names = new Set(dependencies.map((dependency) => dependency.depName));
     for (const name of ["@preact/preset-vite", "turbo", "semantic-release", "markdownlint-cli2"]) {

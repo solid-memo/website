@@ -30,8 +30,8 @@
     // An update is proposed only once its version has been public for 3
     // days, so that the registry and the package's users have time to
     // find a bad or malicious version and pull it before it reaches main
-    // unreviewed (GOVERNANCE.md#dependency-updates), where the release
-    // job holds the deploy key (docs/releasing.md#the-deploy-key).
+    // unreviewed (GOVERNANCE.md#dependency-updates), from where a release
+    // is pushed with the deploy key (docs/releasing.md#the-deploy-key).
     // 'strict' makes no branch, and so no pull request, before then. This
     // wait is on the version an update names: the .npmrc files'
     // min-release-age and uv.toml's exclude-newer hold every package npm
@@ -175,8 +175,9 @@
         // version of an end-to-end test server's image, which runs only in a
         // container the tests start and throw away (docs/testing.md). A new
         // digest, of an image or of a commit to build, is held below. Every
-        // other update waits for a person: the npm packages and the workflows'
-        // actions, which run where the deploy key is; the Python tools in
+        // other update waits for a person: the npm packages, whose release
+        // commit is pushed with the deploy key, and the workflows' actions,
+        // which run where the deploy key is; the Python tools in
         // scripts/requirements-*.in, which maintainers install and run with
         // their own credentials, as the dev container and the weekly taxonomy
         // job on main do; the dev container's image and features, which run as
@@ -406,9 +407,10 @@
         // and no rule after this one merges one on its own again
         // (scripts/renovateConfig.test.ts). The development tools are held
         // too: the build that makes the deployed site runs Vite, its
-        // plugins and turbo; the release job runs semantic-release, its
-        // plugins and what docs:archive loads while it holds the deploy
-        // key (docs/releasing.md#the-deploy-key); and an update of any of
+        // plugins and turbo; the release's prepare job runs
+        // semantic-release, its plugins and what docs:archive loads, and
+        // the commit it makes is pushed with the deploy key
+        // (docs/releasing.md#the-deploy-key); and an update of any of
         // them can move, in package-lock.json, a package the app ships and
         // shares with it. A rule matches only the package an update names,
         // not what the update moves in the lockfile, so no npm update is

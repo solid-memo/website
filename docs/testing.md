@@ -1080,7 +1080,7 @@ uv pip compile --generate-hashes --universal --python-version=3.9 scripts/requir
 uv pip compile --generate-hashes --universal --python-version=3.11 scripts/requirements-lint.in --output-file=scripts/requirements-lint.txt
 ```
 
-CI's `check` job and the release workflow's `draw` and `release` jobs
+CI's `check` job and the release workflow's `draw` and `prepare` jobs
 run `npm audit signatures` right after `npm ci --ignore-scripts`, and
 the Pending updates workflow runs
 it on Renovate's own install in `scripts/renovate/`. For each installed

@@ -26,15 +26,26 @@
  * tag, or every release stops (a tag's push failed). A commit that is
  * only titled as one is passed over, with a notice.
  *
- * `tag`, in deploy.yml and in release.yml's docs job: the commit a
- * version's tag names must be that version's release commit, or the
- * site is not deployed and the docs are not rendered. The tag is read
- * as refs/tags/<tag> only, so a branch of the same name is never taken
- * for it.
+ * `tag`, in deploy.yml and in release.yml's publish and docs jobs: the
+ * commit a version's tag names must be that version's release commit,
+ * or the site is not deployed and the release is not made. The tag is
+ * read as refs/tags/<tag> only, so a branch of the same name is never
+ * taken for it.
+ *
+ * `next`, in release.yml's push job, which holds the deploy key: the
+ * commit a version's tag names, fetched from the bundle the prepare job
+ * made with no key, is pushed onto main only when it is a release
+ * commit whose parent is main's tip, whose message is its subject
+ * alone, and whose files are main's with nothing but the version, the
+ * date and one changelog entry written in (scripts/releaseChanges.ts).
+ *
+ * `notes`, in release.yml's publish and docs jobs: prints the changelog
+ * entry the tag's commit added, which is the release's notes.
  */
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { isRelease, strayFiles } from "./ciGate.ts";
+import { addedEntry, type Change, unexpectedChanges } from "./releaseChanges.ts";
 
 /** Who release.yml makes semantic-release's commits as. */
 const BOT = "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>";
@@ -49,10 +60,23 @@ export interface Commit {
   committer: string;
 }
 
+/** A file a commit changes, and whether it stays a regular file it was (git's status M, mode 100644). */
+export interface FileChange extends Change {
+  modified: boolean;
+}
+
 /** What the checks read. */
 export interface ReleaseCommitIo {
   /** The commits on main's first-parent chain, newest first. */
   firstParents(): Commit[];
+  /** main's tip. */
+  head(): string;
+  /** A commit, by its SHA. */
+  commit(sha: string): Commit;
+  /** A commit's whole message, with no trailing newline. */
+  message(sha: string): string;
+  /** The files a commit changes against its parent, with their text. */
+  changes(sha: string): FileChange[];
   /** The files a commit changes against its parent. */
   changed(sha: string): string[];
   /** The tags that name a commit. */
@@ -118,7 +142,50 @@ function tag(io: ReleaseCommitIo, name: string): number {
   return 0;
 }
 
-const USAGE = "Usage: npm run release:commit -- last | tag <vX.Y.Z>";
+/** Exit code of `next`: 1 when the tag's commit is not a release commit to push onto main's tip. */
+function next(io: ReleaseCommitIo, name: string): number {
+  const refuse = (why: string) => {
+    io.log(
+      `::error::${name} names no release commit that may be pushed onto main (${why}), so nothing is pushed (docs/releasing.md#the-deploy-key).`,
+    );
+    return 1;
+  };
+  const sha = io.tagged(name);
+  if (sha === undefined) return refuse("it names no commit");
+  const commit = io.commit(sha);
+  const head = io.head();
+  if (commit.parents.join(" ") !== head)
+    return refuse(`${sha}'s parent is not main's tip, ${head}`);
+  const why = notRelease(io, commit, name.slice(1));
+  if (why !== undefined) return refuse(`${sha}: ${why}`);
+  if (io.message(sha) !== commit.subject)
+    return refuse(`${sha}'s message is more than its subject`);
+  const changes = io.changes(sha);
+  const odd = changes.filter((change) => !change.modified).map((change) => change.path);
+  if (odd.length > 0)
+    return refuse(`${sha} adds, removes or changes the mode of ${odd.join(", ")}`);
+  const problems = unexpectedChanges(changes, name.slice(1));
+  if (problems.length > 0) return refuse(`${sha}: ${problems.join("; ")}`);
+  io.log(`${name} names ${sha}, a release commit onto main's tip.`);
+  return 0;
+}
+
+/** Exit code of `notes`: 1 when the tag's commit added no changelog entry. */
+function notes(io: ReleaseCommitIo, name: string): number {
+  const sha = io.tagged(name);
+  const changelog = sha && io.changes(sha).find((change) => change.path === "CHANGELOG.md");
+  const entry = changelog && addedEntry(changelog.before, changelog.after);
+  if (!entry) {
+    io.log(`::error::${name} names no commit that added an entry to CHANGELOG.md.`);
+    return 1;
+  }
+  io.log(entry);
+  return 0;
+}
+
+const COMMANDS = { tag, next, notes } as const;
+
+const USAGE = "Usage: npm run release:commit -- last | tag | next | notes <vX.Y.Z>";
 
 /** Exit code: 0 when the check passes, 1 when it fails, 2 when it is called wrongly. */
 export function main(argv: readonly string[], io: ReleaseCommitIo): number {
@@ -126,11 +193,39 @@ export function main(argv: readonly string[], io: ReleaseCommitIo): number {
   const [command, ...args] = argv.slice(1);
   if (command === "last" && args.length === 0) return last(io);
   const [name] = args;
-  if (command === "tag" && args.length === 1 && /^v\d+\.\d+\.\d+$/.test(name!)) {
-    return tag(io, name!);
+  if (
+    Object.hasOwn(COMMANDS, command ?? "") &&
+    args.length === 1 &&
+    /^v\d+\.\d+\.\d+$/.test(name!)
+  ) {
+    return COMMANDS[command as keyof typeof COMMANDS](io, name!);
   }
   io.log(USAGE);
   return 2;
+}
+
+/**
+ * Five fields to a commit, each ended by NUL, which git never lets a
+ * name, an email or a subject hold, so no text in one can pass for
+ * another.
+ */
+const FORMAT = "--format=%H%x00%P%x00%an <%ae>%x00%cn <%ce>%x00%s%x00";
+
+/** The commits `git log` printed in FORMAT. */
+function commits(output: string): Commit[] {
+  const fields = output.split("\0");
+  const result: Commit[] = [];
+  for (let at = 0; at + 5 <= fields.length; at += 5) {
+    const [sha, parents, author, committer, subject] = fields.slice(at, at + 5);
+    result.push({
+      sha: sha!.trim(),
+      parents: parents!.split(" ").filter(Boolean),
+      author: author!,
+      committer: committer!,
+      subject: subject!,
+    });
+  }
+  return result;
 }
 
 /** The io of the repository at `repo`, whose main is `main` (a ref). */
@@ -139,29 +234,25 @@ export function defaultIo(repo: string, main: string): ReleaseCommitIo {
     execFileSync("git", ["-C", repo, ...args], { encoding: "utf8" }).trim();
   const lines = (text: string) => text.split("\n").filter((line) => line !== "");
   return {
-    // Five fields to a commit, each ended by NUL, which git never lets a
-    // name, an email or a subject hold, so no text in one can pass for
-    // another.
-    firstParents: () => {
-      const fields = git(
-        "log",
-        "--first-parent",
-        "--format=%H%x00%P%x00%an <%ae>%x00%cn <%ce>%x00%s%x00",
-        main,
-      ).split("\0");
-      const commits: Commit[] = [];
-      for (let at = 0; at + 5 <= fields.length; at += 5) {
-        const [sha, parents, author, committer, subject] = fields.slice(at, at + 5);
-        commits.push({
-          sha: sha!.trim(),
-          parents: parents!.split(" ").filter(Boolean),
-          author: author!,
-          committer: committer!,
-          subject: subject!,
-        });
-      }
-      return commits;
-    },
+    firstParents: () => commits(git("log", "--first-parent", FORMAT, main)),
+    head: () => git("rev-parse", "--verify", `${main}^{commit}`),
+    commit: (sha) => commits(git("log", "-1", FORMAT, sha))[0]!,
+    message: (sha) => git("log", "-1", "--format=%B", sha),
+    changes: (sha) =>
+      lines(git("diff", "--raw", "--no-renames", "--no-abbrev", `${sha}^`, sha)).map((line) => {
+        const [modes, path] = line.split("\t") as [string, string];
+        const [oldMode, newMode, , , status] = modes.slice(1).split(" ");
+        const modified = status === "M" && oldMode === "100644" && newMode === "100644";
+        // Untrimmed, and as large as package-lock.json.
+        const text = (rev: string) =>
+          execFileSync("git", ["-C", repo, "show", `${rev}:${path}`], {
+            encoding: "utf8",
+            maxBuffer: 256 * 1024 * 1024,
+          });
+        return modified
+          ? { path, modified, before: text(`${sha}^`), after: text(sha) }
+          : { path, modified, before: "", after: "" };
+      }),
     changed: (sha) => lines(git("diff", "--name-only", `${sha}^`, sha)),
     tags: (sha) => lines(git("tag", "--points-at", sha)),
     tagged: (name) => {

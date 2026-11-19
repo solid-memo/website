@@ -5,23 +5,27 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { archivePath } from "./docsArchive.ts";
 
 /**
  * The release workflow's jobs restore nothing from GitHub's cache
- * (docs/releasing.md#the-deploy-key): the release job holds the deploy
- * key, the docs job attests what it renders, and any job on main can
- * write main's cache entries. Nor do the jobs that build the site that
- * is deployed (docs/deployment.md#the-build-ci-tested): ci.yml's site
- * job and deploy.yml's build job. And the deploy ships CI's site only
- * once its files match the site job's attestation, which no other job
- * of a run can make. ci.yml's check job and the release workflow's draw
- * and release jobs check the registry's signatures of what they install,
- * the draw job before Chromium (docs/testing.md#the-workflows). The
- * release job, every step of which can read the deploy key, runs no
- * browser and no apt: the draw job, which holds nothing, draws the
- * docs' diagrams for it (docs/releasing.md#the-deploy-key). A push run
- * releases only while the merge queue is empty, which a job that holds
- * nothing asks (docs/releasing.md#what-a-release-does).
+ * (docs/releasing.md#the-deploy-key): what the prepare job makes is
+ * pushed with the deploy key, the docs job attests what it renders, and
+ * any job on main can write main's cache entries. Nor do the jobs that
+ * build the site that is deployed (docs/deployment.md#the-build-ci-tested):
+ * ci.yml's site job and deploy.yml's build job. And the deploy ships
+ * CI's site only once its files match the site job's attestation, which
+ * no other job of a run can make. ci.yml's check job and the release
+ * workflow's draw and prepare jobs check the registry's signatures of
+ * what they install, the draw job before Chromium
+ * (docs/testing.md#the-workflows). Only the push job holds the deploy
+ * key, every step of which can read it: it installs nothing, loads no
+ * package and runs no browser, and pushes a release commit only once
+ * main's script has checked it (docs/releasing.md#the-deploy-key).
+ * semantic-release runs in the prepare job, which holds no key and no
+ * token that can write, and pushes only to a bare copy of its checkout.
+ * A push run releases only while the merge queue is empty, which a job
+ * that holds nothing asks (docs/releasing.md#what-a-release-does).
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -43,12 +47,46 @@ function jobs(yaml: string): Map<string, string> {
   return byName;
 }
 
-const workflow = jobs(read(".github/workflows/release.yml"));
+const releaseYml = read(".github/workflows/release.yml");
+const workflow = jobs(releaseYml);
 const release = [...workflow.values()].flatMap((job) => steps(job, 6));
 
+/** A job's lines that are not comments. */
+function code(job: string): string {
+  return job
+    .split("\n")
+    .filter((line) => !/^\s*#/.test(line))
+    .join("\n");
+}
+
 describe("release.yml", () => {
-  it("has the queue, draw, release and docs jobs", () => {
-    expect([...workflow.keys()]).toEqual(["queue", "draw", "release", "docs"]);
+  it("has the queue, draw, prepare, push, publish and docs jobs", () => {
+    expect([...workflow.keys()]).toEqual(["queue", "draw", "prepare", "push", "publish", "docs"]);
+  });
+
+  // Each job asks for what it needs; only the push job holds the key.
+  it("gives the key to the push job alone", () => {
+    expect(releaseYml).toMatch(/^permissions: \{\}$/m);
+    for (const [name, job] of workflow) {
+      expect(job, name).toMatch(/^ {4}permissions:$/m);
+      const keyed = name === "push";
+      expect(/^ {4}environment: release$/m.test(job), name).toBe(keyed);
+      expect(/secrets\./.test(code(job)), name).toBe(keyed);
+    }
+    expect(code(releaseYml.slice(0, releaseYml.indexOf("\njobs:\n")))).not.toMatch(/secrets\./);
+  });
+
+  // One run at a time, so no run's prepare job runs between another's
+  // prepare and push; a run that cannot release never replaces one
+  // waiting.
+  it("runs one release at a time, in a group of the workflow's", () => {
+    const head = releaseYml.slice(0, releaseYml.indexOf("\njobs:\n"));
+    expect(head).toMatch(/^concurrency:\n {2}group: >-\n/m);
+    expect(head).toContain("format('release-docs-{0}', inputs.tag)");
+    expect(head).toContain("'release') ||");
+    expect(head).toContain("format('release-none-{0}', github.run_id)");
+    expect(head).toMatch(/^ {2}cancel-in-progress: false$/m);
+    for (const [name, job] of workflow) expect(job, name).not.toMatch(/concurrency:/);
   });
 
   // The queue job runs on workflow_run, beside the job that holds the
@@ -64,7 +102,7 @@ describe("release.yml", () => {
   // A run by hand releases main's tip whatever the queue holds; a push
   // run, only once the queue job found it empty.
   it("releases after a push run only when the merge queue is empty", () => {
-    for (const name of ["draw", "release"]) {
+    for (const name of ["draw", "prepare"]) {
       const job = workflow.get(name) ?? "";
       expect(job).toContain(
         "needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))",
@@ -72,9 +110,15 @@ describe("release.yml", () => {
     }
     expect(workflow.get("draw")).toMatch(/^ {4}needs: queue$/m);
     expect(workflow.get("draw")).toMatch(/^ {6}!cancelled\(\) && \($/m);
-    const job = workflow.get("release") ?? "";
+    const job = workflow.get("prepare") ?? "";
     expect(job).toMatch(/^ {4}needs: \[queue, draw\]$/m);
     expect(job).toMatch(/^ {6}!cancelled\(\) && needs\.draw\.result == 'success' && \($/m);
+    expect(workflow.get("push")).toMatch(
+      /^ {4}needs: prepare\n {4}if: needs\.prepare\.outputs\.tag != ''$/m,
+    );
+    expect(workflow.get("publish")).toMatch(
+      /^ {4}needs: \[prepare, push\]\n {4}if: needs\.push\.outputs\.pushed == 'true'$/m,
+    );
   });
 
   it("uses no cache action", () => {
@@ -83,7 +127,7 @@ describe("release.yml", () => {
 
   it("sets up Node without npm's cache", () => {
     const setups = release.filter((step) => step.includes("uses: actions/setup-node@"));
-    expect(setups).toHaveLength(4);
+    expect(setups).toHaveLength(6);
     for (const step of setups) {
       expect(step).not.toMatch(/^\s+cache:/m);
       expect(step).toMatch(/^\s+package-manager-cache: false$/m);
@@ -138,18 +182,59 @@ describe("release.yml", () => {
     );
   });
 
-  it("runs no browser and no apt in the job that holds the deploy key", () => {
-    const release = workflow.get("release") ?? "";
-    expect(release).toMatch(/^ {4}environment: release$/m);
-    const code = release
-      .split("\n")
-      .filter((line) => !/^\s*#/.test(line))
-      .join("\n");
-    expect(code).not.toMatch(
-      /\.\/\.github\/actions\/|playwright|\bapt(-get)?\b|chromium|--draw\b/i,
+  // GitHub hands a job its environment's secrets when it starts, so any
+  // step of the push job could read the key: it runs only actions that
+  // check out, set up Node and download this run's bundle, git, ssh and
+  // main's own scripts, which import no package.
+  it("installs nothing and loads no package in the job that holds the deploy key", () => {
+    const push = workflow.get("push") ?? "";
+    expect(push).toMatch(/^ {4}permissions:\n {6}contents: read\n/m);
+    expect(code(push)).not.toMatch(
+      /npm ci|npm install|npx|\.\/\.github\/actions\/|playwright|\bapt(-get)?\b|chromium|docs:archive/i,
     );
-    const job = steps(release, 6);
+    const job = steps(push, 6);
+    expect(job.map((step) => step.match(/uses: ([^@\s]+)/)?.[1]).filter(Boolean)).toEqual([
+      "actions/checkout",
+      "actions/setup-node",
+      "actions/download-artifact",
+    ]);
     const at = (text: string) => job.findIndex((step) => step.includes(text));
+    expect(job[at("uses: actions/checkout@")]).toMatch(/^ {10}persist-credentials: false$/m);
+    const downloaded = at("uses: actions/download-artifact@");
+    expect(job[downloaded]).toMatch(/^ {10}name: release-bundle$/m);
+    expect(job[downloaded]).not.toMatch(/run-id|github-token|repository:/);
+    // The tag alone from the bundle, and its commit checked by main's
+    // script before the key is written anywhere.
+    const checked = at("name: The release commit may be pushed onto main");
+    expect(checked).toBe(downloaded + 1);
+    expect(job[checked]).toContain('git bundle verify --quiet "$bundle"');
+    expect(job[checked]).toContain(
+      'git fetch --no-tags --quiet "$bundle" "refs/tags/$TAG:refs/tags/$TAG"',
+    );
+    expect(job[checked]).toMatch(/^ {10}npm run release:commit -- next "\$TAG"$/m);
+    const pushed = at("name: Push the release commit and its tag");
+    expect(pushed).toBe(checked + 1);
+    expect(job[pushed]).toMatch(
+      /^ {10}git push --atomic "\$REPOSITORY_URL" "\$sha:refs\/heads\/main" "refs\/tags\/\$TAG:refs\/tags\/\$TAG"$/m,
+    );
+    expect(job[pushed]).not.toMatch(/--force|\s-f\b|"\+/);
+    const keyed = job.filter((step) => step.includes("secrets.SEMANTIC_RELEASE_KEY"));
+    expect(keyed.map((step) => job.indexOf(step))).toEqual([
+      at("name: The deploy key is set"),
+      pushed,
+    ]);
+  });
+
+  // semantic-release, with no key and no token that can write, pushes to
+  // a bare copy that stands in for GitHub's URL, with https refused.
+  it("runs semantic-release in a job that holds no key, into a bare copy", () => {
+    const prepare = workflow.get("prepare") ?? "";
+    expect(prepare).toMatch(
+      /^ {4}permissions:\n {6}contents: read\n(?: {6}#.*\n)* {6}actions: read\n {4}outputs:$/m,
+    );
+    const job = steps(prepare, 6);
+    const at = (text: string) => job.findIndex((step) => step.includes(text));
+    expect(job[at("uses: actions/checkout@")]).toMatch(/^ {10}persist-credentials: false$/m);
     // The drawings of this run alone, which only the draw job uploads,
     // checked before semantic-release, whose archive draws nothing.
     const downloaded = at("uses: actions/download-artifact@");
@@ -163,12 +248,62 @@ describe("release.yml", () => {
     expect(job[checked]).toMatch(/^ {8}run: npm run docs:archive -- --drawn$/m);
     const released = at("name: npx semantic-release");
     expect(released).toBe(checked + 1);
-    const keyed = job.filter((step) => step.includes("secrets.SEMANTIC_RELEASE_KEY"));
-    expect(keyed.map((step) => job.indexOf(step))).toEqual([
-      at("name: The deploy key is set"),
-      released,
+    expect(job[released]).not.toMatch(/TOKEN|secrets\.|docs:archive/);
+    expect(job[released]).toMatch(
+      /^ {10}REPOSITORY_URL: https:\/\/github\.com\/\$\{\{ github\.repository \}\}\.git$/m,
+    );
+    const lines = job[released]!.split("\n").map((line) => line.trim());
+    const line = (text: string) => lines.indexOf(text);
+    expect(line('git clone --quiet --bare . "$copy"')).toBeGreaterThan(-1);
+    expect(line('git config "url.file://$copy.insteadOf" "$REPOSITORY_URL"')).toBe(
+      line('git clone --quiet --bare . "$copy"') + 1,
+    );
+    expect(line("git config protocol.https.allow never")).toBe(
+      line('git config "url.file://$copy.insteadOf" "$REPOSITORY_URL"') + 1,
+    );
+    expect(line('npx semantic-release --repository-url "$REPOSITORY_URL"')).toBe(
+      line("git config protocol.https.allow never") + 1,
+    );
+    const bundled = at("name: The release, as a bundle");
+    expect(bundled).toBe(released + 1);
+    expect(job[bundled]).toContain(
+      'git -C "$copy" bundle create "$RUNNER_TEMP/bundle/release.bundle" "refs/tags/$tag" "^$TIP"',
+    );
+    const uploads = job.slice(bundled + 1);
+    expect(uploads.map((step) => step.match(/^ {10}name: (\S+)$/m)?.[1])).toEqual([
+      "release-bundle",
+      "release-docs",
     ]);
-    expect(job[released]).not.toMatch(/docs:archive/);
+    expect(uploads[1]).toContain(`path: ${archivePath("${{ steps.released.outputs.version }}")}`);
+  });
+
+  // The release is made as a draft, which the deploy refuses, and
+  // published once its archive is attested and attached.
+  it("makes the GitHub release in a job that holds no key, from main's notes", () => {
+    const publish = workflow.get("publish") ?? "";
+    expect(code(publish)).not.toMatch(/npm ci|npx|\.\/\.github\/actions\//);
+    const job = steps(publish, 6);
+    const at = (text: string) => job.findIndex((step) => step.includes(text));
+    expect(job[at("uses: actions/checkout@")]).toMatch(/^ {10}persist-credentials: false$/m);
+    const notes = at("name: The release's notes");
+    expect(job[notes]).toMatch(/^ {10}npm run release:commit -- tag "\$TAG"$/m);
+    expect(job[notes]).toMatch(
+      /^ {10}npm run --silent release:commit -- notes "\$TAG" > "\$RUNNER_TEMP\/notes\.md"$/m,
+    );
+    const downloaded = at("uses: actions/download-artifact@");
+    expect(job[downloaded]).toMatch(/^ {10}name: release-docs$/m);
+    const attested = at("uses: actions/attest@");
+    expect(attested).toBe(downloaded + 1);
+    const made = at("name: Make the GitHub release");
+    expect(made).toBe(attested + 1);
+    const commands = job[made]!.split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith("gh "));
+    expect(commands).toEqual([
+      'gh release create "$TAG" --verify-tag --draft --title "Solid Memo $version" --notes-file "$RUNNER_TEMP/notes.md"',
+      `gh release upload "$TAG" "${archivePath("$version")}#Documentation $version (HTML)"`,
+      'gh release edit "$TAG" --draft=false --latest',
+    ]);
   });
 });
 
@@ -176,7 +311,7 @@ describe("release.yml", () => {
 // stay in main's history, so a release commit is told apart by
 // scripts/releaseCommit.ts, not by its subject (docs/releasing.md#when-a-release-fails).
 describe("the release commit's checks", () => {
-  const releaseJob = steps(workflow.get("release") ?? "", 6);
+  const releaseJob = steps(workflow.get("prepare") ?? "", 6);
   const version = steps(jobs(read(".github/workflows/deploy.yml")).get("version") ?? "", 6);
   const at = (job: string[], text: string) => job.findIndex((step) => step.includes(text));
 
@@ -213,8 +348,14 @@ describe("the release commit's checks", () => {
     expect(at(docs, "uses: actions/checkout@")).toBeLessThan(checked);
     expect(at(docs, "uses: actions/setup-node@")).toBeLessThan(checked);
     const switched = at(docs, "name: Check out the tag's commit");
-    expect(switched).toBe(checked + 1);
+    expect(switched).toBe(checked + 2);
     expect(docs[switched]).toContain("SHA: ${{ steps.commit.outputs.sha }}");
+    // A release made where there was none, by main's script, before
+    // anything of the tag's is checked out.
+    const made = at(docs, "name: Make the release as a draft");
+    expect(made).toBeGreaterThan(checked);
+    expect(made).toBeLessThan(switched);
+    expect(docs[made]).toMatch(/^if: steps\.release\.outputs\.made == 'false'$/m);
     expect(docs[switched + 1]).toContain("name: The version can archive its docs");
   });
 
@@ -352,8 +493,8 @@ describe("npm audit signatures", () => {
     expect(at(job, "uses: ./.github/actions/chromium")).toBe(installed + 2);
   });
 
-  it("runs right after the install in the release job, before semantic-release", () => {
-    const job = steps(workflow.get("release") ?? "", 6);
+  it("runs right after the install in the prepare job, before semantic-release", () => {
+    const job = steps(workflow.get("prepare") ?? "", 6);
     const installed = at(job, install);
     expect(installed).toBeGreaterThan(-1);
     const audited = job[installed + 1];
