@@ -267,7 +267,7 @@ function writtenTag(tag: string): string {
   return Intl.getCanonicalLocales(tag)[0]!;
 }
 
-/** How many tags' names (languageParts) an I18n keeps at most, before it names them afresh. */
+/** How many tags' names (languageParts) an I18n keeps at most: past it, the least recently used one goes. */
 const LANGUAGE_NAMES_KEPT = 10_000;
 
 /** The message that is the app's name: Solid Memo in every language, unless the site is given another (`appName`). */
@@ -336,14 +336,19 @@ export function createI18n(locale: Locale, appName?: string): I18n {
       : tag;
 
   // Each tag is named once: a screen names every language of a deck's cards each time it draws.
+  // A Map keeps its keys in the order set, so a name used is set again to
+  // be the latest, and a full cache drops the first: the least recently
+  // used, not every name at once.
   const named = new Map<string, LanguageParts>();
   const languageParts: I18n["languageParts"] = (tag) => {
     let parts = named.get(tag);
     if (parts === undefined) {
-      if (named.size >= LANGUAGE_NAMES_KEPT) named.clear();
+      if (named.size >= LANGUAGE_NAMES_KEPT) named.delete(named.keys().next().value!);
       parts = namedParts(tag);
-      named.set(tag, parts);
+    } else {
+      named.delete(tag);
     }
+    named.set(tag, parts);
     return parts;
   };
 

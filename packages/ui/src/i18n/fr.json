@@ -32,6 +32,11 @@
     "translationUnstated": "Traduction dont la langue n’est pas choisie",
     "remove": "Supprimer le texte en {language}",
     "removeUnstated": "Supprimer cette traduction",
+    "moreTranslations": {
+      "one": "Et {count} autre langue, qui n’apparaît pas ici et reste telle quelle.",
+      "many": "Et {count} de langues de plus, qui n’apparaissent pas ici et restent telles quelles.",
+      "other": "Et {count} autres langues, qui n’apparaissent pas ici et restent telles quelles."
+    },
     "field": {
       "deckName": "le nom du paquet",
       "description": "la description",

@@ -5,6 +5,7 @@
 import type { ComponentChildren } from "preact";
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { AppError } from "@solid-memo/domain/appError";
+import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
 import { shownTag, type LangText } from "@solid-memo/domain/langText";
 import { composing } from "./composing";
 import { ErrorMessage } from "./ErrorMessage";
@@ -150,6 +151,14 @@ export function useMissingLanguage(fieldId: string) {
  *
  * `arrival`: the screen was opened at this field (a link to it), so its
  * main text is where the user arrives (useScreenFocus).
+ *
+ * The translations are drawn only while their disclosure is open, and at
+ * most LANGUAGE_CHOICE_LIMIT of them: a text read from a pod or a release
+ * may be in any number of languages. A note says how many more there are;
+ * they stay in the draft, so saving keeps them as they are. With that many
+ * no translation is added. A translation still to get its language (one
+ * with none chosen, or saved with none) is always drawn, as is `missing`,
+ * so the user can give it one.
  */
 export function LangTextField({
   id,
@@ -212,6 +221,12 @@ export function LangTextField({
 
   const takenId = `${id}-taken`;
   const [main, ...translations] = draft;
+  /** A translation still to get its language, or the one asked for: drawn wherever it is. */
+  const needsLanguage = (entry: DraftEntry) =>
+    entry.tag === null || entry.tag === "" || entry.id === missing?.id;
+  let room = LANGUAGE_CHOICE_LIMIT - translations.filter(needsLanguage).length;
+  // The others in the room left, in the draft's order.
+  const drawn = translations.filter((entry) => needsLanguage(entry) || room-- > 0);
   const showTranslations = open || (missing !== undefined && missing.id !== main!.id);
   const name = (tag: string) => languageParts(tag).name;
   /** The id of an entry's text: the field's own for the main text, which its label names. */
@@ -245,8 +260,14 @@ export function LangTextField({
     change([...draft, entry]);
   }
 
+  /** Focus goes to the Add button, or, with none left to draw, to the next translation's picker. */
   function remove(entry: DraftEntry) {
-    focusNext.current = "add";
+    const at = drawn.indexOf(entry);
+    // With LANGUAGE_CHOICE_LIMIT left, more than one is drawn: there is a neighbor.
+    focusNext.current =
+      translations.length - 1 < LANGUAGE_CHOICE_LIMIT
+        ? "add"
+        : languageButtonId(id, (drawn[at + 1] ?? drawn[at - 1])!);
     change(draft.filter((e) => e !== entry));
   }
 
@@ -340,27 +361,38 @@ export function LangTextField({
         </button>,
       )}
       <div id={`${id}-translations`} class="translations" hidden={!showTranslations}>
-        {translations.map((entry) => {
-          const { tag } = entry;
-          return (
-            <div key={entry.id} class="translation">
-              {entryFields(
-                entry,
-                tag === null
-                  ? t("language.translationUnstated")
-                  : t("language.translationLabel", { language: name(tag) }),
-                <button type="button" onClick={() => remove(entry)} disabled={disabled}>
-                  {tag === null
-                    ? t("language.removeUnstated")
-                    : t("language.remove", { language: name(tag) })}
-                </button>,
-              )}
-            </div>
-          );
-        })}
-        <button ref={addRef} type="button" onClick={add} disabled={disabled}>
-          {t("language.add")}
-        </button>
+        {showTranslations && (
+          <>
+            {drawn.map((entry) => {
+              const { tag } = entry;
+              return (
+                <div key={entry.id} class="translation">
+                  {entryFields(
+                    entry,
+                    tag === null
+                      ? t("language.translationUnstated")
+                      : t("language.translationLabel", { language: name(tag) }),
+                    <button type="button" onClick={() => remove(entry)} disabled={disabled}>
+                      {tag === null
+                        ? t("language.removeUnstated")
+                        : t("language.remove", { language: name(tag) })}
+                    </button>,
+                  )}
+                </div>
+              );
+            })}
+            {translations.length > drawn.length && (
+              <p class="hint">
+                {t("language.moreTranslations", { count: translations.length - drawn.length })}
+              </p>
+            )}
+            {translations.length < LANGUAGE_CHOICE_LIMIT && (
+              <button ref={addRef} type="button" onClick={add} disabled={disabled}>
+                {t("language.add")}
+              </button>
+            )}
+          </>
+        )}
       </div>
       <ErrorMessage id={takenId} error={errorText(taken?.error)} />
     </div>

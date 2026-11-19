@@ -32,6 +32,10 @@
     "translationUnstated": "Translation, its language not chosen",
     "remove": "Remove the {language} text",
     "removeUnstated": "Remove this translation",
+    "moreTranslations": {
+      "one": "And {count} more language, not shown here, kept as it is.",
+      "other": "And {count} more languages, not shown here, kept as they are."
+    },
     "field": {
       "deckName": "the deck's name",
       "description": "the description",
