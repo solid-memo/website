@@ -285,11 +285,7 @@ describe("reflow", () => {
       `<div class="instance-bar-identity"><span class="hint">x</span></div>`,
       "span",
     ],
-    [
-      "a storage's address",
-      `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`,
-      "span",
-    ],
+    ["a storage's address", `<ul class="storage-list"><li><button>x</button></li></ul>`, "button"],
     [
       "an instance's address",
       `<ul class="instance-list"><li><span class="hint">x</span></li></ul>`,
@@ -313,11 +309,7 @@ describe("reflow", () => {
       `<div class="deck-group-header"><button class="group-toggle"><span class="group-name">x</span></button></div>`,
       "span",
     ],
-    [
-      "a storage's address",
-      `<ul class="storage-list"><li><span class="hint">x</span></li></ul>`,
-      "span",
-    ],
+    ["a storage's address", `<ul class="storage-list"><li><button>x</button></li></ul>`, "button"],
   ])("breaks %s anywhere, so a long WebID or name fits the width", (_, html, selector) => {
     expect(styled(html, selector).overflowWrap).toBe("anywhere");
   });
