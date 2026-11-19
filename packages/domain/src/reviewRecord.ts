@@ -10,7 +10,7 @@ import type { Deck } from "./deck";
 import { isCardsDocumentOf } from "./deckUpgrade";
 import { boundedFsrsMemory } from "./fsrsSnapshot";
 import { boundedSm2State } from "./sm2";
-import { pathKeys } from "./pathKeys";
+import { isIriPastBound, pathKeys } from "./pathKeys";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
 
 /**
@@ -84,9 +84,12 @@ export type ReviewedDeck = Pick<Deck, "id" | "cardsDocumentUrl">;
  * (isCardsDocumentOf): the card is its fragment either way. Null when
  * the state is not one this app schedules as SM-2: one of another
  * scheduler (kept, never read as SM-2), one of a card outside the deck,
- * one whose direction is not front to back or back to front, or one at a
+ * one whose direction is not front to back or back to front, one at a
  * subject named as an FSRS-6 state's (`…@fsrs6`) that does not name both
- * its card and its direction, as the fragment rule names no card there.
+ * its card and its direction, as the fragment rule names no card there,
+ * or one of a card whose IRI in the deck's cards document is longer than
+ * a term may be (cardIn): no card of the deck has that id, and the
+ * state could not be written back.
  */
 export function reviewKeyOfSubject(
   subjectUrl: string,
@@ -97,7 +100,8 @@ export function reviewKeyOfSubject(
   const fragment = fragmentIdOf(subjectUrl);
   if (fragment.endsWith(FSRS6_SUFFIX) && !named(links)) return null;
   const byName = reviewKeyOf(fragment);
-  const cardId = links.reviewOf === undefined ? byName.cardId : cardOf(links.reviewOf, deck);
+  const cardId =
+    links.reviewOf === undefined ? cardIn(byName.cardId, deck) : cardOf(links.reviewOf, deck);
   if (cardId === null) return null;
   if (links.direction === undefined) return { cardId, direction: byName.direction };
   const direction = directionOf(links.direction);
@@ -109,11 +113,30 @@ function named(links: ReviewLinks): links is ReviewLinks & { reviewOf: string; d
   return links.reviewOf !== undefined && links.direction !== undefined;
 }
 
-/** The card sm:reviewOf names: its fragment, when it is in the deck's cards document (isCardsDocumentOf); else null. */
+/**
+ * The card sm:reviewOf names: its fragment, when it is in the deck's
+ * cards document (isCardsDocumentOf) and is a card there (cardIn); else
+ * null.
+ */
 function cardOf(reviewOf: string, deck: ReviewedDeck): string | null {
   return reviewOf.includes("#") && isCardsDocumentOf(documentUrlOf(reviewOf), deck)
-    ? fragmentIdOf(reviewOf)
+    ? cardIn(fragmentIdOf(reviewOf), deck)
     : null;
+}
+
+/** The IRI of a card of the deck's cards document: what a state's record names it by (sm:reviewOf). */
+const cardIriOf = (cardsDocumentUrl: string, cardId: string) => `${cardsDocumentUrl}#${cardId}`;
+
+/**
+ * The card id, when its IRI in the deck's cards document fits a term
+ * (isIriPastBound); else null. A longer one is no card of the deck, and
+ * a state of it is read as no state of the deck, left as it is: writing
+ * it back, as a format update or a switch of schedulers does, would
+ * name the card by a term no write takes. The subject, and an older
+ * cards document's IRI, can be shorter than that IRI.
+ */
+function cardIn(cardId: string, deck: ReviewedDeck): string | null {
+  return isIriPastBound(cardIriOf(deck.cardsDocumentUrl, cardId)) ? null : cardId;
 }
 
 /** The direction sm:reviewDirection names; null for a concept that is neither front to back nor back to front. */
@@ -247,7 +270,7 @@ export function reviewStateToRecord(state: ReviewState, cardsDocumentUrl: string
           previousDue: state.previous.due,
           previousLastReviewedAt: state.previous.lastReviewedAt,
         }),
-    reviewOf: `${cardsDocumentUrl}#${state.cardId}`,
+    reviewOf: cardIriOf(cardsDocumentUrl, state.cardId),
     direction: conceptOfDirection(state.direction) as NonNullable<ReviewStateV2["direction"]>,
     scheduler: SM2_SCHEDULER,
   };
@@ -304,7 +327,7 @@ export function fsrsReviewStateToRecord(
   cardsDocumentUrl: string,
 ): FsrsReviewStateV1 {
   return {
-    reviewOf: `${cardsDocumentUrl}#${state.cardId}`,
+    reviewOf: cardIriOf(cardsDocumentUrl, state.cardId),
     direction: conceptOfDirection(state.direction) as FsrsReviewStateV1["direction"],
     stability: state.stability,
     difficulty: state.difficulty,
