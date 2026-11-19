@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [7.9.3](https://github.com/solid-memo/website/compare/v7.9.2...v7.9.3) (2026-11-19)
+
+### Fixes
+
+* **solid:** refuse a deck export of IRIs that read back as other terms ([04ca6c8](https://github.com/solid-memo/website/commit/04ca6c869cb87533fb5cbdb9d562591e4b2dcfb0))
+
 ## [7.9.2](https://github.com/solid-memo/website/compare/v7.9.1...v7.9.2) (2026-11-18)
 
 ### Fixes
