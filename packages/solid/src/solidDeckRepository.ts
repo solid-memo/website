@@ -13,6 +13,7 @@ import {
   getUrlAll,
   setThing,
 } from "./client/rdf";
+import type { Catalog } from "@solid-memo/domain/catalog";
 import type { LangText } from "@solid-memo/domain/langText";
 import { copyKeywords, noKeywords, type LangTexts } from "@solid-memo/domain/keywords";
 import type { CardChangeOptions, CardChanges, DeckRepository } from "@solid-memo/application/ports";
@@ -163,6 +164,17 @@ export function createSolidDeckRepository({
 }: SolidDeckRepositoryDeps): DeckRepository {
   const guard = createDeckDocumentGuard(fetch, userStorages);
 
+  /** The catalog document as saveCatalog writes it, and the subjects it writes; nothing is sent. */
+  async function catalogWrite(instanceUrl: string, catalog: Catalog) {
+    const catalogUrl = catalogUrlOf(instanceUrl);
+    const read = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
+    return {
+      catalogUrl,
+      dataset: withCatalog(read, catalogUrl, catalog),
+      subjects: [`${catalogUrl}#catalog`, catalog.publisher.webId],
+    };
+  }
+
   /** Save a document once the subjects the write touched are checked. */
   async function save(
     url: string,
@@ -261,12 +273,13 @@ export function createSolidDeckRepository({
     },
 
     async saveCatalog(instanceUrl, catalog) {
-      const catalogUrl = catalogUrlOf(instanceUrl);
-      const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-      await save(catalogUrl, withCatalog(dataset, catalogUrl, catalog), [
-        `${catalogUrl}#catalog`,
-        catalog.publisher.webId,
-      ]);
+      const { catalogUrl, dataset, subjects } = await catalogWrite(instanceUrl, catalog);
+      await save(catalogUrl, dataset, subjects);
+    },
+
+    async checkCatalogSave(instanceUrl, catalog) {
+      const { dataset, subjects } = await catalogWrite(instanceUrl, catalog);
+      await checkWrite(dataset, subjects, "pod");
     },
 
     async upgradeDecks(instanceUrl, catalog) {

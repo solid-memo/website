@@ -702,6 +702,37 @@ describe("readCatalog and saveCatalog", () => {
       ),
     ).toEqual([deck.url]);
   });
+
+  it("checkCatalogSave checks the catalog as saveCatalog would write it, and writes nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    await makeRepository(checkWrite).checkCatalogSave(INSTANCE, catalog);
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      [`${CATALOG}#catalog`, catalog.publisher.webId],
+      "pod",
+    );
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("checkCatalogSave refuses a catalog a newer version of the app wrote, as saveCatalog would, though it reads", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().saveCatalog(INSTANCE, catalog);
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    vi.mocked(writeDocument).mockClear();
+    const node = getThing(saved, `${CATALOG}#catalog`)!;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(saved, buildThing(node).setInteger(SM.formatVersion, 2).build()) as never,
+    );
+    await expect(makeRepository().readCatalog(INSTANCE)).resolves.toEqual(catalog);
+    await expect(makeRepository().checkCatalogSave(INSTANCE, catalog)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    await expect(makeRepository().saveCatalog(INSTANCE, catalog)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
 });
 
 describe("upgradeDecks", () => {

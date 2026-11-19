@@ -1333,7 +1333,10 @@ catalog or a group is set aside ([below](#data-set-aside)).
 
 The meta document and catalog writes pass the shape check; the type
 index renames are If-Match writes only. Each write is made again from
-a fresh read on a 412, three times in all. The
+a fresh read on a 412, three times in all. A rename checks the
+catalog's write before writing anything: when a newer version of the app
+wrote the catalog, it's refused (`writtenByNewerApp`) with nothing
+written, and the name stays as it was in every document. The
 end-to-end tests hold these edits against real servers
 ([metadata.integration.test.ts](../e2e/pod/src/metadata.integration.test.ts)).
 

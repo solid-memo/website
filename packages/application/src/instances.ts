@@ -127,7 +127,9 @@ export interface InstanceUseCases {
    * the instance list, and those of its data's classes earlier versions
    * wrote. Each write is made of its document as it is then, and made
    * again from a fresh read when it changed meanwhile, three times in
-   * all. The instance as renamed.
+   * all. The catalog's write is checked before anything is written: one it would
+   * refuse (writtenByNewerApp, when a newer version of the app wrote the
+   * catalog) is refused with nothing written. The instance as renamed.
    */
   renameInstance(session: Session, instance: Instance, name: string): Promise<Instance>;
   /**
@@ -332,6 +334,13 @@ export function createInstanceUseCases({
     }
     return work;
   }
+  /** The instance's catalog named `name`, when it has one to rename; null when there is none, or it is named so. */
+  async function catalogRenamed(instanceUrl: string, name: string): Promise<Catalog | null> {
+    const catalog = await deckRepository.readCatalog(instanceUrl);
+    // One that does not fit its shape is left as it is: a write would replace what it says.
+    if (catalog === null || catalog === "misfit" || catalog.title === name) return null;
+    return renamedCatalog(catalog, name);
+  }
   async function createInstance(
     session: Session,
     {
@@ -416,16 +425,17 @@ export function createInstanceUseCases({
     },
     async renameInstance(session, instance, typed) {
       const name = instanceName(typed);
+      // The catalog checked before the record is written: one it would refuse (a newer version of the app wrote it) leaves the name as it was everywhere.
+      const checked = await catalogRenamed(instance.url, name);
+      if (checked !== null) await deckRepository.checkCatalogSave(instance.url, checked);
       await again(async () => {
         const meta = await instanceRepository.readMeta(instance.url);
         if (meta === null) throw new AppError("noMetaToUpdate", { url: instance.url });
         if (meta.name !== name) await instanceRepository.saveMeta(instance.url, { ...meta, name });
       });
       await again(async () => {
-        const catalog = await deckRepository.readCatalog(instance.url);
-        // One that does not fit its shape is left as it is: a write would replace what it says.
-        if (catalog !== null && catalog !== "misfit" && catalog.title !== name)
-          await deckRepository.saveCatalog(instance.url, renamedCatalog(catalog, name));
+        const catalog = await catalogRenamed(instance.url, name);
+        if (catalog !== null) await deckRepository.saveCatalog(instance.url, catalog);
       });
       await instanceRepository.renameRegistrations({
         webId: session.webId,
