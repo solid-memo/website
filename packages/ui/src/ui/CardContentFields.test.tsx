@@ -76,6 +76,30 @@ describe("switching Markdown", () => {
     expect(stillReadOtherwise(translationRemoved)).toBeUndefined();
   });
 
+  it("reads each text's entries once, however many languages it is in", () => {
+    const count = LANGUAGE_CHOICE_LIMIT + 5;
+    let reads = 0;
+    /** A translation that counts how often its id is read. */
+    const entry = (id: number) => ({
+      get id() {
+        reads += 1;
+        return id;
+      },
+      value: "*x*",
+      tag: `sv-${id}`,
+    });
+    const draft = written("a", "b", false);
+    const many = {
+      ...draft,
+      front: [draft.front[0]!, ...Array.from({ length: count }, (_, i) => entry(i + 1))],
+    };
+    const on = switchMarkdown(many, true);
+    expect(on.readOtherwise).toHaveLength(count);
+    reads = 0;
+    expect(stillReadOtherwise(on)).toBe("translation");
+    expect(reads).toBeLessThanOrEqual(count);
+  });
+
   it("says nothing of Markdown typed after it was switched on", () => {
     const on = switchMarkdown(written("a", "b", false), true);
     expect(on.readOtherwise).toEqual([]);

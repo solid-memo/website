@@ -5,6 +5,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/preact";
 import { useState } from "preact/hooks";
+import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { Locale } from "@solid-memo/domain/locale";
 import { I18nProvider } from "./i18n";
@@ -15,6 +16,7 @@ import {
   rememberLanguages,
   textOfDraft,
   useMissingLanguage,
+  type DraftEntry,
   type LangTextDraft,
 } from "./LangTextField";
 import { recentLanguages } from "./remembered";
@@ -323,6 +325,102 @@ describe("LangTextField", () => {
     expect(screen.getByLabelText("Text in Swedish")).toBeVisible();
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("draws no translation while they are folded away", () => {
+    renderField({ initial: draftOf({ en: "Capitals", sv: "Huvudstäder" }, ["en"]) });
+    expect(screen.queryByLabelText("Text in Swedish", { selector: "input" })).toBeNull();
+    expect(document.querySelectorAll("#name-translations *")).toHaveLength(0);
+  });
+
+  it("draws at most LANGUAGE_CHOICE_LIMIT translations, saying how many more it keeps as they are", () => {
+    const more = 5;
+    const tag = (i: number) => `sv-${String(i).padStart(5, "0")}`;
+    /** A text in more languages than the field draws: Capitals in English, then sv-00000 on. */
+    const many: LangText = {
+      en: "Capitals",
+      ...Object.fromEntries(
+        Array.from({ length: LANGUAGE_CHOICE_LIMIT + more }, (_, i) => [tag(i), `x${i}`]),
+      ),
+    };
+    const { text } = renderField({ initial: draftOf(many, ["en"]), translationsOpen: true });
+    expect(
+      screen.getByRole("button", { name: `Translations (${LANGUAGE_CHOICE_LIMIT + more})` }),
+    ).toBeInTheDocument();
+    expect(document.querySelectorAll("#name-translations .translation")).toHaveLength(
+      LANGUAGE_CHOICE_LIMIT,
+    );
+    expect(
+      screen.getByText(`And ${more} more languages, not shown here, kept as they are.`),
+    ).toBeInTheDocument();
+    // With that many, it adds none.
+    expect(screen.queryByRole("button", { name: "Add a translation" })).toBeNull();
+    // Editing one keeps every other, drawn or not.
+    fireEvent.input(document.getElementById("name-1")!, { target: { value: "y0" } });
+    expect(text()).toEqual({ ...many, [tag(0)]: "y0" });
+  });
+
+  it("draws the text whose language it asks for, though past the translations it draws", () => {
+    const initial: LangTextDraft = [
+      { id: 0, value: "Capitals", tag: "en" },
+      ...Array.from({ length: LANGUAGE_CHOICE_LIMIT + 1 }, (_, i) => ({
+        id: i + 1,
+        value: `x${i}`,
+        tag: `sv-${i}`,
+      })),
+      { id: LANGUAGE_CHOICE_LIMIT + 2, value: "y", tag: "de" },
+    ];
+    renderField({ initial, missingId: LANGUAGE_CHOICE_LIMIT + 2 });
+    expect(document.querySelectorAll("#name-translations .translation")).toHaveLength(
+      LANGUAGE_CHOICE_LIMIT,
+    );
+    expect(document.getElementById(languageButtonId("name", initial.at(-1)!))).toBeInTheDocument();
+    expect(
+      screen.getByText("And 2 more languages, not shown here, kept as they are."),
+    ).toBeInTheDocument();
+  });
+
+  it("draws a text saved with no language first, though past the translations it draws", () => {
+    const untagged: DraftEntry = { id: LANGUAGE_CHOICE_LIMIT + 2, value: "y", tag: "" };
+    const initial: LangTextDraft = [
+      { id: 0, value: "Capitals", tag: "en" },
+      ...Array.from({ length: LANGUAGE_CHOICE_LIMIT + 1 }, (_, i) => ({
+        id: i + 1,
+        value: `x${i}`,
+        tag: `sv-${i}`,
+      })),
+      untagged,
+    ];
+    renderField({ initial, translationsOpen: true });
+    const drawn = document.querySelectorAll("#name-translations .translation");
+    expect(drawn).toHaveLength(LANGUAGE_CHOICE_LIMIT);
+    // In the draft's order: the last one drawn, the others making room for it.
+    expect(drawn[drawn.length - 1]).toContainElement(
+      document.getElementById(languageButtonId("name", untagged)),
+    );
+  });
+
+  it("moves focus to the next translation once one is removed, with no Add button", () => {
+    const initial: LangTextDraft = [
+      { id: 0, value: "Capitals", tag: "en" },
+      ...Array.from({ length: LANGUAGE_CHOICE_LIMIT + 2 }, (_, i) => ({
+        id: i + 1,
+        value: `x${i}`,
+        tag: `sv-${i}`,
+      })),
+    ];
+    renderField({ initial, translationsOpen: true });
+    fireEvent.click(screen.getAllByRole("button", { name: /^Remove/ })[0]!);
+    expect(screen.queryByRole("button", { name: "Add a translation" })).toBeNull();
+    expect(document.getElementById(languageButtonId("name", initial[2]!))).toHaveFocus();
+    // The last one drawn removed, focus goes back to the one before it.
+    const removes = screen.getAllByRole("button", { name: /^Remove/ });
+    fireEvent.click(removes.at(-1)!);
+    const drawn = document.querySelectorAll("#name-translations .translation");
+    expect(drawn).toHaveLength(LANGUAGE_CHOICE_LIMIT);
+    expect(
+      document.getElementById(languageButtonId("name", initial[LANGUAGE_CHOICE_LIMIT]!)),
+    ).toHaveFocus();
   });
 
   it("shows the same words in English and another language as a translation, edited on its own", () => {

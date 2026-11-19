@@ -32,6 +32,11 @@
     "translationUnstated": "Traducción sin idioma elegido",
     "remove": "Quitar el texto en {language}",
     "removeUnstated": "Quitar esta traducción",
+    "moreTranslations": {
+      "one": "Y {count} idioma más, que no aparece aquí y se conserva tal cual.",
+      "many": "Y {count} de idiomas más, que no aparecen aquí y se conservan tal cual.",
+      "other": "Y {count} idiomas más, que no aparecen aquí y se conservan tal cual."
+    },
     "field": {
       "deckName": "el nombre del mazo",
       "description": "la descripción",

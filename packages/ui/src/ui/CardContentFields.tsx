@@ -339,8 +339,18 @@ export function switchMarkdown(draft: CardDraft, on: boolean): CardDraft {
  * not; or nowhere, once each is changed, or Markdown switched off.
  */
 export function stillReadOtherwise(draft: CardDraft): "main" | "translation" | undefined {
-  const unchanged = draft.readOtherwise.filter(({ part, id, value }) =>
-    draft[part].some((entry) => entry.id === id && entry.value === value),
+  /** Each part's values by entry id, read once: a text may be in any number of languages. */
+  const values = new Map<CardTextPart, Map<number, string>>();
+  const valueAt = (part: CardTextPart, id: number) => {
+    let ids = values.get(part);
+    if (ids === undefined) {
+      ids = new Map(draft[part].map((entry) => [entry.id, entry.value]));
+      values.set(part, ids);
+    }
+    return ids.get(id);
+  };
+  const unchanged = draft.readOtherwise.filter(
+    ({ part, id, value }) => valueAt(part, id) === value,
   );
   if (unchanged.some(({ part, id }) => draft[part][0]!.id === id)) return "main";
   return unchanged.length > 0 ? "translation" : undefined;

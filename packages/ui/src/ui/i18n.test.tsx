@@ -250,6 +250,31 @@ describe("createI18n", () => {
     }
   });
 
+  it("past the names it keeps, forgets the least recently used one, not every name", () => {
+    const supported = vi.spyOn(Intl.DisplayNames, "supportedLocalesOf");
+    try {
+      const en = createI18n("en");
+      const namings = (tag: string) =>
+        supported.mock.calls.filter(([tags]) => String(tags) === tag).length;
+      const tag = (i: number) => `de-v${String(i).padStart(5, "0")}`;
+      // More tags than it keeps, "sv" asked for now and then among them.
+      for (let i = 0; i < 12_000; i++) {
+        en.languageParts(tag(i));
+        if (i % 1_000 === 0) en.languageParts("sv");
+      }
+      expect(namings("sv")).toBe(1);
+      // The latest tags are still named; the first were forgotten.
+      en.languageParts(tag(11_999));
+      en.languageParts(tag(3_000));
+      expect(namings(tag(11_999))).toBe(1);
+      expect(namings(tag(3_000))).toBe(1);
+      en.languageParts(tag(0));
+      expect(namings(tag(0))).toBe(2);
+    } finally {
+      supported.mockRestore();
+    }
+  });
+
   it("names no language as such, not by its code", () => {
     expect(createI18n("en").languageLabel("zxx")).toBe("No language (codes, numbers, symbols)");
     expect(createI18n("sv").languageParts("zxx")).toEqual({

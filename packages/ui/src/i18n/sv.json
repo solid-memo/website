@@ -32,6 +32,10 @@
     "translationUnstated": "Översättning, språket inte valt",
     "remove": "Ta bort texten på {language}",
     "removeUnstated": "Ta bort den här översättningen",
+    "moreTranslations": {
+      "one": "Och {count} språk till, som inte visas här och sparas som det är.",
+      "other": "Och {count} språk till, som inte visas här och sparas som de är."
+    },
     "field": {
       "deckName": "kortlekens namn",
       "description": "beskrivningen",

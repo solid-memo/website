@@ -32,6 +32,10 @@
     "translationUnstated": "Übersetzung, Sprache nicht gewählt",
     "remove": "Text auf {language} entfernen",
     "removeUnstated": "Diese Übersetzung entfernen",
+    "moreTranslations": {
+      "one": "Und {count} weitere Sprache, die hier nicht angezeigt und unverändert behalten wird.",
+      "other": "Und {count} weitere Sprachen, die hier nicht angezeigt und unverändert behalten werden."
+    },
     "field": {
       "deckName": "den Namen des Stapels",
       "description": "die Beschreibung",
