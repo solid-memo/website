@@ -66,7 +66,7 @@ bug, needs no issue.
 ## Making a change
 
 1. Fork the repository and create a branch from `main`.
-2. Set up as the [README](README.md#develop) says: Node 24 and npm, with
+2. Set up as the [README](README.md#develop) says: Node 26 and npm, with
    Docker for the end-to-end tests. The
    [dev container](.devcontainer/devcontainer.json) has everything.
    Run `npm ci`, and `npm run browsers` once: `npm run check` and

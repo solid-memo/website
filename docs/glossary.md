@@ -262,7 +262,7 @@ status.
   ports, which adapters connect outside; each part can be replaced or
   tested alone. `architecture.md`.
 - **Node.js**: runs JavaScript outside the browser; the site is built
-  and tested with version 24 (`.nvmrc`).
+  and tested with version 26 (`.nvmrc`).
   [nodejs.org](https://nodejs.org/);
   [README](../README.md#develop).
 - **npm**: Node.js's package manager, installing dependencies and
