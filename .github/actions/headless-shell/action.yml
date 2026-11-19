@@ -15,7 +15,7 @@
 # (renovate.json5), after checking that the zip is the same file as
 # Chrome for Testing's own download. `npm run check:shell` fails until
 # the version, the revision and the hash here are the installed
-# playwright-core's, and release.yml's docs job, which downloads the
+# playwright-core's, and release.yml's docs-render job, which downloads the
 # shell with a step of its own, is this step, but for its if. The
 # check with sha256sum fails the step, under set -e, before the zip is
 # unpacked, which check:shell holds both copies to. The hash is Linux

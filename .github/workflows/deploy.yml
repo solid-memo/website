@@ -32,6 +32,12 @@ permissions:
   # To download the user journeys' report from the CI run.
   actions: read
 
+# No job may read or write GitHub's cache: the build restores nothing
+# from it, and runs packages that in a run on main could otherwise write
+# main's cache entries for another job to restore
+# (docs/deployment.md#the-build-ci-tested).
+cache-mode: none
+
 # A deploy waiting its turn is replaced by a newer one in its group. Only
 # a run that may deploy (one by hand, or one after CI on a release
 # commit) shares the group pages, so a newer run that deploys nothing
@@ -159,10 +165,10 @@ jobs:
       contents: read
       # To download the site from the CI run on the release commit.
       actions: read
-      # To check the site's attestation (gh attestation verify).
+      # To check the site's attestation (gh attestation verify). No
+      # pages: write: this job installs packages and runs the build, so
+      # GitHub Pages is set up in the deploy job, which loads none.
       attestations: read
-      # To set up GitHub Pages, before the artifact is uploaded.
-      pages: write
     # A run by hand checks and builds first, with no Turbo cache: as long
     # as CI's check and site jobs, with room for Ubuntu's mirror to stall
     # (actions/playwright-deps gives each apt-get four tries of three
@@ -281,9 +287,6 @@ jobs:
           test -f apps/web/dist/docs/index.html
           && test -f apps/web/dist/docs/diagrams/OFL-Fredoka.txt
           && compgen -G 'apps/web/dist/docs/diagrams/*.svg' > /dev/null; }; }
-      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: apps/web/dist
@@ -321,6 +324,11 @@ jobs:
             echo "::error::$TAG is no longer the newest version on main ($newest is), so the site is not deployed (docs/deployment.md)."
             exit 1
           fi
+      # GitHub Pages set up here, not in the build job, which loads the
+      # packages: only this job's token can write Pages.
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+        with:
+          enablement: true
       - id: deployment
         uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
 

@@ -2,7 +2,18 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { readFileSync } from "node:fs";
+import { execFileSync, spawnSync } from "node:child_process";
+import {
+  appendFileSync,
+  linkSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { archivePath } from "./docsArchive.ts";
@@ -10,9 +21,10 @@ import { archivePath } from "./docsArchive.ts";
 /**
  * The release workflow's jobs restore nothing from GitHub's cache
  * (docs/releasing.md#the-deploy-key): what the prepare job makes is
- * pushed with the deploy key, the docs job attests what it renders, and
- * any job on main can write main's cache entries. Nor do the jobs that
- * build the site that is deployed (docs/deployment.md#the-build-ci-tested):
+ * pushed with the deploy key, what the docs-render job renders is
+ * attested, and any job on main can write main's cache entries. Nor do
+ * the jobs that build the site that is deployed
+ * (docs/deployment.md#the-build-ci-tested):
  * ci.yml's site job and deploy.yml's build job. And the deploy ships
  * CI's site only once its files match the site job's attestation, which
  * no other job of a run can make. ci.yml's check job and the release
@@ -25,7 +37,12 @@ import { archivePath } from "./docsArchive.ts";
  * semantic-release runs in the prepare job, which holds no key and no
  * token that can write, and pushes only to a bare copy of its checkout.
  * A push run releases only while the merge queue is empty, which a job
- * that holds nothing asks (docs/releasing.md#what-a-release-does).
+ * that holds nothing asks (docs/releasing.md#what-a-release-does). No
+ * job of the release and deploy workflows that can write the
+ * repository, attest or deploy installs or loads a package: the docs
+ * of a tag run by hand are rendered in a job that
+ * can only read, and attested and attached in one that loads none
+ * (docs/releasing.md#when-a-release-fails).
  */
 
 const ROOT = join(import.meta.dirname, "..");
@@ -59,9 +76,31 @@ function code(job: string): string {
     .join("\n");
 }
 
+describe("GitHub's cache", () => {
+  // Neither workflow touches the cache: a run on main could otherwise
+  // write main's entries from a job that runs packages
+  // (docs/releasing.md#the-deploy-key).
+  it.each([".github/workflows/release.yml", ".github/workflows/deploy.yml"])(
+    "is closed to every job of %s",
+    (path) => {
+      const yaml = read(path);
+      expect(yaml).toMatch(/^cache-mode: none$/m);
+      expect(code(yaml).match(/^ +cache-mode:/gm)).toBeNull();
+    },
+  );
+});
+
 describe("release.yml", () => {
-  it("has the queue, draw, prepare, push, publish and docs jobs", () => {
-    expect([...workflow.keys()]).toEqual(["queue", "prepare", "push", "publish", "docs"]);
+  it("has the queue, prepare, push, publish and three docs jobs", () => {
+    expect([...workflow.keys()]).toEqual([
+      "queue",
+      "prepare",
+      "push",
+      "publish",
+      "docs-release",
+      "docs-render",
+      "docs-publish",
+    ]);
   });
 
   // Each job asks for what it needs; only the push job holds the key.
@@ -139,18 +178,18 @@ describe("release.yml", () => {
     for (const step of local) expect(step).toMatch(/^\s+with:\n\s+cache: false$/m);
   });
 
-  // A local action is the checkout's, and the docs job checks out the
-  // tag's commit, whose copy of an action may restore from the cache.
-  it("runs no local action in the docs job, which checks out the tag's commit", () => {
-    const docs = steps(workflow.get("docs") ?? "", 6);
-    expect(docs.some((step) => step.includes('git checkout --quiet --detach "$SHA"'))).toBe(true);
+  // A local action is the checkout's, and the docs-render job checks out
+  // the tag's commit, whose copy of an action may restore from the cache.
+  it("runs no local action in the docs-render job, which checks out the tag's commit", () => {
+    const docs = steps(workflow.get("docs-render") ?? "", 6);
+    expect(docs[0]).toMatch(/^ {10}ref: \$\{\{ needs\.docs-release\.outputs\.sha \}\}$/m);
     expect(docs.filter((step) => /uses:\s*\.\//.test(step))).toEqual([]);
     // The shell from its own download, checked against the pinned
     // SHA-256 (npm run check:shell), and only the libraries from
     // Playwright, which takes them from Ubuntu's signed mirror.
     const installs = docs.filter((step) => step.includes("npx playwright install"));
     expect(installs).toHaveLength(1);
-    expect(installs[0]).toMatch(/^ {8}run: npx playwright install-deps chromium$/m);
+    expect(installs[0]).toMatch(/^run: npx playwright install-deps chromium$/m);
     expect(installs[0]).not.toMatch(/playwright install(?!-deps)/);
     const shell = docs.findIndex((step) => step.includes("sha256sum -c -"));
     expect(docs[shell]).toMatch(/^ {10}CHROMIUM_HEADLESS_SHELL_SHA256: [0-9a-f]{64}$/m);
@@ -275,6 +314,162 @@ describe("release.yml", () => {
       'gh release edit "$TAG" --draft=false --latest',
     ]);
   });
+
+  // A job gets its token's permissions, and the means to sign as this
+  // workflow, when it starts, so every step of it can use them: the
+  // tag's packages, and the build that loads them, run only where the
+  // token can read alone.
+  it("renders a tag's docs in a job that can only read, with nothing to attest with", () => {
+    const render = workflow.get("docs-render") ?? "";
+    expect(render).toMatch(/^ {4}permissions:\n {6}contents: read\n {4}outputs:$/m);
+    expect(code(render)).not.toMatch(/id-token|attestations|actions\/attest|secrets\.|GH_TOKEN/);
+    const job = steps(render, 6);
+    const at = (text: string) => job.findIndex((step) => step.includes(text));
+    expect(job[0]).toMatch(/^ {10}persist-credentials: false$/m);
+    const archived = at("name: npm run docs:archive");
+    expect(job[archived]).toContain(
+      "sha256sum \"release-assets/docs-$VERSION.tar.gz\" | cut -d ' ' -f 1",
+    );
+    expect(job[archived + 1]).toMatch(/uses: actions\/upload-artifact@/);
+    expect(job[archived + 1]).toMatch(/^ {10}name: release-docs$/m);
+    expect(job[archived + 1]).toContain(
+      `path: ${archivePath("${{ needs.docs-release.outputs.version }}")}`,
+    );
+  });
+
+  // What docs-render made is the tag's packages' output: the job that
+  // attests and attaches it takes it as one regular file of the
+  // version's name, with the SHA-256 docs-render stated, and runs
+  // nothing of it.
+  it("attests and attaches a tag's docs in a job that checks out nothing and loads no package", () => {
+    const publish = workflow.get("docs-publish") ?? "";
+    expect(publish).toMatch(/^ {4}needs: \[docs-release, docs-render\]$/m);
+    const job = steps(publish, 6);
+    expect(job.map((step) => step.match(/uses: ([^@\s]+)/)?.[1]).filter(Boolean)).toEqual([
+      "actions/download-artifact",
+      "actions/attest",
+    ]);
+    expect(code(publish)).not.toMatch(/npm|npx|node |checkout|\.\/\.github\/actions\//);
+    const at = (text: string) => job.findIndex((step) => step.includes(text));
+    expect(at("name: The archive was rendered, if the release needs it")).toBe(0);
+    const downloaded = at("uses: actions/download-artifact@");
+    expect(job[downloaded]).toMatch(/^ {10}name: release-docs$/m);
+    expect(job[downloaded]).toMatch(/^ {10}path: \$\{\{ runner\.temp \}\}\/docs$/m);
+    expect(job[downloaded]).not.toMatch(/run-id|github-token|repository:/);
+    const checked = at("name: The archive is the version's, as docs-render made it");
+    expect(checked).toBe(downloaded + 1);
+    expect(job[checked]).toContain("SHA256: ${{ needs.docs-render.outputs.sha256 }}");
+    expect(job[checked]).toContain(
+      'if [ "$found" != "./$name" ] || [ -L "$name" ] || [ ! -f "$name" ]; then',
+    );
+    expect(job[checked]).toContain('[ "$(sha256sum "$name" | cut -d \' \' -f 1)" != "$SHA256" ]');
+    expect(job[checked]).not.toMatch(/tar -x|tar x|\bunzip\b|\bsource\b|\bbash\b/);
+    const attested = at("uses: actions/attest@");
+    expect(attested).toBe(checked + 1);
+    expect(job[attested]).toMatch(
+      /^ {10}subject-path: \$\{\{ runner\.temp \}\}\/docs\/docs-\$\{\{ needs\.docs-release\.outputs\.version \}\}\.tar\.gz$/m,
+    );
+    expect(job[attested + 1]).toContain(
+      'gh release upload --clobber "$TAG" "$RUNNER_TEMP/docs/docs-$VERSION.tar.gz#Documentation $VERSION (HTML)"',
+    );
+  });
+
+  // The check runs as the step runs it, with bash, on archives packed
+  // here: only one that lists files under docs/ by plain relative paths
+  // passes, and none is unpacked.
+  describe("the archive's shape", () => {
+    const step =
+      steps(workflow.get("docs-publish") ?? "", 6).find((text) =>
+        text.includes("name: The archive is the version's, as docs-render made it"),
+      ) ?? "";
+    const body = step.slice(step.indexOf("run: |\n") + "run: |\n".length).split("\n");
+    const end = body.findIndex((line) => !line.startsWith(" ".repeat(10)));
+    const script = body
+      .slice(0, end)
+      .map((line) => line.slice(10))
+      .join("\n");
+    const version = "1.2.3";
+    const name = `docs-${version}.tar.gz`;
+
+    /** Runs the step on the archive `tar` packs from a folder `make` fills; what it printed, and whether it passed. */
+    function check(
+      make: (dir: string) => void,
+      args: (dir: string) => string[],
+      after: (archive: string, dir: string) => void = () => {},
+    ): { passed: boolean; output: string } {
+      const root = mkdtempSync(join(tmpdir(), "solid-memo-docs-shape-"));
+      try {
+        const source = join(root, "source");
+        mkdirSync(join(source, "docs"), { recursive: true });
+        make(source);
+        mkdirSync(join(root, "docs"));
+        const archive = join(root, "docs", name);
+        execFileSync("tar", ["-czf", archive, "-C", source, ...args(source)]);
+        after(archive, source);
+        const sha256 = execFileSync("sha256sum", [archive], { encoding: "utf8" }).split(" ")[0];
+        const run = spawnSync("bash", ["-c", script], {
+          env: { PATH: process.env.PATH, RUNNER_TEMP: root, VERSION: version, SHA256: sha256 },
+          encoding: "utf8",
+        });
+        return { passed: run.status === 0, output: `${run.stdout}${run.stderr}` };
+      } finally {
+        rmSync(root, { recursive: true, force: true });
+      }
+    }
+    const page = (dir: string) => writeFileSync(join(dir, "docs", "index.html"), "<p>docs</p>");
+
+    it("passes files under docs/, as npm run docs:archive packs them", () => {
+      expect(check(page, () => ["docs/index.html"])).toEqual({ passed: true, output: "" });
+    });
+
+    it("refuses an archive with an entry past the end tar would stop at", () => {
+      // A second archive appended to the first: tar stops listing at the
+      // first end of archive unless it ignores the zero blocks.
+      const appended = (archive: string, dir: string) => {
+        symlinkSync("/etc/hostname", join(dir, "link"));
+        const second = `${archive}.second`;
+        execFileSync("tar", ["-czf", second, "-C", dir, "link"]);
+        appendFileSync(archive, readFileSync(second));
+        rmSync(second);
+      };
+      const { passed, output } = check(page, () => ["docs/index.html"], appended);
+      expect(passed).toBe(false);
+      expect(output).toContain(`::error::${name} holds no entry, or one that is not a file`);
+    });
+
+    it.each<[string, (dir: string) => void, (dir: string) => string[]]>([
+      ["no entry", () => {}, () => ["-T", "/dev/null"]],
+      [
+        "an entry outside docs/",
+        (dir) => writeFileSync(join(dir, "other.html"), ""),
+        () => ["other.html"],
+      ],
+      ["an absolute path", page, (dir) => ["--absolute-names", join(dir, "docs", "index.html")]],
+      ["a path with ..", page, () => ["--absolute-names", "docs/../docs/index.html"]],
+      [
+        "a name tar escapes",
+        (dir) => writeFileSync(join(dir, "docs", "a\nb.html"), ""),
+        () => ["docs/a\nb.html"],
+      ],
+      [
+        "a symbolic link",
+        (dir) => symlinkSync("/etc/hostname", join(dir, "docs", "link")),
+        () => ["docs/link"],
+      ],
+      [
+        "a hard link",
+        (dir) => {
+          page(dir);
+          linkSync(join(dir, "docs", "index.html"), join(dir, "docs", "copy.html"));
+        },
+        () => ["docs/index.html", "docs/copy.html"],
+      ],
+    ])("refuses an archive with %s", (_, make, args) => {
+      const { passed, output } = check(make, args);
+      expect(passed).toBe(false);
+      expect(output).toContain(`::error::${name} holds no entry, or one that is not a file`);
+    });
+  });
 });
 
 // Any commit can be titled chore(release), and a pull request's commits
@@ -296,11 +491,11 @@ describe("the release commit's checks", () => {
   });
 
   // A bare name is a branch's before it is a tag's for actions/checkout,
-  // so the docs job reads the tag as refs/tags/<tag>, checks its commit
-  // with main's script before anything of the tag's is checked out, and
-  // checks out that commit by its SHA.
-  it("check the tag's commit in release.yml's docs job, then check out its SHA", () => {
-    const docs = steps(workflow.get("docs") ?? "", 6);
+  // so the docs-release job reads the tag as refs/tags/<tag> and checks
+  // its commit with main's script, and the docs-render job checks out
+  // that commit by its SHA.
+  it("check the tag's commit in release.yml's docs-release job, then check out its SHA", () => {
+    const docs = steps(workflow.get("docs-release") ?? "", 6);
     expect(docs.filter((step) => step.includes("inputs.tag") && /\bref:/.test(step))).toEqual([]);
     const checkouts = docs.filter((step) => step.includes("uses: actions/checkout@"));
     expect(checkouts).toHaveLength(1);
@@ -317,16 +512,18 @@ describe("the release commit's checks", () => {
     expect(docs[checked]).not.toMatch(/^\s+if:/m);
     expect(at(docs, "uses: actions/checkout@")).toBeLessThan(checked);
     expect(at(docs, "uses: actions/setup-node@")).toBeLessThan(checked);
-    const switched = at(docs, "name: Check out the tag's commit");
-    expect(switched).toBe(checked + 2);
-    expect(docs[switched]).toContain("SHA: ${{ steps.commit.outputs.sha }}");
-    // A release made where there was none, by main's script, before
-    // anything of the tag's is checked out.
+    expect(workflow.get("docs-release")).toMatch(
+      /^ {6}sha: \$\{\{ steps\.commit\.outputs\.sha \}\}$/m,
+    );
+    // A release made where there was none, by main's script.
     const made = at(docs, "name: Make the release as a draft");
-    expect(made).toBeGreaterThan(checked);
-    expect(made).toBeLessThan(switched);
+    expect(made).toBe(checked + 1);
     expect(docs[made]).toMatch(/^if: steps\.release\.outputs\.made == 'false'$/m);
-    expect(docs[switched + 1]).toContain("name: The version can archive its docs");
+    // The docs-render job checks out that commit, and nothing else.
+    const render = steps(workflow.get("docs-render") ?? "", 6);
+    expect(render.filter((step) => step.includes("uses: actions/checkout@"))).toEqual([render[0]]);
+    expect(render.filter((step) => /git (checkout|switch|fetch)/.test(step))).toEqual([]);
+    expect(render[1]).toContain("name: The version can archive its docs");
   });
 
   it("check the tag's commit in deploy.yml with the script, against origin/main", () => {
@@ -552,3 +749,34 @@ describe("ci.yml's check:merges", () => {
     expect(ok).toContain("${{ needs.commits.result }}");
   });
 });
+
+// GitHub hands a job its token, and with id-token: write the means to
+// sign as its workflow, when the job starts, and any step of it can
+// reach them, not only the steps that name them. So in the workflows
+// that release and deploy, a job that can write the repository, attest
+// or deploy installs and loads no package: it runs main's own scripts,
+// which import none (docs/releasing.md#the-deploy-key).
+describe.each([".github/workflows/release.yml", ".github/workflows/deploy.yml"])(
+  "%s's jobs that can write",
+  (path) => {
+    const writes =
+      /^ {6}(contents|id-token|attestations|artifact-metadata|pages|packages|deployments): write$/m;
+    const loads =
+      /npm ci|npm install|npx |\.\/\.github\/actions\/|playwright|docs:archive|npm run (?!(?:--silent )?release:commit )/;
+
+    it("load no package", () => {
+      const writing = [...jobs(read(path))].filter(([, job]) => writes.test(job));
+      expect(writing).not.toEqual([]);
+      for (const [name, job] of writing) expect(code(job), name).not.toMatch(loads);
+    });
+
+    it("are the jobs that need to", () => {
+      const writing = [...jobs(read(path))]
+        .filter(([, job]) => writes.test(job))
+        .map(([name]) => name);
+      expect(writing).toEqual(
+        path.endsWith("release.yml") ? ["publish", "docs-release", "docs-publish"] : ["deploy"],
+      );
+    });
+  },
+);

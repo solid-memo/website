@@ -9,7 +9,7 @@
  * Playwright's own download checks no hash, so the workflows download
  * the zip themselves and check it against the hash committed beside its
  * version and revision: in actions/headless-shell, and in release.yml's
- * docs job, which cannot use a local action. An update to playwright
+ * docs-render job, which cannot use a local action. An update to playwright
  * that moves the shell fails here until a person records the new
  * build's hash in both, which are the same step, one that checks the
  * zip with sha256sum, failing, before it unpacks it. No workflow
