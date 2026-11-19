@@ -9,6 +9,11 @@
  * card would be longer than a term may be, are written at short subjects
  * instead, so the switch to FSRS-6 and grading work for it as for any
  * card, and a guest's copy keeps it (GHSA-x3xv-53q7-9cc6).
+ *
+ * A state whose card's IRI in the deck's cards document would be longer
+ * than a term may be, when that document's address is longer than the
+ * reviews document's, is no state of the deck: the format update and the
+ * switch to FSRS-6 leave it as it is (GHSA-v7v4-qccx-c3cg).
  */
 import { describe, expect, it } from "vitest";
 import { deckFileBaseOf, importedDeck } from "@solid-memo/domain/deckFile";
@@ -19,7 +24,7 @@ import type { ReviewKey } from "@solid-memo/domain/review";
 import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import { switchedStates } from "@solid-memo/domain/schedulerSwitch";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
-import { asUrl, getThingAll } from "./client/rdf";
+import { asUrl, getPropertyAll, getTermAll, getThingAll } from "./client/rdf";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -232,4 +237,73 @@ describe("a card whose id is as long as fits, added from a guest's deck", () => 
       expect(subjects.every((url) => !isIriPastBound(url))).toBe(true);
     },
   );
+});
+
+describe("a review state of no card, whose card IRI would be longer than a term may be", () => {
+  const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+  // A cards document as an older upgrade named it, longer than the reviews document.
+  const cardsDocumentUrl = `${INSTANCE}decks/deck-1-0123456789abcdef0123456789abcdef0123.ttl`;
+  const reviewsDocumentUrl = `${INSTANCE}reviews/deck-1.ttl`;
+  const deck = {
+    id: "deck-1",
+    url: `${INSTANCE}catalog.ttl#deck-1`,
+    title: { en: "Deck" },
+    cardsDocumentUrl,
+    reviewsDocumentUrl,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    formatVersion: 6,
+    direction: "front-to-back",
+    authors: [],
+  } as unknown as Deck;
+  /** A state of the first format, naming neither its card nor its scheduler. */
+  const formatOne = (fragment: string) =>
+    `<${reviewsDocumentUrl}#${fragment}> a <${SM}ReviewState> ; <${SM}easeFactor> 2.5 ;` +
+    ` <${SM}intervalDays> 1 ; <${SM}repetitions> 1 ; <${SM}due> "2026-11-02" ;` +
+    ` <${SM}firstReviewedAt> ${AT} ; <${SM}lastReviewedAt> ${AT} .\n`;
+
+  it("is left as it is by the format update and the switch to FSRS-6", async () => {
+    const { fetch, reviews } = pod();
+    let length = 1;
+    while (!isIriPastBound(`${reviewsDocumentUrl}#${"c".repeat(length + 1)}`)) length++;
+    const orphan = "c".repeat(length);
+    expect(isIriPastBound(`${cardsDocumentUrl}#${orphan}`)).toBe(true);
+    const put = await fetch(reviewsDocumentUrl, {
+      method: "PUT",
+      headers: { "content-type": "text/turtle" },
+      body: formatOne("ok") + formatOne(orphan),
+    });
+    expect(put.ok).toBe(true);
+
+    expect((await reviews.listReviewStates(deck)).sm2.map((state) => state.cardId)).toEqual(["ok"]);
+    await expect(reviews.upgradeReviewStates(deck)).resolves.toBe(true);
+    await reviews.writeFsrsStates(
+      deck,
+      ({ sm2 }) => switchedStates(deck.url, sm2, [], NOW, 0).fsrs,
+    );
+
+    const states = await reviews.listReviewStates(deck);
+    expect(states.sm2.map((state) => state.cardId)).toEqual(["ok"]);
+    expect(states.fsrs.map((state) => state.cardId)).toEqual(["ok"]);
+    const dataset = (await getSolidDatasetOrNull(reviewsDocumentUrl, fetch))!;
+    const left = getThingAll(dataset).find(
+      (thing) => asUrl(thing) === `${reviewsDocumentUrl}#${orphan}`,
+    )!;
+    expect(getPropertyAll(left).sort()).toEqual(
+      [
+        "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+        `${SM}easeFactor`,
+        `${SM}intervalDays`,
+        `${SM}repetitions`,
+        `${SM}due`,
+        `${SM}firstReviewedAt`,
+        `${SM}lastReviewedAt`,
+      ].sort(),
+    );
+    const leftValues = (property: string) =>
+      getTermAll(left, `${SM}${property}`).map((term) => term.value);
+    expect(leftValues("easeFactor")).toEqual(["2.5"]);
+    expect(leftValues("intervalDays")).toEqual(["1"]);
+    expect(leftValues("repetitions")).toEqual(["1"]);
+    expect(leftValues("due")).toEqual(["2026-11-02"]);
+  });
 });

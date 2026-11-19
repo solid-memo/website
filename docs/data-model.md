@@ -1010,7 +1010,14 @@ graph LR
     own, by the cards' rule above, whatever it says, which removing a
     card leaves too. A state whose
     `sm:reviewOf` names a subject outside the deck's cards documents
-    (another deck's card, or the document's own subject). Nor one whose
+    (another deck's card, or the document's own subject). Nor one of a
+    card whose IRI in the deck's current cards document would be longer
+    than a term may be, as no card of the deck has that id. It can
+    happen when the cards document's address is longer than the reviews
+    document's, by the subject's name or by a link into an older,
+    shorter cards document. Its next write would name the card by that
+    IRI, so the format update and the switch to FSRS-6 leave it as it
+    is. Nor one whose
     direction is neither way (say `sm:bidirectional`), or of another
     scheduler: any value of
     `sm:scheduler` but the `sm:sm2` and `sm:fsrs6` IRIs, a literal too.

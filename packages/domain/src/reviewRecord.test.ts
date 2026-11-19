@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { isIriPastBound } from "./pathKeys";
 import type { FsrsState, ReviewState } from "./review";
 import {
   FSRS6_SCHEDULER,
@@ -24,6 +25,15 @@ const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
 const CARDS = "https://pod.example/a/decks/deck-1.ttl";
 const REVIEWS = "https://pod.example/a/reviews/deck-1.ttl";
 const DECK = { id: "deck-1", cardsDocumentUrl: CARDS };
+/** A cards document of the deck, as an older upgrade named it, longer than the reviews document. */
+const LONGER_CARDS = "https://pod.example/a/decks/deck-1-0123456789abcdef0123456789abcdef0123.ttl";
+
+/** The longest card id whose IRI in `documentUrl` fits a term. */
+function longestFitting(documentUrl: string): string {
+  let length = 1;
+  while (!isIriPastBound(`${documentUrl}#${"c".repeat(length + 1)}`)) length++;
+  return "c".repeat(length);
+}
 
 const key = { cardId: "card-1", direction: "front-to-back" as const };
 const state: ReviewState = {
@@ -173,6 +183,26 @@ describe("what a stored review state is of", () => {
     ).toBeNull();
   });
 
+  it("is nothing for a card whose IRI in the deck's cards document is longer than a term may be", () => {
+    // The cards document's address is longer than the reviews document's, so the longest
+    // subject that fits names a card whose IRI does not.
+    const longer = { id: "deck-1", cardsDocumentUrl: LONGER_CARDS };
+    const fits = longestFitting(REVIEWS);
+    expect(isIriPastBound(subject(fits))).toBe(false);
+    expect(reviewKeyOfSubject(subject(fits), longer, {})).toBeNull();
+    expect(reviewKeyOfSubject(subject(fits), DECK, {})).toEqual({
+      cardId: fits,
+      direction: "front-to-back",
+    });
+    // Named by a link to a shorter cards document of the deck, before an upgrade moved them.
+    expect(
+      reviewKeyOfSubject(subject("rs-1"), longer, { reviewOf: `${CARDS}#${fits}` }),
+    ).toBeNull();
+    expect(
+      reviewKeyOfSubject(subject("rs-1"), DECK, { reviewOf: `${CARDS}#${longestFitting(CARDS)}` }),
+    ).toEqual({ cardId: longestFitting(CARDS), direction: "front-to-back" });
+  });
+
   it("reads no card from a subject named as an FSRS-6 state's, unless the state names both", () => {
     expect(reviewKeyOfSubject(subject("card-1@fsrs6"), DECK, {})).toBeNull();
     expect(
@@ -207,6 +237,13 @@ describe("what a stored FSRS-6 state is of", () => {
       fsrsKeyOfLinks(DECK, { ...links, reviewOf: "https://pod.example/a/decks/deck-2.ttl#c" }),
     ).toBeNull();
     expect(fsrsKeyOfLinks(DECK, { ...links, direction: `${SM}bidirectional` })).toBeNull();
+  });
+
+  it("is nothing for a card whose IRI in the deck's cards document is longer than a term may be", () => {
+    const longer = { id: "deck-1", cardsDocumentUrl: LONGER_CARDS };
+    const reviewOf = `${CARDS}#${longestFitting(CARDS)}`;
+    expect(fsrsKeyOfLinks(DECK, { ...links, reviewOf })).not.toBeNull();
+    expect(fsrsKeyOfLinks(longer, { ...links, reviewOf })).toBeNull();
   });
 });
 
