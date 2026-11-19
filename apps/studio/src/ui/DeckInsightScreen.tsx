@@ -5,11 +5,13 @@
 import type { DeckInsight } from "@solid-memo/application/statistics";
 import { LEECH_LAPSES } from "@solid-memo/domain/cardHistory";
 import type { Card, Deck } from "@solid-memo/domain/deck";
+import { LIST_LIMIT, usePaged } from "@solid-memo/ui/bounded";
 import { useCardText } from "@solid-memo/ui/cardLanguage";
 import { cardName } from "@solid-memo/ui/DataText";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
 import { BarChart, Histogram, StatTile, useBinRanges } from "@solid-memo/ui/StatisticsCharts";
+import { ShowMore } from "./ReleaseLists";
 
 /** How many days the tile of the reviews to come counts, today's included. */
 const WEEK = 7;
@@ -21,7 +23,10 @@ const WEEK = 7;
  * intervals and eases (SM-2's) are spread; and its lapses, counted since the
  * month of its first answer in the log, with its leeches, each a link to the
  * card (`cardHref`), and a link to them all in the card workbench
- * (`leechesHref`). Each chart has its figures as a table too.
+ * (`leechesHref`). Each chart has its figures as a table too. The answer
+ * log decides which cards are leeches, so there can be any number of
+ * them: the list shows a page of LIST_LIMIT at a time (usePaged), with a
+ * button for more.
  */
 export function DeckInsightScreen({
   deck,
@@ -42,6 +47,7 @@ export function DeckInsightScreen({
   const { forecast, lapses, leeches } = insight;
   const week = forecast.slice(0, WEEK).reduce((sum, day) => sum + day.reviews, 0);
   const ranges = useBinRanges();
+  const shownLeeches = usePaged(leeches);
   return (
     <section class="studio-insight">
       <h2>{tx("studio.insight.heading", { deck: <ReaderText text={deck.title} /> })}</h2>
@@ -130,13 +136,23 @@ export function DeckInsightScreen({
       ) : (
         <>
           <ol class="studio-leeches" aria-label={t("studio.insight.leeches")}>
-            {leeches.map(({ card, lapses: count }) => (
+            {shownLeeches.shown.map(({ card, lapses: count }) => (
               <li key={card.url}>
                 <a href={cardHref(card)}>{cardName(card, cardText)}</a>{" "}
                 <span class="hint">{t("studio.insight.leechLapses", { count })}</span>
               </li>
             ))}
           </ol>
+          {shownLeeches.more > 0 && (
+            <p class="hint">
+              {t("studio.insight.moreLeeches", { count: shownLeeches.more })}{" "}
+              <ShowMore
+                more={shownLeeches.more}
+                limit={LIST_LIMIT}
+                onShow={shownLeeches.showMore}
+              />
+            </p>
+          )}
           <p>
             <a href={leechesHref}>{t("studio.insight.allLeeches")}</a>
           </p>

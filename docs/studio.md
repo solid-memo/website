@@ -1257,7 +1257,9 @@ case `deckInsight` reads what it needs, writing nothing.
   - A leech is a card in use with 4 lapses or more (`LEECH_LAPSES`,
     `leechesOf`), the most forgotten first. Each links to its card's
     history, and a link shows them all in the workbench
-    (`state=leech&sort=lapses&order=desc`).
+    (`state=leech&sort=lapses&order=desc`). The list shows 50 at a
+    time (`LIST_LIMIT`), says how many more there are and has a button
+    to show them.
   - A test keeps `lapseIndex` linear over a year of answers: timed on
     the same machine, eight
     times the answers take less than four times as long as an eighth

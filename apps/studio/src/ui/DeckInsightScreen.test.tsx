@@ -7,6 +7,7 @@ import { fireEvent, render, screen, within } from "@testing-library/preact";
 import type { DeckInsight } from "@solid-memo/application/statistics";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import type { ReviewState } from "@solid-memo/domain/review";
+import { LIST_LIMIT } from "@solid-memo/ui/bounded";
 import { DeckInsightScreen } from "./DeckInsightScreen";
 import { makeCard, makeDeck } from "../test/fixtures";
 
@@ -112,6 +113,28 @@ describe("DeckInsightScreen", () => {
     expect(
       screen.getByRole("link", { name: "Show the leeches among the deck's cards" }),
     ).toHaveAttribute("href", "#leeches");
+  });
+
+  it("lists a page of the leeches at a time, however many the answer log makes", () => {
+    const many = Array.from({ length: LIST_LIMIT * 2 + 3 }, (_, i) => ({
+      card: makeCard(deck, `leech-${i}`),
+      lapses: 4,
+    }));
+    renderScreen({ ...insight, leeches: many });
+    expect(screen.getByRole("group", { name: "Leeches" })).toHaveTextContent(String(many.length));
+    const list = () => within(screen.getByRole("list", { name: "Leeches" })).getAllByRole("link");
+    expect(list()).toHaveLength(LIST_LIMIT);
+    expect(
+      screen.getByText(`And ${LIST_LIMIT + 3} more leeches, not listed here.`, { exact: false }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Show ${LIST_LIMIT} more` }));
+    expect(list()).toHaveLength(LIST_LIMIT * 2);
+    fireEvent.click(screen.getByRole("button", { name: "Show 3 more" }));
+    expect(list()).toHaveLength(many.length);
+    expect(screen.queryByRole("button", { name: /^Show \d+ more$/ })).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Show the leeches among the deck's cards" }),
+    ).toBeInTheDocument();
   });
 
   it("says when nothing is studied or logged yet", () => {

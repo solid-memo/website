@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/preact";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CardProgressReport, DeckProgress } from "@solid-memo/application/statistics";
 import type { HardCard } from "@solid-memo/domain/cardHistory";
@@ -11,6 +11,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { easeHistogram, intervalHistogram } from "@solid-memo/domain/scheduleInsight";
 import { makeUseCasesFake } from "../test/useCasesFake";
+import { LIST_LIMIT } from "./bounded";
 import { CardProgressContainer } from "./CardProgressContainer";
 import { HardestCardsContainer } from "./HardestCardsContainer";
 
@@ -145,6 +146,35 @@ describe("HardestCardsContainer", () => {
     const confused = await screen.findByRole("list", { name: "Most-confused options" });
     expect(within(confused).getByRole("listitem")).toHaveTextContent(
       "Spanien confused with Barcelona (sv) 1 time",
+    );
+  });
+
+  it("lists a page of the leeches at a time, however many the answer log makes, and crams them all", async () => {
+    const leeches = Array.from({ length: LIST_LIMIT * 2 + 3 }, (_, i) =>
+      hard(cardOf(capitals, `l-${i}`, `Leech ${i}`), 4, 4),
+    );
+    const useCases = makeUseCasesFake({
+      getCardProgress: vi.fn(async () =>
+        reportOf(progressOf(capitals, { hardest: { reviews: 412, cards: leeches } })),
+      ),
+    });
+    withQueries(<HardestCardsContainer useCases={useCases} instance={INSTANCE} />);
+    const items = async () =>
+      within(await screen.findByRole("list", { name: "Leeches across your decks" })).getAllByRole(
+        "listitem",
+      );
+    expect(await items()).toHaveLength(LIST_LIMIT);
+    expect(
+      screen.getByText(`And ${LIST_LIMIT + 3} more leeches, not listed here.`, { exact: false }),
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `Show ${LIST_LIMIT} more` }));
+    expect(await items()).toHaveLength(LIST_LIMIT * 2);
+    fireEvent.click(screen.getByRole("button", { name: "Show 3 more" }));
+    expect(await items()).toHaveLength(leeches.length);
+    expect(screen.queryByRole("button", { name: /^Show \d+ more$/ })).toBeNull();
+    expect(screen.getByRole("link", { name: "Cram the leeches" })).toHaveAttribute(
+      "href",
+      `#/cram?instance=${encodeURIComponent(INSTANCE.url)}`,
     );
   });
 

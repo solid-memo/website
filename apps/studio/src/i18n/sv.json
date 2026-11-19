@@ -468,6 +468,10 @@
       "noAnswers": "Inga svar är loggade än.",
       "leechHint": "En blodigel är ett kort som glömts {count} gånger eller fler. Det kostar repetition efter repetition: skriv om det, dela upp det eller ta det ur bruk.",
       "noLeeches": "Inga blodiglar.",
+      "moreLeeches": {
+        "one": "Och {count} blodigel till, som inte listas här.",
+        "other": "Och {count} blodiglar till, som inte listas här."
+      },
       "leechLapses": {
         "one": "glömt {count} gång",
         "other": "glömt {count} gånger"
