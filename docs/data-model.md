@@ -2389,7 +2389,11 @@ by one.
   `cardsOf`). What is worked out of the cards alone (the cards in use
   and their places, the outdated ones, the cards by id and their wrong
   options) is worked out once for that array (`derivedOnce` in
-  [frozen.ts](../packages/domain/src/frozen.ts)). Several decks may name
+  [frozen.ts](../packages/domain/src/frozen.ts)). So is what a library
+  upgrade does to them, for each release of the index a copy moves
+  from and to (`planLibraryUpgrade`). A copy from a link shares only
+  its cards by id, as each reads its releases on its own. Several
+  decks may name
   one reviews document too. Decks whose states are read alike, by the
   same cards documents, share one frozen mapping of it
   ([reviewStateMapper.ts](../packages/solid/src/mappers/reviewStateMapper.ts)

@@ -852,6 +852,46 @@ describe("planLibraryUpgrade", () => {
       ).toBeNull();
     });
   });
+
+  it("plans the copies that name one cards document of one release once, each with its own deck's changes", () => {
+    // The repository gives every deck that names one cards document one frozen array of its cards.
+    const shared = Object.freeze([...cards]);
+    const turned = { ...to, direction: "bidirectional" as const };
+    const other: Deck = { ...deck, url: `${deck.url}-2`, direction: "back-to-front" };
+    const first = planLibraryUpgrade({ deck, cards: shared, from, to: turned, releases })!;
+    const second = planLibraryUpgrade({ deck: other, cards: shared, from, to: turned, releases })!;
+    expect(first.direction).toBe("bidirectional");
+    expect(second).not.toHaveProperty("direction");
+    expect(second).toEqual({ ...first, direction: undefined });
+    for (const list of ["add", "change", "remove", "kept", "applied", "gone"] as const) {
+      expect(second[list]).toBe(first[list]);
+      expect(Object.isFrozen(first[list])).toBe(true);
+    }
+    // Shared, so read-only to the type checker too.
+    // @ts-expect-error The plan's lists are readonly.
+    expect(() => first.gone.push("card")).toThrow(TypeError);
+    // Planned anew of other releases as read, other inputs, or cards that may still change.
+    const addOf = (input: Partial<Parameters<typeof planLibraryUpgrade>[0]>) =>
+      planLibraryUpgrade({ deck, cards: shared, from, to: turned, releases, ...input })!.add;
+    const passed = release(2, from.cards);
+    for (const input of [
+      { from: { ...from } },
+      { to: { ...turned } },
+      { linked: true },
+      { course: true },
+      { between: [passed] },
+    ])
+      expect(addOf(input)).not.toBe(first.add);
+    expect(addOf({ linked: true })).toBe(addOf({ linked: true }));
+    expect(addOf({ course: true })).toBe(addOf({ course: true }));
+    // Cards not frozen may change between two plans.
+    const unfrozen = [...cards];
+    expect(addOf({ cards: unfrozen })).not.toBe(addOf({ cards: unfrozen }));
+    expect(addOf({ cards: unfrozen })).toEqual(first.add);
+    const between = addOf({ between: [passed] });
+    expect(addOf({ between: [passed] })).toBe(between);
+    expect(addOf({ between: [release(2, from.cards)] })).not.toBe(between);
+  });
 });
 
 describe("upgradedCards", () => {

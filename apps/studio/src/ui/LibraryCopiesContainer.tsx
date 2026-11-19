@@ -144,7 +144,11 @@ export function LibraryPlanContainer({
 
 /**
  * The instance's copies of library releases, and for each with a newer
- * release what upgrading it would do, as each is planned.
+ * release what upgrading it would do, as each is planned. Copies that
+ * name one cards document and one indexed release are planned of its
+ * cards once (planLibraryUpgrade), each with what its own deck's entry
+ * changes; a copy from a link, whose releases each plan reads anew, is
+ * compared against those it read.
  */
 function useCopyRows(useCases: UseCases, instanceUrl: string) {
   const copiesQuery = useQuery(libraryUpdatesQuery(useCases, instanceUrl));
