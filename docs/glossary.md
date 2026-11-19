@@ -281,8 +281,9 @@ status.
   [reuse.software](https://reuse.software/);
   [style.md](style.md#licenses).
 - **semantic-release**: picks each version's number from the commits'
-  Conventional Commits types, writes the changelog, tags the commit
-  and makes the GitHub release.
+  Conventional Commits types, writes the changelog, and commits and
+  tags the release, which the release workflow then pushes and makes a
+  GitHub release of.
   [semantic-release's docs](https://semantic-release.gitbook.io/);
   `releasing.md`.
 - **SemVer** (Semantic Versioning): version numbers MAJOR.MINOR.PATCH,

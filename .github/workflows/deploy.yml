@@ -117,8 +117,8 @@ jobs:
       # commit titled as a release, is not deployed; and its GitHub
       # release must be made, so the site never runs a version the
       # releases page does not list.
-      # semantic-release makes the release seconds after it pushes the
-      # tag, so it is looked for a few times. A version that is not the
+      # The release workflow's publish job makes the release soon after
+      # the tag is pushed, so it is looked for a few times. A version that is not the
       # newest is a notice; anything else fails the run, as it should not
       # happen (docs/deployment.md).
       - name: The tag is the newest release

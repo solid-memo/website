@@ -18,14 +18,14 @@
  *
  * `npm run docs:archive -- --draw` draws and checks the diagrams as an
  * archive would hold them, keeping them in the drawings' cache, and
- * writes no archive: release.yml's draw job draws them so, with no
- * secret, for the release job, which holds the deploy key and runs no
- * browser (docs/releasing.md#the-deploy-key).
+ * writes no archive: release.yml's prepare job draws them so, with no
+ * secret, before semantic-release runs
+ * (docs/releasing.md#the-deploy-key).
  *
  * With `--drawn`, alone or after the version, nothing is drawn and no
  * browser is started: every drawing must be in the drawings' cache, and
- * pass the checks, or it fails. The release job checks the drawings it
- * is given so, and its archive takes them from the cache so.
+ * pass the checks, or it fails. The release's archive takes them from
+ * the cache so.
  */
 import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";

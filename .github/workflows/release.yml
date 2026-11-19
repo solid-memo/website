@@ -29,25 +29,30 @@ name: Release
 # the deploy after it puts the new version on the site (deploy.yml deploys
 # only a commit a version tag names). This workflow skips that run:
 # nothing has been committed since the release commit's own tag, so the
-# draw and release jobs there would install everything and draw the
-# diagrams only for semantic-release to find nothing. The key is a secret of the release
-# environment, which allows only main, so a workflow pushed on any other
-# branch cannot read it, as it could a repository secret.
+# prepare job there would install everything and draw the
+# diagrams only for semantic-release to find nothing. The key is a secret
+# of the release environment, which allows only main, so a workflow
+# pushed on any other branch cannot read it, as it could a repository
+# secret.
 #
-# The GitHub release carries the version's docs, rendered in the
-# release's prepare step (npm run docs:archive), and attested as this
+# Only the push job holds the key, and it installs nothing and loads no
+# package (docs/releasing.md#the-deploy-key). semantic-release runs in
+# the prepare job, with no key and a token that can only read, and
+# commits and tags the release in a copy of the checkout; the push job
+# checks that the commit holds nothing but a release's changes, and
+# pushes it and its tag at once; the publish job makes the GitHub
+# release, with no key. The release carries the version's docs, rendered
+# in the prepare job (npm run docs:archive) and attested as this
 # workflow's on main, so whoever downloads them can check where they
-# came from. Their diagrams are drawn in Chromium by the draw job, which
-# holds no secret; the release job, which holds the key, takes the
-# drawings from it and runs no browser and no apt
-# (docs/releasing.md#the-deploy-key). When the archive could
-# not be attached or attested, run this by hand with the version's tag,
-# and the docs job renders, attests and attaches it, and publishes the
-# release if it is a draft, without the key
+# came from. Their diagrams are drawn in Chromium in the prepare job. When
+# the release could not be made, or its archive not attached or
+# attested, run this by hand with the version's tag, and the docs job
+# makes the release if it is missing, renders, attests and attaches the
+# archive, and publishes the release if it is a draft, without the key
 # (docs/releasing.md#when-a-release-fails).
 
 on:
-  workflow_run: # zizmor: ignore[dangerous-triggers] only the queue and release jobs run on it, for CI's push runs on main in this repository
+  workflow_run: # zizmor: ignore[dangerous-triggers] only the queue, prepare, push and publish jobs run on it, for CI's push runs on main in this repository
     workflows: [CI]
     types: [completed]
     branches: [main]
@@ -60,16 +65,36 @@ on:
         required: false
         default: ""
 
-permissions:
-  # To make the GitHub release (the commit and the tag are pushed with the key).
-  contents: write
-  # To look up CI's runs on main's tip.
-  actions: read
+# Each job asks for what it needs.
+permissions: {}
+
+# One release at a time, and a running one never canceled: a run
+# canceled between its push and publish jobs leaves a tag without its
+# GitHub release. The group is the workflow's, so no run's prepare job
+# can start between another's prepare and push jobs. GitHub keeps one
+# pending run in a group, so a run queued behind it replaces one already
+# waiting; whichever runs releases main's tip once CI has passed on it.
+# A run that cannot release (for CI's failures, pull requests and the
+# release commit's own run) has a group of its own, so it never replaces
+# a waiting release; a run of the docs job has one for its tag.
+concurrency:
+  group: >-
+    ${{
+      (github.event_name == 'workflow_dispatch' && inputs.tag != '' &&
+       format('release-docs-{0}', inputs.tag)) ||
+      ((github.event_name == 'workflow_dispatch' ||
+        (github.event.workflow_run.conclusion == 'success' &&
+         github.event.workflow_run.event == 'push' &&
+         !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): '))) &&
+       'release') ||
+      format('release-none-{0}', github.run_id)
+    }}
+  cancel-in-progress: false
 
 jobs:
-  # How many entries the merge queue for main holds, for the release job,
+  # How many entries the merge queue for main holds, for the prepare job,
   # which a push run releases with only when it holds none. It runs for
-  # the push runs the release job runs for, and holds no secret, no
+  # the push runs the prepare job runs for, and holds no secret, no
   # environment and a token that can only read: it checks out nothing
   # and runs none of the repository's code. It asks GitHub's GraphQL API
   # with the job's token, which reads a public repository's merge queue
@@ -117,17 +142,17 @@ jobs:
           fi
           echo "entries=$entries" >> "$GITHUB_OUTPUT"
 
-  # The docs' diagrams, drawn in Chromium for the release job's archive
-  # (npm run docs:archive -- --draw), for the runs the release job runs
-  # for. Every step of a job that names the release environment can read
-  # the deploy key, as GitHub hands a job its secrets when it starts, so
-  # the browser, its download and its system libraries, which apt
-  # installs, run here instead: no environment, no secret, a token that
-  # can only read, and a checkout that keeps no credentials. It keeps
-  # the drawings as an artifact of this run, which the release job
-  # checks before it uses them. Nothing comes from GitHub's cache, as
-  # the drawings go into the release's archive.
-  draw:
+  # semantic-release, with no key and a token that can only read
+  # (docs/releasing.md#the-deploy-key). After the queue job, which a run
+  # by hand skips: !cancelled() lets it run when the job it needs was
+  # skipped, and a push run releases only once the queue job has found
+  # the queue empty. It draws the docs' diagrams in Chromium first, and
+  # semantic-release commits and tags the release in a
+  # bare copy of the checkout, which git's url.<copy>.insteadOf puts in
+  # place of GitHub's URL: the notes link to GitHub, and nothing leaves
+  # the runner. The commit and its tag are kept as a git bundle, and the
+  # docs' archive beside it, for the push and publish jobs.
+  prepare:
     needs: queue
     if: >-
       !cancelled() && (
@@ -143,85 +168,179 @@ jobs:
     runs-on: ubuntu-latest
     # Room for Ubuntu's mirror to stall (actions/playwright-deps gives each
     # apt-get four tries of three minutes).
-    timeout-minutes: 30
+    timeout-minutes: 40
     permissions:
       contents: read
+      # To look up CI's runs on main's tip.
+      actions: read
+    outputs:
+      tag: ${{ steps.released.outputs.tag }}
     steps:
-      # main's tip, as the release job checks out: a drawing is kept by
-      # its diagram's source and what draws it, so one that main's newer
-      # tip changed is missing there, and fails it before anything is
-      # pushed.
+      # main's tip, not the commit CI checked: semantic-release releases
+      # the branch. The whole history and every tag, to find the last
+      # release and the commits since. Keeping no credentials.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
+          fetch-depth: 0
           persist-credentials: false
+      # Nothing in the release's jobs comes from GitHub's cache
+      # (docs/releasing.md#the-deploy-key): any job on main can write
+      # main's entries, and what this job makes is pushed with the key.
+      # npm's cache neither, which setup-node would restore for
+      # packageManager in package.json.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
-      - run: npm ci --ignore-scripts
-      - run: npm audit signatures
+      # Only a tip that CI passed on is released. When main has moved on
+      # since the commit CI checked, the tip is released if CI has passed
+      # on it too: a newer run may have been replaced while it waited for
+      # the group, as GitHub keeps one pending run per group. If CI has
+      # not passed on the tip yet, its own run releases it.
+      #
+      # A release commit with no tag (pushed by hand without it) stops
+      # every run: semantic-release, finding no tag, would release the
+      # same version again on top of it. Only a commit semantic-release
+      # made counts (npm run release:commit, scripts/releaseCommit.ts): on
+      # main's first-parent chain, by github-actions[bot], changing only
+      # the files a release writes; a pull request's commit titled as one
+      # does not.
+      - name: CI passed on main's tip
+        id: tip
+        env:
+          EVENT: ${{ github.event_name }}
+          CHECKED: ${{ github.event.workflow_run.head_sha }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          npm run release:commit -- last
+          tip="$(git rev-parse HEAD)"
+          echo "sha=$tip" >> "$GITHUB_OUTPUT"
+          if [ "$EVENT" = workflow_run ] && [ "$tip" = "$CHECKED" ]; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if [ -z "$(gh run list --workflow ci.yml --commit "$tip" --event push --status success --limit 1 --json databaseId --jq '.[].databaseId')" ]; then
+            if [ "$EVENT" = workflow_run ]; then
+              echo "::notice::main has moved on from $CHECKED to $tip, and CI has not passed on $tip yet: its run releases it."
+              echo "release=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::CI has not passed on a push of main's tip, $tip: run this again once it has."
+            exit 1
+          fi
+          echo "release=true" >> "$GITHUB_OUTPUT"
+      # No package's install script runs here: the release needs none,
+      # and Chromium comes from the Chromium action, below.
+      - if: steps.tip.outputs.release == 'true'
+        run: npm ci --ignore-scripts
+      # Every installed version is signed by the registry, and its
+      # attestations verify, as in CI's check job, before Chromium is
+      # downloaded and semantic-release runs
+      # (docs/releasing.md#the-deploy-key).
+      - if: steps.tip.outputs.release == 'true'
+        run: npm audit signatures
       # Chromium, downloaded and checked against a committed SHA-256, with
       # its system libraries from Ubuntu's signed mirror, not restored from
       # the cache.
-      - uses: ./.github/actions/chromium
+      - if: steps.tip.outputs.release == 'true'
+        uses: ./.github/actions/chromium
         with:
           cache: false
       # npm ci emptied the drawings' cache, so it holds this run's
-      # drawings alone, each checked as the archive checks it.
-      - run: npm run docs:archive -- --draw
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      # drawings alone, each checked as the site's build checks it
+      # (checkSvg, and the font's notice); the archive in the release's
+      # prepare step takes them from it with --drawn, drawing nothing
+      # (release.config.mjs).
+      - if: steps.tip.outputs.release == 'true'
+        name: Draw the docs' diagrams
+        run: npm run docs:archive -- --draw
+      # Commits the release and tags it in a bare copy of the checkout,
+      # which stands in for GitHub's URL: semantic-release fetches from,
+      # checks it can push to, and pushes to the copy. No token is in the
+      # step's environment, so semantic-release puts none in the URL,
+      # which would then not be the one the copy stands in for. git
+      # refuses https in the checkout, so nothing reaches GitHub if it
+      # did; and the checkout keeps no credentials, so a push that did
+      # would be refused too (scripts/releaseConfig.test.ts runs it so).
+      - if: steps.tip.outputs.release == 'true'
+        name: npx semantic-release
+        env:
+          REPOSITORY_URL: https://github.com/${{ github.repository }}.git
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+          GIT_TERMINAL_PROMPT: "0"
+        run: |
+          copy="$RUNNER_TEMP/release.git"
+          git clone --quiet --bare . "$copy"
+          git config "url.file://$copy.insteadOf" "$REPOSITORY_URL"
+          git config protocol.https.allow never
+          npx semantic-release --repository-url "$REPOSITORY_URL"
+      # What semantic-release pushed to the copy: nothing, or one commit
+      # on main's tip and its tag, kept as a bundle for the push job,
+      # beside the docs' archive for the publish job. The notes refs it
+      # writes stay behind: a tag without them is on the default channel.
+      - if: steps.tip.outputs.release == 'true'
+        name: The release, as a bundle
+        id: released
+        env:
+          TIP: ${{ steps.tip.outputs.sha }}
+        run: |
+          copy="$RUNNER_TEMP/release.git"
+          head="$(git -C "$copy" rev-parse --verify refs/heads/main)"
+          if [ "$head" = "$TIP" ]; then
+            echo "Nothing to release."
+            exit 0
+          fi
+          tag="$(git -C "$copy" tag --points-at "$head")"
+          if ! [[ "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::semantic-release committed $head, tagged ${tag:-nothing}, not one version's tag."
+            exit 1
+          fi
+          mkdir "$RUNNER_TEMP/bundle"
+          git -C "$copy" bundle create "$RUNNER_TEMP/bundle/release.bundle" "refs/tags/$tag" "^$TIP"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+      - if: steps.released.outputs.tag != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: docs-drawings
-          path: node_modules/.cache/solid-memo-docs-diagrams/
-          include-hidden-files: true
+          name: release-bundle
+          path: ${{ runner.temp }}/bundle/release.bundle
           if-no-files-found: error
-          # Room to re-run only a failed release job (docs/releasing.md#the-deploy-key).
+          retention-days: 7
+      - if: steps.released.outputs.tag != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-docs
+          path: release-assets/docs-${{ steps.released.outputs.version }}.tar.gz
+          if-no-files-found: error
           retention-days: 7
 
-  release:
-    # After the queue and draw jobs, which a run by hand skips the first
-    # of: !cancelled() lets the release job run when a job it needs was
-    # skipped, and a push run releases only once the queue job has found
-    # the queue empty. It releases only with the draw job's drawings.
-    needs: [queue, draw]
-    if: >-
-      !cancelled() && needs.draw.result == 'success' && (
-      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
-       inputs.tag == '') ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push' &&
-       github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository &&
-       !startsWith(github.event.workflow_run.head_commit.message, 'chore(release): ') &&
-       needs.queue.result == 'success' && needs.queue.outputs.entries == '0'))
+  # The release commit and its tag, pushed to main with the deploy key,
+  # which the ruleset on main lets bypass its pull request. Its secret is
+  # the key: GitHub hands it to the job when the job starts, so every
+  # step of the job can read it, not only the steps that name it. So the
+  # job installs nothing and loads no package: git, ssh, and main's own
+  # scripts, which import none (docs/releasing.md#the-deploy-key). The
+  # bundle the prepare job made is pushed only once the commit is a
+  # release commit on main's tip with nothing but a release's changes
+  # (npm run release:commit -- next), and the commit and its tag go in
+  # one atomic push, so main never holds the commit without its tag.
+  push:
+    needs: prepare
+    if: needs.prepare.outputs.tag != ''
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     permissions:
-      contents: write
-      actions: read
-      # To attest the docs' archive (actions/attest).
-      id-token: write
-      attestations: write
-      artifact-metadata: write
-    # One release at a time, and a running one never canceled: a release
-    # canceled halfway could leave its commit pushed and its tag or GitHub
-    # release missing. GitHub keeps one pending job in the group, so a run
-    # queued behind it replaces one already waiting; whichever runs
-    # releases main's tip once CI has passed on it. The group is this
-    # job's, not the workflow's, so a run of the docs job neither replaces
-    # a waiting release nor is replaced by one.
-    concurrency:
-      group: release
-      cancel-in-progress: false
-    # Its secret is the key. GitHub hands it to the job when the job
-    # starts, so every step of the job can read it, not only the steps
-    # that name it: the job runs no browser and installs nothing with
-    # apt (docs/releasing.md#the-deploy-key). Each run is recorded as a
-    # deployment to it: GitHub's docs do not say that its limit to main
-    # holds with deployment: false.
+      contents: read
+    # Each run is recorded as a deployment to it: GitHub's docs do not say
+    # that its limit to main holds with deployment: false.
     environment: release
+    outputs:
+      pushed: ${{ steps.pushed.outputs.pushed }}
     steps:
       # A copy without the key, such as a fork, releases nothing, and says
       # so. GitHub makes the environment, with no secrets, the first time
@@ -237,109 +356,55 @@ jobs:
           else
             echo "set=true" >> "$GITHUB_OUTPUT"
           fi
-      # main's tip, not the commit CI checked: semantic-release releases
-      # the branch, and pushes onto it. The whole history and every tag,
-      # to find the last release and the commits since. Keeping no
-      # credentials: only semantic-release's step, below, writes the key
-      # where git reads it.
+      # main's tip, which the release commit must be on, with every tag.
+      # Keeping no credentials: only the push, below, writes the key where
+      # git reads it.
       - if: steps.key.outputs.set == 'true'
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: main
           fetch-depth: 0
           persist-credentials: false
-      # Node, for the next step's script, which imports no package.
-      # Nothing in this job comes from GitHub's cache
-      # (docs/releasing.md#the-deploy-key): any job on main can write
-      # main's entries, and this one holds the key. npm's cache neither,
-      # which setup-node would restore for packageManager in package.json.
+      # Node, for main's scripts, which import no package.
       - if: steps.key.outputs.set == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
-      # Only a tip that CI passed on is released. When main has moved on
-      # since the commit CI checked, the tip is released if CI has passed
-      # on it too: a newer run may have been replaced while it waited for
-      # this group, as GitHub keeps one pending run per group. If CI has
-      # not passed on the tip yet, its own run releases it.
-      #
-      # A release commit with no tag (its tag's push failed) stops every
-      # run: semantic-release, finding no tag, would release the same
-      # version again on top of it. Only a commit semantic-release made
-      # counts (npm run release:commit, scripts/releaseCommit.ts): on
-      # main's first-parent chain, by github-actions[bot], changing only
-      # the files a release writes; a pull request's commit titled as one
-      # does not.
-      - name: CI passed on main's tip
-        id: tip
-        if: steps.key.outputs.set == 'true'
-        env:
-          EVENT: ${{ github.event_name }}
-          CHECKED: ${{ github.event.workflow_run.head_sha }}
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-        run: |
-          npm run release:commit -- last
-          tip="$(git rev-parse HEAD)"
-          if [ "$EVENT" = workflow_run ] && [ "$tip" = "$CHECKED" ]; then
-            echo "release=true" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-          if [ -z "$(gh run list --workflow ci.yml --commit "$tip" --event push --status success --limit 1 --json databaseId --jq '.[].databaseId')" ]; then
-            if [ "$EVENT" = workflow_run ]; then
-              echo "::notice::main has moved on from $CHECKED to $tip, and CI has not passed on $tip yet: its run releases it."
-              echo "release=false" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-            echo "::error::CI has not passed on a push of main's tip, $tip: run this again once it has."
-            exit 1
-          fi
-          echo "release=true" >> "$GITHUB_OUTPUT"
-      # No package's install script runs here (docs/releasing.md#the-deploy-key):
-      # the release needs none, and no browser runs here.
-      - if: steps.tip.outputs.release == 'true'
-        run: npm ci --ignore-scripts
-      # Every installed version is signed by the registry, and its
-      # attestations verify, as in CI's check job, before semantic-release
-      # runs (docs/releasing.md#the-deploy-key).
-      - if: steps.tip.outputs.release == 'true'
-        run: npm audit signatures
-      # The draw job's drawings, into the drawings' cache, which npm ci
-      # emptied. No run-id: the artifact of this run, which only the draw
-      # job uploads.
-      - if: steps.tip.outputs.release == 'true'
+      # No run-id: the artifact of this run, which only the prepare job
+      # uploads.
+      - if: steps.key.outputs.set == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: docs-drawings
-          path: node_modules/.cache/solid-memo-docs-diagrams
-      # Every drawing the archive holds is there and passes the checks the
-      # site's build makes (checkSvg, and the font's notice); --drawn
-      # draws nothing and starts no browser, as the archive in the
-      # release's prepare step does too (release.config.mjs).
-      - if: steps.tip.outputs.release == 'true'
-        name: The drawings are all there
-        run: npm run docs:archive -- --drawn
-      # Pushes the release commit and the tag over SSH, with the key, and
-      # makes the GitHub release with the run's token. The key is written
-      # to a file for this step alone, which git's ssh reads
-      # (GIT_SSH_COMMAND), and removed when it ends; the git config never
-      # holds it. semantic-release checks it can push before anything
-      # else, and pushes in its prepare step, so the key is on disk for
-      # the whole run, the docs' archive included, which draws nothing
-      # (--drawn).
-      # GitHub's host keys come from its API, over HTTPS, as
-      # actions/checkout would have set them.
-      - if: steps.tip.outputs.release == 'true'
-        name: npx semantic-release
+          name: release-bundle
+          path: ${{ runner.temp }}/bundle
+      # The tag alone, from the bundle, then the commit it names checked
+      # by main's script: a release commit of its version whose parent is
+      # main's tip, whose message is its subject alone, and whose five
+      # files are main's with the version, the date and one changelog
+      # entry written in (scripts/releaseChanges.ts).
+      - if: steps.key.outputs.set == 'true'
+        name: The release commit may be pushed onto main
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          bundle="$RUNNER_TEMP/bundle/release.bundle"
+          git bundle verify --quiet "$bundle"
+          git fetch --no-tags --quiet "$bundle" "refs/tags/$TAG:refs/tags/$TAG"
+          npm run release:commit -- next "$TAG"
+      # The key is written to a file for this step alone, which git's ssh
+      # reads (GIT_SSH_COMMAND), and removed when it ends; the git config
+      # never holds it. GitHub's host keys come from its API, over HTTPS,
+      # as actions/checkout would have set them. Not forced: a main that
+      # moved on, or a tag already there, refuses the whole push.
+      - if: steps.key.outputs.set == 'true'
+        name: Push the release commit and its tag
+        id: pushed
         env:
           KEY: ${{ secrets.SEMANTIC_RELEASE_KEY }}
-          GITHUB_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.prepare.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
           REPOSITORY_URL: git@github.com:${{ github.repository }}.git
-          GIT_AUTHOR_NAME: github-actions[bot]
-          GIT_AUTHOR_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: github-actions[bot]
-          GIT_COMMITTER_EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
         run: |
           ssh="$(mktemp -d "$RUNNER_TEMP/release-ssh.XXXXXX")"
           trap 'rm -rf "$ssh"' EXIT
@@ -347,28 +412,86 @@ jobs:
           unset KEY
           gh api meta --jq '.ssh_keys[] | "github.com " + .' > "$ssh/known_hosts"
           export GIT_SSH_COMMAND="ssh -i $ssh/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$ssh/known_hosts -o StrictHostKeyChecking=yes"
-          npx semantic-release --repository-url "$REPOSITORY_URL"
+          sha="$(git rev-parse --verify "refs/tags/$TAG^{commit}")"
+          git push --atomic "$REPOSITORY_URL" "$sha:refs/heads/main" "refs/tags/$TAG:refs/tags/$TAG"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+  # The GitHub release of the pushed tag, with no key and no package
+  # loaded: "Solid Memo X.Y.Z", with the version's changelog entry as its
+  # notes (npm run release:commit -- notes) and the docs' archive the
+  # prepare job made, attested as this workflow's on main. It is made as
+  # a draft, which the deploy refuses, and published only once the
+  # archive is attested and attached, so no version is public without
+  # its docs. Zenodo archives it once published.
+  publish:
+    needs: [prepare, push]
+    if: needs.push.outputs.pushed == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # To make the release.
+      contents: write
+      # To attest the docs' archive (actions/attest).
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      # main's tip, which the push made the release commit, with every
+      # tag. Keeping no credentials.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+      # Node, for main's scripts, which import no package.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: The release's notes
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          npm run release:commit -- tag "$TAG"
+          npm run --silent release:commit -- notes "$TAG" > "$RUNNER_TEMP/notes.md"
+      # No run-id: the artifact of this run, which only the prepare job
+      # uploads.
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-docs
+          path: release-assets
       # The archive of the version's docs, attested as made by this
       # workflow on main, so whoever downloads it can check where it came
-      # from (docs/deployment.md#a-releases-docs-as-an-archive).
-      # semantic-release makes and uploads it in one run, so it is attested
-      # just after: if this step fails, run the docs job by hand with the
-      # tag, which renders and attests it again.
-      - if: steps.tip.outputs.release == 'true' && hashFiles('release-assets/docs-*.tar.gz') != ''
-        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
+      # from (docs/deployment.md#a-releases-docs-as-an-archive), before
+      # the release that carries it is published.
+      - uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
           subject-path: release-assets/docs-*.tar.gz
+      # The version is main's newest, so the release is the latest.
+      - name: Make the GitHub release
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          version="${TAG#v}"
+          gh release create "$TAG" --verify-tag --draft --title "Solid Memo $version" --notes-file "$RUNNER_TEMP/notes.md"
+          gh release upload "$TAG" "release-assets/docs-$version.tar.gz#Documentation $version (HTML)"
+          gh release edit "$TAG" --draft=false --latest
 
-  # A version's docs, attached to its GitHub release when the release job
-  # could not (docs/releasing.md#when-a-release-fails): the release was
-  # made as a draft, and the upload failed, or the archive was not
-  # attested. Run by hand from main, with the version's tag. It checks
-  # that the tag (read as refs/tags/ only) names its version's release
-  # commit on main, renders the docs from that commit, as the release
-  # would have, attests them as this workflow's on main, and uploads
-  # them, then publishes the draft, which the deploy refuses; it needs
-  # no deploy key, and has none. A release that already carries an
-  # attested archive keeps it: an archive is rendered once.
+  # A version's GitHub release and its docs, when the release jobs could
+  # not make them (docs/releasing.md#when-a-release-fails): the publish
+  # job failed after the push, the release was left a draft, or its
+  # archive was not attested. Run by hand from main, with the version's
+  # tag, while no release run is running or waiting. It checks that the
+  # tag (read as refs/tags/ only) names its version's release commit on
+  # main, makes the release as a draft if it has none, with the
+  # version's changelog entry as its notes, renders the docs from that
+  # commit, as the release would have, attests them as this workflow's
+  # on main, and uploads them, then publishes the draft, which the
+  # deploy refuses; it needs no deploy key, and has none. A release that
+  # already carries an attested archive keeps it: an archive is rendered
+  # once.
   docs:
     if: >-
       github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
@@ -382,15 +505,8 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
-    # A group of its own for each tag, so it neither replaces a release
-    # run waiting its turn nor is replaced by one; run it only while no
-    # release is running or waiting, as it may mark its version latest
-    # (docs/releasing.md#when-a-release-fails).
-    concurrency:
-      group: release-docs-${{ inputs.tag }}
-      cancel-in-progress: false
     steps:
-      - name: The tag is a version with a GitHub release
+      - name: The tag is a version, and what its GitHub release holds
         id: release
         env:
           TAG: ${{ inputs.tag }}
@@ -402,14 +518,17 @@ jobs:
             exit 1
           fi
           version="${TAG#v}"
+          # A tag with no release gets one, as a draft, once its commit is
+          # checked, below.
+          made=true
           if ! draft=$(gh release view "$TAG" --json isDraft --jq .isDraft); then
-            echo "::error::$TAG has no GitHub release: make it first, as a draft (docs/releasing.md#when-a-release-fails)."
-            exit 1
+            made=false
+            draft=true
           fi
           # An archive it carries is kept when this workflow attested it
           # on main; one that is not is replaced.
           attach=true
-          if gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fqx "docs-$version.tar.gz"; then
+          if [ "$made" = true ] && gh release view "$TAG" --json assets --jq '.assets[].name' | grep -Fqx "docs-$version.tar.gz"; then
             carried="$(mktemp -d)"
             gh release download "$TAG" --pattern "docs-$version.tar.gz" --dir "$carried"
             if gh attestation verify "$carried/docs-$version.tar.gz" --repo "$GH_REPO" \
@@ -423,13 +542,14 @@ jobs:
               echo "::notice::The docs the release of $TAG carries are not attested: they are rendered again, and replace them."
             fi
           fi
-          # Latest only when it is the newest version, as semantic-release
+          # Latest only when it is the newest version, as the publish job
           # makes it; publishing an older draft must not take that from a
           # newer release.
           newest=$(gh api --paginate "repos/$GH_REPO/tags" --jq '.[].name' |
             grep -Ex 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n 1)
           {
             echo "version=$version"
+            echo "made=$made"
             echo "draft=$draft"
             echo "attach=$attach"
             echo "latest=$([ "$TAG" = "$newest" ] && echo true || echo false)"
@@ -458,6 +578,18 @@ jobs:
           git fetch --force --no-tags --quiet origin "+refs/tags/$TAG:refs/tags/$TAG"
           RELEASE_MAIN=HEAD npm run release:commit -- tag "$TAG"
           echo "sha=$(git rev-parse --verify "refs/tags/$TAG^{commit}")" >> "$GITHUB_OUTPUT"
+      # With the notes the publish job would have given it, by main's
+      # script, before anything of the tag's is checked out.
+      - if: steps.release.outputs.made == 'false'
+        name: Make the release as a draft
+        env:
+          TAG: ${{ inputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          npm run --silent release:commit -- notes "$TAG" > "$RUNNER_TEMP/notes.md"
+          gh release create "$TAG" --verify-tag --draft --title "Solid Memo $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
       - if: steps.release.outputs.attach == 'true'
         name: Check out the tag's commit
         env:
@@ -472,7 +604,7 @@ jobs:
             echo "::error::$TAG came before the docs were archived, so it has none to attach."
             exit 1
           fi
-      # As in the release job, which this renders the docs as: nothing
+      # As in the prepare job, which this renders the docs as: nothing
       # from GitHub's cache, as this job attests what it renders.
       - if: steps.release.outputs.attach == 'true'
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0

@@ -50,8 +50,9 @@ Only `main` deploys, and only from this repository:
   first-parent chain, titled `chore(release): X.Y.Z`, by
   `github-actions[bot]` as author and committer, and changing only the
   version's files, so a pull request's commit with that title, tagged by
-  hand, isn't deployed. semantic-release makes that release
-  seconds after the tag, so the deploy looks again for about a minute.
+  hand, isn't deployed. The release workflow's `publish` job makes that
+  release soon after the tag, so the deploy looks again for about a
+  minute.
   On an older release commit,
   a re-run of CI or of the deploy deploys nothing and says so in a
   notice, so the site never goes back to an older version. When the
@@ -383,11 +384,10 @@ An archive is rendered once, by that release's own code. It draws
 every diagram in Chromium, ignoring `DOCS_DIAGRAMS`, and fails without
 Chromium unless every drawing is in the drawings' cache already.
 `npm run docs:archive -- --draw` draws and checks them so, and writes
-no archive: the release workflow's `draw` job runs it, with no secret.
-With `--drawn`, alone or after the version, nothing is drawn and no
-browser is started: every drawing must be in the cache, or it fails.
-The release job, which holds the deploy key, checks the `draw` job's
-drawings so, and semantic-release's archive takes them so
+no archive: the release workflow's `prepare` job runs it, with no
+secret, before semantic-release. With `--drawn`, alone or after the
+version, nothing is drawn and no browser is started: every drawing must
+be in the cache, or it fails. semantic-release's archive takes them so
 ([releasing.md](releasing.md#the-deploy-key)). It checks each drawing
 as the build does (`checkSvg`, and the font's notice in it), then
 packs them with the system's `tar`. The

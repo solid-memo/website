@@ -4,17 +4,24 @@
 
 /**
  * semantic-release's settings (docs/releasing.md): after CI passes on a
- * push to main, .github/workflows/release.yml runs it on main's tip. It
- * reads the commits since the last tag, written as Conventional Commits
+ * push to main, .github/workflows/release.yml runs it on main's tip, in
+ * a job that holds no key and no token that can write. It reads the
+ * commits since the last tag, written as Conventional Commits
  * (CONTRIBUTING.md#commit-messages), merge commits aside, and when one
  * of them is releasable it chooses the next version from their types,
- * writes it into the files that name it, commits them to main, tags the
- * commit vX.Y.Z and makes a GitHub release of it, from which Zenodo
- * mints a DOI.
+ * writes it into the files that name it, commits them and tags the
+ * commit vX.Y.Z. It pushes both to a bare copy of the checkout, which
+ * git's url.<copy>.insteadOf puts in place of GitHub's URL, so the
+ * notes still link to GitHub (docs/releasing.md#the-deploy-key).
  *
- * The GitHub release carries the version's docs, as pages in an archive
- * (scripts/docsArchive.ts, docs/deployment.md#a-releases-docs-as-an-archive),
- * for whoever wants a release's docs as it had them.
+ * The workflow's push job checks the commit and pushes it and its tag
+ * to main with the deploy key; its publish job makes the GitHub
+ * release, from which Zenodo mints a DOI, with the version's
+ * changelog entry as its notes and the version's docs as pages in an
+ * archive (scripts/docsArchive.ts,
+ * docs/deployment.md#a-releases-docs-as-an-archive), for whoever wants a
+ * release's docs as it had them. So no plugin here makes the GitHub
+ * release.
  *
  * The release commit is not marked [skip ci]: CI runs on it, and the
  * deploy that follows, which deploys only a commit a version tag names,
@@ -72,17 +79,6 @@ export const assets = [
   "publiccode.yml",
   "CITATION.cff",
 ];
-
-/**
- * The archive of the version's docs, which prepareCmd writes with
- * `npm run docs:archive` (scripts/docsArchive.ts's archivePath), and the
- * GitHub release carries. A glob, as the plugin does not fill in the
- * version in a path; the release job's checkout holds no other archive.
- */
-export const docsArchive = {
-  path: "release-assets/docs-*.tar.gz",
-  label: "Documentation ${nextRelease.version} (HTML)",
-};
 
 /**
  * How the commit analyzer and the release-notes generator find a
@@ -174,10 +170,10 @@ export default {
     ["@semantic-release/npm", { npmPublish: false }],
     // publiccode.yml's and CITATION.cff's version and date; then the
     // version's docs, as an archive the GitHub release carries, with the
-    // drawings release.yml's draw job made in Chromium: --drawn takes
-    // them from the drawings' cache and starts no browser, as the job
-    // that runs this holds the deploy key. A failure here stops the
-    // release before anything is pushed.
+    // drawings release.yml's prepare job made in Chromium before
+    // semantic-release ran: --drawn takes them from the drawings' cache
+    // and starts no browser. A failure here stops the release before
+    // anything is committed.
     [
       "@semantic-release/exec",
       {
@@ -190,21 +186,6 @@ export default {
       {
         assets,
         message: "chore(release): ${nextRelease.version}",
-      },
-    ],
-    // No comments on the issues and pull requests a release includes, and
-    // no issue opened when a release fails: the workflow's run says so,
-    // and the token needs no more than to write the repository's contents.
-    // With an asset, the plugin makes the release as a draft, uploads the
-    // asset, and only then publishes it, so the deploy, which refuses a
-    // draft, never finds the release without its docs.
-    [
-      "@semantic-release/github",
-      {
-        assets: [docsArchive],
-        releaseNameTemplate: "Solid Memo ${nextRelease.version}",
-        successCommentCondition: false,
-        failCommentCondition: false,
       },
     ],
   ],

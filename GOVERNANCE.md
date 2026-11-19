@@ -149,10 +149,10 @@ built to pass the tests, so a person merges each update, unless
   run-time dependencies of the workspace packages that
   `npm run check:dependencies` walks, the Solid client that handles
   login and pod access among them. The CI job whose build is deployed
-  runs Vite, its plugins and `turbo`. The release job runs
-  `semantic-release`, its plugins and what `npm run docs:archive` loads
-  while it holds the deploy key
-  ([docs/releasing.md](docs/releasing.md#the-deploy-key)). And an update
+  runs Vite, its plugins and `turbo`. The release workflow's `prepare`
+  job runs `semantic-release`, its plugins and what
+  `npm run docs:archive` loads, and the commit it makes is pushed with
+  the deploy key ([docs/releasing.md](docs/releasing.md#the-deploy-key)). And an update
   of a development tool can move, in `package-lock.json`, a package the
   app ships and shares with it. A Renovate rule matches only the package
   an update names, not what the update moves in the lockfile, so no npm

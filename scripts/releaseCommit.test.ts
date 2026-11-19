@@ -3,11 +3,19 @@
 // SPDX-License-Identifier: MIT
 
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { type Commit, defaultIo, main, type ReleaseCommitIo, run } from "./releaseCommit.ts";
+import type { Change } from "./releaseChanges.ts";
+import {
+  type Commit,
+  defaultIo,
+  type FileChange,
+  main,
+  type ReleaseCommitIo,
+  run,
+} from "./releaseCommit.ts";
 
 const BOT = "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>";
 
@@ -15,15 +23,31 @@ function commit(sha: string, subject: string, overrides: Partial<Commit> = {}): 
   return { sha, subject, parents: [`${sha}^`], author: BOT, committer: BOT, ...overrides };
 }
 
-/** An io over these first-parent commits, the files each changes, and the tags. */
+/**
+ * An io over these first-parent commits, the files each changes, and the
+ * tags; and, for a release commit not yet on main, main's tip, the
+ * commits off main, their messages and their files' text.
+ */
 function fake(
   commits: Commit[],
-  options: { changed?: Record<string, string[]>; tags?: Record<string, string> } = {},
+  options: {
+    changed?: Record<string, string[]>;
+    tags?: Record<string, string>;
+    head?: string;
+    others?: Commit[];
+    messages?: Record<string, string>;
+    changes?: Record<string, FileChange[]>;
+  } = {},
 ) {
   const messages: string[] = [];
   const tags = options.tags ?? {};
+  const all = [...commits, ...(options.others ?? [])];
   const io: ReleaseCommitIo = {
     firstParents: () => commits,
+    head: () => options.head ?? commits[0]!.sha,
+    commit: (sha) => all.find((each) => each.sha === sha)!,
+    message: (sha) => options.messages?.[sha] ?? all.find((each) => each.sha === sha)!.subject,
+    changes: (sha) => options.changes?.[sha] ?? [],
     changed: (sha) => options.changed?.[sha] ?? ["package.json", "CHANGELOG.md"],
     tags: (sha) => Object.keys(tags).filter((name) => tags[name] === sha),
     tagged: (name) => tags[name],
@@ -132,6 +156,149 @@ describe("main tag", () => {
   });
 });
 
+const { changelogTitle } = (await import(
+  new URL("../release.config.mjs", import.meta.url).href
+)) as {
+  changelogTitle: string;
+};
+
+const ENTRY =
+  "## [1.0.1](https://github.com/solid-memo/website/compare/v1.0.0...v1.0.1) (2026-11-19)\n\n* **solid:** keep the deck";
+
+/** The five files of a release of 1.0.1 on 2026-11-19, as releaseChanges.test.ts holds them. */
+function released(): FileChange[] {
+  const files: Change[] = [
+    {
+      path: "package.json",
+      before: '{\n  "version": "1.0.0"\n}\n',
+      after: '{\n  "version": "1.0.1"\n}\n',
+    },
+    {
+      path: "package-lock.json",
+      before:
+        '{\n  "version": "1.0.0",\n  "packages": {\n    "": {\n      "version": "1.0.0"\n    }\n  }\n}\n',
+      after:
+        '{\n  "version": "1.0.1",\n  "packages": {\n    "": {\n      "version": "1.0.1"\n    }\n  }\n}\n',
+    },
+    {
+      path: "publiccode.yml",
+      before: 'softwareVersion: 1.0.0\nreleaseDate: "2026-01-01"\n',
+      after: 'softwareVersion: 1.0.1\nreleaseDate: "2026-11-19"\n',
+    },
+    {
+      path: "CITATION.cff",
+      before: 'version: "1.0.0"\ndate-released: "2026-01-01"\n',
+      after: 'version: "1.0.1"\ndate-released: "2026-11-19"\n',
+    },
+    {
+      path: "CHANGELOG.md",
+      before: `${changelogTitle}\n\n## 1.0.0\n`,
+      after: `${changelogTitle}\n\n${ENTRY}\n\n## 1.0.0\n`,
+    },
+  ];
+  return files.map((file) => ({ ...file, modified: true }));
+}
+
+describe("main next", () => {
+  const refusal = (why: string) =>
+    `::error::v1.0.1 names no release commit that may be pushed onto main (${why}), so nothing is pushed (docs/releasing.md#the-deploy-key).`;
+  const tip = commit("a", "fix: keep the deck");
+  const next = (overrides: Partial<Commit> = {}, options: Parameters<typeof fake>[1] = {}) =>
+    fake([tip], {
+      tags: { "v1.0.1": "r" },
+      others: [commit("r", "chore(release): 1.0.1", { parents: ["a"], ...overrides })],
+      changed: { r: released().map((change) => change.path) },
+      changes: { r: released() },
+      ...options,
+    });
+
+  it("passes a release commit on main's tip with nothing but a release's changes", () => {
+    const { io, messages } = next();
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(0);
+    expect(messages).toEqual(["v1.0.1 names r, a release commit onto main's tip."]);
+  });
+
+  it("refuses a tag that names no commit", () => {
+    const { io, messages } = next({}, { tags: {} });
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+    expect(messages).toEqual([refusal("it names no commit")]);
+  });
+
+  it("refuses a commit whose parent is not main's tip", () => {
+    for (const parents of [["z"], ["a", "z"]]) {
+      const { io, messages } = next({ parents });
+      expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+      expect(messages).toEqual([refusal("r's parent is not main's tip, a")]);
+    }
+  });
+
+  it("refuses a commit that is not semantic-release's", () => {
+    const { io, messages } = next({ author: "Someone <someone@example.org>" });
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+    expect(messages).toEqual([
+      refusal(`r: its author is Someone <someone@example.org>, not ${BOT}`),
+    ]);
+  });
+
+  // GitHub skips CI on a push whose message holds a skip keyword anywhere.
+  it("refuses a commit whose message is more than its subject", () => {
+    const { io, messages } = next({}, { messages: { r: "chore(release): 1.0.1\n\n[skip ci]" } });
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+    expect(messages).toEqual([refusal("r's message is more than its subject")]);
+  });
+
+  it("refuses a commit that adds, removes or changes the mode of a file", () => {
+    const changes = released().map((change) =>
+      change.path === "package.json" ? { ...change, modified: false } : change,
+    );
+    const { io, messages } = next({}, { changes: { r: changes } });
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+    expect(messages).toEqual([refusal("r adds, removes or changes the mode of package.json")]);
+  });
+
+  it("refuses a commit that changes more than a release writes", () => {
+    const changes = released().map((change) =>
+      change.path === "package.json"
+        ? { ...change, after: '{\n  "version": "1.0.1",\n  "scripts": {}\n}\n' }
+        : change,
+    );
+    const { io, messages } = next({}, { changes: { r: changes } });
+    expect(main(["node", "next", "v1.0.1"], io)).toBe(1);
+    expect(messages).toEqual([
+      refusal("r: package.json: changes more than the version and the date"),
+    ]);
+  });
+});
+
+describe("main notes", () => {
+  it("prints the changelog entry the tag's commit added", () => {
+    const { io, messages } = fake([commit("r", "chore(release): 1.0.1")], {
+      tags: { "v1.0.1": "r" },
+      changes: { r: released() },
+    });
+    expect(main(["node", "notes", "v1.0.1"], io)).toBe(0);
+    expect(messages).toEqual([ENTRY]);
+  });
+
+  it("fails for a tag with no commit, or a commit that added no entry", () => {
+    const changelog = released().filter((change) => change.path === "CHANGELOG.md");
+    const { io, messages } = fake([commit("r", "chore(release): 1.0.1")], {
+      tags: { "v1.0.1": "r", "v1.0.2": "s" },
+      changes: {
+        s: [{ ...changelog[0]!, after: changelog[0]!.before.replace("1.0.0", "0.9.0") }],
+      },
+    });
+    for (const tag of ["v1.0.1", "v1.0.2", "v1.0.3"]) {
+      expect(main(["node", "notes", tag], io)).toBe(1);
+    }
+    expect(messages).toEqual(
+      ["v1.0.1", "v1.0.2", "v1.0.3"].map(
+        (tag) => `::error::${tag} names no commit that added an entry to CHANGELOG.md.`,
+      ),
+    );
+  });
+});
+
 describe("main's usage", () => {
   it("is told for a call it does not know", () => {
     for (const argv of [
@@ -141,11 +308,16 @@ describe("main's usage", () => {
       ["node", "tag", "1.0.1"],
       ["node", "tag", "v1.0.1-rc.1"],
       ["node", "tag", "v1.0.1", "v1.0.2"],
+      ["node", "next", "v1.0.1-rc.1"],
+      ["node", "notes"],
       ["node", "other"],
+      ["node", "toString", "v1.0.1"],
     ]) {
       const { io, messages } = fake([]);
       expect(main(argv, io)).toBe(2);
-      expect(messages).toEqual(["Usage: npm run release:commit -- last | tag <vX.Y.Z>"]);
+      expect(messages).toEqual([
+        "Usage: npm run release:commit -- last | tag | next | notes <vX.Y.Z>",
+      ]);
     }
   });
 });
@@ -251,6 +423,37 @@ describe("defaultIo, on a repository with a pull request's commit titled as a re
     );
   });
 
+  it("reads a commit off main, its whole message and the text of the files it changes", () => {
+    const tip = git(["rev-parse", "main"]);
+    git(["switch", "-q", "--detach"]);
+    write("package.json", '{"version":"1.0.1"}\n');
+    write("added.txt", "new\n");
+    chmodSync(join(repo, "app.js"), 0o755);
+    git(["add", "."]);
+    git(["commit", "-q", "-m", "chore(release): 1.0.1", "-m", "A body."], bot);
+    const sha = git(["rev-parse", "HEAD"]);
+    const real = io();
+    expect(real.head()).toBe(tip);
+    expect(real.commit(sha)).toEqual({
+      sha,
+      parents: [tip],
+      author: BOT,
+      committer: BOT,
+      subject: "chore(release): 1.0.1",
+    });
+    expect(real.message(sha)).toBe("chore(release): 1.0.1\n\nA body.");
+    expect(real.changes(sha)).toEqual([
+      { path: "added.txt", modified: false, before: "", after: "" },
+      { path: "app.js", modified: false, before: "", after: "" },
+      {
+        path: "package.json",
+        modified: true,
+        before: '{"version":"1.0.0"}\n',
+        after: '{"version":"1.0.1"}\n',
+      },
+    ]);
+  });
+
   // A name may hold any character but NUL, a line feed, < and >, so the
   // fields are read apart at NUL: a name with another separator in it
   // stays one name.
@@ -288,7 +491,9 @@ describe("run", () => {
       run(process);
       expect(process.exitCode).toBe(2);
     }
-    expect(log).toHaveBeenCalledWith("Usage: npm run release:commit -- last | tag <vX.Y.Z>");
+    expect(log).toHaveBeenCalledWith(
+      "Usage: npm run release:commit -- last | tag | next | notes <vX.Y.Z>",
+    );
     log.mockRestore();
   });
 });
