@@ -555,8 +555,8 @@ export function recordThing<T>(
  * knows over it, and refuses a source a newer version wrote, as it would
  * in place. Each value is carried as it is. A value that is a blank
  * node is left out, as what it says stays in the source's document, and
- * so is an IRI that is no http(s) URL, as a value (isCarried) or a
- * property.
+ * so is an IRI that is no http(s) URL, as a value, a literal's datatype
+ * (isCarried) or a property.
  */
 export function carriedTo(
   source: Subject,
@@ -574,13 +574,15 @@ export function carriedTo(
 }
 
 /**
- * Whether carriedTo carries a value: a literal, or an http(s) IRI. An
- * IRI of another scheme stays behind, as a property does: one such as
- * `sm:Deck` names no term of the app, yet a JSON-LD file would read it
- * as one (GHSA-gxjp-m253-f2pj).
+ * Whether carriedTo carries a value: an http(s) IRI, or a literal whose
+ * datatype is one. An IRI of another scheme stays behind, as a value, a
+ * literal's datatype or a property: one such as `sm:Deck` names no term
+ * of the app, yet a JSON-LD file would read it as one, and the deck's
+ * export refuses it (GHSA-gxjp-m253-f2pj, GHSA-636q-3g97-fhhw).
  */
 function isCarried(term: Quad_Object): term is Literal | NamedNode {
-  return term.termType === "Literal" || (term.termType === "NamedNode" && isHttpUrl(term.value));
+  if (term.termType === "Literal") return isHttpUrl(term.datatype.value);
+  return term.termType === "NamedNode" && isHttpUrl(term.value);
 }
 
 /**
