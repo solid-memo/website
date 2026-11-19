@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/preact";
-import { parseMarkdown } from "@solid-memo/markdown/parse";
+import { cleanup, render, screen } from "@testing-library/preact";
+import { MAX_CHARS, parseMarkdown } from "@solid-memo/markdown/parse";
 import type { Locale } from "@solid-memo/domain/locale";
 import { I18nProvider } from "./i18n";
 import { inDataRegion, MarkdownBlocks } from "./Markdown";
@@ -227,5 +227,68 @@ describe("inDataRegion", () => {
     expect(inDataRegion(md.querySelector("pre code")!)).toBe(true);
     expect(inDataRegion(md.querySelector("th")!)).toBe(true);
     expect(inDataRegion(md.querySelector("p")!)).toBe(false);
+  });
+});
+
+/**
+ * What drawing a text costs: a text of links as dense as the parser's
+ * budget lets through draws within `most` times what text like a
+ * course's step of the same length takes, as each link is charged what
+ * drawing it takes (LINK_WORK). The densest such texts are inline links
+ * back to back, and reference links to one definition with as much text
+ * between them as an inline link's URL takes. The CPU time of the test's
+ * own thread, the median of seven runs: the two texts take turns, after
+ * a first turn that warms up the renderer, so that both are timed as
+ * warm as each other, and the time a collector spends on another thread
+ * on what an earlier run left behind isn't counted.
+ */
+describe("the cost of drawing a text", () => {
+  const most = 10;
+  const fill = (unit: string, head = "") =>
+    head + unit.repeat(Math.floor((MAX_CHARS - head.length) / unit.length));
+  const defined = (unit: string) => fill(unit, "[a]: https://b\n\n");
+  const draw = (markdown: string) => {
+    const blocks = parseMarkdown(markdown);
+    expect(blocks).not.toBeNull();
+    return () => {
+      const started = process.threadCpuUsage();
+      render(
+        <I18nProvider locale="en" onChoose={() => undefined}>
+          <MarkdownBlocks blocks={blocks!} />
+        </I18nProvider>,
+      );
+      const { user, system } = process.threadCpuUsage(started);
+      cleanup();
+      return user + system;
+    };
+  };
+  const step = fill(
+    "## A heading\n\nA paragraph of a step, with **a term**, `code` and [a link](https://example.org/a).\n\n- A first item\n- A second item\n\n",
+  );
+  it.each([
+    ["links", fill("[a](https://b)")],
+    ["autolinks", fill("<https://b>   ")],
+    ["reference links in prose", defined("A word or two, then [a][] and [a].\n")],
+    ["collapsed reference links as dense as links", defined("[a][]xxxxxxxxx")],
+    ["shortcut reference links as dense as links", defined("[a] xxxxxxxxxx")],
+    ["shortcut reference links as many spaces apart", defined("[a]           ")],
+  ])("draws %s within a small multiple of real text", { timeout: 60_000 }, (_, input) => {
+    const drawStep = draw(step);
+    const drawInput = draw(input);
+    drawStep();
+    drawInput();
+    const bases: number[] = [];
+    const tooks: number[] = [];
+    for (let round = 0; round < 7; round++) {
+      bases.push(drawStep());
+      tooks.push(drawInput());
+    }
+    const median = (times: number[]) => times.sort((a, b) => a - b)[times.length >> 1]!;
+    const base = median(bases);
+    const took = median(tooks);
+    expect(
+      took / base,
+      `${Math.round(took / 1000)} ms against ${Math.round(base / 1000)} ms of text like a course's`,
+    ).toBeLessThan(most);
   });
 });

@@ -125,8 +125,14 @@ shapes of Markdown make the parser slow.
   read lines that later tries read again. Every other try reads its own
   line, or the lines its block holds, besides a table's try that fails,
   which reads the next line too, and a code block's, which reads the
-  blank lines after it, each once. Each byte of a link's or a
-  picture's URL in UTF-8 is a unit too, each time it's used. A
+  blank lines after it, each once. Each link is 112 units more
+  (`LINK_WORK`). Drawing one takes far longer than its few tokens: its
+  element, its icon, the words that say it opens a new tab and the host
+  beside it. No text the budget lets through holds links denser than
+  inline links back to back, such as `[a](https://b)` again and again.
+  A text of reference links to one definition with but a few
+  characters between them, or of autolinks back to back, is past it. Each byte of a link's
+  or a picture's URL in UTF-8 is a unit too, each time it's used. A
   reference link resolves to its definition's URL however often a text
   uses it, and the check and the renderer handle the URL of each use on
   its own. An `href` takes at most three characters for each byte, a
@@ -182,9 +188,12 @@ length takes, or within 4 times what its first eighth takes read eight
 times over. Time linear in the length gives about once, quadratic time
 about eight. Both are CPU time, which a busy CI runner doesn't stretch
 as it does the time on the clock. The costliest shapes the budget lets
-through, such as a heading on each line, lists of one-word items and
-tables of empty rows, each read within 7 times what text like a
-course's step of the same length takes.
+through each read within 7 times what text like a course's step of the
+same length takes. Among them are a heading on each line, lists of
+one-word items, tables of empty rows and a link every few characters.
+Drawn, a text of links as dense as the budget lets through, inline
+links or reference links, takes within 10 times what such a step of its
+length takes, timed on the test's own thread.
 
 ### Chunks
 

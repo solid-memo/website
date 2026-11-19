@@ -2,6 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
+/** A followed link (liveLink): where it leads, and the host it names, both as the URL parser has them. */
+export interface LiveLink {
+  href: string;
+  host: string;
+}
+
 /**
  * Whether a Markdown link is followed, and where it leads: only an
  * absolute `https:` URL without a user name or password is
@@ -12,9 +18,9 @@
  * as the URL parser has it (punycode kept), to be shown beside a link
  * whose text is not its URL.
  */
-export function liveLink(url: string): { href: string; host: string } | null {
-  if (!URL.canParse(url)) return null;
-  const parsed = new URL(url);
+export function liveLink(url: string): LiveLink | null {
+  const parsed = URL.parse(url);
+  if (parsed === null) return null;
   if (parsed.protocol !== "https:" || parsed.username !== "" || parsed.password !== "") return null;
   return { href: parsed.href, host: parsed.host };
 }
