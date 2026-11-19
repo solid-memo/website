@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.1](https://github.com/solid-memo/website/compare/v8.0.0...v8.0.1) (2026-11-19)
+
+### Fixes
+
+* **domain:** read a state of a card past the term bound as none ([a6c0324](https://github.com/solid-memo/website/commit/a6c0324b5dea55668c9d533cd690deacc2d409bf))
+* **release:** pin the version and the date the push job pushes ([8966657](https://github.com/solid-memo/website/commit/89666571e4a8be52467b918949f865068fca357c))
+* **solid:** leave behind copied literals of datatypes that are no URL ([1d17732](https://github.com/solid-memo/website/commit/1d1773229e39020da2be250071910c7addfc9f1d))
+
 ## [8.0.0](https://github.com/solid-memo/website/compare/v7.9.3...v8.0.0) (2026-11-19)
 
 ### ⚠ BREAKING CHANGES
