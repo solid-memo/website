@@ -16,7 +16,7 @@ cd memo
 npm ci
 ```
 
-It needs Node.js 24 or later (`engines` in the root
+It needs Node.js 26.13 or later (`engines` in the root
 [package.json](../package.json); CI uses `.nvmrc`'s version). The
 build and the checks draw the docs' diagrams in Chromium: install it
 once, without `sudo`, with `npm run browsers`, and on Linux any missing

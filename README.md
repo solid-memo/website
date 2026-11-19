@@ -140,7 +140,7 @@ settings.
 
 ## Develop
 
-You need Node 24 (see [`.nvmrc`](.nvmrc)) and npm; Chromium for
+You need Node 26.13 or later (see [`.nvmrc`](.nvmrc)) and npm; Chromium for
 `npm run check` and `npm run build`, which draw the docs' diagrams in it
 ([docs/markdown.md](docs/markdown.md#diagrams)): `npm run browsers`
 installs it once (on Linux, a machine that lacks the system libraries

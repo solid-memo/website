@@ -289,10 +289,10 @@
             ],
             allowedVersions: '<25',
         },
-        // The dev container's image keeps to Node 24, as .nvmrc and CI do.
+        // The dev container's image keeps to Node 26, as .nvmrc and CI do.
         // Its tags put the image's own version first and Node's after it
-        // (5.2.3-24-bookworm), so the rule matches the tag's end: a range
-        // such as '<25' matches none of them.
+        // (5.2.6-26-bookworm), so the rule matches the tag's end: a range
+        // such as '<27' matches none of them.
         {
             matchFileNames: [
                 '.devcontainer/devcontainer.json',
@@ -300,7 +300,7 @@
             matchDepNames: [
                 'mcr.microsoft.com/devcontainers/typescript-node',
             ],
-            allowedVersions: '/-24-bookworm$/',
+            allowedVersions: '/-26-bookworm$/',
         },
         // Pivot's image keeps to Node 22, which Pivot's own CI runs.
         {
