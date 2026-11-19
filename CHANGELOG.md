@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.3](https://github.com/solid-memo/website/compare/v8.0.2...v8.0.3) (2026-11-19)
+
+### Fixes
+
+* **ui:** bound the translation entries the editor draws ([b5d24d6](https://github.com/solid-memo/website/commit/b5d24d645314f01f4a41c651d05d0706fc512c8e))
+
 ## [8.0.2](https://github.com/solid-memo/website/compare/v8.0.1...v8.0.2) (2026-11-19)
 
 ### Fixes
