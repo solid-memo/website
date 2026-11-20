@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.4](https://github.com/solid-memo/website/compare/v8.0.3...v8.0.4) (2026-11-20)
+
+### Fixes
+
+* **library:** plan the copies of one cards document once ([a9cff9f](https://github.com/solid-memo/website/commit/a9cff9fbf6c565b5eb6a2ad464e2bd120df76a30))
+* **release:** render a tag's docs in a job that cannot write ([abaef8f](https://github.com/solid-memo/website/commit/abaef8f25cfa4ad1b0f00d049ce27f9b42b6e1f3))
+* **validation:** check a document many decks name once ([cd4714f](https://github.com/solid-memo/website/commit/cd4714f24afd839b452e7d2eeaec2f75a6766a06))
+
 ## [8.0.3](https://github.com/solid-memo/website/compare/v8.0.2...v8.0.3) (2026-11-19)
 
 ### Fixes
