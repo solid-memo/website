@@ -30,6 +30,8 @@ describe("where a deck's documents may be", () => {
       },
       { cardsDocumentUrl: `${DECKS}old/deck-1.ttl` },
       { cardsDocumentUrl: `${DECKS}deck%201.ttl`, reviewsDocumentUrl: `${DECKS}deck-1.TTL` },
+      // Single dots anywhere but at a segment's start.
+      { cardsDocumentUrl: `${DECKS}v1.0.2/deck.1.ttl` },
       {
         cardsDocumentUrl: "https://pod.example/spanish-cards",
         reviewsDocumentUrl: "https://pod.example/spanish-reviews",
@@ -69,6 +71,16 @@ describe("where a deck's documents may be", () => {
       { reviewsDocumentUrl: `${ROOT}reviews//deck-1.ttl` },
       { cardsDocumentUrl: `${DECKS}` },
       { cardsDocumentUrl: `${DECKS}.ttl` },
+      // Two dots inside a segment, which some servers strip: another spelling of another
+      // document, a deck's or one of the instance's own.
+      { cardsDocumentUrl: `${DECKS}span..ish.ttl` },
+      { cardsDocumentUrl: `${DECKS}span%2e%2eish.ttl` },
+      { cardsDocumentUrl: `${DECKS}span.%2Eish.ttl` },
+      { cardsDocumentUrl: `${DECKS}span%2E.ish.ttl` },
+      { cardsDocumentUrl: `${ROOT}catal..og.ttl` },
+      { reviewsDocumentUrl: `${ROOT}pre..ferences.ttl` },
+      { cardsDocumentUrl: `${ROOT}dra..fts/x/release.ttl` },
+      { reviewsDocumentUrl: `${ROOT}history/2026-10..ttl` },
     ]) {
       expect(isDeckInPlace({ ...deck, ...misplaced }), JSON.stringify(misplaced)).toBe(false);
     }

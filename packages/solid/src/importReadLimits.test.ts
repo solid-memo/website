@@ -220,7 +220,7 @@ describe("a deck's removal, its own document past the limits of one read (GHSA-f
     expect(await p.status(url)).toBe(200);
   });
 
-  it("keeps such a document where a deck whose id holds `..` would keep its own", async () => {
+  it("leaves such a document alone where a deck whose id holds `..` would keep its own", async () => {
     const p = pod((local) => limitedFetch(local, FOREIGN_LIMITS));
     const { deck } = await oversized(p);
     const catalog = `${INSTANCE}catalog.ttl`;
@@ -228,9 +228,10 @@ describe("a deck's removal, its own document past the limits of one read (GHSA-f
     await put(p.local, catalog, text.split(deck.id).join("a..b"));
     const url = `${INSTANCE}decks/a..b.ttl`;
     await put(p.local, url, await (await p.local(deck.cardsDocumentUrl)).text());
-    const [renamed] = await p.decks.listDecks(INSTANCE);
-    expect(renamed!.cardsDocumentUrl).toBe(url);
-    expect(await p.decks.removeDecks([renamed!])).toEqual({ keptDocuments: [url] });
+    // A deck naming an address with `..` inside a segment is not listed, read or written (GHSA-h78f-3xr9-29w9).
+    expect(await p.decks.listDecks(INSTANCE)).toEqual([]);
+    const renamed = { ...deck, id: "a..b", url: `${catalog}#a..b`, cardsDocumentUrl: url };
+    expect(await p.decks.removeDecks([renamed])).toEqual({ keptDocuments: [] });
     expect(await p.status(url)).toBe(200);
   });
 

@@ -94,7 +94,8 @@ flowchart LR
   Memo reads to find its instances. Reading accepts
   `solid:instanceContainer` or `solid:instance` naming an http(s)
   address with no query, fragment, dot segment (`..`, `%2e%2e` in any
-  case) or empty segment (`//`; `isInstanceAddress` in
+  case), empty segment (`//`) or two dots in a row inside a segment
+  (`a..b`, in any spelling; `isInstanceAddress` in
   [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). The
   address is taken as written: another spelling of a folder (its host's
   case, a name outside ASCII) is that folder
@@ -582,7 +583,10 @@ No document Solid Memo names has any.
   may be (`isDeckInPlace`, `isDeckDocumentAddress` in
   [deckAddress.ts](../packages/domain/src/deckAddress.ts)). That's plain
   http(s), with nothing a server might read as a step elsewhere (as
-  above). It isn't a folder, an access control or metadata resource
+  above). It has no two dots in a row anywhere in its path
+  (`span..ish.ttl`, `%2e%2e` or `.%2e` in any case): some servers strip
+  them, so it would be another spelling of another document
+  ([interop.md](interop.md#javascript-solid-server)). It isn't a folder, an access control or metadata resource
   (`.acl`, `.acr`, `.meta`), or one of the instance's own documents (its
   meta, preferences, palettes, catalog and digest, `history/`, `drafts/`,
   `releases/`). It's in a guest's pod exactly when the catalog is: only
