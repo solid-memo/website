@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.7](https://github.com/solid-memo/website/compare/v8.0.6...v8.0.7) (2026-11-20)
+
+### Fixes
+
+* **application:** read a draft's earlier release only when it may follow it ([8925f57](https://github.com/solid-memo/website/commit/8925f57a0bd9d356a325ea1c9330589733b82629))
+* **studio:** bound the release diff and compare only followable releases ([7eea750](https://github.com/solid-memo/website/commit/7eea750d98685104f9b58d96da2a19da98702631))
+
 ## [8.0.6](https://github.com/solid-memo/website/compare/v8.0.5...v8.0.6) (2026-11-20)
 
 ### Fixes
