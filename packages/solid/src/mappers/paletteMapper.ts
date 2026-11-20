@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { type Dataset, asUrl, getThing, getThingAll, getUrlAll, setThing } from "../client/rdf";
-import type { CustomPalette } from "@solid-memo/domain/customPalette";
+import { type CustomPalette, MAX_PALETTES } from "@solid-memo/domain/customPalette";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import {
   colorSetToRecord,
@@ -41,29 +41,31 @@ function colorSetOf(dataset: Dataset, iri: string, documentUrl: string): ColorSe
 }
 
 /**
- * Every palette of a palettes document read from `documentUrl`, in the
+ * The palettes of a palettes document read from `documentUrl`, in the
  * order written: each a subject of that document, as a palette the
- * preferences name must be (isPaletteOf).
+ * preferences name must be (isPaletteOf). Only the first MAX_PALETTES
+ * it can read are kept; the rest are not read at all.
  */
 export function toPalettes(dataset: Dataset, documentUrl: string): CustomPalette[] {
-  return getThingAll(dataset)
-    .filter(
-      (thing) => getUrlAll(thing, RDF.type).includes(SM.Palette) && isIn(asUrl(thing), documentUrl),
-    )
-    .flatMap((thing) => {
-      const read = readVersioned(thing, "palette");
-      if (read === null) return [];
-      const url = asUrl(thing);
-      const data = migrate("palette", read.record, { subject: url });
-      return [
-        paletteFromRecord(
-          url,
-          data,
-          colorSetOf(dataset, data.lightColors, documentUrl),
-          colorSetOf(dataset, data.darkColors, documentUrl),
-        ),
-      ];
-    });
+  const palettes: CustomPalette[] = [];
+  for (const thing of getThingAll(dataset)) {
+    if (palettes.length === MAX_PALETTES) break;
+    if (!getUrlAll(thing, RDF.type).includes(SM.Palette)) continue;
+    const url = asUrl(thing);
+    if (!isIn(url, documentUrl)) continue;
+    const read = readVersioned(thing, "palette");
+    if (read === null) continue;
+    const data = migrate("palette", read.record, { subject: url });
+    palettes.push(
+      paletteFromRecord(
+        url,
+        data,
+        colorSetOf(dataset, data.lightColors, documentUrl),
+        colorSetOf(dataset, data.darkColors, documentUrl),
+      ),
+    );
+  }
+  return palettes;
 }
 
 /**

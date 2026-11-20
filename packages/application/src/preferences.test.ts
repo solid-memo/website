@@ -9,7 +9,7 @@ import { createUseCases } from "./useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { Palette } from "@solid-memo/domain/palette";
-import type { CustomPalette } from "@solid-memo/domain/customPalette";
+import { type CustomPalette, MAX_PALETTES } from "@solid-memo/domain/customPalette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
 import { memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
@@ -482,6 +482,31 @@ describe("preferences", () => {
         await expect(
           code(useCases.savePalette(INSTANCE, { ...READING, url: "https://evil.example/p.ttl#x" })),
         ).resolves.toContain("Not a palette of");
+      });
+
+      const full = () =>
+        Array.from({ length: MAX_PALETTES }, (_, at) => ({
+          ...READING,
+          url: `${INSTANCE}palettes.ttl#palette-${at}`,
+        }));
+
+      it("refuse one not listed once the instance has MAX_PALETTES, as no more are read, but not an edit", async () => {
+        const palettes = paletteRepository(full());
+        const useCases = createUseCases({ ...makeDeps(), paletteRepository: palettes });
+        const { url: _, ...draft } = READING;
+        // A new one, and one at an address of the instance the list does not hold.
+        for (const url of [null, `${INSTANCE}palettes.ttl#palette-${MAX_PALETTES}`]) {
+          const refused = await useCases.savePalette(INSTANCE, { ...draft, url }).then(
+            () => null,
+            (error: unknown) => error,
+          );
+          expect(refused).toBeInstanceOf(AppError);
+          expect(refused).toMatchObject({ code: "paletteLimit", vars: { limit: MAX_PALETTES } });
+        }
+        expect(palettes.savePalette).not.toHaveBeenCalled();
+        const edited = { ...READING, url: `${INSTANCE}palettes.ttl#palette-0` };
+        await expect(useCases.savePalette(INSTANCE, edited)).resolves.toEqual(edited);
+        expect(palettes.savePalette).toHaveBeenCalledWith(INSTANCE, edited);
       });
 
       it("are none, and none saved, without a palettes document", async () => {

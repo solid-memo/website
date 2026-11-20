@@ -3,9 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import type { CustomPalette } from "@solid-memo/domain/customPalette";
+import { type CustomPalette, MAX_PALETTES } from "@solid-memo/domain/customPalette";
 import { createSolidPaletteRepository } from "./solidPaletteRepository";
 import { fakePod } from "./testing/fakePod";
+import { POD, SESSION, wiredApp } from "./testing/wiredApp";
 import { SM, SM_NS } from "./vocab";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
@@ -65,6 +66,93 @@ describe("the palettes in the pod", () => {
         dark: {},
       },
     ]);
+  });
+
+  it("are read up to MAX_PALETTES, the first in the order written, however many the document has", async () => {
+    // Palettes may share one color set, so a document holds many in few triples.
+    const many = Array.from(
+      { length: MAX_PALETTES + 50 },
+      (_, at) =>
+        `<#p${at}> a sm:Palette ; sm:formatVersion 1 ; dcterms:title "P${at}"@en ;
+        sm:basedOn sm:standardPalette ; sm:lightColors <#c> ; sm:darkColors <#c> .`,
+    ).join("\n");
+    const pod = fakePod();
+    await pod.put(
+      DOCUMENT,
+      `${PREFIXES}
+      <#unread> a sm:Palette ; sm:basedOn sm:standardPalette .
+      <#c> a sm:ColorSet ; sm:formatVersion 1 ; sm:backgroundColor "#000000" .
+      ${many}`,
+    );
+    const palettes = await createSolidPaletteRepository({ fetch: pod.fetch }).listPalettes(
+      INSTANCE,
+    );
+    // One it cannot read takes no place of one it can.
+    expect(palettes.map((palette) => palette.url)).toEqual(
+      Array.from({ length: MAX_PALETTES }, (_, at) => `${DOCUMENT}#p${at}`),
+    );
+    expect(palettes[0]).toMatchObject({ light: { "--bg": "#000000" } });
+  });
+
+  it("list the last one the app may make, up to MAX_PALETTES, after those written before it", async () => {
+    const before = Array.from(
+      { length: MAX_PALETTES - 1 },
+      (_, at) =>
+        `<#palette-${at}> a sm:Palette ; sm:formatVersion 1 ; dcterms:title "P${at}"@en ;
+        sm:basedOn sm:standardPalette ; sm:lightColors <#c> ; sm:darkColors <#c> .`,
+    ).join("\n");
+    const pod = fakePod();
+    await pod.put(DOCUMENT, `${PREFIXES}${before}`);
+    const repository = createSolidPaletteRepository({ fetch: pod.fetch });
+    await repository.savePalette(INSTANCE, { ...READING, url: `${DOCUMENT}#a-new` });
+    const listed = await repository.listPalettes(INSTANCE);
+    expect(listed).toHaveLength(MAX_PALETTES);
+    expect(listed.at(-1)?.url).toBe(`${DOCUMENT}#a-new`);
+  });
+
+  it("show one the preferences name past the first MAX_PALETTES as Standard", async () => {
+    const app = wiredApp();
+    const instance = `${POD}solid-memo/main/`;
+    await app.fetch(`${POD}profile/card`, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: `<#me> <http://www.w3.org/ns/pim/space#storage> <${POD}> .`,
+    });
+    await app.useCases.createInstance(SESSION, {
+      containerUrl: instance,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    const document = `${instance}palettes.ttl`;
+    await app.fetch(document, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: `${PREFIXES}<#c> a sm:ColorSet ; sm:formatVersion 1 .
+      ${Array.from(
+        { length: MAX_PALETTES + 1 },
+        (_, at) =>
+          `<#p${at}> a sm:Palette ; sm:formatVersion 1 ; dcterms:title "P${at}"@en ;
+          sm:basedOn sm:parchmentPalette ; sm:lightColors <#c> ; sm:darkColors <#c> .`,
+      ).join("\n")}`,
+    });
+    const named = (at: number): CustomPalette => ({
+      url: `${document}#p${at}`,
+      title: { en: `P${at}` },
+      basedOn: "parchment",
+      light: {},
+      dark: {},
+    });
+    await app.useCases.chooseCustomPalette(named(MAX_PALETTES - 1), instance);
+    await expect(app.useCases.instancePalette(instance)).resolves.toEqual({
+      palette: "parchment",
+      custom: named(MAX_PALETTES - 1),
+    });
+    // The document has it, but past the palettes read.
+    await app.useCases.chooseCustomPalette(named(MAX_PALETTES), instance);
+    await expect(app.useCases.instancePalette(instance)).resolves.toEqual({
+      palette: "standard",
+      custom: null,
+    });
   });
 
   it("are written in place, their color sets beside them, keeping what the app does not know", async () => {

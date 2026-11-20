@@ -294,6 +294,15 @@ it's read and painted:
   No CSS text, `url()` or `var()` from the pod or the device's copy
   reaches a style. The swatches and the editor's preview are painted
   the same way.
+- **Only so many palettes are read.** The app reads the first 100
+  palettes of the document it can read, in the order written
+  (`MAX_PALETTES` in
+  [customPalette.ts](../packages/domain/src/customPalette.ts)), and
+  leaves the rest out, so Colors and the editor list no more than
+  that. A palette past them that the preferences name shows as
+  Standard. The editor saves no new palette once the instance has 100
+  (`paletteLimit`), so one it makes is always listed; an edit of one
+  of them is still saved.
 - **What's kept is small.** A palette's name is kept in at most 32
   languages, each cut to 200 Unicode code points (`parsePalette`). The
   editor's name field takes 200 UTF-16 code units, never more code

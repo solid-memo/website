@@ -1827,6 +1827,7 @@
     "paletteNameEmpty": "Una paleta necesita un nombre.",
     "paletteUnreadable": "El texto es demasiado tenue para leerse sobre el fondo (menos de 3:1). Elige colores más distintos entre sí.",
     "paletteContrastLow": "Algunos colores tienen menos contraste del que necesitan. Elige otros o úsalos de todos modos.",
+    "paletteLimit": "Esta instancia ya tiene tantas paletas como lee Solid Memo ({limit}), así que no puede tener otra. Edita una de ellas en su lugar.",
     "catalogNeedsDescription": "El catálogo necesita una descripción.",
     "noCatalogToUpdate": "Esta instancia aún no tiene catálogo. Actualiza primero la instancia en Solid Memo.",
     "preferencesMisfit": "Tus preferencias guardadas no se ajustan a la forma que lee Solid Memo, así que no se han cambiado. Para guardar estas en su lugar, marca «Sustituir las preferencias guardadas» y vuelve a guardar.",

@@ -1827,6 +1827,7 @@
     "paletteNameEmpty": "Une palette doit avoir un nom.",
     "paletteUnreadable": "Le texte est trop pâle pour être lu sur le fond (moins de 3:1). Choisissez des couleurs plus éloignées.",
     "paletteContrastLow": "Certaines couleurs ont moins de contraste qu’il ne leur en faut. Choisissez-en d’autres, ou utilisez-les quand même.",
+    "paletteLimit": "Cette instance a déjà autant de palettes que Solid Memo en lit ({limit}) ; elle ne peut donc pas en avoir une autre. Modifiez plutôt l’une d’elles.",
     "catalogNeedsDescription": "Le catalogue doit avoir une description.",
     "noCatalogToUpdate": "Cette instance n’a pas encore de catalogue. Mettez d’abord l’instance à jour dans Solid Memo.",
     "preferencesMisfit": "Vos préférences enregistrées ne correspondent pas à la forme que lit Solid Memo, elles n’ont donc pas été modifiées. Pour enregistrer celles-ci à la place, cochez « Remplacer les préférences enregistrées » et enregistrez de nouveau.",
