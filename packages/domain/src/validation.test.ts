@@ -81,6 +81,34 @@ describe("summarize", () => {
     });
   });
 
+  it("counts a document's subjects once, however many reports are made of it (GHSA-pgw5-wjgx-h9vv)", () => {
+    const subjects: DocumentReport["subjects"] = [
+      {
+        url: `${INSTANCE}decks/deck-1.ttl#se`,
+        status: "checked",
+        shape: "card",
+        version: 2,
+        violations: [{ message: { en: "literal" }, severity: "violation", constraint: "NodeKind" }],
+      },
+    ];
+    let passes = 0;
+    const values = subjects[Symbol.iterator].bind(subjects);
+    subjects[Symbol.iterator] = () => {
+      passes++;
+      return values();
+    };
+    const document: DocumentReport = {
+      url: `${INSTANCE}decks/deck-1.ttl`,
+      status: "checked",
+      subjects,
+    };
+    const unread: DocumentReport = { ...document, status: "unreadable", reason: "x" };
+    expect(summarize(INSTANCE, [document]).violationCount).toBe(1);
+    expect(summarize(INSTANCE, [document, { ...document, url: "x" }]).violationCount).toBe(2);
+    expect(summarize(INSTANCE, [unread]).violationCount).toBe(2);
+    expect(passes).toBe(1);
+  });
+
   it("conforms when nothing is violated", () => {
     expect(summarize(INSTANCE, [])).toEqual({
       instanceUrl: INSTANCE,

@@ -4,12 +4,13 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen, waitFor } from "@testing-library/preact";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, QueryObserver } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { DeckHealth } from "@solid-memo/domain/deckHealth";
 import { summarize } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
-import { HealthBadge } from "./HealthBadge";
+import { deckHealthQuery, HealthBadge } from "./HealthBadge";
+import { queryKeys } from "./queryKeys";
 import { instanceA, makeCard, makeDeck } from "../test/fixtures";
 
 afterEach(() => vi.unstubAllGlobals());
@@ -57,6 +58,68 @@ function renderBadge(useCases: UseCases, quiet = false) {
     </QueryClientProvider>,
   );
 }
+
+describe("deckHealthQuery", () => {
+  it("gives the decks of one instance one text check, and another instance its own", async () => {
+    const checkDeck = vi.fn(async () => healthy);
+    const useCases = makeUseCasesFake({ checkDeck: checkDeck as UseCases["checkDeck"] });
+    const queryClient = new QueryClient();
+    const other = makeDeck("deck-2", { en: "Kanji N4" });
+    const signal = new AbortController().signal;
+    const elsewhere = "https://pod.example/elsewhere/";
+    for (const [instanceUrl, each] of [
+      [instanceA.url, deck],
+      [instanceA.url, other],
+      [elsewhere, deck],
+      [elsewhere, other],
+    ] as const)
+      await deckHealthQuery(useCases, queryClient, instanceUrl, each).queryFn({ signal });
+    const texts = checkDeck.mock.calls.map((call) => (call as unknown[])[2]);
+    // One for both decks of an instance: what a document many decks name holds is read once.
+    expect(texts[1]).toBe(texts[0]);
+    expect(texts[2]).not.toBe(texts[0]);
+    expect(texts[3]).toBe(texts[2]);
+    expect(Object.isFrozen(texts[0])).toBe(true);
+  });
+
+  it("is made again only after the instance's check, read afresh with it, has begun", async () => {
+    // The instance's check, as it begins, has the decks' checks read their documents again
+    // (UseCases.checkDeck): a deck's check looks up what is kept only a step after it begins.
+    let begun = 0;
+    const lookedUp: number[] = [];
+    const useCases = makeUseCasesFake({
+      checkInstance: (async () => {
+        begun++;
+        return summarize(instanceA.url, []);
+      }) as UseCases["checkInstance"],
+      checkDeck: (async () => {
+        await Promise.resolve();
+        lookedUp.push(begun);
+        return healthy;
+      }) as UseCases["checkDeck"],
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    // The badge's query first, so that it is made first when both are read afresh.
+    const badge = new QueryObserver(
+      queryClient,
+      deckHealthQuery(useCases, queryClient, instanceA.url, deck),
+    );
+    const stopBadge = badge.subscribe(() => undefined);
+    await waitFor(() => expect(lookedUp).toEqual([0]));
+    const check = new QueryObserver(queryClient, {
+      queryKey: queryKeys.validation(instanceA.url),
+      queryFn: () => useCases.checkInstance(instanceA.url),
+      staleTime: Infinity,
+    });
+    const stopCheck = check.subscribe(() => undefined);
+    await waitFor(() => expect(begun).toBe(1));
+    await queryClient.invalidateQueries({ queryKey: queryKeys.validation(instanceA.url) });
+    expect(begun).toBe(2);
+    expect(lookedUp).toEqual([0, 2]);
+    stopBadge();
+    stopCheck();
+  });
+});
 
 describe("HealthBadge", () => {
   it("checks the deck only once it is on the screen, then links to its problems", async () => {

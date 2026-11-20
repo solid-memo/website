@@ -183,6 +183,49 @@ flowchart LR
   standing is then a lookup. A catalog may name one document for a
   thousand decks, each spelling it its own way, and the check's work
   still grows with the decks and the document, not their product.
+- **Checks of one instance share what they found** (`sharedCheck` in
+  `instanceChecks.ts`): the check run when it's opened, and each deck's
+  own check, as every badge on the Studio's Home runs one. A document
+  is checked once for them all, and a check of it already under way is
+  shared, whatever version the server gives: none, one that can't be
+  sent back, or a new one on every read. What was found is read afresh
+  when the instance's check is made, as it's opened or its check read
+  afresh. A deck's documents and the catalog are read afresh when the
+  deck's health is opened or checked again (`forgetDeckCheck`), so a
+  change made since, by another app or the user, is then found. That
+  read is on condition with the version the document was checked at,
+  and an unchanged document's report is reused. A document that
+  couldn't be read is kept as such until then too, so the decks naming
+  it don't each try again. The instance's check that holds it as
+  unreadable is made again when the user comes back to the tab.
+  The reads of a deck's
+  documents are shared the same way (`sharedReads`), to map its cards
+  and to find whether it's unclaimed. A document is read once for the
+  decks that name it, in any spelling of its address a request sends
+  the same way, and read again when its check is. A spelling that
+  percent-encodes a character needing no encoding is another address,
+  read on its own, as `onceEach` checks it. A read that fails is kept
+  failed until then too, so the decks naming the document don't each
+  read it again, and a deck whose cards can't be read shows its cards
+  document as unreadable. It's read at its address as a request sends
+  it, so what's read is in that spelling for every deck, and a deck
+  finds its cards' problems by comparing addresses in that form
+  (`cardSpotsOf`). A read's cards are one frozen array for every deck
+  naming the document, and the Studio's badges of one instance share
+  one text check. The cards that say the same and the Markdown check's findings
+  are then worked out once for that array (`deckHealth` in
+  `deckHealth.ts`). So are the sides whose language isn't stated, once
+  for each release.
+  What depends on the deck, which of its documents are unclaimed and
+  its own subjects in the catalog, is still worked out for each deck,
+  from that one read. A deck's check looks up nothing kept until an
+  instance's check started at the same time has forgotten it, whichever
+  of them starts first. Only the last instance checked is kept, as the
+  Studio checks one instance at a time. `summarize` counts a document's violations
+  once, however many reports are made of it. A deck's subjects in the
+  catalog are looked up, not searched for: merging a deck's check into
+  the instance's leaves the catalog's report as it is when the deck's
+  subjects in it are the same.
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled:
   they're published with the site, so the browser checks against the

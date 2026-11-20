@@ -178,10 +178,12 @@ function rememberedProblems(): (text: string, rule: FieldRuleName) => MarkdownPr
  * How a deck's health reads its text in Markdown (UseCases.checkDeck):
  * the plain text, each text parsed once (plainTexts), and the markdown
  * package's check of a field held to a rule, each text checked once by
- * each rule (rememberedProblems): many cards may say the same.
+ * each rule (rememberedProblems): many cards may say the same. Frozen,
+ * so what a deck's health finds with it is worked out once for the
+ * decks that share their cards and this check (domain/deckHealth.ts).
  */
 export function deckTextCheck(): DeckTextCheck<MarkdownProblem> {
-  return { plain: plainTexts(), check: rememberedProblems() };
+  return Object.freeze({ plain: plainTexts(), check: rememberedProblems() });
 }
 
 /**

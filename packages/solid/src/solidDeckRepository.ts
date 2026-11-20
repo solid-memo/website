@@ -88,7 +88,7 @@ import {
   withSuggestedAnswers,
 } from "./mappers/deckMapper";
 import { toStoredLayout, withTreeChanges } from "./mappers/deckTreeMapper";
-import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
+import { createDeckDocumentGuard, readAt, type UserStorages } from "./deckPlace";
 import { editOf, type DatasetEdit } from "./datasetEdit";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
@@ -407,16 +407,18 @@ export function createSolidDeckRepository({
       }
     },
 
-    async listCards(deck, { asNoOne = false } = {}): Promise<Card[]> {
+    async listCards(deck, { asNoOne = false, reads } = {}): Promise<Card[]> {
       // Checked here too, not only where the deck was listed: a deck out
       // of place is never read (docs/data-model.md).
       if (!isDeckInPlace(deck)) throw new AppError("deckGone", { deck: deck.title });
-      const dataset = await getSolidDatasetOrNull(
-        deck.cardsDocumentUrl,
-        asNoOne ? publicFetch : fetch,
-      );
+      const url = deck.cardsDocumentUrl;
+      // A shared read is resolved against the address as a request sends it, whichever deck's spelling asked first.
+      const at = asNoOne ? url : readAt(url, reads);
+      const dataset = asNoOne
+        ? await getSolidDatasetOrNull(url, publicFetch)
+        : await guard.read(url, reads);
       if (dataset === null) return [];
-      return cardsOf(dataset, deck.cardsDocumentUrl);
+      return cardsOf(dataset, at);
     },
 
     async readCardsSince(deck, version, { asNoOne = false } = {}) {
@@ -643,13 +645,13 @@ export function createSolidDeckRepository({
       }
     },
 
-    unclaimedDocuments(deck, budget) {
-      return guard.unclaimed(deck, budget);
+    unclaimedDocuments(deck, budget, reads) {
+      return guard.unclaimed(deck, budget, reads);
     },
 
-    isUnclaimedAsRead(decks, url, budget) {
+    isUnclaimedAsRead(decks, url, budget, reads) {
       // A read that fails, or is not made in time, says nothing of a document the check has just found faulty.
-      const read = () => guard.unclaimedAsRead(decks, url, false);
+      const read = () => guard.unclaimedAsRead(decks, url, false, reads);
       return budget === undefined ? read() : budget.spend(false, read);
     },
 

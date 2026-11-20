@@ -12,6 +12,21 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { deckTextCheck } from "@solid-memo/ui/markdownCache";
 import { queryKeys } from "./queryKeys";
 
+/** The text check the decks' healths of the instance last checked share (textCheckOf). */
+let sharedText: { instanceUrl: string; text: ReturnType<typeof deckTextCheck> } | undefined;
+
+/**
+ * The text check of the instance's decks' healths (deckTextCheck): one
+ * for them all, so a text many decks hold is read once, and what a
+ * cards document many decks name holds is found once for them all
+ * (domain/deckHealth.ts). Made anew for another instance, so what it
+ * remembers is only the last instance's.
+ */
+function textCheckOf(instanceUrl: string): ReturnType<typeof deckTextCheck> {
+  if (sharedText?.instanceUrl !== instanceUrl) sharedText = { instanceUrl, text: deckTextCheck() };
+  return sharedText.text;
+}
+
 /**
  * A deck's health (UseCases.checkDeck), the Markdown read by the markdown
  * package. Its key is under the instance's check, so what reads that
@@ -35,7 +50,7 @@ export function deckHealthQuery(
   return {
     queryKey: queryKeys.deckHealth(instanceUrl, deck.url, deck.cardsDocumentUrl),
     queryFn: async ({ signal }: { signal: AbortSignal }) => {
-      const health = await useCases.checkDeck(instanceUrl, deck, deckTextCheck());
+      const health = await useCases.checkDeck(instanceUrl, deck, textCheckOf(instanceUrl));
       if (signal.aborted) return health;
       queryClient.setQueryData<ValidationReport>(
         queryKeys.validation(instanceUrl),

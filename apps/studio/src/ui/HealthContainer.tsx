@@ -81,8 +81,16 @@ function DeckHealthContainer({
   const queryClient = useQueryClient();
   const health = deckHealthQuery(useCases, queryClient, instance.url, deck);
   const reason = useDataCheck(useCases, instance.url).readOnly(deck);
-  // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem.
-  const healthQuery = useQuery({ ...health, refetchOnMount: "always" });
+  // Read afresh each time the screen opens, as a card edited since may have mended (or made) a problem:
+  // its documents too, not what another deck's check found of them (forgetDeckCheck), as the query reads.
+  const healthQuery = useQuery({
+    ...health,
+    queryFn: (context) => {
+      useCases.forgetDeckCheck(instance.url, deck);
+      return health.queryFn(context);
+    },
+    refetchOnMount: "always",
+  });
   const cardsQuery = useQuery({
     queryKey: queryKeys.cards(deck.cardsDocumentUrl),
     queryFn: () => useCases.listCards(deck),
@@ -104,7 +112,10 @@ function DeckHealthContainer({
         cards={cardsQuery.data}
         checking={healthQuery.isFetching}
         // The deck's check alone: what it finds is put in the one that holds it.
-        onCheck={() => void queryClient.invalidateQueries({ queryKey: health.queryKey })}
+        onCheck={() => {
+          useCases.forgetDeckCheck(instance.url, deck);
+          void queryClient.invalidateQueries({ queryKey: health.queryKey });
+        }}
         spotHref={(spot) => spotHref(deck, spot)}
         aboutHref={aboutHref(deck)}
         // Only once the check says so: while it is made, the links stay.

@@ -40,7 +40,7 @@ import {
   saveDataset,
   UNREADABLE,
 } from "./datasets";
-import type { ReadBudget } from "@solid-memo/application/ports";
+import type { ReadBudget, SharedReads } from "@solid-memo/application/ports";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { deckBackLinksOf, isDeckItself } from "./ownership";
 import { hasStorageLink } from "./solidStorageGateway";
@@ -123,6 +123,18 @@ interface DocumentFacts {
 
 /** The facts already worked out of each frozen dataset, by the address asked about. */
 const FACTS = new WeakMap<Dataset, Map<string, DocumentFacts>>();
+
+/**
+ * The address a read of the document at `url` is made at, and what it
+ * gives resolved against (deckPlace read): `url` itself, or, for a read
+ * the data checks share (SharedReads), the address as a request sends
+ * it (canonicalUrlOf), which every spelling of it shares. A deck's
+ * document is at an address a deck's may be (isDeckInPlace), so it has
+ * one.
+ */
+export function readAt(url: string, reads?: SharedReads): string {
+  return reads === undefined ? url : canonicalUrlOf(url)!;
+}
 
 /**
  * The document's facts (DocumentFacts), as `dataset` (null: no document)
@@ -375,7 +387,11 @@ export function createDeckDocumentGuard(
    * `budget`, if given: once it is spent, one not yet read counts as
    * unreadable, so unclaimed, as it then is for a check (ReadBudget).
    */
-  async function unclaimed(deck: DeckPlace, budget?: ReadBudget): Promise<string[]> {
+  async function unclaimed(
+    deck: DeckPlace,
+    budget?: ReadBudget,
+    reads?: SharedReads,
+  ): Promise<string[]> {
     if (!isDeckInPlace(deck)) return [];
     const instance = instanceOf(deck);
     const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
@@ -385,9 +401,11 @@ export function createDeckDocumentGuard(
       urls.map(async (url) => {
         if (!isDocumentIn(url, instance))
           return budget === undefined
-            ? unclaimedAsRead([deck], url)
-            : budget.spend(true, () => unclaimedAsRead([deck], url));
-        return !(await isDedicatedFolder(instance, true)) && unclaimedAsRead([deck], url);
+            ? unclaimedAsRead([deck], url, true, reads)
+            : budget.spend(true, () => unclaimedAsRead([deck], url, true, reads));
+        return (
+          !(await isDedicatedFolder(instance, true)) && unclaimedAsRead([deck], url, true, reads)
+        );
       }),
     );
     return urls.filter((_, at) => found[at]);
@@ -415,21 +433,23 @@ export function createDeckDocumentGuard(
    * Whether the document is unclaimed for every one of the decks, read
    * once, now (unclaimed spares one in the instance's own folder that
    * read). `unreadable` is the answer for a document that cannot be
-   * read. Each deck must be one that can be used, else deckGone.
+   * read. Each deck must be one that can be used, else deckGone. With
+   * `reads`, the read is one those reads share (read).
    */
   async function unclaimedAsRead(
     decks: readonly DeckPlace[],
     url: string,
     unreadable = true,
+    reads?: SharedReads,
   ): Promise<boolean> {
     let dataset: Dataset | null;
     try {
-      dataset = await getSolidDatasetOrNull(url, fetch);
+      dataset = await read(url, reads);
     } catch {
       // Not a document Solid Memo can read (not RDF, refused): nothing says it is the deck's.
       return unreadable;
     }
-    return unclaimedForAll(decks, url, dataset);
+    return unclaimedForAll(decks, readAt(url, reads), dataset);
   }
 
   /**
@@ -449,6 +469,21 @@ export function createDeckDocumentGuard(
     }
   }
 
+  /**
+   * The document at `url` as the user reads it (null: none), the read
+   * one of `reads` when given: the data checks of an instance share it
+   * (SharedReads), so a document many decks name, in whatever spelling
+   * of its address, is read once for them all, to map its cards and to
+   * find where it stands for each. Such a read is made at the address as
+   * a request sends it (readAt), so what it gives is resolved against
+   * that spelling, whichever deck asked first.
+   */
+  function read(url: string, reads?: SharedReads): Promise<Dataset | null> {
+    const at = readAt(url, reads);
+    const fetched = () => getSolidDatasetOrNull(at, fetch);
+    return reads === undefined ? fetched() : reads(at, fetched);
+  }
+
   return {
     /** Refuse a deck that cannot be used (isDeckInPlace): deckGone, before anything is read or sent. */
     assertUsable(deck: DeckPlace): void {
@@ -462,6 +497,8 @@ export function createDeckDocumentGuard(
     unclaimedForAll,
 
     unclaimedAsRead,
+
+    read,
 
     readToRemove,
 

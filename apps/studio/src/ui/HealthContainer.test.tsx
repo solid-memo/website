@@ -54,12 +54,16 @@ describe("HealthContainer", () => {
     const { invalidate } = renderContainer(useCases, deck);
     expect(await screen.findByRole("heading", { name: "Health of Kanji N5" })).toBeInTheDocument();
     expect(useCases.checkDeck).toHaveBeenCalledWith(instanceA.url, deck, expect.anything());
+    // Its documents read afresh as the screen opens, and as it is checked again.
+    expect(useCases.forgetDeckCheck).toHaveBeenCalledWith(instanceA.url, deck);
+    expect(useCases.forgetDeckCheck).toHaveBeenCalledBefore(vi.mocked(useCases.checkDeck));
     expect(
       await screen.findByText(
         /Solid Memo leaves this data as it is: it must be fixed outside the app/,
       ),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /Repair|Remove/ })).toBeNull();
+    const forgotten = vi.mocked(useCases.forgetDeckCheck).mock.calls.length;
     fireEvent.click(screen.getByRole("button", { name: "Check again" }));
     await waitFor(() =>
       expect(invalidate).toHaveBeenCalledWith({
@@ -67,6 +71,11 @@ describe("HealthContainer", () => {
       }),
     );
     await waitFor(() => expect(useCases.checkDeck).toHaveBeenCalledTimes(2));
+    const forget = vi.mocked(useCases.forgetDeckCheck).mock;
+    expect(forget.calls.length).toBeGreaterThan(forgotten);
+    expect(forget.invocationCallOrder.at(-1)).toBeLessThan(
+      vi.mocked(useCases.checkDeck).mock.invocationCallOrder.at(-1)!,
+    );
   });
 
   it("links a deck set aside to none of its forms, which change nothing, and says why", async () => {
