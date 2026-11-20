@@ -5,12 +5,14 @@
 import { describe, expect, it } from "vitest";
 import type { ChapterV1, StepV1 } from "@solid-memo/vocab/types.generated";
 import {
+  answeredOfOutline,
   choicesOf,
   courseAnswerEffect,
   courseOutlineFromRecords,
   outlineOfCards,
   courseProgress,
   courseProgressOf,
+  courseStandingOf,
   editCompletedChapters,
   finalReviewQueue,
   gradeOfChoice,
@@ -332,6 +334,28 @@ describe("a learner's progress", () => {
     });
   });
 
+  it("counts a step that asks no card done, and a card two steps ask toward both, whichever of the answered cards and the chapter's is larger", () => {
+    const shared = courseOutlineFromRecords(
+      RELEASE,
+      [{ url: at("ch-a"), data: chapter(0) }],
+      [
+        { url: at("a-1"), data: step("ch-a", 0, []) },
+        { url: at("a-2"), data: step("ch-a", 1, ["q1", "q2"]) },
+        { url: at("a-3"), data: step("ch-a", 2, ["q1"]) },
+        { url: at("a-4"), data: step("ch-a", 3, ["q3"]) },
+      ],
+    );
+    expect(courseProgress(shared, ["q1"], []).chapters[0]).toMatchObject({
+      doneStepIds: ["a-1", "a-3"],
+      resumeStepId: "a-2",
+    });
+    const many = ["q1", "q2", "q-other", "q-more", "q-yet"];
+    expect(courseProgress(shared, many, []).chapters[0]).toMatchObject({
+      doneStepIds: ["a-1", "a-2", "a-3"],
+      resumeStepId: "a-4",
+    });
+  });
+
   it("unlocks a chapter once those before it are completed, and is done when every chapter is", () => {
     const first = courseProgress(outline, ["q1", "q2", "q3"], [at("ch-a")]);
     expect(first.chapters.map((c) => c.state)).toEqual(["done", "open"]);
@@ -387,6 +411,109 @@ describe("a learner's progress", () => {
   });
 });
 
+describe("a course's standing", () => {
+  it("is the chapter open, where the learner stands in it, and the chapters done, as the progress has them", () => {
+    const completed = [at("ch-a")];
+    const progress = courseProgress(outline, ["q4"], completed);
+    const { doneStepIds: _, ...standing } = progress.chapters[1]!;
+    expect(courseStandingOf(outline, ["q4"], completed)).toEqual({
+      current: outline.chapters[1],
+      progress: standing,
+      done: 1,
+    });
+    expect(courseStandingOf(outline, [], [])).toMatchObject({
+      current: { id: "ch-a" },
+      progress: { state: "open", resumeStepId: "a-1" },
+      done: 0,
+    });
+  });
+
+  it("resumes at the first step to ask a card not answered, without the steps done", () => {
+    const shared = courseOutlineFromRecords(
+      RELEASE,
+      [{ url: at("ch-a"), data: chapter(0) }],
+      [
+        { url: at("a-1"), data: step("ch-a", 0, []) },
+        { url: at("a-2"), data: step("ch-a", 1, ["q1", "q2"]) },
+        { url: at("a-3"), data: step("ch-a", 2, ["q1"]) },
+        { url: at("a-4"), data: step("ch-a", 3, ["q3"]) },
+        { url: at("a-5"), data: step("ch-a", 4, ["q1"]) },
+      ],
+    );
+    const standing = (answered: string[]) => courseStandingOf(shared, answered, [])!.progress;
+    expect(standing([])).toEqual({ url: at("ch-a"), state: "open", resumeStepId: "a-2" });
+    expect(standing(["q1"])).toEqual({ url: at("ch-a"), state: "open", resumeStepId: "a-2" });
+    expect(standing(["q2", "q1"])).toEqual({ url: at("ch-a"), state: "open", resumeStepId: "a-4" });
+    // Every step done: the final review is next.
+    expect(standing(["q1", "q2", "q3", "q-other"])).toEqual({ url: at("ch-a"), state: "open" });
+    for (const answered of [[], ["q1"], ["q1", "q2"], ["q3"], ["q1", "q2", "q3"]]) {
+      const { doneStepIds: _, ...progress } = courseProgress(shared, answered, []).chapters[0]!;
+      expect(standing(answered)).toEqual(progress);
+    }
+  });
+
+  it("is none once every chapter is done", () => {
+    expect(courseStandingOf(outline, [], [at("ch-b"), at("ch-a")])).toBeUndefined();
+  });
+
+  it("counts every chapter of one id done when that id is completed, as the progress does", () => {
+    const [a, b] = outline.chapters;
+    const twice = { ...outline, chapters: [a!, { ...b!, id: a!.id }] };
+    expect(courseProgress(twice, [], [at("ch-a")]).done).toBe(true);
+    expect(courseStandingOf(twice, [], [at("ch-a")])).toBeUndefined();
+    expect(courseProgressOf(twice, [at("ch-a")], []).done).toBe(2);
+  });
+
+  it("walks a frozen outline's chapters and the steps of each once for any number of learners", () => {
+    let walks = 0;
+    let asked = 0;
+    const chapters = outline.chapters.map((chapter) => {
+      const steps = Object.freeze(
+        chapter.steps.map((one) =>
+          Object.freeze({
+            ...one,
+            get questionIds() {
+              asked += 1;
+              return one.questionIds;
+            },
+          }),
+        ),
+      ) as unknown as CourseOutline["chapters"][number]["steps"];
+      return Object.freeze({
+        ...chapter,
+        get steps() {
+          walks += 1;
+          return steps;
+        },
+      });
+    });
+    const frozen: CourseOutline = Object.freeze({ ...outline, chapters });
+    for (let learner = 0; learner < 10; learner++) {
+      courseStandingOf(frozen, [], [at("ch-a")]);
+      courseProgressOf(frozen, [], []);
+      answeredOfOutline(frozen, new Set(["q4"]));
+    }
+    // The outline's index, the open chapter's index, then one look at its steps a learner.
+    expect(walks).toBe(chapters.length + 1 + 10);
+    // Each step's questions read for the outline's index and for its chapter's.
+    expect(asked).toBe(3 + 1);
+  });
+});
+
+describe("the questions of an outline answered", () => {
+  it("are those it asks, each once, in its order, whichever of the two is larger", () => {
+    // A question asked by a step of each chapter counts once, at the first.
+    const [a, b] = outline.chapters;
+    const twice: CourseOutline = {
+      ...outline,
+      chapters: [a!, { ...b!, steps: [...b!.steps, { ...b!.steps[0]!, questionIds: ["q1"] }] }],
+    };
+    expect(answeredOfOutline(twice, new Set(["q4", "q-gone", "q1"]))).toEqual(["q1", "q4"]);
+    const many = new Set(["q4", "q3", "q2", "q1", "q-review", "q-gone", "q-other"]);
+    expect(answeredOfOutline(twice, many)).toEqual(["q1", "q2", "q3", "q-review", "q4"]);
+  });
+});
+
 describe("courseProgressOf", () => {
   const DECK = "https://pod.example/a/catalog.ttl#course";
   const CARDS = "https://pod.example/a/decks/course.ttl";
@@ -411,6 +538,8 @@ describe("courseProgressOf", () => {
   it("says, of a course not begun, that no chapter is done and none has answers", () => {
     expect(courseProgressOf(outline, [], [])).toEqual({
       done: 0,
+      count: 2,
+      start: 0,
       chapters: [
         {
           url: at("ch-a"),
@@ -454,6 +583,27 @@ describe("courseProgressOf", () => {
     const asked = { ...outline, chapters: [a!, { ...b!, reviewQuestionIds: ["q1"] }] };
     const results = courseProgressOf(asked, [], [answer(1, "q1", 3)]);
     expect(results.chapters.map(({ quiz }) => quiz.answers)).toEqual([1, 0]);
+  });
+
+  it("gives the results of a window of the chapters, around the one open, near the end the last, and the first once all are done", () => {
+    const long = courseOutlineFromRecords(
+      RELEASE,
+      Array.from({ length: 200 }, (_, n) => ({ url: at(`ch-${n}`), data: chapter(n) })),
+      Array.from({ length: 200 }, (_, n) => ({
+        url: at(`s-${n}`),
+        data: step(`ch-${n}`, 0, [`q-${n}`]),
+      })),
+    );
+    const upTo = (count: number) => Array.from({ length: count }, (_, n) => at(`ch-${n}`));
+    const middle = courseProgressOf(long, upTo(100), [answer(1, "q-101", 3)]);
+    expect(middle).toMatchObject({ done: 100, count: 200, start: 95 });
+    expect(middle.chapters).toHaveLength(50);
+    expect(middle.chapters[5]).toMatchObject({ url: at("ch-100"), state: "open" });
+    expect(middle.chapters[6]).toMatchObject({ state: "locked", quiz: { answers: 1, right: 1 } });
+    expect(courseProgressOf(long, upTo(190), [])).toMatchObject({ start: 150 });
+    const done = courseProgressOf(long, upTo(200), []);
+    expect(done).toMatchObject({ done: 200, start: 0 });
+    expect(done.chapters[0]).toMatchObject({ url: at("ch-0"), state: "done" });
   });
 
   it("leaves out a course answer that repeats an answer to its card the same day", () => {

@@ -2412,9 +2412,34 @@ by one.
   of a schedule due by each day are summed once too
   ([dueDays.ts](../packages/domain/src/dueDays.ts)), so each deck's
   forecast, overdue prompts, study counts and backlog are lookups in
-  those sums. A course's answered cards are found once for the states,
-  and each course looks up its outline's questions. A schedule decks
-  share is kept in the digest once, for the first of them: the others
+  those sums. A course's answered cards are found once for the states.
+  Course decks may name one release, and share its outline, which the
+  library reads once and freezes
+  ([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)
+  `toCourseOutline`). What is worked out of the outline alone, the
+  questions it asks, each one's first chapter and where each chapter
+  is, is worked out once for it. Which steps ask each card, and the
+  cards in the order the steps first ask them, are worked out once for
+  each chapter ([course.ts](../packages/domain/src/course.ts)
+  `outlineIndexOf`, `chapterIndexOf`). Each course then adds the work
+  of its own answered cards and completed chapters. Its questions
+  answered are found once for decks that share the reviews document
+  too, as one frozen list. The strip's standing of a course looks up
+  the cards of the chapter open in that order up to the first not
+  answered. That card's first step is the one to resume at. So the
+  standing costs at most one card more than the chapter's cards
+  answered, not a step or a step done. Decks that share the release and
+  the reviews document share that frozen list, and the set to look its
+  cards up in is made once for the list (`answeredSetOf`), whichever
+  chapter each deck has open. A deck whose chapter open differs then
+  costs only that chapter's cards up to the first not answered, not the
+  whole list. The step to resume at is worked out once for each chapter
+  open and list (`resumeIn`), so decks that share the chapter open too
+  look up its cards once in all. Only the course's own page counts the
+  steps done. The statistics give each course at most 50 chapters, not
+  a row of every chapter: a window around the one open, with the 5
+  before it, as the screen draws a list. A schedule decks share is kept
+  in the digest once, for the first of them: the others
   aren't served from the digest, and are read from their documents on
   each visit. What stays each deck's own is small: its answers (the
   hardest cards, the wrong options chosen, the course answers), its

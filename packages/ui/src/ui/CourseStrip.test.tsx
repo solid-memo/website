@@ -17,9 +17,9 @@ vi.mock("@solid-memo/domain/course", async (original) => {
   const real = await original<typeof import("@solid-memo/domain/course")>();
   return {
     ...real,
-    courseProgress: (...args: Parameters<typeof real.courseProgress>) => {
+    courseStandingOf: (...args: Parameters<typeof real.courseStandingOf>) => {
       progressCalls.count++;
-      return real.courseProgress(...args);
+      return real.courseStandingOf(...args);
     },
   };
 });

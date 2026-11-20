@@ -5,7 +5,7 @@
 import type { LibraryUseCases } from "@solid-memo/application/library";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Course } from "@solid-memo/application/courses";
-import type { ChapterProgress, CourseChapter } from "@solid-memo/domain/course";
+import type { ChapterStanding, CourseChapter } from "@solid-memo/domain/course";
 import type { Instance } from "@solid-memo/domain/instance";
 import { useCourseLinks, type CourseLinks } from "./courseLinks";
 import { CourseScreen } from "./CourseScreen";
@@ -25,7 +25,7 @@ export function chapterHref(
   instanceUrl: string,
   deckUrl: string,
   chapter: CourseChapter,
-  progress: ChapterProgress,
+  progress: ChapterStanding,
 ): string {
   const toReview =
     chapter.steps.length === 0 ||

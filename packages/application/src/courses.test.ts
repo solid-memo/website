@@ -170,6 +170,8 @@ describe("courses", () => {
       {
         deck: completed,
         done: 1,
+        count: 2,
+        start: 0,
         chapters: [
           {
             url: at("ch-1"),
@@ -364,6 +366,29 @@ describe("courses", () => {
     expect(deps.deckRepository.readDeck).not.toHaveBeenCalled();
     expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
     await expect(useCases.getCourseSummary(deck)).rejects.toThrow("names the release");
+  });
+
+  it("getCourseSummary finds the questions answered once for the decks that share a frozen outline and reviews document", async () => {
+    const { deps, useCases } = setup();
+    const frozen = Object.freeze({ ...outline });
+    const other = Object.freeze({ ...outline, releaseUrl: `${RELEASE}?other` });
+    const states = sm2s([stateOf(noon, "2026-10-08")]);
+    Object.freeze(states.sm2);
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockResolvedValue(states);
+    vi.mocked(deps.deckLibrary.fetchCourseOutline).mockImplementation(async (url) =>
+      url === RELEASE ? frozen : other,
+    );
+    const second: Deck = { ...courseDeck, url: `${courseDeck.url}-2` };
+    const [one, two, elsewhere] = await Promise.all([
+      useCases.getCourseSummary(courseDeck),
+      useCases.getCourseSummary(second),
+      useCases.getCourseSummary({ ...second, sourceUrl: `${RELEASE}?other` }),
+    ]);
+    expect(one!.answeredCardIds).toEqual(["q-iri"]);
+    expect(two!.answeredCardIds).toBe(one!.answeredCardIds);
+    expect(Object.isFrozen(one!.answeredCardIds)).toBe(true);
+    expect(elsewhere!.answeredCardIds).not.toBe(one!.answeredCardIds);
+    expect(elsewhere!.answeredCardIds).toEqual(["q-iri"]);
   });
 
   it("answerCourseQuestion writes a card answered for the first time into the deck, then grades it, logging a multiple-choice answer", async () => {

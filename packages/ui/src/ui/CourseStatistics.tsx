@@ -10,7 +10,6 @@ import type { ChapterState } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Quiz } from "@solid-memo/domain/statistics";
-import { boundedAround } from "./bounded";
 import { useCopies } from "./deckTreeEditor";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
@@ -23,9 +22,10 @@ import { queryKeys } from "./queryKeys";
  * with its chapters completed out of all, and a table of its chapters,
  * where each stands and its graded course answers of the last twelve
  * study months, the share right with the count it is of. A release can
- * state any number of chapters, so a table has at most LIST_LIMIT rows,
- * around the chapter to go on with (boundedAround), and says how many
- * chapters come before and after them. Nothing without a course.
+ * state any number of chapters, so a table has the rows the results
+ * give, a window around the chapter to go on with (courseProgressOf),
+ * and says how many chapters come before and after them. Nothing
+ * without a course.
  */
 export function CourseStatisticsView({
   instanceUrl,
@@ -56,17 +56,14 @@ export function CourseStatisticsView({
 function CourseResults({ course, href }: { course: CourseStatistics; href: string }) {
   const { t, formatPercent } = useI18n();
   const headingId = useId();
-  const { deck, done, chapters } = course;
+  const { deck, done, count, start, chapters } = course;
   const stateText = (state: ChapterState) =>
     state === "done" ? t("course.done") : state === "open" ? t("course.open") : t("course.locked");
   const quizCell = ({ answers, right }: Quiz) =>
     answers === 0
       ? "–"
       : t("statistics.quizShare", { percent: formatPercent(right / answers), count: answers });
-  const { shown, start, more } = boundedAround(
-    chapters,
-    chapters.findIndex((chapter) => chapter.state === "open"),
-  );
+  const more = count - start - chapters.length;
   return (
     <>
       <h4 id={headingId}>
@@ -74,8 +71,8 @@ function CourseResults({ course, href }: { course: CourseStatistics; href: strin
           <ReaderText text={deck.title} />
         </a>
       </h4>
-      <p class="hint">{t("course.chaptersDone", { done, count: chapters.length })}</p>
-      <progress value={done} max={chapters.length} aria-labelledby={headingId} />
+      <p class="hint">{t("course.chaptersDone", { done, count })}</p>
+      <progress value={done} max={count} aria-labelledby={headingId} />
       {start > 0 && <p class="hint">{t("courseChapters.earlier", { count: start })}</p>}
       {/* A chapter's title can be long: the table scrolls on a phone, the titles kept in view. */}
       <div class="table-scroll" role="region" aria-labelledby={headingId} tabIndex={0}>
@@ -88,7 +85,7 @@ function CourseResults({ course, href }: { course: CourseStatistics; href: strin
             </tr>
           </thead>
           <tbody>
-            {shown.map((chapter) => (
+            {chapters.map((chapter) => (
               <tr key={chapter.url}>
                 <th scope="row">
                   <ReaderText text={chapter.title} />

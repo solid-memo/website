@@ -851,7 +851,14 @@ describe("toCourseOutline", () => {
 `,
       DOC,
     );
-    expect(toCourseOutline(DOC, dataset)).toEqual({
+    const outline = toCourseOutline(DOC, dataset);
+    // Frozen through: the course decks that name the release share it (domain/course.ts outlineIndexOf).
+    const step = outline.chapters[0]!.steps[0]!;
+    const chapter = outline.chapters[0]!;
+    for (const part of [outline, outline.chapters, chapter, chapter.steps, step, step.questionIds])
+      expect(Object.isFrozen(part)).toBe(true);
+    expect(Object.isFrozen(chapter.reviewQuestionIds)).toBe(true);
+    expect(outline).toEqual({
       releaseUrl: DOC,
       chapters: [
         {

@@ -298,7 +298,10 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
  * format's shape (one that does not fit is left out) and brought up to
  * the current format, asking only cards of the release that fit their
  * shape (outlineOfCards). A release with none — no course — has an
- * empty outline.
+ * empty outline. The outline is frozen, its chapters and steps too: the
+ * course decks that name one release share it, as the library keeps it,
+ * and what is worked out of it alone is then worked out once
+ * (domain/course.ts outlineIndexOf).
  */
 export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOutline {
   const chapters: { url: string; data: ChapterV1 }[] = [];
@@ -313,7 +316,24 @@ export function toCourseOutline(releaseUrl: string, dataset: Dataset): CourseOut
   }
   // A question asks one of the release's cards, as the player looks it up among them.
   const cardIds = new Set(toLibraryCards(releaseUrl, dataset).map((card) => card.id));
-  return outlineOfCards(courseOutlineFromRecords(releaseUrl, chapters, steps), cardIds);
+  return frozenOutline(
+    outlineOfCards(courseOutlineFromRecords(releaseUrl, chapters, steps), cardIds),
+  );
+}
+
+/** The outline frozen through: its chapters, their steps, and the questions of each. */
+function frozenOutline(outline: CourseOutline): CourseOutline {
+  for (const chapter of outline.chapters) {
+    for (const step of chapter.steps) {
+      Object.freeze(step.questionIds);
+      Object.freeze(step);
+    }
+    Object.freeze(chapter.steps);
+    Object.freeze(chapter.reviewQuestionIds);
+    Object.freeze(chapter);
+  }
+  Object.freeze(outline.chapters);
+  return Object.freeze(outline);
 }
 
 /**

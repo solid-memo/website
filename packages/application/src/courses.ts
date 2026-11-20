@@ -11,6 +11,7 @@ import type { ReviewState } from "@solid-memo/domain/review";
 import { chosenDistractorIn, type ResponseTimes } from "@solid-memo/domain/answer";
 import {
   courseAnswerEffect,
+  answeredOfOutline,
   courseProgress,
   outlineOfCards,
   type CompletedChaptersEdit,
@@ -145,16 +146,25 @@ function answeredOf(states: readonly ReviewState[]): ReadonlySet<string> {
   );
 }
 
-/** The cards an outline asks, each once, in its order. */
-function questionsOf(outline: CourseOutline): string[] {
-  return [
-    ...new Set(
-      outline.chapters.flatMap((chapter) => [
-        ...chapter.steps.flatMap((step) => step.questionIds),
-        ...chapter.reviewQuestionIds,
-      ]),
-    ),
-  ];
+const answeredInOutline = new WeakMap<ReadonlySet<string>, WeakMap<CourseOutline, string[]>>();
+
+/**
+ * The outline's questions answered (answeredOfOutline), in its order. Of
+ * a frozen outline, as the library reads one, they are found once for
+ * the answered cards, which the decks naming one reviews document share
+ * (answeredOf): the course decks that name one release and one reviews
+ * document then share one frozen list.
+ */
+function answeredQuestions(outline: CourseOutline, answered: ReadonlySet<string>): string[] {
+  const known = answeredInOutline.get(answered)?.get(outline);
+  if (known !== undefined) return known;
+  // Frozen whichever the outline: what is derived of it is kept (domain/course.ts resumeIn).
+  const found = Object.freeze(answeredOfOutline(outline, answered)) as string[];
+  if (!Object.isFrozen(outline)) return found;
+  let byOutline = answeredInOutline.get(answered);
+  if (byOutline === undefined) answeredInOutline.set(answered, (byOutline = new WeakMap()));
+  byOutline.set(outline, found);
+  return found;
 }
 
 /**
@@ -188,7 +198,7 @@ export function createCourseUseCases({
     ]);
     // Looked up by the outline's questions, not by every state: decks may share their states.
     const answered = answeredOf(reviews.sm2);
-    const answeredCardIds = questionsOf(outline).filter((id) => answered.has(id));
+    const answeredCardIds = answeredQuestions(outline, answered);
     return { outline, answeredCardIds };
   }
   async function startCourse(instanceUrl: string, course: LibraryDeck): Promise<Deck> {
