@@ -8,6 +8,8 @@
  * which of its columns are shown. Each is a plain value, worked out here.
  */
 
+import { sortText } from "@solid-memo/domain/langText";
+
 /** The keys of the rows selected. One kept selected while its row is not shown stays selected. */
 export type Selection = ReadonlySet<string>;
 
@@ -116,7 +118,10 @@ export type SortValue = string | number | undefined;
  * Rows sorted by a column (`sort`; in their own order without one), by
  * what each has in it (`cellValue`), ties in their own order. Text is
  * compared as the reader's language sorts it (`locale`), case aside and
- * numbers by value ("Kanji 2" before "Kanji 10").
+ * numbers by value ("Kanji 2" before "Kanji 10"), by its `sortText`: a
+ * text from a pod may be as long as a term, and cut, a sort's work is
+ * bounded however long the texts; texts that differ only past the cut
+ * keep their order.
  */
 export function sortedRows<R, K extends string>(
   rows: readonly R[],
@@ -129,7 +134,10 @@ export function sortedRows<R, K extends string>(
   const compare = (a: string | number, b: string | number) =>
     typeof a === "number" && typeof b === "number" ? a - b : collator.compare(String(a), String(b));
   return rows
-    .map((row, index) => ({ row, index, value: cellValue(row, sort.key) }))
+    .map((row, index) => {
+      const value = cellValue(row, sort.key);
+      return { row, index, value: typeof value === "string" ? sortText(value) : value };
+    })
     .sort((a, b) => {
       if (a.value === undefined || b.value === undefined) {
         return a.value === b.value ? a.index - b.index : a.value === undefined ? 1 : -1;

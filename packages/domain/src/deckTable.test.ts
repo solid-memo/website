@@ -254,6 +254,41 @@ describe("the deck table's order", () => {
     );
   });
 
+  it("ranks titles by their first 200 code points, those equal so in the order given", () => {
+    const titled = (id: string, title: string) => row(deck(id, { en: title }));
+    const long = (tail: string) => `${"\u{1F600}".repeat(200)}${tail}`;
+    const pair = [titled("b", long("b")), titled("a", long("a"))];
+    expect(deckSortTexts(pair, "title", english)).toEqual([long(""), long("")]);
+    for (const descending of [false, true]) {
+      const view = { filter: "", sort: { column: "title", descending } } as const;
+      expect(arrangeDeckRows(pair, view.sort, rowRanks(pair, view))).toEqual(pair);
+    }
+  });
+
+  it("takes no longer to rank titles however much longer than 200 code points they are", () => {
+    // Titles that differ only in case: compared whole, each comparison reads them to the end.
+    const titled = (length: number) =>
+      Array.from({ length: 1_000 }, (_, at) =>
+        row(deck(`d-${at}`, { en: `${(at % 2 === 0 ? "aA" : "Aa").repeat(length / 2)}${at}` })),
+      );
+    const ranks = (of: readonly DeckTableRow[]) =>
+      deckTextRanks(deckSortTexts(of, "title", english), "en");
+    expect(new Set(ranks(titled(16_376))).size).toBe(1);
+    // Titles eight times as long take no longer to rank, as only their
+    // first 200 code points are compared; compared whole, they would take
+    // about eight times as long.
+    const ratio = growth(
+      (length) => {
+        const of = titled(length);
+        return () => ranks(of);
+      },
+      2_000,
+      8,
+      0.5,
+    );
+    expect(ratio).toBeLessThan(0.5);
+  });
+
   it("ranks texts in the reader's order, those equal but for case at one place", () => {
     expect(deckTextRanks(["Kanji 10", "kanji 2", "KANJI 2", "Äpple"], "sv")).toEqual([1, 0, 0, 2]);
   });

@@ -647,10 +647,12 @@ either way. The filter keeps the decks whose name, in any language, or
 whose groups' names hold its text, case and accents aside. The domain
 does both ([deckTable.ts](../packages/domain/src/deckTable.ts)). The
 texts of a sorted column are ordered once, and again only when one of
-them or the reader's language changes. A render, as each deck's figures
-come in, doesn't compare them anew, and nor does a draft's cards table
-or Releases. Home's filter goes over the names again only when a deck,
-its groups or the filter's text change.
+them or the reader's language changes. A title sorts by its first 200
+characters, so titles that differ only past them keep the table's
+order. A render, as each deck's figures come in, doesn't compare them
+anew, and nor does a draft's cards table or Releases. Home's filter
+goes over the names again only when a deck, its groups or the
+filter's text change.
 
 **Views.** Tabs above the table (a group named Views, the one shown
 pressed) each keep the decks of one kind, and count them:
@@ -758,8 +760,8 @@ The URL holds the query, which the domain applies
   ([i18n.md](i18n.md#which-language)), in the order of the UI's
   language. Case and accents count only where that language makes a
   letter of one (in Swedish, `ä` after `z`). Numbers sort by value. A
-  side sorts by its first 200 characters (`cardSortText` in
-  `cardQuery.ts`), so sides that differ only past them keep the deck's
+  side sorts by its first 200 characters (`sortText` in
+  `langText.ts`), so sides that differ only past them keep the deck's
   order. A card without the value (one never studied) comes last,
   either way.
 - `page` and `size`: 10, 50 (the default) or 200 cards a page, with the
@@ -2872,7 +2874,8 @@ lists them, and **Enter** opening the release at the cursor. That does
 as its link does, or nothing when it has no link: **j** and **k** then
 leave the focus on the page's body, and go on from that row. A filter
 keeps the releases whose name or address holds its text in its first
-200 characters, case and accents aside.
+200 characters, case and accents aside. A column sorts by the first 200
+characters of its text, as every Studio table does (`sortedRows`).
 The sidebar and the drafts screen link to it ("Published releases"
 there). A learner adds a release in Solid Memo by the link copied here
 ([deck-library.md](deck-library.md#from-a-link)).

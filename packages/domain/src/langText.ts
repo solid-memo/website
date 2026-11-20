@@ -80,6 +80,23 @@ export function firstCodePoints(text: string, count: number): string {
     .join("");
 }
 
+/**
+ * The most code points of a text a sort by it compares. A text from a
+ * pod may be as long as a term, and comparing whole texts that differ
+ * only in case, or in long runs of digits, takes time in their length;
+ * cut, a sort's work is bounded however long the texts.
+ */
+const MAX_SORT_TEXT_CHARACTERS = 200;
+
+/**
+ * What of a text a table or list sorts by: its first
+ * MAX_SORT_TEXT_CHARACTERS code points, so texts that differ only past
+ * them sort as equal.
+ */
+export function sortText(text: string): string {
+  return firstCodePoints(text, MAX_SORT_TEXT_CHARACTERS);
+}
+
 /** The text to show a reader who prefers `languages`: the one `shownTag` picks; empty when there is none. */
 export function shown(text: LangText, languages: readonly string[] = []): string {
   const tag = shownTag(text, languages);
