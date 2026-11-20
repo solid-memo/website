@@ -403,6 +403,16 @@ export interface Card extends CardContent {
 export const MAX_CATALOG_LINKS = 1000;
 
 /**
+ * How many deck groups a catalog may have that the app reads. The deck
+ * list draws each one, so a catalog anyone may have written is bounded
+ * here as its decks are (MAX_CATALOG_LINKS): past this many, its
+ * arrangement is refused (catalogTooManyLinks), not read, and an edit
+ * that would make one more is refused (catalogFull). No one arranging
+ * their decks by hand comes near it.
+ */
+export const MAX_DECK_GROUPS = 1000;
+
+/**
  * How many chapters a deck has completed (Deck.completedChapters) as the
  * app reads, imports and writes them. A course has fewer chapters than
  * this, and completing one adds it only once; the values are data anyone

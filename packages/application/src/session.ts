@@ -5,7 +5,7 @@
 import { profileNameOf, type SolidAccount } from "@solid-memo/domain/account";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
-import { DECK_FORMAT_VERSION, type Deck } from "@solid-memo/domain/deck";
+import { DECK_FORMAT_VERSION, MAX_DECK_GROUPS, type Deck } from "@solid-memo/domain/deck";
 import type { Instance, RegistrationTarget } from "@solid-memo/domain/instance";
 import {
   deckGroupUrlOf,
@@ -48,7 +48,7 @@ import {
   type GuestTransferStep,
 } from "@solid-memo/domain/guest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
-import type { TreeNode } from "@solid-memo/domain/deckTree";
+import { groupCount, type TreeNode } from "@solid-memo/domain/deckTree";
 import type {
   DeckRepository,
   InstanceRepository,
@@ -846,6 +846,9 @@ export function createSessionUseCases({
         // Groups to make in an arrangement a newer version wrote could not be: refused before anything is written.
         if (targetTree.readOnly && tree.children.some((node) => node.kind === "group"))
           throw new AppError("deckTreeTooNew");
+        // So are more groups than the instance's arrangement is read with: past that, none of it would be.
+        if (groupCount(targetTree.children) + groupCount(tree.children) > MAX_DECK_GROUPS)
+          throw new AppError("catalogFull", { limit: MAX_DECK_GROUPS });
         const answers = (
           await Promise.all(months.map((month) => answerLog.readMonth(source, month)))
         ).flat();

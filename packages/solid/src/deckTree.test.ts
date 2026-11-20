@@ -3,8 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { type Deck, MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
-import { decksOf, nodeId, type DeckTree, type TreeNode } from "@solid-memo/domain/deckTree";
+import { type Deck, MAX_CATALOG_LINKS, MAX_DECK_GROUPS } from "@solid-memo/domain/deck";
+import {
+  decksOf,
+  groupCount,
+  nodeId,
+  type DeckTree,
+  type TreeNode,
+} from "@solid-memo/domain/deckTree";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidDeckRepository } from "./solidDeckRepository";
@@ -89,6 +95,41 @@ describe("the deck tree in the pod", () => {
     await expect(repositoryOn(past.fetch).readDeckTree(INSTANCE)).rejects.toMatchObject(tooMany);
     await expect(
       repositoryOn(past.fetch).editDeckTree(INSTANCE, { kind: "removeGroup", group: group.url }),
+    ).rejects.toMatchObject(tooMany);
+    expect(writes(past)).toEqual([]);
+  });
+
+  it("refuses a catalog with more groups than MAX_DECK_GROUPS, as catalogTooManyLinks, to read or edit (GHSA-vx92-3vpf-cq3c)", async () => {
+    // Empty groups, each its own top-level row on the deck list.
+    const groups = (count: number) =>
+      Array.from(
+        { length: count },
+        (
+          _,
+          i,
+        ) => `<#g${i}> a sm:DeckGroup, dcat:Catalog ; sm:formatVersion 1 ; dcterms:title "g${i}"@en ;
+          dcterms:description "Deck group: g${i}."@en ; dcterms:publisher <https://pod.example/profile/card#me> .
+`,
+      ).join("");
+    const most = await podWith(groups(MAX_DECK_GROUPS));
+    expect(groupCount((await repositoryOn(most.fetch).readDeckTree(INSTANCE)).children)).toBe(
+      MAX_DECK_GROUPS,
+    );
+    // One more would leave the arrangement unread: refused before anything is written.
+    await expect(
+      repositoryOn(most.fetch).editDeckTree(INSTANCE, {
+        kind: "combine",
+        dragged: at("c"),
+        target: at("a"),
+        group,
+      }),
+    ).rejects.toMatchObject({ code: "catalogFull", vars: { limit: MAX_DECK_GROUPS } });
+    expect(writes(most)).toEqual([]);
+    const past = await podWith(groups(MAX_DECK_GROUPS + 1));
+    const tooMany = { code: "catalogTooManyLinks", vars: { limit: MAX_DECK_GROUPS } };
+    await expect(repositoryOn(past.fetch).readDeckTree(INSTANCE)).rejects.toMatchObject(tooMany);
+    await expect(
+      repositoryOn(past.fetch).editDeckTree(INSTANCE, { kind: "removeGroup", group: at("g0") }),
     ).rejects.toMatchObject(tooMany);
     expect(writes(past)).toEqual([]);
   });

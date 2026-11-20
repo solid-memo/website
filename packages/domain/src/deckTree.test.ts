@@ -13,6 +13,7 @@ import {
   deleteGroup,
   gather,
   graft,
+  groupCount,
   isDescendant,
   locate,
   moveNode,
@@ -265,6 +266,11 @@ describe("tree lookups", () => {
   it("list the decks under nodes, depth first", () => {
     expect(decksOf(sample.children).map((d) => d.url)).toEqual(["a", "b", "c", "d"]);
     expect(decksOf([sample.children[1]!]).map((d) => d.url)).toEqual(["b", "c"]);
+  });
+
+  it("count the groups under nodes, at any depth", () => {
+    expect(groupCount(tree("a", ["g", ["h"], "b"], ["k"]).children)).toBe(3);
+    expect(groupCount(tree("a").children)).toBe(0);
   });
 });
 

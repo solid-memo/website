@@ -21,6 +21,7 @@ import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import {
   DECK_FORMAT_VERSION,
   MAX_CATALOG_LINKS,
+  MAX_DECK_GROUPS,
   type Card,
   type Deck,
 } from "@solid-memo/domain/deck";
@@ -1839,6 +1840,40 @@ describe("guests", () => {
         await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
       ).toMatchObject({ ok: true });
       expect(deps.deckRepository.addDeck).toHaveBeenCalledOnce();
+    });
+
+    it("mergeGuestStudy refuses, before writing anything, groups past what the instance's arrangement is read with (GHSA-vx92-3vpf-cq3c)", async () => {
+      const { deps } = mergeDeps();
+      const guestTree = await deps.deckRepository.readDeckTree(GUEST_INSTANCE_URL);
+      const groups = (count: number) =>
+        Array.from({ length: count }, (_, at) => ({
+          kind: "group" as const,
+          group: { url: `${TARGET}catalog.ttl#group-other-${at}`, title: { en: `${at}` } },
+          children: [],
+        }));
+      // The guest's one group would be one more than the arrangement is read with.
+      vi.mocked(deps.deckRepository.readDeckTree).mockImplementation(async (url) =>
+        url === TARGET ? { readOnly: false, children: groups(MAX_DECK_GROUPS) } : guestTree,
+      );
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({
+        ok: false,
+        step: "read",
+        error: new AppError("catalogFull", { limit: MAX_DECK_GROUPS }),
+        added: [],
+      });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+      expect(deps.answerLog.appendAll).not.toHaveBeenCalled();
+      expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
+      // Up to the limit, it fits.
+      vi.mocked(deps.deckRepository.readDeckTree).mockImplementation(async (url) =>
+        url === TARGET ? { readOnly: false, children: groups(MAX_DECK_GROUPS - 1) } : guestTree,
+      );
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({ ok: true });
     });
 
     it("mergeGuestStudy refuses, before writing anything, to make groups in an arrangement a newer version wrote", async () => {

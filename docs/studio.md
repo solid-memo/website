@@ -1628,7 +1628,12 @@ written, so the Studio follows at most `MAX_CATALOG_LINKS` (1,000)
 entries of each kind: decks, drafts and releases
 ([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
 it reads none of that kind and says why (`catalogTooManyLinks`), with
-a hint to remove the instance unless the user knows who keeps it. A
+a hint to remove the instance unless the user knows who keeps it. It
+reads at most `MAX_DECK_GROUPS` (1,000) deck groups too, each a row of
+the Groups screen ([Deck groups](data-model.md#deck-groups)). Past
+that, the screens built on the deck tree (Groups, the Decks table,
+Transfer and Drafts) refuse the whole tree, its decks included, with
+the same message and hint. A
 deck, draft or release the catalog has no room for is refused before
 it's written (`catalogFull`), so the Studio never takes an instance past
 what it reads. A draft's folder may list at most `MAX_DRAFT_DOCUMENTS`

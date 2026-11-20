@@ -124,6 +124,13 @@ export function decksOf(nodes: readonly TreeNode[]): Deck[] {
   return nodes.flatMap((node) => (node.kind === "deck" ? [node.deck] : decksOf(node.children)));
 }
 
+/** How many groups are under the nodes, at any depth. */
+export function groupCount(nodes: readonly TreeNode[]): number {
+  let count = 0;
+  for (const node of nodes) if (node.kind === "group") count += 1 + groupCount(node.children);
+  return count;
+}
+
 export interface TreeLocation {
   node: TreeNode;
   parent: ParentId;
