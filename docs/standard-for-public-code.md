@@ -743,7 +743,7 @@ They need checking again before anything relies on them.
   - 1.0.0 is declared ready, and `npm run check` refuses a prerelease or
     0.x dependency of the app but four, each with its reason in
     [vendor-code.md](vendor-code.md#maturity) (decision 14):
-    - `rdf-validate-shacl` 0.6 and `rdf-validate-datatype` 0.2, the
+    - `rdf-validate-shacl` 0.7 and `rdf-validate-datatype` 0.3, the
       SHACL engine the app uses;
     - `@inrupt/solid-client-errors` 0.0, released with
       `@inrupt/solid-client` 4;

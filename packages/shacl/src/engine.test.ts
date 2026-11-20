@@ -21,7 +21,10 @@ const SHAPES = `
     sh:pattern "^https://" .
 <#either> a sh:NodeShape ;
     sh:pattern "^https://" ;
-    sh:xone ( [ sh:property [ sh:path ex:age ; sh:minCount 1 ] ] [ sh:property [ sh:path ex:note ; sh:minCount 1 ] ] ) .
+    sh:or ( [ sh:property [ sh:path ex:age ; sh:minCount 1 ] ] [ sh:property [ sh:path ex:note ; sh:minCount 1 ] ] ) .
+<#one> a sh:NodeShape ;
+    sh:xone ( [ sh:property [ sh:path ex:age ; sh:minCount 1 ] ] [ sh:property [ sh:path ex:note ; sh:minCount 1 ] ] ) ;
+    sh:message "An age or a note."@en, "En ålder eller en anteckning."@sv .
 <#name> sh:path ex:name ; sh:datatype xsd:string ; sh:minCount 1 ; sh:maxCount 1 ;
     sh:message "One name, as text."@en, "Ett namn, som text."@sv, "One name, as text."@en-gb .
 <#age> sh:path ex:age ; sh:datatype xsd:integer ; sh:severity sh:Warning .
@@ -106,20 +109,34 @@ describe("createEngine", () => {
       await (await engine()).validateNode(data, "http://example.com/plain", `${SHAPES_URL}#either`),
     ).toEqual([
       {
+        message: { en: "Or constraint failed." },
+        builtIn: true,
+        value: "http://example.com/plain",
+        severity: "violation",
+        constraint: "Or",
+      },
+      {
         message: { en: 'Value does not match pattern "^https://"' },
         builtIn: true,
         value: "http://example.com/plain",
         severity: "violation",
         constraint: "Pattern",
       },
-      {
-        message: { en: "Xone constraint failed." },
-        builtIn: true,
-        value: "http://example.com/plain",
-        severity: "violation",
-        constraint: "Xone",
-      },
     ]);
+  });
+
+  it("gives a shape's own message over the one its constraint gives", async () => {
+    const data = await datasetFromTurtle(`<#a> <https://example.com/ns#name> "Ann" .`, DATA_URL);
+    expect(await (await engine()).validateNode(data, `${DATA_URL}#a`, `${SHAPES_URL}#one`)).toEqual(
+      [
+        {
+          message: { en: "An age or a note.", sv: "En ålder eller en anteckning." },
+          value: `${DATA_URL}#a`,
+          severity: "violation",
+          constraint: "Xone",
+        },
+      ],
+    );
   });
 
   it("starts every check afresh", async () => {

@@ -5,7 +5,7 @@
 import type { DatasetCore, Quad, Term } from "@rdfjs/types";
 import { validators } from "rdf-validate-datatype";
 import SHACLValidator from "rdf-validate-shacl";
-import environment from "rdf-validate-shacl/src/defaultEnv.js";
+import environment, { type Environment } from "rdf-validate-shacl/src/defaultEnv.js";
 import type { Shape } from "rdf-validate-shacl/src/shapes-graph.js";
 import ValidationEngine from "rdf-validate-shacl/src/validation-engine.js";
 import { shown } from "@solid-memo/domain/langText";
@@ -180,8 +180,10 @@ function termPath(term: Term): string[] {
 /** How many times the library checks a node against one shape at most, as it does by default. */
 const MAX_NODE_CHECKS = 50;
 
+/** The library's engine, over the environment it makes terms with by default. */
+type Engine = ValidationEngine<Environment>;
 type EngineOptions = ConstructorParameters<typeof ValidationEngine>[1];
-type Constraint = Parameters<ValidationEngine["createResultFromObject"]>[1];
+type Constraint = Parameters<Engine["createResultFromObject"]>[1];
 type Severity = Violation["severity"];
 
 /**
@@ -220,7 +222,7 @@ type Severity = Violation["severity"];
  * the app checks against uses sh:node (conformance.test.ts in the solid
  * package says so); one that does needs the limit there first.
  */
-class TermKeyedEngine extends ValidationEngine {
+class TermKeyedEngine extends ValidationEngine<Environment> {
   // Set by initReport, which the library's constructor calls: a field
   // with an initializer would be set again after it.
   declare checks: PathMap<number>;
@@ -235,7 +237,7 @@ class TermKeyedEngine extends ValidationEngine {
     this.limit = limit;
   }
 
-  override clone({ recordErrorsLevel }: EngineOptions = {}): ValidationEngine {
+  override clone({ recordErrorsLevel }: EngineOptions = {}): Engine {
     return new TermKeyedEngine(this.context, { recordErrorsLevel }, this.limit);
   }
 
@@ -249,7 +251,7 @@ class TermKeyedEngine extends ValidationEngine {
   override validateNodeAgainstShape(
     focusNode: Term,
     shape: Shape,
-    dataGraph: Parameters<ValidationEngine["validateNodeAgainstShape"]>[2],
+    dataGraph: Parameters<Engine["validateNodeAgainstShape"]>[2],
   ): boolean {
     if (!shape.deactivated) {
       const path = [...termPath(shape.shapeNode), ...termPath(focusNode)];
@@ -273,11 +275,11 @@ class TermKeyedEngine extends ValidationEngine {
   }
 
   override createResultFromObject(
-    validationResult: Parameters<ValidationEngine["createResultFromObject"]>[0],
+    validationResult: Parameters<Engine["createResultFromObject"]>[0],
     constraint: Constraint,
     focusNode: Term,
     valueNode: Term | null,
-  ): ReturnType<ValidationEngine["createResultFromObject"]> {
+  ): ReturnType<Engine["createResultFromObject"]> {
     const normalized = this.normalizeValidationResult(validationResult, valueNode);
     if (normalized !== null) {
       const severity = this.countedSeverity(normalized, constraint, focusNode, valueNode);
@@ -294,11 +296,30 @@ class TermKeyedEngine extends ValidationEngine {
           dropped === undefined ? severity : moreSevere(dropped, severity),
         );
         // The library leaves out a result of null (its types say otherwise).
-        return null as unknown as ReturnType<ValidationEngine["createResultFromObject"]>;
+        return null as unknown as ReturnType<Engine["createResultFromObject"]>;
       }
       this.results.set(path, count + 1);
     }
     return super.createResultFromObject(validationResult, constraint, focusNode, valueNode);
+  }
+
+  /**
+   * A result's messages, without the one sh:xone gives. The library takes
+   * a constraint's own message before the shape's sh:message, and since
+   * 0.7 sh:xone gives one ("no shapes matched"), which would hide the
+   * message the review-state shapes give in each language behind an
+   * English word on the check. Without it, an sh:xone result has the
+   * shape's message, or none, as before 0.7.
+   */
+  override createResultMessages(
+    validationResult: Parameters<Engine["createResultMessages"]>[0],
+    constraint: Constraint,
+  ): ReturnType<Engine["createResultMessages"]> {
+    const xone = constraint.component.node.value === `${SH}XoneConstraintComponent`;
+    return super.createResultMessages(
+      xone ? { ...validationResult, message: undefined } : validationResult,
+      constraint,
+    );
   }
 
   /**
