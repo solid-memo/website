@@ -181,6 +181,14 @@ function colorsOf(value: unknown): PaletteColors {
   );
 }
 
+/**
+ * The most palettes of the user's own an instance's palettes document is
+ * read with: the first this many it can read, in the order written; any
+ * more are left out, so the Preferences screen draws no more than this.
+ * The app makes no new palette past it.
+ */
+export const MAX_PALETTES = 100;
+
 /** The most languages a palette's name is kept in; any more are left out. */
 export const MAX_PALETTE_NAME_LANGUAGES = 32;
 

@@ -1740,6 +1740,7 @@
     "paletteNameEmpty": "En palett behöver ett namn.",
     "paletteUnreadable": "Texten är för blek för att läsas mot bakgrunden (mindre än 3:1). Välj färger som skiljer sig mer.",
     "paletteContrastLow": "Några färger har mindre kontrast än de behöver. Välj andra, eller använd dem ändå.",
+    "paletteLimit": "Den här instansen har redan så många paletter som Solid Memo läser ({limit}), så den kan inte ha fler. Redigera en av dem i stället.",
     "catalogNeedsDescription": "Katalogen behöver en beskrivning.",
     "noCatalogToUpdate": "Den här instansen har ingen katalog än. Uppdatera instansen i Solid Memo först.",
     "preferencesMisfit": "Dina sparade inställningar passar inte formen som Solid Memo läser, så de ändrades inte. För att spara de här i stället, kryssa i ”Ersätt de sparade inställningarna” och spara igen.",

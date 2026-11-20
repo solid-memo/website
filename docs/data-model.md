@@ -458,7 +458,8 @@ isn't written.
 │                        sm:darkColors, its sm:ColorSet subjects beside
 │                        it (#palette-<id>-light, #palette-<id>-dark),
 │                        a #rrggbb color for each role it sets;
-│                        sm:formatVersion 1 (docs/theme.md)
+│                        sm:formatVersion 1; the app reads the first
+│                        MAX_PALETTES (100) (docs/theme.md)
 ├── catalog.ttl     one subject per deck (titles live ONLY here), a
 │                        sm:Deck and dcat:Dataset: sm:formatVersion 6,
 │                        dcterms:description, sm:studyDirection, optional

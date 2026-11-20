@@ -6,6 +6,7 @@ import { pickLocale, type Locale } from "@solid-memo/domain/locale";
 import {
   checkPalette,
   isReadable,
+  MAX_PALETTES,
   paletteVerdict,
   type CustomPalette,
   type PaletteDraft,
@@ -124,9 +125,10 @@ export interface PreferenceUseCases {
    * as saved. Refused before anything is written when it has no name
    * (paletteNameEmpty), when its text is not readable on the background
    * or a surface (paletteUnreadable, checkPalette), and when a pair is
-   * below the contrast it needs (paletteContrastLow), unless `useAnyway`.
-   * When the palette is the one this device shows, the device's copy is
-   * kept up to date.
+   * below the contrast it needs (paletteContrastLow), unless `useAnyway`;
+   * one not listed yet too when the instance has MAX_PALETTES already
+   * (paletteLimit), as no more are read. When the palette is the one
+   * this device shows, the device's copy is kept up to date.
    */
   savePalette(
     instanceUrl: string,
@@ -421,6 +423,10 @@ export function createPreferenceUseCases({
       const verdict = paletteVerdict(checkPalette(palette));
       if (verdict === "refused") throw new AppError("paletteUnreadable");
       if (verdict === "low" && !useAnyway) throw new AppError("paletteContrastLow");
+      // One past the palettes the app reads would be saved and never listed.
+      const listed = await paletteRepository.listPalettes(instanceUrl);
+      if (listed.length >= MAX_PALETTES && !listed.some((one) => isSameUrl(one.url, palette.url)))
+        throw new AppError("paletteLimit", { limit: MAX_PALETTES });
       await paletteRepository.savePalette(instanceUrl, palette);
       if (customPalettePreference.chosen()?.url === palette.url)
         customPalettePreference.choose(palette);

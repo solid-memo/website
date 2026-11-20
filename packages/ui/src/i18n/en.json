@@ -1740,6 +1740,7 @@
     "paletteNameEmpty": "A palette needs a name.",
     "paletteUnreadable": "The text is too faint to read on the background (less than 3:1). Choose colors further apart.",
     "paletteContrastLow": "Some colors have less contrast than they need. Choose others, or use them anyway.",
+    "paletteLimit": "This instance already has as many palettes as Solid Memo reads ({limit}), so it can't keep another. Edit one of them instead.",
     "catalogNeedsDescription": "The catalog needs a description.",
     "noCatalogToUpdate": "This instance has no catalog yet. Update the instance in Solid Memo first.",
     "preferencesMisfit": "Your saved preferences don't fit the form Solid Memo reads, so they weren't changed. To save these instead, check \"Replace the saved preferences\" and save again.",

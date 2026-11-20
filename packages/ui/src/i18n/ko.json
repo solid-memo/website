@@ -1653,6 +1653,7 @@
     "paletteNameEmpty": "팔레트 이름을 입력해 주세요.",
     "paletteUnreadable": "글자가 너무 흐려서 바탕 위에서 읽을 수 없어요(3:1 미만). 서로 더 다른 색을 골라 주세요.",
     "paletteContrastLow": "일부 색의 대비가 필요한 만큼 되지 않아요. 다른 색을 고르거나 그대로 사용하세요.",
+    "paletteLimit": "이 인스턴스에는 이미 Solid Memo가 읽는 만큼의 팔레트가 있어서({limit}개) 더 추가할 수 없어요. 대신 기존 팔레트 중 하나를 편집하세요.",
     "catalogNeedsDescription": "카탈로그에 설명을 입력해 주세요.",
     "noCatalogToUpdate": "이 인스턴스에는 아직 카탈로그가 없어요. 먼저 Solid Memo에서 인스턴스를 업데이트해 주세요.",
     "preferencesMisfit": "저장된 설정이 Solid Memo가 읽는 형식에 맞지 않아서 바꾸지 않았어요. 대신 이 설정을 저장하려면 ‘저장된 설정 바꾸기’를 선택하고 다시 저장해 주세요.",

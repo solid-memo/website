@@ -1005,10 +1005,11 @@ export interface PreferencesRepository {
  */
 export interface PaletteRepository {
   /**
-   * The instance's palettes, by their address; none when it has no
-   * palettes document. A palette that does not fit its shape is left
-   * out, and a color its color set does not hold as `#rrggbb` with it
-   * (paletteFromRecord).
+   * The instance's palettes, by their address, in the order written;
+   * none when it has no palettes document. A palette that does not fit
+   * its shape is left out, and a color its color set does not hold as
+   * `#rrggbb` with it (paletteFromRecord). At most MAX_PALETTES, the
+   * first it can read; the rest are left out.
    */
   listPalettes(instanceUrl: string): Promise<CustomPalette[]>;
   /**

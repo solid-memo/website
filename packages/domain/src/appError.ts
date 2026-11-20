@@ -58,6 +58,8 @@ export const ERROR_TEMPLATES = {
     "The text is too faint to read on the background (less than 3:1). Choose colors further apart.",
   paletteContrastLow:
     "Some colors have less contrast than they need. Choose others, or use them anyway.",
+  paletteLimit:
+    "This instance already has as many palettes as Solid Memo reads ({limit}), so it can't keep another. Edit one of them instead.",
   catalogNeedsDescription: "The catalog needs a description.",
   noCatalogToUpdate: "This instance has no catalog yet. Update the instance in Solid Memo first.",
   preferencesMisfit:
