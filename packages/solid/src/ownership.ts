@@ -145,8 +145,9 @@ function isCatalogSubject(dataset: Dataset, thing: Subject): boolean {
 function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<string> {
   const pending = [...things];
   const owned = new Set(things.map((thing) => thing.url));
+  const kind = documentKindOf(dataset);
   for (let thing = pending.pop(); thing !== undefined; thing = pending.pop()) {
-    for (const [link, targetClass] of linksWrittenOn(dataset, thing)) {
+    for (const [link, targetClass] of linksWrittenOn(dataset, kind, thing)) {
       for (const url of getUrlAll(thing, link)) {
         const target = owned.has(url) ? null : writtenBeside(dataset, url, targetClass);
         if (target === null) continue;
@@ -171,15 +172,15 @@ function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<st
  * its classes in a release or a draft (a series), and in a catalog only
  * for the catalog itself (isCatalogSubject), with or without its class.
  */
-function linksWrittenOn(dataset: Dataset, thing: Subject): [string, string][] {
+function linksWrittenOn(dataset: Dataset, kind: DocumentKind, thing: Subject): [string, string][] {
   const types = getUrlAll(thing, RDF.type);
   const own = types.filter((type) => type.startsWith(SM_NS));
   let byClass = WRITTEN_BESIDE_IN_DECK;
   let classes = own.length > 0 ? own : types;
-  if (isCatalogDocument(dataset)) {
+  if (kind === "catalog") {
     byClass = WRITTEN_BESIDE_IN_CATALOG;
     if (own.length === 0) classes = isCatalogSubject(dataset, thing) ? [DCAT.Catalog] : [];
-  } else if (!isDeckDocument(dataset)) return [];
+  } else if (kind === "other") return [];
   return [...WRITTEN_BESIDE].filter(([link]) =>
     classes.some((type) => byClass.get(type)?.has(link)),
   );
@@ -193,6 +194,20 @@ function linksWrittenOn(dataset: Dataset, thing: Subject): [string, string][] {
 function isDeckDocument(dataset: Dataset): boolean {
   const url = getSourceUrl(dataset);
   return url !== null && isDeckItself(dataset, url);
+}
+
+/**
+ * The kind of document the dataset is, for the links Solid Memo writes
+ * in it (linksWrittenOn): an instance's catalog (isCatalogDocument), a
+ * release or a draft's release document (isDeckDocument), or any other.
+ * It is told once for a whole document, as telling a deck's document
+ * goes through all its subjects.
+ */
+type DocumentKind = "catalog" | "deck" | "other";
+
+function documentKindOf(dataset: Dataset): DocumentKind {
+  if (isCatalogDocument(dataset)) return "catalog";
+  return isDeckDocument(dataset) ? "deck" : "other";
 }
 
 /** The classes Solid Memo's shapes describe: dcat:Catalog, sm:Deck, foaf:Agent, … */

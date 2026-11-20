@@ -38,6 +38,8 @@ import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import {
   arrangementSetAside,
   deckSetAside,
+  isResultLimit,
+  MAX_RESULTS_PER_CHECK,
   summarize,
   type DocumentReport,
   type Violation,
@@ -380,6 +382,97 @@ describe("createShaclShapeValidator", () => {
     ]);
     expect(validateNode).toHaveBeenCalledOnce();
     expect(validate).not.toHaveBeenCalled();
+  });
+
+  describe("a release with more violations than a check keeps", () => {
+    const release = "https://alice.example/releases/capitals/v1.ttl";
+    const cards = (count: number) =>
+      datasetOfTurtle(
+        release,
+        `@prefix sm: <${SM_NS}> .\n${Array.from(
+          { length: count },
+          (_, i) => `<#c${i}> a sm:Card ; sm:formatVersion 7 .`,
+        ).join("\n")}`,
+      );
+    const results = (count: number, severity: Violation["severity"]) =>
+      Array.from({ length: count }, () => ({
+        message: { en: "Less than 1 values" },
+        severity,
+        constraint: "MinCount",
+      }));
+    const violationsOf = (report: DocumentReport) =>
+      report.subjects.flatMap((subject) =>
+        subject.status === "checked" ? subject.violations : [],
+      );
+
+    it("stops checking its subjects past the limit, and says so once", async () => {
+      const { validator, validateNode } = makeValidator();
+      validateNode.mockResolvedValue(results(400, "violation") as never);
+      const report = await validator.validateDataset(release, await cards(10), "library");
+      expect(validateNode).toHaveBeenCalledTimes(3);
+      expect(report.subjects).toHaveLength(3);
+      const violations = violationsOf(report);
+      expect(violations).toHaveLength(1201);
+      expect(violations.filter(isResultLimit)).toEqual([
+        expect.objectContaining({ severity: "violation" }),
+      ]);
+      expect(violations.at(-1)).toSatisfy(isResultLimit);
+    });
+
+    it("adds no note when the limit is reached on the last subject it checks", async () => {
+      const { validator, validateNode } = makeValidator();
+      validateNode.mockResolvedValue(results(MAX_RESULTS_PER_CHECK / 4, "violation") as never);
+      const report = await validator.validateDataset(release, await cards(4), "library");
+      expect(validateNode).toHaveBeenCalledTimes(4);
+      expect(violationsOf(report)).toHaveLength(MAX_RESULTS_PER_CHECK);
+      expect(violationsOf(report).filter(isResultLimit)).toEqual([]);
+    });
+
+    it("says so once when the subject that reached the limit already says it has more results", async () => {
+      const { validator, validateNode } = makeValidator();
+      validateNode.mockResolvedValue(results(MAX_RESULTS_PER_CHECK + 1, "violation") as never);
+      const report = await validator.validateDataset(release, await cards(3), "library");
+      expect(validateNode).toHaveBeenCalledTimes(1);
+      expect(violationsOf(report)).toHaveLength(MAX_RESULTS_PER_CHECK + 1);
+      expect(violationsOf(report).filter(isResultLimit)).toHaveLength(1);
+    });
+
+    it("checks every subject of a release whose results are warnings, and of an instance's document", async () => {
+      const warned = makeValidator();
+      warned.validateNode.mockResolvedValue(results(400, "warning") as never);
+      await warned.validator.validateDataset(release, await cards(10), "library");
+      expect(warned.validateNode).toHaveBeenCalledTimes(10);
+      const own = makeValidator();
+      own.validateNode.mockResolvedValue(results(400, "violation") as never);
+      const report = await own.validator.validateDataset(release, await cards(10), "pod");
+      expect(own.validateNode).toHaveBeenCalledTimes(10);
+      expect(violationsOf(report).filter(isResultLimit)).toEqual([]);
+    });
+
+    it("refuses many bare decks with a bounded report, still naming a subject in a newer format", async () => {
+      // Two statements each, every one breaking the library's deck shape many times over.
+      const count = 2 * MAX_RESULTS_PER_CHECK;
+      const turtle = `@prefix sm: <${SM_NS}> .\n${Array.from(
+        { length: count },
+        (_, i) => `<#d${i}> a sm:Deck ; sm:formatVersion 6 .`,
+      ).join("\n")}\n<#late> a sm:Card ; sm:formatVersion 99 .`;
+      const validator = createShaclShapeValidator({
+        fetch: vi.fn() as unknown as typeof fetch,
+        shapesFetch,
+        ...SHAPE_SOURCES,
+      });
+      const report = await validator.validateDataset(
+        release,
+        await datasetOfTurtle(release, turtle),
+        "library",
+      );
+      const checked = report.subjects.filter((subject) => subject.status === "checked");
+      expect(checked.length).toBeGreaterThan(1);
+      expect(checked.length).toBeLessThan(count / 10);
+      expect(violationsOf(report).length).toBeLessThan(2 * MAX_RESULTS_PER_CHECK);
+      expect(violationsOf(report).at(-1)).toSatisfy(isResultLimit);
+      expect(report.subjects.at(-1)).toMatchObject({ url: `${release}#late`, status: "newer" });
+    }, 60_000);
   });
 
   it("names a deck whose entry or documents no deck's may have, and only it", async () => {

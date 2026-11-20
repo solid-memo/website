@@ -24,6 +24,8 @@ import {
   type DocumentReport,
   isResultLimit,
   limitResults,
+  MAX_RESULTS_PER_CHECK,
+  resultsNotShown,
   unreadableDocument,
   type SubjectReport,
   type Violation,
@@ -87,7 +89,11 @@ export interface ShaclShapeValidatorDeps {
  */
 export type ShaclShapeValidator = ShapeValidator & {
   checkSubjects: WriteCheck;
-  /** The report on a document already read, as validateDocument makes it of one it reads. */
+  /**
+   * The report on a document already read, as validateDocument makes it
+   * of one it reads. A release ("library"), which any violation refuses,
+   * is checked only until MAX_RESULTS_PER_CHECK violations are found.
+   */
   validateDataset(url: string, dataset: Dataset, context: DocumentContext): Promise<DocumentReport>;
   over(fetch: typeof globalThis.fetch): ShaclShapeValidator;
 };
@@ -453,6 +459,59 @@ function shapelessResult(
 }
 
 /**
+ * Where a check of a release (`whole`), which any violation refuses,
+ * stops: past MAX_RESULTS_PER_CHECK violations found across its subjects,
+ * the others are not checked against their shapes, nor listed in the
+ * report, and a ResultLimit on the results of the subject that reached
+ * it says so, once one is left unchecked (unless they end in one of the
+ * engine's already). A check of an instance's document goes through
+ * every subject.
+ */
+function releaseLimit(whole: boolean) {
+  let found = 0;
+  let reached: Violation[] | undefined;
+  let skipped = false;
+  return {
+    /** Whether the next subject to check against its shapes is left unchecked. */
+    skips(): boolean {
+      if (reached === undefined) return false;
+      if (!skipped && !reached.some(isResultLimit)) reached.push(resultsNotShown("violation"));
+      skipped = true;
+      return true;
+    },
+    /** A subject's results, as reported. */
+    add(violations: Violation[]): void {
+      if (!whole) return;
+      found += violations.filter((v) => v.severity === "violation" && !isResultLimit(v)).length;
+      if (found >= MAX_RESULTS_PER_CHECK) reached = violations;
+    },
+  };
+}
+
+/**
+ * How many subjects of a document a check goes through before it lets
+ * the page do its work (nextTask): a document may hold many thousands,
+ * each checked against its shapes, and a check is made in the page.
+ */
+const SUBJECTS_BETWEEN_TASKS = 256;
+
+/**
+ * A wait for the next task of the event loop: a message to itself, which
+ * a browser delivers at once, where a timeout nested this deep waits
+ * some milliseconds.
+ */
+function nextTask(): Promise<void> {
+  return new Promise((resolve) => {
+    const channel = new MessageChannel();
+    channel.port1.onmessage = () => {
+      channel.port1.close();
+      resolve();
+    };
+    channel.port2.postMessage(null);
+  });
+}
+
+/**
  * A document's report with DCAT-AP's results on its subjects added, each
  * found by its address: a checked subject's added to its own, an untyped
  * subject's making it a profiled one. Newer data is left alone, and a
@@ -776,7 +835,9 @@ export function createShaclShapeValidator({
       }
       return violations;
     };
-    for (const thing of getThingAll(dataset)) {
+    const limit = releaseLimit(whole);
+    /** A subject's report, added to `subjects`, unless the release's check stopped before it (releaseLimit). */
+    const reportSubject = async (thing: Subject): Promise<void> => {
       const subject = asUrl(thing);
       const version = storedVersionOf(thing);
       const types = getUrlAll(thing, RDF.type);
@@ -784,7 +845,7 @@ export function createShaclShapeValidator({
       if (pick.kind === "untyped") {
         // The document saying it is a deck's is Solid Memo's, and no stray.
         if (!isDeckBackLink(dataset, thing)) subjects.push({ url: subject, status: "untyped" });
-        continue;
+        return;
       }
       if (pick.kind === "unknown-version" && pick.version >= 1) {
         subjects.push({
@@ -794,8 +855,9 @@ export function createShaclShapeValidator({
           version: pick.version,
           latest: pick.latest,
         });
-        continue;
+        return;
       }
+      if (limit.skips()) return;
       // A version below 1, which no shape has, is read as a subject that does not fit (records.ts readVersioned).
       const checked =
         pick.kind === "shapes"
@@ -811,13 +873,19 @@ export function createShaclShapeValidator({
               ),
             }
           : shapelessResult(pick, version);
+      const violations = attributed(subject, checked.violations);
       subjects.push({
         url: subject,
         status: "checked",
         ...checked,
-        violations: attributed(subject, checked.violations),
+        violations,
         ...(foreign.has(subject) && { foreign: true }),
       });
+      limit.add(violations);
+    };
+    for (const [index, thing] of getThingAll(dataset).entries()) {
+      if (index > 0 && index % SUBJECTS_BETWEEN_TASKS === 0) await nextTask();
+      await reportSubject(thing);
     }
     const profiled =
       context === "pod" &&
