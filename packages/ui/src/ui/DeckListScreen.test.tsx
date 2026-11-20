@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { useState } from "preact/hooks";
 import {
   applyDeckTreeEdit,
@@ -75,9 +75,12 @@ function Harness({
   onEdit,
   onToggle,
   onUnfold,
+  shut = [],
   ...overrides
 }: Partial<Props> & {
   initial: DeckTree;
+  /** The groups folded shut from the start. */
+  shut?: readonly string[];
   fails?: (edit: DeckTreeEdit) => boolean;
   /** Edits show a tick later, as the container's do (its write is queued first). */
   slow?: boolean;
@@ -86,7 +89,7 @@ function Harness({
   onUnfold: (urls: readonly string[]) => void;
 }) {
   const [shown, setShown] = useState(initial);
-  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
+  const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set(shut));
   return (
     <DeckListScreen
       tree={shown}
@@ -296,6 +299,47 @@ describe("DeckListScreen", () => {
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
     expect(body).not.toHaveAttribute("inert");
+  });
+
+  describe("folded groups", () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it("draws what a shut group holds only until it has folded away (GHSA-vx92-3vpf-cq3c)", () => {
+      setReducedMotion(false);
+      renderScreen();
+      const toggle = screen.getByRole("button", { name: "Japanese 2 decks" });
+      const body = document.getElementById(toggle.getAttribute("aria-controls")!)!;
+      fireEvent.click(toggle);
+      // Still there as it folds, and the end of a row's own movement does not end it.
+      expect(row(kana.url)).not.toBeNull();
+      fireEvent.transitionEnd(row(kana.url));
+      expect(row(kana.url)).not.toBeNull();
+      fireEvent.transitionEnd(body);
+      expect(row(kana.url)).toBeNull();
+      expect(row(grammar)).toBeNull();
+      expect(row(verbs.url)).toBeNull();
+      fireEvent.click(toggle);
+      expect(row(kana.url)).not.toBeNull();
+      expect(row(verbs.url)).not.toBeNull();
+      // A fold cut short ends it too.
+      fireEvent.click(toggle);
+      expect(row(kana.url)).not.toBeNull();
+      fireEvent(body, new Event("transitioncancel"));
+      expect(row(kana.url)).toBeNull();
+    });
+
+    it("draws nothing of what a group holds once shut under reduced motion, nor of a group shut from the start", () => {
+      setReducedMotion(true);
+      renderScreen();
+      fireEvent.click(screen.getByRole("button", { name: "Japanese 2 decks" }));
+      expect(row(kana.url)).toBeNull();
+      cleanup();
+      renderScreen(tree, { shut: [japanese, other] });
+      expect(row(kanji.url)).not.toBeNull();
+      expect(row(japanese)).not.toBeNull();
+      expect(row(kana.url)).toBeNull();
+      expect(row(nouns.url)).toBeNull();
+    });
   });
 
   it("offers to continue a deck's course first in its menu, for a deck copied from a course only", () => {

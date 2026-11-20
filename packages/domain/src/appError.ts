@@ -65,9 +65,9 @@ export const ERROR_TEMPLATES = {
   catalogMisfit:
     "This instance's catalog doesn't fit the form Solid Memo reads, so Solid Memo leaves it as it is. The instance's data check says what's wrong with it.",
   catalogTooManyLinks:
-    "This instance's catalog lists more decks, drafts or releases than Solid Memo reads ({limit} of each at most). Remove the instance unless you know who keeps it.",
+    "This instance's catalog lists more decks, groups, drafts or releases than Solid Memo reads ({limit} of each at most). Remove the instance unless you know who keeps it.",
   catalogFull:
-    "This instance's catalog already lists as many decks, drafts or releases as Solid Memo reads ({limit} of each), so it can't list another.",
+    "This instance's catalog already lists as many decks, groups, drafts or releases as Solid Memo reads ({limit} of each), so it can't list another.",
   draftTooManyDocuments:
     "This draft or file has too many chapters, or this instance's drafts have too many documents together, for Solid Memo to read ({limit} documents at most), so this wasn't done. Use fewer chapters, or delete drafts you no longer need in the Studio. Remove the instance only if its drafts aren't yours and you don't know who keeps it.",
   reviewsReadTooManyWays:

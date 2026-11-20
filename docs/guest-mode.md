@@ -179,7 +179,9 @@ It runs these steps:
    before any deck is written. Nor when the kept decks, but any an
    earlier run added, would give the instance more decks than its
    catalog is read with (`guestMergeTooManyDecks`,
-   [data-model.md](data-model.md#the-catalog)).
+   [data-model.md](data-model.md#the-catalog)). Nor when the guest's
+   groups would give its arrangement more groups than it's read with
+   (`catalogFull`).
 2. **decks:** each kept deck becomes a new deck of the instance, in the
    guest's order ([data-model.md](data-model.md#decks-and-cards)):
    - a new id (`deck-<uuid>`), with its cards and reviews documents

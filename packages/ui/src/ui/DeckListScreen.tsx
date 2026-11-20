@@ -571,9 +571,8 @@ export function DeckListScreen({
               menu={actionsMenu(node, parent)}
             />
           )}
-        >
-          {renderNodes(node.children, node.group, depth + 1)}
-        </DeckGroupItem>
+          members={() => renderNodes(node.children, node.group, depth + 1)}
+        />
       ),
     );
   }
@@ -649,7 +648,9 @@ export function DeckListScreen({
 /**
  * A deck group in the list: its header, and under it what it holds,
  * which folds away (out of the tab order and the accessibility tree too)
- * while the group is shut.
+ * while the group is shut. What a shut group holds is not drawn at all
+ * once it has folded away, so a list of many groups draws only the rows
+ * of those open.
  */
 function DeckGroupItem({
   slot,
@@ -660,7 +661,7 @@ function DeckGroupItem({
   empty,
   depth,
   header,
-  children,
+  members,
 }: {
   /** The key of the row an empty group shows, where a drag can put something. */
   slot: string;
@@ -673,10 +674,22 @@ function DeckGroupItem({
   empty: boolean;
   depth: number;
   header: (bodyId: string, expanded: boolean) => ComponentChildren;
-  children: ComponentChildren;
+  /** The rows of what it holds. */
+  members: () => ComponentChildren;
 }) {
   const { t } = useI18n();
   const bodyId = useId();
+  // Shut by the user, what it holds stays drawn while it folds away; under reduced motion it goes at once.
+  const [folding, setFolding] = useState(false);
+  const [wasCollapsed, setWasCollapsed] = useState(collapsed);
+  if (wasCollapsed !== collapsed) {
+    setWasCollapsed(collapsed);
+    setFolding(collapsed && !reducedMotion());
+  }
+  // Folded away, or the fold cut short; not the end of what a row in it does.
+  const folded = (event: TransitionEvent) => {
+    if (event.target === event.currentTarget) setFolding(false);
+  };
   return (
     <li
       class={`deck-group${lifted ? " drag-source" : ""}${leaving ? " leaving" : ""}`}
@@ -691,15 +704,17 @@ function DeckGroupItem({
         class="deck-group-body"
         data-collapsed={collapsed ? "" : undefined}
         inert={collapsed}
+        onTransitionEnd={folded}
+        onTransitionCancel={folded}
       >
         <div class="deck-group-clip">
-          {empty ? (
+          {collapsed && !folding ? null : empty ? (
             <p class="hint deck-group-empty" data-row-key={slot}>
               {t("deckList.emptyGroup")}
             </p>
           ) : (
             <ul class="deck-list" style={`--depth: ${depth + 1}`}>
-              {children}
+              {members()}
             </ul>
           )}
         </div>

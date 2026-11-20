@@ -1258,6 +1258,19 @@ catalog or group that doesn't conform, or that check still running
 app can't read is never edited: its members show at the top level, and
 the catalog's `dcat:catalog` keeps its link.
 
+A catalog is data anyone may have written, and the deck list draws a
+row for every group, so the app reads at most 1,000 groups of it
+(`MAX_DECK_GROUPS` in [deck.ts](../packages/domain/src/deck.ts)), as it
+reads at most `MAX_CATALOG_LINKS` decks ([The catalog](#the-catalog)).
+Past that, it reads none of the catalog's arrangement, so the deck
+list and every screen built on it (the Studio's Groups, Decks table,
+Transfer and Drafts) show none of its decks, and it says why
+(`catalogTooManyLinks`). An edit that would make one group
+more is refused before anything is written (`catalogFull`), as is
+adding a guest's study whose groups would. The deck list
+draws what a group holds only while the group is open: once a group
+has folded shut, its rows are gone from the page.
+
 **Writing an arrangement.** The screen sends an edit, not a finished
 layout (`DeckTreeEdit` in
 [deckTree.ts](../packages/domain/src/deckTree.ts)). An edit moves a

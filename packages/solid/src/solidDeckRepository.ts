@@ -22,6 +22,7 @@ import {
   CARD_FORMAT_VERSION,
   DECK_FORMAT_VERSION,
   DEFAULT_DECK_DIRECTION,
+  MAX_DECK_GROUPS,
   boundedCompletedChapters,
   withBoundedMetadata,
   type Card,
@@ -52,6 +53,7 @@ import { CARD_V7, DECK_V6 } from "@solid-memo/vocab/descriptors.generated";
 import {
   applyDeckTreeEdit,
   buildTree,
+  groupCount,
   type StoredLayout,
   treeChanges,
 } from "@solid-memo/domain/deckTree";
@@ -145,12 +147,15 @@ const TREE_ATTEMPTS = 3;
 
 /**
  * The arrangement the catalog states (toStoredLayout), or
- * catalogTooManyLinks past MAX_CATALOG_LINKS decks, as listDecks gives:
- * each deck's documents are read by whoever shows the tree.
+ * catalogTooManyLinks past MAX_CATALOG_LINKS decks, as listDecks gives
+ * (each deck's documents are read by whoever shows the tree), or past
+ * MAX_DECK_GROUPS groups, each of which the deck list draws.
  */
 function cappedLayout(dataset: Dataset, catalogUrl: string): StoredLayout {
   const layout = toStoredLayout(dataset, catalogUrl);
   withinCatalogLimit(layout.decks);
+  if (layout.groups.length > MAX_DECK_GROUPS)
+    throw new AppError("catalogTooManyLinks", { limit: MAX_DECK_GROUPS });
   return layout;
 }
 
@@ -380,6 +385,9 @@ export function createSolidDeckRepository({
         const before = buildTree(stored);
         const after = applyDeckTreeEdit(before, edit);
         if (after === before) return after;
+        // One group more than are read would leave the arrangement unread (cappedLayout).
+        if (groupCount(after.children) > MAX_DECK_GROUPS)
+          throw new AppError("catalogFull", { limit: MAX_DECK_GROUPS });
         const { dataset: updated, subjects } = withTreeChanges(
           dataset,
           catalogUrl,
