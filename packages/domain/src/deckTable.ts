@@ -133,13 +133,28 @@ function foldedFormsOf(text: LangText): readonly string[] {
   return forms;
 }
 
+/**
+ * Whether each text, in any language, held the folded filter it was last
+ * searched for. A group's title is shared by every deck in the group or
+ * below it, up to 16 levels deep, so each row searching its groups'
+ * titles anew would search a title once a deck below it; so it is
+ * searched once a filter.
+ */
+const lastSearches = new WeakMap<LangText, { wanted: string; holds: boolean }>();
+
+function holds(text: LangText, wanted: string): boolean {
+  const last = lastSearches.get(text);
+  if (last?.wanted === wanted) return last.holds;
+  const result = foldedFormsOf(text).some((form) => form.includes(wanted));
+  lastSearches.set(text, { wanted, holds: result });
+  return result;
+}
+
 /** Whether a row's title, in any language, or one of its groups' names holds the filter, case and diacritics aside. */
 export function matchesFilter(row: DeckTableRow, filter: string): boolean {
   const wanted = folded(filter.trim());
   if (wanted === "") return true;
-  return [row.deck.title, ...row.groups.map((group) => group.title)]
-    .flatMap(foldedFormsOf)
-    .some((form) => form.includes(wanted));
+  return holds(row.deck.title, wanted) || row.groups.some((group) => holds(group.title, wanted));
 }
 
 /** The columns that sort by a text as the reader sees it; the others by a number. */
@@ -184,17 +199,41 @@ export function deckSortTexts(
   return rows.map((row) => paths.get(row.groups)!);
 }
 
-/** Each list of groups the rows are in, named as the reader sees it: once a list, as decks of a group share theirs and a path can be long. */
+/** Each list of groups the rows are in, named as the reader sees it: once a list, as decks of a group share theirs. */
 export function deckGroupPaths(
   rows: readonly DeckTableRow[],
   text: (text: LangText) => string,
 ): Map<readonly DeckGroup[], string> {
   return new Map(
-    [...new Set(rows.map((row) => row.groups))].map((groups) => [
-      groups,
-      groups.map((group) => text(group.title)).join(" › "),
-    ]),
+    [...new Set(rows.map((row) => row.groups))].map((groups) => [groups, groupPath(groups, text)]),
   );
+}
+
+/**
+ * The most code points of a group's title a path of groups shows. A
+ * title may be as long as a term, and groups nest up to 16 deep, so a
+ * path that showed each title whole could be 16 times as long as every
+ * title read; cut, a path is at most 16 such names.
+ */
+const MAX_PATH_TITLE_CHARACTERS = 200;
+
+/**
+ * A list of groups, the outermost first, named as the reader sees it:
+ * each group's title in the reader's language, cut to
+ * MAX_PATH_TITLE_CHARACTERS code points (the last an ellipsis when cut),
+ * joined by " › ". The Studio's table, its bulk Move and its deck peek
+ * name groups so.
+ */
+export function groupPath(groups: readonly DeckGroup[], text: (text: LangText) => string): string {
+  return groups.map((group) => pathTitle(text(group.title))).join(" › ");
+}
+
+/** A title cut to MAX_PATH_TITLE_CHARACTERS code points, never within one: a code point takes at most two UTF-16 units. */
+function pathTitle(title: string): string {
+  const points = Array.from(title.slice(0, 2 * (MAX_PATH_TITLE_CHARACTERS + 1)));
+  return points.length <= MAX_PATH_TITLE_CHARACTERS
+    ? title
+    : `${points.slice(0, MAX_PATH_TITLE_CHARACTERS - 1).join("")}…`;
 }
 
 /**

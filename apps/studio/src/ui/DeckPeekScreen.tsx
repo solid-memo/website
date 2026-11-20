@@ -4,6 +4,7 @@
 
 import type { ComponentChildren } from "preact";
 import type { Deck } from "@solid-memo/domain/deck";
+import { groupPath } from "@solid-memo/domain/deckTable";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
@@ -45,11 +46,7 @@ export function DeckPeekScreen({ peek }: { peek: DeckPeek | null }) {
       {healthBadge}
       <dl>
         <dt>{t("studio.decks.group")}</dt>
-        <dd>
-          {groups.length === 0
-            ? t("studio.decks.topLevel")
-            : groups.map((group) => readerText(group.title)).join(" › ")}
-        </dd>
+        <dd>{groups.length === 0 ? t("studio.decks.topLevel") : groupPath(groups, readerText)}</dd>
         <dt>{t("studio.decks.cards")}</dt>
         <dd>
           <CountCell count={cards} />

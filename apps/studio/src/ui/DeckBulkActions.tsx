@@ -5,6 +5,7 @@
 import { useState } from "preact/hooks";
 import { DECK_DIRECTIONS, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckPace } from "@solid-memo/domain/deckPace";
+import { groupPath } from "@solid-memo/domain/deckTable";
 import type { DeckGroup } from "@solid-memo/domain/deckTree";
 import { ActionsMenu, MenuItem } from "@solid-memo/ui/ActionsMenu";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -140,7 +141,7 @@ export function DeckBulkActions({
                     <option value="">{t("studio.bulk.topLevel")}</option>
                     {groups.map(({ group, trail }) => (
                       <option key={group.url} value={group.url}>
-                        {trail.map((step) => readerText(step.title)).join(" › ")}
+                        {groupPath(trail, readerText)}
                       </option>
                     ))}
                   </select>
