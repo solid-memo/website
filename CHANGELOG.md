@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.8](https://github.com/solid-memo/website/compare/v8.0.7...v8.0.8) (2026-11-20)
+
+### Fixes
+
+* **domain:** compare document addresses as a decoding server reads them ([3b870c9](https://github.com/solid-memo/website/commit/3b870c9af74db99ff1c907a4acc3e76fbe85061b))
+* **studio:** sort the card workbench once per query, by bounded text ([b5fd4b4](https://github.com/solid-memo/website/commit/b5fd4b43ccc8c117c6d80bb9581f96808915ddc8))
+
 ## [8.0.7](https://github.com/solid-memo/website/compare/v8.0.6...v8.0.7) (2026-11-20)
 
 ### Fixes
