@@ -629,13 +629,33 @@ export function createReleaseDraftUseCases({
     return shapeValidator.validateRelease(draft, place.url, place.index.url);
   }
 
-  async function withPublished(draft: ReleaseDraft): Promise<ReleaseDraft> {
-    if (draft.root.prev === undefined) return draft;
-    try {
-      return { ...draft, published: await published(draft.root.prev) };
-    } catch {
-      return { ...draft, published: publishedIdsOf(draft) };
+  /** Whether each draft may follow its release (isFollowable), by both URLs: told once; one that can't be told is asked again next time. */
+  const followables = new Map<string, Promise<boolean>>();
+
+  function followable(draftUrl: string, prev: string): Promise<boolean> {
+    const key = JSON.stringify([draftUrl, prev]);
+    let told = followables.get(key);
+    if (told === undefined) {
+      told = isFollowable(draftUrl, prev);
+      told.catch(() => followables.delete(key));
+      followables.set(key, told);
     }
+    return told;
+  }
+
+  /**
+   * The draft with what the release it follows published. A release it
+   * may not follow (isFollowable), or whose place can't be told, is not
+   * read, as the release check doesn't read it: as while one can't be
+   * read, everything the draft has counts as published.
+   */
+  async function withPublished(draft: ReleaseDraft): Promise<ReleaseDraft> {
+    const { prev } = draft.root;
+    if (prev === undefined) return draft;
+    const ids = await followable(draft.url, prev)
+      .then((may) => (may ? published(prev) : null))
+      .catch(() => null);
+    return { ...draft, published: ids ?? publishedIdsOf(draft) };
   }
 
   /**

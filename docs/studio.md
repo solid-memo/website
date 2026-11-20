@@ -1753,7 +1753,9 @@ A new draft starts from
     release in someone else's pod, or in a folder of the user's the
     instance's catalog doesn't link, can still be started and saved
     with **Download .ttl**. The check refuses it as an error, so it
-    can't be published in the pod.
+    can't be published in the pod. Its editor doesn't read that
+    release, so everything the draft has counts as published: a
+    subject can be retired but not deleted.
 - **a release saved as a file**, Turtle or JSON-LD, as it is
   (`releaseToDraft` in
   [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)),
@@ -1871,8 +1873,10 @@ over the `ReleaseDraftRepository` port.
   part of them was written before (a chapter they add is there), what
   they changed is kept where nothing else changed it (`mergedDraft`).
 - What a release before a draft published is read from that release
-  (`dcat:prev`), once. While it can't be read, everything the draft has
-  counts as published.
+  (`dcat:prev`), once. It's read only when the draft may follow it, as
+  the instance's or the library's, which is told once too. While it
+  can't be read, or is elsewhere, or where it is can't be told,
+  everything the draft has counts as published.
 - A release that isn't in the library is read as no one, so its server
   learns nothing of who opens the draft. One in the user's own pod (a
   storage of theirs, or an instance they registered) is read as the
