@@ -42,6 +42,7 @@ import {
   documentsInUse,
   ensureTrailingSlash,
   canonicalUrlOf,
+  documentKeyOf,
   reviewsContainerOf,
   subjectOfDocument,
 } from "@solid-memo/domain/instanceLayout";
@@ -795,7 +796,7 @@ export function createSolidDeckRepository({
     for (const [catalogUrl, inDocument] of byDocument(decks)) {
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
       const leaving = new Set(inDocument.map((deck) => deck.url));
-      // Compared as a request sends them: one document spelled two ways is one.
+      // Compared as a server may read them (documentKeyOf): one document spelled two ways is one.
       const used = new Set(
         [
           ...documentsInUse(
@@ -803,10 +804,10 @@ export function createSolidDeckRepository({
               ? []
               : toDecks(dataset, catalogUrl).filter((other) => !leaving.has(other.url)),
           ),
-        ].map(canonicalUrlOf),
+        ].map(documentKeyOf),
       );
       const usable = inDocument.filter(isDeckInPlace);
-      const unused = [...documentsInUse(usable)].filter((url) => !used.has(canonicalUrlOf(url)));
+      const unused = [...documentsInUse(usable)].filter((url) => !used.has(documentKeyOf(url)));
       // Each document's decks found at once, and the entries told once, not per document.
       const decksAt = decksByDocument(usable);
       const entries = deckDocumentSubjects([...leaving]);

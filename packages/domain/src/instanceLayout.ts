@@ -193,6 +193,73 @@ export function isSameUrl(a: string, b: string): boolean {
 }
 
 /**
+ * A percent-encoded character a document key keeps as it is
+ * (documentKeyOf): a slash, a backslash or a percent sign, which decoded
+ * would end the segment, start another or merge with what follows.
+ */
+const KEPT_ESCAPE = /(%(?:2f|5c|25))/i;
+
+/**
+ * An escape decoded where it needs no encoding (a letter, a digit, `-`,
+ * `.`, `_`, `~`), as a server may decode it, and in upper case otherwise.
+ */
+function foldUnreserved(text: string): string {
+  return text.replace(/%[0-9a-f]{2}/gi, (encoded) => {
+    const char = String.fromCharCode(Number.parseInt(encoded.slice(1), 16));
+    return /[\w.~-]/.test(char) ? char : encoded.toUpperCase();
+  });
+}
+
+/**
+ * A path segment as a server that decodes it and encodes it again
+ * (`encodeURIComponent`) reads it, every escape but a kept one
+ * (KEPT_ESCAPE) decoded first. A part that does not decode (a stray `%`,
+ * a broken UTF-8 sequence) has only its unreserved escapes decoded.
+ */
+function segmentKeyOf(segment: string): string {
+  return segment
+    .split(KEPT_ESCAPE)
+    .map((part, index) => {
+      if (index % 2 === 1) return part.toUpperCase();
+      try {
+        return encodeURIComponent(decodeURIComponent(part));
+      } catch {
+        return foldUnreserved(part);
+      }
+    })
+    .join("");
+}
+
+/**
+ * A document's address as a server may read it, to tell whether two
+ * addresses name one document: as a request sends it (canonicalUrlOf),
+ * its host without a trailing dot, which names the same host, and
+ * without a user name or password, which a request does not send in the
+ * address and which name no other document. An http(s) path is taken
+ * segment by segment as a server that decodes each and encodes it again
+ * reads it (segmentKeyOf), so `x(y).ttl` and `x%28y%29.ttl`, or `a+b`
+ * and `a%2Bb`, are one; an encoded slash, backslash or percent sign
+ * stays encoded, so `a%2Fb` and `a/b` are not. Elsewhere an escape of a
+ * character that needs no encoding is decoded, and any other is in
+ * upper case. Text that is no URL is taken as it is written. Where two
+ * addresses being one document keeps data safe (a card transfer, a
+ * document another deck still names, an unclaimed document), they are
+ * compared by this key.
+ */
+export function documentKeyOf(url: string): string {
+  const canonical = canonicalUrlOf(url);
+  if (canonical === null) return url;
+  const parsed = new URL(canonical);
+  parsed.hostname = parsed.hostname.replace(/\.$/, "");
+  parsed.username = "";
+  parsed.password = "";
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:")
+    return foldUnreserved(parsed.href);
+  const path = parsed.pathname.split("/").map(segmentKeyOf).join("/");
+  return `${parsed.protocol}//${parsed.host}${path}${foldUnreserved(parsed.search + parsed.hash)}`;
+}
+
+/**
  * Whether a subject is one of the document at `documentUrl`, and not a
  * subject of another document that this one merely states things of: a
  * fragment is an id only in its own document, so another document's

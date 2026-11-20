@@ -95,6 +95,43 @@ describe("sharesDocumentsWith", () => {
     expect(targets.map(shares)).toEqual(targets.map((t) => sharesDocuments(SOURCE, t)));
   });
 
+  // A server that decodes each path segment and encodes it again reads each pair as one document.
+  it.each([
+    ["Spanish%20(basic).ttl", "Spanish%20%28basic%29.ttl"],
+    ["x!.ttl", "x%21.ttl"],
+    ["x*.ttl", "x%2a.ttl"],
+    ["x'.ttl", "x%27.ttl"],
+    ["a+b.ttl", "a%2Bb.ttl"],
+    ["me@work.ttl", "me%40work.ttl"],
+  ])("takes %s and %s as one document", (one, other) => {
+    const at = (name: string, url: string, reviews: string) => ({
+      url,
+      cardsDocumentUrl: `https://pod.example/a/decks/${name}`,
+      reviewsDocumentUrl: reviews,
+    });
+    const source = at(one, SOURCE.url, SOURCE.reviewsDocumentUrl);
+    expect(sharesDocumentsWith(source)(at(other, TARGET.url, TARGET.reviewsDocumentUrl))).toBe(
+      true,
+    );
+  });
+
+  it.each([
+    ["a%2Fb.ttl", "a/b.ttl"],
+    ["a%5Cb.ttl", "a/b.ttl"],
+    ["a%2541.ttl", "aA.ttl"],
+    ["a%2541.ttl", "a%41.ttl"],
+  ])("keeps %s and %s apart", (one, other) => {
+    const at = (name: string, url: string, reviews: string) => ({
+      url,
+      cardsDocumentUrl: `https://pod.example/a/decks/${name}`,
+      reviewsDocumentUrl: reviews,
+    });
+    const source = at(one, SOURCE.url, SOURCE.reviewsDocumentUrl);
+    expect(sharesDocumentsWith(source)(at(other, TARGET.url, TARGET.reviewsDocumentUrl))).toBe(
+      false,
+    );
+  });
+
   it("reads the source's addresses once, however many targets it is asked about", () => {
     let reads = 0;
     const source = {
@@ -617,6 +654,26 @@ describe("planCardTransfer", () => {
         },
         ["a"],
         copy,
+      ),
+    ).toThrow(expect.objectContaining({ code: "cardTransferSameDeck" }));
+  });
+
+  it.each([
+    ["move", "x(y).ttl", "x%28y%29.ttl"],
+    ["move", "x!.ttl", "x%21.ttl"],
+    ["copy", "x*.ttl", "x%2A.ttl"],
+    ["move", "x'.ttl", "x%27.ttl"],
+    ["copy", "a+b.ttl", "a%2bb.ttl"],
+    ["move", "me@x.ttl", "me%40x.ttl"],
+  ] as const)("refuses a %s from %s to %s, which a server reads as one", (mode, from, to) => {
+    const cards = [card("c1")];
+    const at = (name: string) => `https://pod.example/a/decks/${name}`;
+    expect(() =>
+      planCardTransfer(
+        { ...SOURCE, cardsDocumentUrl: at(from), cards, states: [] },
+        { ...TARGET, cardsDocumentUrl: at(to), cards, states: [] },
+        ["c1"],
+        { mode, keepProgress: true },
       ),
     ).toThrow(expect.objectContaining({ code: "cardTransferSameDeck" }));
   });

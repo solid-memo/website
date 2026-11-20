@@ -1247,6 +1247,23 @@ describe("cards", () => {
         expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       },
     );
+    it("refuses a move to an entry over the deck's document spelled as a server decodes it", async () => {
+      const { deps, useCases } = setup();
+      const named = (spelled: string) =>
+        `https://alice.example/solid-memo/main/decks/Spanish%20${spelled}.ttl`;
+      await expect(
+        useCases.transferCards(
+          instance.url,
+          { ...deck, cardsDocumentUrl: named("(basic)!") },
+          { ...target, cardsDocumentUrl: named("%28basic%29%21") },
+          ["one"],
+          { mode: "move", keepProgress: true },
+          session.webId,
+        ),
+      ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+    });
   });
   describe("deck files", () => {
     const fileDeck: Deck = {

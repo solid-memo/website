@@ -526,6 +526,22 @@ describe("instance checks", () => {
     expect(checked).toContain(`${instance.url}catalog.ttl`);
     expect(checked.filter((url) => url.includes("/notes/"))).toEqual([]);
   });
+  it("checks an unclaimed document in no spelling a server reads as its address", async () => {
+    const { deps, useCases } = setup();
+    const named = { ...deck, cardsDocumentUrl: "https://alice.example/notes/n%28a%29%21.ttl" };
+    deps.deckRepository.listDecks = vi.fn(async () => [named]);
+    deps.deckRepository.unclaimedDocuments = vi.fn(async () => [
+      "https://alice.example/notes/n(a)!.ttl",
+    ]);
+    await useCases.validateInstance(instance.url);
+    await useCases.checkDeck(instance.url, named, { plain: (value) => value, check: () => [] });
+    const checked = [
+      ...vi.mocked(deps.shapeValidator.validateDocumentSince).mock.calls,
+      ...vi.mocked(deps.shapeValidator.validateDocument).mock.calls,
+    ].map(([url]) => url);
+    expect(checked).toContain(deck.reviewsDocumentUrl);
+    expect(checked.filter((url) => url.includes("/notes/"))).toEqual([]);
+  });
   it("checks an address that is no URL, unclaimed or not", async () => {
     const { deps, useCases } = setup();
     const named = { ...deck, cardsDocumentUrl: "no url" };
