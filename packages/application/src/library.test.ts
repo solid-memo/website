@@ -10,7 +10,11 @@ import { createUseCases } from "./useCases";
 import { withLinkedReleasesChecked } from "./library";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
-import type { DocumentReport } from "@solid-memo/domain/validation";
+import {
+  type DocumentReport,
+  MAX_RESULTS_PER_CHECK,
+  resultsNotShown,
+} from "@solid-memo/domain/validation";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { firstRelease } from "@solid-memo/domain/testing/libraryDeck";
 import { librarySeriesUrlOf } from "@solid-memo/domain/libraryLayout";
@@ -439,6 +443,66 @@ describe("the deck library", () => {
         vars: { host: "bob.example", count: 2 },
       });
       await expect(refused).rejects.toThrow("Less than 1 values");
+    });
+
+    it("readReleaseFromLink names no more of a release's violations than a check keeps", async () => {
+      const deps = makeDeps();
+      const many = 3 * MAX_RESULTS_PER_CHECK;
+      reading(deps, [linked(1)], () => ({
+        url: `${RELEASES}v1.ttl`,
+        status: "checked",
+        subjects: Array.from({ length: many }, (_, i) => ({
+          url: `${RELEASES}v1.ttl#d${i}`,
+          status: "checked" as const,
+          shape: "libraryDeck" as const,
+          version: 6,
+          violations: [
+            {
+              path: SM.front,
+              message: { en: "Less than 1 values" },
+              severity: "violation" as const,
+              constraint: "MinCount",
+            },
+          ],
+        })),
+      }));
+      const refused = await createUseCases(deps)
+        .readReleaseFromLink(`${RELEASES}v1.ttl`)
+        .catch((error: unknown) => error);
+      expect(refused).toMatchObject({ code: "releaseNotConforming", vars: { count: many } });
+      const problems = String((refused as { vars: { problems: string } }).vars.problems);
+      expect(problems.split("\n")).toHaveLength(MAX_RESULTS_PER_CHECK + 1);
+      expect(problems).toContain("There are more results than Solid Memo shows");
+    });
+
+    it("readReleaseFromLink counts no note of a check that stopped as a violation, and says there are more", async () => {
+      const deps = makeDeps();
+      const violation = {
+        path: SM.front,
+        message: { en: "Less than 1 values" },
+        severity: "violation" as const,
+        constraint: "MinCount",
+      };
+      reading(deps, [linked(1)], () => ({
+        url: `${RELEASES}v1.ttl`,
+        status: "checked",
+        subjects: [
+          {
+            url: `${RELEASES}v1.ttl#d0`,
+            status: "checked" as const,
+            shape: "libraryDeck" as const,
+            version: 6,
+            violations: [violation, violation, resultsNotShown("violation")],
+          },
+        ],
+      }));
+      const refused = await createUseCases(deps)
+        .readReleaseFromLink(`${RELEASES}v1.ttl`)
+        .catch((error: unknown) => error);
+      expect(refused).toMatchObject({ code: "releaseNotConforming", vars: { count: 2 } });
+      const problems = String((refused as { vars: { problems: string } }).vars.problems);
+      expect(problems.split("\n")).toHaveLength(3);
+      expect(problems).toContain("There are more results than Solid Memo shows");
     });
 
     it("readReleaseFromLink refuses a release with a subject in a newer format than the app reads, as too new", async () => {

@@ -31,7 +31,7 @@ import {
   type DeckUpgradeStep,
 } from "@solid-memo/domain/deckUpgrade";
 import type { ReviewKey } from "@solid-memo/domain/review";
-import type { DocumentReport } from "@solid-memo/domain/validation";
+import { type DocumentReport, isResultLimit, limitResults } from "@solid-memo/domain/validation";
 import type {
   DeckLibrary,
   DeckRepository,
@@ -204,7 +204,10 @@ async function readEach<T>(
  * shapes have, which no shape checks (libraryCardTooNew for a card,
  * libraryDeckTooNew for any other), or with a violation of its shape
  * (releaseNotConforming): the check reports a subject stamped with a
- * version below 1 as breaking its shape.
+ * version below 1 as breaking its shape. The refusal counts the
+ * violations found, the check's notes that it left some out
+ * (isResultLimit) not among them, and names as many as a check keeps
+ * (limitResults), saying when there are more.
  */
 function refuseNonConforming(url: string, report: DocumentReport): void {
   const newer = report.subjects.find((subject) => subject.status === "newer");
@@ -216,14 +219,19 @@ function refuseNonConforming(url: string, report: DocumentReport): void {
   }
   const problems = report.subjects.flatMap((subject) =>
     subject.status === "checked"
-      ? subject.violations.filter((violation) => violation.severity === "violation")
+      ? subject.violations.filter(
+          (violation) => violation.severity === "violation" && !isResultLimit(violation),
+        )
       : [],
+  );
+  const limited = report.subjects.some(
+    (subject) => subject.status === "checked" && subject.violations.some(isResultLimit),
   );
   if (problems.length > 0) {
     throw new AppError("releaseNotConforming", {
       host: releaseHost(url) ?? url,
       count: problems.length,
-      problems: problems
+      problems: limitResults(problems, limited ? "violation" : undefined)
         .map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`)
         .join("\n"),
     });

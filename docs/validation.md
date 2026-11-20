@@ -665,7 +665,25 @@ checked in the `"library"` context
 library shape, no DCAT-AP. The check is of the read the library made
 (`DeckLibrary.readRelease`), which no login goes with, and the read that
 passes is the one imported. A violation refuses the release; a warning
-doesn't.
+doesn't. Once the check has found as many violations as a check keeps
+(`MAX_RESULTS_PER_CHECK`), counted across all the release's subjects,
+it checks no more of them against their shapes, nor lists them, and a
+`ResultLimit` says there are more. It still names a subject in a newer
+format, which refuses the release as too new instead. The refusal
+counts the violations found, not the `ResultLimit`, and names no more
+of them than that limit.
+
+An instance's documents are checked whole, since the health screen
+lists every problem: those of an instance registered outside the
+user's storages too, which the app can't tell apart from the user's
+own when it checks a document. Each subject keeps as many results as a
+check keeps. A release that conforms is checked whole as well. So the
+time a check takes grows with the document, and the limits on what's
+read bound it: `RELEASE_LIMITS` for a release, and `FOREIGN_LIMITS` for
+a document outside the user's storages. A check never compares each
+subject with every other one. It lets the page do its work every few
+hundred subjects, so a large document makes the check long, and the
+page stays responsive while it runs.
 
 ## Data that doesn't fit
 

@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { buildThing, createThing, type Dataset, type NamedSubject, setThing } from "./client/rdf";
 import { datasetFrom } from "./testing/datasets";
 import { readDataset } from "./datasets";
@@ -19,6 +20,11 @@ import {
 import { DCAT, DCTERMS, RDF, SM } from "./vocab";
 import { integerLiteral } from "./testing/literals";
 
+vi.mock("@solid-memo/domain/instanceLayout", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/domain/instanceLayout")>();
+  return { ...actual, isSameUrl: vi.fn(actual.isSameUrl) };
+});
+
 const DOC = "https://pod.example/solid-memo/a/catalog.ttl";
 const DCAT_DISTRIBUTION = "http://www.w3.org/ns/dcat#distribution";
 const FOAF_AGENT = "http://xmlns.com/foaf/0.1/Agent";
@@ -31,6 +37,32 @@ const subject = (id: string) =>
   buildThing(createThing({ url: id.startsWith("https:") ? id : `${DOC}#${id}` }));
 
 describe("foreignSubjects", () => {
+  it("tells the kind of document once, not for each of its subjects", () => {
+    const count = 200;
+    for (const url of [
+      "https://pod.example/releases/r.ttl",
+      "https://pod.example/releases/d.ttl",
+    ]) {
+      let dataset = datasetFrom(url);
+      if (url.endsWith("d.ttl"))
+        dataset = setThing(
+          dataset,
+          buildThing(createThing({ url })).addIri(RDF.type, SM.Deck).build(),
+        );
+      for (let i = 0; i < count; i++)
+        dataset = setThing(
+          dataset,
+          buildThing(createThing({ url: `${url}#d${i}` }))
+            .addIri(RDF.type, SM.Deck)
+            .build(),
+        );
+      vi.mocked(isSameUrl).mockClear();
+      expect(foreignSubjects(dataset)).toEqual(new Set());
+      // Telling a deck's document compares each subject's address with the document's, twice.
+      expect(vi.mocked(isSameUrl).mock.calls.length).toBeLessThanOrEqual(4 * (count + 1));
+    }
+  });
+
   it("leaves out what Solid Memo wrote, stamped or not, and what it names as creator, publisher or distribution", () => {
     const alice = "https://alice.example/profile/card#me";
     const dataset = documentOf(
