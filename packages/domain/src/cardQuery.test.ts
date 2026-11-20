@@ -7,6 +7,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card } from "./deck";
 import {
   cardLanguages,
+  cardSortText,
   DEFAULT_CARD_QUERY,
   isDefaultQuery,
   LANGUAGE_CHOICE_LIMIT,
@@ -396,6 +397,60 @@ describe("queryCards", () => {
     expect(sorted("front", true)).toEqual(["c-10", "c-9", "c-2", "c-1", "c-3"]);
     // A side in Markdown sorts by its plain text: "b", not "**b**".
     expect(sorted("back")).toEqual(["c-9", "c-10", "c-1", "c-2", "c-3"]);
+  });
+
+  it("sorts a side by its first 200 code points, texts that differ only past them in the deck's order", () => {
+    const smile = "\u{1F600}";
+    const long = (tail: string) => `${smile.repeat(199)}${tail}`;
+    expect(cardSortText(long("ab"))).toBe(long("a"));
+    expect(cardSortText(long("b"))).toBe(long("b"));
+    const cards = [
+      card("c-1", { front: { en: long("bz") } }),
+      card("c-2", { front: { en: long("by") } }),
+      card("c-3", { front: { en: long("a") } }),
+      card("c-4", { front: { en: `**${long("c")}**` }, textFormat: SM.markdown }),
+    ];
+    const sorted = (descending: boolean) =>
+      queryCards(
+        cards,
+        reviews,
+        { text: "", field: "any", sort: { key: "front", descending } },
+        TODAY,
+        plain,
+        englishReader,
+      ).map((row) => row.card.id);
+    // "…bz" and "…by" differ only in their 201st code point, so they sort as equal.
+    expect(sorted(false)).toEqual(["c-3", "c-1", "c-2", "c-4"]);
+    expect(sorted(true)).toEqual(["c-4", "c-1", "c-2", "c-3"]);
+  });
+
+  it("takes no longer to sort sides however much longer than 200 code points they are", () => {
+    // Fronts that differ only in case: compared whole, each comparison reads them to the end.
+    const layout = (length: number) =>
+      Array.from({ length: 400 }, (_, at) =>
+        card(`c-${at}`, { front: { en: `${(at % 2 === 0 ? "a" : "A").repeat(length)}${at}` } }),
+      );
+    const query = {
+      text: "",
+      field: "any" as const,
+      sort: { key: "front" as const, descending: false },
+    };
+    expect(queryCards(layout(16_375), reviews, query, TODAY, plain, englishReader)).toHaveLength(
+      400,
+    );
+    // Texts eight times as long take no longer to sort, as only their first
+    // 200 code points are compared; compared whole, they would take about
+    // eight times as long.
+    const ratio = growth(
+      (length) => {
+        const cards = layout(length);
+        return () => queryCards(cards, reviews, query, TODAY, plain, englishReader);
+      },
+      2_000,
+      8,
+      0.5,
+    );
+    expect(ratio).toBeLessThan(0.5);
   });
 
   it("puts a card without the key last, whichever comes first", () => {

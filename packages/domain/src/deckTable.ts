@@ -4,7 +4,7 @@
 
 import { DECK_DIRECTIONS, type Deck } from "./deck";
 import type { DeckGroup, DeckTree, TreeNode } from "./deckTree";
-import { folded, type LangText } from "./langText";
+import { firstCodePoints, folded, type LangText } from "./langText";
 
 /**
  * The Studio's table of an instance's decks (docs/studio.md): a row per
@@ -228,12 +228,12 @@ export function groupPath(groups: readonly DeckGroup[], text: (text: LangText) =
   return groups.map((group) => pathTitle(text(group.title))).join(" › ");
 }
 
-/** A title cut to MAX_PATH_TITLE_CHARACTERS code points, never within one: a code point takes at most two UTF-16 units. */
+/** A title cut to MAX_PATH_TITLE_CHARACTERS code points, never within one, the last an ellipsis when cut. */
 function pathTitle(title: string): string {
-  const points = Array.from(title.slice(0, 2 * (MAX_PATH_TITLE_CHARACTERS + 1)));
-  return points.length <= MAX_PATH_TITLE_CHARACTERS
+  const kept = firstCodePoints(title, MAX_PATH_TITLE_CHARACTERS);
+  return kept.length === title.length
     ? title
-    : `${points.slice(0, MAX_PATH_TITLE_CHARACTERS - 1).join("")}…`;
+    : `${firstCodePoints(kept, MAX_PATH_TITLE_CHARACTERS - 1)}…`;
 }
 
 /**

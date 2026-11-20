@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 import { contrast, hexColor, hexOf, mix, type Rgba } from "./contrast";
-import type { LangText } from "./langText";
+import { firstCodePoints, type LangText } from "./langText";
 import { contrastTargets, isPalette, type Palette } from "./palette";
 import { THEMES, type Theme } from "./theme";
 
@@ -199,14 +199,6 @@ export const MAX_PALETTE_NAME_LANGUAGES = 32;
  */
 export const MAX_PALETTE_NAME_CHARACTERS = 200;
 
-/** `text` cut to MAX_PALETTE_NAME_CHARACTERS code points, never inside one. */
-function cutName(text: string): string {
-  if (text.length <= MAX_PALETTE_NAME_CHARACTERS) return text;
-  return Array.from(text.slice(0, 2 * MAX_PALETTE_NAME_CHARACTERS))
-    .slice(0, MAX_PALETTE_NAME_CHARACTERS)
-    .join("");
-}
-
 /**
  * A name's text by language tag: only text, under a tag of letters,
  * digits and hyphens, in at most MAX_PALETTE_NAME_LANGUAGES languages,
@@ -221,7 +213,7 @@ function titleOf(value: unknown): LangText {
           /^[a-z0-9-]{0,35}$/.test(entry[0]) && typeof entry[1] === "string",
       )
       .slice(0, MAX_PALETTE_NAME_LANGUAGES)
-      .map(([tag, text]) => [tag, cutName(text)]),
+      .map(([tag, text]) => [tag, firstCodePoints(text, MAX_PALETTE_NAME_CHARACTERS)]),
   );
 }
 
