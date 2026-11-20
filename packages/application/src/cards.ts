@@ -219,9 +219,11 @@ export interface CardUseCases {
    * only once it is whole. Each write is checked against the shapes.
    * A failure after the cards document deletes the documents the import
    * wrote, which no entry names. An instance with MAX_CATALOG_LINKS
-   * decks already is refused (catalogFull) before anything is written.
-   * Then the deck's schedule in the digest is brought up to date. The
-   * deck as written.
+   * decks already is refused (catalogFull) before anything is written,
+   * and so is a deck whose cards or review states document would be
+   * larger than a read of it outside the user's storages takes in
+   * (deckFileTooLarge, `fromFile`). Then the deck's schedule in the
+   * digest is brought up to date. The deck as written.
    */
   importDeckFile(
     instanceUrl: string,
@@ -630,12 +632,22 @@ export function createCardUseCases({
           freshId: `deck-${newId()}`,
           now: now().toISOString(),
         });
+        // The progress is made, and refused if no read would take it in, before the cards are written.
+        const sendReviews =
+          reviews.length + fsrsReviews.length > 0
+            ? await reviewStateRepository.prepareReviewChanges(deck, {
+                save: reviews,
+                remove: [],
+                fsrs: { save: fsrsReviews, remove: [] },
+                fromFile: true,
+              })
+            : null;
         try {
           // Only where nothing is yet: a deck's documents are never written over.
           await deckRepository.applyCardChanges(
             deck,
             { save: cards, remove: [] },
-            { whole: true, version: ABSENT_VERSION },
+            { whole: true, version: ABSENT_VERSION, fromFile: true },
           );
         } catch (error) {
           // A cards document an import cut off before its entry left: the deck takes another id.
@@ -644,7 +656,7 @@ export function createCardUseCases({
           decks = [...decks, deck];
           continue;
         }
-        const imported = await completeImport(deck, reviews, fsrsReviews);
+        const imported = await completeImport(deck, sendReviews);
         // The deck is in: a digest left behind is brought up to date by the next deck list.
         await digestStore.refresh(instanceUrl, imported).catch(() => undefined);
         return imported;
@@ -653,7 +665,9 @@ export function createCardUseCases({
   };
 
   /**
-   * After the cards document: the deck's review states, then its entry.
+   * After the cards document: the deck's review states (sent by
+   * `sendReviews`, made before the cards were written; none to send:
+   * null), then its entry.
    * A failure before the entry deletes the documents the import wrote
    * (and one whose write may have been made, its answer lost), which
    * nothing names, never one the pod refused to create; unless the entry
@@ -662,18 +676,13 @@ export function createCardUseCases({
    */
   async function completeImport(
     deck: Deck,
-    reviews: ReviewState[],
-    fsrsReviews: FsrsState[],
+    sendReviews: (() => Promise<void>) | null,
   ): Promise<Deck> {
     const written = [deck.cardsDocumentUrl];
     try {
-      if (reviews.length + fsrsReviews.length > 0) {
+      if (sendReviews !== null) {
         try {
-          await reviewStateRepository.applyReviewChanges(deck, {
-            save: reviews,
-            remove: [],
-            fsrs: { save: fsrsReviews, remove: [] },
-          });
+          await sendReviews();
         } catch (error) {
           if (!unsent(error)) written.push(deck.reviewsDocumentUrl);
           throw error;

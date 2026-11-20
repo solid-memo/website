@@ -1426,12 +1426,13 @@ describe("cards", () => {
           ],
           remove: [],
         },
-        { whole: true, version: "absent" },
+        { whole: true, version: "absent", fromFile: true },
       );
       expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledWith(imported, {
         save: [state],
         remove: [],
         fsrs: { save: [fsrsState], remove: [] },
+        fromFile: true,
       });
       expect(deps.deckRepository.registerDeck).toHaveBeenCalledWith(imported);
       const order = (mock: unknown) =>
@@ -1465,6 +1466,31 @@ describe("cards", () => {
         useCases.importDeckFile(instance.url, file, { withProgress: true }),
       ).rejects.toMatchObject({ code: "catalogFull", vars: { limit: MAX_CATALOG_LINKS } });
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
+    });
+
+    it("refuses a deck whose progress no read would take in before it writes its cards (GHSA-fxpf-f5hv-cr66)", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mockRejectedValueOnce(
+        new AppError("deckFileTooLarge"),
+      );
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toMatchObject({ code: "deckFileTooLarge" });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.deckRepository.deleteDocument).not.toHaveBeenCalled();
+      expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
+    });
+
+    it("refuses a deck whose cards no read would take in, writing nothing (GHSA-fxpf-f5hv-cr66)", async () => {
+      const { deps, useCases } = withFiles();
+      vi.mocked(deps.deckRepository.applyCardChanges).mockRejectedValueOnce(
+        new AppError("deckFileTooLarge"),
+      );
+      await expect(
+        useCases.importDeckFile(instance.url, file, { withProgress: true }),
+      ).rejects.toMatchObject({ code: "deckFileTooLarge" });
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       expect(deps.deckRepository.registerDeck).not.toHaveBeenCalled();
     });

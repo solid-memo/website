@@ -21,9 +21,16 @@ import {
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
 import { ReadLimitError } from "./client/interface";
-import { readThrough, refusalOf } from "./client/readLimits";
-import { deleteSolidDataset, readDocument, writeDocument } from "./client/resources";
+import { FOREIGN_LIMITS, isPastBudget, readThrough, refusalOf } from "./client/readLimits";
+import {
+  deleteSolidDataset,
+  parseQuads,
+  readDocument,
+  solidDatasetAsTurtle,
+  writeDocument,
+} from "./client/resources";
 import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
+import { termOf } from "./ntriples";
 import { isWrittenByNewer } from "./records";
 import { refuseUnwritable } from "./writableTerms";
 import { AppError } from "@solid-memo/domain/appError";
@@ -320,6 +327,9 @@ export function readsAsNone(error: unknown): boolean {
 /** A document the pod served whole that could not be read (readForRemoval). */
 export const UNREADABLE = Symbol("unreadable");
 
+/** A document past what a read of one takes in, not past a budget its reads share (readForRemoval). */
+export const TOO_LARGE = Symbol("tooLarge");
+
 /**
  * A document as a removal reads it, made afresh by a fetch of its own,
  * never one remembered from before: null when it is gone (404, 410),
@@ -327,11 +337,23 @@ export const UNREADABLE = Symbol("unreadable");
  * (not Turtle, not RDF at all, or past the read's limits). Any other
  * failure throws, a body cut off on its way among them: nothing was
  * learned of the document, so the removal can only be tried again.
+ * Asked with TOO_LARGE, that is what a document past the limits of one
+ * read is (not past a budget its reads share: isPastBudget).
  */
+export function readForRemoval(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  tooLarge: typeof TOO_LARGE,
+): Promise<FetchedDataset | null | typeof UNREADABLE | typeof TOO_LARGE>;
+export function readForRemoval(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<FetchedDataset | null | typeof UNREADABLE>;
 export async function readForRemoval(
   url: string,
   fetch: typeof globalThis.fetch,
-): Promise<FetchedDataset | null | typeof UNREADABLE> {
+  tooLarge: typeof UNREADABLE | typeof TOO_LARGE = UNREADABLE,
+): Promise<FetchedDataset | null | typeof UNREADABLE | typeof TOO_LARGE> {
   let served = false;
   const noting: typeof globalThis.fetch = async (input, init) => {
     const response = await fetch(input, init);
@@ -350,6 +372,7 @@ export async function readForRemoval(
   try {
     return await getSolidDatasetOrNull(url, noting);
   } catch (error) {
+    if (error instanceof ReadLimitError && !isPastBudget(error)) return tooLarge;
     if (served || error instanceof ReadLimitError) return UNREADABLE;
     if (statusOf(error) === 410) return null;
     throw error;
@@ -393,6 +416,36 @@ export async function saveDataset<T extends Dataset>(
   if (!isReadFrom(written.dataset, url)) return;
   ETAGS.set(sourceOf(written.dataset)!.key, version);
   readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: written.dataset });
+}
+
+/**
+ * Refuse (deckFileTooLarge), before it is sent, a document of a deck
+ * file's import that a read of it outside the user's storages would not
+ * take in (FOREIGN_LIMITS), wherever its instance is: whether a read is
+ * held to them depends on who reads it and from where, and the same
+ * instance may be read from outside the storages it is in. The Turtle
+ * a write of it sends is measured by its bytes and, read back
+ * (parseQuads), by its triples and their terms, then by the bytes of
+ * those triples as N-Triples (termOf), as a server may serve the
+ * document back in that longer form. A deck file may hold more than
+ * that, and an import writes all its cards as one document, and all
+ * its progress as another.
+ */
+export async function refuseUnreadableImport(url: string, dataset: Dataset): Promise<void> {
+  const tooLarge = () => new AppError("deckFileTooLarge", { ...FOREIGN_LIMITS });
+  const encoder = new TextEncoder();
+  const text = await solidDatasetAsTurtle(dataset);
+  if (encoder.encode(text).byteLength > FOREIGN_LIMITS.bytes) throw tooLarge();
+  const quads = await parseQuads(text, "turtle", url, FOREIGN_LIMITS).catch(() => {
+    throw tooLarge();
+  });
+  let bytes = 0;
+  for (const { subject, predicate, object } of quads) {
+    bytes += encoder.encode(
+      `${termOf(subject)} ${termOf(predicate)} ${termOf(object)} .\n`,
+    ).byteLength;
+    if (bytes > FOREIGN_LIMITS.bytes) throw tooLarge();
+  }
 }
 
 /**

@@ -7,6 +7,7 @@ import {
   buildThing,
   createSolidDataset,
   createThing,
+  type FetchedDataset,
   getThingAll,
   getUrlAll,
   setThing,
@@ -15,12 +16,14 @@ import type { Deck } from "@solid-memo/domain/deck";
 import { AppError } from "@solid-memo/domain/appError";
 import {
   canonicalUrlOf,
+  cardsContainerOf,
   ensureTrailingSlash,
   instanceUrlOfDeck,
   isDocumentIn,
   isInFolder,
   isSameUrl,
   ownsDocument,
+  reviewsContainerOf,
 } from "@solid-memo/domain/instanceLayout";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import {
@@ -31,13 +34,14 @@ import {
 } from "@solid-memo/domain/release/draftLayout";
 import { derivedOnce } from "@solid-memo/domain/frozen";
 import { TextMap } from "@solid-memo/domain/pathKeys";
-import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
 import {
   getSolidDatasetOrNull,
   isReadFrom,
   readForRemoval,
   saveDataset,
+  TOO_LARGE,
   UNREADABLE,
 } from "./datasets";
 import type { ReadBudget, SharedReads } from "@solid-memo/application/ports";
@@ -470,6 +474,41 @@ export function createDeckDocumentGuard(
   }
 
   /**
+   * The document at `url` as the removal of `decks` reads it
+   * (readToRemove, as the first of them reads it), but TOO_LARGE where
+   * it is past the limits of one read and is where one of them keeps its
+   * own (isOwnDocument): no read will ever take it in, so it would be
+   * left behind, kept unread, with nothing left to remove it. The
+   * removal deletes it whole, unread. One past only a budget its reads
+   * share (isPastBudget) is UNREADABLE, kept, as a reload reads it.
+   */
+  async function readOwnToRemove(
+    decks: readonly DeckPlace[],
+    url: string,
+  ): Promise<FetchedDataset | null | typeof UNREADABLE | typeof TOO_LARGE> {
+    if (!decks.some((deck) => isOwnDocument(deck, url))) return readToRemove(decks[0]!, url);
+    return readForRemoval(url, fetch, TOO_LARGE);
+  }
+
+  /**
+   * Whether `url` is where the deck's own cards or reviews document is
+   * made: `decks/<id>.ttl` or `reviews/<id>.ttl` of its instance, its id
+   * of the characters a path segment holds as they are, and no `..`,
+   * which a server may read as a step up, so that it names no other
+   * folder or document.
+   */
+  function isOwnDocument(deck: DeckPlace, url: string): boolean {
+    const instance = instanceOf(deck);
+    const id = fragmentIdOf(deck.url);
+    return (
+      /^(?:[\w~-]|\.(?!\.))+$/.test(id) &&
+      [cardsContainerOf(instance), reviewsContainerOf(instance)].some((folder) =>
+        isSameUrl(url, `${folder}${id}.ttl`),
+      )
+    );
+  }
+
+  /**
    * The document at `url` as the user reads it (null: none), the read
    * one of `reads` when given: the data checks of an instance share it
    * (SharedReads), so a document many decks name, in whatever spelling
@@ -501,6 +540,8 @@ export function createDeckDocumentGuard(
     read,
 
     readToRemove,
+
+    readOwnToRemove,
 
     /**
      * What an instance's deletion does with the deck's document:

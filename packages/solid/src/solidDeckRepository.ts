@@ -59,12 +59,16 @@ import {
   treeChanges,
 } from "@solid-memo/domain/deckTree";
 import {
+  deleteDataset,
   getSolidDatasetOrNull,
   PreconditionFailedError,
+  refuseUnreadableImport,
   removeOwned,
   saveDataset,
+  statusOf,
   versionOf,
   type Removal,
+  TOO_LARGE,
   UNREADABLE,
 } from "./datasets";
 import { deckDocumentSubjects } from "./ownership";
@@ -226,7 +230,7 @@ export function createSolidDeckRepository({
   async function prepareCardChanges(
     deck: Deck,
     changes: CardChanges,
-    { whole, version, carried }: CardChangeOptions = {},
+    { whole, version, carried, fromFile }: CardChangeOptions = {},
   ): Promise<() => Promise<void>> {
     const read = await getSolidDatasetOrNull(deck.cardsDocumentUrl, fetch);
     // Changes made from an earlier read go only to the document as it was then: a later edit is not undone.
@@ -259,6 +263,8 @@ export function createSolidDeckRepository({
           },
     );
     const written = await checkedCardsDocument(deck, changed.dataset, changed.subjects);
+    // A deck file's cards in one document no later read would take in are not written.
+    if (fromFile === true) await refuseUnreadableImport(deck.cardsDocumentUrl, written);
     // If-Match the read above: a document changed since is not written over.
     return () => saveDataset(deck.cardsDocumentUrl, written, fetch, { whole });
   }
@@ -841,7 +847,8 @@ export function createSolidDeckRepository({
     decks: readonly Deck[],
     owned: ReturnType<typeof deckDocumentSubjects>,
   ): Promise<Removal | null> {
-    const existing = await guard.readToRemove(decks[0]!, url);
+    const existing = await guard.readOwnToRemove(decks, url);
+    if (existing === TOO_LARGE) return deleteUnread(url);
     if (existing === UNREADABLE) return "kept";
     if (existing === null) return null;
     for (const deck of decks) {
@@ -849,6 +856,17 @@ export function createSolidDeckRepository({
         return removeOwned(url, owned, fetch, () => guard.readToRemove(decks[0]!, url));
     }
     return null;
+  }
+
+  /**
+   * Delete a deck's own document that no read takes in (TOO_LARGE),
+   * unread, so with no If-Match; one gone meanwhile is as good.
+   */
+  async function deleteUnread(url: string): Promise<Removal> {
+    await deleteDataset(url, createSolidDataset(), fetch).catch((error: unknown) => {
+      if (statusOf(error) !== 404) throw error;
+    });
+    return "deleted";
   }
 
   /**
