@@ -67,6 +67,19 @@ export function shownTag(text: LangText, languages: readonly string[] = []): str
   return englishTag(text) ?? firstTag(Object.keys(text));
 }
 
+/**
+ * `text` cut to its first `count` code points, never inside one (a code
+ * point takes at most two UTF-16 units); the text itself when it has no
+ * more. A screen that names or sorts by a text of any length keeps its
+ * work bounded so.
+ */
+export function firstCodePoints(text: string, count: number): string {
+  if (text.length <= count) return text;
+  return Array.from(text.slice(0, 2 * count))
+    .slice(0, count)
+    .join("");
+}
+
 /** The text to show a reader who prefers `languages`: the one `shownTag` picks; empty when there is none. */
 export function shown(text: LangText, languages: readonly string[] = []): string {
   const tag = shownTag(text, languages);

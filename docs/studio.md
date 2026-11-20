@@ -758,11 +758,16 @@ The URL holds the query, which the domain applies
   ([i18n.md](i18n.md#which-language)), in the order of the UI's
   language. Case and accents count only where that language makes a
   letter of one (in Swedish, `ä` after `z`). Numbers sort by value. A
-  card without the value
-  (one never studied) comes last, either way.
+  side sorts by its first 200 characters (`cardSortText` in
+  `cardQuery.ts`), so sides that differ only past them keep the deck's
+  order. A card without the value (one never studied) comes last,
+  either way.
 - `page` and `size`: 10, 50 (the default) or 200 cards a page, with the
   same pager as Solid Memo's Browser. A change of the search or a
-  filter goes back to the first page.
+  filter goes back to the first page. The cards are found and sorted
+  again only when the deck or what keeps or orders them changes. Another
+  page, a step to the next card or a card opened beside them shows a
+  slice of the same list.
 
 **Views.** Tabs above the filters (a group named Views) put the cards
 in one state: All (none), Due, New and Leeches, the one the query is in
@@ -2125,7 +2130,8 @@ holds the view ([above](#routes)).
   URL's own. Past `LANGUAGE_CHOICE_LIMIT` (100) it offers the most
   used ones only, as the card workbench does.
 - A column's name sorts by it, then the other way, then by id again,
-  from the first page. A page holds 50.
+  from the first page. A side sorts by its first 200 characters, as in
+  the card workbench. A page holds 50.
 
 The table is a [`DataTable`](#card-workbench). **Retire 2 cards** or
 **Restore 1 card**, in the selection's bar, retires or restores those

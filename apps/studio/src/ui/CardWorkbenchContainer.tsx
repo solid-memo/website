@@ -37,7 +37,9 @@ import { queryKeys } from "./queryKeys";
  * The domain finds the cards the query keeps (queryCards), reading a
  * card in Markdown as its plain text, each text parsed once while the
  * cards stay the same, and sorting a side by the text the table shows
- * the reader: in the reader's languages, the UI's first. The instance's
+ * the reader: in the reader's languages, the UI's first. It does so
+ * again only when the cards or what keeps or orders them change, not
+ * for another page of them. The instance's
  * answer log (UseCases.loadAnswerLog) says how often each card was
  * forgotten (lapseIndex), for the lapses column, the leech filter and
  * the sort by lapses; while it is read, a query that needs it waits,
@@ -156,6 +158,11 @@ export function CardWorkbenchContainer({
     ],
     [deck.cardLanguage, locale],
   );
+  // The cards are found and sorted again only when what keeps or orders them changes: a new page,
+  // a step to the next card or a card opened beside them shows another slice of the same rows.
+  const { page: _page, size: _size, ...filter } = query;
+  const filterKey = JSON.stringify(filter);
+  const kept = useMemo(() => filter, [filterKey]);
   const rows = useMemo(
     () =>
       cards === undefined ||
@@ -176,13 +183,13 @@ export function CardWorkbenchContainer({
                 prefs.dayBoundaryHour,
               ),
             },
-            query,
+            kept,
             today!,
             plain,
             languages,
             lapses?.lapses,
           ),
-    [cards, reviews, prefs, today, query, deck.direction, plain, languages, lapses, needsLapses],
+    [cards, reviews, prefs, today, kept, deck.direction, plain, languages, lapses, needsLapses],
   );
 
   useEffect(() => {

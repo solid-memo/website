@@ -23,6 +23,7 @@ import { CardWorkbenchContainer } from "./CardWorkbenchContainer";
 import { queryKeys } from "./queryKeys";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
 import { answer, pick } from "../test/dialogs";
+import { countSorts } from "../test/sorts";
 
 const deck = makeDeck("deck-1", { en: "Kanji N5" });
 const water = { ...makeCard(deck, "water"), back: { en: "**Water**" }, textFormat: SM.markdown };
@@ -118,6 +119,60 @@ describe("CardWorkbenchContainer", () => {
     );
     expect(await screen.findByText("2 of 2 cards")).toBeInTheDocument();
     expect(fronts()).toEqual(["abborre", "zebra"]);
+  });
+
+  it("sorts the cards once for a query, not again for another page of them", async () => {
+    const many = Array.from({ length: 12 }, (_, at) => ({
+      ...fire,
+      id: `card-${at}`,
+      front: { en: `Word ${at}` },
+    }));
+    const useCases = makeUseCasesFake({ listCards: vi.fn(async () => many) });
+    const onRows = vi.fn();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const ui = (query: CardQuery) => (
+      <QueryClientProvider client={queryClient}>
+        <CardWorkbenchContainer
+          useCases={useCases}
+          instance={instanceA}
+          webId={WEB_ID}
+          deck={deck}
+          decks={[deck]}
+          query={query}
+          onQuery={() => undefined}
+          savedViews={[]}
+          onSavedViews={() => undefined}
+          cardHref={(card) => `#/card?card=${card.id}`}
+          onOpen={() => undefined}
+          onRows={onRows}
+          healthHref="#/health"
+        />
+      </QueryClientProvider>
+    );
+    const query: CardQuery = {
+      ...DEFAULT_CARD_QUERY,
+      size: 10,
+      sort: { key: "front", descending: true },
+    };
+    const sorts = countSorts();
+    const { rerender } = render(ui(query));
+    await screen.findByText("12 of 12 cards");
+    expect(fronts()[0]).toBe("Word 11");
+    const settled = sorts();
+    expect(settled).toBeGreaterThan(0);
+
+    // Another page, as a step to the next card or a card opened beside them asks for: the same rows, sliced.
+    rerender(ui({ ...query, page: 2 }));
+    await waitFor(() => expect(fronts()).toEqual(["Word 1", "Word 0"]));
+    rerender(ui({ ...query, sort: { key: "front", descending: true }, page: 1 }));
+    await waitFor(() => expect(fronts()[0]).toBe("Word 11"));
+    expect(sorts()).toBe(settled);
+    expect(onRows).toHaveBeenCalledTimes(1);
+
+    // Another order sorts them again.
+    rerender(ui({ ...query, sort: { key: "front", descending: false } }));
+    await waitFor(() => expect(fronts()[0]).toBe("Word 0"));
+    expect(sorts()).toBeGreaterThan(settled);
   });
 
   it("lists the cards due by the scheduler that sets the due days", async () => {

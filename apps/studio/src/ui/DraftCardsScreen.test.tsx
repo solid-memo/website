@@ -346,6 +346,22 @@ describe("DraftCardsScreen", () => {
     expect(fronts().at(-1)).toBe("a-pic");
   });
 
+  it("sorts a side by its first 200 code points, fronts that differ only past them as equal", () => {
+    const long = (tail: string) => `${"x".repeat(200)}${tail}`;
+    const draft = applyDraftChanges(courseDraft(), [
+      { kind: "addCard", id: "long-b", card: { front: { en: long("b") }, back: { en: "b" } } },
+      { kind: "addCard", id: "long-a", card: { front: { en: long("a") }, back: { en: "a" } } },
+    ]) as ReleaseDraft;
+    const longOnes = () => fronts().filter((front) => front?.startsWith("xxx"));
+    renderScreen(draft, { sort: { key: "front", descending: false } });
+    const ascending = longOnes();
+    cleanup();
+    renderScreen(draft, { sort: { key: "front", descending: true } });
+    // Equal as sorted, the two keep their order either way.
+    expect(longOnes()).toEqual(ascending);
+    expect(ascending).toHaveLength(2);
+  });
+
   it("retires or restores the cards selected at once, and opens one's editor with Enter", () => {
     const draft = applyDraftChanges(courseDraft(), [
       { kind: "retire", of: "card", id: "q-pods-r01" },

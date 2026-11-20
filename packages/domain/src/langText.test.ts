@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   arabicFolded,
   english,
+  firstCodePoints,
   folded,
   inEnglish,
   isolated,
@@ -23,6 +24,14 @@ describe("text in several languages", () => {
     expect(english({ sv: "Huvudstäder", en: "Capitals" })).toBe("Capitals");
     expect(english({ "en-gb": "Capitals", "en-us": "Capitals (US)" })).toBe("Capitals");
     expect(english({ sv: "Huvudstäder" })).toBeUndefined();
+  });
+
+  it("cuts a text to its first code points, never inside one", () => {
+    const smile = "\u{1F600}";
+    expect(firstCodePoints("short", 10)).toBe("short");
+    expect(firstCodePoints("a".repeat(12), 10)).toBe("a".repeat(10));
+    expect(firstCodePoints(smile.repeat(10), 10)).toBe(smile.repeat(10));
+    expect(firstCodePoints(smile.repeat(12), 10)).toBe(smile.repeat(10));
   });
 
   it("shows the English text, else the first language's", () => {
