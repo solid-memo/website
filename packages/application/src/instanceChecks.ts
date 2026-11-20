@@ -5,6 +5,7 @@
 import type { Deck } from "@solid-memo/domain/deck";
 import {
   canonicalUrlOf,
+  documentKeyOf,
   catalogUrlOf,
   historyUrlOf,
   instanceDocumentUrls,
@@ -102,24 +103,19 @@ export interface InstanceCheckUseCases {
  * A test of whether the document at an address is one of these decks'
  * unclaimed ones, in whatever spelling: a deck may name one document
  * twice, and only the first spelling is listed as unclaimed. Each
- * address is compared as a request would send it (canonicalUrlOf), the
+ * address is compared as a server may read it (documentKeyOf), the
  * unclaimed ones brought to that form once for the test, so that a
  * catalog naming many decks costs one lookup per address, not a
  * comparison with every unclaimed document.
  */
 function unclaimedTest(unclaimed: readonly UnclaimedDeck[]): (url: string) => boolean {
-  // Keyed by pieces (TextMap): an address as a request sends it may be longer than V8 hashes all of.
+  // Keyed by pieces (TextMap): an address in documentKeyOf's form may be longer than V8 hashes all of.
   const skipped = new TextMap<true>();
   for (const deck of unclaimed) {
-    for (const document of deck.documents) {
-      const canonical = canonicalDocumentOf(document);
-      if (canonical !== null) skipped.set(canonical, true);
-    }
+    for (const document of deck.documents)
+      skipped.set(documentKeyOf(documentUrlOf(document)), true);
   }
-  return (url) => {
-    const canonical = canonicalDocumentOf(url);
-    return canonical !== null && skipped.has(canonical);
-  };
+  return (url) => skipped.has(documentKeyOf(documentUrlOf(url)));
 }
 
 /**

@@ -4,7 +4,7 @@
 
 import { AppError } from "./appError";
 import type { Card, CardContent, Deck, StudyDirection } from "./deck";
-import { canonicalUrlOf } from "./instanceLayout";
+import { documentKeyOf } from "./instanceLayout";
 import { sameContent } from "./libraryUpgrade";
 import { reviewKeyOf, type FsrsState, type ReviewKey, type ReviewState } from "./review";
 import { withWritableDueDays } from "./scheduling";
@@ -17,29 +17,6 @@ import { withWritableDueDays } from "./scheduling";
 
 /** Where a deck's cards and review states are: its entry and its two documents. */
 type DeckPlace = Pick<Deck, "url" | "cardsDocumentUrl" | "reviewsDocumentUrl">;
-
-/**
- * A document's address as a server may read it, to tell whether two
- * addresses name one document: as a request sends it (canonicalUrlOf),
- * its host without a trailing dot, which names the same host, without
- * a user name or password, which a request does not send in the address
- * and which name no other document, with a percent-encoded character that needs no encoding (a letter, a digit,
- * `-`, `.`, `_`, `~`) decoded, as a server may decode it, and every
- * other escape in upper case. Text that is no URL is taken as it is
- * written.
- */
-function documentKeyOf(url: string): string {
-  const canonical = canonicalUrlOf(url);
-  if (canonical === null) return url;
-  const parsed = new URL(canonical);
-  parsed.hostname = parsed.hostname.replace(/\.$/, "");
-  parsed.username = "";
-  parsed.password = "";
-  return parsed.href.replace(/%[0-9a-f]{2}/gi, (encoded) => {
-    const char = String.fromCharCode(Number.parseInt(encoded.slice(1), 16));
-    return /[\w.~-]/.test(char) ? char : encoded.toUpperCase();
-  });
-}
 
 /**
  * Whether a transfer from `source` to `target` would be one onto itself:

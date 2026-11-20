@@ -14,6 +14,7 @@ import {
   instanceUrlOfDeck,
   digestSubjectOf,
   digestUrlOf,
+  documentKeyOf,
   ensureTrailingSlash,
   historyContainerOf,
   historyUrlOf,
@@ -484,5 +485,49 @@ describe("isInStorages", () => {
 
   it("finds nothing the user's with no storages known", () => {
     expect(isInStorages("https://pod.example/solid-memo/main/", [])).toBe(false);
+  });
+});
+
+describe("documentKeyOf", () => {
+  it.each([
+    // As a server that decodes each path segment and encodes it again reads them.
+    ["https://pod.example/a/x(y).ttl", "https://pod.example/a/x%28y%29.ttl"],
+    ["https://pod.example/a!/x.ttl", "https://pod.example/a%21/x.ttl"],
+    ["https://pod.example/a/x*'.ttl", "https://pod.example/a/x%2a%27.ttl"],
+    ["https://pod.example/a+b/x.ttl", "https://pod.example/a%2bb/x.ttl"],
+    ["https://pod.example/me@x/x.ttl", "https://pod.example/me%40x/x.ttl"],
+    ["https://pod.example/%c3%a9.ttl", "https://pod.example/é.ttl"],
+    ["https://pod.example/a%2f%5c%25.ttl", "https://pod.example/a%2F%5C%25.ttl"],
+    // As a request sends them, which a server cannot tell apart.
+    ["https://POD.example.:443/a/../b.ttl", "https://pod.example/b.ttl"],
+    ["https://me:pw@pod.example/b.ttl", "https://pod.example/b.ttl"],
+    // A query or fragment has only its unreserved escapes decoded.
+    ["https://pod.example/b.ttl?x=%41%2f#%7e", "https://pod.example/b.ttl?x=A%2F#~"],
+    // A scheme other than http(s) has only its unreserved escapes decoded.
+    ["urn:x:%41%2f", "urn:x:A%2F"],
+  ])("takes %s and %s as one document", (one, other) => {
+    expect(documentKeyOf(one)).toBe(documentKeyOf(other));
+  });
+
+  it.each([
+    ["https://pod.example/a%2Fb.ttl", "https://pod.example/a/b.ttl"],
+    ["https://pod.example/a%5Cb.ttl", "https://pod.example/a/b.ttl"],
+    ["https://pod.example/%2541.ttl", "https://pod.example/A.ttl"],
+    ["https://pod.example/%2541.ttl", "https://pod.example/%41.ttl"],
+    ["https://pod.example/a(.ttl", "https://pod.example/a).ttl"],
+    ["urn:x:a(", "urn:x:a%28"],
+    ["not a url", "not  a url"],
+  ])("keeps %s and %s apart", (one, other) => {
+    expect(documentKeyOf(one)).not.toBe(documentKeyOf(other));
+  });
+
+  it("decodes only what needs no encoding in a segment that does not decode", () => {
+    expect(documentKeyOf("https://pod.example/%zz%41%28/%e9%2f%28")).toBe(
+      "https://pod.example/%zzA%28/%E9%2F(",
+    );
+  });
+
+  it("takes text that is no URL as it is written", () => {
+    expect(documentKeyOf("not a url")).toBe("not a url");
   });
 });

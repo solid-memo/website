@@ -1128,8 +1128,13 @@ case refuses such a transfer before reading anything, and the domain
 plans none. Two addresses name one document when a server may read
 them as one: written another way a request or a server resolves, such
 as a character encoded that needs no encoding, or with a user name
-and password in it. The decks to offer are worked out once for each
-read of the decks and of the data check, not on each render of the
+and password in it. A server may decode each segment of the path and
+encode it again, so a character written encoded in one address and
+plain in the other (`(` and `%28`, `+` and `%2B`) is the same too. An
+encoded slash, backslash or percent sign isn't, as decoded it would
+read as another path (`documentKeyOf` in
+[instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). The
+decks to offer are worked out once for each read of the decks and of the data check, not on each render of the
 workbench.
 
 The source's cards and review states are copied into the target. So

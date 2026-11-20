@@ -134,14 +134,16 @@ flowchart LR
   addresses: they don't say they're the deck's, and are outside the
   instance's own folder (the same `data-model.md` section). It's no
   violation: nothing is blocked or set aside, and the deck is still
-  read and studied from. Those documents aren't
-  checked, under any spelling of their address, since they may be
-  anyone's. Each address is compared as a
-  request sends it (`canonicalUrlOf`), the unclaimed ones brought to
-  that form once per check, so a catalog of many decks costs one
-  lookup per document, not a comparison of every pair. Solid Memo's data
-  check and the
-  Studio's Health screen show them (`UnclaimedDecksNotice`) with "These
+  read and studied from. Those documents aren't checked, under any
+  spelling of their address, since they may be anyone's. Each address
+  is compared as a server may read it (`documentKeyOf`, the rule a card
+  transfer uses, [studio.md](studio.md#moving-and-copying-cards)). On
+  a server that keeps two such spellings apart, a document spelled
+  like an unclaimed one is then left unchecked too: the check reads
+  less, and writes nothing. The unclaimed ones are brought to that
+  form once per check, so a catalog of many decks costs one lookup per
+  document, not a comparison of every pair. Solid Memo's data check
+  and the Studio's Health screen show them (`UnclaimedDecksNotice`) with "These
   are this deck's documents", which claims them once the user confirms
   (`claimDeckDocuments`), for the next check. Above every screen of the
   instance, the notice lists at most `LIST_LIMIT` (50) such decks and
