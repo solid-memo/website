@@ -33,7 +33,11 @@ import type {
   ReleaseDraftRepository,
   ShapeValidator,
 } from "./ports";
-import { createReleaseDraftUseCases, type ReleaseDraftUseCases } from "./releaseDrafts";
+import {
+  createReleaseDraftUseCases,
+  type DraftDiff,
+  type ReleaseDraftUseCases,
+} from "./releaseDrafts";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const WEB_ID = "https://pod.example/profile/card#me";
@@ -1571,13 +1575,36 @@ describe("diffReleaseDraft", () => {
     const next = nextVersionDraft(v1, courseDraft().url);
     const draft = { ...next, cards: next.cards.filter((node) => node.id !== "q-loose") };
     const { useCases, repository } = setUp();
-    const diff = (await useCases.diffReleaseDraft(draft))!;
+    const diff = (await useCases.diffReleaseDraft(draft)) as DraftDiff;
     expect(diff.previous).toBe(v1);
     expect(diff.diff.unchanged.card).toBe(3);
     expect(diff.problems.map((one) => one.code)).toEqual(["cardsDropped"]);
     expect(diff.upgrade.lost.cards).toEqual(["q-loose"]);
     await useCases.diffReleaseDraft(next);
     expect(repository.readRelease).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not compare a draft with a release of neither the instance nor the library, which it does not read (GHSA-82j2-8xh5-845q)", async () => {
+    const elsewhere = "https://other.example/r.ttl";
+    const next = nextVersionDraft(v1, courseDraft().url);
+    const draft: ReleaseDraft = { ...next, root: { ...next.root, prev: elsewhere } };
+    const { useCases, repository } = setUp();
+    await expect(useCases.diffReleaseDraft(draft)).resolves.toEqual({
+      previousElsewhere: elsewhere,
+    });
+    expect(repository.readRelease).not.toHaveBeenCalled();
+  });
+
+  it("fails while the catalog cannot be read, and does not read the release it follows", async () => {
+    const beside = "https://pod.example/public/solid/v1.ttl";
+    const next = nextVersionDraft(v1, courseDraft().url);
+    const draft: ReleaseDraft = { ...next, root: { ...next.root, prev: beside } };
+    const { useCases, repository, releasePublisher } = setUp({ published: [beside] });
+    releasePublisher.listPublished.mockRejectedValueOnce(new Error("offline"));
+    await expect(useCases.diffReleaseDraft(draft)).rejects.toThrow("offline");
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    await expect(useCases.diffReleaseDraft(draft)).resolves.toMatchObject({ problems: [] });
+    expect(repository.readRelease).toHaveBeenCalledWith(beside);
   });
 
   it("fails while the release it follows cannot be read, and reads it again next time", async () => {

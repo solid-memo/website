@@ -2280,7 +2280,10 @@ field there (`problemTarget`), focused; a wrong option's problem opens
 its question at it, and counts under it in the outline's badges. A
 draft can have any number of problems, so each list shows at most
 `PROBLEM_LIMIT` (50) and says how many more there are; the counts and
-badges count them all.
+badges count them all. A problem's text names at most `ID_LIMIT` (20)
+of the subjects or values it lists (the ids a draft drops, the steps
+that ask one question, the values stated), and how many more there
+are.
 
 Not every problem can be fixed in the Studio yet, so a new draft's
 problem count may not reach zero:
@@ -2409,7 +2412,13 @@ screen (still at its address) says so. The use case is
 `diffReleaseDraft(draft)`
 ([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)),
 which reads the release once and fails when it can't be read. It
-shows:
+compares the draft only with a release the instance published or the
+library's, as the release check's **Drops** do. Any other can change
+after the draft was made from it, so of that one it says what the
+check says (`previousElsewhere`) and reads nothing. Whether it's one
+of those is told from the instance's catalog and the library's index:
+when either can't be read, the diff fails, where the check's **Drops**
+say `previousUnread` instead. It shows:
 
 - **Rules of the series**: the check's drops (`continuityProblems`),
   at most `PROBLEM_LIMIT` (50) of them, and how many more there are.
@@ -2420,7 +2429,9 @@ shows:
   [releaseDiff.ts](../packages/domain/src/release/releaseDiff.ts)).
 - **Its content**: each chapter, step, card and wrong option the draft
   adds, changes, retires or brings back, matched by id, a link each to
-  its editor, and how many of each kind are as they were.
+  its editor, and how many of each kind are as they were. Each kind
+  lists `OUTLINE_LIMIT` (50) at first, and as many more each time
+  **Show more** is pressed, as a draft can change any number of them.
   - A card compares as an upgrade compares it (`sameContent` in
     [libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)),
     and by what it's about (its `dcterms:subject`, in any order:
@@ -2442,7 +2453,9 @@ shows:
     cards the draft drops, and, of a course, the completion of the
     chapters it drops, found by id, whatever the draft's version. A
     draft that retires what it no
-    longer uses loses nothing.
+    longer uses loses nothing. Each names at most `ID_LIMIT` (20)
+    ids, and how many more there are, as do the drops under **Rules
+    of the series**.
   - A draft whose version doesn't come after the release's offers
     learners nothing.
 

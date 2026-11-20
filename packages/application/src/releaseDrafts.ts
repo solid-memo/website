@@ -132,6 +132,15 @@ export interface DraftDiff {
   upgrade: LearnerUpgrade;
 }
 
+/**
+ * A draft that follows a release of neither the instance nor the
+ * library (isFollowable): it is not compared with that release, which
+ * is not read, as the release check does not read it (previousElsewhere).
+ */
+export interface DiffElsewhere {
+  previousElsewhere: string;
+}
+
 /** A change made, the draft as it is then; or why it was not. */
 export type DraftEdit = { ok: true; draft: ReleaseDraft } | { ok: false; refusal: DraftRefusal };
 
@@ -209,9 +218,12 @@ export interface ReleaseDraftUseCases {
    * The draft as it is against the release it follows (docs/studio.md,
    * The release diff); null for a draft of a first release, which
    * follows none. The release is read once; one that cannot be read
-   * fails it.
+   * fails it. One that is neither the instance's nor the library's
+   * (isFollowable) is not read: the draft is not compared with it
+   * (DiffElsewhere). Fails when the catalog or the library's index
+   * cannot be read.
    */
-  diffReleaseDraft(draft: ReleaseDraft): Promise<DraftDiff | null>;
+  diffReleaseDraft(draft: ReleaseDraft): Promise<DraftDiff | DiffElsewhere | null>;
 }
 
 /** How often a change of a draft is made, in all, while its documents keep changing elsewhere. */
@@ -821,6 +833,7 @@ export function createReleaseDraftUseCases({
     async diffReleaseDraft(draft) {
       const { prev } = draft.root;
       if (prev === undefined) return null;
+      if (!(await isFollowable(draft.url, prev))) return { previousElsewhere: prev };
       const [previous, before] = await Promise.all([release(prev), releaseModel(prev)]);
       const listed = draftLibraryDeck(draft);
       return {

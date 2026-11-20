@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { render, screen, within } from "@testing-library/preact";
-import type { DraftDiff } from "@solid-memo/application/releaseDrafts";
+import { fireEvent, render, screen, within } from "@testing-library/preact";
+import type { DiffElsewhere, DraftDiff } from "@solid-memo/application/releaseDrafts";
 import { AppError } from "@solid-memo/domain/appError";
 import { continuityProblems } from "@solid-memo/domain/release/continuityRules";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
@@ -16,8 +16,9 @@ import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 import { PROBLEM_LIMIT } from "./ProblemList";
-import { subjectName } from "./problemText";
+import { ID_LIMIT, subjectName } from "./problemText";
 import { ReleaseDiffScreen, subjectTarget } from "./ReleaseDiffScreen";
 
 const V1 = "https://pod.example/solid-memo/a/releases/solid/v1.ttl";
@@ -38,7 +39,7 @@ function diffOf(draft: ReleaseDraft, previous = v1()): DraftDiff {
 
 function renderScreen(
   draft: ReleaseDraft,
-  diff: DraftDiff | null | undefined,
+  diff: DraftDiff | DiffElsewhere | null | undefined,
   error: unknown = null,
 ) {
   render(<ReleaseDiffScreen draft={draft} diff={diff} error={error} links={links} />);
@@ -66,6 +67,72 @@ describe("ReleaseDiffScreen", () => {
     expect(
       within(rules).getByText("And 2,950 more problems, not listed here."),
     ).toBeInTheDocument();
+  });
+
+  it("lists OUTLINE_LIMIT of the subjects of each kind it changes at first, and as many more each time (GHSA-82j2-8xh5-845q)", () => {
+    const draft = nextVersionDraft(v1(), DRAFT_URL);
+    const base = diffOf(draft);
+    const kinds = ["chapter", "step", "card", "distractor"] as const;
+    const count = 2 * OUTLINE_LIMIT + 20;
+    renderScreen(draft, {
+      ...base,
+      diff: {
+        ...base.diff,
+        subjects: kinds.flatMap((kind) =>
+          Array.from({ length: count }, (_, at) => ({
+            kind,
+            id: `${kind}-${at}`,
+            status: "added" as const,
+          })),
+        ),
+      },
+    });
+    const content = screen.getByRole("region", { name: "Its content" });
+    const showAll = (name: string) => {
+      const buttons = within(content).getAllByRole("button", { name });
+      expect(buttons).toHaveLength(kinds.length);
+      for (const button of buttons) fireEvent.click(button);
+    };
+    expect(within(content).getAllByRole("link")).toHaveLength(kinds.length * OUTLINE_LIMIT);
+    showAll(`Show ${OUTLINE_LIMIT} more`);
+    expect(within(content).getAllByRole("link")).toHaveLength(kinds.length * 2 * OUTLINE_LIMIT);
+    showAll("Show 20 more");
+    expect(within(content).getAllByRole("link")).toHaveLength(kinds.length * count);
+    expect(within(content).queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("names at most ID_LIMIT of the ids learners would lose progress on, or the series' rules drop, and says how many more", () => {
+    const draft = nextVersionDraft(v1(), DRAFT_URL);
+    const base = diffOf(draft);
+    const ids = (prefix: string) => Array.from({ length: 3000 }, (_, at) => `${prefix}-${at}`);
+    renderScreen(draft, {
+      ...base,
+      problems: [
+        problem(DRAFT_URL, { code: "cardsDropped", params: { ids: ids("q"), previous: V1 } }),
+      ],
+      upgrade: { ...base.upgrade, lost: { cards: ids("q"), chapters: ids("ch") } },
+    });
+    const lost = screen.getByRole("list", { name: "Progress learners would lose" });
+    const [cards, chapters] = within(lost).getAllByRole("listitem");
+    expect(cards).toHaveTextContent(
+      `The review history of 3,000 cards the draft drops: ${ids("q").slice(0, ID_LIMIT).join(", ")} and 2,980 more.`,
+    );
+    expect(chapters).toHaveTextContent(/: ch-0, .*, ch-19 and 2,980 more\.$/);
+    expect(chapters).not.toHaveTextContent("ch-20,");
+    const rules = screen.getByRole("region", { name: "Rules of the series" });
+    expect(within(rules).getByRole("listitem")).toHaveTextContent(/#q-19 and 2,980 more, which/);
+  });
+
+  it("does not compare the draft with a release of neither the instance nor the library", () => {
+    renderScreen(nextVersionDraft(v1(), DRAFT_URL), {
+      previousElsewhere: "https://other.example/r.ttl",
+    });
+    expect(
+      screen.getByText(
+        /^Follows <https:\/\/other\.example\/r\.ttl>, which is a release of neither/,
+      ),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
   });
 
   it("shows that it is comparing, or why it could not", () => {

@@ -7,7 +7,7 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import { problem, type ProblemDetail } from "@solid-memo/domain/release/problems";
 import { createI18n } from "@solid-memo/ui/i18n";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
-import { fieldName, problemMessage, subjectName } from "./problemText";
+import { fieldName, ID_LIMIT, problemMessage, subjectName } from "./problemText";
 
 const draft = courseDraft();
 const at = (id: string) => `${DRAFT_URL}#${id}`;
@@ -33,6 +33,24 @@ function say(detail: ProblemDetail, field?: string, i18n = en): string {
 }
 
 describe("problemMessage", () => {
+  it("names at most ID_LIMIT of the subjects or values a problem lists, and how many more", () => {
+    const many = Array.from({ length: ID_LIMIT + 3 }, (_, index) => at(`s${index}`));
+    const named = many.slice(0, ID_LIMIT).map((_, index) => `#s${index}`);
+    expect(say({ code: "checkedTwice", params: { steps: many } })).toBe(
+      `Is asked by steps ${named.join(", ")} and 3 more: one step at most asks a question.`,
+    );
+    expect(say({ code: "strayParts", params: { parts: many } })).toContain(
+      `Holds ${named.join(", ")} and 3 more, typed a card`,
+    );
+    const stated = Array.from({ length: ID_LIMIT + 1 }, (_, index) => literal(`${index}`));
+    expect(say({ code: "versionMismatch", params: { stated, expected: 2 } })).toBe(
+      `States version ${stated
+        .slice(0, ID_LIMIT)
+        .map(({ value }) => `"${value}"`)
+        .join(", ")} and 1 more; its place says "2".`,
+    );
+  });
+
   it("says every problem in the reader's language, the subjects it names by their ids", () => {
     expect(say({ code: "notARelease", params: { path: "Solid/v1.ttl" } })).toBe(
       "Solid/v1.ttl is no place for a release in the library: its name may hold only lower-case letters, digits and dashes.",

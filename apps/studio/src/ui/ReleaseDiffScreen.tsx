@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DraftDiff } from "@solid-memo/application/releaseDrafts";
+import type { DiffElsewhere, DraftDiff } from "@solid-memo/application/releaseDrafts";
 import type { ProblemTarget } from "@solid-memo/domain/release/releaseCheck";
 import type { SubjectChange } from "@solid-memo/domain/release/releaseDiff";
 import {
@@ -12,12 +12,13 @@ import {
 } from "@solid-memo/domain/release/releaseDraft";
 import type { ReleaseKind } from "@solid-memo/domain/release/releaseModel";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
-import { useI18n, type MessageKey } from "@solid-memo/ui/i18n";
+import { useI18n, type I18n, type MessageKey } from "@solid-memo/ui/i18n";
 import { describeChanges } from "@solid-memo/ui/LibraryUpgradeNotice";
 import { Loading } from "@solid-memo/ui/Loading";
+import { OUTLINE_LIMIT } from "./DraftOutline";
 import { PROBLEM_LIMIT } from "./ProblemList";
-import { problemMessage, subjectName } from "./problemText";
-import { bounded } from "./ReleaseLists";
+import { idList, problemMessage, subjectName } from "./problemText";
+import { bounded, ShowMore, usePage } from "./ReleaseLists";
 
 /** Where the diff links: a subject's place in the draft's editors. */
 export interface ReleaseDiffLinks {
@@ -54,9 +55,13 @@ export function subjectTarget(
  * it changes, each chapter, step, card and wrong option it adds,
  * changes, retires or restores (a link each to its editor), and what a
  * learner's copy of the release would get from it, progress lost
- * included. A draft of a first release follows none, which it says.
- * It lists at most PROBLEM_LIMIT of the rules broken, and says how many
- * more there are.
+ * included. A draft of a first release follows none, which it says;
+ * one that follows a release of neither the instance nor the library
+ * is not compared with it, which it says too. It lists at most
+ * PROBLEM_LIMIT of the rules broken, and says how many more there are;
+ * OUTLINE_LIMIT of the subjects of each kind at first, and as many
+ * more each time; and at most ID_LIMIT of the ids learners would lose
+ * progress on, of each kind. A draft can change any number of them.
  */
 export function ReleaseDiffScreen({
   draft,
@@ -66,7 +71,7 @@ export function ReleaseDiffScreen({
 }: {
   draft: ReleaseDraft;
   /** Undefined while it is made; null for a first release. */
-  diff: DraftDiff | null | undefined;
+  diff: DraftDiff | DiffElsewhere | null | undefined;
   error: unknown;
   links: ReleaseDiffLinks;
 }) {
@@ -86,6 +91,8 @@ export function ReleaseDiffScreen({
         )
       ) : diff === null ? (
         <p>{t("studio.diff.first")}</p>
+      ) : "previousElsewhere" in diff ? (
+        <p>{t("studio.problem.previousElsewhere", { previous: `<${diff.previousElsewhere}>` })}</p>
       ) : (
         <DiffBody draft={draft} diff={diff} links={links} />
       )}
@@ -108,8 +115,6 @@ function DiffBody({
   const rules = bounded(problems, PROBLEM_LIMIT);
   const { about, subjects, unchanged } = diff.diff;
   const previousVersion = previous.root.version ?? "1";
-  const statusOf = ({ status, alsoChanged }: SubjectChange) =>
-    t(`studio.diff.status.${status}${alsoChanged === true ? "Changed" : ""}` as MessageKey);
   return (
     <>
       <p>{t("studio.diff.against", { version: previousVersion, url: previous.url })}</p>
@@ -147,22 +152,15 @@ function DiffBody({
           const changes = subjects.filter((change) => change.kind === kind);
           return (
             changes.length + unchanged[kind] > 0 && (
-              <div key={kind}>
-                <h4>{t(`studio.diff.kind.${kind}` as MessageKey)}</h4>
-                <p class="hint">{t("studio.diff.unchanged", { count: unchanged[kind] })}</p>
-                {changes.length > 0 && (
-                  <ul>
-                    {changes.map((change) => (
-                      <li key={change.id}>
-                        <a href={links.targetHref(subjectTarget(draft, change))}>
-                          {subjectName(draft, iriIn(draft, change.id), i18n)}
-                        </a>
-                        : {statusOf(change)}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <KindChanges
+                key={kind}
+                kind={kind}
+                changes={changes}
+                unchanged={unchanged[kind]}
+                draft={draft}
+                links={links}
+                i18n={i18n}
+              />
             )
           );
         })}
@@ -191,7 +189,7 @@ function DiffBody({
               <li>
                 {t("studio.diff.lostCards", {
                   count: upgrade.lost.cards.length,
-                  ids: upgrade.lost.cards.join(", "),
+                  ids: idList(upgrade.lost.cards, t),
                 })}
               </li>
             )}
@@ -199,7 +197,7 @@ function DiffBody({
               <li>
                 {t("studio.diff.lostChapters", {
                   count: upgrade.lost.chapters.length,
-                  ids: upgrade.lost.chapters.join(", "),
+                  ids: idList(upgrade.lost.chapters, t),
                 })}
               </li>
             )}
@@ -207,5 +205,46 @@ function DiffBody({
         )}
       </section>
     </>
+  );
+}
+
+/** The subjects of one kind the draft changes: OUTLINE_LIMIT at first, and as many more each time. */
+function KindChanges({
+  kind,
+  changes,
+  unchanged,
+  draft,
+  links,
+  i18n,
+}: {
+  kind: ReleaseKind;
+  changes: readonly SubjectChange[];
+  unchanged: number;
+  draft: ReleaseDraft;
+  links: ReleaseDiffLinks;
+  i18n: I18n;
+}) {
+  const { t } = i18n;
+  const page = usePage(changes, OUTLINE_LIMIT);
+  const statusOf = ({ status, alsoChanged }: SubjectChange) =>
+    t(`studio.diff.status.${status}${alsoChanged === true ? "Changed" : ""}` as MessageKey);
+  return (
+    <div>
+      <h4>{t(`studio.diff.kind.${kind}` as MessageKey)}</h4>
+      <p class="hint">{t("studio.diff.unchanged", { count: unchanged })}</p>
+      {changes.length > 0 && (
+        <ul>
+          {page.shown.map((change) => (
+            <li key={change.id}>
+              <a href={links.targetHref(subjectTarget(draft, change))}>
+                {subjectName(draft, iriIn(draft, change.id), i18n)}
+              </a>
+              : {statusOf(change)}
+            </li>
+          ))}
+        </ul>
+      )}
+      <ShowMore more={page.more} limit={OUTLINE_LIMIT} onShow={page.showMore} />
+    </div>
   );
 }
