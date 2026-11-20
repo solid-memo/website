@@ -21,6 +21,21 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.5](https://github.com/solid-memo/website/compare/v8.0.4...v8.0.5) (2026-11-20)
+
+### Fixes
+
+* **application:** check a document once across deck checks ([a0af790](https://github.com/solid-memo/website/commit/a0af7908f78da4a4908792d88ae020d10046715e))
+* **courses:** work out a shared course outline once ([08466e9](https://github.com/solid-memo/website/commit/08466e97d37cf00b0c65f5e843596079bc9500cb))
+* **deck-groups:** bound the deck groups a catalog is read with ([2e6864d](https://github.com/solid-memo/website/commit/2e6864d5f159668c4a173b14c07fae0644fc8744))
+* **deps:** update dependency @tanstack/react-query to ^5.107.2 ([9b54ab6](https://github.com/solid-memo/website/commit/9b54ab6d1b7d9c6cf54c32918f2608b3a9679436))
+* **deps:** update dependency @tanstack/react-query to ^5.108.0 ([a9e0143](https://github.com/solid-memo/website/commit/a9e0143ec4657890690647331600135c08d485d4))
+* **deps:** update dependency rdf-validate-shacl to ^0.7.0 ([fa3e0a9](https://github.com/solid-memo/website/commit/fa3e0a93737ef04743c0a3833e26d9ff2a475e85))
+* **deps:** update dependency renovate to v44.251.0 ([628700a](https://github.com/solid-memo/website/commit/628700adb88f94da7d262b9dc4be02de9d00a5ba))
+* **palettes:** read at most 100 palettes of one's own ([e4dcf43](https://github.com/solid-memo/website/commit/e4dcf43ddbbdf9a8d13726ccd720edcdd5b11152))
+* **shacl:** adapt the engine to rdf-validate-shacl 0.7 ([05a7361](https://github.com/solid-memo/website/commit/05a736162a5b9fd9efb7545c4138481c1a9ad4ac)), closes [#926](https://github.com/solid-memo/website/issues/926)
+* **studio:** leave a deck's addresses in the new draft's folder out ([303b708](https://github.com/solid-memo/website/commit/303b708c3a3a7cdc3ddc1e49c3791300d75e2997))
+
 ## [8.0.4](https://github.com/solid-memo/website/compare/v8.0.3...v8.0.4) (2026-11-20)
 
 ### Fixes
