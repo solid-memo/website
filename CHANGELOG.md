@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.6](https://github.com/solid-memo/website/compare/v8.0.5...v8.0.6) (2026-11-20)
+
+### Fixes
+
+* **studio:** bound the group titles a path of groups shows ([fbbebe5](https://github.com/solid-memo/website/commit/fbbebe5cfc53defa7b4df247caf8efe3fae859e4))
+* **studio:** keep a deck's authors apart from its cards in a new draft ([492749c](https://github.com/solid-memo/website/commit/492749c2219ffe931d8a563bbee69fa7faeb5b77))
+
 ## [8.0.5](https://github.com/solid-memo/website/compare/v8.0.4...v8.0.5) (2026-11-20)
 
 ### Fixes
