@@ -262,6 +262,24 @@ interface BudgetSpent {
   largest: Map<string, ReadsSpent>;
 }
 
+/** The budgets and totals of sharedReadBudget, which a ReadLimitError names once they are spent (isPastBudget). */
+const BUDGETS = new WeakSet<ReadLimits>();
+
+/**
+ * Whether a read failed for the budget its reads share (sharedReadBudget)
+ * being spent, not for the document being larger than one read takes in:
+ * a document that read alone may be read again after the page is loaded
+ * anew. Told apart by the limits the error names being one of the
+ * budgets or totals given to sharedReadBudget, by identity: a budget
+ * spent that is told with other limits (solidDeckLibrary.ts names
+ * RELEASE_LIMITS, the same object as FOREIGN_LIMITS) reads as a
+ * document too large, so a removal (readForRemoval) must not be given
+ * such a fetch.
+ */
+export function isPastBudget(error: ReadLimitError): boolean {
+  return BUDGETS.has(error.limits);
+}
+
 /**
  * Reads under one budget together, as the reads of releases from a link
  * are (solidDeckLibrary.ts): what it gives makes a fetch whose answers
@@ -293,6 +311,8 @@ export function sharedReadBudget({
   /** What the reads of every scope may take together, reads again past `rereads` too: no limit of its own unless given. */
   total?: ReadLimits;
 }): (fetch: typeof globalThis.fetch) => typeof globalThis.fetch {
+  BUDGETS.add(budget);
+  if (total !== NO_SIZE_LIMITS) BUDGETS.add(total);
   const budgets = new Map<string, BudgetSpent>();
   const allSpent = noneSpent();
   const allFree = total === NO_SIZE_LIMITS ? undefined : { ...rereads };

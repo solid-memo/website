@@ -224,11 +224,18 @@ export interface CardChanges {
   remove: string[];
 }
 
-/** How DeckRepository.applyCardChanges writes a deck's cards document. */
+/**
+ * How DeckRepository.applyCardChanges writes a deck's cards document.
+ * `fromFile`: the cards of a deck file's import, refused
+ * (deckFileTooLarge) before anything is sent when the document, as
+ * written, would be larger than a read of it outside the user's
+ * storages takes in: no later read could open it.
+ */
 export interface CardChangeOptions {
   whole?: boolean;
   version?: string;
   carried?: CarriedFrom;
+  fromFile?: true;
 }
 
 export interface DeckRepository {
@@ -835,13 +842,18 @@ export interface FileExchange {
   open(accept: string): Promise<{ name: string; text: string } | null>;
 }
 
-/** The states applyReviewChanges saves and removes of a deck, and where a state carried starts from. */
+/**
+ * The states applyReviewChanges saves and removes of a deck, and where a
+ * state carried starts from. `fromFile`: the progress of a deck file's
+ * import, refused as CardChangeOptions' `fromFile` refuses its cards.
+ */
 export interface ReviewChanges {
   save: ReviewState[];
   remove: ReviewKey[];
   fsrs?: { save: FsrsState[]; remove: ReviewKey[] };
   every?: boolean;
   carried?: CarriedFrom;
+  fromFile?: true;
 }
 
 /**

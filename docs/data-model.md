@@ -700,7 +700,14 @@ No document Solid Memo names has any.
   folder may be anyone's and may never answer, so a failed read doesn't
   hold the deck back: it's kept whole, the result names it
   (`keptDocuments`), and the entry goes. The same holds for one the pod
-  serves that can't be read as RDF.
+  serves that can't be read as RDF. A deck's own document at its
+  default place is `decks/<id>.ttl` or `reviews/<id>.ttl` in its
+  instance. When it's larger than one read takes in, or past the
+  declarations, nesting or term length any read takes in, it can never
+  be read, so its removal deletes it whole, unread. That holds only for
+  a deck id with no `..`, which a server may read as a step up. One
+  that fails only because the page's reads from that server have used
+  up their budget is kept, as it can be read again after a reload.
 - **Any other deck is left alone.** It isn't listed (`toDecks` in
   [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)), so
   nothing reads, writes or deletes through it, whatever the [invalid

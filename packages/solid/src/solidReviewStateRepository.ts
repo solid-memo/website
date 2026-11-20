@@ -12,6 +12,7 @@ import {
   getSolidDatasetOrNull,
   keptDataset,
   PreconditionFailedError,
+  refuseUnreadableImport,
   saveDataset,
 } from "./datasets";
 import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
@@ -124,6 +125,8 @@ export function createSolidReviewStateRepository({
     const written = await changed(deck, changes);
     if (written === null) return async () => undefined;
     const checked = await checkedReviews(deck, written);
+    // A deck file's progress in one document no later read would take in is not written.
+    if (changes.fromFile === true) await refuseUnreadableImport(deck.reviewsDocumentUrl, checked);
     // If-Match the read: a document changed since is not written over.
     return () => saveDataset(deck.reviewsDocumentUrl, checked, fetch);
   }
