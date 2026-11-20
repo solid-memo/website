@@ -1433,6 +1433,23 @@ describe("removeDeck", () => {
     ]);
   });
 
+  it("deletes nothing of a deck that names a document with two dots inside a segment, which some servers strip", async () => {
+    // On such a server `span..ish.ttl` is `spanish.ttl`, the document deck-2 names.
+    const stripped: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/span..ish.ttl` };
+    const sharing = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Spanish")
+      .addIri(SM.cardsDocument, `${INSTANCE}decks/spanish.ttl`)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), sharing) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(stripped);
+
+    expect(deleteSolidDataset).not.toHaveBeenCalled();
+  });
+
   it("skips missing documents and a missing catalog", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
 
@@ -1500,6 +1517,20 @@ describe("listCards", () => {
     expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
     expect(publicFetch).not.toHaveBeenCalled();
+  });
+
+  it("refuses to read or write a deck that names a document with two dots inside a segment, in any spelling", async () => {
+    for (const name of ["span..ish", "span%2e%2eish", "span.%2Eish", "span%2E.ish"]) {
+      const stripped: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/${name}.ttl` };
+      await expect(makeRepository().listCards(stripped), name).rejects.toMatchObject({
+        code: "deckGone",
+      });
+      await expect(
+        makeRepository().applyCardChanges(stripped, { save: [card], remove: [] }),
+        name,
+      ).rejects.toMatchObject({ code: "deckGone" });
+    }
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("maps card subjects", async () => {

@@ -111,6 +111,15 @@ export function hasDotSegment(text: string): boolean {
 }
 
 /**
+ * Two dots in a row anywhere in a path, plain, encoded or mixed, in any
+ * case (`span..ish`, `a%2e%2Eb`, `.%2e`). Some servers (JavaScript Solid
+ * Server) strip every `..` inside a segment, so `span..ish.ttl` is
+ * `spanish.ttl` there: such an address is another spelling of another
+ * document, which no comparison of addresses would see.
+ */
+const DOUBLE_DOT = /(?:\.|%2e){2}/i;
+
+/**
  * Whether the path of the absolute URL `url` has an empty segment (`//`)
  * as a request sends it, however it is written (a backslash, a tab, `/.//`):
  * a client may merge it into one slash, or read what follows it as a host.
@@ -122,13 +131,19 @@ export function hasEmptySegment(url: string): boolean {
 /**
  * Whether a registration's address may be taken as an instance's as it
  * is written: an http(s) address with no query or fragment
- * (isPlainHttpUrl), no dot segment (hasDotSegment) and no empty segment
- * (hasEmptySegment). Another spelling of the same folder (its host's
+ * (isPlainHttpUrl), no dot segment (hasDotSegment), no empty segment
+ * (hasEmptySegment) and no two dots anywhere in its path (DOUBLE_DOT),
+ * as a request sends it. Another spelling of the same folder (its host's
  * case, a character outside ASCII) is that folder, as every address made
  * from it is compared as a request sends it.
  */
 export function isInstanceAddress(text: string): boolean {
-  return isPlainHttpUrl(text) && !hasDotSegment(text) && !hasEmptySegment(text);
+  return (
+    isPlainHttpUrl(text) &&
+    !hasDotSegment(text) &&
+    !hasEmptySegment(text) &&
+    !DOUBLE_DOT.test(new URL(canonicalUrlOf(text)!).pathname)
+  );
 }
 
 /**
@@ -282,10 +297,13 @@ export function subjectOfDocument(documentUrl: string): (subjectUrl: string) => 
  * What no deck's document has in its path, as a request sends it: a
  * `;` (a path parameter to some servers), an encoded slash, backslash or
  * percent sign, a NUL, an overlong UTF-8 byte, an IIS `%u` escape, a
- * segment that begins with a dot, or an empty one (`//`); see
- * OUT_OF_PLACE.
+ * segment that begins with a dot, an empty one (`//`), or two dots
+ * anywhere in a segment (DOUBLE_DOT); see OUT_OF_PLACE.
  */
-const UNSAFE_PATH = /;|%(?:2f|5c|25|00|c0|c1|u)|\/(?:\.|%2e|\/)/i;
+const UNSAFE_PATH = new RegExp(
+  String.raw`;|%(?:2f|5c|25|00|c0|c1|u)|\/(?:\.|%2e|\/)|${DOUBLE_DOT.source}`,
+  "i",
+);
 
 /** A name a server keeps for another resource's access control or metadata. */
 const AUXILIARY = /\.(?:acl|acr|meta)$/i;

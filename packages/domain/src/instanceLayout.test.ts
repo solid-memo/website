@@ -251,13 +251,13 @@ describe("where an instance's documents are", () => {
     expect(instanceAddressOf("not an address")).toBe("not an address/");
   });
 
-  it("takes a registration's address as written, unless a dot segment makes it another folder", () => {
+  it("takes a registration's address as written, unless a dot segment or two dots make it another folder", () => {
     for (const url of [
       ROOT,
       "https://Pod.example/kortlekar-å/",
       "https://pod.example/한국어/",
       "https://bücher.example/a/",
-      "https://pod.example/a.b/..c/",
+      "https://pod.example/a.b/c.d/",
     ]) {
       expect(isInstanceAddress(url), url).toBe(true);
     }
@@ -267,6 +267,9 @@ describe("where an instance's documents are", () => {
       "https://pod.example/a/./b/",
       "https://pod.example/a/%2e%2E/",
       "https://pod.example/a/.%2e/",
+      "https://pod.example/a..b/",
+      "https://pod.example/a.b/..c/",
+      "https://pod.example/a/b%2E.c/",
       "https://pod.example/a\\..\\b/",
       "https://pod.example/a/.\t./",
       "https://evil.example//pod.example/",
@@ -397,6 +400,7 @@ describe("where an instance's documents are", () => {
       "https://pod.example/",
       "https://pod.example/profile/card",
       "https://pod.example/caf%C3%A9/x.ttl",
+      "https://pod.example/v1.0.2/deck.1.ttl",
     ]) {
       expect(isSafeWriteUrl(url), url).toBe(true);
     }
@@ -421,6 +425,17 @@ describe("where an instance's documents are", () => {
       `${DECKS}deck-1.ttl.ac%6C`,
       `${DECKS}%7Edeck.ttl`,
       `${DECKS}deck%2D1.ttl`,
+      // Two dots inside a segment, plain, encoded or mixed, in any case, which some servers
+      // strip (`span..ish.ttl` is `spanish.ttl` there).
+      `${DECKS}span..ish.ttl`,
+      `${DECKS}span%2e%2eish.ttl`,
+      `${DECKS}span%2E%2Eish.ttl`,
+      `${DECKS}span.%2eish.ttl`,
+      `${DECKS}span%2E.ish.ttl`,
+      `${DECKS}deck..`,
+      `${ROOT}catal..og.ttl`,
+      `${ROOT}pre..ferences.ttl`,
+      `${ROOT}dra..fts/x/release.ttl`,
       "https://POD.example/x.ttl",
       "https://pod.example:443/x.ttl",
       "ftp://pod.example/x.ttl",
@@ -434,6 +449,7 @@ describe("where an instance's documents are", () => {
   it("reads a document only at an address a request leaves where it names", () => {
     expect(isSafeDocumentUrl(`${DECKS}deck-1.ttl`)).toBe(true);
     expect(isSafeDocumentUrl("https://pod.example/x")).toBe(true);
+    expect(isSafeDocumentUrl("https://pod.example/v1.0.2/deck.1.ttl")).toBe(true);
     for (const url of [
       `${DECKS}../../../profile/card`,
       `${DECKS}%2e%2e/%2e%2e/private/diary.ttl`,
@@ -450,6 +466,17 @@ describe("where an instance's documents are", () => {
       `${DECKS}deck-1.ttl#card-1`,
       `${DECKS}deck-1.ttl.acl`,
       `${DECKS}deck-1.ttl.Meta`,
+      // Two dots inside a segment, plain, encoded or mixed, in any case, which some servers
+      // strip (`span..ish.ttl` is `spanish.ttl` there).
+      `${DECKS}span..ish.ttl`,
+      `${DECKS}span%2e%2eish.ttl`,
+      `${DECKS}span%2E%2Eish.ttl`,
+      `${DECKS}span.%2eish.ttl`,
+      `${DECKS}span%2E.ish.ttl`,
+      `${DECKS}deck..`,
+      `${ROOT}catal..og.ttl`,
+      `${ROOT}pre..ferences.ttl`,
+      `${ROOT}dra..fts/x/release.ttl`,
       DECKS,
       "https://pod.example/",
       "ftp://pod.example/x.ttl",
