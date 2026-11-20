@@ -8,7 +8,7 @@ import type { Quad } from "@rdfjs/types";
 import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
-import type { Deck } from "@solid-memo/domain/deck";
+import type { Card, Deck } from "@solid-memo/domain/deck";
 import { newestRelease } from "@solid-memo/domain/library";
 import { courseProblems } from "@solid-memo/domain/release/courseRules";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
@@ -1565,6 +1565,87 @@ describe("assemble", () => {
     const later = await made(`${INSTANCE}releases/capitals/v2.ttl`);
     expect(later.draft.root.license).toBeUndefined();
     expect(later.turtle).not.toMatch(/license/i);
+  });
+
+  it("makes a draft of a deck that keeps an author whose node a card or wrong option would be at (GHSA-w96m-f3jj-jcmw)", async () => {
+    const pod = await draftPod();
+    const deck: Deck = {
+      id: "capitals",
+      url: `${INSTANCE}catalog.ttl#capitals`,
+      title: { en: "Capitals" },
+      cardsDocumentUrl: `${INSTANCE}decks/capitals.ttl`,
+      reviewsDocumentUrl: `${INSTANCE}reviews/capitals.ttl`,
+      createdAt: NOW,
+      formatVersion: 6,
+      direction: "bidirectional",
+      description: { en: "Capitals of the world." },
+      authors: ["Bob"],
+      license: "https://creativecommons.org/licenses/by/4.0/",
+    };
+    const card = (id: string, distractors: Card["distractors"] = []): Card => ({
+      id,
+      url: `${deck.cardsDocumentUrl}#${id}`,
+      front: { en: `Q ${id}` },
+      back: { en: `A ${id}` },
+      createdAt: NOW,
+      formatVersion: 7,
+      ...(distractors.length === 0 ? {} : { distractors }),
+    });
+    const cards = [
+      card("agent-bob"),
+      card("c2", [{ id: "c3", text: { en: "Wrong" } }]),
+      card("c3"),
+    ];
+    const useCases = createReleaseDraftUseCases({
+      releaseDraftRepository: pod.repository,
+      deckRepository: { listCards: async () => cards } as never,
+      deckLibrary: {} as never,
+      shapeValidator: {} as never,
+      fileExchange: {} as never,
+      storageGateway: { discoverStorages: async () => [] },
+      releasePublisher: { listPublished: async () => [] },
+      now: () => new Date(NOW),
+    });
+    const created = await useCases.createReleaseDraft(
+      INSTANCE,
+      { kind: "fromDeck", deck },
+      `${POD}profile/card#me`,
+    );
+    const draft = await useCases.getReleaseDraft(created!.draft.url);
+    const [agent] = draft.agents;
+    expect(agent!.data).toEqual({ name: "Bob" });
+    expect(agent!.id).not.toBe("agent-bob");
+    expect(draft.root.creator).toEqual([iriIn(draft, agent!.id)]);
+    expect(draft.root.publisher).toBe(iriIn(draft, agent!.id));
+    expect(draft.cards.map((one) => [one.id, one.data.front])).toEqual([
+      ["agent-bob", { en: "Q agent-bob" }],
+      ["c2", { en: "Q c2" }],
+      ["c3", { en: "Q c3" }],
+    ]);
+    expect(draft.distractors.map((one) => one.id)).toEqual(["c3-2"]);
+    expect(draft.cards[1]!.data.distractor).toEqual([iriIn(draft, "c3-2")]);
+    expect(
+      ruleProblems(draftReleaseModel(draft), "pod").filter(
+        (problem) => problem.severity === "error",
+      ),
+    ).toEqual([]);
+    const target = `${INSTANCE}releases/capitals/v1.ttl`;
+    const quads = await quadsOfTurtle(
+      await pod.repository.assemble(draft.url, target, NOW),
+      target,
+    );
+    const of = (subject: string, predicate: string) =>
+      quads
+        .filter((quad) => quad.subject.value === subject && quad.predicate.value === predicate)
+        .map((quad) => quad.object.value);
+    const bob = `${target}#${agent!.id}`;
+    expect(of(bob, "http://xmlns.com/foaf/0.1/name")).toEqual(["Bob"]);
+    expect(of(target, "http://purl.org/dc/terms/creator")).toEqual([bob]);
+    expect(of(target, "http://purl.org/dc/terms/publisher")).toEqual([bob]);
+    expect(of(`${target}#series`, "http://purl.org/dc/terms/publisher")).toEqual([bob]);
+    expect(of(`${target}#agent-bob`, "http://www.w3.org/1999/02/22-rdf-syntax-ns#type")).toEqual([
+      `${SM}Card`,
+    ]);
   });
 
   it("publishes a release file in another's series in a series of its own, which no learner of that one is offered (GHSA-38m7-8r5j-q79f)", async () => {

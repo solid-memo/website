@@ -409,6 +409,50 @@ ${STEP} ; schema:position "-01"^^xsd:integer ; owl:deprecated "1"^^xsd:boolean .
   });
 });
 
+describe("draftEntries with two subjects at one IRI (GHSA-w96m-f3jj-jcmw)", () => {
+  it("refuses a node of one kind at the id of another, or of the same kind", () => {
+    const draft = deckDraft();
+    const refused = expect.objectContaining({
+      code: "dataNotConforming",
+      vars: { subject: of("w1") },
+    });
+    expect(() => draftEntries({ ...draft, agents: [{ id: "w1", data: { name: "Bob" } }] })).toThrow(
+      refused,
+    );
+    expect(() =>
+      draftEntries({ ...draft, distractors: [{ id: "w1", data: { text: { en: "No" } } }] }),
+    ).toThrow(refused);
+    expect(() => draftEntries({ ...draft, cards: [...draft.cards, ...draft.cards] })).toThrow(
+      refused,
+    );
+    expect(draftEntries(draft).has(of("w1"))).toBe(true);
+  });
+
+  it("refuses a record at the series' id, and keeps statements of the series or beside a record", () => {
+    const draft = deckDraft();
+    const series = draft.root.inSeries!;
+    const card = draft.cards[0]!;
+    for (const root of [draft.root, { ...draft.root, inSeries: of("other") }]) {
+      expect(() =>
+        draftEntries({ ...draft, root, cards: [{ ...card, id: series.slice(DRAFT.length + 1) }] }),
+      ).toThrow(expect.objectContaining({ code: "dataNotConforming", vars: { subject: series } }));
+    }
+    const label = (subject: string) => ({
+      subject,
+      predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+      object: {
+        kind: "literal" as const,
+        value: "x",
+        language: "",
+        datatype: "http://www.w3.org/2001/XMLSchema#string",
+      },
+    });
+    const entries = draftEntries({ ...draft, triples: [label(series), label(of("w1"))] });
+    expect(entries.get(series)!.shaped).toBeUndefined();
+    expect(entries.get(of("w1"))!.raw).toHaveLength(1);
+  });
+});
+
 describe("draftEntries with an IRI longer than a term may be (GHSA-4mgg-5xpp-3jx5)", () => {
   const refused = expect.objectContaining({ code: "termTooLong", vars: { limit: 16_383 } });
   const LONG = "a".repeat(16_383);

@@ -1495,7 +1495,19 @@ own pod, as a draft, before publishing it
   difference and no check sees it, but publishing would write it. A
   subject in a newer format than the app reads is refused as a newer
   app's (`writtenByNewerApp`), whose message says to use a newer
-  version.
+  version. An id names one subject of a draft, whatever its kind: an
+  agent, a card, a wrong option, a chapter, a step and the
+  distribution never share one. None of them has the id of the
+  series the release is in either. A draft that would give two subjects
+  one id isn't written (`dataNotConforming`), as one would replace the
+  other (`draftEntries`). Nor is a draft with a subject at the id of
+  its series (`dcat:inSeries`, `dcterms:isVersionOf`), as publishing
+  would describe the series on that subject. Such a draft is refused
+  when it's saved and when it's edited, as an edit maps the draft as it
+  was too. So a draft already in a pod with a subject at its series'
+  id, which only a malformed file imported before this check can make,
+  takes no edit; delete it and make it again. Statements of the series,
+  and others beside a subject's record, are kept as they are.
 - **Links on the catalog.** `sm:releaseDraft` names a draft's release
   document, and `sm:publishedRelease` a release published from the
   instance. Like `sm:newcomerCourse` on the library's catalog, they

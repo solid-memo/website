@@ -585,7 +585,12 @@ export interface DraftEntry {
  * A draft with an IRI longer than a term may be, there or in the
  * document it is kept in, is refused (termTooLong), as its write would
  * refuse it, before anything is keyed by that IRI
- * (GHSA-4mgg-5xpp-3jx5).
+ * (GHSA-4mgg-5xpp-3jx5). So is one that gives two of its subjects (an
+ * agent and a card, say) one id, or a record the id of the series the
+ * release is in (dataNotConforming): written, one would replace the
+ * other, or publishing would state the series' publisher and versions
+ * of that record (GHSA-w96m-f3jj-jcmw). Statements of the series, or
+ * of a record's subject, beside its record are kept as they are.
  */
 export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
   refuseKeysPastBound(draft);
@@ -610,9 +615,15 @@ export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
       ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }]
       : [],
   });
+  // The series the release is in: what publishing states of it is the series', no record's.
+  const series = new Set([draft.root.inSeries, draft.root.isVersionOf]);
   for (const { list, shape } of KINDS) {
     (draft[list] as readonly DraftNode<unknown>[]).forEach((node, at) => {
       const iri = iriIn(draft, node.id);
+      // Two of its subjects at one IRI: one would replace the other (GHSA-w96m-f3jj-jcmw).
+      if (entries.has(iri) || series.has(iri)) {
+        throw new AppError("dataNotConforming", { subject: iri });
+      }
       entries.set(iri, {
         document: documentOf(iri),
         subject: podIri(iri),
