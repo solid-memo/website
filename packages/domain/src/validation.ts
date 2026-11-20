@@ -211,20 +211,38 @@ export interface ValidationReport {
   conforms: boolean;
 }
 
+/** How many results of severity "violation" each list of subjects holds, counted once per list (violationsIn). */
+const VIOLATIONS = new WeakMap<readonly SubjectReport[], number>();
+
+/**
+ * How many results of severity "violation" the subjects hold, counted
+ * once per list: a document's report is shared by every report made of
+ * it (a deck's, the instance's with a deck's in place, withDeckReport),
+ * so summing those again passes over its subjects only the first time.
+ * Reports are never changed once made.
+ */
+function violationsIn(subjects: readonly SubjectReport[]): number {
+  let count = VIOLATIONS.get(subjects);
+  if (count === undefined) {
+    count = 0;
+    for (const subject of subjects) {
+      if (subject.status !== "checked" && subject.status !== "profiled") continue;
+      for (const violation of subject.violations) if (violation.severity === "violation") count++;
+    }
+    VIOLATIONS.set(subjects, count);
+  }
+  return count;
+}
+
 /** The report on these documents, and on the other spellings of their addresses (`spellings`), counting each document once. */
 export function summarize(
   instanceUrl: string,
   documents: DocumentReport[],
   spellings: readonly DocumentSpelling[] = [],
 ): ValidationReport {
-  const violationCount =
-    documents
-      .flatMap((document) => document.subjects)
-      .flatMap((subject) =>
-        subject.status === "checked" || subject.status === "profiled" ? subject.violations : [],
-      )
-      .filter((violation) => violation.severity === "violation").length +
-    documents.filter((document) => document.status === "unreadable").length;
+  let violationCount = 0;
+  for (const document of documents)
+    violationCount += violationsIn(document.subjects) + (document.status === "unreadable" ? 1 : 0);
   return {
     instanceUrl,
     documents,

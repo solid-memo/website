@@ -15,6 +15,7 @@ import { datasetOfTurtle } from "./testing/datasets";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { readBudget } from "@solid-memo/application/readBudget";
+import type { SharedReads } from "@solid-memo/application/ports";
 
 const ROOT = "https://pod.example/";
 const BOB = `${ROOT}bob/solid-memo/main/`;
@@ -832,6 +833,78 @@ describe("a deck's document, as a data check reads it", () => {
     await expect(
       p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl, readBudget(60_000)),
     ).resolves.toBe(true);
+  });
+});
+
+describe("a deck's document, as the data checks that share their reads read it", () => {
+  it("is read once to list its cards, and to find where it stands for each deck that names it", async () => {
+    const p = await pod();
+    const shared = `${ROOT}shared/cards.ttl`;
+    await p.put(shared, cardTurtle("c1", "uno"));
+    const one = await p.decks.createDeck(BOB, { en: "One" });
+    const two = await p.decks.createDeck(BOB, { en: "Two" });
+    await plant(p, one, shared, one.reviewsDocumentUrl);
+    await plant(p, two, shared, two.reviewsDocumentUrl);
+    const decks = await p.decks.listDecks(BOB);
+    const kept = new Map<string, Promise<unknown>>();
+    const read: string[] = [];
+    const reads: SharedReads = (url, made) => {
+      if (!kept.has(url)) {
+        read.push(url);
+        kept.set(url, made());
+      }
+      return kept.get(url) as ReturnType<typeof made>;
+    };
+    for (const deck of decks) {
+      await expect(p.decks.unclaimedDocuments(deck, undefined, reads)).resolves.toEqual([shared]);
+      await expect(p.decks.isUnclaimedAsRead([deck], shared, undefined, reads)).resolves.toBe(true);
+      await expect(p.decks.listCards(deck, { reads })).resolves.toMatchObject([
+        { url: `${shared}#c1` },
+      ]);
+    }
+    expect(read).toEqual([shared]);
+  });
+
+  it("is read once, and its cards mapped once, for decks naming it in other spellings of its address", async () => {
+    const p = await pod();
+    const shared = `${ROOT}shared/cards.ttl`;
+    const spellings = [
+      shared,
+      shared.replace("pod.example", "POD.example"),
+      shared.replace("pod.example", "pod.example:443"),
+    ];
+    await p.put(shared, cardTurtle("c1", "uno"));
+    for (const [index, spelled] of spellings.entries()) {
+      const deck = await p.decks.createDeck(BOB, { en: `Deck ${index}` });
+      await plant(p, deck, spelled, deck.reviewsDocumentUrl);
+    }
+    const decks = await p.decks.listDecks(BOB);
+    expect(decks.map((deck) => deck.cardsDocumentUrl).sort()).toEqual([...spellings].sort());
+    const kept = new Map<string, Promise<unknown>>();
+    const read: string[] = [];
+    // As the data checks share them: one read for every spelling of the address.
+    const reads: SharedReads = (url, made) => {
+      const key = new URL(url).href;
+      if (!kept.has(key)) {
+        read.push(url);
+        kept.set(key, made());
+      }
+      return kept.get(key) as ReturnType<typeof made>;
+    };
+    const listed: Awaited<ReturnType<typeof p.decks.listCards>>[] = [];
+    for (const deck of decks) {
+      await expect(p.decks.unclaimedDocuments(deck, undefined, reads)).resolves.toEqual([
+        deck.cardsDocumentUrl,
+      ]);
+      await expect(
+        p.decks.isUnclaimedAsRead([deck], deck.cardsDocumentUrl, undefined, reads),
+      ).resolves.toBe(true);
+      listed.push(await p.decks.listCards(deck, { reads }));
+    }
+    // Read at the address as a request sends it, whichever deck asked first, and its cards mapped once.
+    expect(read).toEqual([shared]);
+    expect(listed[0]).toMatchObject([{ url: `${shared}#c1` }]);
+    for (const cards of listed) expect(cards).toBe(listed[0]);
   });
 });
 

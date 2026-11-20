@@ -1435,7 +1435,18 @@ otherwise through the document it was found in. The decks are indexed
 once for those links (`deckOfSubjectsIn`), so each is a lookup, not a
 search through them.
 A badge checks its deck once, and what it finds holds its
-deck too. Reading the instance's check afresh reads every check of
+deck too. The badges share the check of a document many decks name,
+and of the catalog, and the reads of that document for its cards and
+whether it's unclaimed, in any spelling of its address a request sends
+the same way. A spelling that percent-encodes a character needing no
+encoding is another address to a request, so it's checked and read on
+its own, as the instance's check does. Each is checked and read once,
+a read that fails too, until the instance's check or the deck's health
+is read afresh ([validation.md](validation.md#flow)). A deck whose
+cards document can't be read shows it as unreadable. The badges of one instance
+share one text check too, so the cards that say the same and the
+Markdown findings of a cards document many decks name are worked out
+once for them all. Reading the instance's check afresh reads every check of
 the instance afresh (their queries are under its key); "Check again"
 on a deck's health reads only the deck's, which is read afresh each
 time its screen opens too. The end-to-end tests hold `checkDeck`

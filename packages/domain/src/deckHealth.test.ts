@@ -189,6 +189,56 @@ describe("withDeckReport", () => {
   });
 });
 
+describe("withDeckReport of many decks in one catalog (GHSA-pgw5-wjgx-h9vv)", () => {
+  const INSTANCE = "https://pod.example/a/";
+  const decks = Array.from({ length: 50 }, (_, index) => ({
+    ...deck,
+    id: `deck-${index}`,
+    url: `${CATALOG}#deck-${index}`,
+  }));
+
+  it("looks only at each deck's own subjects of the catalog once it is indexed, and leaves its report as it is", () => {
+    let reads = 0;
+    const subjects = new Proxy(
+      decks.flatMap((one) => [checked(one.url), checked(distributionUrlOf(one.url))]),
+      {
+        get(target, key, receiver) {
+          if (typeof key === "string" && /^\d+$/.test(key)) reads++;
+          return Reflect.get(target, key, receiver);
+        },
+      },
+    );
+    let report = summarize(INSTANCE, [document(CATALOG, subjects), document(CARDS, [])]);
+    const catalog = report.documents[0];
+    for (const one of decks) {
+      const part = deckReport(report, one);
+      expect(part.violationCount).toBe(2);
+      report = withDeckReport(report, one, part);
+    }
+    expect(report.documents[0]).toBe(catalog);
+    expect(report.violationCount).toBe(100);
+    // Counted once and indexed once, then each deck's two subjects looked up twice: never the whole catalog per deck.
+    expect(reads).toBeLessThanOrEqual(2 * subjects.length + 4 * decks.length);
+  });
+
+  it("leaves the catalog's report as it is when a later check found the deck's subjects alike, and merges them when not", () => {
+    const report = summarize(INSTANCE, [
+      document(CATALOG, [checked(deck.url), checked(`${CATALOG}#deck-2`), checked(deck.url)]),
+    ]);
+    const alike = summarize(INSTANCE, [document(CATALOG, [checked(deck.url), checked(deck.url)])]);
+    expect(withDeckReport(report, deck, alike).documents[0]).toBe(report.documents[0]);
+    // Its author named twice is one subject.
+    const twice = { ...deck, authors: ["Ada", "Ada"] };
+    expect(deckReport(report, twice).documents[0]!.subjects).toHaveLength(2);
+    const unreadable = summarize(INSTANCE, [
+      { url: CATALOG, status: "unreadable", subjects: [], reason: "podNoAnswer" },
+    ]);
+    const merged = withDeckReport(report, deck, unreadable);
+    expect(merged.documents[0]).toMatchObject({ status: "unreadable" });
+    expect(merged.documents[0]!.subjects.map(({ url }) => url)).toEqual([`${CATALOG}#deck-2`]);
+  });
+});
+
 describe("a document a deck names by another spelling of its address", () => {
   const SPELLED = CARDS.replace("pod.example", "POD.example");
   const spelled: Deck = { ...deck, cardsDocumentUrl: SPELLED, reviewsDocumentUrl: SPELLED };
@@ -304,6 +354,21 @@ describe("cardSpotsOf", () => {
     expect(cardSpotOf(deck.url)).toBeNull();
     expect(cardSpotOf(`${CARDS}#gone`)).toBeNull();
     expect(cardSpotOf(`${REVIEWS}#gone`)).toBeNull();
+    expect(cardSpotOf("not an address#c1")).toBeNull();
+  });
+
+  it("finds a card in a report spelling the deck's document otherwise", () => {
+    // The check of a document many decks name is shared, in one spelling of its address.
+    const spelled = (url: string) =>
+      url.replace("https://pod.example/", "https://POD.example:443/");
+    expect(cardSpotOf(`${spelled(CARDS)}#c1`)).toEqual({
+      card: cards[0],
+      place: { tab: "content" },
+    });
+    expect(cardSpotOf(`${spelled(REVIEWS)}#c1`)).toEqual({
+      card: cards[0],
+      place: { tab: "schedule" },
+    });
   });
 
   it("takes the first card in the deck's order when two share an id", () => {
@@ -712,5 +777,35 @@ describe("deckHealth", () => {
     const health = deckHealth(deck, report, cards, undefined, text);
     expect(health.unstated).toBeNull();
     expect(healthProblemCount(health)).toBe(3);
+  });
+
+  it("reads the text of one cards document once for the decks that share it (GHSA-pgw5-wjgx-h9vv)", () => {
+    const shared = Object.freeze(
+      Array.from({ length: 40 }, (_, i) =>
+        card(`m${i}`, { textFormat: SM.markdown, front: { en: `[x${i}]` }, back: { sv: "y" } }),
+      ),
+    ) as Card[];
+    const counted = Object.freeze({
+      plain: vi.fn(text.plain),
+      check: vi.fn(text.check),
+    }) satisfies DeckTextCheck<{ code: string }>;
+    const release = Object.freeze([card("m0")]);
+    const decks = Array.from({ length: 30 }, (_, i) => ({ ...deck, url: `${CATALOG}#deck-${i}` }));
+    const healths = decks.map((one, i) =>
+      deckHealth(one, report, shared, i % 2 === 0 ? [] : release, counted),
+    );
+    // Each text once, not once per deck: the work grows with the document, not with the decks too.
+    expect(counted.check.mock.calls.length).toBe(shared.length * 2);
+    expect(counted.plain.mock.calls.length).toBe(shared.length * 2);
+    expect(healths[29]!.markdown).toBe(healths[0]!.markdown);
+    expect(healths[29]!.duplicates).toBe(healths[0]!.duplicates);
+    expect(healths[2]!.unstated).toBe(healths[0]!.unstated);
+    expect(healths[3]!.unstated).toBe(healths[1]!.unstated);
+    expect(healths[0]!.markdown).toHaveLength(shared.length);
+    // Cards that may still change, or another text check, are read afresh.
+    const before = counted.check.mock.calls.length;
+    deckHealth(deck, report, [...shared], [], counted);
+    deckHealth(deck, report, shared, [], { ...counted });
+    expect(counted.check.mock.calls.length).toBe(before + 4 * shared.length);
   });
 });

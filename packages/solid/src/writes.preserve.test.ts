@@ -640,6 +640,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   claimDeckDocuments: async ({ u, capitals }) =>
     void (await u.claimDeckDocuments(INSTANCE, capitals.url)),
   checkDeck: async ({ u, capitals }) => void (await u.checkDeck(INSTANCE, capitals, textCheck)),
+  forgetDeckCheck: async ({ u, capitals }) => u.forgetDeckCheck(INSTANCE, capitals),
 
   // Drafts and releases.
   listReleaseDrafts: async ({ u }) => void (await u.listReleaseDrafts(INSTANCE)),

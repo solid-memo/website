@@ -14,13 +14,20 @@ import {
   type Deck,
 } from "./deck";
 import { unlikeRelease } from "./deckLanguages";
+import { derivedOnceOf } from "./frozen";
 import { canonicalUrlOf, catalogUrlOf } from "./instanceLayout";
 import { PathMap, piecesOf, TextMap } from "./pathKeys";
 import type { FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
 import { reviewKeyOf } from "./reviewRecord";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
-import { summarize, withUnclaimed, type ValidationReport } from "./validation";
+import {
+  summarize,
+  withUnclaimed,
+  type DocumentReport,
+  type SubjectReport,
+  type ValidationReport,
+} from "./validation";
 
 /**
  * Everything wrong with one deck, for the Studio's health screen
@@ -123,10 +130,7 @@ export function deckReport(report: ValidationReport, deck: Deck): ValidationRepo
     if (!named.has(of)) named.set(of, url);
   }
   const documents = report.documents.flatMap((document) => {
-    if (document.url === catalog)
-      return [
-        { ...document, subjects: document.subjects.filter((subject) => own.has(subject.url)) },
-      ];
+    if (document.url === catalog) return [{ ...document, subjects: ownIn(document, own) }];
     const url = named.get(document.url);
     if (url === undefined) return [];
     return [url === document.url ? document : { ...document, url }];
@@ -138,10 +142,87 @@ export function deckReport(report: ValidationReport, deck: Deck): ValidationRepo
 }
 
 /** The deck's subjects in the catalog: its entry, its distribution and its authors' agent nodes. */
-function ownSubjectUrls(deck: Deck): TextMap<true> {
-  const own = new TextMap<true>().set(deck.url, true).set(distributionUrlOf(deck.url), true);
-  for (const author of deck.authors) own.set(agentUrlOf(deck.url, author), true);
-  return own;
+function ownSubjectUrls(deck: Deck): string[] {
+  return [
+    deck.url,
+    distributionUrlOf(deck.url),
+    ...deck.authors.map((author) => agentUrlOf(deck.url, author)),
+  ];
+}
+
+/** Where each subject of a list is, by its address: indexed once per list (placesOf). */
+const PLACES = new WeakMap<readonly SubjectReport[], TextMap<number[]>>();
+
+/**
+ * Where in the list the subjects at these addresses are, in the list's
+ * order. The list is indexed once, however many decks look in it: the
+ * catalog's report holds a subject of every deck, and each deck's
+ * health, and each merge of it into the instance's (withDeckReport),
+ * looks up only its own (GHSA-pgw5-wjgx-h9vv). Reports are never
+ * changed once made.
+ */
+function placesOf(subjects: readonly SubjectReport[], urls: readonly string[]): number[] {
+  let places = PLACES.get(subjects);
+  if (places === undefined) {
+    const index = new TextMap<number[]>();
+    subjects.forEach((subject, at) => {
+      const of = index.get(subject.url);
+      if (of === undefined) index.set(subject.url, [at]);
+      else of.push(at);
+    });
+    PLACES.set(subjects, (places = index));
+  }
+  const looked = new TextMap<true>();
+  const found: number[] = [];
+  for (const url of urls) {
+    if (looked.has(url)) continue;
+    looked.set(url, true);
+    for (const at of places.get(url) ?? []) found.push(at);
+  }
+  return found.sort((a, b) => a - b);
+}
+
+/** The subjects of the document at these addresses, in its order (placesOf). */
+function ownIn(document: DocumentReport, urls: readonly string[]): SubjectReport[] {
+  return placesOf(document.subjects, urls).map((at) => document.subjects[at]!);
+}
+
+/** Whether two lists of subjects report the same: each the same report, or one alike. */
+function sameSubjects(a: readonly SubjectReport[], b: readonly SubjectReport[]): boolean {
+  return (
+    a.length === b.length &&
+    a.every((one, at) => one === b[at] || JSON.stringify(one) === JSON.stringify(b[at]))
+  );
+}
+
+/**
+ * The catalog's report in the instance's check (`document`) with the
+ * deck's subjects (`own`) as a later check of it found them (`update`):
+ * the same report when they are the same (the deck's check reused what
+ * the instance's found), so a merge looks only at the deck's own
+ * subjects and the instance's report keeps the catalog's count of
+ * violations (summarize); else the others where they were, and the
+ * deck's at the end.
+ */
+function withOwnSubjects(
+  document: DocumentReport,
+  own: readonly string[],
+  update: DocumentReport,
+): DocumentReport {
+  const places = placesOf(document.subjects, own);
+  if (
+    JSON.stringify({ ...document, subjects: [] }) === JSON.stringify({ ...update, subjects: [] }) &&
+    sameSubjects(
+      places.map((at) => document.subjects[at]!),
+      update.subjects,
+    )
+  )
+    return document;
+  const skipped = new Set(places);
+  return {
+    ...update,
+    subjects: [...document.subjects.filter((_, at) => !skipped.has(at)), ...update.subjects],
+  };
 }
 
 /**
@@ -151,7 +232,9 @@ function ownSubjectUrls(deck: Deck): TextMap<true> {
  * that check found, without the whole instance being checked again.
  * Each document of `part` takes the place of the same one in `report`,
  * where it was: the catalog only in the deck's subjects (an unchanged
- * catalog comes back with none, its own all conforming). A document
+ * catalog comes back with none, its own all conforming), looked up
+ * rather than searched for, and left as it was when they are the same
+ * (withOwnSubjects), so a merge does not pass over the whole catalog. A document
  * `part` does not hold stays as it was; one `report` did not hold (a
  * deck made since it was made) comes at the end.
  */
@@ -173,14 +256,7 @@ export function withDeckReport(
   const documents = report.documents.map((document) => {
     const update = fresh.get(document.url);
     if (update === undefined) return document;
-    if (update.url !== catalog) return update;
-    return {
-      ...update,
-      subjects: [
-        ...document.subjects.filter((subject) => !own.has(subject.url)),
-        ...update.subjects,
-      ],
-    };
+    return update.url === catalog ? withOwnSubjects(document, own, update) : update;
   });
   const known = new Set(report.documents.map((document) => document.url));
   return withUnclaimed(
@@ -254,7 +330,10 @@ export type CardSpotOf = (subjectUrl: string, path?: string) => CardSpot | null;
  * the deck has no card for). The cards and their wrong options are
  * indexed once, so each lookup takes constant time however many cards,
  * wrong options and subjects there are; where two share an id, the
- * first card in the deck's order wins.
+ * first card in the deck's order wins. A subject's document is compared
+ * with the deck's as a request sends both addresses (canonicalUrlOf):
+ * the check of a document many decks name is shared by them all, and
+ * reports it in one spelling of its address, maybe not the deck's.
  */
 export function cardSpotsOf(deck: Deck, cards: readonly Card[]): CardSpotOf {
   const byId = new Map<string, Card>();
@@ -265,14 +344,16 @@ export function cardSpotsOf(deck: Deck, cards: readonly Card[]): CardSpotOf {
       if (!ownerOf.has(distractor.id)) ownerOf.set(distractor.id, card);
     }
   }
+  const reviewsDocument = asSent(deck.reviewsDocumentUrl);
+  const cardsDocument = asSent(deck.cardsDocumentUrl);
   return (subjectUrl, path) => {
-    const document = documentUrlOf(subjectUrl);
+    const document = asSent(documentUrlOf(subjectUrl));
     const id = fragmentIdOf(subjectUrl);
-    if (document === deck.reviewsDocumentUrl) {
+    if (document === reviewsDocument) {
       const card = byId.get(reviewKeyOf(id).cardId);
       return card === undefined ? null : { card, place: { tab: "schedule" } };
     }
-    if (document !== deck.cardsDocumentUrl) return null;
+    if (document !== cardsDocument) return null;
     const card = byId.get(id);
     if (card !== undefined) {
       const part = path === undefined ? undefined : PARTS.get(path);
@@ -287,6 +368,11 @@ export function cardSpotsOf(deck: Deck, cards: readonly Card[]): CardSpotOf {
       place: { tab: "distractors", distractor: id, ...(part === undefined ? {} : { part }) },
     };
   };
+}
+
+/** An address as a request sends it (canonicalUrlOf); as written, for text that is none. */
+function asSent(url: string): string {
+  return canonicalUrlOf(url) ?? url;
 }
 
 /**
@@ -423,11 +509,74 @@ export function unstatedSides(
   );
 }
 
+/** What deckHealth finds of a cards document alone, its cards as one frozen array and the text check (deckText). */
+type DocumentText<F extends MarkdownFinding> = Pick<
+  DeckHealth<F>,
+  "duplicates" | "markdown" | "markdownMore"
+>;
+
+/** What deckHealth found of each cards document, by its cards and the text check: see deckText. */
+const TEXTS = new WeakMap<object, WeakMap<object, Map<string, DocumentText<MarkdownFinding>>>>();
+
+/** The sides to settle (unstatedSides), by the cards and the release: see unstatedOnce. */
+const UNSTATED = new WeakMap<object, WeakMap<object, Map<string, CardSpot[]>>>();
+
+/** The release of a deck not copied from one, as one value to look up the sides it leaves to settle by. */
+const NO_RELEASE: readonly (CardContent & { id: string })[] = Object.freeze([]);
+
+/**
+ * The cards that say the same and what the Markdown check finds, of the
+ * cards of one document: worked out once for the cards and the text
+ * check while both are frozen (derivedOnceOf), however many decks name
+ * the document. Its cards, read once, are one frozen array for them all
+ * (the repository's cardsOf), and the Studio's badges share one text
+ * check, so a document's text is read once, not once per deck naming it
+ * (GHSA-pgw5-wjgx-h9vv).
+ */
+function deckText<F extends MarkdownFinding>(
+  cards: readonly Card[],
+  text: DeckTextCheck<F>,
+): DocumentText<F> {
+  return derivedOnceOf(
+    TEXTS as WeakMap<object, WeakMap<object, Map<string, DocumentText<F>>>>,
+    cards,
+    text,
+    "",
+    () => {
+      const markdown = cardMarkdownProblems(cards, text.check);
+      return Object.freeze({
+        duplicates: Object.freeze(
+          duplicateCardsOf(cards, text.plain).map((group) => Object.freeze(group) as Card[]),
+        ) as Card[][],
+        markdown: Object.freeze(markdown.problems) as CardMarkdownProblem<F>[],
+        markdownMore: markdown.more,
+      });
+    },
+  );
+}
+
+/** The sides to settle (unstatedSides), worked out once for frozen cards and a frozen release (derivedOnceOf). */
+function unstatedOnce(
+  cards: readonly Card[],
+  release: readonly (CardContent & { id: string })[],
+): CardSpot[] {
+  const of = release.length === 0 ? NO_RELEASE : release;
+  return derivedOnceOf(
+    UNSTATED,
+    cards,
+    of,
+    "",
+    () => Object.freeze(unstatedSides(cards, of)) as CardSpot[],
+  );
+}
+
 /**
  * A deck's health, from what the instance's check found (`report`, made
  * of its documents at least), its cards, and the cards of the release it
  * was copied from (`release`: none for a deck not copied; undefined when
- * that release could not be read).
+ * that release could not be read). What depends on the cards alone is
+ * worked out once for the decks that share them (deckText, unstatedOnce),
+ * and those lists are shared by their healths too: frozen, as cards are.
  */
 export function deckHealth<F extends MarkdownFinding>(
   deck: Deck,
@@ -436,13 +585,13 @@ export function deckHealth<F extends MarkdownFinding>(
   release: readonly (CardContent & { id: string })[] | undefined,
   text: DeckTextCheck<F>,
 ): DeckHealth<F> {
-  const markdown = cardMarkdownProblems(cards, text.check);
+  const found = deckText(cards, text);
   return {
     report: deckReport(report, deck),
-    unstated: release === undefined ? null : unstatedSides(cards, release),
-    duplicates: duplicateCardsOf(cards, text.plain),
-    markdown: markdown.problems,
-    markdownMore: markdown.more,
+    unstated: release === undefined ? null : unstatedOnce(cards, release),
+    duplicates: found.duplicates,
+    markdown: found.markdown,
+    markdownMore: found.markdownMore,
   };
 }
 

@@ -12,6 +12,7 @@ import {
 } from "@solid-memo/domain/instanceLayout";
 import {
   summarize,
+  unreadableDocument,
   withUnclaimed,
   type DocumentReport,
   type UnclaimedDeck,
@@ -27,6 +28,7 @@ import type {
   DocumentContext,
   ReadBudget,
   ReleaseDraftRepository,
+  SharedReads,
   StorageGateway,
 } from "./ports";
 import type { AnswerStore } from "./answerStore";
@@ -76,12 +78,24 @@ export interface InstanceCheckUseCases {
    * the cards that say the same; and what `text` (the markdown package's
    * plain text and check, which the caller passes in) finds in its text
    * written in Markdown. Writes nothing but the digest's receipts.
+   * What a check of the instance found of a document since it was last
+   * read afresh is reused (checkInstance, forgetDeckCheck), so the
+   * decks that share a document, or the catalog, check it once; and
+   * given one frozen `text` for them all, what the cards of a document
+   * they share hold is found once too (deckHealth).
    */
   checkDeck<F extends MarkdownFinding>(
     instanceUrl: string,
     deck: Deck,
     text: DeckTextCheck<F>,
   ): Promise<DeckHealth<F>>;
+  /**
+   * Have the deck's next check read its cards and reviews documents and
+   * the catalog afresh, not reuse what an earlier check found of them:
+   * as its health is opened or checked again, after the user may have
+   * changed them.
+   */
+  forgetDeckCheck(instanceUrl: string, deck: Deck): void;
 }
 
 /**
@@ -155,6 +169,34 @@ function canonicalDocumentOf(url: string): string | null {
 type ToCheck = { url: string; context: Exclude<DocumentContext, "library"> };
 
 /**
+ * What a check found of a document (sharedCheck): its report, or null
+ * for one still at the version the digest says conformed; the version
+ * it was read at (null: none known); and whether this read checked it
+ * (`fresh`), not a check made before.
+ */
+interface SharedCheck {
+  /** The address the document was read at, in the spelling of the check that read it. */
+  url: string;
+  report: DocumentReport | null;
+  version: string | null;
+  fresh: boolean;
+}
+
+/**
+ * What is kept of a document of the instance last checked (sharedCheck):
+ * what the last check of it found, the check of it under way, each with
+ * when it started (a tick of the instance checks' clock); its read
+ * (sharedReads), with when it started; and since when a check or read of
+ * it is to be reused (`since`, forgetDeckCheck).
+ */
+interface SharedEntry {
+  kept?: SharedCheck & { started: number };
+  check?: { started: number; found: Promise<SharedCheck> };
+  read?: { started: number; found: Promise<unknown> };
+  since: number;
+}
+
+/**
  * The documents to check, each once however many name it, in whatever
  * spelling of its address (canonicalDocumentOf): a catalog may name one
  * document for a thousand decks. `firsts` are the first to name each;
@@ -197,6 +239,36 @@ function onceEach(documents: readonly ToCheck[]): {
   };
 }
 
+/** The longest reason given for a document that could not be read, as the shape check gives one. */
+const MAX_REASON_LENGTH = 300;
+
+/**
+ * A deck's report with its cards document (`url`) as one that could not
+ * be read, for `error`, when the read that lists its cards failed: the
+ * deck's health shows that document as unreadable, in place of what its
+ * check found, rather than failing as a whole. A report that already
+ * says so is kept.
+ */
+function withCardsUnread(report: ValidationReport, url: string, error: unknown): ValidationReport {
+  const found = report.documents.find((document) => document.url === url);
+  if (found?.status === "unreadable") return report;
+  const reason = error instanceof Error ? error.message : String(error);
+  return withUnclaimed(
+    summarize(
+      report.instanceUrl,
+      [
+        ...report.documents.filter((document) => document !== found),
+        unreadableDocument(
+          url,
+          reason.length > MAX_REASON_LENGTH ? `${reason.slice(0, MAX_REASON_LENGTH)}…` : reason,
+        ),
+      ],
+      report.spellings,
+    ),
+    report.unclaimed ?? [],
+  );
+}
+
 /**
  * The checks of an instance against Solid Memo's shapes (docs/validation.md):
  * the quick one made when it is opened, which spares a document the digest
@@ -227,14 +299,135 @@ export function createInstanceCheckUseCases({
   webId: () => string | undefined;
   ruleset: string;
 }): InstanceCheckUseCases {
+  /** The instance checks' clock: it ticks as a check of a document starts, or what was found is forgotten. */
+  let clock = 0;
+  /**
+   * What is kept of each document of the instance last checked, by where
+   * it is and its address as a request sends it; and since when what was
+   * found of every document is to be reused (`since`, checkInstance).
+   */
+  let shared = { instanceUrl: "", since: 0, entries: new TextMap<SharedEntry>() };
+  /** What is kept of the instance's documents, made anew for another instance. */
+  function sharedOf(instanceUrl: string) {
+    if (shared.instanceUrl !== instanceUrl)
+      shared = { instanceUrl, since: 0, entries: new TextMap() };
+    return shared;
+  }
+  /** What is kept of one document of the instance, made when there is none. */
+  function entryOf(instanceUrl: string, { url, context }: ToCheck): SharedEntry {
+    const { entries } = sharedOf(instanceUrl);
+    const key = `${context} ${canonicalDocumentOf(url) ?? url}`;
+    let entry = entries.get(key);
+    if (entry === undefined) entries.set(key, (entry = { since: 0 }));
+    return entry;
+  }
+  /**
+   * The reads of the instance's documents its checks share (SharedReads):
+   * of the cards to map them, and to find where a document stands for a
+   * deck (DeckRepository.unclaimedDocuments, isUnclaimedAsRead). A
+   * catalog may name one document for a thousand decks, and each deck's
+   * badge on the Studio's Home checks its deck: the document is read
+   * once for them all, in whatever spelling of its address each names
+   * it, as it is checked once (sharedCheck), and read again when what was
+   * found of it is forgotten, as its check is. A read that fails is kept
+   * failed until then too, as a check that could not read the document
+   * keeps its report: each deck naming the document is told so, from that
+   * one read, and none reads it again for itself.
+   *
+   * Every read of it is made at its address as a request sends it
+   * (SharedReads), so what the first gives is resolved against that
+   * spelling, whichever deck asked: a deck finds its cards by their ids
+   * and their problems by the document compared in that form
+   * (cardSpotsOf), and one frozen list of a document's cards is mapped
+   * for them all.
+   */
+  function sharedReads(instanceUrl: string): SharedReads {
+    return <T>(url: string, read: () => Promise<T>): Promise<T> => {
+      const entry = entryOf(instanceUrl, { url, context: "pod" });
+      const since = Math.max(shared.since, entry.since);
+      const kept = entry.read;
+      if (kept !== undefined && kept.started > since) return kept.found as Promise<T>;
+      const started = ++clock;
+      const found = read();
+      entry.read = { started, found };
+      return found;
+    };
+  }
+  /**
+   * The check of a document of the instance, shared by every check that
+   * asks for it: each deck's badge on the Studio's Home, say, where a
+   * catalog may name one document, and the catalog itself, for a
+   * thousand decks. What a check started since what was found was last
+   * forgotten found is reused, and a check under way is joined, so a
+   * document is checked once for them all, whatever the server answers:
+   * with no version, one that cannot be sent, or a new one on every
+   * read. What was found is forgotten, and the document read again,
+   * when the instance's check is made (checkInstance: as the instance is
+   * opened, or its check read afresh), and of a deck's documents when
+   * its health is opened or checked again (forgetDeckCheck): a change
+   * since, another app's or the user's own, is then found. That read is
+   * on condition (validateDocumentSince) with the version it was checked
+   * at, or else the one the digest says conformed (`conformed`), and an
+   * unchanged document's report is reused. The reports are kept for one
+   * instance, the last checked.
+   *
+   * A check under way is joined within the budget of the check that
+   * started it: every check gives a budget of its own (OUTSIDE_READS_MS)
+   * as it starts.
+   */
+  function sharedCheck(
+    instanceUrl: string,
+    document: ToCheck,
+    conformed: string | undefined,
+    budget: ReadBudget | undefined,
+  ): Promise<SharedCheck> {
+    const { url, context } = document;
+    const entry = entryOf(instanceUrl, document);
+    const since = Math.max(shared.since, entry.since);
+    let found: Promise<SharedCheck>;
+    if (entry.check !== undefined && entry.check.started > since) found = entry.check.found;
+    else if (entry.kept !== undefined && entry.kept.started > since)
+      found = Promise.resolve({ ...entry.kept, fresh: false });
+    else {
+      const started = ++clock;
+      const kept = entry.kept;
+      const version = kept === undefined ? conformed : (kept.version ?? undefined);
+      found = shapeValidator
+        .validateDocumentSince(url, version, context, budget)
+        .then((read): SharedCheck => {
+          const result: SharedCheck = read.unchanged
+            ? kept === undefined
+              ? // Unchanged only on condition: on the version the digest says conformed.
+                { url, report: null, version: version!, fresh: false }
+              : { ...kept, fresh: false }
+            : { url, report: read.value, version: read.version, fresh: true };
+          // A check started earlier that ends later keeps the newer's.
+          if (entry.kept === undefined || entry.kept.started < started)
+            entry.kept = { ...result, started };
+          return result;
+        })
+        .finally(() => {
+          if (entry.check?.started === started) entry.check = undefined;
+        });
+      entry.check = { started, found };
+    }
+    // Under the address this check names it by, as onceEach reports another spelling.
+    return found.then((one) =>
+      one.report === null || one.url === url
+        ? { ...one, url }
+        : { ...one, url, report: { ...one.report, url } },
+    );
+  }
   async function checkInstance(instanceUrl: string): Promise<ValidationReport> {
+    // Made as the instance is opened, or its check read afresh: what was found of it before is read again.
+    sharedOf(instanceUrl).since = ++clock;
     const [decks, drafts, digest] = await Promise.all([
       deckRepository.listDecks(instanceUrl),
       releaseDraftRepository.documents(instanceUrl),
       digestStore.of(instanceUrl),
     ]);
     const budget = readBudget(OUTSIDE_READS_MS);
-    const unclaimed = await unclaimedDecksOf(instanceUrl, decks, budget);
+    const unclaimed = await unclaimedDecksOf(instanceUrl, decks, budget, sharedReads(instanceUrl));
     return withUnclaimed(
       await checkDocuments(
         instanceUrl,
@@ -282,16 +475,17 @@ export function createInstanceCheckUseCases({
    * folder, which a catalog may name on anyone's server, are read within
    * the check's `budget` (OUTSIDE_READS_MS): one not read by then counts
    * as unclaimed, so a server that answers slowly holds the check up no
-   * longer.
+   * longer. With `reads`, each is read as those reads share it.
    */
   async function unclaimedDecksOf(
     instanceUrl: string,
     decks: readonly Deck[],
     budget: ReadBudget,
+    reads?: SharedReads,
   ): Promise<UnclaimedDeck[]> {
     const outsidePodOf = outsidePodTest(instanceUrl);
     const found = await mapAtOnce(decks, async (deck) => {
-      const documents = await deckRepository.unclaimedDocuments(deck, budget);
+      const documents = await deckRepository.unclaimedDocuments(deck, budget, reads);
       return {
         deckUrl: deck.url,
         title: deck.title,
@@ -325,7 +519,8 @@ export function createInstanceCheckUseCases({
   /**
    * The check of these documents of the instance, each once however many
    * name it (onceEach), and not checked again while still at the version
-   * the digest says conformed. A receipt is
+   * the digest says conformed, nor again what a check of the instance made
+   * since it was last forgotten found (sharedCheck). A receipt is
    * kept only of one that is the instance's (DigestStore.isInstances).
    * A document that cannot be read is in the report as one
    * (ShapeValidator), so it holds back only what it is part of; so is one
@@ -340,28 +535,30 @@ export function createInstanceCheckUseCases({
   ): Promise<ValidationReport> {
     const { firsts, summary } = onceEach(urls);
     // A few at a time: the catalog says how many there are (MAX_CATALOG_LINKS of each kind at most).
-    const documents = await mapAtOnce(firsts, async ({ url, context }): Promise<DocumentReport> => {
+    const documents = await mapAtOnce(firsts, async (document): Promise<DocumentReport> => {
+      const { url } = document;
       const receipt = digest.receipts[url];
-      const since = await shapeValidator.validateDocumentSince(
-        url,
+      const found = await sharedCheck(
+        instanceUrl,
+        document,
         receipt?.conformedTo === ruleset ? receipt.version : undefined,
-        context,
         budgetFor(url, instanceUrl, budget),
       );
-      if (since.unchanged) return { url, status: "checked", subjects: [] };
+      if (found.report === null) return { url, status: "checked", subjects: [] };
       // A receipt only of a document that is the instance's: one an instance from another's pod names may be the user's own.
       if (
-        since.version !== null &&
-        summarize(instanceUrl, [since.value]).conforms &&
+        found.fresh &&
+        found.version !== null &&
+        summarize(instanceUrl, [found.report]).conforms &&
         (await digestStore.isInstances(instanceUrl, url))
       ) {
-        digestStore.remember(instanceUrl, noting(url, since.version, { conformedTo: ruleset }));
+        digestStore.remember(instanceUrl, noting(url, found.version, { conformedTo: ruleset }));
       }
-      return since.value;
+      return found.report;
     });
     return summary(
       instanceUrl,
-      await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget),
+      await withoutUnclaimedOnRead(instanceUrl, decks, documents, budget, sharedReads(instanceUrl)),
     );
   }
   /**
@@ -373,13 +570,15 @@ export function createInstanceCheckUseCases({
    * unchanged instance still downloads nothing. One outside the
    * instance's folder is read within the check's `budget`, and its report
    * kept when it is not. Each report in its place, null for one left out;
-   * given each document once (onceEach), each is read once.
+   * given each document once (onceEach), each is read once, and with
+   * `reads` once for the checks that share them too.
    */
   async function withoutUnclaimedOnRead(
     instanceUrl: string,
     decks: readonly Deck[],
     documents: readonly DocumentReport[],
     budget: ReadBudget,
+    reads?: SharedReads,
   ): Promise<(DocumentReport | null)[]> {
     const decksOf = decksByDocument(decks);
     const left = await mapAtOnce(documents, async (document) => {
@@ -391,6 +590,7 @@ export function createInstanceCheckUseCases({
           naming,
           document.url,
           budgetFor(document.url, instanceUrl, budget),
+          reads,
         ))
       );
     });
@@ -447,12 +647,21 @@ export function createInstanceCheckUseCases({
         throw new AppError("claimOutsidePod", { deck: deck.title, url: outside });
       await deckRepository.claimDocuments(deck);
     },
+    forgetDeckCheck(instanceUrl, deck) {
+      if (shared.instanceUrl !== instanceUrl) return;
+      for (const url of [catalogUrlOf(instanceUrl), deck.cardsDocumentUrl, deck.reviewsDocumentUrl])
+        entryOf(instanceUrl, { url, context: "pod" }).since = ++clock;
+    },
     async checkDeck(instanceUrl, deck, text) {
+      // Nothing kept is looked up before a check of the instance started in the same turn forgets it: one
+      // reading of the instance's check afresh starts it and the decks' at once, in whatever order.
+      await Promise.resolve();
       const budget = readBudget(OUTSIDE_READS_MS);
-      const [report, cards, release] = await Promise.all([
+      const reads = sharedReads(instanceUrl);
+      const [report, listed, release] = await Promise.all([
         Promise.all([
           digestStore.of(instanceUrl),
-          unclaimedDecksOf(instanceUrl, [deck], budget),
+          unclaimedDecksOf(instanceUrl, [deck], budget, reads),
         ]).then(async ([digest, unclaimed]) => {
           const isUnclaimed = unclaimedTest(unclaimed);
           const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
@@ -472,8 +681,15 @@ export function createInstanceCheckUseCases({
             unclaimed,
           );
         }),
-        // Read as the deck's page reads it, within the read's own deadlines: it holds back this deck's health alone.
-        deckRepository.listCards(deck),
+        // Read as the deck's page reads it, within the read's own deadlines: a read that fails shows the
+        // cards document as unreadable in this deck's health (withCardsUnread), and holds back nothing else.
+        deckRepository.listCards(deck, { reads }).then(
+          (cards) => ({ cards, unread: undefined }),
+          (error: unknown) => {
+            if (error instanceof AppError && error.code === "deckGone") throw error;
+            return { cards: [], unread: error };
+          },
+        ),
         // A release that cannot be read leaves the sides to settle unknown, not the rest of the check.
         deck.sourceUrl === undefined
           ? []
@@ -482,7 +698,15 @@ export function createInstanceCheckUseCases({
               () => undefined,
             ),
       ]);
-      return deckHealth(deck, report, cards, release, text);
+      return deckHealth(
+        deck,
+        listed.unread === undefined
+          ? report
+          : withCardsUnread(report, deck.cardsDocumentUrl, listed.unread),
+        listed.cards,
+        release,
+        text,
+      );
     },
   };
 }

@@ -4,12 +4,13 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import type { ReadBudget, ReleaseDraftRepository } from "./ports";
+import type { ReadBudget, ReleaseDraftRepository, SharedReads } from "./ports";
 import { createUseCases } from "./useCases";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";
 import { deckReport } from "@solid-memo/domain/deckHealth";
 import { deckSetAside, unreadableDocument } from "@solid-memo/domain/validation";
+import { AppError } from "@solid-memo/domain/appError";
 import { instance, deck, libraryContent, makeDeps } from "./testing/fakePorts";
 import { current, card2, setup } from "./testing/digestWorld";
 
@@ -75,6 +76,7 @@ describe("instance checks", () => {
         [deck],
         deck.cardsDocumentUrl,
         undefined,
+        undefined,
       );
     });
 
@@ -109,6 +111,7 @@ describe("instance checks", () => {
         [twice, unusable],
         deck.cardsDocumentUrl.replace("https://", "HTTPS://"),
         undefined,
+        expect.any(Function),
       );
     });
 
@@ -156,6 +159,7 @@ describe("instance checks", () => {
       expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledWith(
         decks,
         deck.cardsDocumentUrl,
+        undefined,
         undefined,
       );
       // The catalog, the preferences, the palettes, the meta document, the cards and the reviews: each once.
@@ -391,13 +395,16 @@ describe("instance checks", () => {
       for (const run of [
         () => useCases.checkInstance(instance.url),
         () => useCases.validateInstance(instance.url),
-        async () =>
-          (
+        async () => {
+          // As the deck's health is opened: not what the instance's check found.
+          useCases.forgetDeckCheck(instance.url, outside);
+          return (
             await useCases.checkDeck(instance.url, outside, {
               plain: (value) => value,
               check: () => [],
             })
-          ).report,
+          ).report;
+        },
       ]) {
         budgets.length = 0;
         const check = run();
@@ -421,6 +428,7 @@ describe("instance checks", () => {
         [outside],
         outside.cardsDocumentUrl,
         expect.objectContaining({ spend: expect.any(Function) }),
+        expect.any(Function),
       );
     } finally {
       vi.useRealTimers();
@@ -469,13 +477,16 @@ describe("instance checks", () => {
       for (const run of [
         () => useCases.checkInstance(instance.url),
         () => useCases.validateInstance(instance.url),
-        async () =>
-          (
+        async () => {
+          // As the deck's health is opened: not what the instance's check found.
+          useCases.forgetDeckCheck(instance.url, outside);
+          return (
             await useCases.checkDeck(instance.url, outside, {
               plain: (value) => value,
               check: () => [],
             })
-          ).report,
+          ).report;
+        },
       ]) {
         const check = run();
         await vi.advanceTimersByTimeAsync(10 * SLOW_MS);
@@ -757,6 +768,485 @@ describe("instance checks", () => {
       const health = await useCases.checkDeck(instance.url, copy, text);
       expect(health.unstated).toBeNull();
       expect(health.duplicates).toHaveLength(1);
+    });
+  });
+
+  describe("decks that share a document (GHSA-pgw5-wjgx-h9vv)", () => {
+    const text = { plain: (value: string) => value, check: () => [] };
+    const catalog = `${instance.url}catalog.ttl`;
+    const failing = (url: string, message = "No.") => ({
+      url,
+      status: "checked" as const,
+      subjects: [
+        {
+          url: `${url}#card-1`,
+          status: "checked" as const,
+          shape: "card" as const,
+          version: 1,
+          violations: [
+            { severity: "violation" as const, message: { en: message }, constraint: "MinCount" },
+          ],
+        },
+      ],
+    });
+    const decks = Array.from({ length: 5 }, (_, index) => ({
+      ...deck,
+      id: `deck-${index}`,
+      url: `${catalog}#deck-${index}`,
+    }));
+    /**
+     * A pod whose documents are at a version each, answering unchanged on
+     * that version; `checked` counts the checks made of each. A server may
+     * give that version as it is (`sent`), give none, one too long to send
+     * again or not quoted (so a read is never on condition), or a new one
+     * on every read.
+     */
+    function sharing(sent: "as is" | "none" | "long" | "unquoted" | "new each read" = "as is") {
+      const deps = makeDeps();
+      const versions = new Map<string, number>();
+      const checked = new Map<string, number>();
+      let reads = 0;
+      const tagOf = (url: string): string | null => {
+        const at = versions.get(url) ?? 1;
+        if (sent === "none") return null;
+        if (sent === "long") return `"${"v".repeat(600)}${at}"`;
+        if (sent === "unquoted") return `v${at}`;
+        if (sent === "new each read") return `"v${at}-${++reads}"`;
+        return `"v${at}"`;
+      };
+      vi.mocked(deps.shapeValidator.validateDocumentSince).mockImplementation(
+        async (url, version) => {
+          const now = `v${versions.get(url) ?? 1}`;
+          const tag = tagOf(url);
+          // As readSince: only a version that can be sent is asked on condition.
+          const sendable =
+            version !== undefined && version.length <= 512 && version.startsWith('"');
+          if (sendable && version === tag) return { unchanged: true };
+          checked.set(url, (checked.get(url) ?? 0) + 1);
+          return {
+            unchanged: false,
+            value:
+              url === deck.cardsDocumentUrl
+                ? failing(url, now)
+                : { url, status: "checked" as const, subjects: [] },
+            version: tag,
+          };
+        },
+      );
+      return { deps, useCases: createUseCases(deps), versions, checked };
+    }
+
+    it("checks a shared document and the catalog once for every deck's check, at once or one after another", async () => {
+      const { deps, useCases, checked } = sharing();
+      const healths = await Promise.all(
+        decks.map((one) => useCases.checkDeck(instance.url, one, text)),
+      );
+      expect(vi.mocked(deps.shapeValidator.validateDocumentSince)).toHaveBeenCalledTimes(3);
+      for (const one of decks) await useCases.checkDeck(instance.url, one, text);
+      expect(Object.fromEntries(checked)).toEqual({
+        [catalog]: 1,
+        [deck.cardsDocumentUrl]: 1,
+        [deck.reviewsDocumentUrl]: 1,
+      });
+      for (const health of healths) {
+        expect(health.report.violationCount).toBe(1);
+        expect(health.report.documents.map(({ url }) => url)).toContain(deck.cardsDocumentUrl);
+      }
+    });
+
+    it("reuses what the instance's check found of a document", async () => {
+      const { useCases, checked } = sharing();
+      await useCases.checkInstance(instance.url);
+      const health = await useCases.checkDeck(instance.url, decks[0]!, text);
+      expect(health.report.violationCount).toBe(1);
+      expect(checked.get(deck.cardsDocumentUrl)).toBe(1);
+      expect(checked.get(catalog)).toBe(1);
+    });
+
+    it.each(["none", "long", "unquoted", "new each read"] as const)(
+      "checks them once too when the server gives a version that is %s",
+      async (sent) => {
+        const { useCases, checked } = sharing(sent);
+        for (const one of decks) await useCases.checkDeck(instance.url, one, text);
+        expect(Object.fromEntries(checked)).toEqual({
+          [catalog]: 1,
+          [deck.cardsDocumentUrl]: 1,
+          [deck.reviewsDocumentUrl]: 1,
+        });
+      },
+    );
+
+    it("reads a deck's documents and the catalog afresh once told to, on condition", async () => {
+      const { deps, useCases, checked } = sharing();
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      useCases.forgetDeckCheck(instance.url, decks[1]!);
+      await useCases.checkDeck(instance.url, decks[1]!, text);
+      // Read again, unchanged: nothing checked again.
+      expect(vi.mocked(deps.shapeValidator.validateDocumentSince)).toHaveBeenCalledTimes(6);
+      expect(vi.mocked(deps.shapeValidator.validateDocumentSince)).toHaveBeenLastCalledWith(
+        expect.any(String),
+        '"v1"',
+        "pod",
+        undefined,
+      );
+      expect(checked.get(deck.cardsDocumentUrl)).toBe(1);
+      // Another instance's are not forgotten: there are none kept.
+      useCases.forgetDeckCheck("https://bob.example/memo/", decks[1]!);
+      await useCases.checkDeck(instance.url, decks[2]!, text);
+      expect(vi.mocked(deps.shapeValidator.validateDocumentSince)).toHaveBeenCalledTimes(6);
+    });
+
+    it.each(["as is", "none", "new each read"] as const)(
+      "checks a document again once it changes and it is read afresh, and finds what is new in it (version %s)",
+      async (sent) => {
+        const { useCases, versions, checked } = sharing(sent);
+        await useCases.checkDeck(instance.url, decks[0]!, text);
+        versions.set(deck.cardsDocumentUrl, 2);
+        useCases.forgetDeckCheck(instance.url, decks[1]!);
+        const health = await useCases.checkDeck(instance.url, decks[1]!, text);
+        expect(checked.get(deck.cardsDocumentUrl)).toBe(2);
+        expect(
+          health.report.documents.find(({ url }) => url === deck.cardsDocumentUrl)!.subjects,
+        ).toMatchObject([{ violations: [{ message: { en: "v2" } }] }]);
+        // The decks after it reuse the new check.
+        const next = await useCases.checkDeck(instance.url, decks[2]!, text);
+        expect(checked.get(deck.cardsDocumentUrl)).toBe(2);
+        expect(next.report.documents.find(({ url }) => url === deck.cardsDocumentUrl)).toBe(
+          health.report.documents.find(({ url }) => url === deck.cardsDocumentUrl),
+        );
+      },
+    );
+
+    it("reads every document afresh as the instance's check is made, and the decks' checks then reuse it", async () => {
+      const { useCases, versions, checked } = sharing("none");
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      versions.set(deck.cardsDocumentUrl, 2);
+      const report = await useCases.checkInstance(instance.url);
+      expect(checked.get(deck.cardsDocumentUrl)).toBe(2);
+      expect(checked.get(catalog)).toBe(2);
+      expect(report.violationCount).toBe(1);
+      for (const one of decks) await useCases.checkDeck(instance.url, one, text);
+      expect(checked.get(deck.cardsDocumentUrl)).toBe(2);
+      expect(checked.get(catalog)).toBe(2);
+    });
+
+    it("keeps the newer check of a document when an older one ends after it", async () => {
+      const { deps, useCases, versions, checked } = sharing();
+      const read = vi.mocked(deps.shapeValidator.validateDocumentSince).getMockImplementation()!;
+      let release: () => void = () => undefined;
+      const held = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      vi.mocked(deps.shapeValidator.validateDocumentSince).mockImplementationOnce(
+        async (...args) => {
+          await held;
+          return read(...args);
+        },
+      );
+      const first = useCases.checkDeck(instance.url, decks[0]!, text);
+      await vi.waitFor(() =>
+        expect(vi.mocked(deps.shapeValidator.validateDocumentSince)).toHaveBeenCalled(),
+      );
+      versions.set(catalog, 2);
+      useCases.forgetDeckCheck(instance.url, decks[1]!);
+      await useCases.checkDeck(instance.url, decks[1]!, text);
+      release();
+      await first;
+      const before = checked.get(catalog);
+      await useCases.checkDeck(instance.url, decks[2]!, text);
+      expect(checked.get(catalog)).toBe(before);
+    });
+
+    it("reports a document shared under another spelling at the address the deck names", async () => {
+      const { useCases, checked } = sharing();
+      const spelled = deck.cardsDocumentUrl.replace("alice.example", "ALICE.example");
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      const health = await useCases.checkDeck(
+        instance.url,
+        { ...decks[1]!, cardsDocumentUrl: spelled },
+        text,
+      );
+      expect(checked.get(deck.cardsDocumentUrl)).toBe(1);
+      expect(checked.has(spelled)).toBe(false);
+      expect(health.report.documents.map(({ url }) => url)).toContain(spelled);
+      expect(health.report.violationCount).toBe(1);
+    });
+
+    /**
+     * The checks of `sharing`, whose deck documents are read as a pod
+     * reads them: each read through the reads a check shares, if given,
+     * counted in `fetched`. Every document is unclaimed for none of the
+     * decks, and the cards document gives the version it was read at.
+     */
+    function sharingReads(sent: Parameters<typeof sharing>[0] = "as is") {
+      const shared = sharing(sent);
+      const { deps, versions } = shared;
+      const fetched = new Map<string, number>();
+      const listed: number[] = [];
+      const readOf = (url: string, reads: SharedReads | undefined): Promise<number> => {
+        const read = async () => {
+          fetched.set(url, (fetched.get(url) ?? 0) + 1);
+          return versions.get(url) ?? 1;
+        };
+        return reads === undefined ? read() : reads(url, read);
+      };
+      deps.deckRepository.listCards = vi.fn(async (one, options) => {
+        listed.push(await readOf(one.cardsDocumentUrl, options?.reads));
+        return [];
+      });
+      deps.deckRepository.unclaimedDocuments = vi.fn(async (one, _budget, reads) => {
+        await Promise.all(
+          [one.cardsDocumentUrl, one.reviewsDocumentUrl].map((url) => readOf(url, reads)),
+        );
+        return [];
+      });
+      deps.deckRepository.isUnclaimedAsRead = vi.fn(async (_decks, url, _budget, reads) => {
+        await readOf(url, reads);
+        return false;
+      });
+      return { ...shared, fetched, listed };
+    }
+
+    it("reads a shared document once for every deck's check, to list its cards and find where it stands", async () => {
+      const { deps, useCases, fetched } = sharingReads("none");
+      await Promise.all(decks.map((one) => useCases.checkDeck(instance.url, one, text)));
+      for (const one of decks) await useCases.checkDeck(instance.url, one, text);
+      // Each deck still asks of its own: what it is told depends on the deck.
+      expect(deps.deckRepository.isUnclaimedAsRead).toHaveBeenCalledTimes(decks.length * 2);
+      expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(decks.length * 2);
+      expect(deps.deckRepository.unclaimedDocuments).toHaveBeenCalledTimes(decks.length * 2);
+      expect(Object.fromEntries(fetched)).toEqual({
+        [deck.cardsDocumentUrl]: 1,
+        [deck.reviewsDocumentUrl]: 1,
+      });
+    });
+
+    it("reads the text of a shared cards document once for every deck's check, with one text check", async () => {
+      const { deps, useCases } = sharingReads("none");
+      const cards = Array.from(
+        { length: 20 },
+        (_, index): Card => ({
+          ...card2,
+          id: `card-${index}`,
+          url: `${deck.cardsDocumentUrl}#card-${index}`,
+          front: { en: `<b>${index}</b>` },
+          back: { en: "x" },
+          textFormat: SM.markdown,
+        }),
+      );
+      // As the repository maps a read: once, to one frozen array, for every deck naming the document.
+      const listCards = vi.mocked(deps.deckRepository.listCards).getMockImplementation()!;
+      let mapped: readonly Card[] | undefined;
+      deps.deckRepository.listCards = vi.fn(async (one, options) => {
+        await listCards(one, options);
+        return (mapped ??= Object.freeze(cards)) as Card[];
+      });
+      const counted = Object.freeze({
+        plain: vi.fn((value: string) => value),
+        check: vi.fn((value: string) => (value.includes("<") ? [{ code: "html" }] : [])),
+      });
+      const healths = await Promise.all(
+        decks.map((one) => useCases.checkDeck(instance.url, one, counted)),
+      );
+      // Each text once: the work grows with the document, not with the decks naming it too.
+      expect(counted.check).toHaveBeenCalledTimes(cards.length * 2);
+      expect(counted.plain).toHaveBeenCalledTimes(cards.length * 2);
+      for (const health of healths) expect(health.markdown).toHaveLength(cards.length);
+    });
+
+    it("reads a shared document, and its text, once for decks naming it in as many spellings", async () => {
+      const { deps, useCases, fetched, checked } = sharingReads("none");
+      const spelled = decks.map((one, index) => ({
+        ...one,
+        cardsDocumentUrl: deck.cardsDocumentUrl.replace(
+          "alice.example",
+          ["alice.example", "ALICE.example", "Alice.example", "aLice.example:443", "alice.EXAMPLE"][
+            index
+          ]!,
+        ),
+      }));
+      const cards = Array.from(
+        { length: 20 },
+        (_, index): Card => ({
+          ...card2,
+          id: `card-${index}`,
+          url: `${deck.cardsDocumentUrl}#card-${index}`,
+          front: { en: `<b>${index}</b>` },
+          back: { en: "x" },
+          textFormat: SM.markdown,
+        }),
+      );
+      // As the repository maps a read: one frozen array for each document read, whatever deck it is for.
+      const mapped = new Map<number, readonly Card[]>();
+      deps.deckRepository.listCards = vi.fn(async (one, options) => {
+        const read = await options!.reads!(one.cardsDocumentUrl, async () => {
+          fetched.set(one.cardsDocumentUrl, (fetched.get(one.cardsDocumentUrl) ?? 0) + 1);
+          return fetched.size;
+        });
+        if (!mapped.has(read)) mapped.set(read, Object.freeze([...cards]));
+        return mapped.get(read) as Card[];
+      });
+      const counted = Object.freeze({
+        plain: vi.fn((value: string) => value),
+        check: vi.fn((value: string) => (value.includes("<") ? [{ code: "html" }] : [])),
+      });
+      const healths = await Promise.all(
+        spelled.map((one) => useCases.checkDeck(instance.url, one, counted)),
+      );
+      const cardReads = [...fetched].filter(([url]) => url.includes("/decks/"));
+      expect(cardReads.reduce((sum, [, count]) => sum + count, 0)).toBe(1);
+      expect([...checked].filter(([url]) => url.includes("/decks/"))).toHaveLength(1);
+      expect(counted.check).toHaveBeenCalledTimes(cards.length * 2);
+      for (const [index, health] of healths.entries()) {
+        expect(health.markdown).toHaveLength(cards.length);
+        expect(health.report.documents.map(({ url }) => url)).toContain(
+          spelled[index]!.cardsDocumentUrl,
+        );
+      }
+    });
+
+    it("reads a deck's documents again once told to, and as the instance's check is made", async () => {
+      const { useCases, versions, fetched, listed } = sharingReads("none");
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      versions.set(deck.cardsDocumentUrl, 2);
+      useCases.forgetDeckCheck(instance.url, decks[1]!);
+      await useCases.checkDeck(instance.url, decks[1]!, text);
+      expect(fetched.get(deck.cardsDocumentUrl)).toBe(2);
+      expect(listed).toEqual([1, 2]);
+      await useCases.checkInstance(instance.url);
+      expect(fetched.get(deck.cardsDocumentUrl)).toBe(3);
+      await useCases.checkDeck(instance.url, decks[2]!, text);
+      expect(fetched.get(deck.cardsDocumentUrl)).toBe(3);
+    });
+
+    it("reads nothing kept before an instance's check started in the same turn, whichever starts first", async () => {
+      const { useCases, versions, listed } = sharingReads("none");
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      versions.set(deck.cardsDocumentUrl, 2);
+      await Promise.all([
+        useCases.checkDeck(instance.url, decks[1]!, text),
+        useCases.checkInstance(instance.url),
+      ]);
+      expect(listed).toEqual([1, 2]);
+    });
+
+    it("reads a shared document whose read fails once for every deck's check, until told to read it again", async () => {
+      const { deps, useCases } = sharingReads();
+      // Read only to list the cards.
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => []);
+      deps.deckRepository.isUnclaimedAsRead = vi.fn(async () => false);
+      let failed = 0;
+      deps.deckRepository.listCards = vi.fn((one, options) =>
+        options!.reads!(one.cardsDocumentUrl, async () => {
+          failed++;
+          throw new Error("Not Turtle.");
+        }),
+      );
+      const healths = await Promise.all(
+        decks.map((one) => useCases.checkDeck(instance.url, one, text)),
+      );
+      for (const one of decks) await useCases.checkDeck(instance.url, one, text);
+      expect(failed).toBe(1);
+      for (const health of healths) {
+        expect(health.report.documents).toContainEqual(
+          unreadableDocument(deck.cardsDocumentUrl, "Not Turtle."),
+        );
+        expect(health.report.violationCount).toBe(1);
+      }
+      useCases.forgetDeckCheck(instance.url, decks[0]!);
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      expect(failed).toBe(2);
+      await useCases.checkInstance(instance.url);
+      await useCases.checkDeck(instance.url, decks[1]!, text);
+      expect(failed).toBe(3);
+    });
+
+    it.each([
+      ["a reason too long", new Error("x".repeat(400)), `${"x".repeat(300)}…`],
+      ["what is not an error", "No.", "No."],
+    ])("gives %s as the reason a deck's cards could not be read", async (_, error, reason) => {
+      const { deps, useCases } = sharingReads();
+      deps.deckRepository.listCards = vi.fn(async () => {
+        throw error;
+      });
+      const health = await useCases.checkDeck(instance.url, decks[0]!, text);
+      expect(health.report.documents).toContainEqual(
+        unreadableDocument(deck.cardsDocumentUrl, reason),
+      );
+    });
+
+    it("keeps what the check found of a deck's cards document that it could not read either", async () => {
+      const { deps, useCases } = sharingReads();
+      const unread = unreadableDocument(deck.cardsDocumentUrl, "403 Forbidden");
+      vi.mocked(deps.shapeValidator.validateDocumentSince).mockImplementation(async (url) => ({
+        unchanged: false,
+        value: url === deck.cardsDocumentUrl ? unread : { url, status: "checked", subjects: [] },
+        version: null,
+      }));
+      deps.deckRepository.listCards = vi.fn(async () => {
+        throw new Error("No.");
+      });
+      const health = await useCases.checkDeck(instance.url, decks[0]!, text);
+      expect(health.report.documents).toContainEqual(unread);
+      expect(health.report.violationCount).toBe(1);
+    });
+
+    it("shows a deck's cards document it could not read as unreadable, unclaimed or not", async () => {
+      const { deps, useCases } = sharingReads();
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => [deck.cardsDocumentUrl]);
+      deps.deckRepository.listCards = vi.fn(async () => {
+        throw new Error("No.");
+      });
+      const health = await useCases.checkDeck(instance.url, decks[0]!, text);
+      expect(health.report.documents).toContainEqual(
+        unreadableDocument(deck.cardsDocumentUrl, "No."),
+      );
+      expect(health.report.unclaimed?.map(({ documents }) => documents)).toEqual([
+        [deck.cardsDocumentUrl],
+      ]);
+    });
+
+    it("still fails the check of a deck that cannot be used", async () => {
+      const { deps, useCases } = sharingReads();
+      deps.deckRepository.listCards = vi.fn(async () => {
+        throw new AppError("deckGone", { deck: "Gone" });
+      });
+      await expect(useCases.checkDeck(instance.url, decks[0]!, text)).rejects.toThrow(AppError);
+    });
+
+    it("keeps a newer read of a document when an older one fails after it", async () => {
+      const { deps, useCases, fetched } = sharingReads();
+      // Read only to list the cards.
+      deps.deckRepository.unclaimedDocuments = vi.fn(async () => []);
+      deps.deckRepository.isUnclaimedAsRead = vi.fn(async () => false);
+      let fail: () => void = () => undefined;
+      vi.mocked(deps.deckRepository.listCards).mockImplementationOnce((_one, options) =>
+        options!.reads!(
+          deck.cardsDocumentUrl,
+          () =>
+            new Promise<never>((_resolve, reject) => {
+              fail = () => reject(new Error("No."));
+            }),
+        ),
+      );
+      const first = useCases.checkDeck(instance.url, decks[0]!, text);
+      await vi.waitFor(() => expect(deps.deckRepository.listCards).toHaveBeenCalled());
+      useCases.forgetDeckCheck(instance.url, decks[1]!);
+      await useCases.checkDeck(instance.url, decks[1]!, text);
+      fail();
+      expect((await first).report.documents).toContainEqual(
+        unreadableDocument(deck.cardsDocumentUrl, "No."),
+      );
+      await useCases.checkDeck(instance.url, decks[2]!, text);
+      expect(fetched.get(deck.cardsDocumentUrl)).toBe(1);
+    });
+
+    it("keeps what it found for the instance last checked only", async () => {
+      const { useCases, checked } = sharing();
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      await useCases.checkDeck("https://bob.example/memo/", decks[0]!, text);
+      await useCases.checkDeck(instance.url, decks[0]!, text);
+      expect(checked.get(deck.cardsDocumentUrl)).toBe(3);
     });
   });
 });

@@ -344,8 +344,9 @@ export interface DeckRepository {
    * into a place they may not be the user's to share. The array may be
    * frozen and shared with the other decks that name the cards document
    * (domain/frozen.ts), and its cards with it: never changed in place.
+   * With `reads`, the cards document is read as those reads share it.
    */
-  listCards(deck: Deck, options?: { asNoOne?: boolean }): Promise<Card[]>;
+  listCards(deck: Deck, options?: { asNoOne?: boolean; reads?: SharedReads }): Promise<Card[]>;
   /**
    * The deck's cards unless its cards document is still at `version`
    * (undefined: read them), read as listCards reads them, `asNoOne` too.
@@ -461,18 +462,25 @@ export interface DeckRepository {
    * written to or deleted, until the user claims them. Writes nothing.
    * One outside the instance's folder, on anyone's server, is read within
    * `budget` if given: once it is spent, one not read by then counts as
-   * unreadable, so unclaimed.
+   * unreadable, so unclaimed. With `reads`, each is read as those reads
+   * share it.
    */
-  unclaimedDocuments(deck: Deck, budget?: ReadBudget): Promise<string[]>;
+  unclaimedDocuments(deck: Deck, budget?: ReadBudget, reads?: SharedReads): Promise<string[]>;
   /**
    * Whether the document, read now, is unclaimed for every one of the
    * decks that name it: unlike unclaimedDocuments, it says so of one in
    * the instance's own folder too, a release or another deck's document
    * there, which the check then leaves out. One that cannot be read is
    * not, so that the check keeps what it found; nor is one not read
-   * before `budget`, if given, is spent. Writes nothing.
+   * before `budget`, if given, is spent. With `reads`, it is read as
+   * those reads share it. Writes nothing.
    */
-  isUnclaimedAsRead(decks: readonly Deck[], url: string, budget?: ReadBudget): Promise<boolean>;
+  isUnclaimedAsRead(
+    decks: readonly Deck[],
+    url: string,
+    budget?: ReadBudget,
+    reads?: SharedReads,
+  ): Promise<boolean>;
   /**
    * Claim the deck's unclaimed documents, as the user confirmed: each is
    * marked as the deck's, in one write made only while it is as read;
@@ -1109,6 +1117,20 @@ export type DocumentContext = "pod" | "draft" | "library";
 export interface ReadBudget {
   spend<T>(otherwise: T, read: () => Promise<T>): Promise<T>;
 }
+
+/**
+ * The reads of documents that data checks share (instanceChecks.ts
+ * sharedReads): `read` of the document at `url` is made once, and what
+ * it gives is given to every check that asks for it again, by any
+ * spelling of its address a request sends the same way, until the
+ * document is to be read afresh. A read that fails is kept failed until
+ * then too, so the checks that ask for it again are told so without
+ * reading it again. Every read of one document must give the same: the
+ * document as the user reads it, read at its address as a request sends
+ * it (canonicalUrlOf), so that what is read is resolved against one
+ * spelling, whichever check asked first.
+ */
+export type SharedReads = <T>(url: string, read: () => Promise<T>) => Promise<T>;
 
 export interface ShapeValidator {
   /**
