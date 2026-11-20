@@ -750,11 +750,14 @@ since the job's output is pushed with the key:
   and not its system libraries, which come from Ubuntu's signed mirror
   (the Chromium action's `cache: false`). Any job on `main` can write
   `main`'s cache entries, so a file restored from them could carry code
-  from the least trusted of those jobs into this one. The release
-  workflow's `docs` job restores nothing either, as it attests what it
-  renders. It installs Chromium and its libraries with its own step,
-  not the Chromium action: that action comes from the tag's checkout,
-  and an older tag's copy restores them from the cache or downloads
+  from the least trusted of those jobs into this one. The workflow sets
+  `cache-mode: none`, so no job of it can read or write the cache at
+  all: `docs-render` runs a tag's packages in a run on `main`, and
+  could otherwise write `main`'s entries for another job to restore.
+  The release workflow's `docs-render` job restores nothing either, as
+  what it renders is attested. It installs Chromium and its libraries with its
+  own step, not the Chromium action: that action comes from the tag's
+  checkout, and an older tag's copy restores them from the cache or downloads
   the shell unchecked. The step checks the shell against the same
   SHA-256, so it fails for a tag whose Playwright wants another build,
   and takes the libraries from Ubuntu's signed mirror
@@ -885,22 +888,51 @@ canceled run is handled by what it left behind, as in the cases below.
   Release run is running or waiting. That run's concurrency group is
   its tag's, so it doesn't wait for a Release run. It marks the
   version latest when it's the newest tag, and a release made while it
-  runs would leave that wrong. The `docs` job reads the tag as
-  `refs/tags/vX.Y.Z` only, never as a bare name, which a branch of the
-  same name would win. It fails unless the tag names that version's
-  release commit on `main`, as the deploy checks
-  (`npm run release:commit`). When the tag has no GitHub release, it
-  makes one as a draft, "Solid Memo X.Y.Z", with the changelog entry
-  that commit added as its notes, as the `publish` job would have. It
-  then checks out that commit by its hash, renders the docs from it,
-  draws them, attests the archive, attaches it with the run's token,
-  and publishes the release if it's still a draft, without the deploy
-  key. It keeps an attested archive already on the release, and renders
-  and replaces one that isn't. For a draft, the maintainer then runs
-  the deploy by hand (Actions › Deploy to GitHub Pages › Run workflow,
-  from `main`). The archive is never uploaded by hand: only this
-  workflow can attest it as made on `main`
-  ([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
+  runs would leave that wrong. The run is three jobs, none with the
+  deploy key, split as the release's jobs are, so no job that can
+  write the repository or attest loads a package:
+  - **`docs-release`** runs `main`'s own scripts and installs nothing.
+    It reads the tag as `refs/tags/vX.Y.Z` only, never as a bare name,
+    which a branch of the same name would win. It fails unless the tag
+    names that version's release commit on `main`, as the deploy checks
+    (`npm run release:commit`). When the tag has no GitHub release, it
+    makes one as a draft, "Solid Memo X.Y.Z", with the changelog entry
+    that commit added as its notes, as the `publish` job would have.
+    An archive already on the release that's attested is kept. One
+    that isn't attested is rendered again and replaced.
+  - **`docs-render`** checks out that commit by its hash, installs its
+    packages, and renders and draws the docs from it, with a token that
+    can only read and nothing to attest with. It passes the archive and
+    its SHA-256 on as an artifact of the run.
+  - **`docs-publish`** holds the token that can write and attest. It
+    checks out nothing and loads no package. It takes the archive only
+    as one regular file of the version's name, with the SHA-256
+    `docs-render` gave. gzip must read it, and tar must list at least
+    one entry, each a file or folder under `docs/` by a relative path,
+    with no `.` or `..` part, no escaped name and no link. Tar lists
+    past an end of archive too, so nothing hides behind one. It never
+    unpacks or runs it. The check catches a broken render, not a
+    hostile one: the archive is only as trusted as `docs-render`, as
+    the prepare job's is in a release, whose publish job attaches it
+    unchecked. It attests
+    the archive, attaches it with the run's token, and publishes the
+    release if it's still a draft. When `docs-render` fails, it
+    attaches nothing and publishes nothing, and the maintainer runs the
+    workflow again once the cause is fixed.
+
+  For a draft, the maintainer then runs the deploy by hand (Actions ›
+  Deploy to GitHub Pages › Run workflow, from `main`). The archive is
+  never uploaded by hand: only this workflow can attest it as made on
+  `main` ([deployment.md](deployment.md#a-releases-docs-as-an-archive)).
+
+  `ci.yml`'s `site` job also installs packages and attests what it
+  builds, yet it stays one job, as it isn't the same case. It can't
+  write the repository, and it builds only the commit its own run
+  checks out, on `main` or in the merge queue. Its attestation is
+  `ci.yml`'s, which the deploy accepts only for the site of the
+  commit it releases or that commit's parent. The docs run held a
+  token that could write, and loaded the packages of a tag that may
+  be older than `main` while it could attest as the release workflow.
 
 A tag is never moved or deleted once pushed, even one whose release
 went wrong: Zenodo and anyone who fetched it may already hold it.

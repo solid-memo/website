@@ -26,7 +26,7 @@
  * tag, or every release stops (a tag's push failed). A commit that is
  * only titled as one is passed over, with a notice.
  *
- * `tag`, in deploy.yml and in release.yml's publish and docs jobs: the
+ * `tag`, in deploy.yml and in release.yml's publish and docs-release jobs: the
  * commit a version's tag names must be that version's release commit,
  * or the site is not deployed and the release is not made. The tag is
  * read as refs/tags/<tag> only, so a branch of the same name is never
@@ -43,7 +43,7 @@
  * tag on main, read from main's own tags, and the date must be the day
  * the check runs, or a day either side.
  *
- * `notes`, in release.yml's publish and docs jobs: prints the changelog
+ * `notes`, in release.yml's publish and docs-release jobs: prints the changelog
  * entry the tag's commit added, which is the release's notes.
  */
 import { execFileSync } from "node:child_process";

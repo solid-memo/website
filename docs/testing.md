@@ -1290,7 +1290,7 @@ checks of the repository as a whole, plain Node scripts in
   it against a SHA-256, as Playwright's own download checks none. The
   version and revision pinned beside that hash, in
   [.github/actions/headless-shell](../.github/actions/headless-shell/action.yml)
-  and in release.yml's `docs` job, which can't use a local action, are
+  and in release.yml's `docs-render` job, which can't use a local action, are
   the ones the installed playwright-core's `browsers.json` names, and
   the two hashes are the same. An update to Playwright that moves the
   shell fails here until a person records the new zip's SHA-256.

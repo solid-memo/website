@@ -126,7 +126,9 @@ own build, when run by hand, does the same, with the Chromium action
 of the tag it builds: a tag from before the shell was pinned still
 installs it with Playwright. Any job on `main` can write `main`'s
 cache entries, so a file restored from them could carry code from the
-least trusted of those jobs into the site.
+least trusted of those jobs into the site. The deploy workflow sets
+`cache-mode: none`, so its build can neither read the cache nor write
+`main`'s entries from the packages it runs.
 
 **Ship only the site the `site` job built.** The other jobs keep their
 caches, and any job of a run can replace one of the run's artifacts.
@@ -410,9 +412,9 @@ gh attestation verify docs-X.Y.Z.tar.gz --repo solid-memo/website \
 ```
 
 When the upload fails, the release stays a draft, which the deploy
-refuses. The release workflow's `docs` job, run by hand with the tag,
-then attests and attaches the archive, replacing one that isn't
-attested, and publishes the release
+refuses. The release workflow's docs jobs, run by hand with the tag,
+then render, attest and attach the archive, replacing one that isn't
+attested, and publish the release
 ([releasing.md](releasing.md#when-a-release-fails)).
 
 ## Older releases' docs

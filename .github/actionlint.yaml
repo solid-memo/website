@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+#
+# SPDX-License-Identifier: MIT
+
+# actionlint's settings (npm run lint:workflows,
+# docs/testing.md#the-workflows).
+paths:
+  .github/workflows/**/*.{yml,yaml}:
+    ignore:
+      # GitHub's cache-mode key (docs/releasing.md#the-deploy-key), which
+      # actionlint doesn't know yet. Drop this once it does.
+      - 'unexpected key "cache-mode" for "(workflow|job)" section'

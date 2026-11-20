@@ -46,9 +46,10 @@ name: Release
 # workflow's on main, so whoever downloads them can check where they
 # came from. Their diagrams are drawn in Chromium in the prepare job. When
 # the release could not be made, or its archive not attached or
-# attested, run this by hand with the version's tag, and the docs job
-# makes the release if it is missing, renders, attests and attaches the
-# archive, and publishes the release if it is a draft, without the key
+# attested, run this by hand with the version's tag, and the docs jobs
+# make the release if it is missing, render the archive in a job that
+# can only read, attest and attach it in one that loads no package, and
+# publish the release if it is a draft, without the key
 # (docs/releasing.md#when-a-release-fails).
 
 on:
@@ -68,6 +69,12 @@ on:
 # Each job asks for what it needs.
 permissions: {}
 
+# No job may read or write GitHub's cache: the release restores nothing
+# from it, and the docs-render job runs a tag's packages, which in a run
+# on main could otherwise write main's cache entries for another job to
+# restore (docs/releasing.md#the-deploy-key).
+cache-mode: none
+
 # One release at a time, and a running one never canceled: a run
 # canceled between its push and publish jobs leaves a tag without its
 # GitHub release. The group is the workflow's, so no run's prepare job
@@ -76,7 +83,7 @@ permissions: {}
 # waiting; whichever runs releases main's tip once CI has passed on it.
 # A run that cannot release (for CI's failures, pull requests and the
 # release commit's own run) has a group of its own, so it never replaces
-# a waiting release; a run of the docs job has one for its tag.
+# a waiting release; a run of the docs jobs has one for its tag.
 concurrency:
   group: >-
     ${{
@@ -485,28 +492,37 @@ jobs:
   # not make them (docs/releasing.md#when-a-release-fails): the publish
   # job failed after the push, the release was left a draft, or its
   # archive was not attested. Run by hand from main, with the version's
-  # tag, while no release run is running or waiting. It checks that the
-  # tag (read as refs/tags/ only) names its version's release commit on
-  # main, makes the release as a draft if it has none, with the
-  # version's changelog entry as its notes, renders the docs from that
-  # commit, as the release would have, attests them as this workflow's
-  # on main, and uploads them, then publishes the draft, which the
-  # deploy refuses; it needs no deploy key, and has none. A release that
-  # already carries an attested archive keeps it: an archive is rendered
-  # once.
-  docs:
+  # tag, while no release run is running or waiting. Three jobs, split
+  # as the release's are, so no job that can write the repository or
+  # attest loads a package: docs-release checks the tag and looks up its
+  # release, docs-render renders the docs from the tag's commit with a
+  # token that can only read, and docs-publish attests and attaches the
+  # archive and publishes the release. None has the deploy key.
+  #
+  # This job checks that the tag (read as refs/tags/ only) names its
+  # version's release commit on main, and makes the release as a draft
+  # if it has none, with the version's changelog entry as its notes. It
+  # runs main's own scripts, which import no package, and installs
+  # nothing: its token can write, as a draft release is seen only by a
+  # token that can. A release that already carries an attested archive
+  # keeps it: an archive is rendered once.
+  docs-release:
     if: >-
       github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main' &&
       inputs.tag != ''
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     permissions:
-      # To upload the asset and publish the release.
+      # To see a draft release, and to make one.
       contents: write
-      # To check the archive's attestation, and to attest a new one.
-      id-token: write
-      attestations: write
-      artifact-metadata: write
+      # To check the archive's attestation.
+      attestations: read
+    outputs:
+      version: ${{ steps.release.outputs.version }}
+      draft: ${{ steps.release.outputs.draft }}
+      attach: ${{ steps.release.outputs.attach }}
+      latest: ${{ steps.release.outputs.latest }}
+      sha: ${{ steps.commit.outputs.sha }}
     steps:
       - name: The tag is a version, and what its GitHub release holds
         id: release
@@ -561,9 +577,8 @@ jobs:
       # names must be its version's release commit on main, as the
       # deploy checks (npm run release:commit, scripts/releaseCommit.ts).
       # main is this run's commit, as the job runs only from main; the
-      # check is main's script, under main's Node, before anything of
-      # the tag's is checked out. The tag's commit is then checked out
-      # by its SHA.
+      # check is main's script, under main's Node. The docs-render job
+      # checks out the tag's commit by its SHA.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
@@ -581,7 +596,7 @@ jobs:
           RELEASE_MAIN=HEAD npm run release:commit -- tag "$TAG"
           echo "sha=$(git rev-parse --verify "refs/tags/$TAG^{commit}")" >> "$GITHUB_OUTPUT"
       # With the notes the publish job would have given it, by main's
-      # script, before anything of the tag's is checked out.
+      # script.
       - if: steps.release.outputs.made == 'false'
         name: Make the release as a draft
         env:
@@ -592,13 +607,31 @@ jobs:
         run: |
           npm run --silent release:commit -- notes "$TAG" > "$RUNNER_TEMP/notes.md"
           gh release create "$TAG" --verify-tag --draft --title "Solid Memo $VERSION" --notes-file "$RUNNER_TEMP/notes.md"
-      - if: steps.release.outputs.attach == 'true'
-        name: Check out the tag's commit
-        env:
-          SHA: ${{ steps.commit.outputs.sha }}
-        run: git checkout --quiet --detach "$SHA"
+
+  # The docs of the tag's commit, rendered as the release would have
+  # rendered them, with a token that can only read and nothing to attest
+  # with: this job installs the tag's packages and runs its build, so it
+  # holds nothing that could write the repository or sign as this
+  # workflow (docs/releasing.md#when-a-release-fails). The archive goes
+  # to the docs-publish job as an artifact of this run, with its SHA-256.
+  docs-render:
+    needs: docs-release
+    if: needs.docs-release.outputs.attach == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    outputs:
+      sha256: ${{ steps.archive.outputs.sha256 }}
+    steps:
+      # The commit docs-release checked, by its SHA. Keeping no
+      # credentials.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.docs-release.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
       - name: The version can archive its docs
-        if: steps.release.outputs.attach == 'true'
         env:
           TAG: ${{ inputs.tag }}
         run: |
@@ -607,14 +640,12 @@ jobs:
             exit 1
           fi
       # As in the prepare job, which this renders the docs as: nothing
-      # from GitHub's cache, as this job attests what it renders.
-      - if: steps.release.outputs.attach == 'true'
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      # from GitHub's cache, as what this job renders is attested.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
           package-manager-cache: false
-      - if: steps.release.outputs.attach == 'true'
-        run: npm ci --ignore-scripts
+      - run: npm ci --ignore-scripts
       # Chromium's headless shell and its system libraries, by this step
       # on main, not by .github/actions: a local action is the
       # checkout's, the tag's, whose copy may restore them from the cache
@@ -623,8 +654,7 @@ jobs:
       # (npm run check:shell holds the two to it), so a tag whose
       # Playwright wants another build fails here; the libraries come
       # from Ubuntu's signed mirror, in the step after it.
-      - if: steps.release.outputs.attach == 'true'
-        shell: bash
+      - shell: bash
         env:
           CHROMIUM_HEADLESS_SHELL_VERSION: 159.0.8154.6
           CHROMIUM_HEADLESS_SHELL_REVISION: "1255"
@@ -649,34 +679,115 @@ jobs:
           unzip -q "$zip" -d "$dir"
           rm "$zip"
           touch "$dir/INSTALLATION_COMPLETE"
-      - if: steps.release.outputs.attach == 'true'
-        run: npx playwright install-deps chromium
-      - if: steps.release.outputs.attach == 'true'
-        name: npm run docs:archive
+      - run: npx playwright install-deps chromium
+      - name: npm run docs:archive
+        id: archive
         env:
-          VERSION: ${{ steps.release.outputs.version }}
-        run: npm run docs:archive -- "$VERSION"
+          VERSION: ${{ needs.docs-release.outputs.version }}
+        run: |
+          npm run docs:archive -- "$VERSION"
+          echo "sha256=$(sha256sum "release-assets/docs-$VERSION.tar.gz" | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-docs
+          path: release-assets/docs-${{ needs.docs-release.outputs.version }}.tar.gz
+          if-no-files-found: error
+          retention-days: 7
+
+  # The archive docs-render made, attested as this workflow's on main and
+  # attached to the release, which is then published if it is a draft,
+  # which the deploy refuses. This job holds the token that can write and
+  # attest, so it checks out nothing, installs nothing and loads no
+  # package: it runs gh, and the actions that download and attest. What
+  # docs-render made is not trusted here: it is attached only as one
+  # regular file of the version's name, whose SHA-256 docs-render stated,
+  # that gzip reads and tar lists as files under docs/ only, and nothing
+  # in it is run or unpacked.
+  docs-publish:
+    needs: [docs-release, docs-render]
+    if: >-
+      !cancelled() && needs.docs-release.result == 'success' &&
+      (needs.docs-release.outputs.draft == 'true' || needs.docs-release.outputs.attach == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # To upload the asset and publish the release.
+      contents: write
+      # To attest the archive (actions/attest).
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+    steps:
+      # A draft whose archive should have been rendered, and was not,
+      # stays a draft.
+      - name: The archive was rendered, if the release needs it
+        env:
+          ATTACH: ${{ needs.docs-release.outputs.attach }}
+          RENDERED: ${{ needs.docs-render.result }}
+        run: |
+          if [ "$ATTACH" = true ] && [ "$RENDERED" != success ]; then
+            echo "::error::The docs-render job did not render the archive ($RENDERED), so the release is left as it is."
+            exit 1
+          fi
+      # No run-id: the artifact of this run, which only docs-render
+      # uploads. Outside the workspace, beside nothing else.
+      - if: needs.docs-release.outputs.attach == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-docs
+          path: ${{ runner.temp }}/docs
+      - if: needs.docs-release.outputs.attach == 'true'
+        name: The archive is the version's, as docs-render made it
+        env:
+          VERSION: ${{ needs.docs-release.outputs.version }}
+          SHA256: ${{ needs.docs-render.outputs.sha256 }}
+        run: |
+          set -eo pipefail
+          cd "$RUNNER_TEMP/docs"
+          name="docs-$VERSION.tar.gz"
+          found="$(find . -mindepth 1 -print)"
+          if [ "$found" != "./$name" ] || [ -L "$name" ] || [ ! -f "$name" ]; then
+            printf '%s\n' "$found"
+            echo "::error::The release-docs artifact holds something other than one regular file, $name (listed above), so it is not attached."
+            exit 1
+          fi
+          if ! [[ "$SHA256" =~ ^[0-9a-f]{64}$ ]] || [ "$(sha256sum "$name" | cut -d ' ' -f 1)" != "$SHA256" ]; then
+            echo "::error::$name is not the archive docs-render made, by its SHA-256, so it is not attached."
+            exit 1
+          fi
+          # Read, never unpacked: at least one entry, each a regular file
+          # or a folder under docs/, by a relative path with no . or ..
+          # in it, as npm run docs:archive packs them.
+          gzip -t "$name"
+          names="$(tar -tizf "$name")"
+          types="$(tar -tvizf "$name" | cut -c 1)"
+          if [ -z "$names" ] || [ "$(wc -l <<< "$names")" != "$(wc -l <<< "$types")" ] ||
+            grep -qv '^[-d]$' <<< "$types" || grep -qv '^docs/' <<< "$names" ||
+            grep -Eq '(^|/)\.\.?(/|$)|[\\]' <<< "$names"; then
+            echo "::error::$name holds no entry, or one that is not a file or folder under docs/ by a plain relative path, so it is not attached."
+            exit 1
+          fi
       # Attested before it is uploaded, so the release never carries it
       # without its attestation.
-      - if: steps.release.outputs.attach == 'true'
+      - if: needs.docs-release.outputs.attach == 'true'
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-path: release-assets/docs-${{ steps.release.outputs.version }}.tar.gz
+          subject-path: ${{ runner.temp }}/docs/docs-${{ needs.docs-release.outputs.version }}.tar.gz
       # The label release.config.mjs gives it; an archive without an
       # attestation is replaced.
-      - if: steps.release.outputs.attach == 'true'
+      - if: needs.docs-release.outputs.attach == 'true'
         name: Attach the archive
         env:
           TAG: ${{ inputs.tag }}
-          VERSION: ${{ steps.release.outputs.version }}
+          VERSION: ${{ needs.docs-release.outputs.version }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-        run: gh release upload --clobber "$TAG" "release-assets/docs-$VERSION.tar.gz#Documentation $VERSION (HTML)"
-      - if: steps.release.outputs.draft == 'true'
+        run: gh release upload --clobber "$TAG" "$RUNNER_TEMP/docs/docs-$VERSION.tar.gz#Documentation $VERSION (HTML)"
+      - if: needs.docs-release.outputs.draft == 'true'
         name: Publish the release
         env:
           TAG: ${{ inputs.tag }}
-          LATEST: ${{ steps.release.outputs.latest }}
+          LATEST: ${{ needs.docs-release.outputs.latest }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: gh release edit "$TAG" --draft=false --latest="$LATEST"
