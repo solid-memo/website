@@ -246,7 +246,8 @@ two fences before the guest's pod or the network:
   [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). Such
   an address, as sent:
   - is http(s), with no query, fragment, dot segment or empty segment
-    (`//`);
+    (`//`), and no two dots in a row anywhere in its path, which some
+    servers strip;
   - has nothing encoded a server might read as a step elsewhere or
     another name: a slash, backslash, percent sign, letter or digit, or
     an overlong byte;

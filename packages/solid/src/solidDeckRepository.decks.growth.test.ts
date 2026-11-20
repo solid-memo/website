@@ -6,7 +6,8 @@
  * Decks are changed and removed in time that grows with them and their
  * cards, not their square, against a pod in memory: a deck removed from
  * a document another app wrote in, many decks of a catalog changed
- * and removed at once, and a deck whose entry names many picture hosts.
+ * and removed at once, a deck removed beside many whose documents'
+ * addresses are long, and a deck whose entry names many picture hosts.
  *
  * Eight times as many must take less than four times as long as an
  * eighth of them done eight times over (testing.md); what puts the input
@@ -105,6 +106,39 @@ describe("card writes", { timeout: 180_000 }, () => {
               return async () => {
                 expect(await fresh.removeDecks(decks)).toEqual({ keptDocuments: [] });
                 expect(await read(fetch, `${INSTANCE}catalog.ttl`)).not.toContain("deck-");
+                expect((await fetch(`${INSTANCE}decks/deck-0.ttl`)).status).toBe(404);
+              };
+            },
+          };
+        }),
+      100,
+      8,
+      4,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
+
+  it("remove a deck beside many whose documents' addresses are longer than V8 hashes once a server's spelling, in time that grows with them, not their square", async () => {
+    // A `+` is encoded when the address is brought to how a server reads it (documentKeyOf),
+    // so an address within the bound on a term becomes about three times as long.
+    const long = "+".repeat(16_300);
+    const ratio = await growthAfterSetup(
+      (count) =>
+        builtOnce(async () => {
+          const { fetch, store, repository } = await catalogOfDecks(1);
+          const [deck] = await repository.listDecks(INSTANCE);
+          const catalogUrl = `${INSTANCE}catalog.ttl`;
+          const others = Array.from({ length: count }, (_, i) => {
+            const n = String(i).padStart(4, "0");
+            return `<#other-${n}> a <${SM}Deck> ; <http://purl.org/dc/terms/title> "Other" ; <${SM}cardsDocument> <${INSTANCE}decks/${long}-cards-${n}.ttl> ; <${SM}reviewsDocument> <${INSTANCE}decks/${long}-reviews-${n}.ttl> .`;
+          });
+          await put(fetch, catalogUrl, [await read(fetch, catalogUrl), ...others].join("\n"));
+          return {
+            restore: await saved(store),
+            start: () => {
+              const fresh = deckRepository(fetch);
+              return async () => {
+                expect(await fresh.removeDecks([deck!])).toEqual({ keptDocuments: [] });
                 expect((await fetch(`${INSTANCE}decks/deck-0.ttl`)).status).toBe(404);
               };
             },
