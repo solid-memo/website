@@ -24,6 +24,7 @@ import { SITE } from "@solid-memo/vocab/tooling/sources";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
+import type { DraftDiff } from "@solid-memo/application/releaseDrafts";
 import {
   draftContainerOf,
   draftDocuments,
@@ -32,6 +33,7 @@ import {
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
+import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
@@ -68,7 +70,12 @@ function page(podFetch: typeof globalThis.fetch = fetch) {
       fetch: podFetch,
       profileStorages: getProfileStorages,
     }),
-    deckLibrary: undefined as never,
+    // The site's library from this repository, whose course the draft follows.
+    deckLibrary: createSolidDeckLibrary({
+      fetch: routedFetch({ origin: SITE, local: shapesFetch, remote: podFetch }),
+      indexUrl: `${SITE}decks/index.ttl`,
+      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
+    }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository(deps),
     deckRepository: createSolidDeckRepository(deps),
@@ -173,7 +180,7 @@ describe.each(SERVERS)("drafts of releases on $name", ({ url: server }) => {
       useCases.diffReleaseDraft(await useCases.getReleaseDraft(summary.url)),
     );
     expect(compared.took).toBeLessThan(BUDGET.diff);
-    const diff = compared.value!;
+    const diff = compared.value as DraftDiff;
     expect(diff.problems).toEqual([]);
     expect(diff.diff.subjects).toEqual([{ kind: "card", id: card!.id, status: "retired" }]);
     expect(diff.upgrade.plan!.retire.map((one) => one.id)).toEqual([card!.id]);

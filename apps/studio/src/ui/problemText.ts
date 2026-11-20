@@ -10,6 +10,7 @@ import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { cardName } from "@solid-memo/ui/DataText";
 import type { I18n, MessageKey } from "@solid-memo/ui/i18n";
 import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditing";
+import { bounded } from "./ReleaseLists";
 
 /**
  * The release check's problems in words (docs/studio.md, The release
@@ -21,6 +22,25 @@ import { problemText, type MarkdownProblem } from "@solid-memo/ui/MarkdownEditin
 const DCTERMS = "http://purl.org/dc/terms/";
 const DCAT = "http://www.w3.org/ns/dcat#";
 const SCHEMA = "https://schema.org/";
+
+/** How many ids, or other items, a list of them in a sentence names at most (idList). */
+export const ID_LIMIT = 20;
+
+/**
+ * Ids, or other items, in a sentence: the first ID_LIMIT of them, and
+ * how many more there are. A release can drop, lose or name any number
+ * of subjects or values, so every list a problem's text or the diff
+ * joins is bounded so.
+ */
+export function idList(ids: readonly string[], t: I18n["t"]): string {
+  const { shown, more } = bounded(ids, ID_LIMIT);
+  return andMore(shown.join(", "), more, t);
+}
+
+/** A list cut short after its first few, with how many it leaves out. */
+function andMore(listed: string, count: number, t: I18n["t"]): string {
+  return count === 0 ? listed : t("studio.check.moreLanguages", { languages: listed, count });
+}
 
 /** The name of each field a problem may be in, by its predicate. */
 const FIELDS: Readonly<Record<string, string>> = {
@@ -138,16 +158,17 @@ export function problemMessage(
   i18n: Pick<I18n, "t" | "languageParts" | "violationText">,
 ): string {
   const { t, languageParts, violationText } = i18n;
-  const list = (iris: readonly string[]) => iris.map((iri) => named(draft, iri)).join(", ");
+  const list = (iris: readonly string[]) =>
+    idList(
+      iris.map((iri) => named(draft, iri)),
+      t,
+    );
   const value = (term: ReleaseTerm) =>
     term.kind === "literal" ? `"${term.value}"` : named(draft, term.value);
   const values = (terms: readonly ReleaseTerm[]) =>
-    terms.length === 0 ? t("studio.check.nothing") : terms.map(value).join(", ");
+    terms.length === 0 ? t("studio.check.nothing") : idList(terms.map(value), t);
   const language = (tag: string) =>
     tag === "" ? t("studio.check.untagged") : languageParts(tag).name;
-  // A list cut short after its first few, with how many it leaves out.
-  const more = (listed: string, count: number) =>
-    count === 0 ? listed : t("studio.check.moreLanguages", { languages: listed, count });
   const field = fieldName(problem.field, t);
   const key = `studio.problem.${problem.code}` as MessageKey;
   switch (problem.code) {
@@ -164,7 +185,10 @@ export function problemMessage(
     case "notARelease":
       return t(key, { path: problem.params.path });
     case "versionGap":
-      return t(key, { deck: problem.params.deck, versions: problem.params.versions.join(", ") });
+      return t(key, {
+        deck: problem.params.deck,
+        versions: idList(problem.params.versions.map(String), t),
+      });
     case "notOneDeck":
       return t(key, {
         decks:
@@ -189,7 +213,10 @@ export function problemMessage(
     case "cardsDropped":
     case "outlineDropped":
       return t(key, {
-        ids: problem.params.ids.map((id) => `#${id}`).join(", "),
+        ids: idList(
+          problem.params.ids.map((id) => `#${id}`),
+          t,
+        ),
         previous: `<${problem.params.previous}>`,
       });
     case "idReused":
@@ -233,7 +260,7 @@ export function problemMessage(
       return t(key, { count: problem.params.count, least: problem.params.least });
     case "distractorLanguages":
       return t(key, {
-        missing: more(problem.params.missing.map(language).join(", "), problem.params.more),
+        missing: andMore(problem.params.missing.map(language).join(", "), problem.params.more, t),
         card: named(draft, problem.params.card),
       });
     case "chapterPositions":
@@ -254,7 +281,7 @@ export function problemMessage(
       const counts = problem.params.counts.map(({ language: tag, chunks }) =>
         t("studio.problem.theoryChunkCount", { count: chunks, language: language(tag) }),
       );
-      return t(key, { field, counts: counts.join(", ") });
+      return t(key, { field, counts: idList(counts, t) });
     }
     case "missingLanguage":
     case "missingImageDescription":
@@ -272,9 +299,10 @@ export function problemMessage(
       return t(key, { field });
     case "sourceUndescribed":
       return t(key, {
-        missing: problem.params.missing
-          .map((detail) => t(`studio.release.detail.${detail}`))
-          .join(", "),
+        missing: idList(
+          problem.params.missing.map((detail) => t(`studio.release.detail.${detail}`)),
+          t,
+        ),
       });
     case "sourceTextAmbiguous":
     case "usedNotDerived":
