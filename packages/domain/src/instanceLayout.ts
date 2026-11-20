@@ -413,16 +413,18 @@ export function deckGroupUrlOf(instanceUrl: string, id: string): string {
   return `${catalogUrlOf(instanceUrl)}#group-${id}`;
 }
 
-/** Every document an instance may hold, given its decks: fixed ones first, then the decks' documents, by their own address, those a deck's may be (isSafeDocumentUrl). */
+/** Every document an instance may hold, given its decks, each address once: fixed ones first, then the decks' documents, by their own address, those a deck's may be (isSafeDocumentUrl). Many decks may name one document. */
 export function instanceDocumentUrls(instanceUrl: string, decks: readonly Deck[]): string[] {
   return [
-    metaUrlOf(instanceUrl),
-    preferencesUrlOf(instanceUrl),
-    palettesUrlOf(instanceUrl),
-    catalogUrlOf(instanceUrl),
-    ...decks
-      .flatMap((deck) => [deck.cardsDocumentUrl, deck.reviewsDocumentUrl])
-      .map(documentUrlOf)
-      .filter(isSafeDocumentUrl),
+    ...new Set([
+      metaUrlOf(instanceUrl),
+      preferencesUrlOf(instanceUrl),
+      palettesUrlOf(instanceUrl),
+      catalogUrlOf(instanceUrl),
+      ...decks
+        .flatMap((deck) => [deck.cardsDocumentUrl, deck.reviewsDocumentUrl])
+        .map(documentUrlOf)
+        .filter(isSafeDocumentUrl),
+    ]),
   ];
 }

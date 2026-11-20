@@ -29,6 +29,8 @@ import {
   isDraftDocumentName,
   RELEASE_DOCUMENT,
 } from "@solid-memo/domain/release/draftLayout";
+import { derivedOnce } from "@solid-memo/domain/frozen";
+import { TextMap } from "@solid-memo/domain/pathKeys";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
 import {
@@ -102,6 +104,58 @@ export function isDraftDocument(url: string): boolean {
       draftPlaceOf(`${container}${RELEASE_DOCUMENT}`) !== null
     );
   });
+}
+
+/**
+ * What the document at an address says that goes for every deck alike:
+ * whether it is never a deck's (a draft's or a deck itself), the decks
+ * the document itself (`<>`) says it is part of, as a request sends
+ * each (canonicalUrlOf), and whether it says it is part of a catalog's
+ * entry (deckBackLinksOf). Worked out once of a dataset read once
+ * (documentFactsOf), so that many decks naming one document each find
+ * where it stands for them with a lookup, not a pass over it.
+ */
+interface DocumentFacts {
+  neverADecks: boolean;
+  partOf: TextMap<true>;
+  backLinked: boolean;
+}
+
+/** The facts already worked out of each frozen dataset, by the address asked about. */
+const FACTS = new WeakMap<Dataset, Map<string, DocumentFacts>>();
+
+/**
+ * The document's facts (DocumentFacts), as `dataset` (null: no document)
+ * says, worked out once per dataset and address while the dataset is
+ * frozen (derivedOnce), as a read gives it: each deck naming a shared
+ * document, and each read of it that the pod answers unchanged, gets
+ * them without a pass over the document.
+ */
+function documentFactsOf(dataset: Dataset | null, url: string): DocumentFacts {
+  if (dataset === null)
+    return { neverADecks: isDraftDocument(url), partOf: new TextMap(), backLinked: false };
+  const byUrl = derivedOnce(FACTS, dataset, () => new Map<string, DocumentFacts>());
+  let facts = byUrl.get(url);
+  if (facts === undefined) {
+    const partOf = new TextMap<true>();
+    for (const deck of partOfOf(dataset, url)) {
+      const canonical = canonicalUrlOf(deck);
+      if (canonical !== null) partOf.set(canonical, true);
+    }
+    facts = {
+      neverADecks: isDraftDocument(url) || isDeckItself(dataset, url),
+      partOf,
+      backLinked: deckBackLinksOf(dataset, url).length > 0,
+    };
+    byUrl.set(url, facts);
+  }
+  return facts;
+}
+
+/** Whether the document says it is the deck's (ownsDocument), as its facts give it. */
+function saysIsDecks(facts: DocumentFacts, deckUrl: string): boolean {
+  const canonical = canonicalUrlOf(deckUrl);
+  return canonical !== null && facts.partOf.has(canonical);
 }
 
 /**
@@ -276,26 +330,34 @@ export function createDeckDocumentGuard(
    * unclaimed, as a check or a removal keeps it; otherwise cannotCheck,
    * as a write is refused for now rather than called not the deck's.
    */
-  async function standingOf(
+  function standingOf(
     deck: DeckPlace,
     url: string,
     dataset: Dataset | null,
     lenient: boolean,
   ): Promise<DocumentStanding> {
+    return standingBy(deck, url, dataset, documentFactsOf(dataset, url), lenient);
+  }
+
+  /** Where the document stands for the deck (standingOf), given what it says (documentFactsOf). */
+  async function standingBy(
+    deck: DeckPlace,
+    url: string,
+    dataset: Dataset | null,
+    facts: DocumentFacts,
+    lenient: boolean,
+  ): Promise<DocumentStanding> {
     const instance = instanceOf(deck);
-    if (isDraftDocument(url) || (dataset !== null && isDeckItself(dataset, url)))
-      return "unclaimed";
+    if (facts.neverADecks) return "unclaimed";
     if (!isDocumentIn(url, instance)) {
       // Saying it is the deck's makes it so only in the instance's storage: anyone who may append to a document can say it.
       const owned =
-        dataset !== null &&
-        ownsDocument(partOfOf(dataset, url), deck.url) &&
-        (await isInInstanceStorage(url, instance, lenient));
+        saysIsDecks(facts, deck.url) && (await isInInstanceStorage(url, instance, lenient));
       return owned ? "owned" : "unclaimed";
     }
-    if (dataset !== null && ownsDocument(partOfOf(dataset, url), deck.url)) return "owned";
+    if (saysIsDecks(facts, deck.url)) return "owned";
     if (dataset === null) return "adoptable";
-    if (deckBackLinksOf(dataset, url).length > 0) return "unclaimed";
+    if (facts.backLinked) return "unclaimed";
     return (await isDedicatedFolder(instance, lenient)) ? "adoptable" : "unclaimed";
   }
 
@@ -331,14 +393,20 @@ export function createDeckDocumentGuard(
     return urls.filter((_, at) => found[at]);
   }
 
-  /** Whether the document, as `dataset` (null: no document) says, is unclaimed for every one of the decks (standing). */
+  /**
+   * Whether the document, as `dataset` (null: no document) says, is
+   * unclaimed for every one of the decks (standing). What it says is
+   * worked out once for them all (documentFactsOf): a catalog may name
+   * one document for a thousand decks.
+   */
   async function unclaimedForAll(
     decks: readonly DeckPlace[],
     url: string,
     dataset: Dataset | null,
   ): Promise<boolean> {
+    const facts = documentFactsOf(dataset, url);
     for (const deck of decks) {
-      if ((await standing(deck, url, dataset)) !== "unclaimed") return false;
+      if ((await standingBy(deck, url, dataset, facts, true)) !== "unclaimed") return false;
     }
     return true;
   }

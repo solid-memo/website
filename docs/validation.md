@@ -169,6 +169,20 @@ flowchart LR
   (`DeckRepository.isUnclaimedAsRead`) only for a document with
   a problem. A check of an unchanged instance still downloads
   nothing.
+- **A document many decks name is checked once**, under any spelling
+  of its address (`onceEach` in `instanceChecks.ts`), and reported
+  once, under the first spelling. The report names the other spellings
+  decks use (`spellings` in `ValidationReport`), so a deck that spells
+  it otherwise is still held back or let go by it, and the deck's own
+  report shows it under the address the deck names. Its problems are
+  counted and listed once, however many decks name it and however they
+  spell it. Whether the document is a deck's once read is asked once
+  too, for all the decks that name it. What the document says of
+  itself is worked out once per read (`documentFactsOf` in
+  [deckPlace.ts](../packages/solid/src/deckPlace.ts)), and each deck's
+  standing is then a lookup. A catalog may name one document for a
+  thousand decks, each spelling it its own way, and the check's work
+  still grows with the decks and the document, not their product.
 - The shapes are fetched at their IRIs, under
   `https://solid-memo.com/ns/shapes/` (`SHAPES_BASE`), not bundled:
   they're published with the site, so the browser checks against the
