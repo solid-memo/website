@@ -13,6 +13,7 @@ import {
   sameText,
   shown,
   shownTag,
+  sortText,
   tidiedSideText,
   tidiedStated,
   tidiedTagged,
@@ -32,6 +33,14 @@ describe("text in several languages", () => {
     expect(firstCodePoints("a".repeat(12), 10)).toBe("a".repeat(10));
     expect(firstCodePoints(smile.repeat(10), 10)).toBe(smile.repeat(10));
     expect(firstCodePoints(smile.repeat(12), 10)).toBe(smile.repeat(10));
+  });
+
+  it("sorts a text by its first 200 code points, never cut inside one", () => {
+    const smile = "\u{1F600}";
+    const long = (tail: string) => `${smile.repeat(199)}${tail}`;
+    expect(sortText(long("ab"))).toBe(long("a"));
+    expect(sortText(long("b"))).toBe(long("b"));
+    expect(sortText(smile.repeat(201))).toBe(smile.repeat(200));
   });
 
   it("shows the English text, else the first language's", () => {

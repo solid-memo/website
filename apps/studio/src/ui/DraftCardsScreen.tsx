@@ -4,7 +4,6 @@
 
 import { useMemo, useState } from "preact/hooks";
 import { isMarkdown } from "@solid-memo/domain/deck";
-import { cardSortText } from "@solid-memo/domain/cardQuery";
 import {
   DRAFT_CARD_FILTERS,
   draftCardLanguages,
@@ -151,13 +150,9 @@ export function DraftCardsScreen({
         (row, column) => {
           switch (column) {
             case "front":
-              return row.card.front === undefined
-                ? row.id
-                : cardSortText(readerText(row.card.front));
+              return row.card.front === undefined ? row.id : readerText(row.card.front);
             case "back":
-              return row.card.back === undefined
-                ? undefined
-                : cardSortText(readerText(row.card.back));
+              return row.card.back === undefined ? undefined : readerText(row.card.back);
             case "place":
               return placeText(row);
             case "distractors":

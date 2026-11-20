@@ -4,7 +4,7 @@
 
 import { DECK_DIRECTIONS, type Deck } from "./deck";
 import type { DeckGroup, DeckTree, TreeNode } from "./deckTree";
-import { firstCodePoints, folded, type LangText } from "./langText";
+import { firstCodePoints, folded, sortText, type LangText } from "./langText";
 
 /**
  * The Studio's table of an instance's decks (docs/studio.md): a row per
@@ -186,14 +186,17 @@ function numberKey(row: DeckTableRow, column: Exclude<DeckColumn, TextColumn>): 
  * The texts the table's rows are sorted by, a text per row in the rows'
  * order: none unless `column` is one of text. A row's figures may
  * change without changing these, so a caller can rank them once and keep
- * the ranks while the texts stay the same.
+ * the ranks while the texts stay the same. A title is cut to its
+ * `sortText`, as a path of groups is cut, so the ranking's work is bounded
+ * however long the titles; titles that differ only past the cut keep the
+ * rows' order.
  */
 export function deckSortTexts(
   rows: readonly DeckTableRow[],
   column: DeckColumn | undefined,
   text: (text: LangText) => string,
 ): string[] {
-  if (column === "title") return rows.map((row) => text(row.deck.title));
+  if (column === "title") return rows.map((row) => sortText(text(row.deck.title)));
   if (column !== "group") return [];
   const paths = deckGroupPaths(rows, text);
   return rows.map((row) => paths.get(row.groups)!);

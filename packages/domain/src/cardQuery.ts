@@ -11,7 +11,7 @@ import {
   type Distractor,
 } from "./deck";
 import { canonicalTag } from "./languageTag";
-import { firstCodePoints, folded, shown, type LangText } from "./langText";
+import { folded, shown, sortText, type LangText } from "./langText";
 import { LEECH_LAPSES } from "./cardHistory";
 import { reviewKeyOf, type DueState, type ReviewState } from "./review";
 import { MATURE_INTERVAL_DAYS } from "./answer";
@@ -343,19 +343,6 @@ function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | un
 }
 
 /**
- * The most code points of a side's text a sort by that side compares. A
- * side may be as long as a term, and comparing whole texts that differ
- * only in case, or in long runs of digits, takes time in their length;
- * cut, a sort's work is bounded however long the texts.
- */
-const MAX_SORT_TEXT_CHARACTERS = 200;
-
-/** What of a card side's shown text a table sorts by: its first MAX_SORT_TEXT_CHARACTERS code points. */
-export function cardSortText(text: string): string {
-  return firstCodePoints(text, MAX_SORT_TEXT_CHARACTERS);
-}
-
-/**
  * A deck's cards as the query shows them, every page: those that match
  * it, sorted by its key (ties, and every card unsorted, in the order they
  * were given in). The page is not read, so a caller keeps the rows while
@@ -365,8 +352,8 @@ export function cardSortText(text: string): string {
  * `today` is the study day ("YYYY-MM-DD") a card is due by. A side is
  * sorted by the text the reader is shown of it: in the first of the
  * reader's `languages` (preferred first) the side has, and as plain text
- * when in Markdown, its first MAX_SORT_TEXT_CHARACTERS code points. It is compared as the first of those languages sorts
- * text: case and accents aside, as the search sets them aside, but a
+ * when in Markdown, cut to its `sortText`. It is compared as the first
+ * of those languages sorts text: case and accents aside, as the search sets them aside, but a
  * letter the language counts as one of its own as that letter (Swedish
  * puts "ä" after "z"); and numbers by value. `lapses`, by card id, says
  * how often each card lapsed in its reviews (lapseIndex; a card it leaves out
@@ -458,7 +445,7 @@ export function queryCards(
     const text = shown(row.card[side], languages);
     if (text === "") return undefined;
     const seen = isMarkdown(row.card.textFormat) ? plain(text) : text;
-    return cardSortText(seen);
+    return sortText(seen);
   };
   const keyOf = (row: CardRow): string | number | undefined => {
     switch (sort.key) {

@@ -7,7 +7,6 @@ import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { Card } from "./deck";
 import {
   cardLanguages,
-  cardSortText,
   DEFAULT_CARD_QUERY,
   isDefaultQuery,
   LANGUAGE_CHOICE_LIMIT,
@@ -402,8 +401,6 @@ describe("queryCards", () => {
   it("sorts a side by its first 200 code points, texts that differ only past them in the deck's order", () => {
     const smile = "\u{1F600}";
     const long = (tail: string) => `${smile.repeat(199)}${tail}`;
-    expect(cardSortText(long("ab"))).toBe(long("a"));
-    expect(cardSortText(long("b"))).toBe(long("b"));
     const cards = [
       card("c-1", { front: { en: long("bz") } }),
       card("c-2", { front: { en: long("by") } }),

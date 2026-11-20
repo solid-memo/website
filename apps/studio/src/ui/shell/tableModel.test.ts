@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
+import { growth } from "@solid-memo/domain/testing/growth";
 import {
   allSelected,
   nextSort,
@@ -175,5 +176,36 @@ describe("sortedRows", () => {
       "a",
       "b",
     ]);
+  });
+
+  it("sorts text by its first 200 code points, texts equal so in their own order", () => {
+    const long = (tail: string) => ({ name: `${"x".repeat(200)}${tail}`, due: undefined });
+    const pair = [long("b"), long("a")];
+    for (const descending of [false, true]) {
+      expect(sortedRows(pair, { key: "name", descending }, cellValue, "en")).toEqual(pair);
+    }
+  });
+
+  it("takes no longer to sort texts however much longer than 200 code points they are", () => {
+    // Texts that differ only in case: compared whole, each comparison reads them to the end.
+    const named = (length: number) =>
+      Array.from({ length: 1_000 }, (_, at) => ({
+        name: `${(at % 2 === 0 ? "aA" : "Aa").repeat(length / 2)}${at}`,
+        due: undefined,
+      }));
+    const sort = { key: "name", descending: false } as const;
+    // Texts eight times as long take no longer to sort, as only their
+    // first 200 code points are compared; compared whole, they would take
+    // about eight times as long.
+    const ratio = growth(
+      (length) => {
+        const of = named(length);
+        return () => sortedRows(of, sort, cellValue, "en");
+      },
+      2_000,
+      8,
+      0.5,
+    );
+    expect(ratio).toBeLessThan(0.5);
   });
 });
