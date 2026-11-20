@@ -12,6 +12,7 @@ import {
   deckTableViewFromParams,
   deckTextRanks,
   deckTableViewToParams,
+  groupPath,
   groupsOfDecks,
   groupTrails,
   matchesFilter,
@@ -22,6 +23,7 @@ import {
 } from "./deckTable";
 import type { DeckGroup, DeckTree } from "./deckTree";
 import { shown, type LangText } from "./langText";
+import { growth } from "./testing/growth";
 
 function deck(id: string, title: LangText, extra: Partial<Deck> = {}): Deck {
   return {
@@ -180,6 +182,48 @@ describe("the deck table's filter", () => {
     expect(matchesFilter({ ...row }, "agg")).toBe(true);
     expect(normalize).toHaveBeenCalledOnce();
   });
+
+  it("searches each group's titles once a filter, however many decks are below it", () => {
+    // A chain of 15 groups, then a group at the 16th level for each of
+    // 985 decks, every title as long as a term: 1000 groups, as many as
+    // an instance is read with.
+    const group = (title: string, at: number): DeckGroup => ({
+      url: `https://pod.example/a/catalog.ttl#group-${at}`,
+      title: { en: title },
+    });
+    const length = 16_383;
+    const chain = Array.from({ length: 15 }, (_, at) => group(String(at % 10).repeat(length), at));
+    const leaves = Array.from({ length: 985 }, (_, at) =>
+      group(`${"x".repeat(length - 8)}leaf${String(at).padStart(4, "0")}`, 15 + at),
+    );
+    const decks = leaves.map((leaf, at) =>
+      row(deck(`d${at}`, { en: `Deck ${at}` }), { groups: [...chain, leaf] }),
+    );
+    const includes = vi.spyOn(String.prototype, "includes");
+    onTestFinished(() => includes.mockRestore());
+    const searched = () => {
+      const total = includes.mock.contexts.reduce<number>(
+        (sum, text) => sum + String(text).length,
+        0,
+      );
+      includes.mockClear();
+      return total;
+    };
+    const titles =
+      1000 * length + decks.reduce((sum, of) => sum + shown(of.deck.title, ["en"]).length, 0);
+
+    expect(decks.filter((of) => matchesFilter(of, "nowhere"))).toEqual([]);
+    expect(searched()).toBe(titles);
+    expect(decks.filter((of) => matchesFilter(of, "LEAF0042")).map((of) => of.deck.id)).toEqual([
+      "d42",
+    ]);
+    expect(searched()).toBeLessThanOrEqual(titles);
+    expect(decks.every((of) => matchesFilter(of, "0000"))).toBe(true);
+    expect(searched()).toBeLessThanOrEqual(titles);
+    // Rows made anew, as on every render, with the same filter: nothing is searched again.
+    expect(decks.map((of) => ({ ...of })).every((of) => matchesFilter(of, "0000"))).toBe(true);
+    expect(searched()).toBe(0);
+  });
 });
 
 describe("the deck table's order", () => {
@@ -231,15 +275,15 @@ describe("the deck table's order", () => {
     expect(arrangeDeckRows(pair, view.sort, deckRowRanks(pair, [1, 0]))).toEqual([twin, kanji]);
   });
 
-  it("ranks paths of groups longer than a single text can be", () => {
+  it("ranks paths of groups by the names they show", () => {
     const parent = { url: "https://x.example/#g", title: { en: "p".repeat(16_383) } } as DeckGroup;
-    const inGroup = (tail: string) => ({
+    const inGroup = (head: string) => ({
       ...kanji,
-      groups: [parent, { ...parent, title: { en: "l".repeat(16_376) + tail } }],
+      groups: [parent, { ...parent, title: { en: head + "l".repeat(16_370) } }],
     });
-    const paths = [inGroup("0000010"), inGroup("0000002"), inGroup("0000003")];
+    const paths = [inGroup("10"), inGroup("2"), inGroup("3")];
     const view = { filter: "", sort: { column: "group", descending: false } } as const;
-    expect(deckSortTexts(paths, "group", english)[0]!.length).toBeGreaterThan(16_383);
+    expect(deckSortTexts(paths, "group", english)[0]).toHaveLength(2 * 200 + 3);
     expect(arrangeDeckRows(paths, view.sort, rowRanks(paths, view))).toEqual([
       paths[1],
       paths[2],
@@ -265,5 +309,64 @@ describe("the deck table's order", () => {
     expect(sorted("cards")).toEqual(["verbs", "kanji", "capitals"]);
     expect(sorted("cards", true)).toEqual(["kanji", "verbs", "capitals"]);
     expect(sorted("new")).toEqual(["verbs", "kanji", "capitals"]);
+  });
+});
+
+describe("a path of groups", () => {
+  const group = (title: string, at = 0): DeckGroup => ({
+    url: `https://pod.example/a/catalog.ttl#group-${at}`,
+    title: { en: title },
+  });
+
+  it("joins the groups' titles in the reader's language, a short title whole", () => {
+    expect(groupPath([languages, scripts], (text) => shown(text, ["sv", "en"]))).toBe(
+      "Languages › Skrifter",
+    );
+    expect(groupPath([], english)).toBe("");
+    expect(groupPath([group("a".repeat(200))], english)).toBe("a".repeat(200));
+  });
+
+  it("cuts a long title to 200 code points, the last an ellipsis", () => {
+    expect(groupPath([group("a".repeat(201)), languages], english)).toBe(
+      `${"a".repeat(199)}… › Languages`,
+    );
+  });
+
+  it("counts and cuts characters outside the BMP as one each, never within one", () => {
+    const smile = "\u{1F600}";
+    expect(groupPath([group(smile.repeat(200))], english)).toBe(smile.repeat(200));
+    const cut = groupPath([group(`${smile.repeat(250)}b`)], english);
+    expect(cut).toBe(`${smile.repeat(199)}…`);
+  });
+
+  it("stays bounded with groups 16 deep and titles as long as a term", () => {
+    // A chain of 15 groups, then a group at the 16th level for each of
+    // 985 decks: 1000 groups, as many as an instance is read with.
+    const layout = (length: number) => {
+      const chain = Array.from({ length: 15 }, (_, at) =>
+        group(String(at % 10).repeat(length), at),
+      );
+      return Array.from({ length: 985 }, (_, at) =>
+        row(deck(`d${at}`, { en: `Deck ${at}` }), {
+          groups: [...chain, group(String(at % 10).repeat(length), 15 + at)],
+        }),
+      );
+    };
+    const paths = deckGroupPaths(layout(16_383), english);
+    expect(paths.size).toBe(985);
+    for (const path of paths.values()) expect(path.length).toBeLessThanOrEqual(16 * 200 + 15 * 3);
+    // A path names each group by at most 200 code points, so titles eight
+    // times as long take no longer to name; titles named whole would
+    // take eight times as long.
+    const ratio = growth(
+      (length) => {
+        const rows = layout(length);
+        return () => deckGroupPaths(rows, english);
+      },
+      2_000,
+      8,
+      0.5,
+    );
+    expect(ratio).toBeLessThan(0.5);
   });
 });

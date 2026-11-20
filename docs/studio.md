@@ -1644,7 +1644,15 @@ reads at most `MAX_DECK_GROUPS` (1,000) deck groups too, each a row of
 the Groups screen ([Deck groups](data-model.md#deck-groups)). Past
 that, the screens built on the deck tree (Groups, the Decks table,
 Transfer and Drafts) refuse the whole tree, its decks included, with
-the same message and hint. A
+the same message and hint. Groups nest up to 16 deep, and the Studio
+names a deck's groups as a path in the Decks table's Group column (its
+sort too), the bulk Move's list of groups and the deck peek. A path
+shows at most 200 characters of each group's title, cut between
+characters with an ellipsis as the last (`groupPath` in
+[deckTable.ts](../packages/domain/src/deckTable.ts)), so it's at most
+16 short names, however long the titles. The filter, which keeps a
+deck whose groups' names hold its text, searches each group's title
+once for a text, not once for each deck below the group. A
 deck, draft or release the catalog has no room for is refused before
 it's written (`catalogFull`), so the Studio never takes an instance past
 what it reads. A draft's folder may list at most `MAX_DRAFT_DOCUMENTS`
