@@ -207,6 +207,70 @@ describe("deckToDraft", () => {
     ]);
   });
 
+  it("leaves out every IRI of the deck in the draft's container or at its default places, and keeps those elsewhere (GHSA-qh9m-2c96-5rr2)", () => {
+    const container = DRAFT.slice(0, DRAFT.lastIndexOf("/") + 1);
+    const places = "https://pod.example/solid-memo/main/releases/solid/";
+    const picture = "https://pictures.example/sweden.png";
+    const shows = { en: "A map" };
+    const card: Card = {
+      ...cards[0]!,
+      frontImageUrl: picture,
+      frontImageDescription: shows,
+      backImageUrl: picture,
+      backImageDescription: shows,
+      textFormat: SM.markdown,
+      subjects: [
+        "http://www.wikidata.org/entity/Q34",
+        `${container}chapter-a.ttl#q`,
+        `${places}v3.ttl#q`,
+      ],
+    };
+    const inside: Card = {
+      ...card,
+      frontImageUrl: `${container}cards.ttl`,
+      backImageUrl: `${places}v2.ttl`,
+      textFormat: `${container}release.ttl#markdown`,
+    };
+    const { draft } = deckToDraft(
+      {
+        ...deck,
+        license: `${container}cards.ttl`,
+        themes: [...deck.themes!, `${DRAFT}#theme`, `${places}v2.ttl#theme`],
+      },
+      [card, inside],
+      DRAFT,
+      NOW,
+    );
+    expect(draft.root).not.toHaveProperty("license");
+    // Its default place, or a later version's, is the release itself: no license of it.
+    for (const license of [`${places}v2.ttl`, `${places}v3.ttl`]) {
+      const atPlace = deckToDraft({ ...deck, license }, [], DRAFT, NOW).draft;
+      expect(atPlace.root).not.toHaveProperty("license");
+      expect(atPlace.triples).toEqual([]);
+    }
+    // An earlier version's place is another release's.
+    expect(
+      deckToDraft({ ...deck, license: `${places}v1.ttl` }, [], DRAFT, NOW).draft.root.license,
+    ).toBe(`${places}v1.ttl`);
+    expect(draft.root.theme).toEqual([
+      "https://solid-memo.com/ns/vocab/topics.ttl#geography",
+      "http://publications.europa.eu/resource/authority/data-theme/EDUC",
+    ]);
+    expect(draft.triples).toEqual([]);
+    const pictured = {
+      frontImage: picture,
+      frontImageDescription: shows,
+      backImage: picture,
+      backImageDescription: shows,
+      textFormat: SM.markdown,
+    };
+    const { subject, ...plain } = deckToDraft(deck, [cards[0]!], DRAFT, NOW).draft.cards[0]!.data;
+    expect(draft.cards.map((made) => made.data)).toEqual([
+      { ...plain, ...pictured, subject },
+      { ...plain, subject },
+    ]);
+  });
+
   it("states EDUC once for a deck that states it already", () => {
     const educ = "http://publications.europa.eu/resource/authority/data-theme/EDUC";
     const { draft } = deckToDraft({ ...deck, themes: [educ] }, [], DRAFT, NOW);
