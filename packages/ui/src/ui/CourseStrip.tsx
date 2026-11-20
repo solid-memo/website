@@ -6,11 +6,7 @@ import { useEffect, useId } from "preact/hooks";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import type { CourseSummary } from "@solid-memo/application/courses";
 import type { UseCases } from "@solid-memo/application/useCases";
-import {
-  courseProgress,
-  type ChapterProgress,
-  type CourseChapter,
-} from "@solid-memo/domain/course";
+import { courseStandingOf, type CourseStanding } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -130,21 +126,14 @@ export function courseStripQuery(useCases: UseCases, deck: Deck) {
  */
 const COURSES_READ_BEHIND = 4;
 
-/** Where a course not yet finished stands, as the strip shows it. */
-interface CourseStanding {
-  /** The chapter to go on with. */
-  current: CourseChapter;
-  /** Where the learner stands in that chapter. */
-  progress: ChapterProgress;
-  /** Chapters completed. */
-  done: number;
-}
-
 /**
  * What each summary came to, and for which completed chapters. The strip
- * renders again as each course's summary arrives, and courses may share
- * one long outline, so nothing that walks an outline runs on each render:
- * it runs once per summary and value of the deck's completed chapters.
+ * renders again as each course's summary arrives, so a standing is worked
+ * out once per summary and value of the deck's completed chapters.
+ * Courses may share one long outline: what is worked out of the outline
+ * alone is kept for the outline and its chapters (courseStandingOf), and
+ * each course adds only its own answered cards, not the steps of the
+ * chapter open.
  */
 const standings = new WeakMap<
   CourseSummary,
@@ -158,23 +147,13 @@ function standingOf(
 ): CourseStanding | undefined {
   const known = standings.get(summary);
   if (known !== undefined && known.completedChapters === completedChapters) return known.standing;
-  const standing = workOutStanding(summary, completedChapters ?? []);
+  const standing = courseStandingOf(
+    summary.outline,
+    summary.answeredCardIds,
+    completedChapters ?? [],
+  );
   standings.set(summary, { completedChapters, standing });
   return standing;
-}
-
-function workOutStanding(
-  { outline, answeredCardIds }: CourseSummary,
-  completedChapters: readonly string[],
-): CourseStanding | undefined {
-  const progress = courseProgress(outline, answeredCardIds, completedChapters);
-  const at = progress.chapters.findIndex((chapter) => chapter.url === progress.currentChapterUrl);
-  if (at === -1) return undefined;
-  return {
-    current: outline.chapters[at]!,
-    progress: progress.chapters[at]!,
-    done: progress.chapters.filter((chapter) => chapter.state === "done").length,
-  };
 }
 
 /**

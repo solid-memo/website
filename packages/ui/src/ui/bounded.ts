@@ -7,7 +7,9 @@ import { useState } from "preact/hooks";
 /**
  * How many of a list a screen draws at most: a release can state any
  * number of a thing, so each of its lists on a screen is bounded so,
- * and says how many more there are (bounded).
+ * and says how many more there are (bounded). A course's statistics
+ * give as many chapters (the domain's RESULTS_LIMIT, course.ts), which
+ * cannot import this: change the two together.
  */
 export const LIST_LIMIT = 50;
 
@@ -40,7 +42,7 @@ export function usePaged<T>(all: readonly T[]): {
   };
 }
 
-/** How many of the list before the one a window is drawn around (boundedAround) it shows too. */
+/** How many of the list before the one a window is drawn around (boundedAround) it shows too: as the domain's RESULTS_LEAD (course.ts). */
 const LIST_LEAD = 5;
 
 /**

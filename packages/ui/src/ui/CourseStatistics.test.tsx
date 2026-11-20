@@ -6,10 +6,11 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CourseStatistics } from "@solid-memo/application/statistics";
+import { courseProgressOf, type CourseOutline } from "@solid-memo/domain/course";
 import type { Deck } from "@solid-memo/domain/deck";
 import { courseDeck, courseInstance, courseLibraryDeck, RELEASE } from "../test/course";
 import { makeUseCasesFake } from "../test/useCasesFake";
-import { LIST_LIMIT } from "./bounded";
+import { boundedAround } from "./bounded";
 import { CourseStatisticsContainer, CourseStatisticsView } from "./CourseStatistics";
 import { courseHref } from "./router";
 
@@ -25,6 +26,8 @@ const { isCourse: _course, ...notCourse } = courseLibraryDeck;
 const results: CourseStatistics = {
   deck: courseDeck,
   done: 1,
+  count: 3,
+  start: 0,
   chapters: [
     {
       url: `${RELEASE}#ch-1`,
@@ -80,15 +83,16 @@ describe("CourseStatisticsView", () => {
     ]);
   });
 
-  it("shows at most LIST_LIMIT chapters of a course, around the one to go on with, and how many more there are", () => {
-    const count = 20_000;
+  it("shows the window of chapters the results give, and how many come before and after it", () => {
     const many: CourseStatistics = {
       deck: courseDeck,
       done: 700,
-      chapters: Array.from({ length: count }, (_, at) => ({
-        url: `${RELEASE}#c${at}`,
-        title: { en: `Title ${at}` },
-        state: at < 700 ? "done" : at === 700 ? "open" : "locked",
+      count: 20_000,
+      start: 695,
+      chapters: Array.from({ length: 50 }, (_, n) => ({
+        url: `${RELEASE}#c${695 + n}`,
+        title: { en: `Title ${695 + n}` },
+        state: n < 5 ? "done" : n === 5 ? "open" : "locked",
         quiz: { answers: 0, right: 0 },
       })),
     };
@@ -96,7 +100,7 @@ describe("CourseStatisticsView", () => {
     const section = screen.getByRole("region", { name: "Your courses" });
     expect(section).toHaveTextContent("700 of 20,000 chapters done");
     const rows = within(section).getAllByRole("row").slice(1);
-    expect(rows).toHaveLength(LIST_LIMIT);
+    expect(rows).toHaveLength(50);
     expect(rows[0]).toHaveTextContent("Title 695");
     expect(rows[5]).toHaveTextContent("Title 700Open");
     expect(section).toHaveTextContent("695 earlier chapters, not listed here.");
@@ -108,6 +112,32 @@ describe("CourseStatisticsView", () => {
       <CourseStatisticsView instanceUrl={courseInstance.url} courses={[]} />,
     );
     expect(container).toBeEmptyDOMElement();
+  });
+});
+
+describe("courseProgressOf", () => {
+  // The domain cannot import the ui: its window is kept in step with the screen's by this test.
+  it("gives the window of chapters a screen draws around the one open (boundedAround)", () => {
+    const count = 120;
+    const outline: CourseOutline = {
+      releaseUrl: RELEASE,
+      chapters: Array.from({ length: count }, (_, at) => ({
+        id: `c${at}`,
+        url: `${RELEASE}#c${at}`,
+        position: at,
+        title: { en: `Title ${at}` },
+        reviewQuestionIds: [`q${at}`],
+        steps: [],
+      })),
+    };
+    const all = outline.chapters.map((chapter) => chapter.url);
+    for (const open of [0, 3, 5, 6, 40, 70, 75, 76, 119, count]) {
+      const completed = all.slice(0, open);
+      const results = courseProgressOf(outline, completed, []);
+      const { shown, start } = boundedAround(all, open < count ? open : -1);
+      expect(results.start).toBe(start);
+      expect(results.chapters.map((chapter) => chapter.url)).toEqual(shown);
+    }
   });
 });
 
