@@ -1675,6 +1675,19 @@ A new draft starts from
     instance's, by the place rule of the next version below. Any other
     is read as no one, so an instance in someone else's pod can't have
     cards kept from everyone copied into it.
+  - The deck's addresses in the new draft's folder are left out, and
+    so are those at its default place or a later version's
+    (`releases/<name>/v<M>.ttl`, below). Left out are its license, a
+    theme, a card's picture with its description, a card's text
+    format, and what a card is about. The deck was made before the
+    draft, so no such address is part of it. Read back, one in the
+    folder would name one of the draft's own documents or subjects.
+    Published at its default place, the release would be its own
+    license, say. The draft is then held to the rule a draft of a
+    release is (below). It keeps no statement of, or naming, an
+    address in its folder. Nor does it keep a statement of its default
+    place or a later version's, which would make publishing there
+    refuse it.
 - **the next version of a release**, by its address, in the library or
   in a pod (`nextVersionDraft` in
   [releaseVersion.ts](../packages/domain/src/release/releaseVersion.ts)).
@@ -1793,7 +1806,8 @@ Also dropped is a statement of, or naming, an address in the
 new draft's folder, its own release document's too, before the
 release's subjects are moved there. Read back from the pod, that
 address would be one of the draft's subjects, with statements no editor
-shows. Copying a draft drops them the same way. One that is kept can
+shows. Copying a draft drops them the same way, and so does making a
+draft of a deck. One that is kept can
 still be of the address the draft is later published at, or of a
 fragment of it. No editor shows it, so publishing there refuses the draft
 (`releaseForeignStatement`, [Publishing a release](#publishing-a-release)).

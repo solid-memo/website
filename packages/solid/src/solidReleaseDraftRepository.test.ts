@@ -8,6 +8,7 @@ import type { Quad } from "@rdfjs/types";
 import { describe, expect, it, vi } from "vitest";
 import { createReleaseDraftUseCases } from "@solid-memo/application/releaseDrafts";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
+import type { Deck } from "@solid-memo/domain/deck";
 import { newestRelease } from "@solid-memo/domain/library";
 import { courseProblems } from "@solid-memo/domain/release/courseRules";
 import { draftUrlOf } from "@solid-memo/domain/release/draftLayout";
@@ -1503,6 +1504,67 @@ describe("assemble", () => {
       );
       expect(released.root.releasedAs).toBeUndefined();
     }
+  });
+
+  it("makes a draft of a deck that publishes, whatever the deck names in the new draft's container (GHSA-qh9m-2c96-5rr2)", async () => {
+    const container = `${INSTANCE}drafts/capitals/v1/`;
+    const cc = "https://creativecommons.org/licenses/by/4.0/";
+    /** The draft of a deck licensed `license`, as read, and its release. */
+    const made = async (license: string) => {
+      const pod = await draftPod();
+      const deck: Deck = {
+        id: "capitals",
+        url: `${INSTANCE}catalog.ttl#capitals`,
+        title: { en: "Capitals" },
+        cardsDocumentUrl: `${INSTANCE}decks/capitals.ttl`,
+        reviewsDocumentUrl: `${INSTANCE}reviews/capitals.ttl`,
+        createdAt: NOW,
+        formatVersion: 6,
+        direction: "bidirectional",
+        authors: [],
+        license,
+      };
+      const useCases = createReleaseDraftUseCases({
+        releaseDraftRepository: pod.repository,
+        deckRepository: { listCards: async () => [] } as never,
+        deckLibrary: {} as never,
+        shapeValidator: {} as never,
+        fileExchange: {} as never,
+        storageGateway: { discoverStorages: async () => [] },
+        releasePublisher: { listPublished: async () => [] },
+        now: () => new Date(NOW),
+      });
+      const created = await useCases.createReleaseDraft(
+        INSTANCE,
+        { kind: "fromDeck", deck },
+        `${POD}profile/card#me`,
+      );
+      const draft = await useCases.getReleaseDraft(created!.draft.url);
+      expect(draft.url).toBe(`${container}release.ttl`);
+      const turtle = await pod.repository.assemble(
+        draft.url,
+        `${INSTANCE}releases/capitals/v1.ttl`,
+        NOW,
+      );
+      return { draft, turtle };
+    };
+    // A license elsewhere is kept, and typed a license.
+    const kept = await made(cc);
+    expect(kept.draft.root.license).toBe(cc);
+    expect(kept.turtle).toContain(cc);
+    // One of the new draft's own documents is no license of the deck's: the draft states none.
+    const own = await made(`${container}cards.ttl`);
+    expect(own.draft.root.license).toBeUndefined();
+    expect(own.turtle).not.toContain("LicenseDocument");
+    // Nor is the address it publishes at, its default place: a release licensed by itself.
+    const place = await made(`${INSTANCE}releases/capitals/v1.ttl`);
+    expect(place.draft.root.license).toBeUndefined();
+    expect(place.turtle).not.toContain("LicenseDocument");
+    expect(place.turtle).not.toMatch(/license/i);
+    // Nor a later version's.
+    const later = await made(`${INSTANCE}releases/capitals/v2.ttl`);
+    expect(later.draft.root.license).toBeUndefined();
+    expect(later.turtle).not.toMatch(/license/i);
   });
 
   it("publishes a release file in another's series in a series of its own, which no learner of that one is offered (GHSA-38m7-8r5j-q79f)", async () => {

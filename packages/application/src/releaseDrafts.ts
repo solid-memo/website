@@ -696,7 +696,8 @@ export function createReleaseDraftUseCases({
           const draft = await create(instanceUrl, { title: from.deck.title, version: 1 }, (url) => {
             const made = deckToDraft(from.deck, cards, url, at);
             basedOn = made.basedOn;
-            return made.draft;
+            // Held to the rule a release made a draft is (GHSA-qh9m-2c96-5rr2): the deck's IRIs are anyone's to choose.
+            return inItsPlace(made.draft, url);
           });
           return basedOn === undefined ? { draft } : { draft, basedOn };
         }
