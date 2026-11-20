@@ -4,7 +4,7 @@
 
 import type { DistractorV1, DraftDeckV1 } from "@solid-memo/vocab/types.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import { agentUrlsOf } from "../agentRecord.ts";
+import { agentUrlsOf, type AgentHolder } from "../agentRecord.ts";
 import { AppError } from "../appError.ts";
 import { cardToRecord, deckAgents, distractorToRecord } from "../deckRecord.ts";
 import type { Card, Deck, DeckDirection } from "../deck.ts";
@@ -40,6 +40,14 @@ const DIRECTIONS: Record<DeckDirection, DraftDeckV1["studyDirection"]> = {
  *   creators; the first of them its publisher. One whose IRI is longer
  *   than a term may be is refused (termTooLong), as the draft's write
  *   would refuse it, before the draft's ids are keyed by it.
+ * - **One id, one subject:** a deck keeps its agents in its catalog and
+ *   its cards and wrong options in its cards document, while a draft
+ *   names all of them in one, so an author's node is never a card's or
+ *   a wrong option's id (the next node agentUrlsOf gives, as for a node
+ *   another author holds), and a wrong option an earlier version left at
+ *   a card's id gets an id of its own (`<id>-2`, …), which the cards
+ *   naming it name. Else one would replace the other when the draft is
+ *   written (GHSA-w96m-f3jj-jcmw).
  * - **Its IRIs in the draft's container, or at its default places**
  *   (where it or a next version of it is published unless the creator
  *   chooses another folder, isDraftsPlaceOnward) are left out: its
@@ -63,19 +71,23 @@ export function deckToDraft(
   const isDraftsOwn = (iri: string) => iri.startsWith(container) || isDraftsPlaceOnward(url, iri);
   const license =
     deck.license === undefined || isDraftsOwn(deck.license) ? undefined : deck.license;
-  const agents = deckAgents(deck, agentUrlsOf(url, deck.authors));
+  const placed = apartFromCards(cards);
+  const ids = new Set(
+    placed.flatMap((card) => [
+      card.id,
+      ...(card.distractors ?? []).map((distractor) => distractor.id),
+    ]),
+  );
+  // A card's or a wrong option's node holds no author, nor is one written over it.
+  const holderAt = (iri: string): AgentHolder =>
+    !isIriPastBound(iri) && ids.has(iri.slice(url.length + 1)) ? "unreadable" : null;
+  const agents = deckAgents(deck, agentUrlsOf(url, deck.authors, holderAt));
   const creators = agents.map((agent) => agent.url);
   if (creators.some(isIriPastBound)) {
     throw new AppError("termTooLong", { limit: HASHED_CHARACTERS });
   }
   const fragment = (iri: string) => iri.slice(url.length + 1);
-  const taken = [
-    ...creators.map(fragment),
-    ...cards.flatMap((card) => [
-      card.id,
-      ...(card.distractors ?? []).map((distractor) => distractor.id),
-    ]),
-  ];
+  const taken = [...creators.map(fragment), ...ids];
   const blank = blankDraft({ url, course: false, title: stated(deck.title), now, taken });
   const description = stated(deck.description ?? {});
   const draft: ReleaseDraft = {
@@ -96,15 +108,52 @@ export function deckToDraft(
       keyword: stated(deck.keywords ?? {}),
     },
     agents: agents.map((agent) => ({ id: fragment(agent.url), data: agent.record })),
-    cards: cards.map((card) => ({
+    cards: placed.map((card) => ({
       id: card.id,
       data: cardToRecord(placedCard(card, isDraftsOwn), card.createdAt, url),
     })),
-    distractors: distractorNodes(cards),
+    distractors: distractorNodes(placed),
     // Its license, typed as a release's is (setLicense).
     triples: license === undefined ? [] : [licenseType(license)],
   };
   return deck.sourceUrl === undefined ? { draft } : { draft, basedOn: deck.sourceUrl };
+}
+
+/**
+ * The cards with every wrong option at a card's id (one subject an
+ * earlier version typed both) at an id of its own instead: `<id>-2`,
+ * `<id>-3`, … the first that is no card's or wrong option's, the same
+ * for every card that names it.
+ */
+function apartFromCards(cards: readonly Card[]): readonly Card[] {
+  const cardIds = new Set(cards.map((card) => card.id));
+  const used = new Set([
+    ...cardIds,
+    ...cards.flatMap((card) => (card.distractors ?? []).map((distractor) => distractor.id)),
+  ]);
+  const renamed = new Map<string, string>();
+  const idOf = (id: string): string => {
+    if (!cardIds.has(id)) return id;
+    let name = renamed.get(id);
+    if (name === undefined) {
+      name = `${id}-2`;
+      for (let n = 3; used.has(name); n++) name = `${id}-${n}`;
+      used.add(name);
+      renamed.set(id, name);
+    }
+    return name;
+  };
+  return cards.map((card) =>
+    card.distractors?.some((distractor) => cardIds.has(distractor.id))
+      ? {
+          ...card,
+          distractors: card.distractors.map((distractor) => ({
+            ...distractor,
+            id: idOf(distractor.id),
+          })),
+        }
+      : card,
+  );
 }
 
 /** The card without an IRI `isDraftsOwn` says is the draft's: a picture goes with what it shows. */

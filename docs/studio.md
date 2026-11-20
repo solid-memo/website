@@ -1679,6 +1679,14 @@ A new draft starts from
   - The draft takes every card under its id, its retired ones and
     wrong options with it, its authors as the release's agents, the
     first as its publisher, its themes and EDUC.
+  - A deck keeps its agents in its catalog and its cards in their own
+    document, while a draft names them all in one. So an author whose
+    agent id (`#agent-<slug>`) is a card's or a wrong option's gets the
+    next free node, as for a node another author holds
+    ([data-model.md](data-model.md#decks-and-cards)). A wrong option an
+    earlier version left at a card's id gets an id of its own
+    (`<id>-2`, …), and the cards that name it name that one. No
+    subject replaces another when the draft is written.
   - The learner's own is left behind: where its documents are, its
     study caps, its card language, the hosts whose pictures it shows,
     its place among the groups, a

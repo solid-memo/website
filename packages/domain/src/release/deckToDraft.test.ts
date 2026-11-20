@@ -193,6 +193,60 @@ describe("deckToDraft", () => {
     ]);
   });
 
+  it("keeps an author apart from a card and a wrong option at the author's id (GHSA-w96m-f3jj-jcmw)", () => {
+    const clashing: Card[] = [
+      {
+        id: "agent-bob",
+        url: `${deck.cardsDocumentUrl}#agent-bob`,
+        front: { en: "Q" },
+        back: { en: "A" },
+        createdAt: NOW,
+        formatVersion: 7,
+      },
+    ];
+    const { draft } = deckToDraft({ ...deck, authors: ["Bob"] }, clashing, DRAFT, NOW);
+    const [agent] = draft.agents;
+    expect(agent!.id).toMatch(/^agent-bob-[0-9a-f]{6}$/);
+    expect(agent!.data).toEqual({ name: "Bob" });
+    expect(draft.root.creator).toEqual([`${DRAFT}#${agent!.id}`]);
+    expect(draft.root.publisher).toBe(`${DRAFT}#${agent!.id}`);
+    expect(draft.cards.map((card) => card.id)).toEqual(["agent-bob"]);
+    // A wrong option at its id, and one at the next node too: the author takes the one after.
+    const option = (id: string) => ({ id, text: { en: id } });
+    const both = deckToDraft(
+      { ...deck, authors: ["Bob"] },
+      [{ ...cards[0]!, distractors: [option("agent-bob"), option(agent!.id)] }],
+      DRAFT,
+      NOW,
+    ).draft;
+    expect(both.agents.map((one) => one.id)).toEqual([`${agent!.id}-2`]);
+    expect(both.root.creator).toEqual([`${DRAFT}#${agent!.id}-2`]);
+    expect(both.distractors.map((one) => one.id)).toEqual(["agent-bob", agent!.id]);
+  });
+
+  it("gives a wrong option at a card's id an id of its own, the same for every card naming it (GHSA-w96m-f3jj-jcmw)", () => {
+    const option = { id: "c2", text: { en: "Bergen" } };
+    const taken = { id: "c2-2", text: { en: "Taken" } };
+    const { draft } = deckToDraft(
+      deck,
+      [
+        { ...cards[0]!, distractors: [option, taken] },
+        { ...cards[1]!, distractors: [option] },
+      ],
+      DRAFT,
+      NOW,
+    );
+    expect(draft.cards.map((card) => card.id)).toEqual(["turtle", "c2"]);
+    expect(draft.distractors).toEqual([
+      { id: "c2-3", data: { text: { en: "Bergen" } } },
+      { id: "c2-2", data: { text: { en: "Taken" } } },
+    ]);
+    expect(draft.cards.map((card) => card.data.distractor)).toEqual([
+      [`${DRAFT}#c2-3`, `${DRAFT}#c2-2`],
+      [`${DRAFT}#c2-3`],
+    ]);
+  });
+
   it("never makes the release a deck was copied from a source of the draft: it is what the deck is based on", () => {
     const { draft, basedOn } = deckToDraft(deck, cards, DRAFT, NOW);
     expect(basedOn).toBe("https://solid-memo.com/decks/capitals/v1.ttl");
