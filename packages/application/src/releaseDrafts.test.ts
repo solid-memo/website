@@ -1229,6 +1229,37 @@ describe("getReleaseDraft", () => {
     await useCases.getReleaseDraft(draft.url);
     expect(repository.readRelease).toHaveBeenCalledTimes(2);
   });
+
+  it("never reads a release it follows that is neither the instance's nor the library's, and counts all it has as published (GHSA-vm79-23qx-7h64)", async () => {
+    const elsewhere = "https://other.example/r/deck/v1.ttl";
+    const draft = { ...courseDraft(), root: { ...courseDraft().root, prev: elsewhere } };
+    const { useCases, repository, releasePublisher } = setUp({ stored: draft });
+    const read = await useCases.getReleaseDraft(draft.url);
+    expect(read.published.ids).toMatchObject({ "q-loose": "card", "ch-b": "chapter" });
+    expect(read.published.activities).toEqual(["compilation"]);
+    await expect(useCases.readReleaseDraft(draft.url)).resolves.toMatchObject({ version: "v1" });
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    // Where it is is told once.
+    expect(releasePublisher.listPublished).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads no release it follows while its place can't be told, and tells it again next time", async () => {
+    const beside = "https://pod.example/public/solid/v1.ttl";
+    const draft = { ...courseDraft(), root: { ...courseDraft().root, prev: beside } };
+    const { useCases, repository, releasePublisher } = setUp({
+      stored: draft,
+      published: [beside],
+    });
+    releasePublisher.listPublished.mockRejectedValueOnce(new Error("offline"));
+    const read = await useCases.getReleaseDraft(draft.url);
+    expect(read.published.ids).toMatchObject({ "q-loose": "card" });
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    await useCases.getReleaseDraft(draft.url);
+    await useCases.getReleaseDraft(draft.url);
+    expect(repository.readRelease).toHaveBeenCalledTimes(1);
+    expect(repository.readRelease).toHaveBeenCalledWith(beside);
+    expect(releasePublisher.listPublished).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("editReleaseDraft", () => {
@@ -1255,6 +1286,37 @@ describe("editReleaseDraft", () => {
       refusal: { refused: "published", of: "card", id: "q-loose" },
     });
     expect(repository.applyChanges).not.toHaveBeenCalled();
+  });
+
+  it("goes by no release it follows that is neither the instance's nor the library's, on any attempt (GHSA-vm79-23qx-7h64)", async () => {
+    // What a release served at either address published: one chapter more than the draft has.
+    const served = (url: string): ReleaseDraft => {
+      const release = rebaseDraft(courseDraft(), url);
+      const chapter = release.chapters[0]!;
+      return { ...release, chapters: [...release.chapters, { ...chapter, id: "ch-z" }] };
+    };
+    const changes: DraftChange[] = [{ kind: "addChapter", id: "ch-z", at: 1 }];
+    const following = (prev: string) => ({
+      ...courseDraft(),
+      root: { ...courseDraft().root, prev },
+    });
+    const elsewhere = "https://other.example/r/deck/v1.ttl";
+    const { useCases, repository } = setUp({ stored: following(elsewhere) });
+    repository.readRelease.mockImplementation(async (url: string) => served(url));
+    repository.applyChanges.mockRejectedValueOnce(new AppError("changedElsewhere", { url: "x" }));
+    await expect(
+      useCases.editReleaseDraft(following(elsewhere).url, changes),
+    ).resolves.toMatchObject({ ok: true });
+    expect(repository.read).toHaveBeenCalledTimes(2);
+    expect(repository.readRelease).not.toHaveBeenCalled();
+    // The instance's own release is gone by.
+    const { useCases: own, repository: ownRepository } = setUp({ stored: following(V1) });
+    ownRepository.readRelease.mockImplementation(async (url: string) => served(url));
+    await expect(own.editReleaseDraft(following(V1).url, changes)).resolves.toEqual({
+      ok: false,
+      refusal: { refused: "idTaken", id: "ch-z" },
+    });
+    expect(ownRepository.readRelease).toHaveBeenCalledWith(V1);
   });
 
   it("reads the draft and makes the changes again when it changed elsewhere, or a new document was made there, a few times", async () => {
