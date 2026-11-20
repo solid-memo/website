@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.9](https://github.com/solid-memo/website/compare/v8.0.8...v8.0.9) (2026-11-20)
+
+### Fixes
+
+* **application,solid:** refuse a deck file import no read could take in ([9012bb3](https://github.com/solid-memo/website/commit/9012bb363d978fe9f6ac93733f6824c8fb91073e))
+* **solid:** bound the shape check of a linked release ([f82a773](https://github.com/solid-memo/website/commit/f82a773ec0e38e05d61010dc7765db0ae21b1449))
+* **studio:** sort deck titles and table text by bounded text ([55b0f72](https://github.com/solid-memo/website/commit/55b0f729ff1747bcca1b28e7d4a9729496e6e015))
+
 ## [8.0.8](https://github.com/solid-memo/website/compare/v8.0.7...v8.0.8) (2026-11-20)
 
 ### Fixes
