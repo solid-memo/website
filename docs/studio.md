@@ -1463,9 +1463,16 @@ doesn't list is an unknown release.
 For each copy with a newer release, the screen asks what upgrading
 would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
 [migrations.md](migrations.md#catching-up-with-the-library)), with the
-copy and its series as found, reading nothing again. It says what the
-upgrade does in Solid Memo's sentence, or that it has nothing for the
-copy.
+copy and its series as found, reading nothing again. Copies that name
+one cards document share its cards by id, worked out once
+([libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)). Copies
+of a release the library's index lists share the plan of the cards too,
+as the library reads each release once: only what each deck's own
+entry changes is planned for each. A copy from a link reads its
+releases for its own plan, so each such copy compares the cards of the
+releases it read, which are within one release's limits. It says what
+the upgrade does in Solid Memo's sentence, or that it has nothing for
+the copy.
 
 The table is a [`DataTable`](#card-workbench). The copy at the cursor is
 in the aside (named Upgrade), with the rest of its plan: what history is

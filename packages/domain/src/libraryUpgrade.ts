@@ -14,6 +14,7 @@ import {
   textFormatOf,
 } from "./deck";
 import { sameOutline, type CourseOutline } from "./course";
+import { derivedOnce } from "./frozen";
 import type { LibraryCard, LibraryDeckContent, LibraryRelease } from "./library";
 import { isDefaultDeckDescription } from "./dcat";
 import { noKeywords, sameKeywords, type LangTexts } from "./keywords";
@@ -56,20 +57,20 @@ export interface LibraryUpgradePlan {
   /** What changed, release by release, oldest first; releases without notes left out. */
   notes: { version: string; notes: string }[];
   /** Cards the library added; retired ones too, kept retired, so a later release can bring them back. */
-  add: LibraryCard[];
+  add: readonly LibraryCard[];
   /**
    * Cards the library changed that the user has not, as the release has
    * them, retired or not; and cards whose copy lost the release's text
    * format (see untouched) but is otherwise as the older release or the
    * newer one has it, whose marker it brings back.
    */
-  change: LibraryCard[];
+  change: readonly LibraryCard[];
   /** Cards the library retired: kept with their review state, as the user has them, but no longer studied. */
-  retire: Card[];
+  retire: readonly Card[];
   /** Retired cards the library uses again: studied again, with the review state they had. */
-  restore: Card[];
+  restore: readonly Card[];
   /** Cards the library removed that the user has not changed. */
-  remove: Card[];
+  remove: readonly Card[];
   /**
    * Cards whose subjects the library changed, which the upgrade does not
    * otherwise change (see `change`), with the newer release's subjects
@@ -79,14 +80,14 @@ export interface LibraryUpgradePlan {
    * not, their content as the user has it. A copy with subjects of its
    * own, which only another app could have written, is left as it is.
    */
-  about: Card[];
+  about: readonly Card[];
   /**
    * Cards the library changed or removed that the user has changed too,
    * and cards it added that the copy has otherwise than the release (an
    * upgrade cut off half-way wrote them, and the user changed them since):
    * left as the user has them.
    */
-  kept: Card[];
+  kept: readonly Card[];
   /**
    * Cards the upgrade writes nothing to that the copy already has as the
    * newer release changed them — added, changed, retired or brought
@@ -97,7 +98,7 @@ export interface LibraryUpgradePlan {
    * still names the older release, and moving it to the newer keeps a
    * later upgrade from taking them for the user's changes.
    */
-  applied: Card[];
+  applied: readonly Card[];
   /**
    * The ids of cards the library removed that the copy no longer has
    * either: an upgrade cut off after it wrote the cards removed them, or
@@ -107,7 +108,7 @@ export interface LibraryUpgradePlan {
    * — but in a course's deck, which lacks every card the learner has not
    * reached.
    */
-  gone: string[];
+  gone: readonly string[];
   /**
    * What of the deck itself the newer release changed and the copy
    * already has as the newer release has it — its direction, title,
@@ -401,66 +402,83 @@ function appliedDeckDetails(
 }
 
 /**
- * What upgrading the copy to the newer release would do; null — no
- * offer — when the release is not newer, uses a card format this app
- * does not know, or would change nothing (a copy already as the newer
- * release has it, in some card or in the deck's own texts, still moves to
- * it: see `applied`, `gone` and `appliedAbout`). Planned again on a copy
- * an upgrade cut off half-way left, it finishes that upgrade, or, once a
- * newer release is out, takes the copy on to that one: a card already as
- * the release the cut-off upgrade was to has it (one of `between`), or as
- * the newer release has it, counts as the library's, not the user's. A
- * course's deck (`course`) holds only the cards the learner has reached,
- * each joining it when its question is first answered: its upgrade adds
- * none, but changes, retires and restores those it holds as any copy's;
- * and a change of its outline alone (`outlines`), or of questions the
- * learner has not reached, is offered too.
+ * What a plan's inputs other than the deck are: the copy's cards and the
+ * releases it is planned with (planLibraryUpgrade).
  */
-export function planLibraryUpgrade({
-  deck,
-  cards,
-  from,
-  between = [],
-  to,
-  releases,
-  course = false,
-  outlines,
-  linked = false,
-}: {
-  deck: Deck;
-  /** The copy's cards, as the pod holds them. */
+interface CardPlanInput {
   cards: readonly Card[];
-  /** The release the copy came from. */
   from: LibraryDeckContent;
-  /**
-   * The releases between the two, when the copy is more than one behind:
-   * an upgrade to one of them, cut off before it moved the deck's entry,
-   * may have left cards as that release has them. None by default.
-   */
-  between?: readonly LibraryDeckContent[];
-  /** The deck's current release. */
+  between: readonly LibraryDeckContent[];
   to: LibraryDeckContent;
-  /** Every release of the deck, as the index describes them. */
-  releases: readonly LibraryRelease[];
-  /** Whether the copy is a course's deck (either release is a course). */
-  course?: boolean;
-  /** A course's outline in the release the copy came from and in the newer one, when both are courses. */
-  outlines?: { from: CourseOutline; to: CourseOutline };
-  /**
-   * Whether the copy's series is from a link, whose releases its creator
-   * writes: a card of the copy that names no release is then the user's,
-   * and out of the plan.
-   */
-  linked?: boolean;
-}): LibraryUpgradePlan | null {
-  if (Number(to.version) <= Number(from.version)) return null;
+  course: boolean;
+  linked: boolean;
+}
+
+/** What a plan does to the copy's cards, which goes by its cards and releases alone, not by the deck's entry. */
+type CardPlan = Pick<
+  LibraryUpgradePlan,
+  "add" | "change" | "retire" | "restore" | "remove" | "about" | "kept" | "applied" | "gone"
+> & { unreached: boolean };
+
+/** The copy's cards by their ids, of a frozen array once (derivedOnce). */
+const copiesById = new WeakMap<readonly Card[], Map<string, Card>>();
+
+/** The card plans made of a frozen array of cards, by the newer release, with the other inputs each went by. */
+const cardPlans = new WeakMap<
+  readonly Card[],
+  WeakMap<LibraryDeckContent, { input: CardPlanInput; plan: CardPlan | null }[]>
+>();
+
+/** Whether two plans' inputs are the same: the same cards and the same releases as read, not only alike. */
+function sameInput(a: CardPlanInput, b: CardPlanInput): boolean {
+  return (
+    a.from === b.from &&
+    a.course === b.course &&
+    a.linked === b.linked &&
+    a.between.length === b.between.length &&
+    a.between.every((release, at) => release === b.between[at])
+  );
+}
+
+/**
+ * planCards of the copy's cards, made once while they are frozen
+ * (derivedOnce): the decks that name one cards document are given one
+ * frozen array of its cards, and the copies of one release among them
+ * share their plan of it, with what the deck's own entry changes
+ * (planLibraryUpgrade) made for each. Each plan goes by the releases as
+ * they were read, which no one changes: one read again is another plan.
+ * So a copy from a link, whose releases each plan reads anew (and their
+ * creator may write again under one URL and version), is planned of
+ * what it read, never of another copy's read.
+ */
+function cardPlanOnce(input: CardPlanInput): CardPlan | null {
+  // Looked up first, as derivedOnce does: cards kept were frozen, and stay so.
+  let made = cardPlans.get(input.cards)?.get(input.to);
+  const found = made?.find((one) => sameInput(one.input, input));
+  if (found !== undefined) return found.plan;
+  if (!Object.isFrozen(input.cards)) return planCards(input);
+  let byRelease = cardPlans.get(input.cards);
+  if (byRelease === undefined) cardPlans.set(input.cards, (byRelease = new WeakMap()));
+  made = byRelease.get(input.to);
+  if (made === undefined) byRelease.set(input.to, (made = []));
+  const plan = planCards(input);
+  made.push({ input, plan });
+  return plan;
+}
+
+/**
+ * What the upgrade does to the copy's cards (planLibraryUpgrade), its
+ * lists frozen; null when the newer release uses a card format this app
+ * does not know.
+ */
+function planCards({ cards, from, between, to, course, linked }: CardPlanInput): CardPlan | null {
   if (to.cards.some((card) => card.formatVersion > CARD_FORMAT_VERSION)) return null;
   const byId = (release: LibraryDeckContent) =>
     new Map(release.cards.map((card) => [card.id, card]));
   const before = byId(from);
   const passed = between.map(byId);
   const after = byId(to);
-  const copy = new Map(cards.map((card) => [card.id, card]));
+  const copy = derivedOnce(copiesById, cards, (all) => new Map(all.map((card) => [card.id, card])));
   /** Whether the copy's card is the user's own, not the series': one of a deck from a link that names no release. */
   const usersOwn = (card: Card) => linked && card.fromRelease === undefined;
   /** The card in each release before the newer one that has it: the one the copy came from, then those in between. */
@@ -535,6 +553,71 @@ export function planLibraryUpgrade({
       unreached = true;
     }
   }
+  const planned = { add, change, retire, restore, remove, kept, applied, about, gone, unreached };
+  // Shared by the copies planned of one cards document: none of them changes another's.
+  for (const list of Object.values(planned)) if (Array.isArray(list)) Object.freeze(list);
+  return planned;
+}
+
+/**
+ * What upgrading the copy to the newer release would do; null — no
+ * offer — when the release is not newer, uses a card format this app
+ * does not know, or would change nothing (a copy already as the newer
+ * release has it, in some card or in the deck's own texts, still moves to
+ * it: see `applied`, `gone` and `appliedAbout`). Planned again on a copy
+ * an upgrade cut off half-way left, it finishes that upgrade, or, once a
+ * newer release is out, takes the copy on to that one: a card already as
+ * the release the cut-off upgrade was to has it (one of `between`), or as
+ * the newer release has it, counts as the library's, not the user's. A
+ * course's deck (`course`) holds only the cards the learner has reached,
+ * each joining it when its question is first answered: its upgrade adds
+ * none, but changes, retires and restores those it holds as any copy's;
+ * and a change of its outline alone (`outlines`), or of questions the
+ * learner has not reached, is offered too. What it does to frozen cards
+ * is planned once for the same releases as read (cardPlanOnce): the
+ * copies that name one cards document share it.
+ */
+export function planLibraryUpgrade({
+  deck,
+  cards,
+  from,
+  between = [],
+  to,
+  releases,
+  course = false,
+  outlines,
+  linked = false,
+}: {
+  deck: Deck;
+  /** The copy's cards, as the pod holds them. */
+  cards: readonly Card[];
+  /** The release the copy came from. */
+  from: LibraryDeckContent;
+  /**
+   * The releases between the two, when the copy is more than one behind:
+   * an upgrade to one of them, cut off before it moved the deck's entry,
+   * may have left cards as that release has them. None by default.
+   */
+  between?: readonly LibraryDeckContent[];
+  /** The deck's current release. */
+  to: LibraryDeckContent;
+  /** Every release of the deck, as the index describes them. */
+  releases: readonly LibraryRelease[];
+  /** Whether the copy is a course's deck (either release is a course). */
+  course?: boolean;
+  /** A course's outline in the release the copy came from and in the newer one, when both are courses. */
+  outlines?: { from: CourseOutline; to: CourseOutline };
+  /**
+   * Whether the copy's series is from a link, whose releases its creator
+   * writes: a card of the copy that names no release is then the user's,
+   * and out of the plan.
+   */
+  linked?: boolean;
+}): LibraryUpgradePlan | null {
+  if (Number(to.version) <= Number(from.version)) return null;
+  const cardPlan = cardPlanOnce({ cards, from, between, to, course, linked });
+  if (cardPlan === null) return null;
+  const { add, change, retire, restore, remove, kept, applied, about, gone, unreached } = cardPlan;
   const direction =
     to.direction !== from.direction && deck.direction === from.direction ? to.direction : undefined;
   const texts = upgradedTexts(deck, from, to);
