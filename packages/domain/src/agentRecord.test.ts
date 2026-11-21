@@ -11,6 +11,7 @@ import {
   agentUrlOf,
   agentUrlsOf,
   authorFromAgentRecord,
+  longestAgentUrlOf,
   sameAgent,
 } from "./agentRecord";
 import { fnv1a } from "./fnv1a";
@@ -50,6 +51,25 @@ describe("agentUrlOf", () => {
     expect(agentUrlOf(CATALOG, "Kim 민수")).toBe(`${CATALOG}#agent-kim-ad54ba`);
     expect(agentUrlOf(CATALOG, "  김민수 ")).toBe(agentUrlOf(`${CATALOG}#deck-2`, "김민수"));
     expect(agentUrlOf(CATALOG, "김민수".normalize("NFD"))).toBe(agentUrlOf(CATALOG, "김민수"));
+  });
+});
+
+describe("longestAgentUrlOf", () => {
+  it("is longer than any node agentUrlsOf gives the author, however many hold its name", () => {
+    const author = "Jane Doe <jane@exämple.org>";
+    const holderAt = (url: string): AgentHolder =>
+      url.endsWith("-999") ? null : { name: "Someone else" };
+    const [counted] = agentUrlsOf(CATALOG, [author], holderAt);
+    expect(counted).toMatch(/-[0-9a-f]{6}-999$/);
+    const longest = longestAgentUrlOf(CATALOG, author);
+    expect(longest.startsWith(counted!.slice(0, -"999".length))).toBe(true);
+    expect(longest.length).toBeGreaterThan(counted!.length);
+  });
+
+  it("adds no second hash to a name whose node has one already", () => {
+    expect(longestAgentUrlOf(CATALOG, "김민수")).toBe(
+      `${CATALOG}#agent-unnamed-5a5e6e-${Number.MAX_SAFE_INTEGER}`,
+    );
   });
 });
 

@@ -15,7 +15,11 @@ import {
 } from "@solid-memo/domain/guest";
 import { createUseCases } from "./useCases";
 import { courseDraft } from "@solid-memo/domain/testing/releaseDraft";
-import { draftSummaryOf, draftUrlOf } from "@solid-memo/domain/release/draftLayout";
+import {
+  draftSummaryOf,
+  draftUrlOf,
+  longestDraftUrlFor,
+} from "@solid-memo/domain/release/draftLayout";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import {
@@ -822,6 +826,79 @@ describe("guests", () => {
     expect(deps.instanceRepository.attachInstance).not.toHaveBeenCalled();
   });
 
+  it("transferGuestStudy refuses before it copies anything a deck with an author too long under the target", async () => {
+    const { deps } = guestDeps();
+    const guestDeck: Deck = {
+      ...deck,
+      url: `${GUEST_INSTANCE_URL}catalog.ttl#deck-a`,
+      title: { en: "Long" },
+      authors: ["Ada", "a".repeat(16_383)],
+    };
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([guestDeck]);
+    const move = () =>
+      createUseCases(deps).transferGuestStudy(session, guestInstance, {
+        containerUrl: TARGET,
+        registrationTarget: "private",
+      });
+    expect(await move()).toMatchObject({
+      ok: false,
+      step: "stage",
+      error: new AppError("guestDeckTooLong", { deck: { en: "Long" } }),
+      cleanedUp: true,
+    });
+    expect(deps.instanceCopier.createContainer).not.toHaveBeenCalled();
+    // Its authors that fit are no reason to refuse it.
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([
+      { ...guestDeck, authors: ["Ada"] },
+    ]);
+    expect(await move()).toMatchObject({ ok: true });
+  });
+
+  it("transferGuestStudy refuses before it copies anything a draft with a subject too long under the target", async () => {
+    const { deps } = guestDeps();
+    const GUEST_DRAFT = draftUrlOf(GUEST_INSTANCE_URL, "solid", 1);
+    const guestDraft = rebaseDraft(courseDraft(), GUEST_DRAFT);
+    const releaseDraftRepository = {
+      list: vi.fn(async (url: string) =>
+        url === GUEST_INSTANCE_URL ? [draftSummaryOf(guestDraft)!] : [],
+      ),
+      read: vi.fn(async () => ({ draft: guestDraft, version: "v1" })),
+      documentCountOf: vi.fn((): number => {
+        throw new AppError("termTooLong", { limit: 16_383 });
+      }),
+    } as unknown as ReleaseDraftRepository & { documentCountOf: ReturnType<typeof vi.fn> };
+    const move = () =>
+      createUseCases({ ...deps, releaseDraftRepository }).transferGuestStudy(
+        session,
+        guestInstance,
+        { containerUrl: TARGET, registrationTarget: "private" },
+      );
+    expect(await move()).toMatchObject({
+      ok: false,
+      step: "stage",
+      error: new AppError("draftCopyTooLong", { draft: "solid" }),
+      cleanedUp: true,
+    });
+    // Asked of the draft where the move puts it, under its own name.
+    expect(releaseDraftRepository.documentCountOf).toHaveBeenCalledWith(
+      rebaseDraft(guestDraft, draftUrlOf(TARGET, "solid", 1)),
+    );
+    expect(deps.instanceCopier.createContainer).not.toHaveBeenCalled();
+    // What the check cannot tell is left to the move, which copies the draft as it is.
+    releaseDraftRepository.documentCountOf.mockImplementation(() => {
+      throw new AppError("draftIdUnsupported", { id: "x" });
+    });
+    await move();
+    expect(deps.instanceCopier.createContainer).toHaveBeenCalledWith(TARGET);
+    // As are the guest's drafts, when they cannot be listed.
+    vi.mocked(deps.instanceCopier.createContainer).mockClear();
+    releaseDraftRepository.documentCountOf.mockClear();
+    vi.mocked(releaseDraftRepository.list).mockRejectedValue(new Error("unreadable"));
+    await move();
+    expect(releaseDraftRepository.documentCountOf).not.toHaveBeenCalled();
+    expect(deps.instanceCopier.createContainer).toHaveBeenCalledWith(TARGET);
+  });
+
   it("transferGuestStudy registers in an index already there with no storage to make one in", async () => {
     const { deps } = guestDeps();
     vi.mocked(deps.storageGateway.discoverStorages).mockResolvedValue([]);
@@ -1537,6 +1614,27 @@ describe("guests", () => {
       ]);
     });
 
+    it("mergeGuestStudy leaves out an author whose agent node in the instance's catalog would be too long", async () => {
+      const { deps } = mergeDeps();
+      // A name from a release, past the bound on a term under the instance's catalog.
+      const long = "a".repeat(16_383);
+      const authored = { ...own, authors: ["Ada", long] };
+      vi.mocked(deps.deckRepository.listDecks).mockImplementation(async (url) =>
+        url === GUEST_INSTANCE_URL ? [authored] : [targetDeck],
+      );
+      vi.mocked(deps.deckRepository.readDeckTree).mockResolvedValue({
+        readOnly: false,
+        children: [],
+      });
+      expect(
+        await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+      ).toMatchObject({ ok: true, added: [{ ...added("deck-n1", own), authors: ["Ada"] }] });
+      expect(deps.deckRepository.addDeck).toHaveBeenCalledExactlyOnceWith({
+        ...added("deck-n1", own),
+        authors: ["Ada"],
+      });
+    });
+
     describe("a guest's drafts", () => {
       const GUEST_DRAFT = draftUrlOf(GUEST_INSTANCE_URL, "solid", 1);
       const guestDraft = rebaseDraft(courseDraft(), GUEST_DRAFT);
@@ -1567,7 +1665,13 @@ describe("guests", () => {
           ),
           read: vi.fn(async () => ({ draft: guestDraft, version: "v1" })),
           create: vi.fn(async (_instance: string, draft: ReleaseDraft) => draftSummaryOf(draft)!),
-        } as unknown as ReleaseDraftRepository & { create: ReturnType<typeof vi.fn> };
+          documentCountOf: vi.fn((_draft: ReleaseDraft) => 2),
+          refuseTooManyInAll: vi.fn(async () => undefined),
+        } as unknown as ReleaseDraftRepository & {
+          create: ReturnType<typeof vi.fn>;
+          documentCountOf: ReturnType<typeof vi.fn>;
+          refuseTooManyInAll: ReturnType<typeof vi.fn>;
+        };
         return {
           ...merge,
           deps: { ...merge.deps, releaseDraftRepository },
@@ -1617,6 +1721,9 @@ describe("guests", () => {
           await createUseCases(unchanged.deps).mergeGuestStudy(session, guestInstance, target),
         ).toMatchObject({ ok: true });
         expect(unchanged.releaseDraftRepository.create).not.toHaveBeenCalled();
+        // Nor is it checked, or counted, again.
+        expect(unchanged.releaseDraftRepository.documentCountOf).not.toHaveBeenCalled();
+        expect(unchanged.releaseDraftRepository.refuseTooManyInAll).not.toHaveBeenCalled();
 
         const changed = draftDeps([copyNamed("solid"), copyNamed("solid-2")]);
         changed.journal.set(
@@ -1636,6 +1743,77 @@ describe("guests", () => {
         );
         await createUseCases(gone.deps).mergeGuestStudy(session, guestInstance, target);
         expect(gone.releaseDraftRepository.create).toHaveBeenCalledOnce();
+      });
+
+      it("refuses, before anything is written, a draft whose copy could hold a term too long, naming it, on every run", async () => {
+        const { deps, releaseDraftRepository } = draftDeps([copyNamed("solid")]);
+        releaseDraftRepository.documentCountOf.mockImplementation(() => {
+          throw new AppError("termTooLong", { limit: 16_383 });
+        });
+        for (let run = 1; run <= 2; run++) {
+          expect(
+            await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+          ).toMatchObject({
+            ok: false,
+            step: "read",
+            error: new AppError("draftCopyTooLong", { draft: "solid" }),
+            added: [],
+            copied: [],
+          });
+        }
+        // Asked under the longest name its copy may take.
+        expect(releaseDraftRepository.documentCountOf).toHaveBeenCalledWith(
+          rebaseDraft(guestDraft, longestDraftUrlFor(TARGET, "solid", 1)),
+        );
+        expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+        expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
+        expect(releaseDraftRepository.create).not.toHaveBeenCalled();
+      });
+
+      it("refuses, before anything is written, drafts that would give the instance's drafts more documents than are read together", async () => {
+        const { deps, releaseDraftRepository } = draftDeps([]);
+        releaseDraftRepository.refuseTooManyInAll.mockRejectedValue(
+          new AppError("draftTooManyDocuments", { limit: 5000 }),
+        );
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
+          ok: false,
+          step: "read",
+          error: { code: "draftTooManyDocuments" },
+          added: [],
+        });
+        expect(releaseDraftRepository.refuseTooManyInAll).toHaveBeenCalledWith(TARGET, 2);
+        expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+        expect(releaseDraftRepository.create).not.toHaveBeenCalled();
+      });
+
+      it("names the deck or draft a term too long refuses once part of the study is added", async () => {
+        const drafted = draftDeps([]);
+        drafted.releaseDraftRepository.create.mockRejectedValueOnce(
+          new AppError("termTooLong", { limit: 16_383 }),
+        );
+        expect(
+          await createUseCases(drafted.deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
+          ok: false,
+          step: "drafts",
+          error: new AppError("draftCopyTooLong", { draft: "solid" }),
+          added: [added("deck-n1", course), added("deck-n2", own)],
+        });
+
+        const { deps } = mergeDeps();
+        vi.mocked(deps.deckRepository.addDeck)
+          .mockImplementationOnce(async (of) => of)
+          .mockRejectedValueOnce(new AppError("termTooLong", { limit: 16_383 }));
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
+          ok: false,
+          step: "decks",
+          error: new AppError("guestDeckTooLong", { deck: own.title }),
+          added: [added("deck-n1", course)],
+        });
       });
 
       it("keeps the guest's study, and the decks added, when a draft cannot be copied", async () => {

@@ -31,6 +31,17 @@ export function agentUrlOf(subjectUrl: string, author: string): string {
   return `${documentUrlOf(subjectUrl)}#agent-${agentFragmentOf(author).fragment}`;
 }
 
+/**
+ * The longest node agentUrlsOf can write `author` to in the document of
+ * `subjectUrl`: agentUrlOf's with the author's hash added (unless it has
+ * one), then the longest count a node can take after it.
+ */
+export function longestAgentUrlOf(subjectUrl: string, author: string): string {
+  const first = agentUrlOf(subjectUrl, author);
+  const hashed = agentFragmentOf(author).hashed ? first : `${first}-${authorHashOf(author)}`;
+  return `${hashed}-${Number.MAX_SAFE_INTEGER}`;
+}
+
 /** The fragment of agentUrlOf, and whether it already ends in the author's hash. */
 function agentFragmentOf(author: string): { fragment: string; hashed: boolean } {
   const folded = author

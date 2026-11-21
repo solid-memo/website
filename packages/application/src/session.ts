@@ -17,6 +17,7 @@ import type { EstablishedSession, Session } from "@solid-memo/domain/session";
 import { isSecureUrl, validateWebId } from "@solid-memo/domain/webId";
 import {
   addressesGuest,
+  authorFitsDeck,
   cardFitsDeck,
   decodeGuestMergeNote,
   encodeGuestMergeNote,
@@ -70,6 +71,7 @@ import {
   draftContainerOf,
   draftPlaceOf,
   isDraftDocumentName,
+  longestDraftUrlFor,
   RELEASE_DOCUMENT,
   type ReleaseDraftSummary,
 } from "@solid-memo/domain/release/draftLayout";
@@ -128,7 +130,9 @@ export interface SessionUseCases {
    * the guest's instance is copied into `containerUrl`, made the user's,
    * checked, and registered in their type index; then deleted from the
    * device. A failure before the registration deletes the copy and leaves
-   * the guest's study as it was.
+   * the guest's study as it was. A deck with an author, or a draft with
+   * a subject, whose IRI would be too long under the target is refused
+   * before anything is written (guestDeckTooLong, draftCopyTooLong).
    */
   transferGuestStudy(
     session: Session,
@@ -157,7 +161,10 @@ export interface SessionUseCases {
    * the guest's study as it was; run again, a deck or draft already
    * added from this device, and unchanged since, is not added twice.
    * Decks that would give `target` more than MAX_CATALOG_LINKS are
-   * refused before any is written (guestMergeTooManyDecks).
+   * refused before any is written (guestMergeTooManyDecks), as is a draft
+   * whose copy could not be written in `target` (draftCopyTooLong, or
+   * draftTooManyDocuments for the drafts together). A deck's author whose
+   * agent node would be too long in `target` is left out (mergedDeck).
    */
   mergeGuestStudy(
     session: Session,
@@ -252,7 +259,7 @@ export function createSessionUseCases({
   answerStore: Pick<AnswerStore, "flush" | "appendAll" | "logMonths">;
   instances: Pick<InstanceUseCases, "createInstance">;
   checks: Pick<InstanceCheckUseCases, "validateInstance">;
-  drafts: Pick<ReleaseDraftUseCases, "copyReleaseDraft">;
+  drafts: Pick<ReleaseDraftUseCases, "copyReleaseDraft" | "checkReleaseDraftCopy">;
   newId: () => string;
 }): SessionUseCases {
   const runsElsewhere = fenceMovesElsewhere(updateJournal, writeFence);
@@ -562,6 +569,33 @@ export function createSessionUseCases({
     }
   }
 
+  /**
+   * Refuse, before anything is written, a guest's study whose move to
+   * `target` could not be written: a deck with an author whose agent
+   * node would be too long there (guestDeckTooLong), or a draft with a
+   * subject that would be (draftCopyTooLong). Its IRIs grow with the
+   * target's address, longer than the guest's. What cannot be read to
+   * tell is left to the move, which copies it as it is.
+   */
+  async function ensureGuestStudyFits(source: string, target: string): Promise<void> {
+    const [decks, guestDrafts] = await Promise.all([
+      deckRepository.listDecks(source).catch((): Deck[] => []),
+      releaseDraftRepository.list(source).catch((): ReleaseDraftSummary[] => []),
+    ]);
+    const unfit = decks.find((deck) => {
+      const moved = { url: rebaseIri(deck.url, source, target) };
+      return deck.authors.some((author) => !authorFitsDeck(author, moved));
+    });
+    if (unfit !== undefined) throw new AppError("guestDeckTooLong", { deck: unfit.title });
+    for (const draft of guestDrafts) {
+      await drafts
+        .checkReleaseDraftCopy(draft.url, rebaseIri(draft.url, source, target))
+        .catch((error: unknown) => {
+          if (error instanceof AppError && error.code === "draftCopyTooLong") throw error;
+        });
+    }
+  }
+
   return {
     async restoreSession() {
       // Another tab's logout during the restore holds for what it brings back.
@@ -709,6 +743,7 @@ export function createSessionUseCases({
         await ensureRegistrable(session.webId, registrationTarget);
         const resources = await listed();
         await ensureGuestLogWhole(source);
+        await ensureGuestStudyFits(source, target);
         progress.stepped();
         await instanceCopier.ensureAbsent(target);
         progress.stepped();
@@ -859,6 +894,15 @@ export function createSessionUseCases({
           chosen.map((deck) => [deck.url, guestDeckStamp(deck, (url) => versions.get(url) ?? "")]),
         );
         const stampOf = (deck: Deck) => stamps.get(deck.url)!;
+        const draftStampOf = (draft: ReleaseDraftSummary) => {
+          const container = draftContainerOf(draft.url);
+          return guestMergeStamp(
+            [...versions]
+              .filter(([url]) => url.startsWith(container))
+              .map(([url, version]) => `${url} ${version}`)
+              .join("\n"),
+          );
+        };
         // More decks than the instance's catalog is read with are refused before any is written; one an earlier run added is there already.
         refuseGuestMergePastLimit(
           targetDecks.length,
@@ -866,6 +910,21 @@ export function createSessionUseCases({
             (deck) => journaledBefore(keyOf(deck), stampOf(deck), targetDecks) === undefined,
           ).length,
         );
+        // So is a draft whose copy could not be written, under the longest name it may take,
+        // or that would give the instance's drafts more documents than are read together.
+        let draftDocuments = 0;
+        for (const draft of guestDrafts) {
+          const key = guestMergeKey(draft.url, targetUrl);
+          if (journaledBefore(key, draftStampOf(draft), targetDrafts) !== undefined) continue;
+          const { name, version } = draftPlaceOf(draft.url)!;
+          draftDocuments += await drafts.checkReleaseDraftCopy(
+            draft.url,
+            longestDraftUrlFor(targetUrl, name, version),
+          );
+        }
+        // Only when a draft is still to be copied: the instance's drafts are not read otherwise.
+        if (draftDocuments > 0)
+          await releaseDraftRepository.refuseTooManyInAll(targetUrl, draftDocuments);
 
         // Each deck whole, one after another: its documents, its entry, then its answers.
         progress.finished("decks", chosen.length);
@@ -875,7 +934,9 @@ export function createSessionUseCases({
           const stamp = stampOf(deck);
           // Added from this device before, its entry and documents unchanged since: there it is.
           const merged = await journaledGuestCopy(key, stamp, targetDecks, () =>
-            addGuestDeck(deck, targetUrl),
+            addGuestDeck(deck, targetUrl).catch(
+              namingTooLong(new AppError("guestDeckTooLong", { deck: deck.title })),
+            ),
           );
           notes.push(key);
           into.set(deck.url, merged);
@@ -912,16 +973,15 @@ export function createSessionUseCases({
         progress.finished("drafts", guestDrafts.length);
         for (const draft of guestDrafts) {
           const key = guestMergeKey(draft.url, targetUrl);
-          const container = draftContainerOf(draft.url);
-          const stamp = guestMergeStamp(
-            [...versions]
-              .filter(([url]) => url.startsWith(container))
-              .map(([url, version]) => `${url} ${version}`)
-              .join("\n"),
-          );
           // Copied from this device before, its documents unchanged since, and the copy still there: there it is.
-          const copy = await journaledGuestCopy(key, stamp, targetDrafts, () =>
-            drafts.copyReleaseDraft(draft.url, targetUrl),
+          const copy = await journaledGuestCopy(key, draftStampOf(draft), targetDrafts, () =>
+            drafts
+              .copyReleaseDraft(draft.url, targetUrl)
+              .catch(
+                namingTooLong(
+                  new AppError("draftCopyTooLong", { draft: draftPlaceOf(draft.url)!.name }),
+                ),
+              ),
           );
           notes.push(key);
           copied.push(copy);
@@ -976,6 +1036,17 @@ export function createSessionUseCases({
         await instanceCopier.deleteRecursively(staging);
       updateJournal.end(source);
     },
+  };
+}
+
+/**
+ * A refusal of a term too long, once part of a guest's study is added, as
+ * `named`, which names the deck or draft: termTooLong says nothing was
+ * changed. Any other failure as it is.
+ */
+function namingTooLong(named: AppError): (error: unknown) => never {
+  return (error) => {
+    throw error instanceof AppError && error.code === "termTooLong" ? named : error;
   };
 }
 

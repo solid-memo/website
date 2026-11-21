@@ -24,6 +24,9 @@ export function makeReleaseDraftUseCasesFake(
       copyReleaseDraft: vi.fn(async () => {
         throw new Error("copyReleaseDraft fake not configured");
       }),
+      checkReleaseDraftCopy: vi.fn(async () => {
+        throw new Error("checkReleaseDraftCopy fake not configured");
+      }),
       getReleaseDraft: vi.fn(async () => {
         throw new Error("getReleaseDraft fake not configured");
       }),

@@ -504,6 +504,49 @@ describe("create", () => {
   });
 });
 
+describe("documentCountOf and refuseTooManyInAll", () => {
+  it("count the documents create would write a draft in, refusing what it would refuse, with nothing written", async () => {
+    const pod = await draftPod();
+    expect(pod.repository.documentCountOf(course())).toBe(4);
+    expect(() =>
+      pod.repository.documentCountOf(courseOfDocuments(MAX_DRAFT_DOCUMENTS + 1)),
+    ).toThrow(expect.objectContaining({ code: "draftTooManyDocuments" }));
+    expect(() => pod.repository.documentCountOf(chapterNamed(course(), ESCAPING_ID))).toThrow(
+      expect.objectContaining({ code: "draftIdUnsupported" }),
+    );
+    expect(writes(pod)).toEqual([]);
+  });
+
+  it("refuse a copy whose subject fits under the draft's address but not under the copy's", async () => {
+    const pod = await draftPod();
+    const guest = draftUrlOf("https://guest.solid-memo.invalid/solid-memo/", "solid", 1);
+    const copy = draftUrlOf("https://alice.solidcommunity.example/apps/solid-memo/", "solid", 1);
+    const id = "a".repeat(16_383 - 2 - `${guest}#`.length);
+    const draft = { ...rebaseDraft(courseDraft(), guest), agents: [{ id, data: { name: "N" } }] };
+    expect(pod.repository.documentCountOf(draft)).toBe(4);
+    expect(() => pod.repository.documentCountOf(rebaseDraft(draft, copy))).toThrow(
+      expect.objectContaining({ code: "termTooLong" }),
+    );
+  });
+
+  it("refuse documents that would take the instance's drafts past MAX_DRAFT_DOCUMENTS_IN_ALL together", async () => {
+    const { pod, repository } = await podOfListedDrafts(
+      MAX_DRAFT_DOCUMENTS_IN_ALL / MAX_DRAFT_DOCUMENTS - 1,
+      MAX_DRAFT_DOCUMENTS,
+    );
+    await expect(repository.refuseTooManyInAll(INSTANCE, MAX_DRAFT_DOCUMENTS)).resolves.toBe(
+      undefined,
+    );
+    await expect(
+      repository.refuseTooManyInAll(INSTANCE, MAX_DRAFT_DOCUMENTS + 1),
+    ).rejects.toMatchObject({
+      code: "draftTooManyDocuments",
+      vars: { limit: MAX_DRAFT_DOCUMENTS_IN_ALL },
+    });
+    expect(writes(pod)).toEqual([]);
+  });
+});
+
 describe("list and documents", () => {
   it("follow only the catalog's links to drafts of the instance, and list one that cannot be read as such", async () => {
     const pod = await draftPod();

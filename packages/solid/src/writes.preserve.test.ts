@@ -649,6 +649,8 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
     await u.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: release }, WEB_ID);
   },
   copyReleaseDraft: async ({ u, draft }) => void (await u.copyReleaseDraft(draft.url, INSTANCE)),
+  checkReleaseDraftCopy: async ({ u, draft }) =>
+    void (await u.checkReleaseDraftCopy(draft.url, draft.url)),
   getReleaseDraft: async ({ u, draft }) => void (await u.getReleaseDraft(draft.url)),
   readReleaseDraft: async ({ u, draft }) => void (await u.readReleaseDraft(draft.url)),
   editReleaseDraft: async ({ u, draft }) =>

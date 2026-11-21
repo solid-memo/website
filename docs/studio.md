@@ -1883,9 +1883,10 @@ left that the catalog doesn't link.
 The use cases are `listReleaseDrafts`, `createReleaseDraft`,
 `copyReleaseDraft` (a guest's draft, as the guest's study is added to
 an instance, [guest-mode.md](guest-mode.md#adding-to-an-instance)),
-`getReleaseDraft`, `editReleaseDraft` and `deleteReleaseDraft`
+`checkReleaseDraftCopy`, `getReleaseDraft`, `editReleaseDraft` and `deleteReleaseDraft`
 ([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)),
-over the `ReleaseDraftRepository` port.
+over the `ReleaseDraftRepository` port. `checkReleaseDraftCopy` tells,
+with nothing written, whether such a copy can be written there.
 
 - When a document changed elsewhere meanwhile, the changes are made
   again on the draft as it is now. If they're then refused because

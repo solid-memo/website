@@ -1871,6 +1871,8 @@
     "guestUrlsLeft": "La copia {url} de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Inténtalo de nuevo.",
     "guestDeckCopyUrlsLeft": "La copia del mazo «{deck}» de tu Pod todavía apunta a los datos de estudio en modo invitado, así que tus datos de estudio se quedan como estaban. Quita ese mazo de los datos de estudio en modo invitado e inténtalo de nuevo.",
     "guestDeckUrlsLeft": "El mazo «{deck}» todavía apunta a los datos de estudio en modo invitado, así que no se añadió a tu Pod. Déjalo fuera e inténtalo de nuevo.",
+    "guestDeckTooLong": "El mazo «{deck}» contiene una dirección o un nombre de autor demasiado largo para la dirección de tu Pod, así que no se añadió a tu Pod. Quítalo de los datos de estudio en modo invitado e inténtalo de nuevo.",
+    "draftCopyTooLong": "El borrador «{draft}» contiene una dirección demasiado larga para la dirección de tu Pod, así que no se copió a tu Pod. Borra ese borrador en el Studio del modo invitado e inténtalo de nuevo.",
     "guestStudyInvalid": {
       "one": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} problema), así que no se añadió nada a tu Pod. Siguen aquí.",
       "many": "Parte de tus datos de estudio en este navegador no está en el formato que espera Solid Memo ({count} de problemas), así que no se añadió nada a tu Pod. Siguen aquí.",

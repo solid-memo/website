@@ -705,6 +705,21 @@ export interface ReleaseDraftRepository {
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
+   * How many documents `create` would write the draft in, with nothing
+   * written; refused as `create` refuses it for what it holds:
+   * termTooLong or unwritableTerm for a term no write takes,
+   * draftIdUnsupported, and draftTooManyDocuments past
+   * MAX_DRAFT_DOCUMENTS.
+   */
+  documentCountOf(draft: ReleaseDraft): number;
+  /**
+   * draftTooManyDocuments, with nothing written, when `count` documents
+   * more would take the instance's drafts past what a read of them
+   * takes together (MAX_DRAFT_DOCUMENTS_IN_ALL), as `create` refuses a
+   * draft that would.
+   */
+  refuseTooManyInAll(instanceUrl: string, count: number): Promise<void>;
+  /**
    * The draft as its documents say now, with the version of this read
    * of them (opaque: another when any of them is read anew rather than
    * found unchanged, or one comes or goes; never only their ETags, which

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { longestAgentUrlOf } from "./agentRecord";
 import { chosenDistractorIn, type Answer } from "./answer";
 import { AppError } from "./appError";
 import { MAX_CATALOG_LINKS, type Deck, type Distractor } from "./deck";
@@ -18,6 +19,7 @@ import type { ReleaseDraftSummary } from "./release/draftLayout";
 import type { ReleaseDraft } from "./release/releaseDraft";
 import { rebaseDraft } from "./release/releaseToDraft";
 import type { Session } from "./session";
+import { isIriPastBound } from "./pathKeys";
 import { sha256Hex } from "./sha256";
 import { fragmentIdOf } from "./subjectUrl";
 
@@ -195,7 +197,9 @@ export function refuseGuestMergePastLimit(decks: number, adding: number): void {
  * fragment id `id`, its documents named after it in the instance's
  * decks/ and reviews/, and everything else it says (its title,
  * provenance, direction, pace, chapters completed, when it was made) as
- * the guest's deck says it. Written in this app's format.
+ * the guest's deck says it, but an author whose agent node in the
+ * instance's catalog could be too long (authorFitsDeck). Written in this
+ * app's format.
  */
 export function mergedDeck(
   guest: Deck,
@@ -204,14 +208,28 @@ export function mergedDeck(
   formatVersion: number,
 ): Deck {
   const base = ensureTrailingSlash(instanceUrl);
+  const url = `${catalogUrlOf(base)}#${id}`;
   return {
     ...guest,
     id,
-    url: `${catalogUrlOf(base)}#${id}`,
+    url,
+    authors: guest.authors.filter((author) => authorFitsDeck(author, { url })),
     cardsDocumentUrl: `${cardsContainerOf(base)}${id}.ttl`,
     reviewsDocumentUrl: `${reviewsContainerOf(base)}${id}.ttl`,
     formatVersion,
   };
+}
+
+/**
+ * Whether the author of a guest's deck can be written with the deck
+ * `to`: every agent node it could be given in `to`'s catalog
+ * (longestAgentUrlOf) can be. The name came from a release and its node
+ * fit under the guest's shorter address; an author that does not fit is
+ * left out, as a card that does not fit is (cardFitsDeck), since the
+ * deck could not be written with it.
+ */
+export function authorFitsDeck(author: string, to: Pick<Deck, "url">): boolean {
+  return !isIriPastBound(longestAgentUrlOf(to.url, author));
 }
 
 /**
