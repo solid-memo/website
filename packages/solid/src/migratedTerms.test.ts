@@ -11,6 +11,7 @@
  * does not fit.
  */
 import { describe, expect, it } from "vitest";
+import { agentUrlOf } from "@solid-memo/domain/agentRecord";
 import { importedDeck } from "@solid-memo/domain/deckFile";
 import { MAX_TERM_CHARACTERS } from "./client/readLimits";
 import { toDeck } from "./mappers/deckMapper";
@@ -189,6 +190,30 @@ describe("a catalog entry in an older format", () => {
     expect(decks.map((deck) => [deck.title, deck.formatVersion])).toEqual([
       [{ en: "Normal" }, 6],
       [{ en: "Long author" }, 2],
+    ]);
+  });
+
+  it("whose author's agent an entry before it pushes past the bound is left as it is, the entry before it brought up to date (GHSA-qw6g-vfqc-37rx)", async () => {
+    const { fetch, repository } = repositoryInPod();
+    // Two authors that fold to one slug: its node fits the bound, the
+    // hashed node the second is given once the first takes it does not.
+    const length = MAX_TERM_CHARACTERS - (agentUrlOf(catalogUrl, "x").length - 1) - 3;
+    const old = (id: string, author: string) =>
+      `${entry(id, id).slice(0, -1)}; <http://purl.org/dc/terms/creator> "${author}" ; <${SM}direction> "front-to-back" ; <${SM}formatVersion> 2 .`;
+    await put(
+      fetch,
+      catalogUrl,
+      [
+        "<#catalog> a <http://www.w3.org/ns/dcat#Catalog> .",
+        old("deck-1", "a".repeat(length)),
+        old("deck-2", "A".repeat(length)),
+      ].join("\n"),
+    );
+    expect(await repository.upgradeDecks(INSTANCE, null)).toBe(true);
+    const decks = await repository.listDecks(INSTANCE);
+    expect(decks.map((deck) => [deck.title, deck.formatVersion])).toEqual([
+      [{ en: "deck-1" }, 6],
+      [{ en: "deck-2" }, 2],
     ]);
   });
 

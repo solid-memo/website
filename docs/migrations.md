@@ -542,9 +542,11 @@ writes in English, with `@en` after it. A deck or release whose
 migration gives it one past the bound is read as not fitting its shape
 (`migrateWithinBound`), since no write of it would be accepted. A deck
 from before format 3 names its authors itself, and a write names their
-agents anew, refusing one past the bound. The format update leaves
-such an entry as it is, so that it doesn't keep the others from being
-brought up to date.
+agents anew, refusing one past the bound. An author whose node an
+earlier deck took is given a longer one. The format update names the
+agents of each entry in turn, as its write does, after the entries
+before it. It leaves an entry with an agent past the bound as it is,
+so that it doesn't keep the others from being brought up to date.
 
 ## The pod migration
 

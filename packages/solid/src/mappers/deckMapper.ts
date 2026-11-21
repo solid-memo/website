@@ -238,26 +238,9 @@ export function withDecks(dataset: Dataset, decks: readonly Deck[]): Dataset {
   const edit = editOf(dataset);
   const nodes = agentNodesIn(edit.getThing);
   for (const deck of decks.map(withBoundedMetadata)) {
-    const creator = nodes.urlsOf(deck.url, deck.authors);
-    if (creator.some(isIriPastBound)) {
+    if (!wroteDeck(edit, nodes, deck)) {
       throw new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
     }
-    edit.setThing(
-      recordThing(deck.url, DECK_V6, deckToRecord(deck, creator), edit.getThing(deck.url)),
-    );
-    for (const { url, record } of deckAgents(deck, creator)) {
-      edit.setThing(recordThing(url, AGENT_V1, record, edit.getThing(url)));
-    }
-    const distribution = deckDistribution(deck);
-    edit.setThing(
-      recordThing(
-        distribution.url,
-        DISTRIBUTION_V1,
-        distribution.record,
-        edit.getThing(distribution.url),
-      ),
-    );
-    for (const url of [deck.url, ...creator, distribution.url]) nodes.written(url);
   }
   const documents = new Set(decks.map((deck) => documentUrlOf(deck.url)));
   return withCatalogDatasets(
@@ -310,11 +293,44 @@ function agentNodesIn(thingAt: (url: string) => NamedSubject | null): AgentNodes
  * itself, and an agent's node, joined from the deck's address and an
  * author's name, can be longer than any term (GHSA-4mgg-5xpp-3jx5):
  * withDecks refuses such a deck, so a format update leaves it out, and
- * it does not keep the others from being brought up to date.
+ * it does not keep the others from being brought up to date. The decks
+ * are written in turn as withDecks writes them, each kept one taking
+ * its nodes, so that a deck whose author is given a longer node because
+ * a deck before it took the shorter one is left out too
+ * (GHSA-qw6g-vfqc-37rx).
  */
 export function decksWithAgentsWithinBound(dataset: Dataset, decks: readonly Deck[]): Deck[] {
-  const nodes = agentNodesIn(editOf(dataset).getThing);
-  return decks.filter((deck) => !nodes.urlsOf(deck.url, deck.authors).some(isIriPastBound));
+  const edit = editOf(dataset);
+  const nodes = agentNodesIn(edit.getThing);
+  return decks.filter((deck) => wroteDeck(edit, nodes, withBoundedMetadata(deck)));
+}
+
+/**
+ * Writes `deck` into `edit` as withDecks writes each deck: its entry,
+ * its agents at the nodes `nodes` names and its distribution, and has
+ * `nodes` look again at what it wrote. False, with nothing written,
+ * when an agent's node is longer than any term.
+ */
+function wroteDeck(edit: DatasetEdit<Dataset>, nodes: AgentNodes, deck: Deck): boolean {
+  const creator = nodes.urlsOf(deck.url, deck.authors);
+  if (creator.some(isIriPastBound)) return false;
+  edit.setThing(
+    recordThing(deck.url, DECK_V6, deckToRecord(deck, creator), edit.getThing(deck.url)),
+  );
+  for (const { url, record } of deckAgents(deck, creator)) {
+    edit.setThing(recordThing(url, AGENT_V1, record, edit.getThing(url)));
+  }
+  const distribution = deckDistribution(deck);
+  edit.setThing(
+    recordThing(
+      distribution.url,
+      DISTRIBUTION_V1,
+      distribution.record,
+      edit.getThing(distribution.url),
+    ),
+  );
+  for (const url of [deck.url, ...creator, distribution.url]) nodes.written(url);
+  return true;
 }
 
 /**

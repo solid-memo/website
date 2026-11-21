@@ -1755,7 +1755,7 @@ describe("many decks that share an author over counted nodes others hold (GHSA-r
       .map(upgradeDeck)
       .map((deck, i) => ({ ...deck, authors: [...deck.authors, ...others[i]!] }));
     const kept = decksWithAgentsWithinBound(dataset, decks);
-    expect(kept).toEqual(decks.filter((deck) => decksWithAgentsWithinBound(dataset, [deck])[0]));
+    expect(kept).toEqual(decks);
     const updated = withDecks(dataset, kept);
     // As written one deck after another, each with its own look at the nodes.
     const oneByOne = kept.reduce<Dataset>((written, deck) => withDecks(written, [deck]), dataset);
@@ -1768,6 +1768,35 @@ describe("many decks that share an author over counted nodes others hold (GHSA-r
     }
     expect(decksSubjects(updated, kept)).toEqual(
       kept.flatMap((deck) => deckSubjects(updated, deck)),
+    );
+  });
+
+  it("leaves out a deck whose author a deck before it pushes past the bound, as the write names them (GHSA-qw6g-vfqc-37rx)", async () => {
+    // Two authors that fold to one slug: its node fits the bound, the
+    // hashed node the second is given once the first takes it does not.
+    const length = MAX_TERM_CHARACTERS - (agentUrlOf(CATALOG, "x").length - 1) - 3;
+    const old = (i: number, author: string) =>
+      `<#deck-${i}> a sm:Deck ; sm:formatVersion 2 ; dcterms:title "D${i}" ; sm:direction "front-to-back" ; sm:cardsDocument <decks/d${i}.ttl> ; sm:reviewsDocument <reviews/d${i}.ttl> ; dcterms:creator "${author}" .`;
+    const dataset = await datasetOfTurtle(
+      CATALOG,
+      [
+        "@prefix dcterms: <http://purl.org/dc/terms/> .",
+        "@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .",
+        old(1, "a".repeat(length)),
+        old(2, "A".repeat(length)),
+      ].join("\n"),
+    );
+    const decks = toDecks(dataset, CATALOG).map(upgradeDeck);
+    expect(decks).toHaveLength(2);
+    // Each alone would be written.
+    for (const deck of decks) expect(decksWithAgentsWithinBound(dataset, [deck])).toEqual([deck]);
+    const { written, updated } = upgraded(dataset);
+    expect(written).toEqual([decks[0]]);
+    expect(getUrlAll(getThing(updated, decks[0]!.url)!, DCTERMS.creator)).toEqual([
+      agentUrlOf(CATALOG, "a".repeat(length)),
+    ]);
+    expect(() => withDecks(dataset, decks)).toThrow(
+      expect.objectContaining({ code: "termTooLong", vars: { limit: MAX_TERM_CHARACTERS } }),
     );
   });
 
