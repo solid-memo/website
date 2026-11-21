@@ -450,6 +450,37 @@ describe("queryCards", () => {
     expect(ratio).toBeLessThan(0.5);
   });
 
+  it("sorts by an id's first 200 code points, however long the ids", () => {
+    // Ids that share a long run of digits: compared whole, a numeric
+    // comparison reads each run to its end.
+    const digits = (length: number) => "1".repeat(length);
+    const layout = (length: number) =>
+      Array.from({ length: 400 }, (_, at) => card(`${digits(length)}${at}`));
+    const query = {
+      text: "",
+      field: "any" as const,
+      sort: { key: "id" as const, descending: false },
+    };
+    // Ids that differ only past their first 200 code points keep the deck's order.
+    expect(
+      queryCards(layout(16_375), reviews, query, TODAY, plain, englishReader).map((row) =>
+        row.card.id.slice(16_375),
+      ),
+    ).toEqual(Array.from({ length: 400 }, (_, at) => `${at}`));
+    // Ids eight times as long take no longer to sort; compared whole, they
+    // would take about eight times as long.
+    const ratio = growth(
+      (length) => {
+        const cards = layout(length);
+        return () => queryCards(cards, reviews, query, TODAY, plain, englishReader);
+      },
+      2_000,
+      8,
+      0.5,
+    );
+    expect(ratio).toBeLessThan(0.5);
+  });
+
   it("puts a card without the key last, whichever comes first", () => {
     const query: CardQuery = { ...DEFAULT_CARD_QUERY, sort: { key: "due", descending: false } };
     const sorted = (given: Card[]) =>
