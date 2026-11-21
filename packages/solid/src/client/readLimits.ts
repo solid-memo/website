@@ -89,6 +89,35 @@ export const PROFILE_LIMITS: ReadLimits = {
 };
 
 /**
+ * The most the app reads of an identity provider's metadata, wherever
+ * the sign-in library reads it (session.ts): the library keeps it in
+ * the browser's storage, one entry for each provider a login starts at,
+ * and removes none, so what is read takes the storage the site's own
+ * settings share. A provider's metadata lists its endpoints and a few
+ * dozen supported values, which fit many times over. The metadata is
+ * JSON, not triples.
+ */
+export const PROVIDER_METADATA_LIMITS: ReadLimits = {
+  bytes: 64 * 1024,
+  quads: 0,
+  characters: 64 * 1024,
+};
+
+/**
+ * The most the app reads of an identity provider's answer to its
+ * dynamic registration of the app (session.ts, and the alternative
+ * client's oidcLogin.ts): a client ID, a secret and a few fields echoed
+ * back fit many times over. What is read is kept in the browser's
+ * storage, which the site's own settings share, so an answer of any size
+ * would fill it. The answer is JSON, not triples.
+ */
+export const REGISTRATION_LIMITS: ReadLimits = {
+  bytes: 8 * 1024,
+  quads: 0,
+  characters: 8 * 1024,
+};
+
+/**
  * The most documents the app reads that a WebID document names as more
  * of the profile, as it looks for the user's storages: a profile names
  * one or two, and those past the first MAX_PROFILE_DOCUMENTS sent are

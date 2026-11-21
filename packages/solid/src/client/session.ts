@@ -12,9 +12,14 @@ import {
   logout,
 } from "@inrupt/solid-client-authn-browser";
 import { AppError } from "@solid-memo/domain/appError";
-import type { SessionClient } from "./interface";
+import { ReadLimitError, type SessionClient } from "./interface";
 import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
-import { limitedFetch, PROFILE_LIMITS, refusalOf } from "./readLimits";
+import {
+  limitedFetch,
+  PROVIDER_METADATA_LIMITS,
+  REGISTRATION_LIMITS,
+  refusalOf,
+} from "./readLimits";
 
 /**
  * The sign-in client (SessionClient, interface.ts) over
@@ -114,23 +119,51 @@ function namesAnotherHost(metadata: unknown): boolean {
 const guardedFetches = new WeakSet<typeof globalThis.fetch>();
 
 /**
+ * The registration endpoints the metadata read so far names. The library
+ * registers the app at one, by a POST, when the provider does not list
+ * the webid scope, and keeps the answer in localStorage as it came.
+ */
+const registrationEndpoints = new Set<string>();
+
+/** A provider's answer the client does not take. */
+const refused = (url: string) => new AppError("loginProviderRefused", { url });
+
+/**
  * Refuses such metadata wherever the library reads it. That has to be
  * at the global fetch: a refresh reads the metadata anew and calls that
  * fetch itself, so nothing else of the app sees it, and the library has
  * no option for its own. Every request passes through; only an answer
  * from an address ending in the metadata's path is looked at, under
- * PROFILE_LIMITS. Any document can sit at this path, and the limits of
- * the read that asked for it wrap this fetch, so they apply only once it
- * has answered; these allow as much as a profile read's own limits do,
- * and past them the read fails as too large. A login and a restore put
- * it in place: a session comes from one of them.
+ * PROVIDER_METADATA_LIMITS, since the library keeps what it reads there
+ * in localStorage for good. Any document can sit at this path, and the
+ * limits of the read that asked for it wrap this fetch, so they apply
+ * only once it has answered; past these, the read fails as too large. A
+ * login and a restore put it in place: a session comes from one of
+ * them.
+ *
+ * The answer to a POST to a registration endpoint that metadata named is
+ * read whole too, under REGISTRATION_LIMITS, before the library keeps
+ * it; past them, the provider is refused.
  */
 function guardProviderMetadata(): void {
   const { fetch: next } = globalThis;
   if (guardedFetches.has(next)) return;
-  const limited = limitedFetch((input, init) => next.call(globalThis, input, init), PROFILE_LIMITS);
+  const unguarded: typeof globalThis.fetch = (input, init) => next.call(globalThis, input, init);
+  const limited = limitedFetch(unguarded, PROVIDER_METADATA_LIMITS);
+  const registering = limitedFetch(unguarded, REGISTRATION_LIMITS);
   const guarded: typeof globalThis.fetch = async (input, init) => {
     const url = String(input);
+    if (init?.method === "POST" && registrationEndpoints.delete(url)) {
+      const response = await registering(input, init).catch((error: unknown) => {
+        throw error instanceof ReadLimitError ? refused(url) : error;
+      });
+      await response
+        .clone()
+        .arrayBuffer()
+        .catch(() => null);
+      if (refusalOf(response) !== undefined) throw refused(url);
+      return response;
+    }
     if (!url.endsWith(METADATA_PATH)) return next.call(globalThis, input, init);
     const response = await limited(input, init);
     const metadata: unknown = await response
@@ -139,7 +172,12 @@ function guardProviderMetadata(): void {
       .catch(() => null);
     const tooLarge = refusalOf(response);
     if (tooLarge !== undefined) throw tooLarge;
-    if (namesAnotherHost(metadata)) throw new AppError("loginProviderRefused", { url });
+    if (namesAnotherHost(metadata)) throw refused(url);
+    // A value that is no string is read as the library reads it, which
+    // turns it into one.
+    const endpoint = (metadata as { registration_endpoint?: unknown } | null)
+      ?.registration_endpoint;
+    if (endpoint != null) registrationEndpoints.add(String(endpoint));
     return response;
   };
   guardedFetches.add(guarded);
@@ -210,16 +248,22 @@ export function createSessionClient(): SessionClient {
       guardProviderMetadata();
       window.localStorage.removeItem(CURRENT_URL_KEY);
       window.sessionStorage.setItem(PROVIDER_REDIRECT_KEY, "login");
+      // A new ID each time, never the one this page restored: the
+      // library reads a session's provider from localStorage by its ID
+      // alone, so under that ID every other tab's refresh would go to
+      // this login's provider. A silent restore does not come here: it
+      // stays under the session's ID, at the session's provider.
+      const sessionId = crypto.randomUUID();
       try {
-        // A new ID each time, never the one this page restored: the
-        // library reads a session's provider from localStorage by its ID
-        // alone, so under that ID every other tab's refresh would go to
-        // this login's provider. A silent restore does not come here: it
-        // stays under the session's ID, at the session's provider.
-        await login({ ...options, sessionId: crypto.randomUUID() } as ILoginInputOptions);
+        await login({ ...options, sessionId } as ILoginInputOptions);
       } catch (error) {
         window.sessionStorage.removeItem(PROVIDER_REDIRECT_KEY);
-        throw error;
+        // What the library kept of this login, such as the provider's
+        // registration of the app, serves no other.
+        window.localStorage.removeItem(`${USER_PREFIX}${sessionId}`);
+        // The library wraps what a step of its login failed with, such as
+        // a provider refused at the global fetch, in an error of its own.
+        throw error instanceof Error && error.cause instanceof AppError ? error.cause : error;
       }
     },
 

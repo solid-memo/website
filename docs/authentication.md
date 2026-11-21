@@ -66,9 +66,19 @@ refresh reads the metadata anew and calls the global `fetch` itself,
 with no option to replace it, so the sign-in client wraps the global
 `fetch`. Every request of the page passes through that wrapper, and it
 reads only an answer from an address ending in the metadata's path,
-under the limits of a profile
+under `PROVIDER_METADATA_LIMITS` (64 KiB)
 ([client/readLimits.ts](../packages/solid/src/client/readLimits.ts)).
-Past them, the read fails as too large and the request is canceled.
+The library keeps each provider's metadata in `localStorage` and never
+removes it, so the limits are far below a profile's. Past them, the
+read fails as too large and the request is canceled.
+
+At a provider that doesn't list the `webid` scope, the library
+registers the app at the `registration_endpoint` the metadata names,
+whatever form the value takes, and keeps the provider's answer in `localStorage`. The wrapper reads
+that answer whole, under `REGISTRATION_LIMITS` (8 KiB), before the
+library sees it, and refuses a larger one as `loginProviderRefused`.
+When a login fails before the browser leaves, the sign-in client
+removes what the library kept under that login's session ID.
 
 `solid-memo-client` needs neither: it refreshes only a stored session
 from the tab's own provider, and its library builds a proof's address

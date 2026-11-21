@@ -107,7 +107,9 @@ Solid-OIDC's authorization-code flow on `oauth4webapi`
   the page has one and the provider lists `webid` in
   `scopes_supported`. Otherwise the provider registers the app
   dynamically, once per issuer and redirect URL, with no secret where
-  the provider allows it (`token_endpoint_auth_method` `none`).
+  the provider allows it (`token_endpoint_auth_method` `none`). The
+  provider's answer is read under `REGISTRATION_LIMITS` (8 KiB), and a
+  larger one fails the login before anything of it is stored.
 - **The request** asks for `openid offline_access webid`, with PKCE
   (S256), a `state` and a `nonce`. A login asks with `prompt=consent`,
   which the Community Solid Server needs before it grants

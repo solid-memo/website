@@ -6,6 +6,7 @@ import * as oauth from "oauth4webapi";
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { type SessionHarness, sessionContract } from "@solid-memo/solid/testing/contract/session";
 import type { LoginOptions } from "@solid-memo/solid/client/interface";
+import { REGISTRATION_LIMITS } from "@solid-memo/solid/client/readLimits";
 import { navigate } from "./oidcBrowser";
 import { PENDING_LOGIN_KEY, type PendingLogin } from "./oidcLogin";
 import { OidcSession, setCurrentSession } from "./oidcSession";
@@ -570,6 +571,30 @@ describe("createSessionClient, over oauth4webapi", () => {
         token_endpoint_auth_method: "none",
       }),
     ]);
+  });
+
+  it.each([
+    ["as it is read", () => ({})],
+    ["by its length alone", (body: string) => ({ "Content-Length": String(body.length) })],
+  ])("refuses a registration answer past the limits %s, keeping none of it", async (_, headers) => {
+    const body = JSON.stringify({
+      client_id: "x".repeat(REGISTRATION_LIMITS.bytes),
+      redirect_uris: [REDIRECT],
+    });
+    const registered = vi.fn();
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
+      if (String(input) !== `${ISSUER}register`) return fakeFetch(input, init);
+      registered();
+      return new Response(body, {
+        status: 201,
+        headers: { "content-type": "application/json", ...headers(body) },
+      });
+    });
+    // The library reads the answer itself, and fails as it reads past the limits.
+    await expect(createSessionClient().login(LOGIN)).rejects.toThrow();
+    expect(registered).toHaveBeenCalledOnce();
+    expect(memory.registrations.size).toBe(0);
+    expect(window.sessionStorage.getItem(PENDING_LOGIN_KEY)).toBeNull();
   });
 
   it("registers once per issuer and redirect URL", async () => {
