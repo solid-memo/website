@@ -476,18 +476,38 @@ export function createDeckDocumentGuard(
   /**
    * The document at `url` as the removal of `decks` reads it
    * (readToRemove, as the first of them reads it), but TOO_LARGE where
-   * it is past the limits of one read and is where one of them keeps its
-   * own (isOwnDocument): no read will ever take it in, so it would be
-   * left behind, kept unread, with nothing left to remove it. The
-   * removal deletes it whole, unread. One past only a budget its reads
-   * share (isPastBudget) is UNREADABLE, kept, as a reload reads it.
+   * it is past the size limits of one read (readForRemoval) and is where
+   * one of them keeps its own (isOwnDocument), in a folder that is the
+   * instance's own (isDedicatedFolder) and outside the user's storages
+   * (isOutsideStorages): no read will ever take it in, so it would be
+   * left behind, kept unread, with nothing left to remove it, as an
+   * import of a deck file there once could leave it. The removal deletes
+   * it whole, unread. Unread, it cannot be asked whether it says it is
+   * another deck's or holds another app's data (standing, removeOwned),
+   * so anywhere else it is UNREADABLE, kept, as is one past only a
+   * budget its reads share (isPastBudget), as a reload reads it.
    */
   async function readOwnToRemove(
     decks: readonly DeckPlace[],
     url: string,
   ): Promise<FetchedDataset | null | typeof UNREADABLE | typeof TOO_LARGE> {
-    if (!decks.some((deck) => isOwnDocument(deck, url))) return readToRemove(decks[0]!, url);
-    return readForRemoval(url, fetch, TOO_LARGE);
+    const own = decks.find((deck) => isOwnDocument(deck, url));
+    if (own === undefined) return readToRemove(decks[0]!, url);
+    const read = await readForRemoval(url, fetch, TOO_LARGE);
+    if (read !== TOO_LARGE) return read;
+    const instance = instanceOf(own);
+    return (await isOutsideStorages(instance)) && (await isDedicatedFolder(instance, true))
+      ? TOO_LARGE
+      : UNREADABLE;
+  }
+
+  /**
+   * Whether the instance is outside every one of the user's storages
+   * (userStorages); not shown to be when they cannot be had.
+   */
+  async function isOutsideStorages(instance: string): Promise<boolean> {
+    const storages = await userStorages().catch(() => null);
+    return storages !== null && !storages.some((storage) => isInFolder(instance, storage));
   }
 
   /**
