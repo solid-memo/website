@@ -836,6 +836,9 @@ export function createSolidDeckRepository({
    * else keep it whole (null). One the pod serves that cannot be read as
    * RDF is kept whole too, and said to be ("kept"), and so is one outside
    * the instance's folder whose read fails (deckPlace.ts, readToRemove).
+   * The deck's own document past the size limits of every read, where a
+   * deck file's import could once leave it, is deleted unread
+   * (readOwnToRemove); anywhere else such a document is kept and named.
    * Any other failed read (refused, a server error, no answer, a body cut
    * off) throws: whether it is theirs is not known, so nothing may be
    * taken as settled. `owned` is what of it goes with the entries of the
@@ -859,8 +862,9 @@ export function createSolidDeckRepository({
   }
 
   /**
-   * Delete a deck's own document that no read takes in (TOO_LARGE),
-   * unread, so with no If-Match; one gone meanwhile is as good.
+   * Delete a deck's own document that no read takes in (TOO_LARGE, only
+   * where readOwnToRemove gives it), unread, so with no If-Match; one
+   * gone meanwhile is as good.
    */
   async function deleteUnread(url: string): Promise<Removal> {
     await deleteDataset(url, createSolidDataset(), fetch).catch((error: unknown) => {

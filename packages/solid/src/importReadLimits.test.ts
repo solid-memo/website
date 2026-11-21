@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { ReviewState } from "@solid-memo/domain/review";
 import { FOREIGN_LIMITS, limitedFetch, sharedReadBudget } from "./client/readLimits";
+import type { UserStorages } from "./deckPlace";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createSolidDeckRepository } from "./solidDeckRepository";
@@ -18,8 +19,11 @@ vi.mock("./client/readLimits", async (importOriginal) => ({
   FOREIGN_LIMITS: { bytes: 500_000, quads: 400, characters: 100_000_000 },
 }));
 
-/** A pod in memory, its reads through `reads` (as they are, unless given), and the repositories over it. */
-function pod(reads: (fetch: typeof globalThis.fetch) => typeof globalThis.fetch = (f) => f) {
+/** A pod in memory, its reads through `reads` (as they are, unless given), and the repositories over it, the user's storages `userStorages` (none unless given). */
+function pod(
+  reads: (fetch: typeof globalThis.fetch) => typeof globalThis.fetch = (f) => f,
+  userStorages?: UserStorages,
+) {
   let n = 0;
   const local = createLocalPod({
     root: "https://pod.example/",
@@ -33,6 +37,7 @@ function pod(reads: (fetch: typeof globalThis.fetch) => typeof globalThis.fetch 
     fetch,
     now: () => new Date("2026-11-20T00:00:00Z"),
     randomId: () => `r${n++}`,
+    userStorages,
   });
   const reviews = createSolidReviewStateRepository({ fetch, randomId: () => `s${n++}` });
   const status = async (url: string) => (await local(url)).status;
@@ -249,4 +254,95 @@ describe("a deck's removal, its own document past the limits of one read (GHSA-f
     expect(await reads.removeDecks([deck])).toEqual({ keptDocuments: [url] });
     expect(await p.status(url)).toBe(200);
   });
+});
+
+describe("a deck's removal, its own document unread only where an import could leave it (GHSA-59mh-w2h2-hq93)", () => {
+  const ROOT = "https://pod.example/";
+
+  /** The deck's cards document, as another app may leave it: saying it is another deck's when `backLinked`, and with one literal of `length` characters. */
+  function otherAppsDocument(length: number, backLinked: boolean): string {
+    return [
+      "@prefix dcterms: <http://purl.org/dc/terms/>.",
+      backLinked ? `<> dcterms:isPartOf <${ROOT}other/catalog.ttl#y>.` : "",
+      `<#note> <https://notes.example/body> "${"x".repeat(length)}".`,
+    ].join("\n");
+  }
+
+  /**
+   * A pod whose reads of the deck's cards document give `text` (the pod
+   * itself takes no term that long), and the deck. The document the pod
+   * holds is gone once a removal deletes it.
+   */
+  async function servingDeck(instance: string, text: string, userStorages: UserStorages) {
+    let at = "";
+    const p = pod(
+      (local) => async (input, init) =>
+        String(input) === at
+          ? Object.defineProperty(
+              new Response(text, {
+                headers: { "Content-Type": "text/turtle", ETag: '"served"' },
+              }),
+              "url",
+              { value: at },
+            )
+          : local(input, init),
+      userStorages,
+    );
+    const deck = await p.decks.importDeck(instance, release(1));
+    at = deck.cardsDocumentUrl;
+    return { p, deck };
+  }
+
+  it.each([
+    ["in the user's storage", INSTANCE, false, [ROOT]],
+    ["that says it is another deck's", INSTANCE, true, [ROOT]],
+    ["of an instance at a storage's root", ROOT, false, []],
+    ["outside the user's storages", INSTANCE, false, []],
+  ])(
+    "keeps a document with a term longer than any read takes in, %s, and names it",
+    async (_, instance, backLinked, storages) => {
+      const { p, deck } = await servingDeck(
+        instance,
+        otherAppsDocument(17_000, backLinked),
+        async () => storages,
+      );
+      expect(await p.decks.removeDecks([deck])).toEqual({
+        keptDocuments: [deck.cardsDocumentUrl],
+      });
+      expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
+      expect(await p.decks.listDecks(instance)).toEqual([]);
+    },
+  );
+
+  it("leaves alone, as before, such a document a read takes in that says it is another deck's", async () => {
+    const { p, deck } = await servingDeck(INSTANCE, otherAppsDocument(100, true), async () => [
+      ROOT,
+    ]);
+    expect(await p.decks.removeDecks([deck])).toEqual({ keptDocuments: [] });
+    expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
+  });
+
+  it.each([
+    ["in the user's storage", INSTANCE, async () => [ROOT]],
+    ["of an instance at a storage's root", ROOT, async () => []],
+    [
+      "when the user's storages cannot be had",
+      INSTANCE,
+      async (): Promise<string[]> => {
+        throw new Error("profile down");
+      },
+    ],
+  ])(
+    "keeps a document larger than a read takes in, %s, and names it",
+    async (_, instance, storages) => {
+      const p = pod((local) => limitedFetch(local, FOREIGN_LIMITS), storages);
+      const deck = await p.decks.importDeck(instance, release(1));
+      const lines = Array.from({ length: 500 }, (_, i) => `<#x${i}> <#p> "${i}" .`);
+      await put(p.local, deck.cardsDocumentUrl, lines.join("\n"));
+      expect(await p.decks.removeDecks([deck])).toEqual({
+        keptDocuments: [deck.cardsDocumentUrl],
+      });
+      expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
+    },
+  );
 });

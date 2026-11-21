@@ -20,7 +20,7 @@ import {
 
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
-import { ReadLimitError } from "./client/interface";
+import { ReadLimitError, type ReadLimits } from "./client/interface";
 import { FOREIGN_LIMITS, isPastBudget, readThrough, refusalOf } from "./client/readLimits";
 import {
   deleteSolidDataset,
@@ -327,7 +327,12 @@ export function readsAsNone(error: unknown): boolean {
 /** A document the pod served whole that could not be read (readForRemoval). */
 export const UNREADABLE = Symbol("unreadable");
 
-/** A document past what a read of one takes in, not past a budget its reads share (readForRemoval). */
+/**
+ * A document larger than a read held to size limits takes in, not past
+ * a budget its reads share (readForRemoval). One past only the bounds
+ * every read keeps, on a term's length, declarations or nesting
+ * (NO_SIZE_LIMITS), is not: no write of the app's makes such a document.
+ */
 export const TOO_LARGE = Symbol("tooLarge");
 
 /**
@@ -337,8 +342,9 @@ export const TOO_LARGE = Symbol("tooLarge");
  * (not Turtle, not RDF at all, or past the read's limits). Any other
  * failure throws, a body cut off on its way among them: nothing was
  * learned of the document, so the removal can only be tried again.
- * Asked with TOO_LARGE, that is what a document past the limits of one
- * read is (not past a budget its reads share: isPastBudget).
+ * Asked with TOO_LARGE, that is what a document past the size limits of
+ * one read is (isSizeLimited; not past a budget its reads share:
+ * isPastBudget).
  */
 export function readForRemoval(
   url: string,
@@ -372,11 +378,17 @@ export async function readForRemoval(
   try {
     return await getSolidDatasetOrNull(url, noting);
   } catch (error) {
-    if (error instanceof ReadLimitError && !isPastBudget(error)) return tooLarge;
+    if (error instanceof ReadLimitError && isSizeLimited(error.limits) && !isPastBudget(error))
+      return tooLarge;
     if (served || error instanceof ReadLimitError) return UNREADABLE;
     if (statusOf(error) === 410) return null;
     throw error;
   }
+}
+
+/** Whether a read refused under `limits` was held to a size: its bytes, triples or their characters. */
+function isSizeLimited({ bytes, quads, characters }: ReadLimits): boolean {
+  return [bytes, quads, characters].some(Number.isFinite);
 }
 
 /**
