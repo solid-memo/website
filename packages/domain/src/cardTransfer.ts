@@ -22,7 +22,8 @@ type DeckPlace = Pick<Deck, "url" | "cardsDocumentUrl" | "reviewsDocumentUrl">;
  * Whether a transfer from `source` to `target` would be one onto itself:
  * the same entry, or two entries with a document in common, a cards or
  * reviews document of one being either of the other's, compared as a
- * server may read them (documentKeyOf). Another app may point two decks
+ * server or its file system may read them (documentKeyOf), so
+ * `decks/A.ttl` and `decks/a.ttl` are one. Another app may point two decks
  * at one document; the cards are in the target already then, and a move
  * would remove them from both.
  */

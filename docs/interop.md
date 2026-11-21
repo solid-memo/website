@@ -61,6 +61,23 @@ an address with two dots in a row in its path, in any spelling, and
 writes to none
 ([data-model.md](data-model.md#where-an-instances-documents-are)).
 
+A server that keeps its documents as files may store them on a file
+system that ignores case, as macOS and Windows do by default, and
+Windows drops a trailing dot or space from a name. There
+`decks/A.ttl`, `decks/a.ttl.` and `decks/a.ttl` are one file. Solid
+Memo takes no deck's document at an address with a path segment that
+ends in a dot or a space, in any spelling, and writes to none. Windows
+also names a file another way with a `:` (a stream, `a.ttl::$DATA`) or
+a `~` and a digit (a short name, `VERBS~1.TTL`). Solid Memo takes no
+deck's document at an address with either in its path, plain or
+encoded, and writes to none. macOS takes a name and its other Unicode
+normalization (`é`, and `e` with a combining accent) as one. Where two
+addresses being one document keeps data safe, it compares them in one
+case and one normalization (`documentKeyOf` in
+[instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). A
+segment that doesn't decode (a stray `%`) is compared in one case for
+its ASCII letters only.
+
 ### jss-lang-tag
 
 **SPARQL Update drops the language tag of a literal in its body.**

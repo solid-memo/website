@@ -803,7 +803,8 @@ export function createSolidDeckRepository({
     for (const [catalogUrl, inDocument] of byDocument(decks)) {
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
       const leaving = new Set(inDocument.map((deck) => deck.url));
-      // Compared as a server may read them (documentKeyOf): one document spelled two ways is one.
+      // Compared as a server or its file system may read them (documentKeyOf): one document
+      // spelled two ways, `decks/A.ttl` and `decks/a.ttl` too, is one.
       // Keyed by pieces (TextMap): an address in that form may be longer than V8 hashes all of.
       const used = new TextMap<true>();
       for (const url of documentsInUse(

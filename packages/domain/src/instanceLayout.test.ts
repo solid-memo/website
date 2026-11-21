@@ -436,6 +436,16 @@ describe("where an instance's documents are", () => {
       `${ROOT}catal..og.ttl`,
       `${ROOT}pre..ferences.ttl`,
       `${ROOT}dra..fts/x/release.ttl`,
+      // A segment that ends in a dot or a space, which some file systems drop
+      // (`deck-1.ttl.` is `deck-1.ttl` there).
+      `${DECKS}deck-1.ttl.`,
+      `${DECKS}deck-1.ttl%20`,
+      `${DECKS}old./deck-1.ttl`,
+      `${DECKS}old%20/`,
+      // Another name Windows may give a file: a stream, or a short name.
+      `${DECKS}deck-1.ttl::$DATA`,
+      `${DECKS}deck-1.ttl%3A$DATA`,
+      `${DECKS}SPANIS~1.TTL`,
       "https://POD.example/x.ttl",
       "https://pod.example:443/x.ttl",
       "ftp://pod.example/x.ttl",
@@ -477,6 +487,19 @@ describe("where an instance's documents are", () => {
       `${ROOT}catal..og.ttl`,
       `${ROOT}pre..ferences.ttl`,
       `${ROOT}dra..fts/x/release.ttl`,
+      // A segment that ends in a dot or a space, which some file systems drop
+      // (`deck-1.ttl.` is `deck-1.ttl` there).
+      `${DECKS}deck-1.ttl.`,
+      `${DECKS}deck-1.ttl%2E`,
+      `${DECKS}deck-1.ttl%20`,
+      `${DECKS}old./deck-1.ttl`,
+      `${DECKS}old%20/deck-1.ttl`,
+      // Another name Windows may give a file: a stream, or a short name.
+      `${DECKS}deck-1.ttl::$DATA`,
+      `${DECKS}deck-1.ttl:x`,
+      `${DECKS}deck-1.ttl%3a$DATA`,
+      `${DECKS}SPANIS~1.TTL`,
+      `${DECKS}SPANIS%7E1.TTL`,
       DECKS,
       "https://pod.example/",
       "ftp://pod.example/x.ttl",
@@ -525,6 +548,19 @@ describe("documentKeyOf", () => {
     ["https://pod.example/me@x/x.ttl", "https://pod.example/me%40x/x.ttl"],
     ["https://pod.example/%c3%a9.ttl", "https://pod.example/é.ttl"],
     ["https://pod.example/a%2f%5c%25.ttl", "https://pod.example/a%2F%5C%25.ttl"],
+    // As a file system that ignores case, and drops a trailing dot or space, stores them.
+    ["https://pod.example/Decks/A.TTL", "https://pod.example/decks/a.ttl"],
+    ["https://pod.example/decks/a.ttl.", "https://pod.example/decks/a.ttl"],
+    ["https://pod.example/decks/a.ttl%2E%20", "https://pod.example/decks/a.ttl"],
+    ["https://pod.example/decks./a.ttl", "https://pod.example/decks/a.ttl"],
+    ["https://pod.example/%C3%89.ttl", "https://pod.example/é.ttl"],
+    ["https://pod.example/%C3%9F.ttl", "https://pod.example/SS.ttl"],
+    ["https://pod.example/glo%E1%BA%9Eary.ttl", "https://pod.example/glossary.ttl"],
+    ["https://pod.example/%E1%BA%9E.ttl", "https://pod.example/%C3%9F.ttl"],
+    ["https://pod.example/A%ff.ttl", "https://pod.example/a%FF.ttl"],
+    // As a file system that ignores Unicode normalization stores them (macOS).
+    ["https://pod.example/decks/%C3%A9.ttl", "https://pod.example/decks/e%CC%81.ttl"],
+    ["https://pod.example/decks/%C3%89.ttl", "https://pod.example/decks/e%CC%81.ttl"],
     // As a request sends them, which a server cannot tell apart.
     ["https://POD.example.:443/a/../b.ttl", "https://pod.example/b.ttl"],
     ["https://me:pw@pod.example/b.ttl", "https://pod.example/b.ttl"],
@@ -550,7 +586,11 @@ describe("documentKeyOf", () => {
 
   it("decodes only what needs no encoding in a segment that does not decode", () => {
     expect(documentKeyOf("https://pod.example/%zz%41%28/%e9%2f%28")).toBe(
-      "https://pod.example/%zzA%28/%E9%2F(",
+      "https://pod.example/%zza%28/%E9%2F(",
+    );
+    // Only its ASCII letters are in one case: a server keeps such a name as it is written.
+    expect(documentKeyOf("https://pod.example/%zz%C3%89.ttl")).not.toBe(
+      documentKeyOf("https://pod.example/%zz%C3%A9.ttl"),
     );
   });
 

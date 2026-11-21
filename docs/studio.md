@@ -1137,7 +1137,10 @@ them as one: written another way a request or a server resolves, such
 as a character encoded that needs no encoding, or with a user name
 and password in it. A server may decode each segment of the path and
 encode it again, so a character written encoded in one address and
-plain in the other (`(` and `%28`, `+` and `%2B`) is the same too. An
+plain in the other (`(` and `%28`, `+` and `%2B`) is the same too. So
+are two spellings that differ only in case, in Unicode normalization
+(`é`, and `e` with a combining accent) or in a trailing dot or space,
+which a file system that ignores them stores as one file. An
 encoded slash, backslash or percent sign isn't, as decoded it would
 read as another path (`documentKeyOf` in
 [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). The

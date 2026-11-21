@@ -1450,6 +1450,24 @@ describe("removeDeck", () => {
     expect(deleteSolidDataset).not.toHaveBeenCalled();
   });
 
+  it("keeps a document another deck names in another case, which some file systems store as one", async () => {
+    const named: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/A.ttl` };
+    const sharing = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Shared")
+      .addIri(SM.cardsDocument, `${INSTANCE}decks/a.ttl`)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), sharing) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(named);
+
+    expect(vi.mocked(deleteSolidDataset).mock.calls.map(([url]) => url)).toEqual([
+      deck.reviewsDocumentUrl,
+    ]);
+  });
+
   it("skips missing documents and a missing catalog", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
 

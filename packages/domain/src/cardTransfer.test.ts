@@ -103,6 +103,14 @@ describe("sharesDocumentsWith", () => {
     ["x'.ttl", "x%27.ttl"],
     ["a+b.ttl", "a%2Bb.ttl"],
     ["me@work.ttl", "me%40work.ttl"],
+    // A file system that ignores case, and drops a trailing dot or space, stores each as one file.
+    ["A.ttl", "a.ttl"],
+    ["a.ttl.", "a.ttl"],
+    ["a.ttl%20", "a.ttl"],
+    ["%C3%84.ttl", "ä.ttl"],
+    ["glo%E1%BA%9Eary.ttl", "glossary.ttl"],
+    // A file system that ignores Unicode normalization (macOS) stores these as one file.
+    ["%C3%A9.ttl", "e%CC%81.ttl"],
   ])("takes %s and %s as one document", (one, other) => {
     const at = (name: string, url: string, reviews: string) => ({
       url,
@@ -665,6 +673,9 @@ describe("planCardTransfer", () => {
     ["move", "x'.ttl", "x%27.ttl"],
     ["copy", "a+b.ttl", "a%2bb.ttl"],
     ["move", "me@x.ttl", "me%40x.ttl"],
+    ["move", "A.ttl", "a.ttl"],
+    ["copy", "a.ttl.", "A.TTL"],
+    ["move", "%C3%A9.ttl", "e%CC%81.ttl"],
   ] as const)("refuses a %s from %s to %s, which a server reads as one", (mode, from, to) => {
     const cards = [card("c1")];
     const at = (name: string) => `https://pod.example/a/decks/${name}`;
