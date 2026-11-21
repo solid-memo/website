@@ -81,6 +81,19 @@ describe("where a deck's documents may be", () => {
       { reviewsDocumentUrl: `${ROOT}pre..ferences.ttl` },
       { cardsDocumentUrl: `${ROOT}dra..fts/x/release.ttl` },
       { reviewsDocumentUrl: `${ROOT}history/2026-10..ttl` },
+      // The instance's own documents in another case, which a file system that ignores case
+      // stores as one, and a segment that ends in a dot or a space, which some drop.
+      { cardsDocumentUrl: `${ROOT}Catalog.ttl` },
+      { reviewsDocumentUrl: `${ROOT}META.TTL` },
+      { cardsDocumentUrl: `${ROOT}History/2026-10.ttl` },
+      { cardsDocumentUrl: `${ROOT}Drafts/spanish/v1/cards.ttl` },
+      { cardsDocumentUrl: `${DECKS}deck-1.ttl.` },
+      { reviewsDocumentUrl: `${ROOT}reviews/deck-1.ttl%20` },
+      { cardsDocumentUrl: `${ROOT}catalog.ttl%2E` },
+      // Another name Windows may give the catalog: a stream of it, or a short name.
+      { cardsDocumentUrl: `${ROOT}catalog.ttl::$DATA` },
+      { reviewsDocumentUrl: `${ROOT}catalog.ttl%3A$DATA` },
+      { cardsDocumentUrl: `${ROOT}PREFER~1.TTL` },
     ]) {
       expect(isDeckInPlace({ ...deck, ...misplaced }), JSON.stringify(misplaced)).toBe(false);
     }

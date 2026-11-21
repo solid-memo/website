@@ -1264,6 +1264,23 @@ describe("cards", () => {
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
+    it("refuses a move to an entry over the deck's documents in another case", async () => {
+      const { deps, useCases } = setup();
+      const at = (folder: string, name: string) =>
+        `https://alice.example/solid-memo/main/${folder}/${name}.ttl`;
+      await expect(
+        useCases.transferCards(
+          instance.url,
+          { ...deck, cardsDocumentUrl: at("decks", "a"), reviewsDocumentUrl: at("reviews", "a") },
+          { ...target, cardsDocumentUrl: at("decks", "A"), reviewsDocumentUrl: at("reviews", "A") },
+          ["one"],
+          { mode: "move", keepProgress: true },
+          session.webId,
+        ),
+      ).rejects.toMatchObject({ code: "cardTransferSameDeck" });
+      expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+    });
   });
   describe("deck files", () => {
     const fileDeck: Deck = {

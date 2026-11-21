@@ -103,7 +103,8 @@ export interface InstanceCheckUseCases {
  * A test of whether the document at an address is one of these decks'
  * unclaimed ones, in whatever spelling: a deck may name one document
  * twice, and only the first spelling is listed as unclaimed. Each
- * address is compared as a server may read it (documentKeyOf), the
+ * address is compared as a server or its file system may read it
+ * (documentKeyOf: `decks/A.ttl` is `decks/a.ttl`), the
  * unclaimed ones brought to that form once for the test, so that a
  * catalog naming many decks costs one lookup per address, not a
  * comparison with every unclaimed document.

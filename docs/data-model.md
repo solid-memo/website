@@ -586,11 +586,18 @@ No document Solid Memo names has any.
   above). It has no two dots in a row anywhere in its path
   (`span..ish.ttl`, `%2e%2e` or `.%2e` in any case): some servers strip
   them, so it would be another spelling of another document
-  ([interop.md](interop.md#javascript-solid-server)). It isn't a folder, an access control or metadata resource
-  (`.acl`, `.acr`, `.meta`), or one of the instance's own documents (its
-  meta, preferences, palettes, catalog and digest, `history/`, `drafts/`,
-  `releases/`). It's in a guest's pod exactly when the catalog is: only
-  a guest's own instance names that pod, which is this browser's
+  ([interop.md](interop.md#javascript-solid-server)). No segment of
+  its path ends in a dot or a space (`deck.ttl.`, `%2e` or `%20`),
+  which some file systems drop. Its path has no `:` and no `~` and a
+  digit, plain or encoded, with which Windows names a file another way
+  (`deck.ttl::$DATA`, `VERBS~1.TTL`). It isn't a folder, an access
+  control or metadata resource (`.acl`, `.acr`, `.meta`), or one of the
+  instance's own documents (its meta, preferences, palettes, catalog
+  and digest, `history/`, `drafts/`, `releases/`). Those are compared
+  in any case, as a file system that ignores case stores them:
+  `Catalog.ttl` is the catalog there. It's in a guest's pod exactly
+  when the catalog is: only a guest's own instance names that pod,
+  which is this browser's
   ([guest-mode.md](guest-mode.md#a-pod-in-the-browser)). New decks are
   made in `decks/` and `reviews/`. One outside the user's own pod (their
   storages and the instances they registered) is read as no one, and
@@ -1324,7 +1331,8 @@ decks first removes their cards and review states from their documents,
 deleting each document that then holds nothing else (one holding
 another app's data too is kept, `keptDocuments`), then their entries in
 one save (`removeDecks`). A document another deck still names, in any
-spelling a server may read as its address (`documentKeyOf`), is
+spelling a server may read as its address, in any case too, as a file
+system that ignores case stores it (`documentKeyOf`), is
 kept. Either way the catalog document is rewritten once for all the decks (`withDecks`, `withoutDecks`), not once per deck,
 so a change to many decks takes time that grows with them, not their
 square. A link of the catalog or of a deck group that is no URL the app

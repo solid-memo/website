@@ -120,6 +120,23 @@ export function hasDotSegment(text: string): boolean {
 const DOUBLE_DOT = /(?:\.|%2e){2}/i;
 
 /**
+ * A path segment that ends in a dot or a space, plain or encoded, in
+ * any case (`deck.ttl.`, `deck.ttl%20`). A file system that drops them
+ * (Windows) stores `deck.ttl.` as `deck.ttl`: such an address is another
+ * spelling of another document, which no comparison of addresses would
+ * see.
+ */
+const TRAILING_DOT_OR_SPACE = /(?:\.|%2e|%20)(?:\/|$)/i;
+
+/**
+ * Another name a Windows file system (NTFS) may give a file: a `:`,
+ * plain or encoded, which names a stream of it (`deck.ttl::$DATA` is
+ * `deck.ttl`), or a `~` and a digit, plain or encoded, as in a short
+ * name (`SPANIS~1.TTL` for `spanish-verbs.ttl`).
+ */
+const WINDOWS_ALIAS = /:|%3a|(?:~|%7e)\d/i;
+
+/**
  * Whether the path of the absolute URL `url` has an empty segment (`//`)
  * as a request sends it, however it is written (a backslash, a tab, `/.//`):
  * a client may merge it into one slash, or read what follows it as a host.
@@ -228,8 +245,17 @@ function foldUnreserved(text: string): string {
 /**
  * A path segment as a server that decodes it and encodes it again
  * (`encodeURIComponent`) reads it, every escape but a kept one
- * (KEPT_ESCAPE) decoded first. A part that does not decode (a stray `%`,
- * a broken UTF-8 sequence) has only its unreserved escapes decoded.
+ * (KEPT_ESCAPE) decoded first, and as a file system that ignores case
+ * and Unicode normalization and drops a trailing dot or space stores it:
+ * composed (NFC, so `é` and `e` with a combining accent are one), every
+ * letter in one case, with no trailing dots or spaces. Letters are
+ * brought to lower case, then upper, then lower again, so that `ẞ`, `ß`
+ * and `ss` are one, as a file system that folds case fully reads them;
+ * this takes some letters as one that a given file system keeps apart,
+ * and where the key is used, that only refuses or keeps more. A part that does not decode (a stray `%`, a
+ * broken UTF-8 sequence) has only its unreserved escapes decoded and
+ * only its ASCII letters in one case: a server keeps such a name as it
+ * is written, if at all.
  */
 function segmentKeyOf(segment: string): string {
   return segment
@@ -237,12 +263,20 @@ function segmentKeyOf(segment: string): string {
     .map((part, index) => {
       if (index % 2 === 1) return part.toUpperCase();
       try {
-        return encodeURIComponent(decodeURIComponent(part));
+        return encodeURIComponent(
+          decodeURIComponent(part)
+            .normalize("NFC")
+            .toLowerCase()
+            .toUpperCase()
+            .toLowerCase()
+            .normalize("NFC"),
+        );
       } catch {
-        return foldUnreserved(part);
+        return foldUnreserved(foldUnreserved(part).toLowerCase());
       }
     })
-    .join("");
+    .join("")
+    .replace(/(?:\.|%20)+$/, "");
 }
 
 /**
@@ -252,14 +286,17 @@ function segmentKeyOf(segment: string): string {
  * without a user name or password, which a request does not send in the
  * address and which name no other document. An http(s) path is taken
  * segment by segment as a server that decodes each and encodes it again
- * reads it (segmentKeyOf), so `x(y).ttl` and `x%28y%29.ttl`, or `a+b`
- * and `a%2Bb`, are one; an encoded slash, backslash or percent sign
- * stays encoded, so `a%2Fb` and `a/b` are not. Elsewhere an escape of a
- * character that needs no encoding is decoded, and any other is in
- * upper case. Text that is no URL is taken as it is written. Where two
- * addresses being one document keeps data safe (a card transfer, a
- * document another deck still names, an unclaimed document), they are
- * compared by this key.
+ * reads it, on a file system that ignores case and drops a trailing dot
+ * or space (segmentKeyOf), so `x(y).ttl` and `x%28y%29.ttl`, `a+b` and
+ * `a%2Bb`, or `A.ttl`, `a.ttl.` and `a.ttl` are one; an encoded slash,
+ * backslash or percent sign stays encoded, so `a%2Fb` and `a/b` are not.
+ * Elsewhere an escape of a character that needs no encoding is decoded,
+ * and any other is in upper case. Text that is no URL is taken as it is
+ * written. Where two addresses being one document keeps data safe (a
+ * card transfer, a document another deck still names, an unclaimed
+ * document, one of the instance's own), they are compared by this key;
+ * reads stay keyed by the address a request sends, so two documents one
+ * server keeps apart are each read.
  */
 export function documentKeyOf(url: string): string {
   const canonical = canonicalUrlOf(url);
@@ -297,11 +334,13 @@ export function subjectOfDocument(documentUrl: string): (subjectUrl: string) => 
  * What no deck's document has in its path, as a request sends it: a
  * `;` (a path parameter to some servers), an encoded slash, backslash or
  * percent sign, a NUL, an overlong UTF-8 byte, an IIS `%u` escape, a
- * segment that begins with a dot, an empty one (`//`), or two dots
- * anywhere in a segment (DOUBLE_DOT); see OUT_OF_PLACE.
+ * segment that begins with a dot, an empty one (`//`), two dots
+ * anywhere in a segment (DOUBLE_DOT), a segment that ends in a dot or
+ * a space (TRAILING_DOT_OR_SPACE), or another name Windows may give a
+ * file (WINDOWS_ALIAS); see OUT_OF_PLACE.
  */
 const UNSAFE_PATH = new RegExp(
-  String.raw`;|%(?:2f|5c|25|00|c0|c1|u)|\/(?:\.|%2e|\/)|${DOUBLE_DOT.source}`,
+  String.raw`;|%(?:2f|5c|25|00|c0|c1|u)|\/(?:\.|%2e|\/)|${DOUBLE_DOT.source}|${TRAILING_DOT_OR_SPACE.source}|${WINDOWS_ALIAS.source}`,
   "i",
 );
 
@@ -351,10 +390,13 @@ export function isSafeWriteUrl(url: string): boolean {
 /**
  * Whether `url` is one of the instance's own documents, which no deck's
  * may be: its meta, preferences, palettes, catalog and digest documents,
- * and any in its `history/`, `drafts/` or `releases/`.
+ * and its `history/`, `drafts/` and `releases/` folders and any document
+ * in them, compared as a file system that ignores case may store them
+ * (documentKeyOf): `Catalog.ttl` is the catalog there.
  */
 export function isInstanceOwnDocument(instanceUrl: string, url: string): boolean {
   const base = ensureTrailingSlash(instanceUrl);
+  const key = documentKeyOf(url);
   return (
     [
       metaUrlOf(base),
@@ -362,8 +404,10 @@ export function isInstanceOwnDocument(instanceUrl: string, url: string): boolean
       palettesUrlOf(base),
       catalogUrlOf(base),
       digestUrlOf(base),
-    ].some((own) => isSameUrl(url, own)) ||
-    ["history/", "drafts/", "releases/"].some((folder) => isDocumentIn(url, `${base}${folder}`))
+    ].some((own) => key === documentKeyOf(own)) ||
+    ["history/", "drafts/", "releases/"].some((folder) =>
+      key.startsWith(documentKeyOf(`${base}${folder}`)),
+    )
   );
 }
 
