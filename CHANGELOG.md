@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.10](https://github.com/solid-memo/website/compare/v8.0.9...v8.0.10) (2026-11-21)
+
+### Fixes
+
+* **domain:** refuse two dots inside a path segment of a document address ([1d934a6](https://github.com/solid-memo/website/commit/1d934a628176793c52e980ec4578bb328230a235))
+
 ## [8.0.9](https://github.com/solid-memo/website/compare/v8.0.8...v8.0.9) (2026-11-20)
 
 ### Fixes
