@@ -13,8 +13,10 @@ import type { FsrsSnapshot, FsrsState, ReviewSnapshot, ReviewState, ReviewStates
 import { rebaseDraft } from "./release/releaseToDraft";
 import { namedFsrsSubject } from "./reviewRecord";
 import { card as draftCard, courseDraft } from "./testing/releaseDraft";
+import { agentUrlOf, longestAgentUrlOf } from "./agentRecord";
 import {
   addressesGuest,
+  authorFitsDeck,
   cardFitsDeck,
   linksGuestPod,
   decodeGuestMergeNote,
@@ -116,6 +118,28 @@ describe("adding a guest's study to an instance", () => {
       reviewsDocumentUrl: `${TARGET}reviews/deck-n.ttl`,
       formatVersion: 6,
     });
+  });
+
+  it("makes a guest deck a new deck without an author whose agent node in the instance's catalog would be too long", () => {
+    const pod = "https://alice.solidcommunity.example/apps/solid-memo/";
+    const guestCatalog = `${GUEST_INSTANCE_URL}catalog.ttl`;
+    // Its node just fits in the guest's catalog, under the guest's shorter address.
+    const long = "a".repeat(16_383 - 2 - `${guestCatalog}#agent-`.length);
+    const guest = deck("deck-g1", GUEST_INSTANCE_URL, { authors: ["Ada", long, "Bo"] });
+    expect(isIriPastBound(agentUrlOf(guest.url, long))).toBe(false);
+    expect(mergedDeck(guest, pod, "deck-n", 6).authors).toEqual(["Ada", "Bo"]);
+    expect(mergedDeck(guest, pod, "deck-n", 6).url).toBe(`${pod}catalog.ttl#deck-n`);
+  });
+
+  it("keeps an author whose every agent node in the deck's catalog can be written", () => {
+    const to = deck("deck-n", TARGET);
+    // The longest name that fits: a bare slug, then its hash and the longest count.
+    let fits = "a".repeat(16_383);
+    while (isIriPastBound(longestAgentUrlOf(to.url, fits))) fits = fits.slice(1);
+    expect(authorFitsDeck("Ada", to)).toBe(true);
+    expect(authorFitsDeck(fits, to)).toBe(true);
+    expect(authorFitsDeck(`${fits}a`, to)).toBe(false);
+    expect(isIriPastBound(agentUrlOf(to.url, `${fits}a`))).toBe(false);
   });
 
   it("names an answer's deck, card and wrong option in the deck it was added as, by the same fragment ids", () => {

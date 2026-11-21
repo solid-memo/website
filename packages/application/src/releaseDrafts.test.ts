@@ -82,6 +82,8 @@ function setUp({
     list: vi.fn(async () => drafts),
     documents: vi.fn(async () => []),
     create: vi.fn(async (_instance: string, draft: ReleaseDraft) => draftSummaryOf(draft)!),
+    documentCountOf: vi.fn((_draft: ReleaseDraft) => 2),
+    refuseTooManyInAll: vi.fn(async () => undefined),
     read: vi.fn(async () => ({ draft: stored, version: "v1" })),
     applyChanges: vi.fn(async () => undefined),
     assemble: vi.fn(),
@@ -1192,6 +1194,35 @@ describe("copyReleaseDraft", () => {
       vars: { url: draftUrlOf(INSTANCE, "solid", 1) },
     });
     expect(repository.create).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("checkReleaseDraftCopy", () => {
+  it("counts the documents of the copy at the given address, with nothing written", async () => {
+    const guest = draftUrlOf(GUEST_INSTANCE_URL, "solid", 2);
+    const stored = rebaseDraft(courseDraft(), guest);
+    const { useCases, repository } = setUp({ stored });
+    const url = draftUrlOf(INSTANCE, "solid-9", 2);
+    await expect(useCases.checkReleaseDraftCopy(guest, url)).resolves.toBe(2);
+    expect(repository.documentCountOf).toHaveBeenCalledWith(rebaseDraft(stored, url));
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
+  it("names the draft whose copy would hold a term too long, and passes any other refusal on", async () => {
+    const guest = draftUrlOf(GUEST_INSTANCE_URL, "solid", 2);
+    const { useCases, repository } = setUp({ stored: rebaseDraft(courseDraft(), guest) });
+    repository.documentCountOf.mockImplementationOnce(() => {
+      throw new AppError("termTooLong", { limit: 16_383 });
+    });
+    await expect(
+      useCases.checkReleaseDraftCopy(guest, draftUrlOf(INSTANCE, "solid", 2)),
+    ).rejects.toMatchObject({ code: "draftCopyTooLong", vars: { draft: "solid" } });
+    repository.documentCountOf.mockImplementationOnce(() => {
+      throw new AppError("draftTooManyDocuments", { limit: 1000 });
+    });
+    await expect(
+      useCases.checkReleaseDraftCopy(guest, draftUrlOf(INSTANCE, "solid", 2)),
+    ).rejects.toMatchObject({ code: "draftTooManyDocuments" });
   });
 });
 

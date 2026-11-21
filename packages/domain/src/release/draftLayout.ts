@@ -431,3 +431,12 @@ export function draftNameFor(title: string, taken: Iterable<string>): string {
   for (let n = 2; used.has(name); n++) name = `${slug}-${n}`;
   return name;
 }
+
+/**
+ * The longest URL draftNameFor can give a draft named after `title`, at
+ * `version` in the instance at `instanceUrl`: its slug with the longest
+ * count a name can take after it.
+ */
+export function longestDraftUrlFor(instanceUrl: string, title: string, version: number): string {
+  return draftUrlOf(instanceUrl, `${slugOf(title) || "draft"}-${Number.MAX_SAFE_INTEGER}`, version);
+}

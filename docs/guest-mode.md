@@ -181,7 +181,14 @@ It runs these steps:
    catalog is read with (`guestMergeTooManyDecks`,
    [data-model.md](data-model.md#the-catalog)). Nor when the guest's
    groups would give its arrangement more groups than it's read with
-   (`catalogFull`).
+   (`catalogFull`). Nor when a draft's copy, under the longest name it
+   may take in the instance, would hold an IRI longer than a term may
+   be (`draftCopyTooLong`, which names the draft). A draft's IRIs grow
+   with the instance's address, which is longer than the guest's. Nor
+   when the drafts would give the instance's drafts more documents
+   than are read together (`draftTooManyDocuments`). A draft an earlier
+   run copied, unchanged since, isn't asked again; with no draft left
+   to copy, the instance's drafts aren't read.
 2. **decks:** each kept deck becomes a new deck of the instance, in the
    guest's order ([data-model.md](data-model.md#decks-and-cards)):
    - a new id (`deck-<uuid>`), with its cards and reviews documents
@@ -192,7 +199,12 @@ It runs these steps:
      creation time. So are the release it came from
      (`prov:wasDerivedFrom`) and, for a course's deck, its
      `schema:Course` type and completed chapters
-     (`sm:completedChapter`);
+     (`sm:completedChapter`). An author's name comes from a release,
+     and its agent node fit under the guest's short catalog address.
+     An author whose node in the instance's catalog could be longer
+     than a term may be, with the hash and count a node may take
+     after its name, is left out, as a card that doesn't fit is
+     (`authorFitsDeck`);
    - its cards keep their fragment ids, distractors and creation
      times, written in this app's format, the document saying it's
      part of the deck. Its review states keep their SM-2 fields and
@@ -271,7 +283,10 @@ entry and, unless the failure was in adding them, answers. The only
 other writes are the groups, after **arrange**, the drafts reported
 copied (`copied`), each whole, and any unnamed deck document whose
 deletion failed. The user is told which decks and drafts (under their
-names there) are in the instance.
+names there) are in the instance. A text or address too long that
+stops the merge once part of the study is added names the deck
+(`guestDeckTooLong`) or the draft (`draftCopyTooLong`), so it can be
+left out or deleted.
 
 Trying again adds what isn't there yet. As each deck is added, and
 before each group is, this browser's update journal notes
@@ -331,7 +346,11 @@ instance goes). It runs these steps:
    ([data-model.md](data-model.md)). List the guest's instance, without
    the digest (this browser's), refused past the same bounds as above
    (`guestStudyTooLarge`). Check the target is free, then create it.
-   Answers waiting to be logged go to the guest's log first. Deleting a
+   Answers waiting to be logged go to the guest's log first. Refuse,
+   before anything is written, a deck with an author whose agent node
+   would be longer than a term may be under the target
+   (`guestDeckTooLong`), or a draft whose copy would hold such an IRI
+   (`draftCopyTooLong`). Each names the deck or draft. Deleting a
    copy that failed half-way walks it within the same bounds.
 2. **copy:** copy each resource with every IRI under the guest's
    instance moved under the target, and the guest's WebID renamed to the

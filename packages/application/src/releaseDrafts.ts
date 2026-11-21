@@ -176,6 +176,14 @@ export interface ReleaseDraftUseCases {
    */
   copyReleaseDraft(draftUrl: string, instanceUrl: string): Promise<ReleaseDraftSummary>;
   /**
+   * How many documents a copy of the draft at `draftUrl`, made as
+   * copyReleaseDraft makes one, would be written in at `url`, with
+   * nothing written; refused as writing it there would be. A term of it
+   * that would be too long there is draftCopyTooLong, naming the draft:
+   * its subjects' IRIs grow with the address of the copy's instance.
+   */
+  checkReleaseDraftCopy(draftUrl: string, url: string): Promise<number>;
+  /**
    * The draft as its documents say now, with what the releases before it
    * published (`published`), read from the release it follows. A release
    * before it that cannot be read counts everything the draft has as
@@ -290,6 +298,21 @@ function draftable(read: ReleaseDraft): ReleaseDraft {
   const foreign = strayPartsOf(release).find((stray) => idIn(release, stray) === null);
   if (foreign !== undefined) throw new AppError("releaseForeignPart", { part: foreign });
   return ownStatements(withOwnVersions(release));
+}
+
+/**
+ * The draft read at `draftUrl` as a copy of it at `url`
+ * (copyReleaseDraft): every subject moved there. What the draft states
+ * of an address in the copy's container, as a release made a draft
+ * could (GHSA-8w75-jg23-rxq5), is not copied. A guest's pod goes once
+ * the guest's study is kept: a copy of a guest's draft that links to
+ * anything in it is guestUrlsLeft (its text may name any address).
+ */
+function copyOf(draft: ReleaseDraft, draftUrl: string, url: string): ReleaseDraft {
+  const copy = rebaseDraft(inItsPlace(draft, url), url);
+  if (isGuestUrl(draftUrl) && draftAddressesGuest(copy))
+    throw new AppError("guestUrlsLeft", { url });
+  return copy;
 }
 
 /**
@@ -792,14 +815,19 @@ export function createReleaseDraftUseCases({
       const { draft } = await releaseDraftRepository.read(draftUrl);
       // A draft is read only at a draft's place; its copy is named as it is, not after its title.
       const { name, version } = draftPlaceOf(draftUrl)!;
-      return create(instanceUrl, { title: {}, name, version }, (url) => {
-        // What the draft states of an address in the copy's container, as a release made a draft could (GHSA-8w75-jg23-rxq5), is not copied.
-        const copy = rebaseDraft(inItsPlace(draft, url), url);
-        // A guest's pod goes once the guest's study is kept: a copy links to nothing in it (its text may name any address).
-        if (isGuestUrl(draftUrl) && draftAddressesGuest(copy))
-          throw new AppError("guestUrlsLeft", { url });
-        return copy;
-      });
+      return create(instanceUrl, { title: {}, name, version }, (url) =>
+        copyOf(draft, draftUrl, url),
+      );
+    },
+
+    async checkReleaseDraftCopy(draftUrl, url) {
+      const { draft } = await releaseDraftRepository.read(draftUrl);
+      try {
+        return releaseDraftRepository.documentCountOf(copyOf(draft, draftUrl, url));
+      } catch (error) {
+        if (!(error instanceof AppError) || error.code !== "termTooLong") throw error;
+        throw new AppError("draftCopyTooLong", { draft: draftPlaceOf(draftUrl)!.name });
+      }
     },
 
     async getReleaseDraft(draftUrl) {

@@ -116,6 +116,10 @@ const NO_DRAFTS: ReleaseDraftRepository = {
   list: none,
   documents: none,
   create: noDrafts,
+  documentCountOf: () => {
+    throw new Error("This app keeps no drafts.");
+  },
+  refuseTooManyInAll: nothing,
   read: noDrafts,
   applyChanges: noDrafts,
   assemble: noDrafts,

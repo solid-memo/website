@@ -21,6 +21,7 @@ import {
   draftDocuments,
   draftDocumentUrl,
   draftNameFor,
+  longestDraftUrlFor,
   draftPlaceOf,
   draftSummaryOf,
   draftsContainerOf,
@@ -181,6 +182,19 @@ describe("draftNameFor", () => {
     expect(draftNameFor("Solid: Fundamentals", [])).toBe("solid-fundamentals");
     expect(draftNameFor("Huvudstäder", ["huvudstader", "huvudstader-2"])).toBe("huvudstader-3");
     expect(draftNameFor("¿?", [])).toBe("draft");
+  });
+});
+
+describe("longestDraftUrlFor", () => {
+  it("is longer than the URL of any name draftNameFor gives the title", () => {
+    const instance = "https://pod.example/solid-memo/main/";
+    const taken = Array.from({ length: 98 }, (_, n) => `solid-${n + 2}`);
+    const named = draftUrlOf(instance, draftNameFor("solid", ["solid", ...taken]), 2);
+    expect(named).toBe(`${instance}drafts/solid-100/v2/release.ttl`);
+    const longest = longestDraftUrlFor(instance, "solid", 2);
+    expect(longest).toBe(`${instance}drafts/solid-${Number.MAX_SAFE_INTEGER}/v2/release.ttl`);
+    expect(longest.length).toBeGreaterThan(named.length);
+    expect(longestDraftUrlFor(instance, "¿?", 1)).toContain("/drafts/draft-");
   });
 });
 

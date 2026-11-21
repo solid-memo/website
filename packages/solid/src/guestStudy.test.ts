@@ -493,6 +493,35 @@ describe("a guest's study", () => {
     expect((await everyTriple(aliceStore)).some((line) => line.includes(id))).toBe(false);
   });
 
+  it("adds a deck whose author's agent node would be too long in the instance's longer address, without that author", async () => {
+    const { useCases, aliceStore } = await app();
+    const longer = `${ALICE_POD}solid-memo/${"p".repeat(200)}/`;
+    const target = await useCases.createInstance(ALICE, {
+      containerUrl: longer,
+      name: "Main",
+      registrationTarget: "private",
+    });
+    await useCases.startGuest("My study");
+    const [guestInstance] = await useCases.listInstances(GUEST_SESSION);
+    const first = await useCases.createDeck(guestInstance!.url, { en: "First" });
+    const deck = await useCases.createDeck(guestInstance!.url, { en: "Capitals" });
+    // A name, as a release may give one, whose node just fits in the guest's catalog.
+    const catalog = deck.url.slice(0, deck.url.indexOf("#"));
+    const long = "a".repeat(16_383 - 2 - `${catalog}#agent-`.length);
+    await useCases.setDeckProvenance(deck, { authors: ["Ada", long] });
+    expect((await useCases.listDecks(guestInstance!.url))[1]!.authors).toEqual(["Ada", long]);
+
+    // Every run alike: the first deck is added, then this one, without that author.
+    const outcome = await useCases.mergeGuestStudy(ALICE, guestInstance!, target);
+
+    expect(outcome).toMatchObject({ ok: true, tidied: true });
+    const added = await useCases.listDecks(target.url);
+    expect(added.map(({ title }) => title)).toEqual([first.title, deck.title]);
+    expect(added[1]!.authors).toEqual(["Ada"]);
+    expect((await useCases.validateInstance(target.url)).conforms).toBe(true);
+    expect((await everyTriple(aliceStore)).some((line) => line.includes(long))).toBe(false);
+  });
+
   it("adds a deck whose card text names the guest's pod to an instance, the text as it was", async () => {
     const { useCases } = await app();
     const target = await useCases.createInstance(ALICE, {

@@ -169,7 +169,7 @@ export function createSolidReleaseDraftRepository({
    */
   async function refuseTooManyInAll(
     instanceUrl: string,
-    draftUrl: string,
+    draftUrl: string | null,
     count: number,
   ): Promise<void> {
     let listed = count;
@@ -295,14 +295,7 @@ export function createSolidReleaseDraftRepository({
       // A draft at an address no draft has would be written where no list finds it, nor a delete.
       const summary = draftSummaryOf(draft);
       if (summary === null) throw new Error(`No draft can be at ${draft.url}`);
-      const byDocument = new Map<string, DraftEntry[]>([[draft.url, []]]);
-      for (const entry of draftEntries(draft).values()) {
-        const entries = byDocument.get(entry.document);
-        if (entries === undefined) byDocument.set(entry.document, [entry]);
-        else entries.push(entry);
-      }
-      // One the app could not read back: nothing of it is written.
-      refuseTooManyDocuments(byDocument.size);
+      const byDocument = entriesByDocument(draft);
       const node = await catalogNode(instanceUrl, fetch);
       if (node === null) throw new AppError("noCatalogToUpdate");
       // Nor one the catalog would refuse to link, its node a newer version's (writtenByNewerApp).
@@ -328,6 +321,17 @@ export function createSolidReleaseDraftRepository({
         throw error;
       }
       return summary;
+    },
+
+    documentCountOf(draft) {
+      const byDocument = entriesByDocument(draft);
+      // What a PUT of each document refuses, refused now.
+      for (const entries of byDocument.values()) refuseUnwritable(entries.flatMap(entryQuads));
+      return byDocument.size;
+    },
+
+    refuseTooManyInAll(instanceUrl, count) {
+      return refuseTooManyInAll(instanceUrl, null, count);
     },
 
     read(draftUrl) {
@@ -630,6 +634,22 @@ export function releaseQuadsOf(quads: readonly Quad[], targetUrl: string, issued
     ],
     targetUrl,
   );
+}
+
+/**
+ * A draft's entries by the document each is written in, the release
+ * document first; refused as draftEntries refuses it, and as
+ * draftTooManyDocuments when the app could not read it back.
+ */
+function entriesByDocument(draft: ReleaseDraft): Map<string, DraftEntry[]> {
+  const byDocument = new Map<string, DraftEntry[]>([[draft.url, []]]);
+  for (const entry of draftEntries(draft).values()) {
+    const entries = byDocument.get(entry.document);
+    if (entries === undefined) byDocument.set(entry.document, [entry]);
+    else entries.push(entry);
+  }
+  refuseTooManyDocuments(byDocument.size);
+  return byDocument;
 }
 
 /** draftTooManyDocuments, for a draft of `count` documents: past MAX_DRAFT_DOCUMENTS, no read of it would take it. */
