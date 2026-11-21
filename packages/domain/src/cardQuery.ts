@@ -352,7 +352,8 @@ function least<T>(values: readonly T[], compare: (a: T, b: T) => number): T | un
  * `today` is the study day ("YYYY-MM-DD") a card is due by. A side is
  * sorted by the text the reader is shown of it: in the first of the
  * reader's `languages` (preferred first) the side has, and as plain text
- * when in Markdown, cut to its `sortText`. It is compared as the first
+ * when in Markdown, cut to its `sortText`; an id too is cut to its
+ * `sortText`. It is compared as the first
  * of those languages sorts text: case and accents aside, as the search sets them aside, but a
  * letter the language counts as one of its own as that letter (Swedish
  * puts "ä" after "z"); and numbers by value. `lapses`, by card id, says
@@ -450,7 +451,7 @@ export function queryCards(
   const keyOf = (row: CardRow): string | number | undefined => {
     switch (sort.key) {
       case "id":
-        return row.card.id;
+        return sortText(row.card.id);
       case "created":
         return Date.parse(row.card.createdAt);
       case "front":

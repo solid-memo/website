@@ -760,9 +760,9 @@ The URL holds the query, which the domain applies
   ([i18n.md](i18n.md#which-language)), in the order of the UI's
   language. Case and accents count only where that language makes a
   letter of one (in Swedish, `ä` after `z`). Numbers sort by value. A
-  side sorts by its first 200 characters (`sortText` in
-  `langText.ts`), so sides that differ only past them keep the deck's
-  order. A card without the value (one never studied) comes last,
+  side or an id sorts by its first 200 characters (`sortText` in
+  `langText.ts`), so sides or ids that differ only past them keep the
+  deck's order. A card without the value (one never studied) comes last,
   either way.
 - `page` and `size`: 10, 50 (the default) or 200 cards a page, with the
   same pager as Solid Memo's Browser. A change of the search or a
