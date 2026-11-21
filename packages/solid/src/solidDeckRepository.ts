@@ -47,6 +47,7 @@ import {
   subjectOfDocument,
 } from "@solid-memo/domain/instanceLayout";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
+import { TextMap } from "@solid-memo/domain/pathKeys";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { isDeckOutdated, isOutdated, upgradeCard, upgradeDeck } from "@solid-memo/domain/migration";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
@@ -803,15 +804,14 @@ export function createSolidDeckRepository({
       const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
       const leaving = new Set(inDocument.map((deck) => deck.url));
       // Compared as a server may read them (documentKeyOf): one document spelled two ways is one.
-      const used = new Set(
-        [
-          ...documentsInUse(
-            dataset === null
-              ? []
-              : toDecks(dataset, catalogUrl).filter((other) => !leaving.has(other.url)),
-          ),
-        ].map(documentKeyOf),
-      );
+      // Keyed by pieces (TextMap): an address in that form may be longer than V8 hashes all of.
+      const used = new TextMap<true>();
+      for (const url of documentsInUse(
+        dataset === null
+          ? []
+          : toDecks(dataset, catalogUrl).filter((other) => !leaving.has(other.url)),
+      ))
+        used.set(documentKeyOf(url), true);
       const usable = inDocument.filter(isDeckInPlace);
       const unused = [...documentsInUse(usable)].filter((url) => !used.has(documentKeyOf(url)));
       // Each document's decks found at once, and the entries told once, not per document.

@@ -51,6 +51,16 @@ The source links are at gitHead
 | [`jss-acl-turtle`](#jss-acl-turtle) | PUT of a Turtle ACL gets 415, though `Accept-Put` lists Turtle | MUST (`Accept-Put`) |
 | [`jss-no-extension`](#jss-no-extension) | A Turtle document without a file extension is served as `application/octet-stream` | MUST |
 
+Beside these causes, JSS deletes every `..` inside each decoded path
+segment, again until none is left, before it maps the address to a
+file
+([url.js](https://github.com/JavaScriptSolidServer/JavaScriptSolidServer/blob/7c9b0de7f50e12084642234fdded5b826ea06239/src/utils/url.js),
+`normalizeUrlPath`). So `decks/span..ish.ttl` and `decks/spanish.ttl`
+are one file there. Solid Memo takes no instance or deck's document at
+an address with two dots in a row in its path, in any spelling, and
+writes to none
+([data-model.md](data-model.md#where-an-instances-documents-are)).
+
 ### jss-lang-tag
 
 **SPARQL Update drops the language tag of a literal in its body.**
