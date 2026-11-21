@@ -328,6 +328,18 @@ describe("createSessionClient, over the library", () => {
     expect(window.sessionStorage.getItem(PROVIDER_REDIRECT_KEY)).toBeNull();
   });
 
+  it("forgets what the library kept under a login's session ID once that login fails", async () => {
+    const other = "solidClientAuthenticationUser:other-session";
+    window.localStorage.setItem(other, "{}");
+    vi.mocked(login).mockImplementation(async (options) => {
+      const { sessionId } = options as { sessionId: string };
+      window.localStorage.setItem(`solidClientAuthenticationUser:${sessionId}`, "{}");
+      throw new Error("refused");
+    });
+    await expect(createSessionClient().login(LOGIN)).rejects.toThrow("refused");
+    expect(Object.keys(window.localStorage)).toEqual([other]);
+  });
+
   it("starts every login under a new session ID", async () => {
     await createSessionClient().login(LOGIN);
     await createSessionClient().login(LOGIN);

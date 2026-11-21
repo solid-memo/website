@@ -4,6 +4,7 @@
 
 import * as oauth from "oauth4webapi";
 import type { LoginOptions } from "@solid-memo/solid/client/interface";
+import { limitedFetch, REGISTRATION_LIMITS } from "@solid-memo/solid/client/readLimits";
 import { navigate } from "./oidcBrowser";
 import { loadRegistration, saveRegistration } from "./oidcStore";
 
@@ -160,7 +161,12 @@ async function clientFor(
       scope: SCOPE,
       ...(noSecret && { token_endpoint_auth_method: "none" }),
     },
-    requestOptions(as.issuer),
+    {
+      ...requestOptions(as.issuer),
+      // Kept in IndexedDB, and with a login under way in sessionStorage
+      // too: an answer past the limits is refused before either.
+      [oauth.customFetch]: limitedFetch((url, init) => fetch(url, init), REGISTRATION_LIMITS),
+    },
   );
   const client = await oauth.processDynamicClientRegistrationResponse(response);
   await saveRegistration(key, client);

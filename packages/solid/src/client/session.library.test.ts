@@ -9,9 +9,9 @@ import { LOGIN_ISSUER_KEY, createSolidSessionGateway } from "../solidSessionGate
 import { type LoginOptions, ReadLimitError } from "./interface";
 import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
 import {
-  ACCESS_CONTROL_LIMITS,
   limitedFetch,
-  PROFILE_LIMITS,
+  PROVIDER_METADATA_LIMITS,
+  REGISTRATION_LIMITS,
   refusalOf,
   RELEASE_LIMITS,
 } from "./readLimits";
@@ -274,6 +274,8 @@ async function providers() {
     metadataReads: 0,
     /** What each issuer's metadata says besides its usual fields. */
     metadataOf: {} as Record<string, Record<string, unknown>>,
+    /** How a provider answers the app's registration. */
+    registration: (): Response => Response.json({ client_id: "registered", redirect_uris: [SITE] }),
   };
   const answer = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     const url = String(input);
@@ -292,6 +294,7 @@ async function providers() {
         ...world.metadataOf[issuer],
       });
     }
+    if (url.endsWith("register")) return world.registration();
     if (url.endsWith("jwks")) {
       return Response.json({ keys: [{ ...key, kid: "k", alg: "ES256", use: "sig" }] });
     }
@@ -423,6 +426,116 @@ describe("createSessionClient, with the library's own sessions", () => {
     expect(handleRedirect).not.toHaveBeenCalled();
   });
 
+  describe("at a provider that registers the app", () => {
+    /** A login at OTHER, which does not list the webid scope; its address, or why it was refused. */
+    function registering(world: Awaited<ReturnType<typeof providers>>): void {
+      world.metadataOf[OTHER] = {
+        scopes_supported: ["openid", "offline_access"],
+        id_token_signing_alg_values_supported: ["ES256"],
+      };
+    }
+
+    async function loginRegistered(world: Awaited<ReturnType<typeof providers>>) {
+      registering(world);
+      const handleRedirect = vi.fn<(url: string) => void>();
+      const refused = await createSessionClient()
+        .login(asked(OTHER, handleRedirect))
+        .catch((error: unknown) => error);
+      return { refused, handleRedirect };
+    }
+
+    /** What the library keeps in localStorage, all together. */
+    const kept = () => Object.values(window.localStorage).join("").length;
+
+    it("logs in as the client the provider registered", async () => {
+      registering(await providers());
+      const url = await answerTo(
+        (handleRedirect) => createSessionClient().login(asked(OTHER, handleRedirect)),
+        OTHER,
+      );
+      const state = new URL(url).searchParams.get("state")!;
+      const session = storedSessionOfState(state);
+      const stored = window.localStorage.getItem(`solidClientAuthenticationUser:${session}`);
+      expect(JSON.parse(stored!)).toMatchObject({ clientId: "registered" });
+    });
+
+    it.each([
+      ["as it is read", () => ({})],
+      ["by its length alone", (body: string) => ({ "Content-Length": String(body.length) })],
+    ])("refuses an answer past the limits %s, keeping none of it", async (_, headers) => {
+      const world = await providers();
+      const body = JSON.stringify({
+        client_id: "x".repeat(REGISTRATION_LIMITS.bytes),
+        redirect_uris: [SITE],
+      });
+      world.registration = () =>
+        new Response(body, {
+          status: 201,
+          headers: { "Content-Type": "application/json", ...headers(body) },
+        });
+      const { refused, handleRedirect } = await loginRegistered(world);
+      expect(refused).toBeInstanceOf(AppError);
+      expect(refused).toMatchObject({ code: "loginProviderRefused" });
+      expect(handleRedirect).not.toHaveBeenCalled();
+      expect(kept()).toBeLessThan(REGISTRATION_LIMITS.bytes);
+    });
+
+    it("refuses an answer past the limits at an endpoint the metadata gives as a list", async () => {
+      const world = await providers();
+      world.registration = () =>
+        Response.json({ client_id: "x".repeat(REGISTRATION_LIMITS.bytes), redirect_uris: [SITE] });
+      registering(world);
+      world.metadataOf[OTHER]!.registration_endpoint = [`${OTHER}register`];
+      const handleRedirect = vi.fn<(url: string) => void>();
+      const refused = await createSessionClient()
+        .login(asked(OTHER, handleRedirect))
+        .catch((error: unknown) => error);
+      expect(refused).toMatchObject({ code: "loginProviderRefused" });
+      expect(handleRedirect).not.toHaveBeenCalled();
+      expect(kept()).toBeLessThan(REGISTRATION_LIMITS.bytes);
+    });
+
+    it("passes on a failed registration as it came", async () => {
+      const world = await providers();
+      world.registration = () => Promise.reject(new TypeError("offline")) as never;
+      const { refused } = await loginRegistered(world);
+      expect(refused).toMatchObject({ cause: expect.any(TypeError) });
+    });
+
+    it("reads only the registration endpoint's answer to a POST under these limits", async () => {
+      const world = await providers();
+      const body = "x".repeat(REGISTRATION_LIMITS.bytes + 1);
+      world.registration = () => new Response(body);
+      await createSessionClient().restore();
+      await fetch(`${OTHER}.well-known/openid-configuration`);
+      await expect((await fetch(`${OTHER}register`)).text()).resolves.toBe(body);
+      const posted = await fetch(`${OTHER}register`, { method: "POST" }).catch(
+        (error: unknown) => error,
+      );
+      expect(posted).toMatchObject({ code: "loginProviderRefused" });
+      // Once only: its next answer is the library's no more.
+      const again = await fetch(`${OTHER}register`, { method: "POST" });
+      await expect(again.text()).resolves.toBe(body);
+    });
+  });
+
+  it("refuses a login at a provider whose metadata is past the limits, keeping none of it", async () => {
+    const world = await providers();
+    world.metadataOf[OTHER] = { claims_supported: ["x".repeat(PROVIDER_METADATA_LIMITS.bytes)] };
+    const handleRedirect = vi.fn<(url: string) => void>();
+    const refused = await createSessionClient()
+      .login(asked(OTHER, handleRedirect))
+      .catch((error: unknown) => error);
+    expect(refused).toBeInstanceOf(Error);
+    expect(handleRedirect).not.toHaveBeenCalled();
+    expect(
+      Object.keys(window.localStorage).filter((key) => key.startsWith("issuerConfig:")),
+    ).toEqual([]);
+    expect(Object.values(window.localStorage).join("").length).toBeLessThan(
+      PROVIDER_METADATA_LIMITS.bytes,
+    );
+  });
+
   it("refuses a provider's metadata at a refresh, sending it nothing", async () => {
     const world = await providers();
     await createSessionClient().restore();
@@ -484,7 +597,7 @@ describe("createSessionClient, with the library's own sessions", () => {
     /** An answer with no end, noting how much of it was read and whether it was canceled. */
     function endlessAnswer(headers?: HeadersInit) {
       const source = { bytes: 0, canceled: false };
-      const chunk = new Uint8Array(64 * 1024);
+      const chunk = new Uint8Array(4 * 1024);
       const body = new ReadableStream<Uint8Array>({
         pull(controller) {
           source.bytes += chunk.byteLength;
@@ -507,25 +620,27 @@ describe("createSessionClient, with the library's own sessions", () => {
       await expect(limitedFetch(fetch, RELEASE_LIMITS)(AT_PATH)).rejects.toBeInstanceOf(
         ReadLimitError,
       );
-      expect(source.bytes).toBeLessThan(2 * PROFILE_LIMITS.bytes);
+      expect(source.bytes).toBeLessThan(2 * PROVIDER_METADATA_LIMITS.bytes);
       await vi.waitFor(() => expect(source.canceled).toBe(true));
     });
 
     it("refuses one past the limits by its length alone", async () => {
-      const source = endlessAnswer({ "Content-Length": String(PROFILE_LIMITS.bytes + 1) });
+      const source = endlessAnswer({
+        "Content-Length": String(PROVIDER_METADATA_LIMITS.bytes + 1),
+      });
       await createSessionClient().restore();
       await expect(fetch(AT_PATH)).rejects.toBeInstanceOf(ReadLimitError);
       await vi.waitFor(() => expect(source.canceled).toBe(true));
     });
 
     it("leaves a smaller one to the limits of the read that asked for it", async () => {
-      const text = "x".repeat(ACCESS_CONTROL_LIMITS.bytes + 1);
+      const text = "x".repeat(REGISTRATION_LIMITS.bytes + 1);
       vi.stubGlobal(
         "fetch",
         vi.fn(async () => new Response(text)),
       );
       await createSessionClient().restore();
-      const held = await limitedFetch(fetch, ACCESS_CONTROL_LIMITS)(AT_PATH);
+      const held = await limitedFetch(fetch, REGISTRATION_LIMITS)(AT_PATH);
       await expect(held.text()).rejects.toThrow();
       expect(refusalOf(held)).toBeInstanceOf(ReadLimitError);
       await expect((await fetch(AT_PATH)).text()).resolves.toBe(text);
