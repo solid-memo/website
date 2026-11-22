@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.11](https://github.com/solid-memo/website/compare/v8.0.10...v8.0.11) (2026-11-22)
+
+### Fixes
+
+* **application:** check what a guest's study grows to before keeping it ([b77f8f5](https://github.com/solid-memo/website/commit/b77f8f5f398da54425407a49d2ad13b626d55495))
+* **domain:** compare document addresses as a case-insensitive pod stores them ([970ffc7](https://github.com/solid-memo/website/commit/970ffc73e5997b387b3fa0faff590b442cd1d5bd))
+* **domain:** sort the card workbench by a bounded card id ([8af4e4e](https://github.com/solid-memo/website/commit/8af4e4e02f90bbbb4e05f960a5ae9b4e0334dbf5))
+* **solid:** bound the provider's registration answer before it is kept ([beb396a](https://github.com/solid-memo/website/commit/beb396ae01a31078aa1d6f5b90771e3c3e2c812f))
+* **solid:** judge outdated catalog entries in turn before the update ([c58f9a8](https://github.com/solid-memo/website/commit/c58f9a84df4f4ff1fc296e6a9d1ed56376ff9740))
+* **solid:** keep a deck's own document a removal cannot read ([6cddc28](https://github.com/solid-memo/website/commit/6cddc2844b4af4e86c8781dfee7c08fe72af8e79))
+
 ## [8.0.10](https://github.com/solid-memo/website/compare/v8.0.9...v8.0.10) (2026-11-21)
 
 ### Fixes
