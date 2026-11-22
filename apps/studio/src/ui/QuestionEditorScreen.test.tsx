@@ -325,6 +325,64 @@ describe("QuestionEditorScreen", () => {
     expect(within(preview()).queryByText("Not quite.")).toBeNull();
   });
 
+  it.each<[string, (draft: ReleaseDraft) => ReleaseDraft]>([
+    [
+      "a statement of the release",
+      (draft) => ({
+        ...draft,
+        triples: [
+          ...draft.triples,
+          {
+            subject: DRAFT_URL,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
+            object: { kind: "iri", value: `${DRAFT_URL}#q-pods-1a-d2` },
+          },
+        ],
+      }),
+    ],
+    [
+      "another card's wrong option",
+      (draft) =>
+        applyDraftChanges(draft, [
+          {
+            kind: "addDistractor",
+            card: "q-pods-r01",
+            id: "q-pods-1a-d2",
+            distractor: { text: { en: "Nobody" } },
+          },
+        ]) as ReleaseDraft,
+    ],
+    [
+      "an agent",
+      (draft) =>
+        applyDraftChanges(draft, [
+          { kind: "setAgent", id: "q-pods-1a-d2", agent: { name: "Alice" } },
+        ]) as ReleaseDraft,
+    ],
+  ])("adds a wrong option under an id that %s does not already name", (_, plant) => {
+    const draft = plant(courseDraft());
+    const onEdit = vi.fn<DraftEditor["edit"]>((changes) => {
+      const applied = applyDraftChanges(draft, changes);
+      return "refused" in applied ? applied : null;
+    });
+    renderScreen("q-pods-1a", draft, onEdit);
+    const options = screen.getByRole("group", { name: "Wrong options" });
+    fireEvent.click(within(options).getByRole("button", { name: "Add a wrong option" }));
+    fireEvent.input(within(options).getByLabelText("Wrong option"), {
+      target: { value: "A server" },
+    });
+    fireEvent.click(within(options).getByRole("button", { name: "Add" }));
+    expect(onEdit).toHaveBeenCalledWith([
+      {
+        kind: "addDistractor",
+        card: "q-pods-1a",
+        id: "q-pods-1a-d3",
+        distractor: { text: { en: "A server" } },
+      },
+    ]);
+    expect(onEdit).toHaveLastReturnedWith(null);
+  });
+
   it("reads the preview's options once, however often the user types or checks", () => {
     const draft = applyDraftChanges(courseDraft(), [
       {
