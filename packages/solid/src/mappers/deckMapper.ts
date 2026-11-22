@@ -59,7 +59,7 @@ import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { documentUrlOf, isSameDocument } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, isDocumentSubject, isSameDocument } from "@solid-memo/domain/subjectUrl";
 import {
   AGENT_V1,
   ALL_SHAPES,
@@ -672,7 +672,8 @@ const readDistractors = new WeakMap<Dataset, Map<string, Distractor | null>>();
  * however many of its cards name it: the cards that share it share one
  * object, which a learner's upgrade compares once (libraryUpgrade.ts).
  * A document never changes (each edit makes a new one), so what was read
- * of it stays true.
+ * of it stays true. A document itself (isDocumentSubject) is no
+ * distractor.
  */
 function distractorAt(dataset: Dataset, url: string): Distractor | null {
   let read = readDistractors.get(dataset);
@@ -681,7 +682,7 @@ function distractorAt(dataset: Dataset, url: string): Distractor | null {
     readDistractors.set(dataset, read);
   }
   if (read.has(url)) return read.get(url) ?? null;
-  const thing = getThing(dataset, url);
+  const thing = isDocumentSubject(url) ? null : getThing(dataset, url);
   const distractor = thing === null ? null : toDistractor(thing);
   read.set(url, distractor);
   return distractor;
@@ -737,7 +738,8 @@ function distractorNamers(dataset: Dataset): Map<string, number> {
  * names, unless a card still names it: a distractor belongs to the one
  * card that names it, so a card's never goes with another's. Only an
  * sm:Distractor that is not an sm:Card is removed (isDistractorOnly):
- * a card, or another app's subject, a card names is never removed. Nor
+ * a card, another app's subject, or the document itself
+ * (isDocumentSubject), that a card names is never removed. Nor
  * is one a newer version of the app wrote (isWrittenByNewer): no write
  * needs it gone, so it is left as it is rather than refused, and a
  * card is never kept from being removed or moved by it
@@ -757,9 +759,13 @@ function isUnnamed(namers: ReadonlyMap<string, number>, url: string): boolean {
   return !namers.has(url);
 }
 
-/** Whether the subject at `url` is typed sm:Distractor and not sm:Card, and this app wrote it (not isWrittenByNewer). */
+/**
+ * Whether the subject at `url` is typed sm:Distractor and not sm:Card,
+ * this app wrote it (not isWrittenByNewer), and it is not the document
+ * itself (isDocumentSubject).
+ */
 function isDistractorOnly(dataset: Dataset, url: string): boolean {
-  const thing = getThing(dataset, url);
+  const thing = isDocumentSubject(url) ? null : getThing(dataset, url);
   if (thing === null) return false;
   const types = getUrlAll(thing, RDF.type);
   return types.includes(SM.Distractor) && !types.includes(SM.Card) && !isWrittenByNewer(thing);
@@ -774,14 +780,16 @@ function isDistractorOnly(dataset: Dataset, url: string): boolean {
  * that is no card and that a newer version of the app wrote
  * (isWrittenByNewer) is no card the removal is for: no write needs it
  * gone or rewritten, so it is left as it is (GHSA-7x88-hfwx-whvj). A
- * card a newer version wrote is refused (writtenByNewerApp).
+ * card a newer version wrote is refused (writtenByNewerApp). The
+ * document itself (isDocumentSubject) is no card: it is left whole, with
+ * what it says of whose the document is.
  */
 export function withoutCardSubjects(dataset: Dataset, urls: readonly string[]): Dataset {
   let namers: Map<string, number> | undefined;
   const removed: string[] = [];
   const kept: NamedSubject[] = [];
   for (const url of urls) {
-    const thing = getThing(dataset, url);
+    const thing = isDocumentSubject(url) ? null : getThing(dataset, url);
     if (thing === null) continue;
     const types = getUrlAll(thing, RDF.type);
     if (!types.includes(SM.Card) && isWrittenByNewer(thing)) continue;

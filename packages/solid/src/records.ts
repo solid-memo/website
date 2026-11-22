@@ -46,7 +46,7 @@ import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import { subjectOfDocument } from "@solid-memo/domain/instanceLayout";
-import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
+import { documentUrlOf, fragmentIdOf, isDocumentSubject } from "@solid-memo/domain/subjectUrl";
 
 /**
  * The generic half of every mapper: a subject read into the record its
@@ -654,14 +654,18 @@ export function removeAllUnlessNewer<D extends Dataset>(dataset: D, urls: readon
 /**
  * The subjects of the document at `documentUrl` that are its own
  * (subjectOfDocument), in document order: a record's id is its fragment,
- * and another document's subject may share it. A fragment at both of the
- * document's spellings, as `documentUrl` is spelled and as the document
- * is fetched, is the one at `documentUrl`, where the app writes it: one
- * id is never two subjects.
+ * and another document's subject may share it. The document itself
+ * (isDocumentSubject), which has no fragment, is no record of it. A
+ * fragment at both of the document's spellings, as `documentUrl` is
+ * spelled and as the document is fetched, is the one at `documentUrl`,
+ * where the app writes it: one id is never two subjects.
  */
 export function ownSubjectsOf(dataset: Dataset, documentUrl: string): Subject[] {
   const own = subjectOfDocument(documentUrl);
-  const subjects = getThingAll(dataset).filter((thing) => own(asUrl(thing)));
+  const subjects = getThingAll(dataset).filter((thing) => {
+    const url = asUrl(thing);
+    return own(url) && !isDocumentSubject(url);
+  });
   const urls = new Set(subjects.map(asUrl));
   return subjects.filter((thing) => {
     const url = asUrl(thing);

@@ -37,6 +37,7 @@ import { TextMap } from "@solid-memo/domain/pathKeys";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
 import {
+  asReadOf,
   getSolidDatasetOrNull,
   isReadFrom,
   readForRemoval,
@@ -587,10 +588,13 @@ export function createDeckDocumentGuard(
      * is the deck's (withPartOf); refused (deckDocumentUnclaimed), before
      * anything is sent, when the document is not the deck's to change. A
      * dataset not read from `url` is a new document, made only where
-     * there is none yet (If-None-Match: *).
+     * there is none yet (If-None-Match: *). Where the document stands is
+     * judged on it as read (asReadOf), never on the edit: an edit that
+     * takes another deck's dcterms:isPartOf out of it does not make it
+     * this deck's.
      */
     async writable(deck: DeckPlace, url: string, dataset: Dataset): Promise<Dataset> {
-      const read = isReadFrom(dataset, url) ? dataset : null;
+      const read = isReadFrom(dataset, url) ? asReadOf(dataset) : null;
       if ((await standingOf(deck, url, read, false)) === "unclaimed")
         throw new AppError("deckDocumentUnclaimed", { deck: deck.title });
       return withPartOf(dataset, url, deck.url);
