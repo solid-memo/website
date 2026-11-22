@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.13](https://github.com/solid-memo/website/compare/v8.0.12...v8.0.13) (2026-11-22)
+
+### Fixes
+
+* **domain:** take a draft link only by a name the app gives a draft ([abfa9ec](https://github.com/solid-memo/website/commit/abfa9ec8fc4c8b3d4a46ee9b5ff989459f9ea07f))
+* **markdown:** give a short text work in proportion to its length ([ea04a26](https://github.com/solid-memo/website/commit/ea04a263acb36a76db36a4ecb00153c06e723f49))
+* **studio:** give a draft's new wrong option an id the draft lacks ([17c30eb](https://github.com/solid-memo/website/commit/17c30ebb8c04304721bbe9ec24c314fa1101f3c7))
+
 ## [8.0.12](https://github.com/solid-memo/website/compare/v8.0.11...v8.0.12) (2026-11-22)
 
 ### Fixes
