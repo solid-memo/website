@@ -258,7 +258,7 @@ function foldUnreserved(text: string): string {
  * is written, if at all.
  */
 function segmentKeyOf(segment: string): string {
-  return segment
+  const key = segment
     .split(KEPT_ESCAPE)
     .map((part, index) => {
       if (index % 2 === 1) return part.toUpperCase();
@@ -275,8 +275,23 @@ function segmentKeyOf(segment: string): string {
         return foldUnreserved(foldUnreserved(part).toLowerCase());
       }
     })
-    .join("")
-    .replace(/(?:\.|%20)+$/, "");
+    .join("");
+  return withoutTrailingDotsOrSpaces(key);
+}
+
+/**
+ * `key` without its trailing dots and spaces (`%20`), dropped from the
+ * end one at a time and cut once: in time that grows with the text, where
+ * a pattern for a trailing run tried at each start inside a run that
+ * stops before the end takes time that grows with its square.
+ */
+function withoutTrailingDotsOrSpaces(key: string): string {
+  let end = key.length;
+  for (;;) {
+    if (key.endsWith(".", end)) end -= 1;
+    else if (key.endsWith("%20", end)) end -= 3;
+    else return key.slice(0, end);
+  }
 }
 
 /**
