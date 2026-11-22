@@ -1243,12 +1243,16 @@ describe("createShaclShapeValidator", () => {
       ]);
       const validator = realValidator();
       const report = await validator.validateDataset(DOC, dataset, "pod");
+      // A publisher of more classes than the checks read is never one
+      // Solid Memo writes beside the catalog (ownership.ts): another
+      // app's, its own result a warning.
+      expect(report.subjects.find((s) => s.url === `${DOC}#x`)).toMatchObject({ foreign: true });
       expect(violationsOf(report, `${DOC}#x`)).toContainEqual(
         expect.objectContaining({
           path: RDF.type,
           value: `${DOC}#x`,
           constraint: "MaxCount",
-          severity: "violation",
+          severity: "warning",
           profile: "dcat-ap",
         }),
       );

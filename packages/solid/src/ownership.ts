@@ -7,6 +7,7 @@ import {
   type Dataset,
   type Subject,
   getInteger,
+  getTermAll,
   getThing,
   getThingAll,
   getUrlAll,
@@ -17,6 +18,7 @@ import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
+import { MAX_CLASSES } from "./records";
 import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM, SM_NS } from "./vocab";
@@ -145,12 +147,22 @@ function isCatalogSubject(dataset: Dataset, thing: Subject): boolean {
 function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<string> {
   const pending = [...things];
   const owned = new Set(things.map((thing) => thing.url));
+  // The subjects found not written beside, by the class they were
+  // judged against, so that each is judged once for each class however
+  // many subjects name it.
+  const refused = new Map<string, Set<string>>();
   const kind = documentKindOf(dataset);
   for (let thing = pending.pop(); thing !== undefined; thing = pending.pop()) {
     for (const [link, targetClass] of linksWrittenOn(dataset, kind, thing)) {
+      const refusedOfClass = refused.get(targetClass) ?? new Set<string>();
+      refused.set(targetClass, refusedOfClass);
       for (const url of getUrlAll(thing, link)) {
-        const target = owned.has(url) ? null : writtenBeside(dataset, url, targetClass);
-        if (target === null) continue;
+        if (owned.has(url) || refusedOfClass.has(url)) continue;
+        const target = writtenBeside(dataset, url, targetClass);
+        if (target === null) {
+          refusedOfClass.add(url);
+          continue;
+        }
         owned.add(url);
         pending.push(target);
       }
@@ -214,14 +226,25 @@ function documentKindOf(dataset: Dataset): DocumentKind {
 const SHAPED_CLASSES: ReadonlySet<string> = new Set(ALL_SHAPES.map((shape) => shape.targetClass));
 
 /**
+ * The classes a subject named beside one of Solid Memo's is told by:
+ * none when it has more values of rdf:type than the checks read a
+ * subject by (MAX_CLASSES), as they read such a subject as having none,
+ * so it is never one Solid Memo writes.
+ */
+function classesBeside(thing: Subject): string[] {
+  return getTermAll(thing, RDF.type).length > MAX_CLASSES ? [] : getUrlAll(thing, RDF.type);
+}
+
+/**
  * The subject at `url` when it is of `targetClass` and of no other
  * class a shape describes, else null: an agent that is also a catalog
- * or a deck, say, is none Solid Memo writes.
+ * or a deck, say, is none Solid Memo writes, nor is one of too many
+ * classes (classesBeside).
  */
 function writtenBeside(dataset: Dataset, url: string, targetClass: string): Subject | null {
   const thing = getThing(dataset, url);
   if (thing === null) return null;
-  const types = getUrlAll(thing, RDF.type);
+  const types = classesBeside(thing);
   const isWritten =
     types.includes(targetClass) &&
     types.every((type) => type === targetClass || !SHAPED_CLASSES.has(type));
@@ -238,13 +261,16 @@ const SHAPED_TYPES: ReadonlySet<string> = new Set(
  * Solid Memo writes beside a deck entry as its creator: a foaf:Agent of
  * no other class a shape describes or adds, stricter than writtenBeside
  * by the classes shapes add, and not the catalog (isCatalogSubject). Another deck's entry, a dcat:Dataset or
- * the catalog a deck names as its creator is none, so an export leaves
- * it behind (solidDeckArchive.ts).
+ * the catalog a deck names as its creator is none, nor is a subject of
+ * too many classes (classesBeside), so an export leaves it behind
+ * (solidDeckArchive.ts). It reads the subject's classes on every call
+ * and remembers nothing, so a caller that judges many entries' creators
+ * remembers each answer instead of asking again per entry.
  */
 export function isCreatorAgent(dataset: Dataset, url: string): boolean {
   const thing = getThing(dataset, url);
   if (thing === null || isCatalogSubject(dataset, thing)) return false;
-  const types = getUrlAll(thing, RDF.type);
+  const types = classesBeside(thing);
   const agent = SHAPES.agent[1].targetClass;
   return types.includes(agent) && types.every((type) => type === agent || !SHAPED_TYPES.has(type));
 }

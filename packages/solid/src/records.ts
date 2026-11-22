@@ -457,7 +457,7 @@ const SHAPED_CLASSES: ReadonlySet<string> = new Set([
  * is checked as having none, which no write of it passes
  * (MAX_TYPES_PER_NODE in packages/shacl/src/engine.ts).
  */
-const MAX_CLASSES = 32;
+export const MAX_CLASSES = 32;
 
 /**
  * The subject with each class a shape asks something of that another
