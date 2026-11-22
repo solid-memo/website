@@ -87,6 +87,8 @@
   /* The glint that sweeps across the course for newcomers: decoration only. */
   --shine: #ffffff8c;
   --glow: color-mix(in srgb, var(--accent-yellow) 30%, transparent);
+  /* The stars on a deck done or a course finished: decoration only, lighter than the gold, faint enough in dark themes that text over them keeps its ratio. */
+  --sparkle: #ffffffc7;
 
   --masthead-bg: #16202a;
   --masthead-text: #f7f6f1;
@@ -165,6 +167,7 @@
   --paper-yellow: #e8ab140d;
   --shine: #ffffff14;
   --glow: color-mix(in srgb, var(--accent-yellow) 30%, transparent);
+  --sparkle: #f7dc8a40;
 
   --masthead-bg: #1d2937;
   --masthead-text: #f7f6f1;
@@ -245,6 +248,7 @@
   --paper-yellow: transparent;
   --shine: transparent;
   --glow: transparent;
+  --sparkle: transparent;
 
   --masthead-bg: #000000;
   --masthead-text: #ffffff;
@@ -319,6 +323,7 @@
   --paper-yellow: transparent;
   --shine: transparent;
   --glow: transparent;
+  --sparkle: transparent;
 
   --masthead-bg: #000000;
   --masthead-text: #ffffff;
@@ -400,6 +405,7 @@
   --paper-yellow: #e69f0029;
   --shine: #ffffff8c;
   --glow: color-mix(in srgb, var(--accent-yellow) 30%, transparent);
+  --sparkle: #ffffffc7;
 
   --masthead-bg: #16202a;
   --masthead-text: #f7f6f1;
@@ -474,6 +480,7 @@
   --paper-yellow: #e69f000d;
   --shine: #ffffff14;
   --glow: color-mix(in srgb, var(--accent-yellow) 30%, transparent);
+  --sparkle: #f7dc8a40;
 
   --masthead-bg: #1d2937;
   --masthead-text: #f7f6f1;
@@ -553,6 +560,7 @@
   --paper-yellow: #ad89001f;
   --shine: #fbf3db8c;
   --glow: color-mix(in srgb, var(--accent-yellow) 30%, transparent);
+  --sparkle: #fffaebc7;
 
   --masthead-bg: #2c3d43;
   --masthead-text: #fbf3db;
@@ -630,6 +638,7 @@
   --paper-yellow: #dbb32d0a;
   --shine: #ece3cc14;
   --glow: color-mix(in srgb, var(--accent-yellow) 30%, transparent);
+  --sparkle: #f7dc8a40;
 
   --masthead-bg: #2b261e;
   --masthead-text: #ece3cc;

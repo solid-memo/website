@@ -584,7 +584,8 @@
     "pause": "일시 정지",
     "resume": "다시 시작",
     "paused": "일시 정지됨",
-    "pausedUntil": "{day}까지 일시 정지됨"
+    "pausedUntil": "{day}까지 일시 정지됨",
+    "courseCompleted": "코스 완료"
   },
   "dialog": {
     "close": "닫기"

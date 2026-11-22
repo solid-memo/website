@@ -2104,6 +2104,213 @@ html.drag-active {
   text-decoration: none;
 }
 
+/* A deck whose every card is learned, or a course finished (ui/RowFlair.tsx): its
+   row on the gold of a day done, as today's strip turns (text on it is
+   held to the ratio text needs, style.test.ts), edged in gold, glowing
+   when pointed at (no glow in High contrast). Its own stacking context,
+   so its decoration lies over its background and under its text. A row
+   a drop would group with keeps that look while it would. */
+.deck-list > li.deck-row.completed:not(.drop-combine) {
+  isolation: isolate;
+  background-color: color-mix(in srgb, var(--accent-yellow) 18%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent-yellow) 70%, transparent);
+}
+
+.deck-list > li.deck-row.completed:not(.drop-combine):hover {
+  border-color: var(--accent-yellow);
+  box-shadow: 0 0 0.6rem var(--glow);
+}
+
+/* "Course completed", after a finished course's name: a tag edged in
+   gold, its words the text's own color. */
+.deck-list .deck-completed {
+  display: inline-block;
+  margin-inline-start: 0.5em;
+  padding: 0 0.45em;
+  border: 1px solid var(--accent-yellow);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  text-indent: 0;
+  white-space: nowrap;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+/* The words on a completed row are the text's own color, not muted, as
+   on today's strip gone gold: a star may lie behind them. */
+.deck-list > li.deck-row.completed .hint {
+  color: var(--text);
+}
+
+/* Its tick is the link's green: deeper than the primary in light themes,
+   brighter in dark ones, so it keeps its ratio over a star too. */
+.deck-list > li.deck-row.completed .study-done {
+  color: var(--link);
+}
+
+/* The decoration, a watermark of stars: behind the row's text, out of
+   the pointer's way, and kept within the row's bounds. Until the row
+   comes into view it is unseen: the row's gold covered, its stars and
+   its tag hidden. Once seen, under two seconds in all, well inside WCAG
+   2.2.2's five: the gold washes in, the large star lands with a bounce,
+   the small ones bounce in after it from left to right, then the tag,
+   and a glimmer, tilted a little, sweeps once across the row from left
+   to right. Each part rests where it ends (the cover and the glimmer
+   gone, the stars in place), so with motion reduced, every animation
+   stopped, the row is gold with its stars from the first. */
+.row-flair {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.row-flair::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: var(--surface-sunken);
+}
+
+.row-flair:not(.seen)::before {
+  opacity: 1;
+}
+
+.row-flair.seen::before {
+  animation: row-flair-unveil 0.5s ease-out backwards;
+}
+
+@keyframes row-flair-unveil {
+  from {
+    opacity: 1;
+  }
+}
+
+/* The glimmer: a soft band of light in the stars' own color, brightest
+   in its middle and fading to nothing at its sides, a third of the row
+   wide and tilted a little, off the row's start at rest. */
+.row-flair::after {
+  content: "";
+  position: absolute;
+  top: -40%;
+  bottom: -40%;
+  left: 0;
+  width: 35%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--sparkle) 40%, transparent) 30%,
+    var(--sparkle) 50%,
+    color-mix(in srgb, var(--sparkle) 40%, transparent) 70%,
+    transparent
+  );
+  transform: translateX(-130%) skewX(-18deg);
+}
+
+.row-flair.seen::after {
+  animation: row-flair-glimmer 1s ease-in-out 0.75s;
+}
+
+@keyframes row-flair-glimmer {
+  to {
+    transform: translateX(330%) skewX(-18deg);
+  }
+}
+
+/* A five-pointed star, lighter than the gold (--sparkle: none in High
+   contrast, and text over it keeps its ratio, style.test.ts), tilted
+   (--tilt), landing with a bounce after its delay (--delay). */
+.row-star {
+  position: absolute;
+  aspect-ratio: 1;
+  background: var(--sparkle);
+  clip-path: polygon(
+    50% 4%,
+    63% 33%,
+    95% 36%,
+    71% 57%,
+    78% 88%,
+    50% 72%,
+    22% 88%,
+    29% 57%,
+    5% 36%,
+    37% 33%
+  );
+  transform: rotate(var(--tilt));
+}
+
+/* The large star: of its size, its end the given way from the row's
+   end, its middle the given way below the row's. */
+.row-star.big {
+  inset-inline-end: var(--end);
+  top: 50%;
+  width: var(--size);
+  translate: 0 calc(-50% + var(--down));
+}
+
+/* A small star, a little fainter, in the room the large star leaves
+   (--reserve): at its share along it (--x), on the line near the top or
+   the bottom; at most its size (--size), and no wider than the row's
+   layout allows (--fit), so on a narrow row the stars shrink rather
+   than overlap. */
+.row-star.top,
+.row-star.bottom {
+  inset-inline-start: calc(var(--x) * (100% - var(--reserve)));
+  width: min(var(--size), (100% - var(--reserve)) * var(--fit));
+  opacity: 0.8;
+  translate: -50% -50%;
+}
+
+.row-star.top {
+  top: 22%;
+}
+
+.row-star.bottom {
+  top: 78%;
+}
+
+.row-flair:not(.seen) .row-star {
+  visibility: hidden;
+}
+
+.row-flair.seen .row-star {
+  animation: row-star-land 0.9s var(--delay) backwards;
+}
+
+@keyframes row-star-land {
+  from {
+    opacity: 0;
+    transform: rotate(calc(var(--tilt) - 25deg)) scale(1.7);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.8, 0.5);
+  }
+
+  45% {
+    transform: rotate(calc(var(--tilt) + 5deg)) scale(0.86);
+    animation-timing-function: cubic-bezier(0.2, 0.6, 0.4, 1);
+  }
+
+  68% {
+    transform: rotate(calc(var(--tilt) - 2deg)) scale(1.06);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+  }
+
+  86% {
+    transform: rotate(var(--tilt)) scale(0.98);
+  }
+}
+
+.deck-row:has(> .row-flair:not(.seen)) .deck-completed {
+  visibility: hidden;
+}
+
+.deck-row:has(> .row-flair.seen) .deck-completed {
+  animation: bounce-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1) 0.7s backwards;
+}
+
 /* A modal dialog (Dialog), the deck list's and the Studio's: its heading beside its Close. */
 .dialog {
   width: min(32rem, calc(100vw - 2rem));

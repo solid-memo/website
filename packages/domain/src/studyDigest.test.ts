@@ -101,7 +101,8 @@ function queueCounts(input: {
       ? {}
       : { backlog: { before: input.backlogBefore, memory } }),
   });
-  return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
+  // The deck has new cards (e and f), so it is never all learned.
+  return { dueCount: queue.due.length, newCount: queue.newPrompts.length, learned: false };
 }
 
 describe("a deck schedule", () => {
@@ -162,8 +163,42 @@ describe("a deck schedule", () => {
     });
     expect(
       studyCountsOf(schedule, { direction: "front-to-back", prefs: DEFAULT_PREFERENCES, now }),
-    ).toEqual({ dueCount: queue.due.length, newCount: queue.newPrompts.length });
+    ).toEqual({ dueCount: queue.due.length, newCount: queue.newPrompts.length, learned: false });
     expect(queue.due).toHaveLength(2);
+  });
+
+  it("says a deck is learned once its every prompt was reviewed, whatever is due, and never of a deck with none", () => {
+    const countsOf = (deckCards: Card[], states: ReviewState[], direction: DeckDirection) =>
+      studyCountsOf(
+        scheduleOf({
+          cards: deckCards,
+          direction,
+          reviews: states,
+          scheduler: "sm2",
+          dayBoundaryHour: 4,
+          now,
+        }),
+        { direction, prefs: DEFAULT_PREFERENCES, now },
+      );
+    const learned = [review("a", "2026-09-19", lastWeek), review("b", "2026-09-30", yesterday)];
+    // Both cards learned, one of them due: learned, with a review to do.
+    expect(countsOf([card("a"), card("b")], learned, "front-to-back")).toEqual({
+      dueCount: 1,
+      newCount: 0,
+      learned: true,
+    });
+    // A retired card is no prompt, so it is not left to learn.
+    expect(
+      countsOf([card("a"), card("b"), card("r", true)], learned, "front-to-back")?.learned,
+    ).toBe(true);
+    // Learned one way only: the other way is still to learn.
+    expect(countsOf([card("a"), card("b")], learned, "bidirectional")?.learned).toBe(false);
+    // A card added since: to learn.
+    expect(countsOf([card("a"), card("b"), card("c")], learned, "front-to-back")?.learned).toBe(
+      false,
+    );
+    // No cards, nothing to learn, and nothing learned either.
+    expect(countsOf([], [], "front-to-back")?.learned).toBe(false);
   });
 
   it("holds the prompts due by day, the new ones and the day's work", () => {

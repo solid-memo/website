@@ -30,6 +30,7 @@ import { useI18n, type ErrorText } from "./i18n";
 import { reducedMotion } from "./motion";
 import { MoveItems } from "./MoveItems";
 import { ReaderText } from "./ReaderText";
+import type { Completion } from "./RowFlair";
 
 type GroupNode = Extract<TreeNode, { kind: "group" }>;
 
@@ -104,6 +105,7 @@ export function DeckListScreen({
   createDeckHref,
   offer,
   pause,
+  completion = () => undefined,
 }: {
   tree: DeckTree;
   /** The catalog or a deck group has invalid data, set aside: the list cannot be rearranged. */
@@ -172,6 +174,12 @@ export function DeckListScreen({
     onPause: (deck: Deck) => void;
     onResume: (deck: Deck) => void;
   };
+  /**
+   * What a deck has completed, if anything: its row turns gold and is
+   * decorated, the rows that completed the same taking the decoration's
+   * layouts in turn, in the list's order; none in the Studio.
+   */
+  completion?: (deck: Deck) => Completion | undefined;
 }) {
   const { t, locale, readerText } = useI18n();
   const readOnly = tree.readOnly || arrangementSetAside || checking;
@@ -461,12 +469,26 @@ export function DeckListScreen({
   const flip = useFlip(listRef, tree);
   const lifted = dragging ? locate(shown, drag.feedback.source!)!.node : null;
   const outline = outlineOf(shown.children);
+  /** Each completed deck's place among those that completed the same, by URL, for its row's decoration. */
+  const completedOrder = new Map<string, number>();
+  const completedCounts = { deck: 0, course: 0 };
+  for (const one of decksOf(shown.children)) {
+    const done = completion(one);
+    if (done !== undefined) completedOrder.set(one.url, completedCounts[done]++);
+  }
 
   function dragOf(key: string): RowDrag | undefined {
     const { phase, source, combine: other, into } = drag.feedback;
     if (source === key) return phase === "pending" ? "pending" : "source";
     if (other === key) return "combine";
     return into === key ? "into" : undefined;
+  }
+
+  function completedOf(one: Deck) {
+    const done = completion(one);
+    return done === undefined
+      ? undefined
+      : { completion: done, variant: completedOrder.get(one.url)! };
   }
 
   /** The menu of what can be done with the node, last in its row. */
@@ -546,6 +568,7 @@ export function DeckListScreen({
           onNamed={(name, refocus) => renamedDeck(node.deck, name, refocus)}
           menu={actionsMenu(node, parent)}
           paused={pause?.pausedToday(node.deck) === true}
+          completed={completedOf(node.deck)}
         />
       ) : (
         <DeckGroupItem

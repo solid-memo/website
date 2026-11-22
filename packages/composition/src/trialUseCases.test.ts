@@ -142,6 +142,7 @@ describe("createTrialUseCases", () => {
     await expect(useCases.getStudyCounts(played.url, deck, new Date())).resolves.toEqual({
       dueCount: expect.any(Number),
       newCount: expect.any(Number),
+      learned: expect.any(Boolean),
     });
 
     // Another trial starts afresh.

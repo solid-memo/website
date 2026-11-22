@@ -608,7 +608,8 @@
     "pause": "Pausieren",
     "resume": "Fortsetzen",
     "paused": "Pausiert",
-    "pausedUntil": "Pausiert bis {day}"
+    "pausedUntil": "Pausiert bis {day}",
+    "courseCompleted": "Kurs abgeschlossen"
   },
   "dialog": {
     "close": "Schließen"

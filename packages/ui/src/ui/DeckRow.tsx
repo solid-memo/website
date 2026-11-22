@@ -8,6 +8,7 @@ import { DeckIcon } from "./icons";
 import { useI18n } from "./i18n";
 import { NameEditor } from "./NameEditor";
 import { ReaderText } from "./ReaderText";
+import { RowFlair, type Completion } from "./RowFlair";
 
 /** How a row takes part in a drag: held (before it lifts), lifted, the row a drop would group it with, or the group it would go into. */
 export type RowDrag = "pending" | "source" | "combine" | "into";
@@ -29,7 +30,9 @@ export const DRAG_CLASS: Record<RowDrag, string> = {
  * done with it (`menu`). While the deck is being renamed, an inline
  * field stands in for the link. The whole row is a handle to drag it by
  * (deckTree/useDragReorder.ts), `drag` saying what part it takes in a
- * drag.
+ * drag. A deck whose every card is learned, or a course finished (`completed`),
+ * turns gold and is decorated (RowFlair), in one of a few layouts
+ * (`completed.variant`); a finished course says so beside its name.
  */
 export function DeckRow({
   deck,
@@ -43,6 +46,7 @@ export function DeckRow({
   onNamed,
   menu,
   paused = false,
+  completed,
 }: {
   deck: Deck;
   /** How many groups the deck is in. */
@@ -62,6 +66,8 @@ export function DeckRow({
   menu: ComponentChildren;
   /** The deck is paused today: the row looks inactive, and says so in words, until when too. */
   paused?: boolean;
+  /** What the deck has completed, if anything, and which of the decoration's layouts the row takes. */
+  completed?: { completion: Completion; variant: number };
 }) {
   const { t, readerText, formatDate } = useI18n();
   const resumesOn = deck.pause?.resumesOn;
@@ -69,9 +75,13 @@ export function DeckRow({
     "deck-row",
     ...(drag === undefined ? [] : [DRAG_CLASS[drag]]),
     ...(paused ? ["paused"] : []),
+    ...(completed === undefined ? [] : ["completed"]),
   ];
   return (
     <li class={classes.join(" ")} data-row-key={deck.url} style={`--depth: ${depth}`}>
+      {completed !== undefined && (
+        <RowFlair completion={completed.completion} variant={completed.variant} />
+      )}
       {naming ? (
         <NameEditor
           initial={readerText(deck.title)}
@@ -86,6 +96,9 @@ export function DeckRow({
             <span class="hint deck-source">{t("deckList.fromHost", { host: fromHost })}</span>
           )}
           {newerRelease && <span class="deck-release">{t("deckList.newerRelease")}</span>}
+          {completed?.completion === "course" && (
+            <span class="deck-completed">{t("deckList.courseCompleted")}</span>
+          )}
           {paused && (
             <span class="deck-paused">
               {resumesOn === undefined

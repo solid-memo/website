@@ -5,7 +5,7 @@
 import { deckPreferences } from "@solid-memo/domain/deckPace";
 import { backlogDayOf, isPaused } from "@solid-memo/domain/deckPause";
 import type { Deck, Prompt } from "@solid-memo/domain/deck";
-import { studyCountsOf, type DeckSchedule } from "@solid-memo/domain/studyDigest";
+import { studyCountsOf, type DeckSchedule, type StudyCounts } from "@solid-memo/domain/studyDigest";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import type { FsrsState, ReviewKey, ReviewQuality, ReviewState } from "@solid-memo/domain/review";
 import {
@@ -34,7 +34,8 @@ export interface StudyUseCases {
   getStudyQueue(instanceUrl: string, deck: Deck, now: Date): Promise<StudySessionQueue>;
   /**
    * How many prompts today's queue would hold, as getStudyQueue counts
-   * them (none for a deck paused today, whose documents are not read); from the deck's schedule in the instance's digest when neither
+   * them, and whether every prompt of the deck is learned (none of it, for a
+   * deck paused today, whose documents are not read); from the deck's schedule in the instance's digest when neither
    * of its documents changed since, else from its documents (and the
    * digest is brought up to date). Each document is read as the user
    * only when it is the instance's (isInInstancePod), as no one
@@ -43,11 +44,7 @@ export interface StudyUseCases {
    * at once, whoever asks, the others waiting their turn: a deck list
    * asks for every deck's, and a catalog may list a thousand.
    */
-  getStudyCounts(
-    instanceUrl: string,
-    deck: Deck,
-    now: Date,
-  ): Promise<{ dueCount: number; newCount: number }>;
+  getStudyCounts(instanceUrl: string, deck: Deck, now: Date): Promise<StudyCounts>;
   /**
    * Keep the deck's schedule in the digest, as of now: when a study
    * session ends. Nothing, for a deck whose documents are not both the
@@ -186,7 +183,8 @@ export function createStudyUseCases({
       digestStore.asNoOneOf(instanceUrl, deck),
     ]);
     // A paused deck has nothing to study today: its documents are not read, and its schedule waits.
-    if (isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour))) return { dueCount: 0, newCount: 0 };
+    if (isPaused(deck, studyDayOf(now, prefs.dayBoundaryHour)))
+      return { dueCount: 0, newCount: 0, learned: false };
     const studyPrefs = deckPreferences(prefs, deck);
     const kept = digest.schedules[deck.url];
     // Each of the deck's documents read as the user only when it is the instance's.

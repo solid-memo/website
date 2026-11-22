@@ -129,8 +129,12 @@ The roles fall into groups:
   activity calendar's days, the answer buttons' and the cards' bars,
   and the young cards' line.
 - **Decoration**: the accents, `--heading-pop`, the page's discs
-  (`--paper-blue`, `--paper-yellow`), the newcomers' glint (`--shine`)
-  and the gold glow of a day's study done (`--glow`).
+  (`--paper-blue`, `--paper-yellow`), the newcomers' glint (`--shine`),
+  the gold glow of a day's study done (`--glow`), which a deck learned or a
+  course finished shares, and the stars on such a row (`--sparkle`).
+  The stars are lighter than the gold, white in light themes and a faint
+  gold in dark ones, and absent in High contrast, so text over them
+  keeps its ratio.
 - **The masthead and the theme toggle**: `--masthead-*`, `--logo-shadow`
   and `--toggle-*`.
 - **Depth**: `--shadow-sm`, `--shadow`, `--ring` (the focus ring of a

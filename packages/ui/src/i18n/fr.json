@@ -632,7 +632,8 @@
     "pause": "Mettre en pause",
     "resume": "Reprendre",
     "paused": "En pause",
-    "pausedUntil": "En pause jusqu’au {day}"
+    "pausedUntil": "En pause jusqu’au {day}",
+    "courseCompleted": "Cours terminé"
   },
   "dialog": {
     "close": "Fermer"

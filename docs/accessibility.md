@@ -81,7 +81,7 @@ but the journeys:
   - text, muted text and field edges on every surface;
   - text on a primary fill, links, danger and warning text, the
     masthead's text, an answer button's text on its grade's tint, and
-    the text of the today strip gone gold for a day done;
+    the text on the gold of a day done (the today strip, a deck's row);
   - a chart's steps on the surfaces, at a field edge's ratio;
   - in the Color-blind friendly palette, that neighboring grades stay
     apart under each color vision deficiency.
