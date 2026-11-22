@@ -12,6 +12,7 @@ import { CommandPalette } from "./CommandPalette";
 import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { deckTabs } from "./workspaceLayout";
 import { queryKeys } from "../queryKeys";
+import { cardName } from "@solid-memo/ui/DataText";
 
 vi.mock("./commandIndex", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./commandIndex")>();
@@ -20,6 +21,11 @@ vi.mock("./commandIndex", async (importOriginal) => {
     indexCommands: vi.fn(actual.indexCommands),
     rankCommands: vi.fn(actual.rankCommands),
   };
+});
+
+vi.mock("@solid-memo/ui/DataText", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/ui/DataText")>();
+  return { ...actual, cardName: vi.fn(actual.cardName) };
 });
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
@@ -221,6 +227,20 @@ describe("CommandPalette", () => {
     expect(picked()).toBe(within(list()).getAllByRole("option")[2]);
     expect(rankCommands).toHaveBeenCalledTimes(ranked);
     expect(indexCommands).toHaveBeenCalledTimes(1);
+  });
+
+  it("names none of the deck's cards as it opens, only once something is typed", () => {
+    const queryClient = readCache();
+    const cards = Array.from({ length: 500 }, (_, n) => makeCard(kanji, `card-${n}`));
+    queryClient.setQueryData(["cards", kanji.cardsDocumentUrl], cards);
+    vi.mocked(cardName).mockClear();
+    renderPalette({ queryClient });
+    expect(cardName).not.toHaveBeenCalled();
+    type("card-499");
+    expect(within(list()).getByRole("group", { name: "Cards of this deck" })).toHaveTextContent(
+      "card-499",
+    );
+    expect(cardName).toHaveBeenCalledTimes(cards.length);
   });
 
   it("closes on Escape", () => {

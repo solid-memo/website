@@ -467,6 +467,9 @@ nothing from the pod. The entries and their rank come from
   ([`shell/prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), key
   `solid-memo:studioRecent.v1`).
 - Each entry shows the keys that do the same, if any.
+- Cards are named only once something is typed, each once, to match
+  it against what was typed, or when a card shows as a recent entry.
+  So opening the palette names none of a large deck's cards.
 
 The field is a combobox over the list: the focus stays in the field,
 and the entry picked is its `aria-activedescendant`. Down and Up pick
