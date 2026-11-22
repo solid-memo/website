@@ -895,7 +895,7 @@ describe("StudyContainer leaving for the deck list", () => {
 
   it("keeps the day's figures as they were when they cannot be known without the pod", async () => {
     const useCases = oneDue({
-      getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0 })),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0, learned: false })),
       knownTodayFigures: vi.fn(async () => {
         throw new Error("offline");
       }),
@@ -937,7 +937,7 @@ describe("StudyContainer leaving for the deck list", () => {
         studiedToday: 0,
         ...QUEUE_DEFAULTS,
       })),
-      getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0 })),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0, learned: false })),
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     // The list counted before the session: one due, fresh for a while yet.

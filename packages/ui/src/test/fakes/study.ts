@@ -58,7 +58,7 @@ export function makeStudyUseCasesFake(
       // As the real ones relate to them: the counts of the queue, the check of the full check.
       getStudyCounts: vi.fn(async (instanceUrl, deck, now) => {
         const queue = await fake.getStudyQueue(instanceUrl, deck, now);
-        return { dueCount: queue.due.length, newCount: queue.newPrompts.length };
+        return { dueCount: queue.due.length, newCount: queue.newPrompts.length, learned: false };
       }),
       refreshStudyDigest: vi.fn(async () => undefined),
     } satisfies StudyUseCases,

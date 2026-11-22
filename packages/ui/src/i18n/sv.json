@@ -608,7 +608,8 @@
     "pause": "Pausa",
     "resume": "Återuppta",
     "paused": "Pausad",
-    "pausedUntil": "Pausad till {day}"
+    "pausedUntil": "Pausad till {day}",
+    "courseCompleted": "Kursen klar"
   },
   "dialog": {
     "close": "Stäng"

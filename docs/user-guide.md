@@ -141,7 +141,14 @@ The deck list is home. From the top:
   preferences keep it
   ([srs.md](srs.md#the-invitation-to-switch)).
 - **Decks**: each deck, with a **Study** button when cards are waiting
-  today, or "Done for today". Click a deck's name to open its page. A
+  today, or "Done for today". Once you've learned every card of a
+  deck, so that it has no new cards left, its row turns gold. A large
+  star near its end and smaller ones across it bounce in as the row
+  comes into view, followed by a glimmer of light. It stays gold
+  while you review it, until a new card is added. The stars are laid
+  out a little differently from row to row. A course you've finished
+  turns gold too, says "Course completed" after its name and gets a
+  larger star and more small ones. Click a deck's name to open its page. A
   library deck says "New release" after its name when the library has a
   newer release, and its page offers the update. A new instance with no
   decks offers the course for newcomers here: "Start the course".

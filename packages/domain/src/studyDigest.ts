@@ -9,7 +9,7 @@ import type { Scheduler } from "./fsrs";
 import type { StudyPreferences } from "./preferences";
 import type { DueState } from "./review";
 import { isStudyDay } from "./reviewStateEdits";
-import { dueBefore, dueThrough } from "./dueDays";
+import { dueBefore, dueThrough, hasDueDay } from "./dueDays";
 import { scheduledStates } from "./scheduleInsight";
 import { holdsNewPrompts, studyDayOf } from "./scheduling";
 import {
@@ -91,10 +91,19 @@ export function scheduleOf(input: {
   };
 }
 
+/** A deck's study counts: today's, as buildStudyQueue would give them, and whether its every prompt is learned. */
+export interface StudyCounts {
+  dueCount: number;
+  newCount: number;
+  /** The deck has prompts, and each was reviewed at least once: none is left to learn, whatever is due. */
+  learned: boolean;
+}
+
 /**
- * Today's counts from a schedule, as buildStudyQueue would give them;
- * null when the schedule cannot say (another direction, day boundary or
- * scheduler, or computed on a later day than today: the clock went back).
+ * Today's counts from a schedule, as buildStudyQueue would give them,
+ * and whether its every prompt is learned; null when the schedule cannot
+ * say (another direction, day boundary or scheduler, or computed on a
+ * later day than today: the clock went back).
  */
 export function studyCountsOf(
   schedule: DeckSchedule,
@@ -105,7 +114,7 @@ export function studyCountsOf(
     /** For a deck that resumed from a pause, its resume day, as buildStudyQueue's backlog. */
     backlogBefore?: string;
   },
-): { dueCount: number; newCount: number } | null {
+): StudyCounts | null {
   const { direction, prefs, now, backlogBefore } = input;
   if (
     schedule.direction !== direction ||
@@ -127,6 +136,7 @@ export function studyCountsOf(
     newCount: holdsNewPrompts(behind, prefs)
       ? 0
       : Math.min(schedule.unreviewed, Math.max(0, prefs.newCardsPerDay - introducedToday)),
+    learned: schedule.unreviewed === 0 && hasDueDay(schedule.dueByDay),
   };
 }
 

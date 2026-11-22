@@ -156,6 +156,13 @@ function standingOf(
   return standing;
 }
 
+/** Whether every chapter of the course is done, as far as the deck says: a course with chapters to do. */
+export function courseFinished(summary: CourseSummary, deck: Deck): boolean {
+  return (
+    summary.outline.chapters.length > 0 && standingOf(summary, deck.completedChapters) === undefined
+  );
+}
+
 /**
  * Reads what the strip needs of each course deck (courseStripQuery) and
  * shows those still to finish, as far as the deck says (its title and

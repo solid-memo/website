@@ -176,7 +176,8 @@ describe.each(SERVERS)("the instance digest on $name", ({ url: server }) => {
 
     const first = page();
     const counts = await first.useCases.getStudyCounts(instanceUrl, deck, now);
-    expect(counts).toEqual({ dueCount: 0, newCount: 3 });
+    // Three cards, none learned yet.
+    expect(counts).toEqual({ dueCount: 0, newCount: 3, learned: false });
     expect((await first.useCases.checkInstance(instanceUrl)).conforms).toBe(true);
     if (etags) await untilLearned(instanceUrl, deck);
 
@@ -215,6 +216,7 @@ describe.each(SERVERS)("the instance digest on $name", ({ url: server }) => {
     expect(await page().useCases.getStudyCounts(instanceUrl, deck, now)).toEqual({
       dueCount: 0,
       newCount: 4,
+      learned: false,
     });
   });
 

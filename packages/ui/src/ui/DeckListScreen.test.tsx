@@ -266,6 +266,31 @@ describe("DeckListScreen", () => {
       expect(icon).toHaveAttribute("aria-hidden", "true");
   });
 
+  it("decorates a learned deck and a finished course, the layouts in turn for each, in the list's order", () => {
+    const completed = new Map([
+      [kanji.url, "deck"],
+      [kana.url, "course"],
+      [verbs.url, "deck"],
+      [nouns.url, "deck"],
+    ] as const);
+    renderScreen(tree, { completion: (d) => completed.get(d.url) });
+    const firstStar = (key: string) =>
+      row(key).querySelector(".row-flair .row-star.big")!.getAttribute("style");
+    for (const key of completed.keys()) expect(row(key)).toHaveClass("completed");
+    expect(firstStar(kanji.url)).toMatch(/^--size: 5\.5rem;/);
+    expect(firstStar(verbs.url)).toMatch(/^--size: 6rem;/);
+    expect(firstStar(nouns.url)).toMatch(/^--size: 5\.2rem;/);
+    expect(firstStar(kana.url)).toMatch(/^--size: 7rem;/);
+    // A finished course says so in words, beside its name.
+    expect(within(row(kana.url)).getByText("Course completed")).toHaveClass("deck-completed");
+    expect(within(row(kanji.url)).queryByText("Course completed")).toBeNull();
+  });
+
+  it("decorates no row that completed nothing", () => {
+    const { container } = renderScreen();
+    expect(container.querySelector(".completed, .row-flair")).toBeNull();
+  });
+
   it("gives every deck and group one menu button, always there, last in its row", () => {
     renderScreen();
     for (const key of [kanji.url, japanese, kana.url, grammar, verbs.url, other, nouns.url]) {

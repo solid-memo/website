@@ -176,10 +176,17 @@ describe.each([
           );
           expect(counts[0]).toEqual(
             sharedReviews
-              ? { dueCount: Math.min(count, DEFAULT_PREFERENCES.maxReviewsPerDay), newCount: 0 }
+              ? {
+                  dueCount: Math.min(count, DEFAULT_PREFERENCES.maxReviewsPerDay),
+                  newCount: 0,
+                  // Every card reviewed: none left to learn.
+                  learned: true,
+                }
               : {
                   dueCount: 1,
                   newCount: Math.min(count - 1, DEFAULT_PREFERENCES.newCardsPerDay),
+                  // One card reviewed: learned only when it is the deck's one card.
+                  learned: count === 1,
                 },
           );
         };

@@ -94,7 +94,7 @@ describe("DeckListContainer", () => {
       let stored: Deck = deck;
       const useCases = makeUseCasesFake({
         listDecks: vi.fn(async () => [stored]),
-        getStudyCounts: vi.fn(async () => ({ dueCount: 3, newCount: 0 })),
+        getStudyCounts: vi.fn(async () => ({ dueCount: 3, newCount: 0, learned: false })),
       });
       vi.mocked(useCases.pauseDeck).mockImplementation(async (_url, paused, resumesOn) => {
         stored = {
@@ -336,6 +336,66 @@ describe("DeckListContainer", () => {
     // The whole course, with its cards, is read behind the strip, of the course it shows only.
     await waitFor(() => expect(useCases.getCourse).toHaveBeenCalledWith(going));
     expect(useCases.getCourse).toHaveBeenCalledOnce();
+  });
+
+  it("decorates a deck with every card learned and a finished course, neither set aside nor paused", async () => {
+    const copy = (n: number, title: string, extra: Partial<Deck> = {}): Deck => ({
+      ...deck,
+      id: `deck-${n}`,
+      url: `${instance.url}catalog.ttl#deck-${n}`,
+      title: { en: title },
+      ...extra,
+    });
+    // Done for today, but with cards still to learn on a later day.
+    const today = copy(2, "Today");
+    const going = copy(3, "Going", { sourceUrl: courseLibraryDeck.url });
+    const finished = copy(4, "Finished", {
+      sourceUrl: courseLibraryDeck.url,
+      completedChapters: [CH1, CH2],
+    });
+    const setAside = copy(5, "Aside");
+    const paused = copy(6, "Paused", { pause: { pausedAt: "2026-01-01T00:00:00.000Z" } });
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [deck, today, going, finished, setAside, paused]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      // Kanji N5 has every card learned, with reviews still due; only the course tells its own end.
+      getStudyCounts: vi.fn(async (_url: string, d: Deck) => ({
+        dueCount: d === today ? 0 : 2,
+        newCount: 0,
+        learned: d === deck || d === setAside || d === paused,
+      })),
+      getCourseSummary: vi.fn(async (d: Deck) => ({
+        outline: courseOutline,
+        answeredCardIds: d === finished ? ["q-1", "q-2", "q-3", "r-1", "q-4"] : ["q-1"],
+      })),
+    });
+    renderContainer(useCases, undefined, (d) => d === setAside);
+    const rowOf = (d: Deck) => document.querySelector<HTMLElement>(`[data-row-key="${d.url}"]`)!;
+    await waitFor(() => expect(rowOf(deck)).toHaveClass("completed"));
+    await waitFor(() => expect(rowOf(finished)).toHaveClass("completed"));
+    expect(within(rowOf(finished)).getByText("Course completed")).toBeInTheDocument();
+    expect(within(rowOf(deck)).queryByText("Course completed")).toBeNull();
+    // A learned deck still offers the reviews it has due.
+    expect(within(rowOf(deck)).getByRole("button", { name: /Study/ })).toBeInTheDocument();
+    for (const other of [today, going, setAside, paused])
+      expect(rowOf(other)).not.toHaveClass("completed");
+  });
+
+  it("finishes no course of no chapters", async () => {
+    const empty: Deck = { ...deck, sourceUrl: courseLibraryDeck.url };
+    const useCases = makeUseCasesFake({
+      listDecks: vi.fn(async () => [empty]),
+      listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 1, newCount: 0, learned: false })),
+      getCourseSummary: vi.fn(async () => ({
+        outline: { ...courseOutline, chapters: [] },
+        answeredCardIds: [],
+      })),
+    });
+    renderContainer(useCases);
+    await waitFor(() => expect(useCases.getCourseSummary).toHaveBeenCalled());
+    expect(await screen.findByText("1 to review")).toBeInTheDocument();
+    expect(document.querySelector(".completed")).toBeNull();
   });
 
   it("moves a course on as its deck is read afresh, its summary not read again", async () => {

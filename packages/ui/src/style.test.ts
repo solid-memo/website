@@ -659,6 +659,41 @@ describe("contrast", () => {
     },
   );
 
+  // A deck done for today, a course finished (style.css's .deck-row.completed), on the same gold.
+  it.each(EACH_BLOCK)(
+    "keeps a done deck's tick at the ratio graphics need on the gold in %s",
+    (_, block) => {
+      expectContrast(
+        block,
+        "var(--link)",
+        "color-mix(in srgb, var(--accent-yellow) 18%, var(--surface))",
+        3,
+      );
+    },
+  );
+
+  it.each(EACH_BLOCK)(
+    "keeps text and a done deck's tick at their ratios over a completed row's stars in %s",
+    (_, block) => {
+      const gold = colorOf(
+        "color-mix(in srgb, var(--accent-yellow) 18%, var(--surface))",
+        block.roles,
+      );
+      const under = over(colorOf("var(--sparkle)", block.roles), gold);
+      const { text, edge } = contrastTargets(block.palette);
+      // A completed row's words, its deck's name too, are the text's own color, not muted (style.css).
+      for (const role of ["--text"])
+        expect({
+          role,
+          enough: contrast(colorOf(`var(${role})`, block.roles), under) >= text,
+        }).toEqual({ role, enough: true });
+      // Its tick is the link's green, brighter in dark themes than the primary (style.css).
+      expect(contrast(colorOf("var(--link)", block.roles), under)).toBeGreaterThanOrEqual(
+        Math.min(edge, 3),
+      );
+    },
+  );
+
   it.each(EACH_BLOCK)(
     "keeps muted text readable over the background's blue disc and the course card's yellow glow in %s",
     (_, block) => {
@@ -1322,6 +1357,55 @@ describe("the day's study done", () => {
     expect(burst.position).toBe("absolute");
     expect(burst.pointerEvents).toBe("none");
     expect(getComputedStyle(document.querySelector(".today-burst>span")!).opacity).toBe("0");
+  });
+});
+
+describe("completed deck rows", () => {
+  it("turns a completed row gold, as a day done turns today's strip", () => {
+    // The test DOM keeps no color-mix() as a value, so the stylesheet is read as written.
+    expect(read("style.css")).toContain(
+      ".deck-list > li.deck-row.completed:not(.drop-combine) {\n  isolation: isolate;\n  background-color: color-mix(in srgb, var(--accent-yellow) 18%, var(--surface));",
+    );
+  });
+
+  it("lays the decoration under the row's text, within its bounds, out of the pointer's way, its stars landing with a bounce once seen", () => {
+    document.body.innerHTML = `<ul class="deck-list"><li class="deck-row completed">
+      <span class="row-flair seen" aria-hidden="true"><span class="row-star big"></span></span></li></ul>`;
+    const flair = getComputedStyle(document.querySelector(".row-flair")!);
+    expect(flair.position).toBe("absolute");
+    expect(flair.zIndex).toBe("-1");
+    expect(flair.pointerEvents).toBe("none");
+    // Nothing of it reaches past the row, onto its neighbors.
+    expect(flair.overflow).toBe("hidden");
+    expect(getComputedStyle(document.querySelector(".row-star")!).visibility).not.toBe("hidden");
+    const [stars] = rules(".row-flair.seen .row-star");
+    expect(stars!.style.getPropertyValue("animation")).toMatch(/^row-star-land .* backwards$/);
+  });
+
+  it("hides the stars until the row is seen", () => {
+    document.body.innerHTML = `<span class="row-flair"><span class="row-star top"></span></span>`;
+    expect(getComputedStyle(document.querySelector(".row-star")!).visibility).toBe("hidden");
+  });
+
+  it("sizes a small star to the room the large star leaves, so on a narrow row the stars shrink rather than overlap", () => {
+    // The test DOM keeps no min() of a sum as a value, so the stylesheet is read as written.
+    expect(read("style.css")).toContain(
+      ".row-star.top,\n.row-star.bottom {\n  inset-inline-start: calc(var(--x) * (100% - var(--reserve)));\n  width: min(var(--size), (100% - var(--reserve)) * var(--fit));",
+    );
+  });
+
+  it("sweeps the glimmer once across the row, resting off it", () => {
+    const [glimmer] = rules(".row-flair.seen::after");
+    expect(glimmer!.style.getPropertyValue("animation")).toMatch(/^row-flair-glimmer 1s /);
+    const [rest] = rules(".row-flair::after");
+    expect(rest!.style.getPropertyValue("transform")).toBe("translateX(-130%) skewX(-18deg)");
+  });
+
+  it("gives a completed row's words the text's own color and its tick the link's green", () => {
+    const [words] = rules(".deck-list > li.deck-row.completed .hint");
+    expect(words!.style.getPropertyValue("color")).toBe("var(--text)");
+    const [tick] = rules(".deck-list > li.deck-row.completed .study-done");
+    expect(tick!.style.getPropertyValue("color")).toBe("var(--link)");
   });
 });
 

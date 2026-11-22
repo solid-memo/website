@@ -11,6 +11,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import { CourseStripContainer } from "./CourseStrip";
 import { DeckListScreen } from "./DeckListScreen";
 import { DeckStudyActionContainer } from "./DeckStudyAction";
+import { useDeckCompletion } from "./deckCompletion";
 import { isPaused } from "@solid-memo/domain/deckPause";
 import { ComebackNotes } from "./ComebackNotes";
 import { PauseDeckDialog } from "./PauseDeckDialog";
@@ -56,7 +57,9 @@ import {
  * (useStudyToday) is left out of today's strip and of the course strip;
  * its menu offers to resume it, any other deck's to pause it
  * (PauseDeckDialog). A deck that resumed from a pause is welcomed back
- * above the list while its backlog lasts (ComebackNotes).
+ * above the list while its backlog lasts (ComebackNotes). A deck whose
+ * every card is learned, and a course finished, turn gold in the list
+ * and are decorated (useDeckCompletion).
  */
 export function DeckListContainer({
   useCases,
@@ -88,6 +91,7 @@ export function DeckListContainer({
   const today = useStudyToday(useCases, instance.url);
   const pausedToday = (deck: Deck) => isPaused(deck, today);
   const studied = (deck: Deck) => !isSetAside(deck) && !pausedToday(deck);
+  const completion = useDeckCompletion(useCases, instance, decks.filter(studied), isCourse);
   const queryClient = useQueryClient();
   /** The deck whose pause dialog is open. */
   const [pausing, setPausing] = useState<Deck | null>(null);
@@ -167,6 +171,7 @@ export function DeckListContainer({
             />
           )
         }
+        completion={completion}
         createDeckHref={routeToHash({ screen: "deckCreator", instanceUrl: instance.url })}
         offer={
           decksOf(editor.tree.children).length === 0 && (

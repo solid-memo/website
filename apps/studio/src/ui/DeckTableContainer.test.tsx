@@ -74,7 +74,7 @@ describe("DeckTableContainer", () => {
     const useCases = makeUseCasesFake({
       listDeckTree: vi.fn(async () => tree),
       listCards: vi.fn(async () => []),
-      getStudyCounts: vi.fn(async () => ({ dueCount: 7, newCount: 5 })),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 7, newCount: 5, learned: false })),
     });
     renderContainer(useCases, { filter: "", sort: { column: "group", descending: false } });
     await waitFor(() => expect(screen.getAllByText("7")).toHaveLength(2));
@@ -104,6 +104,7 @@ describe("DeckTableContainer", () => {
       getStudyCounts: vi.fn(async (_instanceUrl, deck) => ({
         dueCount: deck.url === kanji.url ? 2 : 0,
         newCount: 5,
+        learned: false,
       })),
     });
     renderContainer(useCases);

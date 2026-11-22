@@ -18,6 +18,7 @@ describe("the instance digest", () => {
     await expect(useCases.getStudyCounts(instance.url, paused, now)).resolves.toEqual({
       dueCount: 0,
       newCount: 0,
+      learned: false,
     });
     expect(deps.deckRepository.readCardsSince).not.toHaveBeenCalled();
     expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
@@ -25,6 +26,7 @@ describe("the instance digest", () => {
     await expect(useCases.getStudyCounts(instance.url, resumed, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
   });
 
@@ -33,7 +35,7 @@ describe("the instance digest", () => {
     const today = studyDayOf(now, DEFAULT_PREFERENCES.dayBoundaryHour);
     // The one due card fell due before the deck resumed today: a backlog of one, within a day's limit.
     const resumed = { ...deck, pause: { pausedAt: "2026-09-01T00:00:00.000Z", resumesOn: today } };
-    const counts = { dueCount: 1, newCount: 1 };
+    const counts = { dueCount: 1, newCount: 1, learned: false };
     await expect(useCases.getStudyCounts(instance.url, resumed, now)).resolves.toEqual(counts);
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledOnce());
     await expect(useCases.getStudyCounts(instance.url, resumed, now)).resolves.toEqual(counts);
@@ -46,6 +48,7 @@ describe("the instance digest", () => {
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledOnce());
     expect(stored()!.schedules[deck.url]).toMatchObject({
@@ -84,6 +87,7 @@ describe("the instance digest", () => {
       await expect(useCases.getStudyCounts(instance.url, one, now)).resolves.toEqual({
         dueCount: 0,
         newCount: 1,
+        learned: false,
       });
     await vi.waitFor(() => expect(digestRepository.updateDigest).toHaveBeenCalledTimes(3));
     expect(Object.keys(stored()!.schedules)).toEqual([deck.url]);
@@ -119,6 +123,7 @@ describe("the instance digest", () => {
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
     expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c1", {
       asNoOne: false,
@@ -139,6 +144,7 @@ describe("the instance digest", () => {
     await expect(changed.useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
     expect(changed.deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(deck, "c0", {
       asNoOne: false,
@@ -150,6 +156,7 @@ describe("the instance digest", () => {
     ).resolves.toEqual({
       dueCount: 1,
       newCount: 3,
+      learned: false,
     });
     expect(otherWay.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(
       expect.anything(),
@@ -169,6 +176,7 @@ describe("the instance digest", () => {
     await expect(switched.useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
     expect(switched.deps.deckRepository.readCardsSince).toHaveBeenLastCalledWith(
       expect.anything(),
@@ -203,6 +211,7 @@ describe("the instance digest", () => {
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 0,
       newCount: 1,
+      learned: false,
     });
     const [progress] = (await useCases.getCardProgress(instance.url, now, { deck })).decks;
     // Thirty days from its last review on the 26th: mature, and not overdue.
@@ -251,10 +260,12 @@ describe("the instance digest", () => {
     await expect(useCases.getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
     await expect(createUseCases(deps).getStudyCounts(instance.url, deck, now)).resolves.toEqual({
       dueCount: 1,
       newCount: 1,
+      learned: false,
     });
   });
 
@@ -340,6 +351,7 @@ describe("the instance digest", () => {
       await expect(useCases.getStudyCounts(foreign, deck, now)).resolves.toEqual({
         dueCount: 1,
         newCount: 1,
+        learned: false,
       });
       expect(deps.deckRepository.readCardsSince).toHaveBeenCalledExactlyOnceWith(
         deck,

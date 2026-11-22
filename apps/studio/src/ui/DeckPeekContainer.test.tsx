@@ -54,7 +54,7 @@ describe("DeckPeekContainer", () => {
         makeCard(deck, "b"),
         makeCard(deck, "c", true),
       ]),
-      getStudyCounts: vi.fn(async () => ({ dueCount: 3, newCount: 7 })),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 3, newCount: 7, learned: false })),
     });
     renderPeek(useCases, kanji.url);
     const peek = within(await screen.findByRole("region", { name: "Kanji N5" }));

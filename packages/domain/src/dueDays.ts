@@ -10,7 +10,8 @@ import { derivedOnce } from "./frozen";
  * due days are put in order and summed up once (derivedOnce), so that
  * each sum after that is a lookup, not a pass over every due day: the
  * decks that name the same documents share one schedule, and each asks
- * it for its own sums (forecastOf, overdueOf, studyCountsOf).
+ * it for its own sums (forecastOf, overdueOf, studyCountsOf), and
+ * whether it has any due day at all (hasDueDay).
  */
 
 /** A schedule's due days in order, and the prompts due by each of them, that day included. */
@@ -52,4 +53,9 @@ export function dueBefore(dueByDay: Readonly<Record<string, number>>, day: strin
 /** The prompts due by `day`, that day included. */
 export function dueThrough(dueByDay: Readonly<Record<string, number>>, day: string): number {
   return dueBefore(dueByDay, day) + dueOn(dueByDay, day);
+}
+
+/** Whether any prompt has a due day: one was reviewed. */
+export function hasDueDay(dueByDay: Readonly<Record<string, number>>): boolean {
+  return sumsOf(dueByDay).days.length > 0;
 }
