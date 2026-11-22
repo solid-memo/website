@@ -552,6 +552,7 @@ describe("documentKeyOf", () => {
     ["https://pod.example/Decks/A.TTL", "https://pod.example/decks/a.ttl"],
     ["https://pod.example/decks/a.ttl.", "https://pod.example/decks/a.ttl"],
     ["https://pod.example/decks/a.ttl%2E%20", "https://pod.example/decks/a.ttl"],
+    ["https://pod.example/decks/a%20.b.ttl%20.%20.", "https://pod.example/decks/a%20.b.ttl"],
     ["https://pod.example/decks./a.ttl", "https://pod.example/decks/a.ttl"],
     ["https://pod.example/%C3%89.ttl", "https://pod.example/é.ttl"],
     ["https://pod.example/%C3%9F.ttl", "https://pod.example/SS.ttl"],
