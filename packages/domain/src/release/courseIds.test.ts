@@ -41,6 +41,33 @@ describe("takenIds and idProblem", () => {
     expect(taken.has("ch-c")).toBe(false);
   });
 
+  it("takes every id a record names, though nothing has it", () => {
+    const draft = courseDraft();
+    const pointing: ReleaseDraft = {
+      ...draft,
+      chapters: draft.chapters.map((chapter) =>
+        chapter.id === "ch-a"
+          ? { ...chapter, data: { ...chapter.data, reviewQuestion: [of("q-review")] } }
+          : chapter,
+      ),
+      steps: draft.steps.map((step) =>
+        step.id === "ch-a-1"
+          ? { ...step, data: { ...step.data, checkedBy: [of("q-asked")], chapter: of("ch-held") } }
+          : step,
+      ),
+      cards: draft.cards.map((card) =>
+        card.id === "q-loose"
+          ? { ...card, data: { ...card.data, distractor: [of("q-wrong")], subject: [of("about")] } }
+          : card,
+      ),
+    };
+    for (const id of ["q-review", "q-asked", "ch-held", "q-wrong", "about"]) {
+      expect(idsInUse(pointing).has(id)).toBe(true);
+      expect(idProblem(pointing, id)).toBe("taken");
+    }
+    expect(idsInUse(pointing).has("https://source.example/")).toBe(false);
+  });
+
   it("says why an id cannot be a new subject's", () => {
     const draft = courseDraft(published);
     expect(idProblem(draft, "ch-c")).toBeNull();
@@ -106,6 +133,54 @@ describe("takenIds and idProblem", () => {
     const moved: ReleaseDraft = { ...named, url: "https://example.org/other.ttl" };
     expect(takenIds(moved).has("ch-a")).toBe(true);
     expect(takenIds(moved).has("elsewhere")).toBe(false);
+    // The same ids and statements, a record naming another subject of the draft.
+    expect(takenIds(named).has("ch-held")).toBe(false);
+    const pointed: ReleaseDraft = {
+      ...named,
+      steps: named.steps.map((step, i) =>
+        i === 0 ? { ...step, data: { ...step.data, chapter: of("ch-held") } } : step,
+      ),
+    };
+    expect(takenIds(pointed).has("ch-held")).toBe(true);
+    expect(takenIds({ ...pointed, steps: [...pointed.steps] })).toBe(takenIds(pointed));
+    // A record's field that named no subject of the draft now names one.
+    const unasked: ReleaseDraft = {
+      ...named,
+      steps: named.steps.map((step, i) =>
+        i === 0 ? { ...step, data: { ...step.data, checkedBy: [] } } : step,
+      ),
+    };
+    expect(takenIds(unasked).has("q-held")).toBe(false);
+    const asked: ReleaseDraft = {
+      ...unasked,
+      steps: unasked.steps.map((step, i) =>
+        i === 0 ? { ...step, data: { ...step.data, checkedBy: [of("q-held")] } } : step,
+      ),
+    };
+    expect(takenIds(asked).has("q-held")).toBe(true);
+    // A name or a text is no IRI, whatever it starts with: the ids gathered stay.
+    const worded: ReleaseDraft = {
+      ...asked,
+      root: { ...asked.root, versionNotes: of("notes") },
+      agents: [...asked.agents, { id: "jane", data: { name: of("Jane Doe") } }],
+    };
+    expect(takenIds(worded).has("Jane Doe")).toBe(false);
+    const reworded: ReleaseDraft = {
+      ...worded,
+      root: { ...worded.root, versionNotes: of("other notes") },
+      agents: worded.agents.map((agent) =>
+        agent.id === "jane" ? { ...agent, data: { name: of("Jane") } } : agent,
+      ),
+    };
+    expect(takenIds(reworded)).toBe(takenIds(worded));
+    // An IRI that names no subject of the draft, for another such.
+    const licensed: ReleaseDraft = {
+      ...reworded,
+      root: { ...reworded.root, license: "https://licenses.example/b" },
+    };
+    expect(
+      takenIds({ ...licensed, root: { ...licensed.root, license: "https://licenses.example/c" } }),
+    ).toBe(takenIds(licensed));
     const republished: ReleaseDraft = { ...named, published: NOTHING_PUBLISHED };
     expect(takenIds(republished).has("ch-gone")).toBe(false);
     expect(takenIds({ ...republished, root: { ...republished.root } })).toBe(takenIds(republished));
@@ -407,5 +482,59 @@ describe("idBetween", () => {
       expect(taken.has(between)).toBe(false);
       expect(DRAFT_ID.test(between)).toBe(true);
     }
+  });
+});
+
+describe("ids a record points at", () => {
+  const made = (edited: ReleaseDraft | DraftRefusal) => {
+    if (isRefusal(edited)) throw new Error(edited.refused);
+    return edited;
+  };
+  const withStep = (draft: ReleaseDraft, data: Partial<ReleaseDraft["steps"][number]["data"]>) => ({
+    ...draft,
+    steps: draft.steps.map((step) =>
+      step.id === "ch-a-1" ? { ...step, data: { ...step.data, ...data } } : step,
+    ),
+  });
+
+  it("are not suggested for a new question, which joins the step it is added to", () => {
+    // A release read as it is: its step asks a question it does not have.
+    const asking = withStep(courseDraft(), {
+      checkedBy: [of("q-a-1a"), of("q-b-1a")],
+    });
+    const draft = made(
+      applyDraftChanges(asking, [{ kind: "addStep", id: "ch-b-1", chapter: "ch-b" }]),
+    );
+    const place = { kind: "step", step: "ch-b-1" } as const;
+    const id = questionIdFor(draft, place);
+    expect(id).not.toBe("q-b-1a");
+    expect(
+      applyDraftChanges(draft, [{ kind: "addCard", id: "q-b-1a", card: { front: { en: "F" } } }]),
+    ).toEqual({ refused: "idTaken", id: "q-b-1a" });
+    const added = made(
+      applyDraftChanges(draft, [
+        { kind: "addCard", id, card: { front: { en: "F" }, back: { en: "B" } } },
+        { kind: "addQuestion", card: id, place },
+      ]),
+    );
+    expect(questionsOfStep(added, "ch-b-1")).toEqual([id]);
+    expect(questionsOfStep(added, "ch-a-1")).not.toContain(id);
+  });
+
+  it("are not suggested for a new chapter, which takes in no step", () => {
+    // A release read as it is: its step is part of a chapter it does not have.
+    const draft = withStep(courseDraft(), { chapter: of("ch-basics") });
+    const id = chapterIdFor(draft, { en: "Basics" });
+    expect(id).not.toBe("ch-basics");
+    expect(applyDraftChanges(draft, [{ kind: "addChapter", id: "ch-basics" }])).toEqual({
+      refused: "idTaken",
+      id: "ch-basics",
+    });
+    const added = made(
+      applyDraftChanges(draft, [{ kind: "addChapter", id, text: { title: { en: "Basics" } } }]),
+    );
+    expect(added.steps.filter((step) => step.data.chapter === of(id))).toEqual([]);
+    const deleted = made(applyDraftChanges(added, [{ kind: "delete", of: "chapter", id }]));
+    expect(deleted.steps.map((step) => step.id)).toEqual(draft.steps.map((step) => step.id));
   });
 });

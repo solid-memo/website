@@ -3,18 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import {
-  AGENT_V1,
-  CARD_V7,
-  DISTRACTOR_V1,
-  DISTRIBUTION_V1,
-  DRAFT_CHAPTER_V1,
-  DRAFT_DECK_V1,
-  DRAFT_STEP_V1,
-} from "@solid-memo/vocab/descriptors.generated";
-import {
   idIn,
   idsInUse,
   iriIn,
+  LINK_FIELDS,
   NOTHING_PUBLISHED,
   SERIES_ID,
   type DraftNode,
@@ -187,29 +179,12 @@ export function rebaseDraft(
   };
 }
 
-/** The fields of a draft's records that name an IRI, as their shapes say. */
-const LINKS = new Set(
-  [
-    AGENT_V1,
-    DISTRIBUTION_V1,
-    DRAFT_DECK_V1,
-    DRAFT_CHAPTER_V1,
-    DRAFT_STEP_V1,
-    CARD_V7,
-    DISTRACTOR_V1,
-  ].flatMap((descriptor) =>
-    descriptor.fields
-      .filter((field) => field.kind === "iri" || field.kind === "iriEnum")
-      .map((field) => field.name),
-  ),
-);
-
 /** A record with every IRI it names moved by `move`. */
 function rebased<T>(data: T, move: (iri: string) => string): T {
   return Object.fromEntries(
     Object.entries(data as object).map(([field, value]) => [
       field,
-      !LINKS.has(field) || value === undefined
+      !LINK_FIELDS.has(field) || value === undefined
         ? value
         : Array.isArray(value)
           ? value.map((one: string) => move(one))
