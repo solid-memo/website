@@ -1876,8 +1876,9 @@ address is fixed, a new draft that doesn't state it.
 A draft
 whose documents (perhaps written by another app) name a subject by
 another id isn't opened, and no change gives a draft one
-(`draftIdUnsupported`). Either is refused with nothing written, as is a
-draft at an address no draft has (`draftPlaceOf`).
+(`draftIdUnsupported`). Nor is a new draft made with one, whatever it's
+made from, since it couldn't be read back. Each is refused with nothing
+written, as is a draft at an address no draft has (`draftPlaceOf`).
 
 A draft is named after its title, or its release's name, unlike the
 instance's other drafts of that version. Only a draft's place taken
@@ -2176,18 +2177,29 @@ names them:
 A number of more than 15 digits in an id already there isn't counted,
 and a number already taken is skipped.
 
+An id is taken when a subject of the draft has it, a release before it
+published it, or anything in the draft names it. That's a statement,
+one of the release's own fields, or a record's: a step's questions and
+chapter, a chapter's review questions, a card's wrong options and
+subjects. Only a field that holds an IRI names one: a name, a text or
+a date doesn't, whatever it starts with. So an id the draft points at,
+though no subject has it, is never suggested or accepted. A new
+question given it would join the step that asks it, and a new chapter
+would take in the step that names it as its chapter.
+
 The forms suggest and check an id on each keystroke, and typing in a
 chapter's, a step's or the course's text beside them makes a new
 version of the draft each time. So the ids taken are gathered once for
-each version of the draft, and a version that keeps every id of the
-one before it, as an edit of text does, keeps its ids taken too. Each
-id suggested is found once for those ids. Gathering them again on each
-keystroke would go over every statement of the draft as the user types.
+each version of the draft. A version that keeps every id of the one
+before it and every IRI of the draft its fields name, as an edit of
+text does, keeps its ids taken too. Each id suggested is found once
+for those ids. Gathering them again on each keystroke would go over
+every statement of the draft as the user types.
 
-The user may write another. The field says at once when an id is none
-a subject can have, or one the draft or a release before it has. A new
-question's id sorts after the step's last; past `z`, it's the last's
-id with a number after it.
+The user may write an id other than the one suggested. The field says at
+once when an id is none a subject can have, or one the draft or a
+release before it has or names. A new question's id sorts after the
+step's last; past `z`, it's the last's id with a number after it.
 
 A new question may instead be asked before one already asked ("Ask it",
 `questionIdBefore`), one of the place's first 50. Its id then sorts

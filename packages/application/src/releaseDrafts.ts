@@ -467,6 +467,17 @@ function inItsPlace(source: ReleaseDraft, url: string): ReleaseDraft {
   return ownStatements({ ...source, triples: unplaced(source.triples, source, url) });
 }
 
+/**
+ * The draft, unless it has an id no draft can have (draftIdUnsupported):
+ * written, it could not be read back, so it is refused before anything
+ * is written.
+ */
+function readable(draft: ReleaseDraft): ReleaseDraft {
+  const id = unsupportedIdOf(draft);
+  if (id !== null) throw new AppError("draftIdUnsupported", { id });
+  return draft;
+}
+
 /** The name a release's URL gives its series (`…/capitals/v2.ttl` → `capitals`); null when it is named otherwise. */
 function nameInUrl(url: string): string | null {
   return releasePlaceOf(url)?.name ?? null;
@@ -711,7 +722,7 @@ export function createReleaseDraftUseCases({
       const chosen = draftNameFor(name ?? shown(title), taken);
       const url = draftUrlOf(instanceUrl, chosen, version);
       try {
-        return await releaseDraftRepository.create(instanceUrl, make(url));
+        return await releaseDraftRepository.create(instanceUrl, readable(make(url)));
       } catch (error) {
         // Only a place taken is tried again: any other failure took back what it wrote (the repository's create).
         if (!placeTaken(error, url) || attempt === NAME_ATTEMPTS) throw error;

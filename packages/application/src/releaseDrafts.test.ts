@@ -211,6 +211,17 @@ describe("createReleaseDraft", () => {
     });
   });
 
+  it("writes no draft it could not read back: one with an id no draft can have", async () => {
+    const { useCases, deckRepository, repository } = setUp();
+    vi.mocked(deckRepository.listCards).mockResolvedValueOnce([
+      { ...cards[0]!, id: "c~1", url: `${deck.cardsDocumentUrl}#c~1` },
+    ]);
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromDeck", deck }, WEB_ID),
+    ).rejects.toEqual(new AppError("draftIdUnsupported", { id: "c~1" }));
+    expect(repository.create).not.toHaveBeenCalled();
+  });
+
   it("reads the user's own cards as no one for a draft of a deck in an instance on another origin", async () => {
     const { useCases, deckRepository, created } = setUp();
     const foreign = "https://attacker.example/solid-memo/";

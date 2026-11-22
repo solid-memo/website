@@ -11,6 +11,7 @@ import {
   idIn,
   idsInUse,
   iriIn,
+  LINK_FIELDS,
   type DraftNode,
   type DraftTriple,
   type PublishedIds,
@@ -70,32 +71,48 @@ function listsOf(draft: ReleaseDraft): readonly (readonly DraftNode<unknown>[])[
   ];
 }
 
-/** The IRIs of the draft's subjects a value of the root names, in order. */
+/** The IRIs of the draft's subjects a field's value names, in order. */
 function namedIn(value: unknown, prefix: string): string[] {
   return (Array.isArray(value) ? value : [value]).filter(
     (one): one is string => typeof one === "string" && one.startsWith(prefix),
   );
 }
 
-/** Whether `draft` has the ids `was` was gathered from: its records' and its root's, by what changed only. */
+/**
+ * Whether two versions of a record's or the root's fields name the same
+ * IRIs of the draft, by the fields that changed only, and of those only
+ * the ones that hold an IRI (LINK_FIELDS), as idsInUse reads them.
+ */
+function sameNamed(before: object, after: object, prefix: string): boolean {
+  if (before === after) return true;
+  const was = new Map<string, unknown>(Object.entries(before));
+  const now = new Map<string, unknown>(Object.entries(after));
+  for (const key of new Set([...was.keys(), ...now.keys()])) {
+    if (!LINK_FIELDS.has(key) || was.get(key) === now.get(key)) continue;
+    const then = namedIn(was.get(key), prefix);
+    const named = namedIn(now.get(key), prefix);
+    if (then.length !== named.length || then.some((iri, i) => iri !== named[i])) return false;
+  }
+  return true;
+}
+
+/** Whether `draft` has the ids `was` was gathered from: its records' and the IRIs they and its root name, by what changed only. */
 function sameIds(was: Gathered, draft: ReleaseDraft): boolean {
   if (was.url !== draft.url || was.published !== draft.published) return false;
+  const prefix = iriIn(draft, "");
   const lists = listsOf(draft);
   const sameList = (before: readonly DraftNode<unknown>[], after: readonly DraftNode<unknown>[]) =>
     before === after ||
-    (before.length === after.length && before.every((node, i) => node.id === after[i]!.id));
+    (before.length === after.length &&
+      before.every((node, i) => {
+        const other = after[i]!;
+        return (
+          node === other ||
+          (node.id === other.id && sameNamed(node.data as object, other.data as object, prefix))
+        );
+      }));
   if (!was.lists.every((list, i) => sameList(list, lists[i]!))) return false;
-  if (was.root === draft.root) return true;
-  const prefix = iriIn(draft, "");
-  const before = new Map<string, unknown>(Object.entries(was.root));
-  const after = new Map<string, unknown>(Object.entries(draft.root));
-  for (const key of new Set([...before.keys(), ...after.keys()])) {
-    if (before.get(key) === after.get(key)) continue;
-    const then = namedIn(before.get(key), prefix);
-    const now = namedIn(after.get(key), prefix);
-    if (then.length !== now.length || then.some((iri, i) => iri !== now[i])) return false;
-  }
-  return true;
+  return sameNamed(was.root, draft.root, prefix);
 }
 
 /** Every id the draft has, or a release before it published: none of them is a new subject's. */

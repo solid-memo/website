@@ -12,6 +12,15 @@ import type {
   DraftStepV1,
   LangText,
 } from "@solid-memo/vocab/types.generated";
+import {
+  AGENT_V1,
+  CARD_V7,
+  DISTRACTOR_V1,
+  DISTRIBUTION_V1,
+  DRAFT_CHAPTER_V1,
+  DRAFT_DECK_V1,
+  DRAFT_STEP_V1,
+} from "@solid-memo/vocab/descriptors.generated";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { EDUCATION_THEME, namedWithin, TURTLE_MEDIA_TYPE } from "../dcat.ts";
 import { PathMap, pathKeys } from "../pathKeys.ts";
@@ -174,7 +183,13 @@ export function turtleDistribution(url: string): DistributionV1 {
   return { accessUrl: url, downloadUrl: url, mediaType: TURTLE_MEDIA_TYPE, format: RDF_TURTLE };
 }
 
-/** The fragment id of every subject of the draft, of a record or a triple, and of every IRI of it a statement names. */
+/**
+ * The fragment id of every subject of the draft, of a record or a triple,
+ * and of every IRI of it a statement, a record or the root names (in a
+ * field that holds an IRI, LINK_FIELDS): an id something points at is
+ * taken even when nothing has it yet. A text, a name or a date is no
+ * IRI, whatever it reads like.
+ */
 export function idsInUse(draft: ReleaseDraft): Set<string> {
   return idsStartingWith(draft, "");
 }
@@ -197,17 +212,75 @@ function idsStartingWith(draft: ReleaseDraft, start: string): Set<string> {
     draft.cards,
     draft.distractors,
   ]) {
-    for (const node of nodes) if (node.id.startsWith(start)) ids.add(node.id);
+    for (const node of nodes) {
+      if (node.id.startsWith(start)) ids.add(node.id);
+      for (const iri of linkedIris(node.data)) note(iri);
+    }
   }
   for (const triple of draft.triples) {
     note(triple.subject);
     if (triple.object.kind === "iri") note(triple.object.value);
   }
-  for (const value of Object.values(draft.root)) {
-    for (const one of Array.isArray(value) ? value : [value])
-      if (typeof one === "string") note(one);
-  }
+  for (const iri of linkedIris(draft.root)) note(iri);
   return ids;
+}
+
+/**
+ * Whether idsInUse has `id`, found without gathering the others: adding
+ * a record asks this, so a draft of many records stays quick to build.
+ */
+function idTaken(draft: ReleaseDraft, id: string): boolean {
+  const iri = iriIn(draft, id);
+  const named = (data: object) => {
+    for (const one of linkedIris(data)) if (one === iri) return true;
+    return false;
+  };
+  return (
+    [
+      draft.agents,
+      draft.distributions,
+      draft.chapters,
+      draft.steps,
+      draft.cards,
+      draft.distractors,
+    ].some((nodes) => nodes.some((node) => node.id === id || named(node.data))) ||
+    draft.triples.some(
+      (triple) =>
+        triple.subject === iri || (triple.object.kind === "iri" && triple.object.value === iri),
+    ) ||
+    named(draft.root)
+  );
+}
+
+/** The fields of a draft's records and its root that name an IRI, as their shapes say. */
+export const LINK_FIELDS: ReadonlySet<string> = new Set(
+  [
+    AGENT_V1,
+    DISTRIBUTION_V1,
+    DRAFT_DECK_V1,
+    DRAFT_CHAPTER_V1,
+    DRAFT_STEP_V1,
+    CARD_V7,
+    DISTRACTOR_V1,
+  ].flatMap((descriptor) =>
+    descriptor.fields
+      .filter((field) => field.kind === "iri" || field.kind === "iriEnum")
+      .map((field) => field.name),
+  ),
+);
+
+/**
+ * The IRIs a record's or the root's fields name (LINK_FIELDS), alone or
+ * in a list: a step's questions and chapter, a chapter's review
+ * questions, a card's wrong options and subjects, among others. Its
+ * names, texts and dates are not among them.
+ */
+function* linkedIris(data: object): Generator<string> {
+  for (const [field, value] of Object.entries(data)) {
+    if (!LINK_FIELDS.has(field)) continue;
+    const values: unknown[] = Array.isArray(value) ? value : [value];
+    yield* values.filter((one): one is string => typeof one === "string");
+  }
 }
 
 /**
@@ -693,7 +766,7 @@ function editNode<K extends keyof NodeLists>(
 function refuseId(draft: ReleaseDraft, id: string): DraftRefusal | null {
   if (!DRAFT_ID.test(id)) return { refused: "idInvalid", id };
   if (
-    idsInUse(draft).has(id) ||
+    idTaken(draft, id) ||
     Object.hasOwn(draft.published.ids, id) ||
     draft.published.activities.includes(id)
   )

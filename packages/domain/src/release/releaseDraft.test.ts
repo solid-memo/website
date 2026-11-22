@@ -122,6 +122,35 @@ describe("ids", () => {
       expect(ids.has(id)).toBe(true);
     expect(ids.has("https://source.example/")).toBe(false);
   });
+
+  it("in use are gathered from the IRIs records name in one pass, however many they name", () => {
+    // A step may ask many questions and a card name many subjects: each
+    // is noted once, not looked for in the other records.
+    const ratio = growth(
+      (count) => {
+        const base = courseDraft();
+        const draft: ReleaseDraft = {
+          ...base,
+          steps: base.steps.map((step) => ({
+            ...step,
+            data: {
+              ...step.data,
+              checkedBy: Array.from({ length: count }, (_, n) => of(`q-${n}`)),
+            },
+          })),
+          cards: Array.from({ length: count }, (_, n) => ({
+            id: `c-${n}`,
+            data: card(`${n}`, { subject: [of(`s-${n}`), "https://elsewhere.example/"] }),
+          })),
+        };
+        return () => idsInUse(draft);
+      },
+      1000,
+      8,
+      4,
+    );
+    expect(ratio).toBeLessThan(4);
+  });
 });
 
 describe("applyDraftChange", () => {
@@ -1224,7 +1253,7 @@ describe("the contact", () => {
     const draft = courseDraft();
     const taken = {
       ...draft,
-      agents: [...draft.agents, { ...draft.agents[0]!, id: "contact" }],
+      agents: [...draft.agents, { id: "contact", data: { name: "Contact" } }],
       triples: [...draft.triples, link(DRAFT, RDF_TYPE, of("contact-2"))],
     };
     const set = made(taken, { kind: "setContact", url: "https://a.example/" });
@@ -2062,6 +2091,38 @@ describe("unsupportedIdOf", () => {
         triples: [...draft.triples, link(DRAFT, `${PROV}wasGeneratedBy`, of("making ö"))],
       }),
     ).toBe("making ö");
+  });
+
+  it("reads no name, text or date as an id, whatever it starts with; a record's IRI it does", () => {
+    const draft = courseDraft();
+    const named = `${DRAFT}#Jane Doe`;
+    const written: ReleaseDraft = {
+      ...draft,
+      root: { ...draft.root, versionNotes: named, version: named },
+      agents: [...draft.agents, { id: "jane", data: { name: named } }],
+      distributions: draft.distributions.map((node) => ({
+        ...node,
+        data: { ...node.data, accessUrl: of("turtle") },
+      })),
+      cards: draft.cards.map((node) => ({ ...node, data: { ...node.data, created: named } })),
+    };
+    expect(unsupportedIdOf(written)).toBeNull();
+    expect(idsInUse(written).has("Jane Doe")).toBe(false);
+    expect(
+      unsupportedIdOf({
+        ...written,
+        agents: [...written.agents, { id: "joe", data: { name: "Joe", mbox: named } }],
+      }),
+    ).toBe("Jane Doe");
+    expect(
+      unsupportedIdOf({
+        ...written,
+        cards: written.cards.map((node) => ({
+          ...node,
+          data: { ...node.data, textFormat: named },
+        })),
+      }),
+    ).toBe("Jane Doe");
   });
 });
 

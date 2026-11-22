@@ -749,6 +749,21 @@ describe("read", () => {
     expect(writes(pod, from)).toEqual([]);
   });
 
+  it("writes and reads back a draft whose names and texts start with one of its IRIs", async () => {
+    const pod = await draftPod();
+    const base = course();
+    const named = `${DRAFT}#Jane Doe`;
+    const draft: ReleaseDraft = {
+      ...base,
+      root: { ...base.root, versionNotes: named },
+      agents: [...base.agents, { id: "jane", data: { name: named } }],
+    };
+    await pod.repository.create(INSTANCE, draft);
+    const { draft: read } = await pod.repository.read(DRAFT);
+    expect(read.root.versionNotes).toBe(named);
+    expect(read.agents.find((agent) => agent.id === "jane")!.data.name).toBe(named);
+  });
+
   it("tells blank nodes of one document from another's", async () => {
     const pod = await draftPod();
     await pod.repository.create(INSTANCE, course());
