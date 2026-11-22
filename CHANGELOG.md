@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.0.12](https://github.com/solid-memo/website/compare/v8.0.11...v8.0.12) (2026-11-22)
+
+### Fixes
+
+* **domain:** trim a path segment's trailing dots and spaces in one pass ([2704314](https://github.com/solid-memo/website/commit/27043149833f088889aab517a4dc2247e3190c33))
+* **solid:** judge a node named beside a subject once per class ([57dacd0](https://github.com/solid-memo/website/commit/57dacd033a00a57b1ba3bf9559f606dc2fd33988))
+
 ## [8.0.11](https://github.com/solid-memo/website/compare/v8.0.10...v8.0.11) (2026-11-22)
 
 ### Fixes
