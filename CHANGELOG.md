@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.2](https://github.com/solid-memo/website/compare/v8.1.1...v8.1.2) (2026-11-22)
+
+### Fixes
+
+* **markdown:** bound a label's work to about one parse of its start ([4c8ecf6](https://github.com/solid-memo/website/commit/4c8ecf61a4c439e9c13a1b77e08044273c67eae8))
+
 ## [8.1.1](https://github.com/solid-memo/website/compare/v8.1.0...v8.1.1) (2026-11-22)
 
 ### Fixes
