@@ -304,6 +304,34 @@ describe("ranking the entries", () => {
     expect(rankCommands(many, "", []).map((section) => section.group)).toEqual(["decks"]);
   });
 
+  it("names no card until one is shown or matched, and each once", () => {
+    const named = vi.fn();
+    const counting: typeof en = {
+      ...en,
+      cardReader: (language) => {
+        const reader = en.cardReader(language);
+        return {
+          ...reader,
+          cardText: (text) => {
+            named(text);
+            return reader.cardText(text);
+          },
+        };
+      },
+    };
+    const cards = Array.from({ length: 1000 }, (_, n) => makeCard(kanji, `card-${n}`));
+    const indexed = indexCommands(
+      buildCommands({ ...sources, cards: { deckUrl: kanji.url, cards } }, counting),
+    );
+    expect(rankCommands(indexed, "", []).some((section) => section.group === "cards")).toBe(false);
+    expect(named).not.toHaveBeenCalled();
+    const [found] = rankCommands(indexed, "card-999", []);
+    expect(found!.commands.map((command) => command.label)).toEqual(["card-999"]);
+    expect(named).toHaveBeenCalledTimes(cards.length);
+    rankCommands(indexed, "card-99", []);
+    expect(named).toHaveBeenCalledTimes(cards.length);
+  });
+
   it("matches the start of a name, not what comes after it", () => {
     const long = (label: string): Command => ({ id: label, group: "cards", label, run });
     const late = long(`${"x".repeat(200)}q`);

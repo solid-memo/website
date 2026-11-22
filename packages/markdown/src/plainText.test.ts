@@ -63,6 +63,38 @@ describe("labelText", () => {
     expect(labelText("* * *\n\n[r]: https://x.example\n\nQuestion\n\nmore")).toBe("Question");
   });
 
+  it("is the first block that shows text past runs that show none", () => {
+    expect(labelText("-\n\nWhat is X?")).toBe("What is X?");
+    expect(labelText("#\n\n>\n\n1.\n\n***\n\n\u00a0\n\n# Title\n\nmore")).toBe("Title");
+    expect(labelText("*\n\n- a\n- b\n\nmore")).toBe("a; b");
+    expect(labelText(">\r\n\r\n> quoted\n\nmore")).toBe("quoted");
+  });
+
+  it("reads the rest of its start at once past 16 runs that show none, a list's empty items left out", () => {
+    const empty = (runs: number) => "-\n\n".repeat(runs);
+    expect(labelText(`${empty(15)}- a\n\n- b`)).toBe("a");
+    expect(labelText(`${empty(16)}- a\n\n- b`)).toBe("a; b");
+    expect(labelText(`${empty(16)}late\n\nlater`)).toBe("late");
+    expect(labelText(`${empty(100)}---\n\n> *x*\n\nlater`)).toBe("x");
+    expect(labelText(`${empty(16)}\n\n`)).toBe("");
+  });
+
+  it("parses runs that show nothing at most 17 times, and no character twice, however they're written", () => {
+    const runs = ["-", "*", "#", ">", "1.", "---", "\u00a0", "-\r"];
+    for (const [index, run] of runs.entries())
+      for (const length of [100, 500, LABEL_PREFIX, 4 * LABEL_PREFIX]) {
+        // Each text its own, so none is read from the cache.
+        const text = `${index}${length}\n\n${`${run}\n\n`.repeat(length)}`.slice(0, length);
+        vi.mocked(parseMarkdown).mockClear();
+        labelText(text);
+        const parsed = vi.mocked(parseMarkdown).mock.calls.map(([read]) => read.length);
+        expect(parsed.length).toBeLessThanOrEqual(17);
+        expect(parsed.reduce((sum, read) => sum + read, 0)).toBeLessThanOrEqual(
+          Math.min(length, LABEL_PREFIX),
+        );
+      }
+  });
+
   it("reads no further than LABEL_PREFIX characters looking for text", () => {
     expect(labelText(`${"---\n\n".repeat(LABEL_PREFIX / 4)}late`)).toBe("");
   });

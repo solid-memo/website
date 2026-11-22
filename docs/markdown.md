@@ -176,9 +176,12 @@ shapes of Markdown make the parser slow.
   cells. The rows of such a table are found but not read.
 - **`labelText`** reads one run of lines up to a blank line at a time,
   going on only while what it has read shows no text (a rule, a
-  definition), at most 2,000 characters in all. A label costs the same
-  however long the text. A reference defined after a blank line isn't
-  resolved there, and reads as written. The label of each text's
+  definition), at most 2,000 characters in all. After 16 runs that show
+  no text, it reads the rest of those characters at once, a list's
+  empty items left out. So a label costs about one parse of 2,000
+  characters however the text is written, and the same however long
+  the text. A reference defined after a blank line isn't resolved
+  there, and reads as written. The label of each text's
   first 2,000 characters is kept, so a long list such as a draft's
   outline reads none of its labels again when it's shown again. It's
   kept under a copy of those characters alone, so a lookup costs the

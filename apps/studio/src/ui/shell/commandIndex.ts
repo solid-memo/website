@@ -82,7 +82,9 @@ export interface CommandSources {
  * sections, with their `g` chords, and all the instances; each instance,
  * at its decks; the open instance's decks, at their cards, and its drafts
  * (those that can be read), at their overview; and the cards of the deck
- * shown, each in the inspector.
+ * shown, each in the inspector. A card is named the first time its label
+ * is asked, not before: with nothing typed the palette shows no card, so
+ * opening it names none.
  */
 export function buildCommands(
   sources: CommandSources,
@@ -142,12 +144,16 @@ export function buildCommands(
           label: draftNameOf(draft, i18n),
         }),
       ),
-    ...(sources.cards?.cards ?? []).map(
-      (card): Command => ({
+    ...(sources.cards?.cards ?? []).map((card): Command => {
+      let label: string | undefined;
+      return {
         ...at("cards", { screen: "card", deckUrl: sources.cards!.deckUrl, cardUrl: card.url }),
-        label: cardName(card, cardText),
-      }),
-    ),
+        get label() {
+          label ??= cardName(card, cardText);
+          return label;
+        },
+      };
+    }),
   ];
 }
 
@@ -173,12 +179,22 @@ export interface IndexedCommand {
   name: string;
 }
 
-/** The palette's entries made ready to rank: done once, when it opens, not for each letter typed. */
+/**
+ * The palette's entries made ready to rank: each name folded once, the
+ * first time it is matched, not for each letter typed, and not before,
+ * so opening the palette names none of a deck's cards (buildCommands).
+ */
 export function indexCommands(commands: readonly Command[]): IndexedCommand[] {
-  return commands.map((command) => ({
-    command,
-    name: searchedText(command.label),
-  }));
+  return commands.map((command) => {
+    let name: string | undefined;
+    return {
+      command,
+      get name() {
+        name ??= searchedText(command.label);
+        return name;
+      },
+    };
+  });
 }
 
 /** An entry to show, under the heading it goes under. */

@@ -26,8 +26,10 @@ export const LABEL_PREFIX = 2_000;
  * breadcrumb or a confirmation: the plain text of its first block that
  * shows any (not a rule's), its white space collapsed, cut at a word to
  * at most `max` characters with "…" when given. The text is read a run
- * of lines up to a blank line at a time, and at most LABEL_PREFIX
- * characters of it, so a label costs the same however long the text; it
+ * of lines up to a blank line at a time, LABEL_RUNS runs at most and
+ * then the rest at once, and at most LABEL_PREFIX characters of it, so a
+ * label costs the same however long the text, and about what one parse
+ * of LABEL_PREFIX characters does however its runs are written; it
  * is derived before it is cut, so it is never cut inside Markdown's own
  * marks. A reference link whose definition comes later is not resolved
  * there, and reads as written. The label of each text's start is
@@ -78,25 +80,34 @@ function remember(start: string, label: string): void {
   labelChars += start.length;
 }
 
+/**
+ * The most runs of a text's start labelOf reads one at a time. Past
+ * them, it reads the rest of the start at once: runs that show nothing,
+ * such as a list marker alone, cost a parse each, so a label costs at
+ * most this many short parses more than one of its whole start.
+ */
+const LABEL_RUNS = 16;
+
 /** The label of a text's start, uncut: labelText without its cache. */
 function labelOf(text: string): string {
   let rest = text;
-  let read = 0;
-  let label = "";
-  while (label === "" && read < LABEL_PREFIX) {
+  for (let runs = 0; runs < LABEL_RUNS; runs++) {
     const start = rest.replace(/^(?:[ \t]*\r?\n)+/, "");
-    read += rest.length - start.length;
-    if (start === "" || read >= LABEL_PREFIX) break;
+    if (start === "") return "";
     const end = start.search(/\r?\n[ \t]*\r?\n/);
-    const length = Math.min(end < 0 ? start.length : end, LABEL_PREFIX - read);
-    const run = start.slice(0, length);
-    const blocks = parseMarkdown(run);
-    const shown = blocks === null ? [run] : blocks.map(blockText);
-    label = (shown.find((block) => block.trim() !== "") ?? "").replace(/\s+/g, " ").trim();
-    read += length;
+    const length = end < 0 ? start.length : end;
+    const label = shownText(start.slice(0, length));
+    if (label !== "") return label;
     rest = start.slice(length);
   }
-  return label;
+  return shownText(rest, shownItemsText);
+}
+
+/** The plain text of a text's first block that shows any (by `textOf`), its white space collapsed. */
+function shownText(text: string, textOf = blockText): string {
+  const blocks = parseMarkdown(text);
+  const shown = blocks === null ? [text] : blocks.map(textOf);
+  return (shown.find((block) => block.trim() !== "") ?? "").replace(/\s+/g, " ").trim();
 }
 
 /** A label cut to at most `max` characters, "…" included, at a word when there is one to cut at. */
@@ -113,6 +124,22 @@ function blocksText(blocks: readonly MdBlock[]): string {
     .join("\n");
 }
 
+/**
+ * A block's plain text (blockText), a list's items that show nothing
+ * left out: read at once, empty items that runs would each have read on
+ * their own, such as `-` lines between blank ones, are one list.
+ */
+function shownItemsText(block: MdBlock): string {
+  if (block.type !== "list") return blockText(block);
+  return itemsText(block.items)
+    .filter((item) => item.trim() !== "")
+    .join("; ");
+}
+
+function itemsText(items: readonly MdBlock[][]): string[] {
+  return items.map((item) => blocksText(item).replace(/\n/g, " "));
+}
+
 function blockText(block: MdBlock): string {
   switch (block.type) {
     case "paragraph":
@@ -120,7 +147,7 @@ function blockText(block: MdBlock): string {
     case "code":
       return block.value;
     case "list":
-      return block.items.map((item) => blocksText(item).replace(/\n/g, " ")).join("; ");
+      return itemsText(block.items).join("; ");
     case "quote":
       return blocksText(block.children);
     case "rule":
