@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.3](https://github.com/solid-memo/website/compare/v8.1.2...v8.1.3) (2026-11-22)
+
+### Fixes
+
+* **ui:** decorate a course only once it is finished and learned ([5ef62ca](https://github.com/solid-memo/website/commit/5ef62cac29595309a43eef2667530e311a8e6102)), closes [#961](https://github.com/solid-memo/website/issues/961)
+
 ## [8.1.2](https://github.com/solid-memo/website/compare/v8.1.1...v8.1.2) (2026-11-22)
 
 ### Fixes
