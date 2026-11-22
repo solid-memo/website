@@ -338,7 +338,7 @@ describe("DeckListContainer", () => {
     expect(useCases.getCourse).toHaveBeenCalledOnce();
   });
 
-  it("decorates a deck with every card learned and a finished course, neither set aside nor paused", async () => {
+  it("decorates a deck with every card learned and a finished course with every card learned, neither set aside nor paused", async () => {
     const copy = (n: number, title: string, extra: Partial<Deck> = {}): Deck => ({
       ...deck,
       id: `deck-${n}`,
@@ -348,25 +348,32 @@ describe("DeckListContainer", () => {
     });
     // Done for today, but with cards still to learn on a later day.
     const today = copy(2, "Today");
+    // Every card it has so far learned, but chapters still to go.
     const going = copy(3, "Going", { sourceUrl: courseLibraryDeck.url });
     const finished = copy(4, "Finished", {
+      sourceUrl: courseLibraryDeck.url,
+      completedChapters: [CH1, CH2],
+    });
+    // Every chapter done, but cards of it still to learn.
+    const unlearned = copy(7, "Unlearned", {
       sourceUrl: courseLibraryDeck.url,
       completedChapters: [CH1, CH2],
     });
     const setAside = copy(5, "Aside");
     const paused = copy(6, "Paused", { pause: { pausedAt: "2026-01-01T00:00:00.000Z" } });
     const useCases = makeUseCasesFake({
-      listDecks: vi.fn(async () => [deck, today, going, finished, setAside, paused]),
+      listDecks: vi.fn(async () => [deck, today, going, finished, unlearned, setAside, paused]),
       listLibraryDecks: vi.fn(async () => [courseLibraryDeck]),
-      // Kanji N5 has every card learned, with reviews still due; only the course tells its own end.
+      // Kanji N5 has every card learned, with reviews still due.
       getStudyCounts: vi.fn(async (_url: string, d: Deck) => ({
         dueCount: d === today ? 0 : 2,
         newCount: 0,
-        learned: d === deck || d === setAside || d === paused,
+        learned: [deck, going, finished, setAside, paused].includes(d),
       })),
       getCourseSummary: vi.fn(async (d: Deck) => ({
         outline: courseOutline,
-        answeredCardIds: d === finished ? ["q-1", "q-2", "q-3", "r-1", "q-4"] : ["q-1"],
+        answeredCardIds:
+          d === finished || d === unlearned ? ["q-1", "q-2", "q-3", "r-1", "q-4"] : ["q-1"],
       })),
     });
     renderContainer(useCases, undefined, (d) => d === setAside);
@@ -377,7 +384,7 @@ describe("DeckListContainer", () => {
     expect(within(rowOf(deck)).queryByText("Course completed")).toBeNull();
     // A learned deck still offers the reviews it has due.
     expect(within(rowOf(deck)).getByRole("button", { name: /Study/ })).toBeInTheDocument();
-    for (const other of [today, going, setAside, paused])
+    for (const other of [today, going, unlearned, setAside, paused])
       expect(rowOf(other)).not.toHaveClass("completed");
   });
 

@@ -146,8 +146,9 @@ The deck list is home. From the top:
   star near its end and smaller ones across it bounce in as the row
   comes into view, followed by a glimmer of light. It stays gold
   while you review it, until a new card is added. The stars are laid
-  out a little differently from row to row. A course you've finished
-  turns gold too, says "Course completed" after its name and gets a
+  out a little differently from row to row. A course turns gold only
+  once you've finished every chapter and learned every card of it. It
+  says "Course completed" after its name and gets a
   larger star and more small ones. Click a deck's name to open its page. A
   library deck says "New release" after its name when the library has a
   newer release, and its page offers the update. A new instance with no

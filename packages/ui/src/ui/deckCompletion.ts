@@ -12,9 +12,10 @@ import type { Completion } from "./RowFlair";
 
 /**
  * What each deck studied today has completed, for its deck-list row: a
- * course whose every chapter is done (courseFinished), else a deck whose
- * every card is learned, none left to learn, whatever is due
- * (StudyCounts' learned); neither until it is known. Under the
+ * deck whose every card is learned, none left to learn, whatever is due
+ * (StudyCounts' learned); a course only once every chapter is done
+ * (courseFinished) and every card of it learned too, never for its cards
+ * alone; neither until it is known. Under the
  * keys the rows' counts (studyCountsQuery) and the course strip's
  * summaries (courseStripQuery) are read by, so nothing is read twice.
  */
@@ -32,14 +33,20 @@ export function useDeckCompletion(
   const summaries = useQueries({
     queries: courses.map((deck) => courseStripQuery(useCases, deck)),
   });
-  const completed = new Map<string, Completion>();
-  decks.forEach((deck, at) => {
-    const queue = counts[at]!.data;
-    if (queue?.learned) completed.set(deck.url, "deck");
-  });
-  courses.forEach((deck, at) => {
-    const summary = summaries[at]!.data;
-    if (summary !== undefined && courseFinished(summary, deck)) completed.set(deck.url, "course");
-  });
-  return (deck) => completed.get(deck.url);
+  const learned = new Set(
+    decks.filter((_, at) => counts[at]!.data?.learned).map((deck) => deck.url),
+  );
+  const finished = new Set(
+    courses
+      .filter((deck, at) => {
+        const summary = summaries[at]!.data;
+        return summary !== undefined && courseFinished(summary, deck);
+      })
+      .map((deck) => deck.url),
+  );
+  return (deck) => {
+    if (!learned.has(deck.url)) return undefined;
+    if (!isCourse(deck)) return "deck";
+    return finished.has(deck.url) ? "course" : undefined;
+  };
 }
