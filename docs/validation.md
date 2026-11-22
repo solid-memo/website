@@ -503,9 +503,10 @@ document, or any other, no such link counts. A subject of a Solid Memo
 class counts only the links of that class, whatever other class it
 says it has. The subject it names must be of the class the link names,
 a `foaf:Agent` or a `dcat:Distribution`, and of no other class a shape
-describes. Only the `#catalog` of a `catalog.ttl` is the catalog
-without its class. Any other subject named that way stays another
-app's.
+describes. One with more than 32 values of `rdf:type`, more than the
+checks read, never counts. Only the `#catalog` of a `catalog.ttl` is
+the catalog without its class. Any other subject named that way stays
+another app's.
 
 A review state of another scheduler is never Solid Memo's, whatever its
 stamp: any value of `sm:scheduler` but the `sm:sm2` and

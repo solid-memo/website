@@ -13,6 +13,7 @@ import {
   deckDocumentSubjects,
   draftSubjects,
   foreignSubjects,
+  isCreatorAgent,
   isDeckItself,
   solidMemoSubjects,
   subjectsOfClasses,
@@ -35,6 +36,13 @@ function documentOf(...things: NamedSubject[]): Dataset {
 
 const subject = (id: string) =>
   buildThing(createThing({ url: id.startsWith("https:") ? id : `${DOC}#${id}` }));
+
+/** An agent with `others` classes no shape describes besides foaf:Agent. */
+function agentOf(id: string, others: number): NamedSubject {
+  const builder = subject(id).addIri(RDF.type, FOAF_AGENT);
+  for (let i = 0; i < others; i++) builder.addIri(RDF.type, `https://other.example/T${i}`);
+  return builder.build();
+}
 
 describe("foreignSubjects", () => {
   it("tells the kind of document once, not for each of its subjects", () => {
@@ -99,6 +107,26 @@ describe("foreignSubjects", () => {
       subject("chef").addIri(RDF.type, FOAF_AGENT).build(),
     );
     expect(foreignSubjects(dataset)).toEqual(new Set([`${DOC}#recipes`, `${DOC}#chef`]));
+  });
+
+  it("never counts a subject of more classes than the checks read as written beside, however many decks name it", () => {
+    const decks = Array.from({ length: 3 }, (_, i) =>
+      subject(`deck-${i}`)
+        .addIri(RDF.type, SM.Deck)
+        .addUrl(DCTERMS.creator, `${DOC}#many`)
+        .addUrl(DCTERMS.creator, `${DOC}#enough`)
+        .addUrl(DCTERMS.creator, `${DOC}#none`)
+        .build(),
+    );
+    const dataset = documentOf(
+      ...decks,
+      // 33 classes in all: past what the checks read a subject by.
+      agentOf("many", 32),
+      // 32 classes in all: as many as they read.
+      agentOf("enough", 31),
+      subject("none").addIri(RDF.type, "https://other.example/T").build(),
+    );
+    expect(foreignSubjects(dataset)).toEqual(new Set([`${DOC}#many`, `${DOC}#none`]));
   });
 
   it("finds nothing foreign in an empty document", () => {
@@ -200,6 +228,20 @@ async function served(url: string, turtle: string): Promise<Dataset> {
   await local(url, { method: "PUT", headers: { "Content-Type": "text/turtle" }, body: turtle });
   return readDataset(url, local);
 }
+
+describe("isCreatorAgent", () => {
+  it("is an agent of no other shaped class, within the classes the checks read", () => {
+    const dataset = documentOf(
+      agentOf("enough", 31),
+      agentOf("many", 32),
+      subject("entry").addIri(RDF.type, FOAF_AGENT).addIri(RDF.type, SM.Deck).build(),
+    );
+    expect(isCreatorAgent(dataset, `${DOC}#enough`)).toBe(true);
+    expect(isCreatorAgent(dataset, `${DOC}#many`)).toBe(false);
+    expect(isCreatorAgent(dataset, `${DOC}#entry`)).toBe(false);
+    expect(isCreatorAgent(dataset, `${DOC}#absent`)).toBe(false);
+  });
+});
 
 const CARDS = "https://pod.example/solid-memo/a/decks/deck-1.ttl";
 const ENTRY = "https://pod.example/solid-memo/a/catalog.ttl#deck-1";

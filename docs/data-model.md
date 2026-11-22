@@ -1938,8 +1938,8 @@ An export holds triples as the pod has them, at the pod's IRIs:
   picture hosts (`sm:deckPictureHost`) among them, but not its pause
   (`sm:deckPausedAt`, `sm:deckResumesOn`). A creator goes only
   when it's an agent as Solid Memo writes one: a `foaf:Agent` of no
-  other class a shape describes or adds, and not the catalog
-  (`isCreatorAgent` in
+  other class a shape describes or adds, of no more than 32 classes,
+  and not the catalog (`isCreatorAgent` in
   [ownership.ts](../packages/solid/src/ownership.ts)). Another deck's
   entry, a `dcat:Dataset`, the catalog or any other node named as a
   creator stays behind, and so does the deck's `dcterms:creator` link
