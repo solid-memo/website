@@ -57,7 +57,7 @@
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.6",
-    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/jest-dom": "^8.0.0",
     "@testing-library/preact": "^3.2.6",
     "happy-dom": "^21.0.4",
     "vite": "^8.3.8"
