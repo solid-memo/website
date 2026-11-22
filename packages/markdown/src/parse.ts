@@ -87,8 +87,8 @@ export const MAX_TABLE_COLUMNS = 20;
 export const MAX_TABLE_CELLS = 2_000;
 
 /**
- * The most work the parser may do on a text, for each of its characters
- * (and as if it had at least WORK_FLOOR): a try of one of its rules, or
+ * The most work the parser may do on a text, for each of its characters,
+ * with WORK_FLOOR more for the text as a whole: a try of one of its rules, or
  * a step through a link's label, is one unit of work, as is each byte of
  * a link's or a picture's destination in UTF-8, for each time it is
  * used, and a token it makes is TOKEN_WORK units, a link LINK_WORK
@@ -130,7 +130,16 @@ const TOKEN_WORK = 8;
  * step of its length takes to draw.
  */
 const LINK_WORK = 14 * TOKEN_WORK;
-const WORK_FLOOR = 1_000;
+/**
+ * The work a text may take on top of MAX_WORK for each of its
+ * characters: a short text's blocks cost a few dozen units each to open
+ * (a list of seven one-letter items, or a table of a few rows of
+ * one-character cells, takes about 200 units more than MAX_WORK of its
+ * length), and this lets them through. It is added, not a least length,
+ * so text made of many short texts costs within a small multiple of
+ * what as much text in a few long ones does.
+ */
+const WORK_FLOOR = 300;
 
 /** The first word of a code block's info string, when it looks like a language name. */
 const LANGUAGE = /^[a-z0-9+#-]{1,20}$/;
@@ -207,7 +216,7 @@ export class DocumentError extends Error {
 
 /** The parser's tree of a text, or null past MAX_CHARS or MAX_WORK. */
 function read(text: string): Node[] | null {
-  return text.length > MAX_CHARS ? null : parse(text, MAX_WORK * Math.max(text.length, WORK_FLOOR));
+  return text.length > MAX_CHARS ? null : parse(text, MAX_WORK * text.length + WORK_FLOOR);
 }
 
 /**

@@ -109,12 +109,17 @@ shapes of Markdown make the parser slow.
 - **`MAX_CHARS`, 20,000 characters.** A longer text is plain, its
   source still readable, its hidden characters as markers. The longest
   course text is about 2,600.
-- **`MAX_WORK`, 12 units of the parser's work for each character** (of
-  at least 1,000). Each try of one of the parser's rules and each step
-  through a link's label is a unit, counted as the parser works. Each
-  token it makes is 8 units (`TOKEN_WORK`), as making one takes about as
-  long as that many tries. A try that reads more than its one unit covers
-  costs what it reads. A block rule's silent try asks whether a line
+- **`MAX_WORK`, 12 units of the parser's work for each character**, and
+  300 more for the text as a whole (`WORK_FLOOR`). So a short text's
+  few blocks read, such as a list of seven one-letter items or a table
+  of a few rows. The 300 are added, not given as a least length, so
+  many short texts cost within a small multiple, for each character, of
+  what as much text in a few long ones costs. Each try of one of the
+  parser's rules and each step through a link's label is a unit,
+  counted as the parser works. Each token it makes is 8 units
+  (`TOKEN_WORK`), as making one takes about as long as that many tries.
+  A try that reads more than its one unit covers costs what it reads.
+  A block rule's silent try asks whether a line
   ends the block before it. It costs a unit for each character it reads
   past its first 8, as the tries of raw HTML, a fence, a thematic
   break, a list and a table may read on through a line. A block quote's
@@ -145,11 +150,12 @@ shapes of Markdown make the parser slow.
   line of a paragraph, or link openers before an unclosed declaration
   such as `<!X`. The budget stops them whatever their shape. A text in
   `decks/` takes at most about 2 units a character, and a list of
-  one-word items about 11. So whatever a text holds, the parser reads it
-  in a small multiple of the time such text of its length takes. Dense
-  Markdown of more than about 1,000 characters may show as plain text:
-  a table of one-character cells written without spaces, or a long list
-  of one-letter items. The same written with spaces reads.
+  one-word items about 11. So whatever a text holds, short or long, the
+  parser reads it in a small multiple of the time such text of its
+  length takes. Dense Markdown of more than a few rows may show as
+  plain text: a table of one-character cells written without spaces, or
+  a long list of one-letter items. Such a table written with spaces
+  reads.
 - **`MAX_DEPTH`, 8.** Blocks and phrasing nested deeper show as their
   source, so every walker of the tree recurses at most 8 deep. Each
   quote, list item, paragraph, emphasis and link is a level: in seven
