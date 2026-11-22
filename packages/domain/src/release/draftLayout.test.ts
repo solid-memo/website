@@ -27,6 +27,7 @@ import {
   draftsContainerOf,
   draftUrlOf,
   isDraftDocumentName,
+  isDraftShaped,
   unreadableDraftSummary,
 } from "./draftLayout.ts";
 
@@ -65,6 +66,21 @@ describe("where a draft is kept", () => {
     expect(
       draftPlaceOf("HTTPS://Pod.example:443/solid-memo/main/drafts/solid/v1/release.ttl"),
     ).toMatchObject({ name: "solid", version: 1 });
+  });
+
+  it("is a draft only by a name draftNameFor gives, though shaped as one by any name", () => {
+    for (const name of ["solid", "a", "my-deck-2", draftNameFor("Ünïcode Déck!", [])]) {
+      expect(draftPlaceOf(`${INSTANCE}drafts/${name}/v1/release.ttl`), name).toMatchObject({
+        name,
+      });
+    }
+    for (const name of ["Solid", "SOLID", "my--deck", "-solid", "solid-", "my_deck", "s%6Flid"]) {
+      const url = `${INSTANCE}drafts/${name}/v1/release.ttl`;
+      expect(draftPlaceOf(url), name).toBeNull();
+      expect(isDraftShaped(url), name).toBe(true);
+    }
+    expect(isDraftShaped(`${INSTANCE}drafts/../v1/release.ttl`)).toBe(false);
+    expect(isDraftShaped(`${INSTANCE}catalog.ttl`)).toBe(false);
   });
 
   it("has a release document, a cards document and one per chapter", () => {

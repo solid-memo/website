@@ -2194,17 +2194,134 @@ describe("delete", () => {
     await expect(pod.repository.list(INSTANCE)).resolves.toEqual([]);
   });
 
-  it("deletes a draft the catalog no longer links, or that has no catalog", async () => {
+  it("refuses, as draftGone, a draft the catalog no longer links, or that has no catalog", async () => {
     const pod = await draftPod();
     await pod.repository.create(INSTANCE, course());
     const summary = (await pod.repository.list(INSTANCE))[0]!;
+    const before = await pod.urls();
     await pod.put(CATALOG, `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> .`);
     const from = pod.requests.length;
-    await pod.repository.delete(summary);
-    expect(writes(pod, from).some((write) => write.includes(CATALOG))).toBe(false);
-    await pod.repository.create(INSTANCE, course());
+    await expect(pod.repository.delete(summary)).rejects.toMatchObject({ code: "draftGone" });
+    expect(writes(pod, from)).toEqual([]);
     await pod.local(CATALOG, { method: "DELETE" });
-    await pod.repository.delete(summary);
+    const after = pod.requests.length;
+    await expect(pod.repository.delete(summary)).rejects.toMatchObject({ code: "draftGone" });
+    expect(writes(pod, after)).toEqual([]);
+    expect((await pod.urls()).filter((url) => url.includes("/drafts/"))).toEqual(
+      before.filter((url) => url.includes("/drafts/")),
+    );
+  });
+
+  it.each([
+    [
+      "its catalog goes",
+      (pod: Awaited<ReturnType<typeof draftPod>>) => pod.local(CATALOG, { method: "DELETE" }),
+    ],
+    [
+      "its link goes",
+      (pod: Awaited<ReturnType<typeof draftPod>>) =>
+        pod.put(CATALOG, `<#catalog> a <http://www.w3.org/ns/dcat#Catalog> .`),
+    ],
+  ])("deletes a draft whose %s while its documents are deleted", async (what, meanwhile) => {
+    const pod = await draftPod();
+    const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const response = await pod.fetch(input, init);
+      if (init?.method === "DELETE" && String(input) === DRAFT) await meanwhile(pod);
+      return response;
+    }) as typeof globalThis.fetch;
+    const repository = createSolidReleaseDraftRepository({ fetch, releaseFetch: fetch });
+    await repository.create(INSTANCE, course());
+    const [summary] = await repository.list(INSTANCE);
+    await expect(repository.delete(summary!)).resolves.toEqual({ keptDocuments: [] });
+    const left = await pod.urls();
+    expect(left.some((url) => url.includes("/drafts/"))).toBe(false);
+    expect(left.includes(CATALOG)).toBe(what === "its link goes");
+  });
+
+  describe("on a server that reads a name in any case as the same", () => {
+    /** The pod, answering each address as its lower-case one, as found at the address asked. */
+    async function foldingPod() {
+      const pod = await draftPod();
+      const fold = (url: string) =>
+        url.startsWith(POD) ? POD + url.slice(POD.length).toLowerCase() : url;
+      const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+        // As fetch does, a scheme and host are read in lower case.
+        const asked = new URL(String(input instanceof Request ? input.url : input)).href;
+        const response = await pod.fetch(fold(asked), init);
+        if (asked === fold(asked) || (init?.method ?? "GET") !== "GET") return response;
+        // A folder lists what is in it under the address asked.
+        const body = (await response.text()).split(fold(asked)).join(asked);
+        const answer = new Response(body, { status: response.status, headers: response.headers });
+        Object.defineProperty(answer, "url", { value: asked });
+        return answer;
+      }) as typeof globalThis.fetch;
+      const repository = createSolidReleaseDraftRepository({ fetch, releaseFetch: fetch });
+      await repository.create(INSTANCE, course());
+      const draftUrls = async () => (await pod.urls()).filter((url) => url.includes("/drafts/"));
+      return { pod, repository, before: await draftUrls(), draftUrls };
+    }
+
+    /** Link the catalog to `alias` too, as anyone who may append to it could. */
+    const linkToo = (pod: Awaited<ReturnType<typeof draftPod>>, alias: string) =>
+      pod.local(CATALOG, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/sparql-update" },
+        body: `INSERT DATA { <${CATALOG}#catalog> <${SM}releaseDraft> <${alias}> . }`,
+      });
+
+    it("neither lists nor deletes a link to a draft's name in another case", async () => {
+      const { pod, repository, before, draftUrls } = await foldingPod();
+      const alias = `${INSTANCE}drafts/SOLID/v1/release.ttl`;
+      await linkToo(pod, alias);
+      expect((await repository.list(INSTANCE)).map((draft) => draft.url)).toEqual([DRAFT]);
+      const summary = { ...(await repository.list(INSTANCE))[0]!, url: alias, name: "SOLID" };
+      await expect(repository.delete(summary)).rejects.toMatchObject({ code: "draftGone" });
+      expect(await draftUrls()).toEqual(before);
+      expect(await pod.text(CATALOG)).toContain(alias);
+    });
+
+    it("refuses a draft whose instance and address are in another case, which the catalog doesn't link", async () => {
+      const { pod, repository, before, draftUrls } = await foldingPod();
+      const listed = (await repository.list(INSTANCE))[0]!;
+      const summary = {
+        ...listed,
+        instanceUrl: INSTANCE.replace(POD, POD.toUpperCase()),
+        url: DRAFT.replace(POD, POD.toUpperCase()),
+      };
+      await expect(repository.delete(summary)).rejects.toMatchObject({ code: "draftGone" });
+      expect(await draftUrls()).toEqual(before);
+      expect(await pod.text(CATALOG)).toContain(DRAFT);
+    });
+
+    it("deletes the draft a link in another case also names", async () => {
+      const { pod, repository, draftUrls } = await foldingPod();
+      for (const alias of [
+        `${INSTANCE}drafts/SOLID/v1/release.ttl`,
+        `${INSTANCE.toUpperCase()}drafts/solid/v1/release.ttl`,
+        DRAFT.replace(POD, POD.toUpperCase()),
+      ])
+        await linkToo(pod, alias);
+      const [summary] = await repository.list(INSTANCE);
+      await expect(repository.delete(summary!)).resolves.toEqual({ keptDocuments: [] });
+      expect(await draftUrls()).toEqual([]);
+      expect(await repository.list(INSTANCE)).toEqual([]);
+    });
+  });
+
+  it("deletes a draft whatever other spelling of it the catalog links", async () => {
+    const pod = await draftPod();
+    const repository = createSolidReleaseDraftRepository({
+      fetch: pod.fetch,
+      releaseFetch: pod.fetch,
+    });
+    await repository.create(INSTANCE, course());
+    await pod.local(CATALOG, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/sparql-update" },
+      body: `INSERT DATA { <${CATALOG}#catalog> <${SM}releaseDraft> <${INSTANCE}drafts/SOLID/v1/release.ttl> . }`,
+    });
+    const [summary] = await repository.list(INSTANCE);
+    await repository.delete(summary!);
     expect((await pod.urls()).some((url) => url.includes("/drafts/"))).toBe(false);
   });
 

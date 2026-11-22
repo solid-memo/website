@@ -948,6 +948,8 @@ describe("a deck whose document is one of a draft's, as a draft made from a rele
       `${ALICE}drafts/spanish/v2/c%61rds.ttl`,
       `https://POD.example:443/alice/solid-memo/main/drafts/spanish/v2/chapter-intro.ttl`,
       `${ALICE}%E0%A4%A/drafts/spanish/v2/cards.ttl`,
+      // A name in another case is the draft's on a server that reads it as the same.
+      `${ALICE}drafts/SPANISH/v2/cards.ttl`,
     ])
       await expect(guard.standing(deck, url, null)).resolves.toBe("unclaimed");
     await expect(guard.standing(deck, `${ALICE}drafts/spanish/v2/notes.ttl`, null)).resolves.toBe(

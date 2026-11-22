@@ -740,7 +740,13 @@ No document Solid Memo names has any.
   `<instance>drafts/<name>/v<N>/release.ttl`, in the instance's
   `drafts/` as a request sends it, with no dot segment, and with N a
   safe integer, so the address names the same draft again
-  (`draftPlaceOf`). A name that's a dot segment is no draft's.
+  (`draftPlaceOf`). Its name is one the app gives a draft: lowercase
+  letters and digits, words joined by single dashes. A link in any
+  other shape, such as a name in another letter case, is ignored: it
+  isn't listed, and deleting through it deletes nothing. On a server
+  that reads names in any case as the same, it would name another
+  draft's documents. A document in a folder of a draft's shape is
+  never a deck's, whatever the folder's name (`isDraftShaped`).
 - **A release** the catalog links (`sm:publishedRelease`) is listed only
   at an http(s) address named as a release is, `…/<name>/v<N>.ttl`,
   written as a request sends it, like the folder it's published in
@@ -1591,7 +1597,11 @@ own pod, as a draft, before publishing it
   subjects nothing of the draft leads to are another app's and kept
   with their document (`keptDocuments`). Then it deletes the draft's
   container and the ones above it (`drafts/<name>/`, `drafts/`) where
-  they're then empty, then the link.
+  they're then empty, then the link. It deletes only a draft the list
+  gives, one the instance's catalog links at a draft's place in the
+  instance (`draftPlaceOf`). Any other address, such as another
+  spelling of a draft's name or of its instance, is refused
+  (`draftGone`) and nothing of it is deleted.
 - **A release is frozen.** It's written once, at library deck format 6,
   and describes its own series and publisher
   ([deck-library.md](deck-library.md#a-release-outside-the-library)).

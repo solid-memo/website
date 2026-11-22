@@ -805,6 +805,9 @@ export interface ReleaseDraftRepository {
    * they are then empty, then its link from the catalog. Returns the
    * documents kept for another app's data in them. A draft past the limit
    * on what is read of one (MAX_DRAFT_DOCUMENTS) is deleted all the same.
+   * Nothing is deleted of a draft the list doesn't give, one the
+   * instance's catalog doesn't link at a draft's place in the instance
+   * (draftPlaceOf): that is refused (draftGone).
    */
   delete(draft: ReleaseDraftSummary): Promise<KeptDocuments>;
 }

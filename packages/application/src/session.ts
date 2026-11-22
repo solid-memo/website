@@ -499,7 +499,11 @@ export function createSessionUseCases({
         throw new AppError("guestStudyTooNew");
     }
   }
-  /** Whether `url` is a document of a draft of the instance at `source`, which a draft is read from and copied with. */
+  /**
+   * Whether `url` is a document of a draft of the instance at `source`, which a draft is read from and copied with.
+   * Strict (draftPlaceOf), unlike deckPlace's isDraftDocument (isDraftShaped): what this takes skips a check, so the
+   * safe side is to take only the drafts the list gives.
+   */
   function isDraftDocumentOf(source: string, url: string): boolean {
     const container = draftContainerOf(url);
     return (
