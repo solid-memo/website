@@ -59,24 +59,10 @@ export async function catalogLinks(
 }
 
 /**
- * Refuse, as writtenByNewerApp, a change to the catalog's links when a
- * newer version of the app wrote its node, as changeCatalog would. A
- * change that comes after other writes (a release written, a draft's
- * documents deleted) asks this first, so a refusal leaves them undone.
- */
-export async function refuseNewerCatalog(
-  instanceUrl: string,
-  fetch: typeof globalThis.fetch,
-): Promise<void> {
-  const node = await catalogNode(instanceUrl, fetch);
-  if (node !== null) unlessNewer(node);
-}
-
-/**
  * Refuse linking `url` by `predicate` where addCatalogLink would refuse
  * it after: as noCatalogToUpdate without a catalog, as writtenByNewerApp
  * when a newer version of the app wrote the catalog's node
- * (refuseNewerCatalog), and as catalogFull when the catalog links
+ * (unlessNewer), and as catalogFull when the catalog links
  * MAX_CATALOG_LINKS others by it already, none of which would be read.
  */
 export async function refuseFullCatalog(

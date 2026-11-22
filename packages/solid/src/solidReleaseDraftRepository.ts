@@ -48,8 +48,8 @@ import {
   addCatalogLink,
   catalogLinks,
   catalogNode,
-  refuseNewerCatalog,
   removeCatalogLink,
+  withinCatalogLimit,
 } from "./catalogLinks";
 import { deleteContainerIfEmpty } from "./containers";
 import { deleteDataset, removeOwned, readDataset, saveDataset } from "./datasets";
@@ -150,12 +150,7 @@ export function createSolidReleaseDraftRepository({
   async function linked(
     instanceUrl: string,
   ): Promise<{ url: string; place: { instanceUrl: string; name: string; version: number } }[]> {
-    return (await catalogLinks(instanceUrl, SM.releaseDraft, fetch)).flatMap((url) => {
-      const place = draftPlaceOf(url);
-      return place === null || place.instanceUrl !== ensureTrailingSlash(instanceUrl)
-        ? []
-        : [{ url, place }];
-    });
+    return draftsAmong(instanceUrl, await catalogLinks(instanceUrl, SM.releaseDraft, fetch));
   }
 
   const documentsOf = (draftUrl: string) => draftDocumentsIn(draftUrl, fetch);
@@ -519,7 +514,13 @@ export function createSolidReleaseDraftRepository({
 
     async delete(draft) {
       // Before any document goes: a link the catalog then refuses to drop would lead to a draft no longer there.
-      await refuseNewerCatalog(draft.instanceUrl, fetch);
+      const node = await catalogNode(draft.instanceUrl, fetch);
+      const links =
+        node === null ? [] : withinCatalogLimit(getUrlAll(unlessNewer(node), SM.releaseDraft));
+      // Only a draft the list gives (linked): on a server that reads a name in any case as the same, another
+      // spelling of a draft's address, or of its instance's, finds that draft there.
+      if (!draftsAmong(draft.instanceUrl, links).some(({ url }) => url === draft.url))
+        throw new AppError("draftGone");
       const keptDocuments = await deleteDraftResources(draft.url, fetch);
       reads.delete(draft.url);
       await removeCatalogLink(draft.instanceUrl, SM.releaseDraft, draft.url, fetch);
@@ -527,6 +528,19 @@ export function createSolidReleaseDraftRepository({
     },
   };
   return repository;
+}
+
+/** Of the catalog's `links`, those at a draft's place in the instance at `instanceUrl` (draftPlaceOf), with their places. */
+function draftsAmong(
+  instanceUrl: string,
+  links: readonly string[],
+): { url: string; place: { instanceUrl: string; name: string; version: number } }[] {
+  return links.flatMap((url) => {
+    const place = draftPlaceOf(url);
+    return place === null || place.instanceUrl !== ensureTrailingSlash(instanceUrl)
+      ? []
+      : [{ url, place }];
+  });
 }
 
 /** The number of each dataset read, given once: see readNumberOf. */

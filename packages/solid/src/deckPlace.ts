@@ -28,7 +28,7 @@ import {
 import { isDeckInPlace } from "@solid-memo/domain/deckAddress";
 import {
   draftContainerOf,
-  draftPlaceOf,
+  isDraftShaped,
   isDraftDocumentName,
   RELEASE_DOCUMENT,
 } from "@solid-memo/domain/release/draftLayout";
@@ -105,7 +105,7 @@ export function isDraftDocument(url: string): boolean {
     const container = draftContainerOf(one);
     return (
       isDraftDocumentName(one.slice(container.length)) &&
-      draftPlaceOf(`${container}${RELEASE_DOCUMENT}`) !== null
+      isDraftShaped(`${container}${RELEASE_DOCUMENT}`)
     );
   });
 }

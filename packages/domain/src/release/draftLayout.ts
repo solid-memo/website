@@ -50,15 +50,23 @@ export function draftContainerOf(draftUrl: string): string {
 }
 
 /**
- * The draft a release document is of: its instance, name and version;
- * null for a URL no draft has. The catalog that links a draft is data
- * anyone may have written, so the address is taken only in the
- * instance's `drafts/` as a request would send it (isDocumentIn), and
- * with no dot segment (`..`, `%2e%2E`; hasDotSegment), which would lead
- * elsewhere than its name and instance say. Its version is a safe
- * integer, so that draftUrlOf names the same draft again.
+ * A draft's name as the app gives one (draftNameFor): lower-case
+ * letters and digits, words joined by single dashes.
  */
-export function draftPlaceOf(
+const DRAFT_NAME = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+/**
+ * The instance, name and version a release document's address names
+ * by its shape alone, `<instance>/drafts/<name>/v<N>/release.ttl`,
+ * whatever the name; null for an address of another shape. The catalog
+ * that links a draft is data anyone may have written, so the address is
+ * taken only in the instance's `drafts/` as a request would send it
+ * (isDocumentIn), and with no dot segment (`..`, `%2e%2E`;
+ * hasDotSegment), which would lead elsewhere than its name and instance
+ * say. Its version is a safe integer, so that draftUrlOf names the same
+ * draft again.
+ */
+function draftShapeOf(
   draftUrl: string,
 ): { instanceUrl: string; name: string; version: number } | null {
   const match = /^(.*\/)drafts\/([^/]+)\/v([1-9][0-9]*)\/release\.ttl$/.exec(draftUrl);
@@ -68,6 +76,31 @@ export function draftPlaceOf(
     !isDocumentIn(draftUrl, draftsContainerOf(match[1]!))
     ? null
     : { instanceUrl: match[1]!, name: match[2]!, version: Number(match[3]) };
+}
+
+/**
+ * Whether an address is shaped as a draft's release document
+ * (draftShapeOf), whatever its name: what may be a draft's, on a server
+ * that reads a name in any case as the same, is never taken as anything
+ * else's.
+ */
+export function isDraftShaped(draftUrl: string): boolean {
+  return draftShapeOf(draftUrl) !== null;
+}
+
+/**
+ * The draft a release document is of: its instance, name and version;
+ * null for a URL no draft has. Its address is shaped as a draft's
+ * (draftShapeOf) and its name is one the app gives (DRAFT_NAME): a
+ * server that reads a name in any case as the same would take another
+ * spelling of it for the draft of that name, which a delete of it would
+ * delete.
+ */
+export function draftPlaceOf(
+  draftUrl: string,
+): { instanceUrl: string; name: string; version: number } | null {
+  const place = draftShapeOf(draftUrl);
+  return place === null || !DRAFT_NAME.test(place.name) ? null : place;
 }
 
 /**
