@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.1](https://github.com/solid-memo/website/compare/v8.1.0...v8.1.1) (2026-11-22)
+
+### Fixes
+
+* **solid:** judge a deck's document as read, not as edited ([4e474ce](https://github.com/solid-memo/website/commit/4e474ce341b44c272903a8210a4ec318b9c3aeb8))
+
 ## [8.1.0](https://github.com/solid-memo/website/compare/v8.0.14...v8.1.0) (2026-11-22)
 
 ### Features
