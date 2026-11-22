@@ -632,6 +632,10 @@ No document Solid Memo names has any.
   storage. When the profile can't be read, or the pod doesn't answer
   for a folder on the way, a write fails and can be retried; the data
   check and a removal take the document for unclaimed that time.
+  Where a document stands is judged on it as read, never on the edit
+  about to be saved: an edit that takes another deck's
+  `dcterms:isPartOf` out of it doesn't make it this deck's
+  (`writable` in `deckPlace.ts`).
   The storage rule doesn't tell who made the instance. So what keeps
   the rest of the document safe is what a removal takes out of it: only
   subjects that say nothing but what Solid Memo writes of a card,
@@ -1115,7 +1119,9 @@ graph LR
 - **The cards and reviews documents say whose they are.** Every write of
   a deck's cards or reviews document by the deck's own operations adds
   `<> dcterms:isPartOf <catalog.ttl#deck-X>` once, on the document's own
-  subject, never on a card or a review state. Those operations are:
+  subject, never on a card or a review state. That subject is never
+  read as a card, distractor or review state, so removing one never
+  takes it out (`isDocumentSubject`). Those operations are:
   - import;
   - adding, editing or removing a card, and stating its languages;
   - an answer, and a day reset;

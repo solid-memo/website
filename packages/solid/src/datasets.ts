@@ -83,6 +83,23 @@ const ETAGS = new WeakMap<object, string>();
 /** The source keys of reads that a save on their ETag has since written over (see above). */
 const WRITTEN_OVER = new WeakSet<object>();
 
+/**
+ * The dataset each read gave, or each save left the document holding,
+ * by its source key: an edit of it keeps the key, so what the document
+ * held when read is known however the edit changed it (asReadOf).
+ */
+const AS_READ = new WeakMap<object, Dataset>();
+
+/**
+ * The document as it was when `dataset`, or the read it is an edit of,
+ * was read or saved (AS_READ); the dataset itself when no read of the
+ * app's made it (one built here, never read).
+ */
+export function asReadOf(dataset: Dataset): Dataset {
+  const source = sourceOf(dataset);
+  return (source === undefined ? undefined : AS_READ.get(source.key)) ?? dataset;
+}
+
 /** The pod refused a write because the document is not as Solid Memo last saw it. */
 export class PreconditionFailedError extends AppError {
   constructor(
@@ -243,6 +260,7 @@ async function fetchDataset(
   if ("notModified" in read) return since === undefined ? before!.dataset : UNCHANGED;
   const { dataset, etag } = read;
   const source = sourceOf(dataset);
+  if (source !== undefined) AS_READ.set(source.key, dataset);
   if (etag !== undefined && source !== undefined) ETAGS.set(source.key, etag);
   if (etag !== undefined) known.set(document, { etag, dataset });
   else known.delete(document);
@@ -422,6 +440,9 @@ export async function saveDataset<T extends Dataset>(
     ETAGS.delete(source.key);
     if (etag !== undefined) WRITTEN_OVER.add(source.key);
   }
+  // What the write left the document holding, as far as the app knows: what an edit of it is judged on.
+  const writtenAt = sourceOf(written.dataset);
+  if (writtenAt !== undefined) AS_READ.set(writtenAt.key, written.dataset);
   // Only where a precondition held does the document hold just what was written.
   const version = strong(written.etag);
   if (version === undefined || (isEdit && etag === undefined)) return;

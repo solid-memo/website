@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { documentUrlOf, fragmentIdOf, isSameDocument } from "./subjectUrl";
+import { documentUrlOf, fragmentIdOf, isDocumentSubject, isSameDocument } from "./subjectUrl";
 
 describe("subject URLs", () => {
   it("split a subject URL into its document and fragment", () => {
@@ -23,5 +23,12 @@ describe("subject URLs", () => {
     expect(isSameDocument(`${doc}#catalog`, doc)).toBe(true);
     expect(isSameDocument("https://pod.example/other.ttl#deck-1", `${doc}#catalog`)).toBe(false);
     expect(isSameDocument(`${doc}.acl`, doc)).toBe(false);
+  });
+
+  it("tell a document's own subject from the subjects in it", () => {
+    const doc = "https://pod.example/decks/deck-1.ttl";
+    expect(isDocumentSubject(doc)).toBe(true);
+    expect(isDocumentSubject(`${doc}#card-1`)).toBe(false);
+    expect(isDocumentSubject(`${doc}#`)).toBe(false);
   });
 });

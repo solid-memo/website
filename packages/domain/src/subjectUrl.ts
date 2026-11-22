@@ -13,6 +13,16 @@ export function documentUrlOf(subjectUrl: string): string {
 }
 
 /**
+ * Whether a subject URL is a document's own (`<>`, no fragment) rather
+ * than one of the subjects in it: what says whose the document is
+ * (dcterms:isPartOf) is stated of it, so it is never read, or removed,
+ * as a record such as a card, a distractor or a review state.
+ */
+export function isDocumentSubject(subjectUrl: string): boolean {
+  return !subjectUrl.includes("#");
+}
+
+/**
  * Whether two URLs name subjects of the same document: their document
  * URLs (documentUrlOf) are one. A document's own URL, with no fragment,
  * names a subject of that document too.
