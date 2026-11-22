@@ -117,6 +117,18 @@ describe("DistractorFields", () => {
     expect(screen.getByRole("button", { name: "Add a wrong option" })).toHaveFocus();
   });
 
+  it("adds a wrong option under an id none of `taken` is", () => {
+    const { props } = renderFields({ taken: new Set(["q-d1", "q-d2", "q-d3"]) });
+    fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));
+    fireEvent.input(screen.getByLabelText("Wrong option"), { target: { value: "Only files" } });
+    fireEvent.click(screen.getByRole("button", { name: "Add" }));
+    expect(props.onChange).toHaveBeenCalledWith([
+      d1,
+      d2,
+      { id: "q-d4", text: { en: "Only files" } },
+    ]);
+  });
+
   it("asks the language of a new option when the back says none, and takes Enter for Add", () => {
     const { props } = renderFields({ back: {}, distractors: [] });
     fireEvent.click(screen.getByRole("button", { name: "Add a wrong option" }));

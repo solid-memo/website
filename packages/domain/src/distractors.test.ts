@@ -112,7 +112,7 @@ describe("addDistractor", () => {
         [d1],
         "q",
         { text: { en: " Only files " } },
-        { published: ["q-d1", "q-d2", "q-d3"] },
+        { taken: ["q-d1", "q-d2", "q-d3"] },
       ),
     ).toEqual({
       ok: true,
@@ -217,12 +217,7 @@ describe("deleteDistractor", () => {
     const d3: Distractor = { id: "q-d3", text: { en: "Only files" } };
     const deleted = deleteDistractor([d1, d2, d3], 2, new Set(["q-d1"]));
     expect(deleted).toEqual({ ok: true, distractors: [d1, d2] });
-    const added = addDistractor(
-      [d1, d2],
-      "q",
-      { text: { en: "Only names" } },
-      { published: ["q-d1"] },
-    );
+    const added = addDistractor([d1, d2], "q", { text: { en: "Only names" } }, { taken: ["q-d1"] });
     expect(added).toEqual({
       ok: true,
       distractors: [d1, d2, { id: "q-d3", text: { en: "Only names" } }],

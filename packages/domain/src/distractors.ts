@@ -66,20 +66,21 @@ export function nextDistractorId(cardId: string, used: Iterable<string>): string
 
 /**
  * The card's distractors with a new one at their end, under the next id
- * (nextDistractorId over the card's and `published`); refused while it
- * has no text, so an empty option is never created.
+ * (nextDistractorId over the card's and `taken`: those its release
+ * published, or, in a release draft, every id the draft holds);
+ * refused while it has no text, so an empty option is never created.
  */
 export function addDistractor(
   distractors: readonly Distractor[],
   cardId: string,
   entered: DistractorText,
-  { published = [], formatted = false }: { published?: Iterable<string>; formatted?: boolean } = {},
+  { taken = [], formatted = false }: { taken?: Iterable<string>; formatted?: boolean } = {},
 ): DistractorEdit {
   const tidy = tidiedDistractor(entered, formatted);
   if (!tidy.ok) return tidy;
   const id = nextDistractorId(cardId, [
     ...distractors.map((distractor) => distractor.id),
-    ...published,
+    ...taken,
   ]);
   return {
     ok: true,

@@ -52,18 +52,18 @@ interface Editing {
 
 /**
  * A card's wrong options (its distractors), shared by the card's page in
- * Solid Memo and the Studio's card inspector (docs/studio.md): each with
- * its note, marked when retired, with buttons to edit, retire or restore
- * it, and to delete it, once the user confirms: only one its deck's
- * release never published (`published`, the release's ids); one it did
- * is refused at once, to be retired instead, since a learner's history
- * may name it. "Add a wrong option" writes a new one,
- * created only once it has text, under the card's next id
- * (nextDistractorId). The domain makes each change (domain/distractors.ts);
- * `onChange` gets the card's distractors as they are then, for the
- * caller to save with the card. A caller that saves each change at once
- * returns whether it was saved: the option being written stays open,
- * as the user wrote it, until it is.
+ * Solid Memo and the Studio's card inspector (docs/studio.md): each
+ * with its note, marked when retired, with buttons to edit, retire or
+ * restore it, and to delete it, once the user confirms: only one its
+ * deck's release never published (`published`, the release's ids); one
+ * it did is refused at once, to be retired instead, since a learner's
+ * history may name it. "Add a wrong option" writes a new one, created
+ * only once it has text, under the card's next id (nextDistractorId),
+ * none of `taken`. The domain makes each change
+ * (domain/distractors.ts); `onChange` gets the card's distractors as
+ * they are then, for the caller to save with the card. A caller that
+ * saves each change at once returns whether it was saved: the option
+ * being written stays open, as the user wrote it, until it is.
  *
  * One option is written at a time, in its own fields (LangTextField),
  * text in the language of the back's main text to start with. Add or Update (or
@@ -87,6 +87,7 @@ export function DistractorFields({
   cardId,
   distractors,
   published = NONE_PUBLISHED,
+  taken = published,
   back,
   textFormat,
   busy,
@@ -99,6 +100,8 @@ export function DistractorFields({
   distractors: readonly Distractor[];
   /** The ids of the distractors the release the deck came from has: never deleted. */
   published?: ReadonlySet<string>;
+  /** The ids a new distractor must not take (by default `published`); a release draft's every id. */
+  taken?: ReadonlySet<string>;
   /** The card's back: the options are meant to be in its languages. */
   back: LangText;
   /** The card's text format: Markdown options are written and shown as such. */
@@ -183,7 +186,7 @@ export function DistractorFields({
     const entered = { text: text.text, note: note.text };
     const edit =
       editing.id === null
-        ? addDistractor(distractors, cardId, entered, { published, formatted })
+        ? addDistractor(distractors, cardId, entered, { taken, formatted })
         : editDistractor(distractors, editing.id, entered, formatted);
     if (!edit.ok) return setEditing({ ...editing, missing: undefined, error: edit.error });
     const saved = change(edit.distractors);
