@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.0](https://github.com/solid-memo/website/compare/v8.0.14...v8.1.0) (2026-11-22)
+
+### Features
+
+* **ui:** decorate learned decks and finished courses in the deck list ([85a9129](https://github.com/solid-memo/website/commit/85a91295e6282ed4ed8a79884614fe812cd25b99)), closes [#961](https://github.com/solid-memo/website/issues/961)
+
+### Fixes
+
+* **domain:** take the ids a draft's records point at ([7f3f20c](https://github.com/solid-memo/website/commit/7f3f20cf1371472293dc6d33f6daa280f5b8a633))
+
 ## [8.0.14](https://github.com/solid-memo/website/compare/v8.0.13...v8.0.14) (2026-11-22)
 
 ### Fixes
