@@ -359,7 +359,24 @@ describe("parseMarkdown", () => {
   it("shows as plain text a text the parser would work on too long, whatever its shape", () => {
     for (const unit of ["a\n>>>>\n", "a\n>#\n", ">\na\n>>", "a\n>~~~\n", "a\n><div>\n", "[><!X"])
       expect(parseMarkdown(unit.repeat(Math.floor(MAX_CHARS / unit.length)))).toBeNull();
-    expect(parseMarkdown("a\n>>>>\n".repeat(20))).not.toBeNull();
+    // The most copies of the first shape that a short text's work still pays for.
+    expect(parseMarkdown("a\n>>>>\n".repeat(3))).not.toBeNull();
+    expect(parseMarkdown("a\n>>>>\n".repeat(4))).toBeNull();
+  });
+
+  it("gives a short text work in proportion to its length, not a fixed floor", () => {
+    // A quote nested past MAX_DEPTH with lazy lines after it: dense work in few characters.
+    const dense = `${">".repeat(18)} a\n${"b\n".repeat(46)}`;
+    expect(parseMarkdown(dense)).toBeNull();
+    // The same with enough plain text after it to pay for it reads.
+    expect(parseMarkdown(`${dense}\n${"a".repeat(1_000)}`)).not.toBeNull();
+    // Link openers nested in few characters are past it too.
+    expect(parseMarkdown(`${"[".repeat(20)}a`)).toBeNull();
+    // Short texts with a few blocks still read.
+    const table = `|a|b|c|d|\n|-|-|-|-|\n${"|1|2|3|4|\n".repeat(3)}7`;
+    const list = ["a", "b", "c", "d", "e", "f", "g"].map((item) => `- ${item}`).join("\n");
+    for (const short of ["*a*", list, "|a|b|\n|-|-|\n|c|d|", table, "[a](b)"])
+      expect(parseMarkdown(short)).not.toBeNull();
   });
 
   it("charges a block rule's silent try for what it reads, so a long line read again and again uses up the work", () => {
