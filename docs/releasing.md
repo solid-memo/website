@@ -750,7 +750,13 @@ since the job's output is pushed with the key:
   and not its system libraries, which come from Ubuntu's signed mirror
   (the Chromium action's `cache: false`). Any job on `main` can write
   `main`'s cache entries, so a file restored from them could carry code
-  from the least trusted of those jobs into this one. The workflow sets
+  from the least trusted of those jobs into this one. The rule covers
+  every workflow, not only this one: no job that holds a token that can
+  write, an OIDC token, a secret or an environment restores anything
+  from the cache. That includes npm's cache, which `setup-node` restores
+  on its own unless a step sets `package-manager-cache: false`.
+  [scripts/releaseWorkflow.test.ts](../scripts/releaseWorkflow.test.ts)
+  checks every workflow for it. This workflow sets
   `cache-mode: none`, so no job of it can read or write the cache at
   all: `docs-render` runs a tag's packages in a run on `main`, and
   could otherwise write `main`'s entries for another job to restore.

@@ -8,6 +8,7 @@ import {
   linkSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -76,7 +77,143 @@ function code(job: string): string {
     .join("\n");
 }
 
+/** The permissions block that starts at a `permissions:` line indented `indent`. */
+function permissionsAt(yaml: string, indent: number): string | undefined {
+  return yaml.match(
+    new RegExp(`^ {${indent}}permissions:.*(?:\\n(?: {${indent + 2}}| *#).*)*`, "m"),
+  )?.[0];
+}
+
+/**
+ * Whether a job holds something a cache entry must not reach
+ * (docs/releasing.md#the-deploy-key): a token that can write, the
+ * workflow's when the job asks for none of its own, an OIDC token,
+ * a secret or an environment, whose secrets GitHub hands the job.
+ */
+function privileged(head: string, job: string): boolean {
+  const permissions = code(permissionsAt(job, 4) ?? permissionsAt(head, 0) ?? "");
+  return (
+    /: *write\b|write-all/.test(permissions) ||
+    /secrets\./.test(code(job)) ||
+    /^ {4}environment:/m.test(job)
+  );
+}
+
+/** Whether a local action (`./.github/actions/<name>`) uses GitHub's cache. */
+function cachingAction(uses: string): boolean {
+  return /uses:\s*actions\/cache/.test(read(join(uses, "action.yml")));
+}
+
+/**
+ * The steps of a job that restore from GitHub's cache in a workflow that
+ * leaves it open: setup-node, which restores npm's cache for
+ * packageManager in package.json unless told not to, any step given a
+ * `cache` other than false, the cache action, and a local action that
+ * uses it, unless that action is given `cache: false`.
+ */
+function restores(job: string): string[] {
+  return steps(job, 6).filter((step) => {
+    const uses = step.match(/uses:\s*(\S+)/)?.[1] ?? "";
+    const cache = step.match(/^\s+cache: *(\S+)/m)?.[1];
+    if (/^actions\/cache[/@]/.test(uses)) return true;
+    if (cache !== undefined) return cache !== "false";
+    if (uses.startsWith("actions/setup-node@"))
+      return !/^\s+package-manager-cache: false$/m.test(step);
+    return uses.startsWith("./") && cachingAction(uses);
+  });
+}
+
+/** The jobs of a workflow that hold something and restore from the cache. */
+function privilegedRestores(yaml: string): string[] {
+  if (/^cache-mode: none$/m.test(yaml)) return [];
+  const head = yaml.slice(0, yaml.indexOf("\njobs:\n"));
+  return [...jobs(yaml)]
+    .filter(([, job]) => privileged(head, job) && restores(job).length > 0)
+    .map(([name]) => name);
+}
+
+const workflows = readdirSync(join(ROOT, ".github/workflows")).map(
+  (name) => `.github/workflows/${name}`,
+);
+
 describe("GitHub's cache", () => {
+  // The rule holds in every workflow, not only the release's and the
+  // deploy's: a job that can write, attest or holds a secret restores
+  // nothing a job on main could have saved
+  // (docs/releasing.md#the-deploy-key).
+  it.each(workflows)("restores nothing in a job of %s that can write or holds a secret", (path) => {
+    expect(privilegedRestores(read(path))).toEqual([]);
+  });
+
+  it("finds the jobs that can write or hold a secret", () => {
+    const found = workflows.flatMap((path) => {
+      const yaml = read(path);
+      const head = yaml.slice(0, yaml.indexOf("\njobs:\n"));
+      return [...jobs(yaml)]
+        .filter(([, job]) => privileged(head, job))
+        .map(([name]) => `${path.replace(/^.*\//, "")} ${name}`);
+    });
+    expect(found).toEqual(
+      expect.arrayContaining([
+        "ci.yml caches",
+        "ci.yml site",
+        "deploy.yml deploy",
+        "deploy.yml journeys",
+        "pending-updates.yml comment",
+        "release.yml push",
+        "release.yml publish",
+        "taxonomy.yml publish",
+        "taxonomy.yml failed",
+      ]),
+    );
+    expect(found).not.toContain("pending-updates.yml lookup");
+    expect(found).not.toContain("ci.yml check");
+  });
+
+  const job = (lines: string): string =>
+    `name: Test\non: push\npermissions:\n  contents: read\njobs:\n  test:\n${lines}`;
+  const writes = "    permissions:\n      issues: write\n    steps:\n";
+  const node =
+    "      - uses: actions/setup-node@0 # v7\n        with:\n          node-version-file: .nvmrc\n";
+
+  it.each([
+    ["setup-node with packageManager", writes + node],
+    ["setup-node with cache: npm", `${writes}${node}          cache: npm\n`],
+    [
+      "setup-python with cache: pip",
+      `${writes}      - uses: actions/setup-python@0\n        with:\n          cache: pip\n`,
+    ],
+    ["the cache action", `${writes}      - uses: actions/cache/restore@0\n`],
+    ["a local action that caches", `${writes}      - uses: ./.github/actions/e2e-images\n`],
+    [
+      "a token from the workflow",
+      `    steps:\n${node}`,
+      "name: Test\non: push\npermissions:\n  issues: write\njobs:\n  test:\n",
+    ],
+    ["an OIDC token", `    permissions:\n      id-token: write\n    steps:\n${node}`],
+    ["a secret", `    steps:\n${node}        env:\n          KEY: \${{ secrets.KEY }}\n`],
+    ["an environment", `    environment: release\n    steps:\n${node}`],
+  ])("refuses %s", (_, lines, head?: string) => {
+    const yaml = head ? head + lines : job(lines);
+    expect(privilegedRestores(yaml)).toEqual(["test"]);
+  });
+
+  it.each([
+    ["setup-node without npm's cache", `${writes}${node}          package-manager-cache: false\n`],
+    [
+      "a local action told not to cache",
+      `${writes}      - uses: ./.github/actions/chromium\n        with:\n          cache: false\n`,
+    ],
+    ["a local action that does not cache", `${writes}      - uses: ./.github/actions/publiccode\n`],
+    ["a job that only reads", `    permissions:\n      contents: read\n    steps:\n${node}`],
+  ])("allows %s", (_, lines) => {
+    expect(privilegedRestores(job(lines))).toEqual([]);
+  });
+
+  it("allows anything in a workflow closed to the cache", () => {
+    expect(privilegedRestores(`cache-mode: none\n${job(writes + node)}`)).toEqual([]);
+  });
+
   // Neither workflow touches the cache: a run on main could otherwise
   // write main's entries from a job that runs packages
   // (docs/releasing.md#the-deploy-key).
