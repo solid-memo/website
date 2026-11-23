@@ -427,6 +427,46 @@ describe("readRecord", () => {
     expect(getUrlAll(kept, `${EX}link`)).toEqual(["http://[x"]);
   });
 
+  it("leaves out an IRI that is no http(s) URL, such as one shaped like a prefixed name, and writes the record over it", async () => {
+    const dataset = await datasetOfTurtle(
+      URL_,
+      `<${URL_}> <${EX}name> "Ann" ; <${EX}link> <rdf:type>, <https://example.com/a> ;
+        <${EX}links> <sm:Deck>, <current:c2>, <urn:x:y>, <http://example.com/b> .`,
+    );
+    const thing = getThing(dataset, URL_)!;
+    const record = readRecord(thing, THING)!;
+    expect(record).toMatchObject({
+      link: "https://example.com/a",
+      links: ["http://example.com/b"],
+    });
+    const written = recordThing(URL_, THING, record, thing);
+    expect(getUrlAll(written, `${EX}link`)).toEqual(["https://example.com/a"]);
+    expect(getUrlAll(written, `${EX}links`)).toEqual(["http://example.com/b"]);
+  });
+
+  it("reads a mailbox (foaf:mbox) as its mailto: URL alone", async () => {
+    const MBOX = "http://xmlns.com/foaf/0.1/mbox";
+    const MAILBOX = {
+      ...THING,
+      fields: [
+        { name: "name", predicate: `${EX}name`, kind: "string", cardinality: "one" },
+        { name: "mbox", predicate: MBOX, kind: "iri", cardinality: "optional" },
+      ],
+    } as unknown as ShapeDescriptor<{ name: string; mbox?: string }>;
+    const read = async (mbox: string) => {
+      const dataset = await datasetOfTurtle(
+        URL_,
+        `<${URL_}> <${EX}name> "Ann" ; <${MBOX}> ${mbox} .`,
+      );
+      return readRecord(getThing(dataset, URL_)!, MAILBOX);
+    };
+    expect(await read("<mailto:ann@example.org>")).toEqual({
+      name: "Ann",
+      mbox: "mailto:ann@example.org",
+    });
+    expect(await read("<current:ann>, <https://example.org/ann>")).toEqual({ name: "Ann" });
+  });
+
   it("treats a date past what a JavaScript date holds as absent, so a required one does not fit", () => {
     const thing = buildThing(createThing({ url: URL_ }))
       .addStringNoLocale(`${EX}name`, "Ann")

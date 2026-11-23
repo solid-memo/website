@@ -45,6 +45,7 @@ import { DCAT_AP_SHAPED_CLASSES } from "@solid-memo/shacl/profiles";
 import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
 import { isHttpUrl } from "@solid-memo/domain/webId";
+import { FOAF_MBOX } from "@solid-memo/domain/release/releaseModel";
 import { subjectOfDocument } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf, fragmentIdOf, isDocumentSubject } from "@solid-memo/domain/subjectUrl";
 
@@ -58,20 +59,31 @@ import { documentUrlOf, fragmentIdOf, isDocumentSubject } from "@solid-memo/doma
 type FieldValue = string | number | boolean | readonly string[] | LangText | LangTexts;
 
 /**
- * The subject's IRIs for the property that are URLs, in stored order.
- * n3 reads an IRI that `new URL` refuses, such as `<http://[x>` or
- * `<http://a:99999/x>`, and the client library writes no such IRI
- * (addIri, setIri), so a value read with one would make every later
- * write of the subject fail. It is not read: what is read of a subject
- * can always be written back (docs/data-model.md "Write discipline").
+ * The subject's IRIs for the property that are http(s) URLs, in stored
+ * order, or for a mailbox (foaf:mbox) its mailto: URLs. n3 reads an IRI
+ * that `new URL` refuses, such as `<http://[x>` or `<http://a:99999/x>`,
+ * and the client library writes no such IRI (addIri, setIri), so a value
+ * read with one would make every later write of the subject fail. An IRI
+ * of another scheme, such as `<rdf:type>` or `<sm:Deck>`, names nothing
+ * the app knows, yet a later write of the document may write it as the
+ * prefixed name it looks like, which means another IRI, and the deck's
+ * export refuses it: the rule carriedTo copies by (isCarried,
+ * GHSA-6555-2gvc-c7f4). Neither is read: what is read of a subject can
+ * always be written back (docs/data-model.md "Write discipline").
  */
 export function readIris(thing: Subject, predicate: string): string[] {
-  return getUrlAll(thing, predicate).filter((iri) => URL.canParse(iri));
+  const read = predicate === FOAF_MBOX ? isMailbox : isHttpUrl;
+  return getUrlAll(thing, predicate).filter(read);
 }
 
 /** The first of the subject's IRIs for the property that is a URL (readIris); null when it has none. */
 export function readIri(thing: Subject, predicate: string): string | null {
   return readIris(thing, predicate)[0] ?? null;
+}
+
+/** A mailbox (foaf:mbox): an email's `mailto:` URL. */
+function isMailbox(iri: string): boolean {
+  return iri.startsWith("mailto:") && URL.canParse(iri);
 }
 
 /** One field's value; undefined when absent, null when a required one is. */
