@@ -24,7 +24,7 @@ import { createMemoryResourceStore } from "./memoryResourceStore";
 import { routedFetch } from "./routedFetch";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidAnswerLog } from "./solidAnswerLog";
-import { createSolidDeckLibrary } from "./solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidDigestRepository } from "./solidDigestRepository";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
@@ -295,7 +295,7 @@ describe("a guest's study", () => {
     return createSolidDeckLibrary({
       fetch,
       indexUrl: "https://solid-memo.com/decks/index.ttl",
-      validate: async (url) => ({ url, status: "checked", subjects: [] }),
+      documents: releaseDocumentsOf(async (url) => ({ url, status: "checked", subjects: [] })),
     });
   };
 

@@ -478,6 +478,37 @@ places, but writes only to one in the WebID's own pod. It writes to
 none when that pod would be the whole origin, or when the lookup
 failed.
 
+## Documents the app didn't write
+
+A document the app reads from elsewhere is read, parsed and checked
+off the page, in a worker
+([validation.md](validation.md#off-the-page)): a release from a link,
+a deck file, a release file, and the documents an instance's check
+reads. The worker's code is `solid`'s own: its entry,
+[offPageWorker.ts](../packages/solid/src/offPageWorker.ts), runs the
+adapters' code ([offPageJobs.ts](../packages/solid/src/offPageJobs.ts))
+behind a message interface
+([offPageProtocol.ts](../packages/solid/src/offPageProtocol.ts)).
+`composition` starts the worker
+([offPageWorker.ts](../packages/composition/src/offPageWorker.ts), the
+one module that imports it, with Vite's `?worker`) and puts the ports'
+side in the page in place of the adapters'
+([offPageAdapters.ts](../packages/solid/src/offPageAdapters.ts)).
+
+- The worker makes no request of its own. Each request goes to the
+  page, which makes it through the fences and the credential gate
+  above, as the adapter in the page would, and sends back the answer.
+  So a login never reaches the worker.
+- The worker only reads: it refuses a request that would write before
+  the page hears of it, and the page refuses one too. The page answers
+  only the fetches the job was given, with only the headers a read
+  needs.
+- What comes back is what the port gives (a deck, a report), never a
+  dataset, so the page holds no parse of the document.
+- The user's own data, read to be shown, studied and written, stays in
+  the page, and so do the reads of another instance's data for that,
+  under the read limits ([readLimits.ts](../packages/solid/src/client/readLimits.ts)).
+
 ## Further rules
 
 - UI components never import ports or adapters; they get `UseCases`,

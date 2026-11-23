@@ -24,7 +24,7 @@ import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
-import { createSolidDeckLibrary } from "./solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
@@ -131,7 +131,9 @@ async function app(site: typeof fetch = siteFetch, store = createMemoryResourceS
     deckLibrary: createSolidDeckLibrary({
       fetch: site,
       indexUrl: `${SITE}decks/index.ttl`,
-      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
+      documents: releaseDocumentsOf((url, dataset) =>
+        shapeValidator.validateDataset(url, dataset, "library"),
+      ),
     }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository({ fetch: podFetch, checkWrite, ...ids }),
@@ -1039,7 +1041,7 @@ async function bobCopy(site: typeof fetch & { asked: string[] }) {
       return Object.defineProperty(response, "url", { value: String(input) });
     },
     indexUrl: `${SITE}decks/index.ttl`,
-    validate: () => Promise.reject(new Error("not checked")),
+    documents: releaseDocumentsOf(() => Promise.reject(new Error("not checked"))),
   }).readRelease(bobUrl(3));
   site.asked.length = 0;
   const copy = { deck, series, version: "1", newer: true, fromLink: true } as const;

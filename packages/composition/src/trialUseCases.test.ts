@@ -12,6 +12,7 @@ import { DRAFT, playableCourseDraft } from "@solid-memo/domain/testing/releaseDr
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createAppUseCases } from "./appUseCases";
 import { createTrialUseCases, NO_DEVICE, readOnlyFetch } from "./trialUseCases";
+import { inProcessWorker } from "@solid-memo/solid/testing/inProcessWorker";
 
 const SERVED = "http://localhost:5173/";
 
@@ -121,6 +122,7 @@ describe("createTrialUseCases", () => {
       servedSite: SERVED,
       ruleset: "test",
       indexedDB: undefined,
+      spawnWorker: () => inProcessWorker(),
     });
     await app.startGuest("My study");
     const [instance] = await app.listInstances(GUEST_SESSION);

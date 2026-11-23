@@ -149,17 +149,23 @@ interface Read {
  * one: what they say is copied into a draft to be published, as is a
  * release read `asNoOne`. Both are
  * read under RELEASE_LIMITS: a release may be anyone's, on any server.
+ * `releaseReads`, when given, reads the release a draft follows, and
+ * what it names, as `assemble` reads them, in place of this repository's
+ * own readRelease and readLinked: those the page runs off the page
+ * (offPageAdapters.ts).
  */
 export function createSolidReleaseDraftRepository({
   fetch,
   releaseFetch = fetch,
   publicFetch = releaseFetch,
   checkWrite = noWriteCheck,
+  releaseReads,
 }: {
   fetch: typeof globalThis.fetch;
   releaseFetch?: typeof globalThis.fetch;
   publicFetch?: typeof globalThis.fetch;
   checkWrite?: WriteCheck;
+  releaseReads?: () => Pick<ReleaseDraftRepository, "readRelease" | "readLinked">;
 }): ReleaseDraftRepository {
   /** Each draft's documents as last read, so an edit is written only if they are still so. */
   const reads = new Map<string, Read>();
@@ -453,8 +459,9 @@ export function createSolidReleaseDraftRepository({
       )?.object.value;
       let earlier = new Map<string, DraftTriple[]>();
       if (prev !== undefined) {
-        const followed = await repository.readRelease(prev);
-        earlier = earlierVersionsOf(followed, targetUrl, await repository.readLinked(followed));
+        const reads = releaseReads?.() ?? repository;
+        const followed = await reads.readRelease(prev);
+        earlier = earlierVersionsOf(followed, targetUrl, await reads.readLinked(followed));
       }
       const quads = releaseQuadsOf(withOwnVersionsAt(kept, targetUrl, earlier), targetUrl, issued);
       const subjects = [...new Set(quads.map((quad) => keyOf(quad.subject)))];

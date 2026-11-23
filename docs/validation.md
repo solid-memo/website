@@ -68,7 +68,8 @@ flowchart LR
   update goes on with the other documents; a library upgrade stops, as
   at any failure. Another app's data never stops a write.
 - [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
-  fetches the document and converts it to an RDF/JS dataset
+  fetches the document, in a worker ([below](#off-the-page)), and
+  converts it to an RDF/JS dataset
   (`toRdfJsDataset`). For every subject, it picks the shapes by class
   and stored version as the mappers do (`pickShapes`), and by the values
   a shape fixes (an FSRS-6 review state's `sm:scheduler`,
@@ -308,6 +309,71 @@ flowchart LR
   against it. It runs one check at a time: the library keeps a single
   report per validator, so two documents checked together would mix up
   their results.
+
+## Off the page
+
+The app reads, parses and checks the documents it didn't write in a
+[Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API),
+not in the page:
+
+- a release opened from a link (`#/try?url=…`, Add deck by link) or
+  read for a copy's upgrade, and the catalog its creator keeps above it
+  (`ReleaseDocuments` in
+  [solidDeckLibrary.ts](../packages/solid/src/solidDeckLibrary.ts));
+- a deck file (`DeckArchive.readDeckFile`), a release file, and a
+  release read from anywhere for a draft, with the documents it names
+  (`ReleaseDraftRepository.parseRelease`, `readRelease`, `readLinked`);
+- every document an instance's check reads, in the user's storages
+  and in other instances alike, and a draft's release check
+  (`ShapeValidator.validateDocument`, `validateDocumentSince`,
+  `validateRelease`).
+
+The page sends each one as a job
+([offPage.ts](../packages/solid/src/offPage.ts)): the address or the
+text, and what it's read as. The worker runs the adapter's own code
+on it ([offPageJobs.ts](../packages/solid/src/offPageJobs.ts)) and
+sends back only what the port gives: the typed result and the check's
+report. [offPageAdapters.ts](../packages/solid/src/offPageAdapters.ts)
+is the ports' side in the page, which the composition root wires in
+([appUseCases.ts](../packages/composition/src/appUseCases.ts)).
+
+- **Requests stay in the page.** A job asks the page for each request
+  it makes, and the page makes it with its own fetch: as the user, or as
+  no one, as before. The page sends the answer's body whole. The worker
+  never holds the user's login, and refuses a request that would write
+  ([offPageServe.ts](../packages/solid/src/offPageServe.ts)). The page
+  refuses one too, and sends only the headers a read needs (`Accept`,
+  `If-None-Match`, `If-Modified-Since`, `Range`): a login, a cookie or a
+  proof is its own fetch's to add.
+- **The read limits hold.** The page reads a body under the limits of
+  its read ([readLimits.ts](../packages/solid/src/client/readLimits.ts)),
+  and the worker parses it under them, counting on from what the page
+  had spent. What the parse counts goes back into the page's tally
+  before the job's result does. A parse past a budget the page's reads
+  share names that budget, as a parse in the page does.
+- **A deadline.** A job may work for `OFF_PAGE_DEADLINE_MS` (60
+  seconds), the time it waits for its requests left out. Past it, the
+  page ends the worker, and shows the document as too large to read: a
+  release as `releaseTooLarge`, a file as `deckFileTooLarge`. A
+  document an instance's check reads is unreadable, and the report says
+  the check stopped at its deadline (`documentCheckTooLong`). A worker
+  that ends on its own, out of memory say, counts the same. The tab goes
+  on working.
+- **Workers.** At most `OFF_PAGE_WORKERS` (four) run at once, one job
+  each, and the rest wait their turn. A worker no job needs is kept for
+  30 seconds, with the shapes it has read, then ended.
+- **The build.** Vite bundles the worker as a module of its own
+  ([offPageWorker.ts](../packages/solid/src/offPageWorker.ts)), with the
+  Solid client the page has (`worker` in `apps/web/vite.config.ts`). It's
+  served from the site, so the page's Content Security Policy
+  (`script-src 'self'`) lets it run.
+- **What stays in the page:** the [write check](#the-write-check) of the
+  user's own data, and the reads that show and study an instance's data,
+  another instance's deck's cards among them, under the read limits
+  ([boundaries.md](boundaries.md#documents-the-app-didnt-write)).
+- **Tests** run the jobs in their own process, over a `MessageChannel`
+  (`src/testing/inProcessWorker.ts` in `solid`), so what goes between
+  the page and the worker is copied as a worker's messages are.
 
 ## Profiles: DCAT-AP and SKOS
 

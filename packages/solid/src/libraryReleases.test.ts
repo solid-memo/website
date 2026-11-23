@@ -10,7 +10,7 @@ import { parseAuthor } from "@solid-memo/domain/author";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetLinear } from "./client/resources";
-import { createSolidDeckLibrary } from "./solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 import { RDF, SM } from "./vocab";
 
 /**
@@ -45,7 +45,9 @@ const siteFetch: typeof globalThis.fetch = async (input) => {
 const library = createSolidDeckLibrary({
   fetch: siteFetch,
   indexUrl: `${DECKS}index.ttl`,
-  validate: () => Promise.reject(new Error("A library release is not checked as it is read")),
+  documents: releaseDocumentsOf(() =>
+    Promise.reject(new Error("A library release is not checked as it is read")),
+  ),
 });
 
 const documents = new Map<string, Promise<Dataset>>();

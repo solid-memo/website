@@ -76,4 +76,10 @@ export default defineConfig({
       "react-dom": "preact/compat",
     },
   },
+  // The worker that reads documents the app did not write (docs/validation.md#off-the-page):
+  // a module, so the SHACL engine stays a chunk of its own there, with the Solid client the page has.
+  worker: {
+    format: "es",
+    plugins: () => [solidClientPlugin()],
+  },
 });

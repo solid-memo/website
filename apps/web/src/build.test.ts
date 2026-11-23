@@ -154,6 +154,29 @@ describe("the Studio", () => {
   });
 });
 
+describe("the worker that reads documents off the page", () => {
+  /** The worker's own script: the module the page starts it from. */
+  const worker = () =>
+    assets.find((asset) => /^assets\/offPageWorker-[\w-]+\.js$/.test(asset.fileName))!;
+
+  it("is a module of its own, served from the site, that the page starts (docs/validation.md#off-the-page)", () => {
+    const { fileName } = worker();
+    const name = fileName.slice("assets/".length);
+    const starts = chunks.filter((chunk) =>
+      chunk.code.includes(`new URL(\`${name}\`,import.meta.url)`),
+    );
+    expect(starts).toHaveLength(1);
+    expect(starts[0]!.code).toMatch(/type:`module`/);
+    expect(html).not.toContain(name);
+  });
+
+  it("holds no sign-in client, whose proofs (DPoP) the page's script holds: the page makes its requests", () => {
+    expect(String(worker().source)).not.toMatch(/\bDPoP\b/);
+    const entry = chunks.find((chunk) => chunk.isEntry)!;
+    expect(entry.code).toMatch(/\bDPoP\b/);
+  });
+});
+
 describe("the messages", () => {
   /** The languages of the catalogs under `folder` (packages/ui, apps/studio) that a chunk holds. */
   const catalogsIn = (folder: string, chunk: Rolldown.OutputChunk) =>

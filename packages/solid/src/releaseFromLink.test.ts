@@ -13,7 +13,7 @@ import { RELEASE_LIMITS } from "./client/readLimits";
 import type { Dataset } from "./client/rdf";
 import { toLibraryDeckContent } from "./mappers/libraryMapper";
 import { READ_DEADLINE_MS, withReadDeadline } from "./readDeadline";
-import { createSolidDeckLibrary } from "./solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 
 /**
  * A release added from a link (docs/deck-library.md, From a link), read
@@ -60,7 +60,11 @@ const libraryOver = (
   fetch: typeof globalThis.fetch,
   validate: (url: string, dataset: Dataset) => Promise<DocumentReport> = conforming,
 ) =>
-  createSolidDeckLibrary({ fetch, indexUrl: "https://solid-memo.com/decks/index.ttl", validate });
+  createSolidDeckLibrary({
+    fetch,
+    indexUrl: "https://solid-memo.com/decks/index.ttl",
+    documents: releaseDocumentsOf(validate),
+  });
 
 /** A fetch that answers each read of a document with the next of its answers, the last once they run out. */
 function answering(documents: Record<string, string[]>): typeof globalThis.fetch & {
@@ -299,6 +303,14 @@ describe("readRelease", () => {
     ).rejects.toMatchObject({ code: "podNoAnswer", vars: { url: V2 } });
     await vi.advanceTimersByTimeAsync(READ_DEADLINE_MS);
     await read;
+  });
+
+  it("with `accept`, fails as its check fails when the check cannot be made, not as a release it cannot read", async () => {
+    const shapesGone = new Error("The shapes could not be read");
+    const library = libraryOver(serving({ [V2]: STANDALONE }), () => Promise.reject(shapesGone));
+    await expect(library.readRelease(V2, () => {})).rejects.toMatchObject({
+      message: shapesGone.message,
+    });
   });
 
   it("checks nothing, and keeps nothing, without `accept`", async () => {

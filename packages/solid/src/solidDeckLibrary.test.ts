@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { buildThing, createThing, getThing, setThing } from "./client/rdf";
 import { getSolidDatasetLinear } from "./client/resources";
 import { datasetFrom } from "./testing/datasets";
-import { createSolidDeckLibrary } from "./solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import { integerLiteral } from "./testing/literals";
 
@@ -24,7 +24,9 @@ function makeLibrary() {
   return createSolidDeckLibrary({
     fetch,
     indexUrl: INDEX,
-    validate: () => Promise.reject(new Error("A library release is not checked as it is read")),
+    documents: releaseDocumentsOf(() =>
+      Promise.reject(new Error("A library release is not checked as it is read")),
+    ),
   });
 }
 

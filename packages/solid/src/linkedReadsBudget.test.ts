@@ -9,7 +9,7 @@ import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { withLinkedReleasesChecked } from "@solid-memo/application/library";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import { RELEASE_LIMITS } from "./client/readLimits";
-import { createSolidDeckLibrary } from "./solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 
 /**
  * Reads of releases from a link are bounded together, however many a
@@ -70,23 +70,25 @@ function library(fetch: typeof globalThis.fetch, conforms: (url: string) => bool
   return createSolidDeckLibrary({
     fetch,
     indexUrl: INDEX,
-    validate: async (url): Promise<DocumentReport> => ({
-      url,
-      status: "checked",
-      subjects: conforms(url)
-        ? []
-        : [
-            {
-              url,
-              status: "checked",
-              shape: "libraryDeck",
-              version: 1,
-              violations: [
-                { severity: "violation", message: { en: "No" }, constraint: "minCount" },
-              ],
-            },
-          ],
-    }),
+    documents: releaseDocumentsOf(
+      async (url): Promise<DocumentReport> => ({
+        url,
+        status: "checked",
+        subjects: conforms(url)
+          ? []
+          : [
+              {
+                url,
+                status: "checked",
+                shape: "libraryDeck",
+                version: 1,
+                violations: [
+                  { severity: "violation", message: { en: "No" }, constraint: "minCount" },
+                ],
+              },
+            ],
+      }),
+    ),
   });
 }
 
