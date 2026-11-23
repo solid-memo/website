@@ -409,7 +409,8 @@ FSRS-6 is never turned on without its states.
     with why, and the others go on. The preferences are saved last,
     once every deck is written (until then SM-2 sets the due days, and
     the switch can run again), then each deck's digest schedule is
-    updated. A switch that fails, or is closed early, returns to the
+    updated, three decks at a time, each reading its two documents. A
+    switch that fails, or is closed early, returns to the
     form as last saved, FSRS-6 still chosen.
 - **To SM-2.** Only the preferences are saved: SM-2's states are
   updated on every review, so they're current. The digest's schedules

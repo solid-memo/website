@@ -368,6 +368,28 @@ describe("courses", () => {
     await expect(useCases.getCourseSummary(deck)).rejects.toThrow("names the release");
   });
 
+  it("getCourseSummary reads three course decks' answers at once at most, however many ask", async () => {
+    const { deps, useCases } = setup();
+    const reads: (() => void)[] = [];
+    vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(
+      () => new Promise((done) => reads.push(() => done(sm2s([])))),
+    );
+    const courses = Array.from({ length: 10 }, (_, at) => ({
+      ...courseDeck,
+      url: `${courseDeck.url}-${at}`,
+      reviewsDocumentUrl: `https://h${at}.example/reviews.ttl`,
+    }));
+    const summaries = Promise.all(courses.map((one) => useCases.getCourseSummary(one)));
+    await vi.waitFor(() => expect(reads).toHaveLength(3));
+    while (reads.length > 0) {
+      expect(reads.length).toBeLessThanOrEqual(3);
+      reads.shift()!();
+      await new Promise((settle) => setTimeout(settle));
+    }
+    expect(await summaries).toHaveLength(10);
+    expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledTimes(10);
+  });
+
   it("getCourseSummary finds the questions answered once for the decks that share a frozen outline and reviews document", async () => {
     const { deps, useCases } = setup();
     const frozen = Object.freeze({ ...outline });

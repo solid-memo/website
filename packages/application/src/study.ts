@@ -19,7 +19,7 @@ import {
 } from "@solid-memo/domain/scheduling";
 import { effectiveStates, recallOn } from "@solid-memo/domain/fsrs";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
-import { inTurns, READS_AT_ONCE } from "./atOnce";
+import { allSettledThen, inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
@@ -192,7 +192,8 @@ export function createStudyUseCases({
       deckRepository.readCardsSince(deck, version, { asNoOne: asNoOne.cards });
     const readReviews = (version: string | undefined) =>
       reviewStateRepository.readReviewStatesSince(deck, version, { asNoOne: asNoOne.reviews });
-    const [cardsSince, reviewsSince] = await Promise.all([
+    // Both read before the turn ends, even when one fails.
+    const [cardsSince, reviewsSince] = await allSettledThen([
       readCards(kept?.cardsVersion),
       readReviews(kept?.reviewsVersion),
     ]);
@@ -208,7 +209,7 @@ export function createStudyUseCases({
       const counts = countsOf(kept.schedule);
       if (counts !== null) return counts;
     }
-    const [cards, reviews] = await Promise.all([
+    const [cards, reviews] = await allSettledThen([
       cardsSince.unchanged ? readCards(undefined) : cardsSince,
       reviewsSince.unchanged ? readReviews(undefined) : reviewsSince,
     ]);

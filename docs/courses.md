@@ -195,7 +195,9 @@ new type-index entries ([data-model.md](data-model.md#courses)):
      every course is finished. It depends only on the instance's decks.
    - Each course in the strip has its deck's title, and is read only as
      far as the strip needs (`getCourseSummary`), once the deck list's
-     arrangement is in. The library's index is read beside the
+     arrangement is in. The review states of three courses are read at
+     a time, so a long list never reads all of them at once. The
+     library's index is read beside the
      arrangement, not after it. A course's progress is worked out once
      for each summary and value of its completed chapters, not on each
      render, as the strip renders again with each summary that arrives.

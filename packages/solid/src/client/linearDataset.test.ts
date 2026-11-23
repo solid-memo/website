@@ -69,7 +69,47 @@ describe("getSolidDatasetLinear", () => {
       getSolidDatasetLinear(URL_, { fetch: turtleFetch("", { status: 404 }) }),
     ).rejects.toMatchObject({ statusCode: 404 });
   });
+
+  it("cancels the body of an answer of a type it does not read, whose body never ends, before it fails", async () => {
+    for (const headers of [{ "Content-Type": "text/plain" }, {}] as HeadersInit[]) {
+      const { stream, cancelled } = endlessBody();
+      const fetch = answering(() => new Response(stream, { status: 200, headers }));
+      await expect(getSolidDatasetLinear(URL_, { fetch })).rejects.toThrow(URL_);
+      expect(cancelled).toHaveLength(1);
+    }
+  });
+
+  it("fails as getSolidDataset does on a missing document's answer with no body", async () => {
+    const fetch = answering(() => new Response(null, { status: 404 }));
+    await expect(getSolidDatasetLinear(URL_, { fetch })).rejects.toMatchObject({ statusCode: 404 });
+  });
+
+  it("fails as the fetch does when there is no answer, with no body to cancel", async () => {
+    const fetch: typeof globalThis.fetch = async () => {
+      throw new TypeError("no answer");
+    };
+    await expect(getSolidDatasetLinear(URL_, { fetch })).rejects.toThrow("no answer");
+  });
 });
+
+/** A body that never ends, and the reasons it was cancelled with. */
+function endlessBody(): { stream: ReadableStream<Uint8Array>; cancelled: unknown[] } {
+  const cancelled: unknown[] = [];
+  const stream = new ReadableStream<Uint8Array>({
+    start: (controller) => controller.enqueue(new TextEncoder().encode("<#a> <#b> ")),
+    cancel: (reason) => void cancelled.push(reason),
+  });
+  return { stream, cancelled };
+}
+
+/** A fetch that answers with the response `answer` makes, its URL the one asked for. */
+function answering(answer: () => Response): typeof globalThis.fetch {
+  return async (input) => {
+    const response = answer();
+    Object.defineProperty(response, "url", { value: String(input) });
+    return response;
+  };
+}
 
 describe("graphsOf", () => {
   /** The document's quads as solid-client reads them, so blank nodes are named alike. */

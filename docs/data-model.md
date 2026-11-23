@@ -1191,6 +1191,12 @@ The same limit holds for its links to drafts and releases
 the study counts of three decks at a time (`getStudyCounts` in
 [study.ts](../packages/application/src/study.ts)), each reading the
 deck's two documents, so a long list never reads all of them at once.
+The statistics' card progress (`getCardProgress` in
+[statistics.ts](../packages/application/src/statistics.ts)) reads its
+decks in turns of the same size, three decks at a time, in a queue of
+its own; the Studio's schedule screen reads its one deck outside it. A
+deck's turn ends only once both its reads have, even when one of them
+fails first.
 
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;

@@ -48,7 +48,11 @@ export async function storageRootsOf(
     const response = await limitedFetch(fetch, DESCRIPTION_LIMITS)(storage, {
       headers: { Accept: LWS_DESCRIPTION_TYPE },
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // An answer not read is let go, so that it holds nothing open.
+      await response.body?.cancel();
+      return null;
+    }
     description = JSON.parse(await response.text());
   } catch {
     return null;

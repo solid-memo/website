@@ -225,7 +225,9 @@ The page reads three things on their own:
 - The answers of the range (`UseCases.getStatistics`).
 - The cards and review states of every deck, with the last 12 study
   months of answers for what is hard, whatever the range
-  (`UseCases.getCardProgress`). Decks that name one cards document
+  (`UseCases.getCardProgress`). It reads the documents of three decks
+  at a time, as the deck list's study counts do, so a long catalog
+  never has all of them read at once. Decks that name one cards document
   share one read of it, mapped to cards once. Decks that name the same
   reviews document too, read alike, share its mapping, their schedule,
   and their progress with its intervals and eases, each worked out

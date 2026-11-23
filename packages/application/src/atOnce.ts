@@ -55,3 +55,21 @@ export function inTurns(atOnce = READS_AT_ONCE): <T>(work: () => Promise<T>) => 
     }
   };
 }
+
+/**
+ * Every one of `work`, as `Promise.all` gives them, settled before this
+ * is: a turn whose first read fails ends only once its other reads have
+ * too, so a failing read never frees the turn for more while they run.
+ * It then fails with the failure of the first of `work` in their order
+ * that failed, not the first to fail in time. It never fails early, on
+ * purpose: failing before the others settle is what would free the turn.
+ */
+export async function allSettledThen<T extends readonly unknown[] | []>(
+  work: T,
+): Promise<{ -readonly [P in keyof T]: Awaited<T[P]> }> {
+  const settled = await Promise.allSettled(work);
+  for (const one of settled) if (one.status === "rejected") throw one.reason;
+  return settled.map((one) => (one as PromiseFulfilledResult<unknown>).value) as {
+    -readonly [P in keyof T]: Awaited<T[P]>;
+  };
+}

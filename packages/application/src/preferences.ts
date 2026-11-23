@@ -45,7 +45,7 @@ import type {
   ThemePreference,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
-import { mapAtOnce } from "./atOnce";
+import { mapAtOnce, READS_AT_ONCE } from "./atOnce";
 import { stepReporter } from "./progress";
 import { again } from "./writes";
 import type { PreferenceStore } from "./preferenceStore";
@@ -534,8 +534,11 @@ export function createPreferenceUseCases({
           { replaceMisfit },
         );
         outcome.switched = true;
-        await Promise.all(
-          listed.map((deck) => digestStore.refresh(instanceUrl, deck).catch(() => undefined)),
+        // Three decks at a time, each reading its two documents: however many the catalog lists.
+        await mapAtOnce(
+          listed,
+          (deck) => digestStore.refresh(instanceUrl, deck).catch(() => undefined),
+          READS_AT_ONCE / 2,
         );
       }
       progress.finished();
