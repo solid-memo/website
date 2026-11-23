@@ -542,7 +542,10 @@ writes in English, with `@en` after it. A deck or release whose
 migration gives it one past the bound is read as not fitting its shape
 (`migrateWithinBound`), since no write of it would be accepted. A deck
 from before format 3 names its authors itself, and a write names their
-agents anew, refusing one past the bound. An author whose node an
+agents anew, refusing one past the bound. At most its first
+`MAX_DECK_METADATA` (100) authors are read, before the step names
+their agents, which is all a deck keeps at most
+([data-model.md](data-model.md#decks-and-cards)). An author whose node an
 earlier deck took is given a longer one. The format update names the
 agents of each entry in turn, as its write does, after the entries
 before it. It leaves an entry with an agent past the bound as it is,

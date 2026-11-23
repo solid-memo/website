@@ -25,6 +25,7 @@ import {
   getStringWithLocale,
   getStringWithLocaleAll,
 } from "./testing/datasets";
+import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
@@ -810,6 +811,30 @@ describe("readVersioned", () => {
     });
     expect(readVersioned(instance(FAR_DATE), "instance")).toBeNull();
   });
+
+  it.each([
+    ["deck", 1],
+    ["deck", 2],
+    ["libraryDeck", 1],
+    ["libraryDeck", 2],
+  ] as const)(
+    "reads the first MAX_DECK_METADATA authors a %s of format %i names",
+    (shape, version) => {
+      const authors = Array.from({ length: MAX_DECK_METADATA + 50 }, (_, i) => `Author ${i}`);
+      const b = buildThing(createThing({ url: URL_ }))
+        .addIri(RDF.type, SM.Deck)
+        .addLiteral(SM.formatVersion, integerLiteral(version))
+        .addStringNoLocale(DCTERMS.title, "Capitals")
+        .addStringNoLocale(SM.direction, "front-to-back")
+        .addIri(SM.cardsDocument, "https://pod.example/cards.ttl")
+        .addIri(SM.reviewsDocument, "https://pod.example/reviews.ttl");
+      for (const author of authors) b.addStringNoLocale(DCTERMS.creator, author);
+      const read = readVersioned(b.build(), shape);
+      expect((read!.record.data as { creator: readonly string[] }).creator).toEqual(
+        authors.slice(0, MAX_DECK_METADATA),
+      );
+    },
+  );
 });
 
 describe("the real descriptors", () => {

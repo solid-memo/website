@@ -178,6 +178,16 @@ describe("toLibraryDecks", () => {
     expect(deck!.authorCount).toBe(2_002);
   });
 
+  it("says how many authors a release from before format 3 names, past the first it reads", async () => {
+    const authors = Array.from({ length: MAX_DECK_METADATA + 50 }, (_, n) => `"Author ${n}"`);
+    const turtle = INDEX_TURTLE.replace("sm:formatVersion 3", "sm:formatVersion 2")
+      .replace("sm:studyDirection sm:bidirectional", 'sm:direction "bidirectional"')
+      .replace("<capitals/v2.ttl#anton>, <capitals/v2.ttl#gone>", authors.join(", "));
+    const [deck] = toLibraryDecks(await datasetFromIndex(turtle));
+    expect(deck!.authors).toHaveLength(MAX_DECK_METADATA);
+    expect(deck!.authorCount).toBe(MAX_DECK_METADATA + 50);
+  });
+
   it("says no count of authors of a release, or of a source, that names no more than it keeps", async () => {
     const [deck] = toLibraryDecks(await datasetFromIndex(INDEX_TURTLE));
     expect(deck).not.toHaveProperty("authorCount");
@@ -1055,5 +1065,16 @@ describe("toStandaloneLibraryDeck", () => {
     expect(first.authorCount).toBe(5_000);
     expect(deck.authors).toHaveLength(MAX_DECK_METADATA);
     expect(deck.authorCount).toBe(5_001);
+  });
+
+  it("says how many authors a release from before format 3 names, past the first it reads", async () => {
+    const authors = Array.from({ length: MAX_DECK_METADATA + 50 }, (_, n) => `"Author ${n}"`);
+    const turtle = `<> a <${SM.Deck}> ; <${SM.formatVersion}> 2 ; <${DCTERMS.title}> "Capitals" ;
+      <${SM.direction}> "front-to-back" ; <${DCTERMS.creator}> ${authors.join(", ")} .`;
+    const deck = toStandaloneLibraryDeck(url, await datasetOf(turtle, url));
+    expect(deck.authors).toEqual(
+      Array.from({ length: MAX_DECK_METADATA }, (_, n) => `Author ${n}`),
+    );
+    expect(deck.authorCount).toBe(MAX_DECK_METADATA + 50);
   });
 });
