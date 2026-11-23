@@ -544,6 +544,18 @@
         "distractorNote": "Anteckning till ett felaktigt alternativ"
       },
       "removed": "(borttagen)",
+      "moreCards": {
+        "one": "{count} kort till ändras.",
+        "other": "{count} kort till ändras."
+      },
+      "moreChanges": {
+        "one": "{count} ändring till i kortet.",
+        "other": "{count} ändringar till i kortet."
+      },
+      "moreSkipped": {
+        "one": "{count} kort till lämnas som det är.",
+        "other": "{count} kort till lämnas som de är."
+      },
       "confirmReplace": {
         "one": "Ersätt i {count} kort",
         "other": "Ersätt i {count} kort"

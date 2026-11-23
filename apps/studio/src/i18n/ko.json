@@ -523,6 +523,15 @@
         "distractorNote": "오답 선택지의 메모"
       },
       "removed": "(삭제됨)",
+      "moreCards": {
+        "other": "그 밖에 바뀌는 카드 {count}장."
+      },
+      "moreChanges": {
+        "other": "이 카드의 다른 변경 {count}개."
+      },
+      "moreSkipped": {
+        "other": "그 밖에 그대로 두는 카드 {count}장."
+      },
       "confirmReplace": {
         "other": "카드 {count}장에서 바꾸기"
       },

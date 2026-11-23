@@ -544,6 +544,18 @@
         "distractorNote": "Note of a wrong option"
       },
       "removed": "(removed)",
+      "moreCards": {
+        "one": "{count} more card changes.",
+        "other": "{count} more cards change."
+      },
+      "moreChanges": {
+        "one": "{count} more change in this card.",
+        "other": "{count} more changes in this card."
+      },
+      "moreSkipped": {
+        "one": "{count} more card is left as it is.",
+        "other": "{count} more cards are left as they are."
+      },
       "confirmReplace": {
         "one": "Replace in {count} card",
         "other": "Replace in {count} cards"
