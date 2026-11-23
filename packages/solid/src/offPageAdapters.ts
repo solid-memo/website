@@ -5,8 +5,12 @@
 import type { DeckArchive, ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { type DocumentReport, unreadableDocument } from "@solid-memo/domain/validation";
+import type { DraftTriple } from "@solid-memo/domain/release/releaseDraft";
 import { ReadLimitError } from "./client/interface";
-import { limitedFetch, limitVars, RELEASE_LIMITS } from "./client/readLimits";
+import { datasetAt, withQuads } from "./client/rdf";
+import type { DocumentReader } from "./datasets";
+import { quadOf } from "./mappers/releaseDraftMapper";
+import { FOREIGN_LIMITS, limitedFetch, limitVars, RELEASE_LIMITS } from "./client/readLimits";
 import { OFF_PAGE_DEADLINE_MS, type OffPage } from "./offPage";
 import { releaseReadError } from "./releaseReadError";
 import type { ShaclShapeValidator } from "./shaclShapeValidator";
@@ -29,6 +33,9 @@ const PAST_DEADLINE = Symbol("pastDeadline");
 const CHECK_TOO_LONG = new AppError("documentCheckTooLong", {
   seconds: OFF_PAGE_DEADLINE_MS / 1000,
 });
+
+/** A document past its deadline off the page, as a read past the limits of a document from elsewhere. */
+const pastDeadline = (url: string) => new ReadLimitError(url, FOREIGN_LIMITS);
 
 /**
  * The validator with its checks of documents off the page: a document's
@@ -185,5 +192,32 @@ export function offPageReleaseDrafts(
           if (error instanceof ReadLimitError) return [];
           throw error;
         }),
+  };
+}
+
+/**
+ * A document outside the user's storages read off the page, as
+ * readDocument reads it (datasets.ts readElsewhere), its requests made
+ * with the fetch it is given: the worker parses it, under the limits
+ * the page reads it under, and gives its triples, which the page makes
+ * into the dataset of the address it was read at, in one pass. What the
+ * page then makes of it, and writes back, is as for any other read. One
+ * past its deadline is a document past FOREIGN_LIMITS.
+ */
+export function offPageDocumentReader(offPage: OffPage): DocumentReader {
+  return async (url, { fetch, ifNoneMatch }) => {
+    const read = await offPage.run<
+      { notModified: true } | { url: string; etag: string | undefined; triples: DraftTriple[] }
+    >({
+      job: "readDocument",
+      input: { url, ...(ifNoneMatch === undefined ? {} : { ifNoneMatch }) },
+      fetches: { doc: fetch },
+      tooLarge: () => pastDeadline(url),
+    });
+    if ("notModified" in read) return read;
+    const quads = read.triples.map(({ subject, predicate, object }) =>
+      quadOf(subject, predicate, object),
+    );
+    return { dataset: withQuads(datasetAt(read.url), quads), etag: read.etag };
   };
 }

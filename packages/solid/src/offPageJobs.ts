@@ -4,7 +4,10 @@
 
 import type { DocumentContext } from "@solid-memo/application/ports";
 import type { DeckFileFormat } from "@solid-memo/domain/deckFile";
-import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import type { DraftTriple, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
+import { sourceOf } from "./client/rdf";
+import { readDocument } from "./client/resources";
+import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import type { JobEnv, Jobs } from "./offPageServe";
 import { createShaclShapeValidator, type ShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidDeckArchive } from "./solidDeckArchive";
@@ -36,7 +39,10 @@ const UNUSED = undefined as unknown as typeof globalThis.fetch;
  * - `readDeckFile`: a deck file's text (DeckArchive.readDeckFile);
  * - `parseRelease`, `readDraftRelease`, `readLinked`: a release file's
  *   text, a release document anywhere and the documents it names
- *   (ReleaseDraftRepository), read with `release`.
+ *   (ReleaseDraftRepository), read with `release`;
+ * - `readDocument`: a document outside the user's storages, read with
+ *   `doc` as readDocument reads it (datasets.ts readElsewhere), given as
+ *   the address it was read at, its version and its triples.
  */
 export function offPageJobs({
   shapesFetch,
@@ -105,6 +111,24 @@ export function offPageJobs({
     readDraftRelease: (env: JobEnv, { url }: { url: string }) => drafts(env).readRelease(url),
     readLinked: (env: JobEnv, { release }: { release: ReleaseDraft }) =>
       drafts(env).readLinked(release),
+    readDocument: async (
+      env: JobEnv,
+      { url, ifNoneMatch }: { url: string; ifNoneMatch?: string },
+    ) => {
+      const read = await readDocument(url, { fetch: env.fetch("doc"), ifNoneMatch });
+      if ("notModified" in read) return read;
+      return {
+        url: sourceOf(read.dataset)!.url,
+        etag: read.etag,
+        triples: quadsOf(read.dataset).map(
+          ({ subject, predicate, object }): DraftTriple => ({
+            subject: keyOf(subject),
+            predicate: predicate.value,
+            object: termOf(object),
+          }),
+        ),
+      };
+    },
   };
   return jobs;
 }

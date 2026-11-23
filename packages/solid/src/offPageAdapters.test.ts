@@ -12,10 +12,14 @@ import { catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { ReadLimitError } from "./client/interface";
-import { limitVars, RELEASE_LIMITS } from "./client/readLimits";
+import { FOREIGN_LIMITS, limitVars, RELEASE_LIMITS } from "./client/readLimits";
+import { sourceOf } from "./client/rdf";
+import { readDocument } from "./client/resources";
+import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { createOffPage } from "./offPage";
 import {
   offPageDeckArchive,
+  offPageDocumentReader,
   offPageReleaseDocuments,
   offPageReleaseDrafts,
   offPageShapeValidator,
@@ -296,5 +300,37 @@ describe("offPageReleaseDrafts", () => {
       publicFetch: published,
     });
     await expect(off.readLinked({ url: RELEASE } as never)).rejects.toThrow("broken");
+  });
+});
+
+describe("offPageDocumentReader", () => {
+  const triples = (dataset: Parameters<typeof quadsOf>[0]) =>
+    quadsOf(dataset)
+      .map(
+        ({ subject, predicate, object }) =>
+          `${keyOf(subject)} ${predicate.value} ${JSON.stringify(termOf(object))}`,
+      )
+      .sort();
+
+  it("reads a document as readDocument does, at the address it was read at, with its version", async () => {
+    const { pod } = await podWithDeck();
+    const read = offPageDocumentReader(offPageOf());
+    const url = catalogUrlOf(INSTANCE);
+    const inPage = await readDocument(url, { fetch: pod.fetch });
+    const off = await read(url, { fetch: pod.fetch });
+    if ("notModified" in off || "notModified" in inPage) throw new Error("read");
+    expect(off.etag).toBe(inPage.etag);
+    expect(sourceOf(off.dataset)!.url).toBe(sourceOf(inPage.dataset)!.url);
+    expect(triples(off.dataset)).toEqual(triples(inPage.dataset));
+    expect(await read(url, { fetch: pod.fetch, ifNoneMatch: off.etag })).toEqual({
+      notModified: true,
+    });
+  });
+
+  it("fails a read past its deadline as a document past the limits of one from elsewhere", async () => {
+    const read = offPageDocumentReader(offPageOf(NEVER, 10));
+    await expect(read(RELEASE, { fetch: releaseFetch })).rejects.toEqual(
+      new ReadLimitError(RELEASE, FOREIGN_LIMITS),
+    );
   });
 });

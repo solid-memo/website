@@ -72,6 +72,11 @@ function inFolders(folders: readonly string[]): InFolders {
  * server, and what such a document says of itself (ownership.ts) never
  * makes it the user's. Logged out, nothing is the user's.
  *
+ * `isElsewhere` says of an address whether a read of it goes anywhere
+ * but to `fetch`: to a document the app did not write, outside the
+ * user's storages, that the page reads off the page (datasets.ts
+ * readElsewhere). Logged out, everything is elsewhere.
+ *
  * The folders are asked once a WebID and kept until `revision` moves,
  * which the page does when it adds a folder or an instance or removes
  * one, so a change made here counts at once. An address outside them has
@@ -98,7 +103,7 @@ export function createOwnPodGate({
   /** Moves whenever the page changes what `ownFolders` gives. */
   revision: () => number;
   now?: () => number;
-}): typeof globalThis.fetch {
+}): typeof globalThis.fetch & { isElsewhere(url: string): Promise<boolean> } {
   /** The folders last asked: for whom, at which revision and when. */
   let known:
     | { webId: string; revision: number; at: number; folders: Promise<FolderLookup> }
@@ -130,10 +135,13 @@ export function createOwnPodGate({
     return fetchIn(await ask(user));
   }
 
-  return async (input, init) => {
+  const gate: typeof globalThis.fetch = async (input, init) => {
     const url = urlOf(input);
     return send(await whose(url), publicFetch, url, input, init);
   };
+  return Object.assign(gate, {
+    isElsewhere: async (url: string) => (await whose(url)) !== fetch,
+  });
 }
 
 /**

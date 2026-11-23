@@ -55,8 +55,10 @@ import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSessionClient } from "@solid-memo/solid/client/session";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createOffPage, type WorkerLike } from "@solid-memo/solid/offPage";
+import { readElsewhere } from "@solid-memo/solid/datasets";
 import {
   offPageDeckArchive,
+  offPageDocumentReader,
   offPageReleaseDocuments,
   offPageReleaseDrafts,
   offPageShapeValidator,
@@ -212,20 +214,17 @@ export function createAppUseCases({
    * FOREIGN_LIMITS, within a budget for the page session (foreignReads,
    * instanceReads).
    */
+  const gate = createOwnPodGate({
+    fetch: writeFence.fetch,
+    // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
+    instanceFetch: instanceReads(elsewhereFetch),
+    publicFetch: foreignReads(noOneFetch),
+    webId: session.webId,
+    ownFolders,
+    revision: () => folderRevision,
+  });
   const dataFetch = createPodFence(
-    routedFetch({
-      origin: GUEST_ORIGIN,
-      local: writeFence.fetch,
-      remote: createOwnPodGate({
-        fetch: writeFence.fetch,
-        // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
-        instanceFetch: instanceReads(elsewhereFetch),
-        publicFetch: foreignReads(noOneFetch),
-        webId: session.webId,
-        ownFolders,
-        revision: () => folderRevision,
-      }),
-    }),
+    routedFetch({ origin: GUEST_ORIGIN, local: writeFence.fetch, remote: gate }),
   );
   const siteFetch = createSiteFetch(servedSite);
   const shapes = {
@@ -243,6 +242,23 @@ export function createAppUseCases({
    * worker ends, is shown as a document too large to read.
    */
   const offPage = createOffPage({ spawn: spawnWorker, config: shapes });
+  /**
+   * The reads of documents elsewhere, off the page in workers of their
+   * own, which read no shapes: one waiting for a slow server holds no
+   * other up.
+   */
+  const readsOffPage = offPageDocumentReader(
+    createOffPage({ spawn: spawnWorker, config: shapes, freeWhileWaiting: true }),
+  );
+  // An instance's documents outside the user's storages, the guest's pod being this browser's, are read off the page.
+  readElsewhere(
+    dataFetch,
+    (url) => !url.startsWith(GUEST_ORIGIN) && gate.isElsewhere(url),
+    readsOffPage,
+  );
+  /** A deck's documents read as no one, outside the user's storages, off the page; never from a guest's pod. */
+  const foreignData = () =>
+    readElsewhere(createPodFence(foreignReads(noOneFetch)), () => true, readsOffPage);
 
   const shapeValidator = offPageShapeValidator(
     offPage,
@@ -427,7 +443,7 @@ export function createAppUseCases({
       fetch: dataFetch,
       // A deck's cards copied into a draft outside their pod are read as no one, as the gate reads elsewhere;
       // never from a guest's pod, which is this browser's.
-      publicFetch: createPodFence(foreignReads(noOneFetch)),
+      publicFetch: foreignData(),
       checkWrite,
       now,
       randomId,
@@ -446,7 +462,7 @@ export function createAppUseCases({
       fetch: dataFetch,
       // A deck's states copied into another deck outside their pod are read as no one, as its cards are;
       // never from a guest's pod, which is this browser's.
-      publicFetch: createPodFence(foreignReads(noOneFetch)),
+      publicFetch: foreignData(),
       checkWrite,
       userStorages,
     }),
@@ -472,7 +488,7 @@ export function createAppUseCases({
       createSolidDeckArchive({
         fetch: dataFetch,
         // A deck's documents outside its instance's pod are exported as no one reads them.
-        publicFetch: createPodFence(foreignReads(noOneFetch)),
+        publicFetch: foreignData(),
       }),
     ),
     fileExchange: createBrowserFileExchange(),

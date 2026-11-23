@@ -326,7 +326,15 @@ not in the page:
 - every document an instance's check reads, in the user's storages
   and in other instances alike, and a draft's release check
   (`ShapeValidator.validateDocument`, `validateDocumentSince`,
-  `validateRelease`).
+  `validateRelease`);
+- every document outside the user's storages read to be shown, studied
+  or written back: another instance's, one a catalog names on another
+  server, read as the user or as no one (`readElsewhere` in
+  [datasets.ts](../packages/solid/src/datasets.ts), `isElsewhere` of
+  the credential gate). The worker reads it as `readDocument` does and
+  gives its triples, which the page makes into the document's dataset
+  in one pass. What the adapters make of it, and write back, is as for
+  any other read.
 
 The page sends each one as a job
 ([offPage.ts](../packages/solid/src/offPage.ts)): the address or the
@@ -354,7 +362,8 @@ is the ports' side in the page, which the composition root wires in
 - **A deadline.** A job may work for `OFF_PAGE_DEADLINE_MS` (60
   seconds), the time it waits for its requests left out. Past it, the
   page ends the worker, and shows the document as too large to read: a
-  release as `releaseTooLarge`, a file as `deckFileTooLarge`. A
+  release as `releaseTooLarge`, a file as `deckFileTooLarge`, a
+  document from elsewhere as one past `FOREIGN_LIMITS`. A
   document an instance's check reads is unreadable, and the report says
   the check stopped at its deadline (`documentCheckTooLong`). A worker
   that ends on its own, out of memory say, counts the same. The tab goes
@@ -362,15 +371,18 @@ is the ports' side in the page, which the composition root wires in
 - **Workers.** At most `OFF_PAGE_WORKERS` (four) run at once, one job
   each, and the rest wait their turn. A worker no job needs is kept for
   30 seconds, with the shapes it has read, then ended.
+  The reads of documents elsewhere have workers of their own, which
+  read no shapes. There, a job waiting for its requests doesn't count,
+  so a slow server holds no other read up, and there are at most
+  `OFF_PAGE_WORKERS_IN_ALL` (16) of them.
 - **The build.** Vite bundles the worker as a module of its own
   ([offPageWorker.ts](../packages/solid/src/offPageWorker.ts)), with the
   Solid client the page has (`worker` in `apps/web/vite.config.ts`). It's
   served from the site, so the page's Content Security Policy
   (`script-src 'self'`) lets it run.
-- **What stays in the page:** the [write check](#the-write-check) of the
-  user's own data, and the reads that show and study an instance's data,
-  another instance's deck's cards among them, under the read limits
-  ([boundaries.md](boundaries.md#documents-the-app-didnt-write)).
+- **What stays in the page:** the [write check](#the-write-check), and
+  the reads of the user's own storages and of a guest's study in this
+  browser ([boundaries.md](boundaries.md#documents-the-app-didnt-write)).
 - **Tests** run the jobs in their own process, over a `MessageChannel`
   (`src/testing/inProcessWorker.ts` in `solid`), so what goes between
   the page and the worker is copied as a worker's messages are.

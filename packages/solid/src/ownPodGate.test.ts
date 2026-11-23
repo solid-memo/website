@@ -97,6 +97,18 @@ describe("createOwnPodGate", () => {
     expect(publicFetch).toHaveBeenCalledOnce();
   });
 
+  it("says what is elsewhere: anything but the user's storages, an instance they registered outside them too", async () => {
+    const { gate } = setup(
+      { webId: WEB_ID },
+      ["https://alice.example/"],
+      ["https://shared.example/study/"],
+    );
+    expect(await gate.isElsewhere("https://alice.example/memo/catalog.ttl")).toBe(false);
+    expect(await gate.isElsewhere("https://shared.example/study/catalog.ttl")).toBe(true);
+    expect(await gate.isElsewhere("https://bob.example/cards.ttl")).toBe(true);
+    expect(await setup({ webId: undefined }).gate.isElsewhere("https://alice.example/")).toBe(true);
+  });
+
   it("refuses a write made as a request outside the user's own folders", async () => {
     const { gate, fetch, publicFetch } = setup({ webId: WEB_ID });
     const url = "https://attacker.example/cards.ttl";
