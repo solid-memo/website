@@ -1,0 +1,30 @@
+@base <https://solid-memo.com/ns/bounds/agent.ttl> .
+
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+# The most Solid Memo reads of an agent: each property of every
+# version of its shape that needs a bound. A reader takes at most
+# sh:maxCount values (of a text, one per language), no string longer
+# than sh:maxLength, and only an IRI sh:pattern names, and it stops as
+# it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "AgentBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of an agent." ;
+    sh:property <#name> ,
+                <#mbox> .
+
+# A name anyone may type, as long as a term may be.
+<#name>
+    a sh:PropertyShape ;
+    sh:path foaf:name ;
+    sh:maxLength 16383 .
+
+# A mailbox: a mailto: URL.
+<#mbox>
+    a sh:PropertyShape ;
+    sh:path foaf:mbox ;
+    sh:pattern "^mailto:" .

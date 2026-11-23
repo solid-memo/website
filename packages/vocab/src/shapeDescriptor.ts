@@ -50,6 +50,33 @@ export interface FieldDescriptor {
   cardinality: Cardinality;
   /** kind "enum" and "iriEnum" only: the allowed literals or IRIs, in shape order. */
   values?: readonly string[];
+  /**
+   * The most values read (ns/bounds/): 1 for a field of one value, else
+   * as many as its bounds state; a text's are its languages (one value
+   * each), or with cardinality "many" all its values together. The
+   * reader stops there.
+   */
+  maxCount: number;
+  /** kind "string", "text" and "anyText": the longest value read, in characters; a longer one is not read. */
+  maxLength?: number;
+  /** kind "iri": which IRIs are read, http(s) URLs or mailto: ones; any other is not. */
+  iri?: "http" | "mailbox";
+}
+
+/**
+ * The terms read of a subject beside its record, or of a subject no
+ * shape describes (a WebID profile): a small shape of their own in
+ * ns/bounds/, read as a record is, every value bounded. A missing term
+ * is absent from the record (or an empty list), never a misfit.
+ */
+export interface TermsDescriptor<T = unknown> {
+  /** sh:name, e.g. "DeckTerms". */
+  name: string;
+  /** Path of the bounds document under ns/bounds/. */
+  document: string;
+  fields: readonly FieldDescriptor[];
+  /** Phantom: ties the descriptor to its record type. Never set. */
+  readonly __record?: T;
 }
 
 /**

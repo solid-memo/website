@@ -1,0 +1,39 @@
+@base <https://solid-memo.com/ns/bounds/fsrs-review-state.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# The most Solid Memo reads of an FSRS-6 review state: each property
+# of every version of its shape that needs a bound. A reader takes at
+# most sh:maxCount values (of a text, one per language), no string
+# longer than sh:maxLength, and only an IRI sh:pattern names, and it
+# stops as it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "FsrsReviewStateBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of an FSRS-6 review state." ;
+    sh:property <#reviewOf> ,
+                <#due> ,
+                <#previousDue> .
+
+# An http(s) URL, as every IRI a record holds.
+<#reviewOf>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewOf ;
+    sh:pattern "^https?://" .
+
+# A day, YYYY-MM-DD: 64 characters leave room for any year a date
+# holds.
+<#due>
+    a sh:PropertyShape ;
+    sh:path solid-memo:due ;
+    sh:maxLength 64 .
+
+# A day, YYYY-MM-DD: 64 characters leave room for any year a date
+# holds.
+<#previousDue>
+    a sh:PropertyShape ;
+    sh:path solid-memo:previousDue ;
+    sh:maxLength 64 .

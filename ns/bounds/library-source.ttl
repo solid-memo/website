@@ -1,0 +1,42 @@
+@base <https://solid-memo.com/ns/bounds/library-source.ttl> .
+
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# What Solid Memo reads of a source a release in the library's index
+# names. A small shape of their own, read as a record is, within the
+# same bounds (docs/shapes.md, Bounds).
+<#terms>
+    a sh:NodeShape ;
+    sh:name "LibrarySourceTerms" ;
+    rdfs:comment "What Solid Memo reads of a source a release in the library's index names." ;
+    sh:property <#title> ,
+                <#license> ,
+                <#creator> .
+
+# Text anyone may type, as long as a term may be.
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:maxLength 16383 .
+
+# An http(s) URL.
+<#license>
+    a sh:PropertyShape ;
+    sh:path dcterms:license ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:pattern "^https?://" .
+
+# At most 100 authors (MAX_DECK_METADATA), each as long as a term may
+# be.
+<#creator>
+    a sh:PropertyShape ;
+    sh:path dcterms:creator ;
+    sh:datatype xsd:string ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .

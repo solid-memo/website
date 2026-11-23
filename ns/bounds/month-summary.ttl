@@ -1,0 +1,49 @@
+@base <https://solid-memo.com/ns/bounds/month-summary.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# The most Solid Memo reads of a month's summary in the digest: each
+# property of every version of its shape that needs a bound. A reader
+# takes at most sh:maxCount values (of a text, one per language), no
+# string longer than sh:maxLength, and only an IRI sh:pattern names,
+# and it stops as it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "MonthSummaryBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a month's summary in the digest." ;
+    sh:property <#summaryOf> ,
+                <#summarizedVersion> ,
+                <#studyDayCounts> ,
+                <#recallSecondsCount> .
+
+# An http(s) URL, as every IRI a record holds.
+<#summaryOf>
+    a sh:PropertyShape ;
+    sh:path solid-memo:summaryOf ;
+    sh:pattern "^https?://" .
+
+# An ETag or a ruleset's name: at most 512 characters, as no longer
+# version is ever sent (MAX_SENT_VERSION_LENGTH).
+<#summarizedVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:summarizedVersion ;
+    sh:maxLength 512 .
+
+# At most 64 study days, twice a month's, each "YYYY-MM-DD answers
+# introduced reviews lapses" in at most 128 characters.
+<#studyDayCounts>
+    a sh:PropertyShape ;
+    sh:path solid-memo:studyDayCounts ;
+    sh:maxCount 64 ;
+    sh:maxLength 128 .
+
+# At most 64 recall times: one for each second from 0 to 60, each
+# "seconds count" in at most 64 characters.
+<#recallSecondsCount>
+    a sh:PropertyShape ;
+    sh:path solid-memo:recallSecondsCount ;
+    sh:maxCount 64 ;
+    sh:maxLength 64 .

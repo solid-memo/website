@@ -1,0 +1,33 @@
+@base <https://solid-memo.com/ns/bounds/review-links.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# What Solid Memo reads of a review state in any format, whether or
+# not it fits its shape: its card and direction. A small shape of
+# their own, read as a record is, within the same bounds
+# (docs/shapes.md, Bounds).
+<#terms>
+    a sh:NodeShape ;
+    sh:name "ReviewLinksTerms" ;
+    rdfs:comment "What Solid Memo reads of a review state in any format, whether or not it fits its shape: its card and direction." ;
+    sh:property <#reviewOf> ,
+                <#reviewDirection> .
+
+# The card: an http(s) URL.
+<#reviewOf>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewOf ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:pattern "^https?://" .
+
+# The direction: a concept's http(s) URL.
+<#reviewDirection>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewDirection ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:pattern "^https?://" .

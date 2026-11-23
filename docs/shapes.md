@@ -32,6 +32,10 @@ palette/v1.ttl, color-set/v1.ttl
                               …/palette/v1.ttl#shape  (a palette of the user's own)
 ```
 
+The bounds on what the app reads of each kind, every version
+together, are beside them in [`ns/bounds/`](../ns/bounds/)
+([below](#bounds)).
+
 Each file's address is its IRI and its `@base`. The IRIs keep `.ttl`:
 GitHub Pages serves the file as `text/turtle` but negotiates no
 content, so an address without it is a 404. `npm run generate` finds
@@ -212,9 +216,10 @@ format was the latest. Today's app edits text as the latest formats ask
 ```mermaid
 flowchart LR
     accTitle: What the shapes generate
-    accDescr: npm run generate turns the shapes into types and descriptors, which the migrations, the records, the mappers and the shape registry use.
+    accDescr: npm run generate turns the shapes and their bounds into types and descriptors, which the migrations, the records, the mappers and the shape registry use.
     shapes["ns/shapes/*/v*.ttl"] -->|npm run generate| types["src/types.generated.ts<br/>CardV2, DeckRecord, LATEST_VERSION…"]
     shapes -->|npm run generate| desc["src/descriptors.generated.ts<br/>CARD_V2, SHAPES, ALL_SHAPES"]
+    bounds["ns/bounds/*.ttl"] -->|npm run generate| desc
     types --> migrations["domain: shapes/migrations<br/>record to the next record"]
     types --> records["domain: *Record.ts<br/>record to model and back"]
     desc --> rw["solid: records.ts<br/>Thing to record and back"]
@@ -251,6 +256,86 @@ types) are the envelope, not fields: the generic writer stamps them from
 the descriptor. Generated files, only types and `as const` data, are
 committed; CI (`npm run generate:check`) and
 `packages/vocab/tooling/generate.test.ts` check them for drift.
+
+## Bounds
+
+Every property a shape names is read within bounds, which
+`ns/bounds/<kind>.ttl` states for every version of the kind at once.
+A published shape is never edited, so the bounds live in documents of
+their own, beside the shapes, and a bound may move without a format
+version. Each document holds a node shape, `<#bounds>`, named
+`<Kind>Bounds` (`"CardBounds"`), whose property shapes bound the
+kind's properties by `sh:path`:
+
+| Bound | What it bounds | Needed by |
+|---|---|---|
+| `sh:maxCount` | How many values are read: of a text, its languages, one value each; of a text with several values per language, all its values | A field of several values, and every text |
+| `sh:maxLength` | How long a string or text value may be, in characters | A string or text field, `sh:in` aside |
+| `sh:pattern "^https?://"` | Only http(s) URLs are read | An IRI field without `sh:in` |
+| `sh:pattern "^mailto:"` | Only `mailto:` URLs are read | An agent's mailbox |
+
+A field of one value that's no text reads one value. A value of a
+fixed list (`sh:in`), a number, a boolean or a date-time is one value
+of a known form, and needs no further bound.
+
+`npm run generate` fails, naming the document and the shape, on a
+field without a bound it needs, on a bound of a property no version
+of the kind has, and on a kind without a `<#bounds>` shape
+([bounds.ts](../packages/vocab/tooling/bounds.ts)). It puts each
+field's bounds in its descriptor (`maxCount`, `maxLength`, `iri`).
+
+The terms the app reads of a subject beside its record get a small
+shape of their own, `<#terms>`, named `<Name>Terms` (`"DeckTerms"`).
+They're a deck entry's completed chapters, card language, picture
+hosts and pause, a card's release, a catalog's releases and drafts,
+and the preferences' `sm:connectedScreenSkipped`. A subject no shape
+describes gets one too, in a document of its own. These are a WebID
+profile (`profile.ttl`), a type index's registration, a release's
+contact point, and the library index's releases and sources. So are
+a review state's links in any format, and what a deck's document
+says of itself. A term
+shape states each property's kind (`sh:datatype` or
+`sh:nodeKind sh:IRI`), `sh:maxCount 1` for one value or a larger
+bound for several, and the other bounds a field of its kind needs. No
+term is required: a missing term means its default. The generator
+gives each a record type (`DeckTerms`) and a descriptor
+(`DECK_TERMS`).
+
+Each bound is set well above what any deck in the library or any
+writer of the app holds, and the comment above it says why:
+
+- A text a user types is read in up to 100 languages, the most a deck
+  keeps of its title's (`MAX_DECK_METADATA`), each value up to a
+  term's 16,383 characters (`MAX_TERM_CHARACTERS`), past which no
+  read takes a document at all.
+- A deck's creators, themes and languages are read up to 100, all a
+  deck keeps (`MAX_DECK_METADATA`), and its keywords up to 1,000
+  (`MAX_DECK_KEYWORDS`). A release's sources are read up to 1,000:
+  the library's longest list has 248.
+- A catalog's datasets and a deck group's decks and groups are read
+  up to 1,000 (`MAX_CATALOG_LINKS`, `MAX_DECK_GROUPS`). A catalog's
+  releases, drafts and top groups are read up to 1,001, one past
+  that, so that a catalog linking more is told and refused as before.
+- A deck's completed chapters are read up to 2,000, twice the 1,000
+  it keeps (`MAX_COMPLETED_CHAPTERS`), and its picture hosts up to
+  1,000, ten times the 100 it keeps (`MAX_PICTURE_HOSTS`): values the
+  deck drops leave room for the ones it keeps.
+- A card's wrong options and subjects are read up to 100, a chapter's
+  review questions and a step's cards up to 1,000. The library's
+  cards name 6 wrong options and 4 subjects at most.
+- A deck schedule's due days are read up to 36,501, one for each day
+  up to the longest interval (`MAX_INTERVAL_DAYS`) and today. A month
+  summary's study days are read up to 64, and its recall times up to
+  64, one for each second from 0 to 60.
+- A palette's name is read as the palette editor writes it: up to 32
+  languages (`MAX_PALETTE_NAME_LANGUAGES`) of up to 200 characters
+  (`MAX_PALETTE_NAME_CHARACTERS`). A color is 7 characters, `#rrggbb`.
+- A day (`YYYY-MM-DD`) is read up to 64 characters, an ETag or a
+  ruleset's name up to 512, as no longer version is sent
+  (`MAX_SENT_VERSION_LENGTH`), and a language tag up to 255.
+- A WebID profile's storages, linked documents, type indexes and
+  identity providers are read up to 256 each, and a registration's
+  documents and containers up to 256: a profile names a few.
 
 ## Reading and writing
 

@@ -333,6 +333,7 @@ its own rules, and none follows the app's number:
 |---|---|---|
 | The vocabulary | `v1` in its IRI, and `owl:versionInfo` (1.29) in [`ns/vocab/v1.ttl`](../ns/vocab/v1.ttl) | Terms are only added ([vocab.md](vocab.md#versioning-policy)) |
 | The shapes | `ns/shapes/<class>/v<N>.ttl`, one file per format version | A published version is never edited, and a class gets no further version ([shapes.md](shapes.md)) |
+| The bounds | `ns/bounds/<kind>.ttl`, one file for every version of a kind | A document's address keeps answering; a bound may move, as it changes what the app reads, not the data's format ([shapes.md](shapes.md#bounds)) |
 | Format versions | `sm:formatVersion` on every subject the app writes | The format a kind is written in never moves ([above](#what-never-changes), [migrations.md](migrations.md)) |
 | The library's decks | `decks/<name>/v<N>.ttl` | A published version is never edited ([deck-library.md](deck-library.md#publishing-a-new-version)) |
 

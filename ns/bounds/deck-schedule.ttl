@@ -1,0 +1,57 @@
+@base <https://solid-memo.com/ns/bounds/deck-schedule.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# The most Solid Memo reads of a deck's schedule in the digest: each
+# property of every version of its shape that needs a bound. A reader
+# takes at most sh:maxCount values (of a text, one per language), no
+# string longer than sh:maxLength, and only an IRI sh:pattern names,
+# and it stops as it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "DeckScheduleBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a deck's schedule in the digest." ;
+    sh:property <#scheduleOf> ,
+                <#cardsVersion> ,
+                <#reviewsVersion> ,
+                <#scheduledOn> ,
+                <#dueOnDay> .
+
+# An http(s) URL, as every IRI a record holds.
+<#scheduleOf>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduleOf ;
+    sh:pattern "^https?://" .
+
+# An ETag or a ruleset's name: at most 512 characters, as no longer
+# version is ever sent (MAX_SENT_VERSION_LENGTH).
+<#cardsVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:cardsVersion ;
+    sh:maxLength 512 .
+
+# An ETag or a ruleset's name: at most 512 characters, as no longer
+# version is ever sent (MAX_SENT_VERSION_LENGTH).
+<#reviewsVersion>
+    a sh:PropertyShape ;
+    sh:path solid-memo:reviewsVersion ;
+    sh:maxLength 512 .
+
+# A day, YYYY-MM-DD: 64 characters leave room for any year a date
+# holds.
+<#scheduledOn>
+    a sh:PropertyShape ;
+    sh:path solid-memo:scheduledOn ;
+    sh:maxLength 64 .
+
+# At most one due day for each day up to the longest interval
+# (MAX_INTERVAL_DAYS, 36,500) and today, each "YYYY-MM-DD count" in at
+# most 64 characters.
+<#dueOnDay>
+    a sh:PropertyShape ;
+    sh:path solid-memo:dueOnDay ;
+    sh:maxCount 36501 ;
+    sh:maxLength 64 .

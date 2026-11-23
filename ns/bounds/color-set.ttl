@@ -1,0 +1,149 @@
+@base <https://solid-memo.com/ns/bounds/color-set.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+
+# The most Solid Memo reads of a palette's color set: each property of
+# every version of its shape that needs a bound. A reader takes at
+# most sh:maxCount values (of a text, one per language), no string
+# longer than sh:maxLength, and only an IRI sh:pattern names, and it
+# stops as it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "ColorSetBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a palette's color set." ;
+    sh:property <#backgroundColor> ,
+                <#surfaceColor> ,
+                <#sunkenSurfaceColor> ,
+                <#textColor> ,
+                <#mutedTextColor> ,
+                <#borderColor> ,
+                <#fieldEdgeColor> ,
+                <#primaryColor> ,
+                <#primaryFillColor> ,
+                <#onPrimaryColor> ,
+                <#linkColor> ,
+                <#dangerColor> ,
+                <#warningColor> ,
+                <#grade0Color> ,
+                <#grade1Color> ,
+                <#grade2Color> ,
+                <#grade3Color> ,
+                <#grade4Color> ,
+                <#grade5Color> .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#backgroundColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backgroundColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#surfaceColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:surfaceColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#sunkenSurfaceColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:sunkenSurfaceColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#textColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#mutedTextColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:mutedTextColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#borderColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:borderColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#fieldEdgeColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:fieldEdgeColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#primaryColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:primaryColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#primaryFillColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:primaryFillColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#onPrimaryColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:onPrimaryColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#linkColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:linkColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#dangerColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:dangerColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#warningColor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:warningColor ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#grade0Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade0Color ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#grade1Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade1Color ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#grade2Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade2Color ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#grade3Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade3Color ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#grade4Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade4Color ;
+    sh:maxLength 7 .
+
+# An opaque color, #rrggbb: 7 characters, as its shape's pattern asks.
+<#grade5Color>
+    a sh:PropertyShape ;
+    sh:path solid-memo:grade5Color ;
+    sh:maxLength 7 .
