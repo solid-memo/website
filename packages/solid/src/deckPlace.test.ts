@@ -774,6 +774,84 @@ describe("a deck whose document says it is the deck's, outside the instance's fo
       });
     });
   });
+
+  describe("far below the storage's root", () => {
+    const STORAGE = '<http://www.w3.org/ns/pim/space#Storage>; rel="type"';
+
+    /** A deck whose instance is the folder `instance`. */
+    function deckIn(instance: string, reviewsDocumentUrl = `${instance}reviews/deck-1.ttl`) {
+      return {
+        url: `${instance}catalog.ttl#deck-1`,
+        title: { en: "Spanish" },
+        cardsDocumentUrl: `${instance}cards/deck-1.ttl`,
+        reviewsDocumentUrl,
+      };
+    }
+
+    /**
+     * A guard over a server that types only its root (`/`) as a storage's
+     * and answers every folder; the document at `long`, read, is sent from
+     * a short address (a redirect) and says it is `deckUrl`'s.
+     */
+    function guardOver(long: string, deckUrl: string) {
+      const asked = { heads: 0 };
+      const fetch = (async (input, init) => {
+        const url = String(input);
+        if (init?.method === "HEAD") {
+          asked.heads++;
+          const headers: Record<string, string> =
+            new URL(url).pathname === "/" ? { Link: STORAGE } : {};
+          return new Response(null, { headers });
+        }
+        if (url !== long) return new Response(null, { status: 404 });
+        const response = new Response(`<${long}> <${IS_PART_OF}> <${deckUrl}> .`, {
+          headers: { "Content-Type": "text/turtle", ETag: '"v1"' },
+        });
+        Object.defineProperty(response, "redirected", { value: true });
+        Object.defineProperty(response, "url", { value: `${ROOT}r.ttl` });
+        return response;
+      }) as typeof globalThis.fetch;
+      return { guard: createDeckDocumentGuard(fetch), asked };
+    }
+
+    it("asks a few folders above a deep document, and keeps it and refuses a write to it as no deck's", async () => {
+      const deck = deckIn(`${ROOT}inst/`, `${ROOT}${"a/".repeat(8000)}r.ttl`);
+      const long = deck.reviewsDocumentUrl;
+      const { guard, asked } = guardOver(long, deck.url);
+      await expect(guard.removal(deck, long)).resolves.toBe("unclaimed");
+      // The document's folder and the few above it, no more.
+      expect(asked.heads).toBe(9);
+      // A write, through a fresh guard as a grade uses, asks no more either; it uses a
+      // 200-folder path, because a long address read through a redirect is refused before the walk.
+      const deep = `${ROOT}${"a/".repeat(200)}r.ttl`;
+      const writes = guardOver(deep, deck.url);
+      const says = await datasetOfTurtle(deep, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      await expect(writes.guard.writable(deck, deep, says)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+      expect(writes.asked.heads).toBe(9);
+    });
+
+    it("is the deck's as far below the root as a walk asks, and no deck's a folder further", async () => {
+      const deck = deckIn(`${ROOT}inst/`);
+      const near = `${ROOT}${"a/".repeat(8)}r.ttl`;
+      const far = `${ROOT}${"a/".repeat(9)}r.ttl`;
+      const says = (url: string) => datasetOfTurtle(url, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard } = guardOver(near, deck.url);
+      await expect(guard.standing(deck, near, await says(near))).resolves.toBe("owned");
+      await expect(guard.standing(deck, far, await says(far))).resolves.toBe("unclaimed");
+    });
+
+    it("is no deck's when the instance is further below the root than a walk asks", async () => {
+      const deck = deckIn(`${ROOT}${"i/".repeat(9)}`);
+      const near = `${ROOT}doc/r.ttl`;
+      const { guard, asked } = guardOver(near, deck.url);
+      const says = await datasetOfTurtle(near, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      await expect(guard.standing(deck, near, says)).resolves.toBe("unclaimed");
+      // Two for the document's root, nine for the instance's, which is not found.
+      expect(asked.heads).toBe(11);
+    });
+  });
 });
 
 describe("a deck whose document is a deck itself: a release", () => {

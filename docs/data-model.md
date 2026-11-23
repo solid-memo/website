@@ -623,7 +623,15 @@ No document Solid Memo names has any.
   one of those ([discovery chain](#discovery-chain)).
   Otherwise both must be under the same storage's root that the server
   shows (typed `pim:Storage`, or named by a Linked Web Storage server),
-  with no other root between it and either of them. A folder that
+  with no other root between it and either of them. Each folder
+  asked for that root is a request, so it's looked for no more than
+  `MAX_STORAGE_ANCESTORS` (8) folders above the document's folder and
+  the instance's (`rootOf` in `deckPlace.ts`). So a document outside
+  the instance's folder, in no storage the user's profile names, and
+  more than `MAX_STORAGE_ANCESTORS` folders below its root is
+  unclaimed: a removal keeps it and a write to it is refused. The same
+  holds for every such document of an instance that far below its
+  root. A folder that
   holds both isn't enough: a server may hold many users' pods
   under one root it doesn't type. Anywhere else it's unclaimed,
   whatever it says, and nothing is written to or deleted there for the

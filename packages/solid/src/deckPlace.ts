@@ -48,7 +48,7 @@ import {
 import type { ReadBudget, SharedReads } from "@solid-memo/application/ports";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { deckBackLinksOf, isDeckItself } from "./ownership";
-import { hasStorageLink } from "./solidStorageGateway";
+import { hasStorageLink, MAX_STORAGE_ANCESTORS } from "./solidStorageGateway";
 import { DCTERMS } from "./vocab";
 
 /** A deck as the guard needs it: its entry, its title for an error, and its two documents. */
@@ -273,14 +273,16 @@ export function createDeckDocumentGuard(
 
   /**
    * The storage's root the folder is in: the folder itself or the
-   * nearest folder above it that is a storage's root (isStorageRoot);
-   * null when there is none up to the server's root (`/`), which a
-   * server that types no root leaves.
+   * nearest folder above it that is a storage's root (isStorageRoot),
+   * no more than MAX_STORAGE_ANCESTORS above it, as each one asked is a
+   * request; null when there is none that near, nor up to the server's
+   * root (`/`), which a server that types no root leaves. A folder
+   * further below its root is not shown to be in a storage.
    */
   async function rootOf(folder: string): Promise<string | null> {
-    for (let at = folder; ; at = new URL("..", at).href) {
+    for (let at = folder, above = 0; ; at = new URL("..", at).href, above++) {
       if (await isStorageRoot(at)) return at;
-      if (new URL(at).pathname === "/") return null;
+      if (new URL(at).pathname === "/" || above === MAX_STORAGE_ANCESTORS) return null;
     }
   }
 
@@ -316,10 +318,10 @@ export function createDeckDocumentGuard(
           (storage) => isDocumentIn(url, storage) && isInFolder(instance, storage),
         );
       const root = await rootOf(new URL(".", document).href);
+      if (root === null || !isInFolder(instance, root)) return false;
       // The instance under that root too, with no root of its own below it.
-      return (
-        root !== null && isInFolder(instance, root) && isSameUrl(root, (await rootOf(instance))!)
-      );
+      const instanceRoot = await rootOf(instance);
+      return instanceRoot !== null && isSameUrl(root, instanceRoot);
     } catch (error) {
       if (lenient) return false;
       throw error;
