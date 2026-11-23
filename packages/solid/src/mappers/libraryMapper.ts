@@ -108,7 +108,7 @@ function toLibraryDeck(
   const createdAt = release.created;
   const modifiedAt = release.modified;
   // No more of its metadata than a release added by link keeps (toStandaloneLibraryDeck).
-  return withBoundedListing({
+  const listing = withBoundedListing({
     url: hasCurrentVersion,
     seriesUrl,
     version: release.version,
@@ -132,6 +132,18 @@ function toLibraryDeck(
     ),
     ...courseOf(currentThing!),
   });
+  const total = authorCountOf(currentThing!, current.record.version, release.creator);
+  return { ...listing, ...listedAuthors(listing.authors, total) };
+}
+
+/**
+ * How many authors a release names. One from before format 3 names them
+ * as text, of which only the first MAX_DECK_METADATA are read
+ * (records.ts namedCreators), so they are counted where it stores them,
+ * with no agent named for any.
+ */
+function authorCountOf(thing: Subject, version: number, creators: readonly string[]): number {
+  return version < 3 ? getStringNoLocaleAll(thing, DCTERMS.creator).length : creators.length;
 }
 
 /** `isCourse` for a release that is also typed schema:Course. */
@@ -264,7 +276,8 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
   } = toLibraryDeckContent(url, dataset);
   const deck = releaseDeckOf(url, dataset)!;
   const subject = asUrl(deck);
-  const release = migrate("libraryDeck", readVersioned(deck, "libraryDeck")!.record, { subject });
+  const read = readVersioned(deck, "libraryDeck")!;
+  const release = migrate("libraryDeck", read.record, { subject });
   const seriesThing = getThing(dataset, release.inSeries);
   const series = seriesThing === null ? null : readVersioned(seriesThing, "libraryDeckSeries");
   // The series is data the release's creator wrote: of the other versions it lists, only those at an address a
@@ -285,7 +298,7 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
     languages: [...release.language],
     ...(release.created === undefined ? {} : { createdAt: release.created }),
     // Its content keeps its first authors (libraryDeckFromRecord): how many it names, when more.
-    ...listedAuthors(content.authors, release.creator.length),
+    ...listedAuthors(content.authors, authorCountOf(deck, read.record.version, release.creator)),
     ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
       toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
     ),

@@ -871,9 +871,12 @@ graph LR
     keeps the first values that fit: the title's languages, the
     description's, the authors, topics and keywords, in that order and
     in their stored order, and a keywords' language only with a keyword. A release's content, a deck file's import, a
-    new entry, an upgrade and a read keep them so. Every write of an
-    entry leaves out what it held past the bound, so an entry saved
-    before holds it until the deck is next saved.
+    new entry, an upgrade and a read keep them so. An entry or release
+    from before format 3, which names its authors as text, is read with
+    at most its first 100, before its migration names an agent for
+    each. Every write of an entry leaves out what it held past the
+    bound, so an entry saved before holds it until the deck is next
+    saved.
   - Its cards document is its `dcat:distribution` (`#deck-X-cards`, with
     `dcat:accessURL`).
   - A deck copied from the [deck library](deck-library.md), or from a

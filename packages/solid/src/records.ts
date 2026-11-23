@@ -44,6 +44,7 @@ import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT_AP_SHAPED_CLASSES } from "@solid-memo/shacl/profiles";
 import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
+import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
 import { FOAF_MBOX } from "@solid-memo/domain/release/releaseModel";
 import { subjectOfDocument } from "@solid-memo/domain/instanceLayout";
@@ -98,12 +99,28 @@ function readField(thing: Subject, field: FieldDescriptor): FieldValue | null | 
       case "anyText":
         return readTexts(thing, field.predicate, field.kind === "anyText");
       default:
-        return getStringNoLocaleAll(thing, field.predicate);
+        return field.name === "creator"
+          ? namedCreators(thing, field.predicate)
+          : getStringNoLocaleAll(thing, field.predicate);
     }
   }
   const value = readScalar(thing, field);
   if (value === null) return field.cardinality === "one" ? null : undefined;
   return value;
+}
+
+/**
+ * The authors a deck or a release from before format 3 names as text
+ * ("Name <email>"): at most its first MAX_DECK_METADATA, which is all a
+ * deck keeps at most (withBoundedMetadata). The migration to format 3
+ * names an agent for each at an address joined from the subject's
+ * document, which may be as long as a term, and the agents are named
+ * again to tell who they are (authorOfAgents): an entry naming many
+ * authors must not cost that work and memory for each before the bound
+ * drops all but the first (GHSA-4fxx-vv9w-9g2j).
+ */
+function namedCreators(thing: Subject, predicate: string): string[] {
+  return getStringNoLocaleAll(thing, predicate).slice(0, MAX_DECK_METADATA);
 }
 
 function readScalar(
@@ -360,7 +377,8 @@ export function readVersioned<S extends ShapeName>(
  * fit its shape. The text the chain writes itself is kept within the
  * bound (defaultDeckDescription). Its creators' agents are not held to
  * it here: a deck from before format 3 names its authors, whose agents
- * a write names anew and refuses past the bound (GHSA-4mgg-5xpp-3jx5).
+ * a write names anew and refuses past the bound (GHSA-4mgg-5xpp-3jx5),
+ * and only its first are read (namedCreators).
  */
 export function migrateWithinBound<S extends ShapeName>(
   shape: S,
