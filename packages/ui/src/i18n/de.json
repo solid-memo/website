@@ -1753,7 +1753,7 @@
     "noMetaToUpdate": "Diese Instanz hat keine Beschreibung, die sich aktualisieren lässt. Lade die Seite neu und versuche es erneut.",
     "webIdEmpty": "Gib deine WebID ein.",
     "webIdInvalidUrl": "Das ist keine gültige URL. Eine WebID sieht z. B. so aus: https://you.example/profile/card#me.",
-    "webIdNotHttps": "Eine WebID muss mit https:// beginnen.",
+    "webIdNotHttps": "Eine WebID muss mit https:// beginnen, oder mit http:// für einen Pod auf diesem Gerät (localhost).",
     "webIdWithCredentials": "Eine WebID darf keinen Benutzernamen und kein Passwort enthalten.",
     "providerNotHttps": "Ein Identitätsanbieter muss eine https://-URL sein.",
     "webIdNoSubject": "Dein WebID-Profil beschreibt dich nicht. Prüfe, ob du deine WebID genau eingegeben hast, mit dem Teil nach #, oder wähle stattdessen deinen Anbieter.",

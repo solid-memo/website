@@ -1753,7 +1753,7 @@
     "noMetaToUpdate": "Den här instansen har ingen beskrivning att uppdatera. Läs in sidan igen och försök på nytt.",
     "webIdEmpty": "Ange ditt WebID.",
     "webIdInvalidUrl": "Det är ingen giltig URL. Ett WebID ser ut som https://du.example/profile/card#me.",
-    "webIdNotHttps": "Ett WebID måste börja med https://.",
+    "webIdNotHttps": "Ett WebID måste börja med https://, eller med http:// för en Pod på den här enheten (localhost).",
     "webIdWithCredentials": "Ett WebID får inte innehålla användarnamn eller lösenord.",
     "providerNotHttps": "En identitetsleverantör måste ha en https://-adress.",
     "webIdNoSubject": "Din WebID-profil beskriver inte dig. Kontrollera att du skrev ditt WebID exakt, med delen efter #, eller välj din leverantör i stället.",

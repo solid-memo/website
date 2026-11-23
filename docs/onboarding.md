@@ -165,6 +165,19 @@ accepts only absolute `https:` URLs without embedded credentials. It
 runs in the form (for the message) and in the `loginWithWebId` use
 case (no caller skips it).
 
+Plain `http:` passes on a loopback host only, at any port, so a learner
+can try Solid Memo with a Pod run on their own device, such as
+Community Solid Server at `http://localhost:3000/`. Requests to these
+hosts never leave the device, and browsers count them as secure:
+
+- `localhost`, and any name under `.localhost`
+- an address in `127.0.0.0/8`, such as `127.0.0.1`
+- `[::1]`
+
+A profile's `http:` issuer counts only for a WebID on a loopback host
+too (`isSecureIssuerOf`), so a profile on the web can't send the
+browser to a server on the learner's device.
+
 ## Pod discovery
 
 `discoverAccount(session)` returns a

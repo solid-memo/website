@@ -78,7 +78,8 @@ export const ERROR_TEMPLATES = {
   webIdEmpty: "Enter your WebID.",
   webIdInvalidUrl:
     "That is not a valid URL. A WebID looks like https://you.example/profile/card#me.",
-  webIdNotHttps: "A WebID must start with https://.",
+  webIdNotHttps:
+    "A WebID must start with https://, or with http:// for a Pod on this device (localhost).",
   webIdWithCredentials: "A WebID must not contain a username or password.",
   providerNotHttps: "An identity provider must be an https:// URL.",
   webIdNoSubject:

@@ -20,10 +20,12 @@ describes the default, Inrupt's, and says where the other differs.
 
 The learner enters only a [WebID](https://www.w3.org/2005/Incubator/webid/spec/identity/)
 ([its profile in Solid](https://solid.github.io/webid-profile/)); the
-[onboarding flow](onboarding.md) validates it as an `https:` URL. The
+[onboarding flow](onboarding.md) validates it as an `https:` URL, or
+an `http:` one on a [loopback host](onboarding.md#webid-validation). The
 app reads the WebID document unauthenticated, under `PROFILE_LIMITS`
 ([the credential gate](boundaries.md#the-credential-gate)), takes the
-issuer (`https:` too) from its `solid:oidcIssuer` triple, and starts
+issuer (`https:` too, or `http:` on a loopback host for a WebID on one)
+from its `solid:oidcIssuer` triple, and starts
 the OIDC redirect flow. The issuer is never inferred from the WebID's
 origin: a WebID on `alice.datapod.igrant.io` has the issuer
 `datapod.igrant.io`.
@@ -372,10 +374,10 @@ every restore, with either sign-in client, in one place in the gateway.
   Solid Memo accepts as a document's base; the storage lookup derives
   addresses from its path.
 - A WebID that no pod could serve ends the session before anything is
-  read too, and shows `webIdUnusable`. Such a WebID isn't an https URL,
-  has a user name or password in it, or can't be written in Turtle
-  (`isSecureUrl`), or lies in the guest's or a trial's pod, which only
-  this browser holds.
+  read too, and shows `webIdUnusable`. Such a WebID fails `isSecureUrl`:
+  it isn't https (or http on a loopback host), has a user name or
+  password in it, or can't be written in Turtle. Or it lies in the
+  guest's or a trial's pod, which only this browser holds.
 - The gateway reads the WebID document as no one, under
   `PROFILE_LIMITS`, asking the pod rather than the browser's cache.
 - It looks for the session's issuer among the `solid:oidcIssuer`

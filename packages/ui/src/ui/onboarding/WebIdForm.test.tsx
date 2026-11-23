@@ -44,11 +44,13 @@ describe("WebIdForm", () => {
     const { onSubmit } = renderForm();
     submit("http://bob.example/profile/card#me");
 
-    expect(alertTexts()).toEqual(["A WebID must start with https://."]);
+    expect(alertTexts()).toEqual([
+      "A WebID must start with https://, or with http:// for a Pod on this device (localhost).",
+    ]);
     expect(screen.getByLabelText("WebID")).toHaveAttribute("aria-invalid", "true");
     // The field says why when the user comes back to it, and has the focus.
     expect(screen.getByLabelText("WebID")).toHaveAccessibleDescription(
-      /^A WebID must start with https:\/\/\. Your WebID is/,
+      /^A WebID must start with https:\/\/, or with http:\/\/ for a Pod on this device \(localhost\)\. Your WebID is/,
     );
     expect(screen.getByLabelText("WebID")).toHaveFocus();
     expect(onSubmit).not.toHaveBeenCalled();

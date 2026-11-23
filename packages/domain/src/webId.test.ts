@@ -4,7 +4,14 @@
 
 import { AppError } from "./appError";
 import { describe, expect, it } from "vitest";
-import { isHttpUrl, isLinkableUrl, isSecureUrl, isWritableIri, validateWebId } from "./webId";
+import {
+  isHttpUrl,
+  isLinkableUrl,
+  isSecureIssuerOf,
+  isSecureUrl,
+  isWritableIri,
+  validateWebId,
+} from "./webId";
 
 describe("isHttpUrl", () => {
   it.each(["https://flagcdn.com/h80/af.png", "http://localhost:3000/a.png"])(
@@ -62,6 +69,31 @@ describe("isSecureUrl", () => {
     expect(isSecureUrl("http://issuer.example")).toBe(false);
   });
 
+  it.each([
+    "http://localhost:3000/",
+    "http://LOCALHOST/",
+    "http://pod.localhost:3000/",
+    "http://127.0.0.1:3000/",
+    "http://127.1.2.3/",
+    "http://127.1/",
+    "http://[::1]:3000/",
+  ])("accepts http to a loopback host: %s", (value) => {
+    expect(isSecureUrl(value)).toBe(true);
+  });
+
+  it.each([
+    "http://localhost.example/",
+    "http://localhost.:3000/",
+    "http://128.0.0.1/",
+    "http://10.0.0.1/",
+    "http://[::2]/",
+    "http://[::ffff:127.0.0.1]/",
+    "ftp://localhost/",
+    "http://user@localhost:3000/",
+  ])("rejects %s", (value) => {
+    expect(isSecureUrl(value)).toBe(false);
+  });
+
   it("rejects embedded credentials", () => {
     expect(isSecureUrl("https://user@issuer.example")).toBe(false);
     expect(isSecureUrl("https://:secret@issuer.example")).toBe(false);
@@ -69,6 +101,33 @@ describe("isSecureUrl", () => {
 
   it("rejects a URL Turtle cannot write as an IRI", () => {
     expect(isSecureUrl("https://issuer.example/#a>b")).toBe(false);
+  });
+});
+
+describe("isSecureIssuerOf", () => {
+  const LOCAL_WEBID = "http://localhost:3000/alice/profile/card#me";
+
+  it("accepts an https issuer for any WebID", () => {
+    expect(isSecureIssuerOf("https://issuer.example/", "https://alice.example/card#me")).toBe(true);
+    expect(isSecureIssuerOf("https://issuer.example/", LOCAL_WEBID)).toBe(true);
+  });
+
+  it("accepts an http issuer on a loopback host for a WebID on one", () => {
+    expect(isSecureIssuerOf("http://localhost:3000/", LOCAL_WEBID)).toBe(true);
+    expect(isSecureIssuerOf("http://127.0.0.1:3000/", "http://[::1]:3000/card#me")).toBe(true);
+  });
+
+  it("rejects an http issuer on a loopback host for a WebID on the web", () => {
+    expect(isSecureIssuerOf("http://localhost:3000/", "https://alice.example/card#me")).toBe(false);
+  });
+
+  it("rejects an issuer that isSecureUrl rejects", () => {
+    expect(isSecureIssuerOf("http://issuer.example/", LOCAL_WEBID)).toBe(false);
+    expect(isSecureIssuerOf("javascript:alert(1)", LOCAL_WEBID)).toBe(false);
+  });
+
+  it("rejects an http issuer for a WebID that is not a URL", () => {
+    expect(isSecureIssuerOf("http://localhost:3000/", "not a url")).toBe(false);
   });
 });
 
@@ -130,6 +189,13 @@ describe("validateWebId", () => {
     expect(validateWebId("https://alice.example/profile/card#me|x")).toEqual({
       ok: false,
       error: new AppError("webIdInvalidUrl"),
+    });
+  });
+
+  it("accepts an http WebID on a loopback host, with its port", () => {
+    expect(validateWebId("http://localhost:3000/alice/profile/card#me")).toEqual({
+      ok: true,
+      webId: "http://localhost:3000/alice/profile/card#me",
     });
   });
 

@@ -8,7 +8,7 @@ import { limitedFetch, MAX_BASE_CHARACTERS, PROFILE_LIMITS } from "./client/read
 import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
 import type { SessionOrigin } from "@solid-memo/domain/session";
-import { isSecureUrl } from "@solid-memo/domain/webId";
+import { isSecureIssuerOf, isSecureUrl } from "@solid-memo/domain/webId";
 import { isGuestPodIri } from "@solid-memo/domain/guest";
 import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { SESSION_EXPIRED_EVENT } from "./authFetch";
@@ -55,8 +55,9 @@ function readWebIdProfile(
 /**
  * Read the solid:oidcIssuer triple from the profile so the user only
  * needs to type their WebID. The issuer is never guessed from the
- * WebID's origin, and only an https issuer is accepted: the browser is
- * about to be sent there.
+ * WebID's origin, and only an https issuer is accepted, or an http one
+ * on a loopback host for a WebID on one too (isSecureIssuerOf): the
+ * browser is about to be sent there.
  */
 function issuerOfProfile(dataset: FetchedDataset, webId: string): string {
   const profile = getThing(dataset, webId);
@@ -67,7 +68,7 @@ function issuerOfProfile(dataset: FetchedDataset, webId: string): string {
   if (issuers.length === 0) {
     throw new AppError("webIdNoIssuer", { webId });
   }
-  const issuer = issuers.find(isSecureUrl);
+  const issuer = issuers.find((value) => isSecureIssuerOf(value, webId));
   if (issuer === undefined) {
     throw new AppError("webIdIssuerNotHttps", { webId });
   }
@@ -325,8 +326,9 @@ export function createSolidSessionGateway({
 
   /**
    * Ends the session and refuses it if its WebID is not one whose profile
-   * can be read to check its issuer: an https URL with no user name or
-   * password that Turtle can write (isSecureUrl), outside the guest's
+   * can be read to check its issuer: an https URL, or http on a loopback
+   * host, with no user name or password, that Turtle can write
+   * (isSecureUrl), outside the guest's
    * pod (isGuestPodIri) and a trial's (TRIAL_POD_ORIGIN), which only
    * this browser holds. The issuer check keeps a session whose profile
    * can't be read only for a WebID that a pod could serve.

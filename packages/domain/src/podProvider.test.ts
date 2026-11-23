@@ -21,8 +21,10 @@ describe("POD_PROVIDERS", () => {
   it("only suggests https issuers and sign-up pages, with unique ids", () => {
     for (const provider of POD_PROVIDERS) {
       expect(isSecureUrl(provider.oidcIssuer)).toBe(true);
+      expect(provider.oidcIssuer).toMatch(/^https:/);
       if (provider.signUpUrl !== undefined) {
         expect(isSecureUrl(provider.signUpUrl)).toBe(true);
+        expect(provider.signUpUrl).toMatch(/^https:/);
       }
     }
     expect(new Set(POD_PROVIDERS.map((p) => p.id)).size).toBe(POD_PROVIDERS.length);
