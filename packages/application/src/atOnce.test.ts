@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { inTurns, mapAtOnce, READS_AT_ONCE } from "./atOnce";
+import { allSettledThen, inTurns, mapAtOnce, READS_AT_ONCE } from "./atOnce";
 
 /** `each` that counts how many run at once, each waiting a turn of the event loop. */
 function counted<T>() {
@@ -87,5 +87,29 @@ describe("inTurns", () => {
       "b",
     ]);
     expect(most()).toBe(1);
+  });
+});
+
+describe("allSettledThen", () => {
+  it("gives every value, in order, once all are read", async () => {
+    await expect(allSettledThen([Promise.resolve(1), Promise.resolve("two")])).resolves.toEqual([
+      1,
+      "two",
+    ]);
+  });
+
+  it("fails with the first failure in order, only once the others have settled", async () => {
+    const failure = new Error("unreadable");
+    let slowDone = false;
+    const slow = new Promise<string>((resolve) =>
+      setTimeout(() => {
+        slowDone = true;
+        resolve("read");
+      }, 5),
+    );
+    await expect(
+      allSettledThen([Promise.reject(failure), slow, Promise.reject(new Error("later"))]),
+    ).rejects.toBe(failure);
+    expect(slowDone).toBe(true);
   });
 });

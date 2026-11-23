@@ -61,6 +61,9 @@ export const LOCAL_NODE = "https://inrupt.com/.well-known/sdk-local-node/";
  * the library keeps for subjects not saved yet is left out (LOCAL_NODE).
  * The library is given the response with its `Link` and `WAC-Allow`
  * headers bounded (linkHeader.ts), read under limits or with none.
+ * A read that fails, before the library reads the body (a type it has
+ * no parser for, say) or after, cancels the body before it settles, so
+ * that no answer is left open once its read is done (releaseBody).
  */
 export async function getSolidDatasetLinear(
   url: string,
@@ -73,10 +76,12 @@ export async function getSolidDatasetLinear(
       collected.response = response;
       collected.limits = limitsOf(response);
       collected.spent = spentOf(response);
-      return withBoundedHeaders(keepingBodyFailure(response, collected));
+      collected.handed = withBoundedHeaders(keepingBodyFailure(response, collected));
+      return collected.handed;
     },
     parsers: { "text/turtle": collectingTurtleParser(collected, url) },
-  }).catch((error: unknown) => {
+  }).catch(async (error: unknown) => {
+    await releaseBody(collected);
     // The library reports a parser's error as a plain one of its own, and the browser a body's as its own.
     throw collected.refused ?? refusalOf(collected.response) ?? collected.failed ?? error;
   });
@@ -90,6 +95,23 @@ export function readBlankNodes(): (quad: Quad) => Quad {
 }
 
 /**
+ * Cancels the body of a read that failed: through the reader of the
+ * answer's own body, where keepingBodyFailure holds one, as the stream
+ * it gave the library may be locked by a read of it; else the body
+ * handed to the library, if there is one. A body read to its end is
+ * cancelled to no effect, and one that failed refuses to be, done all
+ * the same.
+ */
+async function releaseBody(collected: Collected): Promise<void> {
+  try {
+    if (collected.cancel !== undefined) await collected.cancel();
+    else await collected.handed?.body?.cancel();
+  } catch {
+    // The body failed already: there is nothing left of it to cancel.
+  }
+}
+
+/**
  * The response, its body as it is, but with the reason the body fails
  * with, if it does, kept in `collected`: the browser fails the read of
  * a body with an error of its own, and the reason, the podNoAnswer of a
@@ -99,6 +121,7 @@ export function readBlankNodes(): (quad: Quad) => Quad {
 function keepingBodyFailure(response: Response, collected: Collected): Response {
   if (response.body === null || response.status !== 200) return response;
   const reader = response.body.getReader();
+  collected.cancel = () => reader.cancel();
   const body = new ReadableStream<Uint8Array>({
     async pull(controller) {
       const next = await reader.read().catch((error: unknown) => {
@@ -178,6 +201,10 @@ interface Collected {
   refused?: ReadLimitError;
   /** What the body's read failed with, as its stream gave it (keepingBodyFailure). */
   failed?: unknown;
+  /** The response the library was given. */
+  handed?: Response;
+  /** Cancels the answer's own body, read through the one the library was given (keepingBodyFailure). */
+  cancel?: () => Promise<void>;
 }
 
 /**

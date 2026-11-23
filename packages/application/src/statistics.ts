@@ -55,6 +55,7 @@ import type {
   AnswerLog,
   FileExchange,
 } from "./ports";
+import { allSettledThen, inTurns, READS_AT_ONCE } from "./atOnce";
 import { readNow } from "./writes";
 import { dueStatesOf, lastLogMonthOf } from "./answerStore";
 import { scheduleFrom } from "./digestStore";
@@ -427,6 +428,13 @@ export function createStatisticsUseCases({
       dayBoundaryHour: prefs.dayBoundaryHour,
     };
   }
+  // Each deck's two documents are read together, and card progress's
+  // decks in turns of their own, as study counts are: a catalog listing
+  // any number of decks never has all of their documents asked for at
+  // once. The Studio's one deck is read outside them, never waiting
+  // behind a catalog's.
+  const documentsTurn = inTurns(READS_AT_ONCE / 2);
+  const ownTurn = <T>(work: () => Promise<T>) => work();
   /**
    * A deck's cards and review states as they are now, with its schedule:
    * the digest's while it is of these documents, else computed afresh and
@@ -437,11 +445,16 @@ export function createStatisticsUseCases({
     deck: Deck,
     at: Date,
     prefs: Pick<StudyPreferences, "scheduler" | "dayBoundaryHour">,
+    turn: <T>(work: () => Promise<T>) => Promise<T>,
   ) {
-    const [digest, cards, reviews] = await Promise.all([
+    const [digest, [cards, reviews]] = await Promise.all([
       digestStore.of(instanceUrl),
-      readNow(deckRepository.readCardsSince(deck, undefined)),
-      readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
+      turn(() =>
+        allSettledThen([
+          readNow(deckRepository.readCardsSince(deck, undefined)),
+          readNow(reviewStateRepository.readReviewStatesSince(deck, undefined)),
+        ]),
+      ),
     ]);
     const versions = { cards: cards.version, reviews: reviews.version };
     const today = studyDayOf(at, prefs.dayBoundaryHour);
@@ -557,7 +570,7 @@ export function createStatisticsUseCases({
     async deckInsight(instanceUrl, deck, at, prefs) {
       const today = studyDayOf(at, prefs.dayBoundaryHour);
       const [{ cards, reviews, schedule }, answers] = await Promise.all([
-        scheduleNow(instanceUrl, deck, at, prefs),
+        scheduleNow(instanceUrl, deck, at, prefs, ownTurn),
         answerStore.loadAll(instanceUrl),
       ]);
       const { maxReviewsPerDay } = deckPreferences(prefs, deck);
@@ -615,7 +628,7 @@ export function createStatisticsUseCases({
       const settled = await Promise.allSettled(
         decks.map(async (one) => {
           const [{ cards, reviews, schedule }, byDeck] = await Promise.all([
-            scheduleNow(instanceUrl, one, at, prefs),
+            scheduleNow(instanceUrl, one, at, prefs, documentsTurn),
             logged,
           ]);
           const { maxReviewsPerDay, newCardsPerDay } = deckPreferences(prefs, one);

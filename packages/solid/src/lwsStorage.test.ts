@@ -91,4 +91,16 @@ describe("storageRootsOf", () => {
   ])("can't name the roots for %s", async (_, fetch) => {
     await expect(storageRootsOf(STORAGE, fetch)).resolves.toBeNull();
   });
+
+  it("lets go of the body of an answer that is not ok, one that never ends too", async () => {
+    const cancelled: unknown[] = [];
+    const body = new ReadableStream<Uint8Array>({
+      cancel: (reason) => void cancelled.push(reason),
+    });
+    const fetch: typeof globalThis.fetch = async () => new Response(body, { status: 500 });
+    await expect(storageRootsOf(STORAGE, fetch)).resolves.toBeNull();
+    expect(cancelled).toHaveLength(1);
+    const noBody: typeof globalThis.fetch = async () => new Response(null, { status: 404 });
+    await expect(storageRootsOf(STORAGE, noBody)).resolves.toBeNull();
+  });
 });

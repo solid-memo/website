@@ -12,7 +12,7 @@ import { derivedOnceOf } from "@solid-memo/domain/frozen";
 import { reviewKeyOf, type ReviewStates } from "@solid-memo/domain/review";
 import { scheduledStates } from "@solid-memo/domain/scheduleInsight";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
-import { inTurns, READS_AT_ONCE } from "./atOnce";
+import { allSettledThen, inTurns, READS_AT_ONCE } from "./atOnce";
 import type { DeckRepository, ReviewStateRepository } from "./ports";
 import type { PreferenceStore } from "./preferenceStore";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
@@ -116,7 +116,10 @@ export function createDeckPauseUseCases({
    */
   async function studied(deck: Deck, prefs: StudyPreferences, day: string): Promise<Studied> {
     const [cards, reviews] = await turn(() =>
-      Promise.all([deckRepository.listCards(deck), reviewStateRepository.listReviewStates(deck)]),
+      allSettledThen([
+        deckRepository.listCards(deck),
+        reviewStateRepository.listReviewStates(deck),
+      ]),
     );
     // By the deck's states, not its cards (scheduledStates), and once for the decks that name the same documents.
     const key = [deck.direction, day, prefs.scheduler, prefs.dayBoundaryHour].join(" ");

@@ -23,6 +23,7 @@ import type { DeckLibrary, DeckRepository, ReviewStateRepository } from "./ports
 import { AppError } from "@solid-memo/domain/appError";
 import { derivedOnce } from "@solid-memo/domain/frozen";
 import { promptDueOf } from "./answerStore";
+import { inTurns, READS_AT_ONCE } from "./atOnce";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
 
@@ -191,10 +192,17 @@ export function createCourseUseCases({
       throw new Error("A course's deck names the release it was copied from");
     return deck.sourceUrl;
   }
+  // The strip asks for every course deck's summary together: their review
+  // states are read in turns, so a catalog listing any number of courses
+  // never has all of them asked for at once. The outlines need no turns
+  // here: one of a release from a link is read through its check
+  // (withLinkedReleasesChecked), which takes the library's turns for such
+  // reads, and one the index lists comes with the site.
+  const reviewsTurn = inTurns(READS_AT_ONCE / 2);
   async function courseSummary(deck: Deck): Promise<CourseSummary> {
     const [outline, reviews] = await Promise.all([
       deckLibrary.fetchCourseOutline(sourceOf(deck)),
-      reviewStateRepository.listReviewStates(deck),
+      reviewsTurn(() => reviewStateRepository.listReviewStates(deck)),
     ]);
     // Looked up by the outline's questions, not by every state: decks may share their states.
     const answered = answeredOf(reviews.sm2);

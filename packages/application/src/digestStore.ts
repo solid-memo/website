@@ -30,6 +30,7 @@ import type {
 import type { AnswerStore } from "./answerStore";
 import type { PreferenceStore } from "./preferenceStore";
 import { isInInstancePod } from "./releaseDrafts";
+import { allSettledThen } from "./atOnce";
 
 /** A digest change noting a document's receipt: at this version, it conformed or is in the latest format. */
 export function noting(
@@ -173,7 +174,8 @@ export function createDigestStore({
     await answerStore.flush(instanceUrl);
     // A deck whose documents are not the instance's keeps nothing in its digest: nothing to read.
     if (!keepsDeck(await asNoOneOf(instanceUrl, deck))) return;
-    const [prefs, cards, reviews] = await Promise.all([
+    // Both read before this ends, even when one fails: a caller that takes decks in turns frees none early.
+    const [prefs, cards, reviews] = await allSettledThen([
       preferenceStore.get(instanceUrl),
       deckRepository.readCardsSince(deck, undefined),
       reviewStateRepository.readReviewStatesSince(deck, undefined),

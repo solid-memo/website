@@ -1059,6 +1059,43 @@ describe("preferences", () => {
       });
     });
 
+    it("to FSRS-6 brings three decks' schedules up to date at once at most, each read whole before the next", async () => {
+      const { deps, useCases } = await studied();
+      const decks = Array.from(
+        { length: 1000 },
+        (_, at): Deck => ({
+          ...second,
+          id: `deck-${at}`,
+          url: `${instance.url}catalog.ttl#deck-${at}`,
+          reviewsDocumentUrl: `${instance.url}reviews/deck-${at}.ttl`,
+        }),
+      );
+      vi.mocked(deps.deckRepository.listDecks).mockResolvedValue(decks);
+      let reading = 0;
+      let most = 0;
+      vi.mocked(deps.deckRepository.readCardsSince).mockImplementation(async () => {
+        most = Math.max(most, ++reading);
+        await Promise.resolve();
+        reading--;
+        throw new Error("unreadable");
+      });
+      const read = deps.reviewStateRepository.readReviewStatesSince;
+      deps.reviewStateRepository.readReviewStatesSince = vi.fn(
+        async (...args: Parameters<typeof read>) => {
+          most = Math.max(most, ++reading);
+          await new Promise((settle) => setTimeout(settle, 1));
+          reading--;
+          return read(...args);
+        },
+      );
+      await expect(useCases.switchScheduler(instance.url, fsrsPrefs)).resolves.toMatchObject({
+        switched: true,
+        failed: [],
+      });
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledTimes(1000);
+      expect(most).toBeLessThanOrEqual(6);
+    }, 60_000);
+
     it("to FSRS-6 with no decks only saves the preferences", async () => {
       const { deps, useCases } = setup();
       vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([]);

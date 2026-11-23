@@ -694,6 +694,95 @@ describe("the cards' progress", () => {
     vi.mocked(deps.deckRepository.listDecks).mockResolvedValue([other]);
     await expect(useCases.getCardProgress(instance.url, now)).rejects.toBe(noAnswer);
   });
+  it("reads three decks' documents at once at most, however many decks the catalog lists", async () => {
+    const { deps, useCases } = setup();
+    const decks = Array.from(
+      { length: 1000 },
+      (_, at): Deck => ({
+        ...deck,
+        id: `deck-${at}`,
+        url: `${instance.url}catalog.ttl#deck-${at}`,
+        cardsDocumentUrl: `https://h${at}.example/cards.ttl`,
+        reviewsDocumentUrl: `https://h${at}.example/reviews.ttl`,
+      }),
+    );
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue(decks);
+    let reading = 0;
+    let most = 0;
+    const slowly =
+      <A extends unknown[], R>(read: (...args: A) => Promise<R>) =>
+      async (...args: A) => {
+        most = Math.max(most, ++reading);
+        await new Promise((settle) => setTimeout(settle));
+        reading--;
+        return read(...args);
+      };
+    deps.deckRepository.readCardsSince = vi.fn(slowly(deps.deckRepository.readCardsSince));
+    deps.reviewStateRepository.readReviewStatesSince = vi.fn(
+      slowly(deps.reviewStateRepository.readReviewStatesSince),
+    );
+    const report = await useCases.getCardProgress(instance.url, now);
+    expect(report.decks).toHaveLength(1000);
+    expect(report.leftOut).toBeUndefined();
+    expect(most).toBe(6);
+  }, 60_000);
+  it("reads the Studio's deck without waiting behind the card progress's decks", async () => {
+    const { deps, useCases } = setup();
+    const decks = Array.from(
+      { length: 10 },
+      (_, at): Deck => ({
+        ...deck,
+        id: `other-${at}`,
+        url: `${instance.url}catalog.ttl#other-${at}`,
+      }),
+    );
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue(decks);
+    const read = deps.deckRepository.readCardsSince;
+    deps.deckRepository.readCardsSince = vi.fn((...args: Parameters<typeof read>) =>
+      args[0].url === deck.url ? read(...args) : new Promise<never>(() => {}),
+    );
+    void useCases.getCardProgress(instance.url, now);
+    // Every turn taken by a deck that never answers, the others waiting.
+    await vi.waitFor(() => expect(deps.deckRepository.readCardsSince).toHaveBeenCalledTimes(3));
+    await expect(
+      useCases.deckInsight(instance.url, deck, now, DEFAULT_PREFERENCES),
+    ).resolves.toMatchObject({ scheduled: expect.any(Number) });
+  });
+  it("ends a deck's turn only once both its reads are done, though the first fails at once", async () => {
+    const { deps, useCases } = setup();
+    const decks = Array.from(
+      { length: 1000 },
+      (_, at): Deck => ({
+        ...deck,
+        id: `deck-${at}`,
+        url: `${instance.url}catalog.ttl#deck-${at}`,
+        cardsDocumentUrl: `https://h${at}.example/cards.ttl`,
+        reviewsDocumentUrl: `https://h${at}.example/reviews.ttl`,
+      }),
+    );
+    vi.mocked(deps.deckRepository.listDecks).mockResolvedValue(decks);
+    let reading = 0;
+    let most = 0;
+    const unreadable = new Error("unreadable");
+    deps.deckRepository.readCardsSince = vi.fn(async () => {
+      most = Math.max(most, ++reading);
+      await Promise.resolve();
+      reading--;
+      throw unreadable;
+    });
+    const read = deps.reviewStateRepository.readReviewStatesSince;
+    deps.reviewStateRepository.readReviewStatesSince = vi.fn(
+      async (...args: Parameters<typeof read>) => {
+        most = Math.max(most, ++reading);
+        await new Promise((settle) => setTimeout(settle, 1));
+        reading--;
+        return read(...args);
+      },
+    );
+    await expect(useCases.getCardProgress(instance.url, now)).rejects.toBe(unreadable);
+    expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledTimes(1000);
+    expect(most).toBe(6);
+  }, 60_000);
   it("refuses a read without a version that says unchanged, for the progress too", async () => {
     const { deps, useCases } = setup();
     deps.reviewStateRepository.readReviewStatesSince = vi.fn(async () => ({
