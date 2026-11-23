@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.4](https://github.com/solid-memo/website/compare/v8.1.3...v8.1.4) (2026-11-23)
+
+### Fixes
+
+* **solid:** bound the storage-root walk above a deck's document ([cd57078](https://github.com/solid-memo/website/commit/cd57078a77128ef03a70f00db08150cf8d669756))
+
 ## [8.1.3](https://github.com/solid-memo/website/compare/v8.1.2...v8.1.3) (2026-11-22)
 
 ### Fixes
