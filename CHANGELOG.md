@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.6](https://github.com/solid-memo/website/compare/v8.1.5...v8.1.6) (2026-11-23)
+
+### Fixes
+
+* **studio:** read the deck table's cards in turns ([24deeb2](https://github.com/solid-memo/website/commit/24deeb24a6543aa06c63dd6a720f9645d6bd4b7c))
+
 ## [8.1.5](https://github.com/solid-memo/website/compare/v8.1.4...v8.1.5) (2026-11-23)
 
 ### Fixes
