@@ -1122,7 +1122,8 @@ Renovate from its own lockfile in `scripts/renovate/`, without install
 scripts, checks its packages' signatures, and holds no secret: its
 token only reads. Its `comment` job, the only one that writes, runs
 [scripts/pendingUpdates.ts](../scripts/pendingUpdates.ts), which needs no
-npm package. The script reads the report's release dates and the wait in
+npm package, and restores nothing from GitHub's cache
+([releasing.md](releasing.md#the-deploy-key)). The script reads the report's release dates and the wait in
 `renovate.json5`, and writes or edits its own comment on the dashboard.
 Renovate's report has no date for a digest update, nor for a Docker tag
 whose date Docker Hub didn't give. The comment says so rather than
