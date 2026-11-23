@@ -11,6 +11,7 @@ import { HttpError, ReadLimitError } from "../../client/interface";
 import {
   limitedFetch,
   MAX_TERM_CHARACTERS,
+  MAX_VALUES_PER_PREDICATE,
   NO_SIZE_LIMITS,
   noneSpent,
   RELEASE_LIMITS,
@@ -1182,6 +1183,41 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
         message: expect.not.stringContaining("subjects"),
       });
+    });
+
+    it("refuses a read past a release's limits on the values one subject has for one predicate, and takes one at them in", async () => {
+      const values = (count: number) =>
+        `<#a> <${EX}p> ${Array.from({ length: count }, (_, i) => i).join(", ")} .`;
+      const at = values(MAX_VALUES_PER_PREDICATE);
+      const past = values(MAX_VALUES_PER_PREDICATE + 1);
+      const refusal = {
+        name: "ReadLimitError",
+        url: URL_,
+        limits: RELEASE_LIMITS,
+        message: expect.stringContaining(
+          `${MAX_VALUES_PER_PREDICATE} values of one subject for one predicate`,
+        ),
+      };
+      for (const read of [
+        (text: string) => parseQuads(text, "turtle", URL_, RELEASE_LIMITS),
+        (text: string) =>
+          getSolidDatasetLinear(URL_, { fetch: limitedFetch(turtleAt(text), RELEASE_LIMITS) }),
+        (text: string) =>
+          getSolidDataset(URL_, { fetch: limitedFetch(turtleAt(text), RELEASE_LIMITS) }),
+      ]) {
+        await expect(read(past)).rejects.toMatchObject(refusal);
+        await expect(read(at)).resolves.toBeDefined();
+      }
+      // A read with no limits, as of the user's own pod, takes it in.
+      await expect(parseQuads(past, "turtle", URL_)).resolves.toHaveLength(
+        MAX_VALUES_PER_PREDICATE + 1,
+      );
+      await expect(
+        parseQuads(values(2), "turtle", URL_, { ...RELEASE_LIMITS, quads: 1 }),
+      ).rejects.toMatchObject({ message: expect.stringContaining("values of one subject") });
+      await expect(
+        parseQuads(values(2), "turtle", URL_, { bytes: 1_000, quads: 1, characters: 1_000 }),
+      ).rejects.toMatchObject({ message: expect.not.stringContaining("values of one subject") });
     });
 
     it("rejects a text that does not parse", async () => {

@@ -111,6 +111,21 @@ const CHANGED = STANDALONE.replace('"Oslo"@en', '"Bergen"@en');
 const catalog = (instance: string, releases: string[]) =>
   `<${instance}catalog.ttl#catalog> a <http://www.w3.org/ns/dcat#Catalog> ; <${SM}publishedRelease> ${releases.map((url) => `<${url}>`).join(", ")} .`;
 
+/**
+ * `count` triples of padding, a thousand values to a subject: a release
+ * may give one subject no more than MAX_VALUES_PER_PREDICATE values for
+ * one predicate.
+ */
+const paddingOf = (count: number, predicate: string) =>
+  Array.from(
+    { length: Math.ceil(count / 1000) },
+    (_, part) =>
+      `<#padding${part === 0 ? "" : part}> ${predicate} ${Array.from(
+        { length: Math.min(1000, count - part * 1000) },
+        (_, at) => part * 1000 + at,
+      ).join(",")} .`,
+  ).join("\n");
+
 describe("readRelease", () => {
   it("reads a release published in a pod on its own: its series' every version, its creator and its live cards", async () => {
     const release = await libraryOver(serving({ [V2]: STANDALONE })).readRelease(V2);
@@ -489,8 +504,7 @@ describe("publishedBeside, of a catalog whose body never comes", () => {
 
 describe("linkedReads", () => {
   /** Triples past the release, of a subject no shape has: `count` of them. */
-  const padding = (count: number) =>
-    `\n<#padding> <${SM}padding> ${Array.from({ length: count }, (_, at) => at).join(",")} .\n`;
+  const padding = (count: number) => `\n${paddingOf(count, `<${SM}padding>`)}\n`;
 
   it("reads releases as the library does, each once, but keeps them to itself, never in the library", async () => {
     const fetch = serving({ [V2]: STANDALONE });
@@ -603,7 +617,7 @@ ${versions
  dcat:mediaType <https://www.iana.org/assignments/media-types/text/turtle>.
 <https://creativecommons.org/publicdomain/zero/1.0/> a dcterms:LicenseDocument.
 ${Array.from({ length: cards }, (_, at) => `<#c${at}> a sm:Card; sm:formatVersion 5; sm:front "f${at}"@en; sm:back "b${at}"@en.`).join("\n")}
-${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, (_, at) => at).join(",")} .`}
+${padding === 0 ? "" : paddingOf(padding, "sm:padding")}
 `;
   }
 

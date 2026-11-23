@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from "vitest";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { ReadLimitError } from "./interface";
 import { growth } from "@solid-memo/domain/testing/growth";
+import { TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
 import type {
   DataFactory,
   Literal,
@@ -16,11 +17,19 @@ import type {
   Quad_Object,
   Quad_Subject,
 } from "@rdfjs/types";
+import { MAX_INTERVAL_DAYS } from "@solid-memo/domain/sm2";
+import { SM_NS } from "@solid-memo/vocab/vocab.generated";
+import type { ReadLimits } from "./interface";
 import {
   blankNodeNamer,
+  FOREIGN_LIMITS,
+  isPastBudget,
   limitedFetch,
   limitsOf,
+  limitVars,
+  MAX_DUE_DAYS,
   MAX_TERM_CHARACTERS,
+  MAX_VALUES_PER_PREDICATE,
   noneSpent,
   quadTally,
   readThrough,
@@ -33,6 +42,7 @@ import {
   writeTurtle,
 } from "./readLimits";
 import { getSolidDatasetLinear, parseQuads } from "./resources";
+import { getStringNoLocaleAll, getThing } from "./rdf";
 
 const URL_ = "https://other.example/release.ttl";
 const LIMITS = { bytes: 10, quads: 5, characters: 100 };
@@ -79,13 +89,18 @@ function serving(body: string | null, { chunk = 4, headers = {} as Record<string
 }
 
 describe("RELEASE_LIMITS", () => {
-  it("leaves a wide margin over every release in the library: each a quarter of its bytes, triples and characters or less, and each term half the bound on one or less", async () => {
+  it("leaves a wide margin over every release in the library: each a quarter of its bytes, triples, characters and values of a subject for a predicate or less, and each term half the bound on one or less", async () => {
     const releases = readdirSync(DECKS_ROOT, { recursive: true, encoding: "utf8" }).filter((path) =>
       /(^|\/)v[0-9]+\.ttl$/.test(path),
     );
     expect(releases.length).toBeGreaterThan(100);
-    const { bytes, quads, characters } = RELEASE_LIMITS;
-    const quarter = { bytes: bytes / 4, quads: quads / 4, characters: characters / 4 };
+    const { bytes, quads, characters, valuesPerPredicate } = RELEASE_LIMITS;
+    const quarter = {
+      bytes: bytes / 4,
+      quads: quads / 4,
+      characters: characters / 4,
+      valuesPerPredicate: valuesPerPredicate! / 4,
+    };
     for (const path of releases) {
       const file = join(DECKS_ROOT, path);
       expect(statSync(file).size, path).toBeLessThan(quarter.bytes);
@@ -104,6 +119,65 @@ describe("RELEASE_LIMITS", () => {
       }
       expect(longest, path).toBeLessThanOrEqual(MAX_TERM_CHARACTERS / 2);
     }
+  });
+});
+
+describe("FOREIGN_LIMITS", () => {
+  const read = (text: string, limits: ReadLimits) =>
+    getSolidDatasetLinear(URL_, {
+      fetch: limitedFetch(serving(text, { chunk: 64 * 1024 }).fetch, limits),
+    });
+
+  it("reads a deck's schedule with a due day for every day from twenty years overdue to as far ahead as an interval goes, though a release may not have as many", async () => {
+    // sm:dueOnDay holds one value per day a schedule's prompts fall due
+    // (digestRecord.ts), on one subject, so a deck studied for long has
+    // far more than a release may give one subject.
+    const start = Date.UTC(2006, 0, 1);
+    const days = 20 * 365 + MAX_INTERVAL_DAYS;
+    const due = Array.from(
+      { length: days },
+      (_, i) => `"${new Date(start + i * 86_400_000).toISOString().slice(0, 10)} 1"`,
+    );
+    const schedule = `<#schedule> a <${SM_NS}DeckSchedule> ; <${SM_NS}dueOnDay> ${due.join(", ")} .`;
+    expect(days).toBeGreaterThan(MAX_VALUES_PER_PREDICATE);
+    expect(days).toBeLessThan(MAX_DUE_DAYS);
+    const thing = getThing(await read(schedule, FOREIGN_LIMITS), `${URL_}#schedule`);
+    expect(getStringNoLocaleAll(thing!, `${SM_NS}dueOnDay`)).toHaveLength(days);
+    await expect(read(schedule, RELEASE_LIMITS)).rejects.toBeInstanceOf(ReadLimitError);
+    const past = Array.from({ length: MAX_DUE_DAYS + 1 }, (_, i) => `"${i}"`);
+    await expect(
+      read(`<#schedule> <${SM_NS}dueOnDay> ${past.join(", ")} .`, FOREIGN_LIMITS),
+    ).rejects.toMatchObject({
+      name: "ReadLimitError",
+      limits: FOREIGN_LIMITS,
+      message: expect.stringContaining(
+        `${MAX_VALUES_PER_PREDICATE} values of one subject for one predicate (${MAX_DUE_DAYS} for [${SM_NS}dueOnDay]), `,
+      ),
+    });
+  });
+
+  it("holds every other predicate of a subject to a release's bound, a card's fronts and backs alike", async () => {
+    const values = (predicate: string, count: number) =>
+      `<#card> <${SM_NS}${predicate}> ${Array.from({ length: count }, (_, i) => `"t"@x-${i}`).join(", ")} .`;
+    for (const predicate of ["front", "back"]) {
+      await expect(
+        read(values(predicate, MAX_VALUES_PER_PREDICATE), FOREIGN_LIMITS),
+      ).resolves.toBeDefined();
+      await expect(
+        read(values(predicate, MAX_VALUES_PER_PREDICATE + 1), FOREIGN_LIMITS),
+      ).rejects.toBeInstanceOf(ReadLimitError);
+    }
+    // Each predicate within, on one subject.
+    const both = `${values("front", MAX_VALUES_PER_PREDICATE)}\n${values("back", MAX_VALUES_PER_PREDICATE)}`;
+    await expect(read(both, FOREIGN_LIMITS)).resolves.toBeDefined();
+  });
+
+  it("names its counts, and each predicate's own bound by its IRI, as an error's values", () => {
+    expect(limitVars(RELEASE_LIMITS)).toEqual(RELEASE_LIMITS);
+    expect(limitVars(FOREIGN_LIMITS)).toEqual({
+      ...RELEASE_LIMITS,
+      [`${SM_NS}dueOnDay`]: MAX_DUE_DAYS,
+    });
   });
 });
 
@@ -385,6 +459,24 @@ describe("sharedReadBudget", () => {
     for (let read = 0; read < 3; read++)
       expect(await reads(fetch, "https://b.example/d.ttl")).toBe(true);
     expect(await reads(fetch, "https://b.example/d.ttl", BUDGET)).toBe(false);
+  });
+
+  it("names a document's own limits, not the budget, for a subject with more values than they allow", async () => {
+    const limits = { bytes: 1000, quads: 100, characters: 10_000, valuesPerPredicate: 2 };
+    const budget = { bytes: 2000, quads: 200, characters: 20_000 };
+    const total = { bytes: 4000, quads: 400, characters: 40_000 };
+    const fetch = sharedReadBudget({ limits, budget, rereads: budget, total })(
+      serving("<#a> <#p> 1, 2 ; <#q> 1, 2 . <#b> <#p> 1, 2 .", {
+        headers: { "Content-Type": "text/turtle" },
+      }).fetch,
+    );
+    expect(await getSolidDatasetLinear(URL_, { fetch })).toBeDefined();
+    const past = sharedReadBudget({ limits, budget, rereads: budget, total })(
+      serving("<#a> <#p> 1, 2, 3 .", { headers: { "Content-Type": "text/turtle" } }).fetch,
+    );
+    const refused = await getSolidDatasetLinear(URL_, { fetch: past }).catch((e: unknown) => e);
+    expect(refused).toMatchObject({ name: "ReadLimitError", limits });
+    expect(isPastBudget(refused as ReadLimitError)).toBe(false);
   });
 
   it("gives an answer with no body as it is, counting nothing", async () => {
@@ -820,5 +912,68 @@ describe("quadTally", () => {
     expect(quads.map(second)).toEqual([false, false, true]);
     // A tally of its own counts from none.
     expect(quads.map(quadTally(limits, "kept"))).toEqual([false, false, false]);
+  });
+
+  it("counts the values of each subject for each predicate where the limits bound them", () => {
+    const [a, b] = [namedNode(`${URL_}#a`), blankNode("b")];
+    const values = (subject: Quad_Subject, count: number, predicate = `${URL_}#p`) =>
+      Array.from(
+        { length: count },
+        (_, i) =>
+          ({ ...quadOf(subject, literal(String(i))), predicate: namedNode(predicate) }) as Quad,
+      );
+    const limits = { ...RELEASE_LIMITS, valuesPerPredicate: 3 };
+    // Three of each, of another predicate or another subject, are within.
+    const within = [...values(a, 3), ...values(a, 3, `${URL_}#q`), ...values(b, 3)];
+    expect(within.map(quadTally(limits, "renamed"))).not.toContain(true);
+    expect([...values(a, 3), ...values(a, 1)].map(quadTally(limits, "renamed"))).toEqual([
+      false,
+      false,
+      false,
+      true,
+    ]);
+    // A predicate with a bound of its own is held to it, past the one on every other.
+    const own = { ...limits, valuesOfPredicate: new Map([[`${URL_}#q`, 5]]) };
+    expect(values(a, 6, `${URL_}#q`).map(quadTally(own, "renamed"))).toEqual([
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+    ]);
+    expect(values(a, 4).map(quadTally(own, "renamed"))).toContain(true);
+    // Unbounded where the limits leave them out.
+    const { valuesPerPredicate: _, ...unbounded } = limits;
+    expect(values(a, 4).map(quadTally(unbounded, "renamed"))).not.toContain(true);
+  });
+
+  it("counts the subjects and values of subjects named as long as a term may be in time linear in them", () => {
+    // V8 hashes a string longer than 16,383 characters by its length
+    // alone: a key of a subject's kind and name joined would be compared
+    // with every other of its length.
+    const at = (count: number) =>
+      Array.from({ length: count }, (_, i) =>
+        quadOf(
+          namedNode(
+            `${"x".repeat(MAX_TERM_CHARACTERS - TERM_NAME_ROOM - 8)}${String(i).padStart(8, "0")}`,
+          ),
+          literal("1"),
+        ),
+      );
+    for (const limits of [RELEASE_LIMITS, { ...RELEASE_LIMITS, subjects: 1_000_000 }]) {
+      expect(at(3).map(quadTally(limits, "renamed"))).not.toContain(true);
+      // Eight times the subjects must take less than four times as long as an eighth of them done eight times over (testing.md).
+      const ratio = growth(
+        (count) => {
+          const quads = at(count);
+          return () => quads.forEach(quadTally(limits, "renamed"));
+        },
+        250,
+        8,
+        4,
+      );
+      expect(ratio).toBeLessThan(4);
+    }
   });
 });

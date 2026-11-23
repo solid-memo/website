@@ -1020,12 +1020,16 @@ flowchart LR
 - Every release is read under `RELEASE_LIMITS`
   ([readLimits.ts](../packages/solid/src/client/readLimits.ts)): 32 MiB
   of body, 400,000 triples, and 64 Mi characters in the terms of those
-  triples, which a Turtle prefix can make far longer than the body. That
-  leaves a wide margin over the largest release in `decks/`, and a test
-  fails once a release there reaches a quarter of any limit. A body past
+  triples, which a Turtle prefix can make far longer than the body. One
+  subject may have no more than 4,096 values for one predicate
+  (`MAX_VALUES_PER_PREDICATE`), each copy of a triple counted. The shape
+  check goes through one subject's values in one go, so this limit
+  bounds how long it holds the page at a stretch. The limits leave a
+  wide margin over the largest release in `decks/`, and a test fails
+  once a release there reaches a quarter of any limit. A body past
   the limit is canceled as soon as it's past it, or before it's read
   when its `Content-Length` says so. Parsing stops keeping triples at
-  the first one past either of the other limits, before any are built
+  the first one past any of the other limits, before any are built
   into a dataset. The text stops being read there too: it's given to
   the parser in parts, and the parser gets no more after it. A
   Turtle text is also refused at the part where it declares its base

@@ -147,23 +147,28 @@ export class HttpError extends Error {
 /**
  * How much of a document a read takes in: its body's bytes, the triples
  * parsed from it, the characters of their terms, and, where given, their
- * subjects (readLimits.ts, quadTally).
+ * subjects and the values one subject has for one predicate, each
+ * predicate valuesOfPredicate names held to its own bound there, past
+ * valuesPerPredicate (readLimits.ts, quadTally).
  */
 export interface ReadLimits {
   readonly bytes: number;
   readonly quads: number;
   readonly characters: number;
   readonly subjects?: number;
+  readonly valuesPerPredicate?: number;
+  readonly valuesOfPredicate?: ReadonlyMap<string, number>;
 }
 
 /**
  * What a read rejects with when the document is larger than its limits
  * allow (readLimits.ts): its body, as sent or as said in advance
- * (Content-Length), or the triples parsed from it, their terms or their
- * subjects; or when a Turtle text's base or prefix declarations, or the IRIs it
- * resolves, or a term, are past what any read takes in, its limits then
- * NO_SIZE_LIMITS for a read with none.
- * What was read so far is dropped.
+ * (Content-Length), or the triples parsed from it, their terms, their
+ * subjects or the values of one subject for one predicate; or when a
+ * Turtle text's base or prefix declarations, or the IRIs it resolves,
+ * or a term, are past what any read takes in, its limits then
+ * NO_SIZE_LIMITS for a read with none. What was read so far is
+ * dropped.
  */
 export class ReadLimitError extends Error {
   constructor(
@@ -175,7 +180,7 @@ export class ReadLimitError extends Error {
     super(
       limits.bytes === Number.POSITIVE_INFINITY
         ? `The document at [${url}] has more or longer base or prefix declarations, longer IRIs to resolve, deeper nesting, or a longer term than a read takes in.`
-        : `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms, ${limits.subjects === undefined ? "" : `${limits.subjects} subjects, `}a few base and prefix declarations, short IRIs to resolve, a few levels of nesting and short terms.`,
+        : `The document at [${url}] is larger than a read takes in: ${limits.bytes} bytes, ${limits.quads} triples, ${limits.characters} characters of terms, ${limits.subjects === undefined ? "" : `${limits.subjects} subjects, `}${limits.valuesPerPredicate === undefined ? "" : `${limits.valuesPerPredicate} values of one subject for one predicate${[...(limits.valuesOfPredicate ?? [])].map(([predicate, values]) => ` (${values} for [${predicate}])`).join("")}, `}a few base and prefix declarations, short IRIs to resolve, a few levels of nesting and short terms.`,
     );
     this.name = "ReadLimitError";
   }

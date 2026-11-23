@@ -17,7 +17,13 @@ import {
 } from "./client/rdf";
 import { datasetFrom, datasetOfTurtle } from "./testing/datasets";
 import { getSolidDatasetLinear } from "./client/resources";
-import { limitedFetch, MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
+import {
+  limitedFetch,
+  MAX_TERM_CHARACTERS,
+  MAX_VALUES_PER_PREDICATE,
+  RELEASE_LIMITS,
+} from "./client/readLimits";
+import { ReadLimitError } from "./client/interface";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetOrNull } from "./datasets";
 import { DCAT, DCTERMS, RDF, SM, SM_NS } from "./vocab";
@@ -2436,4 +2442,147 @@ describe("validateRelease", () => {
     );
     expect(ratio).toBeLessThan(2.5);
   }, 180_000);
+});
+
+/**
+ * The longest stretch, in milliseconds, that `work` holds the event loop
+ * without letting anything else run: the longest gap between turns of a
+ * task that schedules itself again at each turn.
+ */
+async function longestTask(work: () => Promise<unknown>): Promise<number> {
+  let last = performance.now();
+  let longest = 0;
+  let running = true;
+  const turn = () => {
+    const now = performance.now();
+    longest = Math.max(longest, now - last);
+    last = now;
+    if (running) setImmediate(turn);
+  };
+  setImmediate(turn);
+  await work();
+  running = false;
+  return Math.max(longest, performance.now() - last);
+}
+
+/** How many waits for the next task (MessageChannel) `work` makes. */
+async function tasksOf(work: () => Promise<unknown>): Promise<number> {
+  let made = 0;
+  const Channel = globalThis.MessageChannel;
+  vi.stubGlobal(
+    "MessageChannel",
+    class extends Channel {
+      constructor() {
+        super();
+        made++;
+      }
+    },
+  );
+  try {
+    await work();
+  } finally {
+    vi.unstubAllGlobals();
+  }
+  return made;
+}
+
+describe("the page's turn during a check", () => {
+  const release = "https://alice.example/releases/fronts/v1.ttl";
+  /** A release of `count` cards, each with `fronts` fronts, each in a language of its own. */
+  const cards = (count: number, fronts: number) =>
+    [
+      `@prefix sm: <${SM_NS}> .`,
+      ...Array.from(
+        { length: count },
+        (_, c) =>
+          `<#c${c}> a sm:Card ; sm:formatVersion 7 ; sm:back "b"@en ; sm:front ${Array.from(
+            { length: fronts },
+            (_, i) => `"t"@x-${i.toString(36)}`,
+          ).join(", ")} .`,
+      ),
+    ].join("\n");
+  /** A release read as one from a link is. */
+  const read = (text: string) =>
+    getSolidDatasetLinear(release, { fetch: limitedFetch(turtleFetch(text), RELEASE_LIMITS) });
+  const validator = createShaclShapeValidator({
+    fetch: vi.fn() as unknown as typeof fetch,
+    shapesFetch,
+    ...SHAPE_SOURCES,
+  });
+
+  it("checks a release whose subject has as many values for one predicate as a read takes in, and reads none with more", async () => {
+    const report = await validator.validateDataset(
+      release,
+      await read(cards(1, MAX_VALUES_PER_PREDICATE)),
+      "library",
+    );
+    expect(report.subjects).toEqual([
+      expect.objectContaining({ url: `${release}#c0`, status: "checked", violations: [] }),
+    ]);
+    await expect(read(cards(1, MAX_VALUES_PER_PREDICATE + 1))).rejects.toBeInstanceOf(
+      ReadLimitError,
+    );
+  }, 60_000);
+
+  it("lets the page do its work between subjects with many values, so the longest task does not grow with the release", async () => {
+    // Cards of many values each, far fewer than the subjects a check goes
+    // through between tasks: eight times the cards must not hold the page
+    // much longer at a stretch (testing.md).
+    const datasets = new Map<number, Dataset>();
+    for (const count of [4, 32]) datasets.set(count, await read(cards(count, 1024)));
+    const longest = async (count: number) => {
+      let best = Number.POSITIVE_INFINITY;
+      for (let run = 0; run < 3; run++) {
+        best = Math.min(
+          best,
+          await longestTask(() =>
+            validator.validateDataset(release, datasets.get(count)!, "library"),
+          ),
+        );
+      }
+      return best;
+    };
+    await longest(4);
+    expect((await longest(32)) / (await longest(4))).toBeLessThan(2.5);
+  }, 180_000);
+
+  it("lets the page do its work during the profile checks of a document and of a draft's release", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(unstampedCatalog() as never);
+    const { validator: mocked, validate } = makeValidator();
+    await mocked.validateDocument(DOC);
+    expect(validate).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.any(Function),
+      expect.any(Function),
+    );
+    validate.mockClear();
+    await mocked.validateRelease(courseDraft(), DRAFT);
+    for (const call of validate.mock.calls)
+      expect(call).toEqual([expect.anything(), undefined, expect.any(Function)]);
+  });
+
+  it("lets the page do its work as it checks a draft's release subject by subject, after many subjects or many values", async () => {
+    const { validator: mocked } = makeValidator();
+    const base = courseDraft();
+    const card = (name: string, fronts: number) => [
+      { subject: of(name), predicate: RDF.type, object: { kind: "iri" as const, value: SM.Card } },
+      ...Array.from({ length: fronts }, (_, i) => ({
+        subject: of(name),
+        predicate: SM.front,
+        object: {
+          kind: "literal" as const,
+          value: "t",
+          language: `x-${i.toString(36)}`,
+          datatype: "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+        },
+      })),
+    ];
+    const check = (triples: ReturnType<typeof card>) => () =>
+      mocked.validateRelease({ ...base, triples: [...base.triples, ...triples] }, DRAFT);
+    // The engine here is a stand-in that never waits: the subjects make every wait.
+    const none = await tasksOf(check([]));
+    expect(await tasksOf(check([...card("many", 4096), ...card("next", 1)]))).toBeGreaterThan(none);
+    const few = Array.from({ length: 300 }, (_, i) => card(`c${i}`, 1)).flat();
+    expect(await tasksOf(check(few))).toBeGreaterThan(none);
+  });
 });

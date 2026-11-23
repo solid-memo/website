@@ -16,7 +16,7 @@ import { deckRepository, INSTANCE, put, release } from "./testing/deckWrites";
 // Limits small enough that a document past them is quick to make (GHSA-fxpf-f5hv-cr66).
 vi.mock("./client/readLimits", async (importOriginal) => ({
   ...(await importOriginal<typeof import("./client/readLimits")>()),
-  FOREIGN_LIMITS: { bytes: 500_000, quads: 400, characters: 100_000_000 },
+  FOREIGN_LIMITS: { bytes: 500_000, quads: 400, characters: 100_000_000, valuesPerPredicate: 50 },
 }));
 
 /** A pod in memory, its reads through `reads` (as they are, unless given), and the repositories over it, the user's storages `userStorages` (none unless given). */
@@ -149,6 +149,25 @@ describe("a deck file's import, held to what a read outside the user's storages 
         remove: [],
       },
       { whole: true, version: "absent" },
+    );
+    expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
+  });
+
+  it("refuses a card with more values of one predicate than a read takes in, as a release made of it would be (GHSA-pgv2-87p9-4jmw)", async () => {
+    const p = pod();
+    const { deck, cards } = await imported(p, 1, 1);
+    const front = (count: number) =>
+      Object.fromEntries(Array.from({ length: count }, (_, i) => [`en-x-p${i}`, `f${i}`]));
+    const many = cards.map((card) => ({ ...card, front: front(51) }));
+    await expect(write(p, deck, many)).rejects.toMatchObject({
+      code: "deckFileTooLarge",
+      vars: FOREIGN_LIMITS,
+    });
+    expect(await p.status(deck.cardsDocumentUrl)).toBe(404);
+    await write(
+      p,
+      deck,
+      cards.map((card) => ({ ...card, front: front(50) })),
     );
     expect(await p.status(deck.cardsDocumentUrl)).toBe(200);
   });

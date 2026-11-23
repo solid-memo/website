@@ -5,7 +5,12 @@
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import type { ReadLimits } from "./client/interface";
-import { MAX_BASE_CHARACTERS, MAX_TERM_CHARACTERS, plainBase } from "./client/readLimits";
+import {
+  limitVars,
+  MAX_BASE_CHARACTERS,
+  MAX_TERM_CHARACTERS,
+  plainBase,
+} from "./client/readLimits";
 import { isPrefixedLookalike } from "./writableTerms";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
@@ -399,7 +404,7 @@ function valueTally(limits: ReadLimits | null): (visit: Pending) => void {
     else work += VALUE_WORK + (key === "term" ? TERM_WORK : 0);
     if (scalar && value !== null && key !== "cheap") work += LITERAL_WORK;
     work += depth + NESTED_ARRAY_WORK * Math.max(0, arrays - 1);
-    if (work > maxWork) throw new AppError("deckFileTooLarge", { ...limits });
+    if (work > maxWork) throw new AppError("deckFileTooLarge", limitVars(limits!));
     if (!makesNothing(value, place) || ++empty <= MAX_EMPTY_VALUES) return;
     throw new AppError("deckFileUnreadable", {
       reason: `The file has more than ${MAX_EMPTY_VALUES} values that state nothing, or that sit in an array in another array.`,
