@@ -9,13 +9,18 @@ import {
   buildThing,
   createThing,
   type Dataset,
+  createSolidDataset,
   datasetFromQuads,
+  getThing,
+  getUrlAll,
   setThing,
   type SubjectBuilder,
 } from "../client/rdf";
-import { getSolidDataset, parseQuads } from "../client/resources";
+import { getSolidDataset, parseQuads, solidDatasetAsTurtle } from "../client/resources";
 import { datasetFrom } from "../testing/datasets";
 import { answersCsv } from "@solid-memo/domain/answerCsv";
+import { cardToRecord } from "@solid-memo/domain/deckRecord";
+import { CARD_V7 } from "@solid-memo/vocab/descriptors.generated";
 import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
 import { MAX_LISTED_SOURCES } from "@solid-memo/domain/library";
 import { growth } from "@solid-memo/domain/testing/growth";
@@ -32,6 +37,7 @@ import {
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DCTERMS, RDF, SM } from "../vocab";
 import { integerLiteral } from "../testing/literals";
+import { recordThing } from "../records";
 
 const INDEX = "https://solid-memo.com/decks/index.ttl";
 const DOC = "https://solid-memo.com/decks/capitals/v1.ttl";
@@ -425,6 +431,37 @@ describe("toLibraryDeckContent", () => {
         },
       ],
     });
+  });
+
+  it("reads no subject, picture or license shaped like a prefixed name, so a whole write of the copy keeps none (GHSA-6555-2gvc-c7f4)", async () => {
+    const release = "https://other.example/rel/v1.ttl";
+    const turtle = `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+<> a sm:Deck ; sm:formatVersion 2 ; dcterms:title "Odd" ; dcterms:creator "x" ;
+   dcterms:license <current:catalog> ; dcterms:description "d" ; sm:direction "bidirectional" .
+<#c1> a sm:Card ; sm:formatVersion 7 ; sm:front "a"@en ; sm:back "b"@en ;
+   sm:frontImage <current:c2> ; sm:backImage <${FLAG}> ;
+   dcterms:subject <rdf:type> , <sm:Deck> , <${WIKIDATA}> .
+`;
+    const content = toLibraryDeckContent(release, await datasetOf(turtle, release));
+    expect(content).not.toHaveProperty("license");
+    const card = content.cards[0]!;
+    expect(card).not.toHaveProperty("frontImageUrl");
+    expect(card).toMatchObject({ backImageUrl: FLAG, subjects: [WIKIDATA] });
+    // Written whole, as a library upgrade writes the cards document, and read back.
+    const cards = "https://pod.example/solid-memo/main/decks/deck-1.ttl";
+    const written = recordThing(
+      `${cards}#c1`,
+      CARD_V7,
+      cardToRecord(card, "2026-01-01T00:00:00.000Z", cards),
+      null,
+    );
+    const text = await solidDatasetAsTurtle(setThing(createSolidDataset(), written));
+    const back = getThing(await datasetOf(text, cards), `${cards}#c1`)!;
+    expect(getUrlAll(back, DCTERMS.subject)).toEqual([WIKIDATA]);
+    expect(getUrlAll(back, SM.frontImage)).toEqual([]);
+    expect(getUrlAll(back, SM.backImage)).toEqual([FLAG]);
   });
 
   it("treats a deck and cards without a version as the first format", () => {

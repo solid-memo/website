@@ -2255,7 +2255,15 @@ by one.
   its models holds one (`readIris` in
   [records.ts](../packages/solid/src/records.ts)): a deck's theme or
   source, a card's release or subject, a draft's field, or the
-  catalog's publisher, which a new deck group takes. The next write
+  catalog's publisher, which a new deck group takes. Nor does it hold
+  an IRI that isn't an `http:` or `https:` URL, such as `<rdf:type>`,
+  `<sm:Deck>` or `<current:c2>`, as a card's copy doesn't (`carriedTo`,
+  below). That goes for a card's subject or picture, a deck's license,
+  theme or source, and any other IRI a shape names without a fixed set
+  of values. A whole write (PUT) of the document could write such an
+  IRI as the prefixed name it looks like, which names another IRI, and
+  the deck's export refuses it. A mailbox (`foaf:mbox`) is read as its
+  `mailto:` URL alone. The next write
   of a subject leaves such a value out, but a value the write keeps
   stays as it is (`setIriAll`): a link of the catalog or of a deck
   group, a deck entry's `sm:completedChapter`, and a card's
