@@ -7,6 +7,8 @@ import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_INSTANCE_URL, GUEST_ORIGIN, GUEST_WEBID } from "@solid-memo/domain/guest";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import {
+  draftContainerOf,
+  draftIriOf,
   draftSummaryOf,
   draftUrlOf,
   type ReleaseDraftSummary,
@@ -18,6 +20,7 @@ import {
   type DraftChange,
   type DraftTriple,
   type ReleaseDraft,
+  unsupportedIdOf,
 } from "@solid-memo/domain/release/releaseDraft";
 import { sourcesOf } from "@solid-memo/domain/release/releaseMetadata";
 import { checkProblems } from "@solid-memo/domain/release/releaseCheck";
@@ -1060,6 +1063,69 @@ describe("createReleaseDraft", () => {
     await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
     expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 1));
     expect(created().triples).toEqual(rebaseDraft(release, created().url).triples);
+  });
+
+  it("drops what a release's records name by another address in the new draft's container, so the draft reads back (GHSA-r6xv-78fc-m8jh)", async () => {
+    const { useCases, repository, created } = setUp();
+    const elsewhere = "https://elsewhere.example/decks/solid/v1.ttl";
+    const release = rebaseDraft(courseDraft(), elsewhere);
+    const SUBJECT = "https://elsewhere.example/topics/solid";
+    const planted = (version: number): ReleaseDraft => {
+      const taken = `${INSTANCE}drafts/solid/v${version}/cards.ttl#a~b`;
+      return {
+        ...release,
+        root: { ...release.root, license: taken },
+        cards: release.cards.map((card) => ({
+          ...card,
+          data: { ...card.data, subject: [taken, SUBJECT] },
+        })),
+      };
+    };
+    // As the pod would read it back (readDraft): every IRI of its container a fragment of its release document.
+    const readBack = (draft: ReleaseDraft) =>
+      rebaseDraft(draft, draft.url, draftIriOf(draftContainerOf(draft.url), draft.url));
+    const expectKept = (draft: ReleaseDraft) => {
+      expect(draft.root.license).toBeUndefined();
+      expect(draft.cards.map((card) => card.data.subject)).toEqual(
+        draft.cards.map(() => [SUBJECT]),
+      );
+      expect(unsupportedIdOf(readBack(draft))).toBeNull();
+    };
+    repository.readRelease.mockResolvedValueOnce(planted(2));
+    await useCases.createReleaseDraft(INSTANCE, { kind: "nextVersionOf", url: elsewhere }, WEB_ID);
+    expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 2));
+    expectKept(created());
+    repository.parseRelease.mockResolvedValueOnce(planted(1));
+    await useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID);
+    expect(created().url).toBe(draftUrlOf(INSTANCE, "solid", 1));
+    expectKept(created());
+    // A copy of a draft that names the copy's container.
+    const DRAFT = draftUrlOf(INSTANCE, "solid", 1);
+    const draft = rebaseDraft(courseDraft(), DRAFT);
+    const taken = `${INSTANCE}drafts/solid-2/v1/cards.ttl#a~b`;
+    const copied = setUp({
+      stored: { ...draft, root: { ...draft.root, license: taken } },
+      drafts: [summary("solid", 1)],
+    });
+    await copied.useCases.copyReleaseDraft(DRAFT, INSTANCE);
+    expect(copied.created().url).toBe(draftUrlOf(INSTANCE, "solid-2", 1));
+    expect(copied.created().root.license).toBeUndefined();
+  });
+
+  it("writes no draft whose record it cannot be without names an id no draft can have, as it would be read back (GHSA-r6xv-78fc-m8jh)", async () => {
+    const { useCases, repository } = setUp();
+    const release = rebaseDraft(courseDraft(), "https://elsewhere.example/decks/solid/v1.ttl");
+    repository.parseRelease.mockResolvedValueOnce({
+      ...release,
+      distributions: release.distributions.map((node) => ({
+        ...node,
+        data: { ...node.data, accessUrl: `${INSTANCE}drafts/solid/v1/cards.ttl#a~b` },
+      })),
+    });
+    await expect(
+      useCases.createReleaseDraft(INSTANCE, { kind: "fromFile" }, WEB_ID),
+    ).rejects.toEqual(new AppError("draftIdUnsupported", { id: "a~b" }));
+    expect(repository.create).not.toHaveBeenCalled();
   });
 
   it("takes the next name when its place was taken elsewhere meanwhile, a few times", async () => {

@@ -7,6 +7,7 @@ import {
   idsInUse,
   iriIn,
   LINK_FIELDS,
+  NEEDED_LINK_FIELDS,
   NOTHING_PUBLISHED,
   SERIES_ID,
   type DraftNode,
@@ -191,4 +192,36 @@ function rebased<T>(data: T, move: (iri: string) => string): T {
           : move(value as string),
     ]),
   ) as T;
+}
+
+/**
+ * The draft without the IRIs `drop` says go from its records and its
+ * root (LINK_FIELDS): a list keeps its other IRIs, and a field naming
+ * one is left out, unless its record cannot be without it
+ * (NEEDED_LINK_FIELDS). Its statements stay as they are.
+ */
+export function withoutLinks(draft: ReleaseDraft, drop: (iri: string) => boolean): ReleaseDraft {
+  const nodes = <T>(list: readonly DraftNode<T>[]) =>
+    list.map((node) => ({ id: node.id, data: unlinked(node.data, drop) }));
+  return {
+    ...draft,
+    root: unlinked(draft.root, drop),
+    agents: nodes(draft.agents),
+    distributions: nodes(draft.distributions),
+    chapters: nodes(draft.chapters),
+    steps: nodes(draft.steps),
+    cards: nodes(draft.cards),
+    distractors: nodes(draft.distractors),
+  };
+}
+
+/** A record without the IRIs `drop` says go (withoutLinks). */
+function unlinked<T>(data: T, drop: (iri: string) => boolean): T {
+  const kept: [string, unknown][] = [];
+  for (const [field, value] of Object.entries(data as object)) {
+    if (!LINK_FIELDS.has(field) || value === undefined) kept.push([field, value]);
+    else if (Array.isArray(value)) kept.push([field, value.filter((one: string) => !drop(one))]);
+    else if (NEEDED_LINK_FIELDS.has(field) || !drop(value as string)) kept.push([field, value]);
+  }
+  return Object.fromEntries(kept) as T;
 }

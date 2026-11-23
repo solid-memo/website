@@ -4,7 +4,13 @@
 
 import { describe, expect, it } from "vitest";
 import { courseDraft, DRAFT, link } from "../testing/releaseDraft.ts";
-import { moved, rebaseDraft, releaseToDraft, withOwnSeries } from "./releaseToDraft.ts";
+import {
+  moved,
+  rebaseDraft,
+  releaseToDraft,
+  withoutLinks,
+  withOwnSeries,
+} from "./releaseToDraft.ts";
 
 const RELEASE = "https://pod.example/solid-memo/main/releases/solid/v1.ttl";
 
@@ -173,5 +179,45 @@ describe("withOwnSeries", () => {
     const itself = withOwnSeries(inSeries({ inSeries: RELEASE }, [kept]));
     expect(itself.root.inSeries).toBe(`${RELEASE}#series`);
     expect(itself.triples).toContainEqual(kept);
+  });
+});
+
+describe("withoutLinks", () => {
+  const GONE = "https://gone.example/x";
+  const KEPT = "https://kept.example/x";
+  const drop = (iri: string) => iri.startsWith("https://gone.example/");
+
+  it("drops an IRI from a list and a field that names one, and nothing else", () => {
+    const draft = courseDraft();
+    const planted = {
+      ...draft,
+      root: { ...draft.root, license: GONE, publisher: KEPT, prev: undefined },
+      cards: draft.cards.map((card) => ({
+        ...card,
+        data: { ...card.data, subject: [GONE, KEPT], frontImage: GONE },
+      })),
+    };
+    const kept = withoutLinks(planted, drop);
+    expect(kept.root).not.toHaveProperty("license");
+    expect(kept.root.publisher).toBe(KEPT);
+    expect(kept.root.prev).toBeUndefined();
+    expect(kept.root.title).toEqual(draft.root.title);
+    for (const card of kept.cards) {
+      expect(card.data.subject).toEqual([KEPT]);
+      expect(card.data).not.toHaveProperty("frontImage");
+    }
+    expect(kept.triples).toBe(planted.triples);
+  });
+
+  it("keeps an IRI of a field its record cannot be without", () => {
+    const draft = courseDraft();
+    const planted = {
+      ...draft,
+      distributions: draft.distributions.map((node) => ({
+        ...node,
+        data: { ...node.data, accessUrl: GONE },
+      })),
+    };
+    expect(withoutLinks(planted, drop).distributions).toEqual(planted.distributions);
   });
 });

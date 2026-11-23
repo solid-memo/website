@@ -21,7 +21,7 @@ import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import {
   draftDocuments,
   draftDocumentUrl,
-  isDraftDocumentName,
+  draftIriOf,
 } from "@solid-memo/domain/release/draftLayout";
 import {
   idIn,
@@ -174,21 +174,6 @@ export function tripleParts(triple: DraftTriple): string[] {
 /** The quads of a dataset. */
 export function quadsOf(dataset: Dataset): Quad[] {
   return [...toRdfJsDataset(dataset)] as Quad[];
-}
-
-/**
- * A pod IRI of a draft's container as the draft names it: a fragment of
- * one of its documents as the same fragment of its release document;
- * any other IRI as it is.
- */
-export function draftIriOf(container: string, draftUrl: string): (iri: string) => string {
-  return (iri) => {
-    if (!iri.startsWith(container)) return iri;
-    const hash = iri.indexOf("#");
-    const name = (hash === -1 ? iri : iri.slice(0, hash)).slice(container.length);
-    if (!isDraftDocumentName(name)) return iri;
-    return hash === -1 ? draftUrl : `${draftUrl}${iri.slice(hash)}`;
-  };
 }
 
 /**
