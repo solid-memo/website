@@ -20,11 +20,11 @@ import {
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { isSameDocument } from "@solid-memo/domain/subjectUrl";
-import { CATALOG_V1, DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
+import { CATALOG_TERMS, CATALOG_V1, DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import {
-  readIri,
-  readIris,
+  readFieldOf,
+  readTerms,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
@@ -32,7 +32,7 @@ import {
   unlessNewer,
   withoutForeignShapedClasses,
 } from "../records";
-import { DCAT, DCTERMS, RDF, SM } from "../vocab";
+import { DCAT, RDF, SM } from "../vocab";
 import { toDecks } from "./deckMapper";
 
 /**
@@ -79,7 +79,7 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
     decks,
     deckPositions,
     groups,
-    rootGroups: root === null ? [] : readIris(root, DCAT.catalog),
+    rootGroups: root === null ? [] : [...readTerms(root, CATALOG_TERMS).catalog],
     readOnly,
   };
 }
@@ -126,8 +126,8 @@ export function withTreeChanges(
   const noCatalog = () => new Error("Deck groups need the catalog, and its publisher");
   // A publisher that is no URL is none: a new group could not be written with it.
   const publisher = () => {
-    const url = root === null ? null : readIri(root, DCTERMS.publisher);
-    if (url === null) throw noCatalog();
+    const url = root === null ? undefined : readFieldOf(root, CATALOG_V1, "publisher");
+    if (url === undefined) throw noCatalog();
     return url;
   };
 
@@ -155,7 +155,7 @@ export function withTreeChanges(
       groups: before!.groups.filter((link) => groupUrls.has(link)),
     };
     const position = changes.positions.get(url) ?? before?.position;
-    // A link the group has that is no URL (readIris) is no member, and stays as it is (setIriAll).
+    // A link the group has that is no URL (DECK_GROUP_V1's bounds) is no member, and stays as it is (setIriAll).
     const linked = (link: string) => (existing === null ? [] : getUrlAll(existing, link));
     const group: StoredGroup = {
       group: titles.get(url) ?? before!.group,

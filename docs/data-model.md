@@ -2287,10 +2287,12 @@ by one.
 - **What is read can be written back.** An IRI that `new URL` refuses,
   such as `<http://[x>`, is still an IRI to the Turtle parser, but the
   client library writes no such IRI. So no value the app reads into
-  its models holds one (`readIris` in
-  [records.ts](../packages/solid/src/records.ts)): a deck's theme or
-  source, a card's release or subject, a draft's field, or the
-  catalog's publisher, which a new deck group takes. Nor does it hold
+  its models holds one. Each IRI field's rule in
+  [ns/bounds/](../ns/bounds/), `sh:pattern "^https?://"`, keeps it out
+  as `readField` in [records.ts](../packages/solid/src/records.ts)
+  reads the field: a deck's theme or source, a card's release or
+  subject, a draft's field, or the catalog's publisher, which a new
+  deck group takes. Nor does it hold
   an IRI that isn't an `http:` or `https:` URL, such as `<rdf:type>`,
   `<sm:Deck>` or `<current:c2>`, as a card's copy doesn't (`carriedTo`,
   below). That goes for a card's subject or picture, a deck's license,

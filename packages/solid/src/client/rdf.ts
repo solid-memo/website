@@ -16,7 +16,6 @@ import {
   getDecimal as libraryGetDecimal,
   getInteger as libraryGetInteger,
   getPropertyAll as libraryGetPropertyAll,
-  getStringByLocaleAll as libraryGetStringByLocaleAll,
   getStringNoLocale as libraryGetStringNoLocale,
   getStringNoLocaleAll as libraryGetStringNoLocaleAll,
   getNamedNodeAll as libraryGetNamedNodeAll,
@@ -87,12 +86,12 @@ import { pathKeys } from "./readLimits";
  *   with the square of a long literal's length, so readDatetime passes
  *   it only a short literal that is wholly a date-time.
  * - Language tags are lower case wherever a value is read with one
- *   (getStringByLocaleAll, getLiteralAll), however the document spells it.
+ *   (eachStringByLocale, getLiteralAll), however the document spells it.
  * - getDecimal reads a decimal as parseFloat does (`2.50` is 2.5, a value
  *   that is no number null).
  * - A literal with a base direction (RDF 1.2, `"…"@ar--rtl`) is kept with
  *   its language and direction, and written back as it was read. It is
- *   no language text: getStringByLocaleAll and setStringAll leave it be,
+ *   no language text: eachStringByLocale and setStringAll leave it be,
  *   and propertiesOf gives it as a literal of its datatype
  *   (rdf:dirLangString); getLiteralAll and getTermAll give it whole.
  */
@@ -640,6 +639,40 @@ export function getUrlAll(subject: Subject, property: string): string[] {
   return libraryGetUrlAll(thing(subject), property);
 }
 
+/**
+ * The subject's IRIs for the property one at a time, in the order
+ * getUrlAll gives them, each made only when it is asked for: a reader
+ * that takes a few of many builds no list of them all (records.ts).
+ */
+export function* eachUrl(subject: Subject, property: string): Generator<string> {
+  for (const iri of thing(subject).predicates[property]?.namedNodes ?? []) {
+    yield iri.startsWith(LOCAL_NODE) ? `#${iri.slice(LOCAL_NODE.length)}` : iri;
+  }
+}
+
+/** The subject's strings without a language for the property one at a time, in the order getStringNoLocaleAll gives them (eachUrl). */
+export function* eachStringNoLocale(subject: Subject, property: string): Generator<string> {
+  yield* thing(subject).predicates[property]?.literals?.[XSD_STRING] ?? [];
+}
+
+/**
+ * The subject's strings with a language for the property one at a time,
+ * each with its language in lower case, however the document spells
+ * it: the strings of one language in their order, none with a base
+ * direction, which is no language text (isDirectional, eachUrl).
+ */
+export function* eachStringByLocale(
+  subject: Subject,
+  property: string,
+): Generator<[language: string, value: string]> {
+  for (const [locale, values] of Object.entries(
+    thing(subject).predicates[property]?.langStrings ?? {},
+  )) {
+    if (isDirectional(locale)) continue;
+    for (const value of values) yield [locale.toLowerCase(), value];
+  }
+}
+
 /** An IRI the subject has for the property; null when it has none. */
 export function getUrl(subject: Subject, property: string): string | null {
   return libraryGetUrl(thing(subject), property);
@@ -658,17 +691,6 @@ export function getStringNoLocale(subject: Subject, property: string): string | 
 /** Every string without a language the subject has for the property. */
 export function getStringNoLocaleAll(subject: Subject, property: string): string[] {
   return libraryGetStringNoLocaleAll(thing(subject), property);
-}
-
-/**
- * The subject's strings with a language for the property, by their
- * language in lower case; none with a base direction, which is no
- * language text (isDirectional).
- */
-export function getStringByLocaleAll(subject: Subject, property: string): Map<string, string[]> {
-  const strings = libraryGetStringByLocaleAll(thing(subject), property);
-  for (const locale of strings.keys()) if (isDirectional(locale)) strings.delete(locale);
-  return strings;
 }
 
 /** An integer the subject has for the property; null when it has none. */

@@ -29,8 +29,16 @@ import {
   type LibrarySource,
 } from "@solid-memo/domain/library";
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
+import { SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { migrateWithinBound, readDatetime, readVersioned, storedVersionOf } from "../records";
+import {
+  countOf,
+  migrateWithinBound,
+  readDatetime,
+  readVersioned,
+  storedVersionOf,
+} from "../records";
 import { agentNamesOf, authorOfAgents, distractorsOf, readCard } from "./deckMapper";
 import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
 import {
@@ -127,23 +135,44 @@ function toLibraryDeck(
     ...(modifiedAt === undefined ? {} : { modifiedAt }),
     themes: [...release.theme],
     keywords: copyKeywords(release.keyword),
-    ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
-      toLibrarySource(sourceUrl, getThing(index, sourceUrl)),
+    ...boundedSources(
+      release.wasDerivedFrom,
+      (sourceUrl) => toLibrarySource(sourceUrl, getThing(index, sourceUrl)),
+      sourceCountOf(currentThing!, current.record.version),
     ),
     ...courseOf(currentThing!),
   });
-  const total = authorCountOf(currentThing!, current.record.version, release.creator);
+  const total = authorCountOf(currentThing!, current.record.version);
   return { ...listing, ...listedAuthors(listing.authors, total) };
 }
 
+/** The fields of several values of a release that a listing counts past their bounds (countOf). */
+type CountedFields = {
+  creator: readonly string[];
+  source: readonly string[];
+  wasDerivedFrom: readonly string[];
+};
+
+/** The descriptor a release of `version` is read with, for the fields a listing counts. */
+function releaseDescriptor(version: number): ShapeDescriptor<CountedFields> {
+  return (SHAPES.libraryDeck as unknown as Record<number, ShapeDescriptor<CountedFields>>)[
+    version
+  ]!;
+}
+
 /**
- * How many authors a release names. One from before format 3 names them
- * as text, of which only the first MAX_DECK_METADATA are read
- * (records.ts namedCreators), so they are counted where it stores them,
- * with no agent named for any.
+ * How many authors a release names. Only the first MAX_DECK_METADATA
+ * are read (ns/bounds/library-deck.ttl), and one from before format 3
+ * names them as text, so they are counted where it stores them, with
+ * no agent named for any.
  */
-function authorCountOf(thing: Subject, version: number, creators: readonly string[]): number {
-  return version < 3 ? getStringNoLocaleAll(thing, DCTERMS.creator).length : creators.length;
+function authorCountOf(thing: Subject, version: number): number {
+  return countOf(thing, releaseDescriptor(version), "creator");
+}
+
+/** How many sources a release names, past the first it reads: dcterms:source before format 3. */
+function sourceCountOf(thing: Subject, version: number): number {
+  return countOf(thing, releaseDescriptor(version), version < 3 ? "source" : "wasDerivedFrom");
 }
 
 /** `isCourse` for a release that is also typed schema:Course. */
@@ -298,9 +327,11 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
     languages: [...release.language],
     ...(release.created === undefined ? {} : { createdAt: release.created }),
     // Its content keeps its first authors (libraryDeckFromRecord): how many it names, when more.
-    ...listedAuthors(content.authors, authorCountOf(deck, read.record.version, release.creator)),
-    ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
-      toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
+    ...listedAuthors(content.authors, authorCountOf(deck, read.record.version)),
+    ...boundedSources(
+      release.wasDerivedFrom,
+      (sourceUrl) => toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
+      sourceCountOf(deck, read.record.version),
     ),
   };
 }

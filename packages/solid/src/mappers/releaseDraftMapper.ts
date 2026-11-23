@@ -38,13 +38,13 @@ import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { CARD_V7, DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import {
   datetimeOf,
   keptClasses,
-  readIris,
+  readFieldOf,
   readRecord,
   readVersioned,
   recordThing,
@@ -486,7 +486,7 @@ export function draftReadOf(
     // into its record, not the raw triples: the latest card shape writes
     // it, once, and the release diff and a learner's upgrade compare it.
     if (shape === "card" && read.record.version < 7) {
-      const about = readIris(thing, DCTERMS.subject);
+      const about = readFieldOf(thing, CARD_V7, "subject")!;
       refuse(subject, descriptor, read.record.data, [[DCTERMS.subject, about]]);
       own(subject, descriptor, [], [DCTERMS.subject]);
       nodes[list]!.push({ id, data: { ...data, subject: about } });

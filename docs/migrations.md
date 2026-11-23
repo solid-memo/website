@@ -529,6 +529,10 @@ every kind, every step is pure, the latest record passes through
 untouched, and, with the real shapes, every step's output conforms to
 the shape it moves to.
 
+Every step runs on a record read within its kind's bounds
+([shapes.md](shapes.md#bounds)), so it never sees more values than they
+let through.
+
 A step's output is held to the bound on a term, 16,383 characters, as
 every read and write is
 ([data-model.md](data-model.md#write-discipline)), each term measured

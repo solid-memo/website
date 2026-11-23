@@ -284,6 +284,17 @@ of the kind has, and on a kind without a `<#bounds>` shape
 ([bounds.ts](../packages/vocab/tooling/bounds.ts)). It puts each
 field's bounds in its descriptor (`maxCount`, `maxLength`, `iri`).
 
+The reader ([records.ts](../packages/solid/src/records.ts)) reads a
+subject within them. It takes a field's values in stored order and
+stops at `maxCount`, so it never builds a longer list. It reads no
+value longer than `maxLength`: an optional value is absent, a required
+one leaves the record not fitting its shape, and so does a list
+holding one, which would otherwise say less than the subject does. A
+text leaves out a language whose value is longer. An IRI its rule
+doesn't read isn't read at all. A listing that says how many values a
+field has past its bound counts them as it reads them, keeping none
+(`countOf`).
+
 The terms the app reads of a subject beside its record get a small
 shape of their own, `<#terms>`, named `<Name>Terms` (`"DeckTerms"`).
 They're a deck entry's completed chapters, card language, picture
@@ -344,12 +355,15 @@ Every mapper takes three steps
 
 1. `readVersioned(thing, "card")` checks the class, reads the stored
    version (absent = 1), and reads the subject with that version's
-   descriptor into a `{ version, data }` record. A version newer
+   descriptor into a `{ version, data }` record, within the kind's
+   [bounds](#bounds). A version newer
    than this app knows is read with the latest shape it has, its stored
    version passed through unchanged. A version below 1, which no shape
    has, isn't read: the subject is read as one that doesn't fit.
 2. `migrate("card", record)` walks the record up the
    [migration chain](migrations.md) to the latest version, in memory.
+   It runs on the bounded record, so a step never sees more values
+   than the bounds let through.
 3. `cardFromRecord(url, storedVersion, data)` builds the domain model,
    keeping the stored version to count what's outdated.
 

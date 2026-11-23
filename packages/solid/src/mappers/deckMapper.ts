@@ -63,6 +63,7 @@ import { documentUrlOf, isDocumentSubject, isSameDocument } from "@solid-memo/do
 import {
   AGENT_V1,
   ALL_SHAPES,
+  CARD_TERMS,
   CARD_V7,
   CATALOG_V1,
   DECK_V6,
@@ -76,8 +77,8 @@ import {
   migrateWithinBound,
   ownSubjectsOf,
   readDatetime,
-  readIri,
-  readIris,
+  readFieldOf,
+  readTerms,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
@@ -605,9 +606,9 @@ export function toCard(thing: Subject, dataset: Dataset): Card | null {
     read.data,
     distractorsOf(dataset, read.data.distractor),
   );
-  // One that is no URL (readIri) is not read, and stays as it is on the card (cardThing).
-  const fromRelease = readIri(thing, SM.fromRelease);
-  return card === null || fromRelease === null ? card : { ...card, fromRelease };
+  // One that is no URL is not read (CARD_TERMS), and stays as it is on the card (cardThing).
+  const { fromRelease } = readTerms(thing, CARD_TERMS);
+  return card === null || fromRelease === undefined ? card : { ...card, fromRelease };
 }
 
 /**
@@ -625,7 +626,7 @@ export function readCard(thing: Subject): { storedVersion: number; data: CardV7 
   if (read.record.version >= 7) return { storedVersion: read.storedVersion, data };
   return {
     storedVersion: read.storedVersion,
-    data: { ...data, subject: readIris(thing, DCTERMS.subject) },
+    data: { ...data, subject: readFieldOf(thing, CARD_V7, "subject")! },
   };
 }
 

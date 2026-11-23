@@ -11,15 +11,16 @@ import {
   asUrl,
   buildThing,
   createThing,
+  eachStringByLocale,
+  eachStringNoLocale,
+  eachUrl,
   getBoolean,
   getDatetime,
   getDecimal,
   getInteger,
   getLiteralAll,
   getPropertyAll,
-  getStringByLocaleAll,
   getStringNoLocale,
-  getStringNoLocaleAll,
   getTermAll,
   getThing,
   getThingAll,
@@ -28,7 +29,7 @@ import {
   removeThings,
 } from "./client/rdf";
 import type { DatasetEdit } from "./datasetEdit";
-import { isTermTooLong } from "./client/readLimits";
+import { isTermTooLong, MAX_TERM_CHARACTERS } from "./client/readLimits";
 import type { Literal, NamedNode, Quad_Object, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,
@@ -39,14 +40,16 @@ import {
   type VersionedRecord,
 } from "@solid-memo/vocab/types.generated";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import type { FieldDescriptor, ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
+import type {
+  FieldDescriptor,
+  ShapeDescriptor,
+  TermsDescriptor,
+} from "@solid-memo/vocab/shapeDescriptor";
 import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { DCAT_AP_SHAPED_CLASSES } from "@solid-memo/shacl/profiles";
 import { RDF, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
-import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
 import { isHttpUrl } from "@solid-memo/domain/webId";
-import { FOAF_MBOX } from "@solid-memo/domain/release/releaseModel";
 import { subjectOfDocument } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf, fragmentIdOf, isDocumentSubject } from "@solid-memo/domain/subjectUrl";
 
@@ -60,8 +63,9 @@ import { documentUrlOf, fragmentIdOf, isDocumentSubject } from "@solid-memo/doma
 type FieldValue = string | number | boolean | readonly string[] | LangText | LangTexts;
 
 /**
- * The subject's IRIs for the property that are http(s) URLs, in stored
- * order, or for a mailbox (foaf:mbox) its mailto: URLs. n3 reads an IRI
+ * At most `max` of the subject's IRIs for the property that its rule
+ * reads, in stored order: http(s) URLs, or for a mailbox (foaf:mbox,
+ * whose bounds state "^mailto:") its mailto: URLs. n3 reads an IRI
  * that `new URL` refuses, such as `<http://[x>` or `<http://a:99999/x>`,
  * and the client library writes no such IRI (addIri, setIri), so a value
  * read with one would make every later write of the subject fail. An IRI
@@ -72,14 +76,15 @@ type FieldValue = string | number | boolean | readonly string[] | LangText | Lan
  * GHSA-6555-2gvc-c7f4). Neither is read: what is read of a subject can
  * always be written back (docs/data-model.md "Write discipline").
  */
-export function readIris(thing: Subject, predicate: string): string[] {
-  const read = predicate === FOAF_MBOX ? isMailbox : isHttpUrl;
-  return getUrlAll(thing, predicate).filter(read);
+function readIris(thing: Subject, predicate: string, rule: IriRule, max: number): string[] {
+  return [...firstOf(passing(eachUrl(thing, predicate), isReadIri(rule)), max)];
 }
 
-/** The first of the subject's IRIs for the property that is a URL (readIris); null when it has none. */
-export function readIri(thing: Subject, predicate: string): string | null {
-  return readIris(thing, predicate)[0] ?? null;
+/** Which IRIs a field reads (FieldDescriptor.iri): http(s) URLs (isHttpUrl) or, for a mailbox, mailto: ones. */
+type IriRule = NonNullable<FieldDescriptor["iri"]>;
+
+function isReadIri(rule: IriRule): (iri: string) => boolean {
+  return rule === "mailbox" ? isMailbox : isHttpUrl;
 }
 
 /** A mailbox (foaf:mbox): an email's `mailto:` URL. */
@@ -87,21 +92,54 @@ function isMailbox(iri: string): boolean {
   return iri.startsWith("mailto:") && URL.canParse(iri);
 }
 
-/** One field's value; undefined when absent, null when a required one is. */
+/** The first `max` of `values`, each taken only as it is asked for: no more are read. */
+function* firstOf<T>(values: Iterable<T>, max: number): Generator<T> {
+  // A bound is 1 or more (ns/bounds/): the next value is never asked for once it is reached.
+  let taken = 0;
+  for (const value of values) {
+    yield value;
+    if (++taken === max) return;
+  }
+}
+
+/** The values that pass `test`, each taken only as it is asked for. */
+function* passing<T>(values: Iterable<T>, test: (value: T) => boolean): Generator<T> {
+  for (const value of values) if (test(value)) yield value;
+}
+
+/** Whether a string fits a field: no longer than its maxLength, a term's length when it states none. */
+function fits(field: FieldDescriptor): (value: string) => boolean {
+  const max = field.maxLength ?? MAX_TERM_CHARACTERS;
+  return (value) => value.length <= max;
+}
+
+/**
+ * One field's value, read within its bounds (ns/bounds/): at most its
+ * maxCount values, taken in stored order as they are read, so a longer
+ * list is never built; each string or text no longer than its
+ * maxLength, and each IRI one its rule reads (readIris), any other not
+ * read at all; a string longer than that in a list, which would then
+ * say less than the subject does, leaves none of it read (readStrings).
+ * Undefined when absent; null when a required one is, or a list can't
+ * be read.
+ */
 function readField(thing: Subject, field: FieldDescriptor): FieldValue | null | undefined {
   if (field.cardinality === "many") {
     switch (field.kind) {
       case "iri":
-        return readIris(thing, field.predicate);
+        return readIris(thing, field.predicate, field.iri!, field.maxCount);
       case "iriEnum":
-        return getUrlAll(thing, field.predicate).filter((v) => field.values!.includes(v));
+        return [
+          ...firstOf(
+            passing(eachUrl(thing, field.predicate), (v) => field.values!.includes(v)),
+            field.maxCount,
+          ),
+        ];
       case "text":
       case "anyText":
-        return readTexts(thing, field.predicate, field.kind === "anyText");
+        return readTexts(thing, field, field.kind === "anyText");
       default:
-        return field.name === "creator"
-          ? namedCreators(thing, field.predicate)
-          : getStringNoLocaleAll(thing, field.predicate);
+        return readStrings(thing, field);
     }
   }
   const value = readScalar(thing, field);
@@ -110,17 +148,19 @@ function readField(thing: Subject, field: FieldDescriptor): FieldValue | null | 
 }
 
 /**
- * The authors a deck or a release from before format 3 names as text
- * ("Name <email>"): at most its first MAX_DECK_METADATA, which is all a
- * deck keeps at most (withBoundedMetadata). The migration to format 3
- * names an agent for each at an address joined from the subject's
- * document, which may be as long as a term, and the agents are named
- * again to tell who they are (authorOfAgents): an entry naming many
- * authors must not cost that work and memory for each before the bound
- * drops all but the first (GHSA-4fxx-vv9w-9g2j).
+ * At most a field's maxCount strings, in stored order; null when one of
+ * them is longer than its maxLength, as a list missing a value would
+ * say something else than the subject does (a deck schedule's due days).
  */
-function namedCreators(thing: Subject, predicate: string): string[] {
-  return getStringNoLocaleAll(thing, predicate).slice(0, MAX_DECK_METADATA);
+function readStrings(thing: Subject, field: FieldDescriptor): string[] | null {
+  const read: string[] = [];
+  const fit = fits(field);
+  for (const value of eachStringNoLocale(thing, field.predicate)) {
+    if (read.length === field.maxCount) break;
+    if (!fit(value)) return null;
+    read.push(value);
+  }
+  return read;
 }
 
 function readScalar(
@@ -129,11 +169,13 @@ function readScalar(
 ): string | number | boolean | LangText | null {
   switch (field.kind) {
     case "text":
-      return readText(thing, field.predicate);
+      return readLanguages(thing, field, {});
     case "anyText":
-      return readAnyText(thing, field.predicate);
-    case "string":
-      return getStringNoLocale(thing, field.predicate);
+      return readAnyText(thing, field);
+    case "string": {
+      const value = getStringNoLocale(thing, field.predicate);
+      return value !== null && fits(field)(value) ? value : null;
+    }
     case "enum": {
       const value = getStringNoLocale(thing, field.predicate);
       return value !== null && field.values!.includes(value) ? value : null;
@@ -147,7 +189,7 @@ function readScalar(
     case "dateTime":
       return readDatetime(thing, field.predicate)?.toISOString() ?? null;
     case "iri":
-      return readIri(thing, field.predicate);
+      return readIris(thing, field.predicate, field.iri!, 1)[0] ?? null;
     case "iriEnum": {
       const value = getUrl(thing, field.predicate);
       return value !== null && field.values!.includes(value) ? value : null;
@@ -272,49 +314,69 @@ export function unreadableDatetimes(thing: Subject, predicate: string): string[]
 }
 
 /**
- * A text's language-tagged values, by lower-case language tag (the first
- * value of each language: the shapes allow one); null when there are none.
- * Untagged literals are not part of a text.
+ * A text's language-tagged values after `text` (a text's untagged value,
+ * when it may have one), by lower-case language tag: the first value of
+ * each language (the shapes allow one), in at most the field's maxCount
+ * languages in all, each no longer than its maxLength; a language whose
+ * first value is longer is not read. Null when there are none. Untagged
+ * literals are not part of a text.
  */
-export function readText(thing: Subject, predicate: string): LangText | null {
-  const text: LangText = Object.fromEntries(
-    [...getStringByLocaleAll(thing, predicate)].map(([language, values]) => [
-      language.toLowerCase(),
-      values[0],
-    ]),
-  );
-  return Object.keys(text).length > 0 ? text : null;
+function readLanguages(thing: Subject, field: FieldDescriptor, text: LangText): LangText | null {
+  const read: Record<string, string> = { ...text };
+  const fit = fits(field);
+  const seen = new Set<string>();
+  let count = Object.keys(read).length;
+  for (const [language, value] of eachStringByLocale(thing, field.predicate)) {
+    if (count === field.maxCount) break;
+    if (seen.has(language)) continue;
+    seen.add(language);
+    if (!fit(value)) continue;
+    read[language] = value;
+    count++;
+  }
+  return count > 0 ? read : null;
 }
 
-/** A text that may also be untagged: the untagged literal under the empty tag. */
-function readAnyText(thing: Subject, predicate: string): LangText | null {
-  const untagged = getStringNoLocale(thing, predicate);
-  const text = readText(thing, predicate) ?? {};
-  return untagged === null
-    ? Object.keys(text).length > 0
-      ? text
-      : null
-    : { "": untagged, ...text };
+/** A text that may also be untagged: the untagged literal under the empty tag, one of its values. */
+function readAnyText(thing: Subject, field: FieldDescriptor): LangText | null {
+  const untagged = getStringNoLocale(thing, field.predicate);
+  const read = untagged !== null && fits(field)(untagged);
+  return readLanguages(thing, field, read ? { "": untagged } : {});
 }
 
 /**
- * Texts with several values per language (a deck's keywords): every
- * language-tagged value, by lower-case language tag (tags that differ
+ * Texts with several values per language (a deck's keywords): the
+ * language-tagged values, by lower-case language tag (tags that differ
  * only in case are one language), each once, in stored order; for a
  * field that may also be untagged, the untagged values under the empty
- * tag. Empty ({}) when there are none.
+ * tag first. At most the field's maxCount values in all, each no longer
+ * than its maxLength. Empty ({}) when there are none.
  */
-function readTexts(thing: Subject, predicate: string, untagged: boolean): LangTexts {
+function readTexts(thing: Subject, field: FieldDescriptor, untagged: boolean): LangTexts {
   // The client reads each tag in lower case (client/rdf.ts), so a tag comes up once.
-  const texts = new Map<string, string[]>();
-  if (untagged) {
-    const values = getStringNoLocaleAll(thing, predicate);
-    if (values.length > 0) texts.set("", [...new Set(values)]);
+  const texts = new Map<string, Set<string>>();
+  const fit = fits(field);
+  let count = 0;
+  for (const [language, value] of textValues(thing, field.predicate, untagged)) {
+    if (count === field.maxCount) break;
+    if (!fit(value)) continue;
+    const values = texts.get(language) ?? new Set<string>();
+    texts.set(language, values);
+    if (values.has(value)) continue;
+    values.add(value);
+    count++;
   }
-  for (const [language, values] of getStringByLocaleAll(thing, predicate)) {
-    texts.set(language, [...new Set(values)]);
-  }
-  return Object.fromEntries(texts);
+  return Object.fromEntries([...texts].map(([language, values]) => [language, [...values]]));
+}
+
+/** A text's values one at a time, with their language: the untagged ones first ("") when it may have them, then the tagged ones. */
+function* textValues(
+  thing: Subject,
+  predicate: string,
+  untagged: boolean,
+): Generator<[language: string, value: string]> {
+  if (untagged) for (const value of eachStringNoLocale(thing, predicate)) yield ["", value];
+  yield* eachStringByLocale(thing, predicate);
 }
 
 /**
@@ -331,6 +393,84 @@ export function readRecord<T>(thing: Subject, descriptor: ShapeDescriptor<T>): T
   return record as T;
 }
 
+/**
+ * The terms a small shape of ns/bounds/ names (a deck entry's completed
+ * chapters, a WebID profile's storages), read as a record's fields are,
+ * within their bounds: a missing one is absent, and a missing list, or
+ * one that can't be read (readStrings), empty.
+ */
+export function readTerms<T>(thing: Subject, descriptor: TermsDescriptor<T>): T {
+  const terms: Record<string, FieldValue> = {};
+  for (const field of descriptor.fields) {
+    const value = readField(thing, field);
+    if (value !== null && value !== undefined) terms[field.name] = value;
+    else if (field.cardinality === "many") terms[field.name] = [];
+  }
+  return terms as T;
+}
+
+/**
+ * Whether the subject states `iri` as a value of the property. A test
+ * of one value reads the values one at a time and keeps none of them,
+ * so it gives the same answer however many values the subject has, and
+ * needs no bound.
+ */
+export function hasIri(thing: Subject, predicate: string, iri: string): boolean {
+  return someIri(thing, predicate, (value) => value === iri);
+}
+
+/** Whether the subject is of the class: states it as a value of rdf:type (hasIri). */
+export function hasClass(thing: Subject, type: string): boolean {
+  return hasIri(thing, RDF.type, type);
+}
+
+/** Whether one of the subject's IRIs for the property passes `test`, read as hasIri reads them. */
+export function someIri(
+  thing: Subject,
+  predicate: string,
+  test: (iri: string) => boolean,
+): boolean {
+  for (const value of eachUrl(thing, predicate)) if (test(value)) return true;
+  return false;
+}
+
+/**
+ * One field of a shape's descriptor read from the subject within its
+ * bounds, as readRecord reads it, whether or not the subject fits the
+ * shape: undefined when it has none (or none that is read). For one
+ * field read alone, such as the datasets a catalog lists as a write
+ * adds one.
+ */
+export function readFieldOf<T, K extends keyof T & string>(
+  thing: Subject,
+  descriptor: ShapeDescriptor<T>,
+  name: K,
+): T[K] | undefined {
+  const field = descriptor.fields.find((one) => one.name === name)!;
+  return (readField(thing, field) ?? undefined) as T[K] | undefined;
+}
+
+/**
+ * How many values of a field of strings or IRIs the subject states that
+ * the field would read, past its maxCount too: for a listing that says
+ * how many more there are than it shows. They're counted as they're
+ * read, and none is kept.
+ */
+export function countOf<T>(
+  thing: Subject,
+  descriptor: ShapeDescriptor<T>,
+  name: keyof T & string,
+): number {
+  const field = descriptor.fields.find((one) => one.name === name)!;
+  const values =
+    field.kind === "iri"
+      ? passing(eachUrl(thing, field.predicate), isReadIri(field.iri!))
+      : passing(eachStringNoLocale(thing, field.predicate), fits(field));
+  let count = 0;
+  for (const _ of values) count++;
+  return count;
+}
+
 /** What a subject says about its format: absent means 1. */
 export function storedVersionOf(thing: Subject): number {
   return getInteger(thing, SM.formatVersion) ?? 1;
@@ -338,9 +478,7 @@ export function storedVersionOf(thing: Subject): number {
 
 /** Whether the subject has every value the shape fixes (an FSRS-6 state's scheduler). */
 function hasFixedValues(thing: Subject, descriptor: ShapeDescriptor): boolean {
-  return descriptor.fixedValues.every((fixed) =>
-    getUrlAll(thing, fixed.predicate).includes(fixed.value),
-  );
+  return descriptor.fixedValues.every((fixed) => hasIri(thing, fixed.predicate, fixed.value));
 }
 
 /**
@@ -359,7 +497,7 @@ export function readVersioned<S extends ShapeName>(
   if (storedVersion < 1) return null;
   const version = Math.min(storedVersion, LATEST_VERSION[shape]);
   const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[version];
-  if (!getUrlAll(thing, RDF.type).includes(descriptor.targetClass)) return null;
+  if (!hasClass(thing, descriptor.targetClass)) return null;
   if (!hasFixedValues(thing, descriptor)) return null;
   const data = readRecord(thing, descriptor);
   if (data === null) return null;
@@ -378,7 +516,7 @@ export function readVersioned<S extends ShapeName>(
  * bound (defaultDeckDescription). Its creators' agents are not held to
  * it here: a deck from before format 3 names its authors, whose agents
  * a write names anew and refuses past the bound (GHSA-4mgg-5xpp-3jx5),
- * and only its first are read (namedCreators).
+ * and only its first are read (its bounds, ns/bounds/).
  */
 export function migrateWithinBound<S extends ShapeName>(
   shape: S,

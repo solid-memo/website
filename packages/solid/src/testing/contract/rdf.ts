@@ -74,12 +74,14 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     createThing,
     datasetAt,
     datasetFromQuads,
+    eachStringByLocale,
+    eachStringNoLocale,
+    eachUrl,
     fromRdfJsDataset,
     getDatetime,
     getDecimal,
     getLiteralAll,
     getPropertyAll,
-    getStringByLocaleAll,
     getInteger,
     getStringNoLocale,
     getStringNoLocaleAll,
@@ -97,6 +99,15 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     toRdfJsDataset,
     withQuads,
   } = rdf;
+
+  /** The strings with a language, by language, as eachStringByLocale gives them. */
+  const getStringByLocaleAll = (subject: Rdf.Subject, property: string) => {
+    const strings = new Map<string, string[]>();
+    for (const [language, value] of eachStringByLocale(subject, property)) {
+      strings.set(language, [...(strings.get(language) ?? []), value]);
+    }
+    return strings;
+  };
 
   /** The dataset of `turtle` as read from URL_. */
   const read = (turtle = TURTLE) =>
@@ -183,6 +194,31 @@ export function rdfContract({ rdf, resources }: DataClient): void {
           "en-gb",
         ]);
       }
+    });
+
+    it("gives a property's values one at a time, each kind in stored order, language tags in lower case", async () => {
+      const turtle = `@prefix ex: <${EX}> .
+<#a> ex:p <#x>, "one", "en"@EN, <#y>, "två"@sv, "two", "again"@en, "مرحبا"@ar--rtl, 7 .`;
+      const P = `${EX}p`;
+      const thing = getThing(await read(turtle), `${URL_}#a`)!;
+      expect([...eachUrl(thing, P)]).toEqual([`${URL_}#x`, `${URL_}#y`]);
+      expect([...eachStringNoLocale(thing, P)]).toEqual(["one", "two"]);
+      expect(getStringByLocaleAll(thing, P)).toEqual(
+        new Map([
+          ["en", ["en", "again"]],
+          ["sv", ["två"]],
+        ]),
+      );
+      const named = buildThing(createThing({ url: `${URL_}#b` }))
+        .addUrl(P, createThing({ name: "local" }))
+        .build();
+      expect([...eachUrl(named, P)]).toEqual(["#local"]);
+      const none = createThing({ url: `${URL_}#c` });
+      expect([
+        ...eachUrl(none, P),
+        ...eachStringNoLocale(none, P),
+        ...eachStringByLocale(none, P),
+      ]).toEqual([]);
     });
 
     it("reads a decimal as parseFloat does", () => {

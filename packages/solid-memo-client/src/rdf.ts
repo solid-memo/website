@@ -503,6 +503,34 @@ export function getUrlAll(subject: Subject, property: string): string[] {
     .map((value) => readIri(value.value));
 }
 
+/** The subject's IRIs for the property one at a time, in the order getUrlAll gives them, each made only when it is asked for. */
+export function* eachUrl(subject: Subject, property: string): Generator<string> {
+  for (const value of valuesAt(subject, property)) {
+    if (value.termType === "NamedNode") yield readIri(value.value);
+  }
+}
+
+/** The subject's strings without a language for the property one at a time, in the order getStringNoLocaleAll gives them. */
+export function* eachStringNoLocale(subject: Subject, property: string): Generator<string> {
+  for (const value of valuesAt(subject, property)) {
+    if (value.termType === "Literal" && value.datatype.value === XSD_STRING) yield value.value;
+  }
+}
+
+/**
+ * The subject's strings with a language for the property one at a time,
+ * each with its language in lower case: the strings of one language in
+ * stored order, though one language's may come between another's.
+ */
+export function* eachStringByLocale(
+  subject: Subject,
+  property: string,
+): Generator<[language: string, value: string]> {
+  for (const value of valuesAt(subject, property)) {
+    if (isLangString(value)) yield [(value as Literal).language, value.value];
+  }
+}
+
 /** An IRI the subject has for the property; null when it has none. */
 export function getUrl(subject: Subject, property: string): string | null {
   return getUrlAll(subject, property)[0] ?? null;
@@ -521,16 +549,6 @@ export function getStringNoLocale(subject: Subject, property: string): string | 
 /** Every string without a language the subject has for the property. */
 export function getStringNoLocaleAll(subject: Subject, property: string): string[] {
   return lexicalAll(subject, property, XSD_STRING);
-}
-
-/** The subject's strings with a language for the property, by their language in lower case. */
-export function getStringByLocaleAll(subject: Subject, property: string): Map<string, string[]> {
-  return new Map(
-    [...stringsByLanguage(valuesAt(subject, property))].map(([language, values]) => [
-      language,
-      values.map((value) => value.value),
-    ]),
-  );
 }
 
 /** A number read as `parse` reads it; null where that is no number. */

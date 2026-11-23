@@ -8,6 +8,20 @@ import { rdfContract } from "@solid-memo/solid/testing/contract/rdf";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
 
+/** Every string without a language, as eachStringNoLocale gives them. */
+const stringsOf = (subject: rdf.Subject, property: string) => [
+  ...rdf.eachStringNoLocale(subject, property),
+];
+
+/** The strings with a language, by language, as eachStringByLocale gives them. */
+const byLocaleOf = (subject: rdf.Subject, property: string) => {
+  const strings = new Map<string, string[]>();
+  for (const [language, value] of rdf.eachStringByLocale(subject, property)) {
+    strings.set(language, [...(strings.get(language) ?? []), value]);
+  }
+  return strings;
+};
+
 rdfContract({ rdf, resources });
 
 describe("getDatetime, as @inrupt/solid-client reads one", () => {
@@ -102,9 +116,9 @@ describe("datasetFromQuads", () => {
 
   it("holds a value given twice once, and refuses an object no triple can have", () => {
     const twice = quadOf(`${URL_}#a`, term("x"));
-    expect(
-      rdf.getStringNoLocaleAll(rdf.getThing(rdf.datasetFromQuads([twice, twice]), `${URL_}#a`)!, P),
-    ).toEqual(["x"]);
+    expect(stringsOf(rdf.getThing(rdf.datasetFromQuads([twice, twice]), `${URL_}#a`)!, P)).toEqual([
+      "x",
+    ]);
     const variable = quadOf(`${URL_}#a`, { termType: "Variable", value: "v" } as Quad["object"]);
     expect(() => rdf.datasetFromQuads([variable])).toThrow(
       "Objects of type [Variable] are not supported.",
@@ -205,7 +219,7 @@ describe("buildThing", () => {
     expect(rdf.getBoolean(thing, `${EX}no`)).toBe(false);
     expect(rdf.getDatetime(thing, `${EX}when`)).toEqual(when);
     expect(rdf.getInteger(thing, `${EX}count`)).toBe(3);
-    expect(rdf.getStringByLocaleAll(thing, `${EX}back`)).toEqual(
+    expect(byLocaleOf(thing, `${EX}back`)).toEqual(
       new Map([
         ["en", ["Stockholm"]],
         ["es", ["Estocolmo"]],
@@ -224,7 +238,7 @@ describe("buildThing", () => {
       .build();
     expect(rdf.getUrlAll(thing, P)).toEqual([`${URL_}#y`]);
     expect(rdf.getInteger(thing, `${EX}count`)).toBe(2);
-    expect(rdf.getStringNoLocaleAll(thing, `${EX}front`)).toEqual(["b"]);
+    expect(stringsOf(thing, `${EX}front`)).toEqual(["b"]);
   });
 
   it("refuses an IRI value that is no URL", () => {
@@ -242,7 +256,7 @@ describe("buildThing", () => {
       .addIri(P, `${URL_}#x`)
       .removeLiteral(P, langString("Stockholm", "EN"))
       .build();
-    expect(rdf.getStringByLocaleAll(thing, P)).toEqual(
+    expect(byLocaleOf(thing, P)).toEqual(
       new Map([
         ["sv", ["Stockholm"]],
         ["en", ["Other"]],
@@ -263,7 +277,7 @@ describe("buildThing", () => {
       .build();
     expect(rdf.getInteger(thing, P)).toBe(2);
     expect(rdf.getStringNoLocale(thing, P)).toBe("1");
-    expect(rdf.getStringByLocaleAll(thing, P).get("en")).toEqual(["1"]);
+    expect(byLocaleOf(thing, P).get("en")).toEqual(["1"]);
     expect(rdf.getPropertyAll(thing)).toEqual([P]);
   });
 

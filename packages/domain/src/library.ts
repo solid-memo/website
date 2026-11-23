@@ -111,17 +111,18 @@ export const MAX_LISTED_SOURCES = MAX_DECK_METADATA;
  * A release's sources as a listing keeps them: the first
  * MAX_LISTED_SOURCES of `urls`, each as `describe` says, with its first
  * authors as a deck keeps its own (boundedList), and how many it states
- * when that is more.
+ * (`total`, of which `urls` may be the first) when that is more.
  */
 export function boundedSources(
   urls: readonly string[],
   describe: (url: string) => LibrarySource,
+  total = urls.length,
 ): Pick<LibraryDeck, "sources" | "sourceCount"> {
   const sources = urls.slice(0, MAX_LISTED_SOURCES).map((url) => {
     const source = describe(url);
     return { ...source, ...listedAuthors(boundedList(source.authors), source.authors.length) };
   });
-  return urls.length > MAX_LISTED_SOURCES ? { sources, sourceCount: urls.length } : { sources };
+  return total > MAX_LISTED_SOURCES ? { sources, sourceCount: total } : { sources };
 }
 
 /**

@@ -316,7 +316,7 @@ export function graphsOf(quads: Iterable<Quad>): Graphs {
  * them (`ar--rtl`), from which the library's data factory (n3's) makes
  * the same literal again, its language and direction apart. No language
  * tag has `--` in it, so no other is kept there; the getters of language
- * text leave such a one out (rdf.ts getStringByLocaleAll). Undefined for
+ * text leave such a one out (rdf.ts eachStringByLocale). Undefined for
  * a literal in no language, or one with a direction but no language,
  * which is kept by its datatype, as Turtle cannot write it (writableTerms.ts).
  */
