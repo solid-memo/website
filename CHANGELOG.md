@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.2.0](https://github.com/solid-memo/website/compare/v8.1.6...v8.2.0) (2026-11-23)
+
+### Features
+
+* **domain:** allow logging in with a Pod on a loopback host over http ([1f6cf0e](https://github.com/solid-memo/website/commit/1f6cf0e233c81a1762b97ca48654b5f588d2f37a)), closes [#975](https://github.com/solid-memo/website/issues/975)
+
+### Fixes
+
+* **solid-memo-client:** take all of 127.0.0.0/8 as this machine ([b284fc0](https://github.com/solid-memo/website/commit/b284fc00ccff678dcbea255a9ad4649ce7e2bbb4)), closes [#975](https://github.com/solid-memo/website/issues/975)
+
 ## [8.1.6](https://github.com/solid-memo/website/compare/v8.1.5...v8.1.6) (2026-11-23)
 
 ### Fixes
