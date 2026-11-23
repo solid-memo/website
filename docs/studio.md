@@ -879,11 +879,16 @@ The edits are:
   text as written (Markdown as its source), never a pattern. It looks
   in the fields checked (the front, the back, the notes, the labels,
   the wrong options and their notes), in one language or all, matching
-  case and whole words when asked. A preview lists every text changed,
-  before and after, and every card left as it is, and why. A wrong
+  case and whole words when asked. A preview lists the texts changed,
+  before and after, and the cards left as they are, and why. A wrong
   option several cards share is listed once, under the first of them,
-  unless its edit differs for another card.
-  Nothing's written until the user confirms.
+  unless its edit differs for another card. A card can have any number
+  of texts, each of any length, so the preview is bounded. It lists
+  the first 50 changed cards, 10 texts of each and the first 50 cards
+  left as they are, and says how many more there are. Each text shows
+  a window around where it changes, and a long card name is cut short.
+  Nothing's written until the user
+  confirms, and then every change is, listed or not.
 - **Delete**, with every SM-2 and FSRS-6 state of each card, read or
   not, once the user confirms. Another scheduler's state stays
   ([data-model.md](data-model.md#decks-and-cards)), as does a state a

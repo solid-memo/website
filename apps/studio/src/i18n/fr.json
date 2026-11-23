@@ -565,6 +565,21 @@
         "distractorNote": "Note d’une mauvaise réponse"
       },
       "removed": "(supprimé)",
+      "moreCards": {
+        "one": "{count} carte de plus sera modifiée.",
+        "many": "{count} de cartes de plus seront modifiées.",
+        "other": "{count} cartes de plus seront modifiées."
+      },
+      "moreChanges": {
+        "one": "{count} modification de plus dans cette carte.",
+        "many": "{count} de modifications de plus dans cette carte.",
+        "other": "{count} modifications de plus dans cette carte."
+      },
+      "moreSkipped": {
+        "one": "{count} carte de plus reste telle quelle.",
+        "many": "{count} de cartes de plus restent telles quelles.",
+        "other": "{count} cartes de plus restent telles quelles."
+      },
       "confirmReplace": {
         "one": "Remplacer dans {count} carte",
         "many": "Remplacer dans {count} de cartes",

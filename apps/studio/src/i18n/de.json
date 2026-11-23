@@ -544,6 +544,18 @@
         "distractorNote": "Anmerkung zu einer falschen Antwortmöglichkeit"
       },
       "removed": "(entfernt)",
+      "moreCards": {
+        "one": "{count} weitere Karte ändert sich.",
+        "other": "{count} weitere Karten ändern sich."
+      },
+      "moreChanges": {
+        "one": "{count} weitere Änderung in dieser Karte.",
+        "other": "{count} weitere Änderungen in dieser Karte."
+      },
+      "moreSkipped": {
+        "one": "{count} weitere Karte bleibt, wie sie ist.",
+        "other": "{count} weitere Karten bleiben, wie sie sind."
+      },
       "confirmReplace": {
         "one": "In {count} Karte ersetzen",
         "other": "In {count} Karten ersetzen"

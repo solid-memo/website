@@ -565,6 +565,21 @@
         "distractorNote": "Nota de una opción incorrecta"
       },
       "removed": "(eliminado)",
+      "moreCards": {
+        "one": "Cambia {count} tarjeta más.",
+        "many": "Cambian {count} de tarjetas más.",
+        "other": "Cambian {count} tarjetas más."
+      },
+      "moreChanges": {
+        "one": "{count} cambio más en esta tarjeta.",
+        "many": "{count} de cambios más en esta tarjeta.",
+        "other": "{count} cambios más en esta tarjeta."
+      },
+      "moreSkipped": {
+        "one": "{count} tarjeta más se queda tal como está.",
+        "many": "{count} de tarjetas más se quedan tal como están.",
+        "other": "{count} tarjetas más se quedan tal como están."
+      },
       "confirmReplace": {
         "one": "Reemplazar en {count} tarjeta",
         "many": "Reemplazar en {count} de tarjetas",
