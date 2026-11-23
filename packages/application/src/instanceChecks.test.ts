@@ -801,6 +801,75 @@ describe("instance checks", () => {
       expect(health.unstated).toBeNull();
       expect(health.duplicates).toHaveLength(1);
     });
+
+    describe("of many decks", () => {
+      const decks = Array.from({ length: 1000 }, (_, at) => ({
+        ...deck,
+        id: `deck-${at}`,
+        url: `${instance.url}catalog.ttl#deck-${at}`,
+        cardsDocumentUrl: `https://h${at}.example/cards.ttl`,
+        reviewsDocumentUrl: `https://h${at}.example/reviews.ttl`,
+      }));
+      /** The deck a read is of, by its documents' server; none for the instance's catalog. */
+      const deckOf = (url: string) => /^https:\/\/(h\d+)\.example\//.exec(url)?.[1];
+
+      it("reads three decks' documents at once at most, however many are checked together", async () => {
+        const deps = makeDeps();
+        const reading = new Map<string, number>();
+        let most = 0;
+        const slowly =
+          <A extends unknown[], R>(
+            urlOf: (...args: A) => string,
+            read: (...args: A) => Promise<R>,
+          ) =>
+          async (...args: A) => {
+            const of = deckOf(urlOf(...args));
+            if (of !== undefined) reading.set(of, (reading.get(of) ?? 0) + 1);
+            most = Math.max(most, reading.size);
+            await new Promise((settle) => setTimeout(settle));
+            if (of !== undefined) {
+              const left = reading.get(of)! - 1;
+              if (left === 0) reading.delete(of);
+              else reading.set(of, left);
+            }
+            return read(...args);
+          };
+        const { unclaimedDocuments, listCards } = deps.deckRepository;
+        const { validateDocumentSince } = deps.shapeValidator;
+        deps.deckRepository.unclaimedDocuments = vi.fn(
+          slowly((one) => one.cardsDocumentUrl, unclaimedDocuments),
+        );
+        deps.deckRepository.listCards = vi.fn(slowly((one) => one.cardsDocumentUrl, listCards));
+        deps.shapeValidator.validateDocumentSince = vi.fn(
+          slowly((url) => url, validateDocumentSince),
+        );
+        const useCases = createUseCases(deps);
+        const text = { plain: (value: string) => value, check: () => [] };
+        const healths = await Promise.all(
+          decks.map((one) => useCases.checkDeck(instance.url, one, text)),
+        );
+        expect(healths.every((health) => health.report.conforms)).toBe(true);
+        expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(1000);
+        expect(deps.shapeValidator.validateDocumentSince).toHaveBeenCalledTimes(2001);
+        expect(most).toBe(3);
+      }, 60_000);
+
+      it("ends a deck's turn only once all its reads are done, though one fails at once", async () => {
+        const deps = makeDeps();
+        deps.deckRepository.listCards = vi.fn(async () => {
+          throw new AppError("deckGone", { deck: deck.url });
+        });
+        // The documents are never read to the end.
+        deps.shapeValidator.validateDocumentSince = vi.fn(() => new Promise<never>(() => {}));
+        const useCases = createUseCases(deps);
+        const text = { plain: (value: string) => value, check: () => [] };
+        for (const one of decks.slice(0, 4))
+          useCases.checkDeck(instance.url, one, text).catch(() => {});
+        await vi.waitFor(() => expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(3));
+        await new Promise((settle) => setTimeout(settle, 20));
+        expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(3);
+      });
+    });
   });
 
   describe("decks that share a document (GHSA-pgw5-wjgx-h9vv)", () => {

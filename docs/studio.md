@@ -1456,7 +1456,10 @@ otherwise through the document it was found in. The decks are indexed
 once for those links (`deckOfSubjectsIn`), so each is a lookup, not a
 search through them.
 A badge checks its deck once, and what it finds holds its
-deck too. The badges share the check of a document many decks name,
+deck too. The decks' checks read three decks at a time, the rest
+waiting their turn. So a long list scrolled into view never has all of
+its decks' documents read at once. A deck's turn ends only once all
+its reads have. The badges share the check of a document many decks name,
 and of the catalog, and the reads of that document for its cards and
 whether it's unclaimed, in any spelling of its address a request sends
 the same way. A spelling that percent-encodes a character needing no
