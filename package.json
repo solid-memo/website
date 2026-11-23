@@ -106,7 +106,7 @@
     "conventional-changelog-conventionalcommits": "^9.3.1",
     "cspell": "^10.4.0",
     "json5": "^2.2.3",
-    "markdownlint-cli2": "^0.24.1",
+    "markdownlint-cli2": "^0.24.2",
     "readable-stream": "^4.8.0",
     "semantic-release": "^26.0.1",
     "turbo": "^2.11.13",
