@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.1.5](https://github.com/solid-memo/website/compare/v8.1.4...v8.1.5) (2026-11-23)
+
+### Fixes
+
+* **application:** drop record links into a new draft's folder ([6e866ad](https://github.com/solid-memo/website/commit/6e866ada523a301da79db2ea82d864f4184af1cb))
+* **ci:** restore no npm cache in the pending updates comment job ([ef302ac](https://github.com/solid-memo/website/commit/ef302ac78eead19eb7f81531014b6f083578726c))
+* **deps:** update dependency renovate to v44.256.0 ([5fd6748](https://github.com/solid-memo/website/commit/5fd674804db805ff0c342e985b309a69d4a956f7))
+* read card progress and course summaries in turns ([1996562](https://github.com/solid-memo/website/commit/1996562497b08a0dec930767d218cbbd227bc267))
+* **solid:** read record IRIs only as http(s) URLs ([0234cb9](https://github.com/solid-memo/website/commit/0234cb9631c48ee463c63a3ffec1725a79dda7e0))
+* **studio:** check decks' health in turns ([39903c6](https://github.com/solid-memo/website/commit/39903c609b16488081b5cf03e1754260ec68413d))
+
 ## [8.1.4](https://github.com/solid-memo/website/compare/v8.1.3...v8.1.4) (2026-11-23)
 
 ### Fixes
