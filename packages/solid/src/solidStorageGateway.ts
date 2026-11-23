@@ -104,13 +104,15 @@ function atMost(most: number, fetch: typeof globalThis.fetch): typeof globalThis
 }
 
 /**
- * How many ancestor containers of the WebID document the storage
- * walk-up asks, nearest first, before it gives up: a pod's WebID sits a
- * few levels below its storage, and each one asked is a request, so a
- * WebID deeper than this below its storage needs its profile to name
- * the storage (pim:storage), or the storage typed by hand.
+ * How many ancestor containers a walk up to a storage's root asks,
+ * nearest first, before it gives up: a pod's WebID, or a deck's
+ * document (deckPlace.ts), sits a few levels below its storage, and
+ * each one asked is a request. A WebID deeper than this below its
+ * storage needs its profile to name the storage (pim:storage), or the
+ * storage typed by hand; a deck's document deeper than this is not
+ * shown to be in its instance's storage.
  */
-const MAX_STORAGE_ANCESTORS = 8;
+export const MAX_STORAGE_ANCESTORS = 8;
 
 /**
  * Candidate URLs for the Solid Protocol storage walk-up: the WebID document
