@@ -60,6 +60,30 @@ describe("turtleOf", () => {
 `);
   });
 
+  it("writes every IRI in full, with no base and no prefix, when given neither, as a pod document is written", () => {
+    const turtle = turtleOf([
+      quadOf(`${BASE}#se`, RDF_TYPE, iri(`${SM}Card`)),
+      quadOf(`${BASE}#se`, `${SM}front`, literal("1.5", `${XSD}decimal`)),
+      quadOf("#new", `${SM}deck`, iri(BASE)),
+    ]);
+    expect(turtle).toBe(`<${BASE}#se>
+    a <${SM}Card> ;
+    <${SM}front> "1.5"^^<${XSD}decimal> .
+
+<#new>
+    <${SM}deck> <${BASE}> .
+`);
+  });
+
+  it("writes a deck file's IRIs with the prefixes it is given, and no base", () => {
+    const turtle = turtleOf([quadOf(BASE, RDF_TYPE, iri(`${SM}Deck`))], { prefixes: PREFIXES });
+    expect(turtle).toBe(`@prefix solid-memo: <${SM}> .
+
+<${BASE}>
+    a solid-memo:Deck .
+`);
+  });
+
   it.each([
     [
       "an IRI",
