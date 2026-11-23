@@ -2,7 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getContainedResourceUrlAll, getSolidDataset } from "./client/resources";
+import {
+  DEFAULT_TURTLE_PREFIXES,
+  getContainedResourceUrlAll,
+  getSolidDataset,
+} from "./client/resources";
 import {
   type Dataset,
   type FetchedDataset,
@@ -76,7 +80,7 @@ import { recordThing, removeAllUnlessNewer, storedVersionOf, unlessNewer } from 
 import { limitedFetch, pathKeys, RELEASE_LIMITS } from "./client/readLimits";
 import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
-import { refuseUnwritable } from "./writableTerms";
+import { refusePrefixedLookalikes, refuseUnwritable } from "./writableTerms";
 import { turtleOf } from "./turtleWriter";
 import { SM } from "./vocab";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
@@ -91,6 +95,22 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
   ...Object.fromEntries(Object.entries(DECK_FILE_PREFIXES).filter(([prefix]) => prefix !== "sm")),
   adms: "http://www.w3.org/ns/adms#",
   spdx: "http://spdx.org/rdf/terms#",
+};
+
+/**
+ * The prefixes a draft's IRIs must not look like names of. An edit
+ * writes each document whole with a PUT, whose Turtle declares the
+ * client library's default prefixes (DEFAULT_TURTLE_PREFIXES): an IRI
+ * whose scheme is one of them, which a release read from a file or a
+ * link may name, would be saved as the term it looks like
+ * (refusePrefixedLookalikes). A release's and a deck file's prefixes
+ * are added as extra caution, so such a draft is refused at import
+ * rather than later, when it's exported as a deck.
+ */
+const DRAFT_PREFIXES: Readonly<Record<string, string>> = {
+  ...DEFAULT_TURTLE_PREFIXES,
+  ...DECK_FILE_PREFIXES,
+  ...RELEASE_PREFIXES,
 };
 
 /**
@@ -291,6 +311,7 @@ export function createSolidReleaseDraftRepository({
       const summary = draftSummaryOf(draft);
       if (summary === null) throw new Error(`No draft can be at ${draft.url}`);
       const byDocument = entriesByDocument(draft);
+      refuseDraftLookalikes(byDocument);
       const node = await catalogNode(instanceUrl, fetch);
       if (node === null) throw new AppError("noCatalogToUpdate");
       // Nor one the catalog would refuse to link, its node a newer version's (writtenByNewerApp).
@@ -322,6 +343,7 @@ export function createSolidReleaseDraftRepository({
       const byDocument = entriesByDocument(draft);
       // What a PUT of each document refuses, refused now.
       for (const entries of byDocument.values()) refuseUnwritable(entries.flatMap(entryQuads));
+      refuseDraftLookalikes(byDocument);
       return byDocument.size;
     },
 
@@ -664,6 +686,17 @@ function entriesByDocument(draft: ReleaseDraft): Map<string, DraftEntry[]> {
   }
   refuseTooManyDocuments(byDocument.size);
   return byDocument;
+}
+
+/**
+ * unwritableTerm for a draft that names an IRI looking like a prefixed
+ * name (DRAFT_PREFIXES), which a release read from a file or a link
+ * may: written whole, as an edit writes each document, it could be
+ * saved as the term it looks like (GHSA-ffq6-vh8g-98vw).
+ */
+function refuseDraftLookalikes(byDocument: ReadonlyMap<string, readonly DraftEntry[]>): void {
+  for (const entries of byDocument.values())
+    refusePrefixedLookalikes(entries.flatMap(entryQuads), DRAFT_PREFIXES);
 }
 
 /** draftTooManyDocuments, for a draft of `count` documents: past MAX_DRAFT_DOCUMENTS, no read of it would take it. */

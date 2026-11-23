@@ -701,13 +701,17 @@ export interface ReleaseDraftRepository {
    * draft can have (DRAFT_ID); and draftTooManyDocuments, with nothing
    * written, for a draft of more documents than a read of one takes
    * (MAX_DRAFT_DOCUMENTS), or than a read of the instance's drafts takes
-   * with theirs (MAX_DRAFT_DOCUMENTS_IN_ALL).
+   * with theirs (MAX_DRAFT_DOCUMENTS_IN_ALL); unwritableTerm, with
+   * nothing written, for one naming an IRI that looks like a prefixed
+   * name its documents may be written with, which an edit, writing a
+   * document whole, would save as that term.
    */
   create(instanceUrl: string, draft: ReleaseDraft): Promise<ReleaseDraftSummary>;
   /**
    * How many documents `create` would write the draft in, with nothing
    * written; refused as `create` refuses it for what it holds:
-   * termTooLong or unwritableTerm for a term no write takes,
+   * termTooLong or unwritableTerm for a term no write takes, or an IRI
+   * that looks like a prefixed name,
    * draftIdUnsupported, and draftTooManyDocuments past
    * MAX_DRAFT_DOCUMENTS.
    */

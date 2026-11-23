@@ -182,7 +182,9 @@ export interface ReleaseDraftUseCases {
    * copyReleaseDraft makes one, would be written in at `url`, with
    * nothing written; refused as writing it there would be. A term of it
    * that would be too long there is draftCopyTooLong, naming the draft:
-   * its subjects' IRIs grow with the address of the copy's instance.
+   * its subjects' IRIs grow with the address of the copy's instance. An
+   * IRI the copy could not be written with as it is (unwritableTerm) is
+   * draftCopyUnwritable, naming the draft too.
    */
   checkReleaseDraftCopy(draftUrl: string, url: string): Promise<number>;
   /**
@@ -844,8 +846,11 @@ export function createReleaseDraftUseCases({
       try {
         return releaseDraftRepository.documentCountOf(copyOf(draft, draftUrl, url));
       } catch (error) {
-        if (!(error instanceof AppError) || error.code !== "termTooLong") throw error;
-        throw new AppError("draftCopyTooLong", { draft: draftPlaceOf(draftUrl)!.name });
+        if (!(error instanceof AppError)) throw error;
+        const draft = draftPlaceOf(draftUrl)!.name;
+        if (error.code === "termTooLong") throw new AppError("draftCopyTooLong", { draft });
+        if (error.code === "unwritableTerm") throw new AppError("draftCopyUnwritable", { draft });
+        throw error;
       }
     },
 

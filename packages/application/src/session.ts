@@ -162,7 +162,8 @@ export interface SessionUseCases {
    * added from this device, and unchanged since, is not added twice.
    * Decks that would give `target` more than MAX_CATALOG_LINKS are
    * refused before any is written (guestMergeTooManyDecks), as is a draft
-   * whose copy could not be written in `target` (draftCopyTooLong, or
+   * whose copy could not be written in `target` (draftCopyTooLong,
+   * draftCopyUnwritable, or
    * draftTooManyDocuments for the drafts together). A deck's author whose
    * agent node would be too long in `target` is left out (mergedDeck).
    */

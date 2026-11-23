@@ -352,6 +352,105 @@ describe("create", () => {
     expect(writes(pod)).toEqual([]);
   });
 
+  describe("a release naming an IRI that looks like a prefixed name (GHSA-ffq6-vh8g-98vw)", () => {
+    const OTHER = "https://elsewhere.example/public/releases/git/v1.ttl";
+    const LOOKALIKES = [
+      "<> <dc:license> <https://licenses.example/l> .",
+      "<> <rdf:type> <https://example.org/C> .",
+      `<> a <dcat:Catalog> .`,
+      `<> <${SM}p> "x"^^<xsd:string> .`,
+      "<> <https://example.org/p> <solid-memo:Deck> .",
+      "<> <https://example.org/p> <current:x> .",
+    ];
+    const release = (base: string) =>
+      readFileSync(join(DECKS_ROOT, "git-commands/v1.ttl"), "utf8").replace(
+        "@base <https://solid-memo.com/decks/git-commands/v1.ttl>",
+        `@base <${base}>`,
+      );
+
+    /** The use cases over the pod, the release file `file`, and `linked` served at OTHER. */
+    function useCasesOf(pod: Awaited<ReturnType<typeof draftPod>>, file: string, linked: string) {
+      return createReleaseDraftUseCases({
+        releaseDraftRepository: createSolidReleaseDraftRepository({
+          fetch: pod.fetch,
+          releaseFetch: turtleFetch(linked),
+        }),
+        deckRepository: {} as never,
+        deckLibrary: {} as never,
+        shapeValidator: pod.validator,
+        fileExchange: {
+          open: async () => ({ name: "release.ttl", text: file }),
+          save: () => undefined,
+        },
+        storageGateway: { discoverStorages: async () => [] },
+        releasePublisher: { listPublished: async () => [] },
+        now: () => new Date(NOW),
+      });
+    }
+
+    it.each(LOOKALIKES)(
+      "refuses it from a file and as a next version, writing nothing: %s",
+      async (extra) => {
+        const pod = await draftPod();
+        const useCases = useCasesOf(
+          pod,
+          `${release("https://solid-memo.com/decks/git-commands/v1.ttl")}\n${extra}\n`,
+          `${release(OTHER)}\n${extra}\n`,
+        );
+        for (const from of [{ kind: "fromFile" }, { kind: "nextVersionOf", url: OTHER }] as const) {
+          await expect(
+            useCases.createReleaseDraft(INSTANCE, from, "https://pod.example/profile/card#me"),
+          ).rejects.toMatchObject({ code: "unwritableTerm" });
+        }
+        expect(writes(pod)).toEqual([]);
+      },
+    );
+
+    it("makes a draft of the release without them, which an edit saves and a read takes again", async () => {
+      const pod = await draftPod();
+      const useCases = useCasesOf(
+        pod,
+        release("https://solid-memo.com/decks/git-commands/v1.ttl"),
+        release(OTHER),
+      );
+      for (const from of [{ kind: "fromFile" }, { kind: "nextVersionOf", url: OTHER }] as const) {
+        const made = await useCases.createReleaseDraft(
+          INSTANCE,
+          from,
+          "https://pod.example/profile/card#me",
+        );
+        const url = made!.draft.url;
+        const edited = await useCases.editReleaseDraft(url, [
+          { kind: "setMakingNotes", notes: { en: "Edited." } },
+        ]);
+        expect(edited.ok).toBe(true);
+        await expect(pod.repository.read(url)).resolves.toBeDefined();
+      }
+    });
+
+    it("refuses a copy of a draft that names one, as documentCountOf counts it", async () => {
+      const pod = await draftPod();
+      const draft = {
+        ...course(),
+        triples: [
+          ...course().triples,
+          {
+            subject: DRAFT,
+            predicate: "dc:license",
+            object: { kind: "iri", value: "https://l.example/" },
+          },
+        ],
+      } as ReleaseDraft;
+      expect(() => pod.repository.documentCountOf(draft)).toThrow(
+        expect.objectContaining({ code: "unwritableTerm" }),
+      );
+      await expect(pod.repository.create(INSTANCE, draft)).rejects.toMatchObject({
+        code: "unwritableTerm",
+      });
+      expect(writes(pod)).toEqual([]);
+    });
+  });
+
   it("keeps a chapter with its steps, questions and their distractors, and the cards asked nowhere in the cards document", async () => {
     const pod = await draftPod();
     await pod.repository.create(INSTANCE, course());

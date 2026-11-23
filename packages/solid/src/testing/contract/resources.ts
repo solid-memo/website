@@ -83,6 +83,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
   const { buildThing, createSolidDataset, createThing, getThing, getThingAll, setThing } = rdf;
   const {
     createContainerAt,
+    DEFAULT_TURTLE_PREFIXES,
     deleteContainer,
     deleteFile,
     deleteSolidDataset,
@@ -995,6 +996,17 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
   });
 
   describe("solidDatasetAsTurtle", () => {
+    it("writes with DEFAULT_TURTLE_PREFIXES when given none, as a whole-document PUT is written", async () => {
+      const turtle = await solidDatasetAsTurtle(rdf.datasetFromQuads([]));
+      const declared = Object.fromEntries(
+        [...turtle.matchAll(/^@prefix ([^:]*): <([^>]*)>\.$/gm)].map(([, prefix, iri]) => [
+          prefix,
+          iri,
+        ]),
+      );
+      expect(declared).toEqual(DEFAULT_TURTLE_PREFIXES);
+    });
+
     it("writes a dataset as Turtle that reads back the same, with the prefixes given", async () => {
       const turtle = await solidDatasetAsTurtle(await read(), { prefixes: { ex: EX } });
       expect(turtle).toContain(`@prefix ex: <${EX}>`);

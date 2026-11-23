@@ -185,6 +185,8 @@ It runs these steps:
    may take in the instance, would hold an IRI longer than a term may
    be (`draftCopyTooLong`, which names the draft). A draft's IRIs grow
    with the instance's address, which is longer than the guest's. Nor
+   when a draft names an IRI its copy couldn't be written with as it
+   is (`draftCopyUnwritable`, which names the draft too). Nor
    when the drafts would give the instance's drafts more documents
    than are read together (`draftTooManyDocuments`). A draft an earlier
    run copied, unchanged since, isn't asked again; with no draft left
@@ -285,8 +287,8 @@ copied (`copied`), each whole, and any unnamed deck document whose
 deletion failed. The user is told which decks and drafts (under their
 names there) are in the instance. A text or address too long that
 stops the merge once part of the study is added names the deck
-(`guestDeckTooLong`) or the draft (`draftCopyTooLong`), so it can be
-left out or deleted.
+(`guestDeckTooLong`) or the draft (`draftCopyTooLong`,
+`draftCopyUnwritable`), so it can be left out or deleted.
 
 Trying again adds what isn't there yet. As each deck is added, and
 before each group is, this browser's update journal notes

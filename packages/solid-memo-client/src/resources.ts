@@ -78,8 +78,11 @@ const FOAF = "http://xmlns.com/foaf/0.1/";
 const RDFS_SEE_ALSO = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
 const TURTLE = "text/turtle";
 
-/** The prefixes solidDatasetAsTurtle writes when it is given none: those @inrupt/solid-client writes. */
-const PREFIXES: Record<string, string> = {
+/**
+ * The prefixes solidDatasetAsTurtle writes when it is given none, as a
+ * whole-document PUT is written: those @inrupt/solid-client writes.
+ */
+export const DEFAULT_TURTLE_PREFIXES: Readonly<Record<string, string>> = {
   acl: "http://www.w3.org/ns/auth/acl#",
   acp: "http://www.w3.org/ns/solid/acp#",
   cc: "http://creativecommons.org/ns#",
@@ -771,5 +774,5 @@ export function solidDatasetAsTurtle(
   dataset: Dataset,
   options?: { prefixes?: Record<string, string> },
 ): Promise<string> {
-  return turtleOf(toRdfJsDataset(dataset), options?.prefixes ?? PREFIXES);
+  return turtleOf(toRdfJsDataset(dataset), options?.prefixes ?? DEFAULT_TURTLE_PREFIXES);
 }
