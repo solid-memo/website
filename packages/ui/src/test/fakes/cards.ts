@@ -19,6 +19,7 @@ export function makeCardUseCasesFake(
     fake,
     {
       listCards: vi.fn(async () => []),
+      listCardsInTurn: vi.fn(async () => []),
       listDeckReviewStates: vi.fn(async () => ({ sm2: [], fsrs: [] })),
       addCard: vi.fn(async () => {
         throw new Error("addCard fake not configured");

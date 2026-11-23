@@ -57,9 +57,22 @@ import { AppError } from "@solid-memo/domain/appError";
 import { changedElsewhere, finishCutOffImport, readNow, unsent } from "./writes";
 import type { DigestStore } from "./digestStore";
 import { isInInstancePod } from "./releaseDrafts";
+import type { inTurns } from "./atOnce";
 
 export interface CardUseCases {
+  /** The deck's cards, read now: for a screen of the one deck. */
   listCards(deck: Deck): Promise<Card[]>;
+  /**
+   * The deck's cards, as listCards reads them, in turns with every other
+   * deck's read for a list of decks (the Studio's deck table, and the
+   * copies planLibraryUpgrade plans): a catalog as long as anyone may
+   * write never has all of its decks' cards read together. A read whose
+   * `signal` is aborted before its turn comes gives the turn up without
+   * reading, so the reads of a screen that has gone don't hold up the
+   * next. Its caller caches it under a key of its own, so that a screen
+   * of one deck, reading with listCards, never waits for it.
+   */
+  listCardsInTurn(deck: Deck, signal?: AbortSignal): Promise<Card[]>;
   /**
    * The deck's review states, every direction's, as stored: SM-2's, and
    * the FSRS-6 states beside them. The Studio's card workbench lists them
@@ -272,6 +285,7 @@ export function createCardUseCases({
   fileExchange,
   digestStore,
   storageGateway,
+  cardsTurn,
   newId,
   now,
 }: {
@@ -282,6 +296,8 @@ export function createCardUseCases({
   fileExchange: FileExchange;
   digestStore: Pick<DigestStore, "refresh">;
   storageGateway: Pick<StorageGateway, "discoverStorages">;
+  /** The turns whole decks' cards are read in, shared with planLibraryUpgrade (listCardsInTurn). */
+  cardsTurn: ReturnType<typeof inTurns>;
   newId: () => string;
   now: () => Date;
 }): CardUseCases {
@@ -503,6 +519,12 @@ export function createCardUseCases({
   return {
     listCards(deck) {
       return deckRepository.listCards(deck);
+    },
+    listCardsInTurn(deck, signal) {
+      return cardsTurn(() => {
+        signal?.throwIfAborted();
+        return deckRepository.listCards(deck);
+      });
     },
     listDeckReviewStates(deck) {
       return reviewStateRepository.listReviewStates(deck);

@@ -24,6 +24,13 @@ export const queryKeys = {
     deckUrl,
     cardsDocumentUrl,
   ],
+  /**
+   * A deck's cards, as Home's table reads them in turns (listCardsInTurn):
+   * under cards, so whatever refreshes a deck's cards refreshes it too,
+   * yet apart from them, so a screen of one deck never waits for a read
+   * still waiting its turn.
+   */
+  deckTableCards: (cardsDocumentUrl: string) => [...sharedKeys.cards(cardsDocumentUrl), "inTurn"],
   /** An instance's catalog, as its about screen edits it. */
   catalog: (instanceUrl: string) => ["catalog", instanceUrl],
   /** An instance's answer log. */

@@ -25,6 +25,7 @@ describe("queryKeys", () => {
     expect([
       queryKeys.libraryUpdates(INSTANCE),
       queryKeys.deckHealth(INSTANCE, DECK, CARDS),
+      queryKeys.deckTableCards(CARDS),
       queryKeys.catalog(INSTANCE),
       queryKeys.answerLog(INSTANCE),
       queryKeys.deckInsight(DECK, 20, preferences),
@@ -40,6 +41,7 @@ describe("queryKeys", () => {
     ]).toEqual([
       ["decks", INSTANCE, "libraryUpdates"],
       ["validation", INSTANCE, "deck", DECK, CARDS],
+      ["cards", CARDS, "inTurn"],
       ["catalog", INSTANCE],
       ["answerLog", INSTANCE],
       ["deckInsight", DECK, 20, preferences],
@@ -60,5 +62,7 @@ describe("queryKeys", () => {
     expect(queryKeys.libraryUpdates(INSTANCE).slice(0, decks.length)).toEqual(decks);
     const check = queryKeys.validation(INSTANCE);
     expect(queryKeys.deckHealth(INSTANCE, DECK, CARDS).slice(0, check.length)).toEqual(check);
+    const cards = queryKeys.cards(CARDS);
+    expect(queryKeys.deckTableCards(CARDS).slice(0, cards.length)).toEqual(cards);
   });
 });

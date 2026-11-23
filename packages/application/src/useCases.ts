@@ -55,6 +55,7 @@ import {
   type ReleasePublishingUseCases,
 } from "./releasePublishing";
 import { createInstanceGraphUseCases, type InstanceGraphUseCases } from "./instanceGraph";
+import { inTurns, READS_AT_ONCE } from "./atOnce";
 import { createTrialOpeningUseCases, type TrialOpeningUseCases, type TrialSandbox } from "./trial";
 
 /**
@@ -254,6 +255,8 @@ export function createUseCases({
     webId,
     ruleset,
   });
+  // Whole decks' cards read for a list of decks, the Studio's deck table's and the copies' plans, a few at a time.
+  const cardsTurn = inTurns(READS_AT_ONCE);
   const courses = createCourseUseCases({
     deckLibrary,
     deckRepository,
@@ -311,6 +314,7 @@ export function createUseCases({
       fileExchange,
       digestStore,
       storageGateway,
+      cardsTurn,
       newId,
       now,
     }),
@@ -319,6 +323,7 @@ export function createUseCases({
       deckRepository,
       reviewStateRepository,
       courses,
+      cardsTurn,
     }),
     ...createMistakeReportUseCases({ deckLibrary }),
     ...createWhatsNewUseCases({ seenHighlights }),

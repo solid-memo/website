@@ -1207,6 +1207,13 @@ deck's turn ends only once both its reads have, even when one of them
 fails first. The Studio's deck checks (`checkDeck` in
 [instanceChecks.ts](../packages/application/src/instanceChecks.ts))
 take turns of the same size in a queue of their own.
+The Studio's Home reads its decks' cards in turns too, six decks at a
+time (`listCardsInTurn` in
+[cards.ts](../packages/application/src/cards.ts)), and its library
+copies' plans (`planLibraryUpgrade`) read their cards in the same
+turns. A screen of one deck reads its cards outside them, and Home
+keeps its reads under a key of its own, so that screen never waits
+for one Home has queued.
 
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;

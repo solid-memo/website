@@ -18,9 +18,11 @@ import { queryKeys } from "./queryKeys";
 /**
  * The deck beside Home's table (DeckPeekScreen), by its URL (`deckUrl`;
  * none when null), from the same queries as the table's: the
- * instance's decks as arranged, the deck's cards and today's counts,
- * so it reads nothing the table has not. A deck the instance does not
- * have (deleted, say) is none.
+ * instance's decks as arranged and today's counts, so it reads none of
+ * those again. Its cards it reads at once under the deck's cards key
+ * (listCards), not in the table's turns, so it never waits behind the
+ * table's reads. A deck the instance does not have (deleted, say) is
+ * none.
  */
 export function DeckPeekContainer({
   useCases,
