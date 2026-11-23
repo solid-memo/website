@@ -36,7 +36,7 @@ import type { AnswerStore } from "./answerStore";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { TextMap } from "@solid-memo/domain/pathKeys";
-import { mapAtOnce } from "./atOnce";
+import { allSettledThen, inTurns, mapAtOnce, READS_AT_ONCE } from "./atOnce";
 import { readBudget } from "./readBudget";
 import { noting } from "./digestStore";
 import type { DigestStore } from "./digestStore";
@@ -151,6 +151,12 @@ function decksByDocument(decks: readonly Deck[]): (url: string) => readonly Deck
  * instance's own documents takes nothing from it.
  */
 const OUTSIDE_READS_MS = 60_000;
+
+/**
+ * How many decks' checks read at once, each reading up to three
+ * documents: as many decks as the deck list's study counts read at once.
+ */
+const DECK_CHECKS_AT_ONCE = READS_AT_ONCE / 2;
 
 /** The budget a read of the document is made within: the check's for one outside the instance's folder, none for one in it. */
 function budgetFor(url: string, instanceUrl: string, budget: ReadBudget): ReadBudget | undefined {
@@ -630,6 +636,57 @@ export function createInstanceCheckUseCases({
     );
   }
 
+  /**
+   * The decks' checks, in turns of their own (DECK_CHECKS_AT_ONCE): a
+   * list shows a health badge for every deck its catalog names, and each
+   * badge seen asks for its deck's check, so a long list never has all of
+   * their documents read at once. A turn ends only once every read of its
+   * check has settled, even when one of them fails first.
+   */
+  const deckCheckTurn = inTurns(DECK_CHECKS_AT_ONCE);
+  /**
+   * What one deck's check reads of the pod: its entry and documents
+   * checked against the shapes, as the instance's check does, and its
+   * cards as the deck's page reads them.
+   */
+  function checkDeckReads(instanceUrl: string, deck: Deck) {
+    const budget = readBudget(OUTSIDE_READS_MS);
+    const reads = sharedReads(instanceUrl);
+    return allSettledThen([
+      Promise.all([
+        digestStore.of(instanceUrl),
+        unclaimedDecksOf(instanceUrl, [deck], budget, reads),
+      ]).then(async ([digest, unclaimed]) => {
+        const isUnclaimed = unclaimedTest(unclaimed);
+        const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
+          (url) => !isUnclaimed(url),
+        );
+        return withUnclaimed(
+          await checkDocuments(
+            instanceUrl,
+            [catalogUrlOf(instanceUrl), ...urls].map((url) => ({
+              url,
+              context: "pod" as const,
+            })),
+            digest,
+            [deck],
+            budget,
+          ),
+          unclaimed,
+        );
+      }),
+      // Read as the deck's page reads it, within the read's own deadlines: a read that fails shows the
+      // cards document as unreadable in this deck's health (withCardsUnread), and holds back nothing else.
+      deckRepository.listCards(deck, { reads }).then(
+        (cards) => ({ cards, unread: undefined }),
+        (error: unknown) => {
+          if (error instanceof AppError && error.code === "deckGone") throw error;
+          return { cards: [], unread: error };
+        },
+      ),
+    ]);
+  }
+
   return {
     validateInstance,
     checkInstance,
@@ -653,41 +710,10 @@ export function createInstanceCheckUseCases({
       // Nothing kept is looked up before a check of the instance started in the same turn forgets it: one
       // reading of the instance's check afresh starts it and the decks' at once, in whatever order.
       await Promise.resolve();
-      const budget = readBudget(OUTSIDE_READS_MS);
-      const reads = sharedReads(instanceUrl);
-      const [report, listed, release] = await Promise.all([
-        Promise.all([
-          digestStore.of(instanceUrl),
-          unclaimedDecksOf(instanceUrl, [deck], budget, reads),
-        ]).then(async ([digest, unclaimed]) => {
-          const isUnclaimed = unclaimedTest(unclaimed);
-          const urls = [deck.cardsDocumentUrl, deck.reviewsDocumentUrl].filter(
-            (url) => !isUnclaimed(url),
-          );
-          return withUnclaimed(
-            await checkDocuments(
-              instanceUrl,
-              [catalogUrlOf(instanceUrl), ...urls].map((url) => ({
-                url,
-                context: "pod" as const,
-              })),
-              digest,
-              [deck],
-              budget,
-            ),
-            unclaimed,
-          );
-        }),
-        // Read as the deck's page reads it, within the read's own deadlines: a read that fails shows the
-        // cards document as unreadable in this deck's health (withCardsUnread), and holds back nothing else.
-        deckRepository.listCards(deck, { reads }).then(
-          (cards) => ({ cards, unread: undefined }),
-          (error: unknown) => {
-            if (error instanceof AppError && error.code === "deckGone") throw error;
-            return { cards: [], unread: error };
-          },
-        ),
-        // A release that cannot be read leaves the sides to settle unknown, not the rest of the check.
+      const [[report, listed], release] = await Promise.all([
+        deckCheckTurn(() => checkDeckReads(instanceUrl, deck)),
+        // A release that cannot be read leaves the sides to settle unknown, not the rest of the check. The
+        // library takes its own reads in turns.
         deck.sourceUrl === undefined
           ? []
           : deckLibrary.fetchLibraryDeck(deck.sourceUrl).then(

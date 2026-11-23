@@ -1204,7 +1204,9 @@ The statistics' card progress (`getCardProgress` in
 decks in turns of the same size, three decks at a time, in a queue of
 its own; the Studio's schedule screen reads its one deck outside it. A
 deck's turn ends only once both its reads have, even when one of them
-fails first.
+fails first. The Studio's deck checks (`checkDeck` in
+[instanceChecks.ts](../packages/application/src/instanceChecks.ts))
+take turns of the same size in a queue of their own.
 
 The catalog is written when an instance is created, and by the [format
 update](migrations.md) for an instance made before there were catalogs;
