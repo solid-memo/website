@@ -252,21 +252,27 @@ function idTaken(draft: ReleaseDraft, id: string): boolean {
   );
 }
 
+/** How the shapes of a draft's records and its root describe the fields that name an IRI. */
+const LINK_FIELD_DESCRIPTIONS = [
+  AGENT_V1,
+  DISTRIBUTION_V1,
+  DRAFT_DECK_V1,
+  DRAFT_CHAPTER_V1,
+  DRAFT_STEP_V1,
+  CARD_V7,
+  DISTRACTOR_V1,
+].flatMap((descriptor) =>
+  descriptor.fields.filter((field) => field.kind === "iri" || field.kind === "iriEnum"),
+);
+
 /** The fields of a draft's records and its root that name an IRI, as their shapes say. */
 export const LINK_FIELDS: ReadonlySet<string> = new Set(
-  [
-    AGENT_V1,
-    DISTRIBUTION_V1,
-    DRAFT_DECK_V1,
-    DRAFT_CHAPTER_V1,
-    DRAFT_STEP_V1,
-    CARD_V7,
-    DISTRACTOR_V1,
-  ].flatMap((descriptor) =>
-    descriptor.fields
-      .filter((field) => field.kind === "iri" || field.kind === "iriEnum")
-      .map((field) => field.name),
-  ),
+  LINK_FIELD_DESCRIPTIONS.map((field) => field.name),
+);
+
+/** The fields of LINK_FIELDS a record cannot be without (a distribution's access URL, a deck's study direction). */
+export const NEEDED_LINK_FIELDS: ReadonlySet<string> = new Set(
+  LINK_FIELD_DESCRIPTIONS.filter((field) => field.cardinality === "one").map((field) => field.name),
 );
 
 /**

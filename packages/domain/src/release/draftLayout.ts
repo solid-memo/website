@@ -158,6 +158,21 @@ export function isDraftDocumentName(name: string): boolean {
   return name === RELEASE_DOCUMENT || name === CARDS_DOCUMENT || CHAPTER_DOCUMENT.test(name);
 }
 
+/**
+ * A pod IRI of a draft's container as the draft names it: a fragment of
+ * one of its documents as the same fragment of its release document;
+ * any other IRI as it is.
+ */
+export function draftIriOf(container: string, draftUrl: string): (iri: string) => string {
+  return (iri) => {
+    if (!iri.startsWith(container)) return iri;
+    const hash = iri.indexOf("#");
+    const name = (hash === -1 ? iri : iri.slice(0, hash)).slice(container.length);
+    if (!isDraftDocumentName(name)) return iri;
+    return hash === -1 ? draftUrl : `${draftUrl}${iri.slice(hash)}`;
+  };
+}
+
 /** Where a draft's subject is kept: in its release document, its cards document, or a chapter's. */
 export type DraftDocument =
   | { kind: "release" }

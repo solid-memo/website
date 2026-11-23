@@ -1868,8 +1868,13 @@ Also dropped is a statement of, or naming, an address in the
 new draft's folder, its own release document's too, before the
 release's subjects are moved there. Read back from the pod, that
 address would be one of the draft's subjects, with statements no editor
-shows. Copying a draft drops them the same way, and so does making a
-draft of a deck. One that is kept can
+shows. A record's link to such an address is dropped the same way
+(`withoutLinks` in `releaseToDraft.ts`): a card's subject, picture or
+wrong option, a step's or chapter's question, the release's license,
+source or earlier version. Read back, it would name one of the draft's
+subjects, perhaps by an id no draft can have. A link its record can't
+be without, a distribution's address, stays. Copying a draft drops them
+the same way, and so does making a draft of a deck. One that is kept can
 still be of the address the draft is later published at, or of a
 fragment of it. No editor shows it, so publishing there refuses the draft
 (`releaseForeignStatement`, [Publishing a release](#publishing-a-release)).
@@ -1880,7 +1885,9 @@ A draft
 whose documents (perhaps written by another app) name a subject by
 another id isn't opened, and no change gives a draft one
 (`draftIdUnsupported`). Nor is a new draft made with one, whatever it's
-made from, since it couldn't be read back. Each is refused with nothing
+made from, since it couldn't be read back. That check reads the new
+draft as the pod would give it back, with each address in its folder
+named as a fragment of its release document. Each is refused with nothing
 written, as is a draft at an address no draft has (`draftPlaceOf`).
 
 A draft is named after its title, or its release's name, unlike the

@@ -19,7 +19,6 @@ import { quadsOfTurtle } from "../testing/releaseDrafts";
 import {
   draftEntries,
   draftFromQuads,
-  draftIriOf,
   draftQuads,
   entryQuads,
   inPlaceIn,
@@ -38,22 +37,6 @@ const PREFIXES = `@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> 
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix schema: <https://schema.org/> .
 `;
-
-describe("draftIriOf", () => {
-  const iriOf = draftIriOf(CONTAINER, DRAFT);
-
-  it("names a fragment of any of the draft's documents as one of its release document", () => {
-    expect(iriOf(`${CONTAINER}chapter-ch-a.ttl#q1`)).toBe(of("q1"));
-    expect(iriOf(`${CONTAINER}cards.ttl#q2`)).toBe(of("q2"));
-    expect(iriOf(`${CONTAINER}cards.ttl`)).toBe(DRAFT);
-    expect(iriOf(DRAFT)).toBe(DRAFT);
-  });
-
-  it("leaves any other IRI as it is", () => {
-    expect(iriOf(`${CONTAINER}notes.ttl#x`)).toBe(`${CONTAINER}notes.ttl#x`);
-    expect(iriOf("https://elsewhere.example/#x")).toBe("https://elsewhere.example/#x");
-  });
-});
 
 describe("inPlaceIn", () => {
   const inPlace = inPlaceIn(CONTAINER, DRAFT);

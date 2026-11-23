@@ -12,6 +12,7 @@ import { shown, tidiedStated, type LangText } from "@solid-memo/domain/langText"
 import { deckToDraft } from "@solid-memo/domain/release/deckToDraft";
 import {
   draftContainerOf,
+  draftIriOf,
   draftNameFor,
   draftsContainerOf,
   draftPlaceOf,
@@ -69,6 +70,7 @@ import {
 import {
   rebaseDraft,
   releaseToDraft,
+  withoutLinks,
   withOwnSeries,
 } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft, withOwnVersions } from "@solid-memo/domain/release/releaseVersion";
@@ -457,23 +459,29 @@ function unplaced(
  * The release, or draft, to be made the draft at `url`, before it is
  * moved there: without a statement of or naming an address in the new
  * draft's container (takenBy), or of where it is published (unplaced),
- * and with only its own statements (ownStatements): nothing only such a
- * statement led to, nor what a draft read from the pod states of a
- * creator with no record, which an import would have dropped
- * (GHSA-q4pr-36j5-g5m5). Before the move, the draft's own address is
- * one of these too: a statement of it is not one of the source's.
+ * without such an address in a record or the root either (a card's
+ * subject, a license: withoutLinks), as a statement naming it would be
+ * (GHSA-r6xv-78fc-m8jh), and with only its own statements
+ * (ownStatements): nothing only such a statement or link led to, nor
+ * what a draft read from the pod states of a creator with no record,
+ * which an import would have dropped (GHSA-q4pr-36j5-g5m5). Before the
+ * move, the draft's own address is one of these too: a statement of it
+ * is not one of the source's.
  */
 function inItsPlace(source: ReleaseDraft, url: string): ReleaseDraft {
-  return ownStatements({ ...source, triples: unplaced(source.triples, source, url) });
+  const placed = { ...source, triples: unplaced(source.triples, source, url) };
+  return ownStatements(withoutLinks(placed, takenBy(source, url)));
 }
 
 /**
- * The draft, unless it has an id no draft can have (draftIdUnsupported):
- * written, it could not be read back, so it is refused before anything
- * is written.
+ * The draft, unless it has an id no draft can have (draftIdUnsupported)
+ * as it will be read back: every IRI of its container a fragment of its
+ * release document (draftIriOf). Written, it could not be read back, so
+ * it is refused before anything is written (GHSA-r6xv-78fc-m8jh).
  */
 function readable(draft: ReleaseDraft): ReleaseDraft {
-  const id = unsupportedIdOf(draft);
+  const read = rebaseDraft(draft, draft.url, draftIriOf(draftContainerOf(draft.url), draft.url));
+  const id = unsupportedIdOf(read);
   if (id !== null) throw new AppError("draftIdUnsupported", { id });
   return draft;
 }
