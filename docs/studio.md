@@ -1421,9 +1421,11 @@ the problems, then come four parts:
   (`deckTextCheck` in `ui`, which checks a text once by each rule). A
   wrong option that several cards share (by its id) is checked once, and
   what it finds is listed at the first of those cards. One text can give
-  thousands of findings, so the health keeps at most
-  `MARKDOWN_TEXT_LIMIT` (20) of each text and `MARKDOWN_DECK_LIMIT`
-  (500) in all, and counts the rest (`markdownMore`).
+  thousands of findings, so the check lists at most `MAX_PROBLEMS` of
+  a text's and counts the rest ([markdown.md](markdown.md#rules-for-a-release)).
+  The health keeps at most `MARKDOWN_TEXT_LIMIT` (20) of each text and
+  `MARKDOWN_DECK_LIMIT` (500) in all, and counts the rest, those the
+  check counted too (`markdownMore`).
 
 A deck can have any number of problems, so each of the last three
 parts shows at most `PROBLEM_LIMIT` (50) of them and says how many more
@@ -2317,7 +2319,12 @@ becomes: the rules `npm run library:check` runs on `decks/`
   the text that changed. It keeps them only as far as its caches'
   bound goes ([markdown.md](markdown.md#safety)): past it, the oldest
   texts are checked again. It keeps them for one draft, the last one
-  checked: another draft's check starts anew.
+  checked: another draft's check starts anew. The check holds at most
+  `MARKDOWN_TEXT_LIMIT` (20) findings of a text and
+  `MARKDOWN_RELEASE_LIMIT` (500) in all, and ends with how many more
+  there are (`markdownMore`), an error. Once a version of the draft is
+  checked, the checks of other versions that no screen shows are
+  dropped, so editing doesn't pile up a check for each change.
 - **Shapes**, when asked: the release as it's assembled, moved to its
   address (`mapIris`). Each subject is checked against its library
   shape (`LibraryDeckV6` for the release), and the whole against
@@ -2746,9 +2753,12 @@ releases it, two ways.
   ([below](#data-set-aside)).
 - **Checked.** The screen counts the errors the release check finds
   for a pod, with a link to it (`publishErrors` in
-  [releaseCheck.ts](../apps/studio/src/ui/releaseCheck.ts)).
-  Publishing checks the draft again, the shapes too, as the release
-  at the address it's published at. An error stops it
+  [releaseCheck.ts](../apps/studio/src/ui/releaseCheck.ts)). Of a
+  draft past the release check's Markdown limits, that count is its
+  listed Markdown findings and one error for the rest
+  (`markdownMore`), not every finding. Publishing checks the draft
+  again, the shapes too, as the release at the address it's published
+  at. An error stops it
   (`releaseHasErrors`), with nothing written; a warning doesn't.
 - **Written once.** The draft is made one Turtle document at the
   address (`assemble`, at library deck format 6,

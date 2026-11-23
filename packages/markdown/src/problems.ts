@@ -64,12 +64,25 @@ export type MarkdownProblem =
    * A line of text with `---` right under it: a heading, not the text
    * and a thematic break, which a blank line between them would make.
    */
-  | { code: "dashHeading"; source: string };
+  | { code: "dashHeading"; source: string }
+  /**
+   * Last, when the text has more than MAX_PROBLEMS: how many more it
+   * has than are listed before it.
+   */
+  | { code: "more"; count: number };
+
+/**
+ * At most how many problems markdownProblems lists of one text: a dense
+ * text can have one for every few characters, and whoever keeps them,
+ * an editor's hints or a check of a whole release, keeps no more.
+ */
+export const MAX_PROBLEMS = 20;
 
 /**
  * The problems of a text written in Markdown, in a field held to `rule`,
- * in the order they come. A text past the parser's limits has only that
- * problem, since it is shown as plain text.
+ * in the order they come: the first MAX_PROBLEMS of them, then how many
+ * more there are (`more`), if any. A text past the parser's limits has
+ * only that problem, since it is shown as plain text.
  */
 export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem[] {
   const inspected = inspectMarkdown(text);
@@ -78,6 +91,12 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
       text.length > MAX_CHARS ? { code: "tooLong", length: text.length } : { code: "tooComplex" },
     ];
   const problems: MarkdownProblem[] = [];
+  let more = 0;
+  // The first MAX_PROBLEMS are kept, the rest counted.
+  const add = (problem: MarkdownProblem) => {
+    if (problems.length < MAX_PROBLEMS) problems.push(problem);
+    else more++;
+  };
   // A reference link's URL is checked once, however often the text uses it.
   const urls = new Map<string, { live: ReturnType<typeof liveLink>; controls: string[] }>();
   for (const note of inspected.notes) {
@@ -88,15 +107,15 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
       case "largeTable":
       case "characterReference":
       case "dashHeading":
-        problems.push({ code: note.type, source: note.source });
+        add({ code: note.type, source: note.source });
         break;
       case "code": {
         const controls = hiddenControls(note.value);
-        if (controls.length > 0) problems.push({ code: "hiddenControl", controls, in: "code" });
+        if (controls.length > 0) add({ code: "hiddenControl", controls, in: "code" });
         break;
       }
       case "deepControls":
-        problems.push({
+        add({
           code: "hiddenControl",
           controls: hiddenControls(note.source),
           in: note.in,
@@ -109,18 +128,18 @@ export function markdownProblems(text: string, rule: FieldRule): MarkdownProblem
           urls.set(note.url, url);
         }
         const { live } = url;
-        if (!rule.links)
-          problems.push({ code: "link", source: note.source, autolink: note.autolink });
-        else if (live === null) problems.push({ code: "linkNotFollowed", url: note.url });
+        if (!rule.links) add({ code: "link", source: note.source, autolink: note.autolink });
+        else if (live === null) add({ code: "linkNotFollowed", url: note.url });
         else if (!leadsTo(note.text, live.href))
-          problems.push({ code: "linkHost", text: note.text, host: live.host });
+          add({ code: "linkHost", text: note.text, host: live.host });
         const controls = [...new Set([...hiddenControls(note.text), ...url.controls])];
-        if (controls.length > 0) problems.push({ code: "hiddenControl", controls, in: "link" });
+        if (controls.length > 0) add({ code: "hiddenControl", controls, in: "link" });
         break;
       }
     }
   }
-  if (rule.inline && !inspected.oneParagraph) problems.push({ code: "notOneParagraph" });
+  if (rule.inline && !inspected.oneParagraph) add({ code: "notOneParagraph" });
+  if (more > 0) problems.push({ code: "more", count: more });
   return problems;
 }
 

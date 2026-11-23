@@ -5,7 +5,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { liveLink } from "./links";
 import { MAX_CHARS, MAX_DEPTH, MAX_TABLE_COLUMNS } from "./parse";
-import { markdownProblems, OPTION, PROSE, SIDE } from "./problems";
+import { MAX_PROBLEMS, markdownProblems, OPTION, PROSE, SIDE } from "./problems";
 import { growth } from "./testing/growth";
 
 // The links module as it is, its liveLink counted, so a test can tell how often a URL is read.
@@ -259,6 +259,28 @@ describe("markdownProblems", () => {
       ratio,
       `the text at 16,000 characters took ${ratio.toFixed(1)} times the one at 2,000 checked 8 times`,
     ).toBeLessThan(4);
+  });
+
+  it("lists at most MAX_PROBLEMS of a text's problems, then how many more there are", () => {
+    // A tag every three characters, as long as a card's side may be.
+    const tags = "<a>".repeat(Math.floor(16_383 / 3));
+    const html = { code: "html", source: "<a>" };
+    expect(markdownProblems(tags, SIDE)).toEqual([
+      ...Array.from({ length: MAX_PROBLEMS }, () => html),
+      { code: "more", count: tags.length / 3 - MAX_PROBLEMS },
+    ]);
+    // Character references, one every four characters, and links, which count when the rule lists them.
+    const references = "&lt;".repeat(4_000);
+    expect(markdownProblems(references, PROSE)).toHaveLength(MAX_PROBLEMS + 1);
+    expect(markdownProblems(references, PROSE).at(-1)).toEqual({
+      code: "more",
+      count: 4_000 - MAX_PROBLEMS,
+    });
+    const links = "[a](http://a.example) ".repeat(MAX_PROBLEMS);
+    expect(markdownProblems(links, PROSE)).toHaveLength(MAX_PROBLEMS);
+    expect(markdownProblems(`${links}<a>\n\nb`, OPTION).slice(MAX_PROBLEMS)).toEqual([
+      { code: "more", count: 2 },
+    ]);
   });
 
   it("holds an option to one paragraph", () => {

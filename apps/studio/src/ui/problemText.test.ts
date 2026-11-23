@@ -203,6 +203,9 @@ describe("problemMessage", () => {
     ).toBe(
       "Back, English: This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
     );
+    expect(say({ code: "markdownMore", params: { count: 3 } })).toBe(
+      "3 more Markdown problems, not listed: fix those listed, then check again.",
+    );
     expect(say({ code: "theoryEmptyChunk", params: { language: "en" } }, SM.theory)).toContain(
       "Theory, English: a thematic break first",
     );

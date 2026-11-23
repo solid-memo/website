@@ -112,6 +112,36 @@ describe("useReleaseCheck, as the draft and the policy change", () => {
   });
 });
 
+describe("useReleaseCheck, as the draft is edited", () => {
+  it("keeps the check of the version shown, not of each version before it", async () => {
+    const queryClient = new QueryClient();
+    const checkReleaseDraft = vi.fn(async () => check([]));
+    const useCases = makeUseCasesFake({ checkReleaseDraft });
+    function Checked({ of }: { of: ReleaseDraft }) {
+      const found = useReleaseCheck(useCases, of, "pod");
+      return <p>{found.isFetching ? "checking" : "checked"}</p>;
+    }
+    const shown = (of: ReleaseDraft) => (
+      <QueryClientProvider client={queryClient}>
+        <Checked of={of} />
+      </QueryClientProvider>
+    );
+    const kept = () =>
+      queryClient
+        .getQueryCache()
+        .findAll({ queryKey: ["releaseCheck"] })
+        .map((query) => query.state.data);
+    const view = render(shown(draft));
+    await screen.findByText("checked");
+    for (let edit = 0; edit < 5; edit++) {
+      view.rerender(shown({ ...draft }));
+      await screen.findByText("checked");
+    }
+    expect(checkReleaseDraft).toHaveBeenCalledTimes(6);
+    expect(kept()).toHaveLength(1);
+  });
+});
+
 describe("publishErrors", () => {
   it("counts the errors of the rules, the drops and the Markdown, as publishing checks them", () => {
     const error = problem(DRAFT_URL, { code: "libraryUnread", params: {} });

@@ -275,6 +275,8 @@ export function problemMessage(
         language: language(problem.params.language),
         finding: problemText(problem.params.finding as MarkdownProblem, t),
       });
+    case "markdownMore":
+      return t(key, { count: problem.params.count });
     case "theoryEmptyChunk":
       return t(key, { field, language: language(problem.params.language) });
     case "theoryChunks": {

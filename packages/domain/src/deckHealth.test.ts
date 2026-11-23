@@ -17,11 +17,11 @@ import {
   duplicateCardsOf,
   healthProblemCount,
   MARKDOWN_DECK_LIMIT,
-  MARKDOWN_TEXT_LIMIT,
   unstatedSides,
   withDeckReport,
   type DeckTextCheck,
 } from "./deckHealth";
+import { MARKDOWN_TEXT_LIMIT } from "./release/markdownFields";
 import { growth } from "./testing/growth";
 import {
   deckSetAside,
@@ -771,6 +771,18 @@ describe("deckHealth", () => {
     expect(health.markdown).toHaveLength(MARKDOWN_TEXT_LIMIT * 2);
     expect(health.markdownMore).toBe(6);
     expect(healthProblemCount(health)).toBe(1 + (MARKDOWN_TEXT_LIMIT + 3) * 2);
+  });
+
+  it("counts the findings the check counted but did not list", () => {
+    const dense = card("d", { textFormat: SM.markdown, front: { en: "[x]" } });
+    const each: DeckTextCheck<{ code: string; count?: number }> = {
+      plain: text.plain,
+      check: (value) => (value === "[x]" ? [{ code: "link" }, { code: "more", count: 5_000 }] : []),
+    };
+    const health = deckHealth(deck, report, [dense], [], each);
+    expect(health.markdown.map(({ finding }) => finding)).toEqual([{ code: "link" }]);
+    expect(health.markdownMore).toBe(5_000);
+    expect(healthProblemCount(health)).toBe(1 + 1 + 5_000);
   });
 
   it("does not know which sides to settle when the release could not be read", () => {

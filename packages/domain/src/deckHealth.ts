@@ -17,7 +17,7 @@ import { unlikeRelease } from "./deckLanguages";
 import { derivedOnceOf } from "./frozen";
 import { canonicalUrlOf, catalogUrlOf } from "./instanceLayout";
 import { PathMap, piecesOf, TextMap } from "./pathKeys";
-import type { FieldRuleName } from "./release/markdownFields";
+import { listedFindings, MARKDOWN_TEXT_LIMIT, type FieldRuleName } from "./release/markdownFields";
 import type { MarkdownFinding } from "./release/problems";
 import { reviewKeyOf } from "./reviewRecord";
 import { documentUrlOf, fragmentIdOf } from "./subjectUrl";
@@ -81,9 +81,6 @@ export interface DeckHealth<F extends MarkdownFinding = MarkdownFinding> {
   /** How many more findings the Markdown check made than `markdown` holds. */
   markdownMore: number;
 }
-
-/** At most how many findings of one text the deck's health holds: a dense text can give thousands. */
-export const MARKDOWN_TEXT_LIMIT = 20;
 
 /** At most how many findings of the Markdown check the deck's health holds in all. */
 export const MARKDOWN_DECK_LIMIT = 500;
@@ -443,7 +440,8 @@ export function duplicateCardsOf(
  *
  * A text can give any number of findings, so it holds at most
  * MARKDOWN_TEXT_LIMIT of each text's, and MARKDOWN_DECK_LIMIT in all,
- * and counts the rest (`more`), so the counts stay whole.
+ * and counts the rest (`more`), those the check itself only counted
+ * (listedFindings) among them, so the counts stay whole.
  */
 export function cardMarkdownProblems<F extends MarkdownFinding>(
   cards: readonly Card[],
@@ -459,14 +457,15 @@ export function cardMarkdownProblems<F extends MarkdownFinding>(
   ) => {
     for (const [language, value] of Object.entries(text ?? {})) {
       if (value.trim() === "") continue;
-      const found = check(value, rule);
+      const found = listedFindings(check(value, rule));
       const take = Math.min(
-        found.length,
+        found.listed.length,
         MARKDOWN_TEXT_LIMIT,
         MARKDOWN_DECK_LIMIT - problems.length,
       );
-      for (const finding of found.slice(0, take)) problems.push({ card, place, language, finding });
-      more += found.length - take;
+      for (const finding of found.listed.slice(0, take))
+        problems.push({ card, place, language, finding });
+      more += found.listed.length - take + found.more;
     }
   };
   const checked = new Set<string>();

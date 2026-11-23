@@ -119,12 +119,19 @@ export type TextProblem =
    * written: `finding` is what the Markdown check found, its own data.
    */
   | { code: "markdown"; params: { language: string; finding: MarkdownFinding } }
+  /** How many more findings of the Markdown check the release has than it lists (markdownProblems' limits). */
+  | { code: "markdownMore"; params: { count: number } }
   /** A step's theory in one language ("" untagged) with a thematic break that makes an empty chunk. */
   | { code: "theoryEmptyChunk"; params: { language: string } }
   /** A step's theory in other numbers of chunks in other languages: each language's count. */
   | { code: "theoryChunks"; params: { counts: { language: string; chunks: number }[] } };
 
-/** What a Markdown check finds in a text: a code of its own and what it needs to say it. */
+/**
+ * What a Markdown check finds in a text: a code of its own and what it
+ * needs to say it. A check that lists only the first of a text's
+ * findings ends them with `{ code: "more", count }`, how many more there
+ * are (listedFindings).
+ */
 export interface MarkdownFinding {
   code: string;
 }

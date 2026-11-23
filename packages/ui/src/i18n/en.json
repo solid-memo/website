@@ -438,6 +438,10 @@
     "characterReference": "{source} shows as the character it names. Write \\{source} to show it as typed.",
     "notOneParagraph": "This card's back is one of the options of a question: keep it to one paragraph, as the others are.",
     "dashHeading": "A line with --- right under it shows as a heading. For a line across instead, leave a blank line before the ---; for a heading, start the line with ##.",
+    "more": {
+      "one": "And {count} more problem, not listed here.",
+      "other": "And {count} more problems, not listed here."
+    },
     "noText": "This shows no text as Markdown."
   },
   "multipleChoice": {

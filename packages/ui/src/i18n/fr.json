@@ -451,6 +451,11 @@
     "characterReference": "{source} s’affiche comme le caractère qu’il désigne. Écrivez \\{source} pour l’afficher tel qu’il a été saisi.",
     "notOneParagraph": "Le verso de cette carte est l’une des propositions d’une question : limitez-le à un paragraphe, comme les autres.",
     "dashHeading": "Une ligne suivie directement de --- s’affiche comme un titre. Pour un trait horizontal, laissez une ligne vide avant le --- ; pour un titre, commencez la ligne par ##.",
+    "more": {
+      "one": "Et {count} autre problème, non affiché ici.",
+      "many": "Et {count} autres problèmes, non affichés ici.",
+      "other": "Et {count} autres problèmes, non affichés ici."
+    },
     "noText": "Lu comme du Markdown, ce texte n’affiche rien."
   },
   "multipleChoice": {

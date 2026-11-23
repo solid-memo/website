@@ -425,6 +425,9 @@
     "characterReference": "{source}에 해당하는 문자가 표시돼요. 입력한 그대로 표시하려면 \\{source}처럼 써 주세요.",
     "notOneParagraph": "이 카드의 뒷면은 질문의 선택지 중 하나예요. 다른 선택지처럼 한 문단으로 써 주세요.",
     "dashHeading": "바로 아래에 ---가 있는 줄은 제목으로 표시돼요. 가로줄을 넣으려면 --- 앞에 빈 줄을 두고, 제목으로 쓰려면 줄을 ##로 시작해 주세요.",
+    "more": {
+      "other": "그 밖에 문제가 {count}개 더 있어요."
+    },
     "noText": "Markdown으로 표시하면 보이는 텍스트가 없어요."
   },
   "multipleChoice": {

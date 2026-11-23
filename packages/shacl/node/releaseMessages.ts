@@ -50,8 +50,12 @@ function shownValues(terms: readonly ReleaseTerm[]): string {
         .join(", ");
 }
 
-/** What a Markdown problem means for a release's author, after the subject and field it is in. */
-function markdownText(problem: MarkdownProblem): string {
+/**
+ * What a Markdown problem means for a release's author, after the subject
+ * and field it is in: one the release check lists, which counts the rest
+ * in a problem of its own (`markdownMore`).
+ */
+function markdownText(problem: Exclude<MarkdownProblem, { code: "more" }>): string {
   const code = (source: string) => JSON.stringify(source);
   switch (problem.code) {
     case "tooLong":
@@ -187,7 +191,11 @@ export function releaseMessage(problem: WordedProblem, label: string, url: strin
       return `${at}${subject} states solid-memo:textFormat ${shownValues([problem.params.format])}, no concept of solid-memo:TextFormats: the app shows its text as plain text.`;
     case "markdown": {
       const { language, finding } = problem.params;
-      return `${at}${subject} ${nameOf(problem.field!)}${language === "" ? "" : `@${language}`} ${markdownText(finding as MarkdownProblem)}`;
+      return `${at}${subject} ${nameOf(problem.field!)}${language === "" ? "" : `@${language}`} ${markdownText(finding as Exclude<MarkdownProblem, { code: "more" }>)}`;
+    }
+    case "markdownMore": {
+      const { count } = problem.params;
+      return `${at}has ${count} more Markdown ${count === 1 ? "problem" : "problems"}, not listed: fix those listed, then check again.`;
     }
     case "theoryEmptyChunk": {
       const { language } = problem.params;

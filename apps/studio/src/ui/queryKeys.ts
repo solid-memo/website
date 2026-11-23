@@ -51,6 +51,8 @@ export const queryKeys = {
   releaseDraft: (draftUrl: string) => ["releaseDraft", draftUrl],
   /** The mutation key of a draft's writes, whichever screen made them. */
   releaseDraftWrites: (draftUrl: string) => ["editReleaseDraft", draftUrl],
+  /** Every rules' check of a draft (releaseCheck), of any draft, policy and version. */
+  releaseChecks: () => ["releaseCheck"],
   /** The rules' check of one version (revision) of a draft for a policy. */
   releaseCheck: (draftUrl: string | undefined, policy: CheckPolicy, revision: number) => [
     "releaseCheck",
