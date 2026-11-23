@@ -12,7 +12,6 @@ import {
   datasetFromQuads,
   getThing,
   getThingAll,
-  getUrlAll,
   toRdfJsDataset,
 } from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
@@ -34,14 +33,15 @@ import {
 } from "@solid-memo/domain/review";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
+import { DECK_V6 } from "@solid-memo/vocab/descriptors.generated";
 import { getSolidDatasetOrNull } from "./datasets";
 import { isCreatorAgent } from "./ownership";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
 import { refusePrefixedLookalikes, refuseUnwritable, unwritableTermOf } from "./writableTerms";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
 import { reviewedCardIdOf, toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
-import { storedVersionOf } from "./records";
-import { DCTERMS, RDF, SM, SM_NS } from "./vocab";
+import { allIris, hasClass, hasIri, readFieldOf, storedVersionOf } from "./records";
+import { DCTERMS, SM, SM_NS } from "./vocab";
 
 /** The prefixes a deck file is written with, in Turtle and in JSON-LD alike. */
 export const DECK_FILE_PREFIXES: Readonly<Record<string, string>> = {
@@ -101,7 +101,7 @@ export function createSolidDeckArchive({
       if (entry === null) throw new AppError("deckGone", { deck: deck.title });
       // A creator goes only when it is an agent as Solid Memo writes one: another deck's entry or the catalog named so stays behind, and so does the link to it; a creator named as text (before format 3) stays (GHSA-5w7q-8wcr-f9g8).
       const creators = new Set(
-        getUrlAll(entry, DCTERMS.creator).filter((url) => isCreatorAgent(catalog!, url)),
+        readFieldOf(entry, DECK_V6, "creator")!.filter((url) => isCreatorAgent(catalog!, url)),
       );
       const going = new Set([deck.url, distributionUrlOf(deck.url), ...creators]);
       // A pause is the learner's, of this pod: a deck file never arrives paused.
@@ -142,8 +142,7 @@ export function createSolidDeckArchive({
       const dataset = datasetFromQuads(quads);
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);
-      const typed = (type: string) =>
-        things.filter((thing) => getUrlAll(thing, RDF.type).includes(type));
+      const typed = (type: string) => things.filter((thing) => hasClass(thing, type));
       // A file of more than one deck is refused before any is read (GHSA-hcrw-cr33-jg78).
       const deckThings = typed(SM.Deck);
       if (deckThings.length !== 1) throw new AppError("notADeckFile");
@@ -255,11 +254,11 @@ function hasNonUrlValue(quads: readonly Quad[], deckUrl: string): boolean {
  */
 function ownSubjectsOf(deck: Deck, cards: Dataset | null, reviews: Dataset | null): Quad[] {
   const cardThings = subjectsIn(cards, deck.cardsDocumentUrl).filter((thing) =>
-    getUrlAll(thing, RDF.type).includes(SM.Card),
+    hasClass(thing, SM.Card),
   );
   const ids = new Set(cardThings.map((thing) => fragmentIdOf(asUrl(thing))));
   const cardSubjects = new Set(
-    cardThings.flatMap((thing) => [asUrl(thing), ...getUrlAll(thing, SM.distractor)]),
+    cardThings.flatMap((thing) => [asUrl(thing), ...allIris(thing, SM.distractor)]),
   );
   const stateSubjects = new Set(
     subjectsIn(reviews, deck.reviewsDocumentUrl)
@@ -309,12 +308,10 @@ function quadsOf(dataset: Dataset | null): Quad[] {
 
 /** Refuse a subject of a deck's kinds in a newer format than this app reads, as the pod's own are read only by a newer app. */
 function refuseNewer(thing: Subject): void {
-  const types = getUrlAll(thing, RDF.type);
-  const schedulers = getUrlAll(thing, SM.scheduler);
   for (const { type, scheduler, shape } of KINDS) {
     const version = storedVersionOf(thing);
     const ofKind =
-      types.includes(type) && (scheduler === undefined || schedulers.includes(scheduler));
+      hasClass(thing, type) && (scheduler === undefined || hasIri(thing, SM.scheduler, scheduler));
     if (ofKind && version > LATEST_VERSION[shape]) {
       throw new AppError("deckFileTooNew", {
         subject: asUrl(thing),

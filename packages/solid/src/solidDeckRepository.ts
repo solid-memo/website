@@ -10,7 +10,6 @@ import {
   buildThing,
   createSolidDataset,
   getThing,
-  getUrlAll,
   setThing,
 } from "./client/rdf";
 import type { Catalog } from "@solid-memo/domain/catalog";
@@ -73,7 +72,7 @@ import {
   UNREADABLE,
 } from "./datasets";
 import { deckDocumentSubjects } from "./ownership";
-import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
+import { RDF, SCHEMA, SM } from "./vocab";
 import {
   deckSubjects,
   decksSubjects,
@@ -99,8 +98,11 @@ import { editOf, type DatasetEdit } from "./datasetEdit";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { withoutReviewStates } from "./mappers/reviewStateMapper";
 import {
+  allIris,
   datetimeLiteral,
-  readDatetime,
+  everyIri,
+  hasIri,
+  readFieldOf,
   carriedTo,
   recordThing,
   unlessNewer,
@@ -952,8 +954,7 @@ export function createSolidDeckRepository({
     // Distractors no card names any longer go once all are written: one moved to another card stays.
     const written = writeCards(edit, deck, saved, (_, card) => {
       const existing = edit.getThing(urlOf(card.id));
-      const createdAt =
-        existing === null ? undefined : readDatetime(existing, DCTERMS.created)?.toISOString();
+      const createdAt = existing === null ? undefined : readFieldOf(existing, CARD_V7, "created");
       return { card: { ...card, ...(createdAt === undefined ? {} : { createdAt }) }, existing };
     });
     const updated = edit.done();
@@ -1053,7 +1054,7 @@ export function createSolidDeckRepository({
   ): { subjects: string[]; dropped: string[] } {
     const cardUrl = `${deck.cardsDocumentUrl}#${card.id}`;
     unlessTyped(edit, cardUrl, SM.Distractor);
-    const named = existing === null ? [] : getUrlAll(existing, SM.distractor);
+    const named = existing === null ? [] : allIris(existing, SM.distractor);
     const before = named.filter((url) => {
       const thing = edit.getThing(url);
       return thing !== null && toDistractor(thing) !== null;
@@ -1160,7 +1161,7 @@ export function createSolidDeckRepository({
     if (deck.completedChapters !== undefined) {
       // Never more than a read keeps (toDeck), as it keeps them: the release's first.
       const completed = boundedCompletedChapters(
-        [...getUrlAll(entry, SM.completedChapter), ...deck.completedChapters],
+        [...allIris(entry, SM.completedChapter), ...deck.completedChapters],
         [deck.sourceUrl],
       );
       builder = builder.setIriAll(SM.completedChapter, completed);
@@ -1190,10 +1191,12 @@ export function createSolidDeckRepository({
       cardToRecord(card, card.createdAt ?? now().toISOString(), deck.cardsDocumentUrl),
       existing,
     );
-    const stored = getUrlAll(thing, SM.fromRelease);
-    return card.fromRelease === undefined || (stored.length === 1 && stored[0] === card.fromRelease)
+    const { fromRelease } = card;
+    return fromRelease === undefined ||
+      (hasIri(thing, SM.fromRelease, fromRelease) &&
+        everyIri(thing, SM.fromRelease, (iri) => iri === fromRelease))
       ? thing
-      : buildThing(thing).setIri(SM.fromRelease, card.fromRelease).build();
+      : buildThing(thing).setIri(SM.fromRelease, fromRelease).build();
   }
 }
 
@@ -1215,9 +1218,9 @@ function withoutCard(dataset: Dataset, cardUrl: string): Dataset {
 }
 
 /** The distractors the card at `cardUrl` names, none when there is no card. */
-function distractorsNamedBy(dataset: Dataset, cardUrl: string): string[] {
+function distractorsNamedBy(dataset: Dataset, cardUrl: string): readonly string[] {
   const card = getThing(dataset, cardUrl);
-  return card === null ? [] : getUrlAll(card, SM.distractor);
+  return card === null ? [] : allIris(card, SM.distractor);
 }
 
 /**

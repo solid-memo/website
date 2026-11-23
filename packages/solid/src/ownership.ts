@@ -3,23 +3,29 @@
 // SPDX-License-Identifier: MIT
 
 import { getSourceUrl, hasResourceInfo } from "./client/resources";
-import {
-  type Dataset,
-  type Subject,
-  getInteger,
-  getTermAll,
-  getThing,
-  getThingAll,
-  getUrlAll,
-  propertiesOf,
-  toRdfJsDataset,
-} from "./client/rdf";
+import { type Dataset, type Subject, getThing, getThingAll, toRdfJsDataset } from "./client/rdf";
 import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
-import { MAX_CLASSES } from "./records";
-import { ALL_SHAPES, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import {
+  classesWithin,
+  everyIri,
+  everyProperty,
+  hasClass,
+  isStamped,
+  readFieldOf,
+  readTerms,
+  saysOnlyIrisOf,
+  someIri,
+} from "./records";
+import {
+  ALL_SHAPES,
+  DECK_DOCUMENT_TERMS,
+  DECK_GROUP_V1,
+  DECK_V6,
+  SHAPES,
+} from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { DCAT, DCTERMS, RDF, SCHEMA, SM, SM_NS } from "./vocab";
 
@@ -60,6 +66,18 @@ function writtenBesideByClass(
   return links;
 }
 
+/**
+ * The subjects a link of WRITTEN_BESIDE names, read as the field of its
+ * predicate is (a deck's creators and distributions, a catalog's or a
+ * deck group's publisher), within its bounds: one past them is not
+ * followed, so it stays another app's.
+ */
+function linksOn(thing: Subject, link: string): readonly string[] {
+  if (link === DCTERMS.publisher)
+    return [readFieldOf(thing, DECK_GROUP_V1, "publisher") ?? []].flat();
+  return readFieldOf(thing, DECK_V6, link === DCTERMS.creator ? "creator" : "distribution")!;
+}
+
 /** WRITTEN_BESIDE by class in an instance's catalog (isCatalogDocument): a deck entry, a deck group, the catalog. */
 const WRITTEN_BESIDE_IN_CATALOG = writtenBesideByClass("pod");
 
@@ -91,8 +109,8 @@ function isSolidMemos(dataset: Dataset, thing: Subject): boolean {
     isDeckBackLink(dataset, thing) ||
     (!isAnotherSchedulersState(dataset, thing) &&
       (isCatalogSubject(dataset, thing) ||
-        getInteger(thing, SM.formatVersion) !== null ||
-        getUrlAll(thing, RDF.type).some((type) => type.startsWith(SM_NS))))
+        isStamped(thing) ||
+        someIri(thing, RDF.type, (type) => type.startsWith(SM_NS))))
   );
 }
 
@@ -106,12 +124,11 @@ function isSolidMemos(dataset: Dataset, thing: Subject): boolean {
  * shape.
  */
 function isAnotherSchedulersState(dataset: Dataset, thing: Subject): boolean {
-  const types = getUrlAll(thing, RDF.type);
   return (
     namesAnotherScheduler(thing) &&
     !isCatalogSubject(dataset, thing) &&
-    !types.includes(DCAT.Catalog) &&
-    !types.some((type) => type.startsWith(SM_NS) && type !== SM.ReviewState)
+    !hasClass(thing, DCAT.Catalog) &&
+    !someIri(thing, RDF.type, (type) => type.startsWith(SM_NS) && type !== SM.ReviewState)
   );
 }
 
@@ -156,7 +173,7 @@ function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<st
     for (const [link, targetClass] of linksWrittenOn(dataset, kind, thing)) {
       const refusedOfClass = refused.get(targetClass) ?? new Set<string>();
       refused.set(targetClass, refusedOfClass);
-      for (const url of getUrlAll(thing, link)) {
+      for (const url of linksOn(thing, link)) {
         if (owned.has(url) || refusedOfClass.has(url)) continue;
         const target = writtenBeside(dataset, url, targetClass);
         if (target === null) {
@@ -185,7 +202,7 @@ function withWrittenBeside(dataset: Dataset, things: readonly Subject[]): Set<st
  * for the catalog itself (isCatalogSubject), with or without its class.
  */
 function linksWrittenOn(dataset: Dataset, kind: DocumentKind, thing: Subject): [string, string][] {
-  const types = getUrlAll(thing, RDF.type);
+  const types = classesWithin(thing);
   const own = types.filter((type) => type.startsWith(SM_NS));
   let byClass = WRITTEN_BESIDE_IN_DECK;
   let classes = own.length > 0 ? own : types;
@@ -232,7 +249,7 @@ const SHAPED_CLASSES: ReadonlySet<string> = new Set(ALL_SHAPES.map((shape) => sh
  * so it is never one Solid Memo writes.
  */
 function classesBeside(thing: Subject): string[] {
-  return getTermAll(thing, RDF.type).length > MAX_CLASSES ? [] : getUrlAll(thing, RDF.type);
+  return classesWithin(thing);
 }
 
 /**
@@ -288,7 +305,7 @@ export function subjectsOfClasses(...classes: string[]): (dataset: Dataset) => S
       getThingAll(dataset).filter(
         (thing) =>
           isSolidMemos(dataset, thing) &&
-          getUrlAll(thing, RDF.type).some((type) => classes.includes(type)),
+          someIri(thing, RDF.type, (type) => classes.includes(type)),
       ),
     );
 }
@@ -322,8 +339,8 @@ export function deckDocumentSubjects(entries: readonly string[]): (dataset: Data
     if (isDeckItself(dataset, url)) return new Set();
     const self = documentThings(dataset, url);
     const statements = self.flatMap((thing) =>
-      getUrlAll(thing, DCTERMS.isPartOf)
-        .filter(isLeaving)
+      readTerms(thing, DECK_DOCUMENT_TERMS)
+        .isPartOf.filter(isLeaving)
         .map((url): Statement => [thing.url, DCTERMS.isPartOf, url]),
     );
     if (self.some((thing) => deckBackLinks(thing).some((url) => !isLeaving(url))))
@@ -389,7 +406,7 @@ function deckEntrySubjects(dataset: Dataset, url: string): Set<string> {
         (thing) =>
           !isSameUrl(thing.url, url) &&
           isSolidMemos(dataset, thing) &&
-          getUrlAll(thing, RDF.type).some((type) => DECK_ENTRY_CLASSES.has(type)) &&
+          someIri(thing, RDF.type, (type) => DECK_ENTRY_CLASSES.has(type)) &&
           isDeckEntryShaped(thing),
       )
       .map((thing) => thing.url),
@@ -407,8 +424,8 @@ function deckEntrySubjects(dataset: Dataset, url: string): Set<string> {
  */
 function isDeckEntryShaped(thing: Subject): boolean {
   return (
-    getUrlAll(thing, RDF.type).every((type) => DECK_ENTRY_TYPES.has(type)) &&
-    propertiesOf(thing).every(({ predicate }) => DECK_ENTRY_PROPERTIES.has(predicate))
+    everyIri(thing, RDF.type, (type) => DECK_ENTRY_TYPES.has(type)) &&
+    everyProperty(thing, (predicate) => DECK_ENTRY_PROPERTIES.has(predicate))
   );
 }
 
@@ -457,14 +474,8 @@ function termKey(term: { termType: string; value: string }): string {
  */
 export function isDeckBackLink(dataset: Dataset, thing: Subject): boolean {
   if (!hasResourceInfo(dataset) || !isSameUrl(thing.url, getSourceUrl(dataset))) return false;
-  const properties = propertiesOf(thing);
-  const partOf = getUrlAll(thing, DCTERMS.isPartOf);
   return (
-    properties.length === 1 &&
-    properties[0]!.predicate === DCTERMS.isPartOf &&
-    properties[0]!.values.every((value) => value.type === "iri") &&
-    partOf.length > 0 &&
-    partOf.every(isCatalogEntry)
+    saysOnlyIrisOf(thing, DCTERMS.isPartOf) && everyIri(thing, DCTERMS.isPartOf, isCatalogEntry)
   );
 }
 
@@ -488,7 +499,7 @@ function documentThings(dataset: Dataset, url: string): Subject[] {
  */
 export function isDeckItself(dataset: Dataset, url: string): boolean {
   return [url, decodedOf(url)].some((spelling) =>
-    documentThings(dataset, spelling).some((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck)),
+    documentThings(dataset, spelling).some((thing) => hasClass(thing, SM.Deck)),
   );
 }
 
@@ -503,7 +514,7 @@ function decodedOf(url: string): string {
 
 /** The decks a subject says it is part of: its dcterms:isPartOf naming a catalog's entry (isCatalogEntry). */
 function deckBackLinks(thing: Subject): string[] {
-  return getUrlAll(thing, DCTERMS.isPartOf).filter(isCatalogEntry);
+  return readTerms(thing, DECK_DOCUMENT_TERMS).isPartOf.filter(isCatalogEntry);
 }
 
 /**

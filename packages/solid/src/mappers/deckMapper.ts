@@ -9,12 +9,8 @@ import {
   asUrl,
   buildThing,
   createThing,
-  getPropertyAll,
-  getStringNoLocale,
-  getStringNoLocaleAll,
   getThing,
   getThingAll,
-  getUrlAll,
   removeThings,
   setThing,
   setThings,
@@ -66,6 +62,7 @@ import {
   CARD_TERMS,
   CARD_V7,
   CATALOG_V1,
+  DECK_TERMS,
   DECK_V6,
   DISTRACTOR_V1,
   DISTRIBUTION_V1,
@@ -73,15 +70,19 @@ import {
 import { type CardV7, LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { foreignSubjects } from "../ownership";
 import {
+  allIris,
+  hasClass,
   isWrittenByNewer,
   migrateWithinBound,
   ownSubjectsOf,
-  readDatetime,
   readFieldOf,
   readTerms,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
+  saysAnyOf,
+  saysNothing,
+  someIri,
   storedVersionOf,
   unlessNewer,
   unlessTyped,
@@ -104,7 +105,7 @@ const NOT_AGENT_CLASSES: ReadonlySet<string> = new Set(
 export function agentNamesOf(dataset: Dataset): Map<string, string> {
   const names = new Map<string, string>();
   for (const thing of getThingAll(dataset)) {
-    if (getUrlAll(thing, RDF.type).some((type) => NOT_AGENT_CLASSES.has(type))) continue;
+    if (someIri(thing, RDF.type, (type) => NOT_AGENT_CLASSES.has(type))) continue;
     const read = readVersioned(thing, "agent");
     if (read === null) continue;
     const url = asUrl(thing);
@@ -187,21 +188,17 @@ export function toDeck(
     record,
     authorOfAgents(url, own, agentNames),
   );
-  // Only an http(s) URL is a chapter (readIris): another IRI, such as `<rdf:type>`, is dropped here and never written back.
-  const completedChapters = boundedCompletedChapters(readIris(thing, SM.completedChapter), [
-    stored.sourceUrl,
-  ]);
-  const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);
-  const cardLanguage = storedLanguage === null ? undefined : cardLanguageTag(storedLanguage);
-  const pictureHosts = storedPictureHosts(getStringNoLocaleAll(thing, SM.deckPictureHost));
-  const pause = storedPause(
-    readDatetime(thing, SM.deckPausedAt)?.toISOString() ?? null,
-    getStringNoLocale(thing, SM.deckResumesOn),
-  );
+  // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
+  const terms = readTerms(thing, DECK_TERMS);
+  // Only an http(s) URL is a chapter (DECK_TERMS): another IRI, such as `<rdf:type>`, is dropped here and never written back.
+  const completedChapters = boundedCompletedChapters(terms.completedChapter, [stored.sourceUrl]);
+  const cardLanguage =
+    terms.deckCardLanguage === undefined ? undefined : cardLanguageTag(terms.deckCardLanguage);
+  const pictureHosts = storedPictureHosts(terms.deckPictureHost);
+  const pause = storedPause(terms.deckPausedAt ?? null, terms.deckResumesOn ?? null);
   return {
     ...stored,
-    // Outside the deck's shape, like sm:position: every write of the entry keeps them (recordThing).
-    ...(getUrlAll(thing, RDF.type).includes(SCHEMA.Course) ? { course: true as const } : {}),
+    ...(hasClass(thing, SCHEMA.Course) ? { course: true as const } : {}),
     ...(completedChapters.length === 0 ? {} : { completedChapters }),
     ...(cardLanguage === undefined ? {} : { cardLanguage }),
     ...(pictureHosts.length === 0 ? {} : { pictureHosts }),
@@ -346,8 +343,7 @@ function wroteDeck(edit: DatasetEdit<Dataset>, nodes: AgentNodes, deck: Deck): b
 function agentHolderOf(thing: NamedSubject | null): AgentHolder {
   if (thing === null) return null;
   if (isAgentByNewer(thing)) return "unreadable";
-  const said = getPropertyAll(thing);
-  if (!AGENT_V1.fields.some((field) => said.includes(field.predicate))) return null;
+  if (!saysAnyOf(thing, AGENT_FIELDS)) return null;
   const read = readVersioned(thing, "agent");
   return read === null ? "unreadable" : migrate("agent", read.record, { subject: asUrl(thing) });
 }
@@ -380,8 +376,8 @@ export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset 
   );
   const groups: NamedSubject[] = [];
   for (const thing of getThingAll(removed)) {
-    if (!getUrlAll(thing, RDF.type).includes(SM.DeckGroup)) continue;
-    const listed = getUrlAll(thing, DCAT.dataset);
+    if (!hasClass(thing, SM.DeckGroup)) continue;
+    const listed = allIris(thing, DCAT.dataset);
     const kept = listed.filter((url) => !leaving.has(url));
     // A group a newer version of the app wrote is left as it is: its link to a deck gone reads as no member.
     if (kept.length === listed.length || storedVersionOf(thing) > LATEST_VERSION.deckGroup)
@@ -401,12 +397,12 @@ export function withoutDecks(dataset: Dataset, decks: readonly Deck[]): Dataset 
 
 function isTyped(dataset: Dataset, url: string, type: string): boolean {
   const thing = getThing(dataset, url);
-  return thing !== null && getUrlAll(thing, RDF.type).includes(type);
+  return thing !== null && hasClass(thing, type);
 }
 
 function deckUrlsOf(dataset: Dataset): string[] {
   return getThingAll(dataset)
-    .filter((thing) => getUrlAll(thing, RDF.type).includes(SM.Deck))
+    .filter((thing) => hasClass(thing, SM.Deck))
     .map(asUrl);
 }
 
@@ -432,7 +428,7 @@ function withCatalogDatasets(
   for (const [catalogUrl, urls] of byCatalog) {
     const catalog = getThing(dataset, catalogUrl);
     if (catalog === null) continue;
-    const listed = new Set(getUrlAll(catalog, DCAT.dataset));
+    const listed = new Set(allIris(catalog, DCAT.dataset));
     const links = [...urls].filter((url) => listed.has(url) !== (change === "add"));
     if (links.length === 0) continue;
     const changing = new Set(links);
@@ -480,9 +476,9 @@ export function toCatalog(dataset: Dataset, documentUrl: string): CatalogRead {
 export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Catalog): Dataset {
   const url = `${documentUrl}#catalog`;
   const existing = getThing(dataset, url);
-  const before = new Set(existing === null ? [] : getUrlAll(existing, DCTERMS.license));
+  const before = new Set(existing === null ? [] : allIris(existing, DCTERMS.license));
   const foreign = foreignSubjects(dataset);
-  const kept = (existing === null ? [] : getUrlAll(existing, DCAT.dataset)).filter(
+  const kept = (existing === null ? [] : allIris(existing, DCAT.dataset)).filter(
     (link) =>
       !isSameDocument(link, documentUrl) ||
       isTyped(dataset, link, DCAT.Dataset) ||
@@ -498,7 +494,7 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
     updated,
     recordThing(publisher, AGENT_V1, publisherToRecord(catalog), getThing(updated, publisher)),
   );
-  const named = new Set(getThingAll(updated).flatMap((thing) => getUrlAll(thing, DCTERMS.license)));
+  const named = new Set(getThingAll(updated).flatMap((thing) => allIris(thing, DCTERMS.license)));
   // Each old license once, the changes made in one pass: one edit of the
   // whole document per license would take time in the square of them.
   const untyped: Subject[] = [];
@@ -508,13 +504,13 @@ export function withCatalog(dataset: Dataset, documentUrl: string, catalog: Cata
     const node = getThing(updated, license);
     if (node === null) continue;
     const thing = buildThing(node).removeUrl(RDF.type, DCTERMS.LicenseDocument).build();
-    if (getPropertyAll(thing).length === 0) gone.push(license);
+    if (saysNothing(thing)) gone.push(license);
     else untyped.push(thing);
   }
   updated = removeThings(setThings(updated, untyped), gone);
   if (catalog.license !== undefined) {
     const node = getThing(updated, catalog.license) ?? createThing({ url: catalog.license });
-    if (!getUrlAll(node, RDF.type).includes(DCTERMS.LicenseDocument)) {
+    if (!hasClass(node, DCTERMS.LicenseDocument)) {
       updated = setThing(
         updated,
         buildThing(node).addIri(RDF.type, DCTERMS.LicenseDocument).build(),
@@ -535,11 +531,11 @@ function isAgentByNewer(thing: Subject): boolean {
   return storedVersionOf(thing) > AGENT_V1.version;
 }
 
+/** The predicates of an agent's fields (AGENT_V1): a node that has none of them says nothing an agent says. */
+const AGENT_FIELDS: readonly string[] = AGENT_V1.fields.map((field) => field.predicate);
+
 /** What this app writes of an agent: its class, its format stamp and its fields (AGENT_V1). */
-const AGENT_PREDICATES: readonly string[] = [
-  SM.formatVersion,
-  ...AGENT_V1.fields.map((field) => field.predicate),
-];
+const AGENT_PREDICATES: readonly string[] = [SM.formatVersion, ...AGENT_FIELDS];
 
 /**
  * The dataset without the agent nodes this app wrote (`#agent-…`) in one
@@ -562,8 +558,8 @@ function withoutStrayAgents(
 ): Dataset {
   const named = new Set(
     getThingAll(dataset).flatMap((thing) => [
-      ...getUrlAll(thing, DCTERMS.creator),
-      ...getUrlAll(thing, DCTERMS.publisher),
+      ...allIris(thing, DCTERMS.creator),
+      ...allIris(thing, DCTERMS.publisher),
     ]),
   );
   const isStray = (url: string) => {
@@ -584,7 +580,7 @@ function withoutStrayAgents(
     const builder = buildThing(thing).removeUrl(RDF.type, AGENT_V1.targetClass);
     for (const predicate of AGENT_PREDICATES) builder.removeAll(predicate);
     const rest = builder.build();
-    if (getPropertyAll(rest).length === 0) gone.push(asUrl(thing));
+    if (saysNothing(rest)) gone.push(asUrl(thing));
     else kept.push(rest);
   }
   return removeThings(setThings(dataset, kept), gone);
@@ -731,7 +727,7 @@ export function writeDistractors(
 function distractorNamers(dataset: Dataset): Map<string, number> {
   const namers = new Map<string, number>();
   for (const thing of getThingAll(dataset))
-    for (const url of getUrlAll(thing, SM.distractor)) namers.set(url, (namers.get(url) ?? 0) + 1);
+    for (const url of allIris(thing, SM.distractor)) namers.set(url, (namers.get(url) ?? 0) + 1);
   return namers;
 }
 
@@ -769,8 +765,7 @@ function isUnnamed(namers: ReadonlyMap<string, number>, url: string): boolean {
 function isDistractorOnly(dataset: Dataset, url: string): boolean {
   const thing = isDocumentSubject(url) ? null : getThing(dataset, url);
   if (thing === null) return false;
-  const types = getUrlAll(thing, RDF.type);
-  return types.includes(SM.Distractor) && !types.includes(SM.Card) && !isWrittenByNewer(thing);
+  return hasClass(thing, SM.Distractor) && !hasClass(thing, SM.Card) && !isWrittenByNewer(thing);
 }
 
 /**
@@ -793,9 +788,8 @@ export function withoutCardSubjects(dataset: Dataset, urls: readonly string[]): 
   for (const url of urls) {
     const thing = isDocumentSubject(url) ? null : getThing(dataset, url);
     if (thing === null) continue;
-    const types = getUrlAll(thing, RDF.type);
-    if (!types.includes(SM.Card) && isWrittenByNewer(thing)) continue;
-    const named = types.includes(SM.Distractor) && (namers ??= distractorNamers(dataset)).has(url);
+    if (!hasClass(thing, SM.Card) && isWrittenByNewer(thing)) continue;
+    const named = hasClass(thing, SM.Distractor) && (namers ??= distractorNamers(dataset)).has(url);
     if (named) kept.push(distractorOnly(unlessNewer(thing)));
     else removed.push(url);
   }
@@ -836,7 +830,7 @@ export function withSuggestedAnswers(
 ): NamedSubject {
   const named = new Set(distractors);
   const dropped = new Set(before.filter((url) => !named.has(url)));
-  const kept = getUrlAll(card, SCHEMA.suggestedAnswer).filter((url) => !dropped.has(url));
+  const kept = allIris(card, SCHEMA.suggestedAnswer).filter((url) => !dropped.has(url));
   // The new list set in one call (setIriAll), however many distractors the card has.
   return buildThing(card)
     .setIriAll(SCHEMA.suggestedAnswer, [...kept, ...distractors])

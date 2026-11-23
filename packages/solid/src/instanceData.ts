@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, getThing, getThingAll, getUrlAll } from "./client/rdf";
+import { type Dataset, getThing, getThingAll } from "./client/rdf";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
 import {
   cardsContainerOf,
@@ -36,7 +36,9 @@ import {
   subjectsOfClasses,
 } from "./ownership";
 import { deleteDraftResources } from "./solidReleaseDraftRepository";
-import { RDF, SM } from "./vocab";
+import { CATALOG_TERMS, DECK_V2 } from "@solid-memo/vocab/descriptors.generated";
+import { hasClass, readFieldOf, readTerms } from "./records";
+import { SM } from "./vocab";
 
 /**
  * Delete what an instance holds of Solid Memo's, and nothing else
@@ -175,7 +177,7 @@ function releasesElsewhereOf(catalog: Dataset, container: string): string[] {
   const node = getThing(catalog, catalogNodeUrlOf(container));
   return node === null
     ? []
-    : getUrlAll(node, SM.publishedRelease).filter(
+    : readTerms(node, CATALOG_TERMS).publishedRelease.filter(
         (url) =>
           isPublishedReleaseUrl(url) &&
           isDocumentIn(url, container) &&
@@ -194,7 +196,7 @@ function draftsOf(catalog: Dataset, container: string): string[] {
   const node = getThing(catalog, catalogNodeUrlOf(container));
   return node === null
     ? []
-    : getUrlAll(node, SM.releaseDraft).filter(
+    : readTerms(node, CATALOG_TERMS).releaseDraft.filter(
         (url) => draftPlaceOf(url)?.instanceUrl === container,
       );
 }
@@ -206,15 +208,11 @@ function draftsOf(catalog: Dataset, container: string): string[] {
  */
 function deckDocumentsOf(catalog: Dataset, catalogUrl: string): { entry: string; url: string }[] {
   return getThingAll(catalog)
-    .filter(
-      (thing) =>
-        getUrlAll(thing, RDF.type).includes(SM.Deck) &&
-        isSameUrl(documentUrlOf(thing.url), catalogUrl),
-    )
+    .filter((thing) => hasClass(thing, SM.Deck) && isSameUrl(documentUrlOf(thing.url), catalogUrl))
     .flatMap((thing) =>
-      [...getUrlAll(thing, SM.cardsDocument), ...getUrlAll(thing, SM.reviewsDocument)].map(
-        (url) => ({ entry: thing.url, url: documentUrlOf(url) }),
-      ),
+      [readFieldOf(thing, DECK_V2, "cardsDocument"), readFieldOf(thing, DECK_V2, "reviewsDocument")]
+        .filter((url) => url !== undefined)
+        .map((url) => ({ entry: thing.url, url: documentUrlOf(url) })),
     );
 }
 

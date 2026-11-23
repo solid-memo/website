@@ -2,16 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  type Dataset,
-  type NamedSubject,
-  type Subject,
-  asUrl,
-  getTermAll,
-  getThing,
-  getUrl,
-  getUrlAll,
-} from "../client/rdf";
+import { type Dataset, type NamedSubject, type Subject, asUrl, getThing } from "../client/rdf";
 import { editOf, type DatasetEdit } from "../datasetEdit";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { GradedPrompt, PromptStates } from "@solid-memo/domain/grading";
@@ -42,16 +33,23 @@ import { isIriPastBound } from "@solid-memo/domain/pathKeys";
 import { isCardsDocumentOf } from "@solid-memo/domain/deckUpgrade";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { FSRS_REVIEW_STATE_V1, REVIEW_STATE_V2 } from "@solid-memo/vocab/descriptors.generated";
+import {
+  FSRS_REVIEW_STATE_V1,
+  REVIEW_LINKS_TERMS,
+  REVIEW_STATE_V2,
+} from "@solid-memo/vocab/descriptors.generated";
 import {
   carriedTo,
+  everyValue,
+  hasClass,
+  readTerms,
   isWrittenByNewer,
   ownSubjectsOf,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
 } from "../records";
-import { RDF, SM } from "../vocab";
+import { SM } from "../vocab";
 
 /**
  * The deck whose review states are read and written: its id and where
@@ -71,9 +69,8 @@ export interface ReviewDocuments extends ReviewedDeck {
  * app's scheduler.
  */
 function schedulerOf(thing: Subject): Scheduler | null {
-  const terms = getTermAll(thing, SM.scheduler);
   const all = (iri: string) =>
-    terms.every((term) => term.termType === "NamedNode" && term.value === iri);
+    everyValue(thing, SM.scheduler, (term) => term.termType === "NamedNode" && term.value === iri);
   if (all(SM2_SCHEDULER)) return "sm2";
   return all(FSRS6_SCHEDULER) ? "fsrs6" : null;
 }
@@ -91,15 +88,14 @@ export function namesAnotherScheduler(thing: Subject): boolean {
 /** What a subject says of the card, direction and scheduler it is of, in any format. */
 function linksOf(thing: Subject): ReviewLinks {
   const links: ReviewLinks = {};
-  const reviewOf = getUrl(thing, SM.reviewOf);
-  const direction = getUrl(thing, SM.reviewDirection);
-  if (reviewOf !== null) links.reviewOf = reviewOf;
-  if (direction !== null) links.direction = direction;
+  const { reviewOf, reviewDirection } = readTerms(thing, REVIEW_LINKS_TERMS);
+  if (reviewOf !== undefined) links.reviewOf = reviewOf;
+  if (reviewDirection !== undefined) links.direction = reviewDirection;
   if (schedulerOf(thing) !== "sm2") links.anotherScheduler = true;
   return links;
 }
 
-const isReviewState = (thing: Subject) => getUrlAll(thing, RDF.type).includes(SM.ReviewState);
+const isReviewState = (thing: Subject) => hasClass(thing, SM.ReviewState);
 
 /**
  * The card and direction a subject typed sm:ReviewState is of as an SM-2
@@ -400,7 +396,7 @@ function numberOf(read: Readings, urls: readonly string[]): number {
 function namedCardsDocuments(dataset: Dataset, documents: ReviewDocuments): string[] {
   const named = new Set<string>();
   for (const thing of ownSubjectsOf(dataset, documents.reviewsDocumentUrl)) {
-    const reviewOf = getUrl(thing, SM.reviewOf);
+    const { reviewOf } = readTerms(thing, REVIEW_LINKS_TERMS);
     if (reviewOf?.includes("#") === true) named.add(documentUrlOf(reviewOf));
   }
   return [...named].sort((a, b) => (a < b ? -1 : 1));

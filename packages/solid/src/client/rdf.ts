@@ -17,7 +17,6 @@ import {
   getInteger as libraryGetInteger,
   getPropertyAll as libraryGetPropertyAll,
   getStringNoLocale as libraryGetStringNoLocale,
-  getStringNoLocaleAll as libraryGetStringNoLocaleAll,
   getNamedNodeAll as libraryGetNamedNodeAll,
   getThing as libraryGetThing,
   getThingAll as libraryGetThingAll,
@@ -650,7 +649,7 @@ export function* eachUrl(subject: Subject, property: string): Generator<string> 
   }
 }
 
-/** The subject's strings without a language for the property one at a time, in the order getStringNoLocaleAll gives them (eachUrl). */
+/** The subject's strings without a language for the property one at a time, in stored order (eachUrl). */
 export function* eachStringNoLocale(subject: Subject, property: string): Generator<string> {
   yield* thing(subject).predicates[property]?.literals?.[XSD_STRING] ?? [];
 }
@@ -686,11 +685,6 @@ export function removeUrl(subject: Subject, property: string, value: string): Na
 /** A string without a language the subject has for the property; null when it has none. */
 export function getStringNoLocale(subject: Subject, property: string): string | null {
   return libraryGetStringNoLocale(thing(subject), property);
-}
-
-/** Every string without a language the subject has for the property. */
-export function getStringNoLocaleAll(subject: Subject, property: string): string[] {
-  return libraryGetStringNoLocaleAll(thing(subject), property);
 }
 
 /** An integer the subject has for the property; null when it has none. */

@@ -26,6 +26,7 @@ import {
   getThingAll,
   getUrl,
   getUrlAll,
+  propertiesOf,
   removeThings,
 } from "./client/rdf";
 import type { DatasetEdit } from "./datasetEdit";
@@ -430,8 +431,114 @@ export function someIri(
   predicate: string,
   test: (iri: string) => boolean,
 ): boolean {
-  for (const value of eachUrl(thing, predicate)) if (test(value)) return true;
+  return findIri(thing, predicate, test) !== undefined;
+}
+
+/** The first of the subject's IRIs for the property that passes `test`, read as hasIri reads them; undefined when none does. */
+export function findIri(
+  thing: Subject,
+  predicate: string,
+  test: (iri: string) => boolean,
+): string | undefined {
+  for (const value of eachUrl(thing, predicate)) if (test(value)) return value;
+  return undefined;
+}
+
+/** Whether every one of the subject's IRIs for the property passes `test` (true when it has none), read as hasIri reads them. */
+export function everyIri(
+  thing: Subject,
+  predicate: string,
+  test: (iri: string) => boolean,
+): boolean {
+  return !someIri(thing, predicate, (iri) => !test(iri));
+}
+
+/**
+ * Whether every value the subject has for the property, of any kind (a
+ * literal too), passes `test`; true when it has none. Like hasIri, it
+ * gives one answer and keeps no value.
+ */
+export function everyValue(
+  thing: Subject,
+  predicate: string,
+  test: (value: Quad_Object) => boolean,
+): boolean {
+  return getTermAll(thing, predicate).every(test);
+}
+
+/**
+ * Every IRI the subject has for the property, of any scheme, with no
+ * bound: for a write that sets them again beside its own, so that it
+ * keeps what another app linked as it is (docs/data-model.md, "Write
+ * discipline"), and for a removal that must know every subject a link
+ * still names before it lets one go. Never read into a model: a model
+ * reads a field (readRecord, readFieldOf, readTerms).
+ */
+export function allIris(thing: Subject, predicate: string): string[] {
+  return getUrlAll(thing, predicate);
+}
+
+/** The subject's one value for the property, of any kind; null when it has none, or more than one. */
+export function onlyValueOf(thing: Subject, predicate: string): Quad_Object | null {
+  const values = getTermAll(thing, predicate);
+  return values.length === 1 ? values[0]! : null;
+}
+
+/** Whether the subject says nothing: no property has a value. */
+export function saysNothing(thing: Subject): boolean {
+  return getPropertyAll(thing).length === 0;
+}
+
+/** Whether the subject has a value, of any kind, for one of the properties. */
+export function saysAnyOf(thing: Subject, predicates: Iterable<string>): boolean {
+  const said = new Set(getPropertyAll(thing));
+  for (const predicate of predicates) if (said.has(predicate)) return true;
   return false;
+}
+
+/** Whether every property the subject has a value for passes `test`. */
+export function everyProperty(thing: Subject, test: (predicate: string) => boolean): boolean {
+  return getPropertyAll(thing).every(test);
+}
+
+/** Whether all the subject says is IRIs, one or more, for the one property. */
+export function saysOnlyIrisOf(thing: Subject, predicate: string): boolean {
+  const properties = propertiesOf(thing);
+  return (
+    properties.length === 1 &&
+    properties[0]!.predicate === predicate &&
+    properties[0]!.values.every((value) => value.type === "iri")
+  );
+}
+
+/** Whether the subject states its format as an integer (storedVersionOf reads one). */
+export function isStamped(thing: Subject): boolean {
+  return getInteger(thing, SM.formatVersion) !== null;
+}
+
+/** Whether the subject states a format that is no integer, which no shape reads. */
+export function hasUnreadableVersion(thing: Subject): boolean {
+  return saysAnyOf(thing, [SM.formatVersion]) && !isStamped(thing);
+}
+
+/**
+ * The classes a subject is told by where it is judged whose it is
+ * (ownership.ts): the IRIs it states as rdf:type, or none when it has
+ * more values of rdf:type than the checks read a subject by
+ * (MAX_CLASSES), as they read such a subject as having none.
+ */
+export function classesWithin(thing: Subject): string[] {
+  return getTermAll(thing, RDF.type).length > MAX_CLASSES ? [] : getUrlAll(thing, RDF.type);
+}
+
+/**
+ * Everything the subject says, every value of every property: the
+ * WebID document's own view (webIdDocumentMapper.ts) alone, of a
+ * document read under the profile's read limits (PROFILE_LIMITS), which
+ * shows the document as it is.
+ */
+export function statementsOf(thing: Subject): ReturnType<typeof propertiesOf> {
+  return propertiesOf(thing);
 }
 
 /**
@@ -458,7 +565,7 @@ export function readFieldOf<T, K extends keyof T & string>(
  */
 export function countOf<T>(
   thing: Subject,
-  descriptor: ShapeDescriptor<T>,
+  descriptor: ShapeDescriptor<T> | TermsDescriptor<T>,
   name: keyof T & string,
 ): number {
   const field = descriptor.fields.find((one) => one.name === name)!;

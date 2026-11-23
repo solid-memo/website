@@ -84,7 +84,6 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     getPropertyAll,
     getInteger,
     getStringNoLocale,
-    getStringNoLocaleAll,
     getTermAll,
     getThing,
     getThingAll,
@@ -99,6 +98,11 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     toRdfJsDataset,
     withQuads,
   } = rdf;
+
+  /** Every string without a language, as eachStringNoLocale gives them. */
+  const getStringNoLocaleAll = (subject: Rdf.Subject, property: string) => [
+    ...eachStringNoLocale(subject, property),
+  ];
 
   /** The strings with a language, by language, as eachStringByLocale gives them. */
   const getStringByLocaleAll = (subject: Rdf.Subject, property: string) => {

@@ -11,7 +11,6 @@ import {
   getInteger,
   getLiteralAll,
   getStringNoLocale,
-  getStringNoLocaleAll,
   getTermAll,
   getThing,
   getUrl,
@@ -25,6 +24,7 @@ import {
   getStringWithLocale,
   getStringWithLocaleAll,
 } from "./testing/datasets";
+import { getStringNoLocaleAll } from "./testing/datasets";
 import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";

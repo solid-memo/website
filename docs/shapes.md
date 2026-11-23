@@ -367,6 +367,19 @@ Every mapper takes three steps
 3. `cardFromRecord(url, storedVersion, data)` builds the domain model,
    keeping the stored version to count what's outdated.
 
+Beside the record, a mapper reads only through records.ts too:
+
+- the terms beside a record, or of a subject no shape describes, with
+  `readTerms(thing, DECK_TERMS)`;
+- one field of a shape alone, whether or not the subject fits it, with
+  `readFieldOf(thing, CATALOG_V1, "dataset")`;
+- whether a subject is of a class or names a value, with `hasClass`,
+  `hasIri`, `someIri` and `everyIri`, which read the values one at a
+  time and keep none;
+- every IRI of a property, with `allIris`, only for a write that sets
+  them again beside its own, so another app's link stays as it is, or
+  for a removal that must know every subject a link still names.
+
 Writing is the reverse: `cardToRecord(content)`, then
 `recordThing(url, CARD_V2, record, existing)`, which edits the subject in
 place, replacing only the shape's predicates (foreign triples survive),

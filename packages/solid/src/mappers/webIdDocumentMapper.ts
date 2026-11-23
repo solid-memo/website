@@ -3,13 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { getSourceUrl } from "../client/resources";
-import {
-  asUrl,
-  getThingAll,
-  propertiesOf,
-  type SourcedDataset,
-  type Subject as RdfSubject,
-} from "../client/rdf";
+import { asUrl, getThingAll, type SourcedDataset, type Subject as RdfSubject } from "../client/rdf";
+import { statementsOf } from "../records";
 import type { Subject, WebIdDocument } from "@solid-memo/domain/webIdDocument";
 
 export function toWebIdDocument(dataset: SourcedDataset): WebIdDocument {
@@ -20,5 +15,5 @@ export function toWebIdDocument(dataset: SourcedDataset): WebIdDocument {
 }
 
 export function toSubject(thing: RdfSubject): Subject {
-  return { url: asUrl(thing), properties: propertiesOf(thing) };
+  return { url: asUrl(thing), properties: statementsOf(thing) };
 }

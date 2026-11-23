@@ -476,13 +476,6 @@ function stringsByLanguage(values: readonly Value[]): Map<string, Literal[]> {
   );
 }
 
-/** The lexical forms of a property's literals of `datatype`. */
-function lexicalAll(subject: Subject, property: string, datatype: string): string[] {
-  return typedLiterals(valuesAt(subject, property))
-    .filter((value) => value.datatype.value === datatype)
-    .map((value) => value.value);
-}
-
 /** The first of a property's literals of `datatype`, read with `read`; null when it has none. */
 function firstOf<T>(
   subject: Subject,
@@ -510,7 +503,7 @@ export function* eachUrl(subject: Subject, property: string): Generator<string> 
   }
 }
 
-/** The subject's strings without a language for the property one at a time, in the order getStringNoLocaleAll gives them. */
+/** The subject's strings without a language for the property one at a time, in stored order. */
 export function* eachStringNoLocale(subject: Subject, property: string): Generator<string> {
   for (const value of valuesAt(subject, property)) {
     if (value.termType === "Literal" && value.datatype.value === XSD_STRING) yield value.value;
@@ -544,11 +537,6 @@ export function removeUrl(subject: Subject, property: string, value: string): Na
 /** A string without a language the subject has for the property; null when it has none. */
 export function getStringNoLocale(subject: Subject, property: string): string | null {
   return firstOf(subject, property, XSD_STRING, (text) => text);
-}
-
-/** Every string without a language the subject has for the property. */
-export function getStringNoLocaleAll(subject: Subject, property: string): string[] {
-  return lexicalAll(subject, property, XSD_STRING);
 }
 
 /** A number read as `parse` reads it; null where that is no number. */

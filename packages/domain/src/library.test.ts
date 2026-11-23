@@ -71,6 +71,15 @@ describe("boundedSources", () => {
       sourceCount: total,
     });
   });
+
+  it("says how many authors a source names past the first it was given", () => {
+    const [source] = boundedSources([urls[0]!], (url) => ({
+      url,
+      authors: ["Ann"],
+      authorCount: 150,
+    })).sources;
+    expect(source).toEqual({ url: urls[0], authors: ["Ann"], authorCount: 150 });
+  });
 });
 
 describe("isCopyOf", () => {

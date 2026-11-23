@@ -12,7 +12,6 @@ import {
   datasetFromQuads,
   getThing,
   getThingAll,
-  getUrlAll,
   isEmptyDataset,
   setThing,
   withQuads,
@@ -72,7 +71,15 @@ import {
   UNPUBLISHED_ROOT_PREDICATES,
 } from "./mappers/releaseDraftMapper";
 import { draftSubjects } from "./ownership";
-import { recordThing, removeAllUnlessNewer, storedVersionOf, unlessNewer } from "./records";
+import { CATALOG_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import {
+  hasClass,
+  readTerms,
+  recordThing,
+  removeAllUnlessNewer,
+  storedVersionOf,
+  unlessNewer,
+} from "./records";
 import { limitedFetch, pathKeys, RELEASE_LIMITS } from "./client/readLimits";
 import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
@@ -296,10 +303,7 @@ export function createSolidReleaseDraftRepository({
       });
     }
     for (const thing of getThingAll(dataset)) {
-      if (
-        getUrlAll(thing, RDF_TYPE).includes(SM.Card) &&
-        storedVersionOf(thing) > LATEST_VERSION.card
-      ) {
+      if (hasClass(thing, SM.Card) && storedVersionOf(thing) > LATEST_VERSION.card) {
         throw new AppError("libraryCardTooNew", {
           url: asUrl(thing),
           version: storedVersionOf(thing),
@@ -574,7 +578,9 @@ export function createSolidReleaseDraftRepository({
       // Before any document goes: a link the catalog then refuses to drop would lead to a draft no longer there.
       const node = await catalogNode(draft.instanceUrl, fetch);
       const links =
-        node === null ? [] : withinCatalogLimit(getUrlAll(unlessNewer(node), SM.releaseDraft));
+        node === null
+          ? []
+          : withinCatalogLimit(readTerms(unlessNewer(node), CATALOG_TERMS).releaseDraft);
       // Only a draft the list gives (linked): on a server that reads a name in any case as the same, another
       // spelling of a draft's address, or of its instance's, finds that draft there.
       if (!draftsAmong(draft.instanceUrl, links).some(({ url }) => url === draft.url))

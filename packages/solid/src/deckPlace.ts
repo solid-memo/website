@@ -9,7 +9,6 @@ import {
   createThing,
   type FetchedDataset,
   getThingAll,
-  getUrlAll,
   setThing,
 } from "./client/rdf";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -49,7 +48,9 @@ import type { ReadBudget, SharedReads } from "@solid-memo/application/ports";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { deckBackLinksOf, isDeckItself } from "./ownership";
 import { hasStorageLink, MAX_STORAGE_ANCESTORS } from "./solidStorageGateway";
+import { DECK_DOCUMENT_TERMS } from "@solid-memo/vocab/descriptors.generated";
 import { DCTERMS } from "./vocab";
+import { readTerms } from "./records";
 
 /** A deck as the guard needs it: its entry, its title for an error, and its two documents. */
 export type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "reviewsDocumentUrl">;
@@ -83,7 +84,7 @@ export type DocumentStanding = "owned" | "adoptable" | "unclaimed";
 function partOfOf(dataset: Dataset, url: string): string[] {
   return getThingAll(dataset)
     .filter((thing) => isSameUrl(thing.url, url))
-    .flatMap((thing) => getUrlAll(thing, DCTERMS.isPartOf));
+    .flatMap((thing) => readTerms(thing, DECK_DOCUMENT_TERMS).isPartOf);
 }
 
 /**
@@ -155,10 +156,8 @@ function documentFactsOf(dataset: Dataset | null, url: string): DocumentFacts {
   let facts = byUrl.get(url);
   if (facts === undefined) {
     const partOf = new TextMap<true>();
-    for (const deck of partOfOf(dataset, url)) {
-      const canonical = canonicalUrlOf(deck);
-      if (canonical !== null) partOf.set(canonical, true);
-    }
+    // Each an http(s) URL (DECK_DOCUMENT_TERMS), so one a request sends.
+    for (const deck of partOfOf(dataset, url)) partOf.set(canonicalUrlOf(deck)!, true);
     facts = {
       neverADecks: isDraftDocument(url) || isDeckItself(dataset, url),
       partOf,

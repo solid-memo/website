@@ -2,9 +2,10 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getUrlAll, type Subject } from "./client/rdf";
+import type { Subject } from "./client/rdf";
+import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import { readTerms } from "./records";
 import { createFolderGate } from "./ownPodGate";
-import { PIM } from "./vocab";
 import { canonicalUrlOf, isInFolder } from "@solid-memo/domain/instanceLayout";
 
 /**
@@ -27,7 +28,7 @@ export function profilePlacesOf(
       const parsed = URL.parse(url);
       return parsed === null ? [] : [`${parsed.origin}/`];
     }),
-    ...(webIdSubject === null ? [] : getUrlAll(webIdSubject, PIM.storage)),
+    ...(webIdSubject === null ? [] : readTerms(webIdSubject, PROFILE_TERMS).storage),
   ];
 }
 

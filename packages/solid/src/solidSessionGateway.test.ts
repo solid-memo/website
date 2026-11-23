@@ -4,7 +4,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getSolidDataset } from "./client/resources";
-import { getThing, getUrlAll } from "./client/rdf";
+import { eachUrl, getThing } from "./client/rdf";
 import { createSolidSessionGateway } from "./solidSessionGateway";
 import { SESSION_EXPIRED_EVENT } from "./authFetch";
 import { fakeSessionClient } from "./testing/fakeSessionClient";
@@ -647,13 +647,13 @@ describe("createSolidSessionGateway", () => {
     it("discovers the OIDC issuer from the WebID document and starts login", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue(["https://issuer.example"]);
+      vi.mocked(eachUrl).mockReturnValue(["https://issuer.example"] as never);
 
       const gateway = createSolidSessionGateway(options);
       await gateway.login(WEBID);
 
       expect(getThing).toHaveBeenCalledWith(expect.anything(), WEBID);
-      expect(getUrlAll).toHaveBeenCalledWith(
+      expect(eachUrl).toHaveBeenCalledWith(
         expect.anything(),
         "http://www.w3.org/ns/solid/terms#oidcIssuer",
       );
@@ -678,7 +678,7 @@ describe("createSolidSessionGateway", () => {
     it("rejects when the profile declares no solid:oidcIssuer", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue([]);
+      vi.mocked(eachUrl).mockReturnValue([] as never);
 
       const gateway = createSolidSessionGateway(options);
       await expect(gateway.login(WEBID)).rejects.toThrow(
@@ -742,7 +742,7 @@ describe("createSolidSessionGateway", () => {
     it("returns the issuer declared in the profile, not the WebID origin", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue(["https://idp.elsewhere.example"]);
+      vi.mocked(eachUrl).mockReturnValue(["https://idp.elsewhere.example"] as never);
 
       const gateway = createSolidSessionGateway(options);
       await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe(
@@ -753,7 +753,10 @@ describe("createSolidSessionGateway", () => {
     it("skips issuers that are not https URLs", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue(["http://insecure.example", "https://issuer.example"]);
+      vi.mocked(eachUrl).mockReturnValue([
+        "http://insecure.example",
+        "https://issuer.example",
+      ] as never);
 
       const gateway = createSolidSessionGateway(options);
       await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe("https://issuer.example");
@@ -762,7 +765,7 @@ describe("createSolidSessionGateway", () => {
     it("takes an http issuer on a loopback host for a WebID on one, as a local pod's", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue(["http://localhost:3000/"]);
+      vi.mocked(eachUrl).mockReturnValue(["http://localhost:3000/"] as never);
 
       const gateway = createSolidSessionGateway(options);
       await expect(
@@ -773,7 +776,10 @@ describe("createSolidSessionGateway", () => {
     it("skips an http issuer on a loopback host for a WebID on the web", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue(["http://localhost:3000/", "https://issuer.example"]);
+      vi.mocked(eachUrl).mockReturnValue([
+        "http://localhost:3000/",
+        "https://issuer.example",
+      ] as never);
 
       const gateway = createSolidSessionGateway(options);
       await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe("https://issuer.example");
@@ -782,10 +788,20 @@ describe("createSolidSessionGateway", () => {
     it("rejects when no declared issuer is an https URL", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);
-      vi.mocked(getUrlAll).mockReturnValue(["javascript:alert(1)"]);
+      vi.mocked(eachUrl).mockReturnValue(["http://insecure.example/"] as never);
 
       const gateway = createSolidSessionGateway(options);
       await expect(gateway.login(WEBID)).rejects.toThrow("not a secure https:// address");
+      expect(client.login).not.toHaveBeenCalled();
+    });
+
+    it("reads no issuer that is no http(s) URL, as the profile's bounds say (ns/bounds/profile.ttl)", async () => {
+      vi.mocked(getSolidDataset).mockResolvedValue({} as never);
+      vi.mocked(getThing).mockReturnValue({} as never);
+      vi.mocked(eachUrl).mockReturnValue(["javascript:alert(1)"] as never);
+
+      const gateway = createSolidSessionGateway(options);
+      await expect(gateway.login(WEBID)).rejects.toThrow("Your WebID profile does not say where");
       expect(client.login).not.toHaveBeenCalled();
     });
   });

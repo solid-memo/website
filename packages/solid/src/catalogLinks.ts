@@ -2,12 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type NamedSubject, buildThing, getThing, getUrlAll, setThing } from "./client/rdf";
+import { type NamedSubject, buildThing, getThing, setThing } from "./client/rdf";
 import { AppError } from "@solid-memo/domain/appError";
 import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
-import { unlessNewer } from "./records";
+import { CATALOG_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import { hasIri, readTerms, unlessNewer } from "./records";
 
 /**
  * The links an instance's catalog keeps outside every shape, to what
@@ -19,6 +20,16 @@ import { unlessNewer } from "./records";
 
 /** How often a link is written, in all, while the catalog keeps changing elsewhere. */
 const LINK_ATTEMPTS = 3;
+
+/**
+ * The catalog's links by `predicate`, one of the terms beside its record
+ * (CATALOG_TERMS): at most one past MAX_CATALOG_LINKS are read, so that
+ * one with more is told (withinCatalogLimit).
+ */
+function linksOf(node: NamedSubject, predicate: string): readonly string[] {
+  const { name } = CATALOG_TERMS.fields.find((field) => field.predicate === predicate)!;
+  return readTerms(node, CATALOG_TERMS)[name as "publishedRelease" | "releaseDraft"];
+}
 
 export { MAX_CATALOG_LINKS };
 
@@ -55,7 +66,7 @@ export async function catalogLinks(
   fetch: typeof globalThis.fetch,
 ): Promise<string[]> {
   const node = await catalogNode(instanceUrl, fetch);
-  return node === null ? [] : withinCatalogLimit(getUrlAll(node, predicate));
+  return node === null ? [] : [...withinCatalogLimit(linksOf(node, predicate))];
 }
 
 /**
@@ -73,7 +84,7 @@ export async function refuseFullCatalog(
 ): Promise<void> {
   const node = await catalogNode(instanceUrl, fetch);
   if (node === null) throw new AppError("noCatalogToUpdate");
-  const links = withinCatalogLimit(getUrlAll(unlessNewer(node), predicate));
+  const links = withinCatalogLimit(linksOf(unlessNewer(node), predicate));
   if (!links.includes(url) && links.length >= MAX_CATALOG_LINKS)
     throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
 }
@@ -91,9 +102,8 @@ export function addCatalogLink(
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   return changeCatalog(instanceUrl, fetch, true, (node) => {
-    const links = getUrlAll(node, predicate);
-    if (links.includes(url)) return null;
-    if (links.length >= MAX_CATALOG_LINKS)
+    if (hasIri(node, predicate, url)) return null;
+    if (linksOf(node, predicate).length >= MAX_CATALOG_LINKS)
       throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
     return buildThing(node).addUrl(predicate, url).build();
   });
@@ -107,9 +117,7 @@ export function removeCatalogLink(
   fetch: typeof globalThis.fetch,
 ): Promise<void> {
   return changeCatalog(instanceUrl, fetch, false, (node) =>
-    getUrlAll(node, predicate).includes(url)
-      ? buildThing(node).removeUrl(predicate, url).build()
-      : null,
+    hasIri(node, predicate, url) ? buildThing(node).removeUrl(predicate, url).build() : null,
   );
 }
 

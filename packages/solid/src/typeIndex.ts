@@ -11,11 +11,8 @@ import {
   buildThing,
   createSolidDataset,
   createThing,
-  getStringNoLocale,
   getThing,
   getThingAll,
-  getUrl,
-  getUrlAll,
   removeThings,
   setThing,
   setThings,
@@ -29,7 +26,9 @@ import {
   statusOf,
 } from "./datasets";
 import { ensureTrailingSlash } from "./urls";
-import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM, SOLID } from "./vocab";
+import { PROFILE_TERMS, TYPE_REGISTRATION_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import { hasClass, hasIri, readTerms } from "./records";
 import {
   createPlacesFetch,
   isInPlaces,
@@ -150,7 +149,10 @@ export async function locateTypeIndexes(
   }
   // An extended profile is read only in the user's own storages, or, when they are not known, in the
   // storages the WebID document names or the WebID's own pod (ownProfileArea).
-  const area = ownProfileArea(webId, storages ?? storageUrlsOf(getUrlAll(profile, PIM.storage)));
+  const area = ownProfileArea(
+    webId,
+    storages ?? storageUrlsOf(readTerms(profile, PROFILE_TERMS).storage),
+  );
   const subjects = [profile];
   for (const extendedProfileUrl of extendedProfileUrls(webId, profile, profileDataset)) {
     if (!isInPlaces(extendedProfileUrl, area)) continue;
@@ -162,9 +164,9 @@ export async function locateTypeIndexes(
 
   // The preferences file, as an extended profile, is read only in the user's own storages or the WebID's own pod.
   const preferences: Subject[] = [];
-  const preferencesFileUrl = getUrl(profile, PIM.preferencesFile);
+  const preferencesFileUrl = readTerms(profile, PROFILE_TERMS).preferencesFile;
   if (
-    preferencesFileUrl !== null &&
+    preferencesFileUrl !== undefined &&
     isInPlaces(preferencesFileUrl, places) &&
     isInPlaces(preferencesFileUrl, area)
   ) {
@@ -174,14 +176,14 @@ export async function locateTypeIndexes(
 
   const linksOf = (
     kind: TypeIndexKind,
-    predicate: string,
+    term: "privateTypeIndex" | "publicTypeIndex",
     preferenceSubjects: readonly Subject[],
   ): TypeIndexLink[] => {
     const fromPreferences = new Set(
-      preferenceSubjects.flatMap((subject) => getUrlAll(subject, predicate)),
+      preferenceSubjects.flatMap((subject) => readTerms(subject, PROFILE_TERMS)[term]),
     );
     const urls = [
-      ...subjects.flatMap((subject) => getUrlAll(subject, predicate)),
+      ...subjects.flatMap((subject) => readTerms(subject, PROFILE_TERMS)[term]),
       ...fromPreferences,
     ].filter(isOwn);
     return [...new Set(urls)]
@@ -190,9 +192,9 @@ export async function locateTypeIndexes(
   };
   return {
     links: [
-      ...linksOf("private", SOLID.privateTypeIndex, preferences),
+      ...linksOf("private", "privateTypeIndex", preferences),
       // The preferences file is private: a public link there is no one else's to find.
-      ...linksOf("public", SOLID.publicTypeIndex, []),
+      ...linksOf("public", "publicTypeIndex", []),
     ],
     ...placesOf(places, writableOf(webId, storages), fetch, publicFetch),
   };
@@ -260,10 +262,8 @@ function extendedProfileUrls(
   const documentUrl = getSourceUrl(profileDataset);
   const places = profilePlacesOf(webId, documentUrl, profile);
   const self = new Set([stripFragment(profile.url), stripFragment(documentUrl)]);
-  const urls = [
-    ...getUrlAll(profile, RDFS.seeAlso),
-    ...getUrlAll(profile, FOAF.isPrimaryTopicOf),
-  ].map(stripFragment);
+  const { seeAlso, isPrimaryTopicOf } = readTerms(profile, PROFILE_TERMS);
+  const urls = [...seeAlso, ...isPrimaryTopicOf].map(stripFragment);
   return [...new Set(urls)]
     .filter((url) => !self.has(url) && isInPlaces(url, places))
     .slice(0, MAX_PROFILE_DOCUMENTS);
@@ -452,9 +452,14 @@ function refusesReading(error: unknown): boolean {
 }
 
 /** The types the document at `url` gives itself. */
-function typesOf(dataset: Dataset, url: string): string[] {
+function typesOf(dataset: Dataset, url: string): Classes {
   const document = getThing(dataset, documentUrlOf(url));
-  return document === null ? [] : getUrlAll(document, RDF.type);
+  return { includes: (type) => document !== null && hasClass(document, type) };
+}
+
+/** What a document's classes are asked: whether it is of one (hasClass). */
+interface Classes {
+  includes(type: string): boolean;
 }
 
 /** Which kind of type index each document type says a document is. */
@@ -463,7 +468,7 @@ const KIND_TYPES = {
   public: SOLID.ListedDocument,
 } satisfies Record<TypeIndexKind, string>;
 
-function typeFitOf(types: readonly string[], kind: TypeIndexKind): TypeIndexChoice["typeFit"] {
+function typeFitOf(types: Classes, kind: TypeIndexKind): TypeIndexChoice["typeFit"] {
   if (types.includes(KIND_TYPES[kind])) return "match";
   const other = kind === "private" ? "public" : "private";
   return types.includes(KIND_TYPES[other]) ? "other" : "none";
@@ -590,15 +595,12 @@ export async function readInstanceRegistrations(
 function instanceRegistrationsIn(dataset: Dataset): InstanceRegistration[] {
   const registrations: InstanceRegistration[] = [];
   for (const thing of getThingAll(dataset)) {
-    const types = getUrlAll(thing, RDF.type);
-    if (!types.includes(SOLID.TypeRegistration)) continue;
-    if (!getUrlAll(thing, SOLID.forClass).includes(SM.Instance)) continue;
-    const containerUrl = getUrl(thing, SOLID.instanceContainer) ?? getUrl(thing, SOLID.instance);
-    if (containerUrl === null || !isInstanceAddress(containerUrl)) continue;
-    registrations.push({
-      containerUrl,
-      title: getStringNoLocale(thing, DCTERMS.title),
-    });
+    if (!hasClass(thing, SOLID.TypeRegistration)) continue;
+    if (!hasIri(thing, SOLID.forClass, SM.Instance)) continue;
+    const { instanceContainer, instance, title } = readTerms(thing, TYPE_REGISTRATION_TERMS);
+    const containerUrl = instanceContainer[0] ?? instance[0];
+    if (containerUrl === undefined || !isInstanceAddress(containerUrl)) continue;
+    registrations.push({ containerUrl, title: title ?? null });
   }
   return registrations;
 }
@@ -642,8 +644,8 @@ function registeredOf(
   container: string,
 ): string[] {
   const { forClass, target } = REGISTERED_CLASSES[dataClass];
-  if (!getUrlAll(registration, RDF.type).includes(SOLID.TypeRegistration)) return [];
-  if (!getUrlAll(registration, SOLID.forClass).includes(forClass)) return [];
+  if (!hasClass(registration, SOLID.TypeRegistration)) return [];
+  if (!hasIri(registration, SOLID.forClass, forClass)) return [];
   const ours = target(container);
   const matches =
     dataClass === "instance"
@@ -789,7 +791,7 @@ function oldRegisteredOf(
 ): string[] {
   const ownId = `${documentUrlOf(indexUrl)}#${REGISTERED_CLASSES[dataClass].idPrefix}-`;
   if (!registration.url.startsWith(ownId)) return [];
-  if (getUrlAll(registration, SOLID.forClass).includes(SM.Instance)) return [];
+  if (hasIri(registration, SOLID.forClass, SM.Instance)) return [];
   return registeredOf(registration, dataClass, container);
 }
 
@@ -825,10 +827,8 @@ async function removeRegistered(
 
 /** What a registration registers, under either predicate. */
 function registeredUrls(registration: Subject): string[] {
-  return [
-    ...getUrlAll(registration, SOLID.instanceContainer),
-    ...getUrlAll(registration, SOLID.instance),
-  ];
+  const { instanceContainer, instance } = readTerms(registration, TYPE_REGISTRATION_TERMS);
+  return [...instanceContainer, ...instance];
 }
 
 /**
@@ -866,7 +866,7 @@ export async function renameInstanceRegistrations(
     const renamed = getThingAll(dataset)
       .filter(
         (thing) =>
-          getStringNoLocale(thing, DCTERMS.title) !== title &&
+          readTerms(thing, TYPE_REGISTRATION_TERMS).title !== title &&
           REGISTERED_CLASS_NAMES.some(
             (dataClass) => registeredOf(thing, dataClass, container).length > 0,
           ),
