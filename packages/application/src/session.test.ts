@@ -65,7 +65,7 @@ describe("session", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     await expect(useCases.loginWithWebId("http://alice.example/profile/card#me")).rejects.toThrow(
-      "A WebID must start with https://.",
+      "A WebID must start with https://, or with http:// for a Pod on this device (localhost).",
     );
     expect(deps.sessionGateway.login).not.toHaveBeenCalled();
   });

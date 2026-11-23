@@ -1666,7 +1666,7 @@
     "noMetaToUpdate": "이 인스턴스에는 업데이트할 설명이 없어요. 페이지를 새로고침하고 다시 시도해 주세요.",
     "webIdEmpty": "WebID를 입력해 주세요.",
     "webIdInvalidUrl": "올바른 URL이 아니에요. WebID는 https://you.example/profile/card#me 같은 형태예요.",
-    "webIdNotHttps": "WebID는 https://로 시작해야 해요.",
+    "webIdNotHttps": "WebID는 https://로 시작해야 해요. 이 기기의 Pod(localhost)라면 http://로 시작해도 돼요.",
     "webIdWithCredentials": "WebID에는 사용자 이름이나 비밀번호가 들어갈 수 없어요.",
     "providerNotHttps": "ID 제공자는 https:// URL이어야 해요.",
     "webIdNoSubject": "WebID 프로필에 사용자 정보가 없어요. # 뒤의 부분까지 WebID를 정확히 입력했는지 확인하거나, 대신 제공자를 선택해 주세요.",

@@ -32,7 +32,8 @@ import { logInAndCreateInstance, logInToInstance } from "../flows/logIn.ts";
  */
 test("a returning learner @returning", async ({ app, account, runId, newDevice }) => {
   const instance = `Journey ${runId}`;
-  const httpWebId = account.webId.replace(/^https:/, "http:");
+  // Plain http is taken only on this machine (docs/onboarding.md#webid-validation).
+  const httpWebId = "http://pod.example/profile/card#me";
 
   await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
 
@@ -81,7 +82,7 @@ test("a returning learner @returning", async ({ app, account, runId, newDevice }
   );
 
   await app.step(
-    "07 · Log in with the WebID over http, which is refused",
+    "07 · Log in with a WebID over http on another machine, which is refused",
     () => app.onboarding.submitRefusedWebId(httpWebId, "webIdNotHttps"),
     { screen: "onboarding.invalid-webid" },
   );

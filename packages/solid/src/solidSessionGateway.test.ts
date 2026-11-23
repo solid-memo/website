@@ -759,6 +759,26 @@ describe("createSolidSessionGateway", () => {
       await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe("https://issuer.example");
     });
 
+    it("takes an http issuer on a loopback host for a WebID on one, as a local pod's", async () => {
+      vi.mocked(getSolidDataset).mockResolvedValue({} as never);
+      vi.mocked(getThing).mockReturnValue({} as never);
+      vi.mocked(getUrlAll).mockReturnValue(["http://localhost:3000/"]);
+
+      const gateway = createSolidSessionGateway(options);
+      await expect(
+        gateway.discoverOidcIssuer("http://localhost:3000/alice/profile/card#me"),
+      ).resolves.toBe("http://localhost:3000/");
+    });
+
+    it("skips an http issuer on a loopback host for a WebID on the web", async () => {
+      vi.mocked(getSolidDataset).mockResolvedValue({} as never);
+      vi.mocked(getThing).mockReturnValue({} as never);
+      vi.mocked(getUrlAll).mockReturnValue(["http://localhost:3000/", "https://issuer.example"]);
+
+      const gateway = createSolidSessionGateway(options);
+      await expect(gateway.discoverOidcIssuer(WEBID)).resolves.toBe("https://issuer.example");
+    });
+
     it("rejects when no declared issuer is an https URL", async () => {
       vi.mocked(getSolidDataset).mockResolvedValue({} as never);
       vi.mocked(getThing).mockReturnValue({} as never);

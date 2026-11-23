@@ -35,14 +35,51 @@ function hasCredentials(url: URL): boolean {
   return url.username !== "" || url.password !== "";
 }
 
+/** An IPv4 address in 127.0.0.0/8, as the URL parser writes one. */
+const LOOPBACK_IPV4 = /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
 /**
- * True for an absolute https: URL without embedded credentials. Every
- * URL that steers authentication (WebID, OIDC issuer) must pass this
- * before it is used.
+ * True for a host on this machine: `localhost`, a name under
+ * `.localhost`, an address in 127.0.0.0/8 or `[::1]`, the hosts a
+ * browser counts as potentially trustworthy. Requests to them never
+ * leave the machine, so plain http there is no less safe than https.
+ */
+function isLoopbackHost(url: URL): boolean {
+  const host = url.hostname;
+  return (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    LOOPBACK_IPV4.test(host) ||
+    host === "[::1]"
+  );
+}
+
+/** True for an https: URL, or an http: one to a loopback host (isLoopbackHost), any port. */
+function isSecureProtocol(url: URL): boolean {
+  return url.protocol === "https:" || (url.protocol === "http:" && isLoopbackHost(url));
+}
+
+/**
+ * True for an absolute https: URL, or http: to a loopback host such as
+ * a pod run locally, without embedded credentials. Every URL that steers
+ * authentication (WebID, OIDC issuer) must pass this before it is used.
  */
 export function isSecureUrl(value: string): boolean {
   const url = parseUrl(value);
-  return url !== null && url.protocol === "https:" && !hasCredentials(url) && isWritableIri(value);
+  return url !== null && isSecureProtocol(url) && !hasCredentials(url) && isWritableIri(value);
+}
+
+/**
+ * True when the browser may be sent to `issuer` to log in as `webId`
+ * (isSecureUrl), and a plain-http issuer only for a WebID on a loopback
+ * host too: a profile on the web can't send the learner to a server on
+ * their own machine.
+ */
+export function isSecureIssuerOf(issuer: string, webId: string): boolean {
+  if (!isSecureUrl(issuer)) return false;
+  if (new URL(issuer).protocol === "https:") return true;
+  const webIdUrl = parseUrl(webId);
+  return webIdUrl !== null && isLoopbackHost(webIdUrl);
 }
 
 const LINKABLE_PROTOCOLS = ["https:", "http:", "mailto:"];
@@ -73,8 +110,9 @@ export function isHttpUrl(value: string): boolean {
 }
 
 /**
- * Validate user input as a WebID: an absolute https: URL. Returns the
- * normalized WebID, or the error to show next to the field.
+ * Validate user input as a WebID: an absolute https: URL, or http: to a
+ * loopback host (isSecureUrl). Returns the normalized WebID, or the
+ * error to show next to the field.
  */
 export function validateWebId(input: string): WebIdValidation {
   const trimmed = input.trim();
@@ -85,7 +123,7 @@ export function validateWebId(input: string): WebIdValidation {
   if (url === null || !isWritableIri(url.href)) {
     return { ok: false, error: new AppError("webIdInvalidUrl") };
   }
-  if (url.protocol !== "https:") {
+  if (!isSecureProtocol(url)) {
     return { ok: false, error: new AppError("webIdNotHttps") };
   }
   if (hasCredentials(url)) {

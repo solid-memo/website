@@ -49,12 +49,9 @@ test("the learner screens in every palette and theme @tour-learner", async ({
     await app.step("01 · Visit Solid Memo", () => app.onboarding.visit(), { screen: "onboarding" });
 
     await app.step(
-      "02 · Log in with the WebID over http, which is refused",
+      "02 · Log in with a WebID over http on another machine, which is refused",
       () =>
-        app.onboarding.submitRefusedWebId(
-          account.webId.replace(/^https:/, "http:"),
-          "webIdNotHttps",
-        ),
+        app.onboarding.submitRefusedWebId("http://pod.example/profile/card#me", "webIdNotHttps"),
       { screen: "onboarding.invalid-webid" },
     );
 

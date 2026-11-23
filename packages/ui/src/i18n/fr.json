@@ -1840,7 +1840,7 @@
     "noMetaToUpdate": "Cette instance n’a aucune description à mettre à jour. Rechargez la page et réessayez.",
     "webIdEmpty": "Saisissez votre WebID.",
     "webIdInvalidUrl": "Ce n’est pas une URL valide. Un WebID ressemble à https://vous.example/profile/card#me.",
-    "webIdNotHttps": "Un WebID doit commencer par https://.",
+    "webIdNotHttps": "Un WebID doit commencer par https://, ou par http:// pour un Pod sur cet appareil (localhost).",
     "webIdWithCredentials": "Un WebID ne doit pas contenir de nom d’utilisateur ni de mot de passe.",
     "providerNotHttps": "Un fournisseur d’identité doit être une URL https://.",
     "webIdNoSubject": "Votre profil WebID ne vous décrit pas. Vérifiez que vous avez saisi votre WebID exactement, avec la partie après #, ou choisissez plutôt votre fournisseur.",
