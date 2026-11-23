@@ -636,6 +636,7 @@ ${padding === 0 ? "" : `<#padding> sm:padding ${Array.from({ length: padding }, 
       deckRepository: { listCards: async () => [], listDecks: async () => [deck] } as never,
       reviewStateRepository: {} as never,
       courses: {} as never,
+      cardsTurn: (work) => work(),
     });
     const deck = {
       url: "https://alice.example/memo/catalog.ttl#rivers",

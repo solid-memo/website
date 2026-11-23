@@ -7,6 +7,7 @@ import { createAnswerStore } from "@solid-memo/application/answerStore";
 import { createCourseUseCases } from "@solid-memo/application/courses";
 import { createDigestStore } from "@solid-memo/application/digestStore";
 import { createInstanceUseCases } from "@solid-memo/application/instances";
+import { inTurns } from "@solid-memo/application/atOnce";
 import { createLibraryUseCases } from "@solid-memo/application/library";
 import { createPreferenceStore } from "@solid-memo/application/preferenceStore";
 import { createPreferenceUseCases } from "@solid-memo/application/preferences";
@@ -134,6 +135,7 @@ export function createTrialUseCases(
         deckRepository,
         reviewStateRepository,
         courses,
+        cardsTurn: inTurns(),
       }),
       ...createStudyUseCases({
         deckRepository,

@@ -147,8 +147,9 @@ export function DeckTableContainer({
   const decks = decksOf(treeQuery.data?.children ?? []);
   const cardQueries = useQueries({
     queries: decks.map((deck) => ({
-      queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      queryFn: () => useCases.listCards(deck),
+      queryKey: queryKeys.deckTableCards(deck.cardsDocumentUrl),
+      // In turns: a catalog may list many decks, and the table never reads all of their cards together.
+      queryFn: ({ signal }: { signal: AbortSignal }) => useCases.listCardsInTurn(deck, signal),
     })),
   });
   const countQueries = useQueries({

@@ -24,7 +24,15 @@ import {
   type DeckUpgradeProgress,
 } from "@solid-memo/domain/deckUpgrade";
 import type { LibraryCard } from "@solid-memo/domain/library";
-import { sm2s, instance, deck, libraryDeck, libraryContent, makeDeps } from "./testing/fakePorts";
+import {
+  sm2s,
+  instance,
+  deck,
+  card,
+  libraryDeck,
+  libraryContent,
+  makeDeps,
+} from "./testing/fakePorts";
 
 describe("the deck library", () => {
   it("listLibraryDecks delegates to the deck library", async () => {
@@ -109,6 +117,105 @@ describe("the deck library", () => {
     // A library copy's releases are the library's to read and keep, under a release's limits each.
     expect(deps.deckLibrary.linkedReads).not.toHaveBeenCalled();
     expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+  });
+  describe("whole decks' cards, read for a list of decks", () => {
+    /** A library whose capitals series has a newer release than the copies'. */
+    const newerRelease = (deps: ReturnType<typeof makeDeps>) => {
+      const current: LibraryDeck = {
+        ...libraryDeck,
+        url: "https://solid-memo.com/decks/capitals/v2.ttl",
+        version: "2",
+      };
+      vi.mocked(deps.deckLibrary.listLibraryDecks).mockResolvedValue([
+        {
+          ...libraryDeck,
+          ...firstRelease("https://solid-memo.com/decks/rivers/v1.ttl"),
+          url: "https://solid-memo.com/decks/rivers/v1.ttl",
+        },
+        current,
+      ]);
+      const norway = {
+        id: "norway",
+        front: { "": "Norway" },
+        back: { "": "Oslo" },
+        formatVersion: 1,
+      };
+      vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockImplementation(async (url) =>
+        url === current.url
+          ? { ...libraryContent, url, version: "2", cards: [...libraryContent.cards, norway] }
+          : libraryContent,
+      );
+    };
+    const decks = (length: number, sourceUrl?: string) =>
+      Array.from(
+        { length },
+        (_, at): Deck => ({
+          ...deck,
+          id: `listed-${at}`,
+          url: `${instance.url}catalog.ttl#listed-${at}`,
+          cardsDocumentUrl: `https://h${at}.example/cards.ttl`,
+          sourceUrl,
+        }),
+      );
+
+    it("are read a few at a time, the deck table's and the copies' plans in the same turns", async () => {
+      const deps = makeDeps();
+      newerRelease(deps);
+      let reading = 0;
+      let most = 0;
+      vi.mocked(deps.deckRepository.listCards).mockImplementation(async () => {
+        most = Math.max(most, ++reading);
+        await new Promise((settle) => setTimeout(settle));
+        reading--;
+        return [];
+      });
+      const useCases = createUseCases(deps);
+      const [listed, planned] = await Promise.all([
+        Promise.all(decks(500).map((one) => useCases.listCardsInTurn(one))),
+        Promise.all(decks(500, libraryDeck.url).map((copy) => useCases.planLibraryUpgrade(copy))),
+      ]);
+      expect(listed).toHaveLength(500);
+      expect(planned.every((plan) => plan?.toVersion === "2")).toBe(true);
+      expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(1000);
+      expect(most).toBe(READS_AT_ONCE);
+    }, 60_000);
+
+    it("leave listCards, which reads at once, outside the turns", async () => {
+      const deps = makeDeps();
+      newerRelease(deps);
+      vi.mocked(deps.deckRepository.listCards).mockImplementation(async (one) =>
+        one.url === deck.url ? [card] : new Promise<never>(() => {}),
+      );
+      const useCases = createUseCases(deps);
+      for (const one of decks(10)) void useCases.listCardsInTurn(one);
+      for (const copy of decks(10, libraryDeck.url)) void useCases.planLibraryUpgrade(copy);
+      await vi.waitFor(() =>
+        expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(READS_AT_ONCE),
+      );
+      await expect(useCases.listCards(deck)).resolves.toEqual([card]);
+      expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(READS_AT_ONCE + 1);
+    });
+
+    it("give up the turn of a read whose signal was aborted while it waited, reading nothing", async () => {
+      const deps = makeDeps();
+      const answers: (() => void)[] = [];
+      vi.mocked(deps.deckRepository.listCards).mockImplementation(
+        () => new Promise((settle) => answers.push(() => settle([card]))),
+      );
+      const useCases = createUseCases(deps);
+      const taken = decks(READS_AT_ONCE).map((one) => useCases.listCardsInTurn(one));
+      const gone = new AbortController();
+      const waiting = decks(3).map((one) => useCases.listCardsInTurn(one, gone.signal));
+      const kept = useCases.listCardsInTurn(deck, new AbortController().signal);
+      gone.abort();
+      for (const answer of answers) answer();
+      await expect(Promise.all(taken)).resolves.toHaveLength(READS_AT_ONCE);
+      for (const read of waiting) await expect(read).rejects.toBe(gone.signal.reason);
+      await vi.waitFor(() => expect(answers).toHaveLength(READS_AT_ONCE + 1));
+      answers.at(-1)!();
+      await expect(kept).resolves.toEqual([card]);
+      expect(deps.deckRepository.listCards).toHaveBeenLastCalledWith(deck);
+    });
   });
   it("planLibraryUpgrade does not read the index again for a copy whose series is found", async () => {
     const deps = makeDeps();

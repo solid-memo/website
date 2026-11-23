@@ -458,6 +458,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
 
   // Cards.
   listCards: async ({ u, capitals }) => void (await u.listCards(capitals)),
+  listCardsInTurn: async ({ u, capitals }) => void (await u.listCardsInTurn(capitals)),
   listDeckReviewStates: async ({ u, capitals }) => void (await u.listDeckReviewStates(capitals)),
   addCard: async ({ u, capitals }) =>
     void (await u.addCard(capitals, { front: { en: "Iceland" }, back: { en: "Reykjavik" } })),

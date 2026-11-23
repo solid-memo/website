@@ -5,7 +5,9 @@
 import { describe, expect, it, onTestFinished, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import type { UseCases } from "@solid-memo/application/useCases";
+import { READS_AT_ONCE } from "@solid-memo/application/atOnce";
+import { makeDeps } from "@solid-memo/application/testing/fakePorts";
+import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import type { Card } from "@solid-memo/domain/deck";
 import type { DeckTableView } from "@solid-memo/domain/deckTable";
 import type { DeckTree } from "@solid-memo/domain/deckTree";
@@ -15,6 +17,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { ValidationReport } from "@solid-memo/domain/validation";
 import { makeUseCasesFake } from "@solid-memo/ui/test/useCasesFake";
+import { DeckPeekContainer } from "./DeckPeekContainer";
 import { DeckTableContainer } from "./DeckTableContainer";
 import { choose } from "../test/choose";
 import { instanceA, invalidReport, makeCard, makeDeck } from "../test/fixtures";
@@ -61,6 +64,108 @@ function renderContainer(
 const cells = (row: HTMLElement) => within(row).getAllByRole("cell").map(shownText);
 
 describe("DeckTableContainer", () => {
+  it("reads a few decks' cards at a time, however many decks the catalog lists", async () => {
+    const decks = Array.from({ length: 100 }, (_, at) =>
+      makeDeck(`deck-${at}`, { en: `Deck ${at}` }),
+    );
+    const tree: DeckTree = {
+      readOnly: false,
+      children: decks.map((deck) => ({ kind: "deck", deck })),
+    };
+    const deps = makeDeps();
+    let reading = 0;
+    // A pod that never answers: every read taken holds its turn.
+    vi.mocked(deps.deckRepository.listCards).mockImplementation(() => {
+      reading++;
+      return new Promise<never>(() => {});
+    });
+    const useCases: UseCases = {
+      ...createUseCases(deps),
+      listDeckTree: vi.fn(async () => tree),
+      getStudyCounts: vi.fn(() => new Promise<never>(() => {})),
+    };
+    renderContainer(useCases);
+    await waitFor(() => expect(reading).toBe(READS_AT_ONCE));
+    await new Promise((settle) => setTimeout(settle, 50));
+    expect(reading).toBe(READS_AT_ONCE);
+  });
+
+  it("never holds up a screen of one deck, though the table's reads of its cards wait their turn", async () => {
+    const decks = Array.from({ length: 100 }, (_, at) =>
+      makeDeck(`deck-${at}`, { en: `Deck ${at}` }),
+    );
+    const last = decks.at(-1)!;
+    const tree: DeckTree = {
+      readOnly: false,
+      children: decks.map((deck) => ({ kind: "deck", deck })),
+    };
+    const deps = makeDeps();
+    // Every deck's read but the last's never answers: the table's turns are all taken, the last deck's queued.
+    vi.mocked(deps.deckRepository.listCards).mockImplementation(async (deck) =>
+      deck.url === last.url
+        ? [makeCard(deck, "a"), makeCard(deck, "b")]
+        : new Promise<never>(() => {}),
+    );
+    const useCases: UseCases = {
+      ...createUseCases(deps),
+      listDeckTree: vi.fn(async () => tree),
+      getStudyCounts: vi.fn(async () => ({ dueCount: 0, newCount: 0, learned: false })),
+    };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    renderContainer(useCases, { filter: "" }, queryClient);
+    await waitFor(() => expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(READS_AT_ONCE));
+    render(
+      <QueryClientProvider client={queryClient}>
+        <DeckPeekContainer
+          useCases={useCases}
+          instance={instanceA}
+          route={{ screen: "home", instanceUrl: instanceA.url }}
+          deckUrl={last.url}
+        />
+      </QueryClientProvider>,
+    );
+    const peek = await screen.findByRole("region", { name: "Deck 99" });
+    await waitFor(() => expect(peek).toHaveTextContent("Cards2"));
+    expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(READS_AT_ONCE + 1);
+  });
+
+  it("gives up the turns of its reads not yet started once it is gone", async () => {
+    const decks = Array.from({ length: 20 }, (_, at) =>
+      makeDeck(`deck-${at}`, { en: `Deck ${at}` }),
+    );
+    const tree: DeckTree = {
+      readOnly: false,
+      children: decks.map((deck) => ({ kind: "deck", deck })),
+    };
+    const deps = makeDeps();
+    const answers: (() => void)[] = [];
+    vi.mocked(deps.deckRepository.listCards).mockImplementation(
+      () => new Promise((settle) => answers.push(() => settle([]))),
+    );
+    const useCases: UseCases = {
+      ...createUseCases(deps),
+      listDeckTree: vi.fn(async () => tree),
+      getStudyCounts: vi.fn(() => new Promise<never>(() => {})),
+    };
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    const { unmount } = renderContainer(useCases, { filter: "" }, queryClient);
+    await waitFor(() => expect(answers).toHaveLength(READS_AT_ONCE));
+    unmount();
+    const watched = () =>
+      queryClient
+        .getQueryCache()
+        .findAll({ queryKey: ["cards"] })
+        .some((query) => query.getObserversCount() > 0);
+    await waitFor(() => expect(watched()).toBe(false));
+    // The reads still waiting take their turns and give them up, reading nothing: a read asked now is next.
+    for (const answer of answers) answer();
+    const queued = useCases.listCardsInTurn(decks[0]!);
+    await waitFor(() => expect(answers).toHaveLength(READS_AT_ONCE + 1));
+    answers.at(-1)!();
+    await expect(queued).resolves.toEqual([]);
+    expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(READS_AT_ONCE + 1);
+  });
+
   it("makes each path of groups once, as the figures come in", async () => {
     const join = vi.spyOn(Array.prototype, "join");
     onTestFinished(() => join.mockRestore());
@@ -73,7 +178,7 @@ describe("DeckTableContainer", () => {
     };
     const useCases = makeUseCasesFake({
       listDeckTree: vi.fn(async () => tree),
-      listCards: vi.fn(async () => []),
+      listCardsInTurn: vi.fn(async () => []),
       getStudyCounts: vi.fn(async () => ({ dueCount: 7, newCount: 5, learned: false })),
     });
     renderContainer(useCases, { filter: "", sort: { column: "group", descending: false } });
@@ -96,7 +201,7 @@ describe("DeckTableContainer", () => {
     };
     const useCases = makeUseCasesFake({
       listDeckTree: vi.fn(async () => tree),
-      listCards: vi.fn(async (deck) =>
+      listCardsInTurn: vi.fn(async (deck) =>
         deck.url === kanji.url
           ? [makeCard(deck, "a"), makeCard(deck, "b"), makeCard(deck, "c", true)]
           : [],
@@ -190,7 +295,7 @@ describe("DeckTableContainer", () => {
     const { isCourse: _course, ...plain } = solid;
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => [kanji, verbs, course, copy, linked, linkedCourse]),
-      listCards: vi.fn(async (deck) => {
+      listCardsInTurn: vi.fn(async (deck) => {
         if (deck.url === kanji.url) throw new Error("gone");
         return [];
       }),
@@ -315,7 +420,7 @@ describe("DeckTableContainer", () => {
     const cards = [counted("a"), counted("b"), counted("c", true)];
     const useCases = makeUseCasesFake({
       listDecks: vi.fn(async () => decks),
-      listCards: vi.fn(async () => cards),
+      listCardsInTurn: vi.fn(async () => cards),
     });
     // The cards kept as read, so that their looks are the container's alone.
     const queryClient = new QueryClient({
@@ -324,7 +429,7 @@ describe("DeckTableContainer", () => {
     const { rerender } = renderContainer(useCases, { filter: "" }, queryClient);
     const row = await screen.findByRole("row", { name: /Deck 29/ });
     await waitFor(() => expect(cells(row).at(-1)).toBe("2 cards of Deck 29"));
-    expect(useCases.listCards).toHaveBeenCalledTimes(1);
+    expect(useCases.listCardsInTurn).toHaveBeenCalledTimes(1);
     // Typing in the filter renders the table again, and counts nothing again.
     rerender({ filter: "Deck" });
     rerender({ filter: "Deck 2" });
@@ -333,7 +438,7 @@ describe("DeckTableContainer", () => {
 
     // A new read of the document is counted once, and every row shows it.
     const next = [counted("d"), counted("e"), counted("f"), counted("g", true)];
-    queryClient.setQueryData(queryKeys.cards(decks[0]!.cardsDocumentUrl), next);
+    queryClient.setQueryData(queryKeys.deckTableCards(decks[0]!.cardsDocumentUrl), next);
     await waitFor(() =>
       expect(cells(screen.getByRole("row", { name: /Deck 29/ })).at(-1)).toBe("3 cards of Deck 29"),
     );
@@ -460,13 +565,17 @@ describe("DeckTableContainer", () => {
     });
     renderContainer(useCases);
     fireEvent.click(await screen.findByRole("checkbox", { name: "Select Kanji N5" }));
-    await waitFor(() => expect(useCases.listCards).toHaveBeenCalledWith(kanji));
-    vi.mocked(useCases.listCards).mockClear();
+    await waitFor(() =>
+      expect(useCases.listCardsInTurn).toHaveBeenCalledWith(kanji, expect.any(AbortSignal)),
+    );
+    vi.mocked(useCases.listCardsInTurn).mockClear();
     fireEvent.click(screen.getByRole("button", { name: "Delete" }));
     answer("Delete the selected decks", "Delete");
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("The pod said no"));
-    await waitFor(() => expect(useCases.listCards).toHaveBeenCalledWith(kanji));
-    expect(useCases.listCards).not.toHaveBeenCalledWith(verbs);
+    await waitFor(() =>
+      expect(useCases.listCardsInTurn).toHaveBeenCalledWith(kanji, expect.any(AbortSignal)),
+    );
+    expect(useCases.listCardsInTurn).not.toHaveBeenCalledWith(verbs, expect.anything());
   });
 
   it("says why the decks could not be read", async () => {

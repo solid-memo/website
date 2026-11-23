@@ -41,7 +41,7 @@ import type {
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
-import { mapAtOnce } from "./atOnce";
+import { mapAtOnce, type inTurns } from "./atOnce";
 import type { Course, CourseUseCases } from "./courses";
 import { changedElsewhere, readNow, unsent } from "./writes";
 import { stepReporter } from "./progress";
@@ -83,7 +83,8 @@ export interface LibraryUseCases {
    * release would do; null for a deck not from the library, or when
    * there is nothing (safe) to offer. Reads the library's index, the two
    * releases (and those in between, for a copy more than one behind) and
-   * the copy's cards; writes nothing. Given the deck as listLibraryUpdates
+   * the copy's cards, those in turns with other decks' (listCardsInTurn);
+   * writes nothing. Given the deck as listLibraryUpdates
    * lists it (its LibraryCopy, its series found), it does not look for its
    * series again. The releases a copy from a link would be upgraded with
    * are checked against the library's shapes first, as readReleaseFromLink
@@ -319,11 +320,14 @@ export function createLibraryUseCases({
   deckRepository,
   reviewStateRepository,
   courses,
+  cardsTurn,
 }: {
   deckLibrary: DeckLibrary;
   deckRepository: DeckRepository;
   reviewStateRepository: ReviewStateRepository;
   courses: Pick<CourseUseCases, "startCourse">;
+  /** The turns whole decks' cards are read in, shared with the Studio's deck table (listCardsInTurn). */
+  cardsTurn: ReturnType<typeof inTurns>;
 }): LibraryUseCases {
   /**
    * What upgrading the deck to its library deck's current release would
@@ -583,7 +587,8 @@ export function createLibraryUseCases({
         : importLibraryDeck(instanceUrl, release);
     },
     planLibraryUpgrade(deck, copy) {
-      return planUpgrade(deck, () => deckRepository.listCards(deck), copy);
+      // The copy's cards wait their turn: the copies screen plans every copy with a newer release at once.
+      return planUpgrade(deck, () => cardsTurn(() => deckRepository.listCards(deck)), copy);
     },
     async listLibraryUpdates(instanceUrl) {
       const decks = await deckRepository.listDecks(instanceUrl);

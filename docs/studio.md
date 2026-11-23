@@ -630,7 +630,14 @@ is a table with a row per deck. Its columns are:
   the cards document: decks that share one share its count, and a
   render that reads nothing new, a letter typed in the filter or a
   move of the cursor, counts nothing again. So a read of cards
-  is never changed in place: a change comes as a new read.
+  is never changed in place: a change comes as a new read. The decks'
+  cards are read six at a time (`listCardsInTurn`), so a long catalog
+  never reads all of them at once, and kept under a key of the table's
+  own (`deckTableCards`, under the deck's cards). A screen of one deck,
+  the deck beside the table too, reads its cards outside these turns
+  under the deck's cards key, so it never waits for a read the table
+  has queued. A read still waiting when Home closes gives up its turn
+  without reading.
 
 Beside a deck's name are its problems ([health](#health)), "3
 problems", a link to the deck's health, and for a copy with a newer
@@ -690,7 +697,8 @@ workbench and a draft's cards have the menu too, each table its own.
 aside, named Deck
 ([`DeckPeekContainer`](../apps/studio/src/ui/DeckPeekContainer.tsx)):
 its groups, its cards, today's due and new cards, when it last changed,
-its health, and links to its tabs, from the table's own queries. A
+its health, and links to its tabs. It reads its cards at once, outside
+the table's turns, and takes the rest from the table's own queries. A
 `deck` the instance doesn't
 have shows none; before the cursor has moved, the aside says how to
 show one.
@@ -1498,8 +1506,9 @@ doesn't list is an unknown release.
 For each copy with a newer release, the screen asks what upgrading
 would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
 [migrations.md](migrations.md#catching-up-with-the-library)), with the
-copy and its series as found, reading nothing again. Copies that name
-one cards document share its cards by id, worked out once
+copy and its series as found, reading nothing again. Each copy's cards
+are read in the same turns as Home's, six decks at a time. Copies that
+name one cards document share its cards by id, worked out once
 ([libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)). Copies
 of a release the library's index lists share the plan of the cards too,
 as the library reads each release once: only what each deck's own
