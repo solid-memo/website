@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.2.1](https://github.com/solid-memo/website/compare/v8.2.0...v8.2.1) (2026-11-23)
+
+### Fixes
+
+* **solid:** read only the first 100 authors of an old-format deck ([7131634](https://github.com/solid-memo/website/commit/7131634488da4c30e661980e4e2e7a6f8d5f14c4))
+* **studio:** bound the find and replace preview ([2443e55](https://github.com/solid-memo/website/commit/2443e5578360b398472f0ba64edc19eba7fa3b9e))
+
 ## [8.2.0](https://github.com/solid-memo/website/compare/v8.1.6...v8.2.0) (2026-11-23)
 
 ### Features
