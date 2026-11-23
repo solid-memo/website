@@ -753,9 +753,12 @@ describe("createSessionClient, over oauth4webapi", () => {
     provider.pod = pod;
     await client.fetch("http://pod.example/a");
     await client.fetch("http://127.0.0.1:3999/a");
+    await client.fetch("http://127.1.2.3:3999/a");
     expect(pod.mock.calls[0]).toEqual(["http://pod.example/a", undefined]);
-    const init = (pod.mock.calls[1] as unknown as [string, RequestInit])[1];
-    expect(new Headers(init.headers).get("authorization")).toBe("DPoP access-1");
+    for (const call of pod.mock.calls.slice(1)) {
+      const init = (call as unknown as [string, RequestInit])[1];
+      expect(new Headers(init.headers).get("authorization")).toBe("DPoP access-1");
+    }
   });
 
   it("retries a request once with the DPoP nonce the pod asks for, and passes other 401s on", async () => {

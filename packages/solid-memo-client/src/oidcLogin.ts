@@ -49,16 +49,21 @@ export interface Tokens {
 /** The parameters a provider sends back on the redirect URL, removed once read. */
 const RESPONSE_PARAMETERS = ["code", "state", "iss", "error", "error_description", "session_state"];
 
+/** An IPv4 address in 127.0.0.0/8, as the URL parser writes one. */
+const LOOPBACK_IPV4 = /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/;
+
 /**
  * Whether requests to `url` may go over plain HTTP: to a server on this
- * machine only (a local pod in development); oauth4webapi refuses them
- * otherwise.
+ * machine only (a local pod in development), the loopback hosts the
+ * app's WebID check takes too (`localhost`, a name under `.localhost`,
+ * 127.0.0.0/8, `[::1]`); oauth4webapi refuses them otherwise.
  */
 export function isLoopbackHttp(url: URL): boolean {
   return (
     url.protocol === "http:" &&
-    (["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-      url.hostname.endsWith(".localhost"))
+    (["localhost", "[::1]"].includes(url.hostname) ||
+      url.hostname.endsWith(".localhost") ||
+      LOOPBACK_IPV4.test(url.hostname))
   );
 }
 
