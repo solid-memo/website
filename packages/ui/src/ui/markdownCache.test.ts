@@ -9,6 +9,7 @@ import { PROSE, SIDE } from "@solid-memo/markdown/problems";
 import { growth } from "@solid-memo/domain/testing/growth";
 import {
   CACHE_SIZE,
+  CACHE_WEIGHT,
   COURSES_KEPT,
   courseDescriptionBlocks,
   deckTextCheck,
@@ -36,6 +37,31 @@ vi.mock("./textHash", async (importOriginal) => {
   const original = await importOriginal<typeof import("./textHash")>();
   return { textHash: vi.fn(original.textHash) };
 });
+
+/** How many objects and arrays a value is made of. */
+function nodesOf(value: unknown): number {
+  if (typeof value !== "object" || value === null) return 0;
+  return 1 + Object.values(value).reduce<number>((sum, part) => sum + nodesOf(part), 0);
+}
+
+/** A card side of short Markdown lines, each a heading with emphasis: its tree is many times the size of its text. */
+const dense = (index: number) => `${index} ${"# *a*\n".repeat(2731)}`.slice(0, 16_383);
+
+/**
+ * How many of `texts`, the newest first, `read` gives back as it gave
+ * them before (`values`) without calling `compute` again; it stops at the
+ * first it reads anew.
+ */
+function keptOf<T>(texts: string[], values: T[], read: (text: string) => T, compute: unknown) {
+  let kept = 0;
+  for (let index = texts.length - 1; index >= 0; index--) {
+    vi.mocked(compute as () => unknown).mockClear();
+    if (read(texts[index]!) !== values[index]) break;
+    expect(compute).not.toHaveBeenCalled();
+    kept++;
+  }
+  return kept;
+}
 
 describe("markdownBlocks and markdownPhrases", () => {
   it("parse a text once, giving back what they gave before", () => {
@@ -65,6 +91,32 @@ describe("markdownBlocks and markdownPhrases", () => {
     expect(markdownBlocks("first")).not.toBe(first);
     expect(markdownBlocks("first")).toEqual(first);
   });
+
+  it("remember CACHE_SIZE texts of an ordinary card's length, all of them", () => {
+    const texts = Array.from(
+      { length: CACHE_SIZE },
+      (_, index) => `${index} ${"The *quick* brown fox jumps over the lazy dog. ".repeat(20)}`,
+    );
+    const blocks = texts.map(markdownBlocks);
+    expect(keptOf(texts, blocks, markdownBlocks, parseMarkdown)).toBe(CACHE_SIZE);
+  });
+
+  it("keep dense texts' trees only as far as CACHE_WEIGHT goes, however few texts that is", () => {
+    const texts = Array.from({ length: 60 }, (_, index) => dense(index));
+    const blocks = texts.map(markdownBlocks);
+    const kept = keptOf(texts, blocks, markdownBlocks, parseMarkdown);
+    const weight = (from: number) =>
+      blocks.slice(from).reduce((sum, tree, index) => {
+        return sum + texts[from + index]!.length * 32 + nodesOf(tree) * 96;
+      }, 0);
+    expect(kept).toBeGreaterThan(0);
+    expect(kept).toBeLessThan(texts.length);
+    expect(weight(texts.length - kept)).toBeLessThanOrEqual(CACHE_WEIGHT);
+    expect(weight(texts.length - kept - 1)).toBeGreaterThan(CACHE_WEIGHT);
+    const phrases = texts.map(markdownPhrases);
+    expect(markdownPhrases(texts[0]!)).not.toBe(phrases[0]);
+    expect(markdownPhrases(texts.at(-1)!)).toBe(phrases.at(-1));
+  });
 });
 
 describe("courseDescriptionBlocks", () => {
@@ -81,7 +133,7 @@ describe("courseDescriptionBlocks", () => {
     const blocksOf = courseDescriptionBlocks("https://r.example/long");
     const long = "a".repeat(17_000);
     const texts = Array.from(
-      { length: 50 },
+      { length: 12 },
       (_, index) => `${long}${String(index).padStart(3, "0")}`,
     );
     const first = texts.map((text, index) => blocksOf(index, text));
@@ -92,6 +144,25 @@ describe("courseDescriptionBlocks", () => {
     expect(blocksOf(0, texts[1]!)).not.toBe(first[0]);
     expect(blocksOf(0, texts[1]!)).toEqual(first[1]);
     expect(parseMarkdown).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a course's dense descriptions only as far as its share of CACHE_WEIGHT goes", () => {
+    const blocksOf = courseDescriptionBlocks("https://r.example/dense");
+    const texts = Array.from({ length: 12 }, (_, index) => dense(index));
+    const first = texts.map((text, index) => blocksOf(index, text));
+    const weights = texts.map((text, index) => text.length * 32 + nodesOf(first[index]) * 96);
+    let kept = 0;
+    for (let total = weights[0]!; total <= CACHE_WEIGHT / COURSES_KEPT; total += weights[kept]!)
+      kept++;
+    expect(kept).toBeGreaterThan(0);
+    expect(kept).toBeLessThan(texts.length);
+    vi.mocked(parseMarkdown).mockClear();
+    const again = texts.map((text, index) => blocksOf(index, text));
+    expect(again.slice(0, kept).every((blocks, index) => blocks === first[index])).toBe(true);
+    expect(again.slice(kept).some((blocks, index) => blocks === first[kept + index])).toBe(false);
+    expect(parseMarkdown).toHaveBeenCalledTimes(texts.length - kept);
+    expect(blocksOf(0, "*short*")).toEqual(markdownBlocks("*short*"));
+    expect(blocksOf(kept, texts[kept]!)).toBe(blocksOf(kept, texts[kept]!));
   });
 
   it("keeps a release's descriptions for the last COURSES_KEPT courses, the one used longest ago going first", () => {
@@ -144,6 +215,14 @@ describe("markdownPlainText", () => {
     expect(markdownPlainText("**Tea** room")).toBe("Tea room");
     expect(plainText).toHaveBeenCalledTimes(1);
   });
+
+  it("does not keep a text that weighs more than CACHE_WEIGHT by itself", () => {
+    vi.mocked(plainText).mockClear();
+    const long = "a".repeat(CACHE_WEIGHT / 32 + 1);
+    expect(markdownPlainText(long)).toBe(long);
+    expect(markdownPlainText(long)).toBe(long);
+    expect(plainText).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("markdownFieldProblems", () => {
@@ -193,6 +272,19 @@ describe("releaseMarkdownCheck", () => {
     const texts = Array.from({ length: CACHE_SIZE * 2 }, (_, index) => `*text* ${index}`);
     const first = texts.map((text) => check.problems(text, "option"));
     texts.forEach((text, index) => expect(check.problems(text, "option")).toBe(first[index]));
+  });
+
+  it("remembers its texts only as far as CACHE_WEIGHT goes, however few that is", () => {
+    const check = releaseMarkdownCheck();
+    const texts = Array.from(
+      { length: 20 },
+      (_, index) => `${String(index).padStart(2, "0")} ${"a".repeat(200_000)}`,
+    );
+    const first = texts.map((text) => check.problems(text, "side"));
+    const kept = Math.floor(CACHE_WEIGHT / (texts[0]!.length * 32 + nodesOf(first[0]) * 96));
+    expect(kept).toBeLessThan(texts.length);
+    expect(check.problems(texts.at(-kept)!, "side")).toBe(first.at(-kept));
+    expect(check.problems(texts.at(-kept - 1)!, "side")).not.toBe(first.at(-kept - 1));
   });
 
   it("checks a course's 1400 options ten times over in less time than reading them once", () => {

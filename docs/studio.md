@@ -2314,7 +2314,9 @@ becomes: the rules `npm run library:check` runs on `decks/`
   (`releaseMarkdownCheck` in `ui`, its `problems` and `chunks`). It
   keeps the problems of every text it has checked, by field rule, and
   the chunks of every theory, so a changed draft's check reads only
-  the text that changed. It keeps them for one draft, the last one
+  the text that changed. It keeps them only as far as its caches'
+  bound goes ([markdown.md](markdown.md#safety)): past it, the oldest
+  texts are checked again. It keeps them for one draft, the last one
   checked: another draft's check starts anew.
 - **Shapes**, when asked: the release as it's assembled, moved to its
   address (`mapIris`). Each subject is checked against its library
