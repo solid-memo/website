@@ -358,6 +358,64 @@ describe("createSolidDeckArchive", () => {
     });
   });
 
+  it("imports with its progress only the completed chapters an export writes back (GHSA-7w8p-3h7g-cm9x)", async () => {
+    const { pod, deck } = await podWithDeck();
+    const repository = createSolidDeckRepository({
+      fetch: pod.fetch,
+      now: () => new Date("2026-10-02T10:00:00.000Z"),
+      randomId: () => "fresh",
+    });
+    const archive = createSolidDeckArchive({ fetch: pod.fetch, publicFetch: pod.fetch });
+    const asNoOne = { asNoOne: { cards: false, reviews: false } };
+    const exported = await archive.exportDeck(
+      deck,
+      { format: "turtle", withProgress: true },
+      asNoOne,
+    );
+    const base = `${DECK_FILE_BASE}deck`;
+    const withChapters = (...chapters: string[]) =>
+      `${exported}\n<${deck.url}> <${SM.completedChapter}> ${chapters.join(", ")} .\n`;
+    // An IRI an export would write as a prefixed name is refused, in either format.
+    for (const lookalike of ["<rdf:type>", "<sm:Deck>"]) {
+      await expect(
+        archive.readDeckFile(withChapters(lookalike, `<${CHAPTER}>`), "turtle", base),
+      ).rejects.toMatchObject({ code: "unwritableTerm" });
+    }
+    const json = JSON.parse(
+      await archive.exportDeck(deck, { format: "jsonld", withProgress: true }, asNoOne),
+    );
+    json["@graph"].find((node: { "@id": string }) => node["@id"] === deck.url)[
+      "sm:completedChapter"
+    ] = { "@id": "rdf:type" };
+    delete json["@context"].rdf;
+    await expect(archive.readDeckFile(JSON.stringify(json), "jsonld", base)).rejects.toMatchObject({
+      code: "unwritableTerm",
+    });
+    // Another IRI that is no http(s) URL is no chapter: it is left out.
+    const read = await archive.readDeckFile(
+      withChapters("<javascript:alert(1)>", `<${CHAPTER}>`),
+      "turtle",
+      base,
+    );
+    expect(read.deck.completedChapters).toEqual([CHAPTER]);
+    const victim = "https://pod.example/solid-memo/b/";
+    const { deck: imported } = importedDeck(victim, read, {
+      withProgress: true,
+      decks: [],
+      freshId: "fresh",
+      now: "2026-10-02T10:00:00.000Z",
+    });
+    await repository.registerDeck(imported);
+    expect(
+      pod.triples(`${victim}catalog.ttl`)!.filter((t) => t.includes(SM.completedChapter)),
+    ).toEqual([`<${imported.url}> <${SM.completedChapter}> <${CHAPTER}> .`]);
+    const stored = (await repository.readDeck(imported.url))!;
+    for (const format of ["turtle", "jsonld"] as const) {
+      const again = await archive.exportDeck(stored, { format, withProgress: true }, asNoOne);
+      expect(again).toContain(CHAPTER);
+    }
+  });
+
   it("exports the deck's entry alone when its cards document is gone", async () => {
     const { pod, deck } = await podWithDeck();
     const gone = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/gone.ttl` };
