@@ -268,9 +268,15 @@ describe("ReleaseMetadataScreen", () => {
       (_, index) => `https://people.example/${index}`,
     );
     const last = at(ids[count - 1]!);
+    const base = courseDraft();
+    // The agents are put in at once, as a draft read from a release has them: thousands of
+    // setAgent changes, one after another, would each copy the list, and take far longer
+    // than the screen this test is about.
     const draft = with_(
-      courseDraft(),
-      ...ids.map((id): DraftChange => ({ kind: "setAgent", id, agent: { name: `Author ${id}` } })),
+      {
+        ...base,
+        agents: [...base.agents, ...ids.map((id) => ({ id, data: { name: `Author ${id}` } }))],
+      },
       { kind: "setMeta", meta: { creator: [...ids.map(at), ...byAddress], publisher: last } },
     );
     const onEdit = renderScreen(draft);
