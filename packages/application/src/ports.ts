@@ -1066,7 +1066,9 @@ export interface PreferencesRepository {
    * Preferences of a newer format are refused (writtenByNewerApp). When
    * the instance has no preferences subject, `created` is written with
    * it, in this app's format, made only if nothing is there yet; with
-   * `created` null nothing is written. "unchanged" when they already say
+   * `created` null nothing is written. When the preferences changed, or
+   * were made, elsewhere meanwhile (412), they are read and the choice
+   * set on them again, a few times. "unchanged" when they already say
    * so, "none" when there was nothing to write it on.
    */
   markConnectedScreen(

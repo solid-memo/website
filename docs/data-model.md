@@ -2454,11 +2454,20 @@ by one.
 
   In the Solid adapters, `editDocument` in `datasets.ts` makes every
   write that re-applies its change. That's the digest, the deck groups,
-  a deck's catalog entry, a type index, the catalog's links, the answer
-  log and a deck's FSRS-6 states. The adapter says what its edit makes
-  of the document as read; `editDocument` reads, checks, saves with
-  `If-Match`, and reads and edits again on a 412, three times in all
-  unless the adapter asks for more (the digest).
+  a deck's catalog entry, the instance's meta, the catalog, a type
+  index, the catalog's links, the answer log, a deck's FSRS-6 states and
+  the choice to skip the Connected screen. The adapter says what its
+  edit makes of the document as read; `editDocument` reads, checks,
+  saves with `If-Match`, and reads and edits again on a 412, three times
+  in all unless the adapter asks for more (the digest). The other
+  preference writes and a palette's are made once: they write what the
+  screen showed, which a 412 says is out of date.
+
+  A use case that edits a record does so through a port that takes the
+  change (`editMeta`, `editCatalog`, `editDeck`, `editDeckTree`), never
+  a read and then a save. The adapter changes the record from the same
+  read its save is `If-Match` on, so a change made elsewhere between
+  them is never written over.
 
   A grade's edit of the reviews document is made from the document as
   last read or written, at the version that left

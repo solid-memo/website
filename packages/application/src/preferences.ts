@@ -47,7 +47,6 @@ import type {
 import { AppError } from "@solid-memo/domain/appError";
 import { mapAtOnce, READS_AT_ONCE } from "./atOnce";
 import { stepReporter } from "./progress";
-import { again } from "./writes";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
 import type { DigestStore } from "./digestStore";
@@ -318,27 +317,6 @@ export function createPreferenceUseCases({
       : keptPalette(stored, shownPalette(preferences), isOwn);
   }
 
-  /**
-   * Set whether logging in skips the Connected screen in an instance's
-   * preferences, again while they keep changing elsewhere, and once more
-   * when new ones were made elsewhere first: then only the choice is
-   * written on them.
-   */
-  async function marking(
-    instanceUrl: string,
-    skipped: boolean,
-    created: StudyPreferences | null,
-  ): Promise<"written" | "unchanged" | "none"> {
-    const mark = () =>
-      again(() => preferencesRepository.markConnectedScreen(instanceUrl, skipped, created));
-    try {
-      return await mark();
-    } catch (error) {
-      if (!(error instanceof AppError && error.code === "createdElsewhere")) throw error;
-      return mark();
-    }
-  }
-
   /** The defaults, shown as this device shows the app: what an instance with no preferences is given. */
   function created(instanceUrl: string): StudyPreferences {
     return preferenceStore.withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);
@@ -572,10 +550,17 @@ export function createPreferenceUseCases({
       const results = await mapAtOnce(instances, (instance) =>
         preferenceStore
           .inTurn(instance.url, async () => {
-            if ((await marking(instance.url, true, null)) !== "none") return;
+            if (
+              (await preferencesRepository.markConnectedScreen(instance.url, true, null)) !== "none"
+            )
+              return;
             // No preferences: made only where the instance's meta document says an instance is.
             if ((await instanceRepository.readMeta(instance.url)) === null) return;
-            await marking(instance.url, true, created(instance.url));
+            await preferencesRepository.markConnectedScreen(
+              instance.url,
+              true,
+              created(instance.url),
+            );
           })
           .then(
             () => undefined,
@@ -590,7 +575,11 @@ export function createPreferenceUseCases({
     },
     chooseConnectedScreen(instanceUrl, shown) {
       return preferenceStore.inTurn(instanceUrl, async () => {
-        await marking(instanceUrl, !shown, shown ? null : created(instanceUrl));
+        await preferencesRepository.markConnectedScreen(
+          instanceUrl,
+          !shown,
+          shown ? null : created(instanceUrl),
+        );
       });
     },
   };

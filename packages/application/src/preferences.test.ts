@@ -1330,18 +1330,6 @@ describe("preferences", () => {
         expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledOnce();
       });
 
-      it("marks again when the preferences changed, or were made, elsewhere meanwhile", async () => {
-        const deps = makeDeps();
-        vi.mocked(deps.preferencesRepository.markConnectedScreen)
-          .mockRejectedValueOnce(new AppError("changedElsewhere"))
-          .mockResolvedValueOnce("none")
-          .mockRejectedValueOnce(new AppError("createdElsewhere"))
-          .mockResolvedValueOnce("written");
-        vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(META);
-        await createUseCases(deps).skipConnectedScreen([instance]);
-        expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenCalledTimes(4);
-      });
-
       it("saves the others, and rejects with the first failure once all are done", async () => {
         const deps = makeDeps();
         vi.mocked(deps.preferencesRepository.markConnectedScreen).mockImplementation(
