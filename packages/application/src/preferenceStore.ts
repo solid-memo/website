@@ -11,13 +11,10 @@ import {
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
-import type {
-  PreferencesRepository,
-  CustomPalettePreference,
-  PalettePreference,
-  TextSizePreference,
-  ThemePreference,
-} from "./ports";
+import type { Palette } from "@solid-memo/domain/palette";
+import type { TextSize } from "@solid-memo/domain/textSize";
+import type { ThemeChoice } from "@solid-memo/domain/theme";
+import type { CustomPalettePreference, DeviceSetting, PreferencesRepository } from "./ports";
 
 /** Stored preferences that fit their shape; null for none, and for ones that do not. */
 function fitting(read: PreferencesRead): StoredPreferences | null {
@@ -39,10 +36,10 @@ export function createPreferenceStore({
   textSizePreference,
 }: {
   preferencesRepository: PreferencesRepository;
-  themePreference: ThemePreference;
-  palettePreference: PalettePreference;
+  themePreference: DeviceSetting<ThemeChoice>;
+  palettePreference: DeviceSetting<Palette>;
   customPalettePreference: CustomPalettePreference;
-  textSizePreference: TextSizePreference;
+  textSizePreference: DeviceSetting<TextSize>;
 }) {
   const preferenceReads = new Map<string, Promise<PreferencesRead>>();
   /**
@@ -116,6 +113,52 @@ export function createPreferenceStore({
       await preferencesRepository.savePreferences(instanceUrl, next);
     });
   }
+  /** The choices of how the app is shown made so far, and of those the last whose write is done. */
+  let choicesMade = 0;
+  let choicesSettled = 0;
+  /**
+   * Make a choice of how the app is shown: `keep` keeps it on this device
+   * at once, and with an instance open it is written into the
+   * instance's preferences as writeAppearance writes it. Until it is
+   * written, and every choice made after it, a read of preferences is
+   * not shown (shown): one begun before it would put back what it
+   * replaced.
+   */
+  function chooseAppearance(
+    keep: () => void,
+    instanceUrl: string | null,
+    changed: (preferences: StudyPreferences, instanceUrl: string) => StudyPreferences | null,
+  ): Promise<void> {
+    const choice = ++choicesMade;
+    // A read already under way began before the choice: none joins it.
+    preferenceReads.clear();
+    keep();
+    const write =
+      instanceUrl === null
+        ? Promise.resolve()
+        : writeAppearance(instanceUrl, (preferences) => changed(preferences, instanceUrl));
+    return write.finally(() => {
+      if (choice === choicesMade) choicesSettled = choice;
+    });
+  }
+  /**
+   * An instance's stored preferences, to show how they show the app and
+   * keep that on this device; null as stored has it, and also when a
+   * choice of how the app is shown was made while the read was under
+   * way, or was still being written as it began: the read may hold what
+   * the choice replaced, and the choice's own read comes once it is
+   * written.
+   */
+  async function shown(instanceUrl: string): Promise<StoredPreferences | null> {
+    const choice = choicesMade;
+    const settled = appearanceSettled();
+    const stored = await readStoredPreferences(instanceUrl);
+    return settled && choicesMade === choice ? stored : null;
+  }
+  /** Whether every choice of how the app is shown made so far is written (chooseAppearance). */
+  function appearanceSettled(): boolean {
+    return choicesSettled === choicesMade;
+  }
   /**
    * Once every write of the instance's preferences queued so far is done,
    * failed ones too: what a save of all the preferences waits for.
@@ -158,12 +201,13 @@ export function createPreferenceStore({
   }
 
   return {
-    stored: readStoredPreferences,
+    shown,
     get: getPreferences,
     isMisfit,
     inTurn,
-    writeAppearance,
+    chooseAppearance,
     afterAppearanceWrites,
+    appearanceSettled,
     keepAppearance,
     withDeviceAppearance,
   };

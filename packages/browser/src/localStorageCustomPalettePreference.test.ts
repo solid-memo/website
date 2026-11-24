@@ -5,20 +5,7 @@
 import { describe, expect, it } from "vitest";
 import type { CustomPalette } from "@solid-memo/domain/customPalette";
 import { createLocalStorageCustomPalettePreference } from "./localStorageCustomPalettePreference";
-
-function memoryStorage(): Storage {
-  const items = new Map<string, string>();
-  return {
-    get length() {
-      return items.size;
-    },
-    clear: () => items.clear(),
-    getItem: (key) => items.get(key) ?? null,
-    key: (index) => [...items.keys()][index] ?? null,
-    removeItem: (key) => void items.delete(key),
-    setItem: (key, value) => void items.set(key, value),
-  };
-}
+import { memoryStorage } from "./testing/memoryStorage";
 
 const READING: CustomPalette = {
   url: "https://pod.example/solid-memo/main/palettes.ttl#palette-reading",

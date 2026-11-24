@@ -13,8 +13,10 @@ import { createPreferenceStore } from "@solid-memo/application/preferenceStore";
 import { createPreferenceUseCases } from "@solid-memo/application/preferences";
 import { createStudyUseCases } from "@solid-memo/application/study";
 import type { Dependencies } from "@solid-memo/application/useCases";
-import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
-import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
+import { unkeptSetting } from "@solid-memo/application/deviceSetting";
+import { PALETTE_SETTING } from "@solid-memo/domain/palette";
+import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";
+import { THEME_SETTING } from "@solid-memo/domain/theme";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { TRIAL_ORIGIN } from "@solid-memo/domain/release/trial";
 import { createDraftDeckLibrary } from "@solid-memo/solid/draftDeckLibrary";
@@ -185,10 +187,10 @@ export const NO_DEVICE: Pick<
   | "paletteRepository"
 > = {
   languagePreference: { chosen: () => null, choose: () => undefined },
-  themePreference: { chosen: () => "system", choose: () => undefined },
-  palettePreference: { chosen: () => DEFAULT_PALETTE, choose: () => undefined },
+  themePreference: unkeptSetting(THEME_SETTING),
+  palettePreference: unkeptSetting(PALETTE_SETTING),
   customPalettePreference: { chosen: () => null, choose: () => undefined },
-  textSizePreference: { chosen: () => DEFAULT_TEXT_SIZE, choose: () => undefined },
+  textSizePreference: unkeptSetting(TEXT_SIZE_SETTING),
   paletteRepository: {
     listPalettes: async () => [],
     savePalette: async () => {

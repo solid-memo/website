@@ -23,6 +23,8 @@ interfaces; the adapters conform to them.
 - `preferenceStore`, `answerStore` and `digestStore`: what the slices
   share, made once by `createUseCases`; `writes` and `progress`, their
   helpers.
+- `deviceSetting`: `unkeptSetting`, a `DeviceSetting` port that keeps
+  no choice, for an app whose page keeps none (a Studio trial).
 - `testing/*`: the fixtures, the fake ports and `NO_PORTS`, for tests.
 
 ## Boundaries

@@ -4,6 +4,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CHANNEL, createLogoutChannel, KEY } from "./logoutChannel";
+import { memoryStorage } from "./testing/memoryStorage";
 
 /**
  * Until the BroadcastChannel has delivered to `listener`, however busy the
@@ -14,20 +15,6 @@ const delivered = (listener: ReturnType<typeof vi.fn>) =>
 
 function noChannel(): BroadcastChannel {
   throw new DOMException("The operation is insecure.", "SecurityError");
-}
-
-function memoryStorage(): Storage {
-  const items = new Map<string, string>();
-  return {
-    get length() {
-      return items.size;
-    },
-    clear: () => items.clear(),
-    getItem: (key) => items.get(key) ?? null,
-    key: (index) => [...items.keys()][index] ?? null,
-    removeItem: (key) => void items.delete(key),
-    setItem: (key, value) => void items.set(key, value),
-  };
 }
 
 /** A storage that fires, on the other pages' `events`, what a browser's `storage` events say. */

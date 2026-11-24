@@ -9,10 +9,8 @@ import { DATABASE, DATABASE_VERSION, LOCK, RESOURCES } from "./indexedDbResource
 import { CHANNEL as LOGOUT_CHANNEL, KEY as LOGOUT_KEY } from "./logoutChannel";
 import { KEY as LANGUAGE_KEY } from "./localStorageLanguagePreference";
 import { KEY as CUSTOM_PALETTE_KEY } from "./localStorageCustomPalettePreference";
-import { KEY as PALETTE_KEY } from "./localStoragePalettePreference";
 import { KEY as SEEN_HIGHLIGHTS_KEY } from "./localStorageSeenHighlights";
-import { KEY as TEXT_SIZE_KEY } from "./localStorageTextSizePreference";
-import { KEY as THEME_KEY } from "./localStorageThemePreference";
+import { PALETTE_KEY, TEXT_SIZE_KEY, THEME_KEY } from "./localStorageSetting";
 import { PREFIX as JOURNAL_PREFIX } from "./localStorageUpdateJournal";
 
 /**

@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { SettingKind } from "./setting";
+
 /**
  * The palettes the app comes in (docs/theme.md, Palettes): sets of
  * colors for what they do for the reader, each in the light theme and
@@ -18,6 +20,12 @@ export const DEFAULT_PALETTE: Palette = "standard";
 export function isPalette(value: string): value is Palette {
   return (PALETTES as readonly string[]).includes(value);
 }
+
+/** The palette as the device keeps it (SettingKind): Standard is no choice at all. */
+export const PALETTE_SETTING: SettingKind<Palette> = {
+  isValue: isPalette,
+  fallback: DEFAULT_PALETTE,
+};
 
 /**
  * The least contrast a palette holds to (docs/accessibility.md): text on

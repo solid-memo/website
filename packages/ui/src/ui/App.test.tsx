@@ -213,8 +213,18 @@ describe("AppShell", () => {
     it("reads the pod back only after the last of quick choices", async () => {
       fakeBrowserScheme(false);
       const writes: (() => void)[] = [];
+      let unwritten = 0;
       const useCases = inInstance("dark", {
-        chooseTheme: vi.fn(() => new Promise<void>((resolve) => writes.push(resolve))),
+        chooseTheme: vi.fn(() => {
+          unwritten += 1;
+          return new Promise<void>((resolve) =>
+            writes.push(() => {
+              unwritten -= 1;
+              resolve();
+            }),
+          );
+        }),
+        appearanceSettled: () => unwritten === 0,
       });
       renderApp(useCases);
       await waitFor(() => expect(document.documentElement.dataset.theme).toBe("dark"));
@@ -470,6 +480,7 @@ describe("AppShell", () => {
     it("shows no earlier choice that a read begun before a later one brings back", async () => {
       const reads: ((size: "default" | "large" | "largest") => void)[] = [];
       const writes: (() => void)[] = [];
+      let unwritten = 0;
       const useCases = renderAppearance(
         {
           instancePalette: vi
@@ -480,7 +491,16 @@ describe("AppShell", () => {
             .fn<() => Promise<"default" | "large" | "largest">>()
             .mockResolvedValueOnce("large")
             .mockImplementation(() => new Promise((resolve) => reads.push(resolve))),
-          chooseTextSize: vi.fn(() => new Promise<void>((resolve) => writes.push(resolve))),
+          chooseTextSize: vi.fn(() => {
+            unwritten += 1;
+            return new Promise<void>((resolve) =>
+              writes.push(() => {
+                unwritten -= 1;
+                resolve();
+              }),
+            );
+          }),
+          appearanceSettled: () => unwritten === 0,
         },
         HandedOnWorkspace,
       );

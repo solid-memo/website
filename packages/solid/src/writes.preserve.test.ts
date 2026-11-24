@@ -383,6 +383,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   textSizeChoice: local((u) => u.textSizeChoice()),
   instanceTextSize: async ({ u }) => void (await u.instanceTextSize(INSTANCE)),
   chooseTextSize: async ({ u }) => void (await u.chooseTextSize("large", INSTANCE)),
+  appearanceSettled: local((u) => u.appearanceSettled()),
   getPreferences: async ({ u }) => void (await u.getPreferences(INSTANCE)),
   preferencesMisfit: async ({ u }) => void (await u.preferencesMisfit(INSTANCE)),
   savePreferences: async ({ u }) =>

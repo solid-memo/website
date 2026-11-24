@@ -31,9 +31,8 @@ flowchart LR
   which saves what's shown then; until then a choice is kept on the
   device alone. So it is while the stored preferences don't fit their
   shape ([validation.md](validation.md#the-invalid-data-policy)).
-- **On the device**, by the `ThemePreference`, `PalettePreference` and
-  `TextSizePreference` ports
-  ([localStorageThemePreference.ts](../packages/browser/src/localStorageThemePreference.ts),
+- **On the device**, by a `DeviceSetting` port for each
+  ([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
   key `solid-memo:theme`, "As my browser" no key; the palette's and
   the text size's below). The sign-in screens and the first paint
   read these before any pod is reached. Opening an instance whose
@@ -48,6 +47,11 @@ of the study preferences, a switch of scheduler and "Not now" to the
 invitation to FSRS-6 wait for them, so none is refused for the version
 a choice made. A failed write (another device saved meanwhile, say) is
 undone: the app reads the preferences back and shows what they hold. A
+read of an instance's preferences begun before a choice, or while it
+was still being written, may be out of date. It is neither shown nor
+copied to the device (`shown` and `appearanceSettled` in
+[preferenceStore.ts](../packages/application/src/preferenceStore.ts)),
+and the read after the choice's write shows what the pod holds. A
 reload before a write is done opens the instance with the choice its
 preferences held before and shows it: the newer choice is lost.
 
@@ -88,8 +92,8 @@ preferences suggest High contrast. A choice takes effect at once:
 
 The choice is kept in the instance's preferences and on the device, as
 the theme is ([Where the choice is kept](#where-the-choice-is-kept)),
-on the device by the `PalettePreference` port
-([localStoragePalettePreference.ts](../packages/browser/src/localStoragePalettePreference.ts),
+on the device by its `DeviceSetting` port
+([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
 key `solid-memo:palette`; Standard is no key). It's shown as
 `<html data-palette>` (none for Standard), set as `data-theme` is
 ([Showing it](#showing-it)); `theme.tsx` sets it before setting the
@@ -361,8 +365,8 @@ Larger and Largest, at 112.5%, 125% and 150% of it. The user chooses
 under Text size in the study preferences, each size with a sample line
 at that size, and the choice takes effect at once. It's kept in the
 instance's preferences and on the device, as the theme is: on the
-device by the `TextSizePreference` port
-([localStorageTextSizePreference.ts](../packages/browser/src/localStorageTextSizePreference.ts),
+device by its `DeviceSetting` port
+([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
 key `solid-memo:textSize`; Default is no key). It's shown as
 `<html data-text-size>` (none for Default), set as `data-palette` is.
 Each size sets the root's font size as a percentage, which the

@@ -8,11 +8,8 @@ import type {
   GuestPod,
   LanguagePreference,
   CustomPalettePreference,
-  PalettePreference,
   PaletteRepository,
   SeenHighlights,
-  TextSizePreference,
-  ThemePreference,
   UpdateJournal,
   LogoutChannel,
   WriteFence,
@@ -23,20 +20,15 @@ import type {
   InstanceGraphReader,
 } from "../ports";
 import { AppError } from "@solid-memo/domain/appError";
-import { DEFAULT_PALETTE } from "@solid-memo/domain/palette";
-import { DEFAULT_TEXT_SIZE } from "@solid-memo/domain/textSize";
+import { PALETTE_SETTING } from "@solid-memo/domain/palette";
+import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";
+import { THEME_SETTING } from "@solid-memo/domain/theme";
+import { unkeptSetting } from "../deviceSetting";
 
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
 
 const NO_LANGUAGE_PREFERENCE: LanguagePreference = { chosen: () => null, choose: () => undefined };
-
-const NO_THEME_PREFERENCE: ThemePreference = { chosen: () => "system", choose: () => undefined };
-
-const NO_PALETTE_PREFERENCE: PalettePreference = {
-  chosen: () => DEFAULT_PALETTE,
-  choose: () => undefined,
-};
 
 const NO_CUSTOM_PALETTE_PREFERENCE: CustomPalettePreference = {
   chosen: () => null,
@@ -48,11 +40,6 @@ const NO_PALETTES: PaletteRepository = {
   savePalette: async () => {
     throw new Error("This app keeps no palettes.");
   },
-};
-
-const NO_TEXT_SIZE_PREFERENCE: TextSizePreference = {
-  chosen: () => DEFAULT_TEXT_SIZE,
-  choose: () => undefined,
 };
 
 const NO_SEEN_HIGHLIGHTS: SeenHighlights = { seen: () => null, see: () => undefined };
@@ -166,11 +153,11 @@ export const NO_PORTS = {
   deckArchive: NO_DECK_ARCHIVE,
   fileExchange: NO_FILE_EXCHANGE,
   languagePreference: NO_LANGUAGE_PREFERENCE,
-  themePreference: NO_THEME_PREFERENCE,
-  palettePreference: NO_PALETTE_PREFERENCE,
+  themePreference: unkeptSetting(THEME_SETTING),
+  palettePreference: unkeptSetting(PALETTE_SETTING),
   customPalettePreference: NO_CUSTOM_PALETTE_PREFERENCE,
   paletteRepository: NO_PALETTES,
-  textSizePreference: NO_TEXT_SIZE_PREFERENCE,
+  textSizePreference: unkeptSetting(TEXT_SIZE_SETTING),
   seenHighlights: NO_SEEN_HIGHLIGHTS,
   /** No one signed in. */
   webId: (): string | undefined => undefined,
