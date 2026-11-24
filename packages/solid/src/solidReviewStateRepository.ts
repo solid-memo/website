@@ -15,7 +15,9 @@ import {
   PreconditionFailedError,
   refuseUnreadableImport,
   saveDataset,
+  versionOf,
 } from "./datasets";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
@@ -80,15 +82,16 @@ export function createSolidReviewStateRepository({
   }
 
   /**
-   * The reviews document as applyReviewChanges writes it, with the
-   * subjects written; null when nothing is written (no document, and no
-   * state to save). Refuses what applyReviewChanges refuses.
+   * The reviews document as applyReviewChanges writes it, made of `read`
+   * (null: there is none), with the subjects written; null when nothing
+   * is written (no document, and no state to save). Refuses what
+   * applyReviewChanges refuses.
    */
   async function changed(
+    read: Dataset | null,
     deck: Deck,
     { save, remove, fsrs = NO_FSRS, every = false, carried }: ReviewChanges,
   ): Promise<{ dataset: Dataset; subjects: string[] } | null> {
-    const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
     // No document, nothing to remove: one is made only for states to save (a card moved in, with them).
     if (read === null && save.length + fsrs.save.length === 0) return null;
     const dataset = read ?? createSolidDataset();
@@ -115,18 +118,67 @@ export function createSolidReviewStateRepository({
     );
   }
 
+  /**
+   * The reviews document as `changes` leave it, made of `read`, refused
+   * and checked as applyReviewChanges refuses and checks it; null when
+   * nothing is written.
+   */
+  async function checkedChange(
+    read: Dataset | null,
+    deck: Deck,
+    changes: ReviewChanges,
+  ): Promise<Dataset | null> {
+    const written = await changed(read, deck, changes);
+    if (written === null) return null;
+    const checked = await checkedReviews(deck, written);
+    // A deck file's progress in one document no later read would take in is not written.
+    if (changes.fromFile === true) await refuseUnreadableImport(deck.reviewsDocumentUrl, checked);
+    return checked;
+  }
+
   /** The write applyReviewChanges makes, read, refused and checked, but not sent (ReviewStateRepository). */
   async function prepareReviewChanges(
     deck: Deck,
     changes: ReviewChanges,
+    { version }: { version?: string } = {},
   ): Promise<() => Promise<void>> {
-    const written = await changed(deck, changes);
-    if (written === null) return async () => undefined;
-    const checked = await checkedReviews(deck, written);
-    // A deck file's progress in one document no later read would take in is not written.
-    if (changes.fromFile === true) await refuseUnreadableImport(deck.reviewsDocumentUrl, checked);
-    // If-Match the read: a document changed since is not written over.
-    return () => saveDataset(deck.reviewsDocumentUrl, checked, fetch);
+    const url = deck.reviewsDocumentUrl;
+    const read = await getSolidDatasetOrNull(url, fetch);
+    // Changes made from an earlier read go only to the document as it was then: the edit is planned again.
+    if (
+      version !== undefined &&
+      (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version
+    )
+      throw new PreconditionFailedError(url, version === ABSENT_VERSION ? "absent" : "unchanged");
+    const checked = await checkedChange(read, deck, changes);
+    if (checked === null) return async () => undefined;
+    // If-Match the read. Sent after another write, the edit can no longer be planned again: a document
+    // changed since has the same changes made of it read afresh, never written over.
+    return async () => {
+      try {
+        await saveDataset(url, checked, fetch);
+      } catch (error) {
+        if (!(error instanceof PreconditionFailedError)) throw error;
+        await editReviewStates(deck, () => changes);
+      }
+    };
+  }
+
+  /**
+   * The changes `change` makes of the states as read, written of that
+   * same read, If-Match it; read and changed again while the document
+   * keeps changing meanwhile (editDocument, ReviewStateRepository).
+   */
+  function editReviewStates(
+    deck: Deck,
+    change: (states: ReviewStates) => ReviewChanges | null,
+  ): Promise<ReviewChanges | null> {
+    return editDocument(deck.reviewsDocumentUrl, fetch, async (read) => {
+      const changes = change(read === null ? none() : sharedReviewStatesOf(read, deck));
+      if (changes === null) return { result: null };
+      const checked = await checkedChange(read, deck, changes);
+      return checked === null ? { result: changes } : { dataset: checked, result: changes };
+    });
   }
 
   return {
@@ -181,9 +233,12 @@ export function createSolidReviewStateRepository({
       await saveReviews(deck, written);
     },
 
+    // The same changes, made of the document as it is now, also after it changed meanwhile.
     async applyReviewChanges(deck, changes): Promise<void> {
-      await (await prepareReviewChanges(deck, changes))();
+      await editReviewStates(deck, () => changes);
     },
+
+    editReviewStates,
 
     prepareReviewChanges,
 

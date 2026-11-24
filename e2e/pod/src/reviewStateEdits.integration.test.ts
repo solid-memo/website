@@ -11,13 +11,17 @@
  * resetting the study day, in one write of the reviews document, which
  * stays valid, so a reset of the day then cannot bring back the state
  * from before; a card forgotten loses its states, while its answers stay
- * in the log.
+ * in the log. A card graded on another device while it is set due keeps
+ * that grade, due on the day set: the change is made of the states as
+ * the write reads them, and made again of a fresh read when the server
+ * refuses the save (412), where it enforces If-Match (preconditionsOf).
  */
-import { describe, expect, inject, it } from "vitest";
+import { beforeAll, describe, expect, inject, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Deck } from "@solid-memo/domain/deck";
+import type { ReviewState } from "@solid-memo/domain/review";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
@@ -30,12 +34,18 @@ import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPrefere
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
+import { ETAG_OUTLIVES_EDITS, etagMarksEveryEdit, preconditionsOf } from "./serverTraits";
 
 const SERVERS = inject("solidServers");
 
-/** A page of the app as createAppUseCases wires it, its answers logged. */
-function page() {
-  const writeFence = createWriteFence(fetch);
+/** A page of the app as createAppUseCases wires it, its answers logged; `afterRead` runs once each read it makes is answered. */
+function page(afterRead: (url: string) => Promise<void> = async () => undefined) {
+  const watching: typeof fetch = async (input, init) => {
+    const response = await fetch(input, init);
+    if ((init?.method ?? "GET").toUpperCase() === "GET") await afterRead(String(input));
+    return response;
+  };
+  const writeFence = createWriteFence(watching);
   const podFetch = writeFence.fetch;
   const shapeValidator = createShaclShapeValidator({
     fetch: podFetch,
@@ -124,6 +134,15 @@ async function seed(
 const today = () => studyDayOf(new Date(), DEFAULT_PREFERENCES.dayBoundaryHour);
 
 describe.each(SERVERS)("edits of review states on $name", ({ url: server }) => {
+  /** Whether the server enforces If-Match (preconditionsOf). */
+  let conditional = false;
+  /** Whether its ETag changes on every edit (etagMarksEveryEdit). */
+  let everyEdit = false;
+  beforeAll(async () => {
+    conditional = (await preconditionsOf(server)).edits;
+    everyEdit = await etagMarksEveryEdit(server);
+  });
+
   it("sets a card due on a day, its snapshot dropped, so a reset of the day makes it due today", async () => {
     const { instanceUrl, deck, useCases } = await seed(server);
     const [gull] = (await useCases.listDeckReviewStates(deck)).sm2.filter(
@@ -164,6 +183,43 @@ describe.each(SERVERS)("edits of review states on $name", ({ url: server }) => {
     ]);
     const after = await page().getStatistics(instanceUrl, new Date(), { deckUrl: deck.url });
     expect(after.totals).toEqual(before.totals);
+    expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
+  });
+
+  it("keeps a grade another device made while a card is set due, the card due on the day set", async (context) => {
+    if (!conditional)
+      context.skip("this server ignores If-Match, so a change made elsewhere cannot be detected");
+    // The grade is made in the same second as the read, which such a server's ETag does not tell apart.
+    if (!everyEdit) context.skip(ETAG_OUTLIVES_EDITS);
+    const { instanceUrl, deck } = await seed(server);
+    const [gull] = await page().listCards(deck);
+    let graded: ReviewState | undefined;
+    // The Studio reads the deck's states; before it saves them, the card is forgotten on a phone.
+    const studio = page(async (url) => {
+      if (url !== deck.reviewsDocumentUrl || graded !== undefined) return;
+      const phone = await page().recordReview(
+        instanceUrl,
+        deck,
+        { card: gull!, direction: "front-to-back" },
+        1,
+        new Date(),
+      );
+      graded = phone.state;
+    });
+
+    await expect(studio.rescheduleCards(instanceUrl, deck, [gull!.id], "2099-01-01")).resolves.toBe(
+      1,
+    );
+
+    expect(graded).toBeDefined();
+    const kept = (await page().listDeckReviewStates(deck)).sm2.find(
+      (state) => state.cardId === gull!.id,
+    )!;
+    // The phone's lapse, not the schedule the Studio read before it.
+    expect(kept.intervalDays).toBe(graded!.intervalDays);
+    expect(kept.repetitions).toBe(graded!.repetitions);
+    expect(kept.lastReviewedAt).toBe(graded!.lastReviewedAt);
+    expect(kept.due).toBe("2099-01-01");
     expect((await page().validateInstance(instanceUrl)).conforms).toBe(true);
   });
 });

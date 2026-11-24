@@ -971,9 +971,28 @@ export interface ReviewStateRepository {
    * either way. With
    * `carried`, a state written at a new subject starts from the state
    * of its kind the source's reviews document holds of the card it is a
-   * copy of (CarriedFrom, by card id) in its direction.
+   * copy of (CarriedFrom, by card id) in its direction. The save is
+   * made only if the document is still as read (If-Match); when it
+   * changed meanwhile, the same changes are made of it again, read
+   * afresh (editReviewStates). For changes that hold whatever the
+   * document holds now: an answer undone puts its state back.
    */
   applyReviewChanges(deck: Deck, changes: ReviewChanges): Promise<void>;
+  /**
+   * Write the changes `change` makes of the deck's review states as its
+   * reviews document holds them now (as listReviewStates reads them), as
+   * applyReviewChanges writes them, in ONE save made only if the
+   * document is still as read (If-Match); when it changed meanwhile (a
+   * grade on another device), it is read and changed again, a few
+   * times. `change` gives null for no change, which writes nothing; what
+   * it throws is thrown at once. The changes last written, or null. For
+   * an edit made of the states, so the save never writes states made of
+   * an older read over a later one.
+   */
+  editReviewStates(
+    deck: Deck,
+    change: (states: ReviewStates) => ReviewChanges | null,
+  ): Promise<ReviewChanges | null>;
   /**
    * The write applyReviewChanges makes, with what it reads read, and
    * refused and checked as applyReviewChanges refuses and checks it (a
@@ -981,9 +1000,18 @@ export interface ReviewStateRepository {
    * wrote: writtenByNewerApp), but not sent: the function returned sends
    * it, If-Match the read. For a write made after another, so that what
    * would refuse it refuses it before the first, and what is sent is
-   * what was checked.
+   * what was checked. With `version`, the one the changes were made
+   * from (readReviewStatesSince), a document no longer at it refuses
+   * them at once (PreconditionFailedError), nothing sent, so the edit is
+   * planned again. One that changes once the function returned is
+   * called, after the write before it was sent, has the same changes
+   * made of it read afresh (editReviewStates).
    */
-  prepareReviewChanges(deck: Deck, changes: ReviewChanges): Promise<() => Promise<void>>;
+  prepareReviewChanges(
+    deck: Deck,
+    changes: ReviewChanges,
+    options?: { version?: string },
+  ): Promise<() => Promise<void>>;
   /**
    * Write the FSRS-6 states `edit` makes of the deck's states as its
    * reviews document holds them now, in ONE edit made only if it is

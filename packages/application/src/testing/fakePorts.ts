@@ -277,6 +277,12 @@ export function makeDeps() {
     }),
     createReviewStates: vi.fn(async () => undefined),
     applyReviewChanges: vi.fn(async () => undefined),
+    // As the real one does: the changes made of the states stored, which listReviewStates gives, then written.
+    editReviewStates: vi.fn(async (d, change) => {
+      const changes = change(await reviewStateRepository.listReviewStates(d));
+      if (changes !== null) await reviewStateRepository.applyReviewChanges(d, changes);
+      return changes;
+    }),
     // As the real one does: applyReviewChanges's write, sent when the function given is called.
     prepareReviewChanges: vi.fn(
       async (d, changes) => () => reviewStateRepository.applyReviewChanges(d, changes),

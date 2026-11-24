@@ -7,6 +7,7 @@ import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
+import type { ReviewChanges } from "./ports";
 import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
 
 describe("study", () => {
@@ -428,6 +429,51 @@ describe("study", () => {
       const useCases = createUseCases({ ...deps, answerLog: log });
       return { deps, log, byMonth, useCases, states: () => sm2, applyChanges };
     }
+
+    it("resets the states as the edit reads them, after the log: a grade made meanwhile goes back too", async () => {
+      const { deps, log, useCases } = studiedToday();
+      const graded = {
+        cardId: "other",
+        direction: "front-to-back" as const,
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-09-22",
+        firstReviewedAt: now.toISOString(),
+        lastReviewedAt: now.toISOString(),
+        formatVersion: 2,
+      };
+      const order: string[] = [];
+      log.removeDay.mockImplementation(async () => {
+        order.push("log");
+      });
+      let made: ReviewChanges | null = null;
+      vi.mocked(deps.reviewStateRepository.editReviewStates).mockImplementation(
+        async (_deck, change) => {
+          order.push("states");
+          made = change(sm2s([graded]));
+          return made;
+        },
+      );
+
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(1);
+
+      expect(order).toEqual(["log", "states"]);
+      expect(made).toEqual({
+        save: [],
+        remove: [{ cardId: "other", direction: "front-to-back" }],
+        fsrs: { save: [], remove: [] },
+      });
+    });
+
+    it("writes no state, and counts none, when the edit finds the day already reset", async () => {
+      const { deps, useCases } = studiedToday();
+      vi.mocked(deps.reviewStateRepository.editReviewStates).mockImplementation(
+        async (_deck, change) => change(sm2s([])),
+      );
+      await expect(useCases.resetStudyDay(instance.url, deck, now)).resolves.toBe(0);
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
+    });
 
     it("leaves the states when the log removal fails, so a retry removes both", async () => {
       const { deps, log, byMonth, useCases, states } = studiedToday();

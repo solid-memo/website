@@ -1134,7 +1134,10 @@ edited in place. Only `sm:sm2` and `sm:fsrs6` states are touched.
 Neither touches the answer log. The use cases `resetCards` and
 `rescheduleCards` write the change in one write of the reviews
 document (none when no card has a state), then the deck's schedule in
-the digest. The screens then read the review states afresh and drop
+the digest. The change is made of the states as that write reads them
+(`editReviewStates`), and made again of a fresh read when the document
+changed meanwhile: a card graded on another device keeps its grade, due
+on the day set. The screens then read the review states afresh and drop
 the deck's study queue. The end-to-end
 tests hold both against real servers
 ([reviewStateEdits.integration.test.ts](../e2e/pod/src/reviewStateEdits.integration.test.ts)).
@@ -1244,9 +1247,13 @@ nothing written. That's a card or a state a newer version of the app
 wrote that the move would rewrite: a moved card, or the state the app
 reads of one. Any other
 card's subject or state a newer version wrote, such as a distractor,
-stays where it is and doesn't stop the move. Each write is then sent
-If-Match the read it was made from, so a document changed since has
-the move planned again. The end-to-end tests hold this
+stays where it is and doesn't stop the move. Each write is made only
+while its document is at the version the move was planned from, so a
+document changed since has the move planned again, nothing sent. A
+reviews document that changes once a cards document was sent can't
+have the move planned again: its changes, a card's states added or
+removed, are made of it read afresh (`prepareReviewChanges`). The
+end-to-end tests hold this
 against real servers, and include a move stopped before the source's
 cards were written
 ([cardTransfer.integration.test.ts](../e2e/pod/src/cardTransfer.integration.test.ts)).

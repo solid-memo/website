@@ -279,21 +279,24 @@ export function createStudyUseCases({
         reviewStateRepository.listReviewStates(deck),
       ]);
       const reset = resetStudyDay(reviews.sm2, now, prefs.dayBoundaryHour);
-      const count = reset.restore.length + reset.remove.length;
-      if (count > 0) {
-        // The day never happened: its answers leave the log, those still on their way first.
-        // Before the states go back, so a removal that fails leaves the day to reset again,
-        // and the retry repeats both writes.
-        await answerStore.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
-        // FSRS-6's states of the day go back with SM-2's, in the same save.
-        const fsrs = resetFsrsStudyDay(reviews.fsrs, now, prefs.dayBoundaryHour);
-        await reviewStateRepository.applyReviewChanges(deck, {
-          save: reset.restore,
-          remove: reset.remove,
+      if (reset.restore.length + reset.remove.length === 0) return 0;
+      // The day never happened: its answers leave the log, those still on their way first.
+      // Before the states go back, so a removal that fails leaves the day to reset again,
+      // and the retry repeats both writes.
+      await answerStore.removeDay(instanceUrl, deck.url, studyDayOf(now, prefs.dayBoundaryHour));
+      // The states go back as the document holds them now: a grade made meanwhile is reset with
+      // the day, not written over with what was read before it. FSRS-6's go with SM-2's, in the same save.
+      const written = await reviewStateRepository.editReviewStates(deck, (states) => {
+        const sm2 = resetStudyDay(states.sm2, now, prefs.dayBoundaryHour);
+        const fsrs = resetFsrsStudyDay(states.fsrs, now, prefs.dayBoundaryHour);
+        if (sm2.restore.length + sm2.remove.length === 0) return null;
+        return {
+          save: sm2.restore,
+          remove: sm2.remove,
           fsrs: { save: fsrs.restore, remove: fsrs.remove },
-        });
-      }
-      return count;
+        };
+      });
+      return written === null ? 0 : written.save.length + written.remove.length;
     },
   };
 }
