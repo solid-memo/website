@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.3.3](https://github.com/solid-memo/website/compare/v8.3.2...v8.3.3) (2026-11-24)
+
+### Fixes
+
+* **application:** keep no theme, palette or text size on the device from an out-of-date read ([7e66740](https://github.com/solid-memo/website/commit/7e66740c18b526434fab447f423db224224d0483)), closes [#1005](https://github.com/solid-memo/website/issues/1005)
+
 ## [8.3.2](https://github.com/solid-memo/website/compare/v8.3.1...v8.3.2) (2026-11-24)
 
 ### Fixes
