@@ -247,7 +247,7 @@ jobs:
       # downloaded and semantic-release runs
       # (docs/releasing.md#the-deploy-key).
       - if: steps.tip.outputs.release == 'true'
-        run: npm audit signatures
+        run: npm run audit:signatures
       # Chromium, downloaded and checked against a committed SHA-256, with
       # its system libraries from Ubuntu's signed mirror, not restored from
       # the cache.

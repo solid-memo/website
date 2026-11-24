@@ -738,11 +738,13 @@ since the job's output is pushed with the key:
   [.github/actions/headless-shell](../.github/actions/headless-shell/action.yml).
   Playwright's own download checks no hash, so it isn't used, and
   `npm run check:shell` holds the pin to Playwright's version.
-- `npm audit signatures` runs next, before Chromium is
-  downloaded and before semantic-release runs. It fails unless every installed
-  version from a registry has the registry's valid signature, and any
-  attestation it has, such as its provenance, verifies
-  ([testing.md](testing.md#the-workflows)). It checks the registry's
+- `npm audit signatures` runs next (`npm run audit:signatures`), before
+  Chromium is downloaded and before semantic-release runs. It fails
+  unless every installed version from a registry has the registry's
+  valid signature, and any attestation it has, such as its provenance,
+  verifies ([testing.md](testing.md#the-workflows)). Only an answer the
+  registry couldn't give or that npm couldn't read is asked for again,
+  twice at most. It checks the registry's
   record of each version, not the lockfile's hashes or the files
   installed. A valid signature proves a version is one the registry
   published, not that it's safe: a hijacked maintainer account still

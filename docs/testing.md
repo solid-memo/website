@@ -27,6 +27,7 @@ npm run browsers  # once: Chromium's headless shell, which npm run check and npm
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
 npm run coverage:summary   # the coverage the last tests measured, per package, as a table
+npm run audit:signatures   # npm audit signatures, asked again when the registry's answer can't be fetched or read, as CI runs it (-- --prefix <dir> for another install; below)
 npm run dependencies:review -- changes.json    # the advisories and the packages GitHub's comparison of two commits' dependency graphs adds, changes and removes, as tables, as CI's dependency-review job writes them; fails on an advisory the base doesn't have (BASE=<commit> also reads the base's lock files)
 npm run lint:markdown      # markdownlint over the project's Markdown, as npm run check runs it
 npm run lint:spelling      # cspell, American English, over the Markdown and en.json, as npm run check runs it
@@ -862,7 +863,7 @@ jobs run side by side, each
 | Job | Kind | What it checks |
 |---|---|---|
 | `gate` | deterministic | what the run runs: every job, or none but `reuse` (and `release-files`), when the run reuses the one that tested its tree (`npm run ci:gate`, [releasing.md](releasing.md#what-each-stage-checks)); on a release commit, that it changes nothing but the files a release writes |
-| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it) and the growth tests (`growth` runs them), its parts each a step (`check:lints`, `check:tasks`, `check:repository`), so the jobs API shows each part's time. A part runs when a part before it failed, so a run shows every failure, but none runs when a step before the parts failed, such as `npm ci` or `npm audit signatures`. Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm audit signatures` checks the registry's signatures of the installed packages (The workflows, below) |
+| `check` | deterministic | `npm run check:ci`: `npm run check` without the deck library (`library` checks it) and the growth tests (`growth` runs them), its parts each a step (`check:lints`, `check:tasks`, `check:repository`), so the jobs API shows each part's time. A part runs when a part before it failed, so a run shows every failure, but none runs when a step before the parts failed, such as `npm ci` or `npm run audit:signatures`. Chromium's headless shell and its system libraries, for the docs' diagrams, from GitHub's cache or installed ([.github/actions/chromium](../.github/actions/chromium/action.yml), [Browsers](#browsers)). Every package's coverage goes to the run's summary (`npm run coverage:summary`). Turbo's cache is kept between runs under this job's own key, so a task whose inputs haven't changed doesn't run again. Only a run on `main` saves it, and pull requests and the merge queue start from `main`'s; the queue keeps it as its run's `turbo-cache` artifact, which `reuse` saves as `main`'s. Before all of it, `npm run audit:signatures` checks the registry's signatures of the installed packages (The workflows, below) |
 | `growth` | deterministic | `npm run test:growth`: the growth tests, which time CPU work as the ratio of two runs on the same runner, beside `check`, so that its tests don't wait for theirs, and without coverage, which `check`'s tests measure whole. It keeps no Turbo cache, so they run on every run |
 | `site` | deterministic | `npm run build`, once a run, the docs' diagrams drawn as in `check`, kept a week as the run's `site` artifact (a `journeys` job run again still finds it), which the `journeys` jobs test and the deploy ships. Nothing in it comes from GitHub's cache, and in the merge queue and on `main` it attests the list of the site's files, which the deploy checks the artifact against ([deployment.md](deployment.md#the-build-ci-tested)) |
 | `reuse` | deterministic | nothing: on `main`, when the run reuses the one that tested its tree, it takes over that run's site as this run's `site` artifact and, except on a release commit, its Turbo cache, saved as `main`'s. It runs none of the repository's code |
@@ -1081,7 +1082,8 @@ uv pip compile --generate-hashes --universal --python-version=3.11 scripts/requi
 CI's `check` job and the release workflow's `prepare` job
 run `npm audit signatures` right after `npm ci --ignore-scripts`, and
 the Pending updates workflow runs
-it on Renovate's own install in `scripts/renovate/`. For each installed
+it on Renovate's own install in `scripts/renovate/`, each through
+`npm run audit:signatures` ([scripts/auditSignatures.ts](../scripts/auditSignatures.ts)). For each installed
 version from a registry, it fetches the registry's record of that
 version. It checks the registry's signature over its name, version and
 integrity hash, with the public keys [Sigstore](https://www.sigstore.dev/)
@@ -1096,7 +1098,21 @@ Sigstore and against that hash. The command fails on:
 - an attestation whose package, version or hash differs from the
   record's;
 - a version with no signature, from a registry that has signing keys;
-- a record, key or attestation it can't fetch.
+- a record, key or attestation it can't fetch or read.
+
+The registry now and then answers a request with a body that isn't
+JSON, such as `OK`, and npm then stops the whole command with
+`FETCH_ERROR` rather than count it against a package. So
+`npm run audit:signatures` runs the command again, after 15 seconds,
+when npm's error code says it couldn't fetch or read an answer. Those
+codes cover an answer that isn't JSON, a dropped or slow connection, a
+name that didn't resolve, too many requests and a server error. It tries three times at most,
+and each try after the first fetches every record again
+(`--prefer-online`) rather than reading npm's cached copy of the broken
+answer. Each retry leaves a warning in the run. Any other failure fails
+the step on the first try, and an invalid or missing signature or
+attestation fails the same way on every try, so the retries let no
+package through that one try would stop.
 
 A version without attestations passes, and so does one whose earlier
 versions had provenance when this one has none. The command checks the
