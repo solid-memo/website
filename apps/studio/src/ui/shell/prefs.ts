@@ -14,6 +14,7 @@ import {
   scaledPane,
 } from "./splitter";
 import { SAVED_VIEWS, VIEW_TABLES, type SavedView, type ViewTable } from "./views";
+import { latestFirst } from "@solid-memo/domain/latestFirst";
 
 /** How tightly the Studio's rows and controls are packed: compact (about 28px), or comfortable (44px, for touch). */
 export type Density = "compact" | "comfortable";
@@ -150,7 +151,7 @@ export function recentCommands(device: DeviceValueUseCases): string[] {
 /** Notes an entry of the palette as the one used last. */
 export function rememberCommand(id: string, device: DeviceValueUseCases): void {
   const recent = device.deviceValue(RECENT_KEY, RECENT_COMMANDS);
-  recent.write([id, ...recent.read().filter((each) => each !== id)].slice(0, RECENT_LIMIT));
+  recent.write(latestFirst(recent.read(), id, RECENT_LIMIT));
 }
 
 /** A deck or a draft of an instance, by its URL, as the sidebar pins it or lists it as opened lately. */
@@ -298,5 +299,5 @@ export function togglePin(pinned: readonly WorkItem[], item: WorkItem): WorkItem
 /** The items opened last with one opened now: first, once, as many as the device keeps; one it does not keep is not listed. */
 export function openedNow(recent: readonly WorkItem[], item: WorkItem): WorkItem[] {
   if (!keptText(item.url)) return [...recent];
-  return [item, ...recent.filter((each) => !sameItem(each, item))].slice(0, RECENT_ITEMS);
+  return latestFirst(recent, item, RECENT_ITEMS, sameItem);
 }

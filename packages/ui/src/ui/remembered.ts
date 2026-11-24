@@ -7,6 +7,7 @@ import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
 import type { DeviceValueKind, InstanceValueKind } from "@solid-memo/application/ports";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import { validateWebId } from "@solid-memo/domain/webId";
+import { latestFirst } from "@solid-memo/domain/latestFirst";
 
 /** Values kept past their screen, for the life of the page. */
 const memory = new Map<string, unknown>();
@@ -81,7 +82,7 @@ export function rememberLanguage(
   device: DeviceValueUseCases,
 ): void {
   const recent = device.deviceValue(recentKey(kind), RECENT);
-  recent.write([tag, ...recent.read().filter((other) => other !== tag)].slice(0, RECENT_LANGUAGES));
+  recent.write(latestFirst(recent.read(), tag, RECENT_LANGUAGES));
 }
 
 /** The key the folded deck groups are kept under, by instance URL. */
