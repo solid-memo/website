@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { CardContent, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
 import { CardCreatorScreen } from "./CardCreatorScreen";
 import { useI18n } from "./i18n";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the add-card mutation. Deliberately stays on the page after a
@@ -29,7 +30,6 @@ export function CardCreatorContainer({
   backHref: string;
 }) {
   const { errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const cardsQuery = useQuery({
     queryKey: queryKeys.cards(deck.cardsDocumentUrl),
@@ -37,14 +37,9 @@ export function CardCreatorContainer({
   });
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
 
-  const addCardMutation = useMutation({
+  const addCardMutation = useWrite({
     mutationFn: (content: CardContent) => useCases.addCard(deck, content),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-    },
+    changes: () => [changes.cards(deck)],
   });
 
   return (

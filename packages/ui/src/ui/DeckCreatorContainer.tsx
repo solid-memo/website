@@ -2,13 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LangText } from "@solid-memo/domain/langText";
 import { DeckCreatorScreen } from "./DeckCreatorScreen";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /** Owns the create-deck mutation; returns to the deck list on success. */
 export function DeckCreatorContainer({
@@ -22,16 +21,11 @@ export function DeckCreatorContainer({
   onDone: () => void;
 }) {
   const { errorText } = useI18n();
-  const queryClient = useQueryClient();
 
-  const createDeckMutation = useMutation({
+  const createDeckMutation = useWrite({
     mutationFn: (title: LangText) => useCases.createDeck(instance.url, title),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.decks(instance.url),
-      });
-      onDone();
-    },
+    changes: () => [changes.decks(instance.url)],
+    onSuccess: () => onDone(),
   });
 
   return (

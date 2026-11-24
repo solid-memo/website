@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
@@ -12,6 +12,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { InstanceAboutScreen } from "./InstanceAboutScreen";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -35,19 +36,14 @@ export function InstanceAboutContainer({
   healthHref: string;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
   const catalogQuery = useQuery({
     queryKey: queryKeys.catalog(instance.url),
     queryFn: () => useCases.readCatalog(instance.url),
   });
-  const save = useMutation({
+  const save = useWrite({
     mutationFn: (write: () => Promise<unknown>) => write(),
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.allInstances() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.catalog(instance.url) }),
-      ]),
+    changes: () => [changes.reads(queryKeys.allInstances(), queryKeys.catalog(instance.url))],
   });
 
   if (catalogQuery.error) return <ErrorMessage error={errorText(catalogQuery.error)} />;

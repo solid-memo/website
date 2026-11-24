@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { activeCards, type Deck } from "@solid-memo/domain/deck";
 import { deckLanguageIssues, deckLanguages } from "@solid-memo/domain/deckLanguages";
@@ -18,6 +18,7 @@ import { routeToHash, studioHref } from "./router";
 import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the card count, today's study queue and the day reset for one deck.
@@ -65,22 +66,11 @@ export function DeckDetailContainer({
     refetchOnWindowFocus: false,
     refetchOnMount: "always",
   });
-
-  const queryClient = useQueryClient();
-  const resetDayMutation = useMutation({
+  // A failed reset may still have removed the day's answers from the log, so what was read
+  // before it is refreshed either way; the queue this screen shows is read again.
+  const resetDayMutation = useWrite({
     mutationFn: () => useCases.resetStudyDay(instance.url, deck, new Date()),
-    // A failed reset may still have removed the day's answers from the log, so what was read
-    // before it is refreshed either way.
-    onSettled: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.studyQueue(deck.url),
-      });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.statistics(instance.url) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.cardProgress(instance.url) });
-    },
+    changes: () => [changes.reviews(deck)],
   });
 
   const error = cardsQuery.error ?? queueQuery.error;

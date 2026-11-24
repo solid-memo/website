@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import {
   studyDirections,
@@ -24,6 +24,7 @@ import {
   type FsrsSchedule,
   type ScheduleEditMade,
 } from "./CardScheduleScreen";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 const BOTH: readonly StudyDirection[] = ["front-to-back", "back-to-front"];
@@ -109,7 +110,6 @@ export function CardScheduleContainer({
   card: Card;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const [done, setDone] = useState<ScheduleEditMade | null>(null);
   const reviewsQuery = useQuery({
     queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
@@ -120,18 +120,14 @@ export function CardScheduleContainer({
     queryKey: queryKeys.preferences(instanceUrl),
     queryFn: () => useCases.getPreferences(instanceUrl),
   });
-  const editMutation = useMutation({
+  const editMutation = useWrite({
     mutationFn: (edit: ScheduleEditMade) =>
       edit.kind === "reset"
         ? useCases.resetCards(instanceUrl, deck, [card.id], edit.direction)
         : useCases.rescheduleCards(instanceUrl, deck, [card.id], edit.due, edit.direction),
     onMutate: () => setDone(null),
     onSuccess: (_count, edit) => setDone(edit),
-    onSettled: async () => {
-      // The study counts go at once: a screen opened while the states are read again counts afresh.
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) });
-    },
+    changes: () => [changes.reviews(deck)],
   });
 
   const failure = reviewsQuery.error ?? preferencesQuery.error;

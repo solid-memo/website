@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckFile, DeckFileOptions } from "@solid-memo/domain/deckFile";
@@ -15,6 +15,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { TransferScreen, type ExportRun } from "./TransferScreen";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -49,7 +50,6 @@ export function TransferContainer({
   healthHref: string;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const [exporting, setExporting] = useState<ExportRun | null>(null);
   const [file, setFile] = useState<DeckFile | null>(null);
   const check = useDataCheck(useCases, instance.url);
@@ -83,16 +83,12 @@ export function TransferContainer({
     // No file picked: the one picked before stays.
     onSuccess: (opened) => setFile((before) => opened ?? before),
   });
-  const importMutation = useMutation({
+  const importMutation = useWrite({
     scope: { id: catalogScope(instance.url) },
     mutationFn: (withProgress: boolean) =>
       useCases.importDeckFile(instance.url, file!, { withProgress }),
+    changes: () => [changes.manyDecks(instance.url)],
     onSuccess: () => setFile(null),
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
-      ]),
   });
 
   if (treeQuery.error) return <ErrorMessage error={errorText(treeQuery.error)} />;

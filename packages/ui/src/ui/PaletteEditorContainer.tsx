@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { PaletteDraft } from "@solid-memo/domain/customPalette";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -14,6 +14,7 @@ import { routeToHash } from "./router";
 import { useI18n } from "./i18n";
 import { useTheme } from "./theme";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the editor of a palette of the user's own: reads the instance's
@@ -34,17 +35,16 @@ export function PaletteEditorContainer({
   onDone: () => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const { chooseCustomPalette } = useTheme();
   const palettesQuery = useQuery({
     queryKey: queryKeys.palettes(instance.url),
     queryFn: () => useCases.listPalettes(instance.url),
   });
-  const saveMutation = useMutation({
+  const saveMutation = useWrite({
     mutationFn: ({ draft, useAnyway }: { draft: PaletteDraft; useAnyway: boolean }) =>
       useCases.savePalette(instance.url, draft, { useAnyway }),
-    onSuccess: async (saved) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.palettes(instance.url) });
+    changes: () => [changes.reads(queryKeys.palettes(instance.url))],
+    onSuccess: (saved) => {
       chooseCustomPalette(saved);
       onDone();
     },

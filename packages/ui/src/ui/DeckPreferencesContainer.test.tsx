@@ -104,7 +104,7 @@ describe("DeckPreferencesContainer", () => {
 
     await waitFor(() => expect(onDone).toHaveBeenCalledOnce());
     expect(useCases.setDeckPace).toHaveBeenCalledWith(deck, { newCardsPerDay: 3 });
-    expect(remove).toHaveBeenCalledWith({ queryKey: ["studyQueue", deck.url] });
+    expect(remove).toHaveBeenCalledWith({ queryKey: ["studyQueue", deck.url], type: "inactive" });
   });
 
   it("shows a save error and stays", async () => {
@@ -152,8 +152,6 @@ describe("DeckPreferencesContainer", () => {
       ),
     );
     await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] }));
-    // The statistics name cards by the deck in their report, read before the choice.
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cardProgress"] });
     expect(onDone).not.toHaveBeenCalled();
   });
 

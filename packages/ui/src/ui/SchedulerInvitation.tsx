@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useId, useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import { invitesToFsrs, type StudyPreferences } from "@solid-memo/domain/preferences";
@@ -13,6 +13,7 @@ import { useI18n, type ErrorText } from "./i18n";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useTheme } from "./theme";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * The invitation to switch from SM-2 to FSRS-6, above the deck list:
@@ -90,7 +91,6 @@ export function SchedulerInvitationContainer({
 }) {
   const { errorText } = useI18n();
   const { choice: themeChoice } = useTheme();
-  const queryClient = useQueryClient();
   const [progress, setProgress] = useState<SwitchProgress | null>(null);
   /** How the switch ended, said until the learner closes it, with the preferences to try again with. */
   const [ended, setEnded] = useState<{
@@ -110,7 +110,7 @@ export function SchedulerInvitationContainer({
     refetchOnWindowFocus: false,
   });
 
-  const switchMutation = useMutation({
+  const switchMutation = useWrite({
     mutationFn: (preferences: StudyPreferences) => {
       setEnded(null);
       setProgress({ step: "read", done: 0, total: 0 });
@@ -120,18 +120,16 @@ export function SchedulerInvitationContainer({
         setProgress,
       );
     },
-    onSuccess: async (outcome, preferences) => {
-      await queryClient.invalidateQueries();
-      queryClient.removeQueries({ queryKey: queryKeys.allStudyQueues() });
+    changes: () => [changes.scheduler()],
+    onSuccess: (outcome, preferences) => {
       setProgress(null);
       setEnded({ outcome, preferences });
     },
     onError: () => setProgress(null),
   });
-  const dismissMutation = useMutation({
+  const dismissMutation = useWrite({
     mutationFn: () => useCases.dismissSchedulerInvitation(instance.url),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.preferences(instance.url) }),
+    changes: () => [changes.preferences(instance.url)],
   });
 
   if (progress !== null) return <SchedulerSwitchProgress progress={progress} />;

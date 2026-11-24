@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { decksOf } from "@solid-memo/domain/deckTree";
@@ -16,7 +15,7 @@ import { isPaused } from "@solid-memo/domain/deckPause";
 import { ComebackNotes } from "./ComebackNotes";
 import { PauseDeckDialog } from "./PauseDeckDialog";
 import { useStudyToday } from "./pausedToday";
-import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 import { useCopies, useDeckTreeEditor } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
@@ -92,23 +91,17 @@ export function DeckListContainer({
   const pausedToday = (deck: Deck) => isPaused(deck, today);
   const studied = (deck: Deck) => !isSetAside(deck) && !pausedToday(deck);
   const completion = useDeckCompletion(useCases, instance, decks.filter(studied), isCourse);
-  const queryClient = useQueryClient();
   /** The deck whose pause dialog is open. */
   const [pausing, setPausing] = useState<Deck | null>(null);
   // The deck's entry changed, and with it what it counts today: its queue, counts and comeback.
-  const refresh = (deck: Deck) =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-      queryClient.invalidateQueries({ queryKey: queryKeys.studyQueue(deck.url) }),
-    ]);
-  const pauseMutation = useMutation({
+  const pauseMutation = useWrite({
     mutationFn: ({ deck, resumesOn }: { deck: Deck; resumesOn: string | null }) =>
       useCases.pauseDeck(instance.url, deck, resumesOn, new Date()),
-    onSettled: (_paused, _error, { deck }) => refresh(deck),
+    changes: ({ deck }) => [changes.deckSchedule(deck)],
   });
-  const resumeMutation = useMutation({
+  const resumeMutation = useWrite({
     mutationFn: (deck: Deck) => useCases.resumeDeck(instance.url, deck, new Date()),
-    onSettled: (_resumed, _error, deck) => refresh(deck),
+    changes: (deck) => [changes.deckSchedule(deck)],
   });
 
   if (treeQuery.error) {

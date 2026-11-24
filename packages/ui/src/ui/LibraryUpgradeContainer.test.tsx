@@ -206,7 +206,10 @@ describe("LibraryUpgradeContainer", () => {
       expect(announced).toHaveTextContent("Updated to release 2 from the library."),
     );
     expect(useCases.applyLibraryUpgrade).toHaveBeenCalledWith(imported, plan, expect.any(Function));
-    expect(remove).toHaveBeenCalledWith({ queryKey: ["studyQueue", imported.url] });
+    expect(remove).toHaveBeenCalledWith({
+      queryKey: ["studyQueue", imported.url],
+      type: "inactive",
+    });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", imported.cardsDocumentUrl] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["reviews", imported.reviewsDocumentUrl] });
@@ -369,7 +372,10 @@ describe("LibraryUpgradeContainer", () => {
     // What it wrote is read again, and so is the offer, with the deck as it now is.
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", imported.cardsDocumentUrl] });
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["reviews", imported.reviewsDocumentUrl] });
-    expect(remove).toHaveBeenCalledWith({ queryKey: ["studyQueue", imported.url] });
+    expect(remove).toHaveBeenCalledWith({
+      queryKey: ["studyQueue", imported.url],
+      type: "inactive",
+    });
     fireEvent.click(within(region).getByRole("button", { name: "Try again" }));
     await waitFor(() => expect(applyLibraryUpgrade).toHaveBeenCalledTimes(2));
     expect(applyLibraryUpgrade).toHaveBeenLastCalledWith(imported, finishing, expect.any(Function));

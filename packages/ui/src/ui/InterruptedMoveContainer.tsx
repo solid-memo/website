@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ComponentChildren } from "preact";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
@@ -11,6 +11,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { usePanelFocus } from "./panelFocus";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * The partial copy that moving the guest's study into the user's Pod
@@ -31,7 +32,6 @@ export function InterruptedMoveContainer({
   instance: Instance;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const leftoverQuery = useQuery({
     queryKey: queryKeys.interruptedMove(instance.url),
@@ -39,11 +39,9 @@ export function InterruptedMoveContainer({
     staleTime: Infinity,
   });
 
-  const removeMutation = useMutation({
+  const removeMutation = useWrite({
     mutationFn: () => useCases.removeInterruptedGuestMove(session, instance),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.interruptedMove(instance.url) });
-    },
+    changes: () => [changes.reads(queryKeys.interruptedMove(instance.url))],
   });
 
   const leftover = leftoverQuery.data ?? null;

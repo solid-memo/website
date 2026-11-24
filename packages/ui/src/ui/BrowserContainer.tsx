@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck, DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckAbout } from "@solid-memo/domain/deckAbout";
@@ -15,6 +15,7 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import type { BrowserLanguageFilter } from "./router";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the card list and the deck/card mutations for the Browser view.
@@ -47,7 +48,6 @@ export function BrowserContainer({
   onLanguageFilterChange: (filter: BrowserLanguageFilter | undefined) => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const release = useDeckRelease(useCases, deck);
 
@@ -56,17 +56,14 @@ export function BrowserContainer({
     queryFn: () => useCases.listCards(deck),
   });
 
-  const describeDeckMutation = useMutation({
+  const describeDeckMutation = useWrite({
     mutationFn: (about: DeckAbout) => useCases.describeDeck(deck, about),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+    changes: () => [changes.deckEntry()],
   });
 
-  const setDirectionMutation = useMutation({
+  const setDirectionMutation = useWrite({
     mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-    },
+    changes: () => [changes.deckSchedule(deck)],
   });
 
   const toSettle = useMemo(
@@ -77,17 +74,10 @@ export function BrowserContainer({
     [cardsQuery.data, release],
   );
 
-  const removeCardMutation = useMutation({
+  // A removal that stops part-way may have taken the card from its document already.
+  const removeCardMutation = useWrite({
     mutationFn: (card: Card) => useCases.removeCard(deck, card),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-      });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-    },
+    changes: () => [changes.cardsAndReviews(deck)],
   });
 
   if (cardsQuery.error) {

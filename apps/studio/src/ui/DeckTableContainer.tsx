@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo, useState } from "preact/hooks";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { activeCards, type Card, type Deck, type DeckDirection } from "@solid-memo/domain/deck";
 import { deckPreferences, type DeckPace } from "@solid-memo/domain/deckPace";
@@ -29,6 +29,7 @@ import { DeckTableScreen, type DeckBadge } from "./DeckTableScreen";
 import { HealthBadge } from "./HealthBadge";
 import { UpdateBadge } from "./UpdateBadge";
 import type { HomeQuery, HomeView, SavedView } from "./shell/views";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /** A paused deck's badge (DeckBadge): until it is resumed, or until the day it resumes on. */
@@ -132,7 +133,6 @@ export function DeckTableContainer({
   cardsHref: (deck: Deck) => string;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const [failure, setFailure] = useState<unknown>(null);
   const treeQuery = useQuery({
     queryKey: queryKeys.deckTree(instance.url),
@@ -157,7 +157,7 @@ export function DeckTableContainer({
   });
   const { isCourse, linkedHost, readsRefused } = useCopies(useCases, decks);
 
-  const bulkMutation = useMutation({
+  const bulkMutation = useWrite({
     scope: { id: catalogScope(instance.url) },
     mutationFn: async (bulk: Bulk): Promise<void> => {
       switch (bulk.kind) {
@@ -178,17 +178,13 @@ export function DeckTableContainer({
           await useCases.removeDecks(bulk.decks);
       }
     },
+    changes: (bulk) => [
+      changes.manyDecks(instance.url),
+      // A removal stopped part-way may have taken decks' cards already.
+      ...(bulk.kind === "remove" ? bulk.decks.map(changes.cards) : []),
+    ],
     onMutate: () => setFailure(null),
     onError: (error) => setFailure(error),
-    onSettled: (_done, _error, bulk) =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.allStudyQueues() }),
-        // A removal stopped part-way may have taken decks' cards already.
-        ...(bulk.kind === "remove" ? bulk.decks : []).map((deck) =>
-          queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
-        ),
-      ]),
   });
   const run = (bulk: Bulk) =>
     bulkMutation.mutateAsync(bulk).then(

@@ -2,10 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CreatedDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { catalogScope } from "@solid-memo/ui/deckTreeEditor";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -17,17 +18,14 @@ import { queryKeys } from "./queryKeys";
 
 /** Make a release public again, as `webId`; then it, and the instance's releases, are asked afresh. */
 export function useMakePublic(useCases: UseCases, instanceUrl: string, webId: string) {
-  const queryClient = useQueryClient();
-  return useMutation({
+  return useWrite({
     mutationFn: async (url: string) => {
       await useCases.makeReleasePublic(instanceUrl, url, webId);
       return url;
     },
-    onSettled: (_done, _error, url) =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.releasePublic(url) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.publishedReleases(instanceUrl) }),
-      ]),
+    changes: (url) => [
+      changes.reads(queryKeys.releasePublic(url), queryKeys.publishedReleases(instanceUrl)),
+    ],
   });
 }
 
@@ -44,15 +42,14 @@ export function useStartNextVersion(
   onStarted: (created: CreatedDraft) => void,
 ) {
   const queryClient = useQueryClient();
-  return useMutation({
+  return useWrite({
     scope: { id: catalogScope(instanceUrl) },
     mutationFn: async (url: string) =>
       (await useCases.createReleaseDraft(instanceUrl, { kind: "nextVersionOf", url }, webId))!,
+    changes: () => [changes.reads(queryKeys.releaseDrafts(instanceUrl))],
     onSuccess: (created) => {
       queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(created.draft.url) });
       onStarted(created);
     },
-    onSettled: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instanceUrl) }),
   });
 }

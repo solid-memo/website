@@ -12,6 +12,7 @@ import type { Session } from "@solid-memo/domain/session";
 import { useI18n } from "./i18n";
 import { InstancePicker } from "./InstancePicker";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * The instance picker over the use cases: where the user may register an
@@ -54,13 +55,11 @@ export function InstancePickerContainer({
     queryFn: () => useCases.listStorages(session),
   });
 
-  const attachInstanceMutation = useMutation({
+  const attachInstanceMutation = useWrite({
     mutationFn: (args: { url: string; target: RegistrationTarget }) =>
       useCases.attachInstanceByUrl(session, args.url, args.target),
-    onSuccess: async (instance) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instances(webId) });
-      onOpen(instance);
-    },
+    changes: () => [changes.instances(webId)],
+    onSuccess: (instance) => onOpen(instance),
   });
 
   /**

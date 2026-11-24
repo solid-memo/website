@@ -14,6 +14,7 @@ import type { DraftEditor } from "./draftEditor";
 import { markdownCheckOf, publishErrors, useReleaseCheck } from "./releaseCheck";
 import { useMakePublic, useStartNextVersion } from "./releaseActions";
 import { ReleasePublishScreen, type ReleasePublishLinks } from "./ReleasePublishScreen";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -56,18 +57,19 @@ export function ReleasePublishContainer({
     // Asked of an address a release may have only: the draft is data anyone may have written.
     enabled: released !== undefined && isPublishedReleaseUrl(released),
   });
-  const publishMutation = useMutation({
+  const publishMutation = useWrite({
     scope: { id: catalogScope(instanceUrl) },
     mutationFn: (url: string) =>
       useCases.publishRelease(draft.url, url, markdownCheckOf(draft.url)),
+    changes: () => [
+      changes.reads(
+        queryKeys.releaseDraft(draft.url),
+        queryKeys.releaseDrafts(instanceUrl),
+        queryKeys.publishedReleases(instanceUrl),
+      ),
+    ],
     onSuccess: (published) =>
       queryClient.setQueryData(queryKeys.releasePublic(published.url), published.public),
-    onSettled: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.releaseDraft(draft.url) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instanceUrl) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.publishedReleases(instanceUrl) }),
-      ]),
   });
   const publicMutation = useMakePublic(useCases, instanceUrl, webId);
   const nextMutation = useStartNextVersion(useCases, instanceUrl, webId, onStarted);

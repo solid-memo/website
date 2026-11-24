@@ -27,6 +27,7 @@
     "./deckTreeEditor": "./src/ui/deckTreeEditor.ts",
     "./courseLinks": "./src/ui/courseLinks.ts",
     "./queryKeys": "./src/ui/queryKeys.ts",
+    "./writeEffects": "./src/ui/writeEffects.ts",
     "./composing": "./src/ui/composing.ts",
     "./askFirst": "./src/ui/askFirst.ts",
     "./retryable": "./src/ui/retryable.ts",

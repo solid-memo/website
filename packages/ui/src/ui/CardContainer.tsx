@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, CardContent, CardTextPart, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
@@ -11,6 +11,7 @@ import { CardScreen, type CardEdits } from "./CardScreen";
 import { publishedDistractorIds, useDeckRelease } from "./deckRelease";
 import { useI18n } from "./i18n";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the edit/remove mutations of one card's page. The card itself is
@@ -51,7 +52,6 @@ export function CardContainer({
   keep?: { current: CardEdits | null };
 }) {
   const { errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const cardsQuery = useQuery({
     queryKey: queryKeys.cards(deck.cardsDocumentUrl),
@@ -60,29 +60,17 @@ export function CardContainer({
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
   const release = useDeckRelease(useCases, deck);
 
-  const updateCardMutation = useMutation({
+  const updateCardMutation = useWrite({
     mutationFn: (content: CardContent) => useCases.updateCard(deck, card, content),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-      onSaved?.();
-    },
+    changes: () => [changes.cards(deck)],
+    onSuccess: () => onSaved?.(),
   });
 
-  const removeCardMutation = useMutation({
+  // A removal that stops part-way may have taken the card from its document already.
+  const removeCardMutation = useWrite({
     mutationFn: () => useCases.removeCard(deck, card),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-      });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-      onRemoved();
-    },
+    changes: () => [changes.cardsAndReviews(deck)],
+    onSuccess: () => onRemoved(),
   });
 
   return (

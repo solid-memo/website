@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -11,6 +11,7 @@ import { LibraryDeckScreen } from "./LibraryDeckScreen";
 import { libraryPreviewHref, routeToHash, tryHref } from "./router";
 import { useI18n } from "./i18n";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns one library deck's page and its import; returns to the deck list
@@ -37,7 +38,6 @@ export function LibraryDeckContainer({
   onCourseStarted: (deck: Deck) => void;
 }) {
   const { errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const decksQuery = useQuery({
     queryKey: queryKeys.decks(instance.url),
@@ -45,22 +45,16 @@ export function LibraryDeckContainer({
   });
   const imported = (decksQuery.data ?? []).some((podDeck) => isCopyOf(podDeck, deck));
 
-  const importMutation = useMutation({
+  const importMutation = useWrite({
     mutationFn: () => useCases.importLibraryDeck(instance.url, deck),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.decks(instance.url),
-      });
-      onDone();
-    },
+    changes: () => [changes.decks(instance.url)],
+    onSuccess: () => onDone(),
   });
 
-  const startMutation = useMutation({
+  const startMutation = useWrite({
     mutationFn: () => useCases.startCourse(instance.url, deck),
-    onSuccess: async (started) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) });
-      onCourseStarted(started);
-    },
+    changes: () => [changes.decks(instance.url)],
+    onSuccess: (started) => onCourseStarted(started),
   });
 
   return (

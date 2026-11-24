@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useRef } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { Session } from "@solid-memo/domain/session";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * "Old registrations" in Preferences (docs/data-model.md
@@ -31,16 +32,15 @@ export function OldRegistrationsContainer({
   instance: Instance;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const queryKey = queryKeys.oldRegistrations(session.webId, instance.url);
   const statusRef = useRef<HTMLParagraphElement>(null);
   const { data } = useQuery({
     queryKey,
     queryFn: () => useCases.oldRegistrations(session, instance),
   });
-  const removeMutation = useMutation({
+  const removeMutation = useWrite({
     mutationFn: () => useCases.removeOldRegistrations(session, instance),
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    changes: () => [changes.reads(queryKey)],
   });
   const removed = removeMutation.isSuccess;
   useEffect(() => {

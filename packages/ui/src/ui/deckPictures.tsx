@@ -4,7 +4,7 @@
 
 import { createContext, type ComponentChildren } from "preact";
 import { useContext, useLayoutEffect, useMemo, useRef, useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { pictureHost } from "@solid-memo/domain/deckPictures";
@@ -14,6 +14,7 @@ import { libraryIndexQuery } from "./deckTreeEditor";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 import { useRemembered } from "./remembered";
 
 /**
@@ -98,7 +99,6 @@ export function DeckPictures({
   children: ComponentChildren;
 }) {
   const { errorText } = useI18n();
-  const queryClient = useQueryClient();
   const inOwnPod = useInOwnPod(useCases, deck);
   const copy = inOwnPod === true && deck?.sourceUrl !== undefined;
   const libraryQuery = useQuery({ ...libraryIndexQuery(useCases), enabled: copy });
@@ -112,15 +112,13 @@ export function DeckPictures({
   // By deck too, as a cram of every deck's leeches goes from deck to deck under one DeckPictures.
   const [saved, setSaved] = useState<ReadonlySet<string>>(new Set());
   const savedName = (host: string) => `${deck!.url} ${host}`;
-  const allowMutation = useMutation({
-    mutationFn: (host: string) => useCases.setDeckPictureHost(deck!, host, true),
-    onSuccess: (_, host) => {
+  const allowMutation = useWrite({
+    // Shown as soon as it is written, before the decks are read again.
+    mutationFn: async (host: string) => {
+      await useCases.setDeckPictureHost(deck!, host, true);
       setSaved((before) => new Set(before).add(savedName(host)));
-      return Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() }),
-      ]);
     },
+    changes: () => [changes.deckEntry()],
   });
   const unread = copy && isLibraryCopy === undefined && !libraryQuery.isError;
   const asks =

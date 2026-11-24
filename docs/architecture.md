@@ -184,6 +184,39 @@ study counts (`queryKeys.studyCounts`) under its study queue. Each
 function's comment names the key it sits under, which the modules'
 tests check.
 
+### What a write refreshes
+
+Which cached reads a write makes stale is set once, in
+[packages/ui/src/ui/writeEffects.ts](../packages/ui/src/ui/writeEffects.ts),
+by the kind of write: `changes.cards(deck)` for a write of a deck's
+cards document, `changes.deckSchedule(deck)` for its pace or
+direction, and so on. A screen writes with `useWrite`, a mutation that
+names its writes (`changes`) and refreshes what they make stale as it
+ends, whether it succeeded or failed. A write of several documents
+may stop part-way, after it changed some, so a failed write is
+followed by a refresh too. What a write makes stale may depend on how
+it ended: an upgrade of a deck that failed before it wrote anything
+leaves the deck's documents as they were (`upgradeChanges` in
+[packages/ui/src/ui/LibraryUpgradeContainer.tsx](../packages/ui/src/ui/LibraryUpgradeContainer.tsx)).
+The refresh is over before the mutation's own `onSuccess` or
+`onError` runs, so a screen that opens another after a write opens it
+on what was written. A write the screen answers at once, such as an
+answer to a course's question, refreshes in the `background` instead.
+
+A write that patches the cache itself rather than reading it again
+keeps its own `onSuccess`: an answer in a study session, and the
+decks' arrangement, whose writes wait in turn for one another
+(`useDeckTreeEditor` in
+[packages/ui/src/ui/deckTreeEditor.ts](../packages/ui/src/ui/deckTreeEditor.ts)).
+
+A refresh drops some queries, such as a deck's study queue, so that a
+screen opened later doesn't start on what the write changed. A
+dropped query that a screen shows is read again instead. The
+statistics, the cards' progress and their answers are read again after
+every mutation (`keepStudyFiguresFresh` in
+[packages/ui/src/ui/studyFigures.ts](../packages/ui/src/ui/studyFigures.ts)),
+so no write names them.
+
 Every `QueryClient` the apps make hashes its keys with
 `boundedQueryKeyHash` from the first module. TanStack Query keys its
 cache by a hash of each key, by default the key's JSON. A key holds
