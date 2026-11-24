@@ -777,10 +777,10 @@ describe("the site the deploy ships", () => {
   });
 });
 
-describe("npm audit signatures", () => {
+describe("npm run audit:signatures", () => {
   const at = (job: string[], text: string) => job.findIndex((step) => step.includes(text));
   const install = "npm ci --ignore-scripts";
-  const audit = /^\s*run: npm audit signatures$/m;
+  const audit = /^\s*run: npm run audit:signatures$/m;
 
   it("runs right after the install in ci.yml's check job", () => {
     const check = steps(jobs(read(".github/workflows/ci.yml")).get("check") ?? "", 6);

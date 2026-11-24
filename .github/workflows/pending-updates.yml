@@ -47,7 +47,9 @@ jobs:
           cache: npm
           cache-dependency-path: scripts/renovate/package-lock.json
       - run: npm ci --ignore-scripts --prefix scripts/renovate
-      - run: npm audit signatures --prefix scripts/renovate
+      # Renovate's packages' signatures, as in CI's check job
+      # (docs/testing.md#the-workflows).
+      - run: npm run audit:signatures -- --prefix scripts/renovate
       - env:
           GITHUB_COM_TOKEN: ${{ github.token }}
           LOG_LEVEL: info
