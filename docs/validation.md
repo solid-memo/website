@@ -683,8 +683,18 @@ time a check takes grows with the document, and the limits on what's
 read bound it: `RELEASE_LIMITS` for a release, and `FOREIGN_LIMITS` for
 a document outside the user's storages. A check never compares each
 subject with every other one. It lets the page do its work every few
-hundred subjects, so a large document makes the check long, and the
-page stays responsive while it runs.
+hundred subjects, and sooner after subjects with a few thousand values
+between them. A check of the whole document against DCAT-AP lets the
+page do its work at the same pace, node by node. One subject is
+checked in one go, and those same limits bound its values for one
+predicate: no more than 4,096 (`MAX_VALUES_PER_PREDICATE`), in a
+release and in a document outside the user's storages alike. Only a
+deck schedule's due days (`sm:dueOnDay`) may number up to 65,536
+(`MAX_DUE_DAYS`) in a document outside the user's storages, as a
+schedule names each day its prompts fall due, up to a hundred years
+ahead. A release keeps the lower bound for them too. So a large
+document makes the check long, and the check holds the page for at
+most about one subject's values at a time.
 
 ## Data that doesn't fit
 

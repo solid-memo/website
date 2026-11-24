@@ -343,9 +343,14 @@ the [pod fence](#the-pod-fence) that fetch passes the credential gate
   it follows no redirect either. A registered instance outside the
   user's storages is anyone's to make, and another app may register
   it, so what's read there is held to `FOREIGN_LIMITS`, which match a
-  release's ([deck-library.md](deck-library.md)). The storages and the
-  folders entered on this page, a storage entered by hand trusted like
-  one the profile names, are read as the user with no limits on size.
+  release's ([deck-library.md](deck-library.md)). Only the due days
+  of a deck's schedule (`sm:dueOnDay`) may be more there than the
+  values one subject of a release may have for one predicate, as a
+  schedule names a day for each day its prompts fall due
+  ([validation.md](validation.md#the-write-check)). The
+  storages and the folders entered on this page, a storage entered by
+  hand trusted like one the profile names, are read as the user with
+  no limits on size.
   The reads of the profile's documents are the exception, since
   they're made at every sign-in. The WebID document is held to
   `PROFILE_LIMITS`, a wide margin over the few triples a profile holds.

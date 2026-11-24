@@ -4,23 +4,60 @@
 
 import type { BlankNode, DataFactory, Quad, Term } from "@rdfjs/types";
 import { escapedCharacters, HASHED_CHARACTERS, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
+import { SM } from "@solid-memo/vocab/vocab.generated";
 import { ReadLimitError, type ReadLimits } from "./interface";
 
 /** Keys for paths of terms, each term a key of its own, for the client modules and the alternative client. */
 export { pathKeys } from "@solid-memo/domain/pathKeys";
 
 /**
+ * The most values one subject of a release, or of an instance's
+ * document outside the user's storages, may have for one predicate,
+ * every predicate but those FOREIGN_LIMITS names: many times the most
+ * of any release. The largest such count in the library is a
+ * Wikidata-derived deck's prov:used, which names each entity its data
+ * comes from (a few hundred, 485 at most so far), and grows with them.
+ * Of the app's own data, a catalog's links (MAX_CATALOG_LINKS), a
+ * deck's keywords (MAX_DECK_KEYWORDS), its sources and other metadata
+ * (MAX_DECK_METADATA), a month summary's days and its recall times are
+ * bounded far lower. A series' versions (dcat:hasVersion) and an
+ * instance's published releases (sm:publishedRelease) grow by one with
+ * each release published: this many would take a release a day for
+ * over eleven years, so they are held to it too. The shape check goes
+ * through one subject's values in one go, without letting the page do
+ * its work between them, so a subject with very many would hold the
+ * page for as long as they take, however few the document's other
+ * subjects.
+ */
+export const MAX_VALUES_PER_PREDICATE = 4096;
+
+/**
+ * The most days a deck's schedule in an instance's document outside the
+ * user's storages may name its prompts due on (sm:dueOnDay,
+ * digestRecord.ts), the one predicate of the app's data that has more
+ * values on one subject than a release may (MAX_VALUES_PER_PREDICATE):
+ * one for each day from the earliest a prompt is overdue to as far
+ * ahead as an interval goes (MAX_INTERVAL_DAYS, 36,500 days), which
+ * leaves room for some eighty years of overdue days besides, so a
+ * schedule studied for a lifetime is still read. One subject with this
+ * many values of it still holds the page for a bounded time as it is
+ * checked, and every other predicate keeps the lower bound.
+ */
+export const MAX_DUE_DAYS = 65_536;
+
+/**
  * The most the app reads of a release: a wide margin over the largest
  * release in the library (decks/), about 2.4 MB, 40,000 triples and 8.5
- * million characters of terms. A release is anyone's to make, one added
- * from a link is read as soon as its link is opened, and the app keeps
- * every triple of what it reads, so one with no end would hold the tab
- * until it ran out of memory.
+ * million characters of terms, and MAX_VALUES_PER_PREDICATE. A release
+ * is anyone's to make, one added from a link is read as soon as its
+ * link is opened, and the app keeps every triple of what it reads, so
+ * one with no end would hold the tab until it ran out of memory.
  */
 export const RELEASE_LIMITS: ReadLimits = {
   bytes: 32 * 1024 * 1024,
   quads: 400_000,
   characters: 64 * 1024 * 1024,
+  valuesPerPredicate: MAX_VALUES_PER_PREDICATE,
 };
 
 /**
@@ -28,15 +65,31 @@ export const RELEASE_LIMITS: ReadLimits = {
  * storages (ownPodGate.ts), read as no one or, in an instance they
  * registered on another server, as them, and of an instance's meta
  * document anywhere: as much as of a release (RELEASE_LIMITS), which
- * holds a deck's cards as an instance's largest documents do. An
- * instance anyone may make can be added by its address or registered by
- * another app, a catalog may name a deck's documents on any server, and
- * the app keeps every triple of what it reads; all of them together
- * are held to FOREIGN_READS_BUDGET too. The user's storages are
- * read with no limits but on their declarations and nesting
- * (writeTurtle) and on the length of each term (MAX_TERM_CHARACTERS).
+ * holds a deck's cards as an instance's largest documents do, but for
+ * the days a deck's schedule names (sm:dueOnDay), up to MAX_DUE_DAYS
+ * of them. Every other predicate is held to MAX_VALUES_PER_PREDICATE
+ * values on one subject. An instance anyone may make can be added by
+ * its address or registered by another app, a catalog may name a
+ * deck's documents on any server, and the app keeps every triple of
+ * what it reads; all of them together are held to FOREIGN_READS_BUDGET
+ * too. The user's storages are read with no limits but on their
+ * declarations and nesting (writeTurtle) and on the length of each term
+ * (MAX_TERM_CHARACTERS).
  */
-export const FOREIGN_LIMITS: ReadLimits = RELEASE_LIMITS;
+export const FOREIGN_LIMITS: ReadLimits = {
+  ...RELEASE_LIMITS,
+  valuesOfPredicate: new Map([[SM.dueOnDay, MAX_DUE_DAYS]]),
+};
+
+/**
+ * The limits a read went past as the values of an error that names
+ * them (deckFileTooLarge): each of its counts, the predicates with a
+ * bound of their own each by its IRI.
+ */
+export function limitVars(limits: ReadLimits): Readonly<Record<string, number>> {
+  const { valuesOfPredicate, ...counts } = limits;
+  return { ...counts, ...Object.fromEntries(valuesOfPredicate ?? []) };
+}
 
 /**
  * The most subjects an access control the app reads as it makes a
@@ -301,7 +354,7 @@ const BUDGETS = new WeakSet<ReadLimits>();
  * anew. Told apart by the limits the error names being one of the
  * budgets or totals given to sharedReadBudget, by identity: a budget
  * spent that is told with other limits (solidDeckLibrary.ts names
- * RELEASE_LIMITS, the same object as FOREIGN_LIMITS) reads as a
+ * RELEASE_LIMITS) reads as a
  * document too large, so a removal (readForRemoval) must not be given
  * such a fetch.
  */
@@ -376,7 +429,9 @@ export function sharedReadBudget({
     const spent = {} as ReadsSpent;
     PAST.set(spent, (bytes) => {
       if (over(document, limits, bytes)) return limits;
-      return over(session, budget, bytes) ? budget : total;
+      if (over(session, budget, bytes)) return budget;
+      // Past none of the tallies: past what the read's limits bound that no budget counts (valuesPerPredicate).
+      return over(allSpent, total, bytes) ? total : limits;
     });
     for (const key of SPENT_KEYS) {
       Object.defineProperty(spent, key, {
@@ -592,30 +647,75 @@ export function namesIriUnder(
  * a short line of JSON-LD, stand for terms as long as it is, so a
  * document's bytes do not bound what its triples hold. Each call counts
  * one triple, into `spent` (by default the parse's own), and its subject,
- * in this parse, where the limits bound subjects, and says whether a
+ * in this parse, where the limits bound subjects, and the values of its
+ * subject for its predicate, where they bound those (valuesPerPredicate,
+ * or the predicate's own bound in valuesOfPredicate), and says whether a
  * count is now past its limit, or the triple has a term longer than
  * MAX_TERM_CHARACTERS, its blank nodes measured as the read keeps them
- * (BlankLabels): that, with no limits too. The set of subjects
- * holds one past its limit at most, as a read stops there.
+ * (BlankLabels): that, with no limits too. The subjects counted hold
+ * one past their limit at most, as a read stops there. Each copy of a
+ * triple counts, as it does toward the triples: a document that repeats
+ * one triple past the limit on values is refused, though its dataset
+ * would hold the triple once.
  */
 export function quadTally(
   limits: ReadLimits | undefined,
   labels: BlankLabels,
   spent: ReadsSpent = noneSpent(),
 ): (quad: Quad) => boolean {
-  const subjects = new Set<string>();
+  const subjects = subjectCounts();
   return (quad) => {
     if (termPast(quad, labels)) return true;
     if (limits === undefined) return false;
     const { subject, predicate, object, graph } = quad;
     spent.quads++;
     spent.characters += length(subject) + length(predicate) + length(object) + length(graph);
-    if (limits.subjects !== undefined) subjects.add(`${subject.termType} ${subject.value}`);
+    let count = 0;
+    if (limits.subjects !== undefined || limits.valuesPerPredicate !== undefined) {
+      const values = subjects.valuesOf(subject);
+      count = (values.get(predicate.value) ?? 0) + 1;
+      values.set(predicate.value, count);
+    }
+    const bound = limits.valuesPerPredicate ?? Number.POSITIVE_INFINITY;
     return (
       spent.quads > limits.quads ||
       spent.characters > limits.characters ||
-      subjects.size > (limits.subjects ?? Number.POSITIVE_INFINITY)
+      subjects.size() > (limits.subjects ?? Number.POSITIVE_INFINITY) ||
+      // Past the bound on every predicate, a predicate with one of its own is looked up: the few values a document's subjects have look up none.
+      (count > bound && count > (limits.valuesOfPredicate?.get(predicate.value) ?? bound))
     );
+  };
+}
+
+/**
+ * The subjects of a parse, and the values each has for each predicate,
+ * by predicate. They are kept by the subject's kind of term, then its
+ * name, then the predicate's name, each a key of its own, held to the
+ * bound on a term (MAX_TERM_CHARACTERS) before it is counted: never one
+ * string joining them, which could be past the bound.
+ */
+function subjectCounts(): {
+  valuesOf: (subject: Term) => Map<string, number>;
+  size: () => number;
+} {
+  const byKind = new Map<string, Map<string, Map<string, number>>>();
+  let size = 0;
+  return {
+    valuesOf(subject) {
+      let byName = byKind.get(subject.termType);
+      if (byName === undefined) {
+        byName = new Map();
+        byKind.set(subject.termType, byName);
+      }
+      let values = byName.get(subject.value);
+      if (values === undefined) {
+        values = new Map();
+        byName.set(subject.value, values);
+        size++;
+      }
+      return values;
+    },
+    size: () => size,
   };
 }
 

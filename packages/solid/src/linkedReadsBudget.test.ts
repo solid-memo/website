@@ -26,11 +26,24 @@ const STANDALONE = readFileSync(
 );
 const INDEX = `${HOST}index.ttl`;
 
+/**
+ * `count` triples of padding, a thousand values to a subject: a release
+ * may give one subject no more than MAX_VALUES_PER_PREDICATE values for
+ * one predicate.
+ */
+const paddingOf = (count: number, predicate: string) =>
+  Array.from(
+    { length: Math.ceil(count / 1000) },
+    (_, part) =>
+      `<#padding${part === 0 ? "" : part}> ${predicate} ${Array.from(
+        { length: Math.min(1000, count - part * 1000) },
+        (_, at) => part * 1000 + at,
+      ).join(",")} .`,
+  ).join("\n");
+
 const releaseAt = (url: string, padding = 0) =>
   STANDALONE.replaceAll(`<${V2}>`, `<${url}>`) +
-  (padding === 0
-    ? ""
-    : `\n<#padding> <${SM}padding> ${Array.from({ length: padding }, (_, at) => at).join(",")} .\n`);
+  (padding === 0 ? "" : `\n${paddingOf(padding, `<${SM}padding>`)}\n`);
 
 const urlOf = (input: RequestInfo | URL) =>
   typeof input === "string" ? input : input instanceof URL ? input.href : input.url;

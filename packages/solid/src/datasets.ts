@@ -21,7 +21,13 @@ import {
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
 import { ReadLimitError, type ReadLimits } from "./client/interface";
-import { FOREIGN_LIMITS, isPastBudget, readThrough, refusalOf } from "./client/readLimits";
+import {
+  FOREIGN_LIMITS,
+  isPastBudget,
+  limitVars,
+  readThrough,
+  refusalOf,
+} from "./client/readLimits";
 import {
   deleteSolidDataset,
   parseQuads,
@@ -462,10 +468,13 @@ export async function saveDataset<T extends Dataset>(
  * those triples as N-Triples (termOf), as a server may serve the
  * document back in that longer form. A deck file may hold more than
  * that, and an import writes all its cards as one document, and all
- * its progress as another.
+ * its progress as another. Its subjects are held to the values for one
+ * predicate a release may have (MAX_VALUES_PER_PREDICATE), as no
+ * card or progress holds a schedule's due days, so a release made of
+ * its cards is read as well.
  */
 export async function refuseUnreadableImport(url: string, dataset: Dataset): Promise<void> {
-  const tooLarge = () => new AppError("deckFileTooLarge", { ...FOREIGN_LIMITS });
+  const tooLarge = () => new AppError("deckFileTooLarge", limitVars(FOREIGN_LIMITS));
   const encoder = new TextEncoder();
   const text = await solidDatasetAsTurtle(dataset);
   if (encoder.encode(text).byteLength > FOREIGN_LIMITS.bytes) throw tooLarge();

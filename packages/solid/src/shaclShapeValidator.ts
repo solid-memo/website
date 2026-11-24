@@ -11,6 +11,7 @@ import {
   getThing,
   getThingAll,
   getUrlAll,
+  propertiesOf,
   toRdfJsDataset,
 } from "./client/rdf";
 import type { DatasetCore, Quad } from "@rdfjs/types";
@@ -496,6 +497,43 @@ function releaseLimit(whole: boolean) {
 const SUBJECTS_BETWEEN_TASKS = 256;
 
 /**
+ * How many statements of the subjects it checks a check goes through
+ * before it lets the page do its work: a subject is checked in one go,
+ * so a few subjects with many values each take as long as many with a
+ * few. How many values one subject has for one predicate is bounded
+ * where a document from elsewhere is read (MAX_VALUES_PER_PREDICATE,
+ * and MAX_DUE_DAYS for a deck schedule's due days alone).
+ */
+const VALUES_BETWEEN_TASKS = 4096;
+
+/**
+ * The pace of a check that goes through subjects one by one: called
+ * before each, with how many statements it has, it lets the page do its
+ * work (nextTask) once SUBJECTS_BETWEEN_TASKS subjects, or subjects with
+ * VALUES_BETWEEN_TASKS statements, have been checked since it last did.
+ * A check of a whole graph against a profile keeps the same pace (the
+ * shacl package's ShapeEngine.validate, given nextTask).
+ */
+function checkPace(): (statements: number) => Promise<void> {
+  let subjects = 0;
+  let values = 0;
+  return async (statements) => {
+    if (subjects >= SUBJECTS_BETWEEN_TASKS || values >= VALUES_BETWEEN_TASKS) {
+      await nextTask();
+      subjects = 0;
+      values = 0;
+    }
+    subjects++;
+    values += statements;
+  };
+}
+
+/** How many statements a document makes of a subject: its values for all its predicates. */
+function statementCount(thing: Subject): number {
+  return propertiesOf(thing).reduce((count, { values }) => count + values.length, 0);
+}
+
+/**
  * A wait for the next task of the event loop: a message to itself, which
  * a browser delivers at once, where a timeout nested this deep waits
  * some milliseconds.
@@ -676,6 +714,8 @@ export function createShaclShapeValidator({
       const { engine, reference } = await profile(name);
       for (const { focusNode, ...v } of await engine.validate(
         mergeDatasets(quads, beside, ...(reference as Iterable<Quad>[])),
+        undefined,
+        nextTask,
       )) {
         if (v.severity !== "violation" || !subjects.has(focusNode)) continue;
         found.push({ focusNode, violation: { ...v, profile: name } });
@@ -709,6 +749,7 @@ export function createShaclShapeValidator({
     for (const { focusNode, ...violation } of await engine.validate(
       mergeDatasets(data as Iterable<Quad>, ...(reference as Iterable<Quad>[])),
       demoted,
+      nextTask,
     )) {
       if (isOverTypedResult(focusNode, violation)) overTyped.add(focusNode);
       if (
@@ -883,8 +924,9 @@ export function createShaclShapeValidator({
       });
       limit.add(violations);
     };
-    for (const [index, thing] of getThingAll(dataset).entries()) {
-      if (index > 0 && index % SUBJECTS_BETWEEN_TASKS === 0) await nextTask();
+    const pace = checkPace();
+    for (const thing of getThingAll(dataset)) {
+      await pace(statementCount(thing));
       await reportSubject(thing);
     }
     const profiled =
@@ -975,12 +1017,11 @@ export function createShaclShapeValidator({
       // Each subject of a Solid Memo class, or of another class a shape describes, against its library shape.
       // Each subject's statements, so a release of thousands of cards is read in one pass.
       const bySubject = statementsBySubject(quads);
+      const pace = checkPace();
       for (const subject of shapedSubjectsOf(quads)) {
-        const { unshaped, violations } = await releaseSubjectViolations(
-          release,
-          subject,
-          bySubject.get(subject)!,
-        );
+        const own = bySubject.get(subject)!;
+        await pace(own.length);
+        const { unshaped, violations } = await releaseSubjectViolations(release, subject, own);
         if (unshaped) problems.push(problem(back(subject), { code: "unshaped", params: {} }));
         for (const v of violations) {
           problems.push(shapeProblem(subject, v, v.severity === "violation" ? "error" : "warning"));

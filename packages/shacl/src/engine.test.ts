@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { DataFactory as environment } from "n3";
 import { datasetFromTurtle } from "./testing/turtle";
 import type { Literal, Quad } from "@rdfjs/types";
+import SHACLValidator from "rdf-validate-shacl";
 import ValidationEngine from "rdf-validate-shacl/src/validation-engine.js";
 import { createEngine, type Demoted, mapIris, mergeDatasets } from "./engine";
 import { subclassCycle, subclassDiamond } from "./testing/subclassTangle";
@@ -30,6 +31,7 @@ const SHAPES = `
 <#age> sh:path ex:age ; sh:datatype xsd:integer ; sh:severity sh:Warning .
 <#note> sh:path ex:note ; sh:maxCount 1 ; sh:severity sh:Info .
 `;
+const SH = "http://www.w3.org/ns/shacl#";
 const SHAPES_URL = "https://example.com/shapes.ttl";
 const DATA_URL = "https://example.com/data.ttl";
 
@@ -208,6 +210,123 @@ describe("createEngine", () => {
       DATA_URL,
     );
     expect(await e.validate(good)).toEqual([]);
+  });
+
+  it("waits for its pause after every 256 nodes of a whole graph, with the library's own results", async () => {
+    const targeted = await datasetFromTurtle(
+      `@prefix sh: <http://www.w3.org/ns/shacl#> .
+       @prefix ex: <https://example.com/ns#> .
+       <#person> a sh:NodeShape ; sh:targetClass ex:Person ;
+           sh:property [ sh:path ex:name ; sh:minCount 1 ] .`,
+      SHAPES_URL,
+    );
+    const e = createEngine(targeted);
+    const people = (n: number) =>
+      datasetFromTurtle(
+        Array.from({ length: n }, (_, i) => `<#p${i}> a <https://example.com/ns#Person> .`).join(
+          "\n",
+        ),
+        DATA_URL,
+      );
+    for (const [n, pauses] of [
+      [256, 0],
+      [257, 1],
+      [513, 2],
+    ] as const) {
+      const data = await people(n);
+      const pause = vi.fn(async () => undefined);
+      const paused = await e.validate(data, undefined, pause);
+      expect(pause).toHaveBeenCalledTimes(pauses);
+      expect(paused).toHaveLength(n);
+      expect(paused).toEqual(await e.validate(data));
+    }
+    // A node's statements count too: after one with 4,096 of them, the next waits.
+    const names = Array.from({ length: 4095 }, (_, i) => `"n${i}"`).join(", ");
+    const many = await datasetFromTurtle(
+      `@prefix ex: <https://example.com/ns#> .
+       <#a> a ex:Person ; ex:name ${names} . <#b> a ex:Person . <#c> a ex:Person .`,
+      DATA_URL,
+    );
+    const pause = vi.fn(async () => undefined);
+    expect(await e.validate(many, undefined, pause)).toHaveLength(2);
+    expect(pause).toHaveBeenCalledTimes(1);
+  });
+
+  it("checks a whole graph node by node as the library's own check does, results, severities, messages and values alike", async () => {
+    const shapes = await datasetFromTurtle(
+      `${SHAPES}
+       <#shape> sh:targetClass ex:Person .
+       <#either> sh:targetSubjectsOf ex:note .
+       <#one> sh:targetNode <${DATA_URL}#c> .`,
+      SHAPES_URL,
+    );
+    const e = createEngine(shapes);
+    const data = await datasetFromTurtle(
+      `@prefix ex: <https://example.com/ns#> .
+       <#a> a ex:Person ; ex:name "Ann", 1 ; ex:age "old" ; ex:note "x", "y" .
+       <#b> a ex:Person ; ex:age 3 .
+       <#c> a ex:Person ; ex:name "Cy" ; ex:age 4 ; ex:note "z" .`,
+      DATA_URL,
+    );
+    const ownResults = await e.validate(data);
+    expect(ownResults.length).toBeGreaterThan(4);
+    expect(await e.validate(data, undefined, async () => undefined)).toEqual(ownResults);
+  });
+
+  it("relies on parts of the library's own check of a whole graph that are still as they were", async () => {
+    // The paced check (engine.ts, validateAll) does what the library's own
+    // does, step by step, with the library's own parts: should those
+    // change, so must it.
+    const ownCheck = String(SHACLValidator.prototype.validate);
+    for (const step of ["loadOwlImports()", "setDataGraph(", "validateAll(", "getReport()"]) {
+      expect(ownCheck).toContain(step);
+    }
+    const ownAll = String(ValidationEngine.prototype.validateAll);
+    for (const step of [
+      "maxErrorsReached()",
+      "validationError = null",
+      "initReport()",
+      "shapesGraph.shapesWithTarget",
+      "getTargetNodes(dataGraph)",
+      "validateNodeAgainstShape(focusNode, shape, dataGraph)",
+      "validationError = e",
+    ]) {
+      expect(ownAll).toContain(step);
+    }
+    // Private in the library's types, so read through a type of their own.
+    const internals = SHACLValidator.prototype as unknown as Record<
+      "setDataGraph" | "loadOwlImports",
+      () => unknown
+    >;
+    expect(String(internals.setDataGraph)).toContain(
+      "this.factory.clownface({ dataset: dataGraph })",
+    );
+    expect(ValidationEngine.prototype.validateNodeAgainstShape).toBeTypeOf("function");
+    expect(String(ValidationEngine.prototype.getReport)).toContain("this.validationError");
+    const shapes = await datasetFromTurtle(
+      `${SHAPES}
+       <#shape> sh:targetClass ex:Person .
+       <#either> sh:targetSubjectsOf ex:note .`,
+      SHAPES_URL,
+    );
+    const validator = new SHACLValidator(shapes);
+    expect(internals.loadOwlImports).toBeTypeOf("function");
+    expect(validator.shapesGraph.shapesWithTarget).toHaveLength(2);
+    // One comparison with the library's check itself, not through the engine: the same results, node by node.
+    const data = await datasetFromTurtle(
+      `@prefix ex: <https://example.com/ns#> .
+       <#a> a ex:Person ; ex:name 1 ; ex:age "old" ; ex:note "x", "y" .
+       <#b> a ex:Person ; ex:age 3 .`,
+      DATA_URL,
+    );
+    const own = (await validator.validate(data)).results
+      .map((r) => `${r.focusNode?.value} ${r.path?.value} ${r.sourceConstraintComponent?.value}`)
+      .sort();
+    expect(own.length).toBeGreaterThan(3);
+    const paced = (await createEngine(shapes).validate(data, undefined, async () => undefined))
+      .map((v) => `${v.focusNode} ${v.path} ${SH}${v.constraint}ConstraintComponent`)
+      .sort();
+    expect(paced).toEqual(own);
   });
 
   describe.each([

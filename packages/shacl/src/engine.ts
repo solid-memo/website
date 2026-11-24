@@ -59,10 +59,34 @@ export interface ShapeEngine {
    * Every result of checking the whole of `data` against every targeted
    * shape. A violation `demoted` names counts as a warning toward the
    * limit on a node's results (MAX_RESULTS_PER_CHECK), so that many of
-   * them never stand for one violation more of the node.
+   * them never stand for one violation more of the node. With `pause`,
+   * the check waits for it once it has made NODES_BETWEEN_PAUSES checks
+   * of a node against a shape, or checked nodes with VALUES_BETWEEN_PAUSES
+   * statements, since it last did, so that a page can do its work
+   * meanwhile.
    */
-  validate(data: DatasetCore, demoted?: Demoted): Promise<FocusedViolation[]>;
+  validate(
+    data: DatasetCore,
+    demoted?: Demoted,
+    pause?: () => Promise<void>,
+  ): Promise<FocusedViolation[]>;
 }
+
+/**
+ * How many checks of a node against a shape a check of a whole graph
+ * makes before it waits for its `pause` (ShapeEngine.validate): a
+ * document may hold many thousands of nodes, each checked against its
+ * shapes, and the app makes the check in the page.
+ */
+const NODES_BETWEEN_PAUSES = 256;
+
+/**
+ * How many statements of the nodes it checks a check of a whole graph
+ * goes through before it waits for its `pause`, as a node's are checked
+ * in one go: a few nodes with many values each take as long as many
+ * nodes with a few.
+ */
+const VALUES_BETWEEN_PAUSES = 4096;
 
 const SH = "http://www.w3.org/ns/shacl#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
@@ -482,7 +506,7 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
           engine.dropped.get(focusNode),
         );
       }),
-    validate: (data, demoted) =>
+    validate: (data, demoted, pause) =>
       oneAtATime(async () => {
         const checked = checkedData(data);
         const isDemoted =
@@ -490,7 +514,10 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
           ((node: string, result: ResultTerms) => demoted(node, result, checked.overTyped));
         engine.initReport();
         engine.demoted = isDemoted;
-        const report = await validator.validate(checked.data);
+        const report =
+          pause === undefined
+            ? await validator.validate(checked.data)
+            : await validateAll(validator, checked.data, pause);
         return limitedByNode(
           [
             ...report.results.map(
@@ -511,6 +538,52 @@ export function createEngine(shapes: DatasetCore): ShapeEngine {
         );
       }),
   };
+}
+
+/**
+ * Every result of checking the whole of `data` against every targeted
+ * shape, as the library's own check of a whole graph makes them (each
+ * shape with a target, then each node it targets, on the validator's
+ * engine), but node by node, waiting for `pause` once
+ * NODES_BETWEEN_PAUSES checks, or nodes with VALUES_BETWEEN_PAUSES
+ * statements, have been made since it last did: the library's check
+ * runs to its end once begun. A check with no pause is the library's
+ * own, which tests compare this one with, and they fail should the
+ * library's own check of a whole graph, or the parts of it this one
+ * uses, change (engine.test.ts).
+ *
+ * Two things the library's check does are left out, with no change to
+ * what a caller sees. It stops before it begins once maxErrorsReached says so: the
+ * app's engine never sets maxErrors (TermKeyedEngine), so that is never
+ * so. It also catches an error a node's check throws and keeps it as
+ * its validationError, which getReport then throws: here the error
+ * rejects the check at once instead, the same error, so a caller sees
+ * the check fail as it would the library's.
+ */
+async function validateAll(
+  validator: SHACLValidator,
+  data: DatasetCore,
+  pause: () => Promise<void>,
+): Promise<Awaited<ReturnType<SHACLValidator["validate"]>>> {
+  // As the library's check does first: the shapes it imports (none of the app's do), before the targets are read.
+  await (validator as unknown as { loadOwlImports(): Promise<void> }).loadOwlImports();
+  const graph = validator.factory.clownface({ dataset: data });
+  validator.$data = graph;
+  let checks = 0;
+  let values = 0;
+  for (const shape of validator.shapesGraph.shapesWithTarget) {
+    for (const focusNode of shape.getTargetNodes(graph)) {
+      if (checks >= NODES_BETWEEN_PAUSES || values >= VALUES_BETWEEN_PAUSES) {
+        await pause();
+        checks = 0;
+        values = 0;
+      }
+      checks++;
+      values += data.match(focusNode).size;
+      validator.validationEngine.validateNodeAgainstShape(focusNode, shape, graph);
+    }
+  }
+  return validator.validationEngine.getReport();
 }
 
 /**

@@ -4,6 +4,7 @@
 
 import { ReadLimitError, type ReadLimits } from "./client/interface";
 import { parseQuads, solidDatasetAsTurtle } from "./client/resources";
+import { limitVars } from "./client/readLimits";
 import {
   type Dataset,
   type Subject,
@@ -353,7 +354,7 @@ export function parseDeckFile(
   baseUrl: string,
   limits: ReadLimits | null = DECK_FILE_LIMITS,
 ): Promise<Quad[]> {
-  const tooLarge = () => new AppError("deckFileTooLarge", { ...limits });
+  const tooLarge = () => new AppError("deckFileTooLarge", limitVars(limits!));
   if (limits !== null && text.length > limits.bytes) throw tooLarge();
   // The depth is checked, in refuseRemoteContexts, before anything recurses into the document.
   const checked = format === "jsonld" ? refuseRemoteContexts(text, baseUrl, limits) : text;
