@@ -6,7 +6,7 @@ import { type NamedSubject, buildThing, getThing, setThing } from "./client/rdf"
 import { AppError } from "@solid-memo/domain/appError";
 import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";
-import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
+import { editDocument, getSolidDatasetOrNull } from "./datasets";
 import { CATALOG_TERMS } from "@solid-memo/vocab/descriptors.generated";
 import { hasIri, readTerms, unlessNewer } from "./records";
 
@@ -17,9 +17,6 @@ import { hasIri, readTerms, unlessNewer } from "./records";
  * published (`sm:publishedRelease`). CatalogV1 keeps them through every
  * write of the catalog, so they are changed here alone.
  */
-
-/** How often a link is written, in all, while the catalog keeps changing elsewhere. */
-const LINK_ATTEMPTS = 3;
 
 /**
  * The catalog's links by `predicate`, one of the terms beside its record
@@ -123,32 +120,25 @@ export function removeCatalogLink(
 
 /**
  * Change the catalog's node as `change` says (null: nothing to
- * change), If-Match, read and made again on a 412, a few times. Without
- * a catalog there is no link to remove, and none can be added
+ * change), If-Match, read and made again on a 412 (editDocument).
+ * Without a catalog there is no link to remove, and none can be added
  * (noCatalogToUpdate).
  */
-async function changeCatalog(
+function changeCatalog(
   instanceUrl: string,
   fetch: typeof globalThis.fetch,
   adding: boolean,
   change: (node: NamedSubject) => NamedSubject | null,
 ): Promise<void> {
-  const url = catalogUrlOf(instanceUrl);
-  for (let attempt = 1; ; attempt++) {
-    const catalog = await getSolidDatasetOrNull(url, fetch);
+  return editDocument(catalogUrlOf(instanceUrl), fetch, (catalog) => {
     const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
     if (node === null) {
       if (adding) throw new AppError("noCatalogToUpdate");
-      return;
+      return { result: undefined };
     }
     const changed = change(unlessNewer(node));
-    if (changed === null) return;
-    try {
-      // The links are no shape's: the catalog is not checked for them, as for sm:completedChapter.
-      await saveDataset(url, setThing(catalog!, changed), fetch);
-      return;
-    } catch (error) {
-      if (!(error instanceof PreconditionFailedError) || attempt === LINK_ATTEMPTS) throw error;
-    }
-  }
+    if (changed === null) return { result: undefined };
+    // The links are no shape's: the catalog is not checked for them, as for sm:completedChapter.
+    return { dataset: setThing(catalog!, changed), result: undefined };
+  });
 }
