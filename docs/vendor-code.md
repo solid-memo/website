@@ -19,7 +19,7 @@ confined, and what replacing one would cost.
 | RDF/JS community | `jsonld-streaming-parser` (MIT; with `jsonld-context-parser`), which `@inrupt/solid-client` depends on too | `packages/solid/src/client/resources.ts` ([boundaries.md](boundaries.md#files-without-a-vendor-library)) | Reading a deck file's JSON-LD, with a document loader that fetches nothing |
 | RDF/JS community | `n3` | `@solid-memo/turtle`, the node tooling of `shacl`, and `e2e/pod/` (the server contract and tests) | Build-time Turtle parsing for the generators and validation; reading and writing pod documents in the end-to-end tests |
 | RDF/JS community | `n3` (MIT), which `@inrupt/solid-client` depends on too | `packages/solid/src/client/linearDataset.ts` | Parsing Turtle as the library does, but with no triple terms |
-| RDF/JS community | `n3` (MIT), `jsonld-streaming-parser` (MIT) | `@solid-memo/solid-memo-client` | In place of Inrupt's clients, with `SOLID_CLIENT=solid-memo-client`: RDF/JS terms, and parsing and writing Turtle (`n3`); parsing JSON-LD (`jsonld-streaming-parser`) |
+| RDF/JS community | `n3` (MIT), `jsonld-streaming-parser` (MIT) | `@solid-memo/solid-memo-client` | In place of Inrupt's clients, with `SOLID_CLIENT=solid-memo-client`: RDF/JS terms, and parsing Turtle (`n3`); parsing JSON-LD (`jsonld-streaming-parser`) |
 | Filip Skokan | `oauth4webapi` (MIT) | `@solid-memo/solid-memo-client` (`src/session.ts`, `src/oidcLogin.ts`, `src/oidcSession.ts`, and `src/oidcStore.ts` for its types) | In place of Inrupt's clients: Solid-OIDC's discovery, dynamic registration, authorization-code flow with PKCE, token requests and DPoP proofs |
 
 ## Maturity
@@ -197,7 +197,9 @@ type crosses upward past a mapper.
     An edit is one PATCH of the app's own body, `If-Match` the version
     given, sent once more after a 409 with its decimals spelled as
     numbers. An edit too large for one PATCH, or asked to be whole, is
-    one PUT. A write holding a term Turtle can't write as it is is
+    one PUT. A PUT's body is the app's own Turtle (`turtleWriter.ts`):
+    it declares no prefix and reads back as the statements written, for
+    every term of the newest pod snapshot. A write holding a term Turtle can't write as it is is
     refused before anything is sent (`writableTerms.ts`). A write gives
     the ETag the pod answered, and a delete takes `If-Match`. They pin a file's Content-Type too. A failed
     request rejects with `HttpError`, carrying `statusCode`, `response`

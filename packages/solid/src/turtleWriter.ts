@@ -17,25 +17,36 @@ const LOCAL_NAME = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 const MAX_NESTING = 16;
 
 /**
- * Triples as a Turtle document of our own writing, as a release is
- * written (docs/deck-library.md): `@base` the document's own address,
- * so its subjects read `<>` and `<#id>`, then the prefixes it uses; a
- * block per subject, in the order given (`order`, the rest after in the
- * order met), its types first; a blank node named once written in place
- * (`[ … ]`), at most MAX_NESTING deep, the rest by their labels, so a
- * long chain of them costs no more than its length. Text is written on one line, its quotes, backslashes and
- * line breaks escaped; integers and booleans bare. A term written as it
- * is, an IRI or a blank node's label, that Turtle cannot write so is
- * refused (writableTerms.ts). No vendor library
- * writes Turtle with a base in the browser (docs/boundaries.md).
+ * Triples as a Turtle document of our own writing: the one writer of
+ * every document the app writes whole, to a pod or to a file
+ * (docs/data-model.md, Write discipline). With no options, as
+ * a pod document is written, every IRI is written in full, `<…>`, with
+ * no base and no prefix, so that what is written depends on nothing but
+ * the triples. A document people read is written with them, as a choice
+ * of its writer: a release (docs/deck-library.md) with `base`, its own
+ * address, so that its subjects read `<>` and `<#id>`, and `prefixes`,
+ * those it uses declared after the base; a deck file with `prefixes`.
+ * A block per subject, in the order given (`order`, the rest after in
+ * the order met), its types first; a blank node named once written in
+ * place (`[ … ]`), at most MAX_NESTING deep, the rest by their labels,
+ * so a long chain of them costs no more than its length. Text is
+ * written on one line, its quotes, backslashes and line breaks escaped;
+ * integers and booleans bare. A term written as it is, an IRI or a
+ * blank node's label, that Turtle cannot write so is refused
+ * (writableTerms.ts). No vendor library writes Turtle with a base in
+ * the browser (docs/boundaries.md).
  */
 export function turtleOf(
   quads: Iterable<Quad>,
   {
     base,
-    prefixes,
+    prefixes = {},
     order = [],
-  }: { base: string; prefixes: Readonly<Record<string, string>>; order?: readonly string[] },
+  }: {
+    base?: string;
+    prefixes?: Readonly<Record<string, string>>;
+    order?: readonly string[];
+  } = {},
 ): string {
   const bySubject = new Map<string, Quad[]>();
   const named = new Map<string, number>();
@@ -86,8 +97,8 @@ export function turtleOf(
   const inlined = (label: string): boolean => (level.get(label) ?? 0) > 0;
   const used = new Set<string>();
   const iri = (value: string): string => {
-    if (value === base) return "<>";
-    if (value.startsWith(`${base}#`)) return `<${value.slice(base.length)}>`;
+    if (base !== undefined && value === base) return "<>";
+    if (base !== undefined && value.startsWith(`${base}#`)) return `<${value.slice(base.length)}>`;
     for (const [prefix, namespace] of Object.entries(prefixes)) {
       if (value.startsWith(namespace) && LOCAL_NAME.test(value.slice(namespace.length))) {
         used.add(prefix);
@@ -130,13 +141,12 @@ export function turtleOf(
         `${key.startsWith("_:") ? key : iri(key)}\n    ${predicates(bySubject.get(key)!, 0).join(" ;\n    ")} .`,
     );
   const header = [
-    `@base <${base}> .`,
-    "",
+    ...(base === undefined ? [] : [`@base <${base}> .`, ""]),
     ...Object.entries(prefixes)
       .filter(([prefix]) => used.has(prefix))
       .map(([prefix, namespace]) => `@prefix ${prefix}: <${namespace}> .`),
   ];
-  return `${header.join("\n")}\n\n${blocks.join("\n\n")}\n`;
+  return `${header.length === 0 ? "" : `${header.join("\n")}\n\n`}${blocks.join("\n\n")}\n`;
 }
 
 function keyOf(term: Term): string {

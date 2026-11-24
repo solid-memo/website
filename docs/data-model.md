@@ -2022,13 +2022,13 @@ An import refuses a file that names such an IRI the same way
 
 A new Studio draft is refused the same way (`unwritableTerm`), with
 nothing written, whether it's made from a release file, as the next
-version of a release, from a deck or as a copy. An edit writes each of
-the draft's documents whole, and that Turtle declares the client
-library's default prefixes (`dc`, `ldp`, `vcard` and so on), so such an
-IRI would be saved as the term it looks like. As extra caution, an IRI
-that looks like a name with a release's or a deck file's prefix is
-refused too. The draft is then refused when it's made, not later when
-it's exported as a deck ([studio.md](studio.md#drafts)).
+version of a release, from a deck or as a copy. The prefixes are those
+a Solid client library commonly writes a document with (`dc`, `ldp`,
+`vcard` and so on), a release's and a deck file's. The app writes each
+document with every IRI in full, so none would be saved as another
+term. Still, a draft holds none that another tool, or the deck's
+export, would write as a prefixed name. It's refused when it's made,
+not later when it's exported as a deck ([studio.md](studio.md#drafts)).
 
 An import reads the file as the pod is read, with the same mappers:
 
@@ -2296,9 +2296,7 @@ by one.
   below). That goes for a card's subject or picture, a deck's license,
   theme or source, and any other IRI a shape names without a fixed set
   of values, and for a deck's completed chapters, which no shape
-  names. A whole write (PUT) of the document could write such an IRI
-  as the prefixed name it looks like, which names another IRI, and
-  the deck's export refuses it. A mailbox (`foaf:mbox`) is read as its
+  names. The deck's export refuses it. A mailbox (`foaf:mbox`) is read as its
   `mailto:` URL alone. The next write
   of a subject leaves such a value out, but a value the write keeps
   stays as it is (`setIriAll`): a link of the catalog or of a deck
@@ -2479,6 +2477,18 @@ by one.
   whole-second ETags miss a change made in the same second as the read
   (as in the digest). The end-to-end tests hold all of this against
   real servers, that one included ([testing.md](testing.md)).
+- **A document written whole is written by Solid Memo**, by one
+  writer on either client (`turtleOf` in
+  [turtleWriter.ts](../packages/solid/src/turtleWriter.ts)): the PUT
+  that creates a document or replaces it, a deck file and a release. A
+  pod document is written with every IRI in full (`<…>`), with no base
+  and no prefix, and a subject not saved yet as `<#name>` of the
+  document it goes to. So its text depends on its triples alone, not on
+  the defaults of a library. A deck file is written with its prefixes
+  (`DECK_FILE_PREFIXES`), and a release with its own address as its
+  base and its prefixes ([deck-library.md](deck-library.md)), as people
+  read them. A document an earlier version wrote with prefixes holds the
+  same statements, and reads as before.
 - **An edit's PATCH body is written by Solid Memo** (`patchBody` in
   [client/sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts),
   sent by `writeDocument` in `client/resources.ts`), not by

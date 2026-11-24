@@ -2,11 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  DEFAULT_TURTLE_PREFIXES,
-  getContainedResourceUrlAll,
-  getSolidDataset,
-} from "./client/resources";
+import { getContainedResourceUrlAll, getSolidDataset } from "./client/resources";
 import {
   type Dataset,
   type FetchedDataset,
@@ -98,17 +94,50 @@ export const RELEASE_PREFIXES: Readonly<Record<string, string>> = {
 };
 
 /**
- * The prefixes a draft's IRIs must not look like names of. An edit
- * writes each document whole with a PUT, whose Turtle declares the
- * client library's default prefixes (DEFAULT_TURTLE_PREFIXES): an IRI
- * whose scheme is one of them, which a release read from a file or a
- * link may name, would be saved as the term it looks like
- * (refusePrefixedLookalikes). A release's and a deck file's prefixes
- * are added as extra caution, so such a draft is refused at import
- * rather than later, when it's exported as a deck.
+ * The prefixes a Solid client library commonly declares when it writes
+ * a document whole (those of @inrupt/solid-client), which the app's
+ * own writes no longer use (turtleOf writes every IRI in full).
+ */
+const CLIENT_LIBRARY_PREFIXES: Readonly<Record<string, string>> = {
+  acl: "http://www.w3.org/ns/auth/acl#",
+  acp: "http://www.w3.org/ns/solid/acp#",
+  cc: "http://creativecommons.org/ns#",
+  cert: "http://www.w3.org/ns/auth/cert#",
+  csvw: "http://www.w3.org/ns/csvw#",
+  current: "#",
+  dc: "http://purl.org/dc/terms/",
+  dcam: "http://purl.org/dc/dcam/",
+  dcat: "http://www.w3.org/ns/dcat#",
+  dctype: "http://purl.org/dc/dcmitype/",
+  foaf: "http://xmlns.com/foaf/0.1/",
+  ldp: "http://www.w3.org/ns/ldp#",
+  owl: "http://www.w3.org/2002/07/owl#",
+  posixstat: "http://www.w3.org/ns/posix/stat#",
+  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+  schema: "https://schema.org/",
+  shacl: "http://www.w3.org/ns/shacl#",
+  skos: "http://www.w3.org/2004/02/skos/core#",
+  skosxl: "http://www.w3.org/2008/05/skos-xl#",
+  solid: "http://www.w3.org/ns/solid/terms#",
+  swapdoc: "http://www.w3.org/2000/10/swap/pim/doc#",
+  ui: "http://www.w3.org/ns/ui#",
+  vann: "http://purl.org/vocab/vann/",
+  vcard: "http://www.w3.org/2006/vcard/ns#",
+  ws: "http://www.w3.org/ns/pim/space#",
+  xsd: "http://www.w3.org/2001/XMLSchema#",
+};
+
+/**
+ * The prefixes a draft's IRIs must not look like names of
+ * (refusePrefixedLookalikes). A draft is written with every IRI in
+ * full, so none is saved as another term; an IRI that looks like a name
+ * under a common client library's prefixes, a release's or a deck
+ * file's is refused all the same, so a draft holds none that another
+ * tool, or the deck's export, would write as a prefixed name.
  */
 const DRAFT_PREFIXES: Readonly<Record<string, string>> = {
-  ...DEFAULT_TURTLE_PREFIXES,
+  ...CLIENT_LIBRARY_PREFIXES,
   ...DECK_FILE_PREFIXES,
   ...RELEASE_PREFIXES,
 };
