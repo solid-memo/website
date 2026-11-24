@@ -25,14 +25,20 @@ import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePubli
 import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageCustomPalettePreference } from "@solid-memo/browser/localStorageCustomPalettePreference";
-import { createLocalStoragePalettePreference } from "@solid-memo/browser/localStoragePalettePreference";
 import { createLocalStorageSeenHighlights } from "@solid-memo/browser/localStorageSeenHighlights";
-import { createLocalStorageTextSizePreference } from "@solid-memo/browser/localStorageTextSizePreference";
-import { createLocalStorageThemePreference } from "@solid-memo/browser/localStorageThemePreference";
+import {
+  createLocalStorageSetting,
+  PALETTE_KEY,
+  TEXT_SIZE_KEY,
+  THEME_KEY,
+} from "@solid-memo/browser/localStorageSetting";
 import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorageUpdateJournal";
 import { createLogoutChannel } from "@solid-memo/browser/logoutChannel";
 import { createIndexedDbResourceStore } from "@solid-memo/browser/indexedDbResourceStore";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
+import { PALETTE_SETTING } from "@solid-memo/domain/palette";
+import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";
+import { THEME_SETTING } from "@solid-memo/domain/theme";
 import { isInFolder } from "@solid-memo/domain/instanceLayout";
 import { createLocalGuestPod } from "@solid-memo/solid/localGuestPod";
 import { createLocalPod } from "@solid-memo/solid/localPod";
@@ -471,10 +477,10 @@ export function createAppUseCases({
     updateJournal: createLocalStorageUpdateJournal(),
     logoutChannel: createLogoutChannel(),
     languagePreference: createLocalStorageLanguagePreference(),
-    themePreference: createLocalStorageThemePreference(),
-    palettePreference: createLocalStoragePalettePreference(),
+    themePreference: createLocalStorageSetting(THEME_KEY, THEME_SETTING),
+    palettePreference: createLocalStorageSetting(PALETTE_KEY, PALETTE_SETTING),
     customPalettePreference: createLocalStorageCustomPalettePreference(),
-    textSizePreference: createLocalStorageTextSizePreference(),
+    textSizePreference: createLocalStorageSetting(TEXT_SIZE_KEY, TEXT_SIZE_SETTING),
     seenHighlights: createLocalStorageSeenHighlights(),
     writeFence,
     digestRepository: createSolidDigestRepository({ fetch: dataFetch, checkWrite }),

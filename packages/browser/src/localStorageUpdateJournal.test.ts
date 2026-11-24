@@ -14,23 +14,10 @@ import {
   PREFIX,
 } from "./localStorageUpdateJournal";
 import { fakeLocks } from "./testing/fakeLocks";
+import { memoryStorage } from "./testing/memoryStorage";
 
 const SOURCE = "https://guest.solid-memo.invalid/solid-memo/";
 const STAGING = "https://pod.example/solid-memo/main/";
-
-function memoryStorage(): Storage {
-  const items = new Map<string, string>();
-  return {
-    get length() {
-      return items.size;
-    },
-    clear: () => items.clear(),
-    getItem: (key) => items.get(key) ?? null,
-    key: (index) => [...items.keys()][index] ?? null,
-    removeItem: (key) => void items.delete(key),
-    setItem: (key, value) => void items.set(key, value),
-  };
-}
 
 describe("createLocalStorageUpdateJournal", () => {
   it("remembers the copy a move of a guest's study is writing until it ends", () => {

@@ -64,10 +64,10 @@ before any pod is reached:
 | Key | What | Written by |
 |---|---|---|
 | `solid-memo:language` | the chosen language | [`localStorageLanguagePreference.ts`](../packages/browser/src/localStorageLanguagePreference.ts) |
-| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageThemePreference.ts`](../packages/browser/src/localStorageThemePreference.ts) |
-| `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | [`localStoragePalettePreference.ts`](../packages/browser/src/localStoragePalettePreference.ts) |
+| `solid-memo:theme` | light, dark or the browser's; copied from the preferences once saved | [`localStorageSetting.ts`](../packages/browser/src/localStorageSetting.ts) |
+| `solid-memo:palette` | the chosen colors (none for Standard); copied from the preferences | `localStorageSetting.ts` |
 | `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
-| `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | [`localStorageTextSizePreference.ts`](../packages/browser/src/localStorageTextSizePreference.ts) |
+| `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | `localStorageSetting.ts` |
 | `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
 | `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts` |

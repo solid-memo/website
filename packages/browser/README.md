@@ -10,8 +10,10 @@ as downloads and opened from the user's disk.
 `@solid-memo/browser/<module>` is `src/<module>.ts`:
 
 - `localStorageUpdateJournal`, `localStorageLanguagePreference`,
-  `localStorageThemePreference`, `localStoragePalettePreference`,
-  `localStorageTextSizePreference` and `localStorageSeenHighlights`.
+  `localStorageCustomPalettePreference` and `localStorageSeenHighlights`.
+- `localStorageSetting`: the theme, the palette and the text size, one
+  adapter for each `SettingKind` of `domain`, under the keys it
+  exports.
 - `logoutChannel`: word of a logout to the app's other tabs.
 - `indexedDbResourceStore`: the guest's pod ([guest-mode.md](../../docs/guest-mode.md)).
 - `fileExchange`: the `FileExchange` port, with a `Blob` behind a link

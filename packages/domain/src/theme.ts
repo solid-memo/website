@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { SettingKind } from "./setting";
+
 /** The looks the app comes in. */
 export const THEMES = ["light", "dark"] as const;
 
@@ -22,6 +24,12 @@ export const DEFAULT_THEME_CHOICE: ThemeChoice = "system";
 export function isThemeChoice(value: string): value is ThemeChoice {
   return (THEME_CHOICES as readonly string[]).includes(value);
 }
+
+/** The theme as the device keeps it (SettingKind): "system" is no choice at all. */
+export const THEME_SETTING: SettingKind<ThemeChoice> = {
+  isValue: isThemeChoice,
+  fallback: DEFAULT_THEME_CHOICE,
+};
 
 /** The theme to show: the one chosen, else (for "system") the one the browser prefers. */
 export function resolveTheme(choice: ThemeChoice, preferred: Theme): Theme {
