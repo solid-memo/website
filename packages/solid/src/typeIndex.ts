@@ -19,7 +19,7 @@ import {
 } from "./client/rdf";
 import {
   getSolidDatasetOrNull,
-  PreconditionFailedError,
+  editDocument,
   readDataset,
   readsAsNone,
   saveDataset,
@@ -654,41 +654,12 @@ function registeredOf(
   return registeredUrls(registration).filter(matches);
 }
 
-/** How many times a change to a type index is made against the index as it is now, when it keeps changing meanwhile. */
-const ATTEMPTS = 3;
-
-/**
- * Change a type index document as it is now: read it, apply `change`,
- * and save the result only if the document is as it was read
- * (If-Match); when it changed meanwhile (412), read it and apply the
- * change again, ATTEMPTS times in all, then throw. A change that
- * returns the dataset it was given saves nothing. What the last change
- * said.
- */
-async function changeIndex<R>(
-  indexUrl: string,
-  fetch: Fetch,
-  change: (dataset: SourcedDataset) => { dataset: Dataset; result: R },
-): Promise<R> {
-  for (let attempt = 1; ; attempt++) {
-    const read = await readDataset(indexUrl, fetch);
-    const { dataset, result } = change(read);
-    if (dataset === read) return result;
-    try {
-      await saveDataset(indexUrl, dataset, fetch);
-      return result;
-    } catch (error) {
-      if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
-    }
-  }
-}
-
 /**
  * Register the instance in a type index document: a
  * solid:TypeRegistration for sm:Instance naming its container, titled
  * with the instance's name, by which Solid Memo finds it. Its other data
  * is reached from the instance, and gets no registration of its own.
- * Saves nothing when the index already registers it (see changeIndex):
+ * Saves nothing when the index already registers it (see editDocument):
  * the same class, naming the container with or without its trailing
  * slash.
  */
@@ -699,25 +670,30 @@ export async function addInstanceRegistration(
   fetch: Fetch,
 ): Promise<void> {
   const container = ensureTrailingSlash(instanceUrl);
-  await changeIndex(indexUrl, fetch, (dataset) => {
-    if (
-      getThingAll(dataset).some((thing) => registeredOf(thing, "instance", container).length > 0)
-    ) {
-      return { dataset, result: undefined };
-    }
-    const registration = buildThing(createThing({ url: `${indexUrl}#sm-inst-${newId()}` }))
-      .addIri(RDF.type, SOLID.TypeRegistration)
-      .addIri(SOLID.forClass, SM.Instance)
-      .addIri(SOLID.instanceContainer, container)
-      .addStringNoLocale(DCTERMS.title, title)
-      .build();
-    return { dataset: setThing(dataset, registration), result: undefined };
-  });
+  await editDocument(
+    indexUrl,
+    fetch,
+    (dataset) => {
+      if (
+        getThingAll(dataset).some((thing) => registeredOf(thing, "instance", container).length > 0)
+      ) {
+        return { result: undefined };
+      }
+      const registration = buildThing(createThing({ url: `${indexUrl}#sm-inst-${newId()}` }))
+        .addIri(RDF.type, SOLID.TypeRegistration)
+        .addIri(SOLID.forClass, SM.Instance)
+        .addIri(SOLID.instanceContainer, container)
+        .addStringNoLocale(DCTERMS.title, title)
+        .build();
+      return { dataset: setThing(dataset, registration), result: undefined };
+    },
+    { read: readDataset },
+  );
 }
 
 /**
  * Remove every registration of an instance's data from a type index
- * document (see changeIndex), by what each class's registration names
+ * document (see editDocument), by what each class's registration names
  * (registeredOf): the container for its sm:Instance registration, and
  * for those earlier versions wrote exactly the instance's catalog
  * (`<container>catalog.ttl#catalog`), catalog document, `decks/`,
@@ -796,7 +772,7 @@ function oldRegisteredOf(
 }
 
 /**
- * Take out of a type index document (see changeIndex) what each
+ * Take out of a type index document (see editDocument) what each
  * registration registers of the instance's data (`registered`): the
  * registration whole when it registers nothing else (withoutRegistered).
  * Saves only when something was removed. The registrations changed are
@@ -809,20 +785,25 @@ async function removeRegistered(
   fetch: Fetch,
   registered: (registration: Subject) => string[],
 ): Promise<void> {
-  await changeIndex(indexUrl, fetch, (dataset) => {
-    // Every registration changed set at once, and every one removed taken out at once.
-    const changed: Subject[] = [];
-    const removed: Subject[] = [];
-    for (const thing of getThingAll(dataset)) {
-      const ours = registered(thing);
-      if (ours.length === 0) continue;
-      const kept = withoutRegistered(thing, ours);
-      if (kept === null) removed.push(thing);
-      else changed.push(kept);
-    }
-    if (changed.length === 0 && removed.length === 0) return { dataset, result: undefined };
-    return { dataset: removeThings(setThings(dataset, changed), removed), result: undefined };
-  });
+  await editDocument(
+    indexUrl,
+    fetch,
+    (dataset) => {
+      // Every registration changed set at once, and every one removed taken out at once.
+      const changed: Subject[] = [];
+      const removed: Subject[] = [];
+      for (const thing of getThingAll(dataset)) {
+        const ours = registered(thing);
+        if (ours.length === 0) continue;
+        const kept = withoutRegistered(thing, ours);
+        if (kept === null) removed.push(thing);
+        else changed.push(kept);
+      }
+      if (changed.length === 0 && removed.length === 0) return { result: undefined };
+      return { dataset: removeThings(setThings(dataset, changed), removed), result: undefined };
+    },
+    { read: readDataset },
+  );
 }
 
 /** What a registration registers, under either predicate. */
@@ -849,7 +830,7 @@ function withoutRegistered(registration: Subject, urls: readonly string[]): Subj
 
 /**
  * Give every registration of an instance's data in a type index document
- * a new title (dcterms:title), in one save (see changeIndex): the
+ * a new title (dcterms:title), in one save (see editDocument): the
  * instance's, and each one earlier versions wrote for a class of
  * its data, by what it names (registeredOf), all set in one
  * edit (setThings), so many take time that grows with them, not their
@@ -861,20 +842,25 @@ export async function renameInstanceRegistrations(
   fetch: Fetch,
 ): Promise<void> {
   const container = ensureTrailingSlash(containerUrl);
-  await changeIndex(indexUrl, fetch, (dataset) => {
-    // Every registration retitled set at once (setThings).
-    const renamed = getThingAll(dataset)
-      .filter(
-        (thing) =>
-          readTerms(thing, TYPE_REGISTRATION_TERMS).title !== title &&
-          REGISTERED_CLASS_NAMES.some(
-            (dataClass) => registeredOf(thing, dataClass, container).length > 0,
-          ),
-      )
-      .map((thing) => buildThing(thing).setStringNoLocale(DCTERMS.title, title).build());
-    if (renamed.length === 0) return { dataset, result: undefined };
-    return { dataset: setThings(dataset, renamed), result: undefined };
-  });
+  await editDocument(
+    indexUrl,
+    fetch,
+    (dataset) => {
+      // Every registration retitled set at once (setThings).
+      const renamed = getThingAll(dataset)
+        .filter(
+          (thing) =>
+            readTerms(thing, TYPE_REGISTRATION_TERMS).title !== title &&
+            REGISTERED_CLASS_NAMES.some(
+              (dataClass) => registeredOf(thing, dataClass, container).length > 0,
+            ),
+        )
+        .map((thing) => buildThing(thing).setStringNoLocale(DCTERMS.title, title).build());
+      if (renamed.length === 0) return { result: undefined };
+      return { dataset: setThings(dataset, renamed), result: undefined };
+    },
+    { read: readDataset },
+  );
 }
 
 /**

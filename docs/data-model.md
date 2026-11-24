@@ -144,8 +144,8 @@ flowchart LR
   an instance removes them, renaming it retitles them, and the user can
   remove them from Preferences, keeping the instance.
 - **Writing a type index** saves it with `If-Match` the version read; on
-  a 412 it tries again, three attempts in all (`changeIndex` in
-  [typeIndex.ts](../packages/solid/src/typeIndex.ts)). The registration
+  a 412 it tries again, three attempts in all (`editDocument` in
+  `datasets.ts`). The registration
   is added only when no equal one is there: `sm:Instance`, naming the
   container under either predicate, with or without its trailing slash
   (`addInstanceRegistration`).
