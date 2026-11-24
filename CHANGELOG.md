@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.2.3](https://github.com/solid-memo/website/compare/v8.2.2...v8.2.3) (2026-11-24)
+
+### Fixes
+
+* **markdown:** bound the Markdown findings kept of each text ([c0c8688](https://github.com/solid-memo/website/commit/c0c8688feae89cb1fdc544ab3bfdef943d122fcd))
+* **solid:** bound a subject's values and pace the shape checks ([dd10d17](https://github.com/solid-memo/website/commit/dd10d17f45391d9450b3305e78b930bb46a9dcae))
+* **studio:** refuse drafts naming prefixed-name look-alike IRIs ([0caee3f](https://github.com/solid-memo/website/commit/0caee3f020ef9ee0a607b11ec6157bb9e89aff4a))
+
 ## [8.2.2](https://github.com/solid-memo/website/compare/v8.2.1...v8.2.2) (2026-11-24)
 
 ### Fixes
