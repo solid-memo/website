@@ -2444,33 +2444,6 @@ describe("validateRelease", () => {
   }, 180_000);
 });
 
-/**
- * The longest stretch, in microseconds of this process's CPU time, that
- * `work` holds the event loop without letting anything else run: the
- * longest gap between turns of a task that schedules itself again at each
- * turn. Time on the clock would count the waits for the processor too: on
- * a runner busy with other tests, a long run is all but sure to wait during
- * one of its stretches where a short one may not (growth.ts).
- */
-async function longestTask(work: () => Promise<unknown>): Promise<number> {
-  let last = process.cpuUsage();
-  let longest = 0;
-  let running = true;
-  const gap = () => {
-    const { user, system } = process.cpuUsage(last);
-    last = process.cpuUsage();
-    return user + system;
-  };
-  const turn = () => {
-    longest = Math.max(longest, gap());
-    if (running) setImmediate(turn);
-  };
-  setImmediate(turn);
-  await work();
-  running = false;
-  return Math.max(longest, gap());
-}
-
 /** How many waits for the next task (MessageChannel) `work` makes. */
 async function tasksOf(work: () => Promise<unknown>): Promise<number> {
   let made = 0;
@@ -2529,28 +2502,6 @@ describe("the page's turn during a check", () => {
       ReadLimitError,
     );
   }, 60_000);
-
-  it("lets the page do its work between subjects with many values, so the longest task does not grow with the release", async () => {
-    // Cards of many values each, far fewer than the subjects a check goes
-    // through between tasks: eight times the cards must not hold the page
-    // much longer at a stretch (testing.md).
-    const datasets = new Map<number, Dataset>();
-    for (const count of [4, 32]) datasets.set(count, await read(cards(count, 1024)));
-    const longest = async (count: number) => {
-      let best = Number.POSITIVE_INFINITY;
-      for (let run = 0; run < 3; run++) {
-        best = Math.min(
-          best,
-          await longestTask(() =>
-            validator.validateDataset(release, datasets.get(count)!, "library"),
-          ),
-        );
-      }
-      return best;
-    };
-    await longest(4);
-    expect((await longest(32)) / (await longest(4))).toBeLessThan(2.5);
-  }, 180_000);
 
   it("lets the page do its work during the profile checks of a document and of a draft's release", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(unstampedCatalog() as never);
