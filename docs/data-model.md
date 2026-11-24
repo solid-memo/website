@@ -144,8 +144,8 @@ flowchart LR
   an instance removes them, renaming it retitles them, and the user can
   remove them from Preferences, keeping the instance.
 - **Writing a type index** saves it with `If-Match` the version read; on
-  a 412 it tries again, three attempts in all (`changeIndex` in
-  [typeIndex.ts](../packages/solid/src/typeIndex.ts)). The registration
+  a 412 it tries again, three attempts in all (`editDocument` in
+  `datasets.ts`). The registration
   is added only when no equal one is there: `sm:Instance`, naming the
   container under either predicate, with or without its trailing slash
   (`addInstanceRegistration`).
@@ -2451,6 +2451,14 @@ by one.
     catalog, a course's chapters completed), three times in all;
   - a bulk edit of cards, planned again on the cards as they are, three
     times in all, stopping when that plan isn't the one previewed.
+
+  In the Solid adapters, `editDocument` in `datasets.ts` makes every
+  write that re-applies its change. That's the digest, the deck groups,
+  a deck's catalog entry, a type index, the catalog's links, the answer
+  log and a deck's FSRS-6 states. The adapter says what its edit makes
+  of the document as read; `editDocument` reads, checks, saves with
+  `If-Match`, and reads and edits again on a 412, three times in all
+  unless the adapter asks for more (the digest).
 
   A grade's edit of the reviews document is made from the document as
   last read or written, at the version that left

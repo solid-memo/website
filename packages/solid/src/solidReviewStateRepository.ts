@@ -9,6 +9,7 @@ import type { PromptStates } from "@solid-memo/domain/grading";
 import type { ReviewKey, ReviewStates } from "@solid-memo/domain/review";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
 import {
+  editDocument,
   getSolidDatasetOrNull,
   keptDataset,
   PreconditionFailedError,
@@ -42,9 +43,6 @@ export interface SolidReviewStateRepositoryDeps {
 
 /** The states of a deck without a reviews document: none. */
 const none = (): ReviewStates => ({ sm2: [], fsrs: [] });
-
-/** How many times writeFsrsStates reads and writes a document that keeps changing meanwhile. */
-const WRITE_ATTEMPTS = 3;
 
 /** No FSRS-6 state to save or remove. */
 const NO_FSRS = { save: [], remove: [] };
@@ -190,21 +188,15 @@ export function createSolidReviewStateRepository({
     prepareReviewChanges,
 
     async writeFsrsStates(deck, edit): Promise<void> {
-      for (let attempt = 1; ; attempt++) {
-        const dataset = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
-        if (dataset === null) return;
+      // Read and written again while the document keeps changing meanwhile (editDocument).
+      await editDocument(deck.reviewsDocumentUrl, fetch, async (dataset) => {
+        if (dataset === null) return { result: undefined };
         const fsrs = edit(toReviewStates(dataset, deck));
-        if (fsrs.length === 0) return;
+        if (fsrs.length === 0) return { result: undefined };
         const written = withReviewStates(dataset, deck, { sm2: [], fsrs }, randomId);
-        try {
-          // If-Match the read above.
-          await saveReviews(deck, written);
-          return;
-        } catch (error) {
-          if (!(error instanceof PreconditionFailedError) || attempt === WRITE_ATTEMPTS)
-            throw error;
-        }
-      }
+        // Checked as saveReviews checks it; If-Match the read.
+        return { dataset: await checkedReviews(deck, written), result: undefined };
+      });
     },
 
     async upgradeReviewStates(deck): Promise<boolean> {

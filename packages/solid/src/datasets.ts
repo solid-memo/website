@@ -39,6 +39,7 @@ import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
 import { termOf } from "./ntriples";
 import { isWrittenByNewer } from "./records";
 import { refuseUnwritable } from "./writableTerms";
+import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
@@ -489,6 +490,78 @@ export async function saveDataset<T extends Dataset>(
   if (!isReadFrom(written.dataset, url)) return;
   ETAGS.set(sourceOf(written.dataset)!.key, version);
   readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: written.dataset });
+}
+
+/** How many times editDocument makes an edit, in all, while the document keeps changing elsewhere (412). */
+const EDIT_ATTEMPTS = 3;
+
+/**
+ * What an edit (editDocument) makes of a document as read: what it
+ * says (`result`), and the dataset to save, none when it changes
+ * nothing; with it, the subjects to check first (none checked without
+ * them), and whether to save it as one PUT of the whole document
+ * (saveDataset's `whole`).
+ */
+interface DocumentEdit<R> {
+  readonly result: R;
+  readonly dataset?: Dataset;
+  readonly subjects?: readonly string[];
+  readonly whole?: boolean;
+}
+
+/**
+ * How editDocument makes an edit: `attempts` in all (EDIT_ATTEMPTS),
+ * `pause` waited before each one after the first, given its number,
+ * `checkWrite` checking the subjects an edit names (as an instance's
+ * documents, "pod"), the document read by `read` (getSolidDatasetOrNull,
+ * so one not there is null), and `failure` what a write that fails for
+ * good throws in place of what it failed with.
+ */
+interface EditPolicy<D> {
+  readonly attempts?: number;
+  readonly pause?: (attempt: number) => Promise<void>;
+  readonly checkWrite?: WriteCheck;
+  readonly read?: (url: string, fetch: typeof globalThis.fetch) => Promise<D>;
+  readonly failure?: (error: unknown) => unknown;
+}
+
+/**
+ * Edit a document as it is now: read it, make of it what `edit` says
+ * (DocumentEdit), check the subjects the edit names, and save it only
+ * if the document is as it was read (If-Match; a new one only where
+ * there is none, If-None-Match: *). When it changed meanwhile (412),
+ * it is read and the edit made again, as many times as the policy
+ * says (EditPolicy), so a change made elsewhere is kept; the last 412
+ * is thrown. Only the check and the save are tried again: what the
+ * read or the edit throws (a rule of the caller's, even a
+ * PreconditionFailedError) is thrown at once, and so is any other
+ * failure of the write. The one place a write that re-applies a
+ * change on a 412 is made (docs/data-model.md#write-discipline).
+ */
+export async function editDocument<R, D extends Dataset | null = FetchedDataset | null>(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  edit: (read: D) => DocumentEdit<R> | Promise<DocumentEdit<R>>,
+  {
+    attempts = EDIT_ATTEMPTS,
+    pause,
+    checkWrite = noWriteCheck,
+    read = getSolidDatasetOrNull as (url: string, fetch: typeof globalThis.fetch) => Promise<D>,
+    failure = (error) => error,
+  }: EditPolicy<D> = {},
+): Promise<R> {
+  for (let attempt = 1; ; attempt++) {
+    if (attempt > 1) await pause?.(attempt);
+    const { dataset, subjects, whole, result } = await edit(await read(url, fetch));
+    if (dataset === undefined) return result;
+    try {
+      if (subjects !== undefined) await checkWrite(dataset, subjects, "pod");
+      await saveDataset(url, dataset, fetch, { whole });
+      return result;
+    } catch (error) {
+      if (!(error instanceof PreconditionFailedError) || attempt === attempts) throw failure(error);
+    }
+  }
 }
 
 /**
