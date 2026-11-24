@@ -675,6 +675,57 @@ describe("addDeck", () => {
   });
 });
 
+describe("editDeck", () => {
+  it("writes the entry changed from the deck as read, in this app's format, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    const change = vi.fn((stored: Deck) => ({ ...stored, title: { en: "Renamed" } }));
+    const written = await makeRepository(checkWrite).editDeck(
+      { ...deck, title: { en: "As shown" } },
+      change,
+    );
+    expect(change).toHaveBeenCalledWith(expect.objectContaining({ url: deck.url }));
+    expect(written).toMatchObject({ title: { en: "Renamed" }, formatVersion: 6 });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    expect(getStringWithLocale(getThing(saved as Dataset, deck.url)!, DCTERMS.title, "en")).toBe(
+      "Renamed",
+    );
+    expect(checkWrite).toHaveBeenCalledWith(saved, expect.arrayContaining([deck.url]), "pod");
+  });
+
+  it("writes nothing for no change, and gives the deck as read", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().editDeck(deck, () => null)).resolves.toMatchObject({
+      url: deck.url,
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads and changes the entry again when the catalog changed elsewhere meanwhile", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+    const change = vi.fn((stored: Deck) => stored);
+    await makeRepository().editDeck(deck, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a deck with no entry, or no catalog, writing nothing", async () => {
+    const change = vi.fn((stored: Deck) => stored);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().editDeck(deck, change)).rejects.toMatchObject({
+      code: "deckGone",
+    });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(
+      makeRepository().editDeck({ ...deck, url: `${CATALOG}#gone` }, change),
+    ).rejects.toMatchObject({ code: "deckGone" });
+    expect(change).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
 describe("readCatalog and saveCatalog", () => {
   const catalog = {
     title: "Main",

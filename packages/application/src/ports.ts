@@ -473,6 +473,17 @@ export interface DeckRepository {
   /** The deck as its catalog entry says now; null when it has none (any more). */
   readDeck(deckUrl: string): Promise<Deck | null>;
   /**
+   * Edit the deck as its catalog entry says now, for the Studio:
+   * `change` is given the deck as read (as readDeck reads it) and returns
+   * the deck to write, or null for no change, which writes nothing. The
+   * entry is written from that same read, as saveDeck writes it, in ONE
+   * save made only if the catalog document is still as read (If-Match);
+   * when it changed meanwhile, it is read and changed again, a few
+   * times. Throws deckGone, writing nothing, when the deck has no entry.
+   * The deck as it then stands.
+   */
+  editDeck(deck: Deck, change: (stored: Deck) => Deck | null): Promise<Deck>;
+  /**
    * For a library upgrade (domain/deckUpgrade.ts): write the deck's entry
    * as `next` in one write of the catalog document — what changed from
    * `current`, as withDeckChanges puts it — only if the entry still says

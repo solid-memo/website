@@ -146,6 +146,11 @@ export interface SolidDeckRepositoryDeps {
   userStorages?: UserStorages;
 }
 
+/** The deck the catalog document's entry at `deckUrl` says; undefined when it has none. */
+function deckIn(dataset: Dataset, catalogUrl: string, deckUrl: string): Deck | undefined {
+  return toDecks(dataset, catalogUrl).find((deck) => deck.url === deckUrl);
+}
+
 /**
  * The catalog document `read` (none: a new one) with `catalog` written
  * in it, beside its decks, and the subjects the write is checked for.
@@ -555,6 +560,25 @@ export function createSolidDeckRepository({
 
     readDeck,
 
+    editDeck(deck, change) {
+      const catalogUrl = documentUrlOf(deck.url);
+      // The entry written is the one changed from the read the save is If-Match (editDocument).
+      return editDocument(
+        catalogUrl,
+        fetch,
+        (dataset) => {
+          const stored = dataset === null ? undefined : deckIn(dataset, catalogUrl, deck.url);
+          if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
+          const changed = change(stored);
+          if (changed === null) return { result: stored };
+          const written: Deck = { ...changed, formatVersion: DECK_FORMAT_VERSION };
+          const updated = withDecks(dataset!, [written]);
+          return { dataset: updated, subjects: decksSubjects(updated, [written]), result: written };
+        },
+        { checkWrite },
+      );
+    },
+
     async upgradeDeckEntry(current, next): Promise<Deck> {
       const { catalogUrl, dataset, subjects, written } = await upgradedEntry(current, next);
       // The write carries If-Match of the read above: the entry changes as it was checked, or not at all.
@@ -749,10 +773,7 @@ export function createSolidDeckRepository({
       catalogUrl,
       fetch,
       (dataset) => {
-        const stored =
-          dataset === null
-            ? undefined
-            : toDecks(dataset, catalogUrl).find((candidate) => candidate.url === deck.url);
+        const stored = dataset === null ? undefined : deckIn(dataset, catalogUrl, deck.url);
         if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
         const changed = change(stored);
         if (changed === null) return { result: stored };
@@ -1123,9 +1144,7 @@ export function createSolidDeckRepository({
   async function readDeck(deckUrl: string): Promise<Deck | null> {
     const catalogUrl = documentUrlOf(deckUrl);
     const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-    return dataset === null
-      ? null
-      : (toDecks(dataset, catalogUrl).find((deck) => deck.url === deckUrl) ?? null);
+    return dataset === null ? null : (deckIn(dataset, catalogUrl, deckUrl) ?? null);
   }
 
   async function deleteDocument(deck: Deck, url: string): Promise<void> {

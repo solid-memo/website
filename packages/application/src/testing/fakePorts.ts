@@ -194,6 +194,13 @@ export function makeDeps() {
       version: null,
     })),
     readDeck: vi.fn(async () => deck),
+    // As the real one does: the deck read, changed, and the change saved when there is one.
+    editDeck: vi.fn(async (edited, change) => {
+      const stored = await deckRepository.readDeck(edited.url);
+      if (stored === null) throw new AppError("deckGone", { deck: edited.title });
+      const changed = change(stored);
+      return changed === null ? stored : deckRepository.saveDeck(changed);
+    }),
     upgradeDecks: vi.fn(async () => true),
     upgradeDeckEntry: vi.fn(async (_current, next) => next),
     checkDeckEntryUpgrade: vi.fn(async () => undefined),

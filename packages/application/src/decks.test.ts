@@ -2,14 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
 import { createUseCases } from "./useCases";
 import { instance, deck, makeDeps } from "./testing/fakePorts";
 
 describe("decks", () => {
   const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
-  const changed = () => new AppError("changedElsewhere", { url: "x" });
 
   it("describeDeck saves the deck's description in the languages given, topics and keywords, refusing an empty description", async () => {
     const deps = makeDeps();
@@ -259,23 +257,6 @@ describe("decks", () => {
         license: CC0,
       });
       expect(deps.deckRepository.readDeck).toHaveBeenCalledWith(deck.url);
-    });
-
-    it("reads and makes the edit again while the catalog changes elsewhere, three times in all", async () => {
-      const deps = makeDeps();
-      vi.mocked(deps.deckRepository.saveDeck)
-        .mockRejectedValueOnce(changed())
-        .mockRejectedValueOnce(changed());
-      const useCases = createUseCases(deps);
-      await expect(useCases.setDeckProvenance(deck, { authors: ["Ada"] })).resolves.toMatchObject({
-        authors: ["Ada"],
-      });
-      expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(3);
-      vi.mocked(deps.deckRepository.saveDeck).mockRejectedValue(changed());
-      await expect(useCases.setDeckProvenance(deck, { authors: [] })).rejects.toMatchObject({
-        code: "changedElsewhere",
-      });
-      expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(6);
     });
 
     it("refuses a deck that is gone, and stops at once on another failure", async () => {
