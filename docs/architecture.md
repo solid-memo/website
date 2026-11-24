@@ -6,6 +6,229 @@ monorepo. A package's `package.json` names what it may import, which
 `npm run check:boundaries` enforces ([boundaries.md](boundaries.md)).
 The layers meet only in the composition root.
 
+The diagrams below show Solid Memo at the levels of the
+[C4 model](https://c4model.com): the system in its context, the
+containers it runs as, and the components inside them. The packages
+and their imports are the level below, the code. Two views of
+[arc42](https://arc42.org) follow the same way: a runtime view of a
+grade on its way to a pod, and a deployment view of where everything
+runs.
+
+## Reading the diagrams
+
+- A stadium is a person, a box a software system, a container or a
+  component, and a cylinder a store of data.
+- Each box names its kind in brackets, and its technology where it
+  has one, as C4 does: `[Container: Web Workers]`.
+- A frame is a boundary: what's inside runs in it, or belongs to it.
+- An arrow points from the one that acts. Its label says what it does,
+  and how in brackets.
+- A dotted arrow is a dependency only some cases or files have.
+
+## The system in its context
+
+```mermaid
+flowchart TB
+    accTitle: Solid Memo in its context
+    accDescr: A learner studies and an author makes decks with Solid Memo, which keeps each learner's data in their own Solid pod, signs in with their identity provider, loads from its own site and reads releases and pictures from other servers.
+    learner(["Learner<br/>[Person]<br/>studies decks and courses"])
+    author(["Author<br/>[Person]<br/>makes and publishes decks in the Studio"])
+    memo["Solid Memo<br/>[Software system]<br/>spaced-repetition study and the Studio,<br/>running in the browser"]
+    site["solid-memo.com<br/>[Software system: GitHub Pages]<br/>the app's files, the vocabulary and shapes,<br/>the deck library, the docs"]
+    pod[("The learner's Solid pod<br/>[Software system: a Solid server]<br/>decks, cards, review states, answers,<br/>preferences, drafts")]
+    idp["Identity provider<br/>[Software system: Solid-OIDC]<br/>signs the learner in"]
+    others[("Other servers<br/>[Software system]<br/>releases shared by link, card pictures")]
+    apps["Other Solid apps<br/>[Software system]<br/>use the same data, by its vocabulary"]
+    learner -->|"studies with"| memo
+    author -->|"makes decks with"| memo
+    memo -->|"loads from<br/>[HTTPS]"| site
+    memo -->|"reads and writes<br/>the learner's data<br/>[HTTPS, Solid Protocol]"| pod
+    memo -->|"signs in with<br/>[Solid-OIDC]"| idp
+    memo -.->|"reads releases and<br/>pictures from [HTTPS]"| others
+    apps -.->|"read and write<br/>[Solid Protocol]"| pod
+```
+
+Solid Memo has no server of its own ([privacy.md](privacy.md)). The
+site serves files and nothing else, and the browser talks straight to
+the pod's server. So a learner's study stays where they put it, any
+Solid app that knows the [vocabulary](vocab.md) can use it, and the
+project runs nothing that holds anyone's data. A guest's study, before
+logging in, is in the browser instead ([guest-mode.md](guest-mode.md)).
+
+## Containers
+
+What runs where: the page and its workers in the learner's browser,
+each store the browser keeps, and the systems the page talks to.
+
+```mermaid
+flowchart LR
+    accTitle: Solid Memo's containers
+    accDescr: In the learner's browser, the page runs Solid Memo and the Studio, workers read and check the documents the app didn't write, IndexedDB keeps a guest's pod and localStorage the device's settings; the page talks to the site, the pod and the identity provider over HTTPS.
+    learner(["Learner<br/>[Person]"])
+    subgraph browser["The learner's browser"]
+        page["Solid Memo<br/>[Container: single-page app,<br/>Preact, TypeScript]<br/>study, decks, courses, statistics,<br/>and the Studio, a chunk loaded on its routes"]
+        workers["Off-page workers<br/>[Container: Web Workers]<br/>parse and check the documents<br/>the app didn't write"]
+        guest[("Guest's pod<br/>[Container: IndexedDB]<br/>a guest's study, before logging in")]
+        device[("Device settings<br/>[Container: localStorage]<br/>language, theme, text size,<br/>the update journal")]
+    end
+    site["solid-memo.com<br/>[Software system: GitHub Pages]"]
+    pod[("The learner's Solid pod<br/>[Software system]")]
+    idp["Identity provider<br/>[Software system]"]
+    learner -->|"uses"| page
+    page -->|"loads the app, shapes<br/>and library from [HTTPS]"| site
+    page -->|"hands document text to<br/>[postMessage]"| workers
+    page -->|"keeps a guest's study in"| guest
+    page -->|"keeps settings in"| device
+    page -->|"reads and writes<br/>[HTTPS, If-Match]"| pod
+    page -->|"signs in with<br/>[Solid-OIDC]"| idp
+```
+
+The page makes every request itself, and a worker gets only a
+document's text. So a worker never holds the learner's login, and a
+document too large or too strange to read holds up a worker, not the
+page ([validation.md](validation.md#off-the-page)). A write is sent
+`If-Match` the version it was made from, so a change made elsewhere is
+never written over ([data-model.md](data-model.md#write-discipline)).
+
+## Components
+
+Inside the page, Solid Memo is built in ports and adapters. The use
+cases hold what the app does. They reach the outside only through
+ports, interfaces the application owns, which the adapters implement.
+
+```mermaid
+flowchart TB
+    accTitle: Ports and adapters inside Solid Memo
+    accDescr: The screens call the use cases, which use the domain's pure functions and reach the outside only through ports; the Solid and browser adapters implement the ports, and the composition root creates the adapters and hands them to the use cases.
+    subgraph driving["Driving side"]
+        screens["Screens<br/>[Component: ui, Preact]"]
+        studioScreens["Studio screens<br/>[Component: apps/studio]"]
+    end
+    subgraph core["Application core"]
+        useCases["UseCases<br/>[Component: application]<br/>one slice per feature"]
+        domain["Domain<br/>[Component: domain]<br/>pure types and functions:<br/>scheduling, migrations"]
+        ports["Ports<br/>[Interfaces: application]<br/>one per outside capability"]
+    end
+    subgraph driven["Driven side"]
+        solid["Solid adapters<br/>[Component: solid]<br/>DeckRepository, ReviewStateRepository,<br/>AnswerLog, SessionGateway, ..."]
+        browserAdapters["Browser adapters<br/>[Component: browser]<br/>DeviceSetting, ResourceStore,<br/>FileExchange, UpdateJournal, ..."]
+    end
+    root["Composition root<br/>[Component: composition]<br/>creates the adapters and<br/>hands them to the use cases"]
+    screens -->|"call"| useCases
+    studioScreens -->|"call"| useCases
+    useCases -->|"use"| domain
+    useCases -->|"need"| ports
+    solid -.->|"implements"| ports
+    browserAdapters -.->|"implements"| ports
+    root -.->|"creates"| solid
+    root -.->|"creates"| browserAdapters
+```
+
+The arrows between the core and the adapters point inward: an adapter
+depends on the application, never the other way round. So the use
+cases and the domain run in tests with no pod and no browser, and a
+library behind an adapter can be replaced there alone
+([vendor-code.md](vendor-code.md)). [Key objects](#key-objects) names
+the interfaces, and [boundaries.md](boundaries.md) the imports each
+package may make.
+
+## A request on its way to a pod
+
+Every request of an adapter that reads or writes an instance's data
+passes the same steps, made in the composition root
+([appUseCases.ts](../packages/composition/src/appUseCases.ts)). Each
+step guards one thing, so no adapter has to.
+
+```mermaid
+flowchart LR
+    accTitle: A request on its way to a pod
+    accDescr: An adapter's request passes the pod fence, which refuses writes Solid Memo never makes; the credential gate then sends it as the learner into their own pod, through the write fence, or reads anywhere else as no one; a guest's pod is answered from IndexedDB.
+    adapter["Solid adapter"] --> podFence["Pod fence<br/>refuses a write to an address<br/>Solid Memo never writes to"]
+    podFence --> where{"Where does<br/>it go?"}
+    where -->|"the guest's pod"| guestFence["Write fence"] --> local[("Guest's pod<br/>[IndexedDB]")]
+    where -->|"the learner's own pod"| ownFence["Write fence<br/>no write to a study<br/>being moved"] --> session["As the learner<br/>[Solid-OIDC session]"] --> pod[("The learner's pod")]
+    where -->|"anywhere else"| noOne["As no one: reads only,<br/>under limits and a budget,<br/>parsed off the page"] --> others[("Other servers")]
+```
+
+The credential gate sends the learner's login only into their own pod,
+so a catalog that names a document on another server can't make the
+app write there or show it the learner's login
+([boundaries.md](boundaries.md#the-pod-fence)). An instance the learner
+registered on another server is read as them, under the same limits.
+
+## Runtime: a grade
+
+A grade shows the layers at work. The screen calls a use case, the use
+case applies the domain's scheduling through a port, and the adapter
+writes one document of the pod, conditionally
+([srs.md](srs.md#what-a-grade-costs)).
+
+```mermaid
+sequenceDiagram
+    accTitle: A grade, from the screen to the pod
+    accDescr: The learner grades a card; the repository applies the grade to the card's state as the reviews document holds it and writes it with an If-Match PATCH, reading and grading again on a 412; the answer is added to the month's log in the background.
+    actor Learner
+    participant Screen as Study screen (ui)
+    participant UC as UseCases (application)
+    participant Repo as ReviewStateRepository (solid)
+    participant Pod as The learner's pod
+    Learner->>Screen: grade the card
+    Screen->>UC: recordReview(deck, prompt, grade)
+    UC->>Repo: gradeReviewState(deck, key, grade)
+    Repo->>Pod: GET the reviews document, unless its version is known
+    Pod-->>Repo: the document and its ETag
+    Note over Repo: gradePrompt (domain) grades the state the document holds
+    Repo->>Pod: PATCH the state, If-Match the ETag
+    alt another device graded the card meanwhile
+        Pod-->>Repo: 412 Precondition Failed
+        Repo->>Pod: GET the document again
+        Note over Repo: the grade builds on the state it holds now
+        Repo->>Pod: PATCH, If-Match the new ETag
+    end
+    Pod-->>Repo: written
+    Repo-->>UC: the new state
+    UC-->>Screen: the new state, and how to undo it
+    Note over Screen: the screen updates the queue it cached, reading nothing
+    UC-)Pod: in the background, the answer added to history/YYYY-MM.ttl
+```
+
+The answer is added with an insert-only `PATCH` that reads nothing
+first, so the log grows without the learner waiting for it
+([data-model.md](data-model.md#the-answer-log)).
+
+## Deployment
+
+```mermaid
+flowchart LR
+    accTitle: Where Solid Memo runs
+    accDescr: A contributor pushes to GitHub, where GitHub Actions checks every change, tests it against Solid servers in Docker, releases a version and deploys it to GitHub Pages; the learner's browser loads the app from solid-memo.com and talks to pods and identity providers wherever they run.
+    contributor(["Contributor<br/>[Person]"])
+    subgraph github["GitHub"]
+        repo["solid-memo/website<br/>[Git repository]"]
+        actions["GitHub Actions<br/>[CI and release]<br/>checks, tests against Solid servers<br/>in Docker, releases a version"]
+        pages["GitHub Pages<br/>[Static hosting]<br/>solid-memo.com"]
+    end
+    subgraph device["The learner's device"]
+        browser["Web browser<br/>[Solid Memo, its workers,<br/>IndexedDB, localStorage]"]
+    end
+    subgraph web["Anywhere on the web"]
+        pods[("Solid servers<br/>[the learner's pod provider,<br/>or their own server]")]
+        providers["Identity providers<br/>[Solid-OIDC]"]
+    end
+    contributor -->|"pushes to"| repo
+    repo -->|"runs"| actions
+    actions -->|"deploys the newest<br/>version to"| pages
+    browser -->|"loads from<br/>[HTTPS]"| pages
+    browser -->|"reads and writes<br/>[HTTPS]"| pods
+    browser -->|"signs in with"| providers
+```
+
+A version reaches the site only once it's released, from its release
+commit ([deployment.md](deployment.md), [releasing.md](releasing.md)).
+The learner's pod and identity provider can be anyone's: the app
+follows the Solid Protocol, tested against several servers
+([testing.md](testing.md)).
+
 ## Packages
 
 | Package | Folder | Responsibility |
