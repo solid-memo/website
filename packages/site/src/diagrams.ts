@@ -98,11 +98,99 @@ export class DiagramError extends Error {
 }
 
 /**
+ * The colors of Solid Memo's Standard palette the diagrams are drawn in,
+ * light and dark, by their roles in packages/ui/src/palettes.css
+ * (docs/theme.md), which apps/web's diagramColors.test.ts keeps them as.
+ */
+export const DIAGRAM_ROLES = {
+  light: {
+    "--bg": "#f7f6f1",
+    "--surface": "#ffffff",
+    "--surface-sunken": "#fbfaf5",
+    "--text": "#16202a",
+    "--text-muted": "#545c68",
+    "--border-strong": "#cfcbbb",
+    "--primary": "#2c6b3d",
+    "--primary-soft": "#e6f1e8",
+    "--accent-yellow": "#e8ab14",
+    "--warning-soft": "#fdf4dc",
+  },
+  dark: {
+    "--bg": "#11171e",
+    "--surface": "#19212b",
+    "--surface-sunken": "#151c25",
+    "--text": "#ecebe4",
+    "--text-muted": "#aab4bf",
+    "--border-strong": "#3a4859",
+    "--primary": "#4fae6a",
+    "--primary-soft": "#1b3324",
+    "--accent-yellow": "#e8ab14",
+    "--warning-soft": "#33280e",
+  },
+} as const satisfies Record<Theme, Record<string, string>>;
+
+/**
+ * Mermaid's base theme in a theme's colors (DIAGRAM_ROLES), as the app
+ * draws: a box in the soft green of a selected row, edged in the
+ * primary green; a frame as a card, on the surface; lines and arrows in
+ * the muted text's color; a note as a warning, on its soft yellow.
+ */
+function themeColors(theme: Theme): Record<string, string | boolean> {
+  const role = DIAGRAM_ROLES[theme];
+  return {
+    darkMode: theme === "dark",
+    background: role["--bg"],
+    primaryColor: role["--primary-soft"],
+    mainBkg: role["--primary-soft"],
+    primaryBorderColor: role["--primary"],
+    nodeBorder: role["--primary"],
+    primaryTextColor: role["--text"],
+    nodeTextColor: role["--text"],
+    textColor: role["--text"],
+    titleColor: role["--text"],
+    secondaryColor: role["--surface"],
+    secondaryBorderColor: role["--border-strong"],
+    secondaryTextColor: role["--text"],
+    tertiaryColor: role["--surface-sunken"],
+    tertiaryBorderColor: role["--border-strong"],
+    tertiaryTextColor: role["--text"],
+    clusterBkg: role["--surface"],
+    clusterBorder: role["--border-strong"],
+    lineColor: role["--text-muted"],
+    defaultLinkColor: role["--text-muted"],
+    arrowheadColor: role["--text-muted"],
+    edgeLabelBackground: role["--surface"],
+    noteBkgColor: role["--warning-soft"],
+    noteBorderColor: role["--accent-yellow"],
+    noteTextColor: role["--text"],
+    actorBkg: role["--primary-soft"],
+    actorBorder: role["--primary"],
+    actorTextColor: role["--text"],
+    actorLineColor: role["--text-muted"],
+    signalColor: role["--text"],
+    signalTextColor: role["--text"],
+    labelBoxBkgColor: role["--surface"],
+    labelBoxBorderColor: role["--border-strong"],
+    labelTextColor: role["--text"],
+    loopTextColor: role["--text"],
+    activationBkgColor: role["--surface-sunken"],
+    activationBorderColor: role["--border-strong"],
+    transitionColor: role["--text-muted"],
+    transitionLabelColor: role["--text"],
+    labelBackgroundColor: role["--surface"],
+    compositeBackground: role["--surface"],
+    compositeTitleBackground: role["--surface-sunken"],
+    compositeBorder: role["--border-strong"],
+    specialStateColor: role["--text"],
+  };
+}
+
+/**
  * The Mermaid settings for each theme, which are part of every cache
  * key. Labels are SVG text, not HTML (`htmlLabels: false`), so a drawing
- * holds no `<foreignObject>`; every text is set in Fredoka; and the
- * wrapping width is wide enough that no word in the docs' labels is
- * split.
+ * holds no `<foreignObject>`; every text is set in Fredoka; the colors
+ * are the app's own (themeColors); and the wrapping width is wide
+ * enough that no word in the docs' labels is split.
  */
 export function diagramTheme(theme: Theme): Record<string, unknown> {
   const family = `"${FONT_FAMILY}"`;
@@ -111,9 +199,9 @@ export function diagramTheme(theme: Theme): Record<string, unknown> {
     securityLevel: "strict",
     deterministicIds: true,
     htmlLabels: false,
-    theme: theme === "dark" ? "dark" : "default",
+    theme: "base",
     fontFamily: family,
-    themeVariables: { fontFamily: family },
+    themeVariables: { ...themeColors(theme), fontFamily: family },
     flowchart: { wrappingWidth: 400 },
     sequence: { actorFontFamily: family, noteFontFamily: family, messageFontFamily: family },
   };

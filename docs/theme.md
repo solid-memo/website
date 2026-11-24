@@ -176,6 +176,10 @@ Some colors stay fixed whatever the palette:
 - the `theme-color` meta tags written out in `index.html` and the About
   page, which hold Standard's backgrounds for the browser's chrome
   before the app runs (`themeColor.test.ts` keeps them in step);
+- the docs' diagrams, drawn in Standard's colors, light and dark
+  ([markdown.md](markdown.md#diagrams)), written out as
+  `DIAGRAM_ROLES` in `packages/site/src/diagrams.ts`, which
+  `diagramColors.test.ts` keeps in step;
 - forced colors (Windows High Contrast and the like), whose rules
   draw with the system's colors over every palette.
 
