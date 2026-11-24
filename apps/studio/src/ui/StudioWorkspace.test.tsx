@@ -33,6 +33,11 @@ import {
 import { courseDeck, courseInstance, makeCourse } from "@solid-memo/ui/test/course";
 import { narrowScreen, wideScreen } from "../test/media";
 import { answer, dialog } from "../test/dialogs";
+import { DeviceValues } from "@solid-memo/ui/deviceValues";
+import { makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+
+/** The values this device keeps, fresh for each test. */
+let device = makeDeviceValuesFake();
 
 vi.mock("@solid-memo/domain/release/releaseDraft", async (original) => {
   const actual = await original<typeof import("@solid-memo/domain/release/releaseDraft")>();
@@ -48,9 +53,11 @@ function renderWorkspace(useCases: UseCases) {
     <QueryClientProvider client={queryClient}>
       {/* As the site's shell names the app at the Studio's routes (STUDIO in ui's App.tsx). */}
       <AppName.Provider value="studio.name">
-        <StudioWorkspace useCases={useCases} session={session} banner={<p>The masthead</p>}>
-          <p>A notice</p>
-        </StudioWorkspace>
+        <DeviceValues.Provider value={device}>
+          <StudioWorkspace useCases={useCases} session={session} banner={<p>The masthead</p>}>
+            <p>A notice</p>
+          </StudioWorkspace>
+        </DeviceValues.Provider>
       </AppName.Provider>
     </QueryClientProvider>,
   );
@@ -79,7 +86,7 @@ describe("StudioWorkspace", () => {
   beforeEach(() => {
     window.history.replaceState(null, "", window.location.pathname);
     // The layout the device remembers: none, the dock hidden.
-    localStorage.clear();
+    device = makeDeviceValuesFake();
   });
   // A screen widened by a test.
   afterEach(() => vi.restoreAllMocks());
@@ -346,7 +353,7 @@ describe("StudioWorkspace", () => {
     });
     expect(window.history.length).toBe(length);
     expect(
-      JSON.parse(localStorage.getItem("solid-memo:studioInstances.v1")!)[instanceA.url].views.home,
+      JSON.parse(device.stored.get("solid-memo:studioInstances.v1")!)[instanceA.url].views.home,
     ).toEqual([{ name: "Verbs", params: "q=verb" }]);
 
     fireEvent.click(sidebar().getByRole("link", { name: "Kanji N5" }));
@@ -400,7 +407,7 @@ describe("StudioWorkspace", () => {
       within(screen.getByRole("list", { name: "Pinned" })).getByRole("link", { name: "Verbs" }),
     ).toBeInTheDocument();
     expect(
-      JSON.parse(localStorage.getItem("solid-memo:studioInstances.v1")!)[instanceA.url],
+      JSON.parse(device.stored.get("solid-memo:studioInstances.v1")!)[instanceA.url],
     ).toMatchObject({
       pinned: [{ kind: "deck", url: verbs.url }],
       recent: [{ kind: "deck", url: kanji.url }],
@@ -789,7 +796,7 @@ describe("StudioWorkspace", () => {
       "",
       studioRouteToHash({ screen: "about", deckUrl: kanji.url }),
     );
-    localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ dock: true }));
+    device.stored.set("solid-memo:studioLayout.v1", JSON.stringify({ dock: true }));
     const useCases = makeUseCasesFake({
       listInstances: vi.fn(async () => [instanceA]),
       listDecks: vi.fn(async () => [kanji]),
@@ -824,7 +831,7 @@ describe("StudioWorkspace", () => {
       "",
       studioRouteToHash({ screen: "about", deckUrl: kanji.url }),
     );
-    localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ dock: true }));
+    device.stored.set("solid-memo:studioLayout.v1", JSON.stringify({ dock: true }));
     const useCases = makeUseCasesFake({
       listInstances: vi.fn(async () => [instanceA]),
       listDecks: vi.fn(async () => [kanji]),
@@ -1595,8 +1602,7 @@ describe("StudioWorkspace", () => {
 
   it("lists as opened lately only a deck or a draft the instance has, never one its link names alone", async () => {
     const opened = () =>
-      JSON.parse(localStorage.getItem("solid-memo:studioInstances.v1") ?? "{}")[instanceA.url]
-        ?.recent;
+      JSON.parse(device.stored.get("solid-memo:studioInstances.v1") ?? "{}")[instanceA.url]?.recent;
     window.history.replaceState(
       null,
       "",

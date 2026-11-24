@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen, within } from "@testing-library/preact";
+import { act, fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
+import type { ComponentChild } from "preact";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DRAFT_URL, instanceA, instanceB, makeCard, makeDeck } from "../../test/fixtures";
 import { studioRouteToHash, type StudioRoute } from "../router";
@@ -13,6 +15,14 @@ import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { deckTabs } from "./workspaceLayout";
 import { queryKeys } from "../queryKeys";
 import { cardName } from "@solid-memo/ui/DataText";
+
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 vi.mock("./commandIndex", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./commandIndex")>();
@@ -86,8 +96,6 @@ const headings = () =>
 const picked = () => document.getElementById(field().getAttribute("aria-activedescendant")!)!;
 
 describe("CommandPalette", () => {
-  beforeEach(() => localStorage.clear());
-
   it("opens as a dialog with the focus in its field, a combobox over the list", () => {
     renderPalette();
     expect(screen.getByRole("dialog", { name: "Quick open" })).toHaveAttribute("open");
@@ -163,7 +171,7 @@ describe("CommandPalette", () => {
     expect(onChoose).toHaveBeenCalledWith(
       expect.objectContaining({ label: "Verbs", route: { screen: "cards", deckUrl: verbs.url } }),
     );
-    expect(recentCommands()).toEqual([
+    expect(recentCommands(device)).toEqual([
       `decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`,
     ]);
   });
@@ -187,7 +195,7 @@ describe("CommandPalette", () => {
   });
 
   it("lists the entries used last first", () => {
-    localStorage.setItem(
+    device.stored.set(
       "solid-memo:studioRecent.v1",
       JSON.stringify([`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`]),
     );
@@ -199,8 +207,8 @@ describe("CommandPalette", () => {
   });
 
   it("lists the decks and drafts pinned first, then those used last but those pinned, with nothing typed", () => {
-    rememberCommand(`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`);
-    rememberCommand(`decks:${studioRouteToHash(cardsRoute)}`);
+    rememberCommand(`decks:${studioRouteToHash({ screen: "cards", deckUrl: verbs.url })}`, device);
+    rememberCommand(`decks:${studioRouteToHash(cardsRoute)}`, device);
     renderPalette({
       pinned: [
         { kind: "deck", url: verbs.url },

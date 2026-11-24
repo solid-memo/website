@@ -20,6 +20,10 @@ import { DataTable } from "./DataTable";
 import { ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT } from "./splitter";
 import type { ContextTab } from "./workspaceLayout";
 import { narrowScreen, wideScreen } from "../../test/media";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+
+/** The values this device keeps, fresh for each test. */
+let device = makeDeviceValuesFake();
 
 /** Says what a draft editor would: how many of its changes wait. */
 let report: (editor: object, report: EditorReport) => void;
@@ -119,6 +123,7 @@ function renderShell(
         )}
       </StudioShell>
     </QueryClientProvider>,
+    { wrapper: deviceWrapper(device) },
   );
 }
 
@@ -133,7 +138,7 @@ const toggle = () => screen.getByRole("button", { name: "Sidebar" });
 
 describe("StudioShell", () => {
   beforeEach(() => {
-    localStorage.clear();
+    device = makeDeviceValuesFake();
     vi.restoreAllMocks();
     window.history.replaceState(null, "", "#/");
   });
@@ -809,7 +814,7 @@ describe("StudioShell", () => {
 
     it("shows a detail of the main content while the route has it, as wide as its own splitter makes it, closed by going to the main content alone", () => {
       const onClose = vi.fn();
-      localStorage.setItem("solid-memo:studioLayout.v1", JSON.stringify({ aside: false }));
+      device.stored.set("solid-memo:studioLayout.v1", JSON.stringify({ aside: false }));
       const { unmount } = renderShell({
         aside: {
           label: "Card",
@@ -855,7 +860,7 @@ describe("StudioShell", () => {
       expect(screen.getByRole("complementary", { name: "Card" })).toHaveStyle({
         width: `${DETAIL_WIDTH.min}px`,
       });
-      expect(JSON.parse(localStorage.getItem("solid-memo:studioLayout.v1")!)).toMatchObject({
+      expect(JSON.parse(device.stored.get("solid-memo:studioLayout.v1")!)).toMatchObject({
         asideWidth: ASIDE_WIDTH.initial,
       });
     });

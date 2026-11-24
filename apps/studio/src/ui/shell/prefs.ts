@@ -2,6 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
+import type { DeviceValueKind, InstanceValueKind } from "@solid-memo/application/ports";
 import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
 import {
   ASIDE_WIDTH,
@@ -55,47 +57,54 @@ export const DEFAULT_PREFS: StudioPrefs = {
 export const PREFS_KEY = "solid-memo:studioLayout.v1";
 
 /**
- * The Studio's layout as the user left it on this device. Kept in the
- * browser's storage, never in the pod: how the Studio is laid out is
- * this device's view of it. Storage that is missing, refuses or holds
- * something else gives the defaults, each preference on its own.
+ * The Studio's layout as stored: what the device keeps that is not one
+ * of the preferences is the default, each preference on its own.
  */
-export function studioPrefs(storage: () => Storage = () => globalThis.localStorage): StudioPrefs {
-  let stored: unknown;
-  try {
-    stored = JSON.parse(storage().getItem(PREFS_KEY) ?? "{}");
-  } catch {
-    return DEFAULT_PREFS;
-  }
-  const {
-    density,
-    sidebar,
-    aside,
-    asideWidth,
-    detailWidth,
-    dock,
-    dockHeight,
-    hiddenColumns,
-    characterKeys,
-  } = typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
-  const shown = (value: unknown, fallback: boolean) =>
-    typeof value === "boolean" ? value : fallback;
-  // A size out of its bounds is brought within them: the bounds (or the text size) may have changed since.
-  const sized = (value: unknown, size: PaneSize) =>
-    typeof value === "number" && Number.isFinite(value)
-      ? clampSize(value, scaledPane(size))
-      : size.initial;
-  return {
-    density: DENSITIES.includes(density as Density) ? (density as Density) : DEFAULT_PREFS.density,
-    sidebar: shown(sidebar, DEFAULT_PREFS.sidebar),
-    aside: shown(aside, DEFAULT_PREFS.aside),
-    asideWidth: sized(asideWidth, ASIDE_WIDTH),
-    detailWidth: sized(detailWidth, DETAIL_WIDTH),
-    dock: shown(dock, DEFAULT_PREFS.dock),
-    dockHeight: sized(dockHeight, DOCK_HEIGHT),
-    hiddenColumns: columnsHidden(hiddenColumns),
-    characterKeys: shown(characterKeys, DEFAULT_PREFS.characterKeys),
-  };
+const LAYOUT: DeviceValueKind<StudioPrefs> = {
+  decode: (stored) => {
+    const {
+      density,
+      sidebar,
+      aside,
+      asideWidth,
+      detailWidth,
+      dock,
+      dockHeight,
+      hiddenColumns,
+      characterKeys,
+    } = typeof stored === "object" && stored !== null ? (stored as Record<string, unknown>) : {};
+    const shown = (value: unknown, fallback: boolean) =>
+      typeof value === "boolean" ? value : fallback;
+    // A size out of its bounds is brought within them: the bounds (or the text size) may have changed since.
+    const sized = (value: unknown, size: PaneSize) =>
+      typeof value === "number" && Number.isFinite(value)
+        ? clampSize(value, scaledPane(size))
+        : size.initial;
+    return {
+      density: DENSITIES.includes(density as Density)
+        ? (density as Density)
+        : DEFAULT_PREFS.density,
+      sidebar: shown(sidebar, DEFAULT_PREFS.sidebar),
+      aside: shown(aside, DEFAULT_PREFS.aside),
+      asideWidth: sized(asideWidth, ASIDE_WIDTH),
+      detailWidth: sized(detailWidth, DETAIL_WIDTH),
+      dock: shown(dock, DEFAULT_PREFS.dock),
+      dockHeight: sized(dockHeight, DOCK_HEIGHT),
+      hiddenColumns: columnsHidden(hiddenColumns),
+      characterKeys: shown(characterKeys, DEFAULT_PREFS.characterKeys),
+    };
+  },
+  fallback: DEFAULT_PREFS,
+};
+
+/**
+ * The Studio's layout as the user left it on this device. Kept on the
+ * device (DeviceValueUseCases), never in the pod: how the Studio is laid
+ * out is this device's view of it. The defaults when the device keeps
+ * none.
+ */
+export function studioPrefs(device: DeviceValueUseCases): StudioPrefs {
+  return device.deviceValue(PREFS_KEY, LAYOUT).read();
 }
 
 /** The columns each table hides, as stored: only lists of names, by the tables' names; none of anything else. */
@@ -111,15 +120,8 @@ function columnsHidden(value: unknown): Record<string, string[]> {
 }
 
 /** Notes the Studio's layout on this device. */
-export function rememberPrefs(
-  prefs: StudioPrefs,
-  storage: () => Storage = () => globalThis.localStorage,
-): void {
-  try {
-    storage().setItem(PREFS_KEY, JSON.stringify(prefs));
-  } catch {
-    // Without storage the layout starts from the defaults on the next visit; nothing else depends on it.
-  }
+export function rememberPrefs(prefs: StudioPrefs, device: DeviceValueUseCases): void {
+  device.deviceValue(PREFS_KEY, LAYOUT).write(prefs);
 }
 
 /** How many of the palette's entries the device remembers as used last. */
@@ -127,38 +129,28 @@ export const RECENT_LIMIT = 8;
 
 export const RECENT_KEY = "solid-memo:studioRecent.v1";
 
+/** The palette's entries used last, as stored: their ids, as many as the device keeps. */
+const RECENT_COMMANDS: DeviceValueKind<string[]> = {
+  decode: (stored) =>
+    Array.isArray(stored)
+      ? stored.filter((id): id is string => typeof id === "string").slice(0, RECENT_LIMIT)
+      : [],
+  fallback: [],
+};
+
 /**
  * The palette's entries used last on this device, the last first, by
- * their ids (commandIndex.ts). Like the layout, kept in the browser's
- * storage; storage that is missing, refuses or holds something else
- * gives none.
+ * their ids (commandIndex.ts). Like the layout, kept on the device; none
+ * when it keeps none.
  */
-export function recentCommands(storage: () => Storage = () => globalThis.localStorage): string[] {
-  let stored: unknown;
-  try {
-    stored = JSON.parse(storage().getItem(RECENT_KEY) ?? "[]");
-  } catch {
-    return [];
-  }
-  return Array.isArray(stored)
-    ? stored.filter((id): id is string => typeof id === "string").slice(0, RECENT_LIMIT)
-    : [];
+export function recentCommands(device: DeviceValueUseCases): string[] {
+  return device.deviceValue(RECENT_KEY, RECENT_COMMANDS).read();
 }
 
 /** Notes an entry of the palette as the one used last. */
-export function rememberCommand(
-  id: string,
-  storage: () => Storage = () => globalThis.localStorage,
-): void {
-  const recent = [id, ...recentCommands(storage).filter((each) => each !== id)].slice(
-    0,
-    RECENT_LIMIT,
-  );
-  try {
-    storage().setItem(RECENT_KEY, JSON.stringify(recent));
-  } catch {
-    // Without storage the palette lists no entry as used last; nothing else depends on it.
-  }
+export function rememberCommand(id: string, device: DeviceValueUseCases): void {
+  const recent = device.deviceValue(RECENT_KEY, RECENT_COMMANDS);
+  recent.write([id, ...recent.read().filter((each) => each !== id)].slice(0, RECENT_LIMIT));
 }
 
 /** A deck or a draft of an instance, by its URL, as the sidebar pins it or lists it as opened lately. */
@@ -190,29 +182,18 @@ export const RECENT_ITEMS = 5;
 /** How many pins the device keeps for an instance, the first pinned first; one more is not pinned. */
 const PINNED_ITEMS = 100;
 
-/** How many instances the device keeps, those noted last first; one noted before them is let go. */
-const KEPT_INSTANCES = 20;
-
 /**
- * The most characters the key holds, every instance's together: far
- * below what the browser lets a site keep, so the key never fills that
- * and leaves no room for the rest. Instances are let go, those noted
- * longest ago first, until what is left fits.
- */
-const STORED_CHARACTERS = 256 * 1024;
-
-/**
- * Versioned, like the layout's key. The instances are stored in the
- * order they were noted last, the last first; a value stored before
- * that order was kept is read in its own order.
+ * Versioned, like the layout's key. Kept by instance URL
+ * (DeviceValueUseCases `instanceDeviceValues`), for the instances noted
+ * last, as many as fit.
  */
 export const INSTANCE_KEY = "solid-memo:studioInstances.v1";
 
 /**
- * The longest URL the device keeps, of an instance, a deck or a draft,
- * and the longest name or query of a saved view: the bound on a term
- * the app reads (HASHED_CHARACTERS, the solid package's
- * MAX_TERM_CHARACTERS). A longer URL names nothing the app could have
+ * The longest URL the device keeps, of a deck or a draft, and the
+ * longest name or query of a saved view: the bound on a term the app
+ * reads (HASHED_CHARACTERS, the solid package's MAX_TERM_CHARACTERS),
+ * as on an instance's URL. A longer URL names nothing the app could have
  * read, and no view the user saves needs more, so neither is kept, and
  * one kept before is left out as it is read.
  */
@@ -223,77 +204,19 @@ function keptText(text: string): boolean {
   return text.length <= MAX_KEPT_TEXT;
 }
 
-/**
- * Every instance's, as stored, by the instance's URL, each read as
- * instancePrefs reads it: none when the storage holds something else,
- * and none of an instance whose URL the device does not keep, nor more
- * instances than it keeps (kept). When the storage holds more than
- * that, what is read is written back in its place, once, so what the
- * device does not keep leaves the storage without waiting for the next
- * change.
- */
-function storedInstances(storage: () => Storage): Map<string, InstancePrefs> {
-  let raw: string;
-  let stored: unknown;
-  try {
-    raw = storage().getItem(INSTANCE_KEY) ?? "{}";
-    stored = JSON.parse(raw);
-  } catch {
-    return new Map();
-  }
-  if (typeof stored !== "object" || stored === null || Array.isArray(stored)) return new Map();
-  const instances = kept(
-    Object.entries(stored).flatMap(([instanceUrl, prefs]) =>
-      keptText(instanceUrl) ? [[instanceUrl, prefsOf(prefs)] as const] : [],
-    ),
-  );
-  const cleaned = JSON.stringify(Object.fromEntries(instances));
-  if (cleaned !== raw) writeInstances(storage, cleaned);
-  return instances;
-}
+/** What the device keeps of each instance, as stored (prefsOf). */
+const INSTANCE: InstanceValueKind<InstancePrefs> = {
+  decode: (stored) => prefsOf(stored),
+  fallback: NO_INSTANCE_PREFS,
+};
 
 /**
- * The instances the device keeps of those given, the last noted first:
- * at most KEPT_INSTANCES of them, each one that still fits in
- * STORED_CHARACTERS with those kept before it, as JSON.stringify writes
- * them; one that does not is left out, and the next is tried.
- */
-function kept(instances: Iterable<readonly [string, InstancePrefs]>): Map<string, InstancePrefs> {
-  const keeping = new Map<string, InstancePrefs>();
-  let characters = "{}".length;
-  for (const [instanceUrl, prefs] of instances) {
-    if (keeping.size === KEPT_INSTANCES) break;
-    // `"url":{…}`, and the comma before it when it is not the first.
-    const entry =
-      JSON.stringify({ [instanceUrl]: prefs }).length - "{}".length + (keeping.size > 0 ? 1 : 0);
-    // One that does not fit is skipped, not the end: those after it may still fit.
-    if (characters + entry > STORED_CHARACTERS) continue;
-    keeping.set(instanceUrl, prefs);
-    characters += entry;
-  }
-  return keeping;
-}
-
-/** Writes every instance's, as text; storage that refuses keeps what it had. */
-function writeInstances(storage: () => Storage, value: string): void {
-  try {
-    storage().setItem(INSTANCE_KEY, value);
-  } catch {
-    // Without storage the views, the pins and the decks opened last go with the page; nothing else depends on them.
-  }
-}
-
-/**
- * What the device keeps of an instance. Like the layout, kept in the
- * browser's storage, never in the pod; storage that is missing, refuses
- * or holds something else gives none, each part on its own, and a view
+ * What the device keeps of an instance. Like the layout, kept on the
+ * device, never in the pod; nothing when it keeps nothing, and a view
  * or an item that is not one is left out.
  */
-export function instancePrefs(
-  instanceUrl: string,
-  storage: () => Storage = () => globalThis.localStorage,
-): InstancePrefs {
-  return storedInstances(storage).get(instanceUrl) ?? NO_INSTANCE_PREFS;
+export function instancePrefs(instanceUrl: string, device: DeviceValueUseCases): InstancePrefs {
+  return device.instanceDeviceValues(INSTANCE_KEY, INSTANCE).read(instanceUrl);
 }
 
 /** An instance's, as stored: each part on its own, what is not one left out. */
@@ -345,22 +268,15 @@ function listOf(value: unknown): Record<string, unknown>[] {
 }
 
 /**
- * Notes what the device keeps of an instance, as the one noted last,
- * the others' kept as they are read (instancePrefs): an instance, a
- * view or an item the device does not keep is left out, of the others
- * too, and the instances noted longest ago are let go when there are
- * more than the device keeps, or more than fit (kept).
+ * Notes what the device keeps of an instance, as the one noted last: a
+ * view or an item the device does not keep is left out (prefsOf).
  */
 export function rememberInstancePrefs(
   instanceUrl: string,
   prefs: InstancePrefs,
-  storage: () => Storage = () => globalThis.localStorage,
+  device: DeviceValueUseCases,
 ): void {
-  const others = [...storedInstances(storage)].filter(([url]) => url !== instanceUrl);
-  const instances = kept(
-    keptText(instanceUrl) ? [[instanceUrl, prefsOf(prefs)] as const, ...others] : others,
-  );
-  writeInstances(storage, JSON.stringify(Object.fromEntries(instances)));
+  device.instanceDeviceValues(INSTANCE_KEY, INSTANCE).write(instanceUrl, prefsOf(prefs));
 }
 
 /** Whether two items are the same deck or draft. */

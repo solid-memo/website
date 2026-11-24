@@ -550,7 +550,8 @@ side in the page in place of the adapters'
   or the slices they use, as a prop.
 - A screen never reaches the browser's storage itself. What it keeps on
   the device, such as how the deck list is folded, the languages chosen
-  lately or the WebID to remember, goes through `DeviceValueUseCases`
+  lately, the WebID to remember or the Studio's layout, goes through
+  `DeviceValueUseCases`
   ([deviceValues.ts](../packages/application/src/deviceValues.ts)),
   which `App` gives the screens as the `DeviceValues` context
   ([deviceValues.ts](../packages/ui/src/ui/deviceValues.ts)). The screen

@@ -49,7 +49,12 @@ export function makeDeviceValuesFake(): DeviceValueUseCases & {
     deviceValue: valueIn(stored),
     tabValue: valueIn(tab),
     instanceDeviceValues: (key, kind) => {
-      const all = (): Record<string, unknown> => JSON.parse(stored.get(key) ?? "{}");
+      const all = (): Record<string, unknown> => {
+        const value = decode(stored.get(key), { decode: (each) => each, fallback: null }, false);
+        return typeof value === "object" && value !== null && !Array.isArray(value)
+          ? (value as Record<string, unknown>)
+          : {};
+      };
       return {
         read: (instanceUrl) => {
           const value = all()[instanceUrl];

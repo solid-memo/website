@@ -25,6 +25,7 @@ import { useMedia } from "./useMedia";
 import { ScreenKeys, useShortcuts } from "./useShortcuts";
 import { MEDIUM, NARROW, stepProblem, stepTab, type ContextTab } from "./workspaceLayout";
 import "../studio.css";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
 
 const SIDEBAR_ID = "studio-sidebar";
 const ASIDE_ID = "studio-aside";
@@ -129,8 +130,9 @@ export function StudioShell({
   /** The main content. */
   children: ComponentChildren;
 }) {
+  const device = useDeviceValues();
   const { t } = useI18n();
-  const [prefs, setPrefs] = useState<StudioPrefs>(() => studioPrefs());
+  const [prefs, setPrefs] = useState<StudioPrefs>(() => studioPrefs(device));
   const waiting = useWaiting();
   const [help, setHelp] = useState(false);
   const [palette, setPalette] = useState(false);
@@ -339,7 +341,7 @@ export function StudioShell({
 
   function choose(next: StudioPrefs) {
     setPrefs(next);
-    rememberPrefs(next);
+    rememberPrefs(next, device);
   }
 
   // The columns the screens' tables hide, as the device keeps them.

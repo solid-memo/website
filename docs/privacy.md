@@ -74,7 +74,7 @@ before any pod is reached:
 | `solid-memo:collapsedGroups` | by instance URL, which deck groups the learner folded, for the 20 instances folded last; an older `solid-memo:collapsedGroups.<instance URL>` is moved into it once read | `remembered.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
 | `solid-memo:logout` | set and taken off at once to tell other tabs of a logout, only where the browser has no `BroadcastChannel`; holds nothing | [`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts) |
-| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
+| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last, for the 20 instances noted last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), through `webStorageDeviceStore.ts` |
 
 A logout leaves these keys in place, `solid-memo:palette-colors`,
 `solid-memo:webId`, `solid-memo:collapsedGroups` and
