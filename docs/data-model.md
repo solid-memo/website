@@ -2452,6 +2452,14 @@ by one.
   - a bulk edit of cards, planned again on the cards as they are, three
     times in all, stopping when that plan isn't the one previewed.
 
+  In the Solid adapters, `editDocument` in `datasets.ts` makes every
+  write that re-applies its change. That's the digest, the deck groups,
+  a deck's catalog entry, a type index, the catalog's links, the answer
+  log and a deck's FSRS-6 states. The adapter says what its edit makes
+  of the document as read; `editDocument` reads, checks, saves with
+  `If-Match`, and reads and edits again on a 412, three times in all
+  unless the adapter asks for more (the digest).
+
   A grade's edit of the reviews document is made from the document as
   last read or written, at the version that left
   ([srs.md](srs.md#what-a-grade-costs)); on a 412 it's read and graded

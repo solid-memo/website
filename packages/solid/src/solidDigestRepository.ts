@@ -19,7 +19,7 @@ import {
 } from "@solid-memo/domain/studyDigest";
 import { AppError } from "@solid-memo/domain/appError";
 import { HttpError } from "./client/interface";
-import { getSolidDatasetOrNull, PreconditionFailedError, saveDataset } from "./datasets";
+import { editDocument, getSolidDatasetOrNull, PreconditionFailedError } from "./datasets";
 import {
   type DigestSubjects,
   keepWithinLimits,
@@ -109,30 +109,31 @@ export function createSolidDigestRepository({
 }: SolidDigestRepositoryDeps): DigestRepository {
   const queues = new Map<string, { waiting: Waiting[]; writing: boolean }>();
 
-  async function write(instanceUrl: string, changes: DigestChange[]): Promise<void> {
-    const url = digestUrlOf(instanceUrl);
-    for (let attempt = 1; ; attempt++) {
-      if (attempt > 1) await wait(PAUSE_MS * (attempt - 1));
-      const dataset = await getSolidDatasetOrNull(url, fetch);
-      const stored = dataset === null ? null : toDigest(dataset, instanceUrl);
-      const next = changedDigest(stored?.digest ?? null, changes);
-      keepWithinLimits(instanceUrl, stored?.digest ?? emptyDigest(), next);
-      const { updated, subjects } = withDigest(
-        instanceUrl,
-        dataset ?? createSolidDataset(),
-        stored,
-        next,
-      );
-      if (subjects.length === 0) return;
-      try {
-        await checkWrite(updated, subjects, "pod");
-        await saveDataset(url, updated, fetch);
-        return;
-      } catch (error) {
-        if (isRefusal(error)) throw new Refused(error);
-        if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
-      }
-    }
+  function write(instanceUrl: string, changes: DigestChange[]): Promise<void> {
+    return editDocument(
+      digestUrlOf(instanceUrl),
+      fetch,
+      (dataset) => {
+        const stored = dataset === null ? null : toDigest(dataset, instanceUrl);
+        const next = changedDigest(stored?.digest ?? null, changes);
+        keepWithinLimits(instanceUrl, stored?.digest ?? emptyDigest(), next);
+        const { updated, subjects } = withDigest(
+          instanceUrl,
+          dataset ?? createSolidDataset(),
+          stored,
+          next,
+        );
+        if (subjects.length === 0) return { result: undefined };
+        return { dataset: updated, subjects, result: undefined };
+      },
+      {
+        attempts: ATTEMPTS,
+        pause: (attempt) => wait(PAUSE_MS * (attempt - 1)),
+        checkWrite,
+        // Only a write is asked whether it was refused for what it says, never the read.
+        failure: (error) => (isRefusal(error) ? new Refused(error) : error),
+      },
+    );
   }
 
   async function drain(instanceUrl: string): Promise<void> {
