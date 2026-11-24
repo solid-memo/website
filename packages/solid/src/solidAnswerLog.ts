@@ -19,9 +19,8 @@ import { listContainer } from "./containers";
 import {
   appendAllToDocument,
   appendToDocument,
+  editDocument,
   getSolidDatasetOrNull,
-  PreconditionFailedError,
-  saveDataset,
 } from "./datasets";
 import { toAnswer, toAnswerThing } from "./mappers/answerMapper";
 import { mapSince, readSince } from "./readSince";
@@ -53,9 +52,6 @@ function answersIn(url: string, month: string, dataset: Dataset | null): Answer[
  */
 export const APPEND_DEADLINE_MS = READ_DEADLINE_MS;
 
-/** Tries at removing answers while other writes keep adding to the document. */
-const ATTEMPTS = 3;
-
 /**
  * The answer log in the pod (see docs/data-model.md): one document per
  * study month under the instance's history/ container. An answer is
@@ -74,29 +70,23 @@ export function createSolidAnswerLog({
 }): AnswerLog {
   /**
    * Remove the answers of a month's document that `which` picks, unless
-   * another write keeps getting in first. Each goes whole, whatever its
+   * another write keeps getting in first (editDocument). Each goes whole, whatever its
    * format: an answer is never rewritten, only added and removed, and one
    * a newer version wrote is read as an answer (toAnswer), so it is
    * removed as one too. Refusing it (unlessNewer) would keep the app's
    * own answers of the day from being removed with it.
    */
   async function removeAnswers(url: string, which: (answer: Answer) => boolean): Promise<void> {
-    for (let attempt = 1; ; attempt++) {
-      const dataset = await getSolidDatasetOrNull(url, fetch);
-      if (dataset === null) return;
+    await editDocument(url, fetch, (dataset) => {
+      if (dataset === null) return { result: undefined };
       // Only the month document's own answers, as they are read (answersIn).
       const picked = ownSubjectsOf(dataset, url).filter((thing) => {
         const answer = toAnswer(thing);
         return answer !== null && which(answer);
       });
-      if (picked.length === 0) return;
-      try {
-        await saveDataset(url, removeThings(dataset, picked), fetch);
-        return;
-      } catch (error) {
-        if (!(error instanceof PreconditionFailedError) || attempt === ATTEMPTS) throw error;
-      }
-    }
+      if (picked.length === 0) return { result: undefined };
+      return { dataset: removeThings(dataset, picked), result: undefined };
+    });
   }
 
   return {
