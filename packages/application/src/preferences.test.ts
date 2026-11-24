@@ -800,6 +800,26 @@ describe("preferences", () => {
       await expect(useCases.instanceTheme(INSTANCE)).resolves.toBe("dark");
       expect(themePreference.choose).not.toHaveBeenCalledWith("light");
     });
+
+    it("is settled once the last choice is written, a failed one too, not the first of two", async () => {
+      const deps = makeDeps();
+      vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored("light"));
+      const releases: (() => void)[] = [];
+      vi.mocked(deps.preferencesRepository.savePreferences)
+        .mockImplementationOnce(() => new Promise<void>((resolve) => releases.push(resolve)))
+        .mockRejectedValueOnce(new Error("412"));
+      const useCases = createUseCases(deps);
+      expect(useCases.appearanceSettled()).toBe(true);
+      const first = useCases.chooseTheme("dark", INSTANCE);
+      const second = useCases.chooseTextSize("large", INSTANCE);
+      expect(useCases.appearanceSettled()).toBe(false);
+      await vi.waitFor(() => expect(releases).toHaveLength(1));
+      releases[0]!();
+      await first;
+      expect(useCases.appearanceSettled()).toBe(false);
+      await expect(second).rejects.toThrow("412");
+      expect(useCases.appearanceSettled()).toBe(true);
+    });
   });
   it("dismissSchedulerInvitation keeps the stored preferences, but for the invitation", async () => {
     const deps = makeDeps();

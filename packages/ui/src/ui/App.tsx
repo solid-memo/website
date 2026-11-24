@@ -180,21 +180,15 @@ export function AppShell({
 
   // The open instance, whose preferences keep the choices once it has them.
   const themeInstance = useRef<string | null>(null);
-  const appearanceChoices = useRef(0);
-  /** The last choice whose write is done: until the latest is, what a read of the pod brings back is not shown. */
-  const settledChoice = useRef(0);
 
   /** Keep a choice of theme, palette or text size: on the device, and in the open instance's preferences. */
   function keepChoice(write: (instanceUrl: string | null) => Promise<void>) {
     const instanceUrl = themeInstance.current;
-    const count = ++appearanceChoices.current;
     void write(instanceUrl)
       .catch(() => undefined)
       .finally(() => {
         // Read back what the pod holds (which undoes a failed write), unless another choice is on its way.
-        if (count !== appearanceChoices.current) return;
-        settledChoice.current = count;
-        if (instanceUrl === null) return;
+        if (!useCases.appearanceSettled() || instanceUrl === null) return;
         void queryClient.invalidateQueries({
           queryKey: queryKeys.instanceAppearance(instanceUrl),
         });
@@ -206,13 +200,13 @@ export function AppShell({
 
   /**
    * Shows what a read of the instance's preferences holds, unless a
-   * choice made since is still being written: a read begun before it
-   * would put the earlier choice back, and the choice's own read back
-   * comes once it is written.
+   * choice made since is still being written (appearanceSettled): a read
+   * begun before it would put the earlier choice back, and the choice's
+   * own read back comes once it is written.
    */
   function adopting<T>(adopt: (value: T) => void): (value: T) => void {
     return (value) => {
-      if (settledChoice.current === appearanceChoices.current) adopt(value);
+      if (useCases.appearanceSettled()) adopt(value);
     };
   }
 

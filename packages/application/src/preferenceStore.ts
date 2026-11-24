@@ -151,9 +151,13 @@ export function createPreferenceStore({
    */
   async function shown(instanceUrl: string): Promise<StoredPreferences | null> {
     const choice = choicesMade;
-    const settled = choicesSettled === choice;
+    const settled = appearanceSettled();
     const stored = await readStoredPreferences(instanceUrl);
     return settled && choicesMade === choice ? stored : null;
+  }
+  /** Whether every choice of how the app is shown made so far is written (chooseAppearance). */
+  function appearanceSettled(): boolean {
+    return choicesSettled === choicesMade;
   }
   /**
    * Once every write of the instance's preferences queued so far is done,
@@ -203,6 +207,7 @@ export function createPreferenceStore({
     inTurn,
     chooseAppearance,
     afterAppearanceWrites,
+    appearanceSettled,
     keepAppearance,
     withDeviceAppearance,
   };

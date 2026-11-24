@@ -216,31 +216,30 @@ export function useInstanceTheme(useCases: UseCases, instanceUrl: string | null)
     followInstance(instanceUrl);
     return () => followInstance(null);
   }, [instanceUrl]);
-  const url = instanceUrl ?? "";
-  const enabled = instanceUrl !== null;
-  const theme = useQuery({
-    queryKey: queryKeys.instanceAppearancePart(url, "theme"),
-    queryFn: () => useCases.instanceTheme(instanceUrl!),
-    enabled,
-  });
-  const palette = useQuery({
-    queryKey: queryKeys.instanceAppearancePart(url, "palette"),
-    queryFn: () => useCases.instancePalette(instanceUrl!),
-    enabled,
-  });
-  const textSize = useQuery({
-    queryKey: queryKeys.instanceAppearancePart(url, "textSize"),
-    queryFn: () => useCases.instanceTextSize(instanceUrl!),
-    enabled,
+  useInstanceSetting(instanceUrl, "theme", useCases.instanceTheme, adoptTheme);
+  useInstanceSetting(instanceUrl, "palette", useCases.instancePalette, adoptPalette);
+  useInstanceSetting(instanceUrl, "textSize", useCases.instanceTextSize, adoptTextSize);
+}
+
+/**
+ * Reads one part of how the open instance's preferences show the app,
+ * and shows what each read holds: none outside an instance, and nothing
+ * of a read that holds nothing to show (null: no preferences yet, or
+ * a read a choice made out of date).
+ */
+function useInstanceSetting<T>(
+  instanceUrl: string | null,
+  part: "theme" | "palette" | "textSize",
+  read: (instanceUrl: string) => Promise<T | null>,
+  adopt: (value: T) => void,
+) {
+  const { data, dataUpdatedAt } = useQuery({
+    queryKey: queryKeys.instanceAppearancePart(instanceUrl ?? "", part),
+    queryFn: () => read(instanceUrl!),
+    enabled: instanceUrl !== null,
   });
   // Every read counts, an unchanged one too: after a failed write it puts back what the pod holds.
   useEffect(() => {
-    if (theme.data !== undefined && theme.data !== null) adoptTheme(theme.data);
-  }, [theme.data, theme.dataUpdatedAt]);
-  useEffect(() => {
-    if (palette.data !== undefined && palette.data !== null) adoptPalette(palette.data);
-  }, [palette.data, palette.dataUpdatedAt]);
-  useEffect(() => {
-    if (textSize.data !== undefined && textSize.data !== null) adoptTextSize(textSize.data);
-  }, [textSize.data, textSize.dataUpdatedAt]);
+    if (data !== undefined && data !== null) adopt(data);
+  }, [data, dataUpdatedAt]);
 }

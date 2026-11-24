@@ -49,7 +49,7 @@ a choice made. A failed write (another device saved meanwhile, say) is
 undone: the app reads the preferences back and shows what they hold. A
 read of an instance's preferences begun before a choice, or while it
 was still being written, may be out of date. It is neither shown nor
-copied to the device (`shown` in
+copied to the device (`shown` and `appearanceSettled` in
 [preferenceStore.ts](../packages/application/src/preferenceStore.ts)),
 and the read after the choice's write shows what the pod holds. A
 reload before a write is done opens the instance with the choice its

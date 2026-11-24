@@ -147,6 +147,13 @@ export interface PreferenceUseCases {
    */
   chooseTextSize(size: TextSize, instanceUrl: string | null): Promise<void>;
   /**
+   * Whether every choice of theme, palette or text size made so far is
+   * written. Until then a read of an instance's preferences is not to be
+   * shown: one that arrives now may hold what a choice replaced, and the
+   * choice's own read comes once it is written.
+   */
+  appearanceSettled(): boolean;
+  /**
    * The stored preferences; the defaults when none are stored, SM-2's
    * among them (DEFAULT_PREFERENCES): an instance with none was made
    * before a new one stated its own, and studies by SM-2. The defaults
@@ -438,6 +445,7 @@ export function createPreferenceUseCases({
     textSizeChoice: textSize.choice,
     instanceTextSize: textSize.fromInstance,
     chooseTextSize: textSize.choose,
+    appearanceSettled: preferenceStore.appearanceSettled,
     getPreferences: preferenceStore.get,
     preferencesMisfit: preferenceStore.isMisfit,
     async savePreferences(instanceUrl, preferences, { replaceMisfit = false } = {}) {
