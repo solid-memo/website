@@ -6,9 +6,6 @@ import type { Catalog, CatalogRead } from "@solid-memo/domain/catalog";
 import type { Locale } from "@solid-memo/domain/locale";
 import type { LangText } from "@solid-memo/domain/langText";
 import type { CustomPalette } from "@solid-memo/domain/customPalette";
-import type { Palette } from "@solid-memo/domain/palette";
-import type { TextSize } from "@solid-memo/domain/textSize";
-import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
 import type { DeckPause } from "@solid-memo/domain/deckPause";
 import type { DeckFileContent, DeckFileFormat, DeckFileOptions } from "@solid-memo/domain/deckFile";
@@ -1329,28 +1326,18 @@ export interface LanguagePreference {
 }
 
 /**
- * Driven port: the theme the user chose for the app, kept where the app
+ * Driven port: a choice of how the app is shown (a SettingKind of
+ * domain: the theme, the palette, the text size), kept where the app
  * runs (the browser), since it is needed before any pod is reached: on
- * the sign-in screens, and for the first paint. An instance's preferences,
- * once it has them, keep the choice too and win. Best effort: it may
- * forget, and the app then looks as the browser prefers.
+ * the sign-in screens, and for the first paint. An instance's
+ * preferences, once it has them, keep the choice too and win. Best
+ * effort: it may forget, and the setting is then its fallback (the
+ * browser's theme, the standard colors, the browser's own text size).
  */
-export interface ThemePreference {
-  /** The chosen theme; "system" when none was chosen (or it was forgotten). */
-  chosen(): ThemeChoice;
-  choose(choice: ThemeChoice): void;
-}
-
-/**
- * Driven port: the palette the user chose, kept where the app runs (the
- * browser), since the first paint needs it before any pod is reached.
- * Best effort: it may forget, and the app is then in its standard
- * colors.
- */
-export interface PalettePreference {
-  /** The chosen palette; "standard" when none was chosen (or it was forgotten). */
-  chosen(): Palette;
-  choose(palette: Palette): void;
+export interface DeviceSetting<T> {
+  /** The chosen value; the setting's fallback when none was chosen (or it was forgotten). */
+  chosen(): T;
+  choose(value: T): void;
 }
 
 /**
@@ -1368,18 +1355,6 @@ export interface CustomPalettePreference {
   chosen(): CustomPalette | null;
   /** Keep this palette, or none. */
   choose(palette: CustomPalette | null): void;
-}
-
-/**
- * Driven port: the text size the user chose, kept where the app runs
- * (the browser), since the first paint needs it before any pod is
- * reached. Best effort: it may forget, and the text is then the
- * browser's own size.
- */
-export interface TextSizePreference {
-  /** The chosen size; "default" when none was chosen (or it was forgotten). */
-  chosen(): TextSize;
-  choose(size: TextSize): void;
 }
 
 /**

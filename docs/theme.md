@@ -31,8 +31,7 @@ flowchart LR
   which saves what's shown then; until then a choice is kept on the
   device alone. So it is while the stored preferences don't fit their
   shape ([validation.md](validation.md#the-invalid-data-policy)).
-- **On the device**, by the `ThemePreference`, `PalettePreference` and
-  `TextSizePreference` ports
+- **On the device**, by a `DeviceSetting` port for each
   ([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
   key `solid-memo:theme`, "As my browser" no key; the palette's and
   the text size's below). The sign-in screens and the first paint
@@ -88,7 +87,7 @@ preferences suggest High contrast. A choice takes effect at once:
 
 The choice is kept in the instance's preferences and on the device, as
 the theme is ([Where the choice is kept](#where-the-choice-is-kept)),
-on the device by the `PalettePreference` port
+on the device by its `DeviceSetting` port
 ([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
 key `solid-memo:palette`; Standard is no key). It's shown as
 `<html data-palette>` (none for Standard), set as `data-theme` is
@@ -361,7 +360,7 @@ Larger and Largest, at 112.5%, 125% and 150% of it. The user chooses
 under Text size in the study preferences, each size with a sample line
 at that size, and the choice takes effect at once. It's kept in the
 instance's preferences and on the device, as the theme is: on the
-device by the `TextSizePreference` port
+device by its `DeviceSetting` port
 ([localStorageSetting.ts](../packages/browser/src/localStorageSetting.ts),
 key `solid-memo:textSize`; Default is no key). It's shown as
 `<html data-text-size>` (none for Default), set as `data-palette` is.

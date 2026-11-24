@@ -11,13 +11,10 @@ import {
   type StoredPreferences,
   type StudyPreferences,
 } from "@solid-memo/domain/preferences";
-import type {
-  PreferencesRepository,
-  CustomPalettePreference,
-  PalettePreference,
-  TextSizePreference,
-  ThemePreference,
-} from "./ports";
+import type { Palette } from "@solid-memo/domain/palette";
+import type { TextSize } from "@solid-memo/domain/textSize";
+import type { ThemeChoice } from "@solid-memo/domain/theme";
+import type { CustomPalettePreference, DeviceSetting, PreferencesRepository } from "./ports";
 
 /** Stored preferences that fit their shape; null for none, and for ones that do not. */
 function fitting(read: PreferencesRead): StoredPreferences | null {
@@ -39,10 +36,10 @@ export function createPreferenceStore({
   textSizePreference,
 }: {
   preferencesRepository: PreferencesRepository;
-  themePreference: ThemePreference;
-  palettePreference: PalettePreference;
+  themePreference: DeviceSetting<ThemeChoice>;
+  palettePreference: DeviceSetting<Palette>;
   customPalettePreference: CustomPalettePreference;
-  textSizePreference: TextSizePreference;
+  textSizePreference: DeviceSetting<TextSize>;
 }) {
   const preferenceReads = new Map<string, Promise<PreferencesRead>>();
   /**

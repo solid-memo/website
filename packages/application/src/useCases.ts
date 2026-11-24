@@ -18,11 +18,9 @@ import type {
   GuestPod,
   LanguagePreference,
   CustomPalettePreference,
-  PalettePreference,
+  DeviceSetting,
   PaletteRepository,
   SeenHighlights,
-  TextSizePreference,
-  ThemePreference,
   UpdateJournal,
   LogoutChannel,
   WriteFence,
@@ -32,6 +30,9 @@ import type {
   ReleasePublisher,
   InstanceGraphReader,
 } from "./ports";
+import type { Palette } from "@solid-memo/domain/palette";
+import type { TextSize } from "@solid-memo/domain/textSize";
+import type { ThemeChoice } from "@solid-memo/domain/theme";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { createPreferenceStore } from "./preferenceStore";
 import { createAnswerStore } from "./answerStore";
@@ -114,15 +115,15 @@ export interface Dependencies {
   /** The language the user chose, kept on this device. */
   languagePreference: LanguagePreference;
   /** The theme the user chose, kept on this device. */
-  themePreference: ThemePreference;
+  themePreference: DeviceSetting<ThemeChoice>;
   /** The palette the user chose, kept on this device. */
-  palettePreference: PalettePreference;
+  palettePreference: DeviceSetting<Palette>;
   /** A copy of the user's own palette being shown, kept on this device. */
   customPalettePreference: CustomPalettePreference;
   /** The palettes the user designed, in each instance. */
   paletteRepository: PaletteRepository;
   /** The text size the user chose, kept on this device. */
-  textSizePreference: TextSizePreference;
+  textSizePreference: DeviceSetting<TextSize>;
   /** The highlights of new versions this browser has shown, kept on this device. */
   seenHighlights: SeenHighlights;
   /** The clock; injected for tests. */

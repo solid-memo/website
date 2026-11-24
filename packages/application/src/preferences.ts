@@ -39,10 +39,8 @@ import type {
   ReviewStateRepository,
   LanguagePreference,
   CustomPalettePreference,
-  PalettePreference,
+  DeviceSetting,
   PaletteRepository,
-  TextSizePreference,
-  ThemePreference,
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { mapAtOnce, READS_AT_ONCE } from "./atOnce";
@@ -286,10 +284,10 @@ export function createPreferenceUseCases({
   now,
 }: {
   languagePreference: LanguagePreference;
-  themePreference: ThemePreference;
-  palettePreference: PalettePreference;
+  themePreference: DeviceSetting<ThemeChoice>;
+  palettePreference: DeviceSetting<Palette>;
   customPalettePreference: CustomPalettePreference;
-  textSizePreference: TextSizePreference;
+  textSizePreference: DeviceSetting<TextSize>;
   paletteRepository: PaletteRepository;
   preferencesRepository: PreferencesRepository;
   instanceRepository: Pick<InstanceRepository, "listInstances" | "readMeta">;
