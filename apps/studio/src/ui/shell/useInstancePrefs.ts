@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useRef, useState } from "preact/hooks";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
 import {
   instancePrefs,
   NO_INSTANCE_PREFS,
@@ -21,10 +22,11 @@ export function useInstancePrefs(instanceUrl: string | null): {
   prefs: InstancePrefs;
   change: (update: (prefs: InstancePrefs) => InstancePrefs) => void;
 } {
+  const device = useDeviceValues();
   const held = useRef(new Map<string, InstancePrefs>());
   const [, rerender] = useState(0);
   const read = (url: string) => {
-    if (!held.current.has(url)) held.current.set(url, instancePrefs(url));
+    if (!held.current.has(url)) held.current.set(url, instancePrefs(url, device));
     return held.current.get(url)!;
   };
   return {
@@ -32,7 +34,7 @@ export function useInstancePrefs(instanceUrl: string | null): {
     change: (update) => {
       const next = update(read(instanceUrl!));
       held.current.set(instanceUrl!, next);
-      rememberInstancePrefs(instanceUrl!, next);
+      rememberInstancePrefs(instanceUrl!, next, device);
       rerender((count) => count + 1);
     },
   };

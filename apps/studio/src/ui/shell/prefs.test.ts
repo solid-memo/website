@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { UNKEPT_VALUES } from "@solid-memo/ui/deviceValues";
+import { makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
 import {
   DEFAULT_PREFS,
   instancePrefs,
@@ -24,9 +26,12 @@ import { ASIDE_WIDTH, DETAIL_WIDTH, DOCK_HEIGHT } from "./splitter";
 
 const KEY = "solid-memo:studioLayout.v1";
 
-describe("the Studio's layout preferences", () => {
-  beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
 
+describe("the Studio's layout preferences", () => {
   it("are compact at first, the sidebar and the aside shown, the dock hidden, single-key shortcuts on", () => {
     const first = {
       density: "compact",
@@ -39,7 +44,7 @@ describe("the Studio's layout preferences", () => {
       hiddenColumns: {},
       characterKeys: true,
     };
-    expect(studioPrefs()).toEqual(first);
+    expect(studioPrefs(device)).toEqual(first);
     expect(DEFAULT_PREFS).toEqual(first);
   });
 
@@ -55,13 +60,13 @@ describe("the Studio's layout preferences", () => {
       hiddenColumns: { cards: ["ease", "id"] },
       characterKeys: false,
     } as const;
-    rememberPrefs(prefs);
-    expect(studioPrefs()).toEqual(prefs);
-    expect(JSON.parse(localStorage.getItem(KEY)!)).toEqual(prefs);
+    rememberPrefs(prefs, device);
+    expect(studioPrefs(device)).toEqual(prefs);
+    expect(JSON.parse(device.stored.get(KEY)!)).toEqual(prefs);
   });
 
   it("take the default for what the app does not store, each preference on its own", () => {
-    localStorage.setItem(
+    device.stored.set(
       KEY,
       JSON.stringify({
         density: "roomy",
@@ -74,37 +79,37 @@ describe("the Studio's layout preferences", () => {
         characterKeys: "off",
       }),
     );
-    expect(studioPrefs()).toEqual(DEFAULT_PREFS);
-    localStorage.setItem(KEY, JSON.stringify({ density: "comfortable" }));
-    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, density: "comfortable" });
-    localStorage.setItem(KEY, JSON.stringify({ density: "roomy", sidebar: false }));
-    expect(studioPrefs()).toEqual({ ...DEFAULT_PREFS, sidebar: false });
-    localStorage.setItem(KEY, "{not json");
-    expect(studioPrefs()).toEqual(DEFAULT_PREFS);
-    localStorage.setItem(KEY, JSON.stringify(["comfortable"]));
-    expect(studioPrefs()).toEqual(DEFAULT_PREFS);
-    localStorage.setItem(KEY, "null");
-    expect(studioPrefs()).toEqual(DEFAULT_PREFS);
+    expect(studioPrefs(device)).toEqual(DEFAULT_PREFS);
+    device.stored.set(KEY, JSON.stringify({ density: "comfortable" }));
+    expect(studioPrefs(device)).toEqual({ ...DEFAULT_PREFS, density: "comfortable" });
+    device.stored.set(KEY, JSON.stringify({ density: "roomy", sidebar: false }));
+    expect(studioPrefs(device)).toEqual({ ...DEFAULT_PREFS, sidebar: false });
+    device.stored.set(KEY, "{not json");
+    expect(studioPrefs(device)).toEqual(DEFAULT_PREFS);
+    device.stored.set(KEY, JSON.stringify(["comfortable"]));
+    expect(studioPrefs(device)).toEqual(DEFAULT_PREFS);
+    device.stored.set(KEY, "null");
+    expect(studioPrefs(device)).toEqual(DEFAULT_PREFS);
   });
 
   it("keep only lists of columns' names, by their tables' names", () => {
-    localStorage.setItem(
+    device.stored.set(
       KEY,
       JSON.stringify({ hiddenColumns: { cards: ["ease", 2, null, "id"], decks: "due", home: {} } }),
     );
-    expect(studioPrefs().hiddenColumns).toEqual({ cards: ["ease", "id"] });
+    expect(studioPrefs(device).hiddenColumns).toEqual({ cards: ["ease", "id"] });
     for (const stored of [["cards"], "cards", null]) {
-      localStorage.setItem(KEY, JSON.stringify({ hiddenColumns: stored }));
-      expect(studioPrefs().hiddenColumns).toEqual({});
+      device.stored.set(KEY, JSON.stringify({ hiddenColumns: stored }));
+      expect(studioPrefs(device).hiddenColumns).toEqual({});
     }
   });
 
   it("keep the panes' sizes within their bounds", () => {
-    localStorage.setItem(
+    device.stored.set(
       KEY,
       JSON.stringify({ asideWidth: 10, detailWidth: 10_000, dockHeight: 10_000 }),
     );
-    expect(studioPrefs()).toEqual({
+    expect(studioPrefs(device)).toEqual({
       ...DEFAULT_PREFS,
       asideWidth: ASIDE_WIDTH.min,
       detailWidth: DETAIL_WIDTH.max,
@@ -113,56 +118,52 @@ describe("the Studio's layout preferences", () => {
   });
 
   it("keep a pane's size past its bounds at the browser's own text size, in larger text", () => {
-    localStorage.setItem(KEY, JSON.stringify({ asideWidth: 900 }));
+    device.stored.set(KEY, JSON.stringify({ asideWidth: 900 }));
     document.documentElement.style.fontSize = "150%";
     try {
-      expect(studioPrefs().asideWidth).toBe(900);
+      expect(studioPrefs(device).asideWidth).toBe(900);
     } finally {
       document.documentElement.style.fontSize = "";
     }
   });
 
-  it("are the defaults, and are not kept, when the browser's storage refuses", () => {
-    const refusing = () => {
-      throw new Error("SecurityError");
-    };
-    expect(studioPrefs(refusing)).toEqual(DEFAULT_PREFS);
-    expect(() =>
-      rememberPrefs({ ...DEFAULT_PREFS, density: "comfortable" }, refusing),
-    ).not.toThrow();
+  it("are the defaults, and are not kept, where the device keeps nothing", () => {
+    rememberPrefs({ ...DEFAULT_PREFS, density: "comfortable" }, UNKEPT_VALUES);
+    expect(studioPrefs(UNKEPT_VALUES)).toEqual(DEFAULT_PREFS);
+  });
+
+  it("are kept as none when they are the defaults", () => {
+    rememberPrefs({ ...DEFAULT_PREFS, density: "comfortable" }, device);
+    rememberPrefs(DEFAULT_PREFS, device);
+    expect(device.stored.has(KEY)).toBe(false);
   });
 });
 
 describe("the palette's entries used last", () => {
   const RECENT = "solid-memo:studioRecent.v1";
-  beforeEach(() => localStorage.clear());
-
   it("are none at first, then the last used first, each once, as many as the device keeps", () => {
-    expect(recentCommands()).toEqual([]);
-    rememberCommand("a");
-    rememberCommand("b");
-    rememberCommand("a");
-    expect(recentCommands()).toEqual(["a", "b"]);
-    for (let n = 0; n < RECENT_LIMIT + 2; n++) rememberCommand(`#${n}`);
-    expect(recentCommands()).toHaveLength(RECENT_LIMIT);
-    expect(recentCommands()[0]).toBe(`#${RECENT_LIMIT + 1}`);
+    expect(recentCommands(device)).toEqual([]);
+    rememberCommand("a", device);
+    rememberCommand("b", device);
+    rememberCommand("a", device);
+    expect(recentCommands(device)).toEqual(["a", "b"]);
+    for (let n = 0; n < RECENT_LIMIT + 2; n++) rememberCommand(`#${n}`, device);
+    expect(recentCommands(device)).toHaveLength(RECENT_LIMIT);
+    expect(recentCommands(device)[0]).toBe(`#${RECENT_LIMIT + 1}`);
   });
 
   it("are none, or only the ids, when the storage holds something else", () => {
-    localStorage.setItem(RECENT, "{not json");
-    expect(recentCommands()).toEqual([]);
-    localStorage.setItem(RECENT, JSON.stringify({ a: 1 }));
-    expect(recentCommands()).toEqual([]);
-    localStorage.setItem(RECENT, JSON.stringify(["a", 2, null, "b"]));
-    expect(recentCommands()).toEqual(["a", "b"]);
+    device.stored.set(RECENT, "{not json");
+    expect(recentCommands(device)).toEqual([]);
+    device.stored.set(RECENT, JSON.stringify({ a: 1 }));
+    expect(recentCommands(device)).toEqual([]);
+    device.stored.set(RECENT, JSON.stringify(["a", 2, null, "b"]));
+    expect(recentCommands(device)).toEqual(["a", "b"]);
   });
 
-  it("are none, and are not kept, when the browser's storage refuses", () => {
-    const refusing = () => {
-      throw new Error("SecurityError");
-    };
-    expect(recentCommands(refusing)).toEqual([]);
-    expect(() => rememberCommand("a", refusing)).not.toThrow();
+  it("are none, and are not kept, where the device keeps nothing", () => {
+    rememberCommand("a", UNKEPT_VALUES);
+    expect(recentCommands(UNKEPT_VALUES)).toEqual([]);
   });
 });
 
@@ -180,18 +181,16 @@ describe("what the device keeps of an instance", () => {
     pinned: [kanji],
     recent: [solid, kanji],
   };
-  beforeEach(() => localStorage.clear());
-
   it("is nothing at first, then what was kept, for each instance on its own", () => {
-    expect(instancePrefs(a)).toEqual(NO_INSTANCE_PREFS);
-    rememberInstancePrefs(a, kept);
-    rememberInstancePrefs(b, { ...NO_INSTANCE_PREFS, pinned: [solid] });
-    expect(instancePrefs(a)).toEqual(kept);
-    expect(instancePrefs(b)).toEqual({ ...NO_INSTANCE_PREFS, pinned: [solid] });
+    expect(instancePrefs(a, device)).toEqual(NO_INSTANCE_PREFS);
+    rememberInstancePrefs(a, kept, device);
+    rememberInstancePrefs(b, { ...NO_INSTANCE_PREFS, pinned: [solid] }, device);
+    expect(instancePrefs(a, device)).toEqual(kept);
+    expect(instancePrefs(b, device)).toEqual({ ...NO_INSTANCE_PREFS, pinned: [solid] });
   });
 
   it("keeps only the views and the items that are, each part on its own", () => {
-    localStorage.setItem(
+    device.stored.set(
       INSTANCES,
       JSON.stringify({
         [a]: {
@@ -214,23 +213,20 @@ describe("what the device keeps of an instance", () => {
         [b]: { views: null, pinned: {}, recent: "kanji" },
       }),
     );
-    const read = instancePrefs(a);
+    const read = instancePrefs(a, device);
     expect(read.views).toEqual({ home: [{ name: "Due", params: "show=due" }], cards: [] });
     expect(read.pinned).toEqual([kanji]);
     expect(read.recent).toHaveLength(RECENT_ITEMS);
-    expect(instancePrefs(b)).toEqual(NO_INSTANCE_PREFS);
+    expect(instancePrefs(b, device)).toEqual(NO_INSTANCE_PREFS);
     for (const stored of ["{not json", "[]", JSON.stringify({ [a]: "kept" })]) {
-      localStorage.setItem(INSTANCES, stored);
-      expect(instancePrefs(a)).toEqual(NO_INSTANCE_PREFS);
+      device.stored.set(INSTANCES, stored);
+      expect(instancePrefs(a, device)).toEqual(NO_INSTANCE_PREFS);
     }
   });
 
-  it("is nothing, and is not kept, when the browser's storage refuses", () => {
-    const refusing = () => {
-      throw new Error("SecurityError");
-    };
-    expect(instancePrefs(a, refusing)).toEqual(NO_INSTANCE_PREFS);
-    expect(() => rememberInstancePrefs(a, kept, refusing)).not.toThrow();
+  it("is nothing, and is not kept, where the device keeps nothing", () => {
+    rememberInstancePrefs(a, kept, UNKEPT_VALUES);
+    expect(instancePrefs(a, UNKEPT_VALUES)).toEqual(NO_INSTANCE_PREFS);
   });
 
   describe("keeps no URL longer than a term may be", () => {
@@ -242,7 +238,6 @@ describe("what the device keeps of an instance", () => {
       kind: "deck",
       url: `${a}${"a".repeat(HASHED_CHARACTERS - a.length)}`,
     };
-    const longInstance = `${a}${"a".repeat(HASHED_CHARACTERS)}/`;
 
     it("neither lists it as opened nor pins it", () => {
       expect(openedNow([kanji], long)).toEqual([kanji]);
@@ -251,51 +246,31 @@ describe("what the device keeps of an instance", () => {
       expect(togglePin([kanji], longest)).toEqual([kanji, longest]);
     });
 
-    it("leaves it out as it notes an instance's, and notes no instance of such a URL", () => {
-      rememberInstancePrefs(a, {
-        ...NO_INSTANCE_PREFS,
-        pinned: [long, kanji],
-        recent: [long, solid],
-      });
-      rememberInstancePrefs(longInstance, kept);
-      expect(JSON.parse(localStorage.getItem(INSTANCES)!)).toEqual({
+    it("leaves it out as it notes an instance's", () => {
+      rememberInstancePrefs(
+        a,
+        {
+          ...NO_INSTANCE_PREFS,
+          pinned: [long, kanji],
+          recent: [long, solid],
+        },
+        device,
+      );
+      expect(JSON.parse(device.stored.get(INSTANCES)!)).toEqual({
         [a]: { ...NO_INSTANCE_PREFS, pinned: [kanji], recent: [solid] },
       });
     });
 
-    it("leaves out one kept before as it reads, and drops it from the storage then, once", () => {
-      localStorage.setItem(
+    it("leaves out one kept before as it reads", () => {
+      device.stored.set(
         INSTANCES,
         JSON.stringify({
           [a]: { ...kept, pinned: [long, kanji], recent: [long, solid, kanji] },
           [b]: { ...NO_INSTANCE_PREFS, recent: [long] },
-          [longInstance]: kept,
         }),
       );
-      expect(instancePrefs(a)).toEqual(kept);
-      const cleaned = { [a]: kept, [b]: NO_INSTANCE_PREFS };
-      expect(JSON.parse(localStorage.getItem(INSTANCES)!)).toEqual(cleaned);
-      const setItem = vi.spyOn(Storage.prototype, "setItem");
-      try {
-        expect(instancePrefs(b)).toEqual(NO_INSTANCE_PREFS);
-        expect(instancePrefs(longInstance)).toEqual(NO_INSTANCE_PREFS);
-        expect(setItem).not.toHaveBeenCalled();
-      } finally {
-        setItem.mockRestore();
-      }
-      expect(JSON.parse(localStorage.getItem(INSTANCES)!)).toEqual(cleaned);
-    });
-
-    it("reads what it keeps when the storage refuses to drop the rest", () => {
-      const stored = JSON.stringify({ [a]: { ...kept, recent: [long, solid, kanji] } });
-      const refusingWrites = () =>
-        ({
-          getItem: () => stored,
-          setItem: () => {
-            throw new DOMException("full", "QuotaExceededError");
-          },
-        }) as unknown as Storage;
-      expect(instancePrefs(a, refusingWrites)).toEqual(kept);
+      expect(instancePrefs(a, device)).toEqual(kept);
+      expect(instancePrefs(b, device)).toEqual(NO_INSTANCE_PREFS);
     });
 
     it("keeps no saved view whose name or query is longer", () => {
@@ -319,132 +294,30 @@ describe("what the device keeps of an instance", () => {
         ],
         cards: [{ name: "Leeches", params: "state=leech" }],
       };
-      rememberInstancePrefs(a, { ...NO_INSTANCE_PREFS, views });
-      expect(JSON.parse(localStorage.getItem(INSTANCES)!)[a].views).toEqual(keptViews);
-      localStorage.setItem(INSTANCES, JSON.stringify({ [a]: { ...NO_INSTANCE_PREFS, views } }));
-      expect(instancePrefs(a).views).toEqual(keptViews);
-      expect(JSON.parse(localStorage.getItem(INSTANCES)!)[a].views).toEqual(keptViews);
+      rememberInstancePrefs(a, { ...NO_INSTANCE_PREFS, views }, device);
+      expect(JSON.parse(device.stored.get(INSTANCES)!)[a].views).toEqual(keptViews);
+      device.stored.set(INSTANCES, JSON.stringify({ [a]: { ...NO_INSTANCE_PREFS, views } }));
+      expect(instancePrefs(a, device).views).toEqual(keptViews);
     });
   });
 
-  describe("keeps a bounded number of instances, and of their pins and views", () => {
-    const KEPT_INSTANCES = 20;
-    const STORED_CHARACTERS = 256 * 1024;
-    const instance = (n: number) => `https://pod.example/${n}/`;
-    const stored = () => Object.keys(JSON.parse(localStorage.getItem(INSTANCES)!));
-
-    /** A browser's storage that refuses a write past its quota, as localStorage does. */
-    function quotaStorage(quota = 5_000_000): Storage {
-      const map = new Map<string, string>();
-      const used = () => [...map].reduce((n, [k, v]) => n + k.length + v.length, 0);
-      return {
-        get length() {
-          return map.size;
-        },
-        key: (index: number) => [...map.keys()][index] ?? null,
-        getItem: (key: string) => map.get(key) ?? null,
-        setItem: (key: string, value: string) => {
-          const old = map.has(key) ? key.length + map.get(key)!.length : 0;
-          if (used() - old + key.length + value.length > quota)
-            throw new DOMException("full", "QuotaExceededError");
-          map.set(key, value);
-        },
-        removeItem: (key: string) => void map.delete(key),
-        clear: () => map.clear(),
-      };
-    }
-
-    it("keeps the instances noted last, the last first, and lets the oldest go", () => {
-      for (let n = 0; n < KEPT_INSTANCES; n++) rememberInstancePrefs(instance(n), kept);
-      expect(stored()).toHaveLength(KEPT_INSTANCES);
-      expect(stored()[0]).toBe(instance(KEPT_INSTANCES - 1));
-      rememberInstancePrefs(instance(0), kept);
-      rememberInstancePrefs(instance(KEPT_INSTANCES), kept);
-      expect(stored()).toHaveLength(KEPT_INSTANCES);
-      expect(stored().slice(0, 2)).toEqual([instance(KEPT_INSTANCES), instance(0)]);
-      expect(instancePrefs(instance(1))).toEqual(NO_INSTANCE_PREFS);
-      expect(instancePrefs(instance(0))).toEqual(kept);
-    });
-
-    it("stays far below the browser's quota, so the storage takes other writes", () => {
-      const storage = quotaStorage();
-      const long = (tag: string) => `https://pod.example/${tag}/`.padEnd(HASHED_CHARACTERS, "a");
-      for (let n = 0; n < 60; n++) {
-        const recent = Array.from({ length: RECENT_ITEMS }, (_, d) => ({
-          kind: "deck" as const,
-          url: long(`i${n}d${d}`),
-        }));
-        rememberInstancePrefs(long(`i${n}`), { ...NO_INSTANCE_PREFS, recent }, () => storage);
-      }
-      const value = storage.getItem(INSTANCES)!;
-      expect(value.length).toBeLessThanOrEqual(STORED_CHARACTERS);
-      expect(Object.keys(JSON.parse(value))[0]).toBe(long("i59"));
-      expect(instancePrefs(long("i59"), () => storage).recent).toHaveLength(RECENT_ITEMS);
-      expect(instancePrefs(long("i0"), () => storage)).toEqual(NO_INSTANCE_PREFS);
-      expect(() => storage.setItem("another", "x".repeat(100_000))).not.toThrow();
-    });
-
-    const oversized = (): InstancePrefs => ({
-      ...NO_INSTANCE_PREFS,
-      views: {
-        home: Array.from({ length: 50 }, (_, n) => ({
-          name: `${n}`,
-          params: "a".repeat(HASHED_CHARACTERS),
-        })),
-        cards: [],
-      },
-    });
-
-    it("keeps no instance that alone would not fit", () => {
-      rememberInstancePrefs(a, oversized());
-      expect(stored()).toEqual([]);
-    });
-
-    it("keeps the other instances when the one noted would not fit", () => {
-      rememberInstancePrefs(b, kept);
-      rememberInstancePrefs(a, oversized());
-      expect(stored()).toEqual([b]);
-      expect(instancePrefs(b)).toEqual(kept);
-    });
-
-    it("keeps the rest of a value stored before whose first instance would not fit", () => {
-      localStorage.setItem(INSTANCES, JSON.stringify({ [a]: oversized(), [b]: kept }));
-      expect(instancePrefs(b)).toEqual(kept);
-      expect(stored()).toEqual([b]);
-    });
-
-    it("drops what is past its bounds from a value stored before, as it reads", () => {
-      const many = Object.fromEntries(
-        Array.from({ length: KEPT_INSTANCES + 5 }, (_, n) => [instance(n), kept]),
-      );
-      localStorage.setItem(INSTANCES, JSON.stringify(many));
-      expect(instancePrefs(instance(0))).toEqual(kept);
-      expect(stored()).toEqual(Object.keys(many).slice(0, KEPT_INSTANCES));
-      const filler = Array.from({ length: 100 }, (_, n) => ({
-        kind: "deck",
-        url: `${b}${n}`.padEnd(HASHED_CHARACTERS, "a"),
-      }));
-      localStorage.setItem(
-        INSTANCES,
-        JSON.stringify({ [a]: kept, [b]: { ...NO_INSTANCE_PREFS, pinned: filler } }),
-      );
-      expect(instancePrefs(a)).toEqual(kept);
-      expect(stored()).toEqual([a]);
-      expect(localStorage.getItem(INSTANCES)!.length).toBeLessThanOrEqual(STORED_CHARACTERS);
-    });
-
+  describe("keeps a bounded number of pins and views", () => {
     it("keeps no more pins and saved views than it keeps of each", () => {
       const items = Array.from(
         { length: 105 },
         (_, n): WorkItem => ({ kind: "deck", url: `${a}decks/${n}.ttl` }),
       );
       const views = Array.from({ length: 55 }, (_, n) => ({ name: `${n}`, params: "" }));
-      rememberInstancePrefs(a, {
-        views: { home: views, cards: views },
-        pinned: items,
-        recent: [],
-      });
-      const read = instancePrefs(a);
+      rememberInstancePrefs(
+        a,
+        {
+          views: { home: views, cards: views },
+          pinned: items,
+          recent: [],
+        },
+        device,
+      );
+      const read = instancePrefs(a, device);
       expect(read.pinned).toEqual(items.slice(0, 100));
       expect(read.views).toEqual({ home: views.slice(0, 50), cards: views.slice(0, 50) });
       expect(togglePin(items.slice(0, 100), kanji)).toEqual(items.slice(0, 100));

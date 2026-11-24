@@ -50,6 +50,7 @@ import { MAIN_ID, SkipLink } from "./SkipLink";
 import { parseHash, STUDIO_PATH } from "./router";
 import { keepStudyFiguresFresh } from "./studyFigures";
 import { queryKeys } from "./queryKeys";
+import { DeviceValues } from "./deviceValues";
 import { settleLoginWebId } from "./remembered";
 
 /** What an app built on AppShell calls itself, as messages in the user's language. */
@@ -268,15 +269,17 @@ export function AppShell({
         <AppName.Provider value={identity.name}>
           <RepoUrl.Provider value={source.repoUrl}>
             <AppVersion.Provider value={source.version}>
-              <SkipLink />
-              <AppContent
-                useCases={useCases}
-                source={source}
-                providers={providers}
-                identity={identity}
-                workspace={workspace}
-              />
-              <Footer source={source} />
+              <DeviceValues.Provider value={useCases}>
+                <SkipLink />
+                <AppContent
+                  useCases={useCases}
+                  source={source}
+                  providers={providers}
+                  identity={identity}
+                  workspace={workspace}
+                />
+                <Footer source={source} />
+              </DeviceValues.Provider>
             </AppVersion.Provider>
           </RepoUrl.Provider>
         </AppName.Provider>
@@ -381,7 +384,10 @@ function AppContent({
       try {
         const established = await useCases.restoreSession();
         // A WebID the learner asked to remember is kept once its login has succeeded.
-        settleLoginWebId(established?.origin === "login" ? established.session.webId : null);
+        settleLoginWebId(
+          established?.origin === "login" ? established.session.webId : null,
+          useCases,
+        );
         if (established !== null) {
           setSession(established.session);
           setConnecting(established.origin === "login");
@@ -389,7 +395,7 @@ function AppContent({
           setSession(await useCases.startGuest(t("guest.instanceName")));
         }
       } catch (e) {
-        settleLoginWebId(null);
+        settleLoginWebId(null, useCases);
         setAuthError(e);
         // They had a session or were logging in: the login is what they need next, not the introduction.
         setReturning(true);

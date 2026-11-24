@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen, waitFor } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckCreatorContainer } from "./DeckCreatorContainer";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -11,6 +11,16 @@ import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import { makeUseCasesFake } from "../test/useCasesFake";
 import { rememberLanguage } from "./remembered";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
+
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -44,8 +54,7 @@ function renderContainer(useCases: UseCases) {
 
 // The deck's name is in the language last chosen for a deck's text on this device.
 beforeEach(() => {
-  localStorage.clear();
-  rememberLanguage("deck", "en");
+  rememberLanguage("deck", "en", device);
 });
 
 describe("DeckCreatorContainer", () => {

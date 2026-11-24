@@ -1432,6 +1432,70 @@ export interface UpdateJournal {
 }
 
 /**
+ * What a value kept on the device is: how it is read back from what is
+ * stored (`decode`, given what the stored JSON holds), and what it is
+ * when nothing that fits is kept (`fallback`). The fallback is kept as
+ * nothing at all.
+ */
+export interface ValueKind<T> {
+  /** What is stored, read as the value; the fallback for what does not fit. */
+  decode(stored: unknown): T;
+  fallback: T;
+}
+
+/** What a value kept on the device under a key of its own is (DeviceStore `value`). */
+export interface DeviceValueKind<T> extends ValueKind<T> {
+  /**
+   * Kept as its text, not as JSON, and decoded from the text: for a value
+   * other code reads as it is, such as a WebID.
+   */
+  text?: boolean;
+}
+
+/** A value kept on the device (DeviceStore). Best effort: it may forget, and is then its kind's fallback. */
+export interface DeviceValue<T> {
+  read(): T;
+  write(value: T): void;
+}
+
+/**
+ * A value kept on the device for each instance, under one key
+ * (DeviceStore `byInstance`). Best effort, as a DeviceValue is.
+ */
+export interface InstanceDeviceValues<T> {
+  read(instanceUrl: string): T;
+  write(instanceUrl: string, value: T): void;
+}
+
+/** What a value kept for each instance is: a ValueKind, and where it was kept before it was kept by instance. */
+export interface InstanceValueKind<T> extends ValueKind<T> {
+  /**
+   * The prefix of the keys the value was kept under before, one key an
+   * instance, the instance's URL after it: read once, kept by instance,
+   * and removed.
+   */
+  legacyPrefix?: string;
+}
+
+/**
+ * Driven port: values kept where the app runs (the browser), such as how
+ * the deck list is folded, the languages chosen lately or the Studio's
+ * layout, which are this device's and no one's data. Each value is read
+ * and written as its kind says; the store holds what is the same for
+ * every value: storage that is missing or refuses, what it holds that is
+ * not JSON, and how much it keeps, so no value fills the browser's
+ * storage and leaves no room for the rest. Best effort: it may forget.
+ */
+export interface DeviceStore {
+  value<T>(key: string, kind: DeviceValueKind<T>): DeviceValue<T>;
+  /**
+   * A value for each instance, under one key: those of the instances
+   * written last are kept, as many as fit, and the others let go.
+   */
+  byInstance<T>(key: string, kind: InstanceValueKind<T>): InstanceDeviceValues<T>;
+}
+
+/**
  * Driven port: word of a logout to this browser's other pages of the
  * app, each of which holds its session in its own memory. Best effort:
  * a browser with no way to tell them leaves them to their token's end.

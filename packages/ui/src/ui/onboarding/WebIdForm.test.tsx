@@ -3,10 +3,17 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen } from "@testing-library/preact";
+import type { ComponentChild } from "preact";
 import { WebIdForm } from "./WebIdForm";
 import { alertTexts, statusTexts } from "../../test/liveRegions";
 import { loginWebIdKey, webIdKey } from "../remembered";
+import { deviceWrapper, makeDeviceValuesFake } from "../../test/fakes/deviceValues";
+
+let device = makeDeviceValuesFake();
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 function renderForm(overrides: Partial<Parameters<typeof WebIdForm>[0]> = {}) {
   const props = {
@@ -25,8 +32,7 @@ function submit(webId: string) {
 
 describe("WebIdForm", () => {
   beforeEach(() => {
-    localStorage.clear();
-    sessionStorage.clear();
+    device = makeDeviceValuesFake();
   });
 
   it("starts empty, without someone else's WebID prefilled", () => {
@@ -74,21 +80,21 @@ describe("WebIdForm", () => {
       screen.getByRole("checkbox", { name: "Remember my WebID on this device" }),
     ).not.toBeChecked();
     submit("https://bob.example/profile/card#me");
-    expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+    expect(device.tab.get(loginWebIdKey)).toBeUndefined();
   });
 
   it("notes the WebID to remember once its login succeeds", () => {
     const { onSubmit } = renderForm();
     fireEvent.click(screen.getByRole("checkbox", { name: "Remember my WebID on this device" }));
     submit("https://Bob.example/profile/card#me");
-    expect(sessionStorage.getItem(loginWebIdKey)).toBe("https://bob.example/profile/card#me");
+    expect(device.tab.get(loginWebIdKey)).toBe("https://bob.example/profile/card#me");
     // Kept for good only once the login comes back.
-    expect(localStorage.getItem(webIdKey)).toBeNull();
+    expect(device.stored.get(webIdKey)).toBeUndefined();
     expect(onSubmit).toHaveBeenCalledWith("https://bob.example/profile/card#me");
   });
 
   it("fills in the remembered WebID, its box checked, and forgets it when unchecked", () => {
-    localStorage.setItem(webIdKey, "https://bob.example/profile/card#me");
+    device.stored.set(webIdKey, "https://bob.example/profile/card#me");
     const { onSubmit } = renderForm();
     expect(screen.getByLabelText("WebID")).toHaveValue("https://bob.example/profile/card#me");
     const remember = screen.getByRole("checkbox", { name: "Remember my WebID on this device" });
@@ -97,7 +103,7 @@ describe("WebIdForm", () => {
     fireEvent.click(remember);
     fireEvent.click(screen.getByRole("button", { name: "Log in with Solid" }));
     expect(onSubmit).toHaveBeenCalledWith("https://bob.example/profile/card#me");
-    expect(localStorage.getItem(webIdKey)).toBeNull();
+    expect(device.stored.get(webIdKey)).toBeUndefined();
   });
 
   it("never asks for a password", () => {

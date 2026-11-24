@@ -3,11 +3,19 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen } from "@testing-library/preact";
 import { DeckCreatorScreen } from "./DeckCreatorScreen";
 import { recentLanguages, rememberLanguage } from "./remembered";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 function renderScreen(overrides: Partial<Parameters<typeof DeckCreatorScreen>[0]> = {}) {
   const props = {
@@ -47,11 +55,11 @@ describe("DeckCreatorScreen", () => {
     fireEvent.submit(container.querySelector("form")!);
     expect(props.onCreate).toHaveBeenCalledWith({ sv: "Kana" });
     // Chosen once, it is this device's first choice for the next deck.
-    expect(recentLanguages("deck")).toEqual(["sv"]);
+    expect(recentLanguages("deck", device)).toEqual(["sv"]);
   });
 
   it("starts the name in the language last chosen for a deck's text on this device", () => {
-    rememberLanguage("deck", "fi");
+    rememberLanguage("deck", "fi", device);
     const { props, container } = renderScreen();
     expect(screen.getByLabelText("Name")).toHaveAttribute("lang", "fi");
     expect(screen.getByLabelText("Name")).toHaveAttribute("placeholder", "My new deck");

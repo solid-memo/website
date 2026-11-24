@@ -25,6 +25,7 @@ import { DraftOutline, OUTLINE_LIMIT } from "./DraftOutline";
 import { DraftScope, DraftStatus, DraftTextField, IdField, idUsable } from "./DraftParts";
 import { NewQuestionForm } from "./NewQuestionForm";
 import { ShowMore, usePage } from "./ReleaseLists";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
 
 /** What a draft's screens link to. */
 export interface DraftLinks {
@@ -232,9 +233,10 @@ function NewChapterForm({
   draft: ReleaseDraft;
   onAdd: (changes: DraftChange[]) => boolean;
 }) {
+  const device = useDeviceValues();
   const { t } = useI18n();
   const [title, setTitle] = useState(() =>
-    draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }),
+    draftOf(undefined, [], { tag: recentLanguages("deck", device)[0] ?? null }),
   );
   const [typedId, setTypedId] = useState<string | null>(null);
   const [missing, setMissing] = useState<DraftEntry | undefined>(undefined);
@@ -254,7 +256,7 @@ function NewChapterForm({
       !onAdd([{ kind: "addChapter", id, ...(titled === null ? {} : { text: { title: titled } }) }])
     )
       return;
-    rememberLanguages("deck", text.text, title);
+    rememberLanguages("deck", text.text, title, device);
     setTypedId(null);
     setTitle(draftOf(undefined, [], { tag: title[0]!.tag }));
   }

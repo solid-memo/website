@@ -28,6 +28,7 @@ import {
 import { textLanguages, type LanguageRole } from "./LanguagePicker";
 import { CardPreview, MarkdownHelp, readsDifferently, useEntryHints } from "./MarkdownEditing";
 import { recentLanguages } from "./remembered";
+import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
 
 /**
  * The fields of a card as typed: each text as LangTextField edits it, in
@@ -163,11 +164,15 @@ function fieldOf(invalid: CardFieldsError): string | undefined {
  * each group's pickers suggest first: that one, then the deck name's
  * (textLanguages, so at most LANGUAGE_CHOICE_LIMIT).
  */
-export function cardLanguageHints(languages: DeckLanguages, title: LangText): CardLanguageHints {
+export function cardLanguageHints(
+  languages: DeckLanguages,
+  title: LangText,
+  device: DeviceValueUseCases,
+): CardLanguageHints {
   const defaults: CardLanguageDefaults = {
     front: languages.front,
     back: languages.back,
-    own: languages.own ?? recentLanguages("own")[0],
+    own: languages.own ?? recentLanguages("own", device)[0],
   };
   const suggest = (group: LanguageGroup) => [
     ...(defaults[group] === undefined ? [] : [defaults[group]]),
@@ -424,9 +429,13 @@ export function draftChanged(draft: CardDraft, from: CardDraft): boolean {
 }
 
 /** Notes the languages of the user's own text a saved card states, as this device's latest choices for it. */
-export function rememberCardLanguages(content: CardContent, draft: CardDraft): void {
+export function rememberCardLanguages(
+  content: CardContent,
+  draft: CardDraft,
+  device: DeviceValueUseCases,
+): void {
   for (const part of TEXT_PARTS) {
-    if (groupOf(part) === "own") rememberLanguages("own", content[part] ?? {}, draft[part]);
+    if (groupOf(part) === "own") rememberLanguages("own", content[part] ?? {}, draft[part], device);
   }
 }
 

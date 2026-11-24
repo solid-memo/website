@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen } from "@testing-library/preact";
 import { AppError } from "@solid-memo/domain/appError";
 import { DataProse } from "@solid-memo/ui/DataText";
 import { createI18n } from "@solid-memo/ui/i18n";
@@ -16,8 +16,16 @@ import {
   IdField,
 } from "./DraftParts";
 import { courseDraft } from "../test/fixtures";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 /** States the language of the field's main text: English. */
 function pickEnglish() {
@@ -158,7 +166,7 @@ describe("DraftTextField", () => {
   });
 
   it("starts from the text saved, in the language last chosen for a deck's text when there is none", () => {
-    localStorage.setItem("solid-memo:recentLanguages.deck", JSON.stringify(["sv"]));
+    device.stored.set("solid-memo:recentLanguages.deck", JSON.stringify(["sv"]));
     const onSave = vi.fn();
     render(
       <DraftTextField

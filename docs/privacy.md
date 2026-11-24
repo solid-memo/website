@@ -69,15 +69,15 @@ before any pod is reached:
 | `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | [`localStorageCustomPalettePreference.ts`](../packages/browser/src/localStorageCustomPalettePreference.ts) |
 | `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | `localStorageSetting.ts` |
 | `solid-memo:seenHighlights` | the new-version highlights this browser has shown | [`localStorageSeenHighlights.ts`](../packages/browser/src/localStorageSeenHighlights.ts) |
-| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts) |
-| `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts` |
-| `solid-memo:collapsedGroups.<instance URL>` | which deck groups the learner folded | `remembered.ts` |
+| `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts), through [`webStorageDeviceStore.ts`](../packages/browser/src/webStorageDeviceStore.ts) |
+| `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:collapsedGroups` | by instance URL, which deck groups the learner folded, for the 20 instances folded last; an older `solid-memo:collapsedGroups.<instance URL>` is moved into it once read | `remembered.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:update:<…>` | a guest's study being moved or added, so another tab knows | [`localStorageUpdateJournal.ts`](../packages/browser/src/localStorageUpdateJournal.ts) |
 | `solid-memo:logout` | set and taken off at once to tell other tabs of a logout, only where the browser has no `BroadcastChannel`; holds nothing | [`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts) |
-| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts) |
+| `solid-memo:studioLayout.v1`, `solid-memo:studioRecent.v1`, `solid-memo:studioInstances.v1` | the Studio's layout; its palette's last commands; and, by instance URL, saved views, pins and the decks and drafts opened last, for the 20 instances noted last | [`prefs.ts`](../apps/studio/src/ui/shell/prefs.ts), through `webStorageDeviceStore.ts` |
 
 A logout leaves these keys in place, `solid-memo:palette-colors`,
-`solid-memo:webId`, `solid-memo:collapsedGroups.<instance URL>` and
+`solid-memo:webId`, `solid-memo:collapsedGroups` and
 `solid-memo:studioInstances.v1` among them. They hold no credential.
 They do hold instance, deck, draft and palette URLs, a palette's
 colors, and a remembered WebID, which anyone using the same browser

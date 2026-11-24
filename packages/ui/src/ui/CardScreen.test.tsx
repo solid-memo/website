@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen } from "@testing-library/preact";
 import { CardScreen, type CardEdits } from "./CardScreen";
 import { CardLanguage } from "./cardLanguage";
 import type { Card } from "@solid-memo/domain/deck";
@@ -11,8 +11,16 @@ import { alertTexts, statusTexts } from "../test/liveRegions";
 import { I18nProvider } from "./i18n";
 import { recentLanguages } from "./remembered";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 const card: Card = {
   id: "card-1",
@@ -251,9 +259,9 @@ describe("CardScreen", () => {
       backNote: { sv: "Ett element." },
     });
     // Not until the save succeeds.
-    expect(recentLanguages("own")).toEqual([]);
+    expect(recentLanguages("own", device)).toEqual([]);
     rerender(screenOf(true));
-    expect(recentLanguages("own")).toEqual(["sv"]);
+    expect(recentLanguages("own", device)).toEqual(["sv"]);
   });
 
   it("keeps a picture's URL typed before what is known of the deck comes", () => {

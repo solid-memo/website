@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import { applyDraftChanges, type ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import type { DraftEditor } from "./draftEditor";
@@ -11,6 +11,8 @@ import { StepEditorScreen } from "./StepEditorScreen";
 import { OUTLINE_LIMIT } from "./DraftOutline";
 import { courseDraft, draftLinks, longCourseDraft } from "../test/fixtures";
 import { answer } from "../test/dialogs";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
 function renderScreen(
   step: string,
@@ -32,7 +34,13 @@ function renderScreen(
   return { onEdit, onDeleted };
 }
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 describe("StepEditorScreen", () => {
   it("saves the theory as it is typed, previewed as the course player shows it", () => {

@@ -3,15 +3,23 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, screen } from "@testing-library/preact";
+import { act, fireEvent, render as renderBare, screen } from "@testing-library/preact";
 import { CardCreatorScreen } from "./CardCreatorScreen";
 import { I18nProvider } from "./i18n";
 import type { Deck } from "@solid-memo/domain/deck";
 import { alertTexts, statusTexts } from "../test/liveRegions";
 import { recentLanguages, rememberLanguage } from "./remembered";
 import { SM } from "@solid-memo/vocab/vocab.generated";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 const deck: Deck = {
   id: "deck-1",
@@ -322,7 +330,7 @@ describe("CardCreatorScreen", () => {
       expect.any(Function),
     );
     act(() => vi.mocked(props.onAdd).mock.lastCall![1]());
-    expect(recentLanguages("own")).toEqual(["sv"]);
+    expect(recentLanguages("own", device)).toEqual(["sv"]);
 
     fireEvent.input(screen.getByLabelText("Front"), { target: { value: "水" } });
     fireEvent.input(screen.getByLabelText("Back"), { target: { value: "water" } });
@@ -351,7 +359,7 @@ describe("CardCreatorScreen", () => {
   });
 
   it("starts new text in the languages the deck's cards have, once they are read, in place of the device's last for the user's own", () => {
-    rememberLanguage("own", "fi");
+    rememberLanguage("own", "fi", device);
     const { props, rerender } = renderScreen();
     expect(picker("card-front")).toHaveTextContent("Language: not stated");
     expect(picker("card-front-note")).toHaveTextContent("Language: Finnish");
@@ -378,7 +386,7 @@ describe("CardCreatorScreen", () => {
   });
 
   it("keeps the languages a card added kept when the deck's cards are read after it", () => {
-    rememberLanguage("own", "fi");
+    rememberLanguage("own", "fi", device);
     const { props, rerender, container } = renderScreen();
     fireEvent.input(screen.getByLabelText("Front"), { target: { value: "火" } });
     chooseLanguage("card-front", "ja");

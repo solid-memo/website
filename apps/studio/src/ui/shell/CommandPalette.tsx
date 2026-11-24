@@ -24,6 +24,7 @@ import { recentCommands, rememberCommand, type WorkItem } from "./prefs";
 import { keyOf, shortcutOf } from "./shortcuts";
 import { deckOf, type ContextTab } from "./workspaceLayout";
 import { queryKeys } from "../queryKeys";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
 
 /**
  * Quick open and the commands, in a dialog (Ctrl+K): a field to type
@@ -61,6 +62,7 @@ export function CommandPalette({
   onChoose: (command: Command) => void;
   onClose: () => void;
 }) {
+  const device = useDeviceValues();
   const { t, readerText, cardReader } = useI18n();
   const queryClient = useQueryClient();
   const listId = useId();
@@ -96,7 +98,7 @@ export function CommandPalette({
       ),
     );
   });
-  const [recent] = useState(() => recentCommands());
+  const [recent] = useState(() => recentCommands(device));
   // Moving the entry picked draws the list again but changes nothing in it.
   const sections = useMemo(
     () => rankCommands(all, query, recent, pinned.map(itemCommandId)),
@@ -111,7 +113,7 @@ export function CommandPalette({
   }, [picked]);
 
   function choose(command: Command) {
-    rememberCommand(command.id);
+    rememberCommand(command.id, device);
     onChoose(command);
   }
 

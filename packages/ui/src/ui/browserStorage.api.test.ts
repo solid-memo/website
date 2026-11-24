@@ -4,7 +4,8 @@
 
 import { expect, it } from "vitest";
 import {
-  collapsedKey,
+  COLLAPSED_KEY,
+  LEGACY_COLLAPSED_PREFIX,
   loginWebIdKey,
   type RecentLanguageKind,
   recentKey,
@@ -27,7 +28,8 @@ it("keeps api/browser-storage/ui.txt to what the browser keeps", async () => {
     ...(Object.keys(KINDS) as RecentLanguageKind[]).map(
       (kind) => `localStorage: ${recentKey(kind)}`,
     ),
-    `localStorage: ${collapsedKey("<instance URL>")}`,
+    `localStorage: ${COLLAPSED_KEY}, by instance URL`,
+    `localStorage: ${LEGACY_COLLAPSED_PREFIX}<instance URL>, read once into ${COLLAPSED_KEY} and removed`,
     `localStorage: ${webIdKey}, only when the learner asks for it`,
     `sessionStorage: ${loginWebIdKey}, until the next page load`,
   ];

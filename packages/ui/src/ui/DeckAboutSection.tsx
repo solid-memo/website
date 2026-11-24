@@ -25,6 +25,7 @@ import { textLanguages } from "./LanguagePicker";
 import { recentLanguages } from "./remembered";
 import { useI18n } from "./i18n";
 import { ReaderText, ReaderTexts } from "./ReaderText";
+import { useDeviceValues } from "./deviceValues";
 
 /**
  * What a deck says about itself — its description, its topics (from
@@ -52,6 +53,7 @@ export function DeckAboutSection({
   busy: boolean;
   onSave: (about: DeckAbout) => void;
 }) {
+  const device = useDeviceValues();
   const { t, tx, locale, readerText, readerLang, errorText } = useI18n();
   /** The drafts while editing; null otherwise. */
   const [draft, setDraft] = useState<{
@@ -72,13 +74,13 @@ export function DeckAboutSection({
       deck.description === undefined ? undefined : shownTag(deck.description, languages);
     setDraft({
       description: draftOf(deck.description, languages, {
-        tag: titleTag ?? recentLanguages("deck")[0] ?? null,
+        tag: titleTag ?? recentLanguages("deck", device)[0] ?? null,
       }),
       topics: topicsOfDeck(deck),
       keywords: draftOf(joinedKeywords(deck.keywords), languages, {
         tag:
           [descriptionTag, titleTag].find((tag) => tag !== undefined && tag !== "") ??
-          recentLanguages("deck")[0] ??
+          recentLanguages("deck", device)[0] ??
           null,
       }),
     });
@@ -106,8 +108,8 @@ export function DeckAboutSection({
       keywordsQuestion.ask(typed.missing);
       return;
     }
-    rememberLanguages("deck", result.text, draft!.description);
-    rememberLanguages("deck", typed.keywords, draft!.keywords);
+    rememberLanguages("deck", result.text, draft!.description, device);
+    rememberLanguages("deck", typed.keywords, draft!.keywords, device);
     onSave({
       description: result.text,
       topics: draft!.topics,

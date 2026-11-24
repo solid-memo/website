@@ -24,10 +24,12 @@ import {
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import { idUsable, IdField } from "./DraftParts";
 import { OUTLINE_LIMIT } from "./DraftOutline";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
+import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
 
 /** A new side's draft: empty, in the language last chosen for a card's own text. */
-function emptySide(): LangTextDraft {
-  return draftOf(undefined, [], { tag: recentLanguages("own")[0] ?? null });
+function emptySide(device: DeviceValueUseCases): LangTextDraft {
+  return draftOf(undefined, [], { tag: recentLanguages("own", device)[0] ?? null });
 }
 
 /**
@@ -57,12 +59,13 @@ export function NewQuestionForm({
   legend: string;
   onAdd: (changes: DraftChange[], card: string) => boolean;
 }) {
+  const device = useDeviceValues();
   const { t, readerText } = useI18n();
   const [typedId, setTypedId] = useState<string | null>(null);
   /** The card it is asked before; null: after the last. */
   const [before, setBefore] = useState<string | null>(null);
-  const [front, setFront] = useState(emptySide);
-  const [back, setBack] = useState(emptySide);
+  const [front, setFront] = useState(() => emptySide(device));
+  const [back, setBack] = useState(() => emptySide(device));
   const [missing, setMissing] = useState<{ side: "front" | "back"; entry: DraftEntry } | null>(
     null,
   );
@@ -103,12 +106,12 @@ export function NewQuestionForm({
       ...(place === null ? [] : [{ kind: "addQuestion" as const, card: cardId, place }]),
     ];
     if (!onAdd(changes, cardId)) return;
-    rememberLanguages("own", frontText.text, front);
-    rememberLanguages("own", backText.text, back);
+    rememberLanguages("own", frontText.text, front, device);
+    rememberLanguages("own", backText.text, back, device);
     setTypedId(null);
     setBefore(null);
-    setFront(emptySide());
-    setBack(emptySide());
+    setFront(emptySide(device));
+    setBack(emptySide(device));
   }
 
   const errorId = `${id}-error`;

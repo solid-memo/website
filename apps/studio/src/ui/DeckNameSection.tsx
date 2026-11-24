@@ -18,6 +18,7 @@ import {
 } from "@solid-memo/ui/LangTextField";
 import { textLanguages } from "@solid-memo/ui/LanguagePicker";
 import { ReaderText } from "@solid-memo/ui/ReaderText";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
 
 /**
  * A deck's name in every language it has, with a form to rename it: each
@@ -33,6 +34,7 @@ export function DeckNameSection({
   busy: boolean;
   onRename: (title: LangText) => void;
 }) {
+  const device = useDeviceValues();
   const { t, locale, errorText } = useI18n();
   /** The draft while renaming; null otherwise. */
   const [draft, setDraft] = useState<LangTextDraft | null>(null);
@@ -50,7 +52,7 @@ export function DeckNameSection({
       ask(result.missing);
       return;
     }
-    rememberLanguages("deck", result.text, draft!);
+    rememberLanguages("deck", result.text, draft!, device);
     onRename(result.text);
     stop();
   }

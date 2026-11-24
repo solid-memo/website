@@ -14,6 +14,7 @@
     "./dataCheck": "./src/ui/dataCheck.ts",
     "./panelFocus": "./src/ui/panelFocus.ts",
     "./remembered": "./src/ui/remembered.ts",
+    "./deviceValues": "./src/ui/deviceValues.ts",
     "./markdownCache": "./src/ui/markdownCache.ts",
     "./motion": "./src/ui/motion.ts",
     "./keepSchedule": "./src/ui/keepSchedule.ts",

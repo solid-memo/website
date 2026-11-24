@@ -22,6 +22,8 @@ import { ProseField } from "@solid-memo/ui/ProseField";
 import { recentLanguages } from "@solid-memo/ui/remembered";
 import type { DraftEditor, DraftReadOnly } from "./draftEditor";
 import { ReadOnlyNotice } from "./ReadOnly";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
+import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
 
 /** Why a change of a draft was not made, in words. */
 export function refusalText(refusal: DraftRefusal, t: I18n["t"]): string {
@@ -144,13 +146,14 @@ export function DraftScope({
 }
 
 /** A draft's text in the languages it has, to start a field from; a new one in the language last chosen for a deck's text. */
-function startOf(text: LangText | undefined): LangTextDraft {
-  return draftOf(text, [], { tag: recentLanguages("deck")[0] ?? null });
+function startOf(text: LangText | undefined, device: DeviceValueUseCases): LangTextDraft {
+  return draftOf(text, [], { tag: recentLanguages("deck", device)[0] ?? null });
 }
 
 /** The state of a field of a draft's text, saved as it is typed: its draft, and the entry whose language is asked for. */
 function useSavedText(text: LangText | undefined, onSave: (text: LangText) => void) {
-  const [draft, setDraft] = useState(() => startOf(text));
+  const device = useDeviceValues();
+  const [draft, setDraft] = useState(() => startOf(text, device));
   const [missing, setMissing] = useState<DraftEntry | undefined>(undefined);
   function change(next: LangTextDraft) {
     setDraft(next);
@@ -160,7 +163,7 @@ function useSavedText(text: LangText | undefined, onSave: (text: LangText) => vo
       return;
     }
     setMissing(undefined);
-    rememberLanguages("deck", result.text, next);
+    rememberLanguages("deck", result.text, next, device);
     onSave(result.text);
   }
   return { draft, missing, change };

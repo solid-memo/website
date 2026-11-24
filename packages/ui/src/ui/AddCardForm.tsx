@@ -16,6 +16,7 @@ import {
   type CardLanguageHints,
 } from "./CardContentFields";
 import { useI18n } from "./i18n";
+import { useDeviceValues } from "./deviceValues";
 
 /**
  * Card entry form: text and an optional picture for each side. The draft
@@ -40,6 +41,7 @@ export function AddCardForm({
   /** Add the card; `onAdded` once it is. */
   onAdd: (content: CardContent, onAdded: () => void) => void;
 }) {
+  const device = useDeviceValues();
   const { t } = useI18n();
   const { defaults } = languages;
   const [draft, setDraft] = useState(() => newDraft(defaults));
@@ -77,7 +79,7 @@ export function AddCardForm({
     }
     setInvalid(null);
     onAdd(check.content, () => {
-      rememberCardLanguages(check.content, draft);
+      rememberCardLanguages(check.content, draft, device);
       setDraft(nextDraft(draft, defaults));
       sticky.current = true;
       setAdded(true);

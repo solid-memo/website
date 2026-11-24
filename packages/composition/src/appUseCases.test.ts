@@ -335,6 +335,20 @@ describe("createAppUseCases", () => {
     spawnWorker: () => inProcessWorker(jobs),
   };
 
+  it("keeps the screens' values on the device in localStorage, and the tab's in sessionStorage", () => {
+    const useCases = createAppUseCases({ ...options, indexedDB: undefined });
+    const kind = { decode: (stored: unknown) => String(stored), fallback: "", text: true };
+    useCases.deviceValue("solid-memo:test-device", kind).write("kept");
+    useCases.tabValue("solid-memo:test-tab", kind).write("kept");
+    onTestFinished(() => {
+      localStorage.removeItem("solid-memo:test-device");
+      sessionStorage.removeItem("solid-memo:test-tab");
+    });
+    expect(localStorage.getItem("solid-memo:test-device")).toBe("kept");
+    expect(sessionStorage.getItem("solid-memo:test-tab")).toBe("kept");
+    expect(localStorage.getItem("solid-memo:test-tab")).toBeNull();
+  });
+
   it("keeps a guest's study in memory, every write checked against the shapes the site publishes", async () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
     expect(await useCases.startGuest("My study")).toEqual(GUEST_SESSION);

@@ -32,6 +32,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { CardIcon, TrashIcon } from "./icons";
 import { RetiredNotice } from "./RetiredCards";
+import { useDeviceValues } from "./deviceValues";
 
 /** What a deck with no cards (yet read) says of its languages: nothing. */
 const NO_LANGUAGES: DeckLanguages = { unstatedCounts: { front: 0, back: 0 } };
@@ -114,10 +115,14 @@ export function CardScreen({
   /** Where the editor's edits are kept, by its owner, for the editor shown next of the same card. */
   keep?: { current: CardEdits | null };
 }) {
+  const device = useDeviceValues();
   const { t } = useI18n();
   const { cardText, cardLanguages } = useCardText();
   const askFirst = useAskFirst();
-  const hints = useMemo(() => cardLanguageHints(languages, deckTitle), [languages, deckTitle]);
+  const hints = useMemo(
+    () => cardLanguageHints(languages, deckTitle, device),
+    [languages, deckTitle, device],
+  );
   // Each text starts in the language it is shown in elsewhere: the deck's card language first.
   const startDraft = () => draftOf(card, cardLanguages(), { defaults: hints.defaults });
   const [draft, setDraft] = useState(() => keep?.current?.draft ?? startDraft());
@@ -155,7 +160,7 @@ export function CardScreen({
     // Saved, the card read afresh has the wrong options changed here.
     if (saved) setChanged(null);
     if (!saved || submitted.current === null) return;
-    rememberCardLanguages(submitted.current.content, submitted.current.draft);
+    rememberCardLanguages(submitted.current.content, submitted.current.draft, device);
     setPristine(submitted.current.draft);
     submitted.current = null;
   }, [saved]);

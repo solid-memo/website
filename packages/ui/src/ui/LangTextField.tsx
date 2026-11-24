@@ -12,6 +12,7 @@ import { ErrorMessage } from "./ErrorMessage";
 import { useI18n } from "./i18n";
 import { LanguagePicker, languageTextId, type LanguageRole } from "./LanguagePicker";
 import { rememberLanguage, type RecentLanguageKind } from "./remembered";
+import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
 
 /**
  * Text whose languages the user states, as a form edits it: entries of
@@ -80,9 +81,10 @@ export function rememberLanguages(
   kind: RecentLanguageKind,
   text: Readonly<Record<string, unknown>>,
   draft: LangTextDraft,
+  device: DeviceValueUseCases,
 ): void {
   for (const entry of [...draft].reverse()) {
-    if (entry.tag !== null && entry.tag in text) rememberLanguage(kind, entry.tag);
+    if (entry.tag !== null && entry.tag in text) rememberLanguage(kind, entry.tag, device);
   }
 }
 

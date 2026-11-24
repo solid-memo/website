@@ -275,6 +275,8 @@ const local = (use: (u: UseCases) => unknown): Row => {
 
 const MOVED = `${POD}solid-memo/moved/`;
 const IDP = "https://idp.example/";
+/** A value a screen keeps on the device, as text. */
+const DEVICE_TEXT = { decode: (stored: unknown) => String(stored), fallback: "" };
 const textCheck = { plain: (text: string) => text, check: () => [] };
 
 const ROWS: { [Name in keyof UseCases]: Row } = {
@@ -571,6 +573,9 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   reportPlace: async ({ u, courseRelease }) => void (await u.reportPlace(courseRelease.url)),
   unseenHighlights: local((u) => u.unseenHighlights(["a"])),
   dismissHighlights: local((u) => u.dismissHighlights(["a"])),
+  deviceValue: local((u) => u.deviceValue("k", DEVICE_TEXT).write("a")),
+  instanceDeviceValues: local((u) => u.instanceDeviceValues("k", DEVICE_TEXT).write(POD, "a")),
+  tabValue: local((u) => u.tabValue("k", DEVICE_TEXT).write("a")),
 
   // Courses.
   startCourse: async ({ u }) =>

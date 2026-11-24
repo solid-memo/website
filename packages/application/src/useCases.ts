@@ -29,6 +29,7 @@ import type {
   ReleaseDraftRepository,
   ReleasePublisher,
   InstanceGraphReader,
+  DeviceStore,
 } from "./ports";
 import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
@@ -46,6 +47,7 @@ import { createCardUseCases, type CardUseCases } from "./cards";
 import { createLibraryUseCases, withLinkedReleasesChecked, type LibraryUseCases } from "./library";
 import { createMistakeReportUseCases, type MistakeReportUseCases } from "./mistakeReports";
 import { createWhatsNewUseCases, type WhatsNewUseCases } from "./whatsNew";
+import { createDeviceValueUseCases, type DeviceValueUseCases } from "./deviceValues";
 import { createCourseUseCases, type CourseUseCases } from "./courses";
 import { createStudyUseCases, type StudyUseCases } from "./study";
 import { createStatisticsUseCases, type StatisticsUseCases } from "./statistics";
@@ -75,6 +77,7 @@ export interface UseCases
     LibraryUseCases,
     MistakeReportUseCases,
     WhatsNewUseCases,
+    DeviceValueUseCases,
     CourseUseCases,
     StudyUseCases,
     StatisticsUseCases,
@@ -126,6 +129,10 @@ export interface Dependencies {
   textSizePreference: DeviceSetting<TextSize>;
   /** The highlights of new versions this browser has shown, kept on this device. */
   seenHighlights: SeenHighlights;
+  /** The values the screens keep on this device. */
+  deviceStore: DeviceStore;
+  /** The values the screens keep for the tab's life. */
+  tabStore: DeviceStore;
   /** The clock; injected for tests. */
   now?: () => Date;
   /** Fresh identifiers (a deck group, an answer, a guest's deck); injected for tests. */
@@ -182,6 +189,8 @@ export function createUseCases({
   paletteRepository,
   textSizePreference,
   seenHighlights,
+  deviceStore,
+  tabStore,
   now = () => new Date(),
   newId = () => crypto.randomUUID(),
   writeFence,
@@ -328,6 +337,7 @@ export function createUseCases({
     }),
     ...createMistakeReportUseCases({ deckLibrary }),
     ...createWhatsNewUseCases({ seenHighlights }),
+    ...createDeviceValueUseCases({ deviceStore, tabStore }),
     ...courses,
     ...createStudyUseCases({
       deckRepository,

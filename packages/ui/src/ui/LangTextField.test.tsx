@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen } from "@testing-library/preact";
 import { useState } from "preact/hooks";
 import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
 import type { LangText } from "@solid-memo/domain/langText";
@@ -20,8 +20,16 @@ import {
   type LangTextDraft,
 } from "./LangTextField";
 import { recentLanguages } from "./remembered";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 describe("draftOf", () => {
   it("starts new text in the language there is evidence of, else in none", () => {
@@ -88,8 +96,8 @@ describe("rememberLanguages", () => {
       { id: 1, value: "Sanasto", tag: "fi" },
       { id: 2, value: "", tag: "de" },
     ];
-    rememberLanguages("deck", { sv: "Glosor", fi: "Sanasto" }, draft);
-    expect(recentLanguages("deck")).toEqual(["sv", "fi"]);
+    rememberLanguages("deck", { sv: "Glosor", fi: "Sanasto" }, draft, device);
+    expect(recentLanguages("deck", device)).toEqual(["sv", "fi"]);
   });
 });
 

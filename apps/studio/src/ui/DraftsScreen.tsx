@@ -24,6 +24,7 @@ import { useActivity } from "./shell/activity";
 import { useConfirm } from "./shell/ConfirmDialog";
 import { draftNameOf } from "./shell/titles";
 import { useScreenCommands } from "./shell/useScreenCommands";
+import { useDeviceValues } from "@solid-memo/ui/deviceValues";
 
 /** What a new draft starts from, as the form offers it. */
 type Start = NewDraft["kind"];
@@ -89,10 +90,11 @@ export function DraftsScreen({
   deleteError: ErrorText | null;
   onDelete: (draft: ReleaseDraftSummary) => void;
 }) {
+  const device = useDeviceValues();
   const { t, tx, errorText, readerText } = useI18n();
   const [start, setStart] = useState<Start>("blankDeck");
   const [title, setTitle] = useState(() =>
-    draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }),
+    draftOf(undefined, [], { tag: recentLanguages("deck", device)[0] ?? null }),
   );
   const [deckUrl, setDeckUrl] = useState(decks[0]?.url ?? "");
   const [releaseUrl, setReleaseUrl] = useState("");
@@ -131,7 +133,7 @@ export function DraftsScreen({
           ask(result.missing);
           return;
         }
-        rememberLanguages("deck", result.text, title);
+        rememberLanguages("deck", result.text, title, device);
         onCreate({ kind: start, title: result.text });
         return;
       }

@@ -20,6 +20,7 @@ import { ChapterPlayerContainer } from "@solid-memo/ui/ChapterPlayerContainer";
 import { ChapterReviewContainer } from "@solid-memo/ui/ChapterReviewContainer";
 import { CourseContainer, type CompletedChapter } from "@solid-memo/ui/CourseContainer";
 import { Clock, CourseLinksContext, type CourseLinks } from "@solid-memo/ui/courseLinks";
+import { DeviceValues, UNKEPT_VALUES } from "@solid-memo/ui/deviceValues";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { boundedQueryKeyHash } from "@solid-memo/ui/queryKeys";
 import { useI18n } from "@solid-memo/ui/i18n";
@@ -125,17 +126,20 @@ export function TrialContainer({
     >
       {played?.opening.ok === true && (
         <QueryClientProvider client={played.client}>
-          <TrialPlay
-            key={played.id}
-            draft={played.draft}
-            trial={played.opening.trial}
-            chapter={chapter}
-            review={review}
-            links={links}
-            onReview={onReview}
-            onCourse={onCourse}
-            onJump={onJump}
-          />
+          {/* A trial keeps nothing on the device: the page's values are the app's, as its settings are. */}
+          <DeviceValues.Provider value={UNKEPT_VALUES}>
+            <TrialPlay
+              key={played.id}
+              draft={played.draft}
+              trial={played.opening.trial}
+              chapter={chapter}
+              review={review}
+              links={links}
+              onReview={onReview}
+              onCourse={onCourse}
+              onJump={onJump}
+            />
+          </DeviceValues.Provider>
         </QueryClientProvider>
       )}
     </TrialScreen>

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import {
   applyDraftChanges,
   type CheckActivity,
@@ -18,6 +18,8 @@ import { CHECK_LIMIT, COMMENT_LIMIT } from "./ReleaseChecks";
 import { languageNameOf, OTHER_CHOICE_LIMIT, ReleaseMetadataScreen } from "./ReleaseMetadataScreen";
 import { SOURCE_LIMIT } from "./ReleaseSources";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
 const idle = { saving: false, failure: null };
 const links = { draftsHref: "#/drafts", healthHref: "#/health" };
@@ -83,7 +85,13 @@ function renderScreen(
   return onEdit;
 }
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 describe("ReleaseMetadataScreen", () => {
   it("saves the version notes as they are typed, and clears them when emptied", () => {

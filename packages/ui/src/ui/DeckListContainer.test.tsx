@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/preact";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { DeckListContainer } from "./DeckListContainer";
@@ -19,6 +19,7 @@ import { courseHref, deckHref, libraryHref, routeToHash } from "./router";
 import { CH1, CH2, courseLibraryDeck, courseOutline } from "../test/course";
 import { HIGHLIGHTS } from "./highlights";
 import { boundedQueryKeyHash, queryKeys } from "./queryKeys";
+import { collapsedGroups, rememberCollapsed } from "./remembered";
 
 const instance: Instance = {
   url: "https://pod.example/solid-memo/a/",
@@ -962,8 +963,6 @@ function moveDown(name: string) {
 }
 
 describe("DeckListContainer, arranging decks", () => {
-  beforeEach(() => localStorage.clear());
-
   it("lists the decks as arranged, under the instance's decks", async () => {
     const useCases = makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) });
     const { queryClient } = renderContainer(useCases);
@@ -1211,28 +1210,23 @@ describe("DeckListContainer, arranging decks", () => {
   });
 
   it("folds groups as this device remembers, forgetting those gone", async () => {
-    localStorage.setItem(
-      `solid-memo:collapsedGroups.${instance.url}`,
-      JSON.stringify([groupUrl, `${instance.url}catalog.ttl#group-gone`]),
-    );
-    renderContainer(makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) }));
+    const useCases = makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) });
+    rememberCollapsed(instance.url, [groupUrl, `${instance.url}catalog.ttl#group-gone`], useCases);
+    renderContainer(useCases);
     const toggle = await screen.findByRole("button", { name: "Japanese 1 deck" });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
-      [],
-    );
+    expect(collapsedGroups(instance.url, useCases)).toEqual([]);
     fireEvent.click(toggle);
     expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
-      [groupUrl],
-    );
+    expect(collapsedGroups(instance.url, useCases)).toEqual([groupUrl]);
   });
 
   it("opens a group folded shut as something is moved into it", async () => {
-    localStorage.setItem(`solid-memo:collapsedGroups.${instance.url}`, JSON.stringify([groupUrl]));
-    renderContainer(makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) }));
+    const useCases = makeUseCasesFake({ listDeckTree: vi.fn(async () => grouped) });
+    rememberCollapsed(instance.url, [groupUrl], useCases);
+    renderContainer(useCases);
     fireEvent.click(await screen.findByRole("button", { name: `Actions for ${second.title.en}` }));
     fireEvent.click(
       within(screen.getByRole("group", { name: "Move into" })).getByRole("menuitem", {
@@ -1243,9 +1237,7 @@ describe("DeckListContainer, arranging decks", () => {
       "aria-expanded",
       "true",
     );
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
-      [],
-    );
+    expect(collapsedGroups(instance.url, useCases)).toEqual([]);
   });
 
   it("forgets a deleted group's folding", async () => {
@@ -1264,9 +1256,7 @@ describe("DeckListContainer, arranging decks", () => {
     fireEvent.animationEnd(document.querySelector(".deck-group.leaving")!, {
       animationName: "group-leave",
     });
-    expect(JSON.parse(localStorage.getItem(`solid-memo:collapsedGroups.${instance.url}`)!)).toEqual(
-      [],
-    );
+    expect(collapsedGroups(instance.url, useCases)).toEqual([]);
     await waitFor(() => {
       expect(useCases.editDeckTree).toHaveBeenCalledWith(instance.url, {
         kind: "removeGroup",
@@ -1281,8 +1271,6 @@ describe("DeckListContainer, arranging decks", () => {
 });
 
 describe("DeckListContainer, renaming and deleting decks", () => {
-  beforeEach(() => localStorage.clear());
-
   it("links a deck's preferences in this instance from its menu", async () => {
     renderContainer(makeUseCasesFake({ listDecks: vi.fn(async () => [deck]) }));
     fireEvent.click(await screen.findByRole("button", { name: "Actions for Kanji N5" }));

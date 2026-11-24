@@ -202,11 +202,11 @@ export function useDeckTreeEditor(
 
   const groups = new Set(groupUrls(treeQuery.data.children));
   // Only groups still there: one deleted, here or elsewhere, is forgotten at the next change.
-  const collapsed = (collapsedBy[instance.url] ?? collapsedGroups(instance.url)).filter((url) =>
-    groups.has(url),
+  const collapsed = (collapsedBy[instance.url] ?? collapsedGroups(instance.url, useCases)).filter(
+    (url) => groups.has(url),
   );
   function remember(urls: readonly string[]) {
-    rememberCollapsed(instance.url, urls);
+    rememberCollapsed(instance.url, urls, useCases);
     setCollapsedBy((all) => ({ ...all, [instance.url]: urls }));
   }
 

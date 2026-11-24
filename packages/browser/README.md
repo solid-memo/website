@@ -1,8 +1,8 @@
 # @solid-memo/browser
 
 The adapters for the browser itself: the update journal, the language,
-the theme, the palette, the text size and the highlights of new
-versions seen, kept on this device (`localStorage`), the guest's pod's store (IndexedDB), and files saved
+the theme, the palette, the text size, the highlights of new
+versions seen and the values the screens keep, kept on this device (`localStorage`), the guest's pod's store (IndexedDB), and files saved
 as downloads and opened from the user's disk.
 
 ## Exports
@@ -14,6 +14,10 @@ as downloads and opened from the user's disk.
 - `localStorageSetting`: the theme, the palette and the text size, one
   adapter for each `SettingKind` of `domain`, under the keys it
   exports.
+- `webStorageDeviceStore`: the `DeviceStore` port, the values the
+  screens keep, in `localStorage` or, for a tab's, `sessionStorage`:
+  one guard against storage that is missing or refuses, and one bound,
+  for every value ([boundaries.md](../../docs/boundaries.md#further-rules)).
 - `logoutChannel`: word of a logout to the app's other tabs.
 - `indexedDbResourceStore`: the guest's pod ([guest-mode.md](../../docs/guest-mode.md)).
 - `fileExchange`: the `FileExchange` port, with a `Blob` behind a link
