@@ -1419,7 +1419,10 @@ Studio's card inspector edit them
 - Each change is a write of the card (`updateCard`): the card and its
   distractors are written, those it names no more removed unless
   another card names them (`withoutUnnamedDistractors`), and triples
-  the app doesn't know kept (`withDistractors`).
+  the app doesn't know kept (`withDistractors`). What an edit doesn't
+  state is kept as the card says when the write reads it, not as the
+  editor read it: its wrong options, text format and subjects, when it
+  was made and whether it's retired.
 - A wrong option not in the back's languages is a warning in a pod's
   deck, never a refusal. It names the first three languages the option
   lacks, or has that the back lacks, and counts the rest.

@@ -474,22 +474,24 @@ export function createSolidDeckRepository({
       if (thing === null) {
         throw new AppError("cardGone", { card: card.url });
       }
-      // An edit that does not state distractors (the card editor's, while its wrong options are
-      // unchanged) keeps the card's,
-      // and one that does not state a text format, or what the card is about, keeps the card's too.
-      const distractors = content.distractors ?? card.distractors;
-      const textFormat = content.textFormat ?? card.textFormat;
-      const subjects = content.subjects ?? card.subjects;
+      // What the edit does not state is kept as the card says now, not as the editor read it: its
+      // distractors (the card editor's edit, while its wrong options are unchanged), its text format,
+      // what it is about, when it was made and whether it is retired. A card that does not fit its
+      // shape keeps them as given.
+      const stored = toCard(thing, dataset) ?? card;
+      const distractors = content.distractors ?? stored.distractors;
+      const textFormat = content.textFormat ?? stored.textFormat;
+      const subjects = content.subjects ?? stored.subjects;
       const updated: Card = {
         id: card.id,
         url: card.url,
-        createdAt: card.createdAt,
+        createdAt: stored.createdAt,
         ...content,
         ...(distractors === undefined ? {} : { distractors }),
         ...(textFormat === undefined ? {} : { textFormat }),
         ...(subjects === undefined ? {} : { subjects }),
         formatVersion: CARD_FORMAT_VERSION,
-        ...(card.retired === true ? { retired: true } : {}),
+        ...(stored.retired === true ? { retired: true } : {}),
       };
       const written = withCard(dataset, deck, updated, thing);
       await saveCardsDocument(deck, written.dataset, written.subjects);

@@ -375,7 +375,10 @@ export interface DeckRepository {
   addCard(deck: Deck, content: CardContent): Promise<Card>;
   /**
    * Replaces the card's content, writing it in this app's format; review
-   * state is untouched.
+   * state is untouched. What `content` does not state (its wrong options,
+   * text format and what the card is about), when the card was made and
+   * whether it is retired are kept as the card says now, not as `card`,
+   * the card as the editor read it, says.
    */
   updateCard(deck: Deck, card: Card, content: CardContent): Promise<Card>;
   /** Removes the card and its review state. */
