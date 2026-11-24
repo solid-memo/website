@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.3.4](https://github.com/solid-memo/website/compare/v8.3.3...v8.3.4) (2026-11-24)
+
+### Fixes
+
+* **ui:** refresh a deck's cards after a card removal that stopped part-way ([bf953d7](https://github.com/solid-memo/website/commit/bf953d74b0ec5dbc37011a4d24125c2eee83205b)), closes [#1009](https://github.com/solid-memo/website/issues/1009)
+
 ## [8.3.3](https://github.com/solid-memo/website/compare/v8.3.2...v8.3.3) (2026-11-24)
 
 ### Fixes
