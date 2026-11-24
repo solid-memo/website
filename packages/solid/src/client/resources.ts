@@ -12,7 +12,6 @@ import {
   getFile as libraryGetFile,
   overwriteFile as libraryOverwriteFile,
   saveSolidDatasetAt as librarySaveSolidDatasetAt,
-  solidDatasetAsTurtle as librarySolidDatasetAsTurtle,
   type SolidDataset,
   type Thing,
   type WithServerResourceInfo,
@@ -57,6 +56,7 @@ import {
   writeTurtle,
 } from "./readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
+import { turtleOf } from "../turtleWriter";
 import { refuseUnwritable } from "../writableTerms";
 
 /**
@@ -161,12 +161,12 @@ export async function readDocument(
  * With `ifMatch`, the write is made only if the document is still at that
  * version: a 412 otherwise, as HttpError.
  *
- * The library's save gives what it saved with the subjects made by name
- * resolved, copying the whole dataset at each subject, in time in the
- * square of its subjects. So it makes its request of the dataset as it
- * is (libraryRequestOf), but saves one with no subject in its default
- * graph, and the subjects are given back to what it saved, resolved in
- * one pass (withSubjectsOf).
+ * A PUT's body is the whole dataset as solidDatasetAsTurtle writes it,
+ * every IRI in full, never the library's. The library's save gives what
+ * it saved with the subjects made by name resolved, copying the whole
+ * dataset at each subject, in time in the square of its subjects. So it
+ * saves one with no subject in its default graph, and the subjects are
+ * given back to what it saved, resolved in one pass (withSubjectsOf).
  */
 export async function writeDocument(
   url: string,
@@ -184,34 +184,13 @@ export async function writeDocument(
     return withBoundedHeaders(response);
   };
   const data = solidDataset(dataset);
-  const request = await libraryRequestOf(url, data);
   const written = ownPatches(withIfMatch(noting, ifMatch), dataset, whole);
   const saved = await answered(() =>
     librarySaveSolidDatasetAt(url, Object.freeze({ ...data, graphs: { default: {} } }), {
-      // The library's only PUT creates the document: of the whole dataset, as it would send it.
-      fetch: (input, init) =>
-        written(input, init?.method === "PUT" ? { ...init, body: request.body } : init),
+      fetch: written,
     }),
   );
   return { dataset: fetchedDataset(withSubjectsOf(saved, data)), etag };
-}
-
-/** What stops a save once the library has made its request (libraryRequestOf). */
-const MADE = new Error("The request is made.");
-
-/** The request the library's save of `data` to `url` makes, not sent. */
-async function libraryRequestOf(url: string, data: SolidDataset): Promise<RequestInit> {
-  let request: RequestInit | undefined;
-  await librarySaveSolidDatasetAt(url, data, {
-    fetch: async (_input, init) => {
-      request = init;
-      throw MADE;
-    },
-  }).catch((error: unknown) => {
-    if (error !== MADE) throw error;
-  });
-  // The library's request always has its method, headers and body.
-  return request!;
 }
 
 /**
@@ -258,22 +237,25 @@ function withSubjectsOf<T extends SolidDataset & WithServerResourceInfo>(
 }
 
 /**
- * The fetch, refusing a write of a term Turtle cannot write as it is
- * (writableTerms.ts), with the PATCH the library sends given our body
- * (patchBody, sent again with its deleted decimals spelled as numbers
- * where a conflict (409) may come of their spelling), or sent as a PUT
- * of the whole dataset (its every triple, the edit applied) when that
- * body is larger than MAX_PATCH_BYTES, or always (`whole`); other
- * headers kept. The library takes the answer as its PATCH's.
+ * The fetch, with the PUT the library sends to create a document given
+ * the whole dataset as its body (solidDatasetAsTurtle), and the PATCH it
+ * sends given our body (patchBody, sent again with its deleted decimals
+ * spelled as numbers where a conflict (409) may come of their spelling),
+ * or sent as such a PUT when that body is larger than MAX_PATCH_BYTES,
+ * or always (`whole`); other headers kept. A term Turtle cannot write as
+ * it is is refused before anything is sent (writableTerms.ts). The
+ * library takes the answer as its PATCH's.
  */
 function ownPatches(
   fetch: typeof globalThis.fetch,
   dataset: Dataset,
   whole: boolean,
 ): typeof globalThis.fetch {
-  return async (input, init) => {
-    if (init?.method === "PUT") refuseUnwritable(toRdfJsDataset(dataset));
-    if (init?.method !== "PATCH") return fetch(input, init);
+  return async (input, given) => {
+    // The library's save sends a PUT, which creates the document, or a PATCH, and nothing else.
+    const init = given!;
+    if (init.method === "PUT")
+      return fetch(input, { ...init, body: solidDatasetAsTurtle(dataset) });
     const changes = changesOf(dataset);
     const body = patchBody(changes, localNameOf) ?? init.body;
     if (
@@ -291,14 +273,13 @@ function ownPatches(
         ? response
         : fetch(input, { ...init, body: respelled });
     }
-    refuseUnwritable(toRdfJsDataset(dataset));
     const headers = new Headers(init.headers);
     headers.set("Content-Type", "text/turtle");
     return fetch(input, {
       ...init,
       method: "PUT",
       headers,
-      body: await solidDatasetAsTurtle(dataset),
+      body: solidDatasetAsTurtle(dataset),
     });
   };
 }
@@ -591,45 +572,32 @@ export function getContainedResourceUrlAll(container: SourcedDataset): string[] 
 }
 
 /**
- * The prefixes solidDatasetAsTurtle writes with when given none, as a
- * whole-document PUT is written: the client library's defaults. An IRI
- * whose scheme is one of them would be written as the prefixed name it
- * looks like (isPrefixedLookalike), and read back as another term.
+ * A dataset as Turtle text, written by turtleOf, as a PUT sends it:
+ * every IRI in full, with no prefix, a subject made by name and not
+ * saved yet as `<#name>`, of the document it goes to. With `prefixes`,
+ * the IRIs they stand for are written with them, as a deck file is
+ * written for people to read. A term Turtle cannot write as it is is
+ * refused (writableTerms.ts).
  */
-export const DEFAULT_TURTLE_PREFIXES: Readonly<Record<string, string>> = {
-  acl: "http://www.w3.org/ns/auth/acl#",
-  acp: "http://www.w3.org/ns/solid/acp#",
-  cc: "http://creativecommons.org/ns#",
-  cert: "http://www.w3.org/ns/auth/cert#",
-  csvw: "http://www.w3.org/ns/csvw#",
-  current: "#",
-  dc: "http://purl.org/dc/terms/",
-  dcam: "http://purl.org/dc/dcam/",
-  dcat: "http://www.w3.org/ns/dcat#",
-  dctype: "http://purl.org/dc/dcmitype/",
-  foaf: "http://xmlns.com/foaf/0.1/",
-  ldp: "http://www.w3.org/ns/ldp#",
-  owl: "http://www.w3.org/2002/07/owl#",
-  posixstat: "http://www.w3.org/ns/posix/stat#",
-  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-  rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-  schema: "https://schema.org/",
-  shacl: "http://www.w3.org/ns/shacl#",
-  skos: "http://www.w3.org/2004/02/skos/core#",
-  skosxl: "http://www.w3.org/2008/05/skos-xl#",
-  solid: "http://www.w3.org/ns/solid/terms#",
-  swapdoc: "http://www.w3.org/2000/10/swap/pim/doc#",
-  ui: "http://www.w3.org/ns/ui#",
-  vann: "http://purl.org/vocab/vann/",
-  vcard: "http://www.w3.org/2006/vcard/ns#",
-  ws: "http://www.w3.org/ns/pim/space#",
-  xsd: "http://www.w3.org/2001/XMLSchema#",
-};
-
-/** A dataset as Turtle text, with `prefixes` for the IRIs it names. */
 export function solidDatasetAsTurtle(
   dataset: Dataset,
-  options?: { prefixes?: Record<string, string> },
-): Promise<string> {
-  return librarySolidDatasetAsTurtle(solidDataset(dataset), options);
+  options?: { prefixes?: Readonly<Record<string, string>> },
+): string {
+  return turtleOf([...toRdfJsDataset(dataset)].map(writtenQuad), options);
+}
+
+/** A quad as a document is written: a subject made by name and not saved yet as `#name`. */
+function writtenQuad({ subject, predicate, object, graph }: Quad): Quad {
+  return {
+    subject: relative(subject),
+    predicate,
+    object: relative(object),
+    graph,
+  } as Quad;
+}
+
+/** A term made by name and not saved yet as `#name`, relative to the document it is written to; any other as it is. */
+function relative<T extends Quad["subject"] | Quad["object"]>(term: T): T {
+  const name = term.termType === "NamedNode" ? localNameOf(term.value) : undefined;
+  return name === undefined ? term : ({ termType: "NamedNode", value: `#${name}` } as T);
 }

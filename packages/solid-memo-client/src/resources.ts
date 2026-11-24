@@ -32,6 +32,7 @@ import {
   writeTurtle,
 } from "@solid-memo/solid/client/readLimits";
 import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid/client/sparqlUpdate";
+import { turtleOf } from "@solid-memo/solid/turtleWriter";
 import { refuseUnwritable } from "@solid-memo/solid/writableTerms";
 import {
   allQuads,
@@ -45,21 +46,15 @@ import {
   subjectOf,
   type Value,
 } from "./dataset";
-import {
-  changesOf,
-  getThing,
-  getThingAll,
-  getUrlAll,
-  localNameOf,
-  sourceOf,
-  toRdfJsDataset,
-} from "./rdf";
+import { changesOf, getThing, getThingAll, getUrlAll, localNameOf, sourceOf } from "./rdf";
 import { TURTLE_OPTIONS, tripleTermError } from "./turtleDocument";
 
 /**
  * Reading and writing a pod's resources (client/resources.ts) without a
- * Solid client library: plain `fetch` requests, Turtle parsed and written
- * by n3, JSON-LD parsed by jsonld-streaming-parser. It exports what
+ * Solid client library: plain `fetch` requests, Turtle parsed by n3 and
+ * written as the other client writes it (turtleOf, a change with a blank
+ * node in a PATCH by n3, as the library writes one), JSON-LD parsed by
+ * jsonld-streaming-parser. It exports what
  * client/resources.ts exports, and makes the same requests (their
  * methods, Accept and Content-Type headers, preconditions and URLs), so
  * that it passes the same contract (src/testing/contract/resources.ts,
@@ -77,40 +72,6 @@ const PIM_STORAGE = "http://www.w3.org/ns/pim/space#storage";
 const FOAF = "http://xmlns.com/foaf/0.1/";
 const RDFS_SEE_ALSO = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
 const TURTLE = "text/turtle";
-
-/**
- * The prefixes solidDatasetAsTurtle writes when it is given none, as a
- * whole-document PUT is written: those @inrupt/solid-client writes.
- */
-export const DEFAULT_TURTLE_PREFIXES: Readonly<Record<string, string>> = {
-  acl: "http://www.w3.org/ns/auth/acl#",
-  acp: "http://www.w3.org/ns/solid/acp#",
-  cc: "http://creativecommons.org/ns#",
-  cert: "http://www.w3.org/ns/auth/cert#",
-  csvw: "http://www.w3.org/ns/csvw#",
-  current: "#",
-  dc: "http://purl.org/dc/terms/",
-  dcam: "http://purl.org/dc/dcam/",
-  dcat: "http://www.w3.org/ns/dcat#",
-  dctype: "http://purl.org/dc/dcmitype/",
-  foaf: FOAF,
-  ldp: LDP,
-  owl: "http://www.w3.org/2002/07/owl#",
-  posixstat: "http://www.w3.org/ns/posix/stat#",
-  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-  rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-  schema: "https://schema.org/",
-  shacl: "http://www.w3.org/ns/shacl#",
-  skos: "http://www.w3.org/2004/02/skos/core#",
-  skosxl: "http://www.w3.org/2008/05/skos-xl#",
-  solid: "http://www.w3.org/ns/solid/terms#",
-  swapdoc: "http://www.w3.org/2000/10/swap/pim/doc#",
-  ui: "http://www.w3.org/ns/ui#",
-  vann: "http://purl.org/vocab/vann/",
-  vcard: "http://www.w3.org/2006/vcard/ns#",
-  ws: "http://www.w3.org/ns/pim/space#",
-  xsd: "http://www.w3.org/2001/XMLSchema#",
-};
 
 // Requests.
 
@@ -430,9 +391,9 @@ function writtenQuad(quad: Quad): Quad {
   );
 }
 
-/** Quads as Turtle text, with `prefixes`. */
-function turtleOf(quads: Iterable<Quad>, prefixes?: Record<string, string>): Promise<string> {
-  const writer = new Writer({ format: TURTLE, prefixes });
+/** Quads as Turtle text, as the library writes a change it sends in a PATCH (turtleUpdate). */
+function updateTurtleOf(quads: Iterable<Quad>): Promise<string> {
+  const writer = new Writer({ format: TURTLE });
   for (const quad of quads) writer.addQuad(quad);
   // Writing to text, n3 ends with no error.
   return new Promise((resolve) => {
@@ -525,19 +486,17 @@ export async function writeDocument(
   };
 }
 
-/** Send the dataset as one PUT of its every triple, the subjects made by name relative to the document. */
+/** Send the dataset as one PUT of its every triple, as solidDatasetAsTurtle writes it. */
 async function sendWhole(
   url: string,
   dataset: Dataset,
   fetch: typeof globalThis.fetch,
   { headers, ifMatch }: { headers: Record<string, string>; ifMatch: string | undefined },
 ): Promise<Response> {
-  const quads = allQuads(clientDataset(dataset));
-  refuseUnwritable(quads);
   return fetch(url, {
     method: "PUT",
     headers: headersWith(headers, ifMatch),
-    body: await turtleOf(quads.map(writtenQuad)),
+    body: solidDatasetAsTurtle(dataset),
   });
 }
 
@@ -588,7 +547,9 @@ async function editBody(logged: Changes | undefined, changes: Changes): Promise<
  */
 async function turtleUpdate(changes: Changes): Promise<string> {
   const block = async (operation: string, quads: readonly Quad[]) =>
-    quads.length === 0 ? "" : `${operation} {${(await turtleOf(quads.map(writtenQuad))).trim()}};`;
+    quads.length === 0
+      ? ""
+      : `${operation} {${(await updateTurtleOf(quads.map(writtenQuad))).trim()}};`;
   return `${await block("DELETE DATA", changes.deletions)} ${await block("INSERT DATA", changes.additions)}`;
 }
 
@@ -769,10 +730,17 @@ export function getContainedResourceUrlAll(container: SourcedDataset): string[] 
   return getUrlAll(thing, `${LDP}contains`).filter((child) => isChildOf(child, url));
 }
 
-/** A dataset as Turtle text, with `prefixes` for the IRIs it names. */
+/**
+ * A dataset as Turtle text, written by turtleOf, as a PUT sends it:
+ * every IRI in full, with no prefix, a subject made by name and not
+ * saved yet as `<#name>`, of the document it goes to. With `prefixes`,
+ * the IRIs they stand for are written with them, as a deck file is
+ * written for people to read. A term Turtle cannot write as it is is
+ * refused (writableTerms.ts).
+ */
 export function solidDatasetAsTurtle(
   dataset: Dataset,
-  options?: { prefixes?: Record<string, string> },
-): Promise<string> {
-  return turtleOf(toRdfJsDataset(dataset), options?.prefixes ?? DEFAULT_TURTLE_PREFIXES);
+  options?: { prefixes?: Readonly<Record<string, string>> },
+): string {
+  return turtleOf(allQuads(clientDataset(dataset)).map(writtenQuad), options);
 }

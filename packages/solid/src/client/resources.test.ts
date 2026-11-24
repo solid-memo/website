@@ -103,10 +103,11 @@ describe("writeDocument, over the library", () => {
 });
 
 describe("writeDocument, beside the library's own save", () => {
-  // writeDocument has the library make its request of the dataset as it
-  // is, and save one with no subject, giving the subjects back resolved
-  // itself: this holds while the library's only PUT creates the document
-  // and its save resolves only the default graph's subjects made by name.
+  // writeDocument has the library save a dataset with no subject, sends
+  // its own body (solidDatasetAsTurtle) in the PUT, and gives the subjects
+  // back resolved itself: this holds while the library's only PUT creates
+  // the document and its save resolves only the default graph's subjects
+  // made by name.
   const EX = "https://example.com/ns#";
   /** A new document's dataset: a subject made by name, naming another made by name. */
   const created = () => {
@@ -137,15 +138,20 @@ describe("writeDocument, beside the library's own save", () => {
       .map((quad) => `${quad.subject.value} ${quad.predicate.value} ${quad.object.value}`)
       .sort();
 
-  it("creates a document with the library's request and gives back what the library's save does", async () => {
+  it("creates a document saying what the library's request says, and gives back what the library's save does", async () => {
     const ours = pod();
     const theirs = pod();
     const written = await resources.writeDocument(URL_, created(), { fetch: ours.fetch });
     const saved = await librarySaveSolidDatasetAt(URL_, created() as unknown as SolidDataset, {
       fetch: theirs.fetch,
     });
-    expect(ours.requests).toEqual(theirs.requests);
+    const statements = async ({ body }: { body: string }) =>
+      (await resources.parseQuads(body, "turtle", URL_))
+        .map((quad) => `${quad.subject.value} ${quad.predicate.value} ${quad.object.value}`)
+        .sort();
     expect(ours.requests.map(({ method }) => method)).toEqual(["PUT"]);
+    expect(theirs.requests.map(({ method }) => method)).toEqual(["PUT"]);
+    expect(await statements(ours.requests[0]!)).toEqual(await statements(theirs.requests[0]!));
     expect(lines(written.dataset)).toEqual(lines(saved as unknown as rdf.Dataset));
     expect(rdf.getThingAll(written.dataset).map((subject) => subject.url)).toEqual(
       rdf.getThingAll(saved as unknown as rdf.Dataset).map((subject) => subject.url),

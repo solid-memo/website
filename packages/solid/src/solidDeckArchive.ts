@@ -77,7 +77,8 @@ const KINDS: readonly { type: string; scheduler?: string; shape: ShapeName }[] =
  * course's progress unless asked for. Nothing else of its documents goes:
  * a deck may name a document it shares with other data. Turtle is
  * written and read as pod documents are (solidDatasetAsTurtle,
- * parseQuads), JSON-LD read so too and written here (jsonLd.ts). A
+ * parseQuads), written with DECK_FILE_PREFIXES, as people read it,
+ * JSON-LD read so too and written here (jsonLd.ts). A
  * document exportDeck is asked to read as no one is read with
  * `publicFetch`.
  */
@@ -128,7 +129,7 @@ export function createSolidDeckArchive({
       // An IRI either format would write as one of its prefixed names (`<sm:Deck>` as sm:Deck) is refused, as it would read back as another; jsonLdOf refuses one itself (GHSA-gxjp-m253-f2pj).
       if (format === "jsonld") return jsonLdOf(quads, DECK_FILE_PREFIXES);
       refusePrefixedLookalikes(quads, DECK_FILE_PREFIXES);
-      return solidDatasetAsTurtle(datasetFromQuads(quads), { prefixes: { ...DECK_FILE_PREFIXES } });
+      return solidDatasetAsTurtle(datasetFromQuads(quads), { prefixes: DECK_FILE_PREFIXES });
     },
 
     async readDeckFile(text, format, baseUrl) {

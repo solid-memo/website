@@ -21,14 +21,15 @@ types:
 | Module | Replaces | Built on |
 |---|---|---|
 | [rdf.ts](../packages/solid-memo-client/src/rdf.ts), with [dataset.ts](../packages/solid-memo-client/src/dataset.ts) | `packages/solid/src/client/rdf.ts`: datasets and their subjects | `n3`'s RDF/JS terms. Datasets and subjects are the package's own frozen objects; a dataset's edits are a chain of steps that `changesOf` replays. |
-| [resources.ts](../packages/solid-memo-client/src/resources.ts) | `packages/solid/src/client/resources.ts`: documents, containers and files, the profile lookup, and the Turtle and JSON-LD parsers | `fetch`; `n3` to parse and write Turtle; `jsonld-streaming-parser` to parse JSON-LD |
+| [resources.ts](../packages/solid-memo-client/src/resources.ts) | `packages/solid/src/client/resources.ts`: documents, containers and files, the profile lookup, and the Turtle and JSON-LD parsers | `fetch`; `n3` to parse Turtle; `jsonld-streaming-parser` to parse JSON-LD |
 | [session.ts](../packages/solid-memo-client/src/session.ts), with `oidcLogin.ts`, `oidcSession.ts`, `oidcStore.ts` and `oidcBrowser.ts` | `packages/solid/src/client/session.ts`: the sign-in client | `oauth4webapi` for Solid-OIDC, WebCrypto for the DPoP keys, IndexedDB for the session, Web Locks between tabs |
 | [access.ts](../packages/solid-memo-client/src/access.ts) | `packages/solid/src/client/access.ts`: the public-read grant | `fetch` and `n3` |
 | [turtleDocument.ts](../packages/solid-memo-client/src/turtleDocument.ts) | `packages/shacl/src/turtleDocument.ts`: a shape's Turtle, read | `fetch` and `n3` |
 
 The bodies of its PATCH requests come from `solid`'s
-`client/sparqlUpdate.ts`, as Inrupt's client's do, and a write refuses
-the same terms (`writableTerms.ts`). The package imports `solid` for
+`client/sparqlUpdate.ts`, and those of its PUT requests from `solid`'s
+`turtleWriter.ts`, as Inrupt's client's do, and a write refuses the
+same terms (`writableTerms.ts`). The package imports `solid` for
 these, for the interface and, in its tests, for the contract suites. It
 imports no `@inrupt/` package, its tests included, and no package
 imports it, as `npm run check:boundaries` checks.

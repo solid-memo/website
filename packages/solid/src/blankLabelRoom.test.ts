@@ -146,7 +146,7 @@ describe("a blank node label near the bound on a term", () => {
         continue;
       }
       refuseUnwritable(quads);
-      const written = await solidDatasetAsTurtle(datasetFromQuads(quads));
+      const written = solidDatasetAsTurtle(datasetFromQuads(quads));
       await expect(parseQuads(written, "turtle", base), `label of ${length}`).resolves.toHaveLength(
         1,
       );
@@ -167,7 +167,7 @@ describe("a blank node label near the bound on a term", () => {
     for (const theme of ["dark", "light", "dark", "light"] as const) {
       await preferences.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, theme });
       // A read names the blank node anew, so no parser's prefix is kept to grow with each save.
-      expect(pod.documents[PREFERENCES]).toMatch(new RegExp(`<${OTHER}> _:[\\w.-]{1,40}[;.]`));
+      expect(pod.documents[PREFERENCES]).toMatch(new RegExp(`<${OTHER}> _:[\\w.-]{1,40} [;.]`));
     }
     expect(pod.writes()).toBe(4);
     await expect(preferences.getPreferences(INSTANCE)).resolves.not.toBeNull();

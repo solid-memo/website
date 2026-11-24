@@ -197,24 +197,6 @@ describe("containers and files", () => {
   });
 });
 
-describe("solidDatasetAsTurtle", () => {
-  it("writes the library's prefixes when it is given none", async () => {
-    const dataset = rdf.setThing(
-      rdf.createSolidDataset(),
-      rdf
-        .buildThing(rdf.createThing({ url: `${URL_}#a` }))
-        .addIri(
-          "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-          "http://xmlns.com/foaf/0.1/Person",
-        )
-        .build(),
-    );
-    const text = await resources.solidDatasetAsTurtle(dataset);
-    expect(text).toContain("@prefix foaf: <http://xmlns.com/foaf/0.1/>.");
-    expect(text).toContain("foaf:Person");
-  });
-});
-
 describe("getProfileStorages", () => {
   const PROFILE = "https://pod.example/profile/card";
 

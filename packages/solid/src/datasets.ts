@@ -510,7 +510,7 @@ export async function saveDataset<T extends Dataset>(
 export async function refuseUnreadableImport(url: string, dataset: Dataset): Promise<void> {
   const tooLarge = () => new AppError("deckFileTooLarge", limitVars(FOREIGN_LIMITS));
   const encoder = new TextEncoder();
-  const text = await solidDatasetAsTurtle(dataset);
+  const text = solidDatasetAsTurtle(dataset);
   if (encoder.encode(text).byteLength > FOREIGN_LIMITS.bytes) throw tooLarge();
   const quads = await parseQuads(text, "turtle", url, FOREIGN_LIMITS).catch(() => {
     throw tooLarge();

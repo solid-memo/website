@@ -2,12 +2,15 @@
 //
 // SPDX-License-Identifier: MIT
 
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import type { Quad } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
+import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
-import { HttpError, ReadLimitError } from "../../client/interface";
+import { type Dataset, HttpError, ReadLimitError } from "../../client/interface";
 import {
   limitedFetch,
   MAX_TERM_CHARACTERS,
@@ -22,6 +25,41 @@ import { type DataClient, turtleAt } from "./rdf";
 
 const URL_ = "https://pod.example/decks/deck.ttl";
 const EX = "https://example.com/ns#";
+
+/**
+ * The documents of the newest pod snapshot (podSnapshots.roundtrip.test.ts),
+ * which holds every kind of data the app writes, each with every term its
+ * shape names: each document's address and its statements as N-Triples.
+ */
+function snapshotDocuments(): [url: string, nTriples: string][] {
+  const folder = join(VOCAB_ROOT, "fixtures/pods/");
+  const newest = Math.max(
+    ...readdirSync(folder)
+      .filter((name) => /^\d+\.nt$/.test(name))
+      .map((name) => Number.parseInt(name, 10)),
+  );
+  return readFileSync(join(folder, `${newest}.nt`), "utf8")
+    .split(/^# /m)
+    .filter((part) => part !== "")
+    .map((part) => {
+      const [url, ...lines] = part.split("\n");
+      return [url!, lines.join("\n")];
+    });
+}
+
+/** Statements to compare by: each quad's terms, a literal's language, direction and datatype among them, sorted. */
+function statementsOf(quads: Iterable<Quad>): string[] {
+  const term = (one: Quad["subject"] | Quad["object"]) =>
+    one.termType === "Literal"
+      ? `"${one.value}"@${one.language}--${one.direction ?? ""}^^${one.datatype.value}`
+      : `${one.termType} ${one.value}`;
+  return [...quads]
+    .map(({ subject, predicate, object }) => `${term(subject)} ${predicate.value} ${term(object)}`)
+    .sort();
+}
+
+/** A directive that declares a base or a prefix, in either spelling Turtle has. */
+const DIRECTIVE = /^\s*@?(base|prefix)\b/im;
 
 /** The parser's job for each JSON value it reads, which a test counts. */
 type ValueJobs = { newOnValueJob: (...args: unknown[]) => Promise<void> };
@@ -84,7 +122,6 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
   const { buildThing, createSolidDataset, createThing, getThing, getThingAll, setThing } = rdf;
   const {
     createContainerAt,
-    DEFAULT_TURTLE_PREFIXES,
     deleteContainer,
     deleteFile,
     deleteSolidDataset,
@@ -997,22 +1034,70 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
   });
 
   describe("solidDatasetAsTurtle", () => {
-    it("writes with DEFAULT_TURTLE_PREFIXES when given none, as a whole-document PUT is written", async () => {
-      const turtle = await solidDatasetAsTurtle(rdf.datasetFromQuads([]));
-      const declared = Object.fromEntries(
-        [...turtle.matchAll(/^@prefix ([^:]*): <([^>]*)>\.$/gm)].map(([, prefix, iri]) => [
-          prefix,
-          iri,
-        ]),
-      );
-      expect(declared).toEqual(DEFAULT_TURTLE_PREFIXES);
-    });
-
     it("writes a dataset as Turtle that reads back the same, with the prefixes given", async () => {
-      const turtle = await solidDatasetAsTurtle(await read(), { prefixes: { ex: EX } });
+      const turtle = solidDatasetAsTurtle(await read(), { prefixes: { ex: EX } });
       expect(turtle).toContain(`@prefix ex: <${EX}>`);
       const again = await getSolidDataset(URL_, { fetch: turtleAt(turtle) });
       expect(rdf.getStringNoLocale(getThing(again, `${URL_}#a`)!, `${EX}p`)).toBe("x");
+    });
+
+    it("writes every IRI in full when given no prefixes, declaring none, a subject made by name relative to the document", async () => {
+      const turtle = solidDatasetAsTurtle(created());
+      expect(turtle).not.toMatch(DIRECTIVE);
+      expect(turtle).toContain(`<#a>\n    <${EX}p> "x" .`);
+      expect(statementsOf(await parseQuads(turtle, "turtle", URL_))).toEqual(
+        statementsOf(await parseQuads(`<#a> <${EX}p> "x" .`, "turtle", URL_)),
+      );
+    });
+  });
+
+  describe("the Turtle a write sends", () => {
+    /** The body of each PUT a write of `dataset` sends: a creation, or a whole edit of the document read. */
+    const putBodies = async (url: string, created: Dataset, read: Dataset) => {
+      const bodies: string[] = [];
+      for (const [dataset, options] of [
+        [created, {}],
+        [read, { whole: true, ifMatch: '"v1"' }],
+      ] as const) {
+        const { fetch, sent } = pod({ status: 201, body: "" });
+        await writeDocument(url, dataset, { fetch, ...options });
+        expect(sent.map(({ method }) => method)).toEqual(["PUT"]);
+        bodies.push(String(sent[0]!.body));
+      }
+      return bodies;
+    };
+
+    it("declares no prefix and reads back as the same statements, for every term of the newest pod snapshot", async () => {
+      for (const [url, nTriples] of snapshotDocuments()) {
+        const statements = await parseQuads(nTriples, "turtle", url);
+        const read = await getSolidDatasetLinear(url, { fetch: turtleAt(nTriples) });
+        for (const body of await putBodies(url, rdf.datasetFromQuads(statements), read)) {
+          expect(body, url).not.toMatch(DIRECTIVE);
+          expect(statementsOf(await parseQuads(body, "turtle", url)), url).toEqual(
+            statementsOf(statements),
+          );
+        }
+      }
+    });
+
+    it("declares no prefix and reads back as the same statements, for blank nodes, text in a language and with a direction, and the document's own subjects", async () => {
+      const turtle = `@prefix ex: <${EX}> .
+<> ex:p <#a> .
+<#a> ex:p "plain", "Sweden"@en-gb, "مرحبا"@ar--rtl, "1.0"^^<${XSD}decimal>, true, 7 ;
+    ex:q [ ex:p [ ex:p "deep" ] ], _:shared .
+<#b> ex:q _:shared .
+_:shared ex:p "shared" .
+`;
+      const statements = await parseQuads(turtle, "turtle", URL_);
+      const read = await getSolidDatasetLinear(URL_, { fetch: turtleAt(turtle) });
+      for (const body of await putBodies(URL_, rdf.datasetFromQuads(statements), read)) {
+        expect(body).not.toMatch(DIRECTIVE);
+        const back = await parseQuads(body, "turtle", URL_);
+        const blankless = (quads: Iterable<Quad>) =>
+          statementsOf(quads).map((one) => one.replace(/BlankNode \S+/g, "BlankNode"));
+        expect(blankless(back)).toEqual(blankless(statements));
+        expect(back.filter(({ object }) => object.termType === "BlankNode")).toHaveLength(4);
+      }
     });
   });
 
@@ -1138,7 +1223,7 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
         MAX_TERM_CHARACTERS - 34,
       ]) {
         const quads = await parseQuads(jsonLdOf(length), "jsonld", URL_);
-        const written = await solidDatasetAsTurtle(rdf.datasetFromQuads(quads));
+        const written = solidDatasetAsTurtle(rdf.datasetFromQuads(quads));
         await expect(
           parseQuads(written, "turtle", URL_),
           `label of ${length}`,

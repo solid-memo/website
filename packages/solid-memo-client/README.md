@@ -7,7 +7,7 @@ exports, and passes the same contract tests:
 | Module | Replaces | On |
 |---|---|---|
 | `src/rdf.ts`, `src/dataset.ts` | `packages/solid/src/client/rdf.ts` | `n3`'s RDF/JS terms |
-| `src/resources.ts` | `packages/solid/src/client/resources.ts` | `fetch`, `n3` for Turtle, `jsonld-streaming-parser` for JSON-LD |
+| `src/resources.ts` | `packages/solid/src/client/resources.ts` | `fetch`, `n3` to parse Turtle, `jsonld-streaming-parser` for JSON-LD |
 | `src/session.ts`, `src/oidc*.ts` | `packages/solid/src/client/session.ts` | `oauth4webapi`, WebCrypto, IndexedDB |
 | `src/access.ts` | `packages/solid/src/client/access.ts` | `fetch` and `n3` |
 | `src/turtleDocument.ts` | `packages/shacl/src/turtleDocument.ts` | `n3` |
@@ -40,7 +40,7 @@ replaced module's are (`npm run check:exports`).
 ## Boundaries
 
 It may import `solid`: the client's interface, the SPARQL Update
-bodies, `writableTerms` and, in tests, the contract suites in
+bodies, the Turtle writer (`turtleWriter`), `writableTerms` and, in tests, the contract suites in
 `src/testing/contract/`. No package may import it, and it imports no
 `@inrupt/` package, its tests included. Its browser code may use `n3`
 ([boundaries.md](../../docs/boundaries.md)).

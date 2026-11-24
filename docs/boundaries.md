@@ -171,8 +171,9 @@ which another implementation must pass too
 A deck saved as a file, or read from one ([studio.md](studio.md#import-and-export)),
 needs no library of its own:
 
-- `solid` writes Turtle with `@inrupt/solid-client`'s
-  `solidDatasetAsTurtle` and JSON-LD with
+- `solid` writes Turtle with its own writer,
+  [turtleWriter.ts](../packages/solid/src/turtleWriter.ts), with the
+  deck file's prefixes, and JSON-LD with
   [jsonLd.ts](../packages/solid/src/jsonLd.ts), a few lines over the
   triples. It reads both with `parseQuads`. Turtle is read with the
   parser pod documents are read with: the library's, on `n3`, but with
@@ -185,7 +186,8 @@ needs no library of its own:
   [client/resources.ts](../packages/solid/src/client/resources.ts), the
   only file of `solid` that may import `jsonld-streaming-parser`
   (`VENDOR_ONLY_IN`). With `SOLID_CLIENT=solid-memo-client`, that
-  package's `resources.ts` writes and reads Turtle with `n3`, and reads
+  package's `resources.ts` reads Turtle with `n3`, writes it with the
+  same writer, and reads
   JSON-LD with `jsonld-streaming-parser`, also with a document loader
   that loads nothing, and is its only file that may import it.
   Either client tells the JSON-LD parser to read no RDF-star, and `n3`
