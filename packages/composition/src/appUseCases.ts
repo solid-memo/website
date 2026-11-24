@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
@@ -53,7 +54,17 @@ import {
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createSessionClient } from "@solid-memo/solid/client/session";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
+import { createOffPage, type WorkerLike } from "@solid-memo/solid/offPage";
+import { readElsewhere } from "@solid-memo/solid/datasets";
+import {
+  offPageDeckArchive,
+  offPageDocumentReader,
+  offPageReleaseDocuments,
+  offPageReleaseDrafts,
+  offPageShapeValidator,
+} from "@solid-memo/solid/offPageAdapters";
 import { createTrialUseCases } from "./trialUseCases";
+import { spawnOffPageWorker } from "./offPageWorker";
 
 /** What an app built on the use cases says of itself and of the page it runs in. */
 export interface AppOptions {
@@ -73,6 +84,12 @@ export interface AppOptions {
   ruleset: string;
   /** Where the guest's pod is kept; in memory, for this page only, when the browser keeps no IndexedDB. */
   indexedDB: IDBFactory | undefined;
+  /**
+   * Starts a worker that reads documents the app did not write, off the
+   * page (offPage.ts); the one the build bundles (offPageWorker.ts)
+   * unless given.
+   */
+  spawnWorker?: () => WorkerLike;
 }
 
 /**
@@ -88,6 +105,7 @@ export function createAppUseCases({
   libraryIndexUrl,
   ruleset,
   indexedDB,
+  spawnWorker = spawnOffPageWorker,
 }: AppOptions): UseCases {
   /** The logged-in user's session on the sign-in client chosen here, and the fetch that acts as them (docs/authentication.md). */
   const session = createSolidSession(createSessionClient(), {
@@ -196,30 +214,57 @@ export function createAppUseCases({
    * FOREIGN_LIMITS, within a budget for the page session (foreignReads,
    * instanceReads).
    */
+  const gate = createOwnPodGate({
+    fetch: writeFence.fetch,
+    // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
+    instanceFetch: instanceReads(elsewhereFetch),
+    publicFetch: foreignReads(noOneFetch),
+    webId: session.webId,
+    ownFolders,
+    revision: () => folderRevision,
+  });
   const dataFetch = createPodFence(
-    routedFetch({
-      origin: GUEST_ORIGIN,
-      local: writeFence.fetch,
-      remote: createOwnPodGate({
-        fetch: writeFence.fetch,
-        // Another's server, read as the user: with a deadline on the whole read, as a read as no one.
-        instanceFetch: instanceReads(elsewhereFetch),
-        publicFetch: foreignReads(noOneFetch),
-        webId: session.webId,
-        ownFolders,
-        revision: () => folderRevision,
-      }),
-    }),
+    routedFetch({ origin: GUEST_ORIGIN, local: writeFence.fetch, remote: gate }),
   );
   const siteFetch = createSiteFetch(servedSite);
-
-  const shapeValidator = createShaclShapeValidator({
-    fetch: dataFetch,
-    shapesFetch: siteFetch,
+  const shapes = {
     shapesBaseUrl: SHAPES_BASE,
     vocabBaseUrl: VOCAB_BASE,
     vendorBaseUrl: `${servedSite}vendor/`,
-  });
+  };
+  /**
+   * The work on documents the app did not write, off the page, in
+   * workers (docs/validation.md, Off the page): reading, parsing and
+   * checking a release from a link, a deck file, a release file and the
+   * documents an instance's check reads, its own and those elsewhere.
+   * Their requests are made here, with the fetches below, so a worker
+   * never holds the user's login. One past its deadline, or whose
+   * worker ends, is shown as a document too large to read.
+   */
+  const offPage = createOffPage({ spawn: spawnWorker, config: shapes });
+  /**
+   * The reads of documents elsewhere, off the page in workers of their
+   * own, which read no shapes: one waiting for a slow server holds no
+   * other up.
+   */
+  const readsOffPage = offPageDocumentReader(
+    createOffPage({ spawn: spawnWorker, config: shapes, freeWhileWaiting: true }),
+  );
+  // An instance's documents outside the user's storages, the guest's pod being this browser's, are read off the page.
+  readElsewhere(
+    dataFetch,
+    (url) => !url.startsWith(GUEST_ORIGIN) && gate.isElsewhere(url),
+    readsOffPage,
+  );
+  /** A deck's documents read as no one, outside the user's storages, off the page; never from a guest's pod. */
+  const foreignData = () =>
+    readElsewhere(createPodFence(foreignReads(noOneFetch)), () => true, readsOffPage);
+
+  const shapeValidator = offPageShapeValidator(
+    offPage,
+    createShaclShapeValidator({ fetch: dataFetch, shapesFetch: siteFetch, ...shapes }),
+    { fetch: dataFetch, siteFetch },
+  );
   /** Every write is checked against the shapes before it reaches the pod (docs/validation.md). */
   const checkWrite = shapeValidator.checkSubjects;
   const now = () => new Date();
@@ -369,6 +414,25 @@ export function createAppUseCases({
     }),
   });
 
+  /**
+   * The drafts: a release file, and a release and what it names read
+   * anywhere, are read off the page, as are the release a draft follows
+   * and what it names when the draft is assembled.
+   */
+  const releaseDraftRepository: ReleaseDraftRepository = offPageReleaseDrafts(
+    offPage,
+    createSolidReleaseDraftRepository({
+      fetch: dataFetch,
+      checkWrite,
+      releaseReads: () => releaseDraftRepository,
+    }),
+    {
+      releaseFetch,
+      // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
+      publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: noOneFetch }),
+    },
+  );
+
   return createUseCases({
     sessionGateway: session.sessionGateway,
     webId: session.webId,
@@ -379,7 +443,7 @@ export function createAppUseCases({
       fetch: dataFetch,
       // A deck's cards copied into a draft outside their pod are read as no one, as the gate reads elsewhere;
       // never from a guest's pod, which is this browser's.
-      publicFetch: createPodFence(foreignReads(noOneFetch)),
+      publicFetch: foreignData(),
       checkWrite,
       now,
       randomId,
@@ -389,8 +453,8 @@ export function createAppUseCases({
       fetch: siteFetch,
       // The library is published with the site, from decks/.
       indexUrl: libraryIndexUrl ?? `${SITE}decks/index.ttl`,
-      // A release from a link is checked against the library's shapes as it is read, that read alone.
-      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
+      // A release from a link is read and checked against the library's shapes off the page, that read alone.
+      documents: offPageReleaseDocuments(offPage, siteFetch),
     }),
     preferencesRepository: createSolidPreferencesRepository({ fetch: dataFetch, checkWrite }),
     paletteRepository: createSolidPaletteRepository({ fetch: dataFetch, checkWrite }),
@@ -398,7 +462,7 @@ export function createAppUseCases({
       fetch: dataFetch,
       // A deck's states copied into another deck outside their pod are read as no one, as its cards are;
       // never from a guest's pod, which is this browser's.
-      publicFetch: createPodFence(foreignReads(noOneFetch)),
+      publicFetch: foreignData(),
       checkWrite,
       userStorages,
     }),
@@ -418,19 +482,17 @@ export function createAppUseCases({
     ruleset,
     // Its profile is written through the fences too, as every pod write is.
     guestPod: createLocalGuestPod({ fetch: podFetch, store: guestStore }),
-    deckArchive: createSolidDeckArchive({
-      fetch: dataFetch,
-      // A deck's documents outside its instance's pod are exported as no one reads them.
-      publicFetch: createPodFence(foreignReads(noOneFetch)),
-    }),
+    // A deck file is read off the page.
+    deckArchive: offPageDeckArchive(
+      offPage,
+      createSolidDeckArchive({
+        fetch: dataFetch,
+        // A deck's documents outside its instance's pod are exported as no one reads them.
+        publicFetch: foreignData(),
+      }),
+    ),
     fileExchange: createBrowserFileExchange(),
-    releaseDraftRepository: createSolidReleaseDraftRepository({
-      fetch: dataFetch,
-      releaseFetch,
-      // What a release names elsewhere is copied into a draft to be published, so it is read as no one.
-      publicFetch: routedFetch({ origin: SITE, local: siteFetch, remote: noOneFetch }),
-      checkWrite,
-    }),
+    releaseDraftRepository,
     // A release is written as the user, its access control too; whether it is public, asked as no one;
     // the releases a catalog links, read as the instance's data is.
     releasePublisher: createSolidReleasePublisher({

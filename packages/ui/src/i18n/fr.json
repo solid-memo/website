@@ -1909,6 +1909,7 @@
     "alreadyExists": "Il y a déjà quelque chose à cet emplacement de votre Pod. Choisissez un autre emplacement.",
     "cannotCheck": "Solid Memo n’a pas pu vérifier votre Pod. Vérifiez votre connexion et réessayez.",
     "podNoAnswer": "Le serveur n’a pas répondu à temps. Vérifiez votre connexion et réessayez.",
+    "documentCheckTooLong": "Solid Memo a cessé de lire et de vérifier ce document après {seconds} secondes de travail. Réessayez plus tard, ou vérifiez-le avec un autre outil.",
     "dataNotConforming": "Solid Memo n’a pas enregistré ceci : ce n’est pas au format attendu par Solid Memo. Rien n’a été modifié. Rechargez la page et réessayez.",
     "deckGone": "Le paquet « {deck} » n’existe plus. Il a peut-être été supprimé dans un autre onglet ou une autre application.",
     "cardsDocumentGone": "Les cartes de « {deck} » sont désormais introuvables. Rechargez la page et réessayez.",

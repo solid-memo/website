@@ -1341,6 +1341,28 @@ describe("assemble", () => {
     expect(of(`${target}#ch-a-1`, "isPartOf")).toEqual([`${target}#ch-a`]);
   });
 
+  it("reads the release a draft follows, and what it names, with `releaseReads` when it is given", async () => {
+    const pod = await draftPod();
+    const v1 = `${INSTANCE}releases/solid/v1.ttl`;
+    await pod.repository.create(INSTANCE, course());
+    await pod.put(v1, await pod.repository.assemble(DRAFT, v1, NOW));
+    const release = await createdRelease(pod, v1);
+    const next = draftUrlOf(INSTANCE, "solid", 2);
+    await pod.repository.create(INSTANCE, nextVersionDraft(release, next));
+    const v2 = `${INSTANCE}releases/solid/v2.ttl`;
+    const readRelease = vi.fn(pod.repository.readRelease);
+    const readLinked = vi.fn(pod.repository.readLinked);
+    const elsewhere = createSolidReleaseDraftRepository({
+      fetch: pod.fetch,
+      releaseReads: () => ({ readRelease, readLinked }),
+    });
+    expect(await elsewhere.assemble(next, v2, NOW)).toBe(
+      await pod.repository.assemble(next, v2, NOW),
+    );
+    expect(readRelease).toHaveBeenCalledWith(v1);
+    expect(readLinked).toHaveBeenCalledOnce();
+  });
+
   it("writes the next version of a release that describes its series, as the series' last and current", async () => {
     const pod = await draftPod();
     const v1 = `${INSTANCE}releases/solid/v1.ttl`;

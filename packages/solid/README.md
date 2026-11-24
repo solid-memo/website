@@ -26,8 +26,12 @@ with no Inrupt library, which a build takes with
 module, such as `solidSessionGateway`, `solidDeckRepository`,
 `solidReleasePublisher` and `localGuestPod`, and
 `@solid-memo/solid/client/<module>` is a client module.
+`offPage`, `offPageAdapters` and the worker's entry, `offPageWorker`,
+run the work on documents the app didn't write off the page
+([validation.md](../../docs/validation.md#off-the-page)).
 `src/testing/` holds an in-memory pod, dataset fixtures (`datasets.ts`),
-a fake sign-in client for tests, and the contract tests every
+a fake sign-in client for tests, a worker run in the test's own process
+(`inProcessWorker.ts`), and the contract tests every
 implementation of the client modules passes (`contract/`).
 
 ## Boundaries

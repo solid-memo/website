@@ -17,6 +17,8 @@ import { INSTANCE_READS_TOTAL } from "@solid-memo/solid/client/readLimits";
 import { READ_DEADLINE_MS, WHOLE_READ_MS } from "@solid-memo/solid/readDeadline";
 import type { DigestRepository } from "@solid-memo/application/ports";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
+import { inProcessWorker } from "@solid-memo/solid/testing/inProcessWorker";
+import { offPageJobs } from "@solid-memo/solid/offPageJobs";
 
 /**
  * What each pod adapter was made with, by its factory's name, as the
@@ -324,7 +326,14 @@ describe("createSiteFetch", () => {
 });
 
 describe("createAppUseCases", () => {
-  const options = { clientName: "Solid Memo", servedSite: SERVED, ruleset: "test" };
+  // The work off the page runs in this process, as a worker would run it (offPage.ts), the shapes read once.
+  const jobs = offPageJobs({ shapesFetch: createSiteFetch(SERVED) });
+  const options = {
+    clientName: "Solid Memo",
+    servedSite: SERVED,
+    ruleset: "test",
+    spawnWorker: () => inProcessWorker(jobs),
+  };
 
   it("keeps a guest's study in memory, every write checked against the shapes the site publishes", async () => {
     const useCases = createAppUseCases({ ...options, indexedDB: undefined });
@@ -356,6 +365,11 @@ describe("createAppUseCases", () => {
     );
     expect(made!.draft).toMatchObject({ name: "getting-started", version: 2, course: true });
     expect((await useCases.checkInstance(instance!.url)).conforms).toBe(true);
+    // Assembled, the draft is the next version of the release it follows, read off the page.
+    const saved = vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:release");
+    await useCases.downloadRelease(made!.draft.url);
+    expect(saved).toHaveBeenCalledOnce();
+    saved.mockRestore();
     await expect(
       useCases.createReleaseDraft(
         instance!.url,

@@ -33,7 +33,7 @@ import {
 import { routedFetch } from "@solid-memo/solid/routedFetch";
 import { getProfileStorages } from "@solid-memo/solid/client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
-import { createSolidDeckLibrary } from "@solid-memo/solid/solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
@@ -74,7 +74,9 @@ function page(podFetch: typeof globalThis.fetch = fetch) {
     deckLibrary: createSolidDeckLibrary({
       fetch: routedFetch({ origin: SITE, local: shapesFetch, remote: podFetch }),
       indexUrl: `${SITE}decks/index.ttl`,
-      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
+      documents: releaseDocumentsOf((url, dataset) =>
+        shapeValidator.validateDataset(url, dataset, "library"),
+      ),
     }),
     webIdDocumentRepository: createSolidWebIdDocumentRepository({ fetch: podFetch }),
     instanceRepository: createSolidInstanceRepository(deps),

@@ -20,7 +20,7 @@ import {
 
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
-import { ReadLimitError, type ReadLimits } from "./client/interface";
+import { type DocumentRead, ReadLimitError, type ReadLimits } from "./client/interface";
 import {
   FOREIGN_LIMITS,
   isPastBudget,
@@ -229,6 +229,34 @@ export function versionOf(dataset: object): string | undefined {
   return source === undefined ? undefined : ETAGS.get(source.key);
 }
 
+/** How a document is read: as readDocument reads it (client/resources.ts), here or elsewhere. */
+export type DocumentReader = (
+  url: string,
+  options: { fetch: typeof globalThis.fetch; ifNoneMatch?: string },
+) => Promise<DocumentRead>;
+
+/** The fetches whose documents elsewhere are read by another reader (readElsewhere). */
+const ELSEWHERE = new WeakMap<
+  typeof globalThis.fetch,
+  { isElsewhere: (url: string) => boolean | Promise<boolean>; read: DocumentReader }
+>();
+
+/**
+ * `fetch`, its reads of the documents `isElsewhere` names made by `read`
+ * in place of readDocument: the documents outside the user's storages,
+ * which the page reads off the page (offPageAdapters.ts), its requests
+ * still made with `fetch`. What is read is kept, and written back, as
+ * any other read is.
+ */
+export function readElsewhere(
+  fetch: typeof globalThis.fetch,
+  isElsewhere: (url: string) => boolean | Promise<boolean>,
+  read: DocumentReader,
+): typeof globalThis.fetch {
+  ELSEWHERE.set(fetch, { isElsewhere, read });
+  return fetch;
+}
+
 async function fetchDataset(
   url: string,
   fetch: typeof globalThis.fetch,
@@ -256,7 +284,10 @@ async function fetchDataset(
     return readThrough(response, notingStreamFailure);
   };
   try {
-    read = await readDocument(url, { fetch: noting, ifNoneMatch: since ?? before?.etag });
+    const elsewhere = ELSEWHERE.get(fetch);
+    const reader =
+      elsewhere !== undefined && (await elsewhere.isElsewhere(url)) ? elsewhere.read : readDocument;
+    read = await reader(url, { fetch: noting, ifNoneMatch: since ?? before?.etag });
   } catch (error) {
     known.delete(document);
     if (!answered && typeof error === "object" && error !== null) UNPARSED.add(error);
@@ -399,6 +430,9 @@ export async function readForRemoval(
     }
     return response;
   };
+  // A document elsewhere is read as `fetch` reads it (readElsewhere).
+  const elsewhere = ELSEWHERE.get(fetch);
+  if (elsewhere !== undefined) ELSEWHERE.set(noting, elsewhere);
   try {
     return await getSolidDatasetOrNull(url, noting);
   } catch (error) {

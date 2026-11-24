@@ -1021,6 +1021,10 @@ flowchart LR
   with every version the document describes. Format 6 describes the
   series in the release, and a `decks/` release at an older format
   lists only itself. It's read afresh each time.
+- The read, its parse and its check run in a worker, off the page
+  ([validation.md](validation.md#off-the-page)), so a release that
+  takes long to read leaves the tab working. One whose work there
+  passes its deadline is refused as too large (`releaseTooLarge`).
 - Every release is read under `RELEASE_LIMITS`
   ([readLimits.ts](../packages/solid/src/client/readLimits.ts)): 32 MiB
   of body, 400,000 triples, and 64 Mi characters in the terms of those

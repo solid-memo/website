@@ -33,6 +33,7 @@ import {
 } from "./releaseReadError";
 import { isStorageRootAt } from "./deckPlace";
 import { SM } from "./vocab";
+import { fromSent, type SentError, toSent } from "./offPageProtocol";
 
 export interface SolidDeckLibraryDeps {
   /**
@@ -44,11 +45,96 @@ export interface SolidDeckLibraryDeps {
   /** URL of the library's index document. */
   indexUrl: string;
   /**
-   * What the library's shapes say of a release as read
-   * (ShaclShapeValidator.validateDataset, "library"): a release added
-   * from a link is checked as readRelease reads it, that read alone.
+   * The reads of a release's document and of its creator's catalog:
+   * releaseDocumentsOf's, in the page, or the same off it
+   * (offPageAdapters.ts).
    */
-  validate: (url: string, dataset: Dataset) => Promise<DocumentReport>;
+  documents: ReleaseDocuments;
+}
+
+/**
+ * What was made of a release's document, or what making it failed with,
+ * as an error is sent between the page and a worker (offPageProtocol.ts).
+ */
+export type Made<T> = { value: T } | { error: SentError };
+
+/**
+ * A release's document as read once, with what each reader of it makes
+ * of it (ReleaseDocuments.release), so that the document is not kept.
+ */
+export interface ReleaseRead {
+  /** The release on its own, as a learner adds it from a link (toStandaloneLibraryDeck). */
+  deck: Made<LibraryDeck>;
+  /** Its content, as an import reads it (toLibraryDeckContent). */
+  content: Made<LibraryDeckContent>;
+  /** Its course's outline (toCourseOutline). */
+  outline: Made<CourseOutline>;
+  /** What the library's shapes say of it, when it was to be checked and reads as a release. */
+  report?: Made<DocumentReport>;
+}
+
+/**
+ * The reads createSolidDeckLibrary makes of documents anyone may
+ * publish, each with the fetch it is given, within RELEASE_READ_MS
+ * (readWithin): a release's document, read and made into what is
+ * shown and imported of it, and checked against the library's shapes
+ * with `check`; the releases its creator's catalog in a folder links
+ * (catalogLinks); and whether a folder is a storage's root
+ * (isStorageRootAt).
+ */
+export interface ReleaseDocuments {
+  release(url: string, fetch: typeof globalThis.fetch, check: boolean): Promise<ReleaseRead>;
+  catalogLinks(folder: string, fetch: typeof globalThis.fetch): Promise<string[]>;
+  isStorageRoot(folder: string, fetch: typeof globalThis.fetch): Promise<boolean>;
+}
+
+/**
+ * The ReleaseDocuments, made where they are asked for: `validate` is
+ * what the library's shapes say of a release as read
+ * (ShaclShapeValidator.validateDataset, "library"), a release added from
+ * a link checked as it is read, that read alone.
+ */
+export function releaseDocumentsOf(
+  validate: (url: string, dataset: Dataset) => Promise<DocumentReport>,
+): ReleaseDocuments {
+  return {
+    async release(url, fetch, check) {
+      const dataset = await readDocument(url, fetch);
+      const deck = made(() => toStandaloneLibraryDeck(url, dataset));
+      return {
+        deck,
+        content: made(() => toLibraryDeckContent(url, dataset)),
+        outline: made(() => toCourseOutline(url, dataset)),
+        ...(check && "value" in deck
+          ? {
+              report: await validate(url, dataset).then(
+                (value) => ({ value }),
+                (error: unknown) => ({ error: toSent(error) }),
+              ),
+            }
+          : {}),
+      };
+    },
+    catalogLinks: (folder, fetch) =>
+      readWithin(folder, fetch, (fetch) => catalogLinks(folder, SM.publishedRelease, fetch)),
+    isStorageRoot: (folder, fetch) =>
+      readWithin(folder, fetch, (fetch) => isStorageRootAt(folder, fetch)),
+  };
+}
+
+/** What `make` makes, or what it fails with (Made). */
+function made<T>(make: () => T): Made<T> {
+  try {
+    return { value: make() };
+  } catch (error) {
+    return { error: toSent(error) };
+  }
+}
+
+/** What was made, or what making it failed with, thrown. */
+function madeOf<T>(part: Made<T>): T {
+  if ("error" in part) throw fromSent(part.error);
+  return part.value;
 }
 
 /**
@@ -325,15 +411,15 @@ function turnsOf(atOnce: number, turnMs: number, waitMs: number) {
 export function createSolidDeckLibrary({
   fetch,
   indexUrl,
-  validate,
+  documents,
 }: SolidDeckLibraryDeps): DeckLibrary {
   const budget = linkedReadsBudget(fetch);
   const turn = turnsOf(LINKED_READS_AT_ONCE, LINKED_READ_TURN_MS, LINKED_READ_WAIT_MS);
   const limited = limitedFetch(fetch, RELEASE_LIMITS);
   const reads = releaseReads({
-    unchecked: (url) => readDocument(url, limited),
+    unchecked: (url) => documents.release(url, limited, false),
     linked: (url, work) => budget.reads()(url, work),
-    validate,
+    documents,
     tooLarge: budget.tooLarge(),
     turn,
     keptQuads: KEPT_LINKED_QUADS,
@@ -364,9 +450,10 @@ export function createSolidDeckLibrary({
     linkedReads() {
       const linked = budget.reads();
       return releaseReads({
-        unchecked: (url) => turn(url, () => linked(url, ({ fetch }) => readDocument(url, fetch))),
+        unchecked: (url) =>
+          turn(url, () => linked(url, ({ fetch }) => documents.release(url, fetch, false))),
         linked,
-        validate,
+        documents,
         tooLarge: budget.tooLarge(linkedReleasesTooLarge),
         turn,
         keptQuads: Number.POSITIVE_INFINITY,
@@ -388,19 +475,19 @@ export function createSolidDeckLibrary({
 function releaseReads({
   unchecked,
   linked,
-  validate,
+  documents,
   tooLarge,
   turn,
   keptQuads,
 }: {
-  unchecked: (url: string) => Promise<Dataset>;
+  unchecked: (url: string) => Promise<ReleaseRead>;
   linked: LinkedReads;
-  validate: SolidDeckLibraryDeps["validate"];
+  documents: ReleaseDocuments;
   tooLarge: TooLarge;
   turn: ReturnType<typeof turnsOf>;
   keptQuads: number;
 }): LinkedReleaseReads {
-  const releases = new Map<string, Promise<Dataset>>();
+  const releases = new Map<string, Promise<ReleaseRead>>();
   const contents = new Map<string, Promise<LibraryDeckContent>>();
   const outlines = new Map<string, Promise<CourseOutline>>();
   /** The check each accepted release passed, for when it is read again. */
@@ -446,36 +533,36 @@ function releaseReads({
     const read = pinning ? ++pinReads : 0;
     return turn(url, () =>
       linked(url, async ({ fetch, quads }) => {
-        let dataset: Dataset;
+        let release: ReleaseRead;
         try {
-          dataset = await readDocument(url, fetch);
+          release = await documents.release(url, fetch, accept !== undefined);
         } catch (error) {
           throw releaseReadError(url, error, tooLarge);
         }
-        const deck = toStandaloneLibraryDeck(url, dataset);
+        const deck = madeOf(release.deck);
         if (accept !== undefined) {
-          accept(await validate(url, dataset));
+          accept(madeOf(release.report!));
           const pins = read > pinnedRead;
           // A read pinned is what was shown: no other read of that release, under way when it was, takes its place.
-          if (url === pinned && !pins) return { dataset, deck };
+          if (url === pinned && !pins) return { release, deck };
           // What was checked is what is read of the release from now on: its content and outline made of it anew.
           accepts.set(url, accept);
-          releases.set(url, Promise.resolve(dataset));
+          releases.set(url, Promise.resolve(release));
           contents.delete(url);
           outlines.delete(url);
           if (pins) pin(url, read);
           else hold(url, quads());
         }
-        return { dataset, deck };
+        return { release, deck };
       }),
     );
   }
 
   /** The release's document, read once, and with its check again when it was accepted and has been let go. */
-  function release(url: string): Promise<Dataset> {
+  function release(url: string): Promise<ReleaseRead> {
     return kept(releases, url, () => {
       const accept = accepts.get(url);
-      if (accept !== undefined) return readLinked(url, accept).then(({ dataset }) => dataset);
+      if (accept !== undefined) return readLinked(url, accept).then(({ release }) => release);
       return unchecked(url).catch((error: unknown) => {
         throw shownReadError(url, error, tooLarge);
       });
@@ -484,15 +571,11 @@ function releaseReads({
 
   return {
     fetchLibraryDeck(url) {
-      return kept(contents, url, () =>
-        release(url).then((dataset) => toLibraryDeckContent(url, dataset)),
-      );
+      return kept(contents, url, () => release(url).then((read) => madeOf(read.content)));
     },
 
     fetchCourseOutline(url) {
-      return kept(outlines, url, () =>
-        release(url).then((dataset) => toCourseOutline(url, dataset)),
-      );
+      return kept(outlines, url, () => release(url).then((read) => madeOf(read.outline)));
     },
 
     async readRelease(url, accept, options) {
@@ -505,9 +588,7 @@ function releaseReads({
       for (const folder of foldersUpTo(url, instance)) {
         // An instance's catalog is `<instance>catalog.ttl`; one that cannot be read is no answer.
         const links = await turn(folder, () =>
-          linked(folder, ({ fetch }) =>
-            readWithin(folder, fetch, (fetch) => catalogLinks(folder, SM.publishedRelease, fetch)),
-          ),
+          linked(folder, ({ fetch }) => documents.catalogLinks(folder, fetch)),
         ).catch((): string[] => []);
         // The catalog is data its creator wrote: of its links, only those at an address a release may have are
         // read, and may become a copy's source (isPublishedReleaseUrl), as the user's own catalog's are, and of
@@ -527,9 +608,7 @@ function releaseReads({
    */
   function isStorageRoot(folder: string): Promise<boolean> {
     return turn(folder, () =>
-      linked(folder, ({ fetch }) =>
-        readWithin(folder, fetch, (fetch) => isStorageRootAt(folder, fetch)),
-      ),
+      linked(folder, ({ fetch }) => documents.isStorageRoot(folder, fetch)),
     ).catch(() => false);
   }
 }

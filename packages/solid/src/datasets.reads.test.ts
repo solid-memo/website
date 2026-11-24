@@ -2,9 +2,17 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
-import { deleteDataset, getSolidDatasetOrNull, readDataset, saveDataset } from "./datasets";
+import { readDocument } from "./client/resources";
+import {
+  deleteDataset,
+  getSolidDatasetOrNull,
+  readDataset,
+  readElsewhere,
+  readForRemoval,
+  saveDataset,
+} from "./datasets";
 
 /**
  * Reading the same document more than once, through the real Solid
@@ -160,5 +168,26 @@ describe("reading a document more than once", () => {
     const fetch = (async () =>
       new Response(null, { status: 304 })) as unknown as typeof globalThis.fetch;
     await expect(readDataset(DOC, fetch)).rejects.toThrow();
+  });
+});
+
+describe("reading a document elsewhere", () => {
+  it("reads a document `isElsewhere` names with the reader given, kept and conditional as any other read, a removal's too", async () => {
+    const { fetch, gets } = pod();
+    const read = vi.fn(readDocument);
+    readElsewhere(fetch, (url) => url === DOC, read);
+    const first = await readDataset(DOC, fetch);
+    expect(read).toHaveBeenCalledOnce();
+    expect(read.mock.calls[0]![1].ifNoneMatch).toBeUndefined();
+    // Read again on condition, through the same reader, and found unchanged.
+    expect(await getSolidDatasetOrNull(DOC, fetch)).toBe(first);
+    expect(read.mock.calls[1]![1].ifNoneMatch).toBe('"v1"');
+    expect(gets).toHaveLength(2);
+    // Another address is read here.
+    await readDataset("https://pod.example/own.ttl", fetch);
+    expect(read).toHaveBeenCalledTimes(2);
+    // A removal's read goes the same way.
+    expect(await readForRemoval(DOC, fetch)).not.toBeNull();
+    expect(read).toHaveBeenCalledTimes(3);
   });
 });

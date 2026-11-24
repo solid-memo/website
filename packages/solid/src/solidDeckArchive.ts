@@ -330,7 +330,7 @@ function refuseNewer(thing: Subject): void {
  * from a pod, which has no limit of its own. A file is the user's to
  * choose; one with no end would hold the tab until it ran out of memory.
  */
-const DECK_FILE_LIMITS: ReadLimits = {
+export const DECK_FILE_LIMITS: ReadLimits = {
   bytes: 64 * 1024 * 1024,
   quads: 1_000_000,
   characters: 256 * 1024 * 1024,

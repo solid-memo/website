@@ -16,7 +16,7 @@ import { routedFetch } from "../routedFetch";
 import { createShaclShapeValidator } from "../shaclShapeValidator";
 import { createSolidAnswerLog } from "../solidAnswerLog";
 import { createSolidDeckArchive } from "../solidDeckArchive";
-import { createSolidDeckLibrary } from "../solidDeckLibrary";
+import { createSolidDeckLibrary, releaseDocumentsOf } from "../solidDeckLibrary";
 import { createSolidDeckRepository } from "../solidDeckRepository";
 import { createSolidDigestRepository } from "../solidDigestRepository";
 import { createSolidInstanceCopier } from "../solidInstanceCopier";
@@ -72,7 +72,9 @@ export function siteOf(): Site {
     deckLibrary: createSolidDeckLibrary({
       fetch,
       indexUrl: `${SITE}decks/index.ttl`,
-      validate: (url, dataset) => shapeValidator.validateDataset(url, dataset, "library"),
+      documents: releaseDocumentsOf((url, dataset) =>
+        shapeValidator.validateDataset(url, dataset, "library"),
+      ),
     }),
     fetch,
     use(fetch) {

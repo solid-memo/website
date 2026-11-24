@@ -2,8 +2,8 @@
 
 The composition root: the one place where the layers meet. It puts
 every adapter behind its port, sets up the guest's pod, the write
-fence and the credential gate, reads the site's documents from where it is served, and builds
-the use cases over them.
+fence and the credential gate, reads the site's documents from where it is served, runs the
+work on documents the app didn't write in workers, and builds the use cases over them.
 
 ## Exports
 
@@ -15,6 +15,9 @@ the use cases over them.
 - `trialUseCases`: `createTrialUseCases`, the sandbox a Studio trial
   plays a draft in, only the slices a trial plays over a pod of its own
   ([studio.md](../../docs/studio.md#the-trial)).
+- `offPageWorker`: `spawnOffPageWorker`, the worker the page reads
+  the documents it didn't write in, which the build bundles
+  ([validation.md](../../docs/validation.md#off-the-page)).
 
 ## Boundaries
 
