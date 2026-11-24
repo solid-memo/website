@@ -11,7 +11,6 @@ import {
   getDatetime,
   getInteger,
   getStringNoLocale,
-  getStringNoLocaleAll,
   getThing,
   getUrl,
   getUrlAll,
@@ -24,6 +23,7 @@ import {
   getStringWithLocale,
   getStringWithLocaleAll,
 } from "./testing/datasets";
+import { getStringNoLocaleAll } from "./testing/datasets";
 import { MAX_CATALOG_LINKS } from "./catalogLinks";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { getSolidDatasetOrNull, versionOf } from "./datasets";

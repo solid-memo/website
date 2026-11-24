@@ -529,6 +529,10 @@ every kind, every step is pure, the latest record passes through
 untouched, and, with the real shapes, every step's output conforms to
 the shape it moves to.
 
+Every step runs on a record read within its kind's bounds
+([shapes.md](shapes.md#bounds)), so it never sees more values than they
+let through.
+
 A step's output is held to the bound on a term, 16,383 characters, as
 every read and write is
 ([data-model.md](data-model.md#write-discipline)), each term measured
@@ -1062,8 +1066,11 @@ Data added later goes one of the four ways of the
 [versioning policy](vocab.md#versioning-policy):
 
 1. **A term outside every shape.** Add the term to the
-   [vocabulary](vocab.md#adding-a-term). Read and write it in the
-   subject's mapper, beside the record, as
+   [vocabulary](vocab.md#adding-a-term), and to the small shape of the
+   terms beside the kind's record, `<#terms>` in
+   `ns/bounds/<kind>.ttl`, with its bounds
+   ([shapes.md](shapes.md#bounds)). Read it with `readTerms` and write
+   it in the subject's mapper, beside the record, as
    [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts) does
    for `sm:deckCardLanguage`. A missing value means the default, and
    it needs no migration.

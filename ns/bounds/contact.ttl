@@ -1,0 +1,24 @@
+@base <https://solid-memo.com/ns/bounds/contact.ttl> .
+
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+
+# What Solid Memo reads of a release's contact point. A small shape of
+# their own, read as a record is, within the same bounds
+# (docs/shapes.md, Bounds).
+<#terms>
+    a sh:NodeShape ;
+    sh:name "ContactTerms" ;
+    rdfs:comment "What Solid Memo reads of a release's contact point." ;
+    sh:property <#hasURL> .
+
+# At most 2 web pages: enough to tell a contact with one from one with
+# more, which names none the app would lead to.
+<#hasURL>
+    a sh:PropertyShape ;
+    sh:path vcard:hasURL ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 2 ;
+    sh:pattern "^https?://" .

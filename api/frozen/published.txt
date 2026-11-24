@@ -1,3 +1,34 @@
+https://solid-memo.com/ns/bounds/agent.ttl
+https://solid-memo.com/ns/bounds/answer.ttl
+https://solid-memo.com/ns/bounds/card.ttl
+https://solid-memo.com/ns/bounds/catalog.ttl
+https://solid-memo.com/ns/bounds/chapter.ttl
+https://solid-memo.com/ns/bounds/color-set.ttl
+https://solid-memo.com/ns/bounds/contact.ttl
+https://solid-memo.com/ns/bounds/deck-document.ttl
+https://solid-memo.com/ns/bounds/deck-group.ttl
+https://solid-memo.com/ns/bounds/deck-schedule.ttl
+https://solid-memo.com/ns/bounds/deck.ttl
+https://solid-memo.com/ns/bounds/distractor.ttl
+https://solid-memo.com/ns/bounds/distribution.ttl
+https://solid-memo.com/ns/bounds/document-receipt.ttl
+https://solid-memo.com/ns/bounds/draft-chapter.ttl
+https://solid-memo.com/ns/bounds/draft-deck.ttl
+https://solid-memo.com/ns/bounds/draft-step.ttl
+https://solid-memo.com/ns/bounds/fsrs-review-state.ttl
+https://solid-memo.com/ns/bounds/instance.ttl
+https://solid-memo.com/ns/bounds/library-deck-series.ttl
+https://solid-memo.com/ns/bounds/library-deck.ttl
+https://solid-memo.com/ns/bounds/library-release.ttl
+https://solid-memo.com/ns/bounds/library-source.ttl
+https://solid-memo.com/ns/bounds/month-summary.ttl
+https://solid-memo.com/ns/bounds/palette.ttl
+https://solid-memo.com/ns/bounds/preferences.ttl
+https://solid-memo.com/ns/bounds/profile.ttl
+https://solid-memo.com/ns/bounds/review-links.ttl
+https://solid-memo.com/ns/bounds/review-state.ttl
+https://solid-memo.com/ns/bounds/step.ttl
+https://solid-memo.com/ns/bounds/type-registration.ttl
 https://solid-memo.com/ns/shapes/agent/v1.ttl sha256:955987be6ae460703c5b935dc71ef9f3b3c6fb69b8fcd7973eb5ea67b911681a
 https://solid-memo.com/ns/shapes/answer/v1.ttl sha256:ab1f3855509f8667b9fd95c79f1c3cebbef398633e63a5194ea59aa96b3cfef5
 https://solid-memo.com/ns/shapes/card/v1.ttl sha256:3bc3e71005b3aa226219df8fc94d564a59035a42c4167dc4e1d316b2d9bb72f9

@@ -12,7 +12,12 @@ import {
   readNothing,
   storageUrlsOf,
 } from "./profilePlaces";
-import { PIM } from "./vocab";
+
+/** The profile's terms (ns/bounds/profile.ttl). */
+const PIM = {
+  preferencesFile: "http://www.w3.org/ns/pim/space#preferencesFile",
+  storage: "http://www.w3.org/ns/pim/space#storage",
+} as const;
 
 const WEBID = "https://id.example/alice#me";
 

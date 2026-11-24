@@ -11,7 +11,6 @@ import {
   getInteger,
   getLiteralAll,
   getStringNoLocale,
-  getStringNoLocaleAll,
   getTermAll,
   getThing,
   getUrl,
@@ -25,6 +24,7 @@ import {
   getStringWithLocale,
   getStringWithLocaleAll,
 } from "./testing/datasets";
+import { getStringNoLocaleAll } from "./testing/datasets";
 import { MAX_DECK_METADATA } from "@solid-memo/domain/deck";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";
 import { isReviewStateOutdated, upgradeReviewState } from "@solid-memo/domain/migration";
@@ -44,6 +44,7 @@ import {
   CARD_V5,
   CARD_V7,
   COLOR_SET_V1,
+  DECK_TERMS,
   DECK_V2,
   DECK_V4,
   DECK_V6,
@@ -57,7 +58,10 @@ import {
   datetimeLiteral,
   isUnreadableDatetime,
   readDatetime,
+  countOf,
+  readFieldOf,
   readRecord,
+  readTerms,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
@@ -109,27 +113,61 @@ const THING: ShapeDescriptor<Thing> = {
   shapeDocument: "thing/v1.ttl",
   context: "any",
   fields: [
-    { name: "name", predicate: `${EX}name`, kind: "string", cardinality: "one" },
-    { name: "count", predicate: `${EX}count`, kind: "integer", cardinality: "optional" },
-    { name: "ratio", predicate: `${EX}ratio`, kind: "decimal", cardinality: "optional" },
-    { name: "when", predicate: `${EX}when`, kind: "dateTime", cardinality: "optional" },
-    { name: "flag", predicate: `${EX}flag`, kind: "boolean", cardinality: "optional" },
-    { name: "link", predicate: `${EX}link`, kind: "iri", cardinality: "optional" },
+    { name: "name", predicate: `${EX}name`, kind: "string", cardinality: "one", maxCount: 1 },
+    {
+      name: "count",
+      predicate: `${EX}count`,
+      kind: "integer",
+      cardinality: "optional",
+      maxCount: 1,
+    },
+    {
+      name: "ratio",
+      predicate: `${EX}ratio`,
+      kind: "decimal",
+      cardinality: "optional",
+      maxCount: 1,
+    },
+    {
+      name: "when",
+      predicate: `${EX}when`,
+      kind: "dateTime",
+      cardinality: "optional",
+      maxCount: 1,
+    },
+    { name: "flag", predicate: `${EX}flag`, kind: "boolean", cardinality: "optional", maxCount: 1 },
+    {
+      name: "link",
+      predicate: `${EX}link`,
+      kind: "iri",
+      cardinality: "optional",
+      maxCount: 1,
+      iri: "http",
+    },
     {
       name: "mode",
       predicate: `${EX}mode`,
       kind: "enum",
       cardinality: "optional",
       values: ["a", "b"],
+      maxCount: 1,
     },
-    { name: "tags", predicate: `${EX}tag`, kind: "string", cardinality: "many" },
-    { name: "links", predicate: `${EX}links`, kind: "iri", cardinality: "many" },
+    { name: "tags", predicate: `${EX}tag`, kind: "string", cardinality: "many", maxCount: 10 },
+    {
+      name: "links",
+      predicate: `${EX}links`,
+      kind: "iri",
+      cardinality: "many",
+      maxCount: 10,
+      iri: "http",
+    },
     {
       name: "concept",
       predicate: `${EX}concept`,
       kind: "iriEnum",
       cardinality: "optional",
       values: [`${EX}c1`, `${EX}c2`],
+      maxCount: 1,
     },
     {
       name: "concepts",
@@ -137,6 +175,7 @@ const THING: ShapeDescriptor<Thing> = {
       kind: "iriEnum",
       cardinality: "many",
       values: [`${EX}c1`, `${EX}c2`],
+      maxCount: 10,
     },
   ],
 };
@@ -363,7 +402,14 @@ describe("readRecord", () => {
       shapeDocument: "thing/v1.ttl",
       context: "any",
       fields: [
-        { name: "mode", predicate: `${EX}mode`, kind: "enum", cardinality: "one", values: ["a"] },
+        {
+          name: "mode",
+          predicate: `${EX}mode`,
+          kind: "enum",
+          cardinality: "one",
+          values: ["a"],
+          maxCount: 1,
+        },
       ],
     };
     expect(readRecord(thing, required)).toBeNull();
@@ -450,8 +496,15 @@ describe("readRecord", () => {
     const MAILBOX = {
       ...THING,
       fields: [
-        { name: "name", predicate: `${EX}name`, kind: "string", cardinality: "one" },
-        { name: "mbox", predicate: MBOX, kind: "iri", cardinality: "optional" },
+        { name: "name", predicate: `${EX}name`, kind: "string", cardinality: "one", maxCount: 1 },
+        {
+          name: "mbox",
+          predicate: MBOX,
+          kind: "iri",
+          cardinality: "optional",
+          maxCount: 1,
+          iri: "mailbox",
+        },
       ],
     } as unknown as ShapeDescriptor<{ name: string; mbox?: string }>;
     const read = async (mbox: string) => {
@@ -479,6 +532,180 @@ describe("readRecord", () => {
       fields: [{ name: "when", predicate: `${EX}when`, kind: "dateTime", cardinality: "one" }],
     } as unknown as ShapeDescriptor<{ when: string }>;
     expect(readRecord(thing, required)).toBeNull();
+  });
+});
+
+describe("bounds (ns/bounds/)", () => {
+  type Bounded = {
+    name: string;
+    label?: string;
+    note?: Record<string, string>;
+    side?: Record<string, string>;
+    tags: string[];
+    words: Record<string, string[]>;
+    links: string[];
+    concepts: string[];
+  };
+  const BOUNDED: ShapeDescriptor<Bounded> = {
+    ...(THING as unknown as ShapeDescriptor<Bounded>),
+    fields: [
+      {
+        name: "name",
+        predicate: `${EX}name`,
+        kind: "string",
+        cardinality: "one",
+        maxCount: 1,
+        maxLength: 5,
+      },
+      {
+        name: "label",
+        predicate: `${EX}label`,
+        kind: "string",
+        cardinality: "optional",
+        maxCount: 1,
+        maxLength: 5,
+      },
+      {
+        name: "note",
+        predicate: `${EX}note`,
+        kind: "text",
+        cardinality: "optional",
+        maxCount: 2,
+        maxLength: 5,
+      },
+      {
+        name: "side",
+        predicate: `${EX}side`,
+        kind: "anyText",
+        cardinality: "optional",
+        maxCount: 2,
+        maxLength: 5,
+      },
+      {
+        name: "tags",
+        predicate: `${EX}tag`,
+        kind: "string",
+        cardinality: "many",
+        maxCount: 2,
+        maxLength: 5,
+      },
+      {
+        name: "words",
+        predicate: `${EX}word`,
+        kind: "anyText",
+        cardinality: "many",
+        maxCount: 3,
+        maxLength: 5,
+      },
+      {
+        name: "links",
+        predicate: `${EX}link`,
+        kind: "iri",
+        cardinality: "many",
+        maxCount: 2,
+        iri: "http",
+      },
+      {
+        name: "concepts",
+        predicate: `${EX}concept`,
+        kind: "iriEnum",
+        cardinality: "many",
+        values: [`${EX}c1`, `${EX}c2`],
+        maxCount: 1,
+      },
+    ],
+  };
+  const subject = (turtle: string) =>
+    datasetOfTurtle(URL_, `<${URL_}> <${EX}name> "Ann" ; ${turtle} .`).then(
+      (dataset) => getThing(dataset, URL_)!,
+    );
+
+  it("reads at most maxCount values of a list, the first in stored order, and stops there", async () => {
+    const thing = await subject(
+      `<${EX}tag> "a", "b", "c" ; <${EX}link> <rdf:no>, <https://e.example/1>, <https://e.example/2>, <https://e.example/3> ;
+       <${EX}concept> <${EX}c9>, <${EX}c2>, <${EX}c1>`,
+    );
+    expect(readRecord(thing, BOUNDED)).toEqual({
+      name: "Ann",
+      tags: ["a", "b"],
+      words: {},
+      links: ["https://e.example/1", "https://e.example/2"],
+      concepts: [`${EX}c2`],
+    });
+  });
+
+  it("reads no value longer than maxLength: an optional one as absent, a required one as no fit, a list holding one as no fit", async () => {
+    expect(readRecord(await subject(`<${EX}label> "too long"`), BOUNDED)).toMatchObject({
+      name: "Ann",
+    });
+    expect(readRecord(await subject(`<${EX}label> "too long"`), BOUNDED)).not.toHaveProperty(
+      "label",
+    );
+    const long = await datasetOfTurtle(URL_, `<${URL_}> <${EX}name> "Annabel" .`);
+    expect(readRecord(getThing(long, URL_)!, BOUNDED)).toBeNull();
+    expect(readRecord(await subject(`<${EX}tag> "a", "too long"`), BOUNDED)).toBeNull();
+    // Past the bound, a value is not looked at.
+    expect(readRecord(await subject(`<${EX}tag> "a", "b", "too long"`), BOUNDED)?.tags).toEqual([
+      "a",
+      "b",
+    ]);
+  });
+
+  it("reads a text in at most maxCount languages, the untagged value among them, a language whose value is too long left out", async () => {
+    const thing = await subject(
+      `<${EX}note> "far too long"@de, "hej"@sv, "hi"@en, "salut"@fr ;
+       <${EX}side> "plain", "hej"@sv, "hi"@en ;
+       <${EX}word> "x", "too long", "y"@en, "y"@en, "z"@sv, "w"@sv`,
+    );
+    const read = readRecord(thing, BOUNDED)!;
+    expect(read.note).toEqual({ sv: "hej", en: "hi" });
+    expect(read.side).toEqual({ "": "plain", sv: "hej" });
+    expect(read.words).toEqual({ "": ["x"], en: ["y"], sv: ["z"] });
+    const untagged = await subject(`<${EX}side> "too long", "hi"@en`);
+    expect(readRecord(untagged, BOUNDED)!.side).toEqual({ en: "hi" });
+  });
+
+  it("reads the terms beside a record within their bounds: a missing one absent, a missing or unreadable list empty", async () => {
+    const entry = (turtle: string) =>
+      datasetOfTurtle(URL_, `<${URL_}> a <${SM.Deck}> ${turtle} .`).then((d) => getThing(d, URL_)!);
+    expect(readTerms(await entry(""), DECK_TERMS)).toEqual({
+      completedChapter: [],
+      deckPictureHost: [],
+    });
+    const hosts = Array.from({ length: 1_005 }, (_, i) => `"h${i}.example"`).join(", ");
+    const read = readTerms(
+      await entry(
+        `; <${SM.deckPictureHost}> ${hosts} ; <${SM.position}> 3 ; <${SM.completedChapter}> <rdf:no>, <https://e.example/c>`,
+      ),
+      DECK_TERMS,
+    );
+    expect(read.deckPictureHost).toHaveLength(1_000);
+    expect(read.position).toBe(3);
+    expect(read.completedChapter).toEqual(["https://e.example/c"]);
+    const long = readTerms(
+      await entry(`; <${SM.deckPictureHost}> "a.example", "${"h".repeat(254)}"`),
+      DECK_TERMS,
+    );
+    expect(long.deckPictureHost).toEqual([]);
+  });
+
+  it("reads one field alone, whether or not the subject fits its shape, and counts a field's values past its bound", async () => {
+    const subjects = Array.from({ length: 150 }, (_, i) => `<https://e.example/${i}>`).join(", ");
+    const card = await datasetOfTurtle(
+      URL_,
+      `<${URL_}> <${DCTERMS.subject}> <rdf:no>, ${subjects} .`,
+    );
+    const thing = getThing(card, URL_)!;
+    expect(readVersioned(thing, "card")).toBeNull();
+    expect(readFieldOf(thing, CARD_V7, "subject")).toHaveLength(100);
+    expect(readFieldOf(thing, CARD_V7, "textFormat")).toBeUndefined();
+    expect(countOf(thing, CARD_V7, "subject")).toBe(150);
+    const authors = Array.from({ length: 120 }, (_, i) => `"Author ${i}"`).join(", ");
+    const old = await datasetOfTurtle(URL_, `<${URL_}> <${DCTERMS.creator}> ${authors} .`);
+    const longer = buildThing(getThing(old, URL_)!)
+      .addStringNoLocale(DCTERMS.creator, "a".repeat(16_384))
+      .build();
+    expect(countOf(longer, DECK_V2, "creator")).toBe(120);
   });
 });
 

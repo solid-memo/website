@@ -1,0 +1,50 @@
+@base <https://solid-memo.com/ns/bounds/draft-step.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix schema:     <https://schema.org/> .
+
+# The most Solid Memo reads of a draft's step: each property of every
+# version of its shape that needs a bound. A reader takes at most
+# sh:maxCount values (of a text, one per language), no string longer
+# than sh:maxLength, and only an IRI sh:pattern names, and it stops as
+# it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "DraftStepBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a draft's step." ;
+    sh:property <#theory> ,
+                <#checkedBy> ,
+                <#isPartOf> ,
+                <#textFormat> .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#theory>
+    a sh:PropertyShape ;
+    sh:path solid-memo:theory ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# At most 1,000 cards that check a step: the library's steps name 4 at
+# most.
+<#checkedBy>
+    a sh:PropertyShape ;
+    sh:path solid-memo:checkedBy ;
+    sh:maxCount 1000 ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#isPartOf>
+    a sh:PropertyShape ;
+    sh:path schema:isPartOf ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#textFormat>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textFormat ;
+    sh:pattern "^https?://" .

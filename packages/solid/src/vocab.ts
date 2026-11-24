@@ -23,12 +23,6 @@ export const SOLID = {
   instanceContainer: `${SOLID_NS}instanceContainer`,
 } as const;
 
-export const PIM = {
-  preferencesFile: "http://www.w3.org/ns/pim/space#preferencesFile",
-  storage: "http://www.w3.org/ns/pim/space#storage",
-  Storage: "http://www.w3.org/ns/pim/space#Storage",
-} as const;
-
 export const DCTERMS = {
   title: "http://purl.org/dc/terms/title",
   created: "http://purl.org/dc/terms/created",
@@ -65,14 +59,6 @@ export const RDF = {
   type: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
 } as const;
 
-export const RDFS = {
-  seeAlso: "http://www.w3.org/2000/01/rdf-schema#seeAlso",
-} as const;
-
-export const FOAF = {
-  isPrimaryTopicOf: "http://xmlns.com/foaf/0.1/isPrimaryTopicOf",
-} as const;
-
 export const DCAT = {
   /** A catalog: an instance's catalog.ttl#catalog, the library index. */
   Catalog: "http://www.w3.org/ns/dcat#Catalog",
@@ -88,16 +74,6 @@ export const DCAT = {
   version: "http://www.w3.org/ns/dcat#version",
   /** A release's contact (a vcard:Kind): where a mistake in it is reported. */
   contactPoint: "http://www.w3.org/ns/dcat#contactPoint",
-} as const;
-
-export const VCARD = {
-  /** A contact's web page: for the library's releases, its issue tracker. */
-  hasURL: "http://www.w3.org/2006/vcard/ns#hasURL",
-} as const;
-
-export const ADMS = {
-  /** What changed in a release. */
-  versionNotes: "http://www.w3.org/ns/adms#versionNotes",
 } as const;
 
 export const SCHEMA = {

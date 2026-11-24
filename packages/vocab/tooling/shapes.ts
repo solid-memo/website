@@ -14,6 +14,7 @@ import {
 } from "@solid-memo/turtle/rdf";
 import { GENERATED_HEADER, SM_NS } from "./vocab.ts";
 import { SHAPES_BASE } from "../src/ns.ts";
+import type { TermsModel } from "./bounds.ts";
 
 /**
  * The SHACL shape files (ns/shapes/<class>/v<N>.ttl) as the generators see
@@ -22,10 +23,10 @@ import { SHAPES_BASE } from "../src/ns.ts";
  * for the conventions the parser relies on.
  */
 
-const SH = "http://www.w3.org/ns/shacl#";
+export const SH = "http://www.w3.org/ns/shacl#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";
 const RDF_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
-const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
+export const RDFS_COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment";
 
 /**
  * The vocabularies a shape's sh:class may come from: Solid Memo's own,
@@ -54,7 +55,16 @@ export interface ShapeField {
   kind: TermKind;
   cardinality: Cardinality;
   values?: string[];
+  /** The most values read (bounds.ts): 1 for one value, else what ns/bounds/ states. */
+  maxCount?: number;
+  /** The longest string or text read, in characters (bounds.ts). */
+  maxLength?: number;
+  /** Which IRIs are read (bounds.ts): http(s) URLs, or mailto: ones. */
+  iri?: IriRule;
 }
+
+/** Which IRIs a field reads: http(s) URLs (sh:pattern "^https?://") or mailto: URLs (sh:pattern "^mailto:"). */
+export type IriRule = "http" | "mailbox";
 
 /** A predicate whose one value is fixed by the shape (sh:hasValue, sh:maxCount 1). */
 export interface FixedValue {
@@ -99,11 +109,11 @@ const DATATYPES: Record<string, TermKind> = {
   [RDF_LANG_STRING]: "text",
 };
 
-function lowerFirst(text: string): string {
+export function lowerFirst(text: string): string {
   return text.charAt(0).toLowerCase() + text.slice(1);
 }
 
-function integerOf(object: Quad_Object | undefined): number | undefined {
+export function integerOf(object: Quad_Object | undefined): number | undefined {
   return object === undefined ? undefined : Number(object.value);
 }
 
@@ -195,7 +205,7 @@ function parseShapeFile(file: TurtleFile): ShapeModel[] {
 }
 
 /** The objects of a property shape for one SHACL predicate (its local name). */
-type ShapeObjects = (predicate: string) => Quad_Object[];
+export type ShapeObjects = (predicate: string) => Quad_Object[];
 
 /**
  * A property shape as a field: `{ absent }` for a predicate the subject
@@ -295,7 +305,7 @@ function checkFormatVersion(
  * A field's term kind, from its sh:datatype, sh:nodeKind sh:IRI or sh:or,
  * checked against its sh:in values (`values`) if it has any.
  */
-function fieldKind(
+export function fieldKind(
   quads: readonly Quad[],
   of: ShapeObjects,
   shape: string,
@@ -374,7 +384,7 @@ function tsType(field: ShapeField): string {
     : scalar;
 }
 
-function constName(model: ShapeModel): string {
+function constName(model: { name: string }): string {
   return model.name.replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase();
 }
 
@@ -398,7 +408,10 @@ function byShape(models: readonly ShapeModel[]): Map<string, ShapeModel[]> {
 }
 
 /** The domain module: one record interface per shape version, plus the unions. */
-export function renderDomainTypes(models: readonly ShapeModel[]): string {
+export function renderDomainTypes(
+  models: readonly ShapeModel[],
+  terms: readonly TermsModel[] = [],
+): string {
   const groups = byShape(models);
   const shapes = [...groups.keys()];
   const lines = [
@@ -454,6 +467,14 @@ export function renderDomainTypes(models: readonly ShapeModel[]): string {
     "};",
     "",
   );
+  for (const model of terms) {
+    lines.push(`/** ${model.comment} */`, `export interface ${model.name} {`);
+    for (const field of model.fields) {
+      const optional = field.cardinality === "many" ? "" : "?";
+      lines.push(`  readonly ${field.name}${optional}: ${tsType(field)};`);
+    }
+    lines.push("}", "");
+  }
   return lines.join("\n");
 }
 
@@ -461,14 +482,31 @@ function upperFirst(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+/** A field's bounds as a descriptor states them (bounds.ts): none for a field not bounded yet. */
+export function boundParts(field: ShapeField): string[] {
+  return [
+    ...(field.maxCount === undefined ? [] : [`maxCount: ${field.maxCount}`]),
+    ...(field.maxLength === undefined ? [] : [`maxLength: ${field.maxLength}`]),
+    ...(field.iri === undefined ? [] : [`iri: ${JSON.stringify(field.iri)}`]),
+  ];
+}
+
 /** The infrastructure module: one descriptor per shape version and the registry. */
-export function renderDescriptors(models: readonly ShapeModel[]): string {
+export function renderDescriptors(
+  models: readonly ShapeModel[],
+  terms: readonly TermsModel[] = [],
+): string {
   const groups = byShape(models);
   const lines = [
-    GENERATED_HEADER("ns/shapes/<class>/v<N>.ttl"),
-    `import type { ShapeDescriptor } from "./shapeDescriptor.ts";`,
+    GENERATED_HEADER(
+      terms.length === 0
+        ? "ns/shapes/<class>/v<N>.ttl"
+        : "ns/shapes/<class>/v<N>.ttl and ns/bounds/",
+    ),
+    `import type { ShapeDescriptor${terms.length === 0 ? "" : ", TermsDescriptor"} } from "./shapeDescriptor.ts";`,
     "import type {",
     ...models.map((m) => `  ${m.name},`),
+    ...terms.map((m) => `  ${m.name},`),
     `} from "./types.generated.ts";`,
     "",
   ];
@@ -491,6 +529,7 @@ export function renderDescriptors(models: readonly ShapeModel[]): string {
         `kind: ${JSON.stringify(field.kind)}`,
         `cardinality: ${JSON.stringify(field.cardinality)}`,
         ...(field.values === undefined ? [] : [`values: ${JSON.stringify(field.values)}`]),
+        ...boundParts(field),
       ];
       lines.push(`    { ${parts.join(", ")} },`);
     }
@@ -511,5 +550,24 @@ export function renderDescriptors(models: readonly ShapeModel[]): string {
     "];",
     "",
   );
+  for (const model of terms) {
+    lines.push(
+      `export const ${constName(model)}: TermsDescriptor<${model.name}> = {`,
+      `  name: ${JSON.stringify(model.name)},`,
+      `  document: ${JSON.stringify(model.document)},`,
+      "  fields: [",
+    );
+    for (const field of model.fields) {
+      const parts = [
+        `name: ${JSON.stringify(field.name)}`,
+        `predicate: ${JSON.stringify(field.predicate)}`,
+        `kind: ${JSON.stringify(field.kind)}`,
+        `cardinality: ${JSON.stringify(field.cardinality)}`,
+        ...boundParts(field),
+      ];
+      lines.push(`    { ${parts.join(", ")} },`);
+    }
+    lines.push("  ],", "};", "");
+  }
   return lines.join("\n");
 }

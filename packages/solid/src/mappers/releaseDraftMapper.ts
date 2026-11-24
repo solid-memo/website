@@ -8,7 +8,6 @@ import {
   createSolidDataset,
   datasetFromQuads,
   getThing,
-  getUrlAll,
   setThing,
   toRdfJsDataset,
 } from "../client/rdf";
@@ -38,13 +37,15 @@ import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import { CARD_V7, DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import type { ShapeName } from "@solid-memo/vocab/types.generated";
 import {
   datetimeOf,
+  findIri,
+  hasClass,
   keptClasses,
-  readIris,
+  readFieldOf,
   readRecord,
   readVersioned,
   recordThing,
@@ -448,9 +449,8 @@ export function draftReadOf(
     });
 
   const rootThing = getThing(dataset, url);
-  const rootTypes = rootThing === null ? [] : getUrlAll(rootThing, RDF_TYPE);
   const read =
-    rootThing === null || !rootTypes.includes(SM.Deck)
+    rootThing === null || !hasClass(rootThing, SM.Deck)
       ? null
       : readRecord(rootThing, DRAFT_DECK_V1);
   if (read === null) return null;
@@ -459,7 +459,7 @@ export function draftReadOf(
   refuseNewer(refuseHidden, url, storedVersionOf(rootThing!), DRAFT_DECK_V1.version);
   // Of every sm:releasedAs the draft states, one at a release's address, whatever their order.
   const { releasedAs: _first, ...rest } = read;
-  const releasedAs = getUrlAll(rootThing!, SM.releasedAs).find(isPublishedReleaseUrl);
+  const releasedAs = findIri(rootThing!, SM.releasedAs, isPublishedReleaseUrl);
   const root = releasedAs === undefined ? rest : { ...rest, releasedAs };
   refuse(url, DRAFT_DECK_V1, read, [], UNPUBLISHED_ROOT_PREDICATES);
   own(url, DRAFT_DECK_V1, [SCHEMA_COURSE]);
@@ -471,8 +471,7 @@ export function draftReadOf(
     const id = idIn({ url }, subject);
     if (id === null) continue;
     const thing = getThing(dataset, subject) as Subject;
-    const types = getUrlAll(thing, RDF_TYPE);
-    const kinds = KINDS.filter(({ shape }) => types.includes(LATEST(shape).targetClass));
+    const kinds = KINDS.filter(({ shape }) => hasClass(thing, LATEST(shape).targetClass));
     if (kinds.length !== 1) continue;
     const { list, shape } = kinds[0]!;
     const read = readVersioned(thing, shape);
@@ -486,7 +485,7 @@ export function draftReadOf(
     // into its record, not the raw triples: the latest card shape writes
     // it, once, and the release diff and a learner's upgrade compare it.
     if (shape === "card" && read.record.version < 7) {
-      const about = readIris(thing, DCTERMS.subject);
+      const about = readFieldOf(thing, CARD_V7, "subject")!;
       refuse(subject, descriptor, read.record.data, [[DCTERMS.subject, about]]);
       own(subject, descriptor, [], [DCTERMS.subject]);
       nodes[list]!.push({ id, data: { ...data, subject: about } });
@@ -534,7 +533,7 @@ export function draftReadOf(
     );
   const draft: ReleaseDraft = {
     url,
-    course: rootTypes.includes(SCHEMA_COURSE),
+    course: hasClass(rootThing!, SCHEMA_COURSE),
     root,
     ...(nodes as unknown as Pick<
       ReleaseDraft,

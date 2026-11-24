@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { buildThing, createSolidDataset, getBoolean, getThing, setThing } from "./client/rdf";
+import { buildThing, createSolidDataset, getThing, setThing } from "./client/rdf";
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";
@@ -11,8 +11,8 @@ import { AppError } from "@solid-memo/domain/appError";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { toPreferences, toPreferencesThing } from "./mappers/preferencesMapper";
-import { PREFERENCES_V6 } from "@solid-memo/vocab/descriptors.generated";
-import { unlessNewer, withoutForeignShapedClasses } from "./records";
+import { PREFERENCES_TERMS, PREFERENCES_V6 } from "@solid-memo/vocab/descriptors.generated";
+import { readFieldOf, readTerms, unlessNewer, withoutForeignShapedClasses } from "./records";
 import { SM } from "./vocab";
 
 export interface SolidPreferencesRepositoryDeps {
@@ -65,7 +65,10 @@ export function createSolidPreferencesRepository({
       const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
       const url = `${documentUrl}#it`;
       const existing = dataset === null ? null : getThing(dataset, url);
-      if (existing === null || getBoolean(existing, SM.schedulerInvitationDismissed) === true)
+      if (
+        existing === null ||
+        readFieldOf(existing, PREFERENCES_V6, "schedulerInvitationDismissed") === true
+      )
         return;
       const updated = setThing(
         dataset!,
@@ -101,7 +104,9 @@ export function createSolidPreferencesRepository({
       // Outside the shape, as a deck's sm:deckCardLanguage is: read whatever the format, and whether or
       // not the preferences fit it, as markConnectedScreen writes it. A value that is not true (none, or
       // "yes") reads as showing the screen.
-      return subject !== null && getBoolean(subject, SM.connectedScreenSkipped) === true;
+      return (
+        subject !== null && readTerms(subject, PREFERENCES_TERMS).connectedScreenSkipped === true
+      );
     },
 
     /**
@@ -118,7 +123,7 @@ export function createSolidPreferencesRepository({
       if (existing === null && created === null) return "none";
       if (
         existing !== null &&
-        (getBoolean(existing, SM.connectedScreenSkipped) === true) === skipped
+        (readTerms(existing, PREFERENCES_TERMS).connectedScreenSkipped === true) === skipped
       )
         return "unchanged";
       const subject = buildThing(

@@ -14,12 +14,13 @@ import {
 import { readTurtleTree, type TurtleFile } from "@solid-memo/turtle/rdf";
 import { VOCAB_BASE } from "../src/ns.ts";
 import { NS_ROOT } from "./root.ts";
+import { parseBounds, termModels, withBounds } from "./bounds.ts";
 import { parseShapes, renderDescriptors, renderDomainTypes } from "./shapes.ts";
 import { parseVocab, renderVocabConstants, VOCAB_IRI } from "./vocab.ts";
 
 /**
- * `npm run generate`: render the TypeScript that the vocabulary and the
- * shapes (the repository's ns/) determine, and write it; `npm run
+ * `npm run generate`: render the TypeScript that the vocabulary, the
+ * shapes and their bounds (the repository's ns/) determine, and write it; `npm run
  * generate:check` renders and fails on any difference from what is
  * committed. The outputs are data only (constants, interfaces), so drift
  * is caught by `tsc` and the tests too — the check just names the file.
@@ -76,7 +77,9 @@ export function defaultIo(root: string, ns = NS_ROOT): GenerateIo {
 /** Every output path with its rendered text. */
 export async function render(io: GenerateIo): Promise<Record<string, string>> {
   const vocab = parseVocab(await io.readNs("vocab/v1.ttl"));
-  const shapes = parseShapes(await io.readTurtleTree("shapes"));
+  const bounds = parseBounds(await io.readTurtleTree("bounds"));
+  const shapes = withBounds(parseShapes(await io.readTurtleTree("shapes")), bounds);
+  const terms = termModels(bounds);
   const conceptDocuments = await Promise.all(
     CONCEPT_SOURCES.map(async ({ path, baseIri }) => ({
       turtle: await io.readNs(path),
@@ -94,8 +97,8 @@ export async function render(io: GenerateIo): Promise<Record<string, string>> {
   }));
   return {
     [OUTPUTS.vocab]: renderVocabConstants(vocab),
-    [OUTPUTS.types]: renderDomainTypes(shapes),
-    [OUTPUTS.descriptors]: renderDescriptors(shapes),
+    [OUTPUTS.types]: renderDomainTypes(shapes, terms),
+    [OUTPUTS.descriptors]: renderDescriptors(shapes, terms),
     [OUTPUTS.concepts]: renderConcepts(
       [...CONCEPT_SOURCES, REFERENCE_SOURCE].map((source) => `ns/${source.path}`),
       schemes,

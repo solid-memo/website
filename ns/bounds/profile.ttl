@@ -1,0 +1,86 @@
+@base <https://solid-memo.com/ns/bounds/profile.ttl> .
+
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix pim:   <http://www.w3.org/ns/pim/space#> .
+@prefix solid: <http://www.w3.org/ns/solid/terms#> .
+
+# What Solid Memo reads of a WebID profile: where the user's data is,
+# the documents that say more of them, their type indexes and identity
+# providers. A small shape of their own, read as a record is, within
+# the same bounds (docs/shapes.md, Bounds).
+<#terms>
+    a sh:NodeShape ;
+    sh:name "ProfileTerms" ;
+    rdfs:comment "What Solid Memo reads of a WebID profile: where the user's data is, the documents that say more of them, their type indexes and identity providers." ;
+    sh:property <#storage> ,
+                <#preferencesFile> ,
+                <#seeAlso> ,
+                <#isPrimaryTopicOf> ,
+                <#publicTypeIndex> ,
+                <#privateTypeIndex> ,
+                <#oidcIssuer> .
+
+# At most 256: a profile names a few, and the app takes at most 16 of
+# the documents they lead to (MAX_PROFILE_DOCUMENTS).
+<#storage>
+    a sh:PropertyShape ;
+    sh:path pim:storage ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 256 ;
+    sh:pattern "^https?://" .
+
+# The preferences file: an http(s) URL.
+<#preferencesFile>
+    a sh:PropertyShape ;
+    sh:path pim:preferencesFile ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:pattern "^https?://" .
+
+# At most 256: a profile names a few, and the app takes at most 16 of
+# the documents they lead to (MAX_PROFILE_DOCUMENTS).
+<#seeAlso>
+    a sh:PropertyShape ;
+    sh:path rdfs:seeAlso ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 256 ;
+    sh:pattern "^https?://" .
+
+# At most 256: a profile names a few, and the app takes at most 16 of
+# the documents they lead to (MAX_PROFILE_DOCUMENTS).
+<#isPrimaryTopicOf>
+    a sh:PropertyShape ;
+    sh:path foaf:isPrimaryTopicOf ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 256 ;
+    sh:pattern "^https?://" .
+
+# At most 256: a profile names a few, and the app takes at most 16 of
+# the documents they lead to (MAX_PROFILE_DOCUMENTS).
+<#publicTypeIndex>
+    a sh:PropertyShape ;
+    sh:path solid:publicTypeIndex ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 256 ;
+    sh:pattern "^https?://" .
+
+# At most 256: a profile names a few, and the app takes at most 16 of
+# the documents they lead to (MAX_PROFILE_DOCUMENTS).
+<#privateTypeIndex>
+    a sh:PropertyShape ;
+    sh:path solid:privateTypeIndex ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 256 ;
+    sh:pattern "^https?://" .
+
+# At most 256: a profile names a few, and the app takes at most 16 of
+# the documents they lead to (MAX_PROFILE_DOCUMENTS).
+<#oidcIssuer>
+    a sh:PropertyShape ;
+    sh:path solid:oidcIssuer ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 256 ;
+    sh:pattern "^https?://" .

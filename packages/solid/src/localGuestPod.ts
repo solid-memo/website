@@ -7,9 +7,10 @@ import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
 import { solidDatasetAsTurtle } from "./client/resources";
-import { PIM, RDF } from "./vocab";
+import { RDF } from "./vocab";
 
 const FOAF = "http://xmlns.com/foaf/0.1/";
+const PIM_STORAGE = "http://www.w3.org/ns/pim/space#storage";
 
 /**
  * The guest's pod (docs/guest-mode.md), kept in `store` and served by
@@ -53,6 +54,6 @@ function profileOf(origin: string) {
   return buildThing(createThing({ name: "me" }))
     .addUrl(RDF.type, `${FOAF}Person`)
     .addStringNoLocale(`${FOAF}name`, "Guest")
-    .addUrl(PIM.storage, origin)
+    .addUrl(PIM_STORAGE, origin)
     .build();
 }

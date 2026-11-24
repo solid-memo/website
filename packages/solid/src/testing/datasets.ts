@@ -7,7 +7,8 @@ import {
   type Dataset,
   datasetAt,
   type FetchedDataset,
-  getStringByLocaleAll,
+  eachStringByLocale,
+  eachStringNoLocale,
   type Subject,
   withQuads,
 } from "../client/rdf";
@@ -45,6 +46,20 @@ export async function writtenAsGiven(_url: string, dataset: Dataset): Promise<Do
 /** A read of `dataset` as a test's pod gives it, with no version (readDocument). */
 export function readOf(dataset: Dataset): DocumentRead {
   return { dataset: dataset as FetchedDataset, etag: undefined };
+}
+
+/** Every string without a language a subject has for a property, in stored order (eachStringNoLocale). */
+export function getStringNoLocaleAll(subject: Subject, property: string): string[] {
+  return [...eachStringNoLocale(subject, property)];
+}
+
+/** A subject's strings with a language for a property, by their language in lower case (eachStringByLocale). */
+export function getStringByLocaleAll(subject: Subject, property: string): Map<string, string[]> {
+  const strings = new Map<string, string[]>();
+  for (const [language, value] of eachStringByLocale(subject, property)) {
+    strings.set(language, [...(strings.get(language) ?? []), value]);
+  }
+  return strings;
 }
 
 /** A subject's strings of a property in `locale` (any case). */

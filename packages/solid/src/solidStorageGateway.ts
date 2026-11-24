@@ -4,7 +4,9 @@
 
 import type { StorageGateway } from "@solid-memo/application/ports";
 import type { Storage } from "@solid-memo/domain/storage";
-import { getThing, getUrlAll } from "./client/rdf";
+import { getThing } from "./client/rdf";
+import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import { readTerms } from "./records";
 import {
   limitedFetch,
   MAX_PROFILE_DOCUMENTS,
@@ -20,7 +22,6 @@ import {
   readNothing,
   storageUrlsOf,
 } from "./profilePlaces";
-import { PIM } from "./vocab";
 import { isInFolder } from "@solid-memo/domain/instanceLayout";
 import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
@@ -60,7 +61,7 @@ export function createSolidStorageGateway({
       // sent counts: one outside the area, not read, does not.
       const webIdProfile = await readDataset(webId, profileFetch);
       const me = getThing(webIdProfile, webId);
-      const named = storageUrlsOf(me === null ? [] : getUrlAll(me, PIM.storage));
+      const named = storageUrlsOf(me === null ? [] : readTerms(me, PROFILE_TERMS).storage);
       const known = named.length > 0 ? named : storageUrlsOf(await walkUpToStorage(webId, fetch));
       const area = ownProfileArea(webId, known);
       const fromProfile = storageUrlsOf(

@@ -205,8 +205,10 @@ describe("a stored version that is not one bounded entity tag", () => {
         sm:receiptOf <${CARDS}> ; sm:documentVersion "\\"${"a".repeat(16_000)}\\"" .`,
     );
     const digests = createSolidDigestRepository({ fetch: pod.fetch });
-    const planted = (await digests.readDigest(INSTANCE))!.receipts[CARDS]!.version;
-    expect(planted).toHaveLength(16_002);
+    // A version longer than any ETag the app sends is not read (ns/bounds/document-receipt.ttl) ...
+    expect((await digests.readDigest(INSTANCE))!.receipts[CARDS]).toBeUndefined();
+    // ... and one given to a read is not sent.
+    const planted = `"${"a".repeat(16_000)}"`;
 
     await expect(readSince(CARDS, planted, refusing)).resolves.toMatchObject({
       unchanged: false,

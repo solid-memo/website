@@ -1,0 +1,166 @@
+@base <https://solid-memo.com/ns/bounds/card.ttl> .
+
+@prefix sh:         <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:       <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:        <http://www.w3.org/2001/XMLSchema#> .
+@prefix solid-memo: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms:    <http://purl.org/dc/terms/> .
+@prefix schema:     <https://schema.org/> .
+
+# The most Solid Memo reads of a card, at every format: each property
+# of every version of its shape that needs a bound. A reader takes at
+# most sh:maxCount values (of a text, one per language), no string
+# longer than sh:maxLength, and only an IRI sh:pattern names, and it
+# stops as it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "CardBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a card, at every format." ;
+    sh:property <#front> ,
+                <#back> ,
+                <#frontImage> ,
+                <#backImage> ,
+                <#frontNote> ,
+                <#backNote> ,
+                <#frontLabel> ,
+                <#backLabel> ,
+                <#frontImageDescription> ,
+                <#backImageDescription> ,
+                <#distractor> ,
+                <#textFormat> ,
+                <#subject> .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#front>
+    a sh:PropertyShape ;
+    sh:path solid-memo:front ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#back>
+    a sh:PropertyShape ;
+    sh:path solid-memo:back ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# An http(s) URL, as every IRI a record holds.
+<#frontImage>
+    a sh:PropertyShape ;
+    sh:path solid-memo:frontImage ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#backImage>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backImage ;
+    sh:pattern "^https?://" .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#frontNote>
+    a sh:PropertyShape ;
+    sh:path solid-memo:frontNote ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#backNote>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backNote ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#frontLabel>
+    a sh:PropertyShape ;
+    sh:path solid-memo:frontLabel ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#backLabel>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backLabel ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#frontImageDescription>
+    a sh:PropertyShape ;
+    sh:path solid-memo:frontImageDescription ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#backImageDescription>
+    a sh:PropertyShape ;
+    sh:path solid-memo:backImageDescription ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# At most 100 wrong options: a question offers 5
+# (MAX_OFFERED_DISTRACTORS), and the library's cards have 6 at most.
+<#distractor>
+    a sh:PropertyShape ;
+    sh:path solid-memo:distractor ;
+    sh:maxCount 100 ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#textFormat>
+    a sh:PropertyShape ;
+    sh:path solid-memo:textFormat ;
+    sh:pattern "^https?://" .
+
+# At most 100 things a card is about: the library's cards name 4 at
+# most.
+<#subject>
+    a sh:PropertyShape ;
+    sh:path dcterms:subject ;
+    sh:maxCount 100 ;
+    sh:pattern "^https?://" .
+
+# The terms Solid Memo reads of a card beside its record: outside the
+# card's shape, so every write of the card keeps them. A small shape
+# of their own, read as a record is, within the same bounds
+# (docs/shapes.md, Bounds).
+<#terms>
+    a sh:NodeShape ;
+    sh:name "CardTerms" ;
+    rdfs:comment "The terms Solid Memo reads of a card beside its record: outside the card's shape, so every write of the card keeps them." ;
+    sh:property <#term-fromRelease> ,
+                <#term-suggestedAnswer> .
+
+# The release the card was taken from: an http(s) URL.
+<#term-fromRelease>
+    a sh:PropertyShape ;
+    sh:path solid-memo:fromRelease ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 1 ;
+    sh:pattern "^https?://" .
+
+# At most 100 suggested answers, as many as wrong options
+# (sm:distractor), which they name.
+<#term-suggestedAnswer>
+    a sh:PropertyShape ;
+    sh:path schema:suggestedAnswer ;
+    sh:nodeKind sh:IRI ;
+    sh:maxCount 100 ;
+    sh:pattern "^https?://" .

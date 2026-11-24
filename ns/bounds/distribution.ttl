@@ -1,0 +1,45 @@
+@base <https://solid-memo.com/ns/bounds/distribution.ttl> .
+
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+
+# The most Solid Memo reads of a distribution: each property of every
+# version of its shape that needs a bound. A reader takes at most
+# sh:maxCount values (of a text, one per language), no string longer
+# than sh:maxLength, and only an IRI sh:pattern names, and it stops as
+# it reaches a bound, so it never builds a longer list
+# (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "DistributionBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a distribution." ;
+    sh:property <#accessURL> ,
+                <#downloadURL> ,
+                <#mediaType> ,
+                <#format> .
+
+# An http(s) URL, as every IRI a record holds.
+<#accessURL>
+    a sh:PropertyShape ;
+    sh:path dcat:accessURL ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#downloadURL>
+    a sh:PropertyShape ;
+    sh:path dcat:downloadURL ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#mediaType>
+    a sh:PropertyShape ;
+    sh:path dcat:mediaType ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#format>
+    a sh:PropertyShape ;
+    sh:path dcterms:format ;
+    sh:pattern "^https?://" .

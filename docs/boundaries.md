@@ -26,7 +26,10 @@ imports and fails on:
   tests aside, and from any file of `solid-memo-client`, tests included
   ([below](#the-solid-client-libraries));
 - an import of `@inrupt/solid-client`'s access control from any file
-  but the public-read grant's, tests aside ([below](#access-control)).
+  but the public-read grant's, tests aside ([below](#access-control));
+- an import of a raw getter of `solid`'s RDF module from any file but
+  `records.ts`, the client modules and the shape check, tests aside
+  ([below](#reading-pod-data)).
 
 Test files follow their subject's rules and, like the vitest configs,
 may use the root `package.json`'s shared test tooling. A package's Vite
@@ -233,6 +236,34 @@ module may import the rest of the library, never its access control.
 At run time, the
 [pod fence](#the-pod-fence) refuses any other module's ACL or ACR
 write.
+
+## Reading pod data
+
+What the app reads of a pod or a release is data anyone may have
+written, so it's read within bounds: how many values of a property,
+how long a text, which IRIs ([shapes.md](shapes.md#bounds)). The raw
+getters of [client/rdf.ts](../packages/solid/src/client/rdf.ts) read
+every value of a property, with no bound. They're `getUrlAll`,
+`getStringNoLocale`, `getLiteralAll`, `getTermAll`, `getInteger` and
+the other `get…` readers of a property, `getPropertyAll` and
+`propertiesOf`. So are the readers one value at a time, `eachUrl`,
+`eachStringNoLocale` and `eachStringByLocale`.
+
+`npm run check:boundaries` (`RAW_GETTERS` and `RAW_GETTERS_ONLY_IN`)
+lets only these files import them, tests and test helpers aside:
+
+- [records.ts](../packages/solid/src/records.ts), which reads every
+  record and every term beside one within its bounds;
+- the client modules (`client/`), which make the getters and read
+  what a server says of a resource;
+- the shape check,
+  [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),
+  which judges a whole document as SHACL does and reads nothing into
+  the app's models.
+
+A mapper or an adapter reads through records.ts: a record, the terms
+beside it, one field alone, or whether a subject has a class or a
+value ([shapes.md](shapes.md#reading-and-writing)).
 
 ## The pod fence
 

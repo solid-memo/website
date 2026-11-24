@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { getSolidDataset } from "./client/resources";
-import { type FetchedDataset, getThing, getUrlAll } from "./client/rdf";
+import { type FetchedDataset, getThing } from "./client/rdf";
+import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import { readTerms, someIri } from "./records";
 import { limitedFetch, MAX_BASE_CHARACTERS, PROFILE_LIMITS } from "./client/readLimits";
 import type { SessionClient } from "./client/session";
 import type { SessionGateway } from "@solid-memo/application/ports";
@@ -64,7 +66,7 @@ function issuerOfProfile(dataset: FetchedDataset, webId: string): string {
   if (!profile) {
     throw new AppError("webIdNoSubject", { webId });
   }
-  const issuers = getUrlAll(profile, SOLID_OIDC_ISSUER);
+  const issuers = readTerms(profile, PROFILE_TERMS).oidcIssuer;
   if (issuers.length === 0) {
     throw new AppError("webIdNoIssuer", { webId });
   }
@@ -99,9 +101,7 @@ function profileNamesIssuer(dataset: FetchedDataset, webId: string, issuer: stri
   const profile = getThing(dataset, webId);
   if (!profile) return false;
   const wanted = withoutTrailingSlash(issuer);
-  return getUrlAll(profile, SOLID_OIDC_ISSUER).some(
-    (listed) => withoutTrailingSlash(listed) === wanted,
-  );
+  return someIri(profile, SOLID_OIDC_ISSUER, (listed) => withoutTrailingSlash(listed) === wanted);
 }
 
 /**

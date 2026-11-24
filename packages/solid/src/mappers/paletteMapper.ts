@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, asUrl, getThing, getThingAll, getUrlAll, setThing } from "../client/rdf";
+import { type Dataset, asUrl, getThing, getThingAll, setThing } from "../client/rdf";
 import { type CustomPalette, MAX_PALETTES } from "@solid-memo/domain/customPalette";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import {
@@ -14,7 +14,15 @@ import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { ColorSetV1 } from "@solid-memo/vocab/types.generated";
 import { COLOR_SET_V1, PALETTE_V1 } from "@solid-memo/vocab/descriptors.generated";
-import { readVersioned, recordThing, storedVersionOf, unlessNewer } from "../records";
+import {
+  allIris,
+  everyIri,
+  hasClass,
+  readVersioned,
+  recordThing,
+  storedVersionOf,
+  unlessNewer,
+} from "../records";
 import { RDF, SM } from "../vocab";
 
 /**
@@ -50,7 +58,7 @@ export function toPalettes(dataset: Dataset, documentUrl: string): CustomPalette
   const palettes: CustomPalette[] = [];
   for (const thing of getThingAll(dataset)) {
     if (palettes.length === MAX_PALETTES) break;
-    if (!getUrlAll(thing, RDF.type).includes(SM.Palette)) continue;
+    if (!hasClass(thing, SM.Palette)) continue;
     const url = asUrl(thing);
     if (!isIn(url, documentUrl)) continue;
     const read = readVersioned(thing, "palette");
@@ -83,20 +91,16 @@ function placeableBy(
   // A set, so each address tried is told taken in one step, however many other palettes name.
   const others = new Set(
     getThingAll(dataset)
-      .filter(
-        (thing) => asUrl(thing) !== palette && getUrlAll(thing, RDF.type).includes(SM.Palette),
-      )
-      .flatMap((thing) => [
-        ...getUrlAll(thing, SM.lightColors),
-        ...getUrlAll(thing, SM.darkColors),
-      ]),
+      .filter((thing) => asUrl(thing) !== palette && hasClass(thing, SM.Palette))
+      .flatMap((thing) => [...allIris(thing, SM.lightColors), ...allIris(thing, SM.darkColors)]),
   );
   return (iri) => {
     if (!isIn(iri, documentUrl) || others.has(iri)) return false;
     const thing = getThing(dataset, iri);
     if (thing === null) return true;
-    const types = getUrlAll(thing, RDF.type);
-    return types.length === 1 && types[0] === SM.ColorSet;
+    return (
+      hasClass(thing, SM.ColorSet) && everyIri(thing, RDF.type, (type) => type === SM.ColorSet)
+    );
   };
 }
 

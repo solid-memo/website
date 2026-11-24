@@ -820,3 +820,85 @@ export type LatestRecord = {
   reviewState: ReviewStateV2;
   step: StepV1;
 };
+
+/** The terms Solid Memo reads of a card beside its record: outside the card's shape, so every write of the card keeps them. */
+export interface CardTerms {
+  readonly fromRelease?: string;
+  readonly suggestedAnswer: readonly string[];
+}
+
+/** The terms Solid Memo reads of a catalog beside its record: an instance's releases, drafts and deck groups, and the course the library offers newcomers. */
+export interface CatalogTerms {
+  readonly publishedRelease: readonly string[];
+  readonly releaseDraft: readonly string[];
+  readonly catalog: readonly string[];
+  readonly newcomerCourse?: string;
+}
+
+/** What Solid Memo reads of a release's contact point. */
+export interface ContactTerms {
+  readonly hasURL: readonly string[];
+}
+
+/** What Solid Memo reads of a deck's cards or reviews document itself: the decks it says it is part of. */
+export interface DeckDocumentTerms {
+  readonly isPartOf: readonly string[];
+}
+
+/** The terms Solid Memo reads of a deck's catalog entry beside its record: outside the deck's shape, so every write of the entry keeps them. */
+export interface DeckTerms {
+  readonly completedChapter: readonly string[];
+  readonly deckCardLanguage?: string;
+  readonly deckPictureHost: readonly string[];
+  readonly deckPausedAt?: string;
+  readonly deckResumesOn?: string;
+  readonly position?: number;
+}
+
+/** The terms Solid Memo reads of a release in the library's index beside its record. */
+export interface LibraryDeckTerms {
+  readonly cardCount?: number;
+}
+
+/** What Solid Memo reads of a release the library's index names as one of a deck's, whether or not it fits a shape. */
+export interface LibraryReleaseTerms {
+  readonly version?: string;
+  readonly issued?: string;
+  readonly versionNotes?: string;
+}
+
+/** What Solid Memo reads of a source a release in the library's index names. */
+export interface LibrarySourceTerms {
+  readonly title?: string;
+  readonly license?: string;
+  readonly creator: readonly string[];
+}
+
+/** The terms Solid Memo reads of the preferences beside their record: outside their shape, so every write of them keeps them. */
+export interface PreferencesTerms {
+  readonly connectedScreenSkipped?: boolean;
+}
+
+/** What Solid Memo reads of a WebID profile: where the user's data is, the documents that say more of them, their type indexes and identity providers. */
+export interface ProfileTerms {
+  readonly storage: readonly string[];
+  readonly preferencesFile?: string;
+  readonly seeAlso: readonly string[];
+  readonly isPrimaryTopicOf: readonly string[];
+  readonly publicTypeIndex: readonly string[];
+  readonly privateTypeIndex: readonly string[];
+  readonly oidcIssuer: readonly string[];
+}
+
+/** What Solid Memo reads of a review state in any format, whether or not it fits its shape: its card and direction. */
+export interface ReviewLinksTerms {
+  readonly reviewOf?: string;
+  readonly reviewDirection?: string;
+}
+
+/** What Solid Memo reads of a type index's registration. */
+export interface TypeRegistrationTerms {
+  readonly instance: readonly string[];
+  readonly instanceContainer: readonly string[];
+  readonly title?: string;
+}

@@ -2,14 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type NamedSubject, type Subject, asUrl, getInteger, getTermAll } from "../client/rdf";
+import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
 import { preferencesFromRecord, preferencesToRecord } from "@solid-memo/domain/preferencesRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { PREFERENCES_V6, SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
-import { readVersioned, recordThing } from "../records";
-import { SM } from "../vocab";
+import { hasUnreadableVersion, readVersioned, recordThing, saysAnyOf } from "../records";
 
 /**
  * Map a preferences subject to what it stores; null when it is not an
@@ -20,8 +19,7 @@ import { SM } from "../vocab";
  * migration would put the defaults in that value's place.
  */
 export function toPreferences(thing: Subject): StoredPreferences | null {
-  const formatVersions = getTermAll(thing, SM.formatVersion);
-  if (formatVersions.length > 0 && getInteger(thing, SM.formatVersion) === null) return null;
+  if (hasUnreadableVersion(thing)) return null;
   const read = readVersioned(thing, "preferences");
   if (read === null || hasValuesOfALaterFormat(thing, read.record.version)) return null;
   return {
@@ -37,7 +35,7 @@ function hasValuesOfALaterFormat(thing: Subject, version: number): boolean {
   const shapes: Record<number, ShapeDescriptor> = SHAPES.preferences;
   const own = new Set(shapes[version].fields.map((field) => field.predicate));
   return PREFERENCES_V6.fields.some(
-    (field) => !own.has(field.predicate) && getTermAll(thing, field.predicate).length > 0,
+    (field) => !own.has(field.predicate) && saysAnyOf(thing, [field.predicate]),
   );
 }
 

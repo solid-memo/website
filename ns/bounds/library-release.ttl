@@ -1,0 +1,43 @@
+@base <https://solid-memo.com/ns/bounds/library-release.ttl> .
+
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+@prefix adms:    <http://www.w3.org/ns/adms#> .
+
+# What Solid Memo reads of a release the library's index names as one
+# of a deck's, whether or not it fits a shape. A small shape of their
+# own, read as a record is, within the same bounds (docs/shapes.md,
+# Bounds).
+<#terms>
+    a sh:NodeShape ;
+    sh:name "LibraryReleaseTerms" ;
+    rdfs:comment "What Solid Memo reads of a release the library's index names as one of a deck's, whether or not it fits a shape." ;
+    sh:property <#version> ,
+                <#issued> ,
+                <#versionNotes> .
+
+# A version number, 1, 2, …: 64 characters is far past any.
+<#version>
+    a sh:PropertyShape ;
+    sh:path dcat:version ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:maxLength 64 .
+
+# When the release was issued.
+<#issued>
+    a sh:PropertyShape ;
+    sh:path dcterms:issued ;
+    sh:datatype xsd:dateTime ;
+    sh:maxCount 1 .
+
+# Text anyone may type, as long as a term may be.
+<#versionNotes>
+    a sh:PropertyShape ;
+    sh:path adms:versionNotes ;
+    sh:datatype xsd:string ;
+    sh:maxCount 1 ;
+    sh:maxLength 16383 .

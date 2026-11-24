@@ -42,7 +42,8 @@ import {
   writeTurtle,
 } from "./readLimits";
 import { getSolidDatasetLinear, parseQuads } from "./resources";
-import { getStringNoLocaleAll, getThing } from "./rdf";
+import { getThing } from "./rdf";
+import { getStringNoLocaleAll } from "../testing/datasets";
 
 const URL_ = "https://other.example/release.ttl";
 const LIMITS = { bytes: 10, quads: 5, characters: 100 };

@@ -2,15 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import {
-  type Dataset,
-  asUrl,
-  buildThing,
-  getInteger,
-  getThing,
-  getThingAll,
-  getUrlAll,
-} from "../client/rdf";
+import { type Dataset, asUrl, buildThing, getThing, getThingAll } from "../client/rdf";
 import { editOf } from "../datasetEdit";
 import {
   deckGroupFromRecord,
@@ -20,11 +12,18 @@ import {
 import type { StoredGroup, StoredLayout, TreeChanges } from "@solid-memo/domain/deckTree";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import { isSameDocument } from "@solid-memo/domain/subjectUrl";
-import { CATALOG_V1, DECK_GROUP_V1 } from "@solid-memo/vocab/descriptors.generated";
+import {
+  CATALOG_TERMS,
+  CATALOG_V1,
+  DECK_GROUP_V1,
+  DECK_TERMS,
+} from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import {
-  readIri,
-  readIris,
+  allIris,
+  hasClass,
+  readFieldOf,
+  readTerms,
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
@@ -32,7 +31,7 @@ import {
   unlessNewer,
   withoutForeignShapedClasses,
 } from "../records";
-import { DCAT, DCTERMS, RDF, SM } from "../vocab";
+import { DCAT, SM } from "../vocab";
 import { toDecks } from "./deckMapper";
 
 /**
@@ -52,7 +51,7 @@ import { toDecks } from "./deckMapper";
 /** The subjects typed as groups, but for those in `decks`. */
 function groupThings(dataset: Dataset, decks: ReadonlySet<string>) {
   return getThingAll(dataset).filter(
-    (thing) => getUrlAll(thing, RDF.type).includes(SM.DeckGroup) && !decks.has(asUrl(thing)),
+    (thing) => hasClass(thing, SM.DeckGroup) && !decks.has(asUrl(thing)),
   );
 }
 
@@ -70,7 +69,7 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
   }
   const deckPositions = new Map<string, number>();
   for (const deck of decks) {
-    const position = getInteger(getThing(dataset, deck.url)!, SM.position);
+    const { position } = readTerms(getThing(dataset, deck.url)!, DECK_TERMS);
     // A position the tree would not keep is none, as a group's is (usablePosition).
     if (usablePosition(position)) deckPositions.set(deck.url, position);
   }
@@ -79,7 +78,7 @@ export function toStoredLayout(dataset: Dataset, catalogUrl: string): StoredLayo
     decks,
     deckPositions,
     groups,
-    rootGroups: root === null ? [] : readIris(root, DCAT.catalog),
+    rootGroups: root === null ? [] : [...readTerms(root, CATALOG_TERMS).catalog],
     readOnly,
   };
 }
@@ -111,7 +110,7 @@ export function withTreeChanges(
   const typed = (type: string) =>
     new Set(
       getThingAll(dataset)
-        .filter((thing) => getUrlAll(thing, RDF.type).includes(type))
+        .filter((thing) => hasClass(thing, type))
         .map(asUrl),
     );
   const datasets = typed(DCAT.Dataset);
@@ -126,8 +125,8 @@ export function withTreeChanges(
   const noCatalog = () => new Error("Deck groups need the catalog, and its publisher");
   // A publisher that is no URL is none: a new group could not be written with it.
   const publisher = () => {
-    const url = root === null ? null : readIri(root, DCTERMS.publisher);
-    if (url === null) throw noCatalog();
+    const url = root === null ? undefined : readFieldOf(root, CATALOG_V1, "publisher");
+    if (url === undefined) throw noCatalog();
     return url;
   };
 
@@ -155,8 +154,8 @@ export function withTreeChanges(
       groups: before!.groups.filter((link) => groupUrls.has(link)),
     };
     const position = changes.positions.get(url) ?? before?.position;
-    // A link the group has that is no URL (readIris) is no member, and stays as it is (setIriAll).
-    const linked = (link: string) => (existing === null ? [] : getUrlAll(existing, link));
+    // A link the group has that is no URL (DECK_GROUP_V1's bounds) is no member, and stays as it is (setIriAll).
+    const linked = (link: string) => (existing === null ? [] : allIris(existing, link));
     const group: StoredGroup = {
       group: titles.get(url) ?? before!.group,
       decks: [...members.decks, ...foreign(linked(DCAT.dataset), datasets)],
@@ -192,7 +191,7 @@ export function withTreeChanges(
     if (changes.rootGroups !== undefined)
       catalog.setIriAll(DCAT.catalog, [
         ...changes.rootGroups,
-        ...foreign(getUrlAll(root, DCAT.catalog), catalogs),
+        ...foreign(allIris(root, DCAT.catalog), catalogs),
       ]);
     edit.setThing(catalog.build());
   }

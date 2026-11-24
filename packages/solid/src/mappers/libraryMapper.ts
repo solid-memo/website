@@ -3,19 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad_Object } from "@rdfjs/types";
-import {
-  type Dataset,
-  type Subject,
-  asUrl,
-  getInteger,
-  getStringNoLocale,
-  getStringNoLocaleAll,
-  getTermAll,
-  getThing,
-  getThingAll,
-  getUrl,
-  getUrlAll,
-} from "../client/rdf";
+import { type Dataset, type Subject, asUrl, getThing, getThingAll } from "../client/rdf";
 import { directionOfConcept } from "@solid-memo/domain/concepts";
 import { copyKeywords } from "@solid-memo/domain/keywords";
 import { libraryCardFromRecord, libraryDeckFromRecord } from "@solid-memo/domain/deckRecord";
@@ -29,10 +17,29 @@ import {
   type LibrarySource,
 } from "@solid-memo/domain/library";
 import { LATEST_VERSION, type ChapterV1, type StepV1 } from "@solid-memo/vocab/types.generated";
+import {
+  CATALOG_TERMS,
+  CATALOG_V1,
+  CONTACT_TERMS,
+  LIBRARY_DECK_TERMS,
+  LIBRARY_RELEASE_TERMS,
+  LIBRARY_SOURCE_TERMS,
+  SHAPES,
+} from "@solid-memo/vocab/descriptors.generated";
+import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
-import { migrateWithinBound, readDatetime, readVersioned, storedVersionOf } from "../records";
+import {
+  countOf,
+  hasClass,
+  migrateWithinBound,
+  onlyValueOf,
+  readFieldOf,
+  readTerms,
+  readVersioned,
+  storedVersionOf,
+} from "../records";
 import { agentNamesOf, authorOfAgents, distractorsOf, readCard } from "./deckMapper";
-import { ADMS, DCAT, DCTERMS, RDF, SCHEMA, SM, VCARD } from "../vocab";
+import { DCAT, SCHEMA, SM } from "../vocab";
 import {
   courseOutlineFromRecords,
   outlineOfCards,
@@ -55,13 +62,11 @@ import type { LibraryIndexView } from "@solid-memo/domain/release/releaseCheck";
  * fetched from.
  */
 export function toLibraryDecks(index: Dataset): LibraryDeck[] {
-  const catalog = getThingAll(index).find((thing) =>
-    getUrlAll(thing, RDF.type).includes(DCAT.Catalog),
-  );
+  const catalog = getThingAll(index).find((thing) => hasClass(thing, DCAT.Catalog));
   if (catalog === undefined) return [];
   const names = agentNamesOf(index);
-  const newcomerCourse = getUrl(catalog, SM.newcomerCourse);
-  return getUrlAll(catalog, DCAT.dataset)
+  const { newcomerCourse } = readTerms(catalog, CATALOG_TERMS);
+  return readFieldOf(catalog, CATALOG_V1, "dataset")!
     .map((seriesUrl) => toLibraryDeck(index, seriesUrl, names))
     .filter((deck): deck is LibraryDeck => deck !== null)
     .map((deck) =>
@@ -77,12 +82,11 @@ export function toLibraryDecks(index: Dataset): LibraryDeck[] {
  * its catalog's publisher, and every release of every deck it lists.
  */
 export function toLibraryIndexView(indexUrl: string, index: Dataset): LibraryIndexView {
-  const catalog = getThingAll(index).find((thing) =>
-    getUrlAll(thing, RDF.type).includes(DCAT.Catalog),
-  );
+  const catalog = getThingAll(index).find((thing) => hasClass(thing, DCAT.Catalog));
   return {
     url: indexUrl,
-    publisher: catalog === undefined ? null : getUrl(catalog, DCTERMS.publisher),
+    publisher:
+      (catalog === undefined ? null : readFieldOf(catalog, CATALOG_V1, "publisher")) ?? null,
     releases: toLibraryDecks(index).flatMap((deck) => deck.releases.map((release) => release.url)),
   };
 }
@@ -117,7 +121,7 @@ function toLibraryDeck(
       .map((url) => toLibraryRelease(index, url))
       .sort((a, b) => Number(a.version) - Number(b.version)),
     title: release.title,
-    cardCount: getInteger(currentThing!, SM.cardCount) ?? 0,
+    cardCount: readTerms(currentThing!, LIBRARY_DECK_TERMS).cardCount ?? 0,
     languages: [...release.language],
     authors: release.creator.map((agent) => names.get(agent) ?? agent),
     ...(release.license === undefined ? {} : { license: release.license }),
@@ -127,28 +131,49 @@ function toLibraryDeck(
     ...(modifiedAt === undefined ? {} : { modifiedAt }),
     themes: [...release.theme],
     keywords: copyKeywords(release.keyword),
-    ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
-      toLibrarySource(sourceUrl, getThing(index, sourceUrl)),
+    ...boundedSources(
+      release.wasDerivedFrom,
+      (sourceUrl) => toLibrarySource(sourceUrl, getThing(index, sourceUrl)),
+      sourceCountOf(currentThing!, current.record.version),
     ),
     ...courseOf(currentThing!),
   });
-  const total = authorCountOf(currentThing!, current.record.version, release.creator);
+  const total = authorCountOf(currentThing!, current.record.version);
   return { ...listing, ...listedAuthors(listing.authors, total) };
 }
 
+/** The fields of several values of a release that a listing counts past their bounds (countOf). */
+type CountedFields = {
+  creator: readonly string[];
+  source: readonly string[];
+  wasDerivedFrom: readonly string[];
+};
+
+/** The descriptor a release of `version` is read with, for the fields a listing counts. */
+function releaseDescriptor(version: number): ShapeDescriptor<CountedFields> {
+  return (SHAPES.libraryDeck as unknown as Record<number, ShapeDescriptor<CountedFields>>)[
+    version
+  ]!;
+}
+
 /**
- * How many authors a release names. One from before format 3 names them
- * as text, of which only the first MAX_DECK_METADATA are read
- * (records.ts namedCreators), so they are counted where it stores them,
- * with no agent named for any.
+ * How many authors a release names. Only the first MAX_DECK_METADATA
+ * are read (ns/bounds/library-deck.ttl), and one from before format 3
+ * names them as text, so they are counted where it stores them, with
+ * no agent named for any.
  */
-function authorCountOf(thing: Subject, version: number, creators: readonly string[]): number {
-  return version < 3 ? getStringNoLocaleAll(thing, DCTERMS.creator).length : creators.length;
+function authorCountOf(thing: Subject, version: number): number {
+  return countOf(thing, releaseDescriptor(version), "creator");
+}
+
+/** How many sources a release names, past the first it reads: dcterms:source before format 3. */
+function sourceCountOf(thing: Subject, version: number): number {
+  return countOf(thing, releaseDescriptor(version), version < 3 ? "source" : "wasDerivedFrom");
 }
 
 /** `isCourse` for a release that is also typed schema:Course. */
 function courseOf(release: Subject): { isCourse?: true } {
-  return getUrlAll(release, RDF.type).includes(SCHEMA.Course) ? { isCourse: true } : {};
+  return hasClass(release, SCHEMA.Course) ? { isCourse: true } : {};
 }
 
 /**
@@ -162,10 +187,10 @@ function courseOf(release: Subject): { isCourse?: true } {
  * the contact the release's creator saw.
  */
 function contactOf(release: Subject, dataset: Dataset): { contact?: string } {
-  const points = getTermAll(release, DCAT.contactPoint);
-  if (points.length !== 1) return {};
-  const thing = subjectAt(dataset, points[0]!);
-  const urls = thing === null ? [] : getUrlAll(thing, VCARD.hasURL);
+  const point = onlyValueOf(release, DCAT.contactPoint);
+  if (point === null) return {};
+  const thing = subjectAt(dataset, point);
+  const urls = thing === null ? [] : readTerms(thing, CONTACT_TERMS).hasURL;
   return urls.length === 1 ? { contact: urls[0]! } : {};
 }
 
@@ -179,26 +204,27 @@ function subjectAt(dataset: Dataset, term: Quad_Object): Subject | null {
 function toLibraryRelease(index: Dataset, url: string): LibraryRelease {
   const thing = getThing(index, url);
   if (thing === null) return { url, version: "?" };
-  const issued = readDatetime(thing, DCTERMS.issued);
-  const notes = getStringNoLocale(thing, ADMS.versionNotes);
+  const { version, issued, versionNotes } = readTerms(thing, LIBRARY_RELEASE_TERMS);
   return {
     url,
-    version: getStringNoLocale(thing, DCAT.version) ?? "?",
-    ...(issued === null ? {} : { issued: issued.toISOString() }),
-    ...(notes === null ? {} : { notes }),
+    version: version ?? "?",
+    ...(issued === undefined ? {} : { issued }),
+    ...(versionNotes === undefined ? {} : { notes: versionNotes }),
   };
 }
 
 /** A source by URL, plus whatever the index says about it (maybe nothing). */
 function toLibrarySource(url: string, thing: Subject | null): LibrarySource {
   if (thing === null) return { url, authors: [] };
-  const title = getStringNoLocale(thing, DCTERMS.title);
-  const license = getUrl(thing, DCTERMS.license);
+  const { title, license, creator } = readTerms(thing, LIBRARY_SOURCE_TERMS);
+  // Only its first authors are read: how many it names, when more.
+  const authorCount = countOf(thing, LIBRARY_SOURCE_TERMS, "creator");
   return {
     url,
-    ...(title === null ? {} : { title }),
-    authors: getStringNoLocaleAll(thing, DCTERMS.creator),
-    ...(license === null ? {} : { license }),
+    ...(title === undefined ? {} : { title }),
+    authors: [...creator],
+    ...(authorCount > creator.length ? { authorCount } : {}),
+    ...(license === undefined ? {} : { license }),
   };
 }
 
@@ -298,9 +324,11 @@ export function toStandaloneLibraryDeck(url: string, dataset: Dataset): LibraryD
     languages: [...release.language],
     ...(release.created === undefined ? {} : { createdAt: release.created }),
     // Its content keeps its first authors (libraryDeckFromRecord): how many it names, when more.
-    ...listedAuthors(content.authors, authorCountOf(deck, read.record.version, release.creator)),
-    ...boundedSources(release.wasDerivedFrom, (sourceUrl) =>
-      toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
+    ...listedAuthors(content.authors, authorCountOf(deck, read.record.version)),
+    ...boundedSources(
+      release.wasDerivedFrom,
+      (sourceUrl) => toLibrarySource(sourceUrl, getThing(dataset, sourceUrl)),
+      sourceCountOf(deck, read.record.version),
     ),
   };
 }
@@ -375,8 +403,7 @@ type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
  * than the URL it was fetched from; undefined when it holds none.
  */
 function releaseDeckOf(url: string, dataset: Dataset): Subject | undefined {
-  const isDeck = (thing: Subject | null) =>
-    thing !== null && getUrlAll(thing, RDF.type).includes(SM.Deck);
+  const isDeck = (thing: Subject | null) => thing !== null && hasClass(thing, SM.Deck);
   const at = getThing(dataset, url);
   return isDeck(at) ? at! : getThingAll(dataset).find(isDeck);
 }
@@ -409,7 +436,7 @@ function toLibraryCard(
   dataset: Dataset,
   own: ReadonlySet<string>,
 ): LibraryCard | null {
-  if (!getUrlAll(thing, RDF.type).includes(SM.Card)) return null;
+  if (!hasClass(thing, SM.Card)) return null;
   const formatVersion = storedVersionOf(thing);
   if (formatVersion > LATEST_VERSION.card) {
     throw new AppError("libraryCardTooNew", {

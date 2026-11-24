@@ -5,6 +5,8 @@
 import { describe, expect, it } from "vitest";
 import type { Deck } from "./deck";
 import {
+  boundedSources,
+  MAX_LISTED_SOURCES,
   deckCardLanguages,
   filterLibraryDecks,
   isCopyOf,
@@ -56,6 +58,29 @@ const nouns = libraryDeck("swedish-nouns", [`${TOPIC}swedish`], {
   languages: [SWE, ENG],
 });
 const http = libraryDeck("http", [`${TOPIC}computing`]);
+
+describe("boundedSources", () => {
+  const urls = Array.from({ length: 3 }, (_, i) => `https://e.example/${i}`);
+  const describe_ = (url: string) => ({ url, authors: [] });
+
+  it("lists the sources and says how many there are past what a listing keeps", () => {
+    expect(boundedSources(urls, describe_)).toEqual({ sources: urls.map(describe_) });
+    const total = MAX_LISTED_SOURCES + 5;
+    expect(boundedSources(urls, describe_, total)).toEqual({
+      sources: urls.map(describe_),
+      sourceCount: total,
+    });
+  });
+
+  it("says how many authors a source names past the first it was given", () => {
+    const [source] = boundedSources([urls[0]!], (url) => ({
+      url,
+      authors: ["Ann"],
+      authorCount: 150,
+    })).sources;
+    expect(source).toEqual({ url: urls[0], authors: ["Ann"], authorCount: 150 });
+  });
+});
 
 describe("isCopyOf", () => {
   const deck = { sourceUrl: "https://solid-memo.com/decks/capitals/v1.ttl" } as Deck;

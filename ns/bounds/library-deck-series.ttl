@@ -1,0 +1,90 @@
+@base <https://solid-memo.com/ns/bounds/library-deck-series.ttl> .
+
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix dcat:    <http://www.w3.org/ns/dcat#> .
+
+# The most Solid Memo reads of a deck's series in the library's index:
+# each property of every version of its shape that needs a bound. A
+# reader takes at most sh:maxCount values (of a text, one per
+# language), no string longer than sh:maxLength, and only an IRI
+# sh:pattern names, and it stops as it reaches a bound, so it never
+# builds a longer list (docs/shapes.md, Bounds).
+<#bounds>
+    a sh:NodeShape ;
+    sh:name "LibraryDeckSeriesBounds" ;
+    rdfs:comment "The bounds on what Solid Memo reads of a deck's series in the library's index." ;
+    sh:property <#title> ,
+                <#description> ,
+                <#publisher> ,
+                <#theme> ,
+                <#keyword> ,
+                <#first> ,
+                <#last> ,
+                <#hasVersion> ,
+                <#hasCurrentVersion> .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#title>
+    a sh:PropertyShape ;
+    sh:path dcterms:title ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# Text anyone may type, in up to 100 languages (MAX_DECK_METADATA, the
+# most a deck keeps of its title's), each value as long as a term may
+# be (16,383 characters, MAX_TERM_CHARACTERS).
+<#description>
+    a sh:PropertyShape ;
+    sh:path dcterms:description ;
+    sh:maxCount 100 ;
+    sh:maxLength 16383 .
+
+# An http(s) URL, as every IRI a record holds.
+<#publisher>
+    a sh:PropertyShape ;
+    sh:path dcterms:publisher ;
+    sh:pattern "^https?://" .
+
+# At most 100 themes (MAX_DECK_METADATA).
+<#theme>
+    a sh:PropertyShape ;
+    sh:path dcat:theme ;
+    sh:maxCount 100 ;
+    sh:pattern "^https?://" .
+
+# At most 1,000 keywords in all its languages (MAX_DECK_KEYWORDS).
+<#keyword>
+    a sh:PropertyShape ;
+    sh:path dcat:keyword ;
+    sh:maxCount 1000 ;
+    sh:maxLength 16383 .
+
+# An http(s) URL, as every IRI a record holds.
+<#first>
+    a sh:PropertyShape ;
+    sh:path dcat:first ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#last>
+    a sh:PropertyShape ;
+    sh:path dcat:last ;
+    sh:pattern "^https?://" .
+
+# At most 1,000 releases of a deck: the library's decks have 5 at
+# most.
+<#hasVersion>
+    a sh:PropertyShape ;
+    sh:path dcat:hasVersion ;
+    sh:maxCount 1000 ;
+    sh:pattern "^https?://" .
+
+# An http(s) URL, as every IRI a record holds.
+<#hasCurrentVersion>
+    a sh:PropertyShape ;
+    sh:path dcat:hasCurrentVersion ;
+    sh:pattern "^https?://" .

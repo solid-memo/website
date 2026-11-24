@@ -392,6 +392,40 @@ describe("boundaryProblems", () => {
   });
 });
 
+describe("the raw getters of the RDF module", () => {
+  it("fail outside records.ts, the client modules and the shape check, tests aside", () => {
+    const solid = workspace("solid", {
+      "src/records.ts": 'import { getUrlAll, eachUrl } from "./client/rdf";',
+      "src/client/resources.ts": 'import { getUrlAll } from "./rdf";',
+      "src/shaclShapeValidator.ts": 'import { getUrlAll } from "./client/rdf";',
+      "src/mappers/deckMapper.ts": [
+        "import {",
+        "  getThing,",
+        "  getUrlAll,",
+        "  type Subject,",
+        "  getStringNoLocale as text,",
+        '} from "../client/rdf";',
+        'import { hasClass } from "../records";',
+      ].join("\n"),
+      "src/ownership.ts": 'import * as rdf from "./client/rdf.ts";',
+      "src/typeIndex.ts": 'import { eachUrl, propertiesOf, getPropertyAll } from "./client/rdf";',
+      "src/other.ts": 'import { getUrlAll } from "./other/rdf";',
+      "src/mappers/deckMapper.test.ts": 'import { getUrlAll } from "../client/rdf";',
+      "src/testing/datasets.ts": 'import { eachStringNoLocale } from "../client/rdf";',
+    });
+    const only =
+      "(only solid files matching /^src\\/(records\\.ts|client\\/.*|shaclShapeValidator\\.ts)$/ may).";
+    expect(problems(solid)).toEqual([
+      `packages/solid/src/mappers/deckMapper.ts: may not import getUrlAll from ../client/rdf: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/mappers/deckMapper.ts: may not import getStringNoLocale from ../client/rdf: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/ownership.ts: may not import everything from ./client/rdf.ts: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/typeIndex.ts: may not import eachUrl from ./client/rdf: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/typeIndex.ts: may not import propertiesOf from ./client/rdf: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/typeIndex.ts: may not import getPropertyAll from ./client/rdf: read pod data through records.ts, within its bounds ${only}`,
+    ]);
+  });
+});
+
 describe("sourceFiles", () => {
   it("lists a package's TypeScript sources, build output, installs and declarations aside", () => {
     const dir = mkdtempSync(join(tmpdir(), "boundaries-"));

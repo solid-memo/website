@@ -23,7 +23,12 @@
  *   solid-memo-client, the client that replaces them; and some exports of
  *   one only from certain files:
  *   `@inrupt/solid-client`'s access control, by the public-read grant alone
- *   (docs/boundaries.md, Access control).
+ *   (docs/boundaries.md, Access control);
+ * - the raw getters of the solid package's RDF module (client/rdf.ts),
+ *   which read every value of a property, by records.ts, the client
+ *   modules and the shape check alone (docs/boundaries.md, Reading pod
+ *   data): a mapper reads through records.ts, within the bounds of
+ *   ns/bounds/.
  *
  * Test files and configs may also use the shared test tooling from the
  * root package.json.
@@ -137,6 +142,32 @@ export const VENDOR_ONLY_FROM: {
     files: { solid: /^src\/client\/access\.ts$/ },
   },
 ];
+
+/**
+ * The raw getters of the app's RDF module (packages/solid/src/client/rdf.ts):
+ * each reads a property's values, every one of them, with no bound
+ * (getUrlAll, getStringNoLocale, getTermAll, getPropertyAll,
+ * propertiesOf, and the readers one at a time, eachUrl and its
+ * siblings). Outside data is read through records.ts, whose readers
+ * keep to the bounds of ns/bounds/ (docs/shapes.md, Bounds).
+ */
+export const RAW_GETTERS =
+  /^(get(Url|Iri|StringNoLocale|StringWithLocale|StringByLocale|StringEnglish|Literal|Term|NamedNode|Integer|Decimal|Boolean|Datetime|Date|Time)(All)?|getPropertyAll|propertiesOf|each[A-Z]\w*)$/;
+
+/**
+ * The module whose raw getters RAW_GETTERS names, by package, as a path
+ * from the package's folder, and the files that may import them, tests
+ * aside: records.ts, which reads every record and term within its
+ * bounds; the client modules, which make the getters and read what a
+ * server says of a resource; and the shape check, which judges a whole
+ * document as SHACL does and reads nothing into the app's models.
+ */
+export const RAW_GETTERS_ONLY_IN: Record<string, { module: string; files: RegExp }> = {
+  solid: {
+    module: "src/client/rdf",
+    files: /^src\/(records\.ts|client\/.*|shaclShapeValidator\.ts)$/,
+  },
+};
 
 /** A static import's specifier, and what it names: the names inside its braces, or "*" for a namespace import. */
 export const NAMED_IMPORT =
@@ -282,16 +313,7 @@ function vendorImportProblems(where: string, short: string, file: string, text: 
     if (keptOut(short, file, specifier!)) continue;
     for (const rule of VENDOR_ONLY_FROM) {
       if (!rule.specifier.test(specifier!) || rule.files[short]?.test(file)) continue;
-      const names =
-        namespace !== undefined
-          ? ["*"]
-          : braces!.split(",").map(
-              (one) =>
-                one
-                  .trim()
-                  .replace(/^type\s+/, "")
-                  .split(/\s+as\s+/)[0]!,
-            );
+      const names = importedNames(braces, namespace);
       for (const name of names.filter((one) => one === "*" || rule.names.test(one))) {
         problems.push(
           `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: only ${onlyFiles(rule.files)} may.`,
@@ -320,6 +342,39 @@ function vendorPackageProblems(
   const vendor = VENDOR_ONLY_IN.find((rule) => rule.specifier.test(specifier));
   if (vendor === undefined || isTestFile(file) || vendor.files[short]?.test(file)) return [];
   return [`${where}: may not import "${specifier}": only ${onlyFiles(vendor.files)} may.`];
+}
+
+/** The names a static import names (NAMED_IMPORT): "*" for a namespace import, each name without `type` or its alias. */
+function importedNames(braces: string | undefined, namespace: string | undefined): string[] {
+  if (namespace !== undefined) return ["*"];
+  return braces!.split(",").map(
+    (one) =>
+      one
+        .trim()
+        .replace(/^type\s+/, "")
+        .split(/\s+as\s+/)[0]!,
+  );
+}
+
+/**
+ * The raw getters a file imports that RAW_GETTERS_ONLY_IN keeps to
+ * other files of its package (fileProblems), tests aside.
+ */
+function rawGetterProblems(where: string, short: string, file: string, text: string): string[] {
+  const rule = RAW_GETTERS_ONLY_IN[short];
+  if (rule === undefined || rule.files.test(file)) return [];
+  const problems: string[] = [];
+  for (const [, braces, namespace, specifier] of text.matchAll(NAMED_IMPORT)) {
+    if (!specifier!.startsWith(".")) continue;
+    if (join(dirname(file), specifier!).replace(/\.ts$/, "") !== rule.module) continue;
+    for (const name of importedNames(braces, namespace)) {
+      if (name !== "*" && !RAW_GETTERS.test(name)) continue;
+      problems.push(
+        `${where}: may not import ${name === "*" ? "everything" : name} from ${specifier}: read pod data through records.ts, within its bounds (only ${short} files matching ${rule.files} may).`,
+      );
+    }
+  }
+  return problems;
 }
 
 /** What one source file of a workspace package imports against its boundaries. */
@@ -380,6 +435,7 @@ function fileProblems(
     }
   }
   if (!test) problems.push(...vendorImportProblems(where, short, file, text));
+  if (!test) problems.push(...rawGetterProblems(where, short, file, text));
   return problems;
 }
 

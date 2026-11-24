@@ -32,7 +32,15 @@ import {
   removeOldRegistrations,
   renameInstanceRegistrations,
 } from "./typeIndex";
-import { DCAT, DCTERMS, FOAF, PIM, RDF, RDFS, SM, SOLID } from "./vocab";
+import { DCAT, DCTERMS, RDF, SM, SOLID } from "./vocab";
+
+/** The profile's terms (ns/bounds/profile.ttl). */
+const PIM = {
+  preferencesFile: "http://www.w3.org/ns/pim/space#preferencesFile",
+  storage: "http://www.w3.org/ns/pim/space#storage",
+} as const;
+const RDFS = { seeAlso: "http://www.w3.org/2000/01/rdf-schema#seeAlso" } as const;
+const FOAF = { isPrimaryTopicOf: "http://xmlns.com/foaf/0.1/isPrimaryTopicOf" } as const;
 
 vi.mock("./client/resources", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./client/resources")>();

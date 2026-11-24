@@ -8,6 +8,11 @@ import { HttpError } from "@solid-memo/solid/client/interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
 
+/** Every string without a language, as eachStringNoLocale gives them. */
+const stringsOf = (subject: rdf.Subject, property: string) => [
+  ...rdf.eachStringNoLocale(subject, property),
+];
+
 // changesOf as itself, unless a test has it report changes no edit records (one of a blank node).
 vi.mock("./rdf", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./rdf")>();
@@ -156,7 +161,7 @@ describe("writeDocument", () => {
     const { dataset: saved } = await resources.writeDocument(URL_, dataset, { fetch });
     const stored = rdf.getThing(saved, `${URL_}#card`)!;
     expect(rdf.getUrlAll(stored, `${EX}next`)).toEqual([`${URL_}#other`, `${URL_}#third`]);
-    expect(rdf.getStringNoLocaleAll(stored, `${EX}next`)).toEqual(["a text"]);
+    expect(stringsOf(stored, `${EX}next`)).toEqual(["a text"]);
     expect(rdf.getStringNoLocale(stored, `${EX}front`)).toBe("Sweden");
     expect(sent[0]!.body).toContain("<#card>");
   });
