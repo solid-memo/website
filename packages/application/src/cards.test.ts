@@ -228,8 +228,9 @@ describe("cards", () => {
       expect(vi.mocked(prepareCardChanges).mock.calls).toEqual(
         vi.mocked(applyCardChanges).mock.calls,
       );
+      // The pod in memory gives no version, so none is checked.
       expect(vi.mocked(prepareReviewChanges).mock.calls).toEqual(
-        vi.mocked(applyReviewChanges).mock.calls,
+        vi.mocked(applyReviewChanges).mock.calls.map((call) => [...call, {}]),
       );
       expect(
         Math.max(
@@ -297,15 +298,23 @@ describe("cards", () => {
         remove: [],
         every: true,
       });
-      expect(again.deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledOnce();
+      // The plan's read of the states, then the digest's.
+      expect(again.deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledTimes(2);
     });
 
-    it("writes the reviews document again while it changed or was made meanwhile, three times in all", async () => {
+    it("plans the edit again, nothing sent, when the reviews document is no longer at the version read, three times in all", async () => {
       const edit = { kind: "remove" } as const;
+      const withVersion = (deps: ReturnType<typeof setup>["deps"]) =>
+        vi
+          .mocked(deps.reviewStateRepository.readReviewStatesSince)
+          .mockImplementation(async (d) => ({
+            unchanged: false as const,
+            value: await deps.reviewStateRepository.listReviewStates(d),
+            version: "r1",
+          }));
       const { deps, useCases } = setup();
-      vi.mocked(deps.reviewStateRepository.applyReviewChanges)
-        .mockRejectedValueOnce(changed())
-        .mockRejectedValueOnce(new AppError("createdElsewhere", { url: deck.reviewsDocumentUrl }));
+      withVersion(deps);
+      vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mockRejectedValueOnce(changed());
       await useCases.editCards(
         instance.url,
         deck,
@@ -313,11 +322,15 @@ describe("cards", () => {
         edit,
         planCardEdit([one, two], ["one"], edit),
       );
+      const prepared = vi.mocked(deps.reviewStateRepository.prepareReviewChanges).mock.calls;
+      expect(prepared).toHaveLength(2);
+      expect(prepared.map((call) => call[2])).toEqual([{ version: "r1" }, { version: "r1" }]);
       expect(deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
-      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledTimes(3);
+      expect(deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledOnce();
 
       const busy = setup();
-      vi.mocked(busy.deps.reviewStateRepository.applyReviewChanges).mockRejectedValue(changed());
+      withVersion(busy.deps);
+      vi.mocked(busy.deps.reviewStateRepository.prepareReviewChanges).mockRejectedValue(changed());
       await expect(
         busy.useCases.editCards(
           instance.url,
@@ -327,8 +340,8 @@ describe("cards", () => {
           planCardEdit([one, two], ["one"], edit),
         ),
       ).rejects.toMatchObject({ code: "changedElsewhere" });
-      expect(busy.deps.deckRepository.applyCardChanges).toHaveBeenCalledOnce();
-      expect(busy.deps.reviewStateRepository.applyReviewChanges).toHaveBeenCalledTimes(3);
+      expect(busy.deps.reviewStateRepository.prepareReviewChanges).toHaveBeenCalledTimes(3);
+      expect(busy.deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
     });
 
     it("tells of a delete once its cards are written, so a failed reviews write can still be undone", async () => {
@@ -367,7 +380,8 @@ describe("cards", () => {
         planCardEdit([one, two], ["one"], edit),
       );
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
-      expect(deps.reviewStateRepository.readReviewStatesSince).not.toHaveBeenCalled();
+      // The plan's read of the states, and no digest's.
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledOnce();
     });
 
     it("plans the edit again on a cards document changed meanwhile, and writes it while it is the one previewed", async () => {
@@ -463,9 +477,11 @@ describe("cards", () => {
 
     it("keeps an edit made when the digest cannot be refreshed", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(
-        new Error("offline"),
-      );
+      // The plan's read of the states works; the digest's fails.
+      const read = vi.mocked(deps.reviewStateRepository.readReviewStatesSince);
+      read
+        .mockImplementationOnce(read.getMockImplementation()!)
+        .mockRejectedValue(new Error("offline"));
       const edit = { kind: "retire" } as const;
       await expect(
         useCases.editCards(
@@ -805,6 +821,12 @@ describe("cards", () => {
       vi.mocked(deps.reviewStateRepository.listReviewStates).mockImplementation(async (d) =>
         d.url === deck.url ? { sm2: [studied], fsrs: [studiedFsrs] } : sm2s([]),
       );
+      // Each reviews document at a version of its own.
+      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockImplementation(async (d) => ({
+        unchanged: false as const,
+        value: await deps.reviewStateRepository.listReviewStates(d),
+        version: d.url === deck.url ? "r-source" : "r-target",
+      }));
       return { deps, useCases: createUseCases(deps) };
     }
 
@@ -846,12 +868,16 @@ describe("cards", () => {
         // The source's every state of the card goes: its FSRS-6 one too.
         [deck, { save: [], remove: [{ cardId: "one", direction: "front-to-back" }], every: true }],
       ]);
-      // Every write is made, and checked, before the first is sent.
+      // Every write is made, and checked, before the first is sent: each reviews write only while
+      // its document is at the version the transfer was planned from.
       const { prepareReviewChanges } = deps.reviewStateRepository;
       const { prepareCardChanges } = deps.deckRepository;
-      expect(vi.mocked(prepareReviewChanges).mock.calls).toEqual(
-        vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock.calls,
-      );
+      const [toTarget, toSource] = vi.mocked(deps.reviewStateRepository.applyReviewChanges).mock
+        .calls;
+      expect(vi.mocked(prepareReviewChanges).mock.calls).toEqual([
+        [...toTarget!, { version: "r-target" }],
+        [...toSource!, { version: "r-source" }],
+      ]);
       expect(vi.mocked(prepareCardChanges).mock.calls).toEqual(
         vi.mocked(applyCardChanges).mock.calls,
       );
@@ -1092,9 +1118,13 @@ describe("cards", () => {
 
     it("keeps a transfer made when the digest cannot be refreshed", async () => {
       const { deps, useCases } = setup();
-      vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockRejectedValue(
-        new Error("offline"),
-      );
+      // The plan's reads of both decks' states work; the digests' fail.
+      const read = vi.mocked(deps.reviewStateRepository.readReviewStatesSince);
+      const fine = read.getMockImplementation()!;
+      read
+        .mockImplementationOnce(fine)
+        .mockImplementationOnce(fine)
+        .mockRejectedValue(new Error("offline"));
       await expect(
         useCases.transferCards(
           instance.url,
@@ -1159,12 +1189,17 @@ describe("cards", () => {
       expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(named, undefined, {
         asNoOne: true,
       });
-      expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(named, {
-        asNoOne: true,
-      });
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        named,
+        undefined,
+        { asNoOne: true },
+      );
       // The target is the instance's own: read as its data is.
       expect(deps.deckRepository.readCardsSince).toHaveBeenCalledWith(into, undefined);
-      expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledWith(into);
+      expect(deps.reviewStateRepository.readReviewStatesSince).toHaveBeenCalledWith(
+        into,
+        undefined,
+      );
       expect(deps.deckRepository.applyCardChanges).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
@@ -1177,7 +1212,7 @@ describe("cards", () => {
       ]);
       const asNoOne = async (documents: Partial<Deck>) => {
         vi.mocked(deps.deckRepository.readCardsSince).mockClear();
-        vi.mocked(deps.reviewStateRepository.listReviewStates).mockClear();
+        vi.mocked(deps.reviewStateRepository.readReviewStatesSince).mockClear();
         const from = { ...deck, ...documents };
         await useCases.transferCards(
           instance.url,
@@ -1191,9 +1226,9 @@ describe("cards", () => {
           .mocked(deps.deckRepository.readCardsSince)
           .mock.calls.filter(([d]) => d === from);
         const [reviews] = vi
-          .mocked(deps.reviewStateRepository.listReviewStates)
+          .mocked(deps.reviewStateRepository.readReviewStatesSince)
           .mock.calls.filter(([d]) => d === from);
-        return [cards![2]!.asNoOne, reviews![1]!.asNoOne];
+        return [cards![2]!.asNoOne, reviews![2]!.asNoOne];
       };
       // In the instance, or in the storage it is in: the instance's, read as the user.
       await expect(asNoOne({})).resolves.toEqual([false, false]);

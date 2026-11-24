@@ -1839,17 +1839,6 @@ describe("library deck upgrade", () => {
     expect(deps.deckRepository.upgradeDeckEntry).not.toHaveBeenCalled();
   });
 
-  it("writes the removed cards' states again from a fresh read when their document changed since it was read", async () => {
-    const { deps, pod, copy, plan, useCases } = await world();
-    const apply = vi.mocked(deps.reviewStateRepository.applyReviewChanges);
-    const changed = new AppError("changedElsewhere", { url: copy.reviewsDocumentUrl });
-    apply.mockRejectedValueOnce(changed);
-    await expect(useCases.applyLibraryUpgrade(copy, plan)).resolves.toMatchObject({ ok: true });
-    expect(apply).toHaveBeenCalledTimes(2);
-    expect(pod.reviews.get(copy.reviewsDocumentUrl)).toEqual([reviewOf("sweden")]);
-    expect(pod.deck).toMatchObject({ sourceUrl: plan.releaseUrl });
-  });
-
   it("stops where a write fails, nothing put back, and offered again it finishes, no card it wrote taken for the user's", async () => {
     const { deps, pod, copy, plan, useCases, v2 } = await world();
     vi.mocked(deps.deckRepository.upgradeDeckEntry).mockRejectedValueOnce(

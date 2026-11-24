@@ -16,7 +16,7 @@ import {
 import { writeDocument } from "./client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
-import { getSolidDatasetOrNull, keptDataset } from "./datasets";
+import { getSolidDatasetOrNull, keptDataset, versionOf } from "./datasets";
 import {
   MAX_READINGS,
   toFsrsState,
@@ -52,6 +52,7 @@ vi.mock("./datasets", async (importOriginal) => {
     ...actual,
     getSolidDatasetOrNull,
     keptDataset: vi.fn(),
+    versionOf: vi.fn(actual.versionOf),
     // An edit's read, as any other read here.
     editDocument: ((url, fetch, edit, policy) =>
       actual.editDocument(url, fetch, edit, {
@@ -1248,5 +1249,56 @@ describe("applyReviewChanges, as the document changes meanwhile", () => {
     const [, saved] = vi.mocked(writeDocument).mock.calls[1];
     expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
     expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-2`)).not.toBeNull();
+  });
+});
+
+describe("prepareReviewChanges", () => {
+  const removal = {
+    save: [],
+    remove: [{ cardId: "card-1", direction: "front-to-back" as const }],
+  };
+
+  it("makes changes made from an earlier read only while the document is still at the version read", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state)));
+    vi.mocked(versionOf).mockReturnValueOnce('"v1"');
+    await (await makeRepository().prepareReviewChanges(deck, removal, { version: '"v1"' }))();
+    expect(writeDocument).toHaveBeenCalledOnce();
+    // Changed since it was read: refused before anything is sent, so the edit is planned again.
+    vi.mocked(versionOf).mockReturnValueOnce('"v2"');
+    await expect(
+      makeRepository().prepareReviewChanges(deck, removal, { version: '"v1"' }),
+    ).rejects.toMatchObject({ code: "changedElsewhere", vars: { url: deck.reviewsDocumentUrl } });
+    // Gone since, or created since it was read as missing.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(null);
+    await expect(
+      makeRepository().prepareReviewChanges(deck, removal, { version: '"v1"' }),
+    ).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(
+      makeRepository().prepareReviewChanges(deck, removal, { version: "absent" }),
+    ).rejects.toMatchObject({ code: "createdElsewhere" });
+    expect(writeDocument).toHaveBeenCalledOnce();
+  });
+
+  it("makes the same changes of the document read afresh when it changed once they were prepared (412)", async () => {
+    const other: ReviewState = { ...state, cardId: "card-2" };
+    vi.mocked(getSolidDatasetOrNull)
+      .mockResolvedValueOnce(documentOf(named(state)))
+      .mockResolvedValue(documentOf(named(state), named(other)));
+    const send = await makeRepository().prepareReviewChanges(deck, removal);
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+
+    await send();
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[1];
+    expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
+    expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-2`)).not.toBeNull();
+  });
+
+  it("passes on another failure of the send at once", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state)));
+    const send = await makeRepository().prepareReviewChanges(deck, removal);
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 500 });
+    await expect(send()).rejects.toEqual({ statusCode: 500 });
+    expect(writeDocument).toHaveBeenCalledOnce();
   });
 });

@@ -43,7 +43,7 @@ import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
 import { mapAtOnce, type inTurns } from "./atOnce";
 import type { Course, CourseUseCases } from "./courses";
-import { changedElsewhere, readNow, unsent } from "./writes";
+import { readNow, unsent } from "./writes";
 import { stepReporter } from "./progress";
 
 export interface LibraryUseCases {
@@ -439,17 +439,11 @@ export function createLibraryUseCases({
       remove: dropped.sm2,
       fsrs: { save: [], remove: dropped.fsrs },
     };
-    const prepared =
+    // Removals by card: a reviews document that changed once the cards were sent has them made of it afresh.
+    const writeReviews =
       dropped.sm2.length + dropped.fsrs.length > 0
         ? await reviewStateRepository.prepareReviewChanges(deck, changes)
         : undefined;
-    const writeReviews =
-      prepared &&
-      (() =>
-        prepared().catch((error: unknown) => {
-          if (!changedElsewhere(error)) throw error;
-          return reviewStateRepository.applyReviewChanges(deck, changes);
-        }));
     return { writeCards, writeReviews };
   }
   async function importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck> {

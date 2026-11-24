@@ -1000,9 +1000,18 @@ export interface ReviewStateRepository {
    * wrote: writtenByNewerApp), but not sent: the function returned sends
    * it, If-Match the read. For a write made after another, so that what
    * would refuse it refuses it before the first, and what is sent is
-   * what was checked.
+   * what was checked. With `version`, the one the changes were made
+   * from (readReviewStatesSince), a document no longer at it refuses
+   * them at once (PreconditionFailedError), nothing sent, so the edit is
+   * planned again. One that changes once the function returned is
+   * called, after the write before it was sent, has the same changes
+   * made of it read afresh (editReviewStates).
    */
-  prepareReviewChanges(deck: Deck, changes: ReviewChanges): Promise<() => Promise<void>>;
+  prepareReviewChanges(
+    deck: Deck,
+    changes: ReviewChanges,
+    options?: { version?: string },
+  ): Promise<() => Promise<void>>;
   /**
    * Write the FSRS-6 states `edit` makes of the deck's states as its
    * reviews document holds them now, in ONE edit made only if it is

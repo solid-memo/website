@@ -2453,8 +2453,13 @@ by one.
   - an edit of the [deck groups](#deck-groups), and the Studio's edits
     of metadata (a deck's authors and license, the instance's name, the
     catalog, a course's chapters completed), three times in all;
-  - a bulk edit of cards, planned again on the cards as they are, three
-    times in all, stopping when that plan isn't the one previewed.
+  - a bulk edit of cards, planned again on the cards and review states
+    as they are, three times in all, stopping when that plan isn't the
+    one previewed;
+  - the reviews document of a bulk edit, a transfer of cards or an
+    upgrade of a library copy, when it changes once the cards document
+    was sent: its changes are made of it read afresh, three times in all
+    (`prepareReviewChanges`).
 
   In the Solid adapters, `editDocument` in `datasets.ts` makes every
   write that re-applies its change. That's the digest, the deck groups,

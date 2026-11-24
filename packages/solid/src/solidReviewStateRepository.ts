@@ -15,7 +15,9 @@ import {
   PreconditionFailedError,
   refuseUnreadableImport,
   saveDataset,
+  versionOf,
 } from "./datasets";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { createDeckDocumentGuard, type UserStorages } from "./deckPlace";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { mapSince, readSince } from "./readSince";
@@ -138,12 +140,28 @@ export function createSolidReviewStateRepository({
   async function prepareReviewChanges(
     deck: Deck,
     changes: ReviewChanges,
+    { version }: { version?: string } = {},
   ): Promise<() => Promise<void>> {
-    const read = await getSolidDatasetOrNull(deck.reviewsDocumentUrl, fetch);
+    const url = deck.reviewsDocumentUrl;
+    const read = await getSolidDatasetOrNull(url, fetch);
+    // Changes made from an earlier read go only to the document as it was then: the edit is planned again.
+    if (
+      version !== undefined &&
+      (read === null ? ABSENT_VERSION : (versionOf(read) ?? null)) !== version
+    )
+      throw new PreconditionFailedError(url, version === ABSENT_VERSION ? "absent" : "unchanged");
     const checked = await checkedChange(read, deck, changes);
     if (checked === null) return async () => undefined;
-    // If-Match the read: a document changed since is not written over.
-    return () => saveDataset(deck.reviewsDocumentUrl, checked, fetch);
+    // If-Match the read. Sent after another write, the edit can no longer be planned again: a document
+    // changed since has the same changes made of it read afresh, never written over.
+    return async () => {
+      try {
+        await saveDataset(url, checked, fetch);
+      } catch (error) {
+        if (!(error instanceof PreconditionFailedError)) throw error;
+        await editReviewStates(deck, () => changes);
+      }
+    };
   }
 
   /**
