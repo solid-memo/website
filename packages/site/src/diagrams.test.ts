@@ -14,6 +14,7 @@ import {
   type DrawInputs,
   diagramHash,
   diagramsOf,
+  DIAGRAM_ROLES,
   diagramTheme,
   embedFont,
   FONT_CHARS,
@@ -331,12 +332,32 @@ describe("diagramTheme", () => {
       htmlLabels: false,
       deterministicIds: true,
       securityLevel: "strict",
-      theme: "default",
+      theme: "base",
       fontFamily: '"Fredoka"',
       themeVariables: { fontFamily: '"Fredoka"' },
       flowchart: { wrappingWidth: 400 },
     });
-    expect(diagramTheme("dark")).toMatchObject({ theme: "dark" });
+  });
+
+  it("draws in the app's colors, light and dark", () => {
+    expect(diagramTheme("light")).toMatchObject({
+      themeVariables: {
+        darkMode: false,
+        background: DIAGRAM_ROLES.light["--bg"],
+        primaryColor: DIAGRAM_ROLES.light["--primary-soft"],
+        primaryBorderColor: DIAGRAM_ROLES.light["--primary"],
+        noteBkgColor: DIAGRAM_ROLES.light["--warning-soft"],
+      },
+    });
+    expect(diagramTheme("dark")).toMatchObject({
+      theme: "base",
+      themeVariables: {
+        darkMode: true,
+        background: DIAGRAM_ROLES.dark["--bg"],
+        primaryColor: DIAGRAM_ROLES.dark["--primary-soft"],
+        textColor: DIAGRAM_ROLES.dark["--text"],
+      },
+    });
   });
 });
 

@@ -39,6 +39,11 @@ const diagramsFrom = (...blocks: string[]) =>
  * BROKEN (with Mermaid's message), THROWN (with a bare string) or draws
  * one with HTML in it for UNSAFE.
  */
+/** The theme a drawing was asked for: both are Mermaid's base theme, the dark one in dark mode. */
+function themeOf(config: Record<string, unknown>): string {
+  return (config.themeVariables as { darkMode: boolean }).darkMode ? "dark" : "light";
+}
+
 function fakeBrowser() {
   const calls: string[] = [];
   const configs: Record<string, unknown>[] = [];
@@ -55,7 +60,7 @@ function fakeBrowser() {
       if (text.includes("THROWN")) throw "a bare string";
       const extra = text.includes("UNSAFE") ? "<foreignObject/>" : "";
       return {
-        svg: `<svg id="${id}" viewBox="0 0 10 10"><style>#${id}{font-family:"Fredoka";}</style>${extra}<text>${configs.at(-1)!.theme}</text></svg>`,
+        svg: `<svg id="${id}" viewBox="0 0 10 10"><style>#${id}{font-family:"Fredoka";}</style>${extra}<text>${themeOf(configs.at(-1)!)}</text></svg>`,
       };
     },
   });
@@ -104,7 +109,7 @@ describe("drawDiagrams", () => {
     expect(fake.launch).toHaveBeenCalledOnce();
     expect(fake.browser.closed).toBe(true);
     expect(fake.pages).toEqual(["closed", "closed"]);
-    expect(fake.configs.map((config) => config.theme)).toEqual(["default", "dark"]);
+    expect(fake.configs.map(themeOf)).toEqual(["light", "dark"]);
     expect(fake.calls).toContain('font 16px "Fredoka"');
     expect(fake.calls).toContain("script mermaid/dist/mermaid.min.js");
     expect(fake.calls).toContain('style @font-face{font-family:"Fredoka";src:url(data');
@@ -113,7 +118,7 @@ describe("drawDiagrams", () => {
       expect(svg).toContain("@font-face");
       expect(checkSvg(svg)).toBeNull();
     }
-    expect(drawing.light).toContain("<text>default</text>");
+    expect(drawing.light).toContain("<text>light</text>");
     expect(drawing.dark).toContain("<text>dark</text>");
     expect(await cached()).toEqual(
       [`${diagram!.keys.dark}.svg`, `${diagram!.keys.light}.svg`].sort(),
@@ -144,7 +149,7 @@ describe("drawDiagrams", () => {
     );
     const again = fakeBrowser();
     const drawn = await drawDiagrams([diagram!], { inputs, cacheDir, launch: again.launch });
-    expect(again.configs.map((config) => config.theme)).toEqual(["dark"]);
+    expect(again.configs.map(themeOf)).toEqual(["dark"]);
     expect(again.pages).toEqual(["closed"]);
     expect(checkSvg(drawn!.get(diagram!.hash)!.dark)).toBeNull();
     expect(await readFile(join(cacheDir, `${diagram!.keys.dark}.svg`), "utf8")).toContain(

@@ -54,7 +54,7 @@
     schema:isPartOf <#the-code> ;
     schema:position 10 ;
     schema:learningResourceType "explanation" ;
-    dcterms:abstract "the hexagonal layers, one npm workspace package each, and the Turbo tasks that check them."@en .
+    dcterms:abstract "Solid Memo at each level of the C4 model, from its context to its components, a grade at runtime, the deployment, and the hexagonal layers, one npm workspace package each, with the Turbo tasks that check them."@en .
 
 <boundaries.md>
     a schema:TechArticle ;

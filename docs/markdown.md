@@ -352,9 +352,12 @@ labels differ, so a diagram is still checked there after an edit
   (`FONT_CHARS`, [below](#the-diagrams-font)). It throws one
   `DiagramError` listing every problem of the page, each with its file
   and line.
-- **How it is drawn.** A block is drawn light (Mermaid's `default`
-  theme) and dark, with labels as SVG text (`htmlLabels: false`, no
-  `<foreignObject>`), and ids stable across builds. A node label wraps
+- **How it is drawn.** A block is drawn light and dark, in the app's
+  Standard palette: Mermaid's `base` theme, its colors taken from
+  Standard's roles (`DIAGRAM_ROLES`, [theme.md](theme.md#color-roles)),
+  a box in the soft green of a selected row, edged in the primary
+  green. Labels are SVG text (`htmlLabels: false`, no
+  `<foreignObject>`), and ids are stable across builds. A node label wraps
   at 400 pixels, so no word of the docs' labels splits. Mermaid wraps
   an edge label at 200 pixels regardless, so no word in one is longer.
   `drawDiagrams` launches one browser and draws in a page per theme. A
