@@ -21,6 +21,14 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.3.1](https://github.com/solid-memo/website/compare/v8.3.0...v8.3.1) (2026-11-24)
+
+### Fixes
+
+* **application:** edit a deck's name, direction, pace and description as its entry is now ([5dc9cdf](https://github.com/solid-memo/website/commit/5dc9cdf8f02d54db0aaaf3475b23bd6a641eba38)), closes [#999](https://github.com/solid-memo/website/issues/999)
+* **application:** set several decks' direction or pace as their entries are now ([b3bf50a](https://github.com/solid-memo/website/commit/b3bf50af9b864923712efbb5acd6ecf3cbd5788d)), closes [#999](https://github.com/solid-memo/website/issues/999)
+* **solid:** keep what a card edit leaves unstated as the card is now ([71c63ce](https://github.com/solid-memo/website/commit/71c63ced7304cb8efe9beb7493955a85d442376d)), closes [#999](https://github.com/solid-memo/website/issues/999)
+
 ## [8.3.0](https://github.com/solid-memo/website/compare/v8.2.4...v8.3.0) (2026-11-24)
 
 ### Features
