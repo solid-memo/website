@@ -128,6 +128,33 @@ describe("BrowserContainer", () => {
     expect(await screen.findByText("remove refused")).toBeInTheDocument();
   });
 
+  it("shows the cards as the pod has them after a removal that stopped part-way", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    // The card's document was written without it; its review states' write then failed.
+    const listCards = vi
+      .fn<() => Promise<Card[]>>()
+      .mockResolvedValueOnce([card])
+      .mockResolvedValue([]);
+    const useCases = makeUseCasesFake({
+      listCards,
+      removeCard: vi.fn(async () => {
+        throw new Error("reviews refused");
+      }),
+    });
+    const { queryClient } = renderContainer(useCases);
+    const queueKey = ["studyQueue", deck.url];
+    queryClient.setQueryData(queueKey, { due: [card], newCards: [], studiedToday: 0 });
+
+    fireEvent.click(await screen.findByRole("button", { name: /^Remove card / }));
+
+    expect(await screen.findByText("reviews refused")).toBeInTheDocument();
+    expect(await screen.findByText("No cards in this deck yet.")).toBeInTheDocument();
+    expect(queryClient.getQueryData(queueKey)).toBeUndefined();
+  });
+
   it("changes the study direction, refreshing the deck lists and dropping today's queue", async () => {
     const useCases = makeUseCasesFake();
     const { queryClient } = renderContainer(useCases);

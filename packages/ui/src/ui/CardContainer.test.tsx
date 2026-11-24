@@ -181,4 +181,27 @@ describe("CardContainer", () => {
     expect(await screen.findByText("remove refused")).toBeInTheDocument();
     expect(onRemoved).not.toHaveBeenCalled();
   });
+
+  it("refreshes cards and reviews after a removal that stopped part-way", async () => {
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const { invalidate, queryClient } = renderContainer(
+      makeUseCasesFake({
+        removeCard: vi.fn(async () => {
+          throw new Error("reviews refused");
+        }),
+      }),
+    );
+    const queueKey = ["studyQueue", deck.url];
+    queryClient.setQueryData(queueKey, { due: [card], newCards: [], studiedToday: 0 });
+
+    fireEvent.click(screen.getByRole("button", { name: "Remove card" }));
+
+    expect(await screen.findByText("reviews refused")).toBeInTheDocument();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["cards", deck.cardsDocumentUrl] });
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["reviews", deck.reviewsDocumentUrl] });
+    expect(queryClient.getQueryData(queueKey)).toBeUndefined();
+  });
 });

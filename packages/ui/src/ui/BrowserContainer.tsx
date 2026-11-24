@@ -15,6 +15,7 @@ import { useI18n } from "./i18n";
 import { Loading } from "./Loading";
 import type { BrowserLanguageFilter } from "./router";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the card list and the deck/card mutations for the Browser view.
@@ -77,17 +78,10 @@ export function BrowserContainer({
     [cardsQuery.data, release],
   );
 
-  const removeCardMutation = useMutation({
+  // A removal that stops part-way may have taken the card from its document already.
+  const removeCardMutation = useWrite({
     mutationFn: (card: Card) => useCases.removeCard(deck, card),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-      });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-    },
+    changes: () => [changes.cardsAndReviews(deck)],
   });
 
   if (cardsQuery.error) {

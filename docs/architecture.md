@@ -184,6 +184,28 @@ study counts (`queryKeys.studyCounts`) under its study queue. Each
 function's comment names the key it sits under, which the modules'
 tests check.
 
+### What a write refreshes
+
+Which cached reads a write makes stale is set once, in
+[packages/ui/src/ui/writeEffects.ts](../packages/ui/src/ui/writeEffects.ts),
+by the kind of write: `changes.cardsAndReviews(deck)` for a write of
+both of a deck's documents, such as a card removed with its review
+states. A screen writes with `useWrite`, a mutation that names its
+writes (`changes`) and refreshes what they make stale as it ends,
+whether it succeeded or failed. A write of several documents may stop
+part-way, after it changed some, so a failed write is followed by a
+refresh too. The refresh is over before the mutation's own
+`onSuccess` or `onError` runs, so a screen that opens another after a
+write opens it on what was written.
+
+A refresh drops some queries, such as a deck's study queue, so that a
+screen opened later doesn't start on what the write changed. A
+dropped query that a screen shows is read again instead. The
+statistics, the cards' progress and their answers are read again after
+every mutation (`keepStudyFiguresFresh` in
+[packages/ui/src/ui/studyFigures.ts](../packages/ui/src/ui/studyFigures.ts)),
+so no write names them.
+
 Every `QueryClient` the apps make hashes its keys with
 `boundedQueryKeyHash` from the first module. TanStack Query keys its
 cache by a hash of each key, by default the key's JSON. A key holds
