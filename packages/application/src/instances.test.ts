@@ -592,7 +592,13 @@ describe("instances", () => {
         ...instance,
         name: "Languages",
       });
-      expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(instance.url, {
+      expect(deps.instanceRepository.editMeta).toHaveBeenCalledWith(
+        instance.url,
+        expect.any(Function),
+      );
+      await expect(
+        vi.mocked(deps.instanceRepository.editMeta).mock.results[0]!.value,
+      ).resolves.toEqual({
         ...meta,
         name: "Languages",
       });
@@ -616,19 +622,19 @@ describe("instances", () => {
         vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(read);
         await useCases.renameInstance(session, instance, "Languages");
       }
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      // The meta already named so is not changed.
+      for (const [, change] of vi.mocked(deps.instanceRepository.editMeta).mock.calls)
+        expect(change({ ...meta, name: "Languages" })).toBeNull();
       expect(deps.deckRepository.checkCatalogSave).not.toHaveBeenCalled();
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledTimes(3);
     });
 
-    it("reads and writes each document again while it changes elsewhere", async () => {
+    it("reads and writes the catalog again while it changes elsewhere", async () => {
       const deps = makeDeps();
       vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
-      vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(changed());
       vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
       await createUseCases(deps).renameInstance(session, instance, "Languages");
-      expect(deps.instanceRepository.readMeta).toHaveBeenCalledTimes(2);
       // Once for the check before the first write, then once for each write.
       expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(3);
       expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledOnce();
@@ -647,7 +653,7 @@ describe("instances", () => {
         ...catalog,
         title: "Languages",
       });
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.editMeta).not.toHaveBeenCalled();
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
     });

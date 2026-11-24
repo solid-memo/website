@@ -445,11 +445,9 @@ export function createInstanceUseCases({
       // The catalog checked before the record is written: one it would refuse (a newer version of the app wrote it) leaves the name as it was everywhere.
       const checked = await catalogRenamed(instance.url, name);
       if (checked !== null) await deckRepository.checkCatalogSave(instance.url, checked);
-      await again(async () => {
-        const meta = await instanceRepository.readMeta(instance.url);
-        if (meta === null) throw new AppError("noMetaToUpdate", { url: instance.url });
-        if (meta.name !== name) await instanceRepository.saveMeta(instance.url, { ...meta, name });
-      });
+      await instanceRepository.editMeta(instance.url, (meta) =>
+        meta.name === name ? null : { ...meta, name },
+      );
       await again(async () => {
         const catalog = await catalogRenamed(instance.url, name);
         if (catalog !== null) await deckRepository.saveCatalog(instance.url, catalog);

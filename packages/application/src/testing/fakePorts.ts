@@ -138,7 +138,12 @@ export function makeDeps() {
     })),
     detachInstance: vi.fn(async () => undefined),
     readMeta: vi.fn(async () => null),
-    saveMeta: vi.fn(async () => undefined),
+    // As the real one does: the meta read, changed, and the change made when there is one.
+    editMeta: vi.fn(async (url, change) => {
+      const meta = await instanceRepository.readMeta(url);
+      if (meta === null) throw new AppError("noMetaToUpdate", { url });
+      return change(meta) ?? meta;
+    }),
     renameRegistrations: vi.fn(async () => undefined),
     upgradeMeta: vi.fn(async () => true),
     readOldRegistrations: vi.fn(async () => ({ registrations: [], unreadableIndexes: [] })),

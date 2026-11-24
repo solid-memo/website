@@ -170,12 +170,21 @@ export interface InstanceRepository {
   /** What the instance's meta document says; null when there is none. */
   readMeta(instanceUrl: string): Promise<InstanceMeta | null>;
   /**
-   * Rewrite the meta document's subject in place, in this app's format,
-   * in ONE save made only if the document is still as it was read
-   * (If-Match): the Studio's rename. Fails when the document is missing:
-   * a meta document is created with its instance, never on its own.
+   * Edit the instance's meta as it is now, for the Studio's rename:
+   * `change` is given the meta as read and returns the meta to write, or
+   * null for no change, which writes nothing. The subject is rewritten in
+   * place, in this app's format (unknown triples survive), from that same
+   * read, in ONE save made only if the document is still as read
+   * (If-Match); when it changed meanwhile, it is read and changed again,
+   * a few times. Throws noMetaToUpdate, writing nothing, when there is
+   * no meta to edit (none, or one that does not fit its shape): a meta
+   * document is created with its instance, never on its own. The meta
+   * as it then stands.
    */
-  saveMeta(instanceUrl: string, meta: InstanceMeta): Promise<void>;
+  editMeta(
+    instanceUrl: string,
+    change: (meta: InstanceMeta) => InstanceMeta | null,
+  ): Promise<InstanceMeta>;
   /**
    * For the format update: bring the meta document's subject up to this
    * app's format in place (unknown triples survive), in ONE save made

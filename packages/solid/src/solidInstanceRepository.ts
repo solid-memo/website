@@ -20,6 +20,7 @@ import { accessControlFetch } from "./accessControlFetch";
 import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";
 import {
+  editDocument,
   getSolidDatasetOrNull,
   readDataset,
   readsAsNone,
@@ -259,18 +260,27 @@ export function createSolidInstanceRepository({
       return subject === null ? null : toInstanceMeta(subject);
     },
 
-    async saveMeta(instanceUrl, meta): Promise<void> {
+    editMeta(instanceUrl, change) {
       const metaUrl = metaUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(metaUrl, metaFetch);
       const url = `${metaUrl}#it`;
-      const existing = dataset === null ? null : getThing(dataset, url);
-      if (dataset === null || existing === null) {
-        throw new AppError("noMetaToUpdate", { url: instanceUrl });
-      }
-      const updated = setThing(dataset, toInstanceMetaThing(url, meta, existing));
-      await checkWrite(updated, [url], "pod");
-      // If-Match the read above.
-      await saveDataset(metaUrl, updated, metaFetch);
+      // The meta written is the one changed from the read the save is If-Match (editDocument).
+      return editDocument(
+        metaUrl,
+        metaFetch,
+        (dataset) => {
+          const existing = dataset === null ? null : getThing(dataset, url);
+          const meta = existing === null ? null : toInstanceMeta(existing);
+          if (meta === null) throw new AppError("noMetaToUpdate", { url: instanceUrl });
+          const changed = change(meta);
+          if (changed === null) return { result: meta };
+          return {
+            dataset: setThing(dataset!, toInstanceMetaThing(url, changed, existing)),
+            subjects: [url],
+            result: changed,
+          };
+        },
+        { checkWrite },
+      );
     },
 
     async upgradeMeta(instanceUrl): Promise<boolean> {
