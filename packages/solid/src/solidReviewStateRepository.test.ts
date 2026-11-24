@@ -45,11 +45,21 @@ vi.mock("./client/resources", async (importOriginal) => {
     writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
   };
 });
-vi.mock("./datasets", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./datasets")>()),
-  getSolidDatasetOrNull: vi.fn(),
-  keptDataset: vi.fn(),
-}));
+vi.mock("./datasets", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./datasets")>();
+  const getSolidDatasetOrNull = vi.fn();
+  return {
+    ...actual,
+    getSolidDatasetOrNull,
+    keptDataset: vi.fn(),
+    // An edit's read, as any other read here.
+    editDocument: ((url, fetch, edit, policy) =>
+      actual.editDocument(url, fetch, edit, {
+        read: getSolidDatasetOrNull,
+        ...policy,
+      })) as typeof actual.editDocument,
+  };
+});
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 
