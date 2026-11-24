@@ -18,7 +18,7 @@
     "@solid-memo/solid": "*",
     "jsonld-streaming-parser": "^5.0.2",
     "n3": "^2.13.12",
-    "oauth4webapi": "^3.8.8"
+    "oauth4webapi": "^3.8.9"
   },
   "devDependencies": {
     "@rdfjs/types": "^2.0.1",
