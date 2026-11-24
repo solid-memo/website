@@ -186,7 +186,8 @@ export function toDeck(
     record,
     authorOfAgents(url, own, agentNames),
   );
-  const completedChapters = boundedCompletedChapters(getUrlAll(thing, SM.completedChapter), [
+  // Only an http(s) URL is a chapter (readIris): another IRI, such as `<rdf:type>`, is dropped here and never written back.
+  const completedChapters = boundedCompletedChapters(readIris(thing, SM.completedChapter), [
     stored.sourceUrl,
   ]);
   const storedLanguage = getStringNoLocale(thing, SM.deckCardLanguage);

@@ -135,6 +135,8 @@ export function createSolidDeckArchive({
       const quads = (await parseDeckFile(text, format, baseUrl)).filter(
         (quad) => unwritableTermOf(quad) === undefined,
       );
+      // What an export of the deck would refuse, an IRI that looks like a prefixed name (`<sm:Deck>`), an import refuses too: kept, it would block the deck's export (GHSA-7w8p-3h7g-cm9x).
+      refusePrefixedLookalikes(quads, DECK_FILE_PREFIXES);
       const dataset = datasetFromQuads(quads);
       const things = getThingAll(dataset);
       for (const thing of things) refuseNewer(thing);

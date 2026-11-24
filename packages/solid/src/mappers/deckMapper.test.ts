@@ -146,6 +146,27 @@ describe("toDeck", () => {
     });
   });
 
+  it("reads as a completed chapter only an http(s) URL (GHSA-7w8p-3h7g-cm9x)", () => {
+    const chapter = "https://solid-memo.com/decks/solid/v1.ttl#ch-1";
+    const withChapters = (chapters: string[]) =>
+      toDeck(
+        deckThing((t) =>
+          chapters.reduce(
+            (built, iri) => built.addIri(SM.completedChapter, iri),
+            t
+              .addIri(RDF.type, SM.Deck)
+              .addStringNoLocale(DCTERMS.title, "Solid")
+              .addIri(SM.cardsDocument, CARDS_DOC)
+              .addIri(SM.reviewsDocument, REVIEWS_DOC),
+          ),
+        ),
+      )!.completedChapters;
+    expect(withChapters(["rdf:type", "sm:Deck", "javascript:alert(1)", chapter])).toEqual([
+      chapter,
+    ]);
+    expect(withChapters(["sm:Deck"])).toBeUndefined();
+  });
+
   it("reads a course's deck by its schema:Course type, which a write of the deck keeps whatever the deck says", () => {
     const thing = deckThing((t) =>
       t

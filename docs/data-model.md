@@ -1492,7 +1492,12 @@ entries:
   or restarts the course, the same way (`setCompletedChapters`), a write
   that passes the shape check. No shape bounds the values, so the app
   keeps at most `MAX_COMPLETED_CHAPTERS` (1,000) of an entry, each URL
-  once, more than any course has chapters. Past that bound, it first
+  once, more than any course has chapters. A chapter is an `http:` or
+  `https:` URL (`readIris`): any other IRI is left out as it's read,
+  so a deck file's import never writes one, and an edit of the
+  chapters drops it from the entry. A deck that already holds one is
+  repaired by restarting its course or marking a chapter not done, or
+  by removing the deck and importing it again. Past that bound, it first
   leaves out the values of no document of the course: the deck's
   release, and on an import its cards' releases too. Then it leaves
   out the oldest. So values of other documents never push a chapter
@@ -2012,6 +2017,8 @@ other triples; neither format can escape it. So is an IRI whose scheme
 is `_`, or that starts with `@`, which JSON-LD reads as a blank node or
 a keyword (`isPrefixedLookalike` in
 [writableTerms.ts](../packages/solid/src/writableTerms.ts)).
+An import refuses a file that names such an IRI the same way
+(`unwritableTerm`), so no deck it imports has one its export refuses.
 
 An import reads the file as the pod is read, with the same mappers:
 
@@ -2278,8 +2285,9 @@ by one.
   `<sm:Deck>` or `<current:c2>`, as a card's copy doesn't (`carriedTo`,
   below). That goes for a card's subject or picture, a deck's license,
   theme or source, and any other IRI a shape names without a fixed set
-  of values. A whole write (PUT) of the document could write such an
-  IRI as the prefixed name it looks like, which names another IRI, and
+  of values, and for a deck's completed chapters, which no shape
+  names. A whole write (PUT) of the document could write such an IRI
+  as the prefixed name it looks like, which names another IRI, and
   the deck's export refuses it. A mailbox (`foaf:mbox`) is read as its
   `mailto:` URL alone. The next write
   of a subject leaves such a value out, but a value the write keeps
