@@ -33,6 +33,7 @@ describe("queryKeys", () => {
       queryKeys.releaseDrafts(INSTANCE),
       queryKeys.releaseDraft(DRAFT),
       queryKeys.releaseDraftWrites(DRAFT),
+      queryKeys.releaseChecks(),
       queryKeys.releaseCheck(DRAFT, "pod", 2),
       queryKeys.releaseShapes(undefined, "library", 0),
       queryKeys.releaseDiff(DRAFT, 3),
@@ -49,6 +50,7 @@ describe("queryKeys", () => {
       ["releaseDrafts", INSTANCE],
       ["releaseDraft", DRAFT],
       ["editReleaseDraft", DRAFT],
+      ["releaseCheck"],
       ["releaseCheck", DRAFT, "pod", 2],
       ["releaseShapes", undefined, "library", 0],
       ["releaseDiff", DRAFT, 3],
@@ -64,5 +66,7 @@ describe("queryKeys", () => {
     expect(queryKeys.deckHealth(INSTANCE, DECK, CARDS).slice(0, check.length)).toEqual(check);
     const cards = queryKeys.cards(CARDS);
     expect(queryKeys.deckTableCards(CARDS).slice(0, cards.length)).toEqual(cards);
+    const checks = queryKeys.releaseChecks();
+    expect(queryKeys.releaseCheck(DRAFT, "pod", 2).slice(0, checks.length)).toEqual(checks);
   });
 });

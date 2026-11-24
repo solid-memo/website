@@ -438,6 +438,10 @@
     "characterReference": "{source} visas som tecknet den namnger. Skriv \\{source} för att visa den som den skrivits.",
     "notOneParagraph": "Kortets baksida är ett av svarsalternativen i en fråga: håll den till ett stycke, som de andra.",
     "dashHeading": "En rad med --- direkt under sig visas som en rubrik. Lämna en tom rad före --- för ett streck i stället; börja raden med ## för en rubrik.",
+    "more": {
+      "one": "Och {count} problem till, som inte visas här.",
+      "other": "Och {count} problem till, som inte visas här."
+    },
     "noText": "Det här visar ingen text som Markdown."
   },
   "multipleChoice": {

@@ -17,6 +17,9 @@ import {
   text,
 } from "../testing/releaseModel";
 import {
+  listedFindings,
+  MARKDOWN_RELEASE_LIMIT,
+  MARKDOWN_TEXT_LIMIT,
   markdownFields,
   markedSubjects,
   markdownProblems,
@@ -232,6 +235,80 @@ describe("markdownProblems", () => {
       },
       // A chapter's description is not chunked.
     ]);
+  });
+});
+
+describe("listedFindings", () => {
+  it("tells the findings listed from how many more the check counted", () => {
+    expect(listedFindings([])).toEqual({ listed: [], more: 0 });
+    expect(listedFindings([{ code: "a" }, { code: "b" }])).toEqual({
+      listed: [{ code: "a" }, { code: "b" }],
+      more: 0,
+    });
+    expect(listedFindings([{ code: "a" }, { code: "more", count: 7 }])).toEqual({
+      listed: [{ code: "a" }],
+      more: 7,
+    });
+  });
+});
+
+describe("markdownProblems' limits", () => {
+  const chunks = () => ({ chunks: 1, empty: 0 });
+  /** Marked cards, `count` of them, each with a front and a back. */
+  const cards = (count: number) => {
+    const ids = Array.from({ length: count }, (_, i) => `q-${i}`);
+    return model({
+      cards: ids.map((id) => card(id, { front: [text(`Front ${id}`)], back: [text("Back")] })),
+      textFormats: ids.map(marker),
+    });
+  };
+  const counted = (problems: readonly { code: string; params?: unknown }[]) =>
+    problems.filter(({ code }) => code === "markdown").length;
+
+  it("lists at most MARKDOWN_TEXT_LIMIT findings of a text, and counts the rest and those the check counted", () => {
+    const found = markdownProblems(cards(1), {
+      chunks,
+      problems: (value) =>
+        value === "Back"
+          ? [{ code: "a" }, { code: "more", count: 7 }]
+          : Array.from({ length: MARKDOWN_TEXT_LIMIT + 5 }, () => ({ code: "b" })),
+    });
+    expect(counted(found)).toBe(MARKDOWN_TEXT_LIMIT + 1);
+    expect(found.some(({ params }) => JSON.stringify(params).includes('"code":"more"'))).toBe(
+      false,
+    );
+    expect(found.at(-1)).toEqual({
+      severity: "error",
+      subject: RELEASE,
+      code: "markdownMore",
+      params: { count: 5 + 7 },
+    });
+  });
+
+  it("lists at most MARKDOWN_RELEASE_LIMIT findings in all, and counts the rest", () => {
+    const count = MARKDOWN_RELEASE_LIMIT / MARKDOWN_TEXT_LIMIT + 3;
+    const found = markdownProblems(cards(count), {
+      chunks,
+      problems: () => [
+        ...Array.from({ length: MARKDOWN_TEXT_LIMIT }, () => ({ code: "a" })),
+        { code: "more", count: 100 },
+      ],
+    });
+    expect(counted(found)).toBe(MARKDOWN_RELEASE_LIMIT);
+    expect(found).toHaveLength(MARKDOWN_RELEASE_LIMIT + 1);
+    // Each card's two sides give MARKDOWN_TEXT_LIMIT findings listed or counted, and 100 counted.
+    expect(found.at(-1)!.params).toEqual({
+      count: count * 2 * (MARKDOWN_TEXT_LIMIT + 100) - MARKDOWN_RELEASE_LIMIT,
+    });
+  });
+
+  it("adds no count when every finding is listed", () => {
+    const found = markdownProblems(cards(2), {
+      chunks,
+      problems: () => Array.from({ length: MARKDOWN_TEXT_LIMIT }, () => ({ code: "a" })),
+    });
+    expect(found).toHaveLength(4 * MARKDOWN_TEXT_LIMIT);
+    expect(found.every(({ code }) => code === "markdown")).toBe(true);
   });
 });
 

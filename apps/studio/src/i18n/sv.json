@@ -1271,6 +1271,10 @@
       "textFormatMisplaced": "Anger ett textformat, vilket bara ett kort, ett steg eller ett kapitel gör.",
       "textFormatUnknown": "Anger ett textformat som appen inte känner till, {format}: dess text visas som vanlig text.",
       "markdown": "{field}, {language}: {finding}",
+      "markdownMore": {
+        "one": "{count} Markdown-problem till, som inte visas: rätta dem som visas och kontrollera igen.",
+        "other": "{count} Markdown-problem till, som inte visas: rätta dem som visas och kontrollera igen."
+      },
       "theoryEmptyChunk": "{field}, {language}: ett tematiskt avbrott först, sist eller direkt efter ett annat ger en tom del, som appen hoppar över. Ett stegs teori visas en del i taget, delad vid sina tematiska avbrott: skriv text mellan varje två.",
       "theoryChunks": "{field}: i {counts}. Ett stegs teori har lika många delar på varje språk, så att den som byter språk inte tappar sin plats.",
       "theoryChunkCount": {

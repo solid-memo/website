@@ -1351,6 +1351,11 @@
       "textFormatMisplaced": "Indica un formato de texto, algo que solo hacen una tarjeta, un paso o un capítulo.",
       "textFormatUnknown": "Indica un formato de texto que esta aplicación no conoce, {format}: su texto se muestra como texto sin formato.",
       "markdown": "{field}, {language}: {finding}",
+      "markdownMore": {
+        "one": "{count} problema de Markdown más, sin mostrar: corrige los que se muestran y vuelve a comprobar.",
+        "many": "{count} problemas de Markdown más, sin mostrar: corrige los que se muestran y vuelve a comprobar.",
+        "other": "{count} problemas de Markdown más, sin mostrar: corrige los que se muestran y vuelve a comprobar."
+      },
       "theoryEmptyChunk": "{field}, {language}: un separador temático al principio, al final o justo después de otro crea una parte vacía, que la aplicación descarta. La teoría de un paso se muestra parte por parte, dividida por sus separadores temáticos: pon texto entre cada dos.",
       "theoryChunks": "{field}: {counts}. La teoría de un paso tiene el mismo número de partes en cada idioma, para que quien cambie de idioma no pierda su sitio.",
       "theoryChunkCount": {

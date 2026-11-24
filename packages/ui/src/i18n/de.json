@@ -438,6 +438,10 @@
     "characterReference": "{source} wird als das Zeichen angezeigt, für das es steht. Schreibe \\{source}, um es wie eingegeben anzuzeigen.",
     "notOneParagraph": "Die Rückseite dieser Karte ist eine Antwortmöglichkeit einer Frage: Beschränke sie wie die anderen auf einen Absatz.",
     "dashHeading": "Eine Zeile mit --- direkt darunter wird als Überschrift angezeigt. Für eine Trennlinie lass eine Leerzeile vor dem ---; für eine Überschrift beginne die Zeile mit ##.",
+    "more": {
+      "one": "Und {count} weiteres Problem, hier nicht aufgeführt.",
+      "other": "Und {count} weitere Probleme, hier nicht aufgeführt."
+    },
     "noText": "Als Markdown gelesen, wird hier kein Text angezeigt."
   },
   "multipleChoice": {

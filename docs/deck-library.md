@@ -702,6 +702,10 @@ problem:
   characters, 8 levels of blocks and markup, and a table of 20 columns
   or 2,000 cells.
 
+`npm run library:check` lists at most 20 findings of a text (500 of a
+release), then one line, "has N more Markdown problems, not listed",
+for the rest: fix those listed, then check again.
+
 It checks too that only a card, a step or a chapter states
 `sm:textFormat` (a distractor's text follows its card's, any other
 subject's is plain), and only a concept of `sm:TextFormats`. Unmarked

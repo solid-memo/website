@@ -1230,6 +1230,23 @@ describe("markdownProblems", () => {
     ]);
   });
 
+  it("lists the first of a text's Markdown problems and counts the rest", () => {
+    const theory = (count: number) =>
+      chapter("ch-1", 0) +
+      step("s-1", "ch-1", 0, ["q-1"], MD).replace(
+        `"Theory s-1."@en`,
+        `"${"<a>".repeat(count)}"@en`,
+      );
+    const html = `${L}: <#s-1> solid-memo:theory@en has raw HTML, "<a>", which is shown as its source: write it as code, or escape its "<" (\\<).`;
+    expect(problemsOf(theory(23))).toEqual([
+      ...Array.from({ length: 20 }, () => html),
+      `${L}: has 3 more Markdown problems, not listed: fix those listed, then check again.`,
+    ]);
+    expect(problemsOf(theory(21)).at(-1)).toBe(
+      `${L}: has 1 more Markdown problem, not listed: fix those listed, then check again.`,
+    );
+  });
+
   it("holds a step's theory to chunks with text in each, as many in each language", () => {
     const theory = (id: string, position: number, texts: string) =>
       step(id, "ch-1", position, ["q-1"], MD).replace(`"Theory ${id}."@en`, texts);

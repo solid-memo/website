@@ -1271,6 +1271,10 @@
       "textFormatMisplaced": "Gibt ein Textformat an, was nur eine Karte, ein Schritt oder ein Kapitel tut.",
       "textFormatUnknown": "Gibt ein Textformat an, das diese App nicht kennt, {format}: Der Text wird als reiner Text angezeigt.",
       "markdown": "{field}, {language}: {finding}",
+      "markdownMore": {
+        "one": "{count} weiteres Markdown-Problem, nicht aufgeführt: Behebe die aufgeführten und prüfe erneut.",
+        "other": "{count} weitere Markdown-Probleme, nicht aufgeführt: Behebe die aufgeführten und prüfe erneut."
+      },
       "theoryEmptyChunk": "{field}, {language}: Eine Trennlinie am Anfang, am Ende oder direkt nach einer anderen ergibt einen leeren Teil, den die App weglässt. Die Theorie eines Schritts wird Teil für Teil angezeigt, geteilt an ihren Trennlinien: Setze zwischen je zwei Trennlinien Text.",
       "theoryChunks": "{field}: {counts}. Die Theorie eines Schritts hat in jeder Sprache gleich viele Teile, damit Lernende beim Wechsel der Sprache ihre Stelle behalten.",
       "theoryChunkCount": {

@@ -38,10 +38,38 @@ export interface TextChunks {
 
 /** The markdown package's reading of a release's text, which the caller passes in. */
 export interface MarkdownCheck {
-  /** What is wrong with a text written in Markdown, held to a rule. */
+  /**
+   * What is wrong with a text written in Markdown, held to a rule: its
+   * first findings, and how many more (listedFindings).
+   */
   problems(text: string, rule: FieldRuleName): readonly MarkdownFinding[];
   /** How a step's theory is chunked. */
   chunks(text: string): TextChunks;
+}
+
+/** At most how many findings of one text a check of a release or a deck's health holds: a dense text can give thousands. */
+export const MARKDOWN_TEXT_LIMIT = 20;
+
+/** At most how many findings of the Markdown check the check of a release holds in all. */
+export const MARKDOWN_RELEASE_LIMIT = 500;
+
+/**
+ * A text's findings (MarkdownCheck.problems) as those listed, and how
+ * many more the check found than it lists: the count of its last
+ * finding, `{ code: "more", count }`, when it ends with one.
+ */
+export function listedFindings<F extends MarkdownFinding>(
+  found: readonly F[],
+): { listed: readonly F[]; more: number } {
+  const last = found.at(-1);
+  return isMore(last)
+    ? { listed: found.slice(0, -1), more: last.count }
+    : { listed: found, more: 0 };
+}
+
+/** Whether a finding is how many more a check found than it lists. */
+function isMore(finding: MarkdownFinding | undefined): finding is { code: "more"; count: number } {
+  return finding?.code === "more";
 }
 
 /** The concepts of solid-memo:TextFormats. */
@@ -107,6 +135,10 @@ export function markdownFields(model: ReleaseModel): MarkdownField[] {
  * `check` in each field, and after a step's theory how it is chunked
  * (theoryChunkProblems). None of this keeps the app safe, which shows
  * any text safely: it is that the text shows as its author meant.
+ *
+ * A text can give any number of findings, so the problems hold at most
+ * MARKDOWN_TEXT_LIMIT of each text's and MARKDOWN_RELEASE_LIMIT in all,
+ * and end with how many more there are (`markdownMore`, on the release).
  */
 export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): ReleaseProblem[] {
   const problems: ReleaseProblem[] = [];
@@ -136,8 +168,16 @@ export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): Rel
   const fields = markdownFields(model);
   // A step's theory, one text a language, as far as it has been read.
   let theory: ReleaseText[] = [];
+  let listed = 0;
+  let more = 0;
   fields.forEach(({ subject, field, text, rule }, index) => {
-    for (const finding of check.problems(text.value, rule)) {
+    const found = listedFindings(check.problems(text.value, rule));
+    const take = Math.min(
+      found.listed.length,
+      MARKDOWN_TEXT_LIMIT,
+      MARKDOWN_RELEASE_LIMIT - listed,
+    );
+    for (const finding of found.listed.slice(0, take)) {
       problems.push(
         problem(
           subject,
@@ -146,6 +186,8 @@ export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): Rel
         ),
       );
     }
+    listed += take;
+    more += found.listed.length - take + found.more;
     if (field !== SM.theory) return;
     theory.push(text);
     const next = fields[index + 1];
@@ -155,6 +197,8 @@ export function markdownProblems(model: ReleaseModel, check: MarkdownCheck): Rel
       theory = [];
     }
   });
+  if (more > 0)
+    problems.push(problem(model.url, { code: "markdownMore", params: { count: more } }));
   return problems;
 }
 

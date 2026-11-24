@@ -451,6 +451,11 @@
     "characterReference": "{source} se muestra como el carácter que nombra. Escribe \\{source} para mostrarlo tal como se escribió.",
     "notOneParagraph": "El reverso de esta tarjeta es una de las opciones de una pregunta: déjalo en un solo párrafo, como las demás.",
     "dashHeading": "Una línea con --- justo debajo se muestra como encabezado. Para una línea horizontal, deja una línea en blanco antes de ---; para un encabezado, empieza la línea con ##.",
+    "more": {
+      "one": "Y {count} problema más, que no se muestra aquí.",
+      "many": "Y {count} problemas más, que no se muestran aquí.",
+      "other": "Y {count} problemas más, que no se muestran aquí."
+    },
     "noText": "Esto no muestra ningún texto como Markdown."
   },
   "multipleChoice": {

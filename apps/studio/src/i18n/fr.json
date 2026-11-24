@@ -1351,6 +1351,11 @@
       "textFormatMisplaced": "Indique un format de texte, ce que seuls une carte, une étape ou un chapitre peuvent faire.",
       "textFormatUnknown": "Indique un format de texte inconnu de cette application, {format} : son texte s’affiche en texte brut.",
       "markdown": "{field}, {language} : {finding}",
+      "markdownMore": {
+        "one": "{count} autre problème de Markdown, non affiché : corrigez ceux qui sont affichés, puis vérifiez à nouveau.",
+        "many": "{count} autres problèmes de Markdown, non affichés : corrigez ceux qui sont affichés, puis vérifiez à nouveau.",
+        "other": "{count} autres problèmes de Markdown, non affichés : corrigez ceux qui sont affichés, puis vérifiez à nouveau."
+      },
       "theoryEmptyChunk": "{field}, {language} : un séparateur thématique placé au début, à la fin ou juste après un autre crée une partie vide, que l’application ignore. La théorie d’une étape s’affiche partie par partie, découpée à ses séparateurs thématiques : mettez du texte entre deux séparateurs.",
       "theoryChunks": "{field} : {counts}. La théorie d’une étape a le même nombre de parties dans chaque langue, pour qu’un apprenant qui change de langue ne perde pas sa place.",
       "theoryChunkCount": {

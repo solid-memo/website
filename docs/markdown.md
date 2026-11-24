@@ -648,6 +648,12 @@ each card.
 | An option that isn't one paragraph (`notOneParagraph`): a distractor's `distractorText`, and the `back` of a card with distractors (field `OPTION`) | Options show on one line, in the inline profile, and must look alike, or the odd one out gives the answer away. A heading is no paragraph: it shows bold on a revealed back. |
 | Past the [limits](#limits): longer than `MAX_CHARS` (`tooLong`), past `MAX_WORK` (`tooComplex`), nested past `MAX_DEPTH` (`tooDeep`, unless it's plain text that shows as written anyway, with no hidden characters), a table past its caps (`largeTable`) | The text, or that part of it, shows as plain text or as its source, its hidden characters as markers. |
 
+A dense text can have a problem every few characters, so
+`markdownProblems` lists at most `MAX_PROBLEMS` (20) of a text's and
+then counts the rest (`more`). The card editor's hints, the Studio's
+checks and the caches that keep what it finds hold no more than that
+of a text.
+
 A step's theory is held to its chunks too: none of them empty, and as
 many in each language, so a learner who switches language keeps their
 place (`deck-library.md`). None of these is a safety rule: the safety rules hold

@@ -106,6 +106,8 @@ export function problemText(problem: MarkdownProblem, t: I18n["t"]): string {
       return t("markdownProblem.notOneParagraph");
     case "dashHeading":
       return t("markdownProblem.dashHeading");
+    case "more":
+      return t("markdownProblem.more", { count: problem.count });
   }
 }
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { ReleaseProblem } from "@solid-memo/domain/release/problems";
 import {
@@ -31,7 +31,8 @@ let kept: { url: string; check: MarkdownCheck } | undefined;
 
 /**
  * The Markdown check every check of the draft shares, its publishing
- * among them, every text remembered (releaseMarkdownCheck). Only the last
+ * among them, which remembers the texts it checked within its caches'
+ * bound (releaseMarkdownCheck). Only the last
  * draft's is kept: another draft's starts anew, so one draft's texts
  * neither stay in memory nor slow the next one's check.
  */
@@ -59,15 +60,28 @@ export function revisionOf(draft: ReleaseDraft): number {
  * another policy's: the workspace's check goes from draft to draft). A
  * check with a part unread is stale at once, so it is made again when its
  * screen opens again or the window is focused. No draft (null), no check.
+ * Once a version is checked, the checks of the other versions that no
+ * screen shows go: the editor makes a version for each change, and each
+ * check holds all its problems.
  */
 export function useReleaseCheck(
   useCases: UseCases,
   draft: ReleaseDraft | null,
   policy: CheckPolicy,
 ) {
+  const queryClient = useQueryClient();
+  const revision = draft === null ? 0 : revisionOf(draft);
   return useQuery<ReleaseCheck>({
-    queryKey: queryKeys.releaseCheck(draft?.url, policy, draft === null ? 0 : revisionOf(draft)),
-    queryFn: () => useCases.checkReleaseDraft(draft!, markdownCheckOf(draft!.url), policy),
+    queryKey: queryKeys.releaseCheck(draft?.url, policy, revision),
+    queryFn: async () => {
+      const found = await useCases.checkReleaseDraft(draft!, markdownCheckOf(draft!.url), policy);
+      queryClient.removeQueries({
+        queryKey: queryKeys.releaseChecks(),
+        type: "inactive",
+        predicate: (query) => query.queryKey[3] !== revision,
+      });
+      return found;
+    },
     enabled: draft !== null,
     placeholderData: (previous, previousQuery) =>
       previousQuery?.queryKey[1] === draft?.url && previousQuery?.queryKey[2] === policy

@@ -133,6 +133,11 @@ describe("markdownHints", () => {
     expect(hint("a\n---")).toEqual([
       "A line with --- right under it shows as a heading. For a line across instead, leave a blank line before the ---; for a heading, start the line with ##.",
     ]);
+    expect(hint("<a>".repeat(21))).toEqual([
+      "HTML such as <a> shows as typed. Put it in backticks to show it as code.",
+      "And 1 more problem, not listed here.",
+    ]);
+    expect(hint("<a>".repeat(23))).toContain("And 3 more problems, not listed here.");
   });
 });
 
