@@ -560,6 +560,16 @@ describe("applyReviewChanges", () => {
     expect(writeDocument).not.toHaveBeenCalled();
   });
 
+  it("prepares a write that sends nothing when the reviews document does not exist and there is nothing to save", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const send = await makeRepository().prepareReviewChanges(deck, {
+      save: [],
+      remove: [{ cardId: "card-2", direction: "front-to-back" }],
+    });
+    await send();
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
   it("creates the reviews document for states to save, as a card moved in with its progress brings", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
     await makeRepository().applyReviewChanges(deck, { save: [state], remove: [] });
@@ -1163,5 +1173,80 @@ describe("writeFsrsStates", () => {
     await makeRepository().writeFsrsStates(deck, fromSm2);
     expect(fromSm2).toHaveBeenCalledOnce();
     expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("editReviewStates", () => {
+  /** A reschedule's change: the state as read, due another day. */
+  const dueLater = vi.fn(({ sm2 }: { sm2: ReviewState[] }) => ({
+    save: sm2.map((each) => ({ ...each, due: "2027-01-01" })),
+    remove: [],
+  }));
+
+  beforeEach(() => {
+    dueLater.mockClear();
+  });
+
+  it("writes the changes made of the document as read, of that same read, in one checked save", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state)));
+    const checkWrite = vi.fn(async () => undefined);
+
+    const written = await makeRepository(checkWrite).editReviewStates(deck, dueLater);
+
+    expect(dueLater).toHaveBeenCalledWith({ sm2: [state], fsrs: [] });
+    expect(written).toEqual({ save: [{ ...state, due: "2027-01-01" }], remove: [] });
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const saved = savedDataset();
+    expect(toReviewState(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)!, deck)?.due).toBe(
+      "2027-01-01",
+    );
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${deck.reviewsDocumentUrl}#card-1`], "pod");
+  });
+
+  it("makes the changes again of the document read afresh when it changed meanwhile (412): a grade made meanwhile is kept", async () => {
+    const graded: ReviewState = { ...state, intervalDays: 9, repetitions: 4 };
+    vi.mocked(getSolidDatasetOrNull)
+      .mockResolvedValueOnce(documentOf(named(state)))
+      .mockResolvedValue(documentOf(named(graded)));
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+
+    await makeRepository().editReviewStates(deck, dueLater);
+
+    expect(dueLater).toHaveBeenCalledTimes(2);
+    const [, saved] = vi.mocked(writeDocument).mock.calls[1];
+    expect(
+      toReviewState(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)!, deck),
+    ).toEqual({ ...graded, due: "2027-01-01" });
+  });
+
+  it("writes nothing when the change makes none, or there is no document and nothing to save", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(documentOf(named(state)));
+    expect(await makeRepository().editReviewStates(deck, () => null)).toBeNull();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const removal = {
+      save: [],
+      remove: [{ cardId: "card-1", direction: "front-to-back" as const }],
+    };
+    expect(await makeRepository().editReviewStates(deck, () => removal)).toEqual(removal);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("applyReviewChanges, as the document changes meanwhile", () => {
+  it("makes the same changes of the document read afresh (412)", async () => {
+    const other: ReviewState = { ...state, cardId: "card-2" };
+    vi.mocked(getSolidDatasetOrNull)
+      .mockResolvedValueOnce(documentOf(named(state)))
+      .mockResolvedValue(documentOf(named(state), named(other)));
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+
+    await makeRepository().applyReviewChanges(deck, {
+      save: [],
+      remove: [{ cardId: "card-1", direction: "front-to-back" }],
+    });
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[1];
+    expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
+    expect(getThing(saved as Dataset, `${deck.reviewsDocumentUrl}#card-2`)).not.toBeNull();
   });
 });

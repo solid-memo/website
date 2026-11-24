@@ -393,28 +393,31 @@ export function createCardUseCases({
   }
   /**
    * Write an edit of the deck's review states (resetCards,
-   * rescheduleCards) in one write of the reviews document, none when it
-   * changes nothing; then bring the digest up to date. How many cards it
-   * changed.
+   * rescheduleCards): the changes `edit` makes of them as the reviews
+   * document holds them now, in one write of it made only while it is as
+   * read, made again of a fresh read when it changed meanwhile (a grade
+   * on another device), none when it changes nothing; then bring the
+   * digest up to date. How many cards it changed.
    */
   async function writeReviewEdit(
     instanceUrl: string,
     deck: Deck,
-    changes: { save: ReviewState[]; remove: ReviewKey[]; fsrsSave?: FsrsState[] },
+    edit: (states: ReviewStates) => {
+      save: ReviewState[];
+      remove: ReviewKey[];
+      fsrsSave?: FsrsState[];
+    },
   ): Promise<number> {
-    const { save, remove, fsrsSave = [] } = changes;
-    const cards = new Set([...save, ...remove].map((key) => key.cardId));
-    if (cards.size === 0) return 0;
-    // A card forgotten loses every state it has that way, SM-2's and FSRS-6's, so none is read in its place.
-    await reviewStateRepository.applyReviewChanges(deck, {
-      save,
-      remove,
-      fsrs: { save: fsrsSave, remove: [] },
-      every: true,
+    const written = await reviewStateRepository.editReviewStates(deck, (states) => {
+      const { save, remove, fsrsSave = [] } = edit(states);
+      if (save.length + remove.length === 0) return null;
+      // A card forgotten loses every state it has that way, SM-2's and FSRS-6's, so none is read in its place.
+      return { save, remove, fsrs: { save: fsrsSave, remove: [] }, every: true };
     });
+    if (written === null) return 0;
     // The edit is made: a digest left behind is brought up to date by the next deck list.
     await digestStore.refresh(instanceUrl, deck).catch(() => undefined);
-    return cards.size;
+    return new Set([...written.save, ...written.remove].map((key) => key.cardId)).size;
   }
   /**
    * One attempt at a transfer (transferCards): read both decks, the
@@ -578,21 +581,21 @@ export function createCardUseCases({
         return inverse;
       });
     },
-    async resetCards(instanceUrl, deck, ids, direction) {
-      const states = await reviewStateRepository.listReviewStates(deck);
+    resetCards(instanceUrl, deck, ids, direction) {
       // An FSRS-6 state without an SM-2 state beside it goes too: every removes both kinds.
-      const remove = resetStates([...states.sm2, ...states.fsrs], ids, direction);
-      return writeReviewEdit(instanceUrl, deck, { save: [], remove });
+      return writeReviewEdit(instanceUrl, deck, (states) => ({
+        save: [],
+        remove: resetStates([...states.sm2, ...states.fsrs], ids, direction),
+      }));
     },
     async rescheduleCards(instanceUrl, deck, ids, due, direction) {
       if (!isStudyDay(due)) throw new AppError("dueDayInvalid", { day: due });
-      const states = await reviewStateRepository.listReviewStates(deck);
       // Both schedulers' states fall due that day, so it holds whichever sets the due days.
-      return writeReviewEdit(instanceUrl, deck, {
+      return writeReviewEdit(instanceUrl, deck, (states) => ({
         save: rescheduleStates(states.sm2, ids, due, direction),
         remove: [],
         fsrsSave: rescheduleStates(states.fsrs, ids, due, direction),
-      });
+      }));
     },
     async transferCards(instanceUrl, from, to, ids, options, webId) {
       if (sharesDocuments(from, to)) throw new AppError("cardTransferSameDeck");

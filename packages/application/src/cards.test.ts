@@ -14,6 +14,7 @@ import {
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { sm2s, instance, deck, card, libraryContent, makeDeps, session } from "./testing/fakePorts";
+import type { ReviewChanges } from "./ports";
 
 describe("cards", () => {
   describe("stateCardLanguages", () => {
@@ -695,6 +696,37 @@ describe("cards", () => {
         fsrs: { save: [{ ...fsrsLeft, due: "2026-10-12" }], remove: [] },
         every: true,
       });
+    });
+
+    it("sets the states due as the edit reads them: a grade made meanwhile is kept, not written over", async () => {
+      const { deps, useCases } = setup();
+      // Graded on another device after the screen read the states.
+      const graded: ReviewState = { ...studied("one"), intervalDays: 15, repetitions: 3 };
+      let made: ReviewChanges | null = null;
+      vi.mocked(deps.reviewStateRepository.editReviewStates).mockImplementation(
+        async (_deck, change) => (made = change({ sm2: [graded], fsrs: [] })),
+      );
+
+      await expect(
+        useCases.rescheduleCards(instance.url, deck, ["one"], "2026-10-12", "front-to-back"),
+      ).resolves.toBe(1);
+
+      const { previous: _snapshot, ...kept } = graded;
+      expect(made).toEqual({
+        save: [{ ...kept, due: "2026-10-12" }],
+        remove: [],
+        fsrs: { save: [], remove: [] },
+        every: true,
+      });
+    });
+
+    it("writes nothing and counts none when the edit finds no state left to change", async () => {
+      const { deps, useCases } = setup();
+      vi.mocked(deps.reviewStateRepository.editReviewStates).mockImplementation(
+        async (_deck, change) => change({ sm2: [], fsrs: [] }),
+      );
+      await expect(useCases.resetCards(instance.url, deck, ["one"])).resolves.toBe(0);
+      expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
     });
 
     it("refuses a day that is no date before reading anything", async () => {

@@ -805,7 +805,10 @@ budgets. First the deck's answers of the day leave the
 to the log are added first, then removed with the rest. Those of the
 deck and day that still couldn't be added leave the queue, so no later
 add brings them back. Then the state changes go out in one save of the
-reviews document (`applyReviewChanges`), never half-applied. The two
+reviews document, never half-applied. They're made of the states as
+that save reads them (`editReviewStates`), so a card graded on another
+device meanwhile goes back with the rest of the day, rather than being
+written over with what was read before it. The two
 writes aren't one: in this order, a reset that fails at either leaves
 today's states, and with them the reset, and trying again repeats
 both. Removing the day's answers again changes nothing. "Today" honors
