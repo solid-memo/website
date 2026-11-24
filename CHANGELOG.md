@@ -21,6 +21,17 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.4.0](https://github.com/solid-memo/website/compare/v8.3.4...v8.4.0) (2026-11-24)
+
+### Features
+
+* **site:** draw the docs' diagrams in Solid Memo's Standard palette, light and dark ([2163d52](https://github.com/solid-memo/website/commit/2163d524f8ec0c205be438a71d576241cdca1008)), closes [#1013](https://github.com/solid-memo/website/issues/1013)
+
+### Fixes
+
+* **application:** send review states written with cards only to the version they were planned from ([8c6eebb](https://github.com/solid-memo/website/commit/8c6eebb45c36dd10e270b8243b6147fe6df48fd6)), closes [#1011](https://github.com/solid-memo/website/issues/1011)
+* **application:** set a card's due day and reset states of the reviews as the write reads them ([b689c1c](https://github.com/solid-memo/website/commit/b689c1caf2323f5e5633800eede91528df902182)), closes [#1011](https://github.com/solid-memo/website/issues/1011)
+
 ## [8.3.4](https://github.com/solid-memo/website/compare/v8.3.3...v8.3.4) (2026-11-24)
 
 ### Fixes
