@@ -1285,7 +1285,7 @@ describe("checkReleaseDraftCopy", () => {
     expect(repository.create).not.toHaveBeenCalled();
   });
 
-  it("names the draft whose copy would hold a term too long, and passes any other refusal on", async () => {
+  it("names the draft whose copy would hold a term too long or one it can't be written with, and passes any other refusal on", async () => {
     const guest = draftUrlOf(GUEST_INSTANCE_URL, "solid", 2);
     const { useCases, repository } = setUp({ stored: rebaseDraft(courseDraft(), guest) });
     repository.documentCountOf.mockImplementationOnce(() => {
@@ -1295,11 +1295,24 @@ describe("checkReleaseDraftCopy", () => {
       useCases.checkReleaseDraftCopy(guest, draftUrlOf(INSTANCE, "solid", 2)),
     ).rejects.toMatchObject({ code: "draftCopyTooLong", vars: { draft: "solid" } });
     repository.documentCountOf.mockImplementationOnce(() => {
+      throw new AppError("unwritableTerm", { term: "dc:license" });
+    });
+    await expect(
+      useCases.checkReleaseDraftCopy(guest, draftUrlOf(INSTANCE, "solid", 2)),
+    ).rejects.toMatchObject({ code: "draftCopyUnwritable", vars: { draft: "solid" } });
+    repository.documentCountOf.mockImplementationOnce(() => {
       throw new AppError("draftTooManyDocuments", { limit: 1000 });
     });
     await expect(
       useCases.checkReleaseDraftCopy(guest, draftUrlOf(INSTANCE, "solid", 2)),
     ).rejects.toMatchObject({ code: "draftTooManyDocuments" });
+    const failure = new Error("offline");
+    repository.documentCountOf.mockImplementationOnce(() => {
+      throw failure;
+    });
+    await expect(
+      useCases.checkReleaseDraftCopy(guest, draftUrlOf(INSTANCE, "solid", 2)),
+    ).rejects.toBe(failure);
   });
 });
 

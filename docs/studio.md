@@ -1855,6 +1855,12 @@ with nothing written, when it links to the guest's pod by an IRI other
 than its own URL or its own subjects' (`<draft>#id`). Its text may
 name any address.
 
+A draft, however it's made, is refused (`unwritableTerm`), with nothing
+written, when it names an IRI that looks like a prefixed name, such as
+`<dc:license>` or `<dcat:Catalog>`. An edit writes each document whole,
+and that IRI would be saved as the term it looks like
+([data-model.md](data-model.md#decks-as-files)).
+
 Of a release's other statements, the draft keeps those of the release,
 of its own subjects, and of what they name, at any depth: a source, a
 license, a blank node. A statement of what none of these leads to is

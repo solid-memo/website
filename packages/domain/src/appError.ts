@@ -139,6 +139,8 @@ export const ERROR_TEMPLATES = {
     "The deck “{deck}” holds an address or an author's name that is too long for your Pod's address, so it was not added to your Pod. Remove it from the guest's study, then try again.",
   draftCopyTooLong:
     "The draft “{draft}” holds an address that is too long for your Pod's address, so it was not copied to your Pod. Delete that draft in the Studio of the guest's study, then try again.",
+  draftCopyUnwritable:
+    "The draft “{draft}” holds an address that cannot be written to a Pod as it is, so it was not copied to your Pod. Delete that draft in the Studio of the guest's study, then try again.",
   guestStudyInvalid: {
     one: "Part of your study in this browser is not in the format Solid Memo expects ({count} problem), so none of it was added to your Pod. It is still here.",
     other:

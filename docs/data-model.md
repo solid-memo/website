@@ -2020,6 +2020,16 @@ a keyword (`isPrefixedLookalike` in
 An import refuses a file that names such an IRI the same way
 (`unwritableTerm`), so no deck it imports has one its export refuses.
 
+A new Studio draft is refused the same way (`unwritableTerm`), with
+nothing written, whether it's made from a release file, as the next
+version of a release, from a deck or as a copy. An edit writes each of
+the draft's documents whole, and that Turtle declares the client
+library's default prefixes (`dc`, `ldp`, `vcard` and so on), so such an
+IRI would be saved as the term it looks like. As extra caution, an IRI
+that looks like a name with a release's or a deck file's prefix is
+refused too. The draft is then refused when it's made, not later when
+it's exported as a deck ([studio.md](studio.md#drafts)).
+
 An import reads the file as the pod is read, with the same mappers:
 
 - the file must hold one deck (`sm:Deck`) that fits its shape;

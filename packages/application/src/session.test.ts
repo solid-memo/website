@@ -1770,6 +1770,25 @@ describe("guests", () => {
         expect(releaseDraftRepository.create).not.toHaveBeenCalled();
       });
 
+      it("refuses, before anything is written, a draft whose copy names an IRI it can't be written with, naming it", async () => {
+        const { deps, releaseDraftRepository } = draftDeps([copyNamed("solid")]);
+        releaseDraftRepository.documentCountOf.mockImplementation(() => {
+          throw new AppError("unwritableTerm", { term: "dc:license" });
+        });
+        expect(
+          await createUseCases(deps).mergeGuestStudy(session, guestInstance, target),
+        ).toMatchObject({
+          ok: false,
+          step: "read",
+          error: new AppError("draftCopyUnwritable", { draft: "solid" }),
+          added: [],
+          copied: [],
+        });
+        expect(deps.deckRepository.addDeck).not.toHaveBeenCalled();
+        expect(deps.deckRepository.editDeckTree).not.toHaveBeenCalled();
+        expect(releaseDraftRepository.create).not.toHaveBeenCalled();
+      });
+
       it("refuses, before anything is written, drafts that would give the instance's drafts more documents than are read together", async () => {
         const { deps, releaseDraftRepository } = draftDeps([]);
         releaseDraftRepository.refuseTooManyInAll.mockRejectedValue(

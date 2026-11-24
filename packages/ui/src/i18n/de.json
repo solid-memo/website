@@ -1786,6 +1786,7 @@
     "guestDeckUrlsLeft": "Der Stapel „{deck}“ verweist noch auf den Lernstand als Gast, daher wurde er nicht zu deinem Pod hinzugefügt. Lass ihn weg und versuche es erneut.",
     "guestDeckTooLong": "Der Stapel „{deck}“ enthält eine Adresse oder einen Autorennamen, der für die Adresse deines Pods zu lang ist, daher wurde er nicht zu deinem Pod hinzugefügt. Entferne ihn aus dem Lernstand als Gast und versuche es erneut.",
     "draftCopyTooLong": "Der Entwurf „{draft}“ enthält eine Adresse, die für die Adresse deines Pods zu lang ist, daher wurde er nicht in deinen Pod kopiert. Lösche diesen Entwurf im Studio des Lernstands als Gast und versuche es erneut.",
+    "draftCopyUnwritable": "Der Entwurf „{draft}“ enthält eine Adresse, die sich nicht so, wie sie ist, in einen Pod schreiben lässt, daher wurde er nicht in deinen Pod kopiert. Lösche diesen Entwurf im Studio des Lernstands als Gast und versuche es erneut.",
     "guestStudyInvalid": {
       "one": "Ein Teil deines Lernstands in diesem Browser hat nicht das Format, das Solid Memo erwartet ({count} Problem), daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier.",
       "other": "Ein Teil deines Lernstands in diesem Browser hat nicht das Format, das Solid Memo erwartet ({count} Probleme), daher wurde nichts davon in deinen Pod übertragen. Dein Lernstand ist weiterhin hier."

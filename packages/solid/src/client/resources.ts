@@ -590,6 +590,42 @@ export function getContainedResourceUrlAll(container: SourcedDataset): string[] 
   return libraryGetContainedResourceUrlAll(sourcedDataset(container));
 }
 
+/**
+ * The prefixes solidDatasetAsTurtle writes with when given none, as a
+ * whole-document PUT is written: the client library's defaults. An IRI
+ * whose scheme is one of them would be written as the prefixed name it
+ * looks like (isPrefixedLookalike), and read back as another term.
+ */
+export const DEFAULT_TURTLE_PREFIXES: Readonly<Record<string, string>> = {
+  acl: "http://www.w3.org/ns/auth/acl#",
+  acp: "http://www.w3.org/ns/solid/acp#",
+  cc: "http://creativecommons.org/ns#",
+  cert: "http://www.w3.org/ns/auth/cert#",
+  csvw: "http://www.w3.org/ns/csvw#",
+  current: "#",
+  dc: "http://purl.org/dc/terms/",
+  dcam: "http://purl.org/dc/dcam/",
+  dcat: "http://www.w3.org/ns/dcat#",
+  dctype: "http://purl.org/dc/dcmitype/",
+  foaf: "http://xmlns.com/foaf/0.1/",
+  ldp: "http://www.w3.org/ns/ldp#",
+  owl: "http://www.w3.org/2002/07/owl#",
+  posixstat: "http://www.w3.org/ns/posix/stat#",
+  rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+  rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+  schema: "https://schema.org/",
+  shacl: "http://www.w3.org/ns/shacl#",
+  skos: "http://www.w3.org/2004/02/skos/core#",
+  skosxl: "http://www.w3.org/2008/05/skos-xl#",
+  solid: "http://www.w3.org/ns/solid/terms#",
+  swapdoc: "http://www.w3.org/2000/10/swap/pim/doc#",
+  ui: "http://www.w3.org/ns/ui#",
+  vann: "http://purl.org/vocab/vann/",
+  vcard: "http://www.w3.org/2006/vcard/ns#",
+  ws: "http://www.w3.org/ns/pim/space#",
+  xsd: "http://www.w3.org/2001/XMLSchema#",
+};
+
 /** A dataset as Turtle text, with `prefixes` for the IRIs it names. */
 export function solidDatasetAsTurtle(
   dataset: Dataset,
