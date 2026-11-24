@@ -24,6 +24,7 @@ import {
   useMissingLanguage,
   type LangTextDraft,
 } from "./LangTextField";
+import { useDeviceValues } from "./deviceValues";
 
 type Limit = keyof DeckPace;
 
@@ -183,6 +184,7 @@ export function DeckPreferencesScreen({
   /** The hosts whose pictures the learner chose to show on this deck, as far as its entry can be believed. */
   pictureHosts: readonly string[];
 }) {
+  const device = useDeviceValues();
   const { t, tx, locale, readerText, errorText } = useI18n();
   /** The deck-name draft while renaming; null otherwise. */
   const [deckName, setDeckName] = useState<LangTextDraft | null>(null);
@@ -222,7 +224,7 @@ export function DeckPreferencesScreen({
       ask(result.missing);
       return;
     }
-    rememberLanguages("deck", result.text, name);
+    rememberLanguages("deck", result.text, name, device);
     onRename(result.text);
     stopRenaming();
   }

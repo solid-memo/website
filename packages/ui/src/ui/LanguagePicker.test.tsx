@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
-import type { ComponentChildren } from "preact";
+import { fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
+import type { ComponentChild, ComponentChildren } from "preact";
 import { useState } from "preact/hooks";
 import { I18nProvider } from "./i18n";
 import { LANGUAGE_CHOICE_LIMIT } from "@solid-memo/domain/cardQuery";
 import { LanguagePicker, languageTextId, textLanguages, type LanguageRole } from "./LanguagePicker";
 import { rememberLanguage } from "./remembered";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
 
 /** A picker that keeps what is chosen, as a form would. */
 function Picker({
@@ -59,7 +60,13 @@ function radioNames() {
     .map((radio) => radio.parentElement!.textContent);
 }
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 describe("LanguagePicker", () => {
   it("lets nothing be chosen while its form saves, an open group's radios disabled", () => {
@@ -139,8 +146,8 @@ describe("LanguagePicker", () => {
   });
 
   it("offers the value, the deck's languages, recent ones, the page's and browser's, no language and any other, each once", () => {
-    rememberLanguage("own", "ja");
-    rememberLanguage("deck", "de");
+    rememberLanguage("own", "ja", device);
+    rememberLanguage("deck", "de", device);
     render(<Picker initial="fi" suggestions={["sv", "FI", "x-private", "pt-br"]} />);
     open();
     expect(radioNames()).toEqual([
@@ -179,8 +186,8 @@ describe("LanguagePicker", () => {
   it.each<LanguageRole>(["deckName", "description", "keywords"])(
     "offers a deck's own text (%s) the languages recently used for decks first, five at most",
     (role) => {
-      for (const tag of ["fr", "it", "es", "nl", "da"]) rememberLanguage("deck", tag);
-      rememberLanguage("own", "ja");
+      for (const tag of ["fr", "it", "es", "nl", "da"]) rememberLanguage("deck", tag, device);
+      rememberLanguage("own", "ja", device);
       render(<Picker role={role} />);
       open();
       expect(radioNames().slice(0, 6)).toEqual([

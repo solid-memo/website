@@ -3,6 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
+import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
+import type { DeviceValueKind, InstanceValueKind } from "@solid-memo/application/ports";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import { validateWebId } from "@solid-memo/domain/webId";
 
@@ -48,126 +50,120 @@ export const RECENT_LANGUAGES = 5;
 
 export const recentKey = (kind: RecentLanguageKind) => `solid-memo:recentLanguages.${kind}`;
 
+/** Recent languages as kept: language tags as the app stores them, each once, RECENT_LANGUAGES at most. */
+const RECENT: DeviceValueKind<string[]> = {
+  decode: (stored) =>
+    Array.isArray(stored)
+      ? [
+          ...new Set(
+            stored.filter(
+              (tag): tag is string => typeof tag === "string" && canonicalTag(tag) === tag,
+            ),
+          ),
+        ].slice(0, RECENT_LANGUAGES)
+      : [],
+  fallback: [],
+};
+
 /**
  * The languages last chosen for text of `kind` on this device, the
- * latest first. Kept in the browser's storage, which may be missing or
- * refuse (a private window, blocked site data) or hold something else:
- * then there are none, and nothing is preselected from them.
+ * latest first. Kept on the device (DeviceValueUseCases), which may
+ * forget them: then there are none, and nothing is preselected from them.
  */
-export function recentLanguages(
-  kind: RecentLanguageKind,
-  storage: () => Storage = () => globalThis.localStorage,
-): string[] {
-  let stored: unknown;
-  try {
-    stored = JSON.parse(storage().getItem(recentKey(kind)) ?? "[]");
-  } catch {
-    return [];
-  }
-  if (!Array.isArray(stored)) return [];
-  const tags = stored.filter(
-    (tag): tag is string => typeof tag === "string" && canonicalTag(tag) === tag,
-  );
-  return [...new Set(tags)].slice(0, RECENT_LANGUAGES);
+export function recentLanguages(kind: RecentLanguageKind, device: DeviceValueUseCases): string[] {
+  return device.deviceValue(recentKey(kind), RECENT).read();
 }
 
 /** Notes `tag` as the latest language chosen for text of `kind` on this device. */
 export function rememberLanguage(
   kind: RecentLanguageKind,
   tag: string,
-  storage: () => Storage = () => globalThis.localStorage,
+  device: DeviceValueUseCases,
 ): void {
-  const recent = [tag, ...recentLanguages(kind, storage).filter((other) => other !== tag)];
-  try {
-    storage().setItem(recentKey(kind), JSON.stringify(recent.slice(0, RECENT_LANGUAGES)));
-  } catch {
-    // Without storage the choice is not offered again; nothing else depends on it.
-  }
+  const recent = device.deviceValue(recentKey(kind), RECENT);
+  recent.write([tag, ...recent.read().filter((other) => other !== tag)].slice(0, RECENT_LANGUAGES));
 }
 
-export const collapsedKey = (instanceUrl: string) => `solid-memo:collapsedGroups.${instanceUrl}`;
+/** The key the folded deck groups are kept under, by instance URL. */
+export const COLLAPSED_KEY = "solid-memo:collapsedGroups";
+
+/** The prefix of the keys they were kept under before, one an instance, the instance's URL after it. */
+export const LEGACY_COLLAPSED_PREFIX = "solid-memo:collapsedGroups.";
+
+/** Folded groups as kept: their URLs. */
+const COLLAPSED: InstanceValueKind<string[]> = {
+  decode: (stored) =>
+    Array.isArray(stored) ? stored.filter((url): url is string => typeof url === "string") : [],
+  fallback: [],
+  legacyPrefix: LEGACY_COLLAPSED_PREFIX,
+};
 
 /**
  * The deck groups of an instance the user folded shut on this device,
- * by URL. Kept in the browser's storage, never in the pod: how the list
- * is folded is this device's view of it. Storage that is missing,
- * refuses or holds something else folds none.
+ * by URL. Kept on the device, never in the pod: how the list is folded
+ * is this device's view of it. None when the device forgot them.
  */
-export function collapsedGroups(
-  instanceUrl: string,
-  storage: () => Storage = () => globalThis.localStorage,
-): string[] {
-  let stored: unknown;
-  try {
-    stored = JSON.parse(storage().getItem(collapsedKey(instanceUrl)) ?? "[]");
-  } catch {
-    return [];
-  }
-  return Array.isArray(stored)
-    ? stored.filter((url): url is string => typeof url === "string")
-    : [];
+export function collapsedGroups(instanceUrl: string, device: DeviceValueUseCases): string[] {
+  return device.instanceDeviceValues(COLLAPSED_KEY, COLLAPSED).read(instanceUrl);
 }
 
 /** Notes which of an instance's deck groups are folded shut on this device. */
 export function rememberCollapsed(
   instanceUrl: string,
   urls: readonly string[],
-  storage: () => Storage = () => globalThis.localStorage,
+  device: DeviceValueUseCases,
 ): void {
-  try {
-    storage().setItem(collapsedKey(instanceUrl), JSON.stringify(urls));
-  } catch {
-    // Without storage the list unfolds again on the next visit; nothing else depends on it.
-  }
+  device.instanceDeviceValues(COLLAPSED_KEY, COLLAPSED).write(instanceUrl, [...urls]);
 }
 
 export const webIdKey = "solid-memo:webId";
 export const loginWebIdKey = "solid-memo:login-webId";
 
+/** The WebID kept, as its text: one the form would have kept, valid and as it is; none of anything else. */
+const WEB_ID: DeviceValueKind<string | null> = {
+  decode: (stored) => {
+    const text = String(stored);
+    const validation = validateWebId(text);
+    return validation.ok && validation.webId === text ? text : null;
+  },
+  fallback: null,
+  text: true,
+};
+
+/** The WebID noted to be remembered while a login is away, as its text. */
+const LOGIN_WEB_ID: DeviceValueKind<string | null> = {
+  decode: (stored) => String(stored),
+  fallback: null,
+  text: true,
+};
+
 /**
  * The WebID the learner asked this device to remember, once a login
- * with it succeeded (issue #741). Kept in the browser's storage, out of
- * the pod: it is no credential, but anyone using the same browser
- * profile can read it, which is why it is kept only when asked for.
- * Storage that is missing, refuses or holds something other than a
- * valid WebID remembers none.
+ * with it succeeded (issue #741). Kept on the device, out of the pod: it
+ * is no credential, but anyone using the same browser profile can read
+ * it, which is why it is kept only when asked for. None when the device
+ * keeps none, or keeps something other than a valid WebID.
  */
-export function rememberedWebId(
-  storage: () => Storage = () => globalThis.localStorage,
-): string | null {
-  let stored: string | null;
-  try {
-    stored = storage().getItem(webIdKey);
-  } catch {
-    return null;
-  }
-  if (stored === null) return null;
-  const validation = validateWebId(stored);
-  return validation.ok && validation.webId === stored ? stored : null;
+export function rememberedWebId(device: DeviceValueUseCases): string | null {
+  return device.deviceValue(webIdKey, WEB_ID).read();
 }
 
 /**
  * Notes, as the learner leaves for their provider, whether to remember
  * the WebID they typed. Not remembering it forgets the one kept now; to
- * remember it, it waits in the tab's session storage for the login to
- * succeed (settleLoginWebId), so that a WebID whose login fails is
- * never kept.
+ * remember it, it waits in the tab (`tabValue`) for the login to succeed
+ * (settleLoginWebId), so that a WebID whose login fails is never kept.
  */
 export function noteLoginWebId(
   webId: string,
   remember: boolean,
-  storage: () => Storage = () => globalThis.localStorage,
-  session: () => Storage = () => globalThis.sessionStorage,
+  device: DeviceValueUseCases,
 ): void {
-  try {
-    if (remember) {
-      session().setItem(loginWebIdKey, webId);
-    } else {
-      session().removeItem(loginWebIdKey);
-      storage().removeItem(webIdKey);
-    }
-  } catch {
-    // Without storage the WebID is typed again next time, as before it was offered.
+  if (remember) {
+    device.tabValue(loginWebIdKey, LOGIN_WEB_ID).write(webId);
+  } else {
+    device.tabValue(loginWebIdKey, LOGIN_WEB_ID).write(null);
+    device.deviceValue(webIdKey, WEB_ID).write(null);
   }
 }
 
@@ -176,16 +172,9 @@ export function noteLoginWebId(
  * the WebID noted to be remembered if the login succeeded with that
  * very WebID (`loggedInAs`, null for none), and drops the note either way.
  */
-export function settleLoginWebId(
-  loggedInAs: string | null,
-  storage: () => Storage = () => globalThis.localStorage,
-  session: () => Storage = () => globalThis.sessionStorage,
-): void {
-  try {
-    const noted = session().getItem(loginWebIdKey);
-    session().removeItem(loginWebIdKey);
-    if (noted !== null && noted === loggedInAs) storage().setItem(webIdKey, noted);
-  } catch {
-    // Without storage nothing is remembered; the login itself is unaffected.
-  }
+export function settleLoginWebId(loggedInAs: string | null, device: DeviceValueUseCases): void {
+  const note = device.tabValue(loginWebIdKey, LOGIN_WEB_ID);
+  const noted = note.read();
+  note.write(null);
+  if (noted !== null && noted === loggedInAs) device.deviceValue(webIdKey, WEB_ID).write(noted);
 }

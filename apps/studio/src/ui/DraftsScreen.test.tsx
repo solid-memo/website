@@ -3,13 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import type { ReleaseDraftSummary } from "@solid-memo/domain/release/draftLayout";
 import { DraftsScreen } from "./DraftsScreen";
 import { choose } from "../test/choose";
 import { screenCommands, WithCommands } from "../test/commands";
 import { instanceA, makeDeck } from "../test/fixtures";
 import { answer, dialog } from "../test/dialogs";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
 const kanji = makeDeck("deck-1", { en: "Kanji N5" });
 const verbs = makeDeck("deck-2", { en: "Verbs" });
@@ -54,7 +56,13 @@ function renderScreen(overrides: Partial<Props> = {}) {
   return props;
 }
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 describe("DraftsScreen", () => {
   it("goes to the new draft's form from the palette, while a draft can be made", () => {

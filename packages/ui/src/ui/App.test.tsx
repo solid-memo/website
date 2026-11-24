@@ -24,6 +24,7 @@ import { MAIN_ID } from "./SkipLink";
 import { useInstanceTheme, useTheme } from "./theme";
 import { queryKeys } from "./queryKeys";
 import { loginWebIdKey, webIdKey } from "./remembered";
+import { keptBy } from "../test/fakes/deviceValues";
 import { loadLocale } from "./i18n";
 
 vi.mock("./i18n", async (actual) => {
@@ -1030,37 +1031,36 @@ describe("AppShell", () => {
   });
 
   describe("a WebID asked to be remembered", () => {
-    afterEach(() => {
-      localStorage.clear();
-      sessionStorage.clear();
-    });
-
     it("is kept once the login with it has succeeded", async () => {
-      sessionStorage.setItem(loginWebIdKey, session.webId);
-      renderApp(makeUseCases({ restoreSession: vi.fn(async () => loggedIn) }));
-      await waitFor(() => expect(localStorage.getItem(webIdKey)).toBe(session.webId));
-      expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
+      const useCases = makeUseCases({ restoreSession: vi.fn(async () => loggedIn) });
+      const kept = keptBy(useCases);
+      kept.tab.set(loginWebIdKey, session.webId);
+      renderApp(useCases);
+      await waitFor(() => expect(kept.stored.get(webIdKey)).toBe(session.webId));
+      expect(kept.tab.get(loginWebIdKey)).toBeUndefined();
     });
 
     it("is not kept by a session restored without a login", async () => {
-      sessionStorage.setItem(loginWebIdKey, session.webId);
-      renderApp(makeUseCases({ restoreSession: vi.fn(async () => restored) }));
-      await waitFor(() => expect(sessionStorage.getItem(loginWebIdKey)).toBeNull());
-      expect(localStorage.getItem(webIdKey)).toBeNull();
+      const useCases = makeUseCases({ restoreSession: vi.fn(async () => restored) });
+      const kept = keptBy(useCases);
+      kept.tab.set(loginWebIdKey, session.webId);
+      renderApp(useCases);
+      await waitFor(() => expect(kept.tab.get(loginWebIdKey)).toBeUndefined());
+      expect(kept.stored.get(webIdKey)).toBeUndefined();
     });
 
     it("is not kept when the login fails", async () => {
-      sessionStorage.setItem(loginWebIdKey, session.webId);
-      renderApp(
-        makeUseCases({
-          restoreSession: vi.fn(async () => {
-            throw new AppError("loginIssuerMissing", { issuer: "https://issuer.example/" });
-          }),
+      const useCases = makeUseCases({
+        restoreSession: vi.fn(async () => {
+          throw new AppError("loginIssuerMissing", { issuer: "https://issuer.example/" });
         }),
-      );
+      });
+      const kept = keptBy(useCases);
+      kept.tab.set(loginWebIdKey, session.webId);
+      renderApp(useCases);
       expect(await screen.findByLabelText("WebID")).toHaveValue("");
-      expect(sessionStorage.getItem(loginWebIdKey)).toBeNull();
-      expect(localStorage.getItem(webIdKey)).toBeNull();
+      expect(kept.tab.get(loginWebIdKey)).toBeUndefined();
+      expect(kept.stored.get(webIdKey)).toBeUndefined();
     });
   });
 

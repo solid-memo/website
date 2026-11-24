@@ -7,6 +7,7 @@ import { useRef, useState } from "preact/hooks";
 import { validateWebId } from "@solid-memo/domain/webId";
 import { ErrorMessage } from "../ErrorMessage";
 import { useI18n } from "../i18n";
+import { useDeviceValues } from "../deviceValues";
 import { noteLoginWebId, rememberedWebId } from "../remembered";
 
 export function WebIdForm({
@@ -18,8 +19,9 @@ export function WebIdForm({
   onSubmit: (webId: string) => void;
 }) {
   const { t, errorText } = useI18n();
+  const device = useDeviceValues();
   // The WebID this device was asked to remember, and with it the box that keeps it.
-  const [webId, setWebId] = useState(() => rememberedWebId() ?? "");
+  const [webId, setWebId] = useState(() => rememberedWebId(device) ?? "");
   const [remember, setRemember] = useState(() => webId !== "");
   const [invalid, setInvalid] = useState<AppError | null>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -34,7 +36,7 @@ export function WebIdForm({
       input.current!.focus();
       return;
     }
-    noteLoginWebId(validation.webId, remember);
+    noteLoginWebId(validation.webId, remember, device);
     onSubmit(validation.webId);
   }
 

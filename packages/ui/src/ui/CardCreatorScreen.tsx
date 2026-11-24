@@ -10,6 +10,7 @@ import { cardLanguageHints } from "./CardContentFields";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type ErrorText } from "./i18n";
 import { ReaderText } from "./ReaderText";
+import { useDeviceValues } from "./deviceValues";
 
 /** What a deck with no cards (yet read) says of its languages: nothing. */
 const NO_LANGUAGES: DeckLanguages = { unstatedCounts: { front: 0, back: 0 } };
@@ -39,8 +40,12 @@ export function CardCreatorScreen({
   /** URL of the deck's Browser, where Back goes. */
   backHref: string;
 }) {
+  const device = useDeviceValues();
   const { t, tx } = useI18n();
-  const hints = useMemo(() => cardLanguageHints(languages, deck.title), [languages, deck.title]);
+  const hints = useMemo(
+    () => cardLanguageHints(languages, deck.title, device),
+    [languages, deck.title, device],
+  );
   return (
     <section>
       <header>

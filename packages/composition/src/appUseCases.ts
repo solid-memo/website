@@ -26,6 +26,7 @@ import { createBrowserFileExchange } from "@solid-memo/browser/fileExchange";
 import { createLocalStorageLanguagePreference } from "@solid-memo/browser/localStorageLanguagePreference";
 import { createLocalStorageCustomPalettePreference } from "@solid-memo/browser/localStorageCustomPalettePreference";
 import { createLocalStorageSeenHighlights } from "@solid-memo/browser/localStorageSeenHighlights";
+import { createWebStorageDeviceStore } from "@solid-memo/browser/webStorageDeviceStore";
 import {
   createLocalStorageSetting,
   PALETTE_KEY,
@@ -482,6 +483,8 @@ export function createAppUseCases({
     customPalettePreference: createLocalStorageCustomPalettePreference(),
     textSizePreference: createLocalStorageSetting(TEXT_SIZE_KEY, TEXT_SIZE_SETTING),
     seenHighlights: createLocalStorageSeenHighlights(),
+    deviceStore: createWebStorageDeviceStore(),
+    tabStore: createWebStorageDeviceStore(() => globalThis.sessionStorage),
     writeFence,
     digestRepository: createSolidDigestRepository({ fetch: dataFetch, checkWrite }),
     answerLog: createSolidAnswerLog({ fetch: dataFetch, checkWrite }),

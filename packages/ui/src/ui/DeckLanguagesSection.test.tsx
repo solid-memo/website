@@ -3,11 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckLanguages } from "@solid-memo/domain/deckLanguages";
 import { DeckLanguagesSection, DECK_LANGUAGES_ID } from "./DeckLanguagesSection";
 import { I18nProvider } from "./i18n";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
 const deck: Deck = {
   id: "deck-1",
@@ -55,7 +57,13 @@ function choose(picker: string, language: string) {
   fireEvent.click(screen.getByRole("button", { name: /^(Done|Klar)$/ }));
 }
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("DeckLanguagesSection", () => {

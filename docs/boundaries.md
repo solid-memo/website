@@ -548,6 +548,17 @@ side in the page in place of the adapters'
 
 - UI components never import ports or adapters; they get `UseCases`,
   or the slices they use, as a prop.
+- A screen never reaches the browser's storage itself. What it keeps on
+  the device, such as how the deck list is folded, the languages chosen
+  lately or the WebID to remember, goes through `DeviceValueUseCases`
+  ([deviceValues.ts](../packages/application/src/deviceValues.ts)),
+  which `App` gives the screens as the `DeviceValues` context
+  ([deviceValues.ts](../packages/ui/src/ui/deviceValues.ts)). The screen
+  says what a value looks like; the `DeviceStore` adapter
+  ([webStorageDeviceStore.ts](../packages/browser/src/webStorageDeviceStore.ts))
+  keeps it, with one guard and one bound for every value. The keys
+  `index.html` reads before the first paint keep adapters of their own,
+  as does the update journal.
 - Generated files (`packages/vocab/src/*.generated.ts`) are never edited
   by hand: change the vocabulary or the shapes in `ns/` and run
   `npm run generate` ([shapes.md](shapes.md), [vocab.md](vocab.md)).

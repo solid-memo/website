@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import {
   applyDraftChanges,
   blankDraft,
@@ -17,6 +17,8 @@ import { AppError } from "@solid-memo/domain/appError";
 import { DraftOverviewScreen, type OverviewCheck } from "./DraftOverviewScreen";
 import { OUTLINE_LIMIT } from "./DraftOutline";
 import { courseDraft, DRAFT_URL, draftLinks, longCourseDraft } from "../test/fixtures";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
 const idle = { saving: false, failure: null };
 
@@ -42,7 +44,13 @@ function renderScreen(
   return onEdit;
 }
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 /** States the language of the field's main text: English. */
 function pickEnglish(field: HTMLElement) {
@@ -166,7 +174,7 @@ describe("DraftOverviewScreen", () => {
       { kind: "addChapter", id: "ch-thoughts", text: { title: { en: "Ideas" } } },
     ]);
     expect(title).toHaveValue("");
-    expect(recentLanguages("deck")).toEqual(["en"]);
+    expect(recentLanguages("deck", device)).toEqual(["en"]);
     // A chapter of no title yet, by number.
     expect(within(form).getByRole("textbox", { name: "Id" })).toHaveValue("ch-1");
     fireEvent.click(within(form).getByRole("button", { name: "Add the chapter" }));

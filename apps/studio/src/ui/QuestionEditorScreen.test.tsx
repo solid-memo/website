@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import { cleanup, fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import type { QuestionField } from "@solid-memo/domain/release/releaseCheck";
 import {
   applyDraftChanges,
@@ -24,6 +24,8 @@ import {
   LONGEST_COURSE,
   wideCourseDraft,
 } from "../test/fixtures";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
 // Counts the outlines the place selector is listed from, listing them as ever.
 vi.mock("@solid-memo/domain/release/draftOutline", async (actual) => {
@@ -69,7 +71,13 @@ const chapterOf = () => screen.getByRole<HTMLSelectElement>("combobox", { name: 
 
 const preview = () => screen.getByRole("heading", { name: "As the course asks it" }).parentElement!;
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 afterEach(() => vi.unstubAllGlobals());
 
 describe("QuestionEditorScreen", () => {

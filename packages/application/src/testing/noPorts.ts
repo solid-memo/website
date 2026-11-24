@@ -24,6 +24,7 @@ import { PALETTE_SETTING } from "@solid-memo/domain/palette";
 import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";
 import { THEME_SETTING } from "@solid-memo/domain/theme";
 import { unkeptSetting } from "../deviceSetting";
+import { UNKEPT_STORE } from "../deviceValues";
 
 const nothing = async () => undefined;
 const none = async (): Promise<never[]> => [];
@@ -159,6 +160,8 @@ export const NO_PORTS = {
   paletteRepository: NO_PALETTES,
   textSizePreference: unkeptSetting(TEXT_SIZE_SETTING),
   seenHighlights: NO_SEEN_HIGHLIGHTS,
+  deviceStore: UNKEPT_STORE,
+  tabStore: UNKEPT_STORE,
   /** No one signed in. */
   webId: (): string | undefined => undefined,
 };

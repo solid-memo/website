@@ -3,12 +3,20 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen, within } from "@testing-library/preact";
+import { fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import { NewQuestionForm } from "./NewQuestionForm";
 import { OUTLINE_LIMIT } from "./DraftOutline";
 import { courseDraft, longCourseDraft } from "../test/fixtures";
+import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
 
-beforeEach(() => localStorage.clear());
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 afterEach(() => vi.useRealTimers());
 
 const NOW = "2026-10-10T12:00:00.000Z";

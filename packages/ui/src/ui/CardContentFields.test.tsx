@@ -18,6 +18,7 @@ import {
   textFormatOfDraft,
   type CardDraft,
 } from "./CardContentFields";
+import { UNKEPT_VALUES } from "./deviceValues";
 
 const plain: CardContent = { front: { en: "a" }, back: { en: "b" } };
 const marked: CardContent = { ...plain, textFormat: SM.markdown };
@@ -205,6 +206,7 @@ describe("cardLanguageHints", () => {
     const { suggestions } = cardLanguageHints(
       { front: "fi", own: "sv", unstatedCounts: { front: 0, back: 0 } },
       { ...title, "": "b" },
+      UNKEPT_VALUES,
     );
     expect(suggestions.front).toHaveLength(1 + LANGUAGE_CHOICE_LIMIT);
     expect(suggestions.front.slice(0, 2)).toEqual(["fi", "x-t1000"]);

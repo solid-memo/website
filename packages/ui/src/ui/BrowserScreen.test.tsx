@@ -2,14 +2,24 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { describe, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, within } from "@testing-library/preact";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render as renderBare, screen, within } from "@testing-library/preact";
 import { BrowserScreen, CARDS_PER_PAGE } from "./BrowserScreen";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { CardLanguage } from "./cardLanguage";
 import { I18nProvider } from "./i18n";
 import { statusTexts } from "../test/liveRegions";
 import { recentLanguages, rememberLanguage } from "./remembered";
+import { deviceWrapper, makeDeviceValuesFake } from "../test/fakes/deviceValues";
+import type { ComponentChild } from "preact";
+
+let device = makeDeviceValuesFake();
+beforeEach(() => {
+  device = makeDeviceValuesFake();
+});
+
+/** Renders under the values this device keeps, `device`, fresh for each test. */
+const render = (ui: ComponentChild) => renderBare(ui, { wrapper: deviceWrapper(device) });
 
 const deck: Deck = {
   id: "deck-1",
@@ -171,16 +181,14 @@ describe("BrowserScreen deck editing", () => {
   });
 
   it("starts a description and keywords for a deck with no name in the language last chosen on this device, else none", () => {
-    localStorage.clear();
     renderScreen({ deck: { ...deck, title: {} } });
     fireEvent.click(screen.getByRole("button", { name: "Describe deck" }));
     expect(screen.getAllByRole("button", { name: "Language: not stated" })).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "Cancel describing" }));
-    rememberLanguage("deck", "fi");
+    rememberLanguage("deck", "fi", device);
     fireEvent.click(screen.getByRole("button", { name: "Describe deck" }));
     expect(screen.getByLabelText("Description")).toHaveAttribute("lang", "fi");
     expect(screen.getByLabelText("Keywords (optional)")).toHaveAttribute("lang", "fi");
-    localStorage.clear();
   });
 
   it("shows only the keywords in the reader's language, and those in none", () => {
@@ -235,7 +243,6 @@ describe("BrowserScreen deck editing", () => {
   });
 
   it("asks for the language of keywords before saving them, and forgets the question on Cancel", () => {
-    localStorage.clear();
     const { props } = renderScreen({
       deck: { ...deck, description: { en: "Kanji." }, keywords: { en: ["kanji"] } },
     });
@@ -274,8 +281,7 @@ describe("BrowserScreen deck editing", () => {
       topics: [],
       keywords: { en: ["kanji"], sv: ["tecken"] },
     });
-    expect(recentLanguages("deck")).toEqual(["en", "sv"]);
-    localStorage.clear();
+    expect(recentLanguages("deck", device)).toEqual(["en", "sv"]);
   });
 
   it("keeps keywords saved with no language as they are, or some removed, and asks their language for any added", () => {

@@ -11,6 +11,7 @@ import { composing } from "./composing";
 import { ErrorMessage } from "./ErrorMessage";
 import { useI18n, type MessageKey } from "./i18n";
 import { recentLanguages, RECENT_LANGUAGES, type RecentLanguageKind } from "./remembered";
+import { useDeviceValues } from "./deviceValues";
 
 /** Which text a picker says the language of: names its legend. */
 export type LanguageRole =
@@ -144,6 +145,7 @@ export function LanguagePicker({
   field?: ComponentChildren;
   onChange: (tag: string) => void;
 }) {
+  const device = useDeviceValues();
   const { t, locale, languageParts } = useI18n();
   const [open, setOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -214,7 +216,7 @@ export function LanguagePicker({
           tags={choices(
             [
               ...suggestions,
-              ...choices(recentKinds(role).flatMap((kind) => recentLanguages(kind))).slice(
+              ...choices(recentKinds(role).flatMap((kind) => recentLanguages(kind, device))).slice(
                 0,
                 RECENT_LANGUAGES,
               ),

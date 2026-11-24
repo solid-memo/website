@@ -15,6 +15,7 @@ import {
   useMissingLanguage,
 } from "./LangTextField";
 import { recentLanguages } from "./remembered";
+import { useDeviceValues } from "./deviceValues";
 
 /**
  * A new deck, by its name in the language the user states — the one
@@ -31,9 +32,10 @@ export function DeckCreatorScreen({
   error: ErrorText | null;
   onCreate: (title: LangText) => void;
 }) {
+  const device = useDeviceValues();
   const { t, errorText } = useI18n();
   const [draft, setDraft] = useState(() =>
-    draftOf(undefined, [], { tag: recentLanguages("deck")[0] ?? null }),
+    draftOf(undefined, [], { tag: recentLanguages("deck", device)[0] ?? null }),
   );
   const { missing, ask, clear } = useMissingLanguage("deck-name");
 
@@ -45,7 +47,7 @@ export function DeckCreatorScreen({
       ask(result.missing);
       return;
     }
-    rememberLanguages("deck", result.text, draft);
+    rememberLanguages("deck", result.text, draft, device);
     onCreate(result.text);
   }
 
