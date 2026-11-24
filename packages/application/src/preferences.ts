@@ -70,7 +70,9 @@ export interface PreferenceUseCases {
   /**
    * The theme an instance's preferences hold, kept on this device too
    * for the next visit's first paint; null when the instance has no
-   * preferences yet.
+   * preferences yet, and when a choice of how the app is shown, made
+   * while they were read or still being written as the read began, may
+   * make what was read out of date (nothing is kept then).
    */
   instanceTheme(instanceUrl: string): Promise<ThemeChoice | null>;
   /**
@@ -97,8 +99,8 @@ export interface PreferenceUseCases {
    * A palette of one's own whose text is not readable on the background
    * or a surface (checkPalette), as another app may have written it, is
    * shown as its base, and the preferences keep naming it. Kept on this
-   * device too for the next visit's first paint; null when the instance
-   * has no preferences yet.
+   * device too for the next visit's first paint; null as instanceTheme
+   * has it.
    */
   instancePalette(instanceUrl: string): Promise<ShownPalette | null>;
   /**
@@ -136,8 +138,7 @@ export interface PreferenceUseCases {
   textSizeChoice(): TextSize;
   /**
    * The text size an instance's preferences hold, kept on this device
-   * too for the next visit's first paint; null when the instance has no
-   * preferences yet.
+   * too for the next visit's first paint; null as instanceTheme has it.
    */
   instanceTextSize(instanceUrl: string): Promise<TextSize | null>;
   /**
@@ -315,6 +316,37 @@ export function createPreferenceUseCases({
       : keptPalette(stored, shownPalette(preferences), isOwn);
   }
 
+  /**
+   * The use cases of a choice of how the app is shown that the
+   * preferences keep as it is (the theme, the text size): the value
+   * chosen on this device, an instance's, kept on this device too, and
+   * a new choice, kept on this device and in the instance's preferences.
+   */
+  function appearanceSetting<K extends "theme" | "textSize">(
+    field: K,
+    setting: DeviceSetting<StudyPreferences[K]>,
+  ) {
+    return {
+      choice: () => setting.chosen(),
+      async fromInstance(instanceUrl: string): Promise<StudyPreferences[K] | null> {
+        const stored = await preferenceStore.shown(instanceUrl);
+        if (stored === null) return null;
+        setting.choose(stored.preferences[field]);
+        return stored.preferences[field];
+      },
+      choose(value: StudyPreferences[K], instanceUrl: string | null): Promise<void> {
+        return preferenceStore.chooseAppearance(
+          () => setting.choose(value),
+          instanceUrl,
+          (preferences) =>
+            preferences[field] === value ? null : { ...preferences, [field]: value },
+        );
+      },
+    };
+  }
+  const theme = appearanceSetting("theme", themePreference);
+  const textSize = appearanceSetting("textSize", textSizePreference);
+
   /** The defaults, shown as this device shows the app: what an instance with no preferences is given. */
   function created(instanceUrl: string): StudyPreferences {
     return preferenceStore.withDeviceAppearance(DEFAULT_PREFERENCES, instanceUrl);
@@ -327,22 +359,9 @@ export function createPreferenceUseCases({
     chooseLanguage(locale) {
       languagePreference.choose(locale);
     },
-    themeChoice() {
-      return themePreference.chosen();
-    },
-    async instanceTheme(instanceUrl) {
-      const stored = await preferenceStore.stored(instanceUrl);
-      if (stored === null) return null;
-      themePreference.choose(stored.preferences.theme);
-      return stored.preferences.theme;
-    },
-    chooseTheme(choice, instanceUrl) {
-      themePreference.choose(choice);
-      if (instanceUrl === null) return Promise.resolve();
-      return preferenceStore.writeAppearance(instanceUrl, (preferences) =>
-        preferences.theme === choice ? null : { ...preferences, theme: choice },
-      );
-    },
+    themeChoice: theme.choice,
+    instanceTheme: theme.fromInstance,
+    chooseTheme: theme.choose,
     paletteChoice() {
       return palettePreference.chosen();
     },
@@ -353,7 +372,7 @@ export function createPreferenceUseCases({
       return null;
     },
     async instancePalette(instanceUrl) {
-      const stored = await preferenceStore.stored(instanceUrl);
+      const stored = await preferenceStore.shown(instanceUrl);
       if (stored === null) return null;
       const iri = stored.preferences.palette;
       // Only the instance's own palettes document is read: the preferences are data, and may name any address.
@@ -369,19 +388,27 @@ export function createPreferenceUseCases({
       return { palette, custom };
     },
     choosePalette(palette, instanceUrl) {
-      palettePreference.choose(palette);
-      customPalettePreference.choose(null);
-      if (instanceUrl === null) return Promise.resolve();
-      return preferenceStore.writeAppearance(instanceUrl, (preferences) => {
-        const kept = keptPalette(preferences, palette, (iri) => isPaletteOf(instanceUrl, iri));
-        return kept === preferences.palette ? null : { ...preferences, palette: kept };
-      });
+      return preferenceStore.chooseAppearance(
+        () => {
+          palettePreference.choose(palette);
+          customPalettePreference.choose(null);
+        },
+        instanceUrl,
+        (preferences, url) => {
+          const kept = keptPalette(preferences, palette, (iri) => isPaletteOf(url, iri));
+          return kept === preferences.palette ? null : { ...preferences, palette: kept };
+        },
+      );
     },
     chooseCustomPalette(palette, instanceUrl) {
-      palettePreference.choose(palette.basedOn);
-      customPalettePreference.choose(palette);
-      return preferenceStore.writeAppearance(instanceUrl, (preferences) =>
-        preferences.palette === palette.url ? null : { ...preferences, palette: palette.url },
+      return preferenceStore.chooseAppearance(
+        () => {
+          palettePreference.choose(palette.basedOn);
+          customPalettePreference.choose(palette);
+        },
+        instanceUrl,
+        (preferences) =>
+          preferences.palette === palette.url ? null : { ...preferences, palette: palette.url },
       );
     },
     listPalettes(instanceUrl) {
@@ -408,22 +435,9 @@ export function createPreferenceUseCases({
         customPalettePreference.choose(palette);
       return palette;
     },
-    textSizeChoice() {
-      return textSizePreference.chosen();
-    },
-    async instanceTextSize(instanceUrl) {
-      const stored = await preferenceStore.stored(instanceUrl);
-      if (stored === null) return null;
-      textSizePreference.choose(stored.preferences.textSize);
-      return stored.preferences.textSize;
-    },
-    chooseTextSize(size, instanceUrl) {
-      textSizePreference.choose(size);
-      if (instanceUrl === null) return Promise.resolve();
-      return preferenceStore.writeAppearance(instanceUrl, (preferences) =>
-        preferences.textSize === size ? null : { ...preferences, textSize: size },
-      );
-    },
+    textSizeChoice: textSize.choice,
+    instanceTextSize: textSize.fromInstance,
+    chooseTextSize: textSize.choose,
     getPreferences: preferenceStore.get,
     preferencesMisfit: preferenceStore.isMisfit,
     async savePreferences(instanceUrl, preferences, { replaceMisfit = false } = {}) {

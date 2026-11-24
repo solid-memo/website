@@ -127,6 +127,21 @@ describe("preferences", () => {
       expect(palettePreference.choose).not.toHaveBeenCalled();
     });
 
+    it("keeps on this device no palette of a read begun before a choice", async () => {
+      const palettePreference = devicePreference();
+      const deps = makeDeps();
+      let answer!: (read: ReturnType<typeof stored>) => void;
+      vi.mocked(deps.preferencesRepository.getPreferences).mockReturnValueOnce(
+        new Promise((resolve) => (answer = resolve)),
+      );
+      const useCases = createUseCases({ ...deps, palettePreference });
+      const read = useCases.instancePalette(INSTANCE);
+      await useCases.choosePalette("high-contrast", null);
+      answer(stored(`${SM}parchmentPalette`));
+      await expect(read).resolves.toBeNull();
+      expect(useCases.paletteChoice()).toBe("high-contrast");
+    });
+
     it("keeps a choice in the instance's preferences once it has them", async () => {
       const deps = makeDeps();
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(
@@ -177,7 +192,7 @@ describe("preferences", () => {
       });
     });
 
-    it("reads the preferences afresh after a choice is written, not with a read begun before it", async () => {
+    it("reads the preferences afresh after a choice is written, and shows nothing of a read begun before it", async () => {
       const deps = makeDeps();
       let stored = {
         preferences: { ...DEFAULT_PREFERENCES, palette: `${SM}standardPalette` },
@@ -201,7 +216,7 @@ describe("preferences", () => {
       await useCases.choosePalette("parchment", INSTANCE);
       const after = useCases.instancePalette(INSTANCE);
       release();
-      await expect(before).resolves.toEqual({ palette: "standard", custom: null });
+      await expect(before).resolves.toBeNull();
       await expect(after).resolves.toEqual({ palette: "parchment", custom: null });
     });
 
@@ -741,6 +756,49 @@ describe("preferences", () => {
       const useCases = createUseCases({ ...makeDeps(), themePreference });
       await useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, theme: "light" });
       expect(useCases.themeChoice()).toBe("light");
+    });
+
+    it("keeps on this device no theme of a read begun before a choice, and a read after it reads afresh", async () => {
+      const themePreference = devicePreference();
+      const deps = makeDeps();
+      let answer!: (read: ReturnType<typeof stored>) => void;
+      vi.mocked(deps.preferencesRepository.getPreferences)
+        .mockReturnValueOnce(new Promise((resolve) => (answer = resolve)))
+        .mockResolvedValue(stored("dark"));
+      const useCases = createUseCases({ ...deps, themePreference });
+      const read = useCases.instanceTheme(INSTANCE);
+      await useCases.chooseTheme("dark", null);
+      const later = useCases.instanceTheme(INSTANCE);
+      answer(stored("light"));
+      await expect(read).resolves.toBeNull();
+      await expect(later).resolves.toBe("dark");
+      expect(useCases.themeChoice()).toBe("dark");
+      expect(themePreference.choose).not.toHaveBeenCalledWith("light");
+    });
+
+    it("keeps on this device no theme read while a choice is being written, and the read after the write's", async () => {
+      const themePreference = devicePreference();
+      const deps = makeDeps();
+      let theme: ThemeChoice = "light";
+      let release!: () => void;
+      const held = new Promise<void>((resolve) => (release = resolve));
+      vi.mocked(deps.preferencesRepository.getPreferences).mockImplementation(async () =>
+        stored(theme),
+      );
+      vi.mocked(deps.preferencesRepository.savePreferences).mockImplementation(
+        async (_, preferences) => {
+          await held;
+          theme = preferences.theme;
+        },
+      );
+      const useCases = createUseCases({ ...deps, themePreference });
+      const choice = useCases.chooseTheme("dark", INSTANCE);
+      await expect(useCases.instanceTheme(INSTANCE)).resolves.toBeNull();
+      expect(useCases.themeChoice()).toBe("dark");
+      release();
+      await choice;
+      await expect(useCases.instanceTheme(INSTANCE)).resolves.toBe("dark");
+      expect(themePreference.choose).not.toHaveBeenCalledWith("light");
     });
   });
   it("dismissSchedulerInvitation keeps the stored preferences, but for the invitation", async () => {
