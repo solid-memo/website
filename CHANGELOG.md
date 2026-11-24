@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.2.4](https://github.com/solid-memo/website/compare/v8.2.3...v8.2.4) (2026-11-24)
+
+### Performance Improvements
+
+* **solid:** read and check documents from elsewhere in a worker ([be495f4](https://github.com/solid-memo/website/commit/be495f4391d33e70858071a271db12d5d7cb9b4a)), closes [#987](https://github.com/solid-memo/website/issues/987)
+* **solid:** read other instances' documents in a worker ([73817ec](https://github.com/solid-memo/website/commit/73817ecca34ea1f391578d114eed647dbd92654e)), closes [#987](https://github.com/solid-memo/website/issues/987)
+
 ## [8.2.3](https://github.com/solid-memo/website/compare/v8.2.2...v8.2.3) (2026-11-24)
 
 ### Fixes
