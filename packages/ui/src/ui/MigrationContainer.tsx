@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { UpdateOutcome, UpdateProgress } from "@solid-memo/domain/instanceUpdate";
@@ -17,6 +17,7 @@ import {
 } from "./InstanceUpdate";
 import { MigrationNotice } from "./MigrationNotice";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Checks an instance for documents in an older format and, when there
@@ -40,7 +41,6 @@ export function MigrationContainer({
   instance: Instance;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState(false);
   /** The user came back to the notice, from the confirmation or a result: it takes the focus. */
   const [returned, setReturned] = useState(false);
@@ -54,12 +54,12 @@ export function MigrationContainer({
     staleTime: Infinity,
   });
 
-  const updateMutation = useMutation({
+  // The documents are where they were, some in newer formats: everything shown of them is read again,
+  // while the progress still shows, so the offer comes back only as what is still outdated.
+  const updateMutation = useWrite({
     mutationFn: () => useCases.updateInstance(session, instance, setProgress),
-    onSuccess: async (outcome) => {
-      // The documents are where they were, some in newer formats: everything shown of them is read again,
-      // while the progress still shows, so the offer comes back only as what is still outdated.
-      await queryClient.invalidateQueries();
+    changes: () => [changes.everything()],
+    onSuccess: (outcome) => {
       setProgress(null);
       setUnfinished(outcome.failed.length > 0 ? outcome : null);
     },

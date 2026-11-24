@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo, useState } from "preact/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CourseUseCases } from "@solid-memo/application/courses";
 import type { StudyUseCases } from "@solid-memo/application/study";
 import type { Course } from "@solid-memo/application/courses";
@@ -15,7 +14,7 @@ import { useClock } from "./courseLinks";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useI18n } from "./i18n";
 import { useKeepSchedule } from "./keepSchedule";
-import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Answers a course question of `card`, then refreshes what the answer
@@ -30,11 +29,10 @@ export function useCourseAnswer(
   course: Course,
   onAnswered: (answer: CheckedAnswer) => void,
 ) {
-  const queryClient = useQueryClient();
   const deck = course.deck;
   const noteGraded = useKeepSchedule(useCases, instance.url, deck);
   const now = useClock();
-  return useMutation({
+  return useWrite({
     mutationFn: ({
       card,
       choice,
@@ -55,13 +53,16 @@ export function useCourseAnswer(
         now(),
         { recallMillis },
       ),
+    // A graded answer changes the card's review state, and with it the deck's queue.
+    // The answer is shown at once, while they are read again.
+    background: true,
+    changes: (_, { data }) =>
+      data === undefined || data.effect === "none"
+        ? [changes.course(deck)]
+        : [changes.course(deck), changes.cardsAndReviews(deck)],
     onSuccess: ({ effect }, { choice }) => {
       onAnswered({ choice, effect });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) });
-      if (effect === "none") return;
-      noteGraded();
-      void queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) });
-      void queryClient.invalidateQueries({ queryKey: queryKeys.studyQueue(deck.url) });
+      if (effect !== "none") noteGraded();
     },
   });
 }

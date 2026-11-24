@@ -27,6 +27,7 @@ import { RegistrationTargetChooser } from "./RegistrationTargetChooser";
 import { routeToHash } from "./router";
 import { StepProgress } from "./StepProgress";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /** What each step of the move into a new instance does, as the progress line names it. */
 function stepLabels(t: I18n["t"]): Record<GuestTransferStep, string> {
@@ -134,9 +135,9 @@ function GuestStudyOfferStage({
     queryFn: () => useCases.findGuestStudy(),
   });
 
-  const discard = useMutation({
+  const discard = useWrite({
     mutationFn: () => useCases.discardGuest(),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.guestStudy() }),
+    changes: () => [changes.reads(queryKeys.guestStudy())],
   });
 
   /** The move is over: say how, and open the instance it went into. */

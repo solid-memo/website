@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect, useMemo, useState } from "preact/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { CourseUseCases } from "@solid-memo/application/courses";
 import type { StudyUseCases } from "@solid-memo/application/study";
 import type { Course } from "@solid-memo/application/courses";
@@ -14,7 +13,7 @@ import { ChapterReviewScreen, type Completion } from "./ChapterReviewScreen";
 import type { CheckedAnswer } from "./CourseQuestion";
 import { useCourseLinks } from "./courseLinks";
 import { useI18n } from "./i18n";
-import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns one final review of a chapter: it starts when the learner says
@@ -50,7 +49,6 @@ export function ChapterReviewContainer({
 }) {
   const { errorText } = useI18n();
   const links = useCourseLinks();
-  const queryClient = useQueryClient();
   const deck = course.deck;
   const [started, setStarted] = useState(false);
   const [queue, setQueue] = useState(() => finalReviewQueue(chapter, random));
@@ -74,16 +72,12 @@ export function ChapterReviewContainer({
   const finishesCourse =
     !course.progress.done &&
     course.progress.chapters.every((entry) => entry.url === chapter.url || entry.state === "done");
-  const completeMutation = useMutation({
+  const completeMutation = useWrite({
     mutationFn: async () => {
       await useCases.completeChapter(deck, chapter.url);
       return finishesCourse;
     },
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
-      ]),
+    changes: () => [changes.course(deck), changes.decks(instance.url)],
   });
   // Passed to mutate, not to useMutation, so that it is dropped once the
   // review is unmounted.

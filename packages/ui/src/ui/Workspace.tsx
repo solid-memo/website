@@ -89,6 +89,7 @@ import { useDocumentTitle } from "./documentTitle";
 import { useScreenFocus } from "./screenFocus";
 import { MAIN_ID } from "./SkipLink";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * The breadcrumbs' names of what the route has open, each "" (or no
@@ -695,19 +696,20 @@ export function Workspace({
     },
   });
 
-  const createInstanceMutation = useMutation({
-    mutationFn: (args: {
+  const createInstanceMutation = useWrite({
+    mutationFn: async (args: {
       containerUrl: string;
       name: string;
       registrationTarget: RegistrationTarget;
-    }) => useCases.createInstance(session, args),
-    onSuccess: async (instance) => {
+    }) => {
+      const instance = await useCases.createInstance(session, args);
       // A new instance has no decks, so its list offers the library's course for
       // newcomers (NewcomerCourseContainer): read from now, it comes with the list.
       void queryClient.prefetchQuery(libraryIndexQuery(useCases));
-      await queryClient.invalidateQueries({ queryKey: queryKeys.instances(webId) });
-      navigate({ screen: "home", instanceUrl: instance.url });
+      return instance;
     },
+    changes: () => [changes.instances(webId)],
+    onSuccess: (instance) => navigate({ screen: "home", instanceUrl: instance.url }),
   });
 
   const crumbs =

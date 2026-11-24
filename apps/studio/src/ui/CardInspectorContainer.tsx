@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { distractorPicksOf } from "@solid-memo/domain/cardHistory";
 import type { Card, CardTextPart, Deck, Distractor } from "@solid-memo/domain/deck";
@@ -27,6 +27,7 @@ import { CardScheduleContainer } from "./CardScheduleContainer";
 import { ReadOnlyScope } from "./ReadOnly";
 import type { CardTab } from "./router";
 import { useActivityLog } from "./shell/activity";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /** How the card stands to the release (`release`, as useDeckRelease reads it): unknown while it is read, or when it cannot be. */
@@ -102,7 +103,6 @@ export function CardInspectorContainer({
   const { cardText } = useCardText();
   const log = useActivityLog();
   const logSaved = () => log(t("studio.card.saved", { card: cardName(card, cardText) }));
-  const queryClient = useQueryClient();
   const release = useDeckRelease(useCases, deck);
   const readOnly = useDataCheck(useCases, instanceUrlOfDeck(deck.url)).readOnly(deck);
   const answersQuery = useQuery({
@@ -118,14 +118,11 @@ export function CardInspectorContainer({
   // The wrong options' languages to suggest: the back's, at most
   // LANGUAGE_CHOICE_LIMIT of them (textLanguages), untagged text aside.
   const backLanguages = useMemo(() => textLanguages(card.back), [card.back]);
-  const saveMutation = useMutation({
+  const saveMutation = useWrite({
     mutationFn: (distractors: Distractor[]) =>
       useCases.updateCard(deck, card, { ...card, distractors }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-      logSaved();
-    },
+    changes: () => [changes.cards(deck)],
+    onSuccess: () => logSaved(),
   });
 
   return (

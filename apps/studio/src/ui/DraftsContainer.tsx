@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useEffect } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CreatedDraft, NewDraft } from "@solid-memo/application/releaseDrafts";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { decksOf } from "@solid-memo/domain/deckTree";
@@ -15,6 +15,7 @@ import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { DraftsScreen } from "./DraftsScreen";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -61,28 +62,26 @@ export function DraftsContainer({
     queryKey: queryKeys.deckTree(instance.url),
     queryFn: () => useCases.listDeckTree(instance.url),
   });
-  const reread = () =>
-    Promise.all([
-      queryClient.invalidateQueries({ queryKey: queryKeys.releaseDrafts(instance.url) }),
-      // The instance's check covers its drafts' documents too.
-      queryClient.invalidateQueries({ queryKey: queryKeys.validation(instance.url) }),
-    ]);
+  // The instance's check covers its drafts' documents too.
+  const reread = () => [
+    changes.reads(queryKeys.releaseDrafts(instance.url), queryKeys.validation(instance.url)),
+  ];
   const forget = (draft: ReleaseDraftSummary) =>
     queryClient.removeQueries({ queryKey: queryKeys.releaseDraft(draft.url) });
-  const createMutation = useMutation({
+  const createMutation = useWrite({
     scope: { id: catalogScope(instance.url) },
     mutationFn: (from: NewDraft) => useCases.createReleaseDraft(instance.url, from, webId),
+    changes: reread,
     onSuccess: (created) => created !== null && forget(created.draft),
-    onSettled: reread,
   });
-  const deleteMutation = useMutation({
+  const deleteMutation = useWrite({
     scope: { id: catalogScope(instance.url) },
     mutationFn: async (draft: ReleaseDraftSummary) => {
       await useCases.deleteReleaseDraft(draft);
       return draft;
     },
-    onSuccess: forget,
-    onSettled: reread,
+    changes: reread,
+    onSuccess: (draft) => forget(draft),
   });
 
   const created = createMutation.data ?? null;

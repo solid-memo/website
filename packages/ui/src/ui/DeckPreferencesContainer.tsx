@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
@@ -23,6 +23,7 @@ import { useI18n } from "./i18n";
 import { useDeckReleaseQuery } from "./deckRelease";
 import { courseStripQuery } from "./CourseStrip";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns a deck's preferences: reads the instance's (which the deck falls
@@ -61,7 +62,6 @@ export function DeckPreferencesContainer({
   onDone: () => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   // Outside the learner's pod, what the entry states of them is its writer's, not the learner's choice.
   const inOwnPod = useInOwnPod(useCases, deck);
 
@@ -105,59 +105,41 @@ export function DeckPreferencesContainer({
     queryFn: () => useCases.getPreferences(instance.url),
   });
 
-  const saveMutation = useMutation({
+  const saveMutation = useWrite({
     mutationFn: (pace: DeckPace) => useCases.setDeckPace(deck, pace),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-      onDone();
-    },
+    changes: () => [changes.deckSchedule(deck)],
+    onSuccess: () => onDone(),
   });
 
-  const renameMutation = useMutation({
+  const renameMutation = useWrite({
     mutationFn: (title: LangText) => useCases.renameDeck(deck, title),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+    changes: () => [changes.deckEntry()],
   });
 
-  const stateLanguagesMutation = useMutation({
+  const stateLanguagesMutation = useWrite({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+    changes: () => [changes.cards(deck)],
   });
 
-  const cardLanguageMutation = useMutation({
+  // The deck's card language is on the deck: every screen of its cards, and a course's screens
+  // (Workspace's CourseLanguage), read it from the deck list, and the statistics' cards
+  // (hardest cards, confused options, leeches) from the deck in their report.
+  const cardLanguageMutation = useWrite({
     mutationFn: (language: string | null) => useCases.setDeckCardLanguage(deck, language),
-    // The deck's card language is on the deck: every screen of its cards, and a course's screens
-    // (Workspace's CourseLanguage), read it from the deck list, and the statistics' cards
-    // (hardest cards, confused options, leeches) from the deck in their report.
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() }),
-      ]),
+    changes: () => [changes.deckEntry()],
   });
 
-  const hidePicturesMutation = useMutation({
+  const hidePicturesMutation = useWrite({
     mutationFn: (host: string) => useCases.setDeckPictureHost(deck, host, false),
-    onSuccess: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.allCardProgress() }),
-      ]),
+    changes: () => [changes.deckEntry()],
   });
 
-  const removeMutation = useMutation({
+  const removeMutation = useWrite({
     mutationFn: () => useCases.removeDeck(deck),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
-      onDeckRemoved();
-    },
     // A removal stopped part-way may have taken the deck's cards already.
-    onError: () =>
-      Promise.all([
-        queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
-      ]),
+    changes: (_, { error }) =>
+      error === null ? [changes.deckEntry()] : [changes.deckEntry(), changes.cards(deck)],
+    onSuccess: () => onDeckRemoved(),
   });
 
   if (preferencesQuery.error) {

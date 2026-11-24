@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DeckUpgradeOutcome } from "@solid-memo/domain/deckUpgrade";
@@ -12,7 +12,8 @@ import type { LibraryUpgradePlan } from "@solid-memo/domain/libraryUpgrade";
 import { useDataCheck } from "@solid-memo/ui/dataCheck";
 import { ErrorMessage } from "@solid-memo/ui/ErrorMessage";
 import { useI18n } from "@solid-memo/ui/i18n";
-import { libraryUpgradeQuery, refreshUpgradedDeck } from "@solid-memo/ui/LibraryUpgradeContainer";
+import { libraryUpgradeQuery, upgradeChanges } from "@solid-memo/ui/LibraryUpgradeContainer";
+import { useWrite } from "@solid-memo/ui/writeEffects";
 import { Loading } from "@solid-memo/ui/Loading";
 import {
   LibraryCopiesScreen,
@@ -23,7 +24,6 @@ import {
   type PlanState,
 } from "./LibraryCopiesScreen";
 import { libraryUpdatesQuery } from "./UpdateBadge";
-import { queryKeys } from "./queryKeys";
 
 /**
  * The library copies screen's data: the instance's copies of library
@@ -59,14 +59,16 @@ export function LibraryCopiesContainer({
   onCursor: (deck: Deck) => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const check = useDataCheck(useCases, instance.url);
   const { copiesQuery, rows } = useCopyRows(useCases, instance.url);
   const copies = copiesQuery.data ?? [];
   const [running, setRunning] = useState<BatchRun | null>(null);
   const [results, setResults] = useState<BatchResult[]>([]);
 
-  const batchMutation = useMutation({
+  // Each plan is made again for the deck as it now is; an upgraded deck's documents are read afresh.
+  // A failed deck is read again too: it may have changed in another tab, and its plan with it; one the
+  // upgrade changed in part has its documents read afresh as well.
+  const batchMutation = useWrite({
     mutationFn: async (chosen: readonly { deck: Deck; plan: LibraryUpgradePlan }[]) => {
       setResults([]);
       const ended: BatchResult[] = [];
@@ -83,22 +85,10 @@ export function LibraryCopiesContainer({
         setResults([...ended]);
       }
       setRunning(null);
-      // Each plan is made again for the deck as it now is; an upgraded deck's documents are read afresh.
-      // A failed deck is read again too: it may have changed in another tab, and its plan with it; one the
-      // upgrade changed in part has its documents read afresh as well.
-      await Promise.all(
-        ended.map(({ deck, outcome }) =>
-          outcome.ok
-            ? refreshUpgradedDeck(queryClient, instance.url, deck)
-            : Promise.all([
-                outcome.changed
-                  ? refreshUpgradedDeck(queryClient, instance.url, deck)
-                  : queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-                queryClient.invalidateQueries({ queryKey: queryKeys.libraryUpgrade(deck.url) }),
-              ]),
-        ),
-      );
+      return ended;
     },
+    changes: (_, { data = [] }) =>
+      data.flatMap(({ deck, outcome }) => upgradeChanges(instance.url, deck, outcome)),
   });
 
   if (copiesQuery.error) return <ErrorMessage error={errorText(copiesQuery.error)} />;

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient, type QueryKey } from "@tanstack/react-query";
+import { useQuery, type QueryKey } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import { deckLanguages, type StatedLanguages } from "@solid-memo/domain/deckLanguages";
@@ -16,6 +16,7 @@ import { useI18n } from "@solid-memo/ui/i18n";
 import { Loading } from "@solid-memo/ui/Loading";
 import { routeToHash } from "@solid-memo/ui/router";
 import { DeckAboutScreen } from "./DeckAboutScreen";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /** One save of the screen: the write, and the queries it changes beside the decks'. */
@@ -52,7 +53,6 @@ export function DeckAboutContainer({
   healthHref: string;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const isCourse = useCopies(useCases, [deck]).isCourse(deck);
   const { release, error: releaseError } = useDeckReleaseQuery(useCases, deck);
 
@@ -81,21 +81,13 @@ export function DeckAboutContainer({
     [cardsQuery.data, release],
   );
 
-  const save = useMutation({
+  const save = useWrite({
     mutationFn: ({ write }: Save) => write(),
-    onSuccess: async (_written, { touches = [] }) => {
-      await Promise.all(
-        [queryKeys.allDecks(), ...touches].map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey }),
-        ),
-      );
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-    },
+    changes: ({ touches = [] }) => [changes.deckSchedule(deck), changes.reads(...touches)],
   });
-  const stateLanguages = useMutation({
+  const stateLanguages = useWrite({
     mutationFn: (languages: StatedLanguages) => useCases.stateCardLanguages(deck, languages),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
+    changes: () => [changes.cards(deck)],
   });
   const run = (write: Save["write"], touches?: QueryKey[]) =>
     save.mutateAsync({ write, touches }).then(

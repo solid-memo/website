@@ -451,6 +451,7 @@ describe("CardWorkbenchContainer", () => {
     await waitFor(() =>
       expect(screen.getByRole("row", { name: /fire/ })).toHaveTextContent("January 1, 2099"),
     );
+    await waitFor(() => expect(bulk().getByRole("button", { name: "Retire" })).toBeEnabled());
 
     pick("Schedule the selected cards", "Forget progress");
     answer("Forget the selected cards' progress", "Forget progress");

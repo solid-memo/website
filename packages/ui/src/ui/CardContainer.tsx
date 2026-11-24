@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, CardContent, CardTextPart, Deck } from "@solid-memo/domain/deck";
 import { deckLanguages } from "@solid-memo/domain/deckLanguages";
@@ -52,7 +52,6 @@ export function CardContainer({
   keep?: { current: CardEdits | null };
 }) {
   const { errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const cardsQuery = useQuery({
     queryKey: queryKeys.cards(deck.cardsDocumentUrl),
@@ -61,15 +60,10 @@ export function CardContainer({
   const languages = useMemo(() => deckLanguages(cardsQuery.data ?? []), [cardsQuery.data]);
   const release = useDeckRelease(useCases, deck);
 
-  const updateCardMutation = useMutation({
+  const updateCardMutation = useWrite({
     mutationFn: (content: CardContent) => useCases.updateCard(deck, card, content),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.cards(deck.cardsDocumentUrl),
-      });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-      onSaved?.();
-    },
+    changes: () => [changes.cards(deck)],
+    onSuccess: () => onSaved?.(),
   });
 
   // A removal that stops part-way may have taken the card from its document already.

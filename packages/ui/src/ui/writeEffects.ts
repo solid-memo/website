@@ -24,6 +24,9 @@ export interface WriteEffect {
   readonly drop: readonly QueryKey[];
 }
 
+/** The prefix of every query key: refreshing it reaches every query. */
+const EVERY_QUERY: QueryKey = [];
+
 /**
  * Each kind of write, and what it makes stale: a screen names the
  * writes it made, never the keys. A deck's study queue (with its study
@@ -34,11 +37,76 @@ export interface WriteEffect {
  * or not (keepStudyFiguresFresh), so no effect names them.
  */
 export const changes = {
+  /** The deck's cards document. */
+  cards: (deck: Deck): WriteEffect => ({
+    stale: [queryKeys.cards(deck.cardsDocumentUrl)],
+    drop: [queryKeys.studyQueue(deck.url)],
+  }),
+  /** The deck's reviews document. */
+  reviews: (deck: Deck): WriteEffect => ({
+    stale: [queryKeys.reviews(deck.reviewsDocumentUrl)],
+    drop: [queryKeys.studyQueue(deck.url)],
+  }),
   /** Both of the deck's documents: a card removed with its review states, say. */
   cardsAndReviews: (deck: Deck): WriteEffect => ({
     stale: [queryKeys.cards(deck.cardsDocumentUrl), queryKeys.reviews(deck.reviewsDocumentUrl)],
     drop: [queryKeys.studyQueue(deck.url)],
   }),
+  /** A deck's entry, in what it shows: its title, description or card language, say. */
+  deckEntry: (): WriteEffect => ({ stale: [queryKeys.allDecks()], drop: [] }),
+  /** A deck's entry, in what it studies: its pace, direction or pause. */
+  deckSchedule: (deck: Deck): WriteEffect => ({
+    stale: [queryKeys.allDecks()],
+    drop: [queryKeys.studyQueue(deck.url)],
+  }),
+  /** An instance's decks, one added or removed. */
+  decks: (instanceUrl: string): WriteEffect => ({
+    stale: [queryKeys.decks(instanceUrl)],
+    drop: [],
+  }),
+  /** Many of an instance's decks at once, their study queues with them: a bulk edit, or a file imported. */
+  manyDecks: (instanceUrl: string): WriteEffect => ({
+    stale: [queryKeys.decks(instanceUrl)],
+    drop: [queryKeys.allStudyQueues()],
+  }),
+  /**
+   * A deck moved to another release of the library: its entry, both
+   * documents, the instance's format update plan, which counts the
+   * copies' releases, and a course's outline, which the release has.
+   */
+  upgraded: (instanceUrl: string, deck: Deck): WriteEffect => ({
+    stale: [
+      queryKeys.allDecks(),
+      queryKeys.cards(deck.cardsDocumentUrl),
+      queryKeys.reviews(deck.reviewsDocumentUrl),
+      queryKeys.migration(instanceUrl),
+      queryKeys.course(deck.url),
+    ],
+    drop: [queryKeys.studyQueue(deck.url)],
+  }),
+  /** A WebID's instances, one added to its list. */
+  instances: (webId: string): WriteEffect => ({ stale: [queryKeys.instances(webId)], drop: [] }),
+  /** A course's progress through its chapters. */
+  course: (deck: Deck): WriteEffect => ({ stale: [queryKeys.course(deck.url)], drop: [] }),
+  /**
+   * An instance's preferences: every deck's study queue is built with
+   * them, whether logging in shows the Connected screen is among them,
+   * and so is how the app is shown, once they are first saved.
+   */
+  preferences: (instanceUrl: string): WriteEffect => ({
+    stale: [
+      queryKeys.preferences(instanceUrl),
+      queryKeys.connectedScreenShown(instanceUrl),
+      queryKeys.instanceAppearance(instanceUrl),
+    ],
+    drop: [queryKeys.allStudyQueues()],
+  }),
+  /** The scheduler switched, and with it the due days every view of the decks shows. */
+  scheduler: (): WriteEffect => ({ stale: [EVERY_QUERY], drop: [queryKeys.allStudyQueues()] }),
+  /** Data of one screen alone, read with these keys: a palette, a release's draft, say. */
+  reads: (...keys: readonly QueryKey[]): WriteEffect => ({ stale: keys, drop: [] }),
+  /** Data any screen may show: an instance's documents updated to newer formats, say. */
+  everything: (): WriteEffect => ({ stale: [EVERY_QUERY], drop: [] }),
 };
 
 /**
@@ -75,6 +143,11 @@ export type WriteOptions<TData, TError, TVariables, TOnMutateResult> = UseMutati
     variables: TVariables,
     ended: { data: TData; error: null } | { data: undefined; error: TError },
   ) => readonly WriteEffect[];
+  /**
+   * Start the refresh and go on, without waiting for it: for a write the
+   * screen answers at once, and whose screen stays as it is meanwhile.
+   */
+  background?: boolean;
 };
 
 /**
@@ -82,7 +155,8 @@ export type WriteOptions<TData, TError, TVariables, TOnMutateResult> = UseMutati
  * (`changes`) as it ends, written or not: a write of several documents
  * may stop part-way, after it changed some. The refresh is over before
  * the mutation's own onSuccess or onError is called, so one that opens
- * another screen opens it on what was written.
+ * another screen opens it on what was written; unless it is made in the
+ * `background`, while the mutation ends at once.
  */
 export function useWrite<
   TData = unknown,
@@ -91,6 +165,7 @@ export function useWrite<
   TOnMutateResult = unknown,
 >({
   changes: changed,
+  background = false,
   onSuccess,
   onError,
   ...options
@@ -100,14 +175,18 @@ export function useWrite<
   TVariables,
   TOnMutateResult
 > {
+  const refreshed = (client: QueryClient, effects: readonly WriteEffect[]) => {
+    const done = refresh(client, effects);
+    return background ? undefined : done;
+  };
   return useMutation({
     ...options,
     onSuccess: async (data, variables, onMutateResult, context) => {
-      await refresh(context.client, changed(variables, { data, error: null }));
+      await refreshed(context.client, changed(variables, { data, error: null }));
       return onSuccess?.(data, variables, onMutateResult, context);
     },
     onError: async (error, variables, onMutateResult, context) => {
-      await refresh(context.client, changed(variables, { data: undefined, error }));
+      await refreshed(context.client, changed(variables, { data: undefined, error }));
       return onError?.(error, variables, onMutateResult, context);
     },
   });

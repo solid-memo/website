@@ -169,7 +169,7 @@ describe("BrowserContainer", () => {
     await waitFor(() => {
       expect(invalidate).toHaveBeenCalledWith({ queryKey: ["decks"] });
     });
-    expect(remove).toHaveBeenCalledWith({ queryKey: ["studyQueue", deck.url] });
+    expect(remove).toHaveBeenCalledWith({ queryKey: ["studyQueue", deck.url], type: "inactive" });
   });
 
   it("shows a direction error", async () => {

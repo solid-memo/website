@@ -4,13 +4,7 @@
 
 import type { JSX } from "preact";
 import { useState } from "preact/hooks";
-import {
-  useMutation,
-  useMutationState,
-  useQuery,
-  useQueryClient,
-  type QueryClient,
-} from "@tanstack/react-query";
+import { useMutationState, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LibraryUseCases } from "@solid-memo/application/library";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -25,6 +19,7 @@ import {
   type DeckUpgradeScreenStep,
 } from "./DeckUpgrade";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite, type WriteEffect } from "./writeEffects";
 
 /**
  * What upgrading the deck would do (UseCases.planLibraryUpgrade), kept
@@ -40,21 +35,23 @@ export function libraryUpgradeQuery(useCases: LibraryUseCases, deck: Deck) {
   };
 }
 
-/** After a deck's upgrade, everything it touched is read again at once, so the deck changes on screen in one go. */
-export function refreshUpgradedDeck(
-  queryClient: QueryClient,
+/**
+ * What an upgrade of a deck changed (`outcome`; undefined: it could not
+ * start). An upgraded deck has everything it touched read again at
+ * once, so the deck changes on screen in one go. A failed one has its
+ * offer looked at again, with the deck as it now is, and one the
+ * upgrade changed in part is read again as an upgraded one.
+ */
+export function upgradeChanges(
   instanceUrl: string,
   deck: Deck,
-): Promise<unknown> {
-  queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-  return Promise.all([
-    queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.reviews(deck.reviewsDocumentUrl) }),
-    queryClient.invalidateQueries({ queryKey: queryKeys.migration(instanceUrl) }),
-    // A course's deck now follows the newer release, and its outline with it.
-    queryClient.invalidateQueries({ queryKey: queryKeys.course(deck.url) }),
-  ]);
+  outcome: DeckUpgradeOutcome | undefined,
+): WriteEffect[] {
+  if (outcome?.ok === true) return [changes.upgraded(instanceUrl, deck)];
+  return [
+    outcome?.changed === true ? changes.upgraded(instanceUrl, deck) : changes.deckEntry(),
+    changes.reads(queryKeys.libraryUpgrade(deck.url)),
+  ];
 }
 
 /**
@@ -112,33 +109,15 @@ export function LibraryUpgradeContainer({
     done: 0,
   });
   const mutationKey = queryKeys.libraryUpgrade(deck.url);
-  const upgradeMutation = useMutation({
+  const upgradeMutation = useWrite({
     mutationKey,
     mutationFn: async (plan: LibraryUpgradePlan) => {
       setProgress({ step: "read", done: 0 });
       const outcome = await useCases.applyLibraryUpgrade(deck, plan, setProgress);
-      if (!outcome.ok) {
-        // The offer is looked at again, with the deck as it now is; a deck the upgrade changed in part is read again.
-        if (outcome.changed)
-          queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-        await Promise.all([
-          queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
-          queryClient.invalidateQueries({ queryKey: queryKeys.libraryUpgrade(deck.url) }),
-          ...(outcome.changed
-            ? [
-                queryClient.invalidateQueries({ queryKey: queryKeys.cards(deck.cardsDocumentUrl) }),
-                queryClient.invalidateQueries({
-                  queryKey: queryKeys.reviews(deck.reviewsDocumentUrl),
-                }),
-              ]
-            : []),
-        ]);
-        return outcome;
-      }
-      setProgress({ step: "refresh", done: DECK_UPGRADE_SCREEN_STEPS.length - 1 });
-      await refreshUpgradedDeck(queryClient, instance.url, deck);
+      if (outcome.ok) setProgress({ step: "refresh", done: DECK_UPGRADE_SCREEN_STEPS.length - 1 });
       return outcome;
     },
+    changes: (_, { data }) => upgradeChanges(instance.url, deck, data),
   });
 
   // The release the session's last update of the deck brought it to: null when it failed, undefined when there was none.

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck, DeckDirection } from "@solid-memo/domain/deck";
 import type { DeckAbout } from "@solid-memo/domain/deckAbout";
@@ -48,7 +48,6 @@ export function BrowserContainer({
   onLanguageFilterChange: (filter: BrowserLanguageFilter | undefined) => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
 
   const release = useDeckRelease(useCases, deck);
 
@@ -57,17 +56,14 @@ export function BrowserContainer({
     queryFn: () => useCases.listCards(deck),
   });
 
-  const describeDeckMutation = useMutation({
+  const describeDeckMutation = useWrite({
     mutationFn: (about: DeckAbout) => useCases.describeDeck(deck, about),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() }),
+    changes: () => [changes.deckEntry()],
   });
 
-  const setDirectionMutation = useMutation({
+  const setDirectionMutation = useWrite({
     mutationFn: (direction: DeckDirection) => useCases.setDeckDirection(deck, direction),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.allDecks() });
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(deck.url) });
-    },
+    changes: () => [changes.deckSchedule(deck)],
   });
 
   const toSettle = useMemo(

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
@@ -16,6 +16,7 @@ import { PreferencesScreen } from "./PreferencesScreen";
 import { SchedulerSwitchProgress, SchedulerSwitchResult } from "./SchedulerSwitch";
 import { useI18n } from "./i18n";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /** Whether a save was refused over stored preferences that do not fit their shape. */
 function misfitRefused(error: unknown): boolean {
@@ -49,7 +50,6 @@ export function PreferencesContainer({
   onBack: () => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const [progress, setProgress] = useState<SwitchProgress | null>(null);
   /** How a switch to FSRS-6 ended, said until the learner closes it, with what to try again. */
   const [ended, setEnded] = useState<{
@@ -80,7 +80,7 @@ export function PreferencesContainer({
     enabled: offersConnectedScreen,
   });
 
-  const saveMutation = useMutation({
+  const saveMutation = useWrite({
     /**
      * The preferences to save, and the scheduler they replace; whether
      * logging in shows the Connected screen, and what the form read of it.
@@ -110,20 +110,12 @@ export function PreferencesContainer({
       setProgress({ step: "read", done: 0, total: 0 });
       return useCases.switchScheduler(instance.url, preferences, setProgress, options);
     },
-    onSuccess: async (outcome, { preferences, stored }) => {
-      // A switch changes the due days, which every view of the decks shows: all of it is read again.
-      if (outcome !== null) await queryClient.invalidateQueries();
-      else {
-        await queryClient.invalidateQueries({ queryKey: queryKeys.preferences(instance.url) });
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.connectedScreenShown(instance.url),
-        });
-        // The first save puts the theme, the palette and the text size into the instance's preferences.
-        await queryClient.invalidateQueries({
-          queryKey: queryKeys.instanceAppearance(instance.url),
-        });
-      }
-      queryClient.removeQueries({ queryKey: queryKeys.allStudyQueues() });
+    // A switch to another scheduler changes the due days, and one that failed may have changed some.
+    changes: ({ preferences, stored }, { data }) => {
+      const switched = data === undefined ? preferences.scheduler !== stored : data !== null;
+      return [switched ? changes.scheduler() : changes.preferences(instance.url)];
+    },
+    onSuccess: (outcome, { preferences, stored }) => {
       setProgress(null);
       if (outcome === null || preferences.scheduler === "sm2") onBack();
       else setEnded({ outcome, save: { preferences, stored } });

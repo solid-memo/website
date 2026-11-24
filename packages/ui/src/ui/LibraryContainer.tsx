@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useMemo } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck } from "@solid-memo/domain/library";
@@ -15,6 +15,7 @@ import { forgetLibrarySelection, LibraryScreen } from "./LibraryScreen";
 import { Loading } from "./Loading";
 import { importUrlHref, libraryDeckHref, libraryPreviewHref } from "./router";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * Owns the library listing and the import mutation for one instance;
@@ -31,7 +32,6 @@ export function LibraryContainer({
   onDone: () => void;
 }) {
   const { t, errorText } = useI18n();
-  const queryClient = useQueryClient();
   // Per instance: another instance's library is a fresh list.
   const memoryKey = `library:${instance.url}`;
 
@@ -45,21 +45,19 @@ export function LibraryContainer({
   // screen renders again on each keystroke in the search.
   const isImported = useMemo(() => copiedTest(decksQuery.data ?? []), [decksQuery.data]);
 
-  const importMutation = useMutation({
+  // An import that stops part-way may have added some of the decks already.
+  const importMutation = useWrite({
     mutationFn: async (decks: LibraryDeck[]) => {
       for (const deck of decks) {
         await useCases.importLibraryDeck(instance.url, deck);
       }
     },
-    onSuccess: async () => {
+    changes: () => [changes.decks(instance.url)],
+    onSuccess: () => {
       // The checked decks are in now; the next visit starts with none.
       forgetLibrarySelection(memoryKey);
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.decks(instance.url),
-      });
       onDone();
     },
-    onError: () => queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
   });
 
   if (libraryQuery.error) {

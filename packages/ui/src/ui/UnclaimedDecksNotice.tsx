@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { UnclaimedDeck } from "@solid-memo/domain/validation";
 import { bounded } from "./bounded";
@@ -12,6 +11,7 @@ import { ExternalLink } from "./ExternalLink";
 import { useI18n } from "./i18n";
 import { ReaderText } from "./ReaderText";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * The decks whose documents do not say they are the decks' own, outside
@@ -36,14 +36,14 @@ export function UnclaimedDecksNotice({
   decks: readonly UnclaimedDeck[];
 }) {
   const { t, tx, errorText } = useI18n();
-  const queryClient = useQueryClient();
   const [confirming, setConfirming] = useState<string | null>(null);
-  const claim = useMutation({
-    mutationFn: (deckUrl: string) => useCases.claimDeckDocuments(instanceUrl, deckUrl),
-    onSuccess: async () => {
+  const claim = useWrite({
+    // The question goes as soon as the claim is written, while the instance is checked again.
+    mutationFn: async (deckUrl: string) => {
+      await useCases.claimDeckDocuments(instanceUrl, deckUrl);
       setConfirming(null);
-      await queryClient.invalidateQueries({ queryKey: queryKeys.validation(instanceUrl) });
     },
+    changes: () => [changes.reads(queryKeys.validation(instanceUrl))],
   });
   if (decks.length === 0) return null;
   const { shown, more } = bounded(decks);

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { useCallback, useEffect, useMemo, useState } from "preact/hooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import { planCardEdit, type CardEdit, type CardEditPlan } from "@solid-memo/domain/cardBulk";
 import { deckAnswers, lapseIndex } from "@solid-memo/domain/cardHistory";
@@ -28,6 +28,7 @@ import {
 } from "./CardWorkbenchScreen";
 import type { CardTransfer } from "./TransferCardsDialog";
 import type { SavedView } from "./shell/views";
+import { changes, useWrite } from "@solid-memo/ui/writeEffects";
 import { queryKeys } from "./queryKeys";
 
 /**
@@ -102,7 +103,6 @@ export function CardWorkbenchContainer({
   healthHref: string;
 }) {
   const { t, errorText, locale } = useI18n();
-  const queryClient = useQueryClient();
   const [lastEdit, setLastEdit] = useState<CardEditMade | null>(null);
   const [undone, setUndone] = useState(false);
   const [failure, setFailure] = useState<unknown>(null);
@@ -200,17 +200,6 @@ export function CardWorkbenchContainer({
     (ids: readonly string[], edit: CardEdit) => planCardEdit(cards!, ids, edit, states!),
     [cards, states],
   );
-  const reread = async (touched: readonly Deck[] = [deck]) => {
-    // The study counts go at once: a screen opened while the rest is read again counts afresh.
-    for (const each of touched)
-      queryClient.removeQueries({ queryKey: queryKeys.studyQueue(each.url) });
-    await Promise.all(
-      touched.flatMap((each) => [
-        queryClient.invalidateQueries({ queryKey: queryKeys.cards(each.cardsDocumentUrl) }),
-        queryClient.invalidateQueries({ queryKey: queryKeys.reviews(each.reviewsDocumentUrl) }),
-      ]),
-    );
-  };
   /** Before an edit: what the last one said goes, and it can no longer be undone, as it is not the last. */
   const starting = () => {
     setFailure(null);
@@ -219,7 +208,7 @@ export function CardWorkbenchContainer({
     setReviewDone(null);
     setTransferDone(null);
   };
-  const editMutation = useMutation({
+  const editMutation = useWrite({
     mutationFn: ({
       ids,
       edit,
@@ -233,22 +222,22 @@ export function CardWorkbenchContainer({
       useCases.editCards(instance.url, deck, ids, edit, plan, (written) =>
         setLastEdit({ edit, plan: written }),
       ),
+    changes: () => [changes.cardsAndReviews(deck)],
     onMutate: starting,
     onSuccess: (written, { edit }) => setLastEdit({ edit, plan: written }),
     onError: (error) => setFailure(error),
-    onSettled: () => reread(),
   });
-  const reviewMutation = useMutation({
+  const reviewMutation = useWrite({
     mutationFn: ({ ids, edit }: { ids: readonly string[]; edit: ReviewEdit }) =>
       edit.kind === "reset"
         ? useCases.resetCards(instance.url, deck, ids)
         : useCases.rescheduleCards(instance.url, deck, ids, edit.due),
+    changes: () => [changes.cardsAndReviews(deck)],
     onMutate: starting,
     onSuccess: (count, { edit }) => setReviewDone({ edit, count }),
     onError: (error) => setFailure(error),
-    onSettled: () => reread(),
   });
-  const transferMutation = useMutation({
+  const transferMutation = useWrite({
     mutationFn: ({ ids, transfer }: { ids: readonly string[]; transfer: CardTransfer }) =>
       useCases.transferCards(
         instance.url,
@@ -258,17 +247,16 @@ export function CardWorkbenchContainer({
         { mode: transfer.mode, keepProgress: transfer.keepProgress },
         webId,
       ),
+    changes: ({ transfer }) => [
+      changes.cardsAndReviews(deck),
+      changes.cardsAndReviews(transfer.to),
+      changes.decks(instance.url),
+    ],
     onMutate: starting,
     onSuccess: (plan, { transfer }) => setTransferDone({ transfer, plan }),
     onError: (error) => setFailure(error),
-    onSettled: async (_plan, _error, { transfer }) => {
-      await Promise.all([
-        reread([deck, transfer.to]),
-        queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) }),
-      ]);
-    },
   });
-  const undoMutation = useMutation({
+  const undoMutation = useWrite({
     mutationFn: (made: CardEditMade) => useCases.undoCardEdit(instance.url, deck, made.plan),
     onMutate: () => setFailure(null),
     onSuccess: () => {
@@ -276,7 +264,7 @@ export function CardWorkbenchContainer({
       setUndone(true);
     },
     onError: (error) => setFailure(error),
-    onSettled: () => reread(),
+    changes: () => [changes.cardsAndReviews(deck)],
   });
 
   const error =

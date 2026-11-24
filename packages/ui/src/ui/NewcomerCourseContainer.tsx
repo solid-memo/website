@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
@@ -12,6 +12,7 @@ import { useI18n } from "./i18n";
 import { NewcomerCourseOffer } from "./NewcomerCourseOffer";
 import { libraryDeckHref } from "./router";
 import { queryKeys } from "./queryKeys";
+import { changes, useWrite } from "./writeEffects";
 
 /**
  * The course the library offers newcomers (its index names it,
@@ -34,10 +35,10 @@ export function NewcomerCourseContainer({
   const queryClient = useQueryClient();
   const libraryQuery = useQuery(libraryIndexQuery(useCases));
   // In the options, not mutate's: the refreshed list has the course's deck, so this offer is gone by then.
-  const startMutation = useMutation({
+  const startMutation = useWrite({
     mutationFn: (course: LibraryDeck) => useCases.startCourse(instance.url, course),
+    changes: () => [changes.decks(instance.url)],
     onSuccess: async (started) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.decks(instance.url) });
       // The course screen finds its deck among the instance's decks, which nothing
       // on the deck list reads (Workspace fills them in from the arrangement, later).
       // A prefetch never throws: the course is started, and a failed read is the course screen's to make again.

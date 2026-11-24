@@ -185,7 +185,7 @@ describe("MigrationContainer", () => {
         failed: [],
       }),
     );
-    await waitFor(() => expect(invalidate).toHaveBeenCalledWith());
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: [] }));
     expect(await screen.findByRole("status")).toHaveTextContent(/^Your data is up to date\.$/);
     expect(useCases.updateInstance).toHaveBeenCalledWith(session, instance, expect.any(Function));
   });
@@ -240,7 +240,7 @@ describe("MigrationContainer", () => {
       "1 other document was updated. Every document can be read as it is, updated or not. Trying again updates only what is still outdated.",
     );
     // What it wrote is read again.
-    expect(invalidate).toHaveBeenCalledWith();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: [] });
     fireEvent.click(within(result).getByRole("button", { name: "Try again" }));
     result = await screen.findByRole("region", { name: "Update not finished" });
     expect(result).toHaveTextContent("1 document could not be updated now:The instance record:");
