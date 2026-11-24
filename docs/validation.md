@@ -748,19 +748,20 @@ check keeps. A release that conforms is checked whole as well. So the
 time a check takes grows with the document, and the limits on what's
 read bound it: `RELEASE_LIMITS` for a release, and `FOREIGN_LIMITS` for
 a document outside the user's storages. A check never compares each
-subject with every other one. It lets the page do its work every few
-hundred subjects, and sooner after subjects with a few thousand values
-between them. A check of the whole document against DCAT-AP lets the
-page do its work at the same pace, node by node. One subject is
-checked in one go, and those same limits bound its values for one
-predicate: no more than 4,096 (`MAX_VALUES_PER_PREDICATE`), in a
-release and in a document outside the user's storages alike. Only a
-deck schedule's due days (`sm:dueOnDay`) may number up to 65,536
-(`MAX_DUE_DAYS`) in a document outside the user's storages, as a
-schedule names each day its prompts fall due, up to a hundred years
-ahead. A release keeps the lower bound for them too. So a large
-document makes the check long, and the check holds the page for at
-most about one subject's values at a time.
+subject with every other one. It runs in a worker, off the page, so
+the page stays responsive while it runs ([Off the page](#off-the-page)).
+It still lets other work run every few hundred subjects, and sooner
+after subjects with a few thousand values between them, and a check of
+the whole document against DCAT-AP keeps the same pace, node by node.
+One subject is checked in one go, and those same limits bound its
+values for one predicate: no more than 4,096
+(`MAX_VALUES_PER_PREDICATE`), in a release and in a document outside
+the user's storages alike. Only a deck schedule's due days
+(`sm:dueOnDay`) may number up to 65,536 (`MAX_DUE_DAYS`) in a document
+outside the user's storages, as a schedule names each day its prompts
+fall due, up to a hundred years ahead. A release keeps the lower bound
+for them too. So a large document makes the check long, and a check
+that runs past its deadline is ended.
 
 ## Data that doesn't fit
 
