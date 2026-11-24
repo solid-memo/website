@@ -30,7 +30,6 @@ import {
 
 describe("instances", () => {
   const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
-  const changed = () => new AppError("changedElsewhere", { url: "x" });
 
   it("listStorages discovers storages for the session's WebID", async () => {
     const deps = makeDeps();
@@ -592,7 +591,13 @@ describe("instances", () => {
         ...instance,
         name: "Languages",
       });
-      expect(deps.instanceRepository.saveMeta).toHaveBeenCalledWith(instance.url, {
+      expect(deps.instanceRepository.editMeta).toHaveBeenCalledWith(
+        instance.url,
+        expect.any(Function),
+      );
+      await expect(
+        vi.mocked(deps.instanceRepository.editMeta).mock.results[0]!.value,
+      ).resolves.toEqual({
         ...meta,
         name: "Languages",
       });
@@ -616,22 +621,12 @@ describe("instances", () => {
         vi.mocked(deps.deckRepository.readCatalog).mockResolvedValue(read);
         await useCases.renameInstance(session, instance, "Languages");
       }
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      // The meta already named so is not changed.
+      for (const [, change] of vi.mocked(deps.instanceRepository.editMeta).mock.calls)
+        expect(change({ ...meta, name: "Languages" })).toBeNull();
       expect(deps.deckRepository.checkCatalogSave).not.toHaveBeenCalled();
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledTimes(3);
-    });
-
-    it("reads and writes each document again while it changes elsewhere", async () => {
-      const deps = makeDeps();
-      vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(meta);
-      vi.mocked(deps.instanceRepository.saveMeta).mockRejectedValueOnce(changed());
-      vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
-      await createUseCases(deps).renameInstance(session, instance, "Languages");
-      expect(deps.instanceRepository.readMeta).toHaveBeenCalledTimes(2);
-      // Once for the check before the first write, then once for each write.
-      expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(3);
-      expect(deps.instanceRepository.renameRegistrations).toHaveBeenCalledOnce();
     });
 
     it("checks the catalog's write before writing anything, and writes nothing when it would be refused", async () => {
@@ -647,7 +642,7 @@ describe("instances", () => {
         ...catalog,
         title: "Languages",
       });
-      expect(deps.instanceRepository.saveMeta).not.toHaveBeenCalled();
+      expect(deps.instanceRepository.editMeta).not.toHaveBeenCalled();
       expect(deps.deckRepository.saveCatalog).not.toHaveBeenCalled();
       expect(deps.instanceRepository.renameRegistrations).not.toHaveBeenCalled();
     });
@@ -670,16 +665,15 @@ describe("instances", () => {
       await expect(createUseCases(makeDeps()).readCatalog(instance.url)).resolves.toEqual(catalog);
     });
 
-    it("gets its description and license, of the catalog as it is now, again when it changed meanwhile", async () => {
+    it("gets its description and license, of the catalog as it is now", async () => {
       const deps = makeDeps();
-      vi.mocked(deps.deckRepository.saveCatalog).mockRejectedValueOnce(changed());
       const useCases = createUseCases(deps);
       const described = { ...catalog, description: "Shared decks.", license: CC0 };
       await expect(
         useCases.describeCatalog(instance.url, { description: " Shared decks. ", license: CC0 }),
       ).resolves.toEqual(described);
-      expect(deps.deckRepository.readCatalog).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.saveCatalog).toHaveBeenLastCalledWith(instance.url, described);
+      expect(deps.deckRepository.editCatalog).toHaveBeenCalledOnce();
+      expect(deps.deckRepository.saveCatalog).toHaveBeenCalledWith(instance.url, described);
     });
 
     it("refuses an instance without one", async () => {

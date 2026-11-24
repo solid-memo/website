@@ -675,6 +675,57 @@ describe("addDeck", () => {
   });
 });
 
+describe("editDeck", () => {
+  it("writes the entry changed from the deck as read, in this app's format, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    const change = vi.fn((stored: Deck) => ({ ...stored, title: { en: "Renamed" } }));
+    const written = await makeRepository(checkWrite).editDeck(
+      { ...deck, title: { en: "As shown" } },
+      change,
+    );
+    expect(change).toHaveBeenCalledWith(expect.objectContaining({ url: deck.url }));
+    expect(written).toMatchObject({ title: { en: "Renamed" }, formatVersion: 6 });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    expect(getStringWithLocale(getThing(saved as Dataset, deck.url)!, DCTERMS.title, "en")).toBe(
+      "Renamed",
+    );
+    expect(checkWrite).toHaveBeenCalledWith(saved, expect.arrayContaining([deck.url]), "pod");
+  });
+
+  it("writes nothing for no change, and gives the deck as read", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().editDeck(deck, () => null)).resolves.toMatchObject({
+      url: deck.url,
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads and changes the entry again when the catalog changed elsewhere meanwhile", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+    const change = vi.fn((stored: Deck) => stored);
+    await makeRepository().editDeck(deck, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a deck with no entry, or no catalog, writing nothing", async () => {
+    const change = vi.fn((stored: Deck) => stored);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().editDeck(deck, change)).rejects.toMatchObject({
+      code: "deckGone",
+    });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(
+      makeRepository().editDeck({ ...deck, url: `${CATALOG}#gone` }, change),
+    ).rejects.toMatchObject({ code: "deckGone" });
+    expect(change).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
 describe("readCatalog and saveCatalog", () => {
   const catalog = {
     title: "Main",
@@ -707,6 +758,57 @@ describe("readCatalog and saveCatalog", () => {
         "http://www.w3.org/ns/dcat#dataset",
       ),
     ).toEqual([deck.url]);
+  });
+
+  it("editCatalog writes the catalog changed from the one read, beside the decks there, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await makeRepository().saveCatalog(INSTANCE, catalog);
+    const stored = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    vi.mocked(writeDocument).mockClear();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored as never);
+    const checkWrite = vi.fn(async () => undefined);
+    const change = vi.fn((read: unknown) => ({ ...(read as typeof catalog), title: "Renamed" }));
+    await expect(makeRepository(checkWrite).editCatalog(INSTANCE, change)).resolves.toEqual({
+      ...catalog,
+      title: "Renamed",
+    });
+    expect(change).toHaveBeenCalledWith(catalog);
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
+    expect(checkWrite).toHaveBeenCalledWith(
+      saved,
+      [`${CATALOG}#catalog`, catalog.publisher.webId],
+      "pod",
+    );
+  });
+
+  it("editCatalog gives the change no catalog where there is none, and writes nothing for no change", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const change = vi.fn(() => null);
+    await expect(makeRepository().editCatalog(INSTANCE, change)).resolves.toBeNull();
+    expect(change).toHaveBeenCalledWith(null);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("editCatalog reads and changes the catalog again when it changed elsewhere meanwhile", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+    const change = vi.fn(() => catalog);
+    await makeRepository().editCatalog(INSTANCE, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("editCatalog throws what the change throws, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const refused = new Error("refused");
+    await expect(
+      makeRepository().editCatalog(INSTANCE, () => {
+        throw refused;
+      }),
+    ).rejects.toBe(refused);
+    expect(writeDocument).not.toHaveBeenCalled();
   });
 
   it("checkCatalogSave checks the catalog as saveCatalog would write it, and writes nothing", async () => {

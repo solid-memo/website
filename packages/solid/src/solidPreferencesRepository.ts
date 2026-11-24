@@ -2,13 +2,20 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { buildThing, createSolidDataset, getThing, setThing } from "./client/rdf";
+import {
+  type Dataset,
+  type NamedSubject,
+  buildThing,
+  createSolidDataset,
+  getThing,
+  setThing,
+} from "./client/rdf";
 import type { PreferencesRepository } from "@solid-memo/application/ports";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";
 import type { PreferencesRead } from "@solid-memo/domain/preferences";
 import { AppError } from "@solid-memo/domain/appError";
-import { getSolidDatasetOrNull, saveDataset } from "./datasets";
+import { editDocument, getSolidDatasetOrNull } from "./datasets";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { toPreferences, toPreferencesThing } from "./mappers/preferencesMapper";
 import { PREFERENCES_TERMS, PREFERENCES_V6 } from "@solid-memo/vocab/descriptors.generated";
@@ -21,10 +28,56 @@ export interface SolidPreferencesRepositoryDeps {
   checkWrite?: WriteCheck;
 }
 
+/**
+ * A write of the preferences is made once: one of the preferences as
+ * shown is not made again on what changed elsewhere, which its If-Match
+ * refuses (changedElsewhere). Only markConnectedScreen, which writes one
+ * choice on the preferences as they are, is made again (editDocument).
+ */
+const ONCE = 1;
+
 export function createSolidPreferencesRepository({
   fetch,
   checkWrite = noWriteCheck,
 }: SolidPreferencesRepositoryDeps): PreferencesRepository {
+  /**
+   * An edit of an instance's preferences document (editDocument): `edit`
+   * is given the document and its subject (`#it`) as read, and says what
+   * to write, if anything. What is written is checked at the subject and
+   * saved as ONE PUT of the whole document, If-Match the read
+   * (If-None-Match: * when there was none): node-solid-server stores a
+   * boolean a PATCH inserts as false, so "Not now"
+   * (schedulerInvitationDismissed) and the developer settings would not
+   * hold.
+   */
+  function editPreferences<R>(
+    instanceUrl: string,
+    edit: (
+      dataset: Dataset | null,
+      subject: NamedSubject | null,
+      url: string,
+    ) => { result: R; dataset?: Dataset },
+    madeAgain = false,
+  ): Promise<R> {
+    const documentUrl = preferencesUrlOf(instanceUrl);
+    const url = `${documentUrl}#it`;
+    return editDocument(
+      documentUrl,
+      fetch,
+      (dataset) => {
+        const { result, dataset: updated } = edit(
+          dataset,
+          dataset === null ? null : getThing(dataset, url),
+          url,
+        );
+        if (updated === undefined) return { result };
+        return { result, dataset: updated, subjects: [url], whole: true };
+      },
+      // Made again as many times as editDocument makes an edit, or once.
+      madeAgain ? { checkWrite } : { checkWrite, attempts: ONCE },
+    );
+  }
+
   return {
     async getPreferences(instanceUrl): Promise<PreferencesRead> {
       const documentUrl = preferencesUrlOf(instanceUrl);
@@ -41,18 +94,18 @@ export function createSolidPreferencesRepository({
      * user said to replace it: read as none, it would be overwritten
      * with what was shown in its place, the defaults.
      */
-    async savePreferences(instanceUrl, preferences, { replaceMisfit = false } = {}): Promise<void> {
-      const documentUrl = preferencesUrlOf(instanceUrl);
-      const dataset = (await getSolidDatasetOrNull(documentUrl, fetch)) ?? createSolidDataset();
-      const url = `${documentUrl}#it`;
-      const existing = getThing(dataset, url);
-      if (existing !== null && !replaceMisfit && toPreferences(existing) === null)
-        throw new AppError("preferencesMisfit");
-      const updated = setThing(dataset, toPreferencesThing(url, preferences, existing));
-      await checkWrite(updated, [url], "pod");
-      // One PUT of the whole document, If-Match the read above: node-solid-server stores a boolean a PATCH
-      // inserts as false, so "Not now" (schedulerInvitationDismissed) and the developer settings would not hold.
-      await saveDataset(documentUrl, updated, fetch, { whole: true });
+    savePreferences(instanceUrl, preferences, { replaceMisfit = false } = {}): Promise<void> {
+      return editPreferences(instanceUrl, (dataset, existing, url) => {
+        if (existing !== null && !replaceMisfit && toPreferences(existing) === null)
+          throw new AppError("preferencesMisfit");
+        return {
+          result: undefined,
+          dataset: setThing(
+            dataset ?? createSolidDataset(),
+            toPreferencesThing(url, preferences, existing),
+          ),
+        };
+      });
     },
 
     /**
@@ -60,41 +113,36 @@ export function createSolidPreferencesRepository({
      * as markConnectedScreen does, so preferences that do not fit their
      * shape are not rewritten with the defaults.
      */
-    async markSchedulerInvitationDismissed(instanceUrl) {
-      const documentUrl = preferencesUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
-      const url = `${documentUrl}#it`;
-      const existing = dataset === null ? null : getThing(dataset, url);
-      if (
-        existing === null ||
-        readFieldOf(existing, PREFERENCES_V6, "schedulerInvitationDismissed") === true
-      )
-        return;
-      const updated = setThing(
-        dataset!,
-        buildThing(withoutForeignShapedClasses(unlessNewer(existing), PREFERENCES_V6))
-          .removeAll(SM.schedulerInvitationDismissed)
-          .addBoolean(SM.schedulerInvitationDismissed, true)
-          .build(),
-      );
-      await checkWrite(updated, [url], "pod");
-      // One PUT of the whole document, If-Match the read above, as savePreferences writes it.
-      await saveDataset(documentUrl, updated, fetch, { whole: true });
+    markSchedulerInvitationDismissed(instanceUrl) {
+      return editPreferences(instanceUrl, (dataset, existing) => {
+        if (
+          existing === null ||
+          readFieldOf(existing, PREFERENCES_V6, "schedulerInvitationDismissed") === true
+        )
+          return { result: undefined };
+        return {
+          result: undefined,
+          dataset: setThing(
+            dataset!,
+            buildThing(withoutForeignShapedClasses(unlessNewer(existing), PREFERENCES_V6))
+              .removeAll(SM.schedulerInvitationDismissed)
+              .addBoolean(SM.schedulerInvitationDismissed, true)
+              .build(),
+          ),
+        };
+      });
     },
 
-    async upgradePreferences(instanceUrl): Promise<boolean> {
-      const documentUrl = preferencesUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
-      const url = `${documentUrl}#it`;
-      const existing = dataset === null ? null : getThing(dataset, url);
-      // The preferences as read, brought up to date in memory, written in this app's format.
-      const stored = existing === null ? null : toPreferences(existing);
-      if (stored === null || !isPreferencesOutdated(stored)) return false;
-      const updated = setThing(dataset!, toPreferencesThing(url, stored.preferences, existing));
-      await checkWrite(updated, [url], "pod");
-      // One PUT of the whole document, If-Match the read above, as savePreferences writes it.
-      await saveDataset(documentUrl, updated, fetch, { whole: true });
-      return true;
+    upgradePreferences(instanceUrl): Promise<boolean> {
+      return editPreferences(instanceUrl, (dataset, existing, url) => {
+        // The preferences as read, brought up to date in memory, written in this app's format.
+        const stored = existing === null ? null : toPreferences(existing);
+        if (stored === null || !isPreferencesOutdated(stored)) return { result: false };
+        return {
+          result: true,
+          dataset: setThing(dataset!, toPreferencesThing(url, stored.preferences, existing)),
+        };
+      });
     },
 
     async connectedScreenSkipped(instanceUrl): Promise<boolean> {
@@ -113,33 +161,36 @@ export function createSolidPreferencesRepository({
      * Sets or removes the one triple on the subject as stored, whatever
      * its format, so the preferences are not rewritten: ones that do not
      * fit their shape gain the choice alone, which connectedScreenSkipped
-     * reads all the same. Showing the screen leaves no triple.
+     * reads all the same. Showing the screen leaves no triple. Made again
+     * on the preferences as they are then while they keep changing, or
+     * are made, elsewhere (editDocument), so the choice alone is written
+     * on them.
      */
-    async markConnectedScreen(instanceUrl, skipped, created) {
-      const documentUrl = preferencesUrlOf(instanceUrl);
-      const dataset = await getSolidDatasetOrNull(documentUrl, fetch);
-      const url = `${documentUrl}#it`;
-      const existing = dataset === null ? null : getThing(dataset, url);
-      if (existing === null && created === null) return "none";
-      if (
-        existing !== null &&
-        (readTerms(existing, PREFERENCES_TERMS).connectedScreenSkipped === true) === skipped
-      )
-        return "unchanged";
-      const subject = buildThing(
-        existing === null
-          ? toPreferencesThing(url, created!, null)
-          : withoutForeignShapedClasses(unlessNewer(existing), PREFERENCES_V6),
-      ).removeAll(SM.connectedScreenSkipped);
-      const updated = setThing(
-        dataset ?? createSolidDataset(),
-        (skipped ? subject.addBoolean(SM.connectedScreenSkipped, true) : subject).build(),
+    markConnectedScreen(instanceUrl, skipped, created) {
+      return editPreferences(
+        instanceUrl,
+        (dataset, existing, url) => {
+          if (existing === null && created === null) return { result: "none" as const };
+          if (
+            existing !== null &&
+            (readTerms(existing, PREFERENCES_TERMS).connectedScreenSkipped === true) === skipped
+          )
+            return { result: "unchanged" as const };
+          const subject = buildThing(
+            existing === null
+              ? toPreferencesThing(url, created!, null)
+              : withoutForeignShapedClasses(unlessNewer(existing), PREFERENCES_V6),
+          ).removeAll(SM.connectedScreenSkipped);
+          return {
+            result: "written" as const,
+            dataset: setThing(
+              dataset ?? createSolidDataset(),
+              (skipped ? subject.addBoolean(SM.connectedScreenSkipped, true) : subject).build(),
+            ),
+          };
+        },
+        true,
       );
-      await checkWrite(updated, [url], "pod");
-      // One PUT of the whole document, If-Match the read above (If-None-Match when there was none),
-      // as savePreferences writes it: node-solid-server stores a boolean a PATCH inserts as false.
-      await saveDataset(documentUrl, updated, fetch, { whole: true });
-      return "written";
     },
   };
 }

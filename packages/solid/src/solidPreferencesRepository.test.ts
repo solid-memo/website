@@ -35,10 +35,20 @@ vi.mock("./client/resources", async (importOriginal) => {
     writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
   };
 });
-vi.mock("./datasets", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./datasets")>()),
-  getSolidDatasetOrNull: vi.fn(),
-}));
+vi.mock("./datasets", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./datasets")>();
+  const getSolidDatasetOrNull = vi.fn();
+  return {
+    ...actual,
+    getSolidDatasetOrNull,
+    // An edit's read, as any other read here.
+    editDocument: ((url, fetch, edit, policy) =>
+      actual.editDocument(url, fetch, edit, {
+        read: getSolidDatasetOrNull,
+        ...policy,
+      })) as typeof actual.editDocument,
+  };
+});
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const DOCUMENT = `${INSTANCE}preferences.ttl`;
@@ -137,6 +147,15 @@ describe("savePreferences", () => {
     textSize: "default" as const,
   };
 
+  it("saves once: preferences changed elsewhere since they were read are not written over", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(DOCUMENT));
+    vi.mocked(writeDocument).mockRejectedValue({ statusCode: 412 });
+    await expect(makeRepository().savePreferences(INSTANCE, preferences)).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
+    expect(writeDocument).toHaveBeenCalledOnce();
+  });
+
   it("creates the document on first save", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
 
@@ -228,6 +247,25 @@ describe("markConnectedScreen", () => {
     expect(saveUrl).toBe(DOCUMENT);
     return getThing(dataset as Dataset, SUBJECT)!;
   }
+
+  it("marks again, on the preferences as they are then, when they were made or changed elsewhere meanwhile", async () => {
+    // None when first read; made elsewhere before the write (412), then read as they are.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(null).mockResolvedValue(stored(6));
+    vi.mocked(writeDocument)
+      .mockRejectedValueOnce({ statusCode: 412 })
+      .mockImplementation(async (_url, dataset) => ({
+        dataset: dataset as never,
+        etag: undefined,
+      }));
+    await expect(
+      makeRepository().markConnectedScreen(INSTANCE, true, DEFAULT_PREFERENCES),
+    ).resolves.toBe("written");
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+    const [, dataset] = vi.mocked(writeDocument).mock.calls[1]!;
+    const subject = getThing(dataset as Dataset, SUBJECT)!;
+    expect(getBoolean(subject, SM.connectedScreenSkipped)).toBe(true);
+    expect(getStringNoLocale(subject, "https://other.example/#note")).toBe("kept");
+  });
 
   it("sets the choice on the preferences as stored, their format and every other triple kept, checked first", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored(5));

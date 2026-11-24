@@ -170,12 +170,21 @@ export interface InstanceRepository {
   /** What the instance's meta document says; null when there is none. */
   readMeta(instanceUrl: string): Promise<InstanceMeta | null>;
   /**
-   * Rewrite the meta document's subject in place, in this app's format,
-   * in ONE save made only if the document is still as it was read
-   * (If-Match): the Studio's rename. Fails when the document is missing:
-   * a meta document is created with its instance, never on its own.
+   * Edit the instance's meta as it is now, for the Studio's rename:
+   * `change` is given the meta as read and returns the meta to write, or
+   * null for no change, which writes nothing. The subject is rewritten in
+   * place, in this app's format (unknown triples survive), from that same
+   * read, in ONE save made only if the document is still as read
+   * (If-Match); when it changed meanwhile, it is read and changed again,
+   * a few times. Throws noMetaToUpdate, writing nothing, when there is
+   * no meta to edit (none, or one that does not fit its shape): a meta
+   * document is created with its instance, never on its own. The meta
+   * as it then stands.
    */
-  saveMeta(instanceUrl: string, meta: InstanceMeta): Promise<void>;
+  editMeta(
+    instanceUrl: string,
+    change: (meta: InstanceMeta) => InstanceMeta | null,
+  ): Promise<InstanceMeta>;
   /**
    * For the format update: bring the meta document's subject up to this
    * app's format in place (unknown triples survive), in ONE save made
@@ -247,6 +256,21 @@ export interface DeckRepository {
   readCatalog(instanceUrl: string): Promise<CatalogRead>;
   /** Write the instance's catalog, listing every deck, creating the catalog document if need be. */
   saveCatalog(instanceUrl: string, catalog: Catalog): Promise<void>;
+  /**
+   * Edit the instance's catalog as it is now, for the Studio: `change`
+   * is given the catalog as read (as readCatalog reads it) and returns
+   * the catalog to write, or null for no change, which writes nothing.
+   * The catalog is written from that same read, as saveCatalog writes
+   * it, in ONE save made only if the document is still as read
+   * (If-Match; created only if nothing is there, when there is no
+   * document); when it changed meanwhile, it is read and changed again,
+   * a few times. What `change` throws is thrown at once. What `change`
+   * last returned.
+   */
+  editCatalog<C extends Catalog | null>(
+    instanceUrl: string,
+    change: (catalog: CatalogRead) => C,
+  ): Promise<C>;
   /**
    * Throw what saveCatalog would (writtenByNewerApp when a newer version
    * of the app wrote the catalog or its publisher, a failed write check),
@@ -448,6 +472,17 @@ export interface DeckRepository {
   addDeck(deck: Deck): Promise<Deck>;
   /** The deck as its catalog entry says now; null when it has none (any more). */
   readDeck(deckUrl: string): Promise<Deck | null>;
+  /**
+   * Edit the deck as its catalog entry says now, for the Studio:
+   * `change` is given the deck as read (as readDeck reads it) and returns
+   * the deck to write, or null for no change, which writes nothing. The
+   * entry is written from that same read, as saveDeck writes it, in ONE
+   * save made only if the catalog document is still as read (If-Match);
+   * when it changed meanwhile, it is read and changed again, a few
+   * times. Throws deckGone, writing nothing, when the deck has no entry.
+   * The deck as it then stands.
+   */
+  editDeck(deck: Deck, change: (stored: Deck) => Deck | null): Promise<Deck>;
   /**
    * For a library upgrade (domain/deckUpgrade.ts): write the deck's entry
    * as `next` in one write of the catalog document — what changed from
@@ -1031,7 +1066,9 @@ export interface PreferencesRepository {
    * Preferences of a newer format are refused (writtenByNewerApp). When
    * the instance has no preferences subject, `created` is written with
    * it, in this app's format, made only if nothing is there yet; with
-   * `created` null nothing is written. "unchanged" when they already say
+   * `created` null nothing is written. When the preferences changed, or
+   * were made, elsewhere meanwhile (412), they are read and the choice
+   * set on them again, a few times. "unchanged" when they already say
    * so, "none" when there was nothing to write it on.
    */
   markConnectedScreen(

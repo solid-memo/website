@@ -15,7 +15,6 @@ import type { DeckGroup, DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckT
 import { deckGroupUrlOf } from "@solid-memo/domain/instanceLayout";
 import type { DeckRepository } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
-import { again } from "./writes";
 
 export interface DeckUseCases {
   listDecks(instanceUrl: string): Promise<Deck[]>;
@@ -188,11 +187,7 @@ export function createDeckUseCases({
       return deckRepository.saveDeck(withPace(deck, pace));
     },
     setDeckProvenance(offered, provenance) {
-      return again(async () => {
-        const deck = await deckRepository.readDeck(offered.url);
-        if (deck === null) throw new AppError("deckGone", { deck: offered.title });
-        return deckRepository.saveDeck(withProvenance(deck, provenance));
-      });
+      return deckRepository.editDeck(offered, (deck) => withProvenance(deck, provenance));
     },
     setDecksDirection(decks, direction) {
       return deckRepository.saveDecks(decks.map((deck) => ({ ...deck, direction })));

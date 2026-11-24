@@ -18,28 +18,6 @@ export function changedElsewhere(error: unknown): boolean {
   return error instanceof AppError && error.code === "changedElsewhere";
 }
 
-/**
- * How often an edit of metadata (a deck's provenance, an instance's
- * name, its catalog) is made, in all, while its document keeps
- * changing elsewhere (412).
- */
-const METADATA_ATTEMPTS = 3;
-
-/**
- * Make an edit, a read of its document then a write of it If-Match that
- * read, again while the document keeps changing elsewhere: each attempt
- * reads afresh, so what changed meanwhile is kept.
- */
-export async function again<T>(edit: () => Promise<T>): Promise<T> {
-  for (let attempt = 1; ; attempt++) {
-    try {
-      return await edit();
-    } catch (error) {
-      if (!changedElsewhere(error) || attempt === METADATA_ATTEMPTS) throw error;
-    }
-  }
-}
-
 /** A read made without a known version, which always comes with the contents. */
 export async function readNow<T>(
   read: Promise<Since<T>>,

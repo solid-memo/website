@@ -26,7 +26,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { PromptStates } from "@solid-memo/domain/grading";
 import type { ReviewState, ReviewStates } from "@solid-memo/domain/review";
-import type { Catalog } from "@solid-memo/domain/catalog";
+import type { Catalog, CatalogRead } from "@solid-memo/domain/catalog";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
@@ -138,7 +138,12 @@ export function makeDeps() {
     })),
     detachInstance: vi.fn(async () => undefined),
     readMeta: vi.fn(async () => null),
-    saveMeta: vi.fn(async () => undefined),
+    // As the real one does: the meta read, changed, and the change made when there is one.
+    editMeta: vi.fn(async (url, change) => {
+      const meta = await instanceRepository.readMeta(url);
+      if (meta === null) throw new AppError("noMetaToUpdate", { url });
+      return change(meta) ?? meta;
+    }),
     renameRegistrations: vi.fn(async () => undefined),
     upgradeMeta: vi.fn(async () => true),
     readOldRegistrations: vi.fn(async () => ({ registrations: [], unreadableIndexes: [] })),
@@ -148,6 +153,12 @@ export function makeDeps() {
     listDecks: vi.fn(async () => [deck]),
     readCatalog: vi.fn(async () => catalog),
     saveCatalog: vi.fn(async () => undefined),
+    // As the real one does: the catalog read, changed, and the change saved when there is one.
+    editCatalog: vi.fn(async (url: string, change: (read: CatalogRead) => Catalog | null) => {
+      const changed = change(await deckRepository.readCatalog(url));
+      if (changed !== null) await deckRepository.saveCatalog(url, changed);
+      return changed;
+    }) as DeckRepository["editCatalog"],
     checkCatalogSave: vi.fn(async () => undefined),
     createDeck: vi.fn(async () => deck),
     renameDeck: vi.fn(async () => deck),
@@ -183,6 +194,13 @@ export function makeDeps() {
       version: null,
     })),
     readDeck: vi.fn(async () => deck),
+    // As the real one does: the deck read, changed, and the change saved when there is one.
+    editDeck: vi.fn(async (edited, change) => {
+      const stored = await deckRepository.readDeck(edited.url);
+      if (stored === null) throw new AppError("deckGone", { deck: edited.title });
+      const changed = change(stored);
+      return changed === null ? stored : deckRepository.saveDeck(changed);
+    }),
     upgradeDecks: vi.fn(async () => true),
     upgradeDeckEntry: vi.fn(async (_current, next) => next),
     checkDeckEntryUpgrade: vi.fn(async () => undefined),

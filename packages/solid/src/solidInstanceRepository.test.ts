@@ -1049,7 +1049,7 @@ describe("readMeta and upgradeMeta", () => {
 
   it.each([
     ["upgradeMeta", { formatVersion: 2 }],
-    ["saveMeta", { name: "Renamed" }],
+    ["editMeta", { name: "Renamed" }],
     ["createInstance", { name: "Made" }],
   ] as const)(
     "reads the meta document again after %s writes it, not as it was before, however the server versions it",
@@ -1067,8 +1067,8 @@ describe("readMeta and upgradeMeta", () => {
       const repository = makeRepository();
       await expect(repository.readMeta(CONTAINER)).resolves.toMatchObject({ formatVersion: 1 });
       if (write === "upgradeMeta") await repository.upgradeMeta(CONTAINER);
-      else if (write === "saveMeta")
-        await repository.saveMeta(CONTAINER, { ...meta, name: "Renamed" });
+      else if (write === "editMeta")
+        await repository.editMeta(CONTAINER, (read) => ({ ...read, name: "Renamed" }));
       else
         await repository.createInstance({
           webId: WEBID,
@@ -1098,26 +1098,31 @@ describe("renameRegistrations", () => {
   });
 });
 
-describe("saveMeta", () => {
+describe("editMeta", () => {
   const META = `${CONTAINER}meta.ttl`;
   const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
-
-  it("rewrites the subject in place, keeping foreign triples, checked first", async () => {
-    vi.mocked(readDocument).mockResolvedValue(
-      readOf(
-        setThing(
-          datasetFrom(META),
-          buildThing(createThing({ url: `${META}#it` }))
-            .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
-            .addStringNoLocale(DCTERMS.title, "Main")
-            .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
-            .addStringNoLocale("https://other.example/#note", "kept")
-            .build(),
-        ),
+  /** The meta document as another app may have written it: one triple of its own on the subject. */
+  const stored = () =>
+    readOf(
+      setThing(
+        datasetFrom(META),
+        buildThing(createThing({ url: `${META}#it` }))
+          .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
+          .addStringNoLocale(DCTERMS.title, "Main")
+          .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
+          .addStringNoLocale("https://other.example/#note", "kept")
+          .build(),
       ),
     );
+
+  it("rewrites the subject in place from the meta as read, keeping foreign triples, checked first", async () => {
+    vi.mocked(readDocument).mockResolvedValue(stored());
     const checkWrite = vi.fn(async () => undefined);
-    await makeRepository(checkWrite).saveMeta(CONTAINER, { ...meta, name: "Renamed" });
+    const change = vi.fn((read: typeof meta) => ({ ...read, name: "Renamed" }));
+    await expect(makeRepository(checkWrite).editMeta(CONTAINER, change)).resolves.toMatchObject({
+      name: "Renamed",
+    });
+    expect(change).toHaveBeenCalledWith(expect.objectContaining({ name: "Main" }));
     const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
     expect(url).toBe(META);
     const thing = getThing(saved as Dataset, `${META}#it`)!;
@@ -1127,15 +1132,52 @@ describe("saveMeta", () => {
     expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`], "pod");
   });
 
-  it("refuses to save when the meta document or its subject is missing", async () => {
+  it("writes nothing for no change, and gives the meta as read", async () => {
+    vi.mocked(readDocument).mockResolvedValue(stored());
+    await expect(makeRepository().editMeta(CONTAINER, () => null)).resolves.toMatchObject({
+      name: "Main",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads and changes the meta again when it changed elsewhere meanwhile", async () => {
+    vi.mocked(readDocument).mockResolvedValue(stored());
+    vi.mocked(writeDocument)
+      .mockRejectedValueOnce({ statusCode: 412 })
+      .mockImplementation(async (_url, dataset) => ({
+        dataset: dataset as never,
+        etag: undefined,
+      }));
+    const change = vi.fn((read: typeof meta) => ({ ...read, name: "Renamed" }));
+    await makeRepository().editMeta(CONTAINER, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses, writing nothing, when the meta document or its subject is missing, or does not fit its shape", async () => {
+    const change = vi.fn(() => meta);
     vi.mocked(readDocument).mockRejectedValue({ statusCode: 404 });
-    await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toMatchObject({
+    await expect(makeRepository().editMeta(CONTAINER, change)).rejects.toMatchObject({
       code: "noMetaToUpdate",
     });
     vi.mocked(readDocument).mockResolvedValue(readOf(datasetFrom(META)));
-    await expect(makeRepository().saveMeta(CONTAINER, meta)).rejects.toMatchObject({
+    await expect(makeRepository().editMeta(CONTAINER, change)).rejects.toMatchObject({
       code: "noMetaToUpdate",
     });
+    vi.mocked(readDocument).mockResolvedValue(
+      readOf(
+        setThing(
+          datasetFrom(META),
+          buildThing(createThing({ url: `${META}#it` }))
+            .addStringNoLocale("https://other.example/#note", "no meta")
+            .build(),
+        ),
+      ),
+    );
+    await expect(makeRepository().editMeta(CONTAINER, change)).rejects.toMatchObject({
+      code: "noMetaToUpdate",
+    });
+    expect(change).not.toHaveBeenCalled();
     expect(writeDocument).not.toHaveBeenCalled();
   });
 });
