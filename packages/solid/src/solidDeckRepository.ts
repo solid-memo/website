@@ -147,6 +147,17 @@ export interface SolidDeckRepositoryDeps {
 }
 
 /**
+ * The catalog document `read` (none: a new one) with `catalog` written
+ * in it, beside its decks, and the subjects the write is checked for.
+ */
+function catalogWritten(read: Dataset | null, catalogUrl: string, catalog: Catalog) {
+  return {
+    dataset: withCatalog(read ?? createSolidDataset(), catalogUrl, catalog),
+    subjects: [`${catalogUrl}#catalog`, catalog.publisher.webId],
+  };
+}
+
+/**
  * The arrangement the catalog states (toStoredLayout), or
  * catalogTooManyLinks past MAX_CATALOG_LINKS decks, as listDecks gives
  * (each deck's documents are read by whoever shows the tree), or past
@@ -173,12 +184,8 @@ export function createSolidDeckRepository({
   /** The catalog document as saveCatalog writes it, and the subjects it writes; nothing is sent. */
   async function catalogWrite(instanceUrl: string, catalog: Catalog) {
     const catalogUrl = catalogUrlOf(instanceUrl);
-    const read = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-    return {
-      catalogUrl,
-      dataset: withCatalog(read, catalogUrl, catalog),
-      subjects: [`${catalogUrl}#catalog`, catalog.publisher.webId],
-    };
+    const read = await getSolidDatasetOrNull(catalogUrl, fetch);
+    return { catalogUrl, ...catalogWritten(read, catalogUrl, catalog) };
   }
 
   /** Save a document once the subjects the write touched are checked. */
@@ -283,6 +290,21 @@ export function createSolidDeckRepository({
     async saveCatalog(instanceUrl, catalog) {
       const { catalogUrl, dataset, subjects } = await catalogWrite(instanceUrl, catalog);
       await save(catalogUrl, dataset, subjects);
+    },
+
+    editCatalog(instanceUrl, change) {
+      const catalogUrl = catalogUrlOf(instanceUrl);
+      // The catalog written is the one changed from the read the save is If-Match (editDocument).
+      return editDocument(
+        catalogUrl,
+        fetch,
+        (read) => {
+          const changed = change(read === null ? null : toCatalog(read, catalogUrl));
+          if (changed === null) return { result: changed };
+          return { ...catalogWritten(read, catalogUrl, changed), result: changed };
+        },
+        { checkWrite },
+      );
     },
 
     async checkCatalogSave(instanceUrl, catalog) {

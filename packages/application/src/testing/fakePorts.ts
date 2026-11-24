@@ -26,7 +26,7 @@ import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
 import type { PromptStates } from "@solid-memo/domain/grading";
 import type { ReviewState, ReviewStates } from "@solid-memo/domain/review";
-import type { Catalog } from "@solid-memo/domain/catalog";
+import type { Catalog, CatalogRead } from "@solid-memo/domain/catalog";
 import type { Session } from "@solid-memo/domain/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
@@ -153,6 +153,12 @@ export function makeDeps() {
     listDecks: vi.fn(async () => [deck]),
     readCatalog: vi.fn(async () => catalog),
     saveCatalog: vi.fn(async () => undefined),
+    // As the real one does: the catalog read, changed, and the change saved when there is one.
+    editCatalog: vi.fn(async (url: string, change: (read: CatalogRead) => Catalog | null) => {
+      const changed = change(await deckRepository.readCatalog(url));
+      if (changed !== null) await deckRepository.saveCatalog(url, changed);
+      return changed;
+    }) as DeckRepository["editCatalog"],
     checkCatalogSave: vi.fn(async () => undefined),
     createDeck: vi.fn(async () => deck),
     renameDeck: vi.fn(async () => deck),

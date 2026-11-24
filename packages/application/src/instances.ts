@@ -50,7 +50,6 @@ import type {
 } from "./ports";
 import { AppError } from "@solid-memo/domain/appError";
 import { mapAtOnce } from "./atOnce";
-import { again } from "./writes";
 import { stepReporter } from "./progress";
 import type { PreferenceStore } from "./preferenceStore";
 import type { DigestStore } from "./digestStore";
@@ -217,6 +216,16 @@ function refusedForDeck(error: unknown): null {
  * registered for other apps to find, and brought up to this app's
  * formats (docs/migrations.md).
  */
+/**
+ * `catalog` named `name`; null when there is none to rename, or it is
+ * named so already. One that does not fit its shape is left as it is: a
+ * write would replace what it says.
+ */
+function renamedTo(catalog: CatalogRead, name: string): Catalog | null {
+  if (catalog === null || catalog === "misfit" || catalog.title === name) return null;
+  return renamedCatalog(catalog, name);
+}
+
 export function createInstanceUseCases({
   storageGateway,
   instanceRepository,
@@ -353,10 +362,7 @@ export function createInstanceUseCases({
   }
   /** The instance's catalog named `name`, when it has one to rename; null when there is none, or it is named so. */
   async function catalogRenamed(instanceUrl: string, name: string): Promise<Catalog | null> {
-    const catalog = await deckRepository.readCatalog(instanceUrl);
-    // One that does not fit its shape is left as it is: a write would replace what it says.
-    if (catalog === null || catalog === "misfit" || catalog.title === name) return null;
-    return renamedCatalog(catalog, name);
+    return renamedTo(await deckRepository.readCatalog(instanceUrl), name);
   }
   async function createInstance(
     session: Session,
@@ -448,10 +454,7 @@ export function createInstanceUseCases({
       await instanceRepository.editMeta(instance.url, (meta) =>
         meta.name === name ? null : { ...meta, name },
       );
-      await again(async () => {
-        const catalog = await catalogRenamed(instance.url, name);
-        if (catalog !== null) await deckRepository.saveCatalog(instance.url, catalog);
-      });
+      await deckRepository.editCatalog(instance.url, (catalog) => renamedTo(catalog, name));
       await instanceRepository.renameRegistrations({
         webId: session.webId,
         instanceUrl: instance.url,
@@ -463,13 +466,10 @@ export function createInstanceUseCases({
       return deckRepository.readCatalog(instanceUrl);
     },
     describeCatalog(instanceUrl, about) {
-      return again(async () => {
-        const catalog = await deckRepository.readCatalog(instanceUrl);
+      return deckRepository.editCatalog(instanceUrl, (catalog) => {
         if (catalog === null) throw new AppError("noCatalogToUpdate", { url: instanceUrl });
         if (catalog === "misfit") throw new AppError("catalogMisfit", { url: instanceUrl });
-        const described = describedCatalog(catalog, about);
-        await deckRepository.saveCatalog(instanceUrl, described);
-        return described;
+        return describedCatalog(catalog, about);
       });
     },
     planMigration: (instanceUrl) => planOf(instanceUrl),

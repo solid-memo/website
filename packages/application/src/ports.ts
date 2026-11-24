@@ -257,6 +257,21 @@ export interface DeckRepository {
   /** Write the instance's catalog, listing every deck, creating the catalog document if need be. */
   saveCatalog(instanceUrl: string, catalog: Catalog): Promise<void>;
   /**
+   * Edit the instance's catalog as it is now, for the Studio: `change`
+   * is given the catalog as read (as readCatalog reads it) and returns
+   * the catalog to write, or null for no change, which writes nothing.
+   * The catalog is written from that same read, as saveCatalog writes
+   * it, in ONE save made only if the document is still as read
+   * (If-Match; created only if nothing is there, when there is no
+   * document); when it changed meanwhile, it is read and changed again,
+   * a few times. What `change` throws is thrown at once. What `change`
+   * last returned.
+   */
+  editCatalog<C extends Catalog | null>(
+    instanceUrl: string,
+    change: (catalog: CatalogRead) => C,
+  ): Promise<C>;
+  /**
    * Throw what saveCatalog would (writtenByNewerApp when a newer version
    * of the app wrote the catalog or its publisher, a failed write check),
    * writing nothing: for a change that writes other documents before the
