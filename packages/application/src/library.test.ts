@@ -116,7 +116,7 @@ describe("the deck library", () => {
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(current.url);
     // A library copy's releases are the library's to read and keep, under a release's limits each.
     expect(deps.deckLibrary.linkedReads).not.toHaveBeenCalled();
-    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+    expect(deps.deckWrites).not.toHaveBeenCalled();
   });
   describe("whole decks' cards, read for a list of decks", () => {
     /** A library whose capitals series has a newer release than the copies'. */
@@ -357,6 +357,7 @@ describe("the deck library", () => {
   it("addReleaseLanguages gives a copy the languages its release adds, and saves it; nothing for a home-made deck or nothing to add", async () => {
     const deps = makeDeps();
     const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: libraryDeck.url };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(copy);
     vi.mocked(deps.deckLibrary.fetchLibraryDeck).mockResolvedValueOnce({
       ...libraryContent,
       title: { en: "Capitals", sv: "Huvudstäder" },
@@ -365,12 +366,12 @@ describe("the deck library", () => {
       title: { en: "Capitals", sv: "Huvudstäder" },
     });
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(libraryDeck.url);
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
+    expect(deps.deckWrites).toHaveBeenCalledOnce();
     await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toBeNull();
     await expect(
       createUseCases(deps).addReleaseLanguages({ ...deck, sourceUrl: undefined }),
     ).resolves.toBeNull();
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
+    expect(deps.deckWrites).toHaveBeenCalledOnce();
   });
   it("addReleaseLanguages leaves a release added from a link as it is, whatever languages its server adds", async () => {
     const deps = makeDeps();
@@ -383,7 +384,7 @@ describe("the deck library", () => {
     });
     await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toBeNull();
     expect(deps.deckLibrary.fetchLibraryDeck).not.toHaveBeenCalled();
-    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+    expect(deps.deckWrites).not.toHaveBeenCalled();
   });
   it("addReleaseLanguages fills in a copy of an older release the index lists", async () => {
     const deps = makeDeps();
@@ -406,11 +407,12 @@ describe("the deck library", () => {
       title: { en: "Capitals", sv: "Huvudstäder" },
     });
     const copy: Deck = { ...deck, title: { en: "Capitals" }, sourceUrl: older };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(copy);
     await expect(createUseCases(deps).addReleaseLanguages(copy)).resolves.toMatchObject({
       title: { en: "Capitals", sv: "Huvudstäder" },
     });
     expect(deps.deckLibrary.fetchLibraryDeck).toHaveBeenCalledWith(older);
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledOnce();
+    expect(deps.deckWrites).toHaveBeenCalledOnce();
   });
   it("deckRelease reads the release a copy came from; none for a home-made deck", async () => {
     const deps = makeDeps();

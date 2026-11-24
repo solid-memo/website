@@ -373,7 +373,7 @@ describe("a class another app gave a subject of the catalog document", () => {
     const pod = await podWith(`<#a> a <${DATA_SERVICE}>, <${FOAF_DOCUMENT}> .`);
     const repository = checked(pod);
     const deck = (await repository.listDecks(INSTANCE)).find((d) => d.url === at("a"))!;
-    await repository.saveDecks([{ ...deck, title: { en: "renamed" } }]);
+    await repository.editDecks([deck], (stored) => ({ ...stored, title: { en: "renamed" } }));
     expect(typesOf(pod, at("a")).sort()).toEqual(
       [
         `<https://solid-memo.com/ns/vocab/v1.ttl#Deck>`,

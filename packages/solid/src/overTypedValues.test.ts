@@ -103,7 +103,10 @@ describe("a linked node with more types than the engine reads", () => {
   it("leaves a deck's save open when its theme is one", async () => {
     const planted = await podWith(`<#a> dcat:theme <${EDUC}> .\n${types(EDUC)}`);
     const deck = (await planted.repository.listDecks(INSTANCE)).find((d) => d.url === at("a"))!;
-    await planted.repository.saveDecks([{ ...deck, title: { en: "renamed" } }]);
+    await planted.repository.editDecks([deck], (stored) => ({
+      ...stored,
+      title: { en: "renamed" },
+    }));
     expect(await resultsOn(planted, EDUC)).toContainEqual(overTyped(EDUC));
   }, 30_000);
 

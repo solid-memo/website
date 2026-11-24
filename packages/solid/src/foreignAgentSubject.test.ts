@@ -62,9 +62,14 @@ describe("another app's subject at an agent's fragment of a deck catalog", () =>
   it("stays when a deck is renamed, saved or removed", async () => {
     const { repository, deck, other, present } = await setup();
     expect(await present()).toBe(true);
-    const renamed = await repository.renameDeck(deck, { en: "Renamed" });
+    const renamed = await repository.editDeck(deck, (stored) => ({
+      ...stored,
+      title: { en: "Renamed" },
+    }));
     expect(await present()).toBe(true);
-    await repository.saveDecks([{ ...renamed, authors: ["Kim"] }, other]);
+    await repository.editDecks([renamed, other], (stored) =>
+      stored.url === renamed.url ? { ...stored, authors: ["Kim"] } : stored,
+    );
     expect(await present()).toBe(true);
     await repository.removeDecks([other]);
     expect(await present()).toBe(true);

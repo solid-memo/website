@@ -387,14 +387,6 @@ export function createSolidDeckRepository({
       );
     },
 
-    renameDeck(deck, title): Promise<Deck> {
-      return saveDeck({ ...deck, title });
-    },
-
-    saveDeck,
-
-    saveDecks,
-
     removeDeck(deck) {
       return removeDecks([deck]);
     },
@@ -482,22 +474,24 @@ export function createSolidDeckRepository({
       if (thing === null) {
         throw new AppError("cardGone", { card: card.url });
       }
-      // An edit that does not state distractors (the card editor's, while its wrong options are
-      // unchanged) keeps the card's,
-      // and one that does not state a text format, or what the card is about, keeps the card's too.
-      const distractors = content.distractors ?? card.distractors;
-      const textFormat = content.textFormat ?? card.textFormat;
-      const subjects = content.subjects ?? card.subjects;
+      // What the edit does not state is kept as the card says now, not as the editor read it: its
+      // distractors (the card editor's edit, while its wrong options are unchanged), its text format,
+      // what it is about, when it was made and whether it is retired. A card that does not fit its
+      // shape keeps them as given.
+      const stored = toCard(thing, dataset) ?? card;
+      const distractors = content.distractors ?? stored.distractors;
+      const textFormat = content.textFormat ?? stored.textFormat;
+      const subjects = content.subjects ?? stored.subjects;
       const updated: Card = {
         id: card.id,
         url: card.url,
-        createdAt: card.createdAt,
+        createdAt: stored.createdAt,
         ...content,
         ...(distractors === undefined ? {} : { distractors }),
         ...(textFormat === undefined ? {} : { textFormat }),
         ...(subjects === undefined ? {} : { subjects }),
         formatVersion: CARD_FORMAT_VERSION,
-        ...(card.retired === true ? { retired: true } : {}),
+        ...(stored.retired === true ? { retired: true } : {}),
       };
       const written = withCard(dataset, deck, updated, thing);
       await saveCardsDocument(deck, written.dataset, written.subjects);
@@ -560,24 +554,11 @@ export function createSolidDeckRepository({
 
     readDeck,
 
-    editDeck(deck, change) {
-      const catalogUrl = documentUrlOf(deck.url);
-      // The entry written is the one changed from the read the save is If-Match (editDocument).
-      return editDocument(
-        catalogUrl,
-        fetch,
-        (dataset) => {
-          const stored = dataset === null ? undefined : deckIn(dataset, catalogUrl, deck.url);
-          if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
-          const changed = change(stored);
-          if (changed === null) return { result: stored };
-          const written: Deck = { ...changed, formatVersion: DECK_FORMAT_VERSION };
-          const updated = withDecks(dataset!, [written]);
-          return { dataset: updated, subjects: decksSubjects(updated, [written]), result: written };
-        },
-        { checkWrite },
-      );
+    async editDeck(deck, change) {
+      return (await editDecks([deck], change))[0]!;
     },
+
+    editDecks,
 
     async upgradeDeckEntry(current, next): Promise<Deck> {
       const { catalogUrl, dataset, subjects, written } = await upgradedEntry(current, next);
@@ -794,29 +775,47 @@ export function createSolidDeckRepository({
     );
   }
 
-  /** Rewrite a deck's catalog entry in place (saveDecks). */
-  async function saveDeck(deck: Deck): Promise<Deck> {
-    return (await saveDecks([deck]))[0]!;
-  }
-
   /**
-   * Rewrite decks' catalog entries in place, in this app's format, one
-   * save per catalog document: each entry's own predicates are replaced
-   * from the deck, so unknown triples survive; its agents and
-   * distribution are written beside it. Returns the decks as written.
+   * Edit decks as their catalog entries say now (editDecks): one edit of
+   * each catalog document (editDocument), its entries read once, `change`
+   * made to each, and those changed rewritten in place, in this app's
+   * format: each entry's own predicates are replaced from the deck, so
+   * unknown triples survive; its agents and distribution are written
+   * beside it. The entry written is the one changed from the read the
+   * save is If-Match. Returns the decks as they then stand, in order.
    */
-  async function saveDecks(decks: readonly Deck[]): Promise<Deck[]> {
-    const written = decks.map((deck): Deck => ({ ...deck, formatVersion: DECK_FORMAT_VERSION }));
-    for (const [catalogUrl, inDocument] of byDocument(written)) {
-      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      const gone = inDocument.find(
-        (deck) => dataset === null || getThing(dataset, deck.url) === null,
+  async function editDecks(
+    decks: readonly Deck[],
+    change: (stored: Deck) => Deck | null,
+  ): Promise<Deck[]> {
+    const stand = new Map<string, Deck>();
+    for (const [catalogUrl, inDocument] of byDocument(decks)) {
+      const stood = await editDocument(
+        catalogUrl,
+        fetch,
+        (dataset) => {
+          const entries = new Map(
+            (dataset === null ? [] : toDecks(dataset, catalogUrl)).map((d) => [d.url, d]),
+          );
+          const written: Deck[] = [];
+          const result = inDocument.map((deck) => {
+            const stored = entries.get(deck.url);
+            if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
+            const changed = change(stored);
+            if (changed === null) return stored;
+            const one: Deck = { ...changed, formatVersion: DECK_FORMAT_VERSION };
+            written.push(one);
+            return one;
+          });
+          if (written.length === 0) return { result };
+          const updated = withDecks(dataset!, written);
+          return { dataset: updated, subjects: decksSubjects(updated, written), result };
+        },
+        { checkWrite },
       );
-      if (gone !== undefined) throw new AppError("deckGone", { deck: gone.title });
-      const updated = withDecks(dataset!, inDocument);
-      await save(catalogUrl, updated, decksSubjects(updated, inDocument));
+      for (const [at, deck] of inDocument.entries()) stand.set(deck.url, stood[at]!);
     }
-    return written;
+    return decks.map((deck) => stand.get(deck.url)!);
   }
 
   /**

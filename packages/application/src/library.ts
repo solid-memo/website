@@ -612,11 +612,10 @@ export function createLibraryUseCases({
       if (deck.sourceUrl === undefined) return null;
       const indexed = await deckLibrary.listLibraryDecks();
       if (!indexed.some((libraryDeck) => isCopyOf(deck, libraryDeck))) return null;
-      const updated = withReleaseLanguages(
-        deck,
-        await deckLibrary.fetchLibraryDeck(deck.sourceUrl),
-      );
-      return updated === null ? null : deckRepository.saveDeck(updated);
+      const release = await deckLibrary.fetchLibraryDeck(deck.sourceUrl);
+      if (withReleaseLanguages(deck, release) === null) return null;
+      // Added to the deck as its entry says now.
+      return deckRepository.editDeck(deck, (stored) => withReleaseLanguages(stored, release));
     },
     async deckRelease(deck) {
       return deck.sourceUrl === undefined ? null : deckLibrary.fetchLibraryDeck(deck.sourceUrl);

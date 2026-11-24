@@ -22,7 +22,7 @@ describe("deck pauses", () => {
     const until = await useCases.pauseDeck(instance.url, deck, "2026-03-09", now);
     expect(until.pause).toEqual({ pausedAt: now.toISOString(), resumesOn: "2026-03-09" });
     // Edited on the entry as it is now, never by a save of the deck as read.
-    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+    expect(deps.deckWrites).not.toHaveBeenCalled();
   });
 
   it("pauseDeck refuses a resume day that is no day, today or earlier, before any write", async () => {

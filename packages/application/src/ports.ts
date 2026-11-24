@@ -306,21 +306,6 @@ export interface DeckRepository {
    * catalogFull when it has MAX_CATALOG_LINKS decks.
    */
   registerDeck(deck: Deck): Promise<Deck>;
-  /** Replaces the deck's title; cards and review state are untouched. */
-  renameDeck(deck: Deck, title: LangText): Promise<Deck>;
-  /**
-   * Rewrite the deck's catalog entry — name, direction and format
-   * version — in place, so triples this app does not know survive.
-   * Cards and review state are untouched.
-   */
-  saveDeck(deck: Deck): Promise<Deck>;
-  /**
-   * Rewrite several decks' catalog entries as saveDeck does, in ONE save
-   * of their catalog document (one per document, should they be in
-   * several). Throws deckGone, before its document is written, when one
-   * of them is gone. Returns the decks as written.
-   */
-  saveDecks(decks: readonly Deck[]): Promise<Deck[]>;
   /**
    * Removes the deck's catalog entry, cards document and reviews
    * document, and the deck from its group, in the same write. Of a
@@ -390,7 +375,10 @@ export interface DeckRepository {
   addCard(deck: Deck, content: CardContent): Promise<Card>;
   /**
    * Replaces the card's content, writing it in this app's format; review
-   * state is untouched.
+   * state is untouched. What `content` does not state (its wrong options,
+   * text format and what the card is about), when the card was made and
+   * whether it is retired are kept as the card says now, not as `card`,
+   * the card as the editor read it, says.
    */
   updateCard(deck: Deck, card: Card, content: CardContent): Promise<Card>;
   /** Removes the card and its review state. */
@@ -473,16 +461,27 @@ export interface DeckRepository {
   /** The deck as its catalog entry says now; null when it has none (any more). */
   readDeck(deckUrl: string): Promise<Deck | null>;
   /**
-   * Edit the deck as its catalog entry says now, for the Studio:
-   * `change` is given the deck as read (as readDeck reads it) and returns
+   * Edit the deck as its catalog entry says now (its name, direction,
+   * pace, description, provenance, languages): `change` is given the deck as read (as readDeck reads it) and returns
    * the deck to write, or null for no change, which writes nothing. The
-   * entry is written from that same read, as saveDeck writes it, in ONE
+   * entry is rewritten in place from that same read, in this app's
+   * format (triples this app does not know survive; cards and review
+   * state are untouched), in ONE
    * save made only if the catalog document is still as read (If-Match);
    * when it changed meanwhile, it is read and changed again, a few
    * times. Throws deckGone, writing nothing, when the deck has no entry.
    * The deck as it then stands.
    */
   editDeck(deck: Deck, change: (stored: Deck) => Deck | null): Promise<Deck>;
+  /**
+   * Edit several decks as their catalog entries say now, as editDeck
+   * edits one (`change` made to each), in ONE save of their catalog
+   * document (one per document, should they be in several), read and
+   * changed again on a 412. Throws deckGone, before its document is
+   * written, when one of them has no entry. The decks as they then stand,
+   * in the order given.
+   */
+  editDecks(decks: readonly Deck[], change: (stored: Deck) => Deck | null): Promise<Deck[]>;
   /**
    * For a library upgrade (domain/deckUpgrade.ts): write the deck's entry
    * as `next` in one write of the catalog document — what changed from

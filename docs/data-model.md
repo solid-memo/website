@@ -1370,7 +1370,8 @@ applies the edit to `catalog.ttl` as the pod holds it then:
 of `catalog.ttl` ([studio.md](studio.md)). A move into a group is one
 `gather` edit, which leaves a deck already in the group where it is, so
 a retry changes nothing. A
-pace or a direction is one save of every entry (`saveDecks`). Removing
+pace or a direction is one edit of every entry as it is now
+(`editDecks`), read and made again on a 412. Removing
 decks first removes their cards and review states from their documents,
 deleting each document that then holds nothing else (one holding
 another app's data too is kept, `keptDocuments`), then their entries in
@@ -1418,7 +1419,10 @@ Studio's card inspector edit them
 - Each change is a write of the card (`updateCard`): the card and its
   distractors are written, those it names no more removed unless
   another card names them (`withoutUnnamedDistractors`), and triples
-  the app doesn't know kept (`withDistractors`).
+  the app doesn't know kept (`withDistractors`). What an edit doesn't
+  state is kept as the card says when the write reads it, not as the
+  editor read it: its wrong options, text format and subjects, when it
+  was made and whether it's retired.
 - A wrong option not in the back's languages is a warning in a pod's
   deck, never a refusal. It names the first three languages the option
   lacks, or has that the back lacks, and counts the rest.

@@ -66,10 +66,7 @@ async function plantedPod() {
   });
   const a = await repository.createDeck(INSTANCE, { en: "A" });
   const b = await repository.createDeck(INSTANCE, { en: "B" });
-  await repository.saveDecks([
-    { ...a, authors: [AUTHOR] },
-    { ...b, authors: [AUTHOR] },
-  ]);
+  await repository.editDecks([a, b], (stored) => ({ ...stored, authors: [AUTHOR] }));
   const catalogUrl = a.url.split("#")[0]!;
   /** A theme the document describes, as no skos:Concept. */
   const described = `${catalogUrl}#theme-x`;
@@ -164,8 +161,8 @@ describe("values another app added that DCAT-AP refuses", () => {
 
   it("block no rename of either deck, keeping the values", async () => {
     const { repository, a, b, planted } = await plantedPod();
-    await repository.renameDeck(a, { en: "A2" });
-    await repository.saveDecks([{ ...b, title: { en: "B2" } }]);
+    await repository.editDeck(a, (stored) => ({ ...stored, title: { en: "A2" } }));
+    await repository.editDecks([b], (stored) => ({ ...stored, title: { en: "B2" } }));
     expect((await repository.listDecks(INSTANCE)).map((deck) => deck.title.en).sort()).toEqual([
       "A2",
       "B2",
