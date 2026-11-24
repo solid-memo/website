@@ -1370,7 +1370,8 @@ applies the edit to `catalog.ttl` as the pod holds it then:
 of `catalog.ttl` ([studio.md](studio.md)). A move into a group is one
 `gather` edit, which leaves a deck already in the group where it is, so
 a retry changes nothing. A
-pace or a direction is one save of every entry (`saveDecks`). Removing
+pace or a direction is one edit of every entry as it is now
+(`editDecks`), read and made again on a 412. Removing
 decks first removes their cards and review states from their documents,
 deleting each document that then holds nothing else (one holding
 another app's data too is kept, `keptDocuments`), then their entries in

@@ -67,7 +67,9 @@ describe("another app's subject at an agent's fragment of a deck catalog", () =>
       title: { en: "Renamed" },
     }));
     expect(await present()).toBe(true);
-    await repository.saveDecks([{ ...renamed, authors: ["Kim"] }, other]);
+    await repository.editDecks([renamed, other], (stored) =>
+      stored.url === renamed.url ? { ...stored, authors: ["Kim"] } : stored,
+    );
     expect(await present()).toBe(true);
     await repository.removeDecks([other]);
     expect(await present()).toBe(true);

@@ -163,7 +163,6 @@ export function makeDeps() {
     }) as DeckRepository["editCatalog"],
     checkCatalogSave: vi.fn(async () => undefined),
     createDeck: vi.fn(async () => deck),
-    saveDecks: vi.fn(async (saved) => [...saved]),
     removeDeck: vi.fn(async () => ({ keptDocuments: [] })),
     removeDecks: vi.fn(async () => ({ keptDocuments: [] })),
     readDeckTree: vi.fn(async () => ({
@@ -194,6 +193,20 @@ export function makeDeps() {
       version: null,
     })),
     readDeck: vi.fn(async () => deck),
+    // As the real one does: each deck read and changed, the changes written in one save (deckWrites).
+    editDecks: vi.fn(async (edited, change) => {
+      const stood: Deck[] = [];
+      const written: Deck[] = [];
+      for (const one of edited) {
+        const stored = await deckRepository.readDeck(one.url);
+        if (stored === null) throw new AppError("deckGone", { deck: one.title });
+        const changed = change(stored);
+        if (changed !== null) written.push(changed);
+        stood.push(changed ?? stored);
+      }
+      if (written.length > 0) deckWrites(written);
+      return stood;
+    }),
     // As the real one does: the deck read, changed, and the change written when there is one (deckWrites).
     editDeck: vi.fn(async (edited, change) => {
       const stored = await deckRepository.readDeck(edited.url);

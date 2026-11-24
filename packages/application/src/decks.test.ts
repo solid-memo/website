@@ -170,20 +170,23 @@ describe("decks", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     const other = { ...deck, id: "deck-2", url: `${deck.url}-2`, newCardsPerDay: 9 };
+    vi.mocked(deps.deckRepository.readDeck).mockImplementation(async (url) =>
+      url === other.url ? other : deck,
+    );
     await expect(useCases.setDecksDirection([deck, other], "back-to-front")).resolves.toEqual([
       { ...deck, direction: "back-to-front" },
       { ...other, direction: "back-to-front" },
     ]);
     await useCases.setDecksPace([deck, other], { maxReviewsPerDay: 40 });
-    expect(deps.deckRepository.saveDecks).toHaveBeenLastCalledWith([
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
       { ...deck, maxReviewsPerDay: 40 },
       { ...deck, id: "deck-2", url: `${deck.url}-2`, maxReviewsPerDay: 40 },
     ]);
-    expect(deps.deckRepository.saveDecks).toHaveBeenCalledTimes(2);
+    expect(deps.deckWrites).toHaveBeenCalledTimes(2);
     await expect(useCases.setDecksPace([deck], { newCardsPerDay: -1 })).rejects.toThrow(
       "A daily limit is a whole number, 0 or more.",
     );
-    expect(deps.deckRepository.saveDecks).toHaveBeenCalledTimes(2);
+    expect(deps.deckWrites).toHaveBeenCalledTimes(2);
     await useCases.removeDecks([deck, other]);
     expect(deps.deckRepository.removeDecks).toHaveBeenCalledWith([deck, other]);
   });

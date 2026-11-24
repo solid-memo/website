@@ -307,13 +307,6 @@ export interface DeckRepository {
    */
   registerDeck(deck: Deck): Promise<Deck>;
   /**
-   * Rewrite several decks' catalog entries as editDeck writes one, in ONE save
-   * of their catalog document (one per document, should they be in
-   * several). Throws deckGone, before its document is written, when one
-   * of them is gone. Returns the decks as written.
-   */
-  saveDecks(decks: readonly Deck[]): Promise<Deck[]>;
-  /**
    * Removes the deck's catalog entry, cards document and reviews
    * document, and the deck from its group, in the same write. Of a
    * document that also holds another app's data, only the deck's cards
@@ -477,6 +470,15 @@ export interface DeckRepository {
    * The deck as it then stands.
    */
   editDeck(deck: Deck, change: (stored: Deck) => Deck | null): Promise<Deck>;
+  /**
+   * Edit several decks as their catalog entries say now, as editDeck
+   * edits one (`change` made to each), in ONE save of their catalog
+   * document (one per document, should they be in several), read and
+   * changed again on a 412. Throws deckGone, before its document is
+   * written, when one of them has no entry. The decks as they then stand,
+   * in the order given.
+   */
+  editDecks(decks: readonly Deck[], change: (stored: Deck) => Deck | null): Promise<Deck[]>;
   /**
    * For a library upgrade (domain/deckUpgrade.ts): write the deck's entry
    * as `next` in one write of the catalog document — what changed from

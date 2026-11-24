@@ -1387,7 +1387,7 @@ describe("editDeck, of the entry's other fields", () => {
   });
 });
 
-describe("saveDecks", () => {
+describe("editDecks", () => {
   const second: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, title: { en: "Verbs" } };
   const elsewhere: Deck = {
     ...deck,
@@ -1397,6 +1397,9 @@ describe("saveDecks", () => {
   const entry = (of: Deck) =>
     buildThing(createThing({ url: of.url }))
       .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, of.title.en)
+      .addIri(SM.cardsDocument, of.cardsDocumentUrl)
+      .addIri(SM.reviewsDocument, of.reviewsDocumentUrl)
       .build();
 
   it("writes the decks of a catalog document in one save, and each other document in one of its own", async () => {
@@ -1405,11 +1408,10 @@ describe("saveDecks", () => {
         ? setThing(catalogWithDeck(), entry(second))
         : setThing(datasetFrom(url), entry(elsewhere))) as never);
 
-    const saved = await makeRepository().saveDecks([
-      { ...deck, newCardsPerDay: 3 },
-      { ...elsewhere, newCardsPerDay: 3 },
-      { ...second, newCardsPerDay: 3 },
-    ]);
+    const saved = await makeRepository().editDecks([deck, elsewhere, second], (stored) => ({
+      ...stored,
+      newCardsPerDay: 3,
+    }));
 
     expect(
       saved.map((written) => [written.id, written.newCardsPerDay, written.formatVersion]),
@@ -1432,7 +1434,10 @@ describe("saveDecks", () => {
 
   it("writes nothing of a document when one of its decks is gone", async () => {
     vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
-    await expect(makeRepository().saveDecks([deck, second])).rejects.toThrow("no longer exists");
+    const change = vi.fn((stored: Deck) => stored);
+    await expect(makeRepository().editDecks([deck, second], change)).rejects.toThrow(
+      "no longer exists",
+    );
     expect(writeDocument).not.toHaveBeenCalled();
   });
 });

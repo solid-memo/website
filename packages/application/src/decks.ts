@@ -191,10 +191,10 @@ export function createDeckUseCases({
       return deckRepository.editDeck(offered, (deck) => withProvenance(deck, provenance));
     },
     setDecksDirection(decks, direction) {
-      return deckRepository.saveDecks(decks.map((deck) => ({ ...deck, direction })));
+      return deckRepository.editDecks(decks, (stored) => ({ ...stored, direction }));
     },
     async setDecksPace(decks, pace) {
-      return deckRepository.saveDecks(decks.map((deck) => withPace(deck, pace)));
+      return deckRepository.editDecks(decks, (stored) => withPace(stored, pace));
     },
     async setDeckCardLanguage(deck, language) {
       // Checked and put in the case the app stores tags in before any write.

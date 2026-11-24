@@ -71,17 +71,17 @@ describe("card writes", { timeout: 180_000 }, () => {
           const { fetch, repository, store } = await catalogOfDecks(count);
           const decks = await repository.listDecks(INSTANCE);
           // Long titles, so that the change is sent as one PUT at either size, never as a PATCH.
-          const changed = decks.map((deck) => ({
+          const change = (deck: (typeof decks)[number]) => ({
             ...deck,
             title: { en: `${deck.id} ${"x".repeat(1000)}` },
             direction: "back-to-front" as const,
-          }));
+          });
           return {
             restore: await saved(store),
             start: () => {
               const fresh = deckRepository(fetch);
               return async () => {
-                await fresh.saveDecks(changed);
+                await fresh.editDecks(decks, change);
               };
             },
           };
