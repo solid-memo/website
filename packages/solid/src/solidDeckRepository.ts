@@ -60,6 +60,7 @@ import {
 } from "@solid-memo/domain/deckTree";
 import {
   deleteDataset,
+  editDocument,
   getSolidDatasetOrNull,
   PreconditionFailedError,
   refuseUnreadableImport,
@@ -144,14 +145,6 @@ export interface SolidDeckRepositoryDeps {
   /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
   userStorages?: UserStorages;
 }
-
-/**
- * How often an edit of the deck arrangement, a chapter's completion, or
- * the entry of a guest's deck added (addDeck) is made, in all, while the
- * catalog document keeps changing elsewhere (412). The edit is applied
- * again to the document as it is then, so a retry keeps what changed.
- */
-const TREE_ATTEMPTS = 3;
 
 /**
  * The arrangement the catalog states (toStoredLayout), or
@@ -351,20 +344,20 @@ export function createSolidDeckRepository({
     async addDeck(deck): Promise<Deck> {
       const catalogUrl = documentUrlOf(deck.url);
       const written: Deck = { ...deck, formatVersion: DECK_FORMAT_VERSION };
-      for (let attempt = 1; ; attempt++) {
-        const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-        if (getThing(dataset, deck.url) !== null)
-          throw new PreconditionFailedError(deck.url, "absent");
-        refuseFullDeckList(toDecks(dataset, catalogUrl));
-        const updated = withOwnTerms(withDeck(dataset, written), deck);
-        try {
-          // If-Match the read above: the catalog changed elsewhere meanwhile is read and the entry added again.
-          await save(catalogUrl, updated, deckSubjects(updated, written));
-          return written;
-        } catch (error) {
-          if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
-        }
-      }
+      // If-Match the read: the catalog changed elsewhere meanwhile is read and the entry added again.
+      return editDocument(
+        catalogUrl,
+        fetch,
+        (read) => {
+          const dataset = read ?? createSolidDataset();
+          if (getThing(dataset, deck.url) !== null)
+            throw new PreconditionFailedError(deck.url, "absent");
+          refuseFullDeckList(toDecks(dataset, catalogUrl));
+          const updated = withOwnTerms(withDeck(dataset, written), deck);
+          return { dataset: updated, subjects: deckSubjects(updated, written), result: written };
+        },
+        { checkWrite },
+      );
     },
 
     renameDeck(deck, title): Promise<Deck> {
@@ -387,34 +380,33 @@ export function createSolidDeckRepository({
       return buildTree(cappedLayout(dataset ?? createSolidDataset(), catalogUrl));
     },
 
-    async editDeckTree(instanceUrl, edit) {
+    editDeckTree(instanceUrl, edit) {
       const catalogUrl = catalogUrlOf(instanceUrl);
-      for (let attempt = 1; ; attempt++) {
-        const dataset = (await getSolidDatasetOrNull(catalogUrl, fetch)) ?? createSolidDataset();
-        const stored = cappedLayout(dataset, catalogUrl);
-        const before = buildTree(stored);
-        const after = applyDeckTreeEdit(before, edit);
-        if (after === before) return after;
-        // One group more than are read would leave the arrangement unread (cappedLayout).
-        if (groupCount(after.children) > MAX_DECK_GROUPS)
-          throw new AppError("catalogFull", { limit: MAX_DECK_GROUPS });
-        const { dataset: updated, subjects } = withTreeChanges(
-          dataset,
-          catalogUrl,
-          treeChanges(stored, after),
-        );
-        // Only the groups and the catalog are checked: a deck's position is
-        // no shape's, and a deck set aside beside the moved one must not stop it.
-        await checkWrite(updated, subjects, "pod");
-        try {
-          // A PATCH, If-Match the read above: where the pod has no strong ETag
+      return editDocument(
+        catalogUrl,
+        fetch,
+        (read) => {
+          const dataset = read ?? createSolidDataset();
+          const stored = cappedLayout(dataset, catalogUrl);
+          const before = buildTree(stored);
+          const after = applyDeckTreeEdit(before, edit);
+          if (after === before) return { result: after };
+          // One group more than are read would leave the arrangement unread (cappedLayout).
+          if (groupCount(after.children) > MAX_DECK_GROUPS)
+            throw new AppError("catalogFull", { limit: MAX_DECK_GROUPS });
+          const { dataset: updated, subjects } = withTreeChanges(
+            dataset,
+            catalogUrl,
+            treeChanges(stored, after),
+          );
+          // Only the groups and the catalog are checked: a deck's position is
+          // no shape's, and a deck set aside beside the moved one must not stop it.
+          // A PATCH, If-Match the read: where the pod has no strong ETag
           // to match, a whole PUT would undo what changed meanwhile.
-          await saveDataset(catalogUrl, updated, fetch);
-          return after;
-        } catch (error) {
-          if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
-        }
-      }
+          return { dataset: updated, subjects, result: after };
+        },
+        { checkWrite },
+      );
     },
 
     async listCards(deck, { asNoOne = false, reads } = {}): Promise<Card[]> {
@@ -719,10 +711,10 @@ export function createSolidDeckRepository({
    * says, and returns how to edit the entry and the deck it then says, or
    * null for no change, which writes nothing. ONE save made only if the
    * catalog document is as it was read (If-Match), else read and changed
-   * again, TREE_ATTEMPTS times in all; `checked` has the entry checked
-   * first. Throws deckGone when the deck has no entry.
+   * again (editDocument); `checked` has the entry checked first. Throws
+   * deckGone when the deck has no entry.
    */
-  async function editEntry(
+  function editEntry(
     deck: Deck,
     change: (stored: Deck) => {
       edit: (entry: SubjectBuilder) => SubjectBuilder;
@@ -731,31 +723,32 @@ export function createSolidDeckRepository({
     checked = false,
   ): Promise<Deck> {
     const catalogUrl = documentUrlOf(deck.url);
-    for (let attempt = 1; ; attempt++) {
-      const dataset = await getSolidDatasetOrNull(catalogUrl, fetch);
-      const stored =
-        dataset === null
-          ? undefined
-          : toDecks(dataset, catalogUrl).find((candidate) => candidate.url === deck.url);
-      if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
-      const changed = change(stored);
-      if (changed === null) return stored;
-      // A class another app gave the entry that a shape asks something of goes, as recordThing drops it.
-      const entry = changed.edit(
-        buildThing(
-          withoutForeignShapedClasses(unlessNewer(getThing(dataset!, deck.url)!), DECK_V6),
-        ),
-      );
-      const updated = setThing(dataset!, entry.build());
-      if (checked) await checkWrite(updated, [deck.url], "pod");
-      try {
-        // A PATCH of the triples changed, If-Match the read above.
-        await saveDataset(catalogUrl, updated, fetch);
-        return changed.deck;
-      } catch (error) {
-        if (!(error instanceof PreconditionFailedError) || attempt === TREE_ATTEMPTS) throw error;
-      }
-    }
+    return editDocument(
+      catalogUrl,
+      fetch,
+      (dataset) => {
+        const stored =
+          dataset === null
+            ? undefined
+            : toDecks(dataset, catalogUrl).find((candidate) => candidate.url === deck.url);
+        if (stored === undefined) throw new AppError("deckGone", { deck: deck.title });
+        const changed = change(stored);
+        if (changed === null) return { result: stored };
+        // A class another app gave the entry that a shape asks something of goes, as recordThing drops it.
+        const entry = changed.edit(
+          buildThing(
+            withoutForeignShapedClasses(unlessNewer(getThing(dataset!, deck.url)!), DECK_V6),
+          ),
+        );
+        // A PATCH of the triples changed, If-Match the read.
+        return {
+          dataset: setThing(dataset!, entry.build()),
+          ...(checked ? { subjects: [deck.url] } : {}),
+          result: changed.deck,
+        };
+      },
+      { checkWrite },
+    );
   }
 
   /** Rewrite a deck's catalog entry in place (saveDecks). */

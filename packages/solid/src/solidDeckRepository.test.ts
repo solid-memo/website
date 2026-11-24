@@ -58,6 +58,12 @@ vi.mock("./datasets", async (importOriginal) => {
     // A removal's read through the guard, as any other read here.
     readForRemoval: (url: string, fetch: typeof globalThis.fetch) =>
       getSolidDatasetOrNull(url, fetch),
+    // An edit's read, as any other read here.
+    editDocument: ((url, fetch, edit, policy) =>
+      actual.editDocument(url, fetch, edit, {
+        read: getSolidDatasetOrNull,
+        ...policy,
+      })) as typeof actual.editDocument,
     versionOf: vi.fn(actual.versionOf),
   };
 });
