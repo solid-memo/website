@@ -2445,24 +2445,30 @@ describe("validateRelease", () => {
 });
 
 /**
- * The longest stretch, in milliseconds, that `work` holds the event loop
- * without letting anything else run: the longest gap between turns of a
- * task that schedules itself again at each turn.
+ * The longest stretch, in microseconds of this process's CPU time, that
+ * `work` holds the event loop without letting anything else run: the
+ * longest gap between turns of a task that schedules itself again at each
+ * turn. Time on the clock would count the waits for the processor too: on
+ * a runner busy with other tests, a long run is all but sure to wait during
+ * one of its stretches where a short one may not (growth.ts).
  */
 async function longestTask(work: () => Promise<unknown>): Promise<number> {
-  let last = performance.now();
+  let last = process.cpuUsage();
   let longest = 0;
   let running = true;
+  const gap = () => {
+    const { user, system } = process.cpuUsage(last);
+    last = process.cpuUsage();
+    return user + system;
+  };
   const turn = () => {
-    const now = performance.now();
-    longest = Math.max(longest, now - last);
-    last = now;
+    longest = Math.max(longest, gap());
     if (running) setImmediate(turn);
   };
   setImmediate(turn);
   await work();
   running = false;
-  return Math.max(longest, performance.now() - last);
+  return Math.max(longest, gap());
 }
 
 /** How many waits for the next task (MessageChannel) `work` makes. */
