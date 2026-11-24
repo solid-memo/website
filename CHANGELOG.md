@@ -21,6 +21,13 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.2.2](https://github.com/solid-memo/website/compare/v8.2.1...v8.2.2) (2026-11-24)
+
+### Fixes
+
+* **solid:** read completed chapters as http(s) URLs alone ([5a61681](https://github.com/solid-memo/website/commit/5a61681ec19be32812b3761e044cf52add33dbd6))
+* **ui:** bound the Markdown caches by the size of what they keep ([da114dd](https://github.com/solid-memo/website/commit/da114ddced3a374845143df65afed1f940d192bd))
+
 ## [8.2.1](https://github.com/solid-memo/website/compare/v8.2.0...v8.2.1) (2026-11-23)
 
 ### Fixes
