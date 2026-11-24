@@ -21,6 +21,19 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.3.0](https://github.com/solid-memo/website/compare/v8.2.4...v8.3.0) (2026-11-24)
+
+### Features
+
+* **ns:** state bounds for every property the app reads ([b7a4801](https://github.com/solid-memo/website/commit/b7a480111b3ddd09dbba48cb0c896b54b551e577)), closes [#989](https://github.com/solid-memo/website/issues/989)
+* **solid:** read every record within its bounds ([ca60d3a](https://github.com/solid-memo/website/commit/ca60d3a0cb3bcaf5b126f5f0f89e9c4f0ba41934)), closes [#989](https://github.com/solid-memo/website/issues/989)
+* **solid:** read every term outside a record within its bounds ([950de9a](https://github.com/solid-memo/website/commit/950de9aed7be837b6862408447a94abc6fee9143)), closes [#989](https://github.com/solid-memo/website/issues/989)
+
+### Fixes
+
+* **deps:** update dependency @tanstack/react-query to ^5.108.2 ([4d97f78](https://github.com/solid-memo/website/commit/4d97f78ff7fac5b8b1815e60146b2698fce8dc78))
+* **deps:** update dependency oauth4webapi to ^3.8.9 ([fa0568b](https://github.com/solid-memo/website/commit/fa0568b0c8aacc1113b88b10cf3912eda262e389))
+
 ## [8.2.4](https://github.com/solid-memo/website/compare/v8.2.3...v8.2.4) (2026-11-24)
 
 ### Performance Improvements
