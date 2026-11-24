@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.3.2](https://github.com/solid-memo/website/compare/v8.3.1...v8.3.2) (2026-11-24)
+
+### Fixes
+
+* **ci:** retry npm audit signatures when the registry's answer can't be read ([5baa744](https://github.com/solid-memo/website/commit/5baa744e6fc235ec03e5a0ac100cd7f4f4f3383a)), closes [#1003](https://github.com/solid-memo/website/issues/1003)
+
 ## [8.3.1](https://github.com/solid-memo/website/compare/v8.3.0...v8.3.1) (2026-11-24)
 
 ### Fixes
