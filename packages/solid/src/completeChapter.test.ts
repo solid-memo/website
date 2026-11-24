@@ -97,7 +97,7 @@ describe("completing a course chapter", () => {
     const pod = await podWithCourse();
     const elsewhere = repositoryOn(pod.fetch);
     let meanwhile: (() => Promise<unknown>) | null = () =>
-      elsewhere.saveDeck({ ...deck, title: { en: "Solid, renamed" } });
+      elsewhere.editDeck(deck, (stored) => ({ ...stored, title: { en: "Solid, renamed" } }));
     const fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       if (init?.method === "PATCH" && meanwhile !== null) {
         const change = meanwhile;
@@ -293,16 +293,17 @@ describe("the deck's card language", () => {
     ).rejects.toMatchObject({ code: "deckGone" });
   });
 
-  it("is kept by every save of a deck read before it was set", async () => {
+  it("is kept by every edit of a deck read before it was set", async () => {
     const pod = await podWithCourse();
     const repository = repositoryOn(pod.fetch);
     // Another tab sets it while this one holds the deck as read before.
     await repository.setCardLanguage(deck, "sv");
-    await repository.renameDeck(deck, { en: "Solid, renamed" });
-    await repository.saveDeck({ ...deck, newCardsPerDay: 5 });
+    await repository.editDeck(deck, (stored) => ({ ...stored, title: { en: "Solid, renamed" } }));
+    await repository.editDeck(deck, (stored) => ({ ...stored, newCardsPerDay: 5 }));
     expect(languageIn(pod)).toEqual(['"sv"']);
+    // Each edit is made of the entry as it is then: the language, the name and the pace all stay.
     expect(await repository.readDeck(deck.url)).toMatchObject({
-      title: { en: "Solid" },
+      title: { en: "Solid, renamed" },
       newCardsPerDay: 5,
       cardLanguage: "sv",
     });
@@ -353,12 +354,12 @@ describe("the hosts whose pictures the deck shows", () => {
     ).rejects.toMatchObject({ code: "deckGone" });
   });
 
-  it("is kept by every save of a deck read before it was set", async () => {
+  it("is kept by every edit of a deck read before it was set", async () => {
     const pod = await podWithCourse();
     const repository = repositoryOn(pod.fetch);
     await repository.setPictureHost(deck, "a.example", true);
-    await repository.renameDeck(deck, { en: "Solid, renamed" });
-    await repository.saveDeck({ ...deck, newCardsPerDay: 5 });
+    await repository.editDeck(deck, (stored) => ({ ...stored, title: { en: "Solid, renamed" } }));
+    await repository.editDeck(deck, (stored) => ({ ...stored, newCardsPerDay: 5 }));
     expect(hostsIn(pod)).toEqual(['"a.example"']);
   });
 });
@@ -413,12 +414,12 @@ describe("the deck's pause", () => {
     ).rejects.toMatchObject({ code: "deckGone" });
   });
 
-  it("is kept by every save of a deck read before it was set", async () => {
+  it("is kept by every edit of a deck read before it was set", async () => {
     const pod = await podWithCourse();
     const repository = repositoryOn(pod.fetch);
     await repository.setPause(deck, { ...pause, resumesOn: "2026-03-09" });
-    await repository.renameDeck(deck, { en: "Solid, renamed" });
-    await repository.saveDeck({ ...deck, newCardsPerDay: 5 });
+    await repository.editDeck(deck, (stored) => ({ ...stored, title: { en: "Solid, renamed" } }));
+    await repository.editDeck(deck, (stored) => ({ ...stored, newCardsPerDay: 5 }));
     expect(pauseIn(pod)).toHaveLength(2);
   });
 });

@@ -17,17 +17,21 @@ describe("decks", () => {
       topics: [],
       keywords: { en: ["kanji"] },
     });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({
-      ...deck,
-      description: { en: "Kanji." },
-      keywords: { en: ["kanji"] },
-    });
+    expect(deps.deckWrites).toHaveBeenCalledWith([
+      {
+        ...deck,
+        description: { en: "Kanji." },
+        keywords: { en: ["kanji"] },
+      },
+    ]);
     // Only the language the user stated: no English stands in for it.
     await useCases.describeDeck(deck, { description: { sv: "Kanji." }, topics: [], keywords: {} });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...deck,
-      description: { sv: "Kanji." },
-    });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
+      {
+        ...deck,
+        description: { sv: "Kanji." },
+      },
+    ]);
     await expect(
       useCases.describeDeck(deck, { description: { en: "" }, topics: [], keywords: {} }),
     ).rejects.toThrow("A deck needs a description.");
@@ -36,16 +40,19 @@ describe("decks", () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     const legacy = { ...deck, keywords: { "": ["kanji"] } };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(legacy);
     await useCases.describeDeck(legacy, {
       description: { en: "Kanji." },
       topics: [],
       keywords: { "": ["kanji"], "JA-jp": ["漢字"], iw: ["קאנג'י"], he: ["כתב"] },
     });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...deck,
-      description: { en: "Kanji." },
-      keywords: { "": ["kanji"], "ja-jp": ["漢字"], he: ["קאנג'י", "כתב"] },
-    });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
+      {
+        ...deck,
+        description: { en: "Kanji." },
+        keywords: { "": ["kanji"], "ja-jp": ["漢字"], he: ["קאנג'י", "כתב"] },
+      },
+    ]);
     await expect(
       useCases.describeDeck(deck, {
         description: { en: "Kanji." },
@@ -67,16 +74,19 @@ describe("decks", () => {
     // Tags another app wrote: ones the app would refuse ("und", "en-x-custom")
     // or re-tag ("iw") if the user chose them.
     const stored = { ...deck, keywords: { und: ["foo"], "en-x-custom": ["bar"], iw: ["קאנג'י"] } };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(stored);
     await useCases.describeDeck(stored, {
       description: { en: "Only the description changed." },
       topics: [],
       keywords: { und: ["foo"], "EN-x-Custom": ["bar"], iw: ["קאנג'י"], he: ["כתב"] },
     });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...deck,
-      description: { en: "Only the description changed." },
-      keywords: { und: ["foo"], "en-x-custom": ["bar"], iw: ["קאנג'י"], he: ["כתב"] },
-    });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
+      {
+        ...deck,
+        description: { en: "Only the description changed." },
+        keywords: { und: ["foo"], "en-x-custom": ["bar"], iw: ["קאנג'י"], he: ["כתב"] },
+      },
+    ]);
     // A tag the deck does not have is still checked.
     await expect(
       useCases.describeDeck(stored, {
@@ -85,33 +95,50 @@ describe("decks", () => {
         keywords: { "fr-x-custom": ["baz"] },
       }),
     ).rejects.toThrow("“fr-x-custom” is not a language code.");
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledTimes(1);
+    expect(deps.deckWrites).toHaveBeenCalledTimes(1);
   });
   it("renames and describes a deck whose texts have a tag named like a member of Object.prototype", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     const stored = { ...deck, title: { constructor: "x" }, keywords: { constructor: ["y"] } };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(stored);
     await useCases.renameDeck(stored, { constructor: "x", en: "Kanji" });
-    expect(deps.deckRepository.renameDeck).toHaveBeenCalledWith(stored, {
-      constructor: "x",
-      en: "Kanji",
-    });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
+      { ...stored, title: { constructor: "x", en: "Kanji" } },
+    ]);
     await useCases.describeDeck(stored, {
       description: { constructor: "z" },
       topics: [],
       keywords: { constructor: ["y"], en: ["kanji"] },
     });
-    expect(deps.deckRepository.saveDeck).toHaveBeenLastCalledWith({
-      ...stored,
-      description: { constructor: "z" },
-      keywords: { constructor: ["y"], en: ["kanji"] },
-    });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
+      {
+        ...stored,
+        description: { constructor: "z" },
+        keywords: { constructor: ["y"], en: ["kanji"] },
+      },
+    ]);
+  });
+  it("renames a deck, sets its direction, pace and description, each on the deck as its entry says now", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    // Another device set the pace and the description since this screen read the deck.
+    const now = { ...deck, newCardsPerDay: 3, description: { en: "Set elsewhere." } };
+    vi.mocked(deps.deckRepository.readDeck).mockResolvedValue(now);
+    await useCases.renameDeck(deck, { en: "Kanji N4" });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([{ ...now, title: { en: "Kanji N4" } }]);
+    await useCases.setDeckDirection(deck, "bidirectional");
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([{ ...now, direction: "bidirectional" }]);
+    await useCases.setDeckPace(deck, { newCardsPerDay: 3, maxReviewsPerDay: 40 });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([{ ...now, maxReviewsPerDay: 40 }]);
+    await useCases.describeDeck(deck, { description: { en: "Mine." }, topics: [], keywords: {} });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([{ ...now, description: { en: "Mine." } }]);
   });
   it("setDeckPace saves the deck's own daily limits, refusing one that is not a whole number", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);
     await useCases.setDeckPace({ ...deck, maxReviewsPerDay: 50 }, { newCardsPerDay: 5 });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({ ...deck, newCardsPerDay: 5 });
+    expect(deps.deckWrites).toHaveBeenCalledWith([{ ...deck, newCardsPerDay: 5 }]);
     await expect(useCases.setDeckPace(deck, { newCardsPerDay: 1.5 })).rejects.toThrow(
       "A daily limit is a whole number, 0 or more.",
     );
@@ -122,7 +149,7 @@ describe("decks", () => {
     await useCases.setDeckPictureHost(deck, "a.example", true);
     expect(deps.deckRepository.setPictureHost).toHaveBeenLastCalledWith(deck, "a.example", true);
     await expect(useCases.setDeckPictureHost(deck, "a.example", false)).resolves.toEqual(deck);
-    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+    expect(deps.deckWrites).not.toHaveBeenCalled();
   });
   it("setDeckCardLanguage saves the deck's card language or clears it, refusing one that names no language", async () => {
     const deps = makeDeps();
@@ -137,7 +164,7 @@ describe("decks", () => {
     );
     expect(deps.deckRepository.setCardLanguage).toHaveBeenCalledTimes(2);
     // Edited on the entry as it is now, never by a save of the deck as read.
-    expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+    expect(deps.deckWrites).not.toHaveBeenCalled();
   });
   it("sets several decks' direction or pace in one save, and removes several decks at once", async () => {
     const deps = makeDeps();
@@ -225,20 +252,21 @@ describe("decks", () => {
 
     // The name in every language it is to have: one left out is removed.
     await useCases.renameDeck(deck, { ja: " 漢字 N4 ", en: "Kanji N4" });
-    expect(deps.deckRepository.renameDeck).toHaveBeenCalledWith(deck, {
-      ja: "漢字 N4",
-      en: "Kanji N4",
-    });
+    expect(deps.deckWrites).toHaveBeenLastCalledWith([
+      { ...deck, title: { ja: "漢字 N4", en: "Kanji N4" } },
+    ]);
     await expect(useCases.renameDeck(deck, {})).rejects.toThrow("A deck needs a name");
 
     await expect(useCases.setDeckDirection(deck, "bidirectional")).resolves.toEqual({
       ...deck,
       direction: "bidirectional",
     });
-    expect(deps.deckRepository.saveDeck).toHaveBeenCalledWith({
-      ...deck,
-      direction: "bidirectional",
-    });
+    expect(deps.deckWrites).toHaveBeenCalledWith([
+      {
+        ...deck,
+        direction: "bidirectional",
+      },
+    ]);
 
     await useCases.removeDeck(deck);
     expect(deps.deckRepository.removeDeck).toHaveBeenCalledWith(deck);
@@ -272,7 +300,7 @@ describe("decks", () => {
         code: "licenseUnknown",
       });
       expect(deps.deckRepository.readDeck).toHaveBeenCalledTimes(2);
-      expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+      expect(deps.deckWrites).not.toHaveBeenCalled();
     });
   });
 });

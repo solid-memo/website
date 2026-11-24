@@ -164,7 +164,7 @@ describe("values another app added that DCAT-AP refuses", () => {
 
   it("block no rename of either deck, keeping the values", async () => {
     const { repository, a, b, planted } = await plantedPod();
-    await repository.renameDeck(a, { en: "A2" });
+    await repository.editDeck(a, (stored) => ({ ...stored, title: { en: "A2" } }));
     await repository.saveDecks([{ ...b, title: { en: "B2" } }]);
     expect((await repository.listDecks(INSTANCE)).map((deck) => deck.title.en).sort()).toEqual([
       "A2",

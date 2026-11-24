@@ -387,12 +387,6 @@ export function createSolidDeckRepository({
       );
     },
 
-    renameDeck(deck, title): Promise<Deck> {
-      return saveDeck({ ...deck, title });
-    },
-
-    saveDeck,
-
     saveDecks,
 
     removeDeck(deck) {
@@ -792,11 +786,6 @@ export function createSolidDeckRepository({
       },
       { checkWrite },
     );
-  }
-
-  /** Rewrite a deck's catalog entry in place (saveDecks). */
-  async function saveDeck(deck: Deck): Promise<Deck> {
-    return (await saveDecks([deck]))[0]!;
   }
 
   /**

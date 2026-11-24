@@ -103,7 +103,7 @@ describe.each([
         { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
       ],
     });
-    await repository.renameDeck(a!, { en: "Renamed" });
+    await repository.editDeck(a!, (stored) => ({ ...stored, title: { en: "Renamed" } }));
     await expect(repository.upgradeDecks(INSTANCE, null)).resolves.toBe(true);
     await repository.removeDeck(b!);
     expect(await stray()).toEqual(before);
@@ -148,7 +148,7 @@ describe.each([
     const before = await stray();
     const b = (await repository.listDecks(INSTANCE)).find(({ id }) => id === "b")!;
     expect(b.authors).toEqual([name]);
-    await repository.renameDeck(b, { en: "Renamed" });
+    await repository.editDeck(b, (stored) => ({ ...stored, title: { en: "Renamed" } }));
     expect(await stray()).toEqual(before);
     const [named] = await creatorOf("b");
     expect(named).toMatch(creator);
@@ -168,7 +168,7 @@ describe("an agent stamped newer at the node of another author", () => {
     const { repository, stray, creatorOf, subject } = await podWith(`${NEWER("y")}\n${OLD_TTL}`);
     const before = await stray();
     const b = (await repository.listDecks(INSTANCE)).find(({ id }) => id === "b")!;
-    await repository.saveDeck({ ...b, authors: ["x"] });
+    await repository.editDeck(b, (stored) => ({ ...stored, authors: ["x"] }));
     const [creator] = await creatorOf("b");
     expect(creator).toMatch(new RegExp(`^${CATALOG}#agent-x-.+`));
     const node = (await subject(creator!))!;
@@ -192,7 +192,7 @@ const WRITES_BY_X: [string, (repository: Repository) => Promise<string>][] = [
     "saveDeck",
     async (repository) => {
       const b = (await repository.listDecks(INSTANCE)).find(({ id }) => id === "b")!;
-      await repository.saveDeck({ ...b, authors: ["x"] });
+      await repository.editDeck(b, (stored) => ({ ...stored, authors: ["x"] }));
       return b.url;
     },
   ],
@@ -223,7 +223,7 @@ const WRITES_BY_X: [string, (repository: Repository) => Promise<string>][] = [
     async (repository) => {
       const c = (await repository.listDecks(INSTANCE)).find(({ id }) => id === "c")!;
       expect(c.authors).toEqual(["x"]);
-      await repository.renameDeck(c, { en: "Renamed" });
+      await repository.editDeck(c, (stored) => ({ ...stored, title: { en: "Renamed" } }));
       return c.url;
     },
   ],

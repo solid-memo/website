@@ -283,7 +283,7 @@ describe("instances", () => {
       expect(deps.deckRepository.listCards).toHaveBeenCalledTimes(2);
       expect(deps.reviewStateRepository.listReviewStates).toHaveBeenCalledTimes(2);
       expect(deps.deckRepository.upgradeCards).not.toHaveBeenCalled();
-      expect(deps.deckRepository.saveDeck).not.toHaveBeenCalled();
+      expect(deps.deckWrites).not.toHaveBeenCalled();
       expect(deps.reviewStateRepository.applyReviewChanges).not.toHaveBeenCalled();
       expect(deps.preferencesRepository.savePreferences).not.toHaveBeenCalled();
       expect(deps.instanceRepository.upgradeMeta).not.toHaveBeenCalled();

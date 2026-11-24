@@ -161,7 +161,8 @@ export function createDeckUseCases({
       return deckRepository.createDeck(instanceUrl, deckTitle(title));
     },
     async renameDeck(deck, title) {
-      return deckRepository.renameDeck(deck, deckTitle(title));
+      const named = deckTitle(title);
+      return deckRepository.editDeck(deck, (stored) => ({ ...stored, title: named }));
     },
     listDeckTree(instanceUrl) {
       return deckRepository.readDeckTree(instanceUrl);
@@ -176,15 +177,15 @@ export function createDeckUseCases({
       );
     },
     setDeckDirection(deck, direction) {
-      return deckRepository.saveDeck({ ...deck, direction });
+      return deckRepository.editDeck(deck, (stored) => ({ ...stored, direction }));
     },
     async describeDeck(deck, about) {
-      return deckRepository.saveDeck(
-        withAbout(deck, { ...about, keywords: deckKeywords(about.keywords, deck) }),
+      return deckRepository.editDeck(deck, (stored) =>
+        withAbout(stored, { ...about, keywords: deckKeywords(about.keywords, stored) }),
       );
     },
     async setDeckPace(deck, pace) {
-      return deckRepository.saveDeck(withPace(deck, pace));
+      return deckRepository.editDeck(deck, (stored) => withPace(stored, pace));
     },
     setDeckProvenance(offered, provenance) {
       return deckRepository.editDeck(offered, (deck) => withProvenance(deck, provenance));

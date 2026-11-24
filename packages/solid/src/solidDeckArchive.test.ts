@@ -41,14 +41,14 @@ async function podWithDeck() {
   const reviews = createSolidReviewStateRepository({ fetch: pod.fetch });
   const created = await repository.createDeck(INSTANCE, { en: "Capitals", sv: "Huvudstäder" });
   const deck = await repository.setCardLanguage(
-    await repository.saveDeck({
-      ...created,
+    await repository.editDeck(created, (stored) => ({
+      ...stored,
       authors: ["Anton <anton@example.com>"],
       license: "https://creativecommons.org/licenses/by/4.0/",
       description: { en: "Capitals of Europe.", sv: "Europas huvudstäder." },
       keywords: { en: ["capitals"], sv: ["huvudstäder"] },
       newCardsPerDay: 5,
-    }),
+    })),
     "sv",
   );
   const cards: Card[] = [

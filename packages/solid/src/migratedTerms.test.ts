@@ -146,7 +146,7 @@ describe("a catalog entry in an older format", () => {
     expect(decks[1]!.description!.en).toHaveLength(LONGEST_TAGGED_TEXT);
     // And a later save of it is written too.
     await expect(
-      repository.saveDeck({ ...decks[1]!, title: { en: "Renamed" } }),
+      repository.editDeck(decks[1]!, (stored) => ({ ...stored, title: { en: "Renamed" } })),
     ).resolves.toBeDefined();
     expect(await read(fetch, catalogUrl)).toContain("Renamed");
   });
@@ -170,7 +170,7 @@ describe("a catalog entry in an older format", () => {
       expect(text.length).toBeLessThanOrEqual(LONGEST_TAGGED_TEXT);
     }
     await expect(
-      repository.saveDeck({ ...decks[1]!, title: { en: "Renamed" } }),
+      repository.editDeck(decks[1]!, (stored) => ({ ...stored, title: { en: "Renamed" } })),
     ).resolves.toBeDefined();
   });
 
