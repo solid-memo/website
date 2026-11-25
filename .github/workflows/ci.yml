@@ -107,12 +107,15 @@ jobs:
         run: npm run ci:gate
 
   # npm run check:ci, but for the growth tests, which the growth job
-  # runs. Deterministic.
+  # runs. Deterministic. Most of its tasks come from Turbo's cache; a
+  # change that moves every package's folder misses it for all of them,
+  # and a job cut off by its limit saves no cache, so every run of such a
+  # change would start cold again: the limit leaves room for a cold run.
   check:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
