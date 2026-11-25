@@ -3,13 +3,20 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
-import { LOGIN_HASH_KEY, LOGIN_ISSUER_KEY, RESTORE_ATTEMPT_KEY } from "./solidSessionGateway";
+import {
+  LOGIN_HASH_KEY,
+  LOGIN_ISSUER_KEY,
+  RESTORE_ATTEMPT_KEY,
+  SESSION_RECOVERED_KEY,
+  SESSION_RECOVERY_KEY,
+} from "./solidSessionGateway";
 
 /**
  * What this package keeps in the browser, part of the app's public API
  * (docs/releasing.md#the-public-api): the sessionStorage keys a login
  * keeps the page's route and the provider it went to under while the
- * identity provider has the tab, and a silent restore notes its attempt
+ * identity provider has the tab, a silent restore notes its attempt
+ * under, and a reload that restores an expired session notes itself
  * under. The sign-in client's mark is the seam's
  * (semver-public-api-declaration/browser-storage/solid-client.txt), and the keys the Inrupt
  * library keeps are its own, not listed here. A line
@@ -21,6 +28,8 @@ it("keeps semver-public-api-declaration/browser-storage/solid.txt to what the br
     `sessionStorage: ${LOGIN_HASH_KEY}`,
     `sessionStorage: ${LOGIN_ISSUER_KEY}`,
     `sessionStorage: ${RESTORE_ATTEMPT_KEY}`,
+    `sessionStorage: ${SESSION_RECOVERED_KEY}`,
+    `sessionStorage: ${SESSION_RECOVERY_KEY}`,
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
     "../../../../semver-public-api-declaration/browser-storage/solid.txt",

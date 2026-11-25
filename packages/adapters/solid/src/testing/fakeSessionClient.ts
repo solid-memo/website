@@ -10,7 +10,8 @@ import type { RestoredSession, SessionClient } from "@solid-memo/solid-client/in
  * session to restore nor login request under way, until a test says
  * otherwise, login and logout
  * only record their calls, and fetch answers 200 unless a test gives it
- * another implementation, and no one is logged in.
+ * another implementation, and no one is logged in, so no renewal is
+ * overdue.
  */
 export function fakeSessionClient() {
   const restored: RestoredSession = { webId: null, fromLogin: false, restoredFrom: null };
@@ -23,5 +24,6 @@ export function fakeSessionClient() {
     logout: vi.fn<SessionClient["logout"]>(async () => {}),
     fetch: vi.fn<SessionClient["fetch"]>(async () => new Response("ok")),
     webId: vi.fn<SessionClient["webId"]>(() => undefined),
+    renewalOverdue: vi.fn<SessionClient["renewalOverdue"]>(() => false),
   } satisfies SessionClient;
 }

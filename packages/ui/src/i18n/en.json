@@ -1789,6 +1789,7 @@
     "loginProviderRefused": "Your provider's settings name an address Solid Memo cannot use safely, so it stopped the login. Pick another provider.",
     "restoreTimedOut": "Your provider did not answer in time, so Solid Memo stopped restoring your session. Log in again, or pick another provider.",
     "restoreNotReturned": "Your provider did not send you back, so Solid Memo stopped restoring your session. Go back to your provider, log in again, or pick another provider.",
+    "sessionNotRecovered": "Your session expired, and your provider did not log you back in. Log in again.",
     "webIdIssuerNotListed": "Your WebID profile does not name the provider you logged in at, so Solid Memo ended the session for safety. Add the provider to your profile, or log in at one it names.",
     "webIdTooLong": "Your provider names a WebID longer than Solid Memo accepts ({limit} characters at most), so Solid Memo ended the session for safety. Log in at another provider.",
     "webIdUnusable": "Your provider names a WebID Solid Memo cannot check, as it is not a secure https:// address of a Pod, so Solid Memo ended the session for safety. Log in at another provider.",

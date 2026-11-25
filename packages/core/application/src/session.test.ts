@@ -301,6 +301,12 @@ describe("session", () => {
     expect(deps.sessionGateway.onSessionExpired).toHaveBeenCalledWith(listener);
     expect(typeof unsubscribe).toBe("function");
   });
+  it("recoverSession delegates to the session gateway", async () => {
+    const deps = makeDeps();
+    const useCases = createUseCases(deps);
+    await useCases.recoverSession();
+    expect(deps.sessionGateway.recoverSession).toHaveBeenCalledOnce();
+  });
   it("viewWebIdDocument fetches the document for the session's WebID", async () => {
     const deps = makeDeps();
     const useCases = createUseCases(deps);

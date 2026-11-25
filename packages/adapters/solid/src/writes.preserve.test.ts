@@ -289,6 +289,7 @@ const ROWS: { [Name in keyof UseCases]: Row } = {
   forgetStoredSession: local((u) => u.forgetStoredSession()),
   onLoggedOutElsewhere: local((u) => u.onLoggedOutElsewhere(() => undefined)()),
   onSessionExpired: local((u) => u.onSessionExpired(() => undefined)()),
+  recoverSession: local((u) => u.recoverSession()),
   discoverAccount: async ({ u }) => void (await u.discoverAccount(SESSION)),
   viewWebIdDocument: async ({ u }) => void (await u.viewWebIdDocument(SESSION)),
 

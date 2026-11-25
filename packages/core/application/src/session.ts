@@ -100,6 +100,12 @@ export interface SessionUseCases {
   /** Subscribe to session expiry; returns an unsubscribe function. */
   onSessionExpired(listener: () => void): () => void;
   /**
+   * Restores a session that expired as a reload does, by reloading the
+   * page; resolves only when the page stays, and the learner has to log
+   * in again (SessionGateway.recoverSession).
+   */
+  recoverSession(): Promise<void>;
+  /**
    * Subscribe to a logout in another tab, heard at once, or found out
    * when this page returns from the back/forward cache with no session
    * stored. Called once this tab's own session has ended, if it had one;
@@ -654,6 +660,9 @@ export function createSessionUseCases({
     },
     onSessionExpired(listener) {
       return sessionGateway.onSessionExpired(listener);
+    },
+    recoverSession() {
+      return sessionGateway.recoverSession();
     },
     async discoverAccount(session) {
       const [storages, oidcIssuer, name] = await Promise.all([

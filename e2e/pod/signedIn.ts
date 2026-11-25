@@ -106,6 +106,8 @@ export function sessionClient(session: Session): SessionClient {
     forgetSession: never,
     sessionIssuer: async () => session.issuer,
     webId: () => session.webId,
+    // A test's token outlives the test.
+    renewalOverdue: () => false,
     fetch: (input, init) => {
       const request = input instanceof Request ? input : undefined;
       const url = request?.url ?? String(input);

@@ -1457,6 +1457,103 @@ describe("AppShell", () => {
     expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
   });
 
+  describe("when the session expires", () => {
+    /** The use cases with a restored session, and the word that it expired. */
+    function expiring(overrides: Parameters<typeof makeUseCases>[0] = {}) {
+      let expire: (() => void) | undefined;
+      const useCases = makeUseCases({
+        restoreSession: vi.fn(async () => restored),
+        onSessionExpired: vi.fn((listener: () => void) => {
+          expire = listener;
+          return () => undefined;
+        }),
+        ...overrides,
+      });
+      return { useCases, expire: () => act(() => expire!()) };
+    }
+
+    it("restores the session as a reload does, and keeps the screen while the page reloads", async () => {
+      const { useCases, expire } = expiring({
+        // The page reloads: nothing settles here.
+        recoverSession: vi.fn(() => new Promise<void>(() => {})),
+      });
+      renderApp(useCases);
+      await screen.findByRole("button", { name: "Log out" });
+
+      expire();
+      await waitFor(() => expect(useCases.recoverSession).toHaveBeenCalledOnce());
+      expect(screen.getByRole("button", { name: "Log out" })).toBeInTheDocument();
+      expect(screen.queryByText("Your session has expired. Please log in again.")).toBeNull();
+    });
+
+    it("waits for the writes under way before it reloads", async () => {
+      const { useCases, expire } = expiring();
+      const { queryClient } = renderApp(useCases);
+      await screen.findByRole("button", { name: "Log out" });
+      /** A write under way, and what finishes it. */
+      function writing() {
+        let finish!: () => void;
+        const written = queryClient
+          .getMutationCache()
+          .build(queryClient, { mutationFn: () => new Promise<void>((done) => (finish = done)) })
+          .execute(undefined);
+        return async () => {
+          finish();
+          await written;
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        };
+      }
+      const [first, second] = [writing(), writing()];
+
+      expire();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(useCases.recoverSession).not.toHaveBeenCalled();
+      await first();
+      expect(useCases.recoverSession).not.toHaveBeenCalled();
+      await second();
+      await waitFor(() => expect(useCases.recoverSession).toHaveBeenCalledOnce());
+      expect(
+        await screen.findByText("Your session has expired. Please log in again."),
+      ).toBeInTheDocument();
+    });
+
+    it("stops waiting for writes that don't finish", async () => {
+      vi.useFakeTimers({ shouldAdvanceTime: true });
+      try {
+        const { useCases, expire } = expiring();
+        const { queryClient } = renderApp(useCases);
+        await screen.findByRole("button", { name: "Log out" });
+        void queryClient
+          .getMutationCache()
+          .build(queryClient, { mutationFn: () => new Promise<void>(() => {}) })
+          .execute(undefined);
+
+        expire();
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(10_000);
+        });
+        expect(useCases.recoverSession).toHaveBeenCalledOnce();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it("drops to the login screen when the session can't be restored", async () => {
+      const { useCases, expire } = expiring({
+        recoverSession: vi.fn(async () => {
+          throw new Error("sessionStorage refused");
+        }),
+      });
+      renderApp(useCases);
+      await screen.findByRole("button", { name: "Log out" });
+
+      expire();
+      expect(
+        await screen.findByText("Your session has expired. Please log in again."),
+      ).toBeInTheDocument();
+    });
+  });
+
   describe("when another tab logs out", () => {
     /** The use cases, and the word of another tab's logout. */
     function hearing(overrides: Parameters<typeof makeUseCases>[0]) {

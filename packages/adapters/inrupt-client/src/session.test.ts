@@ -188,6 +188,18 @@ describe("createSessionClient, over the library", () => {
     expect(logout).toHaveBeenCalledWith();
   });
 
+  it("has a renewal overdue once the access token has expired, while logged in", () => {
+    const client = createSessionClient();
+    const session = (info: object) =>
+      vi.mocked(getDefaultSession).mockReturnValue({ info: { sessionId: "s", ...info } } as never);
+    session({ isLoggedIn: true, webId: WEBID, expirationDate: Date.now() - 1 });
+    expect(client.renewalOverdue()).toBe(true);
+    session({ isLoggedIn: true, webId: WEBID, expirationDate: Date.now() + 60_000 });
+    expect(client.renewalOverdue()).toBe(false);
+    session({ isLoggedIn: false, expirationDate: Date.now() - 1 });
+    expect(client.renewalOverdue()).toBe(false);
+  });
+
   it("asks the library to complete a login or restore the previous session", async () => {
     await createSessionClient().restore();
     expect(handleIncomingRedirect).toHaveBeenCalledWith({ restorePreviousSession: true });

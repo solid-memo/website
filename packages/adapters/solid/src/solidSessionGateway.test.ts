@@ -852,6 +852,190 @@ describe("createSolidSessionGateway", () => {
       window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT));
       expect(listener).toHaveBeenCalledOnce();
     });
+
+    describe("when the tab comes back with a token the client did not renew", () => {
+      /** The client's grace to renew the token, once the tab is shown online. */
+      const GRACE_MS = 10_000;
+      let visibility: DocumentVisibilityState;
+      let online: boolean;
+
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+        visibility = "visible";
+        online = true;
+        vi.spyOn(document, "visibilityState", "get").mockImplementation(() => visibility);
+        vi.spyOn(window.navigator, "onLine", "get").mockImplementation(() => online);
+        client.renewalOverdue.mockReturnValue(true);
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+        vi.restoreAllMocks();
+      });
+
+      /** The listener, subscribed. */
+      function subscribed() {
+        const listener = vi.fn();
+        const unsubscribe = createSolidSessionGateway(options).onSessionExpired(listener);
+        return { listener, unsubscribe };
+      }
+
+      it.each([
+        ["shown", () => document.dispatchEvent(new Event("visibilitychange"))],
+        ["back online", () => window.dispatchEvent(new Event("online"))],
+        ["back from the cache", () => window.dispatchEvent(new Event("pageshow"))],
+      ])("notifies once the client had its grace, when %s", async (_, comeBack) => {
+        const { listener, unsubscribe } = subscribed();
+        comeBack();
+        comeBack();
+        await vi.advanceTimersByTimeAsync(GRACE_MS - 1);
+        expect(listener).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1);
+        expect(listener).toHaveBeenCalledOnce();
+        unsubscribe();
+      });
+
+      it("stays quiet when the client renewed the token meanwhile", async () => {
+        const { listener, unsubscribe } = subscribed();
+        document.dispatchEvent(new Event("visibilitychange"));
+        client.renewalOverdue.mockReturnValue(false);
+        await vi.advanceTimersByTimeAsync(GRACE_MS);
+        expect(listener).not.toHaveBeenCalled();
+        unsubscribe();
+      });
+
+      it("stays quiet with no renewal overdue, hidden, or offline", async () => {
+        const { listener, unsubscribe } = subscribed();
+        client.renewalOverdue.mockReturnValue(false);
+        document.dispatchEvent(new Event("visibilitychange"));
+        client.renewalOverdue.mockReturnValue(true);
+        visibility = "hidden";
+        document.dispatchEvent(new Event("visibilitychange"));
+        visibility = "visible";
+        online = false;
+        document.dispatchEvent(new Event("visibilitychange"));
+        await vi.advanceTimersByTimeAsync(GRACE_MS);
+        expect(listener).not.toHaveBeenCalled();
+        unsubscribe();
+      });
+
+      it("waits to be online again when the network drops during the grace", async () => {
+        const { listener, unsubscribe } = subscribed();
+        document.dispatchEvent(new Event("visibilitychange"));
+        online = false;
+        await vi.advanceTimersByTimeAsync(GRACE_MS);
+        expect(listener).not.toHaveBeenCalled();
+        online = true;
+        window.dispatchEvent(new Event("online"));
+        await vi.advanceTimersByTimeAsync(GRACE_MS);
+        expect(listener).toHaveBeenCalledOnce();
+        unsubscribe();
+      });
+
+      it("stops after unsubscribe, the grace under way too", async () => {
+        const { listener, unsubscribe } = subscribed();
+        document.dispatchEvent(new Event("visibilitychange"));
+        unsubscribe();
+        await vi.advanceTimersByTimeAsync(GRACE_MS);
+        for (const target of [document, window]) {
+          target.dispatchEvent(new Event("visibilitychange"));
+          target.dispatchEvent(new Event("online"));
+          target.dispatchEvent(new Event("pageshow"));
+        }
+        await vi.advanceTimersByTimeAsync(GRACE_MS);
+        expect(listener).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe("recoverSession", () => {
+    /** How long a reload has to leave before the page is taken to have stayed. */
+    const RELOAD_GRACE_MS = 10_000;
+    let reload: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+      reload = vi.spyOn(window.location, "reload").mockImplementation(() => {});
+      client.sessionIssuer.mockResolvedValue("https://issuer.example/");
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+    });
+
+    it("reloads the page once for every expiry heard meanwhile, and resolves once the page stayed", async () => {
+      const gateway = createSolidSessionGateway(options);
+      let settled = 0;
+      const recoveries = [gateway.recoverSession(), gateway.recoverSession()];
+      for (const recovery of recoveries) void recovery.then(() => settled++);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(reload).toHaveBeenCalledOnce();
+      expect(window.sessionStorage.getItem("solid-memo:session-recovery")).not.toBeNull();
+
+      await vi.advanceTimersByTimeAsync(RELOAD_GRACE_MS - 1);
+      expect(settled).toBe(0);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(settled).toBe(2);
+      // The page stayed: its next load is no recovery's.
+      expect(window.sessionStorage.getItem("solid-memo:session-recovery")).toBeNull();
+    });
+
+    it("doesn't reload again within five minutes of the last time", async () => {
+      const gateway = createSolidSessionGateway(options);
+      const first = gateway.recoverSession();
+      await vi.advanceTimersByTimeAsync(RELOAD_GRACE_MS);
+      await first;
+      await vi.advanceTimersByTimeAsync(5 * 60_000 - RELOAD_GRACE_MS - 1);
+      // As on the load the reload brought: the time is kept in the tab.
+      await createSolidSessionGateway(options).recoverSession();
+      expect(reload).toHaveBeenCalledOnce();
+
+      await vi.advanceTimersByTimeAsync(1);
+      void createSolidSessionGateway(options).recoverSession();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(reload).toHaveBeenCalledTimes(2);
+    });
+
+    it("doesn't reload with no session stored, or a store it can't read", async () => {
+      client.sessionIssuer.mockResolvedValue(null);
+      await createSolidSessionGateway(options).recoverSession();
+      client.sessionIssuer.mockRejectedValue(new Error("storage refused"));
+      await createSolidSessionGateway(options).recoverSession();
+      expect(reload).not.toHaveBeenCalled();
+      expect(window.sessionStorage.getItem("solid-memo:session-recovered")).toBeNull();
+    });
+  });
+
+  describe("restore, after a reload that recovers an expired session", () => {
+    beforeEach(() => {
+      window.sessionStorage.setItem("solid-memo:session-recovery", "reload");
+      client.sessionIssuer.mockResolvedValue("https://issuer.example/");
+    });
+
+    it("returns the session it brings back", async () => {
+      restored(false);
+      await expect(createSolidSessionGateway(options).restore()).resolves.toMatchObject({
+        session: { webId: WEBID },
+      });
+      expect(window.sessionStorage.getItem("solid-memo:session-recovery")).toBeNull();
+    });
+
+    it("says so when it brings no session back", async () => {
+      await expect(createSolidSessionGateway(options).restore()).rejects.toMatchObject({
+        code: "sessionNotRecovered",
+      });
+      expect(window.sessionStorage.getItem("solid-memo:session-recovery")).toBeNull();
+      // The load after that is an ordinary one.
+      await expect(createSolidSessionGateway(options).restore()).resolves.toBeNull();
+    });
+
+    it("keeps the mark for the provider's answer while the page leaves for it", async () => {
+      client.restore.mockReturnValue(new Promise(() => {}));
+      void createSolidSessionGateway(options).restore();
+      await vi.waitFor(() => expect(client.restore).toHaveBeenCalled());
+      expect(window.sessionStorage.getItem("solid-memo:session-recovery")).toBe("reload");
+    });
   });
 
   describe("onReturnedWithoutSession", () => {

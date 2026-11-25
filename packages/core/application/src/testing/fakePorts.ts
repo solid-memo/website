@@ -123,6 +123,7 @@ export function makeDeps() {
     hasStoredSession: vi.fn(async () => false),
     forgetStoredSession: vi.fn(async () => undefined),
     onSessionExpired: vi.fn(() => () => undefined),
+    recoverSession: vi.fn(async () => undefined),
     onReturnedWithoutSession: vi.fn((_listener: () => void): (() => void) => vi.fn()),
   };
   const webIdDocumentRepository: WebIdDocumentRepository = {

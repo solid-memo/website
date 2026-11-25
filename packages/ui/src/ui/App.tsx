@@ -15,7 +15,7 @@ import {
 import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import { resolveTheme, type Theme, type ThemeChoice } from "@solid-memo/domain/theme";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { type QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { UseCases } from "@solid-memo/application/useCases";
 import type { PodProvider } from "@solid-memo/domain/podProvider";
 import type { Session } from "@solid-memo/domain/session";
@@ -301,6 +301,28 @@ function opensAsGuest(hash: string): boolean {
 /** The login screen's error once the session expired: not a failure to report, but why the user is back. */
 const SESSION_EXPIRED = Symbol("session expired");
 
+/** How long an expired session waits on the writes under way before the page reloads, in milliseconds. */
+const WRITES_SETTLE_MS = 10_000;
+
+/**
+ * Settles once no write is under way, or WRITES_SETTLE_MS from now: a
+ * reload would cut off a write the pod may have taken half of.
+ */
+function writesSettled(queryClient: QueryClient): Promise<void> {
+  return new Promise((resolve) => {
+    const settle = () => {
+      stopWatching();
+      clearTimeout(timer);
+      resolve();
+    };
+    const stopWatching = queryClient.getMutationCache().subscribe(() => {
+      if (queryClient.isMutating() === 0) settle();
+    });
+    const timer = setTimeout(settle, WRITES_SETTLE_MS);
+    if (queryClient.isMutating() === 0) settle();
+  });
+}
+
 /** The provider that never sent the learner back, to go back to in their own time; none for any other error. */
 function providerNotReturning(error: unknown): string | null {
   return error instanceof AppError && error.code === "restoreNotReturned"
@@ -409,7 +431,14 @@ function AppContent({
   }, [useCases]);
 
   useEffect(() => {
-    return useCases.onSessionExpired(() => leaveSession(SESSION_EXPIRED));
+    // Restored as a reload restores it, once the writes under way are done; the login only if the page stays.
+    return useCases.onSessionExpired(() => {
+      void writesSettled(queryClient)
+        .then(() => useCases.recoverSession())
+        // A tab that can't keep the mark (sessionStorage refused) can't recover: the login is next.
+        .catch(() => undefined)
+        .then(() => leaveSession(SESSION_EXPIRED));
+    });
   }, [useCases, queryClient]);
 
   useEffect(() => {
