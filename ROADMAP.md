@@ -64,7 +64,7 @@ These are done. Those since 1.0.0 come first; the rest are part of
 - Pull requests merged through GitHub's merge queue, so `main` only
   gets a commit whose checks passed
   ([docs/testing.md](docs/testing.md#the-merge-queue)).
-- The public API written down in [`api/`](api/README.md), and a check
+- The public API written down in [`semver-public-api-declaration/`](semver-public-api-declaration/README.md), and a check
   that fails a change to it that no commit calls breaking
   ([docs/releasing.md](docs/releasing.md#how-ci-holds-to-it)).
 - Commit checks: every commit says why and names its issue, and a pull

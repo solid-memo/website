@@ -1059,7 +1059,7 @@ table above are the ones every later version writes, and the steps
 between them stay, for pods an older version wrote.
 [formats.api.test.ts](../packages/core/domain/src/shapes/migrations/formats.api.test.ts)
 fails when a format rises, and `npm run check:breaking` fails on the
-line that would go from `api/frozen/formats.txt`, whatever the commit
+line that would go from `semver-public-api-declaration/frozen/formats.txt`, whatever the commit
 says.
 
 Data added later goes one of the four ways of the

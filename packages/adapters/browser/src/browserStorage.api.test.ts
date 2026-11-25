@@ -39,7 +39,7 @@ const RECORDS: { [K in StoredResource["kind"]]: Extract<StoredResource, { kind: 
  * raised, is a breaking change, which `npm run check:breaking` holds to
  * a commit that says so.
  */
-it("keeps api/browser-storage/browser.txt to what the browser keeps", async () => {
+it("keeps semver-public-api-declaration/browser-storage/browser.txt to what the browser keeps", async () => {
   const lines = [
     `localStorage: ${LANGUAGE_KEY}`,
     `localStorage: ${PALETTE_KEY}`,
@@ -61,7 +61,7 @@ it("keeps api/browser-storage/browser.txt to what the browser keeps", async () =
     ),
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/browser-storage/browser.txt",
+    "../../../../semver-public-api-declaration/browser-storage/browser.txt",
   );
 });
 
@@ -70,8 +70,8 @@ it("keeps api/browser-storage/browser.txt to what the browser keeps", async () =
  * an older version cannot open a database a newer one raised. A line
  * that goes fails `npm run check:breaking` whatever a commit says.
  */
-it("keeps api/frozen/browser-storage/browser.txt to the database's version", async () => {
+it("keeps semver-public-api-declaration/frozen/browser-storage/browser.txt to the database's version", async () => {
   await expect(`indexedDB: ${DATABASE} version ${DATABASE_VERSION}\n`).toMatchFileSnapshot(
-    "../../../../api/frozen/browser-storage/browser.txt",
+    "../../../../semver-public-api-declaration/frozen/browser-storage/browser.txt",
   );
 });

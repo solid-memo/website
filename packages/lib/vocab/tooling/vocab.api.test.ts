@@ -31,7 +31,7 @@ function short(iri: string): string {
  * ever goes, whatever a commit says (`npm run check:breaking`). A term
  * that should no longer be written is deprecated, which keeps its line.
  */
-it("keeps api/frozen/vocab.txt to the terms and topics", async () => {
+it("keeps semver-public-api-declaration/frozen/vocab.txt to the terms and topics", async () => {
   const vocab = parseVocab(await readFile(join(NS_ROOT, "vocab/v1.ttl"), "utf8"));
   const topics = parseConceptSchemes(
     await readFile(join(NS_ROOT, "vocab/topics.ttl"), "utf8"),
@@ -48,6 +48,6 @@ it("keeps api/frozen/vocab.txt to the terms and topics", async () => {
     ...topics.flatMap((scheme) => scheme.concepts.map((concept) => `${short(concept.iri)}: topic`)),
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/frozen/vocab.txt",
+    "../../../../semver-public-api-declaration/frozen/vocab.txt",
   );
 });

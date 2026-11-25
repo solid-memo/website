@@ -32,7 +32,7 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/vitest.shared.ts",
-        "$TURBO_ROOT$/api/**"
+        "$TURBO_ROOT$/semver-public-api-declaration/**"
       ],
       "dependsOn": [
         "transit",

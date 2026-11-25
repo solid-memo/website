@@ -19,7 +19,7 @@ import {
  * change, which `npm run check:breaking` holds to a commit that says
  * so; a new shape of the preferences takes a new key instead.
  */
-it("keeps api/browser-storage/studio.txt to what the browser keeps", async () => {
+it("keeps semver-public-api-declaration/browser-storage/studio.txt to what the browser keeps", async () => {
   const lines = [
     ...Object.keys(DEFAULT_PREFS).map((field) => `localStorage: ${PREFS_KEY}, field ${field}`),
     `localStorage: ${RECENT_KEY}`,
@@ -28,6 +28,6 @@ it("keeps api/browser-storage/studio.txt to what the browser keeps", async () =>
     ),
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/browser-storage/studio.txt",
+    "../../../../semver-public-api-declaration/browser-storage/studio.txt",
   );
 });

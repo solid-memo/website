@@ -31,18 +31,18 @@ const { LOG_SEPARATOR } = (await import(
   new URL("../commitlint.config.mjs", import.meta.url).href
 )) as { LOG_SEPARATOR: RegExp };
 
-const ROUTES = "api/routes/app.txt";
-const PUBLISHED = "api/frozen/published.txt";
+const ROUTES = "semver-public-api-declaration/routes/app.txt";
+const PUBLISHED = "semver-public-api-declaration/frozen/published.txt";
 
 const commit = (message: string, hash = "0123456789abcdef"): Commit => ({ hash, message });
 
 describe("isApiFile", () => {
-  it("takes the text files of api/, and nothing else", () => {
+  it("takes the text files of semver-public-api-declaration/, and nothing else", () => {
     expect(isApiFile(ROUTES)).toBe(true);
     expect(isApiFile(PUBLISHED)).toBe(true);
-    expect(isApiFile("api/README.md")).toBe(false);
+    expect(isApiFile("semver-public-api-declaration/README.md")).toBe(false);
     expect(isApiFile("packages/adapters/shacl/node/deckLibrary.golden.txt")).toBe(false);
-    expect(isApiFile("docs/api/x.txt")).toBe(false);
+    expect(isApiFile("docs/semver-public-api-declaration/x.txt")).toBe(false);
   });
 });
 
@@ -162,11 +162,23 @@ describe("verdict", () => {
   });
 
   it.each([
-    ["api/frozen/formats.txt", "card: written in format 7", "so a format never moves"],
-    ["api/frozen/pod-layout.txt", "digest: kept in <instance>digest.ttl", "so it never moves"],
-    ["api/frozen/pods.txt", "pods/1.nt sha256:00", "so its snapshot is never edited or removed"],
     [
-      "api/frozen/browser-storage/browser.txt",
+      "semver-public-api-declaration/frozen/formats.txt",
+      "card: written in format 7",
+      "so a format never moves",
+    ],
+    [
+      "semver-public-api-declaration/frozen/pod-layout.txt",
+      "digest: kept in <instance>digest.ttl",
+      "so it never moves",
+    ],
+    [
+      "semver-public-api-declaration/frozen/pods.txt",
+      "pods/1.nt sha256:00",
+      "so its snapshot is never edited or removed",
+    ],
+    [
+      "semver-public-api-declaration/frozen/browser-storage/browser.txt",
       "indexedDB: solid-memo-guest-pod version 1",
       "so its version never moves",
     ],
@@ -181,14 +193,14 @@ describe("verdict", () => {
     expect(problems[0]).not.toContain("publish a new version");
   });
 
-  it("notes a commit that says it breaks when no line of api/ went", () => {
+  it("notes a commit that says it breaks when no line of semver-public-api-declaration/ went", () => {
     const { problems, notes } = verdict(
       [],
       [commit("feat!: remove the trial\n\nBREAKING CHANGE: x")],
     );
     expect(problems).toEqual([]);
     expect(notes).toEqual([
-      "01234567 feat!: remove the trial says it breaks, but no line of api/ went. That is right for a feature removed; otherwise drop the `!` and the footer.",
+      "01234567 feat!: remove the trial says it breaks, but no line of semver-public-api-declaration/ went. That is right for a feature removed; otherwise drop the `!` and the footer.",
     ]);
   });
 });
@@ -348,7 +360,7 @@ describe("defaultIo", () => {
     git("init", "-q", "-b", "main");
     write(ROUTES, "home: #/decks\n");
     write(PUBLISHED, "/ns/vocab/v1.ttl\n");
-    write("api/README.md", "Not a promise.\n");
+    write("semver-public-api-declaration/README.md", "Not a promise.\n");
     git("add", ".");
     git("commit", "-q", "-m", "chore: start");
     git("switch", "-q", "-c", "topic");
@@ -360,7 +372,7 @@ describe("defaultIo", () => {
     git("commit", "-q", "-m", "chore: elsewhere");
     git("switch", "-q", "topic");
     git("merge", "-q", "--no-edit", "main");
-    write("api/new.txt", "new: line\n");
+    write("semver-public-api-declaration/new.txt", "new: line\n");
     rmSync(join(repo, PUBLISHED));
 
     const io = defaultIo(repo);
@@ -374,7 +386,7 @@ describe("defaultIo", () => {
     );
     expect(io.files()).toEqual(
       new Map([
-        ["api/new.txt", "new: line\n"],
+        ["semver-public-api-declaration/new.txt", "new: line\n"],
         [ROUTES, "home: #/home\n"],
       ]),
     );
@@ -384,6 +396,39 @@ describe("defaultIo", () => {
         message: "feat!: move home\n\nBREAKING CHANGE: bookmarks break",
       },
     ]);
+  });
+
+  // The folder was api/ until #1034: a base from before then has the
+  // files there, and the rename takes no line away.
+  it("reads the files at a commit from before the rename under the folder's new name", () => {
+    repo = mkdtempSync(join(tmpdir(), "breaking-"));
+    git("init", "-q", "-b", "main");
+    write("api/routes/app.txt", "home: #/decks\n");
+    write("api/frozen/published.txt", "/ns/vocab/v1.ttl\n");
+    write("api/README.md", "Not a promise.\n");
+    git("add", ".");
+    git("commit", "-q", "-m", "chore: start");
+    git("switch", "-q", "-c", "topic");
+    git("mv", "api", "semver-public-api-declaration");
+    git("commit", "-q", "-m", "refactor: rename the folder");
+
+    const logged: string[] = [];
+    const io = { ...defaultIo(repo), log: (line: string) => logged.push(line) };
+    expect(io.filesAt(git("rev-parse", "main"))).toEqual(
+      new Map([
+        [PUBLISHED, "/ns/vocab/v1.ttl\n"],
+        [ROUTES, "home: #/decks\n"],
+      ]),
+    );
+    expect(main(["node", "--base", "main"], io)).toBe(0);
+
+    write(PUBLISHED, "\n");
+    git("commit", "-q", "-am", "feat!: unpublish\n\nBREAKING CHANGE: gone");
+    logged.length = 0;
+    expect(main(["node", "--base", "main"], io)).toBe(1);
+    expect(logged).toContain(
+      `${PUBLISHED}: "/ns/vocab/v1.ttl" is gone, and never may be: ${PUBLISHED} lists what is published once and for all (docs/releasing.md#what-has-versions-of-its-own); publish a new version instead.`,
+    );
   });
 
   // As the release reads them (scripts/reverts.ts): a revert leaves out
@@ -441,7 +486,7 @@ describe("defaultIo", () => {
       expect(logged).toEqual([
         "Since the last release, v1.0.0, as the release reads the commits from there (a commit that a later one reverts says nothing):",
         `${ROUTES}: "home: #/decks" is gone.`,
-        expect.stringContaining("A line of api/ went"),
+        expect.stringContaining("A line of semver-public-api-declaration/ went"),
       ]);
       // Said again, the change is declared.
       git("commit", "-q", "--amend", "-m", declared);

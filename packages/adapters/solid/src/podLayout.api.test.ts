@@ -310,7 +310,7 @@ async function storageLines(): Promise<string[]> {
  * changed or a link no longer followed, fails `npm run check:breaking`
  * whatever a commit says.
  */
-it("keeps api/frozen/pod-layout.txt to where the data is in the pod", async () => {
+it("keeps semver-public-api-declaration/frozen/pod-layout.txt to where the data is in the pod", async () => {
   const draft = draftUrlOf(INSTANCE, "solid", 2);
   const lines = [
     ...(await storageLines()),
@@ -330,6 +330,6 @@ it("keeps api/frozen/pod-layout.txt to where the data is in the pod", async () =
     `release: version 2 of the release "solid" published from an instance in ${named(releaseUrlIn(releasesContainerOf(INSTANCE), "solid", 2))}`,
   ];
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/frozen/pod-layout.txt",
+    "../../../../semver-public-api-declaration/frozen/pod-layout.txt",
   );
 });

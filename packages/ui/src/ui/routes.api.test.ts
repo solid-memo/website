@@ -96,7 +96,7 @@ const ROUTES: RouteRef[] = [
  * parameter renamed or no longer read, is a breaking change, which
  * `npm run check:breaking` holds to a commit that says so.
  */
-it("keeps api/routes/app.txt to the hashes the app opens", async () => {
+it("keeps semver-public-api-declaration/routes/app.txt to the hashes the app opens", async () => {
   const lines = ROUTES.map((route) => {
     const hash = routeToHash(route);
     expect(parseHash(hash)).toEqual(route);
@@ -107,6 +107,6 @@ it("keeps api/routes/app.txt to the hashes the app opens", async () => {
   expect(parseHash(studio)).toBeNull();
   lines.push(studio);
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../api/routes/app.txt",
+    "../../../../semver-public-api-declaration/routes/app.txt",
   );
 });

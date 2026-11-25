@@ -33,13 +33,13 @@ const MOVED: Partial<Record<ShapeName, number>> = {
  * A line that goes fails `npm run check:breaking` whatever a commit
  * says, and a kind added starts at 1.
  */
-it("keeps api/frozen/formats.txt to the formats written, which never move", async () => {
+it("keeps semver-public-api-declaration/frozen/formats.txt to the formats written, which never move", async () => {
   expect(Object.fromEntries(KINDS.map((kind) => [kind, LATEST_VERSION[kind]]))).toEqual(
     Object.fromEntries(KINDS.map((kind) => [kind, MOVED[kind] ?? 1])),
   );
   const lines = KINDS.map((kind) => `${kind}: written in format ${LATEST_VERSION[kind]}`);
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../../../api/frozen/formats.txt",
+    "../../../../../../semver-public-api-declaration/frozen/formats.txt",
   );
 });
 
@@ -49,7 +49,7 @@ it("keeps api/frozen/formats.txt to the formats written, which never move", asyn
  * breaking change, which `npm run check:breaking` holds to a commit that
  * says so.
  */
-it("keeps api/formats.txt to the formats read", async () => {
+it("keeps semver-public-api-declaration/formats.txt to the formats read", async () => {
   const lines = KINDS.map((kind) => {
     const oldest = Math.min(
       LATEST_VERSION[kind],
@@ -58,6 +58,6 @@ it("keeps api/formats.txt to the formats read", async () => {
     return `${kind}: read from format ${oldest}`;
   });
   await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
-    "../../../../../../api/formats.txt",
+    "../../../../../../semver-public-api-declaration/formats.txt",
   );
 });

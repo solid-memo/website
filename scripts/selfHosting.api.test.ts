@@ -24,7 +24,7 @@ const WEB = join(ROOT, "apps/web");
  * output folder, is a breaking change, which `npm run check:breaking`
  * holds to a commit that says so.
  */
-it("keeps api/self-hosting.txt to what a self-hosted copy relies on", async () => {
+it("keeps semver-public-api-declaration/self-hosting.txt to what a self-hosted copy relies on", async () => {
   const { scripts } = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as {
     scripts: Record<string, string>;
   };
@@ -42,5 +42,7 @@ it("keeps api/self-hosting.txt to what a self-hosted copy relies on", async () =
       ? [`build: with a domain in CNAME, the Client ID Document is at /${CLIENT_ID_FILE}`]
       : []),
   ];
-  await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot("../api/self-hosting.txt");
+  await expect(`${lines.sort().join("\n")}\n`).toMatchFileSnapshot(
+    "../semver-public-api-declaration/self-hosting.txt",
+  );
 });
