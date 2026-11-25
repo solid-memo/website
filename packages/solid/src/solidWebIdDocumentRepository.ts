@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { limitedFetch, PROFILE_LIMITS } from "./client/readLimits";
-import { getSolidDataset } from "./client/resources";
+import { limitedFetch, PROFILE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { getSolidDataset } from "@solid-memo/solid-client/resources";
 import type { WebIdDocumentRepository } from "@solid-memo/application/ports/session";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import { toWebIdDocument } from "./mappers/webIdDocumentMapper";

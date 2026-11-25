@@ -4,10 +4,10 @@
 
 import { pathKeys } from "@solid-memo/domain/pathKeys";
 import type { Quad, Term } from "@rdfjs/types";
-import { toRdfJsDataset } from "./client/rdf";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
-import { directionOf } from "./client/sparqlUpdate";
-import { getSolidDatasetLinear } from "./client/resources";
+import { toRdfJsDataset } from "@solid-memo/solid-client/rdf";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
+import { directionOf } from "@solid-memo/solid-client/sparqlUpdate";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";
 

@@ -292,13 +292,18 @@ describe("boundaryProblems", () => {
     ]);
   });
 
-  it("fails on any @inrupt/ package imported outside the client modules (their interface aside) and shacl's Turtle reader, tests aside, once an import", () => {
+  it("fails on any @inrupt/ package imported outside inrupt-client and shacl's Turtle reader, tests aside, once an import", () => {
+    const client = workspace(
+      "inrupt-client",
+      {
+        "src/rdf.ts": 'import { getThing } from "@inrupt/solid-client";',
+        "src/session.ts": 'import { login } from "@inrupt/solid-client-authn-browser";',
+      },
+      { "@inrupt/solid-client": "*", "@inrupt/solid-client-authn-browser": "*" },
+    );
     const solid = workspace(
       "solid",
       {
-        "src/client/rdf.ts": 'import { getThing } from "@inrupt/solid-client";',
-        "src/client/session.ts": 'import { login } from "@inrupt/solid-client-authn-browser";',
-        "src/client/interface.ts": 'import type { Thing } from "@inrupt/solid-client";',
         "src/datasets.ts": [
           'import { getThing } from "@inrupt/solid-client";',
           'import * as authn from "@inrupt/solid-client-authn-browser";',
@@ -331,9 +336,8 @@ describe("boundaryProblems", () => {
       { "@inrupt/solid-client-authn-browser": "*" },
     );
     const only =
-      "only solid files matching /^src\\/client\\/(?!interface\\.ts$)/, shacl files matching /^src\\/turtleDocument\\.ts$/ may.";
-    expect(boundaryProblems([solid, shacl, ui], TOOLING)).toEqual([
-      `packages/solid/src/client/interface.ts: may not import "@inrupt/solid-client": ${only}`,
+      "only inrupt-client files matching /^src\\//, shacl files matching /^src\\/turtleDocument\\.ts$/ may.";
+    expect(boundaryProblems([client, solid, shacl, ui], TOOLING)).toEqual([
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client": ${only}`,
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client-authn-browser": ${only}`,
       `packages/solid/src/datasets.ts: may not import "@inrupt/solid-client/universal": ${only}`,
@@ -346,45 +350,52 @@ describe("boundaryProblems", () => {
     ]);
   });
 
-  it("lets solid-memo-client use n3 in the browser and import solid, and no package import it", () => {
+  it("lets a client use n3 in the browser and run solid's contract in its tests, and no package import it", () => {
     const client = workspace(
       "solid-memo-client",
       {
         "src/rdf.ts": [
           'import { DataFactory } from "n3";',
-          'import type { Dataset } from "@solid-memo/solid/client/interface";',
+          'import type { Dataset } from "@solid-memo/solid-client/interface";',
         ].join("\n"),
+        "src/rdf.test.ts": 'import { rdfContract } from "@solid-memo/solid/testing/contract/rdf";',
+        "src/resources.ts": 'import { readsOf } from "@solid-memo/solid/records";',
         "src/oidcStore.ts": 'import { readFileSync } from "node:fs";',
       },
-      { n3: "*", "@solid-memo/solid": "*" },
+      { n3: "*", "@solid-memo/solid-client": "*", "@solid-memo/solid": "*" },
     );
     const composition = workspace(
       "composition",
-      { "src/a.ts": 'import { getThing } from "@solid-memo/solid-memo-client/rdf";' },
-      { "@solid-memo/solid-memo-client": "*" },
+      {
+        "src/a.ts": 'import { getThing } from "@solid-memo/solid-memo-client/rdf";',
+        "src/b.ts": 'import { getThing } from "@solid-memo/inrupt-client/rdf";',
+      },
+      { "@solid-memo/solid-memo-client": "*", "@solid-memo/inrupt-client": "*" },
     );
     expect(boundaryProblems([client, composition], TOOLING)).toEqual([
+      "packages/solid-memo-client/src/resources.ts: only files matching /\\.test\\.ts$/ may import @solid-memo/solid.",
       'packages/solid-memo-client/src/oidcStore.ts: runs in the browser, so may not import "node:fs".',
       "packages/composition/src/a.ts: @solid-memo/composition may not import @solid-memo/solid-memo-client.",
+      "packages/composition/src/b.ts: @solid-memo/composition may not import @solid-memo/inrupt-client.",
     ]);
   });
 
-  it("lets solid's Turtle parser use n3 in the browser, and no other file of solid", () => {
-    const solid = workspace(
-      "solid",
+  it("lets inrupt-client's Turtle parser use n3 in the browser, and no other file of it", () => {
+    const client = workspace(
+      "inrupt-client",
       {
-        "src/client/linearDataset.ts": 'import { Parser } from "n3";',
-        "src/client/resources.ts": 'import { Parser } from "n3";',
-        "src/client/resources.test.ts": 'import { Parser } from "n3";',
+        "src/linearDataset.ts": 'import { Parser } from "n3";',
+        "src/resources.ts": 'import { Parser } from "n3";',
+        "src/resources.test.ts": 'import { Parser } from "n3";',
       },
       { n3: "*" },
     );
-    expect(boundaryProblems([solid], TOOLING)).toEqual([
-      'packages/solid/src/client/resources.ts: runs in the browser, so may not import "n3".',
+    expect(boundaryProblems([client], TOOLING)).toEqual([
+      'packages/inrupt-client/src/resources.ts: runs in the browser, so may not import "n3".',
     ]);
   });
 
-  it("fails on any @inrupt/ package in solid-memo-client, its tests too, once an import", () => {
+  it("fails on any @inrupt/ package in solid-memo-client and the seam, their tests too, once an import", () => {
     const client = workspace(
       "solid-memo-client",
       {
@@ -394,19 +405,25 @@ describe("boundaryProblems", () => {
       },
       { "@inrupt/solid-client": "*", "@inrupt/solid-client-authn-browser": "*" },
     );
-    expect(problems(client)).toEqual([
+    const seam = workspace(
+      "solid-client",
+      { "src/interface.ts": 'import type { Thing } from "@inrupt/solid-client";' },
+      { "@inrupt/solid-client": "*" },
+    );
+    expect([...problems(client), ...problems(seam)]).toEqual([
       'packages/solid-memo-client/src/rdf.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
       'packages/solid-memo-client/src/rdf.test.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client-authn-browser".',
       'packages/solid-memo-client/src/access.ts: @solid-memo/solid-memo-client may not import "@inrupt/solid-client".',
+      'packages/solid-client/src/interface.ts: @solid-memo/solid-client may not import "@inrupt/solid-client".',
     ]);
   });
 
   it("fails on access control imported from @inrupt/solid-client outside the public-read grant", () => {
-    const solid = workspace(
-      "solid",
+    const client = workspace(
+      "inrupt-client",
       {
-        "src/client/access.ts": 'import { universalAccess } from "@inrupt/solid-client";',
-        "src/client/pod.ts": [
+        "src/access.ts": 'import { universalAccess } from "@inrupt/solid-client";',
+        "src/pod.ts": [
           "import {",
           "  getSolidDataset,",
           "  type AclDataset,",
@@ -414,48 +431,52 @@ describe("boundaryProblems", () => {
           '} from "@inrupt/solid-client";',
           'import * as solid from "@inrupt/solid-client/universal";',
         ].join("\n"),
-        "src/client/pod.test.ts": 'import { universalAccess } from "@inrupt/solid-client";',
+        "src/pod.test.ts": 'import { universalAccess } from "@inrupt/solid-client";',
       },
       { "@inrupt/solid-client": "*" },
     );
-    expect(problems(solid)).toEqual([
-      "packages/solid/src/client/pod.ts: may not import AclDataset from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
-      "packages/solid/src/client/pod.ts: may not import universalAccess from @inrupt/solid-client: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
-      "packages/solid/src/client/pod.ts: may not import everything from @inrupt/solid-client/universal: only solid files matching /^src\\/client\\/access\\.ts$/ may.",
+    expect(problems(client)).toEqual([
+      "packages/inrupt-client/src/pod.ts: may not import AclDataset from @inrupt/solid-client: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
+      "packages/inrupt-client/src/pod.ts: may not import universalAccess from @inrupt/solid-client: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
+      "packages/inrupt-client/src/pod.ts: may not import everything from @inrupt/solid-client/universal: only inrupt-client files matching /^src\\/access\\.ts$/ may.",
     ]);
   });
 });
 
 describe("the raw getters of the RDF module", () => {
-  it("fail outside records.ts, the client modules and the shape check, tests aside", () => {
-    const solid = workspace("solid", {
-      "src/records.ts": 'import { getUrlAll, eachUrl } from "./client/rdf";',
-      "src/client/resources.ts": 'import { getUrlAll } from "./rdf";',
-      "src/shaclShapeValidator.ts": 'import { getUrlAll } from "./client/rdf";',
-      "src/mappers/deckMapper.ts": [
-        "import {",
-        "  getThing,",
-        "  getUrlAll,",
-        "  type Subject,",
-        "  getStringNoLocale as text,",
-        '} from "../client/rdf";',
-        'import { hasClass } from "../records";',
-      ].join("\n"),
-      "src/ownership.ts": 'import * as rdf from "./client/rdf.ts";',
-      "src/typeIndex.ts": 'import { eachUrl, propertiesOf, getPropertyAll } from "./client/rdf";',
-      "src/other.ts": 'import { getUrlAll } from "./other/rdf";',
-      "src/mappers/deckMapper.test.ts": 'import { getUrlAll } from "../client/rdf";',
-      "src/testing/datasets.ts": 'import { eachStringNoLocale } from "../client/rdf";',
-    });
+  it("fail outside records.ts and the shape check, tests aside", () => {
+    const rdf = "@solid-memo/solid-client/rdf";
+    const solid = workspace(
+      "solid",
+      {
+        "src/records.ts": `import { getUrlAll, eachUrl } from "${rdf}";`,
+        "src/shaclShapeValidator.ts": `import { getUrlAll } from "${rdf}";`,
+        "src/mappers/deckMapper.ts": [
+          "import {",
+          "  getThing,",
+          "  getUrlAll,",
+          "  type Subject,",
+          "  getStringNoLocale as text,",
+          `} from "${rdf}";`,
+          'import { hasClass } from "../records";',
+        ].join("\n"),
+        "src/ownership.ts": `import * as rdf from "${rdf}.ts";`,
+        "src/typeIndex.ts": `import { eachUrl, propertiesOf, getPropertyAll } from "${rdf}";`,
+        "src/other.ts": 'import { getUrlAll } from "./other/rdf";',
+        "src/mappers/deckMapper.test.ts": `import { getUrlAll } from "${rdf}";`,
+        "src/testing/datasets.ts": `import { eachStringNoLocale } from "${rdf}";`,
+      },
+      { "@solid-memo/solid-client": "*" },
+    );
     const only =
-      "(only solid files matching /^src\\/(records\\.ts|client\\/.*|shaclShapeValidator\\.ts)$/ may).";
+      "(only solid files matching /^src\\/(records\\.ts|shaclShapeValidator\\.ts)$/ may).";
     expect(problems(solid)).toEqual([
-      `packages/solid/src/mappers/deckMapper.ts: may not import getUrlAll from ../client/rdf: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/mappers/deckMapper.ts: may not import getStringNoLocale from ../client/rdf: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/ownership.ts: may not import everything from ./client/rdf.ts: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/typeIndex.ts: may not import eachUrl from ./client/rdf: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/typeIndex.ts: may not import propertiesOf from ./client/rdf: read pod data through records.ts, within its bounds ${only}`,
-      `packages/solid/src/typeIndex.ts: may not import getPropertyAll from ./client/rdf: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/mappers/deckMapper.ts: may not import getUrlAll from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/mappers/deckMapper.ts: may not import getStringNoLocale from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/ownership.ts: may not import everything from ${rdf}.ts: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/typeIndex.ts: may not import eachUrl from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/typeIndex.ts: may not import propertiesOf from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
+      `packages/solid/src/typeIndex.ts: may not import getPropertyAll from ${rdf}: read pod data through records.ts, within its bounds ${only}`,
     ]);
   });
 });

@@ -19,8 +19,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { growth } from "@solid-memo/domain/testing/growth";
-import { datasetFromQuads } from "./client/rdf";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { datasetFromQuads } from "@solid-memo/solid-client/rdf";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import { toDecks } from "./mappers/deckMapper";
 import { Parser } from "n3";
 

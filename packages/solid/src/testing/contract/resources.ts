@@ -10,7 +10,7 @@ import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { JsonLdParser } from "jsonld-streaming-parser";
 import { describe, expect, it, vi } from "vitest";
-import { type Dataset, HttpError, ReadLimitError } from "../../client/interface";
+import { type Dataset, HttpError, ReadLimitError } from "@solid-memo/solid-client/interface";
 import {
   limitedFetch,
   MAX_TERM_CHARACTERS,
@@ -18,8 +18,8 @@ import {
   NO_SIZE_LIMITS,
   noneSpent,
   RELEASE_LIMITS,
-} from "../../client/readLimits";
-import { MAX_PATCH_BYTES, patchBody } from "../../client/sparqlUpdate";
+} from "@solid-memo/solid-client/readLimits";
+import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid-client/sparqlUpdate";
 import { decimalLiteral } from "../literals";
 import { type DataClient, turtleAt } from "./rdf";
 
@@ -871,6 +871,44 @@ export function resourcesContract({ rdf, resources }: DataClient): void {
       expect(String(sent[1]!.body)).toContain(`"1"^^<${XSD}decimal>`);
     });
 
+    it("writes an edit of a blank node, which the app's own body cannot name, as one PATCH of the library's", async () => {
+      const dataset = await read(`<#a> <${EX}note> _:b1 .\n_:b1 <${EX}text> "x" .`);
+      const edited = setThing(
+        dataset,
+        buildThing(getThing(dataset, `${URL_}#a`)!)
+          .removeAll(`${EX}note`)
+          .build(),
+      );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      await writeDocument(URL_, edited, { fetch });
+      // The library writes no deletion of a blank node it holds; nothing else changed.
+      expect(sent.map(({ method, body }) => [method, typeof body])).toEqual([["PATCH", "string"]]);
+    });
+
+    it("writes a document read and not changed as one PATCH of nothing but white space", async () => {
+      const dataset = await read(`<#a> <${EX}p> "x" .`);
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      await writeDocument(URL_, dataset, { fetch });
+      expect(sent.map(({ method, body }) => [method, String(body ?? "").trim()])).toEqual([
+        ["PATCH", ""],
+      ]);
+    });
+
+    it("gives a PATCH refused as a conflict as it is when it deletes no decimal to spell otherwise, sent once", async () => {
+      const dataset = await read(`<#a> <${EX}p> "old" .`);
+      const edited = setThing(
+        dataset,
+        buildThing(getThing(dataset, `${URL_}#a`)!)
+          .removeAll(`${EX}p`)
+          .build(),
+      );
+      const { fetch, sent } = pod({ status: 409, body: "" });
+      await expect(writeDocument(URL_, edited, { fetch })).rejects.toMatchObject({
+        statusCode: 409,
+      });
+      expect(sent.map(({ method }) => method)).toEqual(["PATCH"]);
+    });
+
     it("writes an edit too large for one PATCH, or one asked to be whole, as one PUT of the document, If-Match", async () => {
       // Texts no longer than a term may be, together past a PATCH.
       const texts = Array.from({ length: 8 }, (_, at) => `${at}`.repeat(MAX_PATCH_BYTES / 8));
@@ -1154,6 +1192,28 @@ _:shared ex:p "shared" .
         "https://alice.example/settings/c",
         "https://alice.example/settings/missing",
       ]);
+    });
+  });
+
+  describe("getProfileStorages, of a WebID its documents say nothing of", () => {
+    it("finds none, in the WebID document or in one it names as more of the profile", async () => {
+      const card = "https://alice.example/profile/card";
+      const webId = `${card}#me`;
+      const documents: Record<string, string> = {
+        [card]: `<https://alice.example/settings/a> <http://xmlns.com/foaf/0.1/primaryTopic> <#someone> .`,
+        "https://alice.example/settings/a": `<#nobody> <${EX}p> "x" .`,
+      };
+      const fetch: typeof globalThis.fetch = async (input) => {
+        const url = String(input);
+        const response = new Response(documents[url] ?? "", {
+          status: url in documents ? 200 : 404,
+          headers: { "Content-Type": "text/turtle" },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      };
+      const webIdProfile = await getSolidDataset(card, { fetch });
+      await expect(getProfileStorages(webId, { fetch, webIdProfile })).resolves.toEqual([]);
     });
   });
 

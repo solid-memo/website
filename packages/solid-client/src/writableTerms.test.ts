@@ -8,8 +8,13 @@ import { renamedCatalog } from "@solid-memo/domain/catalog";
 import { deckGroupToRecord } from "@solid-memo/domain/deckGroupRecord";
 import type { LangText } from "@solid-memo/domain/langText";
 import { attributionText, checkActivityTriples } from "@solid-memo/domain/release/releaseDraft";
-import { MAX_TERM_CHARACTERS, termKeyLength } from "./client/readLimits";
-import { refuseUnwritable, unwritableTermOf } from "./writableTerms";
+import { MAX_TERM_CHARACTERS, termKeyLength } from "./readLimits";
+import {
+  isPrefixedLookalike,
+  refusePrefixedLookalikes,
+  refuseUnwritable,
+  unwritableTermOf,
+} from "./writableTerms";
 
 const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
 const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
@@ -210,5 +215,33 @@ describe("a default description the app writes for a name as long as a term (GHS
         }
       }
     }
+  });
+});
+
+describe("isPrefixedLookalike", () => {
+  const prefixes = { sm: "https://solid-memo.com/ns/vocab/v1.ttl#" };
+
+  it("is an IRI whose scheme is a prefix, the blank node prefix or a JSON-LD keyword", () => {
+    expect(isPrefixedLookalike("sm:Deck", prefixes)).toBe(true);
+    expect(isPrefixedLookalike("_:b0", prefixes)).toBe(true);
+    expect(isPrefixedLookalike("@id", prefixes)).toBe(true);
+    expect(isPrefixedLookalike("https://pod.example/d", prefixes)).toBe(false);
+    expect(isPrefixedLookalike("toString:x", prefixes)).toBe(false);
+  });
+});
+
+describe("refusePrefixedLookalikes", () => {
+  const prefixes = { sm: "https://solid-memo.com/ns/vocab/v1.ttl#" };
+
+  it("throws unwritableTerm naming the first IRI a file would read as another term, datatypes too", () => {
+    expect(() => refusePrefixedLookalikes([quad(named("sm:x"))], prefixes)).toThrow(
+      expect.objectContaining({ code: "unwritableTerm" }),
+    );
+    expect(() => refusePrefixedLookalikes([quad(literal("1", "", "sm:type"))], prefixes)).toThrow(
+      expect.objectContaining({ code: "unwritableTerm" }),
+    );
+    expect(() =>
+      refusePrefixedLookalikes([quad(named("https://pod.example/o"))], prefixes),
+    ).not.toThrow();
   });
 });

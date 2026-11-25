@@ -18,8 +18,8 @@ import type {
   Quad_Subject,
 } from "@rdfjs/types";
 import { DataFactory, Parser as N3Parser, type ParserOptions, Store } from "n3";
-import { ReadLimitError, type ReadLimits } from "./interface";
-import { withBoundedHeaders } from "./linkHeader";
+import { ReadLimitError, type ReadLimits } from "@solid-memo/solid-client/interface";
+import { withBoundedHeaders } from "@solid-memo/solid-client/linkHeader";
 import {
   blankNodeNamer,
   limitsOf,
@@ -32,7 +32,7 @@ import {
   refusalOf,
   type TextStream,
   writeTurtle,
-} from "./readLimits";
+} from "@solid-memo/solid-client/readLimits";
 
 type Graphs = SolidDataset["graphs"];
 type Graph = Graphs["default"];

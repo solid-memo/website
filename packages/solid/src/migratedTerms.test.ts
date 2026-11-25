@@ -13,7 +13,7 @@
 import { describe, expect, it } from "vitest";
 import { agentUrlOf } from "@solid-memo/domain/agentRecord";
 import { importedDeck } from "@solid-memo/domain/deckFile";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import { toDeck } from "./mappers/deckMapper";
 import {
   toLibraryDeckContent,
@@ -23,7 +23,7 @@ import {
 import { createSolidDeckArchive } from "./solidDeckArchive";
 import { datasetOfTurtle } from "./testing/datasets";
 import { INSTANCE, SM, put, read, repositoryInPod } from "./testing/deckWrites";
-import { buildThing, createThing, getThing, setThing } from "./client/rdf";
+import { buildThing, createThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
 import { datasetFrom } from "./testing/datasets";
 import { integerLiteral } from "./testing/literals";
 import { DCTERMS, RDF } from "./vocab";

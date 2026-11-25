@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ReadLimits } from "./client/interface";
-import { limitedFetch } from "./client/readLimits";
+import type { ReadLimits } from "@solid-memo/solid-client/interface";
+import { limitedFetch } from "@solid-memo/solid-client/readLimits";
 import { ensureTrailingSlash } from "./urls";
 
 /**

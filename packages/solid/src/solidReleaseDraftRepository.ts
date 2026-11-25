@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getContainedResourceUrlAll, getSolidDataset } from "./client/resources";
+import { getContainedResourceUrlAll, getSolidDataset } from "@solid-memo/solid-client/resources";
 import {
   type Dataset,
   type FetchedDataset,
@@ -15,7 +15,7 @@ import {
   isEmptyDataset,
   setThing,
   withQuads,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
 import { mapAtOnce } from "@solid-memo/application/atOnce";
@@ -80,11 +80,11 @@ import {
   storedVersionOf,
   unlessNewer,
 } from "./records";
-import { limitedFetch, pathKeys, RELEASE_LIMITS } from "./client/readLimits";
+import { limitedFetch, pathKeys, RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { releaseReadError } from "./releaseReadError";
 import { DECK_FILE_PREFIXES, parseDeckFile } from "./solidDeckArchive";
-import { refusePrefixedLookalikes, refuseUnwritable } from "./writableTerms";
-import { turtleOf } from "./turtleWriter";
+import { refusePrefixedLookalikes, refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
+import { turtleOf } from "@solid-memo/solid-client/turtleWriter";
 import { SM } from "./vocab";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 

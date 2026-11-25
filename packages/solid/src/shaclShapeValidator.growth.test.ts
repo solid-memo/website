@@ -12,9 +12,9 @@
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { expect, it, vi } from "vitest";
-import type { Dataset } from "./client/rdf";
-import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
-import { getSolidDatasetLinear } from "./client/resources";
+import type { Dataset } from "@solid-memo/solid-client/rdf";
+import { limitedFetch, RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { SM_NS } from "./vocab";
 

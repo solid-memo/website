@@ -6,11 +6,16 @@ import type { DeckArchive, ReleaseDraftRepository } from "@solid-memo/applicatio
 import { AppError } from "@solid-memo/domain/appError";
 import { type DocumentReport, unreadableDocument } from "@solid-memo/domain/validation";
 import type { DraftTriple } from "@solid-memo/domain/release/releaseDraft";
-import { ReadLimitError } from "./client/interface";
-import { datasetAt, withQuads } from "./client/rdf";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import { datasetAt, withQuads } from "@solid-memo/solid-client/rdf";
 import type { DocumentReader } from "./datasets";
 import { quadOf } from "./mappers/releaseDraftMapper";
-import { FOREIGN_LIMITS, limitedFetch, limitVars, RELEASE_LIMITS } from "./client/readLimits";
+import {
+  FOREIGN_LIMITS,
+  limitedFetch,
+  limitVars,
+  RELEASE_LIMITS,
+} from "@solid-memo/solid-client/readLimits";
 import { OFF_PAGE_DEADLINE_MS, type OffPage } from "./offPage";
 import { releaseReadError } from "./releaseReadError";
 import type { ShaclShapeValidator } from "./shaclShapeValidator";

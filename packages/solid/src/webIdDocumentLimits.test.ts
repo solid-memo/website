@@ -11,9 +11,9 @@
  * pod in memory, through the swappable client.
  */
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ReadLimitError } from "./client/interface";
-import { PROFILE_LIMITS } from "./client/readLimits";
-import { getProfileStorages } from "./client/resources";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import { PROFILE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidSessionGateway } from "./solidSessionGateway";
 import { createSolidStorageGateway } from "./solidStorageGateway";

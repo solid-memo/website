@@ -16,7 +16,7 @@ import {
   type ReadLimits,
   type RequestOptions,
   type SourcedDataset,
-} from "@solid-memo/solid/client/interface";
+} from "@solid-memo/solid-client/interface";
 import {
   type BlankLabels,
   blankNodeNamer,
@@ -30,10 +30,10 @@ import {
   type TextStream,
   textChunks,
   writeTurtle,
-} from "@solid-memo/solid/client/readLimits";
-import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid/client/sparqlUpdate";
-import { turtleOf } from "@solid-memo/solid/turtleWriter";
-import { refuseUnwritable } from "@solid-memo/solid/writableTerms";
+} from "@solid-memo/solid-client/readLimits";
+import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid-client/sparqlUpdate";
+import { turtleOf } from "@solid-memo/solid-client/turtleWriter";
+import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
 import {
   allQuads,
   clientDataset,

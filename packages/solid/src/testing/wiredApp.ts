@@ -8,7 +8,7 @@ import { createUseCases, type UseCases } from "@solid-memo/application/useCases"
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { ResourceStore } from "@solid-memo/application/ports/device";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
-import { getProfileStorages } from "../client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createLocalGuestPod } from "../localGuestPod";
 import { createLocalPod } from "../localPod";
 import { createMemoryResourceStore } from "../memoryResourceStore";

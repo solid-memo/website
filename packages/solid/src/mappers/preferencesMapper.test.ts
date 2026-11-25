@@ -10,7 +10,7 @@ import {
   getInteger,
   getStringNoLocale,
   getUrl,
-} from "../client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import { toPreferences, toPreferencesThing } from "./preferencesMapper";
 import { RDF, SM } from "../vocab";
 import { decimalLiteral, integerLiteral } from "../testing/literals";

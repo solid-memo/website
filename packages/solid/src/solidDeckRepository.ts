@@ -11,7 +11,7 @@ import {
   createSolidDataset,
   getThing,
   setThing,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { Catalog } from "@solid-memo/domain/catalog";
 import type { LangText } from "@solid-memo/domain/langText";
 import { copyKeywords, noKeywords, type LangTexts } from "@solid-memo/domain/keywords";

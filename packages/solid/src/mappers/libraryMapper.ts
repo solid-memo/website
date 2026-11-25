@@ -3,7 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad_Object } from "@rdfjs/types";
-import { type Dataset, type Subject, asUrl, getThing, getThingAll } from "../client/rdf";
+import {
+  type Dataset,
+  type Subject,
+  asUrl,
+  getThing,
+  getThingAll,
+} from "@solid-memo/solid-client/rdf";
 import { directionOfConcept } from "@solid-memo/domain/concepts";
 import { copyKeywords } from "@solid-memo/domain/keywords";
 import { libraryCardFromRecord, libraryDeckFromRecord } from "@solid-memo/domain/deckRecord";

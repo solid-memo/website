@@ -13,7 +13,7 @@
  */
 import { expect, it } from "vitest";
 import { growthAfterSetup } from "@solid-memo/domain/testing/growth";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 

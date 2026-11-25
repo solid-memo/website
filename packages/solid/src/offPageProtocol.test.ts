@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
-import { HttpError, ReadLimitError } from "./client/interface";
-import { RELEASE_LIMITS } from "./client/readLimits";
+import { HttpError, ReadLimitError } from "@solid-memo/solid-client/interface";
+import { RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { frozenPaths, fromSent, refreeze, toSent } from "./offPageProtocol";
 
 /** The error as the other side of the channel makes it again. */

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DocumentRead, DocumentWrite } from "../client/interface";
+import type { DocumentRead, DocumentWrite } from "@solid-memo/solid-client/interface";
 import {
   type Dataset,
   datasetAt,
@@ -11,8 +11,8 @@ import {
   eachStringNoLocale,
   type Subject,
   withQuads,
-} from "../client/rdf";
-import { parseQuads } from "../client/resources";
+} from "@solid-memo/solid-client/rdf";
+import { parseQuads } from "@solid-memo/solid-client/resources";
 
 /**
  * Datasets for tests, as a pod gives them: read from a document, so that

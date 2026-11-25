@@ -5,8 +5,8 @@
 import type { Quad } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
 import { growth } from "@solid-memo/domain/testing/growth";
-import type * as Rdf from "../../client/rdf";
-import type * as Resources from "../../client/resources";
+import type * as Rdf from "@solid-memo/solid-client/rdf";
+import type * as Resources from "@solid-memo/solid-client/resources";
 import { integerLiteral } from "../literals";
 
 /**
@@ -79,6 +79,7 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     eachUrl,
     fromRdfJsDataset,
     getDatetime,
+    getBoolean,
     getDecimal,
     getLiteralAll,
     getPropertyAll,
@@ -87,11 +88,13 @@ export function rdfContract({ rdf, resources }: DataClient): void {
     getTermAll,
     getThing,
     getThingAll,
+    getUrl,
     getUrlAll,
     isEmptyDataset,
     localNameOf,
     propertiesOf,
     removeThings,
+    removeUrl,
     setThing,
     setThings,
     sourceOf,
@@ -230,6 +233,32 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       expect(decimal("2.50")).toBe(2.5);
       expect(decimal("1.0")).toBe(1);
       expect(decimal("abc")).toBeNull();
+    });
+  });
+
+  describe("the builder's one-value setters, and the getters of one value", () => {
+    it("set a property to one value, remove one IRI, and read one value back, null for none", () => {
+      const subject = buildThing(createThing())
+        .addUrl(`${EX}p`, `${EX}a`)
+        .addUrl(`${EX}p`, `${EX}b`)
+        .setIri(`${EX}p`, `${EX}c`)
+        .addBoolean(`${EX}flag`, true)
+        .setInteger(`${EX}n`, 1)
+        .setInteger(`${EX}n`, 2)
+        .setStringNoLocale(`${EX}s`, "x")
+        .setStringNoLocale(`${EX}s`, "y")
+        .addUrl(`${EX}r`, `${EX}r1`)
+        .addUrl(`${EX}r`, `${EX}r2`)
+        .removeUrl(`${EX}r`, `${EX}r1`)
+        .build();
+      expect(getUrlAll(subject, `${EX}p`)).toEqual([`${EX}c`]);
+      expect(getBoolean(subject, `${EX}flag`)).toBe(true);
+      expect(getInteger(subject, `${EX}n`)).toBe(2);
+      expect(getStringNoLocale(subject, `${EX}s`)).toBe("y");
+      expect(getUrl(subject, `${EX}r`)).toBe(`${EX}r2`);
+      expect(getUrl(subject, `${EX}none`)).toBeNull();
+      expect(getBoolean(subject, `${EX}none`)).toBeNull();
+      expect(getUrlAll(removeUrl(subject, `${EX}r`, `${EX}r2`), `${EX}r`)).toEqual([]);
     });
   });
 
@@ -431,6 +460,29 @@ export function rdfContract({ rdf, resources }: DataClient): void {
       expect(getStringNoLocale(added, `${EX}other`)).toBe("kept");
       expect(getPropertyAll(added)).not.toContain(`${EX}none`);
       expect(() => buildThing(subject).addAll(new Map([[P, [iri("not a URL")]]]))).toThrow();
+    });
+
+    it("add IRIs alone to a property that has no literal", () => {
+      const added = buildThing(createThing({ url: `${URL_}#a` }))
+        .addAll(new Map([[`${EX}see`, [{ termType: "NamedNode", value: `${EX}x` } as never]]]))
+        .build();
+      expect(getUrlAll(added, `${EX}see`)).toEqual([`${EX}x`]);
+      expect(getLiteralAll(added, `${EX}see`)).toEqual([]);
+    });
+
+    it("keep a blank node the property names by its label", async () => {
+      const subject = getThing(
+        await read(`@prefix ex: <${EX}> .\n<#a> ex:note _:b1 .\n_:b1 ex:text "blank" .\n`),
+        `${URL_}#a`,
+      )!;
+      const added = buildThing(subject)
+        .addAll(new Map([[`${EX}note`, [literal("more")]]]))
+        .build();
+      expect(
+        getTermAll(added, `${EX}note`)
+          .map((term) => term.termType)
+          .sort(),
+      ).toEqual(["BlankNode", "Literal"]);
     });
 
     it("keep a blank node the property has", async () => {

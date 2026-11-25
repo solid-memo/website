@@ -7,7 +7,7 @@ import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { PreconditionFailedError, removeOwned, withOnlyTheirBlankNodes } from "./datasets";
-import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
+import { MAX_PATCH_BYTES } from "@solid-memo/solid-client/sparqlUpdate";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 import { subjectsOfClasses } from "./ownership";

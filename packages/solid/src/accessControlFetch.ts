@@ -2,8 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ReadLimits } from "./client/interface";
-import { ACCESS_CONTROL_LIMITS, limitedFetch } from "./client/readLimits";
+import type { ReadLimits } from "@solid-memo/solid-client/interface";
+import { ACCESS_CONTROL_LIMITS, limitedFetch } from "@solid-memo/solid-client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
 
 /**

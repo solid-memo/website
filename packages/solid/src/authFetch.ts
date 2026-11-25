@@ -4,7 +4,7 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { isInFolder } from "@solid-memo/domain/instanceLayout";
-import type { SessionClient } from "./client/session";
+import type { SessionClient } from "@solid-memo/solid-client/session";
 
 /** Window event dispatched once the user's session expired (createAuthFetch says when). */
 export const SESSION_EXPIRED_EVENT = "solid-memo:session-expired";

@@ -8,7 +8,7 @@ import {
   createSolidDataset,
   removeThings,
   setThings,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { DigestRepository } from "@solid-memo/application/ports/pod";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
 import {
@@ -18,7 +18,7 @@ import {
   type InstanceDigest,
 } from "@solid-memo/domain/studyDigest";
 import { AppError } from "@solid-memo/domain/appError";
-import { HttpError } from "./client/interface";
+import { HttpError } from "@solid-memo/solid-client/interface";
 import { editDocument, getSolidDatasetOrNull, PreconditionFailedError } from "./datasets";
 import {
   type DigestSubjects,

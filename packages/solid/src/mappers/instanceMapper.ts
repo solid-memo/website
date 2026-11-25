@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
+import { type NamedSubject, type Subject, asUrl } from "@solid-memo/solid-client/rdf";
 import type { Instance, InstanceMeta } from "@solid-memo/domain/instance";
 import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import { instanceMetaFromRecord, instanceMetaToRecord } from "@solid-memo/domain/instanceRecord";

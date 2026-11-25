@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad, Term } from "@rdfjs/types";
-import { directionOf } from "./client/sparqlUpdate";
+import { directionOf } from "./sparqlUpdate";
 import { refuseUnwritable } from "./writableTerms";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";

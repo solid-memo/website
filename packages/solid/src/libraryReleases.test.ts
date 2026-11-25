@@ -5,11 +5,17 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { type Dataset, getBoolean, getThingAll, getUrlAll, type Subject } from "./client/rdf";
+import {
+  type Dataset,
+  getBoolean,
+  getThingAll,
+  getUrlAll,
+  type Subject,
+} from "@solid-memo/solid-client/rdf";
 import { parseAuthor } from "@solid-memo/domain/author";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
-import { getSolidDatasetLinear } from "./client/resources";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 import { RDF, SM } from "./vocab";
 

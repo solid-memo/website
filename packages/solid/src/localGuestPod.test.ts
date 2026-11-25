@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { getStringNoLocale, getThing, getUrl } from "./client/rdf";
+import { getStringNoLocale, getThing, getUrl } from "@solid-memo/solid-client/rdf";
 import { GUEST_ORIGIN, GUEST_WEBID } from "@solid-memo/domain/guest";
 import { readDataset } from "./datasets";
 import { createLocalGuestPod } from "./localGuestPod";

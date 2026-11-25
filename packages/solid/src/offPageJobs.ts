@@ -5,8 +5,8 @@
 import type { DocumentContext } from "@solid-memo/application/ports/checks";
 import type { DeckFileFormat } from "@solid-memo/domain/deckFile";
 import type { DraftTriple, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
-import { sourceOf } from "./client/rdf";
-import { readDocument } from "./client/resources";
+import { sourceOf } from "@solid-memo/solid-client/rdf";
+import { readDocument } from "@solid-memo/solid-client/resources";
 import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import type { JobEnv, Jobs } from "./offPageServe";
 import { createShaclShapeValidator, type ShaclShapeValidator } from "./shaclShapeValidator";

@@ -15,7 +15,7 @@ import {
   getUrlAll,
   setThing,
   createThing,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";

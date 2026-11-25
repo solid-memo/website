@@ -17,7 +17,7 @@ import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/sh
 import type { LibraryCard, LibraryDeckContent } from "@solid-memo/domain/library";
 import { deleteDistractor } from "@solid-memo/domain/distractors";
 import { planLibraryUpgrade, upgradedCards } from "@solid-memo/domain/libraryUpgrade";
-import { buildThing, createThing, getThing, setThing } from "./client/rdf";
+import { buildThing, createThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";

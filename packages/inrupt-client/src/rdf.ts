@@ -46,7 +46,7 @@ import type {
   Source,
   Subject,
   SubjectBuilder,
-} from "./interface";
+} from "@solid-memo/solid-client/interface";
 import {
   blankNodesOf,
   graphsOf,
@@ -55,7 +55,7 @@ import {
   quadsOfGraphs,
   rdfJsDatasetOf,
 } from "./linearDataset";
-import { pathKeys } from "./readLimits";
+import { pathKeys } from "@solid-memo/solid-client/readLimits";
 
 /**
  * The app's RDF data model: datasets of subjects, read and built with the
@@ -103,7 +103,7 @@ export type {
   SourcedDataset,
   Subject,
   SubjectBuilder,
-} from "./interface";
+} from "@solid-memo/solid-client/interface";
 
 /**
  * The changes made to a dataset, as setThings and removeThings record

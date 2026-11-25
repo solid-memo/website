@@ -3,8 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
-import { readDocument } from "./client/resources";
+import {
+  buildThing,
+  createSolidDataset,
+  createThing,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
+import { readDocument } from "@solid-memo/solid-client/resources";
 import {
   deleteDataset,
   getSolidDatasetOrNull,

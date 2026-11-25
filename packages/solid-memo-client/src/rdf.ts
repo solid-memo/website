@@ -14,7 +14,7 @@ import type {
   Source,
   Subject,
   SubjectBuilder,
-} from "@solid-memo/solid/client/interface";
+} from "@solid-memo/solid-client/interface";
 import {
   allQuads,
   clientDataset,
@@ -57,7 +57,7 @@ export type {
   SourcedDataset,
   Subject,
   SubjectBuilder,
-} from "@solid-memo/solid/client/interface";
+} from "@solid-memo/solid-client/interface";
 
 const { literal, namedNode } = DataFactory;
 

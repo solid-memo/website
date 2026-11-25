@@ -354,7 +354,7 @@ is the ports' side in the page, which the composition root wires in
   `If-None-Match`, `If-Modified-Since`, `Range`): a login, a cookie or a
   proof is its own fetch's to add.
 - **The read limits hold.** The page reads a body under the limits of
-  its read ([readLimits.ts](../packages/solid/src/client/readLimits.ts)),
+  its read ([readLimits.ts](../packages/solid-client/src/readLimits.ts)),
   and the worker parses it under them, counting on from what the page
   had spent. What the parse counts goes back into the page's tally
   before the job's result does. A parse past a budget the page's reads
@@ -607,7 +607,7 @@ its [receipt](#flow). Only the developer report shows its results. A subject ano
 Solid Memo class is held to that class's shape.
 
 The Solid client keeps some IRIs for subjects it hasn't saved yet
-([`LOCAL_NODE`](../packages/solid/src/client/linearDataset.ts)), so a
+([`LOCAL_NODE`](../packages/inrupt-client/src/linearDataset.ts)), so a
 document can't state one as data: its subject would have no URL to
 report. A read leaves out any statement that names such an IRI, so
 the check, the deck writes and every other reader never see it. The

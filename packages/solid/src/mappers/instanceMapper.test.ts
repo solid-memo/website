@@ -3,7 +3,12 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createThing, getInteger, getStringNoLocale } from "../client/rdf";
+import {
+  buildThing,
+  createThing,
+  getInteger,
+  getStringNoLocale,
+} from "@solid-memo/solid-client/rdf";
 import { toInstance, toInstanceMeta, toInstanceMetaThing } from "./instanceMapper";
 import { datetimeLiteral } from "../records";
 import { DCTERMS, RDF, SM } from "../vocab";

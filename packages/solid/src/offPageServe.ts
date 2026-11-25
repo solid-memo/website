@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ReadBudget } from "@solid-memo/application/ports/checks";
-import { limitedFetch, type ReadsSpent } from "./client/readLimits";
+import { limitedFetch, type ReadsSpent } from "@solid-memo/solid-client/readLimits";
 import {
   frozenPaths,
   fromSent,

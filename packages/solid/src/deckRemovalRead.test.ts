@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { limitedFetch } from "./client/readLimits";
+import { limitedFetch } from "@solid-memo/solid-client/readLimits";
 import { readForRemoval, UNREADABLE } from "./datasets";
 import { deleteInstanceData } from "./instanceData";
 import { createLocalPod } from "./localPod";

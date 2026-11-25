@@ -208,12 +208,12 @@ export function isTest(dir: string, file: string): boolean {
 
 /**
  * The exports nothing but tests uses, as `<file>: <name>` lines from the
- * root. `replacements` names, by module, the one that replaces it in some
+ * root. `replacements` pairs a module with one that replaces it in some
  * builds, whose exports are used where the module's are.
  */
 export function unusedExports(
   packages: readonly Package[],
-  replacements: Record<string, string> = {},
+  replacements: readonly (readonly [string, string])[] = [],
 ): string[] {
   const sources = new Map<string, string>();
   const tests = new Set<string>();
@@ -250,7 +250,7 @@ export function unusedExports(
       if (target !== null) use(target, names);
     }
   }
-  for (const [module, replacement] of Object.entries(replacements)) {
+  for (const [module, replacement] of replacements) {
     const imported = used.get(module);
     if (imported !== undefined) use(replacement, imported === "*" ? "*" : [...imported]);
   }

@@ -13,7 +13,7 @@ import {
   getUrlAll,
   propertiesOf,
   toRdfJsDataset,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { DatasetCore, Quad } from "@rdfjs/types";
 import type {
   DocumentContext,
@@ -34,7 +34,7 @@ import {
 import { instanceUrlOfDeck, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { isDeckDocumentAddress } from "@solid-memo/domain/deckAddress";
 import { documentUrlOf, isSameDocument } from "@solid-memo/domain/subjectUrl";
-import { boundedHeadersFetch } from "./client/linkHeader";
+import { boundedHeadersFetch } from "@solid-memo/solid-client/linkHeader";
 import { jsonPath, PathMap } from "@solid-memo/domain/pathKeys";
 import { getSolidDatasetOrNull } from "./datasets";
 import { readSince } from "./readSince";
@@ -54,8 +54,8 @@ import { moved } from "@solid-memo/domain/release/releaseToDraft";
 import { ALL_SHAPES } from "@solid-memo/vocab/descriptors.generated";
 import { LATEST_VERSION, type ShapeName } from "@solid-memo/vocab/types.generated";
 import type { ProfileName } from "@solid-memo/shacl/profiles";
-import { getSolidDatasetLinear } from "./client/resources";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import { draftQuads, quadOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { releaseQuadsOf } from "./solidReleaseDraftRepository";
 

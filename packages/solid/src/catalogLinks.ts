@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type NamedSubject, buildThing, getThing, setThing } from "./client/rdf";
+import { type NamedSubject, buildThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
 import { AppError } from "@solid-memo/domain/appError";
 import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";

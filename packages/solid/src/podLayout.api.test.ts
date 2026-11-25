@@ -23,7 +23,7 @@ import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import { createSolidPaletteRepository } from "./solidPaletteRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { createSolidStorageGateway } from "./solidStorageGateway";
-import { getProfileStorages } from "./client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { fakePod } from "./testing/fakePod";
 import { locateTypeIndexes } from "./typeIndex";
 

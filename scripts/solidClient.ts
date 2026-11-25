@@ -5,68 +5,94 @@
 /**
  * The Solid client the build and the tests use, chosen by SOLID_CLIENT
  * when a config loads (vitest.shared.ts, apps/web/vite.config.ts,
- * e2e/pod/vitest.config.ts):
+ * e2e/pod/vitest.config.ts). The modules a client gives are declared,
+ * without a body, in packages/solid-client (DECLARED); every import of
+ * one resolves to the module of the same name in the client chosen:
  *
- * - unset, empty or `inrupt`: the modules over Inrupt's libraries
- *   (packages/solid/src/client/), the default; nothing is redirected;
- * - `solid-memo-client`: every import of a module that client replaces
- *   (REPLACEMENTS) resolves to its module of the same name in
- *   packages/solid-memo-client/src/, which uses no Inrupt library.
- *   Callers don't change, and the client's own imports are left alone;
+ * - unset, empty or `inrupt`: packages/inrupt-client/src/, on Inrupt's
+ *   libraries, the default;
+ * - `solid-memo-client`: packages/solid-memo-client/src/, on no Inrupt
+ *   library, which also takes the place of shacl's turtleDocument.ts;
  * - anything else: the config fails to load, naming the values above.
+ *
+ * Callers don't change, and neither client is imported by name.
  */
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 
-/** The values SOLID_CLIENT may take, the default first. */
-const SOLID_CLIENTS = ["inrupt", "solid-memo-client"] as const;
+/** The values SOLID_CLIENT may take, the default first, each with its client's package. */
+const SOLID_CLIENTS = {
+  inrupt: "inrupt-client",
+  "solid-memo-client": "solid-memo-client",
+} as const;
 
-/** Where solid-memo-client is, from the repository's root. */
-const CLIENT = "packages/solid-memo-client/";
+/** A Solid client's package, under packages/. */
+type SolidClient = (typeof SOLID_CLIENTS)[keyof typeof SOLID_CLIENTS];
+
+/** The modules a client gives, declared in packages/solid-client/src/, by name. */
+const DECLARED = ["rdf", "resources", "session", "access"] as const;
 
 /**
- * The modules solid-memo-client replaces, each by its module of the same
- * name, from the repository's root. Its exports are used where the
- * module it replaces is (scripts/checkExports.ts).
+ * The modules `client` puts in place, each by its module of the same
+ * name, from the repository's root: every declared one, and for
+ * solid-memo-client shacl's reader of Turtle too, which reads with
+ * Inrupt's library. Its exports are used where the module it replaces
+ * is (scripts/checkExports.ts).
  */
-export const REPLACEMENTS: Record<string, string> = Object.fromEntries(
-  [
-    "packages/solid/src/client/rdf.ts",
-    "packages/solid/src/client/resources.ts",
-    "packages/solid/src/client/session.ts",
-    "packages/solid/src/client/access.ts",
-    "packages/shacl/src/turtleDocument.ts",
-  ].map((module) => [module, `${CLIENT}src/${module.slice(module.lastIndexOf("/") + 1)}`]),
+function replacementsOf(client: SolidClient): Record<string, string> {
+  const own = `packages/${client}/src/`;
+  return Object.fromEntries([
+    ...DECLARED.map((name) => [`packages/solid-client/src/${name}.ts`, `${own}${name}.ts`]),
+    ...(client === "solid-memo-client"
+      ? [["packages/shacl/src/turtleDocument.ts", `${own}turtleDocument.ts`]]
+      : []),
+  ]);
+}
+
+/**
+ * Every module a client puts in place, with the one it replaces, for
+ * every client: their exports are used where the modules they replace
+ * are (scripts/checkExports.ts).
+ */
+export const REPLACEMENTS: [string, string][] = Object.values(SOLID_CLIENTS).flatMap((client) =>
+  Object.entries(replacementsOf(client)),
 );
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 
+/** The client SOLID_CLIENT (`choice`) names; it throws on a value that names none. */
+function solidClientOf(choice: string | undefined): SolidClient {
+  if (choice === undefined || choice === "") return SOLID_CLIENTS.inrupt;
+  if (!Object.hasOwn(SOLID_CLIENTS, choice)) {
+    throw new Error(
+      `SOLID_CLIENT="${choice}" names no Solid client: leave it unset, or set it to ${Object.keys(
+        SOLID_CLIENTS,
+      )
+        .map((one) => `"${one}"`)
+        .join(" or ")}.`,
+    );
+  }
+  return SOLID_CLIENTS[choice as keyof typeof SOLID_CLIENTS];
+}
+
 /**
  * The Vite plugin that puts the client SOLID_CLIENT (`choice`) names in
- * place; it throws on a value that names none. `root` is the
+ * place of the modules packages/solid-client declares. `root` is the
  * repository's, with a trailing slash.
  */
 export function solidClientPlugin(choice = process.env.SOLID_CLIENT, root = ROOT): Plugin {
-  const name = "solid-memo:solid-client";
-  if (choice !== undefined && choice !== "" && !SOLID_CLIENTS.some((one) => one === choice)) {
-    throw new Error(
-      `SOLID_CLIENT="${choice}" names no Solid client: leave it unset, or set it to ${SOLID_CLIENTS.map((one) => `"${one}"`).join(" or ")}.`,
-    );
-  }
-  // With Inrupt's client the plugin has no hook at all: a resolveId hook
-  // that only returns null still stops vi.mock from replacing client modules.
-  if (choice !== "solid-memo-client") return { name };
+  const client = solidClientOf(choice);
   const replacements = new Map(
-    Object.entries(REPLACEMENTS).map(([module, replacement]) => [
+    Object.entries(replacementsOf(client)).map(([module, replacement]) => [
       `${root}${module}`,
       `${root}${replacement}`,
     ]),
   );
   return {
-    name,
+    name: "solid-memo:solid-client",
     enforce: "pre",
     async resolveId(source, importer, options) {
-      if (importer === undefined || importer.startsWith(`${root}${CLIENT}`)) return null;
+      if (importer === undefined || importer.startsWith(`${root}packages/${client}/`)) return null;
       const resolved = await this.resolve(source, importer, { ...options, skipSelf: true });
       return (resolved && replacements.get(resolved.id)) ?? null;
     },

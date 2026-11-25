@@ -11,13 +11,13 @@ import {
   getStringNoLocale,
   getThing,
   setThing,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import {
   deleteContainer,
   deleteSolidDataset,
   readDocument,
   writeDocument,
-} from "./client/resources";
+} from "@solid-memo/solid-client/resources";
 import { datasetFrom, readOf } from "./testing/datasets";
 import { createSolidInstanceRepository } from "./solidInstanceRepository";
 import {
@@ -33,7 +33,7 @@ import {
   readTypeIndexChoices,
   type TypeIndexes,
 } from "./typeIndex";
-import { ReadLimitError } from "./client/interface";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
 import { datetimeLiteral } from "./records";
 import { DCTERMS, SM } from "./vocab";
 import { AppError } from "@solid-memo/domain/appError";
@@ -42,8 +42,8 @@ import type { TypeIndexChoice } from "@solid-memo/domain/typeIndexChoice";
 import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
 import { deleteInstanceData } from "./instanceData";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return {
     ...actual,
     readDocument: vi.fn(),

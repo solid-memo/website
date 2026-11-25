@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Dataset } from "./client/rdf";
+import type { Dataset } from "@solid-memo/solid-client/rdf";
 import type { ShapeContext } from "@solid-memo/vocab/shapeDescriptor";
 
 /**

@@ -9,7 +9,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
-import { buildThing, createThing, getThing, setThing } from "./client/rdf";
+import { buildThing, createThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";

@@ -10,7 +10,7 @@ import {
   type FetchedDataset,
   getThingAll,
   setThing,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { Deck } from "@solid-memo/domain/deck";
 import { AppError } from "@solid-memo/domain/appError";
 import {
@@ -34,7 +34,7 @@ import {
 import { derivedOnce } from "@solid-memo/domain/frozen";
 import { TextMap } from "@solid-memo/domain/pathKeys";
 import { documentUrlOf, fragmentIdOf } from "@solid-memo/domain/subjectUrl";
-import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
+import { linkTargets, TURTLE_FIRST } from "@solid-memo/solid-client/linkHeader";
 import {
   asReadOf,
   getSolidDatasetOrNull,

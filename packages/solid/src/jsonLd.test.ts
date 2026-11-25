@@ -7,9 +7,9 @@ import type { Quad, Term } from "@rdfjs/types";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { jsonLdOf, refuseRemoteContexts as refuseIn } from "./jsonLd";
 import { termOf } from "./ntriples";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
-import type { ReadLimits } from "./client/interface";
-import { parseQuads } from "./client/resources";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
+import type { ReadLimits } from "@solid-memo/solid-client/interface";
+import { parseQuads } from "@solid-memo/solid-client/resources";
 
 const EX = "https://example.org/ns#";
 const XSD = "http://www.w3.org/2001/XMLSchema#";

@@ -515,15 +515,15 @@ jobs:
           retention-days: 7
 
   # The second Solid client, solid-memo-client (packages/solid-memo-client),
-  # put in place of Inrupt's by SOLID_CLIENT (scripts/solidClient.ts) and
-  # run through the tests of the packages that use it: solid's, its round
-  # trip included, shacl's, composition's and web's, without the tests of
-  # the Inrupt modules it replaces, which test those modules themselves.
-  # Its own tests are check's, in npm run check. Advisory: it only
-  # reports, so a failure fails neither the run nor ci-ok, and holds back
-  # no merge, release or deploy. vitest runs straight, not through Turbo,
-  # so no result is read from a cache, and without coverage, which the
-  # replaced modules' tests left out would lower. web's build test builds
+  # put in place of inrupt-client by SOLID_CLIENT (scripts/solidClient.ts)
+  # and run through the tests of the packages that use it: the seam's
+  # (solid-client), solid's, its round trip included, shacl's,
+  # composition's and web's. The clients' own tests are check's, in npm
+  # run check. Advisory: it only reports, so a failure fails neither the
+  # run nor ci-ok, and holds back no merge, release or deploy. vitest runs
+  # straight, not through Turbo, so no result is read from a cache, and
+  # without coverage, which the default client's modules left unloaded
+  # would lower. web's build test builds
   # the site without the docs' diagrams (DOCS_DIAGRAMS=skip), which need
   # Chromium and have nothing of the client: check draws them.
   # Deterministic.
@@ -545,7 +545,9 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session,session.library,session.redirect.library}.test.ts'
+      - run: npm run test:unit -w @solid-memo/solid-client
+      - if: success() || failure()
+        run: npm run test:unit -w @solid-memo/solid
       - if: success() || failure()
         run: npm run test:roundtrip -w @solid-memo/solid
       - if: success() || failure()

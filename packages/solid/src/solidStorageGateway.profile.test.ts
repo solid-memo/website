@@ -11,9 +11,9 @@
  * solidStorageGateway.growth.test.ts's.
  */
 import { describe, expect, it } from "vitest";
-import { ReadLimitError } from "./client/interface";
-import { MAX_PROFILE_DOCUMENTS, PROFILE_LIMITS } from "./client/readLimits";
-import { getProfileStorages } from "./client/resources";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import { MAX_PROFILE_DOCUMENTS, PROFILE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createSolidStorageGateway } from "./solidStorageGateway";
 import { fakePod } from "./testing/fakePod";
 import {

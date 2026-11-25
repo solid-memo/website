@@ -4,7 +4,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { resourcesContract } from "@solid-memo/solid/testing/contract/resources";
-import { HttpError } from "@solid-memo/solid/client/interface";
+import { HttpError } from "@solid-memo/solid-client/interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
 

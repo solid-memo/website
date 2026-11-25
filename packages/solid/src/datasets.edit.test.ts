@@ -3,7 +3,13 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { buildThing, createSolidDataset, createThing, type Dataset, setThing } from "./client/rdf";
+import {
+  buildThing,
+  createSolidDataset,
+  createThing,
+  type Dataset,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
 import { editDocument, PreconditionFailedError, readDataset, statusOf } from "./datasets";
 import { fakePod } from "./testing/fakePod";
 

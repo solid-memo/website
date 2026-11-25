@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getProfileStorages } from "../client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createSolidStorageGateway } from "../solidStorageGateway";
 import { fakePod } from "./fakePod";
 

@@ -3,8 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { type Dataset, getInteger, getThing, getUrl, getUrlAll } from "../client/rdf";
-import { getSolidDataset } from "../client/resources";
+import {
+  type Dataset,
+  getInteger,
+  getThing,
+  getUrl,
+  getUrlAll,
+} from "@solid-memo/solid-client/rdf";
+import { getSolidDataset } from "@solid-memo/solid-client/resources";
 import { getStringWithLocale } from "../testing/datasets";
 import {
   applyDeckTreeEdit,

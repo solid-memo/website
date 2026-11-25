@@ -33,8 +33,8 @@ import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { READS_AT_ONCE } from "@solid-memo/application/atOnce";
 import { MAX_CATALOG_LINKS } from "./catalogLinks";
-import { RELEASE_LIMITS } from "./client/readLimits";
-import { datasetFromQuads } from "./client/rdf";
+import { RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { datasetFromQuads } from "@solid-memo/solid-client/rdf";
 import { turtleAt } from "./testing/contract/rdf";
 import {
   toLibraryCards,

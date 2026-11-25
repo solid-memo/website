@@ -24,8 +24,8 @@ import {
   type SubjectBuilder,
   toRdfJsDataset,
   withQuads,
-} from "../client/rdf";
-import { solidDatasetAsTurtle } from "../client/resources";
+} from "@solid-memo/solid-client/rdf";
+import { solidDatasetAsTurtle } from "@solid-memo/solid-client/resources";
 import { foreignSubjects } from "../ownership";
 import { datetimeLiteral, recordThing } from "../records";
 import { type Catalog, catalogToRecord, publisherToRecord } from "@solid-memo/domain/catalog";
@@ -37,7 +37,7 @@ import { LONG_SUBJECT, longNames, namesOf } from "@solid-memo/domain/testing/lon
 import { agentUrlOf } from "@solid-memo/domain/agentRecord";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { isDeckOutdated, upgradeDeck } from "@solid-memo/domain/migration";
-import { MAX_TERM_CHARACTERS } from "../client/readLimits";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import {
   deckSubjects,
   decksSubjects,

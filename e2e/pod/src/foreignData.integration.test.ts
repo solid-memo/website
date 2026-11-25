@@ -26,7 +26,7 @@ import { createUseCases, type UseCases } from "@solid-memo/application/useCases"
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import type { Instance } from "@solid-memo/domain/instance";
 import { arrangementSetAside, deckSetAside } from "@solid-memo/domain/validation";
-import { getProfileStorages } from "@solid-memo/solid/client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";

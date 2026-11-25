@@ -4,7 +4,7 @@
 
 import type { StorageGateway } from "@solid-memo/application/ports/session";
 import type { Storage } from "@solid-memo/domain/storage";
-import { getThing } from "./client/rdf";
+import { getThing } from "@solid-memo/solid-client/rdf";
 import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";
 import { readTerms } from "./records";
 import {
@@ -12,8 +12,8 @@ import {
   MAX_PROFILE_DOCUMENTS,
   noneSpent,
   PROFILE_LIMITS,
-} from "./client/readLimits";
-import type { ProfileStorages } from "./client/resources";
+} from "@solid-memo/solid-client/readLimits";
+import type { ProfileStorages } from "@solid-memo/solid-client/resources";
 import { readDataset } from "./datasets";
 import {
   createPlacesFetch,
@@ -23,7 +23,7 @@ import {
   storageUrlsOf,
 } from "./profilePlaces";
 import { isInFolder } from "@solid-memo/domain/instanceLayout";
-import { linkTargets, TURTLE_FIRST } from "./client/linkHeader";
+import { linkTargets, TURTLE_FIRST } from "@solid-memo/solid-client/linkHeader";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { ensureTrailingSlash } from "./urls";
 import { AppError } from "@solid-memo/domain/appError";

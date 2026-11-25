@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, type NamedSubject, type Subject, asUrl, getThing } from "../client/rdf";
+import {
+  type Dataset,
+  type NamedSubject,
+  type Subject,
+  asUrl,
+  getThing,
+} from "@solid-memo/solid-client/rdf";
 import { editOf, type DatasetEdit } from "../datasetEdit";
 import type { Scheduler } from "@solid-memo/domain/fsrs";
 import type { GradedPrompt, PromptStates } from "@solid-memo/domain/grading";

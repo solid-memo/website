@@ -37,7 +37,7 @@ import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRe
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
-import { getProfileStorages } from "@solid-memo/solid/client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createWriteFence } from "@solid-memo/solid/writeFence";

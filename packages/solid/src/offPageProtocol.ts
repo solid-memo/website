@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { AppError, type ErrorCode, type ErrorVars } from "@solid-memo/domain/appError";
-import { HttpError, ReadLimitError, type ReadLimits } from "./client/interface";
-import type { ReadsSpent } from "./client/readLimits";
+import { HttpError, ReadLimitError, type ReadLimits } from "@solid-memo/solid-client/interface";
+import type { ReadsSpent } from "@solid-memo/solid-client/readLimits";
 
 /**
  * The messages between the page and a worker that reads documents the

@@ -11,7 +11,7 @@ import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { growthAsync } from "@solid-memo/domain/testing/growth";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
-import { MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "./client/readLimits";
+import { MAX_TERM_CHARACTERS, RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { agentNamesOf, toDeck } from "./mappers/deckMapper";
 import { createSolidDeckArchive, parseDeckFile } from "./solidDeckArchive";
 import { createSolidDeckRepository } from "./solidDeckRepository";

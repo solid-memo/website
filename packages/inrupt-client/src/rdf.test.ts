@@ -12,8 +12,8 @@ import {
 } from "@inrupt/solid-client";
 import type { Quad, Term } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
-import { rdfContract } from "../testing/contract/rdf";
-import type { Subject } from "./interface";
+import { rdfContract } from "@solid-memo/solid/testing/contract/rdf";
+import type { Subject } from "@solid-memo/solid-client/interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
 

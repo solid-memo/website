@@ -6,8 +6,13 @@ import type { ResourceStore } from "@solid-memo/application/ports/device";
 import type { GuestPod } from "@solid-memo/application/ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
-import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
-import { solidDatasetAsTurtle } from "./client/resources";
+import {
+  buildThing,
+  createSolidDataset,
+  createThing,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
+import { solidDatasetAsTurtle } from "@solid-memo/solid-client/resources";
 import { RDF } from "./vocab";
 
 const FOAF = "http://xmlns.com/foaf/0.1/";

@@ -9,7 +9,7 @@ import { monthSummaryOf } from "@solid-memo/domain/studyDigest";
 import { statisticsOf } from "@solid-memo/domain/statistics";
 import { APPEND_DEADLINE_MS, createSolidAnswerLog } from "./solidAnswerLog";
 import type { WriteCheck } from "./writeCheck";
-import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
+import { MAX_PATCH_BYTES } from "@solid-memo/solid-client/sparqlUpdate";
 
 const INSTANCE = "https://pod.example/solid-memo/main/";
 const HISTORY = `${INSTANCE}history/`;

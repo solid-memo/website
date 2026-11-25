@@ -13,7 +13,7 @@
  */
 import { expect, it } from "vitest";
 import { growth } from "@solid-memo/domain/testing/growth";
-import type { Dataset } from "./client/rdf";
+import type { Dataset } from "@solid-memo/solid-client/rdf";
 import { foreignSubjects } from "./ownership";
 import { datasetOfTurtle } from "./testing/datasets";
 

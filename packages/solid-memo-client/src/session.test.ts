@@ -5,8 +5,8 @@
 import * as oauth from "oauth4webapi";
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
 import { type SessionHarness, sessionContract } from "@solid-memo/solid/testing/contract/session";
-import type { LoginOptions } from "@solid-memo/solid/client/interface";
-import { REGISTRATION_LIMITS } from "@solid-memo/solid/client/readLimits";
+import type { LoginOptions } from "@solid-memo/solid-client/interface";
+import { REGISTRATION_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { navigate } from "./oidcBrowser";
 import { PENDING_LOGIN_KEY, type PendingLogin } from "./oidcLogin";
 import { OidcSession, setCurrentSession } from "./oidcSession";

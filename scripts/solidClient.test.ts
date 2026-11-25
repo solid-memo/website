@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { solidClientPlugin } from "./solidClient.ts";
+import { REPLACEMENTS, solidClientPlugin } from "./solidClient.ts";
 
 const ROOT = "/repo/";
 
@@ -29,20 +29,47 @@ async function resolve(
   return hook.call(context, source, importer, {});
 }
 
+const DECLARED = ["rdf", "resources", "session", "access"];
+
 describe("solidClientPlugin", () => {
-  it("has no hook with Inrupt's client: unset, empty or named", () => {
+  it("runs before Vite's own resolution", () => {
+    expect(solidClientPlugin(undefined, ROOT).enforce).toBe("pre");
+  });
+
+  it("puts Inrupt's client in place of each declared module, unset, empty or named", async () => {
+    const importer = `${ROOT}packages/solid/src/datasets.ts`;
     for (const choice of [undefined, "", "inrupt"]) {
-      expect(solidClientPlugin(choice, ROOT)).toEqual({ name: "solid-memo:solid-client" });
+      const plugin = solidClientPlugin(choice, ROOT);
+      for (const name of DECLARED) {
+        await expect(
+          resolve(
+            plugin,
+            `@solid-memo/solid-client/${name}`,
+            importer,
+            `packages/solid-client/src/${name}.ts`,
+          ),
+        ).resolves.toBe(`${ROOT}packages/inrupt-client/src/${name}.ts`);
+      }
+      // Shacl reads Turtle with Inrupt's library itself.
+      await expect(
+        resolve(plugin, "./turtleDocument", importer, "packages/shacl/src/turtleDocument.ts"),
+      ).resolves.toBeNull();
     }
   });
 
-  it("reads SOLID_CLIENT when given no choice", () => {
+  it("reads SOLID_CLIENT when given no choice", async () => {
     const before = process.env.SOLID_CLIENT;
+    const importer = `${ROOT}packages/solid/src/datasets.ts`;
     try {
-      delete process.env.SOLID_CLIENT;
-      expect(solidClientPlugin().resolveId).toBeUndefined();
       process.env.SOLID_CLIENT = "solid-memo-client";
-      expect(solidClientPlugin().resolveId).toBeTypeOf("function");
+      await expect(
+        resolve(
+          solidClientPlugin(undefined, ROOT),
+          "./x",
+          importer,
+          "packages/solid-client/src/rdf.ts",
+        ),
+      ).resolves.toBe(`${ROOT}packages/solid-memo-client/src/rdf.ts`);
     } finally {
       if (before === undefined) delete process.env.SOLID_CLIENT;
       else process.env.SOLID_CLIENT = before;
@@ -58,21 +85,14 @@ describe("solidClientPlugin", () => {
   describe("with solid-memo-client", () => {
     const plugin = solidClientPlugin("solid-memo-client", ROOT);
 
-    it("runs before Vite's own resolution", () => {
-      expect(plugin.enforce).toBe("pre");
-    });
-
-    it("resolves each module it replaces to the file of the same name in packages/solid-memo-client/src/", async () => {
+    it("resolves each declared module, and shacl's reader of Turtle, to the file of the same name in packages/solid-memo-client/src/", async () => {
       const importer = `${ROOT}packages/solid/src/datasets.ts`;
-      for (const [module, file] of [
-        ["packages/solid/src/client/rdf.ts", "rdf.ts"],
-        ["packages/solid/src/client/resources.ts", "resources.ts"],
-        ["packages/solid/src/client/session.ts", "session.ts"],
-        ["packages/solid/src/client/access.ts", "access.ts"],
-        ["packages/shacl/src/turtleDocument.ts", "turtleDocument.ts"],
-      ] as const) {
-        await expect(resolve(plugin, "./client/x", importer, module)).resolves.toBe(
-          `${ROOT}packages/solid-memo-client/src/${file}`,
+      for (const module of [
+        ...DECLARED.map((name) => `packages/solid-client/src/${name}.ts`),
+        "packages/shacl/src/turtleDocument.ts",
+      ]) {
+        await expect(resolve(plugin, "./x", importer, module)).resolves.toBe(
+          `${ROOT}packages/solid-memo-client/src/${module.slice(module.lastIndexOf("/") + 1)}`,
         );
       }
     });
@@ -80,10 +100,10 @@ describe("solidClientPlugin", () => {
     it("leaves any other module, and one the build cannot resolve, as it is", async () => {
       const importer = `${ROOT}packages/solid/src/datasets.ts`;
       for (const module of [
-        "packages/solid/src/client/interface.ts",
-        "packages/solid/src/client/sparqlUpdate.ts",
-        "packages/solid/src/client/rdf.test.ts",
-        "elsewhere/packages/solid/src/client/rdf.ts",
+        "packages/solid-client/src/interface.ts",
+        "packages/solid-client/src/sparqlUpdate.ts",
+        "packages/inrupt-client/src/rdf.ts",
+        "elsewhere/packages/solid-client/src/rdf.ts",
       ]) {
         await expect(resolve(plugin, "./x", importer, module)).resolves.toBeNull();
       }
@@ -91,11 +111,27 @@ describe("solidClientPlugin", () => {
     });
 
     it("leaves an entry point, and the client's own imports, as they are", async () => {
-      const replaced = "packages/solid/src/client/rdf.ts";
-      await expect(resolve(plugin, "./x", undefined, replaced)).resolves.toBeNull();
+      const declared = "packages/solid-client/src/rdf.ts";
+      await expect(resolve(plugin, "./x", undefined, declared)).resolves.toBeNull();
       await expect(
-        resolve(plugin, "./x", `${ROOT}packages/solid-memo-client/src/rdf.test.ts`, replaced),
+        resolve(plugin, "./x", `${ROOT}packages/solid-memo-client/src/rdf.test.ts`, declared),
       ).resolves.toBeNull();
     });
+  });
+});
+
+describe("REPLACEMENTS", () => {
+  it("pairs each declared module with each client's, and shacl's reader with solid-memo-client's", () => {
+    expect(REPLACEMENTS).toEqual([
+      ...DECLARED.map((name) => [
+        `packages/solid-client/src/${name}.ts`,
+        `packages/inrupt-client/src/${name}.ts`,
+      ]),
+      ...DECLARED.map((name) => [
+        `packages/solid-client/src/${name}.ts`,
+        `packages/solid-memo-client/src/${name}.ts`,
+      ]),
+      ["packages/shacl/src/turtleDocument.ts", "packages/solid-memo-client/src/turtleDocument.ts"],
+    ]);
   });
 });

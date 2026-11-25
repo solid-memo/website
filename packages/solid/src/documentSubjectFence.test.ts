@@ -13,7 +13,13 @@
  * a local one.
  */
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, getThing, removeThings, setThing } from "./client/rdf";
+import {
+  buildThing,
+  createSolidDataset,
+  getThing,
+  removeThings,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
 import { asReadOf, getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createDeckDocumentGuard } from "./deckPlace";
 import { createLocalPod } from "./localPod";

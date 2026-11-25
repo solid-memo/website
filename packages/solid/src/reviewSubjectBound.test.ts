@@ -24,7 +24,7 @@ import type { ReviewKey } from "@solid-memo/domain/review";
 import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import { switchedStates } from "@solid-memo/domain/schedulerSwitch";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
-import { asUrl, getPropertyAll, getTermAll, getThingAll } from "./client/rdf";
+import { asUrl, getPropertyAll, getTermAll, getThingAll } from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";

@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import { anonymousFetch } from "./authFetch";
-import { deleteContainer } from "./client/resources";
-import { FOREIGN_LIMITS, limitedFetch, NO_SIZE_LIMITS } from "./client/readLimits";
-import { createSolidDataset, getThing, setThing } from "./client/rdf";
+import { deleteContainer } from "@solid-memo/solid-client/resources";
+import { FOREIGN_LIMITS, limitedFetch, NO_SIZE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { createSolidDataset, getThing, setThing } from "@solid-memo/solid-client/rdf";
 import type { InstanceRepository } from "@solid-memo/application/ports/pod";
 import {
   INSTANCE_FORMAT_VERSION,
@@ -15,7 +15,7 @@ import {
   type OldRegistrations,
 } from "@solid-memo/domain/instance";
 import { rankedChoices, type TypeIndexKind } from "@solid-memo/domain/typeIndexChoice";
-import type { GrantPublicRead } from "./client/access";
+import type { GrantPublicRead } from "@solid-memo/solid-client/access";
 import { accessControlFetch } from "./accessControlFetch";
 import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isInstanceOutdated } from "@solid-memo/domain/migration";

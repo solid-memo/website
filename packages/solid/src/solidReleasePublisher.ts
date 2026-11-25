@@ -8,9 +8,9 @@ import { AppError } from "@solid-memo/domain/appError";
 import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
 import { addCatalogLink, catalogLinks, refuseFullCatalog } from "./catalogLinks";
-import type { GrantPublicRead } from "./client/access";
+import type { GrantPublicRead } from "@solid-memo/solid-client/access";
 import { accessControlFetch } from "./accessControlFetch";
-import { limitedFetch, RELEASE_LIMITS } from "./client/readLimits";
+import { limitedFetch, RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { parseDeckFile } from "./solidDeckArchive";
 import { RDF, SM } from "./vocab";
 

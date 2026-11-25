@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, createSolidDataset } from "./client/rdf";
+import { type Dataset, createSolidDataset } from "@solid-memo/solid-client/rdf";
 import type { ReviewChanges, ReviewStateRepository } from "@solid-memo/application/ports/pod";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { PromptStates } from "@solid-memo/domain/grading";

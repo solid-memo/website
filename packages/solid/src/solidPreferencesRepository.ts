@@ -9,7 +9,7 @@ import {
   createSolidDataset,
   getThing,
   setThing,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { PreferencesRepository } from "@solid-memo/application/ports/pod";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";

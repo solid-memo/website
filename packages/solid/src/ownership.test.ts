@@ -4,7 +4,13 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
-import { buildThing, createThing, type Dataset, type NamedSubject, setThing } from "./client/rdf";
+import {
+  buildThing,
+  createThing,
+  type Dataset,
+  type NamedSubject,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
 import { datasetFrom } from "./testing/datasets";
 import { readDataset } from "./datasets";
 import { createLocalPod } from "./localPod";

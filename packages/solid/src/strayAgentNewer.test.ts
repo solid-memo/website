@@ -18,7 +18,7 @@
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { describe, expect, it } from "vitest";
 import { getSolidDatasetOrNull } from "./datasets";
-import { getInteger, getThing, getUrlAll } from "./client/rdf";
+import { getInteger, getThing, getUrlAll } from "@solid-memo/solid-client/rdf";
 import { createShaclShapeValidator } from "./shaclShapeValidator";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { fakePod } from "./testing/fakePod";

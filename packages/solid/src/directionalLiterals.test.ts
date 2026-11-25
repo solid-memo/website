@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from "vitest";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
-import { buildThing, getThing, setThing } from "./client/rdf";
+import { buildThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { fakePod } from "./testing/fakePod";

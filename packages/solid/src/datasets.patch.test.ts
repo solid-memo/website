@@ -16,16 +16,16 @@ import {
   setThing,
   toRdfJsDataset,
   withQuads,
-} from "./client/rdf";
-import type { Changes } from "./client/interface";
+} from "@solid-memo/solid-client/rdf";
+import type { Changes } from "@solid-memo/solid-client/interface";
 import { datasetFrom } from "./testing/datasets";
 import type { Quad, Term } from "@rdfjs/types";
 import { appendAllToDocument, saveDataset } from "./datasets";
-import { patchBody } from "./client/sparqlUpdate";
+import { patchBody } from "@solid-memo/solid-client/sparqlUpdate";
 import { integerLiteral } from "./testing/literals";
 
-vi.mock("./client/rdf", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/rdf")>();
+vi.mock("@solid-memo/solid-client/rdf", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/rdf")>();
   return { ...actual, changesOf: vi.fn(actual.changesOf) };
 });
 

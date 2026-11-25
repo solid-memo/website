@@ -3,9 +3,9 @@
 // SPDX-License-Identifier: MIT
 
 import * as oauth from "oauth4webapi";
-import { type ReadLimits, ReadLimitError } from "@solid-memo/solid/client/interface";
-import { linkTargets } from "@solid-memo/solid/client/linkHeader";
-import { limitedFetch } from "@solid-memo/solid/client/readLimits";
+import { type ReadLimits, ReadLimitError } from "@solid-memo/solid-client/interface";
+import { linkTargets } from "@solid-memo/solid-client/linkHeader";
+import { limitedFetch } from "@solid-memo/solid-client/readLimits";
 import { clientAuth, requestOptions, secureEndpoint, timeLimited } from "./oidcLogin";
 
 /**

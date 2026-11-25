@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
+import { type NamedSubject, type Subject, asUrl } from "@solid-memo/solid-client/rdf";
 import type { StoredPreferences, StudyPreferences } from "@solid-memo/domain/preferences";
 import { preferencesFromRecord, preferencesToRecord } from "@solid-memo/domain/preferencesRecord";
 import { migrate } from "@solid-memo/domain/shapes/migrations";

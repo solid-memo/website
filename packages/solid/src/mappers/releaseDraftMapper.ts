@@ -10,9 +10,9 @@ import {
   getThing,
   setThing,
   toRdfJsDataset,
-} from "../client/rdf";
-import { MAX_TERM_CHARACTERS, pathKeys } from "../client/readLimits";
-import { directionOf } from "../client/sparqlUpdate";
+} from "@solid-memo/solid-client/rdf";
+import { MAX_TERM_CHARACTERS, pathKeys } from "@solid-memo/solid-client/readLimits";
+import { directionOf } from "@solid-memo/solid-client/sparqlUpdate";
 import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";

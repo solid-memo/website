@@ -15,8 +15,8 @@ import {
   getUrlAll,
   setThing,
   toRdfJsDataset,
-} from "./client/rdf";
-import { getSolidDataset } from "./client/resources";
+} from "@solid-memo/solid-client/rdf";
+import { getSolidDataset } from "@solid-memo/solid-client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { createEngine, mergeDatasets } from "@solid-memo/shacl/engine";
 import { coreOnly, PROFILES, REFERENCE_DATA } from "@solid-memo/shacl/profiles";

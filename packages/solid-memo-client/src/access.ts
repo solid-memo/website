@@ -4,11 +4,11 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { DataFactory, Writer } from "n3";
-import type { GrantPublicRead } from "@solid-memo/solid/client/interface";
-import { linkTargets, TURTLE_FIRST } from "@solid-memo/solid/client/linkHeader";
+import type { GrantPublicRead } from "@solid-memo/solid-client/interface";
+import { linkTargets, TURTLE_FIRST } from "@solid-memo/solid-client/linkHeader";
 import { parseQuads } from "./resources";
 
-export type { GrantPublicRead } from "@solid-memo/solid/client/interface";
+export type { GrantPublicRead } from "@solid-memo/solid-client/interface";
 
 const { namedNode, quad } = DataFactory;
 

@@ -18,7 +18,7 @@ import type { UseCases } from "@solid-memo/application/useCases";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { getSolidDatasetOrNull } from "./datasets";
-import { getThing, type Dataset } from "./client/rdf";
+import { getThing, type Dataset } from "@solid-memo/solid-client/rdf";
 import { POD, SESSION, siteOf, type Site, wiredApp } from "./testing/wiredApp";
 import { SM } from "./vocab";
 

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, asUrl, getThing, getThingAll, setThing } from "../client/rdf";
+import { type Dataset, asUrl, getThing, getThingAll, setThing } from "@solid-memo/solid-client/rdf";
 import { type CustomPalette, MAX_PALETTES } from "@solid-memo/domain/customPalette";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";
 import {

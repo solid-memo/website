@@ -28,9 +28,9 @@ import {
   getUrlAll,
   propertiesOf,
   removeThings,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { DatasetEdit } from "./datasetEdit";
-import { isTermTooLong, MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { isTermTooLong, MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import type { Literal, NamedNode, Quad_Object, Term } from "@rdfjs/types";
 import {
   LATEST_VERSION,

@@ -1026,7 +1026,7 @@ flowchart LR
   takes long to read leaves the tab working. One whose work there
   passes its deadline is refused as too large (`releaseTooLarge`).
 - Every release is read under `RELEASE_LIMITS`
-  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)): 32 MiB
+  ([readLimits.ts](../packages/solid-client/src/readLimits.ts)): 32 MiB
   of body, 400,000 triples, and 64 Mi characters in the terms of those
   triples, which a Turtle prefix can make far longer than the body. One
   subject may have no more than 4,096 values for one predicate
@@ -1097,7 +1097,7 @@ flowchart LR
 - The headers that describe a resource, `Link` and `WAC-Allow`, are
   bounded on every response the app reads a document, file or access
   control from, a release's or any other
-  ([linkHeader.ts](../packages/solid/src/client/linkHeader.ts)). They
+  ([linkHeader.ts](../packages/solid-client/src/linkHeader.ts)). They
   come before the body, so the limits above never see them, and the
   parsers that read them can take time growing with the square of a
   header's length. A header longer than 8 KiB

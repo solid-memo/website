@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import * as oauth from "oauth4webapi";
-import type { RestoredSession, SessionClient } from "@solid-memo/solid/client/interface";
+import type { RestoredSession, SessionClient } from "@solid-memo/solid-client/interface";
 import {
   completeLogin,
   discover,
@@ -40,7 +40,7 @@ import { clearSession, loadSession, saveSession } from "./oidcStore";
  * its end_session_endpoint, are left alone.
  */
 
-export type { SessionClient } from "@solid-memo/solid/client/interface";
+export type { SessionClient } from "@solid-memo/solid-client/interface";
 
 const LOGGED_OUT: RestoredSession = { webId: null, fromLogin: false, restoredFrom: null };
 

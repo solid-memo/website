@@ -2,11 +2,50 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Quad } from "@rdfjs/types";
+import type { Quad, Term } from "@rdfjs/types";
 import { describe, expect, it } from "vitest";
-import { quadOf } from "./mappers/releaseDraftMapper";
-import { quadsOfTurtle } from "./testing/releaseDrafts";
+import { toRdfJsDataset } from "./rdf";
+import { getSolidDatasetLinear } from "./resources";
 import { turtleOf } from "./turtleWriter";
+
+/** A subject or object of a triple: `_:label` for a blank node. */
+const subjectTerm = (value: string) =>
+  (value.startsWith("_:")
+    ? { termType: "BlankNode", value: value.slice(2) }
+    : { termType: "NamedNode", value }) as Term;
+
+type TermOf =
+  | { kind: "iri" | "blank"; value: string }
+  | { kind: "literal"; value: string; language: string; datatype: string };
+
+/** A statement as a quad of the default graph, as solid's releaseDraftMapper makes one. */
+function quadOf(subject: string, predicate: string, object: TermOf): Quad {
+  const term =
+    object.kind === "literal"
+      ? {
+          termType: "Literal",
+          value: object.value,
+          language: object.language,
+          datatype: { termType: "NamedNode", value: object.datatype },
+        }
+      : subjectTerm(object.kind === "blank" ? `_:${object.value}` : object.value);
+  return {
+    subject: subjectTerm(subject),
+    predicate: { termType: "NamedNode", value: predicate },
+    object: term,
+    graph: { termType: "DefaultGraph", value: "" },
+  } as unknown as Quad;
+}
+
+/** The triples of `turtle`, as the client reads a document at `url`. */
+async function quadsOfTurtle(turtle: string, url: string): Promise<Quad[]> {
+  const fetch: typeof globalThis.fetch = async () => {
+    const response = new Response(turtle, { headers: { "Content-Type": "text/turtle" } });
+    Object.defineProperty(response, "url", { value: url });
+    return response;
+  };
+  return [...toRdfJsDataset(await getSolidDatasetLinear(url, { fetch }))] as Quad[];
+}
 
 const BASE = "https://pod.example/releases/capitals/v1.ttl";
 const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";

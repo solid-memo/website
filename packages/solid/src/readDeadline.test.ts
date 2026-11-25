@@ -4,8 +4,8 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { limitedFetch } from "./client/readLimits";
-import { getSolidDatasetLinear } from "./client/resources";
+import { limitedFetch } from "@solid-memo/solid-client/readLimits";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import { READ_DEADLINE_MS, withReadDeadline } from "./readDeadline";
 
 /** A server that never answers: its request settles only when aborted, as a browser's does. */

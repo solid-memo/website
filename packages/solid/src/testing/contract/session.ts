@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { LoginOptions, SessionClient } from "../../client/interface";
+import type { LoginOptions, SessionClient } from "@solid-memo/solid-client/interface";
 
 /**
  * A sign-in client under test, with the means to set up what the

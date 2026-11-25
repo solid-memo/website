@@ -15,7 +15,13 @@ import { describe, expect, it } from "vitest";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { planCardEdit, type CardChanges } from "@solid-memo/domain/cardBulk";
 import type { ReviewState } from "@solid-memo/domain/review";
-import { buildThing, getThing, removeThings, setThing, type NamedSubject } from "./client/rdf";
+import {
+  buildThing,
+  getThing,
+  removeThings,
+  setThing,
+  type NamedSubject,
+} from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull, saveDataset } from "./datasets";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";

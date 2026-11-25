@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { getSolidDatasetLinear } from "./linearDataset";
 import {
   boundedHeader,
   boundedHeadersFetch,
@@ -72,24 +71,6 @@ describe("boundedHeadersFetch", () => {
     const response = await boundedHeadersFetch(fetch)(URL_, { method: "HEAD" });
     expect(fetch).toHaveBeenCalledWith(URL_, { method: "HEAD" });
     expect(response.headers.get("Link")).toBeNull();
-  });
-});
-
-describe("getSolidDatasetLinear, with a long header", () => {
-  it("reads a document whose Link header is past the bound promptly, as one with no links", async () => {
-    const dataset = await getSolidDatasetLinear(URL_, {
-      fetch: async () => answer({ Link: LONG_LINK }),
-    });
-    expect(Object.keys(dataset.graphs.default)).toEqual([`${URL_}#a`]);
-    expect(dataset.internal_resourceInfo.linkedResources).toEqual({});
-  }, 5_000);
-
-  it("still reads a Link and WAC-Allow header within the bound", async () => {
-    const dataset = await getSolidDatasetLinear(URL_, {
-      fetch: async () => answer({ Link: ACL_LINK, "WAC-Allow": 'user="read",public=""' }),
-    });
-    expect(dataset.internal_resourceInfo.aclUrl).toBe(`${URL_}.acl`);
-    expect(dataset.internal_resourceInfo.permissions?.user.read).toBe(true);
   });
 });
 

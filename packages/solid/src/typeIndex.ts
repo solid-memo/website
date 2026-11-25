@@ -2,8 +2,12 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { limitedFetch, MAX_PROFILE_DOCUMENTS, PROFILE_LIMITS } from "./client/readLimits";
-import { getProfileStorages, getSourceUrl } from "./client/resources";
+import {
+  limitedFetch,
+  MAX_PROFILE_DOCUMENTS,
+  PROFILE_LIMITS,
+} from "@solid-memo/solid-client/readLimits";
+import { getProfileStorages, getSourceUrl } from "@solid-memo/solid-client/resources";
 import {
   type Dataset,
   type SourcedDataset,
@@ -16,7 +20,7 @@ import {
   removeThings,
   setThing,
   setThings,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import {
   getSolidDatasetOrNull,
   editDocument,

@@ -5,7 +5,7 @@
 import type { Literal, Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
 import { isWritableIri } from "@solid-memo/domain/webId";
-import { isTermTooLong, MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { isTermTooLong, MAX_TERM_CHARACTERS } from "./readLimits";
 
 /** The characters a Turtle name may start with (PN_CHARS_U), as ranges of a character class. */
 const PN_CHARS_U =

@@ -4,7 +4,7 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { releaseHost } from "@solid-memo/domain/library";
-import { ReadLimitError } from "./client/interface";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
 
 /** What a release at `url` read past its limits is shown as (releaseReadError, shownReadError). */
 export type TooLarge = (url: string, error: ReadLimitError) => AppError;

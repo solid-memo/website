@@ -13,7 +13,7 @@ import { createLocalStorageUpdateJournal } from "@solid-memo/browser/localStorag
 import { fakeLocks } from "@solid-memo/browser/testing/fakeLocks";
 import { createLocalPod } from "@solid-memo/solid/localPod";
 import { createMemoryResourceStore } from "@solid-memo/solid/memoryResourceStore";
-import { INSTANCE_READS_TOTAL } from "@solid-memo/solid/client/readLimits";
+import { INSTANCE_READS_TOTAL } from "@solid-memo/solid-client/readLimits";
 import { READ_DEADLINE_MS, WHOLE_READ_MS } from "@solid-memo/solid/readDeadline";
 import type { DigestRepository } from "@solid-memo/application/ports/pod";
 import { createAppUseCases, createSiteFetch } from "./appUseCases";
@@ -81,8 +81,8 @@ const smallBudget = vi.hoisted(() => ({
   /** The options each budget was made with. */
   made: [] as { scope?: unknown; total?: unknown }[],
 }));
-vi.mock("@solid-memo/solid/client/readLimits", async (importOriginal) => {
-  const original = await importOriginal<typeof import("@solid-memo/solid/client/readLimits")>();
+vi.mock("@solid-memo/solid-client/readLimits", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@solid-memo/solid-client/readLimits")>();
   return {
     ...original,
     sharedReadBudget: (options: Parameters<typeof original.sharedReadBudget>[0]) => {

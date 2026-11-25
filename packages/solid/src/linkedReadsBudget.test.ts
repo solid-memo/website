@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { withLinkedReleasesChecked } from "@solid-memo/application/library";
 import type { DocumentReport } from "@solid-memo/domain/validation";
-import { RELEASE_LIMITS } from "./client/readLimits";
+import { RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 
 /**

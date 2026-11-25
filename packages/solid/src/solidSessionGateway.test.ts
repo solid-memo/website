@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { getSolidDataset } from "./client/resources";
-import { eachUrl, getThing } from "./client/rdf";
+import { getSolidDataset } from "@solid-memo/solid-client/resources";
+import { eachUrl, getThing } from "@solid-memo/solid-client/rdf";
 import { createSolidSessionGateway } from "./solidSessionGateway";
 import { SESSION_EXPIRED_EVENT } from "./authFetch";
 import { fakeSessionClient } from "./testing/fakeSessionClient";
 
-vi.mock("./client/resources");
-vi.mock("./client/rdf");
+vi.mock("@solid-memo/solid-client/resources");
+vi.mock("@solid-memo/solid-client/rdf");
 
 const WEBID = "https://alice.example/profile/card#me";
 const SITE = "https://memo.example/";

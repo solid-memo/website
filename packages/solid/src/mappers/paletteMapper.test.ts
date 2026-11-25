@@ -6,7 +6,7 @@ import type { CustomPalette } from "@solid-memo/domain/customPalette";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { describe, expect, it } from "vitest";
-import { getSolidDataset } from "../client/resources";
+import { getSolidDataset } from "@solid-memo/solid-client/resources";
 import { SM_NS } from "../vocab";
 import { withPalette } from "./paletteMapper";
 

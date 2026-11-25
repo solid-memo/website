@@ -3,15 +3,15 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, onTestFinished, vi } from "vitest";
-import { buildThing, createThing, getThing, setThing } from "./client/rdf";
-import { getSolidDatasetLinear } from "./client/resources";
+import { buildThing, createThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
 import { DCTERMS, RDF, SCHEMA, SM } from "./vocab";
 import { integerLiteral } from "./testing/literals";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return { ...actual, getSolidDatasetLinear: vi.fn() };
 });
 

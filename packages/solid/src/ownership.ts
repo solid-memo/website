@@ -2,8 +2,14 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { getSourceUrl, hasResourceInfo } from "./client/resources";
-import { type Dataset, type Subject, getThing, getThingAll, toRdfJsDataset } from "./client/rdf";
+import { getSourceUrl, hasResourceInfo } from "@solid-memo/solid-client/resources";
+import {
+  type Dataset,
+  type Subject,
+  getThing,
+  getThingAll,
+  toRdfJsDataset,
+} from "@solid-memo/solid-client/rdf";
 import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";

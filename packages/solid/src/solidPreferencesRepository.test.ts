@@ -16,8 +16,8 @@ import {
   getUrlAll,
   setThing,
   type SubjectBuilder,
-} from "./client/rdf";
-import { writeDocument } from "./client/resources";
+} from "@solid-memo/solid-client/rdf";
+import { writeDocument } from "@solid-memo/solid-client/resources";
 import { datasetFrom, datasetOfTurtle } from "./testing/datasets";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { makeDeps } from "@solid-memo/application/testing/fakePorts";
@@ -28,8 +28,8 @@ import { getSolidDatasetOrNull } from "./datasets";
 import { RDF, SM, SM_NS } from "./vocab";
 import { integerLiteral } from "./testing/literals";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return {
     ...actual, // A write the pod takes as given, with no version.
     writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),

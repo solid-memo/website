@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, type NamedSubject, getThing, setThings } from "./client/rdf";
+import { type Dataset, type NamedSubject, getThing, setThings } from "@solid-memo/solid-client/rdf";
 
 /**
  * Edits of a dataset made a subject at a time, and made to the dataset

@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, asUrl, buildThing, getThing, getThingAll } from "../client/rdf";
+import {
+  type Dataset,
+  asUrl,
+  buildThing,
+  getThing,
+  getThingAll,
+} from "@solid-memo/solid-client/rdf";
 import { editOf } from "../datasetEdit";
 import {
   deckGroupFromRecord,

@@ -5,15 +5,18 @@
 import { describe, expect, it, vi } from "vitest";
 import { draftPod, INSTANCE, POD } from "./testing/releaseDrafts";
 import { addCatalogLink, MAX_CATALOG_LINKS } from "./catalogLinks";
-import { type GrantPublicRead, grantPublicRead as libraryGrant } from "./client/access";
-import type { ReadLimits } from "./client/interface";
-import { createThing } from "./client/rdf";
+import {
+  type GrantPublicRead,
+  grantPublicRead as libraryGrant,
+} from "@solid-memo/solid-client/access";
+import type { ReadLimits } from "@solid-memo/solid-client/interface";
+import { createThing } from "@solid-memo/solid-client/rdf";
 import {
   ACCESS_CONTROL_LIMITS,
   limitedFetch,
   MAX_ACCESS_CONTROL_SUBJECTS,
   RELEASE_LIMITS,
-} from "./client/readLimits";
+} from "@solid-memo/solid-client/readLimits";
 import { createPodFence } from "./podFence";
 import { createSolidReleasePublisher } from "./solidReleasePublisher";
 

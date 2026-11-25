@@ -2,7 +2,13 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, createSolidDataset, removeThings, setThing, setThings } from "./client/rdf";
+import {
+  type Dataset,
+  createSolidDataset,
+  removeThings,
+  setThing,
+  setThings,
+} from "@solid-memo/solid-client/rdf";
 import type { AnswerLog } from "@solid-memo/application/ports/pod";
 import {
   isOfStudyMonth,

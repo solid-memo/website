@@ -9,7 +9,7 @@ import { draftLibraryDeck } from "@solid-memo/domain/release/draftListing";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { refuseRepeatedIds, toCourseOutline, toLibraryCards } from "./mappers/libraryMapper";
-import { datasetFromQuads } from "./client/rdf";
+import { datasetFromQuads } from "@solid-memo/solid-client/rdf";
 import { draftQuads } from "./mappers/releaseDraftMapper";
 
 /**

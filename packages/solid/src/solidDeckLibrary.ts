@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { DeckLibrary, LinkedReleaseReads } from "@solid-memo/application/ports/library";
-import type { Dataset } from "./client/rdf";
+import type { Dataset } from "@solid-memo/solid-client/rdf";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { DocumentReport } from "@solid-memo/domain/validation";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
@@ -13,9 +13,14 @@ import { isDocumentIn } from "@solid-memo/domain/instanceLayout";
 import { AppError } from "@solid-memo/domain/appError";
 import { releaseHost } from "@solid-memo/domain/library";
 import { catalogLinks } from "./catalogLinks";
-import { ReadLimitError, type ReadLimits } from "./client/interface";
-import { getSolidDatasetLinear } from "./client/resources";
-import { limitedFetch, noneSpent, RELEASE_LIMITS, type ReadsSpent } from "./client/readLimits";
+import { ReadLimitError, type ReadLimits } from "@solid-memo/solid-client/interface";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
+import {
+  limitedFetch,
+  noneSpent,
+  RELEASE_LIMITS,
+  type ReadsSpent,
+} from "@solid-memo/solid-client/readLimits";
 import { WHOLE_READ_MS as RELEASE_READ_MS } from "./readDeadline";
 import {
   toCourseOutline,

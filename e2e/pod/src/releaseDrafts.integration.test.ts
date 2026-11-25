@@ -31,7 +31,7 @@ import {
   draftDocumentUrl,
 } from "@solid-memo/domain/release/draftLayout";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
-import { getProfileStorages } from "@solid-memo/solid/client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckLibrary, releaseDocumentsOf } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";

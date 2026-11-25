@@ -4,9 +4,9 @@
 
 import { describe, expect, it } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
-import { ReadLimitError } from "./client/interface";
-import { getSolidDatasetLinear } from "./client/resources";
-import { getThingAll } from "./client/rdf";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
+import { getThingAll } from "@solid-memo/solid-client/rdf";
 import type { PageMessage, SentResponse, WorkerMessage } from "./offPageProtocol";
 import { type JobEnv, type Jobs, serveOffPage } from "./offPageServe";
 

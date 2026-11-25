@@ -15,8 +15,12 @@ import {
   getUrl,
   getUrlAll,
   setThing,
-} from "./client/rdf";
-import { deleteSolidDataset, writeDocument, solidDatasetAsTurtle } from "./client/resources";
+} from "@solid-memo/solid-client/rdf";
+import {
+  deleteSolidDataset,
+  writeDocument,
+  solidDatasetAsTurtle,
+} from "@solid-memo/solid-client/resources";
 import {
   datasetFrom,
   datasetOfTurtle,
@@ -40,8 +44,8 @@ import { integerLiteral } from "./testing/literals";
 
 const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return {
     ...actual,
     // A write the pod takes as given, with no version.

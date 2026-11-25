@@ -29,8 +29,8 @@ import {
   type ReadLimits,
   type RequestOptions,
   type SourcedDataset,
-} from "./interface";
-import { boundedHeadersFetch, withBoundedHeaders } from "./linkHeader";
+} from "@solid-memo/solid-client/interface";
+import { boundedHeadersFetch, withBoundedHeaders } from "@solid-memo/solid-client/linkHeader";
 import {
   getSolidDatasetLinear as libraryGetSolidDatasetLinear,
   LOCAL_NODE,
@@ -54,10 +54,10 @@ import {
   type TextStream,
   textChunks,
   writeTurtle,
-} from "./readLimits";
-import { MAX_PATCH_BYTES, patchBody } from "./sparqlUpdate";
-import { turtleOf } from "../turtleWriter";
-import { refuseUnwritable } from "../writableTerms";
+} from "@solid-memo/solid-client/readLimits";
+import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid-client/sparqlUpdate";
+import { turtleOf } from "@solid-memo/solid-client/turtleWriter";
+import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
 
 /**
  * Reading and writing a pod's resources: documents as datasets (rdf.ts),
@@ -257,11 +257,9 @@ function ownPatches(
     if (init.method === "PUT")
       return fetch(input, { ...init, body: solidDatasetAsTurtle(dataset) });
     const changes = changesOf(dataset);
-    const body = patchBody(changes, localNameOf) ?? init.body;
-    if (
-      !whole &&
-      (typeof body !== "string" || new TextEncoder().encode(body).length <= MAX_PATCH_BYTES)
-    ) {
+    // The library's PATCH has a body of text, which ours replaces unless a change names a blank node.
+    const body = patchBody(changes, localNameOf) ?? String(init.body);
+    if (!whole && new TextEncoder().encode(body).length <= MAX_PATCH_BYTES) {
       refuseUnwritable([...(changes?.additions ?? []), ...(changes?.deletions ?? [])]);
       const response = await fetch(input, { ...init, body });
       // node-solid-server finds no decimal deleted as it served it (`1.0`, `2.50`), only as it reads it (`1`,

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, getThing } from "../client/rdf";
+import { buildThing, createSolidDataset, getThing } from "@solid-memo/solid-client/rdf";
 import { HASHED_CHARACTERS, isIriPastBound, TERM_NAME_ROOM } from "@solid-memo/domain/pathKeys";
 import { namedFsrsSubject, namedReviewSubject } from "@solid-memo/domain/reviewRecord";
 import {

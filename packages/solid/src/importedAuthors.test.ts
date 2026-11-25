@@ -14,7 +14,7 @@ import { authorsOf, otherAuthorsOf } from "@solid-memo/domain/release/releaseMet
 import { NOW } from "@solid-memo/domain/testing/releaseDraft";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
-import { datasetFromQuads } from "./client/rdf";
+import { datasetFromQuads } from "@solid-memo/solid-client/rdf";
 import { toStandaloneLibraryDeck } from "./mappers/libraryMapper";
 import { parseDeckFile } from "./solidDeckArchive";
 import { createSolidReleaseDraftRepository } from "./solidReleaseDraftRepository";

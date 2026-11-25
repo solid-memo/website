@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { ReadLimitError, type ReadLimits } from "./client/interface";
-import { parseQuads, solidDatasetAsTurtle } from "./client/resources";
-import { limitVars } from "./client/readLimits";
+import { ReadLimitError, type ReadLimits } from "@solid-memo/solid-client/interface";
+import { parseQuads, solidDatasetAsTurtle } from "@solid-memo/solid-client/resources";
+import { limitVars } from "@solid-memo/solid-client/readLimits";
 import {
   type Dataset,
   type Subject,
@@ -13,7 +13,7 @@ import {
   getThing,
   getThingAll,
   toRdfJsDataset,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import type { Quad } from "@rdfjs/types";
 import type { DeckArchive } from "@solid-memo/application/ports/library";
 import { AppError } from "@solid-memo/domain/appError";
@@ -37,7 +37,11 @@ import { DECK_V6 } from "@solid-memo/vocab/descriptors.generated";
 import { getSolidDatasetOrNull } from "./datasets";
 import { isCreatorAgent } from "./ownership";
 import { jsonLdOf, refuseRemoteContexts } from "./jsonLd";
-import { refusePrefixedLookalikes, refuseUnwritable, unwritableTermOf } from "./writableTerms";
+import {
+  refusePrefixedLookalikes,
+  refuseUnwritable,
+  unwritableTermOf,
+} from "@solid-memo/solid-client/writableTerms";
 import { agentNamesOf, toCard, toDeck } from "./mappers/deckMapper";
 import { reviewedCardIdOf, toFsrsState, toReviewState } from "./mappers/reviewStateMapper";
 import { allIris, hasClass, hasIri, readFieldOf, storedVersionOf } from "./records";

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type NamedSubject, type Subject, asUrl } from "../client/rdf";
+import { type NamedSubject, type Subject, asUrl } from "@solid-memo/solid-client/rdf";
 import { type Answer, isOfStudyDayRange } from "@solid-memo/domain/answer";
 import { answerFromRecord, answerToRecord } from "@solid-memo/domain/answerRecord";
 import { isStudyDay } from "@solid-memo/domain/reviewStateEdits";

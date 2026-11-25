@@ -14,16 +14,16 @@ import {
   type SubjectBuilder,
   toRdfJsDataset,
   withQuads,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import { datasetFrom, datasetOfTurtle } from "./testing/datasets";
-import { getSolidDatasetLinear } from "./client/resources";
+import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import {
   limitedFetch,
   MAX_TERM_CHARACTERS,
   MAX_VALUES_PER_PREDICATE,
   RELEASE_LIMITS,
-} from "./client/readLimits";
-import { ReadLimitError } from "./client/interface";
+} from "@solid-memo/solid-client/readLimits";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetOrNull } from "./datasets";
 import { DCAT, DCTERMS, RDF, SM, SM_NS } from "./vocab";

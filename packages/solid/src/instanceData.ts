@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, getThing, getThingAll } from "./client/rdf";
+import { type Dataset, getThing, getThingAll } from "@solid-memo/solid-client/rdf";
 import type { InstanceDeletion } from "@solid-memo/domain/instance";
 import {
   cardsContainerOf,

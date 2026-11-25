@@ -12,8 +12,8 @@ import {
   getThingAll,
   getUrl,
   setThing,
-} from "./client/rdf";
-import { writeDocument } from "./client/resources";
+} from "@solid-memo/solid-client/rdf";
+import { writeDocument } from "@solid-memo/solid-client/resources";
 import { datasetFrom } from "./testing/datasets";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { getSolidDatasetOrNull, keptDataset, versionOf } from "./datasets";
@@ -38,8 +38,8 @@ import { decimalLiteral } from "./testing/literals";
 
 const FSRS = "https://fsrs.example/ns#fsrs";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return {
     ...actual, // A write the pod takes as given, with no version.
     writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { buildThing, createThing, setThing, type Subject } from "../client/rdf";
+import { buildThing, createThing, setThing, type Subject } from "@solid-memo/solid-client/rdf";
 import { datasetFrom } from "../testing/datasets";
 import { toSubject, toWebIdDocument } from "./webIdDocumentMapper";
 

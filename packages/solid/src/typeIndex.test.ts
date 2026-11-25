@@ -15,10 +15,10 @@ import {
   type NamedSubject,
   setThing,
   type SubjectBuilder,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import { AppError } from "@solid-memo/domain/appError";
-import { readDocument, writeDocument } from "./client/resources";
-import { MAX_PROFILE_DOCUMENTS } from "./client/readLimits";
+import { readDocument, writeDocument } from "@solid-memo/solid-client/resources";
+import { MAX_PROFILE_DOCUMENTS } from "@solid-memo/solid-client/readLimits";
 import { datasetFrom, readOf, writtenAsGiven } from "./testing/datasets";
 import {
   addInstanceRegistration,
@@ -42,8 +42,8 @@ const PIM = {
 const RDFS = { seeAlso: "http://www.w3.org/2000/01/rdf-schema#seeAlso" } as const;
 const FOAF = { isPrimaryTopicOf: "http://xmlns.com/foaf/0.1/isPrimaryTopicOf" } as const;
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return {
     ...actual,
     readDocument: vi.fn(),

@@ -17,7 +17,7 @@ import {
   getUrlAll,
   setThing,
   toRdfJsDataset,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import {
   datasetFrom,
   datasetOfTurtle,

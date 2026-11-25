@@ -9,6 +9,8 @@
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/packages/inrupt-client/src/**",
+        "$TURBO_ROOT$/packages/inrupt-client/package.json",
         "$TURBO_ROOT$/packages/solid-memo-client/src/**",
         "$TURBO_ROOT$/packages/solid-memo-client/package.json"
       ]

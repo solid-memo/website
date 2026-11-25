@@ -3,14 +3,14 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { readDocument } from "./client/resources";
+import { readDocument } from "@solid-memo/solid-client/resources";
 import { datasetFrom, readOf } from "./testing/datasets";
 import { getSolidDatasetOrNull, readDataset, readsAsNone } from "./datasets";
-import { HttpError, ReadLimitError } from "./client/interface";
+import { HttpError, ReadLimitError } from "@solid-memo/solid-client/interface";
 import { AppError } from "@solid-memo/domain/appError";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return { ...actual, readDocument: vi.fn() };
 });
 
@@ -123,7 +123,9 @@ describe("readsAsNone of a read's own failure", () => {
   }
 
   async function readingWhole(): Promise<void> {
-    const actual = await vi.importActual<typeof import("./client/resources")>("./client/resources");
+    const actual = await vi.importActual<typeof import("@solid-memo/solid-client/resources")>(
+      "@solid-memo/solid-client/resources",
+    );
     vi.mocked(readDocument).mockImplementation(actual.readDocument);
   }
 

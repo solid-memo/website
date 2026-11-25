@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { limitsOf, PROFILE_LIMITS, spentOf } from "./client/readLimits";
-import type { ProfileStorages } from "./client/resources";
+import { limitsOf, PROFILE_LIMITS, spentOf } from "@solid-memo/solid-client/readLimits";
+import type { ProfileStorages } from "@solid-memo/solid-client/resources";
 import { readDataset } from "./datasets";
 import { createSolidStorageGateway, hasStorageLink } from "./solidStorageGateway";
 import { datasetFrom, datasetOfTurtle } from "./testing/datasets";

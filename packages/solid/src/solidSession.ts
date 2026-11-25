@@ -4,7 +4,7 @@
 
 import type { SessionGateway } from "@solid-memo/application/ports/session";
 import { createAuthFetch } from "./authFetch";
-import type { SessionClient } from "./client/session";
+import type { SessionClient } from "@solid-memo/solid-client/session";
 import { createSolidSessionGateway, type SessionGatewayOptions } from "./solidSessionGateway";
 
 /** The user's session: the gateway the app logs in by, and the fetch it reads and writes pods with. */

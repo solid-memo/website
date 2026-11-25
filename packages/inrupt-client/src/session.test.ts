@@ -11,9 +11,9 @@ import {
   login,
   logout,
 } from "@inrupt/solid-client-authn-browser";
-import { type SessionHarness, sessionContract } from "../testing/contract/session";
-import type { LoginOptions } from "./interface";
-import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
+import { type SessionHarness, sessionContract } from "@solid-memo/solid/testing/contract/session";
+import type { LoginOptions } from "@solid-memo/solid-client/interface";
+import { PROVIDER_REDIRECT_KEY } from "@solid-memo/solid-client/providerRedirect";
 import { createSessionClient } from "./session";
 
 vi.mock("@inrupt/solid-client-authn-browser");

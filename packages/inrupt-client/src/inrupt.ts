@@ -8,7 +8,12 @@ import type {
   WithResourceInfo,
   WithServerResourceInfo,
 } from "@inrupt/solid-client";
-import type { Dataset, FetchedDataset, SourcedDataset, Subject } from "./interface";
+import type {
+  Dataset,
+  FetchedDataset,
+  SourcedDataset,
+  Subject,
+} from "@solid-memo/solid-client/interface";
 
 /**
  * The library's objects behind the interface's types (interface.ts), for

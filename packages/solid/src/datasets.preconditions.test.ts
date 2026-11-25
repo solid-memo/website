@@ -10,7 +10,7 @@ import {
   type Dataset,
   setThing,
   toRdfJsDataset,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import {
   deleteDataset,
   getSolidDatasetOrNull,
@@ -20,7 +20,7 @@ import {
   readDataset,
   saveDataset,
 } from "./datasets";
-import { MAX_PATCH_BYTES } from "./client/sparqlUpdate";
+import { MAX_PATCH_BYTES } from "@solid-memo/solid-client/sparqlUpdate";
 
 /**
  * The preconditions through the real Solid client library (client/),

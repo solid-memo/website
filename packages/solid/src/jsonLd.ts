@@ -4,14 +4,14 @@
 
 import type { Quad, Term } from "@rdfjs/types";
 import { AppError } from "@solid-memo/domain/appError";
-import type { ReadLimits } from "./client/interface";
+import type { ReadLimits } from "@solid-memo/solid-client/interface";
 import {
   limitVars,
   MAX_BASE_CHARACTERS,
   MAX_TERM_CHARACTERS,
   plainBase,
-} from "./client/readLimits";
-import { isPrefixedLookalike } from "./writableTerms";
+} from "@solid-memo/solid-client/readLimits";
+import { isPrefixedLookalike } from "@solid-memo/solid-client/writableTerms";
 
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";

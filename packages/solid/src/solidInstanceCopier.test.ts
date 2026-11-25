@@ -11,7 +11,7 @@ import {
   getThing,
   getUrl,
   setThing,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 import {
   createContainerAt,
   deleteContainer,
@@ -20,14 +20,14 @@ import {
   getSolidDataset,
   overwriteFile,
   writeDocument,
-} from "./client/resources";
+} from "@solid-memo/solid-client/resources";
 import { containerFrom, datasetFrom } from "./testing/datasets";
 import { getSolidDatasetOrNull } from "./datasets";
 import { datetimeLiteral } from "./records";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";
 
-vi.mock("./client/resources", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("./client/resources")>();
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
   return {
     ...actual,
     createContainerAt: vi.fn(),

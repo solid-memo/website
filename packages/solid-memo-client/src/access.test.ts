@@ -5,7 +5,7 @@
 import type { Quad } from "@rdfjs/types";
 import { Parser } from "n3";
 import { describe, expect, it } from "vitest";
-import { MAX_DESCRIBING_HEADER_LENGTH } from "@solid-memo/solid/client/linkHeader";
+import { MAX_DESCRIBING_HEADER_LENGTH } from "@solid-memo/solid-client/linkHeader";
 import { accessContract } from "@solid-memo/solid/testing/contract/access";
 import { grantPublicRead } from "./access";
 

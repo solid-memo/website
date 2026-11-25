@@ -34,6 +34,8 @@ import {
   quadTally,
   readThrough,
   refusalOf,
+  limitsPast,
+  NO_SIZE_LIMITS,
   RELEASE_LIMITS,
   sharedReadBudget,
   spentOf,
@@ -42,8 +44,7 @@ import {
   writeTurtle,
 } from "./readLimits";
 import { getSolidDatasetLinear, parseQuads } from "./resources";
-import { getThing } from "./rdf";
-import { getStringNoLocaleAll } from "../testing/datasets";
+import { eachStringNoLocale, getThing } from "./rdf";
 
 const URL_ = "https://other.example/release.ttl";
 const LIMITS = { bytes: 10, quads: 5, characters: 100 };
@@ -143,7 +144,7 @@ describe("FOREIGN_LIMITS", () => {
     expect(days).toBeGreaterThan(MAX_VALUES_PER_PREDICATE);
     expect(days).toBeLessThan(MAX_DUE_DAYS);
     const thing = getThing(await read(schedule, FOREIGN_LIMITS), `${URL_}#schedule`);
-    expect(getStringNoLocaleAll(thing!, `${SM_NS}dueOnDay`)).toHaveLength(days);
+    expect([...eachStringNoLocale(thing!, `${SM_NS}dueOnDay`)]).toHaveLength(days);
     await expect(read(schedule, RELEASE_LIMITS)).rejects.toBeInstanceOf(ReadLimitError);
     const past = Array.from({ length: MAX_DUE_DAYS + 1 }, (_, i) => `"${i}"`);
     await expect(
@@ -275,6 +276,13 @@ describe("limitedFetch", () => {
     const response = await limitedFetch(async () => answer, LIMITS)(URL_);
     expect(response).toBe(answer);
     expect(limitsOf(response)).toBeUndefined();
+  });
+});
+
+describe("limitsPast", () => {
+  it("is the limits given, or none of size for a read with none", () => {
+    expect(limitsPast(RELEASE_LIMITS, undefined)).toBe(RELEASE_LIMITS);
+    expect(limitsPast(undefined, undefined)).toBe(NO_SIZE_LIMITS);
   });
 });
 
@@ -549,6 +557,14 @@ describe("writeTurtle", () => {
 
   it("writes an empty text as a blank one, which the parser ends as it ends any", () => {
     expect(writing("", () => true)).toEqual({ wrote: true, written: [" "], ended: true });
+  });
+
+  it("writes no end once told not to go on after the last part", () => {
+    let asked = 0;
+    const { wrote, written, ended } = writing("<a> <b> <c> .", () => ++asked < 2);
+    expect(wrote).toBe(true);
+    expect(written).toEqual(["<a> <b> <c> ."]);
+    expect(ended).toBe(false);
   });
 
   it("writes no more, nor the end, once told not to go on", () => {

@@ -4,8 +4,13 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
-import { ReadLimitError } from "./client/interface";
-import { isPastBudget, limitedFetch, noneSpent, sharedReadBudget } from "./client/readLimits";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import {
+  isPastBudget,
+  limitedFetch,
+  noneSpent,
+  sharedReadBudget,
+} from "@solid-memo/solid-client/readLimits";
 import { createOffPage, type WorkerLike } from "./offPage";
 import type { PageMessage, WorkerMessage } from "./offPageProtocol";
 

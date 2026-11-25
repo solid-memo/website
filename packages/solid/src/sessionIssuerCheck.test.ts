@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_WEBID } from "@solid-memo/domain/guest";
 import { TRIAL_WEBID } from "@solid-memo/domain/release/trial";
-import { PROFILE_LIMITS } from "./client/readLimits";
+import { PROFILE_LIMITS } from "@solid-memo/solid-client/readLimits";
 import { createSolidSessionGateway } from "./solidSessionGateway";
 import { fakePod } from "./testing/fakePod";
 import { fakeSessionClient } from "./testing/fakeSessionClient";

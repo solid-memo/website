@@ -5,16 +5,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getDefaultSession, login, Session } from "@inrupt/solid-client-authn-browser";
 import { AppError } from "@solid-memo/domain/appError";
-import { LOGIN_ISSUER_KEY, createSolidSessionGateway } from "../solidSessionGateway";
-import { type LoginOptions, ReadLimitError } from "./interface";
-import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
+import { LOGIN_ISSUER_KEY, createSolidSessionGateway } from "@solid-memo/solid/solidSessionGateway";
+import { type LoginOptions, ReadLimitError } from "@solid-memo/solid-client/interface";
+import { PROVIDER_REDIRECT_KEY } from "@solid-memo/solid-client/providerRedirect";
 import {
   limitedFetch,
   PROVIDER_METADATA_LIMITS,
   REGISTRATION_LIMITS,
   refusalOf,
   RELEASE_LIMITS,
-} from "./readLimits";
+} from "@solid-memo/solid-client/readLimits";
 import { createSessionClient } from "./session";
 
 /**

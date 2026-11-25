@@ -15,8 +15,12 @@ import {
   getUrlAll,
   setThing,
   type SubjectBuilder,
-} from "../client/rdf";
-import { getSolidDataset, parseQuads, solidDatasetAsTurtle } from "../client/resources";
+} from "@solid-memo/solid-client/rdf";
+import {
+  getSolidDataset,
+  parseQuads,
+  solidDatasetAsTurtle,
+} from "@solid-memo/solid-client/resources";
 import { datasetFrom } from "../testing/datasets";
 import { answersCsv } from "@solid-memo/domain/answerCsv";
 import { cardToRecord } from "@solid-memo/domain/deckRecord";

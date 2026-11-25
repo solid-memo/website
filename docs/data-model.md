@@ -84,7 +84,7 @@ flowchart LR
   document is read under `PROFILE_LIMITS`, and the others under them
   all together,
   no more than `MAX_PROFILE_DOCUMENTS` of them
-  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)). 0, 1
+  ([readLimits.ts](../packages/solid-client/src/readLimits.ts)). 0, 1
   or N storages are handled.
 - **Instances**: one `solid:TypeRegistration` per instance,
   `solid:forClass sm:Instance`, in the type index the user chooses
@@ -2020,7 +2020,7 @@ looks like, and JSON-LD reads it as one, so the file would read back as
 other triples; neither format can escape it. So is an IRI whose scheme
 is `_`, or that starts with `@`, which JSON-LD reads as a blank node or
 a keyword (`isPrefixedLookalike` in
-[writableTerms.ts](../packages/solid/src/writableTerms.ts)).
+[writableTerms.ts](../packages/solid-client/src/writableTerms.ts)).
 An import refuses a file that names such an IRI the same way
 (`unwritableTerm`), so no deck it imports has one its export refuses.
 
@@ -2266,7 +2266,7 @@ by one.
   `@language` is such a term too. A PATCH, a PUT, an insert-only PATCH,
   a release's Turtle and an export are refused with `unwritableTerm`
   before anything is sent
-  ([writableTerms.ts](../packages/solid/src/writableTerms.ts)). An
+  ([writableTerms.ts](../packages/solid-client/src/writableTerms.ts)). An
   imported deck leaves such triples out; a release read from a file is
   refused, as a draft keeps its triples as they are.
 - **No write holds a term longer than 16,383 characters**, as no read
@@ -2334,7 +2334,7 @@ by one.
   are a release's cards written, cards removed, the deck groups and
   positions of a rearranged deck list, and cards, catalog entries and
   review states brought to this app's format (`setThings` and
-  `removeThings` in [client/rdf.ts](../packages/solid/src/client/rdf.ts), `editOf` in
+  `removeThings` in [client/rdf.ts](../packages/inrupt-client/src/rdf.ts), `editOf` in
   [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)). A subject at
   a time would copy the whole document at each, in time growing with the
   square of its subjects. A list of values of one subject, such as a
@@ -2509,7 +2509,7 @@ by one.
   real servers, that one included ([testing.md](testing.md)).
 - **A document written whole is written by Solid Memo**, by one
   writer on either client (`turtleOf` in
-  [turtleWriter.ts](../packages/solid/src/turtleWriter.ts)): the PUT
+  [turtleWriter.ts](../packages/solid-client/src/turtleWriter.ts)): the PUT
   that creates a document or replaces it, a deck file and a release. A
   pod document is written with every IRI in full (`<…>`), with no base
   and no prefix, and a subject not saved yet as `<#name>` of the
@@ -2520,7 +2520,7 @@ by one.
   read them. A document an earlier version wrote with prefixes holds the
   same statements, and reads as before.
 - **An edit's PATCH body is written by Solid Memo** (`patchBody` in
-  [client/sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts),
+  [client/sparqlUpdate.ts](../packages/solid-client/src/sparqlUpdate.ts),
   sent by `writeDocument` in `client/resources.ts`), not by
   `@inrupt/solid-client`: one triple a line, a
   space before each `.`. node-solid-server's parser fails on a triple
@@ -2608,7 +2608,7 @@ by one.
   download: a 304 gives the dataset read before, and its mapping with
   it.
 - Reading builds the dataset in one pass
-  ([linearDataset.ts](../packages/solid/src/client/linearDataset.ts)):
+  ([linearDataset.ts](../packages/inrupt-client/src/linearDataset.ts)):
   `@inrupt/solid-client` copies the whole graph for every quad, which
   took 9 s for a deck of 3,000 cards.
 - 404 is a normal state for not-yet-created documents; repositories

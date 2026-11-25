@@ -9,8 +9,8 @@ import {
   getSolidDataset,
   getSolidDatasetLinear,
   overwriteFile,
-} from "./client/resources";
-import { fromRdfJsDataset, toRdfJsDataset } from "./client/rdf";
+} from "@solid-memo/solid-client/resources";
+import { fromRdfJsDataset, toRdfJsDataset } from "@solid-memo/solid-client/rdf";
 import type { ContainerMove, InstanceCopier } from "@solid-memo/application/ports/pod";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
 import { deleteContainerRecursively, listContainerTree } from "./containers";

@@ -3,10 +3,10 @@
 // SPDX-License-Identifier: MIT
 
 import { universalAccess } from "@inrupt/solid-client";
-import type { GrantPublicRead } from "./interface";
-import { TURTLE_FIRST, withBoundedHeaders } from "./linkHeader";
+import type { GrantPublicRead } from "@solid-memo/solid-client/interface";
+import { TURTLE_FIRST, withBoundedHeaders } from "@solid-memo/solid-client/linkHeader";
 
-export type { GrantPublicRead } from "./interface";
+export type { GrantPublicRead } from "@solid-memo/solid-client/interface";
 
 /**
  * The public-read grant (GrantPublicRead, interface.ts) over

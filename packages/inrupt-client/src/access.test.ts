@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { accessContract } from "../testing/contract/access";
+import { accessContract } from "@solid-memo/solid/testing/contract/access";
 import { accessFetch, grantPublicRead } from "./access";
 
 accessContract(grantPublicRead);

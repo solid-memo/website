@@ -12,14 +12,14 @@ import {
   logout,
 } from "@inrupt/solid-client-authn-browser";
 import { AppError } from "@solid-memo/domain/appError";
-import { ReadLimitError, type SessionClient } from "./interface";
-import { PROVIDER_REDIRECT_KEY } from "./providerRedirect";
+import { ReadLimitError, type SessionClient } from "@solid-memo/solid-client/interface";
+import { PROVIDER_REDIRECT_KEY } from "@solid-memo/solid-client/providerRedirect";
 import {
   limitedFetch,
   PROVIDER_METADATA_LIMITS,
   REGISTRATION_LIMITS,
   refusalOf,
-} from "./readLimits";
+} from "@solid-memo/solid-client/readLimits";
 
 /**
  * The sign-in client (SessionClient, interface.ts) over
@@ -28,7 +28,7 @@ import {
  * passes the same contract (src/testing/contract/session.ts).
  */
 
-export type { SessionClient } from "./interface";
+export type { SessionClient } from "@solid-memo/solid-client/interface";
 
 /**
  * Where the library (5.x) keeps, in localStorage, the session it

@@ -5,7 +5,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { ReviewState } from "@solid-memo/domain/review";
-import { FOREIGN_LIMITS, limitedFetch, sharedReadBudget } from "./client/readLimits";
+import {
+  FOREIGN_LIMITS,
+  limitedFetch,
+  sharedReadBudget,
+} from "@solid-memo/solid-client/readLimits";
 import type { UserStorages } from "./deckPlace";
 import { createLocalPod } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
@@ -14,8 +18,8 @@ import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { deckRepository, INSTANCE, put, release } from "./testing/deckWrites";
 
 // Limits small enough that a document past them is quick to make (GHSA-fxpf-f5hv-cr66).
-vi.mock("./client/readLimits", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("./client/readLimits")>()),
+vi.mock("@solid-memo/solid-client/readLimits", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@solid-memo/solid-client/readLimits")>()),
   FOREIGN_LIMITS: { bytes: 500_000, quads: 400, characters: 100_000_000, valuesPerPredicate: 50 },
 }));
 

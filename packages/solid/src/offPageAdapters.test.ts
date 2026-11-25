@@ -11,10 +11,10 @@ import { DECK_FILE_BASE } from "@solid-memo/domain/deckFile";
 import { catalogUrlOf } from "@solid-memo/domain/instanceLayout";
 import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
-import { ReadLimitError } from "./client/interface";
-import { FOREIGN_LIMITS, limitVars, RELEASE_LIMITS } from "./client/readLimits";
-import { sourceOf } from "./client/rdf";
-import { readDocument } from "./client/resources";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import { FOREIGN_LIMITS, limitVars, RELEASE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { sourceOf } from "@solid-memo/solid-client/rdf";
+import { readDocument } from "@solid-memo/solid-client/resources";
 import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";
 import { createOffPage } from "./offPage";
 import {

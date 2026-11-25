@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { vi } from "vitest";
-import type { RestoredSession, SessionClient } from "../client/interface";
+import type { RestoredSession, SessionClient } from "@solid-memo/solid-client/interface";
 
 /**
  * A sign-in client for tests: restore finds no one, and there is no

@@ -4,14 +4,18 @@
 
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import { describe, expect, it } from "vitest";
-import { datasetFromQuads } from "./client/rdf";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
-import { getSolidDatasetLinear, parseQuads, solidDatasetAsTurtle } from "./client/resources";
+import { datasetFromQuads } from "@solid-memo/solid-client/rdf";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
+import {
+  getSolidDatasetLinear,
+  parseQuads,
+  solidDatasetAsTurtle,
+} from "@solid-memo/solid-client/resources";
 import { parseDeckFile } from "./solidDeckArchive";
 import { createSolidPaletteRepository } from "./solidPaletteRepository";
 import { createSolidPreferencesRepository } from "./solidPreferencesRepository";
 import { SM_NS } from "./vocab";
-import { refuseUnwritable } from "./writableTerms";
+import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
 
 const INSTANCE = "https://pod.example/solid-memo/a/";
 const PREFERENCES = `${INSTANCE}preferences.ttl`;

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Subject } from "./client/rdf";
+import type { Subject } from "@solid-memo/solid-client/rdf";
 import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";
 import { readTerms } from "./records";
 import { createFolderGate } from "./ownPodGate";

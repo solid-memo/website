@@ -9,7 +9,7 @@ code is in
 [packages/solid/src/solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts),
 behind the `SessionGateway` port. It signs in through the sign-in client
 the composition root passes it, the one in
-[client/session.ts](../packages/solid/src/client/session.ts), the only
+[client/session.ts](../packages/inrupt-client/src/session.ts), the only
 file that calls the authentication library. A build with
 `SOLID_CLIENT=solid-memo-client` passes another sign-in client in its
 place, on `oauth4webapi` and no Inrupt library
@@ -51,7 +51,7 @@ provider with it. A tab holds its refresh token in memory, and at each
 refresh reads the provider to send it to from `localStorage`, by the ID
 alone. Every tab that restores a session shares that session's ID, and
 a logout leaves the ID on the page. So
-[client/session.ts](../packages/solid/src/client/session.ts) passes a
+[client/session.ts](../packages/inrupt-client/src/session.ts) passes a
 new ID to every login the user starts. The library clears what it kept
 of earlier sessions on that login, so another tab still under the old
 ID has no provider to refresh at, and sends nothing. That tab's session
@@ -69,7 +69,7 @@ with no option to replace it, so the sign-in client wraps the global
 `fetch`. Every request of the page passes through that wrapper, and it
 reads only an answer from an address ending in the metadata's path,
 under `PROVIDER_METADATA_LIMITS` (64 KiB)
-([client/readLimits.ts](../packages/solid/src/client/readLimits.ts)).
+([client/readLimits.ts](../packages/solid-client/src/readLimits.ts)).
 The library keeps each provider's metadata in `localStorage` and never
 removes it, so the limits are far below a profile's. Past them, the
 read fails as too large and the request is canceled.

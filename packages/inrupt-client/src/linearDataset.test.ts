@@ -15,7 +15,7 @@ import {
 import type { Quad } from "@rdfjs/types";
 import { growth } from "@solid-memo/domain/testing/growth";
 import { getSolidDatasetLinear, graphsOf } from "./linearDataset";
-import { MAX_TERM_CHARACTERS } from "./readLimits";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 
 const URL_ = "https://pod.example/decks/deck.ttl";
 const XSD_STRING = "http://www.w3.org/2001/XMLSchema#string";

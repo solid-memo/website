@@ -9,13 +9,13 @@ import {
   type SolidDataset,
 } from "@inrupt/solid-client";
 import { describe, expect, it, vi } from "vitest";
-import { MAX_DESCRIBING_HEADER_LENGTH } from "./linkHeader";
-import { resourcesContract } from "../testing/contract/resources";
-import { turtleAt } from "../testing/contract/rdf";
-import { HttpError } from "./interface";
+import { MAX_DESCRIBING_HEADER_LENGTH } from "@solid-memo/solid-client/linkHeader";
+import { resourcesContract } from "@solid-memo/solid/testing/contract/resources";
+import { turtleAt } from "@solid-memo/solid/testing/contract/rdf";
+import { HttpError } from "@solid-memo/solid-client/interface";
 import * as rdf from "./rdf";
 import * as resources from "./resources";
-import { integerLiteral } from "../testing/literals";
+import { integerLiteral } from "@solid-memo/solid/testing/literals";
 
 resourcesContract({ rdf, resources });
 

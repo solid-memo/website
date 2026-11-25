@@ -11,7 +11,7 @@
 import { describe, expect, it } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { ReviewState } from "@solid-memo/domain/review";
-import { getThing, setThing, toRdfJsDataset } from "./client/rdf";
+import { getThing, setThing, toRdfJsDataset } from "@solid-memo/solid-client/rdf";
 import { carriedTo } from "./records";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidInstanceCopier } from "./solidInstanceCopier";

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import { MAX_TERM_CHARACTERS } from "./client/readLimits";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import { createLocalPod, dataBlocks, parentOf } from "./localPod";
 import { createMemoryResourceStore } from "./memoryResourceStore";
 

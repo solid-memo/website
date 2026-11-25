@@ -5,7 +5,7 @@
 // @vitest-environment node
 
 import { describe, expect, it } from "vitest";
-import { getThing } from "./client/rdf";
+import { getThing } from "@solid-memo/solid-client/rdf";
 import { readDataset, readsAsNone } from "./datasets";
 
 /**

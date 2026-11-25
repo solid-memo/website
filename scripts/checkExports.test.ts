@@ -250,11 +250,11 @@ describe("unusedExports", () => {
       }),
     ];
     expect(
-      unusedExports(packages, {
-        "packages/solid/src/rdf.ts": "packages/other/src/rdf.ts",
-        "packages/solid/src/access.ts": "packages/other/src/access.ts",
-        "packages/solid/src/session.ts": "packages/other/src/session.ts",
-      }),
+      unusedExports(packages, [
+        ["packages/solid/src/rdf.ts", "packages/other/src/rdf.ts"],
+        ["packages/solid/src/access.ts", "packages/other/src/access.ts"],
+        ["packages/solid/src/session.ts", "packages/other/src/session.ts"],
+      ]),
     ).toEqual([
       "packages/other/src/rdf.ts: extra",
       "packages/other/src/rdf.ts: unused",

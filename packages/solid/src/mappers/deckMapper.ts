@@ -14,8 +14,8 @@ import {
   removeThings,
   setThing,
   setThings,
-} from "../client/rdf";
-import { MAX_TERM_CHARACTERS } from "../client/readLimits";
+} from "@solid-memo/solid-client/rdf";
+import { MAX_TERM_CHARACTERS } from "@solid-memo/solid-client/readLimits";
 import { editOf, type DatasetEdit } from "../datasetEdit";
 import {
   agentUrlOf,

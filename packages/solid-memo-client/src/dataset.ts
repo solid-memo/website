@@ -4,8 +4,8 @@
 
 import type { BlankNode, Literal, NamedNode, Quad, Quad_Subject } from "@rdfjs/types";
 import { DataFactory } from "n3";
-import type { Changes, Dataset, Subject } from "@solid-memo/solid/client/interface";
-import { pathKeys } from "@solid-memo/solid/client/readLimits";
+import type { Changes, Dataset, Subject } from "@solid-memo/solid-client/interface";
+import { pathKeys } from "@solid-memo/solid-client/readLimits";
 
 /**
  * This client's data model, behind the interface's Dataset and

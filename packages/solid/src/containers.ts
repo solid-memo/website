@@ -7,8 +7,8 @@ import {
   deleteFile,
   getContainedResourceUrlAll,
   getSolidDataset,
-} from "./client/resources";
-import type { SourcedDataset } from "./client/rdf";
+} from "@solid-memo/solid-client/resources";
+import type { SourcedDataset } from "@solid-memo/solid-client/rdf";
 import { getSolidDatasetOrNull } from "./datasets";
 import { AppError } from "@solid-memo/domain/appError";
 

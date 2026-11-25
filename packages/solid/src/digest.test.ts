@@ -4,9 +4,14 @@
 
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { describe, expect, it } from "vitest";
-import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";
+import {
+  buildThing,
+  createSolidDataset,
+  createThing,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
 import { AppError } from "@solid-memo/domain/appError";
-import type { HttpError } from "./client/interface";
+import type { HttpError } from "@solid-memo/solid-client/interface";
 import type { Deck } from "@solid-memo/domain/deck";
 import {
   ABSENT_VERSION,

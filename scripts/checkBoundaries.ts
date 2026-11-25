@@ -46,20 +46,24 @@ export const LAYERS: Record<string, string[]> = {
   domain: ["vocab"],
   application: ["domain", "vocab"],
   shacl: ["domain", "vocab", "turtle", "markdown"],
-  solid: ["application", "domain", "vocab", "shacl"],
+  // The seam between solid and a Solid client: the types and limits a client works to, and what it gives, declared.
+  "solid-client": ["domain", "vocab"],
+  // The Solid adapters, through the seam; never a client by name: the build puts the one SOLID_CLIENT names in place.
+  solid: ["application", "domain", "vocab", "shacl", "solid-client"],
+  // The two Solid clients, each the seam's declared modules over libraries of its own. No package the app is made
+  // of imports either; their tests run solid's contract (scripts/solidClient.ts).
+  "inrupt-client": ["solid-client", "domain", "solid"],
+  "solid-memo-client": ["solid-client", "solid"],
   browser: ["application", "domain"],
   // The components receive use cases and never reach solid or browser.
   ui: ["application", "domain", "vocab", "markdown"],
   // The composition root: every adapter behind its port, and the use cases over them.
-  composition: ["application", "domain", "vocab", "solid", "browser"],
+  composition: ["application", "domain", "vocab", "solid", "solid-client", "browser"],
   // The site's page, which shows the Studio at its routes; its build publishes the docs.
   web: ["application", "domain", "vocab", "ui", "composition", "studio", "build-tools"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
-  "e2e-pod": ["application", "domain", "vocab", "solid", "solid-memo-client"],
-  // A second implementation of solid's client modules, which it tests with solid's contract. No package
-  // the app is made of imports it: the build puts it in their place when SOLID_CLIENT names it (scripts/solidClient.ts).
-  "solid-memo-client": ["solid"],
+  "e2e-pod": ["application", "domain", "vocab", "solid", "solid-client", "solid-memo-client"],
   // The journeys drive the built app in a browser; they read only its text.
   "e2e-journeys": ["ui", "studio"],
 };
@@ -81,6 +85,9 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   shacl: { turtle: /^node\//, markdown: /^node\// },
   // The app's messages (packages/ui/src/i18n, apps/studio/src/i18n), which the page objects find text by.
   "e2e-journeys": { ui: /^harness\/strings\.ts$/, studio: /^harness\/strings\.ts$/ },
+  // A client's tests run solid's contract on it; nothing else of it is solid's.
+  "inrupt-client": { solid: /\.test\.ts$/ },
+  "solid-memo-client": { solid: /\.test\.ts$/ },
   // The signed-in tests sign in to a Linked Web Storage server with the only client that can.
   "e2e-pod": { "solid-memo-client": /^signedInClient\.ts$/ },
 };
@@ -103,32 +110,32 @@ export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
 /**
  * Vendor packages that only certain files may import, tests aside, by
  * package (`files`), with any import. The Solid client libraries, any
- * `@inrupt/` package, are used behind the app's own modules in
- * packages/solid/src/client/, so another library takes their place there
- * alone (docs/vendor-code.md), but for their interface (interface.ts),
- * which names no library; shacl, which may not import solid, reads
- * Turtle through one module of its own. The JSON-LD parser, which must
- * be given a document loader that fetches nothing, is one module's alone
- * in each client: client/resources.ts in solid, resources.ts in
- * solid-memo-client.
+ * `@inrupt/` package, are inrupt-client's alone, the modules
+ * packages/solid-client declares, so another client takes their place
+ * (docs/vendor-code.md); shacl, which may not import solid, reads Turtle
+ * through one module of its own. The JSON-LD parser, which must be
+ * given a document loader that fetches nothing, is one module's alone in
+ * each client: resources.ts.
  */
 export const VENDOR_ONLY_IN: { specifier: RegExp; files: Record<string, RegExp> }[] = [
   {
     specifier: /^@inrupt\//,
-    files: { solid: /^src\/client\/(?!interface\.ts$)/, shacl: /^src\/turtleDocument\.ts$/ },
+    files: { "inrupt-client": /^src\//, shacl: /^src\/turtleDocument\.ts$/ },
   },
   {
     specifier: /^jsonld-streaming-parser$/,
-    files: { solid: /^src\/client\/resources\.ts$/, "solid-memo-client": /^src\/resources\.ts$/ },
+    files: { "inrupt-client": /^src\/resources\.ts$/, "solid-memo-client": /^src\/resources\.ts$/ },
   },
 ];
 
 /**
  * Vendor packages a package never imports, tests and configs included:
- * solid-memo-client is the Solid client without Inrupt's libraries.
+ * solid-memo-client is the Solid client without Inrupt's libraries, and
+ * the seam names no client's library.
  */
 export const VENDOR_NEVER_IN: Record<string, RegExp> = {
   "solid-memo-client": /^@inrupt\//,
+  "solid-client": /^@inrupt\//,
 };
 
 /**
@@ -148,12 +155,12 @@ export const VENDOR_ONLY_FROM: {
     specifier: /^@inrupt\/solid-client(\/|$)/,
     names:
       /^(universalAccess|access|acp_\w+|\w*Ac[lr]\w*|(get|set)(Agent|Group|Public)(Resource|Default)?Access(All)?|getEffectiveAccess)$/,
-    files: { solid: /^src\/client\/access\.ts$/ },
+    files: { "inrupt-client": /^src\/access\.ts$/ },
   },
 ];
 
 /**
- * The raw getters of the app's RDF module (packages/solid/src/client/rdf.ts):
+ * The raw getters of the app's RDF module (packages/solid-client/src/rdf.ts):
  * each reads a property's values, every one of them, with no bound
  * (getUrlAll, getStringNoLocale, getTermAll, getPropertyAll,
  * propertiesOf, and the readers one at a time, eachUrl and its
@@ -164,17 +171,17 @@ export const RAW_GETTERS =
   /^(get(Url|Iri|StringNoLocale|StringWithLocale|StringByLocale|StringEnglish|Literal|Term|NamedNode|Integer|Decimal|Boolean|Datetime|Date|Time)(All)?|getPropertyAll|propertiesOf|each[A-Z]\w*)$/;
 
 /**
- * The module whose raw getters RAW_GETTERS names, by package, as a path
- * from the package's folder, and the files that may import them, tests
+ * The module whose raw getters RAW_GETTERS names, by package, as the
+ * specifier it is imported by, and the files that may import them, tests
  * aside: records.ts, which reads every record and term within its
- * bounds; the client modules, which make the getters and read what a
- * server says of a resource; and the shape check, which judges a whole
- * document as SHACL does and reads nothing into the app's models.
+ * bounds, and the shape check, which judges a whole document as SHACL
+ * does and reads nothing into the app's models. The clients make the
+ * getters, and read what a server says of a resource with them.
  */
 export const RAW_GETTERS_ONLY_IN: Record<string, { module: string; files: RegExp }> = {
   solid: {
-    module: "src/client/rdf",
-    files: /^src\/(records\.ts|client\/.*|shaclShapeValidator\.ts)$/,
+    module: "@solid-memo/solid-client/rdf",
+    files: /^src\/(records\.ts|shaclShapeValidator\.ts)$/,
   },
 };
 
@@ -201,19 +208,21 @@ export const BROWSER: Record<string, RegExp> = {
   ui: /^src\//,
   web: /^src\//,
   studio: /^src\//,
+  "solid-client": /^src\//,
+  "inrupt-client": /^src\//,
   "solid-memo-client": /^src\//,
 };
 
 /**
  * The node-only packages a package's browser code may import all the
  * same, from the files given: solid-memo-client reads and writes Turtle
- * with n3, which Inrupt's client bundles too, and solid's
- * client/linearDataset.ts builds the parser Inrupt's client reads
- * Turtle with, without triple terms, and the terms of a dataset's quads.
+ * with n3, which Inrupt's client bundles too, and inrupt-client's
+ * linearDataset.ts builds the parser Inrupt's library reads Turtle
+ * with, without triple terms, and the terms of a dataset's quads.
  */
 export const BROWSER_MAY_USE: Record<string, { specifier: RegExp; files: RegExp }> = {
   "solid-memo-client": { specifier: /^n3$/, files: /^src\// },
-  solid: { specifier: /^n3$/, files: /^src\/client\/linearDataset\.ts$/ },
+  "inrupt-client": { specifier: /^n3$/, files: /^src\/linearDataset\.ts$/ },
 };
 
 /** Whether BROWSER_MAY_USE lets this file of a package's browser code import `specifier`. */
@@ -374,8 +383,7 @@ function rawGetterProblems(where: string, short: string, file: string, text: str
   if (rule === undefined || rule.files.test(file)) return [];
   const problems: string[] = [];
   for (const [, braces, namespace, specifier] of text.matchAll(NAMED_IMPORT)) {
-    if (!specifier!.startsWith(".")) continue;
-    if (join(dirname(file), specifier!).replace(/\.ts$/, "") !== rule.module) continue;
+    if (specifier!.replace(/\.ts$/, "") !== rule.module) continue;
     for (const name of importedNames(braces, namespace)) {
       if (name !== "*" && !RAW_GETTERS.test(name)) continue;
       problems.push(

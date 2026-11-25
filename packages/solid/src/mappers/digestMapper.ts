@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { type Dataset, type NamedSubject, asUrl, getThingAll } from "../client/rdf";
+import { type Dataset, type NamedSubject, asUrl, getThingAll } from "@solid-memo/solid-client/rdf";
 import {
   monthSummaryFromRecord,
   monthSummaryToRecord,

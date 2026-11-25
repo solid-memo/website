@@ -22,7 +22,7 @@ import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository
 import { createSolidInstanceGraphReader } from "@solid-memo/solid/solidInstanceGraphReader";
 import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRepository";
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
-import { getProfileStorages } from "@solid-memo/solid/client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 

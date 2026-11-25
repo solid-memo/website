@@ -3,21 +3,26 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it } from "vitest";
-import type { GrantPublicRead } from "../../client/interface";
+import type { GrantPublicRead } from "@solid-memo/solid-client/interface";
 import { createLocalPod } from "../../localPod";
 import { createMemoryResourceStore } from "../../memoryResourceStore";
 
 const POD = "https://alice.example/";
 const RELEASE = `${POD}solid-memo/main/releases/solid/v1.ttl`;
 const ACL = "http://www.w3.org/ns/auth/acl#";
+const ACP = "http://www.w3.org/ns/solid/acp#";
 
 /**
  * A pod with Web Access Control (`wac`): each resource's ACL is its URL
  * and `.acl` (rel="acl"), and the root's lets everyone do everything.
- * Without it, the pod has no access control. `sent` is every request
- * made, as method, URL and body.
+ * Without it, the pod has no access control. With `acp`, its access is
+ * controlled by Access Control Policies instead: each resource's access
+ * control is its URL and `.acr`, each answer for which has a Link saying
+ * what it is, a 404 too while it is not written yet, as the Community
+ * Solid Server does. `sent` is every request made, as method, URL and
+ * body.
  */
-async function pod({ wac = true }: { wac?: boolean } = {}) {
+async function pod({ wac = true, acp = false }: { wac?: boolean; acp?: boolean } = {}) {
   const store = createMemoryResourceStore();
   let etags = 0;
   const local = createLocalPod({ root: POD, store, newEtag: () => `"e${++etags}"` });
@@ -34,9 +39,16 @@ async function pod({ wac = true }: { wac?: boolean } = {}) {
     const method = (init?.method ?? "GET").toUpperCase();
     sent.push(`${method} ${url}${typeof init?.body === "string" ? ` ${init.body}` : ""}`);
     const response = await local(input, init);
-    if (!wac || url.endsWith(".acl") || (method !== "GET" && method !== "HEAD")) return response;
+    if (acp && url.endsWith(".acr")) {
+      const headers = new Headers(response.headers);
+      headers.append("Link", `<${ACP}AccessControlResource>; rel="type"`);
+      const answer = new Response(response.body, { status: response.status, headers });
+      Object.defineProperty(answer, "url", { value: url });
+      return answer;
+    }
+    if (!wac || /\.ac[lr]$/.test(url) || (method !== "GET" && method !== "HEAD")) return response;
     const headers = new Headers(response.headers);
-    headers.append("Link", `<${url}.acl>; rel="acl"`);
+    headers.append("Link", `<${url}.${acp ? "acr" : "acl"}>; rel="acl"`);
     const answer = new Response(response.body, { status: response.status, headers });
     Object.defineProperty(answer, "url", { value: url });
     return answer;
@@ -68,6 +80,21 @@ export function accessContract(grantPublicRead: GrantPublicRead): void {
         `PATCH ${RELEASE}.acl`,
       ]);
       expect(writes[0]).not.toMatch(/>\.(\s|\})/);
+    });
+
+    it("writes the document's own ACR on a pod with Access Control Policies, one not written yet read as an empty one, and says it governs the document", async () => {
+      const { fetch, sent, text } = await pod({ acp: true });
+      await expect(grantPublicRead(RELEASE, { fetch })).resolves.toBe(true);
+      // Each address once: a client may write the ACR in one PATCH or in two.
+      const writes = sent.filter((one) => !one.startsWith("GET ") && !one.startsWith("HEAD "));
+      expect([...new Set(writes.map((one) => one.split(" ").slice(0, 2).join(" ")))]).toEqual([
+        `PATCH ${RELEASE}.acr`,
+      ]);
+      const acr = await text(`${RELEASE}.acr`);
+      expect(acr).toContain(`<${ACP}PublicAgent>`);
+      expect(acr).toContain(`<${ACL}Read>`);
+      // The Community Solid Server applies no ACR that doesn't say what it governs.
+      expect(acr).toContain(`<${ACP}resource> <${RELEASE}>`);
     });
 
     it("says a pod without access control did not make the document public", async () => {

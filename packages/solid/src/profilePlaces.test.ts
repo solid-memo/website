@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import { buildThing, createThing } from "./client/rdf";
+import { buildThing, createThing } from "@solid-memo/solid-client/rdf";
 import {
   createPlacesFetch,
   isInPlaces,

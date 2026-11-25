@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { Dataset } from "./client/rdf";
+import type { Dataset } from "@solid-memo/solid-client/rdf";
 import type { Since } from "@solid-memo/application/ports/shared";
 import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
 import { getSolidDatasetOrNull, readDatasetSince, UNCHANGED, versionOf } from "./datasets";

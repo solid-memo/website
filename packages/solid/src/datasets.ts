@@ -16,29 +16,33 @@ import {
   sourceOf,
   toRdfJsDataset,
   withQuads,
-} from "./client/rdf";
+} from "@solid-memo/solid-client/rdf";
 
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
-import { type DocumentRead, ReadLimitError, type ReadLimits } from "./client/interface";
+import {
+  type DocumentRead,
+  ReadLimitError,
+  type ReadLimits,
+} from "@solid-memo/solid-client/interface";
 import {
   FOREIGN_LIMITS,
   isPastBudget,
   limitVars,
   readThrough,
   refusalOf,
-} from "./client/readLimits";
+} from "@solid-memo/solid-client/readLimits";
 import {
   deleteSolidDataset,
   parseQuads,
   readDocument,
   solidDatasetAsTurtle,
   writeDocument,
-} from "./client/resources";
-import { MAX_PATCH_BYTES, patchBody, tripleLine } from "./client/sparqlUpdate";
+} from "@solid-memo/solid-client/resources";
+import { MAX_PATCH_BYTES, patchBody, tripleLine } from "@solid-memo/solid-client/sparqlUpdate";
 import { termOf } from "./ntriples";
 import { isWrittenByNewer } from "./records";
-import { refuseUnwritable } from "./writableTerms";
+import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
 import { noWriteCheck, type WriteCheck } from "./writeCheck";
 import { AppError } from "@solid-memo/domain/appError";
 import { isSameUrl } from "@solid-memo/domain/instanceLayout";

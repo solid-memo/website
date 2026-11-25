@@ -16,7 +16,7 @@
 import { describe, expect, inject, it } from "vitest";
 import { createReleasePublishingUseCases } from "@solid-memo/application/releasePublishing";
 import { createPodFence } from "@solid-memo/solid/podFence";
-import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { grantPublicRead } from "@solid-memo/solid-client/access";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 
 const SERVERS = inject("solidServers");
