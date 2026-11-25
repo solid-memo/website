@@ -435,7 +435,12 @@ whether a `merge_group` run passed that commit. When one did, the push
 run tests nothing, and its `reuse` job keeps the queue run's `site`
 artifact as its own. It also saves the queue run's `turbo-cache`
 artifact as `main`'s Turbo cache, which every pull request starts
-from. When the queue tests
+from. The other way, a pull request's run keeps its Turbo cache as its
+`turbo-cache` artifact, and the queue adds it to `main`'s. The gate
+finds the run that passed the head the queue merges (`warmed-by`). A
+task that run passed on the same inputs doesn't run again. Only a run
+of a branch of this repository counts: a fork's could upload a cache
+that claims tasks passed that never ran. When the queue tests
 several pull requests at once, each is its own commit with its own run,
 on top of those ahead of it, and `main` moves to the last. A run is
 found by its commit, never by its pull request.

@@ -33,6 +33,7 @@ function fakeIo(overrides: Partial<GateIo> = {}): GateIo & { outputs: string[]; 
     head: () => ({ sha: SHA, subject: "feat(app): something", parents: [PARENT] }),
     changed: () => ["CHANGELOG.md", "package.json"],
     passed: async () => undefined,
+    ownPullRequestPassed: async () => undefined,
     kept: async () => true,
     output: (name, value) => outputs.push(`${name}=${value}`),
     log: (message) => logs.push(message),
@@ -83,6 +84,65 @@ describe("decide", () => {
       expect((await decide(fakeIo({ event, ref, passed }))).jobs).toBe("all");
     }
     expect(passed).not.toHaveBeenCalled();
+  });
+
+  describe("in the merge queue", () => {
+    const QUEUE = "refs/heads/gh-readonly-queue/main/pr-1-abc";
+    const HEAD = "c".repeat(40);
+    /** A queue run of the merge of HEAD, a pull request's head, onto PARENT. */
+    const queued = (overrides: Partial<GateIo> = {}) =>
+      fakeIo({
+        event: "merge_group",
+        ref: QUEUE,
+        head: () => ({ sha: SHA, subject: "Merge pull request #1", parents: [PARENT, HEAD] }),
+        ...overrides,
+      });
+
+    it("warms the check with the cache of the pull request's run that passed the head it merges", async () => {
+      const ownPullRequestPassed = vi.fn(async () => 5);
+      const kept = vi.fn(async () => true);
+      expect(await decide(queued({ ownPullRequestPassed, kept }))).toEqual({
+        jobs: "all",
+        warmedBy: 5,
+        why: `A merge_group run on ${QUEUE}: every job runs, from main's Turbo cache and that of run 5, which passed the pull request's cccccccc.`,
+      });
+      expect(ownPullRequestPassed.mock.calls).toEqual([[HEAD]]);
+      expect(kept.mock.calls).toEqual([[5, TURBO_CACHE]]);
+    });
+
+    it("starts from main's cache alone when no run of this repository passed the head", async () => {
+      expect(await decide(queued())).toEqual({
+        jobs: "all",
+        why: `A merge_group run on ${QUEUE}: every job runs, from main's Turbo cache: no run of this repository's pull request passed cccccccc.`,
+      });
+    });
+
+    it("starts from main's cache alone when the run keeps its cache no longer", async () => {
+      const io = queued({ ownPullRequestPassed: async () => 5, kept: async () => false });
+      expect(await decide(io)).toEqual({
+        jobs: "all",
+        why: `A merge_group run on ${QUEUE}: every job runs, from main's Turbo cache: run 5 passed cccccccc, but keeps no turbo-cache, or it expired.`,
+      });
+    });
+
+    it("starts from main's cache alone for a queue commit with no second parent", async () => {
+      const ownPullRequestPassed = vi.fn(async () => 5);
+      const io = queued({
+        head: () => ({ sha: SHA, subject: "Squashed", parents: [PARENT] }),
+        ownPullRequestPassed,
+      });
+      expect(await decide(io)).toEqual({
+        jobs: "all",
+        why: `A merge_group run on ${QUEUE}: every job runs.`,
+      });
+      expect(ownPullRequestPassed).not.toHaveBeenCalled();
+    });
+
+    it("writes which run's cache warms the check", async () => {
+      const io = queued({ ownPullRequestPassed: async () => 5 });
+      expect(await main(io)).toBe(0);
+      expect(io.outputs).toEqual(["jobs=all", "warmed-by=5"]);
+    });
   });
 
   it("reuses the queue run on main when the merge queue passed the commit", async () => {
@@ -245,6 +305,39 @@ describe("defaultIo", () => {
       `https://api.example/repos/owner/repo/actions/workflows/ci.yml/runs?head_sha=${SHA}&event=merge_group&status=success&per_page=1`,
     );
     expect(init.headers).toMatchObject({ authorization: "Bearer t" });
+  });
+
+  it("asks GitHub for a pull request's run that passed on a commit, of a branch of this repository", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        total_count: 3,
+        workflow_runs: [
+          { id: 41, head_repository: { full_name: "someone/fork" } },
+          { id: 40, head_repository: null },
+          { id: 42, head_repository: { full_name: "owner/repo" } },
+        ],
+      }),
+    );
+    const io = defaultIo(
+      repo,
+      { GITHUB_REPOSITORY: "owner/repo", GITHUB_API_URL: "https://api.example", GH_TOKEN: "t" },
+      fetch,
+    );
+    expect(await io.ownPullRequestPassed(SHA)).toBe(42);
+    const [url] = fetch.mock.calls[0] as unknown as [URL];
+    expect(String(url)).toBe(
+      `https://api.example/repos/owner/repo/actions/workflows/ci.yml/runs?head_sha=${SHA}&event=pull_request&status=success&per_page=100`,
+    );
+  });
+
+  it("finds no pull request's run when every run that passed is a fork's", async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({
+        workflow_runs: [{ id: 41, head_repository: { full_name: "someone/fork" } }],
+      }),
+    );
+    const io = defaultIo(repo, { GITHUB_REPOSITORY: "owner/repo", GH_TOKEN: "t" }, fetch);
+    expect(await io.ownPullRequestPassed(SHA)).toBeUndefined();
   });
 
   it("asks GitHub whether a run keeps its artifacts of a prefix, none expired", async () => {

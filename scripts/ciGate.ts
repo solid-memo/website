@@ -20,6 +20,14 @@
  *   the files a release writes (release.config.mjs), or the gate fails.
  *   Its code is its parent's, already tested.
  *
+ * In the merge queue, it also writes `warmed-by=<run id>`: the pull
+ * request's run that passed the commit the queue merges (the queue
+ * commit's second parent), while it keeps Turbo's cache, which the
+ * queue's check adds to main's, so a task the pull request's run passed
+ * on the same inputs doesn't run again. Only a run of a branch of this
+ * repository is taken: a fork's run could upload a cache that claims
+ * tasks passed that never ran.
+ *
  * It writes `jobs=all` or `jobs=reuse` to GITHUB_OUTPUT, and with the
  * latter `tested-by=<run id>`: the CI run that tested this tree, whose
  * artifacts the run takes over: the journeys' blobs for main's report,
@@ -38,7 +46,9 @@ const { assets } = (await import(new URL("../release.config.mjs", import.meta.ur
 };
 
 /** What a run runs: every job, or none but those that reuse the run that tested this code. */
-export type Gate = { jobs: "all"; why: string } | { jobs: "reuse"; testedBy: number; why: string };
+export type Gate =
+  | { jobs: "all"; warmedBy?: number; why: string }
+  | { jobs: "reuse"; testedBy: number; why: string };
 
 const MAIN = "refs/heads/main";
 /**
@@ -48,7 +58,11 @@ const MAIN = "refs/heads/main";
 export const JOURNEYS_BLOBS = "journeys-blob-";
 /** The site the run built (ci.yml's site job), which the deploy ships. */
 export const SITE = "site";
-/** Turbo's cache after a queue run's checks (ci.yml's check job), which becomes main's. */
+/**
+ * Turbo's cache after a run's checks (ci.yml's check job): a pull
+ * request's, which the queue adds to main's, and the queue's, which
+ * becomes main's.
+ */
 export const TURBO_CACHE = "turbo-cache";
 const RELEASE = "chore(release): ";
 
@@ -73,6 +87,8 @@ export interface GateIo {
   changed(sha: string): string[];
   /** The id of a CI run for `event` that passed on the commit, if there is one. */
   passed(sha: string, event: "merge_group" | "push"): Promise<number | undefined>;
+  /** The id of a pull request's CI run that passed on the commit, of a branch of this repository, never a fork's. */
+  ownPullRequestPassed(sha: string): Promise<number | undefined>;
   /** Whether a run has artifacts named with that prefix, and none of them expired. */
   kept(run: number, prefix: string): Promise<boolean>;
   output(name: string, value: string): void;
@@ -99,8 +115,38 @@ async function testedIn(
   };
 }
 
+/**
+ * A merge queue run's: every job, with the run of the pull request it
+ * merges that passed its head (the queue commit's second parent), while
+ * that run keeps Turbo's cache.
+ */
+async function queueGate(io: GateIo): Promise<Gate> {
+  const all = `A merge_group run on ${io.ref}: every job runs`;
+  const head = io.head().parents[1];
+  if (head === undefined) return { jobs: "all", why: `${all}.` };
+  const run = await io.ownPullRequestPassed(head);
+  if (run === undefined) {
+    return {
+      jobs: "all",
+      why: `${all}, from main's Turbo cache: no run of this repository's pull request passed ${head.slice(0, 8)}.`,
+    };
+  }
+  if (!(await io.kept(run, TURBO_CACHE))) {
+    return {
+      jobs: "all",
+      why: `${all}, from main's Turbo cache: run ${run} passed ${head.slice(0, 8)}, but keeps no ${TURBO_CACHE}, or it expired.`,
+    };
+  }
+  return {
+    jobs: "all",
+    warmedBy: run,
+    why: `${all}, from main's Turbo cache and that of run ${run}, which passed the pull request's ${head.slice(0, 8)}.`,
+  };
+}
+
 /** What this run runs, and why; throws when a release commit is not one. */
 export async function decide(io: GateIo): Promise<Gate> {
+  if (io.event === "merge_group") return queueGate(io);
   if (io.event !== "push" || io.ref !== MAIN) {
     return { jobs: "all", why: `A ${io.event} run on ${io.ref}: every job runs.` };
   }
@@ -155,6 +201,9 @@ export async function main(io: GateIo): Promise<number> {
     io.log(gate.why);
     io.output("jobs", gate.jobs);
     if (gate.jobs === "reuse") io.output("tested-by", String(gate.testedBy));
+    if (gate.jobs === "all" && gate.warmedBy !== undefined) {
+      io.output("warmed-by", String(gate.warmedBy));
+    }
     return 0;
   } catch (error) {
     io.log((error as Error).message);
@@ -219,6 +268,17 @@ export function defaultIo(repo: string, env: GateEnv, fetch: typeof globalThis.f
           per_page: "1",
         })) as { workflow_runs: { id: number }[] }
       ).workflow_runs[0]?.id,
+    ownPullRequestPassed: async (sha) => {
+      const { workflow_runs } = (await api(`actions/workflows/ci.yml/runs`, {
+        head_sha: sha,
+        event: "pull_request",
+        status: "success",
+        per_page: "100",
+      })) as { workflow_runs: { id: number; head_repository: { full_name: string } | null }[] };
+      return workflow_runs.find(
+        ({ head_repository }) => head_repository?.full_name === env.GITHUB_REPOSITORY,
+      )?.id;
+    },
     kept: async (run, prefix) => {
       const { artifacts } = (await api(`actions/runs/${run}/artifacts`, { per_page: "100" })) as {
         artifacts: { name: string; expired: boolean }[];
