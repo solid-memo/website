@@ -74,6 +74,8 @@ export const ALLOWED: Record<string, string> = {
 export const INSTALL_SCRIPTS: Record<string, string> = {
   fsevents:
     "File watching on macOS, an optional dependency of Vite and others; its package carries the binary built, which its script only builds again.",
+  esbuild:
+    "The bundler Storybook builds with; its binary comes in the platform's optional package (@esbuild/linux-x64 and the like), which its script only fetches when missing and links in place of a stub, for speed.",
 };
 
 /**

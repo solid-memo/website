@@ -55,6 +55,18 @@
         "GITHUB_SHA"
       ]
     },
+    "build:storybook": {
+      "dependsOn": [
+        "transit"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/tsconfig.base.json"
+      ],
+      "outputs": [
+        "dist/**"
+      ]
+    },
     "generate:check": {
       "dependsOn": [
         "transit"

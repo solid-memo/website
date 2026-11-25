@@ -14,7 +14,7 @@ export default mergeConfig(
       globals: true,
       server: {
         deps: {
-          inline: [/@tanstack\/react-query/],
+          inline: [/@tanstack\/react-query/, /storybook/],
         },
       },
       setupFiles: ["./src/test/setup.ts"],

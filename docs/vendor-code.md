@@ -124,6 +124,7 @@ version, and sits below a fetched package that lists
 | Package | Why its install script is no loss |
 |---|---|
 | `fsevents` | File watching on macOS, an optional dependency of Vite and others. Its package carries the binary built; its script only builds it again. |
+| `esbuild` | The bundler Storybook builds with ([storybook.md](storybook.md)). Its binary comes in the platform's optional package (`@esbuild/linux-x64` and the like); its script only fetches that package when it's missing and puts the binary in place of a stub, for speed. |
 
 Another package with an install script goes into `INSTALL_SCRIPTS` in
 `checkDependencies.ts` and this table, once it's clear the package works

@@ -67,7 +67,11 @@ describe("isTestFile", () => {
     ["vitest.config.ts", true],
     ["vitest.journeys.config.ts", true],
     ["globalSetup.ts", true],
+    ["src/ui/Pager.stories.tsx", true],
+    [".storybook/main.ts", true],
     ["src/deck.ts", false],
+    ["src/ui/stories.tsx", false],
+    ["src/storybook/main.ts", false],
     ["src/contest/rules.ts", false],
   ])("%s: %s", (path, expected) => {
     expect(isTestFile(path)).toBe(expected);

@@ -250,10 +250,16 @@ export const NODE_ONLY = [
  */
 const SHARED_SETUP = new Set(["vitest.shared.ts", "scripts/solidClient.ts"]);
 
-/** A test file, test helper or config, which may also use the shared test tooling. */
+/**
+ * A test file, test helper or config, which may also use the shared test
+ * tooling. A component's stories (`*.stories.tsx`) and the Storybook's
+ * config (`.storybook/`) are tests too: the stories run as tests
+ * (docs/storybook.md#stories-are-tests), and only the Storybook imports them.
+ */
 export const isTestFile = (path: string) =>
   /\.test\.tsx?$/.test(path) ||
-  /(^|\/)(testing|test)\//.test(path) ||
+  /\.stories\.tsx$/.test(path) ||
+  /(^|\/)(testing|test|\.storybook)\//.test(path) ||
   /^(vitest(\.\w+)?\.config|globalSetup)\.ts$/.test(path);
 
 const IMPORT = /(?:\bfrom\s*|\bimport\s*\(\s*|^import\s+|\bvi\.mock\(\s*)["']([^"'\s]+)["']/gm;
