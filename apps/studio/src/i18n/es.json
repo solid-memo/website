@@ -1631,10 +1631,10 @@
       "downloaded": "Se guardó {file}, como la publicación en {url}.",
       "stepsIntro": "Para proponerla a la biblioteca, en una copia del repositorio de Solid Memo:",
       "stepCopy": "Pon el archivo en decks/ como {file}.",
-      "stepLibrary": "Dale formato e inclúyelo en el índice de la biblioteca:",
+      "stepLibrary": "Dale formato y comprueba la biblioteca con él:",
       "stepCheck": "Compruébalo con las reglas de la biblioteca:",
       "stepAll": "Ejecuta todas las comprobaciones:",
-      "stepPullRequest": "Abre una pull request con el archivo nuevo y el índice.",
+      "stepPullRequest": "Abre una pull request con el archivo nuevo.",
       "libraryCheck": "Comprobar primero el borrador para la biblioteca"
     },
     "releases": {

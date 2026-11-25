@@ -316,7 +316,8 @@ its current release is a course; anything else offers nothing.
   contributor names another course, or `undefined` for none, in
   `NEWCOMER_COURSE`
   ([deckLibrary.ts](../packages/adapters/shacl/node/deckLibrary.ts)) and runs
-  `npm run library`, which writes it into the index. The app needs no
+  `npm run library`, which checks it: the index the site's build makes
+  names it ([deck-library.md](deck-library.md#the-index)). The app needs no
   change. With none named, two journeys ([testing.md](testing.md)) are
   retired or moved to another way in: `newcomer-course.journey.ts`,
   which expects an offer, and `course-chapter.journey.ts`, which works

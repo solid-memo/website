@@ -5,10 +5,23 @@
   ],
   "tasks": {
     "test": {
+      "tags": [
+        "heavy"
+      ],
       "inputs": [
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/ns/**",
-        "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/decks/academy-award-best-picture/**",
+        "$TURBO_ROOT$/decks/arabic-adjectives/**",
+        "$TURBO_ROOT$/decks/capitals-of-the-world/**",
+        "$TURBO_ROOT$/decks/getting-started/**",
+        "$TURBO_ROOT$/decks/git-commands/**",
+        "$TURBO_ROOT$/decks/greek-alphabet/**",
+        "$TURBO_ROOT$/decks/http-status-codes/**",
+        "$TURBO_ROOT$/decks/korean-at-the-table/**",
+        "$TURBO_ROOT$/decks/roman-numerals/**",
+        "$TURBO_ROOT$/decks/standard-for-public-code/**",
+        "$TURBO_ROOT$/decks/sweden-counties-and-provinces/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
         "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",
@@ -25,11 +38,15 @@
       ]
     },
     "test:roundtrip": {
+      "tags": [
+        "heavy"
+      ],
       "inputs": [
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/api/frozen/pods.txt",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
         "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",

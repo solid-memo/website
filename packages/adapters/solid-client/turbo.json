@@ -8,6 +8,7 @@
       "inputs": [
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
         "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",

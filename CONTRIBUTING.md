@@ -245,8 +245,9 @@ Closes: #42
   of `commitBody` in [renovate.json5](renovate.json5), and its merge
   commit names the pull request.
 - **One logical change per commit.** Generated files go in the same
-  commit as the change that generated them, and a new deck version goes
-  in the same commit as the library index.
+  commit as the change that generated them. The library's index is
+  made at build time and never committed
+  ([deck-library.md](docs/deck-library.md#the-index)).
 
 A pull request addresses one issue. Two unrelated fixes are two pull
 requests. It closes the issue: its body, or one of its commits, says

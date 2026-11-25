@@ -17,6 +17,7 @@ import { DECKS_ROOT } from "@solid-memo/vocab/tooling/root";
 import { turtleFetch } from "@solid-memo/shacl/testing/turtle";
 import { getSolidDatasetLinear } from "@solid-memo/solid-client/resources";
 import { createSolidDeckLibrary, releaseDocumentsOf } from "./solidDeckLibrary";
+import { indexOfDecks } from "./testing/libraryDecks";
 import { RDF, SM } from "./vocab";
 
 /**
@@ -41,10 +42,16 @@ const releases = readdirSync(DECKS_ROOT, { withFileTypes: true })
   )
   .sort();
 
-/** The site's fetch: every address under decks/ answered with its file. */
+/** The index of every deck, made from the releases as the site's build makes it. */
+const INDEX = indexOfDecks([...new Set(releases.map((path) => path.split("/")[0]!))]);
+
+/** The site's fetch: every address under decks/ answered with its file, the index as made. */
 const siteFetch: typeof globalThis.fetch = async (input) => {
   const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
-  return turtleFetch(readFileSync(join(DECKS_ROOT, url.slice(DECKS.length)), "utf8"))(url);
+  const path = url.slice(DECKS.length);
+  return turtleFetch(path === "index.ttl" ? INDEX : readFileSync(join(DECKS_ROOT, path), "utf8"))(
+    url,
+  );
 };
 
 // The library's own releases are not checked as one from a link is.

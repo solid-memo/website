@@ -1540,10 +1540,10 @@
       "downloaded": "{file} gespeichert, als Ausgabe mit der Adresse {url}.",
       "stepsIntro": "Um sie für die Bibliothek vorzuschlagen, in einer Kopie des Repositorys von Solid Memo:",
       "stepCopy": "Lege die Datei als {file} in decks/ ab.",
-      "stepLibrary": "Formatiere sie und trage sie in den Index der Bibliothek ein:",
+      "stepLibrary": "Formatiere sie und prüfe die Bibliothek mit ihr:",
       "stepCheck": "Prüfe sie gegen die Regeln der Bibliothek:",
       "stepAll": "Führe alle Prüfungen aus:",
-      "stepPullRequest": "Öffne einen Pull-Request mit der neuen Datei und dem Index.",
+      "stepPullRequest": "Öffne einen Pull-Request mit der neuen Datei.",
       "libraryCheck": "Den Entwurf zuerst für die Bibliothek prüfen"
     },
     "releases": {

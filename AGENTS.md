@@ -33,7 +33,9 @@ This repository's docs are indexed in [docs/docs.ttl](docs/docs.ttl); start with
 - **Generated files** (`packages/lib/vocab/src/*.generated.ts`) are never
   edited by hand: change `ns/` and run `npm run generate`.
 - **Turtle**: after editing a `.ttl` file, run `npm run format:turtle`; after
-  changing `decks/`, `npm run library` ([docs/deck-library.md](docs/deck-library.md)).
+  changing `decks/`, `npm run library`, which checks it; its index,
+  `decks/index.ttl`, is made at build time and never committed
+  ([docs/deck-library.md](docs/deck-library.md#the-index)).
 - **A new page** in `docs/` is listed in `docs/docs.ttl`, then
   `npm run format:turtle` ([docs/markdown.md](docs/markdown.md#the-docs-index)).
 - **Coverage** is 100% per package; new code ships with its tests, and

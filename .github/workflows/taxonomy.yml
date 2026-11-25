@@ -129,21 +129,21 @@ jobs:
         working-directory: ${{ runner.temp }}
       - run: python scripts/shacl_crosscheck.py
 
-      # The new version and the index, the only files a new version
-      # changes, with its notes. Anything else changed in decks/ stops the
-      # run, rather than being left out of the pull request unseen.
+      # The new version, the only file a new version changes, with its
+      # notes: the index is made from the releases, and git ignores it
+      # (docs/deck-library.md#the-index). Anything else changed in decks/
+      # stops the run, rather than being left out of the pull request
+      # unseen.
       - name: The files to publish
         run: |
           version="decks/swedish-labour-market-taxonomy-occupation-names/v$NEXT.ttl"
           changed="$(git add --intent-to-add decks && git diff --name-only -- decks | sort)"
-          expected="$(printf '%s\n' decks/index.ttl "$version" | sort)"
-          if [ "$changed" != "$expected" ]; then
-            echo "::error::The new version changed other files in decks/ than $version and decks/index.ttl:"
+          if [ "$changed" != "$version" ]; then
+            echo "::error::The new version changed other files in decks/ than $version:"
             echo "$changed"
             exit 1
           fi
           mkdir -p "$RUNNER_TEMP/deck/$(dirname "$version")"
-          cp decks/index.ttl "$RUNNER_TEMP/deck/decks/index.ttl"
           cp "$version" "$RUNNER_TEMP/deck/$version"
           cp "$RUNNER_TEMP/notes.txt" "$RUNNER_TEMP/deck/notes.txt"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -182,9 +182,8 @@ jobs:
         with:
           name: taxonomy-deck
           path: ${{ runner.temp }}/deck
-      # The artifact holds the new version, the index and the notes, as
-      # plain files, and nothing else; the version is new and the index
-      # is there already. Only those two files are staged.
+      # The artifact holds the new version and the notes, as plain files,
+      # and nothing else; the version is new. Only it is staged.
       - name: The artifact holds only the new version
         run: |
           if ! [[ "$NEWEST" =~ ^[0-9]+$ && "$NEXT" =~ ^[0-9]+$ ]]; then
@@ -193,13 +192,13 @@ jobs:
           fi
           version="decks/swedish-labour-market-taxonomy-occupation-names/v$NEXT.ttl"
           found="$(cd "$RUNNER_TEMP/deck" && find . -mindepth 1 ! -type d | sort)"
-          expected="$(printf './%s\n' decks/index.ttl "$version" notes.txt | sort)"
+          expected="$(printf './%s\n' "$version" notes.txt | sort)"
           if [ "$found" != "$expected" ]; then
-            echo "::error::The artifact holds other files than $version, decks/index.ttl and notes.txt:"
+            echo "::error::The artifact holds other files than $version and notes.txt:"
             echo "$found"
             exit 1
           fi
-          for file in decks/index.ttl "$version" notes.txt; do
+          for file in "$version" notes.txt; do
             if [ -L "$RUNNER_TEMP/deck/$file" ] || ! [ -f "$RUNNER_TEMP/deck/$file" ]; then
               echo "::error::$file in the artifact is not a plain file."
               exit 1
@@ -216,16 +215,15 @@ jobs:
             echo "::error::The artifact's notes.txt is not the version notes the script writes."
             exit 1
           fi
-          if [ -e "$version" ] || ! [ -f decks/index.ttl ] || [ -L decks/index.ttl ]; then
-            echo "::error::$version exists already, or decks/index.ttl does not."
+          if [ -e "$version" ]; then
+            echo "::error::$version exists already."
             exit 1
           fi
-          cp "$RUNNER_TEMP/deck/decks/index.ttl" decks/index.ttl
           cp "$RUNNER_TEMP/deck/$version" "$version"
-          git add -- decks/index.ttl "$version"
+          git add -- "$version"
           status="$(git status --porcelain --untracked-files=all)"
-          if [ "$status" != "$(printf 'M  decks/index.ttl\nA  %s' "$version")" ]; then
-            echo "::error::Other files than $version and decks/index.ttl changed:"
+          if [ "$status" != "A  $version" ]; then
+            echo "::error::Other files than $version changed:"
             echo "$status"
             exit 1
           fi

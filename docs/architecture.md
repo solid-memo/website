@@ -358,7 +358,8 @@ npm run pod       # a Community Solid Server at http://127.0.0.1:3999/, to poke 
 npm run pod:clean # take down the servers an interrupted run left
 npm run generate  # the vocab package's generated TypeScript, from ns/
 npm run format:turtle  # every Turtle file in the house style
-npm run library   # the deck library's index, decks/index.ttl
+npm run library   # check the deck library, and write its index, decks/index.ttl, which git ignores
+npm run library:index   # only write the index, as the site's build does first
 npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requirements-ci.txt)
 ```
 

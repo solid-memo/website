@@ -7,6 +7,8 @@ dist/
 coverage/
 # A release's docs, packed for its GitHub release (scripts/docsArchive.ts).
 release-assets/
+# The deck library's index, made from its releases (docs/deck-library.md#the-index).
+/decks/index.ttl
 __pycache__/
 .turbo/
 e2e/pod/logs/

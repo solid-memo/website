@@ -2912,7 +2912,8 @@ pull request, in a copy of the repository:
 2. `npm run format:turtle && npm run library`.
 3. `npm run library:check -- --base main`.
 4. `npm run check && npm run crosscheck`.
-5. Open a pull request with the new file and the index.
+5. Open a pull request with the new file: the site's build makes the
+   index ([deck-library.md](deck-library.md#the-index)).
 
 It links to the draft's release check for the library first
 ([above](#the-release-check)).

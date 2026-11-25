@@ -12,6 +12,7 @@
         "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl",
         "$TURBO_ROOT$/docs/**",
         "$TURBO_ROOT$/publiccode.yml",
         "$TURBO_ROOT$/*.md",
@@ -39,6 +40,7 @@
         "$TURBO_ROOT$/CNAME",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl",
         "$TURBO_ROOT$/docs/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
@@ -53,6 +55,10 @@
       "passThroughEnv": [
         "PLAYWRIGHT_*",
         "XDG_CACHE_HOME"
+      ],
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@solid-memo/shacl#library:index"
       ]
     }
   }

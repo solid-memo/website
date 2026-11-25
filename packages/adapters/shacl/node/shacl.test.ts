@@ -9,6 +9,7 @@ import { describe, expect, it } from "vitest";
 import {
   loadEngine,
   loadProfileEngine,
+  loadObjectTargets,
   loadReferenceData,
   loadShapesGraph,
   validateProfile,
@@ -894,6 +895,24 @@ describe("ns/vocab/", async () => {
         ),
       ).resolves.toBeUndefined();
     }
+  });
+});
+
+describe("loadObjectTargets", () => {
+  it("names the predicates whose objects the vendored profiles check", async () => {
+    const skos = "http://www.w3.org/2004/02/skos/core#";
+    expect([...(await loadObjectTargets(ROOT))].sort()).toEqual(
+      [
+        "broadMatch",
+        "broader",
+        "closeMatch",
+        "exactMatch",
+        "narrowMatch",
+        "narrower",
+        "related",
+        "relatedMatch",
+      ].map((name) => `${skos}${name}`),
+    );
   });
 });
 

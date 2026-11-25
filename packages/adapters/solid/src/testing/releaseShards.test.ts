@@ -5,8 +5,7 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { libraryReleases } from "./releaseDrafts";
-import { balancedShards, libraryReleaseShards, ROUND_TRIP_FILES } from "./releaseShards";
+import { balancedShards, ROUND_TRIP_FILES } from "./releaseShards";
 
 const weights: Record<string, number> = { a: 5, b: 4, c: 3, d: 3, e: 2, f: 1 };
 const weightOf = (item: string) => weights[item]!;
@@ -36,13 +35,6 @@ describe("balancedShards", () => {
 });
 
 describe("libraryReleaseShards", () => {
-  it("takes every release of the library once", () => {
-    const shards = libraryReleaseShards();
-    expect(shards).toHaveLength(ROUND_TRIP_FILES);
-    for (const shard of shards) expect(shard.length).toBeGreaterThan(0);
-    expect(shards.flat().sort()).toEqual(libraryReleases());
-  });
-
   it("has a round-trip file for each shard, and none more", () => {
     const src = join(import.meta.dirname, "..");
     // The releases' round trips: the task has the pod snapshots' test too.

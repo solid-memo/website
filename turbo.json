@@ -35,7 +35,8 @@
         "$TURBO_ROOT$/api/**"
       ],
       "dependsOn": [
-        "transit"
+        "transit",
+        "@solid-memo/shacl#library:index"
       ],
       "outputLogs": "new-only"
     },
@@ -81,7 +82,8 @@
         "$TURBO_ROOT$/vitest.shared.ts"
       ],
       "dependsOn": [
-        "transit"
+        "transit",
+        "@solid-memo/shacl#library:index"
       ],
       "outputLogs": "new-only"
     },
@@ -91,7 +93,8 @@
         "$TURBO_ROOT$/vitest.shared.ts"
       ],
       "dependsOn": [
-        "transit"
+        "transit",
+        "@solid-memo/shacl#library:index"
       ],
       "outputLogs": "new-only"
     },
@@ -104,7 +107,8 @@
         "E2E_RESULT_JSON"
       ],
       "dependsOn": [
-        "transit"
+        "transit",
+        "@solid-memo/shacl#library:index"
       ]
     }
   }

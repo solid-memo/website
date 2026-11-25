@@ -24,9 +24,24 @@
       "inputs": [
         "$TURBO_DEFAULT$",
         "$TURBO_ROOT$/ns/**",
-        "$TURBO_ROOT$/decks/**"
+        "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl"
       ],
       "outputs": [],
+      "outputLogs": "new-only"
+    },
+    "library:index": {
+      "dependsOn": [
+        "transit"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl"
+      ],
+      "outputs": [
+        "$TURBO_ROOT$/decks/index.ttl"
+      ],
       "outputLogs": "new-only"
     }
   }
