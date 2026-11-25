@@ -772,6 +772,26 @@
     "close": "Fermer",
     "highlight": {}
   },
+  "dailyMessage": {
+    "label": "Message du jour",
+    "dismiss": "Masquer pour aujourd’hui",
+    "link": {
+      "donate": "À quoi servent les dons (en anglais)",
+      "discussions": "Discussions",
+      "repository": "Code source"
+    },
+    "message": {
+      "donate": "Si Solid Memo vous est utile, vous pouvez faire un don à la personne qui le maintient.",
+      "discussions": "Une idée pour Solid Memo ? Partagez-la dans les discussions de la communauté.",
+      "star": "Vous aimez Solid Memo ? Une étoile sur son code source aide d’autres personnes à le trouver.",
+      "noServers": "Le saviez-vous ? Solid Memo n’a pas de serveurs à lui : ce que vous étudiez reste dans votre Pod, ou dans ce navigateur tant que vous êtes invité.",
+      "undo": "Le saviez-vous ? Mauvais bouton pendant l’étude ? La touche U annule votre dernière réponse.",
+      "pause": "Le saviez-vous ? Mettre en pause, dans le menu d’un paquet, le met de côté pendant un voyage ou un examen, sans perdre votre progression.",
+      "reportMistake": "Le saviez-vous ? Signaler une erreur, sous une carte de la bibliothèque, ouvre un signalement où le paquet et la carte sont déjà indiqués.",
+      "courses": "Le saviez-vous ? La bibliothèque de paquets propose aussi des cours.",
+      "statistics": "Le saviez-vous ? Les statistiques montrent où en est votre étude, paquet par paquet."
+    }
+  },
   "deckPreferences": {
     "loading": "Chargement des préférences…",
     "heading": "Préférences : {deck}",

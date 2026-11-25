@@ -734,6 +734,26 @@
     "close": "Close",
     "highlight": {}
   },
+  "dailyMessage": {
+    "label": "Message of the day",
+    "dismiss": "Hide for today",
+    "link": {
+      "donate": "How donations are used",
+      "discussions": "Discussions",
+      "repository": "Source code"
+    },
+    "message": {
+      "donate": "If you find Solid Memo valuable, you may donate to its maintainer.",
+      "discussions": "Have an idea for Solid Memo? Share it in the community's discussions.",
+      "star": "Do you like Solid Memo? A star on its source code helps others find it.",
+      "noServers": "Did you know? Solid Memo has no servers of its own: what you study stays in your Pod, or in this browser while you're a guest.",
+      "undo": "Did you know? Pressed the wrong button while studying? U takes your last answer back.",
+      "pause": "Did you know? Pause, in a deck's menu, sets the deck aside for a trip or an exam, and your progress stays.",
+      "reportMistake": "Did you know? Report a mistake, under a library card, opens a report with the deck and the card filled in.",
+      "courses": "Did you know? The deck library has courses as well as decks.",
+      "statistics": "Did you know? Statistics shows how your study is going, deck by deck."
+    }
+  },
   "deckPreferences": {
     "loading": "Loading preferences…",
     "heading": "Preferences: {deck}",

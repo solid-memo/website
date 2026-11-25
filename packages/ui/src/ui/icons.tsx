@@ -90,6 +90,15 @@ export function CardIcon() {
   );
 }
 
+/** A cross: put this away. */
+export function CloseIcon() {
+  return (
+    <Icon>
+      <path d="M6 6l12 12M18 6 6 18" />
+    </Icon>
+  );
+}
+
 /** A checkmark: done for today. */
 export function CheckIcon() {
   return (

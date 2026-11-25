@@ -772,6 +772,26 @@
     "close": "Cerrar",
     "highlight": {}
   },
+  "dailyMessage": {
+    "label": "Mensaje del día",
+    "dismiss": "Ocultar por hoy",
+    "link": {
+      "donate": "En qué se usan las donaciones (en inglés)",
+      "discussions": "Debates",
+      "repository": "Código fuente"
+    },
+    "message": {
+      "donate": "Si Solid Memo te resulta valioso, puedes hacer una donación a quien lo mantiene.",
+      "discussions": "¿Tienes una idea para Solid Memo? Compártela en los debates de la comunidad.",
+      "star": "¿Te gusta Solid Memo? Una estrella en su código fuente ayuda a que otros lo encuentren.",
+      "noServers": "¿Sabías que Solid Memo no tiene servidores propios? Lo que estudias se queda en tu Pod, o en este navegador mientras eres invitado.",
+      "undo": "¿Pulsaste el botón equivocado al estudiar? La tecla U deshace tu última respuesta.",
+      "pause": "¿Sabías que Pausar, en el menú de un mazo, lo deja a un lado durante un viaje o un examen sin perder tu progreso?",
+      "reportMistake": "¿Sabías que Informar de un error, bajo una tarjeta de la biblioteca, abre un informe con el mazo y la tarjeta ya indicados?",
+      "courses": "¿Sabías que la biblioteca de mazos también tiene cursos?",
+      "statistics": "¿Sabías que Estadísticas muestra cómo va tu estudio, mazo por mazo?"
+    }
+  },
   "deckPreferences": {
     "loading": "Cargando preferencias…",
     "heading": "Preferencias: {deck}",

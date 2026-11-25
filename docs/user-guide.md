@@ -114,6 +114,11 @@ The deck list is home. From the top:
   **Close** puts it away on this browser until a later version brings
   more. A first visit shows none, and a version that only fixes things
   brings none.
+- **Message of the day**: once you have a deck or a course, a short
+  line on about one day in three. It tells of a feature you may not know
+  of, a way to take part in the project, or donating. Every device shows
+  the same message that day. **Hide for today** (the cross) puts it away
+  on this browser until the next day.
 - **Today**: once you've studied today, your streak (days in a row), a
   word of praise and the day's numbers, with a link to all your
   statistics ([statistics.md](statistics.md#the-today-strip)). Finish

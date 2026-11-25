@@ -69,6 +69,7 @@ before any pod is reached:
 | `solid-memo:palette-colors` | a chosen custom palette's address, base and colors, for the first paint; copied from the pod (none for a built-in palette) | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:textSize` | the chosen text size (none for Default); copied from the preferences | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:seenHighlights` | the new-version highlights this browser has shown | `deviceChoices.ts`, through `webStorageDeviceStore.ts` |
+| `solid-memo:dailyMessageDismissed` | the day the message of the day was last hidden | [`DailyMessage.tsx`](../packages/ui/src/ui/DailyMessage.tsx), through `webStorageDeviceStore.ts` |
 | `solid-memo:recentLanguages.deck`, `solid-memo:recentLanguages.own` | languages picked lately for text | [`remembered.ts`](../packages/ui/src/ui/remembered.ts), through `webStorageDeviceStore.ts` |
 | `solid-memo:webId` | the WebID last logged in with, only if the learner checked the box to remember it | `remembered.ts`, through `webStorageDeviceStore.ts` |
 | `solid-memo:collapsedGroups` | by instance URL, which deck groups the learner folded, for the 20 instances folded last; an older `solid-memo:collapsedGroups.<instance URL>` is moved into it once read | `remembered.ts`, through `webStorageDeviceStore.ts` |

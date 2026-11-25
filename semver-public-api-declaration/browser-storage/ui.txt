@@ -1,5 +1,6 @@
 localStorage: solid-memo:collapsedGroups, by instance URL
 localStorage: solid-memo:collapsedGroups.<instance URL>, read once into solid-memo:collapsedGroups and removed
+localStorage: solid-memo:dailyMessageDismissed, the day the message of the day was hidden
 localStorage: solid-memo:recentLanguages.deck
 localStorage: solid-memo:recentLanguages.own
 localStorage: solid-memo:webId, only when the learner asks for it
