@@ -5,7 +5,7 @@
 import { useId, useMemo, useState } from "preact/hooks";
 import { choicesOf, type Choice } from "@solid-memo/domain/course";
 import type { CardContent } from "@solid-memo/domain/deck";
-import { isPublished, takenIds } from "@solid-memo/domain/release/courseIds";
+import { isPublished, publishedIdSet, takenIds } from "@solid-memo/domain/release/courseIds";
 import {
   cardTextOf,
   distractorChanges,
@@ -337,7 +337,7 @@ export function QuestionEditorScreen({
             <DistractorFields
               cardId={card}
               distractors={saved.content.distractors ?? []}
-              published={new Set(Object.keys(draft.published.ids))}
+              published={publishedIdSet(draft)}
               taken={takenIds(draft)}
               back={saved.content.back}
               textFormat={saved.content.textFormat}
