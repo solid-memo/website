@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.4.2](https://github.com/solid-memo/website/compare/v8.4.1...v8.4.2) (2026-11-25)
+
+### Performance Improvements
+
+* **shacl:** check again only the library's releases whose inputs changed ([68f5536](https://github.com/solid-memo/website/commit/68f55365f260bba7e9bad37f81f43810b45a24e2)), closes [#1025](https://github.com/solid-memo/website/issues/1025)
+
 ## [8.4.1](https://github.com/solid-memo/website/compare/v8.4.0...v8.4.1) (2026-11-25)
 
 ### Fixes
