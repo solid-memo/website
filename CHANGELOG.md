@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.1](https://github.com/solid-memo/website/compare/v8.5.0...v8.5.1) (2026-11-25)
+
+### Fixes
+
+* **solid:** restore an expired session as a reload does, without the learner's reload ([981a6e6](https://github.com/solid-memo/website/commit/981a6e663647e249997526c30da9779d8d758b00)), closes [#1041](https://github.com/solid-memo/website/issues/1041)
+
 ## [8.5.0](https://github.com/solid-memo/website/compare/v8.4.3...v8.5.0) (2026-11-25)
 
 ### Features
