@@ -1205,7 +1205,8 @@ The domain plans the transfer
     subject is called.
   - It's written in the target naming the card there (`sm:reviewOf`
     into the target's cards document), under the subject the fragment
-    rule names, or a new `#review-<uuid>` when another's is there.
+    rule names, or a new `#review-<uuid>` when another's, or one
+    stored at a newer format version, is there.
   - Its FSRS-6 state goes with its SM-2 state the same way; where the
     card has none, a state the target held at that prompt goes. One
     with no SM-2 state beside it isn't carried, only removed.

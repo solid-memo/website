@@ -54,6 +54,7 @@ import {
   readVersioned,
   recordThing,
   removeAllUnlessNewer,
+  storedVersionOf,
 } from "../records";
 import { SM } from "../vocab";
 
@@ -411,6 +412,8 @@ function namedCardsDocuments(dataset: Dataset, documents: ReviewDocuments): stri
 /** How one kind of state is written: where it is named, how a subject is read as one, and its subject. */
 interface Kind<T> {
   named: (reviewsDocumentUrl: string, key: ReviewKey) => string;
+  /** The format version `thing` stamps; recordThing refuses a subject stored above it. */
+  writes: number;
   keyOf: (thing: Subject, deck: ReviewedDeck) => ReviewKey | null;
   thing: (
     documents: ReviewDocuments,
@@ -422,12 +425,14 @@ interface Kind<T> {
 
 const SM2_KIND: Kind<ReviewState> = {
   named: namedReviewSubject,
+  writes: REVIEW_STATE_V2.version,
   keyOf: keyOfSubject,
   thing: toReviewStateThing,
 };
 
 const FSRS_KIND: Kind<FsrsState> = {
   named: namedFsrsSubject,
+  writes: FSRS_REVIEW_STATE_V1.version,
   keyOf: fsrsKeyOfSubject,
   thing: toFsrsStateThing,
 };
@@ -438,11 +443,15 @@ const FSRS_KIND: Kind<FsrsState> = {
  * same kind, card and direction that cannot be read (written over, as
  * before); else, when that subject is another's (a state of another card
  * by its sm:reviewOf, of another kind or scheduler, another app's
- * subject), or longer than a term may be (isIriPastBound: a card id
- * near that bound, which a deck file or release can carry, makes the
- * named subject, with its suffixes, longer than the card's IRI), a new
- * subject `#review-<id>`, which names its card. A state is read by its
- * links, whatever its subject is called, so either is read alike.
+ * subject), one stored at a version above the one its kind writes
+ * (what recordThing would refuse, whatever classes it carries: left as
+ * it is, as withoutReviewStates leaves one, so a state the app cannot
+ * read there never stops a new one being written; GHSA-933g-w2r6-v4f4), or
+ * longer than a term may be (isIriPastBound: a card id near that bound,
+ * which a deck file or release can carry, makes the named subject, with
+ * its suffixes, longer than the card's IRI), a new subject
+ * `#review-<id>`, which names its card. A state is read by its links,
+ * whatever its subject is called, so either is read alike.
  */
 function newSubjectFor<T>(
   edit: DatasetEdit<Dataset>,
@@ -456,6 +465,7 @@ function newSubjectFor<T>(
   if (isIriPastBound(named)) return fresh();
   const there = edit.getThing(named);
   if (there === null) return named;
+  if (storedVersionOf(there) > kind.writes) return fresh();
   const thereKey = kind.keyOf(there, documents);
   return thereKey !== null && sameKey(thereKey, key) ? named : fresh();
 }
