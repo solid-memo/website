@@ -207,9 +207,13 @@ Studio draft ([below](#decks-and-drafts-from-elsewhere)):
 - Every card's picture is requested with no referrer.
 
 The learner's own decks and copies of the library's load their pictures
-as before. A card the learner adds to a deck added by link follows the
-deck, as nothing tells it from the release's for certain, and a card
-moved or copied to another deck is that deck's.
+without asking. Their answer's picture, too, is requested with the
+question's and kept out of sight until revealed, so the reveal itself
+requests nothing in any deck. On a deck that asks, a picture from a
+host not chosen yet is requested once the learner chooses it. A card
+the learner adds to a deck added by link follows the deck, as nothing
+tells it from the release's for certain, and a card moved or copied
+to another deck is that deck's.
 
 What counts as a copy of the library's is what the index lists now. A
 copy whose series has left the index, or one made on a deployment with

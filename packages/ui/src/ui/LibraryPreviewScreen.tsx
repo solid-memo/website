@@ -5,6 +5,7 @@
 import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { promptSides, type CardContent, type StudyDirection } from "@solid-memo/domain/deck";
 import { CardFace } from "./CardFace";
+import { useLoadsAhead } from "./deckPictures";
 import { useI18n } from "./i18n";
 
 /** A library card, seen from one side. */
@@ -78,7 +79,9 @@ export function LibraryPreviewScreen({
 /**
  * The card shown: the side asked up, the other under a Reveal button.
  * As in study, the focus goes to the question when a card comes up and
- * to the answer once revealed, Next card a Tab after it.
+ * to the answer once revealed, Next card a Tab after it. An answer with
+ * a picture is on the page from the start, hidden until revealed
+ * (useLoadsAhead).
  */
 function PreviewCard({ prompt, onNext }: { prompt: PreviewPrompt; onNext: () => void }) {
   const { t } = useI18n();
@@ -86,6 +89,7 @@ function PreviewCard({ prompt, onNext }: { prompt: PreviewPrompt; onNext: () => 
   const { question, answer } = promptSides(prompt);
   const questionRef = useRef<HTMLDivElement>(null);
   const answerRef = useRef<HTMLDivElement>(null);
+  const loadsAhead = useLoadsAhead(answer.imageUrl);
 
   useLayoutEffect(() => {
     questionRef.current!.focus();
@@ -99,15 +103,15 @@ function PreviewCard({ prompt, onNext }: { prompt: PreviewPrompt; onNext: () => 
       <div ref={questionRef} class="study-face" tabIndex={-1}>
         <CardFace {...question} note={revealed ? question.note : undefined} role="question" />
       </div>
+      {(revealed || loadsAhead) && (
+        <div ref={answerRef} class="study-face" tabIndex={-1} hidden={!revealed}>
+          <CardFace {...answer} role="answer" />
+        </div>
+      )}
       {revealed ? (
-        <>
-          <div ref={answerRef} class="study-face" tabIndex={-1}>
-            <CardFace {...answer} role="answer" />
-          </div>
-          <button class="primary" onClick={onNext}>
-            {t("libraryPreview.nextCard")}
-          </button>
-        </>
+        <button class="primary" onClick={onNext}>
+          {t("libraryPreview.nextCard")}
+        </button>
       ) : (
         <button onClick={() => setRevealed(true)}>{t("libraryPreview.reveal")}</button>
       )}

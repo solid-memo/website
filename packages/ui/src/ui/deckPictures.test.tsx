@@ -15,6 +15,7 @@ import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import { CardFace, CardRowFront } from "./CardFace";
 import { CourseQuestion } from "./CourseQuestion";
 import { DeckPictures, DraftPictures, HiddenPicturesNotice } from "./deckPictures";
+import { LibraryPreviewScreen } from "./LibraryPreviewScreen";
 import { queryKeys } from "./queryKeys";
 import { StudyScreen } from "./StudyScreen";
 import { courseCards, noShuffle } from "../test/course";
@@ -418,11 +419,57 @@ describe("the answer's picture of a linked deck", () => {
     expect(answer.closest(".study-face")).toHaveFocus();
   });
 
-  it("stays off the page until the reveal on a deck that does not ask", async () => {
+  it("is on the page with the question's on a deck that does not ask, hidden until the reveal", async () => {
     const { container } = renderGated(own, study);
-    await waitFor(() => expect(sources(container)).toEqual([FRONT]));
+    await waitFor(() => expect(sources(container)).toEqual([FRONT, BACK]));
+    const answer = container.querySelector<HTMLImageElement>(`img[src="${BACK}"]`)!;
+    expect(answer.closest(".study-face")).toHaveAttribute("hidden");
+    expect(screen.queryByRole("img", { name: "Picture on the back of the card" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    expect(container.querySelector(`img[src="${BACK}"]`)).toBe(answer);
+    expect(answer.closest(".study-face")).not.toHaveAttribute("hidden");
+  });
+
+  it("does the same with no deck's gate at all, as in a library deck's preview", () => {
+    const { container } = render(
+      <LibraryPreviewScreen
+        deckName="Flags"
+        deckHref="#/library"
+        cardLanguages={[]}
+        prompt={{ card, direction: "front-to-back" }}
+        turn={0}
+        onNext={vi.fn()}
+        onExit={vi.fn()}
+      />,
+    );
     expect(sources(container)).toEqual([FRONT, BACK]);
+    const answer = container.querySelector<HTMLImageElement>(`img[src="${BACK}"]`)!;
+    expect(answer.closest(".study-face")).toHaveAttribute("hidden");
+    expect(screen.queryByRole("button", { name: "Next card" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Reveal" }));
+    expect(container.querySelector(`img[src="${BACK}"]`)).toBe(answer);
+    expect(answer.closest(".study-face")).not.toHaveAttribute("hidden");
+    expect(answer.closest(".study-face")).toHaveFocus();
+  });
+
+  it("stays off the page, before the reveal, when there is no answer's picture", () => {
+    const { container } = render(
+      <StudyScreen
+        deckName="Words"
+        deckHref="#/deck"
+        prompt={{ card: { ...card, backImageUrl: undefined }, direction: "front-to-back" }}
+        position={1}
+        total={1}
+        putBack={false}
+        answerScale="sm2"
+        busy={false}
+        error={null}
+        onAnswer={vi.fn()}
+        onExit={vi.fn()}
+      />,
+    );
+    expect(sources(container)).toEqual([FRONT]);
+    expect(container.querySelectorAll(".study-face")).toHaveLength(1);
   });
 
   it("does the same on a course's question: on the page with the question, the same element once checked", async () => {
@@ -454,6 +501,31 @@ describe("the answer's picture of a linked deck", () => {
     expect(container.querySelector(`img[src="${BACK}"]`)).toBe(answer);
     expect(answer.closest(".course-feedback")).not.toHaveAttribute("hidden");
     expect(answer.closest(".course-feedback")).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
+  });
+
+  it("does the same on a course's question with no deck's gate at all", () => {
+    const question = { ...courseCards[0]!, backImageUrl: BACK };
+    const choices = choicesOf(question, noShuffle);
+    const props = {
+      card: question,
+      choices,
+      focusQuestion: false,
+      busy: false,
+      error: null,
+      nextLabel: "Next",
+      onCheck: vi.fn(),
+      onNext: vi.fn(),
+    };
+    const { container, rerender } = render(<CourseQuestion {...props} answer={null} />);
+    const answer = container.querySelector<HTMLImageElement>(`img[src="${BACK}"]`)!;
+    expect(answer).not.toBeNull();
+    expect(answer.closest(".course-feedback")).toHaveAttribute("hidden");
+    expect(screen.queryByRole("button", { name: "Next" })).toBeNull();
+
+    rerender(<CourseQuestion {...props} answer={{ choice: choices[0]!, effect: "none" }} />);
+    expect(container.querySelector(`img[src="${BACK}"]`)).toBe(answer);
+    expect(answer.closest(".course-feedback")).not.toHaveAttribute("hidden");
     expect(screen.getByRole("button", { name: "Next" })).toBeInTheDocument();
   });
 });
