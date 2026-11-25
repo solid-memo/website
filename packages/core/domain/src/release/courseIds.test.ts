@@ -11,6 +11,7 @@ import {
   idProblem,
   questionIdBefore,
   isPublished,
+  publishedIdSet,
   questionIdFor,
   questionsOfStep,
   reviewQuestionsOf,
@@ -243,6 +244,18 @@ describe("takenIds and idProblem", () => {
     expect(isPublished(courseDraft(published), "q-a-1b")).toBe(true);
     expect(isPublished(courseDraft(published), "q-a-1a")).toBe(false);
     expect(isPublished(courseDraft(published), "constructor")).toBe(false);
+  });
+
+  it("gathers a release's published ids once, however many edits the draft makes", () => {
+    const draft = courseDraft(published);
+    const ids = publishedIdSet(draft);
+    expect([...ids].sort()).toEqual(["ch-gone", "q-a-1b"]);
+    const edited = applyDraftChanges(draft, [
+      { kind: "editChapter", id: "ch-a", text: { title: { en: "A" } } },
+    ]) as ReleaseDraft;
+    expect(edited.published).toBe(draft.published);
+    expect(publishedIdSet(edited)).toBe(ids);
+    expect(publishedIdSet(courseDraft()).size).toBe(0);
   });
 });
 

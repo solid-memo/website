@@ -2239,6 +2239,13 @@ text does, keeps its ids taken too. Each id suggested is found once
 for those ids. Gathering them again on each keystroke would go over
 every statement of the draft as the user types.
 
+The question editor draws again on each keystroke in its card form,
+too. The ids a release before the draft published, which its wrong
+options are checked against, are gathered into a set once for that
+release's ids (`publishedIdSet`), which every edit of the draft keeps,
+not once for each keystroke. A draft read again gathers the set once
+more.
+
 The user may write an id other than the one suggested. The field says at
 once when an id is none a subject can have, or one the draft or a
 release before it has or names. A new question's id sorts after the

@@ -345,3 +345,19 @@ export function questionIdBefore(
 export function isPublished(draft: ReleaseDraft, id: string): boolean {
   return Object.hasOwn(draft.published.ids, id);
 }
+
+/**
+ * Each release's published ids as a set, gathered once: a draft keeps
+ * its `published` through every edit, and the forms that hand the ids on
+ * as a set draw again on each keystroke.
+ */
+const publishedSetOf = new WeakMap<PublishedIds, ReadonlySet<string>>();
+
+/** Every id a release before the draft published (isPublished, for each one), as a set. */
+export function publishedIdSet(draft: ReleaseDraft): ReadonlySet<string> {
+  const known = publishedSetOf.get(draft.published);
+  if (known !== undefined) return known;
+  const ids: ReadonlySet<string> = new Set(Object.keys(draft.published.ids));
+  publishedSetOf.set(draft.published, ids);
+  return ids;
+}

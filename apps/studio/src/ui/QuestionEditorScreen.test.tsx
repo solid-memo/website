@@ -13,6 +13,7 @@ import {
 import { draftOutline } from "@solid-memo/domain/release/draftOutline";
 import { SM } from "@solid-memo/vocab/vocab.generated";
 import { optionPhrases } from "@solid-memo/ui/markdownCache";
+import { DistractorFields } from "@solid-memo/ui/DistractorFields";
 import type { DraftEditor } from "./draftEditor";
 import { QuestionEditorScreen } from "./QuestionEditorScreen";
 import { choose } from "../test/choose";
@@ -37,6 +38,12 @@ vi.mock("@solid-memo/domain/release/draftOutline", async (actual) => {
 vi.mock("@solid-memo/ui/markdownCache", async (actual) => {
   const cache = await actual<typeof import("@solid-memo/ui/markdownCache")>();
   return { ...cache, optionPhrases: vi.fn(() => vi.fn(cache.optionPhrases())) };
+});
+
+// Records what the wrong-option list is drawn with, drawing it as ever.
+vi.mock("@solid-memo/ui/DistractorFields", async (actual) => {
+  const fields = await actual<typeof import("@solid-memo/ui/DistractorFields")>();
+  return { ...fields, DistractorFields: vi.fn(fields.DistractorFields) };
 });
 
 function renderScreen(
@@ -429,6 +436,22 @@ describe("QuestionEditorScreen", () => {
     fireEvent.click(within(preview()).getByRole("button", { name: "Check" }));
     expect(within(preview()).getByText("Not quite.")).toBeInTheDocument();
     expect(made).toHaveBeenCalledTimes(2);
+  });
+
+  it("hands the wrong options the published ids gathered once, not again on each keystroke", () => {
+    const draft = {
+      ...courseDraft(),
+      published: { ids: { "q-old": "card" as const }, activities: [] },
+    };
+    const drawn = vi.mocked(DistractorFields);
+    drawn.mockClear();
+    renderScreen("q-pods-1a", draft);
+    for (const value of ["W", "Wh", "Wha"])
+      fireEvent.input(screen.getByRole("textbox", { name: "Front" }), { target: { value } });
+    const sets = drawn.mock.calls.map(([props]) => props.published);
+    expect(sets.length).toBeGreaterThan(1);
+    expect(new Set(sets).size).toBe(1);
+    expect([...sets[0]!]).toEqual(["q-old"]);
   });
 
   it("asks a deck's card from nowhere, and only retires one published", () => {
