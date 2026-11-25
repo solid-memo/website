@@ -363,6 +363,12 @@ class Main(Repository):
             code = crosscheck.main()
         return code, out.getvalue()
 
+    def test_asks_for_the_index_when_it_has_not_been_made(self) -> None:
+        (self.root / "decks/index.ttl").unlink()
+        code, out = self.run_main()
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "decks/index.ttl is missing: run `npm run library:index`, which makes it from the releases.\n")
+
     def test_passes_when_every_document_conforms(self) -> None:
         code, out = self.run_main()
         self.assertEqual(code, 0)

@@ -1540,10 +1540,10 @@
       "downloaded": "Saved {file}, as the release at {url}.",
       "stepsIntro": "To propose it for the library, in a copy of the Solid Memo repository:",
       "stepCopy": "Put the file in decks/ as {file}.",
-      "stepLibrary": "Format it, and list it in the library's index:",
+      "stepLibrary": "Format it, and check the library with it:",
       "stepCheck": "Check it against the library's rules:",
       "stepAll": "Run every check:",
-      "stepPullRequest": "Open a pull request with the new file and the index.",
+      "stepPullRequest": "Open a pull request with the new file.",
       "libraryCheck": "Check the draft for the library first"
     },
     "releases": {

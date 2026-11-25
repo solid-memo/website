@@ -1595,24 +1595,36 @@ describe("main", () => {
     expect(log).toHaveBeenCalledWith(expect.stringMatching(/^decks\/notes\.txt is neither/));
   });
 
-  it("checks that the index is up to date, writing nothing", async () => {
+  it("checks the library and the index made from it, writing nothing", async () => {
     const { io: library, log, writeIndex } = io(filesOf(LIBRARY));
     expect(await main(["node", "--check"], library)).toBe(0);
     expect(writeIndex).not.toHaveBeenCalled();
     expect(log).toHaveBeenCalledWith("decks/: 3 versions of 2 decks, valid.");
   });
 
-  it("fails the check on an index out of date, or missing", async () => {
-    const stale = io(filesOf(LIBRARY, buildIndex(CAPITALS)));
-    expect(await main(["node", "--check"], stale.io)).toBe(1);
-    expect(stale.log).toHaveBeenCalledWith(
-      "decks/index.ttl is out of date: run `npm run library`.",
-    );
+  it("checks the index made from the releases, whatever decks/index.ttl holds, or without one", async () => {
+    const stale = io(filesOf(LIBRARY, "not the index"));
+    expect(await main(["node", "--check"], stale.io)).toBe(0);
     const files = filesOf(LIBRARY);
     files.delete("index.ttl");
-    const missing = io(files);
-    expect(await main(["node", "--check"], missing.io)).toBe(1);
-    expect(missing.log).toHaveBeenCalledWith("decks/index.ttl is missing: run `npm run library`.");
+    const none = io(files);
+    expect(await main(["node", "--check"], none.io)).toBe(0);
+    expect(none.log).toHaveBeenCalledWith("decks/: 3 versions of 2 decks, valid.");
+  });
+
+  it("writes only the index with --index, checking nothing but that the releases are in place", async () => {
+    const files = filesOf(LIBRARY, "stale");
+    const { io: library, log, writeIndex } = io(files);
+    const loadValidators = vi.fn(library.loadValidators);
+    expect(await main(["node", "--index"], { ...library, loadValidators })).toBe(0);
+    expect(writeIndex).toHaveBeenCalledWith(buildIndex(LIBRARY));
+    expect(loadValidators).not.toHaveBeenCalled();
+    expect(log.mock.calls).toEqual([["wrote decks/index.ttl"]]);
+    files.set("notes.txt", "x");
+    const broken = io(files);
+    expect(await main(["node", "--index"], broken.io)).toBe(1);
+    expect(broken.writeIndex).not.toHaveBeenCalled();
+    expect(broken.log).toHaveBeenCalledWith(expect.stringMatching(/^decks\/notes\.txt is neither/));
   });
 
   it("checks against a git ref that no published version was edited or removed", async () => {
@@ -1671,12 +1683,13 @@ describe("main", () => {
       ["node", "--base"],
       ["node", "--base", "--check"],
       ["node", "extra"],
+      ["node", "--index", "--check"],
     ]) {
       const { io: library, log } = io(filesOf(LIBRARY));
       expect(await main(argv, library), argv.join(" ")).toBe(1);
       expect(log.mock.calls).toEqual([
         [
-          "Usage: npm run library [-- --base <git ref>], or npm run library:check [-- --base <git ref>]",
+          "Usage: npm run library [-- --base <git ref>], npm run library:check [-- --base <git ref>], or npm run library:index",
         ],
       ]);
     }

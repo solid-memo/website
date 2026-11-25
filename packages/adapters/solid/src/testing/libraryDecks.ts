@@ -55,23 +55,34 @@ export function deckReadOf(
   return "unlisted";
 }
 
-/** The index of LIBRARY_DECKS alone, as `npm run library` writes the whole library's. */
-export function indexOfListedDecks(
+/**
+ * The index of `decks`, as `npm run library:index` makes the whole
+ * library's (docs/deck-library.md#the-index): the index is never kept
+ * in git, so the tests read it as made from the releases.
+ */
+export function indexOfDecks(
+  decks: readonly string[],
   readdir: (path: string) => string[] = (path) => fs.readdirSync(path),
   readText: (path: string) => string = (path) => fs.readFileSync(path, "utf8"),
 ): string {
   const files = new Map<string, string>();
-  for (const deck of LIBRARY_DECKS) {
+  for (const deck of decks) {
     for (const file of readdir(join(DECKS_ROOT, deck)).sort()) {
       files.set(`${deck}/${file}`, readText(join(DECKS_ROOT, deck, file)));
     }
   }
   const { releases } = releasesOf(files);
   const course =
-    NEWCOMER_COURSE !== undefined && LIBRARY_DECKS.includes(NEWCOMER_COURSE)
-      ? NEWCOMER_COURSE
-      : undefined;
+    NEWCOMER_COURSE !== undefined && decks.includes(NEWCOMER_COURSE) ? NEWCOMER_COURSE : undefined;
   return buildIndex(releases, course);
+}
+
+/** The index of LIBRARY_DECKS alone. */
+export function indexOfListedDecks(
+  readdir?: (path: string) => string[],
+  readText?: (path: string) => string,
+): string {
+  return indexOfDecks(LIBRARY_DECKS, readdir, readText);
 }
 
 /** The paths of decks/ a test read that it may not, since the last takeUnlistedReads. */

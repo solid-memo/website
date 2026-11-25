@@ -9,10 +9,15 @@
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
         "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
         "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",
         "$TURBO_ROOT$/packages/adapters/solid-memo-client/package.json"
+      ],
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@solid-memo/shacl#library:index"
       ]
     }
   }

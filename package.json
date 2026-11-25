@@ -34,7 +34,7 @@
   ],
   "packageManager": "npm@12.2.3",
   "scripts": {
-    "dev": "npm run dev -w @solid-memo/web",
+    "dev": "npm run library:index && npm run dev -w @solid-memo/web",
     "start": "npm run build && npm run preview -w @solid-memo/web",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
@@ -78,7 +78,7 @@
     "lint:reuse": "reuse lint",
     "lint:workflows": "actionlint && zizmor --offline --no-progress .github",
     "lint:commits": "commitlint --from origin/main --to HEAD && { test -z \"$(git rev-list --merges origin/main..HEAD)\" || { echo 'A merge commit is not linted: update the branch by rebasing it on main (git rebase origin/main).' >&2; exit 1; }; }",
-    "crosscheck": "python3 scripts/shacl_crosscheck.py",
+    "crosscheck": "npm run library:index && python3 scripts/shacl_crosscheck.py",
     "test:crosscheck": "python3 -m unittest discover -s scripts",
     "test:pod": "npm run test:pod -w @solid-memo/e2e-pod",
     "pod": "npm run pod -w @solid-memo/e2e-pod",
@@ -90,6 +90,7 @@
     "generate:check": "turbo run generate:check",
     "library": "node -e \"import('@solid-memo/shacl/node/deckLibrary').then((m) => m.run(process))\" --",
     "library:check": "node -e \"import('@solid-memo/shacl/node/deckLibrary').then((m) => m.run(process))\" -- --check",
+    "library:index": "turbo run library:index --output-logs=errors-only",
     "format:turtle": "turbo run format:turtle",
     "format:turtle:check": "turbo run format:turtle:check"
   },

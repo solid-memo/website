@@ -1449,10 +1449,10 @@
       "downloaded": "{file}을(를) {url}의 릴리스로 저장했어요.",
       "stepsIntro": "라이브러리에 제안하려면 Solid Memo 저장소의 사본에서 다음을 진행해 주세요:",
       "stepCopy": "파일을 decks/에 {file}(으)로 넣어 주세요.",
-      "stepLibrary": "파일 서식을 맞추고 라이브러리 색인에 추가해 주세요:",
+      "stepLibrary": "파일 서식을 맞추고 라이브러리를 검사해 주세요:",
       "stepCheck": "라이브러리 규칙에 맞는지 검사해 주세요:",
       "stepAll": "모든 검사를 실행해 주세요:",
-      "stepPullRequest": "새 파일과 색인으로 풀 리퀘스트를 열어 주세요.",
+      "stepPullRequest": "새 파일로 풀 리퀘스트를 열어 주세요.",
       "libraryCheck": "먼저 라이브러리 기준으로 초안 검사하기"
     },
     "releases": {

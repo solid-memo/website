@@ -828,27 +828,37 @@ export interface LibraryIo {
 }
 
 const USAGE =
-  "Usage: npm run library [-- --base <git ref>], or npm run library:check [-- --base <git ref>]";
+  "Usage: npm run library [-- --base <git ref>], npm run library:check [-- --base <git ref>], or npm run library:index";
 
 /**
- * `npm run library` writes decks/index.ttl from the releases;
- * `npm run library:check` (`--check`) fails if it is not what they make.
- * Both validate the library, and with `--base <git ref>` check that no
- * version published at that ref was edited or removed, and that each
- * version new since then names the library's contact and no email
- * (contactProblems). Exit code 0 when
- * the library is valid (and, in check mode, its index up to date).
+ * The index is made from the releases whenever it is needed, never kept
+ * in git (docs/deck-library.md#the-index). `npm run library:index`
+ * (`--index`) writes it to decks/index.ttl, which git ignores, for the
+ * site's build and the tools that read it there, and checks nothing
+ * else. `npm run library` writes it too, and `npm run library:check`
+ * (`--check`) writes nothing; both validate the library and the index
+ * made from it, and with `--base <git ref>` check that no version
+ * published at that ref was edited or removed, and that each version new
+ * since then names the library's contact and no email
+ * (contactProblems). Exit code 0 when the library is valid; with
+ * `--index`, when the index could be made: decks/ holds only releases
+ * that read as Turtle, in their place.
  */
 export async function main(argv: readonly string[], io: LibraryIo): Promise<number> {
   // `node -e` puts the node binary first and drops the `--`.
   const args = argv.slice(1);
   const check = args.includes("--check");
+  const indexOnly = args.includes("--index");
   const baseAt = args.indexOf("--base");
   const ref = baseAt === -1 ? undefined : args[baseAt + 1];
   const known = args.every(
     (arg, i) => arg === "--check" || arg === "--base" || (baseAt !== -1 && i === baseAt + 1),
   );
-  if (!known || (baseAt !== -1 && (ref === undefined || ref.startsWith("-")))) {
+  if (indexOnly && args.length > 1) {
+    io.log(USAGE);
+    return 1;
+  }
+  if ((!indexOnly && !known) || (baseAt !== -1 && (ref === undefined || ref.startsWith("-")))) {
     io.log(USAGE);
     return 1;
   }
@@ -856,6 +866,13 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
     const files = await io.readFiles();
     const { releases, problems } = releasesOf(files);
     const index = buildIndex(releases, io.newcomerCourse);
+    if (indexOnly) {
+      for (const problem of problems) io.log(problem);
+      if (problems.length > 0) return 1;
+      await io.writeIndex(index);
+      io.log(`wrote decks/${INDEX_FILE}`);
+      return 0;
+    }
     if (ref !== undefined) {
       const published = await io.readFilesAt(ref);
       problems.push(...baseProblems(files, published, ref));
@@ -864,13 +881,7 @@ export async function main(argv: readonly string[], io: LibraryIo): Promise<numb
         problems.push(...contactProblems(release));
       }
     }
-    if (check) {
-      const stated = files.get(INDEX_FILE);
-      if (stated === undefined)
-        problems.push(`decks/${INDEX_FILE} is missing: run \`npm run library\`.`);
-      else if (stated !== index)
-        problems.push(`decks/${INDEX_FILE} is out of date: run \`npm run library\`.`);
-    } else if (problems.length === 0) {
+    if (!check && problems.length === 0) {
       await io.writeIndex(index);
       io.log(`wrote decks/${INDEX_FILE}`);
     }

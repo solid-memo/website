@@ -48,8 +48,6 @@ path = [
     # The public API, one promise a line, each file written by a test
     # (api/README.md).
     "api/**/*.txt",
-    # The deck library's index, written by `npm run library`.
-    "decks/index.ttl",
 ]
 precedence = "override"
 SPDX-FileCopyrightText = "2026 Anton Wiklund and Solid Memo contributors"

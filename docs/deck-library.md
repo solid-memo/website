@@ -13,7 +13,7 @@ its cards and a Turtle `dcat:Distribution`.
 
 | Path under `decks/` | IRI | What |
 |---|---|---|
-| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalog the app lists, generated from the versions and committed: each deck a series (`index.ttl#<name>`), its current version in full but for its cards, how it was made and any email, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
+| `index.ttl` | `https://solid-memo.com/decks/index.ttl` | The catalog the app lists, made from the versions and never committed ([The index](#the-index)): each deck a series (`index.ttl#<name>`), its current version in full but for its cards, how it was made and any email, the publisher `index.ttl#solid-memo`, and the [course for newcomers](#courses). |
 | `<name>/v<N>.ttl` | `https://solid-memo.com/decks/<name>/v<N>.ttl` | Version `N` of a deck, frozen once published; its cards are fragments of it (`…/v1.ttl#sweden`). |
 
 Nothing else is in `decks/` (no lock file, sources or scripts). A
@@ -26,12 +26,34 @@ extension is a 404. Each file states its own address as its `@base`.
 ```mermaid
 flowchart LR
     accTitle: Publishing a deck version
-    accDescr: A new version is copied from the frozen one, indexed with npm run library, checked with npm run library:check and deployed with the site.
+    accDescr: A new version is copied from the frozen one and checked with npm run library:check; the site's build makes the index from the versions and deploys both.
     prev["decks/name/vN.ttl<br/>(published, frozen)"] -->|copy, edit| next["decks/name/vN+1.ttl"]
-    next -->|npm run library| idx["decks/index.ttl<br/>dcat:Catalog"]
-    next & idx -->|"npm run library:check<br/>-- --base ref"| ok["valid, index up to date,<br/>nothing published changed"]
-    ok -->|deploy| site["solid-memo.com/decks/…"]
+    next -->|"npm run library:check<br/>-- --base ref"| ok["valid, nothing<br/>published changed"]
+    ok -->|"build: npm run library:index"| idx["decks/index.ttl<br/>dcat:Catalog"]
+    ok & idx -->|deploy| site["solid-memo.com/decks/…"]
 ```
+
+## The index
+
+`decks/index.ttl` is made from the versions whenever it's needed, and
+git ignores it (`/decks/index.ttl` in `.gitignore`). `buildIndex` in
+[deckLibrary.ts](../packages/adapters/shacl/node/deckLibrary.ts) makes
+it, and its tests hold what it makes. `npm run library:index`, the
+Turbo task `@solid-memo/shacl#library:index`, writes it for what reads
+it from the file:
+
+- the site's build and its dev server (`npm run build`, `npm run dev`),
+  which publish it at its address beside the versions;
+- the tests of `composition` and `web`;
+- the pySHACL cross-check (`npm run crosscheck`).
+
+Turbo writes it before the tasks that read it, and every task whose
+inputs take `decks/` leaves the index out of them. `solid`'s tests make
+the index of the decks they read in memory
+([testing.md](testing.md#conventions)). Running one test file of
+`composition` or `web` by itself, run `npm run library:index` first. A
+pull request shows only its versions, not what the index says of them:
+`npm run library` writes the index to look at.
 
 ## A version
 
@@ -263,16 +285,16 @@ next. To change a deck `<name>` whose latest version is `N`:
      `vcard:Kind` node, and no `foaf:mbox` (remove it from an agent
      copied from a version published before the rule).
 3. Run `npm run format:turtle`, then `npm run library`, which validates
-   the library and writes `decks/index.ttl` (the new version becomes
-   the series' `dcat:last` and current version). Then run
+   the library and writes `decks/index.ttl`, which git ignores (the new
+   version becomes the series' `dcat:last` and current version). Then run
    `npm run library:check -- --base origin/main`, which checks the
    contact of every version new since `origin/main`.
 4. Look at it: under `npm run dev`, the library screen lists the working
    tree's new version and offers it to copies of the old one
    ([migrations.md](migrations.md#catching-up-with-the-library)).
-5. Commit the new version and the index together, as a `feat(decks)`
-   commit ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)). The
-   release it makes publishes them, once deployed
+5. Commit the new version, as a `feat(decks)` commit
+   ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)). The release
+   it makes publishes it, and the index the build makes, once deployed
    ([deployment.md](deployment.md)).
 
 A new deck is the same with `decks/<name>/v1.ttl`, without `dcat:prev`
@@ -356,7 +378,7 @@ npm run library:check -- --base origin/main
 ```
 
 The script prints what it included, left out and adjusted, and the
-version notes. The version and the index go in a `feat(decks)` commit
+version notes. The version goes in a `feat(decks)` commit
 naming its issue
 ([CONTRIBUTING.md](../CONTRIBUTING.md#commit-messages)).
 
@@ -367,8 +389,8 @@ every Monday, and by hand (Actions › Taxonomy › Run workflow):
 - For a taxonomy version the deck lacks, its `update` job runs
   `--verify`, makes the next version, and checks it as CI's `library`
   and `crosscheck` jobs do. It holds no secret, and its token only
-  reads. It fails if anything in `decks/` changed but the new version
-  and the index. It hands those two files and the version notes to the
+  reads. It fails if anything in `decks/` changed but the new version.
+  It hands that file and the version notes to the
   `publish` job as an artifact of the run.
 - The `publish` job takes that artifact from its own run, and refuses
   it if it holds any other file. It refuses notes that aren't one line
@@ -498,7 +520,7 @@ npm run library
 npm run library:check -- --base origin/main
 ```
 
-The new version, the index and the mapping go in a `feat(decks)`
+The new version and the mapping go in a `feat(decks)`
 commit, as for [any new version](#publishing-a-new-version). A version
 made by hand later keeps the cards' text, but the script's next run
 writes the four languages afresh, so a wrong label is mended on
@@ -562,9 +584,10 @@ that says nothing reads as before.
 ## Checks
 
 [`packages/adapters/shacl/node/deckLibrary.ts`](../packages/adapters/shacl/node/deckLibrary.ts)
-is both commands. `npm run library` writes the index;
-`npm run library:check` writes nothing and fails when the index isn't
-what the versions make. Both check:
+is the three commands. `npm run library:index` writes the
+[index](#the-index) and checks only the layout; `npm run library`
+writes it too, and `npm run library:check` writes nothing. Those two
+check the versions and the index made from them:
 
 - the layout: only `index.ttl` and `<name>/v<N>.ttl`, plain names,
   versions from 1 without gaps;

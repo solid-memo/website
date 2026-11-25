@@ -1539,7 +1539,7 @@ graph LR
 - `solid`'s unit tests read only the library's decks that
   `LIBRARY_DECKS` lists
   ([libraryDecks.ts](../packages/adapters/solid/src/testing/libraryDecks.ts)),
-  and the index as `npm run library` would write it for those decks
+  and the index as `npm run library:index` would make it for those decks
   alone. `solid#test`'s inputs name those decks' folders, not all of
   `decks/`, so a new deck, or a new release of another, doesn't run
   them again. A setup file guards node's file reads: a test that reads

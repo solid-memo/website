@@ -26,7 +26,7 @@ USAGE
   The script prints a report of what it included, excluded and adjusted and
   why, then the version notes (--notes-file also writes them to a file). Then
   run `npm run format:turtle` and `npm run library`, and commit the new version
-  with the library's index. --check writes nothing and says whether the
+  (the library's index is made from the releases, never committed). --check writes nothing and says whether the
   taxonomy has a version the deck's newest version lacks; --verify writes
   nothing and makes the cards of the deck's newest version again, from the
   taxonomy versions it records, failing unless they come out byte for byte

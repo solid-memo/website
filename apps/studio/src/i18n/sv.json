@@ -1540,10 +1540,10 @@
       "downloaded": "Sparade {file}, som utgåvan på {url}.",
       "stepsIntro": "För att föreslå den till biblioteket, i en kopia av Solid Memos kodförråd:",
       "stepCopy": "Lägg filen i decks/ som {file}.",
-      "stepLibrary": "Formatera den, och för in den i bibliotekets index:",
+      "stepLibrary": "Formatera den, och kontrollera biblioteket med den:",
       "stepCheck": "Kontrollera den mot bibliotekets regler:",
       "stepAll": "Kör alla kontroller:",
-      "stepPullRequest": "Öppna en pull request med den nya filen och indexet.",
+      "stepPullRequest": "Öppna en pull request med den nya filen.",
       "libraryCheck": "Kontrollera utkastet för biblioteket först"
     },
     "releases": {

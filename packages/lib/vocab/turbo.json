@@ -21,6 +21,7 @@
         "$TURBO_EXTENDS$",
         "$TURBO_ROOT$/ns/**",
         "$TURBO_ROOT$/decks/**",
+        "!$TURBO_ROOT$/decks/index.ttl",
         "$TURBO_ROOT$/docs/**"
       ]
     }

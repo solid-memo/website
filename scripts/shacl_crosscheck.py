@@ -233,9 +233,13 @@ def conformance(data: Graph, shapes: Graph, *, warnings_fail: bool) -> tuple[boo
 
 
 def main() -> int:
-    skos = graph(site("vendor/skohub/skos.shacl.ttl"), site("vendor/skohub/skos.bestPractice.shacl.ttl"))
-
     index = site("decks/index.ttl")
+    if not index[0].is_file():
+        # The index is made from the releases, never kept in git (docs/deck-library.md#the-index).
+        print("decks/index.ttl is missing: run `npm run library:index`, which makes it from the releases.")
+        return 1
+
+    skos = graph(site("vendor/skohub/skos.shacl.ttl"), site("vendor/skohub/skos.bestPractice.shacl.ttl"))
 
     # Each job: its label, the check, and roughly how long it takes (the
     # larger, the sooner it starts, so the slowest do not finish last).

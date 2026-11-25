@@ -482,6 +482,14 @@ jobs:
           cache: pip
           cache-dependency-path: scripts/requirements-ci.txt
       - run: pip install --require-hashes -r scripts/requirements-ci.txt
+      # The library's index, which the script checks, is made from the
+      # releases, never kept in git (docs/deck-library.md#the-index).
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run library:index -w @solid-memo/shacl
       # The script's own tests (scripts/test_shacl_crosscheck.py), on
       # small documents of their own, before it checks the real ones, and
       # the taxonomy deck generator's (scripts/test_taxonomy_deck.py) and the
@@ -584,6 +592,11 @@ jobs:
         run: npm run test:roundtrip -w @solid-memo/solid
       - if: success() || failure()
         run: npm run test:unit -w @solid-memo/shacl
+      # The library's index, which the tests of composition and web read,
+      # is made from the releases (docs/deck-library.md#the-index): npm
+      # runs them here, not Turbo, which makes it first for them.
+      - if: success() || failure()
+        run: npm run library:index -w @solid-memo/shacl
       - if: success() || failure()
         run: npm run test:unit -w @solid-memo/composition
       - if: success() || failure()
