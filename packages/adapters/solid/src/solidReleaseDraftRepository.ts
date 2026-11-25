@@ -21,6 +21,7 @@ import { editOf } from "./datasetEdit";
 import { mapAtOnce } from "@solid-memo/application/atOnce";
 import type { ReleaseDraftRepository } from "@solid-memo/application/ports/library";
 import { AppError } from "@solid-memo/domain/appError";
+import { isHttpUrl } from "@solid-memo/domain/webId";
 import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import {
   draftContainerOf,
@@ -554,7 +555,9 @@ export function createSolidReleaseDraftRepository({
             .map((quad) => quad.subject.value),
         ),
       ];
-      if (roots.length !== 1 || roots[0]!.includes("#")) throw new AppError("notAReleaseFile");
+      // Its deck at an http(s) URL, as a release's is read (libraryMapper releaseDeckOf): its parts are fragments of it.
+      if (roots.length !== 1 || roots[0]!.includes("#") || !isHttpUrl(roots[0]!))
+        throw new AppError("notAReleaseFile");
       if (
         quads.some(
           (quad) =>

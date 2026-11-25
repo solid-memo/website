@@ -93,6 +93,16 @@ describe("completing a course chapter", () => {
     expect(writes(pod)).toEqual([]);
   });
 
+  it("writes nothing for a chapter at an IRI that is no http(s) URL, as a read would not keep it", async () => {
+    const pod = await podWithCourse();
+    const repository = repositoryOn(pod.fetch);
+    await expect(repository.completeChapter(deck, "sm:X#ch-1")).resolves.not.toHaveProperty(
+      "completedChapters",
+    );
+    expect(writes(pod)).toEqual([]);
+    expect(completedIn(pod)).toEqual([]);
+  });
+
   it("adds it again to the document as it is when it changed meanwhile, keeping what changed", async () => {
     const pod = await podWithCourse();
     const elsewhere = repositoryOn(pod.fetch);

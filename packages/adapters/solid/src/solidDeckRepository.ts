@@ -117,6 +117,7 @@ import {
 import { mapSince, readSince } from "./readSince";
 import { AppError } from "@solid-memo/domain/appError";
 import { linksGuestPod } from "@solid-memo/domain/guest";
+import { isHttpUrl } from "@solid-memo/domain/webId";
 import { finishCutOffImport, unsent } from "@solid-memo/application/writes";
 import { sameDeckState, withDeckChanges } from "@solid-memo/domain/deckUpgrade";
 import { refuseFullDeckList, withinCatalogLimit } from "./catalogLinks";
@@ -580,7 +581,9 @@ export function createSolidDeckRepository({
 
     completeChapter(deck, chapterUrl) {
       return editCompletedChapters(deck, (completed) =>
-        // Completed in any release: a chapter keeps its fragment id from one release to the next.
+        // Only an http(s) URL, as a read keeps (toDeck), and completed in any release: a chapter
+        // keeps its fragment id from one release to the next.
+        !isHttpUrl(chapterUrl) ||
         completed.some((url) => fragmentIdOf(url) === fragmentIdOf(chapterUrl))
           ? null
           : { add: [chapterUrl], remove: [] },
