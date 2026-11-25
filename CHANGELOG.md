@@ -21,6 +21,12 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.5.3](https://github.com/solid-memo/website/compare/v8.5.2...v8.5.3) (2026-11-25)
+
+### Fixes
+
+* **ui:** count a plan's cards in use once per frozen list ([e5fafcb](https://github.com/solid-memo/website/commit/e5fafcb2c5e87759abc3f316e03ff02ba44519bf))
+
 ## [8.5.2](https://github.com/solid-memo/website/compare/v8.5.1...v8.5.2) (2026-11-25)
 
 ### Fixes
