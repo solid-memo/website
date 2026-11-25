@@ -12,6 +12,9 @@
  * stopped after the target is written. The state read of the card, when
  * a newer version wrote it, is refused, and a move refused for it writes
  * nothing, so it never stops half way; so does a bulk delete of the card.
+ * One at the subject a card's state is named, which this app cannot
+ * read, is left as it is too: the card's state is written at a subject
+ * of its own, by a grade or a move (GHSA-933g-w2r6-v4f4).
  */
 import { beforeAll, describe, expect, it } from "vitest";
 import type { UseCases } from "@solid-memo/application/useCases";
@@ -444,4 +447,133 @@ describe("a card's subject a newer version wrote", () => {
       expect(await states()).toEqual(statesBefore);
     }
   });
+});
+
+describe("a subject a newer version wrote at a card's named review state", () => {
+  /** A subject stamped with format `version` (99 unless given) at `subject`, with the given extra triples. */
+  const plantAt = async (
+    fetch: typeof globalThis.fetch,
+    on: Deck,
+    subject: string,
+    extra: readonly string[] = [],
+    version = 99,
+  ) => {
+    const response = await fetch(on.reviewsDocumentUrl, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/sparql-update" },
+      body: `INSERT DATA {
+<${subject}> <${RDF_TYPE}> <${SM.ReviewState}> .
+<${subject}> <${SM.formatVersion}> ${version} .
+${extra.map((line) => `<${subject}> ${line} .`).join("\n")}
+};`,
+    });
+    expect(response.ok).toBe(true);
+  };
+  /** The triples of the subject in the deck's reviews document, as text. */
+  const triplesOf = async (fetch: typeof globalThis.fetch, on: Deck, subject: string) =>
+    (await (await fetch(on.reviewsDocumentUrl)).text())
+      .split("\n")
+      .filter((line) => line.startsWith(`<${subject}>`))
+      .sort();
+  /** Grades the card `id` of the deck as new, then again once it is due. */
+  const gradeTwice = async (u: UseCases, on: Deck, id: string) => {
+    const queue = await u.getStudyQueue(INSTANCE, on, NOW);
+    const prompt = queue.newPrompts.find(({ card }) => card.id === id)!;
+    expect(prompt).toBeDefined();
+    await u.recordReview(INSTANCE, on, prompt, 4, NOW);
+    const later = new Date(NOW.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const again = await u.getStudyQueue(INSTANCE, on, later);
+    expect(again.newPrompts.map(({ card }) => card.id)).not.toContain(id);
+    const due = again.due.find(({ card }) => card.id === id)!;
+    expect(due).toBeDefined();
+    await u.recordReview(INSTANCE, on, due, 4, later);
+  };
+
+  it("is left as it is, and a card never studied is graded at a subject of its own", async () => {
+    const { u, a, fetch } = await world();
+    const fresh = await u.addCard(a, { front: { en: "Denmark" }, back: { en: "Copenhagen" } });
+    const named = `${a.reviewsDocumentUrl}#${fresh.id}`;
+    await plantAt(fetch, a, named);
+    const planted = await triplesOf(fetch, a, named);
+
+    await gradeTwice(u, a, fresh.id);
+
+    expect(await triplesOf(fetch, a, named)).toEqual(planted);
+    const states = (await u.listDeckReviewStates(a)).sm2.filter(
+      ({ cardId }) => cardId === fresh.id,
+    );
+    expect(states).toHaveLength(1);
+    expect(states[0]!.repetitions).toBe(2);
+  });
+
+  it("typed with a class of a later format too, is left as it is, and the card is graded", async () => {
+    const { u, a, fetch } = await world();
+    const fresh = await u.addCard(a, { front: { en: "Denmark" }, back: { en: "Copenhagen" } });
+    const named = `${a.reviewsDocumentUrl}#${fresh.id}`;
+    // Above the version a review state is written in, below the one a card is.
+    await plantAt(fetch, a, named, [`<${RDF_TYPE}> <${SM.Card}>`], 5);
+    const planted = await triplesOf(fetch, a, named);
+
+    await gradeTwice(u, a, fresh.id);
+
+    expect(await triplesOf(fetch, a, named)).toEqual(planted);
+    const states = (await u.listDeckReviewStates(a)).sm2.filter(
+      ({ cardId }) => cardId === fresh.id,
+    );
+    expect(states).toHaveLength(1);
+    expect(states[0]!.repetitions).toBe(2);
+  });
+
+  it("at the FSRS-6 subject, is left as it is, and the FSRS-6 state goes to a subject of its own", async () => {
+    const { u, a, fetch } = await world();
+    const prefs = await u.getPreferences(INSTANCE);
+    await u.switchScheduler(INSTANCE, { ...prefs, scheduler: "fsrs6" });
+    const fresh = await u.addCard(a, { front: { en: "Denmark" }, back: { en: "Copenhagen" } });
+    const named = `${a.reviewsDocumentUrl}#${fresh.id}@fsrs6`;
+    await plantAt(fetch, a, named, [
+      `<${SM.reviewOf}> <${fresh.url}>`,
+      `<${SM.reviewDirection}> <${SM.frontToBack}>`,
+      `<${SM.scheduler}> <${SM.fsrs6}>`,
+    ]);
+    const planted = await triplesOf(fetch, a, named);
+
+    await gradeTwice(u, a, fresh.id);
+
+    expect(await triplesOf(fetch, a, named)).toEqual(planted);
+    const states = await u.listDeckReviewStates(a);
+    expect(states.fsrs.filter(({ cardId }) => cardId === fresh.id)).toHaveLength(1);
+    expect(states.sm2.filter(({ cardId }) => cardId === fresh.id)).toHaveLength(1);
+  });
+
+  it.each([
+    [true, 99, []],
+    [false, 99, []],
+    [true, 5, [`<${RDF_TYPE}> <${SM.Card}>`]],
+    [false, 5, [`<${RDF_TYPE}> <${SM.Card}>`]],
+  ] as const)(
+    "in the target, is left by a move (progress kept: %s, format %i), which is done in full",
+    async (keepProgress, version, extra) => {
+      const { u, a, b, cards, held, fetch } = await world();
+      const moved = cards[0]!;
+      const named = `${b.reviewsDocumentUrl}#${moved.id}`;
+      await plantAt(fetch, b, named, extra, version);
+      const planted = await triplesOf(fetch, b, named);
+
+      const plan = await u.transferCards(
+        INSTANCE,
+        a,
+        b,
+        [moved.id],
+        { mode: "move", keepProgress },
+        SESSION.webId,
+      );
+
+      const to = plan.cards[0]!.to;
+      expect(to).toBe(moved.id);
+      expect((await held()).b).toContain(to);
+      if (!keepProgress) await gradeTwice(u, b, to);
+      expect((await u.listDeckReviewStates(b)).sm2.map(({ cardId }) => cardId)).toEqual([to]);
+      expect(await triplesOf(fetch, b, named)).toEqual(planted);
+    },
+  );
 });
