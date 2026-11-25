@@ -21,6 +21,16 @@ changed: see [docs/vocab.md](docs/vocab.md),
 <!-- markdownlint-disable -->
 <!-- cspell:disable -->
 
+## [8.4.3](https://github.com/solid-memo/website/compare/v8.4.2...v8.4.3) (2026-11-25)
+
+### Fixes
+
+* read a contact's pages of any scheme alike in studio and library ([8dca296](https://github.com/solid-memo/website/commit/8dca29659fceb84334a0d57e58bcd5e477be0d5d))
+* **solid:** find a deck document's own subject in any spelling ([e684502](https://github.com/solid-memo/website/commit/e6845028dd671921ab877efbb66868f25094fcb6))
+* **solid:** leave a newer named review state alone when writing anew ([9ba5e56](https://github.com/solid-memo/website/commit/9ba5e567ea60c0e1086dab8e53fab341f0cd5a08))
+* **studio:** name a bounded number of a source's creators ([f1cc2ba](https://github.com/solid-memo/website/commit/f1cc2badb88b573eda3827f52ef03ee8f767792f))
+* **ui:** load the answer's picture ahead on every deck ([4bddb70](https://github.com/solid-memo/website/commit/4bddb7099c71f46c48e2d4c33132b10ffdaadb07))
+
 ## [8.4.2](https://github.com/solid-memo/website/compare/v8.4.1...v8.4.2) (2026-11-25)
 
 ### Performance Improvements
