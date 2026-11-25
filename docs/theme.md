@@ -31,8 +31,8 @@ flowchart LR
   which saves what's shown then; until then a choice is kept on the
   device alone. So it is while the stored preferences don't fit their
   shape ([validation.md](validation.md#the-invalid-data-policy)).
-- **On the device**, by a `DeviceSetting` port for each
-  ([localStorageSetting.ts](../packages/adapters/browser/src/localStorageSetting.ts),
+- **On the device**, by the device store, under a key for each
+  ([deviceChoices.ts](../packages/core/application/src/deviceChoices.ts),
   key `solid-memo:theme`, "As my browser" no key; the palette's and
   the text size's below). The sign-in screens and the first paint
   read these before any pod is reached. Opening an instance whose
@@ -92,8 +92,8 @@ preferences suggest High contrast. A choice takes effect at once:
 
 The choice is kept in the instance's preferences and on the device, as
 the theme is ([Where the choice is kept](#where-the-choice-is-kept)),
-on the device by its `DeviceSetting` port
-([localStorageSetting.ts](../packages/adapters/browser/src/localStorageSetting.ts),
+on the device by the device store
+([deviceChoices.ts](../packages/core/application/src/deviceChoices.ts),
 key `solid-memo:palette`; Standard is no key). It's shown as
 `<html data-palette>` (none for Standard), set as `data-theme` is
 ([Showing it](#showing-it)); `theme.tsx` sets it before setting the
@@ -278,8 +278,8 @@ the page.
 - **On the device**, `solid-memo:palette` holds its base. For the first
   paint, `solid-memo:palette-colors` holds the palette's address, its
   base and the colors to paint in each theme, but not its name
-  ([localStorageCustomPalettePreference.ts](../packages/adapters/browser/src/localStorageCustomPalettePreference.ts),
-  the `CustomPalettePreference` port). Opening the instance copies the
+  ([deviceChoices.ts](../packages/core/application/src/deviceChoices.ts),
+  kept by the device store). Opening the instance copies the
   pod's palette there; choosing a built-in palette removes it.
 
 ### How a palette of one's own is held safe
@@ -369,8 +369,8 @@ Larger and Largest, at 112.5%, 125% and 150% of it. The user chooses
 under Text size in the study preferences, each size with a sample line
 at that size, and the choice takes effect at once. It's kept in the
 instance's preferences and on the device, as the theme is: on the
-device by its `DeviceSetting` port
-([localStorageSetting.ts](../packages/adapters/browser/src/localStorageSetting.ts),
+device by the device store
+([deviceChoices.ts](../packages/core/application/src/deviceChoices.ts),
 key `solid-memo:textSize`; Default is no key). It's shown as
 `<html data-text-size>` (none for Default), set as `data-palette` is.
 Each size sets the root's font size as a percentage, which the

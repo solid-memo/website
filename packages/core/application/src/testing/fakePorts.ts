@@ -6,6 +6,18 @@ import { AppError } from "@solid-memo/domain/appError";
 import { withPictureHost } from "@solid-memo/domain/deckPictures";
 import { vi } from "vitest";
 import { NO_PORTS } from "./noPorts";
+import type { DeviceChoices } from "../deviceChoices";
+import { UNKEPT_STORE } from "../deviceValues";
+import {
+  CUSTOM_PALETTE_KEY,
+  LANGUAGE_KEY,
+  PALETTE_KEY,
+  SEEN_HIGHLIGHTS_KEY,
+  TEXT_SIZE_KEY,
+  THEME_KEY,
+  type DeviceStore,
+  type DeviceValue,
+} from "../ports/device";
 import type { Answer } from "@solid-memo/domain/answer";
 import type { ShapeValidator } from "../ports/checks";
 import type { DeckLibrary } from "../ports/library";
@@ -403,4 +415,32 @@ export function memoryLog() {
     }),
   } satisfies AnswerLog;
   return { log, byMonth };
+}
+
+/** The key each of the use cases' choices is kept under (deviceChoices). */
+const CHOICE_KEYS: Record<keyof DeviceChoices, string> = {
+  languagePreference: LANGUAGE_KEY,
+  themePreference: THEME_KEY,
+  palettePreference: PALETTE_KEY,
+  customPalettePreference: CUSTOM_PALETTE_KEY,
+  textSizePreference: TEXT_SIZE_KEY,
+  seenHighlights: SEEN_HIGHLIGHTS_KEY,
+};
+
+/**
+ * A DeviceStore that gives the values `choices` names under their keys,
+ * so a test can watch or plant a choice; every other value is kept
+ * nowhere (UNKEPT_STORE).
+ */
+export function choicesStore(choices: Partial<DeviceChoices>): DeviceStore {
+  const byKey = new Map<string, unknown>(
+    Object.entries(choices).map(([name, value]) => [
+      CHOICE_KEYS[name as keyof DeviceChoices],
+      value,
+    ]),
+  );
+  return {
+    value: (key, kind) => (byKey.get(key) as DeviceValue<never>) ?? UNKEPT_STORE.value(key, kind),
+    byInstance: UNKEPT_STORE.byInstance,
+  };
 }

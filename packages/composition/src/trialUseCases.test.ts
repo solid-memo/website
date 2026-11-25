@@ -63,18 +63,25 @@ describe("readOnlyFetch", () => {
 
 describe("NO_DEVICE", () => {
   it("keeps no choice of how the app is shown, and no palettes", async () => {
-    const { languagePreference, themePreference, palettePreference, customPalettePreference } =
-      NO_DEVICE;
-    languagePreference.choose("sv");
-    themePreference.choose("dark");
-    palettePreference.choose("parchment");
-    customPalettePreference.choose({} as never);
-    NO_DEVICE.textSizePreference.choose("larger");
-    expect(languagePreference.chosen()).toBeNull();
-    expect(themePreference.chosen()).toBe("system");
-    expect(palettePreference.chosen()).toBe("standard");
-    expect(customPalettePreference.chosen()).toBeNull();
-    expect(NO_DEVICE.textSizePreference.chosen()).toBe("default");
+    const {
+      languagePreference,
+      themePreference,
+      palettePreference,
+      customPalettePreference,
+      seenHighlights,
+    } = NO_DEVICE;
+    languagePreference.write("sv");
+    themePreference.write("dark");
+    palettePreference.write("parchment");
+    customPalettePreference.write({} as never);
+    NO_DEVICE.textSizePreference.write("larger");
+    seenHighlights.write(["a"]);
+    expect(languagePreference.read()).toBeNull();
+    expect(themePreference.read()).toBe("system");
+    expect(palettePreference.read()).toBe("standard");
+    expect(customPalettePreference.read()).toBeNull();
+    expect(NO_DEVICE.textSizePreference.read()).toBe("default");
+    expect(seenHighlights.read()).toBeNull();
     await expect(NO_DEVICE.paletteRepository.listPalettes(TRIAL_ORIGIN)).resolves.toEqual([]);
     await expect(
       NO_DEVICE.paletteRepository.savePalette(TRIAL_ORIGIN, {} as never),

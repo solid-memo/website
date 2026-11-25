@@ -32,7 +32,8 @@ import {
   type SwitchProgress,
   type SwitchStep,
 } from "@solid-memo/domain/schedulerSwitch";
-import type { LanguagePreference, CustomPalettePreference, DeviceSetting } from "./ports/device";
+import type { DeviceChoices } from "./deviceChoices";
+import type { DeviceValue } from "./ports/device";
 import type {
   DeckRepository,
   InstanceRepository,
@@ -289,11 +290,6 @@ export function createPreferenceUseCases({
   newId,
   now,
 }: {
-  languagePreference: LanguagePreference;
-  themePreference: DeviceSetting<ThemeChoice>;
-  palettePreference: DeviceSetting<Palette>;
-  customPalettePreference: CustomPalettePreference;
-  textSizePreference: DeviceSetting<TextSize>;
   paletteRepository: PaletteRepository;
   preferencesRepository: PreferencesRepository;
   instanceRepository: Pick<InstanceRepository, "listInstances" | "readMeta">;
@@ -304,7 +300,7 @@ export function createPreferenceUseCases({
   digestStore: Pick<DigestStore, "refresh">;
   newId: () => string;
   now: () => Date;
-}): PreferenceUseCases {
+} & Omit<DeviceChoices, "seenHighlights">): PreferenceUseCases {
   /**
    * The palette saved preferences keep: one of the user's own of the
    * instance as it is, else as keptPalette has it, against what the
@@ -329,19 +325,19 @@ export function createPreferenceUseCases({
    */
   function appearanceSetting<K extends "theme" | "textSize">(
     field: K,
-    setting: DeviceSetting<StudyPreferences[K]>,
+    setting: DeviceValue<StudyPreferences[K]>,
   ) {
     return {
-      choice: () => setting.chosen(),
+      choice: () => setting.read(),
       async fromInstance(instanceUrl: string): Promise<StudyPreferences[K] | null> {
         const stored = await preferenceStore.shown(instanceUrl);
         if (stored === null) return null;
-        setting.choose(stored.preferences[field]);
+        setting.write(stored.preferences[field]);
         return stored.preferences[field];
       },
       choose(value: StudyPreferences[K], instanceUrl: string | null): Promise<void> {
         return preferenceStore.chooseAppearance(
-          () => setting.choose(value),
+          () => setting.write(value),
           instanceUrl,
           (preferences) =>
             preferences[field] === value ? null : { ...preferences, [field]: value },
@@ -359,21 +355,21 @@ export function createPreferenceUseCases({
 
   return {
     language(preferred) {
-      return pickLocale(languagePreference.chosen(), preferred);
+      return pickLocale(languagePreference.read(), preferred);
     },
     chooseLanguage(locale) {
-      languagePreference.choose(locale);
+      languagePreference.write(locale);
     },
     themeChoice: theme.choice,
     instanceTheme: theme.fromInstance,
     chooseTheme: theme.choose,
     paletteChoice() {
-      return palettePreference.chosen();
+      return palettePreference.read();
     },
     customPaletteChoice() {
-      const custom = customPalettePreference.chosen();
+      const custom = customPalettePreference.read();
       if (custom === null || isReadable(custom)) return custom;
-      customPalettePreference.choose(null);
+      customPalettePreference.write(null);
       return null;
     },
     async instancePalette(instanceUrl) {
@@ -388,15 +384,15 @@ export function createPreferenceUseCases({
         : null;
       const custom = own !== null && isReadable(own) ? own : null;
       const palette = own?.basedOn ?? shownPalette(stored.preferences);
-      palettePreference.choose(palette);
-      customPalettePreference.choose(custom);
+      palettePreference.write(palette);
+      customPalettePreference.write(custom);
       return { palette, custom };
     },
     choosePalette(palette, instanceUrl) {
       return preferenceStore.chooseAppearance(
         () => {
-          palettePreference.choose(palette);
-          customPalettePreference.choose(null);
+          palettePreference.write(palette);
+          customPalettePreference.write(null);
         },
         instanceUrl,
         (preferences, url) => {
@@ -408,8 +404,8 @@ export function createPreferenceUseCases({
     chooseCustomPalette(palette, instanceUrl) {
       return preferenceStore.chooseAppearance(
         () => {
-          palettePreference.choose(palette.basedOn);
-          customPalettePreference.choose(palette);
+          palettePreference.write(palette.basedOn);
+          customPalettePreference.write(palette);
         },
         instanceUrl,
         (preferences) =>
@@ -436,8 +432,8 @@ export function createPreferenceUseCases({
       if (listed.length >= MAX_PALETTES && !listed.some((one) => isSameUrl(one.url, palette.url)))
         throw new AppError("paletteLimit", { limit: MAX_PALETTES });
       await paletteRepository.savePalette(instanceUrl, palette);
-      if (customPalettePreference.chosen()?.url === palette.url)
-        customPalettePreference.choose(palette);
+      if (customPalettePreference.read()?.url === palette.url)
+        customPalettePreference.write(palette);
       return palette;
     },
     textSizeChoice: textSize.choice,

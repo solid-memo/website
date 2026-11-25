@@ -3,11 +3,8 @@
 // SPDX-License-Identifier: MIT
 
 /*
- * The driven ports of what the app keeps where it runs, the browser: the language and the settings, the screens' values, the update journal, word of a logout, the guest's pod's store, and files on the user's device. The browser adapters implement them.
+ * The driven ports of what the app keeps where it runs, the browser: the values the use cases and the screens keep, the update journal, word of a logout, the guest's pod's store, and files on the user's device. The browser adapters implement them.
  */
-
-import type { Locale } from "@solid-memo/domain/locale";
-import type { CustomPalette } from "@solid-memo/domain/customPalette";
 
 /**
  * Driven port: files on the user's device, which the user picks. Text
@@ -18,64 +15,6 @@ export interface FileExchange {
   save(name: string, mediaType: string, text: string): void;
   /** The file the user picks, of those `accept` names (as an input's accept attribute); null when they pick none. */
   open(accept: string): Promise<{ name: string; text: string } | null>;
-}
-
-/**
- * Driven port: the language the user chose for the app, kept where the
- * app runs (the browser), since it is needed before any pod is reached.
- * Best effort: it may forget, and the app then speaks the browser's
- * language.
- */
-export interface LanguagePreference {
-  /** The chosen language; null when none was chosen (or it was forgotten). */
-  chosen(): Locale | null;
-  choose(locale: Locale): void;
-}
-
-/**
- * Driven port: a choice of how the app is shown (a SettingKind of
- * domain: the theme, the palette, the text size), kept where the app
- * runs (the browser), since it is needed before any pod is reached: on
- * the sign-in screens, and for the first paint. An instance's
- * preferences, once it has them, keep the choice too and win. Best
- * effort: it may forget, and the setting is then its fallback (the
- * browser's theme, the standard colors, the browser's own text size).
- */
-export interface DeviceSetting<T> {
-  /** The chosen value; the setting's fallback when none was chosen (or it was forgotten). */
-  chosen(): T;
-  choose(value: T): void;
-}
-
-/**
- * Driven port: a copy of the user's own palette being shown, kept where
- * the app runs (the browser), so that the first paint has its colors
- * before any pod is reached. Best effort: it may forget, and the app is
- * then in the palette's base until the instance is read.
- */
-export interface CustomPalettePreference {
-  /**
-   * The palette kept, without its name (an empty title: only what the
-   * first paint needs is kept); null when none is (a built-in palette is
-   * shown, or it was forgotten).
-   */
-  chosen(): CustomPalette | null;
-  /** Keep this palette, or none. */
-  choose(palette: CustomPalette | null): void;
-}
-
-/**
- * Driven port: the ids of the highlights of new versions ("New in this
- * version") this browser has shown, or spared a first visit, kept where
- * the app runs (the browser), since they are no one's data but the
- * device's. Best effort: it may forget, and the app then takes the next
- * visit for a first one and shows nothing; where it cannot keep them
- * (storage full), a closed card comes back on the next visit.
- */
-export interface SeenHighlights {
-  /** The ids kept; null when none are (a first visit, or they were forgotten). */
-  seen(): string[] | null;
-  see(ids: readonly string[]): void;
 }
 
 /**
@@ -126,9 +65,22 @@ export interface ValueKind<T> {
 export interface DeviceValueKind<T> extends ValueKind<T> {
   /**
    * Kept as its text, not as JSON, and decoded from the text: for a value
-   * other code reads as it is, such as a WebID.
+   * other code reads as it is, such as a WebID, or the theme the script
+   * in index.html sets before the first paint.
    */
   text?: boolean;
+  /**
+   * What is kept as JSON of a value: only part of it, or another form.
+   * The value as it is when none is given. Never given the fallback,
+   * which is kept as no value at all.
+   */
+  encode?(value: T): unknown;
+  /**
+   * The most characters the value takes, its key and its text together,
+   * when that is fewer than the store keeps of any value. A longer one is
+   * not kept, and one kept before is read as none.
+   */
+  maxCharacters?: number;
 }
 
 /** A value kept on the device (DeviceStore). Best effort: it may forget, and is then its kind's fallback. */
@@ -155,6 +107,26 @@ export interface InstanceValueKind<T> extends ValueKind<T> {
    */
   legacyPrefix?: string;
 }
+
+/*
+ * The keys of the choices the use cases keep on this device
+ * (deviceChoices), part of what the device store is given to keep. The theme,
+ * the palette, the text size and the custom palette's colors are also
+ * read by the script in index.html that sets them before the first paint,
+ * so each is kept as that script reads it.
+ */
+/** The language the user chose. */
+export const LANGUAGE_KEY = "solid-memo:language";
+/** The theme (THEME_SETTING). */
+export const THEME_KEY = "solid-memo:theme";
+/** The palette (PALETTE_SETTING). */
+export const PALETTE_KEY = "solid-memo:palette";
+/** The text size (TEXT_SIZE_SETTING). */
+export const TEXT_SIZE_KEY = "solid-memo:textSize";
+/** A copy of the user's own palette being shown (deviceChoices). */
+export const CUSTOM_PALETTE_KEY = "solid-memo:palette-colors";
+/** The ids of the highlights seen, as a JSON array. */
+export const SEEN_HIGHLIGHTS_KEY = "solid-memo:seenHighlights";
 
 /**
  * Driven port: values kept where the app runs (the browser), such as how

@@ -111,7 +111,7 @@ flowchart TB
     end
     subgraph driven["Driven side"]
         solid["Solid adapters<br/>[Component: solid]<br/>DeckRepository, ReviewStateRepository,<br/>AnswerLog, SessionGateway, ..."]
-        browserAdapters["Browser adapters<br/>[Component: browser]<br/>DeviceSetting, ResourceStore,<br/>FileExchange, UpdateJournal, ..."]
+        browserAdapters["Browser adapters<br/>[Component: browser]<br/>DeviceStore, ResourceStore,<br/>FileExchange, UpdateJournal, ..."]
     end
     root["Composition root<br/>[Component: composition]<br/>creates the adapters and<br/>hands them to the use cases"]
     screens -->|"call"| useCases

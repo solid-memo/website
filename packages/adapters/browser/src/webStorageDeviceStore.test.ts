@@ -91,6 +91,33 @@ describe("createWebStorageDeviceStore value", () => {
     expect(value.read()).toEqual([]);
   });
 
+  it("keeps a value in fewer characters when its kind says so, and never more than it keeps", () => {
+    const storage = memoryStorage();
+    const store = createWebStorageDeviceStore(() => storage);
+    const value = store.value("k", { ...STRINGS, maxCharacters: 9 });
+    // `["abcd"]` and the key: nine characters.
+    value.write(["abcd"]);
+    expect(value.read()).toEqual(["abcd"]);
+    value.write(["abcde"]);
+    expect(storage.getItem("k")).toBeNull();
+    storage.setItem("k", '["abcde"]');
+    expect(value.read()).toEqual([]);
+    const above = store.value("k", { ...STRINGS, maxCharacters: MAX_VALUE_CHARACTERS * 2 });
+    above.write(["x".repeat(MAX_VALUE_CHARACTERS)]);
+    expect(storage.getItem("k")).toBeNull();
+  });
+
+  it("keeps what its kind encodes of a value", () => {
+    const storage = memoryStorage();
+    const value = createWebStorageDeviceStore(() => storage).value("k", {
+      ...STRINGS,
+      encode: (list: string[]) => list.slice(0, 1),
+    });
+    value.write(["a", "b"]);
+    expect(storage.getItem("k")).toBe('["a"]');
+    expect(value.read()).toEqual(["a"]);
+  });
+
   it("does without storage", () => {
     const value = createWebStorageDeviceStore(blocked).value("k", STRINGS);
     expect(() => value.write(["a"])).not.toThrow();

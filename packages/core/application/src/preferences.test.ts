@@ -16,7 +16,16 @@ import { memoryFromSm2, nextMemory } from "@solid-memo/domain/fsrs";
 import type { SwitchProgress } from "@solid-memo/domain/schedulerSwitch";
 import type { ReviewState } from "@solid-memo/domain/review";
 import type { Locale } from "@solid-memo/domain/locale";
-import { sm2s, instance, deck, card, makeDeps, memoryLog, session } from "./testing/fakePorts";
+import {
+  sm2s,
+  instance,
+  deck,
+  card,
+  choicesStore,
+  makeDeps,
+  memoryLog,
+  session,
+} from "./testing/fakePorts";
 
 describe("preferences", () => {
   const noon = new Date(2026, 8, 21, 12, 0);
@@ -36,15 +45,18 @@ describe("preferences", () => {
     it("speaks the chosen language, and keeps a new choice", () => {
       let chosen: Locale | null = "sv";
       const languagePreference = {
-        chosen: () => chosen,
-        choose: vi.fn((locale: Locale) => {
+        read: () => chosen,
+        write: vi.fn((locale: Locale) => {
           chosen = locale;
         }),
       };
-      const useCases = createUseCases({ ...makeDeps(), languagePreference });
+      const useCases = createUseCases({
+        ...makeDeps(),
+        deviceStore: choicesStore({ languagePreference }),
+      });
       expect(useCases.language(["en-US"])).toBe("sv");
       useCases.chooseLanguage("en");
-      expect(languagePreference.choose).toHaveBeenCalledWith("en");
+      expect(languagePreference.write).toHaveBeenCalledWith("en");
       expect(useCases.language(["sv-SE"])).toBe("en");
     });
 
@@ -63,8 +75,8 @@ describe("preferences", () => {
     function devicePreference(initial: Palette = "standard") {
       let chosen = initial;
       return {
-        chosen: () => chosen,
-        choose: vi.fn((palette: Palette) => {
+        read: () => chosen,
+        write: vi.fn((palette: Palette) => {
           chosen = palette;
         }),
       };
@@ -80,10 +92,13 @@ describe("preferences", () => {
     it("shows the chosen palette, and keeps a new choice on this device", async () => {
       const palettePreference = devicePreference("high-contrast");
       const deps = makeDeps();
-      const useCases = createUseCases({ ...deps, palettePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ palettePreference }),
+      });
       expect(useCases.paletteChoice()).toBe("high-contrast");
       await useCases.choosePalette("standard", null);
-      expect(palettePreference.choose).toHaveBeenCalledWith("standard");
+      expect(palettePreference.write).toHaveBeenCalledWith("standard");
       expect(useCases.paletteChoice()).toBe("standard");
       expect(deps.preferencesRepository.getPreferences).not.toHaveBeenCalled();
     });
@@ -100,7 +115,10 @@ describe("preferences", () => {
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(
         stored(`${SM}parchmentPalette`),
       );
-      const useCases = createUseCases({ ...deps, palettePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ palettePreference }),
+      });
       await expect(useCases.instancePalette(INSTANCE)).resolves.toEqual({
         palette: "parchment",
         custom: null,
@@ -112,7 +130,10 @@ describe("preferences", () => {
       const palettePreference = devicePreference("high-contrast");
       const deps = makeDeps();
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(LATER_PALETTE));
-      const useCases = createUseCases({ ...deps, palettePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ palettePreference }),
+      });
       await expect(useCases.instancePalette(INSTANCE)).resolves.toEqual({
         palette: "standard",
         custom: null,
@@ -122,9 +143,12 @@ describe("preferences", () => {
 
     it("has no instance palette before the instance's first preferences, and leaves the device's", async () => {
       const palettePreference = devicePreference("parchment");
-      const useCases = createUseCases({ ...makeDeps(), palettePreference });
+      const useCases = createUseCases({
+        ...makeDeps(),
+        deviceStore: choicesStore({ palettePreference }),
+      });
       await expect(useCases.instancePalette(INSTANCE)).resolves.toBeNull();
-      expect(palettePreference.choose).not.toHaveBeenCalled();
+      expect(palettePreference.write).not.toHaveBeenCalled();
     });
 
     it("keeps on this device no palette of a read begun before a choice", async () => {
@@ -134,7 +158,10 @@ describe("preferences", () => {
       vi.mocked(deps.preferencesRepository.getPreferences).mockReturnValueOnce(
         new Promise((resolve) => (answer = resolve)),
       );
-      const useCases = createUseCases({ ...deps, palettePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ palettePreference }),
+      });
       const read = useCases.instancePalette(INSTANCE);
       await useCases.choosePalette("high-contrast", null);
       answer(stored(`${SM}parchmentPalette`));
@@ -224,7 +251,10 @@ describe("preferences", () => {
       const palettePreference = devicePreference("parchment");
       const deps = makeDeps();
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(LATER_PALETTE));
-      const useCases = createUseCases({ ...deps, palettePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ palettePreference }),
+      });
       await useCases.savePreferences(INSTANCE, {
         ...DEFAULT_PREFERENCES,
         palette: `${SM}standardPalette`,
@@ -265,8 +295,8 @@ describe("preferences", () => {
       function deviceCopy(initial: CustomPalette | null = null) {
         let chosen = initial;
         return {
-          chosen: () => chosen,
-          choose: vi.fn((palette: CustomPalette | null) => {
+          read: () => chosen,
+          write: vi.fn((palette: CustomPalette | null) => {
             chosen = palette;
           }),
         };
@@ -287,9 +317,8 @@ describe("preferences", () => {
         const palettes = paletteRepository();
         const useCases = createUseCases({
           ...deps,
-          palettePreference,
-          customPalettePreference,
           paletteRepository: palettes,
+          deviceStore: choicesStore({ palettePreference, customPalettePreference }),
         });
         await expect(useCases.instancePalette(INSTANCE)).resolves.toEqual({
           palette: "parchment",
@@ -308,8 +337,8 @@ describe("preferences", () => {
         const customPalettePreference = deviceCopy(READING);
         const useCases = createUseCases({
           ...deps,
-          customPalettePreference,
           paletteRepository: paletteRepository(),
+          deviceStore: choicesStore({ customPalettePreference }),
         });
         await expect(useCases.instancePalette(INSTANCE)).resolves.toEqual({
           palette: "standard",
@@ -324,9 +353,11 @@ describe("preferences", () => {
         vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(READING.url));
         const useCases = createUseCases({
           ...deps,
-          palettePreference: devicePreference(),
-          customPalettePreference: deviceCopy(READING),
           paletteRepository: paletteRepository([unreadable]),
+          deviceStore: choicesStore({
+            palettePreference: devicePreference(),
+            customPalettePreference: deviceCopy(READING),
+          }),
         });
         await expect(useCases.instancePalette(INSTANCE)).resolves.toEqual({
           palette: "parchment",
@@ -339,10 +370,13 @@ describe("preferences", () => {
 
       it("forgets a device's copy whose text is unreadable", () => {
         const customPalettePreference = deviceCopy({ ...READING, light: { "--text": "#fbf3db" } });
-        const useCases = createUseCases({ ...makeDeps(), customPalettePreference });
+        const useCases = createUseCases({
+          ...makeDeps(),
+          deviceStore: choicesStore({ customPalettePreference }),
+        });
         expect(useCases.customPaletteChoice()).toBeNull();
-        expect(customPalettePreference.choose).toHaveBeenCalledWith(null);
-        expect(customPalettePreference.chosen()).toBeNull();
+        expect(customPalettePreference.write).toHaveBeenCalledWith(null);
+        expect(customPalettePreference.read()).toBeNull();
       });
 
       it("reads no document but the instance's own palettes for the palette its preferences name", async () => {
@@ -373,12 +407,15 @@ describe("preferences", () => {
         );
         const palettePreference = devicePreference();
         const customPalettePreference = deviceCopy();
-        const useCases = createUseCases({ ...deps, palettePreference, customPalettePreference });
+        const useCases = createUseCases({
+          ...deps,
+          deviceStore: choicesStore({ palettePreference, customPalettePreference }),
+        });
         await useCases.chooseCustomPalette(READING, INSTANCE);
         expect(useCases.paletteChoice()).toBe("parchment");
         expect(useCases.customPaletteChoice()).toEqual(READING);
         expect(preferences.palette).toBe(READING.url);
-        // Already chosen: nothing to write.
+        // Already read: nothing to write.
         await useCases.chooseCustomPalette(READING, INSTANCE);
         expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledTimes(1);
         // A built-in palette replaces it, Standard too, on the device and in the preferences.
@@ -392,7 +429,10 @@ describe("preferences", () => {
         vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored(READING.url));
         const palettePreference = devicePreference("parchment");
         const customPalettePreference = deviceCopy(READING);
-        const useCases = createUseCases({ ...deps, palettePreference, customPalettePreference });
+        const useCases = createUseCases({
+          ...deps,
+          deviceStore: choicesStore({ palettePreference, customPalettePreference }),
+        });
         await useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, palette: READING.url });
         expect(deps.preferencesRepository.savePreferences).toHaveBeenLastCalledWith(
           INSTANCE,
@@ -424,8 +464,10 @@ describe("preferences", () => {
         const deps = makeDeps();
         const useCases = createUseCases({
           ...deps,
-          palettePreference: devicePreference("parchment"),
-          customPalettePreference: deviceCopy(READING),
+          deviceStore: choicesStore({
+            palettePreference: devicePreference("parchment"),
+            customPalettePreference: deviceCopy(READING),
+          }),
         });
         await useCases.dismissSchedulerInvitation(INSTANCE);
         expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(
@@ -463,8 +505,8 @@ describe("preferences", () => {
         const customPalettePreference = deviceCopy(READING);
         const useCases = createUseCases({
           ...makeDeps(),
-          customPalettePreference,
           paletteRepository: paletteRepository(),
+          deviceStore: choicesStore({ customPalettePreference }),
         });
         const edited = { ...READING, light: { "--text": "#000000" } };
         await useCases.savePalette(INSTANCE, edited);
@@ -593,8 +635,8 @@ describe("preferences", () => {
     function devicePreference(initial: TextSize = "default") {
       let chosen = initial;
       return {
-        chosen: () => chosen,
-        choose: vi.fn((size: TextSize) => {
+        read: () => chosen,
+        write: vi.fn((size: TextSize) => {
           chosen = size;
         }),
       };
@@ -610,10 +652,13 @@ describe("preferences", () => {
     it("shows the chosen size, and keeps a new choice on this device", async () => {
       const textSizePreference = devicePreference("large");
       const deps = makeDeps();
-      const useCases = createUseCases({ ...deps, textSizePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ textSizePreference }),
+      });
       expect(useCases.textSizeChoice()).toBe("large");
       await useCases.chooseTextSize("largest", null);
-      expect(textSizePreference.choose).toHaveBeenCalledWith("largest");
+      expect(textSizePreference.write).toHaveBeenCalledWith("largest");
       expect(useCases.textSizeChoice()).toBe("largest");
       expect(deps.preferencesRepository.getPreferences).not.toHaveBeenCalled();
     });
@@ -628,16 +673,22 @@ describe("preferences", () => {
       const textSizePreference = devicePreference();
       const deps = makeDeps();
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored("larger"));
-      const useCases = createUseCases({ ...deps, textSizePreference });
+      const useCases = createUseCases({
+        ...deps,
+        deviceStore: choicesStore({ textSizePreference }),
+      });
       await expect(useCases.instanceTextSize(INSTANCE)).resolves.toBe("larger");
       expect(useCases.textSizeChoice()).toBe("larger");
     });
 
     it("has no instance text size before the instance's first preferences, and leaves the device's", async () => {
       const textSizePreference = devicePreference("large");
-      const useCases = createUseCases({ ...makeDeps(), textSizePreference });
+      const useCases = createUseCases({
+        ...makeDeps(),
+        deviceStore: choicesStore({ textSizePreference }),
+      });
       await expect(useCases.instanceTextSize(INSTANCE)).resolves.toBeNull();
-      expect(textSizePreference.choose).not.toHaveBeenCalled();
+      expect(textSizePreference.write).not.toHaveBeenCalled();
     });
 
     it("keeps a choice in the instance's preferences once it has them, and writes nothing when they already say it", async () => {
@@ -654,7 +705,10 @@ describe("preferences", () => {
 
     it("keeps the text size of saved preferences on this device too", async () => {
       const textSizePreference = devicePreference();
-      const useCases = createUseCases({ ...makeDeps(), textSizePreference });
+      const useCases = createUseCases({
+        ...makeDeps(),
+        deviceStore: choicesStore({ textSizePreference }),
+      });
       await useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, textSize: "largest" });
       expect(useCases.textSizeChoice()).toBe("largest");
     });
@@ -665,8 +719,8 @@ describe("preferences", () => {
     function devicePreference(initial: ThemeChoice = "system") {
       let chosen = initial;
       return {
-        chosen: () => chosen,
-        choose: vi.fn((choice: ThemeChoice) => {
+        read: () => chosen,
+        write: vi.fn((choice: ThemeChoice) => {
           chosen = choice;
         }),
       };
@@ -682,7 +736,7 @@ describe("preferences", () => {
     it("keeps the theme chosen on this device", async () => {
       const themePreference = devicePreference("dark");
       const deps = makeDeps();
-      const useCases = createUseCases({ ...deps, themePreference });
+      const useCases = createUseCases({ ...deps, deviceStore: choicesStore({ themePreference }) });
       expect(useCases.themeChoice()).toBe("dark");
       await useCases.chooseTheme("light", null);
       expect(useCases.themeChoice()).toBe("light");
@@ -699,16 +753,19 @@ describe("preferences", () => {
       const themePreference = devicePreference("light");
       const deps = makeDeps();
       vi.mocked(deps.preferencesRepository.getPreferences).mockResolvedValue(stored("dark"));
-      const useCases = createUseCases({ ...deps, themePreference });
+      const useCases = createUseCases({ ...deps, deviceStore: choicesStore({ themePreference }) });
       await expect(useCases.instanceTheme(INSTANCE)).resolves.toBe("dark");
       expect(useCases.themeChoice()).toBe("dark");
     });
 
     it("has no instance theme before the instance's first preferences, and leaves the device's", async () => {
       const themePreference = devicePreference("light");
-      const useCases = createUseCases({ ...makeDeps(), themePreference });
+      const useCases = createUseCases({
+        ...makeDeps(),
+        deviceStore: choicesStore({ themePreference }),
+      });
       await expect(useCases.instanceTheme(INSTANCE)).resolves.toBeNull();
-      expect(themePreference.choose).not.toHaveBeenCalled();
+      expect(themePreference.write).not.toHaveBeenCalled();
     });
 
     it("keeps a choice in the instance's preferences once it has them", async () => {
@@ -753,7 +810,10 @@ describe("preferences", () => {
 
     it("keeps the theme of saved preferences on this device too", async () => {
       const themePreference = devicePreference();
-      const useCases = createUseCases({ ...makeDeps(), themePreference });
+      const useCases = createUseCases({
+        ...makeDeps(),
+        deviceStore: choicesStore({ themePreference }),
+      });
       await useCases.savePreferences(INSTANCE, { ...DEFAULT_PREFERENCES, theme: "light" });
       expect(useCases.themeChoice()).toBe("light");
     });
@@ -765,7 +825,7 @@ describe("preferences", () => {
       vi.mocked(deps.preferencesRepository.getPreferences)
         .mockReturnValueOnce(new Promise((resolve) => (answer = resolve)))
         .mockResolvedValue(stored("dark"));
-      const useCases = createUseCases({ ...deps, themePreference });
+      const useCases = createUseCases({ ...deps, deviceStore: choicesStore({ themePreference }) });
       const read = useCases.instanceTheme(INSTANCE);
       await useCases.chooseTheme("dark", null);
       const later = useCases.instanceTheme(INSTANCE);
@@ -773,7 +833,7 @@ describe("preferences", () => {
       await expect(read).resolves.toBeNull();
       await expect(later).resolves.toBe("dark");
       expect(useCases.themeChoice()).toBe("dark");
-      expect(themePreference.choose).not.toHaveBeenCalledWith("light");
+      expect(themePreference.write).not.toHaveBeenCalledWith("light");
     });
 
     it("keeps on this device no theme read while a choice is being written, and the read after the write's", async () => {
@@ -791,14 +851,14 @@ describe("preferences", () => {
           theme = preferences.theme;
         },
       );
-      const useCases = createUseCases({ ...deps, themePreference });
+      const useCases = createUseCases({ ...deps, deviceStore: choicesStore({ themePreference }) });
       const choice = useCases.chooseTheme("dark", INSTANCE);
       await expect(useCases.instanceTheme(INSTANCE)).resolves.toBeNull();
       expect(useCases.themeChoice()).toBe("dark");
       release();
       await choice;
       await expect(useCases.instanceTheme(INSTANCE)).resolves.toBe("dark");
-      expect(themePreference.choose).not.toHaveBeenCalledWith("light");
+      expect(themePreference.write).not.toHaveBeenCalledWith("light");
     });
 
     it("is settled once the last choice is written, a failed one too, not the first of two", async () => {
@@ -839,9 +899,11 @@ describe("preferences", () => {
     const deps = makeDeps();
     const useCases = createUseCases({
       ...deps,
-      themePreference: { chosen: () => "dark", choose: vi.fn() },
-      palettePreference: { chosen: () => "parchment", choose: vi.fn() },
-      textSizePreference: { chosen: () => "large", choose: vi.fn() },
+      deviceStore: choicesStore({
+        themePreference: { read: () => "dark", write: vi.fn() },
+        palettePreference: { read: () => "parchment", write: vi.fn() },
+        textSizePreference: { read: () => "large", write: vi.fn() },
+      }),
     });
     await useCases.dismissSchedulerInvitation(instance.url);
     expect(deps.preferencesRepository.savePreferences).toHaveBeenCalledWith(instance.url, {
@@ -1390,7 +1452,7 @@ describe("preferences", () => {
         vi.mocked(deps.instanceRepository.readMeta).mockResolvedValue(META);
         const useCases = createUseCases({
           ...deps,
-          themePreference: { chosen: () => "dark", choose: vi.fn() },
+          deviceStore: choicesStore({ themePreference: { read: () => "dark", write: vi.fn() } }),
         });
         await useCases.skipConnectedScreen([instance]);
         expect(deps.instanceRepository.readMeta).toHaveBeenCalledWith(instance.url);
@@ -1496,7 +1558,7 @@ describe("preferences", () => {
         const deps = makeDeps();
         const useCases = createUseCases({
           ...deps,
-          themePreference: { chosen: () => "light", choose: vi.fn() },
+          deviceStore: choicesStore({ themePreference: { read: () => "light", write: vi.fn() } }),
         });
         await useCases.chooseConnectedScreen(instance.url, false);
         expect(deps.preferencesRepository.markConnectedScreen).toHaveBeenLastCalledWith(
