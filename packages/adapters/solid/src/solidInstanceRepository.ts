@@ -1,0 +1,464 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { anonymousFetch } from "./authFetch";
+import { deleteContainer } from "@solid-memo/solid-client/resources";
+import { FOREIGN_LIMITS, limitedFetch, NO_SIZE_LIMITS } from "@solid-memo/solid-client/readLimits";
+import { createSolidDataset, getThing, setThing } from "@solid-memo/solid-client/rdf";
+import type { InstanceRepository } from "@solid-memo/application/ports/pod";
+import {
+  INSTANCE_FORMAT_VERSION,
+  type Instance,
+  type InstanceMeta,
+  type OldRegistrationClass,
+  type OldRegistrations,
+} from "@solid-memo/domain/instance";
+import { rankedChoices, type TypeIndexKind } from "@solid-memo/domain/typeIndexChoice";
+import type { GrantPublicRead } from "@solid-memo/solid-client/access";
+import { accessControlFetch } from "./accessControlFetch";
+import { instanceAddressOf, isInstanceAddress, metaUrlOf } from "@solid-memo/domain/instanceLayout";
+import { isInstanceOutdated } from "@solid-memo/domain/migration";
+import {
+  editDocument,
+  getSolidDatasetOrNull,
+  readDataset,
+  readsAsNone,
+  removeOwned,
+  saveDataset,
+} from "./datasets";
+import { subjectsOfClasses } from "./ownership";
+import type { UserStorages } from "./deckPlace";
+import { deleteInstanceData } from "./instanceData";
+import { noWriteCheck, type WriteCheck } from "./writeCheck";
+import { toInstance, toInstanceMeta, toInstanceMetaThing } from "./mappers/instanceMapper";
+import {
+  addInstanceRegistration,
+  ensureTypeIndex,
+  locateTypeIndexes,
+  readInstanceRegistrations,
+  readTypeIndexChoices,
+  readOldRegistrations,
+  removeInstanceRegistrations,
+  removeOldRegistrations,
+  renameInstanceRegistrations,
+  type InstanceRegistration,
+  type TypeIndexes,
+} from "./typeIndex";
+import { ensureTrailingSlash, lastPathSegment } from "./urls";
+import { SM } from "./vocab";
+import { AppError } from "@solid-memo/domain/appError";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
+
+export interface SolidInstanceRepositoryDeps {
+  fetch: typeof globalThis.fetch;
+  /**
+   * What an instance's data is deleted through, `fetch` when unset: the
+   * catalog names its decks' documents, which may be anywhere, so the app
+   * passes its credential gate (docs/boundaries.md).
+   */
+  dataFetch?: typeof globalThis.fetch;
+  /**
+   * What the type indexes' fetch reads anything outside the profile's
+   * own places through (locateTypeIndexes), as no one: `anonymousFetch`
+   * when unset. An index there is none of the user's (ownTypeIndexes).
+   */
+  publicFetch?: typeof globalThis.fetch;
+  now: () => Date;
+  randomId: () => string;
+  /** Checks what is about to be written; see writeCheck.ts. */
+  checkWrite?: WriteCheck;
+  /** The signed-in user's storages, for where a deck's document is (deckPlace.ts UserStorages); none by default. */
+  userStorages?: UserStorages;
+  /**
+   * The grant that makes a public type index the app creates readable by
+   * anyone (client/access.ts), so other apps find what it registers;
+   * none by default, as for a guest's pod, which no one else reads.
+   */
+  grantPublicRead?: GrantPublicRead;
+  /**
+   * What the grant writes the new index's own access control through,
+   * behind the pod fence's access-control mode (podFence.ts); `fetch`
+   * when unset. Only the index's own ACL or ACR is let through
+   * (accessControlFetch).
+   */
+  shareFetch?: typeof globalThis.fetch;
+}
+
+export function createSolidInstanceRepository({
+  fetch,
+  dataFetch = fetch,
+  publicFetch = anonymousFetch,
+  now,
+  randomId,
+  userStorages,
+  checkWrite = noWriteCheck,
+  grantPublicRead,
+  shareFetch = fetch,
+}: SolidInstanceRepositoryDeps): InstanceRepository {
+  /**
+   * An instance's meta document is read under limits: a folder anyone
+   * may make can be added by its address, and is read as soon as it is,
+   * then again each time the app reads its description. It is written
+   * through the same fetch, so that a write forgets the read it kept
+   * (datasets.ts) and the next read is not answered from it: a server
+   * may give a document rewritten within the same second the same
+   * version.
+   */
+  const metaFetch = limitedFetch(fetch, FOREIGN_LIMITS);
+
+  /** Make a public type index the app created readable by anyone: whether the pod says it now is. */
+  async function share(indexUrl: string): Promise<boolean> {
+    if (grantPublicRead === undefined) return false;
+    try {
+      return await grantPublicRead(indexUrl, {
+        fetch: accessControlFetch(shareFetch, indexUrl, NO_SIZE_LIMITS),
+      });
+    } catch {
+      return false;
+    }
+  }
+
+  return {
+    async listInstances(webId): Promise<Instance[]> {
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      const byUrl = new Map<string, InstanceRegistration>();
+      for (const indexUrl of indexUrlsOf(locations)) {
+        for (const registration of await readRegistrationsSafely(indexUrl, locations.fetch)) {
+          const url = ensureTrailingSlash(registration.containerUrl);
+          if (!byUrl.has(url)) byUrl.set(url, registration);
+        }
+      }
+      // One registration that does not map is left out, not the list.
+      const instances = [...byUrl.values()].flatMap((registration) => {
+        try {
+          return [toInstance(registration)];
+        } catch {
+          return [];
+        }
+      });
+      // A type index is data another app may have written, and each instance listed is read: no more than a catalog's links.
+      return instances.slice(0, MAX_CATALOG_LINKS);
+    },
+
+    async getRegistrationOptions(webId) {
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch);
+      const indexes = rankedChoices(await readTypeIndexChoices(locations, publicFetch));
+      const exists = (kind: TypeIndexKind) => indexes.some((index) => index.kinds.includes(kind));
+      return {
+        privateIndexExists: exists("private"),
+        publicIndexExists: exists("public"),
+        indexes,
+      };
+    },
+
+    async createInstance({ webId, containerUrl, name, registrationTarget }) {
+      // As a request would send it, so every address made from it is compared as sent.
+      const url = instanceAddressOf(containerUrl);
+      const metaUrl = metaUrlOf(url);
+      await saveMetaDocument(
+        metaUrl,
+        { name, createdAt: now().toISOString(), formatVersion: INSTANCE_FORMAT_VERSION },
+        metaFetch,
+        checkWrite,
+      ).catch((error: unknown) => {
+        // One taken off the list stays there, so reloading wouldn't help: the user is told to attach it.
+        throw error instanceof AppError && error.code === "createdElsewhere"
+          ? new AppError("instanceAlreadyThere", { url })
+          : error;
+      });
+      try {
+        const index = await ensureTypeIndex(
+          registrationTarget,
+          webId,
+          url,
+          fetch,
+          publicFetch,
+          share,
+        );
+        await addInstanceRegistration(
+          index.url,
+          { instanceUrl: url, title: name },
+          randomId,
+          index.fetch,
+        );
+      } catch (error) {
+        await bestEffortCleanup(metaUrl, url, fetch);
+        throw error;
+      }
+      return { url, name };
+    },
+
+    async attachInstance({ webId, instanceUrl, registrationTarget }) {
+      // As a request would send it, so every address made from it is compared as sent;
+      // an http(s) folder only, as a registration's is (isInstanceAddress).
+      const url = instanceAddressOf(instanceUrl);
+      if (!isInstanceAddress(url)) throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
+      const name = await readInstanceName(url, metaFetch);
+      const index = await ensureTypeIndex(
+        registrationTarget,
+        webId,
+        url,
+        fetch,
+        publicFetch,
+        share,
+      );
+      await addInstanceRegistration(
+        index.url,
+        { instanceUrl: url, title: name },
+        randomId,
+        index.fetch,
+      );
+      return { url, name };
+    },
+
+    async readOldRegistrations({ webId, instanceUrl }): Promise<OldRegistrations> {
+      const registrations: OldRegistrations["registrations"] = [];
+      const unreadableIndexes: TypeIndexKind[] = [];
+      for (const index of await oldRegistrationsOf(webId, instanceUrl, false)) {
+        if (index.classes === null) {
+          if (!unreadableIndexes.includes(index.kind)) unreadableIndexes.push(index.kind);
+        } else
+          for (const dataClass of index.classes)
+            if (!registrations.some((r) => r.dataClass === dataClass && r.index === index.kind))
+              registrations.push({ dataClass, index: index.kind });
+      }
+      return { registrations, unreadableIndexes };
+    },
+
+    async removeOldRegistrations({ webId, instanceUrl }) {
+      const failures: unknown[] = [];
+      for (const index of await oldRegistrationsOf(webId, instanceUrl, true)) {
+        // One that could not be read is not written to; one that holds none, or that may not be written to, is not written either.
+        if (!index.writable || index.classes === null || index.classes.length === 0) continue;
+        try {
+          await removeOldRegistrations(index.url, instanceUrl, index.fetch);
+        } catch (error) {
+          // One gone since it was read has nothing left to remove.
+          if ((error as { statusCode?: number }).statusCode !== 404) failures.push(error);
+        }
+      }
+      if (failures.length > 0) throw failures[0];
+    },
+
+    async renameRegistrations({ webId, instanceUrl, title }) {
+      const locations = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting: true });
+      for (const indexUrl of writableIndexUrlsOf(locations)) {
+        await renameInstanceRegistrations(
+          indexUrl,
+          { containerUrl: instanceUrl, title },
+          locations.fetch,
+        );
+      }
+    },
+
+    async readMeta(instanceUrl): Promise<InstanceMeta | null> {
+      const metaUrl = metaUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(metaUrl, metaFetch);
+      if (dataset === null) return null;
+      const subject = getThing(dataset, `${metaUrl}#it`);
+      return subject === null ? null : toInstanceMeta(subject);
+    },
+
+    editMeta(instanceUrl, change) {
+      const metaUrl = metaUrlOf(instanceUrl);
+      const url = `${metaUrl}#it`;
+      // The meta written is the one changed from the read the save is If-Match (editDocument).
+      return editDocument(
+        metaUrl,
+        metaFetch,
+        (dataset) => {
+          const existing = dataset === null ? null : getThing(dataset, url);
+          const meta = existing === null ? null : toInstanceMeta(existing);
+          if (meta === null) throw new AppError("noMetaToUpdate", { url: instanceUrl });
+          const changed = change(meta);
+          if (changed === null) return { result: meta };
+          return {
+            dataset: setThing(dataset!, toInstanceMetaThing(url, changed, existing)),
+            subjects: [url],
+            result: changed,
+          };
+        },
+        { checkWrite },
+      );
+    },
+
+    async upgradeMeta(instanceUrl): Promise<boolean> {
+      const metaUrl = metaUrlOf(instanceUrl);
+      const dataset = await getSolidDatasetOrNull(metaUrl, metaFetch);
+      const url = `${metaUrl}#it`;
+      const existing = dataset === null ? null : getThing(dataset, url);
+      // The record as read, brought up to date in memory, written in this app's format.
+      const meta = existing === null ? null : toInstanceMeta(existing);
+      if (meta === null || !isInstanceOutdated(meta)) return false;
+      const updated = setThing(dataset!, toInstanceMetaThing(url, meta, existing));
+      await checkWrite(updated, [url], "pod");
+      // If-Match the read above.
+      await saveDataset(metaUrl, updated, metaFetch);
+      return true;
+    },
+
+    async deleteInstance({ webId, instance }) {
+      const url = ensureTrailingSlash(instance.url);
+      const deletion = await deleteInstanceData(url, dataFetch, userStorages);
+      await removeRegistrations(webId, url);
+      return deletion;
+    },
+
+    async detachInstance({ webId, instance }) {
+      await removeRegistrations(webId, ensureTrailingSlash(instance.url));
+    },
+  };
+
+  /**
+   * Each of the user's own type indexes (locateTypeIndexes), the private
+   * ones first, with the classes of the instance's data it holds a
+   * registration of that earlier versions wrote (readOldRegistrations):
+   * none when the index is not there (404), null when it cannot be read;
+   * and whether it may be written to (TypeIndexes inOwnStorage). When
+   * `forWriting`, a storage lookup that fails now fails them.
+   */
+  async function oldRegistrationsOf(
+    webId: string,
+    instanceUrl: string,
+    forWriting: boolean,
+  ): Promise<OldRegistrationsIndex[]> {
+    const locations = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting });
+    const indexes: OldRegistrationsIndex[] = [];
+    for (const { kind, url } of locations.links) {
+      // A profile that names one document as both indexes has it read once, as the private one.
+      if (indexes.some((index) => index.url === url)) continue;
+      let classes: OldRegistrationClass[] | null;
+      try {
+        classes = await readOldRegistrations(url, instanceUrl, locations.fetch);
+      } catch (error) {
+        classes = (error as { statusCode?: number }).statusCode === 404 ? [] : null;
+      }
+      indexes.push({
+        kind,
+        url,
+        fetch: locations.fetch,
+        classes,
+        writable: locations.inOwnStorage(url),
+      });
+    }
+    return indexes;
+  }
+
+  /**
+   * Drop the registrations of the instance's data from every type index
+   * of the user's own the profile links (locateTypeIndexes) that may be
+   * written to (writableIndexUrlsOf), reading and writing only those: an
+   * instance found in any of them is removed from all of them. A storage
+   * lookup that fails now fails this, writing nothing. Each is tried whatever the others answer, one that isn't
+   * there having nothing to remove, as the list reads each on its own;
+   * the first failure is thrown once all were tried.
+   */
+  async function removeRegistrations(webId: string, url: string): Promise<void> {
+    const locations = await locateTypeIndexes(webId, fetch, publicFetch, { forWriting: true });
+    const failures: unknown[] = [];
+    for (const indexUrl of writableIndexUrlsOf(locations)) {
+      try {
+        await removeInstanceRegistrations(indexUrl, url, locations.fetch);
+      } catch (error) {
+        if ((error as { statusCode?: number }).statusCode !== 404) failures.push(error);
+      }
+    }
+    if (failures.length > 0) throw failures[0];
+  }
+}
+
+/** One of the user's own type indexes, with the old registrations it holds (null: unreadable). */
+type OldRegistrationsIndex = {
+  kind: TypeIndexKind;
+  url: string;
+  fetch: typeof globalThis.fetch;
+  classes: OldRegistrationClass[] | null;
+  /** Whether it may be written to (TypeIndexes inOwnStorage). */
+  writable: boolean;
+};
+
+/** Every type index the profile links (locateTypeIndexes), each once, the private ones first. */
+function indexUrlsOf(indexes: TypeIndexes): string[] {
+  return [...new Set(indexes.links.map((link) => link.url))];
+}
+
+/**
+ * The type indexes the profile links (indexUrlsOf) that may be written
+ * to (TypeIndexes inOwnStorage): one elsewhere may be someone else's,
+ * even on the WebID's origin, so the instance's registrations there are
+ * neither retitled nor removed.
+ */
+function writableIndexUrlsOf(indexes: TypeIndexes): string[] {
+  return indexUrlsOf(indexes).filter((url) => indexes.inOwnStorage(url));
+}
+
+/**
+ * The instances an index registers, none when the index is not there or
+ * not one to read (readsAsNone). An index that could not be read now
+ * fails the list, so that the list read before is kept and the user is
+ * never offered to make an instance they have.
+ */
+async function readRegistrationsSafely(
+  indexUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<InstanceRegistration[]> {
+  try {
+    return await readInstanceRegistrations(indexUrl, fetch);
+  } catch (error) {
+    if (readsAsNone(error)) return [];
+    throw error;
+  }
+}
+
+async function saveMetaDocument(
+  metaUrl: string,
+  meta: InstanceMeta,
+  fetch: typeof globalThis.fetch,
+  checkWrite: WriteCheck,
+): Promise<void> {
+  const dataset = setThing(createSolidDataset(), toInstanceMetaThing(`${metaUrl}#it`, meta, null));
+  await checkWrite(dataset, [`${metaUrl}#it`], "pod");
+  await saveDataset(metaUrl, dataset, fetch);
+}
+
+/**
+ * The name in the instance's `meta.ttl`: notAnInstanceNoMeta when there
+ * is no such document to read there (readsAsNone), and any other failure
+ * as it is, podNoAnswer among them, as the read may well work when tried
+ * again.
+ */
+async function readInstanceName(
+  instanceUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<string> {
+  const metaUrl = metaUrlOf(instanceUrl);
+  let dataset: Awaited<ReturnType<typeof readDataset>>;
+  try {
+    dataset = await readDataset(metaUrl, fetch);
+  } catch (error) {
+    if (!readsAsNone(error)) throw error;
+    throw new AppError("notAnInstanceNoMeta", { url: instanceUrl });
+  }
+  const meta = getThing(dataset, `${metaUrl}#it`);
+  if (meta === null) {
+    throw new AppError("notAnInstanceNoSubject", { url: instanceUrl });
+  }
+  return toInstanceMeta(meta)?.name ?? lastPathSegment(instanceUrl);
+}
+
+/**
+ * Take back the instance's `meta.ttl` a creation that failed wrote: its
+ * `#it` only, the document when nothing else is in it (removeOwned),
+ * then the folder if it is then empty. Whatever fails is left.
+ */
+async function bestEffortCleanup(
+  metaUrl: string,
+  containerUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  try {
+    await removeOwned(metaUrl, subjectsOfClasses(SM.Instance), fetch);
+    await deleteContainer(containerUrl, { fetch });
+  } catch {}
+}

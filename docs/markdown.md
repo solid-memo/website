@@ -63,7 +63,7 @@ a code-only back may be `@zxx`.
 
 ## The package
 
-`@solid-memo/markdown` (`packages/markdown/`) is the only code that
+`@solid-memo/markdown` (`packages/lib/markdown/`) is the only code that
 touches the parser, and only in `src/parse.ts`. The parser is
 `markdown-it`, its `commonmark` preset with its `table` rule, and
 `markdown-it-cjk-friendly`. It keeps a link's URL as written: it
@@ -334,10 +334,10 @@ input at build time only, never for data:
 
 ## Diagrams
 
-The site's build in `@solid-memo/site` (`packages/site/`) draws the
+The site's build in `@solid-memo/build-tools` (`packages/build-tools/`) draws the
 docs' Mermaid blocks to SVG at build time, in Node:
-[diagrams.ts](../packages/site/src/diagrams.ts) and
-[drawDiagrams.ts](../packages/site/src/drawDiagrams.ts). It runs the
+[diagrams.ts](../packages/build-tools/src/diagrams.ts) and
+[drawDiagrams.ts](../packages/build-tools/src/drawDiagrams.ts). It runs the
 official Mermaid in Chromium through Playwright, the same parser family
 and layout engine as GitHub's. GitHub's own Mermaid version and HTML
 labels differ, so a diagram is still checked there after an edit
@@ -387,7 +387,7 @@ labels differ, so a diagram is still checked there after an edit
   reading the cache, so a build's output depends on the setting alone.
   `npm run dev` needs none of it ([below](#the-docs-as-a-site)).
   `npm run check` fails under it: the test that draws in the real
-  browser is skipped, and `site`'s coverage drops below 100%.
+  browser is skipped, and `build-tools`' coverage drops below 100%.
 
 ### A drawing is safe to serve
 
@@ -447,11 +447,11 @@ repository, so `REUSE.toml` and `LICENSES/` don't name it.
 
 ## The docs as a site
 
-The site's build in `@solid-memo/site` renders the docs to static
-pages. `renderDocsSite` in [docsSite.ts](../packages/site/src/docsSite.ts)
+The site's build in `@solid-memo/build-tools` renders the docs to static
+pages. `renderDocsSite` in [docsSite.ts](../packages/build-tools/src/docsSite.ts)
 reads each page of `docs/` with `parseDocument`, and its own emitter
 writes the HTML, escaping every text, with no way to write raw HTML.
-[publishDocs.ts](../packages/site/src/publishDocs.ts), the Vite plugin
+[publishDocs.ts](../packages/build-tools/src/publishDocs.ts), the Vite plugin
 of the site's build ([vite.config.ts](../apps/web/vite.config.ts)),
 emits the pages under `docs/`. Every build, each release's among them,
 publishes its own docs at `/docs/`
@@ -520,7 +520,7 @@ nowhere:
 - a diagram's problems ([above](#diagrams))
 - a Mermaid block in a list or quote, which isn't drawn
 
-`site`'s tests render the repository's own docs, so `npm run check`
+`build-tools`' tests render the repository's own docs, so `npm run check`
 fails on any of these.
 
 ### The docs' index
@@ -577,7 +577,7 @@ committed: it exists in the build and in each release's archive.
   strong, and no link or line break (the link checks read only
   Markdown files). The index is the build's input, not a published
   format: no vocabulary term marks it as Markdown, and it has no shape.
-  `readDocsIndex` in [docsIndex.ts](../packages/site/src/docsIndex.ts)
+  `readDocsIndex` in [docsIndex.ts](../packages/build-tools/src/docsIndex.ts)
   checks everything it may say, and refuses any other subject or
   property.
 

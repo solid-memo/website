@@ -1,38 +1,40 @@
 # The solid-memo-client
 
-`@solid-memo/solid-memo-client` is a second implementation of the
-Solid client modules the app reads and writes pods and signs in
-through, built on no Inrupt library. Inrupt's clients stay the default,
-and a build or a test run takes this one with
-`SOLID_CLIENT=solid-memo-client`. This page says what it replaces, what
+`@solid-memo/solid-memo-client` is one of the two Solid clients the
+app reads and writes pods and signs in through, built on no Inrupt
+library. The other, `@solid-memo/inrupt-client`, on Inrupt's
+libraries, stays the default, and a build or a test run takes this one
+with `SOLID_CLIENT=solid-memo-client`. This page says what it replaces, what
 it's built on, how it keeps a session and grants access, where it
 differs from Inrupt's, and how it's tested.
 
 ## What it replaces
 
-The app reaches the Solid client libraries only through modules of its
-own, whose types are in `client/interface.ts` and name no library
+The app reaches a Solid client only through the modules
+[packages/adapters/solid-client/](../packages/adapters/solid-client/README.md) declares,
+with no body, of the types in its `interface.ts`, which names no library
 ([boundaries.md](boundaries.md#the-solid-client-libraries),
-[vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)). The
-package, [packages/solid-memo-client/](../packages/solid-memo-client/README.md),
-has a module of the same name for each, with the same exports and
-types:
+[vendor-code.md](vendor-code.md#cost-of-swapping-a-vendor)). Each
+client has a module of the same name for each, with the same exports
+and types, which `clientTypes.test.ts` checks:
+[packages/adapters/inrupt-client/](../packages/adapters/inrupt-client/README.md) and this
+package, [packages/adapters/solid-memo-client/](../packages/adapters/solid-memo-client/README.md):
 
-| Module | Replaces | Built on |
+| Module | Beside | Built on |
 |---|---|---|
-| [rdf.ts](../packages/solid-memo-client/src/rdf.ts), with [dataset.ts](../packages/solid-memo-client/src/dataset.ts) | `packages/solid/src/client/rdf.ts`: datasets and their subjects | `n3`'s RDF/JS terms. Datasets and subjects are the package's own frozen objects; a dataset's edits are a chain of steps that `changesOf` replays. |
-| [resources.ts](../packages/solid-memo-client/src/resources.ts) | `packages/solid/src/client/resources.ts`: documents, containers and files, the profile lookup, and the Turtle and JSON-LD parsers | `fetch`; `n3` to parse Turtle; `jsonld-streaming-parser` to parse JSON-LD |
-| [session.ts](../packages/solid-memo-client/src/session.ts), with `oidcLogin.ts`, `oidcSession.ts`, `oidcStore.ts` and `oidcBrowser.ts` | `packages/solid/src/client/session.ts`: the sign-in client | `oauth4webapi` for Solid-OIDC, WebCrypto for the DPoP keys, IndexedDB for the session, Web Locks between tabs |
-| [access.ts](../packages/solid-memo-client/src/access.ts) | `packages/solid/src/client/access.ts`: the public-read grant | `fetch` and `n3` |
-| [turtleDocument.ts](../packages/solid-memo-client/src/turtleDocument.ts) | `packages/shacl/src/turtleDocument.ts`: a shape's Turtle, read | `fetch` and `n3` |
+| [rdf.ts](../packages/adapters/solid-memo-client/src/rdf.ts), with [dataset.ts](../packages/adapters/solid-memo-client/src/dataset.ts) | `packages/adapters/inrupt-client/src/rdf.ts`: datasets and their subjects | `n3`'s RDF/JS terms. Datasets and subjects are the package's own frozen objects; a dataset's edits are a chain of steps that `changesOf` replays. |
+| [resources.ts](../packages/adapters/solid-memo-client/src/resources.ts) | `packages/adapters/inrupt-client/src/resources.ts`: documents, containers and files, the profile lookup, and the Turtle and JSON-LD parsers | `fetch`; `n3` to parse Turtle; `jsonld-streaming-parser` to parse JSON-LD |
+| [session.ts](../packages/adapters/solid-memo-client/src/session.ts), with `oidcLogin.ts`, `oidcSession.ts`, `oidcStore.ts` and `oidcBrowser.ts` | `packages/adapters/inrupt-client/src/session.ts`: the sign-in client | `oauth4webapi` for Solid-OIDC, WebCrypto for the DPoP keys, IndexedDB for the session, Web Locks between tabs |
+| [access.ts](../packages/adapters/solid-memo-client/src/access.ts) | `packages/adapters/inrupt-client/src/access.ts`: the public-read grant | `fetch` and `n3` |
+| [turtleDocument.ts](../packages/adapters/solid-memo-client/src/turtleDocument.ts) | `packages/adapters/shacl/src/turtleDocument.ts`: a shape's Turtle, read | `fetch` and `n3` |
 
-The bodies of its PATCH requests come from `solid`'s
-`client/sparqlUpdate.ts`, and those of its PUT requests from `solid`'s
+The bodies of its PATCH requests come from `solid-client`'s
+`sparqlUpdate.ts`, and those of its PUT requests from its
 `turtleWriter.ts`, as Inrupt's client's do, and a write refuses the
-same terms (`writableTerms.ts`). The package imports `solid` for
-these, for the interface and, in its tests, for the contract suites. It
-imports no `@inrupt/` package, its tests included, and no package
-imports it, as `npm run check:boundaries` checks.
+same terms (`writableTerms.ts`). The package imports `solid-client` for
+these and for the interface, and `solid`, in its tests, for the
+contract suites. It imports no `@inrupt/` package, its tests included,
+and no package imports it, as `npm run check:boundaries` checks.
 
 ## Switching clients
 
@@ -40,19 +42,20 @@ imports it, as `npm run check:boundaries` checks.
 
 | Value | Client |
 |---|---|
-| unset, empty or `inrupt` | Inrupt's, in `packages/solid/src/client/`: the default |
+| unset, empty or `inrupt` | `inrupt-client`, on Inrupt's libraries: the default |
 | `solid-memo-client` | this package's |
 | anything else | none: the config fails to load, and its error names the values above |
 
 The switch is a Vite plugin, `solidClientPlugin` in
 [scripts/solidClient.ts](../scripts/solidClient.ts). Every package's
 Vitest config has it, through `vitest.shared.ts`, and so do
-`apps/web`'s Vite config and `e2e/pod`'s Vitest config. With
-`solid-memo-client`, it resolves every import of a module its
-`REPLACEMENTS` list names to the package's module of the same name,
-the package's own imports aside. No caller changes. With Inrupt's
-client, the plugin has no hooks, so a test's `vi.mock` of a client
-module works as it does without the plugin.
+`apps/web`'s Vite config and `e2e/pod`'s Vitest config. It resolves
+every import of a module `solid-client` declares to the chosen client's
+module of the same name, the client's own imports aside, and with
+`solid-memo-client` `shacl`'s `turtleDocument.ts` too. No caller
+changes. A test's `vi.mock` of a declared module
+(`@solid-memo/solid-client/resources`) mocks the client's module put in
+its place.
 
 ```sh
 SOLID_CLIENT=solid-memo-client npm run build      # the site, the Studio included, on this client
@@ -62,34 +65,29 @@ SOLID_CLIENT=solid-memo-client npm run test:unit -w @solid-memo/shacl   # one pa
 ```
 
 A package's tests run with the switch on without coverage, through
-`test:unit`. With coverage, its `test` task fails: the modules the
-switch replaces are never loaded, so its coverage falls below 100%.
+`test:unit`. With coverage, `shacl`'s `test` task fails: its
+`turtleDocument.ts` is never loaded, so its coverage falls below 100%.
 
 The user journeys test the build in `apps/web/dist/`: a build with the
 switch on, then `npm run journeys`. Run locally, the journeys reuse any
 server already on port 4173, which may serve another build
 ([testing.md](testing.md#user-journeys)).
 
-Under the switch, the tests of the four Inrupt modules this client
-replaces (`packages/solid/src/client/{access,rdf,resources,session,session.library,session.redirect.library}.test.ts`)
-test what is the library's alone, and some fail. The rest of `solid`
-runs without them, as CI runs it:
-
-```sh
-SOLID_CLIENT=solid-memo-client npm run test:unit -w @solid-memo/solid -- --exclude 'src/client/{access,rdf,resources,session,session.library,session.redirect.library}.test.ts'
-```
+The tests of `inrupt-client` test its own modules, whichever client the
+switch puts in place for the other packages.
 
 Turbo hashes `SOLID_CLIENT` (`globalEnv`) and `scripts/solidClient.ts`
 (`globalDependencies`) into every task, so a result cached on one
 client never stands for the other. The tasks that resolve through the
 plugin have the package's `src/` and `package.json` among their
-inputs: `solid`'s `test`, `test:growth` and `test:roundtrip`, `shacl`'s and
+inputs, `inrupt-client`'s too: `solid-client`'s `test`, `solid`'s
+`test`, `test:growth` and `test:roundtrip`, `shacl`'s and
 `composition`'s `test`, and `web`'s `test` and `build`. They run again
-when either changes, on either client, but not for a new release of
+when either client changes, on either client, but not for a new release of
 one of its dependencies that only `package-lock.json` names.
 
-`npm run check:exports` counts an export of this package as used where
-the module it replaces uses the same name, and `npm run check` walks
+`npm run check:exports` counts an export of either client as used where
+the module `solid-client` declares is used under the same name, and `npm run check` walks
 its run-time dependencies for releases before 1.0.0, as it walks the
 app's ([vendor-code.md](vendor-code.md#maturity)).
 
@@ -97,7 +95,7 @@ app's ([vendor-code.md](vendor-code.md#maturity)).
 
 The sign-in client ([authentication.md](authentication.md)) runs
 Solid-OIDC's authorization-code flow on `oauth4webapi`
-([oidcLogin.ts](../packages/solid-memo-client/src/oidcLogin.ts)):
+([oidcLogin.ts](../packages/adapters/solid-memo-client/src/oidcLogin.ts)):
 
 - **Discovery** reads the provider's
   `/.well-known/openid-configuration`. A provider whose authorization,
@@ -127,7 +125,7 @@ Solid-OIDC's authorization-code flow on `oauth4webapi`
 
 Each login makes a new ES256 key pair with WebCrypto, its private key
 not extractable, and binds the tokens to it. The browser keeps
-([oidcStore.ts](../packages/solid-memo-client/src/oidcStore.ts)):
+([oidcStore.ts](../packages/adapters/solid-memo-client/src/oidcStore.ts)):
 
 | Where | What |
 |---|---|
@@ -143,7 +141,7 @@ logout, or a new login, drops them with the session they belong to. IndexedDB ke
 ### Restore, refresh and logout
 
 The session's requests are in
-[oidcSession.ts](../packages/solid-memo-client/src/oidcSession.ts):
+[oidcSession.ts](../packages/adapters/solid-memo-client/src/oidcSession.ts):
 
 - **`restore()`** completes the redirect back from the provider when
   the page is one: a `state` on its address and a request under way in
@@ -212,7 +210,7 @@ neither the DPoP-bound access token nor a DPoP proof. It takes a
 Bearer token its authorization server issues for the session's ID
 token, in an OAuth 2.0 Token Exchange
 ([RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)). The session gets
-one in [lwsAuth.ts](../packages/solid-memo-client/src/lwsAuth.ts),
+one in [lwsAuth.ts](../packages/adapters/solid-memo-client/src/lwsAuth.ts),
 under its fetch in `oidcSession.ts`, so authFetch sees only the final
 answer. The flow follows the
 [LWS Protocol 1.0](https://www.w3.org/TR/lws10-core/)
@@ -312,7 +310,7 @@ provider isn't supported yet: its storages answer 401, as to no one.
 ## The public-read grant
 
 `grantPublicRead`
-([access.ts](../packages/solid-memo-client/src/access.ts)) makes a
+([access.ts](../packages/adapters/solid-memo-client/src/access.ts)) makes a
 published release, or a public type index the app creates, readable by
 everyone, on Web Access Control (WAC) or
 Access Control Policies (ACP), as Inrupt's universal access does
@@ -375,8 +373,7 @@ Both pass the same contract. Beyond it, this client differs:
 ## Tests
 
 - **The contract.** Each module's test file runs the contract suite in
-  `packages/solid/src/testing/contract/` that Inrupt's module's test
-  runs: `rdf.test.ts`, `resources.test.ts`, `session.test.ts` and
+  `packages/adapters/solid/src/testing/contract/` that `inrupt-client`'s runs: `rdf.test.ts`, `resources.test.ts`, `session.test.ts` and
   `access.test.ts`. Beside it they test what is this client's alone:
   the sign-in flow against a fake provider, the session's store on
   `fake-indexeddb`'s IndexedDB, the grant's policies and inherited
@@ -389,9 +386,9 @@ Both pass the same contract. Beyond it, this client differs:
   every package's. Every run that tests the tree also runs, with
   `SOLID_CLIENT=solid-memo-client`, two advisory jobs
   ([testing.md](testing.md#continuous-integration)):
-  - `solid-memo-client (unit)`: `solid`'s unit tests without those of
-    the four modules this client replaces, `solid`'s round trip, and
-    the unit tests of `shacl`, `composition` and `web`, `web`'s with
+  - `solid-memo-client (unit)`: the unit tests of `solid-client` and
+    `solid`, `solid`'s round trip, and the unit tests of `shacl`,
+    `composition` and `web`, `web`'s with
     `DOCS_DIAGRAMS=skip`. npm runs them, not Turbo, so no result comes
     from a cache, and without coverage.
   - `solid-memo-client (<server>)`: the end-to-end tests, one job per

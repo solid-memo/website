@@ -241,7 +241,7 @@ They need checking again before anything relies on them.
   include.
 - SHOULD, met — policy in machine-readable formats: SHACL shapes and
   the library's checks, and SM-2 and FSRS-6 as pure functions in
-  `packages/domain`.
+  `packages/core/domain`.
 - SHOULD, met — CI checks the code against the policy. `sm2.test.ts`
   checks the scheduler against every row of
   [srs.md's worked examples](srs.md#worked-examples), read from the
@@ -592,7 +592,7 @@ They need checking again before anything relies on them.
 ### 12. Use continuous integration
 
 - MUST, met — all functionality has automated tests, at 100% coverage
-  in every package, the docs' build in `packages/markdown/tooling/`
+  in every package, the docs' build in `packages/lib/markdown/tooling/`
   (new since 2.1.1) included. The scripts are covered too
   (`npm run check:scripts`), the four new since 2.1.1 included:
   `checkActions.ts`, `checkProviders.ts`, `docsArchive.ts` and

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
+import type { ReleaseDraftRepository } from "@solid-memo/application/ports/library";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";
@@ -50,16 +50,16 @@ import { createOwnPodGate, type OwnFolders } from "@solid-memo/solid/ownPodGate"
 import { createSolidInstanceCopier } from "@solid-memo/solid/solidInstanceCopier";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";
-import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { grantPublicRead } from "@solid-memo/solid-client/access";
 import {
   FOREIGN_LIMITS,
   FOREIGN_READS_BUDGET,
   INSTANCE_READS_TOTAL,
   FOREIGN_REREADS,
   sharedReadBudget,
-} from "@solid-memo/solid/client/readLimits";
-import { getProfileStorages } from "@solid-memo/solid/client/resources";
-import { createSessionClient } from "@solid-memo/solid/client/session";
+} from "@solid-memo/solid-client/readLimits";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
+import { createSessionClient } from "@solid-memo/solid-client/session";
 import { createSolidWebIdDocumentRepository } from "@solid-memo/solid/solidWebIdDocumentRepository";
 import { createOffPage, type WorkerLike } from "@solid-memo/solid/offPage";
 import { readElsewhere } from "@solid-memo/solid/datasets";

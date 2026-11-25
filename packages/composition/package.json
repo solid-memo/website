@@ -19,6 +19,7 @@
     "@solid-memo/browser": "*",
     "@solid-memo/domain": "*",
     "@solid-memo/solid": "*",
+    "@solid-memo/solid-client": "*",
     "@solid-memo/vocab": "*"
   },
   "devDependencies": {

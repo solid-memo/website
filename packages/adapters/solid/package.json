@@ -1,0 +1,35 @@
+{
+  "name": "@solid-memo/solid",
+  "description": "Solid Memo's adapters for Solid pods, through a Solid client's modules (packages/adapters/solid-client), never a Solid library of their own.",
+  "private": true,
+  "license": "MIT",
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "test": "vitest run --coverage --exclude 'src/**/*.growth.test.ts'",
+    "test:growth": "vitest run .growth.test.ts",
+    "test:unit": "vitest run",
+    "test:watch": "vitest",
+    "test:roundtrip": "vitest run --config vitest.roundtrip.config.ts",
+    "exchange": "vitest run --config vitest.exchange.config.ts"
+  },
+  "dependencies": {
+    "@solid-memo/application": "*",
+    "@solid-memo/domain": "*",
+    "@solid-memo/shacl": "*",
+    "@solid-memo/solid-client": "*",
+    "@solid-memo/vocab": "*"
+  },
+  "devDependencies": {
+    "@inrupt/solid-client-authn-core": "^5.0.3",
+    "@rdfjs/types": "^2.0.1",
+    "@types/n3": "^1.26.6",
+    "happy-dom": "^21.0.4",
+    "jsonld-streaming-parser": "^5.0.2",
+    "n3": "^2.13.12"
+  }
+}

@@ -1,0 +1,1450 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { describe, expect, it } from "vitest";
+import type { Deck } from "@solid-memo/domain/deck";
+import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
+import type { ReviewState } from "@solid-memo/domain/review";
+import { createDeckDocumentGuard } from "./deckPlace";
+import { deleteInstanceData } from "./instanceData";
+import { createLocalPod } from "./localPod";
+import { createMemoryResourceStore } from "./memoryResourceStore";
+import { createSolidDeckArchive } from "./solidDeckArchive";
+import { datasetOfTurtle } from "./testing/datasets";
+import { createSolidDeckRepository } from "./solidDeckRepository";
+import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
+import { readBudget } from "@solid-memo/application/readBudget";
+import type { SharedReads } from "@solid-memo/application/ports/checks";
+
+const ROOT = "https://pod.example/";
+const BOB = `${ROOT}bob/solid-memo/main/`;
+const ALICE = `${ROOT}alice/solid-memo/main/`;
+const CARD = `${ROOT}alice/profile/card`;
+const DIARY = `${ROOT}alice/private/diary.ttl`;
+const PROFILE = `<#me> a <http://xmlns.com/foaf/0.1/Person> .`;
+const SM = "https://solid-memo.com/ns/vocab/v1.ttl#";
+const IS_PART_OF = "http://purl.org/dc/terms/isPartOf";
+const UNO = { front: { "": "uno" }, back: { "": "one" } };
+const DOS = { front: { "": "dos" }, back: { "": "two" } };
+
+/**
+ * Bob's instance and Alice's documents on one server, in memory. Each
+ * address is resolved as a browser's fetch resolves it before the
+ * request leaves (dot segments, `%2e%2e` too, removed), and every write
+ * is recorded where it really went, with the version it was made on
+ * (If-Match), if any.
+ */
+async function pod() {
+  const store = createMemoryResourceStore();
+  let etags = 0;
+  const local = createLocalPod({ root: ROOT, store, newEtag: () => `"e${++etags}"` });
+  const writes: string[] = [];
+  const conditions: (string | null)[] = [];
+  const fetch = (async (input, init) => {
+    const url = new Request(String(input instanceof Request ? input.url : input)).url;
+    const method = (init?.method ?? "GET").toUpperCase();
+    if (method !== "GET" && method !== "HEAD") {
+      writes.push(`${method} ${url}`);
+      conditions.push(new Headers(init?.headers).get("If-Match"));
+    }
+    return local(url, init);
+  }) as typeof globalThis.fetch;
+  const put = async (url: string, body: string) => {
+    const response = await local(url, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body,
+    });
+    expect(response.ok).toBe(true);
+  };
+  await put(CARD, PROFILE);
+  await put(DIARY, `<#entry> <https://example.org/says> "secret" .`);
+  let ids = 0;
+  const decks = createSolidDeckRepository({
+    fetch,
+    now: () => new Date("2026-10-19T00:00:00.000Z"),
+    randomId: () => `id${++ids}`,
+  });
+  const reviews = createSolidReviewStateRepository({ fetch });
+  const text = async (url: string) => (await local(url)).text();
+  return {
+    local,
+    fetch,
+    put,
+    writes,
+    conditions,
+    decks,
+    reviews,
+    text,
+    urls: () => store.urls(),
+  };
+}
+type Pod = Awaited<ReturnType<typeof pod>>;
+
+/** The instance's catalog with the deck's documents named elsewhere: every `<from>` written `<to>`. */
+async function plant(p: Pod, deck: Deck, cards: string, reviews: string, instance = BOB) {
+  const catalog = `${instance}catalog.ttl`;
+  const turtle = (await p.text(catalog))
+    .replaceAll(`<${deck.cardsDocumentUrl}>`, `<${cards}>`)
+    .replaceAll(`<decks/${deck.id}.ttl>`, `<${cards}>`)
+    .replaceAll(`<${deck.reviewsDocumentUrl}>`, `<${reviews}>`)
+    .replaceAll(`<reviews/${deck.id}.ttl>`, `<${reviews}>`);
+  await p.put(catalog, turtle);
+}
+
+/** A deck's document, with its cards or states as Turtle, that says it is the deck's, or (`linked` false) does not. */
+function deckDocument(deck: Deck, turtle: string, linked = true): string {
+  return `${linked ? `<> <${IS_PART_OF}> <${deck.url}> .\n` : ""}${turtle}`;
+}
+
+/** A card in this app's format, as Turtle. */
+function cardTurtle(id: string, front: string): string {
+  return `<#${id}> a <${SM}Card> ; <${SM}front> "${front}" ; <${SM}back> "x" ; <${SM}formatVersion> 6 ; <http://purl.org/dc/terms/created> "2026-10-01T00:00:00.000Z"^^<http://www.w3.org/2001/XMLSchema#dateTime> .`;
+}
+
+/** How often the document says it is the deck's. */
+async function backLinks(p: Pod, url: string, deck: Deck): Promise<number> {
+  return (await p.text(url)).split(`<${deck.url}>`).length - 1;
+}
+
+const UNSAFE = [
+  [
+    "dot segments",
+    `${BOB}decks/../../../../alice/profile/card`,
+    `${BOB}reviews/../../../../alice/private/diary.ttl`,
+  ],
+  [
+    "encoded dot segments",
+    `${BOB}%2e%2e/%2E%2e/.%2e/alice/profile/card`,
+    `${BOB}decks/%2e%2e/%2e%2e/%2e%2e/%2e%2e/alice/private/diary.ttl`,
+  ],
+  [
+    "a guest's pod, from another instance",
+    `${GUEST_ORIGIN}solid-memo/drafts/draft/v1/cards.ttl`,
+    `${GUEST_ORIGIN}solid-memo/reviews/deck-1.ttl`,
+  ],
+] as const;
+
+describe("a deck the catalog names at an address no deck's may have", () => {
+  for (const [label, cards, reviews] of UNSAFE) {
+    it(`is not listed, and removing the deck it was removes its entry and nothing else: ${label}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+      await plant(p, deck, cards, reviews);
+      expect(await p.decks.listDecks(BOB)).toEqual([]);
+      await expect(p.decks.readDeck(deck.url)).resolves.toBeNull();
+      expect((await p.decks.readDeckTree(BOB)).children).toEqual([]);
+
+      // The deck as it was listed before the catalog changed, or as the catalog names it now.
+      p.writes.length = 0;
+      await p.decks.removeDeck({ ...deck, cardsDocumentUrl: cards, reviewsDocumentUrl: reviews });
+      expect(p.writes).toEqual([`PATCH ${BOB}catalog.ttl`]);
+      expect(await p.text(`${BOB}catalog.ttl`)).not.toContain("#deck-");
+      expect(await p.urls()).toEqual(expect.arrayContaining([CARD, DIARY]));
+    });
+
+    it(`is never written through: ${label}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+      const card = await p.decks.addCard(deck, UNO);
+      const there: Deck = { ...deck, cardsDocumentUrl: cards, reviewsDocumentUrl: reviews };
+      p.writes.length = 0;
+      const gone = { code: "deckGone", vars: { deck: deck.title } };
+      await expect(p.decks.addCard(there, DOS)).rejects.toMatchObject(gone);
+      await expect(p.decks.removeCard(there, card)).rejects.toMatchObject(gone);
+      await expect(
+        p.reviews.createReviewStates(there, { sm2: [], fsrs: [] }),
+      ).rejects.toMatchObject(gone);
+      await expect(p.decks.unclaimedDocuments(there)).resolves.toEqual([]);
+      await expect(p.decks.claimDocuments(there)).resolves.toBeUndefined();
+      expect(p.writes).toEqual([]);
+      expect(await p.text(CARD)).toBe(await (await pod()).text(CARD));
+    });
+  }
+
+  it("is held to the instance whose catalog lists it, not one it names itself", async () => {
+    const p = await pod();
+    const own = await p.decks.createDeck(ALICE, { en: "Alice's" });
+    await p.decks.createDeck(BOB, { en: "Bob's" });
+    // Bob's catalog states an entry of Alice's catalog, with her deck's documents.
+    await p.put(
+      `${BOB}catalog.ttl`,
+      `${await p.text(`${BOB}catalog.ttl`)}
+<${own.url}> a <${SM}Deck> ; <${SM}cardsDocument> <${own.cardsDocumentUrl}> ; <${SM}reviewsDocument> <${own.reviewsDocumentUrl}> .`,
+    );
+    expect((await p.decks.listDecks(BOB)).map((deck) => deck.title)).toEqual([{ en: "Bob's" }]);
+    expect((await p.decks.listDecks(ALICE)).map((deck) => deck.url)).toEqual([own.url]);
+  });
+});
+
+describe("a deck the catalog names another of the instance's resources for", () => {
+  const OTHERS = [
+    [
+      "another deck's access control",
+      (a: Deck) => `${a.cardsDocumentUrl}.acl`,
+      (a: Deck) => `${a.reviewsDocumentUrl}.acl`,
+    ],
+    [
+      "another deck's metadata",
+      (a: Deck) => `${a.cardsDocumentUrl}.meta`,
+      (a: Deck) => `${a.reviewsDocumentUrl}.acr`,
+    ],
+    [
+      "another deck's documents by an empty segment",
+      (a: Deck) => `${BOB}decks//${a.id}.ttl`,
+      (a: Deck) => `${BOB}reviews//${a.id}.ttl`,
+    ],
+    ["the instance's own documents", () => `${BOB}meta.ttl`, () => `${BOB}preferences.ttl`],
+  ] as const;
+
+  for (const [label, cardsOf, reviewsOf] of OTHERS) {
+    it(`is not listed, written through, nor removed with them: ${label}`, async () => {
+      const p = await pod();
+      const a = await p.decks.createDeck(BOB, { en: "Spanish" });
+      await p.decks.addCard(a, UNO);
+      const b = await p.decks.createDeck(BOB, { en: "Korean" });
+      const cards = cardsOf(a);
+      const reviews = reviewsOf(a);
+      await plant(p, b, cards, reviews);
+      expect((await p.decks.listDecks(BOB)).map((deck) => deck.url)).toEqual([a.url]);
+
+      const there: Deck = { ...b, cardsDocumentUrl: cards, reviewsDocumentUrl: reviews };
+      const before = await p.text(a.cardsDocumentUrl);
+      p.writes.length = 0;
+      const gone = { code: "deckGone", vars: { deck: b.title } };
+      await expect(p.decks.addCard(there, DOS)).rejects.toMatchObject(gone);
+      await expect(
+        p.reviews.createReviewStates(there, { sm2: [], fsrs: [] }),
+      ).rejects.toMatchObject(gone);
+      expect(p.writes).toEqual([]);
+
+      await p.decks.removeDeck(there);
+      expect(p.writes).toEqual([`PATCH ${BOB}catalog.ttl`]);
+      expect(await p.text(a.cardsDocumentUrl)).toBe(before);
+      expect((await p.decks.listDecks(BOB)).map((deck) => deck.url)).toEqual([a.url]);
+    });
+  }
+});
+
+describe("a deck whose documents do not say they are its own", () => {
+  it("is read, but never written to or deleted through, when they are another's: the profile, another pod's", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const card = await p.decks.addCard(deck, UNO);
+    await plant(p, deck, CARD, DIARY);
+    const [listed] = await p.decks.listDecks(BOB);
+    expect(listed).toMatchObject({ cardsDocumentUrl: CARD, reviewsDocumentUrl: DIARY });
+    await expect(p.decks.listCards(listed!)).resolves.toEqual([]);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([CARD, DIARY]);
+
+    p.writes.length = 0;
+    const unclaimed = { code: "deckDocumentUnclaimed", vars: { deck: deck.title } };
+    await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject(unclaimed);
+    await expect(
+      p.decks.removeCard(listed!, { ...card, url: `${CARD}#${card.id}` }),
+    ).rejects.toMatchObject(unclaimed);
+    await expect(
+      p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
+    ).rejects.toMatchObject(unclaimed);
+    await expect(
+      p.reviews.applyReviewChanges(listed!, {
+        save: [],
+        remove: [{ cardId: "me", direction: "front-to-back" }],
+      }),
+    ).rejects.toMatchObject(unclaimed);
+    expect(p.writes).toEqual([]);
+
+    // Removing the deck removes its entry, and neither document.
+    await p.decks.removeDeck(listed!);
+    expect(p.writes).toEqual([`PATCH ${BOB}catalog.ttl`]);
+    expect(await p.text(CARD)).toBe(await (await pod()).text(CARD));
+    expect(await p.urls()).toEqual(expect.arrayContaining([CARD, DIARY]));
+  });
+
+  it("reads both at once, within the check's budget when they are outside the instance's folder: once it is spent, one not read counts as unclaimed, unread", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    await plant(p, deck, CARD, DIARY);
+    const [listed] = await p.decks.listDecks(BOB);
+    // A server that never answers a read of either.
+    const asked: string[] = [];
+    const decks = createSolidDeckRepository({
+      fetch: (async (input, init) => {
+        const url = String(input instanceof Request ? input.url : input);
+        if (url !== CARD && url !== DIARY) return p.fetch(input, init);
+        asked.push(url);
+        return new Promise<Response>(() => {});
+      }) as typeof globalThis.fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "id",
+    });
+    const budget = readBudget(20);
+    await expect(decks.unclaimedDocuments(listed!, budget)).resolves.toEqual([CARD, DIARY]);
+    expect(asked).toEqual([CARD, DIARY]);
+    // Spent before, it reads neither.
+    asked.length = 0;
+    await expect(decks.unclaimedDocuments(listed!, budget)).resolves.toEqual([CARD, DIARY]);
+    expect(asked).toEqual([]);
+  });
+
+  it("counts one that cannot be read as RDF as unclaimed, and leads no write there", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const picture = `${ROOT}alice/photos/cat.png`;
+    await p.local(picture, {
+      method: "PUT",
+      headers: { "Content-Type": "image/png" },
+      body: "not RDF",
+    });
+    await plant(p, deck, picture, DIARY);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([picture, DIARY]);
+    // A check that found it faulty keeps what it found.
+    await expect(p.decks.isUnclaimedAsRead([listed!], picture)).resolves.toBe(false);
+    p.writes.length = 0;
+    await expect(p.decks.addCard(listed!, DOS)).rejects.toThrow();
+    expect(p.writes).toEqual([]);
+    await p.decks.removeDeck(listed!);
+    expect(p.writes).toEqual([`PATCH ${BOB}catalog.ttl`]);
+    expect(await p.urls()).toContain(picture);
+  });
+
+  it("is refused when they say they are another instance's deck's", async () => {
+    const p = await pod();
+    const alices = await p.decks.createDeck(ALICE, { en: "Alice's" });
+    await p.decks.addCard(alices, UNO);
+    await p.reviews.createReviewStates(alices, { sm2: [], fsrs: [] });
+    const deck = await p.decks.createDeck(BOB, { en: "Bob's" });
+    await plant(p, deck, alices.cardsDocumentUrl, alices.reviewsDocumentUrl);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.listCards(listed!)).resolves.toHaveLength(1);
+    const before = await p.text(alices.cardsDocumentUrl);
+
+    p.writes.length = 0;
+    await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject({
+      code: "deckDocumentUnclaimed",
+    });
+    await p.decks.removeDeck(listed!);
+    expect(p.writes).toEqual([`PATCH ${BOB}catalog.ttl`]);
+    expect(await p.text(alices.cardsDocumentUrl)).toBe(before);
+    expect(await backLinks(p, alices.cardsDocumentUrl, alices)).toBe(1);
+  });
+
+  it("in the instance's folder, is refused when they say they are an instance's deck's that is nested in it", async () => {
+    const p = await pod();
+    const nested = `${BOB}nested/`;
+    const inner = await p.decks.createDeck(nested, { en: "Inner" });
+    await p.decks.addCard(inner, UNO);
+    await p.reviews.createReviewStates(inner, { sm2: [], fsrs: [] });
+    const deck = await p.decks.createDeck(BOB, { en: "Bob's" });
+    await plant(p, deck, inner.cardsDocumentUrl, inner.reviewsDocumentUrl);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.listCards(listed!)).resolves.toHaveLength(1);
+    // In the instance's own folder, not read for the data check: refused on a write instead.
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+    const cards = await p.text(inner.cardsDocumentUrl);
+    const reviews = await p.text(inner.reviewsDocumentUrl);
+
+    p.writes.length = 0;
+    const unclaimed = { code: "deckDocumentUnclaimed", vars: { deck: deck.title } };
+    await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject(unclaimed);
+    await expect(
+      p.reviews.applyReviewChanges(listed!, {
+        save: [],
+        remove: [{ cardId: "card-id2", direction: "front-to-back" }],
+      }),
+    ).rejects.toMatchObject(unclaimed);
+    expect(p.writes).toEqual([]);
+
+    // Deleting the outer instance leaves the inner one's documents as they were.
+    await deleteInstanceData(BOB, p.fetch);
+    expect(p.writes.filter((write) => write.includes(nested))).toEqual([]);
+    expect(await p.text(inner.cardsDocumentUrl)).toBe(cards);
+    expect(await p.text(inner.reviewsDocumentUrl)).toBe(reviews);
+    expect((await p.decks.listCards(inner)).map((card) => card.id)).toEqual(["card-id2"]);
+
+    // And removing the deck, its entry only.
+    const again = await p.decks.createDeck(BOB, { en: "Bob's" });
+    await plant(p, again, inner.cardsDocumentUrl, inner.reviewsDocumentUrl);
+    const [relisted] = await p.decks.listDecks(BOB);
+    p.writes.length = 0;
+    await p.decks.removeDeck(relisted!);
+    expect(p.writes).toEqual([`PATCH ${BOB}catalog.ttl`]);
+    expect(await p.text(inner.cardsDocumentUrl)).toBe(cards);
+  });
+
+  it("saying it is two decks', keeps the other's cards when one goes, taking out only its saying it is its", async () => {
+    const p = await pod();
+    const nested = `${BOB}nested/`;
+    const inner = await p.decks.createDeck(nested, { en: "Inner" });
+    await p.decks.addCard(inner, UNO);
+    await p.reviews.createReviewStates(inner, { sm2: [], fsrs: [] });
+    const deck = await p.decks.createDeck(BOB, { en: "Bob's" });
+    await plant(p, deck, inner.cardsDocumentUrl, inner.reviewsDocumentUrl);
+    // Both documents say they are the outer deck's too (as an earlier version, or another app, left them).
+    const alsoOf = async (outer: Deck) => {
+      for (const url of [inner.cardsDocumentUrl, inner.reviewsDocumentUrl]) {
+        await p.put(url, `${await p.text(url)}\n<${url}> <${IS_PART_OF}> <${outer.url}> .`);
+      }
+    };
+    await alsoOf(deck);
+    const [listed] = await p.decks.listDecks(BOB);
+    expect(await backLinks(p, inner.cardsDocumentUrl, deck)).toBe(1);
+    await p.decks.addCard(listed!, DOS);
+
+    await expect(p.decks.removeDeck(listed!)).resolves.toEqual({
+      keptDocuments: [inner.cardsDocumentUrl, inner.reviewsDocumentUrl],
+    });
+    expect(await backLinks(p, inner.cardsDocumentUrl, deck)).toBe(0);
+    expect(await backLinks(p, inner.cardsDocumentUrl, inner)).toBe(1);
+    expect(await backLinks(p, inner.reviewsDocumentUrl, deck)).toBe(0);
+    expect((await p.decks.listCards(inner)).map((card) => card.id).sort()).toEqual([
+      "card-id2",
+      "card-id4",
+    ]);
+
+    // Deleting the outer instance, its deck named in them again, does the same.
+    const again = await p.decks.createDeck(BOB, { en: "Bob's" });
+    await plant(p, again, inner.cardsDocumentUrl, inner.reviewsDocumentUrl);
+    await alsoOf(again);
+    const result = await deleteInstanceData(BOB, p.fetch);
+    expect(result.keptDocuments).toEqual(
+      expect.arrayContaining([inner.cardsDocumentUrl, inner.reviewsDocumentUrl]),
+    );
+    expect(await backLinks(p, inner.cardsDocumentUrl, again)).toBe(0);
+    expect(await backLinks(p, inner.cardsDocumentUrl, inner)).toBe(1);
+    expect(await p.decks.listCards(inner)).toHaveLength(2);
+    await expect(p.decks.unclaimedDocuments(inner)).resolves.toEqual([]);
+  });
+
+  it("in renamed folders of the instance's own folder (kort/, answers/), says so on its next write", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const cards = `${BOB}kort/spanska.ttl`;
+    const reviews = `${BOB}answers/spanska.ttl`;
+    await p.put(cards, deckDocument(deck, cardTurtle("card-1", "uno"), false));
+    await p.put(reviews, "");
+    await plant(p, deck, cards, reviews);
+    const [listed] = await p.decks.listDecks(BOB);
+    expect((await p.decks.listCards(listed!)).map((card) => card.id)).toEqual(["card-1"]);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+
+    await p.decks.addCard(listed!, DOS);
+    await p.reviews.applyReviewChanges(listed!, {
+      save: [],
+      remove: [],
+      fsrs: { save: [], remove: [] },
+    });
+    expect(await backLinks(p, cards, deck)).toBe(1);
+    expect((await p.decks.listCards(listed!)).map((card) => card.id).sort()).toEqual([
+      "card-1",
+      "card-id2",
+    ]);
+
+    // Removing the deck deletes both: they are its own now.
+    await p.decks.removeDeck(listed!);
+    expect(await p.urls()).not.toContain(cards);
+  });
+
+  it("removes a card's states when its cards document is gone, saying the reviews document is the deck's", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const card = await p.decks.addCard(deck, UNO);
+    await p.reviews.createReviewStates(deck, { sm2: [], fsrs: [] });
+    await p.local(deck.cardsDocumentUrl, { method: "DELETE" });
+    p.writes.length = 0;
+    await p.decks.removeCard(deck, card);
+    expect(p.writes).toEqual([`PATCH ${deck.reviewsDocumentUrl}`]);
+    expect(await backLinks(p, deck.reviewsDocumentUrl, deck)).toBe(1);
+  });
+
+  it("anywhere else, is written to once the user claims them: one write each, on the version read", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const cards = `${ROOT}bob/kort/spanska.ttl`;
+    const reviews = `${ROOT}bob/answers/spanska.ttl`;
+    await p.put(cards, deckDocument(deck, cardTurtle("card-1", "uno"), false));
+    await plant(p, deck, cards, reviews);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([cards, reviews]);
+
+    p.writes.length = 0;
+    p.conditions.length = 0;
+    await p.decks.claimDocuments(listed!);
+    expect(p.writes).toEqual([`PATCH ${cards}`, `PUT ${reviews}`]);
+    // The cards on the version read; the reviews document made only where there was none.
+    expect(p.conditions[0]).toMatch(/^"e\d+"$/);
+    expect(await backLinks(p, cards, deck)).toBe(1);
+    expect(await backLinks(p, reviews, deck)).toBe(1);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+
+    // Claimed once: claiming again sends nothing, and writes work, the link stated once.
+    p.writes.length = 0;
+    await p.decks.claimDocuments(listed!);
+    expect(p.writes).toEqual([]);
+    await p.decks.addCard(listed!, DOS);
+    expect(await backLinks(p, cards, deck)).toBe(1);
+    expect((await p.decks.listCards(listed!)).map((card) => card.id).sort()).toEqual([
+      "card-1",
+      "card-id2",
+    ]);
+  });
+
+  it("is written to anywhere in the instance's storage when it says it is the deck's", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const cards = `${ROOT}carol/shared/spanish`;
+    await p.put(cards, deckDocument(deck, cardTurtle("card-1", "uno")));
+    await plant(p, deck, cards, `${BOB}reviews/${deck.id}.ttl`);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+    await p.decks.addCard(listed!, DOS);
+    expect(await backLinks(p, cards, deck)).toBe(1);
+    await p.decks.removeDeck(listed!);
+    expect(await p.urls()).not.toContain(cards);
+  });
+});
+
+describe("a deck whose document says it is the deck's, outside the instance's folder", () => {
+  const VICTIM = "https://victim.example/";
+  const ATTACKER = "https://attacker.example/";
+  const GUESTBOOK = `${VICTIM}public/guestbook.ttl`;
+  const ENTRIES = `<> <http://purl.org/dc/terms/title> "My guestbook" .
+<#entry1> <http://schema.org/text> "Hello from Alice" .
+<#entry2> <http://schema.org/text> "Hello from Bob" .`;
+
+  it("is never written to or deleted through an instance on another server, whatever classes were appended to it", async () => {
+    let etags = 0;
+    const newEtag = () => `"e${++etags}"`;
+    const victim = createLocalPod({ root: VICTIM, store: createMemoryResourceStore(), newEtag });
+    const attacker = createLocalPod({
+      root: ATTACKER,
+      store: createMemoryResourceStore(),
+      newEtag,
+    });
+    const sent: { method: string; origin: string }[] = [];
+    const fetch = (async (input, init) => {
+      const url = String(input);
+      const { origin } = new URL(url);
+      sent.push({ method: (init?.method ?? "GET").toUpperCase(), origin });
+      return origin === new URL(VICTIM).origin ? victim(url, init) : attacker(url, init);
+    }) as typeof globalThis.fetch;
+    const decks = createSolidDeckRepository({
+      fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "x",
+    });
+    const instance = `${ATTACKER}memo/`;
+    const deck = await decks.createDeck(instance, { en: "Spanish" });
+    // What an agent that may only append to the user's document can add to it.
+    const appended = `${ENTRIES}
+<> <${IS_PART_OF}> <${deck.url}> ; a <${SM}Card> .
+<#entry1> a <${SM}Card> .
+<#entry2> a <${SM}Card> .`;
+    const response = await victim(GUESTBOOK, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: appended,
+    });
+    expect(response.ok).toBe(true);
+    const catalog = `${instance}catalog.ttl`;
+    const turtle = (await (await attacker(catalog)).text())
+      .replaceAll(`<${deck.cardsDocumentUrl}>`, `<${GUESTBOOK}>`)
+      .replaceAll(`<decks/${deck.id}.ttl>`, `<${GUESTBOOK}>`);
+    await attacker(catalog, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: turtle,
+    });
+    const [listed] = await decks.listDecks(instance);
+    expect(listed).toMatchObject({ cardsDocumentUrl: GUESTBOOK });
+    await expect(decks.unclaimedDocuments(listed!)).resolves.toEqual([GUESTBOOK]);
+    await expect(decks.addCard(listed!, UNO)).rejects.toMatchObject({
+      code: "deckDocumentUnclaimed",
+    });
+
+    const before = await (await victim(GUESTBOOK)).text();
+    sent.length = 0;
+    await decks.removeDeck(listed!);
+    expect(
+      sent.filter(
+        (request) => request.origin === new URL(VICTIM).origin && request.method !== "GET",
+      ),
+    ).toEqual([]);
+    expect(await (await victim(GUESTBOOK)).text()).toBe(before);
+    await expect(decks.listDecks(instance)).resolves.toEqual([]);
+  });
+
+  it("keeps what others wrote in the user's document when an instance in the same storage, in another folder, names it", async () => {
+    let etags = 0;
+    const victim = createLocalPod({
+      root: VICTIM,
+      store: createMemoryResourceStore(),
+      newEtag: () => `"e${++etags}"`,
+    });
+    const sent: string[] = [];
+    const fetch = (async (input, init) => {
+      const url = String(input);
+      sent.push(`${(init?.method ?? "GET").toUpperCase()} ${url}`);
+      return victim(url, init);
+    }) as typeof globalThis.fetch;
+    const decks = createSolidDeckRepository({
+      fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "x",
+    });
+    // An instance made where others may append, in the user's own storage.
+    const instance = `${VICTIM}inbox/memo/`;
+    const deck = await decks.createDeck(instance, { en: "Spanish" });
+    const appended = `${ENTRIES}
+<> <${IS_PART_OF}> <${deck.url}> ; a <${SM}Card> .
+<#entry1> a <${SM}Card> .
+<#entry2> a <${SM}Card> .`;
+    const response = await victim(GUESTBOOK, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: appended,
+    });
+    expect(response.ok).toBe(true);
+    const catalog = `${instance}catalog.ttl`;
+    const turtle = (await (await victim(catalog)).text())
+      .replaceAll(`<${deck.cardsDocumentUrl}>`, `<${GUESTBOOK}>`)
+      .replaceAll(`<decks/${deck.id}.ttl>`, `<${GUESTBOOK}>`);
+    await victim(catalog, {
+      method: "PUT",
+      headers: { "Content-Type": "text/turtle" },
+      body: turtle,
+    });
+    const [listed] = await decks.listDecks(instance);
+    expect(listed).toMatchObject({ cardsDocumentUrl: GUESTBOOK });
+
+    const before = await (await victim(GUESTBOOK)).text();
+    sent.length = 0;
+    await decks.removeDeck(listed!);
+    expect(
+      sent.filter((request) => request.endsWith(GUESTBOOK) && !request.startsWith("GET")),
+    ).toEqual([]);
+    expect(await (await victim(GUESTBOOK)).text()).toBe(before);
+  });
+
+  it("refuses a write for now, rather than calling it no deck's, when the pod does not answer for a folder on the way", async () => {
+    const p = await pod();
+    const deck = {
+      url: `${BOB}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${ROOT}bob/kort/spanish.ttl`,
+      reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+    };
+    await p.put(`${BOB}catalog.ttl`, "");
+    await p.put(deck.cardsDocumentUrl, `<> <${IS_PART_OF}> <${deck.url}> .`);
+    const ours = await datasetOfTurtle(deck.cardsDocumentUrl, `<> <${IS_PART_OF}> <${deck.url}> .`);
+    let busy = true;
+    const guard = createDeckDocumentGuard((async (input, init) => {
+      if (busy && init?.method === "HEAD") return new Response(null, { status: 503 });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    await expect(guard.writable(deck, deck.cardsDocumentUrl, ours)).rejects.toMatchObject({
+      code: "cannotCheck",
+    });
+    busy = false;
+    await expect(guard.writable(deck, deck.cardsDocumentUrl, ours)).resolves.toBeDefined();
+  });
+
+  it("is the deck's in the instance's storage only, on a server that holds the storages of many", async () => {
+    const p = await pod();
+    const deck = {
+      url: `${BOB}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${BOB}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+    };
+    const says = await datasetOfTurtle(
+      `${ROOT}alice/public/guestbook.ttl`,
+      `<> <${IS_PART_OF}> <${deck.url}> .`,
+    );
+    const ours = await datasetOfTurtle(
+      `${ROOT}bob/kort/spanish.ttl`,
+      `<> <${IS_PART_OF}> <${deck.url}> .`,
+    );
+    await p.put(`${ROOT}alice/public/guestbook.ttl`, "");
+    await p.put(`${ROOT}bob/kort/spanish.ttl`, "");
+    await p.put(`${BOB}catalog.ttl`, "");
+    const asked: string[] = [];
+    let busy = false;
+    const storages = [`${ROOT}alice/`, `${ROOT}bob/`];
+    const guard = createDeckDocumentGuard((async (input, init) => {
+      const url = String(input);
+      asked.push(url);
+      if (busy) return new Response(null, { status: 503 });
+      if (storages.includes(url))
+        return new Response(null, {
+          headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
+        });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    // Another storage on the instance's server: what the document says makes it no deck's, so nothing is written there.
+    await expect(guard.standing(deck, `${ROOT}alice/public/guestbook.ttl`, says)).resolves.toBe(
+      "unclaimed",
+    );
+    expect(asked).toEqual([`${ROOT}alice/public/`, `${ROOT}alice/`]);
+    // The pod not answering for a folder on the way leaves it no deck's, and the folder is asked again.
+    busy = true;
+    await expect(guard.standing(deck, `${ROOT}bob/kort/spanish.ttl`, ours)).resolves.toBe(
+      "unclaimed",
+    );
+    busy = false;
+    await expect(guard.standing(deck, `${ROOT}bob/kort/spanish.ttl`, ours)).resolves.toBe("owned");
+    // Another server: nothing asked.
+    asked.length = 0;
+    await expect(
+      guard.standing(deck, "https://elsewhere.example/bob/kort/spanish.ttl", ours),
+    ).resolves.toBe("unclaimed");
+    expect(asked).toEqual([]);
+  });
+
+  describe("on a server that holds the pods of many under one root it does not type", () => {
+    const deck = {
+      url: `${ROOT}attacker/memo/catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${ROOT}victim/x/doc.ttl`,
+      reviewsDocumentUrl: `${ROOT}attacker/memo/reviews/deck-1.ttl`,
+    };
+    const doc = `${ROOT}victim/x/doc.ttl`;
+    const mine = `${ROOT}attacker/kort/spanish.ttl`;
+
+    /** A guard over a server whose folders `typed` alone are typed as a storage's root, each folder asked kept in `asked`. */
+    function guardOn(typed: string[], userStorages?: () => Promise<readonly string[]>) {
+      const asked: string[] = [];
+      const fetch = (async (input) => {
+        const url = String(input);
+        asked.push(url);
+        const headers: Record<string, string> = typed.includes(url)
+          ? { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' }
+          : {};
+        return new Response(null, { headers });
+      }) as typeof globalThis.fetch;
+      return { guard: createDeckDocumentGuard(fetch, userStorages), asked };
+    }
+
+    it("is no deck's in another pod there, though the server's root holds both, and a write to it is refused", async () => {
+      const says = await datasetOfTurtle(doc, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard, asked } = guardOn([]);
+      await expect(guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      // Every folder up to the server's root is asked, that root too: none is shown to be a storage's.
+      expect(asked).toEqual([`${ROOT}victim/x/`, `${ROOT}victim/`, ROOT]);
+      await expect(guard.writable(deck, doc, says)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+      // Nor is one in the instance's own pod, which the server does not show either.
+      const ours = await datasetOfTurtle(mine, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      await expect(guard.standing(deck, mine, ours)).resolves.toBe("unclaimed");
+    });
+
+    it("is the deck's in the user's storage that holds the instance too, and no deck's in another of theirs", async () => {
+      const ours = await datasetOfTurtle(mine, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const says = await datasetOfTurtle(doc, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard, asked } = guardOn([], async () => [`${ROOT}attacker/`, `${ROOT}victim/`]);
+      await expect(guard.standing(deck, mine, ours)).resolves.toBe("owned");
+      await expect(guard.writable(deck, mine, ours)).resolves.toBeDefined();
+      await expect(guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      // The user's storages decide it: no folder is asked.
+      expect(asked).toEqual([]);
+      // A storage of the user's that holds the document alone decides it too, whatever the server types.
+      const typed = guardOn([ROOT], async () => [`${ROOT}victim/`]);
+      await expect(typed.guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      expect(typed.asked).toEqual([]);
+    });
+
+    it("is no deck's under the root the server shows when the instance has a root of its own below it", async () => {
+      const says = await datasetOfTurtle(doc, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard } = guardOn([ROOT, `${ROOT}attacker/`]);
+      await expect(guard.standing(deck, doc, says)).resolves.toBe("unclaimed");
+      // Under one root the server shows, with none below it, it is the deck's.
+      await expect(guardOn([ROOT]).guard.standing(deck, doc, says)).resolves.toBe("owned");
+    });
+
+    it("leaves it no deck's when the user's storages cannot be found, and refuses a write for now", async () => {
+      const ours = await datasetOfTurtle(mine, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const failed = new Error("profile unreadable");
+      const { guard } = guardOn([`${ROOT}attacker/`], () => Promise.reject(failed));
+      await expect(guard.standing(deck, mine, ours)).resolves.toBe("unclaimed");
+      await expect(guard.writable(deck, mine, ours)).rejects.toMatchObject({
+        code: "cannotCheck",
+      });
+    });
+  });
+
+  describe("far below the storage's root", () => {
+    const STORAGE = '<http://www.w3.org/ns/pim/space#Storage>; rel="type"';
+
+    /** A deck whose instance is the folder `instance`. */
+    function deckIn(instance: string, reviewsDocumentUrl = `${instance}reviews/deck-1.ttl`) {
+      return {
+        url: `${instance}catalog.ttl#deck-1`,
+        title: { en: "Spanish" },
+        cardsDocumentUrl: `${instance}cards/deck-1.ttl`,
+        reviewsDocumentUrl,
+      };
+    }
+
+    /**
+     * A guard over a server that types only its root (`/`) as a storage's
+     * and answers every folder; the document at `long`, read, is sent from
+     * a short address (a redirect) and says it is `deckUrl`'s.
+     */
+    function guardOver(long: string, deckUrl: string) {
+      const asked = { heads: 0 };
+      const fetch = (async (input, init) => {
+        const url = String(input);
+        if (init?.method === "HEAD") {
+          asked.heads++;
+          const headers: Record<string, string> =
+            new URL(url).pathname === "/" ? { Link: STORAGE } : {};
+          return new Response(null, { headers });
+        }
+        if (url !== long) return new Response(null, { status: 404 });
+        const response = new Response(`<${long}> <${IS_PART_OF}> <${deckUrl}> .`, {
+          headers: { "Content-Type": "text/turtle", ETag: '"v1"' },
+        });
+        Object.defineProperty(response, "redirected", { value: true });
+        Object.defineProperty(response, "url", { value: `${ROOT}r.ttl` });
+        return response;
+      }) as typeof globalThis.fetch;
+      return { guard: createDeckDocumentGuard(fetch), asked };
+    }
+
+    it("asks a few folders above a deep document, and keeps it and refuses a write to it as no deck's", async () => {
+      const deck = deckIn(`${ROOT}inst/`, `${ROOT}${"a/".repeat(8000)}r.ttl`);
+      const long = deck.reviewsDocumentUrl;
+      const { guard, asked } = guardOver(long, deck.url);
+      await expect(guard.removal(deck, long)).resolves.toBe("unclaimed");
+      // The document's folder and the few above it, no more.
+      expect(asked.heads).toBe(9);
+      // A write, through a fresh guard as a grade uses, asks no more either; it uses a
+      // 200-folder path, because a long address read through a redirect is refused before the walk.
+      const deep = `${ROOT}${"a/".repeat(200)}r.ttl`;
+      const writes = guardOver(deep, deck.url);
+      const says = await datasetOfTurtle(deep, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      await expect(writes.guard.writable(deck, deep, says)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+      expect(writes.asked.heads).toBe(9);
+    });
+
+    it("is the deck's as far below the root as a walk asks, and no deck's a folder further", async () => {
+      const deck = deckIn(`${ROOT}inst/`);
+      const near = `${ROOT}${"a/".repeat(8)}r.ttl`;
+      const far = `${ROOT}${"a/".repeat(9)}r.ttl`;
+      const says = (url: string) => datasetOfTurtle(url, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      const { guard } = guardOver(near, deck.url);
+      await expect(guard.standing(deck, near, await says(near))).resolves.toBe("owned");
+      await expect(guard.standing(deck, far, await says(far))).resolves.toBe("unclaimed");
+    });
+
+    it("is no deck's when the instance is further below the root than a walk asks", async () => {
+      const deck = deckIn(`${ROOT}${"i/".repeat(9)}`);
+      const near = `${ROOT}doc/r.ttl`;
+      const { guard, asked } = guardOver(near, deck.url);
+      const says = await datasetOfTurtle(near, `<> <${IS_PART_OF}> <${deck.url}> .`);
+      await expect(guard.standing(deck, near, says)).resolves.toBe("unclaimed");
+      // Two for the document's root, nine for the instance's, which is not found.
+      expect(asked.heads).toBe(11);
+    });
+  });
+});
+
+describe("a deck whose document is a deck itself: a release", () => {
+  it("is read, but never written to, claimed or deleted through, though it says it is the deck's", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    await p.decks.addCard(deck, UNO);
+    const release = `${ALICE}releases/spanish-v2.ttl`;
+    await p.put(release, deckDocument(deck, `<> a <${SM}Deck> .`));
+    await plant(p, deck, deck.cardsDocumentUrl, release);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([release]);
+    const before = await p.text(release);
+
+    p.writes.length = 0;
+    await expect(
+      p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
+    ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+    await p.decks.claimDocuments(listed!);
+    await p.decks.removeDeck(listed!);
+    expect(p.writes.filter((write) => write.endsWith(release))).toEqual([]);
+    expect(await p.text(release)).toBe(before);
+  });
+});
+
+describe("a deck's document, as a data check reads it", () => {
+  it("reads a release in the instance's folder as no deck's document", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const release = `${BOB}published/v1.ttl`;
+    await p.put(release, `<> a <${SM}Deck> ; <${SM}formatVersion> 6 .`);
+    await plant(p, deck, release, deck.reviewsDocumentUrl);
+    const [listed] = await p.decks.listDecks(BOB);
+
+    // The check of an unchanged instance still reads nothing here; a read of it says so.
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+    await expect(p.decks.isUnclaimedAsRead([listed!], release)).resolves.toBe(true);
+  });
+
+  it("reads a document in the folder that names only another deck as no deck's document", async () => {
+    const p = await pod();
+    const other = await p.decks.createDeck(BOB, { en: "Other" });
+    await p.decks.addCard(other, UNO);
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    await plant(p, deck, other.cardsDocumentUrl, deck.reviewsDocumentUrl);
+    const listed = (await p.decks.listDecks(BOB)).find(({ url }) => url === deck.url)!;
+    await expect(p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl)).resolves.toBe(true);
+    await expect(p.decks.isUnclaimedAsRead([listed, other], other.cardsDocumentUrl)).resolves.toBe(
+      false,
+    );
+    // Not read within a check's budget, it is kept as the check found it.
+    const spent = readBudget(0);
+    await spent.spend(undefined, () => new Promise(() => {}));
+    await expect(p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl, spent)).resolves.toBe(
+      false,
+    );
+    await expect(
+      p.decks.isUnclaimedAsRead([listed], other.cardsDocumentUrl, readBudget(60_000)),
+    ).resolves.toBe(true);
+  });
+});
+
+describe("a deck's document, as the data checks that share their reads read it", () => {
+  it("is read once to list its cards, and to find where it stands for each deck that names it", async () => {
+    const p = await pod();
+    const shared = `${ROOT}shared/cards.ttl`;
+    await p.put(shared, cardTurtle("c1", "uno"));
+    const one = await p.decks.createDeck(BOB, { en: "One" });
+    const two = await p.decks.createDeck(BOB, { en: "Two" });
+    await plant(p, one, shared, one.reviewsDocumentUrl);
+    await plant(p, two, shared, two.reviewsDocumentUrl);
+    const decks = await p.decks.listDecks(BOB);
+    const kept = new Map<string, Promise<unknown>>();
+    const read: string[] = [];
+    const reads: SharedReads = (url, made) => {
+      if (!kept.has(url)) {
+        read.push(url);
+        kept.set(url, made());
+      }
+      return kept.get(url) as ReturnType<typeof made>;
+    };
+    for (const deck of decks) {
+      await expect(p.decks.unclaimedDocuments(deck, undefined, reads)).resolves.toEqual([shared]);
+      await expect(p.decks.isUnclaimedAsRead([deck], shared, undefined, reads)).resolves.toBe(true);
+      await expect(p.decks.listCards(deck, { reads })).resolves.toMatchObject([
+        { url: `${shared}#c1` },
+      ]);
+    }
+    expect(read).toEqual([shared]);
+  });
+
+  it("is read once, and its cards mapped once, for decks naming it in other spellings of its address", async () => {
+    const p = await pod();
+    const shared = `${ROOT}shared/cards.ttl`;
+    const spellings = [
+      shared,
+      shared.replace("pod.example", "POD.example"),
+      shared.replace("pod.example", "pod.example:443"),
+    ];
+    await p.put(shared, cardTurtle("c1", "uno"));
+    for (const [index, spelled] of spellings.entries()) {
+      const deck = await p.decks.createDeck(BOB, { en: `Deck ${index}` });
+      await plant(p, deck, spelled, deck.reviewsDocumentUrl);
+    }
+    const decks = await p.decks.listDecks(BOB);
+    expect(decks.map((deck) => deck.cardsDocumentUrl).sort()).toEqual([...spellings].sort());
+    const kept = new Map<string, Promise<unknown>>();
+    const read: string[] = [];
+    // As the data checks share them: one read for every spelling of the address.
+    const reads: SharedReads = (url, made) => {
+      const key = new URL(url).href;
+      if (!kept.has(key)) {
+        read.push(url);
+        kept.set(key, made());
+      }
+      return kept.get(key) as ReturnType<typeof made>;
+    };
+    const listed: Awaited<ReturnType<typeof p.decks.listCards>>[] = [];
+    for (const deck of decks) {
+      await expect(p.decks.unclaimedDocuments(deck, undefined, reads)).resolves.toEqual([
+        deck.cardsDocumentUrl,
+      ]);
+      await expect(
+        p.decks.isUnclaimedAsRead([deck], deck.cardsDocumentUrl, undefined, reads),
+      ).resolves.toBe(true);
+      listed.push(await p.decks.listCards(deck, { reads }));
+    }
+    // Read at the address as a request sends it, whichever deck asked first, and its cards mapped once.
+    expect(read).toEqual([shared]);
+    expect(listed[0]).toMatchObject([{ url: `${shared}#c1` }]);
+    for (const cards of listed) expect(cards).toBe(listed[0]);
+  });
+});
+
+describe("a deck whose document is one of a draft's, as a draft made from a release may hold", () => {
+  for (const name of ["release.ttl", "cards.ttl", "chapter-intro.ttl"]) {
+    it(`is read, but never written to, claimed or deleted through, though it says it is the deck's: ${name}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+      await p.decks.addCard(deck, UNO);
+      const container = `${ALICE}drafts/spanish/v2/`;
+      await p.put(`${container}release.ttl`, `<> a <${SM}Deck> .`);
+      const document = `${container}${name}`;
+      if (name !== "release.ttl")
+        await p.put(document, deckDocument(deck, cardTurtle("q1", "uno")));
+      await plant(p, deck, deck.cardsDocumentUrl, document);
+      const [listed] = await p.decks.listDecks(BOB);
+      await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([document]);
+      const before = await p.text(document);
+
+      p.writes.length = 0;
+      await expect(
+        p.reviews.createReviewStates(listed!, { sm2: [], fsrs: [] }),
+      ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+      await p.decks.claimDocuments(listed!);
+      await p.decks.removeDeck(listed!);
+      expect(p.writes.filter((write) => write.endsWith(document))).toEqual([]);
+      expect(await p.text(document)).toBe(before);
+    });
+  }
+
+  it("is one however its address is spelled, and an address that is none is no draft's", async () => {
+    const p = await pod();
+    const guard = createDeckDocumentGuard(p.fetch);
+    const deck = {
+      url: `${ALICE}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${ALICE}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${ALICE}reviews/deck-1.ttl`,
+    };
+    for (const url of [
+      `${ALICE}drafts/spanish/v2/c%61rds.ttl`,
+      `https://POD.example:443/alice/solid-memo/main/drafts/spanish/v2/chapter-intro.ttl`,
+      `${ALICE}%E0%A4%A/drafts/spanish/v2/cards.ttl`,
+      // A name in another case is the draft's on a server that reads it as the same.
+      `${ALICE}drafts/SPANISH/v2/cards.ttl`,
+    ])
+      await expect(guard.standing(deck, url, null)).resolves.toBe("unclaimed");
+    await expect(guard.standing(deck, `${ALICE}drafts/spanish/v2/notes.ttl`, null)).resolves.toBe(
+      "adoptable",
+    );
+    await expect(guard.standing(deck, "no address", null)).resolves.toBe("unclaimed");
+  });
+});
+
+describe("removing a deck whose document holds another app's data too", () => {
+  it("takes out only the deck's cards and its saying it is the deck's, keeps the document, and names it", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const cards = `${ROOT}carol/shared/spanish`;
+    await p.put(
+      cards,
+      deckDocument(
+        deck,
+        `${cardTurtle("card-1", "uno")}\n<#recipe> <https://other.example/says> "kept" .`,
+      ),
+    );
+    await plant(p, deck, cards, `${BOB}reviews/${deck.id}.ttl`);
+    const [listed] = await p.decks.listDecks(BOB);
+    await expect(p.decks.removeDeck(listed!)).resolves.toEqual({ keptDocuments: [cards] });
+    const left = await p.text(cards);
+    expect(left).toContain("https://other.example/says");
+    expect(left).not.toContain(SM);
+    expect(await backLinks(p, cards, deck)).toBe(0);
+    await expect(p.decks.listDecks(BOB)).resolves.toEqual([]);
+  });
+});
+
+describe("deleting an instance", () => {
+  it("deletes a deck's documents that say they are its own, anywhere in its storage, and keeps unclaimed ones", async () => {
+    const p = await pod();
+    const claimed = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const unclaimed = await p.decks.createDeck(BOB, { en: "Korean" });
+    const kort = `${ROOT}bob/kort/spanish.ttl`;
+    await p.put(kort, deckDocument(claimed, cardTurtle("card-1", "uno")));
+    await plant(p, claimed, kort, `${BOB}reviews/${claimed.id}.ttl`);
+    const older = `${ROOT}bob/kort/korean.ttl`;
+    await p.put(older, deckDocument(unclaimed, cardTurtle("card-1", "hana"), false));
+    await plant(p, unclaimed, older, CARD);
+    await deleteInstanceData(BOB, p.fetch);
+    const urls = await p.urls();
+    expect(urls).not.toContain(kort);
+    expect(urls).toEqual(expect.arrayContaining([older, CARD, DIARY]));
+  });
+});
+
+describe("an instance at the pod's root, laid out flat", () => {
+  it("reads, writes and removes its decks, its documents named freely", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(ROOT, { en: "Spanish" });
+    const card = await p.decks.addCard(deck, UNO);
+    expect(await backLinks(p, deck.cardsDocumentUrl, deck)).toBe(1);
+    await p.reviews.createReviewStates(deck, { sm2: [], fsrs: [] });
+    expect(await backLinks(p, deck.reviewsDocumentUrl, deck)).toBe(1);
+
+    // Moved to the root, renamed, with the catalog's links changed: the back-link and the subjects move with them.
+    const cards = `${ROOT}spanish-cards.ttl`;
+    const reviews = `${ROOT}spanish-reviews.ttl`;
+    const moved = async (from: string, to: string) =>
+      p.put(
+        to,
+        (await p.text(from)).replaceAll(`<${from}>`, `<${to}>`).replaceAll(`<${from}#`, `<${to}#`),
+      );
+    await moved(deck.cardsDocumentUrl, cards);
+    await moved(deck.reviewsDocumentUrl, reviews);
+    await plant(p, deck, cards, reviews, ROOT);
+    const [listed] = await p.decks.listDecks(ROOT);
+    expect(listed).toMatchObject({ cardsDocumentUrl: cards, reviewsDocumentUrl: reviews });
+    expect((await p.decks.listCards(listed!)).map((one) => one.id)).toEqual([card.id]);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([]);
+    await p.decks.addCard(listed!, DOS);
+    await p.decks.removeDeck(listed!);
+    expect(await p.urls()).not.toContain(cards);
+    expect(await p.urls()).not.toContain(reviews);
+    expect(await p.urls()).toEqual(expect.arrayContaining([CARD, DIARY]));
+  });
+
+  it("never marks an older document as a deck's by itself, as the root holds the user's other data too", async () => {
+    const p = await pod();
+    const deck = await p.decks.createDeck(ROOT, { en: "Spanish" });
+    const cards = `${ROOT}spanish.ttl`;
+    await p.put(cards, deckDocument(deck, cardTurtle("card-1", "uno"), false));
+    await plant(p, deck, cards, `${ROOT}reviews/${deck.id}.ttl`, ROOT);
+    const [listed] = await p.decks.listDecks(ROOT);
+    await expect(p.decks.listCards(listed!)).resolves.toHaveLength(1);
+    await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([cards]);
+
+    p.writes.length = 0;
+    await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject({
+      code: "deckDocumentUnclaimed",
+    });
+    await p.decks.removeDeck(listed!);
+    expect(p.writes).toEqual([`PATCH ${ROOT}catalog.ttl`]);
+    expect(await p.urls()).toContain(cards);
+  });
+
+  for (const spelled of ["https://POD.example/", "https://pod.example:443/"]) {
+    it(`never writes to an older document or the profile the catalog spells otherwise: ${spelled}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(ROOT, { en: "Spanish" });
+      const cards = `${ROOT}spanish.ttl`;
+      await p.put(cards, deckDocument(deck, cardTurtle("card-1", "uno"), false));
+      const other = (url: string) => url.replace(ROOT, spelled);
+      await plant(p, deck, other(cards), other(CARD), ROOT);
+      const [listed] = await p.decks.listDecks(ROOT);
+      await expect(p.decks.unclaimedDocuments(listed!)).resolves.toEqual([
+        other(cards),
+        other(CARD),
+      ]);
+
+      p.writes.length = 0;
+      await expect(p.decks.addCard(listed!, DOS)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+      await expect(
+        p.reviews.applyReviewChanges(listed!, {
+          save: [],
+          remove: [{ cardId: "card-1", direction: "front-to-back" }],
+        }),
+      ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+      expect(p.writes).toEqual([]);
+    });
+  }
+
+  it("is not its own folder at a storage's root, and asks again a folder that did not answer", async () => {
+    const p = await pod();
+    const at = (instance: string) => ({
+      url: `${instance}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${instance}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${instance}reviews/deck-1.ttl`,
+    });
+    await p.put(`${ROOT}bob/decks/deck-1.ttl`, "");
+    const storage = (async (input, init) =>
+      String(input) === `${ROOT}bob/`
+        ? new Response(null, {
+            headers: { Link: '<http://www.w3.org/ns/pim/space#Storage>; rel="type"' },
+          })
+        : p.fetch(input, init)) as typeof globalThis.fetch;
+    await expect(createDeckDocumentGuard(storage).unclaimed(at(`${ROOT}bob/`))).resolves.toEqual([
+      `${ROOT}bob/decks/deck-1.ttl`,
+    ]);
+    let asked = 0;
+    const offline = createDeckDocumentGuard((async () => {
+      asked += 1;
+      throw new Error("offline");
+    }) as typeof globalThis.fetch);
+    await expect(offline.unclaimed(at(BOB))).rejects.toThrow("offline");
+    await expect(offline.unclaimed(at(BOB))).rejects.toThrow("offline");
+    expect(asked).toBe(2);
+
+    // A folder that answers 503 once is asked again, not kept as another's: its document is the deck's to mark.
+    await p.put(`${BOB}decks/deck-1.ttl`, "");
+    let heads = 0;
+    const busy = createDeckDocumentGuard((async (input, init) => {
+      if (String(input) === BOB && init?.method === "HEAD" && ++heads === 1)
+        return new Response(null, { status: 503 });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    await expect(busy.unclaimed(at(BOB))).rejects.toMatchObject({
+      code: "cannotCheck",
+      vars: { url: BOB, status: 503 },
+    });
+    await expect(busy.unclaimed(at(BOB))).resolves.toEqual([]);
+    expect(heads).toBe(2);
+  });
+
+  it("is not its own folder at the root a Linked Web Storage server names, and is below it", async () => {
+    const p = await pod();
+    const at = (instance: string) => ({
+      url: `${instance}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${instance}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${instance}reviews/deck-1.ttl`,
+    });
+    const lws = (folder: string, root: string) =>
+      (async (input, init) => {
+        if (String(input) === folder && init?.method === "HEAD")
+          return new Response(null, {
+            headers: { Link: `<${ROOT}bob/>; rel="https://www.w3.org/ns/lws#storage"` },
+          });
+        if (String(input) === `${ROOT}bob/` && init?.method === undefined)
+          return Response.json({
+            id: `${ROOT}bob/`,
+            type: "Storage",
+            service: [{ type: "StorageRoot", serviceEndpoint: root }],
+          });
+        return p.fetch(input, init);
+      }) as typeof globalThis.fetch;
+    await p.put(`${ROOT}bob/decks/deck-1.ttl`, "");
+    await expect(
+      createDeckDocumentGuard(lws(`${ROOT}bob/`, `${ROOT}bob/`)).unclaimed(at(`${ROOT}bob/`)),
+    ).resolves.toEqual([`${ROOT}bob/decks/deck-1.ttl`]);
+    await p.put(`${BOB}decks/deck-1.ttl`, "");
+    await expect(
+      createDeckDocumentGuard(lws(BOB, `${ROOT}bob/`)).unclaimed(at(BOB)),
+    ).resolves.toEqual([]);
+  });
+
+  describe("on a server that holds the pods of many on one origin and types none of their roots", () => {
+    const pod = `${ROOT}alice/`;
+    const SECRET = `<#entry> <https://example.org/says> "secret" .`;
+    const at = (instance: string, document = DIARY) => ({
+      url: `${instance}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: document,
+      reviewsDocumentUrl: document,
+    });
+
+    /** A guard over a server that types no folder and holds `documents` (address to Turtle), each request kept in `asked`. */
+    function untyped(
+      userStorages: () => Promise<readonly string[]>,
+      documents: Record<string, string> = { [DIARY]: SECRET },
+    ) {
+      const asked: string[] = [];
+      const fetch = (async (input, init) => {
+        const method = init?.method ?? "GET";
+        asked.push(`${method} ${String(input)}`);
+        const body = documents[String(input)];
+        if (method === "HEAD" || body === undefined) return new Response(null, { status: 200 });
+        return new Response(body, { headers: { "Content-Type": "text/turtle", ETag: '"e1"' } });
+      }) as typeof globalThis.fetch;
+      return { guard: createDeckDocumentGuard(fetch, userStorages), asked };
+    }
+
+    it("never marks an older document as a deck's by itself at a pod's root the user's storages name", async () => {
+      const diary = await datasetOfTurtle(DIARY, SECRET);
+      // However the storage is spelled: host case, default port, no trailing slash.
+      for (const storage of [pod, "https://POD.example:443/alice"]) {
+        const { guard, asked } = untyped(async () => [storage]);
+        await expect(guard.standing(at(pod), DIARY, diary)).resolves.toBe("unclaimed");
+        await expect(guard.writable(at(pod), DIARY, diary)).rejects.toMatchObject({
+          code: "deckDocumentUnclaimed",
+        });
+        await expect(guard.removal(at(pod), DIARY)).resolves.toBe("unclaimed");
+        await expect(guard.unclaimed(at(pod))).resolves.toEqual([DIARY]);
+        // The user's storages decide it: the folder is never asked.
+        expect(asked.filter((one) => one.startsWith("HEAD"))).toEqual([]);
+      }
+    });
+
+    it("never marks one as a deck's in a folder above the user's storage either", async () => {
+      const diary = await datasetOfTurtle(DIARY, SECRET);
+      const { guard } = untyped(async () => [pod]);
+      const above = `${ROOT}pods/`;
+      const inside = `${above}alice/private/diary.ttl`;
+      const read = await datasetOfTurtle(inside, `<#entry> <https://example.org/says> "x" .`);
+      const nested = untyped(async () => [`${above}alice/`]);
+      await expect(nested.guard.standing(at(above, inside), inside, read)).resolves.toBe(
+        "unclaimed",
+      );
+      // An instance in its own folder in the user's pod still marks an older document as the deck's.
+      const own = `${pod}memo/`;
+      const mine = `${own}decks/deck-1.ttl`;
+      const older = await datasetOfTurtle(mine, cardTurtle("card-1", "uno"));
+      await expect(guard.standing(at(own, mine), mine, older)).resolves.toBe("adoptable");
+      await expect(guard.removal(at(own, mine), mine)).resolves.toBe("deletable");
+      await expect(guard.unclaimed(at(own, mine))).resolves.toEqual([]);
+      await expect(guard.standing(at(pod), DIARY, diary)).resolves.toBe("unclaimed");
+    });
+
+    it("leaves an older document no deck's when the user's storages cannot be found, and refuses a write for now", async () => {
+      const own = `${pod}memo/`;
+      const mine = `${own}decks/deck-1.ttl`;
+      const older = await datasetOfTurtle(mine, cardTurtle("card-1", "uno"));
+      const { guard } = untyped(() => Promise.reject(new Error("profile unreadable")), {
+        [mine]: cardTurtle("card-1", "uno"),
+      });
+      await expect(guard.standing(at(own, mine), mine, older)).resolves.toBe("unclaimed");
+      await expect(guard.writable(at(own, mine), mine, older)).rejects.toMatchObject({
+        code: "cannotCheck",
+        vars: { url: own, status: 0 },
+      });
+      await expect(guard.removal(at(own, mine), mine)).resolves.toBe("unclaimed");
+      await expect(guard.unclaimed(at(own, mine))).resolves.toEqual([mine]);
+    });
+  });
+
+  it("asks again a folder whose storage description can't be read", async () => {
+    const p = await pod();
+    let heads = 0;
+    const guard = createDeckDocumentGuard((async (input, init) => {
+      if (String(input) === BOB && init?.method === "HEAD") {
+        heads += 1;
+        return new Response(null, {
+          headers: { Link: `<${ROOT}bob/>; rel="https://www.w3.org/ns/lws#storage"` },
+        });
+      }
+      if (String(input) === `${ROOT}bob/` && init?.method === undefined)
+        return new Response(null, { status: 500 });
+      return p.fetch(input, init);
+    }) as typeof globalThis.fetch);
+    await p.put(`${BOB}decks/deck-1.ttl`, "");
+    const at = {
+      url: `${BOB}catalog.ttl#deck-1`,
+      title: { en: "Spanish" },
+      cardsDocumentUrl: `${BOB}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+    };
+    await expect(guard.unclaimed(at)).rejects.toMatchObject({ code: "cannotCheck" });
+    await expect(guard.unclaimed(at)).rejects.toMatchObject({ code: "cannotCheck" });
+    expect(heads).toBe(2);
+  });
+});
+
+describe("an instance whose address is spelled otherwise than a request sends it", () => {
+  for (const instance of [
+    `${ROOT}bob/kortlekar-å/`,
+    `${ROOT}bob/한국어/`,
+    "https://Pod.Example/bob/solid-memo/main/",
+    "https://pod.example:443/bob/solid-memo/main/",
+  ]) {
+    it(`lists, removes and deletes its decks: ${instance}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(instance, { en: "Spanish" });
+      await p.decks.addCard(deck, UNO);
+      expect((await p.decks.listDecks(instance)).map((one) => one.url)).toEqual([deck.url]);
+      await expect(p.decks.readDeck(deck.url)).resolves.toMatchObject({ url: deck.url });
+      const second = await p.decks.createDeck(instance, { en: "Korean" });
+      await p.decks.addCard(second, UNO);
+      const sent = (url: string) => new Request(url).url;
+      expect(await p.urls()).toEqual(expect.arrayContaining([sent(deck.cardsDocumentUrl)]));
+      // An edit of a document read is made on the version read, however its address is spelled.
+      p.writes.length = 0;
+      p.conditions.length = 0;
+      await p.decks.addCard(deck, DOS);
+      expect(p.writes).toEqual([`PATCH ${sent(deck.cardsDocumentUrl)}`]);
+      expect(p.conditions).toEqual([expect.stringMatching(/^"e\d+"$/)]);
+
+      p.writes.length = 0;
+      await p.decks.removeDeck(deck);
+      // Its reviews document was never written: there is none to delete.
+      expect(p.writes).toEqual([
+        `DELETE ${sent(deck.cardsDocumentUrl)}`,
+        `PATCH ${sent(`${instance}catalog.ttl`)}`,
+      ]);
+      expect(await p.urls()).not.toContain(sent(deck.cardsDocumentUrl));
+
+      await deleteInstanceData(instance, p.fetch);
+      expect(await p.urls()).not.toContain(sent(second.cardsDocumentUrl));
+      expect(await p.urls()).toEqual(expect.arrayContaining([CARD, DIARY]));
+    });
+
+    it(`keeps a listed deck's cards and progress where they were written: ${instance}`, async () => {
+      const p = await pod();
+      const deck = await p.decks.createDeck(instance, { en: "Spanish" });
+      const card = await p.decks.addCard(deck, UNO);
+      await p.decks.addCard(deck, DOS);
+      const key = { cardId: card.id, direction: "front-to-back" } as const;
+      const grade = ({ sm2 }: { sm2: ReviewState | null }) => ({
+        sm2: {
+          ...key,
+          easeFactor: 2.5,
+          intervalDays: 1,
+          repetitions: (sm2?.repetitions ?? 0) + 1,
+          due: "2026-10-20",
+          firstReviewedAt: "2026-10-19T00:00:00.000Z",
+          lastReviewedAt: "2026-10-19T00:00:00.000Z",
+          formatVersion: 3,
+        },
+      });
+      await p.reviews.gradeReviewState(deck, key, grade);
+      const [listed] = await p.decks.listDecks(instance);
+      await p.reviews.gradeReviewState(listed!, key, grade);
+      const states = await p.reviews.listReviewStates(listed!);
+      expect(states.sm2.map((one) => one.repetitions)).toEqual([2]);
+
+      const archive = createSolidDeckArchive({ fetch: p.fetch, publicFetch: p.fetch });
+      const file = await archive.exportDeck(
+        listed!,
+        { format: "turtle", withProgress: true },
+        { asNoOne: { cards: false, reviews: false } },
+      );
+      const read = await archive.readDeckFile(file, "turtle", "https://example.org/deck");
+      expect(read.cards).toHaveLength(2);
+      expect(read.reviews).toHaveLength(1);
+      expect(read.dropped).toEqual([]);
+    });
+  }
+
+  it("lists a document that is both of a deck's documents once", async () => {
+    const elsewhere = "https://elsewhere.example/both.ttl";
+    const guard = createDeckDocumentGuard(
+      (async () =>
+        new Response("", {
+          headers: { "Content-Type": "text/turtle" },
+        })) as unknown as typeof globalThis.fetch,
+    );
+    await expect(
+      guard.unclaimed({
+        url: "https://pod.example/memo/catalog.ttl#deck",
+        title: {},
+        cardsDocumentUrl: elsewhere,
+        reviewsDocumentUrl: elsewhere,
+      }),
+    ).resolves.toEqual([elsewhere]);
+  });
+});
+
+it("finds a document the deck's whatever else it says it is part of, an address no URL too, and in any spelling of the deck's entry", async () => {
+  const deck = {
+    url: `${BOB}catalog.ttl#deck-1`,
+    title: { en: "Spanish" },
+    cardsDocumentUrl: `${BOB}cards/deck-1.ttl`,
+    reviewsDocumentUrl: `${BOB}reviews/deck-1.ttl`,
+  };
+  const says = await datasetOfTurtle(
+    deck.cardsDocumentUrl,
+    `<> <${IS_PART_OF}> <https://pod.example:port/>, <${deck.url.replace("pod.example", "POD.example")}> .`,
+  );
+  const guard = createDeckDocumentGuard((async () => {
+    throw new Error("Not asked");
+  }) as typeof globalThis.fetch);
+  await expect(guard.standing(deck, deck.cardsDocumentUrl, says)).resolves.toBe("owned");
+  await expect(guard.unclaimedForAll([deck], deck.cardsDocumentUrl, says)).resolves.toBe(false);
+});

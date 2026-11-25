@@ -11,7 +11,7 @@
  * the Links workflow runs it weekly, not as a gate (docs/testing.md#pod-providers);
  * a failure is an entry to fix, or to remove.
  */
-import { POD_PROVIDERS, type PodProvider } from "../packages/domain/src/podProvider.ts";
+import { POD_PROVIDERS, type PodProvider } from "../packages/core/domain/src/podProvider.ts";
 
 /** How often a request that failed or answered 5xx is tried, in all. */
 const ATTEMPTS = 3;

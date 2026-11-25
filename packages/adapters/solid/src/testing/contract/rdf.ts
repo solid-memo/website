@@ -1,0 +1,821 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import type { Quad } from "@rdfjs/types";
+import { describe, expect, it } from "vitest";
+import { growth } from "@solid-memo/domain/testing/growth";
+import type * as Rdf from "@solid-memo/solid-client/rdf";
+import type * as Resources from "@solid-memo/solid-client/resources";
+import { integerLiteral } from "../literals";
+
+/**
+ * An implementation of the RDF and resource modules, as the contract
+ * tests take it: what `import * as` of each gives.
+ */
+export interface DataClient {
+  rdf: typeof Rdf;
+  resources: typeof Resources;
+}
+
+const URL_ = "https://pod.example/decks/deck.ttl";
+const EX = "https://example.com/ns#";
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+
+const TURTLE = `@prefix ex: <${EX}> .
+<#a> ex:front "Sweden" ; ex:back "Stockholm"@EN-gb ; ex:note [ ex:text "blank" ] .
+<#b> ex:front "Norway" .
+`;
+
+/** A Turtle document's answer, from the URL asked. */
+export function turtleAt(turtle: string, init: ResponseInit = {}): typeof globalThis.fetch {
+  return async (input) => {
+    const response = new Response(turtle, {
+      status: 200,
+      headers: { "Content-Type": "text/turtle", ETag: '"v1"' },
+      ...init,
+    });
+    Object.defineProperty(response, "url", { value: String(input) });
+    return response;
+  };
+}
+
+function quad(subject: string, object: Quad["object"], predicate = `${EX}p`): Quad {
+  return {
+    subject: { termType: "NamedNode", value: subject },
+    predicate: { termType: "NamedNode", value: predicate },
+    object,
+    graph: { termType: "DefaultGraph", value: "" },
+  } as Quad;
+}
+
+const text = (value: string, language = ""): Quad["object"] =>
+  ({
+    termType: "Literal",
+    value,
+    language,
+    datatype: {
+      termType: "NamedNode",
+      value:
+        language === "" ? `${XSD}string` : "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString",
+    },
+  }) as Quad["object"];
+
+/**
+ * What the app relies on of the RDF module (client/rdf.ts), beyond its
+ * names and types: an implementation passes these, or a caller breaks.
+ */
+export function rdfContract({ rdf, resources }: DataClient): void {
+  const {
+    asUrl,
+    buildThing,
+    changesOf,
+    createSolidDataset,
+    createThing,
+    datasetAt,
+    datasetFromQuads,
+    eachStringByLocale,
+    eachStringNoLocale,
+    eachUrl,
+    fromRdfJsDataset,
+    getDatetime,
+    getBoolean,
+    getDecimal,
+    getLiteralAll,
+    getPropertyAll,
+    getInteger,
+    getStringNoLocale,
+    getTermAll,
+    getThing,
+    getThingAll,
+    getUrl,
+    getUrlAll,
+    isEmptyDataset,
+    localNameOf,
+    propertiesOf,
+    removeThings,
+    removeUrl,
+    setThing,
+    setThings,
+    sourceOf,
+    toRdfJsDataset,
+    withQuads,
+  } = rdf;
+
+  /** Every string without a language, as eachStringNoLocale gives them. */
+  const getStringNoLocaleAll = (subject: Rdf.Subject, property: string) => [
+    ...eachStringNoLocale(subject, property),
+  ];
+
+  /** The strings with a language, by language, as eachStringByLocale gives them. */
+  const getStringByLocaleAll = (subject: Rdf.Subject, property: string) => {
+    const strings = new Map<string, string[]>();
+    for (const [language, value] of eachStringByLocale(subject, property)) {
+      strings.set(language, [...(strings.get(language) ?? []), value]);
+    }
+    return strings;
+  };
+
+  /** The dataset of `turtle` as read from URL_. */
+  const read = (turtle = TURTLE) =>
+    resources.getSolidDatasetLinear(URL_, { fetch: turtleAt(turtle) });
+
+  /** A subject holding one literal of `datatype`. */
+  const withLiteral = (value: string, datatype: string) =>
+    buildThing(createThing())
+      .addLiteral(`${EX}p`, {
+        termType: "Literal",
+        value,
+        language: "",
+        datatype: { termType: "NamedNode", value: datatype },
+      } as never)
+      .build();
+
+  describe("what the app relies on of the RDF module", () => {
+    it("leaves blank-node subjects out of getThingAll, and getThing finds one by its label", async () => {
+      const dataset = await read();
+      expect(getThingAll(dataset).map((thing) => thing.url)).toEqual([`${URL_}#a`, `${URL_}#b`]);
+      const [blank] = [...toRdfJsDataset(dataset)].filter(
+        (one) => one.subject.termType === "BlankNode",
+      );
+      expect(getThing(dataset, `_:${blank!.subject.value}`)).not.toBeNull();
+    });
+
+    it("finds no subject at an IRI that is no URL, as data read from a pod can name", async () => {
+      const dataset = await read();
+      expect(getThing(dataset, "http://[x")).toBeNull();
+      expect(getThing(dataset, "no url")).toBeNull();
+    });
+
+    it("resolves a subject made by name against the document the dataset was read from", async () => {
+      const dataset = await read();
+      const found = getThing(dataset, createThing({ name: "a" }).url)!;
+      expect(found.url).toBe(`${URL_}#a`);
+      expect(getThing(createSolidDataset(), createThing({ name: "a" }).url)).toBeNull();
+    });
+
+    it("reads no statement that names an IRI kept for subjects made by name", async () => {
+      const kept = createThing({ name: "x" }).url;
+      // asUrl throws on a subject at such an IRI, so a read must give none.
+      expect(() => asUrl(createThing({ name: "x" }))).toThrow();
+      const dataset = await read(`@prefix ex: <${EX}> .
+<${kept}> ex:front "Planted" .
+<#a> ex:front "Sweden" ; ex:link <${kept}> ; <${kept}> "property" ; ex:note "${kept}" .
+`);
+      expect(getThingAll(dataset).map(asUrl)).toEqual([`${URL_}#a`]);
+      expect(getThing(dataset, kept)).toBeNull();
+      const [a] = getThingAll(dataset);
+      expect(propertiesOf(a!).map(({ predicate }) => predicate)).toEqual([
+        `${EX}front`,
+        `${EX}note`,
+      ]);
+      expect(localNameOf(kept)).toBe("x");
+    });
+
+    it("reads a date-time as its unanchored pattern finds one: throwing, or an invalid date", () => {
+      const at = (value: string) => getDatetime(withLiteral(value, `${XSD}dateTime`), `${EX}p`);
+      expect(at("2026-10-01T10:00:00Z")).toEqual(new Date("2026-10-01T10:00:00Z"));
+      expect(at("not a date")).toBeNull();
+      expect(() => at("T2026-01-01T00:00:00Z")).toThrow();
+      expect(Number.isNaN(at("275761-01-01T00:00:00Z")!.getTime())).toBe(true);
+      expect(Number.isNaN(at("-271822-01-01T00:00:00Z")!.getTime())).toBe(true);
+    });
+
+    it("reads a date-time of a year past 9999, or of year 0 or before", () => {
+      const at = (value: string) => getDatetime(withLiteral(value, `${XSD}dateTime`), `${EX}p`);
+      expect(at("12345-01-01T00:00:00Z")).toEqual(new Date("+012345-01-01T00:00:00Z"));
+      expect(at("0000-01-01T00:00:00Z")).toEqual(new Date("0000-01-01T00:00:00Z"));
+      expect(at("-0001-01-01T00:00:00Z")).toEqual(new Date("-000001-01-01T00:00:00Z"));
+    });
+
+    it("gives language tags in lower case, however the document spells them", async () => {
+      const quads = [quad(`${URL_}#a`, text("Stockholm", "EN-gb"), `${EX}back`)];
+      for (const dataset of [
+        await read(),
+        datasetFromQuads(quads),
+        fromRdfJsDataset(quads as never),
+      ]) {
+        const thing = getThing(dataset, `${URL_}#a`)!;
+        expect([...getStringByLocaleAll(thing, `${EX}back`).keys()]).toEqual(["en-gb"]);
+        expect(getLiteralAll(thing, `${EX}back`).map((literal) => literal.language)).toEqual([
+          "en-gb",
+        ]);
+      }
+    });
+
+    it("gives a property's values one at a time, each kind in stored order, language tags in lower case", async () => {
+      const turtle = `@prefix ex: <${EX}> .
+<#a> ex:p <#x>, "one", "en"@EN, <#y>, "två"@sv, "two", "again"@en, "مرحبا"@ar--rtl, 7 .`;
+      const P = `${EX}p`;
+      const thing = getThing(await read(turtle), `${URL_}#a`)!;
+      expect([...eachUrl(thing, P)]).toEqual([`${URL_}#x`, `${URL_}#y`]);
+      expect([...eachStringNoLocale(thing, P)]).toEqual(["one", "two"]);
+      expect(getStringByLocaleAll(thing, P)).toEqual(
+        new Map([
+          ["en", ["en", "again"]],
+          ["sv", ["två"]],
+        ]),
+      );
+      const named = buildThing(createThing({ url: `${URL_}#b` }))
+        .addUrl(P, createThing({ name: "local" }))
+        .build();
+      expect([...eachUrl(named, P)]).toEqual(["#local"]);
+      const none = createThing({ url: `${URL_}#c` });
+      expect([
+        ...eachUrl(none, P),
+        ...eachStringNoLocale(none, P),
+        ...eachStringByLocale(none, P),
+      ]).toEqual([]);
+    });
+
+    it("reads a decimal as parseFloat does", () => {
+      const decimal = (value: string) => getDecimal(withLiteral(value, `${XSD}decimal`), `${EX}p`);
+      expect(decimal("2.50")).toBe(2.5);
+      expect(decimal("1.0")).toBe(1);
+      expect(decimal("abc")).toBeNull();
+    });
+  });
+
+  describe("the builder's one-value setters, and the getters of one value", () => {
+    it("set a property to one value, remove one IRI, and read one value back, null for none", () => {
+      const subject = buildThing(createThing())
+        .addUrl(`${EX}p`, `${EX}a`)
+        .addUrl(`${EX}p`, `${EX}b`)
+        .setIri(`${EX}p`, `${EX}c`)
+        .addBoolean(`${EX}flag`, true)
+        .setInteger(`${EX}n`, 1)
+        .setInteger(`${EX}n`, 2)
+        .setStringNoLocale(`${EX}s`, "x")
+        .setStringNoLocale(`${EX}s`, "y")
+        .addUrl(`${EX}r`, `${EX}r1`)
+        .addUrl(`${EX}r`, `${EX}r2`)
+        .removeUrl(`${EX}r`, `${EX}r1`)
+        .build();
+      expect(getUrlAll(subject, `${EX}p`)).toEqual([`${EX}c`]);
+      expect(getBoolean(subject, `${EX}flag`)).toBe(true);
+      expect(getInteger(subject, `${EX}n`)).toBe(2);
+      expect(getStringNoLocale(subject, `${EX}s`)).toBe("y");
+      expect(getUrl(subject, `${EX}r`)).toBe(`${EX}r2`);
+      expect(getUrl(subject, `${EX}none`)).toBeNull();
+      expect(getBoolean(subject, `${EX}none`)).toBeNull();
+      expect(getUrlAll(removeUrl(subject, `${EX}r`, `${EX}r2`), `${EX}r`)).toEqual([]);
+    });
+  });
+
+  describe("changesOf", () => {
+    it("is undefined for a dataset no change was made to, and lists what setThing added", async () => {
+      expect(changesOf(createSolidDataset())).toBeUndefined();
+      const thing = buildThing(createThing({ url: `${URL_}#c` }))
+        .addStringNoLocale(`${EX}front`, "Finland")
+        .build();
+      const changes = changesOf(setThing(await read(), thing))!;
+      expect(changes.deletions).toEqual([]);
+      expect(changes.additions.map((one) => one.object.value)).toEqual(["Finland"]);
+    });
+  });
+
+  describe("setThings and removeThings", () => {
+    const lines = (quads: Iterable<Quad>) =>
+      [...quads]
+        .map(
+          ({ subject, predicate, object }) => `${subject.value} ${predicate.value} ${object.value}`,
+        )
+        .sort();
+    /** What a dataset holds, in the order getThingAll gives its subjects, and its changes. */
+    const stateOf = (dataset: Rdf.Dataset) => {
+      const changes = changesOf(dataset);
+      return {
+        subjects: getThingAll(dataset).map((subject) => subject.url),
+        quads: lines(toRdfJsDataset(dataset)),
+        additions: changes === undefined ? undefined : lines(changes.additions),
+        deletions: changes === undefined ? undefined : lines(changes.deletions),
+      };
+    };
+    const front = (subject: Rdf.Subject, value: string) =>
+      buildThing(subject).addStringNoLocale(`${EX}front`, value).build();
+
+    it("set and remove subjects in one call as one call per subject does", async () => {
+      const base = await read();
+      const a = getThing(base, `${URL_}#a`)!;
+      const c = front(createThing({ url: `${URL_}#c` }), "Finland");
+      const named = front(createThing({ name: "d" }), "Denmark");
+      const set = [front(a, "Sverige"), c, named, front(a, "Suède")];
+      const removed = [c, `${URL_}#b`, `${URL_}#absent`, named.url];
+      const once = removeThings(setThings(base, set), removed);
+      const fold = removed.reduce<Rdf.Dataset>(
+        (dataset, subject) => removeThings(dataset, [subject]),
+        set.reduce<Rdf.Dataset>((dataset, subject) => setThing(dataset, subject), base),
+      );
+      expect(stateOf(once)).toEqual(stateOf(fold));
+      expect(getThing(once, `${URL_}#d`)).toBeNull();
+      // Edited again: what was removed and is set again, and what was set and is removed, is no change.
+      const b = front(createThing({ url: `${URL_}#b` }), "Norway");
+      const again = removeThings(setThings(once, [b]), [`${URL_}#a`]);
+      expect(stateOf(again)).toEqual(stateOf(removeThings(setThing(fold, b), [`${URL_}#a`])));
+    });
+
+    it("give the dataset itself for no subject", async () => {
+      const base = await read();
+      expect(setThings(base, [])).toBe(base);
+      expect(removeThings(base, [])).toBe(base);
+    });
+
+    it("look for a subject given by its name's IRI as text only in a dataset of a document", () => {
+      const named = front(createThing({ name: "d" }), "Denmark");
+      const built = setThing(createSolidDataset(), named);
+      expect(getThingAll(removeThings(built, [named.url]))).toEqual([]);
+    });
+  });
+
+  describe("setIriAll and setStringAll", () => {
+    const P = `${EX}p`;
+    /** A subject with two IRIs, a string, a language string and an integer for P. */
+    const mixed = () =>
+      buildThing(createThing({ url: `${URL_}#a` }))
+        .addIri(P, `${EX}x`)
+        .addIri(P, `${EX}y`)
+        .addStringNoLocale(P, "plain")
+        .addStringWithLocale(P, "tagged", "en")
+        .addLiteral(P, integerLiteral(7))
+        .build();
+
+    it("set the property's IRIs, each once, and keep its other values", () => {
+      const set = buildThing(mixed())
+        .setIriAll(P, [`${EX}y`, `${EX}z`, `${EX}z`])
+        .build();
+      expect(getUrlAll(set, P)).toEqual([`${EX}y`, `${EX}z`]);
+      expect(getStringNoLocale(set, P)).toBe("plain");
+      expect(getStringByLocaleAll(set, P)).toEqual(new Map([["en", ["tagged"]]]));
+      expect(getInteger(set, P)).toBe(7);
+      expect(getUrlAll(buildThing(mixed()).setIriAll(P, []).build(), P)).toEqual([]);
+      const only = buildThing(createThing({ url: `${URL_}#b` })).setIriAll(P, [`${EX}x`]);
+      expect(getUrlAll(only.setIriAll(P, []).build(), P)).toEqual([]);
+      expect(() => buildThing(mixed()).setIriAll(P, ["not a URL"])).toThrow();
+    });
+
+    it("keep an IRI the subject has already as it is, even one an add refuses as no URL", async () => {
+      const dataset = await read(`<#a> <${P}> <${EX}x>, <http://[oops>, <${EX}y> .\n`);
+      const subject = getThing(dataset, `${URL_}#a`)!;
+      expect(getUrlAll(subject, P)).toEqual([`${EX}x`, "http://[oops", `${EX}y`]);
+      const set = buildThing(subject)
+        .setIriAll(P, ["http://[oops", `${EX}y`, `${EX}z`])
+        .build();
+      expect(getUrlAll(set, P)).toEqual(["http://[oops", `${EX}y`, `${EX}z`]);
+      expect(() => buildThing(subject).setIriAll(P, ["http://[other"])).toThrow();
+      // One it had when the builder was made, before a removeAll of the property, too.
+      const replaced = buildThing(subject).removeAll(P).setIriAll(P, ["http://[oops"]).build();
+      expect(getUrlAll(replaced, P)).toEqual(["http://[oops"]);
+    });
+
+    it("set the property's strings, each once, a language as an add reads it, and keep its other values", () => {
+      const set = buildThing(mixed())
+        .setStringAll(P, [
+          { value: "one", language: "" },
+          { value: "one", language: "" },
+          { value: "två", language: "SV" },
+          { value: "två", language: "sv" },
+        ])
+        .build();
+      expect(getStringNoLocale(set, P)).toBe("one");
+      expect(getStringByLocaleAll(set, P)).toEqual(new Map([["sv", ["två"]]]));
+      expect(getUrlAll(set, P)).toEqual([`${EX}x`, `${EX}y`]);
+      expect(getInteger(set, P)).toBe(7);
+      const none = buildThing(mixed()).setStringAll(P, []).build();
+      expect(getStringNoLocale(none, P)).toBeNull();
+      expect(getStringByLocaleAll(none, P)).toEqual(new Map());
+    });
+
+    it("take time that grows with the values, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const iris = Array.from({ length: count }, (_, i) => `${EX}v${i}`);
+          const strings = iris.map((value, i) => ({ value, language: i % 2 === 0 ? "" : "en" }));
+          const subject = createThing({ url: `${URL_}#a` });
+          return () => buildThing(subject).setIriAll(P, iris).setStringAll(P, strings).build();
+        },
+        2000,
+        8,
+        4,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+
+    it("take time that grows with strings as long as a term may be, not their square", () => {
+      // V8 hashes a string longer than 16,383 characters by its length
+      // alone: a key of a string's language and text joined would be
+      // compared with every other of its length. A text in English is
+      // named in quotes with `@en` after it.
+      const pad = "x".repeat(16_383 - 5 - 6);
+      const ratio = growth(
+        (count) => {
+          const strings = Array.from({ length: count }, (_, i) => ({
+            value: `${pad}${String(i).padStart(6, "0")}`,
+            language: "en",
+          }));
+          const subject = createThing({ url: `${URL_}#a` });
+          return () => buildThing(subject).setStringAll(P, strings).build();
+        },
+        100,
+        8,
+        4,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
+  describe("addAll", () => {
+    const P = `${EX}p`;
+    const Q = `${EX}q`;
+    const iri = (value: string) => ({ termType: "NamedNode", value }) as never;
+    const literal = (value: string, language = "") => text(value, language) as never;
+
+    it("add each property's values as the adds add them, and keep the subject's others", () => {
+      const subject = buildThing(createThing({ url: `${URL_}#a` }))
+        .addIri(P, `${EX}x`)
+        .addStringNoLocale(P, "plain")
+        .addStringWithLocale(P, "tagged", "en")
+        .addLiteral(P, integerLiteral(7))
+        .addStringNoLocale(`${EX}other`, "kept")
+        .build();
+      const added = buildThing(subject)
+        .addAll(
+          new Map([
+            [P, [iri(`${EX}y`), literal("more"), literal("again", "en"), literal("mer", "SV")]],
+            [Q, [integerLiteral(8) as never, iri(`${EX}z`)]],
+            [`${EX}none`, []],
+          ]),
+        )
+        .build();
+      expect(getUrlAll(added, P)).toEqual([`${EX}x`, `${EX}y`]);
+      expect(getStringNoLocaleAll(added, P)).toEqual(["plain", "more"]);
+      expect(getStringByLocaleAll(added, P)).toEqual(
+        new Map([
+          ["en", ["tagged", "again"]],
+          ["sv", ["mer"]],
+        ]),
+      );
+      expect(getInteger(added, P)).toBe(7);
+      expect(getInteger(added, Q)).toBe(8);
+      expect(getUrlAll(added, Q)).toEqual([`${EX}z`]);
+      expect(getStringNoLocale(added, `${EX}other`)).toBe("kept");
+      expect(getPropertyAll(added)).not.toContain(`${EX}none`);
+      expect(() => buildThing(subject).addAll(new Map([[P, [iri("not a URL")]]]))).toThrow();
+    });
+
+    it("add IRIs alone to a property that has no literal", () => {
+      const added = buildThing(createThing({ url: `${URL_}#a` }))
+        .addAll(new Map([[`${EX}see`, [{ termType: "NamedNode", value: `${EX}x` } as never]]]))
+        .build();
+      expect(getUrlAll(added, `${EX}see`)).toEqual([`${EX}x`]);
+      expect(getLiteralAll(added, `${EX}see`)).toEqual([]);
+    });
+
+    it("keep a blank node the property names by its label", async () => {
+      const subject = getThing(
+        await read(`@prefix ex: <${EX}> .\n<#a> ex:note _:b1 .\n_:b1 ex:text "blank" .\n`),
+        `${URL_}#a`,
+      )!;
+      const added = buildThing(subject)
+        .addAll(new Map([[`${EX}note`, [literal("more")]]]))
+        .build();
+      expect(
+        getTermAll(added, `${EX}note`)
+          .map((term) => term.termType)
+          .sort(),
+      ).toEqual(["BlankNode", "Literal"]);
+    });
+
+    it("keep a blank node the property has", async () => {
+      const subject = getThing(await read(), `${URL_}#a`)!;
+      const added = buildThing(subject)
+        .addAll(new Map([[`${EX}note`, [literal("more")]]]))
+        .build();
+      expect(getTermAll(added, `${EX}note`).map((term) => term.termType)).toEqual([
+        "Literal",
+        "BlankNode",
+      ]);
+    });
+
+    it("take time that grows with the properties and values, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const values = new Map(
+            Array.from({ length: count }, (_, i) => [
+              `${EX}p${i}`,
+              [literal(`v${i}`), literal(`v${i}`, "en"), iri(`${EX}v${i}`)],
+            ]),
+          );
+          values.set(
+            P,
+            Array.from({ length: count }, (_, i) => literal(`w${i}`)),
+          );
+          const subject = createThing({ url: `${URL_}#a` });
+          return () => buildThing(subject).addAll(values).build();
+        },
+        1000,
+        8,
+        4,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
+  describe("getTermAll and getLiteralAll", () => {
+    const P = `${EX}p`;
+    const typed = (value: string, datatype: string) =>
+      ({
+        termType: "Literal",
+        value,
+        language: "",
+        datatype: { termType: "NamedNode", value: datatype },
+      }) as never;
+
+    it("take time that grows with a property's languages and datatypes, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const values = Array.from({ length: count }, (_, i) => [
+            text(`v${i}`, `en-x${i}`) as never,
+            typed(`v${i}`, `${EX}t${i}`),
+          ]).flat();
+          const subject = buildThing(createThing({ url: `${URL_}#a` }))
+            .addAll(new Map([[P, values]]))
+            .build();
+          return () => {
+            expect(getTermAll(subject, P)).toHaveLength(2 * count);
+            expect(getLiteralAll(subject, P)).toHaveLength(2 * count);
+          };
+        },
+        5000,
+        8,
+        4,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
+  describe("removeLiteralAll", () => {
+    const P = `${EX}p`;
+    const DATETIME = `${XSD}dateTime`;
+    const literal = (value: string, datatype = DATETIME) =>
+      ({
+        termType: "Literal",
+        value,
+        language: "",
+        datatype: { termType: "NamedNode", value: datatype },
+      }) as never;
+    const subject = () =>
+      buildThing(createThing({ url: `${URL_}#a` }))
+        .addLiteral(P, literal("a"))
+        .addLiteral(P, literal("b"))
+        .addLiteral(P, literal("c"))
+        .addLiteral(P, literal("a", `${XSD}date`))
+        .addStringNoLocale(P, "a")
+        .addIri(P, `${EX}x`)
+        .build();
+
+    it("removes the literals of the datatype named, as removeLiteral does, and keeps the rest", () => {
+      const removed = buildThing(subject()).removeLiteralAll(P, DATETIME, ["a", "c", "z"]).build();
+      const oneByOne = buildThing(subject())
+        .removeLiteral(P, literal("a"))
+        .removeLiteral(P, literal("c"))
+        .removeLiteral(P, literal("z"))
+        .build();
+      const terms = (subject: Rdf.Subject) =>
+        getLiteralAll(subject, P).map((one) => [one.value, one.datatype.value]);
+      expect(terms(removed)).toEqual(terms(oneByOne));
+      expect(terms(removed)).toEqual([
+        ["b", DATETIME],
+        ["a", `${XSD}date`],
+        ["a", `${XSD}string`],
+      ]);
+      expect(getUrlAll(removed, P)).toEqual([`${EX}x`]);
+      const all = buildThing(subject()).removeLiteralAll(P, DATETIME, ["a", "b", "c"]).build();
+      expect(terms(all)).toEqual([
+        ["a", `${XSD}date`],
+        ["a", `${XSD}string`],
+      ]);
+      const none = buildThing(createThing({ url: `${URL_}#b` }))
+        .removeLiteralAll(P, DATETIME, ["a"])
+        .build();
+      expect(propertiesOf(none)).toEqual([]);
+    });
+
+    it("takes time that grows with the values, not their square", () => {
+      const ratio = growth(
+        (count) => {
+          const values = Array.from({ length: count }, (_, i) => `v${i}`);
+          const builder = buildThing(createThing({ url: `${URL_}#a` }));
+          for (const value of values) builder.addLiteral(P, literal(value));
+          const full = builder.build();
+          return () => buildThing(full).removeLiteralAll(P, DATETIME, values).build();
+        },
+        2000,
+        8,
+        4,
+      );
+      expect(ratio).toBeLessThan(4);
+    });
+  });
+
+  describe("sourceOf", () => {
+    it("names the document read, with a key every edit of it keeps and no other read has", async () => {
+      const dataset = await read();
+      const source = sourceOf(dataset)!;
+      expect(source.url).toBe(URL_);
+      const edited = setThing(dataset, createThing({ url: `${URL_}#c` }));
+      expect(sourceOf(edited)!.key).toBe(source.key);
+      expect(sourceOf(await read())!.key).not.toBe(source.key);
+    });
+
+    it("is undefined for a dataset built here", () => {
+      expect(sourceOf(createSolidDataset())).toBeUndefined();
+      expect(sourceOf(datasetFromQuads([]))).toBeUndefined();
+    });
+  });
+
+  describe("datasetAt", () => {
+    it("is empty, of the document at the URL, as a read of it begins", () => {
+      const dataset = datasetAt(URL_);
+      expect(isEmptyDataset(dataset)).toBe(true);
+      expect(sourceOf(dataset)!.url).toBe(URL_);
+      expect(changesOf(dataset)).toBeUndefined();
+      const named = setThing(dataset, createThing({ name: "a" }));
+      expect(getThing(named, `${URL_}#a`)).not.toBeNull();
+    });
+  });
+
+  describe("datasetFromQuads", () => {
+    it("holds the quads and nothing else, with no changes", () => {
+      const dataset = datasetFromQuads([quad(`${URL_}#a`, text("Sweden"))]);
+      expect(getStringNoLocale(getThing(dataset, `${URL_}#a`)!, `${EX}p`)).toBe("Sweden");
+      expect(changesOf(dataset)).toBeUndefined();
+      expect(Object.isFrozen(dataset)).toBe(true);
+    });
+  });
+
+  describe("withQuads", () => {
+    it("holds the new quads, from the same document, with no changes", async () => {
+      const dataset = await read();
+      const replaced = withQuads(dataset, [quad(`${URL_}#c`, text("Finland"))]);
+      expect(getThingAll(replaced).map((thing) => thing.url)).toEqual([`${URL_}#c`]);
+      expect(sourceOf(replaced)!.key).toBe(sourceOf(dataset)!.key);
+      expect(changesOf(replaced)).toEqual({ additions: [], deletions: [] });
+      expect(Object.isFrozen(replaced)).toBe(true);
+    });
+  });
+
+  describe("isEmptyDataset", () => {
+    it("tells a dataset of no subject from one of some", async () => {
+      expect(isEmptyDataset(createSolidDataset())).toBe(true);
+      expect(isEmptyDataset(await read())).toBe(false);
+    });
+  });
+
+  describe("propertiesOf", () => {
+    it("is empty for a subject that says nothing", () => {
+      expect(propertiesOf(createThing())).toEqual([]);
+    });
+
+    it("gives every property's IRIs, literals, language strings and blank nodes, in that order", () => {
+      const subject = `${URL_}#a`;
+      const dataset = datasetFromQuads([
+        quad(subject, { termType: "BlankNode", value: "b0" } as Quad["object"]),
+        quad(subject, text("hello", "en")),
+        quad(subject, {
+          termType: "Literal",
+          value: "42",
+          language: "",
+          datatype: { termType: "NamedNode", value: `${XSD}integer` },
+        } as Quad["object"]),
+        quad(subject, { termType: "NamedNode", value: "https://iri.example/x" } as Quad["object"]),
+        quad(subject, text("x"), `${EX}q`),
+      ]);
+      expect(propertiesOf(getThing(dataset, subject)!)).toEqual([
+        {
+          predicate: `${EX}p`,
+          values: [
+            { type: "iri", value: "https://iri.example/x" },
+            { type: "literal", value: "42", dataType: `${XSD}integer` },
+            { type: "langString", value: "hello", language: "en" },
+            { type: "blankNode", value: "_:b0" },
+          ],
+        },
+        {
+          predicate: `${EX}q`,
+          values: [{ type: "literal", value: "x", dataType: `${XSD}string` }],
+        },
+      ]);
+    });
+  });
+
+  describe("literals with a base direction", () => {
+    const P = `${EX}p`;
+    const DIR_LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#dirLangString";
+    const DIRECTED = `<#a> <${P}> "مرحبا"@ar--rtl, "hello"@en--ltr, "hello"@en--rtl, "hi"@en, "plain" .\n`;
+    /** A literal's parts, its language and direction among them. */
+    const parts = (term: Quad["object"]) =>
+      term.termType === "Literal"
+        ? [term.value, term.language, term.direction ?? "", term.datatype.value]
+        : [term.value];
+    const sorted = (terms: Iterable<Quad["object"]>) => [...terms].map(parts).sort();
+    const DIRECTED_PARTS = [
+      ["hello", "en", "ltr", DIR_LANG_STRING],
+      ["hello", "en", "rtl", DIR_LANG_STRING],
+      ["hi", "en", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"],
+      ["plain", "", "", `${XSD}string`],
+      ["مرحبا", "ar", "rtl", DIR_LANG_STRING],
+    ];
+
+    it("keep their language and direction as read, through every dataset made of them", async () => {
+      const dataset = await read(DIRECTED);
+      for (const again of [
+        dataset,
+        datasetFromQuads(toRdfJsDataset(dataset) as Iterable<Quad>),
+        fromRdfJsDataset(toRdfJsDataset(dataset)),
+        withQuads(dataset, toRdfJsDataset(dataset) as Iterable<Quad>),
+      ]) {
+        expect(sorted([...toRdfJsDataset(again)].map((one) => one.object))).toEqual(DIRECTED_PARTS);
+        expect(sorted(getLiteralAll(getThing(again, `${URL_}#a`)!, P))).toEqual(DIRECTED_PARTS);
+      }
+    });
+
+    it("keep their direction from quads that spell their language in upper case", () => {
+      const quads = [
+        quad(`${URL_}#a`, {
+          termType: "Literal",
+          value: "مرحبا",
+          language: "AR",
+          direction: "rtl",
+          datatype: { termType: "NamedNode", value: DIR_LANG_STRING },
+        } as Quad["object"]),
+      ];
+      for (const dataset of [datasetFromQuads(quads), fromRdfJsDataset(quads as never)]) {
+        expect(sorted(getLiteralAll(getThing(dataset, `${URL_}#a`)!, P))).toEqual([
+          ["مرحبا", "ar", "rtl", DIR_LANG_STRING],
+        ]);
+      }
+    });
+
+    it("are kept once when an RDF/JS dataset states one twice, as a read keeps it", () => {
+      const one = quad(`${URL_}#a`, {
+        termType: "Literal",
+        value: "مرحبا",
+        language: "ar",
+        direction: "rtl",
+        datatype: { termType: "NamedNode", value: DIR_LANG_STRING },
+      } as Quad["object"]);
+      const dataset = fromRdfJsDataset([one, { ...one }] as never);
+      expect(sorted(getLiteralAll(getThing(dataset, `${URL_}#a`)!, P))).toEqual([
+        ["مرحبا", "ar", "rtl", DIR_LANG_STRING],
+      ]);
+    });
+
+    it("are no text in a language, which keeps them when it is set", async () => {
+      const thing = getThing(await read(DIRECTED), `${URL_}#a`)!;
+      expect(getStringByLocaleAll(thing, P)).toEqual(new Map([["en", ["hi"]]]));
+      expect(getStringNoLocale(thing, P)).toBe("plain");
+      expect(
+        propertiesOf(thing)[0]!
+          .values.filter((one) => one.type === "literal")
+          .map((one) => one.value)
+          .sort(),
+      ).toEqual(["hello", "hello", "plain", "مرحبا"]);
+      expect(
+        propertiesOf(thing)[0]!.values.filter(
+          (one) => one.type === "literal" && one.dataType === DIR_LANG_STRING,
+        ),
+      ).toHaveLength(3);
+      const set = buildThing(thing)
+        .setStringAll(P, [{ value: "hej", language: "sv" }])
+        .build();
+      expect(getStringByLocaleAll(set, P)).toEqual(new Map([["sv", ["hej"]]]));
+      expect(sorted(getLiteralAll(set, P))).toEqual([
+        ["hej", "sv", "", "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString"],
+        ...DIRECTED_PARTS.filter(([, , direction]) => direction !== ""),
+      ]);
+    });
+
+    it("are told apart by their direction in a dataset's changes", async () => {
+      const dataset = await read(DIRECTED);
+      const kept = getThing(await read(`<#a> <${P}> "hello"@en--rtl .\n`), `${URL_}#a`)!;
+      const changes = changesOf(setThing(dataset, kept))!;
+      expect(changes.additions).toEqual([]);
+      expect(sorted(changes.deletions.map((one) => one.object))).toEqual(
+        DIRECTED_PARTS.filter(
+          ([, language, direction]) => !(language === "en" && direction === "rtl"),
+        ),
+      );
+    });
+  });
+
+  describe("localNameOf", () => {
+    it("names a subject made by name and not saved yet, and nothing else", () => {
+      const thing = buildThing(createThing({ name: "new" }))
+        .addStringNoLocale(`${EX}front`, "Finland")
+        .build();
+      const [added] = changesOf(setThing(createSolidDataset(), thing))!.additions;
+      expect(localNameOf(added!.subject.value)).toBe("new");
+      expect(localNameOf(`${URL_}#new`)).toBeUndefined();
+    });
+  });
+}

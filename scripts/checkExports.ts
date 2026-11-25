@@ -22,8 +22,9 @@
  * config's, a lazily loaded module's) and the generated files, which
  * describe the vocabulary whole, are not checked.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { dirname, join, normalize, resolve } from "node:path";
+import { packageFolders } from "./packageFolders.ts";
 import { parseSync } from "vite";
 import { isTestFile, sourceFiles } from "./checkBoundaries.ts";
 import { REPLACEMENTS } from "./solidClient.ts";
@@ -208,12 +209,12 @@ export function isTest(dir: string, file: string): boolean {
 
 /**
  * The exports nothing but tests uses, as `<file>: <name>` lines from the
- * root. `replacements` names, by module, the one that replaces it in some
+ * root. `replacements` pairs a module with one that replaces it in some
  * builds, whose exports are used where the module's are.
  */
 export function unusedExports(
   packages: readonly Package[],
-  replacements: Record<string, string> = {},
+  replacements: readonly (readonly [string, string])[] = [],
 ): string[] {
   const sources = new Map<string, string>();
   const tests = new Set<string>();
@@ -250,7 +251,7 @@ export function unusedExports(
       if (target !== null) use(target, names);
     }
   }
-  for (const [module, replacement] of Object.entries(replacements)) {
+  for (const [module, replacement] of replacements) {
     const imported = used.get(module);
     if (imported !== undefined) use(replacement, imported === "*" ? "*" : [...imported]);
   }
@@ -279,10 +280,7 @@ export function defaultIo(root: string): ExportsIo {
         ),
       });
       const workspaces = ["apps", "packages", "e2e"].flatMap((group) =>
-        readdirSync(join(root, group)).map((folder) => {
-          const dir = join(group, folder);
-          return read(dir, sourceFiles(join(root, dir)));
-        }),
+        packageFolders(root, group).map((dir) => read(dir, sourceFiles(join(root, dir)))),
       );
       // The repository's own checks, which the root package.json runs.
       const scripts = sourceFiles(join(root, "scripts")).map((file) => join("scripts", file));

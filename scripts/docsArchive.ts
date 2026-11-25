@@ -32,16 +32,21 @@ import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { promisify } from "node:util";
-import { checkSvg, type DrawInputs, fontNotice } from "@solid-memo/site/diagrams";
-import { type DocsIo, type Draw, renderDocsSite, repositoryIo } from "@solid-memo/site/docsSite";
+import { checkSvg, type DrawInputs, fontNotice } from "@solid-memo/build-tools/diagrams";
+import {
+  type DocsIo,
+  type Draw,
+  renderDocsSite,
+  repositoryIo,
+} from "@solid-memo/build-tools/docsSite";
 import {
   CACHE_DIR,
   drawDiagrams,
   drawInputs,
   type Launch,
   launchChromium,
-} from "@solid-memo/site/drawDiagrams";
-import { siteOrigin } from "@solid-memo/site/siteMap";
+} from "@solid-memo/build-tools/drawDiagrams";
+import { siteOrigin } from "@solid-memo/build-tools/siteMap";
 import { loadEnv } from "vite";
 import { siteConfig } from "../apps/web/src/config.ts";
 import { isReleaseVersion } from "./releaseVersion.ts";

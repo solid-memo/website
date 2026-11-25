@@ -177,13 +177,13 @@ data it reads:
 | `/studio/index.html` | `apps/web/public/studio/` | The Studio's old address: a page that sends `/studio/#/x` on to `/#/studio/x` ([studio.md](studio.md#routes)). |
 | `/ns/vocab/*.ttl`, `/ns/shapes/<class>/v<N>.ttl`, `/ns/bounds/<kind>.ttl` | [`ns/`](../ns/) | The vocabulary, the shapes and the bounds on what the app reads of them ([vocab.md](vocab.md), [shapes.md](shapes.md#bounds)). |
 | `/decks/index.ttl`, `/decks/<name>/v<N>.ttl` | [`decks/`](../decks/) | The deck library ([deck-library.md](deck-library.md)). |
-| `/vendor/…` | [`packages/vocab/vendor/`](../packages/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
+| `/vendor/…` | [`packages/lib/vocab/vendor/`](../packages/lib/vocab/vendor/) | The vendored DCAT-AP and SKOS shapes. |
 | `/journeys/index.html` | `apps/web/public/journeys/` | The user journeys' report's old address: a page that sends `/journeys/#x` on to `https://journeys.solid-memo.com/#x`, where the report now lives ([below](#the-journeys-report)). |
 | `/journeys/trace/sw.bundle.js` | `apps/web/public/journeys/trace/` | A service worker at the address of the old report's trace viewer's, which unregisters itself. |
 
 Vite copies `ns/`, `decks/` and `vendor/` unchanged
 (`turtleDirectoryPlugin` in
-[publishTurtle.ts](../packages/site/src/publishTurtle.ts)), and
+[publishTurtle.ts](../packages/build-tools/src/publishTurtle.ts)), and
 serves them the same way in `npm run dev` and `npm start`.
 
 Pages serves a `.ttl` file as `text/turtle` with
@@ -331,9 +331,9 @@ takes the domain from that setting only, not from a `CNAME` file.
 Another host has steps of its own.
 
 The build reads `CNAME`: `siteMapPlugin` in
-[siteMap.ts](../packages/site/src/siteMap.ts) writes `sitemap.xml` and
+[siteMap.ts](../packages/build-tools/src/siteMap.ts) writes `sitemap.xml` and
 the `Sitemap:` line of `robots.txt` on its domain, and `clientIdPlugin`
-in [clientId.ts](../packages/site/src/clientId.ts) writes the Client ID
+in [clientId.ts](../packages/build-tools/src/clientId.ts) writes the Client ID
 Document, which names it
 ([authentication.md](authentication.md#the-client-id-document)).
 Write the domain into `CNAME` too, as a bare hostname such as

@@ -1,0 +1,144 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { type NamedSubject, buildThing, getThing, setThing } from "@solid-memo/solid-client/rdf";
+import { AppError } from "@solid-memo/domain/appError";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
+import { catalogNodeUrlOf, catalogUrlOf } from "@solid-memo/domain/instanceLayout";
+import { editDocument, getSolidDatasetOrNull } from "./datasets";
+import { CATALOG_TERMS } from "@solid-memo/vocab/descriptors.generated";
+import { hasIri, readTerms, unlessNewer } from "./records";
+
+/**
+ * The links an instance's catalog keeps outside every shape, to what
+ * the Studio writes beside the decks (docs/data-model.md, Drafts and
+ * releases): its drafts (`sm:releaseDraft`) and the releases it
+ * published (`sm:publishedRelease`). CatalogV1 keeps them through every
+ * write of the catalog, so they are changed here alone.
+ */
+
+/**
+ * The catalog's links by `predicate`, one of the terms beside its record
+ * (CATALOG_TERMS): at most one past MAX_CATALOG_LINKS are read, so that
+ * one with more is told (withinCatalogLimit).
+ */
+function linksOf(node: NamedSubject, predicate: string): readonly string[] {
+  const { name } = CATALOG_TERMS.fields.find((field) => field.predicate === predicate)!;
+  return readTerms(node, CATALOG_TERMS)[name as "publishedRelease" | "releaseDraft"];
+}
+
+export { MAX_CATALOG_LINKS };
+
+/** `links`, unless there are more than MAX_CATALOG_LINKS of them: catalogTooManyLinks. */
+export function withinCatalogLimit<L extends readonly unknown[]>(links: L): L {
+  if (links.length > MAX_CATALOG_LINKS)
+    throw new AppError("catalogTooManyLinks", { limit: MAX_CATALOG_LINKS });
+  return links;
+}
+
+/**
+ * Refuse, as catalogFull, one more deck in a catalog that has
+ * MAX_CATALOG_LINKS `decks` already: past that, none of them would be
+ * read (withinCatalogLimit), so an add never takes an instance there.
+ */
+export function refuseFullDeckList(decks: readonly unknown[]): void {
+  if (decks.length >= MAX_CATALOG_LINKS)
+    throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
+}
+
+/** The instance's catalog node, as read; null without a catalog or without one in it. */
+export async function catalogNode(
+  instanceUrl: string,
+  fetch: typeof globalThis.fetch,
+): Promise<NamedSubject | null> {
+  const catalog = await getSolidDatasetOrNull(catalogUrlOf(instanceUrl), fetch);
+  return catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
+}
+
+/** What the catalog links by `predicate`, in the order it names them; none without a catalog, and catalogTooManyLinks past MAX_CATALOG_LINKS. */
+export async function catalogLinks(
+  instanceUrl: string,
+  predicate: string,
+  fetch: typeof globalThis.fetch,
+): Promise<string[]> {
+  const node = await catalogNode(instanceUrl, fetch);
+  return node === null ? [] : [...withinCatalogLimit(linksOf(node, predicate))];
+}
+
+/**
+ * Refuse linking `url` by `predicate` where addCatalogLink would refuse
+ * it after: as noCatalogToUpdate without a catalog, as writtenByNewerApp
+ * when a newer version of the app wrote the catalog's node
+ * (unlessNewer), and as catalogFull when the catalog links
+ * MAX_CATALOG_LINKS others by it already, none of which would be read.
+ */
+export async function refuseFullCatalog(
+  instanceUrl: string,
+  predicate: string,
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  const node = await catalogNode(instanceUrl, fetch);
+  if (node === null) throw new AppError("noCatalogToUpdate");
+  const links = withinCatalogLimit(linksOf(unlessNewer(node), predicate));
+  if (!links.includes(url) && links.length >= MAX_CATALOG_LINKS)
+    throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
+}
+
+/**
+ * Link `url` from the catalog by `predicate`, unless it is linked;
+ * noCatalogToUpdate without a catalog, and catalogFull when it links
+ * MAX_CATALOG_LINKS by `predicate` already: one more would leave none of
+ * them read.
+ */
+export function addCatalogLink(
+  instanceUrl: string,
+  predicate: string,
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  return changeCatalog(instanceUrl, fetch, true, (node) => {
+    if (hasIri(node, predicate, url)) return null;
+    if (linksOf(node, predicate).length >= MAX_CATALOG_LINKS)
+      throw new AppError("catalogFull", { limit: MAX_CATALOG_LINKS });
+    return buildThing(node).addUrl(predicate, url).build();
+  });
+}
+
+/** Take the catalog's link to `url` by `predicate` away; nothing to do when it has none, or no catalog. */
+export function removeCatalogLink(
+  instanceUrl: string,
+  predicate: string,
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  return changeCatalog(instanceUrl, fetch, false, (node) =>
+    hasIri(node, predicate, url) ? buildThing(node).removeUrl(predicate, url).build() : null,
+  );
+}
+
+/**
+ * Change the catalog's node as `change` says (null: nothing to
+ * change), If-Match, read and made again on a 412 (editDocument).
+ * Without a catalog there is no link to remove, and none can be added
+ * (noCatalogToUpdate).
+ */
+function changeCatalog(
+  instanceUrl: string,
+  fetch: typeof globalThis.fetch,
+  adding: boolean,
+  change: (node: NamedSubject) => NamedSubject | null,
+): Promise<void> {
+  return editDocument(catalogUrlOf(instanceUrl), fetch, (catalog) => {
+    const node = catalog === null ? null : getThing(catalog, catalogNodeUrlOf(instanceUrl));
+    if (node === null) {
+      if (adding) throw new AppError("noCatalogToUpdate");
+      return { result: undefined };
+    }
+    const changed = change(unlessNewer(node));
+    if (changed === null) return { result: undefined };
+    // The links are no shape's: the catalog is not checked for them, as for sm:completedChapter.
+    return { dataset: setThing(catalog!, changed), result: undefined };
+  });
+}

@@ -74,7 +74,7 @@ encoded, and writes to none. macOS takes a name and its other Unicode
 normalization (`é`, and `e` with a combining accent) as one. Where two
 addresses being one document keeps data safe, it compares them in one
 case and one normalization (`documentKeyOf` in
-[instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). A
+[instanceLayout.ts](../packages/core/domain/src/instanceLayout.ts)). A
 segment that doesn't decode (a stray `%`) is compared in one case for
 its ASCII letters only.
 

@@ -2,8 +2,11 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
-import type { DeviceValueKind, InstanceValueKind } from "@solid-memo/application/ports";
+import type {
+  DeviceValueUseCases,
+  DeviceValueKind,
+  InstanceValueKind,
+} from "@solid-memo/application/deviceValues";
 import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
 import {
   ASIDE_WIDTH,

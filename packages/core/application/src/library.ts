@@ -1,0 +1,684 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { shown } from "@solid-memo/domain/langText";
+import { isReleaseOfSameInstance, releasePlaceOf } from "@solid-memo/domain/release/releasePlace";
+import {
+  isCopyOf,
+  libraryCopiesOf,
+  newestRelease,
+  offersNewerRelease,
+  releaseHost,
+  releaseUrlOf,
+  type LibraryCopy,
+} from "@solid-memo/domain/library";
+import { libraryCopyTest } from "@solid-memo/domain/libraryCopy";
+import type { Card, Deck } from "@solid-memo/domain/deck";
+import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";
+import {
+  applyLibraryUpgrade,
+  planLibraryUpgrade,
+  withReleaseLanguages,
+  upgradedCards,
+  type LibraryUpgradePlan,
+} from "@solid-memo/domain/libraryUpgrade";
+import {
+  DECK_UPGRADE_STEPS,
+  sameCardChanges,
+  type DeckUpgradeOutcome,
+  type DeckUpgradeProgress,
+  type DeckUpgradeStep,
+} from "@solid-memo/domain/deckUpgrade";
+import type { ReviewKey } from "@solid-memo/domain/review";
+import { type DocumentReport, isResultLimit, limitResults } from "@solid-memo/domain/validation";
+import type { DeckLibrary, LinkedReleaseReads } from "./ports/library";
+import type { DeckRepository, ReviewChanges, ReviewStateRepository } from "./ports/pod";
+import { AppError } from "@solid-memo/domain/appError";
+import { outlineOfCards } from "@solid-memo/domain/course";
+import { mapAtOnce, type inTurns } from "./atOnce";
+import type { Course, CourseUseCases } from "./courses";
+import { readNow, unsent } from "./writes";
+import { stepReporter } from "./progress";
+
+export interface LibraryUseCases {
+  /** The ready-made decks the app offers for import. */
+  listLibraryDecks(): Promise<LibraryDeck[]>;
+  /** Copy a library deck, cards included, into an instance as a new deck. */
+  importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck>;
+  /** A library deck's cards, to look through before importing it. */
+  listLibraryCards(deck: LibraryDeck): Promise<LibraryCard[]>;
+  /**
+   * A library course's outline and its cards by id, to try before
+   * adding it: the outline asks only the release's cards
+   * (outlineOfCards), as getCourse's does. Writes nothing.
+   */
+  getLibraryCourse(deck: LibraryDeck): Promise<LibraryCourse>;
+  /**
+   * A release a learner adds from a link (docs/deck-library.md, From a
+   * link), read on its own and checked against the library's shapes, to
+   * show before it is added. Refused when the text is no address of a
+   * release (releaseUrlInvalid), when a subject of it breaks its shape
+   * (releaseNotConforming), when one is in a newer format than the app
+   * reads (libraryDeckTooNew, libraryCardTooNew), and as
+   * DeckLibrary.readRelease refuses. Read
+   * as anyone reads it; writes nothing.
+   */
+  readReleaseFromLink(url: string): Promise<LibraryDeck>;
+  /**
+   * Add a release read from a link (readReleaseFromLink), as that read
+   * checked it, to an instance as the library's are: a deck imported
+   * (importLibraryDeck), a course started (startCourse, the deck of it
+   * the instance has when it has one). The copy names the release it came from
+   * (`prov:wasDerivedFrom`); nothing is written where the release is.
+   */
+  importReleaseFromUrl(instanceUrl: string, release: LibraryDeck): Promise<Deck>;
+  /**
+   * What upgrading an imported deck to its library deck's current
+   * release would do; null for a deck not from the library, or when
+   * there is nothing (safe) to offer. Reads the library's index, the two
+   * releases (and those in between, for a copy more than one behind) and
+   * the copy's cards, those in turns with other decks' (listCardsInTurn);
+   * writes nothing. Given the deck as listLibraryUpdates
+   * lists it (its LibraryCopy, its series found), it does not look for its
+   * series again. The releases a copy from a link would be upgraded with
+   * are checked against the library's shapes first, as readReleaseFromLink
+   * checks one (releaseNotConforming), and read under one release's
+   * limits together (DeckLibrary.linkedReads, linkedReleasesTooLarge).
+   */
+  planLibraryUpgrade(deck: Deck, copy?: LibraryCopy): Promise<LibraryUpgradePlan | null>;
+  /**
+   * The instance's decks copied from a library release, each with its
+   * deck in the library, the version it was copied from, and whether a
+   * newer release is there (domain/library.ts, libraryCopiesOf). One read
+   * of the library's index serves them all; none when no deck is a copy.
+   * A copy whose series the index does not list is looked for as a
+   * release added from a link: its release read, and its creator's
+   * catalog for a newer one in its series ("unknown" when it cannot be
+   * read), each release once, whichever copies name it, and a few at a
+   * time. Writes nothing: planLibraryUpgrade says what an upgrade would
+   * change.
+   */
+  listLibraryUpdates(instanceUrl: string): Promise<LibraryCopy[]>;
+  /**
+   * Give an imported deck the languages its own release states its title
+   * and description in and the copy lacks, where the copy's English is
+   * the release's, and save it; null when that adds nothing (or the deck
+   * is not from the library). Nothing the user wrote changes. Only a copy
+   * of a series the library's index lists: a release added from a link
+   * stays where its server keeps it, which can change it at any time, so
+   * its texts come only with an upgrade the user agrees to.
+   */
+  addReleaseLanguages(deck: Deck): Promise<Deck | null>;
+  /**
+   * The library release an imported deck was copied from, as it is in
+   * the library; null for a deck not from the library. The forms leave a
+   * text that is still the release's as it is (see sameText). Writes nothing.
+   */
+  deckRelease(deck: Deck): Promise<LibraryDeckContent | null>;
+  /**
+   * Whether the release at `url` is a course, for a copy that does not
+   * say (useCopies): its answer alone, so no list holds on to the cards
+   * of every release it asks of. Read and checked as deckRelease's is.
+   */
+  releaseIsCourse(url: string): Promise<boolean>;
+  /**
+   * Apply the upgrade the user agreed to (domain/deckUpgrade.ts,
+   * docs/migrations.md "How an upgrade is applied"), planned again on the
+   * deck as it is: its cards document first, in one write made only while
+   * it is as the plan read it; then, when cards with review states are
+   * removed, its reviews document without them; and last its catalog
+   * entry, moved to the new release, only while it says what was read.
+   * Each write is one conditional write, made whole or not at all. The
+   * cards' and the review states' writes are made and checked before the
+   * first is sent, so one that would be refused (a removed card's state
+   * a newer version of the app wrote) refuses the upgrade with nothing
+   * written. A later failure stops the upgrade where it is, nothing put
+   * back: the deck is
+   * readable, still names the release it came from, and is offered the
+   * upgrade again, which finishes it. Refuses (deckChangedSinceOffer) when
+   * the deck's cards no longer call for the changes the user agreed to.
+   */
+  applyLibraryUpgrade(
+    deck: Deck,
+    plan: LibraryUpgradePlan,
+    onProgress?: (progress: DeckUpgradeProgress) => void,
+  ): Promise<DeckUpgradeOutcome>;
+}
+
+/**
+ * How many of the releases a creator's catalog links are read for the
+ * series of a copy from a link (linkedSeries), of those named as the
+ * copy's release, and of those its newest release lists between the
+ * copy's and its own (planUpgrade), and how many of them at once: the
+ * catalog and the release are their creator's to write, now or later,
+ * and may name any number of releases, each as large as a release may
+ * be. Of the catalog's links named otherwise, its other decks most of
+ * all, MAX_OTHER_LINKS at most are read.
+ */
+const MAX_LINKED_RELEASES = 16;
+const MAX_OTHER_LINKS = 4;
+const LINKED_READS_AT_ONCE = 4;
+
+/**
+ * Which of a catalog's `links` to read for the series of the release
+ * at `copied`: a newer version of a release is named after its series
+ * (`…/<name>/v<N>.ttl`, docs/studio.md), so those named as it
+ * (`named`), the highest version first, MAX_LINKED_RELEASES of them at
+ * most; then the others, in the catalog's order, MAX_OTHER_LINKS of
+ * them at most.
+ */
+function likeliestNewer(copied: string, links: string[]): { named: string[]; others: string[] } {
+  const name = releasePlaceOf(copied)?.name;
+  const named = links
+    .map((url) => ({ url, place: releasePlaceOf(url) }))
+    .filter(({ place }) => place !== null && place.name === name)
+    .sort((a, b) => b.place!.version - a.place!.version)
+    .slice(0, MAX_LINKED_RELEASES)
+    .map(({ url }) => url);
+  const others = links.filter((url) => !named.includes(url) && releasePlaceOf(url)?.name !== name);
+  return { named, others: others.slice(0, MAX_OTHER_LINKS) };
+}
+
+/** `read` of each of `urls`, in their order, `atOnce` of them at most at once. */
+async function readEach<T>(
+  urls: string[],
+  read: (url: string) => Promise<T>,
+  atOnce = LINKED_READS_AT_ONCE,
+): Promise<T[]> {
+  const results: T[] = [];
+  let next = 0;
+  const reader = async () => {
+    for (let at = next++; at < urls.length; at = next++) results[at] = await read(urls[at]!);
+  };
+  await Promise.all(Array.from({ length: atOnce }, reader));
+  return results;
+}
+
+/**
+ * Refuse a release with a subject in a format newer than the library's
+ * shapes have, which no shape checks (libraryCardTooNew for a card,
+ * libraryDeckTooNew for any other), or with a violation of its shape
+ * (releaseNotConforming): the check reports a subject stamped with a
+ * version below 1 as breaking its shape. The refusal counts the
+ * violations found, the check's notes that it left some out
+ * (isResultLimit) not among them, and names as many as a check keeps
+ * (limitResults), saying when there are more.
+ */
+function refuseNonConforming(url: string, report: DocumentReport): void {
+  const newer = report.subjects.find((subject) => subject.status === "newer");
+  if (newer !== undefined) {
+    const { version, latest } = newer;
+    throw newer.shape === "card"
+      ? new AppError("libraryCardTooNew", { card: newer.url, url, version, latest })
+      : new AppError("libraryDeckTooNew", { url, version, latest });
+  }
+  const problems = report.subjects.flatMap((subject) =>
+    subject.status === "checked"
+      ? subject.violations.filter(
+          (violation) => violation.severity === "violation" && !isResultLimit(violation),
+        )
+      : [],
+  );
+  const limited = report.subjects.some(
+    (subject) => subject.status === "checked" && subject.violations.some(isResultLimit),
+  );
+  if (problems.length > 0) {
+    throw new AppError("releaseNotConforming", {
+      host: releaseHost(url) ?? url,
+      count: problems.length,
+      problems: limitResults(problems, limited ? "violation" : undefined)
+        .map((problem) => `${problem.path ?? ""} ${shown(problem.message)}`)
+        .join("\n"),
+    });
+  }
+}
+
+/**
+ * The deck library with every release its index does not list (one
+ * added from a link) checked against the library's shapes on its first
+ * read in this page session, whatever reads it, as when it was added
+ * (checkLinkedRelease): its cards and outline are then read from that
+ * checked read. A release whose address answers otherwise after it was
+ * added is refused (releaseNotConforming) where it would have been
+ * shown or its cards copied. A check that fails is not kept, so the next
+ * read checks again; one that passes is kept for the page session, and
+ * the read it accepted for as long as the adapter holds it
+ * (DeckLibrary.readRelease), then read and held to the check again. A
+ * release read with a check of the caller's own (`accept`), which is what
+ * is shown before it is added, is held to the library's shapes too, before
+ * that check, so only a read they pass counts as checked, and is pinned,
+ * so what is added is what was shown. Releases the index lists are read
+ * as they are: they come with the site, checked when they were published.
+ */
+export function withLinkedReleasesChecked(deckLibrary: DeckLibrary): DeckLibrary {
+  const checked = new Map<string, Promise<unknown>>();
+  /** The release at `url` checked once, unless the index lists it. */
+  async function checkedOnce(url: string): Promise<void> {
+    if ((await deckLibrary.readLibraryIndex()).releases.includes(url)) return;
+    let check = checked.get(url);
+    if (check === undefined) {
+      const checking = deckLibrary.readRelease(url, (report) => refuseNonConforming(url, report));
+      check = checking;
+      checked.set(url, checking);
+      // A check refused is forgotten, so the next read checks again.
+      checking.catch(() => checked.delete(url));
+    }
+    await check;
+  }
+  return {
+    ...deckLibrary,
+    async fetchLibraryDeck(url) {
+      await checkedOnce(url);
+      return deckLibrary.fetchLibraryDeck(url);
+    },
+    async fetchCourseOutline(url) {
+      await checkedOnce(url);
+      return deckLibrary.fetchCourseOutline(url);
+    },
+    async readRelease(url, accept) {
+      if (accept === undefined) return deckLibrary.readRelease(url);
+      // The library's shapes refuse first, whatever `accept` does: only a read they pass counts as checked.
+      // A read checked as it is added is the one its cards are copied from: it is not read again.
+      const read = await deckLibrary.readRelease(
+        url,
+        (report) => {
+          refuseNonConforming(url, report);
+          accept(report);
+        },
+        { pin: true },
+      );
+      checked.set(url, Promise.resolve(read));
+      return read;
+    },
+  };
+}
+
+/** What a lookup of the series of a release from a link found (linkedSeries). */
+interface LinkedSeries {
+  copied: LibraryDeck;
+  series: LibraryDeck;
+  complete: boolean;
+}
+
+/** A library course as its preview shows it (LibraryUseCases.getLibraryCourse). */
+export type LibraryCourse = Pick<Course, "outline" | "cards">;
+
+/**
+ * The deck library (docs/deck-library.md): its decks looked through and
+ * imported, a release added from a link, checked against the library's
+ * shapes first, and an imported deck upgraded to a newer release of its
+ * series (domain/deckUpgrade.ts, docs/migrations.md).
+ */
+export function createLibraryUseCases({
+  deckLibrary,
+  deckRepository,
+  reviewStateRepository,
+  courses,
+  cardsTurn,
+}: {
+  deckLibrary: DeckLibrary;
+  deckRepository: DeckRepository;
+  reviewStateRepository: ReviewStateRepository;
+  courses: Pick<CourseUseCases, "startCourse">;
+  /** The turns whole decks' cards are read in, shared with the Studio's deck table (listCardsInTurn). */
+  cardsTurn: ReturnType<typeof inTurns>;
+}): LibraryUseCases {
+  /**
+   * What upgrading the deck to its library deck's current release would
+   * do, of its cards as `cards` reads them; null when nothing (safe). A
+   * copy more than one release behind is planned with the releases in
+   * between too: an upgrade to one of them, cut off before it moved the
+   * deck's entry, may have left cards as that release has them, which are
+   * the library's, not the user's.
+   * The deck's series is looked up in the index, else as a release added
+   * from a link, unless it is `known` (a LibraryCopy's). A copy from a
+   * link is upgraded with releases no index lists: each is checked against
+   * the library's shapes first, as the first one was (checkLinkedRelease),
+   * and planned with as that check read it, the copy's own release too.
+   * In such a copy, only the cards that name the release they were taken
+   * from are the series' (planLibraryUpgrade's `linked`). Those releases are read for
+   * the plan alone (DeckLibrary.linkedReads): under one release's limits
+   * together, however many it reads, and none kept once it is made.
+   */
+  async function planUpgrade(
+    deck: Deck,
+    cards: () => Promise<Card[]>,
+    known?: LibraryCopy,
+  ): Promise<LibraryUpgradePlan | null> {
+    if (deck.sourceUrl === undefined) return null;
+    const { series, fromLink } = known ?? (await seriesOf(deck));
+    if (series === null) return null;
+    // The index tells a copy of the current release, or of no older one,
+    // without reading a release (thousands of cards) or the copy's cards.
+    if (!offersNewerRelease(deck, series)) return null;
+    // The releases from a link, the copy's own among them, are read for this plan alone: kept with it, and under one
+    // release's limits together.
+    const reads = fromLink === true ? deckLibrary.linkedReads() : deckLibrary;
+    // A release from a link is checked as it is read, and that read is the one fetchLibraryDeck gives then; the
+    // releases in between and the notes come from it too, not from the series as read before. The copy's own
+    // release is its creator's to change too: it is checked as the newer one is.
+    const [checked] = await Promise.all([
+      fromLink === true ? checkLinkedRelease(series.url, reads) : series,
+      fromLink === true ? checkLinkedRelease(deck.sourceUrl, reads) : null,
+    ]);
+    const [from, to, copy] = await Promise.all([
+      reads.fetchLibraryDeck(deck.sourceUrl),
+      reads.fetchLibraryDeck(series.url),
+      cards(),
+    ]);
+    const inBetween = [
+      ...new Set(
+        checked.releases
+          .filter(
+            (release) =>
+              Number(release.version) > Number(from.version) &&
+              Number(release.version) < Number(to.version),
+          )
+          .sort((a, b) => Number(a.version) - Number(b.version))
+          .map((release) => release.url),
+      ),
+    ];
+    // Oldest first. A release from a link lists what its creator wrote: MAX_LINKED_RELEASES of them at most, the
+    // newest; a card as one left out has it counts as the user's, and is kept.
+    const betweenUrls = fromLink === true ? inBetween.slice(-MAX_LINKED_RELEASES) : inBetween;
+    if (fromLink === true) await readEach(betweenUrls, (url) => checkLinkedRelease(url, reads));
+    const between = await readEach(betweenUrls, (url) => reads.fetchLibraryDeck(url));
+    // A course's outline stays in its release: a newer one may change only that.
+    const outlines =
+      from.isCourse === true && to.isCourse === true
+        ? await Promise.all([reads.fetchCourseOutline(from.url), reads.fetchCourseOutline(to.url)])
+        : null;
+    return planLibraryUpgrade({
+      deck,
+      cards: copy,
+      from,
+      between,
+      to,
+      releases: checked.releases,
+      // A course's deck holds only the cards the learner reached: an upgrade adds none.
+      course: checked.isCourse === true || from.isCourse === true,
+      ...(outlines === null ? {} : { outlines: { from: outlines[0], to: outlines[1] } }),
+      // A card of a deck from a link that names no release is the user's (Card.fromRelease): left as it is.
+      linked: fromLink === true,
+    });
+  }
+  /**
+   * A library upgrade's writes of the deck's cards and of the review
+   * states of the cards it removes, each made and checked, none sent
+   * (prepareCardChanges, prepareReviewChanges): one that would be
+   * refused (a removed card's state a newer version of the app wrote)
+   * refuses the upgrade before anything is written. The cards are
+   * written whole (a PATCH of much text can be cut short,
+   * docs/testing.md), and only while the document is as the plan read
+   * it; the review states only while theirs is as read, else made again
+   * from a fresh read (a grade on another device meanwhile).
+   */
+  async function prepareUpgradeWrites(
+    deck: Deck,
+    plan: LibraryUpgradePlan,
+    version: string | null,
+    dropped: { sm2: ReviewKey[]; fsrs: ReviewKey[] },
+  ) {
+    const save = upgradedCards(plan);
+    const writeCards =
+      save.length + plan.remove.length > 0
+        ? await deckRepository.prepareCardChanges(
+            deck,
+            { save, remove: plan.remove.map((card) => card.id) },
+            { whole: true, ...(version === null ? {} : { version }) },
+          )
+        : undefined;
+    const changes: ReviewChanges = {
+      save: [],
+      remove: dropped.sm2,
+      fsrs: { save: [], remove: dropped.fsrs },
+    };
+    // Removals by card: a reviews document that changed once the cards were sent has them made of it afresh.
+    const writeReviews =
+      dropped.sm2.length + dropped.fsrs.length > 0
+        ? await reviewStateRepository.prepareReviewChanges(deck, changes)
+        : undefined;
+    return { writeCards, writeReviews };
+  }
+  async function importLibraryDeck(instanceUrl: string, deck: LibraryDeck): Promise<Deck> {
+    const content = await deckLibrary.fetchLibraryDeck(deck.url);
+    return deckRepository.importDeck(instanceUrl, content);
+  }
+  /**
+   * A copy's series, as the index lists it, else as a release added from a
+   * link whose creator's catalog can be read (linkedSeries); none
+   * otherwise.
+   */
+  async function seriesOf(deck: Deck): Promise<{ series: LibraryDeck | null; fromLink?: true }> {
+    const library = await deckLibrary.listLibraryDecks();
+    const indexed = library.find((libraryDeck) => isCopyOf(deck, libraryDeck));
+    if (indexed !== undefined) return { series: indexed };
+    return linkedSeries(deck.sourceUrl!, library).then(
+      (found) => (found.complete ? { series: found.series, fromLink: true } : { series: null }),
+      () => ({ series: null }),
+    );
+  }
+  /**
+   * A release read from a link (docs/deck-library.md, From a link), read
+   * once and refused when a subject of that read breaks its shape in the
+   * library's shapes (releaseNotConforming), or is in a format newer than
+   * they have (refuseNonConforming); its warnings do not. The read
+   * accepted is the one the library gives from then on, as the release's
+   * cards are imported or planned with (DeckLibrary.readRelease), by
+   * `reads` (an upgrade plan's own, DeckLibrary.linkedReads).
+   */
+  function checkLinkedRelease(
+    url: string,
+    reads: LinkedReleaseReads = deckLibrary,
+  ): Promise<LibraryDeck> {
+    return reads.readRelease(url, (report) => refuseNonConforming(url, report));
+  }
+  /**
+   * The series of a release added from a link, as its newest release
+   * known describes it (docs/deck-library.md, From a link): the release
+   * itself unless its creator's catalog can be read (`complete`), then
+   * the newest of its series the catalog links. A release the
+   * catalog links that cannot be read is passed over, and so is one the
+   * copied release lists, as no newer one, and one of the library's index
+   * (`library`): a copy from a link stays one, and its pictures asked
+   * about (docs/privacy.md), whatever series its release claims. So is
+   * one outside the instance the copied release was published from
+   * (isReleaseOfSameInstance), whatever catalog links it: a newer
+   * release is its creator's. Of the
+   * rest, those named as
+   * the copied release are read one at a time, the highest version first,
+   * until one is a newer release of its series: the newest. Only when
+   * none is are the others read (likeliestNewer). The copied release,
+   * the catalog and those are read for this lookup alone
+   * (DeckLibrary.linkedReads), under one release's limits together: past
+   * them (linkedReleasesTooLarge), or past what such reads may take in a
+   * page session (linkedReadsSpent), before a newer release is found, the
+   * newest is not known (not `complete`).
+   */
+  async function linkedSeries(url: string, library: readonly LibraryDeck[]): Promise<LinkedSeries> {
+    const linked = deckLibrary.linkedReads();
+    const [copied, published] = await Promise.all([
+      linked.readRelease(url),
+      linked.publishedBeside(url),
+    ]);
+    if (published === null) return { copied, series: copied, complete: false };
+    const listed = new Set(copied.releases.map((release) => release.url));
+    const inLibrary = libraryCopyTest(library);
+    const { named, others } = likeliestNewer(
+      url,
+      [...new Set(published)].filter(
+        (other) =>
+          other !== url &&
+          isReleaseOfSameInstance(url, other) &&
+          !listed.has(other) &&
+          !inLibrary({ sourceUrl: other }),
+      ),
+    );
+    let newest = copied;
+    let pastLimits = false;
+    // Once a newer release is found, or past the limits, the rest are not read.
+    const read = async (other: string): Promise<void> => {
+      if (pastLimits || newest !== copied) return;
+      const release = await linked.readRelease(other).catch((error: unknown) => {
+        if (
+          error instanceof AppError &&
+          (error.code === "linkedReleasesTooLarge" || error.code === "linkedReadsSpent")
+        )
+          pastLimits = true;
+        return null;
+      });
+      newest = newestRelease(newest, [release]);
+    };
+    await readEach(named, read, 1);
+    await readEach(others, read);
+    if (newest === copied && pastLimits) return { copied, series: copied, complete: false };
+    return { copied, series: newest, complete: true };
+  }
+  /** A copy whose series the library's index does not list, as a release added from a link, by what its lookup found; as it was when its release cannot be read. */
+  function linkedCopy(copy: LibraryCopy, found: LinkedSeries | null): LibraryCopy {
+    if (found === null) return copy;
+    const { copied, series, complete } = found;
+    return {
+      deck: copy.deck,
+      series,
+      version: copied.version,
+      newer: complete ? offersNewerRelease(copy.deck, series) : "unknown",
+      fromLink: true,
+    };
+  }
+
+  return {
+    listLibraryDecks() {
+      return deckLibrary.listLibraryDecks();
+    },
+    importLibraryDeck,
+    async listLibraryCards(deck) {
+      return (await deckLibrary.fetchLibraryDeck(deck.url)).cards;
+    },
+    async getLibraryCourse(deck) {
+      const [release, outline] = await Promise.all([
+        deckLibrary.fetchLibraryDeck(deck.url),
+        deckLibrary.fetchCourseOutline(deck.url),
+      ]);
+      const cards = new Map(release.cards.map((card) => [card.id, card]));
+      return { outline: outlineOfCards(outline, new Set(cards.keys())), cards };
+    },
+    async readReleaseFromLink(text) {
+      const url = releaseUrlOf(text);
+      if (url === null) throw new AppError("releaseUrlInvalid", { url: text });
+      // One read: what cannot be read as a release says so before any shape is loaded, and what is checked is shown.
+      return checkLinkedRelease(url);
+    },
+    importReleaseFromUrl(instanceUrl, release) {
+      return release.isCourse === true
+        ? courses.startCourse(instanceUrl, release)
+        : importLibraryDeck(instanceUrl, release);
+    },
+    planLibraryUpgrade(deck, copy) {
+      // The copy's cards wait their turn: the copies screen plans every copy with a newer release at once.
+      return planUpgrade(deck, () => cardsTurn(() => deckRepository.listCards(deck)), copy);
+    },
+    async listLibraryUpdates(instanceUrl) {
+      const decks = await deckRepository.listDecks(instanceUrl);
+      if (decks.every((deck) => deck.sourceUrl === undefined)) return [];
+      const library = await deckLibrary.listLibraryDecks();
+      const copies = libraryCopiesOf(decks, library);
+      // Each release's series is looked up on its own, under limits of its own, as its deck's page looks it up, a few at
+      // a time, and once however many copies name it: they share what is found.
+      const sources = [
+        ...new Set(
+          copies.filter((copy) => copy.series === null).map((copy) => copy.deck.sourceUrl!),
+        ),
+      ];
+      const found = await mapAtOnce(sources, (url) => linkedSeries(url, library).catch(() => null));
+      const foundOf = new Map(sources.map((url, at) => [url, found[at]!]));
+      return copies.map((copy) =>
+        copy.series === null ? linkedCopy(copy, foundOf.get(copy.deck.sourceUrl!)!) : copy,
+      );
+    },
+    async addReleaseLanguages(deck) {
+      if (deck.sourceUrl === undefined) return null;
+      const indexed = await deckLibrary.listLibraryDecks();
+      if (!indexed.some((libraryDeck) => isCopyOf(deck, libraryDeck))) return null;
+      const release = await deckLibrary.fetchLibraryDeck(deck.sourceUrl);
+      if (withReleaseLanguages(deck, release) === null) return null;
+      // Added to the deck as its entry says now.
+      return deckRepository.editDeck(deck, (stored) => withReleaseLanguages(stored, release));
+    },
+    async deckRelease(deck) {
+      return deck.sourceUrl === undefined ? null : deckLibrary.fetchLibraryDeck(deck.sourceUrl);
+    },
+    async releaseIsCourse(url) {
+      return (await deckLibrary.fetchLibraryDeck(url)).isCourse === true;
+    },
+    async applyLibraryUpgrade(offered, offeredPlan, onProgress = () => undefined) {
+      const progress = stepReporter<DeckUpgradeStep>("read", DECK_UPGRADE_STEPS.length, onProgress);
+      /** Whether a document of the deck was written, or may have been (a write whose answer was lost). */
+      let changed = false;
+      /** Make one of the upgrade's writes: it changed the deck, unless its failure says it was never made. */
+      const write = async (made: () => Promise<unknown>) => {
+        try {
+          await made();
+        } catch (error) {
+          if (!unsent(error)) changed = true;
+          throw error;
+        }
+        changed = true;
+      };
+      let releaseUrl: string | undefined;
+      try {
+        // The deck, its cards, the releases (to plan again), and its review states when some are to go.
+        progress.start();
+        const deck = await deckRepository.readDeck(offered.url);
+        if (deck === null) throw new AppError("deckGone", { deck: offered.title });
+        if (deck.cardsDocumentUrl !== offered.cardsDocumentUrl)
+          throw new AppError("deckChangedSinceOffer");
+        const cards = await readNow(deckRepository.readCardsSince(deck, undefined));
+        const plan = await planUpgrade(deck, async () => cards.value);
+        if (plan === null || !sameCardChanges(plan, offeredPlan))
+          throw new AppError("deckChangedSinceOffer");
+        releaseUrl = plan.releaseUrl;
+        // The states of the cards the release removes go with them, and those left of any it removed already.
+        const removed = new Set([...plan.remove.map((card) => card.id), ...plan.gone]);
+        const states =
+          removed.size === 0 ? null : await reviewStateRepository.listReviewStates(deck);
+        const of = <T extends ReviewKey>(list: readonly T[] = []) =>
+          list.filter((state) => removed.has(state.cardId));
+        const dropped = of(states?.sm2);
+        const droppedFsrs = of(states?.fsrs);
+        // Checked before the first write: an entry that would be refused leaves the deck as it is.
+        const upgradedEntry = applyLibraryUpgrade(deck, plan);
+        await deckRepository.checkDeckEntryUpgrade(deck, upgradedEntry);
+        // Both writes made and checked before the first is sent (prepareUpgradeWrites).
+        const { writeCards, writeReviews } = await prepareUpgradeWrites(deck, plan, cards.version, {
+          sm2: dropped,
+          fsrs: droppedFsrs,
+        });
+
+        // The cards first, the deck readable with them, still naming the release it came from.
+        progress.finished("cards");
+        if (writeCards !== undefined) await write(writeCards);
+        // Then the review states of the cards removed: made again from a fresh read when the document
+        // changed since it was read (a grade on another device).
+        progress.finished("reviews");
+        if (writeReviews !== undefined) await write(writeReviews);
+        // Last the entry, which moves the deck to the new release, only while it says what was read.
+        progress.finished("entry");
+        const upgraded = await deckRepository.upgradeDeckEntry(deck, upgradedEntry);
+        progress.finished();
+        return { ok: true, deck: upgraded };
+      } catch (error) {
+        const step = progress.step();
+        if (step === "entry" && !unsent(error)) {
+          // A write of the entry whose answer was lost may have been made: the entry says, when it can be read.
+          const deck = await deckRepository.readDeck(offered.url).catch(() => undefined);
+          if (deck === undefined) changed = true;
+          else if (deck !== null && deck.sourceUrl === releaseUrl) return { ok: true, deck };
+        }
+        // Nothing is put back: the deck reads as its documents are, and planned again, the upgrade finishes.
+        return { ok: false, step, error, changed };
+      }
+    },
+  };
+}

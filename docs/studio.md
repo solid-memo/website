@@ -655,7 +655,7 @@ name sorts by it, then the other way, then back to that order; the
 sorted column says so (`aria-sort`). A figure not known yet sorts last,
 either way. The filter keeps the decks whose name, in any language, or
 whose groups' names hold its text, case and accents aside. The domain
-does both ([deckTable.ts](../packages/domain/src/deckTable.ts)). The
+does both ([deckTable.ts](../packages/core/domain/src/deckTable.ts)). The
 texts of a sorted column are ordered once, and again only when one of
 them or the reader's language changes. A title sorts by its first 200
 characters, so titles that differ only past them keep the table's
@@ -739,7 +739,7 @@ interval and the lowest ease. A copy of a course says its cards are
 the course's questions.
 
 The URL holds the query, which the domain applies
-([cardQuery.ts](../packages/domain/src/cardQuery.ts)):
+([cardQuery.ts](../packages/core/domain/src/cardQuery.ts)):
 
 - `q`: text to find, case and accents aside. A card in Markdown is
   searched as its plain text ([markdown.md](markdown.md)).
@@ -792,7 +792,7 @@ views the user saved ([Layout](#layout)).
 its front and back edited in their cells (Editing in a cell, under
 Layout), a side only while its text is in one stated language. It's a
 bulk edit of that card alone (`setText` in
-[cardBulk.ts](../packages/domain/src/cardBulk.ts)), with **Undo**
+[cardBulk.ts](../packages/core/domain/src/cardBulk.ts)), with **Undo**
 ([below](#bulk-edits)). A side left empty is refused; one unchanged
 writes nothing. Other cards are edited in the
 [inspector](#card-inspector).
@@ -906,7 +906,7 @@ The edits are:
   instance ([below](#moving-and-copying-cards)), with no Undo.
 
 The domain plans each edit
-([cardBulk.ts](../packages/domain/src/cardBulk.ts), `planCardEdit`). A
+([cardBulk.ts](../packages/core/domain/src/cardBulk.ts), `planCardEdit`). A
 card it would change must pass the card editor's validation
 (`validateCardContent`), else it's left as it is, as is a card the
 edit doesn't change, and one whose side or wrong option a replace
@@ -996,7 +996,7 @@ Its four tabs are links, the one shown marked (`aria-current`):
     or the card has an FSRS-6 state that way. It shows its due day, its
     stability (in days), its difficulty (1 to 10, to a tenth) and the
     chance of recalling it now (`recallNow` in
-    [`fsrs.ts`](../packages/domain/src/fsrs.ts), at whole study days
+    [`fsrs.ts`](../packages/core/domain/src/fsrs.ts), at whole study days
     since the last review).
     A line says which of the two sets the due days.
   - While FSRS-6 sets them but the state is missing or stale
@@ -1034,7 +1034,7 @@ Its four tabs are links, the one shown marked (`aria-current`):
     given before a library upgrade count, named by the card's id.
 
 The domain makes each change
-([distractors.ts](../packages/domain/src/distractors.ts)):
+([distractors.ts](../packages/core/domain/src/distractors.ts)):
 
 - `addDistractor` creates one only once it has text, under
   `nextDistractorId`: `<card>-d<n>`, `n` one more than the highest such
@@ -1111,7 +1111,7 @@ states with the workbench's and Solid Memo's queries.
 ## Review state
 
 The domain makes both changes
-([reviewStateEdits.ts](../packages/domain/src/reviewStateEdits.ts)):
+([reviewStateEdits.ts](../packages/core/domain/src/reviewStateEdits.ts)):
 
 - `resetStates` forgets cards, so the scheduler sees them as new: one
   direction in the inspector, every direction of the selected cards in
@@ -1165,7 +1165,7 @@ are two spellings that differ only in case, in Unicode normalization
 which a file system that ignores them stores as one file. An
 encoded slash, backslash or percent sign isn't, as decoded it would
 read as another path (`documentKeyOf` in
-[instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). The
+[instanceLayout.ts](../packages/core/domain/src/instanceLayout.ts)). The
 decks to offer are worked out once for each read of the decks and of the data check, not on each render of the
 workbench.
 
@@ -1180,7 +1180,7 @@ another of its decks. The target is the instance's own deck, read as
 its data is.
 
 The domain plans the transfer
-([cardTransfer.ts](../packages/domain/src/cardTransfer.ts),
+([cardTransfer.ts](../packages/core/domain/src/cardTransfer.ts),
 `planCardTransfer`):
 
 - A card keeps its id when the target's cards document has no subject
@@ -1263,8 +1263,8 @@ cards were written
 A deck's schedule
 ([`DeckInsightContainer`](../apps/studio/src/ui/DeckInsightContainer.tsx))
 shows its study to come. The domain computes it
-([scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts),
-[cardHistory.ts](../packages/domain/src/cardHistory.ts)), and the use
+([scheduleInsight.ts](../packages/core/domain/src/scheduleInsight.ts),
+[cardHistory.ts](../packages/core/domain/src/cardHistory.ts)), and the use
 case `deckInsight` reads what it needs, writing nothing.
 
 - **Tiles**: the reviews today and in the next 7 days, the cards
@@ -1325,10 +1325,10 @@ Solid Memo. Each part has its own form and status line:
   Solid Memo's own form (`DeckAboutSection` in `ui`, `describeDeck`).
 - **Authors and license**: an author a line, `Name` or `Name <email>`,
   and a license chosen from those offered (`KNOWN_LICENSES` in
-  [license.ts](../packages/domain/src/license.ts), each named as
+  [license.ts](../packages/core/domain/src/license.ts), each named as
   `licenseLabel` names it), a license another app wrote among them.
   The domain tidies and checks them
-  ([deckProvenance.ts](../packages/domain/src/deckProvenance.ts)): two
+  ([deckProvenance.ts](../packages/core/domain/src/deckProvenance.ts)): two
   authors that would share one agent node are refused, the form
   staying. An email with `,`, `;`, `?`, `#`, `%` or `&` in it isn't
   read as one: that author stays a name alone. Nothing here
@@ -1392,7 +1392,7 @@ everything wrong with a deck, or with the instance, for every user.
 "Check again" reads it all afresh.
 
 A deck's health is the use case `checkDeck`
-([deckHealth.ts](../packages/domain/src/deckHealth.ts)): a line counts
+([deckHealth.ts](../packages/core/domain/src/deckHealth.ts)): a line counts
 the problems, then come four parts:
 
 - **Data check**: the [shape check](validation.md) of the deck's
@@ -1413,7 +1413,7 @@ the problems, then come four parts:
     ([data that doesn't fit](validation.md#data-that-doesnt-fit)).
 - **Languages**: the card sides that state no language, of the cards
   the user may settle (`unstatedSides`, which, like
-  [deckLanguages.ts](../packages/domain/src/deckLanguages.ts), leaves
+  [deckLanguages.ts](../packages/core/domain/src/deckLanguages.ts), leaves
   out a card still as its release has it). Each links to its side, and
   a link goes to the about screen, which states them all at once. When
   the release can't be read, it says those aren't known.
@@ -1511,7 +1511,7 @@ would change. The screen links to Solid Memo's deck library.
 
 The use case `listLibraryUpdates` reads the instance's decks and the
 library's index once
-([library.ts](../packages/domain/src/library.ts), `libraryCopiesOf`). A
+([library.ts](../packages/core/domain/src/library.ts), `libraryCopiesOf`). A
 copy of the current release, or of one the index lists as no older, is
 up to date (`offersNewerRelease`, as Solid Memo's offer tells it). A
 copy whose deck the index no longer lists says so. A release the index
@@ -1523,7 +1523,7 @@ would do (`planLibraryUpgrade`, the plan Solid Memo's deck page offers;
 copy and its series as found, reading nothing again. Each copy's cards
 are read in the same turns as Home's, six decks at a time. Copies that
 name one cards document share its cards by id, worked out once
-([libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)). Copies
+([libraryUpgrade.ts](../packages/core/domain/src/libraryUpgrade.ts)). Copies
 of a release the library's index lists share the plan of the cards too,
 as the library reads each release once: only what each deck's own
 entry changes is planned for each. A copy from a link reads its
@@ -1671,7 +1671,7 @@ file input: no new library
 tests take a deck with Markdown, pictures, wrong options (one retired),
 text in two languages, a retired card and review states through both
 formats and back
-([solidDeckArchive.test.ts](../packages/solid/src/solidDeckArchive.test.ts)),
+([solidDeckArchive.test.ts](../packages/adapters/solid/src/solidDeckArchive.test.ts)),
 and the end-to-end tests against real servers
 ([deckFiles.integration.test.ts](../e2e/pod/src/deckFiles.integration.test.ts)).
 
@@ -1687,11 +1687,11 @@ draft is registered in no type index
 ([data-model.md](data-model.md#drafts-and-releases)).
 
 The drafts are read a few at a time (`mapAtOnce` in
-[atOnce.ts](../packages/application/src/atOnce.ts)), as are the
+[atOnce.ts](../packages/core/application/src/atOnce.ts)), as are the
 documents the data check validates. A catalog is data anyone may have
 written, so the Studio follows at most `MAX_CATALOG_LINKS` (1,000)
 entries of each kind: decks, drafts and releases
-([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
+([catalogLinks.ts](../packages/adapters/solid/src/catalogLinks.ts)). Past that,
 it reads none of that kind and says why (`catalogTooManyLinks`), with
 a hint to remove the instance unless the user knows who keeps it. It
 reads at most `MAX_DECK_GROUPS` (1,000) deck groups too, each a row of
@@ -1703,7 +1703,7 @@ names a deck's groups as a path in the Decks table's Group column (its
 sort too), the bulk Move's list of groups and the deck peek. A path
 shows at most 200 characters of each group's title, cut between
 characters with an ellipsis as the last (`groupPath` in
-[deckTable.ts](../packages/domain/src/deckTable.ts)), so it's at most
+[deckTable.ts](../packages/core/domain/src/deckTable.ts)), so it's at most
 16 short names, however long the titles. The filter, which keeps a
 deck whose groups' names hold its text, searches each group's title
 once for a text, not once for each deck below the group. A
@@ -1724,7 +1724,7 @@ without the limit, for any instance: each delete stays inside that
 folder, and only the user starts one. The instance's data check and
 graph read only the release document of such a draft and go on with the
 rest. A draft's own documents are read a few at a time too
-([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)).
+([solidReleaseDraftRepository.ts](../packages/adapters/solid/src/solidReleaseDraftRepository.ts)).
 
 Each draft that can be read links to its [overview](#a-drafts-overview),
 where a draft made opens, the [activity](#the-dock) saying so. A draft
@@ -1737,7 +1737,7 @@ A new draft starts from
   distribution and the data theme EDUC. A course is studied front to
   back.
 - **a deck of the instance** (`deckToDraft` in
-  [deckToDraft.ts](../packages/domain/src/release/deckToDraft.ts)).
+  [deckToDraft.ts](../packages/core/domain/src/release/deckToDraft.ts)).
   - The draft takes every card under its id, its retired ones and
     wrong options with it, its authors as the release's agents, the
     first as its publisher, its themes and EDUC.
@@ -1776,7 +1776,7 @@ A new draft starts from
     refuse it.
 - **the next version of a release**, by its address, in the library or
   in a pod (`nextVersionDraft` in
-  [releaseVersion.ts](../packages/domain/src/release/releaseVersion.ts)).
+  [releaseVersion.ts](../packages/core/domain/src/release/releaseVersion.ts)).
   - The draft is the release whole, as version N + 1 in its series,
     with no release time or notes yet. What it published can only be
     retired, never deleted or its id given to another, and its
@@ -1812,7 +1812,7 @@ A new draft starts from
     subject can be retired but not deleted.
 - **a release saved as a file**, Turtle or JSON-LD, as it is
   (`releaseToDraft` in
-  [releaseToDraft.ts](../packages/domain/src/release/releaseToDraft.ts)),
+  [releaseToDraft.ts](../packages/core/domain/src/release/releaseToDraft.ts)),
   but for its series and the version it follows (`withOwnSeries`). It
   follows none (no `dcat:prev` or `dcat:previousVersion`): the
   version the file follows isn't the creator's, and what only that
@@ -1933,7 +1933,7 @@ The use cases are `listReleaseDrafts`, `createReleaseDraft`,
 `copyReleaseDraft` (a guest's draft, as the guest's study is added to
 an instance, [guest-mode.md](guest-mode.md#adding-to-an-instance)),
 `checkReleaseDraftCopy`, `getReleaseDraft`, `editReleaseDraft` and `deleteReleaseDraft`
-([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)),
+([releaseDrafts.ts](../packages/core/application/src/releaseDrafts.ts)),
 over the `ReleaseDraftRepository` port. `checkReleaseDraftCopy` tells,
 with nothing written, whether such a copy can be written there.
 
@@ -1958,7 +1958,7 @@ with nothing written, whether such a copy can be written there.
   screens read of a draft is forgotten when one is deleted or made.
 
 A draft changes by `DraftChange`s
-([releaseDraft.ts](../packages/domain/src/release/releaseDraft.ts),
+([releaseDraft.ts](../packages/core/domain/src/release/releaseDraft.ts),
 `UseCases.editReleaseDraft`), covering:
 
 - the release's metadata and its agents;
@@ -2017,7 +2017,7 @@ Every edit is made at once on the screen, then written in the pod
   why.
 - **Debounced per document.** Text is written once its document
   (`changedDocuments` in
-  [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) has
+  [draftLayout.ts](../packages/core/domain/src/release/draftLayout.ts)) has
   been still for 0.8 seconds (`DEBOUNCE_MS`). Changes typed in that
   time are written together. A keystroke in the contact replaces the
   change before it when that is of the same field: the last one is what
@@ -2086,7 +2086,7 @@ code in `ui`:
   release published, once the user confirms.
 
 Each move is a `moveChapter` or `moveStep` change (`outlineMove` in
-[draftOutline.ts](../packages/domain/src/release/draftOutline.ts)). A
+[draftOutline.ts](../packages/core/domain/src/release/draftOutline.ts)). A
 drop the draft no longer has a place for (it changed under the drag)
 comes to nothing, and says so.
 
@@ -2206,7 +2206,7 @@ is added under the table, asked nowhere yet.
 ### Ids
 
 The id assistant
-([courseIds.ts](../packages/domain/src/release/courseIds.ts)) suggests
+([courseIds.ts](../packages/core/domain/src/release/courseIds.ts)) suggests
 each new subject's id, the way [courses.md](courses.md#writing-a-course)
 names them:
 
@@ -2267,11 +2267,11 @@ The release check
 runs every rule a release is held to on the draft, as the release it
 becomes: the rules `npm run library:check` runs on `decks/`
 ([deck-library.md](deck-library.md)), from the domain's
-([`release/`](../packages/domain/src/release/)). The use case is
+([`release/`](../packages/core/domain/src/release/)). The use case is
 `checkReleaseDraft(draft, markdownCheck, policy)`. It finds:
 
 - **Rules** (`ruleProblems` in
-  [releaseCheck.ts](../packages/domain/src/release/releaseCheck.ts)):
+  [releaseCheck.ts](../packages/core/domain/src/release/releaseCheck.ts)):
   - the course's (`courseProblems`), among them cards, chapters, steps
     or wrong options the draft doesn't hold as its parts
     (`strayParts`): ones outside the release, or whose records can't
@@ -2294,7 +2294,7 @@ becomes: the rules `npm run library:check` runs on `decks/`
   - how the release says it was made (`provenanceProblems`,
     [below](#what-the-check-asks-of-a-releases-provenance));
   - the draft's series (the pod policy only; `ownSeriesProblems` in
-    [continuityRules.ts](../packages/domain/src/release/continuityRules.ts)).
+    [continuityRules.ts](../packages/core/domain/src/release/continuityRules.ts)).
     A draft that follows no release (no `dcat:prev`) is in a series of
     its own, `<release>#id` (`seriesNotOwn`). A next version is in the
     series of the release it follows, in a document in that release's
@@ -2379,7 +2379,7 @@ Neither policy names a series, author or host: a library is its index,
 and a policy is data.
 
 Problems are codes, never text
-([problems.ts](../packages/domain/src/release/problems.ts)), worded in
+([problems.ts](../packages/core/domain/src/release/problems.ts)), worded in
 the reader's language (`studio.problem.<code>`,
 [problemText.ts](../apps/studio/src/ui/problemText.ts)). They're listed
 by severity, then by what they're in, in two lists, Errors and
@@ -2426,7 +2426,7 @@ shows the draft as learners see it in the library: its row in the
 library's list (`LibraryDeckRow`) and its own page
 (`LibraryDeckScreen`). They're over a library deck built from the
 draft alone (`draftLibraryDeck` in
-[draftListing.ts](../packages/domain/src/release/draftListing.ts)),
+[draftListing.ts](../packages/core/domain/src/release/draftListing.ts)),
 each source's title and authors read as learners read them, plain text
 only, and no more of its metadata and sources than learners' listing
 keeps (`withBoundedListing`, `boundedSources`). Both are inert:
@@ -2444,11 +2444,11 @@ chooses to show each host's, for as long as the page stays open
 
 It's played in a sandbox, set up by `openTrial(draft, instanceUrl)`
 with `startTrial`, both in
-[trial.ts](../packages/application/src/trial.ts):
+[trial.ts](../packages/core/application/src/trial.ts):
 
 - **A pod of its own.** Each trial has a new pod, kept in memory, at
   `https://trial.solid-memo.invalid/` (`TRIAL_ORIGIN` in
-  [release/trial.ts](../packages/domain/src/release/trial.ts)), which
+  [release/trial.ts](../packages/core/domain/src/release/trial.ts)), which
   never resolves. `createTrialUseCases`
   ([trialUseCases.ts](../packages/composition/src/trialUseCases.ts))
   wires the page's own Solid adapters over it (`routedFetch`). Other
@@ -2466,7 +2466,7 @@ with `startTrial`, both in
 - **The draft as a library.** The trial's library is the draft alone,
   as the editor keeps it, made afresh at each read
   (`createDraftDeckLibrary` in
-  [draftDeckLibrary.ts](../packages/solid/src/draftDeckLibrary.ts)),
+  [draftDeckLibrary.ts](../packages/adapters/solid/src/draftDeckLibrary.ts)),
   its cards and a course's outline read as a release's are, its
   metadata the listing preview's (`draftLibraryDeck`).
 - **The same shapes.** Its writes are checked by the page's validator,
@@ -2518,7 +2518,7 @@ the draft's Changes tab, compares a draft with the release it follows
 (its `dcat:prev`). A draft of a first version follows none, and the
 screen (still at its address) says so. The use case is
 `diffReleaseDraft(draft)`
-([releaseDrafts.ts](../packages/application/src/releaseDrafts.ts)),
+([releaseDrafts.ts](../packages/core/application/src/releaseDrafts.ts)),
 which reads the release once and fails when it can't be read. It
 compares the draft only with a release the instance published or the
 library's, as the release check's **Drops** do. Any other can change
@@ -2534,21 +2534,21 @@ say `previousUnread` instead. It shows:
   keywords, themes, study direction, license, authors, languages and
   sources changed, and whether it became a course or a deck
   (`releaseDiff` in
-  [releaseDiff.ts](../packages/domain/src/release/releaseDiff.ts)).
+  [releaseDiff.ts](../packages/core/domain/src/release/releaseDiff.ts)).
 - **Its content**: each chapter, step, card and wrong option the draft
   adds, changes, retires or brings back, matched by id, a link each to
   its editor, and how many of each kind are as they were. Each kind
   lists `OUTLINE_LIMIT` (50) at first, and as many more each time
   **Show more** is pressed, as a draft can change any number of them.
   - A card compares as an upgrade compares it (`sameContent` in
-    [libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts)),
+    [libraryUpgrade.ts](../packages/core/domain/src/libraryUpgrade.ts)),
     and by what it's about (its `dcterms:subject`, in any order:
     `sameSubjects`), its wrong options listed on their own.
   - A card a release states in a format before card format 7 (a
     format-4 card compiled from linked data, say) is read with what
     it's about too, kept in the card's record. It's compared, and
     written once, as card format 7 writes it (`draftFromQuads` in
-    [releaseDraftMapper.ts](../packages/solid/src/mappers/releaseDraftMapper.ts)).
+    [releaseDraftMapper.ts](../packages/adapters/solid/src/mappers/releaseDraftMapper.ts)).
   - A subject retired and changed says both.
 - **What learners get** (`simulateLearnerUpgrade`): Solid Memo's own
   upgrade plan (`planLibraryUpgrade`) for a learner's copy of the
@@ -2569,7 +2569,7 @@ say `previousUnread` instead. It shows:
 
 The learner's copy is built in memory from the release and the draft
 (`draftLibraryContent` in
-[draftListing.ts](../packages/domain/src/release/draftListing.ts)),
+[draftListing.ts](../packages/core/domain/src/release/draftListing.ts)),
 reading and writing nothing. Each version of the draft is compared once,
 as the editor keeps it, changes not yet written included.
 
@@ -2603,7 +2603,7 @@ the library's releases are
     up whether one is chosen in a set made once for each draft, so a
     release that states many doesn't slow it down.
   - The license is one of `KNOWN_LICENSES`
-    ([license.ts](../packages/domain/src/license.ts)), or the one it
+    ([license.ts](../packages/core/domain/src/license.ts)), or the one it
     has. `setLicense` types it `dcterms:LicenseDocument`, as DCAT-AP
     asks; the license it replaces loses that type, unless a source
     still names it.
@@ -2619,7 +2619,7 @@ the library's releases are
     one web page, names no contact, and the field is empty; the release
     check warns of it (`contactAmbiguous`). **Use the library's contact**
     fills in `LIBRARY_CONTACT`
-    ([curationRules.ts](../packages/domain/src/release/curationRules.ts)).
+    ([curationRules.ts](../packages/core/domain/src/release/curationRules.ts)).
     The app reads it to say where a mistake is reported
     ([deck-library.md](deck-library.md#reporting-a-mistake)).
   - The publisher is one of the release's first `AUTHOR_LIMIT` agents,
@@ -2627,7 +2627,7 @@ the library's releases are
     else by its IRI.
 - **Authors**: the release's own agents (`foaf:Agent`, `#<name>`), its
   `dcterms:creator`s, each with a name and an optional email
-  ([releaseMetadata.ts](../packages/domain/src/release/releaseMetadata.ts)).
+  ([releaseMetadata.ts](../packages/core/domain/src/release/releaseMetadata.ts)).
   A release in a pod may name an email; one for the library names
   none. Removing an author removes its
   agent too, unless it publishes the release or a statement names it.
@@ -2717,7 +2717,7 @@ the library's releases are
 
 The release check warns of what a reader of how the release was made
 would miss (`provenanceProblems` in
-[provenanceRules.ts](../packages/domain/src/release/provenanceRules.ts)),
+[provenanceRules.ts](../packages/core/domain/src/release/provenanceRules.ts)),
 each a warning that links to the release screen:
 
 - **A source that doesn't describe itself** (`sourceUndescribed`): it
@@ -2748,11 +2748,11 @@ Below a draft's metadata, the release screen
 releases it, two ways.
 
 **Publish to my Pod** (`publishRelease` in
-[releasePublishing.ts](../packages/application/src/releasePublishing.ts)):
+[releasePublishing.ts](../packages/core/application/src/releasePublishing.ts)):
 
 - **Where.** In the instance's `releases/`, or another folder whose
   address the user types, at `<folder><name>/v<N>.ttl` (`releaseUrlIn`
-  in [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)):
+  in [releasePlace.ts](../packages/core/domain/src/release/releasePlace.ts)):
   the draft's name and version, as the library names its releases. The
   screen shows the address before anything is written. Only a release
   in the instance's `releases/` can be offered as a newer version of

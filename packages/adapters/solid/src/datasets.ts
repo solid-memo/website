@@ -1,0 +1,870 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import {
+  type Dataset,
+  type FetchedDataset,
+  type Subject,
+  changesOf,
+  createSolidDataset,
+  getThing,
+  localNameOf,
+  removeThings,
+  removeUrl,
+  setThing,
+  sourceOf,
+  toRdfJsDataset,
+  withQuads,
+} from "@solid-memo/solid-client/rdf";
+
+import type { Quad } from "@rdfjs/types";
+import { editOf } from "./datasetEdit";
+import {
+  type DocumentRead,
+  ReadLimitError,
+  type ReadLimits,
+} from "@solid-memo/solid-client/interface";
+import {
+  FOREIGN_LIMITS,
+  isPastBudget,
+  limitVars,
+  readThrough,
+  refusalOf,
+} from "@solid-memo/solid-client/readLimits";
+import {
+  deleteSolidDataset,
+  parseQuads,
+  readDocument,
+  solidDatasetAsTurtle,
+  writeDocument,
+} from "@solid-memo/solid-client/resources";
+import { MAX_PATCH_BYTES, patchBody, tripleLine } from "@solid-memo/solid-client/sparqlUpdate";
+import { termOf } from "./ntriples";
+import { isWrittenByNewer } from "./records";
+import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
+import { noWriteCheck, type WriteCheck } from "./writeCheck";
+import { AppError } from "@solid-memo/domain/appError";
+import { isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
+import { PathMap } from "@solid-memo/domain/pathKeys";
+
+/**
+ * Reading and writing pod documents with HTTP preconditions, so that a
+ * write never silently undoes someone else's (docs/data-model.md#write-discipline):
+ *
+ * - every read remembers the document's ETag, with the dataset it returned
+ *   (keyed by its source's key, which edits of the dataset keep);
+ * - saving an edit of a dataset read from the same URL (compared as a
+ *   request sends both, isSameUrl) sends `If-Match: <that ETag>`: had
+ *   the document changed since, the pod answers 412 and nothing is
+ *   written;
+ * - saving a new dataset is a creation, sent with `If-None-Match: *`
+ *   (client/resources.ts writeDocument): had the document appeared
+ *   meanwhile, 412;
+ * - deleting a document read before sends `If-Match` too, and so does
+ *   removing what Solid Memo owns of one (removeOwned).
+ *
+ * What goes over the wire, the PATCH of an edit or the PUT of a whole
+ * document too large for one PATCH (MAX_PATCH_BYTES), each with the same
+ * If-Match, is writeDocument's; this module decides which version a
+ * write is conditional on, and keeps what a read or write learned.
+ *
+ * A 412 becomes a PreconditionFailedError naming the document. Weak
+ * ETags (`W/"…"`) are never sent in `If-Match`, where the comparison is
+ * strong and would always fail; a document without an ETag is written
+ * without `If-Match`. A write the pod answers with a strong ETag, made
+ * on a precondition (so the document now holds just what was written),
+ * keeps the written dataset at that version, as a read keeps what it
+ * read: a later edit of it sends `If-Match: <that ETag>`, and the next
+ * read asks `If-None-Match` with it. Pods need not give the new ETag;
+ * without one, nothing is kept, and the next read downloads the document.
+ * Either way the read that write was conditional on is written over: a
+ * later save of a dataset from it (the one saved, or another edit of the
+ * same read) is refused with a PreconditionFailedError before anything
+ * is sent, as the pod would refuse its If-Match, and so is a delete
+ * made on it. A read saved to another address is not written over: an
+ * edit or delete of it where it was read still sends its `If-Match`.
+ * A read without a strong ETag has no precondition to lose:
+ * an edit of it is still written, again and again, without `If-Match`,
+ * and it is still deleted without one.
+ */
+const ETAGS = new WeakMap<object, string>();
+
+/** The source keys of reads that a save on their ETag has since written over (see above). */
+const WRITTEN_OVER = new WeakSet<object>();
+
+/**
+ * The dataset each read gave, or each save left the document holding,
+ * by its source key: an edit of it keeps the key, so what the document
+ * held when read is known however the edit changed it (asReadOf).
+ */
+const AS_READ = new WeakMap<object, Dataset>();
+
+/**
+ * The document as it was when `dataset`, or the read it is an edit of,
+ * was read or saved (AS_READ); the dataset itself when no read of the
+ * app's made it (one built here, never read).
+ */
+export function asReadOf(dataset: Dataset): Dataset {
+  const source = sourceOf(dataset);
+  return (source === undefined ? undefined : AS_READ.get(source.key)) ?? dataset;
+}
+
+/** The pod refused a write because the document is not as Solid Memo last saw it. */
+export class PreconditionFailedError extends AppError {
+  constructor(
+    readonly url: string,
+    readonly expected: "unchanged" | "absent",
+  ) {
+    super(expected === "unchanged" ? "changedElsewhere" : "createdElsewhere", { url });
+    this.name = "PreconditionFailedError";
+  }
+}
+
+/**
+ * What has been read through each fetch, by URL. A screen asks for the
+ * same document several times (a deck's cards for its study queue, the
+ * format check and the data check), at once and again later:
+ *
+ * - a read already under way is shared rather than made again;
+ * - a document read before is asked for with `If-None-Match: <its ETag>`,
+ *   and on 304 the dataset read then is returned: datasets are immutable,
+ *   so it is as good as a new one, without downloading the document again.
+ *
+ * A write to the URL forgets both, so no read after it gets what was
+ * there before, unless the write kept its own dataset (above): then that
+ * is what is known. Both are kept by document: a read by one of its
+ * subjects (a WebID, `card#me`) is forgotten by a write to the document
+ * (`card`). Every read asks the pod, never the browser's cache
+ * (readDocument): this is the only cache.
+ */
+const READS = new WeakMap<
+  typeof globalThis.fetch,
+  {
+    inFlight: Map<string, Promise<FetchedDataset>>;
+    known: Map<string, { etag: string; dataset: FetchedDataset }>;
+  }
+>();
+
+function readsOf(fetch: typeof globalThis.fetch) {
+  let reads = READS.get(fetch);
+  if (reads === undefined) {
+    reads = { inFlight: new Map(), known: new Map() };
+    READS.set(fetch, reads);
+  }
+  return reads;
+}
+
+/** Fetch a dataset, remembering its ETag for a later conditional write; see READS. */
+export function readDataset(url: string, fetch: typeof globalThis.fetch): Promise<FetchedDataset> {
+  const { inFlight, known } = readsOf(fetch);
+  const key = documentUrlOf(url);
+  const shared = inFlight.get(key);
+  if (shared !== undefined) return shared;
+  const read = fetchDataset(url, fetch, known).finally(() => {
+    if (inFlight.get(key) === read) inFlight.delete(key);
+  });
+  inFlight.set(key, read);
+  return read;
+}
+
+/**
+ * The dataset last read from a document, or written to it, at the strong
+ * version the pod then gave, without asking the pod; undefined when none
+ * is known, or only a weak one, which If-Match cannot name. An edit of it
+ * is written only if the document is still at that version (If-Match):
+ * one that changed since is refused (PreconditionFailedError), to be read
+ * again.
+ */
+export function keptDataset(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): FetchedDataset | undefined {
+  const kept = READS.get(fetch)?.known.get(documentUrlOf(url));
+  return kept === undefined || strong(kept.etag) === undefined ? undefined : kept.dataset;
+}
+
+/** A write is about to change the document: reads from now on fetch it again. */
+function forgetRead(url: string, fetch: typeof globalThis.fetch): void {
+  const reads = READS.get(fetch);
+  if (reads === undefined) return;
+  url = documentUrlOf(url);
+  for (const key of reads.inFlight.keys()) {
+    // Plain reads are keyed by the URL, reads since a version by the URL, a newline and the version.
+    if (key === url || key.startsWith(`${url}\n`)) reads.inFlight.delete(key);
+  }
+  reads.known.delete(url);
+}
+
+/** A conditional read's answer: the document is still at the version asked about. */
+export const UNCHANGED = "unchanged" as const;
+
+/**
+ * Read a document unless it is still at `version` (a version an earlier
+ * visit learned, kept in the instance's digest): UNCHANGED on 304,
+ * without a download; else the dataset, as readDataset gives it, or null
+ * when there is none. Reads of the same document at the same version
+ * under way at once are shared.
+ */
+export function readDatasetSince(
+  url: string,
+  version: string,
+  fetch: typeof globalThis.fetch,
+): Promise<FetchedDataset | typeof UNCHANGED | null> {
+  const { inFlight, known } = readsOf(fetch);
+  const key = `${documentUrlOf(url)}\n${version}`;
+  const shared = inFlight.get(key);
+  if (shared !== undefined) return shared as Promise<FetchedDataset | typeof UNCHANGED | null>;
+  const read = fetchDataset(url, fetch, known, version)
+    .catch((error: unknown) => {
+      if (statusOf(error) === 404) return null;
+      throw error;
+    })
+    .finally(() => {
+      if (inFlight.get(key) === read) inFlight.delete(key);
+    });
+  inFlight.set(key, read as Promise<FetchedDataset>);
+  return read;
+}
+
+/** The version (ETag) a dataset was read at; undefined when the pod gave none. */
+export function versionOf(dataset: object): string | undefined {
+  const source = sourceOf(dataset);
+  return source === undefined ? undefined : ETAGS.get(source.key);
+}
+
+/** How a document is read: as readDocument reads it (client/resources.ts), here or elsewhere. */
+export type DocumentReader = (
+  url: string,
+  options: { fetch: typeof globalThis.fetch; ifNoneMatch?: string },
+) => Promise<DocumentRead>;
+
+/** The fetches whose documents elsewhere are read by another reader (readElsewhere). */
+const ELSEWHERE = new WeakMap<
+  typeof globalThis.fetch,
+  { isElsewhere: (url: string) => boolean | Promise<boolean>; read: DocumentReader }
+>();
+
+/**
+ * `fetch`, its reads of the documents `isElsewhere` names made by `read`
+ * in place of readDocument: the documents outside the user's storages,
+ * which the page reads off the page (offPageAdapters.ts), its requests
+ * still made with `fetch`. What is read is kept, and written back, as
+ * any other read is.
+ */
+export function readElsewhere(
+  fetch: typeof globalThis.fetch,
+  isElsewhere: (url: string) => boolean | Promise<boolean>,
+  read: DocumentReader,
+): typeof globalThis.fetch {
+  ELSEWHERE.set(fetch, { isElsewhere, read });
+  return fetch;
+}
+
+async function fetchDataset(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
+): Promise<FetchedDataset>;
+async function fetchDataset(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
+  since: string,
+): Promise<FetchedDataset | typeof UNCHANGED>;
+async function fetchDataset(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  known: Map<string, { etag: string; dataset: FetchedDataset }>,
+  since?: string,
+): Promise<FetchedDataset | typeof UNCHANGED> {
+  const document = documentUrlOf(url);
+  const before = known.get(document);
+  let read: Awaited<ReturnType<typeof readDocument>>;
+  let answered = false;
+  const noting: typeof globalThis.fetch = async (input, init) => {
+    const response = await fetch(input, init);
+    answered = true;
+    return readThrough(response, notingStreamFailure);
+  };
+  try {
+    const elsewhere = ELSEWHERE.get(fetch);
+    const reader =
+      elsewhere !== undefined && (await elsewhere.isElsewhere(url)) ? elsewhere.read : readDocument;
+    read = await reader(url, { fetch: noting, ifNoneMatch: since ?? before?.etag });
+  } catch (error) {
+    known.delete(document);
+    if (!answered && typeof error === "object" && error !== null) UNPARSED.add(error);
+    throw error;
+  }
+  // Asked without `since`, the version asked about is the one `before` was read at.
+  if ("notModified" in read) return since === undefined ? before!.dataset : UNCHANGED;
+  const { dataset, etag } = read;
+  const source = sourceOf(dataset);
+  if (source !== undefined) AS_READ.set(source.key, dataset);
+  if (etag !== undefined && source !== undefined) ETAGS.set(source.key, etag);
+  if (etag !== undefined) known.set(document, { etag, dataset });
+  else known.delete(document);
+  return dataset;
+}
+
+/**
+ * Fetch a dataset, treating 404 as null — not-yet-created documents are a
+ * normal state in this app. Any other failure still throws.
+ */
+export async function getSolidDatasetOrNull(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<FetchedDataset | null> {
+  try {
+    return await readDataset(url, fetch);
+  } catch (error) {
+    if (statusOf(error) === 404) return null;
+    throw error;
+  }
+}
+
+/**
+ * The failures of reads (fetchDataset) that no parse gave: of a read
+ * the pod never answered, or of a body that failed on its way. A plain
+ * Error among them is whatever the fetch or the body's stream failed
+ * with, an abort's own reason for one, and not a parse failure.
+ */
+const UNPARSED = new WeakSet<object>();
+
+/**
+ * The stream, read through one that notes what it fails with in
+ * UNPARSED: the body of a read's answer, whatever its status, so a
+ * failure of the body of an error's answer is noted too.
+ */
+function notingStreamFailure(stream: ReadableStream<Uint8Array>): ReadableStream<Uint8Array> {
+  const reader = stream.getReader();
+  return new ReadableStream<Uint8Array>({
+    async pull(controller) {
+      const next = await reader.read().catch((error: unknown) => {
+        if (typeof error === "object" && error !== null) UNPARSED.add(error);
+        throw error;
+      });
+      if (next.done) controller.close();
+      else controller.enqueue(next.value);
+    },
+    cancel: reader.cancel.bind(reader),
+  });
+}
+
+/**
+ * Whether a read's failure says the document is none to read: not there
+ * (404, 410), or not one the app reads: past its read limits (a
+ * ReadLimitError, the read's budget refusing it before it is sent
+ * among them), or not parsed: a plain Error or a SyntaxError that a
+ * parse of a whole answer gave (the library's), whose causes, if it
+ * has any, are none too. Only these: any other failure says only that
+ * it could not be read now, and what the document holds is unknown. A
+ * refusal (401, 403) or any other status, no answer in time
+ * (podNoAnswer) or any other AppError, an abort, whatever its reason
+ * and whether it comes before the answer or while its body is read, a
+ * network failure (a TypeError from fetch), or an Error that wraps one
+ * is not none: the session may have expired while the app was in the
+ * background, or the pod may be slow to answer.
+ */
+export function readsAsNone(error: unknown): boolean {
+  const seen = new Set<unknown>();
+  for (let failure = error; !seen.has(failure); failure = (failure as Error).cause) {
+    seen.add(failure);
+    if (!(failure instanceof Error)) return false;
+    const status = statusOf(failure);
+    if (status !== undefined) return status === 404 || status === 410;
+    if (failure instanceof ReadLimitError) return true;
+    const kind = Object.getPrototypeOf(failure);
+    if (kind !== Error.prototype && kind !== SyntaxError.prototype) return false;
+    if (UNPARSED.has(failure) || failure.name !== kind.name) return false;
+    if (failure.cause === undefined) return true;
+  }
+  return false;
+}
+
+/** A document the pod served whole that could not be read (readForRemoval). */
+export const UNREADABLE = Symbol("unreadable");
+
+/**
+ * A document larger than a read held to size limits takes in, not past
+ * a budget its reads share (readForRemoval). One past only the bounds
+ * every read keeps, on a term's length, declarations or nesting
+ * (NO_SIZE_LIMITS), is not: no write of the app's makes such a document.
+ */
+export const TOO_LARGE = Symbol("tooLarge");
+
+/**
+ * A document as a removal reads it, made afresh by a fetch of its own,
+ * never one remembered from before: null when it is gone (404, 410),
+ * UNREADABLE when the pod served all of it but it could not be read
+ * (not Turtle, not RDF at all, or past the read's limits). Any other
+ * failure throws, a body cut off on its way among them: nothing was
+ * learned of the document, so the removal can only be tried again.
+ * Asked with TOO_LARGE, that is what a document past the size limits of
+ * one read is (isSizeLimited; not past a budget its reads share:
+ * isPastBudget).
+ */
+export function readForRemoval(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  tooLarge: typeof TOO_LARGE,
+): Promise<FetchedDataset | null | typeof UNREADABLE | typeof TOO_LARGE>;
+export function readForRemoval(
+  url: string,
+  fetch: typeof globalThis.fetch,
+): Promise<FetchedDataset | null | typeof UNREADABLE>;
+export async function readForRemoval(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  tooLarge: typeof UNREADABLE | typeof TOO_LARGE = UNREADABLE,
+): Promise<FetchedDataset | null | typeof UNREADABLE | typeof TOO_LARGE> {
+  let served = false;
+  const noting: typeof globalThis.fetch = async (input, init) => {
+    const response = await fetch(input, init);
+    if (response.ok) {
+      // Taken in first, so that only a parse can fail once it counts as served.
+      await response
+        .clone()
+        .arrayBuffer()
+        .catch((error: unknown) => {
+          throw refusalOf(response) ?? error;
+        });
+      served = true;
+    }
+    return response;
+  };
+  // A document elsewhere is read as `fetch` reads it (readElsewhere).
+  const elsewhere = ELSEWHERE.get(fetch);
+  if (elsewhere !== undefined) ELSEWHERE.set(noting, elsewhere);
+  try {
+    return await getSolidDatasetOrNull(url, noting);
+  } catch (error) {
+    if (error instanceof ReadLimitError && isSizeLimited(error.limits) && !isPastBudget(error))
+      return tooLarge;
+    if (served || error instanceof ReadLimitError) return UNREADABLE;
+    if (statusOf(error) === 410) return null;
+    throw error;
+  }
+}
+
+/** Whether a read refused under `limits` was held to a size: its bytes, triples or their characters. */
+function isSizeLimited({ bytes, quads, characters }: ReadLimits): boolean {
+  return [bytes, quads, characters].some(Number.isFinite);
+}
+
+/**
+ * Save a dataset: an edit of the document it was read from only if that
+ * is unchanged (If-Match), a new dataset only if nothing is there yet
+ * (If-None-Match: *). `whole` writes an edit as one PUT of the whole
+ * document (with the same If-Match) however small it is (writeDocument).
+ */
+export async function saveDataset<T extends Dataset>(
+  url: string,
+  dataset: T,
+  fetch: typeof globalThis.fetch,
+  { whole = false }: { whole?: boolean } = {},
+): Promise<void> {
+  const source = sourceOf(dataset);
+  const isEdit = source !== undefined && isSameUrl(source.url, url);
+  // A dataset from a read since written over (the same, or another edit of it) is not what the document holds.
+  if (isEdit && WRITTEN_OVER.has(source.key)) throw new PreconditionFailedError(url, "unchanged");
+  const etag = isEdit ? strong(ETAGS.get(source.key)) : undefined;
+  forgetRead(url, fetch);
+  let written: Awaited<ReturnType<typeof writeDocument>>;
+  try {
+    written = await writeDocument(url, dataset, { fetch, ifMatch: etag, whole });
+  } catch (error) {
+    if (statusOf(error) === 412)
+      throw new PreconditionFailedError(url, isEdit ? "unchanged" : "absent");
+    throw error;
+  }
+  // A save elsewhere leaves the read as it was: the document it was read from still holds it.
+  if (isEdit) {
+    ETAGS.delete(source.key);
+    if (etag !== undefined) WRITTEN_OVER.add(source.key);
+  }
+  // What the write left the document holding, as far as the app knows: what an edit of it is judged on.
+  const writtenAt = sourceOf(written.dataset);
+  if (writtenAt !== undefined) AS_READ.set(writtenAt.key, written.dataset);
+  // Only where a precondition held does the document hold just what was written.
+  const version = strong(written.etag);
+  if (version === undefined || (isEdit && etag === undefined)) return;
+  if (!isReadFrom(written.dataset, url)) return;
+  ETAGS.set(sourceOf(written.dataset)!.key, version);
+  readsOf(fetch).known.set(documentUrlOf(url), { etag: version, dataset: written.dataset });
+}
+
+/** How many times editDocument makes an edit, in all, while the document keeps changing elsewhere (412). */
+const EDIT_ATTEMPTS = 3;
+
+/**
+ * What an edit (editDocument) makes of a document as read: what it
+ * says (`result`), and the dataset to save, none when it changes
+ * nothing; with it, the subjects to check first (none checked without
+ * them), and whether to save it as one PUT of the whole document
+ * (saveDataset's `whole`).
+ */
+interface DocumentEdit<R> {
+  readonly result: R;
+  readonly dataset?: Dataset;
+  readonly subjects?: readonly string[];
+  readonly whole?: boolean;
+}
+
+/**
+ * How editDocument makes an edit: `attempts` in all (EDIT_ATTEMPTS),
+ * `pause` waited before each one after the first, given its number,
+ * `checkWrite` checking the subjects an edit names (as an instance's
+ * documents, "pod"), the document read by `read` (getSolidDatasetOrNull,
+ * so one not there is null), and `failure` what a write that fails for
+ * good throws in place of what it failed with.
+ */
+interface EditPolicy<D> {
+  readonly attempts?: number;
+  readonly pause?: (attempt: number) => Promise<void>;
+  readonly checkWrite?: WriteCheck;
+  readonly read?: (url: string, fetch: typeof globalThis.fetch) => Promise<D>;
+  readonly failure?: (error: unknown) => unknown;
+}
+
+/**
+ * Edit a document as it is now: read it, make of it what `edit` says
+ * (DocumentEdit), check the subjects the edit names, and save it only
+ * if the document is as it was read (If-Match; a new one only where
+ * there is none, If-None-Match: *). When it changed meanwhile (412),
+ * it is read and the edit made again, as many times as the policy
+ * says (EditPolicy), so a change made elsewhere is kept; the last 412
+ * is thrown. Only the check and the save are tried again: what the
+ * read or the edit throws (a rule of the caller's, even a
+ * PreconditionFailedError) is thrown at once, and so is any other
+ * failure of the write. The one place a write that re-applies a
+ * change on a 412 is made (docs/data-model.md#write-discipline).
+ */
+export async function editDocument<R, D extends Dataset | null = FetchedDataset | null>(
+  url: string,
+  fetch: typeof globalThis.fetch,
+  edit: (read: D) => DocumentEdit<R> | Promise<DocumentEdit<R>>,
+  {
+    attempts = EDIT_ATTEMPTS,
+    pause,
+    checkWrite = noWriteCheck,
+    read = getSolidDatasetOrNull as (url: string, fetch: typeof globalThis.fetch) => Promise<D>,
+    failure = (error) => error,
+  }: EditPolicy<D> = {},
+): Promise<R> {
+  for (let attempt = 1; ; attempt++) {
+    if (attempt > 1) await pause?.(attempt);
+    const { dataset, subjects, whole, result } = await edit(await read(url, fetch));
+    if (dataset === undefined) return result;
+    try {
+      if (subjects !== undefined) await checkWrite(dataset, subjects, "pod");
+      await saveDataset(url, dataset, fetch, { whole });
+      return result;
+    } catch (error) {
+      if (!(error instanceof PreconditionFailedError) || attempt === attempts) throw failure(error);
+    }
+  }
+}
+
+/**
+ * Refuse (deckFileTooLarge), before it is sent, a document of a deck
+ * file's import that a read of it outside the user's storages would not
+ * take in (FOREIGN_LIMITS), wherever its instance is: whether a read is
+ * held to them depends on who reads it and from where, and the same
+ * instance may be read from outside the storages it is in. The Turtle
+ * a write of it sends is measured by its bytes and, read back
+ * (parseQuads), by its triples and their terms, then by the bytes of
+ * those triples as N-Triples (termOf), as a server may serve the
+ * document back in that longer form. A deck file may hold more than
+ * that, and an import writes all its cards as one document, and all
+ * its progress as another. Its subjects are held to the values for one
+ * predicate a release may have (MAX_VALUES_PER_PREDICATE), as no
+ * card or progress holds a schedule's due days, so a release made of
+ * its cards is read as well.
+ */
+export async function refuseUnreadableImport(url: string, dataset: Dataset): Promise<void> {
+  const tooLarge = () => new AppError("deckFileTooLarge", limitVars(FOREIGN_LIMITS));
+  const encoder = new TextEncoder();
+  const text = solidDatasetAsTurtle(dataset);
+  if (encoder.encode(text).byteLength > FOREIGN_LIMITS.bytes) throw tooLarge();
+  const quads = await parseQuads(text, "turtle", url, FOREIGN_LIMITS).catch(() => {
+    throw tooLarge();
+  });
+  let bytes = 0;
+  for (const { subject, predicate, object } of quads) {
+    bytes += encoder.encode(
+      `${termOf(subject)} ${termOf(predicate)} ${termOf(object)} .\n`,
+    ).byteLength;
+    if (bytes > FOREIGN_LIMITS.bytes) throw tooLarge();
+  }
+}
+
+/**
+ * Whether `dataset` was read from (or last saved to) `url`, compared as a
+ * request sends both (isSameUrl): a save of it is an edit there, If-Match
+ * its version.
+ */
+export function isReadFrom(dataset: object, url: string): boolean {
+  const source = sourceOf(dataset);
+  return source !== undefined && isSameUrl(source.url, url);
+}
+
+/**
+ * Delete a document read before, only if it is unchanged since (If-Match).
+ * A read a save has since written over is refused, sending nothing, as a
+ * save of it is; one without a strong ETag is deleted without If-Match.
+ */
+export async function deleteDataset(
+  url: string,
+  dataset: Dataset,
+  fetch: typeof globalThis.fetch,
+): Promise<void> {
+  const source = sourceOf(dataset);
+  const isRead = source !== undefined && isSameUrl(source.url, url);
+  // A read since written over is not what the document holds: deleting on it is refused as a save is.
+  if (isRead && WRITTEN_OVER.has(source.key)) throw new PreconditionFailedError(url, "unchanged");
+  const etag = isRead ? strong(ETAGS.get(source.key)) : undefined;
+  forgetRead(url, fetch);
+  try {
+    await deleteSolidDataset(url, { fetch, ifMatch: etag });
+  } catch (error) {
+    if (statusOf(error) === 412) throw new PreconditionFailedError(url, "unchanged");
+    throw error;
+  }
+}
+
+/** One statement of a document: its subject, predicate and object, an IRI each. */
+export type Statement = readonly [subject: string, predicate: string, object: string];
+
+/**
+ * What of a document is Solid Memo's to remove (removeOwned): subjects,
+ * each with all it states, or those and single statements of a subject
+ * that otherwise stays.
+ */
+export type Owned =
+  | ReadonlySet<string>
+  | { readonly subjects: ReadonlySet<string>; readonly statements: readonly Statement[] };
+
+/** What removeOwned did to a document: there was none, it is gone, or it is kept with what is not Solid Memo's. */
+export type Removal = "absent" | "deleted" | "kept";
+
+/**
+ * Remove from a document what Solid Memo owns of it, and the document
+ * itself only when nothing else is left in it (docs/data-model.md
+ * "Write discipline"):
+ *
+ * 1. it is read afresh; none there is "absent", and one that is not RDF
+ *    is never Solid Memo's: "kept", nothing sent;
+ * 2. `owns` names the subjects of it that are Solid Memo's to remove
+ *    (ownership.ts), less any a newer version of the app wrote
+ *    (unlessNewer), and any single statements of another subject that
+ *    are (Owned); a blank node goes with them when only they name it;
+ * 3. nothing else left: the document is deleted, If-Match its read
+ *    (where the pod gave a strong ETag: on a pod that gives none, an
+ *    edit made meanwhile is deleted too, as it is written over by every
+ *    other write there);
+ * 4. something else left: the removed subjects are taken out of it, a
+ *    PATCH of `DELETE DATA` (If-Match where the pod gave a strong ETag),
+ *    or, where a blank node goes, one PUT of what is left, If-Match: a
+ *    pod that gives no strong ETag gets neither, nor one PATCH too large
+ *    for a PATCH (MAX_PATCH_BYTES), which would be a PUT written over
+ *    whatever changed meanwhile; then the document is kept as it is.
+ *
+ * A document changed meanwhile (412) is read again and the removal made
+ * once more; a second 412 is a PreconditionFailedError. One outside the
+ * user's own pod, which the app's fetch never writes to (ownPodGate.ts,
+ * `writeOutsidePod`), is "kept" as it is. `read` is how the document is
+ * read each time, for a caller that takes a failed read differently
+ * (deckPlace.ts, readToRemove).
+ */
+export async function removeOwned(
+  url: string,
+  owns: (dataset: Dataset) => Owned,
+  fetch: typeof globalThis.fetch,
+  read: () => ReturnType<typeof readForRemoval> = () => readForRemoval(url, fetch),
+): Promise<Removal> {
+  try {
+    return await removeOwnedOnce(url, owns, fetch, read);
+  } catch (error) {
+    if (error instanceof AppError && error.code === "writeOutsidePod") return "kept";
+    if (!(error instanceof PreconditionFailedError)) throw error;
+    return removeOwnedOnce(url, owns, fetch, read);
+  }
+}
+
+async function removeOwnedOnce(
+  url: string,
+  owns: (dataset: Dataset) => Owned,
+  fetch: typeof globalThis.fetch,
+  read: () => ReturnType<typeof readForRemoval>,
+): Promise<Removal> {
+  const dataset = await read();
+  if (dataset === UNREADABLE) return "kept";
+  if (dataset === null) return "absent";
+  const quads = [...toRdfJsDataset(dataset)];
+  const found = owns(dataset);
+  const { subjects, statements } =
+    "subjects" in found ? found : { subjects: found, statements: [] };
+  const owned = [...subjects].filter((subject) => !isNewer(dataset, subject));
+  const removed = withOnlyTheirBlankNodes(quads, owned);
+  // Each statement by the path of its terms (PathMap), never one string
+  // joined from them, which could be past the bound on a term.
+  const removedStatements = new PathMap<true>();
+  for (const statement of statements) removedStatements.set(statement, true);
+  const isGone = (quad: Quad) =>
+    removed.has(termKey(quad.subject)) ||
+    removedStatements.has([quad.subject.value, quad.predicate.value, quad.object.value]);
+  const left = quads.filter((quad) => !isGone(quad));
+  if (left.length === 0) {
+    try {
+      await deleteDataset(url, dataset, fetch);
+    } catch (error) {
+      // Gone since it was read: what was to be deleted is.
+      if (statusOf(error) !== 404) throw error;
+    }
+    return "deleted";
+  }
+  const gone = quads.filter(isGone);
+  if (gone.length === 0) return "kept";
+  const etag = strong(ETAGS.get(sourceOf(dataset)!.key));
+  if (
+    gone.some(
+      (quad) => quad.subject.termType === "BlankNode" || quad.object.termType === "BlankNode",
+    )
+  ) {
+    if (etag === undefined) return "kept";
+    await saveDataset(url, withQuads(dataset, left), fetch, { whole: true });
+    return "kept";
+  }
+  // Every subject taken out, and every statement, at once (removeThings, editOf).
+  const edit = editOf(removeThings(dataset, owned));
+  for (const [subject, predicate, object] of statements) {
+    edit.setThing(removeUrl(edit.getThing(subject)!, predicate, object));
+  }
+  const edited = edit.done();
+  const body = patchBody(changesOf(edited), localNameOf)!;
+  if (etag === undefined && new TextEncoder().encode(body).length > MAX_PATCH_BYTES) return "kept";
+  await saveDataset(url, edited, fetch);
+  return "kept";
+}
+
+/**
+ * Whether a newer version of the app wrote the subject (unlessNewer): it
+ * is never removed. A subject the document does not hold has nothing to
+ * remove, and is none.
+ */
+function isNewer(dataset: Dataset, subject: string): boolean {
+  const thing = getThing(dataset, subject);
+  return thing !== null && isWrittenByNewer(thing);
+}
+
+/**
+ * The subjects, and the blank nodes only they name, and those only these
+ * name, on: what goes with them. A blank node something else names stays.
+ */
+export function withOnlyTheirBlankNodes(
+  quads: readonly Quad[],
+  subjects: readonly string[],
+): Set<string> {
+  // How many times each blank node is named by a subject not yet walked.
+  const namers = new Map<string, number>();
+  const names = new Map<string, string[]>();
+  for (const quad of quads) {
+    if (quad.object.termType !== "BlankNode") continue;
+    const from = termKey(quad.subject);
+    const blank = termKey(quad.object);
+    namers.set(blank, (namers.get(blank) ?? 0) + 1);
+    const named = names.get(from);
+    if (named === undefined) names.set(from, [blank]);
+    else named.push(blank);
+  }
+  const removed = new Set(subjects);
+  const pending = [...removed];
+  for (let key = pending.pop(); key !== undefined; key = pending.pop()) {
+    for (const blank of names.get(key) ?? []) {
+      const left = namers.get(blank)! - 1;
+      namers.set(blank, left);
+      if (left > 0 || removed.has(blank)) continue;
+      removed.add(blank);
+      pending.push(blank);
+    }
+  }
+  return removed;
+}
+
+/** A subject or object as a dataset keys it: a blank node `_:` and its label. */
+function termKey(term: { termType: string; value: string }): string {
+  return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
+}
+
+/**
+ * Add a subject's triples to a document without reading it first: one
+ * insert-only PATCH, with no precondition, since inserting a subject no
+ * other writer names cannot clash with any other edit. Every server the
+ * app is tested on creates the document (and its container) when it is
+ * missing, and keeps every one of several concurrent inserts. A
+ * `signal` aborts it.
+ */
+export function appendToDocument(
+  url: string,
+  thing: Subject,
+  fetch: typeof globalThis.fetch,
+  signal?: AbortSignal,
+): Promise<void> {
+  return appendAllToDocument(url, [thing], fetch, signal);
+}
+
+/**
+ * Add several subjects' triples to a document without reading it, as
+ * appendToDocument adds one: one insert-only PATCH, or several in turn
+ * where one would be larger than MAX_PATCH_BYTES, each subject whole in
+ * one. A subject whose triples are there already changes nothing. A
+ * `signal` aborts them.
+ */
+export async function appendAllToDocument(
+  url: string,
+  things: readonly Subject[],
+  fetch: typeof globalThis.fetch,
+  signal?: AbortSignal,
+): Promise<void> {
+  const encoder = new TextEncoder();
+  const batches: (string | null)[][] = [];
+  let size = 0;
+  for (const thing of things) {
+    const quads = [...toRdfJsDataset(setThing(createSolidDataset(), thing))];
+    refuseUnwritable(quads);
+    const lines = quads.map((quad) => tripleLine(quad, localNameOf, false));
+    const bytes = encoder.encode(lines.join("\n")).length + 1;
+    if (batches.length === 0 || size + bytes > MAX_PATCH_BYTES) {
+      batches.push(lines);
+      size = bytes;
+    } else {
+      // One by one: a subject with very many values would overflow push's arguments.
+      const batch = batches.at(-1)!;
+      for (const line of lines) batch.push(line);
+      size += bytes;
+    }
+  }
+  for (const triples of batches) {
+    forgetRead(url, fetch);
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/sparql-update" },
+      body: `INSERT DATA {\n${triples.join("\n")}\n};\n`,
+      ...(signal === undefined ? {} : { signal }),
+    });
+    if (!response.ok) throw new AppError("addFailed", { url, status: response.status });
+  }
+}
+
+function strong(etag: string | undefined): string | undefined {
+  return etag === undefined || etag.startsWith("W/") ? undefined : etag;
+}
+
+/** The HTTP status a failure carries: its statusCode, else its response's status. */
+export function statusOf(error: unknown): number | undefined {
+  const candidate = error as { statusCode?: number; response?: { status?: number } };
+  return candidate.statusCode ?? candidate.response?.status;
+}

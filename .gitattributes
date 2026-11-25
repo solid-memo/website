@@ -18,17 +18,17 @@
 # Vendored files are kept byte for byte as their authors publish them (one
 # license there has CRLF line endings): the shapes' ruleset is a hash of
 # every file under vendor/ (shapesRuleset in
-# packages/site/src/siteBuild.ts), and a changed byte would void the
+# packages/build-tools/src/siteBuild.ts), and a changed byte would void the
 # check receipts in users' pods.
-packages/vocab/vendor/** -text linguist-vendored
+packages/lib/vocab/vendor/** -text linguist-vendored
 
 # Written by tools, never by hand: collapsed in GitHub's diffs and left out
 # of its language statistics. The vocabulary's constants come from ns/ by
 # `npm run generate` (docs/vocab.md); the golden file from its test, run
 # with -u; the Python tools' lock files from their .in files by
 # `uv pip compile` (docs/testing.md#the-workflows).
-packages/vocab/src/*.generated.ts linguist-generated
-packages/shacl/node/deckLibrary.golden.txt linguist-generated
+packages/lib/vocab/src/*.generated.ts linguist-generated
+packages/adapters/shacl/node/deckLibrary.golden.txt linguist-generated
 scripts/requirements-*.txt linguist-generated
 package-lock.json linguist-generated
 e2e/pod/servers/**/package-lock.json linguist-generated

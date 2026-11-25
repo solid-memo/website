@@ -57,7 +57,7 @@ flowchart LR
     document gets a receipt;
   - the rules are named by a hash of every shape and vendored profile
     file, computed when the site is built (`siteDefines` in
-    `packages/site/src/siteBuild.ts`, used by `apps/web/vite.config.ts`),
+    `packages/build-tools/src/siteBuild.ts`, used by `apps/web/vite.config.ts`),
     so a site with other shapes checks everything again;
   - the answer log is left out: answers are checked as they're written,
     and in the full check, which the developer report always runs.
@@ -67,7 +67,7 @@ flowchart LR
   written (`dataNotConforming`) and is named with why. The format
   update goes on with the other documents; a library upgrade stops, as
   at any failure. Another app's data never stops a write.
-- [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)
+- [shaclShapeValidator.ts](../packages/adapters/solid/src/shaclShapeValidator.ts)
   fetches the document, in a worker ([below](#off-the-page)), and
   converts it to an RDF/JS dataset
   (`toRdfJsDataset`). For every subject, it picks the shapes by class
@@ -94,7 +94,7 @@ flowchart LR
   are warnings ([below](#data-another-app-wrote)). A deck's document's
   own subject, when all it says is which deck the document is part of
   (`isDeckBackLink` in
-  [ownership.ts](../packages/solid/src/ownership.ts)), is Solid Memo's
+  [ownership.ts](../packages/adapters/solid/src/ownership.ts)), is Solid Memo's
   and isn't listed. A document that
   doesn't exist is `missing`, which is normal.
 - **Where a deck is** is checked beside its shape, in an instance's
@@ -114,7 +114,7 @@ flowchart LR
   (`DateTimeRange`, `dateViolations` in `shaclShapeValidator.ts`). It's
   an `xsd:dateTime` in one of the shape's date fields that the app reads
   as no date (`readDatetime` in
-  [records.ts](../packages/solid/src/records.ts)). One is past what a
+  [records.ts](../packages/adapters/solid/src/records.ts)). One is past what a
   JavaScript date holds (after 13 September 275760, or before 20 April
   -271821), which SHACL finds valid. Another is longer than 64
   characters, or isn't a date-time from its first character to its
@@ -154,7 +154,7 @@ flowchart LR
   and its deck gets no such button. A check reads a deck's two
   documents at once. It reads those outside the instance's folder
   within one minute in all (`OUTSIDE_READS_MS` in
-  [instanceChecks.ts](../packages/application/src/instanceChecks.ts)),
+  [instanceChecks.ts](../packages/core/application/src/instanceChecks.ts)),
   whatever the read is for: to find which are unclaimed, to check
   them, or to read again one with a problem. A catalog may
   name a thousand of them on servers that answer slowly, and every
@@ -182,7 +182,7 @@ flowchart LR
   spell it. Whether the document is a deck's once read is asked once
   too, for all the decks that name it. What the document says of
   itself is worked out once per read (`documentFactsOf` in
-  [deckPlace.ts](../packages/solid/src/deckPlace.ts)), and each deck's
+  [deckPlace.ts](../packages/adapters/solid/src/deckPlace.ts)), and each deck's
   standing is then a lookup. A catalog may name one document for a
   thousand decks, each spelling it its own way, and the check's work
   still grows with the decks and the document, not their product.
@@ -237,7 +237,7 @@ flowchart LR
   them from wherever the site is served (for `npm run dev` and
   `npm start`, the repository's `ns/`), once per session.
 - The [SHACL](https://www.w3.org/TR/shacl/) engine
-  ([engine.ts](../packages/shacl/src/engine.ts), the only module that
+  ([engine.ts](../packages/adapters/shacl/src/engine.ts), the only module that
   imports `rdf-validate-shacl`) is a separate chunk, imported
   dynamically when a validation is asked for. It validates one focus
   node against one node shape (`validateNode`), so no `sh:targetClass`
@@ -279,7 +279,7 @@ flowchart LR
   would take time growing with the square of their number. The
   library's own count is turned off.
 - A check keeps at most 1,000 results (`MAX_RESULTS_PER_CHECK` in
-  [validation.ts](../packages/domain/src/validation.ts)): of one
+  [validation.ts](../packages/core/domain/src/validation.ts)): of one
   subject against one shape, and of each node in a check of a whole
   graph against a profile. A constraint on each value, such as
   `sh:datatype`, gives a result for each, and a document may hold any
@@ -319,7 +319,7 @@ not in the page:
 - a release opened from a link (`#/try?url=…`, Add deck by link) or
   read for a copy's upgrade, and the catalog its creator keeps above it
   (`ReleaseDocuments` in
-  [solidDeckLibrary.ts](../packages/solid/src/solidDeckLibrary.ts));
+  [solidDeckLibrary.ts](../packages/adapters/solid/src/solidDeckLibrary.ts));
 - a deck file (`DeckArchive.readDeckFile`), a release file, and a
   release read from anywhere for a draft, with the documents it names
   (`ReleaseDraftRepository.parseRelease`, `readRelease`, `readLinked`);
@@ -330,18 +330,18 @@ not in the page:
 - every document outside the user's storages read to be shown, studied
   or written back: another instance's, one a catalog names on another
   server, read as the user or as no one (`readElsewhere` in
-  [datasets.ts](../packages/solid/src/datasets.ts), `isElsewhere` of
+  [datasets.ts](../packages/adapters/solid/src/datasets.ts), `isElsewhere` of
   the credential gate). The worker reads it as `readDocument` does and
   gives its triples, which the page makes into the document's dataset
   in one pass. What the adapters make of it, and write back, is as for
   any other read.
 
 The page sends each one as a job
-([offPage.ts](../packages/solid/src/offPage.ts)): the address or the
+([offPage.ts](../packages/adapters/solid/src/offPage.ts)): the address or the
 text, and what it's read as. The worker runs the adapter's own code
-on it ([offPageJobs.ts](../packages/solid/src/offPageJobs.ts)) and
+on it ([offPageJobs.ts](../packages/adapters/solid/src/offPageJobs.ts)) and
 sends back only what the port gives: the typed result and the check's
-report. [offPageAdapters.ts](../packages/solid/src/offPageAdapters.ts)
+report. [offPageAdapters.ts](../packages/adapters/solid/src/offPageAdapters.ts)
 is the ports' side in the page, which the composition root wires in
 ([appUseCases.ts](../packages/composition/src/appUseCases.ts)).
 
@@ -349,12 +349,12 @@ is the ports' side in the page, which the composition root wires in
   it makes, and the page makes it with its own fetch: as the user, or as
   no one, as before. The page sends the answer's body whole. The worker
   never holds the user's login, and refuses a request that would write
-  ([offPageServe.ts](../packages/solid/src/offPageServe.ts)). The page
+  ([offPageServe.ts](../packages/adapters/solid/src/offPageServe.ts)). The page
   refuses one too, and sends only the headers a read needs (`Accept`,
   `If-None-Match`, `If-Modified-Since`, `Range`): a login, a cookie or a
   proof is its own fetch's to add.
 - **The read limits hold.** The page reads a body under the limits of
-  its read ([readLimits.ts](../packages/solid/src/client/readLimits.ts)),
+  its read ([readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts)),
   and the worker parses it under them, counting on from what the page
   had spent. What the parse counts goes back into the page's tally
   before the job's result does. A parse past a budget the page's reads
@@ -376,7 +376,7 @@ is the ports' side in the page, which the composition root wires in
   so a slow server holds no other read up, and there are at most
   `OFF_PAGE_WORKERS_IN_ALL` (16) of them.
 - **The build.** Vite bundles the worker as a module of its own
-  ([offPageWorker.ts](../packages/solid/src/offPageWorker.ts)), with the
+  ([offPageWorker.ts](../packages/adapters/solid/src/offPageWorker.ts)), with the
   Solid client the page has (`worker` in `apps/web/vite.config.ts`). It's
   served from the site, so the page's Content Security Policy
   (`script-src 'self'`) lets it run.
@@ -390,8 +390,8 @@ is the ports' side in the page, which the composition root wires in
 ## Profiles: DCAT-AP and SKOS
 
 Data is held to two published profiles, vendored verbatim under
-[packages/vocab/vendor/README.md](../packages/vocab/vendor/README.md),
-pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
+[packages/lib/vocab/vendor/README.md](../packages/lib/vocab/vendor/README.md),
+pinned by commit and sha256 in `packages/lib/vocab/vendor/manifest.json`
 (which a test checks), and published with the site at `/vendor/`:
 
 | Profile | Shapes | Applies to |
@@ -399,7 +399,7 @@ pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
 | `dcat-ap` | [DCAT-AP 3.0.1](https://semiceu.github.io/DCAT-AP/releases/3.0.1/) (SEMIC) | catalogs, decks and deck releases, distributions, agents |
 | `skos` | SkoHub `skos.shacl.ttl` + `skos.bestPractice.shacl.ttl`, for [SKOS](https://www.w3.org/TR/skos-reference/) | the concept schemes in `ns/vocab/` |
 
-- [profiles.ts](../packages/shacl/src/profiles.ts) names each
+- [profiles.ts](../packages/adapters/shacl/src/profiles.ts) names each
   profile's files. Their shapes pick their own targets
   (`sh:targetClass`), so a profile checks a whole graph with the
   engine's `validate`, not one subject with `validateNode`.
@@ -417,12 +417,12 @@ pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
   or deck group's link (`dcat:dataset`, `dcat:catalog`) to a member
   described in another document, in the data check and the
   [write check](#the-write-check) alike (`isMemberElsewhere` in
-  [shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)).
+  [shaclShapeValidator.ts](../packages/adapters/solid/src/shaclShapeValidator.ts)).
   A member of the same document still must be a `dcat:Dataset` or
   `dcat:Catalog`. A member is of the same document when its IRI without
   the fragment is the document's, so the document's own IRI (`<>`)
   counts as one (`isSameDocument` in
-  [subjectUrl.ts](../packages/domain/src/subjectUrl.ts)). Writing
+  [subjectUrl.ts](../packages/core/domain/src/subjectUrl.ts)). Writing
   the catalog or a deck group goes by the same rule.
 - In a pod, DCAT-AP's result about a property Solid Memo doesn't
   write on one of its subjects is a warning, as another app's value
@@ -430,11 +430,11 @@ pinned by commit and sha256 in `packages/vocab/vendor/manifest.json`
   value of a property Solid Memo writes, other than a catalog's
   member, unless a write adds that value and it's no blank node.
 - In node (`npm run library`, the tests), `validateProfile`
-  ([packages/shacl/node/shacl.ts](../packages/shacl/node/shacl.ts))
+  ([packages/adapters/shacl/node/shacl.ts](../packages/adapters/shacl/node/shacl.ts))
   fails on any violation about a subject of the document, and, for
   Solid Memo's own concept schemes (held to SKOS best practice), on
   warnings (a profile's recommendations).
-- Fixtures under `packages/vocab/fixtures/profile/<profile>/{valid,invalid}/`
+- Fixtures under `packages/lib/vocab/fixtures/profile/<profile>/{valid,invalid}/`
   pin every property DCAT-AP makes mandatory on the classes Solid Memo
   writes. These are title and description on a catalog, dataset and
   dataset series, a publisher on a catalog, an access URL on a
@@ -540,7 +540,7 @@ lists at most 50 of each of its data check's lists too.
   past the read's limits, or outside the instance's folder and not
   read within the check's minute) is in the report as unreadable, with why
   (`unreadableDocument` in
-  [validation.ts](../packages/domain/src/validation.ts)). What it holds
+  [validation.ts](../packages/core/domain/src/validation.ts)). What it holds
   isn't known, so it counts as one violation, and it holds back what
   it's part of, no more. Under "Set invalid data aside" the decks
   naming it are set aside (the arrangement too, when it's the
@@ -569,7 +569,7 @@ when it has a Solid Memo class (`sm:Deck`, `sm:Card`, …), or carries
 The catalog (`catalog.ttl#catalog`) is Solid Memo's, and so is
 a subject that one of Solid Memo's subjects names as its
 `dcterms:creator`, `dcterms:publisher` or `dcat:distribution`
-([ownership.ts](../packages/solid/src/ownership.ts)), even when
+([ownership.ts](../packages/adapters/solid/src/ownership.ts)), even when
 another app's rewrite drops its stamp. The catalog, a deck's agents
 and its distribution have no Solid Memo class. Such a link counts only
 where Solid Memo's shapes write it. In an instance's `catalog.ttl`,
@@ -607,7 +607,7 @@ its [receipt](#flow). Only the developer report shows its results. A subject ano
 Solid Memo class is held to that class's shape.
 
 The Solid client keeps some IRIs for subjects it hasn't saved yet
-([`LOCAL_NODE`](../packages/solid/src/client/linearDataset.ts)), so a
+([`LOCAL_NODE`](../packages/adapters/inrupt-client/src/linearDataset.ts)), so a
 document can't state one as data: its subject would have no URL to
 report. A read leaves out any statement that names such an IRI, so
 the check, the deck writes and every other reader never see it. The
@@ -647,7 +647,7 @@ DCAT-AP constrains some of those properties, such as
 entry, or a second `dcterms:type` on an agent that several decks name.
 A DCAT-AP result about such a property is a warning, in the check and
 the write check alike (`foreignValues` in
-[shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts)).
+[shaclShapeValidator.ts](../packages/adapters/solid/src/shaclShapeValidator.ts)).
 The deck isn't set aside, and its entry, its agents and its
 distribution can still be saved and upgraded, with the value kept. The
 properties Solid Memo writes are the subject's classes, its format
@@ -699,14 +699,14 @@ doesn't block it. They're checked against their shapes, and in a
 document with DCAT subjects, against DCAT-AP, where a result about
 [another app's value](#data-another-app-wrote) is a warning
 (`checkSubjects` in
-[shaclShapeValidator.ts](../packages/solid/src/shaclShapeValidator.ts),
+[shaclShapeValidator.ts](../packages/adapters/solid/src/shaclShapeValidator.ts),
 wired into the repositories as `checkWrite` in
 [appUseCases.ts](../packages/composition/src/appUseCases.ts)). A write
 that wouldn't conform is refused with every problem named, and nothing
 is saved.
 
 Every caller names where the write goes (`WriteContext` in
-[writeCheck.ts](../packages/solid/src/writeCheck.ts)), and that picks
+[writeCheck.ts](../packages/adapters/solid/src/writeCheck.ts)), and that picks
 the shapes, as `pickShapes` picks them for a read:
 
 - `"pod"`: an instance's documents, checked against the pod's shapes
@@ -720,7 +720,7 @@ the shapes, as `pickShapes` picks them for a read:
   run: a draft may still lack what a published dataset needs, such as
   a description. Every write
   of a draft is one
-  ([solidReleaseDraftRepository.ts](../packages/solid/src/solidReleaseDraftRepository.ts)),
+  ([solidReleaseDraftRepository.ts](../packages/adapters/solid/src/solidReleaseDraftRepository.ts)),
   and so is the check of a draft's documents.
 
   The [release check](studio.md#the-release-check) holds the draft to

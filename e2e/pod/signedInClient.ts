@@ -4,7 +4,7 @@
 
 import { createPublicKey } from "node:crypto";
 import { OidcSession, setCurrentSession } from "@solid-memo/solid-memo-client/oidcSession";
-import type { SessionClient } from "@solid-memo/solid/client/session";
+import type { SessionClient } from "@solid-memo/solid-client/session";
 import { sessionClient, type Session } from "./signedIn.ts";
 
 const ECDSA = { name: "ECDSA", namedCurve: "P-256" };

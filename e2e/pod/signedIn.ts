@@ -5,7 +5,7 @@
 import { createHash, generateKeyPairSync, randomUUID, sign, type KeyObject } from "node:crypto";
 import dns from "node:dns";
 import { getCACertificates, setDefaultCACertificates } from "node:tls";
-import type { SessionClient } from "@solid-memo/solid/client/session";
+import type { SessionClient } from "@solid-memo/solid-client/session";
 
 /**
  * The signed-in tests' way in (docs/testing.md): a server's two accounts,

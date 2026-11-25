@@ -11,8 +11,8 @@ the learner's copy is an ordinary deck, typed `schema:Course` like its
 release. A course published elsewhere, such as in its creator's pod, is
 added [from a link](deck-library.md#from-a-link) to its release and
 plays like one from the library. The pure parts are in
-[domain/course.ts](../packages/domain/src/course.ts), and the use cases
-in [courses.ts](../packages/application/src/courses.ts).
+[domain/course.ts](../packages/core/domain/src/course.ts), and the use cases
+in [courses.ts](../packages/core/application/src/courses.ts).
 
 ## The model
 
@@ -85,7 +85,7 @@ terms are in [vocab.md](vocab.md#courses), the shapes in
 [shapes.md](shapes.md), and the rules the shapes can't state in
 [deck-library.md](deck-library.md#course-rules). Those rules are the
 domain's
-([`courseRules.ts`](../packages/domain/src/release/courseRules.ts)):
+([`courseRules.ts`](../packages/core/domain/src/release/courseRules.ts)):
 `npm run library:check` runs them, and so can the Studio.
 
 ### Order
@@ -315,7 +315,7 @@ its current release is a course; anything else offers nothing.
 - **Which course** is the library's choice: the app names no course. A
   contributor names another course, or `undefined` for none, in
   `NEWCOMER_COURSE`
-  ([deckLibrary.ts](../packages/shacl/node/deckLibrary.ts)) and runs
+  ([deckLibrary.ts](../packages/adapters/shacl/node/deckLibrary.ts)) and runs
   `npm run library`, which writes it into the index. The app needs no
   change. With none named, two journeys ([testing.md](testing.md)) are
   retired or moved to another way in: `newcomer-course.journey.ts`,
@@ -339,19 +339,20 @@ its current release is a course; anything else offers nothing.
 | `setCompletedChapters(deck, edit)` | The Studio's change of the chapters completed: one marked not done (in any release, by its fragment id), or the course restarted, none completed. Answers and review states stay. |
 
 Two ports have methods for courses
-([ports.ts](../packages/application/src/ports.ts)):
+([ports/library.ts](../packages/core/application/src/ports/library.ts),
+[ports/pod.ts](../packages/core/application/src/ports/pod.ts)):
 
 - **`DeckLibrary.fetchCourseOutline(releaseUrl)`** reads the chapters
   and steps of a release (`toCourseOutline` in
-  [libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)),
+  [libraryMapper.ts](../packages/adapters/solid/src/mappers/libraryMapper.ts)),
   each with its shape and brought up to its latest format. The adapter
-  ([solidDeckLibrary.ts](../packages/solid/src/solidDeckLibrary.ts))
+  ([solidDeckLibrary.ts](../packages/adapters/solid/src/solidDeckLibrary.ts))
   reads each release document once for its cards and outline. It takes
   any address: `getCourse` reads the release the deck names
   (`prov:wasDerivedFrom`) wherever it is, and nothing in the player
   knows where a course came from.
 - **`DeckRepository.completeChapter(deck, chapterUrl)`**
-  ([solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts))
+  ([solidDeckRepository.ts](../packages/adapters/solid/src/solidDeckRepository.ts))
   adds the one triple to `catalog.ttl` with an If-Match PATCH, retried
   on a 412 ([data-model.md](data-model.md#courses)); a chapter completed
   already writes nothing. The write isn't shape-checked:
@@ -362,14 +363,14 @@ Two ports have methods for courses
   guest completed, the same way.
 - **`DeckRepository.setCompletedChapters(deck, edit)`** writes the
   chapters the edit keeps (`editCompletedChapters` in
-  [course.ts](../packages/domain/src/course.ts)) the same way, all in
+  [course.ts](../packages/core/domain/src/course.ts)) the same way, all in
   one go, in time that grows with them. It's the Studio's edit of the
   entry, so it passes the shape check. The entry is read with at most
   `MAX_COMPLETED_CHAPTERS` of them, as `data-model.md` says.
 
 A deck's distractors are written and removed with its cards
 (`withDistractors` and `distractorsOf` in
-[deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)). An edit
+[deckMapper.ts](../packages/adapters/solid/src/mappers/deckMapper.ts)). An edit
 that states no distractors keeps the card's; the card editor states none
 while its wrong options are unchanged. The card editor and the Studio
 edit them ([studio.md](studio.md#card-inspector)).
@@ -471,7 +472,7 @@ answered are kept.
   that don't know Solid Memo.
 - **They're extra types, not the shape's class.** A shape is picked by a
   Solid Memo class (`CLASS_NAMESPACES` in
-  [packages/vocab/tooling/shapes.ts](../packages/vocab/tooling/shapes.ts)),
+  [packages/lib/vocab/tooling/shapes.ts](../packages/lib/vocab/tooling/shapes.ts)),
   so each subject has an `sm:` class too: `sm:Chapter` is a subclass of
   `schema:Syllabus`, `sm:Step` of `schema:LearningResource`, and
   `sm:Distractor` of `schema:Answer`. A course has no `sm:Course`: the

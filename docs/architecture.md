@@ -231,22 +231,46 @@ follows the Solid Protocol, tested against several servers
 
 ## Packages
 
+The folders of `packages/` say each package's role. A role with
+several packages has a folder of its own; a role with one is at the top,
+under the package's name:
+
+```text
+packages/
+  core/          domain, application: the rules, and the use cases with the ports they drive
+  adapters/      browser, inrupt-client, shacl, solid, solid-client, solid-memo-client
+  lib/           markdown, turtle, vocab: libraries the rest builds on
+  composition/   wires the ports to the adapters
+  ui/            the screens both apps share
+  build-tools/   node only: builds the site and its docs, draws and checks them
+apps/            web, studio
+e2e/             journeys, pod
+```
+
+A package in `core/` imports only `core/` and `lib/`, one in `lib/`
+only `lib/`, and only the adapters, the composition root and the
+end-to-end tests import an adapter, as `npm run check:boundaries` checks
+([boundaries.md](boundaries.md#layers)). A package keeps its name
+wherever its folder is (`@solid-memo/domain` is `packages/core/domain/`).
+
 | Package | Folder | Responsibility |
 |---|---|---|
 | `@solid-memo/web` | `apps/web/` | The site's one page: the entry point (`src/main.tsx`); the page (`src/App.tsx`), showing Solid Memo or, at its routes, the Studio; and the Vite build, publishing the app with `ns/` (the vocabulary and shapes), `decks/` (the [deck library](deck-library.md)) and these docs ([deployment.md](deployment.md)). |
 | `@solid-memo/studio` | `apps/studio/` | Solid Memo Studio ([studio.md](studio.md)): screens and router (`src/ui/`) and its entry point, `StudioWorkspace`, its own chunk, loaded at the hashes under `#/studio`. |
 | `@solid-memo/composition` | `packages/composition/` | The composition root (`createAppUseCases`): every adapter behind its port, the guest's pod, the pod and write fences ([boundaries.md](boundaries.md#the-pod-fence)) and the credential gate, the site's documents read from where it's served, the workers that read the documents the app didn't write (`src/offPageWorker.ts`), and the use cases over them, a Studio trial's sandbox too (`createTrialUseCases` in `src/trialUseCases.ts`, [studio.md](studio.md#the-trial)). An app passes its name, where it's served and the build's values. |
 | `@solid-memo/ui` | `packages/ui/` | The Preact UI: components and router (`src/ui/`), messages in each language (`src/i18n/`), the theme and styles (`src/style.css`). It gets `UseCases` and knows no adapter. |
-| `@solid-memo/application` | `packages/application/` | Use cases (what the app does) and ports (what it needs). |
-| `@solid-memo/domain` | `packages/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
-| `@solid-memo/vocab` | `packages/vocab/` | The data contract: TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), its generator (`tooling/`), vendored profiles (`vendor/`) and fixtures. |
-| `@solid-memo/solid` | `packages/solid/` | Adapters for Solid pods, over the Solid client modules in `src/client/` ([vendor-code.md](vendor-code.md)): repositories, type index, instance copier, pod and write fences, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), release drafts and a release's Turtle ([data-model.md](data-model.md#drafts-and-releases)), the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)), and the worker that reads, parses and checks the documents the app didn't write, off the page ([validation.md](validation.md#off-the-page)). |
-| `@solid-memo/solid-memo-client` | `packages/solid-memo-client/` | A second implementation of `solid`'s client modules and `shacl`'s Turtle reader, with no Inrupt library, which the build puts in their place with `SOLID_CLIENT=solid-memo-client` ([solid-memo-client.md](solid-memo-client.md)). Inrupt's stays the default. |
-| `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); in `node/`, validation of Turtle files and the deck library's index and checks, Markdown rules included (`npm run library`). |
-| `@solid-memo/browser` | `packages/browser/` | Browser adapters: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads or opened from disk (`FileExchange`). |
-| `@solid-memo/site` | `packages/site/` | Node-only build of the site, used only by `apps/web`'s `vite.config.ts` and tests and by the root scripts that archive and check the docs: the build values (`siteBuild`), `robots.txt` and sitemap (`siteMap`), the Vite plugin publishing `ns/` and `decks/` (`publishTurtle`; see `deployment.md`), and the docs' build: the pages `docs/docs.ttl` lists, read with `turtle` and `markdown` and rendered to static pages, Mermaid drawn in Chromium ([markdown.md](markdown.md#the-docs-as-a-site)). Of `vocab` it imports only `tooling/root`, where the repository's folders are. |
-| `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
-| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into its own tree: folded to what the app shows, bounded at every entry point, made plain text, checked by a release's rules. It reads the docs in the same dialect, headings kept, for `site`, and imports nothing of the app's. |
+| `@solid-memo/application` | `packages/core/application/` | Use cases (what the app does) and ports (what it needs). |
+| `@solid-memo/domain` | `packages/core/domain/` | Pure types and pure functions: the app's vocabulary, SRS, migrations. |
+| `@solid-memo/vocab` | `packages/lib/vocab/` | The data contract: TypeScript generated (`src/*.generated.ts`) from the RDF vocabulary and SHACL shapes in `ns/` ([vocab.md](vocab.md), [shapes.md](shapes.md)), its generator (`tooling/`), vendored profiles (`vendor/`) and fixtures. |
+| `@solid-memo/solid-client` | `packages/adapters/solid-client/` | The seam between the Solid adapters and a Solid client: the types and limits a client works to, the Turtle a write sends, and the modules a client gives, declared with no body, which the build resolves to the client `SOLID_CLIENT` names ([boundaries.md](boundaries.md#the-solid-client-libraries)). |
+| `@solid-memo/solid` | `packages/adapters/solid/` | Adapters for Solid pods, through a Solid client's modules (`solid-client`, [vendor-code.md](vendor-code.md)): repositories, type index, instance copier, pod and write fences, the pod-reading shape validator, the deck archive (decks as Turtle or JSON-LD files, [data-model.md](data-model.md#decks-as-files)), release drafts and a release's Turtle ([data-model.md](data-model.md#drafts-and-releases)), the guest's pod kept in the browser ([guest-mode.md](guest-mode.md)), and the worker that reads, parses and checks the documents the app didn't write, off the page ([validation.md](validation.md#off-the-page)). |
+| `@solid-memo/inrupt-client` | `packages/adapters/inrupt-client/` | The default Solid client: the modules `solid-client` declares, on Inrupt's libraries. |
+| `@solid-memo/solid-memo-client` | `packages/adapters/solid-memo-client/` | The Solid client with no Inrupt library: the modules `solid-client` declares, and `shacl`'s Turtle reader, which the build puts in place with `SOLID_CLIENT=solid-memo-client` ([solid-memo-client.md](solid-memo-client.md)). Inrupt's stays the default. |
+| `@solid-memo/shacl` | `packages/adapters/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); in `node/`, validation of Turtle files and the deck library's index and checks, Markdown rules included (`npm run library`). |
+| `@solid-memo/browser` | `packages/adapters/browser/` | Browser adapters: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads or opened from disk (`FileExchange`). |
+| `@solid-memo/build-tools` | `packages/build-tools/` | Node-only build of the site, used only by `apps/web`'s `vite.config.ts` and tests and by the root scripts that archive and check the docs: the build values (`siteBuild`), `robots.txt` and sitemap (`siteMap`), the Vite plugin publishing `ns/` and `decks/` (`publishTurtle`; see `deployment.md`), and the docs' build: the pages `docs/docs.ttl` lists, read with `turtle` and `markdown` and rendered to static pages, Mermaid drawn in Chromium ([markdown.md](markdown.md#the-docs-as-a-site)). Of `vocab` it imports only `tooling/root`, where the repository's folders are. |
+| `@solid-memo/turtle` | `packages/lib/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
+| `@solid-memo/markdown` | `packages/lib/markdown/` | Markdown in data, read into its own tree: folded to what the app shows, bounded at every entry point, made plain text, checked by a release's rules. It reads the docs in the same dialect, headings kept, for `build-tools`, and imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the use cases and Solid adapters against real Solid servers in Docker ([testing.md](testing.md)). |
 | `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows through the built app, driven with Playwright in Chromium, Firefox and WebKit against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). Of the app it imports only the messages, to find text on screen. |
 
@@ -301,21 +325,21 @@ files (`i18n/<locale>.json`).
 `format:turtle:check`, `library:check` and `build` in dependency
 order, cached by input: the files of the task's package and its
 dependencies. The few that read `ns/` or `decks/` add them
-in their package's `turbo.json` (`vocab`, `site`, `shacl`, `solid`,
+in their package's `turbo.json` (`vocab`, `build-tools`, `shacl`, `solid`,
 `composition`, `apps/web` and `apps/studio`), so a deck edit reruns
 only the tasks that read the library. Every task's hash holds
 `SOLID_CLIENT` and `scripts/solidClient.ts`, the switch between the
 Solid clients, and the tasks the switch reaches hold
-`packages/solid-memo-client/src/` among their inputs
+`packages/adapters/solid-memo-client/src/` among their inputs
 ([solid-memo-client.md](solid-memo-client.md#switching-clients)).
 
 A test that reads a file outside its package adds it the same way
-(`e2e/pod`'s the workflows, `site`'s the root's `package.json` and
+(`e2e/pod`'s the workflows, `build-tools`' the root's `package.json` and
 `CNAME`, `apps/web`'s the `LICENSE` its About page links to).
 A file Turbo doesn't know of changes no input, so CI, starting from
 `main`'s cache, would reuse `main`'s result and never run the test on
 the change. Exempt is a test that only checks that a docs link's
-target exists (`site`'s and `apps/web`'s), as that could be any file;
+target exists (`build-tools`' and `apps/web`'s), as that could be any file;
 lychee checks those links in CI's `docs` job on every run
 ([testing.md](testing.md#documentation)).
 The Studio has no build of its own; Solid Memo's bundles it
@@ -340,7 +364,7 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
 
 ## Key objects
 
-- `UseCases` ([useCases.ts](../packages/application/src/useCases.ts)) —
+- `UseCases` ([useCases.ts](../packages/core/application/src/useCases.ts)) —
   the UI's only entry point, made once by the composition root's
   `createAppUseCases`
   ([appUseCases.ts](../packages/composition/src/appUseCases.ts)), called
@@ -356,26 +380,31 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
     (`instanceChecks`);
   - the Studio's drafts, publishing, instance graph and trial.
 
-  `create<Feature>UseCases` in `packages/application/src/<feature>.ts`
+  `create<Feature>UseCases` in `packages/core/application/src/<feature>.ts`
   makes each slice from only the ports it uses, each required. Slices
   share stores made once: the preferences
-  ([preferenceStore.ts](../packages/application/src/preferenceStore.ts)),
+  ([preferenceStore.ts](../packages/core/application/src/preferenceStore.ts)),
   the answers written to and read from the log
-  ([answerStore.ts](../packages/application/src/answerStore.ts)), and
-  the digest ([digestStore.ts](../packages/application/src/digestStore.ts)).
+  ([answerStore.ts](../packages/core/application/src/answerStore.ts)), and
+  the digest ([digestStore.ts](../packages/core/application/src/digestStore.ts)).
   `createUseCases` makes the stores and composes every slice. No port
   in its `Dependencies` falls back to doing nothing, so a port the
   composition root forgets is a type error. A Studio trial composes
   only the slices it plays (`createTrialUseCases`, `TrialUseCases`),
   and its screens take only those.
-- Ports ([ports.ts](../packages/application/src/ports.ts)) — narrow
-  interfaces, one per external capability, implemented by factories in
-  `packages/solid/src/` and `packages/browser/src/`.
-- Domain types ([packages/domain/src/](../packages/domain/src/)) — free
+- Ports ([ports/](../packages/core/application/src/ports/)) — narrow
+  interfaces, one per external capability, in one module per kind of
+  thing behind them: `session.ts`, `pod.ts` and `library.ts`, which the
+  factories in `packages/adapters/solid/src/` implement; `checks.ts`, which
+  `shacl` implements through `solid`; and `device.ts`, which
+  `packages/adapters/browser/src/` implements. A type two of them need is in
+  `shared.ts`. An import names the module, so an adapter's imports
+  show which ports it implements, and a slice's which ports it drives.
+- Domain types ([packages/core/domain/src/](../packages/core/domain/src/)) — free
   of library types, so every layer above is testable without
   adapters. They map to the record types `vocab` generates from the
   SHACL [shapes](shapes.md); the migration chain in
-  `packages/domain/src/shapes/migrations/` is hand-written.
+  `packages/core/domain/src/shapes/migrations/` is hand-written.
 
 ## Query keys
 
@@ -449,7 +478,7 @@ the cache's lookups would slow with the square of the number of such
 keys. A key whose JSON is longer gets a short id
 instead, the same for every key of the same JSON and different from
 every other key's (`PathMap` in
-[packages/domain/src/pathKeys.ts](../packages/domain/src/pathKeys.ts)).
+[packages/core/domain/src/pathKeys.ts](../packages/core/domain/src/pathKeys.ts)).
 Refreshing or dropping a shorter key matches the keys themselves, not
 their hashes, so it reaches a key with a long id too. Code that tells
 one query's key from another's uses `matchQuery`, which hashes with

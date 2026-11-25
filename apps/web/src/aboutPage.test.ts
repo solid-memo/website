@@ -6,8 +6,8 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { CLIENT_ID_FILE } from "@solid-memo/site/clientId";
-import { siteOrigin } from "@solid-memo/site/siteMap";
+import { CLIENT_ID_FILE } from "@solid-memo/build-tools/clientId";
+import { siteOrigin } from "@solid-memo/build-tools/siteMap";
 import { describe, expect, it } from "vitest";
 
 /*

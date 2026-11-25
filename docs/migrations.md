@@ -11,8 +11,8 @@ isn't: resetting a day leaves it out and resets the other cards.
 
 The formats are the [shapes](shapes.md). The steps between them are the
 migration modules in
-[domain/shapes/migrations](../packages/domain/src/shapes/migrations/),
-the plan is in [domain/migration.ts](../packages/domain/src/migration.ts),
+[domain/shapes/migrations](../packages/core/domain/src/shapes/migrations/),
+the plan is in [domain/migration.ts](../packages/core/domain/src/migration.ts),
 and the notice the user sees is in
 [MigrationContainer.tsx](../packages/ui/src/ui/MigrationContainer.tsx).
 
@@ -22,7 +22,7 @@ Every subject Solid Memo writes carries `sm:formatVersion`. A missing
 one means 1, the format that predates the field; preferences without
 one that hold a value only a later format has don't fit
 ([validation.md](validation.md#the-invalid-data-policy)). `LATEST_VERSION` in
-the generated [shapes module](../packages/vocab/src/types.generated.ts)
+the generated [shapes module](../packages/lib/vocab/src/types.generated.ts)
 is what the app writes today; `DECK_FORMAT_VERSION` and friends are
 aliases of it.
 
@@ -446,7 +446,7 @@ Rules that hold across versions:
   version above the latest is read with the latest shape this app has;
   the model keeps the stored version, and the migration plan never
   counts it. `recordThing`, through which every subject is written
-  ([records.ts](../packages/solid/src/records.ts)), refuses one whose
+  ([records.ts](../packages/adapters/solid/src/records.ts)), refuses one whose
   stored version is above the version it writes for that kind. It
   refuses before anything is sent (`writtenByNewerApp`: "A newer
   version of Solid Memo has updated this data, so this version does not
@@ -479,7 +479,7 @@ Rules that hold across versions:
 - **Resetting a day leaves a newer review state out.** A state of the
   day stamped above the version this app writes, SM-2's or FSRS-6's,
   is neither restored nor removed (`resetStudyDay`, `resetFsrsStudyDay`
-  in [scheduling.ts](../packages/domain/src/scheduling.ts)). It stays as
+  in [scheduling.ts](../packages/core/domain/src/scheduling.ts)). It stays as
   the newer version wrote it, and the other cards' states go back in
   the same save. One such state used to make the whole reset fail
   after the day's answers were removed.
@@ -564,9 +564,9 @@ other apps' links still hold. Nothing outside the instance is written:
 no type index registration is added or changed. No copy or backup is
 kept. A document that can't be updated now is left as it is, readable,
 and the update goes on; run again, it updates what's still outdated
-([instanceUpdate.ts](../packages/domain/src/instanceUpdate.ts),
+([instanceUpdate.ts](../packages/core/domain/src/instanceUpdate.ts),
 `updateInstance` in
-[instances.ts](../packages/application/src/instances.ts)).
+[instances.ts](../packages/core/application/src/instances.ts)).
 
 ```mermaid
 flowchart TD
@@ -762,7 +762,7 @@ A deck imported from the [deck library](deck-library.md) says which
 release it came from (`prov:wasDerivedFrom <…/decks/name/vN.ttl>`).
 When the library publishes a newer release, the deck page (and a
 course's page) offers to bring the copy up to it (`planLibraryUpgrade`
-in [domain/libraryUpgrade.ts](../packages/domain/src/libraryUpgrade.ts),
+in [domain/libraryUpgrade.ts](../packages/core/domain/src/libraryUpgrade.ts),
 shown by
 [LibraryUpgradeContainer.tsx](../packages/ui/src/ui/LibraryUpgradeContainer.tsx)).
 The Studio lists every copy of an instance, and upgrades several in
@@ -776,7 +776,7 @@ The deck list marks a copy the library has a newer release of with
 offer (`newerRelease` of `useCopies` in
 [deckTreeEditor.ts](../packages/ui/src/ui/deckTreeEditor.ts)). The list
 tells this from the library's index alone (`libraryCopiesOf`,
-`offersNewerRelease` in [library.ts](../packages/domain/src/library.ts)),
+`offersNewerRelease` in [library.ts](../packages/core/domain/src/library.ts)),
 as the Studio's library copies screen does, and reads no release and
 plans no upgrade. So it
 marks some copies the deck page offers nothing for. One is a copy whose
@@ -845,7 +845,7 @@ removed that it lacks is no offer. The course's outline (its
 chapters, steps and theory) is never copied, but read from the release
 the deck names. A release that changes only the outline is an offer of
 its own (`LibraryUpgradePlan.outline`, compared by `sameOutline` in
-[domain/course.ts](../packages/domain/src/course.ts)): it writes no
+[domain/course.ts](../packages/core/domain/src/course.ts)): it writes no
 card and moves the deck to the release. So is a release that changes
 only questions the learner hasn't reached
 (`LibraryUpgradePlan.unreached`): their content, wrong options,
@@ -933,9 +933,9 @@ app wrote refuses the upgrade with nothing written. A later failure
 stops it
 where it is and puts nothing back; planned again, the upgrade is
 offered and finishes
-([domain/deckUpgrade.ts](../packages/domain/src/deckUpgrade.ts),
+([domain/deckUpgrade.ts](../packages/core/domain/src/deckUpgrade.ts),
 `applyLibraryUpgrade` in
-[library.ts](../packages/application/src/library.ts)). The deck, its
+[library.ts](../packages/core/application/src/library.ts)). The deck, its
 documents and its cards keep their addresses and ids, so the answer log
 (statistics count a card by its deck and id) and other apps' links
 still name them.
@@ -1057,7 +1057,7 @@ version of the app out of what a later one saved
 ([releasing.md](releasing.md#what-never-changes)). The formats in the
 table above are the ones every later version writes, and the steps
 between them stay, for pods an older version wrote.
-[formats.api.test.ts](../packages/domain/src/shapes/migrations/formats.api.test.ts)
+[formats.api.test.ts](../packages/core/domain/src/shapes/migrations/formats.api.test.ts)
 fails when a format rises, and `npm run check:breaking` fails on the
 line that would go from `api/frozen/formats.txt`, whatever the commit
 says.
@@ -1071,13 +1071,13 @@ Data added later goes one of the four ways of the
    `ns/bounds/<kind>.ttl`, with its bounds
    ([shapes.md](shapes.md#bounds)). Read it with `readTerms` and write
    it in the subject's mapper, beside the record, as
-   [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts) does
+   [deckMapper.ts](../packages/adapters/solid/src/mappers/deckMapper.ts) does
    for `sm:deckCardLanguage`. A missing value means the default, and
    it needs no migration.
 2. **A new class.** Write `ns/shapes/<class>/v1.ttl` and run
    `npm run generate`: the record type, the descriptor and its entry in
    `LATEST_VERSION` appear, at format 1. Add fixtures under
-   `packages/vocab/fixtures/<class>/v1/`, and the class to the
+   `packages/lib/vocab/fixtures/<class>/v1/`, and the class to the
    [shapes' table](shapes.md#version-by-version).
 3. **A new scheduler's review state**: a shape of its own, as the
    second way, with `sm:scheduler` fixed to the new concept

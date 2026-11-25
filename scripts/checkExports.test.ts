@@ -250,11 +250,11 @@ describe("unusedExports", () => {
       }),
     ];
     expect(
-      unusedExports(packages, {
-        "packages/solid/src/rdf.ts": "packages/other/src/rdf.ts",
-        "packages/solid/src/access.ts": "packages/other/src/access.ts",
-        "packages/solid/src/session.ts": "packages/other/src/session.ts",
-      }),
+      unusedExports(packages, [
+        ["packages/solid/src/rdf.ts", "packages/other/src/rdf.ts"],
+        ["packages/solid/src/access.ts", "packages/other/src/access.ts"],
+        ["packages/solid/src/session.ts", "packages/other/src/session.ts"],
+      ]),
     ).toEqual([
       "packages/other/src/rdf.ts: extra",
       "packages/other/src/rdf.ts: unused",
@@ -314,7 +314,7 @@ describe("the repository's exports", () => {
 
   it("are read from the workspace packages and scripts/", () => {
     const packages = defaultIo(`${import.meta.dirname}/..`).packages();
-    expect(packages.map(({ dir }) => dir)).toContain("packages/domain");
+    expect(packages.map(({ dir }) => dir)).toContain("packages/core/domain");
     expect(packages.at(-1)!.dir).toBe(".");
     expect(Object.keys(packages.at(-1)!.files)).toContain("scripts/checkExports.ts");
   });

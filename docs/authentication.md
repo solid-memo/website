@@ -6,10 +6,10 @@ Login, session restore and logout against a Solid identity provider use
 and [DPoP](https://www.rfc-editor.org/rfc/rfc9449);
 [standards.md](standards.md) lists their status. The authentication
 code is in
-[packages/solid/src/solidSessionGateway.ts](../packages/solid/src/solidSessionGateway.ts),
+[packages/adapters/solid/src/solidSessionGateway.ts](../packages/adapters/solid/src/solidSessionGateway.ts),
 behind the `SessionGateway` port. It signs in through the sign-in client
 the composition root passes it, the one in
-[client/session.ts](../packages/solid/src/client/session.ts), the only
+[client/session.ts](../packages/adapters/inrupt-client/src/session.ts), the only
 file that calls the authentication library. A build with
 `SOLID_CLIENT=solid-memo-client` passes another sign-in client in its
 place, on `oauth4webapi` and no Inrupt library
@@ -51,7 +51,7 @@ provider with it. A tab holds its refresh token in memory, and at each
 refresh reads the provider to send it to from `localStorage`, by the ID
 alone. Every tab that restores a session shares that session's ID, and
 a logout leaves the ID on the page. So
-[client/session.ts](../packages/solid/src/client/session.ts) passes a
+[client/session.ts](../packages/adapters/inrupt-client/src/session.ts) passes a
 new ID to every login the user starts. The library clears what it kept
 of earlier sessions on that login, so another tab still under the old
 ID has no provider to refresh at, and sends nothing. That tab's session
@@ -69,7 +69,7 @@ with no option to replace it, so the sign-in client wraps the global
 `fetch`. Every request of the page passes through that wrapper, and it
 reads only an answer from an address ending in the metadata's path,
 under `PROVIDER_METADATA_LIMITS` (64 KiB)
-([client/readLimits.ts](../packages/solid/src/client/readLimits.ts)).
+([client/readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts)).
 The library keeps each provider's metadata in `localStorage` and never
 removes it, so the limits are far below a profile's. Past them, the
 read fails as too large and the request is canceled.
@@ -147,7 +147,7 @@ A provider that doesn't send `iss` can't be used to log in.
 The fix that brought in these three errors has a
 [security advisory](https://github.com/solid-memo/website/security/advisories/GHSA-vrcx-39mp-3746),
 and each error names it as its `advisory`
-([appError.ts](../packages/domain/src/appError.ts)).
+([appError.ts](../packages/core/domain/src/appError.ts)).
 The app links to the advisory after the error's text, in the
 learner's language, and the error's `message` ends with its address.
 That address is upstream's repository, never `VITE_REPO_URL`
@@ -188,7 +188,7 @@ Solid-OIDC lets an app name itself by the address of a JSON-LD
 document describing it and its redirect URLs
 ([Solid-OIDC, section 5](https://solidproject.org/TR/oidc#clientids)).
 Solid Memo's is at <https://solid-memo.com/clientid.jsonld>.
-[clientId.ts](../packages/site/src/clientId.ts) writes it at build time
+[clientId.ts](../packages/build-tools/src/clientId.ts) writes it at build time
 for the domain in [CNAME](../CNAME), like the sitemap
 ([deployment.md](deployment.md#what-the-artifact-contains)):
 
@@ -237,9 +237,9 @@ next login moves it to the document.
   release before the app uses it.
 - **The tests check it, but no journey logs in with it.** Journeys
   serve the site at `http://127.0.0.1:4173` and register dynamically.
-  [clientId.test.ts](../packages/site/src/clientId.test.ts) checks the
+  [clientId.test.ts](../packages/build-tools/src/clientId.test.ts) checks the
   document,
-  [solidSessionGateway.test.ts](../packages/solid/src/solidSessionGateway.test.ts)
+  [solidSessionGateway.test.ts](../packages/adapters/solid/src/solidSessionGateway.test.ts)
   when the gateway names it, and the build test that the build writes
   it with the address its page logs in with.
 
@@ -407,10 +407,10 @@ profile lists that provider passes it.
 ## Authenticated requests
 
 The composition root injects repositories' `fetch`:
-[authFetch](../packages/solid/src/authFetch.ts), a wrapper around the
+[authFetch](../packages/adapters/solid/src/authFetch.ts), a wrapper around the
 sign-in client's fetch, which calls the current session's, never one
 captured before login.
-[solidSession.ts](../packages/solid/src/solidSession.ts) makes it and
+[solidSession.ts](../packages/adapters/solid/src/solidSession.ts) makes it and
 the session gateway on one client. A router in front sends the guest's URLs to the browser's pod
 ([guest-mode.md](guest-mode.md)). Every pod read goes through
 authFetch, the WebID document's too. An instance's data is sent with it
@@ -503,7 +503,7 @@ client ends the session at the provider.
 
 Each tab holds its token in its own memory, so a logout is announced to
 this browser's other tabs
-([`logoutChannel.ts`](../packages/browser/src/logoutChannel.ts)): on a
+([`logoutChannel.ts`](../packages/adapters/browser/src/logoutChannel.ts)): on a
 `BroadcastChannel`, or through a `localStorage` key where the browser
 has none or refuses one. Each tab with a user then runs the same local
 `logout()`, which discards its token and deletes the session data from

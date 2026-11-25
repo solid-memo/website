@@ -32,7 +32,7 @@ ignorePaths:
   - decks/**
   - ns/**
   - "**/*.generated.ts"
-  - packages/vocab/vendor/*/**
+  - packages/lib/vocab/vendor/*/**
   - packages/ui/src/i18n/de.json
   - packages/ui/src/i18n/es.json
   - packages/ui/src/i18n/fr.json

@@ -21,13 +21,13 @@ browser's engine cannot run, fails CI (see docs/validation.md):
   script stops if DCAT-AP or the documents ever make that untrue);
 - DCAT-AP 3 over pod catalog documents as the app writes them (the
   valid pod fixtures of deck formats 4, 5 and 6 under
-  packages/vocab/fixtures/deck/: format 5 titles and describes a deck in
+  packages/lib/vocab/fixtures/deck/: format 5 titles and describes a deck in
   any language, English or not, and format 6 tags its keywords with
   their language, several per language), with the reference data
   (ns/vocab/external.ttl, ns/vocab/topics.ttl) beside them. A cards
   document has no DCAT subjects, so DCAT-AP has nothing to say about it;
 - DCAT-AP 3 over a release published in a pod (the valid fixtures of
-  library deck format 6 under packages/vocab/fixtures/library-deck/v6/),
+  library deck format 6 under packages/lib/vocab/fixtures/library-deck/v6/),
   which describes its series and publisher itself, with only the
   reference data beside it: no index;
 - Solid Memo's own shapes over the valid fixtures of the formats the
@@ -70,7 +70,7 @@ except ModuleNotFoundError as missing:
     sys.exit(f"{missing.name} is not installed: pip install -r scripts/requirements-ci.txt (in a virtual environment, if your Python is externally managed), then npm run crosscheck again.")
 
 ROOT = Path(__file__).resolve().parent.parent
-VOCAB = ROOT / "packages" / "vocab"
+VOCAB = ROOT / "packages" / "lib" / "vocab"
 SITE = "https://solid-memo.com/"
 
 
@@ -91,7 +91,7 @@ SH = Namespace("http://www.w3.org/ns/shacl#")
 SM = Namespace("https://solid-memo.com/ns/vocab/v1.ttl#")
 DCAT_CATALOG = URIRef("http://www.w3.org/ns/dcat#Catalog")
 # The node shape fragments that name where a subject lives, as
-# packages/vocab/tooling/shapes.ts reads them; any other fits everywhere.
+# packages/lib/vocab/tooling/shapes.ts reads them; any other fits everywhere.
 CONTEXTS = {"inPod": "pod", "inLibrary": "library", "inDraft": "draft"}
 # The Solid Memo classes a release holds subjects of, as registry.ts has them (shaclCrosscheck.test.ts).
 RELEASE_CLASSES = {SM.Deck, SM.Card, SM.Distractor, SM.Chapter, SM.Step}
@@ -101,7 +101,7 @@ Pick = tuple[URIRef, URIRef, int, str, frozenset[tuple[URIRef, URIRef]]]
 
 
 def fixed_values(shapes: Graph, shape: URIRef) -> frozenset[tuple[URIRef, URIRef]]:
-    """The (predicate, value) pairs a node shape fixes: sh:hasValue with sh:maxCount 1 on a predicate other than rdf:type, as packages/vocab/tooling/shapes.ts reads them."""
+    """The (predicate, value) pairs a node shape fixes: sh:hasValue with sh:maxCount 1 on a predicate other than rdf:type, as packages/lib/vocab/tooling/shapes.ts reads them."""
     fixed = set()
     for prop in shapes.objects(shape, SH.property):
         path, value = shapes.value(prop, SH.path), shapes.value(prop, SH.hasValue)

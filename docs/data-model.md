@@ -5,9 +5,9 @@ Solid Pod, as linked data files in one folder, the instance. This page
 says which file holds what, how the app finds the files after a login,
 and how it writes them without losing a change made on another device.
 
-The code is in `packages/solid/src/`: the vocabulary in
-[vocab.ts](../packages/solid/src/vocab.ts), discovery in
-[typeIndex.ts](../packages/solid/src/typeIndex.ts). The app reads and
+The code is in `packages/adapters/solid/src/`: the vocabulary in
+[vocab.ts](../packages/adapters/solid/src/vocab.ts), discovery in
+[typeIndex.ts](../packages/adapters/solid/src/typeIndex.ts). The app reads and
 writes the pod by the [Solid
 Protocol](https://solidproject.org/TR/protocol), and finds Solid Memo's
 data through the [type indexes](https://solid.github.io/type-indexes/),
@@ -65,12 +65,12 @@ flowchart LR
   WebID URL (`rel="type"` targeting `pim:Storage`, capital S), which
   asks the WebID document and its nearest `MAX_STORAGE_ANCESTORS` (8)
   containers
-  ([solidStorageGateway.ts](../packages/solid/src/solidStorageGateway.ts));
+  ([solidStorageGateway.ts](../packages/adapters/solid/src/solidStorageGateway.ts));
   else a URL typed by hand. The documents the WebID document names as
   more of the profile (`rdfs:seeAlso`, `foaf:isPrimaryTopicOf`,
   `foaf:primaryTopic`) count only inside those storages, or inside the
   WebID's own pod when none is found (`ownProfileArea` in
-  [profilePlaces.ts](../packages/solid/src/profilePlaces.ts)). That
+  [profilePlaces.ts](../packages/adapters/solid/src/profilePlaces.ts)). That
   pod is the folder of the WebID document, or the one above it when
   that's `profile/`. This takes that folder to be the user's own pod,
   so a server that keeps many users' WebID documents in one shared
@@ -84,7 +84,7 @@ flowchart LR
   document is read under `PROFILE_LIMITS`, and the others under them
   all together,
   no more than `MAX_PROFILE_DOCUMENTS` of them
-  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)). 0, 1
+  ([readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts)). 0, 1
   or N storages are handled.
 - **Instances**: one `solid:TypeRegistration` per instance,
   `solid:forClass sm:Instance`, in the type index the user chooses
@@ -96,7 +96,7 @@ flowchart LR
   address with no query, fragment, dot segment (`..`, `%2e%2e` in any
   case), empty segment (`//`) or two dots in a row inside a segment
   (`a..b`, in any spelling; `isInstanceAddress` in
-  [instanceLayout.ts](../packages/domain/src/instanceLayout.ts)). The
+  [instanceLayout.ts](../packages/core/domain/src/instanceLayout.ts)). The
   address is taken as written: another spelling of a folder (its host's
   case, a name outside ASCII) is that folder
   ([below](#where-an-instances-documents-are)). An instance created,
@@ -109,12 +109,12 @@ flowchart LR
   An instance with no title is named after its folder, with its
   percent-encoding undone; a name whose escapes don't decode, such as
   `caf%E9`, is shown as written (`lastPathSegment` in
-  [urls.ts](../packages/solid/src/urls.ts)). A registration that still
+  [urls.ts](../packages/adapters/solid/src/urls.ts)). A registration that still
   can't be read as an instance is left out, and the rest of the list
   still loads. An index, a preferences file or an extended profile
   counts as none only when it isn't there (404, 410), can't be parsed
   or goes past the read's limits, even before it's sent (`readsAsNone`
-  in [datasets.ts](../packages/solid/src/datasets.ts)). An extended
+  in [datasets.ts](../packages/adapters/solid/src/datasets.ts)). An extended
   profile or a preferences file outside the user's own storages, or
   the WebID's own pod when none is found (`ownProfileArea`), or one
   past the `MAX_PROFILE_DOCUMENTS` a profile is read in, isn't read at
@@ -228,7 +228,7 @@ flowchart LR
   otherwise (`adoptTypeIndex`).
 - **Deleting an instance** deletes what Solid Memo wrote in its
   container and nothing else (`deleteInstanceData` in
-  [instanceData.ts](../packages/solid/src/instanceData.ts)). Then it
+  [instanceData.ts](../packages/adapters/solid/src/instanceData.ts)). Then it
   removes its registrations from every type index of the user's: its
   `sm:Instance` one and any an earlier version wrote for its data
   (below). In order:
@@ -326,9 +326,9 @@ flowchart LR
 Creating an instance, adding one by its address or moving a guest's
 study offers every type index of the user's they can read now
 (`getRegistrationOptions`, `readTypeIndexChoices` in
-[typeIndex.ts](../packages/solid/src/typeIndex.ts)), ranked
+[typeIndex.ts](../packages/adapters/solid/src/typeIndex.ts)), ranked
 (`rankedFor` in
-[typeIndexChoice.ts](../packages/domain/src/typeIndexChoice.ts)). One
+[typeIndexChoice.ts](../packages/core/domain/src/typeIndexChoice.ts)). One
 that isn't there, or that the user may not read (401, 403), isn't
 offered. Any other failed read (a timeout, a server error) fails the
 choices, as it may work when tried again: an index left out for it
@@ -413,7 +413,7 @@ From Preferences, the user can remove those an earlier version wrote
 for the open instance on the list, keeping the instance. "Old
 registrations" is offered when an index holds any, never to a guest
 and never on its own (`removeOldRegistrations` in
-[typeIndex.ts](../packages/solid/src/typeIndex.ts)). It reads and writes
+[typeIndex.ts](../packages/adapters/solid/src/typeIndex.ts)). It reads and writes
 only the user's own type indexes, and takes a registration for one of
 the app's old ones only when all of these hold:
 
@@ -553,7 +553,7 @@ request sends them (`new URL(…).href`, `canonicalUrlOf`), which resolves
 a dot segment (`..`, `%2e%2e` in any case) and spells the host and any
 character outside ASCII one way. Then the address is checked to be in
 the folder (`isDocumentIn` in
-[instanceLayout.ts](../packages/domain/src/instanceLayout.ts); the
+[instanceLayout.ts](../packages/core/domain/src/instanceLayout.ts); the
 [graph](studio.md#graph) does the same). An instance written otherwise,
 `https://Pod.example/kortlekar-å/`, keeps its decks, and a link that
 climbs out of it doesn't lead there.
@@ -581,7 +581,7 @@ No document Solid Memo names has any.
   document. A deck can be used when its entry is a subject of the
   instance's `catalog.ttl` and each document is at an address a deck's
   may be (`isDeckInPlace`, `isDeckDocumentAddress` in
-  [deckAddress.ts](../packages/domain/src/deckAddress.ts)). That's plain
+  [deckAddress.ts](../packages/core/domain/src/deckAddress.ts)). That's plain
   http(s), with nothing a server might read as a step elsewhere (as
   above). It has no two dots in a row anywhere in its path
   (`span..ish.ttl`, `%2e%2e` or `.%2e` in any case): some servers strip
@@ -654,9 +654,9 @@ No document Solid Memo names has any.
   (`<> a sm:Deck`) is never a deck's document, whatever it says, nor is
   a draft's own document in its folder: its release document,
   `cards.ttl` or a chapter's. It's unclaimed, and claiming leaves it as it is
-  (`isDeckItself` in [ownership.ts](../packages/solid/src/ownership.ts)
+  (`isDeckItself` in [ownership.ts](../packages/adapters/solid/src/ownership.ts)
   and `isDraftDocument` in
-  [deckPlace.ts](../packages/solid/src/deckPlace.ts)).
+  [deckPlace.ts](../packages/adapters/solid/src/deckPlace.ts)).
 - **An older document that doesn't say so** (from an earlier version or a
   copy) is the deck's in the instance's own folder. That
   folder isn't the instance's own when it's the root of a pod or a
@@ -738,7 +738,7 @@ No document Solid Memo names has any.
   reads from that server have used up their budget is kept too, as it
   can be read again after a reload.
 - **Any other deck is left alone.** It isn't listed (`toDecks` in
-  [deckMapper.ts](../packages/solid/src/mappers/deckMapper.ts)), so
+  [deckMapper.ts](../packages/adapters/solid/src/mappers/deckMapper.ts)), so
   nothing reads, writes or deletes through it, whatever the [invalid
   data policy](validation.md#the-invalid-data-policy). The instance
   check reports its entry as not conforming (`DeckPlace`), and leaves
@@ -747,7 +747,7 @@ No document Solid Memo names has any.
   anywhere else is held to the same rule: a write through it is
   `deckGone`, with nothing written, and removing it
   removes only its entry (`removeDecks` in
-  [solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts)).
+  [solidDeckRepository.ts](../packages/adapters/solid/src/solidDeckRepository.ts)).
 - **A draft** the catalog links (`sm:releaseDraft`) is one only at
   `<instance>drafts/<name>/v<N>/release.ttl`, in the instance's
   `drafts/` as a request sends it, with no dot segment, and with N a
@@ -866,7 +866,7 @@ graph LR
     all, and at most `MAX_DECK_METADATA_CHARACTERS` (65,536) characters
     of them all together, the first language of the title and of the
     description always, as the shape requires both
-    (`withBoundedMetadata`, [deck.ts](../packages/domain/src/deck.ts)).
+    (`withBoundedMetadata`, [deck.ts](../packages/core/domain/src/deck.ts)).
     All are far more than any deck in `decks/` has. Past the bound it
     keeps the first values that fit: the title's languages, the
     description's, the authors, topics and keywords, in that order and
@@ -890,10 +890,10 @@ graph LR
   Agents no deck names any more go with the deck that named them,
   unless a newer version wrote the agent's node. The Studio edits the
   authors and the license (`setDeckProvenance`,
-  [deckProvenance.ts](../packages/domain/src/deckProvenance.ts)). Two
+  [deckProvenance.ts](../packages/core/domain/src/deckProvenance.ts)). Two
   authors that would share an agent node are refused, and a license is
   one of `KNOWN_LICENSES`
-  ([license.ts](../packages/domain/src/license.ts)) or the one the deck
+  ([license.ts](../packages/core/domain/src/license.ts)) or the one the deck
   has.
 - **Card sides**: each side is text (`sm:front` / `sm:back`, a literal),
   a picture (`sm:frontImage` / `sm:backImage`, always an IRI; a string
@@ -1021,7 +1021,7 @@ graph LR
   deck. Fragment ids are generated once at creation and never
   re-derived. A card's id is its fragment, so only the document's own
   subjects are its cards (`ownSubjectsOf` in
-  [records.ts](../packages/solid/src/records.ts)). Their address is
+  [records.ts](../packages/adapters/solid/src/records.ts)). Their address is
   spelled exactly as the deck's entry spells it, where the app writes
   them, or as the document is fetched, as a relative IRI such as
   `<#card-1>` is read. A fragment at both is the one the entry spells.
@@ -1038,8 +1038,8 @@ graph LR
   direction (`sm:frontToBack` or `sm:backToFront`) and
   `sm:scheduler sm:sm2` the algorithm of its fields. A reader joins a
   state to its card in
-  [reviewStateMapper.ts](../packages/solid/src/mappers/reviewStateMapper.ts)
-  and [reviewRecord.ts](../packages/domain/src/reviewRecord.ts):
+  [reviewStateMapper.ts](../packages/adapters/solid/src/mappers/reviewStateMapper.ts)
+  and [reviewRecord.ts](../packages/core/domain/src/reviewRecord.ts):
   - **What the state says wins.** The card is the one `sm:reviewOf`
     names and the direction the one `sm:reviewDirection` names; what the
     state leaves out comes from the
@@ -1152,7 +1152,7 @@ graph LR
   to only when the user claims the document for this deck too. The
   subject has no class, so no shape checks it. When it says no more than
   that, it's Solid Memo's (`isDeckBackLink` in
-  [ownership.ts](../packages/solid/src/ownership.ts)), and the [data
+  [ownership.ts](../packages/adapters/solid/src/ownership.ts)), and the [data
   check](validation.md#flow) doesn't list it as a stray.
 
 An instance's URL is permanent, and so is every document's and subject's
@@ -1191,7 +1191,7 @@ instance listing one stays valid on real servers
 A catalog is data anyone may have written, so the app reads at most
 `MAX_CATALOG_LINKS` (1,000) decks of it, in the deck list and its
 arrangement, the statistics and the format update as in the Studio
-([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Past that,
+([catalogLinks.ts](../packages/adapters/solid/src/catalogLinks.ts)). Past that,
 it reads none of them and says why (`catalogTooManyLinks`). So no deck
 is added past it. A new deck, a copy from a link or a course, or a
 deck file is refused before anything is written once the catalog has
@@ -1200,19 +1200,19 @@ them are refused too (`guestMergeTooManyDecks`).
 The same limit holds for its links to drafts and releases
 ([Drafts and releases](#drafts-and-releases)). The deck list works out
 the study counts of three decks at a time (`getStudyCounts` in
-[study.ts](../packages/application/src/study.ts)), each reading the
+[study.ts](../packages/core/application/src/study.ts)), each reading the
 deck's two documents, so a long list never reads all of them at once.
 The statistics' card progress (`getCardProgress` in
-[statistics.ts](../packages/application/src/statistics.ts)) reads its
+[statistics.ts](../packages/core/application/src/statistics.ts)) reads its
 decks in turns of the same size, three decks at a time, in a queue of
 its own; the Studio's schedule screen reads its one deck outside it. A
 deck's turn ends only once both its reads have, even when one of them
 fails first. The Studio's deck checks (`checkDeck` in
-[instanceChecks.ts](../packages/application/src/instanceChecks.ts))
+[instanceChecks.ts](../packages/core/application/src/instanceChecks.ts))
 take turns of the same size in a queue of their own.
 The Studio's Home reads its decks' cards in turns too, six decks at a
 time (`listCardsInTurn` in
-[cards.ts](../packages/application/src/cards.ts)), and its library
+[cards.ts](../packages/core/application/src/cards.ts)), and its library
 copies' plans (`planLibraryUpgrade`) read their cards in the same
 turns. A screen of one deck reads its cards outside them, and Home
 keeps its reads under a key of its own, so that screen never waits
@@ -1323,7 +1323,7 @@ the catalog's `dcat:catalog` keeps its link.
 
 A catalog is data anyone may have written, and the deck list draws a
 row for every group, so the app reads at most 1,000 groups of it
-(`MAX_DECK_GROUPS` in [deck.ts](../packages/domain/src/deck.ts)), as it
+(`MAX_DECK_GROUPS` in [deck.ts](../packages/core/domain/src/deck.ts)), as it
 reads at most `MAX_CATALOG_LINKS` decks ([The catalog](#the-catalog)).
 Past that, it reads none of the catalog's arrangement, so the deck
 list and every screen built on it (the Studio's Groups, Decks table,
@@ -1336,7 +1336,7 @@ has folded shut, its rows are gone from the page.
 
 **Writing an arrangement.** The screen sends an edit, not a finished
 layout (`DeckTreeEdit` in
-[deckTree.ts](../packages/domain/src/deckTree.ts)). An edit moves a
+[deckTree.ts](../packages/core/domain/src/deckTree.ts)). An edit moves a
 node after a sibling, combines two into a new group, renames or removes
 a group, or gathers decks at the end of a group (the Studio's bulk
 move).
@@ -1344,7 +1344,7 @@ move).
 new groups around decks the tree has at the end of the top level, a
 no-op once one of its groups is there. The repository
 (`editDeckTree` in
-[solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts))
+[solidDeckRepository.ts](../packages/adapters/solid/src/solidDeckRepository.ts))
 applies the edit to `catalog.ttl` as the pod holds it then:
 
 - **read, apply, write once**: what changed is written in one PATCH with
@@ -1399,7 +1399,7 @@ write of a card (bulk edits, moves, copies and imports, a course's
 question joining the deck included). Solid Memo's card editor and the
 Studio's card inspector edit them
 ([studio.md](studio.md#card-inspector); the domain is
-[distractors.ts](../packages/domain/src/distractors.ts)):
+[distractors.ts](../packages/core/domain/src/distractors.ts)):
 
 - **A new one** is written once it has text, as `#<card>-d<n>`. `n` is
   one more than the highest such id of up to 15 digits the card or the
@@ -1546,7 +1546,7 @@ own pod, as a draft, before publishing it
   chapter's document); what names it names it where it is. A subject a
   document names otherwise isn't read as the draft's, and publishing the
   draft refuses it (`inPlaceIn` in
-  [releaseDraftMapper.ts](../packages/solid/src/mappers/releaseDraftMapper.ts)).
+  [releaseDraftMapper.ts](../packages/adapters/solid/src/mappers/releaseDraftMapper.ts)).
   The names that count are those of the draft's documents:
   `release.ttl`, `cards.ttl` and `chapter-<id>.ttl`. Named otherwise is
   a fragment of another of them, one of them other than the release
@@ -1556,7 +1556,7 @@ own pod, as a draft, before publishing it
   two documents state of one subject is read as one.
   A chapter's document left with nothing in it is deleted. Anything else
   in the container (`isDraftDocumentName` in
-  [draftLayout.ts](../packages/domain/src/release/draftLayout.ts)) is
+  [draftLayout.ts](../packages/core/domain/src/release/draftLayout.ts)) is
   another app's, and left alone. Every id of a draft is letters, digits,
   `.`, `_` and `-`, starting with a letter or digit (`DRAFT_ID`), so a
   chapter's document is always in the draft's container. A draft whose
@@ -1588,7 +1588,7 @@ own pod, as a draft, before publishing it
   A catalog node a newer version wrote is never changed
   (`writtenByNewerApp`). So making a draft, deleting one and
   publishing check the node before anything is written
-  ([catalogLinks.ts](../packages/solid/src/catalogLinks.ts)). Such a
+  ([catalogLinks.ts](../packages/adapters/solid/src/catalogLinks.ts)). Such a
   refusal leaves no draft unlinked, no link to a deleted draft, and no
   release written that the catalog doesn't list. Only a link to a
   draft's place in the same instance is followed. A
@@ -1656,7 +1656,7 @@ own pod, as a draft, before publishing it
   read since, or an edit, makes publishing at that version
   `changedElsewhere`.
 - **Publishing a release**
-  ([solidReleasePublisher.ts](../packages/solid/src/solidReleasePublisher.ts),
+  ([solidReleasePublisher.ts](../packages/adapters/solid/src/solidReleasePublisher.ts),
   [studio.md](studio.md#publishing-a-release)) puts that text, as it is,
   at `releases/<name>/v<N>.ttl` of the instance, or in another folder
   the user chooses, in one PUT only where nothing is
@@ -1682,7 +1682,7 @@ own pod, as a draft, before publishing it
 ## The answer log
 
 Every grade given in study is kept for the statistics
-([statistics.ts](../packages/domain/src/statistics.ts)): activity by
+([statistics.ts](../packages/core/domain/src/statistics.ts)): activity by
 study day, streaks, how well reviews were remembered, in all and month
 by month (`monthlyRetention`), and the running total of prompts
 introduced (`introducedOverTime`). How many prompts are new, young and
@@ -1718,7 +1718,7 @@ nothing could rebuild it.
   [digest](#the-digest).
 - **One subject per answer**, `#answer-<time>-<random>` (for one added
   from a guest's study, followed by the id of the deck it was added to;
-  [answer.ts](../packages/domain/src/answer.ts)). It names:
+  [answer.ts](../packages/core/domain/src/answer.ts)). It names:
   - the deck's catalog entry and the card it was given to; either may
     since be removed, and a removed deck's answers stay, as a removed
     deck;
@@ -1838,7 +1838,7 @@ nothing could rebuild it.
 `digest.ttl` lets a visit skip what hasn't changed. It holds only what
 Solid Memo learned of the other documents, each fact stamped with the
 version (ETag) of the document it was learned from
-([studyDigest.ts](../packages/domain/src/studyDigest.ts)):
+([studyDigest.ts](../packages/core/domain/src/studyDigest.ts)):
 
 - a **receipt** per document: at that version it conformed to the shapes
   (`sm:conformedTo` names the rules, a hash of the shape files the site
@@ -1978,9 +1978,9 @@ sequenceDiagram
 The Studio saves a deck as a file, and makes a deck of a file
 ([studio.md](studio.md#import-and-export)): Turtle or JSON-LD, one deck
 to a file. The domain names its parts
-([deckFile.ts](../packages/domain/src/deckFile.ts)), and the
+([deckFile.ts](../packages/core/domain/src/deckFile.ts)), and the
 `DeckArchive` port reads and writes it
-([solidDeckArchive.ts](../packages/solid/src/solidDeckArchive.ts)).
+([solidDeckArchive.ts](../packages/adapters/solid/src/solidDeckArchive.ts)).
 
 An export holds triples as the pod has them, at the pod's IRIs:
 
@@ -1991,7 +1991,7 @@ An export holds triples as the pod has them, at the pod's IRIs:
   when it's an agent as Solid Memo writes one: a `foaf:Agent` of no
   other class a shape describes or adds, of no more than 32 classes,
   and not the catalog (`isCreatorAgent` in
-  [ownership.ts](../packages/solid/src/ownership.ts)). Another deck's
+  [ownership.ts](../packages/adapters/solid/src/ownership.ts)). Another deck's
   entry, a `dcat:Dataset`, the catalog or any other node named as a
   creator stays behind, and so does the deck's `dcterms:creator` link
   to it. No subject that goes takes its `sm:position` along, nor its
@@ -2020,7 +2020,7 @@ looks like, and JSON-LD reads it as one, so the file would read back as
 other triples; neither format can escape it. So is an IRI whose scheme
 is `_`, or that starts with `@`, which JSON-LD reads as a blank node or
 a keyword (`isPrefixedLookalike` in
-[writableTerms.ts](../packages/solid/src/writableTerms.ts)).
+[writableTerms.ts](../packages/adapters/solid-client/src/writableTerms.ts)).
 An import refuses a file that names such an IRI the same way
 (`unwritableTerm`), so no deck it imports has one its export refuses.
 
@@ -2266,7 +2266,7 @@ by one.
   `@language` is such a term too. A PATCH, a PUT, an insert-only PATCH,
   a release's Turtle and an export are refused with `unwritableTerm`
   before anything is sent
-  ([writableTerms.ts](../packages/solid/src/writableTerms.ts)). An
+  ([writableTerms.ts](../packages/adapters/solid-client/src/writableTerms.ts)). An
   imported deck leaves such triples out; a release read from a file is
   refused, as a draft keeps its triples as they are.
 - **No write holds a term longer than 16,383 characters**, as no read
@@ -2293,7 +2293,7 @@ by one.
   client library writes no such IRI. So no value the app reads into
   its models holds one. Each IRI field's rule in
   [ns/bounds/](../ns/bounds/), `sh:pattern "^https?://"`, keeps it out
-  as `readField` in [records.ts](../packages/solid/src/records.ts)
+  as `readField` in [records.ts](../packages/adapters/solid/src/records.ts)
   reads the field: a deck's theme or source, a card's release or
   subject, a draft's field, or the catalog's publisher, which a new
   deck group takes. Nor does it hold
@@ -2323,7 +2323,7 @@ by one.
   `-0001-01-01T00:00:00.000Z`. So a date the app read is written back
   and passes the write check.
 - Mutations always follow read → modify → save
-  ([datasets.ts](../packages/solid/src/datasets.ts): `readDataset` or
+  ([datasets.ts](../packages/adapters/solid/src/datasets.ts): `readDataset` or
   `getSolidDatasetOrNull`, then `saveDataset`). The save sends a PATCH
   of the delta, or for a large edit one PUT of the whole document as
   read and edited (below), so unknown triples survive. Only brand-new
@@ -2334,8 +2334,8 @@ by one.
   are a release's cards written, cards removed, the deck groups and
   positions of a rearranged deck list, and cards, catalog entries and
   review states brought to this app's format (`setThings` and
-  `removeThings` in [client/rdf.ts](../packages/solid/src/client/rdf.ts), `editOf` in
-  [datasetEdit.ts](../packages/solid/src/datasetEdit.ts)). A subject at
+  `removeThings` in [client/rdf.ts](../packages/adapters/inrupt-client/src/rdf.ts), `editOf` in
+  [datasetEdit.ts](../packages/adapters/solid/src/datasetEdit.ts)). A subject at
   a time would copy the whole document at each, in time growing with the
   square of its subjects. A list of values of one subject, such as a
   card's distractors or the catalog's links to its decks, is set in one
@@ -2363,7 +2363,7 @@ by one.
   stays in the source's reviews document.
 - **A write keeps what it doesn't own**, and a test holds every use
   case to it
-  ([writes.preserve.test.ts](../packages/solid/src/writes.preserve.test.ts),
+  ([writes.preserve.test.ts](../packages/adapters/solid/src/writes.preserve.test.ts),
   [testing.md](testing.md#strategy-per-layer)). It seeds a pod with what a
   later version may add ([vocab.md](vocab.md#versioning-policy)): a
   term outside every shape on each subject, a subject of a new class in
@@ -2425,7 +2425,7 @@ by one.
     or a draft, or taking back what a failed creation wrote) goes
     through `removeOwned` in `datasets.ts`. It has a rule for what of
     each kind of document is Solid Memo's
-    ([ownership.ts](../packages/solid/src/ownership.ts)). It reads the
+    ([ownership.ts](../packages/adapters/solid/src/ownership.ts)). It reads the
     document afresh, takes out Solid Memo's subjects of that kind,
     less any a newer version of the app wrote, and the blank nodes only
     they name. It deletes the document only when nothing else is left in
@@ -2509,7 +2509,7 @@ by one.
   real servers, that one included ([testing.md](testing.md)).
 - **A document written whole is written by Solid Memo**, by one
   writer on either client (`turtleOf` in
-  [turtleWriter.ts](../packages/solid/src/turtleWriter.ts)): the PUT
+  [turtleWriter.ts](../packages/adapters/solid-client/src/turtleWriter.ts)): the PUT
   that creates a document or replaces it, a deck file and a release. A
   pod document is written with every IRI in full (`<…>`), with no base
   and no prefix, and a subject not saved yet as `<#name>` of the
@@ -2520,7 +2520,7 @@ by one.
   read them. A document an earlier version wrote with prefixes holds the
   same statements, and reads as before.
 - **An edit's PATCH body is written by Solid Memo** (`patchBody` in
-  [client/sparqlUpdate.ts](../packages/solid/src/client/sparqlUpdate.ts),
+  [client/sparqlUpdate.ts](../packages/adapters/solid-client/src/sparqlUpdate.ts),
   sent by `writeDocument` in `client/resources.ts`), not by
   `@inrupt/solid-client`: one triple a line, a
   space before each `.`. node-solid-server's parser fails on a triple
@@ -2545,18 +2545,18 @@ by one.
   `Cache-Control` for days, and answer a plain read with it.
 - **A read of a deck's document is mapped once**. Several decks may
   name one cards document, and they share one frozen array of its cards
-  ([solidDeckRepository.ts](../packages/solid/src/solidDeckRepository.ts)
+  ([solidDeckRepository.ts](../packages/adapters/solid/src/solidDeckRepository.ts)
   `cardsOf`). What is worked out of the cards alone (the cards in use
   and their places, the outdated ones, the cards by id and their wrong
   options) is worked out once for that array (`derivedOnce` in
-  [frozen.ts](../packages/domain/src/frozen.ts)). So is what a library
+  [frozen.ts](../packages/core/domain/src/frozen.ts)). So is what a library
   upgrade does to them, for each release of the index a copy moves
   from and to (`planLibraryUpgrade`). A copy from a link shares only
   its cards by id, as each reads its releases on its own. Several
   decks may name
   one reviews document too. Decks whose states are read alike, by the
   same cards documents, share one frozen mapping of it
-  ([reviewStateMapper.ts](../packages/solid/src/mappers/reviewStateMapper.ts)
+  ([reviewStateMapper.ts](../packages/adapters/solid/src/mappers/reviewStateMapper.ts)
   `sharedReviewStatesOf`). The way a deck reads it is looked up in the
   documents its states name, sorted once for each read. A read is mapped
   in at most `MAX_READINGS` ways, and finding those ways goes through
@@ -2570,17 +2570,17 @@ by one.
   schedule, the progress with its intervals and eases, the outdated
   states, and the recall and due days of a pause's outlook and comeback. The prompts
   of a schedule due by each day are summed once too
-  ([dueDays.ts](../packages/domain/src/dueDays.ts)), so each deck's
+  ([dueDays.ts](../packages/core/domain/src/dueDays.ts)), so each deck's
   forecast, overdue prompts, study counts and backlog are lookups in
   those sums. A course's answered cards are found once for the states.
   Course decks may name one release, and share its outline, which the
   library reads once and freezes
-  ([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)
+  ([libraryMapper.ts](../packages/adapters/solid/src/mappers/libraryMapper.ts)
   `toCourseOutline`). What is worked out of the outline alone, the
   questions it asks, each one's first chapter and where each chapter
   is, is worked out once for it. Which steps ask each card, and the
   cards in the order the steps first ask them, are worked out once for
-  each chapter ([course.ts](../packages/domain/src/course.ts)
+  each chapter ([course.ts](../packages/core/domain/src/course.ts)
   `outlineIndexOf`, `chapterIndexOf`). Each course then adds the work
   of its own answered cards and completed chapters. Its questions
   answered are found once for decks that share the reviews document
@@ -2608,7 +2608,7 @@ by one.
   download: a 304 gives the dataset read before, and its mapping with
   it.
 - Reading builds the dataset in one pass
-  ([linearDataset.ts](../packages/solid/src/client/linearDataset.ts)):
+  ([linearDataset.ts](../packages/adapters/inrupt-client/src/linearDataset.ts)):
   `@inrupt/solid-client` copies the whole graph for every quad, which
   took 9 s for a deck of 3,000 cards.
 - 404 is a normal state for not-yet-created documents; repositories

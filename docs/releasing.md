@@ -171,14 +171,14 @@ deck version ([below](#what-has-versions-of-its-own)).
 
 A later version also reads no less of a pod than the version that
 wrote it. Each pod the app has written is kept as a snapshot, in
-`packages/vocab/fixtures/pods/<n>.nt`, with what the app read of it
+`packages/lib/vocab/fixtures/pods/<n>.nt`, with what the app read of it
 then beside it (`<n>.records.json`). One scenario writes a pod that
 holds every kind of data, each with every term its shape names. When
 the app writes that pod differently, the result is the next snapshot,
 and the earlier ones stay. For each snapshot, the current app reads
 every value the records hold, and saving them back leaves each document
 saying what it said
-([podSnapshots.roundtrip.test.ts](../packages/solid/src/podSnapshots.roundtrip.test.ts)).
+([podSnapshots.roundtrip.test.ts](../packages/adapters/solid/src/podSnapshots.roundtrip.test.ts)).
 `api/frozen/pods.txt` holds each file's hash, so a snapshot edited or
 removed fails `check:breaking` whatever a commit says.
 
@@ -307,7 +307,7 @@ that the change reads what earlier code wrote; only an earlier
 release's code can show that it still reads and saves what the change
 writes. A pod is exchanged with the first release that has the
 exchange's runner
-([podExchange.ts](../packages/solid/src/testing/podExchange.ts)),
+([podExchange.ts](../packages/adapters/solid/src/testing/podExchange.ts)),
 and with the first release of each major version after it, each
 checked out from its tag with its own dependencies:
 

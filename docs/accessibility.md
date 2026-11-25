@@ -91,7 +91,7 @@ but the journeys:
   surface it uses (surfaces without text left out by name), and the
   sidebar's faint pin at a field edge's ratio. Every built-in palette
   passes the editor's check of a palette of one's own
-  ([`customPalette.test.ts`](../packages/domain/src/customPalette.test.ts)).
+  ([`customPalette.test.ts`](../packages/core/domain/src/customPalette.test.ts)).
   It measures every pair the tests check among the colors such a
   palette paints, and `style.test.ts` checks that it does.
 - **Text size**: unit tests fail on a font size or a breakpoint in

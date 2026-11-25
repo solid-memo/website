@@ -26,7 +26,7 @@ import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
 import { releasesContainerOf, releaseUrlIn } from "@solid-memo/domain/release/releasePlace";
 import { routedFetch } from "@solid-memo/solid/routedFetch";
-import { getProfileStorages } from "@solid-memo/solid/client/resources";
+import { getProfileStorages } from "@solid-memo/solid-client/resources";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";
 import { createSolidDeckLibrary, releaseDocumentsOf } from "@solid-memo/solid/solidDeckLibrary";
 import { createSolidDeckRepository } from "@solid-memo/solid/solidDeckRepository";
@@ -34,7 +34,7 @@ import { createSolidInstanceRepository } from "@solid-memo/solid/solidInstanceRe
 import { createSolidPreferencesRepository } from "@solid-memo/solid/solidPreferencesRepository";
 import { createSolidReleaseDraftRepository } from "@solid-memo/solid/solidReleaseDraftRepository";
 import { createPodFence } from "@solid-memo/solid/podFence";
-import { grantPublicRead } from "@solid-memo/solid/client/access";
+import { grantPublicRead } from "@solid-memo/solid-client/access";
 import { createSolidReleasePublisher } from "@solid-memo/solid/solidReleasePublisher";
 import { createSolidReviewStateRepository } from "@solid-memo/solid/solidReviewStateRepository";
 import { createSolidStorageGateway } from "@solid-memo/solid/solidStorageGateway";

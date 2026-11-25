@@ -1,0 +1,173 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import type { Quad, Term } from "@rdfjs/types";
+import { directionOf } from "./sparqlUpdate";
+import { refuseUnwritable } from "./writableTerms";
+
+const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+const LANG_STRING = "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString";
+
+/** What a local name may be, for an IRI to be written as prefix:name: nothing Turtle would read otherwise. */
+const LOCAL_NAME = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+
+/** How many blank nodes deep one is written in place inside another; one deeper is written by its label, in a block of its own. */
+const MAX_NESTING = 16;
+
+/**
+ * Triples as a Turtle document of our own writing: the one writer of
+ * every document the app writes whole, to a pod or to a file
+ * (docs/data-model.md, Write discipline). With no options, as
+ * a pod document is written, every IRI is written in full, `<…>`, with
+ * no base and no prefix, so that what is written depends on nothing but
+ * the triples. A document people read is written with them, as a choice
+ * of its writer: a release (docs/deck-library.md) with `base`, its own
+ * address, so that its subjects read `<>` and `<#id>`, and `prefixes`,
+ * those it uses declared after the base; a deck file with `prefixes`.
+ * A block per subject, in the order given (`order`, the rest after in
+ * the order met), its types first; a blank node named once written in
+ * place (`[ … ]`), at most MAX_NESTING deep, the rest by their labels,
+ * so a long chain of them costs no more than its length. Text is
+ * written on one line, its quotes, backslashes and line breaks escaped;
+ * integers and booleans bare. A term written as it is, an IRI or a
+ * blank node's label, that Turtle cannot write so is refused
+ * (writableTerms.ts). No vendor library writes Turtle with a base in
+ * the browser (docs/boundaries.md).
+ */
+export function turtleOf(
+  quads: Iterable<Quad>,
+  {
+    base,
+    prefixes = {},
+    order = [],
+  }: {
+    base?: string;
+    prefixes?: Readonly<Record<string, string>>;
+    order?: readonly string[];
+  } = {},
+): string {
+  const bySubject = new Map<string, Quad[]>();
+  const named = new Map<string, number>();
+  const namedBy = new Map<string, string>();
+  for (const quad of quads) {
+    refuseUnwritable([quad]);
+    const key = keyOf(quad.subject);
+    const statements = bySubject.get(key);
+    if (statements === undefined) bySubject.set(key, [quad]);
+    else statements.push(quad);
+    if (quad.object.termType === "BlankNode") {
+      named.set(quad.object.value, (named.get(quad.object.value) ?? 0) + 1);
+      namedBy.set(quad.object.value, key);
+    }
+  }
+  // A blank node another subject names once, reached from a named subject, is written in place, at most MAX_NESTING deep; any other by its label.
+  const level = new Map<string, number>();
+  for (const start of named.keys()) {
+    const path: string[] = [];
+    let label = start;
+    let above: number;
+    for (;;) {
+      const known = level.get(label);
+      if (known !== undefined) {
+        above = Math.max(known, 0);
+        break;
+      }
+      if (named.get(label) !== 1 || !bySubject.has(`_:${label}`)) {
+        level.set(label, 0);
+        above = 0;
+        break;
+      }
+      const by = namedBy.get(label)!;
+      if (!by.startsWith("_:")) {
+        level.set(label, 1);
+        above = 1;
+        break;
+      }
+      path.push(label);
+      level.set(label, -1);
+      label = by.slice(2);
+    }
+    for (const below of path.reverse()) {
+      above = above > 0 && above < MAX_NESTING ? above + 1 : 0;
+      level.set(below, above);
+    }
+  }
+  const inlined = (label: string): boolean => (level.get(label) ?? 0) > 0;
+  const used = new Set<string>();
+  const iri = (value: string): string => {
+    if (base !== undefined && value === base) return "<>";
+    if (base !== undefined && value.startsWith(`${base}#`)) return `<${value.slice(base.length)}>`;
+    for (const [prefix, namespace] of Object.entries(prefixes)) {
+      if (value.startsWith(namespace) && LOCAL_NAME.test(value.slice(namespace.length))) {
+        used.add(prefix);
+        return `${prefix}:${value.slice(namespace.length)}`;
+      }
+    }
+    return `<${value}>`;
+  };
+  const object = (term: Term, depth: number): string => {
+    if (term.termType === "NamedNode") return iri(term.value);
+    if (term.termType === "BlankNode") {
+      return inlined(term.value)
+        ? `[ ${predicates(bySubject.get(`_:${term.value}`)!, depth + 1).join(" ; ")} ]`
+        : `_:${term.value}`;
+    }
+    return literal(term as Quad["object"] & { termType: "Literal" }, iri);
+  };
+  const predicates = (statements: readonly Quad[], depth: number): string[] => {
+    const grouped = new Map<string, Quad[]>();
+    for (const statement of statements) {
+      const same = grouped.get(statement.predicate.value);
+      if (same === undefined) grouped.set(statement.predicate.value, [statement]);
+      else same.push(statement);
+    }
+    const keys = [...grouped.keys()].sort(
+      (a, b) => Number(b === RDF_TYPE) - Number(a === RDF_TYPE),
+    );
+    const indent = "    ".repeat(depth + 1);
+    return keys.map((predicate) => {
+      const objects = grouped.get(predicate)!.map((statement) => object(statement.object, depth));
+      const name = predicate === RDF_TYPE ? "a" : iri(predicate);
+      return `${name} ${objects.join(` ,\n${indent}${" ".repeat(name.length + 1)}`)}`;
+    });
+  };
+  const keys = [...new Set([...order.filter((key) => bySubject.has(key)), ...bySubject.keys()])];
+  const blocks = keys
+    .filter((key) => !(key.startsWith("_:") && inlined(key.slice(2))))
+    .map(
+      (key) =>
+        `${key.startsWith("_:") ? key : iri(key)}\n    ${predicates(bySubject.get(key)!, 0).join(" ;\n    ")} .`,
+    );
+  const header = [
+    ...(base === undefined ? [] : [`@base <${base}> .`, ""]),
+    ...Object.entries(prefixes)
+      .filter(([prefix]) => used.has(prefix))
+      .map(([prefix, namespace]) => `@prefix ${prefix}: <${namespace}> .`),
+  ];
+  return `${header.length === 0 ? "" : `${header.join("\n")}\n\n`}${blocks.join("\n\n")}\n`;
+}
+
+function keyOf(term: Term): string {
+  return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
+}
+
+function literal(
+  term: {
+    value: string;
+    language: string;
+    direction?: "ltr" | "rtl" | "" | null;
+    datatype: { value: string };
+  },
+  iri: (value: string) => string,
+): string {
+  const datatype = term.datatype.value;
+  if (datatype === `${XSD}integer` && /^[+-]?[0-9]+$/.test(term.value)) return term.value;
+  if (datatype === `${XSD}boolean` && (term.value === "true" || term.value === "false"))
+    return term.value;
+  const text = `"${term.value.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n").replace(/\r/g, "\\r")}"`;
+  if (term.language !== "" || datatype === LANG_STRING)
+    return `${text}@${term.language}${directionOf(term)}`;
+  return datatype === `${XSD}string` ? text : `${text}^^${iri(datatype)}`;
+}

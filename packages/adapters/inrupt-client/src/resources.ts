@@ -1,0 +1,601 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import {
+  createContainerAt as libraryCreateContainerAt,
+  deleteContainer as libraryDeleteContainer,
+  deleteFile as libraryDeleteFile,
+  deleteSolidDataset as libraryDeleteSolidDataset,
+  FetchError,
+  getContainedResourceUrlAll as libraryGetContainedResourceUrlAll,
+  getFile as libraryGetFile,
+  overwriteFile as libraryOverwriteFile,
+  saveSolidDatasetAt as librarySaveSolidDatasetAt,
+  type SolidDataset,
+  type Thing,
+  type WithServerResourceInfo,
+} from "@inrupt/solid-client";
+import type { Quad } from "@rdfjs/types";
+import { JsonLdParser } from "jsonld-streaming-parser";
+import { fetchedDataset, serverDataset, solidDataset, sourcedDataset } from "./inrupt";
+import {
+  type Dataset,
+  type DocumentRead,
+  type DocumentWrite,
+  type FetchedDataset,
+  HttpError,
+  ReadLimitError,
+  type ReadLimits,
+  type RequestOptions,
+  type SourcedDataset,
+} from "@solid-memo/solid-client/interface";
+import { boundedHeadersFetch, withBoundedHeaders } from "@solid-memo/solid-client/linkHeader";
+import {
+  getSolidDatasetLinear as libraryGetSolidDatasetLinear,
+  LOCAL_NODE,
+  readBlankNodes,
+  turtleParser,
+} from "./linearDataset";
+import {
+  changesOf,
+  datasetAt,
+  getThing,
+  getThingAll,
+  getUrlAll,
+  localNameOf,
+  sourceOf,
+  toRdfJsDataset,
+} from "./rdf";
+import {
+  namesIriUnder,
+  NO_SIZE_LIMITS,
+  quadTally,
+  type TextStream,
+  textChunks,
+  writeTurtle,
+} from "@solid-memo/solid-client/readLimits";
+import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid-client/sparqlUpdate";
+import { turtleOf } from "@solid-memo/solid-client/turtleWriter";
+import { refuseUnwritable } from "@solid-memo/solid-client/writableTerms";
+
+/**
+ * Reading and writing a pod's resources: documents as datasets (rdf.ts),
+ * containers and files, of the types in interface.ts. A thin layer over
+ * @inrupt/solid-client, the only implementation so far, so that the rest
+ * of the package names no library; another implementation passes the
+ * same contract (src/testing/contract/resources.ts). The operations
+ * keep the names the library gives them, and its requests: their Accept and Content-Type
+ * headers and the URLs they ask for. readDocument and writeDocument are
+ * the app's own: the conditional reads and writes datasets.ts builds its
+ * cache and its preconditions on, with the PATCH bodies the app writes
+ * itself (sparqlUpdate.ts).
+ *
+ * A request the server answers with a failure rejects with an HttpError,
+ * whose message is the library's: what the server was asked, and how it
+ * answered. Its cause is the library's own error, with its stack.
+ */
+
+/** The request's result, its failure an HttpError where the server answered with one. */
+async function answered<T>(request: () => Promise<T>): Promise<T> {
+  try {
+    return await request();
+  } catch (error) {
+    if (error instanceof FetchError)
+      throw new HttpError(error.message, error.response, { cause: error });
+    throw error;
+  }
+}
+
+/**
+ * The document at `url`, as a dataset, read as getSolidDatasetLinear
+ * reads it: under the limits of a response limitedFetch gave, and always
+ * under the bound on a Turtle text's declarations and IRIs
+ * (writeTurtle), so that a container's listing, a profile or any other
+ * document is parsed as the documents of a deck are. With no fetch, the
+ * global one.
+ */
+export function getSolidDataset(url: string, options?: RequestOptions): Promise<FetchedDataset> {
+  return getSolidDatasetLinear(url, {
+    fetch: options?.fetch ?? ((input, init) => globalThis.fetch(input, init)),
+  });
+}
+
+/** The document at `url`, as getSolidDataset reads it, but built in time linear in its size (linearDataset.ts). */
+export function getSolidDatasetLinear(
+  url: string,
+  options: { fetch: typeof globalThis.fetch },
+): Promise<FetchedDataset> {
+  return answered(async () => fetchedDataset(await libraryGetSolidDatasetLinear(url, options)));
+}
+
+/**
+ * Read the document at `url` as getSolidDatasetLinear does, always from
+ * the pod, never from the browser's cache (`no-store`), with the version
+ * (ETag) the pod gives it. With `ifNoneMatch`, only if the document is no
+ * longer at that version: `notModified` when it still is (304), with
+ * nothing downloaded.
+ */
+export async function readDocument(
+  url: string,
+  { fetch, ifNoneMatch }: { fetch: typeof globalThis.fetch; ifNoneMatch?: string },
+): Promise<DocumentRead> {
+  let status: number | undefined;
+  let etag: string | undefined;
+  try {
+    const dataset = await getSolidDatasetLinear(url, {
+      fetch: async (input, init) => {
+        const headers = new Headers(init?.headers);
+        if (ifNoneMatch !== undefined) headers.set("If-None-Match", ifNoneMatch);
+        // A browser would answer a plain read from its own cache, which a pod that gives a modification time
+        // and no Cache-Control lets it keep for days; what is kept is the caller's to keep (datasets.ts).
+        const response = await fetch(input, { ...init, headers, cache: "no-store" });
+        status = response.status;
+        etag = response.headers.get("ETag") ?? undefined;
+        return response;
+      },
+    });
+    return { dataset, etag };
+  } catch (error) {
+    // The library fails on a 304 without saying its status.
+    if (status === 304 && ifNoneMatch !== undefined) return { notModified: true };
+    throw error;
+  }
+}
+
+/**
+ * Write a dataset to `url`, and give it as now saved there, with the
+ * version (ETag) the pod answered the write with:
+ *
+ * - an edit of the document it was read from is one PATCH of its
+ *   changes, in the app's own SPARQL Update (patchBody); one the server
+ *   refuses as a conflict (409) is sent once more with its deleted
+ *   decimals spelled as numbers, as node-solid-server reads them. Where
+ *   that body is larger than MAX_PATCH_BYTES, or always (`whole`), the
+ *   edit is one PUT of the whole document instead, the edit applied: for
+ *   a bulk edit of text, which Community Solid Server's in-memory store
+ *   cuts short when a PATCH holds characters beyond ASCII. A change with a
+ *   blank node, which patchBody cannot write, goes as the library writes it;
+ * - a new dataset is a PUT that only creates (If-None-Match: *).
+ *
+ * With `ifMatch`, the write is made only if the document is still at that
+ * version: a 412 otherwise, as HttpError.
+ *
+ * A PUT's body is the whole dataset as solidDatasetAsTurtle writes it,
+ * every IRI in full, never the library's. The library's save gives what
+ * it saved with the subjects made by name resolved, copying the whole
+ * dataset at each subject, in time in the square of its subjects. So it
+ * saves one with no subject in its default graph, and the subjects are
+ * given back to what it saved, resolved in one pass (withSubjectsOf).
+ */
+export async function writeDocument(
+  url: string,
+  dataset: Dataset,
+  {
+    fetch,
+    ifMatch,
+    whole = false,
+  }: { fetch: typeof globalThis.fetch; ifMatch?: string; whole?: boolean },
+): Promise<DocumentWrite> {
+  let etag: string | undefined;
+  const noting: typeof globalThis.fetch = async (input, init) => {
+    const response = await fetch(input, init);
+    etag = response.headers.get("ETag") ?? undefined;
+    return withBoundedHeaders(response);
+  };
+  const data = solidDataset(dataset);
+  const written = ownPatches(withIfMatch(noting, ifMatch), dataset, whole);
+  const saved = await answered(() =>
+    librarySaveSolidDatasetAt(url, Object.freeze({ ...data, graphs: { default: {} } }), {
+      fetch: written,
+    }),
+  );
+  return { dataset: fetchedDataset(withSubjectsOf(saved, data)), etag };
+}
+
+/**
+ * `saved`, as the library saved a dataset with no subject in its default
+ * graph, with the subjects of `data`'s default graph and its other
+ * graphs, as the library resolves them once saved: a subject made by
+ * name, and an IRI value of one, is `#name` in the document saved.
+ */
+function withSubjectsOf<T extends SolidDataset & WithServerResourceInfo>(
+  saved: T,
+  data: SolidDataset,
+): T {
+  const base = saved.internal_resourceInfo.sourceIri;
+  const resolve = (iri: string) => {
+    const name = localNameOf(iri);
+    return name === undefined ? iri : `${base}#${name}`;
+  };
+  const isLocal = (objects: Thing["predicates"][string]) =>
+    (objects.namedNodes ?? []).some((node) => localNameOf(node) !== undefined);
+  const graph: Record<string, Thing> = Object.create(null);
+  for (const [iri, thing] of Object.entries(data.graphs.default)) {
+    const entries = Object.entries(thing.predicates);
+    const predicates = !entries.some(([, objects]) => isLocal(objects))
+      ? thing.predicates
+      : Object.freeze(
+          Object.fromEntries(
+            entries.map(([predicate, objects]) => [
+              predicate,
+              isLocal(objects)
+                ? Object.freeze({
+                    ...objects,
+                    namedNodes: Object.freeze(objects.namedNodes!.map(resolve)),
+                  })
+                : objects,
+            ]),
+          ),
+        );
+    graph[resolve(iri)] = Object.freeze({ ...thing, url: resolve(thing.url), predicates });
+  }
+  return Object.freeze({
+    ...saved,
+    graphs: Object.freeze({ ...data.graphs, default: Object.freeze(graph) }),
+  });
+}
+
+/**
+ * The fetch, with the PUT the library sends to create a document given
+ * the whole dataset as its body (solidDatasetAsTurtle), and the PATCH it
+ * sends given our body (patchBody, sent again with its deleted decimals
+ * spelled as numbers where a conflict (409) may come of their spelling),
+ * or sent as such a PUT when that body is larger than MAX_PATCH_BYTES,
+ * or always (`whole`); other headers kept. A term Turtle cannot write as
+ * it is is refused before anything is sent (writableTerms.ts). The
+ * library takes the answer as its PATCH's.
+ */
+function ownPatches(
+  fetch: typeof globalThis.fetch,
+  dataset: Dataset,
+  whole: boolean,
+): typeof globalThis.fetch {
+  return async (input, given) => {
+    // The library's save sends a PUT, which creates the document, or a PATCH, and nothing else.
+    const init = given!;
+    if (init.method === "PUT")
+      return fetch(input, { ...init, body: solidDatasetAsTurtle(dataset) });
+    const changes = changesOf(dataset);
+    // The library's PATCH has a body of text, which ours replaces unless a change names a blank node.
+    const body = patchBody(changes, localNameOf) ?? String(init.body);
+    if (!whole && new TextEncoder().encode(body).length <= MAX_PATCH_BYTES) {
+      refuseUnwritable([...(changes?.additions ?? []), ...(changes?.deletions ?? [])]);
+      const response = await fetch(input, { ...init, body });
+      // node-solid-server finds no decimal deleted as it served it (`1.0`, `2.50`), only as it reads it (`1`,
+      // `2.5`), and applies nothing (409): sent once more, decimals so spelled. A deletion of a triple that is
+      // gone fails again, as it should; one found the second time names the same number.
+      if (response.status !== 409) return response;
+      const respelled = patchBody(changes, localNameOf, true);
+      return respelled === null || respelled === body
+        ? response
+        : fetch(input, { ...init, body: respelled });
+    }
+    const headers = new Headers(init.headers);
+    headers.set("Content-Type", "text/turtle");
+    return fetch(input, {
+      ...init,
+      method: "PUT",
+      headers,
+      body: solidDatasetAsTurtle(dataset),
+    });
+  };
+}
+
+/** The fetch, with `If-Match` added to the request that writes (the only one the library makes for it). */
+function withIfMatch(
+  fetch: typeof globalThis.fetch,
+  etag: string | undefined,
+): typeof globalThis.fetch {
+  if (etag === undefined) return fetch;
+  return (input, init) => {
+    const headers = new Headers(init?.headers);
+    headers.set("If-Match", etag);
+    return fetch(input, { ...init, headers });
+  };
+}
+
+/** Delete the document at `url`; with `ifMatch`, only if it is still at that version (a 412 otherwise). */
+export function deleteSolidDataset(
+  url: string,
+  { fetch, ifMatch }: { fetch: typeof globalThis.fetch; ifMatch?: string },
+): Promise<void> {
+  return answered(() => libraryDeleteSolidDataset(url, { fetch: withIfMatch(fetch, ifMatch) }));
+}
+
+/** Create a container at `url`, and those above it a server makes with it. */
+export async function createContainerAt(url: string, options: RequestOptions): Promise<void> {
+  await answered(() => libraryCreateContainerAt(url, bounded(options)));
+}
+
+/** Delete the container at `url`, which servers do only when it is empty. */
+export function deleteContainer(url: string, options: RequestOptions): Promise<void> {
+  return answered(() => libraryDeleteContainer(url, options));
+}
+
+/** The file at `url`, as it is. */
+export function getFile(url: string, options: RequestOptions): Promise<Blob> {
+  return answered(() => libraryGetFile(url, bounded(options)));
+}
+
+/** Write a file to `url`, as `contentType`, in place of any there. */
+export async function overwriteFile(
+  url: string,
+  file: Blob,
+  options: RequestOptions & { contentType: string },
+): Promise<void> {
+  await answered(() => libraryOverwriteFile(url, file, bounded(options)));
+}
+
+/**
+ * The options, their fetch (the global one when none) giving responses
+ * with the headers that describe a resource bounded (linkHeader.ts), for
+ * a request whose answer the library reads them from.
+ */
+function bounded<T extends RequestOptions>(options: T): T {
+  return {
+    ...options,
+    fetch: boundedHeadersFetch(options.fetch ?? ((input, init) => globalThis.fetch(input, init))),
+  };
+}
+
+/** Delete the file at `url`. */
+export function deleteFile(url: string, options: RequestOptions): Promise<void> {
+  return answered(() => libraryDeleteFile(url, options));
+}
+
+/**
+ * The storages the profile of `webId` names (pim:storage): in its WebID
+ * document, as already read (`webIdProfile`), and in the documents that
+ * names as more of the profile, each read through `fetch`.
+ */
+export type ProfileStorages = (
+  webId: string,
+  options: RequestOptions & { webIdProfile: FetchedDataset },
+) => Promise<string[]>;
+
+const FOAF_PRIMARY_TOPIC = "http://xmlns.com/foaf/0.1/primaryTopic";
+const FOAF_IS_PRIMARY_TOPIC_OF = "http://xmlns.com/foaf/0.1/isPrimaryTopicOf";
+const RDFS_SEE_ALSO = "http://www.w3.org/2000/01/rdf-schema#seeAlso";
+const PIM_STORAGE = "http://www.w3.org/ns/pim/space#storage";
+
+/**
+ * The documents a WebID document names as more of the profile: those its
+ * subjects are the primary topic of, and those the WebID's subject points
+ * to (rdfs:seeAlso, foaf:isPrimaryTopicOf), the WebID document itself
+ * left out, as the library's getAltProfileUrlAllFrom finds them.
+ */
+function moreProfilesOf(webId: string, webIdProfile: FetchedDataset): string[] {
+  const me = getThing(webIdProfile, webId);
+  const urls = [
+    ...getThingAll(webIdProfile)
+      .filter((thing) => getUrlAll(thing, FOAF_PRIMARY_TOPIC).length > 0)
+      .map((thing) => thing.url),
+    ...(me === null ? [] : getUrlAll(me, RDFS_SEE_ALSO)),
+    ...(me === null ? [] : getUrlAll(me, FOAF_IS_PRIMARY_TOPIC_OF)),
+  ];
+  const own = getSourceUrl(webIdProfile);
+  return [...new Set(urls.filter((url) => url !== own))];
+}
+
+/**
+ * The profile lookup: the WebID document and those it names as more of
+ * the profile that can be read, each asked of the WebID's storages. Each
+ * is read as every pod document is (getSolidDatasetLinear), under the
+ * limits of a response `fetch` gives (solidStorageGateway.ts), not with
+ * the library's getProfileAll, whose reads have neither; one that fails
+ * is left out.
+ */
+export const getProfileStorages: ProfileStorages = async (webId, { fetch, webIdProfile }) => {
+  const more = await Promise.allSettled(
+    moreProfilesOf(webId, webIdProfile).map((url) => getSolidDataset(url, { fetch })),
+  );
+  const storages = new Set<string>();
+  for (const profile of [
+    webIdProfile,
+    ...more.flatMap((result) => (result.status === "fulfilled" ? [result.value] : [])),
+  ]) {
+    const me = getThing(profile, webId);
+    if (me !== null) for (const storage of getUrlAll(me, PIM_STORAGE)) storages.add(storage);
+  }
+  return [...storages];
+};
+
+const MEDIA_TYPES = { turtle: "text/turtle", jsonld: "application/ld+json" } as const;
+
+/**
+ * The quads of a Turtle or JSON-LD text, its relative IRIs resolved
+ * against `baseUrl`, parsed as a pod's documents are: in every graph the
+ * text names. Rejects with the parser's error on a text that does not
+ * parse, as a Turtle text with a triple term does not (turtleParser) nor
+ * JSON-LD with RDF-star, and with a ReadLimitError at the first quad past `limits`
+ * (quadTally; the text's own size is its caller's to check: it holds the
+ * text already), or on a Turtle text at its first base, prefix, IRI or
+ * level of nesting past what a read takes in, with limits or with none (writeTurtle); the
+ * parser reads no further. A quad that names an IRI the library keeps
+ * for subjects not saved yet is left out (LOCAL_NODE). JSON-LD is read
+ * with no fetch at all: a context named by its address is refused
+ * (parseJsonLd).
+ */
+export function parseQuads(
+  text: string,
+  format: keyof typeof MEDIA_TYPES,
+  baseUrl: string,
+  limits?: ReadLimits,
+): Promise<Quad[]> {
+  return new Promise((resolve, reject) => {
+    const quads: Quad[] = [];
+    // A Turtle read's blank nodes are named anew; JSON-LD's keep their labels, held to the bound as a write
+    // holds them (BlankLabels) and to Turtle's grammar on write.
+    const past = quadTally(limits, format === "turtle" ? "renamed" : "kept");
+    const named = format === "turtle" ? readBlankNodes() : (quad: Quad) => quad;
+    let refused = false;
+    const refuse = () => {
+      refused = true;
+      quads.length = 0;
+      // The tally is past limits only under some; the declarations, under none too.
+      reject(new ReadLimitError(baseUrl, limits ?? NO_SIZE_LIMITS));
+    };
+    // Whether to go on: false once past limits, for the parser to stop (parseJsonLd, writeTurtle).
+    const onQuad = (quad: Quad): boolean => {
+      if (refused) return false;
+      if (past(quad)) {
+        refuse();
+        return false;
+      }
+      if (!namesIriUnder(quad, LOCAL_NODE)) quads.push(named(quad));
+      return true;
+    };
+    const done = () => resolve(quads);
+    if (format === "jsonld") {
+      parseJsonLd(text, baseUrl, { onQuad, onError: reject, done });
+      return;
+    }
+    const parser = turtleParser();
+    let failed = false;
+    parser.onQuad(onQuad);
+    parser.onError((error) => {
+      failed = true;
+      reject(error);
+    });
+    parser.onComplete(done);
+    const resourceInfo = serverDataset(datasetAt(baseUrl, MEDIA_TYPES[format]));
+    // solid-client hands the text to n3's parser as it is, which reads a stream as well.
+    const parse = (stream: TextStream) => parser.parse(stream as unknown as string, resourceInfo);
+    // A text that does not parse is written no further, as one past limits is not.
+    if (!writeTurtle(text, baseUrl, parse, () => !refused && !failed)) refuse();
+  });
+}
+
+/**
+ * Parse a JSON-LD text by the parser @inrupt/solid-client reads JSON-LD
+ * with, but given a document loader that loads nothing. The library's
+ * loader fetches every context the text names by its address (or
+ * `@import`s), from the user's browser; here such a text is refused
+ * instead, as one that does not parse, whatever check came before. It
+ * reads the text as it streams, so a node's `@context` is to come before
+ * its other keys (refuseRemoteContexts writes it so), or the text does
+ * not parse: otherwise the parser holds every node to the end, then
+ * matches each against every typed one, time growing with their square.
+ * The text is written in parts (textChunks), each in a task of its own
+ * (taskQueue), and the parser destroyed once `onQuad` says not to go on
+ * or at its first error, so that it reads no further than the part it
+ * is in. The parser reports some errors and reads on, each taking it far
+ * more time than a triple; and the parts written at once would hold the
+ * tab for all the work they queue, past the error that ends the parse.
+ */
+function parseJsonLd(
+  text: string,
+  baseUrl: string,
+  {
+    onQuad,
+    onError,
+    done,
+  }: { onQuad: (quad: Quad) => boolean; onError: (error: Error) => void; done: () => void },
+): void {
+  const parser = new JsonLdParser({
+    baseIRI: baseUrl,
+    streamingProfile: true,
+    // refuseRemoteContexts refuses a type's own context; a plain one may come after the id.
+    streamingProfileAllowOutOfOrderPlainType: true,
+    // No RDF-star: the parser holds a top-level node's annotations to the end, copying them at each.
+    rdfstar: false,
+    documentLoader: {
+      load: (url) => Promise.reject(new Error(`A JSON-LD context elsewhere is not read: ${url}`)),
+    },
+  });
+  let stopped = false;
+  const stop = () => {
+    stopped = true;
+    parser.destroy();
+  };
+  parser.on("data", (quad: Quad) => {
+    if (!onQuad(quad)) stop();
+  });
+  parser.on("error", (error: Error) => {
+    stop();
+    onError(error);
+  });
+  parser.on("end", done);
+  const tasks = taskQueue();
+  (async () => {
+    try {
+      for (const chunk of textChunks(text)) {
+        parser.write(chunk);
+        await tasks.next();
+        if (stopped) break;
+      }
+    } finally {
+      tasks.close();
+    }
+    if (!stopped) parser.end();
+  })().catch(onError);
+}
+
+/**
+ * A wait for the next task of the event loop, after the microtasks
+ * queued so far, the parser's work on what it was written among them:
+ * a message to itself, which a browser delivers at once, where a
+ * timeout nested this deep waits some milliseconds.
+ */
+function taskQueue(): { next: () => Promise<void>; close: () => void } {
+  const channel = new MessageChannel();
+  let resume: () => void;
+  channel.port1.onmessage = () => resume();
+  return {
+    next: () =>
+      new Promise((resolve) => {
+        resume = resolve;
+        channel.port2.postMessage(null);
+      }),
+    close: () => channel.port1.close(),
+  };
+}
+
+/** The URL of the document a dataset was read from or saved to; null for one built here. */
+export function getSourceUrl(dataset: SourcedDataset): string;
+export function getSourceUrl(dataset: Dataset): string | null;
+export function getSourceUrl(dataset: Dataset): string | null {
+  return sourceOf(dataset)?.url ?? null;
+}
+
+/** Whether a dataset knows the document it was read from or saved to. */
+export function hasResourceInfo<T extends Dataset>(dataset: T): dataset is T & SourcedDataset {
+  return sourceOf(dataset) !== undefined;
+}
+
+/** The URLs of the resources a container, read as a dataset, says it contains. */
+export function getContainedResourceUrlAll(container: SourcedDataset): string[] {
+  return libraryGetContainedResourceUrlAll(sourcedDataset(container));
+}
+
+/**
+ * A dataset as Turtle text, written by turtleOf, as a PUT sends it:
+ * every IRI in full, with no prefix, a subject made by name and not
+ * saved yet as `<#name>`, of the document it goes to. With `prefixes`,
+ * the IRIs they stand for are written with them, as a deck file is
+ * written for people to read. A term Turtle cannot write as it is is
+ * refused (writableTerms.ts).
+ */
+export function solidDatasetAsTurtle(
+  dataset: Dataset,
+  options?: { prefixes?: Readonly<Record<string, string>> },
+): string {
+  return turtleOf([...toRdfJsDataset(dataset)].map(writtenQuad), options);
+}
+
+/** A quad as a document is written: a subject made by name and not saved yet as `#name`. */
+function writtenQuad({ subject, predicate, object, graph }: Quad): Quad {
+  return {
+    subject: relative(subject),
+    predicate,
+    object: relative(object),
+    graph,
+  } as Quad;
+}
+
+/** A term made by name and not saved yet as `#name`, relative to the document it is written to; any other as it is. */
+function relative<T extends Quad["subject"] | Quad["object"]>(term: T): T {
+  const name = term.termType === "NamedNode" ? localNameOf(term.value) : undefined;
+  return name === undefined ? term : ({ termType: "NamedNode", value: `#${name}` } as T);
+}

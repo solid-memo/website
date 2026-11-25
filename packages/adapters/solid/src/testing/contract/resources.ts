@@ -1,0 +1,1486 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import type { Quad } from "@rdfjs/types";
+import { AppError } from "@solid-memo/domain/appError";
+import { growthAsync } from "@solid-memo/domain/testing/growth";
+import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
+import { JsonLdParser } from "jsonld-streaming-parser";
+import { describe, expect, it, vi } from "vitest";
+import { type Dataset, HttpError, ReadLimitError } from "@solid-memo/solid-client/interface";
+import {
+  limitedFetch,
+  MAX_TERM_CHARACTERS,
+  MAX_VALUES_PER_PREDICATE,
+  NO_SIZE_LIMITS,
+  noneSpent,
+  RELEASE_LIMITS,
+} from "@solid-memo/solid-client/readLimits";
+import { MAX_PATCH_BYTES, patchBody } from "@solid-memo/solid-client/sparqlUpdate";
+import { decimalLiteral } from "../literals";
+import { type DataClient, turtleAt } from "./rdf";
+
+const URL_ = "https://pod.example/decks/deck.ttl";
+const EX = "https://example.com/ns#";
+
+/**
+ * The documents of the newest pod snapshot (podSnapshots.roundtrip.test.ts),
+ * which holds every kind of data the app writes, each with every term its
+ * shape names: each document's address and its statements as N-Triples.
+ */
+function snapshotDocuments(): [url: string, nTriples: string][] {
+  const folder = join(VOCAB_ROOT, "fixtures/pods/");
+  const newest = Math.max(
+    ...readdirSync(folder)
+      .filter((name) => /^\d+\.nt$/.test(name))
+      .map((name) => Number.parseInt(name, 10)),
+  );
+  return readFileSync(join(folder, `${newest}.nt`), "utf8")
+    .split(/^# /m)
+    .filter((part) => part !== "")
+    .map((part) => {
+      const [url, ...lines] = part.split("\n");
+      return [url!, lines.join("\n")];
+    });
+}
+
+/** Statements to compare by: each quad's terms, a literal's language, direction and datatype among them, sorted. */
+function statementsOf(quads: Iterable<Quad>): string[] {
+  const term = (one: Quad["subject"] | Quad["object"]) =>
+    one.termType === "Literal"
+      ? `"${one.value}"@${one.language}--${one.direction ?? ""}^^${one.datatype.value}`
+      : `${one.termType} ${one.value}`;
+  return [...quads]
+    .map(({ subject, predicate, object }) => `${term(subject)} ${predicate.value} ${term(object)}`)
+    .sort();
+}
+
+/** A directive that declares a base or a prefix, in either spelling Turtle has. */
+const DIRECTIVE = /^\s*@?(base|prefix)\b/im;
+
+/** The parser's job for each JSON value it reads, which a test counts. */
+type ValueJobs = { newOnValueJob: (...args: unknown[]) => Promise<void> };
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+
+/** How the pod answers a request; the body is the Turtle of one subject unless given. */
+interface Answer {
+  status?: number;
+  body?: string;
+  headers?: Record<string, string>;
+}
+
+/** A request the pod got. */
+interface Sent {
+  method: string;
+  url: string;
+  headers: Headers;
+  body: unknown;
+  cache: RequestCache | undefined;
+}
+
+/**
+ * A pod that notes every request and answers each with the next of
+ * `answers`, the last one again once they run out: by default a 200 of
+ * a Turtle document of one subject.
+ */
+function pod(...answers: Answer[]) {
+  const sent: Sent[] = [];
+  const fetch: typeof globalThis.fetch = async (input, init) => {
+    const url = String(input);
+    sent.push({
+      method: init?.method ?? "GET",
+      url,
+      headers: new Headers(init?.headers),
+      body: init?.body,
+      cache: init?.cache,
+    });
+    const {
+      status = 200,
+      body = `<#a> <${EX}p> "x" .`,
+      headers = {},
+    } = answers[Math.min(sent.length - 1, answers.length - 1)] ?? {};
+    const response = new Response([204, 304].includes(status) ? null : body, {
+      status,
+      headers: { "Content-Type": "text/turtle", ...headers },
+    });
+    Object.defineProperty(response, "url", { value: url });
+    return response;
+  };
+  return { fetch, sent };
+}
+
+/**
+ * What the app relies on of the resource module (client/resources.ts):
+ * the requests it makes and how it reads their answers. An
+ * implementation passes these, or a caller breaks; the end-to-end tests
+ * (e2e/pod) hold the same requests to real Solid servers.
+ */
+export function resourcesContract({ rdf, resources }: DataClient): void {
+  const { buildThing, createSolidDataset, createThing, getThing, getThingAll, setThing } = rdf;
+  const {
+    createContainerAt,
+    deleteContainer,
+    deleteFile,
+    deleteSolidDataset,
+    getContainedResourceUrlAll,
+    getFile,
+    getProfileStorages,
+    getSolidDataset,
+    getSolidDatasetLinear,
+    getSourceUrl,
+    hasResourceInfo,
+    overwriteFile,
+    parseQuads,
+    readDocument,
+    solidDatasetAsTurtle,
+    writeDocument,
+  } = resources;
+
+  /** The document at URL_ as read, holding `turtle`. */
+  const read = (turtle = `<#a> <${EX}p> "x" .`) =>
+    getSolidDatasetLinear(URL_, { fetch: turtleAt(turtle) });
+
+  /** How many changes a dataset still holds to be written: none once it is saved. */
+  const pending = (dataset: Parameters<typeof rdf.changesOf>[0]) => {
+    const changes = rdf.changesOf(dataset);
+    return (changes?.additions.length ?? 0) + (changes?.deletions.length ?? 0);
+  };
+
+  /** A dataset not read from anywhere, of one subject made by name. */
+  const created = () =>
+    setThing(
+      createSolidDataset(),
+      buildThing(createThing({ name: "a" }))
+        .addStringNoLocale(`${EX}p`, "x")
+        .build(),
+    );
+
+  describe("HttpError", () => {
+    it("is what a failed request rejects with: the status and the response, and a message naming the URL and the status", async () => {
+      const error = await getSolidDataset(URL_, {
+        fetch: pod({ status: 404, body: "" }).fetch,
+      }).catch((failure: unknown) => failure);
+      expect(error).toBeInstanceOf(HttpError);
+      expect(error).toMatchObject({
+        name: "HttpError",
+        statusCode: 404,
+        response: { status: 404 },
+      });
+      expect((error as HttpError).message).toContain(URL_);
+      expect((error as HttpError).message).toContain("404");
+    });
+
+    it("is what a refused write rejects with", async () => {
+      const { fetch } = pod({ status: 412, body: "" });
+      await expect(writeDocument(URL_, createSolidDataset(), { fetch })).rejects.toMatchObject({
+        statusCode: 412,
+      });
+    });
+
+    it("is not made of a failure that is no answer of the server's: a text that does not parse", async () => {
+      const error = await getSolidDatasetLinear(URL_, {
+        fetch: pod({ body: "<#a> <#b> ." }).fetch,
+      }).catch((failure: unknown) => failure);
+      expect(error).toBeInstanceOf(Error);
+      expect(error).not.toBeInstanceOf(HttpError);
+    });
+  });
+
+  describe("reading documents", () => {
+    it("reads a document through the fetch given, with the same Accept either way", async () => {
+      const { fetch, sent } = pod();
+      for (const reading of [getSolidDataset, getSolidDatasetLinear]) {
+        const dataset = await reading(URL_, { fetch });
+        expect(getThing(dataset, `${URL_}#a`)).not.toBeNull();
+      }
+      expect(sent.map(({ method, url }) => [method, url])).toEqual([
+        ["GET", URL_],
+        ["GET", URL_],
+      ]);
+      expect(sent[0]!.headers.get("Accept")).toBe(sent[1]!.headers.get("Accept"));
+    });
+
+    it("reads in one pass what getSolidDataset reads, frozen", async () => {
+      const turtle = `<#a> <${EX}p> "x", 3 ; <${EX}q> <#b> .\n<#b> <${EX}p> "y"@en .`;
+      const linear = await getSolidDatasetLinear(URL_, { fetch: turtleAt(turtle) });
+      const plain = await getSolidDataset(URL_, { fetch: turtleAt(turtle) });
+      const quads = (dataset: typeof plain) =>
+        [...rdf.toRdfJsDataset(dataset)].map(
+          (one) => `${one.subject.value} ${one.predicate.value} ${one.object.value}`,
+        );
+      expect(quads(linear).sort()).toEqual(quads(plain).sort());
+      expect(getSourceUrl(linear)).toBe(URL_);
+      expect(Object.isFrozen(linear)).toBe(true);
+    });
+
+    it("fails a read whose body fails with the reason its body failed with, a read deadline's podNoAnswer among them", async () => {
+      const reason = new AppError("podNoAnswer", { url: URL_, seconds: 10 });
+      const fetch: typeof globalThis.fetch = async (input) => {
+        let sent = false;
+        const body = new ReadableStream<Uint8Array>({
+          pull(controller) {
+            if (sent) return controller.error(reason);
+            sent = true;
+            controller.enqueue(new TextEncoder().encode(`<#a> <${EX}p> `));
+          },
+        });
+        const response = new Response(body, { headers: { "Content-Type": "text/turtle" } });
+        Object.defineProperty(response, "url", { value: String(input) });
+        return response;
+      };
+      for (const read of [getSolidDataset, getSolidDatasetLinear, readDocument]) {
+        await expect(read(URL_, { fetch })).rejects.toBe(reason);
+      }
+    });
+
+    it("fails a read whose failure's body fails as its body failed, not as an HttpError of the failure", async () => {
+      const reason = new AppError("podNoAnswer", { url: URL_, seconds: 10 });
+      for (const status of [404, 500]) {
+        const fetch: typeof globalThis.fetch = async (input) => {
+          const body = new ReadableStream<Uint8Array>({
+            start: (controller) => controller.enqueue(new TextEncoder().encode("Not ")),
+            pull: (controller) => controller.error(reason),
+          });
+          const response = new Response(body, { status });
+          Object.defineProperty(response, "url", { value: String(input) });
+          return response;
+        };
+        for (const read of [getSolidDataset, getSolidDatasetLinear, readDocument]) {
+          // The runtime's own Response may give the reason itself, or an error of its own that names it.
+          const failure = await read(URL_, { fetch }).catch((error: unknown) => error);
+          expect(failure).not.toBeInstanceOf(HttpError);
+          expect(String(failure)).toContain(reason.message);
+        }
+      }
+    });
+
+    it("reads a Turtle response with no body as an empty document", async () => {
+      const fetch: typeof globalThis.fetch = async (input) => {
+        const response = new Response(null, { headers: { "Content-Type": "text/turtle" } });
+        Object.defineProperty(response, "url", { value: String(input) });
+        return response;
+      };
+      expect(getThingAll(await getSolidDataset(URL_, { fetch }))).toEqual([]);
+      expect(getThingAll(await getSolidDatasetLinear(URL_, { fetch }))).toEqual([]);
+    });
+  });
+
+  describe("read limits", () => {
+    const turtle = `<#a> <${EX}p> "x", "y", "z" .`;
+
+    it("reads a document within its limits as any other", async () => {
+      const fetch = limitedFetch(turtleAt(turtle), {
+        bytes: turtle.length,
+        quads: 3,
+        characters: 1000,
+      });
+      const dataset = await getSolidDatasetLinear(URL_, { fetch });
+      expect(getThing(dataset, `${URL_}#a`)).not.toBeNull();
+      const answer = await readDocument(URL_, { fetch });
+      expect("dataset" in answer).toBe(true);
+    });
+
+    it("refuses a body past its bytes, and a document past its triples, with a ReadLimitError", async () => {
+      const limits = [
+        { bytes: turtle.length - 1, quads: 3, characters: 1000 },
+        { bytes: turtle.length, quads: 2, characters: 1000 },
+        { bytes: turtle.length, quads: 3, characters: 200 },
+      ];
+      for (const limit of limits) {
+        const fetch = limitedFetch(turtleAt(turtle), limit);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+        ]) {
+          const error = await read().catch((failure: unknown) => failure);
+          expect(error).toBeInstanceOf(ReadLimitError);
+          expect(error).toMatchObject({ name: "ReadLimitError", url: URL_, limits: limit });
+        }
+      }
+    });
+
+    it("reads documents that share their limits under them together, the triples of each counted", async () => {
+      // Each within the limits alone, the second past them after the first.
+      const limits = { bytes: turtle.length * 4, quads: 5, characters: 1000 };
+      for (const read of [
+        (fetch: typeof globalThis.fetch) => getSolidDatasetLinear(URL_, { fetch }),
+        (fetch: typeof globalThis.fetch) => readDocument(URL_, { fetch }),
+      ]) {
+        const spent = noneSpent();
+        const fetch = limitedFetch(turtleAt(turtle), limits, spent);
+        await read(fetch);
+        expect(spent.quads).toBe(3);
+        await expect(read(fetch)).rejects.toMatchObject({ name: "ReadLimitError", limits });
+      }
+    });
+
+    it("counts the characters of the terms a prefix stands for, not of the text that says them", async () => {
+      const long = `${EX}${"n".repeat(10_000)}/`;
+      const objects = Array.from({ length: 50 }, (_, at) => `p:o${at}`).join(", ");
+      const text = `@prefix p: <${long}> . p:a p:p ${objects} .`;
+      const limits = { bytes: text.length, quads: 50, characters: 100_000 };
+      const fetch = limitedFetch(turtleAt(text), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", limits });
+      }
+      const within = limitedFetch(turtleAt(text), { ...limits, characters: 50 * 3 * 10_100 });
+      expect(
+        getThing(await getSolidDatasetLinear(URL_, { fetch: within }), `${long}a`),
+      ).not.toBeNull();
+    });
+
+    it("refuses a document with a term longer than any read takes in, with limits or with none, and reads one at the bound", async () => {
+      // A term counts as N-Triples names it, as the shape check keys it: a literal's text in quotes, each
+      // quote, backslash and line break in it escaped as two characters, an IRI in `<>`. V8 hashes a
+      // longer string by its length alone.
+      const literalOf = (length: number) => `<#a> <${EX}p> "${"x".repeat(length - 2)}", "y" .`;
+      const escapedOf = (length: number) =>
+        `<#a> <${EX}p> "${"\\n".repeat(40)}${"x".repeat(length - 85)}"@en, "y" .`;
+      const iriOf = (length: number) => {
+        const iri = `${EX}${"i".repeat(length - 2 - EX.length)}`;
+        return `<#a> <${EX}p> <${iri}> .\n<#a> <${EX}p> "y" .`;
+      };
+      const jsonLdOf = (length: number) =>
+        JSON.stringify({ "@id": "#a", [`${EX}p`]: ["x".repeat(length - 2), "y"] });
+      for (const [past, within, format] of [
+        [literalOf(MAX_TERM_CHARACTERS + 1), literalOf(MAX_TERM_CHARACTERS), "turtle"],
+        [escapedOf(MAX_TERM_CHARACTERS + 1), escapedOf(MAX_TERM_CHARACTERS), "turtle"],
+        [iriOf(MAX_TERM_CHARACTERS + 1), iriOf(MAX_TERM_CHARACTERS), "turtle"],
+        [jsonLdOf(MAX_TERM_CHARACTERS + 1), jsonLdOf(MAX_TERM_CHARACTERS), "jsonld"],
+      ] as const) {
+        await expect(parseQuads(past, format, URL_, RELEASE_LIMITS)).rejects.toMatchObject({
+          name: "ReadLimitError",
+          limits: RELEASE_LIMITS,
+        });
+        // A text from the user's own pod, read with no limits, is held to the bound too.
+        await expect(parseQuads(past, format, URL_)).rejects.toMatchObject({
+          name: "ReadLimitError",
+          limits: NO_SIZE_LIMITS,
+        });
+        await expect(parseQuads(within, format, URL_)).resolves.toHaveLength(2);
+        if (format === "jsonld") continue;
+        for (const fetch of [limitedFetch(turtleAt(past), RELEASE_LIMITS), turtleAt(past)]) {
+          for (const read of [
+            () => getSolidDatasetLinear(URL_, { fetch }),
+            () => readDocument(URL_, { fetch }),
+          ]) {
+            await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+          }
+        }
+        for (const fetch of [limitedFetch(turtleAt(within), RELEASE_LIMITS), turtleAt(within)]) {
+          const dataset = await getSolidDatasetLinear(URL_, { fetch });
+          expect(getThing(dataset, `${URL_}#a`)).not.toBeNull();
+          expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+        }
+      }
+    });
+
+    it("refuses a document at its base when it declares one too often, and reads one that declares it a few times", async () => {
+      const bases = (count: number) => `${"@base <https://pod.example/decks/> .\n".repeat(count)}`;
+      const past = `${bases(17)}<a> <${EX}p> "x" .`;
+      // Limits the text is well within but for its bases.
+      const limits = { bytes: past.length, quads: 10, characters: 100_000 };
+      const fetch = limitedFetch(turtleAt(past), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+        () => parseQuads(past, "turtle", URL_, limits),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+      }
+      // Each relative base adds to the one before, which the parser walks for each one.
+      const few = `${"@base <x/> .\n".repeat(16)}<a> <${EX}p> "x" .`;
+      const subject = `https://pod.example/decks/${"x/".repeat(16)}a`;
+      const dataset = await getSolidDatasetLinear(URL_, {
+        fetch: limitedFetch(turtleAt(few), limits),
+      });
+      expect(getThing(dataset, subject)).not.toBeNull();
+      const [quad] = await parseQuads(few, "turtle", URL_, limits);
+      expect(quad?.subject.value).toBe(subject);
+      // A text from the user's own pod, read with no limits, is held to as few.
+      await expect(parseQuads(past, "turtle", URL_)).rejects.toMatchObject({
+        name: "ReadLimitError",
+        url: URL_,
+        limits: NO_SIZE_LIMITS,
+        message: expect.stringContaining(
+          "declarations, longer IRIs to resolve, deeper nesting, or a longer term than a read takes in",
+        ),
+      });
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
+        () => readDocument(URL_, { fetch: turtleAt(past) }),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+      }
+    });
+
+    it("refuses a document at its base when the base is too long, and reads one whose base is not", async () => {
+      // The parser walks the whole base for each relative IRI it resolves against it.
+      const based = (length: number) =>
+        `@base <${"a".repeat(length)}/> .\n${"<./b> <./b> <./b> .\n".repeat(1_000)}`;
+      const past = based(600);
+      // Limits the text is well within but for its base.
+      const limits = { bytes: past.length, quads: 1_000, characters: 100_000_000 };
+      const fetch = limitedFetch(turtleAt(past), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+        () => parseQuads(past, "turtle", URL_, limits),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+      }
+      const within = based(300);
+      const subject = `https://pod.example/decks/${"a".repeat(300)}/b`;
+      const dataset = await getSolidDatasetLinear(URL_, {
+        fetch: limitedFetch(turtleAt(within), limits),
+      });
+      expect(getThing(dataset, subject)).not.toBeNull();
+      expect(await parseQuads(within, "turtle", URL_, limits)).toHaveLength(1_000);
+      // A text from the user's own pod, read with no limits, is held to as short a base.
+      await expect(parseQuads(past, "turtle", URL_)).rejects.toMatchObject({
+        name: "ReadLimitError",
+        limits: NO_SIZE_LIMITS,
+      });
+      expect(await parseQuads(within, "turtle", URL_)).toHaveLength(1_000);
+    });
+
+    it("refuses a document whose base is too long past a comment that names a short one", async () => {
+      const past = `@base # <>\n<${"a".repeat(600)}/> .\n${"<./b> <./b> <./b> .\n".repeat(1_000)}`;
+      const limits = { bytes: past.length, quads: 1_000, characters: 100_000_000 };
+      const fetch = limitedFetch(turtleAt(past), limits);
+      for (const read of [
+        () => getSolidDatasetLinear(URL_, { fetch }),
+        () => readDocument(URL_, { fetch }),
+        () => parseQuads(past, "turtle", URL_, limits),
+      ]) {
+        await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+      }
+    });
+
+    it("reads a document whose text speaks of bases and prefixes, as a release's cards may, as any other", async () => {
+      const texts = [
+        "When the base < 2, the logarithm is undefined.",
+        "Run git rebase <main> to replay the commits.",
+        "BASE <https://pod.example/> sets the base.",
+        "Database<br>",
+        "Write @base <../> . to go up a level.",
+        "@prefix ex: <x> . names a prefix.",
+      ];
+      // More of them than a document may declare bases, in short, long and single-quoted strings.
+      const cards = Array.from({ length: 20 }, (_, at) => {
+        const text = texts[at % texts.length]!;
+        const literal = [`"${text}"`, `"""${text}\n"""`, `'${text}'`][at % 3];
+        return `<#c${at}> <${EX}text> ${literal} .\n`;
+      }).join("");
+      const fetch = limitedFetch(turtleAt(cards), RELEASE_LIMITS);
+      const dataset = await getSolidDatasetLinear(URL_, { fetch });
+      expect(getThing(dataset, `${URL_}#c19`)).not.toBeNull();
+      expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+      const quads = await parseQuads(cards, "turtle", URL_, RELEASE_LIMITS);
+      expect(quads).toHaveLength(20);
+      expect(quads[0]?.object.value).toBe(texts[0]);
+    });
+
+    it("refuses a document at its base when the base's path has dot segments, and at its prefixes when it declares too many", async () => {
+      const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 1_000, characters: 100_000_000 };
+      for (const past of [
+        `@base <https://pod.example/${"../".repeat(100)}> .\n<a> <${EX}p> "x" .`,
+        `@base <https://pod.example/a//b/> .\n<a> <${EX}p> "x" .`,
+        `${"PREFIX : <.>\n".repeat(4097)}<a> <${EX}p> "x" .`,
+      ]) {
+        const fetch = limitedFetch(turtleAt(past), limits);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(past, "turtle", URL_, limits),
+        ]) {
+          await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_, limits });
+        }
+      }
+      const few = `${"PREFIX : <.>\n".repeat(4096)}:a <${EX}p> "x" .`;
+      const [quad] = await parseQuads(few, "turtle", URL_, limits);
+      expect(quad?.subject.value).toBe("https://pod.example/decks/a");
+    });
+
+    it("reads a document whose relative base has dot segments, as one written by hand may, with limits or with none", async () => {
+      // The parser resolves a relative base against the one before, which removes them.
+      const text = `@base <./> .\n@base <../a/./> .\n<b#it> <${EX}p> "x" .`;
+      const subject = "https://pod.example/a/b#it";
+      for (const fetch of [turtleAt(text), limitedFetch(turtleAt(text), RELEASE_LIMITS)]) {
+        for (const reading of [getSolidDataset, getSolidDatasetLinear]) {
+          expect(getThing(await reading(URL_, { fetch }), subject)).not.toBeNull();
+        }
+        expect("dataset" in (await readDocument(URL_, { fetch }))).toBe(true);
+      }
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const [quad] = await parseQuads(text, "turtle", URL_, limits);
+        expect(quad?.subject.value).toBe(subject);
+      }
+    });
+
+    it("refuses a document at a long IRI the parser resolves, in a triple or a prefix, with limits or with none, and reads a long absolute one", async () => {
+      // A path that goes up and down, which the parser walks again for each segment that goes up.
+      const dotted = (length: number) => `/${"x/".repeat(length / 4)}${"y/../".repeat(length / 8)}`;
+      for (const past of [
+        `<${dotted(900_000)}> <${EX}p> "v" .\n`,
+        `@prefix p: <${dotted(900_000)}> .\np:a <${EX}p> "v" .\n`,
+      ]) {
+        const fetch = limitedFetch(turtleAt(past), RELEASE_LIMITS);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(past, "turtle", URL_, RELEASE_LIMITS),
+        ]) {
+          await expect(read()).rejects.toMatchObject({
+            name: "ReadLimitError",
+            url: URL_,
+            limits: RELEASE_LIMITS,
+          });
+        }
+        // A text from the user's own pod, read with no limits, is held to as short an IRI.
+        for (const read of [
+          () => parseQuads(past, "turtle", URL_),
+          () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
+          () => getSolidDataset(URL_, { fetch: turtleAt(past) }),
+        ]) {
+          await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+        }
+      }
+      const long = `https://pod.example/${"a".repeat(5_000)}`;
+      const within = `<${long}> <${EX}p> <${"y/../".repeat(100)}b> .\n`;
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const [quad] = await parseQuads(within, "turtle", URL_, limits);
+        expect(quad?.subject.value).toBe(long);
+        expect(quad?.object.value).toBe("https://pod.example/decks/b");
+      }
+    });
+
+    it("refuses a document nested deeper than 64 levels, with limits or with none, and reads one nested 64 deep", async () => {
+      // Levels that are opened and never closed make no triple for the limits to count.
+      for (const opening of ["(", `[ <${EX}p> `]) {
+        const past = `<${EX}s> <${EX}p> ${opening.repeat(1_000_000)}`;
+        const fetch = limitedFetch(turtleAt(past), RELEASE_LIMITS);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(past, "turtle", URL_, RELEASE_LIMITS),
+        ]) {
+          await expect(read()).rejects.toMatchObject({
+            name: "ReadLimitError",
+            url: URL_,
+            limits: RELEASE_LIMITS,
+          });
+        }
+        // A text from the user's own pod, read with no limits, is held to as few levels.
+        for (const read of [
+          () => parseQuads(past, "turtle", URL_),
+          () => getSolidDatasetLinear(URL_, { fetch: turtleAt(past) }),
+          () => getSolidDataset(URL_, { fetch: turtleAt(past) }),
+        ]) {
+          await expect(read()).rejects.toMatchObject({ name: "ReadLimitError", url: URL_ });
+        }
+      }
+      // A list of lists, each with a blank node in it.
+      const nested = `${`( [ <${EX}p> `.repeat(32)}"v"${" ] )".repeat(32)}`;
+      const within = `<${EX}s> <${EX}p> ${nested} .\n`;
+      for (const limits of [undefined, RELEASE_LIMITS]) {
+        const quads = await parseQuads(within, "turtle", URL_, limits);
+        expect(quads.filter(({ object }) => object.value === "v")).toHaveLength(1);
+      }
+      expect(
+        getThing(await getSolidDatasetLinear(URL_, { fetch: turtleAt(within) }), `${EX}s`),
+      ).not.toBeNull();
+    });
+
+    it("refuses a long IRI with dot segments in time that grows with it, not its square", async () => {
+      const dotted = (count: number) =>
+        `<${"x/".repeat(count)}${"y/../".repeat(count)}> <${EX}p> "v" .\n`;
+      for (const read of [
+        (text: string) => parseQuads(text, "turtle", URL_, RELEASE_LIMITS),
+        (text: string) => parseQuads(text, "turtle", URL_),
+      ]) {
+        // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
+        const ratio = await growthAsync(
+          (count) => {
+            const text = dotted(count);
+            return () => read(text).catch(() => undefined);
+          },
+          20_000,
+          8,
+          4,
+        );
+        expect(ratio).toBeLessThan(4);
+      }
+    });
+
+    it("refuses a text of prefixes, or of IRIs that go up from a base, in time that does not grow with the rest", async () => {
+      const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 10, characters: 100_000_000 };
+      const dotted = `@base <https://pod.example/${"../".repeat(160)}> .\n`;
+      const longest = `@base <https://pod.example/${"a/".repeat(240)}> .\n`;
+      for (const [head, line] of [
+        [dotted, "PREFIX :<.>\n"],
+        [dotted, "<.> <.> <.> .\n"],
+        [longest, "PREFIX :<.>\n"],
+      ]) {
+        // A text eight times as long must take less than half as long as the short one done eight times over.
+        const ratio = await growthAsync(
+          (count) => {
+            const text = `${head}${line.repeat(count)}`;
+            return () => parseQuads(text, "turtle", URL_, limits).catch(() => undefined);
+          },
+          20_000,
+          8,
+          0.5,
+        );
+        expect(ratio).toBeLessThan(0.5);
+      }
+    });
+
+    it("refuses a chain of relative bases read with no limits, as from the user's own pod, in time that does not grow with it", async () => {
+      // Each relative base the parser resolves against the one before, walking all of it.
+      const chain = (count: number) =>
+        `${`@base <${"a".repeat(40)}/> .\n`.repeat(count)}<s> <p> <o> .`;
+      for (const read of [
+        (text: string) => parseQuads(text, "turtle", URL_),
+        (text: string) => getSolidDatasetLinear(URL_, { fetch: turtleAt(text) }),
+        (text: string) => readDocument(URL_, { fetch: turtleAt(text) }),
+        // As a container's listing, a draft's folder or a profile is read.
+        (text: string) => getSolidDataset(URL_, { fetch: turtleAt(text) }),
+        (text: string) =>
+          getSolidDataset(URL_, { fetch: limitedFetch(turtleAt(text), RELEASE_LIMITS) }),
+      ]) {
+        await expect(read(chain(5_000))).rejects.toMatchObject({
+          name: "ReadLimitError",
+          url: URL_,
+        });
+        // Eight times the text must take less than four times as long as an eighth of it done eight times over (testing.md).
+        const ratio = await growthAsync(
+          (count) => {
+            const text = chain(count);
+            return () => read(text).catch(() => undefined);
+          },
+          2_000,
+          8,
+          4,
+        );
+        expect(ratio).toBeLessThan(4);
+      }
+    });
+
+    it("reads no RDF 1.2 triple term in Turtle: a document with one, nested, reified, annotated or named by a reifier, does not parse, with limits or with none", async () => {
+      const texts = [
+        `<#a> <${EX}p> <<( <#s> <${EX}p> <#o> )>> .`,
+        `<#a> <${EX}p> <<( [] <${EX}p> <<( <#s> <${EX}p> <#o> )>> )>> .`,
+        `<< <#s> <${EX}p> <#o> >> <${EX}q> "y" .`,
+        `<#a> <${EX}p> <#o> {| <${EX}q> <#r> |} .`,
+        `<#a> <${EX}p> <#o> ~ <#r> .`,
+        `<#a> <${EX}p> <#o> ${`{| <${EX}q> <#r> `.repeat(50)}${"|} ".repeat(50)}.`,
+      ];
+      const unparsed = async (read: () => Promise<unknown>) => {
+        const error = await read().catch((failure: unknown) => failure);
+        // A parse error, not a refusal past limits.
+        expect(error).toBeInstanceOf(Error);
+        expect(error).not.toBeInstanceOf(ReadLimitError);
+      };
+      for (const text of texts) {
+        for (const fetch of [turtleAt(text), limitedFetch(turtleAt(text), RELEASE_LIMITS)]) {
+          await unparsed(() => getSolidDatasetLinear(URL_, { fetch }));
+          await unparsed(() => readDocument(URL_, { fetch }));
+        }
+        for (const limits of [undefined, RELEASE_LIMITS]) {
+          await unparsed(() => parseQuads(text, "turtle", URL_, limits));
+        }
+      }
+    });
+
+    it("stops reading a release at its first triple term, nested, annotated or not: what follows is not read", async () => {
+      const nested = (depth: number): string =>
+        depth === 0 ? "<#o>" : `<<( [] <${EX}p> ${nested(depth - 1)} )>>`;
+      // Past the first part, base declarations a read would refuse with a ReadLimitError.
+      const rest = `${`<#b> <${EX}p> <#c> .\n`.repeat(1_000)}${"@base <https://pod.example/> .\n".repeat(17)}`;
+      const annotated = `<#a> <${EX}p> <#o> {| <${EX}q> <#r> |} .`;
+      for (const head of [
+        `<#a> <${EX}p> ${nested(1)} .`,
+        // Deeper, the text is refused at its nesting (MAX_TURTLE_DEPTH) before the parser reads it.
+        `<#a> <${EX}p> ${nested(30)} .`,
+        annotated,
+      ]) {
+        const text = `${head}\n${rest}`;
+        const fetch = limitedFetch(turtleAt(text), RELEASE_LIMITS);
+        for (const read of [
+          () => getSolidDatasetLinear(URL_, { fetch }),
+          () => readDocument(URL_, { fetch }),
+          () => parseQuads(text, "turtle", URL_, RELEASE_LIMITS),
+        ]) {
+          const error = await read().catch((failure: unknown) => failure);
+          expect(error).toBeInstanceOf(Error);
+          expect(error).not.toBeInstanceOf(ReadLimitError);
+        }
+        // The rest alone is refused at its bases.
+        await expect(parseQuads(rest, "turtle", URL_, RELEASE_LIMITS)).rejects.toBeInstanceOf(
+          ReadLimitError,
+        );
+      }
+    });
+
+    it("stops parsing a Turtle text at its first triple past the limits, however long the rest", async () => {
+      // A base as long as is let through, and IRIs that go up from it: each walks the whole base.
+      const head = `@base <https://pod.example/${"a/".repeat(200)}> .\n${"<a> <b> <c> .\n".repeat(20)}`;
+      const limits = { bytes: Number.MAX_SAFE_INTEGER, quads: 10, characters: 100_000_000 };
+      // A text eight times as long must take less than half as long as the short one done eight times over.
+      const ratio = await growthAsync(
+        (count) => {
+          const text = `${head}${"<../b> <../b> <../b> .\n".repeat(count)}`;
+          return () => parseQuads(text, "turtle", URL_, limits).catch(() => undefined);
+        },
+        20_000,
+        8,
+        0.5,
+      );
+      expect(ratio).toBeLessThan(0.5);
+    });
+  });
+
+  describe("readDocument", () => {
+    it("asks the pod, never the browser's cache, and gives the dataset with the version the pod gave", async () => {
+      const { fetch, sent } = pod({ headers: { ETag: '"v1"' } });
+      const answer = await readDocument(URL_, { fetch });
+      if ("notModified" in answer)
+        throw new Error("A read that asks for no version is never unchanged.");
+      expect(answer.etag).toBe('"v1"');
+      expect(getThing(answer.dataset, `${URL_}#a`)).not.toBeNull();
+      expect(
+        sent.map(({ method, cache, headers }) => [method, cache, headers.get("If-None-Match")]),
+      ).toEqual([["GET", "no-store", null]]);
+    });
+
+    it("asks only for a version other than ifNoneMatch, and says when the document is still at it", async () => {
+      const { fetch, sent } = pod({ status: 304 });
+      await expect(readDocument(URL_, { fetch, ifNoneMatch: '"v1"' })).resolves.toEqual({
+        notModified: true,
+      });
+      expect(sent.map(({ headers }) => headers.get("If-None-Match"))).toEqual(['"v1"']);
+    });
+
+    it("gives the document as it now is when it changed, and no version when the pod gives none", async () => {
+      const changed = await readDocument(URL_, {
+        fetch: pod({ headers: { ETag: '"v2"' } }).fetch,
+        ifNoneMatch: '"v1"',
+      });
+      expect(changed).toMatchObject({ etag: '"v2"' });
+      await expect(readDocument(URL_, { fetch: pod().fetch })).resolves.toMatchObject({
+        etag: undefined,
+      });
+    });
+
+    it("rejects as the server answered, a 304 never asked for among it", async () => {
+      await expect(
+        readDocument(URL_, { fetch: pod({ status: 404, body: "" }).fetch }),
+      ).rejects.toMatchObject({ statusCode: 404 });
+      await expect(readDocument(URL_, { fetch: pod({ status: 304 }).fetch })).rejects.toBeDefined();
+    });
+  });
+
+  describe("writeDocument", () => {
+    it("creates a new document with one PUT that only creates, and gives it as saved, with the version answered", async () => {
+      const { fetch, sent } = pod({ status: 201, body: "", headers: { ETag: '"w1"' } });
+      const written = await writeDocument(URL_, created(), { fetch });
+      expect(getThing(written.dataset, `${URL_}#a`)).not.toBeNull();
+      expect(getSourceUrl(written.dataset)).toBe(URL_);
+      expect(written.etag).toBe('"w1"');
+      expect(pending(written.dataset)).toBe(0);
+      expect(
+        sent.map(({ method, url, headers }) => [
+          method,
+          url,
+          headers.get("If-None-Match"),
+          headers.get("Content-Type"),
+        ]),
+      ).toEqual([["PUT", URL_, "*", "text/turtle"]]);
+    });
+
+    it("gives a subject made by name, and a link to one, as the document saved names them", async () => {
+      const { fetch, sent } = pod({ status: 201, body: "", headers: { ETag: '"w1"' } });
+      const b = createThing({ name: "b" });
+      const linked = setThing(
+        created(),
+        buildThing(b)
+          .addUrl(`${EX}link`, createThing({ name: "a" }))
+          .addUrl(`${EX}other`, `${EX}x`)
+          .build(),
+      );
+      const written = await writeDocument(URL_, linked, { fetch });
+      const saved = getThing(written.dataset, `${URL_}#b`)!;
+      expect(rdf.getUrlAll(saved, `${EX}link`)).toEqual([`${URL_}#a`]);
+      expect(rdf.getUrlAll(saved, `${EX}other`)).toEqual([`${EX}x`]);
+      expect(getThing(written.dataset, `${URL_}#a`)).not.toBeNull();
+      expect(sent[0]!.body).toContain("<#b>");
+    });
+
+    it("writes an edit of the document read as one PATCH of the app's own body, If-Match the version given", async () => {
+      const edited = setThing(
+        await read(),
+        buildThing(getThing(await read(), `${URL_}#a`)!)
+          .removeAll(`${EX}p`)
+          .addStringNoLocale(`${EX}p`, "y")
+          .build(),
+      );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      const written = await writeDocument(URL_, edited, { fetch, ifMatch: '"v1"' });
+      expect(written.etag).toBeUndefined();
+      expect(pending(written.dataset)).toBe(0);
+      expect(getThingAll(written.dataset).map((thing) => thing.url)).toEqual([`${URL_}#a`]);
+      expect(
+        sent.map(({ method, headers, body }) => [
+          method,
+          headers.get("If-Match"),
+          headers.get("Content-Type"),
+          body,
+        ]),
+      ).toEqual([
+        [
+          "PATCH",
+          '"v1"',
+          "application/sparql-update",
+          patchBody(rdf.changesOf(edited), rdf.localNameOf),
+        ],
+      ]);
+    });
+
+    it("sends a PATCH refused as a conflict once more, its deleted decimals spelled as numbers", async () => {
+      const dataset = await read(`<#a> <${EX}n> "1.0"^^<${XSD}decimal> .`);
+      const edited = setThing(
+        dataset,
+        buildThing(getThing(dataset, `${URL_}#a`)!)
+          .removeAll(`${EX}n`)
+          .addLiteral(`${EX}n`, decimalLiteral(2))
+          .build(),
+      );
+      const { fetch, sent } = pod({ status: 409, body: "" }, { status: 205, body: "" });
+      await writeDocument(URL_, edited, { fetch });
+      expect(sent.map(({ method, body }) => [method, body])).toEqual([
+        ["PATCH", patchBody(rdf.changesOf(edited), rdf.localNameOf)],
+        ["PATCH", patchBody(rdf.changesOf(edited), rdf.localNameOf, true)],
+      ]);
+      expect(String(sent[1]!.body)).toContain(`"1"^^<${XSD}decimal>`);
+    });
+
+    it("writes an edit of a blank node, which the app's own body cannot name, as one PATCH of the library's", async () => {
+      const dataset = await read(`<#a> <${EX}note> _:b1 .\n_:b1 <${EX}text> "x" .`);
+      const edited = setThing(
+        dataset,
+        buildThing(getThing(dataset, `${URL_}#a`)!)
+          .removeAll(`${EX}note`)
+          .build(),
+      );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      await writeDocument(URL_, edited, { fetch });
+      // The library writes no deletion of a blank node it holds; nothing else changed.
+      expect(sent.map(({ method, body }) => [method, typeof body])).toEqual([["PATCH", "string"]]);
+    });
+
+    it("writes a document read and not changed as one PATCH of nothing but white space", async () => {
+      const dataset = await read(`<#a> <${EX}p> "x" .`);
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      await writeDocument(URL_, dataset, { fetch });
+      expect(sent.map(({ method, body }) => [method, String(body ?? "").trim()])).toEqual([
+        ["PATCH", ""],
+      ]);
+    });
+
+    it("gives a PATCH refused as a conflict as it is when it deletes no decimal to spell otherwise, sent once", async () => {
+      const dataset = await read(`<#a> <${EX}p> "old" .`);
+      const edited = setThing(
+        dataset,
+        buildThing(getThing(dataset, `${URL_}#a`)!)
+          .removeAll(`${EX}p`)
+          .build(),
+      );
+      const { fetch, sent } = pod({ status: 409, body: "" });
+      await expect(writeDocument(URL_, edited, { fetch })).rejects.toMatchObject({
+        statusCode: 409,
+      });
+      expect(sent.map(({ method }) => method)).toEqual(["PATCH"]);
+    });
+
+    it("writes an edit too large for one PATCH, or one asked to be whole, as one PUT of the document, If-Match", async () => {
+      // Texts no longer than a term may be, together past a PATCH.
+      const texts = Array.from({ length: 8 }, (_, at) => `${at}`.repeat(MAX_PATCH_BYTES / 8));
+      const large = setThing(
+        await read(),
+        texts
+          .reduce(
+            (built, text) => built.addStringNoLocale(`${EX}p`, text),
+            buildThing(createThing({ url: `${URL_}#b` })),
+          )
+          .build(),
+      );
+      const small = setThing(await read(), createThing({ url: `${URL_}#b` }));
+      for (const [dataset, whole] of [
+        [large, false],
+        [small, true],
+      ] as const) {
+        const { fetch, sent } = pod({ status: 205, body: "" });
+        await writeDocument(URL_, dataset, { fetch, ifMatch: '"v1"', whole });
+        expect(
+          sent.map(({ method, headers }) => [
+            method,
+            headers.get("If-Match"),
+            headers.get("Content-Type"),
+          ]),
+        ).toEqual([["PUT", '"v1"', "text/turtle"]]);
+        expect(String(sent[0]!.body)).toContain(`<${URL_}#a>`);
+      }
+    });
+
+    it("refuses a term Turtle cannot write as it is, sending nothing: in a new document, an edit, or a whole write", async () => {
+      // A `>` would end the IRI, and what follows be read as statements (GHSA-x937-hx25-qfp4).
+      const injected = `https://img.example/a.png#p> . <${URL_}> <${EX}q> <https://attacker.example/o`;
+      const card = (dataset: ReturnType<typeof createSolidDataset>) =>
+        setThing(
+          dataset,
+          buildThing(createThing({ url: `${URL_}#card` }))
+            .addIri(`${EX}image`, injected)
+            .build(),
+        );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      for (const [dataset, whole] of [
+        [card(createSolidDataset()), false],
+        [card(await read()), false],
+        [card(await read()), true],
+      ] as const) {
+        await expect(writeDocument(URL_, dataset, { fetch, whole })).rejects.toMatchObject({
+          code: "unwritableTerm",
+        });
+      }
+      expect(sent).toEqual([]);
+    });
+
+    it("writes back a literal with a base direction as it was read: beside an edit, in a whole write, and in an edit of it", async () => {
+      const directed = `<${URL_}#a> <${EX}label> "مرحبا"@ar--rtl .`;
+      const dataset = await read(`<#a> <${EX}p> "x" ; <${EX}label> "مرحبا"@ar--rtl .`);
+      const edited = (property: string) =>
+        setThing(
+          dataset,
+          buildThing(getThing(dataset, `${URL_}#a`)!)
+            .removeAll(property)
+            .addStringNoLocale(property, "y")
+            .build(),
+        );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      await writeDocument(URL_, edited(`${EX}p`), { fetch });
+      await writeDocument(URL_, edited(`${EX}p`), { fetch, whole: true });
+      await writeDocument(URL_, edited(`${EX}label`), { fetch });
+      expect(sent.map(({ method }) => method)).toEqual(["PATCH", "PUT", "PATCH"]);
+      expect(String(sent[0]!.body)).not.toContain("مرحبا");
+      expect(String(sent[2]!.body)).toContain(`DELETE DATA {\n${directed}\n}`);
+      const back = await getSolidDatasetLinear(URL_, { fetch: turtleAt(String(sent[1]!.body)) });
+      const [label] = rdf.getLiteralAll(getThing(back, `${URL_}#a`)!, `${EX}label`);
+      expect([label!.value, label!.language, label!.direction]).toEqual(["مرحبا", "ar", "rtl"]);
+    });
+
+    it("refuses a term longer than any read takes in, sending nothing, and writes one at the bound", async () => {
+      // A text is named in quotes, a line break in it escaped: one of MAX_TERM_CHARACTERS - 2 characters is
+      // at the bound, and one of a character less with a line break is past it.
+      const card = (dataset: ReturnType<typeof createSolidDataset>, length: number, text = "") =>
+        setThing(
+          dataset,
+          buildThing(createThing({ url: `${URL_}#card` }))
+            .addStringNoLocale(`${EX}front`, `${text}${"x".repeat(length - text.length)}`)
+            .build(),
+        );
+      const { fetch, sent } = pod({ status: 205, body: "" });
+      for (const [dataset, whole] of [
+        [card(createSolidDataset(), MAX_TERM_CHARACTERS - 1), false],
+        [card(await read(), MAX_TERM_CHARACTERS - 1), false],
+        [card(await read(), MAX_TERM_CHARACTERS - 1), true],
+        [card(await read(), MAX_TERM_CHARACTERS - 2, "\n"), false],
+      ] as const) {
+        await expect(writeDocument(URL_, dataset, { fetch, whole })).rejects.toMatchObject({
+          code: "termTooLong",
+          vars: { limit: MAX_TERM_CHARACTERS },
+        });
+      }
+      expect(sent).toEqual([]);
+      await writeDocument(URL_, card(await read(), MAX_TERM_CHARACTERS - 2), { fetch });
+      expect(sent).toHaveLength(1);
+    });
+  });
+
+  describe("deleteSolidDataset", () => {
+    it("deletes the document, If-Match the version given", async () => {
+      const { fetch, sent } = pod({ status: 204 });
+      await deleteSolidDataset(URL_, { fetch });
+      await deleteSolidDataset(URL_, { fetch, ifMatch: '"v1"' });
+      expect(
+        sent.map(({ method, url, headers }) => [method, url, headers.get("If-Match")]),
+      ).toEqual([
+        ["DELETE", URL_, null],
+        ["DELETE", URL_, '"v1"'],
+      ]);
+    });
+  });
+
+  describe("containers and files", () => {
+    it("creates and deletes a container, and writes, reads and deletes a file", async () => {
+      const { fetch, sent } = pod({ status: 201, body: "" });
+      await createContainerAt("https://pod.example/decks/", { fetch });
+      await overwriteFile("https://pod.example/a.png", new Blob(["png"]), {
+        contentType: "image/png",
+        fetch,
+      });
+      const file = await getFile("https://pod.example/a.png", {
+        fetch: pod({ body: "png", headers: { "Content-Type": "image/png" } }).fetch,
+      });
+      expect(await file.text()).toBe("png");
+      await deleteFile("https://pod.example/a.png", { fetch: pod({ status: 204 }).fetch });
+      await deleteContainer("https://pod.example/decks/", { fetch: pod({ status: 204 }).fetch });
+      expect(
+        sent.map(({ method, url, headers }) => [method, url, headers.get("Content-Type")]),
+      ).toEqual([
+        ["PUT", "https://pod.example/decks/", "text/turtle"],
+        ["PUT", "https://pod.example/a.png", "image/png"],
+      ]);
+    });
+
+    it("lists what a container read says it contains", async () => {
+      const container = await getSolidDataset("https://pod.example/decks/", {
+        fetch: pod({
+          body: `<> <http://www.w3.org/ns/ldp#contains> <a.ttl>, <b/> .`,
+        }).fetch,
+      });
+      expect(getContainedResourceUrlAll(container).sort()).toEqual([
+        "https://pod.example/decks/a.ttl",
+        "https://pod.example/decks/b/",
+      ]);
+    });
+  });
+
+  describe("getSourceUrl and hasResourceInfo", () => {
+    it("name the document a dataset was read from, and none for one built here", async () => {
+      const dataset = await read();
+      expect([getSourceUrl(dataset), hasResourceInfo(dataset)]).toEqual([URL_, true]);
+      const built = createSolidDataset();
+      expect([getSourceUrl(built), hasResourceInfo(built)]).toEqual([null, false]);
+    });
+  });
+
+  describe("solidDatasetAsTurtle", () => {
+    it("writes a dataset as Turtle that reads back the same, with the prefixes given", async () => {
+      const turtle = solidDatasetAsTurtle(await read(), { prefixes: { ex: EX } });
+      expect(turtle).toContain(`@prefix ex: <${EX}>`);
+      const again = await getSolidDataset(URL_, { fetch: turtleAt(turtle) });
+      expect(rdf.getStringNoLocale(getThing(again, `${URL_}#a`)!, `${EX}p`)).toBe("x");
+    });
+
+    it("writes every IRI in full when given no prefixes, declaring none, a subject made by name relative to the document", async () => {
+      const turtle = solidDatasetAsTurtle(created());
+      expect(turtle).not.toMatch(DIRECTIVE);
+      expect(turtle).toContain(`<#a>\n    <${EX}p> "x" .`);
+      expect(statementsOf(await parseQuads(turtle, "turtle", URL_))).toEqual(
+        statementsOf(await parseQuads(`<#a> <${EX}p> "x" .`, "turtle", URL_)),
+      );
+    });
+  });
+
+  describe("the Turtle a write sends", () => {
+    /** The body of each PUT a write of `dataset` sends: a creation, or a whole edit of the document read. */
+    const putBodies = async (url: string, created: Dataset, read: Dataset) => {
+      const bodies: string[] = [];
+      for (const [dataset, options] of [
+        [created, {}],
+        [read, { whole: true, ifMatch: '"v1"' }],
+      ] as const) {
+        const { fetch, sent } = pod({ status: 201, body: "" });
+        await writeDocument(url, dataset, { fetch, ...options });
+        expect(sent.map(({ method }) => method)).toEqual(["PUT"]);
+        bodies.push(String(sent[0]!.body));
+      }
+      return bodies;
+    };
+
+    it("declares no prefix and reads back as the same statements, for every term of the newest pod snapshot", async () => {
+      for (const [url, nTriples] of snapshotDocuments()) {
+        const statements = await parseQuads(nTriples, "turtle", url);
+        const read = await getSolidDatasetLinear(url, { fetch: turtleAt(nTriples) });
+        for (const body of await putBodies(url, rdf.datasetFromQuads(statements), read)) {
+          expect(body, url).not.toMatch(DIRECTIVE);
+          expect(statementsOf(await parseQuads(body, "turtle", url)), url).toEqual(
+            statementsOf(statements),
+          );
+        }
+      }
+    });
+
+    it("declares no prefix and reads back as the same statements, for blank nodes, text in a language and with a direction, and the document's own subjects", async () => {
+      const turtle = `@prefix ex: <${EX}> .
+<> ex:p <#a> .
+<#a> ex:p "plain", "Sweden"@en-gb, "مرحبا"@ar--rtl, "1.0"^^<${XSD}decimal>, true, 7 ;
+    ex:q [ ex:p [ ex:p "deep" ] ], _:shared .
+<#b> ex:q _:shared .
+_:shared ex:p "shared" .
+`;
+      const statements = await parseQuads(turtle, "turtle", URL_);
+      const read = await getSolidDatasetLinear(URL_, { fetch: turtleAt(turtle) });
+      for (const body of await putBodies(URL_, rdf.datasetFromQuads(statements), read)) {
+        expect(body).not.toMatch(DIRECTIVE);
+        const back = await parseQuads(body, "turtle", URL_);
+        const blankless = (quads: Iterable<Quad>) =>
+          statementsOf(quads).map((one) => one.replace(/BlankNode \S+/g, "BlankNode"));
+        expect(blankless(back)).toEqual(blankless(statements));
+        expect(back.filter(({ object }) => object.termType === "BlankNode")).toHaveLength(4);
+      }
+    });
+  });
+
+  describe("getProfileStorages", () => {
+    it("finds the pods a WebID document names", async () => {
+      const webId = "https://alice.example/profile/card#me";
+      const { fetch } = pod({
+        body: `<#me> <http://www.w3.org/ns/pim/space#storage> <https://alice.example/> .`,
+      });
+      const webIdProfile = await getSolidDataset("https://alice.example/profile/card", { fetch });
+      await expect(getProfileStorages(webId, { fetch, webIdProfile })).resolves.toEqual([
+        "https://alice.example/",
+      ]);
+    });
+
+    it("finds the pods named in every document the WebID document names as more of the profile that can be read", async () => {
+      const card = "https://alice.example/profile/card";
+      const webId = `${card}#me`;
+      const storage = "http://www.w3.org/ns/pim/space#storage";
+      const documents: Record<string, string> = {
+        [card]: `@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+<> foaf:primaryTopic <#me> .
+<https://alice.example/settings/c> foaf:primaryTopic <#me> .
+<#me> <http://www.w3.org/2000/01/rdf-schema#seeAlso> <https://alice.example/settings/a> ;
+  foaf:isPrimaryTopicOf <https://alice.example/settings/b>, <https://alice.example/settings/missing> ;
+  <${storage}> <https://alice.example/> .`,
+        "https://alice.example/settings/a": `<${webId}> <${storage}> <https://a.example/> .`,
+        "https://alice.example/settings/b": `<${webId}> <${storage}> <https://alice.example/> .`,
+        "https://alice.example/settings/c": `<${webId}> <${storage}> <https://c.example/> .`,
+      };
+      const sent: string[] = [];
+      const fetch: typeof globalThis.fetch = async (input) => {
+        const url = String(input);
+        sent.push(url);
+        const response = new Response(documents[url] ?? "", {
+          status: url in documents ? 200 : 404,
+          headers: { "Content-Type": "text/turtle" },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      };
+      const webIdProfile = await getSolidDataset(card, { fetch });
+      const storages = await getProfileStorages(webId, { fetch, webIdProfile });
+      expect([...storages].sort()).toEqual([
+        "https://a.example/",
+        "https://alice.example/",
+        "https://c.example/",
+      ]);
+      // The WebID document is not read again; one that cannot be read is left out.
+      expect([...sent].sort()).toEqual([
+        card,
+        "https://alice.example/settings/a",
+        "https://alice.example/settings/b",
+        "https://alice.example/settings/c",
+        "https://alice.example/settings/missing",
+      ]);
+    });
+  });
+
+  describe("getProfileStorages, of a WebID its documents say nothing of", () => {
+    it("finds none, in the WebID document or in one it names as more of the profile", async () => {
+      const card = "https://alice.example/profile/card";
+      const webId = `${card}#me`;
+      const documents: Record<string, string> = {
+        [card]: `<https://alice.example/settings/a> <http://xmlns.com/foaf/0.1/primaryTopic> <#someone> .`,
+        "https://alice.example/settings/a": `<#nobody> <${EX}p> "x" .`,
+      };
+      const fetch: typeof globalThis.fetch = async (input) => {
+        const url = String(input);
+        const response = new Response(documents[url] ?? "", {
+          status: url in documents ? 200 : 404,
+          headers: { "Content-Type": "text/turtle" },
+        });
+        Object.defineProperty(response, "url", { value: url });
+        return response;
+      };
+      const webIdProfile = await getSolidDataset(card, { fetch });
+      await expect(getProfileStorages(webId, { fetch, webIdProfile })).resolves.toEqual([]);
+    });
+  });
+
+  describe("parseQuads", () => {
+    it("reads Turtle, its relative IRIs resolved against the base", async () => {
+      const quads = await parseQuads(`<#a> <${EX}p> "x" .`, "turtle", URL_);
+      expect(quads.map((one) => [one.subject.value, one.object.value])).toEqual([
+        [`${URL_}#a`, "x"],
+      ]);
+    });
+
+    it("reads JSON-LD, in every graph it names", async () => {
+      const quads = await parseQuads(
+        JSON.stringify({
+          "@id": "https://example.com/g",
+          "@graph": [{ "@id": "#a", [`${EX}p`]: "x" }],
+        }),
+        "jsonld",
+        URL_,
+      );
+      expect(quads.map((one) => [one.subject.value, one.graph.value])).toEqual([
+        [`${URL_}#a`, "https://example.com/g"],
+      ]);
+    });
+
+    it("names a Turtle read's blank nodes anew, short, one name for each label, none another read's", async () => {
+      // A label as read would carry the parser's prefix; written back and read again, it would grow.
+      const label = `b${"x".repeat(1_000)}`;
+      const turtle = `_:${label} <${EX}p> _:${label}, _:other, <#a> .`;
+      const blanks = (quads: Quad[]) =>
+        quads
+          .flatMap(({ subject, object }) => [subject, object])
+          .filter((term) => term.termType === "BlankNode")
+          .map((term) => term.value);
+      const first = blanks(await parseQuads(turtle, "turtle", URL_));
+      const second = blanks(await parseQuads(turtle, "turtle", URL_));
+      const [subject, object, again, other, last] = first;
+      expect([object, again, last]).toEqual([subject, subject, subject]);
+      expect(other).not.toBe(subject);
+      expect(first.every((name) => name.length < 20)).toBe(true);
+      expect(second.filter((name) => first.includes(name))).toEqual([]);
+    });
+
+    it("holds a blank node's label to the bound as the read keeps it, so what it keeps is written and read back", async () => {
+      // A Turtle read names a label anew, so it is held as the parser gave it, the parser's prefix in it. A
+      // JSON-LD read keeps it and writes it back as it is, so it is held as a write holds it: with room for
+      // the prefix a later Turtle read puts before it.
+      const turtleOf = (length: number) => `<#a> <${EX}p> _:${"x".repeat(length)}, "y" .`;
+      const jsonLdOf = (length: number) =>
+        JSON.stringify({ "@id": "#a", [`${EX}p`]: [{ "@id": `_:${"x".repeat(length)}` }, "y"] });
+      await expect(
+        parseQuads(turtleOf(MAX_TERM_CHARACTERS - 40), "turtle", URL_),
+      ).resolves.toHaveLength(2);
+      await expect(
+        parseQuads(turtleOf(MAX_TERM_CHARACTERS - 1), "turtle", URL_),
+      ).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      await expect(
+        parseQuads(jsonLdOf(MAX_TERM_CHARACTERS - 33), "jsonld", URL_),
+      ).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      for (const length of [
+        MAX_TERM_CHARACTERS - 36,
+        MAX_TERM_CHARACTERS - 35,
+        MAX_TERM_CHARACTERS - 34,
+      ]) {
+        const quads = await parseQuads(jsonLdOf(length), "jsonld", URL_);
+        const written = solidDatasetAsTurtle(rdf.datasetFromQuads(quads));
+        await expect(
+          parseQuads(written, "turtle", URL_),
+          `label of ${length}`,
+        ).resolves.toHaveLength(2);
+        const dataset = await getSolidDatasetLinear(URL_, { fetch: turtleAt(written) });
+        expect(getThing(dataset, `${URL_}#a`), `label of ${length}`).not.toBeNull();
+      }
+    });
+
+    it("leaves out a quad that names an IRI kept for subjects made by name, in any format", async () => {
+      const kept = rdf.createThing({ name: "x" }).url;
+      const turtle = `<${kept}> <${EX}p> "x" . <#a> <${EX}p> <${kept}> . <#a> <${EX}p> "${kept}" .`;
+      const jsonLd = JSON.stringify({
+        "@id": kept,
+        "@graph": [{ "@id": "#a", [`${EX}p`]: "x" }],
+      });
+      const quads = await parseQuads(turtle, "turtle", URL_);
+      expect(quads.map((one) => [one.subject.value, one.object.value])).toEqual([
+        [`${URL_}#a`, kept],
+      ]);
+      await expect(parseQuads(jsonLd, "jsonld", URL_)).resolves.toEqual([]);
+    });
+
+    it("counts a quad it leaves out for an IRI kept for subjects made by name", async () => {
+      const kept = rdf.createThing({ name: "x" }).url;
+      const limits = { bytes: 1_000, quads: 1, characters: 1_000 };
+      const text = `<${kept}> <${EX}p> "x" . <${kept}> <${EX}p> "y" .`;
+      await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      await expect(
+        getSolidDatasetLinear(URL_, { fetch: limitedFetch(turtleAt(text), limits) }),
+      ).rejects.toMatchObject({ name: "ReadLimitError" });
+    });
+
+    it("counts the subject of a quad it leaves out toward a read's subjects", async () => {
+      const kept = rdf.createThing({ name: "x" }).url;
+      const limits = { bytes: 1_000, quads: 10, characters: 1_000, subjects: 1 };
+      const text = `<${kept}> <${EX}p> "x" . <#a> <${EX}p> "y" .`;
+      await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
+        name: "ReadLimitError",
+      });
+      await expect(
+        parseQuads(`<#a> <${EX}p> "x", "y" .`, "turtle", URL_, limits),
+      ).resolves.toHaveLength(2);
+    });
+
+    it("names a read's subjects in its refusal only where its limits bound them", async () => {
+      const text = `<#a> <${EX}p> "x" . <#b> <${EX}p> "y" .`;
+      const limits = { bytes: 1_000, quads: 1, characters: 1_000 };
+      await expect(
+        parseQuads(text, "turtle", URL_, { ...limits, quads: 10, subjects: 1 }),
+      ).rejects.toMatchObject({ message: expect.stringContaining("1 subjects") });
+      await expect(parseQuads(text, "turtle", URL_, limits)).rejects.toMatchObject({
+        message: expect.not.stringContaining("subjects"),
+      });
+    });
+
+    it("refuses a read past a release's limits on the values one subject has for one predicate, and takes one at them in", async () => {
+      const values = (count: number) =>
+        `<#a> <${EX}p> ${Array.from({ length: count }, (_, i) => i).join(", ")} .`;
+      const at = values(MAX_VALUES_PER_PREDICATE);
+      const past = values(MAX_VALUES_PER_PREDICATE + 1);
+      const refusal = {
+        name: "ReadLimitError",
+        url: URL_,
+        limits: RELEASE_LIMITS,
+        message: expect.stringContaining(
+          `${MAX_VALUES_PER_PREDICATE} values of one subject for one predicate`,
+        ),
+      };
+      for (const read of [
+        (text: string) => parseQuads(text, "turtle", URL_, RELEASE_LIMITS),
+        (text: string) =>
+          getSolidDatasetLinear(URL_, { fetch: limitedFetch(turtleAt(text), RELEASE_LIMITS) }),
+        (text: string) =>
+          getSolidDataset(URL_, { fetch: limitedFetch(turtleAt(text), RELEASE_LIMITS) }),
+      ]) {
+        await expect(read(past)).rejects.toMatchObject(refusal);
+        await expect(read(at)).resolves.toBeDefined();
+      }
+      // A read with no limits, as of the user's own pod, takes it in.
+      await expect(parseQuads(past, "turtle", URL_)).resolves.toHaveLength(
+        MAX_VALUES_PER_PREDICATE + 1,
+      );
+      await expect(
+        parseQuads(values(2), "turtle", URL_, { ...RELEASE_LIMITS, quads: 1 }),
+      ).rejects.toMatchObject({ message: expect.stringContaining("values of one subject") });
+      await expect(
+        parseQuads(values(2), "turtle", URL_, { bytes: 1_000, quads: 1, characters: 1_000 }),
+      ).rejects.toMatchObject({ message: expect.not.stringContaining("values of one subject") });
+    });
+
+    it("rejects a text that does not parse", async () => {
+      await expect(parseQuads("<#a> <#b> .", "turtle", URL_)).rejects.toBeDefined();
+    });
+
+    it("rejects JSON-LD that names a context elsewhere, fetching nothing", async () => {
+      const fetch = vi.spyOn(globalThis, "fetch");
+      try {
+        for (const context of ["https://evil.example/c", { "@import": "https://evil.example/c" }]) {
+          const json = JSON.stringify({ "@context": context, "@id": "#a", [`${EX}p`]: "x" });
+          await expect(parseQuads(json, "jsonld", URL_)).rejects.toBeDefined();
+        }
+        expect(fetch).not.toHaveBeenCalled();
+      } finally {
+        fetch.mockRestore();
+      }
+    });
+
+    it("reads no RDF-star in JSON-LD: an annotation gives no triple, and a triple term does not parse", async () => {
+      const annotated = JSON.stringify({
+        "@context": { ex: EX },
+        "@graph": [{ "@id": "#a", "ex:p": { "@value": "x", "@annotation": { "ex:q": "y" } } }],
+      });
+      const quads = await parseQuads(annotated, "jsonld", URL_);
+      expect(quads.map((one) => [one.subject.value, one.object.value])).toEqual([
+        [`${URL_}#a`, "x"],
+      ]);
+      const triple = JSON.stringify({
+        "@context": { ex: EX },
+        "@id": { "@id": "#a", "ex:p": "x" },
+        "ex:q": "y",
+      });
+      await expect(parseQuads(triple, "jsonld", URL_)).rejects.toBeDefined();
+    });
+
+    it("reads JSON-LD as it streams: a context after a node's other keys does not parse", async () => {
+      const node = { "@id": "#a", "@type": "ex:T", "ex:p": "x" };
+      const after = JSON.stringify({ ...node, "@context": { ex: EX } });
+      await expect(parseQuads(after, "jsonld", URL_)).rejects.toBeDefined();
+      const first = JSON.stringify({ "@context": { ex: EX }, ...node });
+      await expect(parseQuads(first, "jsonld", URL_)).resolves.toHaveLength(2);
+    });
+
+    it("rejects a text past its limits' triples, in either format, with a ReadLimitError", async () => {
+      const limits = { bytes: 1000, quads: 2, characters: 1000 };
+      const texts = [
+        [`<#a> <${EX}p> "x", "y" .`, `<#a> <${EX}p> "x", "y", "z" .`],
+        [
+          JSON.stringify({ "@id": "#a", [`${EX}p`]: ["x", "y"] }),
+          JSON.stringify({ "@id": "#a", [`${EX}p`]: ["x", "y", "z"] }),
+        ],
+      ] as const;
+      for (const [format, [within, past]] of [
+        ["turtle", texts[0]],
+        ["jsonld", texts[1]],
+      ] as const) {
+        await expect(parseQuads(within, format, URL_, limits)).resolves.toHaveLength(2);
+        const error = await parseQuads(past, format, URL_, limits).catch(
+          (failure: unknown) => failure,
+        );
+        expect(error).toBeInstanceOf(ReadLimitError);
+        expect(error).toMatchObject({ url: URL_, limits });
+      }
+    });
+
+    it("stops parsing JSON-LD once past its limits, reading no further than the part it is in", async () => {
+      // A @graph container gives each element's triple again for every element before it.
+      const elements = 2000;
+      const text = JSON.stringify({
+        "@context": { "@vocab": EX, g: { "@container": "@graph" } },
+        "@id": "#s",
+        g: Array.from({ length: elements }, (_, at) => ({ "@id": `#o${at}`, p: "v" })),
+      });
+      const values = vi.spyOn(JsonLdParser.prototype as unknown as ValueJobs, "newOnValueJob");
+      try {
+        const limits = { bytes: text.length, quads: 100, characters: 1_000_000 };
+        await expect(parseQuads(text, "jsonld", URL_, limits)).rejects.toBeInstanceOf(
+          ReadLimitError,
+        );
+        // Anything the parser had still to do would run before this.
+        await new Promise((resolve) => setTimeout(resolve));
+        expect(values.mock.calls.length).toBeLessThan(elements);
+      } finally {
+        values.mockRestore();
+      }
+    });
+
+    it("rejects a text whose terms, as a prefix or a context makes them, are past its limits' characters", async () => {
+      const long = `${EX}${"n".repeat(10_000)}/`;
+      const limits = { bytes: 1000, quads: 100, characters: 100_000 };
+      const names = Array.from({ length: 50 }, (_, at) => `o${at}`);
+      const texts = {
+        turtle: `@prefix p: <${long}> . p:a p:p ${names.map((name) => `p:${name}`).join(", ")} .`,
+        jsonld: JSON.stringify({
+          "@context": { "@vocab": long, x: long },
+          "@id": "x:a",
+          p: names.map((name) => ({ "@id": `x:${name}` })),
+        }),
+      };
+      for (const format of ["turtle", "jsonld"] as const) {
+        await expect(parseQuads(texts[format], format, URL_, limits)).rejects.toMatchObject({
+          name: "ReadLimitError",
+          limits,
+        });
+      }
+    });
+  });
+}

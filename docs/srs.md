@@ -7,8 +7,8 @@ remembered it, by the SM-2 method or, when the preferences name it, by
 FSRS-6 ([FSRS-6](#fsrs-6)), and builds each day's study session.
 
 The domain layer implements all of the scheduling, as pure functions
-([sm2.ts](../packages/domain/src/sm2.ts), [fsrs.ts](../packages/domain/src/fsrs.ts),
-[scheduling.ts](../packages/domain/src/scheduling.ts)).
+([sm2.ts](../packages/core/domain/src/sm2.ts), [fsrs.ts](../packages/core/domain/src/fsrs.ts),
+[scheduling.ts](../packages/core/domain/src/scheduling.ts)).
 
 **Reference.** SM-2 is the algorithm of SuperMemo 2, first described in
 Woźniak, P. A. (1990). *Optimization of learning*. Master's thesis,
@@ -22,7 +22,7 @@ follows.
 ## Prompts and directions
 
 A session asks *prompts*: a card seen from one side (`Prompt` in
-[deck.ts](../packages/domain/src/deck.ts)). A deck's direction decides which
+[deck.ts](../packages/core/domain/src/deck.ts)). A deck's direction decides which
 prompts its cards make — front→back, back→front, or both (a
 *bidirectional* deck, two prompts per card). Each prompt is scheduled on
 its own: knowing "Sweden → Stockholm" says nothing about knowing
@@ -107,14 +107,14 @@ Decisions fixed in code (and tests):
   card's state of its own.
 - Every grade below 3 resets the card. The statistics and the Studio
   count a **lapse** only for a *scored review* graded below 3 (`isLapse`
-  in [answerChain.ts](../packages/domain/src/answerChain.ts),
+  in [answerChain.ts](../packages/core/domain/src/answerChain.ts),
   [statistics.md](statistics.md#what-the-figures-count)): not a first
   answer, a repeat the same day or a course answer.
 
 ### Worked examples
 
 Each row is one answer: the state before it, the grade, and the state
-after. [sm2.test.ts](../packages/domain/src/sm2.test.ts) parses the
+after. [sm2.test.ts](../packages/core/domain/src/sm2.test.ts) parses the
 header and the three number columns and checks the code against every
 row. A change to the rules or a row that leaves the two apart fails
 the tests. Keep the header and the three number columns as they are.
@@ -139,7 +139,7 @@ FSRS-6, the Free Spaced Repetition Scheduler, version 6, is a second
 scheduler beside SM-2. It keeps each prompt's *stability* (how long its
 memory lasts) and *difficulty*, and picks the due day on which the
 chance of recall falls to the *desired retention*, 90% by default.
-[fsrs.ts](../packages/domain/src/fsrs.ts) has the formulas, and `gradePrompt` in [grading.ts](../packages/domain/src/grading.ts)
+[fsrs.ts](../packages/core/domain/src/fsrs.ts) has the formulas, and `gradePrompt` in [grading.ts](../packages/core/domain/src/grading.ts)
 applies a grade to both schedulers. The preferences name the scheduler
 that sets the due days (`sm:studyScheduler`, preferences format 5);
 SM-2's state is updated on every review either way. FSRS-6 is
@@ -167,7 +167,7 @@ Solid Memo fixes what FSRS leaves to the app.
 ### FSRS-6 state
 
 A prompt scheduled with FSRS-6 has an `FsrsState`
-([review.ts](../packages/domain/src/review.ts)), a subject of its own
+([review.ts](../packages/core/domain/src/review.ts)), a subject of its own
 in the reviews document beside its SM-2 `ReviewState`:
 
 | Field | Meaning |
@@ -342,7 +342,7 @@ default changes no one's scheduler.
 
 - **A new instance** is made with its preferences stated
   (`NEW_INSTANCE_PREFERENCES`,
-  [preferences.ts](../packages/domain/src/preferences.ts)): FSRS-6 and
+  [preferences.ts](../packages/core/domain/src/preferences.ts)): FSRS-6 and
   the device's theme. A guest's instance and a trial's sandbox are made
   the same way (`createInstance`): a guest starts on FSRS-6, and a trial
   then takes the user's scheduler.
@@ -377,14 +377,14 @@ is lost then.
 
 Both the preferences screen and the invitation switch through
 `switchScheduler`
-([preferences.ts](../packages/application/src/preferences.ts)). The
+([preferences.ts](../packages/core/application/src/preferences.ts)). The
 preferences screen lists FSRS-6 first and marks it Recommended. A plain
 save of the preferences (`savePreferences`) keeps the stored scheduler:
 FSRS-6 is never turned on without its states.
 
 - **To FSRS-6.** The answer log is read whole, once. Each deck's
   reviews document gets an FSRS-6 state for every SM-2 state
-  (`switchedStates`, [schedulerSwitch.ts](../packages/domain/src/schedulerSwitch.ts)),
+  (`switchedStates`, [schedulerSwitch.ts](../packages/core/domain/src/schedulerSwitch.ts)),
   in one write per deck, made again from a fresh read on a 412
   (`writeFsrsStates`).
   - **Replayed** when the log holds the prompt's whole history: its
@@ -428,7 +428,7 @@ FSRS-6 is never turned on without its states.
 Each row is one answer, at a desired retention of 90%; the memory
 before is a new prompt, a stability and difficulty, or an SM-2 ease
 and interval to estimate from.
-[fsrs.test.ts](../packages/domain/src/fsrs.test.ts) parses the header
+[fsrs.test.ts](../packages/core/domain/src/fsrs.test.ts) parses the header
 and the five number columns and checks the code against every row, to
 within 0.0001 (the table rounds to 4 decimals). The interval is before
 fuzz ([Fuzz](#fuzz)). A change to the
@@ -462,7 +462,7 @@ header and the five number columns as they are.
 Sessions grade with one of two button sets, chosen per instance in the
 preferences (`sm:answerScale`, default `sm2`). Under FSRS-6 the minimal
 scale is always used, matching FSRS-6's four ratings
-(`effectiveAnswerScale` in [preferences.ts](../packages/domain/src/preferences.ts)),
+(`effectiveAnswerScale` in [preferences.ts](../packages/core/domain/src/preferences.ts)),
 and the stored scale stays for switching back to SM-2:
 
 | Scale | Buttons | Records |
@@ -473,13 +473,13 @@ and the stored scale stays for switching back to SM-2:
 The minimal scale is a view over SM-2. Again stands for 0–1 and records
 1; Hard stands for 2–3 and records **3**, the lowest passing grade, so
 it isn't a lapse. On the minimal scale only Again repeats in the session
-([answerScale.ts](../packages/domain/src/answerScale.ts)).
+([answerScale.ts](../packages/core/domain/src/answerScale.ts)).
 
 ## Multiple-choice answers in a course
 
 A [course](courses.md) asks a card as a multiple-choice question, its
 back among its distractors. The answer is right or wrong, and
-`gradeOfChoice` in [course.ts](../packages/domain/src/course.ts), the
+`gradeOfChoice` in [course.ts](../packages/core/domain/src/course.ts), the
 only place a choice becomes a grade, maps it to SM-2:
 
 | Choice | Grade | Why |
@@ -490,9 +490,9 @@ only place a choice becomes a grade, maps it to SM-2:
 FSRS-6 rates it Good or Again (`ratingOfChoice`, [FSRS-6](#fsrs-6));
 "grade 3" below is SM-2's. The grade goes through the same transition as
 a study review (`gradePrompt` in
-[grading.ts](../packages/domain/src/grading.ts), which the answer
+[grading.ts](../packages/core/domain/src/grading.ts), which the answer
 store's `grade` in
-[answerStore.ts](../packages/application/src/answerStore.ts) applies, as
+[answerStore.ts](../packages/core/application/src/answerStore.ts) applies, as
 `recordReview` does). Course answers are front→back.
 
 Whether an answer is graded at all depends on the card's state and
@@ -592,7 +592,7 @@ then it repeats until it passes. The "Card x of y" counter grows with
 each repeat.
 
 Each answer runs the `recordReview` use case
-([study.ts](../packages/application/src/study.ts)):
+([study.ts](../packages/core/application/src/study.ts)):
 
 - It applies the transition (`gradePrompt`: SM-2's, and FSRS-6's while
   it sets the due days) to the card's state as `reviews/<deckId>.ttl`
@@ -609,7 +609,7 @@ caches.
 Under each grade button, and in its name after the grade, is the interval
 `gradePrompt` gives for that grade, a new prompt's from nothing:
 "1 day", "6 days", "15 days"
-(`previewIntervals` in [grading.ts](../packages/domain/src/grading.ts)).
+(`previewIntervals` in [grading.ts](../packages/core/domain/src/grading.ts)).
 It's SM-2's under SM-2, and under FSRS-6 the FSRS-6 interval at the
 desired retention, fuzzed: the study days to the due day the grade
 sets. It depends on the days since the last review.
@@ -721,7 +721,7 @@ preferences share one request, never cached beyond it.
 
 The statistics page and each deck's page show how far along the cards
 are and what falls due next
-([cardProgress.ts](../packages/domain/src/cardProgress.ts)), from the
+([cardProgress.ts](../packages/core/domain/src/cardProgress.ts)), from the
 cards and review states, read afresh each time (`getCardProgress`, two
 GETs a deck), not from the answer log.
 
@@ -738,7 +738,7 @@ GETs a deck), not from the answer log.
   card twice, as the page says; retired cards, and states of a
   direction the deck isn't studied in, don't count.
 - **The forecast** is the Studio's (`forecastOf`,
-  [scheduleInsight.ts](../packages/domain/src/scheduleInsight.ts)),
+  [scheduleInsight.ts](../packages/core/domain/src/scheduleInsight.ts)),
   worked out per deck from its schedule: the digest's while it matches
   the documents read, else `scheduleOf` afresh, then kept in the
   digest. `mergeForecasts` adds the decks up: the reviews due on each
@@ -767,7 +767,7 @@ sessions hadn't happened. (The session undoes a single answer:
 first review**. A second review the same day keeps that snapshot
 (`snapshotBeforeReview`).
 
-`resetStudyDay` (pure, in [scheduling.ts](../packages/domain/src/scheduling.ts)) then
+`resetStudyDay` (pure, in [scheduling.ts](../packages/core/domain/src/scheduling.ts)) then
 decides, per card reviewed today:
 
 | Card | Reset does |
@@ -815,7 +815,7 @@ both. Removing the day's answers again changes nothing. "Today" honors
 the instance's `dayBoundaryHour`, like the queue.
 
 In the [Studio](studio.md#card-inspector), setting a card's due day (`rescheduleState`, in
-[reviewStateEdits.ts](../packages/domain/src/reviewStateEdits.ts)),
+[reviewStateEdits.ts](../packages/core/domain/src/reviewStateEdits.ts)),
 SM-2's or FSRS-6's, drops its snapshot, so a reset of the day can't
 bring back the state from before the new due day. Forgetting a card (`resetStates`) removes its states,
 SM-2's and FSRS-6's, so a reset of the day has nothing of it to
@@ -843,7 +843,7 @@ a day, the deck stays paused until the learner resumes it. On its day it
 resumes by itself, at the start of that study day; resuming by hand
 makes today that day. The record stays once the deck resumes, so the
 day it did is known; pausing again replaces it
-([deckPause.ts](../packages/domain/src/deckPause.ts)).
+([deckPause.ts](../packages/core/domain/src/deckPause.ts)).
 
 Each deck's menu on the deck list offers **Pause**, or **Resume** for a
 deck paused today. Pause opens a small dialog: until the learner
@@ -879,7 +879,7 @@ reviews of the backlog, and the cards not yet due keep their due days.
 
 - **Order**: the backlog goes highest chance of recall today first,
   then higher stability (`recallOn` in
-  [fsrs.ts](../packages/domain/src/fsrs.ts): a prompt's fresh FSRS-6
+  [fsrs.ts](../packages/core/domain/src/fsrs.ts): a prompt's fresh FSRS-6
   state, else the FSRS-6 estimate of its SM-2 state, `memoryFromSm2`,
   whichever scheduler sets the due days). These are the cards a review
   can still save. Short-stability cards that are probably forgotten cost

@@ -29,13 +29,13 @@ function repository(): string {
   const root = mkdtempSync(join(tmpdir(), "solid-memo-coverage-"));
   for (const [dir, name] of [
     ["apps/web", "@x/web"],
-    ["packages/domain", "@x/domain"],
+    ["packages/core/domain", "@x/domain"],
     ["packages/untested", "@x/untested"],
   ]) {
     mkdirSync(join(root, dir), { recursive: true });
     writeFileSync(join(root, dir, "package.json"), JSON.stringify({ name }));
   }
-  for (const dir of ["apps/web", "packages/domain", "scripts"]) {
+  for (const dir of ["apps/web", "packages/core/domain", "scripts"]) {
     mkdirSync(join(root, dir, "coverage"), { recursive: true });
     writeFileSync(join(root, dir, "coverage/coverage-summary.json"), SUMMARY);
   }
@@ -79,7 +79,7 @@ describe("collect", () => {
     const io = defaultIo(repository(), {});
     expect(io.packageDirs()).toEqual([
       "apps/web",
-      "packages/domain",
+      "packages/core/domain",
       "packages/untested",
       "scripts",
     ]);

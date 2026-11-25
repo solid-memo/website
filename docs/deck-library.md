@@ -47,7 +47,7 @@ version stays at its published format; a new one is written at format
   come in every app language (English, Swedish, Korean, German, Spanish
   and French), so a new app language means a new version of every deck.
   `LIBRARY_LANGUAGES` in
-  [`curationRules.ts`](../packages/domain/src/release/curationRules.ts)
+  [`curationRules.ts`](../packages/core/domain/src/release/curationRules.ts)
   takes them from `LOCALES` ([i18n.md](i18n.md)), and
   `npm run library:check` asks them of each deck's newest version
   ([Checks](#checks)). The app shows only the reader's keywords
@@ -119,7 +119,7 @@ configuration, not part of any release:
 `<> sm:newcomerCourse <#name>` on the catalog, `<#name>` the series of
 a course offered to someone with no decks yet
 ([courses.md](courses.md#the-course-for-newcomers)). `NEWCOMER_COURSE` in
-[deckLibrary.ts](../packages/shacl/node/deckLibrary.ts) names the deck
+[deckLibrary.ts](../packages/adapters/shacl/node/deckLibrary.ts) names the deck
 (`io.newcomerCourse` in `main`, so its tests can name another);
 `undefined` names none, and retires the journey that expects an offer.
 No shape owns the term, `CatalogV1` included, and DCAT-AP ignores it.
@@ -144,11 +144,11 @@ describes one. No subject states `foaf:mbox`.
 Versions published before this rule are frozen with the maintainer's
 email (`foaf:mbox` on `<#anton-wiklund>`); a deck's next version drops
 it. The index never repeats an email: `keptInIndex`
-([seriesEntry.ts](../packages/domain/src/release/seriesEntry.ts)) leaves
+([seriesEntry.ts](../packages/core/domain/src/release/seriesEntry.ts)) leaves
 out every `foaf:mbox`, and keeps the current version's contact.
 `npm run library:check` checks the contact rule on every version new
 since `--base` (`contactProblems`, [Checks](#checks)). `LIBRARY_CONTACT`
-in [curationRules.ts](../packages/domain/src/release/curationRules.ts)
+in [curationRules.ts](../packages/core/domain/src/release/curationRules.ts)
 names the tracker. The Studio's release check for the library asks the
 same of a draft (`repoPolicy`,
 [studio.md](studio.md#the-release-check)), and its release screen writes
@@ -212,7 +212,7 @@ card about several things names each.
   form, `http://www.wikidata.org/entity/Q34`, not
   `https://www.wikidata.org/wiki/Q34`. It's on one of the namespaces in
   `ABOUT_NAMESPACES` in
-  [deckLibrary.ts](../packages/shacl/node/deckLibrary.ts): Wikidata's,
+  [deckLibrary.ts](../packages/adapters/shacl/node/deckLibrary.ts): Wikidata's,
   the [labor market taxonomy's](#the-taxonomy-deck)
   (`http://data.jobtechdev.se/taxonomy/concept/`) and the Rijksmuseum
   collection's (`https://id.rijksmuseum.nl/`). A deck from another
@@ -561,7 +561,7 @@ that says nothing reads as before.
 
 ## Checks
 
-[`packages/shacl/node/deckLibrary.ts`](../packages/shacl/node/deckLibrary.ts)
+[`packages/adapters/shacl/node/deckLibrary.ts`](../packages/adapters/shacl/node/deckLibrary.ts)
 is both commands. `npm run library` writes the index;
 `npm run library:check` writes nothing and fails when the index isn't
 what the versions make. Both check:
@@ -574,7 +574,7 @@ what the versions make. Both check:
   for version 1);
 - that each version states at least one `dcterms:license` IRI
   (`noLicense`, in `metadataProblems`,
-  [`libraryRules.ts`](../packages/domain/src/release/libraryRules.ts)),
+  [`libraryRules.ts`](../packages/core/domain/src/release/libraryRules.ts)),
   a library rule since the frozen shapes allow a deck without one. It
   holds every version, and the Studio's library check names it too;
 - that no version drops a card, chapter, step or distractor of the one
@@ -583,7 +583,7 @@ what the versions make. Both check:
 - that each deck's newest version has a title, a description and
   keywords in every language the app speaks (`languageProblems`, by
   `LIBRARY_LANGUAGES` in
-  [`curationRules.ts`](../packages/domain/src/release/curationRules.ts)),
+  [`curationRules.ts`](../packages/core/domain/src/release/curationRules.ts)),
   a library rule, as the shapes ask only for English. When the app gains
   a language, every deck fails until a new version adds it. The Studio's
   library check asks the same of a draft (`repoPolicy`);
@@ -613,7 +613,7 @@ what the versions make. Both check:
 ### Where the rules live
 
 The rules that read a release's data live in
-[`packages/domain/src/release/`](../packages/domain/src/release/), and
+[`packages/core/domain/src/release/`](../packages/core/domain/src/release/), and
 the Studio runs them in the browser too:
 
 | File | What |
@@ -630,15 +630,15 @@ the Studio runs them in the browser too:
 | `draftModel.ts` | A Studio draft as a release model, at its own address or another. |
 
 The command builds each release's model from its quads
-([`quadsToReleaseModel.ts`](../packages/shacl/node/quadsToReleaseModel.ts)),
+([`quadsToReleaseModel.ts`](../packages/adapters/shacl/node/quadsToReleaseModel.ts)),
 words each problem in English
-([`releaseMessages.ts`](../packages/shacl/node/releaseMessages.ts)), and
+([`releaseMessages.ts`](../packages/adapters/shacl/node/releaseMessages.ts)), and
 checks `@base`, Turtle syntax, the shapes and the profiles. It skips the
 curation rules (`LibraryDeckV5` and `LibraryDeckV6` state English and
 `EDUC` for this library) and `versionNotNext`: the path fixes each
 version, and the metadata check names one other than its path says. A
 golden test
-([`deckLibrary.golden.test.ts`](../packages/shacl/node/deckLibrary.golden.test.ts))
+([`deckLibrary.golden.test.ts`](../packages/adapters/shacl/node/deckLibrary.golden.test.ts))
 keeps what the rules say of published releases with faults put in.
 
 ### Course rules
@@ -720,7 +720,7 @@ fails, and so does a version not published there that states
 `foaf:mbox` or lacks the library's [contact](#contact)
 (`contactProblems`); without a base, that rule doesn't run.
 `npm run check` runs `library:check` without a base, as a Turbo task of
-the shacl package ([turbo.json](../packages/shacl/turbo.json)), cached
+the shacl package ([turbo.json](../packages/adapters/shacl/turbo.json)), cached
 until a file it reads (`ns/`, `decks/`, its packages' code) changes.
 CI's `check` job runs `npm run check:ci`, which leaves it to the
 `library` job.
@@ -747,7 +747,7 @@ npm run library:check -- --base origin/main
 
 pySHACL checks the index and every version against DCAT-AP again
 ([validation.md](validation.md#the-ci-cross-check)), and
-[libraryReleases.test.ts](../packages/solid/src/libraryReleases.test.ts)
+[libraryReleases.test.ts](../packages/adapters/solid/src/libraryReleases.test.ts)
 reads every version as the app does, its cards and a course's outline
 ([testing.md](testing.md#strategy-per-layer)).
 
@@ -766,7 +766,7 @@ VITE_LIBRARY_INDEX_URL=https://example.org/decks/index.ttl npm run dev
 ```
 
 The index is read once a page
-([solidDeckLibrary.ts](../packages/solid/src/solidDeckLibrary.ts)): the
+([solidDeckLibrary.ts](../packages/adapters/solid/src/solidDeckLibrary.ts)): the
 deck list, the upgrade offers, the Studio's update badges and a
 release's place share that read and its decks; the index changes only
 with a deploy. A failed read isn't kept, so the next one retries. Each
@@ -777,7 +777,7 @@ its own document, the deck's: the one at the address it was read from,
 else the one at its canonical address (`@base`). A subject anywhere
 else is none of them, whatever its type, and a card's distractor
 anywhere else isn't offered
-([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)).
+([libraryMapper.ts](../packages/adapters/solid/src/mappers/libraryMapper.ts)).
 
 The library conforms to [shapes.md](shapes.md)'s
 `CatalogV1`, `LibraryDeckSeriesV3`, and `LibraryDeckV5` or
@@ -824,7 +824,7 @@ describes:
 The same shapes check it (`LibraryDeckV6`, `LibraryDeckSeriesV3`,
 `AgentV1`), and DCAT-AP accepts it with only the reference data beside
 it
-([`library-deck/v6/valid`](../packages/vocab/fixtures/library-deck/v6/valid/)
+([`library-deck/v6/valid`](../packages/lib/vocab/fixtures/library-deck/v6/valid/)
 is an example, which `npm run crosscheck` checks too). Nothing in the
 data limits who publishes one, and the app reads its content as any
 release's (`toLibraryDeckContent`).
@@ -875,7 +875,7 @@ flowchart LR
 ```
 
 - `toLibraryDecks`
-  ([libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts))
+  ([libraryMapper.ts](../packages/adapters/solid/src/mappers/libraryMapper.ts))
   reads the catalog's datasets, each series' current release and its
   releases, through the `LibraryDeckSeriesV3` and `LibraryDeckV6`
   shapes (older formats migrated in memory), and leaves out a series or
@@ -891,7 +891,7 @@ flowchart LR
   the Swedish decks). A **card languages** filter shows a deck whose
   cards are in every language checked. A **search** covers names,
   descriptions and keywords, in every language (`filterLibraryDecks` in
-  [domain/library.ts](../packages/domain/src/library.ts)). Filters and
+  [domain/library.ts](../packages/core/domain/src/library.ts)). Filters and
   search are kept until a reload.
 - A deck's card languages are its current release's `dcterms:language`
   (`LibraryDeck.languages`), read by `toLibraryDecks` from the index and
@@ -900,15 +900,15 @@ flowchart LR
   none (the shape doesn't ask for them). Each is named in the app's
   language with `Intl.DisplayNames` through its tag ("KOR" is "ko");
   `languageTagOf` in
-  [domain/euLanguages.ts](../packages/domain/src/euLanguages.ts) tags
+  [domain/euLanguages.ts](../packages/core/domain/src/euLanguages.ts) tags
   each language `EU_LANGUAGES` lists and drops any other. The row, the
   deck's page and its preview name them. The search ignores case and
   compares query and text composed (NFC), so "사람" or "é" pasted
   decomposed (NFD), as from macOS file names or PDFs, still matches.
   Arabic is compared without its vowel marks, so "كتاب" finds "كِتَاب"
   (`matchesQuery` in
-  [domain/search.ts](../packages/domain/src/search.ts), `arabicFolded`
-  in [domain/langText.ts](../packages/domain/src/langText.ts)). The
+  [domain/search.ts](../packages/core/domain/src/search.ts), `arabicFolded`
+  in [domain/langText.ts](../packages/core/domain/src/langText.ts)). The
   Browser's card search ignores every diacritic (`folded`), Arabic's the
   same way.
 - A row opens the deck's page: description, topics, keywords in the
@@ -962,7 +962,7 @@ flowchart LR
   allowed. The marks are worked out once for each read of the pod's
   decks, not on each render, and each deck's release link is parsed
   once (`copiedTest` in
-  [libraryCopy.ts](../packages/domain/src/libraryCopy.ts)).
+  [libraryCopy.ts](../packages/core/domain/src/libraryCopy.ts)).
 - Several decks can be checked and imported at once, one at a time; a
   failure part-way leaves the earlier ones imported and reports the
   error.
@@ -1016,7 +1016,7 @@ flowchart LR
   ([routing.md](routing.md#a-link-to-a-release)).
 - `readReleaseFromLink` reads the document with no index
   (`DeckLibrary.readRelease`, `toStandaloneLibraryDeck` in
-  [libraryMapper.ts](../packages/solid/src/mappers/libraryMapper.ts)):
+  [libraryMapper.ts](../packages/adapters/solid/src/mappers/libraryMapper.ts)):
   its deck, its cards counted, its creators and license, and its series
   with every version the document describes. Format 6 describes the
   series in the release, and a `decks/` release at an older format
@@ -1026,7 +1026,7 @@ flowchart LR
   takes long to read leaves the tab working. One whose work there
   passes its deadline is refused as too large (`releaseTooLarge`).
 - Every release is read under `RELEASE_LIMITS`
-  ([readLimits.ts](../packages/solid/src/client/readLimits.ts)): 32 MiB
+  ([readLimits.ts](../packages/adapters/solid-client/src/readLimits.ts)): 32 MiB
   of body, 400,000 triples, and 64 Mi characters in the terms of those
   triples, which a Turtle prefix can make far longer than the body. One
   subject may have no more than 4,096 values for one predicate
@@ -1097,7 +1097,7 @@ flowchart LR
 - The headers that describe a resource, `Link` and `WAC-Allow`, are
   bounded on every response the app reads a document, file or access
   control from, a release's or any other
-  ([linkHeader.ts](../packages/solid/src/client/linkHeader.ts)). They
+  ([linkHeader.ts](../packages/adapters/solid-client/src/linkHeader.ts)). They
   come before the body, so the limits above never see them, and the
   parsers that read them can take time growing with the square of a
   header's length. A header longer than 8 KiB
@@ -1186,7 +1186,7 @@ flowchart LR
   library's index doesn't list is checked the same way on its first read
   in each later page session, whatever reads it
   (`withLinkedReleasesChecked` in
-  [library.ts](../packages/application/src/library.ts)). That covers the
+  [library.ts](../packages/core/application/src/library.ts)). That covers the
   course screen, a course's summary and statistics, the deck's release,
   its check and a mistake report. A release that
   no longer fits the shapes is refused there (`releaseNotConforming`),
@@ -1260,14 +1260,14 @@ flowchart LR
   are copies of the library's is worked out once for each list of decks
   and each read of the index, not on each render, and each deck's release
   link is parsed once
-  ([libraryCopy.ts](../packages/domain/src/libraryCopy.ts)).
+  ([libraryCopy.ts](../packages/core/domain/src/libraryCopy.ts)).
 - **Newer versions** of a release from a link may be listed by the
   creator's catalog, which links what its instance published
   (`sm:publishedRelease`, [data-model.md](data-model.md)).
   The lookup stays within the release's own instance. A release's
   address names it: `<instance>releases/<name>/vN.ttl`
   (`releaseInstanceOf` in
-  [releasePlace.ts](../packages/domain/src/release/releasePlace.ts)).
+  [releasePlace.ts](../packages/core/domain/src/release/releasePlace.ts)).
   `DeckLibrary.publishedBeside` takes the first catalog that links the
   release in the folders above it, nearest first, up to that instance's
   folder, read as anyone reads them. It never climbs above a folder the
@@ -1348,7 +1348,7 @@ that its release has (`ReportMistake` in
 the learner added to their copy has no link. The review of a version
 checks its form, not its facts ([CONTRIBUTING.md](../CONTRIBUTING.md)),
 so these reports find the library's mistakes. `mistakeReportUrl`
-([mistakeReport.ts](../packages/domain/src/mistakeReport.ts)) builds the
+([mistakeReport.ts](../packages/core/domain/src/mistakeReport.ts)) builds the
 link from the release, the card's fragment and where the release is
 reported (`ReportPlace`):
 

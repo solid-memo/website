@@ -1,0 +1,740 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import {
+  type Dataset,
+  type Subject,
+  createSolidDataset,
+  datasetFromQuads,
+  getThing,
+  setThing,
+  toRdfJsDataset,
+} from "@solid-memo/solid-client/rdf";
+import { MAX_TERM_CHARACTERS, pathKeys } from "@solid-memo/solid-client/readLimits";
+import { directionOf } from "@solid-memo/solid-client/sparqlUpdate";
+import type { Literal, Quad, Term } from "@rdfjs/types";
+import { AppError } from "@solid-memo/domain/appError";
+import { isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { isIriPastBound } from "@solid-memo/domain/pathKeys";
+import {
+  draftDocuments,
+  draftDocumentUrl,
+  draftIriOf,
+} from "@solid-memo/domain/release/draftLayout";
+import {
+  idIn,
+  iriIn,
+  NOTHING_PUBLISHED,
+  RDF_TYPE,
+  SCHEMA_COURSE,
+  type DraftNode,
+  type DraftTriple,
+  type ReleaseDraft,
+  unsupportedIdOf,
+} from "@solid-memo/domain/release/releaseDraft";
+import type { ReleaseTerm } from "@solid-memo/domain/release/releaseModel";
+import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";
+import { rebaseDraft } from "@solid-memo/domain/release/releaseToDraft";
+import { migrate } from "@solid-memo/domain/shapes/migrations";
+import { CARD_V7, DRAFT_DECK_V1, SHAPES } from "@solid-memo/vocab/descriptors.generated";
+import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
+import type { ShapeName } from "@solid-memo/vocab/types.generated";
+import {
+  datetimeOf,
+  findIri,
+  hasClass,
+  keptClasses,
+  readFieldOf,
+  readRecord,
+  readVersioned,
+  recordThing,
+  storedVersionOf,
+} from "../records";
+import { DCTERMS, SM } from "../vocab";
+
+/**
+ * A release's draft between its documents and the domain's ReleaseDraft
+ * (domain/release/releaseDraft.ts, docs/data-model.md "Drafts"):
+ *
+ * - **Shaped subjects** (the root, agents, the distribution, chapters,
+ *   steps, cards, distractors) are read by their shapes, the draft
+ *   shapes for the root, chapters and steps, each brought to its latest
+ *   format, and written as records (recordThing): what the shape owns is
+ *   rewritten, anything else on the subject is kept.
+ * - **Every other statement** (how the release was made, its sources
+ *   and license, the series it describes, and what a shaped subject says
+ *   beyond its shape) is read and written as it is: a raw triple.
+ *
+ * A subject is named in the draft as a fragment of its release document,
+ * and in the pod as a fragment of the document it is kept in
+ * (draftDocuments); the IRIs are mapped between the two here.
+ */
+
+/** The kinds of shaped subject a draft has besides its root, by the class that marks each. */
+const KINDS: readonly {
+  list: Exclude<keyof ReleaseDraft, "url" | "course" | "root" | "triples" | "published">;
+  shape: ShapeName;
+}[] = [
+  { list: "agents", shape: "agent" },
+  { list: "distributions", shape: "distribution" },
+  { list: "chapters", shape: "draftChapter" },
+  { list: "steps", shape: "draftStep" },
+  { list: "cards", shape: "card" },
+  { list: "distractors", shape: "distractor" },
+];
+
+const LATEST = (shape: ShapeName): ShapeDescriptor => {
+  const versions = SHAPES[shape] as Record<number, ShapeDescriptor>;
+  return versions[Math.max(...Object.keys(versions).map(Number))]!;
+};
+
+/** A term as the domain keeps it, a literal's base direction with it when it has one. */
+export function termOf(term: Term): ReleaseTerm {
+  switch (term.termType) {
+    case "Literal":
+      return {
+        kind: "literal",
+        value: term.value,
+        language: term.language,
+        datatype: term.datatype.value,
+        ...(term.direction ? { direction: term.direction } : {}),
+      };
+    case "BlankNode":
+      return { kind: "blank", value: term.value };
+    default:
+      return { kind: "iri", value: term.value };
+  }
+}
+
+/** A subject or object of a triple: `_:label` for a blank node. */
+function subjectTerm(value: string): Term {
+  return (
+    value.startsWith("_:")
+      ? { termType: "BlankNode", value: value.slice(2) }
+      : { termType: "NamedNode", value }
+  ) as Term;
+}
+
+/** A statement as a quad of the default graph, plain data that datasetFromQuads and turtleOf read. */
+export function quadOf(subject: string, predicate: string, object: ReleaseTerm): Quad {
+  const term =
+    object.kind === "literal"
+      ? {
+          termType: "Literal",
+          value: object.value,
+          language: object.language,
+          datatype: { termType: "NamedNode", value: object.datatype },
+          ...(object.direction ? { direction: object.direction } : {}),
+        }
+      : subjectTerm(object.kind === "blank" ? `_:${object.value}` : object.value);
+  return {
+    subject: subjectTerm(subject),
+    predicate: { termType: "NamedNode", value: predicate },
+    object: term,
+    graph: { termType: "DefaultGraph", value: "" },
+  } as unknown as Quad;
+}
+
+/** A subject's key: its IRI, or `_:label`. */
+export function keyOf(term: Term): string {
+  return term.termType === "BlankNode" ? `_:${term.value}` : term.value;
+}
+
+/** One statement as a string, to compare by. */
+export function tripleKey(triple: DraftTriple): string {
+  const { object } = triple;
+  const value =
+    object.kind === "literal"
+      ? `"${object.value}"@${object.language.toLowerCase()}${directionOf(object)}^^${object.datatype}`
+      : `${object.kind} ${object.value}`;
+  return `${triple.subject} ${triple.predicate} ${value}`;
+}
+
+/**
+ * One statement as the path of its parts, to key a map by (pathKeys):
+ * the same for two statements tripleKey has the same. The parts are
+ * held to the bound on a term (MAX_TERM_CHARACTERS), where tripleKey
+ * could be past it.
+ */
+export function tripleParts(triple: DraftTriple): string[] {
+  const { object } = triple;
+  const value =
+    object.kind === "literal"
+      ? [
+          object.kind,
+          object.value,
+          object.language.toLowerCase(),
+          object.direction ?? "",
+          object.datatype,
+        ]
+      : [object.kind, object.value];
+  return [triple.subject, triple.predicate, ...value];
+}
+
+/** The quads of a dataset. */
+export function quadsOf(dataset: Dataset): Quad[] {
+  return [...toRdfJsDataset(dataset)] as Quad[];
+}
+
+/**
+ * Whether a subject of the draft's document `document` is named there
+ * as the draft writes it (draftEntries): by an IRI draftIriOf leaves as
+ * it is, as the release document itself in it, or as a fragment of the
+ * document it is in. Any other name of the draft's documents (another
+ * document's fragment, or a document other than the release document
+ * itself) would be read as one of the draft's own subjects, what it
+ * states hidden behind the record read of that subject, and published
+ * with it (GHSA-8w75-jg23-rxq5).
+ */
+export function inPlaceIn(
+  container: string,
+  draftUrl: string,
+): (document: string, iri: string) => boolean {
+  const iriOf = draftIriOf(container, draftUrl);
+  return (document, iri) => {
+    const hash = iri.indexOf("#");
+    const named = hash === -1 ? iri : iri.slice(0, hash);
+    if (iriOf(iri) === iri && named !== draftUrl) return true;
+    return named === document && (hash !== -1 || iri === draftUrl);
+  };
+}
+
+/**
+ * What a release writes of its root itself, in place of what its draft
+ * says (releaseQuadsOf): its format, its time of issue and of change,
+ * and no sm:releasedAs.
+ */
+export const UNPUBLISHED_ROOT_PREDICATES: ReadonlySet<string> = new Set([
+  SM.formatVersion,
+  SM.releasedAs,
+  DCTERMS.issued,
+  DCTERMS.modified,
+]);
+
+const XSD = "http://www.w3.org/2001/XMLSchema#";
+
+/**
+ * An xsd:integer's value in one spelling, its sign and digits without
+ * the zeros that lead them; null when the lexical form is not an
+ * integer's, which the client would read as parseInt does (`"7junk"`
+ * as 7, `"0.9"` as 0).
+ */
+function integerValue(lexical: string): string | null {
+  const match = /^([+-]?)(\d+)$/.exec(lexical);
+  if (match === null) return null;
+  const [, sign, digits] = match as unknown as [string, string, string];
+  let start = 0;
+  while (start < digits.length - 1 && digits[start] === "0") start++;
+  const value = digits.slice(start);
+  return sign === "-" && value !== "0" ? `-${value}` : value;
+}
+
+/**
+ * A term by the value it holds, to compare a stored value with the one
+ * a record writes: an integer, a boolean or a date-time in UTC (`Z`)
+ * by what it means, when its lexical form is one of its datatype (a
+ * date-time's every field in its range, datetimeValue); a text with
+ * its language in lower case (as the records read it); anything else,
+ * an ill-formed literal or a date-time with an offset too, as it is
+ * spelled. The records write a date-time in UTC.
+ */
+function valueParts(term: Term): string[] {
+  if (term.termType !== "Literal") return [term.termType, term.value];
+  const datatype = term.datatype.value;
+  const value =
+    datatype === `${XSD}integer`
+      ? integerValue(term.value)
+      : datatype === `${XSD}boolean`
+        ? ({ true: "true", "1": "true", false: "false", "0": "false" } as Record<string, string>)[
+            term.value
+          ]
+        : datatype === `${XSD}dateTime`
+          ? datetimeValue(term)
+          : undefined;
+  return value === null || value === undefined
+    ? ["Literal", datatype, term.language.toLowerCase(), term.value]
+    : ["value", datatype, value];
+}
+
+/** An xsd:dateTime in UTC, its year, month, day, hour, minute and second. */
+const UTC_DATETIME = /^([+-]?\d{4,})-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)(?:\.\d+)?Z$/;
+
+/**
+ * The instant an xsd:dateTime in UTC holds, as toISOString writes it;
+ * null when it is not in UTC, or when a field is out of its range
+ * (month 13, hour 99), which a date would carry over into the next
+ * rather than refuse.
+ */
+function datetimeValue(term: Literal): string | null {
+  const fields = UTC_DATETIME.exec(term.value);
+  const date = fields === null ? null : datetimeOf(term);
+  if (fields === null || date === null) return null;
+  const [, ...stated] = fields.map(Number);
+  const read = [
+    date.getUTCFullYear(),
+    date.getUTCMonth() + 1,
+    date.getUTCDate(),
+    date.getUTCHours(),
+    date.getUTCMinutes(),
+    date.getUTCSeconds(),
+  ];
+  return read.every((value, at) => value === stated[at]) ? date.toISOString() : null;
+}
+
+const PROBE = "https://solid-memo.com/probe";
+
+/**
+ * The first predicate a shaped subject's statements state otherwise
+ * than its record writes it, so that what an editor shows and the
+ * checks see is not what would be published: a second value of a
+ * field of one, a second text in a language, a value of the wrong kind
+ * or ill-formed for its datatype, an IRI outside a field's list, any
+ * value of a predicate the shape forbids, or a format other than the
+ * one it is read in. A stored value is compared with the one the record
+ * writes (recordThing) by what it holds (valueParts), and two stored
+ * values that hold the same are one too many. Null when the subject
+ * states every predicate its shape owns as its record writes it.
+ * `kept` are IRIs a predicate's record keeps beyond its fields;
+ * `unchecked` are predicates not compared.
+ */
+function hiddenPredicateOf(
+  statements: readonly Quad[],
+  descriptor: ShapeDescriptor,
+  record: unknown,
+  kept: readonly (readonly [string, readonly string[]])[] = [],
+  unchecked: ReadonlySet<string> = new Set(),
+): string | null {
+  // Values and terms are keyed by the paths of their parts, each held to the bound on a term.
+  const valueKeys = pathKeys();
+  const valueKey = (term: Term) => valueKeys(valueParts(term));
+  const termKeys = pathKeys();
+  const expected = new Map<string, Set<number>>(
+    [
+      ...descriptor.absent,
+      ...descriptor.fields.map((field) => field.predicate),
+      SM.formatVersion,
+    ].map((predicate) => [predicate, new Set<number>()]),
+  );
+  for (const quad of quadsOf(
+    setThing(createSolidDataset(), recordThing(PROBE, descriptor, record, null)),
+  )) {
+    expected.get(quad.predicate.value)?.add(valueKey(quad.object));
+  }
+  for (const [predicate, iris] of kept) {
+    expected.set(
+      predicate,
+      new Set(iris.map((iri) => valueKey({ termType: "NamedNode", value: iri } as Term))),
+    );
+  }
+  const stored = new Map<string, { terms: Set<number>; values: Set<number> }>();
+  for (const { predicate, object } of statements) {
+    if (!expected.has(predicate.value)) continue;
+    const of = stored.get(predicate.value) ?? { terms: new Set(), values: new Set() };
+    stored.set(predicate.value, of);
+    of.terms.add(termKeys(Object.values(termOf(object))));
+    of.values.add(valueKey(object));
+  }
+  // A format of 1 goes without saying: a subject that states none is read in it.
+  if (descriptor.version === 1 && !stored.has(SM.formatVersion)) {
+    expected.delete(SM.formatVersion);
+  }
+  for (const [predicate, values] of expected) {
+    if (unchecked.has(predicate)) continue;
+    const of = stored.get(predicate);
+    const same =
+      (of?.terms.size ?? 0) === values.size &&
+      (of?.values.size ?? 0) === values.size &&
+      [...values].every((value) => of!.values.has(value));
+    if (!same) return predicate;
+  }
+  return null;
+}
+
+/**
+ * The draft (or release) at `url` its triples state, every IRI as the
+ * draft names it; null when it has no root this app can read (an
+ * sm:Deck at `url` with its shape's required fields). The release a
+ * draft was published as (`sm:releasedAs`) is kept only at an address
+ * a release may have (isPublishedReleaseUrl): the draft is data anyone
+ * with write access to its container may have written, and the Studio
+ * links that address and asks it whether the release is public. Of
+ * several, one at such an address is kept, whichever comes first.
+ *
+ * With `refuseHidden`, as a draft in the pod is read and published, a
+ * shaped subject whose statements state a predicate its shape owns
+ * otherwise than its record writes it is refused (draftHiddenValue,
+ * hiddenPredicateOf): no editor shows the difference and no check
+ * sees it, but it would be published with the release
+ * (GHSA-32jq-jh7h-r7v4). So each value of such a predicate that is
+ * published holds what its record does. What publishing writes of the
+ * root itself is not compared (UNPUBLISHED_ROOT_PREDICATES). A subject
+ * stamped with a newer format than this app reads it in, the root among
+ * them, is refused as a newer app's (writtenByNewerApp): reloading the
+ * page reads it. So a draft whose root this app could not mark released
+ * is not published (GHSA-9grp-qx53-cphh).
+ */
+export function draftFromQuads(
+  quads: readonly Quad[],
+  url: string,
+  options: { refuseHidden?: boolean } = {},
+): ReleaseDraft | null {
+  return draftReadOf(quads, url, options)?.draft ?? null;
+}
+
+/**
+ * A subject of a draft stamped with a newer format than this app writes
+ * it in, refused as a newer app's (writtenByNewerApp), when `refuse`.
+ */
+function refuseNewer(refuse: boolean, url: string, version: number, writes: number): void {
+  if (refuse && version > writes) throw new AppError("writtenByNewerApp", { url, version, writes });
+}
+
+/**
+ * The draft `quads` state (draftFromQuads), and which classes it does not
+ * keep: `unkept(subject, object)` holds of an rdf:type of a subject the
+ * draft reads by its shape (`subject` its key, `object` as the draft
+ * names it) that is neither one of its own nor one keptClasses keeps of
+ * the others. Publishing leaves those out of the release, as the draft
+ * it checks does (GHSA-8hh7-p2ww-mpjf).
+ */
+export function draftReadOf(
+  quads: readonly Quad[],
+  url: string,
+  { refuseHidden = false }: { refuseHidden?: boolean } = {},
+): { draft: ReleaseDraft; unkept: (subject: string, object: ReleaseTerm) => boolean } | null {
+  const dataset = datasetFromQuads(quads);
+  /** Each subject's statements, by its key. */
+  const statements = new Map<string, Quad[]>();
+  for (const quad of quads) {
+    const key = keyOf(quad.subject);
+    const of = statements.get(key);
+    if (of === undefined) statements.set(key, [quad]);
+    else of.push(quad);
+  }
+  /** Refuse a subject whose record does not keep what it states (hiddenPredicateOf), when asked to. */
+  const refuse = (
+    subject: string,
+    descriptor: ShapeDescriptor,
+    record: unknown,
+    kept?: readonly (readonly [string, readonly string[]])[],
+    unchecked?: ReadonlySet<string>,
+  ) => {
+    if (!refuseHidden) return;
+    const predicate = hiddenPredicateOf(
+      statements.get(subject)!,
+      descriptor,
+      record,
+      kept,
+      unchecked,
+    );
+    if (predicate !== null) throw new AppError("draftHiddenValue", { subject, predicate });
+  };
+  /** For each shaped subject, the predicates its shape owns, and the types. */
+  const owned = new Map<string, { predicates: Set<string>; types: Set<string> }>();
+  const own = (
+    subject: string,
+    descriptor: ShapeDescriptor,
+    types: readonly string[] = [],
+    predicates: readonly string[] = [],
+  ) =>
+    owned.set(subject, {
+      predicates: new Set([
+        ...descriptor.fields.map((field) => field.predicate),
+        ...descriptor.absent,
+        SM.formatVersion,
+        ...predicates,
+      ]),
+      types: new Set([descriptor.targetClass, ...descriptor.additionalTypes, ...types]),
+    });
+
+  const rootThing = getThing(dataset, url);
+  const read =
+    rootThing === null || !hasClass(rootThing, SM.Deck)
+      ? null
+      : readRecord(rootThing, DRAFT_DECK_V1);
+  if (read === null) return null;
+  // Its root too, as a newer app's: marking it released would be
+  // refused after the release is out (GHSA-9grp-qx53-cphh).
+  refuseNewer(refuseHidden, url, storedVersionOf(rootThing!), DRAFT_DECK_V1.version);
+  // Of every sm:releasedAs the draft states, one at a release's address, whatever their order.
+  const { releasedAs: _first, ...rest } = read;
+  const releasedAs = findIri(rootThing!, SM.releasedAs, isPublishedReleaseUrl);
+  const root = releasedAs === undefined ? rest : { ...rest, releasedAs };
+  refuse(url, DRAFT_DECK_V1, read, [], UNPUBLISHED_ROOT_PREDICATES);
+  own(url, DRAFT_DECK_V1, [SCHEMA_COURSE]);
+
+  const nodes: Record<string, DraftNode<unknown>[]> = Object.fromEntries(
+    KINDS.map(({ list }) => [list, []]),
+  );
+  for (const subject of statements.keys()) {
+    const id = idIn({ url }, subject);
+    if (id === null) continue;
+    const thing = getThing(dataset, subject) as Subject;
+    const kinds = KINDS.filter(({ shape }) => hasClass(thing, LATEST(shape).targetClass));
+    if (kinds.length !== 1) continue;
+    const { list, shape } = kinds[0]!;
+    const read = readVersioned(thing, shape);
+    if (read === null) continue;
+    // Read in the latest format this app knows, a newer one would be published in that one: the reload message, not a value to remove.
+    refuseNewer(refuseHidden, subject, read.storedVersion, read.record.version);
+    const descriptor = (SHAPES[shape] as Record<number, ShapeDescriptor>)[read.record.version]!;
+    const data = migrate(shape, read.record, { subject });
+    // What a card stamped below format 7 is about (`dcterms:subject`, as a
+    // release compiled from linked data states it on format-4 cards) goes
+    // into its record, not the raw triples: the latest card shape writes
+    // it, once, and the release diff and a learner's upgrade compare it.
+    if (shape === "card" && read.record.version < 7) {
+      const about = readFieldOf(thing, CARD_V7, "subject")!;
+      refuse(subject, descriptor, read.record.data, [[DCTERMS.subject, about]]);
+      own(subject, descriptor, [], [DCTERMS.subject]);
+      nodes[list]!.push({ id, data: { ...data, subject: about } });
+      continue;
+    }
+    refuse(subject, descriptor, read.record.data);
+    own(subject, descriptor);
+    nodes[list]!.push({ id, data });
+  }
+  // Of the other classes a shaped subject states, only those its write
+  // keeps (keptClasses): a class a shape asks something of, one past the
+  // most the write check reads, or a type that is no IRI would stop
+  // every write of the subject (GHSA-8hh7-p2ww-mpjf).
+  const classes = new Map<string, string[]>();
+  for (const quad of quads) {
+    const subject = keyOf(quad.subject);
+    if (!owned.has(subject) || !isClass(quad)) continue;
+    const of = classes.get(subject);
+    if (of === undefined) classes.set(subject, [quad.object.value]);
+    else of.push(quad.object.value);
+  }
+  const kept = new Map(
+    [...classes].map(([subject, types]) => [
+      subject,
+      new Set(keptClasses(owned.get(subject)!.types, types)),
+    ]),
+  );
+  const unkept = (subject: string, object: ReleaseTerm) =>
+    owned.has(subject) && (object.kind !== "iri" || !kept.get(subject)!.has(object.value));
+  const triples = quads
+    .filter((quad) => {
+      const subject = keyOf(quad.subject);
+      const shaped = owned.get(subject);
+      if (shaped === undefined) return true;
+      if (quad.predicate.value === RDF_TYPE)
+        return !shaped.types.has(quad.object.value) && !unkept(subject, termOf(quad.object));
+      return !shaped.predicates.has(quad.predicate.value);
+    })
+    .map(
+      (quad): DraftTriple => ({
+        subject: keyOf(quad.subject),
+        predicate: quad.predicate.value,
+        object: termOf(quad.object),
+      }),
+    );
+  const draft: ReleaseDraft = {
+    url,
+    course: hasClass(rootThing!, SCHEMA_COURSE),
+    root,
+    ...(nodes as unknown as Pick<
+      ReleaseDraft,
+      "agents" | "distributions" | "chapters" | "steps" | "cards" | "distractors"
+    >),
+    triples,
+    published: NOTHING_PUBLISHED,
+  };
+  return { draft, unkept };
+}
+
+/** One subject of a draft as its document in the pod holds it: its record, when its shape describes it, and its other statements. */
+export interface DraftEntry {
+  /** The document it is kept in. */
+  document: string;
+  /** Its IRI there (`_:label` for a blank node). */
+  subject: string;
+  shaped?: { descriptor: ShapeDescriptor; record: unknown };
+  raw: DraftTriple[];
+}
+
+/**
+ * Every subject of the draft, by its IRI in the draft, as the pod keeps
+ * it: in the document draftDocuments puts it in, at that document's IRI,
+ * with every IRI it names mapped the same way. A chapter's document is
+ * named after its id, so a draft with an id no draft can have (DRAFT_ID)
+ * is refused (draftIdUnsupported): its documents might not be in its
+ * container. A statement that one of its documents itself (`<>`, spelled
+ * any way a request sends it) is dcterms:isPartOf something is left out:
+ * it is what the release the draft was made from said, and to a deck
+ * it would say the document is the deck's to write (ownsDocument).
+ *
+ * A draft with an IRI longer than a term may be, there or in the
+ * document it is kept in, is refused (termTooLong), as its write would
+ * refuse it, before anything is keyed by that IRI
+ * (GHSA-4mgg-5xpp-3jx5). So is one that gives two of its subjects (an
+ * agent and a card, say) one id, or a record the id of the series the
+ * release is in (dataNotConforming): written, one would replace the
+ * other, or publishing would state the series' publisher and versions
+ * of that record (GHSA-w96m-f3jj-jcmw). Statements of the series, or
+ * of a record's subject, beside its record are kept as they are.
+ */
+export function draftEntries(draft: ReleaseDraft): Map<string, DraftEntry> {
+  refuseKeysPastBound(draft);
+  const unsupported = unsupportedIdOf(draft);
+  if (unsupported !== null) throw new AppError("draftIdUnsupported", { id: unsupported });
+  const places = draftDocuments(draft);
+  const documentOf = (iri: string) =>
+    draftDocumentUrl(draft.url, places.get(iri) ?? { kind: "release" });
+  const podIri = (iri: string) => {
+    const id = idIn(draft, iri);
+    const inPod = id === null ? iri : `${documentOf(iri)}#${id}`;
+    if (isIriPastBound(inPod)) throw termTooLong();
+    return inPod;
+  };
+  const pod = rebaseDraft(draft, draft.url, podIri);
+  const entries = new Map<string, DraftEntry>();
+  entries.set(draft.url, {
+    document: draft.url,
+    subject: draft.url,
+    shaped: { descriptor: DRAFT_DECK_V1, record: pod.root },
+    raw: draft.course
+      ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }]
+      : [],
+  });
+  // The series the release is in: what publishing states of it is the series', no record's.
+  const series = new Set([draft.root.inSeries, draft.root.isVersionOf]);
+  for (const { list, shape } of KINDS) {
+    (draft[list] as readonly DraftNode<unknown>[]).forEach((node, at) => {
+      const iri = iriIn(draft, node.id);
+      // Two of its subjects at one IRI: one would replace the other (GHSA-w96m-f3jj-jcmw).
+      if (entries.has(iri) || series.has(iri)) {
+        throw new AppError("dataNotConforming", { subject: iri });
+      }
+      entries.set(iri, {
+        document: documentOf(iri),
+        subject: podIri(iri),
+        shaped: {
+          descriptor: LATEST(shape),
+          record: (pod[list] as readonly DraftNode<unknown>[])[at]!.data,
+        },
+        raw: [],
+      });
+    });
+  }
+  draft.triples.forEach((triple, at) => {
+    const key = triple.subject;
+    const subject = key.startsWith("_:") ? key : podIri(key);
+    const document = entries.get(key)?.document ?? documentOf(key);
+    if (triple.predicate === DCTERMS.isPartOf && isSameUrl(subject, document)) return;
+    let entry = entries.get(key);
+    if (entry === undefined) {
+      entry = { document, subject, raw: [] };
+      entries.set(key, entry);
+    }
+    entry.raw.push(pod.triples[at]!);
+  });
+  return entries;
+}
+
+export function termTooLong(): AppError {
+  return new AppError("termTooLong", { limit: MAX_TERM_CHARACTERS });
+}
+
+/**
+ * Throws termTooLong for a draft with a subject or link V8 would hash by
+ * its length alone. A subject is named at most two characters longer
+ * here than in its shortest document (`release.ttl` for `cards.ttl`), so
+ * no IRI that document can hold is refused for that.
+ */
+function refuseKeysPastBound(draft: ReleaseDraft): void {
+  const refused = (iri: string) => {
+    if (iri.length > MAX_TERM_CHARACTERS) throw termTooLong();
+    return iri;
+  };
+  for (const { list } of KINDS) {
+    for (const node of draft[list] as readonly DraftNode<unknown>[]) refused(iriIn(draft, node.id));
+  }
+  rebaseDraft(draft, draft.url, refused);
+}
+
+/**
+ * The draft's statements, every subject at its IRI in the draft: each
+ * record as its shape writes it, and every other statement as it is.
+ * What its documents hold together, but named as in its release.
+ */
+export function draftQuads(draft: ReleaseDraft): Quad[] {
+  const root: DraftEntry = {
+    document: draft.url,
+    subject: draft.url,
+    shaped: { descriptor: DRAFT_DECK_V1, record: draft.root },
+    raw: draft.course
+      ? [{ subject: draft.url, predicate: RDF_TYPE, object: { kind: "iri", value: SCHEMA_COURSE } }]
+      : [],
+  };
+  const nodes = KINDS.flatMap(({ list, shape }) =>
+    (draft[list] as readonly DraftNode<unknown>[]).map(
+      (node): DraftEntry => ({
+        document: draft.url,
+        subject: iriIn(draft, node.id),
+        shaped: { descriptor: LATEST(shape), record: node.data },
+        raw: [],
+      }),
+    ),
+  );
+  return [
+    ...[root, ...nodes].flatMap(entryQuads),
+    ...draft.triples.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
+  ];
+}
+
+/** A subject as the quads its document holds of it, written new. */
+export function entryQuads(entry: DraftEntry): Quad[] {
+  const shaped =
+    entry.shaped === undefined
+      ? []
+      : quadsOf(
+          setThing(
+            createSolidDataset(),
+            recordThing(entry.subject, entry.shaped.descriptor, entry.shaped.record, null),
+          ),
+        );
+  return withEntryClasses(entry, [
+    ...shaped,
+    ...entry.raw.map((triple) => quadOf(triple.subject, triple.predicate, triple.object)),
+  ]);
+}
+
+/** Whether the quad states a class of its subject: an rdf:type that is an IRI. */
+function isClass(quad: Quad): boolean {
+  return quad.predicate.value === RDF_TYPE && quad.object.termType === "NamedNode";
+}
+
+/**
+ * The quads of an entry with the classes its subject's write would not
+ * keep left out, when its shape describes it: each its own, and of the
+ * others only those keptClasses keeps, so that what a draft writes of a
+ * shaped subject is held to its own shapes alone, whatever its
+ * statements carry (GHSA-8hh7-p2ww-mpjf). A type that is no IRI goes too.
+ */
+export function withEntryClasses(entry: DraftEntry, quads: readonly Quad[]): Quad[] {
+  if (entry.shaped === undefined) return [...quads];
+  const { descriptor } = entry.shaped;
+  const typed = (quad: Quad) =>
+    quad.predicate.value === RDF_TYPE && keyOf(quad.subject) === entry.subject;
+  const kept = new Set(
+    keptClasses(
+      [descriptor.targetClass, ...descriptor.additionalTypes],
+      quads.filter((quad) => typed(quad) && isClass(quad)).map((quad) => quad.object.value),
+    ),
+  );
+  return quads.filter((quad) => !typed(quad) || (isClass(quad) && kept.has(quad.object.value)));
+}
+
+/** Whether two entries say the same of their subject, in the same place. */
+export function sameEntry(a: DraftEntry, b: DraftEntry): boolean {
+  const triples = (entry: DraftEntry) => entry.raw.map(tripleKey).sort().join("\n");
+  return (
+    a.document === b.document &&
+    a.subject === b.subject &&
+    JSON.stringify(a.shaped?.record) === JSON.stringify(b.shaped?.record) &&
+    triples(a) === triples(b)
+  );
+}

@@ -208,10 +208,10 @@ otherwise.
 The ready-made decks carry their own licenses, stated in each deck
 (`dcterms:license`, [docs/deck-library.md](docs/deck-library.md)) and
 shown in the app. The vendored SHACL shapes keep their own: the DCAT-AP
-shapes are CC BY 4.0 ([license](packages/vocab/vendor/dcat-ap/LICENSE))
+shapes are CC BY 4.0 ([license](packages/lib/vocab/vendor/dcat-ap/LICENSE))
 and the SkoHub SKOS shapes Apache 2.0
-([license](packages/vocab/vendor/skohub/LICENSE)); see
-[packages/vocab/vendor](packages/vocab/vendor/README.md).
+([license](packages/lib/vocab/vendor/skohub/LICENSE)); see
+[packages/lib/vocab/vendor](packages/lib/vocab/vendor/README.md).
 
 The repository follows the [REUSE](https://reuse.software/)
 specification: every file states its copyright and license, in an SPDX

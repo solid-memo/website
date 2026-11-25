@@ -1,0 +1,2591 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  buildThing,
+  createThing,
+  type Dataset,
+  getBoolean,
+  getDatetime,
+  getInteger,
+  getStringNoLocale,
+  getThing,
+  getUrl,
+  getUrlAll,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
+import {
+  deleteSolidDataset,
+  writeDocument,
+  solidDatasetAsTurtle,
+} from "@solid-memo/solid-client/resources";
+import {
+  datasetFrom,
+  datasetOfTurtle,
+  getStringWithLocale,
+  getStringWithLocaleAll,
+} from "./testing/datasets";
+import { getStringNoLocaleAll } from "./testing/datasets";
+import { MAX_CATALOG_LINKS } from "./catalogLinks";
+import { createSolidDeckRepository } from "./solidDeckRepository";
+import { getSolidDatasetOrNull, versionOf } from "./datasets";
+import { datetimeLiteral } from "./records";
+import { DCAT, DCTERMS, RDF, SCHEMA, SM } from "./vocab";
+import { MAX_COMPLETED_CHAPTERS, type Card, type Deck } from "@solid-memo/domain/deck";
+import { addDistractor } from "@solid-memo/domain/distractors";
+import { distractorsOf } from "./mappers/deckMapper";
+import { GUEST_INSTANCE_URL } from "@solid-memo/domain/guest";
+import type { LibraryDeckContent } from "@solid-memo/domain/library";
+import { ABSENT_VERSION } from "@solid-memo/domain/studyDigest";
+import { AppError } from "@solid-memo/domain/appError";
+import { integerLiteral } from "./testing/literals";
+
+const OWL_DEPRECATED = "http://www.w3.org/2002/07/owl#deprecated";
+
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
+  return {
+    ...actual,
+    // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
+    deleteSolidDataset: vi.fn(),
+  };
+});
+vi.mock("./datasets", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./datasets")>();
+  const getSolidDatasetOrNull = vi.fn();
+  return {
+    ...actual,
+    getSolidDatasetOrNull,
+    // A removal's read through the guard, as any other read here.
+    readForRemoval: (url: string, fetch: typeof globalThis.fetch) =>
+      getSolidDatasetOrNull(url, fetch),
+    // An edit's read, as any other read here.
+    editDocument: ((url, fetch, edit, policy) =>
+      actual.editDocument(url, fetch, edit, {
+        read: getSolidDatasetOrNull,
+        ...policy,
+      })) as typeof actual.editDocument,
+    versionOf: vi.fn(actual.versionOf),
+  };
+});
+
+const INSTANCE = "https://pod.example/solid-memo/a/";
+const FOAF_NAME = "http://xmlns.com/foaf/0.1/name";
+const DCAT_ACCESS_URL = "http://www.w3.org/ns/dcat#accessURL";
+const PROV_WAS_DERIVED_FROM = "http://www.w3.org/ns/prov#wasDerivedFrom";
+const CATALOG = `${INSTANCE}catalog.ttl`;
+const FLAG = "https://flagcdn.com/h80/af.png";
+
+const deck: Deck = {
+  id: "deck-1",
+  url: `${CATALOG}#deck-1`,
+  title: { en: "Kanji N5" },
+  cardsDocumentUrl: `${INSTANCE}decks/deck-1.ttl`,
+  reviewsDocumentUrl: `${INSTANCE}reviews/deck-1.ttl`,
+  direction: "front-to-back",
+  createdAt: "2026-09-21T10:00:00.000Z",
+  formatVersion: 1,
+  authors: [],
+};
+
+const card: Card = {
+  id: "card-1",
+  url: `${deck.cardsDocumentUrl}#card-1`,
+  front: { "": "水" },
+  back: { "": "water" },
+  createdAt: "2026-09-21T10:00:00.000Z",
+  formatVersion: 1,
+};
+
+function makeRepository(
+  checkWrite?: Parameters<typeof createSolidDeckRepository>[0]["checkWrite"],
+) {
+  return createSolidDeckRepository({
+    // The instance's folder, asked whether it is its own: it is; a document, read to remove from: it is empty.
+    fetch: vi.fn(
+      async () => new Response("", { headers: { "Content-Type": "text/turtle" } }),
+    ) as unknown as typeof globalThis.fetch,
+    now: () => new Date("2026-09-21T10:00:00.000Z"),
+    randomId: () => "fixed",
+    ...(checkWrite === undefined ? {} : { checkWrite }),
+  });
+}
+
+function catalogWithDeck() {
+  return setThing(
+    datasetFrom(CATALOG),
+    buildThing(createThing({ url: deck.url }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, deck.title.en)
+      .addIri(SM.cardsDocument, deck.cardsDocumentUrl)
+      .addIri(SM.reviewsDocument, deck.reviewsDocumentUrl)
+      .build(),
+  );
+}
+
+/** A catalog of `count` decks, listed-0 on: none at another test deck's URL. */
+function catalogOfDecks(count: number) {
+  return datasetOfTurtle(
+    CATALOG,
+    Array.from(
+      { length: count },
+      (_, at) =>
+        `<${CATALOG}#listed-${at}> a <${SM.Deck}>; <${DCTERMS.title}> "Deck ${at}";
+          <${SM.cardsDocument}> <${INSTANCE}decks/listed-${at}.ttl>;
+          <${SM.reviewsDocument}> <${INSTANCE}reviews/listed-${at}.ttl>.`,
+    ).join("\n"),
+  );
+}
+
+/** A document as the pod serves it, parsed from its Turtle. */
+// A valid date-time whose year is past what a JavaScript date holds.
+const OUT_OF_RANGE = '"300000-01-01T00:00:00Z"^^<http://www.w3.org/2001/XMLSchema#dateTime>';
+
+beforeEach(() => {
+  vi.mocked(getSolidDatasetOrNull).mockReset();
+  vi.mocked(writeDocument).mockReset();
+  vi.mocked(deleteSolidDataset).mockReset();
+});
+
+describe("listDecks", () => {
+  it("returns an empty list when the catalog does not exist", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().listDecks(INSTANCE)).resolves.toEqual([]);
+  });
+
+  it("maps catalog subjects to decks", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const decks = await makeRepository().listDecks(INSTANCE);
+    expect(decks).toHaveLength(1);
+    expect(decks[0].title.en).toBe("Kanji N5");
+  });
+
+  it("lists a deck whose creation time is past what a date holds, as one without it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        CATALOG,
+        `<${deck.url}> a <${SM.Deck}>;
+          <${DCTERMS.title}> "Kanji N5";
+          <${DCTERMS.created}> ${OUT_OF_RANGE};
+          <${SM.cardsDocument}> <${deck.cardsDocumentUrl}>;
+          <${SM.reviewsDocument}> <${deck.reviewsDocumentUrl}>.`,
+      ),
+    );
+    const decks = await makeRepository().listDecks(INSTANCE);
+    expect(decks).toHaveLength(1);
+    expect(decks[0].title.en).toBe("Kanji N5");
+    expect(decks[0].createdAt).toBe("");
+  });
+
+  it("refuses a catalog with more decks than MAX_CATALOG_LINKS, as catalogTooManyLinks", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    await expect(makeRepository().listDecks(INSTANCE)).resolves.toHaveLength(MAX_CATALOG_LINKS);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS + 1));
+    await expect(makeRepository().listDecks(INSTANCE)).rejects.toMatchObject({
+      code: "catalogTooManyLinks",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
+  });
+});
+
+describe("checked writes", () => {
+  it("check the subjects each write touches before saving", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    const repository = makeRepository(checkWrite);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const authored = { ...deck, authors: ["Anton"] };
+    await repository.editDeck(authored, () => authored);
+    expect(checkWrite).toHaveBeenLastCalledWith(
+      expect.anything(),
+      [deck.url, `${deck.url}-cards`, `${CATALOG}#agent-anton`],
+      "pod",
+    );
+    await repository.saveCatalog(INSTANCE, {
+      title: "Main",
+      description: "Mine.",
+      publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+    });
+    expect(checkWrite).toHaveBeenLastCalledWith(
+      expect.anything(),
+      [`${CATALOG}#catalog`, "https://alice.example/profile/card#me"],
+      "pod",
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await repository.createDeck(INSTANCE, { en: "New" });
+    expect(checkWrite).toHaveBeenLastCalledWith(
+      expect.anything(),
+      [`${CATALOG}#deck-fixed`, `${CATALOG}#deck-fixed-cards`],
+      "pod",
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: card.url }))
+          .addIri(RDF.type, SM.Card)
+          .build(),
+      ),
+    );
+    await repository.addCard(deck, { front: { "": "a" }, back: { "": "b" } });
+    expect(checkWrite).toHaveBeenLastCalledWith(
+      expect.anything(),
+      [`${deck.cardsDocumentUrl}#card-fixed`],
+      "pod",
+    );
+    await repository.updateCard(deck, card, { front: { "": "a" }, back: { "": "b" } });
+    expect(checkWrite).toHaveBeenLastCalledWith(expect.anything(), [card.url], "pod");
+  });
+
+  it("save nothing when the check refuses", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const checkWrite = vi.fn(async () => {
+      throw new Error("does not conform");
+    });
+    await expect(makeRepository(checkWrite).createDeck(INSTANCE, { en: "New" })).rejects.toThrow(
+      "does not conform",
+    );
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("applyCardChanges", () => {
+  it("writes new and changed cards by id, keeping an existing card's creation time, and removes others, in one write", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        setThing(
+          datasetFrom(deck.cardsDocumentUrl),
+          buildThing(createThing({ url: `${deck.cardsDocumentUrl}#se` }))
+            .addIri(RDF.type, SM.Card)
+            .addStringNoLocale(SM.front, "Sweden")
+            .addStringNoLocale(SM.back, "Stockholm?")
+            .addLiteral(DCTERMS.created, datetimeLiteral("2026-01-01T00:00:00.000Z"))
+            .build(),
+        ),
+        buildThing(createThing({ url: `${deck.cardsDocumentUrl}#is` }))
+          .addIri(RDF.type, SM.Card)
+          .build(),
+      ) as never,
+    );
+    await makeRepository().applyCardChanges(deck, {
+      save: [
+        { id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" } },
+        { id: "no", front: { "": "Norway" }, back: { "": "Oslo" } },
+      ],
+      remove: ["is"],
+    });
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    const se = getThing(saved, `${deck.cardsDocumentUrl}#se`)!;
+    expect(getStringNoLocale(se, SM.back)).toBe("Stockholm");
+    expect(getDatetime(se, DCTERMS.created)?.toISOString()).toBe("2026-01-01T00:00:00.000Z");
+    expect(
+      getDatetime(getThing(saved, `${deck.cardsDocumentUrl}#no`)!, DCTERMS.created)?.toISOString(),
+    ).toBe("2026-09-21T10:00:00.000Z");
+    expect(getThing(saved, `${deck.cardsDocumentUrl}#is`)).toBeNull();
+  });
+
+  it("names the release a card was taken from where it says, and keeps the one a card names where it says none", async () => {
+    const V1 = "https://creator.example/decks/b/v1.ttl";
+    const V2 = "https://creator.example/decks/b/v2.ttl";
+    const taken = (id: string) =>
+      buildThing(createThing({ url: `${deck.cardsDocumentUrl}#${id}` }))
+        .addIri(RDF.type, SM.Card)
+        .addStringNoLocale(SM.front, id)
+        .addStringNoLocale(SM.back, id)
+        .addIri(SM.fromRelease, V1)
+        .build();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(setThing(datasetFrom(deck.cardsDocumentUrl), taken("se")), taken("dk")) as never,
+    );
+    await makeRepository().applyCardChanges(deck, {
+      save: [
+        { id: "se", front: { "": "se" }, back: { "": "Stockholm" }, fromRelease: V2 },
+        { id: "dk", front: { "": "dk" }, back: { "": "Copenhagen" } },
+        { id: "no", front: { "": "no" }, back: { "": "Oslo" } },
+      ],
+      remove: [],
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    const of = (id: string) =>
+      getUrl(getThing(saved, `${deck.cardsDocumentUrl}#${id}`)!, SM.fromRelease);
+    expect([of("se"), of("dk"), of("no")]).toEqual([V2, V1, null]);
+    // Read back, each says so.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    const read = await makeRepository().listCards(deck);
+    expect(read.map((c) => [c.id, c.fromRelease])).toEqual([
+      ["se", V2],
+      ["dk", V1],
+      ["no", undefined],
+    ]);
+  });
+
+  it("writes a card as read again, as an undo does, keeping a release it names that is no URL as it is", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        deck.cardsDocumentUrl,
+        `<${card.url}> a <${SM.Card}> ; <${SM.formatVersion}> 7 ; <${SM.front}> "水" ; <${SM.back}> "water" ;
+          <${SM.fromRelease}> <http://[x> .`,
+      ),
+    );
+    const [read] = await makeRepository().listCards(deck);
+    expect(read!.fromRelease).toBeUndefined();
+
+    await makeRepository().applyCardChanges(deck, { save: [read!], remove: [] });
+
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SM.fromRelease)).toEqual(["http://[x"]);
+  });
+
+  it("writes a card whose creation time is past what a date holds as one without it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        deck.cardsDocumentUrl,
+        `<${deck.cardsDocumentUrl}#se> a <${SM.Card}>; <${DCTERMS.created}> ${OUT_OF_RANGE}.`,
+      ),
+    );
+    await makeRepository().applyCardChanges(deck, {
+      save: [{ id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" } }],
+      remove: [],
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    const se = getThing(saved, `${deck.cardsDocumentUrl}#se`)!;
+    expect(getStringNoLocale(se, SM.back)).toBe("Stockholm");
+    expect(getDatetime(se, DCTERMS.created)?.toISOString()).toBe("2026-09-21T10:00:00.000Z");
+  });
+
+  it("retires a card and brings one back, stating owl:deprecated only on a retired card", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: `${deck.cardsDocumentUrl}#yu` }))
+          .addIri(RDF.type, SM.Card)
+          .addStringNoLocale(SM.front, "Yugoslavia")
+          .addStringNoLocale(SM.back, "Belgrade")
+          .addBoolean(OWL_DEPRECATED, true)
+          .build(),
+      ) as never,
+    );
+    await makeRepository().applyCardChanges(deck, {
+      save: [
+        { id: "yu", front: { "": "Yugoslavia" }, back: { "": "Belgrade" } },
+        { id: "se", front: { "": "Sweden" }, back: { "": "Stockholm" }, retired: true },
+      ],
+      remove: [],
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getBoolean(getThing(saved, `${deck.cardsDocumentUrl}#yu`)!, OWL_DEPRECATED)).toBeNull();
+    expect(getBoolean(getThing(saved, `${deck.cardsDocumentUrl}#se`)!, OWL_DEPRECATED)).toBe(true);
+  });
+
+  it("writes a card's distractors as the Studio's edits, moves and imports do: both links in step, typed sm:Distractor and schema:Answer", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const distractors = [
+      { id: "no-d1", text: { en: "Bergen" } },
+      { id: "no-d2", text: { en: "Trondheim" }, retired: true as const },
+    ];
+    await makeRepository().applyCardChanges(deck, {
+      save: [{ id: "no", front: { en: "Norway" }, back: { en: "Oslo" }, distractors }],
+      remove: [],
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    const urls = distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`);
+    const no = getThing(saved, `${deck.cardsDocumentUrl}#no`)!;
+    expect(getUrlAll(no, SM.distractor).sort()).toEqual(urls);
+    expect(getUrlAll(no, SCHEMA.suggestedAnswer).sort()).toEqual(urls);
+    for (const url of urls)
+      expect(getUrlAll(getThing(saved, url)!, RDF.type).sort()).toEqual([
+        "https://schema.org/Answer",
+        SM.Distractor,
+      ]);
+    expect(getBoolean(getThing(saved, urls[1]!)!, OWL_DEPRECATED)).toBe(true);
+
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    await makeRepository().applyCardChanges(deck, {
+      save: [
+        { id: "no", front: { en: "Norway" }, back: { en: "Oslo" }, distractors: [distractors[0]!] },
+      ],
+      remove: [],
+    });
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    expect(getUrlAll(getThing(again, `${deck.cardsDocumentUrl}#no`)!, SM.distractor)).toEqual([
+      urls[0],
+    ]);
+    expect(
+      getUrlAll(getThing(again, `${deck.cardsDocumentUrl}#no`)!, SCHEMA.suggestedAnswer),
+    ).toEqual([urls[0]]);
+    expect(getThing(again, urls[1]!)).toBeNull();
+  });
+
+  it("creates the cards document when there is none", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().applyCardChanges(deck, {
+      save: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" } }],
+      remove: [],
+    });
+    expect(
+      getThing(vi.mocked(writeDocument).mock.calls[0][1] as Dataset, `${deck.cardsDocumentUrl}#no`),
+    ).not.toBeNull();
+  });
+
+  it("makes a new card at the creation time given, as a card copied whole keeps its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().applyCardChanges(deck, {
+      save: [
+        {
+          id: "no",
+          front: { "": "Norway" },
+          back: { "": "Oslo" },
+          createdAt: "2026-01-02T03:04:05.000Z",
+        },
+      ],
+      remove: [],
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(
+      getDatetime(getThing(saved, `${deck.cardsDocumentUrl}#no`)!, DCTERMS.created)?.toISOString(),
+    ).toBe("2026-01-02T03:04:05.000Z");
+  });
+
+  it("writes changes made from an earlier read only while the document is still at the version read", async () => {
+    const changes = {
+      save: [{ id: "no", front: { "": "Norway" }, back: { "": "Oslo" } }],
+      remove: [],
+    };
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(deck.cardsDocumentUrl));
+    vi.mocked(versionOf).mockReturnValueOnce('"v1"');
+    await makeRepository().applyCardChanges(deck, changes, { whole: true, version: '"v1"' });
+    expect(writeDocument).toHaveBeenCalledOnce();
+    // Changed since it was read: nothing is written.
+    vi.mocked(versionOf).mockReturnValueOnce('"v2"');
+    await expect(
+      makeRepository().applyCardChanges(deck, changes, { version: '"v1"' }),
+    ).rejects.toMatchObject({
+      code: "changedElsewhere",
+      vars: { url: deck.cardsDocumentUrl },
+    });
+    // Gone since, or created since it was read as missing.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(null);
+    await expect(
+      makeRepository().applyCardChanges(deck, changes, { version: '"v1"' }),
+    ).rejects.toMatchObject({ code: "changedElsewhere" });
+    await expect(
+      makeRepository().applyCardChanges(deck, changes, { version: "absent" }),
+    ).rejects.toMatchObject({ code: "createdElsewhere" });
+    expect(writeDocument).toHaveBeenCalledOnce();
+    // Still missing, it is created.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(null);
+    await makeRepository().applyCardChanges(deck, changes, { version: "absent" });
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("addCardIfAbsent", () => {
+  const card = {
+    id: "se",
+    front: { "": "Release" },
+    back: { "": "Release" },
+    fromRelease: "https://lib.example/v1.ttl",
+  };
+  const saved = () => vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+  const typed = (type: string) =>
+    setThing(
+      datasetFrom(deck.cardsDocumentUrl),
+      buildThing(createThing({ url: `${deck.cardsDocumentUrl}#se` }))
+        .addIri(RDF.type, type)
+        .addStringNoLocale(SM.front, "Mine")
+        .build(),
+    ) as never;
+
+  it("writes a card the deck does not have, naming its release, creating the document when there is none", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().addCardIfAbsent(deck, card);
+    expect(writeDocument).toHaveBeenCalledOnce();
+    expect(getUrl(getThing(saved(), `${deck.cardsDocumentUrl}#se`)!, SM.fromRelease)).toBe(
+      card.fromRelease,
+    );
+  });
+
+  it("writes nothing when the deck has a card at that id", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().addCardIfAbsent(deck, card)).resolves.toBe(true);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved() as never);
+    vi.mocked(writeDocument).mockClear();
+    await expect(makeRepository().addCardIfAbsent(deck, card)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("writes over a subject typed as a card that can't be read as one, so a state never lacks its card", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(typed(SM.Card));
+    await expect(makeRepository().addCardIfAbsent(deck, card)).resolves.toBe(true);
+    expect(getUrl(getThing(saved(), `${deck.cardsDocumentUrl}#se`)!, SM.fromRelease)).toBe(
+      card.fromRelease,
+    );
+  });
+
+  it("refuses a subject a newer version of the app has written, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: `${deck.cardsDocumentUrl}#se` }))
+          .addIri(RDF.type, SM.Card)
+          .addLiteral(SM.formatVersion, integerLiteral(99))
+          .build(),
+      ) as never,
+    );
+    await expect(makeRepository().addCardIfAbsent(deck, card)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("goes by what the subject is: another's subject at that id takes the card, a distractor refuses it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(typed("https://other.example/Note"));
+    await makeRepository().addCardIfAbsent(deck, card);
+    expect(getUrlAll(getThing(saved(), `${deck.cardsDocumentUrl}#se`)!, RDF.type)).toContain(
+      SM.Card,
+    );
+    vi.mocked(writeDocument).mockClear();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(typed(SM.Distractor));
+    await expect(makeRepository().addCardIfAbsent(deck, card)).rejects.toMatchObject({
+      code: "idTakenInDeck",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("addDeck", () => {
+  const added: Deck = {
+    ...deck,
+    id: "deck-2",
+    url: `${CATALOG}#deck-2`,
+    cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl`,
+    reviewsDocumentUrl: `${INSTANCE}reviews/deck-2.ttl`,
+    createdAt: "2026-01-02T03:04:05.000Z",
+    sourceUrl: "https://solid-memo.com/decks/solid-fundamentals/v1.ttl",
+    course: true,
+    completedChapters: ["https://solid-memo.com/decks/solid-fundamentals/v1.ttl#ch-why-solid"],
+    cardLanguage: "sv",
+    pictureHosts: ["a.example", "b.example"],
+  };
+
+  it("adds the deck's entry as it is, at its own URLs, a course with its chapters completed, beside the decks there, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    const written = await makeRepository(checkWrite).addDeck(added);
+    expect(written).toEqual({ ...added, formatVersion: 6 });
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      [added.url, `${added.url}-cards`],
+      "pod",
+    );
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    const thing = getThing(saved as Dataset, added.url)!;
+    expect(getUrl(thing, SM.cardsDocument)).toBe(added.cardsDocumentUrl);
+    expect(getUrl(thing, PROV_WAS_DERIVED_FROM)).toBe(added.sourceUrl);
+    expect(getUrlAll(thing, RDF.type)).toContain(SCHEMA.Course);
+    expect(getUrlAll(thing, SM.completedChapter)).toEqual(added.completedChapters);
+    expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
+    expect(getStringNoLocaleAll(thing, SM.deckPictureHost)).toEqual(["a.example", "b.example"]);
+    expect(getDatetime(thing, DCTERMS.created)?.toISOString()).toBe("2026-01-02T03:04:05.000Z");
+    expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
+  });
+
+  it("creates the catalog document when there is none, a deck that is no course stating no chapters", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const { completedChapters: _chapters, course: _course, ...plain } = added;
+    await makeRepository().addDeck(plain);
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([]);
+    expect(getUrlAll(getThing(saved, added.url)!, RDF.type)).not.toContain(SCHEMA.Course);
+  });
+
+  it("writes at most MAX_COMPLETED_CHAPTERS chapters completed, the course's kept first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const others = Array.from(
+      { length: MAX_COMPLETED_CHAPTERS },
+      (_, i) => `https://elsewhere.example/x${i}.ttl#other`,
+    );
+    const own = added.completedChapters!;
+    await makeRepository().addDeck({ ...added, completedChapters: [...own, ...others] });
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    expect(getUrlAll(getThing(saved, added.url)!, SM.completedChapter)).toEqual([
+      ...own,
+      ...others.slice(1),
+    ]);
+  });
+
+  it("refuses an entry where the catalog has one, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().addDeck(deck)).rejects.toMatchObject({
+      code: "createdElsewhere",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("refuses an entry where the catalog has MAX_CATALOG_LINKS decks, writing nothing (GHSA-34c3-mmhj-7w2h)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS - 1));
+    await makeRepository().addDeck(added);
+    expect(writeDocument).toHaveBeenCalledOnce();
+
+    vi.mocked(writeDocument).mockReset();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    await expect(makeRepository().addDeck(added)).rejects.toMatchObject({
+      code: "catalogFull",
+      vars: { limit: MAX_CATALOG_LINKS },
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  const preconditionFailed = () =>
+    Object.assign(new Error("412 Precondition Failed"), { statusCode: 412 });
+
+  it("reads the catalog again and adds the entry to it when it changed elsewhere meanwhile, a few times at most", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockRejectedValueOnce(preconditionFailed());
+    await expect(makeRepository().addDeck(added)).resolves.toEqual({ ...added, formatVersion: 6 });
+    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+
+    vi.mocked(writeDocument).mockReset().mockRejectedValue(preconditionFailed());
+    await expect(makeRepository().addDeck(added)).rejects.toMatchObject({
+      code: "changedElsewhere",
+    });
+    expect(writeDocument).toHaveBeenCalledTimes(3);
+  });
+
+  it("refuses an entry another tab wrote meanwhile, and gives up at once on any other failure", async () => {
+    const withAdded = setThing(
+      catalogWithDeck(),
+      buildThing(createThing({ url: added.url }))
+        .addIri(RDF.type, SM.Deck)
+        .build(),
+    );
+    vi.mocked(getSolidDatasetOrNull)
+      .mockResolvedValueOnce(catalogWithDeck())
+      .mockResolvedValueOnce(withAdded);
+    vi.mocked(writeDocument).mockRejectedValueOnce(preconditionFailed());
+    await expect(makeRepository().addDeck(added)).rejects.toMatchObject({
+      code: "createdElsewhere",
+    });
+    expect(writeDocument).toHaveBeenCalledOnce();
+
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockReset().mockRejectedValueOnce(new Error("403"));
+    await expect(makeRepository().addDeck(added)).rejects.toThrow("403");
+    expect(writeDocument).toHaveBeenCalledOnce();
+  });
+});
+
+describe("editDeck", () => {
+  it("writes the entry changed from the deck as read, in this app's format, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    const change = vi.fn((stored: Deck) => ({ ...stored, title: { en: "Renamed" } }));
+    const written = await makeRepository(checkWrite).editDeck(
+      { ...deck, title: { en: "As shown" } },
+      change,
+    );
+    expect(change).toHaveBeenCalledWith(expect.objectContaining({ url: deck.url }));
+    expect(written).toMatchObject({ title: { en: "Renamed" }, formatVersion: 6 });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    expect(getStringWithLocale(getThing(saved as Dataset, deck.url)!, DCTERMS.title, "en")).toBe(
+      "Renamed",
+    );
+    expect(checkWrite).toHaveBeenCalledWith(saved, expect.arrayContaining([deck.url]), "pod");
+  });
+
+  it("writes nothing for no change, and gives the deck as read", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().editDeck(deck, () => null)).resolves.toMatchObject({
+      url: deck.url,
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads and changes the entry again when the catalog changed elsewhere meanwhile", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+    const change = vi.fn((stored: Deck) => stored);
+    await makeRepository().editDeck(deck, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a deck with no entry, or no catalog, writing nothing", async () => {
+    const change = vi.fn((stored: Deck) => stored);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().editDeck(deck, change)).rejects.toMatchObject({
+      code: "deckGone",
+    });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(
+      makeRepository().editDeck({ ...deck, url: `${CATALOG}#gone` }, change),
+    ).rejects.toMatchObject({ code: "deckGone" });
+    expect(change).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("readCatalog and saveCatalog", () => {
+  const catalog = {
+    title: "Main",
+    description: "My decks.",
+    publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+  };
+
+  it("read no catalog from an instance without a catalog document", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().readCatalog(INSTANCE)).resolves.toBeNull();
+  });
+
+  it("write the catalog into a new catalog document, and read it back", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().saveCatalog(INSTANCE, catalog);
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(CATALOG);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    await expect(makeRepository().readCatalog(INSTANCE)).resolves.toEqual(catalog);
+  });
+
+  it("write the catalog beside the decks of an existing catalog document", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await makeRepository().saveCatalog(INSTANCE, catalog);
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
+    expect(
+      getUrlAll(
+        getThing(saved as Dataset, `${CATALOG}#catalog`)!,
+        "http://www.w3.org/ns/dcat#dataset",
+      ),
+    ).toEqual([deck.url]);
+  });
+
+  it("editCatalog writes the catalog changed from the one read, beside the decks there, checked first", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await makeRepository().saveCatalog(INSTANCE, catalog);
+    const stored = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    vi.mocked(writeDocument).mockClear();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored as never);
+    const checkWrite = vi.fn(async () => undefined);
+    const change = vi.fn((read: unknown) => ({ ...(read as typeof catalog), title: "Renamed" }));
+    await expect(makeRepository(checkWrite).editCatalog(INSTANCE, change)).resolves.toEqual({
+      ...catalog,
+      title: "Renamed",
+    });
+    expect(change).toHaveBeenCalledWith(catalog);
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0]!;
+    expect(saveUrl).toBe(CATALOG);
+    expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
+    expect(checkWrite).toHaveBeenCalledWith(
+      saved,
+      [`${CATALOG}#catalog`, catalog.publisher.webId],
+      "pod",
+    );
+  });
+
+  it("editCatalog gives the change no catalog where there is none, and writes nothing for no change", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const change = vi.fn(() => null);
+    await expect(makeRepository().editCatalog(INSTANCE, change)).resolves.toBeNull();
+    expect(change).toHaveBeenCalledWith(null);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("editCatalog reads and changes the catalog again when it changed elsewhere meanwhile", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    vi.mocked(writeDocument).mockRejectedValueOnce({ statusCode: 412 });
+    const change = vi.fn(() => catalog);
+    await makeRepository().editCatalog(INSTANCE, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("editCatalog throws what the change throws, writing nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const refused = new Error("refused");
+    await expect(
+      makeRepository().editCatalog(INSTANCE, () => {
+        throw refused;
+      }),
+    ).rejects.toBe(refused);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("checkCatalogSave checks the catalog as saveCatalog would write it, and writes nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const checkWrite = vi.fn(async () => undefined);
+    await makeRepository(checkWrite).checkCatalogSave(INSTANCE, catalog);
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      [`${CATALOG}#catalog`, catalog.publisher.webId],
+      "pod",
+    );
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("checkCatalogSave refuses a catalog a newer version of the app wrote, as saveCatalog would, though it reads", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().saveCatalog(INSTANCE, catalog);
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    vi.mocked(writeDocument).mockClear();
+    const node = getThing(saved, `${CATALOG}#catalog`)!;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(saved, buildThing(node).setInteger(SM.formatVersion, 2).build()) as never,
+    );
+    await expect(makeRepository().readCatalog(INSTANCE)).resolves.toEqual(catalog);
+    await expect(makeRepository().checkCatalogSave(INSTANCE, catalog)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    await expect(makeRepository().saveCatalog(INSTANCE, catalog)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("upgradeDecks", () => {
+  const catalog = {
+    title: "Main",
+    description: "My decks.",
+    publisher: { webId: "https://alice.example/profile/card#me", name: "Alice" },
+  };
+  /** The catalog document with a deck entry at format 1 and one, `deck-2`, at this app's format. */
+  function catalogWithTwo() {
+    const current = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringWithLocale(DCTERMS.title, "Current", "en")
+      .addStringWithLocale(DCTERMS.description, "Up to date.", "en")
+      .addIri(SM.cardsDocument, `${INSTANCE}decks/deck-2.ttl`)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .addIri(SM.studyDirection, SM.frontToBack)
+      .addLiteral(SM.formatVersion, integerLiteral(6))
+      .build();
+    return setThing(catalogWithDeck(), current);
+  }
+
+  it("rewrites each outdated entry, as read, in this app's format and writes a missing catalog, in one write of the catalog document", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithTwo());
+    await expect(makeRepository(checkWrite).upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(url).toBe(CATALOG);
+    const entry = getThing(saved as Dataset, deck.url)!;
+    expect(getInteger(entry, SM.formatVersion)).toBe(6);
+    expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe("Kanji N5");
+    expect(
+      getUrlAll(
+        getThing(saved as Dataset, `${CATALOG}#catalog`)!,
+        "http://www.w3.org/ns/dcat#dataset",
+      ),
+    ).toEqual([deck.url, `${CATALOG}#deck-2`]);
+    // The entry in this app's format already is not written.
+    const subjects = (checkWrite.mock.calls[0] as unknown as [Dataset, string[]])[1];
+    expect(subjects).toEqual(
+      expect.arrayContaining([deck.url, `${CATALOG}#catalog`, catalog.publisher.webId]),
+    );
+    expect(subjects).not.toContain(`${CATALOG}#deck-2`);
+  });
+
+  it("keeps an outdated entry's card language", async () => {
+    const old = catalogWithDeck();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        old,
+        buildThing(getThing(old, deck.url)!).addStringNoLocale(SM.deckCardLanguage, "ko").build(),
+      ),
+    );
+    await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(true);
+    const saved = vi.mocked(writeDocument).mock.calls[0]![1] as Dataset;
+    const entry = getThing(saved, deck.url)!;
+    expect(getInteger(entry, SM.formatVersion)).toBe(6);
+    expect(getStringNoLocale(entry, SM.deckCardLanguage)).toBe("ko");
+  });
+
+  it("keeps a catalog the document has, and writes nothing when nothing is outdated", async () => {
+    const withCatalog = setThing(
+      catalogWithTwo(),
+      buildThing(createThing({ url: `${CATALOG}#catalog` }))
+        .addIri(RDF.type, "http://www.w3.org/ns/dcat#Catalog")
+        .addStringNoLocale(DCTERMS.title, "Theirs")
+        .addStringNoLocale(DCTERMS.description, "Kept.")
+        .addIri("http://purl.org/dc/terms/publisher", "https://bob.example/profile/card#me")
+        .build(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(withCatalog);
+    await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getStringNoLocale(getThing(saved, `${CATALOG}#catalog`)!, DCTERMS.title)).toBe("Theirs");
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(datasetFrom(CATALOG), getThing(catalogWithTwo(), `${CATALOG}#deck-2`)!),
+    );
+    await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(false);
+    expect(writeDocument).toHaveBeenCalledOnce();
+  });
+
+  it("leaves a catalog that does not fit its shape as it is, its title, description and license kept", async () => {
+    const license = "https://creativecommons.org/licenses/by/4.0/";
+    const misfit = `<${CATALOG}#catalog> a <${DCAT.Catalog}>;
+      <${DCTERMS.title}> "My Korean study decks"@en;
+      <${DCTERMS.description}> "Carefully written description";
+      <${DCTERMS.publisher}> <https://alice.example/profile/card#me>;
+      <${DCTERMS.license}> <${license}>;
+      <${SM.formatVersion}> 1.`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await datasetOfTurtle(CATALOG, misfit));
+    await expect(makeRepository().readCatalog(INSTANCE)).resolves.toBe("misfit");
+    // Nothing else outdated: nothing is written.
+    await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+    // An outdated deck entry beside it: only the entry is brought up to date.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        CATALOG,
+        `${misfit}
+        <${deck.url}> a <${SM.Deck}>; <${DCTERMS.title}> "Kanji N5";
+          <${SM.cardsDocument}> <${deck.cardsDocumentUrl}>;
+          <${SM.reviewsDocument}> <${deck.reviewsDocumentUrl}>.`,
+      ),
+    );
+    await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
+    const saved = getThing(
+      vi.mocked(writeDocument).mock.calls[0]![1] as Dataset,
+      `${CATALOG}#catalog`,
+    )!;
+    expect(getStringWithLocale(saved, DCTERMS.title, "en")).toBe("My Korean study decks");
+    expect(getStringNoLocaleAll(saved, DCTERMS.title)).toEqual([]);
+    expect(getStringNoLocale(saved, DCTERMS.description)).toBe("Carefully written description");
+    expect(getUrl(saved, DCTERMS.license)).toBe(license);
+  });
+
+  it("leaves a #catalog with statements of its own as it is, whatever its type, or with none", async () => {
+    for (const type of ["", `a <${DCAT.Dataset}>;`]) {
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+        await datasetOfTurtle(
+          CATALOG,
+          `<${CATALOG}#catalog> ${type} <${DCTERMS.title}> "My Korean study decks";
+            <${DCTERMS.description}> "Carefully written description".`,
+        ),
+      );
+      await expect(makeRepository().readCatalog(INSTANCE)).resolves.toBe("misfit");
+      await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(false);
+    }
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("creates the catalog document for a catalog alone, and writes nothing where there is neither", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().upgradeDecks(INSTANCE, null)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+    await expect(makeRepository().upgradeDecks(INSTANCE, catalog)).resolves.toBe(true);
+    expect(
+      getThing(vi.mocked(writeDocument).mock.calls[0][1] as Dataset, `${CATALOG}#catalog`),
+    ).not.toBeNull();
+  });
+});
+
+describe("createDeck", () => {
+  it("adds a deck subject to a fresh catalog and returns the deck", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+
+    const created = await makeRepository().createDeck(INSTANCE, { en: "Kanji N5" });
+
+    expect(created).toEqual({
+      id: "deck-fixed",
+      url: `${CATALOG}#deck-fixed`,
+      title: { en: "Kanji N5" },
+      cardsDocumentUrl: `${INSTANCE}decks/deck-fixed.ttl`,
+      reviewsDocumentUrl: `${INSTANCE}reviews/deck-fixed.ttl`,
+      direction: "front-to-back",
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 6,
+      authors: [],
+    });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(CATALOG);
+    const thing = getThing(saved as Dataset, created.url)!;
+    expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Kanji N5");
+    expect(getStringWithLocale(thing, DCTERMS.description, "en")).toBe("Flashcards: Kanji N5.");
+    expect(getStringWithLocale(thing, DCTERMS.description, "sv")).toBe("Kortlek: Kanji N5.");
+    expect(getInteger(thing, SM.formatVersion)).toBe(6);
+    expect(getUrl(thing, SM.studyDirection)).toBe(SM.frontToBack);
+    expect(getUrlAll(thing, DCTERMS.creator)).toEqual([]);
+    expect(getUrl(thing, DCTERMS.license)).toBeNull();
+    const distribution = getThing(saved as Dataset, `${created.url}-cards`)!;
+    expect(getUrl(distribution, DCAT_ACCESS_URL)).toBe(created.cardsDocumentUrl);
+  });
+
+  it("appends to an existing catalog", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+
+    await makeRepository().createDeck(INSTANCE, { en: "Second deck" });
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(getThing(saved as Dataset, deck.url)).not.toBeNull();
+    expect(getThing(saved as Dataset, `${CATALOG}#deck-fixed`)).not.toBeNull();
+  });
+});
+
+describe("registerDeck", () => {
+  it("refuses a deck past MAX_CATALOG_LINKS, writing nothing, so the decks stay listed (GHSA-34c3-mmhj-7w2h)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    const repository = makeRepository();
+    const extra: Deck = {
+      ...deck,
+      id: "deck-new",
+      url: `${CATALOG}#deck-new`,
+      cardsDocumentUrl: `${INSTANCE}decks/deck-new.ttl`,
+      reviewsDocumentUrl: `${INSTANCE}reviews/deck-new.ttl`,
+    };
+    const full = { code: "catalogFull", vars: { limit: MAX_CATALOG_LINKS } };
+    await expect(repository.registerDeck(extra)).rejects.toMatchObject(full);
+    await expect(repository.createDeck(INSTANCE, { en: "One more" })).rejects.toMatchObject(full);
+    expect(writeDocument).not.toHaveBeenCalled();
+    await expect(repository.listDecks(INSTANCE)).resolves.toHaveLength(MAX_CATALOG_LINKS);
+  });
+});
+
+describe("importDeck", () => {
+  const content: LibraryDeckContent = {
+    url: "https://solid-memo.com/decks/capitals/v1.ttl",
+    title: { en: "Capitals" },
+    formatVersion: 1,
+    authors: ["Anton Wiklund", "A friend"],
+    license: "https://creativecommons.org/publicdomain/zero/1.0/",
+    description: { en: "Capitals, from Wikipedia." },
+    direction: "bidirectional",
+    version: "1",
+    seriesUrl: "https://solid-memo.com/decks/index.ttl#capitals",
+    themes: ["https://solid-memo.com/ns/vocab/topics.ttl#geography"],
+    keywords: { en: ["capitals", "countries"], sv: ["huvudstäder"], "": ["legacy"] },
+    cards: [
+      { id: "sweden", front: { "": "Sweden" }, back: { "": "Stockholm" }, formatVersion: 1 },
+      {
+        id: "afghanistan",
+        front: {},
+        back: { "": "Afghanistan" },
+        frontImageUrl: FLAG,
+        formatVersion: 2,
+      },
+    ],
+  };
+
+  it("writes the cards document once, then the catalog entry with its source", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+
+    const imported = await makeRepository().importDeck(INSTANCE, content);
+
+    expect(imported).toEqual({
+      id: "deck-fixed",
+      url: `${CATALOG}#deck-fixed`,
+      title: { en: "Capitals" },
+      cardsDocumentUrl: `${INSTANCE}decks/deck-fixed.ttl`,
+      reviewsDocumentUrl: `${INSTANCE}reviews/deck-fixed.ttl`,
+      direction: "bidirectional",
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 6,
+      authors: ["Anton Wiklund", "A friend"],
+      license: content.license,
+      description: content.description,
+      sourceUrl: content.url,
+      themes: content.themes,
+      keywords: content.keywords,
+    });
+    const calls = vi.mocked(writeDocument).mock.calls;
+    expect(calls.map((c) => c[0])).toEqual([imported.cardsDocumentUrl, CATALOG]);
+    const cards = calls[0][1] as Dataset;
+    const sweden = getThing(cards, `${imported.cardsDocumentUrl}#sweden`)!;
+    expect(getStringNoLocale(sweden, SM.front)).toBe("Sweden");
+    expect(getStringNoLocale(sweden, SM.back)).toBe("Stockholm");
+    expect(getInteger(sweden, SM.formatVersion)).toBe(7);
+    // Each card names the release it was taken from: the series' card.
+    expect(getUrl(sweden, SM.fromRelease)).toBe(content.url);
+    const afghanistan = getThing(cards, `${imported.cardsDocumentUrl}#afghanistan`)!;
+    expect(getUrl(afghanistan, SM.fromRelease)).toBe(content.url);
+    expect(getStringNoLocale(afghanistan, SM.front)).toBeNull();
+    expect(getUrl(afghanistan, SM.frontImage)).toBe(FLAG);
+    expect(getStringNoLocale(afghanistan, SM.back)).toBe("Afghanistan");
+    // The catalog as the entry is checked first, and again as it is written.
+    expect(getSolidDatasetOrNull).toHaveBeenCalledTimes(2);
+    const entry = getThing(calls[1][1] as Dataset, imported.url)!;
+    expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe("Capitals");
+    expect(getUrl(entry, PROV_WAS_DERIVED_FROM)).toBe(content.url);
+    expect(getUrl(entry, DCTERMS.source)).toBeNull();
+    expect(getInteger(entry, SM.formatVersion)).toBe(6);
+    expect(getUrl(entry, SM.studyDirection)).toBe(SM.bidirectional);
+    expect(getUrlAll(entry, DCTERMS.creator)).toEqual([
+      `${CATALOG}#agent-anton-wiklund`,
+      `${CATALOG}#agent-a-friend`,
+    ]);
+    const anton = getThing(calls[1][1] as Dataset, `${CATALOG}#agent-anton-wiklund`)!;
+    expect(getStringNoLocale(anton, FOAF_NAME)).toBe("Anton Wiklund");
+    expect(getUrlAll(entry, "http://www.w3.org/ns/dcat#theme")).toEqual(content.themes);
+    expect(getStringWithLocaleAll(entry, "http://www.w3.org/ns/dcat#keyword", "en")).toEqual([
+      "capitals",
+      "countries",
+    ]);
+    expect(getStringWithLocaleAll(entry, "http://www.w3.org/ns/dcat#keyword", "sv")).toEqual([
+      "huvudstäder",
+    ]);
+    expect(getStringNoLocaleAll(entry, "http://www.w3.org/ns/dcat#keyword")).toEqual(["legacy"]);
+    expect(getUrl(entry, DCTERMS.license)).toBe(content.license);
+    expect(getStringWithLocale(entry, DCTERMS.description, "en")).toBe(content.description!.en);
+  });
+
+  it("copies a card's distractors beside it, keeping their fragment ids, and checks them with the cards", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    const imported = await makeRepository(checkWrite).importDeck(INSTANCE, {
+      ...content,
+      cards: [
+        {
+          id: "q",
+          front: { en: "What can an IRI name?" },
+          back: { en: "Anything" },
+          distractors: [
+            {
+              id: "q-d1",
+              text: { en: "Only web pages" },
+              note: { en: "A URL is one kind of IRI." },
+            },
+          ],
+          formatVersion: 5,
+        },
+      ],
+    });
+
+    const doc = imported.cardsDocumentUrl;
+    expect(checkWrite).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      [`${doc}#q`, `${doc}#q-d1`],
+      "pod",
+    );
+    const cards = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(cards, `${doc}#q`)!, SM.distractor)).toEqual([`${doc}#q-d1`]);
+    const distractor = getThing(cards, `${doc}#q-d1`)!;
+    expect(getUrlAll(distractor, RDF.type)).toContain(SM.Distractor);
+    expect(getStringWithLocale(distractor, SM.distractorText, "en")).toBe("Only web pages");
+    expect(getStringWithLocale(distractor, SM.distractorNote, "en")).toBe(
+      "A URL is one kind of IRI.",
+    );
+  });
+
+  it("copies the release's title and description in every language it states them in", async () => {
+    const imported = await makeRepository().importDeck(INSTANCE, {
+      ...content,
+      title: { ...content.title, sv: "Huvudstäder" },
+      description: { ...content.description, sv: "Från Wikipedia." },
+    });
+
+    const catalog = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    const entry = getThing(catalog, imported.url)!;
+    expect(getStringWithLocale(entry, DCTERMS.title, "en")).toBe(content.title.en);
+    expect(getStringWithLocale(entry, DCTERMS.title, "sv")).toBe("Huvudstäder");
+    expect(getStringWithLocale(entry, DCTERMS.description, "sv")).toBe("Från Wikipedia.");
+  });
+
+  it("types a course's deck schema:Course, as its release is", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const imported = await makeRepository().importDeck(INSTANCE, {
+      ...content,
+      isCourse: true,
+      cards: [],
+    });
+
+    expect(imported.course).toBe(true);
+    const catalog = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    const types = getUrlAll(getThing(catalog, imported.url)!, RDF.type);
+    expect(types).toEqual(expect.arrayContaining([SM.Deck, DCAT.Dataset, SCHEMA.Course]));
+  });
+
+  it("leaves the catalog alone when the cards document fails to save", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    vi.mocked(writeDocument).mockRejectedValueOnce(new Error("403"));
+
+    await expect(makeRepository().importDeck(INSTANCE, content)).rejects.toThrow("403");
+    expect(writeDocument).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes nothing to a catalog with MAX_CATALOG_LINKS decks (GHSA-34c3-mmhj-7w2h)", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(await catalogOfDecks(MAX_CATALOG_LINKS));
+    await expect(makeRepository().importDeck(INSTANCE, content)).rejects.toMatchObject({
+      code: "catalogFull",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("writes nothing when the entry would be refused", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const checkWrite = vi.fn(async () => {
+      throw new AppError("dataNotConforming");
+    });
+
+    await expect(makeRepository(checkWrite).importDeck(INSTANCE, content)).rejects.toMatchObject({
+      code: "dataNotConforming",
+    });
+    expect(checkWrite).toHaveBeenCalledTimes(1);
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([`${CATALOG}#deck-fixed`]),
+      "pod",
+    );
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("editDeck, renaming", () => {
+  it("replaces the title in place and returns the renamed deck", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+
+    const stored = (await makeRepository().readDeck(deck.url))!;
+    const renamed = await makeRepository().editDeck(deck, (read) => ({
+      ...read,
+      title: { en: "Kanji N4" },
+    }));
+
+    expect(renamed).toEqual({ ...stored, title: { en: "Kanji N4" }, formatVersion: 6 });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(CATALOG);
+    const thing = getThing(saved as Dataset, deck.url)!;
+    expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Kanji N4");
+    expect(getInteger(thing, SM.formatVersion)).toBe(6);
+    expect(getUrl(thing, SM.studyDirection)).toBe(SM.frontToBack);
+    expect(getUrl(thing, SM.cardsDocument)).toBe(deck.cardsDocumentUrl);
+  });
+
+  it("writes the title in every language it has", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+
+    await makeRepository().editDeck(deck, (stored) => ({
+      ...stored,
+      title: { en: "Kanji N4", sv: "Kanji N4 (svenska)" },
+    }));
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(saved as Dataset, deck.url)!;
+    expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Kanji N4");
+    expect(getStringWithLocale(thing, DCTERMS.title, "sv")).toBe("Kanji N4 (svenska)");
+  });
+
+  it("rejects when the catalog no longer exists", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(
+      makeRepository().editDeck(deck, (stored) => ({ ...stored, title: { en: "x" } })),
+    ).rejects.toThrow("no longer exists");
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("rejects when the deck is no longer in the catalog", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(CATALOG));
+    await expect(
+      makeRepository().editDeck(deck, (stored) => ({ ...stored, title: { en: "x" } })),
+    ).rejects.toThrow("no longer exists");
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("editDeck, of the entry's other fields", () => {
+  it("writes the direction and format version in place, keeping the rest and dropping the old direction", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        catalogWithDeck(),
+        buildThing(getThing(catalogWithDeck(), deck.url)!)
+          .addStringNoLocale(SM.direction, "front-to-back")
+          .build(),
+      ),
+    );
+
+    const stored = (await makeRepository().readDeck(deck.url))!;
+    const saved = await makeRepository().editDeck(deck, (read) => ({
+      ...read,
+      direction: "bidirectional",
+    }));
+
+    expect(saved).toEqual({ ...stored, direction: "bidirectional", formatVersion: 6 });
+    const [saveUrl, dataset] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(CATALOG);
+    const thing = getThing(dataset as Dataset, deck.url)!;
+    expect(getUrl(thing, SM.studyDirection)).toBe(SM.bidirectional);
+    expect(getStringNoLocale(thing, SM.direction)).toBeNull();
+    expect(getInteger(thing, SM.formatVersion)).toBe(6);
+    expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe(deck.title.en);
+    expect(getUrl(thing, SM.reviewsDocument)).toBe(deck.reviewsDocumentUrl);
+  });
+
+  it("writes the deck's own daily limits, and removes one the deck no longer sets", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        catalogWithDeck(),
+        buildThing(getThing(catalogWithDeck(), deck.url)!)
+          .addLiteral(SM.deckNewCardsPerDay, integerLiteral(20))
+          .addLiteral(SM.deckMaxReviewsPerDay, integerLiteral(100))
+          .build(),
+      ),
+    );
+
+    const { maxReviewsPerDay: _, ...stored } = (await makeRepository().readDeck(deck.url))!;
+    const saved = await makeRepository().editDeck(deck, (read) => {
+      const { maxReviewsPerDay: _dropped, ...rest } = read;
+      return { ...rest, newCardsPerDay: 5 };
+    });
+
+    expect(saved).toEqual({ ...stored, newCardsPerDay: 5, formatVersion: 6 });
+    const [, dataset] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(dataset as Dataset, deck.url)!;
+    expect(getInteger(thing, SM.deckNewCardsPerDay)).toBe(5);
+    expect(getInteger(thing, SM.deckMaxReviewsPerDay)).toBeNull();
+  });
+
+  it("keeps the entry's card language whatever the deck says, so a deck read before it changed cannot undo it", async () => {
+    const stored = catalogWithDeck();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        stored,
+        buildThing(getThing(stored, deck.url)!)
+          .addStringNoLocale(SM.deckCardLanguage, "sv")
+          .build(),
+      ),
+    );
+    await makeRepository().editDeck(deck, () => deck);
+    await makeRepository().editDeck(deck, (stored) => ({ ...stored, cardLanguage: "ko" }));
+    for (const [, dataset] of vi.mocked(writeDocument).mock.calls) {
+      const thing = getThing(dataset as Dataset, deck.url)!;
+      expect(getStringNoLocale(thing, SM.deckCardLanguage)).toBe("sv");
+    }
+    await expect(makeRepository().listDecks(INSTANCE)).resolves.toMatchObject([
+      { cardLanguage: "sv" },
+    ]);
+  });
+
+  it("renames a deck whose theme or source is no URL, dropping that value", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        CATALOG,
+        `<${deck.url}> a <${SM.Deck}>, <${DCAT.Dataset}> ; <${SM.formatVersion}> 6 ;
+          <${DCTERMS.title}> "${deck.title.en}"@en ; <${DCTERMS.description}> "Flashcards."@en ;
+          <${SM.studyDirection}> <${SM.frontToBack}> ; <${SM.cardsDocument}> <${deck.cardsDocumentUrl}> ; <${SM.reviewsDocument}> <${deck.reviewsDocumentUrl}> ;
+          <http://www.w3.org/ns/dcat#theme> <http://[x> ; <${PROV_WAS_DERIVED_FROM}> <http://a:99999/x> .`,
+      ),
+    );
+    const [read] = await makeRepository().listDecks(INSTANCE);
+    expect(read!.formatVersion).toBe(6);
+    expect(read!.themes).toBeUndefined();
+    expect(read!.sourceUrl).toBeUndefined();
+
+    await makeRepository().editDeck(read!, (stored) => ({ ...stored, title: { en: "Renamed" } }));
+
+    const [, dataset] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(dataset as Dataset, deck.url)!;
+    expect(getStringWithLocale(thing, DCTERMS.title, "en")).toBe("Renamed");
+    expect(getUrlAll(thing, "http://www.w3.org/ns/dcat#theme")).toEqual([]);
+    expect(getUrlAll(thing, PROV_WAS_DERIVED_FROM)).toEqual([]);
+  });
+
+  it("rejects when the deck is gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().editDeck(deck, () => deck)).rejects.toThrow("no longer exists");
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("editDecks", () => {
+  const second: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2`, title: { en: "Verbs" } };
+  const elsewhere: Deck = {
+    ...deck,
+    id: "deck-3",
+    url: "https://pod.example/solid-memo/b/catalog.ttl#deck-3",
+  };
+  const entry = (of: Deck) =>
+    buildThing(createThing({ url: of.url }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, of.title.en)
+      .addIri(SM.cardsDocument, of.cardsDocumentUrl)
+      .addIri(SM.reviewsDocument, of.reviewsDocumentUrl)
+      .build();
+
+  it("writes the decks of a catalog document in one save, and each other document in one of its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG
+        ? setThing(catalogWithDeck(), entry(second))
+        : setThing(datasetFrom(url), entry(elsewhere))) as never);
+
+    const saved = await makeRepository().editDecks([deck, elsewhere, second], (stored) => ({
+      ...stored,
+      newCardsPerDay: 3,
+    }));
+
+    expect(
+      saved.map((written) => [written.id, written.newCardsPerDay, written.formatVersion]),
+    ).toEqual([
+      ["deck-1", 3, 6],
+      ["deck-3", 3, 6],
+      ["deck-2", 3, 6],
+    ]);
+    const saves = vi.mocked(writeDocument).mock.calls;
+    expect(saves.map(([url]) => url)).toEqual([
+      CATALOG,
+      "https://pod.example/solid-memo/b/catalog.ttl",
+    ]);
+    for (const written of [deck, second]) {
+      expect(
+        getInteger(getThing(saves[0]![1] as Dataset, written.url)!, SM.deckNewCardsPerDay),
+      ).toBe(3);
+    }
+  });
+
+  it("writes nothing of a document when one of its decks is gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const change = vi.fn((stored: Deck) => stored);
+    await expect(makeRepository().editDecks([deck, second], change)).rejects.toThrow(
+      "no longer exists",
+    );
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("removeDecks", () => {
+  it("deletes each deck's documents, once each, then their entries in one write", async () => {
+    const second: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${CATALOG}#deck-2`,
+      cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl`,
+      // Another app pointed both decks at one reviews document.
+      reviewsDocumentUrl: deck.reviewsDocumentUrl,
+    };
+    const secondEntry = buildThing(createThing({ url: second.url }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Verbs")
+      .addIri(SM.cardsDocument, second.cardsDocumentUrl)
+      .addIri(SM.reviewsDocument, second.reviewsDocumentUrl)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), secondEntry) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDecks([deck, second]);
+
+    expect(vi.mocked(deleteSolidDataset).mock.calls.map(([url]) => url)).toEqual([
+      deck.cardsDocumentUrl,
+      deck.reviewsDocumentUrl,
+      second.cardsDocumentUrl,
+    ]);
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(getThing(saved as Dataset, deck.url)).toBeNull();
+    expect(getThing(saved as Dataset, second.url)).toBeNull();
+  });
+});
+
+describe("removeDeck", () => {
+  it("deletes both documents and the catalog subject, its distribution and agents no other deck names", async () => {
+    const authored: Deck = { ...deck, authors: ["Anton Wiklund", "A friend"] };
+    const other: Deck = {
+      ...deck,
+      id: "deck-2",
+      url: `${CATALOG}#deck-2`,
+      cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl`,
+      reviewsDocumentUrl: `${INSTANCE}reviews/deck-2.ttl`,
+      authors: ["A friend"],
+    };
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await makeRepository().editDeck(authored, () => authored);
+    let catalog = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    vi.mocked(getSolidDatasetOrNull)
+      .mockReset()
+      .mockResolvedValue(catalog as never);
+    await makeRepository().addDeck(other);
+    catalog = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    expect(getThing(catalog, `${CATALOG}#agent-anton-wiklund`)).not.toBeNull();
+    vi.mocked(writeDocument).mockReset();
+    vi.mocked(getSolidDatasetOrNull)
+      .mockReset()
+      .mockImplementation((async (url: string) =>
+        url === CATALOG ? catalog : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(authored);
+
+    expect(deleteSolidDataset).toHaveBeenCalledWith(deck.cardsDocumentUrl, expect.anything());
+    expect(deleteSolidDataset).toHaveBeenCalledWith(deck.reviewsDocumentUrl, expect.anything());
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(CATALOG);
+    expect(getThing(saved as Dataset, deck.url)).toBeNull();
+    expect(getThing(saved as Dataset, `${deck.url}-cards`)).toBeNull();
+    expect(getThing(saved as Dataset, `${CATALOG}#agent-anton-wiklund`)).toBeNull();
+    expect(getThing(saved as Dataset, `${CATALOG}#agent-a-friend`)).not.toBeNull();
+    expect(getThing(saved as Dataset, other.url)).not.toBeNull();
+  });
+
+  it("keeps a document another deck uses too", async () => {
+    const sharing = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Shared")
+      .addIri(SM.cardsDocument, deck.cardsDocumentUrl)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), sharing) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(deck);
+
+    expect(deleteSolidDataset).toHaveBeenCalledOnce();
+    expect(deleteSolidDataset).toHaveBeenCalledWith(deck.reviewsDocumentUrl, expect.anything());
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(getThing(saved as Dataset, deck.url)).toBeNull();
+    expect(getThing(saved as Dataset, `${CATALOG}#deck-2`)).not.toBeNull();
+  });
+
+  it("keeps a document another deck names in a spelling a server reads as its address", async () => {
+    const named: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/deck(1)!.ttl` };
+    const sharing = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Shared")
+      .addIri(SM.cardsDocument, `${INSTANCE}decks/deck%281%29%21.ttl`)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), sharing) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(named);
+
+    expect(vi.mocked(deleteSolidDataset).mock.calls.map(([url]) => url)).toEqual([
+      deck.reviewsDocumentUrl,
+    ]);
+  });
+
+  it("deletes nothing of a deck that names a document with two dots inside a segment, which some servers strip", async () => {
+    // On such a server `span..ish.ttl` is `spanish.ttl`, the document deck-2 names.
+    const stripped: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/span..ish.ttl` };
+    const sharing = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Spanish")
+      .addIri(SM.cardsDocument, `${INSTANCE}decks/spanish.ttl`)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), sharing) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(stripped);
+
+    expect(deleteSolidDataset).not.toHaveBeenCalled();
+  });
+
+  it("keeps a document another deck names in another case, which some file systems store as one", async () => {
+    const named: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/A.ttl` };
+    const sharing = buildThing(createThing({ url: `${CATALOG}#deck-2` }))
+      .addIri(RDF.type, SM.Deck)
+      .addStringNoLocale(DCTERMS.title, "Shared")
+      .addIri(SM.cardsDocument, `${INSTANCE}decks/a.ttl`)
+      .addIri(SM.reviewsDocument, `${INSTANCE}reviews/deck-2.ttl`)
+      .build();
+    vi.mocked(getSolidDatasetOrNull).mockImplementation((async (url: string) =>
+      url === CATALOG ? setThing(catalogWithDeck(), sharing) : datasetFrom(url)) as never);
+
+    await makeRepository().removeDeck(named);
+
+    expect(vi.mocked(deleteSolidDataset).mock.calls.map(([url]) => url)).toEqual([
+      deck.reviewsDocumentUrl,
+    ]);
+  });
+
+  it("skips missing documents and a missing catalog", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+
+    await makeRepository().removeDeck(deck);
+
+    expect(deleteSolidDataset).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("listCards", () => {
+  it("returns an empty list when the cards document does not exist", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().listCards(deck)).resolves.toEqual([]);
+  });
+
+  it("reads the cards as no one, asked to, through the fetch it is given for that, else its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const deps = { fetch, now: () => new Date(), randomId: () => "fixed" };
+    await createSolidDeckRepository({ ...deps, publicFetch }).listCards(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, publicFetch);
+    await createSolidDeckRepository({ ...deps, publicFetch }).listCards(deck);
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+    await createSolidDeckRepository(deps).listCards(deck, { asNoOne: true });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+  });
+
+  it("reads the cards since a version as no one, asked to, through the fetch it is given for that, else its own", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const deps = { fetch, now: () => new Date(), randomId: () => "fixed" };
+    const repository = createSolidDeckRepository({ ...deps, publicFetch });
+    await expect(repository.readCardsSince(deck, undefined, { asNoOne: true })).resolves.toEqual({
+      unchanged: false,
+      value: [],
+      version: ABSENT_VERSION,
+    });
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, publicFetch);
+    await repository.readCardsSince(deck, undefined);
+    expect(getSolidDatasetOrNull).toHaveBeenLastCalledWith(deck.cardsDocumentUrl, fetch);
+  });
+
+  it("refuses, without a read, a deck whose catalog is not a guest's that names a guest's documents", async () => {
+    const foreign: Deck = {
+      ...deck,
+      cardsDocumentUrl: `${GUEST_INSTANCE_URL}decks/deck-1.ttl`,
+      reviewsDocumentUrl: `${GUEST_INSTANCE_URL}reviews/deck-1.ttl`,
+    };
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const repository = createSolidDeckRepository({
+      fetch,
+      publicFetch,
+      now: () => new Date(),
+      randomId: () => "fixed",
+    });
+    for (const asNoOne of [false, true]) {
+      await expect(repository.listCards(foreign, { asNoOne })).rejects.toMatchObject({
+        code: "deckGone",
+      });
+    }
+    expect(getSolidDatasetOrNull).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+    expect(publicFetch).not.toHaveBeenCalled();
+  });
+
+  it("refuses to read or write a deck that names a document with two dots inside a segment, in any spelling", async () => {
+    for (const name of ["span..ish", "span%2e%2eish", "span.%2Eish", "span%2E.ish"]) {
+      const stripped: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/${name}.ttl` };
+      await expect(makeRepository().listCards(stripped), name).rejects.toMatchObject({
+        code: "deckGone",
+      });
+      await expect(
+        makeRepository().applyCardChanges(stripped, { save: [card], remove: [] }),
+        name,
+      ).rejects.toMatchObject({ code: "deckGone" });
+    }
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("maps card subjects", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: card.url }))
+          .addIri(RDF.type, SM.Card)
+          .addStringNoLocale(SM.front, card.front[""])
+          .addStringNoLocale(SM.back, card.back[""])
+          .build(),
+      ),
+    );
+    const cards = await makeRepository().listCards(deck);
+    expect(cards).toHaveLength(1);
+    expect(cards[0].front).toEqual({ "": "水" });
+  });
+
+  it("maps one read once: decks that name one cards document share its cards, frozen", async () => {
+    const cardsOf = (url: string) =>
+      setThing(
+        datasetFrom(url),
+        buildThing(createThing({ url: `${url}#card-1` }))
+          .addIri(RDF.type, SM.Card)
+          .addStringNoLocale(SM.front, "水")
+          .addStringNoLocale(SM.back, "water")
+          .build(),
+      );
+    const read = cardsOf(deck.cardsDocumentUrl);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(read);
+    const repository = makeRepository();
+    const other: Deck = { ...deck, id: "deck-2", url: `${CATALOG}#deck-2` };
+    const cards = await repository.listCards(deck);
+    expect(cards).toHaveLength(1);
+    expect(Object.isFrozen(cards)).toBe(true);
+    expect(await repository.listCards(other)).toBe(cards);
+    const since = await repository.readCardsSince(other, undefined);
+    expect(!since.unchanged && since.value).toBe(cards);
+    // The same read of another document is that document's cards.
+    const elsewhere: Deck = { ...deck, cardsDocumentUrl: `${INSTANCE}decks/deck-2.ttl` };
+    const theirs = await repository.listCards(elsewhere);
+    expect(theirs).not.toBe(cards);
+    expect(theirs).toEqual([]);
+    // A new read is mapped afresh.
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsOf(deck.cardsDocumentUrl));
+    const again = await repository.listCards(deck);
+    expect(again).not.toBe(cards);
+    expect(again).toEqual(cards);
+  });
+
+  it("reads a card whose creation time is past what a date holds, as one without it", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        deck.cardsDocumentUrl,
+        `<${card.url}> a <${SM.Card}>;
+          <${SM.front}> "水"; <${SM.back}> "water";
+          <${DCTERMS.created}> ${OUT_OF_RANGE}.`,
+      ),
+    );
+    const cards = await makeRepository().listCards(deck);
+    expect(cards).toHaveLength(1);
+    expect(cards[0].front).toEqual({ "": "水" });
+    expect(cards[0].createdAt).toBe("");
+  });
+});
+
+describe("addCard", () => {
+  it("adds a card subject to a fresh cards document", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+
+    const created = await makeRepository().addCard(deck, {
+      front: { "": "火" },
+      back: { "": "fire" },
+    });
+
+    expect(created).toEqual({
+      id: "card-fixed",
+      url: `${deck.cardsDocumentUrl}#card-fixed`,
+      front: { "": "火" },
+      back: { "": "fire" },
+      createdAt: "2026-09-21T10:00:00.000Z",
+      formatVersion: 7,
+    });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(deck.cardsDocumentUrl);
+    const thing = getThing(saved as Dataset, created.url)!;
+    expect(getStringNoLocale(thing, SM.front)).toBe("火");
+    expect(getStringNoLocale(thing, SM.back)).toBe("fire");
+    expect(getUrl(thing, SM.frontImage)).toBeNull();
+    expect(getInteger(thing, SM.formatVersion)).toBe(7);
+    // The document itself says whose cards it holds.
+    expect(getUrlAll(getThing(saved as Dataset, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual(
+      [deck.url],
+    );
+  });
+
+  it("writes a picture as an IRI and no text triple for an empty side", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+
+    const created = await makeRepository().addCard(deck, {
+      front: {},
+      back: { "": "Afghanistan" },
+      frontImageUrl: FLAG,
+    });
+
+    expect(created.frontImageUrl).toBe(FLAG);
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(saved as Dataset, created.url)!;
+    expect(getStringNoLocale(thing, SM.front)).toBeNull();
+    expect(getUrl(thing, SM.frontImage)).toBe(FLAG);
+    expect(getStringNoLocale(thing, SM.frontImage)).toBeNull();
+    expect(getStringNoLocale(thing, SM.back)).toBe("Afghanistan");
+  });
+
+  it("writes each picture's description as language-tagged text, and reads it back", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    const content = {
+      front: {},
+      back: { "": "Sweden" },
+      frontImageUrl: FLAG,
+      frontImageDescription: {
+        en: "A blue flag with a yellow cross",
+        sv: "En blå flagga med ett gult kors",
+      },
+      backImageUrl: FLAG,
+      backImageDescription: { sv: "Samma flagga" },
+    };
+
+    const created = await makeRepository().addCard(deck, content);
+
+    expect(created).toMatchObject(content);
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(saved as Dataset, created.url)!;
+    expect(getStringWithLocale(thing, SM.frontImageDescription, "en")).toBe(
+      "A blue flag with a yellow cross",
+    );
+    expect(getStringWithLocale(thing, SM.frontImageDescription, "sv")).toBe(
+      "En blå flagga med ett gult kors",
+    );
+    expect(getStringWithLocale(thing, SM.backImageDescription, "sv")).toBe("Samma flagga");
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(datasetFrom(deck.cardsDocumentUrl), thing),
+    );
+    const [read] = await makeRepository().listCards(deck);
+    expect(read).toMatchObject(content);
+  });
+
+  it("writes a picture-only back the same way", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+
+    const created = await makeRepository().addCard(deck, {
+      front: { "": "Afghanistan" },
+      back: {},
+      backImageUrl: FLAG,
+    });
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const thing = getThing(saved as Dataset, created.url)!;
+    expect(getStringNoLocale(thing, SM.back)).toBeNull();
+    expect(getUrl(thing, SM.backImage)).toBe(FLAG);
+  });
+});
+
+describe("updateCard", () => {
+  /** The cards document holding the card in format `version`, as `more` adds to it. */
+  function cardsDoc(
+    more: (stored: ReturnType<typeof buildThing>) => typeof stored = (b) => b,
+    version = 1,
+  ) {
+    return setThing(
+      datasetFrom(deck.cardsDocumentUrl),
+      more(
+        buildThing(createThing({ url: card.url }))
+          .addIri(RDF.type, SM.Card)
+          .addStringNoLocale(SM.front, card.front[""])
+          .addStringNoLocale(SM.back, card.back[""])
+          .addLiteral(DCTERMS.created, datetimeLiteral(card.createdAt))
+          .addIri(SM.backImage, "https://img.example/old.png")
+          .addLiteral(SM.formatVersion, integerLiteral(version))
+          .addStringNoLocale("https://other.example/vocab#note", "kept"),
+      ).build(),
+    );
+  }
+
+  it("replaces the content in place, in the current format, and returns the updated card", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+
+    const updated = await makeRepository().updateCard(deck, card, {
+      front: { "": "수영하다" },
+      back: { "": "to swim" },
+      frontImageUrl: FLAG,
+    });
+
+    expect(updated).toEqual({
+      ...card,
+      front: { "": "수영하다" },
+      back: { "": "to swim" },
+      frontImageUrl: FLAG,
+      formatVersion: 7,
+    });
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(deck.cardsDocumentUrl);
+    const thing = getThing(saved as Dataset, card.url)!;
+    expect(getStringNoLocale(thing, SM.front)).toBe("수영하다");
+    expect(getStringNoLocale(thing, SM.back)).toBe("to swim");
+    expect(getUrl(thing, SM.frontImage)).toBe(FLAG);
+    expect(getUrl(thing, SM.backImage)).toBeNull();
+    expect(getInteger(thing, SM.formatVersion)).toBe(7);
+    expect(getStringNoLocale(thing, "https://other.example/vocab#note")).toBe("kept");
+  });
+
+  it("keeps what a card is about when the edit states nothing of it", async () => {
+    const subjects = ["http://www.wikidata.org/entity/Q34"];
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      cardsDoc((stored) => stored.addIri(DCTERMS.subject, subjects[0]!)),
+    );
+
+    // The card as the editor read it, before what it is about was set elsewhere.
+    const updated = await makeRepository().updateCard(deck, card, {
+      front: { "": "水" },
+      back: { "": "water" },
+    });
+
+    expect(updated.subjects).toEqual(subjects);
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, card.url)!, DCTERMS.subject)).toEqual(subjects);
+  });
+
+  it("keeps a card's distractors when the edit states none, and replaces them when it does", async () => {
+    const distractors = [
+      { id: "card-1-d1", text: { en: "Fire" } },
+      { id: "card-1-d2", text: { en: "Earth" } },
+    ];
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+    // The wrong options set elsewhere, after the editor read the card.
+    await makeRepository().updateCard(deck, card, {
+      front: { "": "水" },
+      back: { "": "water" },
+      distractors,
+    });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      vi.mocked(writeDocument).mock.calls[0][1] as never,
+    );
+    vi.mocked(writeDocument).mockClear();
+
+    const kept = await makeRepository().updateCard(deck, card, {
+      front: { "": "水" },
+      back: { "": "water" },
+    });
+
+    expect(kept.distractors).toEqual(distractors);
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SM.distractor)).toEqual(
+      distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      saved as Awaited<ReturnType<typeof getSolidDatasetOrNull>>,
+    );
+
+    const replaced = await makeRepository().updateCard(deck, kept, {
+      front: { "": "水" },
+      back: { "": "water" },
+      distractors: [distractors[1]],
+    });
+
+    expect(replaced.distractors).toEqual([distractors[1]]);
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    expect(getThing(again, `${deck.cardsDocumentUrl}#card-1-d1`)).toBeNull();
+    expect(
+      getStringWithLocale(
+        getThing(again, `${deck.cardsDocumentUrl}#card-1-d2`)!,
+        SM.distractorText,
+        "en",
+      ),
+    ).toBe("Earth");
+  });
+
+  it("keeps each wrong option added to a card that holds a very long numbered one", async () => {
+    const planted = `card-1-d${"9".repeat(25)}`;
+    let current: Card = { ...card, distractors: [{ id: planted, text: { en: "Planted" } }] };
+    let stored: Dataset = cardsDoc();
+    for (const text of ["Fire", "Earth"]) {
+      const edit = addDistractor(current.distractors!, current.id, { text: { en: text } });
+      if (!edit.ok) throw edit.error;
+      vi.mocked(getSolidDatasetOrNull).mockResolvedValue(stored as never);
+      current = await makeRepository().updateCard(deck, current, {
+        front: { "": "水" },
+        back: { "": "water" },
+        distractors: edit.distractors,
+      });
+      stored = vi.mocked(writeDocument).mock.lastCall![1] as Dataset;
+    }
+    const named = getUrlAll(getThing(stored, card.url)!, SM.distractor);
+    expect(distractorsOf(stored, named).map((option) => option.text.en)).toEqual([
+      "Fire",
+      "Earth",
+      "Planted",
+    ]);
+  });
+
+  it("names each distractor a schema:suggestedAnswer too, keeping another app's suggested answers", async () => {
+    const distractors = [
+      { id: "card-1-d1", text: { en: "Fire" } },
+      { id: "card-1-d2", text: { en: "Earth" } },
+    ];
+    const theirs = "https://quiz.example/answers#a1";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        cardsDoc(),
+        buildThing(getThing(cardsDoc(), card.url)!).addUrl(SCHEMA.suggestedAnswer, theirs).build(),
+      ) as never,
+    );
+    const kept = await makeRepository().updateCard(deck, card, {
+      front: { "": "水" },
+      back: { "": "water" },
+      distractors,
+    });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SCHEMA.suggestedAnswer).sort()).toEqual(
+      [theirs, ...distractors.map((d) => `${deck.cardsDocumentUrl}#${d.id}`)].sort(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+
+    await makeRepository().updateCard(deck, kept, {
+      front: { "": "水" },
+      back: { "": "water" },
+      distractors: [distractors[1]],
+    });
+
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    expect(getUrlAll(getThing(again, card.url)!, SCHEMA.suggestedAnswer).sort()).toEqual(
+      [theirs, `${deck.cardsDocumentUrl}#card-1-d2`].sort(),
+    );
+  });
+
+  it("keeps a card's text format when the edit states none, and writes the one it states", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      cardsDoc((stored) => stored.addIri(SM.textFormat, SM.markdown), 7),
+    );
+
+    const kept = await makeRepository().updateCard(deck, card, {
+      front: { "": "水" },
+      back: { "": "**water**" },
+    });
+
+    expect(kept.textFormat).toBe(SM.markdown);
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, card.url)!, SM.textFormat)).toEqual([SM.markdown]);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      saved as Awaited<ReturnType<typeof getSolidDatasetOrNull>>,
+    );
+
+    const plain = await makeRepository().updateCard(deck, kept, {
+      front: { "": "水" },
+      back: { "": "**water**" },
+      textFormat: SM.plainText,
+    });
+
+    expect(plain.textFormat).toBe(SM.plainText);
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    expect(getUrlAll(getThing(again, card.url)!, SM.textFormat)).toEqual([SM.plainText]);
+  });
+
+  it("keeps a text format this app does not know through an edit, and writes none for a card that has none", async () => {
+    const unknown = "https://example.org/formats#asciidoc";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      cardsDoc((stored) => stored.addIri(SM.textFormat, unknown), 7),
+    );
+    await makeRepository().updateCard(deck, card, { front: { "": "水" }, back: { "": "water" } });
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+    // The editor's card says the unknown format, but the card as stored has none now.
+    await makeRepository().updateCard(
+      deck,
+      { ...card, textFormat: unknown },
+      { front: { "": "水" }, back: { "": "water" } },
+    );
+
+    const [first, second] = vi.mocked(writeDocument).mock.calls.map((call) => call[1] as Dataset);
+    expect(getUrlAll(getThing(first!, card.url)!, SM.textFormat)).toEqual([unknown]);
+    expect(getUrlAll(getThing(second!, card.url)!, SM.textFormat)).toEqual([]);
+  });
+
+  it("keeps a text's line breaks and leading spaces through the pod's Turtle and back", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+    const content = {
+      front: { en: "Run it" },
+      back: { en: "a\n\n  b", sv: "a\r\nb\n" },
+      backNote: { en: '# Not a comment\n"quoted"\n' },
+    };
+
+    await makeRepository().updateCard(deck, card, content);
+
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(deck.cardsDocumentUrl, await solidDatasetAsTurtle(saved)),
+    );
+    const [read] = await makeRepository().listCards(deck);
+    expect(read).toMatchObject(content);
+  });
+
+  it("keeps a retired card retired when it is edited", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      cardsDoc((stored) => stored.addBoolean(OWL_DEPRECATED, true), 7),
+    );
+
+    // Retired elsewhere, after the editor read the card.
+    const updated = await makeRepository().updateCard(deck, card, {
+      front: { "": "x" },
+      back: { "": "y" },
+    });
+
+    expect(updated.retired).toBe(true);
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getBoolean(getThing(saved, card.url)!, OWL_DEPRECATED)).toBe(true);
+  });
+
+  it("keeps what the edit does not state as given when the card as stored does not fit its shape", async () => {
+    const subjects = ["http://www.wikidata.org/entity/Q34"];
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: card.url }))
+          .addIri(RDF.type, SM.Card)
+          .build(),
+      ),
+    );
+
+    const updated = await makeRepository().updateCard(
+      deck,
+      { ...card, subjects },
+      { front: { "": "水" }, back: { "": "water" } },
+    );
+
+    expect(updated).toMatchObject({ subjects, createdAt: card.createdAt });
+  });
+
+  it("rejects when the cards document no longer exists", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(
+      makeRepository().updateCard(deck, card, { front: { "": "x" }, back: { "": "y" } }),
+    ).rejects.toThrow("can no longer be found");
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("rejects when the card no longer exists", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(deck.cardsDocumentUrl));
+    await expect(
+      makeRepository().updateCard(deck, card, { front: { "": "x" }, back: { "": "y" } }),
+    ).rejects.toThrow("no longer exists");
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("upgradeCards", () => {
+  const other: Card = {
+    ...card,
+    id: "card-2",
+    url: `${deck.cardsDocumentUrl}#card-2`,
+    front: { "": "火" },
+    back: { "": "fire" },
+  };
+
+  const stored = (c: Card, formatVersion: number) =>
+    buildThing(createThing({ url: c.url }))
+      .addIri(RDF.type, SM.Card)
+      .addStringNoLocale(SM.front, c.front[""])
+      .addStringNoLocale(SM.back, c.back[""])
+      .addLiteral(SM.formatVersion, integerLiteral(formatVersion))
+      .addStringNoLocale("https://other.example/vocab#note", "kept")
+      .build();
+
+  it("rewrites each outdated card, as read, in this app's format, in one checked save; unknown triples and up-to-date cards kept", async () => {
+    const checkWrite = vi.fn(async () => undefined);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(setThing(datasetFrom(deck.cardsDocumentUrl), stored(card, 1)), stored(other, 7)),
+    );
+
+    await expect(makeRepository(checkWrite).upgradeCards(deck)).resolves.toBe(true);
+
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(deck.cardsDocumentUrl);
+    const upgraded = getThing(saved as Dataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getStringNoLocale(upgraded, SM.front)).toBe("水");
+    expect(getStringNoLocale(upgraded, SM.back)).toBe("water");
+    expect(getStringNoLocale(upgraded, "https://other.example/vocab#note")).toBe("kept");
+    expect(checkWrite).toHaveBeenCalledWith(saved, [card.url], "pod");
+  });
+
+  it("keeps what a format-6 card is about, which its format does not name, as it rewrites it", async () => {
+    const subject = "http://www.wikidata.org/entity/Q34";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(stored(card, 6)).addUrl(DCTERMS.subject, subject).build(),
+      ),
+    );
+
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const upgraded = getThing(saved as Dataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getUrlAll(upgraded, DCTERMS.subject)).toEqual([subject]);
+  });
+
+  it("drops an outdated card's link to a subject that is no distractor it can read, another card, another app's or one typed sm:Distractor without its shape, and keeps that subject", async () => {
+    const foreign = `${deck.cardsDocumentUrl}#note`;
+    const unread = `${deck.cardsDocumentUrl}#unread`;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      [
+        stored(other, 7),
+        buildThing(createThing({ url: foreign }))
+          .addStringNoLocale("https://other.example/vocab#note", "kept")
+          .build(),
+        buildThing(createThing({ url: unread }))
+          .addIri(RDF.type, SM.Distractor)
+          .addStringNoLocale("https://other.example/vocab#note", "kept")
+          .build(),
+        buildThing(stored(card, 6))
+          .addUrl(SM.distractor, other.url)
+          .addUrl(SM.distractor, foreign)
+          .addUrl(SM.distractor, unread)
+          .build(),
+      ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(deck.cardsDocumentUrl)),
+    );
+
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(getStringNoLocale(getThing(saved as Dataset, other.url)!, SM.front)).toBe("火");
+    expect(getThing(saved as Dataset, foreign)).not.toBeNull();
+    expect(getThing(saved as Dataset, unread)).not.toBeNull();
+    const upgraded = getThing(saved as Dataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getUrlAll(upgraded, SM.distractor)).toEqual([]);
+  });
+
+  it("rewrites a card whose release or subject is no URL, keeping the release and dropping the subject", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      await datasetOfTurtle(
+        deck.cardsDocumentUrl,
+        `<${card.url}> a <${SM.Card}> ; <${SM.formatVersion}> 6 ; <${SM.front}> "水" ; <${SM.back}> "water" ;
+          <${SM.fromRelease}> <http://a:99999/x> ; <${DCTERMS.subject}> <http://[x> .`,
+      ),
+    );
+
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(true);
+
+    const [, saved] = vi.mocked(writeDocument).mock.calls[0];
+    const upgraded = getThing(saved as Dataset, card.url)!;
+    expect(getInteger(upgraded, SM.formatVersion)).toBe(7);
+    expect(getUrlAll(upgraded, SM.fromRelease)).toEqual(["http://a:99999/x"]);
+    expect(getUrlAll(upgraded, DCTERMS.subject)).toEqual([]);
+  });
+
+  it("writes nothing when no card is outdated, or there is no cards document", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(datasetFrom(deck.cardsDocumentUrl), stored(other, 7)),
+    );
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(false);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().upgradeCards(deck)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("stateCardLanguages", () => {
+  const VOCAB_NOTE = "https://other.example/vocab#note";
+  const urlOf = (id: string) => `${deck.cardsDocumentUrl}#${id}`;
+
+  function cardsDoc() {
+    const untagged = (id: string, front: string, back: string) =>
+      buildThing(createThing({ url: urlOf(id) }))
+        .addIri(RDF.type, SM.Card)
+        .addStringNoLocale(SM.front, front)
+        .addStringNoLocale(SM.back, back)
+        .addLiteral(DCTERMS.created, datetimeLiteral("2026-01-02T03:04:05.000Z"))
+        .addLiteral(SM.formatVersion, integerLiteral(4))
+        .addStringNoLocale(VOCAB_NOTE, "kept")
+        .build();
+    const frontTagged = buildThing(createThing({ url: urlOf("card-2") }))
+      .addIri(RDF.type, SM.Card)
+      .addStringWithLocale(SM.front, "eld", "sv")
+      .addStringNoLocale(SM.back, "fire")
+      .addLiteral(SM.formatVersion, integerLiteral(4))
+      .build();
+    return [
+      untagged("card-1", "水", "water"),
+      frontTagged,
+      untagged("card-3", "木", "tree"),
+    ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(deck.cardsDocumentUrl));
+  }
+
+  it("states the language of the given cards' untagged sides in one write, as each is in the pod", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+    const checkWrite = vi.fn(async () => undefined);
+
+    await expect(
+      makeRepository(checkWrite).stateCardLanguages(deck, ["card-1", "card-2", "card-gone"], {
+        front: "ja",
+        back: "en",
+      }),
+    ).resolves.toBe(2);
+
+    expect(writeDocument).toHaveBeenCalledTimes(1);
+    const [saveUrl, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(saveUrl).toBe(deck.cardsDocumentUrl);
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      [urlOf("card-1"), urlOf("card-2")],
+      "pod",
+    );
+    const first = getThing(saved as Dataset, urlOf("card-1"))!;
+    expect(getStringWithLocale(first, SM.front, "ja")).toBe("水");
+    expect(getStringWithLocale(first, SM.back, "en")).toBe("water");
+    expect(getStringNoLocale(first, SM.front)).toBeNull();
+    expect(getInteger(first, SM.formatVersion)).toBe(7);
+    expect(getDatetime(first, DCTERMS.created)).toEqual(new Date("2026-01-02T03:04:05.000Z"));
+    expect(getStringNoLocale(first, VOCAB_NOTE)).toBe("kept");
+    // A side that states its language is left as it is.
+    const second = getThing(saved as Dataset, urlOf("card-2"))!;
+    expect(getStringWithLocale(second, SM.front, "sv")).toBe("eld");
+    expect(getStringWithLocale(second, SM.front, "ja")).toBeNull();
+    expect(getStringWithLocale(second, SM.back, "en")).toBe("fire");
+    // A card not asked about is untouched.
+    expect(getStringNoLocale(getThing(saved as Dataset, urlOf("card-3"))!, SM.front)).toBe("木");
+  });
+
+  it("writes nothing when no card changes, or the cards document is gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(cardsDoc());
+    await expect(
+      makeRepository().stateCardLanguages(deck, ["card-2"], { front: "ja" }),
+    ).resolves.toBe(0);
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(
+      makeRepository().stateCardLanguages(deck, ["card-1"], { front: "ja" }),
+    ).resolves.toBe(0);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("removeCard", () => {
+  it("refuses to remove a card a newer version of the app has written, writing nothing", async () => {
+    const cardsDoc = setThing(
+      datasetFrom(deck.cardsDocumentUrl),
+      buildThing(createThing({ url: card.url }))
+        .addIri(RDF.type, SM.Card)
+        .addLiteral(SM.formatVersion, integerLiteral(99))
+        .build(),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) =>
+      url === deck.cardsDocumentUrl ? cardsDoc : null,
+    );
+    await expect(makeRepository().removeCard(deck, card)).rejects.toMatchObject({
+      code: "writtenByNewerApp",
+    });
+    expect(
+      vi.mocked(writeDocument).mock.calls.filter(([url]) => url === deck.cardsDocumentUrl),
+    ).toEqual([]);
+  });
+
+  it("removes the card and its review state", async () => {
+    const cardsDoc = setThing(
+      datasetFrom(deck.cardsDocumentUrl),
+      buildThing(createThing({ url: card.url }))
+        .addIri(RDF.type, SM.Card)
+        .addStringNoLocale(SM.front, card.front[""])
+        .addStringNoLocale(SM.back, card.back[""])
+        .build(),
+    );
+    const reviewsDoc = [
+      `${deck.reviewsDocumentUrl}#card-1`,
+      `${deck.reviewsDocumentUrl}#card-1@back-to-front`,
+    ].reduce(
+      (dataset, url) =>
+        setThing(
+          dataset,
+          buildThing(createThing({ url })).addIri(RDF.type, SM.ReviewState).build(),
+        ),
+      datasetFrom(deck.reviewsDocumentUrl),
+    );
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) =>
+      url === deck.cardsDocumentUrl ? cardsDoc : reviewsDoc,
+    );
+
+    await makeRepository().removeCard(deck, card);
+
+    const cardsSave = vi
+      .mocked(writeDocument)
+      .mock.calls.find(([url]) => url === deck.cardsDocumentUrl)!;
+    expect(getThing(cardsSave[1] as Dataset, card.url)).toBeNull();
+    const reviewsSave = vi
+      .mocked(writeDocument)
+      .mock.calls.find(([url]) => url === deck.reviewsDocumentUrl)!;
+    expect(getThing(reviewsSave[1] as Dataset, `${deck.reviewsDocumentUrl}#card-1`)).toBeNull();
+    expect(
+      getThing(reviewsSave[1] as Dataset, `${deck.reviewsDocumentUrl}#card-1@back-to-front`),
+    ).toBeNull();
+  });
+
+  it("removes the card's states that name it, whatever their subject, its FSRS-6 one too, and keeps another card's and another scheduler's", async () => {
+    const reviewState = (id: string, cardId: string, scheduler?: string) => {
+      const thing = buildThing(createThing({ url: `${deck.reviewsDocumentUrl}#${id}` }))
+        .addIri(RDF.type, SM.ReviewState)
+        .addIri(SM.reviewOf, `${deck.cardsDocumentUrl}#${cardId}`);
+      return (scheduler === undefined ? thing : thing.addIri(SM.scheduler, scheduler)).build();
+    };
+    const reviewsDoc = [
+      reviewState("rs-1", "card-1"),
+      reviewState("card-1", "card-2"),
+      reviewState("rs-2", "card-1", "https://fsrs.example/ns#fsrs"),
+      // This app's FSRS-6 state of the card: it goes with it.
+      buildThing(reviewState("card-1@fsrs6", "card-1", SM.fsrs6))
+        .addIri(SM.reviewDirection, SM.frontToBack)
+        .build(),
+    ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(deck.reviewsDocumentUrl));
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) =>
+      url === deck.reviewsDocumentUrl ? reviewsDoc : null,
+    );
+
+    await makeRepository().removeCard(deck, card);
+
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-1`)).toBeNull();
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1`)).not.toBeNull();
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#rs-2`)).not.toBeNull();
+    expect(getThing(saved, `${deck.reviewsDocumentUrl}#card-1@fsrs6`)).toBeNull();
+  });
+
+  it("removes the distractors the card names with it, and leaves a document without the card as it was", async () => {
+    const distractor = `${deck.cardsDocumentUrl}#card-1-d1`;
+    const cardsDoc = [
+      buildThing(createThing({ url: card.url }))
+        .addIri(RDF.type, SM.Card)
+        .addIri(SM.distractor, distractor)
+        .build(),
+      buildThing(createThing({ url: distractor }))
+        .addIri(RDF.type, SM.Distractor)
+        .build(),
+      buildThing(createThing({ url: `${deck.cardsDocumentUrl}#other` }))
+        .addIri(RDF.type, SM.Card)
+        .build(),
+    ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(deck.cardsDocumentUrl));
+    vi.mocked(getSolidDatasetOrNull).mockImplementation(async (url) =>
+      url === deck.cardsDocumentUrl ? cardsDoc : null,
+    );
+
+    await makeRepository().removeCard(deck, card);
+    await makeRepository().removeCard(deck, {
+      ...card,
+      id: "gone",
+      url: `${deck.cardsDocumentUrl}#gone`,
+    });
+
+    const [first, second] = vi.mocked(writeDocument).mock.calls.map((call) => call[1] as Dataset);
+    expect(getThing(first, card.url)).toBeNull();
+    expect(getThing(first, distractor)).toBeNull();
+    expect(getThing(first, `${deck.cardsDocumentUrl}#other`)).not.toBeNull();
+    expect(getThing(second, distractor)).not.toBeNull();
+  });
+
+  it("does nothing when neither document exists", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().removeCard(deck, card);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("library upgrade writes", () => {
+  const CC0 = "https://creativecommons.org/publicdomain/zero/1.0/";
+  const STAGED = `${INSTANCE}decks/deck-1-u1.ttl`;
+
+  it("readDeck reads the deck as its catalog entry says now; null when it is gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    await expect(makeRepository().readDeck(deck.url)).resolves.toMatchObject({
+      url: deck.url,
+      title: deck.title,
+    });
+    await expect(makeRepository().readDeck(`${CATALOG}#deck-2`)).resolves.toBeNull();
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().readDeck(deck.url)).resolves.toBeNull();
+  });
+
+  it("upgradeDeckEntry moves the entry to the new release in one write of the catalog, keeping what changed meanwhile", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const current = (await makeRepository().readDeck(deck.url))!;
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        catalogWithDeck(),
+        buildThing(getThing(catalogWithDeck(), deck.url)!).addUrl(DCTERMS.license, CC0).build(),
+      ),
+    );
+    const next = { ...current, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
+    const upgraded = await makeRepository().upgradeDeckEntry(current, next);
+    expect(upgraded).toMatchObject({
+      cardsDocumentUrl: deck.cardsDocumentUrl,
+      sourceUrl: next.sourceUrl,
+      license: CC0,
+      formatVersion: 6,
+    });
+    expect(writeDocument).toHaveBeenCalledOnce();
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(url).toBe(CATALOG);
+    const thing = getThing(saved as Dataset, deck.url)!;
+    expect(getUrl(thing, SM.cardsDocument)).toBe(deck.cardsDocumentUrl);
+    expect(getUrl(thing, SM.reviewsDocument)).toBe(deck.reviewsDocumentUrl);
+    expect(getUrl(thing, PROV_WAS_DERIVED_FROM)).toBe(next.sourceUrl);
+    expect(getUrl(thing, DCTERMS.license)).toBe(CC0);
+  });
+
+  it("upgradeDeckEntry writes nothing when the entry changed meanwhile, or is gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const current = (await makeRepository().readDeck(deck.url))!;
+    const next = { ...current, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
+    await expect(
+      makeRepository().upgradeDeckEntry({ ...current, title: { en: "Other" } }, next),
+    ).rejects.toThrow(
+      `The deck changed while it was being updated, perhaps in another tab or app. Try again.\nurl: ${deck.url}`,
+    );
+    await expect(
+      makeRepository().upgradeDeckEntry({ ...current, url: `${CATALOG}#deck-2` }, next),
+    ).rejects.toThrow("changed while");
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await expect(makeRepository().upgradeDeckEntry(current, next)).rejects.toThrow("changed while");
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("checkDeckEntryUpgrade checks the entry as upgradeDeckEntry would write it, and writes nothing", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(catalogWithDeck());
+    const current = (await makeRepository().readDeck(deck.url))!;
+    const next = { ...current, sourceUrl: "https://solid-memo.com/decks/capitals/v2.ttl" };
+    const checkWrite = vi.fn(async () => undefined);
+    await makeRepository(checkWrite).checkDeckEntryUpgrade(current, next);
+    expect(checkWrite).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.arrayContaining([deck.url]),
+      "pod",
+    );
+    await expect(
+      makeRepository().checkDeckEntryUpgrade({ ...current, title: { en: "Other" } }, next),
+    ).rejects.toMatchObject({ code: "deckChangedDuringUpgrade" });
+    const refusing = vi.fn(async () => {
+      throw new AppError("dataNotConforming");
+    });
+    await expect(
+      makeRepository(refusing).checkDeckEntryUpgrade(current, next),
+    ).rejects.toMatchObject({ code: "dataNotConforming" });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("deleteDocument deletes a document of the deck there is, and nothing when it is gone", async () => {
+    // Read to tell it is the deck's, then again by its removal (removeOwned).
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(datasetFrom(STAGED));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValueOnce(datasetFrom(STAGED));
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(null);
+    await makeRepository().deleteDocument(deck, STAGED);
+    expect(deleteSolidDataset).toHaveBeenCalledWith(STAGED, expect.anything());
+    vi.mocked(deleteSolidDataset).mockReset();
+    await makeRepository().deleteDocument(deck, STAGED);
+    expect(deleteSolidDataset).not.toHaveBeenCalled();
+  });
+
+  it("deleteDocument throws while the document can't be read to be gone", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(datasetFrom(STAGED));
+    await expect(makeRepository().deleteDocument(deck, STAGED)).rejects.toThrow("still there");
+    vi.mocked(getSolidDatasetOrNull).mockRejectedValue(new Error("offline"));
+    await expect(makeRepository().deleteDocument(deck, STAGED)).rejects.toThrow("offline");
+  });
+});
+
+describe("the cards document itself", () => {
+  it("is never taken for the deck's when it says it is another deck's", async () => {
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: deck.cardsDocumentUrl }))
+          .addUrl(DCTERMS.isPartOf, `${CATALOG}#deck-2`)
+          .build(),
+      ) as never,
+    );
+    await expect(
+      makeRepository().addCard(deck, { front: { "": "火" }, back: { "": "fire" } }),
+    ).rejects.toMatchObject({ code: "deckDocumentUnclaimed" });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("is part of the deck once, keeping what else it is part of, through every write", async () => {
+    const other = "https://other.example/collections/japanese";
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(
+      setThing(
+        datasetFrom(deck.cardsDocumentUrl),
+        buildThing(createThing({ url: deck.cardsDocumentUrl }))
+          .addUrl(DCTERMS.isPartOf, other)
+          .build(),
+      ) as never,
+    );
+    await makeRepository().addCard(deck, { front: { "": "火" }, back: { "": "fire" } });
+    const saved = vi.mocked(writeDocument).mock.calls[0][1] as Dataset;
+    expect(getUrlAll(getThing(saved, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([
+      other,
+      deck.url,
+    ]);
+
+    vi.mocked(getSolidDatasetOrNull).mockResolvedValue(saved as never);
+    await makeRepository().removeCard(deck, {
+      ...card,
+      id: "card-fixed",
+      url: `${deck.cardsDocumentUrl}#card-fixed`,
+    });
+    const again = vi.mocked(writeDocument).mock.calls[1][1] as Dataset;
+    expect(getUrlAll(getThing(again, deck.cardsDocumentUrl)!, DCTERMS.isPartOf)).toEqual([
+      other,
+      deck.url,
+    ]);
+  });
+});

@@ -1,0 +1,1308 @@
+// SPDX-FileCopyrightText: 2026 Anton Wiklund and Solid Memo contributors
+//
+// SPDX-License-Identifier: MIT
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  buildThing,
+  createThing,
+  type Dataset,
+  getInteger,
+  getStringNoLocale,
+  getThing,
+  setThing,
+} from "@solid-memo/solid-client/rdf";
+import {
+  deleteContainer,
+  deleteSolidDataset,
+  readDocument,
+  writeDocument,
+} from "@solid-memo/solid-client/resources";
+import { datasetFrom, readOf } from "./testing/datasets";
+import { createSolidInstanceRepository } from "./solidInstanceRepository";
+import {
+  addInstanceRegistration,
+  createTypeIndex,
+  ensureTypeIndex,
+  locateTypeIndexes,
+  readInstanceRegistrations,
+  readOldRegistrations,
+  removeInstanceRegistrations,
+  removeOldRegistrations,
+  renameInstanceRegistrations,
+  readTypeIndexChoices,
+  type TypeIndexes,
+} from "./typeIndex";
+import { ReadLimitError } from "@solid-memo/solid-client/interface";
+import { datetimeLiteral } from "./records";
+import { DCTERMS, SM } from "./vocab";
+import { AppError } from "@solid-memo/domain/appError";
+import type { RegistrationTarget } from "@solid-memo/domain/instance";
+import type { TypeIndexChoice } from "@solid-memo/domain/typeIndexChoice";
+import { MAX_CATALOG_LINKS } from "@solid-memo/domain/deck";
+import { deleteInstanceData } from "./instanceData";
+
+vi.mock("@solid-memo/solid-client/resources", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@solid-memo/solid-client/resources")>();
+  return {
+    ...actual,
+    readDocument: vi.fn(),
+    // A write the pod takes as given, with no version.
+    writeDocument: vi.fn(async (_url: string, dataset: object) => ({ dataset, etag: undefined })),
+    deleteSolidDataset: vi.fn(),
+    deleteContainer: vi.fn(),
+  };
+});
+vi.mock("./typeIndex");
+vi.mock("./instanceData");
+
+const WEBID = "https://alice.example/profile/card#me";
+const PRIVATE_INDEX = "https://alice.example/settings/privateTypeIndex.ttl";
+const PUBLIC_INDEX = "https://alice.example/settings/publicTypeIndex.ttl";
+const CONTAINER = "https://alice.example/solid-memo/main/";
+
+const META = `${CONTAINER}meta.ttl`;
+const NOTE = "https://other.example/says";
+/** What the type indexes are read and written through, as locateTypeIndexes gives it. */
+const indexFetch = vi.fn() as unknown as typeof globalThis.fetch;
+
+/**
+ * What locateTypeIndexes gives for a profile linking a private and a
+ * public index (null: none): the links in the profile's own places
+ * alone, as it keeps them.
+ */
+function located(
+  privateUrl: string | null,
+  publicUrl: string | null,
+  inOwnStorage: (url: string) => boolean = () => true,
+): TypeIndexes {
+  const links = [
+    ...(privateUrl === null
+      ? []
+      : [{ url: privateUrl, kind: "private" as const, fromPreferences: false }]),
+    ...(publicUrl === null
+      ? []
+      : [{ url: publicUrl, kind: "public" as const, fromPreferences: false }]),
+  ];
+  return { links: links.filter((link) => inOwnStorage(link.url)), fetch: indexFetch, inOwnStorage };
+}
+
+/** The meta.ttl a creation wrote, as read back: the instance's #it, and `others`. */
+const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
+function metaWith(...others: ReturnType<typeof createThing>[]) {
+  return [
+    buildThing(createThing({ url: `${META}#it` }))
+      .addUrl(RDF_TYPE, SM.Instance)
+      .build(),
+    ...others,
+  ].reduce((dataset, thing) => setThing(dataset, thing), datasetFrom(META));
+}
+
+function makeRepository(
+  checkWrite?: Parameters<typeof createSolidInstanceRepository>[0]["checkWrite"],
+  fetch = vi.fn() as unknown as typeof globalThis.fetch,
+) {
+  return createSolidInstanceRepository({
+    fetch,
+    now: () => new Date("2026-09-21T10:00:00.000Z"),
+    randomId: () => "fixed-id",
+    ...(checkWrite === undefined ? {} : { checkWrite }),
+  });
+}
+
+beforeEach(() => {
+  vi.mocked(readDocument).mockReset();
+  vi.mocked(writeDocument).mockReset();
+  vi.mocked(deleteSolidDataset).mockReset();
+  vi.mocked(deleteContainer).mockReset();
+  vi.mocked(locateTypeIndexes).mockReset();
+  vi.mocked(ensureTypeIndex).mockReset();
+  vi.mocked(readInstanceRegistrations).mockReset();
+  vi.mocked(createTypeIndex).mockReset();
+  vi.mocked(readTypeIndexChoices).mockReset();
+  vi.mocked(addInstanceRegistration).mockReset();
+  vi.mocked(removeInstanceRegistrations).mockReset();
+  vi.mocked(readOldRegistrations).mockReset();
+  vi.mocked(removeOldRegistrations).mockReset();
+  vi.mocked(deleteInstanceData).mockReset();
+});
+
+describe("listInstances", () => {
+  it("merges registrations from both indexes, deduplicating by container", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(
+      located(PRIVATE_INDEX, "https://alice.example/settings/publicTypeIndex.ttl"),
+    );
+    vi.mocked(readInstanceRegistrations)
+      .mockResolvedValueOnce([
+        { containerUrl: CONTAINER, title: "Main" },
+        { containerUrl: "https://alice.example/solid-memo/other", title: null },
+      ])
+      .mockResolvedValueOnce([{ containerUrl: CONTAINER, title: "Duplicate" }]);
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([
+      { url: CONTAINER, name: "Main" },
+      { url: "https://alice.example/solid-memo/other/", name: "other" },
+    ]);
+  });
+
+  it("lists the others when one registration does not map", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, null));
+    vi.mocked(readInstanceRegistrations).mockResolvedValueOnce([
+      { containerUrl: CONTAINER, title: "Main" },
+      { containerUrl: "not an address", title: null },
+      { containerUrl: "https://alice.example/x%E9/", title: null },
+    ]);
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([
+      { url: CONTAINER, name: "Main" },
+      { url: "https://alice.example/x%E9/", name: "x%E9" },
+    ]);
+  });
+
+  it.each([
+    ["missing", Object.assign(new Error("404 Not Found"), { statusCode: 404 })],
+    ["not readable as RDF", new Error("Unexpected token")],
+  ])("skips missing indexes and takes one that is %s as none", async (_, failure) => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, null));
+    vi.mocked(readInstanceRegistrations).mockRejectedValue(failure);
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([]);
+  });
+
+  it.each([
+    ["refused (401)", Object.assign(new Error("401 Unauthorized"), { statusCode: 401 })],
+    ["forbidden (403)", Object.assign(new Error("403 Forbidden"), { statusCode: 403 })],
+    ["not reached (a network failure)", new TypeError("Failed to fetch")],
+    ["not answered in time", new AppError("podNoAnswer", { url: PUBLIC_INDEX })],
+  ])("fails, rather than list none, when an index is %s", async (_, failure) => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX));
+    vi.mocked(readInstanceRegistrations).mockImplementation(async (index) => {
+      if (index === PUBLIC_INDEX) throw failure;
+      return [{ containerUrl: CONTAINER, title: "Main" }];
+    });
+
+    await expect(makeRepository().listInstances(WEBID)).rejects.toBe(failure);
+  });
+
+  it("lists the first MAX_CATALOG_LINKS instances of both indexes, a repeated one counted once", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX));
+    const named = (from: number, count: number) =>
+      Array.from({ length: count }, (_, at) => ({
+        containerUrl: `https://i${from + at}.example/a/`,
+        title: `Instance ${from + at}`,
+      }));
+    vi.mocked(readInstanceRegistrations)
+      .mockResolvedValueOnce([...named(0, 600), ...named(0, 600)])
+      .mockResolvedValueOnce(named(600, MAX_CATALOG_LINKS));
+
+    const listed = await makeRepository().listInstances(WEBID);
+
+    expect(listed).toHaveLength(MAX_CATALOG_LINKS);
+    expect(listed[0]).toEqual({ url: "https://i0.example/a/", name: "Instance 0" });
+    expect(listed.at(-1)).toEqual({ url: "https://i999.example/a/", name: "Instance 999" });
+  });
+
+  it("lists nothing an index outside the profile's own places registers, nor reads it", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(
+      located(PRIVATE_INDEX, PUBLIC_INDEX, (url) => url !== PUBLIC_INDEX),
+    );
+    vi.mocked(readInstanceRegistrations).mockResolvedValue([
+      { containerUrl: CONTAINER, title: "Main" },
+    ]);
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([
+      { url: CONTAINER, name: "Main" },
+    ]);
+    expect(readInstanceRegistrations).toHaveBeenCalledExactlyOnceWith(PRIVATE_INDEX, indexFetch);
+  });
+});
+
+describe("getRegistrationOptions", () => {
+  const choice = (url: string, extra: Partial<TypeIndexChoice> = {}): TypeIndexChoice => ({
+    url,
+    kinds: ["private"],
+    fromPreferences: false,
+    typeFit: "match",
+    holdsInstances: false,
+    readableByAnyone: false,
+    ...extra,
+  });
+
+  it("offers every index the user can read, ranked, and says which kinds they have", async () => {
+    const older = "https://alice.example/settings/privateTypeIndex";
+    const located_ = located(PRIVATE_INDEX, PUBLIC_INDEX);
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located_);
+    const publicIndex = choice(PUBLIC_INDEX, { kinds: ["public"], readableByAnyone: true });
+    const preferred = choice(PRIVATE_INDEX, { fromPreferences: true });
+    const plain = choice(older, { typeFit: "none" });
+    vi.mocked(readTypeIndexChoices).mockResolvedValue([publicIndex, plain, preferred]);
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+
+    await expect(
+      createSolidInstanceRepository({
+        fetch: vi.fn() as unknown as typeof globalThis.fetch,
+        publicFetch,
+        now: () => new Date(),
+        randomId: () => "id",
+      }).getRegistrationOptions(WEBID),
+    ).resolves.toEqual({
+      privateIndexExists: true,
+      publicIndexExists: true,
+      indexes: [preferred, plain, publicIndex],
+    });
+    expect(readTypeIndexChoices).toHaveBeenCalledExactlyOnceWith(located_, publicFetch);
+  });
+
+  it("says a kind is missing when no index of it can be read", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX));
+    const publicIndex = choice(PUBLIC_INDEX, { kinds: ["public"] });
+    vi.mocked(readTypeIndexChoices).mockResolvedValue([publicIndex]);
+
+    await expect(makeRepository().getRegistrationOptions(WEBID)).resolves.toEqual({
+      privateIndexExists: false,
+      publicIndexExists: true,
+      indexes: [publicIndex],
+    });
+  });
+});
+
+describe("a public type index the app creates", () => {
+  /** The share the repository hands ensureTypeIndex, as a creation hands it. */
+  async function shareOf(
+    deps: Partial<Parameters<typeof createSolidInstanceRepository>[0]>,
+  ): Promise<(url: string) => Promise<boolean>> {
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PUBLIC_INDEX, fetch: indexFetch });
+    await createSolidInstanceRepository({
+      fetch: vi.fn() as unknown as typeof globalThis.fetch,
+      now: () => new Date(),
+      randomId: () => "id",
+      ...deps,
+    }).createInstance({
+      webId: WEBID,
+      containerUrl: CONTAINER,
+      name: "Main",
+      registrationTarget: "public",
+    });
+    return vi.mocked(ensureTypeIndex).mock.calls[0][5];
+  }
+
+  it("is made readable by anyone with the grant, through a fetch kept to its own access control", async () => {
+    const grantPublicRead = vi.fn(async () => true);
+    const shareFetch = vi.fn(
+      async () => new Response(null, { status: 201 }),
+    ) as unknown as typeof globalThis.fetch;
+    const share = await shareOf({ grantPublicRead, shareFetch });
+
+    await expect(share(PUBLIC_INDEX)).resolves.toBe(true);
+    const [url, { fetch }] = grantPublicRead.mock.calls[0] as unknown as [
+      string,
+      { fetch: typeof globalThis.fetch },
+    ];
+    expect(url).toBe(PUBLIC_INDEX);
+    await fetch(`${PUBLIC_INDEX}.acl`, { method: "PUT" });
+    expect(shareFetch).toHaveBeenCalledOnce();
+    await expect(fetch(PRIVATE_INDEX, { method: "PUT" })).rejects.toThrow(
+      "Not the document's to change",
+    );
+  });
+
+  it("is left as it is made when there is no grant, or the grant fails", async () => {
+    await expect((await shareOf({}))(PUBLIC_INDEX)).resolves.toBe(false);
+    vi.mocked(ensureTypeIndex).mockReset();
+    const failing = vi.fn(async () => {
+      throw new Error("refused");
+    });
+    await expect((await shareOf({ grantPublicRead: failing }))(PUBLIC_INDEX)).resolves.toBe(false);
+  });
+});
+
+describe("an instance registered in several indexes of a kind", () => {
+  const older = "https://alice.example/settings/privateTypeIndex";
+  const several = (): TypeIndexes => ({
+    links: [
+      { url: older, kind: "private", fromPreferences: false },
+      { url: PRIVATE_INDEX, kind: "private", fromPreferences: true },
+      { url: PUBLIC_INDEX, kind: "public", fromPreferences: false },
+    ],
+    fetch: indexFetch,
+    inOwnStorage: () => true,
+  });
+
+  it("is listed once, and removed and renamed in every one", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(several());
+    vi.mocked(readInstanceRegistrations).mockResolvedValue([
+      { containerUrl: CONTAINER, title: "Main" },
+    ]);
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    const repository = makeRepository();
+
+    await expect(repository.listInstances(WEBID)).resolves.toEqual([
+      { url: CONTAINER, name: "Main" },
+    ]);
+    await repository.detachInstance({ webId: WEBID, instance: { url: CONTAINER, name: "Main" } });
+    await repository.renameRegistrations({ webId: WEBID, instanceUrl: CONTAINER, title: "New" });
+
+    const indexes = [older, PRIVATE_INDEX, PUBLIC_INDEX];
+    expect(vi.mocked(readInstanceRegistrations).mock.calls.map(([url]) => url)).toEqual(indexes);
+    expect(vi.mocked(removeInstanceRegistrations).mock.calls.map(([url]) => url)).toEqual(indexes);
+    expect(vi.mocked(renameInstanceRegistrations).mock.calls.map(([url]) => url)).toEqual(indexes);
+  });
+
+  it("says each old registration and each unreadable kind once", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue({
+      ...several(),
+      links: [
+        ...several().links,
+        {
+          url: "https://alice.example/settings/third.ttl",
+          kind: "private",
+          fromPreferences: false,
+        },
+        {
+          url: "https://alice.example/settings/fourth.ttl",
+          kind: "private",
+          fromPreferences: false,
+        },
+      ],
+    });
+    vi.mocked(readOldRegistrations).mockImplementation(async (url) => {
+      if (url.endsWith("third.ttl") || url.endsWith("fourth.ttl"))
+        throw Object.assign(new Error("403"), { statusCode: 403 });
+      return url === PUBLIC_INDEX ? ["card"] : ["card", "answer"];
+    });
+
+    await expect(
+      makeRepository().readOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).resolves.toEqual({
+      registrations: [
+        { dataClass: "card", index: "private" },
+        { dataClass: "answer", index: "private" },
+        { dataClass: "card", index: "public" },
+      ],
+      unreadableIndexes: ["private"],
+    });
+  });
+});
+
+describe("createInstance", () => {
+  const create = (registrationTarget: RegistrationTarget) =>
+    makeRepository().createInstance({
+      webId: WEBID,
+      containerUrl: "https://alice.example/solid-memo/main",
+      name: "Main",
+      registrationTarget,
+    });
+
+  it("writes meta.ttl, registers the instance in the index chosen for it, and returns the instance", async () => {
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+
+    const instance = await create("private");
+
+    expect(instance).toEqual({ url: CONTAINER, name: "Main" });
+
+    const [metaUrl, metaDataset] = vi.mocked(writeDocument).mock.calls[0];
+    expect(metaUrl).toBe(`${CONTAINER}meta.ttl`);
+    const meta = getThing(metaDataset as Dataset, `${CONTAINER}meta.ttl#it`)!;
+    expect(getStringNoLocale(meta, DCTERMS.title)).toBe("Main");
+    expect(getInteger(meta, SM.formatVersion)).toBe(2);
+
+    expect(ensureTypeIndex).toHaveBeenCalledExactlyOnceWith(
+      "private",
+      WEBID,
+      CONTAINER,
+      expect.any(Function),
+      expect.any(Function),
+      expect.any(Function),
+    );
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
+      PRIVATE_INDEX,
+      { instanceUrl: CONTAINER, title: "Main" },
+      expect.any(Function),
+      indexFetch,
+    );
+    expect(vi.mocked(addInstanceRegistration).mock.calls[0][2]()).toBe("fixed-id");
+  });
+
+  it("registers it in the index the user entered by its address", async () => {
+    const entered = "https://alice.example/old/index.ttl";
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: entered, fetch: indexFetch });
+
+    await create({ indexUrl: entered });
+
+    expect(vi.mocked(ensureTypeIndex).mock.calls[0][0]).toEqual({ indexUrl: entered });
+    expect(vi.mocked(addInstanceRegistration).mock.calls[0][0]).toBe(entered);
+  });
+
+  it("makes the instance at its address as a request sends it", async () => {
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+    const instance = await makeRepository().createInstance({
+      webId: WEBID,
+      containerUrl: "https://Alice.example/solid-memo/kortlekar-å",
+      name: "Kortlekar",
+      registrationTarget: "private",
+    });
+    const url = "https://alice.example/solid-memo/kortlekar-%C3%A5/";
+    expect(instance).toEqual({ url, name: "Kortlekar" });
+    expect(vi.mocked(writeDocument).mock.calls[0][0]).toBe(`${url}meta.ttl`);
+  });
+
+  it("takes the instance back and rethrows when the index refuses its registration", async () => {
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PUBLIC_INDEX, fetch: indexFetch });
+    vi.mocked(addInstanceRegistration).mockRejectedValue(new Error("index refused"));
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaWith()));
+
+    await expect(create("public")).rejects.toThrow("index refused");
+    expect(addInstanceRegistration).toHaveBeenCalledOnce();
+    expect(deleteContainer).toHaveBeenCalledWith(CONTAINER, expect.anything());
+  });
+
+  it("cleans up the container and rethrows when there is no index to register in", async () => {
+    vi.mocked(ensureTypeIndex).mockRejectedValue(new Error("cannot create index"));
+    // The meta.ttl just written, as the pod serves it: the instance's #it and nothing else.
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaWith()));
+    await expect(create("private")).rejects.toThrow("cannot create index");
+
+    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
+    expect(deleteSolidDataset).toHaveBeenCalledWith(`${CONTAINER}meta.ttl`, expect.anything());
+    expect(deleteContainer).toHaveBeenCalledWith(CONTAINER, expect.anything());
+  });
+
+  it("takes back only the instance's own subject of a meta.ttl that holds something else too", async () => {
+    vi.mocked(ensureTypeIndex).mockRejectedValue(new Error("cannot create index"));
+    vi.mocked(readDocument).mockResolvedValue(
+      readOf(
+        metaWith(
+          buildThing(createThing({ url: `${META}#note` }))
+            .addStringNoLocale(NOTE, "hi")
+            .build(),
+        ),
+      ),
+    );
+    await expect(create("private")).rejects.toThrow("cannot create index");
+
+    expect(deleteSolidDataset).not.toHaveBeenCalled();
+    const [url, kept] = vi.mocked(writeDocument).mock.calls.at(-1)!;
+    expect(url).toBe(META);
+    expect(getThing(kept, `${META}#it`)).toBeNull();
+    expect(getThing(kept, `${META}#note`)).not.toBeNull();
+  });
+
+  it("rethrows the original error even when cleanup fails too", async () => {
+    vi.mocked(ensureTypeIndex).mockRejectedValue(new Error("original"));
+    vi.mocked(deleteSolidDataset).mockRejectedValue(new Error("cleanup"));
+
+    await expect(create("private")).rejects.toThrow("original");
+  });
+
+  it.each([
+    ["a refused write", new AppError("writeRefused")],
+    ["a network failure", new TypeError("Failed to fetch")],
+  ])("rethrows %s saving meta.ttl as it is", async (_, failure) => {
+    vi.mocked(writeDocument).mockRejectedValue(failure);
+
+    await expect(create("private")).rejects.toBe(failure);
+    expect(ensureTypeIndex).not.toHaveBeenCalled();
+  });
+});
+
+describe("attachInstance", () => {
+  function metaDataset(withTitle: boolean, container = CONTAINER) {
+    let thing = buildThing(createThing({ url: `${container}meta.ttl#it` }))
+      .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
+      .addLiteral(DCTERMS.created, datetimeLiteral("2026-09-21T10:00:00.000Z"));
+    if (withTitle) {
+      thing = thing.addStringNoLocale(DCTERMS.title, "Attached");
+    }
+    return setThing(datasetFrom(`${container}meta.ttl`), thing.build());
+  }
+
+  it("registers an existing instance, and nothing else of it, and returns its name", async () => {
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset(true)));
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+
+    await expect(
+      makeRepository().attachInstance({
+        webId: WEBID,
+        instanceUrl: "https://alice.example/solid-memo/main",
+        registrationTarget: "public",
+      }),
+    ).resolves.toEqual({ url: CONTAINER, name: "Attached" });
+
+    expect(ensureTypeIndex).toHaveBeenCalledWith(
+      "public",
+      WEBID,
+      CONTAINER,
+      expect.anything(),
+      expect.anything(),
+      expect.any(Function),
+    );
+    expect(addInstanceRegistration).toHaveBeenCalledExactlyOnceWith(
+      PRIVATE_INDEX,
+      { instanceUrl: CONTAINER, title: "Attached" },
+      expect.any(Function),
+      indexFetch,
+    );
+  });
+
+  it("falls back to the container slug when meta.ttl has no title", async () => {
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset(false)));
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+
+    await expect(
+      makeRepository().attachInstance({
+        webId: WEBID,
+        instanceUrl: CONTAINER,
+        registrationTarget: "private",
+      }),
+    ).resolves.toEqual({ url: CONTAINER, name: "main" });
+  });
+
+  it("names an untitled instance by its folder as written when the folder does not decode", async () => {
+    const container = "https://alice.example/x%E9/";
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset(false, container)));
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+
+    await expect(
+      makeRepository().attachInstance({
+        webId: WEBID,
+        instanceUrl: container,
+        registrationTarget: "private",
+      }),
+    ).resolves.toEqual({ url: container, name: "x%E9" });
+  });
+
+  it("refuses a folder with an empty segment, reading nothing of it", async () => {
+    for (const instanceUrl of [
+      "https://evil.example//alice.example/",
+      "https://evil.example/\\alice.example/",
+      "https://evil.example/.//alice.example/",
+    ]) {
+      await expect(
+        makeRepository().attachInstance({
+          webId: WEBID,
+          instanceUrl,
+          registrationTarget: "private",
+        }),
+      ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
+    }
+    expect(readDocument).not.toHaveBeenCalled();
+    expect(addInstanceRegistration).not.toHaveBeenCalled();
+  });
+
+  it("rejects a container without a readable meta.ttl", async () => {
+    const limits = { bytes: 1, quads: 1, characters: 1 };
+    for (const error of [
+      new Error("404"),
+      Object.assign(new Error("404"), { statusCode: 404 }),
+      Object.assign(new Error("410"), { statusCode: 410 }),
+      new ReadLimitError(`${CONTAINER}meta.ttl`, limits),
+      new SyntaxError("not Turtle"),
+    ]) {
+      // As the pod answered: a failure before any answer says nothing of the document.
+      vi.mocked(readDocument).mockImplementation(async (url, { fetch }) => {
+        await fetch(url);
+        throw error;
+      });
+      await expect(
+        makeRepository(undefined, async () => new Response("")).attachInstance({
+          webId: WEBID,
+          instanceUrl: CONTAINER,
+          registrationTarget: "private",
+        }),
+      ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
+    }
+    expect(addInstanceRegistration).not.toHaveBeenCalled();
+  });
+
+  it("fails as the read of meta.ttl did when it may work when tried again, registering nothing", async () => {
+    const noAnswer = new AppError("podNoAnswer", { url: `${CONTAINER}meta.ttl`, seconds: 120 });
+    const serverError = Object.assign(new Error("500"), { statusCode: 500 });
+    const offline = new TypeError("Failed to fetch");
+    for (const error of [noAnswer, serverError, offline]) {
+      vi.mocked(readDocument).mockRejectedValue(error);
+      await expect(
+        makeRepository().attachInstance({
+          webId: WEBID,
+          instanceUrl: CONTAINER,
+          registrationTarget: "private",
+        }),
+      ).rejects.toBe(error);
+    }
+    expect(ensureTypeIndex).not.toHaveBeenCalled();
+    expect(addInstanceRegistration).not.toHaveBeenCalled();
+  });
+
+  it("registers the instance at its address as a request sends it, and no address that is not an http(s) folder's", async () => {
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset(true)));
+    vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+    await expect(
+      makeRepository().attachInstance({
+        webId: WEBID,
+        instanceUrl: "HTTPS://Alice.example:443/solid-memo/x/../main",
+        registrationTarget: "private",
+      }),
+    ).resolves.toEqual({ url: CONTAINER, name: "Attached" });
+    vi.mocked(readDocument).mockClear();
+    for (const instanceUrl of ["not an address", "urn:x:main", `${CONTAINER}?x`]) {
+      await expect(
+        makeRepository().attachInstance({
+          webId: WEBID,
+          instanceUrl,
+          registrationTarget: "private",
+        }),
+      ).rejects.toMatchObject({ code: "notAnInstanceNoMeta", vars: { url: instanceUrl } });
+    }
+    expect(readDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads meta.ttl under limits, as it does to read an instance's description", async () => {
+    // The fetch the read is given, asked as readDocument would.
+    vi.mocked(readDocument).mockImplementation(async (url, { fetch }) => {
+      await fetch(url);
+      throw new Error("Read past the fetch");
+    });
+    const fetch = vi.fn(
+      async () => new Response("<#it> a <x> .", { headers: { "Content-Length": "33554433" } }),
+    );
+    const repository = createSolidInstanceRepository({
+      fetch: fetch as unknown as typeof globalThis.fetch,
+      now: () => new Date(),
+      randomId: () => "fixed-id",
+    });
+    await expect(
+      repository.attachInstance({
+        webId: WEBID,
+        instanceUrl: CONTAINER,
+        registrationTarget: "private",
+      }),
+    ).rejects.toMatchObject({ code: "notAnInstanceNoMeta" });
+    await expect(repository.readMeta(CONTAINER)).rejects.toMatchObject({ name: "ReadLimitError" });
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(ensureTypeIndex).not.toHaveBeenCalled();
+  });
+
+  it("rejects a meta.ttl without the #it subject", async () => {
+    vi.mocked(readDocument).mockResolvedValue(readOf(datasetFrom(`${CONTAINER}meta.ttl`)));
+
+    await expect(
+      makeRepository().attachInstance({
+        webId: WEBID,
+        instanceUrl: CONTAINER,
+        registrationTarget: "private",
+      }),
+    ).rejects.toThrow("its description cannot be read");
+  });
+});
+
+describe("deleteInstance", () => {
+  const instance = { url: "https://alice.example/solid-memo/main", name: "Main" };
+
+  it("deletes the instance's data, then unregisters it from both indexes, saying what it kept", async () => {
+    const order: string[] = [];
+    vi.mocked(deleteInstanceData).mockImplementation(async (url) => {
+      order.push(`data ${url}`);
+      return { keptFolder: CONTAINER, keptReleases: false, keptDocuments: [] };
+    });
+    vi.mocked(removeInstanceRegistrations).mockImplementation(async (index) => {
+      order.push(`unregister ${index}`);
+    });
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX));
+
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({
+      keptFolder: CONTAINER,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+
+    expect(order).toEqual([
+      `data ${CONTAINER}`,
+      `unregister ${PRIVATE_INDEX}`,
+      `unregister ${PUBLIC_INDEX}`,
+    ]);
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(
+      PRIVATE_INDEX,
+      CONTAINER,
+      expect.anything(),
+    );
+  });
+
+  it("unregisters it from the one index there is", async () => {
+    vi.mocked(deleteInstanceData).mockResolvedValue({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(null, PUBLIC_INDEX));
+
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).resolves.toEqual({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+
+    expect(removeInstanceRegistrations).toHaveBeenCalledOnce();
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(
+      PUBLIC_INDEX,
+      CONTAINER,
+      expect.anything(),
+    );
+  });
+
+  it("deletes the data through its own fetch with the user's storages, the registrations through the type indexes' own", async () => {
+    vi.mocked(deleteInstanceData).mockResolvedValue({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, null));
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const dataFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const publicFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const userStorages = async () => [];
+    const repository = createSolidInstanceRepository({
+      fetch,
+      dataFetch,
+      publicFetch,
+      now: () => new Date(),
+      randomId: () => "fixed-id",
+      userStorages,
+    });
+
+    await repository.deleteInstance({ webId: WEBID, instance });
+
+    expect(deleteInstanceData).toHaveBeenCalledWith(CONTAINER, dataFetch, userStorages);
+    expect(locateTypeIndexes).toHaveBeenCalledWith(WEBID, fetch, publicFetch, {
+      forWriting: true,
+    });
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, indexFetch);
+  });
+
+  it("keeps the registration when deleting the data fails", async () => {
+    vi.mocked(deleteInstanceData).mockRejectedValue(new Error("403"));
+
+    await expect(makeRepository().deleteInstance({ webId: WEBID, instance })).rejects.toThrow(
+      "403",
+    );
+
+    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
+  });
+});
+
+describe("detachInstance", () => {
+  const instance = { url: "https://bob.example/shared", name: "Shared" };
+  const SHARED = "https://bob.example/shared/";
+
+  it("drops its registrations from both indexes, through theirs alone, and deletes no data", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX));
+    const fetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const dataFetch = vi.fn() as unknown as typeof globalThis.fetch;
+    const repository = createSolidInstanceRepository({
+      fetch,
+      dataFetch,
+      now: () => new Date(),
+      randomId: () => "fixed-id",
+    });
+
+    await repository.detachInstance({ webId: WEBID, instance });
+
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, SHARED, indexFetch);
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, SHARED, indexFetch);
+    expect(deleteInstanceData).not.toHaveBeenCalled();
+    expect(dataFetch).not.toHaveBeenCalled();
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("writes to no type index outside the profile's own places", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(
+      located(PRIVATE_INDEX, PUBLIC_INDEX, (url) => url === PUBLIC_INDEX),
+    );
+
+    await makeRepository().detachInstance({ webId: WEBID, instance });
+
+    expect(removeInstanceRegistrations).toHaveBeenCalledOnce();
+    expect(removeInstanceRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, SHARED, indexFetch);
+  });
+});
+
+describe("removing registrations when an index fails", () => {
+  const instance = { url: "https://bob.example/shared", name: "Shared" };
+  const failing = (at: string, error: unknown) => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX));
+    vi.mocked(removeInstanceRegistrations).mockImplementation(async (index) => {
+      if (index === at) throw error;
+    });
+  };
+
+  for (const [name, at] of [
+    ["private", PRIVATE_INDEX],
+    ["public", PUBLIC_INDEX],
+  ] as const) {
+    it(`tries both when the ${name} index fails, and then says so`, async () => {
+      const refused = new AppError("addFailed", { url: at, status: 500 });
+      failing(at, refused);
+
+      await expect(makeRepository().detachInstance({ webId: WEBID, instance })).rejects.toBe(
+        refused,
+      );
+
+      expect(removeInstanceRegistrations).toHaveBeenCalledTimes(2);
+    });
+
+    it(`counts a missing ${name} index as nothing to remove`, async () => {
+      failing(at, { statusCode: 404 });
+
+      await expect(
+        makeRepository().detachInstance({ webId: WEBID, instance }),
+      ).resolves.toBeUndefined();
+
+      expect(removeInstanceRegistrations).toHaveBeenCalledTimes(2);
+    });
+  }
+});
+
+describe("old registrations", () => {
+  const bothIndexes = (inOwnStorage: (url: string) => boolean = () => true) =>
+    vi
+      .mocked(locateTypeIndexes)
+      .mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX, inOwnStorage));
+  const args = { webId: WEBID, instanceUrl: CONTAINER };
+
+  it("says which each of the user's own indexes holds, the private one's first", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockImplementation(async (index) =>
+      index === PRIVATE_INDEX ? ["card", "answer"] : ["catalog"],
+    );
+
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [
+        { dataClass: "card", index: "private" },
+        { dataClass: "answer", index: "private" },
+        { dataClass: "catalog", index: "public" },
+      ],
+      unreadableIndexes: [],
+    });
+    expect(readOldRegistrations).toHaveBeenCalledWith(PRIVATE_INDEX, CONTAINER, indexFetch);
+    expect(readOldRegistrations).toHaveBeenCalledWith(PUBLIC_INDEX, CONTAINER, indexFetch);
+    expect(removeOldRegistrations).not.toHaveBeenCalled();
+  });
+
+  it("says which index could not be read, takes one that is not there as holding none, and reads none outside the profile's own places", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockImplementation(async (index) => {
+      throw index === PRIVATE_INDEX ? new Error("403 Forbidden") : { statusCode: 404 };
+    });
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [],
+      unreadableIndexes: ["private"],
+    });
+
+    vi.mocked(readOldRegistrations).mockReset().mockResolvedValue(["deck"]);
+    bothIndexes((url) => url === PRIVATE_INDEX);
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [{ dataClass: "deck", index: "private" }],
+      unreadableIndexes: [],
+    });
+    expect(readOldRegistrations).toHaveBeenCalledOnce();
+
+    // One document named as both indexes is read once, as the private one.
+    vi.mocked(readOldRegistrations).mockReset().mockResolvedValue(["deck"]);
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, PRIVATE_INDEX));
+    await expect(makeRepository().readOldRegistrations(args)).resolves.toEqual({
+      registrations: [{ dataClass: "deck", index: "private" }],
+      unreadableIndexes: [],
+    });
+    expect(readOldRegistrations).toHaveBeenCalledOnce();
+  });
+
+  it("removes them from each index that holds any, and writes to none that holds none or cannot be read", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(PRIVATE_INDEX, null));
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    await makeRepository().removeOldRegistrations(args);
+    expect(removeOldRegistrations).toHaveBeenCalledExactlyOnceWith(
+      PRIVATE_INDEX,
+      CONTAINER,
+      indexFetch,
+    );
+
+    vi.mocked(removeOldRegistrations).mockReset();
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockImplementation(async (index) => {
+      if (index === PRIVATE_INDEX) return [];
+      throw new Error("403 Forbidden");
+    });
+    await makeRepository().removeOldRegistrations(args);
+    expect(removeOldRegistrations).not.toHaveBeenCalled();
+
+    // Nor outside the profile's own places.
+    bothIndexes((url) => url === PRIVATE_INDEX);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    await makeRepository().removeOldRegistrations(args);
+    expect(vi.mocked(removeOldRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+    ]);
+  });
+
+  it("tries both indexes when one fails, and then says so", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const refused = new AppError("addFailed", { url: PRIVATE_INDEX, status: 500 });
+    vi.mocked(removeOldRegistrations).mockImplementation(async (index) => {
+      if (index === PRIVATE_INDEX) throw refused;
+    });
+
+    await expect(makeRepository().removeOldRegistrations(args)).rejects.toBe(refused);
+    expect(removeOldRegistrations).toHaveBeenCalledTimes(2);
+  });
+
+  it("says the first failure when both indexes fail", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const privateRefused = new AppError("addFailed", { url: PRIVATE_INDEX, status: 500 });
+    const publicRefused = new AppError("addFailed", { url: PUBLIC_INDEX, status: 500 });
+    vi.mocked(removeOldRegistrations).mockImplementation(async (index) => {
+      throw index === PRIVATE_INDEX ? privateRefused : publicRefused;
+    });
+
+    await expect(makeRepository().removeOldRegistrations(args)).rejects.toBe(privateRefused);
+    expect(removeOldRegistrations).toHaveBeenCalledTimes(2);
+  });
+
+  it("takes an index gone since it was read as nothing left to remove", async () => {
+    bothIndexes();
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    vi.mocked(removeOldRegistrations).mockImplementation(async (index) => {
+      if (index === PRIVATE_INDEX) throw { statusCode: 404 };
+    });
+
+    await expect(makeRepository().removeOldRegistrations(args)).resolves.toBeUndefined();
+    expect(removeOldRegistrations).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("readMeta and upgradeMeta", () => {
+  const META = `${CONTAINER}meta.ttl`;
+  const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
+
+  function metaDataset() {
+    return setThing(
+      datasetFrom(META),
+      buildThing(createThing({ url: `${META}#it` }))
+        .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
+        .addStringNoLocale(DCTERMS.title, "Main")
+        .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
+        .addStringNoLocale("https://other.example/#note", "kept")
+        .build(),
+    );
+  }
+
+  it("reads the meta document, null when it is missing or has no subject", async () => {
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset()));
+    await expect(makeRepository().readMeta(CONTAINER)).resolves.toEqual(meta);
+    vi.mocked(readDocument).mockRejectedValue({ statusCode: 404 });
+    await expect(makeRepository().readMeta(CONTAINER)).resolves.toBeNull();
+    vi.mocked(readDocument).mockResolvedValue(readOf(datasetFrom(META)));
+    await expect(makeRepository().readMeta(CONTAINER)).resolves.toBeNull();
+  });
+
+  it("brings an outdated subject up to this app's format as read, in place, checked first", async () => {
+    vi.mocked(readDocument).mockResolvedValue(readOf(metaDataset()));
+    const checkWrite = vi.fn(async () => undefined);
+    await expect(makeRepository(checkWrite).upgradeMeta(CONTAINER)).resolves.toBe(true);
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(url).toBe(META);
+    const thing = getThing(saved as Dataset, `${META}#it`)!;
+    expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Main");
+    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
+    expect(getInteger(thing, SM.formatVersion)).toBe(2);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`], "pod");
+  });
+
+  it("writes nothing for a subject up to date, missing or unreadable, or no meta document", async () => {
+    vi.mocked(readDocument).mockResolvedValue(
+      readOf(
+        setThing(
+          metaDataset(),
+          buildThing(getThing(metaDataset(), `${META}#it`)!)
+            .setInteger(SM.formatVersion, 2)
+            .build(),
+        ),
+      ),
+    );
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    vi.mocked(readDocument).mockResolvedValue(readOf(datasetFrom(META)));
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    vi.mocked(readDocument).mockResolvedValue(
+      readOf(
+        setThing(
+          datasetFrom(META),
+          buildThing(createThing({ url: `${META}#it` }))
+            .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
+            .build(),
+        ),
+      ),
+    );
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    vi.mocked(readDocument).mockRejectedValue({ statusCode: 404 });
+    await expect(makeRepository().upgradeMeta(CONTAINER)).resolves.toBe(false);
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["upgradeMeta", { formatVersion: 2 }],
+    ["editMeta", { name: "Renamed" }],
+    ["createInstance", { name: "Made" }],
+  ] as const)(
+    "reads the meta document again after %s writes it, not as it was before, however the server versions it",
+    async (write, written) => {
+      // A server that gives a document rewritten within the same second the same version, as the Community Solid Server 6 does.
+      let served: Dataset = metaDataset();
+      vi.mocked(readDocument).mockImplementation(async (_url, { ifNoneMatch }) =>
+        ifNoneMatch === '"v1"' ? { notModified: true } : { dataset: served as never, etag: '"v1"' },
+      );
+      vi.mocked(writeDocument).mockImplementation(async (_url, dataset) => {
+        served = dataset as Dataset;
+        return { dataset: dataset as never, etag: undefined };
+      });
+      vi.mocked(ensureTypeIndex).mockResolvedValue({ url: PRIVATE_INDEX, fetch: indexFetch });
+      const repository = makeRepository();
+      await expect(repository.readMeta(CONTAINER)).resolves.toMatchObject({ formatVersion: 1 });
+      if (write === "upgradeMeta") await repository.upgradeMeta(CONTAINER);
+      else if (write === "editMeta")
+        await repository.editMeta(CONTAINER, (read) => ({ ...read, name: "Renamed" }));
+      else
+        await repository.createInstance({
+          webId: WEBID,
+          containerUrl: CONTAINER,
+          name: "Made",
+          registrationTarget: "private",
+        });
+      expect(writeDocument).toHaveBeenCalledOnce();
+      await expect(repository.readMeta(CONTAINER)).resolves.toMatchObject(written);
+      expect(vi.mocked(readDocument).mock.lastCall?.[1].ifNoneMatch).toBeUndefined();
+    },
+  );
+});
+
+describe("renameRegistrations", () => {
+  it("renames the instance's registrations in each type index there is", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(located(null, PUBLIC_INDEX));
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    await makeRepository().renameRegistrations({
+      webId: WEBID,
+      instanceUrl: CONTAINER,
+      title: "Languages",
+    });
+    expect(vi.mocked(renameInstanceRegistrations).mock.calls.map((c) => [c[0], c[1]])).toEqual([
+      [PUBLIC_INDEX, { containerUrl: CONTAINER, title: "Languages" }],
+    ]);
+  });
+});
+
+describe("editMeta", () => {
+  const META = `${CONTAINER}meta.ttl`;
+  const meta = { name: "Main", createdAt: "2026-09-21T10:00:00.000Z", formatVersion: 1 };
+  /** The meta document as another app may have written it: one triple of its own on the subject. */
+  const stored = () =>
+    readOf(
+      setThing(
+        datasetFrom(META),
+        buildThing(createThing({ url: `${META}#it` }))
+          .addIri("http://www.w3.org/1999/02/22-rdf-syntax-ns#type", SM.Instance)
+          .addStringNoLocale(DCTERMS.title, "Main")
+          .addLiteral(DCTERMS.created, datetimeLiteral(meta.createdAt))
+          .addStringNoLocale("https://other.example/#note", "kept")
+          .build(),
+      ),
+    );
+
+  it("rewrites the subject in place from the meta as read, keeping foreign triples, checked first", async () => {
+    vi.mocked(readDocument).mockResolvedValue(stored());
+    const checkWrite = vi.fn(async () => undefined);
+    const change = vi.fn((read: typeof meta) => ({ ...read, name: "Renamed" }));
+    await expect(makeRepository(checkWrite).editMeta(CONTAINER, change)).resolves.toMatchObject({
+      name: "Renamed",
+    });
+    expect(change).toHaveBeenCalledWith(expect.objectContaining({ name: "Main" }));
+    const [url, saved] = vi.mocked(writeDocument).mock.calls[0];
+    expect(url).toBe(META);
+    const thing = getThing(saved as Dataset, `${META}#it`)!;
+    expect(getStringNoLocale(thing, DCTERMS.title)).toBe("Renamed");
+    expect(getStringNoLocale(thing, "https://other.example/#note")).toBe("kept");
+    expect(getInteger(thing, SM.formatVersion)).toBe(2);
+    expect(checkWrite).toHaveBeenCalledWith(saved, [`${META}#it`], "pod");
+  });
+
+  it("writes nothing for no change, and gives the meta as read", async () => {
+    vi.mocked(readDocument).mockResolvedValue(stored());
+    await expect(makeRepository().editMeta(CONTAINER, () => null)).resolves.toMatchObject({
+      name: "Main",
+    });
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+
+  it("reads and changes the meta again when it changed elsewhere meanwhile", async () => {
+    vi.mocked(readDocument).mockResolvedValue(stored());
+    vi.mocked(writeDocument)
+      .mockRejectedValueOnce({ statusCode: 412 })
+      .mockImplementation(async (_url, dataset) => ({
+        dataset: dataset as never,
+        etag: undefined,
+      }));
+    const change = vi.fn((read: typeof meta) => ({ ...read, name: "Renamed" }));
+    await makeRepository().editMeta(CONTAINER, change);
+    expect(change).toHaveBeenCalledTimes(2);
+    expect(writeDocument).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses, writing nothing, when the meta document or its subject is missing, or does not fit its shape", async () => {
+    const change = vi.fn(() => meta);
+    vi.mocked(readDocument).mockRejectedValue({ statusCode: 404 });
+    await expect(makeRepository().editMeta(CONTAINER, change)).rejects.toMatchObject({
+      code: "noMetaToUpdate",
+    });
+    vi.mocked(readDocument).mockResolvedValue(readOf(datasetFrom(META)));
+    await expect(makeRepository().editMeta(CONTAINER, change)).rejects.toMatchObject({
+      code: "noMetaToUpdate",
+    });
+    vi.mocked(readDocument).mockResolvedValue(
+      readOf(
+        setThing(
+          datasetFrom(META),
+          buildThing(createThing({ url: `${META}#it` }))
+            .addStringNoLocale("https://other.example/#note", "no meta")
+            .build(),
+        ),
+      ),
+    );
+    await expect(makeRepository().editMeta(CONTAINER, change)).rejects.toMatchObject({
+      code: "noMetaToUpdate",
+    });
+    expect(change).not.toHaveBeenCalled();
+    expect(writeDocument).not.toHaveBeenCalled();
+  });
+});
+
+describe("a type index outside the profile's own places", () => {
+  /** The private index in the places, the public one outside them. */
+  const publicElsewhere = () =>
+    vi
+      .mocked(locateTypeIndexes)
+      .mockResolvedValue(located(PRIVATE_INDEX, PUBLIC_INDEX, (url) => url !== PUBLIC_INDEX));
+
+  it("lists nothing it registers when it is the only index", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(
+      located(null, PUBLIC_INDEX, (url) => url !== PUBLIC_INDEX),
+    );
+
+    await expect(makeRepository().listInstances(WEBID)).resolves.toEqual([]);
+    expect(readInstanceRegistrations).not.toHaveBeenCalled();
+  });
+
+  it("is neither renamed in nor unregistered from", async () => {
+    publicElsewhere();
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    vi.mocked(deleteInstanceData).mockResolvedValue({
+      keptFolder: null,
+      keptReleases: false,
+      keptDocuments: [],
+    });
+
+    await makeRepository().renameRegistrations({
+      webId: WEBID,
+      instanceUrl: CONTAINER,
+      title: "Languages",
+    });
+    await makeRepository().deleteInstance({
+      webId: WEBID,
+      instance: { url: CONTAINER, name: "Main" },
+    });
+
+    expect(vi.mocked(renameInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+    ]);
+    expect(vi.mocked(removeInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+    ]);
+  });
+});
+
+describe("a linked type index that may not be written to", () => {
+  /**
+   * Both indexes linked, as when the storage lookup failed or the server
+   * shows none, only the private one in what may be written to.
+   */
+  const publicNotWritable = (): TypeIndexes => ({
+    links: [
+      { url: PRIVATE_INDEX, kind: "private", fromPreferences: false },
+      { url: PUBLIC_INDEX, kind: "public", fromPreferences: false },
+    ],
+    fetch: indexFetch,
+    inOwnStorage: (url) => url === PRIVATE_INDEX,
+  });
+
+  it("is listed from, and read for old registrations", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(publicNotWritable());
+    vi.mocked(readInstanceRegistrations).mockResolvedValue([]);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+
+    await makeRepository().listInstances(WEBID);
+    await expect(
+      makeRepository().readOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).resolves.toEqual({
+      registrations: [
+        { dataClass: "card", index: "private" },
+        { dataClass: "card", index: "public" },
+      ],
+      unreadableIndexes: [],
+    });
+    expect(vi.mocked(readInstanceRegistrations).mock.calls.map((call) => call[0])).toEqual([
+      PRIVATE_INDEX,
+      PUBLIC_INDEX,
+    ]);
+  });
+
+  it("is neither renamed in, unregistered from, nor cleaned", async () => {
+    vi.mocked(locateTypeIndexes).mockResolvedValue(publicNotWritable());
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const repository = makeRepository();
+
+    await repository.renameRegistrations({ webId: WEBID, instanceUrl: CONTAINER, title: "New" });
+    await repository.detachInstance({ webId: WEBID, instance: { url: CONTAINER, name: "Main" } });
+    await repository.removeOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER });
+
+    for (const write of [
+      renameInstanceRegistrations,
+      removeInstanceRegistrations,
+      removeOldRegistrations,
+    ]) {
+      expect(vi.mocked(write).mock.calls.map((call) => call[0])).toEqual([PRIVATE_INDEX]);
+    }
+  });
+
+  it("writes nothing when the user's storages cannot be looked up now", async () => {
+    const failure = Object.assign(new Error("503"), { statusCode: 503 });
+    vi.mocked(locateTypeIndexes).mockImplementation(async (_webId, _fetch, _public, options) => {
+      if (options?.forWriting) throw failure;
+      return publicNotWritable();
+    });
+    vi.mocked(renameInstanceRegistrations).mockReset().mockResolvedValue(undefined);
+    vi.mocked(readOldRegistrations).mockResolvedValue(["card"]);
+    const repository = makeRepository();
+    const instance = { url: CONTAINER, name: "Main" };
+
+    await expect(
+      repository.renameRegistrations({ webId: WEBID, instanceUrl: CONTAINER, title: "New" }),
+    ).rejects.toBe(failure);
+    await expect(repository.detachInstance({ webId: WEBID, instance })).rejects.toBe(failure);
+    await expect(
+      repository.removeOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).rejects.toBe(failure);
+    await expect(
+      repository.readOldRegistrations({ webId: WEBID, instanceUrl: CONTAINER }),
+    ).resolves.toMatchObject({ unreadableIndexes: [] });
+    expect(renameInstanceRegistrations).not.toHaveBeenCalled();
+    expect(removeInstanceRegistrations).not.toHaveBeenCalled();
+    expect(removeOldRegistrations).not.toHaveBeenCalled();
+  });
+});

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": [
+    "//"
+  ],
+  "tasks": {
+    "test": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/package.json"
+      ]
+    },
+    "test:growth": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/package.json"
+      ]
+    },
+    "test:roundtrip": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/api/frozen/pods.txt",
+        "$TURBO_ROOT$/ns/**",
+        "$TURBO_ROOT$/decks/**",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/inrupt-client/package.json",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/src/**",
+        "$TURBO_ROOT$/packages/adapters/solid-memo-client/package.json"
+      ]
+    }
+  }
+}
