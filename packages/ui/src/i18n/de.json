@@ -1789,6 +1789,7 @@
     "loginProviderRefused": "Die Einstellungen deines Anbieters nennen eine Adresse, die Solid Memo nicht sicher verwenden kann, deshalb hat es die Anmeldung abgebrochen. Wähle einen anderen Anbieter.",
     "restoreTimedOut": "Dein Anbieter hat nicht rechtzeitig geantwortet, deshalb hat Solid Memo die Wiederherstellung deiner Sitzung abgebrochen. Melde dich erneut an oder wähle einen anderen Anbieter.",
     "restoreNotReturned": "Dein Anbieter hat dich nicht zurückgeschickt, deshalb hat Solid Memo die Wiederherstellung deiner Sitzung abgebrochen. Geh zurück zu deinem Anbieter, melde dich erneut an oder wähle einen anderen Anbieter.",
+    "sessionNotRecovered": "Deine Sitzung ist abgelaufen, und dein Anbieter hat dich nicht wieder angemeldet. Melde dich erneut an.",
     "webIdIssuerNotListed": "Dein WebID-Profil nennt den Anbieter nicht, bei dem du dich angemeldet hast, deshalb hat Solid Memo die Sitzung zur Sicherheit beendet. Füge den Anbieter deinem Profil hinzu oder melde dich bei einem an, den es nennt.",
     "webIdTooLong": "Dein Anbieter nennt eine WebID, die länger ist, als Solid Memo annimmt (höchstens {limit} Zeichen), deshalb hat Solid Memo die Sitzung zur Sicherheit beendet. Melde dich bei einem anderen Anbieter an.",
     "webIdUnusable": "Dein Anbieter nennt eine WebID, die Solid Memo nicht prüfen kann, weil sie keine sichere https://-Adresse eines Pods ist, deshalb hat Solid Memo die Sitzung zur Sicherheit beendet. Melde dich bei einem anderen Anbieter an.",

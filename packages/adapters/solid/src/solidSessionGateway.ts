@@ -148,6 +148,40 @@ interface RestoreAttempt {
  */
 const RESTORE_DEADLINE_MS = 60_000;
 
+/**
+ * When this tab last reloaded to restore a session that expired, in
+ * milliseconds since the epoch, kept across loads: a session that
+ * expires again within RECOVERY_INTERVAL_MS is not restored again, so
+ * that a provider whose tokens the pod refuses at once can't keep the
+ * page reloading.
+ */
+export const SESSION_RECOVERED_KEY = "solid-memo:session-recovered";
+
+/**
+ * Kept while a reload to restore an expired session is under way in
+ * this tab, until the restore that reload starts settles: a restore that
+ * then brings no session back says so (`sessionNotRecovered`).
+ */
+export const SESSION_RECOVERY_KEY = "solid-memo:session-recovery";
+
+/** How long after restoring an expired session this tab doesn't try again, in milliseconds. */
+const RECOVERY_INTERVAL_MS = 5 * 60_000;
+
+/**
+ * How long a reload has to leave the page before the page is taken to
+ * have stayed, in milliseconds: the learner may choose to stay on a page
+ * with unsaved edits.
+ */
+const RELOAD_GRACE_MS = 10_000;
+
+/**
+ * How long the sign-in client has to renew an expired access token once
+ * the tab is shown again, online, in milliseconds: the library's timer,
+ * late after the computer slept, fires as the page wakes, and its renewal
+ * may still succeed.
+ */
+const RENEWAL_GRACE_MS = 10_000;
+
 /** The parameters an identity provider sends back on the redirect URL. */
 const RESPONSE_PARAMETERS = ["code", "state", "iss", "error", "error_description", "session_state"];
 
@@ -236,6 +270,11 @@ function hasAuthorizationResponse(): boolean {
 function isReload(): boolean {
   const [navigation] = window.performance.getEntriesByType("navigation");
   return (navigation as PerformanceNavigationTiming | undefined)?.type === "reload";
+}
+
+/** Whether the learner sees the page and the browser is online: a reload then goes somewhere. */
+function shownOnline(): boolean {
+  return document.visibilityState === "visible" && window.navigator.onLine;
 }
 
 /** What a restore finds, or a refusal once the deadline passes; what it does after that is ignored. */
@@ -397,7 +436,11 @@ export function createSolidSessionGateway({
    * restore is no longer this page's: it reloads, and whatever still
    * settles here leaves what that load kept alone.
    */
-  async function attemptRestore(loginIssuer: string | null, attempt: RestoreAttempt | null) {
+  async function attemptRestore(
+    loginIssuer: string | null,
+    attempt: RestoreAttempt | null,
+    recovering: boolean,
+  ) {
     const answered = hasAuthorizationResponse();
     let ownAttempt: string | null = null;
     // A login's answer is no silent restore, whatever session is stored from before it.
@@ -416,6 +459,7 @@ export function createSolidSessionGateway({
       return await withinRestoreDeadline(
         checkAuthorizationResponse(loginIssuer, client).then(async () => {
           ownAttempt = await noteRestoreAttempt();
+          if (recovering) window.sessionStorage.setItem(SESSION_RECOVERY_KEY, "reload");
           return client.restore();
         }),
       );
@@ -429,24 +473,55 @@ export function createSolidSessionGateway({
       window.removeEventListener("pageshow", reloadIfTakenOver);
       if (!takenOver()) {
         window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
+        window.sessionStorage.removeItem(SESSION_RECOVERY_KEY);
         if (!keepsAttempt) window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
       }
     }
   }
+
+  /** Whether a session is stored for a restore to try; a store that can't be read vouches for none. */
+  async function hasStoredSession(): Promise<boolean> {
+    return (await client.sessionIssuer().catch(() => null)) !== null;
+  }
+
+  /**
+   * Reloads the page, whose load restores the stored session, unless
+   * there is none or this tab did so within RECOVERY_INTERVAL_MS.
+   * Resolves once the page stayed, RELOAD_GRACE_MS after the reload.
+   */
+  async function recover(): Promise<void> {
+    const last = Number(window.sessionStorage.getItem(SESSION_RECOVERED_KEY));
+    if (Date.now() - last < RECOVERY_INTERVAL_MS || !(await hasStoredSession())) return;
+    window.sessionStorage.setItem(SESSION_RECOVERED_KEY, String(Date.now()));
+    window.sessionStorage.setItem(SESSION_RECOVERY_KEY, "reload");
+    window.location.reload();
+    await new Promise((resolve) => setTimeout(resolve, RELOAD_GRACE_MS));
+    // Still here: the next load is no recovery's.
+    window.sessionStorage.removeItem(SESSION_RECOVERY_KEY);
+  }
+
+  /** The recovery under way, which every expiry heard meanwhile waits on rather than reload again. */
+  let recovery: Promise<void> | null = null;
 
   return {
     async restore() {
       const loginHash = window.sessionStorage.getItem(LOGIN_HASH_KEY) ?? "";
       const loginIssuer = window.sessionStorage.getItem(LOGIN_ISSUER_KEY);
       const attempt = window.sessionStorage.getItem(RESTORE_ATTEMPT_KEY);
+      const recovering = window.sessionStorage.getItem(SESSION_RECOVERY_KEY) !== null;
       window.sessionStorage.removeItem(LOGIN_HASH_KEY);
       window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
       window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
+      window.sessionStorage.removeItem(SESSION_RECOVERY_KEY);
       const { webId, fromLogin, restoredFrom } = await attemptRestore(
         loginIssuer,
         attempt === null ? null : (JSON.parse(attempt) as RestoreAttempt),
+        recovering,
       );
-      if (webId === null) return null;
+      if (webId === null) {
+        if (recovering) throw new AppError("sessionNotRecovered");
+        return null;
+      }
       await refuseLongWebId(webId);
       await refuseUnusableWebId(webId);
       await refuseUnlistedIssuer(webId, fromLogin);
@@ -475,6 +550,13 @@ export function createSolidSessionGateway({
       return (await client.sessionIssuer()) !== null;
     },
 
+    recoverSession() {
+      recovery ??= recover().finally(() => {
+        recovery = null;
+      });
+      return recovery;
+    },
+
     async forgetStoredSession() {
       window.sessionStorage.removeItem(LOGIN_ISSUER_KEY);
       window.sessionStorage.removeItem(RESTORE_ATTEMPT_KEY);
@@ -482,8 +564,27 @@ export function createSolidSessionGateway({
     },
 
     onSessionExpired(listener) {
+      let renewing: ReturnType<typeof setTimeout> | undefined;
+      // A tab shown again, online, whose token expired unrenewed: the client gets a moment to renew it first.
+      const check = () => {
+        if (renewing !== undefined || !shownOnline() || !client.renewalOverdue()) return;
+        renewing = setTimeout(() => {
+          renewing = undefined;
+          // Offline meanwhile: checked again once back online.
+          if (shownOnline() && client.renewalOverdue()) listener();
+        }, RENEWAL_GRACE_MS);
+      };
       window.addEventListener(SESSION_EXPIRED_EVENT, listener);
-      return () => window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
+      document.addEventListener("visibilitychange", check);
+      window.addEventListener("online", check);
+      window.addEventListener("pageshow", check);
+      return () => {
+        window.removeEventListener(SESSION_EXPIRED_EVENT, listener);
+        document.removeEventListener("visibilitychange", check);
+        window.removeEventListener("online", check);
+        window.removeEventListener("pageshow", check);
+        clearTimeout(renewing);
+      };
     },
 
     onReturnedWithoutSession(listener) {

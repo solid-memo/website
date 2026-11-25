@@ -211,5 +211,14 @@ export function sessionContract(harness: SessionHarness): void {
       harness.currentSession(fetch);
       expect(client.webId()).toBeUndefined();
     });
+
+    it("has no renewal overdue for a current session, nor with no one logged in", () => {
+      const client = harness.create();
+      const fetch = vi.fn<typeof globalThis.fetch>();
+      harness.currentSession(fetch, WEBID);
+      expect(client.renewalOverdue()).toBe(false);
+      harness.currentSession(fetch);
+      expect(client.renewalOverdue()).toBe(false);
+    });
   });
 }

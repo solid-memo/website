@@ -101,6 +101,11 @@ identity provider (`solid-memo:provider-redirect`). The mark stays
 until the next restore in that tab ends, or the tab closes. Until the
 next page load, it holds the address of the provider a silent restore
 went to and when it went (`solid-memo:restore-attempt`).
+Once the app reloads the page to restore a session that expired, it
+holds when it last did (`solid-memo:session-recovered`) until the tab
+closes, and a mark that the reload is under way
+(`solid-memo:session-recovery`) until the restore it starts ends
+([authentication.md](authentication.md#restoring-an-expired-session)).
 A login with the box to remember the WebID checked holds that WebID
 (`solid-memo:login-webId`, `remembered.ts`)
 until the next page load, which keeps it as `solid-memo:webId` if the

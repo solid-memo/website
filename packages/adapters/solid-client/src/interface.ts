@@ -242,6 +242,14 @@ export interface SessionClient {
   fetch: typeof globalThis.fetch;
   /** The logged-in user's WebID, as the session has it now; none when logged out. */
   webId(): string | undefined;
+  /**
+   * Whether the session's access token has expired without the client
+   * renewing it, so that only a restore brings the session back: the
+   * library renews on a timer, which a computer's sleep delays, and stops
+   * renewing after a renewal that failed. Never for a client that renews
+   * when a request needs it, nor with no one logged in.
+   */
+  renewalOverdue(): boolean;
 }
 
 /** What restore found. */

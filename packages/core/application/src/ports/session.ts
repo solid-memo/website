@@ -21,10 +21,20 @@ export interface SessionGateway {
    */
   restore(): Promise<EstablishedSession | null>;
   /**
-   * Subscribe to session expiry (e.g. a 401 from the pod). Returns an
-   * unsubscribe function.
+   * Subscribe to session expiry: a 401 from the pod, or the tab shown
+   * again, online, with an access token that expired and was not renewed.
+   * Returns an unsubscribe function.
    */
   onSessionExpired(listener: () => void): () => void;
+  /**
+   * Restores a session that expired as a reload does, by reloading the
+   * page: the restore that load runs fails with `sessionNotRecovered`
+   * when it brings no session back. Resolves only when the page stays:
+   * no session is stored, this tab tried a while ago already, or the
+   * reload did not leave (the learner chose to stay on a page with
+   * unsaved edits).
+   */
+  recoverSession(): Promise<void>;
   /**
    * Subscribe to this page coming back from the browser's back/forward
    * cache, where it heard nothing, with no session stored any more.

@@ -470,9 +470,8 @@ to the login page.
 
 ### An expired session
 
-The app drops the session and shows the login again only when the
-session is gone. authFetch announces it
-(`solid-memo:session-expired`) on a 401 in two cases:
+A session is taken for expired only when it's gone. authFetch announces
+it (`solid-memo:session-expired`) on a 401 in two cases:
 
 - **The sign-in client no longer has the user.** The access token
   expired with no refresh token to renew it, or the provider refused
@@ -492,6 +491,49 @@ A 401 from any other server, such as an instance the user registered
 in someone else's pod, says nothing of the session. The caller reads
 it as refused access, and the user stays logged in. A logout isn't an
 expired session either.
+
+### Restoring an expired session
+
+Inrupt's library renews the access token on a timer, a few seconds
+before it expires, and never when a request needs a token. A computer's
+sleep holds the timer up, so it fires after the token expired. A
+renewal that fails, because the network isn't back yet, is dropped,
+and the library sets no new timer. The session's provider still has the
+user logged in, so a reload brings the session back
+([Session restore](#session-restore)). The app does that reload itself:
+
+- **When the tab comes back.** The gateway asks the sign-in client
+  whether a renewal is overdue (`renewalOverdue()`) each time the tab is
+  shown, comes back online or comes back from the back/forward cache,
+  while the browser is online and the tab shown. With one overdue, it
+  gives the client 10 seconds to renew, as a late timer may still
+  succeed, and then announces the session expired.
+- **On an expired session.** The app waits for the writes under way to
+  finish, for 10 seconds at most, as a reload would cut one off. Then the
+  gateway reloads the page (`recoverSession()`), and that load's restore
+  brings the session back as any reload's does, on the same screen. A
+  write the pod refused for the expired token isn't sent again.
+- **Once in 5 minutes.** The gateway keeps the time of its last reload
+  in `sessionStorage` (`solid-memo:session-recovered`), and doesn't reload
+  again within 5 minutes, so a provider whose tokens the pod refuses
+  at once can't keep the page reloading. It doesn't reload without a
+  stored session either. The app shows the login then, with
+  "Your session has expired".
+- **A restore that brings no session back.** The gateway marks the
+  reload in `sessionStorage` (`solid-memo:session-recovery`) until the
+  restore it starts settles, kept while the page leaves for the
+  provider. A restore that then brings no session back, as when the
+  provider no longer has the user logged in, shows `sessionNotRecovered`
+  with the login.
+- **A page that stays.** The Studio asks before a reload discards
+  unsaved edits ([studio.md](studio.md#card-inspector)). When the
+  learner stays, the page hasn't left 10 seconds after the reload, and
+  the app shows the login, as before.
+
+`solid-memo-client` renews in the request that needs a token, so a
+renewal is never overdue there; its session expires only when the
+provider refused the refresh token, and a reload's restore would leave
+for the provider then.
 
 ## Logout
 

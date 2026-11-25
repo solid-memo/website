@@ -147,5 +147,8 @@ export function createSessionClient(): SessionClient {
     webId() {
       return currentSession()?.webId;
     },
+
+    // The session's fetch renews its tokens itself when a request needs them (oidcSession.ts).
+    renewalOverdue: () => false,
   };
 }

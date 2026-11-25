@@ -1877,6 +1877,7 @@
     "loginProviderRefused": "Los ajustes de tu proveedor indican una dirección que Solid Memo no puede usar de forma segura, así que detuvo el inicio de sesión. Elige otro proveedor.",
     "restoreTimedOut": "Tu proveedor no respondió a tiempo, así que Solid Memo dejó de restaurar tu sesión. Vuelve a iniciar sesión o elige otro proveedor.",
     "restoreNotReturned": "Tu proveedor no te devolvió aquí, así que Solid Memo dejó de restaurar tu sesión. Vuelve a tu proveedor, inicia sesión de nuevo o elige otro proveedor.",
+    "sessionNotRecovered": "Tu sesión caducó y tu proveedor no la restableció. Vuelve a iniciar sesión.",
     "webIdIssuerNotListed": "Tu perfil WebID no indica el proveedor en el que iniciaste sesión, así que Solid Memo cerró la sesión por seguridad. Añade el proveedor a tu perfil o inicia sesión en uno que indique.",
     "webIdTooLong": "Tu proveedor indica un WebID más largo de lo que Solid Memo acepta ({limit} caracteres como máximo), así que Solid Memo cerró la sesión por seguridad. Inicia sesión en otro proveedor.",
     "webIdUnusable": "Tu proveedor indica un WebID que Solid Memo no puede comprobar, porque no es una dirección https:// segura de un Pod, así que Solid Memo cerró la sesión por seguridad. Inicia sesión en otro proveedor.",

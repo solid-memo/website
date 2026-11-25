@@ -278,5 +278,11 @@ export function createSessionClient(): SessionClient {
       const { isLoggedIn, webId } = getDefaultSession().info;
       return isLoggedIn ? webId : undefined;
     },
+
+    // The library moves the expiration date on at every renewal (its SESSION_EXTENDED event).
+    renewalOverdue() {
+      const { isLoggedIn, expirationDate } = getDefaultSession().info;
+      return isLoggedIn && expirationDate !== undefined && Date.now() >= expirationDate;
+    },
   };
 }

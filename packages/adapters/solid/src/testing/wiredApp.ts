@@ -170,6 +170,7 @@ export function wiredApp({
       restore: async () => null,
       discoverOidcIssuer: async () => "https://idp.example/",
       onSessionExpired: () => () => undefined,
+      recoverSession: async () => undefined,
       onReturnedWithoutSession: () => () => undefined,
       login: async () => undefined,
       loginWithIssuer: async () => undefined,
