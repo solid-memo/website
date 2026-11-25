@@ -182,6 +182,7 @@ jobs:
       actions: read
     outputs:
       tag: ${{ steps.released.outputs.tag }}
+      bundled: ${{ steps.released.outputs.bundled }}
     steps:
       # main's tip, not the commit CI checked: semantic-release releases
       # the branch. The whole history and every tag, to find the last
@@ -271,6 +272,13 @@ jobs:
       # refuses https in the checkout, so nothing reaches GitHub if it
       # did; and the checkout keeps no credentials, so a push that did
       # would be refused too (scripts/releaseConfig.test.ts runs it so).
+      #
+      # semantic-release prints every commit's message into the log, where
+      # the runner would read a line that starts with `::`, or holds `##[`,
+      # as a workflow command. So the step stops reading commands, with a
+      # token of the run's that no message can know, until it ends, on a
+      # line of its own; the step itself writes no command, and its
+      # outputs go to GITHUB_OUTPUT, a file.
       - if: steps.tip.outputs.release == 'true'
         name: npx semantic-release
         env:
@@ -285,6 +293,9 @@ jobs:
           git clone --quiet --bare . "$copy"
           git config "url.file://$copy.insteadOf" "$REPOSITORY_URL"
           git config protocol.https.allow never
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
           npx semantic-release --repository-url "$REPOSITORY_URL"
       # What semantic-release pushed to the copy: nothing, or one commit
       # on main's tip and its tag, kept as a bundle for the push job,
@@ -309,8 +320,11 @@ jobs:
           fi
           mkdir "$RUNNER_TEMP/bundle"
           git -C "$copy" bundle create "$RUNNER_TEMP/bundle/release.bundle" "refs/tags/$tag" "^$TIP"
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+          {
+            echo "tag=$tag"
+            echo "version=${tag#v}"
+            echo "bundled=true"
+          } >> "$GITHUB_OUTPUT"
       - if: steps.released.outputs.tag != ''
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -336,9 +350,12 @@ jobs:
   # release commit on main's tip with nothing but a release's changes
   # (npm run release:commit -- next), and the commit and its tag go in
   # one atomic push, so main never holds the commit without its tag.
+  # It runs whenever the prepare job made a bundle, and fails when the
+  # bundle's tag did not reach it, rather than release nothing in a run
+  # that still passes.
   push:
     needs: prepare
-    if: needs.prepare.outputs.tag != ''
+    if: needs.prepare.outputs.bundled == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -349,6 +366,14 @@ jobs:
     outputs:
       pushed: ${{ steps.pushed.outputs.pushed }}
     steps:
+      - name: The prepare job passed on its tag
+        env:
+          TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::The prepare job made a release's bundle but passed on no version's tag, so nothing is released (docs/releasing.md#when-a-release-fails)."
+            exit 1
+          fi
       # A copy without the key, such as a fork, releases nothing, and says
       # so. GitHub makes the environment, with no secrets, the first time
       # a run names it.

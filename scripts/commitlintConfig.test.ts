@@ -17,9 +17,13 @@ import { describe, expect, it } from "vitest";
 
 const ROOT = join(import.meta.dirname, "..");
 
-const { RENOVATE_WHY, holdsChangelogLink } = (await import(
+const { RENOVATE_WHY, WORKFLOW_COMMAND, holdsChangelogLink } = (await import(
   new URL("../commitlint.config.mjs", import.meta.url).href
-)) as { RENOVATE_WHY: string; holdsChangelogLink(message: string): boolean };
+)) as {
+  RENOVATE_WHY: string;
+  WORKFLOW_COMMAND: RegExp;
+  holdsChangelogLink(message: string): boolean;
+};
 const config = await load({}, { cwd: ROOT });
 
 async function errors(message: string): Promise<string[]> {
@@ -221,6 +225,35 @@ Refs: #1`),
       );
     }
     expect(await errors(`fix(app): tidy ==FIELD and END==\n\n${why}\n\nCloses: #12`)).toEqual([]);
+  });
+
+  // A workflow's log reads a line that starts with `::` as a command, and
+  // the release and CI print messages there.
+  it("fails a line that starts with `::`, after any blank space, and `##[` anywhere", async () => {
+    const lines = [
+      "::add-mask::8.5.1",
+      "  ::add-mask::v8",
+      "\t::stop-commands::x",
+      "::warning::x",
+      "##[add-mask]8.5.1",
+      "Why ##[error]x",
+    ];
+    for (const line of lines) {
+      const message = `fix(ui): keep the footer link in view\n\n${why}\n${line}\n\nCloses: #12`;
+      expect(await errors(message), line).toEqual(["no-workflow-command"]);
+    }
+    expect(await errors(`fix(app): tidy\n\n${why}\n\n::add-mask::8.5.1\nCloses: #12`)).toEqual([
+      "no-workflow-command",
+    ]);
+    expect(await errors(`fix(app): tidy ##[add-mask]8.5.1\n\n${why}\n\nCloses: #12`)).toEqual([
+      "no-workflow-command",
+    ]);
+    expect(
+      await errors(`fix(app): tidy a::b and std::move\n\n${why} ::x ## [y]\n\nCloses: #12`),
+    ).toEqual([]);
+    // U+0085 is blank space to the runner too, though no-hidden-break
+    // refuses it first.
+    expect(WORKFLOW_COMMAND.test("a\n\u0085 ::add-mask::8.5.1")).toBe(true);
   });
 
   it("passes a tab, and a carriage return right before a line feed", async () => {

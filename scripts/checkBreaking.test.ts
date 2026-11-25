@@ -593,6 +593,16 @@ describe("defaultIo", () => {
     expect(log).toHaveBeenCalledWith("hello");
     log.mockRestore();
   });
+
+  // CI's log reads a line that starts with `::`, or holds `##[`, as a
+  // workflow command, and a commit's subject is its author's text.
+  it("logs no workflow command from a commit's text", () => {
+    repo = mkdtempSync(join(tmpdir(), "breaking-"));
+    const log = vi.spyOn(console, "log").mockImplementation(() => {});
+    defaultIo(repo).log("0123abcd fix: x ##[add-mask]8.5.1\n::error::y");
+    expect(log).toHaveBeenCalledWith("0123abcd fix: x ##\\[add-mask]8.5.1\n\\::error::y");
+    log.mockRestore();
+  });
 });
 
 describe("run", () => {

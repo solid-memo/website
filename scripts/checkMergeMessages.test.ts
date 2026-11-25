@@ -133,6 +133,26 @@ describe("problemsOf", () => {
     }
   });
 
+  it("refuses a line that starts with `::`, or `##[`, in any commit, skipped or merged", () => {
+    const command =
+      "holds a line that starts with `::`, or `##[`, which a workflow's log reads as a command";
+    for (const line of [
+      "::add-mask::8.5.1",
+      " ::add-mask::v8",
+      "\t::error::x",
+      "##[add-mask]8.5.1",
+      "Why ##[error]x",
+    ]) {
+      expect(problemsOf(`fixup! chore: x\n\nWhy.\n${line}`, false)).toEqual([command]);
+      expect(problemsOf(`fix: x\n\nWhy.\n${line}\n\nRefs: #1`, false)).toEqual([command]);
+      expect(problemsOf(merge(line), true)).toEqual([command]);
+    }
+    expect(problemsOf("fix: tidy ##[add-mask]8.5.1\n\nWhy.\n\nRefs: #1", false)).toEqual([command]);
+    expect(
+      problemsOf("fix: tidy a::b ## [x]\n\nWhy std::move. ::x #[y]\n\nRefs: #1", false),
+    ).toEqual([]);
+  });
+
   it("refuses a directive in a commit commitlint reads", () => {
     expect(problemsOf("fix: tidy <!-- the footer\n\nRefs: #1", false)).toEqual([
       "holds an HTML comment or a spell checker's directive",

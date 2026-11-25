@@ -157,6 +157,9 @@ Nor may a message hold `==FIELD==` or `==END==`, the text the release
 splits git's output at to read its commits. The release reads each
 message from git by its commit's hash as well, and stops when the two
 readings differ.
+Nor may a line of a message start with `::`, after any spaces, nor
+may a message hold `##[` anywhere: a workflow's log reads such text as
+a command, and the release and CI print messages there.
 The merge queue refuses those keywords, comment markers and directives
 in a pull request's title too, and a title that starts as a breaking
 change's footer, as the merge commit holds the title
@@ -166,7 +169,8 @@ a revert that names a commit undoes that commit's change, as
 `git revert` makes it
 ([docs/releasing.md](docs/releasing.md#reverts)).
 `npm run check:merges` reads every commit's whole message for a comment
-marker, a directive, such a character or the release's separators, as
+marker, a directive, such a character, the release's separators, a
+line that starts with `::` or a `##[`, as
 commitlint can miss part of one, and every commit's header and
 breaking change's footer for a link. It reads every commit's author
 and committer name and email for the release's separators and control

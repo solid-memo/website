@@ -44,6 +44,7 @@ import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { asReleased, gitAt } from "./reverts.ts";
+import { inert } from "./workflowLog.ts";
 
 type Parser = { parse(message: string): { notes: unknown[] } };
 
@@ -329,7 +330,8 @@ export function defaultIo(repo: string): BreakingIo {
         gitAt(repo),
       ),
     lastRelease: () => highestRelease(git("tag", "--merged", "HEAD").split("\n")),
-    log: (message) => console.log(message),
+    // The log is a workflow's in CI, and messages hold the authors' text.
+    log: (message) => console.log(inert(message)),
   };
 }
 
