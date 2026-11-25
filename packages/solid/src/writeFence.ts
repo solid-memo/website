@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { WriteFence } from "@solid-memo/application/ports";
+import type { WriteFence } from "@solid-memo/application/ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 
 /** Methods that only read; every other one writes. */

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import type { AnswerLog, DigestRepository } from "./ports";
+import type { AnswerLog, DigestRepository } from "./ports/pod";
 import { createUseCases, type UseCases } from "./useCases";
 import { createAnswerStore } from "./answerStore";
 import { createStatisticsUseCases } from "./statistics";

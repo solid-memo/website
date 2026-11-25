@@ -7,7 +7,7 @@ import { createUseCases } from "./useCases";
 import { DEFAULT_PREFERENCES } from "@solid-memo/domain/preferences";
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import type { Answer } from "@solid-memo/domain/answer";
-import type { ReviewChanges } from "./ports";
+import type { ReviewChanges } from "./ports/pod";
 import { sm2s, promptOf, instance, deck, card, makeDeps, memoryLog } from "./testing/fakePorts";
 
 describe("study", () => {

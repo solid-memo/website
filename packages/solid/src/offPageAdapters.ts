@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeckArchive, ReleaseDraftRepository } from "@solid-memo/application/ports";
+import type { DeckArchive, ReleaseDraftRepository } from "@solid-memo/application/ports/library";
 import { AppError } from "@solid-memo/domain/appError";
 import { type DocumentReport, unreadableDocument } from "@solid-memo/domain/validation";
 import type { DraftTriple } from "@solid-memo/domain/release/releaseDraft";

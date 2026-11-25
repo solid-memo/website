@@ -6,13 +6,9 @@ import { describe, expect, it, vi } from "vitest";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { DraftTriple } from "@solid-memo/domain/release/releaseDraft";
 import { createInstanceGraphUseCases } from "./instanceGraph";
-import type {
-  DeckRepository,
-  InstanceGraphReader,
-  ReleaseDraftRepository,
-  ReleasePublisher,
-  StorageGateway,
-} from "./ports";
+import type { ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
+import type { DeckRepository, InstanceGraphReader } from "./ports/pod";
+import type { StorageGateway } from "./ports/session";
 
 const STORAGE = "https://pod.example/";
 const WEBID = `${STORAGE}profile/card#me`;

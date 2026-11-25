@@ -8,14 +8,10 @@ import { draftPlaceOf } from "@solid-memo/domain/release/draftLayout";
 import type { MarkdownCheck } from "@solid-memo/domain/release/markdownFields";
 import { checkProblems, libraryReleaseUrl } from "@solid-memo/domain/release/releaseCheck";
 import { releaseFileName } from "@solid-memo/domain/release/releasePlace";
-import type {
-  DeckLibrary,
-  FileExchange,
-  ReleaseDraftRepository,
-  ReleasePublisher,
-  ShapeValidator,
-  StorageGateway,
-} from "./ports";
+import type { ShapeValidator } from "./ports/checks";
+import type { FileExchange } from "./ports/device";
+import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
+import type { StorageGateway } from "./ports/session";
 import { isInInstancePod, type ReleaseDraftUseCases } from "./releaseDrafts";
 import { mapAtOnce } from "./atOnce";
 

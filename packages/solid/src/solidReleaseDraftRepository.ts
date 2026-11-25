@@ -19,7 +19,7 @@ import {
 import type { Quad } from "@rdfjs/types";
 import { editOf } from "./datasetEdit";
 import { mapAtOnce } from "@solid-memo/application/atOnce";
-import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
+import type { ReleaseDraftRepository } from "@solid-memo/application/ports/library";
 import { AppError } from "@solid-memo/domain/appError";
 import { ensureTrailingSlash } from "@solid-memo/domain/instanceLayout";
 import {

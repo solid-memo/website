@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
+import type { ResourceStore, StoredResource } from "@solid-memo/application/ports/device";
 
 /**
  * A ResourceStore in memory, for one page: what a guest's pod keeps when

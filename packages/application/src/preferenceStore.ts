@@ -14,7 +14,8 @@ import {
 import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";
-import type { CustomPalettePreference, DeviceSetting, PreferencesRepository } from "./ports";
+import type { CustomPalettePreference, DeviceSetting } from "./ports/device";
+import type { PreferencesRepository } from "./ports/pod";
 
 /** Stored preferences that fit their shape; null for none, and for ones that do not. */
 function fitting(read: PreferencesRead): StoredPreferences | null {

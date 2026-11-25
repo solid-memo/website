@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ReleaseDraftRepository } from "@solid-memo/application/ports";
+import type { ReleaseDraftRepository } from "@solid-memo/application/ports/library";
 import { createUseCases, type UseCases } from "@solid-memo/application/useCases";
 import { createPodFence } from "@solid-memo/solid/podFence";
 import { createWriteFence } from "@solid-memo/solid/writeFence";

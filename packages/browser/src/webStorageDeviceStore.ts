@@ -7,7 +7,7 @@ import type {
   InstanceDeviceValues,
   InstanceValueKind,
   ValueKind,
-} from "@solid-memo/application/ports";
+} from "@solid-memo/application/ports/device";
 import { HASHED_CHARACTERS } from "@solid-memo/domain/pathKeys";
 
 /**

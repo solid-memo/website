@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SeenHighlights } from "@solid-memo/application/ports";
+import type { SeenHighlights } from "@solid-memo/application/ports/device";
 
 /** A JSON array of the ids of the highlights seen. */
 export const KEY = "solid-memo:seenHighlights";

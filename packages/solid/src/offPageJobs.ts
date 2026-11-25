@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DocumentContext } from "@solid-memo/application/ports";
+import type { DocumentContext } from "@solid-memo/application/ports/checks";
 import type { DeckFileFormat } from "@solid-memo/domain/deckFile";
 import type { DraftTriple, ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { sourceOf } from "./client/rdf";

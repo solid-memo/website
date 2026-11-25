@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { GuestPod, ResourceStore } from "@solid-memo/application/ports";
+import type { ResourceStore } from "@solid-memo/application/ports/device";
+import type { GuestPod } from "@solid-memo/application/ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { buildThing, createSolidDataset, createThing, setThing } from "./client/rdf";

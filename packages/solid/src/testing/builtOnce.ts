@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ResourceStore } from "@solid-memo/application/ports";
+import type { ResourceStore } from "@solid-memo/application/ports/device";
 
 /** The work of one run of a growth test, timed. */
 type Work = () => Promise<unknown>;

@@ -26,7 +26,7 @@ import {
   type AnswerMode,
   type ResponseTimes,
 } from "@solid-memo/domain/answer";
-import type { ReviewStateRepository, AnswerLog } from "./ports";
+import type { ReviewStateRepository, AnswerLog } from "./ports/pod";
 import type { GradeBasis, RecordedReview } from "./study";
 import type { PreferenceStore } from "./preferenceStore";
 

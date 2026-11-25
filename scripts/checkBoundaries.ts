@@ -85,10 +85,19 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   "e2e-pod": { "solid-memo-client": /^signedInClient\.ts$/ },
 };
 
+/** Any entry point of application but its ports (src/ports/). */
+const NO_PORT = /^@solid-memo\/application\/(?!ports\/)/;
+
 /** Within a package, the entry points of an allowed package that alone it may import. */
 export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
   // Where the repository's folders are; vocab's generator and data are not the site's build.
   site: { vocab: /^@solid-memo\/vocab\/tooling\/root$/ },
+  // An adapter implements its own ports alone: the browser's are those of what the device keeps.
+  browser: { application: /^@solid-memo\/application\/ports\/device$/ },
+  // The screens drive the use cases and never name a port (docs/boundaries.md#further-rules).
+  ui: { application: NO_PORT },
+  studio: { application: NO_PORT },
+  web: { application: NO_PORT },
 };
 
 /**

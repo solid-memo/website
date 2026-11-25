@@ -50,22 +50,19 @@ import {
 } from "@solid-memo/domain/guest";
 import type { WebIdDocument } from "@solid-memo/domain/webIdDocument";
 import { groupCount, type TreeNode } from "@solid-memo/domain/deckTree";
+import type { UpdateJournal, LogoutChannel } from "./ports/device";
+import type { ReleaseDraftRepository } from "./ports/library";
 import type {
   DeckRepository,
   InstanceRepository,
   ReviewStateRepository,
-  SessionGateway,
-  StorageGateway,
-  WebIdDocumentRepository,
   AnswerLog,
   InstanceCopier,
   ContainerMove,
   GuestPod,
-  UpdateJournal,
-  LogoutChannel,
   WriteFence,
-  ReleaseDraftRepository,
-} from "./ports";
+} from "./ports/pod";
+import type { SessionGateway, StorageGateway, WebIdDocumentRepository } from "./ports/session";
 import type { ReleaseDraftUseCases } from "./releaseDrafts";
 import {
   draftContainerOf,

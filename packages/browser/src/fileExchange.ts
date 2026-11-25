@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { FileExchange } from "@solid-memo/application/ports";
+import type { FileExchange } from "@solid-memo/application/ports/device";
 
 /** How long a saved file's text is kept for the browser to read, as FileSaver.js keeps it. */
 const RELEASE_AFTER_MS = 40_000;

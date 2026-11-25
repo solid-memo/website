@@ -20,13 +20,9 @@ import {
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 import type { ReviewStates } from "@solid-memo/domain/review";
 import { effectiveStates } from "@solid-memo/domain/fsrs";
-import type {
-  DeckRepository,
-  ReviewStateRepository,
-  ShapeValidator,
-  DigestRepository,
-  StorageGateway,
-} from "./ports";
+import type { ShapeValidator } from "./ports/checks";
+import type { DeckRepository, ReviewStateRepository, DigestRepository } from "./ports/pod";
+import type { StorageGateway } from "./ports/session";
 import type { AnswerStore } from "./answerStore";
 import type { PreferenceStore } from "./preferenceStore";
 import { isInInstancePod } from "./releaseDrafts";

@@ -180,6 +180,40 @@ describe("boundaryProblems", () => {
     ]);
   });
 
+  it("holds an adapter to its own ports, and a screen to none", () => {
+    expect(
+      problems(
+        workspace(
+          "browser",
+          {
+            "src/localStorageSetting.ts":
+              'import type { DeviceSetting } from "@solid-memo/application/ports/device";',
+            "src/fileExchange.ts":
+              'import type { DeckRepository } from "@solid-memo/application/ports/pod";',
+          },
+          { "@solid-memo/application": "*" },
+        ),
+      ),
+    ).toEqual([
+      'packages/browser/src/fileExchange.ts: may import only /^@solid-memo\\/application\\/ports\\/device$/ of @solid-memo/application, not "@solid-memo/application/ports/pod".',
+    ]);
+    expect(
+      problems(
+        workspace(
+          "ui",
+          {
+            "src/ui/App.tsx": 'import type { UseCases } from "@solid-memo/application/useCases";',
+            "src/ui/Screen.tsx":
+              'import type { DeviceStore } from "@solid-memo/application/ports/device";',
+          },
+          { "@solid-memo/application": "*" },
+        ),
+      ),
+    ).toEqual([
+      'packages/ui/src/ui/Screen.tsx: may import only /^@solid-memo\\/application\\/(?!ports\\/)/ of @solid-memo/application, not "@solid-memo/application/ports/device".',
+    ]);
+  });
+
   it("fails on a static import of a package that may be loaded only lazily", () => {
     const web = {
       ...workspace(

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ResourceStore } from "@solid-memo/application/ports";
+import type { ResourceStore } from "@solid-memo/application/ports/device";
 import { RDF, SM, SM_NS } from "../vocab";
 
 /**

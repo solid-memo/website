@@ -48,13 +48,9 @@ import {
   type ForecastDay,
 } from "@solid-memo/domain/scheduleInsight";
 import { cardProgressOf, type CardProgress } from "@solid-memo/domain/cardProgress";
-import type {
-  DeckLibrary,
-  DeckRepository,
-  ReviewStateRepository,
-  AnswerLog,
-  FileExchange,
-} from "./ports";
+import type { FileExchange } from "./ports/device";
+import type { DeckLibrary } from "./ports/library";
+import type { DeckRepository, ReviewStateRepository, AnswerLog } from "./ports/pod";
 import { allSettledThen, inTurns, READS_AT_ONCE } from "./atOnce";
 import { readNow } from "./writes";
 import { dueStatesOf, lastLogMonthOf } from "./answerStore";

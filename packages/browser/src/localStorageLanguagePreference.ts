@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { LanguagePreference } from "@solid-memo/application/ports";
+import type { LanguagePreference } from "@solid-memo/application/ports/device";
 import { localeOf } from "@solid-memo/domain/locale";
 
 export const KEY = "solid-memo:language";

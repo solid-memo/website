@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ReadBudget } from "./ports";
+import type { ReadBudget } from "./ports/checks";
 
 /**
  * A budget of `ms` milliseconds for some reads (ReadBudget), whose clock

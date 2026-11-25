@@ -339,7 +339,8 @@ its current release is a course; anything else offers nothing.
 | `setCompletedChapters(deck, edit)` | The Studio's change of the chapters completed: one marked not done (in any release, by its fragment id), or the course restarted, none completed. Answers and review states stay. |
 
 Two ports have methods for courses
-([ports.ts](../packages/application/src/ports.ts)):
+([ports/library.ts](../packages/application/src/ports/library.ts),
+[ports/pod.ts](../packages/application/src/ports/pod.ts)):
 
 - **`DeckLibrary.fetchCourseOutline(releaseUrl)`** reads the chapters
   and steps of a release (`toCourseOutline` in

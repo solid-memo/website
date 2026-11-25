@@ -8,7 +8,10 @@ import type {
   DeviceValueKind,
   InstanceDeviceValues,
   InstanceValueKind,
-} from "./ports";
+} from "./ports/device";
+
+// The kinds of value a screen keeps, which it says what each looks like with: the screens name no port.
+export type { DeviceValueKind, InstanceValueKind } from "./ports/device";
 
 /**
  * The values the screens keep on this device, each of a kind the screen

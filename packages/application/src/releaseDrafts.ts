@@ -74,15 +74,11 @@ import {
   withOwnSeries,
 } from "@solid-memo/domain/release/releaseToDraft";
 import { nextVersionDraft, withOwnVersions } from "@solid-memo/domain/release/releaseVersion";
-import type {
-  DeckLibrary,
-  DeckRepository,
-  FileExchange,
-  ReleaseDraftRepository,
-  ReleasePublisher,
-  ShapeValidator,
-  StorageGateway,
-} from "./ports";
+import type { ShapeValidator } from "./ports/checks";
+import type { FileExchange } from "./ports/device";
+import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
+import type { DeckRepository } from "./ports/pod";
+import type { StorageGateway } from "./ports/session";
 
 /**
  * The drafts of releases (docs/studio.md, Drafts): a creator writes a

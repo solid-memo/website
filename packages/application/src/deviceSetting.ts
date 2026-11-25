@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { SettingKind } from "@solid-memo/domain/setting";
-import type { DeviceSetting } from "./ports";
+import type { DeviceSetting } from "./ports/device";
 
 /**
  * A DeviceSetting kept nowhere: always the setting's fallback, and a

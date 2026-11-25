@@ -29,13 +29,10 @@ import { nextVersionDraft } from "@solid-memo/domain/release/releaseVersion";
 import { courseDraft, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import { problem } from "@solid-memo/domain/release/problems";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import type {
-  DeckLibrary,
-  DeckRepository,
-  FileExchange,
-  ReleaseDraftRepository,
-  ShapeValidator,
-} from "./ports";
+import type { ShapeValidator } from "./ports/checks";
+import type { FileExchange } from "./ports/device";
+import type { DeckLibrary, ReleaseDraftRepository } from "./ports/library";
+import type { DeckRepository } from "./ports/pod";
 import {
   createReleaseDraftUseCases,
   type DraftDiff,

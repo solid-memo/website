@@ -15,7 +15,11 @@ import {
 import type { Catalog } from "@solid-memo/domain/catalog";
 import type { LangText } from "@solid-memo/domain/langText";
 import { copyKeywords, noKeywords, type LangTexts } from "@solid-memo/domain/keywords";
-import type { CardChangeOptions, CardChanges, DeckRepository } from "@solid-memo/application/ports";
+import type {
+  CardChangeOptions,
+  CardChanges,
+  DeckRepository,
+} from "@solid-memo/application/ports/pod";
 import type { KeptDocuments } from "@solid-memo/domain/instance";
 import {
   CARD_FORMAT_VERSION,

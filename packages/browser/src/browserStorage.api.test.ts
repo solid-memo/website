@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, it } from "vitest";
-import type { StoredResource } from "@solid-memo/application/ports";
+import type { StoredResource } from "@solid-memo/application/ports/device";
 import { GUEST_ORIGIN } from "@solid-memo/domain/guest";
 import { DATABASE, DATABASE_VERSION, LOCK, RESOURCES } from "./indexedDbResourceStore";
 import { CHANNEL as LOGOUT_CHANNEL, KEY as LOGOUT_KEY } from "./logoutChannel";

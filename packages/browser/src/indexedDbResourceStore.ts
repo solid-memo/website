@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
+import type { ResourceStore, StoredResource } from "@solid-memo/application/ports/device";
 import { AppError } from "@solid-memo/domain/appError";
 
 export const DATABASE = "solid-memo-guest-pod";

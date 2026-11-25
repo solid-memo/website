@@ -15,13 +15,9 @@ import {
   instanceDocumentUrls,
 } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
-import type {
-  DeckRepository,
-  InstanceGraphReader,
-  ReleaseDraftRepository,
-  ReleasePublisher,
-  StorageGateway,
-} from "./ports";
+import type { ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
+import type { DeckRepository, InstanceGraphReader } from "./ports/pod";
+import type { StorageGateway } from "./ports/session";
 import type { AnswerStore } from "./answerStore";
 
 /**

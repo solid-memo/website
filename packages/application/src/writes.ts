@@ -2,7 +2,8 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeckRepository, Since } from "./ports";
+import type { DeckRepository } from "./ports/pod";
+import type { Since } from "./ports/shared";
 import { AppError } from "@solid-memo/domain/appError";
 import type { Deck } from "@solid-memo/domain/deck";
 import { isGuestUrl } from "@solid-memo/domain/guest";

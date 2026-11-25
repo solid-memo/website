@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import type { SeenHighlights } from "./ports";
+import type { SeenHighlights } from "./ports/device";
 import { createUseCases } from "./useCases";
 import { makeDeps } from "./testing/fakePorts";
 

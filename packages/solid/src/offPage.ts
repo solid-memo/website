@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ReadBudget } from "@solid-memo/application/ports";
+import type { ReadBudget } from "@solid-memo/application/ports/checks";
 import { ReadLimitError, type ReadLimits } from "./client/interface";
 import {
   isPastBudget,

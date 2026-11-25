@@ -44,7 +44,7 @@ import {
   TOO_LARGE,
   UNREADABLE,
 } from "./datasets";
-import type { ReadBudget, SharedReads } from "@solid-memo/application/ports";
+import type { ReadBudget, SharedReads } from "@solid-memo/application/ports/checks";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
 import { deckBackLinksOf, isDeckItself } from "./ownership";
 import { hasStorageLink, MAX_STORAGE_ANCESTORS } from "./solidStorageGateway";

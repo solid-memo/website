@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SeenHighlights } from "./ports";
+import type { SeenHighlights } from "./ports/device";
 
 export interface WhatsNewUseCases {
   /**

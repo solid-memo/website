@@ -2,35 +2,37 @@
 //
 // SPDX-License-Identifier: MIT
 
+import type { ShapeValidator } from "./ports/checks";
+import type {
+  LanguagePreference,
+  CustomPalettePreference,
+  DeviceSetting,
+  SeenHighlights,
+  UpdateJournal,
+  LogoutChannel,
+  FileExchange,
+  DeviceStore,
+} from "./ports/device";
 import type {
   DeckLibrary,
+  DeckArchive,
+  ReleaseDraftRepository,
+  ReleasePublisher,
+} from "./ports/library";
+import type {
   DeckRepository,
   InstanceRepository,
   PreferencesRepository,
   ReviewStateRepository,
-  SessionGateway,
-  StorageGateway,
-  WebIdDocumentRepository,
-  ShapeValidator,
   AnswerLog,
   DigestRepository,
   InstanceCopier,
   GuestPod,
-  LanguagePreference,
-  CustomPalettePreference,
-  DeviceSetting,
   PaletteRepository,
-  SeenHighlights,
-  UpdateJournal,
-  LogoutChannel,
   WriteFence,
-  DeckArchive,
-  FileExchange,
-  ReleaseDraftRepository,
-  ReleasePublisher,
   InstanceGraphReader,
-  DeviceStore,
-} from "./ports";
+} from "./ports/pod";
+import type { SessionGateway, StorageGateway, WebIdDocumentRepository } from "./ports/session";
 import type { Palette } from "@solid-memo/domain/palette";
 import type { TextSize } from "@solid-memo/domain/textSize";
 import type { ThemeChoice } from "@solid-memo/domain/theme";

@@ -32,7 +32,7 @@
  */
 import { beforeAll, describe, expect, it } from "vitest";
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { ResourceStore } from "@solid-memo/application/ports";
+import type { ResourceStore } from "@solid-memo/application/ports/device";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { GUEST_ORIGIN, GUEST_SESSION, GUEST_WEBID } from "@solid-memo/domain/guest";

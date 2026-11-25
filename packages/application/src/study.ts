@@ -20,7 +20,7 @@ import {
 import { effectiveStates, recallOn } from "@solid-memo/domain/fsrs";
 import type { ResponseTimes } from "@solid-memo/domain/answer";
 import { allSettledThen, inTurns, READS_AT_ONCE } from "./atOnce";
-import type { DeckRepository, ReviewStateRepository } from "./ports";
+import type { DeckRepository, ReviewStateRepository } from "./ports/pod";
 import type { PreferenceStore } from "./preferenceStore";
 import type { AnswerStore } from "./answerStore";
 import { scheduleFrom, type DigestStore } from "./digestStore";

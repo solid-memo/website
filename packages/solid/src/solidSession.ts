@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { SessionGateway } from "@solid-memo/application/ports";
+import type { SessionGateway } from "@solid-memo/application/ports/session";
 import { createAuthFetch } from "./authFetch";
 import type { SessionClient } from "./client/session";
 import { createSolidSessionGateway, type SessionGatewayOptions } from "./solidSessionGateway";

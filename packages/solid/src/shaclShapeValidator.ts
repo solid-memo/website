@@ -19,8 +19,8 @@ import type {
   DocumentContext,
   ReadBudget,
   ShapeValidator,
-  Since,
-} from "@solid-memo/application/ports";
+} from "@solid-memo/application/ports/checks";
+import type { Since } from "@solid-memo/application/ports/shared";
 import {
   type DocumentReport,
   isResultLimit,

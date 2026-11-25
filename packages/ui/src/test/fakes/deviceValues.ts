@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { type ComponentChildren, h } from "preact";
-import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
-import type { ValueKind } from "@solid-memo/application/ports";
+import type { DeviceValueKind, DeviceValueUseCases } from "@solid-memo/application/deviceValues";
 import { DeviceValues } from "../../ui/deviceValues";
 
 /**
@@ -23,7 +22,11 @@ export function makeDeviceValuesFake(): DeviceValueUseCases & {
   const tab = new Map<string, string>();
   const encode = <T>(value: T, text: boolean | undefined) =>
     text === true ? String(value) : JSON.stringify(value);
-  const decode = <T>(raw: string | undefined, kind: ValueKind<T>, text: boolean | undefined) => {
+  const decode = <T>(
+    raw: string | undefined,
+    kind: DeviceValueKind<T>,
+    text: boolean | undefined,
+  ) => {
     if (raw === undefined) return kind.fallback;
     if (text === true) return kind.decode(raw);
     try {
@@ -32,7 +35,7 @@ export function makeDeviceValuesFake(): DeviceValueUseCases & {
       return kind.fallback;
     }
   };
-  const isFallback = <T>(value: T, kind: ValueKind<T>) =>
+  const isFallback = <T>(value: T, kind: DeviceValueKind<T>) =>
     value === kind.fallback || JSON.stringify(value) === JSON.stringify(kind.fallback);
   const valueIn =
     (map: Map<string, string>): DeviceValueUseCases["deviceValue"] =>

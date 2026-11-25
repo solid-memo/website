@@ -45,9 +45,8 @@ import type {
   InstanceRepository,
   PreferencesRepository,
   ReviewStateRepository,
-  StorageGateway,
-  WebIdDocumentRepository,
-} from "./ports";
+} from "./ports/pod";
+import type { StorageGateway, WebIdDocumentRepository } from "./ports/session";
 import { AppError } from "@solid-memo/domain/appError";
 import { mapAtOnce } from "./atOnce";
 import { stepReporter } from "./progress";

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { LogoutChannel } from "@solid-memo/application/ports";
+import type { LogoutChannel } from "@solid-memo/application/ports/device";
 
 /** The BroadcastChannel a logout is announced on, and the localStorage key where there is none. */
 export const CHANNEL = "solid-memo:logout";

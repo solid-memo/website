@@ -18,7 +18,7 @@ import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/sh
 import { LATEST_VERSION } from "@solid-memo/vocab/types.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
-import type { ResourceStore } from "@solid-memo/application/ports";
+import type { ResourceStore } from "@solid-memo/application/ports/device";
 import { MAX_DECK_METADATA, MAX_DECK_METADATA_CHARACTERS } from "@solid-memo/domain/deck";
 import type { LibraryDeck } from "@solid-memo/domain/library";
 import { createLocalPod } from "./localPod";

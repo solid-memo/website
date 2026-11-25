@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { expect, vi } from "vitest";
-import type { DigestRepository, DeckRepository, ReviewStateRepository } from "../ports";
+import type { DigestRepository, DeckRepository, ReviewStateRepository } from "../ports/pod";
 import { createUseCases } from "../useCases";
 import { changedDigest, type InstanceDigest } from "@solid-memo/domain/studyDigest";
 import { CARD_FORMAT_VERSION, type Card } from "@solid-memo/domain/deck";

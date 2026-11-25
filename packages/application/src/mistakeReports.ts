@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { ReportPlace } from "@solid-memo/domain/mistakeReport";
-import type { DeckLibrary } from "./ports";
+import type { DeckLibrary } from "./ports/library";
 
 export interface MistakeReportUseCases {
   /**

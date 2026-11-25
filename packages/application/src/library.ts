@@ -32,13 +32,8 @@ import {
 } from "@solid-memo/domain/deckUpgrade";
 import type { ReviewKey } from "@solid-memo/domain/review";
 import { type DocumentReport, isResultLimit, limitResults } from "@solid-memo/domain/validation";
-import type {
-  DeckLibrary,
-  DeckRepository,
-  LinkedReleaseReads,
-  ReviewChanges,
-  ReviewStateRepository,
-} from "./ports";
+import type { DeckLibrary, LinkedReleaseReads } from "./ports/library";
+import type { DeckRepository, ReviewChanges, ReviewStateRepository } from "./ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { outlineOfCards } from "@solid-memo/domain/course";
 import { mapAtOnce, type inTurns } from "./atOnce";

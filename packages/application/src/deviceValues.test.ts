@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { createDeviceValueUseCases, UNKEPT_STORE } from "./deviceValues";
-import type { DeviceStore } from "./ports";
+import type { DeviceStore } from "./ports/device";
 
 const KIND = { decode: (stored: unknown) => String(stored), fallback: "none" };
 

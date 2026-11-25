@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { GuestPod } from "./ports";
+import type { GuestPod } from "./ports/pod";
 import { draftReleaseModel } from "@solid-memo/domain/release/draftModel";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import type { InstanceUseCases } from "./instances";

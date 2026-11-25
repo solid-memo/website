@@ -547,7 +547,10 @@ side in the page in place of the adapters'
 ## Further rules
 
 - UI components never import ports or adapters; they get `UseCases`,
-  or the slices they use, as a prop.
+  or the slices they use, as a prop. `ui`, the Studio and `web` may
+  import any module of `application` but its `ports/`, and an adapter
+  only the ports it implements (`browser`: `ports/device`), which
+  `ONLY_ENTRIES` in `checkBoundaries.ts` checks.
 - A screen never reaches the browser's storage itself. What it keeps on
   the device, such as how the deck list is folded, the languages chosen
   lately, the WebID to remember or the Studio's layout, goes through
@@ -589,7 +592,7 @@ side in the page in place of the adapters'
 
 1. Add it to the one package it belongs to
    (`npm install <lib> -w @solid-memo/<package>`).
-2. If it performs I/O, put it behind a port in
-   `packages/application/src/ports.ts`, implemented in an adapter
-   package.
+2. If it performs I/O, put it behind a port in the module of
+   `packages/application/src/ports/` for what is behind it,
+   implemented in an adapter package.
 3. Add it to the vendor table above.

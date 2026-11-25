@@ -11,7 +11,8 @@ import type { ReleaseCheck } from "@solid-memo/domain/release/releaseCheck";
 import type { ReleaseDraft } from "@solid-memo/domain/release/releaseDraft";
 import { courseDraft, DRAFT, NOW } from "@solid-memo/domain/testing/releaseDraft";
 import type { Storage } from "@solid-memo/domain/storage";
-import type { DeckLibrary, FileExchange, ReleaseDraftRepository, ReleasePublisher } from "./ports";
+import type { FileExchange } from "./ports/device";
+import type { DeckLibrary, ReleaseDraftRepository, ReleasePublisher } from "./ports/library";
 import { READS_AT_ONCE } from "./atOnce";
 import { createReleasePublishingUseCases } from "./releasePublishing";
 

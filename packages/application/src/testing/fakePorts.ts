@@ -7,20 +7,18 @@ import { withPictureHost } from "@solid-memo/domain/deckPictures";
 import { vi } from "vitest";
 import { NO_PORTS } from "./noPorts";
 import type { Answer } from "@solid-memo/domain/answer";
+import type { ShapeValidator } from "../ports/checks";
+import type { DeckLibrary } from "../ports/library";
 import type {
   AnswerLog,
-  Since,
-  DeckLibrary,
   DeckRepository,
   InstanceRepository,
   PreferencesRepository,
   ReviewStateRepository,
-  SessionGateway,
-  StorageGateway,
-  WebIdDocumentRepository,
-  ShapeValidator,
   InstanceCopier,
-} from "../ports";
+} from "../ports/pod";
+import type { SessionGateway, StorageGateway, WebIdDocumentRepository } from "../ports/session";
+import type { Since } from "../ports/shared";
 import { DECK_FORMAT_VERSION, type Card, type Deck } from "@solid-memo/domain/deck";
 import type { Instance } from "@solid-memo/domain/instance";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";

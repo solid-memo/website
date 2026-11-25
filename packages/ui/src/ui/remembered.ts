@@ -3,8 +3,11 @@
 // SPDX-License-Identifier: MIT
 
 import { useState } from "preact/hooks";
-import type { DeviceValueUseCases } from "@solid-memo/application/deviceValues";
-import type { DeviceValueKind, InstanceValueKind } from "@solid-memo/application/ports";
+import type {
+  DeviceValueUseCases,
+  DeviceValueKind,
+  InstanceValueKind,
+} from "@solid-memo/application/deviceValues";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import { validateWebId } from "@solid-memo/domain/webId";
 import { latestFirst } from "@solid-memo/domain/latestFirst";

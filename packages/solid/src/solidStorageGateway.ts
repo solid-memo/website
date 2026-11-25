@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { StorageGateway } from "@solid-memo/application/ports";
+import type { StorageGateway } from "@solid-memo/application/ports/session";
 import type { Storage } from "@solid-memo/domain/storage";
 import { getThing } from "./client/rdf";
 import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";

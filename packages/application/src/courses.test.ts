@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { describe, expect, it, vi } from "vitest";
-import type { AnswerLog } from "./ports";
+import type { AnswerLog } from "./ports/pod";
 import { createUseCases } from "./useCases";
 import type { Deck } from "@solid-memo/domain/deck";
 import type { LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";

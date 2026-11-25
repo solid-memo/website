@@ -20,7 +20,7 @@ import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/sh
 import { SM_NS as SM } from "@solid-memo/vocab/vocab.generated";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
-import type { FileExchange } from "@solid-memo/application/ports";
+import type { FileExchange } from "@solid-memo/application/ports/device";
 import type { Card, Deck } from "@solid-memo/domain/deck";
 import { DECK_FILE_FORMATS } from "@solid-memo/domain/deckFile";
 import { createShaclShapeValidator } from "@solid-memo/solid/shaclShapeValidator";

@@ -20,7 +20,7 @@ import { Parser } from "n3";
 import { SHAPE_SOURCES, shapesFetch } from "@solid-memo/vocab/tooling/testing/shapeSources";
 import { createUseCases } from "@solid-memo/application/useCases";
 import { NO_PORTS } from "@solid-memo/application/testing/noPorts";
-import type { DeckLibrary } from "@solid-memo/application/ports";
+import type { DeckLibrary } from "@solid-memo/application/ports/library";
 import { defaultCatalogDescription } from "@solid-memo/domain/catalog";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { LibraryCard, LibraryDeck, LibraryDeckContent } from "@solid-memo/domain/library";

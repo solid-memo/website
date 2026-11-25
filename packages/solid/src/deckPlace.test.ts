@@ -15,7 +15,7 @@ import { datasetOfTurtle } from "./testing/datasets";
 import { createSolidDeckRepository } from "./solidDeckRepository";
 import { createSolidReviewStateRepository } from "./solidReviewStateRepository";
 import { readBudget } from "@solid-memo/application/readBudget";
-import type { SharedReads } from "@solid-memo/application/ports";
+import type { SharedReads } from "@solid-memo/application/ports/checks";
 
 const ROOT = "https://pod.example/";
 const BOB = `${ROOT}bob/solid-memo/main/`;

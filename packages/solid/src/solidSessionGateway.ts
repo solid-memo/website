@@ -8,7 +8,7 @@ import { PROFILE_TERMS } from "@solid-memo/vocab/descriptors.generated";
 import { readTerms, someIri } from "./records";
 import { limitedFetch, MAX_BASE_CHARACTERS, PROFILE_LIMITS } from "./client/readLimits";
 import type { SessionClient } from "./client/session";
-import type { SessionGateway } from "@solid-memo/application/ports";
+import type { SessionGateway } from "@solid-memo/application/ports/session";
 import type { SessionOrigin } from "@solid-memo/domain/session";
 import { isSecureIssuerOf, isSecureUrl } from "@solid-memo/domain/webId";
 import { isGuestPodIri } from "@solid-memo/domain/guest";

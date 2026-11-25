@@ -6,7 +6,7 @@ import { anonymousFetch } from "./authFetch";
 import { deleteContainer } from "./client/resources";
 import { FOREIGN_LIMITS, limitedFetch, NO_SIZE_LIMITS } from "./client/readLimits";
 import { createSolidDataset, getThing, setThing } from "./client/rdf";
-import type { InstanceRepository } from "@solid-memo/application/ports";
+import type { InstanceRepository } from "@solid-memo/application/ports/pod";
 import {
   INSTANCE_FORMAT_VERSION,
   type Instance,

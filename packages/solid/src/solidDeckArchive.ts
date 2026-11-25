@@ -15,7 +15,7 @@ import {
   toRdfJsDataset,
 } from "./client/rdf";
 import type { Quad } from "@rdfjs/types";
-import type { DeckArchive } from "@solid-memo/application/ports";
+import type { DeckArchive } from "@solid-memo/application/ports/library";
 import { AppError } from "@solid-memo/domain/appError";
 import { distributionUrlOf } from "@solid-memo/domain/dcat";
 import { linksGuestPod } from "@solid-memo/domain/guest";

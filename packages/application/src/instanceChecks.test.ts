@@ -4,7 +4,8 @@
 
 import { describe, expect, it, vi } from "vitest";
 import { SM } from "@solid-memo/vocab/vocab.generated";
-import type { ReadBudget, ReleaseDraftRepository, SharedReads } from "./ports";
+import type { ReadBudget, SharedReads } from "./ports/checks";
+import type { ReleaseDraftRepository } from "./ports/library";
 import { createUseCases } from "./useCases";
 import type { Card } from "@solid-memo/domain/deck";
 import type { LibraryDeckContent } from "@solid-memo/domain/library";

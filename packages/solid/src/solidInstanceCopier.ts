@@ -11,7 +11,7 @@ import {
   overwriteFile,
 } from "./client/resources";
 import { fromRdfJsDataset, toRdfJsDataset } from "./client/rdf";
-import type { ContainerMove, InstanceCopier } from "@solid-memo/application/ports";
+import type { ContainerMove, InstanceCopier } from "@solid-memo/application/ports/pod";
 import { rebaseIri } from "@solid-memo/domain/instanceUpdate";
 import { deleteContainerRecursively, listContainerTree } from "./containers";
 import { PreconditionFailedError, saveDataset } from "./datasets";

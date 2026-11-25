@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { ResourceStore, StoredResource } from "@solid-memo/application/ports";
+import type { ResourceStore, StoredResource } from "@solid-memo/application/ports/device";
 import { TripleLines, triplesOf } from "./ntriples";
 
 const LDP = "http://www.w3.org/ns/ldp#";

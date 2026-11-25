@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { InstanceGraphReader } from "@solid-memo/application/ports";
+import type { InstanceGraphReader } from "@solid-memo/application/ports/pod";
 import type { DraftTriple } from "@solid-memo/domain/release/releaseDraft";
 import { getSolidDatasetOrNull } from "./datasets";
 import { keyOf, quadsOf, termOf } from "./mappers/releaseDraftMapper";

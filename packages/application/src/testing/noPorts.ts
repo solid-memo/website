@@ -3,22 +3,22 @@
 // SPDX-License-Identifier: MIT
 
 import type {
-  AnswerLog,
-  DigestRepository,
-  GuestPod,
   LanguagePreference,
   CustomPalettePreference,
-  PaletteRepository,
   SeenHighlights,
   UpdateJournal,
   LogoutChannel,
-  WriteFence,
-  DeckArchive,
   FileExchange,
-  ReleaseDraftRepository,
-  ReleasePublisher,
+} from "../ports/device";
+import type { DeckArchive, ReleaseDraftRepository, ReleasePublisher } from "../ports/library";
+import type {
+  AnswerLog,
+  DigestRepository,
+  GuestPod,
+  PaletteRepository,
+  WriteFence,
   InstanceGraphReader,
-} from "../ports";
+} from "../ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { PALETTE_SETTING } from "@solid-memo/domain/palette";
 import { TEXT_SIZE_SETTING } from "@solid-memo/domain/textSize";

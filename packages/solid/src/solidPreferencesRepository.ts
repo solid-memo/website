@@ -10,7 +10,7 @@ import {
   getThing,
   setThing,
 } from "./client/rdf";
-import type { PreferencesRepository } from "@solid-memo/application/ports";
+import type { PreferencesRepository } from "@solid-memo/application/ports/pod";
 import { preferencesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { isPreferencesOutdated } from "@solid-memo/domain/migration";
 import type { PreferencesRead } from "@solid-memo/domain/preferences";

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { UseCases } from "@solid-memo/application/useCases";
-import type { ResourceStore } from "@solid-memo/application/ports";
+import type { ResourceStore } from "@solid-memo/application/ports/device";
 import type { Card, CardContent, Deck } from "@solid-memo/domain/deck";
 import type { DeckGroup, TreeNode } from "@solid-memo/domain/deckTree";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";

@@ -9,7 +9,7 @@ import {
   removeThings,
   setThings,
 } from "./client/rdf";
-import type { DigestRepository } from "@solid-memo/application/ports";
+import type { DigestRepository } from "@solid-memo/application/ports/pod";
 import { digestSubjectOf, digestUrlOf } from "@solid-memo/domain/instanceLayout";
 import {
   changedDigest,

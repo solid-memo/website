@@ -13,7 +13,7 @@ import { reviewKeyOf, type ReviewStates } from "@solid-memo/domain/review";
 import { scheduledStates } from "@solid-memo/domain/scheduleInsight";
 import { studyDayOf } from "@solid-memo/domain/scheduling";
 import { allSettledThen, inTurns, READS_AT_ONCE } from "./atOnce";
-import type { DeckRepository, ReviewStateRepository } from "./ports";
+import type { DeckRepository, ReviewStateRepository } from "./ports/pod";
 import type { PreferenceStore } from "./preferenceStore";
 import type { StudyPreferences } from "@solid-memo/domain/preferences";
 

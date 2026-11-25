@@ -32,16 +32,14 @@ import {
   type SwitchProgress,
   type SwitchStep,
 } from "@solid-memo/domain/schedulerSwitch";
+import type { LanguagePreference, CustomPalettePreference, DeviceSetting } from "./ports/device";
 import type {
   DeckRepository,
   InstanceRepository,
   PreferencesRepository,
   ReviewStateRepository,
-  LanguagePreference,
-  CustomPalettePreference,
-  DeviceSetting,
   PaletteRepository,
-} from "./ports";
+} from "./ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { mapAtOnce, READS_AT_ONCE } from "./atOnce";
 import { stepReporter } from "./progress";

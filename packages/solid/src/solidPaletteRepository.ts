@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import { createSolidDataset } from "./client/rdf";
-import type { PaletteRepository } from "@solid-memo/application/ports";
+import type { PaletteRepository } from "@solid-memo/application/ports/pod";
 import { isPaletteOf, palettesUrlOf } from "@solid-memo/domain/instanceLayout";
 import { editDocument, getSolidDatasetOrNull } from "./datasets";
 import { toPalettes, withPalette } from "./mappers/paletteMapper";

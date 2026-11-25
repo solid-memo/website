@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT
 
 import type { Quad, Term } from "@rdfjs/types";
-import type { ReleasePublisher } from "@solid-memo/application/ports";
+import type { ReleasePublisher } from "@solid-memo/application/ports/library";
 import { AppError } from "@solid-memo/domain/appError";
 import { DCTERMS_NS } from "@solid-memo/domain/release/releaseModel";
 import { isPublishedReleaseUrl } from "@solid-memo/domain/release/releasePlace";

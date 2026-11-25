@@ -44,15 +44,10 @@ import {
   type DeckFile,
   type DeckFileOptions,
 } from "@solid-memo/domain/deckFile";
-import type {
-  DeckLibrary,
-  DeckRepository,
-  ReviewChanges,
-  ReviewStateRepository,
-  DeckArchive,
-  FileExchange,
-  StorageGateway,
-} from "./ports";
+import type { FileExchange } from "./ports/device";
+import type { DeckLibrary, DeckArchive } from "./ports/library";
+import type { DeckRepository, ReviewChanges, ReviewStateRepository } from "./ports/pod";
+import type { StorageGateway } from "./ports/session";
 import { AppError } from "@solid-memo/domain/appError";
 import { changedElsewhere, finishCutOffImport, readNow, unsent } from "./writes";
 import type { DigestStore } from "./digestStore";

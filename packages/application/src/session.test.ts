@@ -4,7 +4,8 @@
 
 import { AppError } from "@solid-memo/domain/appError";
 import { describe, expect, it, vi } from "vitest";
-import type { AnswerLog, GuestPod, ReleaseDraftRepository } from "./ports";
+import type { ReleaseDraftRepository } from "./ports/library";
+import type { AnswerLog, GuestPod } from "./ports/pod";
 import {
   GUEST_INSTANCE_URL,
   GUEST_ORIGIN,

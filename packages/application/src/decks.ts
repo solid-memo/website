@@ -13,7 +13,7 @@ import { tidiedStated, type LangText } from "@solid-memo/domain/langText";
 import { canonicalTag } from "@solid-memo/domain/languageTag";
 import type { DeckGroup, DeckTree, DeckTreeEdit } from "@solid-memo/domain/deckTree";
 import { deckGroupUrlOf } from "@solid-memo/domain/instanceLayout";
-import type { DeckRepository } from "./ports";
+import type { DeckRepository } from "./ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 
 export interface DeckUseCases {

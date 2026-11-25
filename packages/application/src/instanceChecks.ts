@@ -22,16 +22,10 @@ import {
 import { deckHealth, type DeckHealth, type DeckTextCheck } from "@solid-memo/domain/deckHealth";
 import type { MarkdownFinding } from "@solid-memo/domain/release/problems";
 import type { InstanceDigest } from "@solid-memo/domain/studyDigest";
-import type {
-  DeckLibrary,
-  DeckRepository,
-  ShapeValidator,
-  DocumentContext,
-  ReadBudget,
-  ReleaseDraftRepository,
-  SharedReads,
-  StorageGateway,
-} from "./ports";
+import type { ShapeValidator, DocumentContext, ReadBudget, SharedReads } from "./ports/checks";
+import type { DeckLibrary, ReleaseDraftRepository } from "./ports/library";
+import type { DeckRepository } from "./ports/pod";
+import type { StorageGateway } from "./ports/session";
 import type { AnswerStore } from "./answerStore";
 import { AppError } from "@solid-memo/domain/appError";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";

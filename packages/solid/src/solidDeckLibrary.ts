@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { DeckLibrary, LinkedReleaseReads } from "@solid-memo/application/ports";
+import type { DeckLibrary, LinkedReleaseReads } from "@solid-memo/application/ports/library";
 import type { Dataset } from "./client/rdf";
 import type { CourseOutline } from "@solid-memo/domain/course";
 import type { DocumentReport } from "@solid-memo/domain/validation";

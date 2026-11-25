@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { CustomPalettePreference } from "@solid-memo/application/ports";
+import type { CustomPalettePreference } from "@solid-memo/application/ports/device";
 import { paintedColors, parsePalette } from "@solid-memo/domain/customPalette";
 
 /** Also read by the script in index.html that paints the palette's colors before the first paint. */

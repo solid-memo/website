@@ -19,7 +19,8 @@ import {
   type CourseOutline,
   type CourseProgress,
 } from "@solid-memo/domain/course";
-import type { DeckLibrary, DeckRepository, ReviewStateRepository } from "./ports";
+import type { DeckLibrary } from "./ports/library";
+import type { DeckRepository, ReviewStateRepository } from "./ports/pod";
 import { AppError } from "@solid-memo/domain/appError";
 import { derivedOnce } from "@solid-memo/domain/frozen";
 import { promptDueOf } from "./answerStore";

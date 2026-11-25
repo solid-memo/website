@@ -14,7 +14,7 @@ import {
 import type { FsrsState, ReviewState } from "@solid-memo/domain/review";
 import { planCardEdit } from "@solid-memo/domain/cardBulk";
 import { sm2s, instance, deck, card, libraryContent, makeDeps, session } from "./testing/fakePorts";
-import type { ReviewChanges } from "./ports";
+import type { ReviewChanges } from "./ports/pod";
 
 describe("cards", () => {
   describe("stateCardLanguages", () => {

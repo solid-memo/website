@@ -368,9 +368,14 @@ npm run crosscheck # the pySHACL cross-check CI runs (Python, scripts/requiremen
   composition root forgets is a type error. A Studio trial composes
   only the slices it plays (`createTrialUseCases`, `TrialUseCases`),
   and its screens take only those.
-- Ports ([ports.ts](../packages/application/src/ports.ts)) — narrow
-  interfaces, one per external capability, implemented by factories in
-  `packages/solid/src/` and `packages/browser/src/`.
+- Ports ([ports/](../packages/application/src/ports/)) — narrow
+  interfaces, one per external capability, in one module per kind of
+  thing behind them: `session.ts`, `pod.ts` and `library.ts`, which the
+  factories in `packages/solid/src/` implement; `checks.ts`, which
+  `shacl` implements through `solid`; and `device.ts`, which
+  `packages/browser/src/` implements. A type two of them need is in
+  `shared.ts`. An import names the module, so an adapter's imports
+  show which ports it implements, and a slice's which ports it drives.
 - Domain types ([packages/domain/src/](../packages/domain/src/)) — free
   of library types, so every layer above is testable without
   adapters. They map to the record types `vocab` generates from the

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import type { UpdateJournal } from "@solid-memo/application/ports";
+import type { UpdateJournal } from "@solid-memo/application/ports/device";
 import {
   decodeGuestMergeNote,
   encodeGuestMergeNote,
