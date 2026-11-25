@@ -15,7 +15,7 @@ fixtures.
 ## Boundaries
 
 It imports no other package of the app. Only `vocab`'s `tooling/`,
-`site` and `shacl`'s `node/` may import it, and never
+`build-tools` and `shacl`'s `node/` may import it, and never
 code that runs in the browser ([boundaries.md](../../docs/boundaries.md)).
 
 ## Tests

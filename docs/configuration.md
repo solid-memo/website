@@ -232,7 +232,7 @@ the source and the server says why, once.
 ## What a build computes
 
 The build works these values out
-([siteBuild.ts](../packages/site/src/siteBuild.ts)): the version goes in
+([siteBuild.ts](../packages/build-tools/src/siteBuild.ts)): the version goes in
 the page's HTML, the others in its script as constants.
 
 | Value | From | Shown or used |

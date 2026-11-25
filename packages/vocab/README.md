@@ -14,7 +14,7 @@ fixtures ([vocab.md](../../docs/vocab.md), [shapes.md](../../docs/shapes.md)).
 - `@solid-memo/vocab/tooling/<module>` is `tooling/<module>.ts`, node
   only: the generator (`npm run generate`, `npm run generate:check`),
   and where the repository's folders are (`root`), which the site's
-  build in [`@solid-memo/site`](../site/) reads too.
+  build in [`@solid-memo/build-tools`](../build-tools/) reads too.
 
 `vendor/` holds the DCAT-AP and SkoHub SKOS shapes, copied verbatim
 under their own licenses ([vendor/README.md](vendor/README.md)).

@@ -42,7 +42,7 @@ export const LAYERS: Record<string, string[]> = {
   markdown: [],
   vocab: ["turtle"],
   // The site's build, in node: it reads where the repository's folders are from vocab, and renders the docs.
-  site: ["vocab", "turtle", "markdown"],
+  "build-tools": ["vocab", "turtle", "markdown"],
   domain: ["vocab"],
   application: ["domain", "vocab"],
   shacl: ["domain", "vocab", "turtle", "markdown"],
@@ -53,7 +53,7 @@ export const LAYERS: Record<string, string[]> = {
   // The composition root: every adapter behind its port, and the use cases over them.
   composition: ["application", "domain", "vocab", "solid", "browser"],
   // The site's page, which shows the Studio at its routes; its build publishes the docs.
-  web: ["application", "domain", "vocab", "ui", "composition", "studio", "site"],
+  web: ["application", "domain", "vocab", "ui", "composition", "studio", "build-tools"],
   // The Studio, a second app on the same layers as Solid Memo's, which the site's page loads.
   studio: ["application", "domain", "vocab", "ui"],
   "e2e-pod": ["application", "domain", "vocab", "solid", "solid-memo-client"],
@@ -71,7 +71,7 @@ export const ONLY_FROM: Record<string, Record<string, RegExp>> = {
   web: {
     composition: /^src\/main\.tsx$/,
     studio: /^src\/main\.tsx$/,
-    site: /^(vite\.config\.ts|src\/[^/]+\.test\.ts)$/,
+    "build-tools": /^(vite\.config\.ts|src\/[^/]+\.test\.ts)$/,
   },
   // Data text is rendered by the components alone (docs/markdown.md).
   ui: { markdown: /^src\/ui\// },
@@ -91,7 +91,7 @@ const NO_PORT = /^@solid-memo\/application\/(?!ports\/)/;
 /** Within a package, the entry points of an allowed package that alone it may import. */
 export const ONLY_ENTRIES: Record<string, Record<string, RegExp>> = {
   // Where the repository's folders are; vocab's generator and data are not the site's build.
-  site: { vocab: /^@solid-memo\/vocab\/tooling\/root$/ },
+  "build-tools": { vocab: /^@solid-memo\/vocab\/tooling\/root$/ },
   // An adapter implements its own ports alone: the browser's are those of what the device keeps.
   browser: { application: /^@solid-memo\/application\/ports\/device$/ },
   // The screens drive the use cases and never name a port (docs/boundaries.md#further-rules).
@@ -229,7 +229,7 @@ export const NODE_ONLY = [
   /^mermaid(\/|$)/,
   /^playwright(\/|$)/,
   /^@solid-memo\/turtle(\/|$)/,
-  /^@solid-memo\/site(\/|$)/,
+  /^@solid-memo\/build-tools(\/|$)/,
   /^@solid-memo\/[a-z-]+\/(tooling|node)\//,
 ];
 

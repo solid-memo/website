@@ -5,12 +5,12 @@
 import { existsSync } from "node:fs";
 import { defineConfig, type Plugin } from "vite";
 import preact from "@preact/preset-vite";
-import { docsSitePlugin } from "@solid-memo/site/publishDocs";
-import { turtleDirectoryPlugin } from "@solid-memo/site/publishTurtle";
+import { docsSitePlugin } from "@solid-memo/build-tools/publishDocs";
+import { turtleDirectoryPlugin } from "@solid-memo/build-tools/publishTurtle";
 import { DECKS_ROOT, NS_ROOT, REPOSITORY_ROOT, VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";
-import { appVersion, commitSha, siteDefines } from "@solid-memo/site/siteBuild";
-import { clientIdPlugin } from "@solid-memo/site/clientId";
-import { siteMapPlugin, siteOrigin } from "@solid-memo/site/siteMap";
+import { appVersion, commitSha, siteDefines } from "@solid-memo/build-tools/siteBuild";
+import { clientIdPlugin } from "@solid-memo/build-tools/clientId";
+import { siteMapPlugin, siteOrigin } from "@solid-memo/build-tools/siteMap";
 import { siteConfig, siteHtml, type SiteConfig } from "./src/config.ts";
 import { solidClientPlugin } from "../../scripts/solidClient.ts";
 

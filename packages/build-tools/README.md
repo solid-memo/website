@@ -1,4 +1,4 @@
-# @solid-memo/site
+# @solid-memo/build-tools
 
 The site's build, in node: what `apps/web`'s `vite.config.ts` adds to
 Vite's build of the page, and what its tests and the root scripts that
@@ -8,7 +8,7 @@ in the browser imports it.
 
 ## Exports
 
-`@solid-memo/site/<module>` is `src/<module>.ts`:
+`@solid-memo/build-tools/<module>` is `src/<module>.ts`:
 
 - `siteBuild`: the values the site is built with: its version, from
   the root `package.json`, the commit, and the shapes' ruleset
@@ -51,8 +51,8 @@ alone, and `vite`'s types in its three plugins.
 ## Tests
 
 ```sh
-npx turbo run typecheck test --filter=@solid-memo/site   # 100% coverage
-npm run test:unit -- packages/site/src/siteMap.test.ts   # one file, from the root
+npx turbo run typecheck test --filter=@solid-memo/build-tools   # 100% coverage
+npm run test:unit -- packages/build-tools/src/siteMap.test.ts   # one file, from the root
 ```
 
 One test draws in the real Chromium, which `npm run browsers` installs

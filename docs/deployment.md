@@ -183,7 +183,7 @@ data it reads:
 
 Vite copies `ns/`, `decks/` and `vendor/` unchanged
 (`turtleDirectoryPlugin` in
-[publishTurtle.ts](../packages/site/src/publishTurtle.ts)), and
+[publishTurtle.ts](../packages/build-tools/src/publishTurtle.ts)), and
 serves them the same way in `npm run dev` and `npm start`.
 
 Pages serves a `.ttl` file as `text/turtle` with
@@ -331,9 +331,9 @@ takes the domain from that setting only, not from a `CNAME` file.
 Another host has steps of its own.
 
 The build reads `CNAME`: `siteMapPlugin` in
-[siteMap.ts](../packages/site/src/siteMap.ts) writes `sitemap.xml` and
+[siteMap.ts](../packages/build-tools/src/siteMap.ts) writes `sitemap.xml` and
 the `Sitemap:` line of `robots.txt` on its domain, and `clientIdPlugin`
-in [clientId.ts](../packages/site/src/clientId.ts) writes the Client ID
+in [clientId.ts](../packages/build-tools/src/clientId.ts) writes the Client ID
 Document, which names it
 ([authentication.md](authentication.md#the-client-id-document)).
 Write the domain into `CNAME` too, as a bare hostname such as

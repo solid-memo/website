@@ -251,7 +251,7 @@
       "includes": [
         "packages/*/src/**",
         "apps/*/src/**",
-        "!packages/site/**",
+        "!packages/build-tools/**",
         "!packages/turtle/**",
         "!**/*.test.ts",
         "!**/*.test.tsx",

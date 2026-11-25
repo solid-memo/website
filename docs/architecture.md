@@ -244,9 +244,9 @@ follows the Solid Protocol, tested against several servers
 | `@solid-memo/solid-memo-client` | `packages/solid-memo-client/` | A second implementation of `solid`'s client modules and `shacl`'s Turtle reader, with no Inrupt library, which the build puts in their place with `SOLID_CLIENT=solid-memo-client` ([solid-memo-client.md](solid-memo-client.md)). Inrupt's stays the default. |
 | `@solid-memo/shacl` | `packages/shacl/` | The SHACL engine (rdf-validate-shacl, loaded lazily), profiles and shape loading (`src/`); in `node/`, validation of Turtle files and the deck library's index and checks, Markdown rules included (`npm run library`). |
 | `@solid-memo/browser` | `packages/browser/` | Browser adapters: the update journal, the language, the guest's pod's store (IndexedDB), and files saved as downloads or opened from disk (`FileExchange`). |
-| `@solid-memo/site` | `packages/site/` | Node-only build of the site, used only by `apps/web`'s `vite.config.ts` and tests and by the root scripts that archive and check the docs: the build values (`siteBuild`), `robots.txt` and sitemap (`siteMap`), the Vite plugin publishing `ns/` and `decks/` (`publishTurtle`; see `deployment.md`), and the docs' build: the pages `docs/docs.ttl` lists, read with `turtle` and `markdown` and rendered to static pages, Mermaid drawn in Chromium ([markdown.md](markdown.md#the-docs-as-a-site)). Of `vocab` it imports only `tooling/root`, where the repository's folders are. |
+| `@solid-memo/build-tools` | `packages/build-tools/` | Node-only build of the site, used only by `apps/web`'s `vite.config.ts` and tests and by the root scripts that archive and check the docs: the build values (`siteBuild`), `robots.txt` and sitemap (`siteMap`), the Vite plugin publishing `ns/` and `decks/` (`publishTurtle`; see `deployment.md`), and the docs' build: the pages `docs/docs.ttl` lists, read with `turtle` and `markdown` and rendered to static pages, Mermaid drawn in Chromium ([markdown.md](markdown.md#the-docs-as-a-site)). Of `vocab` it imports only `tooling/root`, where the repository's folders are. |
 | `@solid-memo/turtle` | `packages/turtle/` | Node-only Turtle tooling (n3): parsing and the house-style formatter. |
-| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into its own tree: folded to what the app shows, bounded at every entry point, made plain text, checked by a release's rules. It reads the docs in the same dialect, headings kept, for `site`, and imports nothing of the app's. |
+| `@solid-memo/markdown` | `packages/markdown/` | Markdown in data, read into its own tree: folded to what the app shows, bounded at every entry point, made plain text, checked by a release's rules. It reads the docs in the same dialect, headings kept, for `build-tools`, and imports nothing of the app's. |
 | `@solid-memo/e2e-pod` | `e2e/pod/` | End-to-end tests of the use cases and Solid adapters against real Solid servers in Docker ([testing.md](testing.md)). |
 | `@solid-memo/e2e-journeys` | `e2e/journeys/` | The user journeys: whole flows through the built app, driven with Playwright in Chromium, Firefox and WebKit against a Community Solid Server in Docker ([testing.md](testing.md#user-journeys)). Of the app it imports only the messages, to find text on screen. |
 
@@ -301,7 +301,7 @@ files (`i18n/<locale>.json`).
 `format:turtle:check`, `library:check` and `build` in dependency
 order, cached by input: the files of the task's package and its
 dependencies. The few that read `ns/` or `decks/` add them
-in their package's `turbo.json` (`vocab`, `site`, `shacl`, `solid`,
+in their package's `turbo.json` (`vocab`, `build-tools`, `shacl`, `solid`,
 `composition`, `apps/web` and `apps/studio`), so a deck edit reruns
 only the tasks that read the library. Every task's hash holds
 `SOLID_CLIENT` and `scripts/solidClient.ts`, the switch between the
@@ -310,12 +310,12 @@ Solid clients, and the tasks the switch reaches hold
 ([solid-memo-client.md](solid-memo-client.md#switching-clients)).
 
 A test that reads a file outside its package adds it the same way
-(`e2e/pod`'s the workflows, `site`'s the root's `package.json` and
+(`e2e/pod`'s the workflows, `build-tools`' the root's `package.json` and
 `CNAME`, `apps/web`'s the `LICENSE` its About page links to).
 A file Turbo doesn't know of changes no input, so CI, starting from
 `main`'s cache, would reuse `main`'s result and never run the test on
 the change. Exempt is a test that only checks that a docs link's
-target exists (`site`'s and `apps/web`'s), as that could be any file;
+target exists (`build-tools`' and `apps/web`'s), as that could be any file;
 lychee checks those links in CI's `docs` job on every run
 ([testing.md](testing.md#documentation)).
 The Studio has no build of its own; Solid Memo's bundles it

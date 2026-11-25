@@ -148,18 +148,18 @@ describe("boundaryProblems", () => {
       ...workspace(
         "web",
         {
-          "vite.config.ts": 'import { docsSitePlugin } from "@solid-memo/site/publishDocs";',
-          "src/build.test.ts": 'import { checkSvg } from "@solid-memo/site/diagrams";',
-          "src/aboutPage.test.ts": 'import { siteOrigin } from "@solid-memo/site/siteMap";',
-          "src/App.tsx": 'import { siteOrigin } from "@solid-memo/site/siteMap";',
+          "vite.config.ts": 'import { docsSitePlugin } from "@solid-memo/build-tools/publishDocs";',
+          "src/build.test.ts": 'import { checkSvg } from "@solid-memo/build-tools/diagrams";',
+          "src/aboutPage.test.ts": 'import { siteOrigin } from "@solid-memo/build-tools/siteMap";',
+          "src/App.tsx": 'import { siteOrigin } from "@solid-memo/build-tools/siteMap";',
         },
-        { "@solid-memo/site": "*" },
+        { "@solid-memo/build-tools": "*" },
       ),
       dir: "apps/web",
     };
     expect(problems(web)).toEqual([
-      "apps/web/src/App.tsx: only files matching /^(vite\\.config\\.ts|src\\/[^/]+\\.test\\.ts)$/ may import @solid-memo/site.",
-      'apps/web/src/App.tsx: runs in the browser, so may not import "@solid-memo/site/siteMap".',
+      "apps/web/src/App.tsx: only files matching /^(vite\\.config\\.ts|src\\/[^/]+\\.test\\.ts)$/ may import @solid-memo/build-tools.",
+      'apps/web/src/App.tsx: runs in the browser, so may not import "@solid-memo/build-tools/siteMap".',
     ]);
   });
 
@@ -167,7 +167,7 @@ describe("boundaryProblems", () => {
     expect(
       problems(
         workspace(
-          "site",
+          "build-tools",
           {
             "src/siteBuild.ts": 'import { VOCAB_ROOT } from "@solid-memo/vocab/tooling/root";',
             "src/siteMap.ts": 'import { run } from "@solid-memo/vocab/tooling/generate";',
@@ -176,7 +176,7 @@ describe("boundaryProblems", () => {
         ),
       ),
     ).toEqual([
-      'packages/site/src/siteMap.ts: may import only /^@solid-memo\\/vocab\\/tooling\\/root$/ of @solid-memo/vocab, not "@solid-memo/vocab/tooling/generate".',
+      'packages/build-tools/src/siteMap.ts: may import only /^@solid-memo\\/vocab\\/tooling\\/root$/ of @solid-memo/vocab, not "@solid-memo/vocab/tooling/generate".',
     ]);
   });
 

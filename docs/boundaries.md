@@ -18,7 +18,7 @@ imports and fails on:
   declare (npm hoists it to the root, where it would still resolve and
   type-check);
 - a node-only import (`node:*`, `n3`, `@solid-memo/turtle`,
-  `@solid-memo/site`, any package's `tooling/` or `node/` entry) in
+  `@solid-memo/build-tools`, any package's `tooling/` or `node/` entry) in
   browser code, `n3` in `solid-memo-client` and in `solid`'s
   `client/linearDataset.ts` aside;
 - an import of a Solid client library, any `@inrupt/` package, from
@@ -81,7 +81,7 @@ boundaries."
 | `turtle` | — | |
 | `markdown` | — | |
 | `vocab` | `turtle` | `turtle`: `tooling/` only |
-| `site` | `vocab`, `turtle`, `markdown` | `vocab`: `tooling/root` alone (the repository's folders); `turtle` for the docs' index ([markdown.md](markdown.md#the-docs-index)); `markdown` to render the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
+| `build-tools` | `vocab`, `turtle`, `markdown` | `vocab`: `tooling/root` alone (the repository's folders); `turtle` for the docs' index ([markdown.md](markdown.md#the-docs-index)); `markdown` to render the docs ([markdown.md](markdown.md#the-docs-as-a-site)) |
 | `domain` | `vocab` | |
 | `application` | `domain`, `vocab` | |
 | `shacl` | `domain`, `vocab`, `turtle`, `markdown` | `turtle`, `markdown`: `node/` only |
@@ -89,7 +89,7 @@ boundaries."
 | `browser` | `application`, `domain` | |
 | `ui` | `application`, `domain`, `vocab`, `markdown` | `markdown`: `src/ui/` only |
 | `composition` | `application`, `domain`, `vocab`, `solid`, `browser` | |
-| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `site` | `composition`, and `studio` with a dynamic `import()`: `src/main.tsx` only; `site`: `vite.config.ts` (the site's build, which renders the docs) and tests only |
+| `web` | `application`, `domain`, `vocab`, `ui`, `composition`, `studio`, `build-tools` | `composition`, and `studio` with a dynamic `import()`: `src/main.tsx` only; `build-tools`: `vite.config.ts` (the site's build, which renders the docs) and tests only |
 | `studio` | `application`, `domain`, `vocab`, `ui` | |
 | `e2e-pod` | `application`, `domain`, `vocab`, `solid`, `solid-memo-client` | `solid-memo-client`: `signedInClient.ts` only, which signs in to a Linked Web Storage server |
 | `solid-memo-client` | `solid` | No package the app is made of imports it: the build puts its modules in place of `solid`'s client modules ([below](#the-solid-client-libraries)) |
@@ -109,7 +109,7 @@ listed:
 | `@inrupt/solid-client`, `@inrupt/solid-client-authn-browser` | `solid` | `src/client/` only ([below](#the-solid-client-libraries)); `shacl` uses `@inrupt/solid-client` in `src/turtleDocument.ts` only, to parse shapes; its access control only in `src/client/access.ts` ([below](#access-control)) |
 | `@inrupt/solid-client-authn-core` | `solid` | tests only: the sign-in library's own DPoP proof, for `authFetch`'s tests |
 | `@tanstack/react-query`, `preact` | `ui`, `web`, `studio` | components; in `web`, `main.tsx`, which renders the page, and `App.tsx`, the page; in `studio`, its screens |
-| `@fontsource/*`, `@fontsource-variable/*` | `ui`, `site` | in `ui`, `src/style.css` only; in `site`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
+| `@fontsource/*`, `@fontsource-variable/*` | `ui`, `build-tools` | in `ui`, `src/style.css` only; in `build-tools`, `@fontsource-variable/fredoka` in `src/drawDiagrams.ts` only, to embed Fredoka in the diagrams ([markdown.md](markdown.md#the-diagrams-font)) |
 | `rdf-validate-shacl`, `rdf-validate-datatype` | `shacl` | `src/engine.ts` only, loaded lazily; `rdf-validate-datatype` for its registry of datatype checks ([validation.md](validation.md#flow)) |
 | `markdown-it`, `markdown-it-cjk-friendly` | `markdown` | `src/parse.ts` only; the package's API is its own types, never markdown-it's tokens ([markdown.md](markdown.md)) |
 | `n3` | `turtle`, the node tooling of `shacl`, `e2e-pod`, `solid-memo-client` and `solid` | in `e2e-pod`, the server contract and the tests; in `solid-memo-client`, in the browser too; in `solid`, `src/client/linearDataset.ts` only, in the browser too: the Turtle parser Inrupt's client is given, and the terms of a dataset's quads ([below](#files-without-a-vendor-library)) |
@@ -117,7 +117,7 @@ listed:
 | `fake-indexeddb` | `browser`, `composition`, `solid-memo-client` | tests only: IndexedDB in node, for the guest's pod's store and the sign-in session |
 | `@playwright/test` | `e2e-journeys` | drives the built app in Chromium, Firefox and WebKit; the harness talks to the Solid server with its request API |
 | `axe-core` | `e2e-journeys` | `pages/App.ts` only, which loads its build into the page: checks the screen each journey step ends on for accessibility ([testing.md](testing.md#user-journeys)) |
-| `mermaid`, `playwright` | `site` | `src/drawDiagrams.ts` only, both node-only in the check: Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, not shipped ([vendor-code.md](vendor-code.md#maturity)) |
+| `mermaid`, `playwright` | `build-tools` | `src/drawDiagrams.ts` only, both node-only in the check: Mermaid draws the docs' diagrams in Chromium, which `playwright` starts ([markdown.md](markdown.md#diagrams)); development tools, not shipped ([vendor-code.md](vendor-code.md#maturity)) |
 
 ## The Solid client libraries
 

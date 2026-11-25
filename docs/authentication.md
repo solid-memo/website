@@ -188,7 +188,7 @@ Solid-OIDC lets an app name itself by the address of a JSON-LD
 document describing it and its redirect URLs
 ([Solid-OIDC, section 5](https://solidproject.org/TR/oidc#clientids)).
 Solid Memo's is at <https://solid-memo.com/clientid.jsonld>.
-[clientId.ts](../packages/site/src/clientId.ts) writes it at build time
+[clientId.ts](../packages/build-tools/src/clientId.ts) writes it at build time
 for the domain in [CNAME](../CNAME), like the sitemap
 ([deployment.md](deployment.md#what-the-artifact-contains)):
 
@@ -237,7 +237,7 @@ next login moves it to the document.
   release before the app uses it.
 - **The tests check it, but no journey logs in with it.** Journeys
   serve the site at `http://127.0.0.1:4173` and register dynamically.
-  [clientId.test.ts](../packages/site/src/clientId.test.ts) checks the
+  [clientId.test.ts](../packages/build-tools/src/clientId.test.ts) checks the
   document,
   [solidSessionGateway.test.ts](../packages/solid/src/solidSessionGateway.test.ts)
   when the gateway names it, and the build test that the build writes

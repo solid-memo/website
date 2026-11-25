@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { resolveConfig } from "vite";
 import { expect, it } from "vitest";
-import { CLIENT_ID_FILE } from "@solid-memo/site/clientId";
+import { CLIENT_ID_FILE } from "@solid-memo/build-tools/clientId";
 import { SITE_ENV } from "../apps/web/src/config.ts";
 
 const ROOT = join(import.meta.dirname, "..");

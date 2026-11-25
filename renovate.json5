@@ -444,7 +444,7 @@
         },
         // Playwright and the browser it downloads move together: one pinned
         // version, @playwright/test's in e2e/journeys/package.json and
-        // playwright's in packages/site/package.json (one group, as a
+        // playwright's in packages/build-tools/package.json (one group, as a
         // monorepo's packages), which CI keys its browser caches by.
         {
             matchDepNames: [

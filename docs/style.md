@@ -49,7 +49,7 @@ holds everywhere. Beyond the recommended rules:
   fails on a list spread into `push` or `unshift` in the packages' and
   apps' `src/` code, which reads lists as long as a pod or a file makes
   them ([below](#typescript)). It leaves out their tests, the site's
-  build (`packages/site`), the Turtle formatter (`packages/turtle`), and
+  build (`packages/build-tools`), the Turtle formatter (`packages/turtle`), and
   the code outside `src/` that reads only this repository's files:
   `packages/shacl/node`, `packages/vocab/tooling`, `scripts/` and
   `e2e/`.
@@ -338,7 +338,7 @@ The [Docs](#docs) and [Language](#language) sections apply as well.
 `npm run lint:prose`, part of `npm run check`, checks every page in
 `docs/` against the rules in [prose.json](../prose.json), each with its reason as its message.
 [checkProse.ts](../scripts/checkProse.ts) runs it, and
-[prose.ts](../packages/site/src/prose.ts) holds the rules' logic: the
+[prose.ts](../packages/build-tools/src/prose.ts) holds the rules' logic: the
 project's own code, so it runs offline, and no package's update
 changes what it accepts.
 

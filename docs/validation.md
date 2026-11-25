@@ -57,7 +57,7 @@ flowchart LR
     document gets a receipt;
   - the rules are named by a hash of every shape and vendored profile
     file, computed when the site is built (`siteDefines` in
-    `packages/site/src/siteBuild.ts`, used by `apps/web/vite.config.ts`),
+    `packages/build-tools/src/siteBuild.ts`, used by `apps/web/vite.config.ts`),
     so a site with other shapes checks everything again;
   - the answer log is left out: answers are checked as they're written,
     and in the full check, which the developer report always runs.

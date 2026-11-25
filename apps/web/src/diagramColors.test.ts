@@ -7,11 +7,11 @@ import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { paletteBlocks } from "@solid-memo/domain/testing/contrast";
-import { DIAGRAM_ROLES } from "@solid-memo/site/diagrams";
+import { DIAGRAM_ROLES } from "@solid-memo/build-tools/diagrams";
 
 /**
  * The docs' diagrams are drawn in Standard's colors (diagramTheme in
- * @solid-memo/site), which the site's build can't read from
+ * @solid-memo/build-tools), which the site's build can't read from
  * palettes.css, so they are written out there: each as palettes.css has
  * it, light and dark.
  */

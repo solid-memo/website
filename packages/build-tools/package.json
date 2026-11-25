@@ -1,5 +1,5 @@
 {
-  "name": "@solid-memo/site",
+  "name": "@solid-memo/build-tools",
   "description": "Node-only build of the Solid Memo site: the values it is built with, its robots.txt, sitemap and Client ID Document, the Vite plugin that publishes ns/ and decks/ with it, and the docs rendered to static pages, their diagrams drawn to SVG.",
   "private": true,
   "license": "MIT",

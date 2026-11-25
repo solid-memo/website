@@ -6,7 +6,7 @@ It reads the text into a tree of its own, folds it
 to what the app shows, bounds it at every entry point, derives plain
 text from it, and checks it by the rules for a release
 ([markdown.md](../../docs/markdown.md)). The site's build,
-[`@solid-memo/site`](../site/), renders the docs to static pages with
+[`@solid-memo/build-tools`](../build-tools/), renders the docs to static pages with
 its parser ([markdown.md](../../docs/markdown.md#the-docs-as-a-site)).
 
 ## Exports
@@ -31,7 +31,7 @@ Its API is its own types, never markdown-it's tokens.
 ## Boundaries
 
 It imports nothing of the app's. `ui` may import it from `src/ui/`
-only, `shacl` from `node/` only, and `site`, the site's build, to
+only, `shacl` from `node/` only, and `build-tools`, the site's build, to
 render the docs. Its parser libraries (`markdown-it` and
 `markdown-it-cjk-friendly`) are used in `src/parse.ts` alone
 ([boundaries.md](../../docs/boundaries.md)).

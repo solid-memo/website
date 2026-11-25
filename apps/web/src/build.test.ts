@@ -12,12 +12,12 @@ import { type Document, Window } from "happy-dom";
 import { build, loadEnv, type Rolldown } from "vite";
 import { beforeAll, describe, expect, it } from "vitest";
 import { PAINTED_ROLES } from "@solid-memo/domain/customPalette";
-import { checkSvg, fontNotice } from "@solid-memo/site/diagrams";
-import { DOCS_CSP } from "@solid-memo/site/docsSite";
-import { diagramMode, FONT_LICENSE_FILE } from "@solid-memo/site/drawDiagrams";
-import { CLIENT_ID_FILE, clientIdDocument, clientIdUrl } from "@solid-memo/site/clientId";
-import { appVersion, commitSha } from "@solid-memo/site/siteBuild";
-import { siteOrigin } from "@solid-memo/site/siteMap";
+import { checkSvg, fontNotice } from "@solid-memo/build-tools/diagrams";
+import { DOCS_CSP } from "@solid-memo/build-tools/docsSite";
+import { diagramMode, FONT_LICENSE_FILE } from "@solid-memo/build-tools/drawDiagrams";
+import { CLIENT_ID_FILE, clientIdDocument, clientIdUrl } from "@solid-memo/build-tools/clientId";
+import { appVersion, commitSha } from "@solid-memo/build-tools/siteBuild";
+import { siteOrigin } from "@solid-memo/build-tools/siteMap";
 import { siteConfig, siteHtml, siteVersion, type SiteConfig } from "./config";
 
 /*

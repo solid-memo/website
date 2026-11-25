@@ -11,8 +11,8 @@
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { DOCS_INDEX, type PageKind, readDocsIndex } from "@solid-memo/site/docsIndex";
-import { proseProblems, readProseRules } from "@solid-memo/site/prose";
+import { DOCS_INDEX, type PageKind, readDocsIndex } from "@solid-memo/build-tools/docsIndex";
+import { proseProblems, readProseRules } from "@solid-memo/build-tools/prose";
 
 export type ProseIo = {
   /** The pages in docs/, by file name. */
