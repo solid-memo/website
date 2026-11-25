@@ -18,6 +18,21 @@ type ComposedStory = { run: () => Promise<void> };
 /** Every stories file of the package, by its path from here. */
 const files = import.meta.glob<StoriesFile>("./**/*.stories.tsx", { eager: true });
 
+/** The UI's files, by their path from here: each a component's, but those NOT_COMPONENTS names. */
+const sources = Object.keys(
+  import.meta.glob(["./ui/**/*.tsx", "!./ui/**/*.test.tsx", "!./ui/**/*.stories.tsx"]),
+);
+
+/** The UI's files that have no stories, each with its reason: none draws a component of its own. */
+const NOT_COMPONENTS: Record<string, string> = {
+  "./ui/i18n.tsx": "The language's provider and its messages: every story is drawn in it.",
+  "./ui/theme.tsx": "The theme's provider and what paints the page: every story is drawn in it.",
+  "./ui/linkify.tsx":
+    "A function that turns a text's addresses into links, drawn by the components that call it.",
+  "./ui/StatisticsCharts.tsx":
+    "The charts the statistics screen draws, each with stories in charts/.",
+};
+
 /**
  * The preview, over the Preact renderer's own (its `render`): Storybook's
  * composeStories doesn't read what setProjectAnnotations keeps unless a
@@ -91,5 +106,18 @@ describe.each(Object.entries(files))("%s", (_path, file) => {
 
   it.each(stories)("%s", async (_name, Story) => {
     await Story.run();
+  });
+});
+
+/** A component's file without stories beside it fails (docs/storybook.md#stories-are-tests). */
+describe("every component has stories", () => {
+  it.each(sources)("%s", (source) => {
+    const stories = source.replace(/\.tsx$/, ".stories.tsx");
+    if (source in NOT_COMPONENTS) expect(files).not.toHaveProperty([stories]);
+    else expect(files).toHaveProperty([stories]);
+  });
+
+  it("names only the UI's files", () => {
+    for (const source of Object.keys(NOT_COMPONENTS)) expect(sources).toContain(source);
   });
 });

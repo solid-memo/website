@@ -65,7 +65,9 @@ are short examples.
   ([vitest.ts](../packages/ui/.storybook/vitest.ts)).
 - **Shared data**, an instance on a made-up pod and decks in the scripts
   the app shows, is in
-  [storyData.ts](../packages/ui/src/test/storyData.ts).
+  [storyData.ts](../packages/ui/src/test/storyData.ts), and each area's
+  own in [test/stories/](../packages/ui/src/test/stories/): cards, the
+  library, statistics made from a fixed seed, instances and preferences.
 - **What a story imports** goes into the browser's bundle: test helpers
   from `storybook/test` only, never from `vitest`, Testing Library or
   `node:` modules.
@@ -90,6 +92,10 @@ with the package's other tests, so the stories count toward its 100%
 coverage ([testing.md](testing.md#coverage-policy)). A story file's own
 code is covered too: every fake method a story writes is one the
 component calls.
+
+The same test fails when a component's file has no stories file beside
+it. The files without one are listed in the test, each with its reason:
+a provider or a module of helpers, not a component.
 
 The repository's checks treat a stories file and `.storybook/` as test
 code (`isTestFile` in
