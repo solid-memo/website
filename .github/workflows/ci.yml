@@ -109,8 +109,9 @@ jobs:
   # npm run check:ci, but for the growth tests, which the growth job
   # runs. Deterministic. Most of its tasks come from Turbo's cache; a
   # change that moves every package's folder misses it for all of them,
-  # and a job cut off by its limit saves no cache, so every run of such a
-  # change would start cold again: the limit leaves room for a cold run.
+  # three tasks at a time, and a job cut off by its limit saves no cache,
+  # so every run of such a change would start cold again: the limit
+  # leaves room for a cold run.
   check:
     needs: gate
     if: needs.gate.outputs.jobs == 'all'
@@ -165,11 +166,15 @@ jobs:
         run: npm run check:lints
       # Every package: typecheck, tests at 100% coverage, the round trip
       # of the library's releases, generated code and Turtle formatting
-      # in step with their sources.
+      # in step with their sources. Three tasks at a time, each Vitest run
+      # with its default workers: when few results come from the cache,
+      # more at once, solid's tests and its round trip among them, take
+      # more memory than the runner has, and it kills one or stalls.
       - if: ${{ !cancelled() && (steps.lints.outcome == 'success' || steps.lints.outcome == 'failure') }}
         run: npm run check:tasks
         env:
           TURBO_CACHE_MAX_AGE: 14d
+          TURBO_CONCURRENCY: 3
       # The boundaries, the docs' index (docs/docs.ttl), the shipped
       # dependencies' maturity and the repository's other checks
       # (docs/testing.md#the-repositorys-own-checks).

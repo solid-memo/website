@@ -69,7 +69,9 @@ only as many workers as its share of three quarters of the memory holds
 ([vitest.shared.ts](../vitest.shared.ts)): one each, with
 ten tasks at once on 15 GB. A package whose workers take more than
 about 0.5 GB says how much (`workerGb`), and its runs start fewer:
-`solid`'s take about 1.5 GB. CI keeps Vitest's default.
+`solid`'s take about 1.5 GB. CI keeps Vitest's default, and runs
+three tasks at a time (`TURBO_CONCURRENCY`), which the runner's memory
+holds when no result comes from the cache.
 
 Two settings make it quicker, in a contributor's shell profile:
 
