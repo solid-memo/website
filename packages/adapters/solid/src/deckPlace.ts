@@ -8,7 +8,6 @@ import {
   createSolidDataset,
   createThing,
   type FetchedDataset,
-  getThingAll,
   setThing,
 } from "@solid-memo/solid-client/rdf";
 import type { Deck } from "@solid-memo/domain/deck";
@@ -46,7 +45,7 @@ import {
 } from "./datasets";
 import type { ReadBudget, SharedReads } from "@solid-memo/application/ports/checks";
 import { LWS_STORAGE_REL, storageRootsOf } from "./lwsStorage";
-import { deckBackLinksOf, isDeckItself } from "./ownership";
+import { deckBackLinksOf, documentThings, isDeckItself } from "./ownership";
 import { hasStorageLink, MAX_STORAGE_ANCESTORS } from "./solidStorageGateway";
 import { DECK_DOCUMENT_TERMS } from "@solid-memo/vocab/descriptors.generated";
 import { DCTERMS } from "./vocab";
@@ -80,11 +79,14 @@ export type DeckPlace = Pick<Deck, "url" | "title" | "cardsDocumentUrl" | "revie
  */
 export type DocumentStanding = "owned" | "adoptable" | "unclaimed";
 
-/** What dcterms:isPartOf the document itself (`<>`, spelled any way a request sends it) states. */
+/**
+ * What dcterms:isPartOf the document itself (`<>`, spelled any way a
+ * server may read it, ownership.ts isDocumentItself) states.
+ */
 function partOfOf(dataset: Dataset, url: string): string[] {
-  return getThingAll(dataset)
-    .filter((thing) => isSameUrl(thing.url, url))
-    .flatMap((thing) => readTerms(thing, DECK_DOCUMENT_TERMS).isPartOf);
+  return documentThings(dataset, url).flatMap(
+    (thing) => readTerms(thing, DECK_DOCUMENT_TERMS).isPartOf,
+  );
 }
 
 /**
@@ -176,13 +178,13 @@ function saysIsDecks(facts: DocumentFacts, deckUrl: string): boolean {
 
 /**
  * The document saying it is the deck's: the document itself (`<>`)
- * dcterms:isPartOf the deck's catalog entry, added once. Any other
+ * dcterms:isPartOf the deck's catalog entry, added once, to the subject
+ * it already has however that is spelled (partOfOf). Any other
  * dcterms:isPartOf stays (another app may point two decks at one document).
  */
 function withPartOf(dataset: Dataset, url: string, deckUrl: string): Dataset {
   if (ownsDocument(partOfOf(dataset, url), deckUrl)) return dataset;
-  const document =
-    getThingAll(dataset).find((thing) => isSameUrl(thing.url, url)) ?? createThing({ url });
+  const document = documentThings(dataset, url)[0] ?? createThing({ url });
   return setThing(dataset, buildThing(document).addUrl(DCTERMS.isPartOf, deckUrl).build());
 }
 

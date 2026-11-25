@@ -1448,3 +1448,71 @@ it("finds a document the deck's whatever else it says it is part of, an address 
   await expect(guard.standing(deck, deck.cardsDocumentUrl, says)).resolves.toBe("owned");
   await expect(guard.unclaimedForAll([deck], deck.cardsDocumentUrl, says)).resolves.toBe(false);
 });
+
+describe("a deck's document named at another spelling of its address, on a server that reads both as one", () => {
+  /** Bob's pod as a server that ignores case reads it: every address in lower case, answered at the address asked. */
+  function ignoringCase(p: Pod): typeof globalThis.fetch {
+    return (async (input, init) => {
+      const url = String(input instanceof Request ? input.url : input);
+      const response = await p.fetch(url.toLowerCase(), init);
+      Object.defineProperty(response, "url", { value: url });
+      return response;
+    }) as typeof globalThis.fetch;
+  }
+
+  it("is another deck's however the address that reads it is spelled: claiming it, then removing the deck that claimed it, takes none of that deck's cards or progress", async () => {
+    const p = await pod();
+    const fetch = ignoringCase(p);
+    const decks = createSolidDeckRepository({
+      fetch,
+      now: () => new Date("2026-10-19T00:00:00.000Z"),
+      randomId: () => "x1",
+      userStorages: async () => [ROOT],
+    });
+    const deck = await p.decks.createDeck(BOB, { en: "Spanish" });
+    const card = await p.decks.addCard(deck, UNO);
+    await p.reviews.gradeReviewState(deck, { cardId: card.id, direction: "front-to-back" }, () => ({
+      sm2: {
+        cardId: card.id,
+        direction: "front-to-back",
+        easeFactor: 2.5,
+        intervalDays: 1,
+        repetitions: 1,
+        due: "2026-10-20",
+        firstReviewedAt: "2026-10-19T00:00:00.000Z",
+        lastReviewedAt: "2026-10-19T00:00:00.000Z",
+        formatVersion: 3,
+      },
+    }));
+    const cards = await p.text(deck.cardsDocumentUrl);
+    const reviews = await p.text(deck.reviewsDocumentUrl);
+    const upper = (url: string) => url.replace(/[^/]+\.ttl$/, (name) => name.toUpperCase());
+
+    // A deck of this instance and one of another in the same storage, each naming them in upper case.
+    for (const instance of [BOB, `${ROOT}bob/solid-memo/second/`]) {
+      const other = await decks.createDeck(instance, { en: "Other" });
+      await plant(p, other, upper(deck.cardsDocumentUrl), upper(deck.reviewsDocumentUrl), instance);
+      const listed = (await decks.listDecks(instance)).find((one) => one.url === other.url)!;
+      expect(listed.cardsDocumentUrl).toBe(upper(deck.cardsDocumentUrl));
+      // One in the instance's own folder is not read for this, and is refused on a write.
+      await expect(decks.unclaimedDocuments(listed)).resolves.toEqual(
+        instance === BOB ? [] : [upper(deck.cardsDocumentUrl), upper(deck.reviewsDocumentUrl)],
+      );
+      await expect(decks.addCard(listed, DOS)).rejects.toMatchObject({
+        code: "deckDocumentUnclaimed",
+      });
+
+      // Claimed (one outside the instance's folder), each says it is the other deck's too, on the subject it already has.
+      await decks.claimDocuments(listed);
+      expect(await p.text(deck.cardsDocumentUrl)).not.toContain(upper(deck.cardsDocumentUrl));
+      expect(await backLinks(p, deck.cardsDocumentUrl, listed)).toBe(instance === BOB ? 0 : 1);
+      await decks.removeDeck(listed);
+      expect(await p.text(deck.cardsDocumentUrl)).toBe(cards);
+      expect(await p.text(deck.reviewsDocumentUrl)).toBe(reviews);
+    }
+    await expect(p.decks.listCards(deck)).resolves.toHaveLength(1);
+    await expect(p.reviews.listReviewStates(deck)).resolves.toMatchObject({
+      sm2: [{ repetitions: 1 }],
+    });
+  });
+});
