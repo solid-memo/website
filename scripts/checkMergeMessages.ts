@@ -40,7 +40,9 @@
  * Nor may any commit hold a character that one reader takes for the end
  * of a line and the release does not (HIDDEN_BREAK, from the same file),
  * which commitlint refuses in the commits it reads, nor the text the
- * release splits git's output at (LOG_SEPARATOR, from the same file).
+ * release splits git's output at (LOG_SEPARATOR, from the same file),
+ * nor a line that starts with `::` or any `##[` (WORKFLOW_COMMAND, from
+ * the same file), which a workflow's log would read as a command.
  * Nor may a commit's author or committer name or email hold either: git
  * writes them in the same output, before the hash and the message, and
  * commitlint never reads them.
@@ -65,6 +67,7 @@ const {
   HIDDEN_BREAK,
   LOG_SEPARATOR,
   SKIP_KEYWORD,
+  WORKFLOW_COMMAND,
   holdsChangelogLink,
   skippedByCommitlint,
 } = (await import(new URL("../commitlint.config.mjs", import.meta.url).href)) as {
@@ -72,6 +75,7 @@ const {
   HIDDEN_BREAK: RegExp;
   LOG_SEPARATOR: RegExp;
   SKIP_KEYWORD: RegExp;
+  WORKFLOW_COMMAND: RegExp;
   holdsChangelogLink(message: string): boolean;
   skippedByCommitlint(message: string): boolean;
 };
@@ -103,6 +107,10 @@ export function problemsOf(message: string, merge: boolean): string[] {
     problems.push("holds a control character or a line separator other than a line feed");
   if (LOG_SEPARATOR.test(message))
     problems.push("holds the text the release splits git's output at");
+  if (WORKFLOW_COMMAND.test(message))
+    problems.push(
+      "holds a line that starts with `::`, or `##[`, which a workflow's log reads as a command",
+    );
   return problems;
 }
 

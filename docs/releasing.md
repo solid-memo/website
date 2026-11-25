@@ -536,6 +536,20 @@ release workflow on `main` (`actions/attest`), makes the release as a
 draft, which the deploy refuses, uploads the archive, then publishes
 the release.
 
+semantic-release prints every commit's message into the `prepare`
+job's log, and CI's `commits` job prints them through commitlint. The
+runner reads a log line that starts with `::` as a workflow command,
+and a line that holds `##[` anywhere as one in the older syntax. So
+both steps stop the runner from reading commands while they run, with
+a token that's new on every run (`::stop-commands::`), and the release
+log no longer runs workflow commands from commit text. The checks that
+print a commit's subject, `npm run check:closes` and
+`npm run check:breaking`, escape both (`\::`, `##\[`). commitlint and
+`npm run check:merges` refuse a message that holds either too. The
+`push` job runs whenever the `prepare` job made a release's bundle,
+and fails when the bundle's tag didn't reach it, so a run can't end
+green with nothing released.
+
 Zenodo archives each of the repository's GitHub releases and gives it
 a DOI. The concept DOI,
 [10.5281/zenodo.23351087](https://doi.org/10.5281/zenodo.23351087),
@@ -839,6 +853,10 @@ canceled run is handled by what it left behind, as in the cases below.
   something in the `prepare` job wrote it, and every run stops the same
   way. The maintainer finds out what before anything else is released,
   and fixes it in its own pull request.
+- **The `push` job got no tag**: the `prepare` job made a release's
+  bundle, but its tag didn't reach the `push` job. Nothing was pushed.
+  The maintainer finds out from the `prepare` job's log why the tag
+  went missing, fixes that, and runs the workflow again.
 - **The push was refused**: `main` moved on between the check and the
   push, or the deploy key, its secret in the `release` environment or
   the bypass is missing. The push is atomic, so neither the commit nor

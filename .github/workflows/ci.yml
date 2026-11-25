@@ -1402,12 +1402,21 @@ jobs:
           BASE: ${{ github.event.merge_group.base_sha }}
           HEAD: ${{ github.event.merge_group.head_sha }}
         run: npm run check:merges -- --base "$BASE" --head "$HEAD" --queue
+      # commitlint prints each message into the log, where the runner
+      # would read a line that starts with `::`, or holds `##[`, as a
+      # workflow command, so the step stops reading commands, with a token
+      # of the run's that no message can know, until it ends. The token
+      # goes on a line of its own, as the last output may end mid-line.
       - if: github.event_name == 'pull_request'
         name: npx commitlint --from <base> --to <head>
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           HEAD: ${{ github.event.pull_request.head.sha }}
-        run: npx commitlint --from "$BASE" --to "$HEAD" --verbose
+        run: |
+          token="$(openssl rand -hex 16)"
+          echo "::stop-commands::$token"
+          trap 'printf "\n::%s::\n" "$token"' EXIT
+          npx commitlint --from "$BASE" --to "$HEAD" --verbose
       - if: github.event_name == 'pull_request'
         name: No merge commits
         env:

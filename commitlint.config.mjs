@@ -71,6 +71,15 @@
  * message, or another commit's, than the one written. `npm run
  * check:merges` reads every commit's whole message for it too.
  *
+ * No line of a commit starts with `::`, after any blank space, and no
+ * part of it holds `##[`: the runner of GitHub's workflows reads such a
+ * line of a step's log as a workflow command, `##[` anywhere in a line
+ * in the older syntax, and tools print messages into the log, the
+ * release and commitlint among them. The workflows stop reading commands while
+ * those tools run (docs/releasing.md#what-a-release-does); this keeps
+ * such a line out of main too. `npm run check:merges` reads every
+ * commit's whole message for it too.
+ *
  * A `chore(release)` header is semantic-release's alone, on the release
  * commit it pushes onto main (docs/releasing.md#what-a-release-does), so
  * a commit of a pull request or a branch may not have it. commitlint
@@ -256,6 +265,24 @@ function noLogSeparator({ raw }) {
 }
 
 /**
+ * Text that the runner of GitHub's workflows would read as a workflow
+ * command were it printed into a step's log: `::` at a line's start,
+ * after any blank space (U+0085 too), or `##[` anywhere, the older
+ * syntax.
+ */
+export const WORKFLOW_COMMAND = /^[\s\u0085]*::|##\[/m;
+
+/**
+ * @param {{ raw: string }} commit
+ */
+function noWorkflowCommand({ raw }) {
+  return [
+    !WORKFLOW_COMMAND.test(raw),
+    "no line of the message may start with `::`, nor any part hold `##[`: a workflow's log would read it as a command, and the release and CI print messages there (CONTRIBUTING.md#commit-messages)",
+  ];
+}
+
+/**
  * The header semantic-release titles its release commit with
  * (release.config.mjs), in upper or lower case and with or without a `!`.
  *
@@ -312,6 +339,7 @@ export default {
         "no-changelog-link": noChangelogLink,
         "no-hidden-break": noHiddenBreak,
         "no-log-separator": noLogSeparator,
+        "no-workflow-command": noWorkflowCommand,
       },
     },
   ],
@@ -327,5 +355,6 @@ export default {
     "no-changelog-link": [2, "always"],
     "no-hidden-break": [2, "always"],
     "no-log-separator": [2, "always"],
+    "no-workflow-command": [2, "always"],
   },
 };

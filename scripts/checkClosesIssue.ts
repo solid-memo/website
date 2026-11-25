@@ -28,6 +28,7 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { inert } from "./workflowLog.ts";
 
 /** A commit since the base: its hash, and its whole message. */
 export type Commit = { hash: string; message: string };
@@ -158,7 +159,8 @@ export function defaultIo(repo: string): ClosesIo {
           message: git("log", "-1", "--format=%B", "--end-of-options", hash).trim(),
         })),
     readFile: (path) => readFileSync(path, "utf8"),
-    log: (message) => console.log(message),
+    // The log is a workflow's in CI, and messages hold the authors' text.
+    log: (message) => console.log(inert(message)),
   };
 }
 

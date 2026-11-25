@@ -77,6 +77,106 @@ function code(job: string): string {
     .join("\n");
 }
 
+/** A step's `run: |` script, as bash runs it. */
+function scriptOf(step: string): string {
+  const body = step.slice(step.indexOf("run: |\n") + "run: |\n".length).split("\n");
+  const end = body.findIndex((line) => !line.startsWith(" ".repeat(10)));
+  return body
+    .slice(0, end === -1 ? undefined : end)
+    .map((line) => line.slice(10))
+    .join("\n");
+}
+
+/** A message whose body holds lines a workflow's log would read as commands. */
+const COMMANDS = [
+  "fix(ui): keep the footer link in view",
+  "",
+  "The link scrolled out on narrow screens.",
+  "::add-mask::8.5.1",
+  "  ::add-mask::v8",
+  "Why ##[add-mask]8.5.1",
+  "",
+  "Refs: #1",
+].join("\n");
+
+/**
+ * Runs a step's script in a repository of one commit, with an `npx`
+ * that prints COMMANDS and `ending`, as semantic-release and commitlint
+ * print messages, then exits with `status`. What the step printed, line
+ * by line, and its status.
+ */
+function runPrinting(
+  script: string,
+  status: number,
+  ending: string,
+): { lines: string[]; status: number | null } {
+  const root = mkdtempSync(join(tmpdir(), "solid-memo-stop-commands-"));
+  try {
+    const bin = join(root, "bin");
+    const repository = join(root, "repository");
+    mkdirSync(bin);
+    mkdirSync(repository);
+    writeFileSync(join(root, "message.txt"), `${COMMANDS}${ending}`);
+    writeFileSync(
+      join(bin, "npx"),
+      `#!/bin/sh\ncat "${join(root, "message.txt")}"\nexit ${status}\n`,
+      {
+        mode: 0o755,
+      },
+    );
+    const git = (...args: string[]) =>
+      execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.org", ...args], {
+        cwd: repository,
+      });
+    git("init", "--quiet");
+    git("commit", "--quiet", "--allow-empty", "-m", "chore: start");
+    const run = spawnSync("bash", ["--noprofile", "--norc", "-eo", "pipefail", "-c", script], {
+      cwd: repository,
+      env: {
+        PATH: `${bin}:${process.env.PATH}`,
+        HOME: root,
+        RUNNER_TEMP: root,
+        REPOSITORY_URL: "https://github.com/solid-memo/website.git",
+        BASE: "HEAD",
+        HEAD: "HEAD",
+      },
+      encoding: "utf8",
+    });
+    return { lines: `${run.stdout}${run.stderr}`.trimEnd().split("\n"), status: run.status };
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
+/**
+ * The runner reads no workflow command between `::stop-commands::<token>`
+ * and `::<token>::`, so a step that prints messages brackets what it
+ * prints with a token no message can know: new on every run, and printed
+ * nowhere else. It resumes when the step fails too, on a line of its
+ * own when the output before it ends mid-line.
+ */
+function expectStopsCommands(step: string): void {
+  const script = scriptOf(step);
+  const tokens = new Set<string>();
+  for (const [status, ending] of [
+    [0, "\n"],
+    [1, "\n"],
+    [0, ""],
+  ] as const) {
+    const { lines, status: exit } = runPrinting(script, status, ending);
+    expect(exit).toBe(status);
+    const start = lines.findIndex((line) => line.startsWith("::stop-commands::"));
+    const token = lines[start]?.slice("::stop-commands::".length) ?? "";
+    expect(token).toMatch(/^[0-9a-f]{32}$/);
+    tokens.add(token);
+    expect(lines.at(-1)).toBe(`::${token}::`);
+    expect(lines.slice(start + 1, -1).join("\n")).toBe(`${COMMANDS}${ending}`);
+    expect(lines.slice(0, start).filter((line) => /^\s*::|##\[/.test(line))).toEqual([]);
+    expect(lines.filter((line) => line.includes(token))).toHaveLength(2);
+  }
+  expect(tokens.size).toBe(3);
+}
+
 /** The permissions block that starts at a `permissions:` line indented `indent`. */
 function permissionsAt(yaml: string, indent: number): string | undefined {
   return yaml.match(
@@ -285,7 +385,7 @@ describe("release.yml", () => {
     expect(job).toMatch(/^ {4}needs: queue$/m);
     expect(job).toMatch(/^ {6}!cancelled\(\) && \($/m);
     expect(workflow.get("push")).toMatch(
-      /^ {4}needs: prepare\n {4}if: needs\.prepare\.outputs\.tag != ''$/m,
+      /^ {4}needs: prepare\n {4}if: needs\.prepare\.outputs\.bundled == 'true'$/m,
     );
     expect(workflow.get("publish")).toMatch(
       /^ {4}needs: \[prepare, push\]\n {4}if: needs\.push\.outputs\.pushed == 'true'$/m,
@@ -408,7 +508,7 @@ describe("release.yml", () => {
       line('git config "url.file://$copy.insteadOf" "$REPOSITORY_URL"') + 1,
     );
     expect(line('npx semantic-release --repository-url "$REPOSITORY_URL"')).toBe(
-      line("git config protocol.https.allow never") + 1,
+      line("git config protocol.https.allow never") + 4,
     );
     const bundled = at("name: The release, as a bundle");
     expect(bundled).toBe(released + 1);
@@ -421,6 +521,40 @@ describe("release.yml", () => {
       "release-docs",
     ]);
     expect(uploads[1]).toContain(`path: ${archivePath("${{ steps.released.outputs.version }}")}`);
+  });
+
+  // semantic-release prints every commit's message, so the runner reads
+  // no workflow command while it runs.
+  it("reads no workflow command while semantic-release runs", () => {
+    const step = steps(workflow.get("prepare") ?? "", 6).find((text) =>
+      text.includes("name: npx semantic-release"),
+    );
+    expectStopsCommands(step ?? "");
+  });
+
+  // A bundle whose tag did not reach the push job fails the run, rather
+  // than leave it green with nothing released.
+  it("runs the push job whenever the prepare job made a bundle, and fails it without a tag", () => {
+    const prepare = workflow.get("prepare") ?? "";
+    expect(prepare).toMatch(/^ {6}bundled: \$\{\{ steps\.released\.outputs\.bundled \}\}$/m);
+    const released = steps(prepare, 6).find((step) => step.includes("id: released")) ?? "";
+    expect(released).toMatch(/^ {12}echo "bundled=true"\n {10}\} >> "\$GITHUB_OUTPUT"$/m);
+    expect(released.indexOf('echo "bundled=true"')).toBeGreaterThan(
+      released.indexOf("bundle create"),
+    );
+    const [first] = steps(workflow.get("push") ?? "", 6);
+    expect(first).toMatch(/^ {10}TAG: \$\{\{ needs\.prepare\.outputs\.tag \}\}$/m);
+    const check = (tag: string) =>
+      spawnSync("bash", ["--noprofile", "--norc", "-eo", "pipefail", "-c", scriptOf(first ?? "")], {
+        env: { PATH: process.env.PATH, TAG: tag },
+        encoding: "utf8",
+      });
+    expect(check("v8.5.1").status).toBe(0);
+    for (const tag of ["", "***", "v8.5", "8.5.1"]) {
+      const run = check(tag);
+      expect(run.status, tag).toBe(1);
+      expect(run.stdout).toMatch(/^::error::/);
+    }
   });
 
   // The release is made as a draft, which the deploy refuses, and
@@ -878,6 +1012,13 @@ describe("ci.yml's check:merges", () => {
     expect(pull).toContain("BASE: ${{ github.event.pull_request.base.sha }}");
     expect(pull).toContain("HEAD: ${{ github.event.pull_request.head.sha }}");
     expect(pull).toContain('run: npm run check:merges -- --base "$BASE" --head "$HEAD"\n');
+  });
+
+  // commitlint prints each message it lints.
+  it("reads no workflow command while commitlint runs", () => {
+    const lint = commits.filter((text) => text.includes("npx commitlint"));
+    expect(lint).toHaveLength(1);
+    expectStopsCommands(lint[0] ?? "");
   });
 
   it("counts toward ci-ok", () => {
