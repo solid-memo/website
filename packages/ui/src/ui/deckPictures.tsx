@@ -195,15 +195,16 @@ export function usePictureAccess(url: string): PictureAccess {
 
 /**
  * Whether a side still to come is to be on the page already, out of
- * sight, for a deck that asks: its picture is then requested with the rest
- * of the card and not at the moment the learner reveals it, so the
- * request says nothing of when they did. An element, as a browser may
- * request anew an address it was told not to keep. Only a picture the
- * learner chose to show; anything else stays as it is.
+ * sight: its picture is then requested with the rest of the card and not
+ * at the moment the learner reveals it, so the request says nothing of
+ * when they did. An element, as a browser may request anew an address it
+ * was told not to keep. Any picture that is shown: every one of a deck
+ * that just loads them, only those the learner chose to show of a deck
+ * that asks; anything else stays as it is.
  */
 export function useLoadsAhead(url: string | undefined): boolean {
   const gate = usePictureGate();
-  return gate !== null && url !== undefined && gate.access(url) === "show";
+  return url !== undefined && (gate === null || gate.access(url) === "show");
 }
 
 /** The button that shows the deck's pictures from a host, with why that failed if it did. */

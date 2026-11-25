@@ -301,9 +301,8 @@ export function StudyScreen({
  * recall, from the card shown to Reveal, and to grade, from Reveal to
  * the grade (to the last grade pressed, when saving failed before).
  *
- * On a deck that asks about its pictures' hosts, an answer with a picture
- * the learner chose to show is on the page from the start, hidden until
- * revealed (useLoadsAhead).
+ * An answer with a picture that is shown is on the page from the start,
+ * hidden until revealed (useLoadsAhead).
  */
 function StudyCard({
   prompt,
