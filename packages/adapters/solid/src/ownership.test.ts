@@ -325,6 +325,33 @@ describe("deckDocumentSubjects", () => {
     );
   });
 
+  it("finds the document itself spelled any way a server may read its address, and names only the read document's own subjects", async () => {
+    const other = "https://pod.example/solid-memo/b/catalog.ttl#deck-2";
+    const alias = CARDS.replace("deck-1.ttl", "DECK-1.ttl");
+    // Read at another spelling: the deck it already says it is part of keeps it.
+    const read = await served(
+      alias,
+      `<${CARDS}> <${DCTERMS.isPartOf}> <${other}> .
+<${CARDS}#c1> a <${SM.Card}> .
+<${alias}> <${DCTERMS.isPartOf}> <${ENTRY}> .`,
+    );
+    expect(deckDocumentSubjects([ENTRY])(read)).toEqual({
+      subjects: new Set(),
+      statements: [[alias, DCTERMS.isPartOf, ENTRY]],
+    });
+    // What it states of another document's subjects is kept; its own, spelled any way, are not.
+    const stated = await served(
+      CARDS,
+      `<> <${DCTERMS.isPartOf}> <${ENTRY}> .
+<#c1> a <${SM.Card}> .
+<${alias}#c2> a <${SM.Card}> .
+<https://pod.example/solid-memo/b/decks/deck-2.ttl#c3> a <${SM.Card}> .`,
+    );
+    expect(deckDocumentSubjects([ENTRY])(stated)).toEqual(
+      new Set([`${CARDS}#c1`, `${alias}#c2`, CARDS]),
+    );
+  });
+
   it("never names the document itself by the class it states, nor what its cards link to", async () => {
     const typed = await served(
       CARDS,

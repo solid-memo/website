@@ -10,7 +10,7 @@ import {
   getThingAll,
   toRdfJsDataset,
 } from "@solid-memo/solid-client/rdf";
-import { canonicalUrlOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
+import { canonicalUrlOf, documentKeyOf, isSameUrl } from "@solid-memo/domain/instanceLayout";
 import { documentUrlOf } from "@solid-memo/domain/subjectUrl";
 import type { Owned, Statement } from "./datasets";
 import { namesAnotherScheduler } from "./mappers/reviewStateMapper";
@@ -401,16 +401,23 @@ const DECK_ENTRY_PROPERTIES: ReadonlySet<string> = new Set([
  * The cards, distractors and review states of the deck's document at
  * `url` that are Solid Memo's (isSolidMemos) and say nothing else
  * (isDeckEntryShaped), and nothing they name: no card links to a
- * subject of another kind. The document itself (`<>`) is never one,
+ * subject of another kind. Each is a subject of that document, its
+ * address spelled any way a server may read it as that document
+ * (documentKeyOf): what it states of another document's subjects is
+ * kept. The document itself (`<>`, isDocumentItself) is never one,
  * whatever class it says it has, so that it goes only when all it says
  * is that it is a deck's (isDeckBackLink).
  */
 function deckEntrySubjects(dataset: Dataset, url: string): Set<string> {
+  const key = documentKeyOf(url);
+  const ofDocument = (subject: string) => documentKeyOf(documentUrlOf(subject)) === key;
+  const itself = isDocumentItself(url);
   return new Set(
     getThingAll(dataset)
       .filter(
         (thing) =>
-          !isSameUrl(thing.url, url) &&
+          ofDocument(thing.url) &&
+          !itself(thing.url) &&
           isSolidMemos(dataset, thing) &&
           someIri(thing, RDF.type, (type) => DECK_ENTRY_CLASSES.has(type)) &&
           isDeckEntryShaped(thing),
@@ -473,13 +480,16 @@ function termKey(term: { termType: string; value: string }): string {
 
 /**
  * Whether `thing` is the document's own subject (`<>`, the document it
- * was read from) saying no more than that the document is a deck's: one
+ * was read from, isDocumentItself) saying no more than that the document is a deck's: one
  * dcterms:isPartOf, or more, each naming an entry of a catalog
  * (isCatalogEntry), as Solid Memo writes it on a deck's cards and
  * reviews documents (deckPlace.ts withPartOf).
  */
 export function isDeckBackLink(dataset: Dataset, thing: Subject): boolean {
-  if (!hasResourceInfo(dataset) || !isSameUrl(thing.url, getSourceUrl(dataset))) return false;
+  // A subject with a fragment is told first, without working out the
+  // document's key, as this is asked of every subject of a document.
+  if (thing.url.includes("#") || !hasResourceInfo(dataset)) return false;
+  if (!isDocumentItself(getSourceUrl(dataset))(thing.url)) return false;
   return (
     saysOnlyIrisOf(thing, DCTERMS.isPartOf) && everyIri(thing, DCTERMS.isPartOf, isCatalogEntry)
   );
@@ -490,14 +500,28 @@ function isCatalogEntry(url: string): boolean {
   return url.includes("#") && documentUrlOf(url).endsWith("/catalog.ttl");
 }
 
-/** The subjects that are the document at `url` itself (`<>`), spelled any way a request sends it. */
-function documentThings(dataset: Dataset, url: string): Subject[] {
-  return getThingAll(dataset).filter((thing) => isSameUrl(thing.url, url));
+/**
+ * Whether a subject is the document at `url` itself (`<>`), its address
+ * spelled any way a server may read it as that document (documentKeyOf):
+ * `<deck.ttl>` read at `DECK.ttl` from a server that ignores case is the
+ * document's own subject, so what it says of whose the document is
+ * counts however the address that reads it is spelled. A subject with a
+ * fragment is never the document itself.
+ */
+function isDocumentItself(url: string): (subjectUrl: string) => boolean {
+  const key = documentKeyOf(url);
+  return (subjectUrl) => !subjectUrl.includes("#") && documentKeyOf(subjectUrl) === key;
+}
+
+/** The subjects that are the document at `url` itself (`<>`, isDocumentItself). */
+export function documentThings(dataset: Dataset, url: string): Subject[] {
+  const itself = isDocumentItself(url);
+  return getThingAll(dataset).filter((thing) => itself(thing.url));
 }
 
 /**
- * Whether the document itself (`<>`, spelled any way a request sends it,
- * with its percent-encoding undone too, as a server may read it) is an
+ * Whether the document itself (`<>`, isDocumentItself, also of the
+ * address with its percent-encoding undone) is an
  * sm:Deck: a release, or a draft's release document. No deck's cards or
  * reviews are kept in one, and what it says of itself is what the
  * release it was made from said, so it is never a deck's document

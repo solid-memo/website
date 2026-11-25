@@ -701,9 +701,11 @@ No document Solid Memo names has any.
   deck, or deleting its instance, takes out a document's cards,
   distractors and review states only when every deck it names is
   leaving; otherwise only the leaving deck's `dcterms:isPartOf` goes
-  (`deckDocumentSubjects` in `ownership.ts`). A subject goes only when
-  it's a card, distractor or review state of Solid Memo's (not one of
-  another scheduler) and says nothing else. Each class it states is
+  (`deckDocumentSubjects` in `ownership.ts`). Only the document's own
+  subjects can go, in any spelling a server may read as its address
+  (`documentKeyOf`). Of those, a subject goes only when it's a card,
+  distractor or review state of Solid Memo's (not one of another
+  scheduler) and says nothing else. Each class it states is
   `sm:Card`, `sm:Distractor`, `sm:ReviewState` or a distractor's
   `schema:Answer`. Each property is `rdf:type`, one of the card,
   distractor, review state or FSRS review state shapes at any version,
@@ -1130,7 +1132,11 @@ graph LR
 - **The cards and reviews documents say whose they are.** Every write of
   a deck's cards or reviews document by the deck's own operations adds
   `<> dcterms:isPartOf <catalog.ttl#deck-X>` once, on the document's own
-  subject, never on a card or a review state. That subject is never
+  subject, never on a card or a review state. The document's own subject
+  is its address in any spelling a server may read as the document's
+  (`isDocumentItself` in `ownership.ts`). So a document
+  named at another spelling of its address still says whose it is, and a
+  write or a claim adds to the subject it has. That subject is never
   read as a card, distractor or review state, so removing one never
   takes it out (`isDocumentSubject`). Those operations are:
   - import;
