@@ -747,7 +747,7 @@ npm run library:check -- --base origin/main
 
 pySHACL checks the index and every version against DCAT-AP again
 ([validation.md](validation.md#the-ci-cross-check)), and
-[libraryReleases.test.ts](../packages/adapters/solid/src/libraryReleases.test.ts)
+[libraryReleases.library.test.ts](../packages/adapters/solid/src/libraryReleases.library.test.ts)
 reads every version as the app does, its cards and a course's outline
 ([testing.md](testing.md#strategy-per-layer)).
 
