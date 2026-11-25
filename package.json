@@ -42,7 +42,7 @@
     "test:growth": "turbo run test:growth",
     "test:unit": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run check:lints && npm run check:tasks -- library:check test:growth && npm run check:repository",
+    "check": "npm run check:lints && npm run check:tasks -- library:check test:growth --filter='!tag:heavy' && TURBO_CONCURRENCY=2 npm run check:tasks -- --filter=tag:heavy && npm run check:repository",
     "check:ci": "npm run check:lints && npm run check:tasks && npm run check:repository",
     "check:lints": "npm run lint && npm run lint:markdown && npm run lint:spelling && npm run lint:prose",
     "check:tasks": "turbo run typecheck test test:roundtrip generate:check format:turtle:check",

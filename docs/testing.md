@@ -22,7 +22,7 @@ npm run test:growth   # the growth tests (*.growth.test.ts), without coverage (t
 npm run check     # Biome's lint, markdownlint, cspell and the prose check, then npm test's tests, the growth tests, the round trip, typecheck, drift, Turtle formatting, the deck library, boundaries, the repository's own checks (below)
 npm run check:ci  # npm run check without the deck library and the growth tests, as CI's check job runs it (its library and growth jobs run those)
 npm run check:lints   # the first part of both: Biome's lint, markdownlint, cspell and the prose check
-npm run check:tasks   # the second: every package's Turbo tasks but the deck library's and the growth tests (npm run check adds them)
+npm run check:tasks   # the second: every package's Turbo tasks but the deck library's and the growth tests (npm run check adds them, and runs solid's tests and round trip in a pass of their own; below)
 npm run browsers  # once: Chromium's headless shell, which npm run check and npm run build draw the docs' diagrams in (on Linux, if it lacks system libraries: sudo npx playwright install-deps chromium)
 npm run lint      # Biome: the formatting and lint rules of the TypeScript, JSON and CSS (docs/style.md)
 npm run format    # Biome: rewrite those files as it formats them
@@ -73,10 +73,21 @@ about 0.5 GB says how much (`workerGb`), and its runs start fewer:
 three tasks at a time (`TURBO_CONCURRENCY`), which the runner's memory
 holds when no result comes from the cache.
 
+Those are `solid`'s unit tests and its round trip, which go on long
+after the other tasks are done. So `npm run check` runs Turbo's tasks
+in two passes: every task but those two, then those two alone
+(tagged `heavy` in [turbo.json](../packages/adapters/solid/turbo.json)).
+The second pass runs them two at a time, so that each gets half of the
+memory, not a share of ten: three workers each on 15 GB. The passes never overlap, so the
+memory the runs take together stays within the same share. A task
+whose result is in the cache is skipped in either pass.
+`npm run check:ci` runs the tasks in one pass, as CI has its own
+limit.
+
 Two settings make it quicker, in a contributor's shell profile:
 
 ```sh
-export TURBO_CONCURRENCY=4   # Turbo's tasks at once, so each run gets more workers (4 each on 15 GB, solid's 1)
+export TURBO_CONCURRENCY=4   # Turbo's tasks at once in the first pass, so each run gets more workers (4 each on 15 GB)
 export TURBO_CACHE_DIR="$HOME/.cache/turbo/solid-memo"   # one cache for every checkout and worktree
 ```
 
