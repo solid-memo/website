@@ -1459,6 +1459,10 @@
       "used": "This version's making used it",
       "usedEarlier": "An earlier version's making used it.",
       "sourceMoreCreators": "Its other creators, kept as they are: {names}.",
+      "sourceCreatorsMore": {
+        "one": "{names} and {count} more",
+        "other": "{names} and {count} more"
+      },
       "sourceOthers": {
         "one": "{count} more statement of it is kept as it is.",
         "other": "{count} more statements of it are kept as they are."

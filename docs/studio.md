@@ -2698,6 +2698,10 @@ the library's releases are
     under them says how many more the release states; those it doesn't
     list stay in the release. A source added past the limit goes last,
     so it isn't listed until earlier ones are removed.
+  - Of each source's creators, its line and its form name at most
+    `CREATOR_LIMIT` (10), each cut to `CREATOR_NAME_LIMIT` (200)
+    characters, then say how many more there are. Saving the source
+    keeps every creator as it is, named or not.
   - A new source is an `http:` or `https:` address the release doesn't
     name yet.
 - **Checks**: each check this version had, by a machine or by AI, with

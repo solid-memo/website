@@ -16,7 +16,7 @@ import type { DraftEditor } from "./draftEditor";
 import { AUTHOR_LIMIT } from "./ReleaseAuthors";
 import { CHECK_LIMIT, COMMENT_LIMIT } from "./ReleaseChecks";
 import { languageNameOf, OTHER_CHOICE_LIMIT, ReleaseMetadataScreen } from "./ReleaseMetadataScreen";
-import { SOURCE_LIMIT } from "./ReleaseSources";
+import { CREATOR_LIMIT, CREATOR_NAME_LIMIT, SOURCE_LIMIT } from "./ReleaseSources";
 import { courseDraft, DRAFT_URL } from "../test/fixtures";
 import { deviceWrapper, makeDeviceValuesFake } from "@solid-memo/ui/test/fakes/deviceValues";
 import type { ComponentChild } from "preact";
@@ -951,6 +951,54 @@ describe("ReleaseMetadataScreen's checks", () => {
     fireEvent.click(within(add).getByRole("button", { name: "Add the source" }));
     expect(onEdit).toHaveBeenCalledTimes(2);
     expect(within(add).getByRole("alert")).not.toBeEmptyDOMElement();
+  });
+
+  it("names at most CREATOR_LIMIT creators of a source, each cut short, and keeps every creator when it is saved (GHSA-g86q-f3rg-rwg5)", () => {
+    const count = 4000;
+    // Each name a few code points past the cut, an astral one at the cut, so a cut inside it would show.
+    const names = Array.from(
+      { length: count },
+      (_, index) =>
+        `${String(index).padStart(4, "0")}${"A".repeat(CREATOR_NAME_LIMIT - 5)}😀${"A".repeat(50)}`,
+    );
+    const statements = names.map((name) => ({
+      predicate: "http://purl.org/dc/terms/creator",
+      object: plain(name),
+    }));
+    const draft = with_(authoredDraft(), {
+      kind: "setSource",
+      iri: "https://source.example/",
+      source: { statements, derivedFrom: true, used: false },
+    });
+    const onEdit = renderScreen(draft);
+    const sources = screen.getByRole("heading", { name: "Sources" }).closest("section")!;
+    const shown = (from: number) =>
+      names
+        .slice(from, from + CREATOR_LIMIT)
+        .map((name) => `${name.slice(0, CREATOR_NAME_LIMIT + 1)}…`)
+        .join(", ");
+    const more = (from: number) => (count - from - CREATOR_LIMIT).toLocaleString("en");
+    expect(
+      within(sources).getByText(`${shown(0)} and ${more(0)} more · The release is derived from it`),
+    ).toBeInTheDocument();
+    expect(sources.textContent!.length).toBeLessThan(CREATOR_LIMIT * CREATOR_NAME_LIMIT * 4);
+    fireEvent.click(within(sources).getByRole("button", { name: "Edit https://source.example/" }));
+    const form = within(sources).getByRole("group", { name: "https://source.example/" });
+    expect(
+      within(form).getByText(
+        `Its other creators, kept as they are: ${shown(1)} and ${more(1)} more.`,
+      ),
+    ).toBeInTheDocument();
+    expect(form.textContent!.length).toBeLessThan(CREATOR_LIMIT * CREATOR_NAME_LIMIT * 2);
+    fireEvent.click(within(form).getByRole("button", { name: "Save the source" }));
+    const saved = onEdit.mock.lastCall![0][0] as Extract<DraftChange, { kind: "setSource" }>;
+    expect(
+      saved
+        .source!.statements.filter(
+          ({ predicate }) => predicate === "http://purl.org/dc/terms/creator",
+        )
+        .map(({ object }) => object.value),
+    ).toEqual(names);
   });
 
   it("lists at most CHECK_LIMIT checks of this version and of earlier ones, and COMMENT_LIMIT comments of each, saying how many more", () => {

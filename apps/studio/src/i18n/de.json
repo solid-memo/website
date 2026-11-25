@@ -1459,6 +1459,10 @@
       "used": "Bei der Entstehung dieser Version verwendet",
       "usedEarlier": "Bei der Entstehung einer früheren Version verwendet.",
       "sourceMoreCreators": "Weitere Urheber, unverändert erhalten: {names}.",
+      "sourceCreatorsMore": {
+        "one": "{names} und {count} weitere",
+        "other": "{names} und {count} weitere"
+      },
       "sourceOthers": {
         "one": "{count} weitere Angabe zu ihr bleibt unverändert erhalten.",
         "other": "{count} weitere Angaben zu ihr bleiben unverändert erhalten."

@@ -12,8 +12,9 @@ import {
   type SourceForm,
   type SourceView,
 } from "@solid-memo/domain/release/releaseMetadata";
+import { firstCodePoints } from "@solid-memo/domain/langText";
 import { licenseLabel } from "@solid-memo/domain/license";
-import { useI18n } from "@solid-memo/ui/i18n";
+import { useI18n, type I18n } from "@solid-memo/ui/i18n";
 import type { DraftEditor } from "./draftEditor";
 import { bounded, MoreInRelease } from "./ReleaseLists";
 
@@ -23,6 +24,34 @@ import { bounded, MoreInRelease } from "./ReleaseLists";
  * release.
  */
 export const SOURCE_LIMIT = 50;
+
+/**
+ * At most how many creators of a source the screen names, in its line
+ * and in its editor; past it, it says how many more there are. A
+ * release can name any number of creators of a source, each as long as
+ * a term; those it doesn't name stay in the release, and saving the
+ * source keeps them as they are.
+ */
+export const CREATOR_LIMIT = 10;
+
+/** At most how many code points of a creator's name the screen shows; past them, the name is cut with an ellipsis. */
+export const CREATOR_NAME_LIMIT = 200;
+
+/**
+ * Creators of a source as the screen names them: the first
+ * CREATOR_LIMIT, each cut to CREATOR_NAME_LIMIT code points (never
+ * inside one), comma-separated, then how many more there are.
+ */
+function creatorNames(creators: readonly string[], t: I18n["t"]): string {
+  const { shown, more } = bounded(creators, CREATOR_LIMIT);
+  const names = shown
+    .map((name) => {
+      const kept = firstCodePoints(name, CREATOR_NAME_LIMIT);
+      return kept.length < name.length ? `${kept}…` : kept;
+    })
+    .join(", ");
+  return more > 0 ? t("studio.release.sourceCreatorsMore", { names, count: more }) : names;
+}
 
 const BLANK: SourceForm = {
   title: "",
@@ -41,7 +70,8 @@ const BLANK: SourceForm = {
  * it), or removed. A source only an earlier version's making used has
  * nothing of this version's to remove: that making still names it. A
  * long list of sources stays light: only the one being edited has a
- * form, and at most SOURCE_LIMIT are listed. A new source is added
+ * form, at most SOURCE_LIMIT are listed, and at most CREATOR_LIMIT
+ * creators of each are named. A new source is added
  * under them.
  */
 export function ReleaseSources({
@@ -117,7 +147,7 @@ function SourceSummary({
       </p>
       <p class="hint">
         {[
-          source.creators.join(", "),
+          creatorNames(source.creators, t),
           source.license === "" ? "" : licenseLabel(source.license),
           ...uses,
         ]
@@ -237,7 +267,7 @@ function SourceEditor({
   const { t } = useI18n();
   const [form, setForm] = useState<SourceForm>(source);
   const [problem, setProblem] = useState<"licenseInvalid" | "sourceUnused" | null>(null);
-  // The creators after the first, which the form doesn't edit: named here, and so not counted with the rest.
+  // The creators after the first, which the form doesn't edit: named here (the first CREATOR_LIMIT, and how many more), and so not counted with the rest.
   const moreCreators = source.creators.slice(1);
   const unshown = source.others.length - moreCreators.length;
   return (
@@ -274,7 +304,7 @@ function SourceEditor({
         </p>
         {moreCreators.length > 0 && (
           <p class="hint">
-            {t("studio.release.sourceMoreCreators", { names: moreCreators.join(", ") })}
+            {t("studio.release.sourceMoreCreators", { names: creatorNames(moreCreators, t) })}
           </p>
         )}
         {unshown > 0 && <p class="hint">{t("studio.release.sourceOthers", { count: unshown })}</p>}

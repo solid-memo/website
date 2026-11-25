@@ -1548,6 +1548,11 @@
       "used": "Se usó para elaborar esta versión",
       "usedEarlier": "Se usó para elaborar una versión anterior.",
       "sourceMoreCreators": "Sus demás creadores, que se conservan tal como están: {names}.",
+      "sourceCreatorsMore": {
+        "one": "{names} y {count} más",
+        "many": "{names} y {count} más",
+        "other": "{names} y {count} más"
+      },
       "sourceOthers": {
         "one": "{count} declaración más sobre ella se conserva tal como está.",
         "many": "{count} de declaraciones más sobre ella se conservan tal como están.",
