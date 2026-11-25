@@ -104,7 +104,8 @@
         "E2E_RESULT_JSON"
       ],
       "dependsOn": [
-        "transit"
+        "transit",
+        "@solid-memo/shacl#library:index"
       ]
     }
   }

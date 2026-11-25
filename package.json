@@ -80,7 +80,7 @@
     "lint:commits": "commitlint --from origin/main --to HEAD && { test -z \"$(git rev-list --merges origin/main..HEAD)\" || { echo 'A merge commit is not linted: update the branch by rebasing it on main (git rebase origin/main).' >&2; exit 1; }; }",
     "crosscheck": "npm run library:index && python3 scripts/shacl_crosscheck.py",
     "test:crosscheck": "python3 -m unittest discover -s scripts",
-    "test:pod": "npm run test:pod -w @solid-memo/e2e-pod",
+    "test:pod": "npm run library:index && npm run test:pod -w @solid-memo/e2e-pod",
     "pod": "npm run pod -w @solid-memo/e2e-pod",
     "pod:clean": "npm run pod:clean -w @solid-memo/e2e-pod",
     "journeys": "npm run test:journeys -w @solid-memo/e2e-journeys --",

@@ -44,14 +44,16 @@ it from the file:
 
 - the site's build and its dev server (`npm run build`, `npm run dev`),
   which publish it at its address beside the versions;
-- the tests of `composition` and `web`;
+- the tests of `composition` and `web`, and the pod tests
+  (`npm run test:pod`);
 - the pySHACL cross-check (`npm run crosscheck`).
 
 Turbo writes it before the tasks that read it, and every task whose
 inputs take `decks/` leaves the index out of them. `solid`'s tests make
 the index of the decks they read in memory
 ([testing.md](testing.md#conventions)). Running one test file of
-`composition` or `web` by itself, run `npm run library:index` first. A
+`composition`, `web` or `e2e/pod` by itself, run `npm run library:index`
+first. A
 pull request shows only its versions, not what the index says of them:
 `npm run library` writes the index to look at.
 
