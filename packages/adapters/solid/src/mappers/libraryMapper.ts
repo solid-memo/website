@@ -412,12 +412,18 @@ type LibraryDeckContentOf = ReturnType<typeof libraryDeckFromRecord>;
 /**
  * The deck a fetched release document states: the one at `url`, else
  * the first it holds, at its canonical URL (declared with @base) rather
- * than the URL it was fetched from; undefined when it holds none.
+ * than the URL it was fetched from; undefined when it holds none. A deck
+ * at an IRI that is no http(s) URL (isHttpUrl) is refused (notADeck):
+ * its chapters, steps and cards, fragments of it (releaseSubjectsOf),
+ * would be no such URL either, and a learner's progress keeps a
+ * chapter's (GHSA-2pm8-m882-hgjh).
  */
 function releaseDeckOf(url: string, dataset: Dataset): Subject | undefined {
   const isDeck = (thing: Subject | null) => thing !== null && hasClass(thing, SM.Deck);
   const at = getThing(dataset, url);
-  return isDeck(at) ? at! : getThingAll(dataset).find(isDeck);
+  const deck = isDeck(at) ? at! : getThingAll(dataset).find(isDeck);
+  if (deck !== undefined && !isHttpUrl(asUrl(deck))) throw new AppError("notADeck", { url });
+  return deck;
 }
 
 /**

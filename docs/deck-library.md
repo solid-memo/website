@@ -827,6 +827,9 @@ else the one at its canonical address (`@base`). A subject anywhere
 else is none of them, whatever its type, and a card's distractor
 anywhere else isn't offered
 ([libraryMapper.ts](../packages/adapters/solid/src/mappers/libraryMapper.ts)).
+The deck's address is an `http:` or `https:` URL, and so are its
+parts. A release whose deck is at any other IRI is `notADeck`. A
+release file the Studio reads with one is `notAReleaseFile`.
 
 The library conforms to [shapes.md](shapes.md)'s
 `CatalogV1`, `LibraryDeckSeriesV3`, and `LibraryDeckV5` or

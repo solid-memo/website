@@ -1032,6 +1032,40 @@ describe("toCourseOutline", () => {
   });
 });
 
+describe("every release reader", () => {
+  it("refuses a release whose deck is at an IRI that is no http(s) URL, so none of its parts is read (GHSA-2pm8-m882-hgjh)", async () => {
+    const dataset = await datasetOf(
+      `
+@prefix sm: <https://solid-memo.com/ns/vocab/v1.ttl#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix schema: <https://schema.org/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+<sm:X> a sm:Deck, dcat:Dataset, schema:Course ; sm:formatVersion 6 ; dcterms:title "C"@en ; dcterms:description "D"@en ;
+  sm:studyDirection sm:frontToBack ; dcterms:language <http://publications.europa.eu/resource/authority/language/ENG> ;
+  dcat:version "1" ; dcat:inSeries <https://elsewhere.example/catalog.ttl#course> ;
+  dcat:isVersionOf <https://elsewhere.example/catalog.ttl#course> ;
+  dcterms:publisher <https://elsewhere.example/catalog.ttl#pub> ;
+  dcat:distribution <${DOC}#ttl> ; dcat:theme <http://publications.europa.eu/resource/authority/data-theme/EDUC> .
+<sm:X#ch-1> a sm:Chapter, schema:Syllabus ; sm:formatVersion 1 ; schema:isPartOf <sm:X> ; schema:position 0 ;
+  dcterms:title "Ch"@en ; sm:reviewQuestion <sm:X#q-1> .
+<sm:X#ch-1-1> a sm:Step, schema:LearningResource ; sm:formatVersion 1 ; schema:isPartOf <sm:X#ch-1> ;
+  schema:position 0 ; sm:theory "T"@en ; sm:checkedBy <sm:X#q-1> .
+<sm:X#q-1> a sm:Card ; sm:formatVersion 7 ; sm:front "Q"@en ; sm:back "A"@en .
+`,
+      DOC,
+    );
+    for (const read of [
+      toCourseOutline,
+      toLibraryCards,
+      toLibraryDeckContent,
+      toStandaloneLibraryDeck,
+    ])
+      expect(() => read(DOC, dataset)).toThrow(
+        expect.objectContaining({ code: "notADeck", vars: { url: DOC } }),
+      );
+  });
+});
+
 describe("a release's card id in the answers CSV", () => {
   it.each([
     [";", "%3B"],

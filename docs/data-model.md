@@ -1509,7 +1509,10 @@ entries:
   once, more than any course has chapters. A chapter is an `http:` or
   `https:` URL (`readIris`): any other IRI is left out as it's read,
   so a deck file's import never writes one, and an edit of the
-  chapters drops it from the entry. A deck that already holds one is
+  chapters drops it from the entry. Completing a chapter at any other
+  IRI writes nothing. A release's deck is at an `http:` or `https:`
+  URL, else the release isn't read ([deck-library.md](deck-library.md)),
+  so its chapters are too. A deck that already holds another IRI is
   repaired by restarting its course or marking a chapter not done, or
   by removing the deck and importing it again. Past that bound, it first
   leaves out the values of no document of the course: the deck's

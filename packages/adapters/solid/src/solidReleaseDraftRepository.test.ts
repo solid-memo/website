@@ -2256,6 +2256,7 @@ describe("readRelease and parseRelease", () => {
       `<#a> a <${SM}Card> .`,
       `<> a <${SM}Deck> . <https://x.example/> a <${SM}Deck> .`,
       `<#deck> a <${SM}Deck> .`,
+      `<sm:X> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "1" .`,
       `<> a <${SM}Deck> ; <${SM}cardsDocument> <cards.ttl> .`,
       `<> a <${SM}Deck> .`,
       `<> a <${SM}Deck> ; <${SM}studyDirection> <${SM}frontToBack> ; <http://www.w3.org/ns/dcat#version> "1.0" .`,
