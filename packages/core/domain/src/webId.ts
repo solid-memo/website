@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-import { AppError } from "./appError";
+import { AppError } from "./appError.ts";
 /** Outcome of validating user input as a WebID. */
 export type WebIdValidation = { ok: true; webId: string } | { ok: false; error: AppError };
 

@@ -596,6 +596,24 @@ ${base === DOC ? "" : '<https://elsewhere.example/other.ttl> a sm:Deck ; dcterms
     ).toBeUndefined();
   });
 
+  it("reads no contact from a point with a web page beside a value of another scheme (GHSA-9475-qxm2-3xgp)", async () => {
+    const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
+    const turtle = await readFile(
+      `${VOCAB_ROOT}fixtures/library-deck/v6/valid/library-standalone-release.ttl`,
+      "utf8",
+    );
+    const VCARD = "http://www.w3.org/2006/vcard/ns#";
+    const contactOf = async (pages: string) =>
+      toLibraryDeckContent(
+        url,
+        await datasetOf(`${turtle}\n<> dcat:contactPoint [ <${VCARD}hasURL> ${pages} ] .\n`, url),
+      ).contact;
+    const good = "https://good.example/issues";
+    expect(await contactOf(`<mailto:a@example.org> , <${good}>`)).toBeUndefined();
+    expect(await contactOf(`<${good}> , <urn:example:other>`)).toBeUndefined();
+    expect(await contactOf(`<${good}> , "a literal"`)).toBe(good);
+  });
+
   it("refuses a release at the guest's pod, or that links to it by an address in it (GHSA-hc3p-fpwj-fvjp)", async () => {
     const url = "https://alice.example/solid-memo/main/releases/capitals/v2.ttl";
     const turtle = await readFile(

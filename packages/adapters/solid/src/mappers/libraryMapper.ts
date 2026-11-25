@@ -36,6 +36,7 @@ import type { ShapeDescriptor } from "@solid-memo/vocab/shapeDescriptor";
 import { migrate } from "@solid-memo/domain/shapes/migrations";
 import {
   countOf,
+  everyIri,
   hasClass,
   migrateWithinBound,
   onlyValueOf,
@@ -45,7 +46,8 @@ import {
   storedVersionOf,
 } from "../records";
 import { agentNamesOf, authorOfAgents, distractorsOf, readCard } from "./deckMapper";
-import { DCAT, SCHEMA, SM } from "../vocab";
+import { DCAT, SCHEMA, SM, VCARD } from "../vocab";
+import { isHttpUrl } from "@solid-memo/domain/webId";
 import {
   courseOutlineFromRecords,
   outlineOfCards,
@@ -187,7 +189,8 @@ function courseOf(release: Subject): { isCourse?: true } {
  * Contact): the vcard:hasURL of its one dcat:contactPoint, named or
  * blank, read from the release's own document. None when it names no
  * contact, a contact with no web page, such as the email the library's
- * older versions name, or more than one contact point or page: the
+ * older versions name, or more than one contact point, or a point with
+ * more than one vcard:hasURL of any scheme (GHSA-9475-qxm2-3xgp): the
  * Studio reads it the same way (`contactOf` in the domain's
  * releaseDraft.ts), so "Report a mistake" never leads elsewhere than
  * the contact the release's creator saw.
@@ -196,8 +199,11 @@ function contactOf(release: Subject, dataset: Dataset): { contact?: string } {
   const point = onlyValueOf(release, DCAT.contactPoint);
   if (point === null) return {};
   const thing = subjectAt(dataset, point);
-  const urls = thing === null ? [] : readTerms(thing, CONTACT_TERMS).hasURL;
-  return urls.length === 1 ? { contact: urls[0]! } : {};
+  if (thing === null) return {};
+  // Counted as the Studio counts them, every IRI of any scheme: one that
+  // isn't a web page, such as a mailto:, beside one that is, names none.
+  const urls = readTerms(thing, CONTACT_TERMS).hasURL;
+  return urls.length === 1 && everyIri(thing, VCARD.hasURL, isHttpUrl) ? { contact: urls[0]! } : {};
 }
 
 /** The subject a term names in the dataset: an IRI's or a blank node's; null for a literal. */
