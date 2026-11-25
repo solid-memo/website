@@ -6,7 +6,7 @@ It reads the text into a tree of its own, folds it
 to what the app shows, bounds it at every entry point, derives plain
 text from it, and checks it by the rules for a release
 ([markdown.md](../../../docs/markdown.md)). The site's build,
-[`@solid-memo/build-tools`](../../../build-tools/), renders the docs to static pages with
+[`@solid-memo/build-tools`](../../build-tools/), renders the docs to static pages with
 its parser ([markdown.md](../../../docs/markdown.md#the-docs-as-a-site)).
 
 ## Exports
